@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.146 2003-03-31 12:08:56 athena Exp $ */
+/* $Id: planner.c,v 1.147 2003-03-31 12:13:45 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -48,11 +48,11 @@
 
 static unsigned addmod(unsigned a, unsigned b, unsigned p)
 {
-#if 1
+#if 0
      /* slow version  */
      return (a + b) % p;
 #else
-     /* faster version, but triggers gcc-2.95 bug on solaris/sparc */
+     /* faster version */
      unsigned c = a + b;
      return c >= p ? c - p : c;
 #endif
