@@ -111,11 +111,11 @@ static void reorder(const P *ego, R *IO)
 
 static int applicable(rdft_kind kind, int r, int m, const planner *plnr)
 {
-     UNUSED(r);
      return (1 
 	     && (R2HC_KINDP(kind) || HC2R_KINDP(kind))
 && (R2HC_KINDP(kind)) /* FIXME: implement HC2R */
 	     && (m % 2)
+	     && (r % 2)
 	     && !NO_UGLYP(plnr)
 	  );
 }
