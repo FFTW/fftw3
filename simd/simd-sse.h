@@ -151,6 +151,12 @@ static __inline__ V LD(const float *x, int ivs)
 extern const union fvec X(sse_p1m1p1m1);
 extern const union fvec X(sse_m1p1m1p1);
 
+static __inline__ V VBYI(V x)
+{
+     V y = VMUL(X(sse_p1m1p1m1).v, x);
+     return SHUFPS(y, y, SHUFVAL(1, 0, 3, 2));
+}
+
 #undef FAST_AND_BLOATED_TWIDDLES
 
 #ifdef FAST_AND_BLOATED_TWIDDLES
@@ -162,12 +168,6 @@ extern const union fvec X(sse_m1p1m1p1);
   {TW_COS, 0, x}, {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_COS, 1, x},	\
   {TW_SIN, 0, -x}, {TW_SIN, 0, x}, {TW_SIN, 1, -x}, {TW_SIN, 1, x}
 #define TWVL (2 * VL)
-
-static __inline__ V VBYI(V x)
-{
-     V y = VMUL(X(sse_p1m1p1m1).v, x);
-     return SHUFPS(y, y, SHUFVAL(1, 0, 3, 2));
-}
 
 static __inline__ V BYTW(const R *t, V sr)
 {
@@ -190,12 +190,6 @@ static __inline__ V BYTWJ(const R *t, V sr)
 #define VTW(x) 								\
   {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
 #define TWVL (VL)
-
-static __inline__ V VBYI(V x)
-{
-     V y = VMUL(X(sse_p1m1p1m1).v, x);
-     return SHUFPS(y, y, SHUFVAL(1, 0, 3, 2));
-}
 
 static __inline__ V BYTW(const R *t, V sr)
 {
