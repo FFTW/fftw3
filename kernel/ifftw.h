@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.214 2003-04-04 21:15:53 athena Exp $ */
+/* $Id: ifftw.h,v 1.215 2003-04-04 21:29:43 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -711,6 +711,7 @@ int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz);
 int X(ct_uglyp)(int min_n, int n, int r);
 
 #if HAVE_SIMD
+R *X(taint)(R *p, int s);
 #define TAINT(p, s) X(taint)(p, s)
 #define UNTAINT(p) ((R *) (((uintptr_t) (p)) & -2))
 #else

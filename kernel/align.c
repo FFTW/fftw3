@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.23 2003-04-04 21:15:53 athena Exp $ */
+/* $Id: align.c,v 1.24 2003-04-04 21:29:43 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -38,6 +38,7 @@ int X(alignment_of)(R *p)
      return (int)(((uintptr_t) p) % ALGN);
 }
 
+#if HAVE_SIMD
 static int stride_aligned_p(int s)
 {
      return !(((unsigned)s * sizeof(R)) % ALGN);
@@ -48,3 +49,4 @@ R *X(taint)(R *p, int s)
      if (!stride_aligned_p(s))
 	  p = (R *) (((uintptr_t) p) | 1);
 }
+#endif /* HAVE_SIMD */
