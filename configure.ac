@@ -53,7 +53,7 @@ AC_SUBST(OCAMLLDFLAGS)
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h limits.h])
 dnl Header file for enabling asm() on Digital Unix  
 AC_CHECK_HEADERS(c_asm.h) 
 

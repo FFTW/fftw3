@@ -18,11 +18,12 @@
  *
  */
 
-/* $Id: cycle.h,v 1.4 2002-06-13 12:59:53 athena Exp $ */
+/* $Id: cycle.h,v 1.5 2002-06-22 15:45:48 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
-#if defined(HAVE_GETHRTIME)
+/*----------------------------------------------------------------*/
+#if defined(HAVE_GETHRTIME) && !defined(HAVE_TICK_COUNTER)
 typedef hrtime_t ticks;
 
 #define getticks() gethrtime()
@@ -35,11 +36,11 @@ static inline double elapsed(ticks t1, ticks t0)
 #define HAVE_TICK_COUNTER
 #endif
 
-
+/*----------------------------------------------------------------*/
 /*
  * PowerPC ``cycle'' counter using the time base register.
  */
-#if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
+#if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))  && !defined(HAVE_TICK_COUNTER)
 typedef unsigned long long ticks;
 
 static __inline__ ticks getticks(void)
@@ -62,11 +63,11 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 
 #define HAVE_TICK_COUNTER
 #endif
-
+/*----------------------------------------------------------------*/
 /*
  * Pentium cycle counter 
  */
-#if (defined(__GNUC__) || defined(__ICC)) && defined(__i386__)
+#if (defined(__GNUC__) || defined(__ICC)) && defined(__i386__)  && !defined(HAVE_TICK_COUNTER)
 typedef unsigned long long ticks;
 
 static __inline__ ticks getticks(void)
@@ -85,11 +86,11 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 
 #define HAVE_TICK_COUNTER
 #endif
-
+/*----------------------------------------------------------------*/
 /*
  * IA64 cycle counter
  */
-#if defined(__GNUC__) && defined(__ia64__)
+#if defined(__GNUC__) && defined(__ia64__) && !defined(HAVE_TICK_COUNTER)
 typedef unsigned long ticks;
 
 static __inline__ ticks getticks(void)
@@ -107,11 +108,11 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 
 #define HAVE_TICK_COUNTER
 #endif
-
+/*----------------------------------------------------------------*/
 /*
  * PA-RISC cycle counter 
  */
-#if defined(__hppa__) || defined(__hppa)
+#if defined(__hppa__) || defined(__hppa) && !defined(HAVE_TICK_COUNTER)
 typedef unsigned long ticks;
 
 #  ifdef __GNUC__
@@ -140,8 +141,8 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 
 #define HAVE_TICK_COUNTER
 #endif
-
-#if defined(__GNUC__) && defined(__alpha__)
+/*----------------------------------------------------------------*/
+#if defined(__GNUC__) && defined(__alpha__) && !defined(HAVE_TICK_COUNTER)
 /*
  * The 32-bit cycle counter on alpha overflows pretty quickly, 
  * unfortunately.  A 1GHz machine overflows in 4 seconds.
@@ -163,7 +164,27 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 #define HAVE_TICK_COUNTER
 #endif
 
-#if defined(__DECC) && defined(__alpha) && defined(HAVE_C_ASM_H)
+/*----------------------------------------------------------------*/
+#if defined(__GNUC__) && defined(__sparc__) && !defined(HAVE_TICK_COUNTER)
+typedef unsigned long ticks;
+
+static __inline__ ticks getticks(void)
+{
+     ticks ret;
+     __asm__("rd %%tick, %0" : "=r" (ret));
+     return ret;
+}
+
+static __inline__ double elapsed(ticks t1, ticks t0)
+{
+     return (double)(t1 - t0);
+}
+
+#define HAVE_TICK_COUNTER
+#endif
+
+/*----------------------------------------------------------------*/
+#if defined(__DECC) && defined(__alpha) && defined(HAVE_C_ASM_H) && !defined(HAVE_TICK_COUNTER)
 #  include <c_asm.h>
 typedef unsigned int ticks;
 
@@ -181,9 +202,9 @@ static __inline double elapsed(ticks t1, ticks t0)
 
 #define HAVE_TICK_COUNTER
 #endif
-
+/*----------------------------------------------------------------*/
 /* SGI/Irix */
-#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_SGI_CYCLE)
+#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_SGI_CYCLE) && !defined(HAVE_TICK_COUNTER)
 typedef struct timespec ticks;
 
 static __inline__ ticks getticks(void)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.39 2002-06-22 02:19:20 athena Exp $ */
+/* $Id: ifftw.h,v 1.40 2002-06-22 15:45:48 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -29,6 +29,10 @@
 
 #include <stdlib.h>		/* size_t */
 #include <stdarg.h>		/* va_list */
+
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>		/* uint, maybe */
+#endif
 
 /* dummy use of unused parameters to avoid compiler warnings */
 #define UNUSED(x) (void)x
