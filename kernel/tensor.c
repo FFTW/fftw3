@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.19 2002-08-22 13:11:34 athena Exp $ */
+/* $Id: tensor.c,v 1.20 2002-08-24 15:05:08 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -357,6 +357,22 @@ tensor X(tensor_append)(const tensor a, const tensor b)
           dimcpy(x.dims + a.rnk, b.dims, b.rnk);
      }
      return x;
+}
+
+/* treat a (rank <= 1)-tensor as a rank-1 tensor, extracting
+   appropriate n, is, and os components */
+void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os)
+{
+     A(t->rnk <= 1);
+     if (t->rnk == 1) {
+	  iodim *vd = t->dims;
+          *n = vd[0].n;
+          *is = vd[0].is;
+          *os = vd[0].os;
+     } else {
+          *n = 1;
+          *is = *os = 0;
+     }
 }
 
 /* The inverse of X(tensor_append): splits the sz tensor into

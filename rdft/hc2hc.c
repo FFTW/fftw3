@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.7 2002-08-23 20:07:12 athena Exp $ */
+/* $Id: hc2hc.c,v 1.8 2002-08-24 15:05:08 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -93,20 +93,6 @@ static const plan_adt padt =
      destroy
 };
 
-void X(rdft_hc2hc_vecstrides)(const problem_rdft *p,
-			  uint *vl, int *ivs, int *ovs)
-{
-     if (p->vecsz.rnk == 1) {
-	  iodim *vd = p->vecsz.dims;
-          *vl = vd[0].n;
-          *ivs = vd[0].is;
-          *ovs = vd[0].os;
-     } else {
-          *vl = 1;
-          *ivs = *ovs = 0;
-     }
-}
-
 plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
                        const problem *p_,
                        planner *plnr,
@@ -165,9 +151,7 @@ plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
      pln->os = d[0].os;
 
      pln->ios = pln->vs = 0;
-
-     X(rdft_hc2hc_vecstrides)(p, &pln->vl, &pln->ivs, &pln->ovs);
-
+     X(tensor_tornk1)(&p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      pln->td = 0;
      adt->finish(pln);
 

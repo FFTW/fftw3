@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.18 2002-08-23 20:07:12 athena Exp $ */
+/* $Id: ct.c,v 1.19 2002-08-24 15:05:08 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -84,19 +84,6 @@ static const plan_adt padt =
      destroy
 };
 
-void X(dft_ct_vecstrides)(const problem_dft *p,
-			  uint *vl, int *ivs, int *ovs)
-{
-     if (p->vecsz.rnk == 1) {
-	  iodim *vd = p->vecsz.dims;
-          *vl = vd[0].n;
-          *ivs = vd[0].is;
-          *ovs = vd[0].os;
-     } else {
-          *vl = 1;
-          *ivs = *ovs = 0;
-     }
-}
 
 plan *X(mkplan_dft_ct)(const solver_ct *ego,
                        const problem *p_,
@@ -143,8 +130,7 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
      pln->os = d[0].os;
 
      pln->ios = pln->vs = 0;
-
-     X(dft_ct_vecstrides)(p, &pln->vl, &pln->ivs, &pln->ovs);
+     X(tensor_tornk1)(&p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
 
      pln->td = 0;
      adt->finish(pln);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.h,v 1.2 2002-08-05 03:57:51 stevenj Exp $ */
+/* $Id: hc2hc.h,v 1.3 2002-08-24 15:05:08 athena Exp $ */
 
 typedef struct {
      solver super;
@@ -65,6 +65,3 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *, const problem_rdft *p,
 			 problem **cldp, problem **cld0p, problem **cldmp);
 void X(rdft_mkcldrn_dif)(const solver_hc2hc *, const problem_rdft *p,
 			 problem **cldp, problem **cld0p, problem **cldmp);
-
-void X(rdft_hc2hc_vecstrides)(const problem_rdft *p,
-			      uint *vl, int *ivs, int *ovs);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-dft.c,v 1.2 2002-08-23 20:07:12 athena Exp $ */
+/* $Id: rdft2-dft.c,v 1.3 2002-08-24 15:05:08 athena Exp $ */
 
 /* Compute RDFT of even size via a DFT of size n/2 */
 
@@ -33,65 +33,74 @@ typedef struct {
      plan_dft super;
      plan *cld;
      twid *td;
-     int is, os;
-     uint n;
+     int is, os, ivs, ovs;
+     uint n, vl;
 } P;
+
+static void radix2_dit(R *rio, R *iio, const R *W, uint n, int dist)
+{
+     uint i;
+     R *riop, *iiop;
+     R *riom, *iiom;
+
+     /* i = n/2 when n is even */
+     if (!(n & 1)) {
+	  uint n2 = n / 2;
+	  iio[n2 * dist] = -iio[n2 * dist];
+     }
+
+     riop = rio;
+     iiop = iio;
+     riom = rio + n * dist;
+     iiom = iio + n * dist;
+
+     /* i = 0 and i = n */
+     {
+	  E rop = *riop;
+	  E iop = *iiop;
+	  *riop = rop + iop;   riop += dist;
+	  *iiop = 0.0;         iiop += dist;
+	  *riom = rop - iop;   riom -= dist;
+	  *iiom = 0.0;         iiom -= dist;
+     }
+
+     /* middle elements */
+     for (i = 1; i < (n + 1) / 2; ++i) {
+	  E rop = *riop;
+	  E iop = *iiop;
+	  E rom = *riom;
+	  E iom = *iiom;
+	  E wr = W[2 * i];
+	  E wi = W[2 * i + 1];
+	  E re = rop + rom;
+	  E ie = iop - iom;
+	  E rd = rom - rop;
+	  E id = iop + iom;
+	  E tr = rd * wr - id * wi;
+	  E ti = id * wr + rd * wi;
+	  *riop = 0.5 * (re + ti);    riop += dist;
+	  *iiop = 0.5 * (ie + tr);    iiop += dist;
+	  *riom = 0.5 * (re - ti);    riom -= dist;
+	  *iiom = 0.5 * (tr - ie);    iiom -= dist;
+     }
+}
 
 static void apply(plan *ego_, R *r, R *rio, R *iio)
 {
      P *ego = (P *) ego_;
-     int is = ego->is, os = ego->os;
 
      {
 	  /* transform input as a vector of complex numbers */
 	  plan_dft *cld = (plan_dft *) ego->cld;
-	  cld->apply((plan *) cld, r, r + is, rio, iio);
+	  cld->apply((plan *) cld, r, r + ego->is, rio, iio);
      }
 
      {
-	  R *W = ego->td->W;
-	  uint n = ego->n / 2;
-	  uint i;
-	  R *riom, *iiom;
-
-	  /* i = n/2 when n is even */
-	  if (!(n & 1)) {
-	       uint n2 = n / 2;
-	       iio[n2 * os] = -iio[n2 * os];
-	  }
-
-	  riom = rio + n * os;
-	  iiom = iio + n * os;
-
-	  /* i = 0 and i = n */
-	  {
-	       E rop = *rio;
-	       E iop = *iio;
-	       *rio = rop + iop;   rio += os;
-	       *iio = 0.0;         iio += os;
-	       *riom = rop - iop;  riom -= os;
-	       *iiom = 0.0;        iiom -= os;
-	  }
-
-	  /* middle elements */
-	  for (i = 1; i < (n + 1) / 2; ++i) {
-	       E rop = *rio;
-	       E iop = *iio;
-	       E rom = *riom;
-	       E iom = *iiom;
-	       E wr = W[2 * i];
-	       E wi = W[2 * i + 1];
-	       E re = rop + rom;
-	       E ie = iop - iom;
-	       E rd = rom - rop;
-	       E id = iop + iom;
-	       E tr = rd * wr - id * wi;
-	       E ti = id * wr + rd * wi;
-	       *rio = 0.5 * (re + ti);    rio += os;
-	       *iio = 0.5 * (ie + tr);    iio += os;
-	       *riom = 0.5 * (re - ti);   riom -= os;
-	       *iiom = 0.5 * (tr - ie);   iiom -= os;
-	  }
+          uint i, vl = ego->vl, n2 = ego->n / 2;
+          int ovs = ego->ovs, os = ego->os;
+	  const R *W = ego->td->W;
+          for (i = 0; i < vl; ++i, rio += ovs, iio += ovs)
+	       radix2_dit(rio, iio, W, n2, os);
      }
 }
 
@@ -122,7 +131,7 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer * p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(r2hc-dft-%u%(%p%))", ego->n, ego->cld);
+     p->print(p, "(r2hc-dft-%u%v%(%p%))", ego->n, ego->vl, ego->cld);
 }
 
 static int applicable(const solver *ego_, const problem *p_)
@@ -132,9 +141,9 @@ static int applicable(const solver *ego_, const problem *p_)
 	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
 	  return (1 
 		  && R2HC_KINDP(p->kind)
+		  && p->vecsz.rnk <= 1
 		  && p->sz.rnk == 1
 		  && (p->sz.dims[0].n % 2) == 0
-		  && p->vecsz.rnk == 0
 	       );
      }
 
@@ -167,10 +176,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_rdft2 *) p_;
      d = p->sz.dims;
 
-     cldp = X(mkproblem_dft_d) (
-	  X(mktensor_1d)(d[0].n / 2, d[0].is * 2, d[0].os),
-	  X(mktensor(0)),
-	  p->r, p->r + d[0].is, p->rio, p->iio);
+     {
+	  cldp = X(mkproblem_dft_d) (
+	       X(mktensor_1d)(d[0].n / 2, d[0].is * 2, d[0].os),
+	       X(tensor_copy)(p->vecsz),
+	       p->r, p->r + d[0].is, p->rio, p->iio);
+     }
 
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy) (cldp);
@@ -182,6 +193,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->n = d[0].n;
      pln->os = d[0].os;
      pln->is = d[0].is;
+     X(tensor_tornk1)(&p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      pln->cld = cld;
      pln->td = 0;
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.3 2002-08-05 03:57:51 stevenj Exp $ */
+/* $Id: hc2hc-dif.c,v 1.4 2002-08-24 15:05:08 athena Exp $ */
 
 /* decimation in frequency Cooley-Tukey */
 #include "rdft.h"
@@ -59,7 +59,7 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
           const problem_rdft *p = (const problem_rdft *) p_;
           iodim *d = p->sz.dims;
 	  uint m = d[0].n / e->radix;
-	  X(rdft_hc2hc_vecstrides)(p, &vl, &ivs, &ovs);
+	  X(tensor_tornk1)(&p->vecsz, &vl, &ivs, &ovs);
           return (1
 		  && (p->I == p->O || (plnr->flags & DESTROY_INPUT))
 		  && (e->genus->okp(e, p->I + d[0].is,

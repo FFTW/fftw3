@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.20 2002-08-23 20:07:12 athena Exp $ */
+/* $Id: ct-dit.c,v 1.21 2002-08-24 15:05:08 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -54,7 +54,7 @@ static int applicable(const solver_ct *ego, const problem *p_,
           const problem_dft *p = (const problem_dft *) p_;
           iodim *d = p->sz.dims;
 	  uint m = d[0].n / e->radix;
-	  X(dft_ct_vecstrides)(p, &vl, &ivs, &ovs);
+	  X(tensor_tornk1)(&p->vecsz, &vl, &ivs, &ovs);
           return (1
 		  && (e->genus->okp(e, p->ro, p->io, 
 				    (int)m * d[0].os, 0, m, d[0].os))
