@@ -223,7 +223,7 @@ portability of C.
 On a Unix system: \courier{configure --enable-float\}.  On a non-Unix
 system: edit \courier{config.h\} to \courier{#define\} the symbol
 \courier{FFTW_SINGLE\} (for FFTW 3.x).  In both cases, you must then
-recompile FFTW.  All FFTW identifiers will then begin with
+recompile FFTW.  In FFTW 3, all FFTW identifiers will then begin with
 \courier{fftwf_\} instead of \courier{fftw_\}.
 
 \comment ######################################################################
