@@ -22,7 +22,8 @@ Other enhancements:
 
 * Efficient prime-size transforms of real data.
 
-* Multidimensional transforms can operate on a subset of a larger matrix.
+* Multidimensional transforms can operate on a subset of a larger matrix,
+  and/or transform selected dimensions of a multidimensional array.
 
 * By popular demand, simultaneous linking to double precision (fftw),
   single precision (fftwf), and long-double precision (fftwl) versions
