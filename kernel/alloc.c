@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.41 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: alloc.c,v 1.42 2004-02-12 20:42:20 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -68,6 +68,9 @@ static void our_free16(void *p)
 #endif
 
 /* part of user-callable API */
+#ifdef __cplusplus
+extern "C"
+#endif /* __cplusplus */
 void *X(malloc)(size_t n)
 {
      void *p;
