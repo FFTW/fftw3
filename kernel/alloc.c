@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.39 2003-03-03 21:58:07 fftw Exp $ */
+/* $Id: alloc.c,v 1.40 2003-03-14 19:34:21 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -50,7 +50,7 @@ extern int posix_memalign(void **, size_t, size_t);
    system libraries, and instead provides an implementation with a
    Visual C++ "Processor Pack" that you have to statically link into
    your program.  We do not want to require users to have VC++
-   (e.g. MinGW should be fine).  Our code should be at least as good
+   (e.g. gcc/MinGW should be fine).  Our code should be at least as good
    as the MS _aligned_malloc, in any case, according to second-hand
    reports of the algorithm it employs (also based on plain malloc). */
 static void *our_malloc16(size_t n)
