@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.54 2003-03-17 19:44:40 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.55 2003-03-18 11:14:51 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -45,17 +45,17 @@ extern "C"
 #define FFTW_MANGLE_LONG_DOUBLE(name) FFTW_CONCAT(fftwl_, name)
 
 
-enum FFTW_R2R_KIND {
+enum fftw_r2r_kind_do_not_use_me {
      FFTW_R2HC=0, FFTW_HC2R=1, FFTW_DHT=2,
      FFTW_REDFT00=3, FFTW_REDFT01=4, FFTW_REDFT10=5, FFTW_REDFT11=6,
      FFTW_RODFT00=7, FFTW_RODFT01=8, FFTW_RODFT10=9, FFTW_RODFT11=10
 };
 
-typedef struct {
+struct fftw_iodim_do_not_use_me {
      int n;                     /* dimension size */
      int is;			/* input stride */
      int os;			/* output stride */
-} FFTW_IODIM;
+};
 
 /*
   huge second-order macro that defines prototypes for all API
@@ -72,9 +72,9 @@ FFTW_DEFINE_COMPLEX(R, C);						\
 									\
 typedef struct X(plan_s) *X(plan);					\
 									\
-typedef FFTW_IODIM X(iodim);						\
+typedef struct fftw_iodim_do_not_use_me X(iodim);			\
 									\
-typedef enum FFTW_R2R_KIND X(r2r_kind);					\
+typedef enum fftw_r2r_kind_do_not_use_me X(r2r_kind);			\
 									\
 void X(execute)(const X(plan) p);					\
 									\
