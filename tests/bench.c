@@ -147,6 +147,7 @@ static plan *pln;
 void setup(struct problem *p)
 {
      double tplan;
+     size_t nsize;
 
      BENCH_ASSERT(can_do(p));
 
@@ -237,12 +238,13 @@ void setup(struct problem *p)
 	  }
      }
 
+     nsize = p->phys_size / p->vsize;
      if (p->kind == PROBLEM_COMPLEX)
 	  prblm = 
 	       FFTW(mkproblem_dft_d)(
 		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, p->n, is, os),
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn, p->vn,
-					     is * p->size, os * p->size), 
+					     is * nsize, os * nsize), 
 		    ri, ii, ro, io);
      else if (p->split) {
 	  CK(p->rank == 1);
@@ -250,7 +252,7 @@ void setup(struct problem *p)
 	       FFTW(mkproblem_rdft_1_d)(
 		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, p->n, is, os),
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn, p->vn,
-					     is * p->size, os * p->size), 
+					     is * nsize, os * nsize), 
 		    ri, ro, 
 #if 1
 		    p->sign == FFT_SIGN ? R2HC : HC2R
@@ -275,7 +277,7 @@ void setup(struct problem *p)
 		    : FFTW(mktensor_rowmajor)(p->rank, p->n, npadc, npadr, 
 					      is, os),
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn, p->vn,
-					     is * p->size, os * p->size), 
+					     is * nsize, (os * nsize) / 2), 
 		    ri, ro, io, 
 		    p->sign == FFT_SIGN ? R2HC : HC2R);
 	  bench_free(npadc);
