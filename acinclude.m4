@@ -182,15 +182,21 @@ AC_REQUIRE([AC_CANONICAL_HOST])
 # line
 if test "$ac_test_CFLAGS" != "set"; then
   CFLAGS=""
+  base_CC=`basename "$CC" | cut -d" " -f1`
   case "${host_cpu}-${host_os}" in
+
+  alpha*linux*)  if test "$base_CC" = ccc; then
+                    CFLAGS="-newc -w0 -O5 -ansi_alias -ansi_args -fp_reorder -tune host -arch host"
+                fi;;
 
   *linux*)
 	;;
-  *-solaris2*) if test `basename "$CC"` = cc; then
+
+  *-solaris2*) if test "$base_CC" = cc; then
                     CFLAGS="-native -fast -xO5 -dalign"
                  fi;;
 
-  alpha*-osf*)  if test "$CC" = cc; then
+  alpha*-osf*)  if test "$base_CC" = cc; then
                     CFLAGS="-newc -w0 -O5 -ansi_alias -ansi_args -fp_reorder -tune host -arch host"
                 fi;;
 
@@ -198,8 +204,8 @@ if test "$ac_test_CFLAGS" != "set"; then
                     CFLAGS="+O3 +Oall +Optrs_ansi -Wp,-H128000"
                 fi;;
 
-   *-aix*)
-	if test "$CC" = cc -o "$CC" = xlc -o "$CC" = ccc; then
+  *-aix*)
+	if test "$base_CC" = cc -o "$base_CC" = xlc -o "$base_CC" = ccc; then
                 ACX_CHECK_CC_FLAGS(-qarch=auto -qtune=auto, qarch_auto,
                         CFLAGS="-O3 -qansialias -w -qarch=auto -qtune=auto",
                         [CFLAGS="-O3 -qansialias -w"
