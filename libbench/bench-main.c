@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.6 2002-08-15 13:48:37 athena Exp $ */
+/* $Id: bench-main.c,v 1.7 2002-08-16 12:06:31 athena Exp $ */
 
 #include "config.h"
 #include "getopt.h"
@@ -33,6 +33,7 @@ int paranoid;
 static struct option long_options[] =
 {
   {"accuracy", required_argument, 0, 'a'},
+  {"accuracy-rounds", required_argument, 0, 405},
   {"can-do", required_argument, 0, 'd'},
   {"help", no_argument, 0, 'h'},
   {"info", required_argument, 0, 'i'},
@@ -64,6 +65,7 @@ static int bench_main1(int argc, char *argv[])
      double tol;
      int repeat = 0;
      int rounds = 10;
+     int arounds = 1; /* this is too low for precise results */
      int c;
      int index;
      char *short_options = make_short_options(long_options);
@@ -72,6 +74,7 @@ static int bench_main1(int argc, char *argv[])
      verbose = paranoid = 0;
 
      tol = SINGLE_PRECISION ? 1.0e-3 : 1.0e-10;
+     bench_srand(1);
 
      while ((c = getopt_long (argc, argv, short_options,
 			      long_options, &index)) != -1) {
@@ -102,7 +105,7 @@ static int bench_main1(int argc, char *argv[])
 		   verify(optarg, rounds, tol);
 		   break;
 	      case 'a':
-		   accuracy(optarg);
+		   accuracy(optarg, arounds);
 		   break;
 	      case 'i':
 		   report_info(optarg);
@@ -164,6 +167,10 @@ static int bench_main1(int argc, char *argv[])
 
 	      case 404: /* --random-seed */
 		   bench_srand(atoi(optarg));
+		   break;
+
+	      case 405: /* --accuracy-rounds */
+		   arounds = atoi(optarg);
 		   break;
 		   
 	      case '?':
