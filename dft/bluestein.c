@@ -148,6 +148,9 @@ static int applicable0(const problem *p_)
 		  && p->vecsz->rnk == 0
 		  /* FIXME: allow other sizes */
 		  && X(is_prime)(p->sz->dims[0].n)
+
+		  /* FIXME: infinite recursion of bluestein with itself */
+		  && p->sz->dims[0].n > 16
 	       );
      }
 
