@@ -601,6 +601,8 @@ static FFTW(plan) mkplan(bench_problem *p, int flags)
 
 int can_do(bench_problem *p)
 {
+     if (verbose > 2 && p->pstring)
+	  printf("Planning %s...\n", p->pstring);
      rdwisdom();
      if (p->destroy_input)
 	  the_flags |= FFTW_DESTROY_INPUT;
