@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.190 2003-03-02 14:14:37 athena Exp $ */
+/* $Id: ifftw.h,v 1.191 2003-03-14 22:23:13 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -679,9 +679,6 @@ int X(stride_aligned_p)(int s);
 unsigned X(hash)(const char *s);
 int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz);
 extern int X(ct_uglyp)(int min_n, int n, int r);
-extern const char *const X(version);
-extern const char *const X(cc);
-extern const char *const X(codelet_optim);
 
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */

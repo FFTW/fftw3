@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: version.c,v 1.5 2002-07-16 11:00:10 athena Exp $ */
+/* $Id: version.c,v 1.1 2003-03-14 22:23:13 athena Exp $ */
 
 #include "config.h"
 #include "ifftw.h"
