@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.15 2003-02-27 07:46:31 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.16 2003-02-27 17:15:10 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -67,10 +67,10 @@ static void apply_re11(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
-     int i, n = ego->n;
+     int i, n = ego->n, n2 = n/2;
      int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
-     int n2even = (n/2) % 2 == 0;
+     int n2even = (n2) % 2 == 0;
      R *buf;
 
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
@@ -78,17 +78,17 @@ static void apply_re11(plan *ego_, R *I, R *O)
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  {
 	       int m;
-	       for (i = 0, m = n; m < 2 * n; ++i, m += 8)
-		    buf[i] = I[is * (m / 2)];
-	       for (; m < 4 * n; ++i, m += 8)
-		    buf[i] = -I[is * ((4*n - m) / 2)];
-	       for (; m < 6 * n; ++i, m += 8)
-		    buf[i] = -I[is * ((m - 4*n) / 2)];
-	       for (; m < 8 * n; ++i, m += 8)
-		    buf[i] = I[is * ((8*n - m) / 2)];
-	       m -= 8 * n;
-	       for (; i < n; ++i, m += 8)
-		    buf[i] = I[is * (m / 2)];
+	       for (i = 0, m = n2; m < n; ++i, m += 4)
+		    buf[i] = I[is * m];
+	       for (; m < 2 * n; ++i, m += 4)
+		    buf[i] = -I[is * (2*n - m - 1)];
+	       for (; m < 3 * n; ++i, m += 4)
+		    buf[i] = -I[is * (m - 2*n)];
+	       for (; m < 4 * n; ++i, m += 4)
+		    buf[i] = I[is * (4*n - m - 1)];
+	       m -= 4 * n;
+	       for (; i < n; ++i, m += 4)
+		    buf[i] = I[is * m];
 	  }
 
 	  { /* child plan: R2HC of size n */
@@ -98,7 +98,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	  
 	  /* FIXME: strength-reduce loops by 4 to eliminate ugly sgn_set? */
 	  if (n2even) {
-	       for (i = 0; i + i + 1 <= n/2; ++i) {
+	       for (i = 0; i + i + 1 <= n2; ++i) {
 		    int k;
 		    E c, s;
 		    
@@ -131,7 +131,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	       O[os * i] = SQRT2 * SGN_SET(buf[0], (i+1)/2);
 	  }
 	  else /* n2odd */ {
-	       for (i = 0; i + i + 1 <= n/2; ++i) {
+	       for (i = 0; i + i + 1 <= n2; ++i) {
 		    int k;
 		    E c, s;
 		    
@@ -174,10 +174,10 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
-     int i, n = ego->n;
+     int i, n = ego->n, n2 = n/2;
      int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
-     int n2even = (n/2) % 2 == 0;
+     int n2even = (n2) % 2 == 0;
      R *buf;
 
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
@@ -185,17 +185,17 @@ static void apply_ro11(plan *ego_, R *I, R *O)
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  {
 	       int m;
-	       for (i = 0, m = n; m < 2 * n; ++i, m += 8)
-		    buf[i] = I[is * (n - 1 - m / 2)];
-	       for (; m < 4 * n; ++i, m += 8)
-		    buf[i] = -I[is * (n - 1 - (4*n - m) / 2)];
-	       for (; m < 6 * n; ++i, m += 8)
-		    buf[i] = -I[is * (n - 1 - (m - 4*n) / 2)];
-	       for (; m < 8 * n; ++i, m += 8)
-		    buf[i] = I[is * (n - 1 - (8*n - m) / 2)];
-	       m -= 8 * n;
-	       for (; i < n; ++i, m += 8)
-		    buf[i] = I[is * (n - 1 - m / 2)];
+	       for (i = 0, m = n2; m < n; ++i, m += 4)
+		    buf[i] = I[is * (n - 1 - m)];
+	       for (; m < 2 * n; ++i, m += 4)
+		    buf[i] = -I[is * (m - n)];
+	       for (; m < 3 * n; ++i, m += 4)
+		    buf[i] = -I[is * (3*n - 1 - m)];
+	       for (; m < 4 * n; ++i, m += 4)
+		    buf[i] = I[is * (m - 3*n)];
+	       m -= 4 * n;
+	       for (; i < n; ++i, m += 4)
+		    buf[i] = I[is * (n - 1 - m)];
 	  }
 	  
 	  { /* child plan: R2HC of size n */
@@ -205,7 +205,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 	  
 	  /* FIXME: strength-reduce loops by 4 to eliminate ugly sgn_set? */
 	  if (n2even) {
-	       for (i = 0; i + i + 1 <= n/2; ++i) {
+	       for (i = 0; i + i + 1 <= n2; ++i) {
 		    int k;
 		    E c, s;
 		    
@@ -258,7 +258,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 	       O[os * i] = SQRT2 * SGN_SET(buf[0], (i+1)/2);
 	  }
 	  else /* n2odd */ {
-	       for (i = 0; i + i + 1 <= n/2; ++i) {
+	       for (i = 0; i + i + 1 <= n2; ++i) {
 		    int k;
 		    E c, s;
 		    
