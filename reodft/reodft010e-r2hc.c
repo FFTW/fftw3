@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.21 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.22 2003-02-10 04:24:52 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -335,6 +335,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld;
      R *buf;
      int n;
+     opcnt ops;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -372,8 +373,20 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      
-     pln->super.super.ops = cld->ops;
-     /* FIXME */
+     X(ops_zero)(&ops);
+     ops.other = 4 + (n-1)/2 * 10 + (1 - n % 2) * 5;
+     if (p->kind[0] == REDFT01 || p->kind[0] == RODFT01) {
+	  ops.add = (n-1)/2 * 6;
+	  ops.mul = (n-1)/2 * 4 + (1 - n % 2) * 2;
+     }
+     else { /* 10 transforms */
+	  ops.add = (n-1)/2 * 2;
+	  ops.mul = 1 + (n-1)/2 * 6 + (1 - n % 2) * 2;
+     }
+     
+     X(ops_zero)(&pln->super.super.ops);
+     X(ops_madd2)(pln->vl, &ops, &pln->super.super.ops);
+     X(ops_madd2)(pln->vl, &cld->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 }

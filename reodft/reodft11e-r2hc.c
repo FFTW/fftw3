@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.19 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.20 2003-02-10 04:24:52 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -232,6 +232,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld;
      R *buf;
      int n;
+     opcnt ops;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -262,8 +263,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      
-     pln->super.super.ops = cld->ops;
-     /* FIXME */
+     X(ops_zero)(&ops);
+     ops.other = 5 + (n-1) * 2 + (n-1)/2 * 12 + (1 - n % 2) * 6;
+     ops.add = (n - 1) * 1 + (n-1)/2 * 6;
+     ops.mul = 2 + (n-1) * 1 + (n-1)/2 * 6 + (1 - n % 2) * 3;
+
+     X(ops_zero)(&pln->super.super.ops);
+     X(ops_madd2)(pln->vl, &ops, &pln->super.super.ops);
+     X(ops_madd2)(pln->vl, &cld->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 }

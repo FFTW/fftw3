@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.19 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.20 2003-02-10 04:24:52 stevenj Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -61,8 +61,8 @@ static void apply(plan *ego_, R *I, R *O)
 	       E a, b, apb, amb;
 	       a = I[is * i];
 	       b = I[is * (n - i)];
-	       csum += W[2*i] * (2.0*(a - b));
-	       amb = W[2*i+1] * (2.0*(a - b));
+	       csum += W[2*i] * (amb = 2.0*(a - b));
+	       amb = W[2*i+1] * amb;
 	       apb = (a + b);
 	       buf[i] = apb - amb;
 	       buf[n - i] = apb + amb;
@@ -145,6 +145,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld;
      R *buf;
      int n;
+     opcnt ops;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -176,8 +177,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      
-     pln->super.super.ops = cld->ops;
-     /* FIXME */
+     X(ops_zero)(&ops);
+     ops.other = 8 + (n-1)/2 * 11 + (1 - n % 2) * 5;
+     ops.add = 2 + (n-1)/2 * 5;
+     ops.mul = (n-1)/2 * 3 + (1 - n % 2) * 1;
+
+     X(ops_zero)(&pln->super.super.ops);
+     X(ops_madd2)(pln->vl, &ops, &pln->super.super.ops);
+     X(ops_madd2)(pln->vl, &cld->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 }
