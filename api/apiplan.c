@@ -74,8 +74,8 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	       X(plan_destroy_internal)(pln);
 	       pln = pln1;
 	  }
-	  else if (!plnr->timed_out) { /* planner really failed */
-	       A(!pln);
+	  else { /* don't bother continuing if planner failed or timed out */
+	       A(!pln || plnr->timed_out);
 	       break;
 	  }
      } while (++pat <= pat_max);
