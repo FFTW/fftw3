@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.94 2002-08-29 22:08:16 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.95 2002-08-30 02:55:29 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -237,6 +237,8 @@ int X(tensor_equal)(const tensor a, const tensor b);
 uint X(tensor_sz)(const tensor sz);
 uint X(tensor_hash)(const tensor t);
 uint X(tensor_max_index)(const tensor sz);
+uint X(tensor_min_istride)(const tensor sz);
+uint X(tensor_min_ostride)(const tensor sz);
 uint X(tensor_min_stride)(const tensor sz);
 int X(tensor_inplace_strides)(const tensor sz);
 tensor X(tensor_copy)(const tensor sz);

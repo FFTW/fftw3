@@ -18,12 +18,14 @@
  *
  */
 
-/* $Id: indirect.c,v 1.6 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: indirect.c,v 1.7 2002-08-30 02:55:29 stevenj Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
    in-place directly.  Use a rank-0 plan to rearrange the data
-   before or after the transform. */
+   before or after the transform.  Can also change an out-of-place
+   plan into a copy + in-place (where the in-place transform
+   is e.g. unit stride). */
 
 #include "rdft.h"
 
@@ -52,15 +54,13 @@ static void apply_before(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
 
-     UNUSED(O); /* input == output */
-
      {
           plan_rdft *cldcpy = (plan_rdft *) ego->cldcpy;
-          cldcpy->apply(ego->cldcpy, I, I);
+          cldcpy->apply(ego->cldcpy, I, O);
      }
      {
           plan_rdft *cld = (plan_rdft *) ego->cld;
-          cld->apply(ego->cld, I, I);
+          cld->apply(ego->cld, O, O);
      }
 }
 
@@ -84,14 +84,13 @@ static void apply_after(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
 
-     UNUSED(O);	/* input == output */
      {
           plan_rdft *cld = (plan_rdft *) ego->cld;
           cld->apply(ego->cld, I, I);
      }
      {
           plan_rdft *cldcpy = (plan_rdft *) ego->cldcpy;
-          cldcpy->apply(ego->cldcpy, I, I);
+          cldcpy->apply(ego->cldcpy, I, O);
      }
 }
 
@@ -131,23 +130,41 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(%s%(%p%)%(%p%))", s->adt->nam, ego->cld, ego->cldcpy);
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable(const solver *ego_, const problem *p_,
+		      const planner *plnr)
 {
      UNUSED(ego_);
      if (RDFTP(p_)) {
+	  const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
                   && FINITE_RNK(p->vecsz.rnk)
 
-                  /* problem must be in-place */
-                  && p->I == p->O
-
                   /* problem must be a nontrivial transform, not just a copy */
                   && p->sz.rnk > 0
 
-                  /* problem must require some rearrangement of data */
-                  && !(X(tensor_inplace_strides)(p->sz)
-		       && X(tensor_inplace_strides)(p->vecsz))
+                  && (0
+
+		      /* problem must be in-place & require some
+		         rearrangement of the data */
+		      || (p->I == p->O
+			  && !(X(tensor_inplace_strides)(p->sz)
+			       && X(tensor_inplace_strides)(p->vecsz)))
+
+		      /* or problem must be out of place, transforming
+			 from stride 1/2 to bigger stride, for apply_after */
+		      || (p->I != p->O && ego->adt->apply == apply_after
+			  && (plnr->flags & DESTROY_INPUT)
+			  && X(tensor_min_istride)(p->sz) <= 2
+			  && X(tensor_min_ostride)(p->sz) > 2)
+			  
+		      /* or problem must be out of place, transforming
+			 to stride 1/2 from bigger stride, for apply_before */
+		      || (p->I != p->O && ego->adt->apply == apply_before
+			  && X(tensor_min_ostride)(p->sz) <= 2
+			  && X(tensor_min_istride)(p->sz) > 2)
+			  
+		       )
 	       );
      }
 
@@ -157,7 +174,7 @@ static int applicable(const solver *ego_, const problem *p_)
 static int score(const solver *ego, const problem *p, const planner *plnr)
 {
      UNUSED(plnr);
-     return (applicable(ego, p)) ? GOOD : BAD;
+     return (applicable(ego, p, plnr)) ? GOOD : BAD;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -172,14 +189,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(rdft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_))
+     if (!applicable(ego_, p_, plnr))
           return (plan *) 0;
 
      {
 	  tensor sz_real = X(rdft_real_sz)(p->kind, p->sz);
 	  cldp = X(mkproblem_rdft_d)(X(mktensor)(0),
 				     X(tensor_append)(p->vecsz, sz_real),
-				     p->I, p->I, (rdft_kind *) 0);
+				     p->I, p->O, (rdft_kind *) 0);
 	  X(tensor_destroy)(sz_real);
      }
      cldcpy = MKPLAN(plnr, cldp);

@@ -18,12 +18,14 @@
  *
  */
 
-/* $Id: indirect.c,v 1.15 2002-08-23 20:07:12 athena Exp $ */
+/* $Id: indirect.c,v 1.16 2002-08-30 02:55:29 stevenj Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
    in-place directly.  Use a rank-0 plan to rearrange the data
-   before or after the transform. */
+   before or after the transform.  Can also change an out-of-place
+   plan into a copy + in-place (where the in-place transform
+   is e.g. unit stride). */
 
 #include "dft.h"
 
@@ -52,16 +54,13 @@ static void apply_before(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
 
-     UNUSED(ro);
-     UNUSED(io); /* input == output */
-
      {
           plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
-          cldcpy->apply(ego->cldcpy, ri, ii, ri, ii);
+          cldcpy->apply(ego->cldcpy, ri, ii, ro, io);
      }
      {
           plan_dft *cld = (plan_dft *) ego->cld;
-          cld->apply(ego->cld, ri, ii, ri, ii);
+          cld->apply(ego->cld, ro, io, ro, io);
      }
 }
 
@@ -85,15 +84,13 @@ static void apply_after(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
 
-     UNUSED(ro);
-     UNUSED(io);		/* input == output */
      {
           plan_dft *cld = (plan_dft *) ego->cld;
           cld->apply(ego->cld, ri, ii, ri, ii);
      }
      {
           plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
-          cldcpy->apply(ego->cldcpy, ri, ii, ri, ii);
+          cldcpy->apply(ego->cldcpy, ri, ii, ro, io);
      }
 }
 
@@ -133,23 +130,40 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(%s%(%p%)%(%p%))", s->adt->nam, ego->cld, ego->cldcpy);
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable(const solver *ego_, const problem *p_,
+		      const planner *plnr)
 {
-     UNUSED(ego_);
      if (DFTP(p_)) {
+	  const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
           return (1
                   && FINITE_RNK(p->vecsz.rnk)
 
-                  /* problem must be in-place */
-                  && p->ri == p->ro
-
                   /* problem must be a nontrivial transform, not just a copy */
                   && p->sz.rnk > 0
 
-                  /* problem must require some rearrangement of data */
-                  && !(X(tensor_inplace_strides)(p->sz)
-		       && X(tensor_inplace_strides)(p->vecsz))
+                  && (0
+
+		      /* problem must be in-place & require some
+		         rearrangement of the data */
+		      || (p->ri == p->ro
+			  && !(X(tensor_inplace_strides)(p->sz)
+			       && X(tensor_inplace_strides)(p->vecsz)))
+
+		      /* or problem must be out of place, transforming
+			 from stride 1/2 to bigger stride, for apply_after */
+		      || (p->ri != p->ro && ego->adt->apply == apply_after
+			  && (plnr->flags & DESTROY_INPUT)
+			  && X(tensor_min_istride)(p->sz) <= 2
+			  && X(tensor_min_ostride)(p->sz) > 2)
+			  
+		      /* or problem must be out of place, transforming
+			 to stride 1/2 from bigger stride, for apply_before */
+		      || (p->ri != p->ro && ego->adt->apply == apply_before
+			  && X(tensor_min_ostride)(p->sz) <= 2
+			  && X(tensor_min_istride)(p->sz) > 2)
+			  
+		       )
 	       );
      }
 
@@ -158,8 +172,7 @@ static int applicable(const solver *ego_, const problem *p_)
 
 static int score(const solver *ego, const problem *p, const planner *plnr)
 {
-     UNUSED(plnr);
-     return (applicable(ego, p)) ? GOOD : BAD;
+     return (applicable(ego, p, plnr)) ? GOOD : BAD;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -174,12 +187,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(dft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_))
+     if (!applicable(ego_, p_, plnr))
           return (plan *) 0;
 
      cldp = X(mkproblem_dft_d)(X(mktensor)(0),
                                X(tensor_append)(p->vecsz, p->sz),
-                               p->ri, p->ii, p->ri, p->ii);
+                               p->ri, p->ii, p->ro, p->io);
      cldcpy = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cldcpy)
