@@ -32,5 +32,6 @@
 
 #define ALIGNED(p) (!(((long)p) % ALIGNMENT))
 #define ALIGNEDA(p) (!(((long)p) % ALIGNMENTA))
-#define VEC_STRIDE_OK(x) (!(((x) * sizeof(R)) % ALIGNMENT))
-#define VEC_STRIDE_OKA(x) (!(((x) * sizeof(R)) % ALIGNMENTA))
+#define SIMD_STRIDE_OK(x) (!(((x) * sizeof(R)) % ALIGNMENT))
+#define SIMD_STRIDE_OKA(x) (!(((x) * sizeof(R)) % ALIGNMENTA))
+#define SIMD_VSTRIDE_OK SIMD_STRIDE_OK

@@ -220,3 +220,5 @@ static inline V BYTWJ(const R *t, V sr)
 }
 
 #define RIGHT_CPU() 1
+
+#define SIMD_VSTRIDE_OKA(x) ((x) == 2)

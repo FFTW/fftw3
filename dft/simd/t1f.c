@@ -28,8 +28,8 @@ static int okp(const ct_desc *d,
 {
      return (RIGHT_CPU()
              && ALIGNED(rio)
-	     && VEC_STRIDE_OK(ios)
-	     && VEC_STRIDE_OK(dist)
+	     && SIMD_STRIDE_OKA(ios)
+	     && SIMD_VSTRIDE_OKA(dist)
 	     && iio == rio + 1
              && (m % VL) == 0
 	     && (!d->s1 || (d->s1 == ios))

@@ -166,3 +166,5 @@ static __inline__ V BYTWJ(const R *t, V sr)
 
 #define RIGHT_CPU X(have_sse2)
 extern int RIGHT_CPU(void);
+
+#define SIMD_VSTRIDE_OKA(x) 1
