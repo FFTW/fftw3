@@ -53,3 +53,7 @@ TODO before FFTW-$2\pi$:
 * still too much code duplication in rader
 
 * cleanup reodft/verify.c using kernel/verify-lib.c
+
+* better estimator: possibly, let "other" cost be coef * n, where
+  coef is a per/solver constant determined via some big numerical
+  optimization/fit.
