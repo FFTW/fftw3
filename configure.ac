@@ -15,7 +15,11 @@ AC_ARG_ENABLE(single, [  --enable-single        compile fftw in single precision
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_SINGLE,1,[Define to compile in single precision.])
 	AC_DEFINE(BENCHFFT_SINGLE,1,[Define to compile in single precision.])
+	PRECISION=s
+else
+	PRECISION=d
 fi
+AC_SUBST(PRECISION)
 
 AC_ARG_ENABLE(research-mode,
  [  --enable-research-mode      enable research code], 

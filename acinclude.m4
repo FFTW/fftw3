@@ -341,16 +341,3 @@ if test "$ac_test_CFLAGS" != "set"; then
 
 fi
 ])
-
-
-dnl like AC_SUBST, but replace XXX_variable_XXX instead of @variable@
-dnl This macro protects VARIABLE from being diverted twice
-dnl if this macro is called twice for it.
-dnl AC_SUBST(VARIABLE)
-define(ACX_SUBST_XXX,
-[ifdef([ACX_SUBST_XXX_$1], ,
-[define([ACX_SUBST_XXX_$1], )dnl
-AC_DIVERT_PUSH(AC_DIVERSION_SED)dnl
-s=XXX_$1_XXX=[$]$1=g
-AC_DIVERT_POP()dnl
-])])
