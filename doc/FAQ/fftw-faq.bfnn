@@ -438,6 +438,13 @@ small amount of other persistent memory.  You can deallocate all of
 FFTW's internally allocated memory, if you wish, by calling
 \courier{fftw_cleanup()\}, as documented in the manual.
 
+\question 16may:allzero The output of FFTW's transform is all zeros
+
+You should initialize your input array \italic{after\} creating the
+plan, unless you use \courier{FFTW_ESTIMATE\}: planning with
+\courier{FFTW_MEASURE\} or \courier{FFTW_PATIENT\} overwrites the
+input/output arrays, as described in the manual.
+
 \comment ######################################################################
 
 \section  Internals of FFTW
