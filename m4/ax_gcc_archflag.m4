@@ -22,7 +22,7 @@ dnl called unless the user specified --with-gcc-arch manually.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.15 2005-01-14 21:57:36 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.16 2005-02-19 04:47:22 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -140,7 +140,10 @@ if test "x$ax_gcc_arch" != x -a "x$ax_gcc_arch" != xno; then
 
 for arch in $ax_gcc_arch; do
   if test "x[]m4_default([$1],yes)" = xyes; then # if we require portable code
-    flags="-mtune=$arch -mcpu=$arch"
+    flags="-mtune=$arch"
+    # -mcpu=$arch and m$arch generate nonportable code on every arch except
+    # x86.  And some other arches (e.g. Alpha) don't accept -mtune.  Grrr.
+    case $host_cpu in i*86|x86_64*) flags="$flags -mcpu=$arch -m$arch";; esac
   else
     flags="-march=$arch -mcpu=$arch -m$arch"
   fi
