@@ -17,4 +17,4 @@ plan-dft-r2c-2d.c plan-dft-r2c-3d.c plan-guru-dft-c2r.c			\
 plan-guru-dft-r2c.c map-r2r-kind.c plan-many-r2r.c plan-r2r-1d.c	\
 plan-r2r-2d.c plan-r2r-3d.c plan-r2r.c plan-guru-r2r.c			\
 plan-with-nthreads.c print-plan.c the-planner.c rdft2-pad.c api.h	\
-fftw3.h
+fftw3.h f77api.c
