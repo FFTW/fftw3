@@ -50,7 +50,6 @@ typedef struct {
 } P_dit;
 
 
-static rader_tl *omegas = 0;
 static rader_tl *twiddles = 0;
 
 /***************************************************************************/
@@ -188,40 +187,6 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
      X(free)(buf);
 }
 
-
-static R *mkomega(plan *p_, uint n, uint ginv)
-{
-     plan_dft *p = (plan_dft *) p_;
-     R *omega;
-     uint i, gpower;
-     trigreal scale;
-
-     if ((omega = X(rader_tl_find)(n, n, ginv, omegas)))
-	  return omega;
-
-     omega = (R *)fftw_malloc(sizeof(R) * (n - 1) * 2, TWIDDLES);
-
-     scale = n - 1.0; /* normalization for convolution */
-
-     for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  omega[2*i] = X(cos2pi)(gpower, n) / scale;
-	  omega[2*i+1] = FFT_SIGN * X(sin2pi)(gpower, n) / scale;
-     }
-     A(gpower == 1);
-
-     AWAKE(p_, 1);
-     p->apply(p_, omega, omega + 1, omega, omega + 1);
-     AWAKE(p_, 0);
-
-     X(rader_tl_insert)(n, n, ginv, omega, &omegas);
-     return omega;
-}
-
-static void free_omega(R *omega)
-{
-     X(rader_tl_delete)(omega, &omegas);
-}
-
 static R *mktwiddle(uint m, uint r, uint g)
 {
      uint i, j, gpower;
@@ -262,10 +227,10 @@ static void awake(plan *ego_, int flg)
 
      if (flg) {
 	  if (!ego->omega) 
-	       ego->omega = mkomega(ego->cld_omega,ego->n,ego->ginv);
+	       ego->omega = 
+		    X(dft_rader_mkomega)(ego->cld_omega, ego->n, ego->ginv);
      } else {
-	  free_omega(ego->omega);
-	  ego->omega = 0;
+	  X(dft_rader_free_omega)(&ego->omega);
      }
 }
 

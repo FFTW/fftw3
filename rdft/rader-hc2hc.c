@@ -255,40 +255,6 @@ static void apply_dif(plan *ego_, R *I, R *O)
      }
 }
 
-
-static R *mkomega(plan *p_, uint n, uint ginv)
-{
-     plan_dft *p = (plan_dft *) p_;
-     R *omega;
-     uint i, gpower;
-     trigreal scale;
-
-     if ((omega = X(rader_tl_find)(n, n, ginv, omegas)))
-	  return omega;
-
-     omega = (R *)fftw_malloc(sizeof(R) * (n - 1) * 2, TWIDDLES);
-
-     scale = n - 1.0; /* normalization for convolution */
-
-     for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  omega[2*i] = X(cos2pi)(gpower, n) / scale;
-	  omega[2*i+1] = FFT_SIGN * X(sin2pi)(gpower, n) / scale;
-     }
-     A(gpower == 1);
-
-     AWAKE(p_, 1);
-     p->apply(p_, omega, omega + 1, omega, omega + 1);
-     AWAKE(p_, 0);
-
-     X(rader_tl_insert)(n, n, ginv, omega, &omegas);
-     return omega;
-}
-
-static void free_omega(R *omega)
-{
-     X(rader_tl_delete)(omega, &omegas);
-}
-
 static R *mktwiddle(uint m, uint r, uint g)
 {
      uint i, j, gpower;
@@ -330,12 +296,12 @@ static void awake(plan *ego_, int flg)
 
      if (flg) {
 	  if (!ego->omega) 
-	       ego->omega = mkomega(ego->cldr, ego->r, ego->ginv);
+	       ego->omega = 
+		    X(dft_rader_mkomega)(ego->cldr, ego->r, ego->ginv);
 	  if (!ego->W)
 	       ego->W = mktwiddle(ego->m, ego->r, ego->g);
      } else {
-	  free_omega(ego->omega);
-	  ego->omega = 0;
+	  X(dft_rader_free_omega)(&ego->omega);
 	  free_twiddle(ego->W);
 	  ego->W = 0;
      }

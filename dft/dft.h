@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.30 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: dft.h,v 1.31 2002-09-22 16:50:36 athena Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -78,6 +78,10 @@ void X(dft_buffered_register)(planner *p);
 void X(dft_generic_register)(planner *p);
 void X(dft_rader_register)(planner *p);
 void X(dft_nop_register)(planner *p);
+
+/* rader-omega.c: auxiliary stuff for rader */
+R *X(dft_rader_mkomega)(plan *p_, uint n, uint ginv);
+void X(dft_rader_free_omega)(R **omega);
 
 /* configurations */
 void X(dft_conf_standard)(planner *p);
