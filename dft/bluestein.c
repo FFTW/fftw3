@@ -232,6 +232,11 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->is = p->sz->dims[0].is;
      pln->os = p->sz->dims[0].os;
 
+     X(ops_add)(&cldf->ops, &cldb->ops, &pln->super.super.ops);
+     pln->super.super.ops.add += 4 * n + 2 * nb;
+     pln->super.super.ops.mul += 8 * n + 4 * nb;
+     pln->super.super.ops.other += 6 * (n + nb);
+
      return &(pln->super.super);
 
  nada:
