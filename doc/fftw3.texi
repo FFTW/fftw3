@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.132 2003-03-12 06:43:27 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.133 2003-03-12 07:24:37 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -31,9 +31,9 @@
 @ifinfo
 O(n log n)
 @end ifinfo
-@ifhtml
+@html
 <i>O</i>(<i>n</i>&nbsp;log&nbsp;<i>n</i>)
-@end ifhtml
+@end html
 @tex
 $O(n \\log n)$
 @end tex
@@ -43,9 +43,9 @@ $O(n \\log n)$
 @ifinfo
 n1 x n2 x n3 x ... x nd
 @end ifinfo
-@ifhtml
+@html
 n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x n<sub>d</sub>
-@end ifhtml
+@end html
 @tex
 $n_1 \\times n_2 \\times n_3 \\times \\cdots \\times n_d$
 @end tex
@@ -55,9 +55,9 @@ $n_1 \\times n_2 \\times n_3 \\times \\cdots \\times n_d$
 @ifinfo
 n1 x n2 x n3 x ... x (nd/2 + 1)
 @end ifinfo
-@ifhtml
+@html
 n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x (n<sub>d</sub>/2 + 1)
-@end ifhtml
+@end html
 @tex
 $n_1 \\times n_2 \\times n_3 \\times \\cdots \\times (n_d/2 + 1)$
 @end tex
@@ -226,9 +226,9 @@ For example, if you need transforms of size
 @tex
 $513 = 19 \cdot 3^3$,
 @end tex
-@ifhtml
+@html
 513&nbsp;=&nbsp;19*3<sup>3</sup>,
-@end ifhtml
+@end html
 you can customize FFTW to support the factor @math{19} efficiently.
 
 For more information regarding FFTW, see the paper, ``FFTW: An
@@ -658,9 +658,9 @@ $2 (n_d/2+1)$
 @ifinfo
 2 * (nd/2+1)
 @end ifinfo
-@ifhtml
+@html
 2 * (n<sub>d</sub>/2+1)
-@end ifhtml
+@end html
 @code{double} values (exactly enough to hold the complex data).
 This physical array size does not, however, change the @emph{logical}
 array size---only
@@ -670,9 +670,9 @@ $n_d$
 @ifinfo
 nd
 @end ifinfo
-@ifhtml
+@html
 n<sub>d</sub>
-@end ifhtml
+@end html
 values are actually stored in the last dimension, and
 @tex
 $n_d$
@@ -680,9 +680,9 @@ $n_d$
 @ifinfo
 nd
 @end ifinfo
-@ifhtml
+@html
 n<sub>d</sub>
-@end ifhtml
+@end html
 is the last dimension passed to the plan-creation routine.
 
 For example, consider the transform of a two-dimensional real array of
@@ -696,13 +696,13 @@ must @emph{pad} the input array so that it is of size @code{nx} by
 @code{2*(ny/2+1)}.  If @code{ny} is even, then there are two padding
 elements at the end of each row (which need not be initialized, as they
 are only used for output).
-@ifhtml
+@html
 The following illustration depicts the input and output arrays just
 described, for both the out-of-place and in-place transforms (with the
 arrows indicating consecutive memory locations):
 
 <p align=center><img src="rfftwnd.gif" width=389 height=583>
-@end ifhtml
+@end html
 
 @tex
 Figure 1 depicts the input and output arrays just
@@ -839,11 +839,11 @@ $$
 @ifinfo
 r0, r1, r2, r(n/2), i((n+1)/2-1), ..., i2, i1
 @end ifinfo
-@ifhtml
+@html
 <p align=center>
 r<sub>0</sub>, r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>n/2</sub>, i<sub>(n+1)/2-1</sub>, ..., i<sub>2</sub>, i<sub>1</sub>
 </p>
-@end ifhtml
+@end html
 
 Here,
 @ifinfo
@@ -852,9 +852,9 @@ rk
 @tex
 $r_k$
 @end tex
-@ifhtml
+@html
 r<sub>k</sub>
-@end ifhtml
+@end html
 is the real part of the @math{k}th output, and
 @ifinfo
 ik
@@ -862,9 +862,9 @@ ik
 @tex
 $i_k$
 @end tex
-@ifhtml
+@html
 i<sub>k</sub>
-@end ifhtml
+@end html
 is the imaginary part.  (Division by 2 is rounded down.) For a
 halfcomplex array @code{hc[n]}, the @math{k}th component thus has its
 real part in @code{hc[k]} and its imaginary part in @code{hc[n-k]}, with
@@ -1186,9 +1186,9 @@ $(i_1, i_2, i_3, \ldots, i_d)$.
 @ifinfo
 (i1, i2, ..., id).
 @end ifinfo
-@ifhtml
+@html
 (i<sub>1</sub>, i<sub>2</sub>, i<sub>3</sub>,..., i<sub>d</sub>).
-@end ifhtml
+@end html
 If the array is stored in row-major
 order, then this element is located at the position
 @tex
@@ -1197,9 +1197,9 @@ $i_d + n_d (i_{d-1} + n_{d-1} (\ldots + n_2 i_1))$.
 @ifinfo
 id + nd * (id-1 + nd-1 * (... + n2 * i1)).
 @end ifinfo
-@ifhtml
+@html
 i<sub>d</sub> + n<sub>d</sub> * (i<sub>d-1</sub> + n<sub>d-1</sub> * (... + n<sub>2</sub> * i<sub>1</sub>)).
-@end ifhtml
+@end html
 
 Note that, for the ordinary complex DFT, each element of the array
 must be of type @code{fftw_complex}; i.e. a (real, imaginary) pair of
@@ -1658,10 +1658,10 @@ FFTW is best at handling sizes of the form
 @tex
 $2^a 3^b 5^c 7^d 11^e 13^f$,
 @end tex
-@ifhtml
+@html
 2<sup>a</sup> 3<sup>b</sup> 5<sup>c</sup> 7<sup>d</sup>
         11<sup>e</sup> 13<sup>f</sup>,
-@end ifhtml
+@end html
 where @math{e+f} is either @math{0} or @math{1}, and the other exponents
 are arbitrary.  Other sizes are computed by means of a slow,
 general-purpose algorithm (which nevertheless retains @Onlogn
@@ -1843,10 +1843,10 @@ FFTW is best at handling sizes of the form
 @tex
 $2^a 3^b 5^c 7^d 11^e 13^f$,
 @end tex
-@ifhtml
+@html
 2<sup>a</sup> 3<sup>b</sup> 5<sup>c</sup> 7<sup>d</sup>
         11<sup>e</sup> 13<sup>f</sup>,
-@end ifhtml
+@end html
 where @math{e+f} is either @math{0} or @math{1}, and the other exponents
 are arbitrary.  Other sizes are computed by means of a slow,
 general-purpose algorithm (which nevertheless retains @Onlogn
@@ -1955,9 +1955,9 @@ $2 (n_d/2+1)$
 @ifinfo
 2 * (nd/2+1)
 @end ifinfo
-@ifhtml
+@html
 2 * (n<sub>d</sub>/2+1)
-@end ifhtml
+@end html
 @code{double} values (exactly enough to hold the complex data).  This
 physical array size does not, however, change the @emph{logical} array
 size---only
@@ -1967,9 +1967,9 @@ $n_d$
 @ifinfo
 nd
 @end ifinfo
-@ifhtml
+@html
 n<sub>d</sub>
-@end ifhtml
+@end html
 values are actually stored in the last dimension, and
 @tex
 $n_d$
@@ -1977,9 +1977,9 @@ $n_d$
 @ifinfo
 nd
 @end ifinfo
-@ifhtml
+@html
 n<sub>d</sub>
-@end ifhtml
+@end html
 is the last dimension passed to the planner.
 
 @c =========>
@@ -2053,10 +2053,10 @@ FFTW is generally best at handling sizes of the form
 @tex
 $2^a 3^b 5^c 7^d 11^e 13^f$,
 @end tex
-@ifhtml
+@html
 2<sup>a</sup> 3<sup>b</sup> 5<sup>c</sup> 7<sup>d</sup>
         11<sup>e</sup> 13<sup>f</sup>,
-@end ifhtml
+@end html
 where @math{e+f} is either @math{0} or @math{1}, and the other exponents
 are arbitrary.  Other sizes are computed by means of a slow,
 general-purpose algorithm (which nevertheless retains @Onlogn
@@ -2128,11 +2128,11 @@ $$
 @ifinfo
 r0, r1, r2, r(n/2), i((n+1)/2-1), ..., i2, i1
 @end ifinfo
-@ifhtml
+@html
 <p align=center>
 r<sub>0</sub>, r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>n/2</sub>, i<sub>(n+1)/2-1</sub>, ..., i<sub>2</sub>, i<sub>1</sub>
 </p>
-@end ifhtml
+@end html
 (Logical @code{N=n}, inverse is @code{FFTW_HC2R}.)
 
 @item
@@ -2692,9 +2692,9 @@ $$
 @ifinfo
 @center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(-2 pi j k sqrt(-1)/n) .
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-dft.gif" align="top">.</center>
-@end ifhtml
+@end html
 The backward (@code{FFTW_BACKWARD}) DFT computes:
 @tex
 $$
@@ -2704,9 +2704,9 @@ $$
 @ifinfo
 @center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(2 pi j k sqrt(-1)/n) .
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-idft.gif" align="top">.</center>
-@end ifhtml
+@end html
 
 @cindex normalization
 FFTW computes an unnormalized transform, in that there is no coefficient
@@ -2741,9 +2741,9 @@ $$
 @ifinfo
 @center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(-2 pi j k sqrt(-1)/n) .
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-dft.gif" align="top">.</center>
-@end ifhtml
+@end html
 This output array @math{Y} can easily be shown to possess the
 ``Hermitian'' symmetry
 @cindex Hermitian
@@ -2753,9 +2753,9 @@ $Y_k = Y_{n-k}^*$,
 @ifinfo
 Y[k] = Y[n-k]*,
 @end ifinfo
-@ifhtml
+@html
 <i>Y<sub>k</sub> = Y<sub>n-k</sub></i><sup>*</sup>,
-@end ifhtml
+@end html
 where we take @math{Y} to be periodic so that
 @tex
 $Y_n = Y_0$.
@@ -2763,9 +2763,9 @@ $Y_n = Y_0$.
 @ifinfo
 Y[n] = Y[0].
 @end ifinfo
-@ifhtml
+@html
 <i>Y<sub>n</sub> = Y</i><sub>0</sub>.
-@end ifhtml
+@end html
 
 As a result of this symmetry, half of the output @math{Y} is redundant
 (being the complex conjugate of the other half), and so the 1d r2c
@@ -2780,9 +2780,9 @@ $Y_0$
 @ifinfo
 Y[0]
 @end ifinfo
-@ifhtml
+@html
 <i>Y</i><sub>0</sub>
-@end ifhtml
+@end html
 and, if @math{n} is even, the
 @tex
 $Y_{n/2}$
@@ -2790,9 +2790,9 @@ $Y_{n/2}$
 @ifinfo
 Y[n/2]
 @end ifinfo
-@ifhtml
+@html
 <i>Y</i><sub><i>n</i>/2</sub>
-@end ifhtml
+@end html
 element, are purely real.  So, for the @code{R2HC} r2r transform, these
 elements are not stored in the halfcomplex output format.
 @cindex r2r
@@ -2811,9 +2811,9 @@ $$
 @ifinfo
 @center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(2 pi j k sqrt(-1)/n) .
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-idft.gif" align="top">.</center>
-@end ifhtml
+@end html
 The outputs @code{Y} of this transform can easily be seen to be purely
 real, and are stored as an array of real numbers.
 
@@ -2842,9 +2842,9 @@ $X_j = X_{N-j}$,
 @ifinfo
 X[j] = X[N-j],
 @end ifinfo
-@ifhtml
+@html
 <i>X<sub>j</sub> = X<sub>N-j</sub></i>,
-@end ifhtml
+@end html
 where we take @math{X} to be periodic so that
 @tex
 $X_N = X_0$.
@@ -2852,9 +2852,9 @@ $X_N = X_0$.
 @ifinfo
 X[N] = X[0].
 @end ifinfo
-@ifhtml
+@html
 <i>X<sub>N</sub> = X</i><sub>0</sub>.
-@end ifhtml
+@end html
 Because of this redundancy, only the first @math{n} real numbers are
 actually stored, where @math{N = 2(n-1)}.
 
@@ -2885,9 +2885,9 @@ $$
 @ifinfo
 Y[k] = X[0] + (-1)^k X[n-1] + 2 (sum for j = 1 to n-2 of X[j] cos(pi jk /(n-1))).
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-redft00.gif" align="top">.</center>
-@end ifhtml
+@end html
 
 @subsubheading REDFT10 (DCT-II)
 @ctindex REDFT10
@@ -2900,9 +2900,9 @@ $$
 @ifinfo
 Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) k / n)).
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-redft10.gif" align="top">.</center>
-@end ifhtml
+@end html
 
 @subsubheading REDFT01 (DCT-III)
 @ctindex REDFT01
@@ -2915,9 +2915,9 @@ $$
 @ifinfo
 Y[k] = X[0] + 2 (sum for j = 1 to n-1 of X[j] cos(pi j (k+1/2) / n)).
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-redft01.gif" align="top">.</center>
-@end ifhtml
+@end html
 
 @subsubheading REDFT11 (DCT-IV)
 @ctindex REDFT11
@@ -2930,9 +2930,9 @@ $$
 @ifinfo
 Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) (k+1/2) / n)).
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-redft11.gif" align="top">.</center>
-@end ifhtml
+@end html
 
 @subsubheading Inverses and Normalization
 
@@ -2965,9 +2965,9 @@ $X_j = -X_{N-j}$,
 @ifinfo
 X[j] = -X[N-j],
 @end ifinfo
-@ifhtml
+@html
 <i>X<sub>j</sub> = -X<sub>N-j</sub></i>,
-@end ifhtml
+@end html
 where we take @math{X} to be periodic so that
 @tex
 $X_N = X_0$.
@@ -2975,9 +2975,9 @@ $X_N = X_0$.
 @ifinfo
 X[N] = X[0].
 @end ifinfo
-@ifhtml
+@html
 <i>X<sub>N</sub> = X</i><sub>0</sub>.
-@end ifhtml
+@end html
 Because of this redundancy, only the first @math{n} real numbers
 starting at @math{j=1} are actually stored (the @math{j=0} element is
 zero), where @math{N = 2(n+1)}.
@@ -3008,9 +3008,9 @@ $$
 @ifinfo
 Y[k] = 2 (sum for j = 1 to n-2 of X[j] sin(pi (j+1)(k+1) / (n+1))).
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-rodft00.gif" align="top">.</center>
-@end ifhtml
+@end html
 
 @subsubheading RODFT10 (DST-II)
 @ctindex RODFT10
@@ -3023,9 +3023,9 @@ $$
 @ifinfo
 Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1) / n)).
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-rodft10.gif" align="top">.</center>
-@end ifhtml
+@end html
 
 @subsubheading RODFT01 (DST-III)
 @ctindex RODFT01
@@ -3038,9 +3038,9 @@ $$
 @ifinfo
 Y[k] = 2 (sum for j = 1 to n-1 of X[j] sin(pi (j+1) (k+1/2) / n)).
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-rodft01.gif" align="top">.</center>
-@end ifhtml
+@end html
 
 @subsubheading RODFT11 (DST-IV)
 @ctindex RODFT11
@@ -3053,9 +3053,9 @@ $$
 @ifinfo
 Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1/2) / n)).
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-rodft11.gif" align="top">.</center>
-@end ifhtml
+@end html
 
 @subsubheading Inverses and Normalization
 
@@ -3085,9 +3085,9 @@ $$
 @ifinfo
 @center Y[k] = sum for j = 0 to (n - 1) of X[j] * [cos(2 pi j k / n) + sin(2 pi j k / n)].
 @end ifinfo
-@ifhtml
+@html
 <center><img src="equation-dht.gif" align="top">.</center>
-@end ifhtml
+@end html
 
 @cindex normalization
 FFTW computes an unnormalized transform, in that there is no coefficient
@@ -3154,15 +3154,14 @@ The definition of FFTW's multi-dimensional DFT of real data (r2c)
 deserves special attention.  In this case, we logically compute the full
 multi-dimensional DFT of the input data; since the input data are purely
 real, the output data have the Hermitian symmetry and therefore only one
-non-redundant half need be stored.  More specifically, for an @ndims{}
-multi-dimensional real-input DFT, the full (logical) complex output array
+non-redundant half need be stored.  More specifically, for an @ndims multi-dimensional real-input DFT, the full (logical) complex output array
 @tex
 $Y[k_1, k_2, \ldots, k_d]$
 @end tex
-@ifhtml
+@html
 <i>Y</i>[<i>k</i><sub>1</sub>, <i>k</i><sub>2</sub>, ...,
 <i>k</i><sub><i>d</i></sub>]
-@end ifhtml
+@end html
 @ifinfo
 Y[k1, k2, ..., kd]
 @end ifinfo
@@ -3172,12 +3171,12 @@ $$
 Y[k_1, k_2, \ldots, k_d] = Y[n_1 - k_1, n_2 - k_2, \ldots, n_d - k_d]^*
 $$
 @end tex
-@ifhtml
+@html
 <i>Y</i>[<i>k</i><sub>1</sub>, <i>k</i><sub>2</sub>, ...,
 <i>k</i><sub><i>d</i></sub>] = <i>Y</i>[<i>n</i><sub>1</sub> -
 <i>k</i><sub>1</sub>, <i>n</i><sub>2</sub> - <i>k</i><sub>2</sub>, ...,
 <i>n</i><sub><i>d</i></sub> - <i>k</i><sub><i>d</i></sub>]<sup>*</sup>
-@end ifhtml
+@end html
 @ifinfo
 Y[k1, k2, ..., kd] = Y[n1 - k1, n2 - k2, ..., nd - kd]*
 @end ifinfo
@@ -3186,9 +3185,9 @@ store the
 @tex
 $k_d = 0 \cdots n_d/2$
 @end tex
-@ifhtml
+@html
 <i>k</i><sub><i>d</i></sub> = 0...<i>n</i><sub><i>d</i></sub>/2+1
-@end ifhtml
+@end html
 @ifinfo
 kd = 0...nd/2
 @end ifinfo
