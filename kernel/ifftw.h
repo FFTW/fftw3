@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.36 2002-06-18 14:33:58 athena Exp $ */
+/* $Id: ifftw.h,v 1.37 2002-06-18 15:55:57 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -87,23 +87,6 @@ extern void X(fftw_debug)(const char *format, ...);
 #define D X(fftw_debug)
 
 /*-----------------------------------------------------------------------*/
-/* alloca: */
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#endif /* HAVE_ALLOCA_H */
-
-#ifdef HAVE_ALLOCA
-/* use alloca if available */
-#define STACK_MALLOC(x) alloca(x)
-#define STACK_FREE(x) 
-
-#else /* ! HAVE_ALLOCA */
-/* use malloc instead of alloca */
-#define STACK_MALLOC(x) fftw_malloc(x, OTHER)
-#define STACK_FREE(x) fftw_free(x)
-#endif /* ! HAVE_ALLOCA */
-
-/*-----------------------------------------------------------------------*/
 /* alloc.c: */
 
 /* objects allocated by malloc, for statistical purposes */
@@ -138,6 +121,24 @@ extern void *X(malloc_plain)(size_t sz);
 
 #define fftw_malloc(n, what)  X(malloc_plain)(n)
 #endif
+
+/*-----------------------------------------------------------------------*/
+/* alloca: */
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif /* HAVE_ALLOCA_H */
+
+#ifdef HAVE_ALLOCA
+/* use alloca if available */
+#define STACK_MALLOC(x) alloca(x)
+#define STACK_FREE(x) 
+
+#else /* ! HAVE_ALLOCA */
+/* use malloc instead of alloca */
+#define STACK_MALLOC(x) fftw_malloc(x, OTHER)
+#define STACK_FREE(x) X(free)(x)
+#endif /* ! HAVE_ALLOCA */
+
 
 /*-----------------------------------------------------------------------*/
 /* ops.c: */

@@ -27,7 +27,7 @@ open K7Translate
 open AssignmentsToVfpinstrs
 open Complex
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.5 2002-06-17 01:30:42 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.6 2002-06-18 15:55:57 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -169,7 +169,7 @@ let generate n =
 
 let main () =
   begin
-    parse speclist usage;
+    parse (speclist @ Twiddle.speclist) usage;
     generate (check_size());
   end
 
