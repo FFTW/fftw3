@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: to_alist.ml,v 1.1.1.1 2002-06-02 18:42:31 athena Exp $ *)
+(* $Id: to_alist.ml,v 1.2 2002-06-18 21:48:41 athena Exp $ *)
 
 (*************************************************************
  * Conversion of the dag to an assignment list
@@ -200,7 +200,7 @@ let rec expr_of_nodeM x =
 	    begin
 	      match a' with
 		Num a'' when !Magic.strength_reduce_mul && Number.is_two a'' ->
-		  (with_tempM b' >>= fun b'' ->
+		  (inlineM b' >>= fun b'' ->
 		    with_temp_maybeM x (Plus [b''; b'']))
 	      | _ -> with_temp_maybeM x (Times (a', b'))
 	    end

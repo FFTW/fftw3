@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: number.ml,v 1.2 2002-06-15 22:23:40 athena Exp $ *)
+(* $Id: number.ml,v 1.3 2002-06-18 21:48:41 athena Exp $ *)
 
 (* The generator keeps track of numeric constants in symbolic
    expressions using the abstract number type, defined in this file.
@@ -141,7 +141,7 @@ let to_konst (N n) =
   in let q = string_of_int (truncate(f2 *. 1.0E9))
   in let r = "0000000000" ^ q
   in let l = String.length r 
-  in let prefix = if (f < 0.0) then "NK" else "PK" in
+  in let prefix = if (f < 0.0) then "KN" else "KP" in
   if (f' >= 1.0) then
     (prefix ^ (string_of_int (truncate f')) ^ "_" ^ 
      (String.sub r (l - 9) 9))

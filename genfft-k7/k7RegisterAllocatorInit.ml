@@ -69,6 +69,11 @@ open HandleOnDemandInstructions
 
 let processInitcode viregfile = function
   | AddIntOnDemandCode(reg,xs) -> VIntRegMap.add reg (IOnDemand xs) viregfile
+  | _ -> viregfile
+
+let makeInitialMap rregfile = function
+  | FixRegister(vreg, rreg) -> (rreg, IFixed vreg)::(remove_assoc rreg rregfile)
+  | _ -> rregfile
 
 let addRegRefForInstr (n0,vsrefs0,virefs0) instr =
   let (_,_,(vsregs,viregs)) = k7vinstrToVregs instr in
@@ -88,10 +93,11 @@ let prepareRegAlloc initcode instrs0 =
   and vsregfile0 = VSimdRegMap.empty in
   let (viregfile1, instrs) = addOndemandInstructions viregfile0 instrs0 in
   let (vsregs,viregs) = fold_right addRegsForInstr instrs ([],[]) in
-    ((map (fun reg -> (reg,SFree)) k7rmmxregs,
-      map (fun reg -> (reg,IFree)) k7rintregs),
-     (fold_right (fun reg -> VSimdRegMap.add reg SFresh) vsregs vsregfile0,
-      fold_right (fun reg -> VIntRegMap.add reg IFresh) viregs viregfile1),
-     getRegRefsForInstrs instrs,
-     instrs)
+  let rimap0 = map (fun reg -> (reg,IFree)) k7rintregs in
+  let rimap1 = fold_left makeInitialMap rimap0 initcode in
+  (((map (fun reg -> (reg,SFree)) k7rmmxregs), rimap1),
+   (fold_right (fun reg -> VSimdRegMap.add reg SFresh) vsregs vsregfile0,
+    fold_right (fun reg -> VIntRegMap.add reg IFresh) viregs viregfile1),
+   getRegRefsForInstrs instrs,
+   instrs)
 

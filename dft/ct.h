@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.h,v 1.6 2002-06-17 01:30:42 athena Exp $ */
+/* $Id: ct.h,v 1.7 2002-06-18 21:48:41 athena Exp $ */
 
 /* Cooley-Tukey variants */
 union kct {
@@ -68,3 +68,5 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
 solver *X(mksolver_dft_ct)(union kct k, const ct_desc *desc,
                            const char *nam, const solver_adt *adt);
 
+problem *X(dft_mkcld_dit)(const solver_ct *ego, const problem_dft *p);
+problem *X(dft_mkcld_dif)(const solver_ct *ego, const problem_dft *p);

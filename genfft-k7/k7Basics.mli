@@ -164,6 +164,7 @@ val k7rmmxregs : k7rmmxreg list
 val k7rintregs : k7rintreg list
 val k7rintregs_calleesaved : k7rintreg list
 val k7rintreg_stackpointer : k7rintreg
+val retval : k7rintreg
 
 val k7operandsizeToString : k7operandsize -> string
 val k7operandsizeToInteger : k7operandsize -> int

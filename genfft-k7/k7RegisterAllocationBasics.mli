@@ -18,11 +18,13 @@
  *)
 
 
-type initcodeinstr =
-    AddIntOnDemandCode of VSimdBasics.vintreg * K7Basics.k7vinstr list
+type initcodeinstr = 
+  | AddIntOnDemandCode of VSimdBasics.vintreg * K7Basics.k7vinstr list
+  | FixRegister of VSimdBasics.vintreg * K7Basics.k7rintreg
 and riregfileentry =
     IFree
   | IHolds of VSimdBasics.vintreg
+  | IFixed of VSimdBasics.vintreg
   | ITmpHoldsProduct of VSimdBasics.vintreg * int
   | IVarHoldsProduct of VSimdBasics.vintreg * VSimdBasics.vintreg * int
 and rsregfileentry = SFree | SHolds of VSimdBasics.vsimdreg

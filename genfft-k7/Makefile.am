@@ -29,10 +29,10 @@ libgenfft_objects = magic.cmo util.cmo number.cmo variable.cmo		\
 expr.cmo stateMonad.cmo memoMonad.cmo monads.cmo littlesimp.cmo		\
 assoctable.cmo oracle.cmo to_alist.cmo algsimp.cmo complex.cmo		\
 twiddle.cmo fft.cmo nonDetMonad.cmo vFpBasics.cmo balanceVfpinstrs.cmo	\
-vSimdBasics.cmo assignmentsToVfpinstrs.cmo k7Basics.cmo id.cmo		\
-k7ExecutionModel.cmo k7InstructionSchedulingBasics.cmo			\
-k7FlatInstructionScheduling.cmo k7RegisterAllocationBasics.cmo		\
-vFpUnparsing.cmo vSimdUnparsing.cmo k7Unparsing.cmo			\
+vSimdBasics.cmo k7Basics.cmo id.cmo k7ExecutionModel.cmo		\
+k7InstructionSchedulingBasics.cmo k7FlatInstructionScheduling.cmo	\
+k7RegisterAllocationBasics.cmo vFpUnparsing.cmo				\
+assignmentsToVfpinstrs.cmo vSimdUnparsing.cmo k7Unparsing.cmo		\
 k7RegisterAllocatorEATranslation.cmo k7RegisterAllocatorInit.cmo	\
 k7RegisterAllocator.cmo k7RegisterReallocation.cmo k7Translate.cmo	\
 nullVectorization.cmo k7Vectorization.cmo vDag.cmo vScheduler.cmo	\

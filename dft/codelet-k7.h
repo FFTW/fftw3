@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet-k7.h,v 1.4 2002-06-17 01:30:42 athena Exp $ */
+/* $Id: codelet-k7.h,v 1.5 2002-06-18 21:48:41 athena Exp $ */
 
 /* K7 codelet stuff */
 
@@ -39,6 +39,7 @@ solver *X(mksolver_dft_direct_k7)(kdft_k7 k, const kdft_k7_desc *desc);
 typedef const R *(*kdft_dit_k7)(R *io, const R *W, int ios, uint m, int dist);
 void X(kdft_dit_register)(planner *p, kdft_dit codelet, const ct_desc *desc);
 solver *X(mksolver_dft_ct_dit_k7)(kdft_dit_k7 codelet, const ct_desc *desc);
+solver *X(mksolver_dft_ct_ditbuf_k7)(kdft_dit_k7 codelet, const ct_desc *desc);
 
 typedef const R *(*kdft_dif_k7)(R *io, const R *W, int ios, uint m, int dist);
 void X(kdft_dif_register)(planner *p, kdft_dif codelet, const ct_desc *desc);

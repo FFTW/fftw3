@@ -394,7 +394,7 @@ static int score_dit(const solver *ego_, const problem *p_, int flags)
      if (applicable_dit(ego_, p_)) {
 	  const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
-	  int r = X(first_divisor)(p->sz.dims[0].n);
+	  uint r = X(first_divisor)(p->sz.dims[0].n);
 	  if (r < ego->min_prime || r == p->sz.dims[0].n)
 	       return UGLY;
 	  else

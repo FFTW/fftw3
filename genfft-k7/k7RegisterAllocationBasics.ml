@@ -29,10 +29,12 @@ open K7Basics
 
 type initcodeinstr = 
   | AddIntOnDemandCode of vintreg * k7vinstr list
+  | FixRegister of vintreg * K7Basics.k7rintreg
 
 type riregfileentry =
   | IFree
   | IHolds of vintreg
+  | IFixed of vintreg
   | ITmpHoldsProduct of vintreg * int		(* used for reusing EAs *)
   | IVarHoldsProduct of vintreg * vintreg * int
 
@@ -156,6 +158,7 @@ let viregfileentryIsFresh = function
 let riregfileentryToVireg = function
   | IVarHoldsProduct(v,_,_) -> Some v
   | IHolds v 		    -> Some v
+  | IFixed v 		    -> Some v
   | IFree		    -> None
   | ITmpHoldsProduct _      -> None
 

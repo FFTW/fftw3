@@ -183,6 +183,8 @@ let addIntSpillCodeM dst_rireg dst_vireg = function
 let spillIntM rireg = function
   | IFree -> 
       unitM ()
+  | IFixed _ ->
+      unitM ()
   | ITmpHoldsProduct _ -> 
       unitM () 
   | IVarHoldsProduct(vireg,_,_) ->
@@ -208,25 +210,30 @@ let reloadIntM dst_rireg src_vireg =
       setRIRegFileEntryM dst_rireg (IHolds src_vireg)
 
 (* choosing register to use *)
-let viregToTagged virefs all_viregs reuse_dead_reg (rireg,riregfileentry) = 
+let viregToTagged vreg virefs all_viregs reuse_dead_reg (rireg,riregfileentry) = 
   match riregfileentry with
-    | IFree -> 
-	[(rireg,riregfileentry,min_int)]
-    | ITmpHoldsProduct _ -> 
-	[(rireg,riregfileentry,-100000)]
-    | _ ->
-	let vireg = optionToValue (riregfileentryToVireg riregfileentry) in
-	  (match VIntRegMap.find vireg virefs with
-	     | [] when not reuse_dead_reg -> []
-	     | [] -> [(rireg,riregfileentry,-1000000)]
-	     | _::_ when mem vireg all_viregs -> []
-	     | next_ref::_ -> [(rireg,riregfileentry,-next_ref)])
+  | IFixed v ->
+      if (v = vreg) then
+	[(rireg,riregfileentry,-100001)]
+      else
+	[(rireg,riregfileentry,100001)]
+  | IFree -> 
+      [(rireg,riregfileentry,-100000)]
+  | ITmpHoldsProduct _ -> 
+      [(rireg,riregfileentry,-100000)]
+  | _ ->
+      let vireg = optionToValue (riregfileentryToVireg riregfileentry) in
+      (match VIntRegMap.find vireg virefs with
+      | [] when not reuse_dead_reg -> []
+      | [] -> [(rireg,riregfileentry,-1000000)]
+      | _::_ when mem vireg all_viregs -> []
+      | next_ref::_ -> [(rireg,riregfileentry,-next_ref)])
 
 
-let getRIRegToBeUsedM virefs all_viregs riregfile mayReuseDeadRegister = 
+let getRIRegToBeUsedM vreg virefs all_viregs riregfile mayReuseDeadRegister = 
   let choices = 
 	concat (map (viregToTagged 
-			virefs all_viregs mayReuseDeadRegister) riregfile) in
+			vreg virefs all_viregs mayReuseDeadRegister) riregfile) in
   let (best_rireg,best_regfileentry,_) = 
 	optionToValue (minimize get3of3 choices) in
     unitM (best_rireg,best_regfileentry)
@@ -238,6 +245,7 @@ let spillAndReloadIntM all_viregs vireg =
       let mayReuseDeadRegister = 
 		viregfileentryIsFresh (VIntRegMap.find vireg viregfile) in
         getRIRegToBeUsedM 
+	        vireg
 		virefs 
 		all_viregs 
 		riregfile 
@@ -260,6 +268,7 @@ let k7intcpyunaryopToRiregfileentryscaling = function
 let forceBufferedExprsOut' = function
   | IFree -> IFree
   | IHolds x -> IHolds x
+  | IFixed x -> IFixed x
   | IVarHoldsProduct(x,_,_) -> IHolds x
   | ITmpHoldsProduct _ -> IFree
 
@@ -267,6 +276,7 @@ let forceBufferedExprsOut (reg,entry) = (reg,forceBufferedExprsOut' entry)
 
 let forceUnusedExprsOut' virefs = function 
   | IFree -> IFree
+  | IFixed x -> IFixed x
   | IHolds x -> if VIntRegMap.find x virefs = [] then IFree else IHolds x
   | IVarHoldsProduct(x,_,_) as orig -> 
       if VIntRegMap.find x virefs = [] then IFree else orig
@@ -315,6 +325,8 @@ let k7vinstrToK7rinstrs2M mapSimd mapInt = function
 		(match (k7intunaryopToRiregfileentryscaling op, entry_sd') with
 		   | (Some c, IHolds x) -> 
 		       IHolds x
+		   | (Some c, IFixed x) -> 
+		       IFixed x
 		   | (Some c, ITmpHoldsProduct(x,k)) -> 
 		       ITmpHoldsProduct(x,c*k)
 		   | (Some c, IVarHoldsProduct(v,x,k)) -> 
@@ -338,7 +350,7 @@ let k7vinstrToK7rinstrs2M mapSimd mapInt = function
 			ITmpHoldsProduct(x,c*k)
 		   | (Some c, IVarHoldsProduct(v,x,k)) -> 
 			IVarHoldsProduct(v,x,c*k)
-		   | (Some _, IFree) -> 
+		   | (Some _, _) -> 
 			failwith "k7vinstrToK7rinstrs2M: IntCpyUnaryOp"
 		   | (None, _) -> 
 			IHolds d) 
@@ -461,6 +473,7 @@ let doCleanupInt riregfile0 viregfile0 viregs =
 	partition 
 	    (function
 	       | (_,IFree) -> true
+	       | (_,IFixed _) -> true
 	       | (_,ITmpHoldsProduct _) -> true
 	       | (_,IVarHoldsProduct(x,_,_)) ->
 		   optionIsSome (vintregmap_find x viregfile)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif-k7.c,v 1.1 2002-06-17 01:30:42 athena Exp $ */
+/* $Id: ct-dif-k7.c,v 1.2 2002-06-18 21:48:41 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -90,20 +90,6 @@ static void finish(plan_ct *ego)
 		     X(ops_mul)(ego->vl * ego->m, ego->slv->desc->ops));
 }
 
-static problem *mkcld(const solver_ct *ego, const problem_dft *p)
-{
-     iodim *d = p->sz.dims;
-     const ct_desc *e = ego->desc;
-     uint m = d[0].n / e->radix;
-
-     tensor radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
-     tensor cld_vec = X(tensor_append)(radix, p->vecsz);
-     X(tensor_destroy)(radix);
-
-     return X(mkproblem_dft_d)(X(mktensor_1d)(m, d[0].is, e->radix * d[0].os),
-			       cld_vec, p->ri, p->ii, p->ro, p->io);
-}
-
 static int score(const solver *ego_, const problem *p_, int flags)
 {
      const solver_ct *ego = (const solver_ct *) ego_;
@@ -125,8 +111,8 @@ static int score(const solver *ego_, const problem *p_, int flags)
 static plan *mkplan(const solver *ego_, const problem *p, planner *plnr)
 {
      const solver_ct *ego = (const solver_ct *)ego_;
-     static const ctadt adtr = { mkcld, finish, applicable, applyr };
-     static const ctadt adti = { mkcld, finish, applicable, applyi };
+     static const ctadt adtr = { X(dft_mkcld_dif), finish, applicable, applyr };
+     static const ctadt adti = { X(dft_mkcld_dif), finish, applicable, applyi };
 
      return X(mkplan_dft_ct)(ego, p, plnr, 
 			     ego->desc->sign == 1 ? &adti : &adtr);

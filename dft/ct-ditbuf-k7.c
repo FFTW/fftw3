@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.9 2002-06-18 21:48:41 athena Exp $ */
+/* $Id: ct-ditbuf-k7.c,v 1.1 2002-06-18 21:48:41 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -56,11 +56,11 @@ static void cpy(uint n0, uint n1,
      }
 }
 
-static const R *doit(kdft_dit k, R *rA, R *iA, const R *W, int ios, int dist, 
-		     uint r, uint batchsz, R *buf, stride bufstride)
+static const R *doit(kdft_dit_k7 k, R *rA, R *iA, const R *W, int ios, int dist, 
+		     uint r, uint batchsz, R *buf)
 {
      cpy(r, batchsz, rA, iA, ios, dist, buf, buf + 1, 2, 2 * r);
-     W = k(buf, buf + 1, W, bufstride, batchsz, 2 * r);
+     W = k(buf, W, 2, batchsz, 2 * r);
      cpy(r, batchsz, buf, buf + 1, 2, 2 * r, rA, iA, ios, dist);
      return W;
 }
@@ -85,15 +85,15 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 	       const R *W = ego->W;
 
 	       for (j = m; j >= batchsz; j -= batchsz) {
-		    W = doit(ego->k.dit, rA, iA, W, ios, os, r, 
-			     batchsz, buf, ego->vs);
+		    W = doit(ego->k.dit_k7, rA, iA, W, ios, os, r, 
+			     batchsz, buf);
 		    rA += os * (int)batchsz;
 		    iA += os * (int)batchsz;
 	       }
 
 	       /* do remaining j calls, if any */
 	       if (j > 0)
-		    doit(ego->k.dit, rA, iA, W, ios, os, r, j, buf, ego->vs);
+		    doit(ego->k.dit_k7, rA, iA, W, ios, os, r, j, buf);
 
 	  }
 
@@ -117,7 +117,6 @@ static int applicable(const solver_ct *ego, const problem *p_)
 static void finish(plan_ct *ego)
 {
      ego->iios = ego->m * ego->os;
-     ego->vs = X(mkstride)(ego->r, 2);
      ego->super.super.ops =
 	  X(ops_add3)(ego->cld->ops,
 		      /* 4 load/stores * N * VL */
@@ -161,12 +160,17 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 }
 
 
-solver *X(mksolver_dft_ct_ditbuf)(kdft_dit codelet, const ct_desc *desc)
+solver *X(mksolver_dft_ct_ditbuf_k7)(kdft_dit_k7 codelet, const ct_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
-     static const char name[] = "dft-ditbuf";
+     static const char name[] = "dft-ditbuf-k7";
      union kct k;
-     k.dit = codelet;
+     k.dit_k7 = codelet;
 
-     return X(mksolver_dft_ct)(k, desc, name, &sadt);
+     /* only accept forward transforms, because the buffer is always
+	stored as R[0] I[0] R[1] I[1] ... */
+     if (desc->sign == FFT_SIGN)
+	  return X(mksolver_dft_ct)(k, desc, name, &sadt);
+     else
+	  return 0;
 }

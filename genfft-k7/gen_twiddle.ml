@@ -27,7 +27,7 @@ open K7Translate
 open AssignmentsToVfpinstrs
 open Complex
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.6 2002-06-18 15:55:57 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.7 2002-06-18 21:48:41 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -72,6 +72,8 @@ let twiddle_gen n sign nt byw =
 		       K7V_IntLoadEA(K7V_SID(iostride4p,4,0), iostride4p)]);
 	] in
   let initcode = map (fun (d,xs) -> AddIntOnDemandCode(d,xs)) int_initcode in
+     (* force W to be allocated in retval register *)
+  let initcode = initcode @ [FixRegister (w, retval)] in
   let do_split = n >= 32 in
   let io_unparser' =
 	if do_split then
@@ -109,7 +111,8 @@ let twiddle_gen n sign nt byw =
 	 K7V_IntBinOp(K7_IAdd, idist4p, inout);
 	 K7V_IntUnaryOp(K7_IDec, m);
 	 K7V_RefInts([inout; w; iostride4p; idist4p; m]);
-	 K7V_CondBranch(K7_BCond_NotZero, K7V_BTarget_Named ".L0")
+	 K7V_CondBranch(K7_BCond_NotZero, K7V_BTarget_Named ".L0");
+	 K7V_RefInts([w]);
 	]
   in ((initcode, body), k7vFlops body)
 

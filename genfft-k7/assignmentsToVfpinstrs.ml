@@ -93,7 +93,10 @@ let varinfo_realodd =
 (****************************************************************************)
 
 let conditionallyCopyVarM s = function
-  | Some d when s <> d -> failwith "conditional_copy_var: unsupported!"
+  | Some d when s <> d ->
+      failwith (Printf.sprintf "conditional_copy_var: unsupported! %s %s" 
+		  (VFpUnparsing.vfpregToString s) 
+		  (VFpUnparsing.vfpregToString d))
   | _ -> unitM s
 
 let extractUseReturnVfpregM fM = function

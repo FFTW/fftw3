@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.37 2002-06-18 15:55:57 athena Exp $ */
+/* $Id: ifftw.h,v 1.38 2002-06-18 21:48:41 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -449,7 +449,7 @@ uint X(safe_mulmod)(uint x, uint y, uint p);
 
 uint X(power_mod)(uint n, uint m, uint p);
 uint X(find_generator)(uint p);
-int X(first_divisor)(uint n);
+uint X(first_divisor)(uint n);
 int X(is_prime)(uint n);
 
 /*-----------------------------------------------------------------------*/

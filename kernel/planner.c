@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.17 2002-06-18 12:13:55 athena Exp $ */
+/* $Id: planner.c,v 1.18 2002-06-18 21:48:41 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -59,8 +59,10 @@ static pair *solvers(planner *ego) { return ego->solvers; }
 
 static void register_solver(planner *ego, solver *s)
 {
-     X(solver_use)(s);
-     ego->solvers = cons(s, ego->idcnt++, ego->solvers);
+     if (s) {
+	  X(solver_use)(s);
+	  ego->solvers = cons(s, ego->idcnt++, ego->solvers);
+     }
 }
 
 static void hooknil(const plan *plan, const problem *p)

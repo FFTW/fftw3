@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.1 2002-06-17 06:30:16 fftw Exp $ */
+/* $Id: primes.c,v 1.2 2002-06-18 21:48:41 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -93,7 +93,7 @@ uint X(find_generator)(uint p)
 
 /* Return first prime divisor of n  (It would be only slightly faster to
    search a static table of primes; there are 6542 primes < 2^16.)  */
-int X(first_divisor)(uint n)
+uint X(first_divisor)(uint n)
 {
      uint i;
      if (n <= 1)

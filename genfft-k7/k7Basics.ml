@@ -287,7 +287,7 @@ let k7rmmxregs = map toK7rmmxreg k7rmmxregs_names
 let k7rintregs = map toK7rintreg k7rintregs_names
 let k7rintregs_calleesaved = map toK7rintreg k7rintregs_calleesaved_names
 let k7rintreg_stackpointer = toK7rintreg k7rintreg_stackpointer_name
-
+let retval = toK7rintreg "eax"
 
 (* FUNCTIONS OPERATING ON VALUES OF TYPE K7... ******************************)
 
