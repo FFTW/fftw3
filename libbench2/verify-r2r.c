@@ -654,12 +654,19 @@ void verify_r2r(bench_problem *p, int rounds, double tol, errors *e)
 
      /* grr, verify-lib.c:preserves_input() only works for complex */
      if (!p->in_place && !p->destroy_input) {
+	  bench_tensor *totalsz_swap, *pckdsz_swap;
+	  totalsz_swap = tensor_copy_swapio(nfo.totalsz);
+	  pckdsz_swap = tensor_copy_swapio(nfo.pckdsz);
+
 	  for (i = 0; i < rounds; ++i) {
 	       rarand(inA, N);
 	       dofft(&nfo, inA, outB);
-	       cpyr((R *) nfo.p->in, nfo.totalsz, inB, nfo.pckdsz);
+	       cpyr((R *) nfo.p->in, totalsz_swap, inB, pckdsz_swap);
 	       racmp(inB, inA, N, "preserves_input", 0.0);
 	  }
+
+	  tensor_destroy(totalsz_swap);
+	  tensor_destroy(pckdsz_swap);
      }
 
      tensor_destroy(nfo.totalsz);
