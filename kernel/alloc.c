@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.27 2003-01-16 10:40:39 athena Exp $ */
+/* $Id: alloc.c,v 1.28 2003-01-16 10:48:30 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -269,27 +269,29 @@ void X(ifree)(void *p)
      }
 }
 
-void X(malloc_print_minfo)(void)
+void X(malloc_print_minfo)(int verbose)
 {
      struct minfo *info;
      int what;
      unsigned int h;
 
-     static const char *names[MALLOC_WHAT_LAST] = {
-	  "EVERYTHING",
-	  "PLANS", "SOLVERS", "PROBLEMS", "BUFFERS",
-	  "HASHT", "TENSORS", "PLANNERS", "SLVDSC", "TWIDDLES",
-	  "STRIDES", "OTHER"
-     };
+     if (verbose) {
+	  static const char *names[MALLOC_WHAT_LAST] = {
+	       "EVERYTHING",
+	       "PLANS", "SOLVERS", "PROBLEMS", "BUFFERS",
+	       "HASHT", "TENSORS", "PLANNERS", "SLVDSC", "TWIDDLES",
+	       "STRIDES", "OTHER"
+	  };
 
-     printf("%12s %8s %8s %10s %10s\n",
-            "what", "cnt", "maxcnt", "siz", "maxsiz");
+	  printf("%12s %8s %8s %10s %10s\n",
+		 "what", "cnt", "maxcnt", "siz", "maxsiz");
 
-     for (what = 0; what < MALLOC_WHAT_LAST; ++what) {
-          struct mstat *stat = mstat + what;
-          printf("%12s %8d %8d %10d %10d\n",
-                 names[what], stat->cnt, stat->maxcnt,
-                 stat->siz, stat->maxsiz);
+	  for (what = 0; what < MALLOC_WHAT_LAST; ++what) {
+	       struct mstat *stat = mstat + what;
+	       printf("%12s %8d %8d %10d %10d\n",
+		      names[what], stat->cnt, stat->maxcnt,
+		      stat->siz, stat->maxsiz);
+	  }
      }
 
      for (h = 0; h < HASHSZ; ++h) 

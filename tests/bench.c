@@ -528,7 +528,7 @@ void done(struct problem *p)
 
 #    ifdef FFTW_DEBUG
      if (verbose >= 1)
-	  FFTW(malloc_print_minfo)();
+	  FFTW(malloc_print_minfo)(verbose);
 #    endif
 }
 

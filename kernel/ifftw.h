@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.173 2003-01-16 10:40:39 athena Exp $ */
+/* $Id: ifftw.h,v 1.174 2003-01-16 10:48:30 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -127,7 +127,7 @@ extern void *X(malloc_debug)(size_t n, enum malloc_tag what,
 			     const char *file, int line);
 #define MALLOC(n, what) X(malloc_debug)(n, what, __FILE__, __LINE__)
 #define NATIVE_MALLOC(n, what) MALLOC(n, what)
-void X(malloc_print_minfo)(void);
+void X(malloc_print_minfo)(int verbose);
 
 #else /* ! FFTW_DEBUG */
 
@@ -163,6 +163,7 @@ extern int X(in_thread);
          p = (T)(((unsigned long)p + (MIN_ALIGNMENT - 1)) &	\
                (~(unsigned long)(MIN_ALIGNMENT - 1)));		\
      }
+#    define STACK_FREE(x) 
 #  else /* HAVE_ALLOCA && !defined(MIN_ALIGNMENT) */
 #    define STACK_MALLOC(T, p, x) p = (T)alloca(x) 
 #    define STACK_FREE(x) 
