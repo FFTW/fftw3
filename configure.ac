@@ -253,9 +253,6 @@ if test $PRECISION = l; then
         if test $ac_cv_sizeof_long_double = 0; then
                 AC_MSG_ERROR([long double is not a supported type with your compiler.])
 	fi
-        if test $ac_cv_sizeof_long_double = $ac_cv_sizeof_double; then
-                AC_MSG_ERROR([long double is the same size as double.  Rather than --enable-long-double, just use the ordinary FFTW.])
-        fi
 fi
 
 dnl Checks for library functions.
