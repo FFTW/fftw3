@@ -516,7 +516,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
-     P_dit *pln;
+     P_dit *pln = 0;
      uint n, is, os, r, m;
      plan *cld = (plan *) 0;
 
@@ -565,7 +565,8 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
  nada:
      if (cld)
           X(plan_destroy)(cld);
-     X(free)(pln);
+     if (pln)
+	  X(free)(pln);
      return (plan *) 0;
 }
 
