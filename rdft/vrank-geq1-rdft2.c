@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.30 2003-03-29 19:38:23 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.31 2003-03-29 20:22:28 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -53,7 +53,7 @@ typedef struct {
      const S *solver;
 } P;
 
-static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
+static void apply(const plan *ego_, R *r, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      int i, vl = ego->vl;
@@ -62,18 +62,6 @@ static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 
      for (i = 0; i < vl; ++i) {
           cldapply(ego->cld, r + i * ivs, rio + i * ovs, iio + i * ovs);
-     }
-}
-
-static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
-{
-     const P *ego = (const P *) ego_;
-     int i, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
-     rdft2apply cldapply = ((plan_rdft2 *) ego->cld)->apply;
-
-     for (i = 0; i < vl; ++i) {
-          cldapply(ego->cld, r + i * ovs, rio + i * ivs, iio + i * ivs);
      }
 }
 
@@ -167,6 +155,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld;
      int vdim;
      iodim *d;
+     int ivs, ovs;
      R *nr, *nrio, *niio;
 
      static const plan_adt padt = {
@@ -181,14 +170,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      A(d->n > 1);  /* or else, p->ri + d->is etc. are invalid */
 
-     if (R2HC_KINDP(p->kind)) {
-	  X(most_unaligned_complex)(p->rio, p->iio, &nrio, &niio, d->os);
-	  nr = p->r == p->rio ? nrio : X(most_unaligned)(p->r, p->r + d->is);
-     }
-     else {
-	  X(most_unaligned_complex)(p->rio, p->iio, &nrio, &niio, d->is);
-	  nr = p->r == p->rio ? nrio : X(most_unaligned)(p->r, p->r + d->os);
-     }
+     X(rdft2_strides)(p->kind, d, &ivs, &ovs);
+     X(most_unaligned_complex)(p->rio, p->iio, &nrio, &niio, ovs);
+     nr = p->r == p->rio ? nrio : X(most_unaligned)(p->r, p->r + ivs);
 
      cld = X(mkplan_d)(plnr, 
 		       X(mkproblem_rdft2_d)(
@@ -197,13 +181,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 			    nr, nrio, niio, p->kind));
      if (!cld) return (plan *) 0;
 
-     pln = MKPLAN_RDFT2(P, &padt,
-			R2HC_KINDP(p->kind) ? apply_r2hc : apply_hc2r);
+     pln = MKPLAN_RDFT2(P, &padt, apply);
 
      pln->cld = cld;
      pln->vl = d->n;
-     pln->ivs = d->is;
-     pln->ovs = d->os;
+     pln->ivs = ivs;
+     pln->ovs = ovs;
 
      pln->solver = ego;
      X(ops_zero)(&pln->super.super.ops);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.17 2003-03-16 20:00:04 stevenj Exp $ */
+/* $Id: direct2.c,v 1.18 2003-03-29 20:22:28 stevenj Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -103,14 +103,14 @@ static int applicable(const solver *ego_, const problem *p_)
 	       /* check strides etc */
 	       && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
-	       && (!R2HC_KINDP(ego->kind) ||
+	       && (ego->kind != R2HC ||
 		   ego->desc.r2hc->genus->okp(ego->desc.r2hc, 
 					      p->r, p->rio, p->rio,
 					      p->sz->dims[0].is,
 					      p->sz->dims[0].os,
 					      p->sz->dims[0].os,
 					      vl, ivs, ovs))
-	       && (!HC2R_KINDP(ego->kind) ||
+	       && (ego->kind != HC2R ||
 		   ego->desc.hc2r->genus->okp(ego->desc.hc2r,
 					      p->rio, p->rio, p->r,
 					      p->sz->dims[0].is,
@@ -156,8 +156,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_rdft2 *) p_;
 
-     r2hc_kindp = R2HC_KINDP(p->kind);
-     A(r2hc_kindp || HC2R_KINDP(p->kind));
+     r2hc_kindp = p->kind == R2HC;
+     A(r2hc_kindp || p->kind == HC2R);
 
      pln = MKPLAN_RDFT2(P, &padt, r2hc_kindp ? apply_r2hc : apply_hc2r);
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.15 2003-03-16 18:00:42 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.16 2003-03-29 20:22:28 stevenj Exp $ */
 
 
 #include "threads.h"
@@ -167,14 +167,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      block_size = (d->n + plnr->nthr - 1) / plnr->nthr;
      nthr = (d->n + block_size - 1) / block_size;
      plnr->nthr = (plnr->nthr + nthr - 1) / nthr;
-     if (R2HC_KINDP(p->kind)) {
-	  its = d->is * block_size;
-	  ots = d->os * block_size;
-     }
-     else {
-	  its = d->os * block_size;
-	  ots = d->is * block_size;
-     }
+     X(rdft2_strides)(p->kind, d, &its, &ots);
+     its *= block_size; ots *= block_size;
 
      cldrn = MALLOC(sizeof(plan *) * nthr, PLANS);
      for (i = 0; i < nthr; ++i) cldrn[i] = (plan *) 0;

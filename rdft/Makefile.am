@@ -5,7 +5,7 @@ noinst_LTLIBRARIES = librdft.la
 
 RDFT2 = buffered2.c direct2.c nop2.c rank0-rdft2.c rank-geq2-rdft2.c	\
 plan2.c problem2.c solve2.c vrank-geq1-rdft2.c rdft2-radix2.c		\
-rdft2-tensor-max-index.c rdft2-inplace-strides.c
+rdft2-tensor-max-index.c rdft2-inplace-strides.c rdft2-strides.c
 
 librdft_la_SOURCES = dft-r2hc.c dht-r2hc.c dht-rader.c buffered.c	\
 codelet-rdft.h conf.c direct.c generic.c khc2hc-dif.c khc2hc-dit.c	\

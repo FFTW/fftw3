@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.30 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.31 2003-03-29 20:22:28 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -228,18 +228,8 @@ static int min_nbuf(const problem_rdft2 *p, int n, int vl)
 	  return 1;
      A(p->vecsz->rnk == 1); /*  rank 0 and MINFTY are inplace */
 
-     if (R2HC_KINDP(p->kind)) {
-	  ivs =  p->vecsz->dims[0].is; /* real stride */
-	  is = p->sz->dims[0].is;
-	  ovs =  p->vecsz->dims[0].os; /* complex stride */
-	  os = p->sz->dims[0].os;
-     }
-     else {
-	  ivs =  p->vecsz->dims[0].os; /* real stride */
-	  is = p->sz->dims[0].os;
-	  ovs =  p->vecsz->dims[0].is; /* complex stride */
-	  os = p->sz->dims[0].is;
-     }
+     X(rdft2_strides)(p->kind, p->sz->dims, &is, &os);
+     X(rdft2_strides)(p->kind, p->vecsz->dims, &ivs, &ovs);
      
      /* handle one potentially common case: "contiguous" real and
 	complex arrays, which overlap because of the differing sizes. */
@@ -335,13 +325,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
-     if (R2HC_KINDP(p->kind))
+     if (p->kind == R2HC)
 	  cldp =
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
 		    X(mktensor_1d)(nbuf, ivs, bufdist),
 		    p->r, bufs, &p->kind);
      else {
+	  A(p->kind == HC2R);
 	  plnr->problem_flags |= DESTROY_INPUT; /* always ok to destroy buf */
 	  cldp =
 	       X(mkproblem_rdft_d)(
@@ -352,13 +343,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!(cld = X(mkplan_d)(plnr, cldp))) goto nada;
 
      /* plan the leftover transforms (cldrest): */
-     if (R2HC_KINDP(p->kind))
+     if (p->kind == R2HC)
 	  cldp =
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
 		    X(mktensor_1d)(vl % nbuf, ivs, bufdist),
 		    p->r, bufs, &p->kind);
-     else
+     else /* HC2R */
 	  cldp =
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, 1, p->sz->dims[0].os),
@@ -370,18 +361,18 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      X(ifree)(bufs);
      bufs = 0;
 
-     pln = MKPLAN_RDFT2(P, &padt, R2HC_KINDP(p->kind) ? apply_r2hc:apply_hc2r);
+     pln = MKPLAN_RDFT2(P, &padt, p->kind == R2HC ? apply_r2hc : apply_hc2r);
      pln->cld = cld;
      pln->cldrest = cldrest;
      pln->slv = ego;
      pln->n = n;
      pln->vl = vl;
-     if (R2HC_KINDP(p->kind)) {
+     if (p->kind == R2HC) {
 	  pln->ivs = ivs * nbuf;
 	  pln->ovs = ovs;
 	  pln->os = p->sz->dims[0].os; /* stride of rio/iio  */
      }
-     else {
+     else { /* HC2R */
 	  pln->ivs = ivs;
 	  pln->ovs = ovs * nbuf;
 	  pln->os = p->sz->dims[0].is; /* stride of rio/iio  */
@@ -393,7 +384,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      X(ops_madd)(vl / nbuf, &cld->ops, &cldrest->ops,
 		 &pln->super.super.ops);
-     pln->super.super.ops.other += (R2HC_KINDP(p->kind) ? (n + 2) : n) * vl;
+     pln->super.super.ops.other += (p->kind == R2HC ? (n + 2) : n) * vl;
 
      return &(pln->super.super);
 

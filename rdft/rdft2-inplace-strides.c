@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-inplace-strides.c,v 1.4 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: rdft2-inplace-strides.c,v 1.5 2003-03-29 20:22:28 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -54,14 +54,7 @@ int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim)
      N = X(tensor_sz)(p->sz);
      Nc = (N / p->sz->dims[p->sz->rnk-1].n) *
 	  (p->sz->dims[p->sz->rnk-1].n/2 + 1);
-     if (p->kind == R2HC) {
-	  is = p->sz->dims[p->sz->rnk-1].is;
-	  os = p->sz->dims[p->sz->rnk-1].os;
-     }
-     else {
-	  is = p->sz->dims[p->sz->rnk-1].os;
-	  os = p->sz->dims[p->sz->rnk-1].is;
-     }
+     X(rdft2_strides)(p->kind, p->sz->dims + p->sz->rnk - 1, &is, &os);
      return(p->vecsz->dims[vdim].is == p->vecsz->dims[vdim].os
 	    && X(iabs)(p->vecsz->dims[vdim].os)
 	    >= X(imax)(Nc * X(iabs)(os), N * X(iabs)(is)));
