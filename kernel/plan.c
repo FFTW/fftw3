@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.8 2002-07-14 21:12:14 stevenj Exp $ */
+/* $Id: plan.c,v 1.9 2002-07-15 19:13:19 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -48,8 +48,11 @@ void X(plan_use)(plan *ego)
  */
 void X(plan_destroy)(plan *ego)
 {
-     if ((--ego->refcnt) == 0) 
+     if ((--ego->refcnt) == 0) {
+	  if (ego->awake_refcnt > 0)
+	       ego->adt->awake(ego, 0);
           DESTROY(ego);
+     }
 }
 
 void X(plan_awake)(plan *ego, int flag)

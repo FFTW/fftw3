@@ -338,7 +338,6 @@ static void awake_dit(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     free_omega(ego->omega);
      X(plan_destroy)(ego->cld_omega);
      X(plan_destroy)(ego->cld2);
      X(plan_destroy)(ego->cld1);
@@ -348,7 +347,6 @@ static void destroy(plan *ego_)
 static void destroy_dit(plan *ego_)
 {
      P_dit *ego = (P_dit *) ego_;
-     free_twiddle(ego->W);
      X(plan_destroy)(ego->cld);
      destroy(ego_);
 }
