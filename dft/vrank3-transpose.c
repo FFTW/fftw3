@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.11 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.12 2002-08-26 23:46:46 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -28,24 +28,17 @@
 static void t(R *rA, R *iA, uint n, int is, int js, uint vn, int vs)
 {
      uint i, j, iv;
+     int im = iA - rA;
 
      for (i = 1; i < n; ++i) {
           for (j = 0; j < i; ++j) {
-	       R *rp0 = rA + i * is + j * js;
-	       R *ip0 = iA + i * is + j * js;
-	       R *rp1 = rA + j * is + i * js;
-	       R *ip1 = iA + j * is + i * js;
+	       R *p0 = rA + i * is + j * js;
+	       R *p1 = rA + j * is + i * js;
                for (iv = 0; iv < vn; ++iv) {
-                    R ar, ai, br, bi;
-
-                    ar = *rp0;
-                    ai = *ip0;
-                    br = *rp1;
-                    bi = *ip1;
-                    *rp1 = ar; rp1 += vs;
-                    *ip1 = ai; ip1 += vs;
-                    *rp0 = br; rp0 += vs;
-                    *ip0 = bi; ip0 += vs;
+                    R ar = p0[0], ai = p0[im];
+                    R br = p1[0], bi = p1[im];
+                    p1[0] = ar; p1[im] = ai; p1 += vs;
+                    p0[0] = br; p0[im] = bi; p0 += vs;
                }
           }
      }
