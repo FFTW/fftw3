@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.13 2003-01-11 19:45:56 athena Exp $ */
+/* $Id: fftw3.h,v 1.14 2003-01-11 20:52:17 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -68,6 +68,14 @@ X(plan) X(plan_dft_2d)(unsigned int nx, unsigned int ny,		  \
 									  \
 X(plan) X(plan_dft_3d)(unsigned int nx, unsigned int ny, unsigned int nz, \
 		       C *in, C *out, int sign, unsigned int flags);	  \
+									  \
+X(plan) X(plan_many_dft)(unsigned int rank, const unsigned int *n,	  \
+                         unsigned int howmany,				  \
+                         C *in, const unsigned int *inembed,		  \
+                         int istride, int idist,			  \
+                         C *out, const unsigned int *onembed,		  \
+                         int ostride, int odist,			  \
+                         int sign, unsigned int flags);			  \
 									  \
 void X(execute_dft)(X(plan) p, R *ri, R *ii, R *ro, R *io);		  \
 									  \
