@@ -40,12 +40,12 @@ static void cdot(int n,
      int wp, i;
 
      E rr = *xr, ri = 0, ir = *xi, ii = 0;
-     for (wp = 0, i = 1; i < n; ++i) {
+     for (wp = 0, i = 1; i + i < n; ++i) {
 	  wp += ws; if (wp >= n) wp -= n;
-	  rr += xr[i * xs] * w[2*wp];
-	  ri += xr[i * xs] * w[2*wp+1];
-	  ii += xi[i * xs] * w[2*wp+1];
-	  ir += xi[i * xs] * w[2*wp];
+	  rr += (xr[i * xs] + xr[(n - i) * xs]) * w[2*wp];
+	  ri += (xr[i * xs] - xr[(n - i) * xs]) * w[2*wp+1];
+	  ii += (xi[i * xs] - xi[(n - i) * xs]) * w[2*wp+1];
+	  ir += (xi[i * xs] + xi[(n - i) * xs]) * w[2*wp];
      }
      *or0 = rr - ii;
      *oi0 = ir + ri;
@@ -153,10 +153,10 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->td = 0;
 
                                  /* csum:             cdot: */
-     pln->super.super.ops.add = 2 * (n-1);
+     pln->super.super.ops.add = 2 * (n-1)      +      (n+1) * (n-1);
      pln->super.super.ops.mul = 0;
-     pln->super.super.ops.fma =                   2 * (n-1) * (n-1) ;
-     pln->super.super.ops.other = 2 * (n + 1)  +  2 * (n-1) * (n+1);
+     pln->super.super.ops.fma =                       (n-1) * (n-1) ;
+     pln->super.super.ops.other = 2 * (n + 1)  +      (n+2) * (n-1);
 
      return &(pln->super.super);
 }
