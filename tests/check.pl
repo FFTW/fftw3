@@ -8,7 +8,7 @@ $exhaustive = 0;
 $patient = 0;
 $estimate = 0;
 $nowisdom = 0;
-$rounds=0;
+$rounds = 0;
 $maxsize = 60000;
 $maxcount = 100;
 $do_1d = 0;
@@ -19,6 +19,7 @@ $keepgoing = 0;
 sub make_options {
     my $options = $default_options;
     $options = "--verify-rounds=$rounds $options" if $rounds;
+    $options = "--verbose=$verbose $options" if $verbose;
     $options = "-o paranoid $options" if $paranoid;
     $options = "-o exhaustive $options" if $exhaustive;
     $options = "-o patient $options" if $patient;
@@ -120,12 +121,12 @@ sub rand_small_factors {
 # way too complicated...
 sub one_random_test {
     my $q = int(2 + rand($maxsize));
-    my $rnk = int(1 + rand(3));
+    my $rnk = int(1 + rand(4));
     my $g = int(2 + exp(log($q) / $rnk));
     my $first = 1;
     my $sz = "";
 
-    while ($q > 1) {
+    while ($q > 1 && $rnk > 0) {
 	my $r = rand_small_factors(int(rand($g) + 10));
 	if ($r > 1) {
 	    $sz = "${sz}x" if (!$first);
@@ -133,6 +134,7 @@ sub one_random_test {
 	    $sz = "${sz}${r}";
 	    $q = int($q / $r);
 	    if ($g > $q) { $g = $q; }
+	    --$rnk;
 	}
     }
     do_size($sz, 1)
@@ -186,4 +188,7 @@ sub parse_arguments (@)
 &small_2d if $do_2d;
 &random_tests if $do_random;
 
-&flush_problems;
+{
+    my $options = &make_options;
+    &flush_problems($options);
+}
