@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.82 2003-03-03 18:26:32 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.83 2003-03-03 18:28:12 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1560,7 +1560,7 @@ with any of FFTW's supported transform types.
 * Complex DFTs::                
 * Planner Flags::               
 * Real-data DFTs::              
-* Real-data DFT array format::  
+* Real-data DFT Array Format::  
 * Real-to-Real Transforms::     
 * Real-to-Real Transform Kinds::  
 @end menu
@@ -1752,7 +1752,7 @@ then.)
 @end itemize
 
 @c =========>
-@node Real-data DFTs, Real-data DFT array format, Planner Flags, Basic Interface
+@node Real-data DFTs, Real-data DFT Array Format, Planner Flags, Basic Interface
 @subsection Real-data DFTs
 
 @example
@@ -1886,8 +1886,8 @@ equivalent to @code{FFTW_BACKWARD}.  For more information, see @ref{What
 FFTW Really Computes}.
 
 @c =========>
-@node Real-data DFT array format, Real-to-Real Transforms, Real-data DFTs, Basic Interface
-@subsection Real-data DFT array format
+@node Real-data DFT Array Format, Real-to-Real Transforms, Real-data DFTs, Basic Interface
+@subsection Real-data DFT Array Format
 @cindex r2c/c2r multi-dimensional array format
 
 The output of a DFT of real data (r2c) contains symmetries that, in
@@ -1957,7 +1957,7 @@ n<sub>d</sub>
 is the last dimension passed to the planner.
 
 @c =========>
-@node Real-to-Real Transforms, Real-to-Real Transform Kinds, Real-data DFT array format, Basic Interface
+@node Real-to-Real Transforms, Real-to-Real Transform Kinds, Real-data DFT Array Format, Basic Interface
 @subsection Real-to-Real Transforms
 @cindex r2r
 
