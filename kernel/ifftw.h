@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.113 2002-09-12 20:28:43 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.114 2002-09-12 20:32:03 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -403,7 +403,7 @@ enum {
      FORCE_VRECURSE = 0x2, 
      DESTROY_INPUT = 0x4,
      POSSIBLY_UNALIGNED = 0x8,
-     FORBID_DHT_R2HC = 0x10,
+     DHT_R2HC_VERBOTEN = 0x10,
      BUFFERING_VERBOTEN = 0x20,
      INDIRECT_VERBOTEN = 0x40
 };
