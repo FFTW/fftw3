@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.53 2002-09-02 15:04:53 athena Exp $ */
+/* $Id: planner.c,v 1.54 2002-09-02 15:55:33 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -180,8 +180,7 @@ static void rehash(planner *ego)
           X(free)(osol);
 }
 
-static solutions *insert(planner *ego, uint flags, uint nthr,
-			 problem *p, slvdesc *sp)
+static solutions *insert1(planner *ego, md5uint *hsh, uint flags, slvdesc *sp)
 {
      solutions *l = (solutions *)fftw_malloc(sizeof(solutions), HASHT);
      md5 m;
@@ -190,12 +189,19 @@ static solutions *insert(planner *ego, uint flags, uint nthr,
      if (ego->cnt > ego->hashsiz)
           rehash(ego);
 
-     hash(&m, p, flags, nthr);
      l->flags = flags;
      l->sp = sp; 
-     hashcpy(m.s, l->s);
+     hashcpy(hsh, l->s);
      insert0(ego, l);
      return l;
+}
+
+static solutions *insert(planner *ego, uint flags, uint nthr,
+			 problem *p, slvdesc *sp)
+{
+     md5 m;
+     hash(&m, p, flags, nthr);
+     return insert1(ego, m.s, flags, sp);
 }
 
 static plan *slv_mkplan(planner *ego, problem *p, solver *s)
