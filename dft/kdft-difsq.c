@@ -18,15 +18,12 @@
  *
  */
 
-/* $Id: conf.c,v 1.3 2002-06-08 13:34:58 athena Exp $ */
+/* $Id: kdft-difsq.c,v 1.1 2002-06-08 13:34:58 athena Exp $ */
 
 #include "dft.h"
 
-void fftw_dft_conf_standard(planner *p)
+void fftw_kdft_difsq_register(planner *p, kdft_difsq k, const ct_desc *desc)
 {
-     fftw_dft_vecloop_register(p);
-     fftw_dft_rank0_register(p);
-     fftw_dft_rank_geq2_register(p);
-     fftw_solvtab_exec(fftw_solvtab_dft_standard, p);
-     fftw_solvtab_exec(fftw_solvtab_dft_inplace, p);
+     solver *s = fftw_mksolver_dft_ct_ditf(k, desc);
+     p->adt->register_solver(p, s);
 }

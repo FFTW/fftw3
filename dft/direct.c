@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.5 2002-06-06 12:07:33 athena Exp $ */
+/* $Id: direct.c,v 1.6 2002-06-08 13:34:58 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -107,7 +107,7 @@ static int applicable(const solver *ego_, const problem *p_)
 
 static enum score score(const solver *ego, const problem *p)
 {
-    return (applicable(ego, p)) ? GOOD : BAD;
+     return (applicable(ego, p)) ? GOOD : BAD;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)

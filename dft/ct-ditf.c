@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.2 2002-06-08 13:34:58 athena Exp $ */
+/* $Id: ct-ditf.c,v 1.1 2002-06-08 13:34:58 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -30,16 +30,12 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      plan *cld0 = ego->cld;
      plan_dft *cld = (plan_dft *) cld0;
 
+     UNUSED(ro);  /* == ri */
+     UNUSED(io);  /* == ii */
+     ego->k.difsq(ri, ii, ego->W, ego->ios, ego->vs, ego->m, ego->is);
+
      /* two-dimensional r x vl sub-transform: */
-     cld->apply(cld0, ri, ii, ro, io);
-
-     {
-	  uint i, m = ego->m, vl = ego->vl;
-	  int os = ego->os, ovs = ego->ovs;
-
-	  for (i = 0; i < vl; ++i) 
-	       ego->k.dit(ro + i * ovs, io + i * ovs, ego->W, ego->ios, m, os);
-     }
+     cld->apply(cld0, ri, ii, ri, ii);
 }
 
 static int applicable(const solver_ct *ego, const problem *p_)
@@ -47,11 +43,18 @@ static int applicable(const solver_ct *ego, const problem *p_)
      if (fftw_dft_ct_applicable(ego, p_)) {
 	  const ct_desc *e = ego->desc;
 	  const problem_dft *p = (const problem_dft *) p_;
-	  iodim *d = p->sz.dims;
+	  iodim *d = p->sz.dims, *vd = p->vecsz.dims;
 
 	  return (1 
-		  /* if hardwired strides, test whether they match */
-		  && (!e->is || e->is == (d[0].n / e->radix) * d[0].os)
+		  && p->ri == p->ro  /* inplace only */
+		  && p->vecsz.rnk == 1
+		  && vd[0].n == e->radix
+		  && d[0].is == e->radix * vd[0].is
+		  && d[0].os == vd[0].is && vd[0].os == d[0].n * vd[0].is
+
+		  /* if specialized strides, then they must match */
+		  && (!e->is || e->is == vd[0].os)
+		  && (!e->vs || e->vs == vd[0].is)
 	       );
      }
      return 0;
@@ -59,43 +62,29 @@ static int applicable(const solver_ct *ego, const problem *p_)
 
 static void finish(plan_ct *ego)
 {
-     ego->ios = fftw_mkstride(ego->r, ego->m * ego->os);
+     ego->ios = fftw_mkstride(ego->r, ego->ovs);
+     ego->vs = fftw_mkstride(ego->r, ego->ivs);
      ego->super.super.flops =
 	 fftw_flops_add(ego->cld->flops,
-			fftw_flops_mul(ego->vl * ego->m,
-				       ego->slv->desc->flops));
+			fftw_flops_mul(ego->m, ego->slv->desc->flops));
 }
 
 static problem *mkcld(const solver_ct *ego, const problem_dft *p)
 {
      iodim *d = p->sz.dims;
+     iodim *vd = p->vecsz.dims;
      const ct_desc *e = ego->desc;
-     uint m = d[0].n / e->radix;
 
-     tensor radix = fftw_mktensor_1d(e->radix, d[0].is, m * d[0].os);
-     tensor cld_vec = fftw_tensor_append(radix, p->vecsz);
-     fftw_tensor_destroy(radix);
-
-     return 
-	  fftw_mkproblem_dft_d(
-	       fftw_mktensor_1d(m, e->radix * d[0].is, d[0].os),
-	       cld_vec, p->ri, p->ii, p->ro, p->io);
+     return fftw_mkproblem_dft_d(
+	  fftw_mktensor_1d(d[0].n / e->radix, d[0].is, d[0].is),
+	  fftw_mktensor_2d(vd[0].n, vd[0].os, vd[0].os, 
+			   e->radix, vd[0].is,vd[0].is),
+	  p->ro, p->io, p->ro, p->io);
 }
 
-static enum score score(const solver *ego_, const problem *p_)
+static enum score score(const solver *ego, const problem *p)
 {
-     const solver_ct *ego = (const solver_ct *) ego_;
-     const problem_dft *p = (const problem_dft *) p_;
-     uint n;
-
-     if (!applicable(ego, p_))
-	  return BAD;
-
-     n = p->sz.dims[0].n;
-     if (n <= 16 || n / ego->desc->radix <= 4)
-	  return UGLY;
-
-     return GOOD;
+     return (applicable(ego, p)) ? GOOD : BAD;
 }
 
 
@@ -106,12 +95,12 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 }
 
 
-solver *fftw_mksolver_dft_ct_dit(kdft_dit codelet, const ct_desc *desc)
+solver *fftw_mksolver_dft_ct_ditf(kdft_difsq codelet, const ct_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
-     static const char name[] = "DFT-DIT";
+     static const char name[] = "DFT-DITF";
      union kct k;
-     k.dit = codelet;
+     k.difsq = codelet;
 
      return fftw_mksolver_dft_ct(k, desc, name, &sadt);
 }

@@ -3,5 +3,5 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/libbench	\
 noinst_PROGRAMS = bench
 
 bench_SOURCES = bench.c
-bench_LDADD = ../libbench/libbench.la ../dft/libdft.la	\
-../kernel/libkernel.la
+bench_LDADD = $(top_builddir)/libfftw3.la	\
+$(top_builddir)/libbench/libbench.la

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.2 2002-06-08 13:34:58 athena Exp $ */
+/* $Id: ct-dif.c,v 1.1 2002-06-08 13:34:58 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -30,16 +30,16 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      plan *cld0 = ego->cld;
      plan_dft *cld = (plan_dft *) cld0;
 
-     /* two-dimensional r x vl sub-transform: */
-     cld->apply(cld0, ri, ii, ro, io);
-
      {
 	  uint i, m = ego->m, vl = ego->vl;
-	  int os = ego->os, ovs = ego->ovs;
+	  int is = ego->is, ivs = ego->ivs;
 
 	  for (i = 0; i < vl; ++i) 
-	       ego->k.dit(ro + i * ovs, io + i * ovs, ego->W, ego->ios, m, os);
+	       ego->k.dif(ri + i * ivs, ii + i * ivs, ego->W, ego->ios, m, is);
      }
+
+     /* two-dimensional r x vl sub-transform: */
+     cld->apply(cld0, ri, ii, ro, io);
 }
 
 static int applicable(const solver_ct *ego, const problem *p_)
@@ -50,8 +50,11 @@ static int applicable(const solver_ct *ego, const problem *p_)
 	  iodim *d = p->sz.dims;
 
 	  return (1 
+		  /* DIF destroys the input and we don't like it */
+		  && p->ri == p->ro
+
 		  /* if hardwired strides, test whether they match */
-		  && (!e->is || e->is == (d[0].n / e->radix) * d[0].os)
+		  && (!e->is || e->is == (d[0].n / e->radix) * d[0].is)
 	       );
      }
      return 0;
@@ -59,7 +62,7 @@ static int applicable(const solver_ct *ego, const problem *p_)
 
 static void finish(plan_ct *ego)
 {
-     ego->ios = fftw_mkstride(ego->r, ego->m * ego->os);
+     ego->ios = fftw_mkstride(ego->r, ego->m * ego->is);
      ego->super.super.flops =
 	 fftw_flops_add(ego->cld->flops,
 			fftw_flops_mul(ego->vl * ego->m,
@@ -72,13 +75,13 @@ static problem *mkcld(const solver_ct *ego, const problem_dft *p)
      const ct_desc *e = ego->desc;
      uint m = d[0].n / e->radix;
 
-     tensor radix = fftw_mktensor_1d(e->radix, d[0].is, m * d[0].os);
+     tensor radix = fftw_mktensor_1d(e->radix, m * d[0].is, d[0].os);
      tensor cld_vec = fftw_tensor_append(radix, p->vecsz);
      fftw_tensor_destroy(radix);
 
      return 
 	  fftw_mkproblem_dft_d(
-	       fftw_mktensor_1d(m, e->radix * d[0].is, d[0].os),
+	       fftw_mktensor_1d(m, d[0].is, e->radix * d[0].os),
 	       cld_vec, p->ri, p->ii, p->ro, p->io);
 }
 
@@ -106,12 +109,12 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 }
 
 
-solver *fftw_mksolver_dft_ct_dit(kdft_dit codelet, const ct_desc *desc)
+solver *fftw_mksolver_dft_ct_dif(kdft_dif codelet, const ct_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
-     static const char name[] = "DFT-DIT";
+     static const char name[] = "DFT-DIF";
      union kct k;
-     k.dit = codelet;
+     k.dif = codelet;
 
      return fftw_mksolver_dft_ct(k, desc, name, &sadt);
 }

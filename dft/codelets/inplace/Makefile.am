@@ -11,14 +11,16 @@ endif
 
 ALL_CODELETS = $(F1_CODELETS) $(F2_CODELETS) $(Q1_CODELETS) 
 
-BUILT_SOURCES=$(ALL_CODELETS)
+BUILT_SOURCES=$(ALL_CODELETS) $(CODLIST)
 
 libdft_inplace_la_SOURCES = $(BUILT_SOURCES)
 
-if MAINTAINER_MODE
+SOLVTAB_NAME = fftw_solvtab_dft_inplace
 
 # special rules for regenerating codelets.
 include $(top_srcdir)/support/Makefile.codelets
+
+if MAINTAINER_MODE
 
 Kf1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS); $(GEN_TWIDDLE) $(FLAGS_F1) -dif -n $* -name Kf1_$*) | $(ADD_DATE) | $(INDENT) >$@
