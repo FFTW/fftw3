@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse2.c,v 1.10 2003-05-15 20:53:16 stevenj Exp $ */
+/* $Id: sse2.c,v 1.11 2004-12-17 21:08:54 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -43,9 +43,15 @@ static inline int cpuid_edx(int op)
 #else
      int eax, ecx, edx;
 
+#  ifdef __x86_64__
+     __asm__("push %%rbx\n\tcpuid\n\tpop %%rbx"
+	     : "=a" (eax), "=c" (ecx), "=d" (edx)
+	     : "a" (op));
+#  else
      __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
 	     : "=a" (eax), "=c" (ecx), "=d" (edx)
 	     : "a" (op));
+#  endif
      return edx;
 #endif
 }

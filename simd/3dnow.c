@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: 3dnow.c,v 1.3 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: 3dnow.c,v 1.4 2004-12-17 21:08:54 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -29,9 +29,15 @@ static inline int cpuid_edx(int op)
 {
      int eax, ecx, edx;
 
+#  ifdef __x86_64__
+     __asm__("push %%rbx\n\tcpuid\n\tpop %%rbx"
+	     : "=a" (eax), "=c" (ecx), "=d" (edx)
+	     : "a" (op));
+#  else
      __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
 	     : "=a" (eax), "=c" (ecx), "=d" (edx)
 	     : "a" (op));
+#  endif
      return edx;
 }
 
@@ -39,9 +45,15 @@ static inline int cpuid_eax(int op)
 {
      int eax, ecx, edx;
 
+#  ifdef __x86_64__
+     __asm__("push %%rbx\n\tcpuid\n\tpop %%rbx"
+	     : "=a" (eax), "=c" (ecx), "=d" (edx)
+	     : "a" (op));
+#  else
      __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
 	     : "=a" (eax), "=c" (ecx), "=d" (edx)
 	     : "a" (op));
+#  endif
      return eax;
 }
 
