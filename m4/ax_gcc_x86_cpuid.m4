@@ -1,6 +1,7 @@
 dnl @synopsis AX_GCC_X86_CPUID(OP)
 dnl
-dnl On Pentium and later x86 processors, with gcc only, run
+dnl On Pentium and later x86 processors, with gcc or a compiler that
+dnl has a compatible syntax for inline assembly instructions, run
 dnl a small program that executes the cpuid instruction with
 dnl input OP.  This can be used to detect the CPU type.
 dnl
@@ -15,7 +16,7 @@ dnl to the string "unknown".
 dnl
 dnl This macro mainly exists to be used in AX_GCC_ARCHFLAG.
 dnl
-dnl @version $Id: ax_gcc_x86_cpuid.m4,v 1.1 2004-10-27 17:14:22 stevenj Exp $
+dnl @version $Id: ax_gcc_x86_cpuid.m4,v 1.2 2004-10-27 17:34:25 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_X86_CPUID],
 [AC_REQUIRE([AC_PROG_CC])
