@@ -77,6 +77,7 @@ void F77(flops,FLOPS)(X(plan) *p, int *add, int *mul, int *fma)
      X(flops)(*p, add, mul, fma);
 }
 
+/******************************** DFT ***********************************/
 
 void F77(plan_dft, PLAN_DFT)(X(plan) *p, int *rank, const int *n,
 			     C *in, C *out, int *sign, int *flags)
@@ -142,4 +143,223 @@ void F77(plan_guru_dft, PLAN_GURU_DFT)(X(plan) *p, int *rank, const int *n,
 void F77(execute_dft, EXECUTE_DFT)(X(plan) *p, R *ri, R *ii, R *ro, R *io)
 {
      X(execute_dft)(*p, ri, ii, ro, io);
+}
+
+/****************************** DFT r2c *********************************/
+
+void F77(plan_dft_r2c, PLAN_DFT_R2C)(X(plan) *p, int *rank, const int *n,
+				     R *in, C *out, int *flags)
+{
+     int *nrev = reverse_n(*rank, n);
+     *p = X(plan_dft_r2c)(*rank, nrev, in, out, *flags);
+     X(ifree0)(nrev);
+}
+
+void F77(plan_dft_r2c_1d, PLAN_DFT_R2C_1D)(X(plan) *p, int *n, R *in, C *out,
+					   int *flags)
+{
+     *p = X(plan_dft_r2c_1d)(*n, in, out, *flags);
+}
+
+void F77(plan_dft_r2c_2d, PLAN_DFT_R2C_2D)(X(plan) *p, int *nx, int *ny,
+					   R *in, C *out, int *flags)
+{
+     *p = X(plan_dft_r2c_2d)(*ny, *nx, in, out, *flags);
+}
+
+void F77(plan_dft_r2c_3d, PLAN_DFT_R2C_3D)(X(plan) *p,
+					   int *nx, int *ny, int *nz,
+					   R *in, C *out,
+					   int *flags)
+{
+     *p = X(plan_dft_r2c_3d)(*nz, *ny, *nx, in, out, *flags);
+}
+
+void F77(plan_many_dft_r2c, PLAN_MANY_DFT_R2C)(
+     X(plan) *p, int *rank, const int *n,
+     int *howmany,
+     R *in, const int *inembed, int *istride, int *idist,
+     C *out, const int *onembed, int *ostride, int *odist,
+     int *flags)
+{
+     int *nrev = reverse_n(*rank, n);
+     int *inembedrev = reverse_n(*rank, inembed);
+     int *onembedrev = reverse_n(*rank, onembed);
+     *p = X(plan_many_dft_r2c)(*rank, nrev, *howmany,
+			       in, inembedrev, *istride, *idist,
+			       out, onembedrev, *ostride, *odist,
+			       *flags);
+     X(ifree0)(onembedrev);
+     X(ifree0)(inembedrev);
+     X(ifree0)(nrev);
+}
+
+void F77(plan_guru_dft_r2c, PLAN_GURU_DFT_R2C)(
+     X(plan) *p, int *rank, const int *n,
+     const int *is, const int *os,
+     int *howmany_rank, const int *h_n,
+     const int *h_is, const int *h_os,
+     R *in, R *ro, R *io, int *flags)
+{
+     X(iodim) *dims = make_dims(*rank, n, is, os);
+     X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
+     *p = X(plan_guru_dft_r2c)(*rank, dims, *howmany_rank, howmany_dims,
+			       in, ro, io, *flags);
+     X(ifree0)(howmany_dims);
+     X(ifree0)(dims);
+}
+
+void F77(execute_dft_r2c, EXECUTE_DFT_R2C)(X(plan) *p,
+					   R *in, R *ro, R *io)
+{
+     X(execute_dft_r2c)(*p, in, ro, io);
+}
+
+/****************************** DFT c2r *********************************/
+
+void F77(plan_dft_c2r, PLAN_DFT_C2R)(X(plan) *p, int *rank, const int *n,
+				     C *in, R *out, int *flags)
+{
+     int *nrev = reverse_n(*rank, n);
+     *p = X(plan_dft_c2r)(*rank, nrev, in, out, *flags);
+     X(ifree0)(nrev);
+}
+
+void F77(plan_dft_c2r_1d, PLAN_DFT_C2R_1D)(X(plan) *p, int *n, C *in, R *out,
+					   int *flags)
+{
+     *p = X(plan_dft_c2r_1d)(*n, in, out, *flags);
+}
+
+void F77(plan_dft_c2r_2d, PLAN_DFT_C2R_2D)(X(plan) *p, int *nx, int *ny,
+					   C *in, R *out, int *flags)
+{
+     *p = X(plan_dft_c2r_2d)(*ny, *nx, in, out, *flags);
+}
+
+void F77(plan_dft_c2r_3d, PLAN_DFT_C2R_3D)(X(plan) *p,
+					   int *nx, int *ny, int *nz,
+					   C *in, R *out,
+					   int *flags)
+{
+     *p = X(plan_dft_c2r_3d)(*nz, *ny, *nx, in, out, *flags);
+}
+
+void F77(plan_many_dft_c2r, PLAN_MANY_DFT_C2R)(
+     X(plan) *p, int *rank, const int *n,
+     int *howmany,
+     C *in, const int *inembed, int *istride, int *idist,
+     R *out, const int *onembed, int *ostride, int *odist,
+     int *flags)
+{
+     int *nrev = reverse_n(*rank, n);
+     int *inembedrev = reverse_n(*rank, inembed);
+     int *onembedrev = reverse_n(*rank, onembed);
+     *p = X(plan_many_dft_c2r)(*rank, nrev, *howmany,
+			       in, inembedrev, *istride, *idist,
+			       out, onembedrev, *ostride, *odist,
+			       *flags);
+     X(ifree0)(onembedrev);
+     X(ifree0)(inembedrev);
+     X(ifree0)(nrev);
+}
+
+void F77(plan_guru_dft_c2r, PLAN_GURU_DFT_C2R)(
+     X(plan) *p, int *rank, const int *n,
+     const int *is, const int *os,
+     int *howmany_rank, const int *h_n,
+     const int *h_is, const int *h_os,
+     R *ri, R *ii, R *out, int *flags)
+{
+     X(iodim) *dims = make_dims(*rank, n, is, os);
+     X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
+     *p = X(plan_guru_dft_c2r)(*rank, dims, *howmany_rank, howmany_dims,
+			       ri, ii, out, *flags);
+     X(ifree0)(howmany_dims);
+     X(ifree0)(dims);
+}
+
+void F77(execute_dft_c2r, EXECUTE_DFT_C2R)(X(plan) *p,
+					   R *ri, R *ii, R *out)
+{
+     X(execute_dft_c2r)(*p, ri, ii, out);
+}
+
+/****************************** r2r *********************************/
+
+void F77(plan_r2r, PLAN_R2R)(X(plan) *p, int *rank, const int *n,
+			     R *in, R *out,
+			     int *kind, int *flags)
+{
+     int *nrev = reverse_n(*rank, n);
+     X(r2r_kind) *k = ints2kinds(*rank, kind);
+     *p = X(plan_r2r)(*rank, nrev, in, out, k, *flags);
+     X(ifree0)(k);
+     X(ifree0)(nrev);
+}
+
+void F77(plan_r2r_1d, PLAN_R2R_1D)(X(plan) *p, int *n, R *in, R *out,
+				   int *kind, int *flags)
+{
+     *p = X(plan_r2r_1d)(*n, in, out, *kind, *flags);
+}
+
+void F77(plan_r2r_2d, PLAN_R2R_2D)(X(plan) *p, int *nx, int *ny,
+				   R *in, R *out, 
+				   int *kindx, int *kindy, int *flags)
+{
+     *p = X(plan_r2r_2d)(*ny, *nx, in, out, *kindy, *kindx, *flags);
+}
+
+void F77(plan_r2r_3d, PLAN_R2R_3D)(X(plan) *p,
+				   int *nx, int *ny, int *nz,
+				   R *in, R *out,
+				   int *kindx, int *kindy, int *kindz,
+				   int *flags)
+{
+     *p = X(plan_r2r_3d)(*nz, *ny, *nx, in, out,
+			     *kindz, *kindy, *kindx, *flags);
+}
+
+void F77(plan_many_r2r, PLAN_MANY_R2R)(
+     X(plan) *p, int *rank, const int *n,
+     int *howmany,
+     R *in, const int *inembed, int *istride, int *idist,
+     R *out, const int *onembed, int *ostride, int *odist,
+     int *kind, int *flags)
+{
+     int *nrev = reverse_n(*rank, n);
+     int *inembedrev = reverse_n(*rank, inembed);
+     int *onembedrev = reverse_n(*rank, onembed);
+     X(r2r_kind) *k = ints2kinds(*rank, kind);
+     *p = X(plan_many_r2r)(*rank, nrev, *howmany,
+			       in, inembedrev, *istride, *idist,
+			       out, onembedrev, *ostride, *odist,
+			       k, *flags);
+     X(ifree0)(k);
+     X(ifree0)(onembedrev);
+     X(ifree0)(inembedrev);
+     X(ifree0)(nrev);
+}
+
+void F77(plan_guru_r2r, PLAN_GURU_R2R)(
+     X(plan) *p, int *rank, const int *n,
+     const int *is, const int *os,
+     int *howmany_rank, const int *h_n,
+     const int *h_is, const int *h_os,
+     R *in, R *out, int *kind, int *flags)
+{
+     X(iodim) *dims = make_dims(*rank, n, is, os);
+     X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
+     X(r2r_kind) *k = ints2kinds(*rank, kind);
+     *p = X(plan_guru_r2r)(*rank, dims, *howmany_rank, howmany_dims,
+			       in, out, k, *flags);
+     X(ifree0)(k);
+     X(ifree0)(howmany_dims);
+     X(ifree0)(dims);
+}
+
+void F77(execute_r2r, EXECUTE_R2R)(X(plan) *p, R *in, R *out)
+{
+     X(execute_r2r)(*p, in, out);
 }

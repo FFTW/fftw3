@@ -81,6 +81,21 @@ static int emitter(void *d)
      return (c < 0 ? EOF : c);
 }
 
+static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
+{
+     if (!FINITE_RNK(rnk) || rnk == 0)
+	  return 0;
+     else {
+	  int i;
+	  X(r2r_kind) *k;
+
+	  k = MALLOC(sizeof(X(r2r_kind)) * rnk, PROBLEMS);
+	  for (i = 0; i < rnk; ++i)
+	       k[i] = ik[rnk - 1 - i]; /* reverse order for Fortran -> C */
+	  return k;
+     }
+}
+
 /*-----------------------------------------------------------------------*/
 
 /* Fortran-like (e.g. as in BLAS) type prefixes for F77 interface */
