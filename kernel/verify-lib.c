@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.2 2002-08-16 22:10:33 athena Exp $ */
+/* $Id: verify-lib.c,v 1.3 2002-08-22 15:16:03 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -27,55 +27,37 @@
 /*
  * Utility functions:
  */
-#ifdef FFTW_LDOUBLE
-#  ifndef HAVE_HYPOTL
-static double hypotl(double a, double b)
-{
-     return sqrt(a * a + b * b);
-}
-#  else /* HAVE_HYPOTL */
-#    if !defined(HAVE_DECL_HYPOTL) || !HAVE_DECL_HYPOTL
-extern long double hypotl(long double a, long double b);
-#    endif
-#  endif
-#  define hypot hypotl
-#else /* !FFTW_LDOUBLE */
-#  ifndef HAVE_HYPOT
-static double hypot(double a, double b)
-{
-     return sqrt(a * a + b * b);
-}
-#  else /* HAVE_HYPOT */
-#    if !defined(HAVE_DECL_HYPOT) || !HAVE_DECL_HYPOT
-extern double hypot(double a, double b);
-#    endif
-#  endif
-#endif /* !FFTW_LDOUBLE */
+static double dabs(double x) { return (x < 0.0) ? -x : x; }
+static double dmax(double x, double y) { return (x > y) ? x : y; }
+static double dmin(double x, double y) { return (x < y) ? x : y; }
 
-static double cerror(C a, C b, double tol)
+static double cerror(C a, C b)
 {
-     double x;
+     double xr, xi;
      double mag;
-     x = hypot(a.r - b.r, a.i - b.i);
-     mag = 0.5 * (hypot(a.r, a.i) + hypot(b.r, b.i)) + tol;
-     x /= mag;
+     xr = dabs(a.r - b.r);
+     xi = dabs(a.i - b.i);
 #ifdef HAVE_ISNAN
-     A(!isnan(x));
+     A(!isnan(xr));
+     A(!isnan(xi));
 #endif
-     return x;
+     return dmax(xr, xi);
 }
 
 static double aerror(C *a, C *b, uint n, double tol)
 {
-     /* compute the relative error */
-     double e = 0.0;
+     /* compute the relative Linf error */
+     double e = 0.0, mag = 0.0;
+     C zero;
      uint i;
 
      for (i = 0; i < n; ++i) {
-	  double x = cerror(a[i], b[i], tol);
-	  if (x > e) e = x;
+	  e = dmax(e, cerror(a[i], b[i]));
+	  mag = dmax(mag, 
+		     dmax(dmin(dabs(a[i].r), dabs(b[i].r)),
+			  dmin(dabs(a[i].i), dabs(b[i].i))));
      }
-     return e;
+     return e / mag;
 }
 
 #ifdef HAVE_DRAND48
@@ -225,10 +207,9 @@ double acmp(C *a, C *b, uint n, const char *test, double tol)
 	  {
 	       uint i;
 	       for (i = 0; i < n; ++i) 
-		    printf("%8d %16.12f %16.12f   %16.12f %16.12f %e\n", i, 
+		    printf("%8d %16.12f %16.12f   %16.12f %16.12f\n", i, 
 			   (double) a[i].r, (double) a[i].i,
-			   (double) b[i].r, (double) b[i].i,
-			   cerror(a[i], b[i], tol));
+			   (double) b[i].r, (double) b[i].i);
 	  }
 
 	  exit(EXIT_FAILURE);
