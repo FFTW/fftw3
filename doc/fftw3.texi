@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.146 2003-03-15 16:41:32 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.147 2003-03-15 18:08:45 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -209,6 +209,7 @@ Wisdom
 * Wisdom Export::               
 * Wisdom Import::               
 * Forgetting Wisdom::           
+* Wisdom Utilities::            
 
 What FFTW Really Computes
 
@@ -1500,39 +1501,52 @@ but may require a long time to compute because FFTW must measure the
 runtime of many possible plans and select the best one.  This setup is
 designed for the situations where so many transforms of the same size
 must be computed that the start-up time is irrelevant.  For short
-initialization times but slightly slower transforms, we have provided
+initialization times, but slower transforms, we have provided
 @code{FFTW_ESTIMATE}.  The @code{wisdom} mechanism is a way to get the
-best of both worlds: You compute a good plan once, you save it to
-disk, and you reload it as many times as necessary.  The wisdom
+best of both worlds: you compute a good plan once, save it to
+disk, and later reload it as many times as necessary.  The wisdom
 mechanism can actually save and reload many plans at once, not just
 one.
+@ctindex FFTW_MEASURE
+@ctindex FFTW_PATIENT
+@ctindex FFTW_EXHAUSTIVE
+@ctindex FFTW_ESTIMATE
 
 Whenever you create a plan, the FFTW planner accumulates wisdom, which
-is sufficient information to reconstruct the plan.  After planning,
-you can save this information to disk by means of this function:
+is information sufficient to reconstruct the plan.  After planning,
+you can save this information to disk by means of the function:
 @example
-     void fftw_export_wisdom_to_file(FILE *output_file);
+void fftw_export_wisdom_to_file(FILE *output_file);
 @end example
 @findex fftw_export_wisdom_to_file
 
 The next time you run the program, you can restore the wisdom with
-@code{fftw_import_wisdom_from_file}, and then recreate the plan using
-the same flags as before.  
+@code{fftw_import_wisdom_from_file} (which returns non-zero on success),
+and then recreate the plan using the same flags as before.
 @example
-     void fftw_import_wisdom_from_file(FILE *output_file);
+int fftw_import_wisdom_from_file(FILE *output_file);
 @end example
+@findex fftw_import_wisdom_from_file
+
+Wisdom is automatically used for any size to which it is applicable, as
+long as the planner flags are not more ``patient'' than those with which
+the wisdom was created.  For example, wisdom created with
+@code{FFTW_MEASURE} can be used if you later plan with
+@code{FFTW_ESTIMATE} or @code{FFTW_MEASURE}, but not with
+@code{FFTW_PATIENT}.
 
 The @code{wisdom} is cumulative, and is stored in a global, private
 data structure managed internally by FFTW.  The storage space required
 is minimal, proportional to the logarithm of the sizes the wisdom was
 generated from.  If memory usage is a concern, however, the wisdom can
-be forgotten and its associated memory freed by calling
+be forgotten and its associated memory freed by calling:
 @example
-     void fftw_forget_wisdom(void);
+void fftw_forget_wisdom(void);
 @end example
+@findex fftw_forget_wisdom
 
 Wisdom can be exported to a file, a string, or any other medium.
-@xref{Wisdom}, for details.
+For details, see @ref{Wisdom}.
 
 @node Caveats in Using Wisdom,  , Words of Wisdom-Saving Plans, Other Important Topics
 @section Caveats in Using Wisdom
@@ -1574,6 +1588,24 @@ therefore wise to recreate wisdom every time an application is
 recompiled.  The more the underlying hardware and software changes
 between the creation of wisdom and its use, the greater grows
 the risk of sub-optimal plans.
+
+Nevertheless, if the choice is between using @code{FFTW_ESTIMATE} or
+using possibly-suboptimal wisdom (created on the same machine, but for a
+different binary), the wisdom is likely to be better.  For this reason,
+we provide a function to import wisdom from a standard system-wide
+location (@code{/etc/fftw/wisdom} on Unix):
+@cindex wisdom, system-wide
+
+@example
+int fftw_import_system_wisdom(void);
+@end example
+@findex fftw_import_system_wisdom
+
+FFTW also provides a standalone program, @code{fftw-wisdom} (described
+by its own @code{man} page on Unix) with which users can create wisdom,
+e.g. for a canonical set of sizes to store in the system wisdom file.
+@xref{Wisdom Utilities}.
+@cindex fftw-wisdom utility
 
 @c ************************************************************
 @node FFTW Reference, Parallel FFTW, Other Important Topics, Top
@@ -2890,6 +2922,7 @@ plans from disk.  This mechanism is called @dfn{wisdom}.
 * Wisdom Export::               
 * Wisdom Import::               
 * Forgetting Wisdom::           
+* Wisdom Utilities::            
 @end menu
 
 @c =========>
@@ -2897,10 +2930,9 @@ plans from disk.  This mechanism is called @dfn{wisdom}.
 @subsection Wisdom Export
 
 @example
-    void fftw_export_wisdom_to_file(FILE *output_file);
-    char *fftw_export_wisdom_to_string(void);
-    void fftw_export_wisdom(void (*write_char)(char c, void *), 
-                            void *data);
+void fftw_export_wisdom_to_file(FILE *output_file);
+char *fftw_export_wisdom_to_string(void);
+void fftw_export_wisdom(void (*write_char)(char c, void *), void *data);
 @end example
 @findex fftw_export_wisdom
 @findex fftw_export_wisdom_to_file
@@ -2938,11 +2970,10 @@ that is insensitive to white space.
 @subsection Wisdom Import
 
 @example
-    int fftw_import_system_wisdom(void);
-    int fftw_import_wisdom_from_file(FILE *input_file);
-    int fftw_import_wisdom_from_string(const char *input_string);
-    int fftw_import_wisdom(int (*read_char)(void *), 
-                           void *data);
+int fftw_import_system_wisdom(void);
+int fftw_import_wisdom_from_file(FILE *input_file);
+int fftw_import_wisdom_from_string(const char *input_string);
+int fftw_import_wisdom(int (*read_char)(void *), void *data);
 @end example
 @findex fftw_import_wisdom
 @findex fftw_import_system_wisdom
@@ -2954,19 +2985,19 @@ These functions import wisdom into a program from data stored by the
 Wisdom-Saving Plans}.)  The imported wisdom replaces any wisdom
 already accumulated by the running program.
 
-@code{fftw_import_wisdom} imports wisdom from any input medium,
-as specified by the callback function @code{read_char}. @code{read_char}
-is a @code{getc}-like function that returns the next character in the
+@code{fftw_import_wisdom} imports wisdom from any input medium, as
+specified by the callback function @code{read_char}. @code{read_char} is
+a @code{getc}-like function that returns the next character in the
 input; its parameter is the @code{data} pointer passed to
 @code{fftw_import_wisdom}. If the end of the input data is reached
-(which should never happen for valid data), it may return either
-@code{NULL} (ASCII 0) or @code{EOF} (as defined in @code{<stdio.h>}).
-For convenience, the following two ``wrapper'' routines are provided:
+(which should never happen for valid data), @code{read_char} should
+return @code{EOF} (as defined in @code{<stdio.h>}).  For convenience,
+the following two ``wrapper'' routines are provided:
 
 @code{fftw_import_wisdom_from_file} reads wisdom from the current
 position in @code{input_file}, which should be open with read
 permission.  Upon exit, the file remains open, but the position of the
-read pointer is undefined.
+read pointer is unspecified.
 
 @code{fftw_import_wisdom_from_string} reads wisdom from the
 @code{NULL}-terminated string @code{input_string}.
@@ -2974,18 +3005,19 @@ read pointer is undefined.
 @code{fftw_import_system_wisdom} reads wisdom from an
 implementation-defined standard file (@code{/etc/fftw/wisdom} on Unix
 and GNU systems).
+@cindex wisdom, system-wide
 
-The return value of these routines is @code{1} if the wisdom was read
-successfully, and @code{0} otherwise. Note that, in all of these
-functions, any data in the input stream past the end of the wisdom
-data is simply ignored.
+The return value of these import routines is @code{1} if the wisdom was
+read successfully and @code{0} otherwise. Note that, in all of these
+functions, any data in the input stream past the end of the wisdom data
+is simply ignored.
 
 @c =========>
-@node Forgetting Wisdom,  , Wisdom Import, Wisdom
+@node Forgetting Wisdom, Wisdom Utilities, Wisdom Import, Wisdom
 @subsection Forgetting Wisdom
 
 @example
-    void fftw_forget_wisdom(void);
+void fftw_forget_wisdom(void);
 @end example
 @findex fftw_forget_wisdom
 
@@ -2993,6 +3025,34 @@ Calling @code{fftw_forget_wisdom} causes all accumulated @code{wisdom}
 to be discarded and its associated memory to be freed. (New
 @code{wisdom} can still be gathered subsequently, however.)
 
+@c =========>
+@node Wisdom Utilities,  , Forgetting Wisdom, Wisdom
+@subsection Wisdom Utilities
+
+FFTW includes two standalone utility programs that deal with wisdom.  We
+merely summarize them here, since they come with their own @code{man}
+pages for Unix and GNU systems (with HTML versions on our web site).
+
+The first program is @code{fftw-wisdom} (or @code{fftwf-wisdom} in
+single precision, etcetera), which can be used to create a wisdom file
+containing plans for any of the transform sizes and types supported by
+FFTW.  It is preferable to create wisdom directly from your executable
+(@pxref{Caveats in Using Wisdom}), but this program is useful for
+creating global wisdom files for @code{fftw_import_system_wisdom}.
+@cindex fftw-wisdom utility
+
+The second program is @code{fftw-wisdom-to-conf}, which takes a wisdom
+file as input and produces a @dfn{configuration routine} as output.  The
+latter is a C subroutine that you can compile and link into your
+program, replacing a routine of the same name in the FFTW library, that
+determines which parts of FFTW are callable by your program.
+@code{fftw-wisdom-to-conf} produces a configuration routine that links
+to only those parts of FFTW needed by the saved plans in the wisdom,
+greatly reducing the size of statically linked executables (which should
+only attempt to create plans corresponding to those in the wisdom,
+however).
+@cindex fftw-wisdom-to-conf utility
+@cindex configuration routines
 
 @c ------------------------------------------------------------
 @node What FFTW Really Computes,  , Wisdom, FFTW Reference
