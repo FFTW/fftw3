@@ -162,8 +162,8 @@ sub parse_arguments (@)
 	elsif ($arglist[0] eq '-k') { ++$keepgoing; }
 	elsif ($arglist[0] eq '--keep-going') { ++$keepgoing; }
 	elsif ($arglist[0] =~ /^--verify-rounds=(.+)$/) { $rounds = $1; }
-	elsif ($arglist[0] =~ /^--count=(.+)$/) { $count = $1; }
-	elsif ($arglist[0] =~ /^-c=(.+)$/) { $count = $1; }
+	elsif ($arglist[0] =~ /^--count=(.+)$/) { $maxcount = $1; }
+	elsif ($arglist[0] =~ /^-c=(.+)$/) { $maxcount = $1; }
 	
 	elsif ($arglist[0] eq '-1d') { ++$do_1d; }
 	elsif ($arglist[0] eq '-2d') { ++$do_2d; }
