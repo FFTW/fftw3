@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.5 2002-06-19 15:20:29 athena Exp $ *)
+(* $Id: genutil.ml,v 1.6 2002-06-19 17:20:37 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -180,11 +180,20 @@ let dump_dag alist =
       close_out ochan;
     end
 
+let dump_alist alist =
+  let fnam = !Magic.alist_dump_file in
+  if (String.length fnam > 0) then
+    let ochan = open_out fnam in
+    begin
+      Expr.dump (output_string ochan) alist;
+      close_out ochan;
+    end
+
 (* utilities for optimization *)
 let standard_scheduler dag =
   let optim = Algsimp.algsimp dag in
   let alist = To_alist.to_assignments optim in
-(*  let _ = Expr.dump alist in *)
+  let _ = dump_alist alist in
   let _ = dump_dag alist in
   let sched = Schedule.schedule alist in
   sched

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.2 2002-06-13 12:48:51 athena Exp $ *)
+(* $Id: magic.ml,v 1.3 2002-06-19 17:20:37 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -44,6 +44,7 @@ let deep_collect_depth = ref 1
 let schedule_type = ref 0
 let compact = ref false
 let dag_dump_file = ref ""
+let alist_dump_file = ref ""
 let network_transposition = ref true
 
 (* command-line parser for magic parameters *)
@@ -72,6 +73,7 @@ let speclist = [
   " Disable -compact";
 
   "-dump-dag", set_string dag_dump_file, undocumented;
+  "-dump-alist", set_string alist_dump_file, undocumented;
 
   "-alternate-convolution", set_int alternate_convolution, undocumented;
   "-deep-collect-depth", set_int deep_collect_depth, undocumented;

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.mli,v 1.3 2002-06-15 22:23:40 athena Exp $ *)
+(* $Id: expr.mli,v 1.4 2002-06-19 17:21:13 athena Exp $ *)
 
 type expr =
   | Num of Number.number
@@ -37,3 +37,5 @@ val assignment_to_string : assignment -> string
 
 val find_vars : expr -> Variable.variable list
 val is_constant : expr -> bool
+
+val dump : (string -> unit) -> assignment list -> unit
