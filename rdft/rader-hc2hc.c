@@ -31,7 +31,6 @@
 
 typedef struct {
      solver super;
-     uint min_prime;
      rdft_kind kind;
 } S;
 
@@ -427,15 +426,7 @@ static int applicable0(const solver *ego_, const problem *p_)
 static int applicable(const solver *ego_, const problem *p_, 
 		      const planner *plnr)
 {
-     if (!applicable0(ego_, p_)) return 0;
-
-     if (NO_UGLYP(plnr))  {
-	  const S *ego = (const S *) ego_;
-          const problem_rdft *p = (const problem_rdft *) p_;
-	  uint r = X(first_divisor)(p->sz.dims[0].n);
-	  if (r < ego->min_prime || r == p->sz.dims[0].n) return 0;
-     }
-     return 1;
+     return (!NO_UGLYP(plnr) && applicable0(ego_, p_));
 }
 
 static int mkP(P *pln, uint r, R *O, int ios, rdft_kind kind, planner *plnr)
@@ -610,27 +601,24 @@ static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
 
 /* constructors */
 
-static solver *mksolver_dit(uint min_prime)
+static solver *mksolver_dit(void)
 {
      static const solver_adt sadt = { mkplan_dit };
      S *slv = MKSOLVER(S, &sadt);
-     slv->min_prime = min_prime;
      slv->kind = R2HC;
      return &(slv->super);
 }
 
-static solver *mksolver_dif(uint min_prime)
+static solver *mksolver_dif(void)
 {
      static const solver_adt sadt = { mkplan_dif };
      S *slv = MKSOLVER(S, &sadt);
-     slv->min_prime = min_prime;
      slv->kind = HC2R;
      return &(slv->super);
 }
 
 void X(rdft_rader_hc2hc_register)(planner *p)
 {
-     /* FIXME: what are good defaults? */
-     REGISTER_SOLVER(p, mksolver_dit(RADER_MIN_GOOD));
-     REGISTER_SOLVER(p, mksolver_dif(RADER_MIN_GOOD));
+     REGISTER_SOLVER(p, mksolver_dit());
+     REGISTER_SOLVER(p, mksolver_dif());
 }

@@ -28,7 +28,6 @@
 
 typedef struct {
      solver super;
-     uint min_prime;
 } S;
 
 typedef struct {
@@ -282,16 +281,7 @@ static int applicable0(const problem *p_)
 static int applicable(const solver *ego_, const problem *p_, 
 		      const planner *plnr)
 {
-     if (!applicable0(p_)) return 0;
-
-     {
-	  const S *ego = (const S *) ego_;
-          const problem_rdft *p = (const problem_rdft *) p_;
-	  if (NO_UGLYP(plnr) && p->sz.dims[0].n < ego->min_prime)
-	       return 0;
-
-     }
-     return 1;
+     return (!NO_UGLYP(plnr) && applicable0(p_));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -408,15 +398,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 /* constructors */
 
-static solver *mksolver(uint min_prime)
+static solver *mksolver(void)
 {
      static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
-     slv->min_prime = min_prime;
      return &(slv->super);
 }
 
 void X(dht_rader_register)(planner *p)
 {
-     REGISTER_SOLVER(p, mksolver(RADER_MIN_GOOD));
+     REGISTER_SOLVER(p, mksolver());
 }
