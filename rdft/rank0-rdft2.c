@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-rdft2.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: rank0-rdft2.c,v 1.4 2003-02-07 22:36:56 stevenj Exp $ */
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
@@ -45,10 +45,10 @@ static int applicable(const problem *p_)
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
           return (1
                   && p->sz->rnk == 0
-		  && ((p->r != p->rio && p->r != p->iio) ||
-		      (p->kind == R2HC && p->r == p->rio &&
-		       X(rdft2_inplace_strides)(p, RNK_MINFTY)))
-		  && p->vecsz->rnk <= 1
+		  && (p->kind == HC2R
+		      || (((p->r != p->rio && p->r != p->iio)
+			   || X(rdft2_inplace_strides)(p, RNK_MINFTY))
+			  && p->vecsz->rnk <= 1))
 	       );
      }
      return 0;
@@ -167,7 +167,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 			(p->r == p->rio ? apply_r2hc_inplace : apply_r2hc) 
 			: apply_hc2r);
      
-     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
+     if (p->kind == R2HC)
+	  X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      pln->cldcpy = cldcpy;
 
      if (p->kind == R2HC) {
