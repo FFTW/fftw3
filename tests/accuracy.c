@@ -12,9 +12,9 @@ int main(int argc, char *argv[])
      planner *plnr;
      problem *prblm;
      plan *pln;
-     R *a, *a0;
+     R *a, *b;
      int i;
-     R e1, e2, einf, re1, re2, reinf, mag;
+     R e1, n1, e2, n2, einf, ninf;
 
      srand48(1);
 
@@ -31,53 +31,40 @@ int main(int argc, char *argv[])
      plnr = FFTW(mkplanner_score)(ESTIMATE);
      FFTW(dft_conf_standard)(plnr);
      a = fftw_malloc(2 * nmax * sizeof(R), OTHER);
-     a0 = fftw_malloc(2 * nmax * sizeof(R), OTHER);
+     b = fftw_malloc(2 * nmax * sizeof(R), OTHER);
 
      for (n = nmin; n <= nmax; n = 2 * n) {
 	  prblm =
 	       FFTW(mkproblem_dft_d)(
-		    FFTW(mktensor_1d)(n, 2, 2), FFTW(mktensor)(0), a, a+1, a, a+1);
+		    FFTW(mktensor_1d)(n, 2, 2), FFTW(mktensor)(0), a, a+1, b, b+1);
 	  pln = plnr->adt->mkplan(plnr, prblm);
 	  AWAKE(pln, 1);
-	  mag = 0.0;
-	  for (i = 0; i < 2 * n; ++i) {
+	  for (i = 0; i < 2 * n; ++i) 
 	       a[i] = drand48() - 0.5;
-	       mag += a[i] * a[i];
-	  }
 
-	  /* normalize */
-	  mag = 1.0 / sqrt(mag);
-	  for (i = 0; i < 2 * n; ++i)
-	       a0[i] = a[i] = mag * a[i];
-	  
 	  pln->adt->solve(pln, prblm);
-	  mfft(n, a0, -1);
+
+	  /* overwrite a with its own fft */
+	  mfft(n, a, -1);
      
 	  e1 = e2 = einf = 0.0;
-	  re1 = re2 = reinf = 0.0;
+	  n1 = n2 = ninf = 0.0;
 	  for (i = 0; i < 2 * n; ++i) {
-	       R d = a[i] - a0[i];
+	       R d;
+	       d = b[i];
 	       if (d < 0) d = -d;
-	       e1 += d;
-	       e2 += d * d;
-	       if (d > einf) einf = d;
+	       n1 += d; n2 += d * d; if (d > ninf) ninf = d;
 
-	       if (a0[i]) {
-		    d /= a0[i];
-		    if (d < 0) d = -d;
-	       }
-	       re1 += d;
-	       re2 += d * d;
-	       if (d > reinf) reinf = d;
+	       d = a[i] - b[i];
+	       if (d < 0) d = -d;
+	       e1 += d; e2 += d * d; if (d > einf) einf = d;
 	  }
-	  e1 /= 2 * n;
-	  e2 = sqrt(e2 / (2 * n));
-	  re1 /= 2 * n;
-	  re2 = sqrt(re2 / (2 * n));
+	  e1 /= n1;
+	  e2 = sqrt(e2 / n1);
+	  einf /= ninf;
 
-	  printf("%10d %6.2e %6.2e %6.2e %6.2e %6.2e %6.2e\n",
-		 n, (double)e1, (double)e2, (double)einf,
-		 (double)re1, (double)re2, (double)reinf);
+	  printf("%10d %6.2e %6.2e %6.2e\n",
+		 n, (double)e1, (double)e2, (double)einf);
 	  X(problem_destroy)(prblm);
      }
 }
