@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: fftw3.h,v 1.2 2002-07-13 20:05:43 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.3 2002-07-16 17:55:50 athena Exp $ */
 
 /* FFTW installed header file */
 #ifndef __FFTW3_H__
@@ -36,7 +36,8 @@ typedef double fftw_real;
 #define FFTW(name) dfftw_ ## name
 #endif
 
-extern const char *FFTW(version);
-extern const char *FFTW(cc);
+extern const char *const FFTW(version);
+extern const char *const FFTW(cc);
+extern const char *const FFTW(codelet_optim);
 
 #endif				/* __FFTW3_H__ */
