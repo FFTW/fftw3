@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.22 2003-02-10 04:24:52 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.23 2003-02-10 07:44:58 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -262,7 +262,7 @@ static void apply_ro10(plan *ego_, R *I, R *O)
 	       cld->apply((plan *) cld, buf, buf);
 	  }
 	  
-	  O[n - 1] = 2.0 * buf[0];
+	  O[os * (n - 1)] = 2.0 * buf[0];
 	  for (i = 1; i < n - i; ++i) {
 	       E a, b, wa, wb;
 	       a = 2.0 * buf[i];
