@@ -3,7 +3,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft		\
 
 EXTRA_DIST = f77funcs.c
 
-include_HEADERS = fftw3.h
+include_HEADERS = fftw3.h fftw3.f
 noinst_LTLIBRARIES = libapi.la
 
 libapi_la_SOURCES = apiplan.c configure.c execute.c execute-dft.c	\
@@ -21,3 +21,12 @@ plan-r2r-1d.c plan-r2r-2d.c plan-r2r-3d.c plan-r2r.c plan-guru-r2r.c	\
 print-plan.c the-planner.c rdft2-pad.c api.h fftw3.h f77api.c x77.h
 
 f77api.o: f77funcs.c
+
+BUILT_SOURCES = fftw3.f
+
+# convert constants to F77 PARAMETER statements
+fftw3.f: fftw3.h
+	rm -f $@
+	perl -pe 's/([A-Z0-9_]+)=([0-9]+)/\n      INTEGER \1\n      PARAMETER (\1=\2)\n/g' $< |egrep 'PARAMETER|INTEGER' > $@
+	perl -pe 's/#define +([A-Z0-9_]+) +\(([+-]?[0-9]+)\)/\n      INTEGER \1\n      PARAMETER (\1=\2)\n/g' $< |egrep 'PARAMETER|INTEGER' >> $@
+	perl -pe 'if (/#define +([A-Z0-9_]+) +\(([0-9]+)U? *<< *([0-9]+)\)/) { print "\n      INTEGER $$1\n      PARAMETER ($$1=",$$2 << $$3,")\n"; }' $< |egrep 'PARAMETER|INTEGER' >> $@
