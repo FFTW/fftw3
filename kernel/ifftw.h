@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.162 2003-01-08 09:00:22 athena Exp $ */
+/* $Id: ifftw.h,v 1.163 2003-01-08 09:21:40 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -36,23 +36,20 @@
 #endif
 
 /* determine precision and name-mangling scheme */
-#define FFTW_MANGLE(prefix, name) prefix ## name
+#define CONCAT(prefix, name) prefix ## name
 #if defined(FFTW_SINGLE)
-typedef float fftw_real;
-#define X(name) FFTW_MANGLE(fftwf_, name)
+typedef float R;
+#define X(name) CONCAT(fftwf_, name)
 #elif defined(FFTW_LDOUBLE)
-typedef long double fftw_real;
-#define X(name) FFTW_MANGLE(fftwl_, name)
+typedef long double R;
+#define X(name) CONCAT(fftwl_, name)
 #else
-typedef double fftw_real;
-#define X(name) FFTW_MANGLE(fftw_, name)
+typedef double R;
+#define X(name) CONCAT(fftw_, name)
 #endif
 
-/* dummy use of unused parameters to avoid compiler warnings */
+/* dummy use of unused parameters to silence compiler warnings */
 #define UNUSED(x) (void)x
-
-/* shorthands */
-typedef fftw_real R;
 
 #define FFT_SIGN (-1)  /* sign convention for forward transforms */
 

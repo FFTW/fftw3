@@ -70,7 +70,7 @@ static void apply_aux(uint r, plan_dft *cldr, const R *omega,
 
      /* now, multiply by omega: */
      for (k = 0; k < r - 1; ++k) {
-	  fftw_real rB, iB, rW, iW;
+	  R rB, iB, rW, iW;
 	  rW = omega[2*k];
 	  iW = omega[2*k+1];
 	  rB = buf[2*k];

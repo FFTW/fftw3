@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.22 2002-09-25 01:27:49 athena Exp $ */
+/* $Id: buffered2.c,v 1.23 2003-01-08 09:21:40 athena Exp $ */
 
 #include "rdft.h"
 
@@ -63,8 +63,8 @@ static void hc2c(uint n, R *r, R *rio, R *iio, int os)
 	  iio[i * os] = r[n - i];
      }
      for (; i < n2; i += 4) {
-	  fftw_real r0, r1, r2, r3;
-	  fftw_real i0, i1, i2, i3;
+	  R r0, r1, r2, r3;
+	  R i0, i1, i2, i3;
 	  r0 = r[i];
 	  r1 = r[i + 1];
 	  r2 = r[i + 2];
@@ -100,8 +100,8 @@ static void c2hc(uint n, R *rio, R *iio, int is, R *r)
 	  r[n - i] = iio[i * is];
      }
      for (; i < n2; i += 4) {
-	  fftw_real r0, r1, r2, r3;
-	  fftw_real i0, i1, i2, i3;
+	  R r0, r1, r2, r3;
+	  R i0, i1, i2, i3;
 	  r0 = rio[i * is];
 	  i0 = iio[i * is];
 	  r1 = rio[(i + 1) * is];
