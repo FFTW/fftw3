@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.4 2002-06-10 10:49:55 athena Exp $ */
+/* $Id: bench-user.h,v 1.5 2002-06-13 12:59:53 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -165,17 +165,6 @@ extern void bench_free(void *ptr);
  **************************************************************/
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
-#endif
-
-#ifdef HAVE_ALLOCA
-/* use alloca if available */
-#define STACK_MALLOC(x) alloca(x)
-#define STACK_FREE(x) 
-
-#else
-/* use malloc instead of alloca */
-#define STACK_MALLOC(x) bench_malloc(x)
-#define STACK_FREE(x) bench_free(x)
 #endif
 
 extern int verbose;

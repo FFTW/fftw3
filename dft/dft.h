@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.16 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: dft.h,v 1.17 2002-06-13 12:59:53 athena Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -73,4 +73,3 @@ void X(dft_nop_register)(planner *p);
 /* configurations */
 void X(dft_conf_standard)(planner *p);
 
-#define OPTIMAL_SIZE 12		/* for estimator */

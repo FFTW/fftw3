@@ -18,13 +18,11 @@
  *
  */
 
-/* $Id: direct.c,v 1.14 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: direct.c,v 1.15 2002-06-13 12:59:53 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
 #include "dft.h"
-
-#define OPTIMAL_SIZE 32		/* for estimator */
 
 typedef struct {
      solver super;

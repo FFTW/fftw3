@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.3 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: cycle.h,v 1.4 2002-06-13 12:59:53 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -66,7 +66,7 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 /*
  * Pentium cycle counter 
  */
-#if defined(__i386__)
+#if (defined(__GNUC__) || defined(__ICC)) && defined(__i386__)
 typedef unsigned long long ticks;
 
 static __inline__ ticks getticks(void)
