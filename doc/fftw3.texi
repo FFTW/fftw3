@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.100 2003-03-06 07:50:38 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.101 2003-03-06 07:51:02 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1308,6 +1308,7 @@ The recent C99 standard provides a way to dynamically reinterpret the
 array as a static-like multi-dimensional array amenable to @samp{[]},
 but this feature is not yet widely supported by compilers.
 @cindex C99
+@cindex C++
 
 @c =========>
 @node Dynamic Arrays in C-The Wrong Way,  , Dynamic Arrays in C, Multi-dimensional Array Format
@@ -1430,6 +1431,7 @@ all current major implementations of the standard library and shown to
 be working.''  To the extent that this is true, if you have a variable
 @code{complex<double> *x}, you can pass it directly to FFTW via
 @code{reinterpret_cast<fftw_complex*>(x)}.
+@cindex C++
 
 @c =========>
 @node Precision, Memory Allocation, Complex numbers, Data Types and Files
