@@ -18,28 +18,26 @@
  *
  */
 
-/* $Id: trig.c,v 1.12 2003-01-09 10:40:34 athena Exp $ */
+#include "api.h"
+#include "dft.h"
 
-/* trigonometric functions */
-#include "ifftw.h"
-#include <math.h>
-
-trigreal X(cos2pi)(int m, uint n)
+X(plan) X(plan_dft_1d)(unsigned int n, C *in, C *out, int sign, 
+		       unsigned int flags)
 {
-     return X(sincos)((trigreal)m, (trigreal)n, 0);
-}
+     R *ri, *ii, *ro, *io;
+     problem *prblm;
+     plan *pln;
+     planner *plnr = X(the_planner)();
 
-trigreal X(sin2pi)(int m, uint n)
-{
-     return X(sincos)((trigreal)m, (trigreal)n, 1);
-}
+     X(extract_reim)(sign, in, &ri, &ii);
+     X(extract_reim)(sign, out, &ro, &io);
+     
+     prblm = X(mkproblem_dft_d)(X(mktensor_1d)(n, 2, 2), 
+				X(mktensor_0d)(), 
+				ri, ii, ro, io);
+     X(mapflags)(plnr, flags);
+     
+     pln = plnr->adt->mkplan(plnr, prblm);
 
-trigreal X(tan2pi)(int m, uint n)
-{
-#if 0      /* unimplemented, unused */
-     trigreal dm = m, dn = n;
-     return TAN(by2pi(dm, dn));
-#endif
-     UNUSED(m); UNUSED(n);
-     return 0.0;
+     return X(mkapiplan)(pln, prblm);
 }

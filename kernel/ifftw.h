@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.163 2003-01-08 09:21:40 athena Exp $ */
+/* $Id: ifftw.h,v 1.164 2003-01-09 10:40:34 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -620,6 +620,7 @@ typedef double trigreal;
 extern trigreal X(cos2pi)(int, uint);
 extern trigreal X(sin2pi)(int, uint);
 extern trigreal X(tan2pi)(int, uint);
+extern trigreal X(sincos)(trigreal m, trigreal n, int sinp);
 
 /*-----------------------------------------------------------------------*/
 /* primes.c: */

@@ -18,28 +18,25 @@
  *
  */
 
-/* $Id: trig.c,v 1.12 2003-01-09 10:40:34 athena Exp $ */
+#include "api.h"
+#include "dft.h"
+#include "rdft.h"
+#include "reodft.h"
+#include "threads.h"
 
-/* trigonometric functions */
-#include "ifftw.h"
-#include <math.h>
+static planner *plnr = 0;
 
-trigreal X(cos2pi)(int m, uint n)
+/* create the planner for the rest of the API */
+planner *X(the_planner)(void)
 {
-     return X(sincos)((trigreal)m, (trigreal)n, 0);
-}
-
-trigreal X(sin2pi)(int m, uint n)
-{
-     return X(sincos)((trigreal)m, (trigreal)n, 1);
-}
-
-trigreal X(tan2pi)(int m, uint n)
-{
-#if 0      /* unimplemented, unused */
-     trigreal dm = m, dn = n;
-     return TAN(by2pi(dm, dn));
-#endif
-     UNUSED(m); UNUSED(n);
-     return 0.0;
+     if (!plnr) {
+	  plnr = X(mkplanner)();
+	  X(dft_conf_standard)(plnr);
+	  X(rdft_conf_standard)(plnr);
+	  X(reodft_conf_standard)(plnr);
+	  X(threads_conf_standard)(plnr);
+	  plnr->nthr = 1;
+     }
+     
+     return plnr;
 }

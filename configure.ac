@@ -269,6 +269,8 @@ AC_CONFIG_FILES([
 
    threads/Makefile
 
+   api/Makefile
+
    libbench/Makefile
    tests/Makefile
 

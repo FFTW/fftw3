@@ -8,12 +8,13 @@ else
 GENFFT =
 endif
 
-SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft threads libbench . tests
+SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft threads api	\
+libbench . tests
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS
 
 libfftw3@PREC_SUFFIX@_la_SOURCES = 
 
-libfftw3@PREC_SUFFIX@_la_LIBADD =				\
+libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	kernel/libkernel.la				\
 	simd/libsimd.la					\
 	dft/libdft.la					\
@@ -27,8 +28,9 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =				\
 	rdft/librdft.la					\
 	rdft/codelets/librdft_codelets.la		\
 	rdft/codelets/r2hc/librdft_codelets_r2hc.la	\
-	rdft/codelets/hc2r/librdft_codelets_hc2r.la     \
-	reodft/libreodft.la                             \
-	threads/libthreads.la
+	rdft/codelets/hc2r/librdft_codelets_hc2r.la	\
+	reodft/libreodft.la				\
+	threads/libthreads.la				\
+	api/libapi.la
 
 libfftw3@PREC_SUFFIX@_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@

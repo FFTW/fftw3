@@ -18,28 +18,20 @@
  *
  */
 
-/* $Id: trig.c,v 1.12 2003-01-09 10:40:34 athena Exp $ */
+/* support functions for dft API */
+#include "api.h"
 
-/* trigonometric functions */
-#include "ifftw.h"
-#include <math.h>
+/* decompose complex pointer into real and imaginary parts.
+   Flip real and imaginary if there the sign does not match
+   FFTW's idea of what the sign should be */
 
-trigreal X(cos2pi)(int m, uint n)
+void X(extract_reim)(int sign, C *c, R **r, R **i)
 {
-     return X(sincos)((trigreal)m, (trigreal)n, 0);
-}
-
-trigreal X(sin2pi)(int m, uint n)
-{
-     return X(sincos)((trigreal)m, (trigreal)n, 1);
-}
-
-trigreal X(tan2pi)(int m, uint n)
-{
-#if 0      /* unimplemented, unused */
-     trigreal dm = m, dn = n;
-     return TAN(by2pi(dm, dn));
-#endif
-     UNUSED(m); UNUSED(n);
-     return 0.0;
+     if (sign == FFT_SIGN) {
+	  *r = c[0] + 0;
+	  *i = c[0] + 1;
+     } else {
+	  *r = c[0] + 1;
+	  *i = c[0] + 0;
+     }
 }
