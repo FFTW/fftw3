@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.63 2003-03-02 20:52:41 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.64 2003-03-02 20:54:14 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1816,7 +1816,7 @@ programs be required to link with the Fortran I/O library.)
 
 @c ************************************************************
 @node Installation and Customization, Acknowledgments, Calling FFTW from Fortran, Top
-@chapter Inst]allation and Customization
+@chapter Installation and Customization
 
 @menu
 * Installation on Unix::        
