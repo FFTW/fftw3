@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.12 2002-07-31 22:57:04 athena Exp $ */
+/* $Id: problem.c,v 1.13 2002-08-01 02:06:46 stevenj Exp $ */
 
 #include "dft.h"
 
@@ -98,8 +98,8 @@ void X(dft_zerotens)(tensor sz, R *ri, R *ii)
 static void print(problem *ego_, printer *p)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
-     p->print(p, "(dft %d %td %td %td %T %T)", 
-	      (int)X(alignment_of)(ego->ri),
+     p->print(p, "(dft %u %td %td %td %T %T)", 
+	      X(alignment_of)(ego->ri),
 	      ego->ro - ego->ri, 
 	      ego->ii - ego->ri, 
 	      ego->io - ego->ro,
