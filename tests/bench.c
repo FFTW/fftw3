@@ -68,10 +68,10 @@ void setup(struct problem *p)
      bench_real *ri, *ii, *ro, *io;
      BENCH_ASSERT(can_do(p));
 
-#if 0
-     plnr = FFTW(mkplanner_naive)(ESTIMATE);
-#else
+#if CLASSIC_MODE
      plnr = FFTW(mkplanner_score)(ESTIMATE);
+#else
+     plnr = FFTW(mkplanner_naive)(ESTIMATE);
 #endif
      
      FFTW(dft_conf_standard) (plnr);
