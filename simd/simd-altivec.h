@@ -27,7 +27,7 @@
 
 #ifndef __VEC__
 
-/* simulate altivec spec by means of gcc builtins */
+/* simulate altivec spec by means of gcc-3.1 builtins */
 #define vector __attribute__((vector_size(16)))
 #define vec_add __builtin_altivec_vaddfp
 #define vec_sub __builtin_altivec_vsubfp
