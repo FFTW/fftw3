@@ -269,12 +269,12 @@ static void toreals(const N a, REAL *out_, int n)
      }
 } 
 
-void neg(N a)
+static void neg(N a)
 {
      SGNA = -SGNA;
 }
 
-void inv(const N a, N x)
+static void inv(const N a, N x)
 {
      N w, z, one, two;
 
