@@ -45,7 +45,8 @@ typedef struct {
      P super;
      plan *cld;
      R *W;
-     int os, m;
+     int os;
+     uint m;
 } P_dit;
 
 /***************************************************************************/
@@ -163,8 +164,8 @@ static int isprime(uint n)
 static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
-     uint is, os, r;
-     uint k, gpower, g;
+     int is, os;
+     uint k, gpower, g, r;
      R *buf;
      const R *omega;
      R r0, i0;
@@ -231,8 +232,8 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
      P_dit *ego_dit = (P_dit *) ego_;
      P *ego;
      plan *cld1, *cld2;
-     uint os, osm, r, m;
-     uint j, k, gpower, g, ginv;
+     int os, osm;
+     uint j, k, gpower, g, ginv, r, m;
      R *buf;
      const R *omega, *W;
      R r0, i0;
@@ -314,6 +315,8 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
 }
 
 /***************************************************************************/
+
+/* FIXME: share Rader omega and twiddle arrays between plans */
 
 static R *mkomega(plan *p_, R *buf, uint n, uint ginv)
 {
@@ -507,7 +510,7 @@ static int score_dit(const solver *ego_, const problem *p_, int flags)
      return BAD;
 }
 
-static int mkP(P *pln, uint n, uint is, uint os, R *ro, R *io,
+static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
 	       planner *plnr)
 {
      plan *cld1 = (plan *) 0;
