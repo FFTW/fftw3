@@ -1,0 +1,57 @@
+This directory contains a benchmarking and testing program
+for fftw3.
+
+The `bench' program has a zillion options, because we use it for
+benchmarking other FFT libraries as well.  This file only documents
+the basic usage of bench.
+
+Usage: bench <commands>
+
+where each command is as follows:
+
+-s <problem>
+--speed <problem>
+
+    Benchmarks the speed of <problem>.
+
+    The syntax for problems is [i|o][r|c][f|b]<size>, where
+
+      i/o means in-place or out-of-place.  In-place is the default
+      r/c means real or complex transform.  Complex is the default
+      f/b means forward or backward transform.  Forward is the default.
+      <size> is an arbitrary multidimensional sequence of integers
+        separated by the character 'x'.
+
+    (The syntax for problems is actually richer, but we do not document
+    it here.)
+
+    Example:
+
+        ib256 : in-place backward complex transform of size 256
+        32x64 : out-of-place forward complex 2D transform of 32 rows
+                and 64 columns.
+
+-y <problem>
+--verify <problem>
+
+   Verify that FFTW is computing the correct answer.
+
+   The program does not output anything unless an error occurs or
+   verbosity is at least one.
+
+-v<n>
+
+   Set verbosity to <n>, or 1 if <n> is omitted.
+   
+-oestimate
+-opatient
+-oexhaustive
+ 
+  Plan with FFTW_ESTIMATE, FFTW_PATIENT, or FFTW_EXHAUSTIVE, respectively.
+  The default is FFTW_MEASURE.
+
+  If you benchmark FFTW, please use -opatient.
+      
+
+
+

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.149 2003-04-08 09:38:09 athena Exp $ */
+/* $Id: planner.c,v 1.150 2003-04-09 14:12:18 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -324,6 +324,7 @@ static void invoke_hook(planner *ego, plan *pln, const problem *p,
 
 static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 {
+     invoke_hook(ego, pln, p, 0);
      if (!BELIEVE_PCOSTP(ego) || pln->pcost == 0.0) {
 	  ego->nplan++;
 	  if (ESTIMATEP(ego)) {
