@@ -22,23 +22,23 @@
 
 typedef struct {
      scanner super;
-     int (*get_input)(void *);
+     int (*read_char)(void *);
      void *data;
 } S;
 
 static int getchr_generic(scanner * s_)
 {
      S *s = (S *) s_;
-     return (s->get_input)(s->data);
+     return (s->read_char)(s->data);
 }
 
-int X(import_wisdom)(int (*get_input)(void *), void *data)
+int X(import_wisdom)(int (*read_char)(void *), void *data)
 {
      S *s = (S *) X(mkscanner)(sizeof(S), getchr_generic);
      planner *plnr = X(the_planner)();
      int ret;
 
-     s->get_input = get_input;
+     s->read_char = read_char;
      s->data = data;
      ret = plnr->adt->imprt(plnr, (scanner *) s);
      X(scanner_destroy)((scanner *) s);

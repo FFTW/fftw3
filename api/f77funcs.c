@@ -43,13 +43,13 @@ void F77(forget_wisdom, FORGET_WISDOM)(void)
      X(forget_wisdom)();
 }
 
-void F77(export_wisdom, EXPORT_WISDOM)(void (*f77_absorber)(char *, void *),
+void F77(export_wisdom, EXPORT_WISDOM)(void (*f77_write_char)(char *, void *),
 				       void *data)
 {
-     absorber_data ad;
-     ad.f77_absorber = f77_absorber;
+     write_char_data ad;
+     ad.f77_write_char = f77_write_char;
      ad.data = data;
-     X(export_wisdom)(absorber, (void *) &ad);
+     X(export_wisdom)(write_char, (void *) &ad);
 }
 
 void F77(import_wisdom, IMPORT_WISDOM)(int *isuccess,

@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.143 2003-03-15 14:07:31 athena Exp $
+@comment $Id: fftw3.texi,v 1.144 2003-03-15 16:29:12 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2899,7 +2899,7 @@ plans from disk.  This mechanism is called @dfn{wisdom}.
 @example
     void fftw_export_wisdom_to_file(FILE *output_file);
     char *fftw_export_wisdom_to_string(void);
-    void fftw_export_wisdom(void (*absorber)(char c, void *), 
+    void fftw_export_wisdom(void (*write_char)(char c, void *), 
                             void *data);
 @end example
 @findex fftw_export_wisdom
@@ -2914,7 +2914,7 @@ of these routines.
 
 @code{fftw_export_wisdom} exports the wisdom to any output
 medium, as specified by the callback function
-@code{absorber}. @code{absorber} is a @code{putc}-like function that
+@code{write_char}. @code{write_char} is a @code{putc}-like function that
 writes the character @code{c} to some output; its second parameter is
 the @code{data} pointer passed to @code{fftw_export_wisdom}.  For
 convenience, the following two ``wrapper'' routines are provided:
@@ -2941,7 +2941,7 @@ that is insensitive to white space.
     int fftw_import_system_wisdom(void);
     int fftw_import_wisdom_from_file(FILE *input_file);
     int fftw_import_wisdom_from_string(const char *input_string);
-    int fftw_import_wisdom(int (*get_input)(void *), 
+    int fftw_import_wisdom(int (*read_char)(void *), 
                            void *data);
 @end example
 @findex fftw_import_wisdom
@@ -2955,7 +2955,7 @@ Wisdom-Saving Plans}.)  The imported wisdom replaces any wisdom
 already accumulated by the running program.
 
 @code{fftw_import_wisdom} imports wisdom from any input medium,
-as specified by the callback function @code{get_input}. @code{get_input}
+as specified by the callback function @code{read_char}. @code{read_char}
 is a @code{getc}-like function that returns the next character in the
 input; its parameter is the @code{data} pointer passed to
 @code{fftw_import_wisdom}. If the end of the input data is reached

@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.49 2003-03-15 13:37:52 athena Exp $ */
+/* $Id: fftw3.h,v 1.50 2003-03-15 16:29:12 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -193,11 +193,11 @@ void X(cleanup_threads)(void);						\
 									\
 void X(export_wisdom_to_file)(FILE *output_file);			\
 char *X(export_wisdom_to_string)(void);					\
-void X(export_wisdom)(void (*absorber)(char c, void *), void *data);	\
+void X(export_wisdom)(void (*write_char)(char c, void *), void *data);	\
 int X(import_system_wisdom)(void);					\
 int X(import_wisdom_from_file)(FILE *input_file);			\
 int X(import_wisdom_from_string)(const char *input_string);		\
-int X(import_wisdom)(int (*get_input)(void *), void *data);		\
+int X(import_wisdom)(int (*read_char)(void *), void *data);		\
 									\
 void X(print_plan)(const X(plan) p, FILE *output_file);			\
 									\

@@ -58,14 +58,14 @@ static X(iodim) *make_dims(int rnk, const int *n,
 }
 
 typedef struct {
-     void (*f77_absorber)(char *, void *);
+     void (*f77_write_char)(char *, void *);
      void *data;
-} absorber_data;
+} write_char_data;
 
-static void absorber(char c, void *d)
+static void write_char(char c, void *d)
 {
-     absorber_data *ad = (absorber_data *) d;
-     ad->f77_absorber(&c, ad->data);
+     write_char_data *ad = (write_char_data *) d;
+     ad->f77_write_char(&c, ad->data);
 }
 
 typedef struct {

@@ -30,7 +30,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     Strictly speaking, the '$' format specifier, which allows us to
 c     write a character without a trailing newline, is not standard F77.
 c     However, it seems to be a nearly universal extension.
-      subroutine absorb(c, iunit)
+      subroutine write_char(c, iunit)
       character c
       integer iunit
       write(iunit,321) c
@@ -39,8 +39,8 @@ c     However, it seems to be a nearly universal extension.
 
       subroutine export_wisdom_to_file(iunit)
       integer iunit
-      external absorb
-      call dfftw_export_wisdom(absorb, iunit)
+      external write_char
+      call dfftw_export_wisdom(write_char, iunit)
       end
 
 c     Fortran 77 does not have any portable way to read an arbitrary
@@ -49,7 +49,7 @@ c     read a whole line into a buffer, since for fftw-exported wisdom we
 c     can bound the line length.  (If the file contains longer lines,
 c     then the lines will be truncated and the wisdom import should
 c     simply fail.)  Ugh.
-      subroutine emit(ic, iunit)
+      subroutine read_char(ic, iunit)
       integer ic
       integer iunit
       character*256 buf
@@ -74,6 +74,6 @@ c     simply fail.)  Ugh.
       subroutine import_wisdom_from_file(isuccess, iunit)
       integer isuccess
       integer iunit
-      external emit
-      call dfftw_import_wisdom(isuccess, emit, iunit)
+      external read_char
+      call dfftw_import_wisdom(isuccess, read_char, iunit)
       end
