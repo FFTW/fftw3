@@ -192,6 +192,9 @@ if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
 
         ibm) CODELET_OPTIM=-O;;
 
+        hp) # must (sometimes) manually increase cpp limits to handle fftw3.h
+            AX_CHECK_COMPILER_FLAGS([-Wp,-H128000],
+            		            [CFLAGS="$CFLAGS -Wp,-H128000"])
       esac
     fi
 fi

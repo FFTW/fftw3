@@ -15,7 +15,7 @@ dnl floating-point computations can be re-ordered as needed.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_ARCHFLAG, AX_CC_VENDOR
 dnl
-dnl @version $Id: ax_cc_maxopt.m4,v 1.8 2005-03-07 19:19:24 stevenj Exp $
+dnl @version $Id: ax_cc_maxopt.m4,v 1.9 2005-03-07 19:29:43 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
 [
@@ -39,7 +39,7 @@ if test "$ac_test_CFLAGS" != "set"; then
 	   CFLAGS="$CFLAGS -xarch=generic"
          fi;;
 
-    hp)  CFLAGS="+Oall +Optrs_ansi -Wp,-H128000 +DSnative"
+    hp)  CFLAGS="+Oall +Optrs_ansi +DSnative"
 	 if test "x$acx_maxopt_portable" = xyes; then
 	   CFLAGS="$CFLAGS +DAportable"
 	 fi;;
