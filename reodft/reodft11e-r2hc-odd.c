@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.10 2003-02-27 06:17:23 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.11 2003-02-27 06:29:32 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -60,6 +60,8 @@ typedef struct {
 } P;
 
 static DK(SQRT2, +1.4142135623730950488016887242096980785696718753769);
+
+#define MINUS1_POW(i) (1 - 2 * ((i) % 2)) /* (-1) ^ i */
 
 static void apply_re11(plan *ego_, R *I, R *O)
 {
@@ -105,11 +107,11 @@ static void apply_re11(plan *ego_, R *I, R *O)
 		    s = buf[n - k];
 		    
 		    O[os * i] =
-			 SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) +
-				  s * (1 - 2 * ((i/2) % 2)));
+			 SQRT2 * (c * MINUS1_POW((i+1)/2) +
+				  s * MINUS1_POW(i/2));
 		    O[os * (n - 1 - i)] =
-			 SQRT2 * (c * (1 - 2 * ((i/2) % 2)) +
-				  s * (1 - 2 * (((i+3)/2) % 2)));
+			 SQRT2 * (c * MINUS1_POW(i/2) +
+				  s * MINUS1_POW((i+3)/2));
 	       }
 	       for (; i + i + 1 < n; ++i) {
 		    int k;
@@ -120,13 +122,13 @@ static void apply_re11(plan *ego_, R *I, R *O)
 		    s = buf[k];
 		    
 		    O[os * i] =
-			 SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
-				  s * (1 - 2 * ((i/2) % 2)));
+			 SQRT2 * (c * MINUS1_POW((i+1)/2) -
+				  s * MINUS1_POW(i/2));
 		    O[os * (n - 1 - i)] =
-			 SQRT2 * (c * (1 - 2 * ((i/2) % 2)) -
-				  s * (1 - 2 * (((i+3)/2) % 2)));
+			 SQRT2 * (c * MINUS1_POW(i/2) -
+				  s * MINUS1_POW((i+3)/2));
 	       }
-	       O[os * i] = SQRT2 * buf[0] * (1 - 2 * (((i+1)/2) % 2));
+	       O[os * i] = SQRT2 * buf[0] * MINUS1_POW((i+1)/2);
 	  }
 	  else /* n2odd */ {
 	       for (i = 0; i + i + 1 <= n/2; ++i) {
@@ -138,11 +140,11 @@ static void apply_re11(plan *ego_, R *I, R *O)
 		    s = buf[n - k];
 		    
 		    O[os * i] =
-			 SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) +
-				  s * (1 - 2 * ((i/2) % 2)));
+			 SQRT2 * (c * MINUS1_POW((i+1)/2) +
+				  s * MINUS1_POW(i/2));
 		    O[os * (n - 1 - i)] =
-			 SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) +
-				  s * (1 - 2 * (((i+1)/2) % 2)));
+			 SQRT2 * (c * MINUS1_POW((i+2)/2) +
+				  s * MINUS1_POW((i+1)/2));
 	       }
 	       for (; i + i + 1 < n; ++i) {
 		    int k;
@@ -153,13 +155,13 @@ static void apply_re11(plan *ego_, R *I, R *O)
 		    s = buf[k];
 		    
 		    O[os * i] =
-			 SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
-				  s * (1 - 2 * ((i/2) % 2)));
+			 SQRT2 * (c * MINUS1_POW((i+1)/2) -
+				  s * MINUS1_POW(i/2));
 		    O[os * (n - 1 - i)] =
-			 SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) -
-				  s * (1 - 2 * (((i+1)/2) % 2)));
+			 SQRT2 * (c * MINUS1_POW((i+2)/2) -
+				  s * MINUS1_POW((i+1)/2));
 	       }
-	       O[os * i] = SQRT2 * buf[0] * (1 - 2 * (((i+1)/2) % 2));
+	       O[os * i] = SQRT2 * buf[0] * MINUS1_POW((i+1)/2);
 	  }
      }
 
@@ -213,19 +215,19 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 		    
 		    if (i % 2) {
 			 O[os * i] =
-			      SQRT2 * (c * (1 - 2 * (((i+3)/2) % 2)) +
-				       s * (1 - 2 * (((i+2)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+3)/2) +
+				       s * MINUS1_POW((i+2)/2));
 			 O[os * (n - 1 - i)] =
-			      SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) +
-				       s * (1 - 2 * (((i+1)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+2)/2) +
+				       s * MINUS1_POW((i+1)/2));
 		    }
 		    else {
 			 O[os * i] =
-			      SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) +
-				       s * (1 - 2 * ((i/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+1)/2) +
+				       s * MINUS1_POW(i/2));
 			 O[os * (n - 1 - i)] =
-			      SQRT2 * (c * (1 - 2 * ((i/2) % 2)) +
-				       s * (1 - 2 * (((i+3)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW(i/2) +
+				       s * MINUS1_POW((i+3)/2));
 		    }
 	       }
 	       for (; i + i + 1 < n; ++i) {
@@ -238,22 +240,22 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 		    
 		    if (i % 2) {
 			 O[os * i] =
-			      SQRT2 * (c * (1 - 2 * (((i+3)/2) % 2)) -
-				       s * (1 - 2 * (((i+2)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+3)/2) -
+				       s * MINUS1_POW((i+2)/2));
 			 O[os * (n - 1 - i)] =
-			      SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) -
-				       s * (1 - 2 * (((i+1)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+2)/2) -
+				       s * MINUS1_POW((i+1)/2));
 		    }
 		    else {
 			 O[os * i] =
-			      SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
-				       s * (1 - 2 * ((i/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+1)/2) -
+				       s * MINUS1_POW(i/2));
 			 O[os * (n - 1 - i)] =
-			      SQRT2 * (c * (1 - 2 * ((i/2) % 2)) -
-				       s * (1 - 2 * (((i+3)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW(i/2) -
+				       s * MINUS1_POW((i+3)/2));
 		    }
 	       }
-	       O[os * i] = SQRT2 * buf[0] * (1 - 2 * (((i+1)/2) % 2));
+	       O[os * i] = SQRT2 * buf[0] * MINUS1_POW((i+1)/2);
 	  }
 	  else /* n2odd */ {
 	       for (i = 0; i + i + 1 <= n/2; ++i) {
@@ -266,19 +268,19 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 		    
 		    if (i % 2) {
 			 O[os * i] =
-			      SQRT2 * (c * (1 - 2 * (((i+3)/2) % 2)) +
-				       s * (1 - 2 * (((i+2)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+3)/2) +
+				       s * MINUS1_POW((i+2)/2));
 			 O[os * (n - 1 - i)] =
-			      SQRT2 * (c * (1 - 2 * ((i/2) % 2)) +
-				       s * (1 - 2 * (((i+3)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW(i/2) +
+				       s * MINUS1_POW((i+3)/2));
 		    }
 		    else {
 			 O[os * i] =
-			      SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) +
-				       s * (1 - 2 * ((i/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+1)/2) +
+				       s * MINUS1_POW(i/2));
 			 O[os * (n - 1 - i)] =
-			      SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) +
-				       s * (1 - 2 * (((i+1)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+2)/2) +
+				       s * MINUS1_POW((i+1)/2));
 		    }
 	       }
 	       for (; i + i + 1 < n; ++i) {
@@ -291,22 +293,22 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 		    
 		    if (i % 2) {
 			 O[os * i] =
-			      SQRT2 * (c * (1 - 2 * (((i+3)/2) % 2)) -
-				       s * (1 - 2 * (((i+2)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+3)/2) -
+				       s * MINUS1_POW((i+2)/2));
 			 O[os * (n - 1 - i)] =
-			      SQRT2 * (c * (1 - 2 * ((i/2) % 2)) -
-				       s * (1 - 2 * (((i+3)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW(i/2) -
+				       s * MINUS1_POW((i+3)/2));
 		    }
 		    else {
 			 O[os * i] =
-			      SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
-				       s * (1 - 2 * ((i/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+1)/2) -
+				       s * MINUS1_POW(i/2));
 			 O[os * (n - 1 - i)] =
-			      SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) -
-				       s * (1 - 2 * (((i+1)/2) % 2)));
+			      SQRT2 * (c * MINUS1_POW((i+2)/2) -
+				       s * MINUS1_POW((i+1)/2));
 		    }
 	       }
-	       O[os * i] = SQRT2 * buf[0] * (1 - 2 * (((i+3)/2) % 2));
+	       O[os * i] = SQRT2 * buf[0] * MINUS1_POW((i+3)/2);
 	  }
      }
 
