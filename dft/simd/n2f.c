@@ -29,12 +29,12 @@ static int okp(const kdft_desc *d,
 {
      return (RIGHT_CPU()
              && ALIGNEDA(ri)
-             && ALIGNED(ro)
+             && ALIGNEDA(ro)
 	     && !NO_SIMDP(plnr)
 	     && SIMD_STRIDE_OKA(is)
-	     && SIMD_STRIDE_OK(os)
 	     && SIMD_VSTRIDE_OKA(ivs)
-	     && SIMD_VSTRIDE_OK(ovs)
+	     && SIMD_VSTRIDE_OKA(os) /* os == 2 enforced by codelet */
+	     && SIMD_STRIDE_OKA(ovs)
              && ii == ri + 1
              && io == ro + 1
              && (vl % VL) == 0
