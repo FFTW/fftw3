@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.35 2003-05-13 20:58:07 stevenj Exp $ */
+/* $Id: cycle.h,v 1.36 2003-07-04 10:56:26 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -172,6 +172,7 @@ static __inline__ ticks getticks(void)
 INLINE_ELAPSED(__inline__)
 
 #define HAVE_TICK_COUNTER
+#define TIME_MIN 5000.0   /* unreliable pentium IV cycle counter */
 #endif
 
 /* Visual C++ -- thanks to Morten Nissov for his help with this */
@@ -198,6 +199,7 @@ static __inline double elapsed(ticks t1, ticks t0)
 }  
 
 #define HAVE_TICK_COUNTER
+#define TIME_MIN 5000.0   /* unreliable pentium IV cycle counter */
 #endif
 
 /*----------------------------------------------------------------*/
