@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.11 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: vrank2-transpose.c,v 1.12 2003-03-29 03:09:22 stevenj Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -67,7 +67,7 @@ static int applicable(const problem *p_)
                   && p->I == p->O
                   && p->sz->rnk == 0
                   && p->vecsz->rnk == 2
-                  && !X(dimcmp)(p->vecsz->dims + 0, p->vecsz->dims + 1)
+                  && X(transposedims)(p->vecsz->dims, p->vecsz->dims + 1, 1)
 	       );
      }
      return 0;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.19 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: vrank2-transpose.c,v 1.20 2003-03-29 03:09:22 stevenj Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -67,7 +67,7 @@ static int applicable(const problem *p_)
                   && p->ri == p->ro
                   && p->sz->rnk == 0
                   && p->vecsz->rnk == 2
-                  && !X(dimcmp)(d + 0, d + 1)
+                  && X(transposedims)(d + 0, d + 1, 1)
 	       );
      }
      return 0;
@@ -88,8 +88,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  X(dft_solve), X(null_awake), print, X(plan_null_destroy)
      };
 
-     UNUSED(plnr);
      UNUSED(ego);
+     UNUSED(plnr);
 
      if (!applicable(p_))
           return (plan *) 0;
