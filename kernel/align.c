@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.15 2003-03-27 20:49:53 athena Exp $ */
+/* $Id: align.c,v 1.16 2003-03-28 03:06:07 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -69,10 +69,13 @@ void X(most_unaligned_complex)(R **rp, R **ip, int s)
 	  *ip = p = X(most_unaligned)(i, i + s);
 	  *rp = r + (p - i);
      } else {
-	  /* split format.  Do nothing. */
-	  /* FIXME: set UNALIGNED?  For now, SIMD codelets 
-	     only work for |r - i| = 1, but this may
-	     change in the future */
+	  /* split format.  pick worst of r/i, adjust other accordingly. */
+	  *rp = X(most_unaligned)(r, r + s);
+	  *ip = X(most_unaligned)(i, i + s);
+	  if (*rp == X(most_unaligned)(*rp, *ip))
+               *ip = i + (*rp - r);
+	  else
+               *rp = r + (*ip - i);
      }
 }
 
