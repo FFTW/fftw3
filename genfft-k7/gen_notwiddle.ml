@@ -37,8 +37,7 @@ let no_twiddle_gen n dir =
   and (fnarg_output, fnarg_ostride) = (K7_MFunArg 2, K7_MFunArg 4) in
 
   let (input,input2), (output,output2) = makeNewVintreg2 (), makeNewVintreg2 ()
-  and (istride4p, istride4n) = makeNewVintreg2 ()
-  and (ostride4p, ostride4n) = makeNewVintreg2 () in
+  and (istride4p, ostride4p) = makeNewVintreg2 () in
   let int_initcode = 
 	loadfnargs [(fnarg_input, input); (fnarg_output, output)] @
         [
@@ -48,19 +47,15 @@ let no_twiddle_gen n dir =
 		      K7V_IntLoadEA(K7V_SID(istride4p,4,0), istride4p)]);
          (ostride4p, [K7V_IntLoadMem(fnarg_ostride,ostride4p);
 		      K7V_IntLoadEA(K7V_SID(ostride4p,4,0), ostride4p)]);
-         (istride4n, [K7V_IntCpyUnaryOp(K7_ICopy, istride4p, istride4n);
-		      K7V_IntUnaryOp(K7_INegate, istride4n)]);
-         (ostride4n, [K7V_IntCpyUnaryOp(K7_ICopy, ostride4p, ostride4n);
-		      K7V_IntUnaryOp(K7_INegate, ostride4n)]);
 	] in
   let initcode = map (fun (d,xs) -> AddIntOnDemandCode(d,xs)) int_initcode in
   let do_split = n >= 16 in
   let (in_unparser',out_unparser') =
     if do_split then
       let splitPt = 1 lsl (pred (msb n)) in
-        (([K7V_RefInts [istride4p; istride4n]],
+        (([K7V_RefInts [istride4p]],
           strided_complex_split2_unparser (input,input2,splitPt,istride4p)),
-	 ([K7V_RefInts [ostride4p; ostride4n]],
+	 ([K7V_RefInts [ostride4p]],
 	  strided_complex_split2_unparser (output,output2,splitPt,ostride4p)))
     else
       (([], strided_complex_unparser (input,istride4p)),
