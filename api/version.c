@@ -18,14 +18,15 @@
  *
  */
 
-/* $Id: version.c,v 1.6 2003-03-17 09:15:50 athena Exp $ */
+/* $Id: version.c,v 1.7 2005-02-07 18:42:45 athena Exp $ */
 
 #include "api.h"
+#include "version.h"
 
 const char X(cc)[] = FFTW_CC;
 const char X(codelet_optim)[] = CODELET_OPTIM;
 
-const char X(version)[] = PACKAGE "-" VERSION
+const char X(version)[] = PACKAGE "-" FFTW_PACKAGE_VERSION
 
 #if HAVE_SSE
    "-sse"

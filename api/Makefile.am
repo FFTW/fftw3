@@ -19,9 +19,11 @@ plan-guru-r2r.c plan-guru-split-dft-c2r.c plan-guru-split-dft-r2c.c	\
 plan-guru-split-dft.c plan-many-dft-c2r.c plan-many-dft-r2c.c		\
 plan-many-dft.c plan-many-r2r.c plan-r2r-1d.c plan-r2r-2d.c		\
 plan-r2r-3d.c plan-r2r.c print-plan.c rdft2-pad.c the-planner.c		\
-version.c api.h f77funcs.h fftw3.h x77.h
+version.c version.h api.h f77funcs.h fftw3.h fftw3.f x77.h
 
-BUILT_SOURCES = fftw3.f
+BUILT_SOURCES = fftw3.f version.h
+
+if MAINTAINER_MODE
 
 # convert constants to F77 PARAMETER statements
 fftw3.f: fftw3.h
@@ -29,3 +31,8 @@ fftw3.f: fftw3.h
 	perl -pe 's/([A-Z0-9_]+)=([0-9]+)/\n      INTEGER \1\n      PARAMETER (\1=\2)\n/g' $< |egrep 'PARAMETER|INTEGER' > $@
 	perl -pe 's/#define +([A-Z0-9_]+) +\(([+-]?[0-9]+)U?\)/\n      INTEGER \1\n      PARAMETER (\1=\2)\n/g' $< |egrep 'PARAMETER|INTEGER' >> $@
 	perl -pe 'if (/#define +([A-Z0-9_]+) +\(([0-9]+)U? *<< *([0-9]+)\)/) { print "\n      INTEGER $$1\n      PARAMETER ($$1=",$$2 << $$3,")\n"; }' $< |egrep 'PARAMETER|INTEGER' >> $@
+
+version.h: Makefile
+	echo "#define FFTW_PACKAGE_VERSION \"$(PACKAGE_VERSION)\"" >$@
+
+endif # MAINTAINER_MODE
