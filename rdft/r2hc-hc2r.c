@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: r2hc-hc2r.c,v 1.3 2002-07-23 18:51:01 stevenj Exp $ */
+/* $Id: r2hc-hc2r.c,v 1.4 2002-07-23 18:52:04 stevenj Exp $ */
 
 /* Solve an HC2R problem by using an R2HC problem of the same size.
    The two problems can be expressed in terms of one another by
@@ -164,6 +164,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->super.super.ops = cld->ops;
      pln->super.super.ops.other += 8 * ((pln->n - 1)/2);
      pln->super.super.ops.add += 4 * ((pln->n - 1)/2);
+#if !DESTROY_INPUT
+     pln->super.super.ops.other += 2 + (pln->n % 2 ? 0 : 2);
+#endif
 
      return &(pln->super.super);
 }
