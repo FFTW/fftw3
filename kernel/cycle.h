@@ -18,9 +18,35 @@
  *
  */
 
-/* $Id: cycle.h,v 1.21 2003-03-31 20:13:21 athena Exp $ */
+/* $Id: cycle.h,v 1.22 2003-04-01 06:06:53 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
+
+/* This file uses macros like HAVE_GETHRTIME which are assumed to be
+   defined according to whether the corresponding function/type/header
+   is available on your system.  The necessary macros are most
+   conveniently defined if you are using GNU autoconf, via the tests:
+   
+   dnl ---------------------------------------------------------------------
+
+   AC_HEADER_TIME
+
+   AC_CHECK_TYPE([hrtime_t],[AC_DEFINE(HAVE_HRTIME_T, 1, [Define to 1 if hrtime_t is defined in <sys/time.h>])],,[#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif])
+
+   AC_CHECK_FUNCS([gethrtime read_real_time time_base_to_time clock_gettime])
+
+   dnl Cray UNICOS _rtc() (real-time clock) intrinsic
+   AC_MSG_CHECKING([for _rtc intrinsic])
+   rtc_ok=yes
+   AC_TRY_LINK([#ifdef HAVE_INTRINSICS_H
+#include <intrinsics.h>
+#endif], [_rtc()], [AC_DEFINE(HAVE__RTC,1,[Define if you have the UNICOS _rtc() intrinsic.])], [rtc_ok=no])
+   AC_MSG_RESULT($rtc_ok)
+
+   dnl ---------------------------------------------------------------------
+*/
 
 /*----------------------------------------------------------------*/
 #if defined(HAVE_GETHRTIME) && defined(HAVE_HRTIME_T) && !defined(HAVE_TICK_COUNTER)
