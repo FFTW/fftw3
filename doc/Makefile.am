@@ -21,7 +21,7 @@ equation-redft00.gif equation-redft01.gif equation-redft10.gif		\
 equation-redft11.gif equation-rodft00.gif equation-rodft01.gif		\
 equation-rodft10.gif equation-rodft11.gif
 
-EXTRA_DIST = fftw.pdf html rfftwnd.fig
+EXTRA_DIST = fftw3.pdf html rfftwnd.fig
 
 html: $(fftw3_TEXINFOS) $(EQN_IMAGES) rfftwnd.png
 	$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
