@@ -19,7 +19,6 @@
  */
 
 #include "api.h"
-#include "dft.h"
 
 X(plan) X(plan_dft)(unsigned int rank, const unsigned int *n,
 		    C *in, const unsigned int *inembed,
