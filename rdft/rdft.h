@@ -76,7 +76,6 @@ solver *X(mksolver_rdft_hc2r_direct)(khc2r k, const khc2r_desc *desc);
 solver *X(mksolver_rdft_r2r_direct)(kr2r k, const kr2r_desc *desc);
 
 void X(rdft_rank0_register)(planner *p);
-void X(rdft_rank0_vrank2_register)(planner *p);
 void X(rdft_vrank3_transpose_register)(planner *p);
 void X(rdft_rank_geq2_register)(planner *p);
 void X(rdft_indirect_register)(planner *p);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.12 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: rank0.c,v 1.13 2005-02-20 23:22:15 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -28,131 +28,203 @@
 #include <string.h>		/* for memcpy() */
 #endif
 
-
-typedef struct {
-     rdftapply apply;
-     int (*applicable)(const problem_rdft *p);
-     const char *nam;
-} rnk0adt;
-
 typedef struct {
      solver super;
-     const rnk0adt *adt;
+     rdftapply apply;
+     const char *nam;
+     int minrnk;
+     int maxrnk;
 } S;
+
+#define MAXRNK 2
 
 typedef struct {
      plan_rdft super;
      int vl;
-     int ivs, ovs;
-     const S *slv;
+     int rnk;
+     iodim d[MAXRNK];
+     const char *nam;
 } P;
 
-/* generic applicability function */
-static int applicable(const solver *ego_, const problem *p_)
+/* copy up to MAXRNK dimensions from problem into plan.  If a
+   contiguous dimension exists, save its length in pln->vl */
+static int fill_iodim(P *pln, const problem_rdft *p)
+{
+     int i;
+     const tensor *vecsz = p->vecsz;
+
+     pln->vl = 1;
+     pln->rnk = 0;
+     for (i = 0; i < vecsz->rnk; ++i) {
+	  /* extract contiguous dimensions */
+	  if (pln->vl == 1 &&
+	      vecsz->dims[i].is == 1 && vecsz->dims[i].os == 1) 
+	       pln->vl = vecsz->dims[i].n;
+	  else if (pln->rnk == MAXRNK) 
+	       return 0;
+	  else 
+	       pln->d[pln->rnk++] = vecsz->dims[i];
+     }
+     return 1;
+}
+
+/* execution routines */
+#define CUTOFF 4
+
+static void cpy1d(R *I, R *O, int n0, int is0, int os0, int vl)
+{
+     int i0, v;
+     switch (vl) {
+	 case 1:
+	      for (; n0 > 0; --n0, I += is0, O += os0) 
+		   *O = *I;
+	      break;
+	 case 2:
+	      for (; n0 > 0; --n0, I += is0, O += os0) {
+		   R x0 = I[0];
+		   R x1 = I[1];
+		   O[0] = x0;
+		   O[1] = x1;
+	      }
+	      break;
+	 default:
+	      for (i0 = 0; i0 < n0; ++i0) 
+		   for (v = 0; v < vl; ++v) {
+			R x0 = I[i0 * is0 + v];
+			O[i0 * os0 + v] = x0;
+		   }
+	      break;
+     }
+}
+
+static void cpy2d(R *I, R *O,
+		  int n0, int is0, int os0,
+		  int n1, int is1, int os1,
+		  int vl)
+{
+     int i0, i1, v;
+     switch (vl) {
+	 case 1:
+	      for (i1 = 0; i1 < n1; ++i1)
+		   for (i0 = 0; i0 < n0; ++i0) {
+			R x0 = I[i0 * is0 + i1 * is1];
+			O[i0 * os0 + i1 * os1] = x0;
+		   }
+	      break;
+	 case 2:
+	      for (i1 = 0; i1 < n1; ++i1)
+		   for (i0 = 0; i0 < n0; ++i0) {
+			R x0 = I[i0 * is0 + i1 * is1];
+			R x1 = I[i0 * is0 + i1 * is1 + 1];
+			O[i0 * os0 + i1 * os1] = x0;
+			O[i0 * os0 + i1 * os1 + 1] = x1;
+		   }
+	      break;
+	 default:
+	      for (i1 = 0; i1 < n1; ++i1)
+		   for (i0 = 0; i0 < n0; ++i0) 
+			for (v = 0; v < vl; ++v) {
+			     R x0 = I[i0 * is0 + i1 * is1 + v];
+			     O[i0 * os0 + i1 * os1 + v] = x0;
+			}
+	      break;
+     }
+}
+
+static void cpy2d_rec(R *I, R *O,
+		      int n0, int is0, int os0,
+		      int n1, int is1, int os1,
+		      int vl)
+{
+ tail:
+     if (n0 >= n1 && n0 > CUTOFF) {
+	  int nm = n0 / 2;
+	  cpy2d_rec(I, O, nm, is0, os0, n1, is1, os1, vl);
+	  I += nm * is0; O += nm * os0; n0 -= nm; goto tail;
+     } else if (/* n1 >= n0 && */ n1 > CUTOFF) {
+	  int nm = n1 / 2;
+	  cpy2d_rec(I, O, n0, is0, os0, nm, is1, os1, vl);
+	  I += nm * is1; O += nm * os1; n1 -= nm; goto tail;
+     } else 
+	  cpy2d(I, O, n0, is0, os0, n1, is1, os1, vl);
+}
+
+static void apply_iter(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     int vl = ego->vl;
+
+     switch (ego->rnk) {
+	 case 0: 
+	      for (; vl > 0; --vl, ++I, ++O) 
+		   *O = *I;
+	      break;
+	 case 1:
+	      cpy1d(I, O, 
+		    ego->d[0].n, ego->d[0].is, ego->d[0].os, 
+		    vl);
+	      break;
+	 case 2:
+	      cpy2d(I, O, 
+		    ego->d[0].n, ego->d[0].is, ego->d[0].os,
+		    ego->d[1].n, ego->d[1].is, ego->d[1].os,
+		    vl);
+	      break;
+	 default:
+	      A(0 /* can't happen */); 
+     }
+}
+
+static void apply_rec(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     int vl = ego->vl;
+
+     A(ego->rnk == 2);
+     cpy2d_rec(I, O, 
+	       ego->d[0].n, ego->d[0].is, ego->d[0].os,
+	       ego->d[1].n, ego->d[1].is, ego->d[1].os,
+	       vl);
+}
+
+static void apply_memcpy(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     int vl = ego->vl;
+
+     A(ego->rnk == 0);
+     memcpy(O, I, vl * sizeof(R));
+}
+
+static int applicable(const S *ego, const problem *p_)
 {
      if (RDFTP(p_)) {
-          const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
+	  P pln;
           return (1
 		  && p->I != p->O
                   && p->sz->rnk == 0
-                  && ego->adt->applicable(p)
+		  && FINITE_RNK(p->vecsz->rnk)
+		  && fill_iodim(&pln, p)
+		  && pln.rnk >= ego->minrnk
+		  && pln.rnk <= ego->maxrnk
 	       );
      }
      return 0;
 }
 
-/*-----------------------------------------------------------------------*/
-/* rank-0 rdft, vl == 1: just a copy */
-static void apply_1(const plan *ego_, R *I, R *O)
-{
-     UNUSED(ego_);
-     *O = *I;
-}
-
-static int applicable_1(const problem_rdft *p)
-{
-     return (p->vecsz->rnk == 0);
-}
-
-static const rnk0adt adt_cpy1 =
-{
-     apply_1, applicable_1, "rdft-rank0-cpy1"
-};
-
-/*-----------------------------------------------------------------------*/
-/* rank-0 rdft, vl > 1: just a copy loop (unroll 4) */
-static void apply_vec(const plan *ego_, R *I, R *O)
-{
-     const P *ego = (const P *) ego_;
-     int i, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
-
-     for (i = 4; i <= vl; i += 4) {
-          R r0, r1, r2, r3;
-          r0 = *I; I += ivs;
-          r1 = *I; I += ivs;
-          r2 = *I; I += ivs;
-          r3 = *I; I += ivs;
-          *O = r0; O += ovs;
-          *O = r1; O += ovs;
-          *O = r2; O += ovs;
-	  *O = r3; O += ovs;
-     }
-     for (; i < vl + 4; ++i) {
-          R r0;
-          r0 = *I; I += ivs;
-          *O = r0; O += ovs;
-     }
-}
-
-static int applicable_vec(const problem_rdft *p)
-{
-     return (p->vecsz->rnk == 1 && p->O != p->I);
-}
-
-static const rnk0adt adt_vec =
-{
-     apply_vec, applicable_vec, "rdft-rank0-vec"
-};
-
-/*-----------------------------------------------------------------------*/
-/* rank-0 rdft, vl > 1, [io]vs == 1, using memcpy */
-static void apply_io1(const plan *ego_, R *I, R *O)
-{
-     const P *ego = (const P *) ego_;
-     int vl = ego->vl;
-     memcpy(O, I, vl * sizeof(R));
-}
-
-static int applicable_io1(const problem_rdft *p)
-{
-     return (1
-             && applicable_vec(p)
-             && p->vecsz->dims[0].is == 1
-             && p->vecsz->dims[0].os == 1
-	  );
-}
-
-static const rnk0adt adt_io1 =
-{
-     apply_io1, applicable_io1, "rdft-rank0-io1-memcpy"
-};
-
-/*-----------------------------------------------------------------------*/
-/* generic stuff: */
-
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s%v)", ego->slv->adt->nam, ego->vl);
+     p->print(p, "(%s/%d%v)", ego->nam, ego->rnk, ego->vl);
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
-     const S *ego = (const S *) ego_;
      const problem_rdft *p;
+     const S *ego = (const S *) ego_;
      P *pln;
+     int retval;
 
      static const plan_adt padt = {
 	  X(rdft_solve), X(null_awake), print, X(plan_null_destroy)
@@ -160,35 +232,43 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      UNUSED(plnr);
 
-     if (!applicable(ego_, p_))
+     if (!applicable(ego, p_))
           return (plan *) 0;
 
      p = (const problem_rdft *) p_;
-     pln = MKPLAN_RDFT(P, &padt, ego->adt->apply);
+     pln = MKPLAN_RDFT(P, &padt, ego->apply);
 
-     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
-     pln->slv = ego;
+     retval = fill_iodim(pln, p);
+     A(retval);
+     pln->nam = ego->nam;
 
      /* vl loads, vl stores */
-     X(ops_other)(2 * pln->vl, &pln->super.super.ops);
+     X(ops_other)(2 * X(tensor_sz)(p->vecsz), &pln->super.super.ops);
      return &(pln->super.super);
 }
 
-static solver *mksolver(const rnk0adt *adt)
-{
-     static const solver_adt sadt = { mkplan };
-     S *slv = MKSOLVER(S, &sadt);
-     slv->adt = adt;
-     return &(slv->super);
-}
 
 void X(rdft_rank0_register)(planner *p)
 {
      unsigned i;
-     static const rnk0adt *const adts[] = {
-	  &adt_cpy1, &adt_vec, &adt_io1
+     static struct {
+	  rdftapply apply;
+	  int minrnk;
+	  int maxrnk;
+	  const char *nam;
+     } tab[] = {
+	  { apply_iter,     0, 2, "rdft-rank0" },
+	  { apply_rec ,     2, 2, "rdft-rank0-rec" },
+	  { apply_memcpy ,  0, 0, "rdft-rank0-memcpy" },
      };
 
-     for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
-          REGISTER_SOLVER(p, mksolver(adts[i]));
+     for (i = 0; i < sizeof(tab) / sizeof(tab[0]); ++i) {
+	  static const solver_adt sadt = { mkplan };
+	  S *slv = MKSOLVER(S, &sadt);
+	  slv->apply = tab[i].apply;
+	  slv->minrnk = tab[i].minrnk;
+	  slv->maxrnk = tab[i].maxrnk;
+	  slv->nam = tab[i].nam;
+	  REGISTER_SOLVER(p, &(slv->super));
+     }
 }
