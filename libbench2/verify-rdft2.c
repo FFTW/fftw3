@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft2.c,v 1.7 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: verify-rdft2.c,v 1.8 2003-11-15 00:14:40 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -182,6 +182,7 @@ static void rdft2_apply(dofft_closure *k_,
 	  int N, vN, i;
 	  cpyr(&c_re(in[0]), pckdsz, ri, totalsz);
 	  doit(1, p);
+	  cpyr(ri, totalsz, &c_re(in[0]), pckdsz);
 	  cpyhc2(ro, io, probsz2, totalsz2, totalscale,
 		 &c_re(out[0]), &c_im(out[0]), pckdsz2);
 	  N = tensor_sz(p->sz);
@@ -193,6 +194,8 @@ static void rdft2_apply(dofft_closure *k_,
 	  icpyhc2(ri, ii, probsz2, totalsz2, totalscale,
 		  &c_re(in[0]), &c_im(in[0]), pckdsz2);
 	  doit(1, p);
+	  cpyhc2(ri, ii, probsz2, totalsz2, totalscale,
+		 &c_re(in[0]), &c_im(in[0]), pckdsz2);
 	  mkreal(out, tensor_sz(pckdsz));
 	  cpyr(ro, totalsz, &c_re(out[0]), pckdsz);
      }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.13 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: verify-dft.c,v 1.14 2003-11-15 00:14:40 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -84,6 +84,8 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
      cpy(&c_re(in[0]), &c_im(in[0]), pckdsz, 1,
 	    ri, ii, totalsz, totalscale);
      doit(1, p);
+     cpy(ri, ii, totalsz, totalscale,
+	 &c_re(in[0]), &c_im(in[0]), pckdsz, 1);
      cpy(ro, io, totalsz, totalscale,
 	 &c_re(out[0]), &c_im(out[0]), pckdsz, 1);
 

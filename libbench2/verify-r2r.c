@@ -831,6 +831,8 @@ static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 
      switch (p->k[0]) {
 	 case R2R_R2HC:
+	      cpyr1(n, ri, is, &c_re(in[0]), 2, 1.0);
+
 	      cpyr1(n/2 + 1, ro, os, &c_re(out[0]), 2, 1.0);
 	      cpyr1((n+1)/2 - 1, ro + os*(n-1), -os, &c_im(out[1]), 2, 1.0);
 	      c_im(out[0]) = 0.0;
@@ -839,38 +841,49 @@ static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 	      mkhermitian1(out, n);
 	      break;
 	 case R2R_HC2R:
+	      cpyr1(n/2 + 1, ri, is, &c_re(in[0]), 2, 1.0);
+	      cpyr1((n+1)/2 - 1, ri + is*(n-1), -is, &c_im(in[1]), 2, 1.0);
+
 	      cpyr1(n, ro, os, &c_re(out[0]), 2, 1.0);
 	      mkreal(out, n);
 	      break;
 	 case R2R_REDFT00:
+	      cpyr1(n, ri, is, &c_re(in[0]), 2, 1.0);
 	      cpyr1(n, ro, os, &c_re(out[0]), 2, 1.0);
 	      mkre00(out, k->n0);
 	      break;
 	 case R2R_RODFT00:
+	      cpyr1(n, ri, is, &c_im(in[1]), 2, -1.0);
 	      cpyr1(n, ro, os, &c_im(out[1]), 2, -1.0);
 	      mkio00(out, k->n0);
 	      break;
 	 case R2R_REDFT01:
+	      cpyr1(n, ri, is, &c_re(in[0]), 2, 1.0);
 	      cpyr1(n, ro, os, &c_re(out[1]), 4, 2.0);
 	      mkre10(out, k->n0);
 	      break;
 	 case R2R_REDFT10:
+	      cpyr1(n, ri, is, &c_re(in[1]), 4, 2.0);
 	      cpyr1(n, ro, os, &c_re(out[0]), 2, 1.0);
 	      mkre01(out, k->n0);
 	      break;
 	 case R2R_RODFT01:
+	      cpyr1(n, ri, is, &c_re(in[1]), 2, 1.0);
 	      cpyr1(n, ro, os, &c_im(out[1]), 4, -2.0);
 	      mkio10(out, k->n0);
 	      break;
 	 case R2R_RODFT10:
+	      cpyr1(n, ri, is, &c_im(in[1]), 4, -2.0);
 	      cpyr1(n, ro, os, &c_re(out[1]), 2, 1.0);
 	      mkro01(out, k->n0);
 	      break;
 	 case R2R_REDFT11:
+	      cpyr1(n, ri, is, &c_re(in[1]), 4, 2.0);
 	      cpyr1(n, ro, os, &c_re(out[1]), 4, 2.0);
 	      mkre11(out, k->n0);
 	      break;
 	 case R2R_RODFT11:
+	      cpyr1(n, ri, is, &c_im(in[1]), 4, -2.0);
 	      cpyr1(n, ro, os, &c_im(out[1]), 4, -2.0);
 	      mkio11(out, k->n0);
 	      break;
