@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.66 2002-09-09 21:03:32 athena Exp $ */
+/* $Id: planner.c,v 1.67 2002-09-09 21:10:45 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -243,22 +243,12 @@ static plan *slv_mkplan(planner *ego, problem *p, solver *s)
 static plan *mkplan(planner *ego, problem *p)
 {
      solutions *sol;
-     plan *pln = 0;
+     plan *pln;
      slvdesc *sp = 0;
 
-     if ((sol = lookup(ego, p))) {
-	  if ((sp = sol->sp)) {
-	       /* call solver to create plan */
-	       ego->inferior_mkplan(ego, p, &pln, &sp);
-	  }
-     }
-
-     if (!pln) {
-	  /* Lookup failed. Run inferior planner */
-	  ++ego->nprob;
-	  ego->inferior_mkplan(ego, p, &pln, &sp);
-     }
-
+     ++ego->nprob;
+     sp = (sol = lookup(ego, p)) ? sol->sp : 0;
+     ego->inferior_mkplan(ego, p, &pln, &sp);
      insert(ego, ego->flags, ego->nthr, p, sp);
 
      if (pln)
