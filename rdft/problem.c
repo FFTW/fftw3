@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.32 2003-01-08 21:46:24 stevenj Exp $ */
+/* $Id: problem.c,v 1.33 2003-01-08 21:53:16 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -89,7 +89,7 @@ const char *X(rdft_kind_str)(rdft_kind kind)
 	  "redft00", "redft01", "redft10", "redft11",
 	  "rodft00", "rodft01", "rodft10", "rodft11"
      };
-     A(kind >= 0 && kind < sizeof(kstr) / KSTR_LEN);
+     A(/* kind >= 0 && */ kind < sizeof(kstr) / KSTR_LEN);
      return kstr[kind];
 }
 
