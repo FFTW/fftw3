@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.22 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: dft-r2hc.c,v 1.23 2003-03-29 03:06:14 stevenj Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -86,13 +86,16 @@ static void print(const plan *ego_, printer *p)
      p->print(p, "(dft-r2hc-%d%(%p%))", ego->n, ego->cld);
 }
 
+#define ALLOW_RANK0 0 /* disable for now, subject to testing */
+
 static int applicable0(const problem *p_)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
-          return (1
-	       && p->sz->rnk == 1
-	       && p->vecsz->rnk == 0
+          return ((p->sz->rnk == 1 && p->vecsz->rnk == 0)
+#if ALLOW_RANK0
+		  || p->sz->rnk == 0
+#endif
 	       );
      }
 
@@ -112,7 +115,8 @@ static int applicable(const problem *p_, const planner *plnr)
 	  const problem_dft *p = (const problem_dft *) p_;
 	  if (NO_UGLYP(plnr) && DFT_R2HC_ICKYP(plnr)) return 0;
 
-	  if (split(p->ri, p->ii, p->sz->dims[0].n, p->sz->dims[0].is) &&
+	  if (p->sz->rnk == 1 &&
+	      split(p->ri, p->ii, p->sz->dims[0].n, p->sz->dims[0].is) &&
 	      split(p->ro, p->io, p->sz->dims[0].n, p->sz->dims[0].os))
 	       return 1;
 
@@ -148,8 +152,18 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_DFT(P, &padt, apply);
 
-     pln->n = p->sz->dims[0].n;
-     pln->os = p->sz->dims[0].os;
+#if ALLOW_RANK0
+     if (p->sz->rnk == 0) {
+	  pln->n = 1;
+	  pln->os = 0;
+     }
+     else
+#endif
+     {
+	  pln->n = p->sz->dims[0].n;
+	  pln->os = p->sz->dims[0].os;
+     }
+
      pln->cld = cld;
      
      pln->super.super.ops = cld->ops;
