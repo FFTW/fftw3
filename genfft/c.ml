@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.16 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: c.ml,v 1.17 2003-03-26 19:28:41 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -429,4 +429,7 @@ let imag_of s = "c_im(" ^ s ^ ")"
 
 let flops_of f =
   let (add, mul, fma) = count_flops f in
-  Printf.sprintf "{ %d, %d, %d, 0 }" add mul fma
+  if !Simdmagic.simd_mode then
+    Printf.sprintf "{ %d / VL, %d / VL, %d / VL, 0 }" add mul fma
+  else
+    Printf.sprintf "{ %d, %d, %d, 0 }" add mul fma
