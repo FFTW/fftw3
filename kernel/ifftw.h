@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.121 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.122 2002-09-16 02:55:41 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -213,8 +213,10 @@ typedef unsigned int md5uint;
 typedef unsigned long md5uint; /* at least 32 bits as per C standard */
 #endif
 
+typedef md5uint md5sig[4];
+
 typedef struct {
-     md5uint s[4]; /* state and signature */
+     md5sig s; /* state and signature */
 
      /* fields not meant to be used outside md5.c: */
      unsigned char c[64]; /* stuff not yet processed */

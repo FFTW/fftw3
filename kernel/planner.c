@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.87 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: planner.c,v 1.88 2002-09-16 02:55:41 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -101,13 +101,13 @@ static short slookup(planner *ego, char *nam, int id)
 */
 
 /* first hash function */
-static uint h1(planner *ego, md5uint *s)
+static uint h1(planner *ego, const md5sig s)
 {
      return s[0] % ego->hashsiz;
 }
 
 /* second hash function (for double hashing) */
-static uint h2(planner *ego, md5uint *s)
+static uint h2(planner *ego, const md5sig s)
 {
      return 1 + s[1] % (ego->hashsiz - 1);
 }
@@ -122,12 +122,12 @@ static void md5hash(md5 *m, const problem *p, const planner *plnr)
      X(md5end)(m);
 }
 
-static int md5eq(md5uint *a, md5uint *b)
+static int md5eq(const md5sig a, const md5sig b)
 {
      return a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3];
 }
 
-static void sigcpy(md5uint *a, md5uint *b)
+static void sigcpy(const md5sig a, md5sig b)
 {
      b[0] = a[0]; b[1] = a[1]; b[2] = a[2]; b[3] = a[3];
 }
@@ -142,12 +142,12 @@ static void sigcpy(md5uint *a, md5uint *b)
    unde mundus iudicetur
 */
 struct solution_s {
-     md5uint s[4];
+     md5sig s;
      unsigned short flags;
      short slvndx;
 };
 
-static solution *hlookup(planner *ego, md5uint *s, unsigned short flags)
+static solution *hlookup(planner *ego, const md5sig s, unsigned short flags)
 {
      uint g, h = h1(ego, s), d = h2(ego, s);
 
@@ -169,7 +169,7 @@ static solution *hlookup(planner *ego, md5uint *s, unsigned short flags)
 }
 
 
-static void hinsert0(planner *ego, md5uint *s, unsigned short flags,
+static void hinsert0(planner *ego, const md5sig s, unsigned short flags,
 		     short slvndx, solution *l)
 {
      ++ego->insert;
@@ -243,7 +243,7 @@ static void hshrink(planner *ego)
      rehash(ego, nextsz(nelem));
 }
 
-static void hinsert(planner *ego, md5uint *s, 
+static void hinsert(planner *ego, const md5sig s, 
 		    unsigned short flags, short slvndx)
 {
      solution *l;
