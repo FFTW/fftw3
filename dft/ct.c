@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.33 2003-05-15 23:09:07 athena Exp $ */
+/* $Id: ct.c,v 1.34 2003-05-16 13:51:05 athena Exp $ */
 
 #include "dft.h"
 
@@ -26,6 +26,7 @@ typedef struct {
      solver super;
      int r;
      int dec;
+     const int *buddies;
 } S;
 
 typedef struct {
@@ -84,10 +85,26 @@ static void print(const plan *ego_, printer *p)
 }
 
 #define divides(a, b) (((int)(b) % (int)(a)) == 0)
+static int choose_radix(const S *ego, int n, int *rp)
+{
+     int r = ego->r;
+     const int *p;
+     if (r == 0) {
+	  r = X(first_divisor)(n);
+	  for (p = ego->buddies; *p; ++p)
+	       if (*p == r) return 0; /* ignore if buddy exists with
+					 the same radix */
+     }
+     *rp = r;
+     return 1;
+}
+
 static int applicable0(const S *ego, const problem *p_, planner *plnr)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
+	  int r;
+
           return (1
                   && p->sz->rnk == 1
                   && p->vecsz->rnk <= 1 
@@ -96,9 +113,10 @@ static int applicable0(const S *ego, const problem *p_, planner *plnr)
                   && (ego->dec == DECDIT || 
 		      p->ri == p->ro || 
 		      DESTROY_INPUTP(plnr))
-
-		  && p->sz->dims[0].n > ego->r
-                  && divides(ego->r, p->sz->dims[0].n));
+		  
+		  && choose_radix(ego, p->sz->dims[0].n, &r)
+		  && p->sz->dims[0].n > r
+                  && divides(r, p->sz->dims[0].n));
      }
      return 0;
 }
@@ -140,7 +158,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_dft *) p_;
      d = p->sz->dims;
      n = d[0].n;
-     r = ego->r;
+     choose_radix(ego, n, &r);
      m = n / r;
 
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
@@ -209,28 +227,31 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(int r, int dec)
+static solver *mksolver(int r, const int *buddies, int dec)
 {
      static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->r = r;
      slv->dec = dec;
+     slv->buddies = buddies;
      return &(slv->super);
 }
 
 void X(dft_ct_register)(planner *p)
 {
-     unsigned i;
-     /* FIXME: add general radices */
+     int *q;
      static const int r[] = {
-	  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64
-
-	  ,17,19,23,29,31,37,41,43,53,73,79,128,256
+	  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64, 
+	  0
      };
 
-     for (i = 0; i < sizeof(r) / sizeof(r[0]); ++i) {
-          REGISTER_SOLVER(p, mksolver(r[i], DECDIT));
-          REGISTER_SOLVER(p, mksolver(r[i], DECDIF));
+     /* r = 0 : choose smallest prime factor */
+     REGISTER_SOLVER(p, mksolver(0, r, DECDIT));
+     REGISTER_SOLVER(p, mksolver(0, r, DECDIF));
+
+     for (q = r; *q; ++q) {
+          REGISTER_SOLVER(p, mksolver(*q, r, DECDIT));
+          REGISTER_SOLVER(p, mksolver(*q, r, DECDIF));
      }
 }
 
