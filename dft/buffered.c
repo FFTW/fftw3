@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.12 2002-06-11 15:45:41 athena Exp $ */
+/* $Id: buffered.c,v 1.13 2002-06-12 23:07:48 athena Exp $ */
 
 #include "dft.h"
 
@@ -156,10 +156,6 @@ static int applicable(const problem *p_, const S *ego)
           if (1
 	      && p->vecsz.rnk <= 1
 	      && p->sz.rnk == 1
-
-	      /*  should decide whether to be BAD or UGLY when problem
-		  is too big. */
-	      && !toobig(d[0].n, ego)
 	       ) {
 
                /*
@@ -199,6 +195,10 @@ static int score(const solver *ego_, const problem *p_)
      p = (const problem_dft *) p_;
      if (p->ri != p->ro)
 	  return UGLY;
+
+     if (toobig(p->sz.dims[0].n, ego))
+	 return UGLY;
+
      return GOOD;
 }
 

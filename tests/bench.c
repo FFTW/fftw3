@@ -101,8 +101,8 @@ void setup(struct problem *p)
 	  pln->adt->print(pln, pr);
 	  FFTW(printer_destroy) (pr);
 	  printf("\n");
+	  printf("nprob %u  nplan %u\n", plnr->nprob, plnr->nplan);
      }
-     printf("nprob %u  nplan %u\n", plnr->nprob, plnr->nplan);
      pln->adt->awake(pln, 1);
 }
 
