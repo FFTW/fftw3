@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.3 2002-06-03 12:09:05 athena Exp $ */
+/* $Id: problem.c,v 1.4 2002-06-04 21:49:39 athena Exp $ */
 
 #include "dft.h"
 
@@ -53,15 +53,17 @@ static int equal(const problem *ego_, const problem *problem_)
 static void zerotens(tensor sz, R *ri, R *ii)
 {
      if (sz.rnk == 0)
-	  ri[0] = ii[0] = 0;
+	  ri[0] = ii[0] = 0.0;
      else if (sz.rnk == 1) {
-	  /* this case is redundant */
-	  int i, n = sz.dims[0].n, is = sz.dims[0].is;
+	  /* this case is redundant but faster */
+	  uint i, n = sz.dims[0].n;
+	  int is = sz.dims[0].is;
 
 	  for (i = 0; i < n; ++i)
 	       ri[i * is] = ii[i * is] = 0.0;
      } else if (sz.rnk > 0) {
-	  int i, n = sz.dims[0].n, is = sz.dims[0].is;
+	  uint i, n = sz.dims[0].n;
+	  int is = sz.dims[0].is;
 
 	  sz.dims++;
 	  sz.rnk--;

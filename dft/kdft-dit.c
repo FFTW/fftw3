@@ -18,24 +18,11 @@
  *
  */
 
-/* $Id: flops.c,v 1.2 2002-06-04 21:49:39 athena Exp $ */
+/* $Id: kdft-dit.c,v 1.1 2002-06-04 21:49:39 athena Exp $ */
 
-#include "ifftw.h"
+#include "dft.h"
 
-flopcnt fftw_flops_add(flopcnt a, flopcnt b)
+void fftw_kdft_dit_register(planner *p, kdft_dit codelet, const ct_desc *desc)
 {
-     a.add += b.add;
-     a.mul += b.mul;
-     a.fma += b.fma;
-     return a;
+     /* TODO */
 }
-
-flopcnt fftw_flops_mul(uint a, flopcnt b)
-{
-     b.add *= a;
-     b.mul *= a;
-     b.fma *= a;
-     return b;
-}
-
-const flopcnt fftw_flops_zero = { 0, 0, 0 };

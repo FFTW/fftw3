@@ -78,6 +78,7 @@ void doit(int iter, struct problem *p)
      plan *PLN = pln;
      fftw_problem *PRBLM = prblm;
 
+     UNUSED(p);
      for (i = 0; i < iter; ++i) {
 	  PLN->adt->solve(PLN, PRBLM);
      }

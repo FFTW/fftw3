@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.1.1.1 2002-06-02 18:42:29 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.2 2002-06-04 21:49:39 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.1.1.1 2002-06-02 18:42:29 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.2 2002-06-04 21:49:39 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -92,9 +92,9 @@ let generate n =
       "(const " ^ C.realtype ^ " *ri, const " ^ C.realtype ^ " *ii, "
       ^ C.realtype ^ " *ro, " ^ C.realtype ^ " *io,\n" ^ 
       C.stridetype ^ " is, " ^  C.stridetype ^ " os, " ^ 
-      " int v, int ivs, int ovs)\n" ^
+      " uint v, int ivs, int ovs)\n" ^
     "{\n" ^
-    "int i;\n" ^
+    "uint i;\n" ^
     "for (i = 0; i < v; ++i) {\n" ^
     name0 ^ "(ri + i * ivs, ii + i * ivs, ro + i * ovs, io + i * ovs" ^
        (if stride_fixed !uistride then "" else ", is") ^ 

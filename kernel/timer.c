@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.2 2002-06-03 13:18:46 athena Exp $ */
+/* $Id: timer.c,v 1.3 2002-06-04 21:49:39 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdio.h>
@@ -258,7 +258,7 @@ double fftw_measure_execution_time(plan *pln, const problem *p, int secondsp)
      p->adt->zero(p);
 
  start_over:
-     for (iter = 1; ; iter *= 2) {
+     for (iter = 1; iter; iter *= 2) {
 	  tmin = 1.0E10;
 	  tmax = -1.0E10;
 
@@ -288,6 +288,5 @@ double fftw_measure_execution_time(plan *pln, const problem *p, int secondsp)
 	       return tmin;
 	  }
      }
-     
      goto start_over; /* may happen if timer is screwed up */
 }

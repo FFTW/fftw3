@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.6 2002-06-04 20:28:58 athena Exp $ */
+/* $Id: ifftw.h,v 1.7 2002-06-04 21:49:39 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -34,6 +34,10 @@
 
 /* shorthand */
 typedef fftw_real R;
+
+#ifndef HAVE_UINT
+typedef unsigned int uint;
+#endif
 
 /* forward declarations */
 typedef struct problem_s problem;
@@ -106,7 +110,7 @@ typedef struct {
 } flopcnt;
 
 flopcnt fftw_flops_add(flopcnt a, flopcnt b);
-flopcnt fftw_flops_mul(int a, flopcnt b);
+flopcnt fftw_flops_mul(uint a, flopcnt b);
 extern const flopcnt fftw_flops_zero;
 
 /*-----------------------------------------------------------------------*/
@@ -117,43 +121,42 @@ int fftw_imin(int a, int b);
 /*-----------------------------------------------------------------------*/
 /* tensor.c: */
 typedef struct {
-     int n;
+     uint n;
      int is;			/* input stride */
      int os;			/* output stride */
 } iodim;
 
 typedef struct {
-     int rnk;
+     uint rnk;
      iodim *dims;
 } tensor;
 
-tensor fftw_mktensor(int rnk);
-tensor fftw_mktensor_1d(int n, int is, int os);
-tensor fftw_mktensor_2d(int n0, int is0, int os0,
-			int n1, int is1, int os1);
-tensor fftw_mktensor_rowmajor(int rnk,
-			      const int *n,
-			      const int *nphys, int is, int os);
+tensor fftw_mktensor(uint rnk);
+tensor fftw_mktensor_1d(uint n, int is, int os);
+tensor fftw_mktensor_2d(uint n0, int is0, int os0,
+			uint n1, int is1, int os1);
+tensor fftw_mktensor_rowmajor(uint rnk, const uint *n, const uint *nphys, 
+			      int is, int os);
 int fftw_tensor_equal(const tensor a, const tensor b);
-int fftw_tensor_sz(const tensor sz);
-int fftw_tensor_hash(const tensor t);
+uint fftw_tensor_sz(const tensor sz);
+uint fftw_tensor_hash(const tensor t);
 int fftw_tensor_max_index(const tensor sz);
 int fftw_tensor_min_stride(const tensor sz);
 int fftw_tensor_inplace_strides(const tensor sz);
 tensor fftw_tensor_copy(const tensor sz);
-tensor fftw_tensor_copy_except(const tensor sz, int except_dim);
-tensor fftw_tensor_copy_sub(const tensor sz, int start_dim, int rnk);
+tensor fftw_tensor_copy_except(const tensor sz, uint except_dim);
+tensor fftw_tensor_copy_sub(const tensor sz, uint start_dim, uint rnk);
 tensor fftw_tensor_compress(const tensor sz);
 tensor fftw_tensor_compress_contiguous(const tensor sz);
 tensor fftw_tensor_append(const tensor a, const tensor b);
-void fftw_tensor_split(const tensor sz, tensor *a, int a_rnk, tensor *b);
+void fftw_tensor_split(const tensor sz, tensor *a, uint a_rnk, tensor *b);
 void fftw_tensor_destroy(tensor sz);
 
 /*-----------------------------------------------------------------------*/
 /* problem.c: */
 typedef struct {
      int (*equal) (const problem *ego, const problem *p);
-     unsigned int (*hash) (const problem *ego);
+     uint (*hash) (const problem *ego);
      void (*zero) (const problem *ego);
      void (*destroy) (problem *ego);
 } problem_adt;
