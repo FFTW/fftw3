@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.70 2002-09-12 14:58:56 athena Exp $ */
+/* $Id: planner.c,v 1.71 2002-09-12 15:29:16 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -157,11 +157,11 @@ static void hinsert0(planner *ego, md5uint *s, uint flags, slvdesc *sp,
 		     solution *l)
 {
      if (!l) { 	 
-	  /* search for empty slot */
+	  /* search for nonfull slot */
 	  uint g, h = sig_to_hash_index(ego, s); 
 	  for (g = h; ; g = (g + 1) % ego->hashsiz) {
 	       l = ego->sols + g;
-	       if (l->state == H_EMPTY) break;
+	       if (l->state != H_VALID) break;
 	       A((g + 1) % ego->hashsiz != h);
 	  }
      }
