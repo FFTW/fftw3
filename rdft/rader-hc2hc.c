@@ -22,10 +22,11 @@
 #include "dft.h"
 
 /*
- * Compute transforms large prime factors using Rader's trick: turn them
- * into convolutions of size n - 1, which you then perform via a pair
- * of FFTs.   This file contains only twiddle hc2hc transforms, which
- * are actually ordinary complex transforms in a slightly funny order.
+ * Compute transforms with large prime factors using Rader's trick:
+ * turn them into convolutions of size n - 1, which you then perform
+ * via a pair of FFTs.  This file contains only twiddle hc2hc
+ * transforms, which are actually ordinary complex transforms in a
+ * slightly funny order.
  */
 
 typedef struct {
