@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.34 2003-05-16 13:51:05 athena Exp $ */
+/* $Id: ct.c,v 1.35 2003-05-16 17:34:16 athena Exp $ */
 
 #include "dft.h"
 
@@ -34,6 +34,7 @@ typedef struct {
      plan *cld;
      plan *cldw;
      const S *slv;
+     int r;
 } P;
 
 static void apply_dit(const plan *ego_, R *ri, R *ii, R *ro, R *io)
@@ -81,7 +82,7 @@ static void print(const plan *ego_, printer *p)
      const P *ego = (const P *) ego_;
      p->print(p, "(dft-ct-%s/%d%(%p%)%(%p%))",
 	      ego->slv->dec == DECDIT ? "dit" : "dif",
-	      ego->slv->r, ego->cldw, ego->cld);
+	      ego->r, ego->cldw, ego->cld);
 }
 
 #define divides(a, b) (((int)(b) % (int)(a)) == 0)
@@ -218,6 +219,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cld = cld;
      pln->cldw = cldw;
      pln->slv = ego;
+     pln->r = r;
      X(ops_add)(&cld->ops, &cldw->ops, &pln->super.super.ops);
      return &(pln->super.super);
 
