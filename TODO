@@ -52,3 +52,5 @@ TODO before FFTW-$2\pi$:
 * better estimator: possibly, let "other" cost be coef * n, where
   coef is a per-solver constant determined via some big numerical
   optimization/fit.
+
+* vector radix, multidimensional codelets
