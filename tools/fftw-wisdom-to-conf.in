@@ -16,7 +16,7 @@ cat <<EOF
 void ${prefix}configure_planner(void *plnr)
 {
     struct solvtab_s { void (*reg)(void *); const char *reg_nam; };
-    extern void ${prefix}solvtab_exec(struct solvtab_s s[], void *);
+    extern void ${prefix}solvtab_exec(const struct solvtab_s s[], void *);
 EOF
 
 tmp=`tempfile`
@@ -26,7 +26,7 @@ cat $tmp | sort | uniq | while read reg_nam; do
     echo "    extern void $reg_nam(void *);"
 done
 
-echo "    struct solvtab_s s[] = {" 
+echo "    const struct solvtab_s s[] = {" 
 cat $tmp | sort | uniq | while read reg_nam; do
     echo "        { $reg_nam, \"$reg_nam\" },"
 done
