@@ -114,8 +114,8 @@ static void bytwiddle(const P *ego, int m0, int m1, R *buf, R *rio, R *iio)
      }
 }
 
-static int applicable(const S *ego, int r, int m, int vl, int dec,
-		      const planner *plnr)
+static int applicable0(const S *ego, int r, int m, int vl, int dec,
+		       const planner *plnr)
 {
      return (1 
 	     && vl == 1
@@ -124,8 +124,18 @@ static int applicable(const S *ego, int r, int m, int vl, int dec,
 	     && m % ego->batchsz == 0
 	     && r >= 64
 	     && m >= r
-	     && m * r >= 65536
 	  );
+}
+
+static int applicable(const S *ego, int r, int m, int vl, int dec,
+		      const planner *plnr)
+{
+     if (!applicable0(ego, r, m, vl, dec, plnr))
+	  return 0;
+     if (NO_UGLYP(plnr) && m * r >= 65536)
+	  return 0;
+
+     return 1;
 }
 
 static void dobatch(const P *ego, int m0, int m1, R *buf, R *rio, R *iio)
