@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.22 2002-09-17 06:50:15 stevenj Exp $ */
+/* $Id: indirect.c,v 1.23 2002-09-17 14:55:15 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -192,7 +192,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(ego_, p_, plnr))
           return (plan *) 0;
 
-     plnr->problem_flags |= NO_BUFFERING;
+     plnr->planner_flags |= NO_BUFFERING;
 
      cldp = X(mkproblem_dft_d)(X(mktensor)(0),
                                X(tensor_append)(p->vecsz, p->sz),
