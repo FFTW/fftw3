@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.111 2002-09-18 22:03:18 athena Exp $ */
+/* $Id: planner.c,v 1.112 2002-09-18 22:28:44 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -42,9 +42,8 @@
    f2, defining a partial ordering. */
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_FLAGS)
 #define NONIMPATIENCE(flags) ((flags) & NONIMPATIENCE_FLAGS)
-#define ORDERED(f1, f2) (subsumes(f1, f2) || subsumes(f2, f1))
-
-#define subsumes(f1, f2) ((IMPATIENCE(f1) & f2) == IMPATIENCE(f1))
+#define ORDERED(f1, f2) (SUBSUMES(f1, f2) || SUBSUMES(f2, f1))
+#define SUBSUMES(f1, f2) ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1))
 
 /*
   slvdesc management:
@@ -258,11 +257,11 @@ static void hinsert(planner *ego, const md5sig s,
      solution *l;
 
      if ((l = hlookup(ego, s, flags))) {
-	  if (subsumes(flags, l->flags)) {
+	  if (SUBSUMES(flags, l->flags)) {
 	       /* overwrite old solution */
 	       flags |= l->flags & BLESSING; /* ne me perdas illa die */
 	  } else {
-	       A(subsumes(l->flags, flags));
+	       A(SUBSUMES(l->flags, flags));
 	       return;
 	  }
      } else {
@@ -286,7 +285,7 @@ static void hcurse_subsumed(planner *ego)
 		    solution *m = ego->solutions + g;
 		    if (VALIDP(m)) {
 			 if (md5eq(l->s, m->s) 
-			     && subsumes(l->flags, m->flags)) {
+			     && SUBSUMES(l->flags, m->flags)) {
 			      /* quidquid latet apparebit */
 			      l->flags |= m->flags & BLESSING;
 			      /* cum vix justus sit securus */
@@ -391,7 +390,7 @@ static plan *mkplan(planner *ego, problem *p)
 
      pln = 0;
      if ((sol = hlookup(ego, m.s, ego->planner_flags))) {
-	  if (subsumes(sol->flags, ego->planner_flags)) {
+	  if (SUBSUMES(sol->flags, ego->planner_flags)) {
 	       /* wisdom is acceptable */
 	       if (sol->slvndx < 0) return 0;   /* known to be infeasible */
 
@@ -401,7 +400,7 @@ static plan *mkplan(planner *ego, problem *p)
 				   (IMPATIENCE(sol->flags) |
 				    NONIMPATIENCE(ego->planner_flags)));
 	  } else {
-	       A(subsumes(ego->planner_flags, sol->flags));
+	       A(SUBSUMES(ego->planner_flags, sol->flags));
 	  }
      }
 
