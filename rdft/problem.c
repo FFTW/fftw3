@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.3 2002-07-21 06:06:53 stevenj Exp $ */
+/* $Id: problem.c,v 1.4 2002-07-22 11:27:06 athena Exp $ */
 
 #include "rdft.h"
 
@@ -33,11 +33,11 @@ static void destroy(problem *ego_)
 static unsigned int hash(const problem *p_)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
-     return (0
+     return (0xDEADBEEF
 	     ^ ((p->I == p->O) * 31)
 	     ^ (p->kind * 37)
-	     ^ (X(tensor_hash)(p->sz) * 10477)
-             ^ (X(tensor_hash)(p->vecsz) * 27191)
+	     ^ (X(tensor_hash)(p->sz) * 10487)
+             ^ (X(tensor_hash)(p->vecsz) * 27197)
 	  );
 }
 
