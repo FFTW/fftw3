@@ -267,7 +267,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 			X(mkproblem_rdft_1_d)(X(mktensor_1d)(n - 1, 1, os),
 					      X(mktensor_1d)(1, 0, 0),
 					      buf, 
-					      X(most_unaligned)(O, O + os),
+					      O + os,
 					      R2HC));
      if (!cld1) goto nada;
 
@@ -275,7 +275,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           X(mkproblem_rdft_1_d)(
                X(mktensor_1d)(n - 1, os, 1),
                X(mktensor_1d)(1, 0, 0),
-	       X(most_unaligned)(O, O + os),
+	       O + os,
 	       buf, 
 #if R2HC_ONLY_CONV
 	       R2HC

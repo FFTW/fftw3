@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.31 2003-03-29 20:22:28 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.32 2003-04-04 18:12:58 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -156,7 +156,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      int vdim;
      iodim *d;
      int ivs, ovs;
-     R *nr, *nrio, *niio;
 
      static const plan_adt padt = {
 	  X(rdft2_solve), awake, print, destroy
@@ -171,14 +170,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      A(d->n > 1);  /* or else, p->ri + d->is etc. are invalid */
 
      X(rdft2_strides)(p->kind, d, &ivs, &ovs);
-     X(most_unaligned_complex)(p->rio, p->iio, &nrio, &niio, ovs);
-     nr = p->r == p->rio ? nrio : X(most_unaligned)(p->r, p->r + ivs);
+     X(check_strides_alignment)(plnr, ivs, ovs);
 
      cld = X(mkplan_d)(plnr, 
 		       X(mkproblem_rdft2_d)(
 			    X(tensor_copy)(p->sz),
 			    X(tensor_copy_except)(p->vecsz, vdim),
-			    nr, nrio, niio, p->kind));
+			    p->r, p->rio, p->iio, p->kind));
      if (!cld) return (plan *) 0;
 
      pln = MKPLAN_RDFT2(P, &padt, apply);

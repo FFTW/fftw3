@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.21 2003-04-02 10:25:56 athena Exp $ */
+/* $Id: align.c,v 1.22 2003-04-04 18:12:56 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -38,42 +38,15 @@ int X(alignment_of)(R *p)
      return (int)(((uintptr_t) p) % ALGN);
 }
 
-/* NONPORTABLE */
-R *X(most_unaligned)(R *p1, R *p2)
+static int stride_aligned_p(int s)
 {
-     uintptr_t a1 = (uintptr_t)p1;
-     uintptr_t a2 = (uintptr_t)p2;
-     
-     if (p1 == p2) return p1;
-
-     for (;;) {
-	  if (a1 & 1) return p1;
-	  if (a2 & 1) return p2;
-	  a1 >>= 1;
-	  a2 >>= 1;
-     }
+     return !(((unsigned)s * sizeof(R)) % ALGN);
 }
 
-void X(most_unaligned_complex)(R *r, R *i, R **rp, R **ip, int s)
+int X(check_strides_alignment)(planner *plnr, int is, int os)
 {
-     R *p;
-     if (i == r + 1) {
-	  /* forward complex format.  Choose the worst alignment
-	     for r, adjust i consequently */
-	  *rp = p = X(most_unaligned)(r, r + s);
-	  *ip = i + (p - r);
-     } else if (r == i + 1) {
-	  /* backward complex format.  Choose the worst alignment
-	     for i, adjust r consequently */
-	  *ip = p = X(most_unaligned)(i, i + s);
-	  *rp = r + (p - i);
-     } else {
-	  /* split format.  pick worst of r/i, adjust other accordingly. */
-	  *rp = X(most_unaligned)(r, r + s);
-	  *ip = X(most_unaligned)(i, i + s);
-	  if (*rp == X(most_unaligned)(*rp, *ip))
-               *ip = i + (*rp - r);
-	  else
-               *rp = r + (*ip - i);
-     }
+     if (!stride_aligned_p(is))
+	  plnr->problem_flags |= UNALIGNED;
+     if (!stride_aligned_p(os))
+	  plnr->problem_flags |= UNALIGNED;
 }

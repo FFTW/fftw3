@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.28 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: buffered.c,v 1.29 2003-04-04 18:12:58 athena Exp $ */
 
 #include "rdft.h"
 
@@ -213,6 +213,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
+     X(check_strides_alignment)(plnr, ivs * nbuf, ovs * nbuf);
      cld = X(mkplan_d)(plnr, 
 		       X(mkproblem_rdft_d)(
 			    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
