@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.14 2005-02-20 23:27:29 athena Exp $ */
+/* $Id: rank0.c,v 1.15 2005-02-21 03:18:59 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -34,6 +34,7 @@ typedef struct {
      const char *nam;
      int minrnk;
      int maxrnk;
+     int maxvl;
 } S;
 
 #define MAXRNK 2
@@ -69,8 +70,6 @@ static int fill_iodim(P *pln, const problem_rdft *p)
 }
 
 /* execution routines */
-#define CUTOFF 4
-
 static void cpy1d(R *I, R *O, int n0, int is0, int os0, int vl)
 {
      int i0, v;
@@ -131,6 +130,33 @@ static void cpy2d(R *I, R *O,
      }
 }
 
+/*
+  Recursive 2-dimensional copy routines, useful e.g. for
+  transpositions.
+
+  In an ideal world where caches don't suck, the ``cache-oblivious''
+  cpy2d_rec() routine would be sufficient and optimal.
+
+  In a real world of caches with limited associativity, the extra
+  buffering of cpy2d_recbuf() is necessary when stride=2^k (i.e., in the
+  common case.) See
+  
+     K.S. Gatlin and Larry Carter, ``Memory Hierarchy Considerations
+     for Fast Transpose and Bit-Reversals'', HPCA99, January 1999.
+
+*/
+
+/*
+  Ideally:  max CUTOFF s.t.
+    CUTOFF^2 * sizeof(complex double) <= cache size
+    CUTOFF * sizeof(float) >= line size 
+
+  CUTOFF = 16 implies cache size >= 4096, which is reasonable.
+  CUTOFF = 16 fails to exploit 128 bytes lines vl = 1, R = float;
+  however vl = 2 or R = double is ok.
+*/
+#define CUTOFF 16
+
 static void cpy2d_rec(R *I, R *O,
 		      int n0, int is0, int os0,
 		      int n1, int is1, int os1,
@@ -145,8 +171,42 @@ static void cpy2d_rec(R *I, R *O,
 	  int nm = n1 / 2;
 	  cpy2d_rec(I, O, n0, is0, os0, nm, is1, os1, vl);
 	  I += nm * is1; O += nm * os1; n1 -= nm; goto tail;
-     } else 
+     } else {
 	  cpy2d(I, O, n0, is0, os0, n1, is1, os1, vl);
+     }
+}
+
+static void cpy2d_recbuf(R *I, R *O,
+			 int n0, int is0, int os0,
+			 int n1, int is1, int os1,
+			 int vl)
+{
+ tail:
+     if (n0 >= n1 && n0 > CUTOFF) {
+	  int nm = n0 / 2;
+	  cpy2d_recbuf(I, O, nm, is0, os0, n1, is1, os1, vl);
+	  I += nm * is0; O += nm * os0; n0 -= nm; goto tail;
+     } else if (/* n1 >= n0 && */ n1 > CUTOFF) {
+	  int nm = n1 / 2;
+	  cpy2d_recbuf(I, O, n0, is0, os0, nm, is1, os1, vl);
+	  I += nm * is1; O += nm * os1; n1 -= nm; goto tail;
+     } else {
+	  R buf[CUTOFF*CUTOFF*2];
+
+	  /* copy from I to buf; exploit the fact that the inner loop
+	     is for n0 */
+	  if (is0 < is1)
+	       cpy2d(I, buf, n0, is0, 2, n1, is1, 2 * CUTOFF, vl);
+	  else
+	       cpy2d(I, buf, n1, is1, 2 * CUTOFF, n0, is0, 2, vl);
+
+	  /* copy from buf to O; exploit the fact that the inner loop
+	     is for n0 */
+	  if (os0 < os1)
+	       cpy2d(buf, O, n0, 2, os0, n1, 2 * CUTOFF, os1, vl);
+	  else
+	       cpy2d(buf, O, n1, 2 * CUTOFF, os1, n0, 2, os0, vl);
+     }
 }
 
 static void apply_iter(const plan *ego_, R *I, R *O)
@@ -187,6 +247,19 @@ static void apply_rec(const plan *ego_, R *I, R *O)
 	       vl);
 }
 
+static void apply_recbuf(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     int vl = ego->vl;
+
+     A(ego->rnk == 2);
+     A(vl <= 2);
+     cpy2d_recbuf(I, O, 
+		  ego->d[0].n, ego->d[0].is, ego->d[0].os,
+		  ego->d[1].n, ego->d[1].is, ego->d[1].os,
+		  vl);
+}
+
 static void apply_memcpy(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
@@ -208,6 +281,7 @@ static int applicable(const S *ego, const problem *p_)
 		  && fill_iodim(&pln, p)
 		  && pln.rnk >= ego->minrnk
 		  && pln.rnk <= ego->maxrnk
+		  && (!ego->maxvl || pln.vl <= ego->maxvl)
 	       );
      }
      return 0;
@@ -240,6 +314,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      retval = fill_iodim(pln, p);
      A(retval);
+     A(pln->vl > 0); /* because FINITE_RNK(p->vecsz->rnk) holds */
      pln->nam = ego->nam;
 
      /* X(tensor_sz)(p->vecsz) loads, X(tensor_sz)(p->vecsz) stores */
@@ -255,11 +330,13 @@ void X(rdft_rank0_register)(planner *p)
 	  rdftapply apply;
 	  int minrnk;
 	  int maxrnk;
+	  int maxvl;
 	  const char *nam;
      } tab[] = {
-	  { apply_iter,     0, 2, "rdft-rank0" },
-	  { apply_rec ,     2, 2, "rdft-rank0-rec" },
-	  { apply_memcpy ,  0, 0, "rdft-rank0-memcpy" },
+	  { apply_iter,    0, 2, 0, "rdft-rank0" },
+	  { apply_rec ,    2, 2, 0, "rdft-rank0-rec" },
+	  { apply_recbuf , 2, 2, 2, "rdft-rank0-recbuf" },
+	  { apply_memcpy , 0, 0, 0, "rdft-rank0-memcpy" },
      };
 
      for (i = 0; i < sizeof(tab) / sizeof(tab[0]); ++i) {
@@ -268,6 +345,7 @@ void X(rdft_rank0_register)(planner *p)
 	  slv->apply = tab[i].apply;
 	  slv->minrnk = tab[i].minrnk;
 	  slv->maxrnk = tab[i].maxrnk;
+	  slv->maxvl = tab[i].maxvl;
 	  slv->nam = tab[i].nam;
 	  REGISTER_SOLVER(p, &(slv->super));
      }
