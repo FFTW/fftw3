@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.21 2003-06-04 19:11:29 athena Exp $ *)
+(* $Id: c.ml,v 1.22 2003-06-04 23:54:38 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -121,11 +121,21 @@ let rec unparse_expr_c =
     | _ -> failwith "unparse_expr_c"
 
 and unparse_expr_generic = 
-  let rec binary op a b = 
-    op ^ "(" ^ (unparse_expr_generic a) ^ ", " ^ (unparse_expr_generic b) ^ ")"
-  and unary op a = 
-    op ^ "(" ^ (unparse_expr_generic a) ^ ")"
+  let rec u x = unparse_expr_generic x
+  and unary op a = Printf.sprintf "%s(%s)" op (u a)
+  and binary op a b = Printf.sprintf "%s(%s, %s)" op (u a) (u b)
+  and ternary op a b c = Printf.sprintf "%s(%s, %s, %s)" op (u a) (u b) (u c)
+  and quaternary op a b c d = 
+    Printf.sprintf "%s(%s, %s, %s, %s)" op (u a) (u b) (u c) (u d)
   and unparse_plus = function
+    | [(Uminus (Times (a, b))); Times (c, d)] -> quaternary "FNMMS" a b c d
+    | [Times (c, d); (Uminus (Times (a, b)))] -> quaternary "FNMMS" a b c d
+    | [Times (c, d); (Times (a, b))] -> quaternary "FMMA" a b c d
+    | [(Uminus (Times (a, b))); c] -> ternary "FNMS" a b c
+    | [c; (Uminus (Times (a, b)))] -> ternary "FNMS" a b c
+    | [c; (Times (a, b))] -> ternary "FMA" a b c
+    | [(Times (a, b)); c] -> ternary "FMA" a b c
+    | [a; Uminus b] -> binary "SUB" a b
     | [a; b] -> binary "ADD" a b
     | a :: b :: c -> binary "ADD" a (Plus (b :: c))
     | _ -> failwith "unparse_plus"
