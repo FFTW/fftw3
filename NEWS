@@ -51,3 +51,26 @@ Other enhancements:
 * Multi-threaded version has optional OpenMP support.
 
 * Authors' good looks have greatly improved with age.
+
+Changes from 3.0beta1:
+
+* Faster in-place 1d transforms of non-power-of-two sizes.
+
+* SIMD improvements for in-place, multi-dimensional, and/or non-FFTW_PATIENT
+  transforms.
+
+* Added support for hard-coded DCT/DST/DHT codelets of small sizes; the
+  default distribution only includes hard-coded size-8 DCT-II/III, however.
+
+* Many minor improvements to the manual.  Added section on using the
+  codelet generator to customize and enhance FFTW.
+
+* The default 'make check' should now only take a few minutes; for more
+  strenuous tests (which may take a day or so), do 'cd tests; make bigcheck'.
+
+* fftw_print_plan is split into fftw_fprint_plan and fftw_print_plan, where
+  the latter uses stdout.
+
+* Fixed ability to compile with a C++ compiler.
+
+* Fixed support for C99 complex type under glibc.
