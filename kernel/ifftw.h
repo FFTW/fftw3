@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.134 2002-09-17 13:09:56 athena Exp $ */
+/* $Id: ifftw.h,v 1.135 2002-09-17 13:36:16 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -422,8 +422,8 @@ enum {
      NO_INDIRECT_OP = 0x40,
      BELIEVE_PCOST = 0x80,
      NO_DHT_R2HC = 0x100,
-     USE_SCORE = 0x200,
-     NO_UGLY = 0x400,
+     NO_UGLY = 0x200,
+     USE_SCORE = 0x400,
 
      /* a canonical set of fftw2-like impatient flags */
      IMPATIENT = (0
@@ -435,7 +435,7 @@ enum {
 		  | BELIEVE_PCOST
 	  ),
 
-     ESTIMATE = 0x2000, /* subsumed by all other impatience flags */
+     ESTIMATE = 0x800, /* subsumed by all other impatience flags */
      IMPATIENCE_FLAGS = (ESTIMATE | (ESTIMATE - 1)),
      
      BLESSING = 0x4000,  /* save this entry */
@@ -453,6 +453,8 @@ enum {
 #define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
 #define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
 #define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
+#define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
+#define USE_SCOREP(plnr) ((plnr)->planner_flags & USE_SCORE)
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.106 2002-09-17 13:09:57 athena Exp $ */
+/* $Id: planner.c,v 1.107 2002-09-17 13:36:16 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -50,10 +50,12 @@ static unsigned short canonicalize(unsigned short x)
      return x;
 }
 
+#define CANONICALP(x) ((x) == canonicalize(x))
+
 static int subsumes(unsigned short f1, unsigned short f2)
 {
-     f1 = canonicalize(f1);
-     f2 = canonicalize(f2);
+     A(CANONICALP(f1));
+     A(CANONICALP(f2));
      return (IMPATIENCE(f1) & f2) == IMPATIENCE(f1);
 }
 
@@ -193,6 +195,8 @@ static solution *hlookup(planner *ego, const md5sig s, unsigned short flags)
 static void hinsert0(planner *ego, const md5sig s, unsigned short flags,
 		     short slvndx, solution *l)
 {
+     A(CANONICALP(flags));
+
      ++ego->insert;
      if (!l) { 	 
 	  /* search for nonfull slot */
@@ -317,7 +321,7 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 {
      if (!BELIEVE_PCOSTP(ego) || pln->pcost == 0.0) {
 	  ego->nplan++;
-	  if (canonicalize(ego->planner_flags) & ESTIMATE) {
+	  if (ESTIMATEP(ego)) {
 	       /* heuristic */
 	       pln->pcost = 0
 		    + pln->ops.add
@@ -349,10 +353,7 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
 
 static int compute_score(planner *ego, problem *p, solver *s)
 {
-     if (canonicalize(ego->planner_flags) & USE_SCORE) 
-	  return s->adt->score(s, p, ego);
-     else  
-	  return GOOD;
+     return USE_SCOREP(ego) ?  s->adt->score(s, p, ego) : GOOD;
 }
 
 
@@ -423,6 +424,8 @@ static plan *mkplan(planner *ego, problem *p)
      plan *pln;
      md5 m;
      slvdesc *sp;
+
+     ego->planner_flags = canonicalize(ego->planner_flags);
 
      ++ego->nprob;
      md5hash(&m, p, ego);
@@ -610,14 +613,13 @@ void X(planner_destroy)(planner *ego)
 static void check_partial_order(void)
 {
      unsigned short a, b, c;
-     for (a = 0; a <= IMPATIENCE_FLAGS; ++a) {
+     for (a = 0; a <= IMPATIENCE_FLAGS; ++a) if (CANONICALP(a)) {
 	  /* reflexive */
 	  CK(subsumes(a, a));
-	  for (b = 0; b <= IMPATIENCE_FLAGS; ++b) {
+	  for (b = 0; b <= IMPATIENCE_FLAGS; ++b) if (CANONICALP(b)) {
 	       /* antisymmetric */
-	       CK(IMPLIES(subsumes(a, b) && subsumes(b, a),
-			  canonicalize(a) == canonicalize(b)));
-	       for (c = 0; c <= IMPATIENCE_FLAGS; ++c) {
+	       CK(IMPLIES(subsumes(a, b) && subsumes(b, a), a == b));
+	       for (c = 0; c <= IMPATIENCE_FLAGS; ++c) if (CANONICALP(c)) {
 		    /* transitive */
 		    CK(IMPLIES(subsumes(a, b) && subsumes(b, c),
 			       subsumes(a, c)));
