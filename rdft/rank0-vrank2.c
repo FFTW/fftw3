@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-vrank2.c,v 1.2 2004-04-07 04:16:49 stevenj Exp $ */
+/* $Id: rank0-vrank2.c,v 1.3 2004-04-07 04:46:07 stevenj Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations), with vector rank 2;
    these plans are not strictly necessary, but are an optimization
@@ -138,6 +138,10 @@ static int applicable_consecpairs(const S *s, const problem_rdft *p, planner *pl
      return (p->vecsz->dims[1].n == 2
 	     && p->vecsz->dims[1].is == 1
 	     && p->vecsz->dims[1].os == 1
+#if FFTW_2R_IS_DOUBLE
+	     && p->vecsz->dims[0].is % 2 == 0
+	     && p->vecsz->dims[0].os % 2 == 0
+#endif
 	     && !s->reverse);
 }
 
