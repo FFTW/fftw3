@@ -19,12 +19,12 @@ $(top_builddir)/libbench2/libbench2.a $(THREADLIBS)
 check-local: bench
 	perl -w $(srcdir)/check.pl -r -c=30 -v --nowisdom `pwd`/bench
 	@echo "--------------------------------------------------------------"
-	@echo "         FFTW transforms passed simple tests!"
+	@echo "         FFTW transforms passed basic tests!"
 	@echo "--------------------------------------------------------------"
 if THREADS
 	perl -w $(srcdir)/check.pl -r -c=30 -v --nthreads=2 --nowisdom `pwd`/bench
 	@echo "--------------------------------------------------------------"
-	@echo "         FFTW threaded transforms passed simple tests!"
+	@echo "         FFTW threaded transforms passed basic tests!"
 	@echo "--------------------------------------------------------------"
 endif
 
