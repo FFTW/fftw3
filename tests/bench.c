@@ -11,10 +11,6 @@
 #include <fftw3.h>
 #include <string.h>
 
-BEGIN_BENCH_DOC
-BENCH_DOC("name", "fftw3")
-END_BENCH_DOC 
-
 #define CONCAT(prefix, name) prefix ## name
 #if defined(BENCHFFT_SINGLE)
 #define FFTW(x) CONCAT(fftwf_, x)
@@ -23,6 +19,17 @@ END_BENCH_DOC
 #else
 #define FFTW(x) CONCAT(fftw_, x)
 #endif
+
+static const char *mkversion(void) { return FFTW(version); }
+static const char *mkcc(void) { return FFTW(cc); }
+static const char *mkcodelet_optim(void) { return FFTW(codelet_optim); }
+
+BEGIN_BENCH_DOC
+BENCH_DOC("name", "fftw3")
+BENCH_DOCF("version", mkversion)
+BENCH_DOCF("cc", mkcc)
+BENCH_DOCF("codelet-optim", mkcodelet_optim)
+END_BENCH_DOC 
 
 FFTW(plan) the_plan = 0;
 

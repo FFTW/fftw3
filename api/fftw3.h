@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.47 2003-03-04 06:44:09 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.48 2003-03-14 11:21:43 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -102,7 +102,7 @@ X(plan) X(plan_guru_dft)(int rank, const X(iodim) *dims,		\
 			 R *ri, R *ii, R *ro, R *io,			\
 			 unsigned flags);				\
 									\
-void X(execute_dft)(const X(plan) p, R *ri, R *ii, R *ro, R *io);      	\
+void X(execute_dft)(const X(plan) p, R *ri, R *ii, R *ro, R *io);	\
 									\
 X(plan) X(plan_many_dft_r2c)(int rank, const int *n,			\
                              int howmany,				\
@@ -204,7 +204,12 @@ void X(print_plan)(const X(plan) p, FILE *output_file);			\
 void *X(malloc)(size_t n);						\
 void X(free)(void *p);							\
 									\
-void X(flops)(const X(plan) p, int *add, int *mul, int *fma);
+void X(flops)(const X(plan) p, int *add, int *mul, int *fma);		\
+									\
+extern const char *const X(version);					\
+extern const char *const X(cc);						\
+extern const char *const X(codelet_optim);
+
 
 /* end of FFTW_DEFINE_API macro */
 
