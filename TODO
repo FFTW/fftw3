@@ -1,13 +1,3 @@
-* fma codelets?
-
-* inline codelets?
-
-TODO before/at release:
-
-* remember to remove -no-randomized-cse from rdft codelets before
-  final release.  This flag speeds up the generator but produces worse
-  codelets
-
 TODO before FFTW-$2\pi$:
 
 * MPI version
