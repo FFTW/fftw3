@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.1 2002-07-21 04:12:19 stevenj Exp $ */
+/* $Id: verify.c,v 1.2 2002-07-21 23:31:22 stevenj Exp $ */
 
 #include "rdft.h"
 #include <math.h>
@@ -361,9 +361,9 @@ static void linear(uint n, info *nfo, C *inA, C *inB, C *inC, C *outA,
      for (j = 0; j < rounds; ++j) {
 	  C alpha, beta;
 	  alpha.r = mydrand();
-	  alpha.i = mydrand();
+	  alpha.i = 0;
 	  beta.r = mydrand();
-	  beta.i = mydrand();
+	  beta.i = 0;
 	  arand(inA, n);
 	  arand(inB, n);
 	  dofft(nfo, inA, outA);
