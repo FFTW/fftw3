@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.7 2002-06-14 14:28:12 athena Exp $ */
+/* $Id: codelet.h,v 1.8 2002-06-14 18:18:15 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -66,12 +66,9 @@ static __inline__ R FNMS(R a, R b, R c)
 /* DFT codelets */
 
 typedef struct {
-     const char *nam;
      uint sz;    /* size of transform computed */
      int is;     /* input stride, or 0 if any */
      int os;     /* output stride, or 0 if any */
-     int iimri;  /* distance between input pointers, or 0 if any */
-     int iomro;  /* distance between output pointers, or 0 if any */
      opcnt ops;
 } kdft_desc;
 

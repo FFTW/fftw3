@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.17 2002-06-14 14:28:12 athena Exp $ */
+/* $Id: direct.c,v 1.18 2002-06-14 18:18:15 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -60,9 +60,7 @@ static void print(plan *ego_, printer *p)
      const S *s = ego->slv;
      const kdft_desc *d = s->desc;
 
-     p->print(p, "(dft-direct-%u%ois=%oos=%oiimri=%oiomro=%v \"%s\")", 
-	      d->sz, d->is, d->os, d->iimri, d->iomro, ego->vl,
-	      d->nam);
+     p->print(p, "(dft-direct-%u%ois=%oos=%v)", d->sz, d->is, d->os, ego->vl);
 }
 
 static int applicable(const solver *ego_, const problem *p_)
@@ -78,11 +76,10 @@ static int applicable(const solver *ego_, const problem *p_)
 	       && p->vecsz.rnk <= 1
 	       && p->sz.dims[0].n == d->sz
 
-	       /* check strides, pointers */
+	       /* check strides */
 	       && (!d->is || d->is == p->sz.dims[0].is)
 	       && (!d->os || d->os == p->sz.dims[0].os)
-	       && (!d->iimri || p->ii - p->ri == d->iimri)
-	       && (!d->iomro || p->io - p->ro == d->iomro)
+
 	       && (0
 		   /* can operate out-of-place */
 		   || p->ri != p->ro
