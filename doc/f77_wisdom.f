@@ -47,8 +47,8 @@ c     Fortran 77 does not have any portable way to read an arbitrary
 c     file one character at a time.  The best alternative seems to be to
 c     read a whole line into a buffer, since for fftw-exported wisdom we
 c     can bound the line length.  (If the file contains longer lines,
-c     then the lines will truncated and the wisdom import should simply
-c     fail.)  Ugh.
+c     then the lines will be truncated and the wisdom import should
+c     simply fail.)  Ugh.
       subroutine emit(ic, iunit)
       integer ic
       integer iunit
