@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.10 2003-02-11 22:32:56 stevenj Exp $ */
+/* $Id: verify-dft.c,v 1.11 2003-02-15 05:42:48 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -131,7 +131,7 @@ void verify_dft(bench_problem *p, int rounds, double tol, errors *e)
 				tmp, rounds, tol, FREQ_SHIFT));
 
      if (!p->in_place && !p->destroy_input)
-	  preserves_input(&k.k, 0,0, N, inA, inB, outB, rounds);
+	  preserves_input(&k.k, 0, N, inA, inB, outB, rounds);
 
      bench_free(tmp);
      bench_free(outC);

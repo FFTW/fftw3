@@ -638,6 +638,7 @@ void verify_r2r(bench_problem *p, int rounds, double tol, errors *e)
 typedef struct {
      dofft_closure k;
      bench_problem *p;
+     int n0;
 } dofft_r2r_closure;
 
 static void cpyr1(int n, R *in, int is, R *out, int os, R scale)
@@ -655,6 +656,70 @@ static void mkre00(C *a, int n)
 	  c_re(a[n - i]) = c_re(a[i]);
 }
 
+static void mkimag(C *a, int n)
+{
+     int i;
+     for (i = 0; i < n; ++i)
+	  c_re(a[i]) = 0.0;
+}
+
+static void mko00(C *a, int n, int c)
+{
+     int i;
+     a[0][c] = 0.0;
+     for (i = 1; i + i < n; ++i)
+	  a[n - i][c] = -a[i][c];
+     if (i + i == n)
+	  a[i][c] = 0.0;
+}
+
+static void mkro00(C *a, int n)
+{
+     mkreal(a, n);
+     mko00(a, n, 0);
+}
+
+static void mkio00(C *a, int n)
+{
+     mkimag(a, n);
+     mko00(a, n, 1);
+}
+
+static void mkre01(C *a, int n) /* n should be be multiple of 4 */
+{
+     R a0;
+     a0 = c_re(a[0]);
+     mko00(a, n/2, 0);
+     c_re(a[n/2]) = -(c_re(a[0]) = a0);
+     mkre00(a, n);
+}
+
+static void mkro01(C *a, int n) /* n should be be multiple of 4 */
+{
+     c_re(a[0]) = c_im(a[0]) = 0.0;
+     mkre00(a, n/2);
+     mkro00(a, n);
+}
+
+static void mkoddonly(C *a, int n)
+{
+     int i;
+     for (i = 0; i < n; i += 2)
+	  c_re(a[i]) = c_im(a[i]) = 0.0;
+}
+
+static void mkre10(C *a, int n)
+{
+     mkoddonly(a, n);
+     mkre00(a, n);
+}
+
+static void mkio10(C *a, int n)
+{
+     mkoddonly(a, n);
+     mkio00(a, n);
+}
+
 static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 {
      dofft_r2r_closure *k = (dofft_r2r_closure *)k_;
@@ -669,6 +734,17 @@ static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
      ri = (bench_real *) p->in;
      ro = (bench_real *) p->out;
 
+#define DEBUG_ARR 0
+
+#if DEBUG_ARR
+     {
+	  int i;
+	  printf("IN:\n");
+	  for (i = 0; i < k->n0; ++i)
+	       printf("  %g+%gi\n", c_re(in[i]), c_im(in[i]));
+     }
+#endif
+
      switch (p->k[0]) {
 	 case R2R_R2HC:
 	      cpyr1(n, &c_re(in[0]), 2, ri, is, 1.0);
@@ -679,6 +755,21 @@ static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 	      break;
 	 case R2R_REDFT00:
 	      cpyr1(n, &c_re(in[0]), 2, ri, is, 1.0);
+	      break;
+	 case R2R_RODFT00:
+	      cpyr1(n, &c_re(in[1]), 2, ri, is, 1.0);
+	      break;
+	 case R2R_REDFT01:
+	      cpyr1(n, &c_re(in[0]), 2, ri, is, 1.0);
+	      break;
+	 case R2R_REDFT10:
+	      cpyr1(n, &c_re(in[1]), 4, ri, is, 1.0);
+	      break;
+	 case R2R_RODFT01:
+	      cpyr1(n, &c_re(in[1]), 2, ri, is, 1.0);
+	      break;
+	 case R2R_RODFT10:
+	      cpyr1(n, &c_im(in[1]), 4, ri, is, 1.0);
 	      break;
 	 default:
 	      BENCH_ASSERT(0); /* not yet implemented */
@@ -701,11 +792,40 @@ static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 	      break;
 	 case R2R_REDFT00:
 	      cpyr1(n, ro, os, &c_re(out[0]), 2, 1.0);
-	      mkre00(out, 2*(n-1));
+	      mkre00(out, k->n0);
+	      break;
+	 case R2R_RODFT00:
+	      cpyr1(n, ro, os, &c_im(out[1]), 2, -1.0);
+	      mkio00(out, k->n0);
+	      break;
+	 case R2R_REDFT01:
+	      cpyr1(n, ro, os, &c_re(out[1]), 4, 2.0);
+	      mkre10(out, k->n0);
+	      break;
+	 case R2R_REDFT10:
+	      cpyr1(n, ro, os, &c_re(out[0]), 2, 1.0);
+	      mkre01(out, k->n0);
+	      break;
+	 case R2R_RODFT01:
+	      cpyr1(n, ro, os, &c_im(out[1]), 4, -2.0);
+	      mkio10(out, k->n0);
+	      break;
+	 case R2R_RODFT10:
+	      cpyr1(n, ro, os, &c_re(out[1]), 2, 1.0);
+	      mkro01(out, k->n0);
 	      break;
 	 default:
 	      BENCH_ASSERT(0); /* not yet implemented */
      }
+
+#if DEBUG_ARR
+     {
+	  int i;
+	  printf("OUT:\n");
+	  for (i = 0; i < k->n0; ++i)
+	       printf("  %g+%gi\n", c_re(out[i]), c_im(out[i]));
+     }
+#endif
 }
 
 void accuracy_r2r(bench_problem *p, int rounds, double t[6])
@@ -727,8 +847,14 @@ void accuracy_r2r(bench_problem *p, int rounds, double t[6])
          case R2R_R2HC: constrain = mkreal; n0 = n; break;
          case R2R_HC2R: constrain = mkhermitian1; n0 = n; break;
          case R2R_REDFT00: constrain = mkre00; n0 = 2*(n-1); break;
+         case R2R_RODFT00: constrain = mkro00; n0 = 2*(n+1); break;
+         case R2R_REDFT01: constrain = mkre01; n0 = 4*n; break;
+         case R2R_REDFT10: constrain = mkre10; n0 = 4*n; break;
+         case R2R_RODFT01: constrain = mkro01; n0 = 4*n; break;
+         case R2R_RODFT10: constrain = mkio10; n0 = 4*n; break;
 	 default: BENCH_ASSERT(0); /* not yet implemented */
      }
+     k.n0 = n0;
 
      a = (C *) bench_malloc(n0 * sizeof(C));
      b = (C *) bench_malloc(n0 * sizeof(C));

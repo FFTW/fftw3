@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.9 2003-02-11 22:32:56 stevenj Exp $ */
+/* $Id: verify-lib.c,v 1.10 2003-02-15 05:42:48 stevenj Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -404,21 +404,15 @@ double tf_shift(dofft_closure *k,
 }
 
 
-void preserves_input(dofft_closure *k, int realp, int hermitianp,
+void preserves_input(dofft_closure *k, aconstrain constrain,
 		     int n, C *inA, C *inB, C *outB, int rounds)
 {
      int j;
-     bench_iodim d;
-
-     d.n = n;
-     d.is = d.os = 1;
 
      for (j = 0; j < rounds; ++j) {
 	  arand(inA, n);
-	  if (realp)
-	       mkreal(inA, n);
-	  if (hermitianp)
-	       mkhermitian(inA, 1, &d, 1);
+	  if (constrain)
+	       constrain(inA, n);
 	  
 	  acopy(inB, inA, n);
 	  k->apply(k, inB, outB);

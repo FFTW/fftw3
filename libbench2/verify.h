@@ -31,6 +31,8 @@ typedef struct dofft_closure_s {
 
 double dmax(double x, double y);
 
+typedef void (*aconstrain)(C *a, int n);
+
 void arand(C *a, int n);
 void mkreal(C *A, int n);
 void mkhermitian(C *A, int rank, const bench_iodim *dim, int stride);
@@ -50,7 +52,7 @@ double impulse(dofft_closure *k,
 double linear(dofft_closure *k, int realp,
 	      int n, C *inA, C *inB, C *inC, C *outA,
 	      C *outB, C *outC, C *tmp, int rounds, double tol);
-void preserves_input(dofft_closure *k, int realp, int hermitianp,
+void preserves_input(dofft_closure *k, aconstrain constrain,
                      int n, C *inA, C *inB, C *outB, int rounds);
 
 enum { TIME_SHIFT, FREQ_SHIFT };
@@ -67,7 +69,6 @@ typedef struct dotens2_closure_s {
 void bench_dotens2(const bench_tensor *sz0, 
 		   const bench_tensor *sz1, dotens2_closure *k);
 
-typedef void (*aconstrain)(C *a, int n);
 void accuracy_test(dofft_closure *k, aconstrain constrain,
 		   int sign, int n, C *a, C *b, int rounds,
 		   double t[6]);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft2.c,v 1.4 2003-02-11 22:32:56 stevenj Exp $ */
+/* $Id: verify-rdft2.c,v 1.5 2003-02-15 05:42:48 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -246,7 +246,7 @@ void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e)
 				     tmp, rounds, tol, FREQ_SHIFT));
 
      if (!p->in_place && !p->destroy_input)
-	  preserves_input(&k.k, p->sign < 0, p->sign > 0,
+	  preserves_input(&k.k, p->sign < 0 ? mkreal : mkhermitian1,
 			  N, inA, inB, outB, rounds);
 
      bench_free(tmp);
