@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.44 2002-08-30 16:09:48 athena Exp $ */
+/* $Id: planner.c,v 1.45 2002-08-30 22:07:21 stevenj Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -228,7 +228,6 @@ static plan *mkplan(planner *ego, problem *p)
 
 	  if ((sp = sol->sp)) {
 	       /* call solver to create plan */
-	       solver *slv = sp->slv;
 	       ego->inferior_mkplan(ego, p, &pln, &sp);
 	       A(pln);  /* solver must be applicable or something
 			   is screwed up */
