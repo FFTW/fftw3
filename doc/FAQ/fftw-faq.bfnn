@@ -333,8 +333,7 @@ order of the numerical accuracy; typically a fractional difference of
 Yes. Starting with version 1.2, FFTW provides the \courier{wisdom\}
 mechanism for saving plans; see the FFTW manual.
 
-\question 14sep:whyscaled Why does your inverse transform return a
-scaled result?
+\question 14sep:whyscaled Why does your inverse transform return a scaled result?
 
 Computing the forward transform followed by the backward transform (or
 vice versa) yields the original array scaled by the size of the array.
