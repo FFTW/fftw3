@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.114 2002-09-19 01:47:17 athena Exp $ */
+/* $Id: planner.c,v 1.115 2002-09-20 18:45:54 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -395,7 +395,7 @@ static plan *mkplan(planner *ego, problem *p)
      unsigned short flags;
 
      /* Canonical form. */
-     if (~NO_EXHAUSTIVEP(ego)) ego->planner_flags &= ~NO_UGLY;
+     if (!NO_EXHAUSTIVEP(ego)) ego->planner_flags &= ~NO_UGLY;
 	  
      ++ego->nprob;
      md5hash(&m, p, ego);
