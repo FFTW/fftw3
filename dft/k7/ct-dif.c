@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif-k7.c,v 1.2 2002-06-18 21:48:41 athena Exp $ */
+/* $Id: ct-dif.c,v 1.1 2002-06-19 22:47:55 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"

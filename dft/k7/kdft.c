@@ -18,13 +18,14 @@
  *
  */
 
-/* $Id: kdft-dif-k7.c,v 1.1 2002-06-17 01:30:42 athena Exp $ */
+/* $Id: kdft.c,v 1.1 2002-06-19 22:47:55 athena Exp $ */
 
 #include "dft.h"
 
 #if K7_MODE
-void X(kdft_dif_k7_register)(planner *p, kdft_dif_k7 k, const ct_desc *desc)
+void X(kdft_k7_register)(planner *p, kdft_k7 codelet, const kdft_k7_desc *desc)
 {
-     REGISTER_SOLVER(p, X(mksolver_dft_ct_dif_k7)(k, desc));
+     solver *s = X(mksolver_dft_direct_k7)(codelet, desc);
+     REGISTER_SOLVER(p, s);
 }
 #endif

@@ -23,7 +23,7 @@ AM_CONDITIONAL(SINGLE, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 
 AC_ARG_ENABLE(k7, [  --enable-k7         enable AMD K7 optimizations], k7_mode=$enableval, k7_mode=no)
-if test $PRECISION = d; then k7_mode=no; fi
+if test "$PRECISION" = "d"; then k7_mode=no; fi
 if test "$k7_mode" = "yes"; then
 	AC_DEFINE(K7_MODE,1,[Define to enable AMD K7 optimizations.])
 fi
@@ -121,7 +121,8 @@ AC_OUTPUT([
    dft/codelets/Makefile
    dft/codelets/standard/Makefile
    dft/codelets/inplace/Makefile
-   dft/codelets/k7/Makefile
+   dft/k7/Makefile
+   dft/k7/codelets/Makefile
 
    libbench/Makefile
    tests/Makefile

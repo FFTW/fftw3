@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: kdft-dit-k7.c,v 1.2 2002-06-18 21:48:41 athena Exp $ */
+/* $Id: kdft-dit.c,v 1.1 2002-06-19 22:47:55 athena Exp $ */
 
 #include "dft.h"
 

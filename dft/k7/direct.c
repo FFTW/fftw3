@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct-k7.c,v 1.4 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: direct.c,v 1.1 2002-06-19 22:47:55 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet.  
    This code handles K7-specific codelets */
