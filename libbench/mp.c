@@ -12,15 +12,8 @@
 #define IRADIX (1.0 / RADIX)
 #define LO(x) ((x) & (RADIX - 1))
 #define HI(x) ((x) >> SHFT)
-#define HI_SIGNED(x)						\
- (((-1L) >> SHFT) == (-1L) ? 					\
-    (((signed long)x) >> SHFT)  /* arithmetic shift works */	\
-  : ((x & (1 << (2 * SHFT - 1))) ?				\
-       (((x) >> SHFT) | (RADIX * (RADIX - 1UL)))		\
-     : ((x) >> SHFT)))
-  
-#define SEXT(x) (((x) < RADIX / 2) ? (x) : (x) + RADIX * (RADIX - 1UL))
-
+#define HI_SIGNED(x) \
+   ((((x) + (ACC)(RADIX >> 1) * RADIX) >> SHFT) - (RADIX >> 1))
 #define ZEROEXP (-32768)
 
 #define LEN 10
@@ -521,7 +514,7 @@ static void bluestein(unsigned int n, bench_complex *a)
 static void mfft0(unsigned int n, bench_complex *a, int sign)
 {
      N *b = (N *)bench_malloc(2 * n * sizeof(N));
-     int i;
+     unsigned int i;
 
      for (i = 0; i < n; ++i) {
 	  fromreal(c_re(a[i]), b[2 * i]);
@@ -537,7 +530,7 @@ static void mfft0(unsigned int n, bench_complex *a, int sign)
 
 static void swapri(unsigned int n, bench_complex *a)
 {
-     int i;
+     unsigned int i;
      for (i = 0; i < n; ++i) {
 	  bench_real t = c_re(a[i]);
 	  c_re(a[i]) = c_im(a[i]);
