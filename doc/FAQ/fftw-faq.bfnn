@@ -120,10 +120,14 @@ versions 5-7, and Sun WorkShop \courier{cc\} version 6, for example.
 
 \courier{gcc\} 2.95.x for Solaris/SPARC produces incorrect code for
 the test program (workaround: recompile the \courier{libbench2\}
-directory with \courier{-O2\}).  NetBSD/macppc 1.6 comes with a
-\courier{gcc\} version that also miscompiles the test program (we
-haven't tried to find a workaround).  \courier{gcc\} 3.2.3 for ARM
-crashes during compilation.
+directory with \courier{-O2\}).
+
+NetBSD/macppc 1.6 comes with a \courier{gcc\} version that also
+miscompiles the test program. (Please report a workaround if you know
+one.)
+
+\courier{gcc\} 3.2.3 for ARM reportedly crashes during compilation.
+(Please report a workaround if you know one.)
 
 \courier{ranlib\} of GNU \courier{binutils\} 2.9.1 on Irix has been
 observed to corrupt the FFTW libraries, causing a link failure when
@@ -132,14 +136,17 @@ on Irix, we suggest deleting it from your system and replacing it with
 a symbolic link to \courier{/bin/echo\}.
 
 If support for SIMD instructions is enabled in FFTW, further compiler
-problems may appear.  Some 3.0.x and 3.1.x versions of \courier{gcc\}
-may crash, although the problem is fixed in version
-3.2. \courier{gcc\} 2.95 on MacOS X miscompiles AltiVec code (fixed in
-later versions).  \courier{gcc\} 3.2.x miscompiles AltiVec
-permutations, but FFTW has a workaround.  Intel's \courier{icc\} 6.0
-misaligns SSE constants, but FFTW has a workaround.  \courier{gcc\}
+problems may appear.  
+
+Some 3.0.x and 3.1.x versions of \courier{gcc\} on \courier{x86\} may
+crash, although the problem is fixed in version 3.2.  \courier{gcc\}
 so-called 2.96 shipping with RedHat 7.3 reportedly crashes when
-compiling SIMD code.
+compiling SIMD code. Intel's \courier{icc\} 6.0 misaligns SSE
+constants, but FFTW has a workaround.
+
+\courier{gcc\} 2.95 on MacOS X miscompiles AltiVec code (fixed in
+later versions).  \courier{gcc\} 3.2.x miscompiles AltiVec
+permutations, but FFTW has a workaround.  
 
 \question 26aug:solarisSucks FFTW does not compile on Solaris, complaining about \courier{const\}.
 
