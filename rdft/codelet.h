@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.7 2002-08-03 21:53:29 stevenj Exp $ */
+/* $Id: codelet.h,v 1.8 2002-08-03 23:38:17 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -167,5 +167,7 @@ struct kr2r_desc_s {
 typedef void (*kr2r) (const R *I, R *O, stride is, stride os,
 		      uint vl, int ivs, int ovs);
 void X(kr2r_register)(planner *p, kr2r codelet, const kr2r_desc *desc);
+
+extern const solvtab X(solvtab_rdft_r2r);
 
 #endif				/* __RDFT_CODELET_H__ */
