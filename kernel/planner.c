@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.79 2002-09-13 14:11:10 athena Exp $ */
+/* $Id: planner.c,v 1.80 2002-09-13 14:13:02 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -249,7 +249,6 @@ static plan *mkplan(planner *ego, problem *p)
 
      md5hash(&m, p, ego);
 
-     sp = 0;
      if ((sol = hlookup(ego, m.s))) {
 	  sp = sol->sp;
 	  if (!sp) return 0; 	  /* known to be infeasible */
@@ -257,6 +256,8 @@ static plan *mkplan(planner *ego, problem *p)
 	  /* reject wisdom if too impatient */
 	  if (IMPATIENCE(sol->flags) > IMPATIENCE(ego->planner_flags))
 	       sp = 0;
+     } else {
+	  sp = 0; /* nothing known about this problem */
      }
 
      ego->inferior_mkplan(ego, p, &pln, &sp);
