@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.1 2002-06-03 12:09:05 athena Exp $ */
+/* $Id: timer.c,v 1.2 2002-06-03 13:18:46 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdio.h>
@@ -183,7 +183,7 @@ static int find_n(double tmin)
 
 	       k /= t;
 	       k *= tmin;
-	       n = k + 1;
+	       n = ((int)k) + 1;
 	  }
 	  t = time_n(n);
      }

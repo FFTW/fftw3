@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.3 2002-06-03 12:09:05 athena Exp $ */
+/* $Id: ifftw.h,v 1.4 2002-06-03 13:18:46 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -109,9 +109,6 @@ extern const flopcnt fftw_flops_zero;
 /* minmax.c: */
 int fftw_imax(int a, int b);
 int fftw_imin(int a, int b);
-
-/* rand.c: */
-double fftw_drand(void);
 
 /* tensor.c: */
 typedef struct {
