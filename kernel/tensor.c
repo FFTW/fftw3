@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.24 2002-09-01 23:22:53 athena Exp $ */
+/* $Id: tensor.c,v 1.25 2002-09-01 23:51:50 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -89,24 +89,6 @@ tensor X(mktensor_rowmajor)(uint rnk, const uint *n,
           }
      }
      return x;
-}
-
-int X(tensor_equal)(const tensor a, const tensor b)
-{
-     uint i;
-
-     if (a.rnk != b.rnk)
-          return 0;
-
-     if (!FINITE_RNK(a.rnk))
-          return 1;
-
-     for (i = 0; i < a.rnk; ++i) {
-          iodim *ad = a.dims + i, *bd = b.dims + i;
-          if (ad->n != bd->n || ad->is != bd->is || ad->os != bd->os)
-               return 0;
-     }
-     return 1;
 }
 
 uint X(tensor_sz)(const tensor sz)
@@ -388,31 +370,4 @@ void X(tensor_print)(tensor x, printer *p)
 	  }
      }
      p->print(p, ")");
-}
-
-int X(tensor_scan)(tensor *x, scanner *sc)
-{
-     int r;
-     if (!sc->scan(sc, "(t:%d", &r))
-	  return 0;
-     if (r < 0 && r != -1)
-	  return 0;
-     talloc(x, r < 0 ? RNK_MINFTY : (uint) r);
-     if (FINITE_RNK(x->rnk)) {
-	  uint i;
-	  for (i = 0; i < x->rnk; ++i) {
-	       iodim *d = x->dims + i;
-	       if (!sc->scan(sc, " (%u %d %d)", &d->n, &d->is, &d->os)) {
-		    X(tensor_destroy)(*x);
-		    x->dims = 0;
-		    return 0;
-	       }
-	  }
-     }
-     if (!sc->scan(sc, ")")) {
-	  X(tensor_destroy)(*x);
-	  x->dims = 0;
-	  return 0;
-     }
-     return 1;
 }

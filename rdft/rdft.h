@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.23 2002-08-30 05:31:47 stevenj Exp $ */
+/* $Id: rdft.h,v 1.24 2002-09-01 23:51:50 athena Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -151,9 +151,6 @@ void X(rdft2_rank_geq2_register)(planner *p);
 void X(rdft2_radix2_register)(planner *p);
 
 /****************************************************************************/
-
-void X(problem_rdft_register)(planner *p);
-void X(problem_rdft2_register)(planner *p);
 
 /* configurations */
 void X(rdft_conf_standard)(planner *p);

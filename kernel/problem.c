@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.4 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: problem.c,v 1.5 2002-09-01 23:51:50 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -28,21 +28,12 @@ problem *X(mkproblem)(size_t sz, const problem_adt *adt)
      problem *p = (problem *)fftw_malloc(sz, PROBLEMS);
 
      p->adt = adt;
-     p->refcnt = 1;
      return p;
 }
 
 /* destructor */
 void X(problem_destroy)(problem *ego)
 {
-     if ((--ego->refcnt) == 0)
-	  DESTROY(ego);
-}
-
-/* ``copy'' the problem */
-problem *X(problem_dup)(problem *ego)
-{
-     ++ego->refcnt;
-     return ego;
+     DESTROY(ego);
 }
 

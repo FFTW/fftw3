@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.26 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: dft.h,v 1.27 2002-09-01 23:51:50 athena Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -81,8 +81,6 @@ void X(dft_buffered_register)(planner *p);
 void X(dft_generic_register)(planner *p);
 void X(dft_rader_register)(planner *p);
 void X(dft_nop_register)(planner *p);
-
-void X(problem_dft_register)(planner *p);
 
 /* configurations */
 void X(dft_conf_standard)(planner *p);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.102 2002-09-01 23:22:53 athena Exp $ */
+/* $Id: ifftw.h,v 1.103 2002-09-01 23:51:50 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -60,7 +60,6 @@ typedef fftw_real R;
 /* get rid of that object-oriented stink: */
 #define DESTROY(thing) ((thing)->adt->destroy)(thing)
 #define REGISTER_SOLVER(p, s) ((p)->adt->register_solver)((p), (s))
-#define REGISTER_PROBLEM(p, padt) ((p)->adt->register_problem)((p), (padt))
 #define MKPLAN(plnr, prblm) ((plnr)->adt->mkplan)((plnr), (prblm))
 
 #define STRINGIZEx(x) #x
@@ -260,7 +259,6 @@ tensor X(mktensor_2d)(uint n0, int is0, int os0,
 tensor X(mktensor_rowmajor)(uint rnk, const uint *n,
 			    const uint *niphys, const uint *nophys,
                             int is, int os);
-int X(tensor_equal)(const tensor a, const tensor b);
 uint X(tensor_sz)(const tensor sz);
 void X(tensor_md5)(md5 *p, const tensor t);
 uint X(tensor_max_index)(const tensor sz);
@@ -280,7 +278,6 @@ void X(tensor_split)(const tensor sz, tensor *a, uint a_rnk, tensor *b);
 void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os);
 void X(tensor_destroy)(tensor sz);
 void X(tensor_print)(tensor sz, printer *p);
-int X(tensor_scan)(tensor *x, scanner *sc);
 
 /*-----------------------------------------------------------------------*/
 /* dotens.c: */
@@ -301,30 +298,18 @@ void X(dotens2)(tensor sz0, tensor sz1, dotens2_closure *k);
 /*-----------------------------------------------------------------------*/
 /* problem.c: */
 typedef struct {
-     int (*equal) (const problem *ego, const problem *p);
      void (*hash) (const problem *ego, md5 *p);
      void (*zero) (const problem *ego);
      void (*print) (problem *ego, printer *p);
      void (*destroy) (problem *ego);
-     int (*scan)(scanner *sc, problem **p);
-     const char *nam;
 } problem_adt;
 
 struct problem_s {
      const problem_adt *adt;
-     int refcnt;
 };
-
-typedef struct prbdesc_s {
-     const problem_adt *adt;
-     const char *reg_nam;
-     int mark;
-     struct prbdesc_s *cdr;
-} prbdesc;
 
 problem *X(mkproblem)(size_t sz, const problem_adt *adt);
 void X(problem_destroy)(problem *ego);
-problem *X(problem_dup)(problem *ego);
 
 /*-----------------------------------------------------------------------*/
 /* print.c */
@@ -353,11 +338,9 @@ struct scanner_s {
      int (*vscan)(scanner *sc, const char *format, va_list ap);
      int (*getchr)(scanner *sc);
      int ungotc;
-     const prbdesc *problems;
 };
 
-scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc),
-		      const prbdesc *probs);
+scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc));
 void X(scanner_destroy)(scanner *sc);
 int X(scanner_getchr)(scanner *sc);
 void X(scanner_ungetchr)(scanner *sc, int c);
@@ -365,8 +348,8 @@ void X(scanner_ungetchr)(scanner *sc, int c);
 /*-----------------------------------------------------------------------*/
 /* scanners.c */
 
-scanner *X(mkscanner_file)(FILE *f, const prbdesc *probs);
-scanner *X(mkscanner_str)(const char *s, const prbdesc *probs);
+scanner *X(mkscanner_file)(FILE *f);
+scanner *X(mkscanner_str)(const char *s);
 
 /*-----------------------------------------------------------------------*/
 /* traverse.c */
@@ -459,7 +442,6 @@ typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
 typedef struct {
      void (*register_solver)(planner *ego, solver *s);
-     void (*register_problem)(planner *ego, const problem_adt *adt);
      plan *(*mkplan)(planner *ego, problem *p);
      void (*forget)(planner *ego, amnesia a);
      void (*exprt)(planner *ego, printer *p); /* export is a reserved
@@ -479,7 +461,6 @@ struct planner_s {
      const char *cur_reg_nam;
      slvdesc *solvers, **solvers_tail;
      solutions **sols;
-     prbdesc *problems;
      void (*destroy)(planner *ego);
      void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvdesc **);
      uint hashsiz;
@@ -638,7 +619,6 @@ void X(null_awake)(plan *ego, int awake);
 int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
 uint X(alignment_of)(R *p);
-R *X(ptr_with_alignment)(uint algn);
 extern const char *const FFTW(version);
 extern const char *const FFTW(cc);
 extern const char *const FFTW(codelet_optim);

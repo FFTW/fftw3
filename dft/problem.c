@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.17 2002-09-01 23:22:53 athena Exp $ */
+/* $Id: problem.c,v 1.18 2002-09-01 23:51:50 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -34,6 +34,7 @@ static void destroy(problem *ego_)
 static void hash(const problem *p_, md5 *m)
 {
      const problem_dft *p = (const problem_dft *) p_;
+     X(md5puts)(m, "dft", 3);
      X(md5int)(m, p->ri == p->ro);
      X(md5ptrdiff)(m, p->ii - p->ri);
      X(md5ptrdiff)(m, p->io - p->ro);
@@ -41,35 +42,6 @@ static void hash(const problem *p_, md5 *m)
      X(md5uint)(m, X(alignment_of)(p->ro));
      X(tensor_md5)(m, p->sz);
      X(tensor_md5)(m, p->vecsz);
-}
-
-static int equal(const problem *ego_, const problem *problem_)
-{
-     if (ego_->adt == problem_->adt) {
-          const problem_dft *e = (const problem_dft *) ego_;
-          const problem_dft *p = (const problem_dft *) problem_;
-
-          return (1
-
-		  /* both in-place or both out-of-place */
-                  && ((p->ri == p->ro) == (e->ri == e->ro))
-
-		  /* distance between real and imag must be the same (1) */
-		  && p->ii - p->ri == e->ii - e->ri
-
-		  /* idem for output */
-		  && p->io - p->ro == e->io - e->ro
-
-		  /* aligments must match */
-		  && X(alignment_of)(p->ri) == X(alignment_of)(e->ri)
-		  && X(alignment_of)(p->ro) == X(alignment_of)(e->ro)
-		  /* alignments for imag are implied by (1) */
-
-		  && X(tensor_equal)(p->sz, e->sz)
-                  && X(tensor_equal)(p->vecsz, e->vecsz)
-	       );
-     }
-     return 0;
 }
 
 void X(dft_zerotens)(tensor sz, R *ri, R *ii)
@@ -108,25 +80,6 @@ static void print(problem *ego_, printer *p)
 	      &ego->vecsz);
 }
 
-static int scan(scanner *sc, problem **p)
-{
-     tensor sz = { 0, 0 }, vecsz = { 0, 0 };
-     uint align;
-     ptrdiff_t offio, offi, offo;
-     R *ri, *ro;
-
-     if (!sc->scan(sc, "%u %td %td %td %T %T",
-		   &align, &offio, &offi, &offo, &sz, &vecsz)) {
-	  X(tensor_destroy)(sz);
-	  X(tensor_destroy)(vecsz);
-	  return 0;
-     }
-     ri = X(ptr_with_alignment)(align);
-     ro = ri + offio;
-     *p = X(mkproblem_dft_d)(sz, vecsz, ri, ri + offi, ro, ro + offo);
-     return 1;
-}
-
 static void zero(const problem *ego_)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
@@ -137,13 +90,10 @@ static void zero(const problem *ego_)
 
 static const problem_adt padt =
 {
-     equal,
      hash,
      zero,
      print,
-     destroy,
-     scan,
-     "dft"
+     destroy
 };
 
 int X(problem_dft_p)(const problem *p)
@@ -180,9 +130,4 @@ problem *X(mkproblem_dft_d)(tensor sz, tensor vecsz,
      X(tensor_destroy)(vecsz);
      X(tensor_destroy)(sz);
      return p;
-}
-
-void X(problem_dft_register)(planner *p)
-{
-     REGISTER_PROBLEM(p, &padt);
 }

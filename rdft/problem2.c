@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.14 2002-09-01 23:22:54 athena Exp $ */
+/* $Id: problem2.c,v 1.15 2002-09-01 23:51:50 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -35,6 +35,7 @@ static void destroy(problem *ego_)
 static void hash(const problem *p_, md5 *m)
 {
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
+     X(md5puts)(m, "rdft2", 5);
      X(md5int)(m, p->r == p->rio);
      X(md5int)(m, p->r == p->iio);
      X(md5ptrdiff)(m, p->iio - p->rio);  /* (1) */
@@ -44,35 +45,6 @@ static void hash(const problem *p_, md5 *m)
      X(md5int)(m, p->kind);
      X(tensor_md5)(m, p->sz);
      X(tensor_md5)(m, p->vecsz);
-}
-
-static int equal(const problem *ego_, const problem *problem_)
-{
-     if (ego_->adt == problem_->adt) {
-          const problem_rdft2 *e = (const problem_rdft2 *) ego_;
-          const problem_rdft2 *p = (const problem_rdft2 *) problem_;
-
-          return (1
-
-		  /* both in-place or both out-of-place */
-                  && ((p->r == p->rio) == (e->r == e->rio))
-                  && ((p->r == p->iio) == (e->r == e->iio))
-
-		  /* distance between real and imag must be the same (1) */
-                  && p->iio - p->rio == e->iio - e->rio
-
-		  /* aligments must match */
-		  && X(alignment_of)(p->r) == X(alignment_of)(e->r)
-		  && X(alignment_of)(p->rio) == X(alignment_of)(e->rio)
-		  /* alignment of imag is implied by (1) */
-
-		  && p->kind == e->kind
-
-		  && X(tensor_equal)(p->sz, e->sz)
-                  && X(tensor_equal)(p->vecsz, e->vecsz)
-	       );
-     }
-     return 0;
 }
 
 static void print(problem *ego_, printer *p)
@@ -85,25 +57,6 @@ static void print(problem *ego_, printer *p)
 	      (int)(ego->kind),
 	      &ego->sz,
 	      &ego->vecsz);
-}
-
-static int scan(scanner *sc, problem **p)
-{
-     tensor sz = { 0, 0 }, vecsz = { 0, 0 };
-     uint align;
-     ptrdiff_t offr, offi;
-     int kind;
-     R *r;
-     
-     if (!sc->scan(sc, "%u %td %td %d %T %T",
-		   &align, &offr, &offi, &kind, &sz, &vecsz)) {
-	  X(tensor_destroy)(sz);
-	  X(tensor_destroy)(vecsz);
-	  return 0;
-     }
-     r = X(ptr_with_alignment)(align);
-     *p = X(mkproblem_rdft2_d)(sz, vecsz, r, r + offr, r + offi, kind);
-     return 1;
 }
 
 static void zero(const problem *ego_)
@@ -128,13 +81,10 @@ static void zero(const problem *ego_)
 
 static const problem_adt padt =
 {
-     equal,
      hash,
      zero,
      print,
-     destroy,
-     scan,
-     "rdft2"
+     destroy
 };
 
 int X(problem_rdft2_p)(const problem *p)
@@ -213,9 +163,4 @@ int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim)
      return(p->vecsz.dims[vdim].is == p->vecsz.dims[vdim].os
 	    && X(iabs)(p->vecsz.dims[vdim].os)
 	    >= X(uimax)(Nc * X(iabs)(os), N * X(iabs)(is)));
-}
-
-void X(problem_rdft2_register)(planner *p)
-{
-     REGISTER_PROBLEM(p, &padt);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.6 2002-08-31 01:29:10 athena Exp $ */
+/* $Id: scan.c,v 1.7 2002-09-01 23:51:50 athena Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -134,28 +134,6 @@ static R getR(scanner *sc, int *ret)
      return x;
 }
 
-static int getproblem(scanner *sc, problem **p)
-{
-     char buf[BSZ];
-
-     *p = (problem *) 0;
-
-     if (!sc->scan(sc, "(%*s", BSZ, buf)) return 0;
-
-     if (!strcmp(buf, "null"))
-	  return sc->scan(sc, ")");
-     else {
-	  const prbdesc *pp;
-	  for (pp = sc->problems; pp && strcmp(pp->adt->nam,buf); pp = pp->cdr)
-	       ;
-	  if (!pp)
-	       return 0;
-	  if (!pp->adt->scan(sc, p)) return 0;
-     }
-     
-     return sc->scan(sc, ")");
-}
-
 /* vscan is mostly scanf-like, with our additional format specifiers,
    but with a few twists.  It returns simply 0 or 1 indicating whether
    the match was successful. '(' and ')' in the format string match
@@ -217,24 +195,6 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 		       case '(': case ')':
 			    eat_blanks(sc);
 			    break;
-		       case 'P': {
-			    /* scan problem */
-			    problem **x = va_arg(ap, problem **);
-			    if (!getproblem(sc, x)) {
-				 if (*x) {
-				      X(problem_destroy)(*x);
-				      *x = 0;
-				 }
-				 return 0;
-			    }
-			    break;
-		       }
-		       case 'T': {
-			    /* scan tensor */
-			    tensor *x = va_arg(ap, tensor *);
-			    if (!X(tensor_scan)(x, sc)) return 0;
-			    break;
-		       }
 		       case '0': case '1': case '2': case '3': case '4':
 		       case '5': case '6': case '7': case '8': case '9': {
 			    fmt_len = c - '0';
@@ -275,15 +235,13 @@ static int scan(scanner *sc, const char *format, ...)
      return ret;
 }
 
-scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc),
-		      const prbdesc *probs)
+scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc))
 {
      scanner *s = (scanner *)fftw_malloc(size, OTHER);
      s->scan = scan;
      s->vscan = vscan;
      s->getchr = getchr;
      s->ungotc = EOF;
-     s->problems = probs;
      return s;
 }
 

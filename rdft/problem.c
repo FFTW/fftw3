@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.23 2002-09-01 23:22:54 athena Exp $ */
+/* $Id: problem.c,v 1.24 2002-09-01 23:51:50 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -41,45 +41,13 @@ static void kind_hash(md5 *m, const rdft_kind *kind, uint rnk)
 static void hash(const problem *p_, md5 *m)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
+     X(md5puts)(m, "rdft", 4);
      X(md5int)(m, p->I == p->O);
      kind_hash(m, p->kind, p->sz.rnk);
      X(md5uint)(m, X(alignment_of)(p->I));
      X(md5uint)(m, X(alignment_of)(p->O));
      X(tensor_md5)(m, p->sz);
      X(tensor_md5)(m, p->vecsz);
-}
-
-static int kind_equal(const rdft_kind *k1, const rdft_kind *k2, uint rnk)
-{
-     uint i;
-     for (i = 0; i < rnk; ++i)
-	  if (k1[i] != k2[i])
-	       return 0;
-     return 1;
-}
-
-static int equal(const problem *ego_, const problem *problem_)
-{
-     if (ego_->adt == problem_->adt) {
-          const problem_rdft *e = (const problem_rdft *) ego_;
-          const problem_rdft *p = (const problem_rdft *) problem_;
-
-          return (1
-
-		  /* both in-place or both out-of-place */
-                  && ((p->I == p->O) == (e->I == e->O))
-
-		  /* aligments must match */
-		  && X(alignment_of)(p->I) == X(alignment_of)(e->I)
-		  && X(alignment_of)(p->O) == X(alignment_of)(e->O)
-
-		  && X(tensor_equal)(p->sz, e->sz)
-                  && X(tensor_equal)(p->vecsz, e->vecsz)
-
-		  && kind_equal(p->kind, e->kind, p->sz.rnk)
-	       );
-     }
-     return 0;
 }
 
 void X(rdft_zerotens)(tensor sz, R *I)
@@ -166,40 +134,6 @@ static void print(problem *ego_, printer *p)
      p->print(p, ")");
 }
 
-static int scan(scanner *sc, problem **p)
-{
-     tensor sz = { 0, 0 }, vecsz = { 0, 0 };
-     uint align, i;
-     ptrdiff_t offio;
-     rdft_kind *kind = (rdft_kind *) 0;
-     R *I;
-     
-     if (!sc->scan(sc, "%u %td %T %T",
-		   &align, &offio, &sz, &vecsz))
-	  goto nada;
-     kind = (rdft_kind *) fftw_malloc(sizeof(rdft_kind) * sz.rnk, OTHER);
-     for (i = 0; i < sz.rnk; ++i) {
-	  int k;
-	  if (!sc->scan(sc, " %d", &k))
-	       goto nada;
-	  kind[i] = (rdft_kind) k; /* FIXME: check range? */
-     }
-     if (!sc->scan(sc,")"))
-	  goto nada;
-     
-     I = X(ptr_with_alignment)(align);
-     *p = X(mkproblem_rdft_d)(sz, vecsz, I, I + offio, kind);
-     X(free)(kind);
-     return 1;
-
- nada:
-     if (kind)
-	  X(free)(kind);
-     X(tensor_destroy)(sz);
-     X(tensor_destroy)(vecsz);
-     return 0;
-}
-
 static void zero(const problem *ego_)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
@@ -212,13 +146,10 @@ static void zero(const problem *ego_)
 
 static const problem_adt padt =
 {
-     equal,
      hash,
      zero,
      print,
-     destroy,
-     scan,
-     "rdft"
+     destroy
 };
 
 int X(problem_rdft_p)(const problem *p)
@@ -277,9 +208,3 @@ problem *X(mkproblem_rdft_1_d)(tensor sz, tensor vecsz,
      A(sz.rnk <= 1);
      return X(mkproblem_rdft_d)(sz, vecsz, I, O, &kind);
 }
-
-void X(problem_rdft_register)(planner *p)
-{
-     REGISTER_PROBLEM(p, &padt);
-}
-

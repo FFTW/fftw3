@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.51 2002-09-01 23:22:53 athena Exp $ */
+/* $Id: planner.c,v 1.52 2002-09-01 23:51:50 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -56,19 +56,6 @@ static void register_solver(planner *ego, solver *s)
 	  *ego->solvers_tail = n;
 	  ego->solvers_tail = &n->cdr;
      }
-}
-
-static void register_problem(planner *ego, const problem_adt *adt)
-{
-     prbdesc *p;
-     for (p = ego->problems; p; p = p->cdr)
-	  if (p->adt == adt)
-	       return;
-     p = (prbdesc *) fftw_malloc(sizeof(prbdesc), OTHER);
-     p->adt = adt;
-     p->reg_nam = ego->cur_reg_nam;
-     p->cdr = ego->problems;
-     ego->problems = p;
 }
 
 /* memoization routines */
@@ -292,6 +279,7 @@ static void htab_destroy(planner *ego)
 /* tantus labor non sit cassus */
 static void exprt(planner *ego, printer *p)
 {
+#if 0
      solutions *s;
      uint h;
 
@@ -304,10 +292,12 @@ static void exprt(planner *ego, printer *p)
 		    p->print(p, "(s %d %d)", 
 			     s->sp ? s->sp->id : 0, s->flags);
      p->print(p, ")");
+#endif
 }
 
 static int imprt(planner *ego, scanner *sc)
 {
+#if 0
      slvdesc **slvrs;
      problem *p = 0;
      int i, ret = 0;
@@ -347,8 +337,10 @@ static int imprt(planner *ego, scanner *sc)
      if (p)
 	  X(problem_destroy)(p);
      return ret;
+#endif
 }
 
+#if 0
 static void clear_problem_marks(planner *ego)
 {
      prbdesc *pp;
@@ -365,9 +357,11 @@ static void mark_problem(planner *ego, problem *p)
 	       return;
 	  }
 }
+#endif
 
 static void exprt_conf(planner *ego, printer *p)
 {
+#if 0
      solutions *s;
      prbdesc *pp;
      uint h;
@@ -387,9 +381,7 @@ static void exprt_conf(planner *ego, printer *p)
           for (s = ego->sols[h]; s; s = s->cdr) {
                if (BLESSEDP(s) && s->sp && s->sp->reg_nam && s->sp->id > 0) {
 		    s->sp->id = 0; /* mark to prevent duplicates */
-#if 0
 		    mark_problem(ego, s->p);
-#endif
 		    p->print(p, "          extern void %s(planner*);\n",
 			     s->sp->reg_nam);
 	       }
@@ -452,6 +444,7 @@ static void exprt_conf(planner *ego, printer *p)
 	      "     %s(s, p);\n"
 	      "     /* FIXME: import wisdom */\n"
 	      "}\n", STRINGIZE(X(solvtab_exec)));
+#endif
 }
 
 static void hooknil(plan *pln, const problem *p, int optimalp)
@@ -472,7 +465,7 @@ planner *X(mkplanner)(size_t sz,
 		      uint flags)
 {
      static const planner_adt padt = {
-	  register_solver, register_problem,
+	  register_solver, 
 	  mkplan, forget, exprt, imprt, exprt_conf, slv_mkplan
      };
 
@@ -486,7 +479,6 @@ planner *X(mkplanner)(size_t sz,
      p->cur_reg_nam = 0;
      p->solvers = 0;
      p->solvers_tail = &p->solvers;
-     p->problems = 0;
      p->sols = 0;
      p->hashsiz = 0;
      p->cnt = 0;
@@ -501,7 +493,6 @@ planner *X(mkplanner)(size_t sz,
 void X(planner_destroy)(planner *ego)
 {
      slvdesc *l, *l0;
-     prbdesc *p, *p0;
 
      /* destroy local state, if any */
      if (ego->destroy)
@@ -515,12 +506,6 @@ void X(planner_destroy)(planner *ego)
           l0 = l->cdr;
           X(solver_destroy)(l->slv);
           X(free)(l);
-     }
-     
-     /* destroy all problems (a feature sure to be popular) */
-     for (p = ego->problems; p; p = p0) {
-          p0 = p->cdr;
-          X(free)(p);
      }
 
      X(free)(ego);
