@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.18 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: cycle.h,v 1.19 2003-03-16 19:18:32 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -264,7 +264,6 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 	  (double)(t1.tv_nsec - t0.tv_nsec);
 }
 #define HAVE_TICK_COUNTER
-#define TIME_MIN_TICK 10000.0
 #endif
 
 /*----------------------------------------------------------------*/
