@@ -87,7 +87,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	  p->sign = sign; /* cache for execute_dft */
 	  
 	  /* re-create plan from wisdom, adding blessing */
-	  p->pln = mkplan(plnr, sign, flags | FFTW_ESTIMATE, prb, 1);
+	  p->pln = mkplan(plnr, sign, flags | pats[pat - 1], prb, 1);
 	  AWAKE(p->pln, 1);
 	  
 	  /* we don't use pln for p->pln, above, since by re-creating the
