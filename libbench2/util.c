@@ -182,8 +182,9 @@ void *bench_malloc(size_t n)
      if (n == 0) n = 1;
 
 #if defined(WITH_OUR_MALLOC16) && (MIN_ALIGNMENT == 16)
-     /* Our own 16-byte aligned malloc/free.  Assumes sizeof(void*) is a
-	power of two <= 8 and that malloc is at least sizeof(void*)-aligned. */
+     /* Our own 16-byte aligned malloc/free.  Assumes sizeof(void*) is
+	a power of two <= 8 and that malloc is at least
+	sizeof(void*)-aligned.  Assumes size_t = uintptr_t.  */
      {
 	  void *p0;
 	  if ((p0 = malloc(n + 16))) {
