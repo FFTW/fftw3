@@ -27,6 +27,8 @@
 #define VL 2            /* SIMD complex vector length */
 #define ALIGNMENT 8     /* alignment for LD/ST */
 #define ALIGNMENTA 16   /* alignment for LDA/STA */
+#define SIMD_VSTRIDE_OKA(x) ((x) == 2)
+#define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
 #ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
@@ -192,8 +194,6 @@ static __inline__ V BYTWJ2(const R *t, V sr)
 #define RIGHT_CPU X(have_altivec)
 extern int RIGHT_CPU(void);
 
-#define SIMD_VSTRIDE_OKA(x) ((x) == 2)
-#define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 #define BEGIN_SIMD()
 #define END_SIMD()
 
