@@ -113,7 +113,6 @@ static void apply(const plan *ego_, R *I, R *O)
      /* do inverse permutation to unshuffle the output;
 	also "fold" padded outputs (if any) back to get cyclic convolution */
      A(gpower == 1);
-     A(r - 1 == rpad || rpad >= 2*(r - 1) - 1);
      g = ego->ginv;
      if (rpad == r - 1) {
 	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
@@ -121,6 +120,7 @@ static void apply(const plan *ego_, R *I, R *O)
 	  }
      }
      else {
+	  A(rpad >= 2*(r - 1) - 1);
 	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
 	       O[gpower * os] = buf[k] + buf[k + (r - 1)];
 	  }
