@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.28 2005-02-25 01:07:38 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.29 2005-02-26 15:04:30 athena Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -75,10 +75,10 @@ static void rec_transpose(R *A, R *B, int n0, int n1,
 			  int lda, int ldb, int vl)
 {
      /* FIXME: inline and get rid of this routine */
-     X(cpy2d_tiled)(A, B,
-		    n0, lda * vl, vl, 
-		    n1, vl, ldb * vl,
-		    vl);
+     X(cpy2d)(A, B,
+	      n0, lda * vl, vl, 
+	      n1, vl, ldb * vl,
+	      vl);
 }
 
 static void rec_transpose_sq_ip(R *M, int n, int vl)
