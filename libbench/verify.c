@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.6 2002-08-15 20:30:03 athena Exp $ */
+/* $Id: verify.c,v 1.7 2002-08-15 21:25:37 athena Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -289,7 +289,7 @@ static double linear(struct problem *p,
      return e;
 }
 
-static double impulse(struct problem *p,
+static double impulse0(struct problem *p,
 		      bench_complex *inA,
 		      bench_complex *inB,
 		      bench_complex *inC,
@@ -301,15 +301,8 @@ static double impulse(struct problem *p,
 		      double tol)
 {
      unsigned int n = p->size;
-     const bench_complex one = {1.0, 0.0};
-     const bench_complex zero = {0.0, 0.0};
      unsigned int i;
      double e = 0.0;
-
-     /* test 2: check that the unit impulse is transformed properly */
-     caset(inA, n, zero);
-     inA[0] = one;
-     caset(outA, n, one);
 
      /* a simple test first, to help with debugging: */
      do_fft(p, inA, outB);
@@ -323,6 +316,38 @@ static double impulse(struct problem *p,
 	  caadd(tmp, outB, outC, n);
 	  e = dmax(e, acmp(tmp, outA, n, "impulse response", tol));
      }
+     return e;
+}
+
+static double impulse(struct problem *p,
+		      bench_complex *inA,
+		      bench_complex *inB,
+		      bench_complex *inC,
+		      bench_complex *outA,
+		      bench_complex *outB,
+		      bench_complex *outC,
+		      bench_complex *tmp,
+		      unsigned int rounds,
+		      double tol)
+{
+     double e;
+     const bench_complex one = {1.0, 0.0};
+     const bench_complex zero = {0.0, 0.0};
+     unsigned int n = p->size;
+
+     /* test 2: check that the unit impulse is transformed properly */
+     caset(inA, n, zero);
+     inA[0] = one;
+     caset(outA, n, one);
+     e = impulse0(p, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
+
+     /* check that ones(n, 1) is transformed properly */
+     caset(inA, n, one);
+     caset(outA, n, zero);
+     c_re(outA[0]) = n;
+     e = dmax(impulse0(p, inA, inB, inC, outA, outB, outC, tmp, rounds, tol),
+	      e);
+     
      return e;
 }
 
