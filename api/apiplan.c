@@ -20,9 +20,11 @@
 
 #include "api.h"
 
-static apiplan *mkapiplan0(int sign, unsigned flags, problem *prb)
-{
-     plan *pln, *pln0;
+
+apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
+WITH_ALIGNED_STACK({
+     plan *pln;
+     plan *pln0;
      apiplan *p = 0;
      planner *plnr = X(the_planner)();
      
@@ -55,11 +57,6 @@ static apiplan *mkapiplan0(int sign, unsigned flags, problem *prb)
      plnr->adt->forget(plnr, FORGET_ACCURSED);
      
      return p;
-}
-
-apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
-WITH_ALIGNED_STACK({
-     return mkapiplan0(sign, flags, prb);
 })
 
 void X(destroy_plan)(X(plan) p)
