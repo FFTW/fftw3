@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.159 2002-09-25 11:37:38 athena Exp $ */
+/* $Id: ifftw.h,v 1.160 2002-09-26 19:06:38 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -304,6 +304,7 @@ void X(tensor_destroy)(tensor *sz);
 void X(tensor_destroy2)(tensor *a, tensor *b);
 void X(tensor_destroy4)(tensor *a, tensor *b, tensor *c, tensor *d);
 void X(tensor_print)(const tensor *sz, printer *p);
+int X(dimcmp)(const iodim *a, const iodim *b);
 
 /*-----------------------------------------------------------------------*/
 /* problem.c: */

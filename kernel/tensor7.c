@@ -18,14 +18,13 @@
  *
  */
 
-/* $Id: tensor7.c,v 1.1 2002-09-22 14:21:36 athena Exp $ */
+/* $Id: tensor7.c,v 1.2 2002-09-26 19:06:38 athena Exp $ */
 
 #include "ifftw.h"
 
-/* qsort comparison function */
-static int cmp_iodim(const void *av, const void *bv)
+/* total order among iodim's */
+int X(dimcmp)(const iodim *a, const iodim *b)
 {
-     const iodim *a = (const iodim *) av, *b = (const iodim *) bv;
      if (b->is != a->is)
           return (b->is - a->is);	/* shorter strides go later */
      if (b->os != a->os)
@@ -65,7 +64,8 @@ tensor *X(tensor_compress)(const tensor *sz)
                x->dims[rnk++] = sz->dims[i];
      }
 
-     qsort(x->dims, (size_t)x->rnk, sizeof(iodim), cmp_iodim);
+     qsort(x->dims, (size_t)x->rnk, sizeof(iodim),
+	   (int (*)(const void *, const void *))X(dimcmp));
 
      return x;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.7 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.8 2002-09-26 19:06:38 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -66,9 +66,7 @@ static int pickdim(const tensor *s, uint *pdim0, uint *pdim1)
 
      for (dim0 = 0; dim0 < s->rnk; ++dim0)
           for (dim1 = dim0 + 1; dim1 < s->rnk; ++dim1)
-               if (s->dims[dim0].n == s->dims[dim1].n &&
-		   s->dims[dim0].is == s->dims[dim1].os &&
-		   s->dims[dim0].os == s->dims[dim1].is) {
+               if (!X(dimcmp)(s->dims + dim0, s->dims + dim1)) {
                     *pdim0 = dim0;
                     *pdim1 = dim1;
                     return 1;

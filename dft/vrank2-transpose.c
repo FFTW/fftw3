@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.14 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: vrank2-transpose.c,v 1.15 2002-09-26 19:06:38 athena Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -62,13 +62,12 @@ static int applicable(const problem *p_)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *)p_;
+	  const iodim *d = p->vecsz->dims;
           return (1
                   && p->ri == p->ro
                   && p->sz->rnk == 0
                   && p->vecsz->rnk == 2
-                  && p->vecsz->dims[0].n == p->vecsz->dims[1].n
-                  && p->vecsz->dims[0].is == p->vecsz->dims[1].os
-                  && p->vecsz->dims[0].os == p->vecsz->dims[1].is
+                  && !X(dimcmp)(d + 0, d + 1)
 	       );
      }
      return 0;
