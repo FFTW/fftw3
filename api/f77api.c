@@ -98,18 +98,7 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
 
 /*-----------------------------------------------------------------------*/
 
-/* Fortran-like (e.g. as in BLAS) type prefixes for F77 interface */
-#if defined(FFTW_SINGLE)
-#  define x77(name) CONCAT(sfftw_, name)
-#  define X77(NAME) CONCAT(SFFTW_, NAME)
-#elif defined(FFTW_LDOUBLE)
-/* FIXME: what is best?  BLAS uses D..._X, apparently.  Ugh. */
-#  define x77(name) CONCAT(lfftw_, name)
-#  define X77(NAME) CONCAT(LFFTW_, NAME)
-#else
-#  define x77(name) CONCAT(dfftw_, name)
-#  define X77(NAME) CONCAT(DFFTW_, NAME)
-#endif
+#include "x77.h"
 
 #define F77x(a, A) F77_FUNC(a, A)
 #define F77(a, A) F77x(x77(a), X77(A))
