@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.187 2003-04-09 07:01:03 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.188 2003-04-09 10:10:40 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -197,6 +197,7 @@ Advanced Interface
 
 Guru Interface
 
+* Interleaved and split arrays::  
 * Guru vector and transform sizes::  
 * Guru Complex DFTs::           
 * Guru Real-data DFTs::         
@@ -1825,8 +1826,8 @@ the arrays for which it was planned (which must still exist).  The plan
 is not modified, and @code{fftw_execute} can be called as many times as
 desired.
 
-(Alternatively, there is a guru interface for applying a given plan to a
-different array, if sufficient care is taken.  @xref{Guru Interface}.)
+To apply a given plan to a different array, you can use the guru
+interface.  @xref{Guru Interface}.
 
 @code{fftw_execute} (and equivalents) is the only function in FFTW
 guaranteed to be thread-safe; see @ref{Thread safety}.
@@ -2664,18 +2665,20 @@ size and stride.
 One can also use more general complex-number formats, e.g. separate real
 and imaginary arrays.
 
-In addition to the more flexible planner interface, there are also guru
-generalizations of @code{fftw_execute} that allow a given plan to be
-executed on a different array (sufficiently similar to the original).
-Note that in order to use the guru execute functions, you do @emph{not}
-need to use the guru planner interface: you can create plans with the
-basic or advanced interface and execute them with the guru interface.
+In addition to the more flexible planner interface, there are also
+guru generalizations of @code{fftw_execute} that allow a given plan to
+be executed on a different array (sufficiently similar to the
+original).  Note that in order to use the guru execute functions, you
+do not need to use the guru planner interface: you can create plans
+with the basic or advanced interface and execute them with the guru
+interface.
 
 For those users who require the flexibility of the guru interface, it is
 important that they pay special attention to the documentation lest they
 shoot themselves in the foot.
 
 @menu
+* Interleaved and split arrays::  
 * Guru vector and transform sizes::  
 * Guru Complex DFTs::           
 * Guru Real-data DFTs::         
@@ -2684,7 +2687,31 @@ shoot themselves in the foot.
 @end menu
 
 @c =========>
-@node Guru vector and transform sizes, Guru Complex DFTs, Guru Interface, Guru Interface
+@node  Interleaved and split arrays, Guru vector and transform sizes, Guru Interface, Guru Interface
+@subsection Interleaved and split arrays
+
+The guru interface supports two representations of complex numbers,
+which we call the interleaved and the split format.
+
+The @dfn{interleaved} format is the same one used by the basic and
+advanced interfaces, and it is documented in @ref{Complex numbers}.
+In the interleaved format, you provide pointers to the real part of a
+complex number, and the imaginary part understood to be stored in the
+next memory location.
+@cindex interleaved format
+
+The @dfn{split} format allows separate pointers to the real and
+imaginary parts of a complex array.
+@cindex split format
+
+Technically, the interleaved format is redundant, because you can
+always express an interleaved array in terms of a split array with
+appropriate pointers and strides.  On the other hand, the interleaved
+format is simpler to use, and it is common in practice.  Hence, FFTW
+supports it as a special case.
+
+@c =========>
+@node Guru vector and transform sizes, Guru Complex DFTs, Interleaved and split arrays, Guru Interface
 @subsection Guru vector and transform sizes
 
 The guru interface introduces one basic new data structure,
@@ -2700,9 +2727,21 @@ typedef struct @{
 @end example
 @tindex fftw_iodim
 
-Here, @code{n} is the size of the dimension, and @code{is} and @code{os}
-are the strides (in units of @code{double}) of that dimension for the
-input and output arrays.
+Here, @code{n} is the size of the dimension, and @code{is} and
+@code{os} are the strides of that dimension for the input and output
+arrays.  
+
+The meaning of the stride parameter depends on the type of the array
+that the stride refers to.  @emph{If the array is interleaved complex,
+strides are expressed in units of complex numbers
+(@code{fftw_complex}).  If the array is split complex or real, strides
+are expressed in units of real numbers (@code{double}).}  This
+convention is consistent with the usual pointer arithmetic in the C
+language.  An interleaved array is denoted by a pointer @code{p} to
+@code{fftw_complex}, so that @code{p+1} points to the next complex
+number.  Split arrays are denoted by pointers to @code{double}, in
+which case pointer arithmetic operates in units of
+@code{sizeof(double)}.
 @cindex stride
 
 The guru planner interfaces all take a (@code{rank}, @code{dims[rank]})
@@ -2714,48 +2753,63 @@ multi-dimensional loop of transforms to perform), where @code{dims} and
 For example, the @code{howmany} parameter in the advanced complex-DFT
 interface corresponds to @code{howmany_rank} = 1,
 @code{howmany_dims[0].n} = @code{howmany}, @code{howmany_dims[0].is} =
-@code{2*idist}, and @code{howmany_dims[0].os} = @code{2*odist}.  Here,
-the factors of 2 in the strides are because the advanced complex-DFT
-interface measures all strides in units of @code{fftw_complex}, whereas
-here we use units of @code{double}.
+@code{idist}, and @code{howmany_dims[0].os} = @code{odist}.
 @cindex howmany loop
 @cindex dist
 
 A row-major multidimensional array with dimensions @code{n[rank]}
-(@pxref{Row-major Format}) corresponds to @code{dims[i].n} = @code{n[i]}
-and the recurrence @code{dims[i].is} = @code{n[i+1] * dims[i+1].is}
-(similarly for @code{os}).  The stride of the last (@code{i=rank-1})
-dimension is the overall stride of the array.  e.g. to be equivalent to
-the advanced complex-DFT interface, you would have
-@code{dims[rank-1].is} = @code{2*istride} and @code{dims[rank-1].os} =
-@code{2*ostride}.
+(@pxref{Row-major Format}) corresponds to @code{dims[i].n} =
+@code{n[i]} and the recurrence @code{dims[i].is} = @code{n[i+1] *
+dims[i+1].is} (similarly for @code{os}).  The stride of the last
+(@code{i=rank-1}) dimension is the overall stride of the array.
+e.g. to be equivalent to the advanced complex-DFT interface, you would
+have @code{dims[rank-1].is} = @code{istride} and
+@code{dims[rank-1].os} = @code{ostride}.
 
 In general, we only guarantee FFTW to return a non-@code{NULL} plan if
 the vector and transform dimensions correspond to a set of distinct
-indices, and for in-place transforms the input/output strides should be
-the same.
+indices, and for in-place transforms the input/output strides should
+be the same.
 
 @c =========>
 @node Guru Complex DFTs, Guru Real-data DFTs, Guru vector and transform sizes, Guru Interface
 @subsection Guru Complex DFTs
 
 @example
-fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
-                             int howmany_rank,
-                             const fftw_iodim *howmany_dims,
-                             double *ri, double *ii,
-                             double *ro, double *io,
-                             unsigned flags);
+fftw_plan fftw_plan_guru_dft(
+     int rank, const fftw_iodim *dims,
+     int howmany_rank, const fftw_iodim *howmany_dims,
+     fftw_complex *in, fftw_complex *out,
+     int sign, unsigned flags);
+
+fftw_plan fftw_plan_guru_split_dft(
+     int rank, const fftw_iodim *dims,
+     int howmany_rank, const fftw_iodim *howmany_dims,
+     double *ri, double *ii, double *ro, double *io,
+     unsigned flags);
 @end example
 @findex fftw_plan_guru_dft
+@findex fftw_plan_guru_split_dft
 
-Plan a complex-data, multi-dimensional @code{FFTW_FORWARD} DFT with
-transform dimensions given by (@code{rank}, @code{dims}) over a
+These two functions plan a complex-data, multi-dimensional DFT
+for the interleaved and split format, respectively.
+Transform dimensions are given by (@code{rank}, @code{dims}) over a
 multi-dimensional vector (loop) of dimensions (@code{howmany_rank},
 @code{howmany_dims}).  @code{dims} and @code{howmany_dims} should point
 to @code{fftw_iodim} arrays of length @code{rank} and
 @code{howmany_rank}, respectively.
 
+@cindex flags
+@code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
+as defined in @ref{Planner Flags}.
+
+In the @code{fftw_plan_guru_dft} function, the pointers @code{in} and
+@code{out} point to the interleaved input and output arrays,
+respectively.  The sign can be either @math{-1} (=
+@code{FFTW_FORWARD}) or @math{+1} (= @code{FFTW_BACKWARD}).  If the
+pointers are equal, the transform is in-place.
+
+In the @code{fftw_plan_guru_split_dft} function,
 @code{ri} and @code{ii} point to the real and imaginary input arrays,
 and @code{ro} and @code{io} point to the real and imaginary output
 arrays.  The input and output pointers may be the same, indicating an
@@ -2769,22 +2823,22 @@ ro = (double *) out;
 io = (double *) out + 1;
 @end example
 
-For a contiguous @code{fftw_complex} array, the overall stride of the
-transform should be 2, the distance between consecutive real parts or
-between consecutive imaginary parts; see @ref{Guru vector and transform
-sizes}.  Note that the dimension strides are applied equally to the real
-and imaginary parts; real and imaginary arrays with different strides
-are not supported.
+Because @code{fftw_plan_guru_split_dft} accepts split arrays, strides
+are expressed in units of @code{double}.  For a contiguous
+@code{fftw_complex} array, the overall stride of the transform should
+be 2, the distance between consecutive real parts or between
+consecutive imaginary parts; see @ref{Guru vector and transform
+sizes}.  Note that the dimension strides are applied equally to the
+real and imaginary parts; real and imaginary arrays with different
+strides are not supported.
 
-@cindex flags
-@code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
-as defined in @ref{Planner Flags}.
-
-To perform an @code{FFTW_BACKWARD} transform, one can exploit the
+There is no @code{sign} parameter in @code{fftw_plan_guru_split_dft}.
+This function always plans for an @code{FFTW_FORWARD} transform.  To
+plan for an @code{FFTW_BACKWARD} transform, you can exploit the
 identity that the backwards DFT is equal to the forwards DFT with the
 real and imaginary parts swapped.  For example, in the case of the
-@code{fftw_complex} arrays above, the @code{FFTW_BACKWARD} transform is
-computed by the parameters:
+@code{fftw_complex} arrays above, the @code{FFTW_BACKWARD} transform
+is computed by the parameters:
 
 @example
 ri = (double *) in + 1;
@@ -2793,30 +2847,39 @@ ro = (double *) out + 1;
 io = (double *) out;
 @end example
 
-Although this interface permits more flexible complex-number formats,
-such as separate real and imaginary arrays, we recommend the interleaved
-@code{fftw_complex} format for optimal performance.
-
 @c =========>
 @node Guru Real-data DFTs, Guru Real-to-real Transforms, Guru Complex DFTs, Guru Interface
 @subsection Guru Real-data DFTs
 
 @example
-fftw_plan fftw_plan_guru_dft_r2c(int rank, const fftw_iodim *dims,
-                                 int howmany_rank,
-                                 const fftw_iodim *howmany_dims,
-                                 double *in,
-                                 double *ro, double *io,
-                                 unsigned flags);
-fftw_plan fftw_plan_guru_dft_c2r(int rank, const fftw_iodim *dims,
-                                 int howmany_rank,
-                                 const fftw_iodim *howmany_dims,
-                                 double *ri, double *ii,
-                                 double *out,
-                                 unsigned flags);
+fftw_plan fftw_plan_guru_dft_r2c(
+     int rank, const fftw_iodim *dims,
+     int howmany_rank, const fftw_iodim *howmany_dims,
+     double *in, fftw_complex *out,
+     unsigned flags);
+
+fftw_plan fftw_plan_guru_split_dft_r2c(
+     int rank, const fftw_iodim *dims,
+     int howmany_rank, const fftw_iodim *howmany_dims,
+     double *in, double *ro, double *io,
+     unsigned flags);
+
+fftw_plan fftw_plan_guru_dft_c2r(
+     int rank, const fftw_iodim *dims,
+     int howmany_rank, const fftw_iodim *howmany_dims,
+     fftw_complex *in, double *out,
+     unsigned flags);
+
+fftw_plan fftw_plan_guru_split_dft_c2r(
+     int rank, const fftw_iodim *dims,
+     int howmany_rank, const fftw_iodim *howmany_dims,
+     double *ri, double *ii, double *out,
+     unsigned flags);
 @end example
 @findex fftw_plan_guru_dft_r2c
+@findex fftw_plan_guru_split_dft_r2c
 @findex fftw_plan_guru_dft_c2r
+@findex fftw_plan_guru_split_dft_c2r
 
 Plan a real-input (r2c) or real-output (c2r), multi-dimensional DFT with
 transform dimensions given by (@code{rank}, @code{dims}) over a
@@ -2827,37 +2890,34 @@ to @code{fftw_iodim} arrays of length @code{rank} and
 interfaces, an r2c transform is @code{FFTW_FORWARD} and a c2r transform
 is @code{FFTW_BACKWARD}.
 
-The @emph{last} dimension of @code{dims} is interpreted specially: that
-dimension of the real array has size @code{dims[rank-1].n}, but that
-dimension of the complex array has size @code{dims[rank-1].n/2+1}
+The @emph{last} dimension of @code{dims} is interpreted specially:
+that dimension of the real array has size @code{dims[rank-1].n}, but
+that dimension of the complex array has size @code{dims[rank-1].n/2+1}
 (division rounded down).  The strides, on the other hand, are taken to
-be exactly as specified (and are given in units of @code{double}, as
-usual.  It is up to the user to specify the strides appropriately for
-the peculiar dimensions of the data, and we do not guarantee that the
-planner will succeed (return non-@code{NULL}) for any dimensions other
-than those described in @ref{Real-data DFT Array Format} and generalized
-in @ref{Advanced Real-data DFTs}.  (That is, for an in-place transform,
-each individual dimension should be able to operate in place.)
+be exactly as specified.  It is up to the user to specify the strides
+appropriately for the peculiar dimensions of the data, and we do not
+guarantee that the planner will succeed (return non-@code{NULL}) for
+any dimensions other than those described in @ref{Real-data DFT Array
+Format} and generalized in @ref{Advanced Real-data DFTs}.  (That is,
+for an in-place transform, each individual dimension should be able to
+operate in place.)
 @cindex in-place
 
-@code{in} and @code{out} point to the real input and output arrays for
-r2c and c2r transforms, respectively.  @code{ri} and @code{ii} point to
-the real and imaginary input arrays for a c2r transform, and @code{ro}
-and @code{io} point to the real and imaginary output arrays for an r2c
-transform.  @code{in} and @code{ro} or @code{ri} and @code{out} may be
-the same, indicating an in-place transform.  (See also the previous
-section for use with @code{fftw_complex} arrays.)
+@code{in} and @code{out} point to the input and output arrays for r2c
+and c2r transforms, respectively.  For split arrays, @code{ri} and
+@code{ii} point to the real and imaginary input arrays for a c2r
+transform, and @code{ro} and @code{io} point to the real and imaginary
+output arrays for an r2c transform.  @code{in} and @code{ro} or
+@code{ri} and @code{out} may be the same, indicating an in-place
+transform.  
 
 @cindex flags
 @code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
 as defined in @ref{Planner Flags}.
 
-Although this interface permits more flexible complex-number formats,
-such as separate real and imaginary arrays, we recommend the interleaved
-@code{fftw_complex} format for optimal performance.  Moreover, we should
-note that separate real and imaginary arrays, in particular, are not
-supported for in-place multi-dimensional transforms (the planner will
-return @code{NULL}).
+In-place transforms of rank greater than 1 are currently only
+supported for interleaved arrays.  For split arrays, the planner will
+return @code{NULL}.
 
 @c =========>
 @node Guru Real-to-real Transforms, Guru Execution of Plans, Guru Real-data DFTs, Guru Interface
@@ -2917,9 +2977,10 @@ The input and output arrays are the same (in-place) or different
 out-of-place, respectively.
 
 @item
-The separations between the real and imaginary parts, @code{ii-ri} and
-@code{io-ro}, are the same as they were for the input and output arrays
-when the plan was created.
+For split arrays, the separations between the real and imaginary
+parts, @code{ii-ri} and @code{io-ro}, are the same as they were for
+the input and output arrays when the plan was created.  (This
+condition is automatically satisfied for interleaved arrays.)
 
 @item
 The @dfn{alignment} of the new input/output arrays is the same as that
@@ -2941,17 +3002,40 @@ and go use the advanced interface instead (@pxref{Advanced Interface})).
 The guru execute functions are:
 
 @example
-void fftw_execute_dft(const fftw_plan p, 
-                      double *ri, double *ii, double *ro, double *io);
-void fftw_execute_dft_r2c(const fftw_plan p,
-                          double *in, double *ro, double *io);
-void fftw_execute_dft_c2r(const fftw_plan p,
-                          double *ri, double *ii, double *out);
-void fftw_execute_r2r(const fftw_plan p, double *in, double *out);
+void fftw_execute_dft(
+     const fftw_plan p, 
+     fftw_complex *in, fftw_complex *out);
+
+void fftw_execute_split_dft(
+     const fftw_plan p, 
+     double *ri, double *ii, double *ro, double *io);
+
+void fftw_execute_dft_r2c(
+     const fftw_plan p,
+     double *in, fftw_complex *out);
+
+void fftw_execute_split_dft_r2c(
+     const fftw_plan p,
+     double *in, double *ro, double *io);
+
+void fftw_execute_dft_c2r(
+     const fftw_plan p,
+     fftw_complex *in, double *out);
+
+void fftw_execute_split_dft_c2r(
+     const fftw_plan p,
+     double *ri, double *ii, double *out);
+
+void fftw_execute_r2r(
+     const fftw_plan p, 
+     double *in, double *out);
 @end example
 @findex fftw_execute_dft
+@findex fftw_execute_split_dft
 @findex fftw_execute_dft_r2c
+@findex fftw_execute_split_dft_r2c
 @findex fftw_execute_dft_c2r
+@findex fftw_execute_split_dft_c2r
 @findex fftw_execute_dft_r2r
 
 These execute the @code{plan} to compute the corresponding transform on
@@ -2966,10 +3050,6 @@ corresponding to the execute function, e.g. it must be a complex-DFT
 plan for @code{fftw_execute_dft}.  Any of the planner routines for that
 transform type, from the basic to the guru interface, could have been
 used to create the plan, however.
-
-Note that @code{FFTW_BACKWARD} complex-DFT plans created by the basic or
-advanced interfaces actually correspond to swapped real and imaginary
-parts for the input and output, as described in @ref{Guru Complex DFTs}.
 
 @c ------------------------------------------------------------
 @node Wisdom, What FFTW Really Computes, Guru Interface, FFTW Reference
