@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.10 2002-06-22 02:19:20 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.11 2002-06-23 00:47:28 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.10 2002-06-22 02:19:20 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.11 2002-06-23 00:47:28 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -85,7 +85,7 @@ let generate n =
 	  @ (if stride_fixed !uostride then [] 
 	       else [Decl (C.stridetype, ostride)])
 	 ),
-	 C.add_constants (Asch annot))
+	 add_constants (Asch annot))
 
   in let loop =
     "static void " ^ name ^

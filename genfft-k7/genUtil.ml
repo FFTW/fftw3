@@ -315,14 +315,15 @@ let rec addIndexToListElems i0 = function
   | [] -> []
   | x::xs -> (i0,x)::(addIndexToListElems (succ i0) xs)
 
-let procedure_proepilog stackframe_size_bytes code = 
+let procedure_proepilog stackframe_size_bytes nargs code = 
   let regs_to_save =
 	addIndexToListElems 1
 		(filter (fun r -> exists (k7rinstrUsesK7rintreg r) code) 
 			k7rintregs_calleesaved) in
   let total_stackframe_size = 
-	(if stackframe_size_bytes < 0 then 0 else stackframe_size_bytes) + 
-	(if regs_to_save = [] then 0 else 16) in
+    0 + (if (nargs mod 2 = 1) then 4 else 0)
+      + (if stackframe_size_bytes < 0 then 0 else stackframe_size_bytes) 
+      + (if regs_to_save = [] then 0 else 16) in
   [K7R_FEMMS] @
   (if total_stackframe_size > 0 then 
      [K7R_IntUnaryOp(K7_ISubImm total_stackframe_size, k7rintreg_stackpointer)]
@@ -338,35 +339,6 @@ let procedure_proepilog stackframe_size_bytes code =
   [K7R_FEMMS; K7R_Ret]
 
 (****************************************************************************)
-
-let compileToAsm_with_fixedstride (initcode, k7vinstrs) (istride,ostride) =
-  let _ = info "compileToAsm..." in
-  let realcode = K7RegisterAllocator.regalloc initcode k7vinstrs in
-  let stackframe_size_bytes = getStackFrameSize realcode in
-  let realcode = procedure_proepilog stackframe_size_bytes realcode in
-  let _ = info "scheduling instructions..." in
-  let realcode = fixpoint k7rinstrsToPromiseEarly realcode in
-  let realcode' =
-      avoid_address_generation_interlock 
-	  (optimize 1000000 (k7rinstrsToInstructionscheduled realcode)) in
-
-  let _ = info "before unparseToAsm" in
-  let all_consts = k7rinstrsToConstants (map get3of3 realcode') in
-  let datasection = 
-	if all_consts = [] then 
-	  ""
-	else
-	  ".section .rodata" ^ "\n" ^
-          "\t" ^ ".balign 64" ^ "\n" ^
-          "\t" ^ (listToString myconst_to_decl "\n\t" all_consts) ^ "\n\n" in
-  begin
-    print_string datasection;
-    asmline (".text");
-    k7rinstrInitStackPointerAdjustment 0;
-    iter emit_instr realcode'
-  end
-
-
 let datasection all_consts =
   if all_consts <> [] then begin
     asmline (".section .rodata");
@@ -375,11 +347,11 @@ let datasection all_consts =
     asmline (".text");
   end
 
-let compileToAsm name (initcode, k7vinstrs) =
+let compileToAsm name nargs (initcode, k7vinstrs) =
   let _ = info "compileToAsm..." in
   let realcode = K7RegisterAllocator.regalloc initcode k7vinstrs in
   let stackframe_size_bytes = getStackFrameSize realcode in
-  let realcode = procedure_proepilog stackframe_size_bytes realcode in
+  let realcode = procedure_proepilog stackframe_size_bytes nargs realcode in
   let _ = info "scheduling instructions..." in
   let realcode = fixpoint k7rinstrsToPromiseEarly realcode in
   let realcode' =

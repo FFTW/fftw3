@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.6 2002-06-22 02:19:20 athena Exp $ *)
+(* $Id: c.ml,v 1.7 2002-06-23 00:47:28 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -228,47 +228,26 @@ and ast_to_expr_list = function
 (* add a new key & value to a list of (key,value) pairs, where
    the keys are floats and each key is unique up to almost_equal *)
 
-let add_float_key_value list_so_far k = 
-  if exists (fun k2 -> Number.equal k k2) list_so_far then
-    list_so_far
-  else
-    k :: list_so_far
-
-(* find all constants in a given expression *)
-let rec expr_to_constants = function
-  | Num n -> [n]
-  | Plus a -> flatten (map expr_to_constants a)
-  | Times (a, b) -> (expr_to_constants a) @ (expr_to_constants b)
-  | Uminus a -> expr_to_constants a
-  | _ -> []
-
 let extract_constants f =
   let constlist = flatten (map expr_to_constants (ast_to_expr_list f))
-  in let unique_constants = fold_left add_float_key_value [] constlist
+  in let u = unique_constants constlist
   in let use_const () = 
     map 
       (fun n ->
 	Idecl (("const " ^ realtype), (Number.to_konst n),
 	       "K(" ^ (Number.to_string n) ^ ")"))
-      unique_constants
+      u
   and use_compact () = 
     map
       (fun n ->
 	Tdecl 
 	  ("DK(" ^ (Number.to_konst n) ^ ", " ^ (Number.to_string n) ^ ")"))
-      unique_constants
+      u
   in 
   if !Magic.compact then 
     use_compact ()
   else
     use_const ()
-
-let add_constants ast = 
-  let mergedecls = function
-      Block (d1, [Block (d2, s)]) -> Block (d1 @ d2, s)
-    | x -> x
-	  
-  in mergedecls (Block (extract_constants ast, [ast]))
 
 (******************************
    Extracting operation counts 

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.4 2002-06-22 13:36:47 athena Exp $ *)
+(* $Id: simd.ml,v 1.5 2002-06-23 00:47:28 athena Exp $ *)
 
 open Expr
 open List
@@ -262,4 +262,12 @@ and unparse_function vardeclinfo = function
       in 
       (typ ^ " " ^ name ^ "(" ^ unparse_args args ^ ")\n" ^
        unparse_ast' vardeclinfo body)
+
+let extract_constants f =
+  let constlist = flatten (map expr_to_constants (C.ast_to_expr_list f))
+  in map
+    (fun n ->
+      Tdecl 
+	("DVK(" ^ (Number.to_konst n) ^ ", " ^ (Number.to_string n) ^ ")"))
+    (unique_constants constlist)
 

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.ml,v 1.4 2002-06-19 17:20:37 athena Exp $ *)
+(* $Id: expr.ml,v 1.5 2002-06-23 00:47:28 athena Exp $ *)
 
 (* Here, we define the data type encapsulating a symbolic arithmetic
    expression, and provide some routines for manipulating it. *)
@@ -95,3 +95,20 @@ let assignment_to_string = function
   | Assign (v, a) -> "(:= " ^ (Variable.unparse v) ^ " " ^ (to_string a) ^ ")"
 
 let dump print = List.iter (fun x -> print ((assignment_to_string x) ^ "\n"))
+
+(* find all constants in a given expression *)
+let rec expr_to_constants = function
+  | Num n -> [n]
+  | Plus a -> List.flatten (List.map expr_to_constants a)
+  | Times (a, b) -> (expr_to_constants a) @ (expr_to_constants b)
+  | Uminus a -> expr_to_constants a
+  | _ -> []
+
+
+let add_float_key_value list_so_far k = 
+  if List.exists (fun k2 -> Number.equal k k2) list_so_far then
+    list_so_far
+  else
+    k :: list_so_far
+
+let unique_constants = List.fold_left add_float_key_value [] 

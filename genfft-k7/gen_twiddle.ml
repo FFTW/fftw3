@@ -27,7 +27,7 @@ open K7Translate
 open AssignmentsToVfpinstrs
 open Complex
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.7 2002-06-18 21:48:41 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.8 2002-06-23 00:47:28 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -130,7 +130,7 @@ let generate n =
   begin
     boilerplate cvsid;
     p "#if defined(FFTW_SINGLE) && defined(K7_MODE)\n";
-    compileToAsm name code;
+    compileToAsm name 5 code;
     p "\n";
     p ".section .rodata\n";
     p "\t.align 2\n";

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.3 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: bench-main.c,v 1.4 2002-06-23 00:47:28 athena Exp $ */
 
 #include "config.h"
 #include "getopt.h"
@@ -219,6 +219,16 @@ int bench_main(int argc, char *argv[])
 		*/
 	       __asm__ __volatile__ ("addl $-4, %esp");
 	  }
+     }
+#endif
+
+#ifdef __ICC /* Intel's compiler for ia32 */
+     {
+	  /*
+	   * Simply calling alloca seems to do the right thing. 
+	   * The size of the allocated block seems to be irrelevant.
+	   */
+	  _alloca(8);
      }
 #endif
 

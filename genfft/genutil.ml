@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.8 2002-06-22 02:19:20 athena Exp $ *)
+(* $Id: genutil.ml,v 1.9 2002-06-23 00:47:28 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -274,3 +274,15 @@ let unparse cvsid vardeclinfo tree =
     Simd.unparse_function vardeclinfo tree
   else
     C.unparse_function tree)
+
+let add_constants ast = 
+  let mergedecls = function
+      C.Block (d1, [C.Block (d2, s)]) -> C.Block (d1 @ d2, s)
+    | x -> x
+  and extract_constants =
+    if !Simdmagic.simd_mode then 
+      Simd.extract_constants 
+    else
+      C.extract_constants
+	
+  in mergedecls (C.Block (extract_constants ast, [ast]))

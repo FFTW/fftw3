@@ -85,6 +85,7 @@ AC_CHECK_FUNCS(drand48)
 AC_CHECK_FUNCS(hypot)
 AC_CHECK_FUNCS(sqrt)
 AC_CHECK_FUNCS(memset)
+AC_CHECK_FUNCS(memalign)
 dnl high-resolution clock on SGI machines
 AC_CHECK_FUNCS(clock_gettime)  
 

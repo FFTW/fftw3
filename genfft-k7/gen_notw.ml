@@ -105,7 +105,7 @@ let no_twiddle_gen n sign =
   
   in ((initcode, body), k7vFlops body)
 
-let cvsid = "$Id: gen_notw.ml,v 1.4 2002-06-16 22:30:18 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.5 2002-06-23 00:47:28 athena Exp $"
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let generate n =
@@ -117,7 +117,7 @@ let generate n =
   begin
     boilerplate cvsid;
     p "#if defined(FFTW_SINGLE) && defined(K7_MODE)\n";
-    compileToAsm name code;
+    compileToAsm name 7 code;
     p "\n";
     p ".section .rodata\n";
     p "\t.align 4\n";
