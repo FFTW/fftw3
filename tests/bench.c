@@ -36,7 +36,7 @@ FFTW(plan) the_plan = 0;
 static const char *wisdat = "wis.dat";
 unsigned the_flags = 0;
 int paranoid = 0;
-int usewisdom = 1;
+int usewisdom = 0;
 int havewisdom = 0;
 int nthreads = 1;
 
@@ -53,7 +53,7 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "unaligned")) the_flags |= FFTW_UNALIGNED;
      else if (sscanf(arg, "flag=%d", &x) == 1) the_flags |= x;
      else if (!strcmp(arg, "paranoid")) paranoid = 1;
-     else if (!strcmp(arg, "nowisdom")) usewisdom = 0;
+     else if (!strcmp(arg, "wisdom")) usewisdom = 1;
      else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
 
      else fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);

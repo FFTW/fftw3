@@ -7,7 +7,7 @@ $paranoid = 0;
 $exhaustive = 0;
 $patient = 0;
 $estimate = 0;
-$nowisdom = 0;
+$wisdom = 0;
 $nthreads = 1;
 $rounds = 0;
 $maxsize = 60000;
@@ -26,7 +26,7 @@ sub make_options {
     $options = "-o exhaustive $options" if $exhaustive;
     $options = "-o patient $options" if $patient;
     $options = "-o estimate $options" if $estimate;
-    $options = "-o nowisdom $options" if $nowisdom;
+    $options = "-o wisdom $options" if $wisdom;
     $options = "-o nthreads=$nthreads $options" if ($nthreads > 1);
     return $options;
 }
@@ -198,7 +198,7 @@ sub parse_arguments (@)
 	elsif ($arglist[0] eq '--exhaustive') { ++$exhaustive; }
 	elsif ($arglist[0] eq '--patient') { ++$patient; }
 	elsif ($arglist[0] eq '--estimate') { ++$estimate; }
-	elsif ($arglist[0] eq '--nowisdom') { ++$nowisdom; }
+	elsif ($arglist[0] eq '--wisdom') { ++$wisdom; }
 	elsif ($arglist[0] =~ /^--nthreads=(.+)$/) { $nthreads = $1; }
 	elsif ($arglist[0] eq '-k') { ++$keepgoing; }
 	elsif ($arglist[0] eq '--keep-going') { ++$keepgoing; }

@@ -17,30 +17,30 @@ $(top_builddir)/libfftw3@PREC_SUFFIX@.la		\
 $(top_builddir)/libbench2/libbench2.a $(THREADLIBS)
 
 check-local: bench
-	perl -w $(srcdir)/check.pl -r -c=30 -v --nowisdom `pwd`/bench
+	perl -w $(srcdir)/check.pl -r -c=30 -v `pwd`/bench
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW transforms passed basic tests!"
 	@echo "--------------------------------------------------------------"
 if THREADS
-	perl -w $(srcdir)/check.pl -r -c=30 -v --nthreads=2 --nowisdom `pwd`/bench
+	perl -w $(srcdir)/check.pl -r -c=30 -v --nthreads=2 `pwd`/bench
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW threaded transforms passed basic tests!"
 	@echo "--------------------------------------------------------------"
 endif
 
 bigcheck: bench
-	perl -w $(srcdir)/check.pl -a -v --nowisdom `pwd`/bench
+	perl -w $(srcdir)/check.pl -a -v `pwd`/bench
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW transforms passed big tests!"
 	@echo "--------------------------------------------------------------"
 if THREADS
-	perl -w $(srcdir)/check.pl -a -v --nthreads=2 --nowisdom `pwd`/bench
-	perl -w $(srcdir)/check.pl -a -v --nthreads=3 --nowisdom `pwd`/bench
-	perl -w $(srcdir)/check.pl -a -v --nthreads=10 --nowisdom `pwd`/bench
+	perl -w $(srcdir)/check.pl -a -v --nthreads=2 `pwd`/bench
+	perl -w $(srcdir)/check.pl -a -v --nthreads=3 `pwd`/bench
+	perl -w $(srcdir)/check.pl -a -v --nthreads=10 `pwd`/bench
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW threaded transforms passed big tests!"
 	@echo "--------------------------------------------------------------"
 endif
 
 paranoid-check: bench
-	perl -w $(srcdir)/check.pl -a --paranoid --nowisdom `pwd`/bench
+	perl -w $(srcdir)/check.pl -a --paranoid `pwd`/bench
