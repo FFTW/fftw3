@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.15 2004-04-03 02:18:27 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.16 2004-04-03 02:31:00 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -50,9 +50,10 @@ typedef struct {
 
 /**************************************************************************/
 
-/* FIXME: what is the best value for this cutoff? */
+/* FIXME: what is the best value for these cutoffs? */
 
 #define CUTOFF 8 /* size below which we do a naive transpose */
+#define CUTOFF_UGLY 2000 /* size at which naive transpose is UGLY */
 
 /*************************************************************************/
 /* some utilities for the solvers */
@@ -598,7 +599,7 @@ static int transpose_simplep(planner *plnr, const problem_rdft *p,
      get_transpose_vec(p, dim2, &vl, &vs);
      return (n == p->vecsz->dims[dim1].n
 	     && (!NO_UGLYP(plnr)
-		 || n * vl < CUTOFF 
+		 || n * vl < CUTOFF_UGLY 
 		 || vs != 1));
 }
 
