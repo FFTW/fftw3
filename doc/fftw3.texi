@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.93 2003-03-05 16:06:41 athena Exp $
+@comment $Id: fftw3.texi,v 1.94 2003-03-06 03:45:31 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -323,7 +323,7 @@ The basic usage of FFTW to compute a one-dimensional DFT of size
     out = fftw_malloc(sizeof(fftw_complex) * N);
     p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
     ...
-    fftw_execute(p); /* repeat as needed */
+    fftw_execute(p); /* @r{repeat as needed} */
     ...
     fftw_destroy_plan(p);
     fftw_free(in); fftw_free(out);
@@ -1322,7 +1322,7 @@ For example, the analogue in this method to the example above is:
 
 @example
 int i,j;
-fftw_complex ***a_bad_array;  /* another way to make a 5x12x27 array */
+fftw_complex ***a_bad_array;  /* @r{another way to make a 5x12x27 array} */
 
 a_bad_array = (fftw_complex ***) malloc(5 * sizeof(fftw_complex **));
 for (i = 0; i < 5; ++i) @{
