@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.28 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: problem.c,v 1.29 2003-01-28 11:50:20 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -46,9 +46,10 @@ static void hash(const problem *p_, md5 *m)
 static void print(problem *ego_, printer *p)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
-     p->print(p, "(dft %d %td %td %td %T %T)", 
+     p->print(p, "(dft %d %d %d %td %td %T %T)", 
+	      ego->ri == ego->ro,
 	      X(alignment_of)(ego->ri),
-	      ego->ro - ego->ri, 
+	      X(alignment_of)(ego->ro),
 	      ego->ii - ego->ri, 
 	      ego->io - ego->ro,
 	      ego->sz,
