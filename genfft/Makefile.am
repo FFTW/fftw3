@@ -2,14 +2,14 @@
 
 EXTRA_DIST = .depend algsimp.ml annotate.ml assoctable.ml c.ml		\
 complex.ml conv.ml dag.ml expr.ml fft.ml gen_athnotw.ml gen_athtw.ml	\
-gen_conv.ml gen_hc2hc.ml gen_hc2r.ml gen_hc2r_noinline.ml		\
-gen_notw_c.ml gen_notw.ml gen_notw_noinline_c.ml gen_notw_noinline.ml	\
-gen_r2hc.ml gen_r2hc_noinline.ml gen_r2r.ml gen_twiddle_c.ml		\
-gen_twiddle.ml gen_twidsq_c.ml gen_twidsq.ml genutil.ml littlesimp.ml	\
-magic.ml monads.ml number.ml oracle.ml schedule.ml simdmagic.ml		\
-simd.ml to_alist.ml trig.ml twiddle.ml unique.ml util.ml variable.ml	\
-algsimp.mli annotate.mli assoctable.mli c.mli complex.mli conv.mli	\
-dag.mli expr.mli fft.mli littlesimp.mli number.mli oracle.mli		\
+gen_conv.ml gen_hc2hc.ml gen_hc2r.ml gen_hc2r_noinline.ml gen_mdct.ml	\
+gen_notw.ml gen_notw_c.ml gen_notw_noinline.ml gen_notw_noinline_c.ml	\
+gen_r2hc.ml gen_r2hc_noinline.ml gen_r2r.ml gen_twiddle.ml		\
+gen_twiddle_c.ml gen_twidsq.ml gen_twidsq_c.ml genutil.ml		\
+littlesimp.ml magic.ml monads.ml number.ml oracle.ml schedule.ml	\
+simd.ml simdmagic.ml to_alist.ml trig.ml twiddle.ml unique.ml util.ml	\
+variable.ml algsimp.mli annotate.mli assoctable.mli c.mli complex.mli	\
+conv.mli dag.mli expr.mli fft.mli littlesimp.mli number.mli oracle.mli	\
 schedule.mli simd.mli to_alist.mli trig.mli twiddle.mli unique.mli	\
 util.mli variable.mli
 
