@@ -29,3 +29,6 @@ if THREADS
 	perl -w $(srcdir)/check.pl -a -v --nthreads=3 --nowisdom `pwd`/bench
 	perl -w $(srcdir)/check.pl -a -v --nthreads=10 --nowisdom `pwd`/bench
 endif
+
+paranoid-check: bench
+	perl -w $(srcdir)/check.pl -a -v --paranoid --nowisdom `pwd`/bench

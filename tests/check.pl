@@ -105,6 +105,10 @@ sub small_1d {
     for ($i = 1; $i <= 100; ++$i) {
 	do_size ($i, 1);
     }
+    do_size (128, 1);
+    do_size (256, 1);
+    do_size (512, 1);
+    do_size (1024, 1);
 }
 
 sub small_2d {

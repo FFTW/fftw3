@@ -8,12 +8,12 @@ AM_CCASFLAGS = $(DEFAULT_INCLUDES)
 
 N1_CODELETS = n1k7_2.S n1k7_3.S n1k7_4.S n1k7_5.S n1k7_6.S n1k7_7.S	\
 n1k7_8.S n1k7_9.S n1k7_10.S n1k7_11.S n1k7_12.S n1k7_13.S n1k7_14.S	\
-n1k7_15.S n1k7_16.S n1k7_32.S n1k7_64.S n1k7_128.S
+n1k7_15.S n1k7_16.S n1k7_32.S n1k7_64.S n1k7_128.S n1k7_256.S
 
 N1I_CODELETS = n1k7i_2.S n1k7i_3.S n1k7i_4.S n1k7i_5.S n1k7i_6.S	\
 n1k7i_7.S n1k7i_8.S n1k7i_9.S n1k7i_10.S n1k7i_11.S n1k7i_12.S		\
 n1k7i_13.S n1k7i_14.S n1k7i_15.S n1k7i_16.S n1k7i_32.S n1k7i_64.S	\
-n1k7i_128.S
+n1k7i_128.S n1k7i_256.S
 
 T1_CODELETS = t1k7_2.S t1k7_3.S t1k7_4.S t1k7_5.S t1k7_6.S t1k7_7.S	\
 t1k7_8.S t1k7_9.S t1k7_10.S t1k7_12.S t1k7_15.S t1k7_16.S t1k7_32.S	\
