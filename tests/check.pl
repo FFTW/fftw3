@@ -2,7 +2,6 @@
 
 $program = "./bench";
 $default_options = "";
-@failures = ();
 $verbose = 0;
 $paranoid = 0;
 $exhaustive = 0;
@@ -28,26 +27,40 @@ sub make_options {
     return $options;
 }
 
+@list_of_problems = ();
+
+sub flush_problems {
+    my $options = shift;
+    my $problist = "";
+
+    if ($#list_of_problems >= 0) {
+	for (@list_of_problems) {
+	    $problist = "$problist --verify $_";
+	}
+	print "Executing \"$program $options $problist\"\n" 
+	    if $verbose;
+	if (system("$program $options $problist") != 0) {
+	    print "FAILED: $problist\n";
+	    exit 1 unless $keepgoing;
+	}
+	@list_of_problems = ();
+    }
+}
+
 sub do_problem {
     my $problem = shift;
     my $doablep = shift;
     my $options = &make_options;
     
     if ($doablep) {
-	print "Executing \"$program $options --verify $problem\"\n" 
-	    if $verbose;
-	if (system("$program $options --verify $problem") != 0) {
-	    print "FAILED: $problem does not verify\n";
-	    exit 1 unless $keepgoing;
-	    @failures = ($problem, @failures);
-	}
+	@list_of_problems = ($problem, @list_of_problems);
+	&flush_problems($options) if ($#list_of_problems > 42);
     } else {
 	print "Executing \"$program $options --can-do $problem\"\n" 
 	    if $verbose;
 	if (`$program $options --can-do $problem` ne "#f\n") {
 	    print "FAILED: $problem is not undoable\n";
 	    exit 1 unless $keepgoing;
-	    @failures = ($problem, @failures);
 	}
     }
 }
@@ -173,3 +186,4 @@ sub parse_arguments (@)
 &small_2d if $do_2d;
 &random_tests if $do_random;
 
+&flush_problems;

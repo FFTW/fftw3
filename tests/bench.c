@@ -21,7 +21,7 @@ static FFTW(plan) the_plan;
 
 static const char *wisdat = "wis.dat";
 unsigned the_flags = 0;
-int paranoid;
+int paranoid = 0;
 int usewisdom = 1;
 int havewisdom = 0;
 
@@ -289,7 +289,14 @@ static FFTW(plan) mkplan(bench_problem *p, int flags)
 
 int can_do(bench_problem *p)
 {
+     int oparanoid = paranoid;
+
+     /* p->in and p->out are invalid at this stage---disable exhaustive
+	verification */
+     paranoid = 0;
      the_plan = mkplan(p, the_flags | FFTW_ESTIMATE);
+     paranoid = oparanoid;
+
      if (the_plan) {
 	  FFTW(destroy_plan)(the_plan);
 	  return 1;
