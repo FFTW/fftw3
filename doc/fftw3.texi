@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.110 2003-03-07 04:03:03 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.111 2003-03-07 04:10:41 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3260,7 +3260,7 @@ functions that allowed the user to replace FFTW's memory-allocation
 routines (e.g. to implement different error-handling, since by default
 FFTW prints an error message and calls @code{exit} to abort the program
 if @code{malloc} returns @code{NULL}).  These hooks are not supported in
-FFTW 3; those few users who require this functionality can simply
+FFTW 3; those few users who require this functionality can just
 directly modify the memory-allocation routines in FFTW (they are defined
 in @code{kernel/alloc.c}).
 
