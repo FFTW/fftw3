@@ -12,6 +12,9 @@ The doc/ directory contains the manual in texinfo, PDF, info, and HTML
 formats.  Frequently asked questions and answers can be found in the
 doc/FAQ/ directory in ASCII and HTML.
 
+For a quick introduction to calling FFTW, see the "Tutorial" section
+of the manual.
+
 Installation instructions are provided in the manual (don't worry, it
 is straightforward).
 
