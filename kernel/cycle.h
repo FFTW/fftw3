@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.6 2002-06-22 16:53:26 athena Exp $ */
+/* $Id: cycle.h,v 1.7 2002-07-14 01:46:02 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -31,6 +31,29 @@ typedef hrtime_t ticks;
 static inline double elapsed(ticks t1, ticks t0)
 {
      return (double)(t1 - t0);
+}
+
+#define HAVE_TICK_COUNTER
+#endif
+
+/*----------------------------------------------------------------*/
+/* AIX v. 4+ routines to read the real-time clock or time-base register */
+#if defined(HAVE_READ_REAL_TIME) && defined(HAVE_TIME_BASE_TO_TIME) && !defined(HAVE_TICK_COUNTER)
+#include <sys/time.h>
+typedef timebasestruct_t ticks;
+
+static inline ticks getticks(void)
+{
+     ticks t;
+     read_real_time(&t, TIMEBASE_SZ);
+     return t;
+}
+
+static inline double elapsed(ticks t1, ticks t0) /* time in nanoseconds */
+{
+     time_base_to_time(&t1, TIMEBASE_SZ);
+     time_base_to_time(&t0, TIMEBASE_SZ);
+     return ((t1.tb_high - t0.tb_high) * 1e9 + (t1.tb_low - t0.tb_low));
 }
 
 #define HAVE_TICK_COUNTER
