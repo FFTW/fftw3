@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.4 2002-06-03 13:18:46 athena Exp $ */
+/* $Id: ifftw.h,v 1.5 2002-06-03 22:10:12 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -41,6 +41,7 @@ typedef struct plan_s plan;
 typedef struct solver_s solver;
 typedef struct planner_s planner;
 
+/*-----------------------------------------------------------------------*/
 /* assert.c: */
 extern void fftw_assertion_failed(const char *s, int line, char *file);
 
@@ -56,6 +57,7 @@ extern void fftw_assertion_failed(const char *s, int line, char *file);
 #define A(ex) /* nothing */
 #endif
 
+/*-----------------------------------------------------------------------*/
 /* alloc.c: */
 
 /* objects allocated by malloc, for statistical purposes */
@@ -90,6 +92,7 @@ extern void *fftw_malloc_plain(size_t sz);
      fftw_malloc_plain(n)
 #endif
 
+/*-----------------------------------------------------------------------*/
 /* flops.c: */
 /*
  * flops counter.  The total number of additions is add + fma
@@ -106,10 +109,12 @@ flopcnt fftw_flops_add(flopcnt a, flopcnt b);
 flopcnt fftw_flops_mul(int a, flopcnt b);
 extern const flopcnt fftw_flops_zero;
 
+/*-----------------------------------------------------------------------*/
 /* minmax.c: */
 int fftw_imax(int a, int b);
 int fftw_imin(int a, int b);
 
+/*-----------------------------------------------------------------------*/
 /* tensor.c: */
 typedef struct {
      int n;
@@ -144,7 +149,7 @@ tensor fftw_tensor_append(const tensor a, const tensor b);
 void fftw_tensor_split(const tensor sz, tensor *a, int a_rnk, tensor *b);
 void fftw_tensor_destroy(tensor sz);
 
-
+/*-----------------------------------------------------------------------*/
 /* problem.c: */
 typedef struct {
      int (*equal) (const problem *ego, const problem *p);
@@ -162,6 +167,7 @@ problem *fftw_mkproblem(size_t sz, const problem_adt *adt);
 void fftw_problem_destroy(problem *ego);
 problem *fftw_problem_dup(problem *ego);
 
+/*-----------------------------------------------------------------------*/
 /* plan.c: */
 typedef int (*plan_printf)(const char *format, ...);
 
@@ -185,6 +191,7 @@ plan *fftw_mkplan(size_t size, const plan_adt *adt);
 void fftw_plan_use(plan *ego);
 void fftw_plan_destroy(plan *ego);
 
+/*-----------------------------------------------------------------------*/
 /* solver.c: */
 enum score {
      BAD,   /* solver cannot solve problem */
@@ -204,10 +211,52 @@ struct solver_s {
 
 solver *fftw_mksolver(size_t size, const solver_adt *adt);
 void fftw_solver_use(solver *ego);
+void fftw_solver_destroy(solver *ego);
 
-  /* shorthand */
+ /* shorthand */
 #define MKSOLVER(type, adt) (type *)fftw_mksolver(sizeof(type), adt)
 
+/*-----------------------------------------------------------------------*/
+/* planner.c */
+
+typedef struct pair_s pair; /* opaque */
+
+typedef struct {
+     solver *(*car)(pair *cons);
+     pair *(*cdr)(pair *cons);
+     pair *(*solvers)(planner *ego);
+     void (*register_solver)(planner *ego, solver *s);
+} planner_adt;
+
+struct planner_s {
+     const planner_adt *adt;
+     int ntry;  /* number of plans evaluated */
+     void (*hook)(plan *plan, problem *p); 
+
+     pair *solvers;
+     void (*destroy)(planner *ego);
+     plan *(*mkplan)(planner *ego, problem *p);
+};
+
+planner *fftw_mkplanner(size_t sz, 
+			plan *(*mkplan)(planner *, problem *),
+			void (*destroy) (planner *));
+void fftw_planner_destroy(planner *ego);
+void fftw_planner_set_hook(planner *p, void (*hook)(plan *, problem *));
+
+#define FORALL_SOLVERS(ego, s, what)					 \
+{									 \
+     pair *_l_;								 \
+     for (_l_ = ego->adt->solvers(ego); _l_; _l_ = ego->adt->cdr(_l_)) { \
+	  solver *s = ego->adt->car(_l_);				 \
+	  what;								 \
+     }									 \
+}
+
+/* various planners */
+planner *fftw_mkplanner_naive(void);
+
+/*-----------------------------------------------------------------------*/
 /* stride.c: */
 
 /* If PRECOMPUTE_ARRAY_INDICES is defined, precompute all strides. */
@@ -231,10 +280,10 @@ typedef int stride;
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
 
-/* awake.c: */
+/*-----------------------------------------------------------------------*/
+/* misc stuff */
 void fftw_null_awake(plan *ego, int awake);
-
-/* square.c: */
 int fftw_square(int x);
+double fftw_measure_execution_time(plan *pln, const problem *p, int secondsp);
 
 #endif /* __IFFTW_H__ */

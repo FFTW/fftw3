@@ -27,6 +27,8 @@ NAMES: keep them short.  Shorter than you think.  The Bible was written
 
    Leave that hungarian crap to MS.  foo_t counts as hungarian: use
    foo instead.  All lowercase so that it does not look like a DOS program.
+   Exception: typedef struct foo_s {...} foo;  instead of
+	      typedef struct foo {...} foo;  for C++ compatibility.
 
 REPEATED CODE:  favor a table.  E.g., do not write
 
