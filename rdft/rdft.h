@@ -18,7 +18,10 @@
  *
  */
 
-/* $Id: rdft.h,v 1.16 2002-08-12 17:31:37 stevenj Exp $ */
+/* $Id: rdft.h,v 1.17 2002-08-19 23:40:18 stevenj Exp $ */
+
+#ifndef __RDFT_H__
+#define __RDFT_H__
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -145,3 +148,4 @@ void X(problem_rdft2_register)(planner *p);
 /* configurations */
 void X(rdft_conf_standard)(planner *p);
 
+#endif /* __RDFT_H__ */

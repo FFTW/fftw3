@@ -8,7 +8,7 @@ else
 GENFFT =
 endif
 
-SUBDIRS=support $(GENFFT) kernel simd dft rdft libbench . tests
+SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft libbench . tests
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS
 
 lib@PRECISION@fftw3_la_SOURCES = 
@@ -27,6 +27,7 @@ lib@PRECISION@fftw3_la_LIBADD =				\
 	rdft/librdft.la					\
 	rdft/codelets/librdft_codelets.la		\
 	rdft/codelets/r2hc/librdft_codelets_r2hc.la	\
-	rdft/codelets/hc2r/librdft_codelets_hc2r.la
+	rdft/codelets/hc2r/librdft_codelets_hc2r.la     \
+	reodft/libreodft.la
 
 lib@PRECISION@fftw3_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@

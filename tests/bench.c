@@ -13,6 +13,7 @@ extern double timer_stop(void);
 #include "ifftw.h"
 #include "dft.h"
 #include "rdft.h"
+#include "reodft.h"
 #undef problem
 extern const char *const FFTW(version);
 extern const char *const FFTW(cc);
@@ -134,8 +135,10 @@ static void hook(plan *pln, const fftw_problem *p_)
      if (paranoid) {
 	  if (DFTP(p_))
 	       X(dft_verify)(pln, (const problem_dft *) p_, 5);
-	  else if (RDFTP(p_))
+	  else if (RDFTP(p_)) {
 	       X(rdft_verify)(pln, (const problem_rdft *) p_, 5);
+	       X(reodft_verify)(pln, (const problem_rdft *) p_, 5);
+	  }
      }
 }
 
@@ -158,6 +161,7 @@ void setup(struct problem *p)
      plnr = FFTW(mkplanner_score)(0);
      FFTW(dft_conf_standard) (plnr);
      FFTW(rdft_conf_standard) (plnr);
+     FFTW(reodft_conf_standard) (plnr);
      FFTW(planner_set_hook) (plnr, hook);
      /* plnr->flags |= IMPATIENT | CLASSIC_VRECURSE; */
      if (p->kind == PROBLEM_REAL)
@@ -241,7 +245,12 @@ void setup(struct problem *p)
 		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, p->n, is, os),
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn, p->vn,
 					     is * p->size, os * p->size), 
-		    ri, ro, p->sign == FFT_SIGN ? R2HC : HC2R);
+		    ri, ro, 
+#if 1
+		    p->sign == FFT_SIGN ? R2HC : HC2R);
+#else
+                    RODFT01);
+#endif
      else {
 	  uint i, *npadr, *npadc;
 	  npadr = (uint *) bench_malloc(p->rank * sizeof(uint));

@@ -18,7 +18,10 @@
  *
  */
 
-/* $Id: dft.h,v 1.24 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: dft.h,v 1.25 2002-08-19 23:40:18 stevenj Exp $ */
+
+#ifndef __DFT_H__
+#define __DFT_H__
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -81,3 +84,4 @@ void X(problem_dft_register)(planner *p);
 /* configurations */
 void X(dft_conf_standard)(planner *p);
 
+#endif /* __DFT_H__ */
