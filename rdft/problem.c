@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.43 2003-04-03 00:16:53 stevenj Exp $ */
+/* $Id: problem.c,v 1.44 2003-04-03 00:43:59 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -134,8 +134,8 @@ int X(problem_rdft_p)(const problem *p)
    these constant factors from different dimensions could be combined. */
 static int nontrivial(const iodim *d, rdft_kind kind)
 {
-     return (d->n > 1 || ((REDFT_KINDP(kind) || RODFT_KINDP(kind))
-			  && kind != REDFT01 && kind != RODFT01));
+     return (d->n > 1 || kind == R2HC11 || kind == HC2R11
+	     || (REODFT_KINDP(kind) && kind != REDFT01 && kind != RODFT01));
 }
 
 problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,

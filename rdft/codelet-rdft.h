@@ -61,6 +61,7 @@ typedef enum {
 
 #define REDFT_KINDP(k) ((k) >= REDFT00 && (k) <= REDFT11)
 #define RODFT_KINDP(k) ((k) >= RODFT00 && (k) <= RODFT11)
+#define REODFT_KINDP(k) ((k) >= REDFT00 && (k) <= RODFT11)
 
 /* real-input DFT codelets */
 typedef struct kr2hc_desc_s kr2hc_desc;
