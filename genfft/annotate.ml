@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.8 2002-07-28 18:50:09 athena Exp $ *)
+(* $Id: annotate.ml,v 1.9 2002-10-01 13:32:56 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.8 2002-07-28 18:50:09 athena Exp $ *)
+(* $Id: annotate.ml,v 1.9 2002-10-01 13:32:56 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -175,3 +175,10 @@ let annotate schedule =
   let res = rewrite_declarations true (analyze [] schedule) in
   let () = Util.info "end annotate" in
   res
+
+let rec dump print (Annotate (_, _, _, _, code)) =
+  dump_code print code
+and dump_code print = function
+  | ADone -> ()
+  | AInstr x -> print ((assignment_to_string x) ^ "\n")
+  | ASeq (a, b) -> dump print a; dump print b

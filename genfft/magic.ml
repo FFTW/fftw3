@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.10 2002-09-13 21:53:13 stevenj Exp $ *)
+(* $Id: magic.ml,v 1.11 2002-10-01 13:32:56 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -47,6 +47,8 @@ let schedule_type = ref 0
 let compact = ref false
 let dag_dump_file = ref ""
 let alist_dump_file = ref ""
+let asched_dump_file = ref ""
+let lisp_syntax = ref false
 let network_transposition = ref true
 let inklude = ref ""
 
@@ -78,6 +80,8 @@ let speclist = [
 
   "-dump-dag", set_string dag_dump_file, undocumented;
   "-dump-alist", set_string alist_dump_file, undocumented;
+  "-dump-asched", set_string asched_dump_file, undocumented;
+  "-lisp-syntax", set_bool lisp_syntax, undocumented;
 
   "-alternate-convolution", set_int alternate_convolution, undocumented;
   "-deep-collect-depth", set_int deep_collect_depth, undocumented;

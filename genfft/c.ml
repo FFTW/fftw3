@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.14 2002-08-07 16:58:10 athena Exp $ *)
+(* $Id: c.ml,v 1.15 2002-10-01 13:32:56 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -391,11 +391,23 @@ let rec simplify_stride stride i =
   
 let rec cstride_to_string = function
   | Simple i -> string_of_int i
-  | Constant (s, i) -> s ^ " * " ^ (string_of_int i)
-  | Composite (s, i) -> "WS(" ^ s ^ ", " ^ (string_of_int i) ^ ")"
+  | Constant (s, i) -> 
+        if !Magic.lisp_syntax then
+	  "(* " ^ s ^ " " ^ (string_of_int i) ^ ")"
+	else
+	  s ^ " * " ^ (string_of_int i)
+  | Composite (s, i) -> 
+        if !Magic.lisp_syntax then
+	  "(* " ^ s ^ " " ^ (string_of_int i) ^ ")"
+	else
+	  "WS(" ^ s ^ ", " ^ (string_of_int i) ^ ")"
   | Negative x -> "-" ^ cstride_to_string x
 
-let aref name index = Printf.sprintf "%s[%s]"  name index
+let aref name index = 
+  if !Magic.lisp_syntax then
+    Printf.sprintf "(aref %s %s)"  name index
+  else
+    Printf.sprintf "%s[%s]"  name index
 
 let array_subscript name stride k = 
   aref name (cstride_to_string (simplify_stride stride k))
