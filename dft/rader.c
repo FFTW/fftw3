@@ -188,7 +188,7 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 /* shared twiddle and omega lists, keyed by two/three integers. */
 
-typedef struct TLs { uint k1,k2,k3; R *W; int refcnt; struct TLs *nxt; } TL;
+typedef struct TL_s { uint k1,k2,k3; R *W; int refcnt; struct TL_s *nxt; } TL;
 
 static TL *TL_insrt(uint k1, uint k2, uint k3, R *W, TL *tl)
 {
