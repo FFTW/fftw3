@@ -22,14 +22,14 @@ dnl called unless the user specified --with-gcc-arch manually.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.5 2004-11-09 02:46:50 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.6 2004-11-09 03:12:39 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
 AC_ARG_WITH(gcc-arch, [AC_HELP_STRING([--with-gcc-arch=<arch>], [use architecture <arch> for gcc -march/-mtune, instead of guessing])], 
-	ax_gcc_arch=$withval, ax_gcc_arch=guess)
+	ax_gcc_arch=$withval, ax_gcc_arch=yes)
 
 AC_MSG_CHECKING([for gcc architecture flag])
 AC_MSG_RESULT([])
@@ -39,7 +39,7 @@ ax_cv_gcc_archflag="unknown"
 
 if test $GCC = yes -a $cross_compiling = no; then
 
-if test "x$ax_gcc_arch" = xguess; then
+if test "x$ax_gcc_arch" = xyes; then
 ax_gcc_arch=""
 case $host_cpu in
   i386*) ax_gcc_arch=i386 ;;
