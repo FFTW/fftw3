@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.42 2005-03-06 01:09:25 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.43 2005-03-12 20:03:45 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -186,7 +186,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      X(ops_zero)(&pln->super.super.ops);
      pln->super.super.ops.other = 3.14159; /* magic to prefer codelet loops */
      X(ops_madd2)(pln->vl, &cld->ops, &pln->super.super.ops);
-     pln->super.super.pcost = pln->vl * cld->pcost;
+
+     if (p->sz->rnk != 1 || (p->sz->dims[0].n > 64))
+	  pln->super.super.pcost = pln->vl * cld->pcost;
 
      return &(pln->super.super);
 }

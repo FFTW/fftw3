@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.34 2003-04-15 19:03:20 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.35 2005-03-12 20:03:47 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -191,7 +191,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      X(ops_zero)(&pln->super.super.ops);
      pln->super.super.ops.other = 3.14159; /* magic to prefer codelet loops */
      X(ops_madd2)(pln->vl, &cld->ops, &pln->super.super.ops);
-     pln->super.super.pcost = pln->vl * cld->pcost;
+
+     if (p->sz->rnk != 1 || (p->sz->dims[0].n > 128))
+	  pln->super.super.pcost = pln->vl * cld->pcost;
 
      return &(pln->super.super);
 }
