@@ -48,4 +48,6 @@ Other enhancements:
 * Fortran API can be used with both g77 and non-g77 compilers
   simultaneously.
 
+* Multi-threaded version has optional OpenMP support.
+
 * Authors' good looks have greatly improved with age.
