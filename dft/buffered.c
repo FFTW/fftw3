@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.6 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: buffered.c,v 1.7 2002-06-09 19:34:54 athena Exp $ */
 
 #include "dft.h"
 
@@ -114,8 +114,8 @@ static void print(plan *ego_, printer *p)
      P *ego = (P *) ego_;
      p->print(p, "(%s-%u%v/%u-%u%p%p%p)", 
 	      ego->slv->adt->nam, 
-	      ego->n, ego->nbuf, ego->vl, 
-	      ego->bufdist % ego->n,
+	      ego->n, ego->nbuf, 
+	      ego->vl, ego->bufdist % ego->n,
 	      ego->cld, ego->cldcpy, ego->cldrest);
 }
 
