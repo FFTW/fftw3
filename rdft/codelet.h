@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: codelet.h,v 1.1 2002-07-21 01:06:50 stevenj Exp $ */
+/* $Id: codelet.h,v 1.2 2002-07-21 04:22:14 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
  * type or macro which is required to compile a codelet.
  */
 
-#ifndef __CODELET_H__
-#define __CODELET_H__
+#ifndef __RDFT_CODELET_H__
+#define __RDFT_CODELET_H__
 
 #include <math.h>
 #include "ifftw.h"
@@ -130,4 +130,4 @@ void X(khc2hc_dif_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc);
 
 extern const solvtab X(solvtab_rdft_hc2r);
 
-#endif				/* __CODELET_H__ */
+#endif				/* __RDFT_CODELET_H__ */

@@ -12,7 +12,7 @@ extern double timer_stop(void);
 #define problem fftw_problem
 #include "ifftw.h"
 #include "dft.h"
-#include "codelet.h"
+#include "rdft.h"
 #undef problem
 extern const char *const FFTW(version);
 extern const char *const FFTW(cc);
