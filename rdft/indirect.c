@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.3 2002-08-05 18:17:58 stevenj Exp $ */
+/* $Id: indirect.c,v 1.4 2002-08-10 23:33:23 stevenj Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
@@ -68,12 +68,8 @@ static problem *mkcld_before(const problem_rdft *p)
 {
      uint i;
      tensor v, s;
-     v = X(tensor_copy)(p->vecsz);
-     for (i = 0; i < v.rnk; ++i)
-          v.dims[i].is = v.dims[i].os;
-     s = X(tensor_copy)(p->sz);
-     for (i = 0; i < s.rnk; ++i)
-          s.dims[i].is = s.dims[i].os;
+     v = X(tensor_copy_inplace)(p->vecsz, INPLACE_OS);
+     s = X(tensor_copy_inplace)(p->sz, INPLACE_OS);
      return X(mkproblem_rdft_d)(s, v, p->O, p->O, p->kind);
 }
 
@@ -104,12 +100,8 @@ static problem *mkcld_after(const problem_rdft *p)
 {
      uint i;
      tensor v, s;
-     v = X(tensor_copy)(p->vecsz);
-     for (i = 0; i < v.rnk; ++i)
-          v.dims[i].os = v.dims[i].is;
-     s = X(tensor_copy)(p->sz);
-     for (i = 0; i < s.rnk; ++i)
-          s.dims[i].os = s.dims[i].is;
+     v = X(tensor_copy_inplace)(p->vecsz, INPLACE_IS);
+     s = X(tensor_copy_inplace)(p->sz, INPLACE_IS);
      return X(mkproblem_rdft_d)(s, v, p->I, p->I, p->kind);
 }
 
