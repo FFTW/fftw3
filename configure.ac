@@ -167,11 +167,12 @@ if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
       # FMA.  Bottom line: disable the ``web'' pass.
       AX_CHECK_COMPILER_FLAGS(-fno-web, [CFLAGS="$CFLAGS -fno-web"])
 
-      # tweak codelet optimization level to avoid gcc bugs (sigh)
+      # tweak codelet optimization level
       if test "x$CODELET_OPTIM" = x; then
          case "${host_cpu}" in
-            i586*|i686*) 
-               AX_GCC_VERSION(3,4, CODELET_OPTIM=-O2, CODELET_OPTIM=-O) ;;
+	    # gcc's ``optimizations'' slow down everything on IA32.
+	    # (not to mention compiler bugs)
+            i?86*) CODELET_OPTIM=-O ;;
          esac
       fi
     fi
