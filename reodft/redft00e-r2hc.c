@@ -18,9 +18,25 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.23 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.24 2003-04-08 20:48:08 stevenj Exp $ */
 
-/* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
+/* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing.
+
+   This code uses the trick from FFTPACK, also documented in a similar
+   form by Numerical Recipes.  Unfortunately, this algorithm seems to
+   have intrinsic numerical problems (similar to those in
+   reodft11e-r2hc.c), possibly due to the fact that it multiplies its
+   input by a cosine, causing a loss of precision near the zero.  For
+   transforms of 16k points, it has already lost three or four decimal
+   places of accuracy, which we deem unacceptable.
+
+   So, we have abandoned this algorithm in favor of the one in
+   redft00-r2hc-pad.c, which unfortunately sacrifices 30-50% in speed.
+   The only other alternative in the literature that does not have
+   similar numerical difficulties seems to be the direct adaptation of
+   the Cooley-Tukey decomposition for symmetric data, but this would
+   require a whole new set of codelets and it's not clear that it's
+   worth it at this point. */
 
 #include "reodft.h"
 
@@ -37,9 +53,6 @@ typedef struct {
      int vl;
      int ivs, ovs;
 } P;
-
-/* Use the trick from FFTPACK, also documented in a similar form
-   by Numerical Recipes. */
 
 static void apply(const plan *ego_, R *I, R *O)
 {
