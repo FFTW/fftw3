@@ -34,7 +34,7 @@ dnl (with help from M. Frigo), as well as ac_pthread and hb_pthread
 dnl macros posted by AFC to the autoconf macro repository.  We are also
 dnl grateful for the helpful feedback of numerous users.
 dnl
-dnl @version $Id: acx_pthread.m4,v 1.1 2002-08-29 05:44:33 stevenj Exp $
+dnl @version $Id: acx_pthread.m4,v 1.2 2002-09-17 04:40:04 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Alejandro Forero Cuervo <bachue@bachue.com>
 
 AC_DEFUN([ACX_PTHREAD], [
@@ -194,7 +194,7 @@ if test "x$acx_pthread_ok" = xyes; then
         flag=no
         case "${host_cpu}-${host_os}" in
                 *-aix* | *-freebsd*)     flag="-D_THREAD_SAFE";;
-                *solaris* | alpha*-osf*) flag="-D_REENTRANT";;
+                *solaris* | *-osf* | *-hpux*) flag="-D_REENTRANT";;
         esac
         AC_MSG_RESULT(${flag})
         if test "x$flag" != xno; then
