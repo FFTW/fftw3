@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.30 2002-07-30 23:54:41 stevenj Exp $ */
+/* $Id: planner.c,v 1.31 2002-07-31 02:35:24 stevenj Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -46,11 +46,11 @@ struct solutions_s {
 };
 
 /* pair management */
-static inline pair *cons(solver *slv, int id, pair *cdr)
+static inline pair *cons(solver *slv, const char *reg_nam, int id, pair *cdr)
 {
      pair *n = (pair *) fftw_malloc(sizeof(pair), PAIRS);
      n->slv = slv;
-     n->reg_nam = (char *) 0;
+     n->reg_nam = reg_nam;
      n->id = id;
      n->cdr = cdr;
      return n;
@@ -62,21 +62,13 @@ static pair *solvers(planner *ego) { return ego->solvers; }
 
 static void register_solver(planner *ego, solver *s)
 {
-     if (s) {
+     if (s) { /* add s to end of solver list */
+	  pair *n;
 	  X(solver_use)(s);
-	  ego->solvers = cons(s, ego->idcnt++, ego->solvers);
+	  n = cons(s, ego->cur_reg_nam, ego->idcnt++, 0);
+	  *ego->last_solver_cdr = n;
+	  ego->last_solver_cdr = &n->cdr;
      }
-}
-
-static void register_registrar(planner *ego, const char *reg_nam)
-{
-     FORALL_SOLVERS(ego, s, sp, {
-	  UNUSED(s);
-          if (!sp->reg_nam)
-	       sp->reg_nam = reg_nam;
-	  else
-	       break;
-     });
 }
 
 static void hooknil(plan *pln, const problem *p)
@@ -331,26 +323,23 @@ static void exprt_conf(planner *ego, printer *p)
      for (h = 0; h < ego->hashsiz; ++h)
           for (s = ego->sols[h]; s; s = s->cdr) {
                if (s->blessed || (s->pln && s->pln->blessed)) {
-		    if (s->sp)
-			 s->sp->id = idcnt + 1 - s->sp->id;
 		    print_solution(s, p);
 	       }
 	  }
      p->print(p, "\";\n");
 
      /* reset ids: */
-     idcnt = ego->idcnt - 1;
+     idcnt = 1;
      FORALL_SOLVERS(ego, s, sp, {
 	  UNUSED(s);
-          sp->id = idcnt--;
+          sp->id = idcnt++;
      });
+     A(idcnt == sp->idcnt);
 
-     /* Ugh, solvtab_exec_reverse is a hack to get the wisdom's solver id's
-	correct, because we can't traverse the solver table backwards */
      p->print(p, "\n"
 	      "     %s(s, p);\n"
 	      "     /* FIXME: import wisdom */\n"
-	      "}\n", STRINGIZE(X(solvtab_exec_reverse)));
+	      "}\n", STRINGIZE(X(solvtab_exec)));
 }
 
 /*
@@ -363,7 +352,7 @@ planner *X(mkplanner)(size_t sz,
 		      int flags)
 {
      static const planner_adt padt = {
-	  slv, cdr, solvers, register_solver, register_registrar,
+	  slv, cdr, solvers, register_solver,
 	  mkplan, forget, exprt, exprt_conf, slv_mkplan
      };
 
@@ -374,7 +363,9 @@ planner *X(mkplanner)(size_t sz,
      p->destroy = destroy;
      p->nplan = p->nprob = 0;
      p->hook = hooknil;
+     p->cur_reg_nam = 0;
      p->solvers = 0;
+     p->last_solver_cdr = &p->solvers;
      p->sols = 0;
      p->hashsiz = 0;
      p->cnt = 0;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.60 2002-07-30 05:20:11 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.61 2002-07-31 02:35:24 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -344,7 +344,6 @@ typedef struct {
      pair *(*cdr)(pair *cons);
      pair *(*solvers)(planner *ego);
      void (*register_solver)(planner *ego, solver *s);
-     void (*register_registrar)(planner *ego, const char *reg_nam);
      plan *(*mkplan)(planner *ego, problem *p);
      void (*forget)(planner *ego, amnesia a);
      void (*exprt)(planner *ego, printer *pr); /* export is a reserved word
@@ -359,7 +358,8 @@ struct planner_s {
      uint nprob;    /* number of problems evaluated */
      void (*hook)(plan *plan, const problem *p);
 
-     pair *solvers;
+     const char *cur_reg_nam;
+     pair *solvers, **last_solver_cdr;
      solutions **sols;
      void (*destroy)(planner *ego);
      void (*inferior_mkplan)(planner *ego, problem *p, plan **, pair **);
@@ -443,7 +443,6 @@ typedef int stride;
 struct solvtab_s { void (*reg)(planner *); const char *reg_nam; };
 typedef struct solvtab_s solvtab[];
 void X(solvtab_exec)(const solvtab tbl, planner *p);
-void X(solvtab_exec_reverse)(const solvtab tbl, planner *p);
 #define SOLVTABx(s) { s, #s }
 #define SOLVTAB(s) SOLVTABx(s) /* indirection so # works on macros */
 #define SOLVTAB_END { 0, 0 }
