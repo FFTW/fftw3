@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.157 2005-01-09 13:15:36 athena Exp $ */
+/* $Id: planner.c,v 1.158 2005-01-09 13:52:40 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -380,7 +380,7 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
      return pln;
 }
 
-static plan *search0(planner *ego, problem *p, slvdesc **descp,
+static plan *search0(planner *ego, problem *p, int *slvndx,
 		     unsigned short planner_flags)
 {
      plan *best = 0;
@@ -399,13 +399,13 @@ static plan *search0(planner *ego, problem *p, slvdesc **descp,
 		    if (pln->pcost < best->pcost) {
 			 X(plan_destroy_internal)(best);
 			 best = pln;
-			 *descp = sp;
+			 *slvndx = sp - ego->slvdescs;
 		    } else {
 			 X(plan_destroy_internal)(pln);
 		    }
 	       } else {
 		    best = pln;
-		    *descp = sp;
+		    *slvndx = sp - ego->slvdescs;
 	       }
 	  }
      });
@@ -413,7 +413,7 @@ static plan *search0(planner *ego, problem *p, slvdesc **descp,
      return best;
 }
 
-static plan *search(planner *ego, problem *p, slvdesc **descp,
+static plan *search(planner *ego, problem *p, int *slvndx,
 		    unsigned short planner_flags)
 {
      plan *pln = 0;
@@ -421,7 +421,7 @@ static plan *search(planner *ego, problem *p, slvdesc **descp,
      /* try a first search in NO_UGLY mode, unless we are
 	searching exhaustively */
      if (planner_flags & NO_EXHAUSTIVE) 
-	  pln = search0(ego, p, descp, planner_flags | NO_UGLY);
+	  pln = search0(ego, p, slvndx, planner_flags | NO_UGLY);
      else {
 	  /* assertion holds because of canonicalization in mkplan()
 	     below */
@@ -432,7 +432,7 @@ static plan *search(planner *ego, problem *p, slvdesc **descp,
 	  /* if we still don't have a plan, try a search in UGLY
 	     mode, unless the mode was NO_UGLY to begin with */
 	  if (!(planner_flags & NO_UGLY)) {
-	       pln = search0(ego, p, descp, planner_flags);
+	       pln = search0(ego, p, slvndx, planner_flags);
 	  }
      }
 
@@ -443,14 +443,15 @@ static plan *mkplan(planner *ego, problem *p)
 {
      plan *pln;
      md5 m;
-     slvdesc *sp;
+     int slvndx;
      unsigned short flags_of_solution;
      solution *sol;
 
      ASSERT_ALIGNED_DOUBLE;
 
 #ifdef FFTW_DEBUG
-     check(ego);
+     check(&ego->htab_blessed);
+     check(&ego->htab_unblessed);
 #endif
 
      /* Canonical form. */
@@ -462,13 +463,12 @@ static plan *mkplan(planner *ego, problem *p)
      pln = 0;
 
      flags_of_solution = ego->planner_flags;
-     if ((sol = hlookup(ego, m.s, flags_of_solution))) {
+     if ((sol = hlookup(ego, m.s, flags_of_solution))) { 
 	  /* wisdom is acceptable */
-	  if (sol->slvndx < 0) 
-	       return 0;   /* known to be infeasible */
 
-	  /* use solver to obtain a plan */
-	  sp = ego->slvdescs + sol->slvndx;
+	  slvndx = sol->slvndx;
+	  if (slvndx < 0) 
+	       return 0;   /* known to be infeasible */
 
 	  flags_of_solution = (0
 			       | IMPATIENCE(sol->flags)
@@ -478,9 +478,13 @@ static plan *mkplan(planner *ego, problem *p)
 			       | BLISS(sol->flags)
 			       | BLISS(flags_of_solution));
 
-	  pln = invoke_solver(ego, p, sp->slv, flags_of_solution);	  
+	  /* use solver to obtain a plan */
+	  pln = invoke_solver(ego, p, ego->slvdescs[slvndx].slv,
+			      flags_of_solution);	  
 
-	  sol = 0; /* may be dangling after invoke_solver() */
+	  sol = 0; /* Paranoid: SOL may be dangling after
+		      invoke_solver(); make sure we don't accidentally
+		      reuse it. */
 
 	  /* if (!pln) then the entry is bogus, but
 	     we currently do nothing about it. */
@@ -492,7 +496,7 @@ static plan *mkplan(planner *ego, problem *p)
 
      if (!pln) {
 	  flags_of_solution = ego->planner_flags;
-	  pln = search(ego, p, &sp, flags_of_solution);
+	  pln = search(ego, p, &slvndx, flags_of_solution);
      }
 
      if (pln) {
@@ -500,7 +504,7 @@ static plan *mkplan(planner *ego, problem *p)
 	     problem is feasible. */
 	  flags_of_solution &= ~NO_UGLY;
 
-	  hinsert(ego, m.s, flags_of_solution, sp - ego->slvdescs);
+	  hinsert(ego, m.s, flags_of_solution, slvndx);
 
 	  invoke_hook(ego, pln, p, 1);
      } else {
