@@ -168,7 +168,10 @@ workaround.
 
 Visual C++ 6.0 reportedly produces incorrect code for SSE/SSE2 when
 compiling FFTW.  People who tried using VC++ reportedly had switch to
-the Intel compiler in order to get the SIMD code to work.
+the Intel compiler in order to get the SIMD code to work. VC++ 6.0
+also reportedly produces incorrect code for the file
+\courier{reodft11e-r2hc-odd.c\} unless optimizations are disabled for
+that file.
 
 \courier{gcc\} 2.95 on MacOS X miscompiles AltiVec code (fixed in
 later versions).  \courier{gcc\} 3.2.x miscompiles AltiVec
