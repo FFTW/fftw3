@@ -111,19 +111,6 @@ void copy_c2r(struct problem *p, bench_complex *in)
           copy_c2r_packed(p, in);
 }
 
-
-typedef struct {
-     visit_closure super;
-     int count;
-} increment_closure;
-
-static void increment(visit_closure *k_, plan *p)
-{
-     increment_closure *k = (increment_closure *)k_;
-     UNUSED(p);
-     ++k->count;
-}
-
 static void hook(plan *pln, const fftw_problem *p_, int optimalp)
 {
      if (verbose > 2 && optimalp)
@@ -311,13 +298,6 @@ void setup(struct problem *p)
 	  pr->print(pr, "%d add, %d mul, %d fma, %d other\n",
 		    pln->ops.add, pln->ops.mul, pln->ops.fma, pln->ops.other);
 	  pr->print(pr, "planner time: %g s\n", tplan);
-	  if (verbose > 1) {
-	       increment_closure k;
-	       k.super.visit = increment;
-	       k.count = 0;
-	       FFTW(traverse_plan)(pln, 0, &k.super);
-	       printf("number of child plans: %d\n", k.count - 1);
-	  }
 	  if (verbose > 3) {
 	       plnr->adt->exprt(plnr, pr);
 	       pr->print(pr, "\n");

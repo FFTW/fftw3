@@ -18,34 +18,34 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.18 2002-09-01 23:22:53 athena Exp $ */
+/* $Id: planner-score.c,v 1.19 2002-09-02 01:26:38 athena Exp $ */
 #include "ifftw.h"
 
-typedef struct {
-     visit_closure super;
-     int sc;
-} adjclosure;
+/* scoring planner */
 
-static void visit(visit_closure *k_, plan *p)
-{
-     adjclosure *k = (adjclosure *)k_;
-     if (p->score < k->sc) k->sc = p->score; 
-}
+/* 
+   The usage of the planner->score field is nonobvious.
+  
+   We want to compute the score of a plan as the minimum of the
+   ``natural'' score of the plan (as determined by solver->score) and
+   the score of all children.  We do not want to have each solver
+   compute this quantity.
 
-static void adjust_score(plan *pln)
-{
-     adjclosure k;
-     k.super.visit = visit;
-     k.sc = pln->score;
-     X(traverse_plan)(pln, 0, &k.super);
-     pln->score = k.sc;
-}
+   Instead, planner->score initially holds the natural score of the
+   parent.  The child planner updates planner->score to the minimum of
+   planner->score and the score of the child.  The parent planner
+   reads this value when the child planner returns.
+
+   In effect, planner->score is a hidden additional function argument
+   that we are too lazy to push around.
+*/
 
 static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 {
      plan *best = 0;
      int best_score;
      int best_not_yet_timed = 1;
+     int parent_score = ego->score; /* save for later */
      slvdesc *sp;
 
      *bestp = 0;
@@ -53,16 +53,16 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
      /* if a solver is suggested (by wisdom) use it */
      if ((sp = *descp)) {
 	  solver *s = sp->slv;
+	  ego->score = s->adt->score(s, p, ego); /* natural score of solver */
 	  best = ego->adt->slv_mkplan(ego, p, s);
 	  if (best) {
-	       best->score = s->adt->score(s, p, ego);
-	       adjust_score(best);
-	       *bestp = best;
-	       return;
+	       best->score = ego->score;
+	       goto done;
 	  }
 	  /* BEST may be 0 in case of md5 collision */
      }
 
+     /* find highest score */
      best_score = BAD;
      FORALL_SOLVERS(ego, s, sp, {
 	  int sc = s->adt->score(s, p, ego);
@@ -73,9 +73,15 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
      for (; best_score > BAD; --best_score) {
           FORALL_SOLVERS(ego, s, sp, {
 	       if (s->adt->score(s, p, ego) == best_score) {
-		    plan *pln = ego->adt->slv_mkplan(ego, p, s);
+		    plan *pln;
+
+		    ego->score = best_score; /* natural score of this solver */
+		    pln = ego->adt->slv_mkplan(ego, p, s);
 
 		    if (pln) {
+			 pln->score = ego->score; /* min of natural score
+						     and score of children */
+
 			 X(plan_use)(pln);
 
 			 if (best) {
@@ -99,14 +105,15 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	       }
 	  });
 
-	  if (best) {
-	       best->score = best_score;
-	       adjust_score(best);
-	       *bestp = best;
-	       if (best->score >= best_score)
-		    break;
-	  }
+
+	  /* condition may be false if children have lower score */
+	  if (best && best->score >= best_score)
+	       break;
      };
+
+ done:
+     ego->score = X(imin)(parent_score, best ? best->score : GOOD);
+     *bestp = best;
 }
 
 /* constructor */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.103 2002-09-01 23:51:50 athena Exp $ */
+/* $Id: ifftw.h,v 1.104 2002-09-02 01:26:38 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -352,14 +352,6 @@ scanner *X(mkscanner_file)(FILE *f);
 scanner *X(mkscanner_str)(const char *s);
 
 /*-----------------------------------------------------------------------*/
-/* traverse.c */
-typedef struct visit_closure_s {
-     void (*visit)(struct visit_closure_s *, plan *);
-} visit_closure;
-
-void X(traverse_plan)(plan *p, int recur, visit_closure *k);
-
-/*-----------------------------------------------------------------------*/
 /* plan.c: */
 typedef struct {
      void (*solve)(plan *ego, const problem *p);
@@ -467,6 +459,7 @@ struct planner_s {
      uint cnt;
      uint flags;
      uint nthr;
+     int score;  /* see planner-score.c */
      int idcnt;
 };
 
