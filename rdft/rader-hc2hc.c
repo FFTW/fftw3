@@ -173,7 +173,7 @@ static void apply_dif(plan *ego_, R *I, R *O)
      R *buf, *rio, *ii, *io;
      const R *omega, *W;
 
-     /* 0th twiddle transform is just size-r (prime) R2HC: */
+     /* 0th twiddle transform is just size-r (prime) HC2R: */
      {
 	   plan_rdft *cldr0 = (plan_rdft *) ego->cldr0;
 	   cldr0->apply((plan *) cldr0, I, I);

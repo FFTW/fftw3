@@ -224,7 +224,7 @@ void setup(struct problem *p)
 		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, is, os),
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
 					     is * p->size, os * p->size), 
-		    ri, ro, p->sign);
+		    ri, ro, p->sign == FFT_SIGN ? R2HC : HC2R);
      else if (p->rank == 1) {
 	  iodim sz = { 0, 1, 2 };
 	  sz.n = p->n[0];
@@ -233,7 +233,8 @@ void setup(struct problem *p)
 		    sz,
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
 					     is * p->size, os * p->size), 
-		    ri, ro, io, p->sign);
+		    ri, ro, io, 
+		    p->sign == FFT_SIGN ? R2HC : HC2R);
      }
      else
 	  BENCH_ASSERT(0);

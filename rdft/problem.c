@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.14 2002-08-03 21:55:44 stevenj Exp $ */
+/* $Id: problem.c,v 1.15 2002-08-05 18:17:58 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -93,21 +93,61 @@ void X(rdft_zerotens)(tensor sz, R *I)
 const char *X(rdft_kind_str)(rdft_kind kind)
 {
      switch (kind) {
-	 case R2HC: return "r2hc";
-	 case R2HCII: return "r2hcii";
-	 case HC2R: return "hc2r";
-	 case HC2RIII: return "hc2riii";
+	 case R2HC00: return "r2hc";
+	 case R2HC01: return "r2hc01";
+	 case R2HC10: return "r2hc10";
+	 case R2HC11: return "r2hc11";
+
+	 case HC2R00: return "hc2r";
+	 case HC2R01: return "hc2r01";
+	 case HC2R10: return "hc2r10";
+	 case HC2R11: return "hc2r11";
+
 	 case DHT: return "dht";
-	 case DST00: return "dst00";
-	 case DST01: return "dst01";
-	 case DST10: return "dst10";
-	 case DST11: return "dst11";
-	 case DCT00: return "dct00";
-	 case DCT01: return "dct01";
-	 case DCT10: return "dct10";
-	 case DCT11: return "dct11";
+
+	 case REDFT00: return "redft00";
+	 case REDFT01: return "redft01";
+	 case REDFT10: return "redft10";
+	 case REDFT11: return "redft11";
+
+	 case RODFT00: return "rodft00";
+	 case RODFT01: return "rodft01";
+	 case RODFT10: return "rodft10";
+	 case RODFT11: return "rodft11";
+
 	 default: A(0); return 0;
      }
+}
+
+/* for a given transform order n, return the actual number of
+   real values in the data input/output arrays.  This is
+   less than n for real-{even,odd} transforms. */
+uint X(rdft_real_n)(rdft_kind kind, uint n)
+{
+     switch (kind) {
+	 case R2HC00: case R2HC01: case R2HC10: case R2HC11:
+	 case HC2R00: case HC2R01: case HC2R10: case HC2R11:
+	 case DHT:
+	      return n;
+
+	 case REDFT00: return n/2 + 1;
+	 case RODFT00: return (n + 1)/2 - 1;
+
+	 case REDFT01: case REDFT10: case REDFT11: return (n + 1)/2;
+	 case RODFT01: case RODFT10: case RODFT11: return n/2;
+
+	 default: A(0); return 0;
+     }
+}
+
+tensor X(rdft_real_sz)(rdft_kind kind, const tensor sz)
+{
+     uint i;
+     tensor sz_real;
+     sz_real = X(tensor_copy)(sz);
+     for (i = 0; i < sz.rnk; ++i)
+	  sz_real.dims[i].n = X(rdft_real_n)(kind, sz_real.dims[i].n);
+     return sz_real;
 }
 
 static void print(problem *ego_, printer *p)
@@ -170,6 +210,11 @@ problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
      problem_rdft *ego =
           (problem_rdft *)X(mkproblem)(sizeof(problem_rdft), &padt);
 
+     uint i, total_n = 1;
+     for (i = 0; i < sz.rnk; ++i)
+	  total_n *= X(rdft_real_n)(kind, sz.dims[i].n);
+     A(total_n > 0); /* or should we use vecsz RNK_MINFTY? */
+     
      ego->sz = X(tensor_compress)(sz);
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->I = I;

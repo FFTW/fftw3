@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.8 2002-08-03 23:38:17 stevenj Exp $ */
+/* $Id: codelet.h,v 1.9 2002-08-05 18:17:58 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -35,14 +35,32 @@
  * types of codelets
  **************************************************************/
 
+/* FOOab, with a,b in {0,1}, denotes the FOO transform
+   where a/b say whether the input/output are shifted by
+   half a sample/slot. */
+
 typedef enum {
-     R2HC = FFT_SIGN, HC2R = -FFT_SIGN, 
-     R2HCII, HC2RIII,
-     DHT, DST00, DST01, DST10, DST11, DCT00, DCT01, DCT10, DCT11
+     R2HC00, R2HC01, R2HC10, R2HC11,
+     HC2R00, HC2R01, HC2R10, HC2R11,
+     DHT, 
+     REDFT00, REDFT01, REDFT10, REDFT11, /* real-even == DCT's */
+     RODFT00, RODFT01, RODFT10, RODFT11  /*  real-odd == DST's */
 } rdft_kind;
-#define R2HC_KINDP(k) ((k) == R2HC || (k) == R2HCII) /* uses kr2hc_genus */
-#define HC2R_KINDP(k) ((k) == HC2R || (k) == HC2RIII) /* uses khc2r_genus */
-#define R2R_KINDP(k) ((k) >= DHT)
+
+/* standard R2HC/HC2R transforms are unshifted */
+#define R2HC R2HC00
+#define HC2R HC2R00
+
+#define R2HCII R2HC01
+#define HC2RIII HC2R10
+
+#define R2HC_KINDP(k) ((k) >= R2HC00 && (k) <= R2HC11) /* uses kr2hc_genus */
+#define HC2R_KINDP(k) ((k) >= HC2R00 && (k) <= HC2R11) /* uses khc2r_genus */
+
+#define R2R_KINDP(k) ((k) >= DHT) /* uses kr2r_genus */
+
+#define REDFT_KINDP(k) ((k) >= REDFT00 && (k) <= REDFT11)
+#define RODFT_KINDP(k) ((k) >= RODFT00 && (k) <= RODFT11)
 
 /* real-input DFT codelets */
 typedef struct kr2hc_desc_s kr2hc_desc;

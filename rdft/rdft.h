@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.14 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: rdft.h,v 1.15 2002-08-05 18:17:58 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -40,6 +40,8 @@ problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
 problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
 			     R *I, R *O, rdft_kind kind);
 const char *X(rdft_kind_str)(rdft_kind kind);
+uint X(rdft_real_n)(rdft_kind kind, uint n);
+tensor X(rdft_real_sz)(rdft_kind kind, const tensor sz);
 
 /* verify.c: */
 void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds);
