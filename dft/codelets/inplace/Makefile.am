@@ -3,12 +3,16 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 CFLAGS = @CFLAGS@ @CODELET_OPTIM@
 noinst_LTLIBRARIES = libdft_inplace.la
 
-F1 = f1_2.c f1_3.c f1_4.c f1_5.c f1_6.c f1_7.c f1_8.c f1_9.c f1_10.c	\
-f1_12.c f1_15.c f1_16.c f1_32.c f1_64.c
+# The F (DIF) codelets are used for a kind of in-place transform algorithm,
+# but the planner seems to never (or hardly ever) use them on the machines
+# we have access to, preferring the Q codelets and the use of buffers
+# for sub-transforms.  So, we get rid of them, at least for now.
 
-F2 = f2_4.c f2_8.c f2_16.c f2_32.c f2_64.c
+F1 = # f1_2.c f1_3.c f1_4.c f1_5.c f1_6.c f1_7.c f1_8.c f1_9.c f1_10.c f1_12.c f1_15.c f1_16.c f1_32.c f1_64.c
 
-Q1 = q1_2.c q1_4.c q1_8.c
+F2 = # f2_4.c f2_8.c f2_16.c f2_32.c f2_64.c
+
+Q1 = q1_2.c q1_4.c q1_8.c  q1_3.c q1_5.c q1_6.c
 
 ALL_CODELETS = $(F1) $(F2) $(Q1)
 
