@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.4 2002-07-22 11:27:06 athena Exp $ */
+/* $Id: problem.c,v 1.5 2002-07-22 11:37:12 athena Exp $ */
 
 #include "rdft.h"
 
@@ -87,17 +87,21 @@ static void zerotens(tensor sz, R *I)
 
 const char *X(rdft_kind_str)(rdft_kind kind)
 {
-     static const char s[][8] = { "r2hc", "hc2r", "r2hcII", "hc2rIII" };
-     switch (kind) {
-	 case R2HC:
-	      return s[0];
-	 case HC2R:
-	      return s[1];
-	 case R2HCII:
-	      return s[2];
-	 case HC2RIII:
-	      return s[3];
-     }
+     uint i;
+
+     static const struct {
+	  rdft_kind k;
+	  const char *nam;
+     } tab[] = {
+	  { R2HC, "r2hc" },
+	  { R2HCII, "r2hcii" },
+	  { HC2R, "hc2r" },
+	  { HC2RIII, "hc2riii" }
+     };
+
+     for (i = 0; i < sizeof(tab) / sizeof(tab[0]); ++i) 
+	  if (tab[i].k == kind)
+	       return tab[i].nam;
      A(0);
      return 0;
 }
