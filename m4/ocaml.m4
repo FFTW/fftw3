@@ -7,15 +7,9 @@ if test "x$ocaml_prefix" = xNONE; then
 fi
 
 OCAML_BINDIR="${ocaml_prefix}/bin"
-if test $target != $build; then
-	OCAML_LIBDIR="${ocaml_prefix}/${target_alias}/lib"
-	OCAML_TARGET_BINDIR="${ocaml_prefix}/${target_alias}/bin"
-	INSTALLED_OCAMLC=$OCAML_BINDIR/${target_alias}-ocamlc
-else
-	OCAML_LIBDIR="${ocaml_prefix}/lib"
-	OCAML_TARGET_BINDIR="${ocaml_prefix}/bin"
-	INSTALLED_OCAMLC=$OCAML_BINDIR/ocamlc
-fi
+OCAML_LIBDIR="${ocaml_prefix}/lib"
+OCAML_TARGET_BINDIR="${ocaml_prefix}/bin"
+INSTALLED_OCAMLC=$OCAML_BINDIR/ocamlc
 AC_SUBST(INSTALLED_OCAMLC)
 TARGET_OCAMLLIB=$OCAML_LIBDIR/$PACKAGE
 AC_SUBST(TARGET_OCAMLLIB)

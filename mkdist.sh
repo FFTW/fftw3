@@ -13,11 +13,6 @@ emacs -batch -q -no-site-file --eval \
 sh bootstrap.sh
 
 make maintainer-clean
-./configure --enable-maintainer-mode --enable-fma
-make -j $NJOBS
-make -j $NJOBS dist
-
-make maintainer-clean
 ./configure --enable-maintainer-mode --disable-fma
 make -j $NJOBS
 make -j $NJOBS dist

@@ -8,14 +8,19 @@ AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AC_SUBST(SHARED_VERSION_INFO)
 AM_ENABLE_SHARED(no) dnl to hell with shared libraries
+AC_CANONICAL_HOST
 
 dnl configure options
-AC_ARG_ENABLE(fma, [AC_HELP_STRING([--enable-fma],[build a fma-style distribution])], ok=$enableval, ok=no)
-if test "$ok" = "yes"; then
- 	VERSION=${VERSION}-fma
- 	PACKAGE_VERSION=${PACKAGE_VERSION}-fma
+case "${host_cpu}" in
+  powerpc*) have_fma=yes;;
+  *) have_fma=no;;
+esac
+
+AC_ARG_ENABLE(fma, [AC_HELP_STRING([--enable-fma],[enable optimizations for machines with fused multiply-add])], have_fma=$enableval)
+if test "$have_fma"x = "yes"x; then
+	AC_DEFINE(HAVE_FMA,1,[Define if you have a machine with fused multiply-add])
 fi
-AM_CONDITIONAL(FMA, test "$ok" = "yes")
+
 
 AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then

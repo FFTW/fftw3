@@ -61,15 +61,15 @@ FLAGS_HB2=$(RDFT_FLAGS_COMMON) -sign 1 -twiddle-log3
 FLAGS_HC2RIII=$(RDFT_FLAGS_COMMON) -sign 1
 
 hc2r_%.c:  $(CODELET_DEPS) $(GEN_HC2R)
-	($(PRELUDE_COMMANDS_RDFT); $(GEN_HC2R) $(FLAGS_HC2R) -n $* -name hc2r_$* -include "hc2r.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2R) $(FLAGS_HC2R) -n $* -name hc2r_$* -include "hc2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hb_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
-	($(PRELUDE_COMMANDS_RDFT); $(GEN_HC2HC) $(FLAGS_HB) -n $* -dif -name hb_$* -include "hb.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2HC) $(FLAGS_HB) -n $* -dif -name hb_$* -include "hb.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hb2_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
-	($(PRELUDE_COMMANDS_RDFT); $(GEN_HC2HC) $(FLAGS_HB2) -n $* -dif -name hb2_$* -include "hb.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2HC) $(FLAGS_HB2) -n $* -dif -name hb2_$* -include "hb.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hc2rIII_%.c:  $(CODELET_DEPS) $(GEN_HC2R)
-	($(PRELUDE_COMMANDS_RDFT); $(GEN_HC2R) $(FLAGS_HC2R) -n $* -name hc2rIII_$* -dft-III -include "hc2rIII.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2R) $(FLAGS_HC2R) -n $* -name hc2rIII_$* -dft-III -include "hc2rIII.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE
