@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.22 2003-01-19 04:46:57 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.23 2003-02-15 20:16:26 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -130,7 +130,7 @@ home page}.
 @fpindex benchfft
 
 In order to use FFTW effectively, you need to understand one basic
-concept of FFTW's internal structure.  FFTW does not used a fixed
+concept of FFTW's internal structure:  FFTW does not used a fixed
 algorithm for computing the transform, but instead can adapt the DFT
 algorithm to details of the underlying hardware in order to achieve
 the best performance.  Hence, the computation of the transform is
@@ -246,12 +246,12 @@ This chapter describes the basic usage of FFTW, i.e., how to compute
 @cindex basic interface
 the Fourier transform of a single array.  This chapter tells the
 truth, but not the @emph{whole} truth. Specifically, FFTW implements
-additional routines and flags, providing extra functionality, that are
-not documented here, although in many cases we try to indicate where
-added capabilities exist.  For more complete information, see
-@ref{FFTW Reference}.  (Note that you need to compile and install FFTW
-before you can use it in a program.  For the details of the
-installation, see @ref{Installation and Customization}.)
+additional routines and flags that are not documented here, although
+in many cases we try to indicate where added capabilities exist.  For
+more complete information, see @ref{FFTW Reference}.  (Note that you
+need to compile and install FFTW before you can use it in a program.
+For the details of the installation, see @ref{Installation and
+Customization}.)
 
 We recommend that you read this tutorial in order.@footnote{You can
 read the tutorial in bit-reversed order after computing your first
@@ -449,6 +449,85 @@ formats.  For more information, see @ref{FFTW Reference}.
 @c ------------------------------------------------------------
 @node One-Dimensional DFTs of Real Data, Multi-Dimensional DFTs of Real Data, Complex Multi-Dimensional DFTs, Tutorial
 @section One-Dimensional DFTs of Real Data
+
+In many practical applications, the input data @code{in[i]} are purely
+real numbers, in which case the DFT output satisfies the ``Hermitian''
+@cindex Hermitian
+redundancy: @code{out[i]} is the conjugate of @code{out[n-i]}.  It is
+possible to take advantage of these circumstances in order to achieve
+roughly a factor of two improvement in both speed and memory usage.
+
+In exchange for these speed and space advantages, the user sacrifices
+some of the simplicity of FFTW's complex transforms. First of all, the
+input and output arrays are of different sizes and types: the input is
+@code{n} real numbers, while the output is @code{n/2+1} complex
+numbers; this requires slight ``padding'' of the input array for
+@cindex padding
+in-place transforms.  Second, the inverse transform (complex to real)
+has the side-effect of destroying its input array, by default.  Neither
+of these inconveniences should pose a serious problem for users, but
+it is important to be aware of them.
+
+The routines to perform real-data transforms are almost the same as
+those for complex transforms: you allocate arrays of @code{double}
+and/or @code{fftw_complex} (preferably using @code{fftw_malloc}),
+create an @code{fftw_plan}, execute it as many times as you want with
+@code{fftw_execute(plan)}, and clean up with
+@code{fftw_destroy_plan(plan)} (and @code{fftw_free}).  The only
+differences are that the input (or output) is of type @code{double},
+and there are new routines to create the plan:
+
+@example
+fftw_plan fftw_plan_dft_r2c_1d(int n, double *in, fftw_complex *out,
+                               unsigned flags);
+fftw_plan fftw_plan_dft_c2r_1d(int n, fftw_complex *in, double *out,
+                               unsigned flags);
+@end example
+@findex fftw_plan_dft_r2c_1d
+@findex fftw_plan_dft_c2r_1d
+
+Here, @code{n} is the ``logical'' size of the DFT, not necessarily the
+physical size of the array.  In particular, the real (@code{double})
+array has @code{n} elements, while the complex (@code{fftw_complex})
+array has @code{n/2+1} elements (where @samp{@code{/}} denotes C
+integer division, truncating for odd @code{n}).  For an in-place transform,
+@cindex in-place
+@code{in} and @code{out} are aliased to the same array, which must be
+big enough to hold both; so, the real array would actually have
+@code{2*(n/2+1)} elements, where the elements beyond the first
+@code{n} are unused padding.  (For single/long-double precision
+@code{fftwf} and @code{fftwl}, @code{double} should be replaced by
+@code{float} and @code{long double}, respectively.)
+
+Unlike the complex DFT planner, there is no @code{sign} argument.
+Instead, r2c DFTs are always @code{FFTW_FORWARD} and c2r DFTs are
+always @code{FFTW_BACKWARD}.
+@ctindex FFTW_FORWARD
+@ctindex FFTW_BACKWARD
+
+As noted above, the c2r transform destroys its input array even for
+out-of-place transforms.  This can be prevented, if necessary, by
+including @code{FFTW_PRESERVE_INPUT} in the @code{flags}, with
+unfortunately some sacrifice in performance.
+@cindex flags
+@ctindex FFTW_PRESERVE_INPUT
+
+Readers familiar with DFTs of real data will recall that the 0th (DC)
+and @code{n/2}-th (Nyquist, for even @code{n}) elements of the complex
+output are purely real.  Some implementations therefore store the
+Nyquist element where the DC imaginary part would go, in order to make
+the input and output arrays the same size.  Such packing, however,
+does not generalize well to multidimensional transforms, and the space
+savings are miniscule in any case.
+
+An alternate interface for one-dimensional r2c and c2r DFTs can be
+found in the @samp{r2r} interface (@pxref{The Halfcomplex-format
+DFT}), with ``halfcomplex''-format output that @emph{is} the same size
+(and type) as the input array.
+@cindex halfcomplex format
+That interface, although it does not generalize well to
+multidimensional transforms, may sometimes yield better performance
+(especially for odd @code{n}).
 
 @c ------------------------------------------------------------
 @node Multi-Dimensional DFTs of Real Data, More DFTs of Real Data, One-Dimensional DFTs of Real Data, Tutorial
