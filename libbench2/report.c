@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: report.c,v 1.6 2003-04-09 12:44:13 athena Exp $ */
+/* $Id: report.c,v 1.7 2003-04-11 11:00:53 athena Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -106,6 +106,7 @@ void report_verbose(const bench_problem *p, double *t, int st)
 {
      struct stats s;
      char bmin[64], bmax[64], bavg[64], bmedian[64], btmin[64];
+     char bsetup[64];
 
      mkstat(t, st, &s);
 
@@ -114,9 +115,10 @@ void report_verbose(const bench_problem *p, double *t, int st)
      sprintf_time(s.avg, bavg);
      sprintf_time(s.median, bmedian);
      sprintf_time(time_min, btmin);
+     sprintf_time(p->setup_time, bsetup);
 
-     ovtpvt("Problem: %s, time: %s, mflops: %.5g\n",
-	    p->pstring, bmin, mflops(p, s.min));
+     ovtpvt("Problem: %s, setup: %s, time: %s, mflops: %.5g\n",
+	    p->pstring, bsetup, bmin, mflops(p, s.min));
 
      if (verbose) {
 	  ovtpvt("Took %d measurements for at least %s each.\n", st, btmin);
