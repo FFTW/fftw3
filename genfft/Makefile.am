@@ -16,7 +16,7 @@ util.mli variable.mli
 noinst_SCRIPTS=gen_notw gen_notw_noinline gen_notw_c			\
 gen_notw_noinline_c gen_twiddle gen_twiddle_c gen_twidsq gen_twidsq_c	\
 gen_r2r gen_conv gen_r2hc gen_hc2r gen_r2hc_noinline gen_hc2r_noinline	\
-gen_hc2hc
+gen_hc2hc gen_mdct
 
 libgenfft_objects = unique.cmo magic.cmo util.cmo number.cmo		\
 variable.cmo expr.cmo littlesimp.cmo monads.cmo complex.cmo		\
@@ -121,6 +121,12 @@ gen_conv: libgenfft.cmxa $(gen_conv_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
 maintainer-clean-local::
 	rm -f gen_conv
+
+gen_mdct_OBJECTS = gen_mdct.cmo
+gen_mdct: libgenfft.cmxa $(gen_mdct_OBJECTS:.cmo=.cmx)
+	$(OCAMLOPTLINK)
+maintainer-clean-local::
+	rm -f gen_mdct
 
 
 SUFFIXES = .mli .ml .cmi .cmo .cmx .p.cmx .c .o .cma .cmxa .a
