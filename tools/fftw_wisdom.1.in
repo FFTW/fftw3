@@ -179,4 +179,4 @@ Copyright (c) 2002 Matteo Frigo
 .br
 Copyright (c) 2002 Steven G. Johnson
 .SH "SEE ALSO"
-fftw-wisdom(1)
+fftw-wisdom-to-conf(1)
