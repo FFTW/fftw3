@@ -53,7 +53,6 @@ X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,
 	       swap_strides(X(mktensor_rowmajor_pad)(rank,n,onembed,inembed,
 						     ostride, 2*istride,
 						     out == ri || out == ii)),
-	       howmany == 1 ? X(mktensor_0d)() 
-	       : X(mktensor_1d)(howmany, 2*idist, odist), 
+	       X(mktensor_1d)(howmany, 2*idist, odist), 
 	       out, ri, ii, HC2R));
 }

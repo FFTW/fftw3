@@ -38,7 +38,6 @@ X(plan) X(plan_many_dft_r2c)(unsigned int rank, const unsigned int *n,
 	  X(mkproblem_rdft2_d)(X(mktensor_rowmajor_pad)(rank,n,inembed,onembed,
 							istride, 2*ostride,
 							in == ro || in == io),
-			       howmany == 1 ? X(mktensor_0d)() 
-			       : X(mktensor_1d)(howmany, idist, 2*odist), 
+			       X(mktensor_1d)(howmany, idist, 2*odist), 
 			       in, ro, io, R2HC));
 }
