@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: cycle.h,v 1.24 2003-04-01 06:16:46 stevenj Exp $ */
+/* $Id: cycle.h,v 1.25 2003-04-01 06:17:15 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
-/* This file uses macros like HAVE_GETHRTIME which are assumed to be
+/* This file uses macros like HAVE_GETHRTIME that are assumed to be
    defined according to whether the corresponding function/type/header
    is available on your system.  The necessary macros are most
    conveniently defined if you are using GNU autoconf, via the tests:
