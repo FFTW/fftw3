@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: conf.c,v 1.1 2002-08-19 23:40:18 stevenj Exp $ */
+/* $Id: conf.c,v 1.2 2002-08-20 19:31:54 stevenj Exp $ */
 
 #include "reodft.h"
 
 static const solvtab s =
 {
      SOLVTAB(X(redft00e_r2hc_register)),
-     SOLVTAB(X(redft010e_r2hc_register)),
      SOLVTAB(X(rodft00e_r2hc_register)),
+     SOLVTAB(X(reodft010e_r2hc_register)),
 
      SOLVTAB_END
 };

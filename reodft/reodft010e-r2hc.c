@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.3 2002-08-20 19:16:48 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.4 2002-08-20 19:31:54 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -387,7 +387,7 @@ static solver *mksolver(void)
      return &(slv->super);
 }
 
-void X(redft010e_r2hc_register)(planner *p)
+void X(reodft010e_r2hc_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft.h,v 1.1 2002-08-19 23:40:18 stevenj Exp $ */
+/* $Id: reodft.h,v 1.2 2002-08-20 19:31:54 stevenj Exp $ */
 
 #ifndef __REODFT_H__
 #define __REODFT_H__
@@ -31,12 +31,10 @@
 /* verify.c: */
 void X(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds);
 
-void X(rodft00e_r2hc_register)(planner *p);
-void X(rodft010e_r2hc_register)(planner *p);
-void X(rodft11e_r2hc_register)(planner *p);
 void X(redft00e_r2hc_register)(planner *p);
-void X(redft010e_r2hc_register)(planner *p);
-void X(redft11e_r2hc_register)(planner *p);
+void X(rodft00e_r2hc_register)(planner *p);
+void X(reodft010e_r2hc_register)(planner *p);
+void X(reodft11e_r2hc_register)(planner *p);
 
 /* configurations */
 void X(reodft_conf_standard)(planner *p);
