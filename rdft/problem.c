@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.31 2002-09-25 00:54:43 athena Exp $ */
+/* $Id: problem.c,v 1.32 2003-01-08 21:46:24 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -93,36 +93,6 @@ const char *X(rdft_kind_str)(rdft_kind kind)
      return kstr[kind];
 }
 
-/* for a given transform order n, return the actual number of
-   real values in the data input/output arrays.  This is
-   less than n for real-{even,odd} transforms. */
-uint X(rdft_real_n)(rdft_kind kind, uint n)
-{
-     switch (kind) {
-	 case R2HC00: case R2HC01: case R2HC10: case R2HC11:
-	 case HC2R00: case HC2R01: case HC2R10: case HC2R11:
-	 case DHT:
-	      return n;
-
-	 case REDFT00: return n/2 + 1;
-	 case RODFT00: return (n + 1)/2 - 1;
-
-	 case REDFT01: case REDFT10: case REDFT11: return (n + 1)/2;
-	 case RODFT01: case RODFT10: case RODFT11: return n/2;
-
-	 default: A(0); return 0;
-     }
-}
-
-tensor *X(rdft_real_sz)(const rdft_kind *kind, const tensor *sz)
-{
-     uint i;
-     tensor *sz_real = X(tensor_copy)(sz);
-     for (i = 0; i < sz->rnk; ++i)
-	  sz_real->dims[i].n = X(rdft_real_n)(kind[i], sz_real->dims[i].n);
-     return sz_real;
-}
-
 static void print(problem *ego_, printer *p)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
@@ -140,10 +110,9 @@ static void print(problem *ego_, printer *p)
 static void zero(const problem *ego_)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
-     tensor *rsz = X(rdft_real_sz)(ego->kind, ego->sz);
-     tensor *sz = X(tensor_append)(ego->vecsz, rsz);
+     tensor *sz = X(tensor_append)(ego->vecsz, ego->sz);
      X(rdft_zerotens)(sz, ego->I);
-     X(tensor_destroy2)(sz, rsz);
+     X(tensor_destroy)(sz);
 }
 
 static const problem_adt padt =
@@ -159,19 +128,33 @@ int X(problem_rdft_p)(const problem *p)
      return (p->adt == &padt);
 }
 
+/* Dimensions of size 1 that are not REDFT/RODFT are no-ops and can be
+   eliminated.  REDFT/RODFT unit dimensions still have factors of 2.0
+   and suchlike from normalization and phases, although in principle
+   these constant factors from different dimensions could be combined. */
+static int nontrivial(const iodim *d, rdft_kind kind)
+{
+     return (d->n > 1 || REDFT_KINDP(kind) || RODFT_KINDP(kind));
+}
+
 problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 			   R *I, R *O, const rdft_kind *kind)
 {
      problem_rdft *ego;
      uint rnk = sz->rnk;
-     uint i, total_n = 1;
+     uint i;
 
-     A(FINITE_RNK(rnk));
+     A(FINITE_RNK(sz->rnk));
+     for (i = rnk = 0; i < sz->rnk; ++i) {
+          A(sz->dims[i].n > 0);
+          if (nontrivial(sz->dims + i, kind[i]))
+               ++rnk;
+     }
 
 #if defined(STRUCT_HACK_KR)
      ego = (problem_rdft *) X(mkproblem)(sizeof(problem_rdft)
 					 + sizeof(rdft_kind)
-					 * (rnk > 1 ? rnk - 1 : 0), &padt);
+					 * (rnk > 0 ? rnk - 1 : 0), &padt);
 #elif defined(STRUCT_HACK_C99)
      ego = (problem_rdft *) X(mkproblem)(sizeof(problem_rdft)
 					 + sizeof(rdft_kind) * rnk, &padt);
@@ -180,17 +163,33 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
      ego->kind = (rdft_kind *) fftw_malloc(sizeof(rdft_kind) * rnk, PROBLEMS);
 #endif
 
-     for (i = 0; i < sz->rnk; ++i)
-	  total_n *= X(rdft_real_n)(kind[i], sz->dims[i].n);
-     A(total_n > 0); /* or should we use vecsz RNK_MINFTY? */
+     /* do compression and sorting as in X(tensor_compress), but take
+	transform kind into account (sigh) */
+     ego->sz = X(mktensor)(rnk);
+     for (i = rnk = 0; i < sz->rnk; ++i) {
+          if (nontrivial(sz->dims + i, kind[i])) {
+	       ego->kind[rnk] = kind[i];
+               ego->sz->dims[rnk++] = sz->dims[i];
+	  }
+     }
+     for (i = 0; i + 1 < rnk; ++i) {
+	  uint j;
+	  for (j = i + 1; j < rnk; ++j)
+	       if (X(dimcmp)(ego->sz->dims + i, ego->sz->dims + j) > 0) {
+		    iodim dswap;
+		    rdft_kind kswap;
+		    dswap = ego->sz->dims[i];
+		    ego->sz->dims[i] = ego->sz->dims[j];
+		    ego->sz->dims[j] = dswap;
+		    kswap = ego->kind[i];
+		    ego->kind[i] = ego->kind[j];
+		    ego->kind[j] = kswap;
+	       }
+     }
 
-     /* FIXME: how are shifted transforms compressed? */
-     ego->sz = X(tensor_compress)(sz);
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->I = I;
      ego->O = O;
-     for (i = 0; i < sz->rnk; ++i)
-	  ego->kind[i] = kind[i];
 
      A(FINITE_RNK(ego->sz->rnk));
      return &(ego->super);

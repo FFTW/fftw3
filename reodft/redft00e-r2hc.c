@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.13 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.14 2003-01-08 21:46:24 stevenj Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -108,7 +108,7 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(redft00e-r2hc-%u%(%p%))", ego->n * 2, ego->cld);
+     p->print(p, "(redft00e-r2hc-%u%(%p%))", ego->n + 1, ego->cld);
 }
 
 static int applicable0(const solver *ego_, const problem *p_)
@@ -120,7 +120,7 @@ static int applicable0(const solver *ego_, const problem *p_)
 		  && p->sz->rnk == 1
 		  && p->vecsz->rnk == 0
 		  && p->kind[0] == REDFT00
-		  && p->sz->dims[0].n % 2 == 0
+		  && p->sz->dims[0].n > 1  /* n == 1 is not well-defined */
 	       );
      }
 
@@ -150,7 +150,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_rdft *) p_;
 
-     n = p->sz->dims[0].n / 2;
+     n = p->sz->dims[0].n - 1;
+     A(n > 0);
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
      {

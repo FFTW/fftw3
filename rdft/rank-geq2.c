@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.14 2003-01-07 20:00:14 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.15 2003-01-08 21:46:24 stevenj Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
 
@@ -156,7 +156,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      P *pln;
      plan *cld1 = 0, *cld2 = 0;
-     tensor *sz1, *rsz1, *sz2, *vecszi, *sz2i, *rsz2i;
+     tensor *sz1, *sz2, *vecszi, *sz2i;
      uint spltrnk;
 
      static const plan_adt padt = {
@@ -170,19 +170,17 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      X(tensor_split)(p->sz, &sz1, spltrnk, &sz2);
      vecszi = X(tensor_copy_inplace)(p->vecsz, INPLACE_OS);
      sz2i = X(tensor_copy_inplace)(sz2, INPLACE_OS);
-     rsz1 = X(rdft_real_sz)(p->kind, sz1);
-     rsz2i = X(rdft_real_sz)(p->kind + spltrnk, sz2i);
 
      cld1 = X(mkplan_d)(plnr, 
 			X(mkproblem_rdft_d)(X(tensor_copy)(sz2),
-					    X(tensor_append)(p->vecsz, rsz1),
+					    X(tensor_append)(p->vecsz, sz1),
 					    p->I, p->O, p->kind + spltrnk));
      if (!cld1) goto nada;
 
      cld2 = X(mkplan_d)(plnr, 
 			X(mkproblem_rdft_d)(
 			     X(tensor_copy_inplace)(sz1, INPLACE_OS),
-			     X(tensor_append)(vecszi, rsz2i),
+			     X(tensor_append)(vecszi, sz2i),
 			     p->O, p->O, p->kind));
      if (!cld2) goto nada;
 
@@ -194,16 +192,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->solver = ego;
      X(ops_add)(&cld1->ops, &cld2->ops, &pln->super.super.ops);
 
-     X(tensor_destroy4)(rsz2i, rsz1, sz2, sz1);
-     X(tensor_destroy2)(vecszi, sz2i);
+     X(tensor_destroy4)(sz2, sz1, vecszi, sz2i);
 
      return &(pln->super.super);
 
  nada:
      X(plan_destroy)(cld2);
      X(plan_destroy)(cld1);
-     X(tensor_destroy4)(rsz2i, rsz1, sz2, sz1);
-     X(tensor_destroy2)(vecszi, sz2i);
+     X(tensor_destroy4)(sz2, sz1, vecszi, sz2i);
      return (plan *) 0;
 }
 

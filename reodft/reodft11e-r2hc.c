@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.13 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.14 2003-01-08 21:46:24 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -190,7 +190,7 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
      p->print(p, "(%se-r2hc-%u%(%p%))",
-	      X(rdft_kind_str)(ego->kind), ego->n * 2, ego->cld);
+	      X(rdft_kind_str)(ego->kind), ego->n, ego->cld);
 }
 
 static int applicable0(const solver *ego_, const problem *p_)
@@ -202,7 +202,6 @@ static int applicable0(const solver *ego_, const problem *p_)
 		  && p->sz->rnk == 1
 		  && p->vecsz->rnk == 0
 		  && (p->kind[0] == REDFT11 || p->kind[0] == RODFT11)
-		  && p->sz->dims[0].n % 2 == 0
 	       );
      }
 
@@ -232,7 +231,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_rdft *) p_;
 
-     n = p->sz->dims[0].n / 2;
+     n = p->sz->dims[0].n;
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
      {

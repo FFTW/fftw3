@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.6 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: verify-reodft.c,v 1.7 2003-01-08 21:46:24 stevenj Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -38,27 +38,29 @@ typedef struct {
  * Utility functions:
  */
 
-static double rerror(R a, R b, double tol)
+static double dabs(double x) { return (x < 0.0) ? -x : x; }
+static double dmax(double x, double y) { return (x > y) ? x : y; }
+static double dmin(double x, double y) { return (x < y) ? x : y; }
+
+static double aerror(R *a, R *b, uint n)
 {
-     double x;
-     x = fabs(a - b) / (0.5 * (fabs(a) + fabs(b)) + tol);
+     if (n > 0) {
+          /* compute the relative Linf error */
+          double e = 0.0, mag = 0.0;
+          uint i;
+
+          for (i = 0; i < n; ++i) {
+               e = dmax(e, dabs(a[i] - b[i]));
+               mag = dmax(mag, dmin(dabs(a[i]), dabs(b[i])));
+          }
+          e /= mag;
+
 #ifdef HAVE_ISNAN
-     A(!isnan(x));
+          A(!isnan(e));
 #endif
-     return x;
-}
-
-static double aerror(R *a, R *b, uint n, double tol)
-{
-     /* compute the relative error */
-     double e = 0.0;
-     uint i;
-
-     for (i = 0; i < n; ++i) {
-	  double x = rerror(a[i], b[i], tol);
-	  if (x > e) e = x;
-     }
-     return e;
+          return e;
+     } else
+          return 0.0;
 }
 
 #ifdef HAVE_DRAND48
@@ -237,16 +239,15 @@ static void dofft(info *n, R *in, R *out)
 
 static double acmp(R *a, R *b, uint n, const char *test, double tol)
 {
-     double d = aerror(a, b, n, tol);
+     double d = aerror(a, b, n);
      if (d > tol) {
 	  fprintf(stderr, "Found relative error %e (%s)\n", d, test);
 	  {
 	       uint i;
-	       for (i = 0; i < n; ++i) 
-		    printf("%8d %16.12f   %16.12f %e\n", i, 
-			   (double) a[i],
-			   (double) b[i],
-			   rerror(a[i], b[i], tol));
+	       for (i = 0; i < n; ++i)
+		    fprintf(stderr, "%8d %16.12f   %16.12f\n", i, 
+			    (double) a[i],
+			    (double) b[i]);
 	  }
 	  exit(EXIT_FAILURE);
      }
@@ -421,16 +422,13 @@ static void really_verify(plan *pln, const problem_rdft *p,
 	  rounds = 20;  /* default value */
 
      A(p->sz->rnk == 1);
-     n0 = p->sz->dims[0].n;
-     n = X(rdft_real_n)(p->kind[0], n0);
+     n = p->sz->dims[0].n;
+     n0 = 2 * (n + (p->kind[0] == REDFT00 ? -1 : 
+		    (p->kind[0] == RODFT00 ? 1 : 0)));
      vecn = X(tensor_sz)(p->vecsz);
      N = n * vecn;
 
      switch (p->kind[0]) {
-	 case RODFT00:
-	      i0 = k0 = 1;
-	      ti = tst = tsf = sin00;
-	      break;
 	 case REDFT00:
 	      isL1t = isR1t = isL1f = isR1f = 1;
 	      i0 = k0 = 0;
@@ -455,6 +453,11 @@ static void really_verify(plan *pln, const problem_rdft *p,
 	      i0 = k0 = 0;
 	      ti = cos11; impulse_amp = 2.0;
 	      tst = tsf = cos01;
+	      break;
+	 case RODFT00:
+	      i0 = k0 = 1;
+	      ti = sin00;
+	      tst = tsf = cos00;
 	      break;
 	 case RODFT01:
 	      isR1t = 1;
@@ -494,7 +497,7 @@ static void really_verify(plan *pln, const problem_rdft *p,
 
      nfo.pln = pln;
      nfo.p = p;
-     nfo.probsz = X(rdft_real_sz)(p->kind, p->sz);
+     nfo.probsz = p->sz;
      nfo.totalsz = X(tensor_append)(p->vecsz, nfo.probsz);
      nfo.pckdsz = pack(nfo.totalsz, 1);
      nfo.pckdvecsz = pack(p->vecsz, X(tensor_sz)(nfo.probsz));
@@ -510,7 +513,6 @@ static void really_verify(plan *pln, const problem_rdft *p,
 	      rounds, tol, FREQ_SHIFT, 
 	      isL0f, isL1f, isR0f, isR1f, n0, i0, tsf);
 
-     X(tensor_destroy)(nfo.probsz);
      X(tensor_destroy)(nfo.totalsz);
      X(tensor_destroy)(nfo.pckdsz);
      X(tensor_destroy)(nfo.pckdvecsz);
