@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.10 2002-06-14 21:42:35 athena Exp $ */
+/* $Id: codelet.h,v 1.11 2002-06-15 01:11:16 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -120,4 +120,7 @@ typedef void (*kdft_k7)(const R *ri, R *ro, int is, int os,
 			uint vl, int ivs, int ovs);
 void X(kdft_k7_register)(planner *p, kdft_k7 codelet, 
 			 const kdft_k7_desc *desc);
+
+extern solvtab X(solvtab_dft_k7);
+
 #endif				/* __CODELET_H__ */

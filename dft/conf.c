@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.11 2002-06-14 19:54:29 athena Exp $ */
+/* $Id: conf.c,v 1.12 2002-06-15 01:11:16 athena Exp $ */
 
 #include "dft.h"
 
@@ -40,4 +40,7 @@ void X(dft_conf_standard)(planner *p)
      X(solvtab_exec)(s, p);
      X(solvtab_exec)(X(solvtab_dft_standard), p);
      X(solvtab_exec)(X(solvtab_dft_inplace), p);
+#if K7_MODE
+     X(solvtab_exec)(X(solvtab_dft_k7), p);
+#endif
 }

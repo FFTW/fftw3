@@ -1,2 +1,2 @@
-SUBDIRS=standard inplace
+SUBDIRS=standard inplace k7
 

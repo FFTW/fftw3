@@ -103,7 +103,7 @@ let no_twiddle_gen n dir =
   
   in ((initcode, body), k7vFlops body)
 
-let cvsid = "$Id: gen_notwiddle.ml,v 1.6 2002-06-14 21:42:35 athena Exp $"
+let cvsid = "$Id: gen_notwiddle.ml,v 1.7 2002-06-15 01:11:16 athena Exp $"
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let generate n =
@@ -114,6 +114,7 @@ let generate n =
   let (code, (add, mul)) = no_twiddle_gen n dir in
   begin
     boilerplate cvsid;
+    Printf.printf "#if FFTW_SINGLE && K7_MODE\n";
     Printf.printf
       "static void %s(const R *ri, R *ro, int is, int os, uint v, int ivs, int ovs)\n"
       name;
@@ -125,6 +126,7 @@ let generate n =
       n sign add mul;
     Printf.printf "%s { X(kdft_k7_register)(p, %s, &desc); }"
       (declare_register_fcn name) name;
+    Printf.printf "#endif\n";
   end
 
 let main () =
