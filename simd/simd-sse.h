@@ -144,6 +144,7 @@ static __inline__ V LD(const R *x, int ivs, const R *aligned_like)
 {
      V var;
      (void)aligned_like; /* UNUSED */
+     (void)ivs; /* UNUSED */
      var = LOADL0(x, var);
      var = LOADH(x + ivs, var);
      return var;
@@ -165,6 +166,7 @@ static __inline__ void ST(R *x, V v, int ovs, const R *aligned_like)
 static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
+     (void)ovs; /* UNUSED */
      *(V *)x = v;
 }
 
