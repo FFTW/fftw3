@@ -26,8 +26,9 @@
 #define ALIGNMENT 8     /* alignment for LD/ST */
 #define ALIGNMENTA 16   /* alignment for LDA/STA */
 
+#ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
-
+#endif
 
 #ifndef __VEC__
 #error "Need version of gcc that supports altivec"
