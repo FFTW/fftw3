@@ -32,20 +32,20 @@
 
 #if defined(F77_FUNC)
 #  define F77x(a, A) F77_FUNC(a, A)
-#  include "f77funcs.c"
+#  include "f77funcs.h"
 #endif
 
 #if defined(F77_FUNC_) && !defined(F77_FUNC_EQUIV)
 #  undef F77x
 #  define F77x(a, A) F77_FUNC_(a, A)
-#  include "f77funcs.c"
+#  include "f77funcs.h"
 #endif
 
 #else /* WINDOWS_F77_MANGLING */
 
 #  define WINDOWS_F77_FUNC(a, A) a ## __
 #  define F77x(a, A) WINDOWS_F77_FUNC(a, A)
-#  include "f77funcs.c"
+#  include "f77funcs.h"
 
 #  undef WINDOWS_F77_FUNC
 #  if defined(__GNUC__)
@@ -55,7 +55,7 @@
 #  else
 #    define WINDOWS_F77_FUNC(a, A) A /* oh well */
 #  endif
-#  include "f77funcs.c"
+#  include "f77funcs.h"
 
 #endif /* WINDOWS_F77_MANGLING */
 

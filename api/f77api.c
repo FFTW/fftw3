@@ -106,7 +106,7 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
 
 #if defined(F77_FUNC)
 #  define F77x(a, A) F77_FUNC(a, A)
-#  include "f77funcs.c"
+#  include "f77funcs.h"
 #endif
 
 /* If identifiers with underscores are mangled differently than those
@@ -121,7 +121,7 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
 #if defined(F77_FUNC_) && !defined(F77_FUNC_EQUIV)
 #  undef F77x
 #  define F77x(a, A) F77_FUNC_(a, A)
-#  include "f77funcs.c"
+#  include "f77funcs.h"
 #endif
 
 #else /* WINDOWS_F77_MANGLING */
@@ -131,7 +131,7 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
 /* g77 */
 #  define WINDOWS_F77_FUNC(a, A) a ## __
 #  define F77x(a, A) WINDOWS_F77_FUNC(a, A)
-#  include "f77funcs.c"
+#  include "f77funcs.h"
 
 /* Digital/Compaq/HP Visual Fortran, Intel Fortran.  stdcall attribute
    is apparently required to adjust for calling conventions (callee
@@ -146,7 +146,7 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
 #  else
 #    define WINDOWS_F77_FUNC(a, A) A /* oh well */
 #  endif
-#  include "f77funcs.c"
+#  include "f77funcs.h"
 
 #endif /* WINDOWS_F77_MANGLING */
 
