@@ -20,61 +20,46 @@ noinst_LTLIBRARIES = libdft_codelets_simd.la
 # n1fv_<n> is a hard-coded FFTW_FORWARD FFT of size <n>, using SIMD
 N1F = n1fv_2.c n1fv_3.c n1fv_4.c n1fv_5.c n1fv_6.c n1fv_7.c n1fv_8.c	\
 n1fv_9.c n1fv_10.c n1fv_11.c n1fv_12.c n1fv_13.c n1fv_14.c n1fv_15.c	\
-n1fv_16.c n1fv_32.c n1fv_64.c
+n1fv_16.c
 
 # as above, but FFTW_BACKWARD
 N1B = n1bv_2.c n1bv_3.c n1bv_4.c n1bv_5.c n1bv_6.c n1bv_7.c n1bv_8.c	\
 n1bv_9.c n1bv_10.c n1bv_11.c n1bv_12.c n1bv_13.c n1bv_14.c n1bv_15.c	\
-n1bv_16.c n1bv_32.c n1bv_64.c
+n1bv_16.c
 
 # as above, with arbitrary input vector stride
 N2F = n2fv_2.c n2fv_3.c n2fv_4.c n2fv_5.c n2fv_6.c n2fv_7.c n2fv_8.c	\
 n2fv_9.c n2fv_10.c n2fv_11.c n2fv_12.c n2fv_13.c n2fv_14.c n2fv_15.c	\
-n2fv_16.c n2fv_32.c n2fv_64.c
+n2fv_16.c
 
 N2B = n2bv_2.c n2bv_3.c n2bv_4.c n2bv_5.c n2bv_6.c n2bv_7.c n2bv_8.c	\
 n2bv_9.c n2bv_10.c n2bv_11.c n2bv_12.c n2bv_13.c n2bv_14.c n2bv_15.c	\
-n2bv_16.c n2bv_32.c n2bv_64.c
+n2bv_16.c
 
 # common code to both n1 and n2
 NFCOD = nfv_2.cod nfv_3.cod nfv_4.cod nfv_5.cod nfv_6.cod nfv_7.cod	\
 nfv_8.cod nfv_9.cod nfv_10.cod nfv_11.cod nfv_12.cod nfv_13.cod		\
-nfv_14.cod nfv_15.cod nfv_16.cod nfv_32.cod nfv_64.cod
+nfv_14.cod nfv_15.cod nfv_16.cod
 
 NBCOD = nbv_2.cod nbv_3.cod nbv_4.cod nbv_5.cod nbv_6.cod nbv_7.cod	\
 nbv_8.cod nbv_9.cod nbv_10.cod nbv_11.cod nbv_12.cod nbv_13.cod		\
-nbv_14.cod nbv_15.cod nbv_16.cod nbv_32.cod nbv_64.cod
+nbv_14.cod nbv_15.cod nbv_16.cod
 
 ###########################################################################
 # m* codelets are like n* codelets, but with the loop body in
 # a separate function.  This nonsense is necessary, compilers
 # being what they are.
-M1F = m1fv_2.c m1fv_3.c m1fv_4.c m1fv_5.c m1fv_6.c m1fv_7.c m1fv_8.c	\
-m1fv_9.c m1fv_10.c m1fv_11.c m1fv_12.c m1fv_13.c m1fv_14.c m1fv_15.c	\
-m1fv_16.c m1fv_32.c m1fv_64.c
+M1F = m1fv_16.c m1fv_32.c m1fv_64.c
 
-# as above, but FFTW_BACKWARD
-M1B = m1bv_2.c m1bv_3.c m1bv_4.c m1bv_5.c m1bv_6.c m1bv_7.c m1bv_8.c	\
-m1bv_9.c m1bv_10.c m1bv_11.c m1bv_12.c m1bv_13.c m1bv_14.c m1bv_15.c	\
-m1bv_16.c m1bv_32.c m1bv_64.c
+M1B = m1bv_16.c m1bv_32.c m1bv_64.c
 
-# as above, with arbitrary imput vector stride
-M2F = m2fv_2.c m2fv_3.c m2fv_4.c m2fv_5.c m2fv_6.c m2fv_7.c m2fv_8.c	\
-m2fv_9.c m2fv_10.c m2fv_11.c m2fv_12.c m2fv_13.c m2fv_14.c m2fv_15.c	\
-m2fv_16.c m2fv_32.c m2fv_64.c
+M2F = m2fv_16.c m2fv_32.c m2fv_64.c
 
-M2B = m2bv_2.c m2bv_3.c m2bv_4.c m2bv_5.c m2bv_6.c m2bv_7.c m2bv_8.c	\
-m2bv_9.c m2bv_10.c m2bv_11.c m2bv_12.c m2bv_13.c m2bv_14.c m2bv_15.c	\
-m2bv_16.c m2bv_32.c m2bv_64.c
+M2B = m2bv_16.c m2bv_32.c m2bv_64.c
 
-# commom code to both m1 amd m2
-MFCOD = mfv_2.cod mfv_3.cod mfv_4.cod mfv_5.cod mfv_6.cod mfv_7.cod	\
-mfv_8.cod mfv_9.cod mfv_10.cod mfv_11.cod mfv_12.cod mfv_13.cod		\
-mfv_14.cod mfv_15.cod mfv_16.cod mfv_32.cod mfv_64.cod
+MFCOD = mfv_16.cod mfv_32.cod mfv_64.cod
 
-MBCOD = mbv_2.cod mbv_3.cod mbv_4.cod mbv_5.cod mbv_6.cod mbv_7.cod	\
-mbv_8.cod mbv_9.cod mbv_10.cod mbv_11.cod mbv_12.cod mbv_13.cod		\
-mbv_14.cod mbv_15.cod mbv_16.cod mbv_32.cod mbv_64.cod
+MBCOD = mbv_16.cod mbv_32.cod mbv_64.cod
 
 ###########################################################################
 # t1fv_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT step

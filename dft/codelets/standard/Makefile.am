@@ -19,13 +19,12 @@ noinst_LTLIBRARIES = libdft_standard.la
 ###########################################################################
 # n1_<n> is a hard-coded FFT of size <n> (base cases of FFT recursion)
 N1 = n1_2.c n1_3.c n1_4.c n1_5.c n1_6.c n1_7.c n1_8.c n1_9.c n1_10.c	\
-n1_11.c n1_12.c n1_13.c n1_14.c n1_15.c n1_16.c n1_32.c n1_64.c
+n1_11.c n1_12.c n1_13.c n1_14.c n1_15.c n1_16.c
 
 ###########################################################################
 # m1_<n> is a hard-coded FFT of size <n>, with the loop body in a
 # separate function
-M1 = m1_2.c m1_3.c m1_4.c m1_5.c m1_6.c m1_7.c m1_8.c m1_9.c m1_10.c	\
-m1_11.c m1_12.c m1_13.c m1_14.c m1_15.c m1_16.c m1_32.c m1_64.c
+M1 = m1_16.c m1_32.c m1_64.c
 
 ###########################################################################
 # t1_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT step

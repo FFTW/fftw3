@@ -21,13 +21,11 @@ noinst_LTLIBRARIES = librdft_codelets_hc2r.la
 # of real-output FFT recursion)
 HC2R = hc2r_3.c hc2r_4.c hc2r_5.c hc2r_6.c hc2r_7.c hc2r_8.c hc2r_9.c	\
 hc2r_10.c hc2r_11.c hc2r_12.c hc2r_13.c hc2r_14.c hc2r_15.c hc2r_16.c	\
-hc2r_32.c hc2r_64.c hc2r_128.c
+hc2r_32.c
 
 # (hc2r_2.c is equivalent to r2hc_2.c)
 
-MHC2R = mhc2r_3.c mhc2r_4.c mhc2r_5.c mhc2r_6.c mhc2r_7.c mhc2r_8.c	\
-mhc2r_9.c mhc2r_10.c mhc2r_11.c mhc2r_12.c mhc2r_13.c mhc2r_14.c	\
-mhc2r_15.c mhc2r_16.c mhc2r_32.c mhc2r_64.c mhc2r_128.c
+MHC2R = mhc2r_32.c mhc2r_64.c mhc2r_128.c
 
 ###########################################################################
 # hb_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIF
@@ -44,11 +42,9 @@ HB2 = hb2_4.c hb2_8.c hb2_16.c hb2_32.c hb2_64.c
 # every hb_<r> or hb2_<r> codelet should have a corresponding hc2rIII_<r>
 HC2RIII = hc2rIII_2.c hc2rIII_3.c hc2rIII_4.c hc2rIII_5.c hc2rIII_6.c	\
 hc2rIII_7.c hc2rIII_8.c hc2rIII_9.c hc2rIII_10.c hc2rIII_12.c		\
-hc2rIII_15.c hc2rIII_16.c hc2rIII_32.c hc2rIII_64.c
+hc2rIII_15.c hc2rIII_16.c hc2rIII_32.c
 
-MHC2RIII = mhc2rIII_2.c mhc2rIII_3.c mhc2rIII_4.c mhc2rIII_5.c		\
-mhc2rIII_6.c mhc2rIII_7.c mhc2rIII_8.c mhc2rIII_9.c mhc2rIII_10.c	\
-mhc2rIII_12.c mhc2rIII_15.c mhc2rIII_16.c mhc2rIII_32.c mhc2rIII_64.c
+MHC2RIII = mhc2rIII_32.c mhc2rIII_64.c
 
 ###########################################################################
 ALL_CODELETS = $(HC2R) $(MHC2R) $(HB) $(HC2RIII) $(MHC2RIII)
