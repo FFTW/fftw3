@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.12 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: rank0.c,v 1.13 2002-06-16 23:05:58 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -153,7 +153,7 @@ static const rnk0adt adt_io1 =
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 dft, vl > 1, [io]vs == 2 (interleaved) using memcpy */
-static void apply_io2(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_io2r(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
      uint vl = ego->vl;
@@ -162,7 +162,7 @@ static void apply_io2(plan *ego_, R *ri, R *ii, R *ro, R *io)
      memcpy(ro, ri, vl * sizeof(R) * 2);
 }
 
-static int applicable_io2(const problem_dft *p)
+static int applicable_io2r(const problem_dft *p)
 {
      return (1
              && applicable_vec(p)
@@ -172,9 +172,33 @@ static int applicable_io2(const problem_dft *p)
 	  );
 }
 
-static const rnk0adt adt_io2 =
+static const rnk0adt adt_io2r =
 {
-     apply_io2, applicable_io2, "dft-rank0-io2-memcpy"
+     apply_io2r, applicable_io2r, "dft-rank0-io2r-memcpy"
+};
+
+static void apply_io2i(plan *ego_, R *ri, R *ii, R *ro, R *io)
+{
+     P *ego = (P *) ego_;
+     uint vl = ego->vl;
+     UNUSED(ri);
+     UNUSED(ro);		/* r{in,out}put == i{in,out}put + 1 */
+     memcpy(io, ii, vl * sizeof(R) * 2);
+}
+
+static int applicable_io2i(const problem_dft *p)
+{
+     return (1
+             && applicable_vec(p)
+             && p->vecsz.dims[0].is == 2
+             && p->vecsz.dims[0].os == 2
+             && p->ri == p->ii + 1 && p->ro == p->io + 1
+	  );
+}
+
+static const rnk0adt adt_io2i =
+{
+     apply_io2i, applicable_io2i, "dft-rank0-io2i-memcpy"
 };
 
 /*-----------------------------------------------------------------------*/
@@ -248,7 +272,7 @@ void X(dft_rank0_register)(planner *p)
 {
      uint i;
      static const rnk0adt *adts[] = {
-	  &adt_cpy1, &adt_vec, &adt_io1, &adt_io2
+	  &adt_cpy1, &adt_vec, &adt_io1, &adt_io2r, &adt_io2i
      };
 
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
