@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.94 2003-03-06 03:45:31 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.95 2003-03-06 03:56:05 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -192,8 +192,8 @@ this case, FFTW provides fast planners based on heuristics or on
 previously computed plans (``wisdom'').
 @cindex wisdom
 
-FFTW supports transforms of data of arbitrary size, rank, multiplicity,
-and with a very general memory layout.  This generality can be confusing
+FFTW supports transforms of data with arbitrary size, rank, multiplicity,
+and a very general memory layout.  This generality can be confusing
 and hard to use, however.  Consequently, we organized the interface to
 FFTW into three levels.  The @dfn{basic interface} allows you to compute
 a single transforms of contiguous data.  The @dfn{advanced interface}
