@@ -91,6 +91,7 @@ void X(dht_r2hc_register)(planner *p);
 void X(dht_rader_register)(planner *p);
 void X(dft_r2hc_register)(planner *p);
 void X(rdft_nop_register)(planner *p);
+void X(rdft_ct_generic_register)(planner *p);
 
 /****************************************************************************/
 /* problem2.c: */

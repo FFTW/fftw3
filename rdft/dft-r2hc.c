@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.23 2003-03-29 03:06:14 stevenj Exp $ */
+/* $Id: dft-r2hc.c,v 1.24 2004-03-23 16:49:01 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -56,7 +56,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      os = ego->os;
      n = ego->n;
      for (i = 1; i < (n + 1)/2; ++i) {
-	  R rop, iop, iom, rom;
+	  E rop, iop, iom, rom;
 	  rop = ro[os * i];
 	  iop = io[os * i];
 	  rom = ro[os * (n - i)];

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.23 2004-01-01 21:00:07 athena Exp $ */
+/* $Id: conf.c,v 1.24 2004-03-23 16:49:01 athena Exp $ */
 
 #include "rdft.h"
 
@@ -27,10 +27,7 @@ static const solvtab s =
      SOLVTAB(X(rdft_indirect_register)),
      SOLVTAB(X(rdft_rank0_register)),
      SOLVTAB(X(rdft_vrank_geq1_register)),
-     /* 
-	SOLVTAB(X(rdft_vrank2_transpose_register)),
-	SOLVTAB(X(rdft_vrank3_transpose_register)),
-     */
+
      SOLVTAB(X(rdft_nop_register)),
      SOLVTAB(X(rdft_buffered_register)),
      SOLVTAB(X(rdft_generic_register)),
@@ -48,6 +45,8 @@ static const solvtab s =
      SOLVTAB(X(rdft2_buffered_register)),
      SOLVTAB(X(rdft2_rank_geq2_register)),
      SOLVTAB(X(rdft2_radix2_register)),
+
+     SOLVTAB(X(rdft_ct_generic_register)),
 
      SOLVTAB_END
 };
