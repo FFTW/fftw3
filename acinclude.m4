@@ -293,9 +293,9 @@ if test "$ac_test_CFLAGS" != "set"; then
 	  powerpc*)
 		cputype=`((grep cpu /proc/cpuinfo | head -1 | cut -d: -f2 | sed 's/ //g') ; /usr/bin/machine ; /bin/machine) 2> /dev/null`
 		cputype=`echo $cputype | sed -e s/ppc//g`
-		is60x=`echo $cputype | egrep "^60[0-9]e?$"`
+		is60x=`echo $cputype | egrep "^60[[0-9]]e?$"`
 		is750=`echo $cputype | grep "750"`
-		is74xx=`echo $cputype | egrep "^74[0-9][0-9]$"`
+		is74xx=`echo $cputype | egrep "^74[[0-9]][[0-9]]$"`
 		if test -n "$is60x"; then
 			ACX_CHECK_CC_FLAGS(-mcpu=$cputype,m_cpu_60x,
 				CPU_FLAGS=-mcpu=$cputype)
