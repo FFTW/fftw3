@@ -22,7 +22,7 @@ dnl called unless the user specified --with-gcc-arch manually.
 dnl
 dnl Requires macros: AX_CHECK_CC_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.1 2004-10-27 17:14:22 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.2 2004-10-27 17:41:57 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -104,7 +104,7 @@ case $host_cpu in
   alphaev68) ax_gcc_arch="ev68 ev67" ;;
   alphaev69) ax_gcc_arch="ev69 ev68 ev67" ;;
   alphaev7) ax_gcc_arch="ev7 ev69 ev68 ev67" ;;
-  alphaev79) ax_gcc_arch="ev79 ev7" ;;
+  alphaev79) ax_gcc_arch="ev79 ev7 ev69 ev68 ev67" ;;
 
   powerpc*)
      cputype=`((grep cpu /proc/cpuinfo | head -1 | cut -d: -f2 | sed 's/ //g') ; /usr/bin/machine ; /bin/machine) 2> /dev/null`
