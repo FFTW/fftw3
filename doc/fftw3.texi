@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.161 2003-03-17 19:44:40 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.162 2003-03-17 20:17:59 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -437,6 +437,9 @@ read the tutorial in bit-reversed order after computing your first
 transform.}  At the least, read the first section (@pxref{Complex
 One-Dimensional DFTs}) before reading any of the others, even if your
 main interest lies in one of the other transform types.
+
+Users of FFTW version 2 and earlier may also want to read @ref{Upgrading
+from FFTW version 2}.
 
 @c ------------------------------------------------------------
 @node Complex One-Dimensional DFTs, Complex Multi-Dimensional DFTs, Tutorial, Tutorial
