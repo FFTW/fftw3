@@ -39,7 +39,7 @@ dnl macros posted by Alejandro Forero Cuervo to the autoconf macro
 dnl repository.  We are also grateful for the helpful feedback of
 dnl numerous users.
 dnl
-dnl @version $Id: acx_pthread.m4,v 1.2 2005-01-13 21:30:33 stevenj Exp $
+dnl @version $Id: acx_pthread.m4,v 1.3 2005-01-19 03:30:27 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([ACX_PTHREAD], [
@@ -187,7 +187,7 @@ if test "x$acx_pthread_ok" = xyes; then
 	AC_MSG_CHECKING([for joinable pthread attribute])
 	attr_name=unknown
 	for attr in PTHREAD_CREATE_JOINABLE PTHREAD_CREATE_UNDETACHED; do
-	    AC_TRY_LINK([#include <pthread.h>], [int attr=$attr;],
+	    AC_TRY_LINK([#include <pthread.h>], [int attr=$attr; return attr;],
                         [attr_name=$attr; break])
 	done
         AC_MSG_RESULT($attr_name)
