@@ -194,9 +194,9 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s-%s-%d-%d%(%p%))", 
+     p->print(p, "(%s-%s-%d-%d%v%(%p%))", 
 	      ego->adt->nam, ego->dec == DECDIT ? "dit" : "dif",
-	      ego->r, ego->m, ego->cld);
+	      ego->r, ego->m, ego->vl, ego->cld);
 }
 
 static int applicable0(const problem *p_)
