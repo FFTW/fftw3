@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.7 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: tensor.c,v 1.8 2003-11-15 01:05:54 stevenj Exp $ */
 #include "bench.h"
 #include <stdlib.h>
 
@@ -222,5 +222,19 @@ bench_tensor *tensor_copy_sub(const bench_tensor *sz, int start_dim, int rnk)
      BENCH_ASSERT(FINITE_RNK(sz->rnk) && start_dim + rnk <= sz->rnk);
      x = mktensor(rnk);
      dimcpy(x->dims, sz->dims + start_dim, rnk);
+     return x;
+}
+
+bench_tensor *tensor_copy_swapio(const bench_tensor *sz)
+{
+     bench_tensor *x = tensor_copy(sz);
+     int i;
+     if (FINITE_RNK(x->rnk))
+	  for (i = 0; i < x->rnk; ++i) {
+	       int s;
+	       s = x->dims[i].is;
+	       x->dims[i].is = x->dims[i].os;
+	       x->dims[i].os = s;
+	  }
      return x;
 }

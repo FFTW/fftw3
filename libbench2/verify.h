@@ -26,7 +26,7 @@ typedef bench_complex C;
 typedef struct dofft_closure_s {
      void (*apply)(struct dofft_closure_s *k,
 		   bench_complex *in, bench_complex *out);
-     
+     int recopy_input;
 } dofft_closure;
 
 double dmax(double x, double y);

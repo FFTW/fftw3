@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft2.c,v 1.8 2003-11-15 00:14:40 stevenj Exp $ */
+/* $Id: verify-rdft2.c,v 1.9 2003-11-15 01:05:54 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -140,8 +140,9 @@ static void rdft2_apply(dofft_closure *k_,
 {
      dofft_rdft2_closure *k = (dofft_rdft2_closure *)k_;
      bench_problem *p = k->p;
-     bench_tensor *totalsz, *pckdsz;
+     bench_tensor *totalsz, *pckdsz, *totalsz_swap, *pckdsz_swap;
      bench_tensor *probsz2, *totalsz2, *pckdsz2;
+     bench_tensor *probsz2_swap, *totalsz2_swap, *pckdsz2_swap;
      bench_real *ri, *ii, *ro, *io;
      int n2, totalscale;
 
@@ -165,6 +166,12 @@ static void rdft2_apply(dofft_closure *k_,
 	  pckdsz2 = tensor_copy(pckdsz);
      }
 
+     totalsz_swap = tensor_copy_swapio(totalsz);
+     pckdsz_swap = tensor_copy_swapio(pckdsz);
+     totalsz2_swap = tensor_copy_swapio(totalsz2);
+     pckdsz2_swap = tensor_copy_swapio(pckdsz2);
+     probsz2_swap = tensor_copy_swapio(probsz2);
+
      /* confusion: the stride is the distance between complex elements
 	when using interleaved format, but it is the distance between
 	real elements when using split format */
@@ -182,7 +189,8 @@ static void rdft2_apply(dofft_closure *k_,
 	  int N, vN, i;
 	  cpyr(&c_re(in[0]), pckdsz, ri, totalsz);
 	  doit(1, p);
-	  cpyr(ri, totalsz, &c_re(in[0]), pckdsz);
+	  if (k->k.recopy_input)
+	       cpyr(ri, totalsz_swap, &c_re(in[0]), pckdsz_swap);
 	  cpyhc2(ro, io, probsz2, totalsz2, totalscale,
 		 &c_re(out[0]), &c_im(out[0]), pckdsz2);
 	  N = tensor_sz(p->sz);
@@ -194,17 +202,23 @@ static void rdft2_apply(dofft_closure *k_,
 	  icpyhc2(ri, ii, probsz2, totalsz2, totalscale,
 		  &c_re(in[0]), &c_im(in[0]), pckdsz2);
 	  doit(1, p);
-	  cpyhc2(ri, ii, probsz2, totalsz2, totalscale,
-		 &c_re(in[0]), &c_im(in[0]), pckdsz2);
+	  if (k->k.recopy_input)
+	       cpyhc2(ri, ii, probsz2_swap, totalsz2_swap, totalscale,
+		      &c_re(in[0]), &c_im(in[0]), pckdsz2_swap);
 	  mkreal(out, tensor_sz(pckdsz));
 	  cpyr(ro, totalsz, &c_re(out[0]), pckdsz);
      }
 
      tensor_destroy(totalsz);
      tensor_destroy(pckdsz);
+     tensor_destroy(totalsz_swap);
+     tensor_destroy(pckdsz_swap);
      tensor_destroy(probsz2);
      tensor_destroy(totalsz2);
      tensor_destroy(pckdsz2);
+     tensor_destroy(probsz2_swap);
+     tensor_destroy(totalsz2_swap);
+     tensor_destroy(pckdsz2_swap);
 }
 
 void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e)
@@ -216,6 +230,7 @@ void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e)
      BENCH_ASSERT(p->kind == PROBLEM_REAL);
 
      k.k.apply = rdft2_apply;
+     k.k.recopy_input = 0;
      k.p = p;
 
      if (rounds == 0)
@@ -247,7 +262,7 @@ void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e)
 	  e->s = dmax(e->s, tf_shift(&k.k, 1, p->sz, n, vecn, p->sign,
 				     inA, inB, outA, outB, 
 				     tmp, rounds, tol, FREQ_SHIFT));
-
+     
      if (!p->in_place && !p->destroy_input)
 	  preserves_input(&k.k, p->sign < 0 ? mkreal : mkhermitian1,
 			  N, inA, inB, outB, rounds);
@@ -273,6 +288,7 @@ void accuracy_rdft2(bench_problem *p, int rounds, int impulse_rounds,
      BENCH_ASSERT(p->vecsz->rnk == 0);
 
      k.k.apply = rdft2_apply;
+     k.k.recopy_input = 0;
      k.p = p;
      n = tensor_sz(p->sz);
 

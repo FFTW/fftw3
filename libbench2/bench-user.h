@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.17 2003-03-30 14:41:27 athena Exp $ */
+/* $Id: bench-user.h,v 1.18 2003-11-15 01:05:54 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -86,6 +86,7 @@ int tensor_real_rowmajorp(bench_tensor *t, int sign, int in_place);
 bench_tensor *tensor_append(const bench_tensor *a, const bench_tensor *b);
 bench_tensor *tensor_copy(const bench_tensor *sz);
 bench_tensor *tensor_copy_sub(const bench_tensor *sz, int start_dim, int rnk);
+bench_tensor *tensor_copy_swapio(const bench_tensor *sz);
 void tensor_ibounds(bench_tensor *t, int *lbp, int *ubp);
 void tensor_obounds(bench_tensor *t, int *lbp, int *ubp);
 

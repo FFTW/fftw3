@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.14 2003-11-15 00:14:40 stevenj Exp $ */
+/* $Id: verify-dft.c,v 1.15 2003-11-15 01:05:54 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -59,6 +59,7 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
      dofft_dft_closure *k = (dofft_dft_closure *)k_;
      bench_problem *p = k->p;
      bench_tensor *totalsz, *pckdsz;
+     bench_tensor *totalsz_swap, *pckdsz_swap;
      bench_real *ri, *ii, *ro, *io;
      int n, totalscale;
 
@@ -67,6 +68,9 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
      n = tensor_sz(totalsz);
      ri = (bench_real *) p->in;
      ro = (bench_real *) p->out;
+
+     totalsz_swap = tensor_copy_swapio(totalsz);
+     pckdsz_swap = tensor_copy_swapio(pckdsz);
 
      /* confusion: the stride is the distance between complex elements
 	when using interleaved format, but it is the distance between
@@ -84,13 +88,16 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
      cpy(&c_re(in[0]), &c_im(in[0]), pckdsz, 1,
 	    ri, ii, totalsz, totalscale);
      doit(1, p);
-     cpy(ri, ii, totalsz, totalscale,
-	 &c_re(in[0]), &c_im(in[0]), pckdsz, 1);
+     if (k->k.recopy_input)
+	  cpy(ri, ii, totalsz_swap, totalscale,
+	      &c_re(in[0]), &c_im(in[0]), pckdsz_swap, 1);
      cpy(ro, io, totalsz, totalscale,
 	 &c_re(out[0]), &c_im(out[0]), pckdsz, 1);
 
      tensor_destroy(totalsz);
      tensor_destroy(pckdsz);
+     tensor_destroy(totalsz_swap);
+     tensor_destroy(pckdsz_swap);
 }
 
 void verify_dft(bench_problem *p, int rounds, double tol, errors *e)
@@ -102,6 +109,7 @@ void verify_dft(bench_problem *p, int rounds, double tol, errors *e)
      BENCH_ASSERT(p->kind == PROBLEM_COMPLEX);
 
      k.k.apply = dft_apply;
+     k.k.recopy_input = 0;
      k.p = p;
 
      if (rounds == 0)
@@ -157,6 +165,7 @@ void accuracy_dft(bench_problem *p, int rounds, int impulse_rounds,
      BENCH_ASSERT(p->vecsz->rnk == 0);
 
      k.k.apply = dft_apply;
+     k.k.recopy_input = 0;
      k.p = p;
      n = tensor_sz(p->sz);
 

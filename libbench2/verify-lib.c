@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.14 2003-05-20 21:32:04 stevenj Exp $ */
+/* $Id: verify-lib.c,v 1.15 2003-11-15 01:05:54 stevenj Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -411,7 +411,9 @@ void preserves_input(dofft_closure *k, aconstrain constrain,
 		     int n, C *inA, C *inB, C *outB, int rounds)
 {
      int j;
+     int recopy_input = k->recopy_input;
 
+     k->recopy_input = 1;
      for (j = 0; j < rounds; ++j) {
 	  arand(inA, n);
 	  if (constrain)
@@ -421,6 +423,7 @@ void preserves_input(dofft_closure *k, aconstrain constrain,
 	  k->apply(k, inB, outB);
 	  acmp(inB, inA, n, "preserves_input", 0.0);
      }
+     k->recopy_input = recopy_input;
 }
 
 
