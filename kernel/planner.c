@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.47 2002-08-31 13:21:48 athena Exp $ */
+/* $Id: planner.c,v 1.48 2002-08-31 13:55:57 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -220,18 +220,21 @@ static plan *mkplan(planner *ego, problem *p)
 
 	       /* inherit blessings etc. from planner */
 	       merge_flags(sol, ego->flags);
-	       return pln;
 	  } else {
 	       /* impossible problem */
-	       return 0;
+	       pln = 0;
 	  }
      } else {
 	  /* not in table.  Run inferior planner */
 	  ++ego->nprob;
 	  ego->inferior_mkplan(ego, p, &pln, &sp);
 	  insert(ego, ego->flags, ego->nthr, p, sp);
-	  return pln;  /* plan already USEd by inferior */
      }
+
+
+     if (pln)
+	  ego->hook(pln, p, 1);
+     return pln;
 }
 
 /* destroy hash table entries.  If FORGET_EVERYTHING, destroy the whole
@@ -428,10 +431,11 @@ static void exprt_conf(planner *ego, printer *p)
 	      "}\n", STRINGIZE(X(solvtab_exec)));
 }
 
-static void hooknil(plan *pln, const problem *p)
+static void hooknil(plan *pln, const problem *p, int optimalp)
 {
      UNUSED(pln);
      UNUSED(p);
+     UNUSED(optimalp);
      /* do nothing */
 }
 
@@ -500,7 +504,8 @@ void X(planner_destroy)(planner *ego)
 }
 
 /* set planner hook */
-void X(planner_set_hook)(planner *p, void (*hook)(plan *, const problem *))
+void X(planner_set_hook)(planner *p, 
+			 void (*hook)(plan *, const problem *, int))
 {
      p->hook = hook;
 }
@@ -520,7 +525,7 @@ void X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
 	       pln->pcost = X(measure_execution_time)(pln, p);
 	  }
      }
-     ego->hook(pln, p);
+     ego->hook(pln, p, 0);
 }
 
 /*

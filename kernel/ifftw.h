@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.99 2002-08-31 01:29:10 athena Exp $ */
+/* $Id: ifftw.h,v 1.100 2002-08-31 13:55:57 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -436,8 +436,8 @@ typedef struct {
      void (*register_problem)(planner *ego, const problem_adt *adt);
      plan *(*mkplan)(planner *ego, problem *p);
      void (*forget)(planner *ego, amnesia a);
-     void (*exprt)(planner *ego, printer *p); /* export is a reserved word
-						 in C++.  Idiots. */
+     void (*exprt)(planner *ego, printer *p); /* export is a reserved
+						 word in C++. */
      int (*imprt)(planner *ego, scanner *sc);
      void (*exprt_conf)(planner *ego, printer *p);
      plan *(*slv_mkplan)(planner *ego, problem *p, solver *s);
@@ -447,7 +447,7 @@ struct planner_s {
      const planner_adt *adt;
      uint nplan;    /* number of plans evaluated */
      uint nprob;    /* number of problems evaluated */
-     void (*hook)(plan *plan, const problem *p);
+     void (*hook)(plan *plan, const problem *p, int optimalp);
 
      const char *cur_reg_nam;
      slvdesc *solvers, **solvers_tail;
@@ -468,7 +468,8 @@ planner *X(mkplanner)(size_t sz,
                       void (*destroy) (planner *), 
 		      uint flags);
 void X(planner_destroy)(planner *ego);
-void X(planner_set_hook)(planner *p, void (*hook)(plan *, const problem *));
+void X(planner_set_hook)(planner *p, 
+			 void (*hook)(plan *, const problem *, int));
 void X(evaluate_plan)(planner *ego, plan *pln, const problem *p);
 
 #ifdef FFTW_DEBUG

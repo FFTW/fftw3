@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.11 2002-08-31 01:29:10 athena Exp $ */
+/* $Id: plan.c,v 1.12 2002-08-31 13:55:57 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -31,6 +31,11 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
      p->adt = adt;
      p->ops = X(ops_zero);
      p->pcost = 0.0;
+     
+     /* default value. The scoring planner sets this field but the
+	naive planner does not. */
+     p->score = GOOD;
+
      return p;
 }
 

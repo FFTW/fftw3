@@ -124,8 +124,12 @@ static void increment(visit_closure *k_, plan *p)
      ++k->count;
 }
 
-static void hook(plan *pln, const fftw_problem *p_)
+static void hook(plan *pln, const fftw_problem *p_, int optimalp)
 {
+     if (verbose > 2 && optimalp)
+	  if (pln->score == UGLY)
+	       D("Optimal UGLY plan %P\n%p\n", p_, pln);
+
      if (verbose > 5) {
 	  printer *pr = FFTW(mkprinter_file) (stdout);
 	  pr->print(pr, "%P:%(%p%)\n", p_, pln);
@@ -171,7 +175,7 @@ void setup(struct problem *p)
      /* plnr->flags |= IMPATIENT; */
      /* plnr->flags |= IMPATIENT | CLASSIC_VRECURSE; */
      /* plnr->flags |= ESTIMATE | IMPATIENT; */
-     /* plnr->flags |= IMPATIENT; */
+     /* plnr->flags |= ESTIMATE; */
 
      if (p->kind == PROBLEM_REAL)
 	  plnr->flags |= DESTROY_INPUT;
@@ -325,7 +329,7 @@ void setup(struct problem *p)
      AWAKE(pln, 1);
 #if 1
      if (pln)
-          hook(pln, prblm);
+          hook(pln, prblm, 1);
 #endif
 }
 

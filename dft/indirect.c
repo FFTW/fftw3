@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.16 2002-08-30 02:55:29 stevenj Exp $ */
+/* $Id: indirect.c,v 1.17 2002-08-31 13:55:57 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -162,7 +162,6 @@ static int applicable(const solver *ego_, const problem *p_,
 		      || (p->ri != p->ro && ego->adt->apply == apply_before
 			  && X(tensor_min_ostride)(p->sz) <= 2
 			  && X(tensor_min_istride)(p->sz) > 2)
-			  
 		       )
 	       );
      }
