@@ -396,7 +396,6 @@ AC_CONFIG_FILES([
    dft/Makefile
    dft/codelets/Makefile
    dft/codelets/standard/Makefile
-   dft/codelets/inplace/Makefile
    dft/simd/Makefile
    dft/simd/codelets/Makefile
    dft/k7/Makefile
