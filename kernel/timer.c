@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.15 2003-05-07 18:24:46 athena Exp $ */
+/* $Id: timer.c,v 1.16 2003-05-08 00:46:10 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -26,7 +26,7 @@
 #  include <unistd.h>
 #endif
 
-#ifndef WITHOUT_CYCLE_COUNTER
+#ifndef WITH_SLOW_TIMER
 #  include "cycle.h"
 #else
 #  if TIME_WITH_SYS_TIME
@@ -88,7 +88,7 @@ static double elapsed_sec(seconds t1, seconds t0)
 #  define HAVE_SECONDS_TIMER
 #endif
 
-#ifdef WITHOUT_CYCLE_COUNTER
+#ifdef WITH_SLOW_TIMER
 /* excruciatingly slow; only use this if there is no choice! */
 typedef seconds ticks;
 #  define getticks getseconds

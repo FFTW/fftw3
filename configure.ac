@@ -97,9 +97,9 @@ fi
 
 AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
 
-AC_ARG_WITH(cycle-counter, [AC_HELP_STRING([--without-cycle-counter],[don't use CPU cycle counter (SLOW)])], with_cycle_counter=$withval, with_cycle_counter=yes)
-if test "$with_cycle_counter" = "no"; then
-	AC_DEFINE(WITHOUT_CYCLE_COUNTER,1,[Use our own 16-byte aligned malloc routine; mainly helpful for Windows systems lacking aligned allocation system-library routines.])
+AC_ARG_WITH(slow-timer, [AC_HELP_STRING([--with-slow-timer],[use low-precision timers (SLOW)])], with_slow_timer=$withval, with_slow_timer=no)
+if test "$with_slow_timer" = "yes"; then
+	AC_DEFINE(WITH_SLOW_TIMER,1,[Use low-precision timers, making planner very slow])
 fi
 
 AC_ARG_WITH(our-malloc16, [AC_HELP_STRING([--with-our-malloc16],[use our 16-byte aligned malloc (helpful for Win32)])], with_our_malloc16=$withval, with_our_malloc16=no)

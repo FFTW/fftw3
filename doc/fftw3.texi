@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.191 2003-04-26 16:26:15 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.192 2003-05-08 00:46:10 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4588,11 +4588,11 @@ negligible amount, so they are included by default as long as the
 @code{configure} script finds a Fortran compiler on your system.
 
 @item
-@code{--without-cycle-counter}: Disables the use of hardware cycle
-counters, and falls back on @code{gettimeofday} or @code{clock}.  This
-greatly worsens performance, and should not be used if there is any
-chance of getting a cycle counter working on your system.  @xref{Cycle
-Counters}.
+@code{--with-slow-timer}: Disables the use of hardware cycle counters,
+and falls back on @code{gettimeofday} or @code{clock}.  This greatly
+worsens performance, and should generally not be used (unless you don't
+have a cycle counter but still really want an optimized plan regardless
+of the time).  @xref{Cycle Counters}.
 
 @item
 @code{--enable-sse}, @code{--enable-sse2}, @code{--enable-k7},
@@ -4703,25 +4703,25 @@ UltraSPARC (SPARC v9), IA64, PA-RISC, and MIPS processors.
 
 @cindex compiler
 Access to the cycle counters, unfortunately, is a compiler and/or
-operating-system dependent task, and often requires inline assembly
+operating-system dependent task, often requiring inline assembly
 language, and it may be that your compiler is not supported.  If you are
-@emph{not} supported, you will get an error ``Don't know a cycle counter
-for this system'' during compilation of FFTW.
+@emph{not} supported, FFTW will by default fall back on its estimator
+(effectively using @code{FFTW_ESTIMATE} for all plans).
+@ctindex FFTW_ESTIMATE
 
-If you get this message indicating that your system is not supported,
-you can add support by editing the file @code{kernel/cycle.h}; normally,
+You can add support by editing the file @code{kernel/cycle.h}; normally,
 this will involve adapting one of the examples already present in order
 to use the inline-assembler syntax for your C compiler, and will only
 require a couple of lines of code.  Anyone adding support for a new
 system to @code{cycle.h} is encouraged to email us at @email{fftw@@fftw.org}.
 
 If a cycle counter is not available on your system (e.g. some embedded
-processor), as a last resort you can use the
-@code{--without-cycle-counter} option to @code{configure} (on Unix) or
-@code{#define WITHOUT_CYCLE_COUNTER} in @code{config.h} (elsewhere).
+processor), and you don't want to use estimated plans, as a last resort
+you can use the @code{--with-slow-timer} option to @code{configure} (on
+Unix) or @code{#define WITH_SLOW_TIMER} in @code{config.h} (elsewhere).
 This will use the much slower @code{gettimeofday} function, or even
 @code{clock} if the former is unavailable, and planning will be
-extremely slow (you may just want to use @code{FFTW_ESTIMATE}).
+extremely slow.
 
 @c ------------------------------------------------------------
 @node Generating your own code,  , Cycle Counters, Installation and Customization
