@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.8 2003-06-01 02:10:45 stevenj Exp $ */
+/* $Id: reodft11e-radix2.c,v 1.9 2003-06-01 02:11:28 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:
@@ -322,8 +322,8 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
 	       E u, v;
 	       u = I[is * n2];
 	       v = I[is * (n2 - 1)];
-	       buf[i] = K(2.0) * (u + v) * W[2*i];
-	       buf[n - i] = K(2.0) * (u - v) * W[2*i];
+	       buf[i] = (u + v) * (W[2*i] * K(2.0));
+	       buf[n - i] = (u - v) * (W[2*i] * K(2.0));
 	  }
 
 
