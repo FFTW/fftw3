@@ -8,3 +8,4 @@
   Given problem, look up solver in wisdom, use solver to compute
   plan.
 
+* adapt verify() to vecsz.rnk > 0 .
