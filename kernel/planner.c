@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.142 2003-03-26 22:23:56 athena Exp $ */
+/* $Id: planner.c,v 1.143 2003-03-26 22:31:16 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -382,17 +382,20 @@ static plan *search(planner *ego, problem *p, slvdesc **descp)
 	       plan *pln = invoke_solver(ego, p, s, nflags);
 
 	       if (pln) {
-		    evaluate_plan(ego, pln, p);
-
 		    if (best) {
+			 if (best_not_yet_timed) {
+			      evaluate_plan(ego, best, p);
+			      best_not_yet_timed = 0;
+			 }
+			 evaluate_plan(ego, pln, p);
 			 if (pln->pcost < best->pcost) {
 			      X(plan_destroy_internal)(best);
-			      goto keep_pln;
+			      best = pln;
+			      *descp = sp;
 			 } else {
 			      X(plan_destroy_internal)(pln);
 			 }
 		    } else {
-		    keep_pln:
 			 best = pln;
 			 *descp = sp;
 		    }
