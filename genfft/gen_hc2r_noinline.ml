@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r.ml,v 1.14 2003-04-17 19:25:50 athena Exp $ *)
+(* $Id: gen_hc2r_noinline.ml,v 1.1 2003-04-17 19:25:50 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r.ml,v 1.14 2003-04-17 19:25:50 athena Exp $"
+let cvsid = "$Id: gen_hc2r_noinline.ml,v 1.1 2003-04-17 19:25:50 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -81,8 +81,6 @@ let generate n =
   and ristride = "ris"
   and iistride = "iis"
   and ostride = "os" 
-  and i = "i" 
-  and v = "v"
   and (transform, kind) =
     if !dftIII_flag then(hcdftIII, "hc2rIII") else (Trig.hdft, "hc2r")
   in
@@ -115,39 +113,58 @@ let generate n =
   let odag = store_array_r n oloc output in
   let annot = standard_optimizer odag in
 
-  let body = Block (
-    [Decl ("int", i)],
-    [For (Expr_assign (CVar i, CVar v),
-	  Binop (" > ", CVar i, Integer 0),
-	  list_to_comma 
-	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
-	     Expr_assign (CVar riarray, CPlus [CVar riarray; CVar !Simd.ivs]);
-	     Expr_assign (CVar iiarray, CPlus [CVar iiarray; CVar !Simd.ivs]);
-	     Expr_assign (CVar oarray, CPlus [CVar oarray; CVar !Simd.ovs])],
-	  Asch annot)
-   ])
-  in
-
-  let tree =
-    Fcn ("static void", name,
+  let tree0 =
+    Fcn ("static void", name0,
 	 ([Decl (C.constrealtypep, riarray);
 	   Decl (C.constrealtypep, iiarray);
-	   Decl (C.realtypep, oarray);
-	   Decl (C.stridetype, ristride);
-	   Decl (C.stridetype, iistride);
-	   Decl (C.stridetype, ostride);
-	   Decl ("int", v);
-	   Decl ("int", "ivs");
-	   Decl ("int", "ovs")]),
-	 add_constants body)
+	   Decl (C.realtypep, oarray)]
+	  @ (if stride_fixed !uristride then [] 
+               else [Decl (C.stridetype, ristride)])
+	  @ (if stride_fixed !uiistride then [] 
+               else [Decl (C.stridetype, iistride)])
+	  @ (if stride_fixed !uostride then [] 
+	       else [Decl (C.stridetype, ostride)])
+	  @ (choose_simd []
+	       (if stride_fixed !uivstride then [] else 
+	       [Decl ("int", !Simd.ivs)]))
+	  @ (choose_simd []
+	       (if stride_fixed !uovstride then [] else 
+	       [Decl ("int", !Simd.ovs)]))
+	 ),
+	 add_constants (Asch annot))
 
-  in let desc = 
+  in let loop =
+    "static void " ^ name ^ "(" ^ 
+    "const " ^ C.realtype ^ " *ri, " ^ 
+    "const " ^ C.realtype ^ " *ii, " ^ 
+    C.realtype ^ " *O, " ^
+    C.stridetype ^ " ris, " ^
+    C.stridetype ^ " iis, " ^
+    C.stridetype ^ " os, " ^ 
+      " int v, int ivs, int ovs)\n" ^
+    "{\n" ^
+    "int i;\n" ^
+    "for (i = v; i > 0; --i) {\n" ^
+      name0 ^ "(ri, ii, O" ^
+       (if stride_fixed !uristride then "" else ", ris") ^ 
+       (if stride_fixed !uiistride then "" else ", iis") ^ 
+       (if stride_fixed !uostride then "" else ", os") ^ 
+       (choose_simd ""
+	  (if stride_fixed !uivstride then "" else ", ivs")) ^ 
+       (choose_simd ""
+	  (if stride_fixed !uovstride then "" else ", ovs")) ^ 
+    ");\n" ^
+    "ri += ivs; ii += ivs; O += ovs;\n" ^
+    "}\n}\n\n"
+
+  and desc = 
     Printf.sprintf 
       "static const khc2r_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n\n"
-      n name (flops_of tree) 
+      n name (flops_of tree0) 
       (stride_to_solverparm !uristride) (stride_to_solverparm !uiistride)
       (stride_to_solverparm !uostride)
-      "0" "0"
+      (choose_simd "0" (stride_to_solverparm !uivstride))
+      (choose_simd "0" (stride_to_solverparm !uovstride))
 
   and init =
     (declare_register_fcn name) ^
@@ -156,7 +173,7 @@ let generate n =
     "}\n"
 
   in
-  (unparse cvsid tree) ^ "\n" ^ desc ^ init
+  (unparse cvsid tree0) ^ "\n" ^ loop ^ desc ^ init
 
 
 let main () =

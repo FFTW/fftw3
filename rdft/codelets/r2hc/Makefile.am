@@ -23,6 +23,10 @@ R2HC = r2hc_2.c r2hc_3.c r2hc_4.c r2hc_5.c r2hc_6.c r2hc_7.c r2hc_8.c	\
 r2hc_9.c r2hc_10.c r2hc_11.c r2hc_12.c r2hc_13.c r2hc_14.c r2hc_15.c	\
 r2hc_16.c r2hc_32.c r2hc_64.c r2hc_128.c
 
+MR2HC = mr2hc_2.c mr2hc_3.c mr2hc_4.c mr2hc_5.c mr2hc_6.c mr2hc_7.c	\
+mr2hc_8.c mr2hc_9.c mr2hc_10.c mr2hc_11.c mr2hc_12.c mr2hc_13.c		\
+mr2hc_14.c mr2hc_15.c mr2hc_16.c mr2hc_32.c mr2hc_64.c mr2hc_128.c
+
 ###########################################################################
 # hf_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT
 # step for a real-input FFT.  Every hf codelet must have a
@@ -40,8 +44,12 @@ R2HCII = r2hcII_2.c r2hcII_3.c r2hcII_4.c r2hcII_5.c r2hcII_6.c		\
 r2hcII_7.c r2hcII_8.c r2hcII_9.c r2hcII_10.c r2hcII_12.c r2hcII_15.c	\
 r2hcII_16.c r2hcII_32.c r2hcII_64.c
 
+MMR2HCII = mr2hcII_2.c mr2hcII_3.c mr2hcII_4.c mr2hcII_5.c mr2hcII_6.c	\
+mr2hcII_7.c mr2hcII_8.c mr2hcII_9.c mr2hcII_10.c mr2hcII_12.c		\
+mr2hcII_15.c mr2hcII_16.c mr2hcII_32.c mr2hcII_64.c
+
 ###########################################################################
-ALL_CODELETS = $(R2HC) $(HF) $(HF2) $(R2HCII)
+ALL_CODELETS = $(R2HC) $(MR2HC) $(HF) $(HF2) $(R2HCII) $(MR2HCII)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
@@ -61,6 +69,9 @@ FLAGS_R2HCII=$(RDFT_FLAGS_COMMON)
 r2hc_%.c:  $(CODELET_DEPS) $(GEN_R2HC)
 	($(PRELUDE_COMMANDS_RDFT); $(GEN_R2HC) $(FLAGS_R2HC) -n $* -name r2hc_$* -include "r2hc.h") | $(ADD_DATE) | $(INDENT) >$@
 
+mr2hc_%.c:  $(CODELET_DEPS) $(GEN_R2HC_NOINLINE)
+	($(PRELUDE_COMMANDS_RDFT); $(GEN_R2HC_NOINLINE) $(FLAGS_R2HC) -n $* -name mr2hc_$* -include "r2hc.h") | $(ADD_DATE) | $(INDENT) >$@
+
 hf_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
 	($(PRELUDE_COMMANDS_RDFT); $(GEN_HC2HC) $(FLAGS_HF) -n $* -dit -name hf_$* -include "hf.h") | $(ADD_DATE) | $(INDENT) >$@
 
@@ -69,5 +80,8 @@ hf2_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
 
 r2hcII_%.c:  $(CODELET_DEPS) $(GEN_R2HC)
 	($(PRELUDE_COMMANDS_RDFT); $(GEN_R2HC) $(FLAGS_R2HC) -n $* -name r2hcII_$* -dft-II -include "r2hcII.h") | $(ADD_DATE) | $(INDENT) >$@
+
+mr2hcII_%.c:  $(CODELET_DEPS) $(GEN_R2HC_NOINLINE)
+	($(PRELUDE_COMMANDS_RDFT); $(GEN_R2HC_NOINLINE) $(FLAGS_R2HC) -n $* -name mr2hcII_$* -dft-II -include "r2hcII.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE

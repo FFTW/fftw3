@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2r.ml,v 1.2 2003-04-16 19:51:27 athena Exp $ *)
+(* $Id: gen_r2r.ml,v 1.3 2003-04-17 19:25:50 athena Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2r.ml,v 1.2 2003-04-16 19:51:27 athena Exp $"
+let cvsid = "$Id: gen_r2r.ml,v 1.3 2003-04-17 19:25:50 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -162,7 +162,7 @@ let generate n mode =
   let annot = standard_optimizer odag in
 
   let tree0 =
-    Fcn ("static MAYBE_INLINE void", name0,
+    Fcn ("static void", name0,
 	 ([Decl (C.constrealtypep, iarray);
 	   Decl (C.realtypep, oarray)]
 	  @ (if stride_fixed !uistride then [] 

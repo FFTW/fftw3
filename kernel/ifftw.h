@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.224 2003-04-15 18:53:44 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.225 2003-04-17 19:25:50 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -790,9 +790,6 @@ static __inline__ E FNMS(E a, E b, E c)
 #define FNMA(a, b, c) (- (((a) * (b)) + (c)))
 #define FNMS(a, b, c) ((c) - ((a) * (b)))
 #endif
-
-/* inline nontwiddle codelets, at the discretion of the compiler */
-#define MAYBE_INLINE inline
 
 
 /* stack-alignment hackery */

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2hc.ml,v 1.8 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: gen_hc2hc.ml,v 1.9 2003-04-17 19:25:50 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2hc.ml,v 1.8 2003-03-15 20:29:42 stevenj Exp $"
+let cvsid = "$Id: gen_hc2hc.ml,v 1.9 2003-04-17 19:25:50 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -120,10 +120,10 @@ let generate n =
   in
   let body = Block (
     [Decl ("int", i)],
-    [For (Expr_assign (vi, Integer 2),
-	  Binop (" < ", vi, vm),
+    [For (Expr_assign (vi, (CPlus [vm; CUminus (Integer 2)])),
+	  Binop (" > ", vi, Integer 0),
 	  list_to_comma 
-	    [Expr_assign (vi, CPlus [vi; byvl (Integer 2)]);
+	    [Expr_assign (vi, CPlus [vi; CUminus (byvl (Integer 2))]);
 	     Expr_assign (vrioarray, CPlus [vrioarray; byvl vdist]);
 	     Expr_assign (viioarray, 
 			  CPlus [viioarray; CUminus (byvl vdist)]);
