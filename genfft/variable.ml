@@ -18,15 +18,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: variable.ml,v 1.1.1.1 2002-06-02 18:42:31 athena Exp $ *)
+(* $Id: variable.ml,v 1.2 2002-06-20 19:04:37 athena Exp $ *)
+
+type info =
+  | Real of int
+  | Imag of int 
+  | Unknown
 
 type variable = 
       (* temporary variables generated automatically *)
   | Temporary of int
       (* memory locations, e.g., array elements *)
-  | Locative of (Unique.unique * Unique.unique * string)
+  | Locative of (info * Unique.unique * Unique.unique * string)
       (* constant values, e.g., twiddle factors *)
-  | Constant of (Unique.unique * string)
+  | Constant of (info * Unique.unique * string)
 
 let hash v = Hashtbl.hash v
 
@@ -44,17 +49,22 @@ let is_locative = function
   | Locative _ -> true
   | _ -> false
 
+let info = function
+  | Locative (i, _, _, _) -> i
+  | Constant (i, _, _) -> i
+  | _ -> failwith "info"
+
 let same_location a b = 
   match (a, b) with
-  | (Locative (location_a, _, _), Locative (location_b, _, _)) ->
+  | (Locative (_, location_a, _, _), Locative (_, location_b, _, _)) ->
       Unique.same location_a location_b
   | _ -> false
 
 let same_class a b = 
   match (a, b) with
-  | (Locative (_, class_a, _), Locative (_, class_b, _)) ->
+  | (Locative (_, _, class_a, _), Locative (_, _, class_b, _)) ->
       Unique.same class_a class_b
-  | (Constant (class_a, _), Constant (class_b, _)) ->
+  | (Constant (_, class_a, _), Constant (_, class_b, _)) ->
       Unique.same class_a class_b
   | _ -> false
 
@@ -65,11 +75,11 @@ let make_temporary =
     Temporary !tmp_count
   end
 
-let make_constant class_token name = 
-  Constant (class_token, name)
+let make_constant info class_token name = 
+  Constant (info, class_token, name)
 
-let make_locative location_token class_token name =
-  Locative (location_token, class_token, name)
+let make_locative info location_token class_token name =
+  Locative (info, location_token, class_token, name)
 
 (* special naming conventions for variables *)
 let rec base62_of_int k = 
@@ -95,5 +105,5 @@ let varname_of_int k =
 
 let unparse = function
   | Temporary k -> "t" ^ (varname_of_int k)
-  | Constant (_, name) -> name
-  | Locative (_, _, name) -> name
+  | Constant (_, _, name) -> name
+  | Locative (_, _, _, name) -> name

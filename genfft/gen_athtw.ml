@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_athtw.ml,v 1.1.1.1 2002-06-02 18:42:29 athena Exp $ *)
+(* $Id: gen_athtw.ml,v 1.2 2002-06-20 19:04:37 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_athtw.ml,v 1.1.1.1 2002-06-02 18:42:29 athena Exp $"
+let cvsid = "$Id: gen_athtw.ml,v 1.2 2002-06-20 19:04:37 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -47,8 +47,8 @@ let mkloc n a loc =
     let klass = Unique.make () in
     let (rloc, iloc) = loc i in
     let aref = C.array_subscript a (C.SVar stride) i in
-    (Variable.make_locative rloc klass (C.real_of aref),
-     Variable.make_locative iloc klass (C.imag_of aref)))
+    (Variable.make_locative (Variable.Real i) rloc klass (C.real_of aref),
+     Variable.make_locative (Variable.Imag i) iloc klass (C.imag_of aref)))
 
 let generate n =
   let a = "a"
@@ -62,7 +62,7 @@ let generate n =
   let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
   let nt = num_twiddles n in
 
-  let byw = bytwiddle n sign (load_constant_array_r nt twarray) in
+  let byw = bytwiddle n sign (twiddle_array nt twarray) in
 
   let locations = unique_array_c n in
   let iloc = mkloc n a locations in
@@ -75,7 +75,7 @@ let generate n =
     | DIF -> array n (byw (Fft.dft sign n liloc))
   in
   let odag = store_array_c n oloc output in
-  let annot = standard_optimizer odag in
+  let (vardeclinfo, annot) = standard_optimizer odag in
 
   let body = Block (
     [Decl ("int", i)],

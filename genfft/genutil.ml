@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.6 2002-06-19 17:20:37 athena Exp $ *)
+(* $Id: genutil.ml,v 1.7 2002-06-20 19:04:37 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -36,16 +36,16 @@ let locative_array_c n rarr iarr loc =
   array n (fun i -> 
     let klass = Unique.make () in
     let (rloc, iloc) = loc i in
-    (Variable.make_locative rloc klass (rarr i),
-     Variable.make_locative iloc klass (iarr i)))
+    (Variable.make_locative (Variable.Real i) rloc klass (rarr i),
+     Variable.make_locative (Variable.Imag i) iloc klass (iarr i)))
 
 let locative_v_array_c veclen n rarr iarr loc = 
   array veclen (fun v ->
     array n (fun i -> 
       let klass = Unique.make () in
       let (rloc, iloc) = loc v i in
-      (Variable.make_locative rloc klass (rarr v i),
-       Variable.make_locative iloc klass (iarr v i))))
+      (Variable.make_locative (Variable.Real i) rloc klass (rarr v i),
+       Variable.make_locative (Variable.Imag i) iloc klass (iarr v i))))
 
 let temporary_array n = 
   array n (fun i -> Variable.make_temporary ())
@@ -59,27 +59,6 @@ let temporary_array_c n =
 let temporary_v_array_c veclen n =
   array veclen (fun v -> temporary_array_c n)
 
-let load_constant_array_r n arr = 
-  array n (fun i -> 
-    let klass = Unique.make () in
-    let aref = C.array_subscript arr (C.SInteger 1) i in
-    Expr.Load (Variable.make_constant klass aref))
-
-let constant_array_c n arr = 
-  array n (fun i -> 
-    let klass = Unique.make () in
-    let aref = C.array_subscript arr (C.SInteger 1) i in
-    (Variable.make_constant klass (C.real_of aref),
-     Variable.make_constant klass (C.imag_of aref)))
-
-let constant_v_array_c veclen n arr vstride =
-  array veclen (fun v -> 
-    array n (fun i -> 
-      let klass = Unique.make () in
-      let aref = C.varray_subscript arr vstride (C.SInteger 1) v i in
-      (Variable.make_constant klass (C.real_of aref),
-       Variable.make_constant klass (C.imag_of aref))))
-
 let temporary_array_c n = 
   let tmpr = temporary_array n
   and tmpi = temporary_array n
@@ -89,6 +68,18 @@ let temporary_array_c n =
 let load_c (vr, vi) = Complex.make (Expr.Load vr, Expr.Load vi)
 let load_r (vr, vi) = Complex.make (Expr.Load vr, Expr.Num (Number.zero))
 let load_hc (vr, _) (vi, _) = load_c (vr, vi)
+
+let twiddle_array nt w =
+  array (nt/2) (fun i ->
+    let klass = Unique.make () in
+    let (refr, refi) = (C.array_subscript w (C.SInteger 1) (2 * i),
+			C.array_subscript w (C.SInteger 1) (2 * i + 1))
+    in
+    let (kr, ki) = (Variable.make_constant (Variable.Real i) klass refr,
+		    Variable.make_constant (Variable.Imag i) klass refi)  
+    in
+    load_c (kr, ki))
+
 
 let load_array_c n var = array n (fun i -> load_c (var i))
 let load_array_r n var = array n (fun i -> load_r (var i))

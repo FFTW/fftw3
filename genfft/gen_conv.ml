@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_conv.ml,v 1.1.1.1 2002-06-02 18:42:29 athena Exp $ *)
+(* $Id: gen_conv.ml,v 1.2 2002-06-20 19:04:37 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_conv.ml,v 1.1.1.1 2002-06-02 18:42:29 athena Exp $"
+let cvsid = "$Id: gen_conv.ml,v 1.2 2002-06-20 19:04:37 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -63,7 +63,7 @@ let generate n =
       (C.array_subscript bogus (C.SInteger 1))
       (unique_array_c n2) in
   let odag = store_array_r n2 oloc output in
-  let annot = standard_optimizer odag in
+  let (vardeclinfo, annot) = standard_optimizer odag in
 
   let tree =
     Fcn ("void", name,

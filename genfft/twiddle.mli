@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.mli,v 1.2 2002-06-16 22:30:18 athena Exp $ *)
+(* $Id: twiddle.mli,v 1.3 2002-06-20 19:04:37 athena Exp $ *)
 
 val speclist : (string * Arg.spec * string) list
 
@@ -26,7 +26,7 @@ type twinstr
 
 val twiddle_policy :
     unit ->
-    (int -> int -> (int -> Expr.expr) -> (int -> Complex.expr) ->
+    (int -> int -> (int -> Complex.expr) -> (int -> Complex.expr) ->
       int -> Complex.expr) *(int -> int) * (int -> twinstr list)
 
 val twinstr_to_c_string : twinstr list -> string

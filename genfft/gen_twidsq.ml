@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twidsq.ml,v 1.5 2002-06-16 22:30:18 athena Exp $ *)
+(* $Id: gen_twidsq.ml,v 1.6 2002-06-20 19:04:37 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twidsq.ml,v 1.5 2002-06-16 22:30:18 athena Exp $"
+let cvsid = "$Id: gen_twidsq.ml,v 1.6 2002-06-20 19:04:37 athena Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 
@@ -79,9 +79,9 @@ let generate n =
 
   let byw =
     if !reload_twiddle then
-      array n (fun v -> bytwiddle n sign (load_constant_array_r nt twarray))
+      array n (fun v -> bytwiddle n sign (twiddle_array nt twarray))
     else
-      let a = bytwiddle n sign (load_constant_array_r nt twarray)
+      let a = bytwiddle n sign (twiddle_array nt twarray)
       in fun v -> a
   in
 
@@ -111,8 +111,7 @@ let generate n =
   in
 
   let odag = store_v_array_c n n ioo (transpose output) in
-  let annot = standard_optimizer odag in
-
+  let (vardeclinfo, annot) = standard_optimizer odag in
 
   let body = Block (
     [Decl ("uint", i)],

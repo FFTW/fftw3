@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.2 2002-06-16 22:30:18 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.3 2002-06-20 19:04:37 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -71,10 +71,10 @@ let rec_array n f =
     h
   end
 
+ 
 let load_reim sign w i = 
-  let x = Complex.make (w (2 * i), w (2 * i + 1)) in
-  if sign = 1 then x else Complex.conj x
-  
+  if sign = 1 then w i else Complex.conj (w i)
+
 (* various policies for computing/loading twiddle factors *)
 
 (* load all twiddle factors *)

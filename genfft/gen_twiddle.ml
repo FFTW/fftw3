@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle.ml,v 1.5 2002-06-16 22:30:18 athena Exp $ *)
+(* $Id: gen_twiddle.ml,v 1.6 2002-06-20 19:04:37 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.5 2002-06-16 22:30:18 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.6 2002-06-20 19:04:37 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -62,7 +62,7 @@ let generate n =
   let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
   let nt = num_twiddles n in
 
-  let byw = bytwiddle n sign (load_constant_array_r nt twarray) in
+  let byw = bytwiddle n sign (twiddle_array nt twarray) in
 
   let viostride = either_stride (!uiostride) (C.SVar iostride) in
 
@@ -85,7 +85,7 @@ let generate n =
     | DIF -> array n (byw (Fft.dft sign n liloc))
   in
   let odag = store_array_c n oloc output in
-  let annot = standard_optimizer odag in
+  let (vardeclinfo, annot) = standard_optimizer odag in
 
   let body = Block (
     [Decl ("uint", i)],

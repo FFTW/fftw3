@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.8 2002-06-14 18:18:15 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.9 2002-06-20 19:04:37 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.8 2002-06-14 18:18:15 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.9 2002-06-20 19:04:37 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -72,7 +72,7 @@ let generate n =
       (C.array_subscript ioarray vostride)
       locations in
   let odag = store_array_c n oloc output in
-  let annot = standard_optimizer odag in
+  let (vardeclinfo, annot) = standard_optimizer odag in
 
   let tree0 =
     Fcn ("static void", name0,
