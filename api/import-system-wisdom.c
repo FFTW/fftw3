@@ -30,7 +30,7 @@
 
 int X(import_system_wisdom)(void)
 {
-#ifdef defined(__WIN32__) || defined(WIN32) || defined(_WINDOWS)
+#if defined(__WIN32__) || defined(WIN32) || defined(_WINDOWS)
      return 0; /* TODO? */
 #else
 
