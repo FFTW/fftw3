@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.21 2003-03-29 07:58:39 stevenj Exp $ */
+/* $Id: vrank2-transpose.c,v 1.22 2003-03-29 18:45:13 stevenj Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -49,6 +49,7 @@ typedef struct {
      int n;
      int s0, s1;
      int m;
+     int offset;
      int nd, md, d; /* d = gcd(n,m), nd = n / d, md = m / d */
 } P;
 
@@ -68,7 +69,7 @@ static void apply_general(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      R *buf = (R *)MALLOC((sizeof(R) * 2) * nd * md * d, BUFFERS);
 
      UNUSED(ii); UNUSED(ro); UNUSED(io);
-     X(transpose)(ri, nd, md, d, 2, buf);
+     X(transpose)(ri + ego->offset, nd, md, d, 2, buf);
      X(ifree)(buf);
 }
 
@@ -82,7 +83,7 @@ static void apply_slow(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      UNUSED(ii); UNUSED(ro); UNUSED(io);
      STACK_MALLOC(char *, move, move_size);
-     X(transpose_slow)(ri, n, m, 2, move, move_size, buf);
+     X(transpose_slow)(ri + ego->offset, n, m, 2, move, move_size, buf);
      STACK_FREE(move);
 }
 
@@ -95,7 +96,8 @@ static int applicable(const problem *p_)
                   && p->ri == p->ro
                   && p->sz->rnk == 0
                   && p->vecsz->rnk == 2
-		  && X(transposable)(d, d+1, 1, 2, 2)
+		  && X(transposable)(d, d+1, 1, X(imin)(d[0].is,d[0].os),
+				     p->ri, p->ii)
 	       );
      }
      return 0;
@@ -126,10 +128,12 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      d = p->vecsz->dims;
      pln = MKPLAN_DFT(P, &padt, 
-		      X(transpose_simplep)(d, d+1, 2) ? apply :
+		      X(transpose_simplep)(d, d+1, 1, X(imin)(d[0].is,d[0].os),
+					   p->ri, p->ii) ? apply :
 		      (X(transpose_slowp)(d, d+1, 2) ? apply_slow : 
 		       apply_general));
      X(transpose_dims)(d, d+1, &pln->n, &pln->m, &pln->d, &pln->nd, &pln->md);
+     pln->offset = (p->ri - p->ii == 1) ? -1 : 0;
      pln->s0 = d[0].is;
      pln->s1 = d[0].os;
 

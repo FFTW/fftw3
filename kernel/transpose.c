@@ -29,20 +29,27 @@
 /*************************************************************************/
 /* some utilities for the solvers */
 
+static int Ntuple_transposable(const iodim *a, const iodim *b,
+			       int vl, int s, R *ri, R *ii)
+{
+     return(2 == s && (ii == ri + 1 || ri == ii + 1)
+	    &&
+	    ((a->is == b->os && a->is == (vl*2)
+	      && a->os == b->n * (vl*2) && b->is == a->n * (vl*2))
+	     ||
+	     (a->os == b->is && a->os == (vl*2)
+	      && a->is == b->n * (vl*2) && b->os == a->n * (vl*2))));
+}
+
+
 /* our solvers' transpose routines work for square matrices of arbitrary
    stride, or for non-square matrices of a given vl*vl2 corresponding
    to the N of the Ntuple with vl2 == s. */
-int X(transposable)(const iodim *a, const iodim *b, int vl, int vl2, int s)
+int X(transposable)(const iodim *a, const iodim *b,
+		    int vl, int s, R *ri, R *ii)
 {
      return ((a->n == b->n && a->os == b->is && a->is == b->os)
-	     ||
-	     (vl2 == s
-	      &&
-	      ((a->is == b->os && a->is == (vl*vl2)
-		&& a->os == b->n * (vl*vl2) && b->is == a->n * (vl*vl2))
-	       ||
-	       (a->os == b->is && a->os == (vl*vl2)
-		&& a->is == b->n * (vl*vl2) && b->os == a->n * (vl*vl2)))));
+	     || Ntuple_transposable(a, b, vl, s, ri, ii));
 }
 
 int gcd(int a, int b)
@@ -79,9 +86,12 @@ void X(transpose_dims)(const iodim *a, const iodim *b,
 
 /* use the simple square transpose in the solver for square matrices
    that aren't too big or which have the wrong stride */
-int X(transpose_simplep)(const iodim *a, const iodim *b, int N)
+int X(transpose_simplep)(const iodim *a, const iodim *b, int vl, int s,
+			 R *ri, R *ii)
 {
-     return (a->n == b->n && (a->n*N < CUTOFF ||  X(imin)(a->is, a->os) != N));
+     return (a->n == b->n &&
+	     (a->n*(vl*2) < CUTOFF 
+	      ||  !Ntuple_transposable(a, b, vl, s, ri, ii)));
 }
 
 /* use the slow general transpose if the buffer would be more than 1/8

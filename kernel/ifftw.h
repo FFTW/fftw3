@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.207 2003-03-29 13:05:41 athena Exp $ */
+/* $Id: ifftw.h,v 1.208 2003-03-29 18:45:13 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -692,10 +692,12 @@ void X(rader_tl_delete)(R *W, rader_tl **tl);
 void X(transpose)(R *A, int n, int m, int d, int N, R *buf);
 void X(transpose_slow)(R *a, int nx, int ny, int N,
 		       char *move, int move_size, R *buf);
-int X(transposable)(const iodim *a, const iodim *b, int vl, int vl2, int s);
+int X(transposable)(const iodim *a, const iodim *b,
+		    int vl, int s, R *ri, R *ii);
 void X(transpose_dims)(const iodim *a, const iodim *b,
                        int *n, int *m, int *d, int *nd, int *md);
-int X(transpose_simplep)(const iodim *a, const iodim *b, int N);
+int X(transpose_simplep)(const iodim *a, const iodim *b, int vl, int s,
+			 R *ri, R *ii);
 int X(transpose_slowp)(const iodim *a, const iodim *b, int N);
 
 /*-----------------------------------------------------------------------*/

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.24 2003-03-29 07:58:39 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.25 2003-03-29 18:45:13 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -51,6 +51,7 @@ typedef struct {
      int n, vl;
      int s0, s1, vs;
      int m;
+     int offset;
      int nd, md, d; /* d = gcd(n,m), nd = n / d, md = m / d */
 } P;
 
@@ -70,7 +71,7 @@ static void apply_general(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      R *buf = (R *)MALLOC((sizeof(R) * 2) * vl * nd * md * d, BUFFERS);
 
      UNUSED(ii); UNUSED(ro); UNUSED(io);
-     X(transpose)(ri, nd, md, d, 2*vl, buf);
+     X(transpose)(ri + ego->offset, nd, md, d, 2*vl, buf);
      X(ifree)(buf);
 }
 
@@ -84,12 +85,13 @@ static void apply_slow(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      UNUSED(ii); UNUSED(ro); UNUSED(io);
      STACK_MALLOC(char *, move, move_size);
-     X(transpose_slow)(ri, n, m, 2*vl, move, move_size, buf);
+     X(transpose_slow)(ri + ego->offset, n, m, 2*vl, move, move_size, buf);
      STACK_FREE(move);
      X(ifree)(buf);
 }
 
-static int pickdim(const tensor *s, int *pdim0, int *pdim1, int *pdim2)
+static int pickdim(const tensor *s, int *pdim0, int *pdim1, int *pdim2,
+		   R *ri, R *ii)
 {
      int dim0, dim1;
 
@@ -98,7 +100,8 @@ static int pickdim(const tensor *s, int *pdim0, int *pdim1, int *pdim2)
 	       int dim2 = 3 - dim0 - dim1;
                if (s->dims[dim2].is == s->dims[dim2].os
 		   && X(transposable)(s->dims + dim0, s->dims + dim1, 
-				      s->dims[dim2].n, 2, s->dims[dim2].is)) {
+				      s->dims[dim2].n, s->dims[dim2].is,
+				      ri, ii)) {
                     *pdim0 = dim0;
                     *pdim1 = dim1;
 		    *pdim2 = dim2;
@@ -116,7 +119,7 @@ static int applicable0(const problem *p_, int *dim0, int *dim1, int *dim2)
                   && p->ri == p->ro
                   && p->sz->rnk == 0
                   && p->vecsz->rnk == 3
-                  && pickdim(p->vecsz, dim0, dim1, dim2)
+                  && pickdim(p->vecsz, dim0, dim1, dim2, p->ri, p->ii)
 	       );
      }
      return 0;
@@ -169,11 +172,14 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      d = p->vecsz->dims;
      vl = d[dim2].n;
      pln = MKPLAN_DFT(P, &padt,
-                      X(transpose_simplep)(d+dim0, d+dim1, 2*vl) ? apply :
+                      X(transpose_simplep)(d+dim0, d+dim1,
+					   vl, p->vecsz->dims[dim2].is,
+					   p->ri, p->ii) ? apply :
                       (X(transpose_slowp)(d+dim0, d+dim1, 2*vl) ? apply_slow
                        : apply_general));
      X(transpose_dims)(d+dim0, d+dim1, 
 		       &pln->n, &pln->m, &pln->d, &pln->nd, &pln->md);
+     pln->offset = (p->ri - p->ii == 1) ? -1 : 0;
      pln->s0 = d[dim0].is;
      pln->s1 = d[dim0].os;
      pln->vl = vl;
