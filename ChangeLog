@@ -1,3 +1,69 @@
+2003-01-08  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/rdft/problem.c:
+	got rid of compiler warning
+
+	* /home/fftw/Repository/fftw3/tests/bench.c:
+	whoops, test r2hc and not rodft00 by default
+
+	* /home/fftw/Repository/fftw3/rdft/buffered.c, /home/fftw/Repository/fftw3/rdft/indirect.c, /home/fftw/Repository/fftw3/rdft/problem.c, /home/fftw/Repository/fftw3/rdft/rank-geq2.c, /home/fftw/Repository/fftw3/rdft/rdft.h, /home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c, /home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c, /home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c, /home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c, /home/fftw/Repository/fftw3/tests/bench.c, /home/fftw/Repository/fftw3/tests/verify-reodft.c:
+	got rid of real_n...use physical n everywhere in rdft; fixed rdft sz compression; fixed rodft00 verify bug
+
+2003-01-08  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/simd/Makefile.am, /home/fftw/Repository/fftw3/simd/sse-aux.c, /home/fftw/Repository/fftw3/simd/sse.c, /home/fftw/Repository/fftw3/simd/sse2-aux.c, /home/fftw/Repository/fftw3/simd/sse2.c:
+	icc-6.0 bug workaround
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h, /home/fftw/Repository/fftw3/rdft/buffered2.c, /home/fftw/Repository/fftw3/rdft/rader-hc2hc.c, /home/fftw/Repository/fftw3/tests/bench.c:
+	Reclaimed the fftw_real identifier, because I need it for the API
+
+	* /home/fftw/Repository/fftw3/configure.ac:
+	Use recommended AC_OUTPUT syntax
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h, /home/fftw/Repository/fftw3/tests/bench.c:
+	Removed FFTW(foo) as a synonym for X(foo).  This is an API issue.
+
+2003-01-07  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/simd/sse2.c: get rid of warning
+
+2003-01-07  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/Makefile.am, /home/fftw/Repository/fftw3/dft/codelet-dft.h, /home/fftw/Repository/fftw3/dft/codelet.h, /home/fftw/Repository/fftw3/dft/codelets/inplace/Makefile.am, /home/fftw/Repository/fftw3/dft/codelets/n.c, /home/fftw/Repository/fftw3/dft/codelets/standard/Makefile.am, /home/fftw/Repository/fftw3/dft/codelets/t.c, /home/fftw/Repository/fftw3/dft/dft.h, /home/fftw/Repository/fftw3/dft/simd/codelets/Makefile.am, /home/fftw/Repository/fftw3/dft/simd/n1b.c, /home/fftw/Repository/fftw3/dft/simd/n1f.c, /home/fftw/Repository/fftw3/dft/simd/t1b.c, /home/fftw/Repository/fftw3/dft/simd/t1f.c, /home/fftw/Repository/fftw3/rdft/Makefile.am, /home/fftw/Repository/fftw3/rdft/codelet-rdft.h, /home/fftw/Repository/fftw3/rdft/codelet.h, /home/fftw/Repository/fftw3/rdft/codelets/hc2r.c, /home/fftw/Repository/fftw3/rdft/codelets/hc2r/Makefile.am, /home/fftw/Repository/fftw3/rdft/codelets/hfb.c, /home/fftw/Repository/fftw3/rdft/codelets/r2hc.c, /home/fftw/Repository/fftw3/rdft/codelets/r2hc/Makefile.am, /home/fftw/Repository/fftw3/rdft/rdft.h, /home/fftw/Repository/fftw3/support/Makefile.am, /home/fftw/Repository/fftw3/support/Makefile.codelets, /home/fftw/Repository/fftw3/support/codelet_prelude, /home/fftw/Repository/fftw3/support/codelet_prelude.dft, /home/fftw/Repository/fftw3/support/codelet_prelude.rdft:
+	Renamed conflicting files */codelet.h into dft/codelet-dft.h and
+	rdft/codelet-rdft.h
+
+2003-01-07  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/ChangeLog: updated
+
+2003-01-07  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/simd/simd-3dnow.h, /home/fftw/Repository/fftw3/simd/simd-sse.h, /home/fftw/Repository/fftw3/simd/simd-sse2.h, /home/fftw/Repository/fftw3/simd/sse2.c:
+	Silence warnings
+
+2003-01-07  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/rank-geq2.c, /home/fftw/Repository/fftw3/rdft/rank-geq2.c:
+	fftw2 used spltrnk=1
+
+2003-01-07  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/codelet.h, /home/fftw/Repository/fftw3/rdft/codelet.h, /home/fftw/Repository/fftw3/simd/simd-sse.h, /home/fftw/Repository/fftw3/simd/sse.c:
+	Silence warning
+
+2003-01-07  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/TODO: noted deficiency
+
+2003-01-07  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c, /home/fftw/Repository/fftw3/rdft/vrank-geq1.c:
+	Strengthened conditions for a problem to be POSSIBLY_UNALIGNED
+
+	* /home/fftw/Repository/fftw3/dft/vrank-geq1.c, /home/fftw/Repository/fftw3/kernel/align.c, /home/fftw/Repository/fftw3/kernel/ifftw.h:
+	Strengthened conditions for a plan to be POSSIBLY_UNALIGNED
+
 2003-01-07  Matteo Frigo  <athena@superjdj4>
 
 	* /home/fftw/Repository/fftw3/simd/simd-3dnow.h,
