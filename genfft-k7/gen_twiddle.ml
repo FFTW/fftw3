@@ -27,7 +27,7 @@ open K7Translate
 open AssignmentsToVfpinstrs
 open Complex
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.12 2002-09-12 20:33:49 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.13 2003-04-18 01:21:45 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -146,10 +146,11 @@ let generate n =
     p "\t.long %d\n" n;
     p "\t.long nam\n";
     p "\t.long twinstr\n";
-    p "\t.long %d\n" add;
-    p "\t.long %d\n" mul;
-    p "\t.long 0\n";  (* fma *)
-    p "\t.long 0\n";  (* other *)
+    p "\t.zero 4\n"; (* pad *)
+    p "\t.double %d\n" add;
+    p "\t.double %d\n" mul;
+    p "\t.double 0\n";  (* fma *)
+    p "\t.double 0\n";  (* other *)
     p "\t.long fftwf_kdft_ct_k7_%sgenus\n" (choose sign "m" "p");
     p "\t.long 0\n";  (* s1 *)
     p "\t.long 0\n";  (* s2 *)
