@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.52 2003-03-01 23:15:22 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.53 2003-03-01 23:43:21 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1128,6 +1128,208 @@ guarantee alignment of your @code{main} function (with @code{gcc}).
 @c ------------------------------------------------------------
 @node Multi-dimensional Array Format, Words of Wisdom, The Importance of Alignment, Other Stuff You Should Know
 @section Multi-dimensional Array Format
+
+This section describes the format in which multi-dimensional arrays
+are stored in FFTW.  We felt that a detailed discussion of this topic
+was necessary, since it is often a source of confusion among users and
+several different formats are common.
+
+@menu
+* Row-major Format::            
+* Column-major Format::         
+* Static Arrays in C::          
+* Dynamic Arrays in C::         
+* Dynamic Arrays in C-The Wrong Way::  
+@end menu
+
+@node Row-major Format, Column-major Format, Multi-dimensional Array Format, Multi-dimensional Array Format
+@subsection Row-major Format
+@cindex row-major
+
+The multi-dimensional arrays passed to @code{fftw_plan_dft} etcetera
+are expected to be stored as a single contiguous block in
+@dfn{row-major} order (sometimes called ``C order'').  Basically, this
+means that as you step through adjacent memory locations, the first
+dimension's index varies most slowly and the last dimension's index
+varies most quickly.
+
+To be more explicit, let us consider an array of rank @math{d} whose
+dimensions are
+@tex
+$n_1 \times n_2 \times n_3 \times \cdots \times n_d$.
+@end tex
+@ifinfo
+n1 x n2 x n3 x ... x nd.
+@end ifinfo
+@ifhtml
+n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x n<sub>d</sub>.
+@end ifhtml
+Now, we specify a location in the array by a sequence of (zero-based) indices,
+one for each dimension:
+@tex
+$(i_1, i_2, i_3, \ldots, i_d)$.
+@end tex
+@ifinfo
+(i1, i2, ..., id).
+@end ifinfo
+@ifhtml
+(i<sub>1</sub>, i<sub>2</sub>, i<sub>3</sub>,..., i<sub>d</sub>).
+@end ifhtml
+If the array is stored in row-major
+order, then this element is located at the position
+@tex
+$i_d + n_d (i_{d-1} + n_{d-1} (\ldots + n_2 i_1))$.
+@end tex
+@ifinfo
+id + nd * (id-1 + nd-1 * (... + n2 * i1)).
+@end ifinfo
+@ifhtml
+i<sub>d</sub> + n<sub>d</sub> * (i<sub>d-1</sub> + n<sub>d-1</sub> * (... + n<sub>2</sub> * i<sub>1</sub>)).
+@end ifhtml
+
+Note that, for the ordinary complex DFT, each element of the array
+must be of type @code{fftw_complex}; i.e. a (real, imaginary) pair of
+(double-precision) numbers. 
+
+In the advanced FFTW interface, the physical dimensions @math{n}
+above, from which the indices are computed, can be different from
+(bigger than) the logical dimensions of the transform to be computed,
+in order to transform a subset of a larger array.
+@cindex advanced interface
+Note also that, in the advanced interface, the expression above is
+multiplied by a @dfn{stride} to get the actual array index---this is
+useful in situations where each element of the multi-dimensional array
+is actually a data structure (or another array), and you just want to
+transform a single field. In the basic interface, however, the stride
+is 1.
+@cindex stride
+
+@node Column-major Format, Static Arrays in C, Row-major Format, Multi-dimensional Array Format
+@subsection Column-major Format
+@cindex column-major
+
+Readers from the Fortran world are used to arrays stored in
+@dfn{column-major} order (sometimes called ``Fortran order'').  This is
+essentially the exact opposite of row-major order in that, here, the
+@emph{first} dimension's index varies most quickly.
+
+If you have an array stored in column-major order and wish to
+transform it using FFTW, it is quite easy to do.  When creating the
+plan, simply pass the dimensions of the array to the planner in
+@emph{reverse order}.  For example, if your array is a rank three
+@code{N x M x L} matrix in column-major order, you should pass the
+dimensions of the array as if it were an @code{L x M x N} matrix
+(which it is, from the perspective of FFTW).  This is done for you
+@emph{automatically} by the FFTW Fortran wrapper routines
+(@pxref{Calling FFTW from Fortran}).
+@cindex Fortran-callable wrappers
+
+@node Static Arrays in C, Dynamic Arrays in C, Column-major Format, Multi-dimensional Array Format
+@subsection Static Arrays in C
+@cindex C multi-dimensional arrays
+
+Multi-dimensional arrays declared statically (that is, at compile time,
+not necessarily with the @code{static} keyword) in C are @emph{already}
+in row-major order.  You don't have to do anything special to transform
+them.  For example:
+
+@example
+@{
+     fftw_complex data[NX][NY][NZ];
+     fftw_plan plan;
+     ...
+     plan = fftw_plan_dft_3d(NX, NY, NZ, &data[0][0][0], &data[0][0][0],
+                             FFTW_FORWARD, FFTW_ESTIMATE);
+     ...
+@}
+@end example
+
+This will plan a 3d in-place transform of size @code{NX x NY x NZ}.
+Notice how we took the address of the zero-th element to pass to the
+planner (we could also have used a typecast).
+
+However, we tend to @emph{discourage} users from declaring their
+arrays statically in this way, for two reasons.  First, this allocates
+the array on the stack, which has a very limited size on most
+operating systems (declaring an array with more than a few thousand
+elements will often cause a crash).  Second, it may not optimally
+align the array if you link with a SIMD FFTW (@pxref{SIMD alignment
+and fftw_malloc}).  Instead, we recommend using @code{fftw_malloc}, as
+described below.
+
+@node Dynamic Arrays in C, Dynamic Arrays in C-The Wrong Way, Static Arrays in C, Multi-dimensional Array Format
+@subsection Dynamic Arrays in C
+
+We recommend allocating most arrays dynamically, with
+@code{fftw_malloc}.  This isn't too hard to do, although it is not as
+straightforward for multi-dimensional arrays as it is for
+one-dimensional arrays.
+
+Creating the array is simple: using a dynamic-allocation routine like
+@code{fftw_malloc}, allocate an array big enough to store the N
+@code{fftw_complex} values (for a complex DFT), where N is the product
+of the sizes of the array dimensions (i.e. the total number of complex
+values in the array).  For example, here is code to allocate a 5x12x27
+rank 3 array:
+@findex fftw_malloc
+
+@example
+fftw_complex *an_array;
+
+an_array = (fftw_complex *) fftw_malloc(5 * 12 * 27 * sizeof(fftw_complex));
+@end example
+
+Accessing the array elements, however, is more tricky---you can't simply
+use multiple applications of the @samp{[]} operator like you could for
+static arrays.  Instead, you have to explicitly compute the offset into
+the array using the formula given earlier for row-major arrays.  For
+example, to reference the @math{(i,j,k)}-th element of the array
+allocated above, you would use the expression @code{an_array[k + 27 * (j
++ 12 * i)]}.
+
+This pain can be alleviated somewhat by defining appropriate macros,
+or, in C++, creating a class and overloading the @samp{()} operator.
+The recent C99 standard provides a way to dynamically reinterpret the
+array as a static-like multi-dimensional array amenable to @samp{[]},
+but this feature is not yet widely supported by compilers.
+
+@node Dynamic Arrays in C-The Wrong Way,  , Dynamic Arrays in C, Multi-dimensional Array Format
+@subsection Dynamic Arrays in C---The Wrong Way
+
+A different method for allocating multi-dimensional arrays in C is
+often suggested that is incompatible with FFTW: @emph{using it will
+cause FFTW to die a painful death}.  We discuss the technique here,
+however, because it is so commonly known and used.  This method is to
+create arrays of pointers of arrays of pointers of @dots{}etcetera.
+For example, the analogue in this method to the example above is:
+
+@example
+int i,j;
+fftw_complex ***a_bad_array;  /* another way to make a 5x12x27 array */
+
+a_bad_array = (fftw_complex ***) malloc(5 * sizeof(fftw_complex **));
+for (i = 0; i < 5; ++i) @{
+     a_bad_array[i] = 
+        (fftw_complex **) malloc(12 * sizeof(fftw_complex *));
+     for (j = 0; j < 12; ++j)
+          a_bad_array[i][j] =
+                (fftw_complex *) malloc(27 * sizeof(fftw_complex));
+@}
+@end example
+
+As you can see, this sort of array is inconvenient to allocate (and
+deallocate).  On the other hand, it has the advantage that the
+@math{(i,j,k)}-th element can be referenced simply by
+@code{a_bad_array[i][j][k]}.
+
+If you like this technique and want to maximize convenience in accessing
+the array, but still want to pass the array to FFTW, you can use a
+hybrid method.  Allocate the array as one contiguous block, but also
+declare an array of arrays of pointers that point to appropriate places
+in the block.  That sort of trick is beyond the scope of this
+documentation; for more information on multi-dimensional arrays in C,
+see the @code{comp.lang.c}
+@uref{http://www.eskimo.com/~scs/C-faq/s6.html, FAQ}.
 
 @c ------------------------------------------------------------
 @node Words of Wisdom,  , Multi-dimensional Array Format, Other Stuff You Should Know
