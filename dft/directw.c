@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: directw.c,v 1.1 2003-05-15 23:09:07 athena Exp $ */
+/* $Id: directw.c,v 1.2 2003-05-26 14:21:22 athena Exp $ */
 
 /* direct DFTW solver, if we have a codelet */
 
@@ -87,10 +87,6 @@ static int applicable0(const solver *ego_, const problem *p_,
 
 	       && p->dec == ego->dec
 	       && p->r == e->radix
-
-	       /* in-place only */
-	       && p->s == p->ws
-	       && p->vs == p->wvs
 
 	       /* check for alignment/vector length restrictions */
 	       && (e->genus->okp(e, p->rio, p->iio,

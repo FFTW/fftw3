@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problemw.c,v 1.1 2003-05-15 23:09:07 athena Exp $ */
+/* $Id: problemw.c,v 1.2 2003-05-26 14:21:22 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -39,28 +39,26 @@ static void hash(const problem *p_, md5 *m)
      X(md5int)(m, p->r);
      X(md5int)(m, p->m);
      X(md5int)(m, p->s);
-     X(md5int)(m, p->ws);
      X(md5int)(m, p->vl);
      X(md5int)(m, p->vs);
-     X(md5int)(m, p->wvs);
 }
 
 static void print(problem *ego_, printer *p)
 {
      const problem_dftw *ego = (const problem_dftw *) ego_;
-     p->print(p, "(dftw %s %d %td (%d %d %d %d) (%d %d %d))", 
+     p->print(p, "(dftw %s %d %td (%d %d %d) (%d %d))", 
 	      ego->dec == DECDIF ? "dif" : "dit",
 	      X(alignment_of)(ego->rio),
 	      ego->iio - ego->rio, 
-	      ego->r, ego->m, ego->s, ego->ws,
-	      ego->vl, ego->vs, ego->wvs);
+	      ego->r, ego->m, ego->s,
+	      ego->vl, ego->vs);
 }
 
 static void zero(const problem *ego_)
 {
      const problem_dftw *ego = (const problem_dftw *) ego_;
-     tensor *sz0 = X(mktensor_1d)(ego->m * ego->r, ego->s, ego->ws);
-     tensor *sz1 = X(mktensor_1d)(ego->vl, ego->vs, ego->wvs);
+     tensor *sz0 = X(mktensor_1d)(ego->m * ego->r, ego->s, ego->s);
+     tensor *sz1 = X(mktensor_1d)(ego->vl, ego->vs, ego->vs);
      tensor *sz = X(tensor_append)(sz1, sz0);
      X(dft_zerotens)(sz, UNTAINT(ego->rio), UNTAINT(ego->iio));
      X(tensor_destroy2)(sz0, sz1);
@@ -80,9 +78,7 @@ int X(problem_dftw_p)(const problem *p)
      return (p->adt == &padt);
 }
 
-problem *X(mkproblem_dftw)(int dec, int r, int m, 
-			   int s, int ws,
-			   int vl, int vs, int wvs,
+problem *X(mkproblem_dftw)(int dec, int r, int m, int s, int vl, int vs, 
 			   R *rio, R *iio)
 {
      problem_dftw *ego =
@@ -93,8 +89,8 @@ problem *X(mkproblem_dftw)(int dec, int r, int m,
 			    canonicalizing to problem_dft? */
 
      ego->dec = dec;
-     ego->r = r; ego->m = m; ego->s = s; ego->ws = ws;
-     ego->vl = vl; ego->vs = vs; ego->wvs = wvs;
+     ego->r = r; ego->m = m; ego->s = s;
+     ego->vl = vl; ego->vs = vs;
 
      ego->rio = rio;
      ego->iio = iio;

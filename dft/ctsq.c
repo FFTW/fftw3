@@ -18,103 +18,93 @@
  *
  */
 
-/* $Id: ctsq.c,v 1.2 2003-05-17 11:01:42 athena Exp $ */
+/* $Id: ctsq.c,v 1.3 2003-05-26 14:21:22 athena Exp $ */
 
-/* special ``square transpose'' in-place cooley-tukey solver */
-/* FIXME: do out-of-place too? */
+/* special ``square transpose'' cooley-tukey solver for in-place problems */
 #include "dft.h"
 
 typedef struct {
      solver super;
+     const ct_desc *desc;
+     kdftwsq k;
      int dec;
 } S;
 
 typedef struct {
      plan_dft super;
+     kdftwsq k;
+     twid *td;
      plan *cld;
-     plan *cldw;
+     stride ios, vs;
+     int m, r, dist;
      const S *slv;
-     int r;
 } P;
-
-#if 0
-static void apply_dit(const plan *ego_, R *ri, R *ii, R *ro, R *io)
-{
-     const P *ego = (const P *) ego_;
-     plan_dft *cld;
-     plan_dftw *cldw;
-
-     cld = (plan_dft *) ego->cld;
-     cld->apply(ego->cld, ri, ii, ro, io);
-
-     cldw = (plan_dftw *) ego->cldw;
-     cldw->apply(ego->cldw, ro, io);
-}
-#endif
 
 static void apply_dif(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
-     plan_dftw *cldw;
 
-     cldw = (plan_dftw *) ego->cldw;
-     cldw->apply(ego->cldw, ri, ii);
+     UNUSED(ro);  /* == ri */
+     UNUSED(io);  /* == ii */
+     ego->k(ri, ii, ego->td->W, ego->ios, ego->vs, ego->m, ego->dist);
 
      cld = (plan_dft *) ego->cld;
-     cld->apply(ego->cld, ri, ii, ro, io);
+     cld->apply(ego->cld, ri, ii, ri, ii);
 }
 
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
      AWAKE(ego->cld, flg);
-     AWAKE(ego->cldw, flg);
+     X(twiddle_awake)(flg, &ego->td, ego->slv->desc->tw, 
+		      ego->r * ego->m, ego->r, ego->m);
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy_internal)(ego->cldw);
      X(plan_destroy_internal)(ego->cld);
+     X(stride_destroy)(ego->ios);
+     X(stride_destroy)(ego->vs);
 }
 
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dft-ctsq-%s/%d%(%p%)%(%p%))",
-	      ego->slv->dec == DECDIT ? "dit" : "dif",
-	      ego->r, ego->cldw, ego->cld);
+     const S *slv = ego->slv;
+     const ct_desc *e = slv->desc;
+
+     p->print(p, "(dft-ctsq-%s/%d \"%s\"%(%p%))",
+	      slv->dec == DECDIT ? "dit" : "dif",
+	      ego->r, e->nam, ego->cld);
 }
 
 #define divides(a, b) (((int)(b) % (int)(a)) == 0)
 static int applicable(const S *ego, const problem *p_, planner *plnr)
 {
-     UNUSED(ego); UNUSED(plnr);
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
+          const ct_desc *e = ego->desc;
           iodim *d = p->sz->dims, *vd = p->vecsz->dims;
 
-	  /* 
-	     FIXME: these conditions are too strong.  In principle,
-	     the dftw problem can always be transposed.  In practice,
-	     we currently have no way to deal with general transpositions. 
-	  */
-	     
           return (1
-
                   && p->ri == p->ro  /* inplace only */
                   && p->sz->rnk == 1
                   && p->vecsz->rnk == 1
 
-		  /* radix == vd[0].n */
-		  && d[0].n > vd[0].n
-                  && divides(vd[0].n, d[0].n)
+		  && d[0].n > e->radix
+                  && divides(e->radix, d[0].n)
 
-		  /* strides must be transposed */
+		  /* conditions for transposition */
+                  && vd[0].n == e->radix
                   && d[0].os == vd[0].is
-                  && d[0].is == vd[0].n * vd[0].is
-                  && vd[0].os == d[0].n * vd[0].is
+                  && d[0].is == (int)e->radix * vd[0].is
+                  && vd[0].os == (int)d[0].n * vd[0].is
+
+		  /* SIMD strides etc. */
+		  && (e->genus->okp(e, p->ri, p->ii, vd[0].os, vd[0].is, 
+				    d[0].n / e->radix, d[0].is, plnr))
 	       );
      }
      return 0;
@@ -126,9 +116,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      const problem_dft *p;
      P *pln = 0;
-     plan *cld = 0, *cldw = 0;
+     plan *cld = 0;
      iodim *d, *vd;
-     int n, r, m;
+     const ct_desc *e = ego->desc;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -140,65 +130,58 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_dft *) p_;
      d = p->sz->dims;
      vd = p->vecsz->dims;
-     n = d[0].n;
-     r = vd[0].n;
-     m = n / r;
-
 
      switch (ego->dec) {
 	 case DECDIT:
 	 {
 	      A(0); /* not implemented */
 	 }
-
 	 case DECDIF:
 	 {
-	      cldw = X(mkplan_d)(
-		   plnr, 
-		   X(mkproblem_dftw)(DECDIF, r, m, d[0].is, d[0].os, 
-				     r, vd[0].is, vd[0].os,
-				     p->ri, p->ii) );
-	      if (!cldw) goto nada;
-
-	      cld = X(mkplan_d)(
-		   plnr, 
-		   X(mkproblem_dft_d)(
-			X(mktensor_1d)(m, d[0].is, d[0].is),
-			X(mktensor_2d)(r, vd[0].is, vd[0].is,
-				       r, vd[0].os, vd[0].os),
-			p->ro, p->io, p->ro, p->io));
+	      cld = X(mkplan_d)(plnr, 
+				X(mkproblem_dft_d)(
+				     X(mktensor_1d)(d[0].n / e->radix, 
+						    d[0].is, d[0].is),
+				     X(mktensor_2d)(vd[0].n, 
+						    vd[0].os, vd[0].os,
+						    e->radix, 
+						    vd[0].is,vd[0].is),
+				     p->ro, p->io, p->ro, p->io));
 	      if (!cld) goto nada;
 	      
 	      pln = MKPLAN_DFT(P, &padt, apply_dif);
+	      pln->ios = X(mkstride)(e->radix, vd[0].os);
+	      pln->vs = X(mkstride)(e->radix, vd[0].is);
+	      pln->dist = d[0].is;
 	      break;
 	 }
 
 	 default: A(0);
-	      
      }
 
      pln->cld = cld;
-     pln->cldw = cldw;
      pln->slv = ego;
-     pln->r = r;
-     X(ops_add)(&cld->ops, &cldw->ops, &pln->super.super.ops);
+     pln->r = e->radix;
+     pln->m = d[0].n / pln->r;
+     pln->td = 0;
+     pln->k = ego->k;
+
+     X(ops_madd)(pln->m / e->genus->vl, &e->ops, &cld->ops,
+		 &pln->super.super.ops);
      return &(pln->super.super);
 
  nada:
-     X(plan_destroy_internal)(cldw);
      X(plan_destroy_internal)(cld);
      return (plan *) 0;
 }
 
-static solver *mksolver(int dec)
+solver *X(mksolver_dftsq)(kdftwsq codelet, const ct_desc *desc, int dec)
 {
      static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
+     slv->k = codelet;
+     slv->desc = desc;
      slv->dec = dec;
      return &(slv->super);
 }
 
-void X(dft_ctsq_register)(planner *p)
-{
-     REGISTER_SOLVER(p, mksolver(DECDIF));
-}

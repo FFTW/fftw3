@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.37 2003-05-16 17:02:06 athena Exp $ */
+/* $Id: dft.h,v 1.38 2003-05-26 14:21:22 athena Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -51,17 +51,15 @@ typedef struct {
 #    define DECDIT 1
 
      int r, m;
-     int s;  /* stride on the side without twiddles */
-     int ws; /* stride on the side with twiddles */
-     int vl, vs, wvs;
+     int s;
+     int vl, vs;
      R *rio, *iio;
 } problem_dftw;
 
 int X(problem_dftw_p)(const problem *p);
 #define DFTWP X(problem_dftw_p)  /* shorthand */
 
-problem *X(mkproblem_dftw)(int dec, int r, int m, 
-			   int s, int ws, int vl, int vs, int wvs,
+problem *X(mkproblem_dftw)(int dec, int r, int m, int s, int vl, int vs, 
 			   R *rio, R *iio);
 
 /* solve.c: */
@@ -96,9 +94,7 @@ solver *X(mksolver_dft_direct)(kdft k, const kdft_desc *desc);
 solver *X(mksolver_dft_directw)(kdftw codelet, const ct_desc *desc, int dec);
 solver *X(mksolver_dft_directwbuf)(kdftw codelet, 
 				   const ct_desc *desc, int dec);
-solver *X(mksolver_dft_directwsq)(kdftwsq codelet,
-				  const ct_desc *desc, int dec);
-
+solver *X(mksolver_dftsq)(kdftwsq codelet, const ct_desc *desc, int dec);
 
 extern void (*X(kdft_dit_register_hook))(planner *, kdftw, const ct_desc *);
 extern void (*X(kdft_dif_register_hook))(planner *, kdftw, const ct_desc *);

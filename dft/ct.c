@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.38 2003-05-24 19:00:53 athena Exp $ */
+/* $Id: ct.c,v 1.39 2003-05-26 14:21:22 athena Exp $ */
 
 #include "dft.h"
 
@@ -201,8 +201,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	 {
 	      cldw = X(mkplan_d)(plnr, 
 				 X(mkproblem_dftw)(DECDIT, r, m, 
-						   d[0].os, d[0].os, 
-						   vl, ovs, ovs,
+						   d[0].os, vl, ovs,
 						   p->ro, p->io) );
 	      if (!cldw) goto nada;
 
@@ -224,8 +223,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	 {
 	      cldw = X(mkplan_d)(plnr, 
 				 X(mkproblem_dftw)(DECDIF, r, m, 
-						   d[0].is, d[0].is, 
-						   vl, ivs, ivs, 
+						   d[0].is, vl, ivs,
 						   p->ri, p->ii) );
 	      if (!cldw) goto nada;
 
