@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.127 2003-03-12 04:50:43 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.128 2003-03-12 05:06:34 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2730,7 +2730,7 @@ output.  (The frequency @math{-k/n} is the same as the frequency
 @subsection The 1d Real-data DFT
 
 The real-input (r2c) DFT in FFTW computes the @emph{forward} transform
-@math{Y} of the size-n @code{n} real array @math{X}, exactly as defined
+@math{Y} of the size @code{n} real array @math{X}, exactly as defined
 above, i.e.
 @tex
 $$
