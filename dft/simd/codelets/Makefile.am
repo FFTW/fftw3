@@ -17,7 +17,6 @@ t1fv_9.c t1fv_10.c t1fv_12.c t1fv_15.c t1fv_16.c t1fv_32.c t1fv_64.c
 T1B = t1bv_2.c t1bv_3.c t1bv_4.c t1bv_5.c t1bv_6.c t1bv_7.c t1bv_8.c	\
 t1bv_9.c t1bv_10.c t1bv_12.c t1bv_15.c t1bv_16.c t1bv_32.c t1bv_64.c
 
-if FRANZ_MODE
 SN1F = sn1fv_2_4_2.c sn1fv_2_8_2.c sn1fv_2_16_2.c sn1fv_2_32_2.c	\
 sn1fv_2_64_2.c sn1fv_2_128_2.c sn1fv_2_256_2.c sn1fv_2_512_2.c		\
 sn1fv_2_1024_2.c sn1fv_4_4_2.c sn1fv_4_8_2.c sn1fv_4_16_2.c		\
@@ -52,15 +51,11 @@ st1fv_64_512.c st1fv_64_1024.c
 ST1FCOD = st1fv_16.cod st1fv_2.cod st1fv_32.cod st1fv_4.cod	\
 st1fv_64.cod st1fv_8.cod
 
-FRANZ_CODELETS = $(SN1F) $(ST1F)
-FRANZ_EXTRA = $(SN1FCOD) $(ST1FCOD)
-
-else
+#FRANZ_CODELETS = $(SN1F) $(ST1F)
+#FRANZ_EXTRA = $(SN1FCOD) $(ST1FCOD)
 
 FRANZ_CODELETS =
 FRANZ_EXTRA =
-
-endif
 
 SIMD_CODELETS = $(N1F) $(N1B) $(T1F) $(T1B) $(FRANZ_CODELETS)
 

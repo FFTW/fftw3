@@ -79,9 +79,6 @@ if test "$have_3dnow" = "yes"; then
 	have_simd="yes"
 fi
 
-AC_ARG_ENABLE(franz-mode, [AC_HELP_STRING([--enable-franz-mode],[don't use unless you are Franz])], franz_mode=$enableval, franz_mode=no)
-AM_CONDITIONAL(FRANZ_MODE, test "$franz_mode" = "yes")
-
 if test "$PRECISION" = "l" && test "$have_simd" = "yes"; then
 	AC_MSG_ERROR([cannot use SIMD optimizations with long double])
 fi
