@@ -121,6 +121,11 @@ union dvec {
      V v;
 };
 
+union uvec {
+     unsigned u[4];
+     V v;
+};
+
 static __inline__ V LDA(const R *x, int ivs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
@@ -146,7 +151,7 @@ static __inline__ V FLIP_RI(V x)
      return SHUFPD(x, x, 1);
 }
 
-extern const union dvec X(sse2_mp);
+extern const union uvec X(sse2_mp);
 static __inline__ V CHS_R(V x)
 {
      return VXOR(X(sse2_mp).v, x);

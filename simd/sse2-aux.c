@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse2-aux.c,v 1.2 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: sse2-aux.c,v 1.3 2005-03-18 00:20:54 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -29,6 +29,13 @@
    misaligns the following vector.  The alignment is correct
    if we put the declaration in a separate file */
 
+#if 0
+/* apparently, MSVC converts -0.0 to 0.0 */
 const union dvec X(sse2_mp) = { {-0.0, 0.0} };
+#endif
+
+const union uvec X(sse2_mp) = {
+     { 0x80000000, 0x00000000, 0x80000000, 0x00000000 }
+};
 #endif
 
