@@ -36,6 +36,7 @@ printer *X(mkprinter_cnt)(uint *cnt)
 {
      P_cnt *p = (P_cnt *) X(mkprinter)(sizeof(P_cnt), putchr_cnt);
      p->cnt = cnt;
+     *cnt = 0;
      return &p->super;
 }
 
@@ -70,7 +71,7 @@ char *X(export_wisdom_to_string)(void)
      plnr->adt->exprt(plnr, p);
      X(printer_destroy)(p);
 
-     s = (char *) non_fftw_malloc(sizeof(char) * cnt, OTHER);
+     s = (char *) non_fftw_malloc(sizeof(char) * (cnt + 1), OTHER);
 
      p = X(mkprinter_str)(s);
      plnr->adt->exprt(plnr, p);
