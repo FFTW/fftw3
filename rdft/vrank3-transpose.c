@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.22 2005-02-19 21:55:29 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.23 2005-02-19 22:15:19 athena Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -544,88 +544,9 @@ static int transpose_simplep(planner *plnr, const problem_rdft *p,
 }
 
 /*-----------------------------------------------------------------------*/
-/* simple double-loop square transpose of vector-length 1, no buffers */
-
-static void apply_simple(const plan *ego_, R *I, R *O)
-{
-     const P *ego = (const P *) ego_;
-     int n = ego->n;
-     int s0 = ego->s0, s1 = ego->s1;
-     int i, j;
-     A(n == ego->m && ego->vl == 1);
-     UNUSED(O);
-     for (i = 1; i < n; ++i) {
-          for (j = 0; j < i; ++j) {
-	       R *p0 = I + i * s0 + j * s1;
-	       R *p1 = I + j * s0 + i * s1;
-	       R t0 = p0[0];
-	       p0[0] = p1[0];
-	       p1[0] = t0;
-          }
-     }
-}
-
-static int applicable_simple(const problem_rdft *p, 
-			     planner *plnr,
-			     int dim0, int dim1, int dim2, int *nbuf)
-{
-     *nbuf = 0;
-     return (p->vecsz->rnk == 2
-	     && transpose_simplep(plnr, p, dim0, dim1, dim2)
-	  );
-}
-
-static const transpose_adt adt_simple =
-{
-     apply_simple, applicable_simple,
-     "rdft-transpose-simple"
-};
-
-/*-----------------------------------------------------------------------*/
-/* simple double-loop square transpose of consecutive pairs, no buffers */
-
-static void apply_simple_consecpairs(const plan *ego_, R *I, R *O)
-{
-     const P *ego = (const P *) ego_;
-     int n = ego->n;
-     int s0 = ego->s0, s1 = ego->s1;
-     int i, j;
-     A(n == ego->m && ego->vl == 2 && ego->vs == 1);
-     UNUSED(O);
-     for (i = 1; i < n; ++i) {
-          for (j = 0; j < i; ++j) {
-	       R *p0 = I + i * s0 + j * s1;
-	       R *p1 = I + j * s0 + i * s1;
-	       R t0 = p0[0], t1 = p0[1];
-	       p0[0] = p1[0];
-	       p0[1] = p1[1];
-	       p1[0] = t0;
-	       p1[1] = t1;
-          }
-     }
-}
-
-static int applicable_simple_consecpairs(const problem_rdft *p, planner *plnr,
-			   int dim0, int dim1, int dim2, int *nbuf)
-{
-     if (nbuf) *nbuf = 0;
-     return (p->vecsz->rnk == 3
-	     && transpose_simplep(plnr, p, dim0, dim1, dim2)
-	     && p->vecsz->dims[dim2].n == 2
-	     && p->vecsz->dims[dim2].is == 1
-	  );
-}
-
-static const transpose_adt adt_simple_consecpairs =
-{
-     apply_simple_consecpairs, applicable_simple_consecpairs,
-     "rdft-transpose-simple-consecpairs"
-};
-
-/*-----------------------------------------------------------------------*/
 /* simple triple-loop square transpose of vectors, no buffers */
 
-static void apply_simple_vec(const plan *ego_, R *I, R *O)
+static void apply_simple(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      int n = ego->n;
@@ -634,35 +555,65 @@ static void apply_simple_vec(const plan *ego_, R *I, R *O)
      int i, j, iv;
      A(n == ego->m);
      UNUSED(O);
-     for (i = 1; i < n; ++i) {
-          for (j = 0; j < i; ++j) {
-	       R *p0 = I + i * s0 + j * s1;
-	       R *p1 = I + j * s0 + i * s1;
-	       for (iv = 0; iv < vl; ++iv) {
-		    R t0 = p0[0];
-		    p0[0] = p1[0]; p0 += vs;
-		    p1[0] = t0; p1 += vs;
-	       }
-          }
+     switch (vl) {
+	 case 1:
+	      for (i = 1; i < n; ++i) {
+		   for (j = 0; j < i; ++j) {
+			R *p0 = I + i * s0 + j * s1;
+			R *p1 = I + j * s0 + i * s1;
+			R t0 = p0[0];
+			R r0 = p1[0];
+			p0[0] = r0;
+			p1[0] = t0;
+		   }
+	      }
+	      break;
+	 case 2:
+	      for (i = 1; i < n; ++i) {
+		   for (j = 0; j < i; ++j) {
+			R *p0 = I + i * s0 + j * s1;
+			R *p1 = I + j * s0 + i * s1;
+			R t0 = p0[0];
+			R t1 = p0[vs];
+			R r0 = p1[0];
+			R r1 = p1[vs];
+			p0[0] = r0;
+			p0[vs] = r1;
+			p1[0] = t0;
+			p1[vs] = t1;
+		   }
+	      }
+	      break;
+	 default:
+	      for (i = 1; i < n; ++i) {
+		   for (j = 0; j < i; ++j) {
+			R *p0 = I + i * s0 + j * s1;
+			R *p1 = I + j * s0 + i * s1;
+			for (iv = 0; iv < vl; ++iv) {
+			     R t0 = p0[0];
+			     R r0 = p1[0];
+			     p0[0] = r0; p0 += vs;
+			     p1[0] = t0; p1 += vs;
+			}
+		   }
+	      }
+	      break;
      }
 }
 
-static int applicable_simple_vec(const problem_rdft *p, planner *plnr,
+static int applicable_simple(const problem_rdft *p, planner *plnr,
 				 int dim0, int dim1, int dim2, int *nbuf)
 {
      *nbuf = 0;
-     return (p->vecsz->rnk == 3
+     return (1
+	     && (p->vecsz->rnk == 2 || p->vecsz->rnk == 3)
 	     && transpose_simplep(plnr, p, dim0, dim1, dim2)
-	     && (!NO_UGLYP(plnr)
-		 || !applicable_simple_consecpairs(p, plnr,
-						   dim0, dim1, dim2, 0))
 	  );
 }
 
-static const transpose_adt adt_simple_vec =
+static const transpose_adt adt_simple =
 {
-     apply_simple_vec, applicable_simple_vec,
-     "rdft-transpose-simple-vec"
+     apply_simple, applicable_simple, "rdft-transpose-simple"
 };
 
 /*-----------------------------------------------------------------------*/
@@ -868,8 +819,7 @@ void X(rdft_vrank3_transpose_register)(planner *p)
 {
      unsigned i;
      static const transpose_adt *const adts[] = {
-	  &adt_simple, &adt_simple_consecpairs, &adt_simple_vec,
-	  &adt_recsq, &adt_gcd, &adt_cut, &adt_toms513
+	  &adt_simple, &adt_recsq, &adt_gcd, &adt_cut, &adt_toms513
      };
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
           REGISTER_SOLVER(p, mksolver(adts[i]));
