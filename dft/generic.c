@@ -26,63 +26,44 @@ typedef struct {
 
 typedef struct {
      plan_dft super;
-     plan *cld;
      twid *td;
-     int os;
-     int r, m;
+     int n, is, os;
 } P;
 
-/***************************************************************************/
+
+static void cdot(int n,
+		 const R *xr, const R *xi, int xs,
+		 const R *w, int i,
+		 R *or, R *oi)
+{
+     int i0 = 0, n0 = n;
+
+     E rr = *xr, ri = 0, ir = *xi, ii = 0;
+     while (--n) {
+	  xr += xs; xi += xs;
+	  i0 += i; i0 -= (i0 >= n0) * n0;
+	  rr += *xr * w[2*i0];
+	  ri += *xr * w[2*i0+1];
+	  ii += *xi * w[2*i0+1];
+	  ir += *xi * w[2*i0];
+     }
+     *or = rr - ii;
+     *oi = ri + ir;
+}
 
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
-     int n, m, r, j;
-     int os, osm;
-     E *buf;
-     const R *W;
+     int i;
+     int n = ego->n, is = ego->is, os = ego->os;
+     const R *W = ego->td->W;
 
-     {
-	  plan_dft *cld = (plan_dft *) ego->cld;
-	  cld->apply((plan *) cld, ri, ii, ro, io);
-     }
-
-     r = ego->r;
-
-     STACK_MALLOC(E *, buf, r * 2 * sizeof(E));
-     
-     osm = (m = ego->m) * (os = ego->os);
-     n = m * r;
-     W = ego->td->W;
-     for (j = 0; j < m; ++j, ro += os, io += os) {
-	  int k;
-	  for (k = 0; k < r; ++k) {
-	       E rb = ro[0], ib = io[0];
-	       int i, iw, iw_inc = j + m * k;
-	       for (i = 1, iw = iw_inc; i < r; ++i) {
-		    E xr = ro[i*osm], xi = io[i*osm];
-		    E wr = W[2*iw], wi = W[2*iw+1];
-		    /* note that W[iw] is the product of the DIT twiddle
-		       factor and the size-r DFT twiddle factor */
-		    rb += xr * wr - xi * wi;
-		    ib += xr * wi + xi * wr;
-		    iw += iw_inc;
-		    if (iw >= n)
-			 iw -= n;
-	       }
-	       buf[2*k] = rb;
-	       buf[2*k+1] = ib;
-	  }
-	  for (k = 0; k < r; ++k) {
-	       ro[k*osm] = buf[2*k];
-	       io[k*osm] = buf[2*k+1];
-	  }
-     }
-
-     STACK_FREE(buf);
+     for (i = 0; i < n; ++i) 
+	  cdot(n,
+	       ri, ii, is,
+	       W, i,
+	       ro + i * os, io + i * os);
 }
-
-/***************************************************************************/
 
 static void awake(plan *ego_, int flg)
 {
@@ -92,22 +73,14 @@ static void awake(plan *ego_, int flg)
 	  { TW_NEXT, 1, 0 }
      };
 
-     AWAKE(ego->cld, flg);
-     X(twiddle_awake)(flg, &ego->td, generic_tw,
-		      ego->r * ego->m, ego->r, ego->m);
-}
-
-static void destroy(plan *ego_)
-{
-     P *ego = (P *) ego_;
-     X(plan_destroy_internal)(ego->cld);
+     X(twiddle_awake)(flg, &ego->td, generic_tw, ego->n, 1, ego->n);
 }
 
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
 
-     p->print(p, "(dft-generic-dit-%d%(%p%))", ego->r, ego->cld);
+     p->print(p, "(dft-generic-%d)", ego->n);
 }
 
 static int applicable0(const problem *p_)
@@ -115,9 +88,10 @@ static int applicable0(const problem *p_)
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
           return (1
-	       && p->sz->rnk == 1
-	       && p->vecsz->rnk == 0
-	       && p->sz->dims[0].n > 1
+		  && p->sz->rnk == 1
+		  && p->vecsz->rnk == 0
+		  && p->ri != p->ro  /* out of place only */
+		  && X(is_prime)(p->sz->dims[0].n)
 	       );
      }
 
@@ -133,7 +107,7 @@ static int applicable(const solver *ego, const problem *p_,
 
      if (NO_LARGE_GENERICP(plnr)) {
           const problem_dft *p = (const problem_dft *) p_;
-	  if (X(first_divisor)(p->sz->dims[0].n) >= GENERIC_MIN_BAD) return 0; 
+	  if (p->sz->dims[0].n >= GENERIC_MIN_BAD) return 0; 
      }
      return 1;
 }
@@ -141,52 +115,29 @@ static int applicable(const solver *ego, const problem *p_,
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
-     P *pln = 0;
-     int n, r, m;
-     int is, os;
-     plan *cld = (plan *) 0;
+     P *pln;
+     int n;
 
      static const plan_adt padt = {
-	  X(dft_solve), awake, print, destroy
+	  X(dft_solve), awake, print, X(plan_null_destroy)
      };
 
      if (!applicable(ego, p_, plnr))
-          goto nada;
-
-     n = p->sz->dims[0].n;
-     is = p->sz->dims[0].is;
-     os = p->sz->dims[0].os;
-
-     r = X(first_divisor)(n);
-     m = n / r;
-
-     cld = X(mkplan_d)(plnr, 
-		       X(mkproblem_dft_d)(X(mktensor_1d)(m, r * is, os),
-					  X(mktensor_1d)(r, is, m * os),
-					  p->ri, p->ii, p->ro, p->io));
-     if (!cld) goto nada;
+          return (plan *)0;
 
      pln = MKPLAN_DFT(P, &padt, apply);
 
-     pln->os = os;
-     pln->r = r;
-     pln->m = m;
-     pln->cld = cld;
+     pln->n = n = p->sz->dims[0].n;
+     pln->is = p->sz->dims[0].is;
+     pln->os = p->sz->dims[0].os;
      pln->td = 0;
 
      X(ops_zero)(&pln->super.super.ops);
-     pln->super.super.ops.add = 4 * r * (r-1);
-     pln->super.super.ops.mul = 4 * r * (r-1);
-     /* loads + stores, minus loads + stores for all DIT codelets */
-     pln->super.super.ops.other = 4 * r + 4 * r * r - (6*r - 2);
-     X(ops_madd)(m, &pln->super.super.ops, &cld->ops, &pln->super.super.ops);
+     pln->super.super.ops.add = 4 * n * (n - 1);
+     pln->super.super.ops.mul = 4 * n * (n - 1);
+     pln->super.super.ops.other = 4 * n * n;
 
      return &(pln->super.super);
-
- nada:
-     X(plan_destroy_internal)(cld);
-     X(ifree0)(pln);
-     return (plan *) 0;
 }
 
 /* constructors */
