@@ -12,7 +12,7 @@ $(CODLIST): Makefile
 	echo;								\
 	for i in $(ALL_CODELETS) NIL; do				\
 	   if test "$$i" != NIL; then					\
-	     j=`echo $$i | sed -e 's/[.][cS]$$//g'`;			\
+	     j=`basename $$i | sed -e 's/[.][cS]$$//g'`;		\
              echo "extern void X($(CODELET_NAME)$$j)(planner *);";	\
            fi								\
 	done;								\
@@ -21,7 +21,7 @@ $(CODLIST): Makefile
 	echo "const solvtab $(SOLVTAB_NAME) = {";			\
 	for i in $(ALL_CODELETS) NIL; do				\
 	   if test "$$i" != NIL; then					\
-	     j=`echo $$i | sed -e 's/[.][cS]$$//g'`;			\
+	     j=`basename $$i | sed -e 's/[.][cS]$$//g'`;		\
 	     echo "   SOLVTAB(X($(CODELET_NAME)$$j)),";			\
 	   fi								\
 	done;								\
