@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.26 2003-01-16 06:03:31 stevenj Exp $ */
+/* $Id: alloc.c,v 1.27 2003-01-16 10:40:39 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -42,26 +42,31 @@ void *X(malloc)(size_t n)
 {
      void *p;
 
-#if defined(HAVE_MEMALIGN)
+#ifdef MIN_ALIGNMENT
+#  if defined(HAVE_MEMALIGN)
      p = memalign(MIN_ALIGNMENT, n);
-#elif defined(HAVE_POSIX_MEMALIGN)
+#  elif defined(HAVE_POSIX_MEMALIGN)
      /* note: posix_memalign is broken in glibc 2.2.5: it constrains
 	the size, not the alignment, to be (power of two) * sizeof(void*).
         The bug seems to have been fixed as of glibc 2.3.1. */
      if (posix_memalign(&p, MIN_ALIGNMENT, n))
 	  p = (void*) 0;
-#elif defined(__ICC) || defined(__INTEL_COMPILER) || defined(HAVE__MM_MALLOC)
+#  elif defined(__ICC) || defined(__INTEL_COMPILER) || defined(HAVE__MM_MALLOC)
      /* Intel's C compiler defines _mm_malloc and _mm_free intrinsics */
      p = (void *) _mm_malloc(n, MIN_ALIGNMENT);
 #    undef real_free
 #    define real_free _mm_free
-#elif defined(HAVE_SIMD) && defined(_MSC_VER)
+#  elif defined(HAVE_SIMD) && defined(_MSC_VER)
      /* MS Visual C++ 6.0 with a "Processor Pack" supports SIMD
 	and _aligned_malloc/free (uses malloc.h) */
      p = (void *) _aligned_malloc(n, MIN_ALIGNMENT);
 #    undef real_free
 #    define real_free _aligned_free
-#else
+#  else
+     /* Add your machine here and send a patch to fftw@fftw.org */
+#    error "Don't know how to malloc() aligned memory."
+#  endif
+#else /* !defined(MIN_ALIGMENT) */
      p = malloc(n);
 #endif
      return p;
@@ -313,7 +318,11 @@ void *X(malloc_plain)(size_t n)
           n = 1;
      p = real_malloc(n);
      CK(p);
+
+#ifdef MIN_ALIGMENT
      A((((long)p) % MIN_ALIGNMENT) == 0);
+#endif
+
      return p;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.172 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: ifftw.h,v 1.173 2003-01-16 10:40:39 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -97,7 +97,9 @@ extern void X(debug)(const char *format, ...);
 
 /*-----------------------------------------------------------------------*/
 /* alloc.c: */
+#if HAVE_SIMD
 #define MIN_ALIGNMENT 16
+#endif
 
 /* objects allocated by malloc, for statistical purposes */
 enum malloc_tag {
@@ -153,19 +155,22 @@ extern int X(in_thread);
 #endif /* HAVE_ALLOCA_H */
 
 #ifdef HAVE_ALLOCA
-/* use alloca if available */
-#define STACK_MALLOC(T, p, x)				\
-{							\
-     p = (T)alloca((x) + MIN_ALIGNMENT);		\
-     p = (T)(((unsigned long)p + (MIN_ALIGNMENT - 1)) &	\
-           (~(unsigned long)(MIN_ALIGNMENT - 1)));	\
-}
-#define STACK_FREE(x) 
-
+   /* use alloca if available */
+#  ifdef MIN_ALIGNMENT
+#    define STACK_MALLOC(T, p, x)				\
+     {								\
+         p = (T)alloca((x) + MIN_ALIGNMENT);			\
+         p = (T)(((unsigned long)p + (MIN_ALIGNMENT - 1)) &	\
+               (~(unsigned long)(MIN_ALIGNMENT - 1)));		\
+     }
+#  else /* HAVE_ALLOCA && !defined(MIN_ALIGNMENT) */
+#    define STACK_MALLOC(T, p, x) p = (T)alloca(x) 
+#    define STACK_FREE(x) 
+#  endif
 #else /* ! HAVE_ALLOCA */
-/* use malloc instead of alloca */
-#define STACK_MALLOC(T, p, x) p = (T)MALLOC(x, OTHER)
-#define STACK_FREE(x) X(ifree)(x)
+   /* use malloc instead of alloca */
+#  define STACK_MALLOC(T, p, x) p = (T)MALLOC(x, OTHER)
+#  define STACK_FREE(x) X(ifree)(x)
 #endif /* ! HAVE_ALLOCA */
 
 
