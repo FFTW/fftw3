@@ -92,6 +92,12 @@ static __inline__ V UNPCKH(V a, V b)
 #endif
 
 #if defined(__ICC) || defined(_MSC_VER) /* Intel's compiler for ia32 */
+
+/* some versions of glibc's sys/cdefs.h define __inline to be empty,
+   which is wrong because emmintrin.h defines several inline
+   procedures */
+#undef __inline
+
 #include <emmintrin.h>
 
 typedef __m128d V;

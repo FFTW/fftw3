@@ -104,6 +104,12 @@ static __inline__ void STOREL(R *addr, V val)
 #endif
 
 #if defined(__ICC) || defined(_MSC_VER) /* Intel's compiler for ia32 */
+
+/* some versions of glibc's sys/cdefs.h define __inline to be empty,
+   which is wrong because xmmintrin.h defines several inline
+   procedures */
+#undef __inline
+
 #include <xmmintrin.h>
 
 typedef __m128 V;
