@@ -475,7 +475,7 @@ static double rimpulse(dim_stuff *d, R impulse_amp,
 	  inA[i] = 0.0;
      }
      for (i = 0; i < vecn; ++i) {
-	  inA[i * n] = mydrand();
+	  inA[i * n] = (i+1) / (double)(vecn+1);
      
 	  /* transform of the pls */
 	  impulse_response(nfo->probsz->rnk, d, impulse_amp * inA[i * n],

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.17 2005-02-19 22:28:43 athena Exp $ */
+/* $Id: verify-lib.c,v 1.18 2005-02-19 22:57:44 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -294,15 +294,15 @@ double impulse(dofft_closure *k,
 
      /* check impulsive input */
      for (i = 0; i < vecn; ++i) {
-	  R xr = mydrand(), xi = 0;
+	  R x = (i+1) / (double)(vecn+1);
 	  for (j = 0; j < n; ++j) {
 	       c_re(inA[j + i * n]) = 0;
 	       c_im(inA[j + i * n]) = 0;
-	       c_re(outA[j + i * n]) = xr;
-	       c_im(outA[j + i * n]) = xi;
+	       c_re(outA[j + i * n]) = x;
+	       c_im(outA[j + i * n]) = 0;
 	  }
-	  c_re(inA[i * n]) = xr;
-	  c_im(inA[i * n]) = xi;
+	  c_re(inA[i * n]) = x;
+	  c_im(inA[i * n]) = 0;
      }
 
      e = dmax(e, impulse0(k, n, vecn, inA, inB, inC, outA, outB, outC,
@@ -310,15 +310,15 @@ double impulse(dofft_closure *k,
 
      /* check constant input */
      for (i = 0; i < vecn; ++i) {
-	  R xr = mydrand(), xi = 0;
+	  R x = (i+1) / (double)(vecn+1);
 	  for (j = 0; j < n; ++j) {
-	       c_re(inA[j + i * n]) = xr;
-	       c_im(inA[j + i * n]) = xi;
+	       c_re(inA[j + i * n]) = x;
+	       c_im(inA[j + i * n]) = 0;
 	       c_re(outA[j + i * n]) = 0;
 	       c_im(outA[j + i * n]) = 0;
 	  }
-	  c_re(outA[i * n]) = n * xr;
-	  c_im(outA[i * n]) = n * xi;
+	  c_re(outA[i * n]) = n * x;
+	  c_im(outA[i * n]) = 0;
      }
 
      e = dmax(e, impulse0(k, n, vecn, inA, inB, inC, outA, outB, outC,

@@ -12,6 +12,7 @@ $nthreads = 1;
 $rounds = 0;
 $maxsize = 60000;
 $maxcount = 100;
+$do_0d = 0;
 $do_1d = 0;
 $do_2d = 0;
 $do_random = 0;
@@ -120,6 +121,21 @@ sub do_size {
     do_geometry("r$size", $doablep);
 }
 
+sub small_0d {
+    for ($i = 0; $i <= 16; ++$i) {
+	for ($j = 0; $j <= 16; ++$j) {
+	    for ($vl = 1; $vl <= 5; ++$vl) {
+		my $ivl = $i * $vl;
+		my $jvl = $j * $vl;
+		do_problem("o1v${i}:${vl}:${jvl}x${j}:${ivl}:${vl}x${vl}:1:1", 1);
+		do_problem("i1v${i}:${vl}:${jvl}x${j}:${ivl}:${vl}x${vl}:1:1", 1);
+		do_problem("ok1v${i}:${vl}:${jvl}x${j}:${ivl}:${vl}x${vl}:1:1", 1);
+		do_problem("ik1v${i}:${vl}:${jvl}x${j}:${ivl}:${vl}x${vl}:1:1", 1);
+	    }
+	}
+    }
+}
+
 sub small_1d {
     do_size (0, 0);
     for ($i = 1; $i <= 100; ++$i) {
@@ -226,12 +242,13 @@ sub parse_arguments (@)
 	elsif ($arglist[0] =~ /^--count=(.+)$/) { $maxcount = $1; }
 	elsif ($arglist[0] =~ /^-c=(.+)$/) { $maxcount = $1; }
 	
+	elsif ($arglist[0] eq '-0d') { ++$do_0d; }
 	elsif ($arglist[0] eq '-1d') { ++$do_1d; }
 	elsif ($arglist[0] eq '-2d') { ++$do_2d; }
 	elsif ($arglist[0] eq '-r') { ++$do_random; }
 	elsif ($arglist[0] eq '--random') { ++$do_random; }
 	elsif ($arglist[0] eq '-a') { 
-	    ++$do_1d; ++$do_2d; ++$do_random; 
+	    ++$do_0d; ++$do_1d; ++$do_2d; ++$do_random; 
 	}
 
 	else { $program=$arglist[0]; }
@@ -244,6 +261,7 @@ sub parse_arguments (@)
 &parse_arguments (@ARGV);
 
 &random_tests if $do_random;
+&small_0d if $do_0d;
 &small_1d if $do_1d;
 &small_2d if $do_2d;
 
