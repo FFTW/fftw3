@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.43 2004-07-18 22:54:18 stevenj Exp $ */
+/* $Id: cycle.h,v 1.44 2004-11-13 18:43:01 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -247,6 +247,23 @@ INLINE_ELAPSED(__inline)
 /*
  * IA64 cycle counter
  */
+
+/* intel's icc/ecc compiler */
+#if (defined(__EDG_VERSION) || defined(__ECC)) && defined(__ia64__) && !defined(HAVE_TICK_COUNTER)
+typedef unsigned long ticks;
+#include <ia64intrin.h>
+
+static __inline__ ticks getticks(void)
+{
+     return __getReg(_IA64_REG_AR_ITC);
+}
+ 
+INLINE_ELAPSED(__inline__)
+ 
+#define HAVE_TICK_COUNTER
+#endif
+
+/* gcc */
 #if defined(__GNUC__) && defined(__ia64__) && !defined(HAVE_TICK_COUNTER)
 typedef unsigned long ticks;
 
@@ -278,21 +295,6 @@ static inline ticks getticks(void)
 
 INLINE_ELAPSED(inline)
 
-#define HAVE_TICK_COUNTER
-#endif
-
-/* intel's ecc compiler */
-#if defined(__ECC) && defined(__ia64__) && !defined(HAVE_TICK_COUNTER)
-typedef unsigned long ticks;
-#include <ia64intrin.h>
-
-static __inline__ ticks getticks(void)
-{
-     return __getReg(_IA64_REG_AR_ITC);
-}
- 
-INLINE_ELAPSED(__inline__)
- 
 #define HAVE_TICK_COUNTER
 #endif
 
