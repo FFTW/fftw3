@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse.c,v 1.9 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: sse.c,v 1.10 2003-05-15 20:53:16 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -30,12 +30,24 @@
 
 static inline int cpuid_edx(int op)
 {
+#ifdef _MSC_VER
+     int ret;
+     _asm {
+	  push ebx
+	  mov eax,op
+          cpuid
+	  mov ret,edx
+          pop ebx
+     }
+     return ret;
+#else
      int eax, ecx, edx;
 
      __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
 	     : "=a" (eax), "=c" (ecx), "=d" (edx)
 	     : "a" (op));
      return edx;
+#endif
 }
 
 static jmp_buf jb;
@@ -54,7 +66,11 @@ static int sse_works(void)
 	  signal(SIGILL, oldsig);
 	  return 0;
      } else {
+#ifdef _MSC_VER
+	  _asm { xorps xmm0,xmm0 }
+#else
 	  __asm__ __volatile__ ("xorps %xmm0, %xmm0");
+#endif
 	  signal(SIGILL, oldsig);
 	  return 1;
      }
