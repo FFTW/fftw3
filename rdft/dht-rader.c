@@ -254,7 +254,7 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
 
-     p->print(p, "(rader-dht-%u%ois=%oos=%(%p%)",
+     p->print(p, "(dht-rader-%u%ois=%oos=%(%p%)",
               ego->n, ego->is, ego->os, ego->cld1);
      if (ego->cld2 != ego->cld1)
           p->print(p, "%(%p%)", ego->cld2);
@@ -416,7 +416,7 @@ static solver *mksolver(uint min_prime)
      return &(slv->super);
 }
 
-void X(rader_dht_register)(planner *p)
+void X(dht_rader_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver(RADER_MIN_GOOD));
 }

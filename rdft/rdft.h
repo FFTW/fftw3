@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.22 2002-08-30 05:21:37 stevenj Exp $ */
+/* $Id: rdft.h,v 1.23 2002-08-30 05:31:47 stevenj Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -91,9 +91,9 @@ void X(rdft_vrank3_transpose_register)(planner *p);
 void X(rdft_buffered_register)(planner *p);
 void X(rdft_generic_register)(planner *p);
 void X(rdft_rader_hc2hc_register)(planner *p);
-void X(rader_dht_register)(planner *p);
 void X(rdft_dht_register)(planner *p);
 void X(dht_r2hc_register)(planner *p);
+void X(dht_rader_register)(planner *p);
 void X(dft_r2hc_register)(planner *p);
 void X(rdft_nop_register)(planner *p);
 
