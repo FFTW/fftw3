@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor7.c,v 1.6 2004-03-31 23:11:02 stevenj Exp $ */
+/* $Id: tensor7.c,v 1.7 2004-04-01 20:25:30 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -26,8 +26,8 @@
 int X(dimcmp)(const iodim *a, const iodim *b)
 {
      int sa = X(iabs)(a->is), sb = X(iabs)(b->is);
-     if (sb != a->is)
-          return (sb - a->is);	/* shorter strides go later */
+     if (sb != sa)
+          return (sb - sa);	/* shorter strides go later */
      sa = X(iabs)(a->os); sb = X(iabs)(b->os);
      if (sb != sa)
           return (sb - sa);	/* shorter strides go later */
