@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.24 2002-07-15 00:35:49 athena Exp $ */
+/* $Id: planner.c,v 1.25 2002-07-15 01:01:44 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -237,6 +237,7 @@ static void print_solution(solutions *s, printer *p)
      p->print(p, "(s %d %P)\n", s->sp ? s->sp->id : 0, s->p);
 }
 
+/* tantus labor non sit cassus */
 static void exprt(planner *ego, printer *p)
 {
      solutions *s;
