@@ -138,6 +138,11 @@ union fvec {
      V v;
 };
 
+union uvec {
+     unsigned u[4];
+     V v;
+};
+
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
 #define VFMS(a, b, c) VSUB(VMUL(a, b), c)
@@ -192,7 +197,7 @@ static __inline__ V FLIP_RI(V x)
      return SHUFPS(x, x, SHUFVAL(1, 0, 3, 2));
 }
 
-extern const union fvec X(sse_mpmp);
+extern const union uvec X(sse_mpmp);
 static __inline__ V CHS_R(V x)
 {
      return VXOR(X(sse_mpmp).v, x);
