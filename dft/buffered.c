@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.19 2002-07-08 00:32:01 athena Exp $ */
+/* $Id: buffered.c,v 1.20 2002-07-12 19:08:13 stevenj Exp $ */
 
 #include "dft.h"
 
@@ -337,7 +337,7 @@ void X(dft_buffered_register)(planner *p)
      /* FIXME: what are good defaults? */
      static const bufadt adt = {
 	  /* nbuf */           8,
-	  /* maxbufsz */       (8192 / sizeof(R)),
+	  /* maxbufsz */       (65536 / sizeof(R)),
 	  /* skew_alignment */ 8,
 	  /* skew */           5,
 	  /* nam */            "dft-buffered"
