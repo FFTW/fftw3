@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet-dft.h,v 1.5 2003-05-16 23:52:43 stevenj Exp $ */
+/* $Id: codelet-dft.h,v 1.6 2005-02-14 17:08:52 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -96,7 +96,6 @@ void X(kdft_difsq_register)(planner *p, kdftwsq codelet, const ct_desc *desc);
 
 
 extern const solvtab X(solvtab_dft_standard);
-extern const solvtab X(solvtab_dft_inplace);
 
 #if HAVE_K7
 extern const solvtab X(solvtab_dft_k7);

@@ -31,15 +31,27 @@ t1_10.c t1_12.c t1_15.c t1_16.c t1_32.c t1_64.c
 # (this is faster for large sizes).
 T2 = t2_4.c t2_8.c t2_16.c t2_32.c t2_64.c
 
-# f1_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIF step
-F1 = f1_2.c f1_3.c f1_4.c f1_5.c f1_6.c f1_7.c f1_8.c f1_9.c f1_10.c	\
-f1_12.c f1_15.c f1_16.c f1_32.c f1_64.c
+###########################################################################
+# The F (DIF) codelets are used for a kind of in-place transform algorithm,
+# but the planner seems to never (or hardly ever) use them on the machines
+# we have access to, preferring the Q codelets and the use of buffers
+# for sub-transforms.  So, we comment them out, at least for now.
 
-# like t2_<r>, but DIF
-F2 = f2_4.c f2_8.c f2_16.c f2_32.c f2_64.c
+# f1_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIF step
+F1 = # f1_2.c f1_3.c f1_4.c f1_5.c f1_6.c f1_7.c f1_8.c f1_9.c f1_10.c f1_12.c f1_15.c f1_16.c f1_32.c f1_64.c
+
+# like f1, but partially generates its trig. table on the fly
+F2 = # f2_4.c f2_8.c f2_16.c f2_32.c f2_64.c
 
 ###########################################################################
-ALL_CODELETS = $(N1) $(T1) $(T2) # $(F1) $(F2)
+# q1_<r> is <r> twiddle FFTs of size <r> (DIF step), where the output is
+# transposed.  This is used for in-place transposes in sizes that are
+# divisible by <r>^2.  These codelets have size ~ <r>^2, so you should
+# probably not use <r> bigger than 8 or so.
+Q1 = q1_2.c q1_4.c q1_8.c  q1_3.c q1_5.c q1_6.c
+
+###########################################################################
+ALL_CODELETS = $(N1) $(T1) $(T2) $(F1) $(F2) $(Q1)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
@@ -54,6 +66,10 @@ if MAINTAINER_MODE
 FLAGS_N1=$(DFT_FLAGS_COMMON)
 FLAGS_T1=$(DFT_FLAGS_COMMON)
 FLAGS_T2=$(DFT_FLAGS_COMMON) -twiddle-log3
+FLAGS_F1=$(DFT_FLAGS_COMMON)
+FLAGS_F2=$(DFT_FLAGS_COMMON) -twiddle-log3
+FLAGS_Q1=$(DFT_FLAGS_COMMON) -reload-twiddle
+FLAGS_Q2=$(DFT_FLAGS_COMMON) -twiddle-log3
 
 n1_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW) $(FLAGS_N1) -n $* -name n1_$* -include "n.h") | $(ADD_DATE) | $(INDENT) >$@
@@ -61,13 +77,19 @@ n1_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
 t1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T1) -n $* -name t1_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
 
-f1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T1) -dif -n $* -name f1_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
-
 t2_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T2) -n $* -name t2_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
 
+f1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_F1) -dif -n $* -name f1_$* -include "f.h") | $(ADD_DATE) | $(INDENT) >$@
+
 f2_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T2) -dif -n $* -name f2_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_F2) -dif -n $* -name f2_$* -include "f.h") | $(ADD_DATE) | $(INDENT) >$@
+
+q1_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDSQ) $(FLAGS_Q1) -dif -n $* -name q1_$* -include "q.h") | $(ADD_DATE) | $(INDENT) >$@
+
+q2_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDSQ) $(FLAGS_Q2) -dif -n $* -name q2_$* -include "q.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE

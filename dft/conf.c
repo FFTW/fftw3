@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.25 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: conf.c,v 1.26 2005-02-14 17:08:52 athena Exp $ */
 
 #include "dft.h"
 
@@ -40,7 +40,6 @@ void X(dft_conf_standard)(planner *p)
 {
      X(solvtab_exec)(s, p);
      X(solvtab_exec)(X(solvtab_dft_standard), p);
-     X(solvtab_exec)(X(solvtab_dft_inplace), p);
 #if HAVE_K7
      X(solvtab_exec)(X(solvtab_dft_k7), p);
 #endif
