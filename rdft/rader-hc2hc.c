@@ -312,11 +312,11 @@ static R *mkomega(plan *p_, uint n, uint ginv)
 
      omega = (R *)fftw_malloc(sizeof(R) * (n - 1) * 2, TWIDDLES);
 
-     scale = ((trigreal)1.0) / (n - 1); /* normalization for convolution */
+     scale = n - 1.0; /* normalization for convolution */
 
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  omega[2*i] = scale * X(cos2pi)(gpower, n);
-	  omega[2*i+1] = FFT_SIGN * scale * X(sin2pi)(gpower, n);
+	  omega[2*i] = X(cos2pi)(gpower, n) / scale;
+	  omega[2*i+1] = FFT_SIGN * X(sin2pi)(gpower, n) / scale;
      }
      A(gpower == 1);
 
