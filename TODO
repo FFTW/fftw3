@@ -28,3 +28,9 @@
 * merge genfft-k7 generator with the main genfft branch.
   genfft-k7 was written by Stefan Kral based on the fftw-2.1 genfft.
 
+* buffered solver produces wrong strides for rank0 interleaved
+  solvers.  In buffered, pointers obey I = R + 1.  When forward
+  transform, the interleaved copy is applicable.  However, when
+  backward transform, the interleaved copy is not applicable
+  because R = I + 1 in input/output arrays.  Either fix the
+  buffered solver or handle the special case in rank0.c
