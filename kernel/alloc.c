@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.30 2003-01-25 23:54:39 stevenj Exp $ */
+/* $Id: alloc.c,v 1.31 2003-01-25 23:59:55 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -43,7 +43,8 @@ void *X(malloc)(size_t n)
      void *p;
 
      /* Note: MacOS X malloc is already 16-byte aligned */
-#if defined(MIN_ALIGNMENT) && (MIN_ALIGNMENT > 16 || !defined(__MACOSX__))
+#if defined(MIN_ALIGNMENT) && (MIN_ALIGNMENT > 16 || \
+                               !(defined(__MACOSX__) || defined(__APPLE__)))
 #  if defined(HAVE_MEMALIGN)
      p = memalign(MIN_ALIGNMENT, n);
 #  elif defined(HAVE_POSIX_MEMALIGN)
