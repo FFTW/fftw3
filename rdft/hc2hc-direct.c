@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-direct.c,v 1.1 2004-03-21 17:38:45 athena Exp $ */
+/* $Id: hc2hc-direct.c,v 1.2 2004-03-22 00:25:56 athena Exp $ */
 
 #include "ct.h"
 
@@ -167,7 +167,10 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->cldm = cldm;
 
      X(ops_zero)(&pln->super.super.ops);
-     X(ops_madd2)(vl * (m / e->genus->vl), &e->ops, &pln->super.super.ops);
+     X(ops_madd2)(vl * (((m - 1) / 2) / e->genus->vl),
+		  &e->ops, &pln->super.super.ops);
+     X(ops_madd2)(vl, &cld0->ops, &pln->super.super.ops);
+     X(ops_madd2)(vl, &cldm->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 }
