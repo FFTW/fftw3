@@ -105,6 +105,27 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
 
 #define F77(a, A) F77x(x77(a), X77(A))
 
+/* If F77_FUNC is not defined and the user didn't explicitly specify
+   --disable-fortran, then make our best guess at default wrappers
+   (since F77_FUNC_EQUIV should not be defined in this case, we
+    will use both double-underscored g77 wrappers and single- or
+    non-underscored wrappers).  This saves us from dealing with
+    complaints in the cases where the user failed to specify
+    an F77 compiler or wrapper detection failed for some reason. */
+#if !defined(F77_FUNC) && !defined(DISABLE_FORTRAN)
+#  if (defined(_WIN32) || defined(__WIN32__)) && !defined(WINDOWS_F77_MANGLING)
+#    define WINDOWS_F77_MANGLING 1
+#  endif
+#  if defined(_AIX) || defined(__hpux) || defined(hpux)
+#    define F77_FUNC(a, A) a
+#  elif defined(CRAY) || defined(_CRAY) || defined(_UNICOS)
+#    define F77_FUNC(a, A) A
+#  else
+#    define F77_FUNC(a, A) a ## _
+#  endif
+#  define F77_FUNC_(a, A) a ## __
+#endif
+
 #ifndef WINDOWS_F77_MANGLING
 
 #if defined(F77_FUNC)
