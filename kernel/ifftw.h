@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.183 2003-01-29 20:41:56 athena Exp $ */
+/* $Id: ifftw.h,v 1.184 2003-01-30 00:03:43 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -36,6 +36,10 @@
 
 #if HAVE_STDINT_H
 # include <stdint.h>             /* uintptr_t, maybe */
+#endif
+
+#if HAVE_INTTYPES_H
+# include <inttypes.h>           /* uintptr_t, maybe */
 #endif
 
 /* determine precision and name-mangling scheme */
