@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.24 2003-01-12 04:46:34 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.25 2003-01-12 18:57:13 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -145,6 +145,9 @@ X(plan) X(plan_guru_dft_c2r)(unsigned int rank, const X(iodim) *dims,	      \
 			     const X(iodim) *howmany_dims,		      \
 			     R *ri, R *ii, R *out,			      \
 			     unsigned int flags);			      \
+									      \
+void X(execute_dft_r2c)(X(plan) p, R *in, R *ro, R *io);		      \
+void X(execute_dft_c2r)(X(plan) p, R *ri, R *ii, R *out);		      \
 									      \
 void X(destroy_plan)(X(plan) p);					      \
 void X(forget_wisdom)(void);						      \
