@@ -63,7 +63,7 @@ void wrwisdom(void)
      }
 }
 
-static FFTW(iodim) *tensor_to_fftw_iodim(tensor *t)
+static FFTW(iodim) *tensor_to_fftw_iodim(tensor *t, int stride_factor)
 {
      FFTW(iodim) *d;
      int i;
@@ -74,8 +74,8 @@ static FFTW(iodim) *tensor_to_fftw_iodim(tensor *t)
      d = (FFTW(iodim) *)bench_malloc(sizeof(FFTW(iodim)) * t->rnk);
      for (i = 0; i < t->rnk; ++i) {
 	  d[i].n = t->dims[i].n;
-	  d[i].is = t->dims[i].is;
-	  d[i].os = t->dims[i].os;
+	  d[i].is = t->dims[i].is * stride_factor;
+	  d[i].os = t->dims[i].os * stride_factor;
      }
 
      return d;
@@ -158,8 +158,8 @@ static FFTW(plan) mkplan_complex_interleaved(problem *p, int flags)
 	  extract_reim(p->sign, p->in, &ri, &ii);
 	  extract_reim(p->sign, p->out, &ro, &io);
 
-	  dims = tensor_to_fftw_iodim(sz);
-	  howmany_dims = tensor_to_fftw_iodim(vecsz);
+	  dims = tensor_to_fftw_iodim(sz, 2);
+	  howmany_dims = tensor_to_fftw_iodim(vecsz, 2);
 	  pln = FFTW(plan_guru_dft)(sz->rnk, dims,
 				    vecsz->rnk, howmany_dims,
 				    ri, ii, ro, io, flags);
