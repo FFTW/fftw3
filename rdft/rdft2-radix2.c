@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.19 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.20 2003-02-07 21:28:55 stevenj Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -74,6 +74,16 @@ static int applicable_f(const problem *p_, const planner *plnr)
      return 0;
 }
 
+static int applicable_f_dft(const problem *p_, const planner *plnr)
+{
+     UNUSED(plnr);
+     if (applicable_f(p_, plnr)) {
+	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
+	  return(p->r != p->rio || p->iio == p->rio + p->sz->dims[0].is);
+     }
+     return 0;
+}
+
 /* common applicability function of backward problems */
 static int applicable_b(const problem *p_, const planner *plnr)
 {
@@ -91,6 +101,15 @@ static int applicable_b(const problem *p_, const planner *plnr)
      return 0;
 }
 
+static int applicable_b_dft(const problem *p_, const planner *plnr)
+{
+     UNUSED(plnr);
+     if (applicable_b(p_, plnr)) {
+	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
+	  return(p->r != p->rio || p->iio == p->rio + p->sz->dims[0].os);
+     }
+     return 0;
+}
 
 /*
  * forward rdft2 via dft
@@ -161,7 +180,7 @@ static problem *mkcld_f_dft(const problem_rdft2 *p)
 }
 
 static const madt adt_f_dft = {
-     applicable_f, apply_f_dft, mkcld_f_dft, {10, 8, 0, 0}, "r2hc2-dft"
+     applicable_f_dft, apply_f_dft, mkcld_f_dft, {10, 8, 0, 0}, "r2hc2-dft"
 };
 
 /*
@@ -301,7 +320,7 @@ static problem *mkcld_b_dft(const problem_rdft2 *p)
 }
 
 static const madt adt_b_dft = {
-     applicable_b, apply_b_dft, mkcld_b_dft, {10, 8, 0, 0}, "hc2r2-dft"
+     applicable_b_dft, apply_b_dft, mkcld_b_dft, {10, 8, 0, 0}, "hc2r2-dft"
 };
 
 /*
