@@ -13,6 +13,7 @@ fi
 AC_ARG_ENABLE(single, [  --enable-single        compile fftw in single precision], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_SINGLE,1,[Define to compile in single precision.])
+	AC_DEFINE(BENCHFFT_SINGLE,1,[Define to compile in single precision.])
 fi
 
 OCAML_INIT_PATHS
@@ -90,6 +91,7 @@ AC_OUTPUT([
    kernel/Makefile
    dft/Makefile
    libbench/Makefile
+   tests/Makefile
 
    codelets/Makefile
    codelets/dft-standard/Makefile

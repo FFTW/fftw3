@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.5 2002-06-03 22:10:12 athena Exp $ */
+/* $Id: ifftw.h,v 1.6 2002-06-04 20:28:58 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -200,7 +200,7 @@ enum score {
 };
 
 typedef struct {
-     plan *(*mkplan)(const solver *ego, const problem *p, planner *planner);
+     plan *(*mkplan)(const solver *ego, const problem *p, planner *plnr);
      enum score (*score)(const solver *ego, const problem *p);
 } solver_adt;
 
@@ -244,6 +244,18 @@ planner *fftw_mkplanner(size_t sz,
 void fftw_planner_destroy(planner *ego);
 void fftw_planner_set_hook(planner *p, void (*hook)(plan *, problem *));
 
+/*
+   Iterate over all solvers.   Read:
+ 
+   @article{ baker93iterators,
+    author = "Henry G. Baker, Jr.",
+    title = "Iterators: Signs of Weakness in Object-Oriented Languages",
+    journal = "{ACM} {OOPS} Messenger",
+    volume = "4",
+    number = "3",
+    pages = "18--25"
+   }
+*/
 #define FORALL_SOLVERS(ego, s, what)					 \
 {									 \
      pair *_l_;								 \
@@ -255,6 +267,7 @@ void fftw_planner_set_hook(planner *p, void (*hook)(plan *, problem *));
 
 /* various planners */
 planner *fftw_mkplanner_naive(void);
+planner *fftw_mkplanner_estimate(void);
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */
@@ -279,6 +292,12 @@ typedef int stride;
 #define fftw_stride_destroy(p) {}
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
+
+/*-----------------------------------------------------------------------*/
+/* solvtab.c */
+
+typedef void (*const solvtab[])(planner *);
+void fftw_solvtab_exec(solvtab tbl, planner *p);
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */

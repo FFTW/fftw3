@@ -18,16 +18,13 @@
  *
  */
 
-/* $Id: fftw.h,v 1.2 2002-06-04 20:28:58 athena Exp $ */
+/* $Id: solvtab.c,v 1.1 2002-06-04 20:28:58 athena Exp $ */
 
-/* FFTW installed header file */
-#ifndef __FFTW_H__
-#define __FFTW_H__
+#include "ifftw.h"
 
-#ifdef FFTW_SINGLE
-typedef float fftw_real;
-#else
-typedef double fftw_real;
-#endif
+void fftw_solvtab_exec(solvtab tbl, planner *p)
+{
+     for (; *tbl; ++tbl) 
+	  (*tbl)(p);
+}
 
-#endif				/* __FFTW_H__ */

@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: dft.h,v 1.2 2002-06-02 23:49:03 athena Exp $ */
+/* $Id: dft.h,v 1.3 2002-06-04 20:28:58 athena Exp $ */
 
 #include "ifftw.h"
+#include "codelet.h"
 
 /* problem.c: */
 typedef struct {
@@ -31,6 +32,11 @@ typedef struct {
 
 int fftw_problem_dft_p(const problem *p);
 #define DFTP fftw_problem_dft_p  /* shorthand */
+
+problem *fftw_mkproblem_dft(const tensor sz, const tensor vecsz,
+			    R *ri, R *ii, R *ro, R *io);
+problem *fftw_mkproblem_dft_d(tensor sz, tensor vecsz,
+			      R *ri, R *ii, R *ro, R *io);
 
 /* solve.c: */
 void fftw_dft_solve(plan *ego_, const problem *p_);
@@ -47,3 +53,6 @@ plan *fftw_mkplan_dft(size_t size, const plan_adt *adt, dftapply apply);
 
 #define MKPLAN_DFT(type, adt, apply) \
   (type *)fftw_mkplan_dft(sizeof(type), adt, apply)
+
+/* various solvers */
+solver *fftw_mksolver_dft_direct(kdft k, const kdft_desc *desc);

@@ -18,12 +18,11 @@
  *
  */
 
-/* $Id: direct.c,v 1.1 2002-06-02 23:49:03 athena Exp $ */
+/* $Id: direct.c,v 1.2 2002-06-04 20:28:58 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
 #include "dft.h"
-#include "codelet.h"
 
 #define OPTIMAL_SIZE 32		/* for estimator */
 
@@ -160,7 +159,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
 static const solver_adt sadt = { mkplan, score };
 
 /* constructor */
-solver *fftw_make_dft_direct_solver(kdft k, const kdft_desc *desc)
+solver *fftw_mksolver_dft_direct(kdft k, const kdft_desc *desc)
 {
      S *solver;
      

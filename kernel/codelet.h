@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.2 2002-06-02 19:00:11 athena Exp $ */
+/* $Id: codelet.h,v 1.3 2002-06-04 20:28:58 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -122,5 +122,7 @@ void fftw_kdft_difsq_register(planner *p, kdft_difsq codelet,
 typedef const R *(*kdft_dif) (R *rioarray, R *iioarray, const R *W,
 			      stride ios, int m, int dist);
 void fftw_kdft_dif_register(planner *p, kdft_dif codelet, const ct_desc *desc);
+
+extern solvtab fftw_solvtab_dft_standard;
 
 #endif				/* __CODELET_H__ */

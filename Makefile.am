@@ -7,7 +7,7 @@ else
 GENFFT=
 endif
 
-SUBDIRS=$(GENFFT) codelets kernel dft libbench
+SUBDIRS=$(GENFFT) codelets kernel dft libbench tests
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS
 
 lib_LTLIBRARIES = libfftw3.la

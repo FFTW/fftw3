@@ -18,16 +18,12 @@
  *
  */
 
-/* $Id: fftw.h,v 1.2 2002-06-04 20:28:58 athena Exp $ */
+/* $Id: kdft.c,v 1.1 2002-06-04 20:28:58 athena Exp $ */
 
-/* FFTW installed header file */
-#ifndef __FFTW_H__
-#define __FFTW_H__
+#include "dft.h"
 
-#ifdef FFTW_SINGLE
-typedef float fftw_real;
-#else
-typedef double fftw_real;
-#endif
-
-#endif				/* __FFTW_H__ */
+void fftw_kdft_register(planner *p, kdft codelet, const kdft_desc *desc)
+{
+     solver *s = fftw_mksolver_dft_direct(codelet, desc);
+     p->adt->register_solver(p, s);
+}

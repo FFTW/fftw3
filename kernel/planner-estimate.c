@@ -18,16 +18,38 @@
  *
  */
 
-/* $Id: fftw.h,v 1.2 2002-06-04 20:28:58 athena Exp $ */
+/* $Id: planner-estimate.c,v 1.1 2002-06-04 20:28:58 athena Exp $ */
+#include "ifftw.h"
 
-/* FFTW installed header file */
-#ifndef __FFTW_H__
-#define __FFTW_H__
+static plan *mkplan(planner *ego, problem *p)
+{
+     plan *best = (plan *) 0;
 
-#ifdef FFTW_SINGLE
-typedef float fftw_real;
-#else
-typedef double fftw_real;
-#endif
+     FORALL_SOLVERS(ego, s, {
+	  plan *pln = s->adt->mkplan(s, p, ego);
 
-#endif				/* __FFTW_H__ */
+	  if (pln) {
+	       fftw_plan_use(pln);
+	       ego->ntry++;
+	       ego->hook(pln, p);
+	       if (best) {
+		    if (pln->cost < best->cost) {
+			 fftw_plan_destroy(best);
+			 best = pln;
+		    } else {
+			 fftw_plan_destroy(pln);
+		    }
+	       } else {
+		    best = pln;
+	       }
+	  }
+     });
+
+     return best;
+}
+
+/* constructor */
+planner *fftw_mkplanner_estimate(void)
+{
+     return fftw_mkplanner(sizeof(planner), mkplan, 0);
+}
