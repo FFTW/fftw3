@@ -24,7 +24,7 @@ Other enhancements:
 
 * Multidimensional transforms can operate on a subset of a larger matrix.
 
-* By popular demand, simultanteous linking to double precision (fftw),
+* By popular demand, simultaneous linking to double precision (fftw),
   single precision (fftwf), and long-double precision (fftwl) versions
   of FFTW is now supported.
 
