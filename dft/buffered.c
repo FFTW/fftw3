@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.50 2003-05-15 23:09:07 athena Exp $ */
+/* $Id: buffered.c,v 1.51 2003-05-26 11:22:59 athena Exp $ */
 
 #include "dft.h"
 
@@ -60,11 +60,6 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      int ivs = ego->ivs, ovs = ego->ovs;
      int roffset = ego->roffset, ioffset = ego->ioffset;
 
-     /* note unsigned i:  the obvious statement
-
-          for (i = 0; i <= vl - nbuf; i += nbuf) 
-
-	is wrong */
      for (i = nbuf; i <= vl; i += nbuf) {
           /* transform to bufs: */
           cld->apply((plan *) cld, ri, ii, bufs + roffset, bufs + ioffset);
