@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.64 2003-03-02 20:54:14 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.65 2003-03-03 00:03:23 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -314,6 +314,7 @@ data is an array of type @code{fftw_complex}, which is by default a
 @code{double[2]} containing the real (@code{in[i][0]}) and imaginary
 (@code{in[i][1]}) parts.
 @tindex fftw_complex
+@cindex C99
 If you have a C compiler, such as @code{gcc}, supporting the recent
 C99 standard, and you @code{#include <complex.h>} @emph{before}
 @code{<fftw3.h>}, then @code{fftw_complex} is the native
@@ -1296,6 +1297,7 @@ or, in C++, creating a class and overloading the @samp{()} operator.
 The recent C99 standard provides a way to dynamically reinterpret the
 array as a static-like multi-dimensional array amenable to @samp{[]},
 but this feature is not yet widely supported by compilers.
+@cindex C99
 
 @c =========>
 @node Dynamic Arrays in C-The Wrong Way,  , Dynamic Arrays in C, Multi-dimensional Array Format
@@ -1346,6 +1348,8 @@ see the @code{comp.lang.c}
 @node FFTW Reference, Parallel FFTW, Other Stuff You Should Know, Top
 @chapter FFTW Reference
 @menu
+* Data Types and Files::        
+* Using Plans::                 
 * Basic Interface::             
 * Advanced Interface::          
 * Guru Interface::              
@@ -1353,7 +1357,147 @@ see the @code{comp.lang.c}
 @end menu
 
 @c ------------------------------------------------------------
-@node Basic Interface, Advanced Interface, FFTW Reference, FFTW Reference
+@node Data Types and Files, Using Plans, FFTW Reference, FFTW Reference
+@section Data Types and Files
+
+All programs using FFTW should include its header file:
+
+@example
+#include <fftw3.h>
+@end example
+
+You will @emph{also} need to link to the FFTW library.  On Unix, this
+means adding @code{-lfftw3 -lm} at the @emph{end} of the link command.
+
+@menu
+* Complex numbers::             
+* Precision::                   
+@end menu
+
+@c =========>
+@node Complex numbers, Precision, Data Types and Files, Data Types and Files
+@subsection Complex numbers
+
+The default FFTW interface uses @code{double} precision for all
+floating-point numbers, and defines a @code{fftw_complex} type to hold
+complex numbers as:
+
+@example
+typedef double fftw_complex[2];
+@end example
+@tindex fftw_complex
+
+Here, the @code{[0]} element holds the real part and the @code{[1]}
+element holds the imaginary part.
+
+Alternatively, if you have a C compiler (such as @code{gcc}) that
+supports the C99 revision of the ANSI C standard, you can use C's new
+native complex type (which is binary-compatible with the typedef above).
+In particular, if you @code{#include <complex.h>} @emph{before}
+@code{<fftw3.h>}, then @code{fftw_complex} is defined to be the native
+complex type and you can manipulate it with ordinary arithmetic
+(e.g. @code{x = y * (3+4*I)}, where @code{x} and @code{y} are
+@code{fftw_complex} and @code{I} is the standard symbol for the
+imaginary unit);
+@cindex C99
+
+@c =========>
+@node Precision,  , Complex numbers, Data Types and Files
+@subsection Precision
+@cindex precision
+
+You can also install single and long-double precision versions of FFTW,
+which replace @code{double} with @code{float} and @code{long double},
+respectively.  To use these interfaces, you:
+
+@itemize @bullet
+
+@item
+Link to the single/long-double libraries; on Unix, @code{-lfftw3f} or
+@code{-lfftw3l} instead of (or in addition to) @code{-lfftw3}.  (You
+@emph{can} link to the different-precision libraries simultaneously.)
+
+@item
+Include the @emph{same} @code{<fftw3.h>} header file.
+
+@item
+In all data types and subroutine names, replace @samp{fftw_} with
+@samp{fftwf_} or @code{fftwl_} for single or long-double precision,
+respectively
+
+@item
+All-uppercase names, i.e. constants beginning with @samp{FFTW_}, remain
+the same.
+
+@item
+Replace @code{double} with @code{float} or @code{long double} for
+subroutine parameters.
+
+@end itemize
+
+Depending upon your compiler and/or hardware, @code{long double} may not
+be any more precise than @code{double} (or may not be supported at all,
+although it is standard in C99).
+@cindex C99
+
+@c ------------------------------------------------------------
+@node Using Plans, Basic Interface, Data Types and Files, FFTW Reference
+@section Using Plans
+
+Plans for all transform types in FFTW are stored as type
+@code{fftw_plan} (an opaque pointer type), and are created by one of the
+various planning routines described in the following sections.
+@tindex fftw_plan
+
+@example
+void fftw_execute(const fftw_plan plan);
+@end example
+@findex fftw_execute
+
+This executes the @code{plan}, to compute the corresponding transform on
+the arrays for which it was planned (which must still exist).  The plan
+is not modified, and @code{fftw_execute} can be called as many times as
+desired.
+
+(Alternatively, there is a guru interface for applying a given plan to a
+different array, if sufficient care is taken.  @xref{Guru Interface}.)
+
+@code{fftw_execute} (and equivalents) is the only function in FFTW
+guaranteed to be re-entrant; see @ref{Thread safety}.
+
+@example
+void fftw_destroy_plan(fftw_plan plan);
+@end example
+@findex fftw_destroy_plan
+
+This deallocates the @code{plan} and all its associated data.
+
+The following two routines are provided purely for academic purposes
+(that is, for entertainment).
+
+@example
+void fftw_flops(const fftw_plan plan, int *add, int *mul, int *fma);
+@end example
+@findex fftw_flops
+
+Given a @code{plan}, set @code{add}, @code{mul}, and @code{fma} to an
+exact count of the number of floating-point additions, multiplications,
+and fused multiply-add operations involved in the plan's execution.  The
+total number of floating-point operations (flops) is @code{add + mul +
+2*fma}, or @code{add + mul + fma} if the hardware supports fused
+multiply-add instructions (although the number of FMA operations is only
+approximate because of compiler voodoo).
+
+@example
+void fftw_print_plan(const fftw_plan plan, FILE *output_file);
+@end example
+@findex fftw_print_plan
+
+This outputs a ``nerd-readable'' representation of the @code{plan} to
+the given file.
+
+@c ------------------------------------------------------------
+@node Basic Interface, Advanced Interface, Using Plans, FFTW Reference
 @section Basic Interface
 @cindex basic interface
 
