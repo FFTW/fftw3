@@ -290,6 +290,11 @@ if test "$enable_threads" = "yes"; then
 		AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
 			omp_enabler="$CC -omp"])
 		if test -z "$THREADLIBS"; then
+			CFLAGS="$save_CFLAGS -openmp"
+			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
+				omp_enabler="$CC -openmp"])
+		fi
+		if test -z "$THREADLIBS"; then
 			CFLAGS="$save_CFLAGS -mp"
 			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
 				omp_enabler="$CC -mp"])
