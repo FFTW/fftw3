@@ -229,7 +229,7 @@ The two FFTW packages are otherwise identical.
 Definitely use the fma version if you have a PowerPC-based system with
 \courier{gcc\} (or IBM \courier{xlc\}).  This includes all GNU/Linux
 systems for PowerPC and all MacOS X systems.  Also use it on PA-RISC
-with the HP/UX compiler.
+and Itanium with the HP/UX compiler.
 
 Definitely do not use the fma version if you have an ia-32 processor
 (Intel, AMD, etcetera).
