@@ -4,8 +4,6 @@
 
 * real transforms
 
-* generic-radix cooley-tukey
-
 * I can't believe that there isn't a closed form for the omega
   array in Rader.
 
