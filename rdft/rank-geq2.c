@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.17 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.18 2003-02-09 18:01:45 stevenj Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
 
@@ -105,17 +105,6 @@ static int applicable0(const solver *ego_, const problem *p_, int *rp)
           return (1
                   && p->sz->rnk >= 2
                   && picksplit(ego, p->sz, rp)
-                  && (0
-
-                      /* can always operate out-of-place */
-                      || p->I != p->O
-
-                      /* Can operate in-place as long as all dimension
-			 strides are the same, provided that the child
-			 plans work in-place.  (This condition is
-			 sufficient, but is it necessary?) */
-                      || X(tensor_inplace_strides)(p->sz)
-		       )
 	       );
      }
 

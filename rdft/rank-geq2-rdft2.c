@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.17 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.18 2003-02-09 18:01:44 stevenj Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -118,8 +118,7 @@ static int applicable0(const solver *ego_, const problem *p_, int *rp,
 			  (p->kind == R2HC || DESTROY_INPUTP(plnr)))
 
 		      /* FIXME: what are sufficient conditions for inplace? */
-                      || (!(p->r != p->rio && p->r != p->iio) &&
-			  X(rdft2_inplace_strides)(p, RNK_MINFTY))
+                      || (!(p->r != p->rio && p->r != p->iio))
 		       )
 	       );
      }
