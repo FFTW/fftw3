@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.106 2002-09-02 19:36:21 athena Exp $ */
+/* $Id: ifftw.h,v 1.107 2002-09-02 19:58:19 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -405,13 +405,14 @@ enum {
      POSSIBLY_UNALIGNED = 0x8,
      FORBID_DHT_R2HC = 0x10,
      BUFFERING_VERBOTEN = 0x20,
-     EQV_MASK = 0xFF,
+     INDIRECT_VERBOTEN = 0x40,
+     EQV_MASK = 0xFFFF,
 
      /* flags that influence the behavior of the planner but not problem
 	equivalence */
-     IMPATIENT = 0x1000, 
-     ESTIMATE = 0x2000,
-     BLESSING = 0x4000, 
+     IMPATIENT = 0x10000, 
+     ESTIMATE = 0x20000,
+     BLESSING = 0x40000, 
      IMPATIENCE_MASK = (IMPATIENT | ESTIMATE)
 };
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.8 2002-09-02 19:36:21 athena Exp $ */
+/* $Id: indirect.c,v 1.9 2002-09-02 19:58:19 athena Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
@@ -133,7 +133,6 @@ static void print(plan *ego_, printer *p)
 static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
-     UNUSED(ego_);
      if (RDFTP(p_)) {
 	  const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
@@ -173,7 +172,8 @@ static int applicable(const solver *ego_, const problem *p_,
 
 static int score(const solver *ego, const problem *p, const planner *plnr)
 {
-     UNUSED(plnr);
+     if (plnr->flags & INDIRECT_VERBOTEN)
+	  return BAD;
      return (applicable(ego, p, plnr)) ? GOOD : BAD;
 }
 
@@ -193,6 +193,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           return (plan *) 0;
 
      plnr->flags |= BUFFERING_VERBOTEN;
+     plnr->flags |= INDIRECT_VERBOTEN;
 
      {
 	  tensor sz_real = X(rdft_real_sz)(p->kind, p->sz);
