@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
 
 	       if (a0[i]) {
 		    d /= a0[i];
+		    if (d < 0) d = -d;
 	       }
 	       re1 += d;
 	       re2 += d * d;
