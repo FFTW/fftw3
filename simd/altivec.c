@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: altivec.c,v 1.1 2002-07-28 14:38:10 athena Exp $ */
+/* $Id: altivec.c,v 1.2 2002-07-28 20:13:19 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -32,7 +32,9 @@ const vector unsigned int X(altivec_flipri_perm) =
    (vector unsigned int)VLIT(0x04050607, 0x00010203,
 			     0x0c0d0e0f, 0x08090a0b);
 
-const vector float X(altivec_chsr_msk) = 
+const vector float X(altivec_chsr_sgn) = 
    (vector float)VLIT(-1.0, 1.0, -1.0, 1.0);
+const vector float X(altivec_chsr_msk) = 
+   (vector float)VLIT(-0.0, 0.0, -0.0, 0.0);
 
 #endif

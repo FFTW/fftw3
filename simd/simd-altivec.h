@@ -85,6 +85,12 @@ vec_mergel (vector float a1, vector float a2)
 #endif
 }
 
+static inline vector float
+vec_xor (vector float a1, vector float a2)
+{
+  return (vector float) __builtin_altivec_vxor ((vector signed int) a1, (vector signed int) a2);
+}
+
 #define VLIT(x0, x1, x2, x3) {x0, x1, x2, x3}
 
 #else /* !__VEC__ */
@@ -157,10 +163,11 @@ static inline V FLIP_RI(V x)
 }
 
 extern const vector float X(altivec_chsr_msk);
+extern const vector float X(altivec_chsr_sgn);
 
 static inline V CHS_R(V x)
 {
-     return VMUL(x, X(altivec_chsr_msk));
+     return vec_xor(x, X(altivec_chsr_msk));
 }
 
 static inline V VBYI(V x)
@@ -170,12 +177,12 @@ static inline V VBYI(V x)
 
 static inline V VFMAI(V b, V c)
 {
-     return VFMA(FLIP_RI(b), X(altivec_chsr_msk), c);
+     return VFMA(FLIP_RI(b), X(altivec_chsr_sgn), c);
 }
 
 static inline V VFNMSI(V b, V c)
 {
-     return VFNMS(FLIP_RI(b), X(altivec_chsr_msk), c);
+     return VFNMS(FLIP_RI(b), X(altivec_chsr_sgn), c);
 }
 
 #define VTW(x) {TW_COS, 1, x}, {TW_COS, 0, x}, {TW_SIN, 1, x}, {TW_SIN, 0, x}
