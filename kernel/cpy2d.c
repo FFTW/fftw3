@@ -81,74 +81,52 @@ void X(cpy2d_co)(R *I, R *O,
 	  X(cpy2d) (I, O, n1, is1, os1, n0, is0, os0, vl);
 }
 
-/*
-  Recursive 2-dimensional copy routines, useful e.g. for
-  transpositions.
 
-  In an ideal world where caches don't suck, the ``cache-oblivious''
-  cpy2d_rec() routine would be sufficient and optimal.
-
-  In a real world of caches with limited associativity, the extra
-  buffering of cpy2d_recbuf() is necessary when stride=2^k (i.e., in the
-  common case.) See
-  
-     K.S. Gatlin and Larry Carter, ``Memory Hierarchy Considerations
-     for Fast Transpose and Bit-Reversals'', HPCA99, January 1999.
-
-*/
-
-/*
-  Ideally:  max CUTOFF s.t.
-    CUTOFF^2 * sizeof(complex double) <= cache size
-    CUTOFF * sizeof(float) >= line size 
-
-  CUTOFF = 16 implies cache size >= 4096, which is reasonable.
-  CUTOFF = 16 fails to exploit 128 bytes lines vl = 1, R = float;
-  however vl = 2 or R = double is ok.
-*/
-#define CUTOFF 16
-
-void X(cpy2d_rec)(R *I, R *O,
-		  int n0, int is0, int os0,
-		  int n1, int is1, int os1,
-		  int vl)
+static void dotile(R *I, R *O,
+		   int n0, int is0, int os0,
+		   int n1, int is1, int os1, 
+		   int vl, R *buf) 
 {
-   tail:
-     if (n0 >= n1 && n0 > CUTOFF) {
-	  int nm = n0 / 2;
-	  X(cpy2d_rec) (I, O, nm, is0, os0, n1, is1, os1, vl);
-	  I += nm * is0; O += nm * os0; n0 -= nm; goto tail;
-     } else if ( /* n1 >= n0 && */ n1 > CUTOFF) {
-	  int nm = n1 / 2;
-	  X(cpy2d_rec) (I, O, n0, is0, os0, nm, is1, os1, vl);
-	  I += nm * is1; O += nm * os1; n1 -= nm; goto tail;
-     } else {
-	  X(cpy2d) (I, O, n0, is0, os0, n1, is1, os1, vl);
-     }
+     /* copy from I to buf */
+     X(cpy2d_ci) (I, buf, n0, is0, vl, n1, is1, vl * n0, vl);
+     
+     /* copy from buf to O */
+     X(cpy2d_co) (buf, O, n0, vl, os0, n1, vl * n0, os1, vl);
 }
 
-void X(cpy2d_recbuf)(R *I, R *O,
-		     int n0, int is0, int os0,
-		     int n1, int is1, int os1, int vl) 
+void X(cpy2d_tiled)(R *I, R *O,
+		    int n0, int is0, int os0,
+		    int n1, int is1, int os1, int vl) 
 {
-     A(vl <= 2);
+     R buf[CACHESIZE];
+     int tilesz = X(isqrt)((CACHESIZE / sizeof(R)) / vl);
+     int i0, i1;
 
-   tail:
-     if (n0 >= n1 && n0 > CUTOFF) {
-	  int nm = n0 / 2;
-	  X(cpy2d_recbuf) (I, O, nm, is0, os0, n1, is1, os1, vl);
-	  I += nm * is0; O += nm * os0; n0 -= nm; goto tail;
-     } else if ( /* n1 >= n0 && */ n1 > CUTOFF) {
-	  int nm = n1 / 2;
-	  X(cpy2d_recbuf) (I, O, n0, is0, os0, nm, is1, os1, vl);
-	  I += nm * is1; O += nm * os1; n1 -= nm; goto tail;
-     } else {
-	  R buf[CUTOFF * CUTOFF * 2];
+     for (i1 = 0; i1 < n1 - tilesz; i1 += tilesz) {
+	  for (i0 = 0; i0 < n0 - tilesz; i0 += tilesz) 
+	       dotile(I + i0 * is0 + i1 * is1,
+		      O + i0 * os0 + i1 * os1,
+		      tilesz, is0, os0,
+		      tilesz, is1, os1,
+		      vl, buf);
 
-	  /* copy from I to buf */
-	  X(cpy2d_ci) (I, buf, n0, is0, vl, n1, is1, vl * CUTOFF, vl);
-
-	  /* copy from buf to O */
-	  X(cpy2d_co) (buf, O, n0, vl, os0, n1, vl * CUTOFF, os1, vl);
+	  dotile(I + i0 * is0 + i1 * is1,
+		 O + i0 * os0 + i1 * os1,
+		 n0 - i0, is0, os0,
+		 tilesz, is1, os1,
+		 vl, buf);
      }
+
+     for (i0 = 0; i0 < n0 - tilesz; i0 += tilesz) 
+	  dotile(I + i0 * is0 + i1 * is1,
+		 O + i0 * os0 + i1 * os1,
+		 tilesz, is0, os0,
+		 n1 - i1, is1, os1,
+		 vl, buf);
+
+     dotile(I + i0 * is0 + i1 * is1,
+	    O + i0 * os0 + i1 * os1,
+	    n0 - i0, is0, os0,
+	    n1 - i1, is1, os1,
+	    vl, buf);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.248 2005-02-23 03:32:06 athena Exp $ */
+/* $Id: ifftw.h,v 1.249 2005-02-24 02:51:50 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -707,6 +707,7 @@ int X(is_prime)(int n);
 int X(next_prime)(int n);
 int X(factors_into)(int n, const int *primes);
 int X(choose_radix)(int r, int n);
+int X(isqrt)(int n);
 
 #define GENERIC_MIN_BAD 173 /* min prime for which generic becomes bad */
 
@@ -720,6 +721,10 @@ void X(rader_tl_delete)(R *W, rader_tl **tl);
 
 /*-----------------------------------------------------------------------*/
 /* copy/transposition routines */
+
+/* lower bound to the cache size, for tiled routines */
+#define CACHESIZE 8192
+
 void X(cpy1d)(R *I, R *O, int n0, int is0, int os0, int vl);
 void X(cpy2d)(R *I, R *O,
 	      int n0, int is0, int os0,
@@ -733,14 +738,10 @@ void X(cpy2d_co)(R *I, R *O,
 		 int n0, int is0, int os0,
 		 int n1, int is1, int os1,
 		 int vl);
-void X(cpy2d_rec)(R *I, R *O,
-		  int n0, int is0, int os0,
-		  int n1, int is1, int os1,
-		  int vl);
-void X(cpy2d_recbuf)(R *I, R *O,
-		     int n0, int is0, int os0,
-		     int n1, int is1, int os1,
-		     int vl);
+void X(cpy2d_tiled)(R *I, R *O,
+		    int n0, int is0, int os0,
+		    int n1, int is1, int os1, 
+		    int vl);
 void X(cpy2d_pair)(R *I0, R *I1, R *O0, R *O1,
 		   int n0, int is0, int os0,
 		   int n1, int is1, int os1);
@@ -752,8 +753,7 @@ void X(cpy2d_pair_co)(R *I0, R *I1, R *O0, R *O1,
 		      int n1, int is1, int os1);
 
 void X(transpose)(R *I, int n, int s0, int s1, int vl);
-void X(transpose_rec)(R *I, int n, int s0, int s1, int vl) ;
-void X(transpose_recbuf)(R *I, int n, int s0, int s1, int vl) ;
+void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl) ;
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.19 2005-02-22 22:08:48 athena Exp $ */
+/* $Id: rank0.c,v 1.20 2005-02-24 02:51:50 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -110,42 +110,29 @@ static int applicable_iter(const P *pln, const problem_rdft *p)
 }
 
 /**************************************************************/
-/* rank 2, out of place, recursive */
-static void apply_rec(const plan *ego_, R *I, R *O)
-{
-     const P *ego = (const P *) ego_;
-     int vl = ego->vl;
-
-     A(ego->rnk == 2);
-     X(cpy2d_rec)(I, O, 
-		  ego->d[0].n, ego->d[0].is, ego->d[0].os,
-		  ego->d[1].n, ego->d[1].is, ego->d[1].os,
-		  vl);
-}
-
-static int applicable_rec(const P *pln, const problem_rdft *p)
-{
-     return (p->I != p->O) && (pln->rnk == 2);
-}
-
-/**************************************************************/
-/* rank 2, out of place, recursive with buffer, vl <= 2 */
-static void apply_recbuf(const plan *ego_, R *I, R *O)
+/* rank 2, out of place, tiled, vl <= 2 */
+static void apply_tiled(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      int vl = ego->vl;
 
      A(ego->rnk == 2);
      A(vl <= 2);
-     X(cpy2d_recbuf)(I, O, 
+     X(cpy2d_tiled)(I, O, 
 		     ego->d[0].n, ego->d[0].is, ego->d[0].os,
 		     ego->d[1].n, ego->d[1].is, ego->d[1].os,
 		     vl);
 }
 
-static int applicable_recbuf(const P *pln, const problem_rdft *p)
+static int applicable_tiled(const P *pln, const problem_rdft *p)
 {
-     return (p->I != p->O) && (pln->rnk == 2) && (pln->vl <= 2);
+     return (1
+	     && p->I != p->O
+	     && pln->rnk == 2
+
+	     /* somewhat arbitrary */
+	     && pln->vl < CACHESIZE / (16 * sizeof(R))
+	  );
 }
 
 /**************************************************************/
@@ -188,28 +175,22 @@ static int applicable_ip_sq(const P *pln, const problem_rdft *p)
 }
 
 /**************************************************************/
-/* rank 2, in place, square transpose, recursive */
-static void apply_ip_sq_rec(const plan *ego_, R *I, R *O)
+/* rank 2, in place, square transpose, tiled */
+static void apply_ip_sq_tiled(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      UNUSED(O);
-     X(transpose_rec)(I, ego->d[0].n, ego->d[0].is, ego->d[0].os, ego->vl);
+     X(transpose_tiled)(I, ego->d[0].n, ego->d[0].is, ego->d[0].os, ego->vl);
 }
 
-#define applicable_ip_sq_rec applicable_ip_sq
-
-/**************************************************************/
-/* rank 2, in place, square transpose, recursive with buffer */
-static void apply_ip_sq_recbuf(const plan *ego_, R *I, R *O)
+static int applicable_ip_sq_tiled(const P *pln, const problem_rdft *p)
 {
-     const P *ego = (const P *) ego_;
-     UNUSED(O);
-     X(transpose_recbuf)(I, ego->d[0].n, ego->d[0].is, ego->d[0].os, ego->vl);
-}
+     return (1
+	     && applicable_ip_sq(pln, p)
 
-static int applicable_ip_sq_recbuf(const P *pln, const problem_rdft *p)
-{
-     return pln->vl <= 2 && applicable_ip_sq_rec(pln, p);
+	     /* somewhat arbitrary */
+	     && pln->vl * 2 < CACHESIZE / (16 * sizeof(R))
+	  );
 }
 
 /**************************************************************/
@@ -277,16 +258,14 @@ void X(rdft_rank0_register)(planner *p)
 	  int (*applicable)(const P *pln, const problem_rdft *p);
 	  const char *nam;
      } tab[] = {
-	  { apply_iter,      applicable_iter,      "rdft-rank0" },
-	  { apply_rec,       applicable_rec,       "rdft-rank0-rec" },
-	  { apply_recbuf,    applicable_recbuf,    "rdft-rank0-recbuf" },
-	  { apply_memcpy,    applicable_memcpy,    "rdft-rank0-memcpy" },
-	  { apply_ip_sq,     applicable_ip_sq,     "rdft-rank0-ip-sq" },
-	  { apply_ip_sq_rec, applicable_ip_sq_rec, "rdft-rank0-ip-sq-rec" },
+	  { apply_memcpy,  applicable_memcpy,  "rdft-rank0-memcpy" },
+	  { apply_iter,    applicable_iter,    "rdft-rank0-iter" },
+	  { apply_tiled,   applicable_tiled,   "rdft-rank0-tiled" },
+	  { apply_ip_sq,   applicable_ip_sq,   "rdft-rank0-ip-sq" },
 	  { 
-	       apply_ip_sq_recbuf,
-	       applicable_ip_sq_recbuf,
-	       "rdft-rank0-ip-sq-recbuf" 
+	       apply_ip_sq_tiled,
+	       applicable_ip_sq_tiled,
+	       "rdft-rank0-ip-sq-tiled" 
 	  },
      };
 
