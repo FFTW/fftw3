@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.34 2003-02-27 22:24:20 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.35 2003-02-28 04:27:48 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -324,9 +324,10 @@ fftw_plan fftw_plan_dft_1d(int n, fftw_complex *in, fftw_complex *out,
 The first argument, @code{n}, is the size of the transform you are
 trying to compute.  The size @code{n} can be any positive integer, but
 sizes that are products of small factors are transformed most
-efficiently.  The next two arguments are the input and output arrays
-of the transform; they can be the same, indicating an @dfn{in-place}
-transform. 
+efficiently (although even prime sizes use an @math{O(n lg n)}
+algorithm).  The next two arguments are the input and output arrays of
+the transform; they can be the same, indicating an @dfn{in-place}
+transform.
 @cindex in-place
 The fourth argument, @code{sign}, can be either @code{FFTW_FORWARD}
 (@code{-1}) or @code{FFTW_BACKWARD} (@code{+1}),
@@ -509,8 +510,11 @@ For an in-place transform,
 @code{in} and @code{out} are aliased to the same array, which must be
 big enough to hold both; so, the real array would actually have
 @code{2*(n/2+1)} elements, where the elements beyond the first @code{n}
-are unused padding.  The @math{k}th element of the complex array is exactly
-the same as the @math{k}th element of the corresponding complex DFT.
+are unused padding.  The @math{k}th element of the complex array is
+exactly the same as the @math{k}th element of the corresponding complex
+DFT.  All positive @code{n} are supported; products of small factors are
+most efficient, but an @math{O(n lg n)} algorithm is used even for prime
+sizes.
 
 As noted above, the c2r transform destroys its input array even for
 out-of-place transforms.  This can be prevented, if necessary, by
@@ -730,9 +734,14 @@ fftw_plan fftw_plan_r2r(int rank, const int *n, double *in, double *out,
 @findex fftw_plan_r2r
 
 Just as for the complex DFT, these plan 1d/2d/3d/multi-dimensional
-transforms for contiguous arrays in row-major order, transforming
-(real) input to output of the same size, where @code{n} specifies the
-@emph{physical} dimensions of the arrays.
+transforms for contiguous arrays in row-major order, transforming (real)
+input to output of the same size, where @code{n} specifies the
+@emph{physical} dimensions of the arrays.  All positive @code{n} are
+supported (with the exception of @code{n=1} REDFT00 kinds, noted in the
+real-even subsection below); products of small factors are most
+efficient (factorizing @code{n-1} and @code{n+1} for REDFT00 and RODFT00
+kinds, described below), but an @math{O(n lg n)} algorithm is used even
+for prime sizes.
 
 Each dimension has a @dfn{kind} parameter, of type
 @code{fftw_r2r_kind}, specifying the kind of r2r transform to be used
@@ -817,6 +826,7 @@ only if @code{n} is even)---in these two cases, the imaginary part is
 zero due to symmetries of the real-input DFT, and is not stored.
 Thus, the r2hc transform of @code{n} real values is a halfcomplex array of
 length @code{n}, and vice versa for hc2r.
+@cindex normalization
 
 Aside from the differing format, the output of
 @code{FFTW_R2HC}/@code{FFTW_HC2R} is otherwise exactly the same as for
@@ -845,6 +855,92 @@ interface (@pxref{Multi-Dimensional DFTs of Real Data}).
 @c =========>
 @node Real even/odd DFTs (cosine/sine transforms), The Discrete Hartley Transform, The Halfcomplex-format DFT, More DFTs of Real Data
 @subsection Real even/odd DFTs (cosine/sine transforms)
+
+The Fourier transform of a real-even function @math{f(-x) = f(x)} is
+real-even, and @math{i} times the Fourier transform of a real-odd
+function @math{f(-x) = -f(x)} is real-odd.  Similar results hold for a
+discrete Fourier transform, and thus for these symmetries the need for
+complex inputs/outputs is entirely eliminated.  Moreover, one gains a
+factor of two in speed/space from the fact that the data are real, and
+an additional factor of two from the even/odd symmetry.  The result is
+the real-even DFT (@dfn{REDFT}) and the real-odd DFT (@dfn{RODFT}), also
+known as the discrete cosine and sine transforms (@dfn{DCT} and @dfn{DST}),
+respectively.
+@cindex real-even DFT
+@cindex REDFT
+@cindex real-odd DFT
+@cindex RODFT
+@cindex DCT
+@cindex DST
+
+Because of the discrete sampling, one has an additional choice: is the
+data even/odd around a sampling point, or around the point halfway
+between two samples?  The latter corresponds to @emph{shifting} the
+samples by @emph{half} an interval, and gives rise to several transform
+variants denoted by REDFT@math{ab} and RODFT@math{ab}: @math{a} and
+@math{b} are @math{0} or @math{1}, and indicate whether the input
+(@math{a}) and/or output (@math{b}) are shifted by half a sample.  These
+are also known as types I-IV of the DCT and DST, and all four types are
+supported by FFTW's r2r interface.@footnote{There are also type V-VIII
+transforms, which correspond to a logical DFT of odd size @math{N},
+independent of the physical size @code{n} of the transform, but we do
+not support these.}
+
+The r2r kinds for the various REDFT and RODFT types supported by FFTW,
+along with the boundary conditions at both ends of the @emph{input} array
+(@code{n} real numbers @code{in[j=0..n-1]}), are:
+
+@itemize @bullet
+
+@item
+@code{FFTW_REDFT00} (DCT-I): even around @math{j=0} and even around @math{j=n-1}.
+@ctindex FFTW_REDFT00
+
+@code{FFTW_REDFT10} (DCT-II): even around @math{j=-0.5} and even around @math{j=n-0.5}.
+@ctindex FFTW_REDFT10
+
+@code{FFTW_REDFT01} (DCT-III): even around @math{j=0} and odd around @math{j=n}.
+@ctindex FFTW_REDFT01
+
+@code{FFTW_REDFT11} (DCT-IV): even around @math{j=-0.5} and odd around @math{j=n-0.5}.
+@ctindex FFTW_REDFT11
+
+@item
+@code{FFTW_RODFT00} (DST-I): odd around @math{j=-1} and odd around @math{j=n}.
+@ctindex FFTW_RODFT00
+
+@code{FFTW_RODFT10} (DST-II): odd around @math{j=-0.5} and odd around @math{j=n-0.5}.
+@ctindex FFTW_RODFT10
+
+@code{FFTW_RODFT01} (DST-III): odd around @math{j=-1} and even around @math{j=n-1}.
+@ctindex FFTW_RODFT01
+
+@code{FFTW_RODFT11} (DST-IV): odd around @math{j=-0.5} and even around @math{j=n-0.5}.
+@ctindex FFTW_RODFT11
+
+@end itemize
+
+All of these transforms are invertible.  The inverse of R*DFT00 is
+R*DFT00; of R*DFT10 is R*DFT01 and vice versa; and of R*DFT11 is
+R*DFT11.  However, the transforms computed by FFTW are unnormalized,
+exactly like the corresponding real and complex DFTs, so computing a
+transform followed by its inverse yields the original array scaled by
+@math{N}, where @math{N} is the @emph{logical} DFT size.  For REDFT00,
+@math{N=2(n-1)}; for RODFT00, @math{N=2(n+1)}; otherwise, @math{N=2n}.
+@cindex normalization
+
+FFTW is most efficient when @math{N} is a product of small factors; note
+that this @emph{differs} from the factorization of the physical size
+@code{n} for REDFT00 and RODFT00!  There is another oddity: @code{n=1}
+REDFT00 transforms correspond to @code{N=0}, and so are @emph{not
+defined} (the planner will return @code{NULL}).  Otherwise, any positive
+@code{n} is supported.
+
+For the precise mathematical definitions of these transforms, as used by
+FFTW, see @ref{What FFTW Really Computes}.  (For people accustomed to the
+DCT/DST, FFTW's definitions have a coefficient of @math{2} in front of
+the cos/sin functions so that they correspond precisely to an even/odd
+DFT of size @math{N}.)
 
 @c =========>
 @node The Discrete Hartley Transform,  , Real even/odd DFTs (cosine/sine transforms), More DFTs of Real Data
