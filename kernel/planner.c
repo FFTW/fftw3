@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.148 2003-04-05 02:35:49 stevenj Exp $ */
+/* $Id: planner.c,v 1.149 2003-04-08 09:38:09 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -48,7 +48,8 @@
 
 static unsigned addmod(unsigned a, unsigned b, unsigned p)
 {
-#if 0
+     /* gcc-2.95/sparc produces incorrect code for the fast version below. */
+#if defined(__sparc__) && defined(__GNUC__)
      /* slow version  */
      return (a + b) % p;
 #else
