@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.53 2002-07-15 23:28:30 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.54 2002-07-21 01:06:50 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -501,5 +501,39 @@ int X(is_prime)(uint n);
 void X(null_awake)(plan *ego, int awake);
 int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
+
+/*-----------------------------------------------------------------------*/
+/* macros used in codelets to reduce source code size */
+
+#ifdef FFTW_LDOUBLE
+#  define K(x) ((R) x##L)
+#else
+#  define K(x) ((R) x)
+#endif
+#define DK(name, value) const R name = K(value)
+
+/* FMA macros */
+
+#if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
+static __inline__ R FMA(R a, R b, R c)
+{
+     return a * b + c;
+}
+
+static __inline__ R FMS(R a, R b, R c)
+{
+     return a * b - c;
+}
+
+static __inline__ R FNMS(R a, R b, R c)
+{
+     return -(a * b - c);
+}
+
+#else
+#define FMA(a, b, c) (((a) * (b)) + (c))
+#define FMS(a, b, c) (((a) * (b)) - (c))
+#define FNMS(a, b, c) ((c) - ((a) * (b)))
+#endif
 
 #endif /* __IFFTW_H__ */

@@ -1,5 +1,5 @@
-AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
--I$(top_srcdir)/dft/codelets
+AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/rdft	\
+-I$(top_srcdir)/rdft/codelets
 CFLAGS = @CFLAGS@ @CODELET_OPTIM@
 noinst_LTLIBRARIES = librdft_codelets_r2hc.la
 

@@ -182,6 +182,8 @@ AC_OUTPUT([
    dft/k7/Makefile
    dft/k7/codelets/Makefile
 
+   rdft/Makefile
+   rdft/codelets/Makefile
    rdft/codelets/r2hc/Makefile
    rdft/codelets/hc2r/Makefile
 

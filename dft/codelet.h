@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.19 2002-07-13 20:05:43 stevenj Exp $ */
+/* $Id: codelet.h,v 1.20 2002-07-21 01:06:50 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -30,38 +30,6 @@
 
 #include <math.h>
 #include "ifftw.h"
-
-/* macros used in codelets to reduce source code size */
-#ifdef FFTW_LDOUBLE
-#  define K(x) ((R) x##L)
-#else
-#  define K(x) ((R) x)
-#endif
-#define DK(name, value) const R name = K(value)
-
-/* FMA macros */
-
-#if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
-static __inline__ R FMA(R a, R b, R c)
-{
-     return a * b + c;
-}
-
-static __inline__ R FMS(R a, R b, R c)
-{
-     return a * b - c;
-}
-
-static __inline__ R FNMS(R a, R b, R c)
-{
-     return -(a * b - c);
-}
-
-#else
-#define FMA(a, b, c) (((a) * (b)) + (c))
-#define FMS(a, b, c) (((a) * (b)) - (c))
-#define FNMS(a, b, c) ((c) - ((a) * (b)))
-#endif
 
 /**************************************************************
  * types of codelets

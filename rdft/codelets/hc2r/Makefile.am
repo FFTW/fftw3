@@ -1,5 +1,5 @@
-AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
--I$(top_srcdir)/dft/codelets
+AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/rdft	\
+-I$(top_srcdir)/rdft/codelets
 CFLAGS = @CFLAGS@ @CODELET_OPTIM@
 noinst_LTLIBRARIES = librdft_codelets_hc2r.la
 
@@ -34,7 +34,7 @@ hc2r_%.c:  $(CODELET_DEPS) $(GEN_HC2R)
 	($(PRELUDE_COMMANDS); $(GEN_HC2R) $(FLAGS_HC2R) -n $* -name hc2r_$* -include "hc2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hb_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
-	($(PRELUDE_COMMANDS); $(GEN_HC2HC) $(FLAGS_HB) -n $* -dit -name hb_$* -include "hb.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS); $(GEN_HC2HC) $(FLAGS_HB) -n $* -dif -name hb_$* -include "hb.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hc2rIII_%.c:  $(CODELET_DEPS) $(GEN_HC2R)
 	($(PRELUDE_COMMANDS); $(GEN_HC2R) $(FLAGS_HC2R) -n $* -name hc2rIII_$* -dft-III -include "hc2rIII.h") | $(ADD_DATE) | $(INDENT) >$@

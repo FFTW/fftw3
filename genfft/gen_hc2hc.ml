@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2hc.ml,v 1.3 2002-07-20 21:54:39 athena Exp $ *)
+(* $Id: gen_hc2hc.ml,v 1.4 2002-07-21 01:06:50 stevenj Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2hc.ml,v 1.3 2002-07-20 21:54:39 athena Exp $"
+let cvsid = "$Id: gen_hc2hc.ml,v 1.4 2002-07-21 01:06:50 stevenj Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -133,7 +133,7 @@ let generate n =
   in
 
   let tree = 
-    Fcn ("static void", name,
+    Fcn ("static const R *", name,
 	 [Decl (C.realtypep, rioarray);
 	  Decl (C.realtypep, iioarray);
 	  Decl (C.constrealtypep, twarray);

@@ -8,7 +8,7 @@ else
 GENFFT =
 endif
 
-SUBDIRS=support $(GENFFT) kernel simd dft libbench . tests
+SUBDIRS=support $(GENFFT) kernel simd dft rdft libbench . tests
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS
 
 lib@PRECISION@fftw3_la_SOURCES = 
