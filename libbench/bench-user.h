@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: bench-user.h,v 1.2 2002-06-06 22:03:17 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -174,6 +174,7 @@ extern void bench_free(void *ptr);
 #define STACK_FREE(x) bench_free(x)
 #endif
 
+extern int verbose;
 
 /**************************************************************
  * assert

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vecloop.c,v 1.1 2002-06-06 12:07:33 athena Exp $ */
+/* $Id: vecloop.c,v 1.2 2002-06-06 22:03:17 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -199,7 +199,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
 			       fftw_tensor_copy_except(p->vecsz, 
 						       (uint) vecloop_dim),
 			       p->ri, p->ii, p->ro, p->io);
-     cld = planner->mkplan(planner, cldp);
+     cld = planner->adt->mkplan(planner, cldp);
      fftw_problem_destroy(cldp);
      if (!cld)
 	  return (plan *) 0;

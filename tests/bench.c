@@ -1,6 +1,7 @@
 
 #include "bench-user.h"
 #include <math.h>
+#include <stdio.h>
 
 #include "fftw.h"
 
@@ -68,8 +69,14 @@ void setup(struct problem *p)
 	       fftw_mktensor_rowmajor(p->rank, p->n, p->n, 2, 2),
 	       fftw_mktensor_1d(1, 0, 0),
 	       ri, ii, ro, io);
-     pln = plnr->mkplan(plnr, prblm);
+     pln = plnr->adt->mkplan(plnr, prblm);
      BENCH_ASSERT(pln);
+     
+     if (verbose) {
+	  pln->adt->print(pln, printf);
+	  printf("\n");
+     }
+
      pln->adt->awake(pln, AWAKE);
 }
 
@@ -88,11 +95,18 @@ void doit(int iter, struct problem *p)
 void done(struct problem *p)
 {
      UNUSED(p);
+
+#    ifdef FFTW_DEBUG
+       if (verbose >= 2) 
+	    fftw_planner_dump(plnr, verbose - 2);
+#    endif
+
      fftw_plan_destroy(pln);
      fftw_problem_destroy(prblm);
      fftw_planner_destroy(plnr);
 
 #    ifdef FFTW_DEBUG
-        fftw_malloc_print_minfo();
+       if (verbose >= 1) 
+	    fftw_malloc_print_minfo();
 #    endif
 }

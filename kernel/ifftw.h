@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.12 2002-06-06 12:07:33 athena Exp $ */
+/* $Id: ifftw.h,v 1.13 2002-06-06 22:03:17 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -225,12 +225,14 @@ void fftw_solver_destroy(solver *ego);
 /* planner.c */
 
 typedef struct pair_s pair; /* opaque */
+typedef struct solutions_s solutions; /* opaque */
 
 typedef struct {
      solver *(*car)(pair *cons);
      pair *(*cdr)(pair *cons);
      pair *(*solvers)(planner *ego);
      void (*register_solver)(planner *ego, solver *s);
+     plan *(*mkplan)(planner *ego, problem *p);
 } planner_adt;
 
 struct planner_s {
@@ -239,8 +241,13 @@ struct planner_s {
      void (*hook)(plan *plan, problem *p); 
 
      pair *solvers;
+     solutions **solutions;
      void (*destroy)(planner *ego);
-     plan *(*mkplan)(planner *ego, problem *p);
+     plan *(*inferior_mkplan)(planner *ego, problem *p);
+     uint hashsiz;
+     uint cnt;
+     int memoize;               /* If TRUE, turn memoization on */
+     int memoize_failures;	/* if TRUE, also memoize unfeasible problems */
 };
 
 planner *fftw_mkplanner(size_t sz, 
@@ -248,6 +255,10 @@ planner *fftw_mkplanner(size_t sz,
 			void (*destroy) (planner *));
 void fftw_planner_destroy(planner *ego);
 void fftw_planner_set_hook(planner *p, void (*hook)(plan *, problem *));
+
+#ifdef FFTW_DEBUG
+  void fftw_planner_dump(planner *ego, int verbose);
+#endif
 
 /*
    Iterate over all solvers.   Read:

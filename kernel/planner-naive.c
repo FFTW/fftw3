@@ -18,14 +18,14 @@
  *
  */
 
-/* $Id: planner-naive.c,v 1.3 2002-06-05 15:28:09 athena Exp $ */
+/* $Id: planner-naive.c,v 1.4 2002-06-06 22:03:17 athena Exp $ */
 #include "ifftw.h"
 
 /* naive planner with no memoization */
 
 static plan *mkplan(planner *ego, problem *p)
 {
-     plan *best = (plan *) 0;
+     plan *best = 0;
 
      FORALL_SOLVERS(ego, s, {
 	  plan *pln = s->adt->mkplan(s, p, ego);

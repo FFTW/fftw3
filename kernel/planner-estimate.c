@@ -18,12 +18,12 @@
  *
  */
 
-/* $Id: planner-estimate.c,v 1.1 2002-06-04 20:28:58 athena Exp $ */
+/* $Id: planner-estimate.c,v 1.2 2002-06-06 22:03:17 athena Exp $ */
 #include "ifftw.h"
 
 static plan *mkplan(planner *ego, problem *p)
 {
-     plan *best = (plan *) 0;
+     plan *best = 0;
 
      FORALL_SOLVERS(ego, s, {
 	  plan *pln = s->adt->mkplan(s, p, ego);

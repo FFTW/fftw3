@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: trig.ml,v 1.1.1.1 2002-06-02 18:42:31 athena Exp $ *)
+(* $Id: trig.ml,v 1.2 2002-06-06 22:03:17 athena Exp $ *)
 
 (* trigonometric transforms *)
 open Util
@@ -137,22 +137,22 @@ let make_dst dft =
 	    input))
 
 (*
- * DCT-I:  y[k] = sum x[j] cos(pi * j * k / n)
+ * DST-I:  y[k] = sum x[j] sin(pi * j * k / n)
  *)
 let dstI = make_dst dftI
 
 (*
- * DCT-II:  y[k] = sum x[j] cos(pi * (j + 1/2) * k / n)
+ * DST-II:  y[k] = sum x[j] sin(pi * (j + 1/2) * k / n)
  *)
 let dstII = make_dst dftII
 
 (*
- * DCT-III:  y[k] = sum x[j] cos(pi * j * (k + 1/2) / n)
+ * DST-III:  y[k] = sum x[j] sin(pi * j * (k + 1/2) / n)
  *)
 let dstIII = make_dst dftIII
 
 (*
- * DCT-IV  y[k] = sum x[j] cos(pi * (j + 1/2) * (k + 1/2) / n)
+ * DST-IV  y[k] = sum x[j] sin(pi * (j + 1/2) * (k + 1/2) / n)
  *)
 let dstIV = make_dst dftIV
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.2 2002-06-05 23:02:56 athena Exp $ */
+/* $Id: ct.c,v 1.3 2002-06-06 22:03:17 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -122,7 +122,7 @@ plan *fftw_mkplan_dft_ct(const solver_ct *ego,
      m = n / r;
 
      cldp = adt->mkcld(ego, p);
-     cld = plnr->mkplan(plnr, cldp);
+     cld = plnr->adt->mkplan(plnr, cldp);
      fftw_problem_destroy(cldp);
 
      if (!cld)
