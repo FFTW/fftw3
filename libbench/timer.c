@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.3 2002-09-14 03:07:39 stevenj Exp $ */
+/* $Id: timer.c,v 1.4 2003-01-14 05:23:04 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -59,6 +59,28 @@ static double elapsed(mytime t1, mytime t0)
 {
      return (double)(t1.tv_sec - t0.tv_sec) +
 	  (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6;
+}
+
+#define HAVE_TIMER
+#endif
+
+#if !defined(HAVE_TIMER) && (defined(__WIN32__) || defined(WIN32) || defined(_WINDOWS))
+#include <windows.h>
+typedef LARGE_INTEGER mytime;
+
+static mytime get_time(void)
+{
+     mytime tv;
+     QueryPerformanceCounter(&tv);
+     return tv;
+}
+
+static double elapsed(mytime t1, mytime t0)
+{
+     LARGE_INTEGER freq;
+     QueryPerformanceFrequency(&freq);
+     return ((double) (t1.QuadPart - t0.QuadPart)) /
+	  ((double) freq.QuadPart);
 }
 
 #define HAVE_TIMER
