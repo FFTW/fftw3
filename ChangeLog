@@ -1,3 +1,327 @@
+2002-09-16  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/ct-dif.c,
+	/home/fftw/Repository/fftw3/dft/ct-dit.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditbuf.c,
+	/home/fftw/Repository/fftw3/dft/ct.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-buf.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c:
+	partially-ordered impatience
+
+2002-09-14  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner-naive.c,
+	/home/fftw/Repository/fftw3/kernel/planner-score.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Removed all that
+	planner inheritance crap.
+
+2002-09-14  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: string.h is used
+	for more than strlen
+
+2002-09-14  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: Reduced hashtable
+	size by 1/6 (on 32-bit machines) at the expense of messier
+	planner.
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: Only print wisdom if
+	verbose > 3
+
+	* /home/fftw/Repository/fftw3/genfft-k7/variable.ml,
+	/home/fftw/Repository/fftw3/genfft/variable.ml: Changed syntax of
+	temporaries to avoid shadowing library functions (which is
+	harmless but I hate the warning)
+
+2002-09-14  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/acinclude.m4,
+	/home/fftw/Repository/fftw3/configure.ac,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/kernel/alloc.c,
+	/home/fftw/Repository/fftw3/kernel/assert.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/md5.c,
+	/home/fftw/Repository/fftw3/kernel/planner-score.c,
+	/home/fftw/Repository/fftw3/kernel/primes.c,
+	/home/fftw/Repository/fftw3/kernel/scan.c,
+	/home/fftw/Repository/fftw3/libbench/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench/bench.h,
+	/home/fftw/Repository/fftw3/libbench/report.c,
+	/home/fftw/Repository/fftw3/libbench/timer.c,
+	/home/fftw/Repository/fftw3/libbench/util.c,
+	/home/fftw/Repository/fftw3/libbench/verify.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/tests/verify-lib.c: only add warnings
+	in debug/maintainer mode, and add a few more warning flags;
+	eliminate more warnings; add support for posix_memalign (broken in
+	glibc, grrr)
+
+2002-09-14  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/twiddle.c: Explicit cast
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/kernel/primes.c: Use double-hashing.
+	This allows a slightly higher load factor at the expense of a
+	messier computation of the hashtable size.
+
+2002-09-13  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/genfft/magic.ml: typo
+
+2002-09-13  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Slight change in
+	hash table growth functions.
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: More statistics.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Clearer logic.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Oops.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Cleaned up
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Deal properly with
+	infeasible problems.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Redundantly
+	initialize hash table to prevent valgrind warnings.
+
+2002-09-12  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/md5.c: Removed relics from
+	past.
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: md5hash a problem
+	only once.
+
+	* /home/fftw/Repository/fftw3/genfft-k7/genUtil.ml,
+	/home/fftw/Repository/fftw3/genfft-k7/gen_notw.ml,
+	/home/fftw/Repository/fftw3/genfft-k7/gen_twiddle.ml: Renamed k7
+	codelets
+
+2002-09-12  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c: FORBID_DHT_R2HC ->
+	DHT_R2HC_VERBOTEN for consistency
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: removed obsolete
+	macro
+
+2002-09-12  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/simd/n1b.c,
+	/home/fftw/Repository/fftw3/dft/simd/n1f.c,
+	/home/fftw/Repository/fftw3/dft/simd/t1b.c,
+	/home/fftw/Repository/fftw3/dft/simd/t1f.c: Split flags in SIMD
+	code.
+
+	* /home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c: Forgot to
+	fix threads
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/ct-dif.c,
+	/home/fftw/Repository/fftw3/dft/ct-dit.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditbuf.c,
+	/home/fftw/Repository/fftw3/dft/ct.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/rank0.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner-naive.c,
+	/home/fftw/Repository/fftw3/kernel/planner-score.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-buf.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Split flags into
+	planner_flags and problem_flags
+
+2002-09-12  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: tetrameter
+
+2002-09-12  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Overwrite less
+	impatient solutions properly.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Oops.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Keep less
+	impatient solution in case of conflict.  Paranoid cast to uint in
+	certain places.
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Complete
+	reimplementation of planner hash table.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: planner->cnt was
+	not properly decremented.
+
+2002-09-11  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/NEWS: typo
+
+2002-09-09  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Simplified
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Always overwrite
+	old wisdom with new, in case the old is corrupt/conclicting.
+
+2002-09-09  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/plan.c: added quote/joke
+
+2002-09-09  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/md5.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/kernel/print.c,
+	/home/fftw/Repository/fftw3/kernel/scan.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Completed wisdom import
+
+	* /home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/md5.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c: Slight cleanup of md5
+	interface.
+
+2002-09-04  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner-naive.c,
+	/home/fftw/Repository/fftw3/kernel/planner-score.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c: More consistent
+	protocol between planner and inferior.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: I can't think of
+	any situation where saving infeasible problems would be desirable.
+	Removed relevant code.
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/kernel/solvtab.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Encoder registrar's
+	names in wisdom.  Remove export_conf, since a separate program can
+	now generate it.
+
+2002-09-03  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Fixed typo
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Fixed broken
+	trochaic meter.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Initialize
+	planner->score.  It is correct to leave it uninitialized, but I
+	don't want people to send reports about purify complaining.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: More latin
+	silliness
+
+2002-09-02  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/ChangeLog: updated
+
+	* /home/fftw/Repository/fftw3/kernel/timer.c:
+	added clock() getseconds timer
+
+2002-09-02  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/rdft/indirect.c: Oops
+
+	* /home/fftw/Repository/fftw3/dft/indirect.c, /home/fftw/Repository/fftw3/kernel/ifftw.h, /home/fftw/Repository/fftw3/rdft/indirect.c:
+	Experimental INDIRECT_VERBOTEN flag (not used)
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c, /home/fftw/Repository/fftw3/dft/indirect.c, /home/fftw/Repository/fftw3/kernel/ifftw.h, /home/fftw/Repository/fftw3/rdft/buffered.c, /home/fftw/Repository/fftw3/rdft/buffered2.c, /home/fftw/Repository/fftw3/rdft/indirect.c:
+	Do not allow buffering in children of indirect solvers.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Oops
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c:
+	Hash sizeof(R) as part of wisdom.
+
+2002-09-02  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/configure.ac:
+	added --enable-float synonym for --enable-single (since with have --enable-long-double)
+
+2002-09-02  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/Makefile.am, /home/fftw/Repository/fftw3/dft/problem.c, /home/fftw/Repository/fftw3/dft/zero.c:
+	zerotens is now in its own file, so it does not cause dft to be linked
+	in if only rdft is used.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Removed unused var.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c:
+	Split insert() in preparation for wisdom import
+
+	* /home/fftw/Repository/fftw3/dft/Makefile.am, /home/fftw/Repository/fftw3/dft/dft.h, /home/fftw/Repository/fftw3/dft/verify.c, /home/fftw/Repository/fftw3/kernel/Makefile.am, /home/fftw/Repository/fftw3/kernel/dotens.c, /home/fftw/Repository/fftw3/kernel/dotens2.c, /home/fftw/Repository/fftw3/kernel/ifftw.h, /home/fftw/Repository/fftw3/kernel/verify-lib.c, /home/fftw/Repository/fftw3/kernel/verify.h, /home/fftw/Repository/fftw3/rdft/Makefile.am, /home/fftw/Repository/fftw3/rdft/rdft.h, /home/fftw/Repository/fftw3/rdft/verify.c, /home/fftw/Repository/fftw3/reodft/Makefile.am, /home/fftw/Repository/fftw3/reodft/reodft.h, /home/fftw/Repository/fftw3/reodft/verify.c, /home/fftw/Repository/fftw3/tests/Makefile.am, /home/fftw/Repository/fftw3/tests/bench.c, /home/fftw/Repository/fftw3/tests/debug.h, /home/fftw/Repository/fftw3/tests/dotens.c, /home/fftw/Repository/fftw3/tests/dotens2.c, /home/fftw/Repository/fftw3/tests/verify-dft.c, /home/fftw/Repository/fftw3/tests/verify-lib.c, /home/fftw/Repository/fftw3/tests/verify-rdft.c, /home/fftw/Repository/fftw3/tests/verify-reodft.c, /home/fftw/Repository/fftw3/tests/verify.h:
+	Moved debugging infrastructure to test directory so that it is not
+	linked into the shared library.
+
+	* /home/fftw/Repository/fftw3/kernel/print.c, /home/fftw/Repository/fftw3/kernel/planner.c:
+	Reactivated wisdom export
+
 2002-09-02  Steven G. Johnson  <stevenj@ab-initio>
 
 	* kernel/timer.c: added clock() getseconds timer
