@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.31 2003-04-05 13:18:23 athena Exp $ */
+/* $Id: problem.c,v 1.32 2003-04-05 14:29:11 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -34,9 +34,9 @@ static void hash(const problem *p_, md5 *m)
 {
      const problem_dft *p = (const problem_dft *) p_;
      X(md5puts)(m, "dft");
-     X(md5int)(m, UNTAINT(p->ri) == UNTAINT(p->ro));
-     X(md5ptrdiff)(m, UNTAINT(p->ii) - UNTAINT(p->ri));
-     X(md5ptrdiff)(m, UNTAINT(p->io) - UNTAINT(p->ro));
+     X(md5int)(m, p->ri == p->ro);
+     X(md5ptrdiff)(m, p->ii - p->ri);
+     X(md5ptrdiff)(m, p->io - p->ro);
      X(md5int)(m, X(alignment_of)(p->ri));
      X(md5int)(m, X(alignment_of)(p->ii));
      X(md5int)(m, X(alignment_of)(p->ro));
@@ -49,11 +49,11 @@ static void print(problem *ego_, printer *p)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
      p->print(p, "(dft %d %d %d %td %td %T %T)", 
-	      UNTAINT(ego->ri) == UNTAINT(ego->ro),
+	      ego->ri == ego->ro,
 	      X(alignment_of)(ego->ri),
 	      X(alignment_of)(ego->ro),
-	      UNTAINT(ego->ii) - UNTAINT(ego->ri), 
-	      UNTAINT(ego->io) - UNTAINT(ego->ro),
+	      ego->ii - ego->ri, 
+	      ego->io - ego->ro,
 	      ego->sz,
 	      ego->vecsz);
 }
@@ -89,6 +89,13 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
      A(X(tensor_kosherp)(sz));
      A(X(tensor_kosherp)(vecsz));
 
+     /* conditions for correctness. */
+     /* FIXME: use A instead of CK */
+     CK(TAINTOF(ri) == TAINTOF(ii));
+     CK(TAINTOF(ro) == TAINTOF(io));
+     CK(UNTAINT(ri) != UNTAINT(ro) || ri == ro);
+     CK(UNTAINT(ii) != UNTAINT(io) || ii == io);
+
      ego->sz = X(tensor_compress)(sz);
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->ri = ri;
@@ -97,6 +104,8 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
      ego->io = io;
 
      A(FINITE_RNK(ego->sz->rnk));
+     CK((((long)ri) & 3) == (((long)ii) & 3));
+     CK((((long)ro) & 3) == (((long)io) & 3));
      return &(ego->super);
 }
 

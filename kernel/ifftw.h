@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.219 2003-04-05 11:19:25 athena Exp $ */
+/* $Id: ifftw.h,v 1.220 2003-04-05 14:29:11 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -714,9 +714,11 @@ int X(ct_uglyp)(int min_n, int n, int r);
 R *X(taint)(R *p, int s);
 #define TAINT(p, s) X(taint)(p, s)
 #define UNTAINT(p) ((R *) (((uintptr_t) (p)) & ~(uintptr_t)3))
+#define TAINTOF(p) (((uintptr_t)(p)) & 3)
 #else
 #define TAINT(p, s) (p)
 #define UNTAINT(p) (p)
+#define TAINTOF(p) 0
 #endif
 
 #ifdef FFTW_DEBUG_ALIGNMENT

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.29 2003-04-05 13:18:23 athena Exp $ */
+/* $Id: problem2.c,v 1.30 2003-04-05 14:29:11 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -35,9 +35,9 @@ static void hash(const problem *p_, md5 *m)
 {
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
      X(md5puts)(m, "rdft2");
-     X(md5int)(m, UNTAINT(p->r) == UNTAINT(p->rio));
-     X(md5int)(m, UNTAINT(p->r) == UNTAINT(p->iio));
-     X(md5ptrdiff)(m, UNTAINT(p->iio) - UNTAINT(p->rio));
+     X(md5int)(m, p->r == p->rio);
+     X(md5int)(m, p->r == p->iio);
+     X(md5ptrdiff)(m, p->iio - p->rio);
      X(md5int)(m, X(alignment_of)(p->r));
      X(md5int)(m, X(alignment_of)(p->rio)); 
      X(md5int)(m, X(alignment_of)(p->iio)); 
@@ -51,8 +51,8 @@ static void print(problem *ego_, printer *p)
      problem_rdft2 *ego = (problem_rdft2 *) ego_;
      p->print(p, "(rdft2 %d %td %td %d %T %T)", 
 	      X(alignment_of)(ego->r),
-	      UNTAINT(ego->rio) - UNTAINT(ego->r), 
-	      UNTAINT(ego->iio) - UNTAINT(ego->r),
+	      ego->rio - ego->r, 
+	      ego->iio - ego->r,
 	      (int)(ego->kind),
 	      ego->sz,
 	      ego->vecsz);
@@ -99,6 +99,12 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
      A(X(tensor_kosherp)(sz));
      A(X(tensor_kosherp)(vecsz));
      A(FINITE_RNK(sz->rnk));
+
+     /* conditions for correctness. */
+     /* FIXME: use A instead of CK */
+     CK(TAINTOF(rio) == TAINTOF(iio));
+     CK(UNTAINT(r) != UNTAINT(rio) || r == rio);
+     CK(UNTAINT(r) != UNTAINT(iio) || r == iio);
 
      if (sz->rnk > 1) { /* have to compress rnk-1 dims separately, ugh */
 	  tensor *szc = X(tensor_copy_except)(sz, sz->rnk - 1);
