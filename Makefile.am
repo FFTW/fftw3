@@ -10,7 +10,7 @@ endif
 
 SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft threads api	\
 libbench2 . tests doc tools
-EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in
+EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in acx_pthread.m4
 
 libfftw3@PREC_SUFFIX@_la_SOURCES = 
 
