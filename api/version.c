@@ -18,11 +18,35 @@
  *
  */
 
-/* $Id: version.c,v 1.2 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: version.c,v 1.3 2003-03-16 14:24:19 athena Exp $ */
 
 #include "config.h"
 #include "ifftw.h"
 
-const char *const X(version) = PACKAGE "-" VERSION;
+
 const char *const X(cc) = FFTW_CC;
 const char *const X(codelet_optim) = CODELET_OPTIM;
+
+
+const char *const X(version) = PACKAGE "-" VERSION
+
+#if HAVE_SSE
+   "-sse"
+#endif
+
+#if HAVE_SSE2
+   "-sse2"
+#endif
+
+#if HAVE_ALTIVEC
+   "-altivec"
+#endif
+
+#if HAVE_3DNOW
+   "-3dnow"
+#endif
+
+#if HAVE_K7
+   "-k7"
+#endif
+;
