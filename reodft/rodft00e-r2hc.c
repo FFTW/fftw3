@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.1 2002-08-19 23:40:18 stevenj Exp $ */
+/* $Id: rodft00e-r2hc.c,v 1.2 2002-08-19 23:48:56 stevenj Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -36,6 +36,9 @@ typedef struct {
      int is, os;
      uint n;
 } P;
+
+/* Use the trick from FFTPACK, also documented in a similar form
+   by Numerical Recipes. */
 
 static void apply(plan *ego_, R *I, R *O)
 {
