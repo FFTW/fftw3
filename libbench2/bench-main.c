@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.10 2003-04-05 12:11:56 athena Exp $ */
+/* $Id: bench-main.c,v 1.11 2003-04-09 12:44:13 athena Exp $ */
 
 #include "getopt.h"
 #include "bench.h"
@@ -40,13 +40,10 @@ static struct option long_options[] =
   {"print-precision", no_argument, 0, 402},
   {"print-time-min", no_argument, 0, 400},
   {"random-seed", required_argument, 0, 404},
-  {"report-avg-mflops", no_argument, 0, 302},
-  {"report-avg-time", no_argument, 0, 312},
   {"report-benchmark", no_argument, 0, 320},
-  {"report-max-mflops", no_argument, 0, 301},
   {"report-mflops", no_argument, 0, 300},
-  {"report-min-time", no_argument, 0, 311},
   {"report-time", no_argument, 0, 310},
+  {"report-verbose", no_argument, 0, 330},
   {"speed", required_argument, 0, 's'},
   {"time-min", required_argument, 0, 't'},
   {"time-repeat", required_argument, 0, 'r'},
@@ -79,7 +76,7 @@ int bench_main(int argc, char *argv[])
 
      check_alignment(&tol);
 
-     report = report_time; /* default */
+     report = report_verbose; /* default */
      verbose = 0;
 
      tol = SINGLE_PRECISION ? 1.0e-3 : 1.0e-10;
@@ -129,25 +126,17 @@ int bench_main(int argc, char *argv[])
 	      case 300: /* --report-mflops */
 		   report = report_mflops;
 		   break;
-	      case 301: /* --report-max-mflops */
-		   report = report_max_mflops;
-		   break;
-	      case 302: /* --report-avg-mflops */
-		   report = report_avg_mflops;
-		   break;
 
 	      case 310: /* --report-time */
 		   report = report_time;
 		   break;
-	      case 311: /* --report-min-time */
-		   report = report_min_time;
-		   break;
-	      case 312: /* --report-avg-time */
-		   report = report_avg_time;
-		   break;
 
  	      case 320: /* --report-benchmark */
 		   report = report_benchmark;
+		   break;
+
+ 	      case 330: /* --report-verbose */
+		   report = report_verbose;
 		   break;
 
 	      case 400: /* --print-time-min */

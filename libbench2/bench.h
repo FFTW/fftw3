@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.8 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: bench.h,v 1.9 2003-04-09 12:44:13 athena Exp $ */
 
 /* benchmark program definitions */
 #include "bench-user.h"
@@ -32,12 +32,9 @@ extern void timer_init(double tmin, int repeat);
 extern void (*report)(const bench_problem *p, double *t, int st);
 
 void report_mflops(const bench_problem *p, double *t, int st);
-void report_max_mflops(const bench_problem *p, double *t, int st);
-void report_avg_mflops(const bench_problem *p, double *t, int st);
 void report_time(const bench_problem *p, double *t, int st);
-void report_min_time(const bench_problem *p, double *t, int st);
-void report_avg_time(const bench_problem *p, double *t, int st);
 void report_benchmark(const bench_problem *p, double *t, int st);
+void report_verbose(const bench_problem *p, double *t, int st);
 
 void report_can_do(const char *param);
 void report_info(const char *param);
