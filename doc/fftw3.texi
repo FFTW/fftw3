@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.138 2003-03-14 10:58:53 athena Exp $
+@comment $Id: fftw3.texi,v 1.139 2003-03-14 17:26:04 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -563,7 +563,7 @@ Really Computes}.
 @cindex DFT
 @cindex normalization
 
-If you have a C compiler, such as @code{gcc}, that supportis the
+If you have a C compiler, such as @code{gcc}, that supports the
 recent C99 standard, and you @code{#include <complex.h>} @emph{before}
 @code{<fftw3.h>}, then @code{fftw_complex} is the native
 double-precision complex type and you can manipulate it with ordinary
@@ -923,7 +923,7 @@ as is described below.)
 
 In the current version of FFTW, all r2r transforms except for the
 halfcomplex type are computed via pre- or post-processing of
-halfcomplex transforms, and are therefore they are not as fast as they
+halfcomplex transforms, and they are therefore not as fast as they
 could be.  Since most other general DCT/DST codes employ a similar
 algorithm, however, FFTW's implementation should provide at least
 competitive performance.
