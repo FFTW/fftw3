@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_c.ml,v 1.10 2005-02-06 21:59:39 athena Exp $ *)
+(* $Id: gen_notw_c.ml,v 1.11 2005-02-10 02:35:01 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_c.ml,v 1.10 2005-02-06 21:59:39 athena Exp $"
+let cvsid = "$Id: gen_notw_c.ml,v 1.11 2005-02-10 02:35:01 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -50,6 +50,12 @@ let speclist = [
   Arg.String(fun x -> uovstride := arg_to_stride x),
   " specialize for given output vector stride"
 ] 
+
+let nonstandard_optimizer list_of_pairable_stores dag =
+  let sched = standard_scheduler dag in
+  let annot = Annotate.annotate list_of_pairable_stores sched in
+  let _ = dump_asched annot in
+  annot
 
 let generate n =
   let riarray = "xi"
@@ -89,8 +95,16 @@ let generate n =
       (C.array_subscript roarray vostride)
       (C.array_subscript "BUG" vostride)
       locations in
+  let list_of_pairable_stores =
+    if (!Simdmagic.store_pairs) then
+      if (n mod 2 == 0) then
+	List.map (fun i -> (fst (oloc (2 * i)), fst (oloc (2 * i + 1))))
+	  (iota (n / 2)) 
+      else failwith "n must be even for -store-pairs to work"
+    else []
+  in
   let odag = store_array_r n oloc output in
-  let annot = standard_optimizer odag in
+  let annot = nonstandard_optimizer list_of_pairable_stores odag in
 
   let body = Block (
     [Decl ("int", i);

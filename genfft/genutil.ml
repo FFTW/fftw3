@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.18 2005-02-06 21:59:39 athena Exp $ *)
+(* $Id: genutil.ml,v 1.19 2005-02-10 02:35:01 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -207,10 +207,9 @@ let standard_scheduler dag =
 
 let standard_optimizer dag =
   let sched = standard_scheduler dag in
-  let annot = Annotate.annotate sched in
+  let annot = Annotate.annotate [] sched in
   let _ = dump_asched annot in
   annot
-
 
 let size = ref None
 let sign = ref (-1)

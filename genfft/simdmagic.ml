@@ -18,13 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simdmagic.ml,v 1.7 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: simdmagic.ml,v 1.8 2005-02-10 02:35:01 athena Exp $ *)
 
 (* SIMD magic parameters *)
 let simd_mode = ref false
+let store_pairs = ref false
 
 open Magic
 
 let speclist = [
   "-simd", set_bool simd_mode, undocumented;
+  "-store-pairs", set_bool store_pairs, undocumented;
 ]

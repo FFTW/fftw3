@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.16 2005-02-06 21:59:39 athena Exp $ *)
+(* $Id: simd.ml,v 1.17 2005-02-10 02:35:01 athena Exp $ *)
 
 open Expr
 open List
@@ -44,10 +44,14 @@ let foldr_string_concat l = fold_right (^) l ""
 let rec unparse_by_twiddle nam tw src = 
   sprintf "%s(&(%s),%s)" nam (Variable.unparse tw) (unparse_expr src)
 
-and unparse_store dst src_expr =
-  sprintf "ST(&(%s),%s,%s,&(%s));\n" 
-    (Variable.unparse dst) (unparse_expr src_expr) !ovs
-    (Variable.unparse_for_alignment alignment_mod dst)
+and unparse_store dst = function
+  | Times (NaN PAIR, Plus [even; odd]) ->
+      sprintf "STPAIR(&(%s),%s,%s,%s);\n" 
+	(Variable.unparse dst) (unparse_expr even) (unparse_expr odd) !ovs
+  | src_expr -> 
+      sprintf "ST(&(%s),%s,%s,&(%s));\n" 
+	(Variable.unparse dst) (unparse_expr src_expr) !ovs
+	(Variable.unparse_for_alignment alignment_mod dst)
 
 and unparse_expr =
   let rec unparse_plus = function

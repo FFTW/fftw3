@@ -114,6 +114,12 @@ static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
 #define LD LDA
 #define ST STA
 
+static __inline__ void STPAIR(R *x, V v0, V v1, int ovs)
+{
+     STA(x, v0, ovs, 0);
+     STA(x + 2, v1, ovs, 0);
+}
+
 static __inline__ V FLIP_RI(V x)
 {
      return VSWAP(x);

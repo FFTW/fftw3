@@ -28,13 +28,11 @@ n1bv_9.c n1bv_10.c n1bv_11.c n1bv_12.c n1bv_13.c n1bv_14.c n1bv_15.c	\
 n1bv_16.c n1bv_32.c n1bv_64.c
 
 # as above, with restricted input vector stride
-N2F = n2fv_2.c n2fv_3.c n2fv_4.c n2fv_5.c n2fv_6.c n2fv_7.c n2fv_8.c	\
-n2fv_9.c n2fv_10.c n2fv_11.c n2fv_12.c n2fv_13.c n2fv_14.c n2fv_15.c	\
-n2fv_16.c n2fv_32.c n2fv_64.c
+N2F = n2fv_2.c n2fv_4.c n2fv_6.c n2fv_8.c n2fv_10.c n2fv_12.c	\
+n2fv_14.c n2fv_16.c n2fv_32.c n2fv_64.c
 
-N2B = n2bv_2.c n2bv_3.c n2bv_4.c n2bv_5.c n2bv_6.c n2bv_7.c n2bv_8.c	\
-n2bv_9.c n2bv_10.c n2bv_11.c n2bv_12.c n2bv_13.c n2bv_14.c n2bv_15.c	\
-n2bv_16.c n2bv_32.c n2bv_64.c
+N2B = n2bv_2.c n2bv_4.c n2bv_6.c n2bv_8.c n2bv_10.c n2bv_12.c	\
+n2bv_14.c n2bv_16.c n2bv_32.c n2bv_64.c
 
 ###########################################################################
 # t1fv_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT step
@@ -84,13 +82,13 @@ n1fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name n1fv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 n2fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name n2fv_$* -with-ostride 2 -include "n2f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name n2fv_$* -with-ostride 2 -include "n2f.h" -store-pairs) | $(ADD_DATE) | $(INDENT) >$@
 
 n1bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name n1bv_$* -include "n1b.h") | $(ADD_DATE) | $(INDENT) >$@
 
 n2bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name n2bv_$* -with-ostride 2 -include "n2b.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name n2bv_$* -with-ostride 2 -include "n2b.h"  -store-pairs) | $(ADD_DATE) | $(INDENT) >$@
 
 t1fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1fv_$* -include "t1f.h") | $(ADD_DATE) | $(INDENT) >$@

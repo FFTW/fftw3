@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.mli,v 1.6 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: annotate.mli,v 1.7 2005-02-10 02:35:01 athena Exp $ *)
 
 open Variable
 open Expr
@@ -31,6 +31,9 @@ and aschedule =
   | AInstr of assignment
   | ASeq of (annotated_schedule * annotated_schedule)
 
-val annotate : Schedule.schedule -> annotated_schedule
+val annotate :
+    (variable * variable) list ->
+      Schedule.schedule -> 
+	annotated_schedule
 
 val dump : (string -> unit) -> annotated_schedule -> unit

@@ -176,6 +176,12 @@ static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
      *(V *)x = v;
 }
 
+static __inline__ void STPAIR(R *x, V v0, V v1, int ovs)
+{
+     STA(x, SHUFPS(v0, v1, SHUFVAL(0, 1, 0, 1)), ovs, 0);
+     STA(x + ovs, SHUFPS(v0, v1, SHUFVAL(2, 3, 2, 3)), ovs, 0);
+}
+
 static __inline__ V FLIP_RI(V x)
 {
      return SHUFPS(x, x, SHUFVAL(1, 0, 3, 2));
