@@ -30,7 +30,7 @@
 
 /* OS-specific configuration-file directory */
 #if defined(__DJGPP__)
-#  define WISDOM_DIR "/dev/env/DJGPP/etc/fftw/"
+#  define WISDOM_DIR "/dev/env/DJDIR/etc/fftw/"
 #else
 #  define WISDOM_DIR "/etc/fftw/"
 #endif
