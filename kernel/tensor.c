@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.37 2003-02-09 12:31:13 athena Exp $ */
+/* $Id: tensor.c,v 1.38 2003-02-09 13:14:03 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -105,10 +105,10 @@ int X(tensor_tornk1)(const tensor *t, int *n, int *is, int *os)
 
 void X(tensor_print)(const tensor *x, printer *p)
 {
-     p->print(p, "(");
      if (FINITE_RNK(x->rnk)) {
 	  int i;
 	  int first = 1;
+	  p->print(p, "(");
 	  for (i = 0; i < x->rnk; ++i) {
 	       const iodim *d = x->dims + i;
 	       p->print(p, "%s(%d %d %d)", 
@@ -116,8 +116,8 @@ void X(tensor_print)(const tensor *x, printer *p)
 			d->n, d->is, d->os);
 	       first = 0;
 	  }
+	  p->print(p, ")");
      } else {
-	  p->print(p, "nil"); 
+	  p->print(p, "rank-minfty"); 
      }
-     p->print(p, ")");
 }
