@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.169 2003-03-25 17:31:49 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.170 2003-03-25 17:46:44 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4598,7 +4598,8 @@ efficient REDFT codelets of small sizes by modifying
 @code{rdft/codelets/r2r/Makefile.am}.
 @cindex REDFT
 After you modify any @code{Makefile.am} files, you can type @code{sh
-bootstrap.sh} in the top-level directory to re-generate the files.
+bootstrap.sh} in the top-level directory followed by @code{make} to
+re-generate the files.
 
 We do not provide more details about the code-generation process, since
 we do not expect that most users will need to generate their own code.
