@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.17 2005-02-22 15:06:13 athena Exp $ */
+/* $Id: rank0.c,v 1.18 2005-02-22 15:13:02 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -86,8 +86,7 @@ static void apply_iter(const plan *ego_, R *I, R *O)
 
      switch (ego->rnk) {
 	 case 0: 
-	      for (; vl > 0; --vl, ++I, ++O) 
-		   *O = *I;
+	      X(cpy1d)(I, O, vl, 1, 1, 1);
 	      break;
 	 case 1:
 	      X(cpy1d)(I, O, 
