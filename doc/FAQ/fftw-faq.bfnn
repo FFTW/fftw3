@@ -118,7 +118,7 @@ compilers to their limits.  We have successfully used \courier{gcc\}
 of IBM's \courier{xlc\} compiler for AIX, Intel's \courier{icc\}
 versions 5-7, and Sun WorkShop \courier{cc\} version 6, for example.
 
-\courier{gcc\} 2.95.3 for Solaris/SPARC produces incorrect code for
+\courier{gcc\} 2.95.x for Solaris/SPARC produces incorrect code for
 the test program (workaround: recompile the \courier{libbench2\}
 directory with \courier{-O2\}).  NetBSD/macppc 1.6 comes with a
 \courier{gcc\} version that also miscompiles the test program (we
