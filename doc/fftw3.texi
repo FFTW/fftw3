@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.222 2005-02-16 04:53:53 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.223 2005-02-27 18:51:24 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4979,7 +4979,7 @@ FFTW.}
 
 
 FFTW is Copyright @copyright{} 2003 Matteo Frigo, Copyright
-@copyright{} 2002 Steven G. Johnson.
+@copyright{} 2003 Massachusetts Institute of Technology.
 
 FFTW is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
