@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.66 2002-08-01 12:03:46 athena Exp $ */
+/* $Id: ifftw.h,v 1.67 2002-08-02 19:26:37 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -571,27 +571,29 @@ uint X(alignment_of)(R *p);
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */
 
+typedef R E;  /* internal precision of codelets. */
+
 #ifdef FFTW_LDOUBLE
-#  define K(x) ((R) x##L)
+#  define K(x) ((E) x##L)
 #else
-#  define K(x) ((R) x)
+#  define K(x) ((E) x)
 #endif
-#define DK(name, value) const R name = K(value)
+#define DK(name, value) const E name = K(value)
 
 /* FMA macros */
 
 #if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
-static __inline__ R FMA(R a, R b, R c)
+static __inline__ E FMA(E a, E b, E c)
 {
      return a * b + c;
 }
 
-static __inline__ R FMS(R a, R b, R c)
+static __inline__ E FMS(E a, E b, E c)
 {
      return a * b - c;
 }
 
-static __inline__ R FNMS(R a, R b, R c)
+static __inline__ E FNMS(E a, E b, E c)
 {
      return -(a * b - c);
 }

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.11 2002-07-15 20:46:35 athena Exp $ *)
+(* $Id: c.ml,v 1.12 2002-08-02 19:26:37 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -32,6 +32,7 @@ open List
 
 let realtype = "R"
 let realtypep = realtype ^ " *"
+let extended_realtype = "E"
 let constrealtype = "const " ^ realtype
 let constrealtypep = constrealtype ^ " *"
 
@@ -134,7 +135,7 @@ and unparse_annotated force_bracket =
       if (List.length l <= s) then
 	match l with
 	  [] -> ""
-	| _ -> realtype ^ " " ^ (uvar l)
+	| _ -> extended_realtype ^ " " ^ (uvar l)
       else
 	(vvar (Util.take s l)) ^ (vvar (Util.drop s l))
     in vvar (List.filter Variable.is_temporary l)
@@ -239,7 +240,7 @@ let extract_constants f =
   in let use_const () = 
     map 
       (fun n ->
-	Idecl (("const " ^ realtype), (Number.to_konst n),
+	Idecl (("const " ^ extended_realtype), (Number.to_konst n),
 	       "K(" ^ (Number.to_string n) ^ ")"))
       u
   and use_compact () = 
