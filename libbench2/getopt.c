@@ -76,6 +76,7 @@
 # endif
 #endif
 
+#if 0
 #ifndef _
 /* This is for other GNU distributions with internationalized messages.  */
 # if defined HAVE_LIBINTL_H || defined _LIBC
@@ -87,6 +88,12 @@
 #  define _(msgid)	(msgid)
 # endif
 #endif
+#endif
+
+/* we don't care about internationalization in fftw */
+#undef _
+#define _(msgid)	(msgid)
+
 
 /* This version of `getopt' appears to the caller like standard Unix `getopt'
    but it behaves differently for the user, since it allows the user
