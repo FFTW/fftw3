@@ -7,15 +7,11 @@
 
 * still too much code duplication in rader
 
-* rdft/rank-geq2 (and per-dimension kind's) needs to be tested
-
 * cleanup reodft/verify.c using kernel/verify-lib.c
 
 * it may be a good idea to unify all those little loops that do
   copying, (X[i], X[n-i]) <- (X[i] + X[n-i], X[i] - X[n-i]),
   and multiplication of vectors by twiddle factors.
-
-* better test program (need syntax for real even/odd transforms, too)
 
 * $prefix/bin/fftw_wisdom to generate/update /etc/fftw/wisdom and wisdom_conf.c
 
