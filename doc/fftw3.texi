@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.37 2003-02-28 04:49:37 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.38 2003-02-28 05:54:09 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -885,12 +885,13 @@ between two samples?  The latter corresponds to @emph{shifting} the
 samples by @emph{half} an interval, and gives rise to several transform
 variants denoted by REDFT@math{ab} and RODFT@math{ab}: @math{a} and
 @math{b} are @math{0} or @math{1}, and indicate whether the input
-(@math{a}) and/or output (@math{b}) are shifted by half a sample.  These
-are also known as types I-IV of the DCT and DST, and all four types are
-supported by FFTW's r2r interface.@footnote{There are also type V-VIII
-transforms, which correspond to a logical DFT of @emph{odd} size @math{N},
-independent of whether the physical size @code{n} is odd, but we do not
-support these variants.}
+(@math{a}) and/or output (@math{b}) are shifted by half a sample
+(@math{1} means it is shifted).  These are also known as types I-IV of
+the DCT and DST, and all four types are supported by FFTW's r2r
+interface.@footnote{There are also type V-VIII transforms, which
+correspond to a logical DFT of @emph{odd} size @math{N}, independent of
+whether the physical size @code{n} is odd, but we do not support these
+variants.}
 
 The r2r kinds for the various REDFT and RODFT types supported by FFTW,
 along with the boundary conditions at both ends of the @emph{input} array
