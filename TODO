@@ -21,6 +21,10 @@
 
 * implement fftw2 buffering: copy to buffers, transform in-place, copy back
 
+* --enable-long-double fails in verify().  The problem appears
+  to be a bug in gcc-2.95 -malign-double.  The problem disappears
+  with gcc-3.1, icc, and without -malign-double.  I couldn't figure
+  out exactly what the problem is. 
 
 
 TODO before/at release:
