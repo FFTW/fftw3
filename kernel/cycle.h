@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.34 2003-05-12 22:26:51 stevenj Exp $ */
+/* $Id: cycle.h,v 1.35 2003-05-13 20:58:07 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -225,7 +225,7 @@ typedef ULONG64 ticks;
 
 #define getticks __rdtsc
 
-INLINE_ELAPSED(inline)
+INLINE_ELAPSED(__inline)
 
 #define HAVE_TICK_COUNTER
 #endif
