@@ -18,15 +18,28 @@
  *
  */
 
-/* $Id: solvtab.c,v 1.4 2002-07-30 03:52:07 stevenj Exp $ */
+/* $Id: solvtab.c,v 1.5 2002-07-30 05:20:11 stevenj Exp $ */
 
 #include "ifftw.h"
 
-void X(solvtab_exec)(const solvtab tbl, planner *p)
+static void exec_entry(const solvtab tbl, planner *p)
 {
-     for (; tbl->reg; ++tbl) {
-          tbl->reg(p);
-	  p->adt->register_registrar(p, tbl->reg_nam);
-     }
+     tbl->reg(p);
+     p->adt->register_registrar(p, tbl->reg_nam);
 }
 
+void X(solvtab_exec)(const solvtab tbl, planner *p)
+{
+     for (; tbl->reg; ++tbl)
+	  exec_entry(tbl, p);
+}
+
+
+void X(solvtab_exec_reverse)(const solvtab tbl, planner *p)
+{
+     const struct solvtab_s *tbl0 = tbl;
+     for (; tbl->reg; ++tbl) 
+	  ;
+     for (--tbl; tbl >= tbl0; --tbl)
+	  exec_entry(tbl, p);
+}

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.28 2002-07-30 04:41:15 stevenj Exp $ */
+/* $Id: planner.c,v 1.29 2002-07-30 05:20:11 stevenj Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -343,10 +343,12 @@ static void exprt_conf(planner *ego, printer *p)
           sp->id = idcnt--;
      });
 
+     /* Ugh, solvtab_exec_reverse is a hack to get the wisdom's solver id's
+	correct, because we can't traverse the solver table backwards */
      p->print(p, "\n"
 	      "     %s(s, p);\n"
 	      "     /* FIXME: import wisdom */\n"
-	      "}\n", STRINGIZE(X(solvtab_exec)));
+	      "}\n", STRINGIZE(X(solvtab_exec_reverse)));
 }
 
 /*

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.59 2002-07-30 04:41:15 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.60 2002-07-30 05:20:11 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -440,8 +440,10 @@ typedef int stride;
 /*-----------------------------------------------------------------------*/
 /* solvtab.c */
 
-typedef struct { void (*reg)(planner *); const char *reg_nam; } solvtab[];
+struct solvtab_s { void (*reg)(planner *); const char *reg_nam; };
+typedef struct solvtab_s solvtab[];
 void X(solvtab_exec)(const solvtab tbl, planner *p);
+void X(solvtab_exec_reverse)(const solvtab tbl, planner *p);
 #define SOLVTABx(s) { s, #s }
 #define SOLVTAB(s) SOLVTABx(s) /* indirection so # works on macros */
 #define SOLVTAB_END { 0, 0 }
