@@ -19,8 +19,8 @@
  *
  *)
 
-(* $Id: algsimp.ml,v 1.1.1.1 2002-06-02 18:42:27 athena Exp $ *)
-let cvsid = "$Id: algsimp.ml,v 1.1.1.1 2002-06-02 18:42:27 athena Exp $"
+(* $Id: algsimp.ml,v 1.2 2002-06-30 22:34:06 athena Exp $ *)
+let cvsid = "$Id: algsimp.ml,v 1.2 2002-06-30 22:34:06 athena Exp $"
 
 open Util
 open Expr
@@ -303,6 +303,15 @@ end = struct
 		mangleSumM [l''; d''']
 
   and splusM l =
+    let fma_heuristics = function
+      |	[Uminus (Times _); Times _] -> Some false
+      |	[Times _; Uminus (Times _)] -> Some false
+      |	[Uminus (_); Times _] -> Some true
+      |	[Times _; Uminus (Plus _)] -> Some true
+      |	[_; Uminus (Times _)] -> Some false
+      |	[Uminus (Times _); _] -> Some false
+      |	_ -> None
+    in
     mangleSumM l >>=  fun l' ->
       (* no terms are negative.  Don't do anything *)
       if not (List.exists negative l') then
@@ -310,12 +319,15 @@ end = struct
       (* all terms are negative.  Negate them all and collect the minus sign *)
       else if List.for_all negative l' then
 	mapM suminusM l' >>= splusM >>= suminusM
-      (* some terms are positive and some are negative.  We are in trouble.
-	 Ask the Oracle for the canonical form *)
-      else if Oracle.should_flip_sign (Plus l') then
-	mapM suminusM l' >>= splusM >>= suminusM
-      else
-	canonicalizeM l'
+      else match fma_heuristics l' with
+      |	Some true -> mapM suminusM l' >>= splusM >>= suminusM
+      |	Some false -> canonicalizeM l'
+      |	_ ->
+         (* Ask the Oracle for the canonical form *)
+	  if Oracle.should_flip_sign (Plus l') then
+	    mapM suminusM l' >>= splusM >>= suminusM
+	  else
+	    canonicalizeM l'
 
   (* monadic style algebraic simplifier for the dag *)
   let rec algsimpM x =

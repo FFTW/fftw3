@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: to_alist.ml,v 1.3 2002-06-22 02:19:20 athena Exp $ *)
+(* $Id: to_alist.ml,v 1.4 2002-06-30 22:34:06 athena Exp $ *)
 
 (*************************************************************
  * Conversion of the dag to an assignment list
@@ -117,10 +117,10 @@ type fma =
 let build_fma l = 
   if (not !Magic.enable_fma) then NO_FMA
   else match l with
-  | [Uminus a; Times (b, c)] -> FMS (a, b, c)
-  | [Times (b, c); Uminus a] -> FMS (a, b, c)
   | [a; Uminus (Times (b, c))] -> FNMS (a, b, c)
   | [Uminus (Times (b, c)); a] -> FNMS (a, b, c)
+  | [Uminus a; Times (b, c)] -> FMS (a, b, c)
+  | [Times (b, c); Uminus a] -> FMS (a, b, c)
   | [a; Times (b, c)] -> FMA (a, b, c)
   | [Times (b, c); a] -> FMA (a, b, c)
   | _ -> NO_FMA

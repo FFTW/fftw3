@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: oracle.ml,v 1.1.1.1 2002-06-02 18:42:30 athena Exp $ *)
+(* $Id: oracle.ml,v 1.2 2002-06-30 22:34:06 athena Exp $ *)
 
 (*
  * the oracle decrees whether the sign of an expression should
@@ -88,7 +88,7 @@ let should_flip_sign node =
   not (almost_equal v v')
 
 (*
- * determine with high probability if two expression are equal.
+ * determine with high probability if two expressions are equal.
  *
  * The test is randomized: if the two expressions have the
  * same value for NTESTS random inputs, then they are proclaimed

@@ -18,10 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.8 2002-06-30 18:37:55 athena Exp $ *)
+(* $Id: magic.ml,v 1.9 2002-06-30 22:34:06 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
+let vneg = ref false
 let karatsuba_min = ref 15
 let karatsuba_variant = ref 2
 let circular_min = ref 64
@@ -110,6 +111,7 @@ let speclist = [
   "-network-transposition", set_bool network_transposition, undocumented;
   "-no-network-transposition", unset_bool network_transposition, undocumented;
 
+  "-vneg", set_bool vneg, undocumented;
   "-fma", set_bool enable_fma, undocumented;
   "-no-fma", unset_bool enable_fma, undocumented;
 

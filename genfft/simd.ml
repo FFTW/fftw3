@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.6 2002-06-30 18:37:55 athena Exp $ *)
+(* $Id: simd.ml,v 1.7 2002-06-30 22:34:06 athena Exp $ *)
 
 open Expr
 open List
@@ -118,8 +118,9 @@ and unparse_expr =
     | [a] -> unparse_expr a
     | (Uminus (Times (a, b))) :: c :: d -> op "VFNMS" a b (c :: d)
     | c :: (Uminus (Times (a, b))) :: d -> op "VFNMS" a b (c :: d)
-    | (Times (a, b)) :: (Uminus c) :: d -> op "VFMS" a b (c :: negate d)
+(*    | (Times (a, b)) :: (Uminus c) :: d -> op "VFMS" a b (c :: negate d)
     | (Uminus c) :: (Times (a, b)) :: d -> op "VFMS" a b (c :: negate d)
+*)
     | (Times (a, b)) :: c :: d          -> op "VFMA" a b (c :: d)
     | c :: (Times (a, b)) :: d          -> op "VFMA" a b (c :: d)
     | (Uminus a :: b)                   -> op2 "VSUB" b [a]
@@ -143,6 +144,7 @@ and unparse_expr =
     | Plus [a] -> " /* bug */ " ^ (unparse_expr a)
     | Plus a -> unparse_plus a
     | Times(a,b) -> sprintf "VMUL(%s,%s)" (unparse_expr a) (unparse_expr b)
+    | Uminus a when !Magic.vneg -> sprintf "VNEG(%s)" (unparse_expr a)
     | Uminus a -> failwith "SIMD Uminus"
     | _ -> failwith "unparse_expr"
 
