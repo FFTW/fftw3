@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.2 2002-07-05 19:49:14 athena Exp $ */
+/* $Id: verify.c,v 1.3 2002-07-13 20:05:43 stevenj Exp $ */
 
 #include "dft.h"
 #include <math.h>
@@ -41,12 +41,30 @@ typedef struct {
 /*
  * Utility functions:
  */
-#ifndef HAVE_HYPOT
+#ifdef FFTW_LDOUBLE
+#  ifndef HAVE_HYPOTL
+static double hypotl(double a, double b)
+{
+     return sqrt(a * a + b * b);
+}
+#  else /* HAVE_HYPOTL */
+#    if !defined(HAVE_DECL_HYPOTL) || !HAVE_DECL_HYPOTL
+extern long double hypotl(long double a, long double b);
+#    endif
+#  endif
+#  define hypot hypotl
+#else /* !FFTW_LDOUBLE */
+#  ifndef HAVE_HYPOT
 static double hypot(double a, double b)
 {
      return sqrt(a * a + b * b);
 }
-#endif
+#  else /* HAVE_HYPOT */
+#    if !defined(HAVE_DECL_HYPOT) || !HAVE_DECL_HYPOT
+extern double hypot(double a, double b);
+#    endif
+#  endif
+#endif /* !FFTW_LDOUBLE */
 
 static inline double cerror(C a, C b, double tol)
 {
@@ -139,14 +157,13 @@ static void arol(C *b, C *a, uint n, uint nb, uint na)
 static void aphase_shift(C *b, C *a, uint n, uint nb, uint na, double sign)
 {
      uint j, jb, ja;
-     const double k2pi = 6.2831853071795864769252867665590057683943388;
-     double twopin;
-     twopin = k2pi / n;
+     trigreal twopin;
+     twopin = K2PI / n;
 
      for (jb = 0; jb < nb; ++jb)
 	  for (j = 0; j < n; ++j) {
-	       double s = sign * sin(j * twopin);
-	       double c = cos(j * twopin);
+	       trigreal s = sign * SIN(j * twopin);
+	       trigreal c = COS(j * twopin);
 
 	       for (ja = 0; ja < na; ++ja) {
 		    uint k = (jb * n + j) * na + ja;
@@ -213,8 +230,10 @@ static double acmp(info *nfo, C *a, C *b, uint n, const char *test, double tol)
 	  {
 	       uint i;
 	       for (i = 0; i < n; ++i) 
-		    printf("%8d %16.12f %16.12f   %16.12f %16.12f %e\n", i, a[i].r, a[i].i,
-			   b[i].r, b[i].i, cerror(a[i], b[i], tol));
+		    printf("%8d %16.12f %16.12f   %16.12f %16.12f %e\n", i, 
+			   (double) a[i].r, (double) a[i].i,
+			   (double) b[i].r, (double) b[i].i,
+			   cerror(a[i], b[i], tol));
 	  }
 	  exit(EXIT_FAILURE);
      }

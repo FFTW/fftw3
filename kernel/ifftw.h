@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.46 2002-07-08 00:32:01 athena Exp $ */
+/* $Id: ifftw.h,v 1.47 2002-07-13 20:05:43 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -61,9 +61,6 @@ typedef unsigned int uint;
 #else
 #define HAVE_SIMD 0
 #endif
-
-#undef SINGLE_PRECISION
-#define SINGLE_PRECISION (sizeof(R) == sizeof(float))
 
 /* forward declarations */
 typedef struct problem_s problem;
@@ -447,12 +444,20 @@ twid *X(mktwiddle)(const tw_instr *instr, uint r, uint m);
 void X(twiddle_destroy)(twid *p);
 uint X(twiddle_length)(const tw_instr *p);
 
-/* change here if you need higher precision */
+#ifdef FFTW_LDOUBLE
+typedef long double trigreal;
+#  define COS cosl
+#  define SIN sinl
+#  define TAN tanl
+#  define KTRIG(x) (x##L)
+#else
 typedef double trigreal;
-#define COS cos
-#define SIN sin
-#define TAN tan
-#define K2PI ((trigreal)6.2831853071795864769252867665590057683943388)
+#  define COS cos
+#  define SIN sin
+#  define TAN tan
+#  define KTRIG(x) (x)
+#endif
+#define K2PI KTRIG(6.2831853071795864769252867665590057683943388)
 
 /*-----------------------------------------------------------------------*/
 /* primes.c: */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.2 2002-07-13 16:48:10 stevenj Exp $ */
+/* $Id: verify.c,v 1.3 2002-07-13 20:05:43 stevenj Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -30,16 +30,30 @@
 /*************************************************
  * complex correctness test
  *************************************************/
-#ifndef HAVE_HYPOT
+#ifdef BENCHFFT_LDOUBLE
+#  ifndef HAVE_HYPOTL
+static double hypotl(double a, double b)
+{
+     return sqrt(a * a + b * b);
+}
+#  else /* HAVE_HYPOTL */
+#    if !defined(HAVE_DECL_HYPOTL) || !HAVE_DECL_HYPOTL
+extern long double hypotl(long double a, long double b);
+#    endif
+#  endif
+#  define hypot hypotl
+#else /* !BENCHFFT_LDOUBLE */
+#  ifndef HAVE_HYPOT
 static double hypot(double a, double b)
 {
      return sqrt(a * a + b * b);
 }
-#else /* HAVE_HYPOT */
-#  if !defined(HAVE_DECL_HYPOT) || !HAVE_DECL_HYPOT
+#  else /* HAVE_HYPOT */
+#    if !defined(HAVE_DECL_HYPOT) || !HAVE_DECL_HYPOT
 extern double hypot(double a, double b);
+#    endif
 #  endif
-#endif
+#endif /* !BENCHFFT_LDOUBLE */
 
 static double dmax(double a, double b)
 {
@@ -166,20 +180,34 @@ static void arol(bench_complex *B, bench_complex *A,
      }
 }
 
+#ifdef BENCHFFT_LDOUBLE
+     typedef long double trigreal;
+#  define COS cosl
+#  define SIN sinl
+#  define TAN tanl
+#  define KTRIG(x) (x##L)
+#else
+     typedef double trigreal;
+#  define COS cos
+#  define SIN sin
+#  define TAN tan
+#  define KTRIG(x) (x)
+#endif
+#define K2PI KTRIG(6.2831853071795864769252867665590057683943388)
+
 static void aphase_shift(bench_complex *B, bench_complex *A,
 			 unsigned int n, 
 			 unsigned int n_before, unsigned int n_after,
 			 bench_real sign)
 {
      unsigned int j, jb, ja;
-     const double k2pi = 6.2831853071795864769252867665590057683943388;
-     double twopin;
-     twopin = k2pi / n;
+     trigreal twopin;
+     twopin = K2PI / n;
 
      for (jb = 0; jb < n_before; ++jb)
 	  for (j = 0; j < n; ++j) {
-	       double s = sign * sin(j * twopin);
-	       double c = cos(j * twopin);
+	       trigreal s = sign * SIN(j * twopin);
+	       trigreal c = COS(j * twopin);
 
 	       for (ja = 0; ja < n_after; ++ja) {
 		    unsigned int index = (jb * n + j) * n_after + ja;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: info.c,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: info.c,v 1.2 2002-07-13 20:05:43 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -53,5 +53,7 @@ void report_info_all(void)
 	  ovtpvt("(%s \"%s\")\n", p->key, p->val);
      }
      ovtpvt("(benchmark-precision \"%s\")\n", 
-	    SINGLE_PRECISION ? "single" : "double");
+	    SINGLE_PRECISION ? "single" : 
+	    (LDOUBLE_PRECISION ? "long-double" : "double"));
 }
+

@@ -22,8 +22,20 @@ fi
 AM_CONDITIONAL(SINGLE, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 
+AC_ARG_ENABLE(long-double, [  --enable-long-double   compile fftw in long-double precision], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+	if test "$PRECISION" = "s"; then
+		AC_MSG_ERROR([--enable-single/--enable-long-double conflict])
+	fi
+	AC_DEFINE(FFTW_LDOUBLE,1,[Define to compile in long-double precision.])
+	AC_DEFINE(BENCHFFT_LDOUBLE,1,[Define to compile in long-double precision.])
+	PRECISION=l
+fi
+AM_CONDITIONAL(LDOUBLE, test "$ok" = "yes")
+AC_SUBST(PRECISION)
+
 AC_ARG_ENABLE(k7, [  --enable-k7         enable AMD K7 optimizations], have_k7=$enableval, have_k7=no)
-if test "$PRECISION" = "d"; then have_k7=no; fi
+if test "$PRECISION" != "s"; then have_k7=no; fi
 if test "$have_k7" = "yes"; then
 	AC_DEFINE(HAVE_K7,1,[Define to enable AMD K7 optimizations.])
 fi
@@ -47,6 +59,10 @@ AC_ARG_ENABLE(altivec, [  --enable-altivec         enable Altivec optimizations]
 if test "$have_altivec" = "yes"; then
 	AC_DEFINE(HAVE_ALTIVEC,1,[Define to enable Altivec optimizations.])
 	have_simd="yes"
+fi
+
+if test "$PRECISION" = "l" -a "$have_simd" = "yes"; then
+	AC_MSG_ERROR([cannot use SIMD optimizations with long double])
 fi
 
 AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
@@ -104,12 +120,16 @@ AC_CHECK_FUNCS(BSDgettimeofday)
 AC_CHECK_FUNCS(gettimeofday)
 AC_CHECK_FUNCS(gethrtime)
 AC_CHECK_FUNCS(drand48)
-AC_CHECK_FUNCS(hypot)
+AC_CHECK_FUNCS(hypot hypotl)
 AC_CHECK_FUNCS(sqrt)
 AC_CHECK_FUNCS(memset)
 AC_CHECK_FUNCS(memalign)
 dnl high-resolution clock on SGI machines
 AC_CHECK_FUNCS(clock_gettime)  
+
+if test "$PRECISION" = "l"; then
+	AC_CHECK_FUNCS(cosl sinl tanl, [], [AC_MSG_ERROR([long-double precision requires long-double trigonometric routines])])
+fi
 
 AC_MSG_CHECKING([for isnan])
 AC_TRY_LINK([#include <math.h>

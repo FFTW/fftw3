@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.4 2002-06-23 00:47:28 athena Exp $ */
+/* $Id: bench-main.c,v 1.5 2002-07-13 20:05:43 stevenj Exp $ */
 
 #include "config.h"
 #include "getopt.h"
@@ -143,9 +143,11 @@ static int bench_main1(int argc, char *argv[])
 		   break;
 
 	      case 402: /* --print-precision */
-		   if (sizeof(bench_real) == sizeof(float))
+		   if (SINGLE_PRECISION)
 			ovtpvt("single\n");
-		   else if (sizeof(bench_real) == sizeof(double))
+		   else if (LDOUBLE_PRECISION)
+			ovtpvt("long-double\n");
+		   else if (DOUBLE_PRECISION)
 			ovtpvt("double\n");
 		   else 
 			ovtpvt("unknown %d\n", sizeof(bench_real));

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.7 2002-06-30 18:37:55 athena Exp $ */
+/* $Id: bench-user.h,v 1.8 2002-07-13 20:05:43 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -37,8 +37,10 @@ extern "C" {
 #include <stdlib.h>
 #endif
 
-#ifdef BENCHFFT_SINGLE
+#if defined(BENCHFFT_SINGLE)
 typedef float bench_real;
+#elif defined(BENCHFFT_LDOUBLE)
+typedef long double bench_real;
 #else
 typedef double bench_real;
 #endif
@@ -50,10 +52,12 @@ typedef struct {
 #define c_re(c)  ((c).re)
 #define c_im(c)  ((c).im)
 
-#undef SINGLE_PRECISION
-#define SINGLE_PRECISION (sizeof(bench_real) == sizeof(float))
 #undef DOUBLE_PRECISION
 #define DOUBLE_PRECISION (sizeof(bench_real) == sizeof(double))
+#undef SINGLE_PRECISION
+#define SINGLE_PRECISION (!DOUBLE_PRECISION && sizeof(bench_real) == sizeof(float))
+#undef LDOUBLE_PRECISION
+#define LDOUBLE_PRECISION (!DOUBLE_PRECISION && sizeof(bench_real) == sizeof(long double))
 
 typedef enum { PROBLEM_COMPLEX, PROBLEM_REAL } problem_kind_t;
 

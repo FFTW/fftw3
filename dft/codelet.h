@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.18 2002-07-04 00:32:28 athena Exp $ */
+/* $Id: codelet.h,v 1.19 2002-07-13 20:05:43 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -32,7 +32,11 @@
 #include "ifftw.h"
 
 /* macros used in codelets to reduce source code size */
-#define K(x) ((R) x)
+#ifdef FFTW_LDOUBLE
+#  define K(x) ((R) x##L)
+#else
+#  define K(x) ((R) x)
+#endif
 #define DK(name, value) const R name = K(value)
 
 /* FMA macros */

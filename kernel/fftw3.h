@@ -18,16 +18,19 @@
  *
  */
 
-/* $Id: fftw3.h,v 1.1 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: fftw3.h,v 1.2 2002-07-13 20:05:43 stevenj Exp $ */
 
 /* FFTW installed header file */
 #ifndef __FFTW3_H__
 #define __FFTW3_H__
 
 /* determine precision and name-mangling scheme */
-#ifdef FFTW_SINGLE
+#if defined(FFTW_SINGLE)
 typedef float fftw_real;
 #define FFTW(name) sfftw_ ## name
+#elif defined(FFTW_LDOUBLE)
+typedef long double fftw_real;
+#define FFTW(name) lfftw_ ## name
 #else
 typedef double fftw_real;
 #define FFTW(name) dfftw_ ## name

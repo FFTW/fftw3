@@ -18,7 +18,7 @@
  *
  */
 
-#ifdef FFTW_SINGLE
+#if defined(FFTW_SINGLE) || defined(FFTW_LDOUBLE)
 #error "SSE2 only works in double precision"
 #endif
 

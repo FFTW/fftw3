@@ -18,8 +18,8 @@
  *
  */
 
-/* $Id: dfftw3.h,v 1.2 2002-07-13 20:05:43 stevenj Exp $ */
+/* $Id: lfftw3.h,v 1.1 2002-07-13 20:05:43 stevenj Exp $ */
 
 #undef FFTW_SINGLE
-#undef FFTW_LDOUBLE
+#define FFTW_LDOUBLE
 #include <fftw3.h>
