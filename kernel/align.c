@@ -18,22 +18,19 @@
  *
  */
 
-/* $Id: align.c,v 1.10 2003-01-16 19:53:41 stevenj Exp $ */
+/* $Id: align.c,v 1.11 2003-03-05 18:12:56 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
 
-#if HAVE_SIMD
-#include "simd.h"
-#define ALGN SIMD_ALIGNMENT
-#endif
-
-#if HAVE_K7
-#define ALGN 8
-#endif
-
-#ifndef ALGN
-#define ALGN (sizeof(R))
+#if HAVE_3DNOW
+#  define ALGN 8
+#elif HAVE_SIMD
+#  define ALGN 16
+#elif HAVE_K7
+#  define ALGN 8
+#else
+#  define ALGN (sizeof(R))
 #endif
 
 int X(stride_aligned_p)(int s)
