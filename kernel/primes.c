@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.4 2002-09-14 03:07:39 stevenj Exp $ */
+/* $Id: primes.c,v 1.5 2003-01-14 20:14:29 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -78,8 +78,8 @@ static uint period(uint n, uint p)
 
 /* Find a generator for the multiplicative group mod p, where p is
    prime.  The generators are dense enough that this takes O(p)
-   time, not O(p^2) as you might naively expect.   (There are even
-   faster ways to find a generator; c.f. Knuth.) */
+   time, not O(p^2) as you might naively expect.   (There are
+   asymptotically faster ways to find a generator; c.f. Knuth.) */
 uint X(find_generator)(uint p)
 {
      uint g;
@@ -91,7 +91,7 @@ uint X(find_generator)(uint p)
      return g;
 }
 
-/* Return first prime divisor of n  (It would be only slightly faster to
+/* Return first prime divisor of n  (It would be at best slightly faster to
    search a static table of primes; there are 6542 primes < 2^16.)  */
 uint X(first_divisor)(uint n)
 {
