@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.6 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: primes.c,v 1.7 2003-02-01 14:23:43 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -62,33 +62,47 @@ int X(power_mod)(int n, int m, int p)
 	  return MULMOD(n, X(power_mod)(n, m - 1, p), p);
 }
 
-/* Find the period of n in the multiplicative group mod p (p prime).
-   That is, return the smallest m such that n^m == 1 mod p. */
-static int period(int n, int p)
+/* the following two routines were contributed by Greg Dionne. */
+static int get_prime_factors(int n, int *primef)
 {
-     int prod = n, per = 1;
+     int i;
+     int size = 0;
 
-     while (prod != 1) {
-	  prod = MULMOD(prod, n, p);
-	  ++per;
-	  A(prod != 0);
-     }
-     return per;
+     primef[size++] = 2;
+     do
+	  n >>= 1;
+     while ((n & 1) == 0);
+
+     if (n == 1)
+	  return size;
+
+     for (i = 3; i * i <= n; i += 2)
+	  if (!(n % i)) {
+	       primef[size++] = i;
+	       do
+		    n /= i;
+	       while (!(n % i));
+	  }
+     if (n == 1)
+	  return size;
+     primef[size++] = n;
+     return size;
 }
 
-/* Find a generator for the multiplicative group mod p, where p is
-   prime.  The generators are dense enough that this takes O(p)
-   time, not O(p^2) as you might naively expect.   (There are
-   asymptotically faster ways to find a generator; c.f. Knuth.) */
 int X(find_generator)(int p)
 {
-     int g;
+    int n, i, size;
+    int primef[16];     /* smallest number = 32589158477190044730 > 2^64 */
+    int pm1 = p - 1;
 
-     for (g = 1; g < p; ++g)
-	  if (period(g, p) == p - 1)
-	       break;
-     A(g != p);
-     return g;
+    size = get_prime_factors(pm1, primef);
+    n = 2;
+    for (i = 0; i < size; i++)
+        if (X(power_mod)(n, pm1 / primef[i], p) == 1) {
+            i = -1;
+            n++;
+        }
+    return n;
 }
 
 /* Return first prime divisor of n  (It would be at best slightly faster to
