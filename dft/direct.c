@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.37 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: direct.c,v 1.38 2003-03-16 20:00:03 stevenj Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -109,7 +109,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      P *pln;
      const problem_dft *p;
-     iodim *d, *vd;
+     iodim *d;
      const kdft_desc *e = ego->desc;
 
      static const plan_adt padt = {
@@ -126,7 +126,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln = MKPLAN_DFT(P, &padt, apply);
 
      d = p->sz->dims;
-     vd = p->vecsz->dims;
 
      pln->k = ego->k;
      pln->is = X(mkstride)(e->sz, d[0].is);

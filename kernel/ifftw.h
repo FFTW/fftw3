@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.193 2003-03-16 15:26:28 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.194 2003-03-16 20:00:04 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -578,9 +578,9 @@ typedef int stride;
 #define fftwf_mkstride(n, stride) stride
 #define fftw_mkstride(n, stride) stride
 #define fftwl_mkstride(n, stride) stride
-#define fftwf_stride_destroy(p) {}
-#define fftw_stride_destroy(p) {}
-#define fftwl_stride_destroy(p) {}
+#define fftwf_stride_destroy(p) ((void) p)
+#define fftw_stride_destroy(p) ((void) p)
+#define fftwl_stride_destroy(p) ((void) p)
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.16 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: direct2.c,v 1.17 2003-03-16 20:00:04 stevenj Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -142,7 +142,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      P *pln;
      const problem_rdft2 *p;
-     iodim d, *vd;
+     iodim d;
      int r2hc_kindp;
 
      static const plan_adt padt = {
@@ -162,7 +162,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln = MKPLAN_RDFT2(P, &padt, r2hc_kindp ? apply_r2hc : apply_hc2r);
 
      d = p->sz->dims[0];
-     vd = p->vecsz->dims;
 
      pln->k = ego->k;
 

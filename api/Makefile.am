@@ -1,8 +1,6 @@
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft		\
 -I$(top_srcdir)/rdft -I$(top_srcdir)/reodft
 
-EXTRA_DIST = f77funcs.c
-
 include_HEADERS = fftw3.h fftw3.f
 noinst_LTLIBRARIES = libapi.la
 
@@ -19,9 +17,7 @@ plan-dft-r2c-1d.c plan-dft-r2c-2d.c plan-dft-r2c-3d.c			\
 plan-guru-dft-c2r.c plan-guru-dft-r2c.c map-r2r-kind.c plan-many-r2r.c	\
 plan-r2r-1d.c plan-r2r-2d.c plan-r2r-3d.c plan-r2r.c plan-guru-r2r.c	\
 print-plan.c the-planner.c rdft2-pad.c version.c api.h fftw3.h		\
-f77api.c x77.h
-
-f77api.o: f77funcs.c
+f77api.c f77funcs.h x77.h
 
 BUILT_SOURCES = fftw3.f
 

@@ -498,12 +498,9 @@ static double t_shift(int n, int vecn, info *nfo,
 		      dim_stuff *d)
 {
      double e = 0.0;
-     double sign;
      int nb, na, dim, N = n * vecn;
      int i, j;
      bench_tensor *sz = nfo->probsz;
-
-     sign = -1.0;
 
      /* test 3: check the time-shift property */
      /* the paper performs more tests, but this code should be fine too */
