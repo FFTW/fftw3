@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.17 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: problem2.c,v 1.18 2002-09-21 22:04:05 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -92,14 +92,14 @@ int X(problem_rdft2_p)(const problem *p)
      return (p->adt == &padt);
 }
 
-problem *X(mkproblem_rdft2)(const tensor sz, const tensor vecsz,
+problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
 			    R *r, R *rio, R *iio, rdft_kind kind)
 {
      problem_rdft2 *ego =
           (problem_rdft2 *)X(mkproblem)(sizeof(problem_rdft2), &padt);
 
-     ego->sz = X(tensor_compress)(&sz);
-     ego->vecsz = X(tensor_compress_contiguous)(&vecsz);
+     ego->sz = X(tensor_compress)(sz);
+     ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->r = r;
      ego->rio = rio;
      ego->iio = iio;
@@ -115,7 +115,7 @@ problem *X(mkproblem_rdft2_d)(tensor sz, tensor vecsz,
 			      R *r, R *rio, R *iio, rdft_kind kind)
 {
      problem *p;
-     p = X(mkproblem_rdft2)(sz, vecsz, r, rio, iio, kind);
+     p = X(mkproblem_rdft2)(&sz, &vecsz, r, rio, iio, kind);
      X(tensor_destroy)(&vecsz);
      X(tensor_destroy)(&sz);
      return p;

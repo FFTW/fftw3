@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.7 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: rdft-dht.c,v 1.8 2002-09-21 22:04:05 athena Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime
@@ -177,10 +177,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_rdft *) p_;
 
      if (p->kind[0] == R2HC || DESTROY_INPUTP(plnr))
-	  cldp = X(mkproblem_rdft_1)(p->sz, p->vecsz, p->I, p->O, DHT);
+	  cldp = X(mkproblem_rdft_1)(&p->sz, &p->vecsz, p->I, p->O, DHT);
      else {
 	  tensor sz = X(tensor_copy_inplace)(&p->sz, INPLACE_OS);
-	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, p->O, p->O, DHT);
+	  cldp = X(mkproblem_rdft_1)(&sz, &p->vecsz, p->O, p->O, DHT);
 	  X(tensor_destroy)(&sz);
      }
      cld = MKPLAN(plnr, cldp);

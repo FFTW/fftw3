@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.9 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.10 2002-09-21 22:04:05 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -156,7 +156,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      {
 	  tensor sz = X(mktensor_1d)(n, 1, 1);
-	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, buf, buf, R2HC);
+	  cldp = X(mkproblem_rdft_1)(&sz, &p->vecsz, buf, buf, R2HC);
 	  X(tensor_destroy)(&sz);
      }
 

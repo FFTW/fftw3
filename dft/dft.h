@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.28 2002-09-02 15:46:57 athena Exp $ */
+/* $Id: dft.h,v 1.29 2002-09-21 22:04:05 athena Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -37,7 +37,7 @@ int X(problem_dft_p)(const problem *p);
 #define DFTP X(problem_dft_p)  /* shorthand */
 
 void X(dft_zerotens)(tensor sz, R *ri, R *ii);
-problem *X(mkproblem_dft)(const tensor sz, const tensor vecsz,
+problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
                           R *ri, R *ii, R *ro, R *io);
 problem *X(mkproblem_dft_d)(tensor sz, tensor vecsz,
                             R *ri, R *ii, R *ro, R *io);

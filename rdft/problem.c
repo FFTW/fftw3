@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.26 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: problem.c,v 1.27 2002-09-21 22:04:05 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -157,26 +157,26 @@ int X(problem_rdft_p)(const problem *p)
      return (p->adt == &padt);
 }
 
-problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
+problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 			   R *I, R *O, const rdft_kind *kind)
 {
      problem_rdft *ego =
           (problem_rdft *)X(mkproblem)(sizeof(problem_rdft)
 				       + sizeof(rdft_kind)
-				       * (X(uimax)(1, sz.rnk) - 1), 
+				       * (X(uimax)(1, sz->rnk) - 1), 
 				       &padt);
 
      uint i, total_n = 1;
-     for (i = 0; i < sz.rnk; ++i)
-	  total_n *= X(rdft_real_n)(kind[i], sz.dims[i].n);
+     for (i = 0; i < sz->rnk; ++i)
+	  total_n *= X(rdft_real_n)(kind[i], sz->dims[i].n);
      A(total_n > 0); /* or should we use vecsz RNK_MINFTY? */
 
      /* FIXME: how are shifted transforms compressed? */
-     ego->sz = X(tensor_compress)(&sz);
-     ego->vecsz = X(tensor_compress_contiguous)(&vecsz);
+     ego->sz = X(tensor_compress)(sz);
+     ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->I = I;
      ego->O = O;
-     for (i = 0; i < sz.rnk; ++i)
+     for (i = 0; i < sz->rnk; ++i)
 	  ego->kind[i] = kind[i];
 
      A(FINITE_RNK(ego->sz.rnk));
@@ -188,17 +188,17 @@ problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
 			     R *I, R *O, const rdft_kind *kind)
 {
      problem *p;
-     p = X(mkproblem_rdft)(sz, vecsz, I, O, kind);
+     p = X(mkproblem_rdft)(&sz, &vecsz, I, O, kind);
      X(tensor_destroy)(&vecsz);
      X(tensor_destroy)(&sz);
      return p;
 }
 
 /* As above, but for rnk == 1 only and takes a scalar kind parameter */
-problem *X(mkproblem_rdft_1)(const tensor sz, const tensor vecsz,
+problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
 			     R *I, R *O, rdft_kind kind)
 {
-     A(sz.rnk <= 1);
+     A(sz->rnk <= 1);
      return X(mkproblem_rdft)(sz, vecsz, I, O, &kind);
 }
 

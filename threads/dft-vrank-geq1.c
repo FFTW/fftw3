@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-vrank-geq1.c,v 1.5 2002-09-21 21:47:36 athena Exp $ */
+/* $Id: dft-vrank-geq1.c,v 1.6 2002-09-21 22:04:05 athena Exp $ */
 
 #include "threads.h"
 
@@ -172,7 +172,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      for (i = 0; i < nthr; ++i) {
 	  vecsz.dims[vdim].n =
 	       (i == nthr - 1) ? (d->n - i*block_size) : block_size;
-	  cldp = X(mkproblem_dft)(p->sz, vecsz,
+	  cldp = X(mkproblem_dft)(&p->sz, &vecsz,
 				  p->ri + i*its, p->ii + i*its, 
 				  p->ro + i*ots, p->io + i*ots);
 	  cldrn[i] = MKPLAN(plnr, cldp);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.26 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: rdft.h,v 1.27 2002-09-21 22:04:05 athena Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -38,11 +38,11 @@ int X(problem_rdft_p)(const problem *p);
 #define RDFTP X(problem_rdft_p)  /* shorthand */
 
 void X(rdft_zerotens)(tensor sz, R *I);
-problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
+problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 			   R *I, R *O, const rdft_kind *kind);
 problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
 			     R *I, R *O, const rdft_kind *kind);
-problem *X(mkproblem_rdft_1)(const tensor sz, const tensor vecsz,
+problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
 			     R *I, R *O, rdft_kind kind);
 problem *X(mkproblem_rdft_1_d)(tensor sz, tensor vecsz,
 			       R *I, R *O, rdft_kind kind);
@@ -111,7 +111,7 @@ typedef struct {
 int X(problem_rdft2_p)(const problem *p);
 #define RDFT2P X(problem_rdft2_p)  /* shorthand */
 
-problem *X(mkproblem_rdft2)(const tensor sz, const tensor vecsz,
+problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
 			    R *r, R *rio, R *iio, rdft_kind kind);
 problem *X(mkproblem_rdft2_d)(tensor sz, tensor vecsz,
 			      R *r, R *rio, R *iio, rdft_kind kind);

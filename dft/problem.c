@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.21 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: problem.c,v 1.22 2002-09-21 22:04:05 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -77,7 +77,7 @@ int X(problem_dft_p)(const problem *p)
      return (p->adt == &padt);
 }
 
-problem *X(mkproblem_dft)(const tensor sz, const tensor vecsz,
+problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
                           R *ri, R *ii, R *ro, R *io)
 {
      problem_dft *ego =
@@ -86,8 +86,8 @@ problem *X(mkproblem_dft)(const tensor sz, const tensor vecsz,
      /* both in place or both out of place */
      CK((ri == ro) == (ii == io));
 
-     ego->sz = X(tensor_compress)(&sz);
-     ego->vecsz = X(tensor_compress_contiguous)(&vecsz);
+     ego->sz = X(tensor_compress)(sz);
+     ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->ri = ri;
      ego->ii = ii;
      ego->ro = ro;
@@ -102,7 +102,7 @@ problem *X(mkproblem_dft_d)(tensor sz, tensor vecsz,
                             R *ri, R *ii, R *ro, R *io)
 {
      problem *p;
-     p = X(mkproblem_dft)(sz, vecsz, ri, ii, ro, io);
+     p = X(mkproblem_dft)(&sz, &vecsz, ri, ii, ro, io);
      X(tensor_destroy)(&vecsz);
      X(tensor_destroy)(&sz);
      return p;
