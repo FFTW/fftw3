@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.1 2002-07-23 18:09:19 stevenj Exp $ */
+/* $Id: dft-r2hc.c,v 1.2 2002-07-23 18:49:43 stevenj Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -167,8 +167,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cldi = cldi;
      
      pln->super.super.ops = X(ops_add)(cldr->ops, cldi->ops);
-     pln->super.super.ops.other += 4 * (pln->n - 1);
-     pln->super.super.ops.add += 2 * (pln->n - 1);
+     pln->super.super.ops.other += 8 * ((pln->n - 1)/2);
+     pln->super.super.ops.add += 4 * ((pln->n - 1)/2);
 
      return &(pln->super.super);
 }
