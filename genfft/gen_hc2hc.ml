@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2hc.ml,v 1.10 2004-03-21 17:38:45 athena Exp $ *)
+(* $Id: gen_hc2hc.ml,v 1.11 2005-02-06 21:59:39 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2hc.ml,v 1.10 2004-03-21 17:38:45 athena Exp $"
+let cvsid = "$Id: gen_hc2hc.ml,v 1.11 2005-02-06 21:59:39 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -128,7 +128,9 @@ let generate n =
 	     Expr_assign (viioarray, 
 			  CPlus [viioarray; CUminus (byvl vdist)]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
-					       byvl (Integer nt)])],
+					       byvl (Integer nt)]);
+	     make_volatile_stride (CVar iostride)
+	   ],
 	  Asch asch);
      Return (CVar twarray)]
     )

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.15 2003-04-13 20:46:12 athena Exp $ *)
+(* $Id: simd.ml,v 1.16 2005-02-06 21:59:39 athena Exp $ *)
 
 open Expr
 open List
@@ -156,6 +156,7 @@ and unparse_ast ast =
     | (a :: b) -> " + " ^ (parenthesize a) ^ (unparse_plus b)
   and parenthesize x = match x with
   | (CVar _) -> unparse_ast x
+  | (CCall _) -> unparse_ast x
   | (Integer _) -> unparse_ast x
   | _ -> "(" ^ (unparse_ast x) ^ ")"
 

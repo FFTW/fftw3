@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.mli,v 1.8 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: c.mli,v 1.9 2005-02-06 21:59:39 athena Exp $ *)
 
 type stride = 
   | SVar of string
@@ -55,6 +55,7 @@ and c_ast =
   | Comma of c_ast * c_ast
   | Integer of int
   | CVar of string
+  | CCall of string * c_ast
   | CPlus of c_ast list
   | CTimes of c_ast * c_ast
   | CUminus of c_ast

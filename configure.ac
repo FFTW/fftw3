@@ -156,17 +156,6 @@ AX_CC_MAXOPT
 if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
 
     if test "$GCC" = "yes"; then
-      # the gcc scheduler is too smart and destroys our own schedule.
-      # Disable the first instruction scheduling pass.  The second
-      # scheduling pass (after register reload) is ok.
-      AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns, [CFLAGS="$CFLAGS -fno-schedule-insns"])
-    
-      # The gcc-3.4 ``web'' pass destroys FMAs.  More precisely,
-      # it circumvents our code which in turn is meant to circumvent
-      # the common-subexpression-elimination step, because CSE destroys
-      # FMA.  Bottom line: disable the ``web'' pass.
-      AX_CHECK_COMPILER_FLAGS(-fno-web, [CFLAGS="$CFLAGS -fno-web"])
-
       # The gcc-3.4 inliner is totally broken; it does not inline
       # small functions like VFMAI.
       AX_CHECK_COMPILER_FLAGS(
@@ -183,6 +172,15 @@ if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
 	    # (not to mention compiler bugs)
             i?86*) CODELET_OPTIM=-O ;;
          esac
+
+         # disable certain other gcc ``optimizations'' that produce worse 
+	 # codelets
+         AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns,
+		 [CODELET_OPTIM="$CODELET_OPTIM -fno-schedule-insns"])
+         AX_CHECK_COMPILER_FLAGS(-fno-web,
+		 [CODELET_OPTIM="$CODELET_OPTIM -fno-web"])
+         AX_CHECK_COMPILER_FLAGS(-fno-loop-optimize,
+		 [CODELET_OPTIM="$CODELET_OPTIM -fno-loop-optimize"])
       fi
     fi
 fi

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r.ml,v 1.14 2003-04-17 19:25:50 athena Exp $ *)
+(* $Id: gen_hc2r.ml,v 1.15 2005-02-06 21:59:39 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r.ml,v 1.14 2003-04-17 19:25:50 athena Exp $"
+let cvsid = "$Id: gen_hc2r.ml,v 1.15 2005-02-06 21:59:39 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -123,7 +123,11 @@ let generate n =
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
 	     Expr_assign (CVar riarray, CPlus [CVar riarray; CVar !Simd.ivs]);
 	     Expr_assign (CVar iiarray, CPlus [CVar iiarray; CVar !Simd.ivs]);
-	     Expr_assign (CVar oarray, CPlus [CVar oarray; CVar !Simd.ovs])],
+	     Expr_assign (CVar oarray, CPlus [CVar oarray; CVar !Simd.ovs]);
+	     make_volatile_stride (CVar ristride);
+	     make_volatile_stride (CVar iistride);
+	     make_volatile_stride (CVar ostride)
+	   ],
 	  Asch annot)
    ])
   in

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.23 2003-07-09 00:42:22 athena Exp $ *)
+(* $Id: c.ml,v 1.24 2005-02-06 21:59:39 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -59,6 +59,7 @@ and c_ast =
   | Comma of c_ast * c_ast
   | Integer of int
   | CVar of string
+  | CCall of string * c_ast
   | CPlus of c_ast list
   | CTimes of c_ast * c_ast
   | CUminus of c_ast
@@ -199,6 +200,7 @@ and unparse_ast =
     | (a :: b) -> " + " ^ (parenthesize a) ^ (unparse_plus b)
   and parenthesize x = match x with
   | (CVar _) -> unparse_ast x
+  | (CCall _) -> unparse_ast x
   | (Integer _) -> unparse_ast x
   | _ -> "(" ^ (unparse_ast x) ^ ")"
 
@@ -227,6 +229,7 @@ and unparse_ast =
     | Comma (a, b) -> (unparse_ast a) ^ ", " ^ (unparse_ast b)
     | Integer i -> string_of_int i
     | CVar s -> s
+    | CCall (s, x) -> s ^ "(" ^ (unparse_ast x) ^ ")"
     | CPlus [] -> "0 /* bug */"
     | CPlus [a] -> " /* bug */ " ^ (unparse_ast a)
     | CPlus (a::b) -> (parenthesize a) ^ (unparse_plus b)

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.17 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: genutil.ml,v 1.18 2005-02-06 21:59:39 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -327,3 +327,4 @@ let twinstr_to_string x =
   else
     Twiddle.twinstr_to_c_string x
 
+let make_volatile_stride x = C.CCall ("MAKE_VOLATILE_STRIDE", x)

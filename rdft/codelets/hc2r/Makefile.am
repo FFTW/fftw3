@@ -21,11 +21,9 @@ noinst_LTLIBRARIES = librdft_codelets_hc2r.la
 # of real-output FFT recursion)
 HC2R = hc2r_3.c hc2r_4.c hc2r_5.c hc2r_6.c hc2r_7.c hc2r_8.c hc2r_9.c	\
 hc2r_10.c hc2r_11.c hc2r_12.c hc2r_13.c hc2r_14.c hc2r_15.c hc2r_16.c	\
-hc2r_32.c
+hc2r_32.c hc2r_64.c hc2r_128.c
 
 # (hc2r_2.c is equivalent to r2hc_2.c)
-
-MHC2R = mhc2r_32.c mhc2r_64.c mhc2r_128.c
 
 ###########################################################################
 # hb_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIF
@@ -42,12 +40,10 @@ HB2 = hb2_4.c hb2_8.c hb2_16.c hb2_32.c hb2_64.c
 # every hb_<r> or hb2_<r> codelet should have a corresponding hc2rIII_<r>
 HC2RIII = hc2rIII_2.c hc2rIII_3.c hc2rIII_4.c hc2rIII_5.c hc2rIII_6.c	\
 hc2rIII_7.c hc2rIII_8.c hc2rIII_9.c hc2rIII_10.c hc2rIII_12.c		\
-hc2rIII_15.c hc2rIII_16.c hc2rIII_32.c
-
-MHC2RIII = mhc2rIII_32.c mhc2rIII_64.c
+hc2rIII_15.c hc2rIII_16.c hc2rIII_32.c hc2rIII_64.c
 
 ###########################################################################
-ALL_CODELETS = $(HC2R) $(MHC2R) $(HB) $(HC2RIII) $(MHC2RIII)
+ALL_CODELETS = $(HC2R) $(HB) $(HC2RIII)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
@@ -67,9 +63,6 @@ FLAGS_HC2RIII=$(RDFT_FLAGS_COMMON) -sign 1
 hc2r_%.c:  $(CODELET_DEPS) $(GEN_HC2R)
 	($(PRELUDE_COMMANDS_RDFT); $(GEN_HC2R) $(FLAGS_HC2R) -n $* -name hc2r_$* -include "hc2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
-mhc2r_%.c:  $(CODELET_DEPS) $(GEN_HC2R_NOINLINE)
-	($(PRELUDE_COMMANDS_RDFT); $(GEN_HC2R_NOINLINE) $(FLAGS_HC2R) -n $* -name mhc2r_$* -include "hc2r.h") | $(ADD_DATE) | $(INDENT) >$@
-
 hb_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
 	($(PRELUDE_COMMANDS_RDFT); $(GEN_HC2HC) $(FLAGS_HB) -n $* -dif -name hb_$* -include "hb.h") | $(ADD_DATE) | $(INDENT) >$@
 
@@ -78,8 +71,5 @@ hb2_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
 
 hc2rIII_%.c:  $(CODELET_DEPS) $(GEN_HC2R)
 	($(PRELUDE_COMMANDS_RDFT); $(GEN_HC2R) $(FLAGS_HC2R) -n $* -name hc2rIII_$* -dft-III -include "hc2rIII.h") | $(ADD_DATE) | $(INDENT) >$@
-
-mhc2rIII_%.c:  $(CODELET_DEPS) $(GEN_HC2R_NOINLINE)
-	($(PRELUDE_COMMANDS_RDFT); $(GEN_HC2R_NOINLINE) $(FLAGS_HC2R) -n $* -name mhc2rIII_$* -dft-III -include "hc2rIII.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE

@@ -20,33 +20,21 @@ noinst_LTLIBRARIES = libdft_codelets_simd.la
 # n1fv_<n> is a hard-coded FFTW_FORWARD FFT of size <n>, using SIMD
 N1F = n1fv_2.c n1fv_3.c n1fv_4.c n1fv_5.c n1fv_6.c n1fv_7.c n1fv_8.c	\
 n1fv_9.c n1fv_10.c n1fv_11.c n1fv_12.c n1fv_13.c n1fv_14.c n1fv_15.c	\
-n1fv_16.c
+n1fv_16.c n1fv_32.c n1fv_64.c
 
 # as above, but FFTW_BACKWARD
 N1B = n1bv_2.c n1bv_3.c n1bv_4.c n1bv_5.c n1bv_6.c n1bv_7.c n1bv_8.c	\
 n1bv_9.c n1bv_10.c n1bv_11.c n1bv_12.c n1bv_13.c n1bv_14.c n1bv_15.c	\
-n1bv_16.c
+n1bv_16.c n1bv_32.c n1bv_64.c
 
 # as above, with restricted input vector stride
 N2F = n2fv_2.c n2fv_3.c n2fv_4.c n2fv_5.c n2fv_6.c n2fv_7.c n2fv_8.c	\
 n2fv_9.c n2fv_10.c n2fv_11.c n2fv_12.c n2fv_13.c n2fv_14.c n2fv_15.c	\
-n2fv_16.c
+n2fv_16.c n2fv_32.c n2fv_64.c
 
 N2B = n2bv_2.c n2bv_3.c n2bv_4.c n2bv_5.c n2bv_6.c n2bv_7.c n2bv_8.c	\
 n2bv_9.c n2bv_10.c n2bv_11.c n2bv_12.c n2bv_13.c n2bv_14.c n2bv_15.c	\
-n2bv_16.c
-
-###########################################################################
-# m* codelets are like n* codelets, but with the loop body in
-# a separate function.  This nonsense is necessary, compilers
-# being what they are.
-M1F = m1fv_16.c m1fv_32.c m1fv_64.c
-
-M1B = m1bv_16.c m1bv_32.c m1bv_64.c
-
-M2F = m2fv_16.c m2fv_32.c m2fv_64.c
-
-M2B = m2bv_16.c m2bv_32.c m2bv_64.c
+n2bv_16.c n2bv_32.c n2bv_64.c
 
 ###########################################################################
 # t1fv_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT step
@@ -70,8 +58,8 @@ Q1F = q1fv_2.c q1fv_4.c q1fv_8.c
 Q1B = q1bv_2.c q1bv_4.c q1bv_8.c
 
 ###########################################################################
-SIMD_CODELETS = $(N1F) $(N1B) $(N2F) $(N2B) $(M1F) $(M1B) $(M2F)	\
-$(M2B) $(T1F) $(T1B) $(Q1F) $(Q1B)
+SIMD_CODELETS = $(N1F) $(N1B) $(N2F) $(N2B) $(T1F) $(T1B) $(Q1F)	\
+$(Q1B)
 
 if HAVE_SIMD
 ALL_CODELETS = $(SIMD_CODELETS)
@@ -103,18 +91,6 @@ n1bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 
 n2bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name n2bv_$* -with-ostride 2 -include "n2b.h") | $(ADD_DATE) | $(INDENT) >$@
-
-m1fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_NOINLINE_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE_C) $(GFLAGS) -n $* -name m1fv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
-
-m2fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_NOINLINE_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE_C) $(GFLAGS) -n $* -name m2fv_$* -with-ostride 2 -include "n2f.h") | $(ADD_DATE) | $(INDENT) >$@
-
-m1bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_NOINLINE_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE_C) $(GFLAGS) -sign 1 -n $* -name m1bv_$* -include "n1b.h") | $(ADD_DATE) | $(INDENT) >$@
-
-m2bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_NOINLINE_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE_C) $(GFLAGS) -sign 1 -n $* -name m2bv_$* -with-ostride 2 -include "n2b.h") | $(ADD_DATE) | $(INDENT) >$@
 
 t1fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1fv_$* -include "t1f.h") | $(ADD_DATE) | $(INDENT) >$@

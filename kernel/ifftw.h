@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.243 2005-01-15 21:35:42 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.244 2005-02-06 21:59:39 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -604,7 +604,7 @@ typedef int *stride;
 #define WS(stride, i)  (stride[i])
 extern stride X(mkstride)(int n, int s);
 void X(stride_destroy)(stride p);
-
+#define MAKE_VOLATILE_STRIDE(x) (void)0 /* a no-op in expession context */
 #else
 
 typedef int stride;
@@ -615,6 +615,11 @@ typedef int stride;
 #define fftwf_stride_destroy(p) ((void) p)
 #define fftw_stride_destroy(p) ((void) p)
 #define fftwl_stride_destroy(p) ((void) p)
+
+/* hackery to prevent the compiler from ``optimizing'' induction
+   variables in codelet loops. */
+extern const int X(an_int_guaranteed_to_be_zero);
+#define MAKE_VOLATILE_STRIDE(x) (x) = (x) ^ X(an_int_guaranteed_to_be_zero)
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
 
@@ -799,7 +804,6 @@ static __inline__ E FNMS(E a, E b, E c)
 #define FNMA(a, b, c) (- (((a) * (b)) + (c)))
 #define FNMS(a, b, c) ((c) - ((a) * (b)))
 #endif
-
 
 /* stack-alignment hackery */
 #if defined(__GNUC__) && defined(__i386__)

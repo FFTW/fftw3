@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twidsq_c.ml,v 1.1 2003-03-26 12:45:03 athena Exp $ *)
+(* $Id: gen_twidsq_c.ml,v 1.2 2005-02-06 21:59:39 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twidsq_c.ml,v 1.1 2003-03-26 12:45:03 athena Exp $"
+let cvsid = "$Id: gen_twidsq_c.ml,v 1.2 2005-02-06 21:59:39 athena Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 
@@ -141,7 +141,10 @@ let generate n =
 	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; 
 						byvl (CVar !Simd.ivs)]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
-					       bytwvl (Integer nt)])],
+					       bytwvl (Integer nt)]);
+	     make_volatile_stride (CVar istride);
+	     make_volatile_stride (CVar vstride)
+	   ],
 	  Asch annot);
      CVar("END_SIMD();");
      Return (CVar twarray)

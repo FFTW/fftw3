@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_c.ml,v 1.9 2003-04-16 21:21:53 athena Exp $ *)
+(* $Id: gen_notw_c.ml,v 1.10 2005-02-06 21:59:39 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_c.ml,v 1.9 2003-04-16 21:21:53 athena Exp $"
+let cvsid = "$Id: gen_notw_c.ml,v 1.10 2005-02-06 21:59:39 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -106,7 +106,10 @@ let generate n =
 	     Expr_assign (CVar riarray, CPlus [CVar riarray; 
 					       byvl (CVar !Simd.ivs)]);
 	     Expr_assign (CVar roarray, CPlus [CVar roarray; 
-					       byvl (CVar !Simd.ovs)])],
+					       byvl (CVar !Simd.ovs)]);
+	     make_volatile_stride (CVar istride);
+	     make_volatile_stride (CVar ostride)
+	   ],
 	  Asch annot);
      CVar("END_SIMD();")
    ])
