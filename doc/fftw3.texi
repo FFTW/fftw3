@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.208 2004-03-07 12:56:08 athena Exp $
+@comment $Id: fftw3.texi,v 1.209 2004-04-06 17:49:13 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3400,10 +3400,10 @@ complex-to-real (backward) transform will multiply the input by
 @node 1d Real-even DFTs (DCTs), 1d Real-odd DFTs (DSTs), The 1d Real-data DFT, What FFTW Really Computes
 @subsection 1d Real-even DFTs (DCTs)
 
-The Real-even DFTs in FFTW are exactly equivalent to the unnormalized
+The Real-even symmetry DFTs in FFTW are exactly equivalent to the unnormalized
 forward (and backward) DFTs as defined above, where the input array
-@math{X} of length @math{N} is purely real and is also @dfn{even}.  In
-this case, the output array is likewise real and even.
+@math{X} of length @math{N} is purely real and is also @dfn{even} symmetry.  In
+this case, the output array is likewise real and even symmetry.
 @cindex real-even DFT
 @cindex REDFT
 
@@ -3550,10 +3550,10 @@ sacrifices the direct equivalence to a symmetric DFT.
 @node 1d Real-odd DFTs (DSTs), 1d Discrete Hartley Transforms (DHTs), 1d Real-even DFTs (DCTs), What FFTW Really Computes
 @subsection 1d Real-odd DFTs (DSTs)
 
-The Real-odd DFTs in FFTW are exactly equivalent to the unnormalized
+The Real-odd symmetry DFTs in FFTW are exactly equivalent to the unnormalized
 forward (and backward) DFTs as defined above, where the input array
-@math{X} of length @math{N} is purely real and is also @dfn{odd}.  In
-this case, the output is odd and purely imaginary.
+@math{X} of length @math{N} is purely real and is also @dfn{odd} symmetry.  In
+this case, the output is odd symmetry and purely imaginary.
 @cindex real-odd DFT
 @cindex RODFT
 
