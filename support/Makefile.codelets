@@ -64,9 +64,9 @@ CODELET_DEPS=$(COPYRIGHT) $(PRELUDE) $(ASMPRELUDE)
 PRELUDE_COMMANDS=cat $(COPYRIGHT) $(PRELUDE)
 ASMPRELUDE_COMMANDS=cat $(COPYRIGHT) $(ASMPRELUDE)
 
-FLAGS_COMMON = -compact -variables 4
-DFT_FLAGS_COMMON = $(FLAGS_COMMON) -no-randomized-cse
-RDFT_FLAGS_COMMON = $(FLAGS_COMMON)  -no-randomized-cse
+FLAGS_COMMON = -compact -variables 4 -no-randomized-cse
+DFT_FLAGS_COMMON = $(FLAGS_COMMON) 
+RDFT_FLAGS_COMMON = $(FLAGS_COMMON)
 
 # cancel the hideous builtin rules that cause an infinite loop
 %: %.o
