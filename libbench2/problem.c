@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.6 2003-01-18 22:27:15 athena Exp $ */
+/* $Id: problem.c,v 1.7 2003-01-19 18:52:09 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -107,7 +107,7 @@ static const char *parsetensor(const char *s, bench_tensor **tp,
 	  m->car.os = 0;
      }
 
-     if (*s == 'x' || *s == 'X' || *s == '*' || *s == ',') {
+     if (*s == 'x' || *s == 'X') {
 	  ++s;
 	  goto L1;
      }
