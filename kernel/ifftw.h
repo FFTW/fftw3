@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.245 2005-02-16 04:53:53 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.246 2005-02-18 02:15:42 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -768,7 +768,7 @@ typedef R E;  /* internal precision of codelets. */
 
 /* FMA macros */
 
-#if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
+#if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__) || defined(_POWER))
 /* this peculiar coding seems to do the right thing on all of
    gcc-2.95, gcc-3.1, and gcc-3.2.  
 
