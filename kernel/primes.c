@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.10 2003-05-15 22:47:18 stevenj Exp $ */
+/* $Id: primes.c,v 1.11 2003-05-18 17:05:51 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -132,4 +132,12 @@ int X(next_prime)(int n)
 {
      while (!X(is_prime)(n)) ++n;
      return n;
+}
+
+int X(factors_into)(int n, const int *primes)
+{
+     for (; *primes; ++primes) 
+	  while ((n % *primes) == 0) 
+	       n /= *primes;
+     return (n == 1);
 }

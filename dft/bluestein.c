@@ -182,15 +182,9 @@ static void print(const plan *ego_, printer *p)
 static int choose_transform_size(int minsz)
 {
      static const int primes[] = { 2, 3, 5, 0 };
-     for (;; ++minsz) {
-	  int n = minsz;
-	  const int *p;
-	  for (p = primes; *p; ++p) 
-	       while ((n % *p) == 0) 
-		    n /= *p;
-	  if (n == 1)
-	       return minsz;
-     }
+     while (!X(factors_into)(minsz, primes))
+	  ++minsz;
+     return minsz;
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)

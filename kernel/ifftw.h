@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.230 2003-05-16 18:22:37 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.231 2003-05-18 17:05:51 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -678,6 +678,7 @@ int X(find_generator)(int p);
 int X(first_divisor)(int n);
 int X(is_prime)(int n);
 int X(next_prime)(int n);
+int X(factors_into)(int n, const int *primes);
 
 #define GENERIC_MIN_BAD 173 /* min prime for which generic becomes bad */
 
