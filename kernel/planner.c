@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.103 2002-09-17 03:54:34 athena Exp $ */
+/* $Id: planner.c,v 1.104 2002-09-17 11:27:17 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -36,16 +36,16 @@
 
 /* Flags f1 subsumes flags f2 iff f1 is less/equally impatient than
    f2, defining a partial ordering. */
-#define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
-#define SUBSUMES(f1,f2) ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1) ||    \
-                         (f1 & EXHAUSTIVE) ||                            \
-			 ((f2 & ESTIMATE) && !(f1 & ESTIMATE)))
+#define IMPATIENCE(flags) ((flags) & IMPATIENCE_FLAGS)
+#define SUBSUMES(f1,f2) 			\
+  ((f2 & ESTIMATE) || !(f1 & USE_SCORE) || \
+   ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1)))
 #define ORDERED(f1, f2) (SUBSUMES(f1, f2) || SUBSUMES(f2, f1))
 
 #define MAXNAM 64  /* maximum length of registrar's name.
 		      Used for reading wisdom.  There is no point
 		      in doing this right */
-		      
+
 /*
   slvdesc management:
 */
@@ -337,9 +337,7 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
 
 static int compute_score(planner *ego, problem *p, solver *s)
 {
-     if (EXHAUSTIVEP(ego))
-	  return GOOD;
-     return s->adt->score(s, p, ego);
+     return (USE_SCOREP(ego)) ? s->adt->score(s, p, ego) : GOOD;
 }
 
 
@@ -410,7 +408,6 @@ static plan *mkplan(planner *ego, problem *p)
      slvdesc *sp;
 
      ++ego->nprob;
-
      md5hash(&m, p, ego);
 
      sp = 0; /* nothing known about this problem, yet */

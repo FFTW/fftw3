@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.132 2002-09-17 06:50:15 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.133 2002-09-17 11:27:17 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -422,7 +422,8 @@ enum {
      NO_INDIRECT_OP = 0x40,
      BELIEVE_PCOST = 0x80,
      NO_DHT_R2HC = 0x100,
-     NO_UGLY = 0x200,
+     USE_SCORE = 0x200,
+     NO_UGLY = 0x400,
 
      /* a canonical set of fftw2-like impatient flags */
      IMPATIENT = (0
@@ -434,13 +435,9 @@ enum {
 		  | BELIEVE_PCOST
 	  ),
 
-     ESTIMATE = 0x1000, /* subsumed by all other impatience flags */
-
-     IMPATIENCE_MASK = (ESTIMATE | (ESTIMATE - 1)),
+     ESTIMATE = 0x2000, /* subsumed by all other impatience flags */
+     IMPATIENCE_FLAGS = (ESTIMATE | (ESTIMATE - 1)),
      
-     /* EXHAUSTIVE subsumes all impatience */
-     EXHAUSTIVE = 0x2000, /* ignore scores */
-
      BLESSING = 0x4000,  /* save this entry */
      H_VALID = 0x8000    /* valid hastable entry */
 };
@@ -456,9 +453,9 @@ enum {
 #define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
 #define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
 #define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
+#define USE_SCOREP(plnr) ((plnr)->planner_flags & USE_SCORE)
 
 #define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
-#define EXHAUSTIVEP(plnr) ((plnr)->planner_flags & EXHAUSTIVE)
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
