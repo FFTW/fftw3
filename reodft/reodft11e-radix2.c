@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.2 2003-02-26 22:46:17 stevenj Exp $ */
+/* $Id: reodft11e-radix2.c,v 1.3 2003-02-27 06:43:00 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:
@@ -485,7 +485,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      
      X(ops_zero)(&ops);
-     /* FIXME */
+     ops.add = 2 + (n/2 - 1)/2 * 20;
+     ops.mul = 6 + (n/2 - 1)/2 * 16;
+     ops.other = 4*n + 2 + (n/2 - 1)/2 * 6;
+     if ((n/2) % 2 == 0) {
+	  ops.add += 4;
+	  ops.mul += 8;
+	  ops.other += 4;
+     }
 
      X(ops_zero)(&pln->super.super.ops);
      X(ops_madd2)(pln->vl, &ops, &pln->super.super.ops);
