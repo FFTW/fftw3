@@ -120,37 +120,37 @@ static inline V VFMS(V a, V b, V c)
 
 extern const vector unsigned int X(altivec_ld_selmsk);
 
-static inline V LD(const float *x, int ivs, const float *aligned_like) 
+static inline V LD(const R *x, int ivs, const R *aligned_like) 
 {
      /* common subexpressions */
      int fivs = 4 * ivs;
        /* you are not expected to understand this: */
-     vector unsigned char ml = vec_lvsr(fivs + 8, (float *)aligned_like);
-     vector unsigned char mh = vec_lvsl(0, (float *)aligned_like);
+     vector unsigned char ml = vec_lvsr(fivs + 8, (R *)aligned_like);
+     vector unsigned char mh = vec_lvsl(0, (R *)aligned_like);
      vector unsigned char msk =
 	  (vector unsigned char)vec_sel((V)mh, (V)ml, X(altivec_ld_selmsk));
      /* end of common subexpressions */
 
-     return vec_perm(vec_ld(0, (float *)x), vec_ld(fivs, (float *)x), msk);
+     return vec_perm(vec_ld(0, (R *)x), vec_ld(fivs, (R *)x), msk);
 }
 
 /* store lower half */
-static inline void STH(float *x, V v, const float *aligned_like)
+static inline void STH(R *x, V v, const R *aligned_like)
 {
-     v = vec_perm(v, v, vec_lvsr(0, (float *)aligned_like));
+     v = vec_perm(v, v, vec_lvsr(0, (R *)aligned_like));
      vec_ste(v, 0, x);
      vec_ste(v, 4, x);
 }
 
-static inline void STL(float *x, V v, int ovs, const float *aligned_like)
+static inline void STL(R *x, V v, int ovs, const R *aligned_like)
 {
      int fovs = 4 * ovs;
-     v = vec_perm(v, v, vec_lvsr(fovs + 8, (float *)aligned_like));
+     v = vec_perm(v, v, vec_lvsr(fovs + 8, (R *)aligned_like));
      vec_ste(v, fovs, x);
      vec_ste(v, 4 + fovs, x);
 }
 
-static inline void ST(float *x, V v, int ovs, const float *aligned_like) 
+static inline void ST(R *x, V v, int ovs, const R *aligned_like) 
 {
      STH(x, v, aligned_like);
      STL(x, v, ovs, aligned_like);

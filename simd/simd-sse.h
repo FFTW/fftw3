@@ -30,38 +30,38 @@ typedef R V __attribute__ ((mode(V4SF),aligned(16)));
 
 /* gcc-3.1 seems to generate slower code when we use SSE builtins.
    Use asm instead. */
-static __inline__ V VADD(V a, V b) 
+static __inline__ V VADD(V a, V b)
 {
      V ret;
      __asm__("addps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
-static __inline__ V VSUB(V a, V b) 
+static __inline__ V VSUB(V a, V b)
 {
      V ret;
      __asm__("subps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
-static __inline__ V VMUL(V b, V a) 
+static __inline__ V VMUL(V b, V a)
 {
      V ret;
      __asm__("mulps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
-static __inline__ V VXOR(V b, V a) 
+static __inline__ V VXOR(V b, V a)
 {
      V ret;
      __asm__("xorps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
-static __inline__ V UNPCKL(V a, V b) 
+static __inline__ V UNPCKL(V a, V b)
 {
      V ret;
      __asm__("unpcklps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
 
-static __inline__ V UNPCKH(V a, V b) 
+static __inline__ V UNPCKH(V a, V b)
 {
      V ret;
      __asm__("unpckhps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
@@ -126,7 +126,7 @@ typedef __m128 V;
 
 
 /* common stuff */
-union fvec { 
+union fvec {
      R f[4];
      V v;
 };
@@ -139,20 +139,32 @@ union fvec {
    (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
 
-static __inline__ V LD(const float *x, int ivs, const float *aligned_like) 
+static __inline__ V LD(const R *x, int ivs, const R *aligned_like)
 {
      V var;
      (void)aligned_like; /* UNUSED */
-     var = LOADL0(x, var);		
+     var = LOADL0(x, var);
      var = LOADH(x + ivs, var);
      return var;
 }
 
-static __inline__ void ST(float *x, V v, int ovs, const float *aligned_like) 
-{					
-     (void)aligned_like; /* UNUSED */	
+static __inline__ V LDA(const R *x, int ivs, const R *aligned_like)
+{
+     (void)aligned_like; /* UNUSED */
+     return *(const V *)x;
+}
+
+static __inline__ void ST(R *x, V v, int ovs, const R *aligned_like)
+{
+     (void)aligned_like; /* UNUSED */
      STOREL(x, v);
      STOREH(x + ovs, v);
+}
+
+static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
+{
+     (void)aligned_like; /* UNUSED */
+     *(V *)x = v;
 }
 
 static __inline__ V FLIP_RI(V x)
@@ -212,20 +224,20 @@ static __inline__ V BYTW(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V tx = twp[0];
+     V si = VBYI(sr);
      V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
-     V si = FLIP_RI(sr);
-     return VADD(VMUL(tr, sr), VMUL(CHS_R(ti), si));
+     return VADD(VMUL(tr, sr), VMUL(ti, si));
 }
 
 static __inline__ V BYTWJ(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V tx = twp[0];
+     V si = VBYI(sr);
      V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
-     V si = FLIP_RI(sr);
-     return VSUB(VMUL(tr, sr), VMUL(CHS_R(ti), si));
+     return VSUB(VMUL(tr, sr), VMUL(ti, si));
 }
 
 #endif /* FAST_AND_BLOATED_TWIDDLES */

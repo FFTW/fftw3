@@ -30,26 +30,26 @@
 /* horrible hack because gcc does not support sse2 yet */
 typedef float V __attribute__ ((mode(V4SF),aligned(16)));
 
-static __inline__ V VADD(V a, V b) 
+static __inline__ V VADD(V a, V b)
 {
      V ret;
      __asm__("addpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
-static __inline__ V VSUB(V a, V b) 
+static __inline__ V VSUB(V a, V b)
 {
      V ret;
      __asm__("subpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
-static __inline__ V VMUL(V b, V a) 
+static __inline__ V VMUL(V b, V a)
 {
      V ret;
      __asm__("mulpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
 
-static __inline__ V VXOR(V b, V a) 
+static __inline__ V VXOR(V b, V a)
 {
      V ret;
      __asm__("xorpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
@@ -67,14 +67,14 @@ static __inline__ V VXOR(V b, V a)
      ret;								   \
 })
 
-static __inline__ V UNPCKL(V a, V b) 
+static __inline__ V UNPCKL(V a, V b)
 {
      V ret;
      __asm__("unpcklpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
 
-static __inline__ V UNPCKH(V a, V b) 
+static __inline__ V UNPCKH(V a, V b)
 {
      V ret;
      __asm__("unpckhpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
@@ -100,13 +100,25 @@ typedef __m128d V;
 #define UNPCKH _mm_unpackhi_pd
 #endif
 
-union dvec { 
+union dvec {
      double d[2];
      V v;
 };
 
-#define LD(loc, ivs, aligned_like) (*(const V *)(loc))
-#define ST(loc, var, ovs, aligned_like) *(V *)(loc) = var
+static __inline__ V LDA(const R *x, int ivs, const R *aligned_like)
+{
+     (void)aligned_like; /* UNUSED */
+     return *(const V *)x;
+}
+
+static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
+{
+     (void)aligned_like; /* UNUSED */
+     *(V *)x = v;
+}
+
+#define LD LDA
+#define ST STA
 
 static __inline__ V FLIP_RI(V x)
 {
@@ -130,19 +142,19 @@ static __inline__ V VBYI(V x)
 static __inline__ V BYTW(const R *t, V sr)
 {
      V tx = LD(t, 1, t);
+     V si = VBYI(sr);
      V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
-     V si = FLIP_RI(sr);
-     return VADD(VMUL(tr, sr), VMUL(CHS_R(ti), si));
+     return VADD(VMUL(tr, sr), VMUL(ti, si));
 }
 
 static __inline__ V BYTWJ(const R *t, V sr)
 {
      V tx = LD(t, 1, t);
+     V si = VBYI(sr);
      V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
-     V si = FLIP_RI(sr);
-     return VSUB(VMUL(tr, sr), VMUL(CHS_R(ti), si));
+     return VSUB(VMUL(tr, sr), VMUL(ti, si));
 }
 
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
