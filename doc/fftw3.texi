@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.116 2003-03-07 06:58:15 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.117 2003-03-07 07:04:45 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3481,8 +3481,8 @@ option to support SSE/SSE2/AltiVec (see the ``Processor type and
 features'' settings).
 @item
 With AltiVec and @code{gcc}, you may have to use the
-@code{-mabi=altivec} to compile any code linking to FFTW, in order to
-properly align the stack.  (This is not necessary on MacOS X.)
+@code{-mabi=altivec} option when compile any code that links to FFTW, in
+order to properly align the stack.  (This is not necessary on MacOS X.)
 @end itemize
 
 @end itemize
