@@ -22,12 +22,10 @@
 #include "dft.h"
 #include "rdft.h"
 #include "reodft.h"
-#include "threads.h"
 
 void X(configure_planner)(planner *plnr)
 {
      X(dft_conf_standard)(plnr);
      X(rdft_conf_standard)(plnr);
      X(reodft_conf_standard)(plnr);
-     X(threads_conf_standard)(plnr);
 }

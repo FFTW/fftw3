@@ -474,6 +474,6 @@ int X(threads_init)(void)
      X(khc2hc_dif_register_hook) = khc2hc_dif_register_hook;
      return 0; /* no error */
 #else
-     return -31416; /* no threads */
+     return 0; /* no threads, no error */
 #endif
 }

@@ -23,17 +23,34 @@
 
 static int threads_inited = 0;
 
-int X(plan_with_nthreads)(int nthreads)
+/* should be called before all other FFTW functions! */
+int X(init_threads)(void)
 {
-     planner *plnr = X(the_planner)();
+     if (!threads_inited) {
+	  planner *plnr;
 
-     if (!nthreads)
-          return 0;
-     if (nthreads > 1 && !threads_inited) {
           if (X(threads_init)())
                return 0;
+
+	  /* this should be the first time the_planner is called,
+	     and hence the time it is configured */
+	  plnr = X(the_planner)();
+	  X(threads_conf_standard)(plnr);
+	       
           threads_inited = 1;
      }
-     plnr->nthr = nthreads;
      return 1;
+}
+
+void X(plan_with_nthreads)(int nthreads)
+{
+     planner *plnr;
+
+     if (!threads_inited) {
+	  X(cleanup)();
+	  X(init_threads)();
+     }
+     A(threads_inited);
+     plnr = X(the_planner)();
+     plnr->nthr = X(imax)(1, nthreads);
 }

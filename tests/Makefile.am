@@ -5,8 +5,15 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/libbench	\
 noinst_PROGRAMS = bench
 noinst_LIBRARIES=libdebug.a
 
+if THREADS
+LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_threads.la
+else
+LIBFFTWTHREADS = 
+endif
+
 bench_SOURCES = bench.c
-bench_LDADD = $(top_builddir)/libfftw3@PREC_SUFFIX@.la libdebug.a	\
+bench_LDADD = $(LIBFFTWTHREADS)				\
+$(top_builddir)/libfftw3@PREC_SUFFIX@.la libdebug.a	\
 $(top_builddir)/libbench/libbench.a $(THREADLIBS)
 
 libdebug_a_SOURCES = dotens.c dotens2.c verify-dft.c verify-lib.c	\

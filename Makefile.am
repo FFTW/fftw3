@@ -30,7 +30,6 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	rdft/codelets/r2hc/librdft_codelets_r2hc.la	\
 	rdft/codelets/hc2r/librdft_codelets_hc2r.la	\
 	reodft/libreodft.la				\
-	threads/libthreads.la				\
 	api/libapi.la
 
 libfftw3@PREC_SUFFIX@_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@

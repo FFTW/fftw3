@@ -61,6 +61,11 @@ void setup(struct problem *p)
      const unsigned flags = 0;
      double tim;
 
+#ifdef HAVE_THREADS
+     BENCH_ASSERT(FFTW(init_threads)());
+     FFTW(plan_with_nthreads)(1);
+#endif
+
      rdwisdom();
 
      timer_start();
