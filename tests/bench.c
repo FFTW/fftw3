@@ -168,7 +168,7 @@ void setup(struct problem *p)
 		    pln->ops.add, pln->ops.mul, pln->ops.fma, pln->ops.other);
 	  pr->print(pr, "planner time: %g s\n", tplan);
 	  if (verbose > 1) {
-	       int count;
+	       int count = 0;
 	       FFTW(traverse_plan)(pln, increment, (void *) &count);
 	       printf("number of child plans: %d\n", count - 1);
 	  }
