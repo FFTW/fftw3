@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.87 2003-03-04 05:17:23 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.88 2003-03-04 05:20:05 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2200,7 +2200,7 @@ case the @code{dist} parameters are ignored).
 @cindex dist
 
 The two @code{nembed} parameters (which should be arrays of length
-@code{rank}) indicate the sizes of the input and output arrays
+@code{rank}) indicate the sizes of the input and output array
 dimensions, respectively, where the transform is of a subarray of size
 @code{n}.  (Each dimension of @code{n} should be @code{<=} the
 corresponding dimension of the @code{nembed} arrays.)  That is, the
