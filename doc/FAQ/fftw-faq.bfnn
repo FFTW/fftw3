@@ -122,7 +122,8 @@ versions 5-7, Sun WorkShop \courier{cc\} version 6, for example.
 the test program (workaround: recompile the \courier{libbench2\}
 directory with \courier{-O2\}).  NetBSD/macppc 1.6 comes with a
 \courier{gcc\} version that also miscompiles the test program (we
-haven't tried to find a workaround).
+haven't tried to find a workaround).  \courier{gcc\} 3.2.3 for ARM
+crashes during compilation.
 
 \courier{ranlib\} of GNU \courier{binutils\} 2.9.1 on Irix has been
 observed to corrupt the FFTW libraries, causing a link failure when
