@@ -175,9 +175,10 @@ static __inline__ V FLIP_RI(V x)
      return SHUFPS(x, x, SHUFVAL(1, 0, 3, 2));
 }
 
+extern const union fvec X(sse_mpmp);
+
 static __inline__ V CHS_R(V x)
 {
-     extern const union fvec X(sse_mpmp);
      return VXOR(X(sse_mpmp).v, x);
 }
 

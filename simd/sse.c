@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse.c,v 1.4 2002-08-24 00:21:25 athena Exp $ */
+/* $Id: sse.c,v 1.5 2003-01-07 19:32:06 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -61,7 +61,6 @@ static int sse_works(void)
 
 int RIGHT_CPU(void)
 {
-     extern const union fvec X(sse_mpmp);
      static int init = 0, res;
      CK(ALIGNED(&X(sse_mpmp))); /* compiler bug? */
      if (!init) {

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.10 2002-08-25 18:10:55 fftw Exp $ */
+/* $Id: codelet.h,v 1.11 2003-01-07 19:32:06 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -28,7 +28,6 @@
 #ifndef __RDFT_CODELET_H__
 #define __RDFT_CODELET_H__
 
-#include <math.h>
 #include "ifftw.h"
 
 /**************************************************************
