@@ -199,20 +199,20 @@ routines.
 \question 18apr:fma What's the difference between the fma and the non-fma versions?
 
 The fma version tries to exploit the fused multiply-add instruction
-implemented in many processors such as the PowerPC, ia-64, and MIPS.
+implemented in many processors such as PowerPC, ia-64, and MIPS.
 The two FFTW packages are otherwise identical.
 
 Definitely use the fma version if you have a PowerPC based system with
 \courier{gcc\}.  This includes all GNU/Linux systems for PowerPC, and
-all macosx systems.
+all MacOS X systems.
 
 Definitely do not use the fma version if you have a ia-32 processor
-(Intel, AMD, etc.)
+(Intel, AMD, etcetera).
 
 On other architectures, the situation is not so clear.  For example,
 ia-64 has the fma instruction, but \courier{gcc-3.2\} appears not to
 exploit it correctly.  Other compilers may do the right thing, but we
-have not tried.  Please send us your feedback so that we can update
+have not tried them.  Please send us your feedback so that we can update
 this FAQ entry.
 
 \question 26aug:languages  Which language is FFTW written in?
