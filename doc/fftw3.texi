@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.12 2003-01-19 01:05:50 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.13 2003-01-19 01:07:33 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -243,6 +243,7 @@ thank all the people who helped us in @ref{Acknowledgments}.
 @end menu
 
 This chapter describes the basic usage of FFTW, i.e., how to compute
+@cindex basic interface
 the Fourier transform of a single array.  This chapter tells the
 truth, but not the @emph{whole} truth. Specifically, FFTW implements
 additional routines and flags, providing extra functionality, that are
