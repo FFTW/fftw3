@@ -49,7 +49,9 @@ set of sizes (see below) via:
 .ce
 fftw@PREC_SUFFIX@-wisdom -v -c -o wisdom@PREC_SUFFIX@
 
-(which may take several hours) and the output
+(this may take several hours, which can be limited by the 
+.B -t
+option) and the output
 .I wisdom@PREC_SUFFIX@
 file can then be copied (as root) to
 .I /etc/fftw/
