@@ -10,7 +10,7 @@ endif
 
 SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft threads api	\
 libbench2 . tests doc tools
-EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS
+EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in
 
 libfftw3@PREC_SUFFIX@_la_SOURCES = 
 
@@ -34,6 +34,11 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	api/libapi.la
 
 libfftw3@PREC_SUFFIX@_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
+
+fftw3@PREC_SUFFIX@.pc: fftw.pc
+	cp -f fftw.pc fftw3@PREC_SUFFIX@
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = fftw3@PREC_SUFFIX@.pc
 
 WISDOM_DIR = /etc/fftw
 WISDOM = wisdom@PREC_SUFFIX@

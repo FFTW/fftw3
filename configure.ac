@@ -375,6 +375,7 @@ AC_CONFIG_FILES([
    tools/fftw_wisdom.1
    tools/fftw-wisdom-to-conf
 
+   fftw.pc
 ])
 
 AC_OUTPUT
