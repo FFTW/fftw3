@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.33 2003-01-08 21:53:16 stevenj Exp $ */
+/* $Id: problem.c,v 1.34 2003-01-09 05:02:35 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -100,8 +100,8 @@ static void print(problem *ego_, printer *p)
      p->print(p, "(rdft %u %td %T %T", 
 	      X(alignment_of)(ego->I),
 	      ego->O - ego->I, 
-	      &ego->sz,
-	      &ego->vecsz);
+	      ego->sz,
+	      ego->vecsz);
      for (i = 0; i < ego->sz->rnk; ++i)
 	  p->print(p, " %d", (int)ego->kind[i]);
      p->print(p, ")");

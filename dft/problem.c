@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.24 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: problem.c,v 1.25 2003-01-09 05:02:35 stevenj Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -51,8 +51,8 @@ static void print(problem *ego_, printer *p)
 	      ego->ro - ego->ri, 
 	      ego->ii - ego->ri, 
 	      ego->io - ego->ro,
-	      &ego->sz,
-	      &ego->vecsz);
+	      ego->sz,
+	      ego->vecsz);
 }
 
 static void zero(const problem *ego_)
