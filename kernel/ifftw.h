@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.156 2002-09-24 21:21:09 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.157 2002-09-25 00:08:44 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -661,6 +661,7 @@ int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
 uint X(alignment_of)(R *p);
 uint X(hash)(const char *s);
+uint X(compute_nbuf)(uint n, uint vl, uint nbuf, uint maxbufsz);
 extern int X(ct_uglyp)(uint min_n, uint n, uint r);
 extern const char *const FFTW(version);
 extern const char *const FFTW(cc);

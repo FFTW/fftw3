@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.36 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: buffered.c,v 1.37 2002-09-25 00:08:44 athena Exp $ */
 
 #include "dft.h"
 
@@ -112,24 +112,8 @@ static void print(plan *ego_, printer *p)
 
 static uint compute_nbuf(uint n, uint vl, const S *ego)
 {
-     uint i, nbuf = ego->adt->nbuf, maxbufsz = ego->adt->maxbufsz;
-
-     if (nbuf * n > maxbufsz)
-          nbuf = X(uimax)((uint)1, maxbufsz / n);
-
-     /*
-      * Look for a buffer number (not too big) that divides the
-      * vector length, in order that we only need one child plan:
-      */
-     for (i = nbuf; i < vl && i < 2 * nbuf; ++i)
-          if (vl % i == 0)
-               return i;
-
-     /* whatever... */
-     nbuf = X(uimin)(nbuf, vl);
-     return nbuf;
+     return X(compute_nbuf)(n, vl, ego->adt->nbuf, ego->adt->maxbufsz);
 }
-
 
 static int toobig(uint n, const S *ego)
 {
