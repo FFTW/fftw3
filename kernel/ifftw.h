@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.205 2003-03-29 07:58:39 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.206 2003-03-29 08:07:34 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -350,7 +350,6 @@ void X(tensor_destroy2)(tensor *a, tensor *b);
 void X(tensor_destroy4)(tensor *a, tensor *b, tensor *c, tensor *d);
 void X(tensor_print)(const tensor *sz, printer *p);
 int X(dimcmp)(const iodim *a, const iodim *b);
-int X(transposedims)(const iodim *a, const iodim *b, int square);
 
 /*-----------------------------------------------------------------------*/
 /* problem.c: */

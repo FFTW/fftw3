@@ -26,9 +26,6 @@
 
 #define CUTOFF 100 /* size below which we do a naive transpose */
 
-/* disable non-ntuples for now, since we don't need real transposes */
-#define NON_NTUPLE 0 /* include specialized code for non-Ntuples */
-
 /*************************************************************************/
 /* some utilities for the solvers */
 
@@ -95,142 +92,11 @@ int X(transpose_slowp)(const iodim *a, const iodim *b, int N)
      return (d < 8 && (a->n * b->n * N) / d > 65536);
 }
 
-#if NON_NTUPLE
 /*************************************************************************/
 /* Out-of-place transposes: */
 
 /* Transpose A (n x m) to B (m x n), where A and B are stored
-   as n x fda and m x fda arrays, respectively. */
-static void rec_transpose(R *A, R *B, int n, int m, int fda, int fdb)
-{
-     if (n + m < CUTOFF*2) {
-	  int i, j;
-	  for (i = 0; i < n; ++i) {
-	       for (j = 0; j < (m-3); j += 4) {
-		    R a0, a1, a2, a3;
-		    a0 = A[(i*fda + j)];
-		    a1 = A[(i*fda + j) + 1];
-		    a2 = A[(i*fda + j) + 2];
-		    a3 = A[(i*fda + j) + 3];
-		    B[j*fdb + i] = a0;
-		    B[(j + 1)*fdb + i] = a1;
-		    B[(j + 2)*fdb + i] = a2;
-		    B[(j + 3)*fdb + i] = a3;
-	       }
-	       for (; j < m; ++j) {
-		    B[j*fdb + i] = A[i*fda + j];
-	       }
-	  }
-     }
-     else if (n > m) {
-	  int n2 = n / 2;
-	  rec_transpose(A, B, n2, m, fda, fdb);
-	  rec_transpose(A + n2*fda, B + n2, n - n2, m, fda, fdb);
-     }
-     else {
-	  int m2 = m / 2;
-	  rec_transpose(A, B, n, m2, fda, fdb);
-	  rec_transpose(A + m2, B + m2*fdb, n, m - m2, fda, fdb);
-     }
-}
-
-/*************************************************************************/
-/* In-place transposes of square matrices: */
-
-/* Transpose both A and B, where A is n x m and B is m x n, storing
-   the transpose of A in B and the transpose of B in A.  A and B
-   are actually stored as n x fda and m x fda arrays. */
-static void rec_transpose_swap(R *A, R *B, int n, int m, int fda)
-{
-     if (n+m <= CUTOFF*2) {
-	  int i, j;
-	  for (i = 0; i < n; ++i) {
-	       for (j = 0; j < (m-3); j += 4) {
-		    R a0, a1, a2, a3;
-		    R b0, b1, b2, b3;
-		    a0 = A[(i*fda + j)];
-		    a1 = A[(i*fda + j) + 1];
-		    a2 = A[(i*fda + j) + 2];
-		    a3 = A[(i*fda + j) + 3];
-		    b0 = B[j*fda + i];
-		    b1 = B[(j + 1)*fda + i];
-		    b2 = B[(j + 2)*fda + i];
-		    b3 = B[(j + 3)*fda + i];
-		    A[(i*fda + j)] = b0;
-		    A[(i*fda + j) + 1] = b1;
-		    A[(i*fda + j) + 2] = b2;
-		    A[(i*fda + j) + 3] = b3;
-		    B[j*fda + i] = a0;
-		    B[(j + 1)*fda + i] = a1;
-		    B[(j + 2)*fda + i] = a2;
-		    B[(j + 3)*fda + i] = a3;
-	       }
-	       for (; j < m; ++j) {
-		    R a = A[i*fda + j];
-		    A[i*fda + j] = B[j*fda + i];
-		    B[j*fda + i] = a;
-	       }
-	  }
-     }
-     else if (n > m) {
-	  int n2 = n / 2;
-	  rec_transpose_swap(A, B, n2, m, fda);
-	  rec_transpose_swap(A + n2*fda, B + n2, n - n2, m, fda);
-     }
-     else {
-	  int m2 = m / 2;
-	  rec_transpose_swap(A, B, n, m2, fda);
-	  rec_transpose_swap(A + m2, B + m2*fda, n, m - m2, fda);
-     }
-}
-
-/* Transpose A, an n x n matrix (stored as n x fda), in-place. */
-static void rec_transpose_sq_ip(R *A, int n, int fda)
-{
-     if (n <= CUTOFF) {
-	  int i, j;
-	  for (i = 0; i < n; ++i) {
-	       for (j = i+1; j < (n-3); j += 4) {
-		    R a0, a1, a2, a3;
-		    R b0, b1, b2, b3;
-		    a0 = A[(i*fda + j)];
-		    a1 = A[(i*fda + j) + 1];
-		    a2 = A[(i*fda + j) + 2];
-		    a3 = A[(i*fda + j) + 3];
-		    b0 = A[j*fda + i];
-		    b1 = A[(j + 1)*fda + i];
-		    b2 = A[(j + 2)*fda + i];
-		    b3 = A[(j + 3)*fda + i];
-		    A[(i*fda + j)] = b0;
-		    A[(i*fda + j) + 1] = b1;
-		    A[(i*fda + j) + 2] = b2;
-		    A[(i*fda + j) + 3] = b3;
-		    A[j*fda + i] = a0;
-		    A[(j + 1)*fda + i] = a1;
-		    A[(j + 2)*fda + i] = a2;
-		    A[(j + 3)*fda + i] = a3;
-	       }
-	       for (; j < n; ++j) {
-		    R a = A[i*fda + j];
-		    A[i*fda + j] = A[j*fda + i];
-		    A[j*fda + i] = a;
-	       }
-	  }
-     }
-     else {
-	  int n2 = n / 2;
-	  rec_transpose_sq_ip(A, n2, fda);
-	  rec_transpose_sq_ip((A + n2) + fda*n2, n - n2, fda);
-	  rec_transpose_swap(A + n2, A + fda*n2, n2, n - n2, fda);
-     }
-}
-
-#endif /* NON_NTUPLE */
-
-/*************************************************************************/
-/* Out-of-place transposes: */
-
-/* as rec_transpose, but operates on N-tuples: */
+   as n x fda and m x fda arrays, respectively, operating on N-tuples: */
 static void rec_transpose_Ntuple(R *A, R *B, int n, int m, int fda, int fdb,
 			  int N)
 {
@@ -238,7 +104,7 @@ static void rec_transpose_Ntuple(R *A, R *B, int n, int m, int fda, int fdb,
 	  int i, j, k;
 	  for (i = 0; i < n; ++i) {
 	       for (j = 0; j < m; ++j) {
-		    for (k = 0; k < N; ++k) {
+		    for (k = 0; k < N; ++k) { /* FIXME: unroll */
 			 B[(j*fdb + i) * N + k] = A[(i*fda + j) * N + k];
 		    }
 	       }
@@ -259,13 +125,16 @@ static void rec_transpose_Ntuple(R *A, R *B, int n, int m, int fda, int fdb,
 /*************************************************************************/
 /* In-place transposes of square matrices of N-tuples: */
 
+/* Transpose both A and B, where A is n x m and B is m x n, storing
+   the transpose of A in B and the transpose of B in A.  A and B
+   are actually stored as n x fda and m x fda arrays. */
 static void rec_transpose_swap_Ntuple(R *A, R *B, int n, int m, int fda, int N)
 {
      if (n == 1 || m == 1 || (n + m) * N <= CUTOFF*2) {
 	  int i, j, k;
 	  for (i = 0; i < n; ++i) {
 	       for (j = 0; j < m; ++j) {
-		    for (k = 0; k < N; ++k) {
+		    for (k = 0; k < N; ++k) { /* FIXME: unroll */
 			 R a = A[(i*fda + j) * N + k];
 			 A[(i*fda + j) * N + k] = B[(j*fda + i) * N + k];
 			 B[(j*fda + i) * N + k] = a;
@@ -285,6 +154,7 @@ static void rec_transpose_swap_Ntuple(R *A, R *B, int n, int m, int fda, int N)
      }
 }
 
+/* Transpose A, an n x n matrix (stored as n x fda), in-place. */
 static void rec_transpose_sq_ip_Ntuple(R *A, int n, int fda, int N)
 {
      if (n == 1)
@@ -293,7 +163,7 @@ static void rec_transpose_sq_ip_Ntuple(R *A, int n, int fda, int N)
 	  int i, j, k;
 	  for (i = 0; i < n; ++i) {
 	       for (j = i + 1; j < n; ++j) {
-		    for (k = 0; k < N; ++k) {
+		    for (k = 0; k < N; ++k) { /* FIXME: unroll */
 			 R a = A[(i*fda + j) * N + k];
 			 A[(i*fda + j) * N + k] = A[(j*fda + i) * N + k];
 			 A[(j*fda + i) * N + k] = a;
@@ -320,21 +190,11 @@ void X(transpose)(R *A, int n, int m, int d, int N, R *buf)
 {
      A(n > 0 && m > 0 && N > 0 && d > 0);
      if (d == 1) {
-#if NON_NTUPLE
-	  if (N == 1)
-	       rec_transpose(A, buf, n,m, m,n);
-	  else
-#endif
-	       rec_transpose_Ntuple(A, buf, n,m, m,n, N);
+	  rec_transpose_Ntuple(A, buf, n,m, m,n, N);
 	  memcpy(A, buf, m*n*N*sizeof(R));
      }
      else if (n*m == 1) {
-#if NON_NTUPLE
-	  if (N == 1)
-	       rec_transpose_sq_ip(A, d, d);
-	  else
-#endif
-	       rec_transpose_sq_ip_Ntuple(A, d, d, N);
+	  rec_transpose_sq_ip_Ntuple(A, d, d, N);
      }
      else {
 	  int i, num_el = n*m*d*N;
@@ -345,21 +205,10 @@ void X(transpose)(R *A, int n, int m, int d, int N, R *buf)
 	     using the buf matrix.  This consists of d transposes
 	     of contiguous n x d' matrices of m-tuples. */
 	  if (n > 1) {
-#if NON_NTUPLE
-	       if (m*N == 1) {
-		    for (i = 0; i < d; ++i) {
-			 rec_transpose(A + i*num_el, buf, n,d, d,n);
-			 memcpy(A + i*num_el, buf, num_el*sizeof(R));
-		    }
-	       }
-	       else 
-#endif
-	       {
-		    for (i = 0; i < d; ++i) {
-			 rec_transpose_Ntuple(A + i*num_el, buf,
-					      n,d, d,n, m*N);
-			 memcpy(A + i*num_el, buf, num_el*sizeof(R));
-		    }
+	       for (i = 0; i < d; ++i) {
+		    rec_transpose_Ntuple(A + i*num_el, buf,
+					 n,d, d,n, m*N);
+		    memcpy(A + i*num_el, buf, num_el*sizeof(R));
 	       }
 	  }
 	  
@@ -371,21 +220,10 @@ void X(transpose)(R *A, int n, int m, int d, int N, R *buf)
 	     using the buf matrix.  This consists of d' transposes
 	     of contiguous d*n x m matrices. */
 	  if (m > 1) {
-#if NON_NTUPLE
-	       if (N == 1) {
-		    for (i = 0; i < d; ++i) {
-			 rec_transpose(A + i*num_el, buf, d*n,m, m,d*n);
-			 memcpy(A + i*num_el, buf, num_el*sizeof(R));
-		    }
-	       }
-	       else 
-#endif
-	       {
-		    for (i = 0; i < d; ++i) {
-			 rec_transpose_Ntuple(A + i*num_el, buf,
-					      d*n,m, m,d*n, N);
-			 memcpy(A + i*num_el, buf, num_el*sizeof(R));
-		    }
+	       for (i = 0; i < d; ++i) {
+		    rec_transpose_Ntuple(A + i*num_el, buf,
+					 d*n,m, m,d*n, N);
+		    memcpy(A + i*num_el, buf, num_el*sizeof(R));
 	       }
 	  }
      }
