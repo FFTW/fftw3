@@ -18,32 +18,12 @@
  *
  */
 
-/* $Id: altivec.c,v 1.11 2005-02-13 23:17:32 athena Exp $ */
+/* $Id: altivec.c,v 1.12 2005-02-14 16:16:15 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
 
 #if HAVE_ALTIVEC
-const vector unsigned int X(altivec_constants)[] = {
-     /* select even */
-     /* 0: */ VLIT(0x00010203, 0x04050607, 0x10111213, 0x14151617),
-
-     /* select odd */
-     /* 1: */ VLIT(0x08090a0b, 0x0c0d0e0f, 0x18191a1b, 0x1c1d1e1f),
-
-     /* swap real/imag */
-     /* 2: */ VLIT(0x04050607, 0x00010203, 0x0c0d0e0f, 0x08090a0b),
-
-     /* used in LD for alignment */
-     /* 3: */ VLIT(0, 0, 0xFFFFFFFF, 0xFFFFFFFF),
-
-     /* representation of (-1.0, 1.0, -1.0, 1.0).  Multiply by this
-      * constant to change the sign of the real part */
-     /* 4: */ VLIT(0xbf800000, 0x3f800000, 0xbf800000, 0x3f800000),
-
-     /* xor with this to change the sign of the real part */
-     /* 5: */ VLIT(0x80000000, 0x00000000, 0x80000000, 0x00000000)
-};
 
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
