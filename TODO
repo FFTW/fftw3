@@ -19,7 +19,8 @@ TODO before FFTW-$2\pi$:
 * Explore the idea of having n < 0 in tensors, possibly to mean
   inverse DFT.
 
-* still too much code duplication in rader
+* implement NO_RADER flag, have rader.c set NO_RADER, to avoid
+  recursive applications of the algorithm. (?)
 
 * better estimator: possibly, let "other" cost be coef * n, where
   coef is a per-solver constant determined via some big numerical
