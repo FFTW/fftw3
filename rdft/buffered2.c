@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.33 2003-04-04 21:15:53 athena Exp $ */
+/* $Id: buffered2.c,v 1.34 2003-04-04 23:14:14 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -325,14 +325,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
-     plnr->problem_flags |= UNALIGNED; /* FIXME */
-
      if (p->kind == R2HC)
 	  cldp =
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
 		    X(mktensor_1d)(nbuf, ivs, bufdist),
-		    p->r, bufs, &p->kind);
+		    TAINT(p->r, ivs * nbuf), bufs, &p->kind);
      else {
 	  A(p->kind == HC2R);
 	  plnr->problem_flags |= DESTROY_INPUT; /* always ok to destroy buf */
@@ -340,7 +338,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, 1, p->sz->dims[0].os),
 		    X(mktensor_1d)(nbuf, bufdist, ovs),
-		    bufs, p->r, &p->kind);
+		    bufs, TAINT(p->r, ovs * nbuf), &p->kind);
      }
      if (!(cld = X(mkplan_d)(plnr, cldp))) goto nada;
 
@@ -350,13 +348,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
 		    X(mktensor_1d)(vl % nbuf, ivs, bufdist),
-		    p->r, bufs, &p->kind);
+		    p->r + ivs * (nbuf * (vl / nbuf)), bufs, &p->kind);
      else /* HC2R */
 	  cldp =
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, 1, p->sz->dims[0].os),
 		    X(mktensor_1d)(vl % nbuf, bufdist, ovs),
-		    bufs, p->r, &p->kind);
+			 bufs, p->r + ovs * (nbuf * (vl / nbuf)), &p->kind);
      if (!(cldrest = X(mkplan_d)(plnr, cldp))) goto nada;
 
      /* deallocate buffers, let apply() allocate them for real */

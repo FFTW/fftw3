@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.48 2003-04-04 21:15:53 athena Exp $ */
+/* $Id: buffered.c,v 1.49 2003-04-04 23:14:14 stevenj Exp $ */
 
 #include "dft.h"
 
@@ -252,11 +252,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      bufs = 0;
 
      /* plan the leftover transforms (cldrest): */
-     cldrest = X(mkplan_d)(plnr, 
-			   X(mkproblem_dft_d)(
-				X(tensor_copy)(p->sz),
-				X(mktensor_1d)(vl % nbuf, ivs, ovs),
-				p->ri, p->ii, p->ro, p->io));
+     {
+	  int id = ivs * (nbuf * (vl / nbuf));
+	  int od = ovs * (nbuf * (vl / nbuf));
+	  cldrest = X(mkplan_d)(plnr, 
+				X(mkproblem_dft_d)(
+				     X(tensor_copy)(p->sz),
+				     X(mktensor_1d)(vl % nbuf, ivs, ovs),
+				     p->ri+id, p->ii+id, p->ro+od, p->io+od));
+     }
      if (!cldrest)
           goto nada;
 
