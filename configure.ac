@@ -101,9 +101,9 @@ ACX_PROG_CC_MAXOPT(fftw)
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h limits.h])
-dnl Header file for enabling asm() on Digital Unix  
-AC_CHECK_HEADERS(c_asm.h) 
+AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h limits.h c_asm.h intrinsics.h])
+dnl c_asm.h: Header file for enabling asm() on Digital Unix  
+dnl intrinsics.h: cray unicos
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -129,20 +129,12 @@ AC_FUNC_MALLOC
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
-AC_CHECK_FUNCS(BSDgettimeofday)
-AC_CHECK_FUNCS(gettimeofday)
-AC_CHECK_FUNCS(gethrtime)
-AC_CHECK_FUNCS(read_real_time time_base_to_time)
-AC_CHECK_FUNCS(drand48)
-AC_CHECK_FUNCS(hypot hypotl)
-AC_CHECK_FUNCS(sqrt)
-AC_CHECK_FUNCS(memset)
-AC_CHECK_FUNCS(memalign _mm_malloc _mm_free)
-dnl high-resolution clock on SGI machines
-AC_CHECK_FUNCS(clock_gettime)
+AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime 
+                read_real_time time_base_to_time drand48
+		hypot hypotl sqrt memset memalign _mm_malloc _mm_free
+		clock_gettime])
 
 dnl Cray UNICOS _rtc() (real-time clock) intrinsic
-AC_CHECK_HEADERS(intrinsics.h)
 AC_MSG_CHECKING([for _rtc intrinsic])
 rtc_ok=yes
 AC_TRY_LINK([#ifdef HAVE_INTRINSICS_H
@@ -151,7 +143,7 @@ AC_TRY_LINK([#ifdef HAVE_INTRINSICS_H
 AC_MSG_RESULT($rtc_ok)
 
 if test "$PRECISION" = "l"; then
-	AC_CHECK_FUNCS(cosl sinl tanl, [], [AC_MSG_ERROR([long-double precision requires long-double trigonometric routines])])
+	AC_CHECK_FUNCS([cosl sinl tanl], [], [AC_MSG_ERROR([long-double precision requires long-double trigonometric routines])])
 fi
 
 AC_MSG_CHECKING([for isnan])
