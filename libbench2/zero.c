@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: zero.c,v 1.5 2003-02-09 00:11:58 stevenj Exp $ */
+/* $Id: zero.c,v 1.6 2003-02-09 07:36:25 stevenj Exp $ */
 
 #include "bench.h"
 
@@ -29,6 +29,9 @@ void problem_zero(bench_problem *p)
      if (p->kind == PROBLEM_COMPLEX) {
 	  caset(p->inphys, p->iphyssz, czero);
 	  caset(p->outphys, p->ophyssz, czero);
+     } else if (p->kind == PROBLEM_R2R) {
+	  aset(p->inphys, p->iphyssz, 0.0);
+	  aset(p->outphys, p->ophyssz, 0.0);
      } else if (p->kind == PROBLEM_REAL && p->sign < 0) {
 	  aset(p->inphys, p->iphyssz, 0.0);
 	  caset(p->outphys, p->ophyssz, czero);

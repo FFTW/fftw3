@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.12 2003-02-09 00:35:56 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.13 2003-02-09 07:36:25 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -57,7 +57,13 @@ typedef bench_real bench_complex[2];
 #undef LDOUBLE_PRECISION
 #define LDOUBLE_PRECISION (!DOUBLE_PRECISION && sizeof(bench_real) == sizeof(long double))
 
-typedef enum { PROBLEM_COMPLEX, PROBLEM_REAL } problem_kind_t;
+typedef enum { PROBLEM_COMPLEX, PROBLEM_REAL, PROBLEM_R2R } problem_kind_t;
+
+typedef enum {
+     R2R_R2HC, R2R_HC2R, R2R_DHT,
+     R2R_REDFT00, R2R_REDFT01, R2R_REDFT10, R2R_REDFT11,
+     R2R_RODFT00, R2R_RODFT01, R2R_RODFT10, R2R_RODFT11
+} r2r_kind_t;
 
 typedef struct {
      int n;
@@ -95,6 +101,7 @@ void tensor_obounds(bench_tensor *t, int *lbp, int *ubp);
 
 typedef struct {
      problem_kind_t kind;
+     r2r_kind_t *k;
      bench_tensor *sz;
      bench_tensor *vecsz;
      int sign;
@@ -150,6 +157,7 @@ typedef struct {
 
 void verify_dft(bench_problem *p, int rounds, double tol, errors *e);
 void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e);
+void verify_r2r(bench_problem *p, int rounds, double tol, errors *e);
 
 /**************************************************************
  * malloc

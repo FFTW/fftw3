@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.11 2003-02-09 00:11:58 stevenj Exp $ */
+/* $Id: verify.c,v 1.12 2003-02-09 07:36:25 stevenj Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,7 +32,7 @@ void verify_problem(bench_problem *p, int rounds, double tol)
      switch (p->kind) {
 	 case PROBLEM_COMPLEX: verify_dft(p, rounds, tol, &e); break;
 	 case PROBLEM_REAL: verify_rdft2(p, rounds, tol, &e); break;
-	 default: BENCH_ASSERT(0); 
+	 case PROBLEM_R2R: verify_r2r(p, rounds, tol, &e); break;
      }
 
      if (verbose)

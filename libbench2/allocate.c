@@ -1,6 +1,6 @@
 /* not worth copyrighting */
 
-/* $Id: allocate.c,v 1.5 2003-02-09 00:11:58 stevenj Exp $ */
+/* $Id: allocate.c,v 1.6 2003-02-09 07:36:25 stevenj Exp $ */
 
 #include "bench.h"
 
@@ -41,6 +41,22 @@ void problem_alloc(bench_problem *p)
 	  } else {
 	       p->ophyssz = osz;
 	       p->outphys = out = bench_malloc(osz * sizeof(bench_complex));
+	       p->out = out - olb;
+	  }
+     } else if (p->kind == PROBLEM_R2R) {
+	  bench_real *in, *out;
+
+	  p->iphyssz = isz;
+	  p->inphys = in = bench_malloc(isz * sizeof(bench_real));
+	  p->in = in - ilb;
+	  
+	  if (p->in_place) {
+	       p->out = p->in;
+	       p->outphys = p->inphys;
+	       p->ophyssz = p->iphyssz;
+	  } else {
+	       p->ophyssz = osz;
+	       p->outphys = out = bench_malloc(osz * sizeof(bench_real));
 	       p->out = out - olb;
 	  }
      } else if (p->kind == PROBLEM_REAL && p->sign < 0) { /* R2HC */

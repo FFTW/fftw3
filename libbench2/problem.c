@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.18 2003-02-09 00:52:58 stevenj Exp $ */
+/* $Id: problem.c,v 1.19 2003-02-09 07:36:25 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -92,9 +92,10 @@ static const char *parseint(const char *s, int *n)
      return s;
 }
 
-struct dimlist { bench_iodim car; struct dimlist *cdr; };
+struct dimlist { bench_iodim car; r2r_kind_t k; struct dimlist *cdr; };
 
-static const char *parsetensor(const char *s, bench_tensor **tp)
+static const char *parsetensor(const char *s, bench_tensor **tp,
+			       r2r_kind_t **k)
 {
      struct dimlist *l = 0, *m;
      bench_tensor *t;
@@ -125,12 +126,68 @@ static const char *parsetensor(const char *s, bench_tensor **tp)
 	  m->car.os = 0;
      }
 
+     if (*s == 'f' || *s == 'F') {
+	  m->k = R2R_R2HC;
+	  ++s;
+     }
+     else if (*s == 'b' || *s == 'B') {
+	  m->k = R2R_HC2R;
+	  ++s;
+     }
+     else if (*s == 'h' || *s == 'H') {
+	  m->k = R2R_DHT;
+	  ++s;
+     }
+     else if (*s == 'e' || *s == 'E' || *s == 'o' || *s == 'O') {
+	  char c = *(s++);
+	  int ab;
+
+	  s = parseint(s, &ab);
+
+	  if (c == 'e' || c == 'E') {
+	       if (ab == 0)
+		    m->k = R2R_REDFT00;
+	       else if (ab == 1)
+		    m->k = R2R_REDFT01;
+	       else if (ab == 10)
+		    m->k = R2R_REDFT10;
+	       else if (ab == 11)
+		    m->k = R2R_REDFT11;
+	       else
+		    BENCH_ASSERT(0);
+	  }
+	  else {
+	       if (ab == 0)
+		    m->k = R2R_RODFT00;
+	       else if (ab == 1)
+		    m->k = R2R_RODFT01;
+	       else if (ab == 10)
+		    m->k = R2R_RODFT10;
+	       else if (ab == 11)
+		    m->k = R2R_RODFT11;
+	       else
+		    BENCH_ASSERT(0);
+	  }
+     }
+     else
+	  m->k = R2R_R2HC;
+
      if (*s == 'x' || *s == 'X') {
 	  ++s;
 	  goto L1;
      }
      
-     /* now we have a dimlist.  Build bench_tensor */
+     /* now we have a dimlist.  Build bench_tensor, etc. */
+
+     if (k && rnk > 0) {
+	  int i;
+	  *k = bench_malloc(sizeof(r2r_kind_t) * t->rnk);
+	  for (m = l, i = rnk - 1; i >= 0; --i, m = m->cdr) {
+	       BENCH_ASSERT(m);
+	       (*k)[i] = m->k;
+	  }
+     }
+
      t = mktensor(rnk);
      while (--rnk >= 0) {
 	  bench_iodim *d = t->dims + rnk;
@@ -158,6 +215,7 @@ bench_problem *problem_parse(const char *s)
      p = bench_malloc(sizeof(bench_problem));
 
      p->kind = PROBLEM_COMPLEX;
+     p->k = 0;
      p->sign = -1;
      p->in = p->out = 0;
      p->inphys = p->outphys = 0;
@@ -180,10 +238,11 @@ bench_problem *problem_parse(const char *s)
 	 case '+': p->sign = 1; ++s; goto L1;
 	 case 'r': p->kind = PROBLEM_REAL; ++s; goto L1;
 	 case 'c': p->kind = PROBLEM_COMPLEX; ++s; goto L1;
+	 case 'k': p->kind = PROBLEM_R2R; ++s; goto L1;
 	 default : ;
      }
 
-     s = parsetensor(s, &sz);
+     s = parsetensor(s, &sz, p->kind == PROBLEM_R2R ? &p->k : 0);
 
      if (p->kind == PROBLEM_REAL) {
 	  if (p->sign < 0) {
@@ -200,12 +259,12 @@ bench_problem *problem_parse(const char *s)
      if (*s == '*') { /* "external" vector */
 	  ++s;
 	  p->sz = dwim(sz, &last_iodim, nti, nto, sz_last_iodim);
-	  s = parsetensor(s, &sz);
+	  s = parsetensor(s, &sz, 0);
 	  p->vecsz = dwim(sz, &last_iodim, nti, nto, sz_last_iodim);
      } else if (*s == 'v' || *s == 'V') { /* "internal" vector */
 	  bench_tensor *vecsz;
 	  ++s;
-	  s = parsetensor(s, &vecsz);
+	  s = parsetensor(s, &vecsz, 0);
 	  p->vecsz = dwim(vecsz, &last_iodim, nti, nto, sz_last_iodim);
 	  p->sz = dwim(sz, &last_iodim, nti, nto, sz_last_iodim);
      } else {
@@ -225,6 +284,8 @@ void problem_destroy(bench_problem *p)
 {
      BENCH_ASSERT(p);
      problem_free(p);
+     if (p->k)
+	  bench_free(p->k);
      bench_free(p);
 }
 
