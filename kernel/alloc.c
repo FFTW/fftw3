@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.36 2003-02-26 01:42:08 stevenj Exp $ */
+/* $Id: alloc.c,v 1.37 2003-03-03 21:50:33 fftw Exp $ */
 
 #include "ifftw.h"
 
@@ -41,6 +41,32 @@ extern int posix_memalign(void **, size_t, size_t);
 #define real_malloc X(malloc)
 #define real_free free /* memalign and malloc use ordinary free */
 
+#if defined(WITH_OUR_MALLOC16) && (MIN_ALIGNMENT == 16)
+/* Our own 16-byte aligned malloc/free.  Assumes sizeof(void*) is a
+   power of two <= 8.
+
+   The main reason for this routine is that, as of this writing,
+   Windows does not include any aligned allocation routines in its
+   system libraries, and instead provides an implementation with a
+   Visual C++ "Processor Pack" that you have to statically link into
+   your program.  We do not want to require users to have VC++
+   (e.g. MinGW should be fine).  Our code should be at least as good
+   as the MS _aligned_malloc, in any case, according to second-hand
+   reports of the algorithm it employs (also based on plain malloc). */
+static void *our_malloc16(size_t n)
+{
+     void *p0, *p;
+     p0 = malloc(n + 16);
+     p = (void *) (((uintptr_t) p0 + 16) & (~((uintptr_t) 15)));
+     *((void **) p - 1) = p0;
+     return p;
+}
+static void our_free16(void *p)
+{
+     free(*((void **) p - 1));
+}
+#endif
+
 /* part of user-callable API */
 void *X(malloc)(size_t n)
 {
@@ -48,7 +74,12 @@ void *X(malloc)(size_t n)
 
 #if defined(MIN_ALIGNMENT)
 
-#  if defined(HAVE_MEMALIGN)
+#  if defined(WITH_OUR_MALLOC16) && (MIN_ALIGNMENT == 16)
+     p = our_malloc16(n);
+#    undef real_free
+#    define real_free our_free16
+
+#  elif defined(HAVE_MEMALIGN)
      p = memalign(MIN_ALIGNMENT, n);
 
 #  elif defined(HAVE_POSIX_MEMALIGN)
@@ -91,7 +122,8 @@ void *X(malloc)(size_t n)
 #    define real_free MPFree
 
 #  else
-     /* Add your machine here and send a patch to fftw@fftw.org */
+     /* Add your machine here and send a patch to fftw@fftw.org 
+        or (e.g. for Windows) configure --with-our-malloc16 */
 #    error "Don't know how to malloc() aligned memory."
 #  endif
 

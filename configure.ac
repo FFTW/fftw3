@@ -85,6 +85,11 @@ fi
 
 AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
 
+AC_ARG_WITH(our-malloc16, [AC_HELP_STRING([--with-our-malloc16],[use our own 16-byte aligned malloc (helpful for Win32)])], with_our_malloc16=$withval, with_our_malloc16=no)
+if test "$with_our_malloc16" = "yes"; then
+	AC_DEFINE(WITH_OUR_MALLOC16,1,[Use our own 16-byte aligned malloc routine; mainly helpful for Windows systems lacking aligned allocation system-library routines.])
+fi
+
 AC_ARG_ENABLE(unsafe-mulmod, [AC_HELP_STRING([--enable-unsafe-mulmod],[risk overflow for large prime sizes])], enable_unsafe_mulmod=$enableval, enable_unsafe_mulmod=no)
 if test "$enable_unsafe_mulmod" = "yes"; then
         AC_DEFINE([FFTW_ENABLE_UNSAFE_MULMOD],1,[enable fast, unsafe modular multiplications, risking overflow for large prime sizes])
