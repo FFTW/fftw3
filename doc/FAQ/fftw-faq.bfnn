@@ -241,6 +241,32 @@ be used for any transform of the same size).  We believe that it
 should be possible to upgrade most programs without any difficulty,
 however.
 
+\question 20mar:planperarray Why do FFTW 3 plans encapsulate the input/output arrays and not just the algorithm?
+
+There are several reasons:
+
+\call startlist
+\call item
+It was important for performance reasons that the plan be specific to
+array characteristics like the stride (and alignment, for SIMD), and
+requiring that the user maintain these invariants is error prone.
+\call item
+In most high-performance applications, as far as we can tell, you are
+usually transforming the same array over and over, so FFTW's semantics
+should not be a burden.
+\call item
+If you need to transform another array of the same size, creating a
+new plan once the first exists is a cheap operation.
+\call item
+If you need to transform many arrays of the same size at once, you
+should really use the \courier{plan_many\} routines in FFTW's "advanced"
+interface.
+\call item
+If the abovementioned array characteristics are the same, you are
+willing to pay close attention to the documentation, and you really
+need to, we provide a "guru" interface to apply a plan to a new array.
+\call endlist
+
 \question 25may:slow FFTW seems really slow.
 
 You are probably recreating the plan before every transform, rather
