@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.1 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.2 2002-06-11 01:35:29 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -32,9 +32,9 @@
    Copy A -> B, where A and B are n0 x n1 complex matrices
    such that the (i0, i1) element has index (i0 * s0 + i1 * s1). 
 */
-static inline void cpy0(uint n0, uint n1, 
-			const R *rA, const R *iA, int sa0, int sa1, 
-			R *rB, R *iB, int sb0, int sb1)
+static void cpy(uint n0, uint n1, 
+		const R *rA, const R *iA, int sa0, int sa1, 
+		R *rB, R *iB, int sb0, int sb1)
 {
      uint i0, i1;
 
@@ -47,23 +47,6 @@ static inline void cpy0(uint n0, uint n1,
 	       iB[i0 * sb0 + i1 * sb1] = xi;
 	  }
      }
-}
-
-static void cpy(uint n0, uint n1, 
-		const R *rA, const R *iA, int sa0, int sa1, 
-		R *rB, R *iB, int sb0, int sb1)
-{
-     if (n1 == 4) {
-	  if (sa1 == 2 && sb0 == 2) {
-	       cpy0(n0, 4, rA, iA, sa0, 2, rB, iB, 2, sb1);
-	       return;
-	  }
-	  if (sa0 == 2 && sb1 == 2) {
-	       cpy0(n0, 4, rA, iA, 2, sa1, rB, iB, sb0, 2);
-	       return;
-	  }
-     }
-     cpy0(n0, n1, rA, iA, sa0, sa1, rB, iB, sb0, sb1);
 }
 
 static const R *doit(kdft_dit k, R *rA, R *iA, const R *W, int ios, int dist, 
