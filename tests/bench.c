@@ -163,7 +163,9 @@ void setup(struct problem *p)
      FFTW(rdft_conf_standard) (plnr);
      FFTW(reodft_conf_standard) (plnr);
      FFTW(planner_set_hook) (plnr, hook);
+     /* plnr->flags |= IMPATIENT; */
      /* plnr->flags |= IMPATIENT | CLASSIC_VRECURSE; */
+     /* plnr->flags |= ESTIMATE | IMPATIENT; */
      if (p->kind == PROBLEM_REAL)
 	  plnr->flags |= DESTROY_INPUT;
 
