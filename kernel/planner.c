@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.92 2002-09-16 03:51:14 stevenj Exp $ */
+/* $Id: planner.c,v 1.93 2002-09-16 03:55:44 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -530,7 +530,6 @@ static int imprt(planner *ego, scanner *sc)
 
      if (!sc->scan(sc, "(" WISDOM_PREAMBLE))
 	  goto bad;
-
 
      while (1) {
 	  if (sc->scan(sc, ")"))
