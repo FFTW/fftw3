@@ -26,7 +26,6 @@
 #define ALIGNMENT 8
 #define ALIGNMENTA 8
 
-/* horrible hack because gcc does not support 3dnow yet */
 typedef float V __attribute__ ((mode(V2SF),aligned(8)));
 
 static __inline__ V VADD(V a, V b)
