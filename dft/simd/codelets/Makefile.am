@@ -172,12 +172,6 @@ include $(top_srcdir)/support/Makefile.codelets
 if MAINTAINER_MODE
 GFLAGS = -simd -trivial-stores $(FLAGS_COMMON)
 
-nfv_%.cod:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name "") | $(ADD_DATE) | $(INDENT) >$@
-
-nbv_%.cod:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name "") | $(ADD_DATE) | $(INDENT) >$@
-
 n1fv_%.c:  $(CODELET_DEPS)						
 	(echo "#include \"n1f.h\"";			\
 	n=$*; echo "#define NAME X(codelet_n1fv_$$n)";	\
