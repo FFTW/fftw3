@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: verify.c,v 1.2 2002-07-13 16:48:10 stevenj Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -404,5 +404,6 @@ void verify(const char *param, int rounds, double tol)
      problem_zero(p);
      setup(p);
      do_verify(p, rounds, tol);
+     done(p);
      problem_destroy(p);
 }
