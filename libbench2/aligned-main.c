@@ -18,7 +18,9 @@
  *
  */
 
-/* $Id: aligned-main.c,v 1.1 2003-02-09 23:08:26 athena Exp $ */
+/* $Id: aligned-main.c,v 1.2 2003-02-09 23:11:48 athena Exp $ */
+
+#include "bench.h"
 
 int aligned_main(int argc, char *argv[])
 {
