@@ -104,17 +104,17 @@ Kq2s_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ)
 %: %.S
 
 # rule to build codlist
-$(CODLIST): Makefile
+$(CODLIST): Makefile							\
 	(								\
 	echo "#include \"ifftw.h\"";					\
 	echo;								\
-	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))); do		\
+	for i in "$(subst .c,,$(filter %.c,$(ALL_CODELETS)))"; do	\
 	   echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
 	done;								\
 	echo;								\
 	echo;								\
-	echo "const solvtab $(SOLVTAB_NAME) = {";                       \
-	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))); do		\
+	echo "const solvtab $(SOLVTAB_NAME) = {";			\
+	for i in "$(subst .c,,$(filter %.c,$(ALL_CODELETS)))"; do	\
 	   echo "   X($(CODELET_NAME)$$i),";				\
 	done;								\
 	echo "   0";							\
