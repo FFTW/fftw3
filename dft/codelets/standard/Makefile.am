@@ -22,6 +22,12 @@ N1 = n1_2.c n1_3.c n1_4.c n1_5.c n1_6.c n1_7.c n1_8.c n1_9.c n1_10.c	\
 n1_11.c n1_12.c n1_13.c n1_14.c n1_15.c n1_16.c n1_32.c n1_64.c
 
 ###########################################################################
+# m1_<n> is a hard-coded FFT of size <n>, with the loop body in a
+# separate function
+M1 = m1_2.c m1_3.c m1_4.c m1_5.c m1_6.c m1_7.c m1_8.c m1_9.c m1_10.c	\
+m1_11.c m1_12.c m1_13.c m1_14.c m1_15.c m1_16.c m1_32.c m1_64.c
+
+###########################################################################
 # t1_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT step
 T1 = t1_2.c t1_3.c t1_4.c t1_5.c t1_6.c t1_7.c t1_8.c t1_9.c	\
 t1_10.c t1_12.c t1_15.c t1_16.c t1_32.c t1_64.c
@@ -72,7 +78,7 @@ FRANZ_CODELETS = # $(SN1) $(ST1)
 FRANZ_EXTRA = # $(SN1COD) $(ST1COD)
 
 ###########################################################################
-ALL_CODELETS = $(N1) $(T1) $(T2) $(FRANZ_CODELETS)
+ALL_CODELETS = $(N1) $(M1) $(T1) $(T2) $(FRANZ_CODELETS)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST) $(FRANZ_EXTRA)
 
@@ -90,6 +96,9 @@ FLAGS_T2=$(DFT_FLAGS_COMMON) -twiddle-log3
 
 n1_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW) $(FLAGS_N1) -n $* -name n1_$* -include "n.h") | $(ADD_DATE) | $(INDENT) >$@
+
+m1_%.c:  $(CODELET_DEPS) $(GEN_NOTW_NOINLINE)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE) $(FLAGS_N1) -n $* -name m1_$* -include "n.h") | $(ADD_DATE) | $(INDENT) >$@
 
 
 sn1_%.cod:  $(CODELET_DEPS) $(GEN_NOTW)
