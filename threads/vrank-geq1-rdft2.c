@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.14 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.15 2003-03-16 18:00:42 stevenj Exp $ */
 
 
 #include "threads.h"
@@ -58,26 +58,13 @@ static void *spawn_apply(spawn_data *d)
      return 0;
 }
 
-static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
+static void apply(const plan *ego_, R *r, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      PD d;
 
      d.its = ego->its;
      d.ots = ego->ots;
-     d.cldrn = ego->cldrn;
-     d.r = r; d.rio = rio; d.iio = iio;
-
-     X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*) &d);
-}
-
-static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
-{
-     const P *ego = (const P *) ego_;
-     PD d;
-
-     d.its = ego->ots;
-     d.ots = ego->its;
      d.cldrn = ego->cldrn;
      d.r = r; d.rio = rio; d.iio = iio;
 
@@ -180,8 +167,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      block_size = (d->n + plnr->nthr - 1) / plnr->nthr;
      nthr = (d->n + block_size - 1) / block_size;
      plnr->nthr = (plnr->nthr + nthr - 1) / nthr;
-     its = d->is * block_size;
-     ots = d->os * block_size;
+     if (R2HC_KINDP(p->kind)) {
+	  its = d->is * block_size;
+	  ots = d->os * block_size;
+     }
+     else {
+	  its = d->os * block_size;
+	  ots = d->is * block_size;
+     }
 
      cldrn = MALLOC(sizeof(plan *) * nthr, PLANS);
      for (i = 0; i < nthr; ++i) cldrn[i] = (plan *) 0;
@@ -198,8 +191,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
      X(tensor_destroy)(vecsz);
 
-     pln = MKPLAN_RDFT2(P, &padt,
-			R2HC_KINDP(p->kind) ? apply_r2hc : apply_hc2r);
+     pln = MKPLAN_RDFT2(P, &padt, apply);
 
      pln->cldrn = cldrn;
      pln->its = its;
