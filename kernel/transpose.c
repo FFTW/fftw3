@@ -325,7 +325,7 @@ static void unpack(R *A, int n, int fda, int N)
    n = p, m = q.  Probably the latter if |p-q| * gcd(p,q) < max(p,q). */
 void X(transpose)(R *A, int n, int m, int d, int N, R *buf)
 {
-     A(n > 0 && m > 0 && N > 0 && d > 0);
+     A(n > 0 && m > 0 && N > 0 && d >= 0);
      if (d == 1) {
 	  rec_transpose_Ntuple(A, buf, n,m, m,n, N);
 	  memcpy(A, buf, m*n*N*sizeof(R));
