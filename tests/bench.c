@@ -184,10 +184,12 @@ void setup(struct problem *p)
 	  tplan = timer_stop();
 	  {
                printer *pr = X(mkprinter_file)(stdout);
-	       pr->print(pr, "READ WISDOM (%g seconds): ", tplan);
+	       if (verbose)
+		    pr->print(pr, "READ WISDOM (%g seconds): ", tplan);
                if (verbose > 3)
 		    plnr->adt->exprt(plnr, pr);
-	       pr->print(pr, "\n");
+	       if (verbose)
+		    pr->print(pr, "\n");
                X(printer_destroy)(pr);
           }
      }
