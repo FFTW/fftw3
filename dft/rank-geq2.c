@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.13 2002-07-02 20:13:24 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.14 2002-07-02 20:18:09 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -98,11 +98,12 @@ static int picksplit(const S *ego, uint rnk, uint *rp)
      /* check whether some buddy solver would produce the same split.
         If so, consider this solver unapplicable and let the buddy
         take care of it.  The smallest buddy is applicable. */
-     for (i = 0; i < ego->nbuddies; ++i)
+     for (i = 0; i < ego->nbuddies; ++i) {
 	  if (ego->buddies[i] == ego->spltrnk)
 	       break;  /* found self */
-          if (really_picksplit(ego->buddies[i], rnk) == r0)
+	  if (really_picksplit(ego->buddies[i], rnk) == r0)
                return 0; /* found equivalent buddy */
+     }
 
      *rp = r0;
      return 1;
