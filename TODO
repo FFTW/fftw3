@@ -50,3 +50,7 @@ TODO before FFTW-$2\pi$:
 
 * export NO_SEARCH flag to the user (i.e. document FFTW_WISDOM_ONLY) (?)
   (This is currently obsolete)
+
+* Add a FAQ entry about the crash because of gcc-3.4.[1-3] bugs.
+  I am waiting until gcc-3.4.4 is released.
+
