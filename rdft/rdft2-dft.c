@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-dft.c,v 1.4 2002-08-24 15:19:30 athena Exp $ */
+/* $Id: rdft2-dft.c,v 1.5 2002-08-24 21:43:54 athena Exp $ */
 
 /* Compute RDFT of even size via a DFT of size n/2 */
 
@@ -59,19 +59,19 @@ static void radix2_dit(R *rio, R *iio, const R *W, uint n, int dist)
 	  E rop = *riop;
 	  E iop = *iiop;
 	  *riop = rop + iop;   riop += dist;
-	  *iiop = 0.0;         iiop += dist;
 	  *riom = rop - iop;   riom -= dist;
+	  *iiop = 0.0;         iiop += dist;
 	  *iiom = 0.0;         iiom -= dist;
      }
 
      /* middle elements */
-     for (i = 1; i < (n + 1) / 2; ++i) {
+     for (W += 2, i = 2; i < n; i += 2, W += 2) {
 	  E rop = *riop;
 	  E iop = *iiop;
 	  E rom = *riom;
 	  E iom = *iiom;
-	  E wr = W[2 * i];
-	  E wi = W[2 * i + 1];
+	  E wr = W[0];
+	  E wi = W[1];
 	  E re = rop + rom;
 	  E ie = iop - iom;
 	  E rd = rom - rop;
