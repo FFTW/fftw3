@@ -18,27 +18,7 @@
  *
  */
 
-/* $Id: printers.c,v 1.1 2002-08-01 07:03:18 stevenj Exp $ */
-
-#include "ifftw.h"
-
-typedef struct {
-     printer super;
-     FILE *f;
-} P_file;
-
-static void putchr_file(printer *p_, char c)
-{
-     P_file *p = (P_file *) p_;
-     fputc(c, p->f);
-}
-
-printer *X(mkprinter_file)(FILE *f)
-{
-     P_file *p = (P_file *) X(mkprinter)(sizeof(P_file), putchr_file);
-     p->f = f;
-     return &p->super;
-}
+#include "api.h"
 
 typedef struct {
      printer super;
@@ -77,4 +57,24 @@ printer *X(mkprinter_str)(char *s)
      p->s = s;
      *s = 0;
      return &p->super;
+}
+
+char *X(export_wisdom_to_string)(void)
+{
+     printer *p;
+     planner *plnr = X(the_planner)();
+     uint cnt;
+     char *s;
+
+     p = X(mkprinter_cnt)(&cnt);
+     plnr->adt->exprt(plnr, p);
+     X(printer_destroy)(p);
+
+     s = (char *) non_fftw_malloc(sizeof(char) * cnt, OTHER);
+
+     p = X(mkprinter_str)(s);
+     plnr->adt->exprt(plnr, p);
+     X(printer_destroy)(p);
+
+     return s;
 }

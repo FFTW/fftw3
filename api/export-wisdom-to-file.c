@@ -18,44 +18,30 @@
  *
  */
 
-/* $Id: scanners.c,v 1.3 2002-09-01 23:51:50 athena Exp $ */
-
-#include "ifftw.h"
+#include "api.h"
 
 typedef struct {
-     scanner super;
+     printer super;
      FILE *f;
-} S_file;
+} P_file;
 
-static int getchr_file(scanner *sc_)
+static void putchr_file(printer *p_, char c)
 {
-     S_file *sc = (S_file *) sc_;
-     return fgetc(sc->f);
+     P_file *p = (P_file *) p_;
+     fputc(c, p->f);
 }
 
-scanner *X(mkscanner_file)(FILE *f)
+printer *X(mkprinter_file)(FILE *f)
 {
-     S_file *sc = (S_file *) X(mkscanner)(sizeof(S_file), getchr_file);
-     sc->f = f;
-     return &sc->super;
+     P_file *p = (P_file *) X(mkprinter)(sizeof(P_file), putchr_file);
+     p->f = f;
+     return &p->super;
 }
 
-typedef struct {
-     scanner super;
-     const char *s;
-} S_str;
-
-static int getchr_str(scanner *sc_)
+void X(export_wisdom_to_file)(FILE *output_file)
 {
-     S_str *sc = (S_str *) sc_;
-     if (!*sc->s)
-	  return EOF;
-     return *sc->s++;
-}
-
-scanner *X(mkscanner_str)(const char *s)
-{
-     S_str *sc = (S_str *) X(mkscanner)(sizeof(S_str), getchr_str);
-     sc->s = s;
-     return &sc->super;
+     printer *p = X(mkprinter_file)(output_file);
+     planner *plnr = X(the_planner)();
+     plnr->adt->exprt(plnr, p);
+     X(printer_destroy)(p);
 }
