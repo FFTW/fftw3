@@ -244,7 +244,7 @@ void setup(struct problem *p)
 	  if (verbose > 3) 
 	       plnr->adt->exprt(plnr, pr);
 	  if (verbose > 4) 
-	       plnr->adt->exprt_registrars(plnr, pr);
+	       plnr->adt->exprt_conf(plnr, pr);
 	  FFTW(printer_destroy)(pr);
      }
      AWAKE(pln, 1);

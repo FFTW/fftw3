@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.27 2002-07-30 04:36:26 stevenj Exp $ */
+/* $Id: planner.c,v 1.28 2002-07-30 04:41:15 stevenj Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -267,7 +267,7 @@ static void exprt(planner *ego, printer *p)
 #define STRINGIZEx(x) #x
 #define STRINGIZE(x) STRINGIZEx(x)
 
-static void exprt_registrars(planner *ego, printer *p)
+static void exprt_conf(planner *ego, printer *p)
 {
      solutions *s;
      uint h;
@@ -320,8 +320,9 @@ static void exprt_registrars(planner *ego, printer *p)
      });
      if (blessed_reg_nam)
 	  idcnt += reg_nam_cnt;
-
-     p->print(p, "     }; /* yields %d solvers */\n", idcnt);
+     
+     p->print(p, "          SOLVTAB_END\n"
+	      "     }; /* yields %d solvers */\n", idcnt);
 
      /* export wisdom as hard-coded string, w/ids corresponding to solvtab */
      p->print(p, "     static const char * const wisdom = \"");
@@ -359,7 +360,7 @@ planner *X(mkplanner)(size_t sz,
 {
      static const planner_adt padt = {
 	  slv, cdr, solvers, register_solver, register_registrar,
-	  mkplan, forget, exprt, exprt_registrars, slv_mkplan
+	  mkplan, forget, exprt, exprt_conf, slv_mkplan
      };
 
      planner *p = (planner *) fftw_malloc(sz, PLANNERS);

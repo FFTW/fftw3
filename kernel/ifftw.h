@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.58 2002-07-30 03:52:07 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.59 2002-07-30 04:41:15 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -349,7 +349,7 @@ typedef struct {
      void (*forget)(planner *ego, amnesia a);
      void (*exprt)(planner *ego, printer *pr); /* export is a reserved word
 						  in C++.  Idiots. */
-     void (*exprt_registrars)(planner *ego, printer *pr);
+     void (*exprt_conf)(planner *ego, printer *pr);
      plan *(*slv_mkplan)(planner *ego, problem *p, solver *s);
 } planner_adt;
 
