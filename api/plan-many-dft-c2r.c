@@ -46,7 +46,7 @@ X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,
      R *ri, *ii;
 
      X(extract_reim)(FFT_SIGN, in, &ri, &ii);
-     
+     flags |= FFTW_DESTROY_INPUT;
      return X(mkapiplan)(
 	  flags,
 	  X(mkproblem_rdft2_d)(
