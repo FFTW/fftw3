@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: print.c,v 1.8 2002-06-18 14:33:58 athena Exp $ */
+/* $Id: print.c,v 1.9 2002-07-12 19:40:14 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
 #include <stdio.h>
 
-#define BSZ 32
+#define BSZ 64
 
 static void myputs(printer *p, const char *s)
 {
@@ -60,6 +60,13 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       case 'd': {
 			    int x = va_arg(ap, int);
 			    sprintf(buf, "%d", x);
+			    goto putbuf;
+		       }
+		       case 'f': case 'e': case 'g': {
+			    char fmt[3] = "%x";
+			    double x = va_arg(ap, double);
+			    fmt[1] = c;
+			    sprintf(buf, fmt, x);
 			    goto putbuf;
 		       }
 		       case 'v': {
