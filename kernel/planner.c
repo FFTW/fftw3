@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.65 2002-09-09 19:04:47 athena Exp $ */
+/* $Id: planner.c,v 1.66 2002-09-09 21:03:32 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -43,7 +43,7 @@ struct solutions_s {
 };
 
 /* slvdesc management */
-static uint hash_regnam(char *s)
+static uint hash_regnam(const char *s)
 {
      uint h = 0xDEADBEEFul;
      do {
@@ -243,31 +243,23 @@ static plan *slv_mkplan(planner *ego, problem *p, solver *s)
 static plan *mkplan(planner *ego, problem *p)
 {
      solutions *sol;
-     plan *pln;
+     plan *pln = 0;
      slvdesc *sp = 0;
 
      if ((sol = lookup(ego, p))) {
 	  if ((sp = sol->sp)) {
 	       /* call solver to create plan */
 	       ego->inferior_mkplan(ego, p, &pln, &sp);
-
-	       /* PLN = 0 in the unlikely case of MD5 collision */
-	       if (!pln) goto search;
-
-	       /* inherit blessings etc. from planner */
-	       merge_flags(sol, ego->flags);
-	  } else {
-	       /* impossible problem */
-	       pln = 0;
 	  }
-     } else {
-     search:
-	  /* not in table.  Run inferior planner */
-	  ++ego->nprob;
-	  ego->inferior_mkplan(ego, p, &pln, &sp);
-	  insert(ego, ego->flags, ego->nthr, p, sp);
      }
 
+     if (!pln) {
+	  /* Lookup failed. Run inferior planner */
+	  ++ego->nprob;
+	  ego->inferior_mkplan(ego, p, &pln, &sp);
+     }
+
+     insert(ego, ego->flags, ego->nthr, p, sp);
 
      if (pln)
 	  ego->hook(pln, p, 1);
