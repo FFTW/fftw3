@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.150 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: ifftw.h,v 1.151 2002-09-22 17:27:46 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -58,7 +58,8 @@ typedef fftw_real R;
 #define FFT_SIGN (-1)  /* sign convention for forward transforms */
 
 /* get rid of that object-oriented stink: */
-#define REGISTER_SOLVER(p, s) ((p)->adt->register_solver)((p), (s))
+//#define REGISTER_SOLVER(p, s) ((p)->adt->register_solver)((p), (s))
+#define REGISTER_SOLVER(p, s) X(solver_register)(p, s)
 
 #define STRINGIZEx(x) #x
 #define STRINGIZE(x) STRINGIZEx(x)
@@ -384,6 +385,7 @@ struct solver_s {
 solver *X(mksolver)(size_t size, const solver_adt *adt);
 void X(solver_use)(solver *ego);
 void X(solver_destroy)(solver *ego);
+void X(solver_register)(planner *plnr, solver *s);
 
 /* shorthand */
 #define MKSOLVER(type, adt) (type *)X(mksolver)(sizeof(type), adt)

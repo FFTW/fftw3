@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: solver.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: solver.c,v 1.3 2002-09-22 17:27:46 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -40,4 +40,9 @@ void X(solver_destroy)(solver *ego)
 {
      if ((--ego->refcnt) == 0)
           X(free)(ego);
+}
+
+void X(solver_register)(planner *plnr, solver *s)
+{
+     plnr->adt->register_solver(plnr, s);
 }
