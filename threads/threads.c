@@ -292,9 +292,9 @@ typedef pthread_t fftw_thr_id;
 
 #define fftw_thr_wait(tid) CK(!pthread_join(tid,0))
 
-/* SYSV/POSIX semaphores are disabled for now because, at least on my Linux
+/* POSIX semaphores are disabled for now because, at least on my Linux
    machine, they don't seem to offer much performance advantage. */
-#if 0
+#if 1
 #define HAVE_SEMAPHORES 1
 
 #include <semaphore.h>
