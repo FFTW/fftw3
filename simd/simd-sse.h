@@ -106,7 +106,7 @@ static __inline__ void STOREL(R *addr, V val)
 
 #endif
 
-#ifdef __ICC /* Intel's compiler for ia32 */
+#if defined(__ICC) || defined(_MSC_VER) /* Intel's compiler for ia32 */
 #include <xmmintrin.h>
 
 typedef __m128 V;
@@ -125,6 +125,9 @@ typedef __m128 V;
 #define LDK(x) _mm_set_ps1(x)
 #endif
 
+#ifdef _MSC_VER
+#  define __inline__ __inline
+#endif
 
 /* common stuff */
 union fvec {

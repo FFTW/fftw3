@@ -94,7 +94,7 @@ static __inline__ V UNPCKH(V a, V b)
 #define LDK(x) x
 #endif
 
-#ifdef __ICC /* Intel's compiler for ia32 */
+#if defined(__ICC) || defined(_MSC_VER) /* Intel's compiler for ia32 */
 #include <emmintrin.h>
 
 typedef __m128d V;
@@ -107,6 +107,10 @@ typedef __m128d V;
 #define SHUFPD _mm_shuffle_pd
 #define UNPCKL _mm_unpacklo_pd
 #define UNPCKH _mm_unpackhi_pd
+#endif
+
+#ifdef _MSC_VER
+#  define __inline__ __inline
 #endif
 
 union dvec {
