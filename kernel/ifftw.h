@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.185 2003-02-10 12:59:57 athena Exp $ */
+/* $Id: ifftw.h,v 1.186 2003-02-11 03:04:18 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -152,7 +152,7 @@ extern void *X(malloc_debug)(size_t n, enum malloc_tag what,
 			     const char *file, int line);
 #define MALLOC(n, what) X(malloc_debug)(n, what, __FILE__, __LINE__)
 #define NATIVE_MALLOC(n, what) MALLOC(n, what)
-void X(malloc_print_minfo)(int verbose);
+void X(malloc_print_minfo)(int vrbose);
 
 #else /* ! FFTW_DEBUG */
 
@@ -529,7 +529,7 @@ planner *X(mkplanner)(void);
 void X(planner_destroy)(planner *ego);
 
 #ifdef FFTW_DEBUG
-void X(planner_dump)(planner *ego, int verbose);
+void X(planner_dump)(planner *ego, int vrbose);
 #endif
 
 /*
