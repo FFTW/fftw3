@@ -1,4 +1,4 @@
-* simd
+* implement verify for rdft2 n-dimensional problems
 
 * threads/mpi
 
