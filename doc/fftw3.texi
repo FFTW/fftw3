@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.91 2003-03-04 07:22:14 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.92 2003-03-04 20:55:47 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2174,7 +2174,16 @@ array.  Other than these additional features, the planner operates in
 the same fashion as in the basic interface, and the resulting
 @code{fftw_plan} is used in the same way (@pxref{Using Plans}).
 
-@subsubheading Complex DFTs
+@menu
+* Advanced Complex DFTs::       
+* Advanced Real-data DFTs::     
+* Advanced Real-to-real Transforms::  
+@end menu
+
+@c =========>
+@node Advanced Complex DFTs, Advanced Real-data DFTs, Advanced Interface, Advanced Interface
+@subsection Advanced Complex DFTs
+
 @example
 fftw_plan fftw_plan_many_dft(int rank, const int *n, int howmany,
                              fftw_complex *in, const int *inembed,
@@ -2231,7 +2240,10 @@ length @math{M}, one would use a @code{howmany} of @math{M}, a
 @code{stride} of @math{M}, and a @code{dist} of 1.
 @cindex vector
 
-@subsubheading Real DFTs
+@c =========>
+@node Advanced Real-data DFTs, Advanced Real-to-real Transforms, Advanced Complex DFTs, Advanced Interface
+@subsection Advanced Real-data DFTs
+
 @example
 fftw_plan fftw_plan_many_dft_r2c(int rank, const int *n, int howmany,
                                  fftw_complex *in, const int *inembed,
@@ -2274,7 +2286,10 @@ as for @code{fftw_plan_many_dft}.  In this case, each dimension of
 @code{nembed} should be @code{>=} what it would be in the basic
 interface (e.g. the halved or padded @code{n}).
 
-@subsubheading Real-to-real transforms
+@c =========>
+@node Advanced Real-to-real Transforms,  , Advanced Real-data DFTs, Advanced Interface
+@subsection Advanced Real-to-real Transforms
+
 @example
 fftw_plan fftw_plan_many_r2r(int rank, const int *n, int howmany,
                              double *in, const int *inembed,
@@ -2300,32 +2315,42 @@ the same as for @code{fftw_plan_many_dft}.  (Of course, the
 
 The ``guru'' interface to FFTW is intended to expose as much as possible
 of the flexibility in the underlying FFTW architecture.  It allows one
-to compute multi-dimensional ``vectors'' of multi-dimensional
+to compute multi-dimensional ``vectors'' (loops) of multi-dimensional
 transforms, where each vector/transform dimension has an independent
 size and stride.
 @cindex vector
 One can also use more general complex-number formats, e.g. separate real
-and imaginary arrays.  In addition to the more-flexible planner
-interface, there are also generalizations of @code{fftw_execute} that
-allow a given plan to be executed on a different array (sufficiently
-similar to the original).
+and imaginary arrays.
+
+In addition to the more-flexible planner interface, there are also guru
+generalizations of @code{fftw_execute} that allow a given plan to be
+executed on a different array (sufficiently similar to the original).
 
 For those users who require the flexibility of the guru interface, it is
 important that they pay special attention to the documentation lest they
 shoot themselves in the foot.
 
-@subsubheading Vector and transform sizes
+@menu
+* Vector and transform sizes::  
+* Guru Complex DFTs::           
+* Guru Real-data DFTs::         
+* Guru Real-to-real Transforms::  
+@end menu
+
+@c =========>
+@node Vector and transform sizes, Guru Complex DFTs, Guru Interface, Guru Interface
+@subsection Vector and transform sizes
 
 The guru interface introduces one basic new data structure,
 @code{fftw_iodim}, that is used to specify sizes and strides for
 multi-dimensional transforms and vectors:
 
 @example
-typedef struct {
+typedef struct @{
      int n;
      int is;
      int os;
-} fftw_iodim;
+@} fftw_iodim;
 @end example
 @tindex fftw_iodim
 
@@ -2364,7 +2389,10 @@ the vector and transform dimensions correspond to a set of distinct
 indices, and for in-place transforms the input/output strides should be
 the same.
 
-@subsubheading Complex DFTs
+@c =========>
+@node Guru Complex DFTs, Guru Real-data DFTs, Vector and transform sizes, Guru Interface
+@subsection GuruComplex DFTs
+
 @example
 fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
                              int howmany_rank,
@@ -2375,7 +2403,10 @@ fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
 @end example
 @findex fftw_plan_guru_dft
 
-@subsubheading Real-data DFTs
+@c =========>
+@node Guru Real-data DFTs, Guru Real-to-real Transforms, Guru Complex DFTs, Guru Interface
+@subsection Guru Real-data DFTs
+
 @example
 fftw_plan fftw_plan_guru_dft_r2c(int rank, const fftw_iodim *dims,
                                  int howmany_rank,
@@ -2393,7 +2424,10 @@ fftw_plan fftw_plan_guru_dft_c2r(int rank, const fftw_iodim *dims,
 @findex fftw_plan_guru_dft_r2c
 @findex fftw_plan_guru_dft_c2r
 
-@subsubheading Real-to-real transforms
+@c =========>
+@node Guru Real-to-real Transforms,  , Guru Real-data DFTs, Guru Interface
+@subsection Guru Real-to-real Transforms
+
 @example
 fftw_plan fftw_plan_guru_r2r(int rank, const fftw_iodim *dims,
                              int howmany_rank,
