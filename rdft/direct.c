@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.14 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: direct.c,v 1.15 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -52,16 +52,16 @@ typedef struct {
      const S *slv;
 } P;
 
-static void apply_r2hc(plan *ego_, R *I, R *O)
+static void apply_r2hc(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      ego->k.r2hc(I, O, O + ego->ioffset, ego->is, ego->ros, ego->ios,
 		 ego->vl, ego->ivs, ego->ovs);
 }
 
-static void apply_hc2r(plan *ego_, R *I, R *O)
+static void apply_hc2r(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      ego->k.hc2r(I, I + ego->ioffset, O, ego->ros, ego->ios, ego->is,
 		 ego->vl, ego->ivs, ego->ovs);
 }
@@ -74,9 +74,9 @@ static void destroy(plan *ego_)
      X(stride_destroy)(ego->ios);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      const S *s = ego->slv;
 
      p->print(p, "(rdft-%s-direct-%d%v \"%s\")", 

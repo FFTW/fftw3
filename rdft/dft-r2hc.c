@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.20 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.21 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -40,9 +40,9 @@ typedef struct {
      int n;
 } P;
 
-static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int os;
      int i, n;
 
@@ -80,9 +80,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(dft-r2hc-%d%(%p%))", ego->n, ego->cld);
 }
 

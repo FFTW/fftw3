@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.18 2003-02-09 18:01:44 stevenj Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.19 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -38,9 +38,9 @@ typedef struct {
      const S *solver;
 } P;
 
-static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      {
 	  plan_rdft2 *cldr = (plan_rdft2 *) ego->cldr;
@@ -53,9 +53,9 @@ static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
      }
 }
 
-static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
+static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      {
 	  plan_dft *cldc = (plan_dft *) ego->cldc;
@@ -83,9 +83,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cldc);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      const S *s = ego->solver;
      p->print(p, "(rdft2-rank>=2/%d%(%p%)%(%p%))", 
 	      s->spltrnk, ego->cldr, ego->cldc);

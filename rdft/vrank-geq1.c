@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.22 2003-01-17 06:44:44 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.23 2003-02-28 23:28:58 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -52,9 +52,9 @@ typedef struct {
      const S *solver;
 } P;
 
-static void apply(plan *ego_, R *I, R *O)
+static void apply(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      rdftapply cldapply = ((plan_rdft *) ego->cld)->apply;
@@ -76,9 +76,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      const S *s = ego->solver;
      p->print(p, "(rdft-vrank>=1-x%d/%d%(%p%))",
 	      ego->vl, s->vecloop_dim, ego->cld);

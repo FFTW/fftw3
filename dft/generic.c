@@ -34,9 +34,9 @@ typedef struct {
 
 /***************************************************************************/
 
-static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int n, m, r, j;
      int os, osm;
      E *buf;
@@ -103,9 +103,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      p->print(p, "(dft-generic-dit-%d%(%p%))", ego->r, ego->cld);
 }

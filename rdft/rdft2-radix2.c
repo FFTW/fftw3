@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.21 2003-02-08 18:31:14 stevenj Exp $ */
+/* $Id: rdft2-radix2.c,v 1.22 2003-02-28 23:28:58 stevenj Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -37,7 +37,7 @@
 
 typedef struct {
      int (*applicable) (const problem *p_, const planner *plnr);
-     void (*apply) (plan *ego_, R *r, R *rio, R *iio);
+     void (*apply) (const plan *ego_, R *r, R *rio, R *iio);
      problem *(*mkcld) (const problem_rdft2 *p);
      opcnt ops;
      const char *nam;
@@ -155,9 +155,9 @@ static void k_f_dft(R *rio, R *iio, const R *W, int n, int dist)
      if (!(n & 1)) pp[im] = -pp[im];
 }
 
-static void apply_f_dft(plan *ego_, R *r, R *rio, R *iio)
+static void apply_f_dft(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      {
           /* transform input as a vector of complex numbers */
@@ -223,9 +223,9 @@ static void k_f_rdft(R *rio, R *iio, const R *W, int n, int dist)
      if (!(n & 1)) pp[im] = -pp[im];
 }
 
-static void apply_f_rdft(plan *ego_, R *r, R *rio, R *iio)
+static void apply_f_rdft(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      {
           plan_rdft *cld = (plan_rdft *) ego->cld;
@@ -294,9 +294,9 @@ static void k_b_dft(R *rio, R *iio, const R *W, int n, int dist)
      if (!(n & 1)) { pp[0] *= 2.0; pp[im] *= -2.0; }
 }
 
-static void apply_b_dft(plan *ego_, R *r, R *rio, R *iio)
+static void apply_b_dft(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      {
           int i, vl = ego->vl, n2 = ego->n / 2;
           int ivs = ego->ivs, is = ego->is;
@@ -360,9 +360,9 @@ static void k_b_rdft(R *rio, R *iio, const R *W, int n, int dist)
      if (!(n & 1)) { pp[0] *= 2.0; pp[im] *= -2.0; }
 }
 
-static void apply_b_rdft(plan *ego_, R *r, R *rio, R *iio)
+static void apply_b_rdft(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      {
           int i, vl = ego->vl, n2 = ego->n / 2;
@@ -413,9 +413,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal) (ego->cld);
 }
 
-static void print(plan *ego_, printer * p)
+static void print(const plan *ego_, printer * p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(%s-%d%v%(%p%))", ego->slv->adt->nam,
               ego->n, ego->vl, ego->cld);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.21 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: hc2hc.c,v 1.22 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -54,9 +54,9 @@ static void awake(plan *ego_, int flg)
      }
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     plan_hc2hc *ego = (plan_hc2hc *) ego_;
+     const plan_hc2hc *ego = (const plan_hc2hc *) ego_;
      const solver_hc2hc *slv = ego->slv;
      const hc2hc_desc *e = slv->desc;
 

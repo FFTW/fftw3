@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.35 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: direct.c,v 1.36 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -40,9 +40,9 @@ typedef struct {
      const S *slv;
 } P;
 
-static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      ego->k(ri, ii, ro, io, ego->is, ego->os, ego->vl, ego->ivs, ego->ovs);
 }
 
@@ -53,9 +53,9 @@ static void destroy(plan *ego_)
      X(stride_destroy)(ego->os);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      const S *s = ego->slv;
      const kdft_desc *d = s->desc;
 

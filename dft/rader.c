@@ -110,9 +110,9 @@ static void apply_aux(int r, int ginv, plan *cld1,plan *cld2, const R *omega,
      A(gpower == 1);
 }
 
-static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is;
      int k, gpower, g, r;
      R *buf;
@@ -135,10 +135,10 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      X(ifree)(buf);
 }
 
-static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_dit(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P_dit *ego_dit = (P_dit *) ego_;
-     P *ego;
+     const P_dit *ego_dit = (const P_dit *) ego_;
+     const P *ego;
      plan *cld1, *cld2;
      int os, osm;
      int j, k, gpower, g, ginv, r, m;
@@ -151,7 +151,7 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
 	   cld->apply(cld0, ri, ii, ro, io);
      }
 
-     ego = (P *) ego_;
+     ego = (const P *) ego_;
      cld1 = ego->cld1;
      cld2 = ego->cld2;
      r = ego->n;
@@ -264,7 +264,7 @@ static void destroy_dit(plan *ego_)
      destroy(ego_);
 }
 
-static void print_aux(const char *name, P *ego, printer *p)
+static void print_aux(const char *name, const P *ego, printer *p)
 {
      p->print(p, "(%s-%d%ois=%oos=%(%p%)",
               name, ego->n, ego->is, ego->os, ego->cld1);
@@ -274,17 +274,17 @@ static void print_aux(const char *name, P *ego, printer *p)
           p->print(p, "%(%p%)", ego->cld_omega);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     print_aux("dft-rader", (P *) ego_, p);
+     print_aux("dft-rader", (const P *) ego_, p);
      p->putchr(p, ')');
 }
 
-static void print_dit(plan *ego_, printer *p)
+static void print_dit(const plan *ego_, printer *p)
 {
-     P_dit *ego_dit = (P_dit *) ego_;
+     const P_dit *ego_dit = (const P_dit *) ego_;
 
-     print_aux("dft-rader-dit", (P *) ego_, p);
+     print_aux("dft-rader-dit", (const P *) ego_, p);
      p->print(p, "%(%p%))", ego_dit->cld);
 }
 

@@ -67,7 +67,7 @@ void F77(import_system_wisdom, IMPORT_SYSTEM_WISDOM)(int *isuccess)
      *isuccess = X(import_system_wisdom)();
 }
 
-void F77(print_plan_stdout, PRINT_PLAN_STDOUT)(X(plan) *p)
+void F77(print_plan_stdout, PRINT_PLAN_STDOUT)(X(plan) * const p)
 {
      X(print_plan)(*p, stdout);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-buf.c,v 1.12 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: hc2hc-buf.c,v 1.13 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -64,9 +64,9 @@ static const R *doit(khc2hc k, R *rA, R *iA, const R *W, int ios, int dist,
 
 #define BATCHSZ 4 /* FIXME: parametrize? */
 
-static void apply_dit(plan *ego_, R *I, R *O)
+static void apply_dit(const plan *ego_, R *I, R *O)
 {
-     plan_hc2hc *ego = (plan_hc2hc *) ego_;
+     const plan_hc2hc *ego = (const plan_hc2hc *) ego_;
 
      /* two-dimensional r x vl sub-transform: */
      {
@@ -108,9 +108,9 @@ static void apply_dit(plan *ego_, R *I, R *O)
      }
 }
 
-static void apply_dif(plan *ego_, R *I, R *O)
+static void apply_dif(const plan *ego_, R *I, R *O)
 {
-     plan_hc2hc *ego = (plan_hc2hc *) ego_;
+     const plan_hc2hc *ego = (const plan_hc2hc *) ego_;
      R *I0 = I;
 
      {

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.21 2003-02-10 04:24:52 stevenj Exp $ */
+/* $Id: rodft00e-r2hc.c,v 1.22 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -41,9 +41,9 @@ typedef struct {
 /* Use the trick from FFTPACK, also documented in a similar form
    by Numerical Recipes. */
 
-static void apply(plan *ego_, R *I, R *O)
+static void apply(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n;
      int iv, vl = ego->vl;
@@ -107,9 +107,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(rodft00e-r2hc-%d%v%(%p%))", ego->n - 1, ego->vl, ego->cld);
 }
 

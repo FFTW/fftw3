@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.33 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: indirect.c,v 1.34 2003-02-28 23:28:58 stevenj Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -50,9 +50,9 @@ typedef struct {
 
 /*-----------------------------------------------------------------------*/
 /* first rearrange, then transform */
-static void apply_before(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_before(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      {
           plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
@@ -79,9 +79,9 @@ static const ndrct_adt adt_before =
 /*-----------------------------------------------------------------------*/
 /* first transform, then rearrange */
 
-static void apply_after(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_after(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      {
           plan_dft *cld = (plan_dft *) ego->cld;
@@ -120,9 +120,9 @@ static void awake(plan *ego_, int flg)
      AWAKE(ego->cld, flg);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      const S *s = ego->slv;
      p->print(p, "(%s%(%p%)%(%p%))", s->adt->nam, ego->cld, ego->cldcpy);
 }

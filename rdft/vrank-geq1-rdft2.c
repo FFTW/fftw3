@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.24 2003-01-17 06:44:44 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.25 2003-02-28 23:28:58 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -53,9 +53,9 @@ typedef struct {
      const S *solver;
 } P;
 
-static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      rdft2apply cldapply = ((plan_rdft2 *) ego->cld)->apply;
@@ -65,9 +65,9 @@ static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
      }
 }
 
-static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
+static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      rdft2apply cldapply = ((plan_rdft2 *) ego->cld)->apply;
@@ -89,9 +89,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      const S *s = ego->solver;
      p->print(p, "(rdft2-vrank>=1-x%d/%d%(%p%))",
 	      ego->vl, s->vecloop_dim, ego->cld);

@@ -20,7 +20,7 @@
 
 #include "api.h"
 
-void X(print_plan)(X(plan) p, FILE *output_file)
+void X(print_plan)(const X(plan) p, FILE *output_file)
 {
      printer *pr = X(mkprinter_file)(output_file);
      plan *pln = p->pln;

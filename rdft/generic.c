@@ -36,9 +36,9 @@ typedef struct {
 
 /***************************************************************************/
 
-static void apply_dit(plan *ego_, R *I, R *O)
+static void apply_dit(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int n, m, r;
      int i, j, k;
      int os, osm;
@@ -132,9 +132,9 @@ static void apply_dit(plan *ego_, R *I, R *O)
      STACK_FREE(buf);
 }
 
-static void apply_dif(plan *ego_, R *I, R *O)
+static void apply_dif(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int n, m, r;
      int i, j, k;
      int is, ism;
@@ -252,9 +252,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      p->print(p, "(rdft-generic-%s-%d%(%p%))", 
 	      ego->kind == R2HC ? "r2hc-dit" : "hc2r-dif",

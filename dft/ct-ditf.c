@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.18 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: ct-ditf.c,v 1.19 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
 #include "ct.h"
 
-static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     plan_ct *ego = (plan_ct *) ego_;
+     const plan_ct *ego = (const plan_ct *) ego_;
      plan *cld0 = ego->cld;
      plan_dft *cld = (plan_dft *) cld0;
 

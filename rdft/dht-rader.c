@@ -50,9 +50,9 @@ static rader_tl *omegas = 0;
    plan/codelets for both Rader children. */
 #define R2HC_ONLY_CONV 1
 
-static void apply(plan *ego_, R *I, R *O)
+static void apply(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int r = ego->n;
      int is = ego->is, os;
      int k, gpower, g;
@@ -200,9 +200,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld1);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      p->print(p, "(dht-rader-%d%ois=%oos=%(%p%)",
               ego->n, ego->is, ego->os, ego->cld1);

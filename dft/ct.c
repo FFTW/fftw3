@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.30 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: ct.c,v 1.31 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -43,9 +43,9 @@ static void awake(plan *ego_, int flg)
 		      ego->r * ego->m, ego->r, ego->m);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     plan_ct *ego = (plan_ct *) ego_;
+     const plan_ct *ego = (const plan_ct *) ego_;
      const solver_ct *slv = ego->slv;
      const ct_desc *e = slv->desc;
 

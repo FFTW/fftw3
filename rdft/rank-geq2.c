@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.18 2003-02-09 18:01:45 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.19 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
 
@@ -51,9 +51,9 @@ typedef struct {
 
 /* Compute multi-dimensional RDFT by applying the two cld plans
    (lower-rnk RDFTs). */
-static void apply(plan *ego_, R *I, R *O)
+static void apply(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      plan_rdft *cld1, *cld2;
 
      cld1 = (plan_rdft *) ego->cld1;
@@ -78,9 +78,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld1);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      const S *s = ego->solver;
      p->print(p, "(rdft-rank>=2/%d%(%p%)%(%p%))",
 	      s->spltrnk, ego->cld1, ego->cld2);

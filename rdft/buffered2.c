@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.28 2003-01-17 06:44:44 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.29 2003-02-28 23:28:58 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -125,9 +125,9 @@ static void c2hc(int n, R *rio, R *iio, int is, R *r)
 
 /***************************************************************************/
 
-static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      plan_rdft *cld = (plan_rdft *) ego->cld;
      int i, j, vl = ego->vl, nbuf = ego->nbuf, bufdist = ego->bufdist;
      int n = ego->n;
@@ -158,9 +158,9 @@ static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
      X(ifree)(bufs);
 }
 
-static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
+static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      plan_rdft *cld = (plan_rdft *) ego->cld;
      int i, j, vl = ego->vl, nbuf = ego->nbuf, bufdist = ego->bufdist;
      int n = ego->n;
@@ -207,9 +207,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(%s-%s-%d%v/%d-%d%(%p%)%(%p%))",
               ego->slv->adt->nam,
 	      ego->super.apply == apply_r2hc ? "r2hc" : "hc2r",

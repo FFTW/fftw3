@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.10 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: rank0.c,v 1.11 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -64,7 +64,7 @@ static int applicable(const solver *ego_, const problem *p_)
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 rdft, vl == 1: just a copy */
-static void apply_1(plan *ego_, R *I, R *O)
+static void apply_1(const plan *ego_, R *I, R *O)
 {
      UNUSED(ego_);
      *O = *I;
@@ -82,9 +82,9 @@ static const rnk0adt adt_cpy1 =
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 rdft, vl > 1: just a copy loop (unroll 4) */
-static void apply_vec(plan *ego_, R *I, R *O)
+static void apply_vec(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
 
@@ -118,9 +118,9 @@ static const rnk0adt adt_vec =
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 rdft, vl > 1, [io]vs == 1, using memcpy */
-static void apply_io1(plan *ego_, R *I, R *O)
+static void apply_io1(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int vl = ego->vl;
      memcpy(O, I, vl * sizeof(R));
 }
@@ -142,9 +142,9 @@ static const rnk0adt adt_io1 =
 /*-----------------------------------------------------------------------*/
 /* generic stuff: */
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(%s%v)", ego->slv->adt->nam, ego->vl);
 }
 

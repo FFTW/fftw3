@@ -18,14 +18,14 @@
  *
  */
 
-/* $Id: solve2.c,v 1.1 2002-07-28 20:10:59 stevenj Exp $ */
+/* $Id: solve2.c,v 1.2 2003-02-28 23:28:58 stevenj Exp $ */
 
 #include "rdft.h"
 
 /* use the apply() operation for RDFT2 problems */
-void X(rdft2_solve)(plan *ego_, const problem *p_)
+void X(rdft2_solve)(const plan *ego_, const problem *p_)
 {
-     plan_rdft2 *ego = (plan_rdft2 *) ego_;
+     const plan_rdft2 *ego = (const plan_rdft2 *) ego_;
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
      ego->apply(ego_, p->r, p->rio, p->iio);
 }

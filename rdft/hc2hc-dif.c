@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.13 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: hc2hc-dif.c,v 1.14 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* decimation in frequency Cooley-Tukey */
 #include "rdft.h"
 #include "hc2hc.h"
 
-static void apply(plan *ego_, R *I, R *O)
+static void apply(const plan *ego_, R *I, R *O)
 {
-     plan_hc2hc *ego = (plan_hc2hc *) ego_;
+     const plan_hc2hc *ego = (const plan_hc2hc *) ego_;
      R *I0 = I;
 
      {

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop2.c,v 1.8 2003-01-09 01:02:35 stevenj Exp $ */
+/* $Id: nop2.c,v 1.9 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* plans for vrank -infty RDFT2s (nothing to do), as well as in-place
    rank-0 HC2R.  Note that in-place rank-0 R2HC is *not* a no-op, because
@@ -26,7 +26,7 @@
 
 #include "rdft.h"
 
-static void apply(plan *ego_, R *r, R *rio, R *iio)
+static void apply(const plan *ego_, R *r, R *rio, R *iio)
 {
      UNUSED(ego_);
      UNUSED(r);
@@ -55,7 +55,7 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static void print(plan *ego, printer *p)
+static void print(const plan *ego, printer *p)
 {
      UNUSED(ego);
      p->print(p, "(rdft2-nop)");

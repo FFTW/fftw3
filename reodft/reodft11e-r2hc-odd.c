@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.16 2003-02-27 17:15:10 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.17 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -63,9 +63,9 @@ static DK(SQRT2, +1.4142135623730950488016887242096980785696718753769);
 
 #define SGN_SET(x, i) ((i) % 2 ? -(x) : (x))
 
-static void apply_re11(plan *ego_, R *I, R *O)
+static void apply_re11(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n, n2 = n/2;
      int iv, vl = ego->vl;
@@ -170,9 +170,9 @@ static void apply_re11(plan *ego_, R *I, R *O)
 
 /* like for rodft01, rodft11 is obtained from redft11 by
    reversing the input and flipping the sign of every other output. */
-static void apply_ro11(plan *ego_, R *I, R *O)
+static void apply_ro11(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n, n2 = n/2;
      int iv, vl = ego->vl;
@@ -327,9 +327,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(%se-r2hc-odd-%d%v%(%p%))",
 	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }

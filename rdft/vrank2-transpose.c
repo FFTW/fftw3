@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.9 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: vrank2-transpose.c,v 1.10 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -52,9 +52,9 @@ typedef struct {
      int s0, s1;
 } P;
 
-static void apply(plan *ego_, R *I, R *O)
+static void apply(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      UNUSED(O);
      t(I, ego->n, ego->s0, ego->s1);
 }
@@ -73,9 +73,9 @@ static int applicable(const problem *p_)
      return 0;
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(rdft-transpose-%d)", ego->n);
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.22 2003-02-26 22:40:54 stevenj Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.23 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -51,9 +51,9 @@ typedef struct {
      rdft_kind kind;
 } P;
 
-static void apply_re11(plan *ego_, R *I, R *O)
+static void apply_re11(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n;
      int iv, vl = ego->vl;
@@ -116,9 +116,9 @@ static void apply_re11(plan *ego_, R *I, R *O)
 
 /* like for rodft01, rodft11 is obtained from redft11 by
    reversing the input and flipping the sign of every other output. */
-static void apply_ro11(plan *ego_, R *I, R *O)
+static void apply_ro11(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n;
      int iv, vl = ego->vl;
@@ -204,9 +204,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(%se-r2hc-%d%v%(%p%))",
 	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }

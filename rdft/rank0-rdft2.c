@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-rdft2.c,v 1.4 2003-02-07 22:36:56 stevenj Exp $ */
+/* $Id: rank0-rdft2.c,v 1.5 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
@@ -54,9 +54,9 @@ static int applicable(const problem *p_)
      return 0;
 }
 
-static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
 
@@ -84,9 +84,9 @@ static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
 }
 
 /* in-place r2hc rank-0: set imaginary parts of output to 0 */
-static void apply_r2hc_inplace(plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hc_inplace(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int i, vl = ego->vl;
      int ovs = ego->ovs;
 
@@ -105,9 +105,9 @@ static void apply_r2hc_inplace(plan *ego_, R *r, R *rio, R *iio)
 
 /* a rank-0 HC2R rdft2 problem is just a copy from rio to r,
    so we can use a rank-0 rdft plan */
-static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
+static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      plan_rdft *cldcpy = (plan_rdft *) ego->cldcpy;
      UNUSED(iio);
      cldcpy->apply((plan *) cldcpy, rio, r);
@@ -127,9 +127,9 @@ static void destroy(plan *ego_)
 	  X(plan_destroy_internal)(ego->cldcpy);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      if (ego->cldcpy)
 	  p->print(p, "(rdft2-hc2r-rank0%(%p%))", ego->cldcpy);
      else

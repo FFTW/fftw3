@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.34 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: rdft.h,v 1.35 2003-02-28 23:28:58 stevenj Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -56,10 +56,10 @@ problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
 const char *X(rdft_kind_str)(rdft_kind kind);
 
 /* solve.c: */
-void X(rdft_solve)(plan *ego_, const problem *p_);
+void X(rdft_solve)(const plan *ego_, const problem *p_);
 
 /* plan.c: */
-typedef void (*rdftapply) (plan *ego, R *I, R *O);
+typedef void (*rdftapply) (const plan *ego, R *I, R *O);
 
 typedef struct {
      plan super;
@@ -126,10 +126,10 @@ int X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k);
 void X(rdft2_verify)(plan *pln, const problem_rdft2 *p, int rounds);
 
 /* solve.c: */
-void X(rdft2_solve)(plan *ego_, const problem *p_);
+void X(rdft2_solve)(const plan *ego_, const problem *p_);
 
 /* plan.c: */
-typedef void (*rdft2apply) (plan *ego, R *r, R *rio, R *iio);
+typedef void (*rdft2apply) (const plan *ego, R *r, R *rio, R *iio);
 
 typedef struct {
      plan super;

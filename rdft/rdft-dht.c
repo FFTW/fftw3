@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.14 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: rdft-dht.c,v 1.15 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime
@@ -38,9 +38,9 @@ typedef struct {
      int n;
 } P;
 
-static void apply_r2hc(plan *ego_, R *I, R *O)
+static void apply_r2hc(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int os;
      int i, n;
 
@@ -65,9 +65,9 @@ static void apply_r2hc(plan *ego_, R *I, R *O)
 }
 
 /* hc2r, destroying input as usual */
-static void apply_hc2r(plan *ego_, R *I, R *O)
+static void apply_hc2r(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is;
      int i, n = ego->n;
 
@@ -91,9 +91,9 @@ static void apply_hc2r(plan *ego_, R *I, R *O)
 }
 
 /* hc2r, without destroying input */
-static void apply_hc2r_save(plan *ego_, R *I, R *O)
+static void apply_hc2r_save(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n;
 
@@ -131,9 +131,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(%s-dht-%d%(%p%))", 
 	      ego->super.apply == apply_r2hc ? "r2hc" : "hc2r",
 	      ego->n, ego->cld);

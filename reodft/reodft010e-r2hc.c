@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.23 2003-02-10 07:44:58 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.24 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -74,9 +74,9 @@ typedef struct {
    (They do unnecessary passes over the array, though.)
 */
 
-static void apply_re01(plan *ego_, R *I, R *O)
+static void apply_re01(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n;
      int iv, vl = ego->vl;
@@ -128,9 +128,9 @@ static void apply_re01(plan *ego_, R *I, R *O)
 
 /* ro01 is same as re01, but with i <-> n - 1 - i in the input and
    the sign of the odd output elements flipped. */
-static void apply_ro01(plan *ego_, R *I, R *O)
+static void apply_ro01(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n;
      int iv, vl = ego->vl;
@@ -180,9 +180,9 @@ static void apply_ro01(plan *ego_, R *I, R *O)
      X(ifree)(buf);
 }
 
-static void apply_re10(plan *ego_, R *I, R *O)
+static void apply_re10(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n;
      int iv, vl = ego->vl;
@@ -231,9 +231,9 @@ static void apply_re10(plan *ego_, R *I, R *O)
 
 /* ro10 is same as re10, but with i <-> n - 1 - i in the output and
    the sign of the odd input elements flipped. */
-static void apply_ro10(plan *ego_, R *I, R *O)
+static void apply_ro10(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n;
      int iv, vl = ego->vl;
@@ -300,9 +300,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(%se-r2hc-%d%v%(%p%))",
 	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }

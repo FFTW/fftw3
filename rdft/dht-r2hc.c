@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dht-r2hc.c,v 1.17 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: dht-r2hc.c,v 1.18 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */
@@ -36,9 +36,9 @@ typedef struct {
      int n;
 } P;
 
-static void apply(plan *ego_, R *I, R *O)
+static void apply(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int os = ego->os;
      int i, n = ego->n;
 
@@ -73,9 +73,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(dht-r2hc-%d%(%p%))", ego->n, ego->cld);
 }
 

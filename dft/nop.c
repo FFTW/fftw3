@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: nop.c,v 1.13 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: nop.c,v 1.14 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* plans for vrank -infty DFTs (nothing to do) */
 
 #include "dft.h"
 
-static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      UNUSED(ego_);
      UNUSED(ri);
@@ -53,7 +53,7 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static void print(plan *ego, printer *p)
+static void print(const plan *ego, printer *p)
 {
      UNUSED(ego);
      p->print(p, "(dft-nop)");

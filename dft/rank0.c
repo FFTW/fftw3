@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.24 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: rank0.c,v 1.25 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -64,7 +64,7 @@ static int applicable(const solver *ego_, const problem *p_)
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 dft, vl == 1: just a copy */
-static void apply_1(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_1(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      UNUSED(ego_);
      *ro = *ri;
@@ -83,9 +83,9 @@ static const rnk0adt adt_cpy1 =
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 dft, vl > 1: just a copy loop (unroll 4) */
-static void apply_vec(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_vec(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      int imi = ii - ri, imo = io - ro;
@@ -108,9 +108,9 @@ static const rnk0adt adt_vec =
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 dft, vl > 1, [io]vs == 1, using memcpy */
-static void apply_io1(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_io1(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int vl = ego->vl;
      memcpy(ro, ri, vl * sizeof(R));
      memcpy(io, ii, vl * sizeof(R));
@@ -132,9 +132,9 @@ static const rnk0adt adt_io1 =
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 dft, vl > 1, [io]vs == 2 (interleaved) using memcpy */
-static void apply_io2r(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_io2r(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int vl = ego->vl;
      UNUSED(ii);
      UNUSED(io);		/* i{in,out}put == r{in,out}put + 1 */
@@ -156,9 +156,9 @@ static const rnk0adt adt_io2r =
      apply_io2r, applicable_io2r, "dft-rank0-io2r-memcpy"
 };
 
-static void apply_io2i(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_io2i(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int vl = ego->vl;
      UNUSED(ri);
      UNUSED(ro);		/* r{in,out}put == i{in,out}put + 1 */
@@ -183,9 +183,9 @@ static const rnk0adt adt_io2i =
 /*-----------------------------------------------------------------------*/
 /* generic stuff: */
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(%s%v)", ego->slv->adt->nam, ego->vl);
 }
 

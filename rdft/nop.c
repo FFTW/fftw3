@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: nop.c,v 1.7 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: nop.c,v 1.8 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* plans for vrank -infty RDFTs (nothing to do) */
 
 #include "rdft.h"
 
-static void apply(plan *ego_, R *I, R *O)
+static void apply(const plan *ego_, R *I, R *O)
 {
      UNUSED(ego_);
      UNUSED(I);
@@ -51,7 +51,7 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static void print(plan *ego, printer *p)
+static void print(const plan *ego, printer *p)
 {
      UNUSED(ego);
      p->print(p, "(rdft-nop)");

@@ -87,9 +87,9 @@ static void apply_aux(int r, plan_dft *cldr, const R *omega,
      cldr->apply((plan *) cldr, buf, buf+1, buf, buf+1);
 }
 
-static void apply_dit(plan *ego_, R *I, R *O)
+static void apply_dit(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      plan_dft *cldr;
      int os, ios;
      int j, k, gpower, g, ginv, r, m;
@@ -165,9 +165,9 @@ static void apply_dit(plan *ego_, R *I, R *O)
      X(ifree)(buf);
 }
 
-static void apply_dif(plan *ego_, R *I, R *O)
+static void apply_dif(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      plan_dft *cldr;
      int is, ios;
      int j, k, gpower, g, ginv, r, m;
@@ -314,9 +314,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cldr0);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
 
      p->print(p, "(rdft-rader-%s-%d%(%p%)%(%p%)%(%p%))",
 	      ego->kind == R2HC ? "r2hc-dit" : "hc2r-dif",

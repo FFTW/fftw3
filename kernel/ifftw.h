@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.187 2003-02-26 01:42:08 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.188 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -381,9 +381,9 @@ void X(scanner_destroy)(scanner *sc);
 /*-----------------------------------------------------------------------*/
 /* plan.c: */
 typedef struct {
-     void (*solve)(plan *ego, const problem *p);
+     void (*solve)(const plan *ego, const problem *p);
      void (*awake)(plan *ego, int flag);
-     void (*print)(plan *ego, printer *p);
+     void (*print)(const plan *ego, printer *p);
      void (*destroy)(plan *ego);
 } plan_adt;
 

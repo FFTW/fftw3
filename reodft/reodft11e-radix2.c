@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.3 2003-02-27 06:43:00 stevenj Exp $ */
+/* $Id: reodft11e-radix2.c,v 1.4 2003-02-28 23:28:58 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:
@@ -57,9 +57,9 @@ typedef struct {
      rdft_kind kind;
 } P;
 
-static void apply_re11(plan *ego_, R *I, R *O)
+static void apply_re11(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n, n2 = n/2;
      int iv, vl = ego->vl;
@@ -191,9 +191,9 @@ static void apply_re11(plan *ego_, R *I, R *O)
    (it is simpler) and because it may become more efficient if we
    ever implement REDFT01 codelets. */
 
-static void apply_re11(plan *ego_, R *I, R *O)
+static void apply_re11(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n;
      int iv, vl = ego->vl;
@@ -265,9 +265,9 @@ static void apply_re11(plan *ego_, R *I, R *O)
 
 /* like for rodft01, rodft11 is obtained from redft11 by
    reversing the input and flipping the sign of every other output. */
-static void apply_ro11(plan *ego_, R *I, R *O)
+static void apply_ro11(const plan *ego_, R *I, R *O)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      int is = ego->is, os = ego->os;
      int i, n = ego->n, n2 = n/2;
      int iv, vl = ego->vl;
@@ -418,9 +418,9 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      p->print(p, "(%se-radix2-r2hc-%d%v%(%p%))",
 	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }

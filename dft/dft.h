@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.33 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: dft.h,v 1.34 2003-02-28 23:28:58 stevenj Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -43,10 +43,10 @@ problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
                             R *ri, R *ii, R *ro, R *io);
 
 /* solve.c: */
-void X(dft_solve)(plan *ego_, const problem *p_);
+void X(dft_solve)(const plan *ego_, const problem *p_);
 
 /* plan.c: */
-typedef void (*dftapply) (plan *ego, R *ri, R *ii, R *ro, R *io);
+typedef void (*dftapply) (const plan *ego, R *ri, R *ii, R *ro, R *io);
 
 typedef struct {
      plan super;

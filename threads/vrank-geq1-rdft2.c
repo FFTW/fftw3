@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.12 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.13 2003-02-28 23:28:58 stevenj Exp $ */
 
 
 #include "threads.h"
@@ -58,9 +58,9 @@ static void *spawn_apply(spawn_data *d)
      return 0;
 }
 
-static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      PD d;
 
      d.its = ego->its;
@@ -71,9 +71,9 @@ static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
      X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*) &d);
 }
 
-static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
+static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      PD d;
 
      d.its = ego->ots;
@@ -101,9 +101,9 @@ static void destroy(plan *ego_)
      X(ifree)(ego->cldrn);
 }
 
-static void print(plan *ego_, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
+     const P *ego = (const P *) ego_;
      const S *s = ego->solver;
      int i;
      p->print(p, "(rdft2-thr-vrank>=1-x%d/%d)", ego->nthr, s->vecloop_dim);
