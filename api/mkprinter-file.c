@@ -18,36 +18,22 @@
  *
  */
 
-/* internal API definitions */
-#ifndef __API_H__
-#define __API_H__
+#include "api.h"
 
-#undef _Complex_I  /* just in case: force <fftw3.h> not to use C99
-		      complex numbers */
+typedef struct {
+     printer super;
+     FILE *f;
+} P_file;
 
-#include "fftw3.h"
-#include "ifftw.h"
+static void putchr_file(printer *p_, char c)
+{
+     P_file *p = (P_file *) p_;
+     fputc(c, p->f);
+}
 
-/* the API ``plan'' contains both the kernel plan and problem */
-struct X(plan_s) {
-     plan *pln;
-     problem *prb;
-};
-
-/* shorthand */
-typedef struct X(plan_s) apiplan;
-
-/* complex type for internal use */
-typedef R C[2];
-
-void X(extract_reim)(int sign, C *c, R **r, R **i);
-printer *X(mkprinter_file)(FILE *f);
-
-planner *X(the_planner)(void);
-void X(configure_planner)(planner *plnr);
-
-void X(mapflags)(planner *, unsigned int);
-
-apiplan *X(mkapiplan)(unsigned int flags, problem *prb);
-
-#endif /* __API_H__ */
+printer *X(mkprinter_file)(FILE *f)
+{
+     P_file *p = (P_file *) X(mkprinter)(sizeof(P_file), putchr_file);
+     p->f = f;
+     return &p->super;
+}

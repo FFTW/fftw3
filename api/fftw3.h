@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.12 2003-01-11 18:12:01 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.13 2003-01-11 19:45:56 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -81,7 +81,8 @@ void X(forget_wisdom)(void);						  \
 int X(import_system_wisdom)(void);					  \
 int X(import_wisdom_from_file)(FILE *input_file);			  \
 int X(import_wisdom_from_string)(const char *input_string);		  \
-int X(import_wisdom)(int (*emitter)(void *), void *data);
+int X(import_wisdom)(int (*emitter)(void *), void *data);		  \
+void X(print_plan)(X(plan) p, FILE *output_file);
 
 /* end of FFTW_DEFINE_API macro */
 

@@ -102,8 +102,9 @@ void setup(struct problem *p)
 	  }
      }
      tim = timer_stop();
-     if (verbose)
-	  printf("planner time: %g s\n", tim);
+     if (verbose) printf("planner time: %g s\n", tim);
+     if (verbose) FFTW(print_plan)(the_plan, stdout);
+	  
 
      BENCH_ASSERT(the_plan);
 }
