@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.7 2002-06-17 05:39:55 fftw Exp $ */
+/* $Id: twiddle.c,v 1.8 2002-07-14 19:08:29 stevenj Exp $ */
 
 /* Twiddle manipulation */
 
@@ -42,41 +42,46 @@ static int equal_instr(const tw_instr *p, const tw_instr *q)
      A(0 /* can't happen */);
 }
 
-static int equal_twid(const twid *t, const tw_instr *q, uint r, uint m)
+static int equal_twid(const twid *t, const tw_instr *q, uint n, uint r, uint m)
 {
-     return (r == t->r && m == t->m && equal_instr(t->instr, q));
+     return (n == t->n && r == t->r && m == t->m && equal_instr(t->instr, q));
 }
 
-static twid *lookup(const tw_instr *q, uint r, uint m)
+static twid *lookup(const tw_instr *q, uint n, uint r, uint m)
 {
      twid *p;
 
-     for (p = twlist; p && !equal_twid(p, q, r, m); p = p->cdr)
+     for (p = twlist; p && !equal_twid(p, q, n, r, m); p = p->cdr)
           ;
      return p;
 }
 
-static uint twlen0(const tw_instr **pp)
+static uint twlen0(uint r, const tw_instr **pp)
 {
      uint ntwiddle = 0;
      const tw_instr *p = *pp;
 
      /* compute length of bytecode program */
-     for ( ; p->op != TW_NEXT; ++p)
-          ++ntwiddle;
+     A(r > 0);
+     for ( ; p->op != TW_NEXT; ++p) {
+	  if (p->op == TW_FULL)
+	       ntwiddle += (r - 1) * 2;
+	  else
+	       ++ntwiddle;
+     }
 
      *pp = p;
      return ntwiddle;
 }
 
-uint X(twiddle_length)(const tw_instr *p)
+uint X(twiddle_length)(uint r, const tw_instr *p)
 {
-     return twlen0(&p);
+     return twlen0(r, &p);
 }
 
-static R *compute(const tw_instr *instr, uint r, uint m)
+static R *compute(const tw_instr *instr, uint n, uint r, uint m)
 {
-     uint ntwiddle, j, n = r * m;
+     uint ntwiddle, j;
      R *W, *W0;
      const tw_instr *p;
      trigreal twoPiOverN = K2PI / (trigreal) n;
@@ -84,34 +89,45 @@ static R *compute(const tw_instr *instr, uint r, uint m)
      static trigreal (*const f[])(trigreal) = { COS, SIN, TAN };
 
      p = instr;
-     ntwiddle = twlen0(&p);
+     ntwiddle = twlen0(r, &p);
 
      W0 = W = (R *)fftw_malloc(ntwiddle * (m / p->v) * sizeof(R), TWIDDLES);
 
      for (j = 0; j < m; j += p->v) {
-          for (p = instr; p->op != TW_NEXT; ++p)
-               *W++ = f[p->op](twoPiOverN * ((j + p->v) * p->i));
+          for (p = instr; p->op != TW_NEXT; ++p) {
+	       if (p->op == TW_FULL) {
+		    uint i;
+		    A(p->i == 0); /* unused */
+		    for (i = 1; i < r; ++i) {
+			 *W++ = COS(twoPiOverN * ((j + p->v) * i));
+			 *W++ = SIN(twoPiOverN * ((j + p->v) * i));
+		    }
+	       }
+	       else
+		    *W++ = f[p->op](twoPiOverN * ((j + p->v) * p->i));
+	  }
           A(m % p->v == 0);
      }
 
      return W0;
 }
 
-twid *X(mktwiddle)(const tw_instr *instr, uint r, uint m)
+twid *X(mktwiddle)(const tw_instr *instr, uint n, uint r, uint m)
 {
      twid *p;
 
-     if ((p = lookup(instr, r, m))) {
+     if ((p = lookup(instr, n, r, m))) {
           ++p->refcnt;
           return p;
      }
 
      p = (twid *) fftw_malloc(sizeof(twid), TWIDDLES);
+     p->n = n;
      p->r = r;
      p->m = m;
      p->instr = instr;
      p->refcnt = 1;
-     p->W = compute(instr, r, m);
+     p->W = compute(instr, n, r, m);
 
      /* cons! onto twlist */
      p->cdr = twlist;

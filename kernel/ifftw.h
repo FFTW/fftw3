@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.48 2002-07-14 17:49:20 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.49 2002-07-14 19:08:29 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -425,7 +425,7 @@ void X(solvtab_exec)(const solvtab tbl, planner *p);
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */
 /* little language to express twiddle factors computation */
-enum { TW_COS = 0, TW_SIN = 1, TW_TAN = 2, TW_NEXT = 3};
+enum { TW_COS = 0, TW_SIN = 1, TW_TAN = 2, TW_NEXT = 3, TW_FULL = 4 };
 
 typedef struct {
      unsigned char op;
@@ -435,15 +435,15 @@ typedef struct {
 
 typedef struct twid_s {
      R *W;                     /* array of twiddle factors */
-     uint r, m;                /* radix, N / r */
+     uint n, r, m;                /* transform order, radix, # twiddle rows */
      int refcnt;
      const tw_instr *instr;
      struct twid_s *cdr;
 } twid;
 
-twid *X(mktwiddle)(const tw_instr *instr, uint r, uint m);
+twid *X(mktwiddle)(const tw_instr *instr, uint n, uint r, uint m);
 void X(twiddle_destroy)(twid *p);
-uint X(twiddle_length)(const tw_instr *p);
+uint X(twiddle_length)(uint r, const tw_instr *p);
 
 #ifdef FFTW_LDOUBLE
 typedef long double trigreal;
