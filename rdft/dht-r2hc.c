@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dht-r2hc.c,v 1.8 2002-09-19 11:48:25 athena Exp $ */
+/* $Id: dht-r2hc.c,v 1.9 2002-09-20 18:49:12 athena Exp $ */
 
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */
@@ -80,9 +80,8 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(dht-r2hc-%u%(%p%))", ego->n, ego->cld);
 }
 
-static int applicable0(const solver *ego_, const problem *p_, planner *plnr)
+static int applicable0(const problem *p_, const planner *plnr)
 {
-     UNUSED(ego_);
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
@@ -98,7 +97,7 @@ static int applicable0(const solver *ego_, const problem *p_, planner *plnr)
 static int applicable(const solver *ego, const problem *p, const planner *plnr)
 {
      if (NO_UGLYP(plnr)) return 0;
-     return (applicable0(ego, p, plnr));
+     return (applicable0(p, plnr));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
