@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.15 2005-03-04 22:50:29 stevenj Exp $ */
+/* $Id: primes.c,v 1.16 2005-03-09 01:44:25 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -159,6 +159,12 @@ int X(isqrt)(int n)
      return guess;
 }
 
+static int isqrt_maybe(int n)
+{
+     int guess = X(isqrt)(n);
+     return guess * guess == n ? guess : 0;
+}
+
 #define divides(a, b) (((int)(b) % (int)(a)) == 0)
 int X(choose_radix)(int r, int n)
 {
@@ -170,6 +176,6 @@ int X(choose_radix)(int r, int n)
      } else {
 	  /* r is negative.  If n = (-r) * q^2, take q as the radix */
 	  r = -r;
-	  return (n > r && divides(r, n)) ? X(isqrt)(n / r) : 0;
+	  return (n > r && divides(r, n)) ? isqrt_maybe(n / r) : 0;
      }
 }
