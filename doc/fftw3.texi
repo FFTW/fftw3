@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.209 2004-04-06 17:49:13 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.210 2004-08-07 17:42:22 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4117,7 +4117,7 @@ structure from the guru interface (@pxref{Guru vector and transform
 sizes}) must be split into separate arguments.  In particular, any
 @code{fftw_iodim} array arguments in the C guru interface become three
 integer array arguments (@code{n}, @code{is}, and @code{os}) in the
-Fortran guru interface, all of whose length should be equal to the
+Fortran guru interface, all of whose lengths should be equal to the
 corresponding @code{rank} argument.
 
 @end itemize
