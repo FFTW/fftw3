@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.7 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: hc2hc-dif.c,v 1.8 2002-09-16 03:20:14 stevenj Exp $ */
 
 /* decimation in frequency Cooley-Tukey */
 #include "rdft.h"
@@ -108,7 +108,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 	  )
           return UGLY;
 
-     if (NONTHREADED_ICKYP(plnr) && plnr->nthr > 1)
+     if (NONTHREADED_ICKYP(plnr))
 	  return UGLY; /* prefer threaded version */
 
      return GOOD;

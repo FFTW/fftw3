@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.122 2002-09-16 02:55:41 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.123 2002-09-16 03:20:14 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -449,7 +449,8 @@ enum {
 #define NO_VRECURSEP(plnr) ((plnr)->planner_flags & NO_VRECURSE)
 #define NO_RANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_RANK_SPLITS)
 #define NO_VRANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_VRANK_SPLITS)
-#define NONTHREADED_ICKYP(plnr) ((plnr)->planner_flags & NONTHREADED_ICKY)
+#define NONTHREADED_ICKYP(plnr) (((plnr)->planner_flags & NONTHREADED_ICKY) \
+				 && (plnr)->nthr > 1)
 #define DFT_R2HC_ICKYP(plnr) ((plnr)->planner_flags & DFT_R2HC_ICKY)
 #define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
 #define NO_INDIRECTP(plnr) ((plnr)->planner_flags & NO_INDIRECT)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.19 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.20 2002-09-16 03:20:14 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -143,7 +143,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      if (p->sz.rnk == 0 && p->vecsz.rnk == 1)
 	  return UGLY;
 
-     if (NONTHREADED_ICKYP(plnr) && plnr->nthr > 1)
+     if (NONTHREADED_ICKYP(plnr))
 	  return UGLY; /* prefer threaded version */
 
      return GOOD;
