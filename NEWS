@@ -18,7 +18,7 @@ FFTW 3.0.1
 * Added S390 cycle counter, courtesy of James Treacy.
 
 * Added missing static keyword that prevented simultaneous linkage
-  of different-precision versions; thanks to Rasmus Larson for the bug report.
+  of different-precision versions; thanks to Rasmus Larsen for the bug report.
 
 * Corrected accidental omission of f77_wisdom.f file; thanks to Alan Watson.
 
