@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.7 2003-01-19 18:52:09 stevenj Exp $ */
+/* $Id: problem.c,v 1.8 2003-01-19 18:55:35 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -167,7 +167,7 @@ bench_problem *problem_parse(const char *s)
 
      s = parsetensor(s, &p->sz, &last_iodim);
 
-     if (*s == '/' || *s == 'v' || *s == 'V') {
+     if (*s == 'v' || *s == 'V') {
 	  ++s;
 	  s = parsetensor(s, &p->vecsz, &last_iodim);
      } else {
