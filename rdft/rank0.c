@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.27 2005-03-06 01:09:25 athena Exp $ */
+/* $Id: rank0.c,v 1.28 2005-03-15 18:25:53 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -131,7 +131,7 @@ static void apply_iter(const plan *ego_, R *I, R *O)
 		       ego->vl);
 	      break;
 	 default:
-	      copy(ego->d, ego->rnk, ego->vl, I, O, X(cpy2d));
+	      copy(ego->d, ego->rnk, ego->vl, I, O, X(cpy2d_ci));
 	      break;
      }
 }
@@ -140,6 +140,28 @@ static int applicable_iter(const P *pln, const problem_rdft *p)
 {
      UNUSED(pln);
      return (p->I != p->O);
+}
+
+/**************************************************************/
+/* out of place, write contiguous output */
+static void apply_cpy2dco(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     copy(ego->d, ego->rnk, ego->vl, I, O, X(cpy2d_co));
+}
+
+static int applicable_cpy2dco(const P *pln, const problem_rdft *p)
+{
+     int rnk = pln->rnk;
+     return (1
+	     && p->I != p->O
+	     && rnk >= 2
+
+	     /* must not duplicate apply_iter */
+	     && (X(iabs)(pln->d[rnk - 2].is) <= X(iabs)(pln->d[rnk - 1].is)
+		 ||
+		 X(iabs)(pln->d[rnk - 2].os) <= X(iabs)(pln->d[rnk - 1].os))
+	  );
 }
 
 /**************************************************************/
@@ -304,7 +326,8 @@ void X(rdft_rank0_register)(planner *p)
 	  const char *nam;
      } tab[] = {
 	  { apply_memcpy,   applicable_memcpy,   "rdft-rank0-memcpy" },
-	  { apply_iter,     applicable_iter,     "rdft-rank0-iter" },
+	  { apply_iter,     applicable_iter,     "rdft-rank0-iter-ci" },
+	  { apply_cpy2dco,  applicable_cpy2dco,  "rdft-rank0-iter-co" },
 	  { apply_tiled,    applicable_tiled,    "rdft-rank0-tiled" },
 	  { apply_tiledbuf, applicable_tiledbuf, "rdft-rank0-tiledbuf" },
 	  { apply_ip_sq,    applicable_ip_sq,    "rdft-rank0-ip-sq" },
