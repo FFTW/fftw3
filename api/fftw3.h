@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.60 2003-04-15 18:53:44 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.61 2003-09-22 19:28:56 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -33,7 +33,7 @@ extern "C"
 
 /* If <complex.h> is included, use the C99 complex type.  Otherwise
    define a type bit-compatible with C99 complex */
-#ifdef _Complex_I
+#if !defined(FFTW_NO_Complex_I) && defined(_Complex_I)
 #  define FFTW_DEFINE_COMPLEX(R, C) typedef R _Complex C
 #else
 #  define FFTW_DEFINE_COMPLEX(R, C) typedef R C[2]
