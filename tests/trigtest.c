@@ -17,39 +17,38 @@ typedef double trigreal;
 static const trigreal K2PI = 
     KTRIG(6.2831853071795864769252867665590057683943388);
 
-trigreal sin2pi(trigreal x);
-
-trigreal cos2pi(trigreal x)
+trigreal naive_sin2pi(int m, uint n)
 {
-     if (x < 0.0) return cos2pi(-x);
-     if (x > 0.5) return cos2pi(1.0 - x);
-     if (x > 0.25) return -sin2pi(x - 0.25);
-     if (x > 0.125) return sin2pi(0.25 - x);
-     return COS(K2PI * x);
+     return SIN(K2PI * ((trigreal)m / (trigreal)n));
 }
 
-trigreal sin2pi(trigreal x)
+trigreal naive_cos2pi(int m, uint n)
 {
-     if (x < 0.0) return -sin2pi(-x);
-     if (x > 0.5) return -sin2pi(1.0 - x);
-     if (x > 0.25) return cos2pi(x - 0.25);
-     if (x > 0.125) return cos2pi(0.25 - x);
-     return SIN(K2PI * x);
+     return COS(K2PI * ((trigreal)m / (trigreal)n));
 }
 
-trigreal naive_sin2pi(trigreal x)
+trigreal sin2pi(int m, uint n);
+trigreal cos2pi(int m, uint n)
 {
-     return SIN(K2PI * x);
+     if (m < 0) return cos2pi(-m, n);
+     if (2*m > n) return cos2pi(n-m, n);
+     if (4*m > n) return -sin2pi(4*m - n, 4*n);
+     if (8*m > n) return sin2pi(n - 4*m, 4*n);
+     return COS(K2PI * ((trigreal)m/(trigreal)n));
 }
 
-trigreal naive_cos2pi(trigreal x)
+trigreal sin2pi(int m, uint n)
 {
-     return COS(K2PI * x);
+     if (m < 0) return -sin2pi(-m, n);
+     if (2*m > n) return -sin2pi(n-m, n);
+     if (4*m > n) return cos2pi(4*m - n, 4*n);
+     if (8*m > n) return cos2pi(n - 4*m, 4*n);
+     return SIN(K2PI * ((trigreal)m/(trigreal)n));
 }
 
 long prec = 25;
 
-double ck(long m, long n, double (*cf)(double), GEN (*gf)(GEN, long))
+double ck(long m, long n, double (*cf)(int, uint), GEN (*gf)(GEN, long))
 {
      GEN gv, gcval, err, arg;
      double cerr, cval;
@@ -59,7 +58,7 @@ double ck(long m, long n, double (*cf)(double), GEN (*gf)(GEN, long))
      setlg(arg, prec);
      gv = gf(arg, prec);
 
-     cval = cf((double)m / (double)n);
+     cval = cf(m, n);
      gcval = dbltor(cval);
 
      err = gsub(gcval, gv);

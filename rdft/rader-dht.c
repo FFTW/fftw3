@@ -236,7 +236,7 @@ static R *mkomega(plan *p_, uint n, uint ginv)
      plan_rdft *p = (plan_rdft *) p_;
      R *omega;
      uint i, gpower;
-     trigreal scale, ninv;
+     trigreal scale;
      R *buf; 
      TL *o;
 
@@ -249,11 +249,10 @@ static R *mkomega(plan *p_, uint n, uint ginv)
      buf = (R *) fftw_malloc(sizeof(R) * (n - 1), BUFFERS);
 
      scale = ((trigreal)1.0) / (n - 1); /* normalization for convolution */
-     ninv = 1.0 / (trigreal) n;
 
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  buf[i] = scale * X(cos2pi)(ninv * gpower)
-	       + FFT_SIGN * scale * X(sin2pi)(ninv * gpower);
+	  buf[i] = scale * X(cos2pi)(gpower, n)
+	       + FFT_SIGN * scale * X(sin2pi)(gpower, n);
      }
      A(gpower == 1);
 
