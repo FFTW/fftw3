@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.134 2003-01-27 11:59:40 athena Exp $ */
+/* $Id: planner.c,v 1.135 2003-01-28 11:54:38 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -33,6 +33,7 @@
 
 #define BLESSEDP(solution) ((solution)->flags & BLESSING)
 #define VALIDP(solution) ((solution)->flags & H_VALID)
+#define UNBLESS(flags)  flags &= ~BLESSING
 
 #define MAXNAM 64  /* maximum length of registrar's name.
 		      Used for reading wisdom.  There is no point
@@ -240,6 +241,15 @@ static void hshrink(planner *ego)
      rehash(ego, nextsz(nelem));
 }
 
+/* inherit blessing, but only if the solver is the same */
+static unsigned short merge_flags(unsigned short dstflags, int dstndx,
+				  unsigned short srcflags, int srcndx)
+{
+     if (srcndx == dstndx)
+	  dstflags |= (srcflags & BLESSING); /* ne me perdas illa die */
+     return dstflags;
+}
+
 static void hinsert(planner *ego, const md5sig s, 
 		    unsigned short flags, int slvndx)
 {
@@ -248,16 +258,10 @@ static void hinsert(planner *ego, const md5sig s,
      if ((l = hlookup(ego, s, flags))) {
 	  if (SUBSUMES(flags, l->flags)) {
 	       /* overwrite old solution */
-#if 0
-	       /* TODO */
-	       flags |= l->flags & BLESSING; /* ne me perdas illa die */
-#endif
+	       flags = merge_flags(flags, slvndx, l->flags, l->slvndx);
 	  } else {
 	       A(SUBSUMES(l->flags, flags));
-#if 0
-	       /* TODO */
-	       l->flags |= flags & BLESSING;
-#endif
+	       l->flags = merge_flags(l->flags, l->slvndx, flags, slvndx);
 	       return;
 	  }
      } else {
@@ -280,15 +284,14 @@ static void hcurse_subsumed(planner *ego)
 	       for (; ; g = (g + d) % ego->hashsiz) {
 		    solution *m = ego->solutions + g;
 		    if (VALIDP(m)) {
-			 if (md5eq(l->s, m->s) 
-			     && SUBSUMES(l->flags, m->flags)) {
-#if 0
-			      /* TODO */
+			 if (md5eq(l->s, m->s) &&
+			     SUBSUMES(l->flags, m->flags)) {
 			      /* ne cadant in obscurum */
-			      l->flags |= m->flags & BLESSING;
-#endif
+			      l->flags = merge_flags(l->flags, l->slvndx,
+						     m->flags, m->slvndx);
+
 			      /* cum vix justus sit securus */
-			      m->flags &= ~BLESSING;
+			      UNBLESS(m->flags);
 			 }
 		    }
 		    else break;
@@ -341,8 +344,10 @@ static plan *search(planner *ego, problem *p, slvdesc **descp)
      int best_not_yet_timed = 1;
      int pass;
 
-     if (NO_SEARCHP(ego)) 
+     if (NO_SEARCHP(ego)) {
+	  /* D("invalid search for %P %x\n", p, ego->planner_flags); */
 	  return 0;
+     }
 
      for (pass = 0; pass < 2; ++pass) {
 	  unsigned short nflags = ego->planner_flags;
@@ -419,8 +424,8 @@ static plan *mkplan(planner *ego, problem *p)
 				    | NONIMPATIENCE(ego->planner_flags) ));
 
 	       if (!pln) {
-		    /* TODO: delete entry? */
-		    /* D("bogus entry for %P\n", p); */
+		    /* D("bogus entry for %P %x\n", p, ego->planner_flags); */
+		    UNBLESS(sol->flags);
 	       }
 	  } else {
 	       A(SUBSUMES(ego->planner_flags, sol->flags));
