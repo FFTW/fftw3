@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.6 2002-07-22 05:10:21 stevenj Exp $ */
+/* $Id: verify.c,v 1.7 2002-07-23 06:39:11 stevenj Exp $ */
 
 #include "rdft.h"
 #include <math.h>
@@ -308,6 +308,44 @@ static void cpyhc(R *a, tensor sza, tensor vecsza, R *rb, R *ib, tensor szb)
      X(dotens2)(vecsza, szb, &k.k);
 }
 
+/* icpyhc is the inverse of cpyhc */
+
+static void icpyhc0(dotens2_closure *k_, 
+		  int indxa, int ondxa, int indxb, int ondxb)
+{
+     cpyhc_closure *k = (cpyhc_closure *)k_;
+     uint i, n = k->n;
+     int as = k->as;
+     R *a = k->a + indxa, *rb = k->rb + ondxb, *ib = k->ib + ondxb;
+     UNUSED(ondxa); UNUSED(indxb);
+
+     if (n > 0) {
+	  rb[0] = a[0];
+	  ib[0] = 0;
+     }
+     for (i = 1; i < (n + 1) / 2; ++i) {
+	  a[as*i] = rb[2*i];
+	  a[as*(n-i)] = ib[2*i];
+     }
+     if (2 * i == n) {
+	  a[as*i] = rb[2*i];
+     }
+}
+
+static void icpyhc(R *a, tensor sza, tensor vecsza, R *rb, R *ib, tensor szb)
+{
+     cpyhc_closure k;
+     A(sza.rnk <= 1); /* TODO: support multidimensions? */
+     k.k.apply = icpyhc0;
+     k.n = X(tensor_sz(sza));
+     if (!FINITE_RNK(sza.rnk) || sza.rnk == 0)
+	  k.as = 0;
+     else
+	  k.as = sza.dims[0].is;
+     k.a = a; k.rb = rb; k.ib = ib;
+     X(dotens2)(vecsza, szb, &k.k);
+}
+
 static void dofft(info *n, C *in, C *out)
 {
      switch (n->p->kind) {
@@ -316,6 +354,13 @@ static void dofft(info *n, C *in, C *out)
 	      n->pln->adt->solve(n->pln, &(n->p->super));
 	      cpyhc(n->p->O, n->probsz, n->p->vecsz, 
 		    &out->r, &out->i, n->pckdvecsz);
+	      break;
+	 case HC2R:
+	      icpyhc(n->p->I, n->probsz, n->p->vecsz, 
+		     &in->r, &in->i, n->pckdvecsz);
+	      n->pln->adt->solve(n->pln, &(n->p->super));
+	      mkreal(out, X(tensor_sz)(n->pckdsz));
+	      cpyr(n->p->O, n->totalsz, &out->r, n->pckdsz);
 	      break;
 	 default:
 	      A(0); /* not implemented */

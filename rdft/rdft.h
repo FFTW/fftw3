@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.6 2002-07-23 04:45:23 stevenj Exp $ */
+/* $Id: rdft.h,v 1.7 2002-07-23 06:39:11 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -76,6 +76,7 @@ void X(rdft_buffered_register)(planner *p);
 void X(rdft_generic_register)(planner *p);
 void X(rdft_rader_register)(planner *p);
 void X(rdft_rader_dht_register)(planner *p);
+void X(rdft_r2hc_hc2r_register)(planner *p);
 void X(rdft_nop_register)(planner *p);
 
 /* configurations */

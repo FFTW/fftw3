@@ -139,7 +139,12 @@ void setup(struct problem *p)
      FFTW(planner_set_hook) (plnr, hook);
      /* plnr->flags |= CLASSIC | CLASSIC_VRECURSE; */
 
-     if (p->split || p->kind == PROBLEM_REAL) {
+     if (p->kind == PROBLEM_REAL) {
+	  is = os = 1;
+	  ri = ii = p->in;
+	  ro = io = p->out;
+     }
+     else if (p->split) {
 	  is = os = 1;
 	  if (p->sign == FFT_SIGN) {
 	       ri = p->in;
