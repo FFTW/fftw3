@@ -24,6 +24,10 @@
 
 * cleanup reodft/verify.c using kernel/verify-lib.c
 
+* it may be a good idea to unify all those little loops that do
+  copying, (X[i], X[n-i]) <- (X[i] + X[n-i], X[i] - X[n-i]),
+  and multiplication of vectors by twiddle factors.
+
 TODO before/at release:
 
 * remember to remove -no-randomized-cse from rdft codelets before
