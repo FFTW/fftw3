@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.20 2003-02-09 08:15:28 stevenj Exp $ */
+/* $Id: problem.c,v 1.21 2003-02-26 22:36:13 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -225,6 +225,8 @@ bench_problem *problem_parse(const char *s)
      p->userinfo = 0;
      p->sz = p->vecsz = 0;
      p->ini = p->outi = 0;
+     p->pstring = (char *) bench_malloc(sizeof(char) * (strlen(s) + 1));
+     strcpy(p->pstring, s);
 
  L1:
      switch (tolower(*s)) {
@@ -286,6 +288,7 @@ void problem_destroy(bench_problem *p)
      problem_free(p);
      if (p->k)
 	  bench_free(p->k);
+     bench_free(p->pstring);
      bench_free(p);
 }
 

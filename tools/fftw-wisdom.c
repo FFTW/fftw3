@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <fftw3.h>
 #include <string.h>
+#include <time.h>
 
 #define CONCAT(prefix, name) prefix ## name
 #if defined(BENCHFFT_SINGLE)
@@ -29,24 +30,36 @@ void uninstall_hook(void) {}
 
 int verbose;
 
-static void do_problem(const char *param)
+static void do_problem(bench_problem *p)
 {
-     bench_problem *p;
      if (verbose > 0)
-	  printf("PLANNING PROBLEM: %s\n", param);
-     p = problem_parse(param);
+	  printf("PLANNING PROBLEM: %s\n", p->pstring);
      BENCH_ASSERT(can_do(p));
      problem_alloc(p);
      setup(p);
      done(p);
-     problem_destroy(p);
 }
 
-static void do_file(FILE *f)
+static void add_problem(const char *pstring,
+			bench_problem ***p, int *ip, int *np)
 {
-     char s[1025];
-     while (1 == fscanf(f, "%1024s", s))
-	  do_problem(s);
+     if (*ip >= *np) {
+	  *np = *np * 2 + 1;
+	  *p = (bench_problem **) realloc(*p, sizeof(bench_problem *) * *np);
+     }
+     (*p)[(*ip)++] = problem_parse(pstring);
+}
+
+static int sz(const bench_problem *p)
+{
+     return tensor_sz(p->sz) * tensor_sz(p->vecsz);
+}
+
+static int prob_size_cmp(const void *p1_, const void *p2_)
+{
+     const bench_problem **p1 = (const bench_problem **) p1_;
+     const bench_problem **p2 = (const bench_problem **) p2_;
+     return (sz(*p1) - sz(*p2));
 }
 
 /* By default, don't allow fftw-wisdom tool to use threads; we don't
@@ -61,6 +74,7 @@ static struct option long_options[] =
   {"verbose", optional_argument, 0, 'v'},
 
   {"canonical", no_argument, 0, 'c'},
+  {"time-limit", required_argument, 0, 't'},
 
   {"output-file", required_argument, 0, 'o'},
 
@@ -72,7 +86,7 @@ static struct option long_options[] =
   {"wisdom-file", required_argument, 0, 'w'},
 
 #if USE_THREADS && defined(HAVE_THREADS)
-  {"threads", required_argument, 0, 't'},
+  {"threads", required_argument, 0, 'T'},
 #endif
 
   /* options to restrict configuration to rdft-only, etcetera? */
@@ -92,6 +106,7 @@ static void help(FILE *f, const char *program_name)
  "                -V, --version: print version/copyright info\n"
  "                -v, --verbose: verbose output\n"
  "              -c, --canonical: plan/optimize canonical set of sizes\n"
+ "     -t <h>, --time-limit=<h>: time limit in hours (default: 0, no limit)\n"
  "  -o FILE, --output-file=FILE: output to FILE instead of stdout\n"
  "              -i, --impatient: plan in IMPATIENT mode (PATIENT is default)\n"
  "               -e, --estimate: plan in ESTIMATE mode (not recommended)\n"
@@ -99,7 +114,7 @@ static void help(FILE *f, const char *program_name)
  "       -n, --no-system-wisdom: don't read /etc/fftw/ system wisdom file\n"
  "  -w FILE, --wisdom-file=FILE: read wisdom from FILE (stdin if -)\n"
 #if USE_THREADS && defined(HAVE_THREADS)
- "            -t N, --threads=N: plan with N threads\n"
+ "            -T N, --threads=N: plan with N threads\n"
 #endif
 	  "\nSize syntax: <type><inplace><direction><geometry>\n"
  "      <type> = c/r/k for complex/real(r2c,c2r)/r2r\n" 
@@ -138,8 +153,12 @@ int bench_main(int argc, char *argv[])
      int impatient = 0;
      int system_wisdom = 1;
      int canonical = 0;
+     double hours = 0;
      FILE *output_file;
      char *output_fname = 0;
+     bench_problem **problems = 0;
+     int nproblems = 0, iproblem = 0;
+     clock_t begin;
 
      verbose = 0;
      usewisdom = 0;
@@ -192,6 +211,10 @@ int bench_main(int argc, char *argv[])
 		   canonical = 1;
 		   break;
 
+	      case 't':
+		   hours = atof(optarg);
+		   break;
+
 	      case 'o':
 		   if (output_fname)
 			bench_free(output_fname);
@@ -240,7 +263,7 @@ int bench_main(int argc, char *argv[])
 	      }
 
 #if USE_THREADS && defined(HAVE_THREADS)
-	      case 't':
+	      case 'T':
 		   nthreads = atoi(optarg);
 		   if (nthreads > 1) {
 			fprintf(stderr, "fftw-wisdom: "
@@ -278,20 +301,40 @@ int bench_main(int argc, char *argv[])
 		    if (!strchr(canonical_sizes[i],'x')
 			|| !strchr(types[j],'o')) {
 			 sprintf(ps, "%s%s", types[j], canonical_sizes[i]);
-			 do_problem(ps);
+			 add_problem(ps, &problems, &iproblem, &nproblems);
 		    }
 	       }
 	  }
      }
 
      while (optind < argc) {
-	  if (!strcmp(argv[optind], "-"))
-	       do_file(stdin);
+	  if (!strcmp(argv[optind], "-")) {
+	       char s[1025];
+	       while (1 == fscanf(stdin, "%1024s", s))
+		    add_problem(s, &problems, &iproblem, &nproblems);
+	  }
 	  else
-	       do_problem(argv[optind]);
+	       add_problem(argv[optind], &problems, &iproblem, &nproblems);
 	  ++optind;
      }
+
+     nproblems = iproblem;
+     qsort(problems, nproblems, sizeof(bench_problem *), prob_size_cmp);
+
+     begin = clock();
+     for (iproblem = 0; iproblem < nproblems; ++iproblem) {
+	  if (hours > 0
+	      && hours > (clock() - begin) / 3600.0 / CLOCKS_PER_SEC)
+	       do_problem(problems[iproblem]);
+	  problem_destroy(problems[iproblem]);
+	  
+     }
+     free(problems);
      
+     if (verbose && hours > 0
+	 && hours < (clock() - begin) / 3600.0 / CLOCKS_PER_SEC)
+	  fprintf(stderr, "EXCEEDED TIME LIMIT OF %g HOURS.\n", hours);
+
      if (!output_fname)
 	  output_file = stdout;
      else

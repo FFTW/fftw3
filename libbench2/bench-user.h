@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.14 2003-02-11 01:37:54 athena Exp $ */
+/* $Id: bench-user.h,v 1.15 2003-02-26 22:36:13 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -111,6 +111,7 @@ typedef struct {
      void *in, *out;
      void *inphys, *outphys;
      int iphyssz, ophyssz;
+     char *pstring;
      void *userinfo; /* user can store whatever */
 
      /* internal hack so that we can use verifier in FFTW test program */

@@ -37,8 +37,11 @@ libfftw3@PREC_SUFFIX@_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
 WISDOM_DIR = /etc/fftw
 WISDOM = wisdom@PREC_SUFFIX@
 
+WISDOM_TIME=12 # default to 12-hour limit, i.e. overnight
+WISDOM_FLAGS=--verbose --canonical --time-limit=$(WISDOM_TIME)
+
 wisdom:
-	tools/fftw@PREC_SUFFIX@-wisdom --verbose --canonical -o $@
+	tools/fftw@PREC_SUFFIX@-wisdom -o $@ $(WISDOM_FLAGS)
 
 install-wisdom: wisdom
 	$(mkinstalldirs) $(WISDOM_DIR)

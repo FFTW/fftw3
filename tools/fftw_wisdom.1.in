@@ -136,6 +136,12 @@ backwards, in-place and out-of-place transforms.  Also includes two-
 and three-dimensional transforms of equal-size dimensions
 (e.g. 16x16x16).
 .TP
+\fB\-t\fR \fIhours\fR, \fB\--time-limit\fR=\fIhours\fR
+Stop after a time of
+.I hours
+(hours) has elapsed, outputting accumulated wisdom.  (The problems are planned
+in increasing order of size.)  Defaults to 0, indicating no time limit.
+.TP
 \fB\-o\fR \fIfile\fR, \fB\--output-file\fR=\fIfile\fR
 Send wisdom output to
 .I file
