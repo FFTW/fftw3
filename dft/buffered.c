@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.38 2002-09-25 00:54:43 athena Exp $ */
+/* $Id: buffered.c,v 1.39 2002-09-25 01:08:19 athena Exp $ */
 
 #include "dft.h"
 
@@ -219,11 +219,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      /* attempt to keep real and imaginary part in the same order,
 	so as to allow optimizations in the the copy plan */
-     if (p->ii - p->ri > 0) {
-	  roffset = 0; ioffset = 1;
-     } else {
-	  roffset = 1; ioffset = 0;
-     }
+     roffset = (p->ri - p->ii > 0) ? 1 : 0;
+     ioffset = 1 - roffset;
 
      /* initial allocation for the purpose of planning */
      bufs = (R *) fftw_malloc(sizeof(R) * nbuf * bufdist * 2, BUFFERS);
