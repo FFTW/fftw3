@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.4 2002-07-25 02:01:53 stevenj Exp $ */
+/* $Id: dft-r2hc.c,v 1.5 2002-07-28 04:54:59 stevenj Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -34,7 +34,7 @@ typedef struct {
 } S;
 
 typedef struct {
-     plan_rdft super;
+     plan_dft super;
      plan *cld;
      int os;
      uint n;
