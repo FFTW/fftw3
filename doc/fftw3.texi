@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.76 2003-03-03 05:52:02 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.77 2003-03-03 06:10:28 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1992,11 +1992,11 @@ not defined).
 
 @item
 @code{rank} is the dimensionality of the transform (it should be the
-size of the array @code{*n}), and can be any non-negative integer.  The
-@samp{_1d}, @samp{_2d}, and @samp{_3d} planners correspond to a
-@code{rank} of @code{1}, @code{2}, and @code{3}, respectively.  A
-@code{rank} of zero is equivalent to a copy of one number from input to
-output.
+size of the arrays @code{*n} and @code{*kind}), and can be any
+non-negative integer.  The @samp{_1d}, @samp{_2d}, and @samp{_3d}
+planners correspond to a @code{rank} of @code{1}, @code{2}, and
+@code{3}, respectively.  A @code{rank} of zero is equivalent to a copy
+of one number from input to output.
 
 @item
 @code{n}, or @code{nx}/@code{ny}/@code{nz}, or @code{n[rank]},
@@ -2156,6 +2156,51 @@ r<sub>0</sub>, r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>n/2</sub>, i<sub>(n+1)/2
 @node Advanced Interface, Guru Interface, Basic Interface, FFTW Reference
 @section Advanced Interface
 @cindex advanced interface
+
+FFTW's ``advanced'' interface supplements the basic interface with four
+new planner routines, providing a new level of flexibility: one can plan
+a transform of multiple arrays simulaneously, operate on non-contiguous
+(strided) data, and transform a subset of a larger multi-dimensional
+array.  Other than these additional features, the planner operates in
+the same fashion as in the basic interface, and the resulting
+@code{fftw_plan} is used in the same way (@pxref{Using Plans}).
+
+@example
+fftw_plan fftw_plan_many_dft(int rank, const int *n, int howmany,
+                             fftw_complex *in, const int *inembed,
+                             int istride, int idist,
+                             fftw_complex *out, const int *onembed,
+                             int ostride, int odist,
+                             int sign, unsigned flags);
+@end example
+@findex fftw_plan_many_dft
+
+@example
+fftw_plan fftw_plan_many_dft_r2c(int rank, const int *n, int howmany,
+                                 fftw_complex *in, const int *inembed,
+                                 int istride, int idist,
+                                 double *out, const int *onembed,
+                                 int ostride, int odist,
+                                 unsigned flags);
+fftw_plan fftw_plan_many_dft_c2r(int rank, const int *n, int howmany,
+                                 fftw_complex *in, const int *inembed,
+                                 int istride, int idist,
+                                 double *out, const int *onembed,
+                                 int ostride, int odist,
+                                 unsigned flags);
+@end example
+@findex fftw_plan_many_dft_r2c
+@findex fftw_plan_many_dft_c2r
+
+@example
+fftw_plan fftw_plan_many_r2r(int rank, const int *n, int howmany,
+                             double *in, const int *inembed,
+                             int istride, int idist,
+                             double *out, const int *onembed,
+                             int ostride, int odist,
+                             const fftw_r2r_kind *kind, unsigned flags);
+@end example
+@findex fftw_plan_many_r2r
 
 @c ------------------------------------------------------------
 @node Guru Interface, What FFTW Really Computes, Advanced Interface, FFTW Reference
