@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.4 2002-07-22 04:22:02 stevenj Exp $ */
+/* $Id: verify.c,v 1.5 2002-07-22 05:04:40 stevenj Exp $ */
 
 #include "rdft.h"
 #include <math.h>
@@ -406,6 +406,9 @@ static void impulse(uint n, uint vecn, info *nfo,
      }
      for (i = 0; i < vecn; ++i)
 	  inA[i * n] = pls;
+
+     dofft(nfo, inA, tmp);
+     acmp(nfo, tmp, outA, N, "impulse 1", tol);
 
      for (j = 0; j < rounds; ++j) {
 	  arand(inB, N);
