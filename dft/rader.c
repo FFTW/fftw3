@@ -36,7 +36,7 @@ typedef struct {
      plan_dft super;
 
      plan *cld1, *cld2;
-     R *buf, *omega;
+     R *omega;
      uint n, is, os, g, ginv;
      plan *cld_omega;
 } P;
@@ -71,8 +71,11 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      const R *omega;
      R r0, i0;
 
+     r = ego->n; is = ego->is; g = ego->g; 
+
+     buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
+
      /* First, permute the input, storing in buf: */
-     r = ego->n; is = ego->is; g = ego->g; buf = ego->buf;
      for (gpower = 1, k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
 	  R rA, iA;
 	  rA = ri[gpower * is];
@@ -126,6 +129,8 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  io[gpower * os] = -buf[2*k+1];
      }
      A(gpower == 1);
+
+     X(free)(buf);
 }
 
 static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
@@ -152,12 +157,13 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
      m = ego_dit->m;
      g = ego->g; 
      ginv = ego->ginv;
-     buf = ego->buf;
      omega = ego->omega;
      W = ego_dit->W;
      os = ego_dit->os;
      osm = ego->os;
      gpower = 1;
+
+     buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
 
      for (j = 0; j < m; ++j, ro += os, io += os, W += 2*(r - 1)) {
 	  /* First, permute the input and multiply by W, storing in buf: */
@@ -213,18 +219,24 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  }
 	  A(gpower == 1);
      }
+
+     X(free)(buf);
 }
 
 /***************************************************************************/
 
 /* FIXME: share Rader omega and twiddle arrays between plans */
 
-static R *mkomega(plan *p_, R *buf, uint n, uint ginv)
+static R *mkomega(plan *p_, uint n, uint ginv)
 {
      plan_dft *p = (plan_dft *) p_;
      R *omega;
      uint i, gpower;
      trigreal scale, twoPiOverN;
+     R *buf; 
+
+     omega = (R *)fftw_malloc(sizeof(R) * (n - 1) * 2, TWIDDLES);
+     buf = (R *) fftw_malloc(sizeof(R) * (n - 1) * 2, BUFFERS);
 
      scale = ((trigreal)1.0) / (n - 1); /* normalization for convolution */
      twoPiOverN = K2PI / (trigreal) n;
@@ -235,11 +247,11 @@ static R *mkomega(plan *p_, R *buf, uint n, uint ginv)
      }
      A(gpower == 1);
 
-     omega = (R *)fftw_malloc(sizeof(R) * (n - 1) * 2, TWIDDLES);
-
      AWAKE(p_, 1);
      p->apply(p_, buf, buf + 1, omega, omega + 1);
      AWAKE(p_, 0);
+
+     X(free)(buf);
      return omega;
 }
 
@@ -275,18 +287,12 @@ static void awake(plan *ego_, int flg)
      AWAKE(ego->cld_omega, flg);
 
      if (flg) {
-          if (!ego->buf)
-               ego->buf = 
-		    (R *)fftw_malloc(sizeof(R) * (ego->n - 1) * 2, BUFFERS);
 	  if (!ego->omega) 
-	       ego->omega = mkomega(ego->cld_omega,ego->buf,ego->n,ego->ginv);
+	       ego->omega = mkomega(ego->cld_omega,ego->n,ego->ginv);
      } else {
 	  if (ego->omega)
 	       X(free)(ego->omega);
 	  ego->omega = 0;
-	  if (ego->buf)
-	       X(free)(ego->buf);
-	  ego->buf = 0;
      }
 }
 
@@ -310,8 +316,6 @@ static void destroy(plan *ego_)
      P *ego = (P *) ego_;
      if (ego->omega)
 	  X(free)(ego->omega);
-     if (ego->buf)
-	  X(free)(ego->buf);
      X(plan_destroy)(ego->cld_omega);
      X(plan_destroy)(ego->cld2);
      X(plan_destroy)(ego->cld1);
@@ -449,7 +453,7 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      if (!cld_omega)
           goto nada;
 
-     /* deallocate buffers; let awake() allocate them for real */
+     /* deallocate buffers; let awake() or apply() allocate them for real */
      X(free)(omega);
      omega = 0;
      X(free)(buf);
@@ -458,7 +462,6 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      pln->cld1 = cld1;
      pln->cld2 = cld2;
      pln->cld_omega = cld_omega;
-     pln->buf = buf;
      pln->omega = omega;
      pln->n = n;
      pln->is = is;

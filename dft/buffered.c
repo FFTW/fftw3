@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.15 2002-06-18 15:07:13 athena Exp $ */
+/* $Id: buffered.c,v 1.16 2002-06-19 05:43:31 fftw Exp $ */
 
 #include "dft.h"
 
@@ -41,7 +41,6 @@ typedef struct {
      plan *cld, *cldcpy, *cldrest;
      uint n, vl, nbuf, bufdist;
      int ivs, ovs;
-     R *bufs;
      int roffset, ioffset;
 
      const S *slv;
@@ -57,7 +56,9 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      uint i, vl = ego->vl, nbuf = ego->nbuf;
      int ivs = ego->ivs, ovs = ego->ovs;
      int roffset = ego->roffset, ioffset = ego->ioffset;
-     R *bufs = ego->bufs;
+     R *bufs;
+
+     bufs = (R *)fftw_malloc(sizeof(R) * nbuf * ego->bufdist * 2, BUFFERS);
 
      /* note unsigned i:  the obvious statement
 
@@ -77,6 +78,8 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      /* Do the remaining transforms, if any: */
      cldrest = (plan_dft *) ego->cldrest;
      cldrest->apply(ego->cldrest, ri, ii, ro, io);
+
+     X(free)(bufs);
 }
 
 
@@ -87,24 +90,11 @@ static void awake(plan *ego_, int flg)
      AWAKE(ego->cld, flg);
      AWAKE(ego->cldcpy, flg);
      AWAKE(ego->cldrest, flg);
-
-     if (flg) {
-          if (!ego->bufs)
-               ego->bufs = 
-		    (R *)fftw_malloc(
-			 sizeof(R) * ego->nbuf * ego->bufdist * 2, BUFFERS);
-     } else {
-          if (ego->bufs)
-               X(free)(ego->bufs);
-          ego->bufs = 0;
-     }
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     if (ego->bufs)
-          X(free)(ego->bufs);
      X(plan_destroy)(ego->cldrest);
      X(plan_destroy)(ego->cldcpy);
      X(plan_destroy)(ego->cld);
@@ -284,7 +274,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!cldcpy)
           goto nada;
 
-     /* deallocate buffers, let awake() allocate them for real */
+     /* deallocate buffers, let apply() allocate them for real */
      X(free)(bufs);
      bufs = 0;
 
@@ -313,7 +303,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln->nbuf = nbuf;
      pln->bufdist = bufdist;
-     pln->bufs = 0;		/* let awake() reallocate buffer space */
 
      pln->super.super.ops =
 	  X(ops_add)(
