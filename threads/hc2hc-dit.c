@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dit.c,v 1.8 2003-03-15 20:08:25 stevenj Exp $ */
+/* $Id: hc2hc-dit.c,v 1.9 2003-03-15 20:11:24 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -70,7 +70,7 @@ static void apply(const plan *ego_, R *I, R *O)
 	  plan_rdft *cldm = (plan_rdft *) ego->cldm;
           int r = ego->r, m = ego->m;
           int os = ego->os;
-	  P *ego_thr = (P *) ego_;
+	  const P *ego_thr = (const P *) ego_;
 	  PD d;
 	  
 	  cldm->apply((plan *) cldm, O + os*(m/2), O + os*(m/2));

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.8 2003-03-15 20:08:25 stevenj Exp $ */
+/* $Id: ct-dit.c,v 1.9 2003-03-15 20:11:24 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -61,7 +61,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      cld->apply(cld0, ri, ii, ro, io);
 
      {
-	  P *ego_thr = (P *) ego_;
+	  const P *ego_thr = (const P *) ego_;
 	  PD d;
 	  
 	  d.ro = ro; d.io = io;

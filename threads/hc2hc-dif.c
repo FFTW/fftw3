@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.10 2003-03-15 20:08:25 stevenj Exp $ */
+/* $Id: hc2hc-dif.c,v 1.11 2003-03-15 20:11:24 stevenj Exp $ */
 
 /* decimation in frequency Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -64,7 +64,7 @@ static void apply(const plan *ego_, R *I, R *O)
 	  plan_rdft *cldm = (plan_rdft *) ego->cldm;
           int r = ego->r, m = ego->m;
           int is = ego->is;
-	  P *ego_thr = (P *) ego_;
+	  const P *ego_thr = (const P *) ego_;
 	  PD d;
 	  
 	  cldm->apply((plan *) cldm, I + is*(m/2), I + is*(m/2));
