@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.4 2002-06-15 17:51:39 athena Exp $ *)
+(* $Id: genutil.ml,v 1.5 2002-06-19 15:20:29 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -184,14 +184,7 @@ let dump_dag alist =
 let standard_scheduler dag =
   let optim = Algsimp.algsimp dag in
   let alist = To_alist.to_assignments optim in
-(*
-  let _ = 
-    List.iter
-      (fun x -> Printf.printf "%s\n" (Expr.assignment_to_string x)) 
-      alist
-  in
-*)
-
+(*  let _ = Expr.dump alist in *)
   let _ = dump_dag alist in
   let sched = Schedule.schedule alist in
   sched

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.ml,v 1.2 2002-06-15 17:51:39 athena Exp $ *)
+(* $Id: expr.ml,v 1.3 2002-06-19 15:20:29 athena Exp $ *)
 
 (* Here, we define the data type encapsulating a symbolic arithmetic
    expression, and provide some routines for manipulating it. *)
@@ -93,3 +93,6 @@ let rec to_string_a d x =
 let to_string = to_string_a 10
 let assignment_to_string = function
   | Assign (v, a) -> "(:= " ^ (Variable.unparse v) ^ " " ^ (to_string a) ^ ")"
+
+let dump =
+  List.iter (fun x -> Printf.printf "%s\n" (assignment_to_string x)) 
