@@ -13,6 +13,7 @@ AC_CANONICAL_HOST
 dnl configure options
 case "${host_cpu}" in
   powerpc*) have_fma=yes;;
+  ia64*) have_fma=yes;;
   *) have_fma=no;;
 esac
 
