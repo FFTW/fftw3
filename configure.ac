@@ -6,12 +6,12 @@ AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
 dnl configure options
-AC_ARG_ENABLE(debug, [  --enable-debug          compile fftw with extra runtime checks for debugging], ok=$enableval, ok=no)
+AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_DEBUG,1,[Define to enable extra FFTW debugging code.])
 fi
 
-AC_ARG_ENABLE(single, [  --enable-single        compile fftw in single precision], ok=$enableval, ok=no)
+AC_ARG_ENABLE(single, [AC_HELP_STRING([--enable-single],[compile fftw in single precision])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_SINGLE,1,[Define to compile in single precision.])
 	AC_DEFINE(BENCHFFT_SINGLE,1,[Define to compile in single precision.])
@@ -22,7 +22,7 @@ fi
 AM_CONDITIONAL(SINGLE, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 
-AC_ARG_ENABLE(long-double, [  --enable-long-double   compile fftw in long-double precision], ok=$enableval, ok=no)
+AC_ARG_ENABLE(long-double, [AC_HELP_STRING([--enable-long-double],[compile fftw in long-double precision])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	if test "$PRECISION" = "s"; then
 		AC_MSG_ERROR([--enable-single/--enable-long-double conflict])
@@ -34,7 +34,7 @@ fi
 AM_CONDITIONAL(LDOUBLE, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 
-AC_ARG_ENABLE(k7, [  --enable-k7         enable AMD K7 optimizations], have_k7=$enableval, have_k7=no)
+AC_ARG_ENABLE(k7, [AC_HELP_STRING([--enable-k7],[enable AMD K7 optimizations])], have_k7=$enableval, have_k7=no)
 if test "$PRECISION" != "s"; then have_k7=no; fi
 if test "$have_k7" = "yes"; then
 	AC_DEFINE(HAVE_K7,1,[Define to enable AMD K7 optimizations.])
@@ -43,19 +43,19 @@ AM_CONDITIONAL(HAVE_K7, test "$have_k7" = "yes")
 
 have_simd="no"
 
-AC_ARG_ENABLE(sse, [  --enable-sse         enable SSE optimizations], have_sse=$enableval, have_sse=no)
+AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
 if test "$have_sse" = "yes"; then
 	AC_DEFINE(HAVE_SSE,1,[Define to enable SSE optimizations.])
 	have_simd="yes"
 fi
 
-AC_ARG_ENABLE(sse2, [  --enable-sse2         enable SSE2 optimizations], have_sse2=$enableval, have_sse2=no)
+AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
 if test "$have_sse2" = "yes"; then
 	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
 	have_simd="yes"
 fi
 
-AC_ARG_ENABLE(altivec, [  --enable-altivec         enable Altivec optimizations], have_altivec=$enableval, have_altivec=no)
+AC_ARG_ENABLE(altivec, [AC_HELP_STRING([--enable-altivec],[enable Altivec optimizations])], have_altivec=$enableval, have_altivec=no)
 if test "$have_altivec" = "yes"; then
 	AC_DEFINE(HAVE_ALTIVEC,1,[Define to enable Altivec optimizations.])
 	have_simd="yes"
@@ -67,6 +67,10 @@ fi
 
 AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
 
+AC_ARG_ENABLE(unsafe-mulmod, [AC_HELP_STRING([--enable-unsafe-mulmod],[risk overflow for large prime sizes])], enable_unsafe_mulmod=$enableval, enable_unsafe_mulmod=no)
+if test "$enable_unsafe_mulmod" = "yes"; then
+        AC_DEFINE([FFTW_ENABLE_UNSAFE_MULMOD],1,[enable fast, unsafe modular multiplications, risking overflow for large prime sizes])
+fi
 OCAML_INIT_PATHS
 
 dnl Checks for programs.
@@ -105,10 +109,6 @@ AC_HEADER_TIME
 AC_CHECK_SIZEOF(uint, 0)
 AC_CHECK_SIZEOF(unsigned int, 0)
 AC_CHECK_SIZEOF(unsigned long long, 0)
-AC_ARG_ENABLE(unsafe-mulmod, [  --enable-unsafe-mulmod  risk overflow for large prime sizes], enable_unsafe_mulmod=$enableval, enable_unsafe_mulmod=no)
-if test "$enable_unsafe_mulmod" = "yes"; then
-        AC_DEFINE([FFTW_ENABLE_UNSAFE_MULMOD],1,[enable fast, unsafe modular multiplications, risking overflow for large prime sizes])
-fi
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
