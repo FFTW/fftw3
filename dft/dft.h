@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.43 2005-03-01 14:19:16 athena Exp $ */
+/* $Id: dft.h,v 1.44 2005-03-20 21:12:44 athena Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -75,6 +75,7 @@ void X(dft_rader_register)(planner *p);
 void X(dft_bluestein_register)(planner *p);
 void X(dft_nop_register)(planner *p);
 void X(ct_generic_register)(planner *p);
+void X(ct_genericbuf_register)(planner *p);
 
 /* configurations */
 void X(dft_conf_standard)(planner *p);
