@@ -11,7 +11,7 @@ emacs -batch -q -no-site-file --eval \
 sh bootstrap.sh
 
 make maintainer-clean
-./configure --enable-maintainer-mode --enable-fma
+./configure --enable-maintainer-mode --enable-fma --enable-float --enable-sse
 make -j 8
 make -j 8 dist
 
