@@ -62,19 +62,18 @@
 
       -- #define fftw_thr_wait(tid) to block until the thread
          whose identifier is tid has terminated.  You can also
-         define this as a subroutine (put it in fftw_thrs.c) if
+         define this as a subroutine (put it in threads.c) if
 	 it is too complicated for a macro.  The prototype should be:
 	
 	 void fftw_thr_wait(fftw_thr_id tid);
 
    * If you need to perform any initialization before using threads,
-     put your initialization code in the fftw_thrs_init() function
-     in fftw_thrs.c, bracketed by the appropriate #ifdef of course.
+     put your initialization code in the X(threads_init)() function
+     in threads.c, bracketed by the appropriate #ifdef of course.
 
    * Also, of course, you should modify config.h to #define
-     USING_FOO_THREADS, or better yet modify config.h.in
-     and configure.ac so that autoconf can automatically detect
-     your threads library.
+     USING_FOO_THREADS, or better yet modify and configure.ac so that
+     autoconf can automatically detect your threads library.
 
    * Finally, if you do implement support for a new threads API, be
      sure to let us know at fftw@fftw.org so that we can distribute
@@ -134,7 +133,7 @@ typedef thread_id fftw_thr_id;
    (since the code below is so short), but I make no guarantees.
    Consider it to be a starting point for your own implementation.
 
-   I also had to insert some code in fftw_thrs.c. 
+   I also had to insert some code in threads.c. 
 
    MacOS X has real SMP support, thank goodness; I'm leaving this
    code here mainly for historical purposes. */
@@ -148,7 +147,7 @@ typedef thread_id fftw_thr_id;
 
    In your code, you should check at run-time with MPLibraryIsLoaded()
    to see if the MP library is available. If it is not, it is
-   still safe to call the fftw_thrs routines...in this case,
+   still safe to call the fftw threads routines...in this case,
    however, you must always pass 1 for the nthreads parameter!
    (Otherwise, you will probably want to pass the value of
    MPProcessors() for the nthreads parameter.) */
@@ -260,10 +259,6 @@ typedef char fftw_thr_id;  /* dummy */
 
 /* POSIX threads glue.  Tested. */
 
-#ifndef USING_POSIX_THREADS
-#define USING_POSIX_THREADS
-#endif
-
 /* link with -lpthread, or better yet use ACX_PTHREAD in autoconf */
 
 #include <pthread.h>
@@ -293,9 +288,9 @@ typedef pthread_t fftw_thr_id;
    proc(d) is called to execute a block of iterations from d->min
    to d->max-1.  d->thr_num indicate the number of the thread
    that is executing proc (from 0 to nthreads-1), and d->data is
-   the same as the data parameter passed to fftw_thr_spawn_loop.
+   the same as the data parameter passed to X(spawn_loop).
 
-   This function returns only when all the threads have completed. */
+   This function returns only after all the threads have completed. */
 void X(spawn_loop)(uint loopmax, uint nthr,
 		   spawn_function proc, void *data)
 {
@@ -328,7 +323,7 @@ void X(spawn_loop)(uint loopmax, uint nthr,
 #endif
 	  uint i;
 	  
-	  THREAD_ON;
+	  THREAD_ON; /* prevent debugging mode from failing under threads */
 
 #ifdef USING_COMPILER_THREADS
 	  
@@ -377,7 +372,7 @@ void X(spawn_loop)(uint loopmax, uint nthr,
 
 #endif /* ! USING_COMPILER_THREADS */
 
-	  THREAD_OFF;
+	  THREAD_OFF; /* prevent debugging mode from failing under threads */
      }
 }
 
@@ -414,12 +409,11 @@ static pthread_attr_t fftw_pthread_attributes; /* attrs for POSIX threads */
 pthread_attr_t *fftw_pthread_attributes_p = NULL;
 #endif /* USING_POSIX_THREADS */
 
-/* fftw_thrs_init does any initialization that is necessary to use
-   threads.  It must be called before calling fftw_thrs or
-   fftwnd_threads. 
+/* X(threads_init) does any initialization that is necessary to use
+   threads.  It must be called before calling any fftw threads functions.
    
    Returns 0 if successful, and non-zero if there is an error.
-   Do not call any fftw_thrs routines if fftw_thrs_init
+   Do not call any fftw threads routines if X(threads_init)
    is not successful! */
 
 int X(threads_init)(void)
