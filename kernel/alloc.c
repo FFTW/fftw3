@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.43 2004-02-13 12:20:31 athena Exp $ */
+/* $Id: alloc.c,v 1.44 2005-03-15 02:43:05 stevenj Exp $ */
 #include "ifftw.h"
 
 /**********************************************************
@@ -264,7 +264,7 @@ void *X(malloc_plain)(size_t n)
      p = X(kernel_malloc)(n);
      CK(p);
 
-#ifdef MIN_ALIGMENT
+#ifdef MIN_ALIGNMENT
      A((((uintptr_t)p) % MIN_ALIGNMENT) == 0);
 #endif
 
