@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.140 2002-09-19 01:47:17 athena Exp $ */
+/* $Id: ifftw.h,v 1.141 2002-09-19 11:48:24 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -401,6 +401,7 @@ enum {
 #define DESTROY_INPUTP(plnr) ((plnr)->problem_flags & DESTROY_INPUT)
 #define POSSIBLY_UNALIGNEDP(plnr) ((plnr)->problem_flags & POSSIBLY_UNALIGNED)
 #define CONSERVE_MEMORYP(plnr) ((plnr)->problem_flags & CONSERVE_MEMORY)
+#define NO_DHT_R2HCP(plnr) ((plnr)->problem_flags & NO_DHT_R2HC)
 
 /* values for planner_flags: */
 enum {
