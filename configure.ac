@@ -127,6 +127,28 @@ AC_SUBST(OCAMLLDFLAGS)
 dnl determine CFLAGS first
 ACX_PROG_CC_MAXOPT(fftw)
 
+if test "$GCC" = "yes"; then
+    if test "$have_sse" = "yes"; then
+	ACX_CHECK_CC_FLAGS(-msse, msse,
+	    CFLAGS="$CFLAGS -msse",
+	    [AC_MSG_ERROR([Need a version of gcc with -msse])])
+    elif test "$have_sse2" = "yes"; then
+	ACX_CHECK_CC_FLAGS(-msse2, msse2,
+	    CFLAGS="$CFLAGS -msse2",
+	    [AC_MSG_ERROR([Need a version of gcc with -msse2])])
+    elif test "$have_3dnow" = "yes"; then
+	ACX_CHECK_CC_FLAGS(-m3dnow, m3dnow,
+	    CFLAGS="$CFLAGS -m3dnow",
+	    [AC_MSG_ERROR([Need a version of gcc with -m3dnow])])
+    elif test "$have_altivec" = "yes"; then
+	ACX_CHECK_CC_FLAGS(-faltivec, faltivec,
+	    CFLAGS="$CFLAGS -faltivec",
+	    [ACX_CHECK_CC_FLAGS(-maltivec -mabi=altivec, maltivec,
+		CFLAGS="$CFLAGS -maltivec -mabi=altivec",
+		[AC_MSG_ERROR([Need a version of gcc with -maltivec])])])
+    fi
+fi
+
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h limits.h c_asm.h intrinsics.h stdint.h])
