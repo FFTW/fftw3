@@ -1,25 +1,55 @@
+# This Makefile.am specifies a set of codelets, efficient transforms
+# of small sizes, that are used as building blocks (kernels) by FFTW
+# to build up large transforms, as well as the options for generating
+# and compiling them.
+
+# You can customize FFTW for special needs, e.g. to handle certain
+# sizes more efficiently, by adding new codelets to the lists of those
+# included by default.  If you change the list of codelets, any new
+# ones you added will be automatically generated when you run the
+# bootstrap script (see "Generating your own code" in the FFTW
+# manual).
+
+###########################################################################
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 -I$(top_srcdir)/dft/simd -I$(top_srcdir)/simd
 CFLAGS = @CFLAGS@ @CODELET_OPTIM@ $(SIMD_CFLAGS)
 noinst_LTLIBRARIES = libdft_codelets_simd.la
 
+###########################################################################
+# n1fv_<n> is a hard-coded FFTW_FORWARD FFT of size <n>, using SIMD
 N1F = n1fv_2.c n1fv_3.c n1fv_4.c n1fv_5.c n1fv_6.c n1fv_7.c n1fv_8.c	\
 n1fv_9.c n1fv_10.c n1fv_11.c n1fv_12.c n1fv_13.c n1fv_14.c n1fv_15.c	\
 n1fv_16.c n1fv_32.c n1fv_64.c
 
+# as above, but FFTW_BACKWARD
 N1B = n1bv_2.c n1bv_3.c n1bv_4.c n1bv_5.c n1bv_6.c n1bv_7.c n1bv_8.c	\
 n1bv_9.c n1bv_10.c n1bv_11.c n1bv_12.c n1bv_13.c n1bv_14.c n1bv_15.c	\
 n1bv_16.c n1bv_32.c n1bv_64.c
 
+###########################################################################
+# t1fv_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT step
+# for an FFTW_FORWARD transform, using SIMD
 T1F = t1fv_2.c t1fv_3.c t1fv_4.c t1fv_5.c t1fv_6.c t1fv_7.c t1fv_8.c	\
 t1fv_9.c t1fv_10.c t1fv_12.c t1fv_15.c t1fv_16.c t1fv_32.c t1fv_64.c
 
+# as above, but FFTW_BACKWARD
 T1B = t1bv_2.c t1bv_3.c t1bv_4.c t1bv_5.c t1bv_6.c t1bv_7.c t1bv_8.c	\
 t1bv_9.c t1bv_10.c t1bv_12.c t1bv_15.c t1bv_16.c t1bv_32.c t1bv_64.c
 
+###########################################################################
+# q1fv_<r> is <r> twiddle FFTW_FORWARD FFTs of size <r> (DIF step),
+# where the output is transposed, using SIMD.  This is used for
+# in-place transposes in sizes that are divisible by <r>^2.  These
+# codelets have size ~ <r>^2, so you should probably not use <r>
+# bigger than 8 or so.
 Q1F = q1fv_2.c q1fv_4.c q1fv_8.c
 
+# as above, but FFTW_BACKWARD
 Q1B = q1bv_2.c q1bv_4.c q1bv_8.c
+
+###########################################################################
+# input/output stride-specific versions of the above (see FRANZ notes below).
 
 SN1F = sn1fv_2_4_2.c sn1fv_2_8_2.c sn1fv_2_16_2.c sn1fv_2_32_2.c	\
 sn1fv_2_64_2.c sn1fv_2_128_2.c sn1fv_2_256_2.c sn1fv_2_512_2.c		\
@@ -57,11 +87,12 @@ st1fv_64.cod st1fv_8.cod
 
 # Uncomment these to include many specialized codelets of fixed
 # strides, which can speed things up on Pentia where stride arithmetic
-# is expensive, as well as improving SIMD utilization for the
+# is expensive, as well as improving 4-way SIMD efficiency for the
 # unit-stride cases, at the expense of increased library size.
 FRANZ_CODELETS = # $(SN1F) $(ST1F)
 FRANZ_EXTRA = # $(SN1FCOD) $(ST1FCOD)
 
+###########################################################################
 SIMD_CODELETS = $(N1F) $(N1B) $(T1F) $(T1B) $(Q1F) $(Q1B) $(FRANZ_CODELETS)
 
 if HAVE_SIMD

@@ -1,15 +1,38 @@
+# This Makefile.am specifies a set of codelets, efficient transforms
+# of small sizes, that are used as building blocks (kernels) by FFTW
+# to build up large transforms, as well as the options for generating
+# and compiling them.
+
+# You can customize FFTW for special needs, e.g. to handle certain
+# sizes more efficiently, by adding new codelets to the lists of those
+# included by default.  If you change the list of codelets, any new
+# ones you added will be automatically generated when you run the
+# bootstrap script (see "Generating your own code" in the FFTW
+# manual).
+
+###########################################################################
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 -I$(top_srcdir)/dft/codelets
 CFLAGS = @CFLAGS@ @CODELET_OPTIM@
 noinst_LTLIBRARIES = libdft_standard.la
 
+###########################################################################
+# n1_<n> is a hard-coded FFT of size <n> (base cases of FFT recursion)
 N1 = n1_2.c n1_3.c n1_4.c n1_5.c n1_6.c n1_7.c n1_8.c n1_9.c n1_10.c	\
 n1_11.c n1_12.c n1_13.c n1_14.c n1_15.c n1_16.c n1_32.c n1_64.c
 
+###########################################################################
+# t1_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT step
 T1 = t1_2.c t1_3.c t1_4.c t1_5.c t1_6.c t1_7.c t1_8.c t1_9.c	\
 t1_10.c t1_12.c t1_15.c t1_16.c t1_32.c t1_64.c
 
+# t2_<r> is also a twiddle FFT, but instead of using a complete lookup table
+# of trig. functions, it partially generates the trig. values on the fly
+# (this is faster for large sizes).
 T2 = t2_4.c t2_8.c t2_16.c t2_32.c t2_64.c
+
+###########################################################################
+# input/output stride-specific versions of the above (see FRANZ notes below).
 
 SN1 = sn1_2_2_2.c sn1_2_4_2.c sn1_2_8_2.c sn1_2_16_2.c sn1_2_32_2.c	\
 sn1_2_64_2.c sn1_2_128_2.c sn1_2_256_2.c sn1_2_512_2.c sn1_2_1024_2.c	\
@@ -48,6 +71,7 @@ st1_8.cod
 FRANZ_CODELETS = # $(SN1) $(ST1)
 FRANZ_EXTRA = # $(SN1COD) $(ST1COD)
 
+###########################################################################
 ALL_CODELETS = $(N1) $(T1) $(T2) $(FRANZ_CODELETS)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST) $(FRANZ_EXTRA)
