@@ -18,19 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle_c.ml,v 1.6 2003-03-26 12:45:03 athena Exp $ *)
+(* $Id: gen_twidsq_c.ml,v 1.1 2003-03-26 12:45:03 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle_c.ml,v 1.6 2003-03-26 12:45:03 athena Exp $"
-
+let cvsid = "$Id: gen_twidsq_c.ml,v 1.1 2003-03-26 12:45:03 athena Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
+
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number> [ -dit | -dif ]"
 
-let uiostride = ref Stride_variable
+let reload_twiddle = ref false
+
+let uistride = ref Stride_variable
+let uvstride = ref Stride_variable
 let udist = ref Stride_variable
 
 let speclist = [
@@ -42,9 +45,17 @@ let speclist = [
   Arg.Unit(fun () -> ditdif := DIF),
   " generate a DIF codelet";
 
-  "-with-iostride",
-  Arg.String(fun x -> uiostride := arg_to_stride x),
-  " specialize for given i/o stride";
+  "-reload-twiddle",
+  Arg.Unit(fun () -> reload_twiddle := true),
+  " do not collect common twiddle factors";
+
+  "-with-istride",
+  Arg.String(fun x -> uistride := arg_to_stride x),
+  " specialize for given input stride";
+
+  "-with-vstride",
+  Arg.String(fun x -> uvstride := arg_to_stride x),
+  " specialize for given vector stride";
 
   "-with-dist",
   Arg.String(fun x -> udist := arg_to_stride x),
@@ -53,8 +64,9 @@ let speclist = [
 
 let generate n =
   let rioarray = "x"
-  and iostride = "ios"
-  and twarray = "W"
+  and istride = "is"
+  and vstride = "vs"
+  and twarray = "W" 
   and i = "i" 
   and m = "m"
   and dist = "dist" in
@@ -74,32 +86,46 @@ let generate n =
     fun x -> Complex.times (Complex.nan Expr.CPLXJ) (Complex.real x)
   in
 
-  let byw = bytwiddle n sign (tf @@ (twiddle_array nt twarray)) in
-
-  let viostride = either_stride (!uiostride) (C.SVar iostride) in
+  let svstride = either_stride (!uvstride) (C.SVar vstride)
+  and sistride = either_stride (!uistride) (C.SVar istride) in
   let _ = Simd.ovs := stride_to_string "dist" !udist in
   let _ = Simd.ivs := stride_to_string "dist" !udist in
 
-  let locations = unique_array_c n in
-  let iloc = 
-    locative_array_c n 
-      (C.array_subscript rioarray viostride)
-      (C.array_subscript "BUG" viostride)
-      locations
-  and oloc = 
-    locative_array_c n 
-      (C.array_subscript rioarray viostride)
-      (C.array_subscript "BUG" viostride)
+  let byw =
+    if !reload_twiddle then
+      array n (fun v -> bytwiddle n sign (tf @@ (twiddle_array nt twarray)))
+    else
+      let a = bytwiddle n sign (tf @@ (twiddle_array nt twarray))
+      in fun v -> a
+  in
+
+  let locations = unique_v_array_c n n in
+
+  let ioi = 
+    locative_v_array_c n n 
+      (C.varray_subscript rioarray svstride sistride) 
+      (C.varray_subscript "BUG" svstride sistride) 
+      locations 
+  and ioo = 
+    locative_v_array_c n n 
+      (C.varray_subscript rioarray svstride sistride) 
+      (C.varray_subscript "BUG" svstride sistride) 
       locations 
   in
-  let liloc = load_array_r n iloc in
+
+  let icache = temporary_v_array_c n n
+  and ocache = temporary_v_array_c n n
+  in
+
+  let lioi = load_v_array_c n n ioi in
   let fft = Trig.dft_via_rdft  in
   let output =
     match !ditdif with
-    | DIT -> array n (fft sign n (byw liloc))
-    | DIF -> array n (byw (fft sign n liloc))
+    | DIT -> array n (fun v -> fft sign n (byw v (lioi v)))
+    | DIF -> array n (fun v -> byw v (fft sign n (lioi v)))
   in
-  let odag = store_array_r n oloc output in
+
+  let odag = store_v_array_c n n ioo (transpose output) in
   let annot = standard_optimizer odag in
 
   let body = Block (
@@ -119,15 +145,15 @@ let generate n =
 	  Asch annot);
      CVar("END_SIMD();");
      Return (CVar twarray)
-   ])
-  in
+   ]) in
 
   let tree = 
     Fcn (("static " ^ C.constrealtypep), ename,
 	 [Decl (C.realtypep, "ri");
 	  Decl (C.realtypep, "ii");
 	  Decl (C.constrealtypep, twarray);
-	  Decl (C.stridetype, iostride);
+	  Decl (C.stridetype, istride);
+	  Decl (C.stridetype, vstride);
 	  Decl ("int", m);
 	  Decl ("int", dist)],
          add_constants body)
@@ -135,20 +161,22 @@ let generate n =
   let twinstr = 
     Printf.sprintf "static const tw_instr twinstr[] = %s;\n\n" 
       (twinstr_to_string (twdesc n))
+
   and desc = 
     Printf.sprintf
       "static const ct_desc desc = {%d, %s, twinstr, %s, &GENUS, %s, %s, %s};\n\n"
       n (stringify name) (flops_of tree) 
-      (stride_to_solverparm !uiostride) "0"
+      (stride_to_solverparm !uistride) 
+      (stride_to_solverparm !uvstride)
       (stride_to_solverparm !udist) 
+
   and register = 
     match !ditdif with
-    | DIT -> "X(kdft_dit_register)"
-    | DIF -> "X(kdft_dif_register)"
-
+    | DIT -> "X(kdft_ditsq_register)"
+    | DIF -> "X(kdft_difsq_register)"
   in
   let init =
-    "\n" ^
+    "\n" ^ 
     twinstr ^ 
     desc ^
     (declare_register_fcn name) ^
@@ -159,8 +187,7 @@ let generate n =
 
 
 let main () =
-  begin 
-    Simdmagic.simd_mode := true;
+  begin
     parse (speclist @ Twiddle.speclist) usage;
     print_string (generate (check_size ()));
   end

@@ -19,20 +19,21 @@
  */
 
 #include "codelet-dft.h"
-#include "t1f.h"
+#include "q1b.h"
 
 #if HAVE_SIMD
 static int okp(const ct_desc *d,
 	       const R *rio, const R *iio, 
-	       int ios, int vs, int m, int dist,
+	       int ios, int vs, int m, int dist, 
 	       const planner *plnr)
 {
      return (RIGHT_CPU()
-             && ALIGNEDA(rio)
+             && ALIGNED(iio)
 	     && !(plnr->problem_flags & POSSIBLY_UNALIGNED)
-	     && SIMD_STRIDE_OKA(ios)
-	     && SIMD_VSTRIDE_OKA(dist)
-	     && iio == rio + 1
+	     && SIMD_STRIDE_OK(ios)
+	     && SIMD_STRIDE_OK(vs)
+	     && SIMD_VSTRIDE_OK(dist)
+	     && rio == iio + 1
              && (m % VL) == 0
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))

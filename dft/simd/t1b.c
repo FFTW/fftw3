@@ -36,6 +36,7 @@ static int okp(const ct_desc *d,
              && (m % VL) == 0
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))
+	     && (!d->dist || (d->dist == dist))
 	  );
 }
 const ct_genus GENUS = { okp, VL };
