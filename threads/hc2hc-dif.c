@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.3 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: hc2hc-dif.c,v 1.4 2002-09-18 23:31:57 stevenj Exp $ */
 
 /* decimation in frequency Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -87,8 +87,8 @@ static void apply(plan *ego_, R *I, R *O)
 
 }
 
-static int applicable(const solver_hc2hc *ego, const problem *p_,
-		      const planner *plnr)
+static int applicable0(const solver_hc2hc *ego, const problem *p_,
+		       const planner *plnr)
 {
      if (plnr->nthr > 1 && X(rdft_hc2hc_applicable)(ego, p_)) {
           const hc2hc_desc *e = ego->desc;
@@ -106,6 +106,23 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
      return 0;
 }
 
+static int applicable(const solver_hc2hc *ego, const problem *p_,
+		      const planner *plnr)
+{
+     const problem_rdft *p;
+
+     if (!applicable0(ego, p_, plnr)) return 0;
+
+     p = (const problem_rdft *) p_;
+
+     if (NO_UGLYP(plnr)) {
+          uint n = p->sz.dims[0].n;
+          if (n <= 16 || n / ego->desc->radix <= 4) return 0;
+     }
+
+     return 1;
+}
+
 static void finish(plan_hc2hc *ego)
 {
      const hc2hc_desc *d = ego->slv->desc;
@@ -117,27 +134,6 @@ static void finish(plan_hc2hc *ego)
 						      ego->cldm->ops))),
 		     X(ops_mul)(ego->vl * ((ego->m - 1)/2) / d->genus->vl,
 				d->ops));
-}
-
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
-{
-     const solver_hc2hc *ego = (const solver_hc2hc *) ego_;
-     const problem_rdft *p;
-     uint n;
-
-     if (!applicable(ego, p_, plnr))
-          return BAD;
-
-     p = (const problem_rdft *) p_;
-
-     n = p->sz.dims[0].n;
-     if (0
-	 || n <= 16 
-	 || n / ego->desc->radix <= 4
-	  )
-          return UGLY;
-
-     return GOOD;
 }
 
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
@@ -161,7 +157,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 
 solver *X(mksolver_rdft_hc2hc_dif_thr)(khc2hc codelet, const hc2hc_desc *desc)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      static const char name[] = "rdft-dif-thr";
 
      return X(mksolver_rdft_hc2hc)(codelet, desc, name, &sadt);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.3 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.4 2002-09-18 23:31:57 stevenj Exp $ */
 
 
 #include "threads.h"
@@ -121,8 +121,8 @@ static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
 		       vecsz, oop, dp);
 }
 
-static int applicable(const solver *ego_, const problem *p_, uint *dp,
-		      const planner *plnr)
+static int applicable0(const solver *ego_, const problem *p_,
+		       const planner *plnr, uint *dp)
 {
      if (RDFT2P(p_) && plnr->nthr > 1) {
           const S *ego = (const S *) ego_;
@@ -140,22 +140,18 @@ static int applicable(const solver *ego_, const problem *p_, uint *dp,
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable(const solver *ego_, const problem *p_,
+		      const planner *plnr, uint *dp)
 {
      const S *ego = (const S *)ego_;
-     const problem_rdft2 *p;
-     uint vdim;
 
-     if (!applicable(ego_, p_, &vdim, plnr))
-          return BAD;
+     if (!applicable0(ego_, p_, plnr, dp)) return 0;
 
      /* fftw2 behavior */
      if (NO_VRANK_SPLITSP(plnr) && (ego->vecloop_dim != ego->buddies[0]))
-	  return BAD;
+	  return 0;
 
-     p = (const problem_rdft2 *) p_;
-
-     return GOOD;
+     return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -175,7 +171,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(rdft2_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_, &vdim, plnr))
+     if (!applicable(ego_, p_, plnr, &vdim))
           return (plan *) 0;
      p = (const problem_rdft2 *) p_;
 
@@ -236,7 +232,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int vecloop_dim, const int *buddies, uint nbuddies)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->vecloop_dim = vecloop_dim;
      slv->buddies = buddies;
