@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.233 2003-11-15 01:57:55 athena Exp $ */
+/* $Id: ifftw.h,v 1.234 2004-01-01 17:59:30 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -708,7 +708,6 @@ int X(transpose_slowp)(const iodim *a, const iodim *b, int N);
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
 void X(null_awake)(plan *ego, int awake);
-int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
 int X(alignment_of)(R *p);
 unsigned X(hash)(const char *s);
