@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.54 2003-03-01 23:46:38 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.55 2003-03-01 23:50:43 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -309,7 +309,7 @@ First, of course, you allocate the arrays; you can do this any way that
 you like, but we recommend using @code{fftw_malloc}, which behaves the
 @findex fftw_malloc
 same as @code{malloc} except that it properly aligns the array when SIMD
-acceleration is available (@pxref{The Importance of Alignment}).  The
+acceleration is available (@pxref{SIMD alignment and fftw_malloc}).  The
 data is an array of type @code{fftw_complex}, which is by default a
 @code{double[2]} containing the real (@code{in[i][0]}) and imaginary
 (@code{in[i][1]}) parts.
@@ -1191,10 +1191,10 @@ Note that, for the ordinary complex DFT, each element of the array
 must be of type @code{fftw_complex}; i.e. a (real, imaginary) pair of
 (double-precision) numbers. 
 
-In the advanced FFTW interface, the physical dimensions @math{n}
-above, from which the indices are computed, can be different from
-(bigger than) the logical dimensions of the transform to be computed,
-in order to transform a subset of a larger array.
+In the advanced FFTW interface, the physical dimensions @math{n} from
+which the indices are computed can be different from (bigger than)
+the logical dimensions of the transform to be computed, in order to
+transform a subset of a larger array.
 @cindex advanced interface
 Note also that, in the advanced interface, the expression above is
 multiplied by a @dfn{stride} to get the actual array index---this is
@@ -1220,9 +1220,9 @@ plan, simply pass the dimensions of the array to the planner in
 @code{N x M x L} matrix in column-major order, you should pass the
 dimensions of the array as if it were an @code{L x M x N} matrix
 (which it is, from the perspective of FFTW).  This is done for you
-@emph{automatically} by the FFTW Fortran wrapper routines
+@emph{automatically} by the FFTW Fortran interface
 (@pxref{Calling FFTW from Fortran}).
-@cindex Fortran-callable wrappers
+@cindex Fortran interface
 
 @node Static Arrays in C, Dynamic Arrays in C, Column-major Format, Multi-dimensional Array Format
 @subsection Static Arrays in C
