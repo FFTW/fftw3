@@ -15,6 +15,7 @@
 #include "bench-user.h"
 #include "api.h"
 #include "dft.h"
+#include "rdft.h"
 
 extern int paranoid; /* in bench.c */
 extern X(plan) the_plan; /* in bench.c */
@@ -65,6 +66,56 @@ static bench_problem *fftw_problem_to_bench_problem(const problem *p_)
 	  bp->userinfo = 0;
 	  bp->sz = fftw_tensor_to_bench_tensor(p->sz);
 	  bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
+     }
+     else if (RDFTP(p_)) {
+	  const problem_rdft *p = (const problem_rdft *) p_;
+	  int i;
+
+	  if (!p->I || !p->O)
+	       abort();
+
+	  for (i = 0; i < p->sz->rnk; ++i)
+	       switch (p->kind[i]) {
+		   case R2HC01:
+		   case R2HC10:
+		   case R2HC11:
+		   case HC2R01:
+		   case HC2R10:
+		   case HC2R11:
+			return bp;
+	       }
+	  
+	  bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
+
+	  bp->kind = PROBLEM_R2R;
+	  bp->sign = FFT_SIGN;
+	  bp->split = 0;
+	  bp->in = UNTAINT(p->I);
+	  bp->out = UNTAINT(p->O);
+	  bp->ini = bp->outi = 0;
+	  bp->inphys = bp->outphys = 0;
+	  bp->iphyssz = bp->ophyssz = 0;
+	  bp->in_place = p->I == p->O;
+	  bp->destroy_input = 0;
+	  bp->userinfo = 0;
+	  bp->sz = fftw_tensor_to_bench_tensor(p->sz);
+	  bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
+	  bp->k = (r2r_kind_t *) bench_malloc(sizeof(r2r_kind_t) * p->sz->rnk);
+	  for (i = 0; i < p->sz->rnk; ++i)
+	       switch (p->kind[i]) {
+		   case R2HC: bp->k[i] = R2R_R2HC; break;
+		   case HC2R: bp->k[i] = R2R_HC2R; break;
+		   case DHT: bp->k[i] = R2R_DHT; break;
+		   case REDFT00: bp->k[i] = R2R_REDFT00; break;
+		   case REDFT01: bp->k[i] = R2R_REDFT01; break;
+		   case REDFT10: bp->k[i] = R2R_REDFT10; break;
+		   case REDFT11: bp->k[i] = R2R_REDFT11; break;
+		   case RODFT00: bp->k[i] = R2R_RODFT00; break;
+		   case RODFT01: bp->k[i] = R2R_RODFT01; break;
+		   case RODFT10: bp->k[i] = R2R_RODFT10; break;
+		   case RODFT11: bp->k[i] = R2R_RODFT11; break;
+		   default: CK(0);
+	  }
      }
      else {
 	  /* TODO */
