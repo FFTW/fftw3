@@ -57,3 +57,4 @@ typedef struct dotens2_closure_s {
 
 void bench_dotens2(const bench_tensor *sz0, 
 		   const bench_tensor *sz1, dotens2_closure *k);
+

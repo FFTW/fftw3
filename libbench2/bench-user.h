@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.6 2003-01-18 22:27:15 athena Exp $ */
+/* $Id: bench-user.h,v 1.7 2003-01-19 12:09:54 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -133,8 +133,14 @@ typedef struct dofft_closure_s {
 
 bench_tensor *verify_pack(const bench_tensor *sz, int s);
 
-void verify_dft(dofft_closure *k, bench_tensor *sz, bench_tensor *vecsz, int sign,
-		int rounds, double tol);
+typedef struct {
+     double l;
+     double i;
+     double s;
+} errors;
+
+void verify_dft(dofft_closure *k, bench_tensor *sz, bench_tensor *vecsz, 
+		int sign, int rounds, double tol, errors *e);
 
 
 /**************************************************************

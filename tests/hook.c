@@ -149,10 +149,13 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 static void dodft(plan *pln, const problem_dft *p, int rounds, double tol)
 {
      dofft_dft_closure k;
+     errors e;
      bench_tensor *bsz = fftw_tensor_to_bench_tensor(p->sz);
      bench_tensor *bvecsz = fftw_tensor_to_bench_tensor(p->vecsz);
+
      k.k.apply = dft_apply; k.p = p; k.pln = pln;
-     verify_dft((dofft_closure *)&k, bsz, bvecsz, FFT_SIGN, rounds, tol);
+     verify_dft((dofft_closure *)&k, bsz, bvecsz, FFT_SIGN, rounds, tol, &e);
+
      tensor_destroy(bsz);
      tensor_destroy(bvecsz);
 }

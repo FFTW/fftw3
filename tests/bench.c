@@ -22,6 +22,8 @@ static FFTW(plan) the_plan;
 static const char *wisdat = "wis.dat";
 unsigned the_flags = 0;
 int paranoid;
+int usewisdom = 1;
+
 extern void install_hook(void);  /* in hook.c */
 
 void useropt(const char *arg)
@@ -30,6 +32,7 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "estimate")) the_flags |= FFTW_ESTIMATE;
      else if (!strcmp(arg, "exhaustive")) the_flags |= FFTW_EXHAUSTIVE;
      else if (!strcmp(arg, "paranoid")) paranoid = 1;
+     else if (!strcmp(arg, "nowisdom")) usewisdom = 0;
 
      else fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);
 }
@@ -48,11 +51,11 @@ void rdwisdom(void)
 
      tim = timer_stop();
 
-     if (verbose > 2) printf("READ WISDOM (%g seconds): ", tim);
+     if (verbose > 1) printf("READ WISDOM (%g seconds): ", tim);
 
      if (verbose > 3)
 	  FFTW(export_wisdom_to_file)(stdout);
-     if (verbose > 2)
+     if (verbose > 1)
 	  printf("\n");
 }
 
@@ -94,6 +97,23 @@ static void extract_reim(int sign, bench_complex *c,
           *r = c[0] + 1;
           *i = c[0] + 0;
      }
+}
+
+static void extract_reim_split(int sign, int size, bench_real *p,
+			       bench_real **r, bench_real **i)
+{
+     if (sign == FFTW_FORWARD) {
+          *r = p + 0;
+          *i = p + size;
+     } else {
+          *r = p + size;
+          *i = p + 0;
+     }
+}
+
+static int sizeof_problem(bench_problem *p)
+{
+     return tensor_sz(p->sz) * tensor_sz(p->vecsz);
 }
 
 /* ouch */
@@ -147,7 +167,24 @@ static FFTW(plan) mkplan_real(bench_problem *p, int flags)
 
 static FFTW(plan) mkplan_complex_split(bench_problem *p, int flags)
 {
-     return 0; /* TODO */
+     FFTW(plan) pln;
+     bench_tensor *sz = p->sz, *vecsz = p->vecsz;
+     FFTW(iodim) *dims, *howmany_dims;
+     bench_real *ri, *ii, *ro, *io;
+     int n = sizeof_problem(p);
+
+     extract_reim_split(p->sign, n, p->in, &ri, &ii);
+     extract_reim_split(p->sign, n, p->out, &ro, &io);
+
+     dims = bench_tensor_to_fftw_iodim(sz, 1);
+     howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 1);
+     if (verbose > 2) printf("using plan_guru_dft\n");
+     pln = FFTW(plan_guru_dft)(sz->rnk, dims,
+			       vecsz->rnk, howmany_dims,
+			       ri, ii, ro, io, flags);
+     bench_free(dims);
+     bench_free(howmany_dims);
+     return pln;
 }
 
 static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
@@ -166,19 +203,19 @@ static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
  api_simple:
      switch (sz->rnk) {
 	 case 1:
-	      if (verbose > 2) ovtpvt("using plan_dft_1d\n");
+	      if (verbose > 2) printf("using plan_dft_1d\n");
 	      return FFTW(plan_dft_1d)(sz->dims[0].n, 
 				       p->in, p->out, 
 				       p->sign, flags);
 	      break;
 	 case 2:
-	      if (verbose > 2) ovtpvt("using plan_dft_2d\n");
+	      if (verbose > 2) printf("using plan_dft_2d\n");
 	      return FFTW(plan_dft_2d)(sz->dims[0].n, sz->dims[1].n,
 				       p->in, p->out, 
 				       p->sign, flags);
 	      break;
 	 case 3:
-	      if (verbose > 2) ovtpvt("using plan_dft_3d\n");
+	      if (verbose > 2) printf("using plan_dft_3d\n");
 	      return FFTW(plan_dft_3d)(
 		   sz->dims[0].n, sz->dims[1].n, sz->dims[2].n,
 		   p->in, p->out, 
@@ -186,7 +223,7 @@ static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
 	      break;
 	 default: {
 	      int *n = mkn(sz);
-	      if (verbose > 2) ovtpvt("using plan_dft\n");
+	      if (verbose > 2) printf("using plan_dft\n");
 	      pln = FFTW(plan_dft)(sz->rnk, n, p->in, p->out, p->sign, flags);
 	      bench_free(n);
 	      return pln;
@@ -199,7 +236,7 @@ static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
 	  BENCH_ASSERT(vecsz->rnk == 1);
 	  n = mkn(sz);
 	  mknembed_many(sz, &inembed, &onembed);
-	  if (verbose > 2) ovtpvt("using plan_many_dft\n");
+	  if (verbose > 2) printf("using plan_many_dft\n");
 	  pln = FFTW(plan_many_dft)(
 	       sz->rnk, n, vecsz->dims[0].n, 
 	       p->in, inembed, sz->dims[sz->rnk - 1].is, vecsz->dims[0].is,
@@ -219,7 +256,7 @@ static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
 
 	  dims = bench_tensor_to_fftw_iodim(sz, 2);
 	  howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 2);
-	  if (verbose > 2) ovtpvt("using plan_guru_dft\n");
+	  if (verbose > 2) printf("using plan_guru_dft\n");
 	  pln = FFTW(plan_guru_dft)(sz->rnk, dims,
 				    vecsz->rnk, howmany_dims,
 				    ri, ii, ro, io, flags);
@@ -267,16 +304,16 @@ void setup(bench_problem *p)
 #endif
      install_hook();
 
-     rdwisdom();
+     if (usewisdom) rdwisdom();
 
      timer_start();
      the_plan = mkplan(p, the_flags);
      tim = timer_stop();
-     if (verbose > 2) printf("planner time: %g s\n", tim);
+     if (verbose > 1) printf("planner time: %g s\n", tim);
 
      BENCH_ASSERT(the_plan);
 
-     if (verbose > 2) {
+     if (verbose > 1) {
 	  FFTW(print_plan)(the_plan, stdout);
 	  printf("\n");
      }
@@ -298,7 +335,7 @@ void done(bench_problem *p)
      UNUSED(p);
 
      FFTW(destroy_plan)(the_plan);
-     wrwisdom();
+     if (usewisdom) wrwisdom();
      FFTW(cleanup)();
 
 #    ifdef FFTW_DEBUG
