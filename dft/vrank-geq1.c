@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.34 2003-03-27 11:37:07 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.35 2003-03-27 20:59:01 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -167,7 +167,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      d = p->vecsz->dims + vdim;
 
-     A(d->n > 0);  /* or else, p->ri + d->is etc. are invalid */
+     A(d->n > 1);  /* or else, p->ri + d->is etc. are invalid */
      nri = p->ri; nii = p->ii; nro = p->ro; nio = p->io;
      X(most_unaligned_complex)(&nri, &nii, d->is);
      X(most_unaligned_complex)(&nro, &nio, d->os);

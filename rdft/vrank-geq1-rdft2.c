@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.27 2003-03-27 11:37:07 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.28 2003-03-27 20:59:01 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -177,7 +177,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_rdft2 *) p_;
 
      d = p->vecsz->dims + vdim;
-     A(d->n > 0);
+
+     A(d->n > 1);  /* or else, p->ri + d->is etc. are invalid */
 
      /* FIXME: try to use X(most_unaligned).
 	When done, remove X(stride_aligned_p) from alloc.c, ifftw.h */
