@@ -18,8 +18,6 @@
  *
  */
 
-/* $Id: threads.h,v 1.5 2003-03-15 20:29:43 stevenj Exp $ */
-
 #ifndef __THREADS_H__
 #define __THREADS_H__
 

@@ -18,8 +18,6 @@
  *
  */
 
-/* $Id: hc2hc.h,v 1.6 2003-03-15 20:29:43 stevenj Exp $ */
-
 typedef struct {
      solver super;
      const char *nam;

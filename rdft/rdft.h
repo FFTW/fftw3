@@ -18,8 +18,6 @@
  *
  */
 
-/* $Id: rdft.h,v 1.38 2003-03-29 20:22:28 stevenj Exp $ */
-
 #ifndef __RDFT_H__
 #define __RDFT_H__
 

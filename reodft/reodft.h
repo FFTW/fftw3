@@ -18,8 +18,6 @@
  *
  */
 
-/* $Id: reodft.h,v 1.5 2003-03-15 20:29:43 stevenj Exp $ */
-
 #ifndef __REODFT_H__
 #define __REODFT_H__
 

@@ -18,8 +18,6 @@
  *
  */
 
-/* $Id: codelet-rdft.h,v 1.5 2003-03-25 16:51:49 stevenj Exp $ */
-
 /*
  * This header file must include every file or define every
  * type or macro which is required to compile a codelet.
