@@ -85,7 +85,7 @@
      THIS IS CURRENTLY EXPERIMENTAL ONLY.
 
    * If you need to perform any initialization before using threads,
-     put your initialization code in the X(threads_init)() function
+     put your initialization code in the X(ithreads_init)() function
      in threads.c, bracketed by the appropriate #ifdef of course.
 
    * Also, of course, you should modify config.h to #define
@@ -544,14 +544,14 @@ void khc2hc_dif_register_hook(planner *p, khc2hc k, const hc2hc_desc *d)
 }
 #endif /* HAVE_THREADS */
 
-/* X(threads_init) does any initialization that is necessary to use
+/* X(ithreads_init) does any initialization that is necessary to use
    threads.  It must be called before calling any fftw threads functions.
    
    Returns 0 if successful, and non-zero if there is an error.
-   Do not call any fftw threads routines if X(threads_init)
+   Do not call any fftw threads routines if X(ithreads_init)
    is not successful! */
 
-int X(threads_init)(void)
+int X(ithreads_init)(void)
 {
 #ifdef USING_POSIX_THREADS
      /* Set the thread creation attributes as necessary.  If we don't
@@ -581,8 +581,10 @@ int X(threads_init)(void)
              permissions, giving err == 1, but the default
              (PTHREAD_SCOPE_PROCESS) already parallelizes over
              multiple CPUs(?).  So, we ignore err == 1. */
-          if (err && err != 1) return err;
-	  attr_changed = 1;
+	  if (err == 0)
+	       attr_changed = 1;
+	  else if (err != 1)
+	       return err;
      }
 
      if (attr_changed)  /* we aren't using the defaults */
