@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.142 2003-03-15 10:50:50 athena Exp $
+@comment $Id: fftw3.texi,v 1.143 2003-03-15 14:07:31 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -204,6 +204,12 @@ Guru Interface
 * Guru Real-to-real Transforms::  
 * Guru Execution of Plans::     
 
+Wisdom
+
+* Wisdom Export::               
+* Wisdom Import::               
+* Forgetting Wisdom::           
+
 What FFTW Really Computes
 
 * The 1d Discrete Fourier Transform (DFT)::  
@@ -236,7 +242,6 @@ Installation and Customization
 * Installation on Unix::        
 * Installation on non-Unix systems::  
 * Cycle Counters::              
-* Generating your own code::    
 
 @end detailmenu
 @end menu
@@ -318,7 +323,6 @@ this sort is acceptable.  On the other hand, if you need a single
 transform of a given size, the one-time cost of the planner becomes
 significant.  For this case, FFTW provides fast planners based on
 heuristics or on previously computed plans.
-@cindex wisdom
 
 FFTW supports transforms of data with arbitrary size, rank,
 multiplicity, and a general memory layout.  In simple cases, however,
@@ -479,6 +483,7 @@ which behaves like
 @code{malloc} except that it properly aligns the array when SIMD
 instructions (such as SSE and Altivec) are available (@pxref{SIMD
 alignment and fftw_malloc}).
+@cindex SIMD
 
 The data is an array of type @code{fftw_complex}, which is by default a
 @code{double[2]} composed of the real (@code{in[i][0]}) and imaginary
@@ -1545,6 +1550,9 @@ increaseth sorrow.
 [Ecclesiastes 1:18]
 @cindex Ecclesiastes
 @end quotation
+@iftex
+@medskip
+@end iftex
 
 There are pitfalls to using wisdom, in that it can negate FFTW's
 ability to adapt to changing hardware and other conditions. For
@@ -2875,6 +2883,117 @@ parts for the input and output, as described in @ref{Guru Complex DFTs}.
 @cindex wisdom
 @cindex saving plans to disk
 
+This section documents the FFTW mechanism for saving and restoring
+plans from disk.  This mechanism is called @dfn{wisdom}.
+
+@menu
+* Wisdom Export::               
+* Wisdom Import::               
+* Forgetting Wisdom::           
+@end menu
+
+@c =========>
+@node Wisdom Export, Wisdom Import, Wisdom, Wisdom
+@subsection Wisdom Export
+
+@example
+    void fftw_export_wisdom_to_file(FILE *output_file);
+    char *fftw_export_wisdom_to_string(void);
+    void fftw_export_wisdom(void (*absorber)(char c, void *), 
+                            void *data);
+@end example
+@findex fftw_export_wisdom
+@findex fftw_export_wisdom_to_file
+@findex fftw_export_wisdom_to_string
+
+These functions allow you to export all currently accumulated wisdom
+in a form from which it can be later imported and restored, even
+during a separate run of the program. (@xref{Words of Wisdom-Saving
+Plans}.)  The current store of wisdom is not affected by calling any
+of these routines.
+
+@code{fftw_export_wisdom} exports the wisdom to any output
+medium, as specified by the callback function
+@code{absorber}. @code{absorber} is a @code{putc}-like function that
+writes the character @code{c} to some output; its second parameter is
+the @code{data} pointer passed to @code{fftw_export_wisdom}.  For
+convenience, the following two ``wrapper'' routines are provided:
+
+@code{fftw_export_wisdom_to_file} writes the wisdom to the
+current position in @code{output_file}, which should be open with write
+permission.  Upon exit, the file remains open and is positioned at the
+end of the wisdom data.
+
+@code{fftw_export_wisdom_to_string} returns a pointer to a
+@code{NULL}-terminated string holding the wisdom data. This string is
+dynamically allocated, and it is the responsibility of the caller to
+deallocate it with @code{fftw_free} when it is no longer needed.
+
+All of these routines export the wisdom in the same format, which we
+will not document here except to say that it is LISP-like ASCII text
+that is insensitive to white space.
+
+@c =========>
+@node Wisdom Import, Forgetting Wisdom, Wisdom Export, Wisdom
+@subsection Wisdom Import
+
+@example
+    int fftw_import_system_wisdom(void);
+    int fftw_import_wisdom_from_file(FILE *input_file);
+    int fftw_import_wisdom_from_string(const char *input_string);
+    int fftw_import_wisdom(int (*get_input)(void *), 
+                           void *data);
+@end example
+@findex fftw_import_wisdom
+@findex fftw_import_system_wisdom
+@findex fftw_import_wisdom_from_file
+@findex fftw_import_wisdom_from_string
+
+These functions import wisdom into a program from data stored by the
+@code{fftw_export_wisdom} functions above. (@xref{Words of
+Wisdom-Saving Plans}.)  The imported wisdom replaces any wisdom
+already accumulated by the running program.
+
+@code{fftw_import_wisdom} imports wisdom from any input medium,
+as specified by the callback function @code{get_input}. @code{get_input}
+is a @code{getc}-like function that returns the next character in the
+input; its parameter is the @code{data} pointer passed to
+@code{fftw_import_wisdom}. If the end of the input data is reached
+(which should never happen for valid data), it may return either
+@code{NULL} (ASCII 0) or @code{EOF} (as defined in @code{<stdio.h>}).
+For convenience, the following two ``wrapper'' routines are provided:
+
+@code{fftw_import_wisdom_from_file} reads wisdom from the current
+position in @code{input_file}, which should be open with read
+permission.  Upon exit, the file remains open, but the position of the
+read pointer is undefined.
+
+@code{fftw_import_wisdom_from_string} reads wisdom from the
+@code{NULL}-terminated string @code{input_string}.
+
+@code{fftw_import_system_wisdom} reads wisdom from an
+implementation-defined standard file (@code{/etc/fftw/wisdom} on Unix
+and GNU systems).
+
+The return value of these routines is @code{1} if the wisdom was read
+successfully, and @code{0} otherwise. Note that, in all of these
+functions, any data in the input stream past the end of the wisdom
+data is simply ignored.
+
+@c =========>
+@node Forgetting Wisdom,  , Wisdom Import, Wisdom
+@subsection Forgetting Wisdom
+
+@example
+    void fftw_forget_wisdom(void);
+@end example
+@findex fftw_forget_wisdom
+
+Calling @code{fftw_forget_wisdom} causes all accumulated @code{wisdom}
+to be discarded and its associated memory to be freed. (New
+@code{wisdom} can still be gathered subsequently, however.)
+
+
 @c ------------------------------------------------------------
 @node What FFTW Really Computes,  , Wisdom, FFTW Reference
 @section What FFTW Really Computes
@@ -4132,7 +4251,6 @@ efficiently by the standard FFTW distribution.
 * Installation on Unix::        
 * Installation on non-Unix systems::  
 * Cycle Counters::              
-* Generating your own code::    
 @end menu
 
 @c ------------------------------------------------------------
@@ -4332,7 +4450,7 @@ Once these files are all compiled, link them into a library, or a shared
 library, or directly into your program.
 
 @c ------------------------------------------------------------
-@node Cycle Counters, Generating your own code, Installation on non-Unix systems, Installation and Customization
+@node Cycle Counters,  , Installation on non-Unix systems, Installation and Customization
 @section Cycle Counters
 @cindex cycle counter
 
@@ -4366,10 +4484,6 @@ This will use the much slower @code{gettimeofday} function, or even
 @code{clock} if the former is unavailable, and planning will be
 extremely slow (you may just want to use @code{FFTW_ESTIMATE}).
 
-@c ------------------------------------------------------------
-@node Generating your own code,  , Cycle Counters, Installation and Customization
-@section Generating your own code
-
 @c ************************************************************
 @node Acknowledgments, License and Copyright, Installation and Customization, Top
 @chapter Acknowledgments
@@ -4401,15 +4515,14 @@ computer to the FFTW project.
 We thank the Compaq/HP testdrive program and Sourceforge for providing
 remote access to machines that were used to test FFTW.
 
-The @code{genfft} program was written using Objective Caml, a dialect of
-ML.  Objective Caml is a small and elegant language developed by Xavier
-Leroy.  The implementation is available from @code{ftp.inria.fr} in the
-directory @code{lang/caml-light}.  We used versions 1.07 and 2.00 of the
-software.  In previous releases of FFTW, @code{genfft} was written in
-Caml Light, by the same authors.  An even earlier implementation of
-@code{genfft} was written in Scheme, but Caml is definitely better for
-this kind of application.
-@pindex genfft
+The @code{genfft} suite of code generators was written using Objective
+Caml, a dialect of ML.  Objective Caml is a small and elegant language
+developed by Xavier Leroy.  The implementation is available from
+@code{ftp.inria.fr} in the directory @code{lang/caml-light}.  We used
+versions 1.07 and 2.00 of the software.  In previous releases of FFTW,
+@code{genfft} was written in Caml Light, by the same authors.  An even
+earlier implementation of @code{genfft} was written in Scheme, but
+Caml is definitely better for this kind of application.
 @cindex Caml
 @cindex LISP
 
