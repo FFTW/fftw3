@@ -18,9 +18,18 @@
  *
  */
 
-/* $Id: planner.c,v 1.90 2002-09-16 03:41:01 stevenj Exp $ */
+/* $Id: planner.c,v 1.91 2002-09-16 03:49:50 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
+
+/* GNU Coding Standards, Sec. 5.2: Please write the comments in a GNU
+   program in English, because English is the one language that nearly
+   all programmers in all countries can read. 
+
+                    ingemisco tanquam reus
+		    culpa rubet vultus meus
+		    supplicanti parce deus
+*/
 
 #define BLESSEDP(solution) ((solution)->flags & BLESSING)
 #define VALIDP(solution) ((solution)->flags & H_VALID)
