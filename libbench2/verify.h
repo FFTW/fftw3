@@ -23,6 +23,8 @@
 typedef bench_real R;
 typedef bench_complex C;
 
+double dmax(double x, double y);
+
 void arand(C *a, int n);
 void mkreal(C *A, int n);
 void mkhermitian(C *A, int rank, const bench_iodim *dim);
@@ -33,20 +35,20 @@ void aphase_shift(C *b, C *a, int n, int nb, int na, double sign);
 void ascale(C *a, C alpha, int n);
 double acmp(C *a, C *b, int n, const char *test, double tol);
 double mydrand(void);
-void impulse(dofft_closure *k,
-	     int n, int vecn, 
-	     C *inA, C *inB, C *inC,
-	     C *outA, C *outB, C *outC,
-	     C *tmp, int rounds, double tol);
-void linear(dofft_closure *k, int realp,
-	    int n, C *inA, C *inB, C *inC, C *outA,
-	    C *outB, C *outC, C *tmp, int rounds, double tol);
+double impulse(dofft_closure *k,
+	       int n, int vecn, 
+	       C *inA, C *inB, C *inC,
+	       C *outA, C *outB, C *outC,
+	       C *tmp, int rounds, double tol);
+double linear(dofft_closure *k, int realp,
+	      int n, C *inA, C *inB, C *inC, C *outA,
+	      C *outB, C *outC, C *tmp, int rounds, double tol);
 
 enum { TIME_SHIFT, FREQ_SHIFT };
-void tf_shift(dofft_closure *k, int realp, const bench_tensor *sz,
-	      int n, int vecn, double sign,
-	      C *inA, C *inB, C *outA, C *outB, C *tmp,
-	      int rounds, double tol, int which_shift);
+double tf_shift(dofft_closure *k, int realp, const bench_tensor *sz,
+		int n, int vecn, double sign,
+		C *inA, C *inB, C *outA, C *outB, C *tmp,
+		int rounds, double tol, int which_shift);
 
 typedef struct dotens2_closure_s {
      void (*apply)(struct dotens2_closure_s *k, 

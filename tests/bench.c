@@ -48,11 +48,11 @@ void rdwisdom(void)
 
      tim = timer_stop();
 
-     if (verbose) printf("READ WISDOM (%g seconds): ", tim);
+     if (verbose > 2) printf("READ WISDOM (%g seconds): ", tim);
 
      if (verbose > 3)
 	  FFTW(export_wisdom_to_file)(stdout);
-     if (verbose)
+     if (verbose > 2)
 	  printf("\n");
 }
 
@@ -272,11 +272,11 @@ void setup(bench_problem *p)
      timer_start();
      the_plan = mkplan(p, the_flags);
      tim = timer_stop();
-     if (verbose) printf("planner time: %g s\n", tim);
+     if (verbose > 2) printf("planner time: %g s\n", tim);
 
      BENCH_ASSERT(the_plan);
 
-     if (verbose) {
+     if (verbose > 2) {
 	  FFTW(print_plan)(the_plan, stdout);
 	  printf("\n");
      }
@@ -305,7 +305,7 @@ void done(bench_problem *p)
      {
 	  /* undocumented memory checker */
 	  extern void FFTW(malloc_print_minfo)(void);
-	  if (verbose >= 1)
+	  if (verbose > 2)
 	       FFTW(malloc_print_minfo)();
      }
 #    endif

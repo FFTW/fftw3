@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.3 2003-01-18 21:13:15 athena Exp $ */
+/* $Id: verify-dft.c,v 1.4 2003-01-19 01:31:22 athena Exp $ */
 
 #include "verify.h"
 
@@ -27,6 +27,7 @@ void verify_dft(dofft_closure *k, bench_tensor *sz, bench_tensor *vecsz, int sig
 {
      C *inA, *inB, *inC, *outA, *outB, *outC, *tmp;
      int n, vecn, N;
+     double el, ei, es = 0.0;
 
      if (rounds == 0)
 	  rounds = 20;  /* default value */
@@ -43,13 +44,17 @@ void verify_dft(dofft_closure *k, bench_tensor *sz, bench_tensor *vecsz, int sig
      outC = (C *) bench_malloc(N * sizeof(C));
      tmp = (C *) bench_malloc(N * sizeof(C));
 
-     impulse(k, n, vecn, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
-     linear(k, 0, N, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
+     ei = impulse(k, n, vecn, inA, inB, inC, outA, outB, outC, 
+		  tmp, rounds, tol);
+     el = linear(k, 0, N, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
 
-     tf_shift(k, 0, sz, n, vecn, sign, inA, inB, outA, outB, tmp, 
-	      rounds, tol, TIME_SHIFT);
-     tf_shift(k, 0, sz, n, vecn, sign, inA, inB, outA, outB, tmp, 
-	      rounds, tol, FREQ_SHIFT);
+     es = dmax(es, tf_shift(k, 0, sz, n, vecn, sign, inA, inB, outA, outB, 
+			    tmp, rounds, tol, TIME_SHIFT));
+     es = dmax(es, tf_shift(k, 0, sz, n, vecn, sign, inA, inB, outA, outB, 
+			    tmp, rounds, tol, FREQ_SHIFT));
+
+     if (verbose)
+	  ovtpvt("%g %g %g\n", el, ei, es);
 
      bench_free(tmp);
      bench_free(outC);

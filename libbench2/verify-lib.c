@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.3 2003-01-18 21:13:15 athena Exp $ */
+/* $Id: verify-lib.c,v 1.4 2003-01-19 01:31:22 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -29,9 +29,10 @@
  * Utility functions:
  */
 static double dabs(double x) { return (x < 0.0) ? -x : x; }
-static double dmax(double x, double y) { return (x > y) ? x : y; }
 static double dmin(double x, double y) { return (x < y) ? x : y; }
 static double norm2(double x, double y) { return dmax(dabs(x), dabs(y)); }
+
+double dmax(double x, double y) { return (x > y) ? x : y; }
 
 static double aerror(C *a, C *b, int n)
 {
@@ -235,17 +236,18 @@ double acmp(C *a, C *b, int n, const char *test, double tol)
  * Nevada, 29 May--1 June 1995.
  */
 
-static void impulse0(dofft_closure *k,
-		     int n, int vecn, 
-		     C *inA, C *inB, C *inC,
-		     C *outA, C *outB, C *outC,
-		     C *tmp, int rounds, double tol)
+static double impulse0(dofft_closure *k,
+		       int n, int vecn, 
+		       C *inA, C *inB, C *inC,
+		       C *outA, C *outB, C *outC,
+		       C *tmp, int rounds, double tol)
 {
      int N = n * vecn;
+     double e = 0.0;
      int j;
 
      k->apply(k, inA, tmp);
-     acmp(tmp, outA, N, "impulse 1", tol);
+     e = dmax(e, acmp(tmp, outA, N, "impulse 1", tol));
 
      for (j = 0; j < rounds; ++j) {
 	  arand(inB, N);
@@ -253,19 +255,21 @@ static void impulse0(dofft_closure *k,
 	  k->apply(k, inB, outB);
 	  k->apply(k, inC, outC);
 	  aadd(tmp, outB, outC, N);
-	  acmp(tmp, outA, N, "impulse", tol);
+	  e = dmax(e, acmp(tmp, outA, N, "impulse", tol));
      }
+     return e;
 }
 
-void impulse(dofft_closure *k,
-	     int n, int vecn, 
-	     C *inA, C *inB, C *inC,
-	     C *outA, C *outB, C *outC,
-	     C *tmp, int rounds, double tol)
+double impulse(dofft_closure *k,
+	       int n, int vecn, 
+	       C *inA, C *inB, C *inC,
+	       C *outA, C *outB, C *outC,
+	       C *tmp, int rounds, double tol)
 {
      int N = n * vecn;
      C pls;
      int i;
+     double e = 0.0;
 
      /* check that the unit impulse is transformed properly */
      c_re(pls) = 1.0;
@@ -279,22 +283,24 @@ void impulse(dofft_closure *k,
      for (i = 0; i < vecn; ++i)
 	  CASSIGN(inA[i * n], pls);
 
-     impulse0(k, n, vecn, inA, inB, inC, outA, outB, outC,
-	      tmp, rounds, tol);
+     e = dmax(e, impulse0(k, n, vecn, inA, inB, inC, outA, outB, outC,
+			  tmp, rounds, tol));
 
      c_re(pls) = n;
      for (i = 0; i < vecn; ++i)
 	  CASSIGN(inA[i * n], pls);
 
-     impulse0(k, n, vecn, outA, inB, inC, inA, outB, outC,
-	      tmp, rounds, tol);
+     e = dmax(e, impulse0(k, n, vecn, outA, inB, inC, inA, outB, outC,
+			  tmp, rounds, tol));
+     return e;
 }
 
-void linear(dofft_closure *k, int realp,
-	    int n, C *inA, C *inB, C *inC, C *outA,
-	    C *outB, C *outC, C *tmp, int rounds, double tol)
+double linear(dofft_closure *k, int realp,
+	      int n, C *inA, C *inB, C *inC, C *outA,
+	      C *outB, C *outC, C *tmp, int rounds, double tol)
 {
      int j;
+     double e = 0.0;
 
      for (j = 0; j < rounds; ++j) {
 	  C alpha, beta;
@@ -315,21 +321,22 @@ void linear(dofft_closure *k, int realp,
 	  aadd(inC, inA, inB, n);
 	  k->apply(k, inC, outC);
 
-	  acmp(outC, tmp, n, "linear", tol);
+	  e = dmax(e, acmp(outC, tmp, n, "linear", tol));
      }
-
+     return e;
 }
 
 
 
-void tf_shift(dofft_closure *k,
-	      int realp, const bench_tensor *sz,
-	      int n, int vecn, double sign,
-	      C *inA, C *inB, C *outA, C *outB, C *tmp,
-	      int rounds, double tol, int which_shift)
+double tf_shift(dofft_closure *k,
+		int realp, const bench_tensor *sz,
+		int n, int vecn, double sign,
+		C *inA, C *inB, C *outA, C *outB, C *tmp,
+		int rounds, double tol, int which_shift)
 {
      int nb, na, dim, N = n * vecn;
      int i, j;
+     double e = 0.0;
 
      /* test 3: check the time-shift property */
      /* the paper performs more tests, but this code should be fine too */
@@ -356,7 +363,7 @@ void tf_shift(dofft_closure *k,
 		    for (i = 0; i < vecn; ++i) 
 			 aphase_shift(tmp + i * n, outB + i * n, ncur, 
 				      nb, na, sign);
-		    acmp(tmp, outA, N, "time shift", tol);
+		    e = dmax(e, acmp(tmp, outA, N, "time shift", tol));
 	       } else {
 		    for (i = 0; i < vecn; ++i) {
 			 if (realp) 
@@ -368,12 +375,13 @@ void tf_shift(dofft_closure *k,
 		    k->apply(k, inB, outB);
 		    for (i = 0; i < vecn; ++i) 
 			 arol(tmp + i * n, outB + i * n, ncur, nb, na);
-		    acmp(tmp, outA, N, "freq shift", tol);
+		    e = dmax(e, acmp(tmp, outA, N, "freq shift", tol));
 	       }
 	  }
 
 	  nb *= ncur;
      }
+     return e;
 }
 
 
