@@ -11,7 +11,7 @@ dnl using gcc and the stack is/isn't aligned, respectively.
 dnl
 dnl Requires macro: AX_CHECK_COMPILER_FLAGS
 dnl
-dnl @version $Id: ax_gcc_aligns_stack.m4,v 1.3 2005-01-17 23:54:55 stevenj Exp $
+dnl @version $Id: ax_gcc_aligns_stack.m4,v 1.4 2005-02-24 23:02:31 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 AC_DEFUN([AX_GCC_ALIGNS_STACK],
 [
@@ -21,7 +21,8 @@ if test "$GCC" = "yes"; then
 AX_CHECK_COMPILER_FLAGS(-mpreferred-stack-boundary=4, [
 	AC_MSG_CHECKING([whether the stack is correctly aligned by gcc])
 	save_CFLAGS="$CFLAGS"
-	CFLAGS="-O -malign-double"
+	CFLAGS="-O"
+	AX_CHECK_COMPILER_FLAGS(-malign-double, CFLAGS="$CFLAGS -malign-double")
 	AC_TRY_RUN([#include <stdlib.h>
 #       include <stdio.h>
 	struct yuck { int blechh; };
