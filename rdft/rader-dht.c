@@ -87,7 +87,7 @@ static int apply_aux(P *ego, uint r, int is, R *I, R *O)
      O[(0 + 1) * os] *= omega[0];
 #if R2HC_ONLY_CONV
      for (k = 1; k < (r - 1)/2; ++k) {
-	  fftw_real rB, iB, rW, iW, a, b;
+	  E rB, iB, rW, iW, a, b;
 	  rW = omega[k];
 	  iW = omega[(r-1) - k];
 	  rB = O[(k + 1) * os];
@@ -99,7 +99,7 @@ static int apply_aux(P *ego, uint r, int is, R *I, R *O)
      }
 #else
      for (k = 1; k < (r - 1)/2; ++k) {
-	  fftw_real rB, iB, rW, iW;
+	  E rB, iB, rW, iW;
 	  rW = omega[k];
 	  iW = omega[(r-1) - k];
 	  rB = O[(k + 1) * os];
@@ -158,7 +158,7 @@ static void apply_r2hc(plan *ego_, R *I, R *O)
      /* finally, unscramble DHT back into DFT:
         (sucks that this requires an extra pass) */
      for (k = 1; k < (r+1)/2; ++k) {
-	  R rp, rm;
+	  E rp, rm;
 	  rp = O[k * os];
 	  rm = O[(r - k) * os];
 	  O[k * os] = 0.5 * (rp + rm);
@@ -178,7 +178,7 @@ static void apply_hc2r(plan *ego_, R *I, R *O)
      /* before everything, scramble DFT into DHT (destroying input):
         (sucks that this requires an extra pass) */
      for (k = 1; k < (r+1)/2; ++k) {
-	  R a, b;
+	  E a, b;
 	  a = I[k * is];
 	  b = I[(r - k) * is];
 	  I[k * is] = a + b;

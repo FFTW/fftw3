@@ -80,7 +80,7 @@ static void apply_aux(uint r, uint ginv, plan *cld1,plan *cld2, const R *omega,
 
      /* now, multiply by omega: */
      for (k = 0; k < r - 1; ++k) {
-	  fftw_real rB, iB, rW, iW;
+	  E rB, iB, rW, iW;
 	  rW = omega[2*k];
 	  iW = omega[2*k+1];
 	  rB = ro[(k+1)*os];
@@ -168,7 +168,7 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  /* First, permute the input and multiply by W, storing in buf: */
 	  A(gpower == 1);
 	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
-	       R rA, iA, rW, iW;
+	       E rA, iA, rW, iW;
 	       rA = ro[gpower * osm];
 	       iA = io[gpower * osm];
 	       rW = W[2*k];

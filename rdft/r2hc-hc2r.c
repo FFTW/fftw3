@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: r2hc-hc2r.c,v 1.4 2002-07-23 18:52:04 stevenj Exp $ */
+/* $Id: r2hc-hc2r.c,v 1.5 2002-08-03 21:49:11 stevenj Exp $ */
 
 /* Solve an HC2R problem by using an R2HC problem of the same size.
    The two problems can be expressed in terms of one another by
@@ -55,7 +55,7 @@ static void apply(plan *ego_, R *I, R *O)
 #  define os1 os
 #endif
      for (i = 1; i < (n + 1)/2; ++i) {
-	  R a, b;
+	  E a, b;
 	  a = I[is * i];
 	  b = I[is * (n - i)];
 	  O1[os1 * i] = a + b;
@@ -74,7 +74,7 @@ static void apply(plan *ego_, R *I, R *O)
 #undef os1
 
      for (i = 1; i < (n + 1)/2; ++i) {
-	  R a, b;
+	  E a, b;
 	  a = O[os * i];
 	  b = O[os * (n - i)];
 	  O[os * i] = a + b;

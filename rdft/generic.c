@@ -43,10 +43,10 @@ static void apply_dit(plan *ego_, R *I, R *O)
      uint n, m, r;
      uint i, j, k;
      int os, osm;
-     R *buf;
+     E *buf;
      const R *W;
      R *X, *YO, *YI;
-     R rsum, isum;
+     E rsum, isum;
      uint wp, wincr;
 
      {
@@ -56,7 +56,7 @@ static void apply_dit(plan *ego_, R *I, R *O)
 
      r = ego->r;
 
-     STACK_MALLOC(R *, buf, r * 2 * sizeof(R));
+     STACK_MALLOC(E *, buf, r * 2 * sizeof(E));
      
      osm = (m = ego->m) * (os = ego->os);
      n = m * r;
@@ -72,9 +72,9 @@ static void apply_dit(plan *ego_, R *I, R *O)
 	  isum = 0.0;
 	  wincr = m * i;
 	  for (j = 0, wp = 0; j < r; ++j) {
-	       R tw_r = W[2*wp];
-	       R tw_i = W[2*wp+1] ;
-	       R re = X[j * osm];
+	       E tw_r = W[2*wp];
+	       E tw_i = W[2*wp+1] ;
+	       E re = X[j * osm];
 	       rsum += re * tw_r;
 	       isum += re * tw_i;
 	       wp += wincr;
@@ -103,10 +103,10 @@ static void apply_dit(plan *ego_, R *I, R *O)
 	       isum = 0.0;
 	       wincr = k + m * i;
 	       for (j = 0, wp = 0; j < r; ++j) {
-		    R tw_r = W[2*wp];
-		    R tw_i = W[2*wp+1] ;
-		    R re = X[j * osm];
-		    R im = YI[j * osm];
+		    E tw_r = W[2*wp];
+		    E tw_i = W[2*wp+1] ;
+		    E re = X[j * osm];
+		    E im = YI[j * osm];
 		    rsum += re * tw_r - im * tw_i;
 		    isum += re * tw_i + im * tw_r;
 		    wp += wincr;
@@ -139,15 +139,15 @@ static void apply_dif(plan *ego_, R *I, R *O)
      uint n, m, r;
      uint i, j, k;
      int is, ism;
-     R *buf;
+     E *buf;
      const R *W;
      R *X, *YO, *YI;
-     R rsum, isum;
+     E rsum, isum;
      uint wp, wincr;
 
      r = ego->r;
 
-     STACK_MALLOC(R *, buf, r * 2 * sizeof(R));
+     STACK_MALLOC(E *, buf, r * 2 * sizeof(E));
      
      ism = (m = ego->m) * (is = ego->os);
      n = m * r;
@@ -172,10 +172,10 @@ static void apply_dif(plan *ego_, R *I, R *O)
 	  rsum = 0.0;
 	  wincr = m * i;
 	  for (j = 1, wp = wincr; j + j < r; ++j) {
-	       R tw_r = W[2*wp];
-	       R tw_i = W[2*wp+1];
-	       R re = buf[2*j];
-	       R im = buf[2*j+1];
+	       E tw_r = W[2*wp];
+	       E tw_i = W[2*wp+1];
+	       E re = buf[2*j];
+	       E im = buf[2*j+1];
 	       rsum += re * tw_r + im * tw_i;
 	       wp += wincr;
 	       if (wp >= n)
@@ -205,10 +205,10 @@ static void apply_dif(plan *ego_, R *I, R *O)
 	       isum = 0.0;
 	       wincr = m * i;
 	       for (j = 0, wp = k * i; j < r; ++j) {
-		    R tw_r = W[2*wp];
-		    R tw_i = W[2*wp+1];
-		    R re = buf[2*j];
-		    R im = buf[2*j+1];
+		    E tw_r = W[2*wp];
+		    E tw_i = W[2*wp+1];
+		    E re = buf[2*j];
+		    E im = buf[2*j+1];
 		    rsum += re * tw_r + im * tw_i;
 		    isum += im * tw_r - re * tw_i;
 		    wp += wincr;

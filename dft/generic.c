@@ -40,7 +40,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      P *ego = (P *) ego_;
      uint n, m, r, j;
      int os, osm;
-     R *buf;
+     E *buf;
      const R *W;
 
      {
@@ -50,7 +50,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      r = ego->r;
 
-     STACK_MALLOC(R *, buf, r * 2 * sizeof(R));
+     STACK_MALLOC(E *, buf, r * 2 * sizeof(E));
      
      osm = (m = ego->m) * (os = ego->os);
      n = m * r;
@@ -58,11 +58,11 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      for (j = 0; j < m; ++j, ro += os, io += os) {
 	  uint k;
 	  for (k = 0; k < r; ++k) {
-	       R rb = ro[0], ib = io[0];
+	       E rb = ro[0], ib = io[0];
 	       uint i, iw, iw_inc = j + m * k;
 	       for (i = 1, iw = iw_inc; i < r; ++i) {
-		    R xr = ro[i*osm], xi = io[i*osm];
-		    R wr = W[2*iw], wi = W[2*iw+1];
+		    E xr = ro[i*osm], xi = io[i*osm];
+		    E wr = W[2*iw], wi = W[2*iw+1];
 		    /* note that W[iw] is the product of the DIT twiddle
 		       factor and the size-r DFT twiddle factor */
 		    rb += xr * wr - xi * wi;
