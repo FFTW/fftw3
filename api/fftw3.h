@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.11 2003-01-11 17:55:49 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.12 2003-01-11 18:12:01 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -71,7 +71,7 @@ X(plan) X(plan_dft_3d)(unsigned int nx, unsigned int ny, unsigned int nz, \
 									  \
 void X(execute_dft)(X(plan) p, R *ri, R *ii, R *ro, R *io);		  \
 									  \
-void X(plan_destroy)(X(plan) p);					  \
+void X(destroy_plan)(X(plan) p);					  \
 void X(cleanup)(void);							  \
 									  \
 void X(export_wisdom_to_file)(FILE *output_file);			  \

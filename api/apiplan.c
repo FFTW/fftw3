@@ -56,7 +56,7 @@ apiplan *X(mkapiplan)(unsigned int flags, problem *prb)
      return p;
 }
 
-void X(plan_destroy)(X(plan) p)
+void X(destroy_plan)(X(plan) p)
 {
      if (p) {
 	  AWAKE(p->pln, 0);

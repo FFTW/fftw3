@@ -123,7 +123,7 @@ void done(struct problem *p)
 {
      UNUSED(p);
 
-     FFTW(plan_destroy)(the_plan);
+     FFTW(destroy_plan)(the_plan);
      wrwisdom();
      FFTW(cleanup)();
 
