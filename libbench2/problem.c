@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.26 2004-03-31 00:44:54 stevenj Exp $ */
+/* $Id: problem.c,v 1.27 2005-03-09 03:14:02 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -102,6 +102,17 @@ static const char *parseint(const char *s, int *n)
      }
      
      *n *= sign;
+
+     if (*s == 'k' || *s == 'K') {
+	  *n *= 1024;
+	  ++s;
+     }
+
+     if (*s == 'm' || *s == 'M') {
+	  *n *= 1024 * 1024;
+	  ++s;
+     }
+
      return s;
 }
 
