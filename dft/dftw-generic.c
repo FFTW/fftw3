@@ -107,20 +107,20 @@ static void bytwiddle2(const P *ego, R *rio, R *iio)
      const R *W0 = ego->W0, *W1 = ego->W1;
      for (i = 0; i < vl; ++i) {
 	  for (j = 1; j < r; ++j) {
-	       for (k = kstart; k < mcount; ++k) {
-		    unsigned jk = j * (k + mstart);
-		    int jk0 = jk & twmsk;
-		    int jk1 = jk >> twshft;
-		    E xr = rio[s * (j * m + k)];
-		    E xi = iio[s * (j * m + k)];
+	       unsigned jk = j * (kstart + mstart);
+	       for (k = kstart; k < mcount; ++k, jk += j) {
+		    unsigned jk0 = jk & twmsk;
+		    unsigned jk1 = jk >> twshft;
+		    E xr = rio[s * j * m + s * k];
+		    E xi = iio[s * j * m + s * k];
 		    E wr0 = W0[2 * jk0];
 		    E wi0 = W0[2 * jk0 + 1];
 		    E wr1 = W1[2 * jk1];
 		    E wi1 = W1[2 * jk1 + 1];
 		    E wr = wr1 * wr0 - wi1 * wi0;
 		    E wi = wi1 * wr0 + wr1 * wi0;
-		    rio[s * (j * m + k)] = xr * wr + xi * wi;
-		    iio[s * (j * m + k)] = xi * wr - xr * wi;
+		    rio[s * j * m + s * k] = xr * wr + xi * wi;
+		    iio[s * j * m + s * k] = xi * wr - xr * wi;
 	       }
 	  }
 	  rio += vs;
