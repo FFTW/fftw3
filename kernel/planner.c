@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.26 2002-07-30 03:52:07 stevenj Exp $ */
+/* $Id: planner.c,v 1.27 2002-07-30 04:36:26 stevenj Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -262,7 +262,10 @@ static void exprt(planner *ego, printer *p)
 		    print_solution(s, p);
 		    p->putchr(p, '\n');
 	       }
-} 
+}
+
+#define STRINGIZEx(x) #x
+#define STRINGIZE(x) STRINGIZEx(x)
 
 static void exprt_registrars(planner *ego, printer *p)
 {
@@ -273,8 +276,10 @@ static void exprt_registrars(planner *ego, printer *p)
 
      /* FIXME: need to use external API */
 
+     p->print(p, "void wisdom_conf(planner *p)\n{\n");
+
 #ifndef __cplusplus
-     p->print(p, "#ifdef __cplusplus\nextern \"C\" {\n#endif\n");
+     p->print(p, "#ifdef __cplusplus\n     extern \"C\" {\n#endif\n");
 #endif
 
      for (h = 0; h < ego->hashsiz; ++h)
@@ -282,15 +287,16 @@ static void exprt_registrars(planner *ego, printer *p)
                if ((s->blessed || (s->pln && s->pln->blessed))
 		   && s->sp && s->sp->reg_nam && s->sp->id > 0) {
 		    s->sp->id = 0; /* mark to prevent duplicates */
-		    p->print(p, "extern void %s(planner*);\n", s->sp->reg_nam);
+		    p->print(p, "          extern void %s(planner*);\n",
+			     s->sp->reg_nam);
 	       }
 	  }
 
 #ifndef __cplusplus
-     p->print(p, "#ifdef __cplusplus\n}\n#endif\n");
+     p->print(p, "#ifdef __cplusplus\n     }\n#endif\n");
 #endif
 
-     p->print(p, "\nstatic const solvtab s =\n{\n");
+     p->print(p, "     static const solvtab s = {\n");
 
      /* output solvtab entries, and compute correct id's of blessed
 	entries as they will appear in the generated table (ugh). */
@@ -307,7 +313,7 @@ static void exprt_registrars(planner *ego, printer *p)
 	  }
 	  if (sp->id == 0) {
 	       if (!blessed_reg_nam) /* i.e., not already printed */
-		    p->print(p, "     SOLVTAB(%s),\n", sp->reg_nam);
+		    p->print(p, "          SOLVTAB(%s),\n", sp->reg_nam);
 	       blessed_reg_nam = 1;
 	       sp->id = idcnt + reg_nam_cnt;
 	  }
@@ -315,10 +321,10 @@ static void exprt_registrars(planner *ego, printer *p)
      if (blessed_reg_nam)
 	  idcnt += reg_nam_cnt;
 
-     p->print(p, "}; /* yields %d solvers */\n", idcnt);
+     p->print(p, "     }; /* yields %d solvers */\n", idcnt);
 
      /* export wisdom as hard-coded string, w/ids corresponding to solvtab */
-     p->print(p, "\nstatic const char * const wisdom = \"");
+     p->print(p, "     static const char * const wisdom = \"");
      for (h = 0; h < ego->hashsiz; ++h)
           for (s = ego->sols[h]; s; s = s->cdr) {
                if (s->blessed || (s->pln && s->pln->blessed)) {
@@ -335,6 +341,11 @@ static void exprt_registrars(planner *ego, printer *p)
 	  UNUSED(s);
           sp->id = idcnt--;
      });
+
+     p->print(p, "\n"
+	      "     %s(s, p);\n"
+	      "     /* FIXME: import wisdom */\n"
+	      "}\n", STRINGIZE(X(solvtab_exec)));
 }
 
 /*
