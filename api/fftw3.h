@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.18 2003-01-11 21:43:54 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.19 2003-01-11 23:04:57 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -113,9 +113,10 @@ void X(print_plan)(X(plan) p, FILE *output_file);
 
 /* end of FFTW_DEFINE_API macro */
 
-FFTW_DEFINE_API(FFTW_MANGLE_DOUBLE, double, fftw_complex)
-FFTW_DEFINE_API(FFTW_MANGLE_FLOAT, float, fftwf_complex)
-FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
+#define FFTW_DEFINE_APIx(X, R) FFTW_DEFINE_API(X, R, X(complex))
+FFTW_DEFINE_APIx(FFTW_MANGLE_DOUBLE, double)
+FFTW_DEFINE_APIx(FFTW_MANGLE_FLOAT, float)
+FFTW_DEFINE_APIx(FFTW_MANGLE_LONG_DOUBLE, long double)
 
 #define FFTW_FORWARD (-1)
 #define FFTW_BACKWARD (+1)
