@@ -28,7 +28,8 @@
 #if defined(__GNUC__) && defined(__i386__)
 
 /* horrible hack because gcc does not support sse2 yet */
-typedef float V __attribute__ ((mode(V4SF)));
+typedef float V __attribute__ ((mode(V4SF),aligned(16)));
+
 static __inline__ V VADD(V a, V b) 
 {
      V ret;
@@ -74,6 +75,7 @@ union dvec {
      static const union dvec _var = { {val, val} };	\
      _var.v;						\
 })
+#define LDK(x) x
 
 #define ST2(a, ovs, s0, s1)			\
 {						\
@@ -103,7 +105,8 @@ typedef __m128d V;
 #define VMUL _mm_mul_pd
 #define LD(var, loc) var = *(const V *)(&(loc))
 #define ST(loc, var) *(V *)(&(loc)) = var
-#define DVK(var, val) V var = _mm_set1_pd(val)
+#define DVK(var, val) const R var = K(val)
+#define LDK(x) _mm_set1_pd(x)
 
 #define ST2(a, ovs, s0, s1)			\
 {						\

@@ -38,6 +38,7 @@ typedef int Vint __attribute__((vector_size(16)));
 #define LD(var, loc) var = *(const V *)(&(loc))
 #define ST(loc, var) *(V *)(&(loc)) = var
 #define DVK(var, val) static const V var = { val, val, val, val }
+#define LDK(x) x
 
 static inline V VMUL(V a, V b)
 {

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.8 2002-07-02 17:15:58 athena Exp $ *)
+(* $Id: simd.ml,v 1.9 2002-07-02 19:38:36 athena Exp $ *)
 
 open Expr
 open List
@@ -139,7 +139,7 @@ and unparse_expr =
 
   in function
     | Load v -> Variable.unparse v
-    | Num n -> Number.to_konst n
+    | Num n -> sprintf "LDK(%s)" (Number.to_konst n)
     | Plus [] -> "0.0 /* bug */"
     | Plus [a] -> " /* bug */ " ^ (unparse_expr a)
     | Plus a -> unparse_plus a

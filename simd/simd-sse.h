@@ -26,7 +26,7 @@
 #define ALIGNMENT 16
 
 #if defined(__GNUC__) && defined(__i386__)
-typedef float V __attribute__ ((mode(V4SF)));
+typedef float V __attribute__ ((mode(V4SF),aligned(16)));
 
 /* gcc-3.1 seems to generate slower code when we use SSE builtins.
    Use asm instead. */
@@ -60,15 +60,14 @@ union fvec {
      V v;
 };
 
-#define DVK(var, val) const V var = __extension__ ({			\
+#define DVK(var, val) const V var = __extension__ ({		\
      static const union fvec _var = { {val, val, val, val} };	\
      _var.v;							\
 })
 
-
 #define LD(var, loc) var = *(const V *)(&(loc))
 #define ST(loc, var) *(V *)(&(loc)) = var
-
+#define LDK(x) x
 
 #define VTR4(r0, r1, r2, r3)			\
 {						\
@@ -109,7 +108,8 @@ typedef __m128 V;
 #define VMUL _mm_mul_ps
 #define LD(var, loc) var = *(const V *)(&(loc))
 #define ST(loc, var) *(V *)(&(loc)) = var
-#define DVK(var, val) V var = _mm_set_ps1(val)
+#define DVK(var, val) const R var = K(val)
+#define LDK(x) _mm_set_ps1(x)
 
 #define ST4(a, ovs, v0, v1, v2, v3)		\
 {						\
