@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.48 2002-08-31 13:55:57 athena Exp $ */
+/* $Id: planner.c,v 1.49 2002-08-31 16:44:04 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -538,7 +538,7 @@ void X(planner_dump)(planner *ego, int verbose)
      int cnt = 0, cnt_null = 0, max_len = 0, empty = 0;
      solutions *s;
      uint h;
-     if (verbose) {
+     if (verbose > 4) {
           for (h = 0; h < ego->hashsiz; ++h) {
                D("\nbucket %d:\n", h);
 
