@@ -119,7 +119,6 @@ DHT and the second dimension is an REDFT01 (DCT-III).
 Display help on the command-line options and usage.
 .TP
 \fB\-V\fR, \fB\--version\fR
-.B -V
 Print the version number and copyright information.
 .TP
 \fB\-v\fR, \fB\--verbose\fR
