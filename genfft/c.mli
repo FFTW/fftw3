@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.mli,v 1.2 2002-06-13 12:48:51 athena Exp $ *)
+(* $Id: c.mli,v 1.3 2002-06-20 22:51:33 athena Exp $ *)
 
 type stride = 
   | SVar of string
@@ -34,10 +34,6 @@ val realtype : string
 val realtypep : string
 val constrealtype : string
 val constrealtypep : string
-val complextype : string
-val complextypep : string
-val constcomplextype : string
-val constcomplextypep : string
 val stridetype : string
 
 type c_decl = 
@@ -62,6 +58,13 @@ and c_ast =
   | CTimes of c_ast * c_ast
   | CUminus of c_ast
 and c_fcn = | Fcn of string * string * c_decl list * c_ast
+
+val unparse_expr : Expr.expr -> string
+val unparse_assignment : Expr.assignment -> string
+val unparse_annotated : bool -> Annotate.annotated_schedule -> string
+val unparse_decl : c_decl -> string
+val unparse_ast : c_ast -> string
+val unparse_function : c_fcn -> string
 
 val unparse : string -> c_fcn -> string
 val flops_of : c_fcn -> string

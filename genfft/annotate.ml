@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.2 2002-06-20 19:04:37 athena Exp $ *)
+(* $Id: annotate.ml,v 1.3 2002-06-20 22:51:33 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -31,7 +31,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.2 2002-06-20 19:04:37 athena Exp $ *)
+(* $Id: annotate.ml,v 1.3 2002-06-20 22:51:33 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -79,22 +79,6 @@ let rec overlap a b = Util.count (fun y -> has_related y b) a
 (* for transposed store, we need to have all scalar stores to n adjacent
  * numbers in one block. (n=|simd_vector|, typically 2 or 4).
  *)
-
-let is_real v =
-  match Variable.info v with
-  | Variable.Real _ -> true
-  | _ -> false
-
-let is_imag v =
-  match Variable.info v with
-  | Variable.Imag _ -> true
-  | _ -> false
-
-let var_index v = 
-  match Variable.info v with
-  | Variable.Real x -> x
-  | Variable.Imag x -> x
-  | _ -> failwith "var_index"
 
 type ldst =
   | MLoad

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.4 2002-06-13 19:30:41 athena Exp $ *)
+(* $Id: c.ml,v 1.5 2002-06-20 22:51:33 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -34,11 +34,6 @@ let realtype = "R"
 let realtypep = realtype ^ " *"
 let constrealtype = "const " ^ realtype
 let constrealtypep = constrealtype ^ " *"
-
-let complextype = "C"
-let complextypep = complextype ^ " *"
-let constcomplextype = "const " ^ complextype
-let constcomplextypep = constcomplextype ^ " *"
 
 let stridetype = "stride"
 

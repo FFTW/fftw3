@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.4 2002-06-20 19:04:37 athena Exp $ *)
+(* $Id: magic.ml,v 1.5 2002-06-20 22:51:33 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -54,6 +54,11 @@ let collect_store = ref false
 let collect_twiddle = ref false
 let store_transpose = ref false
 let vector_length = ref 4
+let transform_length = ref 0
+let simd_mode = ref false
+let simd_use_load_vect = ref false
+let simd_use_store_vect = ref false
+let simd_store_transpose = ref false
 
 (* command-line parser for magic parameters *)
 let undocumented = " Undocumented voodoo parameter"

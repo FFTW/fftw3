@@ -4,19 +4,19 @@ EXTRA_DIST = .depend algsimp.ml annotate.ml assoctable.ml c.ml		\
 complex.ml conv.ml dag.ml expr.ml fft.ml gen_athnotw.ml gen_athtw.ml	\
 gen_conv.ml gen_hc2r.ml gen_notw.ml gen_r2hc.ml gen_trig.ml		\
 gen_twiddle.ml gen_twidsq.ml genutil.ml littlesimp.ml magic.ml		\
-monads.ml number.ml oracle.ml schedule.ml to_alist.ml trig.ml		\
+monads.ml number.ml oracle.ml schedule.ml simd.ml to_alist.ml trig.ml	\
 twiddle.ml unique.ml util.ml variable.ml algsimp.mli annotate.mli	\
 assoctable.mli c.mli complex.mli conv.mli dag.mli expr.mli fft.mli	\
 littlesimp.mli number.mli oracle.mli schedule.mli to_alist.mli		\
 trig.mli twiddle.mli unique.mli util.mli variable.mli
 
-noinst_SCRIPTS=gen_notw gen_twiddle gen_twidsq gen_trig gen_athnotw	\
-gen_athtw gen_conv gen_r2hc gen_hc2r
+noinst_SCRIPTS=gen_notw gen_twiddle gen_twidsq gen_trig gen_conv	\
+gen_r2hc gen_hc2r
 
-libgenfft_objects = unique.cmo magic.cmo util.cmo number.cmo	\
-variable.cmo expr.cmo littlesimp.cmo monads.cmo complex.cmo	\
-assoctable.cmo oracle.cmo algsimp.cmo to_alist.cmo dag.cmo	\
-schedule.cmo annotate.cmo twiddle.cmo fft.cmo conv.cmo c.cmo	\
+libgenfft_objects = unique.cmo magic.cmo util.cmo number.cmo		\
+variable.cmo expr.cmo littlesimp.cmo monads.cmo complex.cmo		\
+assoctable.cmo oracle.cmo algsimp.cmo to_alist.cmo dag.cmo		\
+schedule.cmo annotate.cmo twiddle.cmo fft.cmo conv.cmo c.cmo simd.cmo	\
 genutil.cmo trig.cmo
 
 libgenfft.cma: $(libgenfft_objects)
@@ -74,22 +74,6 @@ gen_trig.nonopt: libgenfft.cma $(gen_trig_OBJECTS)
 	$(OCAMLLINK)
 clean-local::
 	rm -f gen_trig gen_trig.nonopt
-
-gen_athnotw_OBJECTS = gen_athnotw.cmo
-gen_athnotw: libgenfft.cmxa $(gen_athnotw_OBJECTS:.cmo=.cmx)
-	$(OCAMLOPTLINK)
-gen_athnotw.nonopt: libgenfft.cma $(gen_athnotw_OBJECTS)
-	$(OCAMLLINK)
-clean-local::
-	rm -f gen_athnotw gen_athnotw.nonopt
-
-gen_athtw_OBJECTS = gen_athtw.cmo
-gen_athtw: libgenfft.cmxa $(gen_athtw_OBJECTS:.cmo=.cmx)
-	$(OCAMLOPTLINK)
-gen_athtw.nonopt: libgenfft.cma $(gen_athtw_OBJECTS)
-	$(OCAMLLINK)
-clean-local::
-	rm -f gen_athtw gen_athtw.nonopt
 
 gen_conv_OBJECTS = gen_conv.cmo
 gen_conv: libgenfft.cmxa $(gen_conv_OBJECTS:.cmo=.cmx)

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: variable.ml,v 1.2 2002-06-20 19:04:37 athena Exp $ *)
+(* $Id: variable.ml,v 1.3 2002-06-20 22:51:33 athena Exp $ *)
 
 type info =
   | Real of int
@@ -107,3 +107,20 @@ let unparse = function
   | Temporary k -> "t" ^ (varname_of_int k)
   | Constant (_, _, name) -> name
   | Locative (_, _, _, name) -> name
+
+
+let is_real v =
+  match info v with
+  | Real _ -> true
+  | _ -> false
+
+let is_imag v =
+  match info v with
+  | Imag _ -> true
+  | _ -> false
+
+let var_index v = 
+  match info v with
+  | Real x -> x
+  | Imag x -> x
+  | _ -> failwith "var_index"

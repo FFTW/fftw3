@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: variable.mli,v 1.2 2002-06-20 19:04:37 athena Exp $ *)
+(* $Id: variable.mli,v 1.3 2002-06-20 22:51:33 athena Exp $ *)
 
 type variable
 type info = Real of int | Imag of int | Unknown
@@ -36,3 +36,6 @@ val make_locative :
   info -> Unique.unique -> Unique.unique -> string -> variable
 val unparse : variable -> string
 val info : variable -> info
+val is_real : variable -> bool
+val is_imag : variable -> bool
+val var_index : variable -> int
