@@ -8,7 +8,7 @@ extern void mfft(int n, R *a, int sign);
 
 int main(int argc, char *argv[])
 {
-     int n = 1024;
+     int nmin = 1024, nmax, n;
      planner *plnr;
      problem *prblm;
      plan *pln;
@@ -17,32 +17,40 @@ int main(int argc, char *argv[])
      R e1, e2, einf;
 
      if (argc > 1)
-	  n = atoi(argv[1]);
+	  nmin = atoi(argv[1]);
+     if (argc > 2)
+	  nmax = atoi(argv[2]);
+     else
+	  nmax = nmin;
 
      plnr = FFTW(mkplanner_score)(ESTIMATE);
      FFTW(dft_conf_standard)(plnr);
-     a = fftw_malloc(2 * n * sizeof(R), OTHER);
-     a0 = fftw_malloc(2 * n * sizeof(R), OTHER);
-     prblm =
-	  FFTW(mkproblem_dft_d)(
-	       FFTW(mktensor_1d)(n, 2, 2), FFTW(mktensor)(0), a, a+1, a, a+1);
-     pln = plnr->adt->mkplan(plnr, prblm);
-     AWAKE(pln, 1);
-     for (i = 0; i < 2 * n; ++i) 
-	  a0[i] = a[i] = drand48();
-     pln->adt->solve(pln, prblm);
-     mfft(n, a0, -1);
-     
-     e1 = e2 = einf = 0.0;
-     for (i = 0; i < 2 * n; ++i) {
-	  double d = a[i] - a0[i];
-	  if (d < 0) d = -d;
-	  e1 += d;
-	  e2 += d * d;
-	  if (d > einf) einf = d;
-     }
-     e1 /= 2 * n;
-     e2 = sqrt(e2 / (2 * n));
+     a = fftw_malloc(2 * nmax * sizeof(R), OTHER);
+     a0 = fftw_malloc(2 * nmax * sizeof(R), OTHER);
 
-     printf("e1: %g e2: %g einf: %g\n", e1, e2, einf);
+     for (n = nmin; n <= nmax; n = 2 * n) {
+	  prblm =
+	       FFTW(mkproblem_dft_d)(
+		    FFTW(mktensor_1d)(n, 2, 2), FFTW(mktensor)(0), a, a+1, a, a+1);
+	  pln = plnr->adt->mkplan(plnr, prblm);
+	  AWAKE(pln, 1);
+	  for (i = 0; i < 2 * n; ++i) 
+	       a0[i] = a[i] = drand48();
+	  pln->adt->solve(pln, prblm);
+	  mfft(n, a0, -1);
+     
+	  e1 = e2 = einf = 0.0;
+	  for (i = 0; i < 2 * n; ++i) {
+	       double d = a[i] - a0[i];
+	       if (d < 0) d = -d;
+	       e1 += d;
+	       e2 += d * d;
+	       if (d > einf) einf = d;
+	  }
+	  e1 /= 2 * n;
+	  e2 = sqrt(e2 / (2 * n));
+
+	  printf("n: %d e1: %g e2: %g einf: %g\n", n, e1, e2, einf);
+	  X(problem_destroy)(prblm);
+     }
 }
