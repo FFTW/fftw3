@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.125 2003-03-11 20:18:39 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.126 2003-03-12 02:17:54 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3193,6 +3193,12 @@ output @code{ostride} and @code{odist} parameters were ignored for
 in-place transforms; now, if they are specified via the advanced
 interface, they are significant even in the in-place case, although they
 should normally equal the corresponding input parameters.)
+
+The @code{FFTW_ESTIMATE} and @code{FFTW_MEASURE} flags have the same
+meaning as before, although the planning time will differ.  You may also
+consider using @code{FFTW_PATIENT}, which is like @code{FFTW_MEASURE}
+except that it takes more time in order to consider a wider variety of
+algorithms.
 
 For multi-dimensional complex DFTs, instead of @code{fftwnd_create_plan}
 (or @code{fftw2d_create_plan} or @code{fftw3d_create_plan}), followed by
