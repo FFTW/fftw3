@@ -315,7 +315,7 @@ typedef sem_t fftw_sem_id;
 #ifndef HAVE_SEMAPHORES
 #define HAVE_SEMAPHORES 1
 
-/* from linux/kernel.h */
+/* from x86 linux/kernel.h */
 /* Optimization barrier */
 /* The "volatile" is due to gcc bugs */
 #define barrier() __asm__ __volatile__("": : :"memory")
