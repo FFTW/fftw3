@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.20 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: ct-ditbuf.c,v 1.21 2002-09-12 20:10:05 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -147,7 +147,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      p = (const problem_dft *) p_;
 
      /* emulate fftw2 behavior */
-     if ((p->vecsz.rnk > 0) && NO_VRECURSE(plnr->flags))
+     if ((p->vecsz.rnk > 0) && NO_VRECURSE(plnr))
 	  return BAD;
 
      n = p->sz.dims[0].n;

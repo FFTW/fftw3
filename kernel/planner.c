@@ -18,13 +18,12 @@
  *
  */
 
-/* $Id: planner.c,v 1.73 2002-09-12 19:46:56 stevenj Exp $ */
+/* $Id: planner.c,v 1.74 2002-09-12 20:10:05 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
-#define MODULO_EQV(flags) ((flags) & EQV_MASK)
-#define BLESSEDP(s) ((s)->flags & BLESSING)
+#define BLESSEDP(solution) ((solution)->flags & BLESSING)
 
 #define MAXNAM 64  /* maximum length of registrar's name.
 		      Used for reading wisdom.  There is no point
@@ -80,12 +79,12 @@ static uint sig_to_hash_index(planner *ego, md5uint *s)
      return s[0] % ego->hashsiz;
 }
 
-static void md5hash(md5 *m, const problem *p, uint flags, uint nthr)
+static void md5hash(md5 *m, const problem *p, const planner *plnr)
 {
      X(md5begin)(m);
      X(md5uint)(m, sizeof(R)); /* so we don't mix different precisions */
-     X(md5uint)(m, MODULO_EQV(flags));
-     X(md5uint)(m, nthr);
+     X(md5uint)(m, plnr->problem_flags);
+     X(md5uint)(m, plnr->nthr);
      p->adt->hash(p, m);
      X(md5end)(m);
 }
@@ -142,8 +141,8 @@ static solution *hlookup(planner *ego, md5uint *s)
 }
 
 
-static void hinsert0(planner *ego, md5uint *s, uint flags, slvdesc *sp,
-		     solution *l)
+static void hinsert0(planner *ego, md5uint *s, unsigned short flags,
+		     slvdesc *sp, solution *l)
 {
      if (!l) { 	 
 	  /* search for nonfull slot */
@@ -192,7 +191,7 @@ static void rehash(planner *ego)
 	  for (h = 0; h < osiz; ++h) {
 	       solution *l = osol + h;
 	       if (l->state == H_VALID)
-		    hinsert0(ego, l->s, (uint)l->flags, l->sp, 0);
+		    hinsert0(ego, l->s, l->flags, l->sp, 0);
 	  }
 
 	  if (osol)
@@ -201,13 +200,14 @@ static void rehash(planner *ego)
 }
 
 
-static void hinsert(planner *ego, md5uint *s, uint flags, slvdesc *sp)
+static void hinsert(planner *ego, md5uint *s, 
+		    unsigned short flags, slvdesc *sp)
 {
      solution *l;
 
      if ((l = hlookup(ego, s))) {
 	  /* overwrite old solution */
-	  if (IMPATIENCE(flags) > IMPATIENCE(((uint)l->flags)))
+	  if (IMPATIENCE(flags) > IMPATIENCE(l->flags))
 	       return; /* don't overwrite less impatient solution */
 
 	  flags |= l->flags & BLESSING; /* ne me perdas illa die */
@@ -222,8 +222,8 @@ static void hinsert(planner *ego, md5uint *s, uint flags, slvdesc *sp)
 static void insert(planner *ego, problem *p, slvdesc *sp)
 {
      md5 m;
-     md5hash(&m, p, ego->flags, ego->nthr);
-     hinsert(ego, m.s, ego->flags, sp);
+     md5hash(&m, p, ego);
+     hinsert(ego, m.s, ego->planner_flags, sp);
 }
 
 static solution *lookup(planner *ego, problem *p)
@@ -231,22 +231,23 @@ static solution *lookup(planner *ego, problem *p)
      md5 m;
      solution *l;
 
-     md5hash(&m, p, ego->flags, ego->nthr);
+     md5hash(&m, p, ego);
      l = hlookup(ego, m.s);
-     return  (l && (IMPATIENCE(ego->flags) >= IMPATIENCE(((uint)l->flags)))) 
-	  ? l : 0;
+     return 
+	  (l && (IMPATIENCE(ego->planner_flags) >= IMPATIENCE(l->flags))) ?
+	  l : 0;
 }
 
-/*
-  routines to make plans:
-*/
+/* maintain dynamic scoping of flags, nthr: */
 static plan *slv_mkplan(planner *ego, problem *p, solver *s)
 {
-     uint flags = ego->flags;
+     uint problem_flags = ego->problem_flags;
+     unsigned short planner_flags = ego->planner_flags;
      uint nthr = ego->nthr;
      plan *pln;
      pln = s->adt->mkplan(s, p, ego);
-     ego->flags = flags;
+     ego->problem_flags = problem_flags;
+     ego->planner_flags = planner_flags;
      ego->nthr = nthr;
      return pln;
 }
@@ -345,7 +346,7 @@ static int imprt(planner *ego, scanner *sc)
 	       goto bad; /* TODO: panic? */
 
 	  /* inter oves locum praesta */
-	  hinsert(ego, sig, flags, sp);
+	  hinsert(ego, sig, (unsigned short)flags, sp);
      }
      return 1;
 
@@ -366,9 +367,7 @@ static void hooknil(plan *pln, const problem *p, int optimalp)
  */
 planner *X(mkplanner)(size_t sz,
 		      void (*infmkplan)(planner *ego, problem *p,
-					plan **, slvdesc **),
-                      void (*destroy) (planner *),
-		      uint flags)
+					plan **, slvdesc **))
 {
      static const planner_adt padt = {
 	  register_solver,
@@ -379,7 +378,6 @@ planner *X(mkplanner)(size_t sz,
 
      p->adt = &padt;
      p->inferior_mkplan = infmkplan;
-     p->destroy = destroy;
      p->nplan = p->nprob = p->hit = p->access = 0;
      p->hook = hooknil;
      p->cur_reg_nam = 0;
@@ -389,7 +387,8 @@ planner *X(mkplanner)(size_t sz,
      p->cnt = 0;
      p->nrehash = 0;
      p->score = BAD;            /* unused, but we initialize it anyway */
-     p->flags = flags;
+     p->problem_flags = 0;
+     p->planner_flags = 0;
      p->nthr = 1;
      rehash(p);			/* so that hashsiz > 0 */
 
@@ -399,10 +398,6 @@ planner *X(mkplanner)(size_t sz,
 void X(planner_destroy)(planner *ego)
 {
      slvdesc *l, *l0;
-
-     /* destroy local state, if any */
-     if (ego->destroy)
-          ego->destroy(ego);
 
      /* destroy hash table */
      htab_destroy(ego);
@@ -426,9 +421,9 @@ void X(planner_set_hook)(planner *p,
 
 void X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
 {
-     if (!(ego->flags & IMPATIENT) || pln->pcost == 0.0) {
+     if (!(ego->planner_flags & IMPATIENT) || pln->pcost == 0.0) {
 	  ego->nplan++;
-	  if (ego->flags & ESTIMATE) {
+	  if (ego->planner_flags & ESTIMATE) {
 	       /* heuristic */
 	       pln->pcost = 0
 		    + pln->ops.add

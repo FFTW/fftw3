@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.17 2002-08-29 22:08:16 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.18 2002-09-12 20:10:05 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -118,14 +118,15 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
           return BAD;
 
      /* fftw2 behavior */
-     if ((plnr->flags & IMPATIENT) && (ego->vecloop_dim != ego->buddies[0]))
+     if ((plnr->planner_flags & IMPATIENT) && 
+	 (ego->vecloop_dim != ego->buddies[0]))
 	  return BAD;
 
      p = (const problem_dft *) p_;
 
      /* fftw2-like heuristic: once we've started vector-recursing,
 	don't stop (unless we have to) */
-     if ((plnr->flags & FORCE_VRECURSE) && p->vecsz.rnk == 1)
+     if ((plnr->problem_flags & FORCE_VRECURSE) && p->vecsz.rnk == 1)
 	  return UGLY;
 
      /* Heuristic: if the transform is multi-dimensional, and the
@@ -148,7 +149,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      if (p->sz.rnk == 0 && p->vecsz.rnk == 1)
 	  return UGLY;
 
-     if ((plnr->flags & IMPATIENT) && plnr->nthr > 1)
+     if ((plnr->planner_flags & IMPATIENT) && plnr->nthr > 1)
 	  return UGLY; /* prefer threaded version */
 
      return GOOD;
@@ -173,8 +174,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_dft *) p_;
 
      /* fftw2 vector recursion: use it or lose it */
-     if (p->vecsz.rnk == 1 && (plnr->flags & CLASSIC_VRECURSE))
-	  plnr->flags &= ~CLASSIC_VRECURSE & ~FORCE_VRECURSE;
+     if (p->vecsz.rnk == 1 && (plnr->problem_flags & CLASSIC_VRECURSE))
+	  plnr->problem_flags &= ~CLASSIC_VRECURSE & ~FORCE_VRECURSE;
 
      /* record whether the vector loop would cause either the input or
         the output to become unaligned. */
@@ -184,7 +185,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	      X(alignment_of)(p->ii + d->is) ||
 	      X(alignment_of)(p->ro + d->os) || 
 	      X(alignment_of)(p->io + d->os))
-	       plnr->flags |= POSSIBLY_UNALIGNED;
+	       plnr->problem_flags |= POSSIBLY_UNALIGNED;
 
      cldp = X(mkproblem_dft_d)(X(tensor_copy)(p->sz),
 			       X(tensor_copy_except)(p->vecsz, vdim),

@@ -351,7 +351,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      omega = (R *) fftw_malloc(sizeof(R) * (n - 1), BUFFERS);
 
-     plnr->flags |= ESTIMATE;
+     plnr->planner_flags |= ESTIMATE;
      cldp =
           X(mkproblem_rdft_1_d)(
                X(mktensor_1d)(n - 1, 1, 1),

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.20 2002-08-26 10:38:49 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.21 2002-09-12 20:10:05 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -123,7 +123,8 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
           return BAD;
 
      /* fftw2 behavior */
-     if ((plnr->flags & IMPATIENT) && (ego->spltrnk != ego->buddies[0]))
+     if ((plnr->planner_flags & IMPATIENT) &&
+	 (ego->spltrnk != ego->buddies[0]))
 	  return BAD;
 
      /* Heuristic: if the vector stride is greater than the transform

@@ -155,20 +155,20 @@ void setup(struct problem *p)
 
      FFTW(threads_init)();
 
-     plnr = FFTW(mkplanner_score)(0);
+     plnr = FFTW(mkplanner_score)();
      FFTW(dft_conf_standard) (plnr);
      FFTW(rdft_conf_standard) (plnr);
      FFTW(reodft_conf_standard) (plnr);
      FFTW(threads_conf_standard) (plnr);
      plnr->nthr = 1;
      FFTW(planner_set_hook) (plnr, hook);
-     /* plnr->flags |= IMPATIENT; */
-     /* plnr->flags |= IMPATIENT | CLASSIC_VRECURSE; */
-     /* plnr->flags |= ESTIMATE | IMPATIENT; */
-     /* plnr->flags |= ESTIMATE; */
+     /* plnr->planner_flags |= IMPATIENT; */
+     /* plnr->planner_flags |= IMPATIENT | CLASSIC_VRECURSE; */
+     /* plnr->planner_flags |= ESTIMATE | IMPATIENT; */
+     /* plnr->planner_flags |= ESTIMATE; */
 
      if (p->kind == PROBLEM_REAL)
-	  plnr->flags |= DESTROY_INPUT;
+	  plnr->problem_flags |= DESTROY_INPUT;
 
 #if 1
      {
@@ -290,10 +290,10 @@ void setup(struct problem *p)
      {
 	  /* tentative blessing protocol (to be implemented by API) */
 	  plan *pln0;
-	  plnr->flags |= BLESSING;
+	  plnr->planner_flags |= BLESSING;
 	  pln0 = plnr->adt->mkplan(plnr, prblm);
 	  X(plan_destroy)(pln0);
-	  plnr->flags |= ~BLESSING;
+	  plnr->planner_flags |= ~BLESSING;
      }
 	  
      if (verbose) {

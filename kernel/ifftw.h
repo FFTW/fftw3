@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.111 2002-09-12 14:02:51 athena Exp $ */
+/* $Id: ifftw.h,v 1.112 2002-09-12 20:10:05 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -397,26 +397,25 @@ typedef struct slvdesc_s {
 
 typedef struct solution_s solution; /* opaque */
 
-/* planner flags. */
-/* make sure that flags fit in 16 bits, or otherwise change 
-   struct solution_s in planner.c */
+/* values for problem_flags: */
 enum { 
-     /* flags that influence whether problems are equivalent or not */
      CLASSIC_VRECURSE = 0x1,
      FORCE_VRECURSE = 0x2, 
      DESTROY_INPUT = 0x4,
      POSSIBLY_UNALIGNED = 0x8,
      FORBID_DHT_R2HC = 0x10,
      BUFFERING_VERBOTEN = 0x20,
-     INDIRECT_VERBOTEN = 0x40,
-     EQV_MASK = 0xFF,
+     INDIRECT_VERBOTEN = 0x40
+};
 
-     /* flags that influence the behavior of the planner but not problem
-	equivalence */
-     IMPATIENT = 0x100, 
-     ESTIMATE = 0x200,
-     BLESSING = 0x400, 
-     IMPATIENCE_MASK = (IMPATIENT | ESTIMATE)
+
+/* values for planner_flags: */
+enum {
+     IMPATIENT = 0x1, 
+     ESTIMATE = 0x2,
+     IMPATIENCE_MASK = IMPATIENT | ESTIMATE,
+
+     BLESSING = 0x4
 };
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
@@ -443,19 +442,18 @@ struct planner_s {
 
      slvdesc *solvers;
      solution *sols;
-     void (*destroy)(planner *ego);
      void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvdesc **);
      uint hashsiz, cnt, nrehash;
-     uint flags;
+     uint problem_flags;
+     unsigned short planner_flags; /* matches type of solution.flags in
+				      planner.c */
      uint nthr;
      int score;  /* see planner-score.c */
 };
 
 planner *X(mkplanner)(size_t sz,
 		      void (*mkplan)(planner *ego, problem *p, 
-				     plan **, slvdesc **),
-                      void (*destroy) (planner *), 
-		      uint flags);
+				     plan **, slvdesc **));
 void X(planner_destroy)(planner *ego);
 void X(planner_set_hook)(planner *p, 
 			 void (*hook)(plan *, const problem *, int));
@@ -487,11 +485,12 @@ void X(planner_dump)(planner *ego, int verbose);
 }
 
 /* various planners */
-planner *X(mkplanner_naive)(uint flags);
-planner *X(mkplanner_score)(uint flags);
+planner *X(mkplanner_naive)(void);
+planner *X(mkplanner_score)(void);
 
-#define NO_VRECURSE(flags) \
-   (((flags) & IMPATIENT) && !((flags) & (CLASSIC_VRECURSE | FORCE_VRECURSE)))
+#define NO_VRECURSE(plnr) \
+   ((plnr->planner_flags & IMPATIENT) && \
+    !(plnr->problem_flags & (CLASSIC_VRECURSE | FORCE_VRECURSE)))
 #define CLASSIC_VRECURSE_RESET(plnr) \
    { if ((plnr)->flags & CLASSIC_VRECURSE) (plnr)->flags &= ~FORCE_VRECURSE; }
 

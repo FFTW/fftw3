@@ -468,7 +468,7 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      /* initial allocation for the purpose of planning */
      omega = (R *) fftw_malloc(sizeof(R) * (n - 1) * 2, BUFFERS);
 
-     plnr->flags |= ESTIMATE;
+     plnr->planner_flags |= ESTIMATE;
      cldp =
           X(mkproblem_dft_d)(
                X(mktensor_1d)(n - 1, 2, 2),

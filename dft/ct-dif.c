@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.21 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: ct-dif.c,v 1.22 2002-09-12 20:10:05 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -58,7 +58,7 @@ static int applicable(const solver_ct *ego, const problem *p_,
 	  X(tensor_tornk1)(&p->vecsz, &vl, &ivs, &ovs);
           return (1
                   /* DIF destroys the input and we don't like it */
-                  && (p->ri == p->ro || (plnr->flags & DESTROY_INPUT))
+                  && (p->ri == p->ro || (plnr->problem_flags & DESTROY_INPUT))
 
 		  && (e->genus->okp(e, p->ri, p->ii,
 				    (int)m * d[0].is, 0, m, d[0].is, plnr))
@@ -90,7 +90,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      n = p->sz.dims[0].n;
 
      /* emulate fftw2 behavior */
-     if ((p->vecsz.rnk > 0) && NO_VRECURSE(plnr->flags))
+     if ((p->vecsz.rnk > 0) && NO_VRECURSE(plnr))
 	  return BAD;
 
      if (n <= 16 || n / ego->desc->radix <= 4)

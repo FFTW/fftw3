@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.20 2002-09-04 02:32:43 athena Exp $ */
+/* $Id: planner-score.c,v 1.21 2002-09-12 20:10:05 athena Exp $ */
 #include "ifftw.h"
 
 /* scoring planner */
@@ -118,7 +118,7 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 }
 
 /* constructor */
-planner *X(mkplanner_score)(uint flags)
+planner *X(mkplanner_score)(void)
 {
-     return X(mkplanner)(sizeof(planner), mkplan, 0, flags);
+     return X(mkplanner)(sizeof(planner), mkplan);
 }

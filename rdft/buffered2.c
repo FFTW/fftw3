@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.9 2002-09-02 19:36:21 athena Exp $ */
+/* $Id: buffered2.c,v 1.10 2002-09-12 20:10:05 athena Exp $ */
 
 #include "rdft.h"
 
@@ -298,7 +298,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      const problem_rdft2 *p;
      UNUSED(plnr);
 
-     if (plnr->flags & BUFFERING_VERBOTEN)
+     if (plnr->problem_flags & BUFFERING_VERBOTEN)
           return BAD;
 
      if (!applicable(p_, ego))
@@ -368,7 +368,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 		    X(mktensor_1d)(nbuf, ivs, bufdist),
 		    p->r, bufs, &p->kind);
      else {
-	  plnr->flags |= DESTROY_INPUT; /* always ok to destroy buf */
+	  plnr->problem_flags |= DESTROY_INPUT; /* always ok to destroy buf */
 	  cldp =
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, 1, p->sz.dims[0].os),
