@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.35 2003-06-11 10:55:21 athena Exp $ */
+/* $Id: buffered2.c,v 1.36 2004-01-09 20:41:50 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -294,6 +294,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      R *bufs = (R *) 0;
      int nbuf = 0, bufdist, n, vl;
      int ivs, ovs;
+     int save_problem_flags;
 
      static const plan_adt padt = {
 	  X(rdft2_solve), awake, print, destroy
@@ -326,6 +327,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
+     save_problem_flags = plnr->problem_flags;
+     if (p->r == p->rio || p->r == p->iio)
+	  plnr->problem_flags |= DESTROY_INPUT; /* ok to destroy input */
+
      if (p->kind == R2HC)
 	  cldp =
 	       X(mkproblem_rdft_d)(
@@ -342,6 +347,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 		    bufs, TAINT(p->r, ovs * nbuf), &p->kind);
      }
      if (!(cld = X(mkplan_d)(plnr, cldp))) goto nada;
+
+     /* don't include DESTROY_INPUT for leftover transforms */
+     plnr->problem_flags = save_problem_flags;
 
      /* plan the leftover transforms (cldrest): */
      if (p->kind == R2HC)

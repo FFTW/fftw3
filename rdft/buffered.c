@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.31 2003-04-04 23:14:14 stevenj Exp $ */
+/* $Id: buffered.c,v 1.32 2004-01-09 20:41:50 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -181,6 +181,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      R *bufs = (R *) 0;
      int nbuf = 0, bufdist, n, vl;
      int ivs, ovs;
+     int save_problem_flags;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -213,12 +214,20 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
+     save_problem_flags = plnr->problem_flags;
+     if (p->I == p->O)
+	  plnr->problem_flags |= DESTROY_INPUT; /* ok to destroy I */
+
      cld = X(mkplan_d)(plnr, 
 		       X(mkproblem_rdft_d)(
 			    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
 			    X(mktensor_1d)(nbuf, ivs, bufdist),
 			    TAINT(p->I, ivs * nbuf), bufs, p->kind));
      if (!cld) goto nada;
+
+     /* don't include DESTROY_INPUT for copy and leftover transforms;
+	it would be correct, but it might inhibit some wisdom sharing. */
+     plnr->problem_flags = save_problem_flags;
 
      /* copying back from the buffer is a rank-0 transform: */
      cldcpy = X(mkplan_d)(plnr, 
