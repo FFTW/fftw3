@@ -39,9 +39,9 @@ static void cdot(int n,
      int i0 = 0, n0 = n;
 
      E rr = *xr, ri = 0, ir = *xi, ii = 0;
-     while (--n) {
+     while (--n0) {
 	  xr += xs; xi += xs;
-	  i0 += i; if (i0 >= n0) i0 -= n0;
+	  i0 += i; if (i0 >= n) i0 -= n;
 	  rr += *xr * w[2*i0];
 	  ri += *xr * w[2*i0+1];
 	  ii += *xi * w[2*i0+1];
