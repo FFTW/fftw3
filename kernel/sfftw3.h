@@ -18,26 +18,7 @@
  *
  */
 
-/* $Id: flops.c,v 1.3 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: sfftw3.h,v 1.1 2002-06-10 13:04:21 athena Exp $ */
 
-#include "ifftw.h"
-
-flopcnt X(flops_add)(flopcnt a, flopcnt b)
-{
-     a.add += b.add;
-     a.mul += b.mul;
-     a.fma += b.fma;
-     return a;
-}
-
-flopcnt X(flops_mul)(uint a, flopcnt b)
-{
-     b.add *= a;
-     b.mul *= a;
-     b.fma *= a;
-     return b;
-}
-
-const flopcnt X(flops_zero) = {
-     0, 0, 0
-};
+#define FFTW_SINGLE
+#include <fftw3.h>

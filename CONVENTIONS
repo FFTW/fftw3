@@ -21,15 +21,21 @@ NAMES: keep them short.  Shorter than you think.  The Bible was written
    S       : solver, defined internally to each solver file
    P       : plan, defined internally to each solver file
    k       : codelet
+   X       : used for mangling of external names (see below)
 
    If a name is used often and must have the form fftw_foo to avoid
    namespace pollution, #define FOO FFTW_FOO and use the short name.
 
    Leave that hungarian crap to MS.  foo_t counts as hungarian: use
-   foo instead.  All lowercase so that it does not look like a DOS program.
-   Exception: typedef struct foo_s {...} foo;  instead of
-	      typedef struct foo {...} foo;  for C++ compatibility.
+   foo instead.  foo is lowercase so that it does not look like a DOS
+   program. Exception: typedef struct foo_s {...} foo;  instead of
+   typedef struct foo {...} foo;  for C++ compatibility.
 
+NAME MANGLING: use X(foo) for external names instead of fftw_foo.
+    X(foo) expands to sfftw_foo or dfftw_foo, depending on the
+    precision.  Names that are not exported do not need to be mangled.
+    (Unfortunately, this is a form of hungarian notation.  Grrr...)
+  
 REPEATED CODE:  favor a table.  E.g., do not write
 
     foo("xxx", 1);

@@ -18,16 +18,7 @@
  *
  */
 
-/* $Id: fftw.h,v 1.2 2002-06-04 20:28:58 athena Exp $ */
+/* $Id: dfftw3.h,v 1.1 2002-06-10 13:04:21 athena Exp $ */
 
-/* FFTW installed header file */
-#ifndef __FFTW_H__
-#define __FFTW_H__
-
-#ifdef FFTW_SINGLE
-typedef float fftw_real;
-#else
-typedef double fftw_real;
-#endif
-
-#endif				/* __FFTW_H__ */
+#undef FFTW_SINGLE
+#include <fftw3.h>

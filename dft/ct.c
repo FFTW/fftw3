@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.5 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: ct.c,v 1.6 2002-06-10 13:04:21 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -30,11 +30,11 @@ static void destroy(plan *ego_)
 {
      plan_ct *ego = (plan_ct *) ego_;
 
-     fftw_twiddle_destroy(ego->td);
-     fftw_plan_destroy(ego->cld);
-     fftw_stride_destroy(ego->ios);
-     fftw_stride_destroy(ego->vs);
-     fftw_free(ego);
+     X(twiddle_destroy)(ego->td);
+     X(plan_destroy)(ego->cld);
+     X(stride_destroy)(ego->ios);
+     X(stride_destroy)(ego->vs);
+     X(free)(ego);
 }
 
 static void awake(plan *ego_, int flg)
@@ -45,15 +45,15 @@ static void awake(plan *ego_, int flg)
      cld->adt->awake(cld, flg);
 
      if (flg) {
-	  if (!ego->td) {
-	       ego->td = fftw_mktwiddle(ego->slv->desc->tw, ego->r, ego->m);
-	       ego->W = ego->td->W;	/* cache for efficiency */
-	  }
+          if (!ego->td) {
+               ego->td = X(mktwiddle)(ego->slv->desc->tw, ego->r, ego->m);
+               ego->W = ego->td->W;	/* cache for efficiency */
+          }
      } else {
-	  if (ego->td)
-	       fftw_twiddle_destroy(ego->td);
-	  ego->td = 0;
-	  ego->W = 0;
+          if (ego->td)
+               X(twiddle_destroy)(ego->td);
+          ego->td = 0;
+          ego->W = 0;
      }
 }
 
@@ -64,38 +64,39 @@ static void print(plan *ego_, printer *p)
      const ct_desc *e = slv->desc;
 
      p->print(p, "(%s-%u/%u%ois=%ovs=%v%p)",
-	      slv->nam, ego->r, fftw_twiddle_length(e->tw),
-	      e->is, e->vs, ego->vl, ego->cld);
+              slv->nam, ego->r, X(twiddle_length)(e->tw),
+              e->is, e->vs, ego->vl, ego->cld);
 }
 
 #define divides(a, b) (((uint)(b) % (uint)(a)) == 0)
 
-int fftw_dft_ct_applicable(const solver_ct *ego, const problem *p_)
+int X(dft_ct_applicable)(const solver_ct *ego, const problem *p_)
 {
      if (DFTP(p_)) {
-	  const problem_dft *p = (const problem_dft *) p_;
-	  const ct_desc *e = ego->desc;
-	  return (1
-		  && p->sz.rnk == 1
-		  && p->vecsz.rnk <= 1 
-		  && divides(e->radix, p->sz.dims[0].n)
+          const problem_dft *p = (const problem_dft *) p_;
+          const ct_desc *e = ego->desc;
+          return (1
+                  && p->sz.rnk == 1
+                  && p->vecsz.rnk <= 1
+                  && divides(e->radix, p->sz.dims[0].n)
 	       );
      }
      return 0;
 }
 
 
-static const plan_adt padt = {
-     fftw_dft_solve,
+static const plan_adt padt =
+{
+     X(dft_solve),
      awake,
      print,
      destroy
 };
 
-plan *fftw_mkplan_dft_ct(const solver_ct *ego, 
-			 const problem *p_,
-			 planner *plnr, 
-			 const ctadt *adt)
+plan *X(mkplan_dft_ct)(const solver_ct *ego,
+                       const problem *p_,
+                       planner *plnr,
+                       const ctadt *adt)
 {
      plan_ct *pln;
      plan *cld;
@@ -106,7 +107,7 @@ plan *fftw_mkplan_dft_ct(const solver_ct *ego,
      const ct_desc *e = ego->desc;
 
      if (!adt->applicable(ego, p_))
-	  return (plan *) 0;
+          return (plan *) 0;
 
      p = (const problem_dft *) p_;
      d = p->sz.dims;
@@ -117,10 +118,10 @@ plan *fftw_mkplan_dft_ct(const solver_ct *ego,
 
      cldp = adt->mkcld(ego, p);
      cld = plnr->adt->mkplan(plnr, cldp);
-     fftw_problem_destroy(cldp);
+     X(problem_destroy)(cldp);
 
      if (!cld)
-	  return (plan *) 0;
+          return (plan *) 0;
 
      pln = MKPLAN_DFT(plan_ct, &padt, adt->apply);
 
@@ -136,25 +137,25 @@ plan *fftw_mkplan_dft_ct(const solver_ct *ego,
      pln->ios = pln->vs = 0;
 
      if (p->vecsz.rnk == 1) {
-	  pln->vl = vd[0].n;
-	  pln->ivs = vd[0].is;
-	  pln->ovs = vd[0].os;
+          pln->vl = vd[0].n;
+          pln->ivs = vd[0].is;
+          pln->ovs = vd[0].os;
      } else {
-	  pln->vl = 1;
-	  pln->ivs = pln->ovs = 0;
+          pln->vl = 1;
+          pln->ivs = pln->ovs = 0;
      }
 
      pln->td = 0;
      pln->super.super.cost =
-	 1.0 + 0.1 * fftw_square(e->radix - OPTIMAL_SIZE) + cld->cost;
+          1.0 + 0.1 * X(square)(e->radix - OPTIMAL_SIZE) + cld->cost;
 
      adt->finish(pln);
 
      return &(pln->super.super);
 }
 
-solver *fftw_mksolver_dft_ct(union kct k, const ct_desc *desc,
-			     const char *nam, const solver_adt *adt)
+solver *X(mksolver_dft_ct)(union kct k, const ct_desc *desc,
+                           const char *nam, const solver_adt *adt)
 {
      solver_ct *slv;
 

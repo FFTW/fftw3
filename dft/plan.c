@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: plan.c,v 1.1 2002-06-02 23:49:03 athena Exp $ */
+/* $Id: plan.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
 
 #include "dft.h"
 
-plan *fftw_mkplan_dft(size_t size, const plan_adt *adt, dftapply apply)
+plan *X(mkplan_dft)(size_t size, const plan_adt *adt, dftapply apply)
 {
      plan_dft *ego;
 
-     ego = (plan_dft *) fftw_mkplan(size, adt);
+     ego = (plan_dft *) X(mkplan)(size, adt);
      ego->apply = apply;
 
      return &(ego->super);

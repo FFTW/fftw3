@@ -18,20 +18,20 @@
  *
  */
 
-/* $Id: conf.c,v 1.8 2002-06-09 15:01:41 athena Exp $ */
+/* $Id: conf.c,v 1.9 2002-06-10 13:04:21 athena Exp $ */
 
 #include "dft.h"
 
-void fftw_dft_conf_standard(planner *p)
+void X(dft_conf_standard)(planner *p)
 {
-     fftw_dft_vecloop_register(p);
-     fftw_dft_indirect_register(p);
-     fftw_dft_rank0_register(p);
-     fftw_dft_rank_geq2_register(p);
-     fftw_dft_vrank2_transpose_register(p);
-     fftw_dft_vrank3_transpose_register(p);
-     fftw_dft_buffered_register(p);
-     fftw_dft_nop_register(p);
-     fftw_solvtab_exec(fftw_solvtab_dft_standard, p);
-     fftw_solvtab_exec(fftw_solvtab_dft_inplace, p);
+     X(dft_vecloop_register)(p);
+     X(dft_indirect_register)(p);
+     X(dft_rank0_register)(p);
+     X(dft_rank_geq2_register)(p);
+     X(dft_vrank2_transpose_register)(p);
+     X(dft_vrank3_transpose_register)(p);
+     X(dft_buffered_register)(p);
+     X(dft_nop_register)(p);
+     X(solvtab_exec)(X(solvtab_dft_standard), p);
+     X(solvtab_exec)(X(solvtab_dft_inplace), p);
 }

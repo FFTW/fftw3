@@ -18,22 +18,23 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.17 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: ifftw.h,v 1.18 2002-06-10 13:04:21 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
 #define __IFFTW_H__
 
-#include "fftw.h"
 #include "config.h"
+#include "fftw3.h"
 
 #include <stdlib.h>		/* size_t */
 
 /* dummy use of unused parameters to avoid compiler warnings */
 #define UNUSED(x) (void)x
 
-/* shorthand */
+/* shorthands */
 typedef fftw_real R;
+#define X FFTW
 
 #ifndef HAVE_UINT
 typedef unsigned int uint;
@@ -48,16 +49,16 @@ typedef struct printer_s printer;
 
 /*-----------------------------------------------------------------------*/
 /* assert.c: */
-extern void fftw_assertion_failed(const char *s, int line, char *file);
+extern void X(assertion_failed)(const char *s, int line, char *file);
 
 /* always check */
 #define CK(ex)						 \
-      (void)((ex) || (fftw_assertion_failed(#ex, __LINE__, __FILE__), 0))
+      (void)((ex) || (X(assertion_failed)(#ex, __LINE__, __FILE__), 0))
 
 #ifdef FFTW_DEBUG
 /* check only if debug enabled */
 #define A(ex)						 \
-      (void)((ex) || (fftw_assertion_failed(#ex, __LINE__, __FILE__), 0))
+      (void)((ex) || (X(assertion_failed)(#ex, __LINE__, __FILE__), 0))
 #else
 #define A(ex) /* nothing */
 #endif
@@ -81,22 +82,21 @@ enum fftw_malloc_what {
      MALLOC_WHAT_LAST		/* must be last */
 };
 
-extern void fftw_free(void *ptr);
+extern void X(free)(void *ptr);
 
 #ifdef FFTW_DEBUG
-extern void *fftw_malloc_debug(size_t n, enum fftw_malloc_what what,
-			       const char *file, int line);
+extern void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
+			     const char *file, int line);
 
 #define fftw_malloc(n, what) \
-     fftw_malloc_debug(n, what, __FILE__, __LINE__)
+     X(malloc_debug)(n, what, __FILE__, __LINE__)
 
-void fftw_malloc_print_minfo(void);
+void X(malloc_print_minfo)(void);
 
 #else
-extern void *fftw_malloc_plain(size_t sz);
+extern void *X(malloc_plain)(size_t sz);
 
-#define fftw_malloc(n, what) \
-     fftw_malloc_plain(n)
+#define fftw_malloc(n, what)  X(malloc_plain)(n)
 #endif
 
 /*-----------------------------------------------------------------------*/
@@ -112,16 +112,16 @@ typedef struct {
      int fma;
 } flopcnt;
 
-flopcnt fftw_flops_add(flopcnt a, flopcnt b);
-flopcnt fftw_flops_mul(uint a, flopcnt b);
-extern const flopcnt fftw_flops_zero;
+flopcnt X(flops_add)(flopcnt a, flopcnt b);
+flopcnt X(flops_mul)(uint a, flopcnt b);
+extern const flopcnt X(flops_zero);
 
 /*-----------------------------------------------------------------------*/
 /* minmax.c: */
-int fftw_imax(int a, int b);
-int fftw_imin(int a, int b);
-uint fftw_uimax(uint a, uint b);
-uint fftw_uimin(uint a, uint b);
+int X(imax)(int a, int b);
+int X(imin)(int a, int b);
+uint X(uimax)(uint a, uint b);
+uint X(uimin)(uint a, uint b);
 
 /*-----------------------------------------------------------------------*/
 /* tensor.c: */
@@ -137,35 +137,35 @@ typedef struct {
 } tensor;
 
 /*
-   Definition of rank -infinity.
-   This definition has the property that if you want rank 0 or 1,
-   you can simply test for rank <= 1.  This is a common case.
-
-   A tensor of rank -infinity has size 0.
+  Definition of rank -infinity.
+  This definition has the property that if you want rank 0 or 1,
+  you can simply test for rank <= 1.  This is a common case.
+ 
+  A tensor of rank -infinity has size 0.
 */
 #define RNK_MINFTY  ((uint) -1)
 #define FINITE_RNK(rnk) ((rnk) != RNK_MINFTY)
 
-tensor fftw_mktensor(uint rnk);
-tensor fftw_mktensor_1d(uint n, int is, int os);
-tensor fftw_mktensor_2d(uint n0, int is0, int os0,
-			uint n1, int is1, int os1);
-tensor fftw_mktensor_rowmajor(uint rnk, const uint *n, const uint *nphys, 
-			      int is, int os);
-int fftw_tensor_equal(const tensor a, const tensor b);
-uint fftw_tensor_sz(const tensor sz);
-uint fftw_tensor_hash(const tensor t);
-int fftw_tensor_max_index(const tensor sz);
-int fftw_tensor_min_stride(const tensor sz);
-int fftw_tensor_inplace_strides(const tensor sz);
-tensor fftw_tensor_copy(const tensor sz);
-tensor fftw_tensor_copy_except(const tensor sz, uint except_dim);
-tensor fftw_tensor_copy_sub(const tensor sz, uint start_dim, uint rnk);
-tensor fftw_tensor_compress(const tensor sz);
-tensor fftw_tensor_compress_contiguous(const tensor sz);
-tensor fftw_tensor_append(const tensor a, const tensor b);
-void fftw_tensor_split(const tensor sz, tensor *a, uint a_rnk, tensor *b);
-void fftw_tensor_destroy(tensor sz);
+tensor X(mktensor)(uint rnk);
+tensor X(mktensor_1d)(uint n, int is, int os);
+tensor X(mktensor_2d)(uint n0, int is0, int os0,
+                      uint n1, int is1, int os1);
+tensor X(mktensor_rowmajor)(uint rnk, const uint *n, const uint *nphys,
+                            int is, int os);
+int X(tensor_equal)(const tensor a, const tensor b);
+uint X(tensor_sz)(const tensor sz);
+uint X(tensor_hash)(const tensor t);
+int X(tensor_max_index)(const tensor sz);
+int X(tensor_min_stride)(const tensor sz);
+int X(tensor_inplace_strides)(const tensor sz);
+tensor X(tensor_copy)(const tensor sz);
+tensor X(tensor_copy_except)(const tensor sz, uint except_dim);
+tensor X(tensor_copy_sub)(const tensor sz, uint start_dim, uint rnk);
+tensor X(tensor_compress)(const tensor sz);
+tensor X(tensor_compress_contiguous)(const tensor sz);
+tensor X(tensor_append)(const tensor a, const tensor b);
+void X(tensor_split)(const tensor sz, tensor *a, uint a_rnk, tensor *b);
+void X(tensor_destroy)(tensor sz);
 
 /*-----------------------------------------------------------------------*/
 /* problem.c: */
@@ -181,9 +181,9 @@ struct problem_s {
      int refcnt;
 };
 
-problem *fftw_mkproblem(size_t sz, const problem_adt *adt);
-void fftw_problem_destroy(problem *ego);
-problem *fftw_problem_dup(problem *ego);
+problem *X(mkproblem)(size_t sz, const problem_adt *adt);
+void X(problem_destroy)(problem *ego);
+problem *X(problem_dup)(problem *ego);
 
 /*-----------------------------------------------------------------------*/
 /* print.c */
@@ -193,8 +193,8 @@ struct printer_s {
      uint indent;
 };
 
-printer *fftw_mkprinter(size_t size, void (*putchr)(printer *p, char c));
-void fftw_printer_destroy(printer *p);
+printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c));
+void X(printer_destroy)(printer *p);
 
 /*-----------------------------------------------------------------------*/
 /* plan.c: */
@@ -210,13 +210,13 @@ typedef struct {
 struct plan_s {
      const plan_adt *adt;
      int refcnt;
-     flopcnt flops; 
+     flopcnt flops;
      double cost;
 };
 
-plan *fftw_mkplan(size_t size, const plan_adt *adt);
-void fftw_plan_use(plan *ego);
-void fftw_plan_destroy(plan *ego);
+plan *X(mkplan)(size_t size, const plan_adt *adt);
+void X(plan_use)(plan *ego);
+void X(plan_destroy)(plan *ego);
 
 /*-----------------------------------------------------------------------*/
 /* solver.c: */
@@ -236,12 +236,12 @@ struct solver_s {
      int refcnt;
 };
 
-solver *fftw_mksolver(size_t size, const solver_adt *adt);
-void fftw_solver_use(solver *ego);
-void fftw_solver_destroy(solver *ego);
+solver *X(mksolver)(size_t size, const solver_adt *adt);
+void X(solver_use)(solver *ego);
+void X(solver_destroy)(solver *ego);
 
- /* shorthand */
-#define MKSOLVER(type, adt) (type *)fftw_mksolver(sizeof(type), adt)
+/* shorthand */
+#define MKSOLVER(type, adt) (type *)X(mksolver)(sizeof(type), adt)
 
 /*-----------------------------------------------------------------------*/
 /* planner.c */
@@ -260,7 +260,7 @@ typedef struct {
 struct planner_s {
      const planner_adt *adt;
      int ntry;  /* number of plans evaluated */
-     void (*hook)(plan *plan, problem *p); 
+     void (*hook)(plan *plan, problem *p);
 
      pair *solvers;
      solutions **sols;
@@ -272,27 +272,26 @@ struct planner_s {
      int memoize_failures;	/* if TRUE, also memoize unfeasible problems */
 };
 
-planner *fftw_mkplanner(size_t sz, 
-			plan *(*mkplan)(planner *, problem *),
-			void (*destroy) (planner *));
-void fftw_planner_destroy(planner *ego);
-void fftw_planner_set_hook(planner *p, void (*hook)(plan *, problem *));
+planner *X(mkplanner)(size_t sz, plan *(*mkplan)(planner *, problem *),
+                      void (*destroy) (planner *));
+void X(planner_destroy)(planner *ego);
+void X(planner_set_hook)(planner *p, void (*hook)(plan *, problem *));
 
 #ifdef FFTW_DEBUG
-  void fftw_planner_dump(planner *ego, int verbose);
+void fftw_planner_dump(planner *ego, int verbose);
 #endif
 
 /*
-   Iterate over all solvers.   Read:
+  Iterate over all solvers.   Read:
  
-   @article{ baker93iterators,
-    author = "Henry G. Baker, Jr.",
-    title = "Iterators: Signs of Weakness in Object-Oriented Languages",
-    journal = "{ACM} {OOPS} Messenger",
-    volume = "4",
-    number = "3",
-    pages = "18--25"
-   }
+  @article{ baker93iterators,
+  author = "Henry G. Baker, Jr.",
+  title = "Iterators: Signs of Weakness in Object-Oriented Languages",
+  journal = "{ACM} {OOPS} Messenger",
+  volume = "4",
+  number = "3",
+  pages = "18--25"
+  }
 */
 #define FORALL_SOLVERS(ego, s, what)					 \
 {									 \
@@ -304,9 +303,9 @@ void fftw_planner_set_hook(planner *p, void (*hook)(plan *, problem *));
 }
 
 /* various planners */
-planner *fftw_mkplanner_naive(void);
-planner *fftw_mkplanner_estimate(void);
-planner *fftw_mkplanner_score(void);
+planner *X(mkplanner_naive)(void);
+planner *X(mkplanner_estimate)(void);
+planner *X(mkplanner_score)(void);
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */
@@ -320,15 +319,15 @@ planner *fftw_mkplanner_score(void);
 
 typedef int *stride;
 #define WS(stride, i)  (stride[i])
-extern stride fftw_mkstride(int n, int stride);
-void fftw_stride_destroy(stride p);
+extern stride X(mkstride)(int n, int stride);
+void X(stride_destroy)(stride p);
 
 #else
 
 typedef int stride;
 #define WS(stride, i)  (stride * i)
-#define fftw_mkstride(n, stride) stride
-#define fftw_stride_destroy(p) {}
+#define X(mkstride)(n, stride) stride
+#define X(stride_destroy)(p) {}
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
 
@@ -336,7 +335,7 @@ typedef int stride;
 /* solvtab.c */
 
 typedef void (*const solvtab[])(planner *);
-void fftw_solvtab_exec(solvtab tbl, planner *p);
+void X(solvtab_exec)(solvtab tbl, planner *p);
 
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */
@@ -357,14 +356,14 @@ typedef struct twid_s {
      struct twid_s *cdr;
 } twid;
 
-twid *fftw_mktwiddle(const tw_instr *instr, uint r, uint m);
-void fftw_twiddle_destroy(twid *p);
-uint fftw_twiddle_length(const tw_instr *p);
+twid *X(mktwiddle)(const tw_instr *instr, uint r, uint m);
+void X(twiddle_destroy)(twid *p);
+uint X(twiddle_length)(const tw_instr *p);
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
-void fftw_null_awake(plan *ego, int awake);
-int fftw_square(int x);
-double fftw_measure_execution_time(plan *pln, const problem *p);
+void X(null_awake)(plan *ego, int awake);
+int X(square)(int x);
+double X(measure_execution_time)(plan *pln, const problem *p);
 
 #endif /* __IFFTW_H__ */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.3 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.4 2002-06-10 13:04:21 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -63,9 +63,9 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     fftw_plan_destroy(ego->cld2);
-     fftw_plan_destroy(ego->cld1);
-     fftw_free(ego);
+     X(plan_destroy)(ego->cld2);
+     X(plan_destroy)(ego->cld1);
+     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)
@@ -82,11 +82,11 @@ static uint really_picksplit(int spltrnk, uint rnk)
 {
      A(rnk > 1);		/* must be at least 2d to split */
      if (spltrnk > 0)	/* positive: split from the front */
-	  return fftw_uimin(rnk - 1, (uint)spltrnk);
+          return X(uimin)(rnk - 1, (uint)spltrnk);
      else if (spltrnk < 0)	/* negative: split from the back */
-	  return fftw_uimax(1, rnk + (uint)spltrnk);
+          return X(uimax)(1, rnk + (uint)spltrnk);
      else			/* zero: split in the middle */
-	  return (rnk / 2);
+          return (rnk / 2);
 }
 
 static int picksplit(const S *ego, uint rnk, uint *rp)
@@ -97,12 +97,12 @@ static int picksplit(const S *ego, uint rnk, uint *rp)
      /* check whether some buddy solver would produce the same split.
         If so, consider this solver unapplicable and let the buddy
         take care of it.  The smallest buddy is applicable. */
-     for (i = 0; i < ego->nbuddies; ++i) 
-	  if (1
-	      && ego->buddies[i] < ego->spltrnk 
+     for (i = 0; i < ego->nbuddies; ++i)
+          if (1
+	      && ego->buddies[i] < ego->spltrnk
 	      && really_picksplit(ego->buddies[i], rnk) == r0
-	       ) 
-	       return 0;
+	       )
+               return 0;
 
      *rp = r0;
      return 1;
@@ -111,21 +111,21 @@ static int picksplit(const S *ego, uint rnk, uint *rp)
 static int applicable(const solver *ego_, const problem *p_, uint *rp)
 {
      if (DFTP(p_)) {
-	  const problem_dft *p = (const problem_dft *) p_;
-	  const S *ego = (const S *)ego_;
-	  return (1
-		  && p->sz.rnk >= 2
-		  && picksplit(ego, p->sz.rnk, rp)
-		  && (0
+          const problem_dft *p = (const problem_dft *) p_;
+          const S *ego = (const S *)ego_;
+          return (1
+                  && p->sz.rnk >= 2
+                  && picksplit(ego, p->sz.rnk, rp)
+                  && (0
 
-		      /* can always operate out-of-place */
-		      || p->ri != p->ro
+                      /* can always operate out-of-place */
+                      || p->ri != p->ro
 
-		      /* Can operate in-place as long as all dimension
+                      /* Can operate in-place as long as all dimension
 			 strides are the same, provided that the cld
 			 plans work in-place.  (This condition is
 			 sufficient, but is it necessary?) */
-		      || fftw_tensor_inplace_strides(p->sz)
+                      || X(tensor_inplace_strides)(p->sz)
 		       )
 	       );
      }
@@ -141,7 +141,7 @@ static int score(const solver *ego_, const problem *p_)
      uint dummy;
 
      if (!applicable(ego_, p_, &dummy))
-	  return BAD;
+          return BAD;
 
      /* Prefer spltrnk values within the dimension range.  Also
         prefer positive spltrnk to negative (assuming that they
@@ -149,14 +149,14 @@ static int score(const solver *ego_, const problem *p_)
         planner from trying effectively duplicate plans. */
      if ((ego->spltrnk > 0 && ego->spltrnk >= (int)p->sz.rnk) ||
 	 (ego->spltrnk < 0 && -2 * ego->spltrnk >= (int)p->sz.rnk))
-	  return UGLY;
+          return UGLY;
 
      /* Heuristic: if the vector stride is greater than the transform
         sz, don't use (prefer to do the vector loop first with a
         vecloop plan). */
      if (p->vecsz.rnk > 0 &&
-	 fftw_tensor_min_stride(p->vecsz) > fftw_tensor_max_index(p->sz))
-	  return UGLY;
+	 X(tensor_min_stride)(p->vecsz) > X(tensor_max_index)(p->sz))
+          return UGLY;
 
      return GOOD;
 }
@@ -171,31 +171,31 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      problem *cldp;
      uint spltrnk;
 
-     static const plan_adt padt = { 
-	  fftw_dft_solve, awake, print, destroy 
+     static const plan_adt padt = {
+	  X(dft_solve), awake, print, destroy
      };
 
      if (!applicable(ego_, p_, &spltrnk))
-	  return (plan *) 0;
+          return (plan *) 0;
 
      p = (const problem_dft *) p_;
-     fftw_tensor_split(p->sz, &sz1, spltrnk, &sz2);
+     X(tensor_split)(p->sz, &sz1, spltrnk, &sz2);
 
-     cldp = fftw_mkproblem_dft_d(fftw_tensor_copy(sz2),
-				 fftw_tensor_append(p->vecsz, sz1),
-				 p->ri, p->ii, p->ro, p->io);
+     cldp = X(mkproblem_dft_d)(X(tensor_copy)(sz2),
+                               X(tensor_append)(p->vecsz, sz1),
+                               p->ri, p->ii, p->ro, p->io);
      cld1 = plnr->adt->mkplan(plnr, cldp);
-     fftw_problem_destroy(cldp);
+     X(problem_destroy)(cldp);
      if (!cld1)
-	  goto nada;
+          goto nada;
 
-     cldp = fftw_mkproblem_dft_d(fftw_tensor_copy(sz1),
-				 fftw_tensor_append(p->vecsz, sz2),
-				 p->ro, p->io, p->ro, p->io);
+     cldp = X(mkproblem_dft_d)(X(tensor_copy)(sz1),
+                               X(tensor_append)(p->vecsz, sz2),
+                               p->ro, p->io, p->ro, p->io);
      cld2 = plnr->adt->mkplan(plnr, cldp);
-     fftw_problem_destroy(cldp);
+     X(problem_destroy)(cldp);
      if (!cld2)
-	  goto nada;
+          goto nada;
 
      pln = MKPLAN_DFT(P, &padt, apply);
 
@@ -204,20 +204,20 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln->solver = ego;
      pln->super.super.cost = cld1->cost + cld2->cost;
-     pln->super.super.flops = fftw_flops_add(cld1->flops, cld2->flops);
+     pln->super.super.flops = X(flops_add)(cld1->flops, cld2->flops);
 
-     fftw_tensor_destroy(sz1);
-     fftw_tensor_destroy(sz2);
+     X(tensor_destroy)(sz1);
+     X(tensor_destroy)(sz2);
 
      return &(pln->super.super);
 
-   nada:
+ nada:
      if (cld2)
-	  fftw_plan_destroy(cld2);
+          X(plan_destroy)(cld2);
      if (cld1)
-	  fftw_plan_destroy(cld1);
-     fftw_tensor_destroy(sz2);
-     fftw_tensor_destroy(sz1);
+          X(plan_destroy)(cld1);
+     X(tensor_destroy)(sz2);
+     X(tensor_destroy)(sz1);
      return (plan *) 0;
 }
 
@@ -231,23 +231,25 @@ static solver *mksolver(int spltrnk, const int *buddies, uint nbuddies)
      return &(slv->super);
 }
 
-void fftw_dft_rank_geq2_register(planner *p)
+void X(dft_rank_geq2_register)(planner *p)
 {
      uint i;
-     static const int buddies[] = { 1, -1, 0 };
+     static const int buddies[] = {
+	  1, -1, 0
+     };
      const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 
      for (i = 0; i < nbuddies; ++i)
-	  p->adt->register_solver(p, mksolver(buddies[i], buddies, nbuddies));
+          p->adt->register_solver(p, mksolver(buddies[i], buddies, nbuddies));
 
      /* FIXME:
 
-        Should we try more buddies? 
+     Should we try more buddies? 
 
-        Another possible variant is to swap cld1 and cld2 (or
-        rather, to swap their problems; they are not interchangeable
-        because cld2 must be in-place).  In past versions of FFTW,
-        however, I seem to recall that such rearrangements have made
-        little or no difference. 
+     Another possible variant is to swap cld1 and cld2 (or
+     rather, to swap their problems; they are not interchangeable
+     because cld2 must be in-place).  In past versions of FFTW,
+     however, I seem to recall that such rearrangements have made
+     little or no difference. 
      */
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.6 2002-06-10 01:11:51 athena Exp $ */
+/* $Id: tensor.c,v 1.7 2002-06-10 13:04:21 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -36,25 +36,25 @@ static void talloc(tensor *x, uint rnk)
 {
      x->rnk = rnk;
      if (FINITE_RNK(rnk) && rnk > 0)
-	  x->dims = (iodim *)fftw_malloc(sizeof(iodim) * rnk, TENSORS);
+          x->dims = (iodim *)fftw_malloc(sizeof(iodim) * rnk, TENSORS);
      else
-	  x->dims = 0;
+          x->dims = 0;
 }
 
-void fftw_tensor_destroy(tensor sz)
+void X(tensor_destroy)(tensor sz)
 {
      if (sz.dims)
-	  fftw_free(sz.dims);
+          X(free)(sz.dims);
 }
 
-tensor fftw_mktensor(uint rnk)
+tensor X(mktensor)(uint rnk)
 {
      tensor x;
      talloc(&x, rnk);
      return x;
 }
 
-tensor fftw_mktensor_1d(uint n, int is, int os)
+tensor X(mktensor_1d)(uint n, int is, int os)
 {
      tensor x;
      talloc(&x, 1);
@@ -64,8 +64,8 @@ tensor fftw_mktensor_1d(uint n, int is, int os)
      return x;
 }
 
-tensor fftw_mktensor_2d(uint n0, int is0, int os0, 
-			uint n1, int is1, int os1)
+tensor X(mktensor_2d)(uint n0, int is0, int os0,
+                      uint n1, int is1, int os1)
 {
      tensor x;
      talloc(&x, 2);
@@ -78,112 +78,112 @@ tensor fftw_mktensor_2d(uint n0, int is0, int os0,
      return x;
 }
 
-tensor fftw_mktensor_rowmajor(uint rnk, const uint *n, const uint *nphys,
-			      int is, int os)
+tensor X(mktensor_rowmajor)(uint rnk, const uint *n, const uint *nphys,
+                            int is, int os)
 {
      tensor x;
      talloc(&x, rnk);
 
      if (FINITE_RNK(rnk) && rnk > 0) {
-	  uint i;
+          uint i;
 
-	  A(n && nphys);
-	  x.dims[rnk - 1].is = is;
-	  x.dims[rnk - 1].os = os;
-	  x.dims[rnk - 1].n = n[rnk - 1];
-	  for (i = rnk - 1; i > 0; --i) {
-	       x.dims[i - 1].is = x.dims[i].is * nphys[i];
-	       x.dims[i - 1].os = x.dims[i].os * nphys[i];
-	       x.dims[i - 1].n = n[i - 1];
-	  }
+          A(n && nphys);
+          x.dims[rnk - 1].is = is;
+          x.dims[rnk - 1].os = os;
+          x.dims[rnk - 1].n = n[rnk - 1];
+          for (i = rnk - 1; i > 0; --i) {
+               x.dims[i - 1].is = x.dims[i].is * nphys[i];
+               x.dims[i - 1].os = x.dims[i].os * nphys[i];
+               x.dims[i - 1].n = n[i - 1];
+          }
      }
      return x;
 }
 
-int fftw_tensor_equal(const tensor a, const tensor b)
+int X(tensor_equal)(const tensor a, const tensor b)
 {
      uint i;
 
      if (a.rnk != b.rnk)
-	  return 0;
+          return 0;
 
      if (!FINITE_RNK(a.rnk))
-	  return 1;
+          return 1;
 
      for (i = 0; i < a.rnk; ++i) {
-	  iodim *ad = a.dims + i, *bd = b.dims + i;
-	  if (ad->n != bd->n || ad->is != bd->is || ad->os != bd->os)
-	       return 0;
+          iodim *ad = a.dims + i, *bd = b.dims + i;
+          if (ad->n != bd->n || ad->is != bd->is || ad->os != bd->os)
+               return 0;
      }
      return 1;
 }
 
-uint fftw_tensor_sz(const tensor sz)
+uint X(tensor_sz)(const tensor sz)
 {
      uint i, n = 1;
 
      if (!FINITE_RNK(sz.rnk))
-	  return 0;
+          return 0;
 
      for (i = 0; i < sz.rnk; ++i)
-	  n *= sz.dims[i].n;
+          n *= sz.dims[i].n;
      return n;
 }
 
-uint fftw_tensor_hash(const tensor t)
+uint X(tensor_hash)(const tensor t)
 {
      uint i;
      uint h = 1023 * t.rnk;
 
      if (!FINITE_RNK(t.rnk))
-	  return h;
+          return h;
 
      /* FIXME: find a decent hash function */
      for (i = 0; i < t.rnk; ++i) {
-	  iodim *p = t.dims + i;
-	  h = h * 13131 + p->n + 7 * p->is + 13 * p->os;
+          iodim *p = t.dims + i;
+          h = h * 13131 + p->n + 7 * p->is + 13 * p->os;
      }
 
      return h;
 }
 
-int fftw_tensor_max_index(const tensor sz)
+int X(tensor_max_index)(const tensor sz)
 {
      uint i;
      int n = 0;
 
      A(FINITE_RNK(sz.rnk));
      for (i = 0; i < sz.rnk; ++i) {
-	  iodim *p = sz.dims + i;
-	  n += (p->n - 1) * imax(p->is, p->os);
+          iodim *p = sz.dims + i;
+          n += (p->n - 1) * imax(p->is, p->os);
      }
      return n;
 }
 
-int fftw_tensor_min_stride(const tensor sz)
+int X(tensor_min_stride)(const tensor sz)
 {
      A(FINITE_RNK(sz.rnk));
      if (sz.rnk == 0)
-	  return 0;
+          return 0;
      else {
-	  uint i;
-	  int s = imin(sz.dims[0].is, sz.dims[0].os);
-	  for (i = 1; i < sz.rnk; ++i) {
-	       iodim *p = sz.dims + i;
-	       s = imin(s, imin(p->is, p->os));
-	  }
-	  return s;
+          uint i;
+          int s = imin(sz.dims[0].is, sz.dims[0].os);
+          for (i = 1; i < sz.rnk; ++i) {
+               iodim *p = sz.dims + i;
+               s = imin(s, imin(p->is, p->os));
+          }
+          return s;
      }
 }
 
-int fftw_tensor_inplace_strides(const tensor sz)
+int X(tensor_inplace_strides)(const tensor sz)
 {
      uint i;
      A(FINITE_RNK(sz.rnk));
      for (i = 0; i < sz.rnk; ++i) {
-	  iodim *p = sz.dims + i;
-	  if (p->is != p->os)
-	       return 0;
+          iodim *p = sz.dims + i;
+          if (p->is != p->os)
+               return 0;
      }
      return 1;
 }
@@ -192,11 +192,11 @@ static void dimcpy(iodim *dst, const iodim *src, uint rnk)
 {
      uint i;
      if (FINITE_RNK(rnk))
-	  for (i = 0; i < rnk; ++i)
-	       dst[i] = src[i];
+          for (i = 0; i < rnk; ++i)
+               dst[i] = src[i];
 }
 
-tensor fftw_tensor_copy(const tensor sz)
+tensor X(tensor_copy)(const tensor sz)
 {
      tensor x;
 
@@ -205,23 +205,23 @@ tensor fftw_tensor_copy(const tensor sz)
      return x;
 }
 
-/* Like fftw_tensor_copy, but copy all of the dimensions *except*
+/* Like X(tensor_copy), but copy all of the dimensions *except*
    except_dim. */
-tensor fftw_tensor_copy_except(const tensor sz, uint except_dim)
+tensor X(tensor_copy_except)(const tensor sz, uint except_dim)
 {
      tensor x;
 
      A(FINITE_RNK(sz.rnk) && sz.rnk >= 1 && except_dim < sz.rnk);
      talloc(&x, sz.rnk - 1);
      dimcpy(x.dims, sz.dims, except_dim);
-     dimcpy(x.dims + except_dim, sz.dims + except_dim + 1, 
-	    x.rnk - except_dim);
+     dimcpy(x.dims + except_dim, sz.dims + except_dim + 1,
+            x.rnk - except_dim);
      return x;
 }
 
-/* Like fftw_tensor_copy, but copy only rnk dimensions starting
+/* Like X(tensor_copy), but copy only rnk dimensions starting
    with start_dim. */
-tensor fftw_tensor_copy_sub(const tensor sz, uint start_dim, uint rnk)
+tensor X(tensor_copy_sub)(const tensor sz, uint start_dim, uint rnk)
 {
      tensor x;
 
@@ -236,15 +236,15 @@ static int cmp_iodim(const void *av, const void *bv)
 {
      const iodim *a = (const iodim *) av, *b = (const iodim *) bv;
      if (b->is != a->is)
-	  return (b->is - a->is);	/* shorter strides go later */
+          return (b->is - a->is);	/* shorter strides go later */
      if (b->os != a->os)
-	  return (b->os - a->os);	/* shorter strides go later */
+          return (b->os - a->os);	/* shorter strides go later */
      return (int)(a->n - b->n);	        /* larger n's go later */
 }
 
 /* Like tensor_copy, but eliminate n == 1 dimensions, which
    never effect any transform or transform vector.
-
+ 
    Also, we sort the tensor into a canonical order of decreasing
    is.  In general, processing a loop/array in order of
    decreasing stride will improve locality; sorting also makes the
@@ -256,22 +256,22 @@ static int cmp_iodim(const void *av, const void *bv)
    recursion).  (Both forward and backwards traversal of the tensor
    are considered e.g. by ridft-vecloop, so sorting in increasing
    vs. decreasing order is not really important.) */
-tensor fftw_tensor_compress(const tensor sz)
+tensor X(tensor_compress)(const tensor sz)
 {
      uint i, rnk;
      tensor x;
 
      A(FINITE_RNK(sz.rnk));
      for (i = rnk = 0; i < sz.rnk; ++i) {
-	  A(sz.dims[i].n > 0);
-	  if (sz.dims[i].n != 1)
-	       ++rnk;
+          A(sz.dims[i].n > 0);
+          if (sz.dims[i].n != 1)
+               ++rnk;
      }
 
      talloc(&x, rnk);
      for (i = rnk = 0; i < sz.rnk; ++i) {
-	  if (sz.dims[i].n != 1)
-	       x.dims[rnk++] = sz.dims[i];
+          if (sz.dims[i].n != 1)
+               x.dims[rnk++] = sz.dims[i];
      }
 
      qsort(x.dims, (size_t)x.rnk, sizeof(iodim), cmp_iodim);
@@ -283,70 +283,70 @@ tensor fftw_tensor_compress(const tensor sz)
    effective contiguous 1d array.  Assumes that a.is >= b.is. */
 static int strides_contig(iodim *a, iodim *b)
 {
-     return (a->is == b->is * (int)b->n && 
-	     a->os == b->os * (int)b->n);
+     return (a->is == b->is * (int)b->n &&
+             a->os == b->os * (int)b->n);
 }
 
 /* Like tensor_compress, but also compress into one dimension any
    group of dimensions that form a contiguous block of indices with
    some stride.  (This can safely be done for transform vector sizes.) */
-tensor fftw_tensor_compress_contiguous(const tensor sz)
+tensor X(tensor_compress_contiguous)(const tensor sz)
 {
      uint i, rnk;
      tensor sz2, x;
 
-     if (fftw_tensor_sz(sz) == 0) {
-	  talloc(&x, RNK_MINFTY);
-	  return x;
+     if (X(tensor_sz)(sz) == 0) {
+          talloc(&x, RNK_MINFTY);
+          return x;
      }
 
-     sz2 = fftw_tensor_compress(sz);
+     sz2 = X(tensor_compress)(sz);
      A(FINITE_RNK(sz2.rnk));
 
      if (sz2.rnk < 2)		/* nothing to compress */
-	  return sz2;
+          return sz2;
 
      for (i = rnk = 1; i < sz2.rnk; ++i)
-	  if (!strides_contig(sz2.dims + i - 1, sz2.dims + i))
-	       ++rnk;
+          if (!strides_contig(sz2.dims + i - 1, sz2.dims + i))
+               ++rnk;
 
      talloc(&x, rnk);
      x.dims[0] = sz2.dims[0];
      for (i = rnk = 1; i < sz2.rnk; ++i) {
-	  if (strides_contig(sz2.dims + i - 1, sz2.dims + i)) {
-	       x.dims[rnk - 1].n *= sz2.dims[i].n;
-	       x.dims[rnk - 1].is = sz2.dims[i].is;
-	       x.dims[rnk - 1].os = sz2.dims[i].os;
-	  } else {
-	       A(rnk < x.rnk);
-	       x.dims[rnk++] = sz2.dims[i];
-	  }
+          if (strides_contig(sz2.dims + i - 1, sz2.dims + i)) {
+               x.dims[rnk - 1].n *= sz2.dims[i].n;
+               x.dims[rnk - 1].is = sz2.dims[i].is;
+               x.dims[rnk - 1].os = sz2.dims[i].os;
+          } else {
+               A(rnk < x.rnk);
+               x.dims[rnk++] = sz2.dims[i];
+          }
      }
 
-     fftw_tensor_destroy(sz2);
+     X(tensor_destroy)(sz2);
      return x;
 }
 
-tensor fftw_tensor_append(const tensor a, const tensor b)
+tensor X(tensor_append)(const tensor a, const tensor b)
 {
      tensor x;
 
      if (!FINITE_RNK(a.rnk) || !FINITE_RNK(b.rnk)) {
-	  talloc(&x, RNK_MINFTY);
+          talloc(&x, RNK_MINFTY);
      } else {
-	  talloc(&x, a.rnk + b.rnk);
-	  dimcpy(x.dims, a.dims, a.rnk);
-	  dimcpy(x.dims + a.rnk, b.dims, b.rnk);
+          talloc(&x, a.rnk + b.rnk);
+          dimcpy(x.dims, a.dims, a.rnk);
+          dimcpy(x.dims + a.rnk, b.dims, b.rnk);
      }
      return x;
 }
 
-/* The inverse of fftw_tensor_append: splits the sz tensor into
+/* The inverse of X(tensor_append): splits the sz tensor into
    tensor a followed by tensor b, where a's rank is arnk. */
-void fftw_tensor_split(const tensor sz, tensor *a, uint arnk, tensor *b)
+void X(tensor_split)(const tensor sz, tensor *a, uint arnk, tensor *b)
 {
      A(FINITE_RNK(sz.rnk) && FINITE_RNK(arnk));
 
-     *a = fftw_tensor_copy_sub(sz, 0, arnk);
-     *b = fftw_tensor_copy_sub(sz, arnk, sz.rnk - arnk);
+     *a = X(tensor_copy_sub)(sz, 0, arnk);
+     *b = X(tensor_copy_sub)(sz, arnk, sz.rnk - arnk);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.4 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.5 2002-06-10 13:04:21 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -30,31 +30,33 @@ static void t(R *rA, R *iA, uint n, int is, int js, uint vn, int vs)
      uint i, j, iv;
 
      for (i = 1; i < n; ++i) {
-	  for (j = 0; j < i; ++j) {
-	       for (iv = 0; iv < vn; ++iv) {
-		    R ar, ai, br, bi;
+          for (j = 0; j < i; ++j) {
+               for (iv = 0; iv < vn; ++iv) {
+                    R ar, ai, br, bi;
 
-		    ar = rA[i * is + j * js + iv * vs];
-		    ai = iA[i * is + j * js + iv * vs];
-		    br = rA[j * is + i * js + iv * vs];
-		    bi = iA[j * is + i * js + iv * vs];
+                    ar = rA[i * is + j * js + iv * vs];
+                    ai = iA[i * is + j * js + iv * vs];
+                    br = rA[j * is + i * js + iv * vs];
+                    bi = iA[j * is + i * js + iv * vs];
 
-		    rA[j * is + i * js + iv * vs] = ar;
-		    iA[j * is + i * js + iv * vs] = ai;
-		    rA[i * is + j * js + iv * vs] = br;
-		    iA[i * is + j * js + iv * vs] = bi;
-	       }
-	  }
+                    rA[j * is + i * js + iv * vs] = ar;
+                    iA[j * is + i * js + iv * vs] = ai;
+                    rA[i * is + j * js + iv * vs] = br;
+                    iA[i * is + j * js + iv * vs] = bi;
+               }
+          }
      }
 }
 
 typedef solver S;
 
-typedef struct {
+typedef struct
+{
      plan_dft super;
      uint n, vl;
      int s0, s1, vs;
-} P;
+}
+P;
 
 static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
@@ -69,14 +71,14 @@ static int pickdim(tensor s, uint *pdim0, uint *pdim1)
      uint dim0, dim1;
 
      for (dim0 = 0; dim0 < s.rnk; ++dim0)
-	  for (dim1 = dim0 + 1; dim1 < s.rnk; ++dim1)
-	       if (s.dims[dim0].n == s.dims[dim1].n &&
+          for (dim1 = dim0 + 1; dim1 < s.rnk; ++dim1)
+               if (s.dims[dim0].n == s.dims[dim1].n &&
 		   s.dims[dim0].is == s.dims[dim1].os &&
 		   s.dims[dim0].os == s.dims[dim1].is) {
-		    *pdim0 = dim0;
-		    *pdim1 = dim1;
-		    return 1;
-	       }
+                    *pdim0 = dim0;
+                    *pdim1 = dim1;
+                    return 1;
+               }
      return 0;
 }
 
@@ -90,16 +92,16 @@ static int other_dim(uint *dim0, uint *dim1, uint *dim2)
 static int applicable(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
 {
      if (DFTP(p_)) {
-	  const problem_dft *p = (const problem_dft *)p_;
-	  return (1
-		  && p->ri == p->ro 
-		  && p->sz.rnk == 0 
-		  && p->vecsz.rnk == 3 
-		  && pickdim(p->vecsz, dim0, dim1)
-		  && other_dim(dim0, dim1, dim2)
+          const problem_dft *p = (const problem_dft *)p_;
+          return (1
+                  && p->ri == p->ro
+                  && p->sz.rnk == 0
+                  && p->vecsz.rnk == 3
+                  && pickdim(p->vecsz, dim0, dim1)
+                  && other_dim(dim0, dim1, dim2)
 
-		  /* non-transpose dimension must be in-place */
-		  && p->vecsz.dims[*dim2].is == p->vecsz.dims[*dim2].os
+                  /* non-transpose dimension must be in-place */
+                  && p->vecsz.dims[*dim2].is == p->vecsz.dims[*dim2].os
 	       );
      }
      return 0;
@@ -111,20 +113,20 @@ static int score(const solver *ego, const problem *p_)
      const problem_dft *p;
      UNUSED(ego);
 
-     if (!applicable(p_, &dim0, &dim1, &dim2)) 
-	  return BAD;
+     if (!applicable(p_, &dim0, &dim1, &dim2))
+          return BAD;
 
      p = (const problem_dft *) p_;
-     if (p->vecsz.dims[dim2].is > fftw_imax(p->vecsz.dims[dim0].is, 
-					    p->vecsz.dims[dim0].os))
-	  return UGLY;		/* loops are in the wrong order for locality */
+     if (p->vecsz.dims[dim2].is > X(imax)(p->vecsz.dims[dim0].is,
+                                          p->vecsz.dims[dim0].os))
+          return UGLY;		/* loops are in the wrong order for locality */
 
      return GOOD;
 }
 
 static void destroy(plan *ego)
 {
-     fftw_free(ego);
+     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)
@@ -139,14 +141,15 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      P *pln;
      uint dim0, dim1, dim2;
 
-     static const plan_adt padt = { 
-	  fftw_dft_solve, fftw_null_awake, print, destroy 
+     static const plan_adt padt = {
+	  X(dft_solve), X(null_awake), print, destroy
      };
 
-     UNUSED(plnr); UNUSED(ego);
+     UNUSED(plnr);
+     UNUSED(ego);
 
-     if (!applicable(p_, &dim0, &dim1, &dim2)) 
-	  return (plan *) 0;
+     if (!applicable(p_, &dim0, &dim1, &dim2))
+          return (plan *) 0;
      p = (const problem_dft *) p_;
 
      pln = MKPLAN_DFT(P, &padt, apply);
@@ -157,7 +160,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->vs = p->vecsz.dims[dim2].is; /* == os */
 
      pln->super.super.cost = 1.0;	/* FIXME? */
-     pln->super.super.flops = fftw_flops_zero;
+     pln->super.super.flops = X(flops_zero);
      return &(pln->super.super);
 }
 
@@ -167,7 +170,7 @@ static solver *mksolver(void)
      return MKSOLVER(S, &sadt);
 }
 
-void fftw_dft_vrank3_transpose_register(planner *p)
+void X(dft_vrank3_transpose_register)(planner *p)
 {
      p->adt->register_solver(p, mksolver());
 }

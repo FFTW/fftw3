@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(kernel/fftw.h)
+AC_INIT(kernel/fftw3.h)
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(fftw, 3.0)
 AM_CONFIG_HEADER(config.h)

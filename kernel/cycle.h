@@ -18,14 +18,14 @@
  *
  */
 
-/* $Id: cycle.h,v 1.1 2002-06-03 12:09:05 athena Exp $ */
+/* $Id: cycle.h,v 1.2 2002-06-10 13:04:21 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
 #if defined(HAVE_GETHRTIME)
 typedef hrtime_t ticks;
 
-#  define getticks() gethrtime()
+#define getticks() gethrtime()
 
 static inline double elapsed(ticks t1, ticks t0)
 {
@@ -47,9 +47,9 @@ static __inline__ ticks getticks(void)
      unsigned int tbl, tbu0, tbu1;
 
      do {
-	  __asm__ __volatile__ ("mftbu %0" : "=r"(tbu0));	
+	  __asm__ __volatile__ ("mftbu %0" : "=r"(tbu0));
 	  __asm__ __volatile__ ("mftb %0" : "=r"(tbl));
-	  __asm__ __volatile__ ("mftbu %0" : "=r"(tbu1));	
+	  __asm__ __volatile__ ("mftbu %0" : "=r"(tbu1));
      } while (tbu0 != tbu1);
 
      return (((unsigned long long)tbu0) << 32) | tbl;
@@ -73,7 +73,7 @@ static __inline__ ticks getticks(void)
 {
      ticks ret;
 
-     __asm__ __volatile__("rdtsc": "=A" (ret)); 
+     __asm__ __volatile__("rdtsc": "=A" (ret));
      /* no input, nothing else clobbered */
      return ret;
 }
@@ -119,7 +119,7 @@ static __inline__ ticks getticks(void)
 {
      ticks ret;
 
-     __asm__ __volatile__("mfctl 16, %0": "=r" (ret)); 
+     __asm__ __volatile__("mfctl 16, %0": "=r" (ret));
      /* no input, nothing else clobbered */
      return ret;
 }
@@ -142,16 +142,16 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 #endif
 
 #if defined(__GNUC__) && defined(__alpha__)
-/* 
-    * The 32-bit cycle counter on alpha overflows pretty quickly, 
-    * unfortunately.  A 1GHz machine overflows in 4 seconds.
-    */
+/*
+ * The 32-bit cycle counter on alpha overflows pretty quickly, 
+ * unfortunately.  A 1GHz machine overflows in 4 seconds.
+ */
 typedef unsigned int ticks;
 
 static __inline__ ticks getticks(void)
 {
      unsigned long cc;
-     __asm__ __volatile__ ("rpcc %0" : "=r"(cc));	
+     __asm__ __volatile__ ("rpcc %0" : "=r"(cc));
      return (cc & 0xFFFFFFFF);
 }
 

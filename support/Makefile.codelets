@@ -13,7 +13,7 @@ GEN_TWIDDLE = ${GENFFTDIR}/gen_twiddle
 GEN_TWIDSQ = ${GENFFTDIR}/gen_twidsq
 PRELUDE = ${top_srcdir}/support/codelet_prelude
 ADD_DATE = sed -e s/@DATE@/"`date`"/
-FFTW_CODELET_NAME=fftw_codelet_
+CODELET_NAME=codelet_
 
 COPYRIGHT=${top_srcdir}/COPYRIGHT
 CODELET_DEPS=$(COPYRIGHT) $(PRELUDE)
@@ -107,13 +107,13 @@ $(CODLIST): Makefile
 	echo "#include \"ifftw.h\"";					\
 	echo;								\
 	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))); do		\
-	   echo "extern void $(FFTW_CODELET_NAME)$$i(planner *);";	\
+	   echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
 	done;								\
 	echo;								\
 	echo;								\
 	echo "solvtab $(SOLVTAB_NAME) = {";				\
 	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))); do		\
-	   echo "   $(FFTW_CODELET_NAME)$$i,";				\
+	   echo "   X($(CODELET_NAME)$$i),";				\
 	done;								\
 	echo "   0";							\
 	echo "};";							\

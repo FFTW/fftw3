@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.3 2002-06-09 19:30:13 athena Exp $ */
+/* $Id: print.c,v 1.4 2002-06-10 13:04:21 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
@@ -30,7 +30,7 @@ static void myputs(printer *p, const char *s)
 {
      char c;
      while ((c = *s++))
-	  p->putchr(p, c);
+          p->putchr(p, c);
 }
 
 static void print(printer *p, const char *format, ...)
@@ -42,11 +42,11 @@ static void print(printer *p, const char *format, ...)
      uint i;
 
      for (i = 0; i < p->indent; ++i)
-	  p->putchr(p, ' ');
+          p->putchr(p, ' ');
 
      va_start (ap, format);
      while ((c = *s++)) {
-	  switch (c) {
+          switch (c) {
 	      case '%':
 		   switch ((c = *s++)) {
 		       case 's': {
@@ -71,10 +71,12 @@ static void print(printer *p, const char *format, ...)
 		       case 'o': {
 			    /* integer option.  Usage: %oNAME= */
 			    int x = va_arg(ap, int);
-			    if (x) p->putchr(p, '/');
+			    if (x)
+				 p->putchr(p, '/');
 			    while ((c = *s++) != '=')
-				 if (x) p->putchr(p, c);
-			    if (x) { 
+				 if (x)
+				      p->putchr(p, c);
+			    if (x) {
 				 sprintf(buf, "=%d", x);
 				 goto putbuf;
 			    }
@@ -98,19 +100,19 @@ static void print(printer *p, const char *format, ...)
 			    A(0 /* unknown format */);
 			    break;
 
-		       putbuf:
+		   putbuf:
 			    myputs(p, buf);
 		   }
 		   break;
 	      default:
 		   p->putchr(p, c);
 		   break;
-	  }
+          }
      }
      va_end(ap);
 }
 
-printer *fftw_mkprinter(size_t size, void (*putchr)(printer *p, char c))
+printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c))
 {
      printer *s = (printer *)fftw_malloc(size, OTHER);
      s->print = print;
@@ -119,7 +121,7 @@ printer *fftw_mkprinter(size_t size, void (*putchr)(printer *p, char c))
      return s;
 }
 
-void fftw_printer_destroy(printer *p)
+void X(printer_destroy)(printer *p)
 {
-     fftw_free(p);
+     X(free)(p);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.1 2002-06-08 19:11:09 athena Exp $ */
+/* $Id: planner-score.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
 #include "ifftw.h"
 
 static plan *mkplan(planner *ego, problem *p)
@@ -34,22 +34,21 @@ static plan *mkplan(planner *ego, problem *p)
      });
 
      for (; best_score > BAD; --best_score) {
-	  FORALL_SOLVERS(ego, s, {
-	       int sc = s->adt->score(s, p);
-	       if (sc == best_score) {
+          FORALL_SOLVERS(ego, s, {
+	       if (s->adt->score(s, p) == best_score) {
 		    plan *pln = s->adt->mkplan(s, p, ego);
 
 		    if (pln) {
-			 fftw_plan_use(pln);
+			 X(plan_use)(pln);
 			 ego->ntry++;
 			 ego->hook(pln, p);
-			 pln->cost = fftw_measure_execution_time(pln, p);
+			 pln->cost = X(measure_execution_time)(pln, p);
 			 if (best) {
 			      if (pln->cost < best->cost) {
-				   fftw_plan_destroy(best);
+				   X(plan_destroy)(best);
 				   best = pln;
 			      } else {
-				   fftw_plan_destroy(pln);
+				   X(plan_destroy)(pln);
 			      }
 			 } else {
 			      best = pln;
@@ -57,14 +56,15 @@ static plan *mkplan(planner *ego, problem *p)
 		    }
 	       }
 	  });
-	  if (best) break;
+          if (best)
+               break;
      };
 
      return best;
 }
 
 /* constructor */
-planner *fftw_mkplanner_score(void)
+planner *X(mkplanner_score)(void)
 {
-     return fftw_mkplanner(sizeof(planner), mkplan, 0);
+     return X(mkplanner)(sizeof(planner), mkplan, 0);
 }

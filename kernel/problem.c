@@ -18,12 +18,12 @@
  *
  */
 
-/* $Id: problem.c,v 1.1.1.1 2002-06-02 18:42:32 athena Exp $ */
+/* $Id: problem.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
 
 #include "ifftw.h"
 
 /* constructor */
-problem *fftw_mkproblem(size_t sz, const problem_adt *adt)
+problem *X(mkproblem)(size_t sz, const problem_adt *adt)
 {
      problem *p = (problem *)fftw_malloc(sz, PROBLEMS);
 
@@ -33,14 +33,14 @@ problem *fftw_mkproblem(size_t sz, const problem_adt *adt)
 }
 
 /* destructor */
-void fftw_problem_destroy(problem *ego)
+void X(problem_destroy)(problem *ego)
 {
      if ((--ego->refcnt) == 0)
-	  ego->adt->destroy(ego);
+          ego->adt->destroy(ego);
 }
 
 /* ``copy'' the problem */
-problem *fftw_problem_dup(problem *ego)
+problem *X(problem_dup)(problem *ego)
 {
      ++ego->refcnt;
      return ego;

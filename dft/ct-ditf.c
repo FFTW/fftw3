@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.4 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: ct-ditf.c,v 1.5 2002-06-10 13:04:21 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -40,22 +40,22 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 static int applicable(const solver_ct *ego, const problem *p_)
 {
-     if (fftw_dft_ct_applicable(ego, p_)) {
-	  const ct_desc *e = ego->desc;
-	  const problem_dft *p = (const problem_dft *) p_;
-	  iodim *d = p->sz.dims, *vd = p->vecsz.dims;
+     if (X(dft_ct_applicable)(ego, p_)) {
+          const ct_desc *e = ego->desc;
+          const problem_dft *p = (const problem_dft *) p_;
+          iodim *d = p->sz.dims, *vd = p->vecsz.dims;
 
-	  return (1 
-		  && p->ri == p->ro  /* inplace only */
-		  && p->vecsz.rnk == 1
-		  && vd[0].n == e->radix
-		  && d[0].os == vd[0].is 
-		  && d[0].is == (int)e->radix * vd[0].is
-		  && vd[0].os == (int)d[0].n * vd[0].is
+          return (1
+                  && p->ri == p->ro  /* inplace only */
+                  && p->vecsz.rnk == 1
+                  && vd[0].n == e->radix
+                  && d[0].os == vd[0].is
+                  && d[0].is == (int)e->radix * vd[0].is
+                  && vd[0].os == (int)d[0].n * vd[0].is
 
-		  /* if specialized strides, then they must match */
-		  && (!e->is || e->is == vd[0].os)
-		  && (!e->vs || e->vs == vd[0].is)
+                  /* if specialized strides, then they must match */
+                  && (!e->is || e->is == vd[0].os)
+                  && (!e->vs || e->vs == vd[0].is)
 	       );
      }
      return 0;
@@ -63,11 +63,11 @@ static int applicable(const solver_ct *ego, const problem *p_)
 
 static void finish(plan_ct *ego)
 {
-     ego->ios = fftw_mkstride(ego->r, ego->ovs);
-     ego->vs = fftw_mkstride(ego->r, ego->ivs);
+     ego->ios = X(mkstride)(ego->r, ego->ovs);
+     ego->vs = X(mkstride)(ego->r, ego->ivs);
      ego->super.super.flops =
-	 fftw_flops_add(ego->cld->flops,
-			fftw_flops_mul(ego->m, ego->slv->desc->flops));
+          X(flops_add)(ego->cld->flops,
+                       X(flops_mul)(ego->m, ego->slv->desc->flops));
 }
 
 static problem *mkcld(const solver_ct *ego, const problem_dft *p)
@@ -76,10 +76,10 @@ static problem *mkcld(const solver_ct *ego, const problem_dft *p)
      iodim *vd = p->vecsz.dims;
      const ct_desc *e = ego->desc;
 
-     return fftw_mkproblem_dft_d(
-	  fftw_mktensor_1d(d[0].n / e->radix, d[0].is, d[0].is),
-	  fftw_mktensor_2d(vd[0].n, vd[0].os, vd[0].os, 
-			   e->radix, vd[0].is,vd[0].is),
+     return X(mkproblem_dft_d)(
+	  X(mktensor_1d)(d[0].n / e->radix, d[0].is, d[0].is),
+	  X(mktensor_2d)(vd[0].n, vd[0].os, vd[0].os,
+			 e->radix, vd[0].is,vd[0].is),
 	  p->ro, p->io, p->ro, p->io);
 }
 
@@ -92,17 +92,19 @@ static int score(const solver *ego_, const problem *p)
 
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
-     static const ctadt adt = { mkcld, finish, applicable, apply };
-     return fftw_mkplan_dft_ct((const solver_ct *) ego, p, plnr, &adt);
+     static const ctadt adt = {
+	  mkcld, finish, applicable, apply
+     };
+     return X(mkplan_dft_ct)((const solver_ct *) ego, p, plnr, &adt);
 }
 
 
-solver *fftw_mksolver_dft_ct_ditf(kdft_difsq codelet, const ct_desc *desc)
+solver *X(mksolver_dft_ct_ditf)(kdft_difsq codelet, const ct_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
      static const char name[] = "dft-ditf";
      union kct k;
      k.difsq = codelet;
 
-     return fftw_mksolver_dft_ct(k, desc, name, &sadt);
+     return X(mksolver_dft_ct)(k, desc, name, &sadt);
 }

@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: square.c,v 1.1 2002-06-02 23:49:03 athena Exp $ */
+/* $Id: square.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
 
 #include "ifftw.h"
 
-int fftw_square(int x) 
+int X(square)(int x)
 {
      return x * x;
 }

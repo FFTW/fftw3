@@ -18,25 +18,25 @@
  *
  */
 
-/* $Id: stride.c,v 1.2 2002-06-05 20:03:44 athena Exp $ */
+/* $Id: stride.c,v 1.3 2002-06-10 13:04:21 athena Exp $ */
 #include "ifftw.h"
 
 #ifdef PRECOMPUTE_ARRAY_INDICES
-stride fftw_mkstride(int n, int s)
+stride X(mkstride)(int n, int s)
 {
      int i;
      int *p = (int *) fftw_malloc(n * sizeof(int), OTHER);
 
      for (i = 0; i < n; ++i)
-	  p[i] = s * i;
+          p[i] = s * i;
 
      return p;
 }
 
-void fftw_stride_destroy(stride p)
+void X(stride_destroy)(stride p)
 {
-     if (p) 
-	  fftw_free(p);
+     if (p)
+          X(free)(p);
 }
 
 #endif

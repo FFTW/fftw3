@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-estimate.c,v 1.2 2002-06-06 22:03:17 athena Exp $ */
+/* $Id: planner-estimate.c,v 1.3 2002-06-10 13:04:21 athena Exp $ */
 #include "ifftw.h"
 
 static plan *mkplan(planner *ego, problem *p)
@@ -29,15 +29,15 @@ static plan *mkplan(planner *ego, problem *p)
 	  plan *pln = s->adt->mkplan(s, p, ego);
 
 	  if (pln) {
-	       fftw_plan_use(pln);
+	       X(plan_use)(pln);
 	       ego->ntry++;
 	       ego->hook(pln, p);
 	       if (best) {
 		    if (pln->cost < best->cost) {
-			 fftw_plan_destroy(best);
+			 X(plan_destroy)(best);
 			 best = pln;
 		    } else {
-			 fftw_plan_destroy(pln);
+			 X(plan_destroy)(pln);
 		    }
 	       } else {
 		    best = pln;
@@ -49,7 +49,7 @@ static plan *mkplan(planner *ego, problem *p)
 }
 
 /* constructor */
-planner *fftw_mkplanner_estimate(void)
+planner *X(mkplanner_estimate)(void)
 {
-     return fftw_mkplanner(sizeof(planner), mkplan, 0);
+     return X(mkplanner)(sizeof(planner), mkplan, 0);
 }

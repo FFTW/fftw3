@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.5 2002-06-09 20:07:12 athena Exp $ */
+/* $Id: twiddle.c,v 1.6 2002-06-10 13:04:21 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -38,13 +38,13 @@ static twid *twlist = (twid *) 0;
 static int equal_instr(const tw_instr *p, const tw_instr *q)
 {
      if (p == q)
-	  return 1;
+          return 1;
 
      for (;; ++p, ++q) {
-	  if (p->op != q->op || p->v != q->v || p->i != q->i)
-	       return 0;
-	  if (p->op == TW_NEXT)  /* == q->op */
-	       return 1;
+          if (p->op != q->op || p->v != q->v || p->i != q->i)
+               return 0;
+          if (p->op == TW_NEXT)  /* == q->op */
+               return 1;
      }
      A(0 /* can't happen */);
 }
@@ -58,8 +58,8 @@ static twid *lookup(const tw_instr *q, uint r, uint m)
 {
      twid *p;
 
-     for (p = twlist; p && !equal_twid(p, q, r, m); p = p->cdr) 
-	  ;
+     for (p = twlist; p && !equal_twid(p, q, r, m); p = p->cdr)
+          ;
      return p;
 }
 
@@ -70,13 +70,13 @@ static uint twlen0(const tw_instr **pp)
 
      /* compute length of bytecode program */
      for ( ; p->op != TW_NEXT; ++p)
-	  ++ntwiddle;
+          ++ntwiddle;
 
      *pp = p;
      return ntwiddle;
 }
 
-uint fftw_twiddle_length(const tw_instr *p)
+uint X(twiddle_length)(const tw_instr *p)
 {
      return twlen0(&p);
 }
@@ -90,54 +90,59 @@ static R *compute(const tw_instr *instr, uint r, uint m)
 
      static trigreal (*const f[])(trigreal) = { COS, SIN, TAN };
 
-     p = instr; ntwiddle = twlen0(&p);
+     p = instr;
+     ntwiddle = twlen0(&p);
 
      W0 = W = (R *)fftw_malloc(ntwiddle * (m / p->v) * sizeof(R), TWIDDLES);
 
      for (j = 0; j < m; j += p->v) {
-	  for (p = instr; p->op != TW_NEXT; ++p) 
-	       *W++ = f[p->op](twoPiOverN * ((j + p->v) * p->i));
-	  A(m % p->v == 0);
+          for (p = instr; p->op != TW_NEXT; ++p)
+               *W++ = f[p->op](twoPiOverN * ((j + p->v) * p->i));
+          A(m % p->v == 0);
      }
 
      return W0;
 }
 
-twid *fftw_mktwiddle(const tw_instr *instr, uint r, uint m)
+twid *X(mktwiddle)(const tw_instr *instr, uint r, uint m)
 {
      twid *p;
 
      if ((p = lookup(instr, r, m))) {
-	  ++p->refcnt;
-	  return p;
+          ++p->refcnt;
+          return p;
      }
 
      p = (twid *) fftw_malloc(sizeof(twid), TWIDDLES);
-     p->r = r;  p->m = m;  p->instr = instr;  p->refcnt = 1;
+     p->r = r;
+     p->m = m;
+     p->instr = instr;
+     p->refcnt = 1;
      p->W = compute(instr, r, m);
 
      /* cons! onto twlist */
-     p->cdr = twlist; twlist = p;
+     p->cdr = twlist;
+     twlist = p;
 
      return p;
 }
 
-void fftw_twiddle_destroy(twid *p)
+void X(twiddle_destroy)(twid *p)
 {
      if (p) {
-	  twid **q;
-	  if ((--p->refcnt) == 0) {
-	       /* remove p from twiddle list */
-	       for (q = &twlist; *q; q = &((*q)->cdr)) {
-		    if (*q == p) {
-			 *q = p->cdr;
-			 fftw_free(p->W);
-			 fftw_free(p);
-			 return;
-		    }
-	       }
+          twid **q;
+          if ((--p->refcnt) == 0) {
+               /* remove p from twiddle list */
+               for (q = &twlist; *q; q = &((*q)->cdr)) {
+                    if (*q == p) {
+                         *q = p->cdr;
+                         X(free)(p->W);
+                         X(free)(p);
+                         return;
+                    }
+               }
 
-	       A(0 /* can't happen */ );
-	  }
+               A(0 /* can't happen */ );
+          }
      }
 }

@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: solver.c,v 1.1.1.1 2002-06-02 18:42:32 athena Exp $ */
+/* $Id: solver.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
 
 #include "ifftw.h"
 
-solver *fftw_mksolver(size_t size, const solver_adt *adt)
+solver *X(mksolver)(size_t size, const solver_adt *adt)
 {
      solver *s = (solver *)fftw_malloc(size, SOLVERS);
 
@@ -31,13 +31,13 @@ solver *fftw_mksolver(size_t size, const solver_adt *adt)
      return s;
 }
 
-void fftw_solver_use(solver *ego)
+void X(solver_use)(solver *ego)
 {
      ++ego->refcnt;
 }
 
-void fftw_solver_destroy(solver *ego)
+void X(solver_destroy)(solver *ego)
 {
      if ((--ego->refcnt) == 0)
-	  fftw_free(ego);
+          X(free)(ego);
 }

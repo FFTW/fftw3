@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.11 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: direct.c,v 1.12 2002-06-10 13:04:21 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -51,9 +51,9 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     fftw_stride_destroy(ego->is);
-     fftw_stride_destroy(ego->os);
-     fftw_free(ego);
+     X(stride_destroy)(ego->is);
+     X(stride_destroy)(ego->os);
+     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)
@@ -68,21 +68,21 @@ static void print(plan *ego_, printer *p)
 static int applicable(const solver *ego_, const problem *p_)
 {
      if (DFTP(p_)) {
-	  const S *ego = (const S *) ego_;
-	  const problem_dft *p = (const problem_dft *) p_;
-	  const kdft_desc *d = ego->desc;
+          const S *ego = (const S *) ego_;
+          const problem_dft *p = (const problem_dft *) p_;
+          const kdft_desc *d = ego->desc;
 
-	  return (
+          return (
 	       1
-	       && p->sz.rnk == 1 
+	       && p->sz.rnk == 1
 	       && p->vecsz.rnk <= 1
 	       && p->sz.dims[0].n == d->sz
 	       && (!d->is || d->is == p->sz.dims[0].is)
 	       && (!d->os || d->os == p->sz.dims[0].os)
-	       && (0 
+	       && (0
 
 		   /* can always operate out-of-place */
-		   || p->ri != p->ro 
+		   || p->ri != p->ro
 
 		   /*
 		    * can always compute one transform in-place, no
@@ -92,8 +92,8 @@ static int applicable(const solver *ego_, const problem *p_)
 
 
 		   /* can operate in-place as long as strides are the same */
-		   || (fftw_tensor_inplace_strides(p->sz) &&
-		       fftw_tensor_inplace_strides(p->vecsz))
+		   || (X(tensor_inplace_strides)(p->sz) &&
+		       X(tensor_inplace_strides)(p->vecsz))
 		    )
 	       );
      }
@@ -114,14 +114,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
      iodim *d, *vd;
      const kdft_desc *e = ego->desc;
 
-     static const plan_adt padt = { 
-	  fftw_dft_solve, fftw_null_awake, print, destroy 
+     static const plan_adt padt = {
+	  X(dft_solve), X(null_awake), print, destroy
      };
 
      UNUSED(planner);
 
      if (!applicable(ego_, p_))
-	  return (plan *)0;
+          return (plan *)0;
 
      p = (const problem_dft *) p_;
 
@@ -131,27 +131,27 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
      vd = p->vecsz.dims;
 
      pln->k = ego->k;
-     pln->is = fftw_mkstride(e->sz, d[0].is);
-     pln->os = fftw_mkstride(e->sz, d[0].os);
+     pln->is = X(mkstride)(e->sz, d[0].is);
+     pln->os = X(mkstride)(e->sz, d[0].os);
 
      if (p->vecsz.rnk == 0) {
-	  pln->vl = 1;
-	  pln->ivs = pln->ovs = 0;
+          pln->vl = 1;
+          pln->ivs = pln->ovs = 0;
      } else {
-	  pln->vl = vd[0].n;
-	  pln->ivs = vd[0].is;
-	  pln->ovs = vd[0].os;
+          pln->vl = vd[0].n;
+          pln->ivs = vd[0].is;
+          pln->ovs = vd[0].os;
      }
 
      pln->slv = ego;
-     pln->super.super.cost = 1.0 + 0.1 * fftw_square(e->sz - OPTIMAL_SIZE);
-     pln->super.super.flops = fftw_flops_mul(pln->vl, e->flops);
+     pln->super.super.cost = 1.0 + 0.1 * X(square)(e->sz - OPTIMAL_SIZE);
+     pln->super.super.flops = X(flops_mul)(pln->vl, e->flops);
 
      return &(pln->super.super);
 }
 
 /* constructor */
-solver *fftw_mksolver_dft_direct(kdft k, const kdft_desc *desc)
+solver *X(mksolver_dft_direct)(kdft k, const kdft_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
      S *slv = MKSOLVER(S, &sadt);

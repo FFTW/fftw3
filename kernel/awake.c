@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: awake.c,v 1.1 2002-06-02 23:49:03 athena Exp $ */
+/* $Id: awake.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
 
 #include "ifftw.h"
 
-void fftw_null_awake(plan *ego, int awake)
+void X(null_awake)(plan *ego, int awake)
 {
      UNUSED(ego);
      UNUSED(awake);

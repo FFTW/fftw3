@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.3 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: vrank2-transpose.c,v 1.4 2002-06-10 13:04:21 athena Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -30,19 +30,19 @@ static void t(R *rA, R *iA, uint n, int is, int js)
      uint i, j;
 
      for (i = 1; i < n; ++i) {
-	  for (j = 0; j < i; ++j) {
-	       R ar, ai, br, bi;
+          for (j = 0; j < i; ++j) {
+               R ar, ai, br, bi;
 
-	       ar = rA[i * is + j * js];
-	       ai = iA[i * is + j * js];
-	       br = rA[j * is + i * js];
-	       bi = iA[j * is + i * js];
+               ar = rA[i * is + j * js];
+               ai = iA[i * is + j * js];
+               br = rA[j * is + i * js];
+               bi = iA[j * is + i * js];
 
-	       rA[j * is + i * js] = ar;
-	       iA[j * is + i * js] = ai;
-	       rA[i * is + j * js] = br;
-	       iA[i * is + j * js] = bi;
-	  }
+               rA[j * is + i * js] = ar;
+               iA[j * is + i * js] = ai;
+               rA[i * is + j * js] = br;
+               iA[i * is + j * js] = bi;
+          }
      }
 }
 
@@ -65,14 +65,14 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 static int applicable(const problem *p_)
 {
      if (DFTP(p_)) {
-	  const problem_dft *p = (const problem_dft *)p_;
-	  return (1
-		  && p->ri == p->ro 
-		  && p->sz.rnk == 0 
-		  && p->vecsz.rnk == 2 
-		  && p->vecsz.dims[0].n == p->vecsz.dims[1].n 
-		  && p->vecsz.dims[0].is == p->vecsz.dims[1].os 
-		  && p->vecsz.dims[0].os == p->vecsz.dims[1].is
+          const problem_dft *p = (const problem_dft *)p_;
+          return (1
+                  && p->ri == p->ro
+                  && p->sz.rnk == 0
+                  && p->vecsz.rnk == 2
+                  && p->vecsz.dims[0].n == p->vecsz.dims[1].n
+                  && p->vecsz.dims[0].is == p->vecsz.dims[1].os
+                  && p->vecsz.dims[0].os == p->vecsz.dims[1].is
 	       );
      }
      return 0;
@@ -86,7 +86,7 @@ static int score(const solver *ego, const problem *p)
 
 static void destroy(plan *ego)
 {
-     fftw_free(ego);
+     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)
@@ -100,14 +100,15 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      const problem_dft *p;
      P *pln;
 
-     static const plan_adt padt = { 
-	  fftw_dft_solve, fftw_null_awake, print, destroy 
+     static const plan_adt padt = {
+	  X(dft_solve), X(null_awake), print, destroy
      };
 
-     UNUSED(plnr); UNUSED(ego);
+     UNUSED(plnr);
+     UNUSED(ego);
 
      if (!applicable(p_))
-	  return (plan *) 0;
+          return (plan *) 0;
      p = (const problem_dft *) p_;
 
      pln = MKPLAN_DFT(P, &padt, apply);
@@ -116,7 +117,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->s1 = p->vecsz.dims[0].os;
 
      pln->super.super.cost = 1.0;	/* FIXME? */
-     pln->super.super.flops = fftw_flops_zero;
+     pln->super.super.flops = X(flops_zero);
      return &(pln->super.super);
 }
 
@@ -126,7 +127,7 @@ static solver *mksolver(void)
      return MKSOLVER(S, &sadt);
 }
 
-void fftw_dft_vrank2_transpose_register(planner *p)
+void X(dft_vrank2_transpose_register)(planner *p)
 {
      p->adt->register_solver(p, mksolver());
 }

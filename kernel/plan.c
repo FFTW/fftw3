@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: plan.c,v 1.2 2002-06-03 12:09:05 athena Exp $ */
+/* $Id: plan.c,v 1.3 2002-06-10 13:04:21 athena Exp $ */
 
 #include "ifftw.h"
 
-plan *fftw_mkplan(size_t size, const plan_adt *adt)
+plan *X(mkplan)(size_t size, const plan_adt *adt)
 {
      plan *p = (plan *)fftw_malloc(size, PLANS);
 
@@ -35,7 +35,7 @@ plan *fftw_mkplan(size_t size, const plan_adt *adt)
 /*
  * use a plan
  */
-void fftw_plan_use(plan *ego)
+void X(plan_use)(plan *ego)
 {
      ++ego->refcnt;
 }
@@ -43,10 +43,10 @@ void fftw_plan_use(plan *ego)
 /*
  * destroy a plan
  */
-void fftw_plan_destroy(plan *ego)
+void X(plan_destroy)(plan *ego)
 {
      if ((--ego->refcnt) == 0) {
-	  A(ego->adt->destroy);
-	  ego->adt->destroy(ego);
+          A(ego->adt->destroy);
+          ego->adt->destroy(ego);
      }
 }

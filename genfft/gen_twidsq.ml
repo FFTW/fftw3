@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twidsq.ml,v 1.2 2002-06-04 21:49:39 athena Exp $ *)
+(* $Id: gen_twidsq.ml,v 1.3 2002-06-10 13:04:21 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twidsq.ml,v 1.2 2002-06-04 21:49:39 athena Exp $"
+let cvsid = "$Id: gen_twidsq.ml,v 1.3 2002-06-10 13:04:21 athena Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 
@@ -149,8 +149,8 @@ let generate n =
 
   and register = 
     match !ditdif with
-    | DIT -> "fftw_kdft_ditsq_register"
-    | DIF -> "fftw_kdft_difsq_register"
+    | DIT -> "X(kdft_ditsq_register)"
+    | DIF -> "X(kdft_difsq_register)"
   in
   let init =
     "\n" ^ 

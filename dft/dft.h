@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.12 2002-06-09 15:01:41 athena Exp $ */
+/* $Id: dft.h,v 1.13 2002-06-10 13:04:21 athena Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -30,44 +30,46 @@ typedef struct {
      R *ri, *ii, *ro, *io;
 } problem_dft;
 
-int fftw_problem_dft_p(const problem *p);
-#define DFTP fftw_problem_dft_p  /* shorthand */
+int X(problem_dft_p)(const problem *p);
+#define DFTP X(problem_dft_p)  /* shorthand */
 
-problem *fftw_mkproblem_dft(const tensor sz, const tensor vecsz,
-			    R *ri, R *ii, R *ro, R *io);
-problem *fftw_mkproblem_dft_d(tensor sz, tensor vecsz,
-			      R *ri, R *ii, R *ro, R *io);
+problem *X(mkproblem_dft)(const tensor sz, const tensor vecsz,
+                          R *ri, R *ii, R *ro, R *io);
+problem *X(mkproblem_dft_d)(tensor sz, tensor vecsz,
+                            R *ri, R *ii, R *ro, R *io);
 
 /* solve.c: */
-void fftw_dft_solve(plan *ego_, const problem *p_);
+void X(dft_solve)(plan *ego_, const problem *p_);
 
 /* plan.c: */
 typedef void (*dftapply) (plan *ego, R *ri, R *ii, R *ro, R *io);
 
-typedef struct {
+typedef struct
+{
      plan super;
      dftapply apply;
-} plan_dft;
+}
+plan_dft;
 
-plan *fftw_mkplan_dft(size_t size, const plan_adt *adt, dftapply apply);
+plan *X(mkplan_dft)(size_t size, const plan_adt *adt, dftapply apply);
 
 #define MKPLAN_DFT(type, adt, apply) \
-  (type *)fftw_mkplan_dft(sizeof(type), adt, apply)
+  (type *)X(mkplan_dft)(sizeof(type), adt, apply)
 
 /* various solvers */
-solver *fftw_mksolver_dft_direct(kdft k, const kdft_desc *desc);
-solver *fftw_mksolver_dft_ct_dit(kdft_dit codelet, const ct_desc *desc);
-solver *fftw_mksolver_dft_ct_dif(kdft_dif codelet, const ct_desc *desc);
-solver *fftw_mksolver_dft_ct_ditf(kdft_difsq codelet, const ct_desc *desc);
+solver *X(mksolver_dft_direct)(kdft k, const kdft_desc *desc);
+solver *X(mksolver_dft_ct_dit)(kdft_dit codelet, const ct_desc *desc);
+solver *X(mksolver_dft_ct_dif)(kdft_dif codelet, const ct_desc *desc);
+solver *X(mksolver_dft_ct_ditf)(kdft_difsq codelet, const ct_desc *desc);
 
-void fftw_dft_vecloop_register(planner *p);
-void fftw_dft_rank0_register(planner *p);
-void fftw_dft_rank_geq2_register(planner *p);
-void fftw_dft_indirect_register(planner *p);
-void fftw_dft_vrank2_transpose_register(planner *p);
-void fftw_dft_vrank3_transpose_register(planner *p);
-void fftw_dft_buffered_register(planner *p);
-void fftw_dft_nop_register(planner *p);
+void X(dft_vecloop_register)(planner *p);
+void X(dft_rank0_register)(planner *p);
+void X(dft_rank_geq2_register)(planner *p);
+void X(dft_indirect_register)(planner *p);
+void X(dft_vrank2_transpose_register)(planner *p);
+void X(dft_vrank3_transpose_register)(planner *p);
+void X(dft_buffered_register)(planner *p);
+void X(dft_nop_register)(planner *p);
 
 /* configurations */
-void fftw_dft_conf_standard(planner *p);
+void X(dft_conf_standard)(planner *p);

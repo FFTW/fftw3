@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle.ml,v 1.2 2002-06-04 21:49:39 athena Exp $ *)
+(* $Id: gen_twiddle.ml,v 1.3 2002-06-10 13:04:21 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.2 2002-06-04 21:49:39 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.3 2002-06-10 13:04:21 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -120,8 +120,8 @@ let generate n =
       ns (stride_to_solverparm !uiostride) (flops_of tree)
   and register = 
     match !ditdif with
-    | DIT -> "fftw_kdft_dit_register"
-    | DIF -> "fftw_kdft_dif_register"
+    | DIT -> "X(kdft_dit_register)"
+    | DIF -> "X(kdft_dif_register)"
 
   in
   let init =

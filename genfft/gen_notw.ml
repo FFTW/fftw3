@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.3 2002-06-07 11:07:46 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.4 2002-06-10 13:04:21 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.3 2002-06-07 11:07:46 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.4 2002-06-10 13:04:21 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -110,7 +110,7 @@ let generate n =
   and init =
     (declare_register_fcn name) ^
     "{" ^
-    "  fftw_kdft_register(p, " ^ name ^ ", &desc);\n" ^
+    "  X(kdft_register)(p, " ^ name ^ ", &desc);\n" ^
     "}\n"
 
   in

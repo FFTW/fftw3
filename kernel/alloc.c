@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.5 2002-06-07 11:12:25 athena Exp $ */
+/* $Id: alloc.c,v 1.6 2002-06-10 13:04:21 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -29,23 +29,23 @@
 #include <stdio.h>
 
 /*
-    debugging malloc/free. 
+  debugging malloc/free. 
  
   1) Initialize every malloced and freed area to random values, just
-     to make sure we are not using uninitialized pointers.
-
+  to make sure we are not using uninitialized pointers.
+ 
   2) check for blocks freed twice.
-
+ 
   3) Check for writes past the ends of allocated blocks
-
+ 
   4) destroy contents of freed blocks in order to detect incorrect reuse.
-
+ 
   5) keep track of who allocates what and report memory leaks
-
+ 
   This code is a quick and dirty hack.  May be nonportable. 
   Use at your own risk.
-
- */
+ 
+*/
 
 struct mstat {
      int siz;
@@ -70,8 +70,8 @@ struct minfo {
 
 static struct minfo *minfo = 0;
 
-void *fftw_malloc_debug(size_t n, enum fftw_malloc_what what,
-			const char *file, int line)
+void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
+                      const char *file, int line)
 {
      char *p;
      size_t i;
@@ -80,14 +80,14 @@ void *fftw_malloc_debug(size_t n, enum fftw_malloc_what what,
      struct mstat *estat = mstat + EVERYTHING;
 
      if (n == 0)
-	  n = 1;
+          n = 1;
 
-     stat->siz += n; 
+     stat->siz += n;
      if (stat->siz > stat->maxsiz)
-	  stat->maxsiz = stat->siz;
-     estat->siz += n; 
+          stat->maxsiz = stat->siz;
+     estat->siz += n;
      if (estat->siz > estat->maxsiz)
-	  estat->maxsiz = estat->siz;
+          estat->maxsiz = estat->siz;
 
      p = (char *) malloc(PAD_FACTOR * n + THREE_SIZE_T);
      A(p);
@@ -99,15 +99,15 @@ void *fftw_malloc_debug(size_t n, enum fftw_malloc_what what,
 
      /* fill with junk */
      for (i = 0; i < PAD_FACTOR * n; i++)
-	  p[i + THREE_SIZE_T] = (char) (i ^ 0xDEADBEEF);
+          p[i + THREE_SIZE_T] = (char) (i ^ 0xDEADBEEF);
 
      ++stat->cnt;
      ++estat->cnt;
 
      if (stat->cnt > stat->maxcnt)
-	  stat->maxcnt = stat->cnt;
+          stat->maxcnt = stat->cnt;
      if (estat->cnt > estat->maxcnt)
-	  estat->maxcnt = estat->cnt;
+          estat->maxcnt = estat->cnt;
 
 
      /* skip the info we stored previously */
@@ -125,7 +125,7 @@ void *fftw_malloc_debug(size_t n, enum fftw_malloc_what what,
      return (void *) p;
 }
 
-void fftw_free(void *p)
+void X(free)(void *p)
 {
      char *q;
 
@@ -135,90 +135,90 @@ void fftw_free(void *p)
      A(q);
 
      {
-	  size_t n = ((size_t *) q)[0];
-	  size_t magic = ((size_t *) q)[1];
-	  int what = ((size_t *) q)[2];
-	  size_t i;
-	  struct mstat *stat = mstat + what;
-	  struct mstat *estat = mstat + EVERYTHING;
+          size_t n = ((size_t *) q)[0];
+          size_t magic = ((size_t *) q)[1];
+          int what = ((size_t *) q)[2];
+          size_t i;
+          struct mstat *stat = mstat + what;
+          struct mstat *estat = mstat + EVERYTHING;
 
-	  /* set to zero to detect duplicate free's */
-	  ((size_t *) q)[0] = 0;
+          /* set to zero to detect duplicate free's */
+          ((size_t *) q)[0] = 0;
 
-	  A(magic == MAGIC);
-	  ((size_t *) q)[1] = ~MAGIC;
+          A(magic == MAGIC);
+          ((size_t *) q)[1] = ~MAGIC;
 
-	  stat->siz -= n;
-	  A(stat->siz >= 0);
-	  estat->siz -= n;
-	  A(estat->siz >= 0);
+          stat->siz -= n;
+          A(stat->siz >= 0);
+          estat->siz -= n;
+          A(estat->siz >= 0);
 
-	  /* check for writing past end of array: */
-	  for (i = n; i < PAD_FACTOR * n; ++i)
-	       if (q[i + THREE_SIZE_T] != (char) (i ^ 0xDEADBEEF)) {
-		    A(0 /* array bounds overwritten */ );
-	       }
-	  for (i = 0; i < PAD_FACTOR * n; ++i)
-	       q[i + THREE_SIZE_T] = (char) (i ^ 0xBEEFDEAD);
+          /* check for writing past end of array: */
+          for (i = n; i < PAD_FACTOR * n; ++i)
+               if (q[i + THREE_SIZE_T] != (char) (i ^ 0xDEADBEEF)) {
+                    A(0 /* array bounds overwritten */ );
+               }
+          for (i = 0; i < PAD_FACTOR * n; ++i)
+               q[i + THREE_SIZE_T] = (char) (i ^ 0xBEEFDEAD);
 
-	  --stat->cnt;
-	  --estat->cnt;
+          --stat->cnt;
+          --estat->cnt;
 
-	  A(stat->cnt >= 0);
-	  A((stat->cnt == 0 && stat->siz == 0) ||
-	    (stat->cnt > 0 && stat->siz > 0));
-	  A(estat->cnt >= 0);
-	  A((estat->cnt == 0 && estat->siz == 0) ||
-	    (estat->cnt > 0 && estat->siz > 0));
+          A(stat->cnt >= 0);
+          A((stat->cnt == 0 && stat->siz == 0) ||
+            (stat->cnt > 0 && stat->siz > 0));
+          A(estat->cnt >= 0);
+          A((estat->cnt == 0 && estat->siz == 0) ||
+            (estat->cnt > 0 && estat->siz > 0));
 
-	  free(q);
+          free(q);
      }
 
      {
-	  /* delete minfo entry */
-	  struct minfo **i;
+          /* delete minfo entry */
+          struct minfo **i;
 
-	  for (i = &minfo; *i; i = &((*i)->next)) {
-	       if ((*i)->p == p) {
-		    struct minfo *i0 = (*i)->next;
-		    free(*i);
-		    *i = i0;
-		    return;
-	       }
-	  }
+          for (i = &minfo; *i; i = &((*i)->next)) {
+               if ((*i)->p == p) {
+                    struct minfo *i0 = (*i)->next;
+                    free(*i);
+                    *i = i0;
+                    return;
+               }
+          }
 
-	  A(0 /* no entry in minfo list */ );
+          A(0 /* no entry in minfo list */ );
      }
 }
 
-void fftw_malloc_print_minfo(void)
+void X(malloc_print_minfo)(void)
 {
      struct minfo *info;
      int what;
 
      static const char *names[MALLOC_WHAT_LAST] = {
-	  "EVERYTHING", 
-	  "PLANS", "SOLVERS", "PROBLEMS", "BUFFERS", 
+	  "EVERYTHING",
+	  "PLANS", "SOLVERS", "PROBLEMS", "BUFFERS",
 	  "HASHT", "TENSORS", "PLANNERS", "PAIRS", "TWIDDLES",
 	  "OTHER"
      };
 
      printf("%12s %8s %8s %10s %10s\n",
-	    "what", "cnt", "maxcnt", "siz", "maxsiz");
+            "what", "cnt", "maxcnt", "siz", "maxsiz");
 
      for (what = 0; what < MALLOC_WHAT_LAST; ++what) {
-	  struct mstat *stat = mstat + what;
-	  printf("%12s %8d %8d %10d %10d\n",
-		 names[what], stat->cnt, stat->maxcnt, 
-		 stat->siz, stat->maxsiz);
+          struct mstat *stat = mstat + what;
+          printf("%12s %8d %8d %10d %10d\n",
+                 names[what], stat->cnt, stat->maxcnt,
+                 stat->siz, stat->maxsiz);
      }
 
      if (minfo)
-	  printf("\nUnfreed allocations:\n");
+          printf("\nUnfreed allocations:\n");
 
      for (info = minfo; info; info = info->next) {
-	  printf("%s:%d:  %u bytes at %p\n",
-		 info->file, info->line, info->n, info->p);
+          printf("%s:%d:  %u bytes at %p\n",
+                 info->file, info->line, info->n, info->p);
      }
 }
 #else
@@ -227,17 +227,17 @@ void fftw_malloc_print_minfo(void)
  **********************************************************/
 /* production version, no hacks */
 
-void *fftw_malloc_plain(size_t n)
+void *X(malloc_plain)(size_t n)
 {
      void *p;
      if (n == 0)
-	  n = 1;
+          n = 1;
      p = malloc(n);
      CK(p);
      return p;
 }
 
-void fftw_free(void *p)
+void X(free)(void *p)
 {
      free(p);
 }

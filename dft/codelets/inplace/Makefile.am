@@ -15,7 +15,7 @@ BUILT_SOURCES=$(ALL_CODELETS) $(CODLIST)
 
 libdft_inplace_la_SOURCES = $(BUILT_SOURCES)
 
-SOLVTAB_NAME = fftw_solvtab_dft_inplace
+SOLVTAB_NAME = X(solvtab_dft_inplace)
 
 # special rules for regenerating codelets.
 include $(top_srcdir)/support/Makefile.codelets

@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: version.c,v 1.1.1.1 2002-06-02 18:42:32 athena Exp $ */
+/* $Id: version.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
 
 #include "config.h"
+#include "ifftw.h"
 
-const char *fftw_version = PACKAGE "-" VERSION;
-const char *fftw_cc = FFTW_CC;
+const char *X(version) = PACKAGE "-" VERSION;
+const char *X(cc) = FFTW_CC;

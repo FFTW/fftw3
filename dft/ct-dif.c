@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.4 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: ct-dif.c,v 1.5 2002-06-10 13:04:21 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -31,11 +31,11 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      plan_dft *cld = (plan_dft *) cld0;
 
      {
-	  uint i, m = ego->m, vl = ego->vl;
-	  int is = ego->is, ivs = ego->ivs;
+          uint i, m = ego->m, vl = ego->vl;
+          int is = ego->is, ivs = ego->ivs;
 
-	  for (i = 0; i < vl; ++i) 
-	       ego->k.dif(ri + i * ivs, ii + i * ivs, ego->W, ego->ios, m, is);
+          for (i = 0; i < vl; ++i)
+               ego->k.dif(ri + i * ivs, ii + i * ivs, ego->W, ego->ios, m, is);
      }
 
      /* two-dimensional r x vl sub-transform: */
@@ -44,17 +44,17 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 static int applicable(const solver_ct *ego, const problem *p_)
 {
-     if (fftw_dft_ct_applicable(ego, p_)) {
-	  const ct_desc *e = ego->desc;
-	  const problem_dft *p = (const problem_dft *) p_;
-	  iodim *d = p->sz.dims;
+     if (X(dft_ct_applicable)(ego, p_)) {
+          const ct_desc *e = ego->desc;
+          const problem_dft *p = (const problem_dft *) p_;
+          iodim *d = p->sz.dims;
 
-	  return (1 
-		  /* DIF destroys the input and we don't like it */
-		  && p->ri == p->ro
+          return (1
+                  /* DIF destroys the input and we don't like it */
+                  && p->ri == p->ro
 
-		  /* if hardwired strides, test whether they match */
-		  && (!e->is || e->is == (int)(d[0].n / e->radix) * d[0].is)
+                  /* if hardwired strides, test whether they match */
+                  && (!e->is || e->is == (int)(d[0].n / e->radix) * d[0].is)
 	       );
      }
      return 0;
@@ -62,11 +62,11 @@ static int applicable(const solver_ct *ego, const problem *p_)
 
 static void finish(plan_ct *ego)
 {
-     ego->ios = fftw_mkstride(ego->r, ego->m * ego->is);
+     ego->ios = X(mkstride)(ego->r, ego->m * ego->is);
      ego->super.super.flops =
-	 fftw_flops_add(ego->cld->flops,
-			fftw_flops_mul(ego->vl * ego->m,
-				       ego->slv->desc->flops));
+          X(flops_add)(ego->cld->flops,
+                       X(flops_mul)(ego->vl * ego->m,
+                                    ego->slv->desc->flops));
 }
 
 static problem *mkcld(const solver_ct *ego, const problem_dft *p)
@@ -75,14 +75,14 @@ static problem *mkcld(const solver_ct *ego, const problem_dft *p)
      const ct_desc *e = ego->desc;
      uint m = d[0].n / e->radix;
 
-     tensor radix = fftw_mktensor_1d(e->radix, m * d[0].is, d[0].os);
-     tensor cld_vec = fftw_tensor_append(radix, p->vecsz);
-     fftw_tensor_destroy(radix);
+     tensor radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
+     tensor cld_vec = X(tensor_append)(radix, p->vecsz);
+     X(tensor_destroy)(radix);
 
-     return 
-	  fftw_mkproblem_dft_d(
-	       fftw_mktensor_1d(m, d[0].is, e->radix * d[0].os),
-	       cld_vec, p->ri, p->ii, p->ro, p->io);
+     return
+          X(mkproblem_dft_d)(
+               X(mktensor_1d)(m, d[0].is, e->radix * d[0].os),
+               cld_vec, p->ri, p->ii, p->ro, p->io);
 }
 
 static int score(const solver *ego_, const problem *p_)
@@ -92,11 +92,11 @@ static int score(const solver *ego_, const problem *p_)
      uint n;
 
      if (!applicable(ego, p_))
-	  return BAD;
+          return BAD;
 
      n = p->sz.dims[0].n;
      if (n <= 16 || n / ego->desc->radix <= 4)
-	  return UGLY;
+          return UGLY;
 
      return GOOD;
 }
@@ -104,17 +104,19 @@ static int score(const solver *ego_, const problem *p_)
 
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
-     static const ctadt adt = { mkcld, finish, applicable, apply };
-     return fftw_mkplan_dft_ct((const solver_ct *) ego, p, plnr, &adt);
+     static const ctadt adt = {
+	  mkcld, finish, applicable, apply
+     };
+     return X(mkplan_dft_ct)((const solver_ct *) ego, p, plnr, &adt);
 }
 
 
-solver *fftw_mksolver_dft_ct_dif(kdft_dif codelet, const ct_desc *desc)
+solver *X(mksolver_dft_ct_dif)(kdft_dif codelet, const ct_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
      static const char name[] = "dft-dif";
      union kct k;
      k.dif = codelet;
 
-     return fftw_mksolver_dft_ct(k, desc, name, &sadt);
+     return X(mksolver_dft_ct)(k, desc, name, &sadt);
 }

@@ -18,26 +18,22 @@
  *
  */
 
-/* $Id: flops.c,v 1.3 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: fftw3.h,v 1.1 2002-06-10 13:04:21 athena Exp $ */
 
-#include "ifftw.h"
+/* FFTW installed header file */
+#ifndef __FFTW3_H__
+#define __FFTW3_H__
 
-flopcnt X(flops_add)(flopcnt a, flopcnt b)
-{
-     a.add += b.add;
-     a.mul += b.mul;
-     a.fma += b.fma;
-     return a;
-}
+/* determine precision and name-mangling scheme */
+#ifdef FFTW_SINGLE
+typedef float fftw_real;
+#define FFTW(name) sfftw_ ## name
+#else
+typedef double fftw_real;
+#define FFTW(name) dfftw_ ## name
+#endif
 
-flopcnt X(flops_mul)(uint a, flopcnt b)
-{
-     b.add *= a;
-     b.mul *= a;
-     b.fma *= a;
-     return b;
-}
+extern const char *FFTW(version);
+extern const char *FFTW(cc);
 
-const flopcnt X(flops_zero) = {
-     0, 0, 0
-};
+#endif				/* __FFTW3_H__ */

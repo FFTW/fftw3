@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.5 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: indirect.c,v 1.6 2002-06-10 13:04:21 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -52,15 +52,16 @@ static void apply_before(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
 
-     UNUSED(ro); UNUSED(io); /* input == output */
+     UNUSED(ro);
+     UNUSED(io); /* input == output */
 
      {
-	  plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
-	  cldcpy->apply(ego->cldcpy, ri, ii, ri, ii);
+          plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
+          cldcpy->apply(ego->cldcpy, ri, ii, ri, ii);
      }
      {
-	  plan_dft *cld = (plan_dft *) ego->cld;
-	  cld->apply(ego->cld, ri, ii, ri, ii);
+          plan_dft *cld = (plan_dft *) ego->cld;
+          cld->apply(ego->cld, ri, ii, ri, ii);
      }
 }
 
@@ -68,14 +69,17 @@ static problem *mkcld_before(const problem_dft *p)
 {
      uint i;
      tensor v, s;
-     v = fftw_tensor_copy(p->vecsz);
-     for (i = 0; i < v.rnk; ++i) v.dims[i].is = v.dims[i].os;
-     s = fftw_tensor_copy(p->sz);
-     for (i = 0; i < s.rnk; ++i) s.dims[i].is = s.dims[i].os;
-     return fftw_mkproblem_dft_d(s, v, p->ro, p->io, p->ro, p->io);
+     v = X(tensor_copy)(p->vecsz);
+     for (i = 0; i < v.rnk; ++i)
+          v.dims[i].is = v.dims[i].os;
+     s = X(tensor_copy)(p->sz);
+     for (i = 0; i < s.rnk; ++i)
+          s.dims[i].is = s.dims[i].os;
+     return X(mkproblem_dft_d)(s, v, p->ro, p->io, p->ro, p->io);
 }
 
-static const ndrct_adt adt_before = { 
+static const ndrct_adt adt_before =
+{
      apply_before, mkcld_before, "dft-indirect-before"
 };
 
@@ -89,12 +93,12 @@ static void apply_after(plan *ego_, R *ri, R *ii, R *ro, R *io)
      UNUSED(ro);
      UNUSED(io);		/* input == output */
      {
-	  plan_dft *cld = (plan_dft *) ego->cld;
-	  cld->apply(ego->cld, ri, ii, ri, ii);
+          plan_dft *cld = (plan_dft *) ego->cld;
+          cld->apply(ego->cld, ri, ii, ri, ii);
      }
      {
-	  plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
-	  cldcpy->apply(ego->cldcpy, ri, ii, ri, ii);
+          plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
+          cldcpy->apply(ego->cldcpy, ri, ii, ri, ii);
      }
 }
 
@@ -102,14 +106,17 @@ static problem *mkcld_after(const problem_dft *p)
 {
      uint i;
      tensor v, s;
-     v = fftw_tensor_copy(p->vecsz);
-     for (i = 0; i < v.rnk; ++i) v.dims[i].os = v.dims[i].is;
-     s = fftw_tensor_copy(p->sz);
-     for (i = 0; i < s.rnk; ++i) s.dims[i].os = s.dims[i].is;
-     return fftw_mkproblem_dft_d(s, v, p->ri, p->ii, p->ri, p->ii);
+     v = X(tensor_copy)(p->vecsz);
+     for (i = 0; i < v.rnk; ++i)
+          v.dims[i].os = v.dims[i].is;
+     s = X(tensor_copy)(p->sz);
+     for (i = 0; i < s.rnk; ++i)
+          s.dims[i].os = s.dims[i].is;
+     return X(mkproblem_dft_d)(s, v, p->ri, p->ii, p->ri, p->ii);
 }
 
-static const ndrct_adt adt_after = { 
+static const ndrct_adt adt_after =
+{
      apply_after, mkcld_after, "dft-indirect-after"
 };
 
@@ -117,9 +124,9 @@ static const ndrct_adt adt_after = {
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     fftw_plan_destroy(ego->cld);
-     fftw_plan_destroy(ego->cldcpy);
-     fftw_free(ego);
+     X(plan_destroy)(ego->cld);
+     X(plan_destroy)(ego->cldcpy);
+     X(free)(ego);
 }
 
 static void awake(plan *ego_, int flg)
@@ -140,19 +147,19 @@ static int applicable(const solver *ego_, const problem *p_)
 {
      UNUSED(ego_);
      if (DFTP(p_)) {
-	  const problem_dft *p = (const problem_dft *) p_;
-	  return (1
-		  && FINITE_RNK(p->vecsz.rnk)
+          const problem_dft *p = (const problem_dft *) p_;
+          return (1
+                  && FINITE_RNK(p->vecsz.rnk)
 
-		  /* problem must be in-place */
-		  && p->ri == p->ro
+                  /* problem must be in-place */
+                  && p->ri == p->ro
 
-		  /* problem must be a nontrivial transform, not just a copy */
-		  && p->sz.rnk > 0
+                  /* problem must be a nontrivial transform, not just a copy */
+                  && p->sz.rnk > 0
 
-		  /* problem must require some rearrangement of data */
-		  && !fftw_tensor_inplace_strides(p->sz)
-		  && !fftw_tensor_inplace_strides(p->vecsz)
+                  /* problem must require some rearrangement of data */
+                  && !X(tensor_inplace_strides)(p->sz)
+                  && !X(tensor_inplace_strides)(p->vecsz)
 	       );
      }
 
@@ -172,24 +179,26 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      problem *cldp;
      plan *cld = 0, *cldcpy = 0;
 
-     static const plan_adt padt = { 
-	  fftw_dft_solve, awake, print, destroy 
+     static const plan_adt padt = {
+	  X(dft_solve), awake, print, destroy
      };
 
      if (!applicable(ego_, p_))
-	  return (plan *) 0;
+          return (plan *) 0;
 
-     cldp = fftw_mkproblem_dft_d(fftw_mktensor(0),
-				 fftw_tensor_append(p->vecsz, p->sz),
-				 p->ri, p->ii, p->ri, p->ii);
+     cldp = X(mkproblem_dft_d)(X(mktensor)(0),
+                               X(tensor_append)(p->vecsz, p->sz),
+                               p->ri, p->ii, p->ri, p->ii);
      cldcpy = plnr->adt->mkplan(plnr, cldp);
-     fftw_problem_destroy(cldp);
-     if (!cldcpy) goto nada;
+     X(problem_destroy)(cldp);
+     if (!cldcpy)
+          goto nada;
 
      cldp = ego->adt->mkcld(p);
      cld = plnr->adt->mkplan(plnr, cldp);
-     fftw_problem_destroy(cldp);
-     if (!cld) goto nada;
+     X(problem_destroy)(cldp);
+     if (!cld)
+          goto nada;
 
      pln = MKPLAN_DFT(P, &padt, ego->adt->apply);
      pln->cld = cld;
@@ -201,8 +210,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     if (cld) fftw_plan_destroy(cld);
-     if (cldcpy) fftw_plan_destroy(cldcpy);
+     if (cld)
+          X(plan_destroy)(cld);
+     if (cldcpy)
+          X(plan_destroy)(cldcpy);
      return (plan *)0;
 }
 
@@ -214,11 +225,13 @@ static solver *mksolver(const ndrct_adt *adt)
      return &(slv->super);
 }
 
-void fftw_dft_indirect_register(planner *p)
+void X(dft_indirect_register)(planner *p)
 {
      uint i;
-     static const ndrct_adt *adts[] = { &adt_before, &adt_after };
+     static const ndrct_adt *adts[] = {
+	  &adt_before, &adt_after
+     };
 
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
-	  p->adt->register_solver(p, mksolver(adts[i]));
+          p->adt->register_solver(p, mksolver(adts[i]));
 }

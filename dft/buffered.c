@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.7 2002-06-09 19:34:54 athena Exp $ */
+/* $Id: buffered.c,v 1.8 2002-06-10 13:04:21 athena Exp $ */
 
 #include "dft.h"
 
@@ -59,24 +59,24 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      /* note unsigned i:  the obvious statement
 
-	     for (i = 0; i <= vl - nbuf; i += nbuf) 
+     for (i = 0; i <= vl - nbuf; i += nbuf) 
 
-        is wrong */
+     is wrong */
      for (i = nbuf; i <= vl; i += nbuf) {
-	  i1 = i - nbuf;
-	  /* transform to bufs: */
-	  cld->apply(ego->cld, ri + i1 * ivs, ii + i1 * ivs, bufs, bufs + 1);
+          i1 = i - nbuf;
+          /* transform to bufs: */
+          cld->apply(ego->cld, ri + i1 * ivs, ii + i1 * ivs, bufs, bufs + 1);
 
-	  /* copy back */
-	  cldcpy->apply(ego->cldcpy, bufs, bufs + 1,
-			ro + i1 * ovs, io + i1 * ovs);
+          /* copy back */
+          cldcpy->apply(ego->cldcpy, bufs, bufs + 1,
+                        ro + i1 * ovs, io + i1 * ovs);
      }
 
      /* Do the remaining transforms, if any: */
      cldrest = (plan_dft *) ego->cldrest;
      i1 = i - nbuf;
      cldrest->apply(ego->cldrest, ri + i1 * ivs, ii + i1 * ivs,
-		     ro + i1 * ovs, io + i1 * ovs);
+                    ro + i1 * ovs, io + i1 * ovs);
 }
 
 
@@ -89,34 +89,36 @@ static void awake(plan *ego_, int flg)
      ego->cldrest->adt->awake(ego->cldrest, flg);
 
      if (flg) {
-	  if (!ego->bufs)
-	       ego->bufs = 
-		    (R *) fftw_malloc(sizeof(R) * ego->nbuf * ego->bufdist * 2,
-				      BUFFERS);
+          if (!ego->bufs)
+               ego->bufs =
+                    (R *) fftw_malloc(sizeof(R) * ego->nbuf * ego->bufdist * 2,
+                                      BUFFERS);
      } else {
-	  if (ego->bufs) fftw_free(ego->bufs);
-	  ego->bufs = 0;
+          if (ego->bufs)
+               X(free)(ego->bufs);
+          ego->bufs = 0;
      }
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     if (ego->bufs) fftw_free(ego->bufs);
-     fftw_plan_destroy(ego->cldrest);
-     fftw_plan_destroy(ego->cldcpy);
-     fftw_plan_destroy(ego->cld);
-     fftw_free(ego);
+     if (ego->bufs)
+          X(free)(ego->bufs);
+     X(plan_destroy)(ego->cldrest);
+     X(plan_destroy)(ego->cldcpy);
+     X(plan_destroy)(ego->cld);
+     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(%s-%u%v/%u-%u%p%p%p)", 
-	      ego->slv->adt->nam, 
-	      ego->n, ego->nbuf, 
-	      ego->vl, ego->bufdist % ego->n,
-	      ego->cld, ego->cldcpy, ego->cldrest);
+     p->print(p, "(%s-%u%v/%u-%u%p%p%p)",
+              ego->slv->adt->nam,
+              ego->n, ego->nbuf,
+              ego->vl, ego->bufdist % ego->n,
+              ego->cld, ego->cldcpy, ego->cldrest);
 }
 
 static uint compute_nbuf(uint n, uint vl, const S *ego)
@@ -124,18 +126,18 @@ static uint compute_nbuf(uint n, uint vl, const S *ego)
      uint i, nbuf = ego->adt->nbuf, maxbufsz = ego->adt->maxbufsz;
 
      if (nbuf * n > maxbufsz)
-	  nbuf = fftw_uimax((uint)1, maxbufsz / n);
+          nbuf = X(uimax)((uint)1, maxbufsz / n);
 
      /*
       * Look for a buffer number (not too big) that divides the
       * vector length, in order that we only need one child plan:
       */
      for (i = nbuf; i < vl && i < 2 * nbuf; ++i)
-	  if (vl % i == 0)
-	       return i;
+          if (vl % i == 0)
+               return i;
 
      /* whatever... */
-     nbuf = fftw_uimin(nbuf, vl);
+     nbuf = X(uimin)(nbuf, vl);
      return nbuf;
 }
 
@@ -148,42 +150,42 @@ static int toobig(uint n, const S *ego)
 static int applicable(const problem *p_, const S *ego)
 {
      if (DFTP(p_)) {
-	  const problem_dft *p = (const problem_dft *) p_;
-	  iodim *d = p->sz.dims;
+          const problem_dft *p = (const problem_dft *) p_;
+          iodim *d = p->sz.dims;
 
-	  if (1 
+          if (1
 	      && p->vecsz.rnk <= 1
 	      && p->sz.rnk == 1
-	      
+
 	      /*  should decide whether to be BAD or UGLY when problem
 		  is too big. */
 	      && !toobig(d[0].n, ego)
 	       ) {
 
-	       /*
+               /*
 		 In principle, the buffered transforms might
 		 be useful when working out of place.
 		 However, in order to prevent infinite loops
 		 in the planner, we require that the output
 		 stride of the buffered transforms be less
 		 than greater than 2.
-	       */
-	       if (p->ri != p->ro) 
-		    return (d[0].os > 2);
+               */
+               if (p->ri != p->ro)
+                    return (d[0].os > 2);
 
-	       /* We can always do a single transform in-place */
-	       if (p->vecsz.rnk == 0)
-		    return 1;
+               /* We can always do a single transform in-place */
+               if (p->vecsz.rnk == 0)
+                    return 1;
 
-	       /*
+               /*
 		* If the problem is in place, the input/output strides must
 		* be the same or the whole thing must fit in the buffer.
 		*/
-	       return ((fftw_tensor_inplace_strides(p->sz) &&
-			fftw_tensor_inplace_strides(p->vecsz))
-		       || (compute_nbuf(d[0].n, p->vecsz.dims[0].n, ego) 
-			   == p->vecsz.dims[0].n));
-	  }
+               return ((X(tensor_inplace_strides)(p->sz) &&
+                        X(tensor_inplace_strides)(p->vecsz))
+                       || (compute_nbuf(d[0].n, p->vecsz.dims[0].n, ego)
+                           == p->vecsz.dims[0].n));
+          }
      }
      return 0;
 }
@@ -193,11 +195,11 @@ static int score(const solver *ego_, const problem *p_)
      const S *ego = (const S *) ego_;
      const problem_dft *p;
      if (!applicable(p_, ego))
-	  return BAD;
+          return BAD;
 
      p = (const problem_dft *) p_;
      if (p->ri != p->ro)
-	  return UGLY;
+          return UGLY;
 
      return GOOD;
 }
@@ -216,74 +218,78 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      uint nbuf = 0, bufdist, n, vl;
      int ivs, ovs;
 
-     static const plan_adt padt = { 
-	  fftw_dft_solve, awake, print, destroy 
+     static const plan_adt padt = {
+	  X(dft_solve), awake, print, destroy
      };
 
 
      if (!applicable(p_, ego))
-	  goto nada;
+          goto nada;
 
-     n = fftw_tensor_sz(p->sz);
-     vl = fftw_tensor_sz(p->vecsz);
+     n = X(tensor_sz)(p->sz);
+     vl = X(tensor_sz)(p->vecsz);
 
      nbuf = compute_nbuf(n, vl, ego);
      A(nbuf > 0);
 
-     /*  
+     /*
       * Determine BUFDIST, the offset between successive array bufs.
       * bufdist = n + skew, where skew is chosen such that bufdist %
       * skew_alignment = skew.
       */
      if (vl == 1) {
-	  bufdist = n;
-	  ivs = ovs = 0;
+          bufdist = n;
+          ivs = ovs = 0;
      } else {
-	  bufdist = 
-	       n + ((adt->skew_alignment + adt->skew - n % adt->skew_alignment)
-		    % adt->skew_alignment);
-	  A(p->vecsz.rnk == 1);
-	  ivs = p->vecsz.dims[0].is;
-	  ovs = p->vecsz.dims[0].os;
+          bufdist =
+               n + ((adt->skew_alignment + adt->skew - n % adt->skew_alignment)
+                    % adt->skew_alignment);
+          A(p->vecsz.rnk == 1);
+          ivs = p->vecsz.dims[0].is;
+          ovs = p->vecsz.dims[0].os;
      }
 
      /* initial allocation for the purpose of planning */
      bufs = (R *) fftw_malloc(sizeof(R) * nbuf * bufdist * 2, BUFFERS);
 
-     cldp = 
-	  fftw_mkproblem_dft_d(
-	       fftw_mktensor_1d(n, p->sz.dims[0].is, 2),
-	       fftw_mktensor_1d(nbuf, ivs, bufdist * 2),
-	       p->ri, p->ii, bufs, bufs + 1);
+     cldp =
+          X(mkproblem_dft_d)(
+               X(mktensor_1d)(n, p->sz.dims[0].is, 2),
+               X(mktensor_1d)(nbuf, ivs, bufdist * 2),
+               p->ri, p->ii, bufs, bufs + 1);
 
      cld = plnr->adt->mkplan(plnr, cldp);
-     fftw_problem_destroy(cldp);
-     if (!cld) goto nada;
+     X(problem_destroy)(cldp);
+     if (!cld)
+          goto nada;
 
      /* copying back from the buffer is a rank-0 transform: */
-     cldp = 
-	  fftw_mkproblem_dft_d(
-	       fftw_mktensor(0),
-	       fftw_mktensor_2d(nbuf, bufdist * 2, ovs, 
-				n, 2, p->sz.dims[0].os),
-	       bufs, bufs + 1, p->ro, p->io);
+     cldp =
+          X(mkproblem_dft_d)(
+               X(mktensor)(0),
+               X(mktensor_2d)(nbuf, bufdist * 2, ovs,
+                              n, 2, p->sz.dims[0].os),
+               bufs, bufs + 1, p->ro, p->io);
 
      cldcpy = plnr->adt->mkplan(plnr, cldp);
-     fftw_problem_destroy(cldp);
-     if (!cldcpy) goto nada;
+     X(problem_destroy)(cldp);
+     if (!cldcpy)
+          goto nada;
 
      /* deallocate buffers, let awake() allocate them for real */
-     fftw_free(bufs); bufs = 0;
+     X(free)(bufs);
+     bufs = 0;
 
      /* plan the leftover transforms (cldrest): */
-     cldp = 
-	  fftw_mkproblem_dft_d(
-	       fftw_tensor_copy(p->sz),
-	       fftw_mktensor_1d(vl % nbuf, ivs, ovs),
-	       p->ri, p->ii, p->ro, p->io);
+     cldp =
+          X(mkproblem_dft_d)(
+               X(tensor_copy)(p->sz),
+               X(mktensor_1d)(vl % nbuf, ivs, ovs),
+               p->ri, p->ii, p->ro, p->io);
      cldrest = plnr->adt->mkplan(plnr, cldp);
-     fftw_problem_destroy(cldp);
-     if (!cldrest) goto nada;
+     X(problem_destroy)(cldp);
+     if (!cldrest)
+          goto nada;
 
      pln = MKPLAN_DFT(P, &padt, apply);
      pln->cld = cld;
@@ -300,22 +306,22 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->bufs = 0;		/* let awake() reallocate buffer space */
 
      pln->super.super.cost =
-	  (cldcpy->cost + cld->cost) * (vl / nbuf) + cldrest->cost;
+          (cldcpy->cost + cld->cost) * (vl / nbuf) + cldrest->cost;
      pln->super.super.flops =
-	 fftw_flops_add(fftw_flops_mul((vl / nbuf), cld->flops),
-			cldrest->flops);
+          X(flops_add)(X(flops_mul)((vl / nbuf), cld->flops),
+                       cldrest->flops);
 
      return &(pln->super.super);
 
-   nada:
+ nada:
      if (bufs)
-	  fftw_free(bufs);
+          X(free)(bufs);
      if (cldrest)
-	  fftw_plan_destroy(cldrest);
+          X(plan_destroy)(cldrest);
      if (cldcpy)
-	  fftw_plan_destroy(cldcpy);
+          X(plan_destroy)(cldcpy);
      if (cld)
-	  fftw_plan_destroy(cld);
+          X(plan_destroy)(cld);
      return (plan *) 0;
 }
 
@@ -328,11 +334,11 @@ static solver *mksolver(const bufadt *adt)
 }
 
 
-void fftw_dft_buffered_register(planner *p)
+void X(dft_buffered_register)(planner *p)
 {
      /* FIXME: what are good defaults? */
      static const bufadt adt = {
-	  /* nbuf */           8,   
+	  /* nbuf */           8,
 	  /* maxbufsz */       (16384 / sizeof(R)),
 	  /* skew_alignment */ 8,
 	  /* skew */           5,

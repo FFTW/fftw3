@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: assert.c,v 1.1.1.1 2002-06-02 18:42:32 athena Exp $ */
+/* $Id: assert.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
 #include "ifftw.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-void fftw_assertion_failed(const char *s, int line, char *file)
+void X(assertion_failed)(const char *s, int line, char *file)
 {
      fflush(stdout);
      fprintf(stderr, "fftw: %s:%d: assertion failed: %s\n", file, line, s);

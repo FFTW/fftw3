@@ -18,12 +18,12 @@
  *
  */
 
-/* $Id: solve.c,v 1.1 2002-06-02 23:49:03 athena Exp $ */
+/* $Id: solve.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
 
 #include "dft.h"
 
 /* use the apply() operation for DFT problems */
-void fftw_dft_solve(plan *ego_, const problem *p_)
+void X(dft_solve)(plan *ego_, const problem *p_)
 {
      plan_dft *ego = (plan_dft *) ego_;
      const problem_dft *p = (const problem_dft *) p_;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.4 2002-06-05 15:28:09 athena Exp $ */
+/* $Id: timer.c,v 1.5 2002-06-10 13:04:21 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdio.h>
@@ -57,20 +57,20 @@
 #endif
 
 #if defined(HAVE_GETTIMEOFDAY) && !defined(HAVE_SECONDS_TIMER)
-   typedef struct timeval seconds;
+typedef struct timeval seconds;
 
-   static seconds getseconds(void)
-   {
-	struct timeval tv;
-	gettimeofday(&tv, 0);
-	return tv;
-   }
+static seconds getseconds(void)
+{
+     struct timeval tv;
+     gettimeofday(&tv, 0);
+     return tv;
+}
 
-   static double elapsed_sec(seconds t1, seconds t0)
-   {
-	return (double)(t1.tv_sec - t0.tv_sec) +
-	     (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6;
-   }
+static double elapsed_sec(seconds t1, seconds t0)
+{
+     return (double)(t1.tv_sec - t0.tv_sec) +
+	  (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6;
+}
 
 #  define HAVE_SECONDS_TIMER
 #endif
@@ -85,9 +85,8 @@ static double measure(plan *pln, const problem *p, int iter)
      int i;
 
      t0 = getticks();
-     for (i = 0; i < iter; ++i) {
-	  pln->adt->solve(pln, p);
-     }
+     for (i = 0; i < iter; ++i) 
+          pln->adt->solve(pln, p);
      t1 = getticks();
      return elapsed(t1, t0);
 }
@@ -99,7 +98,7 @@ static double measure(plan *pln, const problem *p, int iter)
  * the time is returned in some arbitrary unit if this
  * allows the use of fast timers.
  */
-double fftw_measure_execution_time(plan *pln, const problem *p)
+double X(measure_execution_time)(plan *pln, const problem *p)
 {
      seconds begin, now;
      double t, tmax, tmin;
@@ -111,34 +110,36 @@ double fftw_measure_execution_time(plan *pln, const problem *p)
 
  start_over:
      for (iter = 1; iter; iter *= 2) {
-	  tmin = 1.0E10;
-	  tmax = -1.0E10;
+          tmin = 1.0E10;
+          tmax = -1.0E10;
 
-	  begin = getseconds();
-	  /* repeat the measurement TIME_REPEAT times */
-	  for (repeat = 0; repeat < TIME_REPEAT; ++repeat) {
-	       t = measure(pln, p, iter);
+          begin = getseconds();
+          /* repeat the measurement TIME_REPEAT times */
+          for (repeat = 0; repeat < TIME_REPEAT; ++repeat) {
+               t = measure(pln, p, iter);
 
-	       if (t < 0)
-		    goto start_over;
+               if (t < 0)
+                    goto start_over;
 
-	       if (t < tmin) tmin = t;
-	       if (t > tmax) tmax = t;
+               if (t < tmin)
+                    tmin = t;
+               if (t > tmax)
+                    tmax = t;
 
-	       /* do not run for too long */
-	       now = getseconds();
-	       t = elapsed_sec(now, begin);
+               /* do not run for too long */
+               now = getseconds();
+               t = elapsed_sec(now, begin);
 
-	       if (t > FFTW_TIME_LIMIT)
-		    break;
-	  }
+               if (t > FFTW_TIME_LIMIT)
+                    break;
+          }
 
-	  if (tmin >= TIME_MIN) {
-	       tmin /= (double) iter;
-	       tmax /= (double) iter;
-	       pln->adt->awake(pln, SLEEP);
-	       return tmin;
-	  }
+          if (tmin >= TIME_MIN) {
+               tmin /= (double) iter;
+               tmax /= (double) iter;
+               pln->adt->awake(pln, SLEEP);
+               return tmin;
+          }
      }
      goto start_over; /* may happen if timer is screwed up */
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.6 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: planner.c,v 1.7 2002-06-10 13:04:21 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -58,7 +58,7 @@ static pair *solvers(planner *ego)
 
 static void register_solver(planner *ego, solver *s)
 {
-     fftw_solver_use(s);
+     X(solver_use)(s);
      ego->solvers = cons(s, ego->solvers);
 }
 
@@ -83,10 +83,10 @@ static int lookup(planner *ego, problem *p, plan **pln)
      h = hash(ego, p);
 
      for (l = ego->sols[h]; l; l = l->cdr) {
-	  if (p->adt->equal(p, l->p)) {
-	       *pln = l->pln;
-	       return 1;
-	  }
+          if (p->adt->equal(p, l->p)) {
+               *pln = l->pln;
+               return 1;
+          }
      }
      return 0;
 }
@@ -103,42 +103,41 @@ static void rehash(planner *ego)
      unsigned int osiz = ego->hashsiz;
      unsigned int nsiz = 2 * osiz + 1;
      solutions **osol = ego->sols;
-     solutions **nsol = 
-	  (solutions **)fftw_malloc(nsiz * sizeof(solutions *), HASHT);
+     solutions **nsol =
+          (solutions **)fftw_malloc(nsiz * sizeof(solutions *), HASHT);
      solutions *s, *s_cdr;
      unsigned int h;
 
-     for (h = 0; h < nsiz; ++h) {
-	  nsol[h] = 0;
-     }
+     for (h = 0; h < nsiz; ++h) 
+          nsol[h] = 0;
 
      ego->hashsiz = nsiz;
      ego->sols = nsol;
 
      for (h = 0; h < osiz; ++h) {
-	  for (s = osol[h]; s; s = s_cdr) {
-	       s_cdr = s->cdr;
-	       really_insert(ego, s);
-	  }
+          for (s = osol[h]; s; s = s_cdr) {
+               s_cdr = s->cdr;
+               really_insert(ego, s);
+          }
      }
 
      if (osol)
-	  fftw_free(osol);
+          X(free)(osol);
 }
 
 static void insert(planner *ego, problem *p, plan *plan)
 {
      solutions *l = (solutions *)
-	 fftw_malloc(sizeof(solutions), HASHT);
+	  fftw_malloc(sizeof(solutions), HASHT);
 
      ++ego->cnt;
      if (ego->cnt > ego->hashsiz)
-	  rehash(ego);
+          rehash(ego);
 
      if (plan)
-	  fftw_plan_use(plan);
+          X(plan_use)(plan);
      l->pln = plan;
-     l->p = fftw_problem_dup(p);
+     l->p = X(problem_dup)(p);
 
      really_insert(ego, l);
 }
@@ -148,15 +147,15 @@ static plan *mkplan(planner *ego, problem *p)
      plan *best;
 
      if (lookup(ego, p, &best)) {
-	  if (best) 
-	       fftw_plan_use(best);
-	  return best;
+          if (best)
+               X(plan_use)(best);
+          return best;
      }
 
      best = ego->inferior_mkplan(ego, p);
 
-     if (ego->memoize && (best || ego->memoize_failures)) 
-	  insert(ego, p, best);
+     if (ego->memoize && (best || ego->memoize_failures))
+          insert(ego, p, best);
 
      return best;
 }
@@ -166,30 +165,30 @@ static void htab_destroy(planner *ego)
      solutions *s;
 
      if (ego) {
-	  unsigned int h;
+          unsigned int h;
 
-	  for (h = 0; h < ego->hashsiz; ++h) {
-	       s = ego->sols[h];
-	       while (s) {
-		    solutions *s_cdr = s->cdr;
-		    if (s->pln)
-			 fftw_plan_destroy(s->pln);
-		    fftw_problem_destroy(s->p);
-		    fftw_free(s);
-		    s = s_cdr;
-	       }
-	  }
+          for (h = 0; h < ego->hashsiz; ++h) {
+               s = ego->sols[h];
+               while (s) {
+                    solutions *s_cdr = s->cdr;
+                    if (s->pln)
+                         X(plan_destroy)(s->pln);
+                    X(problem_destroy)(s->p);
+                    X(free)(s);
+                    s = s_cdr;
+               }
+          }
 
-	  fftw_free(ego->sols);
+          X(free)(ego->sols);
      }
 }
 
 /*
  * create a planner
  */
-planner *fftw_mkplanner(size_t sz, 
-			plan *(*inferior_mkplan)(planner *, problem *),
-			void (*destroy) (planner *))
+planner *X(mkplanner)(size_t sz,
+                      plan *(*inferior_mkplan)(planner *, problem *),
+                      void (*destroy) (planner *))
 {
      static const planner_adt padt = {
 	  car, cdr, solvers, register_solver, mkplan
@@ -213,29 +212,29 @@ planner *fftw_mkplanner(size_t sz,
      return p;
 }
 
-void fftw_planner_destroy(planner *ego)
+void X(planner_destroy)(planner *ego)
 {
      pair *l, *l0;
 
      /* destroy local state, if any */
      if (ego->destroy)
-	  ego->destroy(ego);
+          ego->destroy(ego);
 
      /* destroy hash table */
      htab_destroy(ego);
 
      /* destroy all solvers */
      for (l = ego->solvers; l; l = l0) {
-	  l0 = cdr(l);
-	  fftw_solver_destroy(car(l));
-	  fftw_free(l);
+          l0 = cdr(l);
+          X(solver_destroy)(car(l));
+          X(free)(l);
      }
 
-     fftw_free(ego);
+     X(free)(ego);
 }
 
 /* set planner hook */
-void fftw_planner_set_hook(planner *p, void (*hook)(plan *, problem *))
+void X(planner_set_hook)(planner *p, void (*hook)(plan *, problem *))
 {
      p->hook = hook;
 }
@@ -259,36 +258,35 @@ void fftw_planner_dump(planner *ego, int verbose)
      solutions *s;
      unsigned int h;
      if (verbose) {
-	  printer *pr = fftw_mkprinter(sizeof(printer), putchr);
-	  for (h = 0; h < ego->hashsiz; ++h) {
-	       printf("bucket %d\n", h);
+          printer *pr = X(mkprinter)(sizeof(printer), putchr);
+          for (h = 0; h < ego->hashsiz; ++h) {
+               printf("bucket %d\n", h);
 
-	       for (s = ego->sols[h]; s; s = s->cdr) {
-		    if (s->pln) {
-			 s->pln->adt->print(s->pln, pr);
-		    } else {
-			 printf("(null)");
-		    }
-		    printf("\n");
-	       }
-	       printf("\n");
-	  }
-	  fftw_printer_destroy(pr);
+               for (s = ego->sols[h]; s; s = s->cdr) {
+                    if (s->pln) 
+                         s->pln->adt->print(s->pln, pr);
+		    else 
+                         printf("(null)");
+                    printf("\n");
+               }
+               printf("\n");
+          }
+          X(printer_destroy)(pr);
      }
 
      for (h = 0; h < ego->hashsiz; ++h) {
-	  int l = 0;
+          int l = 0;
 
-	  for (s = ego->sols[h]; s; s = s->cdr) {
-	       ++l;
-	       ++cnt;
-	       if (!s->pln)
-		    ++cnt_null;
-	  }
-	  if (l > max_len)
-	       max_len = l;
-	  if (!l)
-	       ++empty;
+          for (s = ego->sols[h]; s; s = s->cdr) {
+               ++l;
+               ++cnt;
+               if (!s->pln)
+                    ++cnt_null;
+          }
+          if (l > max_len)
+               max_len = l;
+          if (!l)
+               ++empty;
      }
 
      printf("ntry = %d\n", ego->ntry);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop.c,v 1.3 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: nop.c,v 1.4 2002-06-10 13:04:21 athena Exp $ */
 
 /* plans for vrank -infty DFTs (nothing to do) */
 
@@ -37,8 +37,8 @@ static int applicable(const solver *ego_, const problem *p_)
 {
      UNUSED(ego_);
      if (DFTP(p_)) {
-	  const problem_dft *p = (const problem_dft *) p_;
-	  return 0
+          const problem_dft *p = (const problem_dft *) p_;
+          return 0
 	       /* case 1 : -infty vector rank */
 	       || (p->vecsz.rnk == RNK_MINFTY)
 
@@ -46,16 +46,16 @@ static int applicable(const solver *ego_, const problem *p_)
 	       || (1
 		   && p->sz.rnk == 0
 		   && FINITE_RNK(p->vecsz.rnk)
-		   && p->ro == p->ri 
-		   && fftw_tensor_inplace_strides(p->vecsz)
-		    );
+		   && p->ro == p->ri
+		   && X(tensor_inplace_strides)(p->vecsz)
+                    );
      }
      return 0;
 }
 
 static void destroy(plan *ego)
 {
-     fftw_free(ego);
+     X(free)(ego);
 }
 
 static void print(plan *ego, printer *p)
@@ -71,15 +71,15 @@ static int score(const solver *ego, const problem *p)
 
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
-     static const plan_adt padt = { 
-	  fftw_dft_solve, fftw_null_awake, print, destroy 
+     static const plan_adt padt = {
+	  X(dft_solve), X(null_awake), print, destroy
      };
      plan_dft *pln;
 
      UNUSED(plnr);
 
      if (!applicable(ego, p))
-	  return (plan *) 0;
+          return (plan *) 0;
      pln = MKPLAN_DFT(plan_dft, &padt, apply);
      return &(pln->super);
 }
@@ -90,7 +90,7 @@ static solver *mksolver(void)
      return MKSOLVER(solver, &sadt);
 }
 
-void fftw_dft_nop_register(planner *p)
+void X(dft_nop_register)(planner *p)
 {
      p->adt->register_solver(p, mksolver());
 }

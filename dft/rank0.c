@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.7 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: rank0.c,v 1.8 2002-06-10 13:04:21 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -51,11 +51,11 @@ typedef struct {
 static int applicable(const solver *ego_, const problem *p_)
 {
      if (DFTP(p_)) {
-	  const S *ego = (const S *) ego_;
-	  const problem_dft *p = (const problem_dft *) p_;
-	  return (1 
-		  && p->sz.rnk == 0
-		  && ego->adt->applicable(p)
+          const S *ego = (const S *) ego_;
+          const problem_dft *p = (const problem_dft *) p_;
+          return (1
+                  && p->sz.rnk == 0
+                  && ego->adt->applicable(p)
 	       );
      }
      return 0;
@@ -75,7 +75,10 @@ static int applicable_1(const problem_dft *p)
      return (p->vecsz.rnk == 0);
 }
 
-static const rnk0adt adt_cpy1 = { apply_1, applicable_1, "dft-rank0-cpy1" };
+static const rnk0adt adt_cpy1 =
+{
+     apply_1, applicable_1, "dft-rank0-cpy1"
+};
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 dft, vl > 1: just a copy loop (unroll 4) */
@@ -86,32 +89,32 @@ static void apply_vec(plan *ego_, R *ri, R *ii, R *ro, R *io)
      int ivs = ego->ivs, ovs = ego->ovs;
 
      for (i = 4; i <= vl; i += 4) {
-	  R r0, r1, r2, r3;
-	  R i0, i1, i2, i3;
+          R r0, r1, r2, r3;
+          R i0, i1, i2, i3;
 
-	  r0 = ri[(i - 4) * ivs];
-	  i0 = ii[(i - 4) * ivs];
-	  r1 = ri[(i - 3) * ivs];
-	  i1 = ii[(i - 3) * ivs];
-	  r2 = ri[(i - 2) * ivs];
-	  i2 = ii[(i - 2) * ivs];
-	  r3 = ri[(i - 1) * ivs];
-	  i3 = ii[(i - 1) * ivs];
-	  ro[(i - 4) * ovs] = r0;
-	  io[(i - 4) * ovs] = i0;
-	  ro[(i - 3) * ovs] = r1;
-	  io[(i - 3) * ovs] = i1;
-	  ro[(i - 2) * ovs] = r2;
-	  io[(i - 2) * ovs] = i2;
-	  ro[(i - 1) * ovs] = r3;
-	  io[(i - 1) * ovs] = i3;
+          r0 = ri[(i - 4) * ivs];
+          i0 = ii[(i - 4) * ivs];
+          r1 = ri[(i - 3) * ivs];
+          i1 = ii[(i - 3) * ivs];
+          r2 = ri[(i - 2) * ivs];
+          i2 = ii[(i - 2) * ivs];
+          r3 = ri[(i - 1) * ivs];
+          i3 = ii[(i - 1) * ivs];
+          ro[(i - 4) * ovs] = r0;
+          io[(i - 4) * ovs] = i0;
+          ro[(i - 3) * ovs] = r1;
+          io[(i - 3) * ovs] = i1;
+          ro[(i - 2) * ovs] = r2;
+          io[(i - 2) * ovs] = i2;
+          ro[(i - 1) * ovs] = r3;
+          io[(i - 1) * ovs] = i3;
      }
      for (i -= 4; i < vl; ++i) {
-	  R r0, i0;
-	  r0 = ri[i * ivs];
-	  i0 = ii[i * ivs];
-	  ro[i * ovs] = r0;
-	  io[i * ovs] = i0;
+          R r0, i0;
+          r0 = ri[i * ivs];
+          i0 = ii[i * ivs];
+          ro[i * ovs] = r0;
+          io[i * ovs] = i0;
      }
 }
 
@@ -120,7 +123,10 @@ static int applicable_vec(const problem_dft *p)
      return (p->vecsz.rnk == 1 && p->ro != p->ri);
 }
 
-static const rnk0adt adt_vec = { apply_vec, applicable_vec, "dft-rank0-vec" };
+static const rnk0adt adt_vec =
+{
+     apply_vec, applicable_vec, "dft-rank0-vec"
+};
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 dft, vl > 1, [io]vs == 1, using memcpy */
@@ -135,13 +141,14 @@ static void apply_io1(plan *ego_, R *ri, R *ii, R *ro, R *io)
 static int applicable_io1(const problem_dft *p)
 {
      return (1
-	     && applicable_vec(p)
-	     && p->vecsz.dims[0].is == 1
-	     && p->vecsz.dims[0].os == 1
+             && applicable_vec(p)
+             && p->vecsz.dims[0].is == 1
+             && p->vecsz.dims[0].os == 1
 	  );
 }
 
-static const rnk0adt adt_io1 = {
+static const rnk0adt adt_io1 =
+{
      apply_io1, applicable_io1, "dft-rank0-io1-memcpy"
 };
 
@@ -159,15 +166,16 @@ static void apply_io2(plan *ego_, R *ri, R *ii, R *ro, R *io)
 static int applicable_io2(const problem_dft *p)
 {
      return (1
-	     && applicable_vec(p)
-	     && p->vecsz.dims[0].is == 2
-	     && p->vecsz.dims[0].os == 2 
-	     && p->ii == p->ri + 1 && p->io == p->ro + 1
+             && applicable_vec(p)
+             && p->vecsz.dims[0].is == 2
+             && p->vecsz.dims[0].os == 2
+             && p->ii == p->ri + 1 && p->io == p->ro + 1
 	  );
 }
 
-static const rnk0adt adt_io2 = { 
-     apply_io2, applicable_io2, "dft-rank0-io2-memcpy" 
+static const rnk0adt adt_io2 =
+{
+     apply_io2, applicable_io2, "dft-rank0-io2-memcpy"
 };
 
 /*-----------------------------------------------------------------------*/
@@ -175,7 +183,7 @@ static const rnk0adt adt_io2 = {
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     fftw_free(ego);
+     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)
@@ -186,7 +194,7 @@ static void print(plan *ego_, printer *p)
 
 static int score(const solver *ego, const problem *p)
 {
-    return (applicable(ego, p)) ? GOOD : BAD;
+     return (applicable(ego, p)) ? GOOD : BAD;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -197,23 +205,23 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      uint vl;
      int is, os;
 
-     static const plan_adt padt = { 
-	  fftw_dft_solve, fftw_null_awake, print, destroy 
+     static const plan_adt padt = {
+	  X(dft_solve), X(null_awake), print, destroy
      };
 
      UNUSED(plnr);
 
      if (!applicable(ego_, p_))
-	  return (plan *) 0;
+          return (plan *) 0;
 
      p = (const problem_dft *) p_;
      if (p->vecsz.rnk == 0) {
-	  vl = 1U;
-	  is = os = 1;
+          vl = 1U;
+          is = os = 1;
      } else {
-	  vl = p->vecsz.dims[0].n;
-	  is = p->vecsz.dims[0].is;
-	  os = p->vecsz.dims[0].os;
+          vl = p->vecsz.dims[0].n;
+          is = p->vecsz.dims[0].is;
+          os = p->vecsz.dims[0].os;
      }
 
      pln = MKPLAN_DFT(P, &padt, ego->adt->apply);
@@ -223,7 +231,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->ovs = os;
      pln->slv = ego;
      pln->super.super.cost = 1.0;	/* FIXME? */
-     pln->super.super.flops = fftw_flops_zero;
+     pln->super.super.flops = X(flops_zero);
      return &(pln->super.super);
 }
 
@@ -235,7 +243,7 @@ static solver *mksolver(const rnk0adt *adt)
      return &(slv->super);
 }
 
-void fftw_dft_rank0_register(planner *p)
+void X(dft_rank0_register)(planner *p)
 {
      uint i;
      static const rnk0adt *adts[] = {
@@ -243,5 +251,5 @@ void fftw_dft_rank0_register(planner *p)
      };
 
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
-	  p->adt->register_solver(p, mksolver(adts[i]));
+          p->adt->register_solver(p, mksolver(adts[i]));
 }

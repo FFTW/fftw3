@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.2 2002-06-08 13:34:58 athena Exp $ */
+/* $Id: codelet.h,v 1.3 2002-06-10 13:04:21 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -60,9 +60,9 @@ static __inline__ R FNMS(R a, R b, R c)
 #endif
 
 #if defined(__GNUC__) && defined(__i386__)
-/* 
-   Inline loop in notw codelets.
-   This is a good idea on Pentia and a bad idea everywhere else
+/*
+  Inline loop in notw codelets.
+  This is a good idea on Pentia and a bad idea everywhere else
 */
 
 #define INLINE_KDFT __inline__
@@ -84,8 +84,8 @@ typedef struct {
 } kdft_desc;
 
 typedef void (*kdft) (const R *ri, const R *ii, R *ro, R *io,
-		      stride is, stride os, uint vl, int ivs, int ovs);
-void fftw_kdft_register(planner *p, kdft codelet, const kdft_desc *desc);
+                      stride is, stride os, uint vl, int ivs, int ovs);
+void X(kdft_register)(planner *p, kdft codelet, const kdft_desc *desc);
 
 
 typedef struct {
@@ -98,22 +98,22 @@ typedef struct {
 
 
 typedef const R *(*kdft_dit) (R *rioarray, R *iioarray, const R *W,
-			      stride ios, uint m, int dist);
-void fftw_kdft_dit_register(planner *p, kdft_dit codelet, const ct_desc *desc);
+                              stride ios, uint m, int dist);
+void X(kdft_dit_register)(planner *p, kdft_dit codelet, const ct_desc *desc);
 
 
 typedef const R *(*kdft_difsq) (R *rioarray, R *iioarray,
-				const R *W, stride is, stride vs,
-				uint m, int dist);
-void fftw_kdft_difsq_register(planner *p, kdft_difsq codelet,
-			      const ct_desc *desc);
+                                const R *W, stride is, stride vs,
+                                uint m, int dist);
+void X(kdft_difsq_register)(planner *p, kdft_difsq codelet,
+                            const ct_desc *desc);
 
 
 typedef const R *(*kdft_dif) (R *rioarray, R *iioarray, const R *W,
-			      stride ios, uint m, int dist);
-void fftw_kdft_dif_register(planner *p, kdft_dif codelet, const ct_desc *desc);
+                              stride ios, uint m, int dist);
+void X(kdft_dif_register)(planner *p, kdft_dif codelet, const ct_desc *desc);
 
-extern solvtab fftw_solvtab_dft_standard;
-extern solvtab fftw_solvtab_dft_inplace;
+extern solvtab X(solvtab_dft_standard);
+extern solvtab X(solvtab_dft_inplace);
 
 #endif				/* __CODELET_H__ */

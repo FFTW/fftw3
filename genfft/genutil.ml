@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.1.1.1 2002-06-02 18:42:29 athena Exp $ *)
+(* $Id: genutil.ml,v 1.2 2002-06-10 13:04:21 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -213,7 +213,7 @@ let check_size () =
   | None -> failwith "must specify -n"
 
 let declare_register_fcn name =
-  "void fftw_codelet_" ^ name ^ "(planner *p)\n"
+  "void X(codelet_" ^ name ^ ")(planner *p)\n"
 
 let parse user_speclist usage =
   Arg.parse
