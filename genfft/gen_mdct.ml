@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_mdct.ml,v 1.3 2003-06-01 00:43:31 stevenj Exp $ *)
+(* $Id: gen_mdct.ml,v 1.4 2003-06-05 17:41:34 stevenj Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_mdct.ml,v 1.3 2003-06-01 00:43:31 stevenj Exp $"
+let cvsid = "$Id: gen_mdct.ml,v 1.4 2003-06-05 17:41:34 stevenj Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -87,6 +87,22 @@ let speclist = [
   "-mdct-window-sym",
   Arg.Unit(fun () -> mode := MDCT_WINDOW_SYM),
   " generate an MDCT codelet with symmetric window array";
+
+  "-imdct",
+  Arg.Unit(fun () -> mode := IMDCT),
+  " generate an IMDCT codelet";
+
+  "-imdct-mp3",
+  Arg.Unit(fun () -> mode := IMDCT_MP3),
+  " generate an IMDCT codelet with MP3 windowing";
+
+  "-imdct-window",
+  Arg.Unit(fun () -> mode := IMDCT_WINDOW),
+  " generate an IMDCT codelet with window array";
+
+  "-imdct-window-sym",
+  Arg.Unit(fun () -> mode := IMDCT_WINDOW_SYM),
+  " generate an IMDCT codelet with symmetric window array";
 ]
 
 let unity_window n i = Complex.one
@@ -113,9 +129,8 @@ let load_window_sym w n i = w (if (i < n) then i else (2*n - 1 - i))
 (* fixme: use same locations for input and output so that it works in-place? *)
 
 (* Note: only correct for even n! *)
-let load_array_mdct window n rarr iarr =
+let load_array_mdct window n rarr iarr locations =
   let twon = 2 * n in
-  let locations = unique_array_c twon in
   let arr = load_array_c twon 
       (locative_array_c twon rarr iarr locations) in
   let arrw = fun i -> Complex.times (window n i) (arr i) in
@@ -129,9 +144,32 @@ let load_array_mdct window n rarr iarr =
 	 Complex.plus [arrw (i - n/2); 
 		       Complex.uminus (arrw (n + n/2 - 1 - i))]))
 
+let store_array_mdct window n rarr iarr locations arr =
+  store_array_r n (locative_array_c n rarr iarr locations) arr
+
+let load_array_imdct window n rarr iarr locations =
+  load_array_c n (locative_array_c n rarr iarr locations)
+
+let store_array_imdct window n rarr iarr locations arr =
+  let n2 = n/2 in
+  let threen2 = 3*n2 in
+  let arr2 = fun i ->
+    if (i < n2) then
+      arr (i + n2)
+    else if (i < threen2) then
+      Complex.uminus (arr (threen2 - 1 - i))
+    else
+      Complex.uminus (arr (i - threen2))
+  in
+  let arr2w = fun i -> Complex.times (window n i) (arr2 i) in
+  let twon = 2 * n in
+  store_array_r twon (locative_array_c twon rarr iarr locations) arr2w
+
 let window_param = function
     MDCT_WINDOW -> true
   | MDCT_WINDOW_SYM -> true
+  | IMDCT_WINDOW -> true
+  | IMDCT_WINDOW_SYM -> true
   | _ -> false
 
 let generate n mode =
@@ -153,29 +191,44 @@ let generate n mode =
   let _ = Simd.ovs := stride_to_string "ovs" !uovstride in
   let _ = Simd.ivs := stride_to_string "ivs" !uivstride in
 
-  let (transform, load_input) = match mode with
-  | MDCT -> Trig.dctIV, load_array_mdct unity_window
-  | MDCT_MP3 -> Trig.dctIV, load_array_mdct mp3_window
+  let (transform, load_input, store_output) = match mode with
+  | MDCT -> Trig.dctIV, load_array_mdct unity_window,
+      store_array_mdct unity_window
+  | MDCT_MP3 -> Trig.dctIV, load_array_mdct mp3_window,
+      store_array_mdct unity_window
   | MDCT_WINDOW -> Trig.dctIV, load_array_mdct
-	(load_window (window_array (2 * n) window))
+	(load_window (window_array (2 * n) window)),
+      store_array_mdct unity_window
   | MDCT_WINDOW_SYM -> Trig.dctIV, load_array_mdct
-	(load_window_sym (window_array n window))
+	(load_window_sym (window_array n window)),
+      store_array_mdct unity_window
+  | IMDCT -> Trig.dctIV, load_array_imdct unity_window,
+      store_array_imdct unity_window
+  | IMDCT_MP3 -> Trig.dctIV, load_array_imdct unity_window,
+      store_array_imdct mp3_window
+  | IMDCT_WINDOW -> Trig.dctIV, load_array_imdct unity_window,
+      store_array_imdct (load_window (window_array (2 * n) window))
+  | IMDCT_WINDOW_SYM -> Trig.dctIV, load_array_imdct unity_window,
+      store_array_imdct (load_window_sym (window_array n window))
   | _ -> failwith "must specify transform kind"
   in
     
+  let locations = unique_array_c (2*n) in
   let input = 
     load_input n
       (C.array_subscript iarray vistride)
       (C.array_subscript "BUG" vistride)
+      locations
   in
   let output = (Complex.times (Complex.inverse_int !normalization)) 
     @@ (transform n input) in
-  let oloc = 
-    locative_array_c n 
+  let odag =
+    store_output n
       (C.array_subscript oarray vostride)
       (C.array_subscript "BUG" vostride)
-      (unique_array_c n) in
-  let odag = store_array_r n oloc output in
+      locations
+      output
+  in
   let annot = standard_optimizer odag in
 
   let tree =
