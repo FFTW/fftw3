@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.81 2002-09-13 18:58:22 athena Exp $ */
+/* $Id: planner.c,v 1.82 2002-09-13 19:36:07 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -120,8 +120,17 @@ enum { H_EMPTY, H_VALID, H_DELETED };
 
 
 /* maintain invariant lb(nelem) <= hashsz < ub(nelem) */
-static uint ub(uint nelem) { return 3U * (nelem + 10U); }
-static uint lb(uint nelem) { return ub(nelem) / 2U; }
+static uint lb(uint nelem) 
+{
+     nelem += 4;
+     return nelem + (nelem / 2);
+}
+
+static uint ub(uint nelem) 
+{
+     uint a = lb(nelem);
+     return a + (a / 2);
+}
 
 static solution *hlookup(planner *ego, md5uint *s)
 {
