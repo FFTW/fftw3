@@ -1,1 +1,1 @@
-EXTRA_DIST=simd-sse.h simd.h
+EXTRA_DIST=simd-altivec.h simd-sse.h simd.h

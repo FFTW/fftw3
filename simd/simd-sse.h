@@ -88,7 +88,6 @@ typedef __m128 V;
 #endif
 
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
-#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
 
 #define VTW(op, x) {op, 0, x}, {op, 1, x}, {op, 2, x}, {op, 3, x}
