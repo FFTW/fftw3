@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.11 2002-08-20 15:46:29 athena Exp $ */
+/* $Id: verify.c,v 1.12 2002-08-22 15:29:29 athena Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -30,40 +30,10 @@
 /*************************************************
  * complex correctness test
  *************************************************/
-#ifdef BENCHFFT_LDOUBLE
-#  ifndef HAVE_HYPOTL
-static double hypotl(double a, double b)
-{
-     return sqrt(a * a + b * b);
-}
-#  else /* HAVE_HYPOTL */
-#    if !defined(HAVE_DECL_HYPOTL) || !HAVE_DECL_HYPOTL
-extern long double hypotl(long double a, long double b);
-#    endif
-#  endif
-#  define hypot hypotl
-#else /* !BENCHFFT_LDOUBLE */
-#  ifndef HAVE_HYPOT
-static double hypot(double a, double b)
-{
-     return sqrt(a * a + b * b);
-}
-#  else /* HAVE_HYPOT */
-#    if !defined(HAVE_DECL_HYPOT) || !HAVE_DECL_HYPOT
-extern double hypot(double a, double b);
-#    endif
-#  endif
-#endif /* !BENCHFFT_LDOUBLE */
-
-static double dmax(double a, double b)
-{
-     return a > b ? a : b;
-}
-
-static double dmin(double a, double b)
-{
-     return a > b ? a : b;
-}
+static double dabs(double x) { return (x < 0.0) ? -x : x; }
+static double dmax(double x, double y) { return (x > y) ? x : y; }
+static double dmin(double x, double y) { return (x < y) ? x : y; }
+static double norm2(double x, double y) { return dmax(dabs(x), dabs(y)); }
 
 static double cerror(bench_complex *A, bench_complex *B, unsigned int n)
 {
@@ -74,21 +44,18 @@ static double cerror(bench_complex *A, bench_complex *B, unsigned int n)
 
      for (i = 0; i < n; ++i) {
 	  mag = dmax(mag,
-		     dmin(hypot(c_re(A[i]), c_im(A[i])),
-			  hypot(c_re(B[i]), c_im(B[i]))));
+		     dmin(norm2(c_re(A[i]), c_im(A[i])),
+			  norm2(c_re(B[i]), c_im(B[i]))));
+
+	  error = dmax(error, norm2(c_re(A[i]) - c_re(B[i]), 
+				    c_im(A[i]) - c_im(B[i])));
      }
 
-     for (i = 0; i < n; ++i) {
-	  double a;
-
-	  a = hypot(c_re(A[i]) - c_re(B[i]), c_im(A[i]) - c_im(B[i])) / mag;
-	  if (a > error) 
-	       error = a;
+     error /= mag;
 
 #ifdef HAVE_ISNAN
-	  BENCH_ASSERT(!isnan(a));
+     BENCH_ASSERT(!isnan(error));
 #endif
-     }
      return error;
 }
 

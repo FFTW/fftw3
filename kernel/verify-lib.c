@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.3 2002-08-22 15:16:03 athena Exp $ */
+/* $Id: verify-lib.c,v 1.4 2002-08-22 15:29:29 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -30,34 +30,26 @@
 static double dabs(double x) { return (x < 0.0) ? -x : x; }
 static double dmax(double x, double y) { return (x > y) ? x : y; }
 static double dmin(double x, double y) { return (x < y) ? x : y; }
+static double norm2(double x, double y) { return dmax(dabs(x), dabs(y)); }
 
-static double cerror(C a, C b)
-{
-     double xr, xi;
-     double mag;
-     xr = dabs(a.r - b.r);
-     xi = dabs(a.i - b.i);
-#ifdef HAVE_ISNAN
-     A(!isnan(xr));
-     A(!isnan(xi));
-#endif
-     return dmax(xr, xi);
-}
-
-static double aerror(C *a, C *b, uint n, double tol)
+static double aerror(C *a, C *b, uint n)
 {
      /* compute the relative Linf error */
      double e = 0.0, mag = 0.0;
-     C zero;
      uint i;
 
      for (i = 0; i < n; ++i) {
-	  e = dmax(e, cerror(a[i], b[i]));
+	  e = dmax(e, norm2(a[i].r - b[i].r, a[i].i - b[i].i));
 	  mag = dmax(mag, 
-		     dmax(dmin(dabs(a[i].r), dabs(b[i].r)),
-			  dmin(dabs(a[i].i), dabs(b[i].i))));
+		     dmin(norm2(a[i].r, a[i].i),
+			  norm2(b[i].r, b[i].i)));
      }
-     return e / mag;
+     e /= mag;
+
+#ifdef HAVE_ISNAN
+     A(!isnan(e));
+#endif
+     return e;
 }
 
 #ifdef HAVE_DRAND48
@@ -200,7 +192,7 @@ void ascale(C *a, C alpha, uint n)
 
 double acmp(C *a, C *b, uint n, const char *test, double tol)
 {
-     double d = aerror(a, b, n, tol);
+     double d = aerror(a, b, n);
      if (d > tol) {
 	  fprintf(stderr, "Found relative error %e (%s)\n", d, test);
 
