@@ -97,7 +97,7 @@ static void extract_reim(int sign, bench_complex *c,
 }
 
 /* ouch */
-static int kosher_for_api_many(bench_tensor *t)
+static int expressible_as_api_many(bench_tensor *t)
 {
      int i;
 
@@ -158,7 +158,7 @@ static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
      if (vecsz->rnk == 0 && tensor_unitstridep(sz) && tensor_rowmajorp(sz)) 
 	  goto api_simple;
      
-     if (vecsz->rnk == 1 && kosher_for_api_many(sz))
+     if (vecsz->rnk == 1 && expressible_as_api_many(sz))
 	  goto api_many;
 
      goto api_guru;
