@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.11 2002-09-02 21:33:49 stevenj Exp $ */
+/* $Id: timer.c,v 1.12 2003-03-07 05:25:02 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -45,14 +45,8 @@
 #endif
 #endif
 
-#include "cycle.h"
-
-#ifndef TIME_MIN
-#  define TIME_MIN 100.0
-#endif
-
-#ifndef TIME_REPEAT
-#  define TIME_REPEAT 8
+#ifndef WITHOUT_CYCLE_COUNTER
+#  include "cycle.h"
 #endif
 
 #if defined(HAVE_GETTIMEOFDAY) && !defined(HAVE_SECONDS_TIMER)
@@ -71,6 +65,7 @@ static double elapsed_sec(seconds t1, seconds t0)
 	  (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6;
 }
 
+#  define TIME_MIN_SEC 1.0e-2 /* from fftw2 */
 #  define HAVE_SECONDS_TIMER
 #endif
 
@@ -86,11 +81,29 @@ static double elapsed_sec(seconds t1, seconds t0)
      return ((double) (t1 - t0)) / CLOCKS_PER_SEC;
 }
 
+#  define TIME_MIN_SEC 2.0e-1 /* from fftw2 */
 #  define HAVE_SECONDS_TIMER
 #endif
 
-#if !defined(HAVE_TICK_COUNTER) || !defined(HAVE_SECONDS_TIMER)
-#error "Don't know how to time on this system"
+#ifdef WITHOUT_CYCLE_COUNTER
+/* excruciatingly slow; only use this if there is no choice! */
+typedef seconds ticks;
+#  define getticks getseconds
+#  define elapsed elapsed_sec
+#  define TIME_MIN TIME_MIN_SEC
+#  define TIME_REPEAT 4 /* from fftw2 */
+#endif
+
+#if !defined(HAVE_TICK_COUNTER) && !defined(WITHOUT_CYCLE_COUNTER)
+#  error "Don't know a cycle counter for this system."
+#endif
+
+#ifndef TIME_MIN
+#  define TIME_MIN 100.0
+#endif
+
+#ifndef TIME_REPEAT
+#  define TIME_REPEAT 8
 #endif
 
 static double measure(plan *pln, const problem *p, int iter)
