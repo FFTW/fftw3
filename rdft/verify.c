@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.5 2002-07-22 05:04:40 stevenj Exp $ */
+/* $Id: verify.c,v 1.6 2002-07-22 05:10:21 stevenj Exp $ */
 
 #include "rdft.h"
 #include <math.h>
@@ -550,8 +550,10 @@ static void really_verify(plan *pln, const problem_rdft *p,
 
 void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds)
 {
-     AWAKE(pln, 1);
-     really_verify(pln, p, rounds, 
-		   sizeof(R) == sizeof(float) ? 1.0e-2 : 1.0e-7);
-     AWAKE(pln, 0);
+     if (p->kind == R2HC || p->kind == HC2R) {
+	  AWAKE(pln, 1);
+	  really_verify(pln, p, rounds, 
+			sizeof(R) == sizeof(float) ? 1.0e-2 : 1.0e-7);
+	  AWAKE(pln, 0);
+     }
 }
