@@ -76,7 +76,8 @@ void X(mapflags)(planner *plnr, unsigned flags)
 		      | FFTW_NO_RANK_SPLITS
 		      | FFTW_NO_VRANK_SPLITS
 		      | FFTW_NONTHREADED_ICKY
-		      | FFTW_DFT_R2HC_ICKY | FFTW_BELIEVE_PCOST))
+		      | FFTW_DFT_R2HC_ICKY
+		      | FFTW_BELIEVE_PCOST))
      };
 
      /* map of (processed) api flags to internal problem/planner flags */
