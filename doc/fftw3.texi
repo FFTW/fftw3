@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.21 2003-01-19 02:53:18 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.22 2003-01-19 04:46:57 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -292,22 +292,21 @@ The basic usage of FFTW is simple, and typically looks like:
 (When you compile, you must also link with the fftw3 library,
 e.g. @code{-lfftw3 -lm} on Unix systems.)
 
-First, of course, you allocate the arrays; you can do this any way
-that you like, but we recommend using @code{fftw_malloc}, which
-behaves the same as @code{malloc} except that it properly aligns the
-array when SIMD acceleration is available (@pxref{The Importance of
-Alignment}).  The data is an array of type @code{fftw_complex}, which
-is by default a @code{double[2]} containing the real (@code{in[i][0]})
-and imaginary (@code{in[i][1]}) parts.  If you have a C compiler, such
-as @code{gcc}, supporting the recent C99 standard, and you
-@code{#include <complex.h>} @emph{before} @code{<fftw3.h>}, then
-@code{fftw_complex} is the native double-precision complex type and
-you can manipulate it with ordinary arithmetic.  (To use the C++
-@code{<complex>} template class, see the FFTW FAQ.)  Single and
-long-double precision versions of FFTW may also be installed, with the
-@code{fftw_} prefix replaced by @code{fftwf_} or @code{fftwl_} and
-linking with @code{-lfftw3f} or @code{-lfftw3l}, but using the
-@emph{same} @code{<fftw3.h>} header file.
+First, of course, you allocate the arrays; you can do this any way that
+you like, but we recommend using @code{fftw_malloc}, which behaves the
+same as @code{malloc} except that it properly aligns the array when SIMD
+acceleration is available (@pxref{The Importance of Alignment}).  The
+data is an array of type @code{fftw_complex}, which is by default a
+@code{double[2]} containing the real (@code{in[i][0]}) and imaginary
+(@code{in[i][1]}) parts.  If you have a C compiler, such as @code{gcc},
+supporting the recent C99 standard, and you @code{#include <complex.h>}
+@emph{before} @code{<fftw3.h>}, then @code{fftw_complex} is the native
+double-precision complex type and you can manipulate it with ordinary
+arithmetic.  (To use the C++ @code{<complex>} template class, see the
+FFTW FAQ.)  Single and long-double precision versions of FFTW may also
+be installed; to use them, replace the @code{fftw_} prefix by
+@code{fftwf_} or @code{fftwl_} and link with @code{-lfftw3f} or
+@code{-lfftw3l}, but use the @emph{same} @code{<fftw3.h>} header file.
 
 The next thing is to create a @dfn{plan}, which is an object
 @cindex plan
