@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.27 2003-04-19 13:18:25 athena Exp $ */
+/* $Id: cycle.h,v 1.28 2003-04-29 15:45:34 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -248,6 +248,26 @@ static inline unsigned long getticks(void)
 #  endif
 
 static inline double elapsed(ticks t1, ticks t0)
+{
+     return (double)(t1 - t0);
+}
+
+#define HAVE_TICK_COUNTER
+#endif
+
+/*----------------------------------------------------------------*/
+/* S390, courtesy of James Treacy */
+#if defined(__GNUC__) && defined(__s390__) && !defined(HAVE_TICK_COUNTER)
+typedef unsigned long long ticks;
+
+static __inline__ ticks getticks(void)
+{
+     ticks cycles;
+     __asm__("stck 0(%0)" : : "a" (&(cycles)) : "memory", "cc");
+     return cycles;
+}
+
+static __inline__ double elapsed(ticks t1, ticks t0)
 {
      return (double)(t1 - t0);
 }
