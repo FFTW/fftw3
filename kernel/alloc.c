@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.32 2003-01-26 00:16:53 stevenj Exp $ */
+/* $Id: alloc.c,v 1.33 2003-01-26 00:17:26 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -34,7 +34,7 @@ extern void *memalign(size_t, size_t);
 extern int posix_memalign(void **, size_t, size_t);
 #endif
 
-#if defined(macintosh) || defined(Macintosh)
+#if defined(macintosh) /* MacOS 9 */
 #  include <Multiprocessing.h>
 #endif
 
@@ -68,7 +68,7 @@ void *X(malloc)(size_t n)
      p = (void *) _aligned_malloc(n, MIN_ALIGNMENT);
 #    undef real_free
 #    define real_free _aligned_free
-#  elif defined(macintosh)
+#  elif defined(macintosh) /* MacOS 9 */
      p = (void *) MPAllocateAligned(n,
 #    if MIN_ALIGNMENT == 8
 				    kMPAllocate8ByteAligned,
