@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.3 2002-06-09 12:19:26 athena Exp $ */
+/* $Id: tensor.c,v 1.4 2002-06-09 12:20:13 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -196,7 +196,7 @@ tensor fftw_tensor_copy_except(const tensor sz, uint except_dim)
 {
      tensor x;
 
-     A(sz.rnk >= 1 && except_dim >= 0 && except_dim < sz.rnk);
+     A(sz.rnk >= 1 && except_dim < sz.rnk);
      talloc(&x, sz.rnk - 1);
      dimcpy(x.dims, sz.dims, except_dim);
      dimcpy(x.dims + except_dim, sz.dims + except_dim + 1, 
@@ -210,7 +210,7 @@ tensor fftw_tensor_copy_sub(const tensor sz, uint start_dim, uint rnk)
 {
      tensor x;
 
-     A(start_dim >= 0 && sz.rnk >= 0 && start_dim + rnk <= sz.rnk);
+     A(start_dim + rnk <= sz.rnk);
      talloc(&x, rnk);
      dimcpy(x.dims, sz.dims + start_dim, rnk);
      return x;
@@ -246,7 +246,6 @@ tensor fftw_tensor_compress(const tensor sz)
      uint i, rnk;
      tensor x;
 
-     A(sz.rnk >= 0);
      for (i = rnk = 0; i < sz.rnk; ++i) {
 	  A(sz.dims[i].n > 0);
 	  if (sz.dims[i].n != 1)
