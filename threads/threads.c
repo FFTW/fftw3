@@ -532,15 +532,15 @@ void X(spawn_loop)(int loopmax, int nthr,
 #endif
 
 #ifdef HAVE_THREADS
-void kdft_dit_register_hook(planner *p, kdft_dit k, const ct_desc *d)
+static void kdft_dit_register_hook(planner *p, kdft_dit k, const ct_desc *d)
 {
      REGISTER_SOLVER(p, X(mksolver_dft_ct_dit_thr)(k, d));
 }
-void khc2hc_dit_register_hook(planner *p, khc2hc k, const hc2hc_desc *d)
+static void khc2hc_dit_register_hook(planner *p, khc2hc k, const hc2hc_desc *d)
 {
      REGISTER_SOLVER(p, X(mksolver_rdft_hc2hc_dit_thr)(k, d));
 }
-void khc2hc_dif_register_hook(planner *p, khc2hc k, const hc2hc_desc *d)
+static void khc2hc_dif_register_hook(planner *p, khc2hc k, const hc2hc_desc *d)
 {
      REGISTER_SOLVER(p, X(mksolver_rdft_hc2hc_dif_thr)(k, d));
 }
