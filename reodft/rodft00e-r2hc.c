@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.5 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: rodft00e-r2hc.c,v 1.6 2002-08-26 16:59:44 stevenj Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -68,6 +68,7 @@ static void apply(plan *ego_, R *I, R *O)
 	  cld->apply((plan *) cld, buf, buf);
      }
 
+     /* FIXME: use recursive/cascade summation for better stability? */
      O[0] = buf[0] * 0.5;
      for (i = 1; i + i < n - 1; ++i) {
 	  uint k = i + i;

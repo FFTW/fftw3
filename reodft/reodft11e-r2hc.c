@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.5 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.6 2002-08-26 16:59:44 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -55,6 +55,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
      /* I wish that this didn't require an extra pass. */
+     /* FIXME: use recursive/cascade summation for better stability? */
      buf[n - 1] = cur = 2.0 * I[is * (n - 1)];
      for (i = n - 1; i > 0; --i) {
 	  E curnew;
@@ -114,6 +115,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
      /* I wish that this didn't require an extra pass. */
+     /* FIXME: use recursive/cascade summation for better stability? */
      buf[n - 1] = cur = 2.0 * I[0];
      for (i = n - 1; i > 0; --i) {
 	  E curnew;
