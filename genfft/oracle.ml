@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: oracle.ml,v 1.4 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: oracle.ml,v 1.5 2003-06-01 11:00:54 athena Exp $ *)
 
 (*
  * the oracle decrees whether the sign of an expression should
@@ -99,7 +99,7 @@ let should_flip_sign node =
  * necessary.)
  *)
 let likely_equal a b =
-  let tolerance = 1.0e-8 
+  let tolerance = 1.0e-8
   and ntests = 20
   in
   let rec loop n =
@@ -110,7 +110,9 @@ let likely_equal a b =
       let va = eval_aux r a
       and vb = eval_aux r b
       in
-      if (abs_float (va -. vb)) > tolerance then
+      if (abs_float (va -. vb)) > 
+	   tolerance *. (abs_float va +. abs_float vb +. 0.0001)
+      then
 	false
       else
 	loop (n - 1)
