@@ -27,13 +27,30 @@ open K7Translate
 open AssignmentsToVfpinstrs
 open Complex
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.4 2002-06-16 22:30:18 athena Exp $"
-let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
+let cvsid = "$Id: gen_twiddle.ml,v 1.5 2002-06-17 01:30:42 athena Exp $"
+
+type ditdif = DIT | DIF
+let ditdif = ref DIT
+let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number> [ -dit | -dif ]"
+
+let speclist = [
+  "-dit",
+  Arg.Unit(fun () -> ditdif := DIT),
+  " generate a DIT codelet";
+
+  "-dif",
+  Arg.Unit(fun () -> ditdif := DIF),
+  " generate a DIF codelet";
+]
 
 
 let twiddle_gen n sign nt byw =
   let _ = info "generating..." in
-  let expr = Fft.dft sign n (byw (load_var @@ access_input)) in
+  let expr = 
+    match !ditdif with
+    | DIT -> Fft.dft sign n (byw (load_var @@ access_input)) 
+    | DIF -> byw (Fft.dft sign n (load_var @@ access_input)) 
+  in
   let code = store_array_c n expr in
   let code' = vect_optimize varinfo_twiddle n code in
 
@@ -138,7 +155,11 @@ let generate n =
     p "\tpushl $desc\n";
     p "\tpushl $%s\n" name;
     p "\tpushl %%eax\n";
-    p "\tcall sfftw_kdft_dit_k7_register\n";
+    begin
+      match !ditdif with
+      | DIT -> p "\tcall sfftw_kdft_dit_k7_register\n"
+      | DIF -> p "\tcall sfftw_kdft_dif_k7_register\n"
+    end;
     p "\taddl $16,%%esp\n";
     p "\taddl $12,%%esp\n";
     p "\tret\n";

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.15 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: planner.c,v 1.16 2002-06-17 01:30:42 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -285,8 +285,6 @@ void X(planner_set_hook)(planner *p,
 
 void X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
 {
-     ego->hook(pln, p);
-
      if (!(ego->flags & CLASSIC) || pln->pcost == 0.0) {
 	  ego->nplan++;
 	  if (ego->flags & ESTIMATE) {
@@ -300,6 +298,7 @@ void X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
 	       pln->pcost = X(measure_execution_time)(pln, p);
 	  }
      }
+     ego->hook(pln, p);
 }
 
 /*

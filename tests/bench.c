@@ -45,6 +45,7 @@ static void debug_hook(const plan *pln, const fftw_problem *p_)
      printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
      pr->print(pr, "%P:%(%p%)\n", p, pln);
      FFTW(printer_destroy) (pr);
+     printf("%g\n", pln->pcost);
 }
 
 int can_do(struct problem *p)

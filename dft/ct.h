@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.h,v 1.5 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: ct.h,v 1.6 2002-06-17 01:30:42 athena Exp $ */
 
 /* Cooley-Tukey variants */
 union kct {
@@ -26,6 +26,7 @@ union kct {
      kdft_dif dif;
      kdft_difsq difsq;
      kdft_dit_k7 dit_k7;
+     kdft_dif_k7 dif_k7;
 };
 
 typedef struct {
