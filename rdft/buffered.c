@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.10 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: buffered.c,v 1.11 2002-09-16 19:28:47 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -130,7 +130,7 @@ static int toobig(uint n, const S *ego)
      return (n > ego->adt->maxbufsz);
 }
 
-static int applicable(const problem *p_, const S *ego)
+static int applicable(const problem *p_, const S *ego, const planner *plnr)
 {
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
@@ -140,6 +140,9 @@ static int applicable(const problem *p_, const S *ego)
 	      && p->vecsz.rnk <= 1
 	      && p->sz.rnk == 1
 	       ) {
+
+	       if (toobig(p->sz.dims[0].n, ego) && CONSERVE_MEMORYP(plnr))
+		    return 0;
 
                /*
 		 In principle, the buffered transforms might be useful
@@ -177,7 +180,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      if (NO_BUFFERINGP(plnr))
           return BAD;
 
-     if (!applicable(p_, ego))
+     if (!applicable(p_, ego, plnr))
           return BAD;
 
      p = (const problem_rdft *) p_;
@@ -209,7 +212,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      };
 
 
-     if (!applicable(p_, ego))
+     if (!applicable(p_, ego, plnr))
           goto nada;
 
      n = X(tensor_sz)(p->sz);
