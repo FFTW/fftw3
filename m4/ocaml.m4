@@ -1,4 +1,4 @@
-AC_DEFUN(OCAML_INIT_PATHS,
+AC_DEFUN([OCAML_INIT_PATHS],
 [
 eval "ocaml_prefix=$exec_prefix"
 if test "x$ocaml_prefix" = xNONE; then
@@ -25,7 +25,7 @@ TARGET_OCAMLRUN=$TARGET_OCAMLBIN/ocamlrun
 AC_SUBST(TARGET_OCAMLRUN)
 ])
 
-AC_DEFUN(OCAML_CHECK_TOOLS,
+AC_DEFUN([OCAML_CHECK_TOOLS],
 [
 AC_ARG_ENABLE(bootstrap,  [  --enable-bootstrap      use the bootstrap ocaml compiler], enable_bootstrap=$enableval, enable_bootstrap=no)
 ocaml_srcdir='${top_srcdir}'/$1
