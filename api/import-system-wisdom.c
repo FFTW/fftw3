@@ -28,6 +28,13 @@
 #  define WISDOM_NAME "wisdom"
 #endif
 
+/* OS-specific configuration-file directory */
+#if defined(__DJGPP__)
+#  define WISDOM_DIR "/dev/env/DJGPP/etc/fftw/"
+#else
+#  define WISDOM_DIR "/etc/fftw/"
+#endif
+
 int X(import_system_wisdom)(void)
 {
 #if defined(__WIN32__) || defined(WIN32) || defined(_WINDOWS)
@@ -35,7 +42,7 @@ int X(import_system_wisdom)(void)
 #else
 
      FILE *f;
-     f = fopen("/etc/fftw/" WISDOM_NAME, "r");
+     f = fopen(WISDOM_DIR WISDOM_NAME, "r");
      if (f) {
           int ret = X(import_wisdom_from_file)(f);
           fclose(f);

@@ -57,7 +57,7 @@ void ${prefix}configure_planner(void *plnr)
     extern void ${prefix}solvtab_exec(const struct solvtab_s s[], void *);
 EOF
 
-tmp=/tmp/fftw-wisdom-to-conf$$
+tmp=${TMPDIR-/tmp}/fftw-wisdom-to-conf$$
 sed 's/ *(//' | cut -d" " -f1 | grep -v -- - | egrep -v '^ *\)*$' > $tmp
 
 cat $tmp | sort | uniq | while read reg_nam; do

@@ -16,7 +16,7 @@ bench_LDADD = $(LIBFFTWTHREADS)				\
 $(top_builddir)/libfftw3@PREC_SUFFIX@.la		\
 $(top_builddir)/libbench2/libbench2.a $(THREADLIBS)
 
-check-local: bench
+check-local: bench$(EXEEXT)
 	perl -w $(srcdir)/check.pl -r -c=30 -v `pwd`/bench
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW transforms passed basic tests!"
@@ -28,7 +28,7 @@ if THREADS
 	@echo "--------------------------------------------------------------"
 endif
 
-bigcheck: bench
+bigcheck: bench$(EXEEXT)
 	perl -w $(srcdir)/check.pl -a -v `pwd`/bench
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW transforms passed big tests!"
@@ -42,7 +42,7 @@ if THREADS
 	@echo "--------------------------------------------------------------"
 endif
 
-smallcheck: bench
+smallcheck: bench$(EXEEXT)
 	perl -w $(srcdir)/check.pl -r -c=1 -v `pwd`/bench
 	perl -w $(srcdir)/check.pl -r --estimate -c=5 -v `pwd`/bench
 	@echo "--------------------------------------------------------------"
@@ -55,7 +55,7 @@ if THREADS
 	@echo "--------------------------------------------------------------"
 endif
 
-paranoid-check: bench
+paranoid-check: bench$(EXEEXT)
 if THREADS
 	perl -w $(srcdir)/check.pl -a -o=exhaustive --nthreads=10 --paranoid `pwd`/bench
 	perl -w $(srcdir)/check.pl -a -o=exhaustive --nthreads=7 --paranoid `pwd`/bench
