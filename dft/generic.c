@@ -31,21 +31,18 @@ typedef struct {
 } P;
 
 
-static void cdot(int n,
-		 const R *xr, const R *xi, int xs,
-		 const R *w, int ws,
-		 R *or0, R *oi0,
-		 R *or1, R *oi1)
+static void cdot(int n, const E *x, const R *w, int ws,
+		 R *or0, R *oi0, R *or1, R *oi1)
 {
      int wp, i;
 
-     E rr = *xr, ri = 0, ir = *xi, ii = 0;
+     E rr = x[0], ri = 0, ir = x[1], ii = 0;
      for (wp = 0, i = 1; i + i < n; ++i) {
 	  wp += ws; if (wp >= n) wp -= n;
-	  rr += (xr[i * xs] + xr[(n - i) * xs]) * w[2*wp];
-	  ri += (xr[i * xs] - xr[(n - i) * xs]) * w[2*wp+1];
-	  ii += (xi[i * xs] - xi[(n - i) * xs]) * w[2*wp+1];
-	  ir += (xi[i * xs] + xi[(n - i) * xs]) * w[2*wp];
+	  rr += x[2 * i]           * w[2*wp];
+	  ri += x[2 * (n - i)]     * w[2*wp+1];
+	  ii += x[2 * (n - i) + 1] * w[2*wp+1];
+	  ir += x[2 * i + 1]       * w[2*wp];
      }
      *or0 = rr - ii;
      *oi0 = ir + ri;
@@ -53,35 +50,49 @@ static void cdot(int n,
      *oi1 = ir - ri;
 }
 
-static void csum(int n,
-		 const R *xr, const R *xi, int xs,
-		 R *or, R *oi)
+static void csum(int n, const E *x, R *or, R *oi)
 {
      int i;
 
-     E rr = *xr, ir = *xi;
-     for (i = 1; i < n; ++i) {
-	  rr += xr[i * xs];
-	  ir += xi[i * xs];
+     E rr = x[0], ir = x[1];
+     for (i = 1; i + i < n; ++i) {
+	  rr += x[2 * i];
+	  ir += x[2 * i + 1];
      }
      *or = rr;
      *oi = ir;
 }
 
+static void hartley(int n, const R *xr, const R *xi, int xs, E *o)
+{
+     int i;
+     o[0] = xr[0]; o[1] = xi[0];
+     for (i = 1; i + i < n; ++i) {
+	  o[2 * i]           = xr[i * xs] + xr[(n - i) * xs];
+	  o[2 * i + 1]       = xi[i * xs] + xi[(n - i) * xs];
+	  o[2 * (n - i)]     = xr[i * xs] - xr[(n - i) * xs];
+	  o[2 * (n - i) + 1] = xi[i * xs] - xi[(n - i) * xs];
+     }
+}
+		    
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
      int i;
      int n = ego->n, is = ego->is, os = ego->os;
      const R *W = ego->td->W;
+     E *buf;
 
-     csum(n, ri, ii, is, ro, io);
+     STACK_MALLOC(E *, buf, n * 2 * sizeof(E));
+     hartley(n, ri, ii, is, buf);
+
+     csum(n, buf, ro, io);
      for (i = 1; i + i < n; ++i) 
-	  cdot(n,
-	       ri, ii, is,
-	       W, i,
+	  cdot(n, buf, W, i,
 	       ro + i * os, io + i * os,
 	       ro + (n - i) * os, io + (n - i) * os);
+
+     STACK_FREE(buf);
 }
 
 static void awake(plan *ego_, int flg)
@@ -109,7 +120,6 @@ static int applicable0(const problem *p_)
           return (1
 		  && p->sz->rnk == 1
 		  && p->vecsz->rnk == 0
-		  && p->ri != p->ro 
 		  && (p->sz->dims[0].n % 2) == 1 
 		  && X(is_prime)(p->sz->dims[0].n)
 	       );
@@ -152,11 +162,12 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->os = p->sz->dims[0].os;
      pln->td = 0;
 
-                                 /* csum:             cdot: */
-     pln->super.super.ops.add = 2 * (n-1)      +      (n+1) * (n-1);
+     pln->super.super.ops.add = (n-1) * (2 /* hartley */ 
+					 + 1 /* csum */ 
+					 + 2 /* cdot */);
      pln->super.super.ops.mul = 0;
-     pln->super.super.ops.fma =                       (n-1) * (n-1) ;
-     pln->super.super.ops.other = 2 * (n + 1)  +      (n+2) * (n-1);
+     pln->super.super.ops.fma = (n-1) * (n-1) ;
+     pln->super.super.ops.other = (n-1)*(4 + 1 + 2 * (n-1));  /* approximate */
 
      return &(pln->super.super);
 }
