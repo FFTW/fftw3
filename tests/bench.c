@@ -619,12 +619,18 @@ static FFTW(plan) mkplan(bench_problem *p, int flags)
 
 int can_do(bench_problem *p)
 {
+     unsigned local_flags = 0;
+
      if (verbose > 2 && p->pstring)
 	  printf("Planning %s...\n", p->pstring);
      rdwisdom();
+
      if (p->destroy_input)
-	  the_flags |= FFTW_DESTROY_INPUT;
-     the_plan = mkplan(p, the_flags | FFTW_ESTIMATE);
+	  local_flags |= FFTW_DESTROY_INPUT;
+     else
+	  local_flags |= FFTW_PRESERVE_INPUT;
+
+     the_plan = mkplan(p, the_flags | local_flags | FFTW_ESTIMATE);
 
      if (the_plan) {
 	  FFTW(destroy_plan)(the_plan);
@@ -637,13 +643,13 @@ int can_do(bench_problem *p)
 void setup(bench_problem *p)
 {
      double tim;
-     int save_flags = the_flags;
+     unsigned local_flags = 0;;
 
      if (p->destroy_input)
-	  the_flags |= FFTW_DESTROY_INPUT;
-     if (p->kind == PROBLEM_REAL && p->sign > 0 && !p->in_place)
-	  p->destroy_input = 1; /* default for c2r out-of-place transforms */
-
+	  local_flags |= FFTW_DESTROY_INPUT;
+     else
+	  local_flags |= FFTW_PRESERVE_INPUT;
+	  
      if (amnesia)
 	  FFTW(forget_wisdom)();
 
@@ -655,7 +661,7 @@ void setup(bench_problem *p)
 #endif
 
      timer_start();
-     the_plan = mkplan(p, the_flags);
+     the_plan = mkplan(p, the_flags | local_flags);
      tim = timer_stop();
      if (verbose > 1) printf("planner time: %g s\n", tim);
 
@@ -668,8 +674,6 @@ void setup(bench_problem *p)
 	  FFTW(flops)(the_plan, &add, &mul, &fma);
 	  printf("flops: %0.0f add, %0.0f mul, %0.0f fma\n", add, mul, fma);
      }
-
-     the_flags = save_flags;
 }
 
 
