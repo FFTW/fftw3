@@ -20,7 +20,7 @@ k7FlatInstructionScheduling.mli k7InstructionSchedulingBasics.mli	\
 k7RegisterAllocationBasics.mli k7RegisterAllocator.mli			\
 k7RegisterAllocatorEATranslation.mli k7RegisterAllocatorInit.mli	\
 k7RegisterReallocation.mli k7Translate.mli k7Unparsing.mli		\
-k7Vectorization.mli magic.mli memoMonad.mli nonDetMonad.mli		\
+k7Vectorization.mli memoMonad.mli nonDetMonad.mli			\
 nullVectorization.mli number.mli stateMonad.mli util.mli		\
 vAnnotatedScheduler.mli vDag.mli vFpBasics.mli vFpUnparsing.mli		\
 vImproveSchedule.mli vK7Optimization.mli vScheduler.mli			\

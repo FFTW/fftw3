@@ -108,14 +108,18 @@ $(CODLIST): Makefile
 	(								\
 	echo "#include \"ifftw.h\"";					\
 	echo;								\
-	for i in "$(subst .c,,$(filter %.c,$(ALL_CODELETS)))"; do	\
-	   echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
+	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))) NIL; do	\
+	   if test "$$i" != NIL; then					\
+             echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
+           fi								\
 	done;								\
 	echo;								\
 	echo;								\
 	echo "const solvtab $(SOLVTAB_NAME) = {";			\
-	for i in "$(subst .c,,$(filter %.c,$(ALL_CODELETS)))"; do	\
-	   echo "   X($(CODELET_NAME)$$i),";				\
+	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))) NIL; do	\
+	   if test "$$i" != NIL; then					\
+	     echo "   X($(CODELET_NAME)$$i),";				\
+	   fi								\
 	done;								\
 	echo "   0";							\
 	echo "};";							\

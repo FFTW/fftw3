@@ -17,7 +17,7 @@
  *
  *)
 
-(* $Id: twiddle.ml,v 1.1 2002-06-14 10:56:15 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.2 2002-06-15 01:33:02 athena Exp $ *)
 
 (* This file implements various policies for either loading the twiddle
  * factors according to various algorithms. *)
@@ -26,7 +26,7 @@ open Complex
 open Util
 
 let square x = 
-  if !Magic.use_wsquare then
+  if !Magic.wsquare then
     wsquare x
   else
     times x x

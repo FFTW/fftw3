@@ -24,7 +24,7 @@ let window = ref 5
 
 let number_of_variables = ref 4
 
-let use_wsquare = ref false
+let wsquare = ref false
 
 let inline_single = ref true
 

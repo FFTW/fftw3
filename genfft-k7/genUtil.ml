@@ -390,36 +390,11 @@ let speclist =  [
   "-rader-min", Arg.Int(fun i -> Magic.rader_min := i),
     "<n> : Use Rader's algorithm for prime sizes >= <n>";
 
-  "-magic-alternate-convolution", 
-    Arg.Int(fun i -> Magic.alternate_convolution := i),
-    undocumented;
-
   "-magic-loopo", set_bool Magic.loopo, undocumented;
   "-magic-loopi", unset_bool Magic.loopo, undocumented;
 
   "-magic-times-3-3", set_bool Magic.times_3_3, undocumented;
   "-magic-times-4-2", unset_bool Magic.times_3_3, undocumented;
-
-  "-magic-collect-common-twiddle", 
-    Arg.Unit(fun () -> Magic.collect_common_twiddle := true),
-    undocumented;
-  "-magic-no-collect-common-twiddle", 
-    Arg.Unit(fun () -> Magic.collect_common_twiddle := false),
-    undocumented;
-
-  "-magic-collect-common-inputs", 
-    Arg.Unit(fun () -> Magic.collect_common_inputs := true),
-    undocumented;
-  "-magic-no-collect-common-inputs", 
-    Arg.Unit(fun () -> Magic.collect_common_inputs := false),
-    undocumented;
-
-  "-magic-use-wsquare", 
-    Arg.Unit(fun () -> Magic.use_wsquare := true),
-    undocumented;
-  "-magic-no-wsquare", 
-    Arg.Unit(fun () -> Magic.use_wsquare := false),
-    undocumented;
 
   "-magic-vectsteps-limit", 
     Arg.Int(fun i -> Magic.vectsteps_limit := i), 
