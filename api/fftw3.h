@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.53 2003-03-17 09:15:50 athena Exp $ */
+/* $Id: fftw3.h,v 1.54 2003-03-17 19:44:40 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -199,7 +199,8 @@ int X(import_wisdom_from_file)(FILE *input_file);			\
 int X(import_wisdom_from_string)(const char *input_string);		\
 int X(import_wisdom)(int (*read_char)(void *), void *data);		\
 									\
-void X(print_plan)(const X(plan) p, FILE *output_file);			\
+void X(fprint_plan)(const X(plan) p, FILE *output_file);		\
+void X(print_plan)(const X(plan) p);					\
 									\
 void *X(malloc)(size_t n);						\
 void X(free)(void *p);							\

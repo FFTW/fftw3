@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.160 2003-03-17 19:19:10 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.161 2003-03-17 19:44:40 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1818,12 +1818,14 @@ multiply-add instructions (although the number of FMA operations is only
 approximate because of compiler voodoo).
 
 @example
-void fftw_print_plan(const fftw_plan plan, FILE *output_file);
+void fftw_fprint_plan(const fftw_plan plan, FILE *output_file);
+void fftw_print_plan(const fftw_plan plan);
 @end example
+@findex fftw_fprint_plan
 @findex fftw_print_plan
 
 This outputs a ``nerd-readable'' representation of the @code{plan} to
-the given file.
+the given file or to @code{stdout}, respectively.
 
 @c ------------------------------------------------------------
 @node Basic Interface, Advanced Interface, Using Plans, FFTW Reference
