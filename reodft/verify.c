@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.2 2002-08-20 23:44:43 stevenj Exp $ */
+/* $Id: verify.c,v 1.3 2002-08-25 18:10:55 fftw Exp $ */
 
 #include "reodft.h"
 #include <math.h>
@@ -37,7 +37,7 @@ typedef struct {
  * Utility functions:
  */
 
-static inline double rerror(R a, R b, double tol)
+static double rerror(R a, R b, double tol)
 {
      double x;
      x = fabs(a - b) / (0.5 * (fabs(a) + fabs(b)) + tol);

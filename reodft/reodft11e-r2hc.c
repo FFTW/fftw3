@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.3 2002-08-24 15:19:30 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.4 2002-08-25 18:10:55 fftw Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -247,12 +247,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!cld)
           return (plan *)0;
 
-     switch (p->kind) {
-	 case REDFT11: pln = MKPLAN_RDFT(P, &padt, apply_re11); break;
-	 case RODFT11: pln = MKPLAN_RDFT(P, &padt, apply_ro11); break;
-	 default: A(0);
-     }
-
+     pln = MKPLAN_RDFT(P, &padt, p->kind == REDFT11 ? apply_re11 : apply_ro11);
      pln->n = n;
      pln->is = p->sz.dims[0].is;
      pln->os = p->sz.dims[0].os;

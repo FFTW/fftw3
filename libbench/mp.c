@@ -259,20 +259,6 @@ static REAL toreal(const N a)
      }
 }
 
-static void toreals(const N a, REAL *out_, int n)
-{
-     N a0, b;
-     int i;
-     volatile REAL *out = (volatile REAL *)out_; /* force rounding */
-
-     cpy(a, a0);
-     for (i = 0; i < n; ++i, ++out) {
-	  *out = toreal(a0);
-	  fromreal(*out, b);
-	  sub(a0, b, a0);
-     }
-} 
-
 static void neg(N a)
 {
      SGNA = -SGNA;

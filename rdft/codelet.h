@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.9 2002-08-05 18:17:58 stevenj Exp $ */
+/* $Id: codelet.h,v 1.10 2002-08-25 18:10:55 fftw Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -54,7 +54,7 @@ typedef enum {
 #define R2HCII R2HC01
 #define HC2RIII HC2R10
 
-#define R2HC_KINDP(k) ((k) >= R2HC00 && (k) <= R2HC11) /* uses kr2hc_genus */
+#define R2HC_KINDP(k) (/* (k) >= R2HC00 && */ (k) <= R2HC11) /* uses kr2hc_genus */
 #define HC2R_KINDP(k) ((k) >= HC2R00 && (k) <= HC2R11) /* uses khc2r_genus */
 
 #define R2R_KINDP(k) ((k) >= DHT) /* uses kr2r_genus */

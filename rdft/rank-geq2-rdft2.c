@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.2 2002-08-17 03:44:28 stevenj Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.3 2002-08-25 18:10:55 fftw Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -89,9 +89,9 @@ static void print(plan *ego_, printer *p)
 static int applicable(const solver *ego_, const problem *p_, 
 		      const planner *plnr)
 {
+     UNUSED(ego_);
      if (RDFT2P(p_)) {
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
-          const S *ego = (const S *)ego_;
           return (1
                   && p->sz.rnk >= 2
                   && (0
@@ -113,7 +113,6 @@ static int applicable(const solver *ego_, const problem *p_,
 /* TODO: revise this. */
 static int score(const solver *ego_, const problem *p_, const planner *plnr)
 {
-     const S *ego = (const S *)ego_;
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
 
      if (!applicable(ego_, p_, plnr))
@@ -131,14 +130,12 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
-     const S *ego = (const S *) ego_;
      const problem_rdft2 *p;
      P *pln;
      plan *cldr = 0, *cldc = 0;
      tensor sz1, sz2, vecszi, sz2i;
      inplace_kind k;
      problem *cldp;
-     uint i;
 
      static const plan_adt padt = {
 	  X(rdft2_solve), awake, print, destroy

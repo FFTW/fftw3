@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.4 2002-08-10 23:33:23 stevenj Exp $ */
+/* $Id: indirect.c,v 1.5 2002-08-25 18:10:55 fftw Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
@@ -66,7 +66,6 @@ static void apply_before(plan *ego_, R *I, R *O)
 
 static problem *mkcld_before(const problem_rdft *p)
 {
-     uint i;
      tensor v, s;
      v = X(tensor_copy_inplace)(p->vecsz, INPLACE_OS);
      s = X(tensor_copy_inplace)(p->sz, INPLACE_OS);
@@ -98,7 +97,6 @@ static void apply_after(plan *ego_, R *I, R *O)
 
 static problem *mkcld_after(const problem_rdft *p)
 {
-     uint i;
      tensor v, s;
      v = X(tensor_copy_inplace)(p->vecsz, INPLACE_IS);
      s = X(tensor_copy_inplace)(p->sz, INPLACE_IS);

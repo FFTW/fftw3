@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.17 2002-08-16 22:10:33 athena Exp $ */
+/* $Id: verify.c,v 1.18 2002-08-25 18:10:55 fftw Exp $ */
 
 #include "rdft.h"
 #include "verify.h"
@@ -345,16 +345,13 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
 			   uint rounds, double tol)
 {
      C *inA, *inB, *inC, *outA, *outB, *outC, *tmp;
-     tensor psz = {1, 0};
      info nfo;
      uint n, vecn, N;
      
-     psz.dims = (iodim *) &p->sz;
-
      if (rounds == 0)
 	  rounds = 20;  /* default value */
 
-     n = X(tensor_sz)(psz);
+     n = X(tensor_sz)(p->sz);
      vecn = X(tensor_sz)(p->vecsz);
      N = n * vecn;
 
@@ -369,10 +366,10 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
      nfo.pln = pln;
      nfo.p = 0;
      nfo.p2 = p;
-     nfo.probsz = psz;
-     nfo.totalsz = X(tensor_append)(p->vecsz, psz);
+     nfo.probsz = p->sz;
+     nfo.totalsz = X(tensor_append)(p->vecsz, p->sz);
      nfo.pckdsz = verify_pack(nfo.totalsz, 2);
-     nfo.pckdvecsz = verify_pack(p->vecsz, 2 * X(tensor_sz)(psz));
+     nfo.pckdvecsz = verify_pack(p->vecsz, 2 * X(tensor_sz)(p->sz));
 
      impulse(dofft, &nfo, 
 	     n, vecn, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
@@ -381,11 +378,11 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
 
 
      if (nfo.p2->kind == R2HC)
-	  tf_shift(dofft, &nfo, 0, psz,
+	  tf_shift(dofft, &nfo, 0, p->sz,
 		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, TIME_SHIFT);
      if (nfo.p2->kind == HC2R)
-	  tf_shift(dofft, &nfo, 0, psz,
+	  tf_shift(dofft, &nfo, 0, p->sz,
 		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, FREQ_SHIFT);
 

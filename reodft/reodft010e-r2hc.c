@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.6 2002-08-24 15:19:30 athena Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.7 2002-08-25 18:10:55 fftw Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -351,7 +351,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	 case REDFT10: pln = MKPLAN_RDFT(P, &padt, apply_re10); break;
 	 case RODFT01: pln = MKPLAN_RDFT(P, &padt, apply_ro01); break;
 	 case RODFT10: pln = MKPLAN_RDFT(P, &padt, apply_ro10); break;
-	 default: A(0); pln = 0; /* silence compiler */
+	 default: A(0); return (plan*)0;
      }
 
      pln->n = n;
