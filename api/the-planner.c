@@ -32,7 +32,6 @@ planner *X(the_planner)(void)
      if (!plnr) {
 	  plnr = X(mkplanner)();
 	  X(configure_planner)(plnr);
-	  plnr->nthr = 1;
      }
      
      return plnr;
