@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.195 2003-05-28 00:31:25 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.196 2003-06-06 02:29:52 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -90,7 +90,7 @@ approved by the Free Software Foundation.
 
 @dircategory Texinfo documentation system
 @direntry
-* fftw3: (fftw3)FFTW User's Manual.
+* fftw3: (fftw3).	FFTW User's Manual.
 @end direntry
 
 @titlepage
