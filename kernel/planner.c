@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.46 2002-08-31 01:29:10 athena Exp $ */
+/* $Id: planner.c,v 1.47 2002-08-31 13:21:48 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -527,13 +527,6 @@ void X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
  * Debugging code:
  */
 #ifdef FFTW_DEBUG
-#include <stdio.h>
-
-static void putchr(printer *p, char c)
-{
-     UNUSED(p);
-     putchar(c);
-}
 
 void X(planner_dump)(planner *ego, int verbose)
 {
@@ -541,14 +534,12 @@ void X(planner_dump)(planner *ego, int verbose)
      solutions *s;
      uint h;
      if (verbose) {
-          printer *pr = X(mkprinter)(sizeof(printer), putchr);
           for (h = 0; h < ego->hashsiz; ++h) {
-               pr->print(pr, "\nbucket %d:\n", h);
+               D("\nbucket %d:\n", h);
 
                for (s = ego->sols[h]; s; s = s->cdr) 
-		    pr->print(pr, "%P\n", s->p);
+		    D("%P %s\n", s->p, s->sp ? s->sp->reg_nam : 0);
           }
-          X(printer_destroy)(pr);
      }
 
      for (h = 0; h < ego->hashsiz; ++h) {
@@ -566,12 +557,12 @@ void X(planner_dump)(planner *ego, int verbose)
                ++empty;
      }
 
-     printf("nplan = %u\n", ego->nplan);
-     printf("nprob = %u\n", ego->nprob);
-     printf("hashsiz = %d\n", ego->hashsiz);
-     printf("cnt = %d\n", cnt);
-     printf("cnt_null = %d\n", cnt_null);
-     printf("max_len = %d\n", max_len);
-     printf("empty = %d\n", empty);
+     D("nplan = %u\n", ego->nplan);
+     D("nprob = %u\n", ego->nprob);
+     D("hashsiz = %d\n", ego->hashsiz);
+     D("cnt = %d\n", cnt);
+     D("cnt_null = %d\n", cnt_null);
+     D("max_len = %d\n", max_len);
+     D("empty = %d\n", empty);
 }
 #endif

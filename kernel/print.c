@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.12 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: print.c,v 1.13 2002-08-31 13:21:48 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -54,7 +54,10 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       }
 		       case 's': {
 			    char *x = va_arg(ap, char *);
-			    myputs(p, x);
+			    if (x)
+				 myputs(p, x);
+			    else
+				 goto putnull;
 			    break;
 		       }
 		       case 'd': {
