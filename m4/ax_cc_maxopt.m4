@@ -15,7 +15,7 @@ dnl floating-point computations can be re-ordered as needed.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_ARCHFLAG
 dnl
-dnl @version $Id: ax_cc_maxopt.m4,v 1.6 2005-02-16 17:30:29 stevenj Exp $
+dnl @version $Id: ax_cc_maxopt.m4,v 1.7 2005-03-06 18:04:23 athena Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
 [
@@ -70,13 +70,13 @@ if test "$ac_test_CFLAGS" != "set"; then
                 	xlc_opt="-qtune=auto"
 		fi
                 AX_CHECK_COMPILER_FLAGS($xlc_opt,
-                        CFLAGS="-O -qansialias -w $xlc_opt",
-                        [CFLAGS="-O -qansialias -w"
+                        CFLAGS="-O3 -qansialias -w $xlc_opt",
+                        [CFLAGS="-O3 -qansialias -w"
                 echo "*******************************************************"
                 echo "*  You seem to have AIX and the IBM compiler.  It is  *"
                 echo "*  recommended for best performance that you use:     *"
                 echo "*                                                     *"
-                echo "*    CFLAGS=-O -qarch=xxx -qtune=xxx -qansialias -w   *"
+                echo "*    CFLAGS=-O3 -qarch=xxx -qtune=xxx -qansialias -w  *"
                 echo "*                      ^^^        ^^^                 *"
                 echo "*  where xxx is pwr2, pwr3, 604, or whatever kind of  *"
                 echo "*  CPU you have.  (Set the CFLAGS environment var.    *"
