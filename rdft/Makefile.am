@@ -3,4 +3,4 @@ SUBDIRS = codelets
 
 noinst_LTLIBRARIES = librdft.la
 
-librdft_la_SOURCES = codelet.h
+librdft_la_SOURCES = codelet.h conf.c plan.c problem.c rdft.h solve.c
