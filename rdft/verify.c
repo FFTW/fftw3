@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.16 2002-08-16 20:31:19 athena Exp $ */
+/* $Id: verify.c,v 1.17 2002-08-16 22:10:33 athena Exp $ */
 
 #include "rdft.h"
 #include "verify.h"
@@ -285,24 +285,6 @@ static void dofft(void *n_, C *in, C *out)
 
 /***************************************************************************/
 
-/* Make a copy of the size tensor, with the same dimensions, but with
-   the strides corresponding to a "packed" row-major array with the
-   given stride. */
-static tensor pack(tensor sz, int s)
-{
-     tensor x = X(tensor_copy)(sz);
-     if (FINITE_RNK(x.rnk) && x.rnk > 0) {
-	  uint i;
-	  x.dims[x.rnk - 1].is = s;
-	  x.dims[x.rnk - 1].os = s;
-	  for (i = x.rnk - 1; i > 0; --i) {
-	       x.dims[i - 1].is = x.dims[i].is * x.dims[i].n;
-	       x.dims[i - 1].os = x.dims[i].os * x.dims[i].n;
-	  }
-     }
-     return x;
-}
-
 static void really_verify(plan *pln, const problem_rdft *p, 
 			  uint rounds, double tol)
 {
@@ -330,8 +312,8 @@ static void really_verify(plan *pln, const problem_rdft *p,
      nfo.p2 = 0;
      nfo.probsz = p->sz;
      nfo.totalsz = X(tensor_append)(p->vecsz, p->sz);
-     nfo.pckdsz = pack(nfo.totalsz, 2);
-     nfo.pckdvecsz = pack(p->vecsz, 2 * X(tensor_sz)(p->sz));
+     nfo.pckdsz = verify_pack(nfo.totalsz, 2);
+     nfo.pckdvecsz = verify_pack(p->vecsz, 2 * X(tensor_sz)(p->sz));
 
      impulse(dofft, &nfo, 
 	     n, vecn, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
@@ -389,8 +371,8 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
      nfo.p2 = p;
      nfo.probsz = psz;
      nfo.totalsz = X(tensor_append)(p->vecsz, psz);
-     nfo.pckdsz = pack(nfo.totalsz, 2);
-     nfo.pckdvecsz = pack(p->vecsz, 2 * X(tensor_sz)(psz));
+     nfo.pckdsz = verify_pack(nfo.totalsz, 2);
+     nfo.pckdvecsz = verify_pack(p->vecsz, 2 * X(tensor_sz)(psz));
 
      impulse(dofft, &nfo, 
 	     n, vecn, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);

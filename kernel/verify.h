@@ -78,3 +78,6 @@ void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
 	      C *inA, C *inB, C *outA, C *outB, C *tmp,
 	      uint rounds, double tol, int which_shift);
 
+
+#define verify_pack X(verify_pack)
+tensor verify_pack(tensor sz, int s);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.1 2002-08-16 19:22:36 athena Exp $ */
+/* $Id: verify-lib.c,v 1.2 2002-08-16 22:10:33 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -392,3 +392,21 @@ void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
      }
 }
 
+
+/* Make a copy of the size tensor, with the same dimensions, but with
+   the strides corresponding to a "packed" row-major array with the
+   given stride. */
+tensor verify_pack(tensor sz, int s)
+{
+     tensor x = X(tensor_copy)(sz);
+     if (FINITE_RNK(x.rnk) && x.rnk > 0) {
+	  uint i;
+	  x.dims[x.rnk - 1].is = s;
+	  x.dims[x.rnk - 1].os = s;
+	  for (i = x.rnk - 1; i > 0; --i) {
+	       x.dims[i - 1].is = x.dims[i].is * x.dims[i].n;
+	       x.dims[i - 1].os = x.dims[i].os * x.dims[i].n;
+	  }
+     }
+     return x;
+}
