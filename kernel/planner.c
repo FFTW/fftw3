@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.75 2002-09-12 22:53:44 athena Exp $ */
+/* $Id: planner.c,v 1.76 2002-09-13 11:15:06 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -182,8 +182,12 @@ static void rehash(planner *ego)
 	  ++ego->nrehash;
 
 	  /* init new table */
-	  for (h = 0; h < nsiz; ++h)
-	       nsol[h].state = H_EMPTY;
+	  for (h = 0; h < nsiz; ++h) {
+	       solution *l = nsol + h;
+	       l->state = H_EMPTY;
+	       l->flags = 0;  /* redundant initializations */
+	       l->sp = 0;
+	  }
 
 	  /* install new table */
 	  ego->hashsiz = nsiz;
