@@ -28,5 +28,5 @@ void *X(malloc)(size_t n)
 
 void X(free)(void *p)
 {
-     X(kernel_free(p));
+     X(kernel_free)(p);
 }
