@@ -85,11 +85,15 @@ vec_mergel (vector float a1, vector float a2)
 #endif
 }
 
-#define VLIT(x0, x1, x2, x3) {x0, x1, x2, x3}
+#define VLIT4(x0, x1, x2, x3) {x0, x1, x2, x3}
+#define VLIT16(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xa, xb, xc, xd, xe, xf)\
+ {x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xa, xb, xc, xd, xe, xf}
 
 #else /* !__VEC__ */
 
-#define VLIT(x0, x1, x2, x3) (x0, x1, x2, x3)
+#define VLIT4(x0, x1, x2, x3) (x0, x1, x2, x3)
+#define VLIT16(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xa, xb, xc, xd, xe, xf)\
+ (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xa, xb, xc, xd, xe, xf)
 
 #endif
 
@@ -97,9 +101,9 @@ typedef vector float V;
 #define VADD(a, b) vec_add(a, b)
 #define VSUB(a, b) vec_sub(a, b)
 #define VFMA(a, b, c) vec_madd(a, b, c)
-#define VFNMS(a, b, c) vec_nmsub(a, b, c) 
+#define VFNMS(a, b, c) vec_nmsub(a, b, c)
 #define LDK(x) x
-#define DVK(var, val) const V var = (vector float)VLIT(val, val, val, val)
+#define DVK(var, val) const V var = (vector float)VLIT4(val, val, val, val)
 
 static inline V VMUL(V a, V b)
 {
@@ -113,26 +117,26 @@ static inline V VFMS(V a, V b, V c)
 }
 
 /* load lower half */
-static inline V LDL(const float *x, int ivs) 
+static inline V LDL(const float *x, int ivs)
 {
      int fivs = 4 * ivs;
      V v = vec_ld(fivs, (float *)x);
      return vec_perm(v, v, vec_lvsl(fivs, (float *)x));
 }
 
-static inline V LDH(const float *x) 
+static inline V LDH(const float *x)
 {
      V v = vec_ld(0, (float *)x);
      return vec_perm(v, v, vec_lvsl(8, (float *)x));
 }
 
-extern const vector unsigned int X(altivec_ld_selmsk);
-
-static inline V LD(const float *x, int ivs) 
+static inline V LD(const float *x, int ivs)
 {
+     const vector unsigned int msk =
+	  (vector unsigned int)VLIT4(0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
      V l = LDL(x, ivs);
      V h = LDH(x);
-     return vec_sel(l, h, X(altivec_ld_selmsk));
+     return vec_sel(l, h, msk);
 }
 
 /* store lower half */
@@ -151,23 +155,24 @@ static inline void STH(float *x, V v)
      vec_ste(v, 4, x);
 }
 
-static inline void ST(float *x, V v, int ovs) 
-{			
+static inline void ST(float *x, V v, int ovs)
+{
      STL(x, v, ovs);
      STH(x, v);
 }
 
-extern const vector unsigned int X(altivec_flipri_perm);
 static inline V FLIP_RI(V x)
 {
-     return vec_perm(x, x, (vector unsigned char)X(altivec_flipri_perm));
+     const vector unsigned char perm =
+	  (vector unsigned char)VLIT16(4, 5, 6, 7, 0, 1, 2, 3,
+				       12, 13, 14, 15, 8, 9, 10, 11);
+     return vec_perm(x, x, perm);
 }
-
-extern const vector float X(altivec_chsr_msk);
 
 static inline V CHS_R(V x)
 {
-     return VMUL(x, X(altivec_chsr_msk));
+     const vector float msk = (vector float)VLIT4(-1.0, 1.0, -1.0, 1.0);
+     return VMUL(x, msk);
 }
 
 static inline V VBYI(V x)
@@ -177,12 +182,14 @@ static inline V VBYI(V x)
 
 static inline V VFMAI(V b, V c)
 {
-     return VFMA(FLIP_RI(b), X(altivec_chsr_msk), c);
+     const vector float msk = (vector float)VLIT4(-1.0, 1.0, -1.0, 1.0);
+     return VFMA(FLIP_RI(b), msk, c);
 }
 
 static inline V VFNMSI(V b, V c)
 {
-     return VFNMS(FLIP_RI(b), X(altivec_chsr_msk), c);
+     const vector float msk = (vector float)VLIT4(-1.0, 1.0, -1.0, 1.0);
+     return VFNMS(FLIP_RI(b), msk, c);
 }
 
 #define VTW(x) {TW_COS, 1, x}, {TW_COS, 0, x}, {TW_SIN, 1, x}, {TW_SIN, 0, x}
