@@ -22,6 +22,8 @@
 #error "ALTIVEC only works in single precision"
 #endif
 
+/* define these unconditionally, because they are used by
+   taint.c which is compiled without altivec */
 #define VL 2            /* SIMD complex vector length */
 #define ALIGNMENT 8     /* alignment for LD/ST */
 #define ALIGNMENTA 16   /* alignment for LDA/STA */
@@ -30,20 +32,17 @@
 #include <altivec.h>
 #endif
 
-#ifndef __VEC__
-#error "Need version of gcc that supports altivec"
-#endif
-
-#define VLIT(x0, x1, x2, x3) {x0, x1, x2, x3}
-#define VLIT_UNSIGNED(x0, x1, x2, x3) {x0, x1, x2, x3}
+#ifdef __VEC__
 
 typedef vector float V;
-#define VADD(a, b) vec_add(a, b)
-#define VSUB(a, b) vec_sub(a, b)
-#define VFMA(a, b, c) vec_madd(a, b, c)
-#define VFNMS(a, b, c) vec_nmsub(a, b, c)
+#define VLIT(x0, x1, x2, x3) {x0, x1, x2, x3}
 #define LDK(x) x
 #define DVK(var, val) const V var = VLIT(val, val, val, val)
+
+static inline V VADD(V a, V b) { return vec_add(a, b); }
+static inline V VSUB(V a, V b) { return vec_sub(a, b); }
+static inline V VFMA(V a, V b, V c) { return vec_madd(a, b, c); }
+static inline V VFNMS(V a, V b, V c) { return vec_nmsub(a, b, c); }
 
 static inline V VMUL(V a, V b)
 {
@@ -51,10 +50,7 @@ static inline V VMUL(V a, V b)
      return VFMA(a, b, zero);
 }
 
-static inline V VFMS(V a, V b, V c)
-{
-     return VSUB(VMUL(a, b), c);
-}
+static inline V VFMS(V a, V b, V c) { return VSUB(VMUL(a, b), c); }
 
 extern const vector unsigned int X(altivec_ld_selmsk);
 
@@ -164,3 +160,5 @@ extern int RIGHT_CPU(void);
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2)
 #define BEGIN_SIMD()
 #define END_SIMD()
+
+#endif /* #ifdef __VEC__ */
