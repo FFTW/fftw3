@@ -23,16 +23,22 @@
 
 #include "dft.h"
 
+struct P_s;
+typedef struct {
+     void (*bytwiddle)(const struct P_s *ego, R *rio, R *iio);
+     void (*mktwiddle)(struct P_s *ego, int flg);
+     const char *nam;
+} wadt;
+
 typedef struct {
      solver super;
-     int kind;
+     const wadt *adt;
 } S;
 
 typedef struct P_s {
      plan_dft super;
 
-     void (*bytwiddle)(const struct P_s *ego, R *rio, R *iio);
-     void (*mktwiddle)(struct P_s *ego, int flg);
+     const wadt *adt;
      int r, m, s;
      plan *cld;
 
@@ -149,7 +155,7 @@ static void apply_dit(const plan *ego_, R *rio, R *iio)
      const P *ego = (const P *) ego_;
      plan_dft *cld;
 
-     ego->bytwiddle(ego, rio, iio);
+     ego->adt->bytwiddle(ego, rio, iio);
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
@@ -163,14 +169,14 @@ static void apply_dif(const plan *ego_, R *rio, R *iio)
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
 
-     ego->bytwiddle(ego, rio, iio);
+     ego->adt->bytwiddle(ego, rio, iio);
 }
 
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
      AWAKE(ego->cld, flg);
-     ego->mktwiddle(ego, flg);
+     ego->adt->mktwiddle(ego, flg);
 }
 
 static void destroy(plan *ego_)
@@ -183,8 +189,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     const char *nam = (ego->slv->kind == 1) ? "dftw-dft1" : "dftw-dft2";
-     p->print(p, "(%s-%d-%d%(%p%))", nam, ego->r, ego->m, ego->cld);
+     p->print(p, "(%s-%d-%d%(%p%))", ego->adt->nam, ego->r, ego->m, ego->cld);
 }
 
 static int applicable0(const problem *p_)
@@ -212,13 +217,10 @@ static int applicable(const S *ego, const problem *p_, const planner *plnr)
      p = (const problem_dftw *) p_;
 
      if (NO_UGLYP(plnr)) {
-	  switch (ego->kind) {
-	      case 1:
-		   if (p->m * p->r > 16384) return 0;
-		   break;
-	      case 2:
-		   if (p->m * p->r <= 65536) return 0;
-		   break;
+	  if (ego->adt->bytwiddle == bytwiddle1) {
+	       if (p->m * p->r > 16384) return 0;
+	  } else {
+	       if (p->m * p->r <= 65536) return 0;
 	  }
      }
      return 1;
@@ -250,23 +252,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_DFTW(P, &padt, p->dec == DECDIT ? apply_dit : apply_dif);
      pln->slv = ego;
+     pln->adt = ego->adt;
      pln->cld = cld;
      pln->r = p->r;
      pln->m = p->m;
      pln->s = p->s;
      pln->W0 = pln->W1 = 0;
      pln->td = 0;
-
-     switch (ego->kind) {
-	 case 1:
-	      pln->mktwiddle = mktwiddle1;
-	      pln->bytwiddle = bytwiddle1;
-	      break;
-	 case 2:
-	      pln->mktwiddle = mktwiddle2;
-	      pln->bytwiddle = bytwiddle2;
-	      break;
-     }
 
      {
 	  double n0 = (p->r - 1) * (p->m - 1);
@@ -282,16 +274,19 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(int kind)
+static solver *mksolver(const wadt *adt)
 {
      static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
-     slv->kind = kind;
+     slv->adt = adt;
      return &(slv->super);
 }
 
 void X(dftw_dft_register)(planner *p)
 {
-     REGISTER_SOLVER(p, mksolver(1));
-     REGISTER_SOLVER(p, mksolver(2));
+     static const wadt a[2] = 
+	  { { bytwiddle1, mktwiddle1, "dftw-dft1" },
+	    { bytwiddle2, mktwiddle2, "dftw-dft2" } };
+     int i;
+     for (i = 0; i < 2; ++i) REGISTER_SOLVER(p, mksolver(&a[i]));
 }
