@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.88 2002-08-25 17:16:49 athena Exp $ */
+/* $Id: ifftw.h,v 1.89 2002-08-26 02:06:52 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -504,6 +504,11 @@ typedef struct solvtab_s solvtab[];
 void X(solvtab_exec)(const solvtab tbl, planner *p);
 #define SOLVTAB(s) { s, STRINGIZE(s) }
 #define SOLVTAB_END { 0, 0 }
+
+/*-----------------------------------------------------------------------*/
+/* pickdim.c */
+int X(pickdim)(int which_dim, const int *buddies, uint nbuddies,
+	       const tensor sz, int oop, uint *dp);
 
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */

@@ -303,7 +303,7 @@ void setup(struct problem *p)
 	  FFTW(printer_destroy)(pr);
      }
      AWAKE(pln, 1);
-#if 0
+#if 1
      if (pln)
           hook(pln, prblm);
 #endif

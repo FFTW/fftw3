@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.18 2002-08-10 23:32:03 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.19 2002-08-26 02:06:52 stevenj Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -76,36 +76,14 @@ static void print(plan *ego_, printer *p)
 	      s->spltrnk, ego->cld1, ego->cld2);
 }
 
-/* Given a solver spltrnk and a vector rnk, return the actual
-   rank that it corresponds to.  (This returned RANK is the rank of
-   the first sub-transform, comprising the first rank dimensions.) */
-static uint really_picksplit(int spltrnk, uint rnk)
+static int picksplit(const S *ego, const tensor sz, uint *rp)
 {
-     A(rnk > 1);		/* must be at least 2d to split */
-     if (spltrnk > 0)	/* positive: split from the front */
-          return X(uimin)(rnk - 1, (uint)spltrnk);
-     else if (spltrnk < 0)	/* negative: split from the back */
-          return X(uimax)(1, rnk + (uint)spltrnk);
-     else			/* zero: split in the middle */
-          return (rnk / 2);
-}
-
-static int picksplit(const S *ego, uint rnk, uint *rp)
-{
-     uint i, r0;
-     r0 = really_picksplit(ego->spltrnk, rnk);
-
-     /* check whether some buddy solver would produce the same split.
-        If so, consider this solver unapplicable and let the buddy
-        take care of it.  The smallest buddy is applicable. */
-     for (i = 0; i < ego->nbuddies; ++i) {
-	  if (ego->buddies[i] == ego->spltrnk)
-	       break;  /* found self */
-	  if (really_picksplit(ego->buddies[i], rnk) == r0)
-               return 0; /* found equivalent buddy */
-     }
-
-     *rp = r0;
+     A(rnk > 1); /* cannot split rnk <= 1 */
+     if (!X(pickdim)(ego->spltrnk, ego->buddies, ego->nbuddies, sz, 1, rp))
+	  return 0;
+     *rp += 1; /* convert from dim. index to rank */
+     if (*rp >= sz.rnk) /* split must reduce rank */
+	  return 0;
      return 1;
 }
 
@@ -116,7 +94,7 @@ static int applicable(const solver *ego_, const problem *p_, uint *rp)
           const S *ego = (const S *)ego_;
           return (1
                   && p->sz.rnk >= 2
-                  && picksplit(ego, p->sz.rnk, rp)
+                  && picksplit(ego, p->sz, rp)
                   && (0
 
                       /* can always operate out-of-place */
@@ -236,7 +214,7 @@ static solver *mksolver(int spltrnk, const int *buddies, uint nbuddies)
 void X(dft_rank_geq2_register)(planner *p)
 {
      uint i;
-     static const int buddies[] = { 0, 1, -1 };
+     static const int buddies[] = { 0, 1, -2 };
 
      const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.14 2002-08-25 17:16:49 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.15 2002-08-26 02:06:52 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -86,52 +86,10 @@ static void print(plan *ego_, printer *p)
 	      ego->vl, s->vecloop_dim, ego->cld);
 }
 
-/* Given a solver vecloop_dim, a vector sz, and whether or not the
-   transform is out-of-place, return the actual dimension index that
-   it corresponds to.  The basic idea here is that we return the
-   vecloop_dim'th valid dimension, starting from the end if
-   vecloop_dim < 0. */
-static int really_pickdim(int vecloop_dim, tensor vecsz, int oop, uint *vdim)
-{
-     uint i;
-     int count_ok = 0;
-     if (vecloop_dim > 0) {
-          for (i = 0; i < vecsz.rnk; ++i) {
-               if (vecsz.dims[i].is == vecsz.dims[i].os || oop)
-                    if (++count_ok == vecloop_dim) {
-                         *vdim = i;
-                         return 1;
-                    }
-          }
-     } else if (vecloop_dim < 0) {
-          for (i = vecsz.rnk; i > 0; --i) {
-               if (vecsz.dims[i - 1].is == vecsz.dims[i - 1].os || oop)
-                    if (++count_ok == -vecloop_dim) {
-                         *vdim = i - 1;
-                         return 1;
-                    }
-          }
-     }
-     return 0;
-}
-
 static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
 {
-     uint i, d1;
-
-     if (!really_pickdim(ego->vecloop_dim, vecsz, oop, dp))
-          return 0;
-
-     /* check whether some buddy solver would produce the same dim.
-        If so, consider this solver unapplicable and let the buddy
-        take care of it.  The smallest-indexed buddy is applicable. */
-     for (i = 0; i < ego->nbuddies; ++i) {
-	  if (ego->buddies[i] == ego->vecloop_dim)
-	       break;  /* found self */
-          if (really_pickdim(ego->buddies[i], vecsz, oop, &d1) && *dp == d1)
-               return 0; /* found equivalent buddy */
-     }
-     return 1;
+     return X(pickdim)(ego->vecloop_dim, ego->buddies, ego->nbuddies,
+		       vecsz, oop, dp);
 }
 
 static int applicable(const solver *ego_, const problem *p_, uint *dp)
