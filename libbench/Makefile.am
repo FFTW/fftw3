@@ -16,3 +16,7 @@ copy-r2c-packed.c copy-c2r-packed.c copy-c2r-unpacked.c mp.c
 
 benchmark: all
 	@echo "nothing to benchmark"
+
+accuracy: all
+	@echo "nothing to benchmark"
+
