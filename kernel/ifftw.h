@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.225 2003-04-17 19:25:50 athena Exp $ */
+/* $Id: ifftw.h,v 1.226 2003-05-15 18:32:06 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -578,7 +578,7 @@ plan *X(mkplan_d)(planner *ego, problem *p);
 /* stride.c: */
 
 /* If PRECOMPUTE_ARRAY_INDICES is defined, precompute all strides. */
-#if defined(__i386__) && !HAVE_K7 && !defined(FFTW_LDOUBLE)
+#if (defined(__i386__) || _M_IX86 >= 500) && !HAVE_K7 && !defined(FFTW_LDOUBLE)
 #define PRECOMPUTE_ARRAY_INDICES
 #endif
 
