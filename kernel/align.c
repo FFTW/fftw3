@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.16 2003-03-28 03:06:07 stevenj Exp $ */
+/* $Id: align.c,v 1.17 2003-03-28 18:45:47 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -54,9 +54,8 @@ R *X(most_unaligned)(R *p1, R *p2)
      }
 }
 
-void X(most_unaligned_complex)(R **rp, R **ip, int s)
+void X(most_unaligned_complex)(R *r, R *i, R **rp, R **ip, int s)
 {
-     R *r = *rp, *i = *ip;
      R *p;
      if (i == r + 1) {
 	  /* forward complex format.  Choose the worst alignment

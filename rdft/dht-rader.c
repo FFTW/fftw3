@@ -266,14 +266,17 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      cld1 = X(mkplan_d)(plnr, 
 			X(mkproblem_rdft_1_d)(X(mktensor_1d)(n - 1, 1, os),
 					      X(mktensor_1d)(1, 0, 0),
-					      buf, O + os, R2HC));
+					      buf, 
+					      X(most_unaligned)(O, O + os),
+					      R2HC));
      if (!cld1) goto nada;
 
      cldp =
           X(mkproblem_rdft_1_d)(
                X(mktensor_1d)(n - 1, os, 1),
                X(mktensor_1d)(1, 0, 0),
-               O + os, buf, 
+	       X(most_unaligned)(O, O + os),
+	       buf, 
 #if R2HC_ONLY_CONV
 	       R2HC
 #else

@@ -337,20 +337,22 @@ static int mkP(P *pln, int n, int is, int os, R *ro, R *io,
      plan *cld2 = (plan *) 0;
      plan *cld_omega = (plan *) 0;
      R *buf = (R *) 0;
+     R *nro, *nio;
 
      /* initial allocation for the purpose of planning */
      buf = (R *) MALLOC(sizeof(R) * (n - 1) * 2, BUFFERS);
 
+     X(most_unaligned_complex)(ro, io, &nro, &nio, os);
      cld1 = X(mkplan_d)(plnr, 
 			X(mkproblem_dft_d)(X(mktensor_1d)(n - 1, 2, os),
 					   X(mktensor_1d)(1, 0, 0),
-					   buf, buf + 1, ro + os, io + os));
+					   buf, buf + 1, nro, nio));
      if (!cld1) goto nada;
 
      cld2 = X(mkplan_d)(plnr, 
 			X(mkproblem_dft_d)(X(mktensor_1d)(n - 1, os, 2),
 					   X(mktensor_1d)(1, 0, 0),
-					   ro + os, io + os, buf, buf + 1));
+					   nro, nio, buf, buf + 1));
      if (!cld2) goto nada;
 
      /* plan for omega array */

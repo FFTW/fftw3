@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.200 2003-03-28 17:43:23 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.201 2003-03-28 18:45:48 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -692,7 +692,7 @@ double X(measure_execution_time)(plan *pln, const problem *p);
 int X(alignment_of)(R *p);
 R *X(most_unaligned)(R *p1, R *p2);
 int X(stride_aligned_p)(int s);
-void X(most_unaligned_complex)(R **rp, R **ip, int s);
+void X(most_unaligned_complex)(R *r, R *i, R **rp, R **ip, int s);
 unsigned X(hash)(const char *s);
 int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz);
 extern int X(ct_uglyp)(int min_n, int n, int r);
