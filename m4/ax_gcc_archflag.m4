@@ -22,7 +22,7 @@ dnl called unless the user specified --with-gcc-arch manually.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.9 2005-01-10 19:50:23 athena Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.10 2005-01-10 21:09:43 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -44,7 +44,7 @@ ax_gcc_arch=""
 case $host_cpu in
   i386*) ax_gcc_arch=i386 ;;
   i486*) ax_gcc_arch=i486 ;;
-  i[[56]]86*) # use cpuid codes, extracted from x86info by Dave Jones
+  i[[56]]86*) # use cpuid codes, extracted from x86info-1.12b by Dave Jones
      AX_GCC_X86_CPUID(0)
      AX_GCC_X86_CPUID(1)
      case $ax_cv_gcc_x86_cpuid_0 in
