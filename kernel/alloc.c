@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.10 2002-07-04 00:32:28 athena Exp $ */
+/* $Id: alloc.c,v 1.11 2002-07-29 01:19:35 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -26,12 +26,19 @@
 #include <malloc.h>
 #endif
 
+#define real_free free /* memalign and malloc use ordinary free */
+
 static inline void *real_malloc(size_t n)
 {
      void *p;
 
-#ifdef HAVE_MEMALIGN
+#if defined(HAVE_MEMALIGN)
      p = memalign(MIN_ALIGNMENT, n);
+#elif defined(__ICC) || defined(__INTEL_COMPILER) || defined(HAVE__MM_MALLOC)
+     /* Intel's C compiler defines _mm_malloc and _mm_free intrinsics */
+     p = (void *) _mm_malloc(n, MIN_ALIGNMENT);
+#    undef real_free
+#    define real_free _mm_free
 #else
      p = malloc(n);
 #endif
@@ -187,7 +194,7 @@ void X(free)(void *p)
           A((estat->cnt == 0 && estat->siz == 0) ||
             (estat->cnt > 0 && estat->siz > 0));
 
-          free(q);
+          real_free(q);
      }
 
      {
@@ -255,7 +262,7 @@ void *X(malloc_plain)(size_t n)
 
 void X(free)(void *p)
 {
-     free(p);
+     real_free(p);
 }
 
 #endif
