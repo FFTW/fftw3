@@ -25,7 +25,7 @@
 
 struct P_s;
 typedef struct {
-     void (*bytwiddle)(const struct P_s *ego, R *rio, R *iio, int vl, int vs);
+     void (*bytwiddle)(const struct P_s *ego, R *rio, R *iio);
      void (*mktwiddle)(struct P_s *ego, int flg);
      const char *nam;
 } wadt;
@@ -93,10 +93,10 @@ static void mktwiddle2(P *ego, int flg)
      }
 }
 
-static void bytwiddle2(const P *ego, R *rio, R *iio, int vl, int vs)
+static void bytwiddle2(const P *ego, R *rio, R *iio)
 {
      int i, j, k;
-     int r = ego->r, m = ego->m, s = ego->s;
+     int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
      int twshft = ego->log2_twradix;
      int twmsk = (1 << twshft) - 1;
 
@@ -140,10 +140,10 @@ static void mktwiddle1(P *ego, int flg)
      X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->m, ego->r - 1);
 }
 
-static void bytwiddle1(const P *ego, R *rio, R *iio, int vl, int vs)
+static void bytwiddle1(const P *ego, R *rio, R *iio)
 {
      int i, j, k;
-     int r = ego->r, m = ego->m, s = ego->s;
+     int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
      int ip = iio - rio;
      R *p;
 
@@ -173,7 +173,7 @@ static void apply_dit(const plan *ego_, R *rio, R *iio)
      const P *ego = (const P *) ego_;
      plan_dft *cld;
 
-     ego->adt->bytwiddle(ego, rio, iio, ego->vl, ego->vs);
+     ego->adt->bytwiddle(ego, rio, iio);
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
@@ -187,7 +187,7 @@ static void apply_dif(const plan *ego_, R *rio, R *iio)
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
 
-     ego->adt->bytwiddle(ego, rio, iio, ego->vl, ego->vs);
+     ego->adt->bytwiddle(ego, rio, iio);
 }
 
 static void awake(plan *ego_, int flg)
