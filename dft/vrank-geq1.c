@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.12 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.13 2002-08-05 02:50:19 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -160,7 +160,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
           return BAD;
 
      /* fftw2 behavior */
-     if ((plnr->flags & CLASSIC) && (ego->vecloop_dim != ego->buddies[0]))
+     if ((plnr->flags & IMPATIENT) && (ego->vecloop_dim != ego->buddies[0]))
 	  return BAD;
 
      p = (const problem_dft *) p_;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.38 2002-08-04 21:34:04 stevenj Exp $ */
+/* $Id: planner.c,v 1.39 2002-08-05 02:50:19 stevenj Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -95,7 +95,7 @@ static solutions *lookup(planner *ego, problem *p)
      h = hash(ego, p);
 
      for (l = ego->sols[h]; l; l = l->cdr) 
-          if ((ego->flags & IMPATIENCE_FLAGS) > (l->flags & IMPATIENCE_FLAGS)
+          if (IMPATIENCE(ego->flags) >= IMPATIENCE(l->flags)
 	      && p->adt->equal(p, l->p)) 
 	       return l;
      return 0;
@@ -484,7 +484,7 @@ void X(planner_set_hook)(planner *p, void (*hook)(plan *, const problem *))
 
 void X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
 {
-     if (!(ego->flags & CLASSIC) || pln->pcost == 0.0) {
+     if (!(ego->flags & IMPATIENT) || pln->pcost == 0.0) {
 	  ego->nplan++;
 	  if (ego->flags & ESTIMATE) {
 	       /* heuristic */

@@ -142,7 +142,7 @@ void setup(struct problem *p)
      FFTW(dft_conf_standard) (plnr);
      FFTW(rdft_conf_standard) (plnr);
      FFTW(planner_set_hook) (plnr, hook);
-     /* plnr->flags |= CLASSIC | CLASSIC_VRECURSE; */
+     /* plnr->flags |= IMPATIENT | CLASSIC_VRECURSE; */
 
 #if 0
      {

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.71 2002-08-04 21:24:37 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.72 2002-08-05 02:50:19 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -381,10 +381,10 @@ typedef struct slvpair_s {
 typedef struct solutions_s solutions; /* opaque */
 
 /* planner flags */
-enum { ESTIMATE = 0x2, CLASSIC = 0x1,
+enum { ESTIMATE = 0x2, IMPATIENT = 0x1, PATIENT = 0x0,
        CLASSIC_VRECURSE = 0x4, FORCE_VRECURSE = 0x8 };
 
-#define IMPATIENCE_FLAGS (ESTIMATE | CLASSIC)
+#define IMPATIENCE(flags) ((flags) & (ESTIMATE | IMPATIENT | PATIENT))
 
 typedef enum { FORGET_PLANS, FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
@@ -456,7 +456,7 @@ void X(planner_dump)(planner *ego, int verbose);
 planner *X(mkplanner_naive)(int flags);
 planner *X(mkplanner_score)(int flags);
 
-#define NO_VRECURSE(flags) (((flags) & CLASSIC) && !((flags) & (CLASSIC_VRECURSE | FORCE_VRECURSE)))
+#define NO_VRECURSE(flags) (((flags) & IMPATIENT) && !((flags) & (CLASSIC_VRECURSE | FORCE_VRECURSE)))
 #define CLASSIC_VRECURSE_RESET(plnr) { if ((plnr)->flags & CLASSIC_VRECURSE) (plnr)->flags &= ~FORCE_VRECURSE; }
 
 /*-----------------------------------------------------------------------*/
