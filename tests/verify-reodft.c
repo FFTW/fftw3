@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.1 2002-09-02 15:46:57 athena Exp $ */
+/* $Id: verify-reodft.c,v 1.2 2002-09-16 23:04:41 athena Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -240,8 +240,6 @@ static double acmp(info *nfo, R *a, R *b, uint n, const char *test, double tol)
      double d = aerror(a, b, n, tol);
      if (d > tol) {
 	  fprintf(stderr, "Found relative error %e (%s)\n", d, test);
-	  D("%P\n", nfo->p);
-	  D("%p\n", nfo->pln);
 	  {
 	       uint i;
 	       for (i = 0; i < n; ++i) 
