@@ -96,7 +96,7 @@ existing licensees.
 \question 26aug:systems  Which systems does FFTW run on?
 
 FFTW is written in ANSI C, and should work on any system with a decent
-C compiler.  (See also \qref runOnDOS and \qref compilerCrashes.)
+C compiler.  (See also \qref runOnWindows and \qref compilerCrashes.)
 FFTW can also take advantage of certain hardware-specific features,
 such as cycle counters and SIMD instructions, but this is optional.
 
