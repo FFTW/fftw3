@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.25 2003-04-01 06:17:15 stevenj Exp $ */
+/* $Id: cycle.h,v 1.26 2003-04-15 18:51:50 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -92,7 +92,7 @@ static inline double elapsed(ticks t1, ticks t0) /* time in nanoseconds */
 /*
  * PowerPC ``cycle'' counter using the time base register.
  */
-#if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))  && !defined(HAVE_TICK_COUNTER)
+#if ((defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))) || (defined(__MWERKS__) && defined(macintosh)))  && !defined(HAVE_TICK_COUNTER)
 typedef unsigned long long ticks;
 
 static __inline__ ticks getticks(void)
