@@ -18,32 +18,14 @@
  *
  */
 
-/* $Id: dft.h,v 1.2 2002-06-02 23:49:03 athena Exp $ */
+/* $Id: solve.c,v 1.1 2002-06-02 23:49:03 athena Exp $ */
 
-#include "ifftw.h"
+#include "dft.h"
 
-/* problem.c: */
-typedef struct {
-     problem super;
-     tensor sz, vecsz;
-     R *ri, *ii, *ro, *io;
-} problem_dft;
-
-int fftw_problem_dft_p(const problem *p);
-#define DFTP fftw_problem_dft_p  /* shorthand */
-
-/* solve.c: */
-void fftw_dft_solve(plan *ego_, const problem *p_);
-
-/* plan.c: */
-typedef void (*dftapply) (plan *ego, R *ri, R *ii, R *ro, R *io);
-
-typedef struct {
-     plan super;
-     dftapply apply;
-} plan_dft;
-
-plan *fftw_mkplan_dft(size_t size, const plan_adt *adt, dftapply apply);
-
-#define MKPLAN_DFT(type, adt, apply) \
-  (type *)fftw_mkplan_dft(sizeof(type), adt, apply)
+/* use the apply() operation for DFT problems */
+void fftw_dft_solve(plan *ego_, const problem *p_)
+{
+     plan_dft *ego = (plan_dft *) ego_;
+     const problem_dft *p = (const problem_dft *) p_;
+     ego->apply(ego_, p->ri, p->ii, p->ro, p->io);
+}

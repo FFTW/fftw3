@@ -18,14 +18,14 @@
  *
  */
 
-/* $Id: problem.c,v 1.1.1.1 2002-06-02 18:42:26 athena Exp $ */
+/* $Id: problem.c,v 1.2 2002-06-02 23:49:03 athena Exp $ */
 
 #include "dft.h"
 
 static void destroy(problem *ego_)
 {
      problem_dft *ego = (problem_dft *) ego_;
-     fftw_tensor_destroy(ego->vec_sz);
+     fftw_tensor_destroy(ego->vecsz);
      fftw_tensor_destroy(ego->sz);
      fftw_free(ego_);
 }
@@ -34,7 +34,7 @@ static unsigned int hash(const problem *ego_)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
      return (fftw_tensor_hash(ego->sz) * 31415 +
-	     fftw_tensor_hash(ego->vec_sz) * 27183);
+	     fftw_tensor_hash(ego->vecsz) * 27183);
 }
 
 static int equal(const problem *ego_, const problem *problem_)
@@ -44,7 +44,7 @@ static int equal(const problem *ego_, const problem *problem_)
 	  const problem_dft *p = (const problem_dft *) problem_;
 
 	  return (fftw_tensor_equal(p->sz, e->sz) &&
-		  fftw_tensor_equal(p->vec_sz, e->vec_sz) &&
+		  fftw_tensor_equal(p->vecsz, e->vecsz) &&
 		  ((p->ri == p->ro) == (e->ri == e->ro)));
      }
      return 0;
@@ -73,7 +73,7 @@ static void zerotens(tensor sz, R *ri, R *ii)
 static void zero(const problem *ego_)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
-     tensor sz = fftw_tensor_append(ego->vec_sz, ego->sz);
+     tensor sz = fftw_tensor_append(ego->vecsz, ego->sz);
      zerotens(sz, ego->ri, ego->ii);
      fftw_tensor_destroy(sz);
 }
@@ -90,7 +90,7 @@ int fftw_problem_dft_p(const problem *p)
      return (p->adt == &padt);
 }
 
-problem *fftw_mkproblem_dft(const tensor sz, const tensor vec_sz,
+problem *fftw_mkproblem_dft(const tensor sz, const tensor vecsz,
 			    R *ri, R *ii, R *ro, R *io)
 {
      problem_dft *ego =
@@ -100,7 +100,7 @@ problem *fftw_mkproblem_dft(const tensor sz, const tensor vec_sz,
      A((ri == ro) == (ii == io));
 
      ego->sz = fftw_tensor_compress(sz);
-     ego->vec_sz = fftw_tensor_compress_contiguous(vec_sz);
+     ego->vecsz = fftw_tensor_compress_contiguous(vecsz);
      ego->ri = ri;
      ego->ii = ii;
      ego->ro = ro;
@@ -110,12 +110,12 @@ problem *fftw_mkproblem_dft(const tensor sz, const tensor vec_sz,
 }
 
 /* Same as fftw_mkproblem_dft, but also destroy input tensors. */
-problem *fftw_mkproblem_dft_d(tensor sz, tensor vec_sz,
+problem *fftw_mkproblem_dft_d(tensor sz, tensor vecsz,
 			      R *ri, R *ii, R *ro, R *io)
 {
      problem *p;
-     p = fftw_mkproblem_dft(sz, vec_sz, ri, ii, ro, io);
-     fftw_tensor_destroy(vec_sz);
+     p = fftw_mkproblem_dft(sz, vecsz, ri, ii, ro, io);
+     fftw_tensor_destroy(vecsz);
      fftw_tensor_destroy(sz);
      return p;
 }

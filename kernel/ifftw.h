@@ -18,9 +18,11 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.1.1.1 2002-06-02 18:42:32 athena Exp $ */
+/* $Id: ifftw.h,v 1.2 2002-06-02 23:49:03 athena Exp $ */
 
 /* FFTW internal header file */
+#ifndef __IFFTW_H__
+#define __IFFTW_H__
 
 #include "fftw.h"
 #include "config.h"
@@ -39,7 +41,7 @@ typedef struct plan_s plan;
 typedef struct solver_s solver;
 typedef struct planner_s planner;
 
-/* assert.c */
+/* assert.c: */
 #ifdef FFTW_DEBUG
 extern void fftw_assertion_failed(const char *s, int line, char *file);
 #define A(ex)						 \
@@ -48,7 +50,7 @@ extern void fftw_assertion_failed(const char *s, int line, char *file);
 #define A(ex) /* nothing */
 #endif
 
-/* alloc.c */
+/* alloc.c: */
 
 /* objects allocated by malloc, for statistical purposes */
 enum fftw_malloc_what {
@@ -82,7 +84,7 @@ extern void *fftw_malloc_plain(size_t sz);
      fftw_malloc_plain(n)
 #endif
 
-/* flops.c */
+/* flops.c: */
 /*
  * flops counter.  The total number of additions is add + fma
  * and the total number of multiplications is mul + fma.
@@ -98,14 +100,14 @@ flopcnt fftw_flops_add(flopcnt a, flopcnt b);
 flopcnt fftw_flops_mul(int a, flopcnt b);
 extern const flopcnt fftw_flops_zero;
 
-/* minmax.c */
+/* minmax.c: */
 int fftw_imax(int a, int b);
 int fftw_imin(int a, int b);
 
-/* rand.c */
+/* rand.c: */
 double fftw_drand(void);
 
-/* tensor.c */
+/* tensor.c: */
 typedef struct {
      int n;
      int is;			/* input stride */
@@ -140,7 +142,7 @@ void fftw_tensor_split(const tensor sz, tensor *a, int a_rnk, tensor *b);
 void fftw_tensor_destroy(tensor sz);
 
 
-/* problem.c */
+/* problem.c: */
 typedef struct {
      int (*equal) (const problem *ego, const problem *p);
      unsigned int (*hash) (const problem *ego);
@@ -157,10 +159,11 @@ problem *fftw_mkproblem(size_t sz, const problem_adt *adt);
 void fftw_problem_destroy(problem *ego);
 problem *fftw_problem_dup(problem *ego);
 
-/* plan.c */
+/* plan.c: */
 typedef int (*plan_printf)(const char *format, ...);
 
 typedef struct {
+     void (*solve)(plan *ego, const problem *p);
      void (*awake)(plan *ego, int awaken);
      void (*print)(plan *ego, plan_printf prntf);
      void (*destroy)(plan *ego);
@@ -168,13 +171,16 @@ typedef struct {
 
 struct plan_s {
      const plan_adt *adt;
-     void (*solve)(plan *ego, const problem *p);
      int refcnt;
      flopcnt flops; 
      double cost;
 };
 
-/* solver.c */
+plan *fftw_mkplan(size_t size, const plan_adt *adt);
+void fftw_plan_use(plan *ego);
+void fftw_plan_destroy(plan *ego);
+
+/* solver.c: */
 enum score {
      BAD,   /* solver cannot solve problem */
      UGLY,  /* we are 99% sure that this solver is suboptimal */
@@ -191,7 +197,13 @@ struct solver_s {
      int refcnt;
 };
 
-/* stride.c */
+solver *fftw_mksolver(size_t size, const solver_adt *adt);
+void fftw_solver_use(solver *ego);
+
+  /* shorthand */
+#define MKSOLVER(type, adt) (type *)fftw_mksolver(sizeof(type), adt)
+
+/* stride.c: */
 
 /* If PRECOMPUTE_ARRAY_INDICES is defined, precompute all strides. */
 #if defined(__i386__)
@@ -202,7 +214,7 @@ struct solver_s {
 
 typedef int *stride;
 #define WS(stride, i)  (stride[i])
-extern stride fftw_stride_make(int n, int stride);
+extern stride fftw_mkstride(int n, int stride);
 void fftw_stride_destroy(stride p);
 
 #else
@@ -213,3 +225,11 @@ typedef int stride;
 #define fftw_stride_destroy(p) {}
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
+
+/* awake.c: */
+void fftw_null_awake(plan *ego, int awake);
+
+/* square.c: */
+int fftw_square(int x);
+
+#endif /* __IFFTW_H__ */

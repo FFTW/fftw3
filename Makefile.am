@@ -8,13 +8,13 @@ GENFFT=
 endif
 
 SUBDIRS=$(GENFFT) codelets kernel dft
-EXTRA_DIST=COPYRIGHT bootstrap.sh
+EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS
 
-lib_LTLIBRARIES = libfftw.la
+lib_LTLIBRARIES = libfftw3.la
 
-libfftw_la_SOURCES = 
+libfftw3_la_SOURCES = 
 
-libfftw_la_LIBADD =				\
+libfftw3_la_LIBADD =				\
 	kernel/libkernel.la			\
 	dft/libdft.la				\
 	codelets/libcodelets.la

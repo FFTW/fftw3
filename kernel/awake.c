@@ -18,32 +18,13 @@
  *
  */
 
-/* $Id: dft.h,v 1.2 2002-06-02 23:49:03 athena Exp $ */
+/* $Id: awake.c,v 1.1 2002-06-02 23:49:03 athena Exp $ */
 
 #include "ifftw.h"
 
-/* problem.c: */
-typedef struct {
-     problem super;
-     tensor sz, vecsz;
-     R *ri, *ii, *ro, *io;
-} problem_dft;
-
-int fftw_problem_dft_p(const problem *p);
-#define DFTP fftw_problem_dft_p  /* shorthand */
-
-/* solve.c: */
-void fftw_dft_solve(plan *ego_, const problem *p_);
-
-/* plan.c: */
-typedef void (*dftapply) (plan *ego, R *ri, R *ii, R *ro, R *io);
-
-typedef struct {
-     plan super;
-     dftapply apply;
-} plan_dft;
-
-plan *fftw_mkplan_dft(size_t size, const plan_adt *adt, dftapply apply);
-
-#define MKPLAN_DFT(type, adt, apply) \
-  (type *)fftw_mkplan_dft(sizeof(type), adt, apply)
+void fftw_null_awake(plan *ego, int awake)
+{
+     UNUSED(ego);
+     UNUSED(awake);
+     /* do nothing */
+}

@@ -1,0 +1,49 @@
+Code conventions used in fftw3:
+
+LEARN FROM THE MASTERS:  read Ken Thompson's C compiler in Plan 9.
+   Avoid learning from C++/Java programs.
+
+INDENTATION: K&R, 5 spaces/tab.  In case of doubt, indent -kr -i5.
+
+NAMES: keep them short.  Shorter than you think.  The Bible was written
+   without vowels.  Don't outsmart the Bible.
+
+   Common names:
+
+   R       : real type, aka fftw_real
+   sz      : size
+   vecsz   : vector size
+   is, os  : input/output stride
+   ri, ii  : real/imag input 
+   ro, io  : real/imag output
+   A       : assert
+   S       : solver, defined internally to each solver file
+   P       : plan, defined internally to each solver file
+   k       : codelet
+
+   If a name is used often and must have the form fftw_foo to avoid
+   namespace pollution, #define FOO FFTW_FOO and use the short name.
+
+   Leave that hungarian crap to MS.  foo_t counts as hungarian: use
+   foo instead.  All lowercase so that it does not look like a DOS program.
+
+REPEATED CODE:  favor a table.  E.g., do not write
+
+    foo("xxx", 1);
+    foo("yyy", 2);
+    foo("zzz", -1);
+
+    Instead write
+
+      struct { const char *nam, int arg } footab[] = {
+	{ "xxx", 1 },
+	{ "yyy", 2 },
+	{ "zzz", -1 }
+      };
+
+    and loop over footab.  Rationale: it saves code space.
+
+C++: The code should compile as a C++ program. Run the code through
+    gcc -xc++ .  The extra C++ restrictions are unnecessary, of
+    course, but this will save us from a flood of complaints when
+    we release the code.
