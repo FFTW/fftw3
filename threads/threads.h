@@ -22,8 +22,8 @@
 #define __THREADS_H__
 
 #include "ifftw.h"
-#include "dft.h"
-#include "rdft.h"
+#include "ct.h"
+#include "hc2hc.h"
 
 typedef struct {
      int min, max, thr_num;
@@ -44,9 +44,8 @@ void X(dft_thr_vrank_geq1_register)(planner *p);
 void X(rdft_thr_vrank_geq1_register)(planner *p);
 void X(rdft2_thr_vrank_geq1_register)(planner *p);
 
-solver *X(mksolver_dft_ct_dit_thr)(kdft_dit codelet, const ct_desc *desc);
-solver *X(mksolver_rdft_hc2hc_dit_thr)(khc2hc codelet, const hc2hc_desc *desc);
-solver *X(mksolver_rdft_hc2hc_dif_thr)(khc2hc codelet, const hc2hc_desc *desc);
+ct_solver *X(mksolver_ct_threads)(size_t size, int r, int dec, ct_mkinferior mkcldw);
+hc2hc_solver *X(mksolver_hc2hc_threads)(size_t size, int r, hc2hc_mkinferior mkcldw);
 
 void X(threads_conf_standard)(planner *p);
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.240 2004-10-01 01:12:47 athena Exp $ */
+/* $Id: ifftw.h,v 1.241 2004-10-24 05:18:14 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -654,6 +654,7 @@ void X(twiddle_destroy)(twid **pp);
 int X(twiddle_length)(int r, const tw_instr *p);
 void X(twiddle_awake)(int flg, twid **pp, 
 		      const tw_instr *instr, int n, int r, int m);
+const R *X(twiddle_shift)(const twid *p, int mstart);
 
 /*-----------------------------------------------------------------------*/
 /* trig.c */

@@ -40,7 +40,7 @@ typedef struct P_s {
      plan_dftw super;
 
      const wadt *adt;
-     int r, m, s, vl, vs;
+     int r, m, s, vl, vs, mstart, mcount;
      plan *cld;
 
      /* defined only for solver1: */
@@ -101,12 +101,14 @@ static void bytwiddle2(const P *ego, R *rio, R *iio)
      int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
      int twshft = ego->log2_twradix;
      int twmsk = (1 << twshft) - 1;
+     int mstart = ego->mstart, mcount = ego->mcount;
+     int kstart = mstart == 0;
 
      const R *W0 = ego->W0, *W1 = ego->W1;
      for (i = 0; i < vl; ++i) {
 	  for (j = 1; j < r; ++j) {
-	       for (k = 1; k < m; ++k) {
-		    unsigned jk = j * k;
+	       for (k = kstart; k < mcount; ++k) {
+		    unsigned jk = j * (k + mstart);
 		    int jk0 = jk & twmsk;
 		    int jk1 = jk >> twshft;
 		    E xr = rio[s * (j * m + k)];
@@ -147,17 +149,21 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
 {
      int i, j, k;
      int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
+     int mcount = ego->mcount, mstart = ego->mstart;
+     int jstart = mstart == 0;
+     int jrem_W = 2 * ((m - 1) - (mcount - jstart));
+     int jrem_p = s * (m - mcount);
      ptrdiff_t ip = iio - rio;
      R *p;
 
      for (i = 0; i < vl; ++i) {
-	  const R *W = ego->td->W;
+	  const R *W = ego->td->W + 2 * (mstart - 1 + jstart);
 
 	  /* loop invariant: p = rio + s * (k * m + j) + i * vs. */
 	  p = rio + i * vs;
 
 	  for (k = 1, p += s * m, W += 2 * (m - 1); k < r; ++k) {
-	       for (j = 1, p += s; j < m; ++j, p += s) {
+	       for (j = jstart, p += jstart*s; j < mcount; ++j, p += s) {
 		    E xr = p[0];
 		    E xi = p[ip];
 		    E wr = W[0];
@@ -166,6 +172,8 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
 		    p[ip] = xi * wr - xr * wi;
 		    W += 2;
 	       }
+	       W += jrem_W;
+	       p += jrem_p;
 	  }
      }
 }
@@ -226,6 +234,7 @@ static void print(const plan *ego_, printer *p)
 
 static plan *mkcldw(const ct_solver *ego_, 
 		    int dec, int r, int m, int s, int vl, int vs, 
+		    int mstart, int mcount,
 		    R *rio, R *iio,
 		    planner *plnr)
 {
@@ -237,13 +246,14 @@ static plan *mkcldw(const ct_solver *ego_,
 	  0, awake, print, destroy
      };
 
+     A(mstart >= 0 && mstart + mcount <= m);
      if (!ego->adt->applicable(r, m, plnr))
           return (plan *)0;
 
      cld = X(mkplan_d)(plnr, 
 			X(mkproblem_dft_d)(
 			     X(mktensor_1d)(r, m * s, m * s),
-			     X(mktensor_2d)(m, s, s, vl, vs, vs),
+			     X(mktensor_2d)(mcount, s, s, vl, vs, vs),
 			     rio, iio, rio, iio)
 			);
      if (!cld) goto nada;
@@ -257,12 +267,14 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->s = s;
      pln->vl = vl;
      pln->vs = vs;
+     pln->mstart = mstart;
+     pln->mcount = mcount;
      pln->dec = dec;
      pln->W0 = pln->W1 = 0;
      pln->td = 0;
 
      {
-	  double n0 = (r - 1) * (m - 1) * vl;
+	  double n0 = (r - 1) * (mcount - 1) * vl;
 	  pln->super.super.ops = cld->ops;
 	  pln->super.super.ops.mul += 8 * n0;
 	  pln->super.super.ops.add += 4 * n0;
@@ -275,14 +287,19 @@ static plan *mkcldw(const ct_solver *ego_,
      return (plan *) 0;
 }
 
-static solver *mksolver(const wadt *adt, int r, int dec)
+static void regsolver(planner *plnr, const wadt *adt, int r, int dec)
 {
-     S *slv = (S *)X(mksolver_dft_ct)(sizeof(S), r, dec, mkcldw);
+     S *slv = (S *)X(mksolver_ct)(sizeof(S), r, dec, mkcldw);
      slv->adt = adt;
-     return &(slv->super.super);
+     REGISTER_SOLVER(plnr, &(slv->super.super));
+     if (X(mksolver_ct_hook)) {
+	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), r, dec, mkcldw);
+	  slv->adt = adt;
+	  REGISTER_SOLVER(plnr, &(slv->super.super));
+     }
 }
 
-void X(dft_ct_generic_register)(planner *p)
+void X(ct_generic_register)(planner *p)
 {
      static const wadt a[] = {
 	  { bytwiddle1, mktwiddle1, applicable1, "dftw-generic1" },
@@ -291,8 +308,8 @@ void X(dft_ct_generic_register)(planner *p)
      unsigned i;
 
      for (i = 0; i < sizeof(a) / sizeof(a[0]); ++i) {
-	  REGISTER_SOLVER(p, mksolver(&a[i], 0, DECDIT));
-	  REGISTER_SOLVER(p, mksolver(&a[i], 0, DECDIF));
+	  regsolver(p, &a[i], 0, DECDIT);
+	  regsolver(p, &a[i], 0, DECDIF);
      }
-/*   REGISTER_SOLVER(p, mksolver(&a[1], -1, DECDIT)); 4-step? */
+/*   regsolver(p, &a[1], -1, DECDIT); 4-step? */
 }

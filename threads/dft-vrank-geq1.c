@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-vrank-geq1.c,v 1.17 2003-04-03 12:50:43 athena Exp $ */
+/* $Id: dft-vrank-geq1.c,v 1.18 2004-10-24 05:18:14 stevenj Exp $ */
 
 #include "threads.h"
 
@@ -49,7 +49,7 @@ WITH_ALIGNED_STACK({
      int its = ego->its;
      int ots = ego->ots;
      int thr_num = d->thr_num;
-     plan_dft *cld = (plan_dft *) ego->cldrn[d->thr_num];
+     plan_dft *cld = (plan_dft *) ego->cldrn[thr_num];
 
      cld->apply((plan *) cld,
 		ego->ri + thr_num * its, ego->ii + thr_num * its,

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ctsq.c,v 1.4 2003-07-05 17:05:51 athena Exp $ */
+/* $Id: ctsq.c,v 1.5 2004-10-24 05:18:14 stevenj Exp $ */
 
 /* special ``square transpose'' cooley-tukey solver for in-place problems */
 #include "ct.h"
@@ -175,7 +175,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-solver *X(mksolver_dft_ctsq)(kdftwsq codelet, const ct_desc *desc, int dec)
+solver *X(mksolver_ctsq)(kdftwsq codelet, const ct_desc *desc, int dec)
 {
      static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);

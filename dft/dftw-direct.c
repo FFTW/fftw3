@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.1 2004-03-21 22:56:15 athena Exp $ */
+/* $Id: dftw-direct.c,v 1.2 2004-10-24 05:18:14 stevenj Exp $ */
 
 #include "ct.h"
 
@@ -31,20 +31,24 @@ typedef struct {
 typedef struct {
      plan_dftw super;
      kdftw k;
-     twid *td;
-     int r, m, vl;
+     int vl;
      int s, vs;
+     int mcount;
      stride ios;
+     const R *tdW;
+     int mstart, m, r;
+     twid *td;
      const S *slv;
 } P;
 
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     int i, m = ego->m, vl = ego->vl, s = ego->s, vs = ego->vs;
+     int i, vl = ego->vl, s = ego->s, vs = ego->vs, mcount = ego->mcount;
+     const R *W = ego->tdW;
      ASSERT_ALIGNED_DOUBLE;
      for (i = 0; i < vl; ++i)
-	  ego->k(rio + i * vs, iio + i * vs, ego->td->W, ego->ios, m, s);
+	  ego->k(rio + i * vs, iio + i * vs, W, ego->ios, mcount, s);
 }
 
 static void awake(plan *ego_, int flg)
@@ -53,6 +57,7 @@ static void awake(plan *ego_, int flg)
 
      X(twiddle_awake)(flg, &ego->td, ego->slv->desc->tw, 
 		      ego->r * ego->m, ego->r, ego->m);
+     ego->tdW = X(twiddle_shift)(ego->td, ego->mstart);
 }
 
 static void destroy(plan *ego_)
@@ -100,17 +105,15 @@ static int applicable(const S *ego,
      if (!applicable0(ego, dec, r, m, s, vl, vs, rio, iio, plnr))
           return 0;
 
-     if (NO_UGLYP(plnr)) {
-	  if (X(ct_uglyp)(16, m * r, r)) return 0;
-	  if (NONTHREADED_ICKYP(plnr))
-	       return 0; /* prefer threaded version */
-     }
+     if (NO_UGLYP(plnr) && X(ct_uglyp)(16, m * r, r))
+	  return 0;
 
      return 1;
 }
 
 static plan *mkcldw(const ct_solver *ego_, 
 		    int dec, int r, int m, int s, int vl, int vs, 
+		    int mstart, int mcount,
 		    R *rio, R *iio,
 		    planner *plnr)
 {
@@ -122,7 +125,7 @@ static plan *mkcldw(const ct_solver *ego_,
 	  0, awake, print, destroy
      };
 
-
+     A(mstart >= 0 && mstart + mcount <= m);
      if (!applicable(ego, dec, r, m, s, vl, vs, rio, iio, plnr))
           return (plan *)0;
 
@@ -131,23 +134,34 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->k = ego->k;
      pln->ios = X(mkstride)(r, m * s);
      pln->td = 0;
+     pln->tdW = 0;
      pln->r = r;
      pln->m = m;
      pln->s = s;
      pln->vl = vl;
      pln->vs = vs;
+     pln->mstart = mstart;
+     pln->mcount = mcount;
      pln->slv = ego;
 
      X(ops_zero)(&pln->super.super.ops);
-     X(ops_madd2)(vl * (m / e->genus->vl), &e->ops, &pln->super.super.ops);
+     X(ops_madd2)(vl * (mcount/e->genus->vl), &e->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 }
 
-solver *X(mksolver_dft_ct_directw)(kdftw codelet, const ct_desc *desc, int dec)
+void X(regsolver_ct_directw)(planner *plnr,
+				 kdftw codelet, const ct_desc *desc, int dec)
 {
-     S *slv = (S *)X(mksolver_dft_ct)(sizeof(S), desc->radix, dec, mkcldw);
+     S *slv = (S *)X(mksolver_ct)(sizeof(S), desc->radix, dec, mkcldw);
      slv->k = codelet;
      slv->desc = desc;
-     return &(slv->super.super);
+     REGISTER_SOLVER(plnr, &(slv->super.super));
+     if (X(mksolver_ct_hook)) {
+	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), desc->radix, 
+					     dec, mkcldw);
+	  slv->k = codelet;
+	  slv->desc = desc;
+	  REGISTER_SOLVER(plnr, &(slv->super.super));
+     }
 }

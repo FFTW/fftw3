@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.40 2004-01-01 21:00:07 athena Exp $ */
+/* $Id: dft.h,v 1.41 2004-10-24 05:18:14 stevenj Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -61,9 +61,6 @@ plan *X(mkplan_dft)(size_t size, const plan_adt *adt, dftapply apply);
 /* various solvers */
 solver *X(mksolver_dft_direct)(kdft k, const kdft_desc *desc);
 
-extern void (*X(kdft_dit_register_hook))(planner *, kdftw, const ct_desc *);
-extern void (*X(kdft_dif_register_hook))(planner *, kdftw, const ct_desc *);
-
 void X(dft_rank0_register)(planner *p);
 void X(dft_rank_geq2_register)(planner *p);
 void X(dft_indirect_register)(planner *p);
@@ -75,7 +72,7 @@ void X(dft_generic_register)(planner *p);
 void X(dft_rader_register)(planner *p);
 void X(dft_bluestein_register)(planner *p);
 void X(dft_nop_register)(planner *p);
-void X(dft_ct_generic_register)(planner *p);
+void X(ct_generic_register)(planner *p);
 
 /* configurations */
 void X(dft_conf_standard)(planner *p);

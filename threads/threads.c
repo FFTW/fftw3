@@ -292,10 +292,8 @@ typedef pthread_t fftw_thr_id;
 
 #define fftw_thr_wait(tid) CK(!pthread_join(tid,0))
 
-/* SYSV semaphores are disabled for now because, at least on my Linux
-   machine, they don't seem to offer much performance advantage.  We
-   should problably use pthread mutices or condition variables
-   instead, for portability. */
+/* SYSV/POSIX semaphores are disabled for now because, at least on my Linux
+   machine, they don't seem to offer much performance advantage. */
 #if 0
 #define HAVE_SEMAPHORES 1
 
@@ -350,7 +348,7 @@ typedef struct worker_data_s {
 } worker_data;
 
 static void *do_work(worker_data *w)
-WITH_ALIGNED_STACK({
+{
      while (1) {
 	  fftw_sem_wait(&w->sid_ready);
 	  if (!w->proc) break;
@@ -358,7 +356,7 @@ WITH_ALIGNED_STACK({
 	  fftw_sem_post(&w->sid_done);
      }
      return 0;
-})
+}
 
 worker_data *workers = (worker_data *) 0;
 
@@ -531,21 +529,6 @@ void X(spawn_loop)(int loopmax, int nthr,
 }
 #endif
 
-#ifdef HAVE_THREADS
-static void kdft_dit_register_hook(planner *p, kdft_dit k, const ct_desc *d)
-{
-     REGISTER_SOLVER(p, X(mksolver_dft_ct_dit_thr)(k, d));
-}
-static void khc2hc_dit_register_hook(planner *p, khc2hc k, const hc2hc_desc *d)
-{
-     REGISTER_SOLVER(p, X(mksolver_rdft_hc2hc_dit_thr)(k, d));
-}
-static void khc2hc_dif_register_hook(planner *p, khc2hc k, const hc2hc_desc *d)
-{
-     REGISTER_SOLVER(p, X(mksolver_rdft_hc2hc_dif_thr)(k, d));
-}
-#endif /* HAVE_THREADS */
-
 /* X(ithreads_init) does any initialization that is necessary to use
    threads.  It must be called before calling any fftw threads functions.
    
@@ -612,9 +595,8 @@ int X(ithreads_init)(void)
 #endif
 
 #ifdef HAVE_THREADS
-     X(kdft_dit_register_hook) = kdft_dit_register_hook;
-     X(khc2hc_dit_register_hook) = khc2hc_dit_register_hook;
-     X(khc2hc_dif_register_hook) = khc2hc_dif_register_hook;
+     X(mksolver_ct_hook) = X(mksolver_ct_threads);
+     X(mksolver_hc2hc_hook) = X(mksolver_hc2hc_threads);
      return 0; /* no error */
 #else
      return 0; /* no threads, no error */
@@ -646,8 +628,7 @@ void X(threads_cleanup)(void)
 #endif
 
 #ifdef HAVE_THREADS
-     X(kdft_dit_register_hook) = 0;
-     X(khc2hc_dit_register_hook) = 0;
-     X(khc2hc_dif_register_hook) = 0;
+     X(mksolver_ct_hook) = 0;
+     X(mksolver_hc2hc_hook) = 0;
 #endif
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.26 2004-03-22 19:43:16 athena Exp $ */
+/* $Id: twiddle.c,v 1.27 2004-10-24 05:18:14 stevenj Exp $ */
 
 /* Twiddle manipulation */
 
@@ -208,4 +208,13 @@ void X(twiddle_awake)(int flg, twid **pp,
 	  X(mktwiddle)(pp, instr, n, r, m);
      else 
 	  X(twiddle_destroy)(pp);
+}
+
+/* return a pointer to twiddles (0 if none) starting at mstart out of m */
+const R *X(twiddle_shift)(const twid *p, int mstart)
+{
+     if (p)
+	  return (p->W + mstart * X(twiddle_length)(p->r, p->instr));
+     else
+	  return 0;
 }

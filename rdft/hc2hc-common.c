@@ -20,11 +20,37 @@
 
 /* common hc2hc routines */
 
-#include "ct.h"
+#include "hc2hc.h"
+
+/* A note on mstart and mcount for real solvers:
+
+   For the complex solvers, we have a loop from 0 to m-1 of twiddle
+   codelets, and we specify a subset from mstart to mstart+mcount-1.
+
+   For the real solvers, it is more complicated since we typically perform
+   the "logical" loop from 0 to m-1 as:
+
+       i) a real nontwiddle (DC-component) transform (0)
+       ii) (m-1)/2 *pairs* of twiddle transforms
+       iii) if m is even, the Nyquist-component transform (m/2)
+
+   Thus, there are (m+2)/2 transforms to perform, counting a pair
+   in (ii) as one unit.  These transforms are indexed from 0 to
+   (m+2)/2-1, with the 0th being (i) and the last (if m is even)
+   being (iii).  We specify a subset of these indices from
+   mstart to mstart+mcount-1.
+
+   Therefore, for a given (mstart,mcount), the number of (ii) iterations
+   to perform is therefore:
+       #ii = mcount - (mstart==0) - (m%2 == 0 && mstart+mcount == (m+2)/2)
+   The "m" parameter passed to the twiddle codelet for (ii), however,
+   is for historical reasons 1 + 2 * #ii.  Sigh.
+*/
 
 /* generic routine that produces cld0 and cldm, used by inferior
    solvers */
-int X(rdft_ct_mkcldrn)(rdft_kind kind, int r, int m, int s, 
+int X(hc2hc_mkcldrn)(rdft_kind kind, int r, int m, int s,
+		       int mstart, int mcount,
 		       R *IO, planner *plnr,
 		       plan **cld0p, plan **cldmp)
 {
@@ -34,14 +60,17 @@ int X(rdft_ct_mkcldrn)(rdft_kind kind, int r, int m, int s,
      plan *cld0 = 0, *cldm = 0;
 
      A(R2HC_KINDP(kind) || HC2R_KINDP(kind));
+     A(mstart >= 0 && mcount > 0 && mstart + mcount <= (m + 2) / 2);
 
      cld0 = X(mkplan_d)(plnr, 
-			X(mkproblem_rdft_1)(radix, null, IO, IO, kind));
+			X(mkproblem_rdft_1)(mstart == 0 ? radix : null, 
+					    null, IO, IO, kind));
      if (!cld0) goto nada;
 
      cldm = X(mkplan_d)(plnr,
 			X(mkproblem_rdft_1)(
-			     m%2 ? null : radix, null, IO + imid, IO + imid, 
+			     (m%2 || mstart+mcount < (m+2)/2) ? null : radix, 
+			     null, IO + imid, IO + imid, 
 			     R2HC_KINDP(kind) ? R2HCII : HC2RIII));
      if (!cldm) goto nada;
 

@@ -18,40 +18,70 @@
  *
  */
 
-/* $Id: ct.c,v 1.43 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: ct.c,v 1.1 2004-10-24 05:18:14 stevenj Exp $ */
 
-#include "ct.h"
-
-ct_solver *(*X(mksolver_ct_hook))(size_t, int, int, ct_mkinferior) = 0;
+#include "threads.h"
 
 typedef struct {
      plan_dft super;
      plan *cld;
-     plan *cldw;
+     plan **cldws;
+     int nthr, ts;
      int r;
 } P;
+
+typedef struct {
+     plan **cldws;
+     R *r, *i;
+     int ts;
+} PD;
+
+static void *spawn_apply(spawn_data *d)
+WITH_ALIGNED_STACK({
+     PD *ego = (PD *) d->data;
+     int thr_num = d->thr_num;
+     int offset = thr_num * ego->ts;
+     
+     plan_dftw *cldw = (plan_dftw *) (ego->cldws[thr_num]);
+     cldw->apply((plan *) cldw, ego->r + offset, ego->i + offset);
+     return 0;
+})
 
 static void apply_dit(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
-     plan_dftw *cldw;
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, ri, ii, ro, io);
 
-     cldw = (plan_dftw *) ego->cldw;
-     cldw->apply(ego->cldw, ro, io);
+     {
+	  const P *ego_thr = (const P *) ego_;
+	  PD d;
+	  
+	  d.r = ro; d.i = io;
+	  d.cldws = ego->cldws;
+	  d.ts = ego->ts;
+
+	  X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*)&d);
+     }
 }
 
 static void apply_dif(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
-     plan_dftw *cldw;
 
-     cldw = (plan_dftw *) ego->cldw;
-     cldw->apply(ego->cldw, ri, ii);
+     {
+	  const P *ego_thr = (const P *) ego_;
+	  PD d;
+	  
+	  d.r = ri; d.i = ii;
+	  d.cldws = ego->cldws;
+	  d.ts = ego->ts;
+
+	  X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*)&d);
+     }
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, ri, ii, ro, io);
@@ -60,70 +90,44 @@ static void apply_dif(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
+     int i;
      AWAKE(ego->cld, flg);
-     AWAKE(ego->cldw, flg);
+     for (i = 0; i < ego->nthr; ++i)
+	  AWAKE(ego->cldws[i], flg);
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy_internal)(ego->cldw);
+     int i;
      X(plan_destroy_internal)(ego->cld);
+     for (i = 0; i < ego->nthr; ++i)
+	  X(plan_destroy_internal)(ego->cldws[i]);
+     X(ifree)(ego->cldws);
 }
 
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dft-ct-%s/%d%(%p%)%(%p%))",
+     int i;
+     p->print(p, "(dft-thr-ct-%s-x%d/%d",
 	      ego->super.apply == apply_dit ? "dit" : "dif",
-	      ego->r, ego->cldw, ego->cld);
+	      ego->nthr, ego->r);
+     for (i = 0; i < ego->nthr; ++i)
+          if (i == 0 || (ego->cldws[i] != ego->cldws[i-1] &&
+                         (i <= 1 || ego->cldws[i] != ego->cldws[i-2])))
+               p->print(p, "%(%p%)", ego->cldws[i]);
+     p->print(p, "%(%p%))", ego->cld);
 }
-
-static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
-{
-     if (DFTP(p_)) {
-          const problem_dft *p = (const problem_dft *) p_;
-	  int r;
-
-          return (1
-                  && p->sz->rnk == 1
-                  && p->vecsz->rnk <= 1 
-
-                  /* DIF destroys the input and we don't like it */
-                  && (ego->dec == DECDIT || 
-		      p->ri == p->ro || 
-		      DESTROY_INPUTP(plnr))
-		  
-		  && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 0)
-		  && p->sz->dims[0].n > r);
-     }
-     return 0;
-}
-
-
-int X(ct_applicable)(const ct_solver *ego, const problem *p_, planner *plnr)
-{
-     const problem_dft *p;
-
-     if (!applicable0(ego, p_, plnr))
-          return 0;
-
-     p = (const problem_dft *) p_;
-
-     /* emulate fftw2 behavior */
-     if (NO_VRECURSEP(plnr) && (p->vecsz->rnk > 0))  return 0;
-
-     return 1;
-}
-
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const ct_solver *ego = (const ct_solver *) ego_;
      const problem_dft *p;
      P *pln = 0;
-     plan *cld = 0, *cldw = 0;
+     plan *cld = 0, **cldws = 0;
      int n, r, m, vl, ivs, ovs;
+     int i, block_size, nthr, plnr_nthr_save, ts;
      iodim *d;
      tensor *t1, *t2;
 
@@ -131,8 +135,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(dft_solve), awake, print, destroy
      };
 
-     if ((NO_UGLYP(plnr) && NONTHREADED_ICKYP(plnr))
-	 || !X(ct_applicable)(ego, p_, plnr))
+     if (plnr->nthr <= 1 || !X(ct_applicable)(ego, p_, plnr))
           return (plan *) 0;
 
      p = (const problem_dft *) p_;
@@ -143,17 +146,34 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
+     block_size = (m + plnr->nthr - 1) / plnr->nthr;
+     nthr = (m + block_size - 1) / block_size;
+     plnr_nthr_save = plnr->nthr;
+     plnr->nthr = (plnr->nthr + nthr - 1) / nthr;
+
+     cldws = (plan **) MALLOC(sizeof(plan *) * nthr, PLANS);
+     for (i = 0; i < nthr; ++i) cldws[i] = (plan *) 0;
+
      switch (ego->dec) {
 	 case DECDIT:
 	 {
-	      cldw = ego->mkcldw(ego, 
-				 DECDIT, r, m, d[0].os, vl, ovs, 0, m,
-				 p->ro, p->io, plnr);
-	      if (!cldw) goto nada;
+	      ts = d[0].os * block_size;
+
+	      for (i = 0; i < nthr; ++i) {
+		   cldws[i] = ego->mkcldw(ego, 
+					  DECDIT, r, m, d[0].os, vl, ovs,
+					  i*block_size, 
+					  (i == nthr - 1) ? 
+					  (m - i*block_size) : block_size,
+					  p->ro + ts*i, p->io + ts*i, plnr);
+		   if (!cldws[i]) goto nada;
+	      }
 
 	      t1 = X(mktensor_1d)(r, d[0].is, m * d[0].os);
 	      t2 = X(tensor_append)(t1, p->vecsz);
 	      X(tensor_destroy)(t1);
+	      
+	      plnr->nthr = plnr_nthr_save;
 
 	      cld = X(mkplan_d)(plnr, 
 				X(mkproblem_dft_d)(
@@ -167,14 +187,23 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	 }
 	 case DECDIF:
 	 {
-	      cldw = ego->mkcldw(ego,
-				 DECDIF, r, m, d[0].is, vl, ivs, 0, m,
-				 p->ri, p->ii, plnr);
-	      if (!cldw) goto nada;
+	      ts = d[0].is * block_size;
+
+	      for (i = 0; i < nthr; ++i) {
+		   cldws[i] = ego->mkcldw(ego, 
+					  DECDIF, r, m, d[0].is, vl, ivs,
+					  i*block_size, 
+					  (i == nthr - 1) ? 
+					  (m - i*block_size) : block_size,
+					  p->ri + ts*i, p->ii + ts*i, plnr);
+		   if (!cldws[i]) goto nada;
+	      }
 
 	      t1 = X(mktensor_1d)(r, m * d[0].is, d[0].os);
 	      t2 = X(tensor_append)(t1, p->vecsz);
 	      X(tensor_destroy)(t1);
+
+	      plnr->nthr = plnr_nthr_save;
 
 	      cld = X(mkplan_d)(plnr, 
 				X(mkproblem_dft_d)(
@@ -192,33 +221,33 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
 
      pln->cld = cld;
-     pln->cldw = cldw;
+     pln->cldws = cldws;
+     pln->nthr = nthr;
+     pln->ts = ts;
      pln->r = r;
-     X(ops_add)(&cld->ops, &cldw->ops, &pln->super.super.ops);
+     X(ops_zero)(&pln->super.super.ops);
+     for (i = 0; i < nthr; ++i)
+          X(ops_add2)(&cldws[i]->ops, &pln->super.super.ops);
+     X(ops_add2)(&cld->ops, &pln->super.super.ops);
      return &(pln->super.super);
 
  nada:
-     X(plan_destroy_internal)(cldw);
+     if (cldws) {
+	  for (i = 0; i < nthr; ++i)
+	       X(plan_destroy_internal)(cldws[i]);
+	  X(ifree)(cldws);
+     }
      X(plan_destroy_internal)(cld);
      return (plan *) 0;
 }
 
-ct_solver *X(mksolver_ct)(size_t size, int r, int dec, ct_mkinferior mkcldw)
+ct_solver *X(mksolver_ct_threads)(size_t size, int r, int dec,
+				  ct_mkinferior mkcldw)
 {
      static const solver_adt sadt = { mkplan };
-     ct_solver *slv = (ct_solver *)X(mksolver)(size, &sadt);
+     ct_solver *slv = (ct_solver *) X(mksolver)(size, &sadt);
      slv->r = r;
      slv->dec = dec;
      slv->mkcldw = mkcldw;
      return slv;
-}
-
-plan *X(mkplan_dftw)(size_t size, const plan_adt *adt, dftwapply apply)
-{
-     plan_dftw *ego;
-
-     ego = (plan_dftw *) X(mkplan)(size, adt);
-     ego->apply = apply;
-
-     return &(ego->super);
 }

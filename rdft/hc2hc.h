@@ -21,10 +21,10 @@
 #include "rdft.h"
 
 typedef void (*hc2hcapply) (const plan *ego, R *IO);
-typedef struct ct_solver_s ct_solver;
-typedef plan *(*mkinferior)(const ct_solver *ego,
+typedef struct hc2hc_solver_s hc2hc_solver;
+typedef plan *(*hc2hc_mkinferior)(const hc2hc_solver *ego,
 			    rdft_kind kind, int r, int m, int s, 
-			    int vl, int vs, 
+			    int vl, int vs, int mstart, int mcount,
 			    R *IO, planner *plnr);
 
 typedef struct {
@@ -38,19 +38,23 @@ extern plan *X(mkplan_hc2hc)(size_t size, const plan_adt *adt,
 #define MKPLAN_HC2HC(type, adt, apply) \
   (type *)X(mkplan_hc2hc)(sizeof(type), adt, apply)
 
-struct ct_solver_s {
+struct hc2hc_solver_s {
      solver super;
      int r;
 
-     mkinferior mkcldw;
+     hc2hc_mkinferior mkcldw;
 };
 
-ct_solver *X(mksolver_rdft_ct)(size_t size, int r, mkinferior mkcldw);
+hc2hc_solver *X(mksolver_hc2hc)(size_t size, int r, hc2hc_mkinferior mkcldw);
+extern hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, int, hc2hc_mkinferior);
 
-solver *X(mksolver_rdft_hc2hc_direct)(khc2hc codelet, const hc2hc_desc *desc);
-solver *X(mksolver_rdft_hc2hc_directbuf)(khc2hc codelet, 
-					 const hc2hc_desc *desc);
+void X(regsolver_hc2hc_direct)(planner *plnr, khc2hc codelet, 
+			       const hc2hc_desc *desc);
+void X(regsolver_hc2hc_directbuf)(planner *plnr, khc2hc codelet, 
+				  const hc2hc_desc *desc);
 
-int X(rdft_ct_mkcldrn)(rdft_kind kind, int r, int m, int s, 
+int X(hc2hc_applicable)(const hc2hc_solver *, const problem *, planner *);
+int X(hc2hc_mkcldrn)(rdft_kind kind, int r, int m, int s, 
+		       int mstart, int mcount,
 		       R *IO, planner *plnr,
 		       plan **cld0p, plan **cldmp);

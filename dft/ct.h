@@ -22,8 +22,9 @@
 
 typedef void (*dftwapply) (const plan *ego, R *rio, R *iio);
 typedef struct ct_solver_s ct_solver;
-typedef plan *(*mkinferior)(const ct_solver *ego,
+typedef plan *(*ct_mkinferior)(const ct_solver *ego,
 			    int dec, int r, int m, int s, int vl, int vs, 
+			    int mstart, int mcount,
 			    R *rio, R *iio,
 			    planner *plnr);
 
@@ -44,13 +45,15 @@ struct ct_solver_s {
 #    define DECDIF 0
 #    define DECDIT 1
 
-     mkinferior mkcldw;
+     ct_mkinferior mkcldw;
 };
 
-ct_solver *X(mksolver_dft_ct)(size_t size, int r, int dec, mkinferior mkcldw);
+int X(ct_applicable)(const ct_solver *, const problem *, planner *);
+ct_solver *X(mksolver_ct)(size_t size, int r, int dec, ct_mkinferior mkcldw);
+extern ct_solver *(*X(mksolver_ct_hook))(size_t, int, int, ct_mkinferior);
 
-solver *X(mksolver_dft_ct_directw)(kdftw codelet, const ct_desc *desc, 
-				   int dec);
-solver *X(mksolver_dft_ct_directwbuf)(kdftw codelet, 
-				      const ct_desc *desc, int dec);
-solver *X(mksolver_dft_ctsq)(kdftwsq codelet, const ct_desc *desc, int dec);
+void X(regsolver_ct_directw)(planner *plnr,
+     kdftw codelet, const ct_desc *desc, int dec);
+void X(regsolver_ct_directwbuf)(planner *plnr,
+     kdftw codelet, const ct_desc *desc, int dec);
+solver *X(mksolver_ctsq)(kdftwsq codelet, const ct_desc *desc, int dec);

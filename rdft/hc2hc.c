@@ -18,43 +18,41 @@
  *
  */
 
-/* $Id: ct.c,v 1.43 2004-10-24 05:18:14 stevenj Exp $ */
+#include "hc2hc.h"
 
-#include "ct.h"
-
-ct_solver *(*X(mksolver_ct_hook))(size_t, int, int, ct_mkinferior) = 0;
+hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, int, hc2hc_mkinferior) = 0;
 
 typedef struct {
-     plan_dft super;
+     plan_rdft super;
      plan *cld;
      plan *cldw;
      int r;
 } P;
 
-static void apply_dit(const plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_dit(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     plan_dft *cld;
-     plan_dftw *cldw;
+     plan_rdft *cld;
+     plan_hc2hc *cldw;
 
-     cld = (plan_dft *) ego->cld;
-     cld->apply(ego->cld, ri, ii, ro, io);
+     cld = (plan_rdft *) ego->cld;
+     cld->apply((plan *) cld, I, O);
 
-     cldw = (plan_dftw *) ego->cldw;
-     cldw->apply(ego->cldw, ro, io);
+     cldw = (plan_hc2hc *) ego->cldw;
+     cldw->apply((plan *) cldw, O);
 }
 
-static void apply_dif(const plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_dif(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     plan_dft *cld;
-     plan_dftw *cldw;
+     plan_rdft *cld;
+     plan_hc2hc *cldw;
 
-     cldw = (plan_dftw *) ego->cldw;
-     cldw->apply(ego->cldw, ri, ii);
+     cldw = (plan_hc2hc *) ego->cldw;
+     cldw->apply((plan *) cldw, I);
 
-     cld = (plan_dft *) ego->cld;
-     cld->apply(ego->cld, ri, ii, ro, io);
+     cld = (plan_rdft *) ego->cld;
+     cld->apply((plan *) cld, I, O);
 }
 
 static void awake(plan *ego_, int flg)
@@ -74,25 +72,28 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dft-ct-%s/%d%(%p%)%(%p%))",
+     p->print(p, "(rdft-ct-%s/%d%(%p%)%(%p%))",
 	      ego->super.apply == apply_dit ? "dit" : "dif",
 	      ego->r, ego->cldw, ego->cld);
 }
 
-static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
+static int applicable0(const hc2hc_solver *ego, const problem *p_, planner *plnr)
 {
-     if (DFTP(p_)) {
-          const problem_dft *p = (const problem_dft *) p_;
+     if (RDFTP(p_)) {
+          const problem_rdft *p = (const problem_rdft *) p_;
 	  int r;
 
           return (1
                   && p->sz->rnk == 1
                   && p->vecsz->rnk <= 1 
 
-                  /* DIF destroys the input and we don't like it */
-                  && (ego->dec == DECDIT || 
-		      p->ri == p->ro || 
-		      DESTROY_INPUTP(plnr))
+		  && (/* either the problem is R2HC, which is solved by DIT */
+		       (p->kind[0] == R2HC)
+		      ||
+		       /* or the problem is HC2R, in which case it is solved
+			  by DIF, which destroys the input */
+		       (p->kind[0] == HC2R && 
+			(p->I == p->O || DESTROY_INPUTP(plnr))))
 		  
 		  && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 0)
 		  && p->sz->dims[0].n > r);
@@ -101,14 +102,14 @@ static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
 }
 
 
-int X(ct_applicable)(const ct_solver *ego, const problem *p_, planner *plnr)
+int X(hc2hc_applicable)(const hc2hc_solver *ego, const problem *p_, planner *plnr)
 {
-     const problem_dft *p;
+     const problem_rdft *p;
 
      if (!applicable0(ego, p_, plnr))
           return 0;
 
-     p = (const problem_dft *) p_;
+     p = (const problem_rdft *) p_;
 
      /* emulate fftw2 behavior */
      if (NO_VRECURSEP(plnr) && (p->vecsz->rnk > 0))  return 0;
@@ -116,11 +117,10 @@ int X(ct_applicable)(const ct_solver *ego, const problem *p_, planner *plnr)
      return 1;
 }
 
-
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
-     const ct_solver *ego = (const ct_solver *) ego_;
-     const problem_dft *p;
+     const hc2hc_solver *ego = (const hc2hc_solver *) ego_;
+     const problem_rdft *p;
      P *pln = 0;
      plan *cld = 0, *cldw = 0;
      int n, r, m, vl, ivs, ovs;
@@ -128,14 +128,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      tensor *t1, *t2;
 
      static const plan_adt padt = {
-	  X(dft_solve), awake, print, destroy
+	  X(rdft_solve), awake, print, destroy
      };
 
      if ((NO_UGLYP(plnr) && NONTHREADED_ICKYP(plnr))
-	 || !X(ct_applicable)(ego, p_, plnr))
+         || !X(hc2hc_applicable)(ego, p_, plnr))
           return (plan *) 0;
 
-     p = (const problem_dft *) p_;
+     p = (const problem_rdft *) p_;
      d = p->sz->dims;
      n = d[0].n;
      r = X(choose_radix)(ego->r, n);
@@ -143,12 +143,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
-     switch (ego->dec) {
-	 case DECDIT:
-	 {
+     switch (p->kind[0]) {
+	 case R2HC:
 	      cldw = ego->mkcldw(ego, 
-				 DECDIT, r, m, d[0].os, vl, ovs, 0, m,
-				 p->ro, p->io, plnr);
+				 R2HC, r, m, d[0].os, vl, ovs, 0, (m+2)/2, 
+				 p->O, plnr);
 	      if (!cldw) goto nada;
 
 	      t1 = X(mktensor_1d)(r, d[0].is, m * d[0].os);
@@ -156,20 +155,19 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	      X(tensor_destroy)(t1);
 
 	      cld = X(mkplan_d)(plnr, 
-				X(mkproblem_dft_d)(
+				X(mkproblem_rdft_d)(
 				     X(mktensor_1d)(m, r * d[0].is, d[0].os),
-				     t2, p->ri, p->ii, p->ro, p->io)
+				     t2, p->I, p->O, p->kind)
 		   );
 	      if (!cld) goto nada;
 
-	      pln = MKPLAN_DFT(P, &padt, apply_dit);
+	      pln = MKPLAN_RDFT(P, &padt, apply_dit);
 	      break;
-	 }
-	 case DECDIF:
-	 {
+
+	 case HC2R:
 	      cldw = ego->mkcldw(ego,
-				 DECDIF, r, m, d[0].is, vl, ivs, 0, m,
-				 p->ri, p->ii, plnr);
+				 HC2R, r, m, d[0].is, vl, ivs, 0, (m+2)/2, 
+				 p->I, plnr);
 	      if (!cldw) goto nada;
 
 	      t1 = X(mktensor_1d)(r, m * d[0].is, d[0].os);
@@ -177,17 +175,17 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	      X(tensor_destroy)(t1);
 
 	      cld = X(mkplan_d)(plnr, 
-				X(mkproblem_dft_d)(
+				X(mkproblem_rdft_d)(
 				     X(mktensor_1d)(m, d[0].is, r * d[0].os),
-				     t2, p->ri, p->ii, p->ro, p->io)
+				     t2, p->I, p->O, p->kind)
 		   );
 	      if (!cld) goto nada;
 	      
-	      pln = MKPLAN_DFT(P, &padt, apply_dif);
+	      pln = MKPLAN_RDFT(P, &padt, apply_dif);
 	      break;
-	 }
 
-	 default: A(0);
+	 default: 
+	      A(0);
 	      
      }
 
@@ -203,21 +201,20 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-ct_solver *X(mksolver_ct)(size_t size, int r, int dec, ct_mkinferior mkcldw)
+hc2hc_solver *X(mksolver_hc2hc)(size_t size, int r, hc2hc_mkinferior mkcldw)
 {
      static const solver_adt sadt = { mkplan };
-     ct_solver *slv = (ct_solver *)X(mksolver)(size, &sadt);
+     hc2hc_solver *slv = (hc2hc_solver *)X(mksolver)(size, &sadt);
      slv->r = r;
-     slv->dec = dec;
      slv->mkcldw = mkcldw;
      return slv;
 }
 
-plan *X(mkplan_dftw)(size_t size, const plan_adt *adt, dftwapply apply)
+plan *X(mkplan_hc2hc)(size_t size, const plan_adt *adt, hc2hcapply apply)
 {
-     plan_dftw *ego;
+     plan_hc2hc *ego;
 
-     ego = (plan_dftw *) X(mkplan)(size, adt);
+     ego = (plan_hc2hc *) X(mkplan)(size, adt);
      ego->apply = apply;
 
      return &(ego->super);
