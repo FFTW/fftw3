@@ -18,21 +18,33 @@
  *
  */
 
-/* $Id: tensor7.c,v 1.7 2004-04-01 20:25:30 stevenj Exp $ */
+/* $Id: tensor7.c,v 1.8 2005-03-06 01:09:25 athena Exp $ */
 
 #include "ifftw.h"
 
 /* total order among iodim's */
 int X(dimcmp)(const iodim *a, const iodim *b)
 {
-     int sa = X(iabs)(a->is), sb = X(iabs)(b->is);
-     if (sb != sa)
-          return (sb - sa);	/* shorter strides go later */
-     sa = X(iabs)(a->os); sb = X(iabs)(b->os);
-     if (sb != sa)
-          return (sb - sa);	/* shorter strides go later */
-     return (int)(a->n - b->n);	        /* larger n's go later */
+     int sai = X(iabs)(a->is), sbi = X(iabs)(b->is);
+     int sao = X(iabs)(a->os), sbo = X(iabs)(b->os);
+     int sam = X(imin)(sai, sao), sbm = X(imin)(sbi, sbo);
+
+     /* in descending order of min{istride, ostride} */
+     if (sam != sbm)
+	  return (sbm - sam);
+
+     /* in case of a tie, in descending order of istride */
+     if (sbi != sai)
+          return (sbi - sai);
+
+     /* in case of a tie, in descending order of ostride */
+     if (sbo != sao)
+          return (sbo - sao);
+
+     /* in case of a tie, in ascending order of n */
+     return (int)(a->n - b->n);
 }
+
 
 /* Like tensor_copy, but eliminate n == 1 dimensions, which
    never affect any transform or transform vector.

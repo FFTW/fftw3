@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.30 2003-04-15 19:03:20 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.31 2005-03-06 01:09:25 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -99,6 +99,10 @@ static int applicable0(const solver *ego_, const problem *p_, int *dp)
           return (1
                   && FINITE_RNK(p->vecsz->rnk)
                   && p->vecsz->rnk > 0
+
+		  /* the rank-0 solver deals with the general case */
+                  && p->sz->rnk > 0
+
                   && pickdim(ego, p->vecsz, p->I != p->O, dp)
 	       );
      }
@@ -134,11 +138,6 @@ static int applicable(const solver *ego_, const problem *p_,
 		    )
 		    return 0;
 	  }
-
-	  /* Heuristic: don't use a vrank-geq1 for rank-0 vrank-1
-	     transforms, since this case is better handled by rank-0
-	     solvers. */
-	  if (p->sz->rnk == 0 && p->vecsz->rnk == 1) return 0;
 
 	  /* prefer threaded version */
 	  if (NONTHREADED_ICKYP(plnr)) return 0;
