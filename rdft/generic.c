@@ -1,0 +1,281 @@
+/*
+ * Copyright (c) 2002 Matteo Frigo
+ * Copyright (c) 2002 Steven G. Johnson
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+#include "rdft.h"
+
+typedef struct {
+     solver super;
+     rdft_kind kind;
+} S;
+
+typedef struct {
+     plan_rdft super;
+     plan *cld;
+     twid *td;
+     R *W;
+     int os;
+     uint r, m;
+     rdft_kind kind;
+} P;
+
+/***************************************************************************/
+
+static void apply_dit(plan *ego_, R *I, R *O)
+{
+     P *ego = (P *) ego_;
+     uint n, m, r;
+     uint i, j, k;
+     int os, osm;
+     R *buf;
+     const R *W;
+     R *X, *YO, *YI;
+     R rsum, isum;
+     uint wp, wincr;
+
+     {
+	  plan_rdft *cld = (plan_rdft *) ego->cld;
+	  cld->apply((plan *) cld, I, O);
+     }
+
+     r = ego->r;
+
+     STACK_MALLOC(R *, buf, r * 2 * sizeof(R));
+     
+     osm = (m = ego->m) * (os = ego->os);
+     n = m * r;
+     W = ego->W;
+
+     X = O;
+     YO = O + r * osm;
+     YI = O + osm;
+
+     /* compute the transform of the r 0th elements (which are real) */
+     for (i = 0; i + i < r; ++i) {
+	  rsum = 0.0;
+	  isum = 0.0;
+	  wincr = m * i;
+	  for (j = 0, wp = 0; j < r; ++j) {
+	       R tw_r = W[2*wp];
+	       R tw_i = W[2*wp+1] ;
+	       R re = X[j * osm];
+	       rsum += re * tw_r;
+	       isum += re * tw_i;
+	       wp += wincr;
+	       if (wp >= n)
+		    wp -= n;
+	  }
+	  buf[2*i] = rsum;
+	  buf[2*i+1] = isum;
+     }
+
+     /* store the transform back onto the A array */
+     X[0] = buf[0];
+     for (i = 1; i + i < r; ++i) {
+	  X[i * osm] = buf[2*i];
+	  YO[-i * osm] = buf[2*i+1];
+     }
+
+     X += os;
+     YI -= os;
+     YO -= os;
+
+     /* compute the transform of the middle elements (which are complex) */
+     for (k = 1; k + k < m; ++k, X += os, YI -= os, YO -= os) {
+	  for (i = 0; i < r; ++i) {
+	       rsum = 0.0;
+	       isum = 0.0;
+	       wincr = k + m * i;
+	       for (j = 0, wp = 0; j < r; ++j) {
+		    R tw_r = W[2*wp];
+		    R tw_i = W[2*wp+1] ;
+		    R re = X[j * osm];
+		    R im = YI[j * osm];
+		    rsum += re * tw_r - im * tw_i;
+		    isum += re * tw_i + im * tw_r;
+		    wp += wincr;
+		    if (wp >= n)
+			 wp -= n;
+	       }
+	       buf[2*i] = rsum;
+	       buf[2*i+1] = isum;
+	  }
+
+	  /* store the transform back onto the A array */
+	  for (i = 0; i + i < r; ++i) {
+	       X[i * osm] = buf[2*i];
+	       YO[-i * osm] = buf[2*i+1];
+	  }
+	  for (; i < r; ++i) {
+	       X[i * osm] = -buf[2*i+1];
+	       YO[-i * osm] = buf[2*i];
+	  }
+     }
+
+     /* no final element, since m is odd */
+
+     STACK_FREE(buf);
+}
+
+/***************************************************************************/
+
+static void awake(plan *ego_, int flg)
+{
+     P *ego = (P *) ego_;
+     static const tw_instr generic_tw[] = {
+	  { TW_GENERIC, 0, 0 },
+	  { TW_NEXT, 1, 0 }
+     };
+
+     AWAKE(ego->cld, flg);
+     if (flg) {
+          if (!ego->td) {
+	       /* FIXME: can we get away with fewer twiddles? */
+               ego->td = X(mktwiddle)(generic_tw,
+                                      ego->r * ego->m, ego->r, ego->m);
+	       ego->W = ego->td->W;
+          }
+     }
+     else {
+          if (ego->td)
+               X(twiddle_destroy)(ego->td);
+          ego->td = 0;
+	  ego->W = 0;
+     }
+}
+
+static void destroy(plan *ego_)
+{
+     P *ego = (P *) ego_;
+     X(plan_destroy)(ego->cld);
+     X(free)(ego);
+}
+
+static void print(plan *ego_, printer *p)
+{
+     P *ego = (P *) ego_;
+
+     p->print(p, "(rdft-generic-%s-%u%(%p%))", 
+	      ego->kind == R2HC ? "r2hc-dit" : "hc2r-dif",
+	      ego->r, ego->cld);
+}
+
+static int applicable(const solver *ego_, const problem *p_)
+{
+     if (RDFTP(p_)) {
+	  const S *ego = (const S *) ego_;
+          const problem_rdft *p = (const problem_rdft *) p_;
+          return (1
+		  && p->sz.rnk == 1
+		  && p->vecsz.rnk == 0
+		  && p->sz.dims[0].n > 1
+                  && p->sz.dims[0].n % 4 /* make sure n / r = m is odd */
+                  && p->kind == ego->kind
+	       );
+     }
+
+     return 0;
+}
+
+static int score(const solver *ego_, const problem *p_, int flags)
+{
+     UNUSED(flags);
+     if (applicable(ego_, p_))
+	  return UGLY;
+     return BAD;
+}
+
+static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
+{
+     const problem_rdft *p = (const problem_rdft *) p_;
+     P *pln = 0;
+     uint n, is, os, r, m;
+     plan *cld = (plan *) 0;
+
+     static const plan_adt padt = {
+	  X(rdft_solve), awake, print, destroy
+     };
+
+     if (!applicable(ego, p_))
+          goto nada;
+
+     n = p->sz.dims[0].n;
+     is = p->sz.dims[0].is;
+     os = p->sz.dims[0].os;
+
+     r = X(first_divisor)(n);
+     m = n / r;
+
+     {
+	  problem *cldp;
+	  cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, r * is, os),
+				     X(mktensor_1d)(r, is, m * os),
+				     p->I, p->O, p->kind);
+	  cld = MKPLAN(plnr, cldp);
+	  X(problem_destroy)(cldp);
+	  if (!cld)
+	       goto nada;
+     }
+
+     pln = MKPLAN_RDFT(P, &padt, apply_dit);
+
+     pln->os = os;
+     pln->r = r;
+     pln->m = m;
+     pln->cld = cld;
+     pln->td = 0;
+     pln->W = 0;
+     pln->kind = p->kind;
+
+     pln->super.super.ops = X(ops_zero);
+     pln->super.super.ops.add = 4 * r * r;
+     pln->super.super.ops.mul = 4 * r * r;
+     /* loads + stores, minus loads + stores for all DIT codelets */
+     pln->super.super.ops.other = 4 * r + 4 * r * r - (6*r - 2);
+     pln->super.super.ops =
+	  X(ops_add)(X(ops_mul)((m - 1)/2, pln->super.super.ops),
+		     cld->ops);
+     pln->super.super.ops.add += 2 * r * r;
+     pln->super.super.ops.mul += 2 * r * r;
+     pln->super.super.ops.other += 3 * r + 3 * r * r - 2*r;
+
+     return &(pln->super.super);
+
+ nada:
+     if (cld)
+          X(plan_destroy)(cld);
+     if (pln)
+	  X(free)(pln);
+     return (plan *) 0;
+}
+
+/* constructors */
+
+static solver *mksolver_dit(void)
+{
+     static const solver_adt sadt = { mkplan_dit, score };
+     S *slv = MKSOLVER(S, &sadt);
+     slv->kind = R2HC;
+     return &(slv->super);
+}
+
+void X(rdft_generic_register)(planner *p)
+{
+     REGISTER_SOLVER(p, mksolver_dit());
+}
