@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor7.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: tensor7.c,v 1.4 2003-01-15 18:20:35 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -64,8 +64,11 @@ tensor *X(tensor_compress)(const tensor *sz)
                x->dims[rnk++] = sz->dims[i];
      }
 
-     qsort(x->dims, (size_t)x->rnk, sizeof(iodim),
-	   (int (*)(const void *, const void *))X(dimcmp));
+     if (rnk) {
+	  /* God knows how qsort() behaves if n==0 */
+	  qsort(x->dims, (size_t)x->rnk, sizeof(iodim),
+		(int (*)(const void *, const void *))X(dimcmp));
+     }
 
      return x;
 }
