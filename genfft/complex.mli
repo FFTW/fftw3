@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.mli,v 1.5 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: complex.mli,v 1.6 2003-03-25 16:51:49 stevenj Exp $ *)
 
 type expr
 val make : (Expr.expr * Expr.expr) -> expr
@@ -62,3 +62,4 @@ val assign :
   expr -> Expr.assignment * Expr.assignment
 
 val hermitian : int -> (int -> expr) -> int -> expr
+val antihermitian : int -> (int -> expr) -> int -> expr

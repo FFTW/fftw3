@@ -48,6 +48,7 @@ GEN_TWIDSQ = ${GENFFTDIR}/gen_twidsq
 GEN_R2HC = ${GENFFTDIR}/gen_r2hc
 GEN_HC2HC = ${GENFFTDIR}/gen_hc2hc
 GEN_HC2R = ${GENFFTDIR}/gen_hc2r
+GEN_R2R = ${GENFFTDIR}/gen_r2r
 PRELUDE_DFT = ${top_srcdir}/support/codelet_prelude.dft
 PRELUDE_RDFT = ${top_srcdir}/support/codelet_prelude.rdft
 ASMPRELUDE = ${top_srcdir}/support/codelet_asmprelude
@@ -59,7 +60,7 @@ PRELUDE_COMMANDS_DFT=cat $(COPYRIGHT) $(PRELUDE_DFT)
 PRELUDE_COMMANDS_RDFT=cat $(COPYRIGHT) $(PRELUDE_RDFT)
 ASMPRELUDE_COMMANDS=cat $(COPYRIGHT) $(ASMPRELUDE)
 
-FLAGS_COMMON = -compact -variables 4 #-no-randomized-cse
+FLAGS_COMMON = -compact -variables 4 # -no-randomized-cse
 DFT_FLAGS_COMMON = $(FLAGS_COMMON) 
 RDFT_FLAGS_COMMON = $(FLAGS_COMMON)
 

@@ -9,7 +9,7 @@ rdft2-tensor-max-index.c rdft2-inplace-strides.c
 
 librdft_la_SOURCES = dft-r2hc.c dht-r2hc.c dht-rader.c buffered.c	\
 codelet-rdft.h conf.c direct.c generic.c khc2hc-dif.c khc2hc-dit.c	\
-khc2r.c kr2hc.c hc2hc.c hc2hc.h hc2hc-dif.c hc2hc-dit.c hc2hc-buf.c	\
-indirect.c nop.c plan.c problem.c rader-hc2hc.c rank0.c rank-geq2.c	\
-rdft.h rdft-dht.c solve.c vrank-geq1.c vrank2-transpose.c		\
+khc2r.c kr2hc.c kr2r.c hc2hc.c hc2hc.h hc2hc-dif.c hc2hc-dit.c		\
+hc2hc-buf.c indirect.c nop.c plan.c problem.c rader-hc2hc.c rank0.c	\
+rank-geq2.c rdft.h rdft-dht.c solve.c vrank-geq1.c vrank2-transpose.c	\
 vrank3-transpose.c $(RDFT2)

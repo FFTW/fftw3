@@ -3,7 +3,7 @@
 EXTRA_DIST = .depend algsimp.ml annotate.ml assoctable.ml c.ml		\
 complex.ml conv.ml dag.ml expr.ml fft.ml gen_athnotw.ml gen_athtw.ml	\
 gen_conv.ml gen_hc2hc.ml gen_hc2r.ml gen_notw.ml gen_notw_c.ml		\
-gen_r2hc.ml gen_trig.ml gen_twiddle.ml gen_twiddle_c.ml gen_twidsq.ml	\
+gen_r2hc.ml gen_r2r.ml gen_twiddle.ml gen_twiddle_c.ml gen_twidsq.ml	\
 genutil.ml littlesimp.ml magic.ml monads.ml number.ml oracle.ml		\
 schedule.ml simd.ml simdmagic.ml to_alist.ml trig.ml twiddle.ml		\
 unique.ml util.ml variable.ml algsimp.mli annotate.mli assoctable.mli	\
@@ -12,7 +12,7 @@ number.mli oracle.mli schedule.mli simd.mli to_alist.mli trig.mli	\
 twiddle.mli unique.mli util.mli variable.mli
 
 noinst_SCRIPTS=gen_notw gen_notw_c gen_twiddle gen_twiddle_c	\
-gen_twidsq gen_trig gen_conv gen_r2hc gen_hc2r gen_hc2hc
+gen_twidsq gen_r2r gen_conv gen_r2hc gen_hc2r gen_hc2hc
 
 libgenfft_objects = unique.cmo magic.cmo util.cmo number.cmo		\
 variable.cmo expr.cmo littlesimp.cmo monads.cmo complex.cmo		\
@@ -75,13 +75,13 @@ gen_hc2hc: libgenfft.cmxa $(gen_hc2hc_OBJECTS:.cmo=.cmx)
 maintainer-clean-local::
 	rm -f gen_hc2hc
 
-# experimental stuff
-gen_trig_OBJECTS = gen_trig.cmo
-gen_trig: libgenfft.cmxa $(gen_trig_OBJECTS:.cmo=.cmx)
+gen_r2r_OBJECTS = gen_r2r.cmo
+gen_r2r: libgenfft.cmxa $(gen_r2r_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
 maintainer-clean-local::
-	rm -f gen_trig
+	rm -f gen_r2r
 
+# experimental stuff
 gen_conv_OBJECTS = gen_conv.cmo
 gen_conv: libgenfft.cmxa $(gen_conv_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)

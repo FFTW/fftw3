@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.ml,v 1.5 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: complex.ml,v 1.6 2003-03-25 16:51:49 stevenj Exp $ *)
 
 (* abstraction layer for complex operations *)
 open Littlesimp
@@ -133,6 +133,7 @@ let plus a =
 (* extract real/imaginary *)
 let real (CE (a, b)) = CE (a, makeNum Number.zero)
 let imag (CE (a, b)) = CE (b, makeNum Number.zero)
+let iimag (CE (a, b)) = CE (makeNum Number.zero, b)
 let conj (CE (a, b)) = CE (a, makeUminus b)
 
     
@@ -194,3 +195,9 @@ let hermitian n a =
     else if (i > n - i)  then conj (a (n - i))
     else real (a i))
 
+let antihermitian n a =
+  Util.array n (fun i ->
+    if (i = 0) then iimag (a 0)
+    else if (i < n - i)  then (a i)
+    else if (i > n - i)  then uminus (conj (a (n - i)))
+    else iimag (a i))

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet-rdft.h,v 1.4 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: codelet-rdft.h,v 1.5 2003-03-25 16:51:49 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -170,7 +170,6 @@ typedef struct {
 	  const kr2r_desc *desc,
 	  const R *I, const R *O,
 	  int is, int os, int vl, int ivs, int ovs);
-     rdft_kind kind;
      int vl;
 } kr2r_genus;
 
@@ -179,6 +178,7 @@ struct kr2r_desc_s {
      const char *nam;
      opcnt ops;
      const kr2r_genus *genus;
+     rdft_kind kind;
      int is, os;
      int ivs;
      int ovs;

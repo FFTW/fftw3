@@ -29,6 +29,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	rdft/codelets/librdft_codelets.la		\
 	rdft/codelets/r2hc/librdft_codelets_r2hc.la	\
 	rdft/codelets/hc2r/librdft_codelets_hc2r.la	\
+	rdft/codelets/r2r/librdft_codelets_r2r.la	\
 	reodft/libreodft.la				\
 	api/libapi.la
 

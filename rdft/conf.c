@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.20 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: conf.c,v 1.21 2003-03-25 16:51:49 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -56,4 +56,5 @@ void X(rdft_conf_standard)(planner *p)
      X(solvtab_exec)(s, p);
      X(solvtab_exec)(X(solvtab_rdft_r2hc), p);
      X(solvtab_exec)(X(solvtab_rdft_hc2r), p);
+     X(solvtab_exec)(X(solvtab_rdft_r2r), p);
 }

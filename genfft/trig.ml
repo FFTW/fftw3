@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: trig.ml,v 1.6 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: trig.ml,v 1.7 2003-03-25 16:51:49 stevenj Exp $ *)
 
 (* trigonometric transforms *)
 open Util
@@ -46,122 +46,109 @@ let dht sign n input =
   (fun i ->
     Complex.plus [Complex.real (f i); Complex.imag (f i)])
 
-let trigI n input =
+let trigI n input = 
   let twon = 2 * n in
-  let input' = array twon (fun i ->
-    if (i == 0) then
-      Complex.times Complex.two (input i)
-    else if (i < n) then
-      input i
-    else if (i > twon - n) then
-      Complex.conj (input (twon - i))
-    else
-      Complex.zero)
+  let input' = Complex.hermitian twon input
   in
   Fft.dft 1 twon input'
+
+let interleave_zero input = fun i -> 
+  if (i mod 2) == 0
+      then Complex.zero
+  else
+    input ((i - 1) / 2)
 
 let trigII n input =
   let twon = 2 * n 
   and fourn = 4 * n in
-  let input' = array fourn (fun i ->
-    if (i mod 2) == 0
-	then Complex.zero
-    else 
-      let i = (i - 1) / 2 in
-      if (i < n) then
-	(input i)
-      else (* twon > i >= n *)
-	Complex.conj (input (twon - 1 - i)))
+  let input' = Complex.hermitian fourn (interleave_zero input)
   in
   Fft.dft 1 fourn input'
 
 let trigIII n input =
   let fourn = 4 * n in
-  let input' = array fourn (fun i ->
-    if (i == 0) then
-      Complex.times Complex.two (input i)
-    else if (i < n) then
-      input i
-    else if (i > fourn - n) then
-      Complex.conj (input (fourn - i))
-    else
-      Complex.zero)
+  let twon = 2 * n in
+  let input' = Complex.hermitian fourn
+      (fun i -> 
+	if (i == 0) then
+	  Complex.real (input 0)
+	else if (i == twon) then
+	  Complex.uminus (Complex.real (input 0))
+	else
+	  Complex.antihermitian twon input i)
   in
   let dft = Fft.dft 1 fourn input'
   in fun k -> dft (2 * k + 1)
 
+let zero_extend n input = fun i ->
+  if (i >= 0 && i < n)
+  then input i
+  else Complex.zero
+
 let trigIV n input =
   let fourn = 4 * n
   and eightn = 8 * n in
-  let input' = array eightn (fun i ->
-    if (i mod 2) == 0
-	then Complex.zero
-    else 
-      let i = (i - 1) / 2 in
-      if (i < n) then
-	input i
-      else if (i >= fourn - n) then
-	Complex.conj (input (fourn - 1 - i))
-      else
-	Complex.zero)
+  let input' = Complex.hermitian eightn 
+      (zero_extend fourn (Complex.antihermitian fourn 
+			 (interleave_zero input)))
   in
   let dft = Fft.dft 1 eightn input'
   in fun k -> dft (2 * k + 1)
 
-
-let make_dct trig =
+let make_dct scale nshift trig =
   fun n input ->
-    trig n (Complex.real (* @@ (Complex.times Complex.half) *) @@ input)
-
+    trig (n - nshift) (Complex.real @@ (Complex.times scale) @@ 
+		       (zero_extend n input))
 (*
  * DCT-I:  y[k] = sum x[j] cos(pi * j * k / n)
  *)
-let dctI = make_dct trigI
+let dctI = make_dct Complex.one 1 trigI
 
 (*
  * DCT-II:  y[k] = sum x[j] cos(pi * (j + 1/2) * k / n)
  *)
-let dctII = make_dct trigII
+let dctII = make_dct Complex.one 0 trigII
 
 (*
  * DCT-III:  y[k] = sum x[j] cos(pi * j * (k + 1/2) / n)
  *)
-let dctIII = make_dct trigIII
+let dctIII = make_dct Complex.half 0 trigIII
 
 (*
  * DCT-IV  y[k] = sum x[j] cos(pi * (j + 1/2) * (k + 1/2) / n)
  *)
-let dctIV = make_dct trigIV
+let dctIV = make_dct Complex.half 0 trigIV
 
+let shift s input = fun i -> input (i - s)
 
-
-(* DST-x input := TRIG-x (input / 2i) *)
-let make_dst trig =
+(* DST-x input := TRIG-x (input / i) *)
+let make_dst scale nshift kshift jshift trig =
   fun n input ->
     Complex.real @@ 
-    (trig n (Complex.uminus @@
-	     (Complex.times Complex.i) @@
-	     (Complex.times Complex.half) @@ 
-	     Complex.real @@ 
-	     input))
+    (shift (- jshift)
+       (trig (n + nshift) (Complex.uminus @@
+			   (Complex.times Complex.i) @@
+			   (Complex.times scale) @@ 
+			   Complex.real @@ 
+			   (shift kshift (zero_extend n input)))))
 
 (*
  * DST-I:  y[k] = sum x[j] sin(pi * j * k / n)
  *)
-let dstI = make_dst trigI
+let dstI = make_dst Complex.one 1 1 1 trigI
 
 (*
  * DST-II:  y[k] = sum x[j] sin(pi * (j + 1/2) * k / n)
  *)
-let dstII = make_dst trigII
+let dstII = make_dst Complex.one 0 0 1 trigII
 
 (*
  * DST-III:  y[k] = sum x[j] sin(pi * j * (k + 1/2) / n)
  *)
-let dstIII = make_dst trigIII
+let dstIII = make_dst Complex.half 0 1 0 trigIII
 
 (*
  * DST-IV  y[k] = sum x[j] sin(pi * (j + 1/2) * (k + 1/2) / n)
  *)
-let dstIV = make_dst trigIV
+let dstIV = make_dst Complex.half 0 0 0 trigIV
 

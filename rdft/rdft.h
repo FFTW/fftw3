@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.36 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: rdft.h,v 1.37 2003-03-25 16:51:49 stevenj Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -75,6 +75,7 @@ plan *X(mkplan_rdft)(size_t size, const plan_adt *adt, rdftapply apply);
 
 solver *X(mksolver_rdft_r2hc_direct)(kr2hc k, const kr2hc_desc *desc);
 solver *X(mksolver_rdft_hc2r_direct)(khc2r k, const khc2r_desc *desc);
+solver *X(mksolver_rdft_r2r_direct)(kr2r k, const kr2r_desc *desc);
 solver *X(mksolver_rdft_hc2hc_dit)(khc2hc k, const hc2hc_desc *desc);
 solver *X(mksolver_rdft_hc2hc_ditbuf)(khc2hc k, const hc2hc_desc *desc);
 solver *X(mksolver_rdft_hc2hc_dif)(khc2hc k, const hc2hc_desc *desc);
