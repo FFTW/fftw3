@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.ml,v 1.1.1.1 2002-06-02 18:42:28 athena Exp $ *)
+(* $Id: complex.ml,v 1.2 2002-06-13 19:30:41 athena Exp $ *)
 
 (* abstraction layer for complex operations *)
 open Littlesimp
@@ -195,4 +195,11 @@ type signal = int -> expr
 
 (* make a finite signal infinite *)
 let infinite n signal i = if ((0 <= i) && (i < n)) then signal i else zero
+
+let hermitian n a =
+  Util.array n (fun i ->
+    if (i = 0) then real (a 0)
+    else if (i < n - i)  then (a i)
+    else if (i > n - i)  then conj (a (n - i))
+    else real (a i))
 

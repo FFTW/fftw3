@@ -1,16 +1,17 @@
 # this makefile requires GNU make.
 
-EXTRA_DIST = .depend algsimp.ml algsimp.mli annotate.ml annotate.mli	\
-assoctable.ml assoctable.mli c.ml c.mli complex.ml complex.mli dag.ml	\
-dag.mli expr.ml expr.mli fft.ml fft.mli conv.ml conv.mli gen_notw.ml	\
-gen_twiddle.ml genutil.ml littlesimp.ml littlesimp.mli magic.ml		\
-monads.ml number.ml number.mli oracle.ml oracle.mli schedule.ml		\
-schedule.mli to_alist.ml to_alist.mli twiddle.ml twiddle.mli unique.ml	\
-unique.mli util.ml util.mli variable.ml variable.mli gen_twidsq.ml	\
-trig.ml trig.mli gen_trig.ml gen_athnotw.ml gen_athtw.ml
+EXTRA_DIST = .depend algsimp.ml annotate.ml assoctable.ml c.ml		\
+complex.ml conv.ml dag.ml expr.ml fft.ml gen_athnotw.ml gen_athtw.ml	\
+gen_conv.ml gen_hc2r.ml gen_notw.ml gen_r2hc.ml gen_trig.ml		\
+gen_twiddle.ml gen_twidsq.ml genutil.ml littlesimp.ml magic.ml		\
+monads.ml number.ml oracle.ml schedule.ml to_alist.ml trig.ml		\
+twiddle.ml unique.ml util.ml variable.ml algsimp.mli annotate.mli	\
+assoctable.mli c.mli complex.mli conv.mli dag.mli expr.mli fft.mli	\
+littlesimp.mli number.mli oracle.mli schedule.mli to_alist.mli		\
+trig.mli twiddle.mli unique.mli util.mli variable.mli
 
 noinst_SCRIPTS=gen_notw gen_twiddle gen_twidsq gen_trig gen_athnotw	\
-gen_athtw gen_conv
+gen_athtw gen_conv gen_r2hc gen_hc2r
 
 libgenfft_objects = unique.cmo magic.cmo util.cmo number.cmo	\
 variable.cmo expr.cmo littlesimp.cmo monads.cmo complex.cmo	\
@@ -49,6 +50,23 @@ gen_twidsq.nonopt: libgenfft.cma $(gen_twidsq_OBJECTS)
 clean-local::
 	rm -f gen_twidsq gen_twidsq.nonopt
 
+gen_r2hc_OBJECTS = gen_r2hc.cmo
+gen_r2hc: libgenfft.cmxa $(gen_r2hc_OBJECTS:.cmo=.cmx)
+	$(OCAMLOPTLINK)
+gen_r2hc.nonopt: libgenfft.cma $(gen_r2hc_OBJECTS)
+	$(OCAMLLINK)
+clean-local::
+	rm -f gen_r2hc gen_r2hc.nonopt
+
+gen_hc2r_OBJECTS = gen_hc2r.cmo
+gen_hc2r: libgenfft.cmxa $(gen_hc2r_OBJECTS:.cmo=.cmx)
+	$(OCAMLOPTLINK)
+gen_hc2r.nonopt: libgenfft.cma $(gen_hc2r_OBJECTS)
+	$(OCAMLLINK)
+clean-local::
+	rm -f gen_hc2r gen_hc2r.nonopt
+
+# experimental stuff
 gen_trig_OBJECTS = gen_trig.cmo
 gen_trig: libgenfft.cmxa $(gen_trig_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)

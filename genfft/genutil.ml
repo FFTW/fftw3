@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.2 2002-06-10 13:04:21 athena Exp $ *)
+(* $Id: genutil.ml,v 1.3 2002-06-13 19:30:41 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -88,9 +88,17 @@ let temporary_array_c n =
 
 let load_c (vr, vi) = Complex.make (Expr.Load vr, Expr.Load vi)
 let load_r (vr, vi) = Complex.make (Expr.Load vr, Expr.Num (Number.zero))
+let load_hc (vr, _) (vi, _) = load_c (vr, vi)
 
 let load_array_c n var = array n (fun i -> load_c (var i))
 let load_array_r n var = array n (fun i -> load_r (var i))
+let load_array_hc n var = 
+  array n (fun i -> 
+    if (i = 0) then
+      load_r (var i)
+    else if (i <= n - i) then
+      load_hc (var i) (var (n - i))
+    else Complex.conj (load_hc (var (n - i)) (var n)))
 
 let load_v_array_c veclen n var =
   array veclen (fun v -> load_array_c n (var v))
@@ -156,13 +164,6 @@ let conj_v_array_c = elementwise_v Complex.conj
 let real_v_array_c = elementwise_v Complex.real
 let imag_v_array_c = elementwise_v Complex.imag
 
-
-let hermitian_array_c n a =
-  array n (fun i ->
-    if (i = 0) then Complex.real (a 0)
-    else if (i < n - i)  then (a i)
-    else if (i > n - i)  then Complex.conj (a (n - i))
-    else Complex.real (a i))
 
 let transpose f i j = f j i
 let symmetrize f i j = if i <= j then f i j else f j i

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.mli,v 1.1.1.1 2002-06-02 18:42:28 athena Exp $ *)
+(* $Id: complex.mli,v 1.2 2002-06-13 19:30:41 athena Exp $ *)
 
 type expr
 val make : (Expr.expr * Expr.expr) -> expr
@@ -59,3 +59,5 @@ val assign_imag : Variable.variable -> expr -> Expr.assignment
 val assign :
   Variable.variable * Variable.variable ->
   expr -> Expr.assignment * Expr.assignment
+
+val hermitian : int -> (int -> expr) -> int -> expr

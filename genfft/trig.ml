@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: trig.ml,v 1.2 2002-06-06 22:03:17 athena Exp $ *)
+(* $Id: trig.ml,v 1.3 2002-06-13 19:30:41 athena Exp $ *)
 
 (* trigonometric transforms *)
 open Util
@@ -29,7 +29,7 @@ let rdft sign n input =
 
 (* DFT of hermitian input *)
 let hdft sign n input =
-  Fft.dft sign n (Genutil.hermitian_array_c n input)
+  Fft.dft sign n (Complex.hermitian n input)
 
 (* Discrete Hartley Transform *)
 let dht sign n input =

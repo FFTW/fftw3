@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.3 2002-06-13 12:48:51 athena Exp $ *)
+(* $Id: c.ml,v 1.4 2002-06-13 19:30:41 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -258,7 +258,7 @@ let extract_constants f =
     map 
       (fun n ->
 	Idecl (("const " ^ realtype), (Number.to_konst n),
-	       "K(" ^ (Number.to_string n)))
+	       "K(" ^ (Number.to_string n) ^ ")"))
       unique_constants
   and use_compact () = 
     map
