@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.10 2002-07-20 22:25:47 athena Exp $ */
+/* $Id: twiddle.c,v 1.11 2002-07-22 03:15:12 stevenj Exp $ */
 
 /* Twiddle manipulation */
 
@@ -42,16 +42,16 @@ static int equal_instr(const tw_instr *p, const tw_instr *q)
      A(0 /* can't happen */);
 }
 
-static int equal_twid(const twid *t, const tw_instr *q, uint n, uint r, uint m)
+static int ok_twid(const twid *t, const tw_instr *q, uint n, uint r, uint m)
 {
-     return (n == t->n && r == t->r && m == t->m && equal_instr(t->instr, q));
+     return (n == t->n && r == t->r && m <= t->m && equal_instr(t->instr, q));
 }
 
 static twid *lookup(const tw_instr *q, uint n, uint r, uint m)
 {
      twid *p;
 
-     for (p = twlist; p && !equal_twid(p, q, n, r, m); p = p->cdr)
+     for (p = twlist; p && !ok_twid(p, q, n, r, m); p = p->cdr)
           ;
      return p;
 }
