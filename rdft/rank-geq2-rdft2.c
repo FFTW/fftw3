@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.14 2003-01-09 05:44:45 stevenj Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.15 2003-01-09 06:43:13 stevenj Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -148,7 +148,8 @@ static int applicable(const solver *ego_, const problem *p_,
 	     sz, don't use (prefer to do the vector loop first with a
 	     vrank-geq1 plan). */
 	  if (p->vecsz->rnk > 0 &&
-	      X(tensor_min_stride)(p->vecsz) > X(tensor_max_index)(p->sz))
+	      X(tensor_min_stride)(p->vecsz) 
+	      > X(rdft2_tensor_max_index)(p->sz, p->kind))
 	       return 0;
      }
 
