@@ -1,5 +1,6 @@
 # script to initialize automake/autoconf etc
 echo "Please ignore warnings and errors"
+touch ChangeLog
 touch genfft/.depend
 touch genfft-k7/.depend
 autoheader
