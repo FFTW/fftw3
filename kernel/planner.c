@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.23 2002-07-14 21:33:02 stevenj Exp $ */
+/* $Id: planner.c,v 1.24 2002-07-15 00:35:49 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -200,9 +200,8 @@ static void forget(planner *ego, amnesia a)
      uint h;
 
      for (h = 0; h < ego->hashsiz; ++h) {
-	  solutions *s = ego->sols[h], *sprev = 0;
-	  while (s) {
-	       solutions *s_cdr = s->cdr;
+	  solutions **ps = ego->sols + h, *s;
+	  while ((s = *ps)) {
 	       if (s->pln) {
 		    s->blessed = s->pln->blessed;
 		    if (a == FORGET_PLANS) {
@@ -210,20 +209,19 @@ static void forget(planner *ego, amnesia a)
 			 s->pln = 0;
 		    }
 	       }
+
 	       if (a == FORGET_EVERYTHING ||
 		   (a == FORGET_ACCURSED && !s->blessed)) {
+		    /* confutatis maledictis flammis acribus addictis */
+		    *ps = s->cdr;
 		    if (s->pln)
 			 X(plan_destroy)(s->pln);
 		    X(problem_destroy)(s->p);
 		    X(free)(s);
-		    if (sprev)
-			 sprev->cdr = s_cdr;
-		    else
-			 ego->sols[h] = s_cdr;
+	       } else {
+		    /* voca me cum benedictis */
+		    ps = &s->cdr;
 	       }
-	       else
-		    sprev = s;
-	       s = s_cdr;
 	  }
      }
 }
@@ -246,7 +244,10 @@ static void exprt(planner *ego, printer *p)
 
      for (h = 0; h < ego->hashsiz; ++h) 
 	  for (s = ego->sols[h]; s; s = s->cdr) 
-	       print_solution(s, p);
+	       /* qui salvandos salvas gratis
+		  salva me fons pietatis */
+	       if (s->blessed || (s->pln && s->pln->blessed))
+		    print_solution(s, p);
 } 
 
 /*
