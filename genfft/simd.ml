@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.10 2002-07-04 00:32:28 athena Exp $ *)
+(* $Id: simd.ml,v 1.11 2002-07-08 00:32:01 athena Exp $ *)
 
 open Expr
 open List
@@ -40,214 +40,132 @@ let ovs = ref "ovs"
  *)
 let foldr_string_concat l = fold_right (^) l ""
 
-let first_simd_load v = function 
-  | MUseReIm(MLoad,v1,e1,v2,e2) -> v == v1	(* wait for 1st load *)
-  | _ -> false
+let rec unparse_by_twiddle nam tw src = 
+  sprintf "%s(&(%s),%s)" nam (Variable.unparse tw) (unparse_expr src)
 
-let last_simd_store v = function 
-  | MUseReIm(MStore,v1,e1,v2,e2) -> v == v2	(* wait for 2nd store *)
-  | _ -> false
-
-let cmp_locations v v' = compare (var_index v) (var_index v')
-
-let rec last = function
-  | [] -> failwith "last"
-  | [a] -> a
-  | _::xs -> last xs
-
-let last_transpose_simd_store dst = function
-  | MTransposes zs -> Variable.same (fst (last zs)) dst
-  | _ 		   -> false
-
-let rec listToString toString separator = function
-  | [] -> ""
-  | [x] -> toString x
-  | x::xs -> (toString x) ^ separator ^ (listToString toString separator xs)
-
-let real_imag (v1,e1,v2,e2) = 
-  if Variable.is_real v1 then (v1,e1,v2,e2) 
-  else if Variable.is_real v2 then (v2,e2,v1,e1)
-  else failwith "real_imag"
-
-let rec unparse_load vardeclinfo dst src = 
-  match !ldmode with
-  | VEC -> sprintf "LD(%s,%s);\n" (Variable.unparse dst) (Variable.unparse src)
-  | RI ->
-      begin
-	match Util.find_elem (first_simd_load src) vardeclinfo with
-	| Some (MUseReIm(MLoad,v1,e1,v2,e2)) ->
-	    let (v1,e1,v2,e2) = real_imag (v1,e1,v2,e2) in
-	    sprintf "LDRI(%s,%s,%s,%s);\n" 
-	      (unparse_expr e1) (unparse_expr e2) (Variable.unparse v1) !ivs
-	| _ -> ""
-      end
-  | RI2 ->
-      begin
-	match Util.find_elem (first_simd_load src) vardeclinfo with
-	| Some (MUseReIm(MLoad,v1,e1,v2,e2)) ->
-	    let (v1,e1,v2,e2) = real_imag (v1,e1,v2,e2) in
-	    sprintf "LDRI2(%s,%s,%s);\n" 
-	      (unparse_expr e1) (unparse_expr e2) (Variable.unparse v1)
-	| _ -> ""
-      end
-  | _ -> failwith "ldmode not implemented"
-
-
-and unparse_load_twiddle vardeclinfo dst src = 
-  sprintf "LD(%s,%s);\n" (Variable.unparse dst) (Variable.unparse src)
-
-and unparse_store vardeclinfo dst src_expr =
-  match !stmode with
-  | VEC -> 
-      sprintf "ST(%s,%s);\n" (Variable.unparse dst) (unparse_expr src_expr)
-  | RI ->
-      begin
-	match Util.find_elem (last_simd_store dst) vardeclinfo with
-	| Some (MUseReIm(MStore,v1,e1,v2,e2)) ->
-	    let (v1,e1,v2,e2) = real_imag (v1,e1,v2,e2) in
-	    sprintf  "STRI(%s,%s,%s,%s);\n"
-	      (Variable.unparse v1) !ovs (unparse_expr e1) (unparse_expr e2)
-	| _ -> ""
-      end
-  | RI2 ->
-      begin
-	match Util.find_elem (last_simd_store dst) vardeclinfo with
-	| Some (MUseReIm(MStore,v1,e1,v2,e2)) ->
-	    let (v1,e1,v2,e2) = real_imag (v1,e1,v2,e2) in
-	    sprintf  "STRI2(%s,%s,%s);\n"
-	      (Variable.unparse v1) (unparse_expr e1) (unparse_expr e2)
-	| _ -> ""
-      end
-  | TR ->
-      begin
-	match Util.find_elem (last_transpose_simd_store dst) vardeclinfo with
-	| Some (MTransposes zs) ->
-	    begin
-	      let zs' = List.sort (fun (v,_) (v',_) -> cmp_locations v v') zs  in
-	      let dst = fst (List.hd zs') in
-	      match !vector_length with
-	      | 4 -> sprintf "ST4(%s, %s, %s);\n"
-		    (Variable.unparse dst) !ovs
-		    (listToString unparse_expr ", " (map snd zs'))
-	      | 2 -> sprintf "ST2(%s, %s, %s);\n"
-		    (Variable.unparse dst) !ovs
-		    (listToString unparse_expr ", " (map snd zs'))
-	      | _ -> failwith "store_transpose"
-	    end
-	| _ -> ""
-      end
+and unparse_store dst src_expr =
+  sprintf "ST(&(%s),%s,%s);\n" 
+    (Variable.unparse dst) (unparse_expr src_expr) !ovs
 
 and unparse_expr =
   let rec unparse_plus = function
     | [a] -> unparse_expr a
-    | (Uminus (Times (a, b))) :: c :: d -> op "VFNMS" a b (c :: d)
-    | c :: (Uminus (Times (a, b))) :: d -> op "VFNMS" a b (c :: d)
-(*    | (Times (a, b)) :: (Uminus c) :: d -> op "VFMS" a b (c :: negate d)
-    | (Uminus c) :: (Times (a, b)) :: d -> op "VFMS" a b (c :: negate d)
-*)
-    | (Times (a, b)) :: c :: d          -> op "VFMA" a b (c :: d)
-    | c :: (Times (a, b)) :: d          -> op "VFMA" a b (c :: d)
+    | (Uminus (Times (a, b))) :: c :: d when t a ->
+	op3 "VFNMS" a b (c :: d)
+    | c :: (Uminus (Times (a, b))) :: d when t a -> 
+	op3 "VFNMS" a b (c :: d)
+    | (Times (a, b)) :: (Uminus c) :: d when t a ->
+        op3 "VFMS" a b (c :: negate d)
+    | (Uminus c) :: (Times (a, b)) :: d when t a ->
+        op3 "VFMS" a b (c :: negate d)
+    | (Times (a, b)) :: c :: d when t a -> op3 "VFMA" a b (c :: d)
+    | c :: (Times (a, b)) :: d when t a -> op3 "VFMA" a b (c :: d)
     | (Uminus a :: b)                   -> op2 "VSUB" b [a]
     | (b :: Uminus a :: c)              -> op2 "VSUB" (b :: c) [a]
     | (a :: b)                          -> op2 "VADD" [a] b
     | [] -> failwith "unparse_plus"
-  and op nam a b c =
+  and op3 nam a b c =
     nam ^ "(" ^ (unparse_expr a) ^ ", " ^ (unparse_expr b) ^ ", " ^
     (unparse_plus c) ^ ")"
   and op2 nam a b = 
     nam ^ "(" ^ (unparse_plus a) ^ ", " ^ (unparse_plus b) ^ ")"
+  and op1 nam a = 
+    nam ^ "(" ^ (unparse_expr a) ^ ")"
   and negate = function
     | [] -> []
     | (Uminus x) :: y -> x :: negate y
     | x :: y -> (Uminus x) :: negate y
+  and t = function Num _ -> true | _ -> false
 
   in function
-    | Load v -> Variable.unparse v
+    | Times(Times(NaN CPLX, Load tw), src) when Variable.is_constant tw ->
+	unparse_by_twiddle "BYTW" tw src
+    | Times(Times(NaN CPLXJ, Load tw), src) when Variable.is_constant tw ->
+	unparse_by_twiddle "BYTWJ" tw src
+    | Load v when is_locative(v) ->
+	sprintf "LD(&(%s),%s)" (Variable.unparse v) !ivs
+    | Load v  -> Variable.unparse v
     | Num n -> sprintf "LDK(%s)" (Number.to_konst n)
+    | NaN n -> failwith "NaN in unparse_expr"
     | Plus [] -> "0.0 /* bug */"
     | Plus [a] -> " /* bug */ " ^ (unparse_expr a)
     | Plus a -> unparse_plus a
-    | Times(a,b) -> sprintf "VMUL(%s,%s)" (unparse_expr a) (unparse_expr b)
-    | Uminus a when !Magic.vneg -> sprintf "VNEG(%s)" (unparse_expr a)
+    | Times(NaN I,b) -> op1 "VBYI" b
+    | Times(a,b) ->
+	sprintf "VMUL(%s,%s)" (unparse_expr a) (unparse_expr b)
+    | Uminus a when !Magic.vneg -> op1 "VNEG" a
     | Uminus a -> failwith "SIMD Uminus"
     | _ -> failwith "unparse_expr"
 
 and unparse_decl x = C.unparse_decl x
 
-and unparse_ast' vardeclinfo ast = 
-  let rec unparse_ast ast =
-    let rec unparse_assignment = function
-      | Assign(dst, Load src) when (Variable.is_constant src) -> 
-	  unparse_load_twiddle vardeclinfo dst src
-      | Assign(dst, Load src) when (not (Variable.is_locative dst)) -> 
-	  unparse_load vardeclinfo dst src
-      | Assign (v, x) when Variable.is_locative v ->
-	  unparse_store vardeclinfo v x
-      | Assign (v, x) -> 
-	  (Variable.unparse v) ^ " = " ^ (unparse_expr x) ^ ";\n"
+and unparse_ast ast = 
+  let rec unparse_assignment = function
+    | Assign (v, x) when Variable.is_locative v ->
+	unparse_store v x
+    | Assign (v, x) -> 
+	(Variable.unparse v) ^ " = " ^ (unparse_expr x) ^ ";\n"
 
-    and unparse_annotated force_bracket = 
-      let rec unparse_code = function
-        | ADone -> ""
-        | AInstr i -> unparse_assignment i
-        | ASeq (a, b) -> 
-	    (unparse_annotated false a) ^ (unparse_annotated false b)
-      and declare_variables l = 
-	let rec uvar = function
-	    [] -> failwith "uvar"
-	  |	[v] -> (Variable.unparse v) ^ ";\n"
-	  | a :: b -> (Variable.unparse a) ^ ", " ^ (uvar b)
-	in let rec vvar l = 
-	  let s = if !Magic.compact then 10 else 1 in
-	  if (List.length l <= s) then
-	    match l with
-	      [] -> ""
-	    | _ -> realtype ^ " " ^ (uvar l)
-	  else
-	    (vvar (Util.take s l)) ^ (vvar (Util.drop s l))
-	in vvar (List.filter Variable.is_temporary l)
-      in function
-          Annotate (_, _, decl, _, code) ->
-            if (not force_bracket) && (Util.null decl) then 
-              unparse_code code
-            else "{\n" ^
-              (declare_variables decl) ^
-              (unparse_code code) ^
-	      "}\n"
+  and unparse_annotated force_bracket = 
+    let rec unparse_code = function
+      | ADone -> ""
+      | AInstr i -> unparse_assignment i
+      | ASeq (a, b) -> 
+	  (unparse_annotated false a) ^ (unparse_annotated false b)
+    and declare_variables l = 
+      let rec uvar = function
+	  [] -> failwith "uvar"
+	|	[v] -> (Variable.unparse v) ^ ";\n"
+	| a :: b -> (Variable.unparse a) ^ ", " ^ (uvar b)
+      in let rec vvar l = 
+	let s = if !Magic.compact then 10 else 1 in
+	if (List.length l <= s) then
+	  match l with
+	    [] -> ""
+	  | _ -> realtype ^ " " ^ (uvar l)
+	else
+	  (vvar (Util.take s l)) ^ (vvar (Util.drop s l))
+      in vvar (List.filter Variable.is_temporary l)
+    in function
+        Annotate (_, _, decl, _, code) ->
+          if (not force_bracket) && (Util.null decl) then 
+            unparse_code code
+          else "{\n" ^
+            (declare_variables decl) ^
+            (unparse_code code) ^
+	    "}\n"
 
 (* ---- *)
-    and unparse_plus = function
-      | [] -> ""
-      | (CUminus a :: b) -> " - " ^ (parenthesize a) ^ (unparse_plus b)
-      | (a :: b) -> " + " ^ (parenthesize a) ^ (unparse_plus b)
-    and parenthesize x = match x with
-      | (CVar _) -> unparse_ast x
-      | (Integer _) -> unparse_ast x
-      | _ -> "(" ^ (unparse_ast x) ^ ")"
+  and unparse_plus = function
+    | [] -> ""
+    | (CUminus a :: b) -> " - " ^ (parenthesize a) ^ (unparse_plus b)
+    | (a :: b) -> " + " ^ (parenthesize a) ^ (unparse_plus b)
+  and parenthesize x = match x with
+  | (CVar _) -> unparse_ast x
+  | (Integer _) -> unparse_ast x
+  | _ -> "(" ^ (unparse_ast x) ^ ")"
 
-    in match ast with 
-    | Asch a -> (unparse_annotated true a)
-    | Return x -> "return " ^ unparse_ast x ^ ";"
-    | For (a, b, c, d) ->
-	"for (" ^
-	unparse_ast a ^ "; " ^ unparse_ast b ^ "; " ^ unparse_ast c
-	^ ")" ^ unparse_ast d
-    | If (a, d) ->
-	"if (" ^
-	unparse_ast a 
-	^ ")" ^ unparse_ast d
-    | Block (d, s) ->
-	if (s == []) then ""
-	else 
-          "{\n"                                      ^ 
-          foldr_string_concat (map unparse_decl d)   ^ 
-          foldr_string_concat (map unparse_ast s)    ^
-          "}\n"      
-    | x -> C.unparse_ast x
+  in match ast with 
+  | Asch a -> (unparse_annotated true a)
+  | Return x -> "return " ^ unparse_ast x ^ ";"
+  | For (a, b, c, d) ->
+      "for (" ^
+      unparse_ast a ^ "; " ^ unparse_ast b ^ "; " ^ unparse_ast c
+      ^ ")" ^ unparse_ast d
+  | If (a, d) ->
+      "if (" ^
+      unparse_ast a 
+      ^ ")" ^ unparse_ast d
+  | Block (d, s) ->
+      if (s == []) then ""
+      else 
+        "{\n"                                      ^ 
+        foldr_string_concat (map unparse_decl d)   ^ 
+        foldr_string_concat (map unparse_ast s)    ^
+        "}\n"      
+  | x -> C.unparse_ast x
 
-  in unparse_ast ast
-
-and unparse_function vardeclinfo = function
+and unparse_function = function
     Fcn (typ, name, args, body) ->
       let rec unparse_args = function
           [Decl (a, b)] -> a ^ " " ^ b 
@@ -257,7 +175,7 @@ and unparse_function vardeclinfo = function
 	| _ -> failwith "unparse_function"
       in 
       (typ ^ " " ^ name ^ "(" ^ unparse_args args ^ ")\n" ^
-       unparse_ast' vardeclinfo body)
+       unparse_ast body)
 
 let extract_constants f =
   let constlist = flatten (map expr_to_constants (C.ast_to_expr_list f))

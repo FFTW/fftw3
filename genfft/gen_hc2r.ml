@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r.ml,v 1.4 2002-06-23 00:47:28 athena Exp $ *)
+(* $Id: gen_hc2r.ml,v 1.5 2002-07-08 00:32:01 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r.ml,v 1.4 2002-06-23 00:47:28 athena Exp $"
+let cvsid = "$Id: gen_hc2r.ml,v 1.5 2002-07-08 00:32:01 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -70,7 +70,7 @@ let generate n =
       (C.array_subscript "BUG" vostride)
       locations in
   let odag = store_array_r n oloc output in
-  let (vardeclinfo, annot) = standard_optimizer odag in
+  let annot = standard_optimizer odag in
 
   let tree0 =
     Fcn ("static void", name0,
@@ -109,7 +109,7 @@ let generate n =
     "}\n"
 
   in
-  (unparse cvsid vardeclinfo tree0) ^ "\n" ^ loop ^ desc ^ init
+  (unparse cvsid tree0) ^ "\n" ^ loop ^ desc ^ init
 
 
 let main () =

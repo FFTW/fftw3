@@ -18,26 +18,8 @@
  *
  */
 
-#include "codelet.h"
-#include "n4.h"
+#include "simd.h"
 
-#if HAVE_SIMD
-static int okp(const kdft_desc *d,
-	       const R *ri, const R *ii, const R *ro, const R *io,
-	       int is, int os, uint vl, int ivs, int ovs)
-{
-     return (RIGHT_CPU()
-	     && ALIGNED(ri)
-	     && ALIGNED(ro)
-	     && ALIGNED(ii)
-	     && ALIGNED(io)
-	     && (vl % VL) == 0
-	     && (!d->is || (d->is == is))
-	     && (!d->os || (d->os == os))
-	     && (!d->ivs || (d->ivs == ivs))
-	     && (!d->ovs || (d->ovs == ovs))
-	  );
-}
+#define GENUS X(dft_t1fsimd_genus)
+extern const ct_genus GENUS;
 
-const kdft_genus GENUS = { okp, VL };
-#endif

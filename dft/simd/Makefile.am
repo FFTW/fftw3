@@ -1,7 +1,5 @@
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft -I$(top_srcdir)/simd
 noinst_LTLIBRARIES = libdft_simd.la
-EXTRA_DIST = NAMING
 SUBDIRS = codelets
 
-libdft_simd_la_SOURCES = n2f.c n4.c t2f.c t4.c n2f.h n3f.h n4.h t2f.h	\
-t3f.h t4.h
+libdft_simd_la_SOURCES = n1b.c n1f.c t1b.c t1f.c n1b.h n1f.h t1b.h t1f.h

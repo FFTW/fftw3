@@ -22,7 +22,7 @@
 #error "SSE2 only works in double precision"
 #endif
 
-#define VL 2            /* SIMD vector length */
+#define VL 1            /* SIMD vector length, in term of complex numbers */
 #define ALIGNMENT 16
 
 #if defined(__GNUC__) && defined(__i386__)
@@ -42,60 +42,37 @@ static __inline__ V VSUB(V a, V b)
      __asm__("subpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
-static __inline__ V VMUL(V a, V b) 
+static __inline__ V VMUL(V b, V a) 
 {
      V ret;
      __asm__("mulpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
 
-static __inline__ V VUNPACKLO(V a, V b) 
+#define DVK(var, val) V var = __extension__ ({		\
+     static const union dvec _var = { {val, val} };	\
+     _var.v;						\
+})
+
+#define SHUFPD(a, b, msk) __extension__ ({				   \
+     V ret;								   \
+     __asm__("shufpd %3, %2, %0" : "=x"(ret) : "0"(a), "xm"(b), "i"(msk)); \
+     ret;								   \
+})
+
+static __inline__ V UNPCKL(V a, V b) 
 {
      V ret;
      __asm__("unpcklpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
 
-static __inline__ V VUNPACKHI(V a, V b) 
+static __inline__ V UNPCKH(V a, V b) 
 {
      V ret;
      __asm__("unpckhpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
-
-
-static __inline__ V LOADH(const R *addr, V val)
-{
-     V ret;
-     __asm__("movhpd %2, %0" : "=x"(ret) : "0"(val), "m"(*addr));
-     return ret;
-}
-
-static __inline__ V LOADL0(const R *addr, V val)
-{
-     __asm__("movlpd %1, %0" : "=x"(val) : "m"(*addr));
-     return val;
-}
-
-
-static __inline__ void STOREH(R *addr, V val)
-{
-     __asm__("movhpd %1, %0" : "=m"(*addr) : "x"(val));
-}
-static __inline__ void STOREL(R *addr, V val)
-{
-     __asm__("movlpd %1, %0" : "=m"(*addr) : "x"(val));
-}
-
-union dvec { 
-     double d[2];
-     V v;
-};
-
-#define DVK(var, val) V var = __extension__ ({		\
-     static const union dvec _var = { {val, val} };	\
-     _var.v;						\
-})
 
 #define LDK(x) x
 #endif
@@ -110,47 +87,60 @@ typedef __m128d V;
 #define VMUL _mm_mul_pd
 #define DVK(var, val) const R var = K(val)
 #define LDK(x) _mm_set1_pd(x)
-#define VUNPACKLO _mm_unpacklo_pd
-#define VUNPACKHI _mm_unpackhi_pd
+#define SHUFPD _mm_shuffle_pd
+#define UNPCKL _mm_unpacklo_pd
+#define UNPCKH _mm_unpackhi_pd
 #endif
 
-#define LD(var, loc) var = *(const V *)(&(loc))
-#define ST(loc, var) *(V *)(&(loc)) = var
+union dvec { 
+     double d[2];
+     V v;
+};
 
-#define ST2(a, ovs, s0, s1)			\
-{						\
-     R *_b = &(a);				\
-     V _v0 = VUNPACKLO(s0, s1);			\
-     V _v1 = VUNPACKHI(s0, s1);			\
-     ST(_b[0 * ovs], _v0);			\
-     ST(_b[1 * ovs], _v1);			\
+#define LD(loc, ivs) (*(const V *)(loc))
+#define ST(loc, var, ovs) *(V *)(loc) = var
+
+extern const union dvec X(sse2_p1m1);
+extern const union dvec X(sse2_m1p1);
+
+static __inline__ V VBYI(V x)
+{
+     V y = VMUL(X(sse2_p1m1).v, x);
+     return SHUFPD(y, y, 1);
 }
 
-#define ST4(a, ovs, v0, v1, v2, v3)		\
-{						\
-     ST2(a, ovs, v0, v1);			\
-     ST2((&(a))[2], ovs, v2, v3);		\
+static __inline__ V BYTW(const R *t, V c_d)
+{
+     V a_b = LD(t, 1);
+     V d_c = SHUFPD(c_d, c_d, 1);
+     V ac_bd = VMUL(a_b, c_d);
+     V ad_bc = VMUL(a_b, d_c);
+     V ac_ad = UNPCKL(ac_bd, ad_bc);
+     V bd_bc = UNPCKH(ac_bd, ad_bc);
+     V mbd_bc = VMUL(X(sse2_m1p1).v, bd_bc);
+     V x = VADD(mbd_bc, ac_ad);
+     return x;
 }
 
-#define STRI ST2 /* hack */
-
-#define LDRI(r, i, a, ovs)			\
-{						\
-     const R *_b = &(a);			\
-     V _v0, _v1;				\
-     LD(_v0, _b[0 * ovs]);			\
-     LD(_v1, _b[1 * ovs]);			\
-     r = VUNPACKLO(_v0, _v1);			\
-     i = VUNPACKHI(_v0, _v1);			\
+static __inline__ V BYTWJ(const R *t, V c_d)
+{
+     V a_mb = LD(t, 1);
+     V d_c = SHUFPD(c_d, c_d, 1);
+     V ac_mbd = VMUL(a_mb, c_d);
+     V ad_mbc = VMUL(a_mb, d_c);
+     V ac_ad = UNPCKL(ac_mbd, ad_mbc);
+     V mbd_mbc = UNPCKH(ac_mbd, ad_mbc);
+     V mbd_bc = VMUL(X(sse2_p1m1).v, mbd_mbc);
+     V x = VADD(mbd_bc, ac_ad);
+     return x;
 }
 
-#define STRI2(a, r, i) STRI(a, 2, r, i)
-#define LDRI2(r, i, a) LDRI(r, i, a, 2)
 
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
-
-#define VTW(op, x) {op, 0, x}, {op, 1, x}
+#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
+#define VTW(x) {TW_COS, 0, x}, {TW_SIN, 0, x}
+#define TWVL 1
 
 #define RIGHT_CPU X(have_sse2)
 extern int RIGHT_CPU(void);

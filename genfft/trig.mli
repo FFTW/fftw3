@@ -18,10 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: trig.mli,v 1.1.1.1 2002-06-02 18:42:31 athena Exp $ *)
+(* $Id: trig.mli,v 1.2 2002-07-08 00:32:01 athena Exp $ *)
 
 val rdft : int -> int -> Complex.signal -> Complex.signal
 val hdft : int -> int -> Complex.signal -> Complex.signal
+val dft_via_rdft : int -> int -> Complex.signal -> Complex.signal
 val dht : int -> int -> Complex.signal -> Complex.signal
 
 val dctI : int -> Complex.signal -> Complex.signal

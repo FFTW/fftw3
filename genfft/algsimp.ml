@@ -19,8 +19,8 @@
  *
  *)
 
-(* $Id: algsimp.ml,v 1.3 2002-07-02 12:51:38 athena Exp $ *)
-let cvsid = "$Id: algsimp.ml,v 1.3 2002-07-02 12:51:38 athena Exp $"
+(* $Id: algsimp.ml,v 1.4 2002-07-08 00:32:01 athena Exp $ *)
+let cvsid = "$Id: algsimp.ml,v 1.4 2002-07-08 00:32:01 athena Exp $"
 
 open Util
 open Expr
@@ -55,7 +55,8 @@ end = struct
 
   let structurallyEqualCSE a b = 
     match (a, b) with
-      (Num a, Num b) -> Number.equal a b
+    | (Num a, Num b) -> Number.equal a b
+    | (NaN a, NaN b) -> a == b
     | (Load a, Load b) -> Variable.same a b
     | (Times (a, a'), Times (b, b')) ->
  	((a == b) && (a' == b')) or
@@ -149,10 +150,16 @@ end = struct
   | a :: s -> 
       reduce_sumM s >>= fun s' -> returnM (a :: s')
 
+  and collectible1 = function
+    | NaN _ -> false
+    | Uminus x -> collectible1 x
+    | _ -> true
+  and collectible (a, b) = collectible1 a
+
   (* collect common factors: ax + bx -> (a+b)x *)
   and collectM which x = 
     let rec findCoeffM which = function
-      |	Times (a, b) -> returnM (which (a, b))
+      |	Times (a, b) when collectible (which (a, b)) -> returnM (which (a, b))
       | Uminus x -> 
 	  findCoeffM which x >>= fun (coeff, b) ->
 	    suminusM coeff >>= fun mcoeff ->
@@ -164,11 +171,11 @@ end = struct
  	  separateM xpr b >>= fun (w, wo) ->
 	    (* try first factor *)
  	    findCoeffM (fun (a, b) -> (a, b)) a >>= fun (c, x) ->
- 	      if (xpr == x) then returnM (c :: w, wo)
+ 	      if (xpr == x) && collectible (c, x) then returnM (c :: w, wo)
  	      else
 	      (* try second factor *)
  		findCoeffM (fun (a, b) -> (b, a)) a >>= fun (c, x) ->
- 		  if (xpr == x) then returnM (c :: w, wo)
+ 		  if (xpr == x) && collectible (c, x) then returnM (c :: w, wo)
  		  else returnM (w, a :: wo)
     in match x with
       [] -> returnM x
@@ -337,7 +344,8 @@ end = struct
   let rec algsimpM x =
     memoizing lookupSimpM insertSimpM 
       (function 
- 	  Num a -> snumM a
+ 	| Num a -> snumM a
+ 	| NaN _ as x -> makeNode x
  	| Plus a -> 
  	    mapM algsimpM a >>= splusM
  	| Times (a, b) -> 
@@ -380,10 +388,10 @@ module Transpose = struct
       [] -> (visited, parent_table)
     | node :: rest ->
 	match node_lookup node vtable with
-	  Some _ -> visit visited vtable parent_table rest
+	| Some _ -> visit visited vtable parent_table rest
 	| None ->
 	    let children = match node with
-	      Store (v, n) -> [n]
+	    | Store (v, n) -> [n]
 	    | Plus l -> l
 	    | Times (a, b) -> [a; b]
 	    | Uminus x -> [x]
@@ -404,7 +412,7 @@ module Transpose = struct
   let make_transposer parent_table =
     let rec termM node candidate_parent = 
       match candidate_parent with
-	Store (_, n) when n == node -> 
+      |	Store (_, n) when n == node -> 
 	  dualM candidate_parent >>= fun x' -> returnM [x']
       | Plus (l) when List.memq node l -> 
 	  dualM candidate_parent >>= fun x' -> returnM [x']
@@ -419,7 +427,7 @@ module Transpose = struct
     and dualExpressionM this_node = 
       mapM (termM this_node) 
 	(match node_lookup this_node parent_table with
-	  Some a -> a
+	| Some a -> a
 	| None -> failwith "bug in dualExpressionM"
 	) >>= fun l ->
 	returnM (makePlus (List.flatten l))
@@ -427,7 +435,7 @@ module Transpose = struct
     and dualM this_node =
       memoizing lookupDualsM insertDualsM
 	(function
-	    Load v as x -> 
+	  | Load v as x -> 
 	      if (Variable.is_constant v) then
 		returnM (Load v)
 	      else
@@ -440,17 +448,19 @@ module Transpose = struct
     in dualM
 
   let is_store = function 
-      Store _ -> true
+    | Store _ -> true
     | _ -> false
 
   let transpose dag = 
+    let _ = Util.info "begin transpose" in
     let (all_nodes, parent_table) = 
       visit [] Assoctable.empty Assoctable.empty dag in
     let transposerM = make_transposer parent_table in
     let mapTransposerM = mapM transposerM in
     let duals = runM Assoctable.empty mapTransposerM all_nodes in
-    let roots = List.filter is_store duals
-    in roots
+    let roots = List.filter is_store duals in
+    let _ = Util.info "end transpose" in
+    roots
 end
 
 
@@ -492,7 +502,8 @@ end = struct
 	    | Plus x -> (load, store, plus + (List.length x - 1), times, uminus, num)
 	    | Times _ -> (load, store, plus, times + 1, uminus, num)
 	    | Uminus _ -> (load, store, plus, times, uminus + 1, num)
-	    | Num _ -> (load, store, plus, times, uminus, num + 1))
+	    | Num _ -> (load, store, plus, times, uminus, num + 1)
+	    | NaN _ -> (load, store, plus, times, uminus, num))
 	    rest
     in let (l, s, p, t, u, n) = 
       loop (0, 0, 0, 0, 0, 0) (visit [] Assoctable.empty dag)

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.mli,v 1.2 2002-06-13 19:30:41 athena Exp $ *)
+(* $Id: complex.mli,v 1.3 2002-07-08 00:32:01 athena Exp $ *)
 
 type expr
 val make : (Expr.expr * Expr.expr) -> expr
@@ -35,6 +35,7 @@ val plus : expr list -> expr
 val real : expr -> expr
 val imag : expr -> expr
 val conj : expr -> expr
+val nan : Expr.transcendent -> expr
 val sigma : int -> int -> (int -> expr) -> expr
 
 val (@*) : expr -> expr -> expr

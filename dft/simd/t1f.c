@@ -18,8 +18,21 @@
  *
  */
 
-#include "simd.h"
+#include "codelet.h"
+#include "t1f.h"
 
-
-#define GENUS X(dft_simd_t4_genus)
-extern const ct_genus GENUS;
+#if HAVE_SIMD
+static int okp(const ct_desc *d,
+	       const R *rio, const R *iio, 
+	       int ios, int vs, uint m, int dist)
+{
+     return (RIGHT_CPU()
+             && ALIGNED(rio)
+	     && iio == rio + 1
+             && (m % VL) == 0
+	     && (!d->s1 || (d->s1 == ios))
+	     && (!d->s2 || (d->s2 == vs))
+	  );
+}
+const ct_genus GENUS = { okp, VL };
+#endif

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.45 2002-07-05 19:49:14 athena Exp $ */
+/* $Id: ifftw.h,v 1.46 2002-07-08 00:32:01 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -432,7 +432,7 @@ enum { TW_COS = 0, TW_SIN = 1, TW_TAN = 2, TW_NEXT = 3};
 typedef struct {
      unsigned char op;
      unsigned char v;
-     unsigned short i;
+     short i;
 } tw_instr;
 
 typedef struct twid_s {

@@ -22,7 +22,7 @@
 #error "SSE only works in single precision"
 #endif
 
-#define VL 4            /* SIMD vector length */
+#define VL 2            /* SIMD complex vector length */
 #define ALIGNMENT 16
 
 #if defined(__GNUC__) && defined(__i386__)
@@ -42,7 +42,7 @@ static __inline__ V VSUB(V a, V b)
      __asm__("subps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
-static __inline__ V VMUL(V a, V b) 
+static __inline__ V VMUL(V b, V a) 
 {
      V ret;
      __asm__("mulps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
@@ -92,12 +92,6 @@ static __inline__ void STOREL(R *addr, V val)
      __asm__("movlps %1, %0" : "=m"(*addr) : "x"(val));
 }
 
-
-union fvec { 
-     R f[4];
-     V v;
-};
-
 #define DVK(var, val) const V var = __extension__ ({		\
      static const union fvec _var = { {val, val, val, val} };	\
      _var.v;							\
@@ -126,73 +120,106 @@ typedef __m128 V;
 
 
 /* common stuff */
+union fvec { 
+     R f[4];
+     V v;
+};
+
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
-#define LD(var, loc) var = *(const V *)(&(loc))
-#define ST(loc, var) *(V *)(&(loc)) = var
-#define VTW(op, x) {op, 0, x}, {op, 1, x}, {op, 2, x}, {op, 3, x}
+#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
 
-#define SHUFVAL(fp3,fp2,fp1,fp0) \
+#define SHUFVAL(fp0,fp1,fp2,fp3) \
    (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
-#define ST4(a, ovs, r0, r1, r2, r3)		\
-{						\
-     R *_b = &(a);				\
-     V _t0, _t1, _t2, _t3;			\
-     _t0 = UNPCKL(r0, r2);			\
-     _t1 = UNPCKL(r1, r3);			\
-     _t2 = UNPCKH(r0, r2);			\
-     _t3 = UNPCKH(r1, r3);			\
-						\
-     ST(_b[0 * ovs], UNPCKL(_t0,_t1));		\
-     ST(_b[1 * ovs], UNPCKH(_t0,_t1));		\
-     ST(_b[2 * ovs], UNPCKL(_t2,_t3));		\
-     ST(_b[3 * ovs], UNPCKH(_t2,_t3));		\
+
+static __inline__ V LD(const float *x, int ivs) 
+{
+     V var;
+     var = LOADL0(x, var);		
+     var = LOADH(x + ivs, var);
+     return var;
 }
 
-#define LDRI(r, i, a, ivs)			\
+#define ST(loc, var, ovs)			\
 {						\
-     V _t0, _t1;				\
-     const R *_b = &(a);			\
-     _t0 = LOADL0(_b, _t0);			\
-     _t0 = LOADH(_b + ivs, _t0);		\
-     _t1 = LOADL0(_b + 2 * ivs, _t1);		\
-     _t1 = LOADH(_b + 3 * ivs, _t1);		\
-     r = SHUFPS(_t0, _t1, SHUFVAL(2, 0, 2, 0));	\
-     i = SHUFPS(_t0, _t1, SHUFVAL(3, 1, 3, 1));	\
-}						
-
-#define LDRI2(r, i, a)				\
-{						\
-     V _t0, _t1;				\
-     const R *_b = &(a);			\
-     LD(_t0, _b[0]);				\
-     LD(_t1, _b[4]);				\
-     r = SHUFPS(_t0, _t1, SHUFVAL(2, 0, 2, 0));	\
-     i = SHUFPS(_t0, _t1, SHUFVAL(3, 1, 3, 1)); \
+     R *loc_ = loc;				\
+     STOREL(loc_, var);				\
+     STOREH(loc_ + ovs, var);			\
 }
 
-#define STRI(a, ovs, r, i)			\
-{						\
-     V _t0, _t1;				\
-     R *_b = &(a);				\
-     _t0 = UNPCKL(r, i);			\
-     _t1 = UNPCKH(r, i);			\
-     STOREL(_b, _t0);				\
-     STOREH(_b + ovs, _t0);			\
-     STOREL(_b + 2 * ovs, _t1);			\
-     STOREH(_b + 3 * ovs, _t1);			\
+extern const union fvec X(sse_p1m1p1m1);
+extern const union fvec X(sse_m1p1m1p1);
+
+#undef FAST_AND_BLOATED_TWIDDLES
+
+#ifdef FAST_AND_BLOATED_TWIDDLES
+
+/* avoid twiddle shuffling by storing twiddles twice in the
+   proper format */
+
+#define VTW(x) 								\
+  {TW_COS, 0, x}, {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_COS, 1, x},	\
+  {TW_SIN, 0, -x}, {TW_SIN, 0, x}, {TW_SIN, 1, -x}, {TW_SIN, 1, x}
+#define TWVL (2 * VL)
+
+static __inline__ V VBYI(V x)
+{
+     V y = VMUL(X(sse_p1m1p1m1).v, x);
+     return SHUFPS(y, y, SHUFVAL(1, 0, 3, 2));
 }
 
-#define STRI2(a, r, i)				\
-{						\
-     V _t0, _t1;				\
-     R *_b = &(a);				\
-     _t0 = UNPCKL(r, i);			\
-     _t1 = UNPCKH(r, i);			\
-     ST(_b[0], _t0);				\
-     ST(_b[4], _t1);				\
+static __inline__ V BYTW(const R *t, V sr)
+{
+     const V *twp = (const V *)t;
+     V si = SHUFPS(sr, sr, SHUFVAL(1, 0, 3, 2));
+     V tr = twp[0], ti = twp[1];
+     return VADD(VMUL(tr, sr), VMUL(ti, si));
 }
+
+static __inline__ V BYTWJ(const R *t, V sr)
+{
+     const V *twp = (const V *)t;
+     V si = SHUFPS(sr, sr, SHUFVAL(1, 0, 3, 2));
+     V tr = twp[0], ti = twp[1];
+     return VSUB(VMUL(tr, sr), VMUL(ti, si));
+}
+
+#else /* FAST_AND_BLOATED_TWIDDLES */
+
+#define VTW(x) 								\
+  {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
+#define TWVL (VL)
+
+static __inline__ V VBYI(V x)
+{
+     V y = VMUL(X(sse_p1m1p1m1).v, x);
+     return SHUFPS(y, y, SHUFVAL(1, 0, 3, 2));
+}
+
+static __inline__ V BYTW(const R *t, V sr)
+{
+     const V *twp = (const V *)t;
+     V tx = twp[0];
+     V ti = UNPCKH(tx, tx);
+     V tr = UNPCKL(tx, tx);
+     V si = SHUFPS(sr, sr, SHUFVAL(1, 0, 3, 2));
+     ti = VMUL(X(sse_m1p1m1p1).v, ti);
+     return VADD(VMUL(tr, sr), VMUL(ti, si));
+}
+
+static __inline__ V BYTWJ(const R *t, V sr)
+{
+     const V *twp = (const V *)t;
+     V tx = twp[0];
+     V ti = UNPCKH(tx, tx);
+     V tr = UNPCKL(tx, tx);
+     V si = SHUFPS(sr, sr, SHUFVAL(1, 0, 3, 2));
+     ti = VMUL(X(sse_m1p1m1p1).v, ti);
+     return VSUB(VMUL(tr, sr), VMUL(ti, si));
+}
+
+#endif /* FAST_AND_BLOATED_TWIDDLES */
 
 #define RIGHT_CPU X(have_sse)
 extern int RIGHT_CPU(void);

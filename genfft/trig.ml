@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: trig.ml,v 1.3 2002-06-13 19:30:41 athena Exp $ *)
+(* $Id: trig.ml,v 1.4 2002-07-08 00:32:01 athena Exp $ *)
 
 (* trigonometric transforms *)
 open Util
@@ -30,6 +30,15 @@ let rdft sign n input =
 (* DFT of hermitian input *)
 let hdft sign n input =
   Fft.dft sign n (Complex.hermitian n input)
+
+(* DFT real transform of vectors of two real numbers,
+   multiplication by (NaN I), and summation *)
+let dft_via_rdft sign n input =
+  let f = rdft sign n input
+  in fun i -> 
+    Complex.plus
+      [Complex.real (f i); 
+       Complex.times (Complex.nan Expr.I) (Complex.imag (f i))]
 
 (* Discrete Hartley Transform *)
 let dht sign n input =

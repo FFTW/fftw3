@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse.c,v 1.1 2002-07-01 18:05:56 athena Exp $ */
+/* $Id: sse.c,v 1.2 2002-07-08 00:32:01 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -69,5 +69,8 @@ int RIGHT_CPU(void)
      }
      return res;
 }
+
+const union fvec X(sse_p1m1p1m1) = { {1.0, -1.0, 1.0, -1.0} };
+const union fvec X(sse_m1p1m1p1) = { {-1.0, 1.0, -1.0, 1.0} };
 
 #endif

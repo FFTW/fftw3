@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: to_alist.ml,v 1.4 2002-06-30 22:34:06 athena Exp $ *)
+(* $Id: to_alist.ml,v 1.5 2002-07-08 00:32:01 athena Exp $ *)
 
 (*************************************************************
  * Conversion of the dag to an assignment list
@@ -126,7 +126,7 @@ let build_fma l =
   | _ -> NO_FMA
 
 let children_fma l = match build_fma l with
-  FMA (a, b, c) -> Some (a, b, c)
+| FMA (a, b, c) -> Some (a, b, c)
 | FMS (a, b, c) -> Some (a, b, c)
 | FNMS (a, b, c) -> Some (a, b, c)
 | NO_FMA -> None
@@ -134,8 +134,9 @@ let children_fma l = match build_fma l with
 
 let rec visitM x =
   counting (function
-      Load v -> returnM ()
+    | Load v -> returnM ()
     | Num a -> returnM ()
+    | NaN a -> returnM ()
     | Store (v, x) -> visitM x
     | Plus a -> (match children_fma a with
 	None -> mapM visitM a >> returnM ()
@@ -168,6 +169,7 @@ let rec expr_of_nodeM x =
           inlineM (Num a)
 	else
           with_temp_maybeM x (Num a)
+    | NaN a -> inlineM (NaN a)
     | Store (v, x) -> 
         expr_of_nodeM x >>= 
 	(if !Magic.trivial_stores then with_tempM else inlineM) >>=
@@ -197,6 +199,10 @@ let rec expr_of_nodeM x =
               mapM expr_of_nodeM a >>= fun a' ->
 		with_temp_maybeM x (Plus a')
 	end
+    | Times (Times ((NaN _ as n), (Load _ as a)), b) ->
+	(* funny special case for SIMD twiddle factors *)
+        expr_of_nodeM b >>= fun b' ->
+	  with_tempM (Times (Times (n, a), b'))
     | Times (a, b) ->
         expr_of_nodeM a >>= fun a' ->
           expr_of_nodeM b >>= fun b' ->

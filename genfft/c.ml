@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.8 2002-06-30 18:37:55 athena Exp $ *)
+(* $Id: c.ml,v 1.9 2002-07-08 00:32:01 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -298,11 +298,18 @@ let count_memory_acc f =
   in (count_ast body) + 
     fold_left count_acc_expr_func 0 (fcn_to_expr_list f)
 
+let good_for_fma x = 
+  not !Simdmagic.simd_mode ||
+  match x with
+  | (Num _, _) -> true
+  | (_, Num _) -> true
+  | _ -> false
+
 let build_fma = function
-  | [a; Times (b, c)] -> Some (a, b, c)
-  | [Times (b, c); a] -> Some (a, b, c)
-  | [a; Uminus (Times (b, c))] -> Some (a, b, c)
-  | [Uminus (Times (b, c)); a] -> Some (a, b, c)
+  | [a; Times (b, c)] when good_for_fma (b, c) -> Some (a, b, c)
+  | [Times (b, c); a] when good_for_fma (b, c) -> Some (a, b, c)
+  | [a; Uminus (Times (b, c))] when good_for_fma (b, c) -> Some (a, b, c)
+  | [Uminus (Times (b, c)); a] when good_for_fma (b, c) -> Some (a, b, c)
   | _ -> None
 
 let rec count_flops_expr_func (adds, mults, fmas) = function
@@ -318,10 +325,19 @@ let rec count_flops_expr_func (adds, mults, fmas) = function
 	in  (newadds, newmults, newfmas + 1))
   | Plus (a :: b) -> 
       count_flops_expr_func (adds, mults, fmas) (Plus [a; Plus b])
-  | Times (a,b) -> 
+  | Times (NaN _,b) -> count_flops_expr_func (adds, mults, fmas) b
+  | Times (Num _, b) -> 
+      let (newadds, newmults, newfmas) = 
+	count_flops_expr_func (adds, mults, fmas) b
+      in (newadds, newmults + 1, newfmas)
+  | Times (a,b) ->
       let (newadds, newmults, newfmas) = 
 	fold_left count_flops_expr_func (adds, mults, fmas) [a; b]
-      in (newadds, newmults + 1, newfmas)
+      in if !Simdmagic.simd_mode then
+        (* complex multiplication *)
+	(newadds + 1, newmults + 2, newfmas)
+      else
+	(newadds, newmults + 1, newfmas)
   | Uminus a -> count_flops_expr_func (adds, mults, fmas) a
   | _ -> (adds, mults, fmas)
 

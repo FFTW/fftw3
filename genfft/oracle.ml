@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: oracle.ml,v 1.2 2002-06-30 22:34:06 athena Exp $ *)
+(* $Id: oracle.ml,v 1.3 2002-07-08 00:32:01 athena Exp $ *)
 
 (*
  * the oracle decrees whether the sign of an expression should
@@ -72,6 +72,7 @@ let eval_aux random_oracle =
     memoizing
       (function
 	| Expr.Num x -> Number.to_float x
+	| Expr.NaN x -> Expr.transcendent_to_float x
 	| Expr.Load v -> random_oracle v
 	| Expr.Store (v, x) -> eval x
 	| Expr.Plus l -> sum_list (List.map eval l)

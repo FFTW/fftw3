@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_athnotw.ml,v 1.2 2002-06-20 19:04:37 athena Exp $ *)
+(* $Id: gen_athnotw.ml,v 1.3 2002-07-08 00:32:01 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_athnotw.ml,v 1.2 2002-06-20 19:04:37 athena Exp $"
+let cvsid = "$Id: gen_athnotw.ml,v 1.3 2002-07-08 00:32:01 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -50,7 +50,7 @@ let generate n =
   let output = Fft.dft sign n (load_array_c n input) in
   let oloc = mkloc n a locations in
   let odag = store_array_c n oloc output in
-  let (vardeclinfo, annot) = standard_optimizer odag in
+  let annot = standard_optimizer odag in
 
   let tree0 =
     Fcn ("static NOTW_INLINE void", name0,

@@ -1,8 +1,7 @@
 (*
  * Copyright (c) 1997-1999 Massachusetts Institute of Technology
- * Copyright (c) 2002 Matteo Frigo
- * Copyright (c) 2002 Steven G. Johnson
- * Copyright (c) 2002 Stefan Kral
+ * Copyright (c) 2000 Matteo Frigo
+ * Copyright (c) 2000 Steven G. Johnson
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.6 2002-07-04 00:32:28 athena Exp $ *)
+(* $Id: annotate.ml,v 1.7 2002-07-08 00:32:01 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -31,11 +30,10 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.6 2002-07-04 00:32:28 athena Exp $ *)
+(* $Id: annotate.ml,v 1.7 2002-07-08 00:32:01 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
-open List
 
 type annotated_schedule = 
     Annotate of variable list * variable list * variable list * int * aschedule
@@ -73,101 +71,6 @@ let has_related x = List.exists (Variable.same_class x)
 
 let rec overlap a b = Util.count (fun y -> has_related y b) a
 
-
-(* skral starts ------------------------------------------------------------ *)
-type ldst =
-  | MLoad
-  | MStore
-
-type useinfo = 
-  | MUse of ldst * Variable.variable * Expr.expr
-  | MTranspose of Variable.variable * Expr.expr
-  | MTwid of Variable.variable * Variable.variable
-
-type useinfo2 = 
-  | MUseReIm of ldst * Variable.variable * Expr.expr * Variable.variable * Expr.expr
-  | MTransposes of (Variable.variable * Expr.expr) list
-  | MTwid2 of Variable.variable * Variable.variable * Variable.variable * Variable.variable
-
-(* for transposed store, we need to have all scalar stores to n adjacent
- * numbers in one block. (n=|simd_vector|, typically 2 or 4).
- *)
-
-let rec annotatedsched_varpairs = function
-  | Annotate (_,_,_,_,asch) -> asch_varpairs asch
-and ainstr_ldvarpairs = function
-  | Assign (v, Load v') 
-    when Simdmagic.f_collect_load () && Variable.is_locative v' -> 
-      [MUse(MLoad,v',Load v)]
-  | Assign (v, Load v')
-    when Simdmagic.f_collect_twiddle () && Variable.is_constant v' &&
-	 (is_real v' || is_imag v') -> 
-      [MTwid(v, v')]
-  | _ -> []
-and ainstr_stvarpairs = function
-  | Assign (v, e) 
-    when Simdmagic.f_store_transpose () && Variable.is_locative v ->
-      [MTranspose(v,e)]
-  | Assign (v, e) 
-    when Simdmagic.f_collect_store () && Variable.is_locative v -> 
-      [MUse(MStore,v,e)]
-  | _ -> []
-and asch_varpairs = function
-  | ADone -> []
-  | AInstr i -> (ainstr_ldvarpairs i) @ (ainstr_stvarpairs i)
-  | ASeq (a,b) -> (annotatedsched_varpairs a) @ (annotatedsched_varpairs b)
-
-let locativeToArea v = var_index v / !Simdmagic.vector_length 
-
-let similarpairs a b = match (a,b) with
-  | MTwid(d1,s1), MTwid(d2,s2) ->
-      var_index s1 = var_index s2
-
-  | MUse(t1,v1,e1), MUse(t2,v2,e2) -> 
-      t1=t2 && (Variable.same_class v1 v2)
-      (* does not work: 
-		(is_real v1 && is_real v2 || is_imag v1 && is_imag v2)
-       *)
-  | MTranspose(v1,_),  MTranspose(v2,_) -> 
-      locativeToArea v1 = locativeToArea v2 && 
-      ((is_real v1 && is_real v2) || (is_imag v1 && is_imag v2)) 
-  | _ -> false
-
-let useinfoToTransposevar = function
-  | MTranspose(x,e) -> (x,e)
-  | _ -> failwith "useinfoToTransposevar"
-
-let combineuseinfos = function
-  | [MUse(t1,v1,e1); MUse(t2,v2,e2)] -> MUseReIm(t1,v1,e1,v2,e2)
-  | [MTwid(d1,s1);   MTwid(d2,s2)]   -> MTwid2(d1,s1,d2,s2)
-  | zs -> MTransposes (map useinfoToTransposevar zs)
-
-(* use List.partition *)
-let selectP pred =
-  let rec selectP2 prefix = function
-    | []    -> None
-    | x::xs -> if pred x then Some(x,prefix@xs) else selectP2 (x::prefix) xs
-  in selectP2 []
-
-let rec collectpairs = function
-  | [] -> []
-  | x::xs -> 
-      match List.partition (similarpairs x) xs with
-        | ([], _)  -> failwith "collectpairs: internal error!"
-	| (xs, zs) -> (combineuseinfos (x::xs))::(collectpairs zs)
-
-let combineuseinfoToDeclvars = function
-  | MTwid2(d1,s1,d2,s2)     -> 
-      if Simdmagic.f_collect_twiddle () then [d1;d2] else []
-  | MUseReIm(_,v1,e1,v2,e2) -> [v1;v2] @ (find_vars e1) @ (find_vars e2)
-  | MTransposes vs 	    -> concat (map (fun (_,e) -> find_vars e) vs)
-
-let collectedpairs_to_declvars = 
-  map (fun d -> filter is_temporary (combineuseinfoToDeclvars d))
-
-(* skral ends -------------------------------------------------------------- *)
-
-
 (* reorder a list of schedules so as to maximize overlap of variables *)
 let reorder l =
   let rec loop = function
@@ -192,32 +95,15 @@ let reorder l =
       let l'' = Util.remove m l' in
       loop (m :: l'')
 
-let rec rewrite_declarations force_declarations var_decls
+let rec rewrite_declarations force_declarations 
     (Annotate (_, _, declared, _, what)) =
   let m = !Magic.number_of_variables in
 
-  (** skral: decide upon delayed declaration of variables *)
-  let declare_it declared =	
-    if (List.exists (fun xs -> 
-	  (List.exists (fun x -> List.mem x declared) xs) && 
-	   (not (List.for_all (fun x -> List.mem x declared) xs))) var_decls) then
-	if force_declarations then
-	  failwith("Annotate.rewrite_declarations: Internal Error!")
-	else
-	  (declared, [])
-    else
-        if (force_declarations or List.length declared >= m) then
-          ([], declared)
-        else
-          (declared, [])
-
-(*
   let declare_it declared =
     if (force_declarations or List.length declared >= m) then
       ([], declared)
     else
       (declared, [])
-*)
 
   in match what with
     ADone -> Annotate ([], [], [], 0, what)
@@ -225,8 +111,8 @@ let rec rewrite_declarations force_declarations var_decls
       let (u, d) = declare_it declared
       in Annotate ([], u, d, 0, what)
   | ASeq (a, b) ->
-      let ma = rewrite_declarations false var_decls a
-      and mb = rewrite_declarations false var_decls b
+      let ma = rewrite_declarations false a
+      and mb = rewrite_declarations false b
       in let Annotate (_, ua, _, _, _) = ma
       and Annotate (_, ub, _, _, _) = mb
       in let (u, d) = declare_it (declared @ ua @ ub)
@@ -284,14 +170,8 @@ let annotate schedule =
 
       | x -> pick_best [x]
 
-  in
-  let intermediate_result = analyze [] schedule in
-  let vardeclinfo = collectpairs (annotatedsched_varpairs intermediate_result)
   in 
-  (vardeclinfo, (rewrite_declarations 
-		   true 
-		   (collectedpairs_to_declvars vardeclinfo) 
-		   intermediate_result))
-
-
-
+  let () = Util.info "begin annotate" in
+  let res = rewrite_declarations true (analyze [] schedule) in
+  let () = Util.info "end annotate" in
+  res

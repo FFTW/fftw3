@@ -18,10 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.mli,v 1.5 2002-06-23 00:47:28 athena Exp $ *)
+(* $Id: expr.mli,v 1.6 2002-07-08 00:32:01 athena Exp $ *)
+
+type transcendent = I | CPLX | CPLXJ
 
 type expr =
   | Num of Number.number
+  | NaN of transcendent
   | Plus of expr list
   | Times of expr * expr
   | Uminus of expr
@@ -34,6 +37,8 @@ val hash_float : float -> int
 val hash : expr -> int
 val to_string : expr -> string
 val assignment_to_string : assignment -> string
+val transcendent_to_float : transcendent -> float
+val string_of_transcendent : transcendent -> string
 
 val find_vars : expr -> Variable.variable list
 val is_constant : expr -> bool

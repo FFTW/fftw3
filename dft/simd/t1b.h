@@ -20,6 +20,6 @@
 
 #include "simd.h"
 
+#define GENUS X(dft_t2fsimd_genus)
+extern const ct_genus GENUS;
 
-#define GENUS X(dft_simd_n2f_genus)
-extern const kdft_genus GENUS;

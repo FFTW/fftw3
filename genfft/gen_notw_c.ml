@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.16 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: gen_notw_c.ml,v 1.1 2002-07-08 00:32:01 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.16 2002-07-08 00:32:01 athena Exp $"
+let cvsid = "$Id: gen_notw_c.ml,v 1.1 2002-07-08 00:32:01 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -52,10 +52,8 @@ let speclist = [
 ] 
 
 let generate n =
-  let riarray = "ri"
-  and iiarray = "ii"
-  and roarray = "ro"
-  and ioarray = "io"
+  let riarray = "xi"
+  and roarray = "xo"
   and istride = "is"
   and ostride = "os" 
   in
@@ -74,41 +72,40 @@ let generate n =
   let _ = Simd.ovs := stride_to_string "ovs" !uovstride in
   let _ = Simd.ivs := stride_to_string "ivs" !uivstride in
 
+  let fft = Trig.dft_via_rdft in
+
   let locations = unique_array_c n in
   let input = 
     locative_array_c n 
       (C.array_subscript riarray vistride)
-      (C.array_subscript iiarray vistride)
+      (C.array_subscript "BUG" vistride)
       locations in
-  let output = Fft.dft sign n (load_array_c n input) in
+  let output = fft sign n (load_array_r n input) in
   let oloc = 
     locative_array_c n 
       (C.array_subscript roarray vostride)
-      (C.array_subscript ioarray vostride)
+      (C.array_subscript "BUG" vostride)
       locations in
-  let odag = store_array_c n oloc output in
+  let odag = store_array_r n oloc output in
   let annot = standard_optimizer odag in
 
   let tree0 =
     Fcn ("static void", name0,
 	 ([Decl (C.constrealtypep, riarray);
-	   Decl (C.constrealtypep, iiarray);
-	   Decl (C.realtypep, roarray);
- 	   Decl (C.realtypep, ioarray)] 
+	   Decl (C.realtypep, roarray)]
 	  @ (if stride_fixed !uistride then [] 
 	       else [Decl (C.stridetype, istride)])
 	  @ (if stride_fixed !uostride then [] 
 	       else [Decl (C.stridetype, ostride)])
-	  @ (choose_simd []
-	       (if stride_fixed !uivstride then [] else 
-	       [Decl ("int", !Simd.ivs)]))
-	  @ (choose_simd []
-	       (if stride_fixed !uovstride then [] else 
-	       [Decl ("int", !Simd.ovs)]))
+	  @ (if stride_fixed !uivstride then [] else [Decl ("int", !Simd.ivs)])
+	  @ (if stride_fixed !uovstride then [] else [Decl ("int", !Simd.ovs)])
 	 ),
 	 add_constants (Asch annot))
-
-  in let loop =
+      
+  in
+  let si = if sign < 0 then "ri" else "ii" in
+  let so = if sign < 0 then "ro" else "io" in
+  let loop =
     "static void " ^ name ^
       "(const " ^ C.realtype ^ " *ri, const " ^ C.realtype ^ " *ii, "
       ^ C.realtype ^ " *ro, " ^ C.realtype ^ " *io,\n" ^ 
@@ -118,7 +115,7 @@ let generate n =
     "uint i;\n" ^
     "for (i = 0; i < v; i += " ^ vl ^ ") {\n" ^
       name0 ^ 
-        "(ri, ii, ro, io" ^
+        "(" ^ si ^", " ^ so ^ 
            (if stride_fixed !uistride then "" else ", is") ^ 
            (if stride_fixed !uostride then "" else ", os") ^ 
            (choose_simd ""
@@ -126,13 +123,8 @@ let generate n =
            (choose_simd ""
 	      (if stride_fixed !uovstride then "" else ", ovs")) ^ 
           ");\n" ^
-      (choose_simd
-	 (Printf.sprintf
-	    "ri += ivs; ii += ivs; ro += %s; io += %s;\n"
-	    !Simd.ovs !Simd.ovs)
-	 (Printf.sprintf
-	    "ri += VL * %s; ii += VL * %s; ro += VL * %s; io += VL * %s;\n"
-	    !Simd.ivs !Simd.ivs !Simd.ovs !Simd.ovs)) ^
+    (Printf.sprintf 
+       "%s += VL * %s; %s += VL * %s;\n" si !Simd.ivs so !Simd.ovs) ^
     "}\n}\n\n"
 
   and desc = 

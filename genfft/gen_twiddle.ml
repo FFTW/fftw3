@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle.ml,v 1.11 2002-07-04 00:32:28 athena Exp $ *)
+(* $Id: gen_twiddle.ml,v 1.12 2002-07-08 00:32:01 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.11 2002-07-04 00:32:28 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.12 2002-07-08 00:32:01 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -92,7 +92,7 @@ let generate n =
     | DIF -> array n (byw (Fft.dft sign n liloc))
   in
   let odag = store_array_c n oloc output in
-  let (vardeclinfo, annot) = standard_optimizer odag in
+  let annot = standard_optimizer odag in
 
   let body = Block (
     [Decl ("uint", i)],
@@ -144,7 +144,7 @@ let generate n =
     (Printf.sprintf "{\n%s(p, %s, &desc);\n}" register name)
   in
 
-  (unparse cvsid vardeclinfo tree) ^ "\n" ^ init
+  (unparse cvsid tree) ^ "\n" ^ init
 
 
 let main () =

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.4 2002-06-30 18:37:55 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.5 2002-07-08 00:32:01 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -48,14 +48,15 @@ let twinstr_to_c_string l =
   in "{" ^ (loop true l) ^ "}"
 
 let twinstr_to_simd_string l =
-  let one = function
-    | (TW_NEXT, 1, 0) -> "{TW_NEXT, VL, 0}"
+  let one sep = function
+    | (TW_NEXT, 1, 0) -> sep ^ "{TW_NEXT, VL, 0}"
     | (TW_NEXT, _, _) -> failwith "twinstr_to_simd_string"
-    | (op, 0, b) -> Printf.sprintf "VTW(%s, %d)" (optostring op) b
+    | (TW_COS, 0, b) -> sep ^ (Printf.sprintf "VTW(%d)" b)
+    | (TW_SIN, 0, b) -> ""
     | _ -> failwith "twinstr_to_simd_string"
   in let rec loop first = function
     | [] -> ""
-    | a :: b ->  (if first then "\n" else ",\n") ^ (one a) ^ (loop false b)
+    | a :: b ->  (one (if first then "\n" else ",\n") a) ^ (loop false b)
   in "{" ^ (loop true l) ^ "}"
   
 let square x = 

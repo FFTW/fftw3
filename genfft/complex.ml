@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.ml,v 1.2 2002-06-13 19:30:41 athena Exp $ *)
+(* $Id: complex.ml,v 1.3 2002-07-08 00:32:01 athena Exp $ *)
 
 (* abstraction layer for complex operations *)
 open Littlesimp
@@ -37,6 +37,8 @@ let uminus (CE (a, b)) =  CE (makeUminus a, makeUminus b)
 
 let inverse_int n = CE (makeNum (Number.div Number.one (Number.of_int n)),
 			makeNum Number.zero)
+
+let nan x = CE (NaN x, makeNum Number.zero)
 
 let half = inverse_int 2
 

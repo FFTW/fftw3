@@ -18,9 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.mli,v 1.5 2002-07-02 17:15:58 athena Exp $ *)
+(* $Id: simd.mli,v 1.6 2002-07-08 00:32:01 athena Exp $ *)
 
-val unparse_function : Annotate.useinfo2 list -> C.c_fcn -> string
+val unparse_function : C.c_fcn -> string
 val extract_constants : C.c_ast -> C.c_decl list
 val realtype : string
 val realtypep : string

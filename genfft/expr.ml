@@ -18,13 +18,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.ml,v 1.5 2002-06-23 00:47:28 athena Exp $ *)
+(* $Id: expr.ml,v 1.6 2002-07-08 00:32:01 athena Exp $ *)
 
 (* Here, we define the data type encapsulating a symbolic arithmetic
    expression, and provide some routines for manipulating it. *)
 
+type transcendent = I | CPLX | CPLXJ
+
 type expr =
-    Num of Number.number
+  | Num of Number.number
+  | NaN of transcendent
   | Plus of expr list
   | Times of expr * expr
   | Uminus of expr
@@ -40,8 +43,14 @@ let hash_float x =
 
 let sum_list l = List.fold_right (+) l 0
 
+let transcendent_to_float = function
+  | I -> 2.718281828459045235360287471  (* any transcendent number will do *)
+  | CPLX -> 3.141592653589793238462643383
+  | CPLXJ -> 0.4210244382407083333356273777
+
 let rec hash = function
-    Num x -> hash_float (Number.to_float x)
+  | Num x -> hash_float (Number.to_float x)
+  | NaN x -> hash_float (transcendent_to_float x)
   | Load v -> 1 + 1237 * Variable.hash v
   | Store (v, x) -> 2 * Variable.hash v - 2345 * hash x
   | Plus l -> 5 + 23451 * sum_list (List.map Hashtbl.hash l)
@@ -61,6 +70,7 @@ let rec find_vars x =
 (* TRUE if expression is a constant *)
 let is_constant = function
   | Num _ -> true
+  | NaN _ -> true
   | Load v -> Variable.is_constant v
   | _ -> false
 
@@ -71,9 +81,15 @@ let rec foldr_string_concat l =
   | [a] -> a
   | a :: b -> a ^ " " ^ (foldr_string_concat b)
 
+let string_of_transcendent = function
+  | I -> "I"
+  | CPLX -> "CPLX"
+  | CPLXJ -> "CPLXJ"
+
 let rec to_string = function
   | Load v -> Variable.unparse v
   | Num n -> string_of_float (Number.to_float n)
+  | NaN n -> string_of_transcendent n
   | Plus x -> "(+ " ^ (foldr_string_concat (List.map to_string x)) ^ ")"
   | Times (a, b) -> "(* " ^ (to_string a) ^ " " ^ (to_string b) ^ ")"
   | Uminus a -> "(- " ^ (to_string a) ^ ")"
@@ -84,6 +100,7 @@ let rec to_string_a d x =
   if (d = 0) then "..." else match x with
   | Load v -> Variable.unparse v
   | Num n -> Number.to_konst n
+  | NaN n -> string_of_transcendent n
   | Plus x -> "(+ " ^ (foldr_string_concat (List.map (to_string_a (d - 1)) x)) ^ ")"
   | Times (a, b) -> "(* " ^ (to_string_a (d - 1) a) ^ " " ^ (to_string_a (d - 1) b) ^ ")"
   | Uminus a -> "(- " ^ (to_string_a (d-1) a) ^ ")"
@@ -91,6 +108,7 @@ let rec to_string_a d x =
       (to_string_a (d-1) a) ^ ")"
 
 let to_string = to_string_a 10
+
 let assignment_to_string = function
   | Assign (v, a) -> "(:= " ^ (Variable.unparse v) ^ " " ^ (to_string a) ^ ")"
 

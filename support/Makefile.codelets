@@ -46,8 +46,10 @@ INDENT = indent -kr -cs -i5 -fca -nfc1 -sc -sob -cli4 -TR -Tplanner -TV
 GENFFTDIR = ${top_builddir}/genfft
 K7GENFFTDIR = ${top_builddir}/genfft-k7
 GEN_NOTW = ${GENFFTDIR}/gen_notw
+GEN_NOTW_C = ${GENFFTDIR}/gen_notw_c
 K7GEN_NOTW = ${K7GENFFTDIR}/gen_notw
 GEN_TWIDDLE = ${GENFFTDIR}/gen_twiddle
+GEN_TWIDDLE_C = ${GENFFTDIR}/gen_twiddle_c
 K7GEN_TWIDDLE = ${K7GENFFTDIR}/gen_twiddle
 GEN_TWIDSQ = ${GENFFTDIR}/gen_twidsq
 PRELUDE = ${top_srcdir}/support/codelet_prelude
@@ -67,73 +69,6 @@ FLAGS_F1=$(FLAGS_COMMON)
 FLAGS_F2=$(FLAGS_COMMON) -twiddle-square2
 FLAGS_Q1=$(FLAGS_COMMON) -reload-twiddle
 FLAGS_Q2=$(FLAGS_COMMON) -twiddle-square2
-
-Kn1s_%.h:  $(CODELET_DEPS) $(GEN_NOTW)
-	($(PRELUDE_COMMANDS); $(GEN_NOTW) $(FLAGS_N1) -n $* -name UNNAMED -with-istride ISTRIDE -with-ostride OSTRIDE) | $(ADD_DATE) | $(INDENT) >$@
-
-Kn1s_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
-	echo "$*" | tr '_' \\n | (read n; read is; read os;	\
-        echo "#define ISTRIDE $$is";				\
-        echo "#define OSTRIDE $$os";				\
-        echo "#define fftw_codelet_UNNAMED fftw_codelet_Kn1s_$${n}_$${is}_$${os}";\
-        echo "#include \"Kn1s_$${n}.h\"") >$@
-
-Kt1s_%.h:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS); $(GEN_TWIDDLE) $(FLAGS_T1) -n $* -name UNNAMED -with-iostride IOSTRIDE) | $(ADD_DATE) | $(INDENT) >$@
-
-Kt1s_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
-	echo "$*" | tr '_' \\n | (read n; read ios;	\
-        echo "#define IOSTRIDE $$ios";				\
-        echo "#define fftw_codelet_UNNAMED fftw_codelet_Kt1s_$${n}_$${ios}";\
-        echo "#include \"Kt1s_$${n}.h\"") >$@
-
-Kt2s_%.h:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS); $(GEN_TWIDDLE) $(FLAGS_T2) -n $* -name UNNAMED -with-iostride IOSTRIDE) | $(ADD_DATE) | $(INDENT) >$@
-
-Kt2s_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
-	echo "$*" | tr '_' \\n | (read n; read ios;	\
-        echo "#define IOSTRIDE $$ios";				\
-        echo "#define fftw_codelet_UNNAMED fftw_codelet_Kt2s_$${n}_$${ios}";\
-        echo "#include \"Kt2s_$${n}.h\"") >$@
-
-
-Kf1s_%.h:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS); $(GEN_TWIDDLE) $(FLAGS_F1) -dif -n $* -name UNNAMED -with-iostride IOSTRIDE) | $(ADD_DATE) | $(INDENT) >$@
-
-Kf1s_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
-	echo "$*" | tr '_' \\n | (read n; read ios;	\
-        echo "#define IOSTRIDE $$ios";				\
-        echo "#define fftw_codelet_UNNAMED fftw_codelet_Kf1s_$${n}_$${ios}";\
-        echo "#include \"Kf1s_$${n}.h\"") >$@
-
-Kf2s_%.h:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS); $(GEN_TWIDDLE) $(FLAGS_F2) -dif -n $* -name UNNAMED -with-iostride IOSTRIDE) | $(ADD_DATE) | $(INDENT) >$@
-
-Kf2s_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
-	echo "$*" | tr '_' \\n | (read n; read ios;	\
-        echo "#define IOSTRIDE $$ios";				\
-        echo "#define fftw_codelet_UNNAMED fftw_codelet_Kf2s_$${n}_$${ios}";\
-        echo "#include \"Kf2s_$${n}.h\"") >$@
-
-Kq1s_%.h:  $(CODELET_DEPS) $(GEN_TWIDSQ)
-	($(PRELUDE_COMMANDS); $(GEN_TWIDSQ) $(FLAGS_Q1) -dif -n $* -name UNNAMED -with-istride ISTRIDE -with-vstride VSTRIDE) | $(ADD_DATE) | $(INDENT) >$@
-
-Kq1s_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ)
-	echo "$*" | tr '_' \\n | (read n; read is; read vs;\
-        echo "#define ISTRIDE $$is";				\
-        echo "#define VSTRIDE $$vs";				\
-        echo "#define fftw_codelet_UNNAMED fftw_codelet_Kq1s_$${n}_$${is}_$${vs}";\
-        echo "#include \"Kq1s_$${n}.h\"") >$@
-
-Kq2s_%.h:  $(CODELET_DEPS) $(GEN_TWIDSQ)
-	($(PRELUDE_COMMANDS); $(GEN_TWIDSQ) $(FLAGS_Q2) -dif -n $* -name UNNAMED -with-istride ISTRIDE -with-vstride VSTRIDE) | $(ADD_DATE) | $(INDENT) >$@
-
-Kq2s_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ)
-	echo "$*" | tr '_' \\n | (read n; read is; read vs;\
-        echo "#define ISTRIDE $$is";				\
-        echo "#define VSTRIDE $$vs";				\
-        echo "#define fftw_codelet_UNNAMED fftw_codelet_Kq2s_$${n}_$${is}_$${vs}";\
-        echo "#include \"Kq2s_$${n}.h\"") >$@
 
 # cancel the hideous builtin rules that cause an infinite loop
 %: %.o
