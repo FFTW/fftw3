@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.3 2005-03-01 03:21:14 athena Exp $ */
+/* $Id: dftw-direct.c,v 1.4 2005-03-01 14:19:16 athena Exp $ */
 
 #include "ct.h"
 
@@ -135,16 +135,13 @@ static void print(const plan *ego_, printer *p)
      const S *slv = ego->slv;
      const ct_desc *e = slv->desc;
 
-     if (slv->bufferedp) {
-	  int batchsz = compute_batchsize(ego->r);
-
+     if (slv->bufferedp) 
 	  p->print(p, "(dftw-directbuf/%d-%d/%d%v \"%s\")",
-		   batchsz, ego->r, X(twiddle_length)(ego->r, e->tw), 
-		   ego->vl, e->nam);
-     } else {
+		   compute_batchsize(ego->r), ego->r, 
+		   X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam);
+     else
 	  p->print(p, "(dftw-direct-%d/%d%v \"%s\")",
 		   ego->r, X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam);
-     }
 }
 
 static int applicable0(const S *ego, 
@@ -249,8 +246,8 @@ static plan *mkcldw(const ct_solver *ego_,
      X(ops_madd2)(mcount * (vl/e->genus->vl), &e->ops, &pln->super.super.ops);
      
      if (ego->bufferedp) {
-	  /* 4 load/stores * N * VL */
-	  pln->super.super.ops.other += 4 * r * mcount * vl;
+	  /* 8 load/stores * N * VL */
+	  pln->super.super.ops.other += 8 * r * mcount * vl;
      }
 
      return &(pln->super.super);
