@@ -118,6 +118,7 @@ sub do_size {
     my $doablep = shift;
     do_geometry("c$size", $doablep);
     do_geometry("r$size", $doablep);
+    do_geometry("dr$size", $doablep);
 }
 
 sub small_1d {
