@@ -5,7 +5,7 @@ dnl and architectures, for some definition of "good".  (In our case,
 dnl good for FFTW and hopefully for other scientific codes.)
 dnl
 dnl The user can override the flags by setting the CFLAGS environment
-dnl variable.  The user can also specify --with-portable-binary in
+dnl variable.  The user can also specify --enable-portable-binary in
 dnl order to disable any optimization flags that might result in
 dnl a binary that only runs on the host architecture.
 dnl
@@ -15,14 +15,14 @@ dnl floating-point computations can be re-ordered as needed.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_ARCHFLAG
 dnl
-dnl @version $Id: ax_cc_maxopt.m4,v 1.5 2005-02-05 23:34:25 athena Exp $
+dnl @version $Id: ax_cc_maxopt.m4,v 1.6 2005-02-16 17:30:29 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
 [
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
-AC_ARG_WITH(portable-binary, [AC_HELP_STRING([--with-portable-binary], [disable compiler optimizations that would produce unportable binaries])], 
+AC_ARG_ENABLE(portable-binary, [AC_HELP_STRING([--enable-portable-binary], [disable compiler optimizations that would produce unportable binaries])], 
 	acx_maxopt_portable=$withval, acx_maxopt_portable=no)
 
 # Try to determine "good" native compiler flags if none specified on command

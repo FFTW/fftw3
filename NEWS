@@ -17,8 +17,8 @@ Since FFTW 3.0.1:
   time.
 
 * Automatic detection of native architecture flag for gcc.  New
-  configure options: --with-portable-binary and --with-gcc-arch=<arch>,
-  mainly for people distributing compiled binaries of FFTW (see manual).
+  configure options: --enable-portable-binary and --with-gcc-arch=<arch>,
+  for people distributing compiled binaries of FFTW (see manual).
 
 * Automatic detection of Altivec under Linux with gcc 3.4 (so that
   same binary should work on both Altivec and non-Altivec PowerPCs).
