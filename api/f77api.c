@@ -24,18 +24,15 @@
    for the Fortran linker, and we must omit the f77 API. */
 #ifdef F77_FUNC
 
-/* C analogues to Fortran integer type: */
-typedef int fint;
-
 /*-----------------------------------------------------------------------*/
 /* some internal functions used by the f77 api */
 
 /* in fortran, the natural array ordering is column-major, which
    corresponds to reversing the dimensions relative to C's row-major */
-static int *reverse_n(fint rnk, const fint *n)
+static int *reverse_n(int rnk, const int *n)
 {
      int *nrev;
-     fint i;
+     int i;
      A(FINITE_RNK(rnk));
      nrev = MALLOC(sizeof(int) * rnk, PROBLEMS);
      for (i = 0; i < rnk; ++i)
@@ -45,11 +42,11 @@ static int *reverse_n(fint rnk, const fint *n)
 
 /* f77 doesn't have data structures, so we have to pass iodims as
    parallel arrays */
-static X(iodim) *make_dims(fint rnk, const fint *n,
-			   const fint *is, const fint *os)
+static X(iodim) *make_dims(int rnk, const int *n,
+			   const int *is, const int *os)
 {
      X(iodim) *dims;
-     fint i;
+     int i;
      A(FINITE_RNK(rnk));
      dims = MALLOC(sizeof(X(iodim)) * rnk, PROBLEMS);
      for (i = 0; i < rnk; ++i) {

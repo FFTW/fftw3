@@ -67,45 +67,51 @@ void F77(import_system_wisdom, IMPORT_SYSTEM_WISDOM)(int *isuccess)
      *isuccess = X(import_system_wisdom)();
 }
 
-void F77(print_plan, PRINT_PLAN)(X(plan) *p)
+void F77(print_plan_stdout, PRINT_PLAN_STDOUT)(X(plan) *p)
 {
      X(print_plan)(*p, stdout);
 }
 
-void F77(plan_dft, PLAN_DFT)(X(plan) *p, fint *rank, const fint *n,
-			     C *in, C *out, fint *sign, fint *flags)
+void F77(flops,FLOPS)(X(plan) *p, int *add, int *mul, int *fma)
+{
+     X(flops)(*p, add, mul, fma);
+}
+
+
+void F77(plan_dft, PLAN_DFT)(X(plan) *p, int *rank, const int *n,
+			     C *in, C *out, int *sign, int *flags)
 {
      int *nrev = reverse_n(*rank, n);
      *p = X(plan_dft)(*rank, nrev, in, out, *sign, *flags);
      X(ifree0)(nrev);
 }
 
-void F77(plan_dft_1d, PLAN_DFT_1D)(X(plan) *p, fint *n, C *in, C *out,
-				   fint *sign, fint *flags)
+void F77(plan_dft_1d, PLAN_DFT_1D)(X(plan) *p, int *n, C *in, C *out,
+				   int *sign, int *flags)
 {
      *p = X(plan_dft_1d)(*n, in, out, *sign, *flags);
 }
 
-void F77(plan_dft_2d, PLAN_DFT_2D)(X(plan) *p, fint *nx, fint *ny,
-				   C *in, C *out, fint *sign, fint *flags)
+void F77(plan_dft_2d, PLAN_DFT_2D)(X(plan) *p, int *nx, int *ny,
+				   C *in, C *out, int *sign, int *flags)
 {
      *p = X(plan_dft_2d)(*ny, *nx, in, out, *sign, *flags);
 }
 
-void F77(plan_dft_3d, PLAN_DFT_3D)(X(plan) *p, fint *nx, fint *ny, fint *nz,
+void F77(plan_dft_3d, PLAN_DFT_3D)(X(plan) *p, int *nx, int *ny, int *nz,
 				   C *in, C *out,
-				   fint *sign, fint *flags)
+				   int *sign, int *flags)
 {
      *p = X(plan_dft_3d)(*nz, *ny, *nx, in, out, *sign, *flags);
 }
 
-void F77(plan_many_dft, PLAN_MANY_DFT)(X(plan) *p, fint *rank, const fint *n,
-				       fint *howmany,
-				       C *in, const fint *inembed,
-				       fint *istride, fint *idist,
-				       C *out, const fint *onembed,
-				       fint *ostride, fint *odist,
-				       fint *sign, fint *flags)
+void F77(plan_many_dft, PLAN_MANY_DFT)(X(plan) *p, int *rank, const int *n,
+				       int *howmany,
+				       C *in, const int *inembed,
+				       int *istride, int *idist,
+				       C *out, const int *onembed,
+				       int *ostride, int *odist,
+				       int *sign, int *flags)
 {
      int *nrev = reverse_n(*rank, n);
      int *inembedrev = reverse_n(*rank, inembed);
@@ -119,11 +125,11 @@ void F77(plan_many_dft, PLAN_MANY_DFT)(X(plan) *p, fint *rank, const fint *n,
      X(ifree0)(nrev);
 }
 
-void F77(plan_guru_dft, PLAN_GURU_DFT)(X(plan) *p, fint *rank, const fint *n,
-				       const fint *is, const fint *os,
-				       fint *howmany_rank, const fint *h_n,
-				       const fint *h_is, const fint *h_os,
-				       R *ri, R *ii, R *ro, R *io, fint *flags)
+void F77(plan_guru_dft, PLAN_GURU_DFT)(X(plan) *p, int *rank, const int *n,
+				       const int *is, const int *os,
+				       int *howmany_rank, const int *h_n,
+				       const int *h_is, const int *h_os,
+				       R *ri, R *ii, R *ro, R *io, int *flags)
 {
      X(iodim) *dims = make_dims(*rank, n, is, os);
      X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
