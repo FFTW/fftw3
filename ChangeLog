@@ -1,3 +1,196 @@
+2002-09-02  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/timer.c: added clock() getseconds timer
+
+2002-09-02  Matteo Frigo  <athena@ab-initio>
+
+	* rdft/indirect.c: Oops
+
+	* dft/indirect.c, kernel/ifftw.h, rdft/indirect.c: Experimental
+	INDIRECT_VERBOTEN flag (not used)
+
+	* dft/buffered.c, dft/indirect.c, kernel/ifftw.h, rdft/buffered.c,
+	rdft/buffered2.c, rdft/indirect.c: Do not allow buffering in
+	children of indirect solvers.
+
+	* kernel/planner.c: Oops
+
+	* kernel/planner.c: Hash sizeof(R) as part of wisdom.
+
+2002-09-02  Steven G. Johnson  <stevenj@ab-initio>
+
+	* configure.ac: added --enable-float synonym for --enable-single
+	(since with have --enable-long-double)
+
+2002-09-02  Matteo Frigo  <athena@ab-initio>
+
+	* dft/Makefile.am, dft/problem.c, dft/zero.c: zerotens is now in
+	its own file, so it does not cause dft to be linked in if only
+	rdft is used.
+
+	* kernel/planner.c: Removed unused var.
+
+	* kernel/planner.c: Split insert() in preparation for wisdom
+	import
+
+	* dft/Makefile.am, dft/dft.h, dft/verify.c, kernel/Makefile.am,
+	kernel/dotens.c, kernel/dotens2.c, kernel/ifftw.h,
+	kernel/verify-lib.c, kernel/verify.h, rdft/Makefile.am,
+	rdft/rdft.h, rdft/verify.c, reodft/Makefile.am, reodft/reodft.h,
+	reodft/verify.c, tests/Makefile.am, tests/bench.c, tests/debug.h,
+	tests/dotens.c, tests/dotens2.c, tests/verify-dft.c,
+	tests/verify-lib.c, tests/verify-rdft.c, tests/verify-reodft.c,
+	tests/verify.h: Moved debugging infrastructure to test directory
+	so that it is not linked into the shared library.
+
+	* kernel/print.c, kernel/planner.c: Reactivated wisdom export
+
+	* kernel/verify-lib.c: Dump errors to stderr, not stdout.
+
+	* kernel/Makefile.am, kernel/ifftw.h, kernel/planner-score.c,
+	kernel/traverse.c, tests/bench.c: Removed traverse.c.  traverse.c
+	is no longer need for plan blessing.  I figured out a way to avoid
+	using it in planner-score.c, so the file is now redundant.
+
+2002-09-01  Matteo Frigo  <athena@ab-initio>
+
+	* dft/conf.c, dft/dft.h, dft/problem.c, kernel/align.c,
+	kernel/ifftw.h, kernel/planner.c, kernel/problem.c, kernel/scan.c,
+	kernel/scanners.c, kernel/tensor.c, rdft/conf.c, rdft/problem.c,
+	rdft/problem2.c, rdft/rdft.h: Removed code made obsolete by new
+	MD5 scheme: problem equality tests, scanners, and associated list
+	of problem kinds.
+
+	* rdft/problem.c, rdft/problem2.c, dft/problem.c,
+	kernel/Makefile.am, kernel/ifftw.h, kernel/md5.c,
+	kernel/planner-naive.c, kernel/planner-score.c, kernel/planner.c,
+	kernel/tensor.c: Started md5 implementation
+
+2002-08-31  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/ifftw.h, kernel/planner.c: Keep track of hit rate
+
+	* kernel/planner.c: Only dump when verbose > 4
+
+	* dft/indirect.c, kernel/ifftw.h, kernel/plan.c, kernel/planner.c,
+	tests/bench.c: Debugging infrastructure
+
+	* kernel/planner.c, kernel/print.c: Use debug infrastructure to
+	dump planner.
+
+	* kernel/alloc.c, kernel/ifftw.h, kernel/plan.c,
+	kernel/planner-naive.c, kernel/planner-score.c, kernel/planner.c,
+	kernel/scan.c, kernel/scanners.c, tests/bench.c: Do not store
+	plans in planner, plus general planner cleanup.
+
+2002-08-30  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/ifftw.h, rdft/dht-r2hc.c: renamed IN_DHT_R2HC to the more
+	general FORBID_DHT_R2HC
+
+	* kernel/planner.c: eliminated unused var
+
+2002-08-30  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/planner-naive.c, kernel/planner-score.c,
+	kernel/planner.c: Score planner was not working correctly when
+	using wisdom.  Fixed.
+
+	* kernel/alloc.c, kernel/ifftw.h, kernel/stride.c: Use hash table
+	in debug malloc
+
+2002-08-30  Steven G. Johnson  <stevenj@ab-initio>
+
+	* NEWS: listed some good stuff
+
+	* TODO: timed planner
+
+	* TODO: fma?
+
+	* TODO: update
+
+	* rdft/Makefile.am, rdft/conf.c, rdft/dht-rader.c,
+	rdft/rader-dht.c, rdft/rdft.h: rader-dht -> dht-rader
+
+	* kernel/ifftw.h, rdft/Makefile.am, rdft/buffered2.c, rdft/conf.c,
+	rdft/dht-r2hc.c, rdft/r2hc-hc2r.c, rdft/rader-dht.c,
+	rdft/rank-geq2.c, rdft/rdft-dht.c, rdft/rdft.h: add DHT solver,
+	and break up rader-dht and r2hc-hc2r
+
+	* tests/bench.c: another option
+
+	* dft/indirect.c, kernel/ifftw.h, kernel/tensor.c,
+	rdft/indirect.c: generalized indirect solvers for fftw2-like
+	buffering and more
+
+2002-08-29  Steven G. Johnson  <stevenj@ab-initio>
+
+	* dft/vrank-geq1.c, kernel/ifftw.h, kernel/tensor.c,
+	rdft/vrank-geq1-rdft2.c, rdft/vrank-geq1.c: tensor_max_index and
+	tensor_min_stride are now both unsigned
+
+	* kernel/Makefile.am, kernel/iabs.c, kernel/ifftw.h,
+	kernel/tensor.c, rdft/buffered2.c, rdft/problem2.c: added iabs.c,
+	and tensor_min_stride returns min absolute value
+
+	* rdft/buffered2.c: bug fix in cldrest hc2c/c2hc copy loops
+
+2002-08-29  Matteo Frigo  <athena@ab-initio>
+
+	* TODO: Added things to do.
+
+2002-08-29  Steven G. Johnson  <stevenj@ab-initio>
+
+	* configure.ac: added automake prereq
+
+2002-08-29  Matteo Frigo  <athena@ab-initio>
+
+	* rdft/rdft2-radix2.c: Use indexed addressing
+
+	* libbench/verify.c, rdft/rdft2-radix2.c: Ooops
+
+	* kernel/ifftw.h: Oops
+
+2002-08-29  Steven G. Johnson  <stevenj@ab-initio>
+
+	* threads/threads.c: updates to win32 threads code (ick)
+
+	* Makefile.am, acx_pthread.m4, configure.ac, dft/ct-dif.c,
+	dft/ct-dit.c, dft/ct-ditbuf.c, dft/ct-ditf.c, dft/ct.c, dft/ct.h,
+	dft/dft.h, dft/kdft-dif.c, dft/kdft-dit.c, dft/vrank-geq1.c,
+	kernel/alloc.c, kernel/ifftw.h, kernel/planner.c,
+	rdft/hc2hc-buf.c, rdft/hc2hc-dif.c, rdft/hc2hc-dit.c,
+	rdft/hc2hc.c, rdft/hc2hc.h, rdft/khc2hc-dif.c, rdft/khc2hc-dit.c,
+	rdft/rdft.h, rdft/vrank-geq1-rdft2.c, rdft/vrank-geq1.c,
+	tests/Makefile.am, tests/bench.c, threads/Makefile.am,
+	threads/conf.c, threads/ct-dit.c, threads/dft-vrank-geq1.c,
+	threads/hc2hc-dif.c, threads/hc2hc-dit.c,
+	threads/rdft-vrank-geq1.c, threads/threads.c, threads/threads.h,
+	threads/vrank-geq1-rdft2.c: added threaded version
+
+2002-08-28  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/Makefile.am: fix make dist
+
+	* rdft/rank-geq2-rdft2.c: whoops, bugfix for inverse
+
+2002-08-28  Matteo Frigo  <athena@ab-initio>
+
+	* Makefile.am, configure.ac, kernel/Makefile.am, kernel/dfftw3.h,
+	kernel/fftw3.h, kernel/ifftw.h, kernel/lfftw3.h, kernel/sfftw3.h,
+	tests/Makefile.am: Use C9x convention for naming (fftwf etc.).
+	Removed installable header files since they will be part of the
+	API.
+
+2002-08-28  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/problem.c: allow _1 variants to accept rnk 0 (sz 1)
+	problems
+
+2002-08-27  Steven G. Johnson  <stevenj@ab-initio>
+
+	* ChangeLog: updated
+
 2002-08-27  Matteo Frigo  <athena@ab-initio>
 
 	* dft/rank0.c: Loop unroll is useless
