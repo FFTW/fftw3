@@ -1,3 +1,740 @@
+2003-01-07  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/simd/simd-3dnow.h,
+	/home/fftw/Repository/fftw3/simd/simd-sse.h,
+	/home/fftw/Repository/fftw3/simd/simd-sse2.h,
+	/home/fftw/Repository/fftw3/simd/sse2.c: Silence warnings
+
+2003-01-07  Steven G. Johnson  <stevenj@superjdj4>
+
+	* /home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c: fftw2 used spltrnk=1
+
+2003-01-07  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/dft/codelet.h,
+	/home/fftw/Repository/fftw3/rdft/codelet.h,
+	/home/fftw/Repository/fftw3/simd/simd-sse.h,
+	/home/fftw/Repository/fftw3/simd/sse.c: Silence warning
+
+2003-01-07  Steven G. Johnson  <stevenj@superjdj4>
+
+	* /home/fftw/Repository/fftw3/TODO: noted deficiency
+
+2003-01-07  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c: Strengthened
+	conditions for a problem to be POSSIBLY_UNALIGNED
+
+	* /home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h: Strengthened
+	conditions for a plan to be POSSIBLY_UNALIGNED
+
+2003-01-05  Steven G. Johnson  <stevenj@superjdj4>
+
+	* /home/fftw/Repository/fftw3/TODO: added copyright todo
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: modified comment
+
+	* /home/fftw/Repository/fftw3/tests/verify-rdft.c: fixed comment
+
+	* /home/fftw/Repository/fftw3/TODO,
+	/home/fftw/Repository/fftw3/tests/verify-rdft.c: implemented rdft2
+	verify
+
+2003-01-04  Steven G. Johnson  <stevenj@superjdj4>
+
+	* /home/fftw/Repository/fftw3/configure.ac: fix --enable-single
+
+2002-10-23  Steven G. Johnson  <stevenj@superjdj4>
+
+	* /home/fftw/Repository/fftw3/threads/threads.c: slight fixes
+
+	* /home/fftw/Repository/fftw3/threads/threads.c: typo
+
+2002-10-01  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/genfft/annotate.ml,
+	/home/fftw/Repository/fftw3/genfft/annotate.mli,
+	/home/fftw/Repository/fftw3/genfft/c.ml,
+	/home/fftw/Repository/fftw3/genfft/genutil.ml,
+	/home/fftw/Repository/fftw3/genfft/magic.ml: Experimental stuff
+
+2002-09-28  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/configure.ac,
+	/home/fftw/Repository/fftw3/dft/simd/codelets/Makefile.am,
+	/home/fftw/Repository/fftw3/genfft/gen_notw_c.ml,
+	/home/fftw/Repository/fftw3/genfft/gen_twiddle_c.ml,
+	/home/fftw/Repository/fftw3/genfft/genutil.ml: Experimental Franz
+	mode
+
+2002-09-26  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/kernel/tensor.c: const-correct
+
+	* /home/fftw/Repository/fftw3/dft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/dft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/tensor7.c,
+	/home/fftw/Repository/fftw3/rdft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/rdft/vrank3-transpose.c: Reuse dimcmp
+	routine for other purposes
+
+2002-09-25  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/tensor.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct2.c: Use tornk1 correctly.
+
+	* /home/fftw/Repository/fftw3/rdft/rdft2-radix2.c: Hmm... I
+	thought I had fixed this before...
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/rank0.c,
+	/home/fftw/Repository/fftw3/kernel/tensor.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/rank0.c: Collect more common
+	idioms
+
+	* /home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct2.c: Still collecting
+	common idioms...
+
+	* /home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct2.c: More garbage
+	collection.
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c: More compact code
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/kernel/alloc.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/kernel/stride.c,
+	/home/fftw/Repository/fftw3/kernel/tensor.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c: Collect common
+	pattern if (foo) free(foo) ==> free0(foo)
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/buffered.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c: Collect some common
+	code in */buffered*.c
+
+2002-09-24  Steven G. Johnson  <stevenj@superjdj4>
+
+	* /home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/rdft.h: use STRUCT_HACK #define
+	to determing rdft kind[] allocation
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: report total pcost
+	of measured/estimated plans...epcost is especially useful to
+	estimate the effects of various impatience flags on planning time
+	for large transforms
+
+2002-09-23  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/trig.c,
+	/home/fftw/Repository/fftw3/kernel/trig1.c: Prevent unwanted
+	inlining
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/trig.c: Space compaction
+
+	* /home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/hash.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/md5-1.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/kernel/scan.c: Still reducing size
+
+2002-09-22  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/ct-dif.c,
+	/home/fftw/Repository/fftw3/dft/ct-dit.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditbuf.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditf.c,
+	/home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/nop.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/rank0.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/dft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/dft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/ops.c,
+	/home/fftw/Repository/fftw3/kernel/plan.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct2.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-buf.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/nop.c,
+	/home/fftw/Repository/fftw3/rdft/nop2.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rank0.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/rdft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/rdft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/threads/ct-dit.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c: Saved
+	another 5KB by redesigning opcnt protocol. (gasp!)
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/tensor1.c,
+	/home/fftw/Repository/fftw3/kernel/tensor4.c,
+	/home/fftw/Repository/fftw3/kernel/tensor8.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c: More code
+	compression
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/solver.c: Smaller code size.
+
+	* /home/fftw/Repository/fftw3/dft/Makefile.am,
+	/home/fftw/Repository/fftw3/dft/dft.h,
+	/home/fftw/Repository/fftw3/dft/rader-omega.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c: Started
+	unification of rader
+
+	* /home/fftw/Repository/fftw3/rdft/rdft2-radix2.c: Typo
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/ct.c,
+	/home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/nop.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/rank0.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/dft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/dft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/plan.c,
+	/home/fftw/Repository/fftw3/kernel/problem.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct2.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/nop.c,
+	/home/fftw/Repository/fftw3/rdft/nop2.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rank0.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/rdft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/rdft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c: Changed
+	protocol for destroy_plan so as to save space.
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/ct.c,
+	/home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/threads/ct-dit.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c: Introduced
+	convenient function X(mkplan_d)
+
+	* /home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/md5-1.c,
+	/home/fftw/Repository/fftw3/kernel/md5.c,
+	/home/fftw/Repository/fftw3/kernel/tensor.c,
+	/home/fftw/Repository/fftw3/kernel/tensor1.c,
+	/home/fftw/Repository/fftw3/kernel/tensor2.c,
+	/home/fftw/Repository/fftw3/kernel/tensor3.c,
+	/home/fftw/Repository/fftw3/kernel/tensor4.c,
+	/home/fftw/Repository/fftw3/kernel/tensor5.c,
+	/home/fftw/Repository/fftw3/kernel/tensor7.c: Split tensor/md5
+	into separate files to allow independent linking and/or prevent
+	undesidred inlining
+
+	* /home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/nop.c,
+	/home/fftw/Repository/fftw3/rdft/nop2.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rank0.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft.h,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/rdft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/rdft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/tests/debug.h,
+	/home/fftw/Repository/fftw3/tests/dotens.c,
+	/home/fftw/Repository/fftw3/tests/dotens2.c,
+	/home/fftw/Repository/fftw3/tests/verify-dft.c,
+	/home/fftw/Repository/fftw3/tests/verify-lib.c,
+	/home/fftw/Repository/fftw3/tests/verify-rdft.c,
+	/home/fftw/Repository/fftw3/tests/verify-reodft.c,
+	/home/fftw/Repository/fftw3/tests/verify.h,
+	/home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/ct-dif.c,
+	/home/fftw/Repository/fftw3/dft/ct-dit.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditbuf.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditf.c,
+	/home/fftw/Repository/fftw3/dft/ct.c,
+	/home/fftw/Repository/fftw3/dft/dft.h,
+	/home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/nop.c,
+	/home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/rank0.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/dft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/dft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/dft/zero.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/tensor.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct2.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-buf.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c: Treat all tensors as
+	dynamically allocated objects.  They were dynamically allocated in
+	part anyway, so there is no point in complicating the object code
+	with the clumsy calling conventions for by-value structs.
+
+2002-09-21  Steven G. Johnson  <stevenj@superjdj4>
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: typo
+
+2002-09-21  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/tests/verify-lib.c: Avoid generating
+	NaN when n = 0.
+
+	* /home/fftw/Repository/fftw3/dft/dft.h,
+	/home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft.h,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c: Saved more.
+
+	* /home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/ct.c,
+	/home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/nop.c,
+	/home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/dft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/pickdim.c,
+	/home/fftw/Repository/fftw3/kernel/print.c,
+	/home/fftw/Repository/fftw3/kernel/tensor.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/nop.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft.h,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/rdft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/tests/verify-dft.c,
+	/home/fftw/Repository/fftw3/tests/verify-lib.c,
+	/home/fftw/Repository/fftw3/tests/verify-rdft.c,
+	/home/fftw/Repository/fftw3/tests/verify-reodft.c: Save 1200 bytes
+	of object code.  Do not pass structs by value whenever practical,
+	because the calling protocol generates clumsy code.
+
+	* /home/fftw/Repository/fftw3/rdft/dht-rader.c: Do not allocate
+	buffers for rader omegas.  Let the planner do it if necessary.
+
+	* /home/fftw/Repository/fftw3/tests/verify-rdft.c,
+	/home/fftw/Repository/fftw3/tests/verify-reodft.c: Check rank
+	*before* reading kind[0], which may be undefined if rnk < 1
+
+	* /home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c: Second step
+	towards rader unification.
+
+	* /home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/rader.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c: First step towards
+	unification of Rader code
+
+	* /home/fftw/Repository/fftw3/dft/ct-dif.c,
+	/home/fftw/Repository/fftw3/dft/ct-dit.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditbuf.c,
+	/home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/ct.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-buf.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/threads/ct-dit.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dit.c: Fix ugliness
+	condition for cooley-tukey.
+
+2002-09-20  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c: Removed
+	RADER_MIN_GOOD and associated machinery
+
+	* /home/fftw/Repository/fftw3/rdft/dht-r2hc.c: Proper cast
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Typo
+
+	* /home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Implemented
+	NO_LARGE_GENERIC
+
+2002-09-19  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h: Consistent
+	macroization of NO_DHT_R2HC
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: NO_DHT_R2HC is a
+	planner flag, otherwise the EXHAUSTIVE planner loops.
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: Resurrected
+	NO_EXHAUSTIVE
+
+2002-09-18  Steven G. Johnson  <stevenj@superjdj4>
+
+	* /home/fftw/Repository/fftw3/threads/ct-dit.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c: au revoir,
+	score()
+
+	* /home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/tests/verify-reodft.c: eliminated
+	unused
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: capitalize and
+	parenthesize SUBSUMES
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: comment
+
+2002-09-18  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: Use flags from
+	wisdom if wisdom is applicable.
+
+	* /home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/rdft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/rdft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/ct-dif.c,
+	/home/fftw/Repository/fftw3/dft/ct-dit.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditbuf.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditf.c,
+	/home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/nop.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/rank0.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/dft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/dft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct2.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-buf.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/nop.c,
+	/home/fftw/Repository/fftw3/rdft/nop2.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rank0.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c: Removed
+	score() machinery
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Revised planner
+	hack
+
+	* /home/fftw/Repository/fftw3/simd/simd-altivec.h: Fix warning
+
+2002-09-17  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c: Type qualifiers.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: ESTIMATE is no
+	longer subsumed by everything else.
+
+	* /home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c: NO_BUFFERING is a
+	planner flag, not a problem flag
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: Maintain flags in
+	canonical form.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h: In dramatic break with
+	tradition, SUBSUME is now a partial order.  I swear.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Added comment
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Inverted ESTIMATE flag,
+	renamed USE_SCORE for consistency with the convention that 0
+	subsumes 1.
+
+2002-09-17  Steven G. Johnson  <stevenj@superjdj4>
+
+	* /home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: NO_INDIRECT ->
+	NO_INDIRECT_OP (out-of-place only)
+
+	* /home/fftw/Repository/fftw3/acx_pthread.m4: hpux needs
+	-D_REENTRANT (thanks to Clinton Roy for the bug report)
+
+2002-09-17  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Oops.
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: Yet another attempt
+	at getting the planner right.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Better coding.
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: NO_UGLY is no longer
+	a flag, but a separate planner field that does not interfere with
+	wisdom.
+
+2002-09-16  Matteo Frigo  <athena@superjdj4>
+
+	* /home/fftw/Repository/fftw3/tests/verify-reodft.c: Did not
+	compile without FFTW_DEBUG
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/plan.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Changed scoring
+	mechanism.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Count infeasible
+	plans
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: curse subsumed
+	plans before export
+
+2002-09-16  Steven G. Johnson  <stevenj@superjdj4>
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: removed ESTIMATE_BIT
+	vs. ESTIMATE... ESTIMATE | IMPATIENT is a UI issue
+
+	* /home/fftw/Repository/fftw3/rdft/buffered2.c: cleanup
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c: use CONSERVE_MEMORY
+	flag to prevent buffered for large sizes
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: moved NO_DHT_R2HC
+	back into planner flags: there's no reason we would want this flag
+	to block plan reuse
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: whoops, commas
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: problem_flags ==
+	checked in applicable, planner_flags == checked in score
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: ESTIMATE should not
+	*include* all impatience flags, even if it subsumes them; some
+	impatience flags, like NO_INDIRECT, might make a problem
+	unsolvable
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: quotatio marks
+
 2002-09-16  Steven G. Johnson  <stevenj@ab-initio>
 
 	* /home/fftw/Repository/fftw3/dft/buffered.c,
