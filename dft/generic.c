@@ -129,7 +129,14 @@ static int applicable(const solver *ego, const problem *p_,
 		      const planner *plnr)
 {
      UNUSED(ego);
-     return (NO_UGLYP(plnr) && applicable0(p_));
+     if (NO_UGLYP(plnr)) return 0; /* always ugly */
+     if (!applicable0(p_)) return 0;
+
+     if (NO_LARGE_GENERICP(plnr)) {
+          const problem_dft *p = (const problem_dft *) p_;
+	  if (X(first_divisor)(p->sz.dims[0].n) >= GENERIC_MIN_BAD) return 0; 
+     }
+     return 1;
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)

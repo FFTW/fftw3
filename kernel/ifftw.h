@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.141 2002-09-19 11:48:24 athena Exp $ */
+/* $Id: ifftw.h,v 1.142 2002-09-20 18:38:13 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -407,16 +407,17 @@ enum {
 enum {
      /* impatience flags  */
 
-     NO_VRECURSE = 0x1,
-     NO_RANK_SPLITS = 0x2,
-     NO_VRANK_SPLITS = 0x4,
-     NONTHREADED_ICKY = 0x8,
-     DFT_R2HC_ICKY = 0x10,
-     NO_BUFFERING = 0x20,
-     NO_INDIRECT_OP = 0x40,
-     BELIEVE_PCOST = 0x80,
+     BELIEVE_PCOST = 0x1,
+     DFT_R2HC_ICKY = 0x2,
+     NONTHREADED_ICKY = 0x4,
+     NO_BUFFERING = 0x8,
+     NO_EXHAUSTIVE = 0x10,
+     NO_INDIRECT_OP = 0x20,
+     NO_LARGE_GENERIC = 0x40,
+     NO_RANK_SPLITS = 0x80,
      NO_UGLY = 0x100,  /* avoid plans we are 99% sure are suboptimal */
-     NO_EXHAUSTIVE = 0x200,
+     NO_VRANK_SPLITS = 0x200,
+     NO_VRECURSE = 0x400,
 
      /* a canonical set of fftw2-like impatient flags */
      IMPATIENT = (0
@@ -428,7 +429,7 @@ enum {
 		  | BELIEVE_PCOST
 	  ),
 
-     ESTIMATE = 0x400, /* subsumed by all other impatience flags */
+     ESTIMATE = 0x800, /* subsumed by all other impatience flags */
      IMPATIENCE_FLAGS = (ESTIMATE | (ESTIMATE - 1)),
      
      BLESSING = 0x4000,  /* save this entry */
@@ -436,18 +437,19 @@ enum {
      NONIMPATIENCE_FLAGS = BLESSING
 };
 
-#define NO_VRECURSEP(plnr) ((plnr)->planner_flags & NO_VRECURSE)
-#define NO_RANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_RANK_SPLITS)
-#define NO_VRANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_VRANK_SPLITS)
-#define NONTHREADED_ICKYP(plnr) (((plnr)->planner_flags & NONTHREADED_ICKY) \
-				 && (plnr)->nthr > 1)
-#define DFT_R2HC_ICKYP(plnr) ((plnr)->planner_flags & DFT_R2HC_ICKY)
-#define NO_BUFFERINGP(plnr) ((plnr)->planner_flags & NO_BUFFERING)
-#define NO_INDIRECT_OP_P(plnr) ((plnr)->planner_flags & NO_INDIRECT_OP)
 #define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
-#define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
+#define DFT_R2HC_ICKYP(plnr) ((plnr)->planner_flags & DFT_R2HC_ICKY)
 #define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
+#define NONTHREADED_ICKYP(plnr) (((plnr)->planner_flags & NONTHREADED_ICKY) \
+                                  && (plnr)->nthr > 1)
+#define NO_BUFFERINGP(plnr) ((plnr)->planner_flags & NO_BUFFERING)
 #define NO_EXHAUSTIVEP(plnr) ((plnr)->planner_flags & NO_EXHAUSTIVE)
+#define NO_INDIRECT_OP_P(plnr) ((plnr)->planner_flags & NO_INDIRECT_OP)
+#define NO_LARGE_GENERICP(plnr) ((plnr)->planner_flags & NO_LARGE_GENERIC)
+#define NO_RANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_RANK_SPLITS)
+#define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
+#define NO_VRANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_VRANK_SPLITS)
+#define NO_VRECURSEP(plnr) ((plnr)->planner_flags & NO_VRECURSE)
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
@@ -615,7 +617,8 @@ uint X(first_divisor)(uint n);
 int X(is_prime)(uint n);
 uint X(next_prime)(uint n);
 
-#define RADER_MIN_GOOD 71 /* min prime for which Rader becomes GOOD */
+#define RADER_MIN_GOOD 71 /* min prime for which Rader becomes good */
+#define GENERIC_MIN_BAD 71 /* min prime for which generic becomes ugly */
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */

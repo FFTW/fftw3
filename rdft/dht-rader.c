@@ -290,8 +290,8 @@ static int applicable(const solver *ego_, const problem *p_,
 	  if (NO_UGLYP(plnr) && p->sz.dims[0].n < ego->min_prime)
 	       return 0;
 
-	  return 1;
      }
+     return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
