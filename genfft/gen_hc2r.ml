@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r.ml,v 1.12 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: gen_hc2r.ml,v 1.13 2003-04-16 19:51:27 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r.ml,v 1.12 2003-03-15 20:29:42 stevenj Exp $"
+let cvsid = "$Id: gen_hc2r.ml,v 1.13 2003-04-16 19:51:27 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -144,7 +144,7 @@ let generate n =
       " int v, int ivs, int ovs)\n" ^
     "{\n" ^
     "int i;\n" ^
-    "for (i = 0; i < v; ++i) {\n" ^
+    "for (i = v; i > 0; --i) {\n" ^
       name0 ^ "(ri, ii, O" ^
        (if stride_fixed !uristride then "" else ", ris") ^ 
        (if stride_fixed !uiistride then "" else ", iis") ^ 

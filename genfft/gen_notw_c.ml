@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_c.ml,v 1.7 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: gen_notw_c.ml,v 1.8 2003-04-16 19:51:27 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_c.ml,v 1.7 2003-03-15 20:29:42 stevenj Exp $"
+let cvsid = "$Id: gen_notw_c.ml,v 1.8 2003-04-16 19:51:27 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -115,7 +115,7 @@ let generate n =
     "{\n" ^
     "int i;\n" ^
     "BEGIN_SIMD();\n" ^
-    "for (i = 0; i < v; i += " ^ vl ^ ") {\n" ^
+    "for (i = v; i > 0; i -= " ^ vl ^ ") {\n" ^
       name0 ^ 
         "(" ^ si ^", " ^ so ^ 
            (if stride_fixed !uistride then "" else ", is") ^ 

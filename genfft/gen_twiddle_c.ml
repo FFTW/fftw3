@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle_c.ml,v 1.6 2003-03-26 12:45:03 athena Exp $ *)
+(* $Id: gen_twiddle_c.ml,v 1.7 2003-04-16 19:51:27 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle_c.ml,v 1.6 2003-03-26 12:45:03 athena Exp $"
+let cvsid = "$Id: gen_twiddle_c.ml,v 1.7 2003-04-16 19:51:27 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -108,10 +108,10 @@ let generate n =
     [Stmt_assign (CVar rioarray,
 		  CVar (if (sign < 0) then "ri" else "ii"));
      CVar("BEGIN_SIMD();"); (* hack *)
-     For (Expr_assign (CVar i, Integer 0),
-	  Binop (" < ", CVar i, CVar m),
+     For (Expr_assign (CVar i, CVar m),
+	  Binop (" > ", CVar i, Integer 0),
 	  list_to_comma 
-	    [Expr_assign (CVar i, CPlus [CVar i; byvl (Integer 1)]);
+	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (byvl (Integer 1))]);
 	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; 
 						byvl (CVar !Simd.ivs)]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; 

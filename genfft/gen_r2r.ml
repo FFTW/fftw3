@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2r.ml,v 1.1 2003-03-25 16:51:49 stevenj Exp $ *)
+(* $Id: gen_r2r.ml,v 1.2 2003-04-16 19:51:27 athena Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2r.ml,v 1.1 2003-03-25 16:51:49 stevenj Exp $"
+let cvsid = "$Id: gen_r2r.ml,v 1.2 2003-04-16 19:51:27 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -187,7 +187,7 @@ let generate n mode =
       " int v, int ivs, int ovs)\n" ^
     "{\n" ^
     "int i;\n" ^
-    "for (i = 0; i < v; ++i) {\n" ^
+    "for (i = v; i > 0; --i) {\n" ^
       name0 ^ "(I, O" ^
        (if stride_fixed !uistride then "" else ", is") ^ 
        (if stride_fixed !uostride then "" else ", os") ^ 
