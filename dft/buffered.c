@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.11 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: buffered.c,v 1.12 2002-06-11 15:45:41 athena Exp $ */
 
 #include "dft.h"
 
@@ -198,8 +198,7 @@ static int score(const solver *ego_, const problem *p_)
 
      p = (const problem_dft *) p_;
      if (p->ri != p->ro)
-          return UGLY;
-
+	  return UGLY;
      return GOOD;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.23 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: ifftw.h,v 1.24 2002-06-11 15:45:41 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -255,8 +255,7 @@ void X(plan_destroy)(plan *ego);
 enum {
      BAD,   /* solver cannot solve problem */
      UGLY,  /* we are 99% sure that this solver is suboptimal */
-     GOOD,
-     BETTER
+     GOOD
 };
 
 typedef struct {

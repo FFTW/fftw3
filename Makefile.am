@@ -11,10 +11,10 @@ endif
 # distribute file RESEARCH-MODE if research mode is true
 if RESEARCH_MODE
 RESEARCH_DIST = RESEARCH-MODE
-distdir = $(PACKAGE)-research-$(VERSION)
+distdir = $(PACKAGE)-$(VERSION)-research
 else
 RESEARCH_DIST = 
-distdir = $(PACKAGE)-classic-$(VERSION)
+distdir = $(PACKAGE)-$(VERSION)-classic
 endif
 
 SUBDIRS=$(GENFFT) kernel dft libbench . tests

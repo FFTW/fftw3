@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.3 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.4 2002-06-11 15:45:41 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -98,7 +98,12 @@ static int applicable(const solver_ct *ego, const problem *p_)
 {
      if (X(dft_ct_applicable)(ego, p_)) {
           const ct_desc *e = ego->desc;
+          const problem_dft *p = (const problem_dft *)p_;
           return (1
+
+		  /* emulate fftw-2 behavior */
+		  && (RESEARCH_MODE || p->vecsz.rnk == 0)
+
                   /* stride is always 2 */
                   && (!e->is || e->is == 2)
 	       );
@@ -139,9 +144,6 @@ static int score(const solver *ego_, const problem *p_)
 
      if (!applicable(ego, p_))
           return BAD;
-
-     if (!RESEARCH_MODE)
-	  return UGLY;
 
      n = p->sz.dims[0].n;
 

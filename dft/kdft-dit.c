@@ -18,17 +18,14 @@
  *
  */
 
-/* $Id: kdft-dit.c,v 1.4 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: kdft-dit.c,v 1.5 2002-06-11 15:45:41 athena Exp $ */
 
 #include "dft.h"
 
 void X(kdft_dit_register)(planner *p, kdft_dit codelet, const ct_desc *desc)
 {
-     solver *s;
+     REGISTER_SOLVER(p, X(mksolver_dft_ct_dit)(codelet, desc));
 
-     s = X(mksolver_dft_ct_dit)(codelet, desc);
-     REGISTER_SOLVER(p, s);
-
-     s = X(mksolver_dft_ct_ditbuf)(codelet, desc);
-     REGISTER_SOLVER(p, s);
+     if (RESEARCH_MODE) 
+	  REGISTER_SOLVER(p, X(mksolver_dft_ct_ditbuf)(codelet, desc));
 }
