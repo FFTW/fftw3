@@ -345,6 +345,14 @@ if test "$enable_threads" = "yes"; then
 	fi
 
 	if test -z "$THREADLIBS"; then
+		AC_MSG_CHECKING([for Win32 threads])
+		AC_TRY_LINK([#include <windows.h>],
+			[_beginthreadex(0,0,0,0,0,0);],
+			[THREADLIBS=" "; AC_MSG_RESULT(yes)],
+			[AC_MSG_RESULT(no)])
+	fi
+
+	if test -z "$THREADLIBS"; then
 		AC_MSG_ERROR([couldn't find threads library for --enable-threads])
 	fi
 	AC_DEFINE(HAVE_THREADS, 1, [Define if we have a threads library.])
