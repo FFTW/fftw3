@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.16 2003-02-09 00:11:58 stevenj Exp $ */
+/* $Id: problem.c,v 1.17 2003-02-09 00:35:56 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -161,6 +161,7 @@ bench_problem *problem_parse(const char *s)
      p->in = p->out = 0;
      p->inphys = p->outphys = 0;
      p->in_place = 0;
+     p->destroy_input = 0;
      p->split = 0;
      p->userinfo = 0;
      p->sz = p->vecsz = 0;
@@ -170,6 +171,7 @@ bench_problem *problem_parse(const char *s)
      switch (tolower(*s)) {
 	 case 'i': p->in_place = 1; ++s; goto L1;
 	 case 'o': p->in_place = 0; ++s; goto L1;
+	 case 'd': p->destroy_input = 1; ++s; goto L1;
 	 case '/': p->split = 1; ++s; goto L1;
 	 case 'f': 
 	 case '-': p->sign = -1; ++s; goto L1;

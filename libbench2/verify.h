@@ -43,6 +43,8 @@ double impulse(dofft_closure *k,
 double linear(dofft_closure *k, int realp,
 	      int n, C *inA, C *inB, C *inC, C *outA,
 	      C *outB, C *outC, C *tmp, int rounds, double tol);
+void preserves_input(dofft_closure *k, int realp, int hermitianp,
+                     int n, C *inA, C *inB, C *outB, int rounds);
 
 enum { TIME_SHIFT, FREQ_SHIFT };
 double tf_shift(dofft_closure *k, int realp, const bench_tensor *sz,

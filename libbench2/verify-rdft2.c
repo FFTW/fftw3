@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft2.c,v 1.1 2003-02-09 00:11:58 stevenj Exp $ */
+/* $Id: verify-rdft2.c,v 1.2 2003-02-09 00:35:56 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -244,6 +244,10 @@ void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e)
 	  e->s = dmax(e->s, tf_shift(&k.k, 1, p->sz, n, vecn, p->sign,
 				     inA, inB, outA, outB, 
 				     tmp, rounds, tol, FREQ_SHIFT));
+
+     if (!p->in_place && !p->destroy_input)
+	  preserves_input(&k.k, p->sign < 0, p->sign > 0,
+			  N, inA, inB, outB, rounds);
 
      bench_free(tmp);
      bench_free(outC);

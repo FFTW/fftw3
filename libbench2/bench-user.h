@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.11 2003-02-09 00:11:58 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.12 2003-02-09 00:35:56 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -99,6 +99,7 @@ typedef struct {
      bench_tensor *vecsz;
      int sign;
      int in_place;
+     int destroy_input;
      int split;
      void *in, *out;
      void *inphys, *outphys;

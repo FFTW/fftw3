@@ -478,6 +478,8 @@ static FFTW(plan) mkplan(bench_problem *p, int flags)
 int can_do(bench_problem *p)
 {
      rdwisdom();
+     if (p->destroy_input)
+	  the_flags |= FFTW_DESTROY_INPUT;
      the_plan = mkplan(p, the_flags | FFTW_ESTIMATE);
 
      if (the_plan) {
@@ -491,6 +493,11 @@ int can_do(bench_problem *p)
 void setup(bench_problem *p)
 {
      double tim;
+
+     if (p->destroy_input)
+	  the_flags |= FFTW_DESTROY_INPUT;
+     if (p->kind == PROBLEM_REAL && p->sign > 0 && !p->in_place)
+	  p->destroy_input = 1; /* default for c2r out-of-place transforms */
 
 #ifdef HAVE_THREADS
      BENCH_ASSERT(FFTW(init_threads)());

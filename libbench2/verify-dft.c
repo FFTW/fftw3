@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.7 2003-02-09 00:11:58 stevenj Exp $ */
+/* $Id: verify-dft.c,v 1.8 2003-02-09 00:35:56 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -129,6 +129,9 @@ void verify_dft(bench_problem *p, int rounds, double tol, errors *e)
      e->s = dmax(e->s, tf_shift(&k.k, 0, p->sz, n, vecn, p->sign,
 				inA, inB, outA, outB, 
 				tmp, rounds, tol, FREQ_SHIFT));
+
+     if (!p->in_place && !p->destroy_input)
+	  preserves_input(&k.k, 0,0, N, inA, inB, outB, rounds);
 
      bench_free(tmp);
      bench_free(outC);

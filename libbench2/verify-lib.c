@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.6 2003-02-09 00:11:58 stevenj Exp $ */
+/* $Id: verify-lib.c,v 1.7 2003-02-09 00:35:56 stevenj Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -125,6 +125,17 @@ void mkhermitian(C *A, int rank, const bench_iodim *dim, int stride)
                assign_conj(A + (n0 - i) * s, A + i * s, rank, dim, stride);
           if (2*i == n0)
                mkhermitian(A + i * s, rank, dim, stride);
+     }
+}
+
+/* C = A */
+void acopy(C *c, C *a, int n)
+{
+     int i;
+
+     for (i = 0; i < n; ++i) {
+	  c_re(c[i]) = c_re(a[i]);
+	  c_im(c[i]) = c_im(a[i]);
      }
 }
 
@@ -396,6 +407,29 @@ double tf_shift(dofft_closure *k,
 	  nb *= ncur;
      }
      return e;
+}
+
+
+void preserves_input(dofft_closure *k, int realp, int hermitianp,
+		     int n, C *inA, C *inB, C *outB, int rounds)
+{
+     int j;
+     bench_iodim d;
+
+     d.n = n;
+     d.is = d.os = 1;
+
+     for (j = 0; j < rounds; ++j) {
+	  arand(inA, n);
+	  if (realp)
+	       mkreal(inA, n);
+	  if (hermitianp)
+	       mkhermitian(inA, 1, &d, 1);
+	  
+	  acopy(inB, inA, n);
+	  k->apply(k, inB, outB);
+	  acmp(inB, inA, n, "preserves_input", 0.0);
+     }
 }
 
 
