@@ -3,7 +3,7 @@ dnl
 dnl Check to see if we are using a version of gcc that aligns the stack
 dnl (true in gcc-2.95+, which have the -mpreferred-stack-boundary flag).
 dnl Also, however, checks whether main() is correctly aligned by the
-dnl OS/libc/..., as well asfor a bug in the stack alignment of gcc-2.95.x
+dnl OS/libc/..., as well as for a bug in the stack alignment of gcc-2.95.x
 dnl (see http://gcc.gnu.org/ml/gcc-bugs/1999-11/msg00259.html).
 dnl
 dnl ACTION-IF-YES/ACTION-IF-NO are shell commands to execute if we are
@@ -11,7 +11,7 @@ dnl using gcc and the stack is/isn't aligned, respectively.
 dnl
 dnl Requires macro: AX_CHECK_COMPILER_FLAGS
 dnl
-dnl @version $Id: ax_gcc_aligns_stack.m4,v 1.2 2004-11-09 02:46:50 stevenj Exp $
+dnl @version $Id: ax_gcc_aligns_stack.m4,v 1.3 2005-01-17 23:54:55 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 AC_DEFUN([AX_GCC_ALIGNS_STACK],
 [
