@@ -2,6 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <fftw3.h>
+#include <string.h>
 
 BEGIN_BENCH_DOC
 BENCH_DOC("name", "fftw3")
@@ -19,7 +20,18 @@ END_BENCH_DOC
 static FFTW(plan) the_plan;
 
 static const char *wisdat = "wis.dat";
+unsigned the_flags = 0;
 
+void useropt(const char *arg)
+{
+     if (!strcmp(arg, "patient")) the_flags |= FFTW_PATIENT;
+     else if (!strcmp(arg, "estimate")) the_flags |= FFTW_ESTIMATE;
+     else if (!strcmp(arg, "exhaustive")) the_flags |= FFTW_EXHAUSTIVE;
+
+     else {
+     fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);
+     }
+}
 void rdwisdom(void)
 {
      FILE *f;
@@ -66,8 +78,7 @@ static FFTW(plan) mkplan_complex_interleaved(problem *p, int flags)
 {
      tensor *sz = p->sz, *vecsz = p->vecsz;
 
-     if (vecsz->rnk == 0 && sz->rnk >= 1 && sz->rnk <= 3 && 
-	 tensor_unitstridep(sz) && tensor_rowmajorp(sz)) 
+     if (vecsz->rnk == 0 && tensor_unitstridep(sz) && tensor_rowmajorp(sz)) 
 	  goto api_simple;
      
      if (0)
@@ -93,9 +104,16 @@ static FFTW(plan) mkplan_complex_interleaved(problem *p, int flags)
 		   p->in, p->out, 
 		   p->sign, flags);
 	      break;
-	 default:
-	      /* TODO */
-	      return 0;
+	 default: {
+	      int *n = bench_malloc(sizeof(int *) * sz->rnk);
+	      int i;
+	      FFTW(plan) pln;
+
+	      for (i = 0; i < sz->rnk; ++i) n[i] = sz->dims[i].n;
+	      pln = FFTW(plan_dft)(sz->rnk, n, p->in, p->out, p->sign, flags);
+	      bench_free(n);
+	      return pln;
+	 }
      }
 
  api_many:
@@ -132,7 +150,6 @@ int can_do(problem *p)
 
 void setup(problem *p)
 {
-     const unsigned flags = 0;
      double tim;
 
 #ifdef HAVE_THREADS
@@ -143,7 +160,7 @@ void setup(problem *p)
      rdwisdom();
 
      timer_start();
-     the_plan = mkplan(p, flags);
+     the_plan = mkplan(p, the_flags);
      tim = timer_stop();
      if (verbose) printf("planner time: %g s\n", tim);
 

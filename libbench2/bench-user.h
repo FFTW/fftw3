@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.2 2003-01-18 12:20:18 athena Exp $ */
+/* $Id: bench-user.h,v 1.3 2003-01-18 13:03:07 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -115,6 +115,7 @@ extern void setup(struct problem *p);
 extern void doit(int iter, struct problem *p);
 extern void done(struct problem *p);
 extern void verify(const char *param, int rounds, double tol);
+extern void useropt(const char *arg);
 
 extern void problem_alloc(struct problem *p);
 extern void problem_free(struct problem *p);
