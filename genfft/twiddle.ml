@@ -18,27 +18,37 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.5 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.6 2002-07-20 22:25:47 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
 open Util
 
-type twop = TW_COS | TW_SIN | TW_TAN | TW_NEXT
+type twop = TW_FULL | TW_COS | TW_SIN | TW_TAN | TW_NEXT
 
 let optoint = function
   | TW_COS -> 0
   | TW_SIN -> 1
   | TW_TAN -> 2
   | TW_NEXT -> 3
+  | TW_FULL -> 4
 
 let optostring = function
   | TW_COS -> "TW_COS"
   | TW_SIN -> "TW_SIN"
   | TW_TAN -> "TW_TAN"
   | TW_NEXT -> "TW_NEXT"
+  | TW_FULL -> "TW_FULL"
 
 type twinstr = (twop * int * int)
+
+let rec unroll_twfull l = match l with
+| [] -> []
+| (TW_FULL, 0, n) :: b ->
+    (List.flatten
+       (forall [] cons 1 n (fun i -> [(TW_COS, 0, i); (TW_SIN, 0, i)])))
+    @ unroll_twfull b
+| a :: b -> a :: unroll_twfull b
 
 let twinstr_to_c_string l =
   let one (op, a, b) = Printf.sprintf "{ %s, %d, %d }" (optostring op) a b
@@ -57,7 +67,7 @@ let twinstr_to_simd_string l =
   in let rec loop first = function
     | [] -> ""
     | a :: b ->  (one (if first then "\n" else ",\n") a) ^ (loop false b)
-  in "{" ^ (loop true l) ^ "}"
+  in "{" ^ (loop true (unroll_twfull l)) ^ "}"
   
 let square x = 
   if (!Magic.wsquare) then
@@ -97,10 +107,7 @@ let twiddle_policy_load_all =
     else
       Complex.times (load_reim sign w (i - 1)) (f i)
   and twidlen n = 2 * (n - 1)
-  and twdesc n =
-    (List.flatten
-      (forall [] cons 1 n (fun i -> [(TW_COS, 0, i); (TW_SIN, 0, i)])))
-    @ [(TW_NEXT, 1, 0)]
+  and twdesc r = [(TW_FULL, 0, r);(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
 (* shorthand for policies that only load W[0] *)

@@ -22,3 +22,7 @@
   genfft-k7 was written by Stefan Kral based on the fftw-2.1 genfft.
 
 * implement fftw2 buffering: copy to buffers, transform in-place, copy back
+
+* remember to remove -no-randomized-cse from rdft codelets before
+  final release.  This flag speeds up the generator but produces worse
+  codelets

@@ -183,6 +183,7 @@ AC_OUTPUT([
    dft/k7/codelets/Makefile
 
    rdft/codelets/r2hc/Makefile
+   rdft/codelets/hc2r/Makefile
 
    libbench/Makefile
    tests/Makefile

@@ -18,25 +18,27 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.5 2002-06-16 22:30:18 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.6 2002-07-20 22:25:47 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
 open Util
 
-type twop = TW_COS | TW_SIN | TW_TAN | TW_NEXT
+type twop = TW_FULL | TW_COS | TW_SIN | TW_TAN | TW_NEXT
 
 let optoint = function
   | TW_COS -> 0
   | TW_SIN -> 1
   | TW_TAN -> 2
   | TW_NEXT -> 3
+  | TW_FULL -> 4
 
 let optostring = function
   | TW_COS -> "TW_COS"
   | TW_SIN -> "TW_SIN"
   | TW_TAN -> "TW_TAN"
   | TW_NEXT -> "TW_NEXT"
+  | TW_FULL -> "TW_FULL"
 
 type twinstr = (twop * int * int)
 
@@ -76,13 +78,9 @@ let rec_array n f =
     h
   end
 
-(*
 let load_reim sign w i = 
-  let x = Complex.make (w (2 * i), w (2 * i + 1)) in
-  if sign = 1 then x else Complex.conj x
-*)
-let load_reim sign w i = if sign = 1 then w i else Complex.conj (w i)
-  
+  if sign = 1 then w i else Complex.conj (w i)
+
 (* various policies for computing/loading twiddle factors *)
 
 (* load all twiddle factors *)
@@ -93,10 +91,7 @@ let twiddle_policy_load_all =
     else
       Complex.times (load_reim sign w (i - 1)) (f i)
   and twidlen n = 2 * (n - 1)
-  and twdesc n =
-    (List.flatten
-      (forall [] cons 1 n (fun i -> [(TW_COS, 0, i); (TW_SIN, 0, i)])))
-    @ [(TW_NEXT, 1, 0)]
+  and twdesc r = [(TW_FULL, 0, r);(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
 (* shorthand for policies that only load W[0] *)

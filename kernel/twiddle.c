@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.9 2002-07-15 23:28:30 stevenj Exp $ */
+/* $Id: twiddle.c,v 1.10 2002-07-20 22:25:47 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -64,12 +64,16 @@ static uint twlen0(uint r, const tw_instr **pp)
      /* compute length of bytecode program */
      A(r > 0);
      for ( ; p->op != TW_NEXT; ++p) {
-	  if (p->op == TW_FULL)
-	       ntwiddle += (r - 1) * 2;
-	  else if (p->op == TW_GENERIC)
-	       ntwiddle += r * 2;
-	  else
-	       ++ntwiddle;
+	  switch (p->op) {
+	      case TW_FULL:
+		   ntwiddle += (r - 1) * 2;
+		   break;
+	      case TW_GENERIC:
+		   ntwiddle += r * 2;
+		   break;
+	      default:
+		   ++ntwiddle;
+	  }
      }
 
      *pp = p;
@@ -97,26 +101,35 @@ static R *compute(const tw_instr *instr, uint n, uint r, uint m)
 
      for (j = 0; j < m; j += p->v) {
           for (p = instr; p->op != TW_NEXT; ++p) {
-	       if (p->op == TW_FULL) {
-		    uint i;
-		    A(p->i == 0); /* unused */
-		    for (i = 1; i < r; ++i) {
-			 *W++ = COS(twoPiOverN * ((j + p->v) * i));
-			 *W++ = SIN(twoPiOverN * ((j + p->v) * i));
-		    }
+	       switch (p->op) {
+		   case TW_FULL:
+		   {
+			uint i;
+			A(p->i == r); /* consistency check */
+			for (i = 1; i < r; ++i) {
+			     *W++ = COS(twoPiOverN * ((j + p->v) * i));
+			     *W++ = SIN(twoPiOverN * ((j + p->v) * i));
+			}
+			break;
+		   }
+
+		   case TW_GENERIC:
+		   {
+			uint i;
+			A(p->v == 0); /* unused */
+			A(p->i == 0); /* unused */
+			for (i = 0; i < r; ++i) {
+			     uint k = j * r + i;
+			     *W++ = COS(twoPiOverN * k);
+			     *W++ = FFT_SIGN * SIN(twoPiOverN * k);
+			}
+			break;
+		   }
+		   
+		   default:
+			*W++ = f[p->op](twoPiOverN * ((j + p->v) * p->i));
+			break;
 	       }
-	       else if (p->op == TW_GENERIC) {
-		    uint i;
-		    A(p->v == 0); /* unused */
-		    A(p->i == 0); /* unused */
-		    for (i = 0; i < r; ++i) {
-			 uint k = j * r + i;
-			 *W++ = COS(twoPiOverN * k);
-			 *W++ = FFT_SIGN * SIN(twoPiOverN * k);
-		    }
-	       }
-	       else
-		    *W++ = f[p->op](twoPiOverN * ((j + p->v) * p->i));
 	  }
           A(m % p->v == 0);
      }
