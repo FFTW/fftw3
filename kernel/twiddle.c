@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.24 2004-01-01 20:44:09 athena Exp $ */
+/* $Id: twiddle.c,v 1.25 2004-03-22 18:22:44 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -106,7 +106,6 @@ static R *compute(const tw_instr *instr, int n, int r, int m)
 		   case TW_FULL:
 		   {
 			int i;
-			A((int)p->i == r); /* consistency check */
 			A(m * r <= n);
 			for (i = 1; i < r; ++i) {
 			     *W++ = f[TW_COS]((j + p->v) * i, n);

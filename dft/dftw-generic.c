@@ -136,17 +136,10 @@ static int applicable2(int r, int m, const planner *plnr)
 /**************************************************************/
 static void mktwiddle1(P *ego, int flg)
 {
-     static const tw_instr tw_template[] = { { TW_FULL, 0, 0 }, 
-					     { TW_NEXT, 1, 0 } };
-
-     tw_instr tw[2];
+     static const tw_instr tw[] = { { TW_FULL, 0, 0 }, { TW_NEXT, 1, 0 } };
 
      /* note that R and M are swapped, to allow for sequential
 	access both to data and twiddles */
-     tw[0] = tw_template[0];
-     tw[1] = tw_template[1];
-     tw[0].i = ego->m;
-
      X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->m, ego->r);
 }
 
