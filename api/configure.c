@@ -18,36 +18,16 @@
  *
  */
 
-/* internal API definitions */
-#ifndef __API_H__
-#define __API_H__
+#include "api.h"
+#include "dft.h"
+#include "rdft.h"
+#include "reodft.h"
+#include "threads.h"
 
-#undef _Complex_I  /* just in case: force <fftw3.h> not to use C99
-		      complex numbers */
-
-#include "fftw3.h"
-#include "ifftw.h"
-
-/* the API ``plan'' contains both the kernel plan and problem */
-struct X(plan_s) {
-     plan *pln;
-     problem *prb;
-};
-
-/* shorthand */
-typedef struct X(plan_s) apiplan;
-
-/* complex type for internal use */
-typedef R C[2];
-
-void X(extract_reim)(int sign, C *c, R **r, R **i);
-
-planner *X(the_planner)(void);
-void X(configure_planner)(planner *plnr);
-
-void X(mapflags)(planner *, unsigned int);
-
-apiplan *X(mkapiplan)(unsigned int flags, problem *prb);
-void X(apiplan_destroy)(apiplan *p);
-
-#endif /* __API_H__ */
+void X(configure_planner)(planner *plnr)
+{
+     X(dft_conf_standard)(plnr);
+     X(rdft_conf_standard)(plnr);
+     X(reodft_conf_standard)(plnr);
+     X(threads_conf_standard)(plnr);
+}

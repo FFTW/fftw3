@@ -31,10 +31,7 @@ planner *X(the_planner)(void)
 {
      if (!plnr) {
 	  plnr = X(mkplanner)();
-	  X(dft_conf_standard)(plnr);
-	  X(rdft_conf_standard)(plnr);
-	  X(reodft_conf_standard)(plnr);
-	  X(threads_conf_standard)(plnr);
+	  X(configure_planner)(plnr);
 	  plnr->nthr = 1;
      }
      

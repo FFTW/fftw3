@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.2 2003-01-09 11:48:53 athena Exp $ */
+/* $Id: fftw3.h,v 1.3 2003-01-09 18:41:51 athena Exp $ */
 
 /* If <complex.h> is included, use the C99 complex type.  Otherwise
    define a type bit-compatible with C99 complex */
@@ -30,8 +30,8 @@
 #endif
 
 /*
-  huge macro that defines prototypes for all API functions.
-  We expand this macro for each supported precision
+  huge second-order macro that defines prototypes for all API
+  functions.  We expand this macro for each supported precision
 
   X: name-mangling macro
   R: real data type
