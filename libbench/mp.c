@@ -384,6 +384,7 @@ static void sin2pi(REAL m, REAL n, N a)
      else {by2pi(m, n, b); msin(b, a);}
 }
 
+/*----------------------------------------------------------------------*/
 /* FFT stuff */
 static void bitrev(unsigned int n, N *a)
 {
@@ -473,26 +474,23 @@ static void cmulj(N r0, N i0, N r1, N i1, N r2, N i2)
      cpy(q, r2);
 }
 
-static void bluestein(unsigned int n, bench_complex *a)
+static void bluestein(unsigned int n, N *a)
 {
      unsigned int nb = pow2_atleast(2 * n);
-     REAL nbinv = 1.0 / nb; /* exact because nb = 2^k */
      N *w = (N *)bench_malloc(2 * n * sizeof(N));
      N *y = (N *)bench_malloc(2 * nb * sizeof(N));
      N *b = (N *)bench_malloc(2 * nb * sizeof(N));
+     N nbinv;
      unsigned int i;
 
+     fromreal(1.0 / nb, nbinv); /* exact because nb = 2^k */
      bluestein_sequence(n, w);
 
      for (i = 0; i < 2*nb; ++i)  cpy(zero, y[i]);
      for (i = 0; i < 2*nb; ++i)  cpy(zero, b[i]);
      
-     for (i = 0; i < n; ++i) {
-	  N c, s;
-	  fromreal(c_re(a[i]), c);
-	  fromreal(c_im(a[i]), s);
-	  cmulj(w[2*i], w[2*i+1], c, s, b[2*i], b[2*i+1]);
-     }
+     for (i = 0; i < n; ++i) 
+	  cmulj(w[2*i], w[2*i+1], a[2*i], a[2*i+1], b[2*i], b[2*i+1]);
 
      for (i = 0; i < n; ++i) {
 	  cpy(w[2*i], y[2*i]);
@@ -511,10 +509,9 @@ static void bluestein(unsigned int n, bench_complex *a)
      fft0(nb, b, 1);
 
      for (i = 0; i < n; ++i) {
-	  N c, s;
-	  cmulj(w[2*i], w[2*i+1], b[2*i], b[2*i+1], c, s);
-	  c_re(a[i]) = nbinv * toreal(c);
-	  c_im(a[i]) = nbinv * toreal(s);
+	  cmulj(w[2*i], w[2*i+1], b[2*i], b[2*i+1], a[2*i], a[2*i+1]);
+	  mul(nbinv, a[2*i], a[2*i]);
+	  mul(nbinv, a[2*i+1], a[2*i+1]);
      }
 
      bench_free(w);
@@ -522,39 +519,88 @@ static void bluestein(unsigned int n, bench_complex *a)
      bench_free(b);
 }
 
-static void mfft0(unsigned int n, bench_complex *a, int sign)
+
+static void swapri(unsigned int n, N *a)
 {
-     N *b = (N *)bench_malloc(2 * n * sizeof(N));
+     unsigned int i;
+     for (i = 0; i < n; ++i) {
+	  N t;
+	  cpy(a[2 * i], t);
+	  cpy(a[2 * i + 1], a[2 * i]);
+	  cpy(t, a[2 * i + 1]);
+     }
+}
+
+static void fft1(unsigned int n, N *a, int sign)
+{
+     if (power_of_two(n)) {
+	  fft0(n, a, sign);
+     } else {
+	  if (sign == 1) swapri(n, a);
+	  bluestein(n, a);
+	  if (sign == 1) swapri(n, a);
+     }
+}
+
+static void fromrealv(unsigned int n, bench_complex *a, N *b)
+{
      unsigned int i;
 
      for (i = 0; i < n; ++i) {
 	  fromreal(c_re(a[i]), b[2 * i]);
 	  fromreal(c_im(a[i]), b[2 * i + 1]);
      }
-     fft0(n, b, sign);
-     for (i = 0; i < n; ++i) {
-	  c_re(a[i]) = toreal(b[2 * i]);
-	  c_im(a[i]) = toreal(b[2 * i + 1]);
-     }
-     bench_free(b);
 }
 
-static void swapri(unsigned int n, bench_complex *a)
+static void compare(unsigned int n, N *a, N *b, double *err)
 {
      unsigned int i;
-     for (i = 0; i < n; ++i) {
-	  bench_real t = c_re(a[i]);
-	  c_re(a[i]) = c_im(a[i]);
-	  c_im(a[i]) = t;
-     }
+     double e1, e2, einf;
+     double n1, n2, ninf;
+
+     e1 = e2 = einf = 0.0;
+     n1 = n2 = ninf = 0.0;
+
+#    define DO(x1, x2, xinf, var) { 			\
+     double d = var;					\
+     if (d < 0) d = -d;					\
+     x1 += d; x2 += d * d; if (d > xinf) xinf = d;	\
 }
-void mfft(unsigned int n, bench_complex *a, int sign)
-{
-     if (power_of_two(n)) {
-	  mfft0(n, a, sign);
-     } else {
-	  if (sign == 1) swapri(n, a);
-	  bluestein(n, a);
-	  if (sign == 1) swapri(n, a);
+	  
+     for (i = 0; i < 2 * n; ++i) {
+	  N dd;
+	  sub(a[i], b[i], dd);
+	  DO(n1, n2, ninf, toreal(a[i]));
+	  DO(e1, e2, einf, toreal(dd));
      }
+
+#    undef DO
+     err[0] = e1 / n1;
+     err[1] = sqrt(e2 / n2);
+     err[2] = einf / ninf;
+}
+
+void fftaccuracy(unsigned int n, bench_complex *a, bench_complex *ffta,
+		 int sign, double err[6])
+{
+     N *b = (N *)bench_malloc(2 * n * sizeof(N));
+     N *fftb = (N *)bench_malloc(2 * n * sizeof(N));
+     N mn, ninv;
+     unsigned int i;
+
+     fromreal(n, mn); inv(mn, ninv);
+
+     /* forward error */
+     fromrealv(n, a, b); fromrealv(n, ffta, fftb);
+     fft1(n, b, sign);
+     compare(n, b, fftb, err);
+
+     /* backward error */
+     fromrealv(n, a, b); fromrealv(n, ffta, fftb);
+     for (i = 0; i < 2 * n; ++i) mul(fftb[i], ninv, fftb[i]);
+     fft1(n, fftb, -sign);
+     compare(n, b, fftb, err + 3);
+
+     bench_free(fftb);
+     bench_free(b);
 }

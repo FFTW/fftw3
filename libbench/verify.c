@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.10 2002-08-18 23:44:14 athena Exp $ */
+/* $Id: verify.c,v 1.11 2002-08-20 15:46:29 athena Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -450,12 +450,17 @@ static void do_verify(struct problem *p, unsigned int rounds, double tol)
 
 static void do_accuracy(struct problem *p, int rounds)
 {
-     extern void mfft(unsigned int n, bench_complex *a, int sign);
+     extern void fftaccuracy(unsigned int n, 
+			     bench_complex *a, bench_complex *ffta,
+			     int sign, double err[6]);
      unsigned int n, i;
      int r;
      bench_complex *a, *b;
-     bench_real e1, n1, e2, n2, einf, ninf;
-     bench_real t1, t2, tinf;
+     /* err[0] : L1 error
+	err[1] : L2 error
+	err[2] : Linf error
+	err[3..5]: L1, L2, Linf backward error */
+     double t[6], err[6];  
 
      /* only works for these cases */
      BENCH_ASSERT(p->rank == 1);
@@ -465,11 +470,9 @@ static void do_accuracy(struct problem *p, int rounds)
      a = (bench_complex *) bench_malloc(n * sizeof(bench_complex));
      b = (bench_complex *) bench_malloc(n * sizeof(bench_complex));
      
-     t1 = t2 = tinf = 0.0;
-     for (r = 0; r < rounds; ++r) {
-	  e1 = e2 = einf = 0.0;
-	  n1 = n2 = ninf = 0.0;
+     for (i = 0; i < 6; ++i) t[i] = 0.0;
 
+     for (r = 0; r < rounds; ++r) {
 	  arand(a, n);
 
 	  if (p->kind == PROBLEM_REAL) {
@@ -480,35 +483,24 @@ static void do_accuracy(struct problem *p, int rounds)
 	  }
 
 	  do_fft(p, a, b);
-	  mfft(n, a, p->sign);
+	  fftaccuracy(n, a, b, p->sign, err);
 
-	  for (i = 0; i < n; ++i) {
-
-#              define DO(x1, x2, xinf, var) {				\
-                    bench_real d = var;					\
-	            if (d < 0) d = -d;					\
-	            x1 += d; x2 += d * d; if (d > xinf) xinf = d;	\
-               }
-	       DO(n1, n2, ninf, c_re(b[i]));
-	       DO(n1, n2, ninf, c_im(b[i]));
-	       DO(e1, e2, einf, c_re(a[i]) - c_re(b[i]));
-	       DO(e1, e2, einf, c_im(a[i]) - c_im(b[i]));
-#         undef DO
-	  }
-
-	  e1 /= n1;
-	  e2 = e2 / n1;
-	  einf /= ninf;
-
-	  t1 += e1;
-	  t2 += e2;
-	  tinf = dmax(tinf, einf);
+	  t[0] += err[0];
+	  t[1] += err[1] * err[1];
+	  t[2] = dmax(t[2], err[2]);
+	  t[3] += err[3];
+	  t[4] += err[4] * err[4];
+	  t[5] = dmax(t[5], err[5]);
      }
 
-     t1 /= rounds;
-     t2 = sqrt(t2 / rounds);
+     t[0] /= rounds;
+     t[1] = sqrt(t[1] / rounds);
+     t[3] /= rounds;
+     t[4] = sqrt(t[4] / rounds);
 
-     ovtpvt("%6.2e %6.2e %6.2e\n", (double)t1, (double)t2, (double)tinf);
+     ovtpvt("%6.2e %6.2e %6.2e %6.2e %6.2e %6.2e\n", 
+	    t[0], t[1], t[2], t[3], t[4], t[5]);
+
 }
 
 void verify(const char *param, int rounds, double tol)
