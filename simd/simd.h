@@ -30,6 +30,10 @@
 #include "simd-altivec.h"
 #endif
 
+#ifdef HAVE_3DNOW
+#include "simd-3dnow.h"
+#endif
+
 #define ALIGNED(p) (!(((long)p) % ALIGNMENT))
 #define ALIGNEDA(p) (!(((long)p) % ALIGNMENTA))
 #define SIMD_STRIDE_OK(x) (!(((x) * sizeof(R)) % ALIGNMENT))

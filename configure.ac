@@ -64,6 +64,12 @@ if test "$have_altivec" = "yes"; then
 	have_simd="yes"
 fi
 
+AC_ARG_ENABLE(3dnow, [AC_HELP_STRING([--enable-3dnow],[enable 3DNow! optimizations])], have_3dnow=$enableval, have_3dnow=no)
+if test "$have_3dnow" = "yes"; then
+	AC_DEFINE(HAVE_3DNOW,1,[Define to enable 3DNow! optimizations.])
+	have_simd="yes"
+fi
+
 if test "$PRECISION" = "l" && test "$have_simd" = "yes"; then
 	AC_MSG_ERROR([cannot use SIMD optimizations with long double])
 fi

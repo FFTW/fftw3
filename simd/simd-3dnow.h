@@ -18,91 +18,83 @@
  *
  */
 
-#if defined(FFTW_SINGLE) || defined(FFTW_LDOUBLE)
-#error "SSE2 only works in double precision"
+#ifndef FFTW_SINGLE
+#error "3DNow! only works in single precision"
 #endif
 
 #define VL 1            /* SIMD vector length, in term of complex numbers */
-#define ALIGNMENT 16
-#define ALIGNMENTA 16
+#define ALIGNMENT 8
+#define ALIGNMENTA 8
 
-#if defined(__GNUC__) && defined(__i386__)
-
-/* horrible hack because gcc does not support sse2 yet */
-typedef float V __attribute__ ((mode(V4SF),aligned(16)));
+/* horrible hack because gcc does not support 3dnow yet */
+typedef float V __attribute__ ((mode(V2SF),aligned(8)));
 
 static __inline__ V VADD(V a, V b)
 {
      V ret;
-     __asm__("addpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     __asm__("pfadd %2, %0" : "=y"(ret) : "0"(a), "ym"(b));
      return ret;
 }
 static __inline__ V VSUB(V a, V b)
 {
      V ret;
-     __asm__("subpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     __asm__("pfsub %2, %0" : "=y"(ret) : "0"(a), "ym"(b));
      return ret;
 }
 static __inline__ V VMUL(V b, V a)
 {
      V ret;
-     __asm__("mulpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     __asm__("pfmul %2, %0" : "=y"(ret) : "0"(a), "ym"(b));
+     return ret;
+}
+
+static __inline__ V PFACC(V b, V a)
+{
+     V ret;
+     __asm__("pfacc %2, %0" : "=y"(ret) : "0"(a), "ym"(b));
+     return ret;
+}
+
+static __inline__ V PFPNACC(V b, V a)
+{
+     V ret;
+     __asm__("pfpnacc %2, %0" : "=y"(ret) : "0"(a), "ym"(b));
      return ret;
 }
 
 static __inline__ V VXOR(V b, V a)
 {
      V ret;
-     __asm__("xorpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     __asm__("pxor %2, %0" : "=y"(ret) : "0"(a), "ym"(b));
      return ret;
 }
 
 #define DVK(var, val) V var = __extension__ ({		\
-     static const union dvec _var = { {val, val} };	\
+     static const union fvec _var = { {val, val} };	\
      _var.v;						\
 })
 
-#define SHUFPD(a, b, msk) __extension__ ({				   \
-     V ret;								   \
-     __asm__("shufpd %3, %2, %0" : "=x"(ret) : "0"(a), "xm"(b), "i"(msk)); \
-     ret;								   \
-})
-
-static __inline__ V UNPCKL(V a, V b)
+static __inline__ V VSWAP(V a)
 {
      V ret;
-     __asm__("unpcklpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     __asm__("pswapd %1, %0" : "=y"(ret) : "ym"(a));
      return ret;
 }
 
-static __inline__ V UNPCKH(V a, V b)
+static __inline__ void BEGIN_SIMD(void)
 {
-     V ret;
-     __asm__("unpckhpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
-     return ret;
+     __asm__ __volatile__("femms");
+}
+
+static __inline__ void END_SIMD(void)
+{
+     __asm__ __volatile__("femms");
 }
 
 #define LDK(x) x
-#endif
 
-
-#ifdef __ICC /* Intel's compiler for ia32 */
-#include <emmintrin.h>
-
-typedef __m128d V;
-#define VADD _mm_add_pd
-#define VSUB _mm_sub_pd
-#define VMUL _mm_mul_pd
-#define VXOR _mm_xor_pd
-#define DVK(var, val) const R var = K(val)
-#define LDK(x) _mm_set1_pd(x)
-#define SHUFPD _mm_shuffle_pd
-#define UNPCKL _mm_unpacklo_pd
-#define UNPCKH _mm_unpackhi_pd
-#endif
-
-union dvec {
-     double d[2];
+union fvec {
+     float d[2];
      V v;
 };
 
@@ -125,13 +117,13 @@ static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
 
 static __inline__ V FLIP_RI(V x)
 {
-     return SHUFPD(x, x, 1);
+     return VSWAP(x);
 }
 
 static __inline__ V CHS_R(V x)
 {
-     extern const union dvec X(sse2_mp);
-     return VXOR(X(sse2_mp).v, x);
+     extern const union fvec X(3dnow_mp);
+     return VXOR(X(3dnow_mp).v, x);
 }
 
 static __inline__ V VBYI(V x)
@@ -142,22 +134,22 @@ static __inline__ V VBYI(V x)
 #define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 
-static __inline__ V BYTW(const R *t, V sr)
+static __inline__ V BYTW(const R *t, V ri)
 {
-     V tx = LD(t, 1, t);
-     V si = VBYI(sr);
-     V ti = UNPCKH(tx, tx);
-     V tr = UNPCKL(tx, tx);
-     return VADD(VMUL(tr, sr), VMUL(ti, si));
+     V tri = LD(t, 1, t);
+     V ir = FLIP_RI(ri);
+     V rrii = VMUL(tri, ri);
+     V riir = VMUL(tri, ir);
+     return PFPNACC(riir, rrii);
 }
 
-static __inline__ V BYTWJ(const R *t, V sr)
+static __inline__ V BYTWJ(const R *t, V ri)
 {
-     V tx = LD(t, 1, t);
-     V si = VBYI(sr);
-     V ti = UNPCKH(tx, tx);
-     V tr = UNPCKL(tx, tx);
-     return VSUB(VMUL(tr, sr), VMUL(ti, si));
+     V tri = LD(t, 1, t);
+     V ir = FLIP_RI(ri);
+     V rrii = VMUL(tri, ri);
+     V riir = VMUL(tri, ir);
+     return FLIP_RI(PFPNACC(rrii, riir));
 }
 
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
@@ -166,10 +158,7 @@ static __inline__ V BYTWJ(const R *t, V sr)
 #define VTW(x) {TW_COS, 0, x}, {TW_SIN, 0, x}
 #define TWVL 1
 
-#define RIGHT_CPU X(have_sse2)
+#define RIGHT_CPU X(have_3dnow)
 extern int RIGHT_CPU(void);
 
 #define SIMD_VSTRIDE_OKA(x) 1
-#define BEGIN_SIMD()
-#define END_SIMD()
-
