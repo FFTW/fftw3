@@ -353,7 +353,7 @@ static void destroy_dit(plan *ego_)
      destroy(ego_);
 }
 
-static void print1(char *name, P *ego, printer *p)
+static void print_aux(char *name, P *ego, printer *p)
 {
      p->print(p, "(%s-%u%ois=%oos=%(%p%)",
               name, ego->n, ego->is, ego->os, ego->cld1);
@@ -365,7 +365,7 @@ static void print1(char *name, P *ego, printer *p)
 
 static void print(plan *ego_, printer *p)
 {
-     print1("dft-rader", (P *) ego_, p);
+     print_aux("dft-rader", (P *) ego_, p);
      p->putchr(p, ')');
 }
 
@@ -373,7 +373,7 @@ static void print_dit(plan *ego_, printer *p)
 {
      P_dit *ego_dit = (P_dit *) ego_;
 
-     print1("dft-rader-dit", (P *) ego_, p);
+     print_aux("dft-rader-dit", (P *) ego_, p);
      p->print(p, "%(%p%))", ego_dit->cld);
 }
 
