@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.24 2005-02-27 02:28:39 athena Exp $ */
+/* $Id: rank0.c,v 1.25 2005-02-27 03:19:16 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -95,7 +95,7 @@ static void copy(const P *ego, R *I, R *O,
 		   ++n1, I += ego->d[1].is, O += ego->d[1].os) {
 		   cpy2d(I, O, 
 			 ego->d[0].n, ego->d[0].is, ego->d[0].os,
-			 ego->d[1].n, ego->d[1].is, ego->d[1].os,
+			 ego->d[2].n, ego->d[2].is, ego->d[2].os,
 			 ego->vl);
 	      }
 	      break;
