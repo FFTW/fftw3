@@ -126,7 +126,16 @@ AC_CHECK_FUNCS(sqrt)
 AC_CHECK_FUNCS(memset)
 AC_CHECK_FUNCS(memalign)
 dnl high-resolution clock on SGI machines
-AC_CHECK_FUNCS(clock_gettime)  
+AC_CHECK_FUNCS(clock_gettime)
+
+dnl Cray UNICOS _rtc() (real-time clock) intrinsic
+AC_CHECK_HEADERS(intrinsics.h)
+AC_MSG_CHECKING([for _rtc intrinsic])
+rtc_ok=yes
+AC_TRY_LINK([#ifdef HAVE_INTRINSICS_H
+#include <intrinsics.h>
+#endif], [_rtc()], [AC_DEFINE(HAVE__RTC,1,[Define if you have the UNICOS _rtc() intrinsic.])], [rtc_ok=no])
+AC_MSG_RESULT($rtc_ok)
 
 if test "$PRECISION" = "l"; then
 	AC_CHECK_FUNCS(cosl sinl tanl, [], [AC_MSG_ERROR([long-double precision requires long-double trigonometric routines])])

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.7 2002-07-14 01:46:02 stevenj Exp $ */
+/* $Id: cycle.h,v 1.8 2002-07-14 02:17:29 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -39,7 +39,6 @@ static inline double elapsed(ticks t1, ticks t0)
 /*----------------------------------------------------------------*/
 /* AIX v. 4+ routines to read the real-time clock or time-base register */
 #if defined(HAVE_READ_REAL_TIME) && defined(HAVE_TIME_BASE_TO_TIME) && !defined(HAVE_TICK_COUNTER)
-#include <sys/time.h>
 typedef timebasestruct_t ticks;
 
 static inline ticks getticks(void)
@@ -244,5 +243,24 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 }
 #define HAVE_TICK_COUNTER
 #define TIME_MIN_TICK 10000.0
+#endif
+
+/*----------------------------------------------------------------*/
+/* Cray UNICOS _rtc() intrinsic function */
+#if defined(HAVE__RTC) && !defined(HAVE_TICK_COUNTER)
+#ifdef HAVE_INTRINSICS_H
+#  include <intrinsics.h>
+#endif
+
+typedef long long ticks;
+
+#define getticks() _rtc()
+
+static inline double elapsed(ticks t1, ticks t0)
+{
+     return (double)(t1 - t0);
+}
+
+#define HAVE_TICK_COUNTER
 #endif
 
