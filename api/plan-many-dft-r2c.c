@@ -30,14 +30,26 @@ X(plan) X(plan_many_dft_r2c)(unsigned int rank, const unsigned int *n,
 			     unsigned int flags)
 {
      R *ro, *io;
+     uint *nfi, *nfo;
+     int inplace;
+     X(plan) p;
 
      X(extract_reim)(FFT_SIGN, out, &ro, &io);
+     inplace = in == ro;
      
-     return X(mkapiplan)(
+     p = X(mkapiplan)(
 	  flags,
-	  X(mkproblem_rdft2_d)(X(mktensor_rowmajor_pad)(rank,n,inembed,onembed,
-							istride, 2*ostride,
-							in == ro || in == io),
-			       X(mktensor_1d)(howmany, idist, 2*odist), 
-			       in, ro, io, R2HC));
+	  X(mkproblem_rdft2_d)(
+	       X(mktensor_rowmajor)(rank, n,
+				    X(rdft2_pad)(rank, n, inembed,
+						 inplace, 0, &nfi),
+				    X(rdft2_pad)(rank, n, onembed,
+						 inplace, 1, &nfo),
+				    istride, 2*ostride),
+	       X(mktensor_1d)(howmany, idist, 2*odist), 
+	       in, ro, io, R2HC));
+
+     X(free0)(nfi);
+     X(free0)(nfo);
+     return p;
 }

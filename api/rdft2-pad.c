@@ -18,40 +18,23 @@
  *
  */
 
-/* internal API definitions */
-#ifndef __API_H__
-#define __API_H__
+#include <string.h>
+#include "api.h"
 
-#undef _Complex_I  /* just in case: force <fftw3.h> not to use C99
-		      complex numbers */
-
-#include "fftw3.h"
-#include "ifftw.h"
-
-/* the API ``plan'' contains both the kernel plan and problem */
-struct X(plan_s) {
-     plan *pln;
-     problem *prb;
-};
-
-/* shorthand */
-typedef struct X(plan_s) apiplan;
-
-/* complex type for internal use */
-typedef R C[2];
-
-void X(extract_reim)(int sign, C *c, R **r, R **i);
-tensor *X(mktensor_iodims)(unsigned int rank, const X(iodim) *dims);
 const uint *X(rdft2_pad)(uint rnk, const uint *n, const uint *nembed,
-                         int inplace, int cmplx, uint **nfree);
-
-printer *X(mkprinter_file)(FILE *f);
-
-planner *X(the_planner)(void);
-void X(configure_planner)(planner *plnr);
-
-void X(mapflags)(planner *, unsigned int);
-
-apiplan *X(mkapiplan)(unsigned int flags, problem *prb);
-
-#endif /* __API_H__ */
+			 int inplace, int cmplx, uint **nfree)
+{
+     A(FINITE_RNK(rnk));
+     *nfree = 0;
+     if (!nembed && rnk > 0) {
+	  if (inplace || cmplx) {
+	       uint *np = (uint *) fftw_malloc(sizeof(uint) * rnk, PROBLEMS);
+	       memcpy(np, n, sizeof(uint) * rnk);
+	       np[rnk-1] = (n[rnk-1]/2 + 1) * (1 + !cmplx);
+	       nembed = *nfree = np;
+	  }
+	  else
+	       nembed = n;
+     }
+     return nembed;
+}

@@ -21,20 +21,6 @@
 #include "api.h"
 #include "rdft.h"
 
-/* this way, we can re-use the ugly padding logic from the r2c transform */
-static tensor *swap_strides(tensor *x)
-{
-     if (FINITE_RNK(x->rnk)) {
-	  uint i;
-	  for (i = 0; i < x->rnk; ++i) {
-	       int s = x->dims[i].is;
-	       x->dims[i].is = x->dims[i].os;
-	       x->dims[i].os = s;
-	  }
-     }
-     return x;
-}
-
 X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,
 			     unsigned int howmany,
 			     C *in, const unsigned int *inembed,
@@ -44,15 +30,26 @@ X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,
 			     unsigned int flags)
 {
      R *ri, *ii;
+     uint *nfi, *nfo;
+     int inplace;
+     X(plan) p;
 
      X(extract_reim)(FFT_SIGN, in, &ri, &ii);
-     flags |= FFTW_DESTROY_INPUT;
-     return X(mkapiplan)(
+     inplace = out == ri;
+     
+     p = X(mkapiplan)(
 	  flags,
 	  X(mkproblem_rdft2_d)(
-	       swap_strides(X(mktensor_rowmajor_pad)(rank,n,onembed,inembed,
-						     ostride, 2*istride,
-						     out == ri || out == ii)),
+	       X(mktensor_rowmajor)(rank, n,
+				    X(rdft2_pad)(rank, n, inembed,
+						 inplace, 1, &nfi),
+				    X(rdft2_pad)(rank, n, onembed,
+						 inplace, 0, &nfo),
+				    2*istride, ostride),
 	       X(mktensor_1d)(howmany, 2*idist, odist), 
 	       out, ri, ii, HC2R));
+
+     X(free0)(nfi);
+     X(free0)(nfo);
+     return p;
 }
