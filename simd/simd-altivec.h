@@ -25,13 +25,72 @@
 #define VL 2            /* SIMD complex vector length */
 #define ALIGNMENT 16
 
+#ifndef __VEC__
+
+/* simulate altivec spec by means of gcc builtins */
+#define vector __attribute__((vector_size(16)))
+#define vec_add __builtin_altivec_vaddfp
+#define vec_sub __builtin_altivec_vsubfp
+#define vec_madd __builtin_altivec_vmaddfp
+#define vec_nmsub __builtin_altivec_vnmsubfp
+#define vec_lvsl(a1, a2) ((vector unsigned char) __builtin_altivec_lvsl ((a1), (a2)))
+
+#define vec_lvsr(a1, a2) ((vector unsigned char) __builtin_altivec_lvsr ((a1), (a2)))
+
+static inline vector float
+vec_perm (vector float a1, vector float a2, vector unsigned char a3)
+{
+  return (vector float) __builtin_altivec_vperm_4si ((vector signed int) a1, (vector signed int) a2, (vector signed char) a3);
+}
+
+static inline vector float
+vec_sel (vector float a1, vector float a2, vector unsigned int a3)
+{
+  return (vector float) __builtin_altivec_vsel_4si ((vector signed int) a1, (vector signed int) a2, (vector signed int) a3);
+}
+
+static inline vector float
+vec_ld (int a1, float *a2)
+{
+  return (vector float) __builtin_altivec_lvx (a1, (void *) a2);
+}
+
+static inline void
+vec_ste (vector float a1, int a2, void *a3)
+{
+  __builtin_altivec_stvewx ((vector signed int) a1, a2, (void *) a3);
+}
+static inline vector float
+vec_mergeh (vector float a1, vector float a2)
+{
+  return (vector float) __builtin_altivec_vmrghw ((vector signed int) a1, (vector signed int) a2);
+}
+
+static inline vector float
+vec_mergel (vector float a1, vector float a2)
+{
+  return (vector float) __builtin_altivec_vmrglw ((vector signed int) a1, (vector signed int) a2);
+}
+
+#define VLIT4(x0, x1, x2, x3) {x0, x1, x2, x3}
+#define VLIT16(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xa, xb, xc, xd, xe, xf)\
+ {x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xa, xb, xc, xd, xe, xf}
+
+#else /* !__VEC__ */
+
+#define VLIT4(x0, x1, x2, x3) (x0, x1, x2, x3)
+#define VLIT16(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xa, xb, xc, xd, xe, xf)\
+ (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, xa, xb, xc, xd, xe, xf)
+
+#endif
+
 typedef vector float V;
 #define VADD(a, b) vec_add(a, b)
 #define VSUB(a, b) vec_sub(a, b)
 #define VFMA(a, b, c) vec_madd(a, b, c)
 #define VFNMS(a, b, c) vec_nmsub(a, b, c) 
-#define DVK(var, val) V var = (vector float)(val, val, val, val)
 #define LDK(x) x
+#define DVK(var, val) const V var = (vector float)VLIT4(val, val, val, val)
 
 static inline V VMUL(V a, V b)
 {
@@ -45,10 +104,10 @@ static inline V VFMS(V a, V b, V c)
 }
 
 /* load lower half */
-static inline V LDL(const float *x) 
+static inline V LDL(const float *x, int ivs) 
 {
-     V v = vec_ld(0, (float *)x);
-     return vec_perm(v, v, vec_lvsl(0, (float *)x));
+     V v = vec_ld(4 * ivs, (float *)x);
+     return vec_perm(v, v, vec_lvsl(4 * ivs, (float *)x));
 }
 
 static inline V LDH(const float *x) 
@@ -59,18 +118,20 @@ static inline V LDH(const float *x)
 
 static inline V LD(const float *x, int ivs) 
 {
-     const vector unsigned int msk = (vector unsigned int)(0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
-     V l = LDL(x);
-     V h = LDH(x + ivs);
+     const vector unsigned int msk = 
+	  (vector unsigned int)VLIT4(0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
+     V l = LDL(x, ivs);
+     V h = LDH(x);
      return vec_sel(l, h, msk);
 }
 
 /* store lower half */
-static inline void STL(float *x, V v)
+static inline void STL(float *x, V v, int ovs)
 {
-     v = vec_perm(v, v, vec_lvsr(0, x));
-     vec_ste(v, 0, x);
-     vec_ste(v, 4, x);
+     int fovs = 4 * ovs;
+     v = vec_perm(v, v, vec_lvsr(fovs, x));
+     vec_ste(v, fovs, x);
+     vec_ste(v, 4 + fovs, x);
 }
 
 static inline void STH(float *x, V v)
@@ -82,21 +143,21 @@ static inline void STH(float *x, V v)
 
 static inline void ST(float *x, V v, int ovs) 
 {						
-     STL(x, v);
-     STH(x + ovs, v);
+     STL(x, v, ovs);
+     STH(x, v);
 }
 
 static inline V FLIP_RI(V x)
 {
      const vector unsigned char perm = 
-	  (vector unsigned char)(4, 5, 6, 7, 0, 1, 2, 3, 
-				 12, 13, 14, 15, 8, 9, 10, 11);
+	  (vector unsigned char)VLIT16(4, 5, 6, 7, 0, 1, 2, 3, 
+				       12, 13, 14, 15, 8, 9, 10, 11);
      return vec_perm(x, x, perm);
 }
 
 static inline V CHS_R(V x)
 {
-     const vector float msk = (vector float)(-1.0, 1.0, -1.0, 1.0);
+     const vector float msk = (vector float)VLIT4(-1.0, 1.0, -1.0, 1.0);
      return VMUL(x, msk);
 }
 
@@ -107,13 +168,13 @@ static inline V VBYI(V x)
 
 static inline V VFMAI(V b, V c)
 {
-     const vector float msk = (vector float)(-1.0, 1.0, -1.0, 1.0);
+     const vector float msk = (vector float)VLIT4(-1.0, 1.0, -1.0, 1.0);
      return VFMA(FLIP_RI(b), msk, c);
 }
 
 static inline V VFNMSI(V b, V c)
 {
-     const vector float msk = (vector float)(-1.0, 1.0, -1.0, 1.0);
+     const vector float msk = (vector float)VLIT4(-1.0, 1.0, -1.0, 1.0);
      return VFNMS(FLIP_RI(b), msk, c);
 }
 
@@ -125,8 +186,8 @@ static inline V VFNMSI(V b, V c)
    proper format */
 
 #define VTW(x) 								\
-  {TW_COS, 0, x}, {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_COS, 1, x},	\
-  {TW_SIN, 0, -x}, {TW_SIN, 0, x}, {TW_SIN, 1, -x}, {TW_SIN, 1, x}
+  {TW_COS, 1, x}, {TW_COS, 1, x}, {TW_COS, 0, x}, {TW_COS, 0, x},	\
+  {TW_SIN, 1, -x}, {TW_SIN, 1, x}, {TW_SIN, 0, -x}, {TW_SIN, 0, x}
 #define TWVL (2 * VL)
 
 static inline V BYTW(const R *t, V sr)
@@ -148,7 +209,7 @@ static inline V BYTWJ(const R *t, V sr)
 #else /* FAST_AND_BLOATED_TWIDDLES */
 
 #define VTW(x) 								\
-  {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
+  {TW_COS, 1, x}, {TW_COS, 0, x}, {TW_SIN, 1, x}, {TW_SIN, 0, x}
 #define TWVL (VL)
 
 static inline V BYTW(const R *t, V sr)
