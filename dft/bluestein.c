@@ -38,12 +38,12 @@ static void bluestein_sequence(int n, R *w)
 {
      int k, ksq, n2 = 2 * n;
 
-     ksq = 1; /* (-1)^2 */
+     ksq = 0; /* (-1)^2 */
      for (k = 0; k < n; ++k) {
-          /* careful with overflow */
-          ksq = ksq + 2*k - 1; while (ksq > n2) ksq -= n2;
           w[2*k] = X(cos2pi)(ksq, n2);
           w[2*k+1] = X(sin2pi)(ksq, n2);
+          /* careful with overflow */
+          ksq += 2*k + 1; while (ksq > n2) ksq -= n2;
      }
 }
 
