@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.14 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: buffered.c,v 1.15 2002-06-18 15:07:13 athena Exp $ */
 
 #include "dft.h"
 
@@ -42,6 +42,7 @@ typedef struct {
      uint n, vl, nbuf, bufdist;
      int ivs, ovs;
      R *bufs;
+     int roffset, ioffset;
 
      const S *slv;
 } P;
@@ -53,8 +54,9 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      plan_dft *cld = (plan_dft *) ego->cld;
      plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
      plan_dft *cldrest;
-     uint i, i1, vl = ego->vl, nbuf = ego->nbuf;
+     uint i, vl = ego->vl, nbuf = ego->nbuf;
      int ivs = ego->ivs, ovs = ego->ovs;
+     int roffset = ego->roffset, ioffset = ego->ioffset;
      R *bufs = ego->bufs;
 
      /* note unsigned i:  the obvious statement
@@ -63,20 +65,18 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 	is wrong */
      for (i = nbuf; i <= vl; i += nbuf) {
-          i1 = i - nbuf;
           /* transform to bufs: */
-          cld->apply(ego->cld, ri + i1 * ivs, ii + i1 * ivs, bufs, bufs + 1);
+          cld->apply(ego->cld, ri, ii, bufs + roffset, bufs + ioffset);
+	  ri += ivs; ii += ivs;
 
           /* copy back */
-          cldcpy->apply(ego->cldcpy, bufs, bufs + 1,
-                        ro + i1 * ovs, io + i1 * ovs);
+          cldcpy->apply(ego->cldcpy, bufs + roffset, bufs + ioffset, ro, io);
+	  ro += ovs; io += ovs;
      }
 
      /* Do the remaining transforms, if any: */
      cldrest = (plan_dft *) ego->cldrest;
-     i1 = i - nbuf;
-     cldrest->apply(ego->cldrest, ri + i1 * ivs, ii + i1 * ivs,
-                    ro + i1 * ovs, io + i1 * ovs);
+     cldrest->apply(ego->cldrest, ri, ii, ro, io);
 }
 
 
@@ -216,7 +216,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_dft *p = (const problem_dft *) p_;
      R *bufs = (R *) 0;
      uint nbuf = 0, bufdist, n, vl;
-     int ivs, ovs;
+     int ivs, ovs, roffset, ioffset;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -249,6 +249,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           ovs = p->vecsz.dims[0].os;
      }
 
+     /* attempt to keep real and imaginary part in the same order,
+	so as to allow optimizations in the the copy plan */
+     if (p->ii - p->ri > 0) {
+	  roffset = 0; ioffset = 1;
+     } else {
+	  roffset = 1; ioffset = 0;
+     }
+
      /* initial allocation for the purpose of planning */
      bufs = (R *) fftw_malloc(sizeof(R) * nbuf * bufdist * 2, BUFFERS);
 
@@ -256,7 +264,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           X(mkproblem_dft_d)(
                X(mktensor_1d)(n, p->sz.dims[0].is, 2),
                X(mktensor_1d)(nbuf, ivs, bufdist * 2),
-               p->ri, p->ii, bufs, bufs + 1);
+               p->ri, p->ii, bufs + roffset, bufs + ioffset);
 
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
@@ -269,7 +277,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
                X(mktensor)(0),
                X(mktensor_2d)(nbuf, bufdist * 2, ovs,
                               n, 2, p->sz.dims[0].os),
-               bufs, bufs + 1, p->ro, p->io);
+               bufs + roffset, bufs + ioffset, p->ro, p->io);
 
      cldcpy = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
@@ -300,6 +308,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->vl = vl;
      pln->ivs = ivs;
      pln->ovs = ovs;
+     pln->roffset = roffset;
+     pln->ioffset = ioffset;
 
      pln->nbuf = nbuf;
      pln->bufdist = bufdist;
