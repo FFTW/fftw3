@@ -3,9 +3,11 @@ SUBDIRS = codelets
 
 noinst_LTLIBRARIES = librdft.la
 
+RDFT2 = buffered2.c direct2.c nop2.c plan2.c problem2.c solve2.c	\
+vrank-geq1-rdft2.c
+
 librdft_la_SOURCES = dft-r2hc.c buffered.c codelet.h conf.c direct.c	\
 generic.c khc2hc-dif.c khc2hc-dit.c khc2r.c kr2hc.c hc2hc.c hc2hc.h	\
 hc2hc-dif.c hc2hc-dit.c hc2hc-buf.c indirect.c nop.c plan.c problem.c	\
 r2hc-hc2r.c rader-dht.c rader-hc2hc.c rank0.c rdft.h solve.c verify.c	\
-vrank-geq1.c vrank2-transpose.c vrank3-transpose.c
-
+vrank-geq1.c vrank2-transpose.c vrank3-transpose.c $(RDFT2)

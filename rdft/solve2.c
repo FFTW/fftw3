@@ -18,12 +18,14 @@
  *
  */
 
-/* $Id: khc2r.c,v 1.4 2002-07-28 20:10:59 stevenj Exp $ */
+/* $Id: solve2.c,v 1.1 2002-07-28 20:10:59 stevenj Exp $ */
 
 #include "rdft.h"
 
-void X(khc2r_register)(planner *p, khc2r codelet, const khc2r_desc *desc)
+/* use the apply() operation for RDFT2 problems */
+void X(rdft2_solve)(plan *ego_, const problem *p_)
 {
-     REGISTER_SOLVER(p, X(mksolver_rdft_hc2r_direct)(codelet, desc));
-     REGISTER_SOLVER(p, X(mksolver_rdft2_hc2r_direct)(codelet, desc));
+     plan_rdft2 *ego = (plan_rdft2 *) ego_;
+     const problem_rdft2 *p = (const problem_rdft2 *) p_;
+     ego->apply(ego_, p->r, p->rio, p->iio);
 }

@@ -79,12 +79,18 @@ void copy_c2c_to(struct problem *p, bench_complex *out)
 
 void copy_h2c(struct problem *p, bench_complex *out)
 {
-     copy_h2c_1d_halfcomplex(p, out, FFT_SIGN);
+     if (p->split)
+	  copy_h2c_1d_halfcomplex(p, out, FFT_SIGN);
+     else
+	  copy_h2c_unpacked(p, out, FFT_SIGN);
 }
 
 void copy_c2h(struct problem *p, bench_complex *in)
 {
-     copy_c2h_1d_halfcomplex(p, in, FFT_SIGN);
+     if (p->split)
+	  copy_c2h_1d_halfcomplex(p, in, FFT_SIGN);
+     else
+	  copy_c2h_unpacked(p, in, FFT_SIGN);
 }
 
 static void putchr(printer *p, char c)
@@ -145,9 +151,21 @@ void setup(struct problem *p)
      /* plnr->flags |= CLASSIC | CLASSIC_VRECURSE; */
 
      if (p->kind == PROBLEM_REAL) {
-	  is = os = 1;
-	  ri = ii = p->in;
-	  ro = io = p->out;
+	  if (p->split) {
+	       is = os = 1;
+	       ri = ii = p->in;
+	       ro = io = p->out;
+	  }
+	  else if (p->sign == FFT_SIGN) {
+	       is = 1; os = 2;
+	       ri = ii = p->in;
+	       ro = p->out; io = ro + 1;
+	  }
+	  else {
+	       is = 2; os = 1;
+	       ri = ii = p->out;
+	       ro = p->in; io = ro + 1;
+	  }
      }
      else if (p->split) {
 	  is = os = 1;
@@ -184,13 +202,24 @@ void setup(struct problem *p)
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
 					     is * p->size, os * p->size), 
 		    ri, ii, ro, io);
-     else
+     else if (p->split)
 	  prblm = 
 	       FFTW(mkproblem_rdft_d)(
 		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, is, os),
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
 					     is * p->size, os * p->size), 
 		    ri, ro, p->sign);
+     else if (p->rank == 1) {
+	  iodim sz = { p->n[0], 1, 2 };
+	  prblm = 
+	       FFTW(mkproblem_rdft2_d)(
+		    sz,
+		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
+					     is * p->size, os * p->size), 
+		    ri, ro, io, p->sign);
+     }
+     else
+	  BENCH_ASSERT(0);
      timer_start();
      pln = plnr->adt->mkplan(plnr, prblm);
      tplan = timer_stop();

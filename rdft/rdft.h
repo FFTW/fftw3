@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.12 2002-07-28 05:39:54 stevenj Exp $ */
+/* $Id: rdft.h,v 1.13 2002-07-28 20:10:59 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -82,6 +82,58 @@ void X(rdft_rader_dht_register)(planner *p);
 void X(rdft_r2hc_hc2r_register)(planner *p);
 void X(dft_r2hc_register)(planner *p);
 void X(rdft_nop_register)(planner *p);
+
+/****************************************************************************/
+/* problem2.c: */
+/* an RDFT2 problem transforms a 1d real array r[sz.n] with stride
+   sz.is to/from an "unpacked" complex array {rio,iio}[sz.n/2 + 1]
+   with stride sz.os.  vecsz has the usual interpretation.  */
+typedef struct {
+     problem super;
+     iodim sz;
+     tensor vecsz;
+     R *r, *rio, *iio;
+     rdft_kind kind; /* R2HC or HC2R */
+} problem_rdft2;
+
+int X(problem_rdft2_p)(const problem *p);
+#define RDFT2P X(problem_rdft2_p)  /* shorthand */
+
+problem *X(mkproblem_rdft2)(iodim sz, const tensor vecsz,
+			    R *r, R *rio, R *iio, rdft_kind kind);
+problem *X(mkproblem_rdft2_d)(iodim sz, tensor vecsz,
+			      R *r, R *rio, R *iio, rdft_kind kind);
+int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim);
+
+/* verify.c: */
+void X(rdft2_verify)(plan *pln, const problem_rdft2 *p, uint rounds);
+
+/* solve.c: */
+void X(rdft2_solve)(plan *ego_, const problem *p_);
+
+/* plan.c: */
+typedef void (*rdft2apply) (plan *ego, R *r, R *rio, R *iio);
+
+typedef struct {
+     plan super;
+     rdft2apply apply;
+} plan_rdft2;
+
+plan *X(mkplan_rdft2)(size_t size, const plan_adt *adt, rdft2apply apply);
+
+#define MKPLAN_RDFT2(type, adt, apply) \
+  (type *)X(mkplan_rdft2)(sizeof(type), adt, apply)
+
+/* various solvers */
+
+solver *X(mksolver_rdft2_r2hc_direct)(kr2hc k, const kr2hc_desc *desc);
+solver *X(mksolver_rdft2_hc2r_direct)(khc2r k, const khc2r_desc *desc);
+
+void X(rdft2_vrank_geq1_register)(planner *p);
+void X(rdft2_buffered_register)(planner *p);
+void X(rdft2_nop_register)(planner *p);
+
+/****************************************************************************/
 
 /* configurations */
 void X(rdft_conf_standard)(planner *p);

@@ -18,12 +18,16 @@
  *
  */
 
-/* $Id: khc2r.c,v 1.4 2002-07-28 20:10:59 stevenj Exp $ */
+/* $Id: plan2.c,v 1.1 2002-07-28 20:10:59 stevenj Exp $ */
 
 #include "rdft.h"
 
-void X(khc2r_register)(planner *p, khc2r codelet, const khc2r_desc *desc)
+plan *X(mkplan_rdft2)(size_t size, const plan_adt *adt, rdft2apply apply)
 {
-     REGISTER_SOLVER(p, X(mksolver_rdft_hc2r_direct)(codelet, desc));
-     REGISTER_SOLVER(p, X(mksolver_rdft2_hc2r_direct)(codelet, desc));
+     plan_rdft2 *ego;
+
+     ego = (plan_rdft2 *) X(mkplan)(size, adt);
+     ego->apply = apply;
+
+     return &(ego->super);
 }
