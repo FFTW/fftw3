@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.226 2003-05-15 18:32:06 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.227 2003-05-16 01:53:25 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -676,7 +676,7 @@ int X(first_divisor)(int n);
 int X(is_prime)(int n);
 int X(next_prime)(int n);
 
-#define GENERIC_MIN_BAD 71 /* min prime for which generic becomes bad */
+#define GENERIC_MIN_BAD 173 /* min prime for which generic becomes bad */
 
 /*-----------------------------------------------------------------------*/
 /* rader.c: */
