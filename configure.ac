@@ -301,20 +301,20 @@ if test "$enable_threads" = "yes"; then
 		CFLAGS="$save_CFLAGS -omp"
 		AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
 			omp_enabler="$CC -omp"])
-		if test -z "$THREADLIBS"; then
+		if test -z "$THREADLIBS"; then # ICC
 			CFLAGS="$save_CFLAGS -openmp"
 			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
 				omp_enabler="$CC -openmp"])
 		fi
-		if test -z "$THREADLIBS"; then
+		if test -z "$THREADLIBS"; then # SGI etc.
 			CFLAGS="$save_CFLAGS -mp"
 			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
 				omp_enabler="$CC -mp"])
 		fi
-		if test -z "$THREADLIBS"; then
-			CFLAGS="$save_CFLAGS -openmp"
+		if test -z "$THREADLIBS"; then # Sun
+			CFLAGS="$save_CFLAGS -xopenmp"
 			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
-				omp_enabler="$CC -openmp"])
+				omp_enabler="$CC -xopenmp"])
 		fi
 		if test -z "$THREADLIBS"; then
 			CFLAGS="$save_CFLAGS"
