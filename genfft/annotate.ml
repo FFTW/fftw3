@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.17 2005-02-24 23:59:38 athena Exp $ *)
+(* $Id: annotate.ml,v 1.18 2005-02-26 05:31:52 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.17 2005-02-24 23:59:38 athena Exp $ *)
+(* $Id: annotate.ml,v 1.18 2005-02-26 05:31:52 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -121,8 +121,10 @@ let subset a b =
   List.for_all (fun x -> List.exists (fun y -> x == y) b) a
 
 let use_same_vars (Assign (av, ax)) (Assign (bv, bx)) =
-  let va = Expr.find_vars ax and vb = Expr.find_vars bx in
-  subset va vb && subset vb va
+  is_temporary av &&
+  is_temporary bv &&
+  (let va = Expr.find_vars ax and vb = Expr.find_vars bx in
+   subset va vb && subset vb va)
 
 let store_to_same_class (Assign (av, ax)) (Assign (bv, bx)) =
   is_locative av &&
