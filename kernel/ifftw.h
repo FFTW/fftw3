@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.115 2002-09-12 22:53:44 athena Exp $ */
+/* $Id: ifftw.h,v 1.116 2002-09-13 18:58:22 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -451,6 +451,7 @@ struct planner_s {
      uint nplan;    /* number of plans evaluated */
      uint nprob;    /* number of problems evaluated */
      uint lookup, succ_lookup, lookup_iter;
+     uint insert, insert_iter, insert_unknown;
      uint nrehash;
 
      int score;  /* see planner-score.c */

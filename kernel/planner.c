@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.80 2002-09-13 14:13:02 athena Exp $ */
+/* $Id: planner.c,v 1.81 2002-09-13 18:58:22 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -146,10 +146,13 @@ static solution *hlookup(planner *ego, md5uint *s)
 static void hinsert0(planner *ego, md5uint *s, unsigned short flags,
 		     slvdesc *sp, solution *l)
 {
+     ++ego->insert;
      if (!l) { 	 
 	  /* search for nonfull slot */
 	  uint g, h = sig_to_hash_index(ego, s); 
+	  ++ego->insert_unknown;
 	  for (g = h; ; g = (g + 1) % ego->hashsiz) {
+	       ++ego->insert_iter;
 	       l = ego->sols + g;
 	       if (l->state != H_VALID) break;
 	       A((g + 1) % ego->hashsiz != h);
@@ -380,6 +383,7 @@ planner *X(mkplanner)(size_t sz,
      p->inferior_mkplan = infmkplan;
      p->nplan = p->nprob = p->nrehash = 0;
      p->succ_lookup = p->lookup = p->lookup_iter = 0;
+     p->insert = p->insert_iter = p->insert_unknown = 0;
      p->hook = hooknil;
      p->cur_reg_nam = 0;
      p->solvers = 0;
@@ -461,6 +465,9 @@ void X(planner_dump)(planner *ego, int verbose)
      D("lookup = %u\n", ego->lookup);
      D("succ_lookup = %u\n", ego->succ_lookup);
      D("lookup_iter = %u\n", ego->lookup_iter);
+     D("insert = %u\n", ego->insert);
+     D("insert_iter = %u\n", ego->insert_iter);
+     D("insert_unknown = %u\n", ego->insert_unknown);
      D("nrehash = %d\n", ego->nrehash);
      D("hashsiz = %d\n", ego->hashsiz);
      D("empty = %d\n", empty);
