@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.12 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: magic.ml,v 1.13 2003-06-04 19:11:29 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -51,6 +51,7 @@ let asched_dump_file = ref ""
 let lisp_syntax = ref false
 let network_transposition = ref true
 let inklude = ref ""
+let generic_arith = ref false
 
 (* command-line parser for magic parameters *)
 let undocumented = " Undocumented voodoo parameter"
@@ -89,6 +90,9 @@ let speclist = [
 
   "-dif-split-radix", set_bool dif_split_radix, undocumented;
   "-dit-split-radix", unset_bool dif_split_radix, undocumented;
+
+  "-generic-arith", set_bool generic_arith, undocumented;
+  "-no-generic-arith", unset_bool generic_arith, undocumented;
 
   "-inline-single", set_bool inline_single, undocumented;
   "-no-inline-single", unset_bool inline_single, undocumented;

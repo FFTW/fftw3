@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.20 2003-06-01 11:01:17 athena Exp $ *)
+(* $Id: c.ml,v 1.21 2003-06-04 19:11:29 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -75,7 +75,7 @@ let ctimes = function
  *)
 let foldr_string_concat l = fold_right (^) l ""
 
-let rec unparse_expr =
+let rec unparse_expr_c =
   let yes x = x and no x = "" in
 
   let rec unparse_plus maybe = 
@@ -103,22 +103,45 @@ let rec unparse_expr =
     | (a :: b) -> 
 	maybep ^ (parenthesize a) ^ (unparse_plus yes b)
   and parenthesize x = match x with
-  | (Load _) -> unparse_expr x
-  | (Num _) -> unparse_expr x
-  | _ -> "(" ^ (unparse_expr x) ^ ")"
+  | (Load _) -> unparse_expr_c x
+  | (Num _) -> unparse_expr_c x
+  | _ -> "(" ^ (unparse_expr_c x) ^ ")"
   and op nam a b c =
-    nam ^ "(" ^ (unparse_expr a) ^ ", " ^ (unparse_expr b) ^ ", " ^
-    (unparse_expr c) ^ ")"
+    nam ^ "(" ^ (unparse_expr_c a) ^ ", " ^ (unparse_expr_c b) ^ ", " ^
+    (unparse_expr_c c) ^ ")"
       			      
   in function
     | Load v -> Variable.unparse v
     | Num n -> Number.to_konst n
     | Plus [] -> "0.0 /* bug */"
-    | Plus [a] -> " /* bug */ " ^ (unparse_expr a)
+    | Plus [a] -> " /* bug */ " ^ (unparse_expr_c a)
     | Plus a -> (unparse_plus no a)
     | Times (a, b) -> (parenthesize a) ^ " * " ^ (parenthesize b)
     | Uminus a -> "- " ^ (parenthesize a)
+    | _ -> failwith "unparse_expr_c"
+
+and unparse_expr_generic = 
+  let rec binary op a b = 
+    op ^ "(" ^ (unparse_expr_generic a) ^ ", " ^ (unparse_expr_generic b) ^ ")"
+  and unary op a = 
+    op ^ "(" ^ (unparse_expr_generic a) ^ ")"
+  and unparse_plus = function
+    | [a; b] -> binary "ADD" a b
+    | a :: b :: c -> binary "ADD" a (Plus (b :: c))
+    | _ -> failwith "unparse_plus"
+  in function
+    | Load v -> Variable.unparse v 
+    | Num n -> Number.to_konst n
+    | Plus a -> unparse_plus a
+    | Times (a, b) -> binary "MUL" a b
+    | Uminus a -> unary "NEG" a
     | _ -> failwith "unparse_expr"
+
+and unparse_expr x = 
+  if !Magic.generic_arith then
+    unparse_expr_generic x
+  else
+    unparse_expr_c x
 
 and unparse_assignment (Assign (v, x)) =
   (Variable.unparse v) ^ " = " ^ (unparse_expr x) ^ ";\n"
