@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.193 2003-05-21 03:07:43 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.194 2003-05-28 00:02:31 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2730,9 +2730,9 @@ typedef struct @{
 @end example
 @tindex fftw_iodim
 
-Here, @code{n} is the size of the dimension, and @code{is} and
-@code{os} are the strides of that dimension for the input and output
-arrays.  
+Here, @code{n} is the size of the dimension, and @code{is} and @code{os}
+are the strides of that dimension for the input and output arrays.  (The
+stride is the separation of consecutive elements along this dimension.)
 
 The meaning of the stride parameter depends on the type of the array
 that the stride refers to.  @emph{If the array is interleaved complex,
