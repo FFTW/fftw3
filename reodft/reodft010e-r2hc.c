@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.26 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.27 2003-03-20 21:12:15 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -72,6 +72,10 @@ typedef struct {
 
    The FFTPACK source code was very helpful in working this out.
    (They do unnecessary passes over the array, though.)
+
+   Note that Numerical Recipes suggests a different algorithm that
+   requires more operations and uses trig. functions for both pre- and
+   post-processing pass.
 */
 
 static void apply_re01(const plan *ego_, R *I, R *O)
