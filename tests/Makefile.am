@@ -43,4 +43,4 @@ if THREADS
 endif
 
 paranoid-check: bench
-	perl -w $(srcdir)/check.pl -a -v --paranoid --nowisdom `pwd`/bench
+	perl -w $(srcdir)/check.pl -a --paranoid --nowisdom `pwd`/bench
