@@ -601,7 +601,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 
 /* constructors */
 
-solver *mksolver(uint min_prime)
+static solver *mksolver(uint min_prime)
 {
      static const solver_adt sadt = { mkplan, score };
      S *slv = MKSOLVER(S, &sadt);
@@ -609,7 +609,7 @@ solver *mksolver(uint min_prime)
      return &(slv->super);
 }
 
-solver *mksolver_dit(uint min_prime)
+static solver *mksolver_dit(uint min_prime)
 {
      static const solver_adt sadt = { mkplan_dit, score_dit };
      S *slv = MKSOLVER(S, &sadt);
