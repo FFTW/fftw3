@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.13 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: direct2.c,v 1.14 2003-02-09 01:59:07 stevenj Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -121,7 +121,6 @@ static int applicable(const solver *ego_, const problem *p_)
 	       && (0
 		   /* can operate out-of-place */
 		   || p->r != p->rio
-		   || p->r != p->iio
 
 		   /*
 		    * can compute one transform in-place, no matter
