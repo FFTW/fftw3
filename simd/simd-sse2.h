@@ -129,7 +129,7 @@ static __inline__ V VBYI(V x)
 
 static __inline__ V BYTW(const R *t, V sr)
 {
-     V tx = LD(t, 1);
+     V tx = LD(t, 1, t);
      V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
      V si = FLIP_RI(sr);
@@ -138,7 +138,7 @@ static __inline__ V BYTW(const R *t, V sr)
 
 static __inline__ V BYTWJ(const R *t, V sr)
 {
-     V tx = LD(t, 1);
+     V tx = LD(t, 1, t);
      V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
      V si = FLIP_RI(sr);
