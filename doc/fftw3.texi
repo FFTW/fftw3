@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.55 2003-03-01 23:50:43 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.56 2003-03-02 00:14:16 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -233,7 +233,7 @@ basic interface/features of FFTW in @ref{Tutorial}.  The following
 chapter discusses @ref{Other Stuff You Should Know}, including
 @ref{The Importance of Alignment}, the storage scheme of
 multi-dimensional arrays (@pxref{Multi-dimensional Array Format}), and
-FFTW's mechanism for storing plans on disk (@pxref{Words of Wisdom: Saving Plans}).
+FFTW's mechanism for storing plans on disk (@pxref{Words of Wisdom-Saving Plans}).
 Next, @ref{FFTW Reference} provides comprehensive documentation of all
 FFTW's features.  Parallel transforms are discussed in their own
 chapter @ref{Parallel FFTW}.  Fortran programmers can also use FFTW,
@@ -1034,7 +1034,7 @@ For the precise mathematical definition of the DHT as used by FFTW, see
 @menu
 * The Importance of Alignment::  
 * Multi-dimensional Array Format::  
-* Words of Wisdom: Saving Plans::             
+* Words of Wisdom-Saving Plans::             
 @end menu
 
 @c ------------------------------------------------------------
@@ -1126,7 +1126,7 @@ can copy the code from FFTW's @code{libbench2/aligned-main.c} to
 guarantee alignment of your @code{main} function (with @code{gcc}).
 
 @c ------------------------------------------------------------
-@node Multi-dimensional Array Format, Words of Wisdom: Saving Plans, The Importance of Alignment, Other Stuff You Should Know
+@node Multi-dimensional Array Format, Words of Wisdom-Saving Plans, The Importance of Alignment, Other Stuff You Should Know
 @section Multi-dimensional Array Format
 
 This section describes the format in which multi-dimensional arrays
@@ -1332,8 +1332,8 @@ see the @code{comp.lang.c}
 @uref{http://www.eskimo.com/~scs/C-faq/s6.html, FAQ}.
 
 @c ------------------------------------------------------------
-@node Words of Wisdom: Saving Plans,  , Multi-dimensional Array Format, Other Stuff You Should Know
-@section Words of Wisdom: Saving Plans
+@node Words of Wisdom-Saving Plans,  , Multi-dimensional Array Format, Other Stuff You Should Know
+@section Words of Wisdom---Saving Plans
 @cindex wisdom
 @cindex saving plans to disk
 
