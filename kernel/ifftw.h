@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.218 2003-04-05 02:35:49 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.219 2003-04-05 11:19:25 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -722,7 +722,7 @@ R *X(taint)(R *p, int s);
 #ifdef FFTW_DEBUG_ALIGNMENT
 #  define ASSERT_ALIGNED_DOUBLE {		\
      double __foo;				\
-     CK(0 == ((uintptr_t) &__foo) & 0x7);	\
+     CK(!(((uintptr_t) &__foo) & 0x7));		\
 }
 #else
 #  define ASSERT_ALIGNED_DOUBLE 
