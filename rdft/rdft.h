@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.28 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: rdft.h,v 1.29 2002-09-24 23:39:22 stevenj Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -31,7 +31,13 @@ typedef struct {
      problem super;
      tensor *sz, *vecsz;
      R *I, *O;
-     rdft_kind kind[1]; /* C99 allows [0], sigh */
+#if defined(STRUCT_HACK_KR)
+     rdft_kind kind[1];
+#elif defined(STRUCT_HACK_C99)
+     rdft_kind kind[];
+#else
+     rdft_kind *kind;
+#endif
 } problem_rdft;
 
 int X(problem_rdft_p)(const problem *p);

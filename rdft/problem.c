@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.29 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: problem.c,v 1.30 2002-09-24 23:39:22 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -26,6 +26,10 @@
 static void destroy(problem *ego_)
 {
      problem_rdft *ego = (problem_rdft *) ego_;
+#if !defined(STRUCT_HACK_C99) && !defined(STRUCT_HACK_KR)
+     if (ego->kind)
+	  X(free)(ego->kind);
+#endif
      X(tensor_destroy2)(ego->vecsz, ego->sz);
      X(free)(ego_);
 }
@@ -159,13 +163,24 @@ int X(problem_rdft_p)(const problem *p)
 problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 			   R *I, R *O, const rdft_kind *kind)
 {
-     problem_rdft *ego =
-          (problem_rdft *)X(mkproblem)(sizeof(problem_rdft)
-				       + sizeof(rdft_kind)
-				       * (X(uimax)(1, sz->rnk) - 1), 
-				       &padt);
-
+     problem_rdft *ego;
+     uint rnk = sz->rnk;
      uint i, total_n = 1;
+
+     A(FINITE_RNK(rnk));
+
+#if defined(STRUCT_HACK_KR)
+     ego = (problem_rdft *) X(mkproblem)(sizeof(problem_rdft)
+					 + sizeof(rdft_kind)
+					 * (rnk > 1 ? rnk - 1 : 0), &padt);
+#elif defined(STRUCT_HACK_C99)
+     ego = (problem_rdft *) X(mkproblem)(sizeof(problem_rdft)
+					 + sizeof(rdft_kind) * rnk, &padt);
+#else
+     ego = (problem_rdft *) X(mkproblem)(sizeof(problem_rdft), &padt);
+     ego->kind = (rdft_kind *) fftw_malloc(sizeof(rdft_kind) * rnk, PROBLEMS);
+#endif
+
      for (i = 0; i < sz->rnk; ++i)
 	  total_n *= X(rdft_real_n)(kind[i], sz->dims[i].n);
      A(total_n > 0); /* or should we use vecsz RNK_MINFTY? */
@@ -192,7 +207,7 @@ problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
      return p;
 }
 
-/* As above, but for rnk == 1 only and takes a scalar kind parameter */
+/* As above, but for rnk <= 1 only and takes a scalar kind parameter */
 problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
 			     R *I, R *O, rdft_kind kind)
 {
