@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.4 2002-08-15 13:48:37 athena Exp $ */
+/* $Id: verify.c,v 1.5 2002-08-15 20:29:16 athena Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -440,6 +440,9 @@ static void do_accuracy(struct problem *p)
      b = (bench_complex *) bench_malloc(n * sizeof(bench_complex));
      
      arand(a, n);
+     for (i = 0; i < n; ++i)
+	  c_re(a[i]) = c_im(a[i]) = i;
+
      if (p->kind == PROBLEM_REAL) {
 	  if (p->sign == -1) 
 	       mkreal(a, n); 

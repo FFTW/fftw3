@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2hc.ml,v 1.5 2002-07-22 03:43:03 stevenj Exp $ *)
+(* $Id: gen_hc2hc.ml,v 1.6 2002-08-15 20:29:16 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2hc.ml,v 1.5 2002-07-22 03:43:03 stevenj Exp $"
+let cvsid = "$Id: gen_hc2hc.ml,v 1.6 2002-08-15 20:29:16 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -72,11 +72,13 @@ let genone sign n transform load store viostride =
   in annot
 
 let byi = Complex.times Complex.i
+let byui = Complex.times (Complex.uminus Complex.i)
 
 let sym1 n f i = 
   Complex.plus [Complex.real (f i); byi (Complex.imag (f (n - 1 - i)))]
 
 let sym2 n f i = if (i < n - i) then f i else byi (f i)
+let sym2i n f i = if (i < n - i) then f i else byui (f i)
 
 let generate n =
   let iostride = "ios"
@@ -106,7 +108,7 @@ let generate n =
 	  load_array_c store_array_c viostride
     | DIF -> 
 	genone sign n 
-	  (fun sign n input -> sym1 n (byw (Fft.dft sign n (sym2 n input))))
+	  (fun sign n input -> sym1 n (byw (Fft.dft sign n (sym2i n input))))
 	  load_array_c store_array_c viostride
   in
 
