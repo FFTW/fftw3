@@ -22,7 +22,8 @@
 
 double X(timelimit) = 1e30;
 
-static plan *mkplan(planner *plnr, int sign, unsigned flags, problem *prb)
+static plan *mkplan(planner *plnr, int sign, unsigned flags, problem *prb,
+		    int bless)
 WITH_ALIGNED_STACK({
      plan *pln;
      double timelimit = plnr->timelimit;
@@ -32,6 +33,11 @@ WITH_ALIGNED_STACK({
      
      /* map API flags into FFTW flags */
      X(mapflags)(plnr, flags);
+
+     if (bless)
+	  plnr->planner_flags |= BLESSING;
+     else
+	  plnr->planner_flags &= ~BLESSING;
 
      /* create plan */
      pln = plnr->adt->mkplan(plnr, prb);
@@ -60,11 +66,9 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
      plnr->timelimit = X(seconds)() + ((flags & FFTW_TIMELIMIT)
 				       ? X(timelimit) : 1e30);
 	  
-     plnr->planner_flags &= ~BLESSING;
-
      /* plan at incrementally increasing patience until we run out of time */
      do {
-	  plan *pln1 = mkplan(plnr, sign, flags | pats[pat], prb);
+	  plan *pln1 = mkplan(plnr, sign, flags | pats[pat], prb, 0);
 
 	  if (pln1) {
 	       X(plan_destroy_internal)(pln);
@@ -82,9 +86,8 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	  p->prb = prb;
 	  p->sign = sign; /* cache for execute_dft */
 	  
-	  /* blessing protocol */
-	  plnr->planner_flags |= BLESSING;
-	  p->pln = mkplan(plnr, sign, flags | FFTW_ESTIMATE, prb);
+	  /* re-create plan from wisdom, adding blessing */
+	  p->pln = mkplan(plnr, sign, flags | FFTW_ESTIMATE, prb, 1);
 	  AWAKE(p->pln, 1);
 	  
 	  /* we don't use pln for p->pln, above, since by re-creating the
