@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: traverse.c,v 1.1 2002-07-14 20:09:17 stevenj Exp $ */
+/* $Id: traverse.c,v 1.2 2002-07-14 20:14:15 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
@@ -94,21 +94,20 @@ static void traverse(printer *p, const char *format, ...)
      va_end(ap);
 }
 
-static printer *mktraverser(void (*visit)(plan *, void *), void *closure)
-{
-     traverser *s = (traverser *)fftw_malloc(sizeof(traverser), OTHER);
-     s->parent.print = traverse;
-     s->parent.vprint = vtraverse;
-     s->parent.putchr = 0;
-     s->parent.indent = s->parent.indent_incr = 0;
-     s->visit = visit;
-     s->closure = closure;
-     return (printer *) s;
-}
+static void putchr_nop(printer *p, char c) { UNUSED(p); UNUSED(c); }
 
 void X(traverse_plan)(plan *p, void (*visit)(plan *, void *), void *closure)
 {
-     printer *pr = mktraverser(visit, closure);
+     traverser *s = (traverser *)fftw_malloc(sizeof(traverser), OTHER);
+     printer *pr = (printer *) s;
+
+     s->parent.print = traverse;
+     s->parent.vprint = vtraverse;
+     s->parent.putchr = putchr_nop;
+     s->parent.indent = s->parent.indent_incr = 0;
+     s->visit = visit;
+     s->closure = closure;
+
      p->adt->print(p, pr);
      visit(p, closure);
      X(free)(pr);
