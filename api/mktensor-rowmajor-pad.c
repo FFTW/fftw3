@@ -44,10 +44,6 @@ static uint *copy_n(uint rnk, const uint *n)
    - if nophys == n, then the last dimension of nophys is cut in half + 1
      to convert to the halfcomplex output size.
 
-   - otherwise, if nophys == niphys then the last dimension of nophys
-     is cut in half to convert from the real to the complex size,
-     adding 1 if niphys[rnk-1] == n[rnk-1].
-
    Ugh.
 */
 tensor *X(mktensor_rowmajor_pad)(uint rnk, const uint *n,
@@ -55,7 +51,6 @@ tensor *X(mktensor_rowmajor_pad)(uint rnk, const uint *n,
 				 int is, int os,
 				 int inplace)
 {
-     const uint *niphys0 = niphys;
      uint *niphys_pad = 0;
      uint *nophys_pad = 0;
      tensor *x;
@@ -69,12 +64,6 @@ tensor *X(mktensor_rowmajor_pad)(uint rnk, const uint *n,
 	  if (nophys == n) {
 	       nophys_pad = copy_n(rnk, n);
 	       nophys_pad[rnk-1] = n[rnk-1] / 2 + 1;
-	       nophys = nophys_pad;
-	  }
-	  else if (nophys == niphys0) {
-	       nophys_pad = copy_n(rnk, niphys);
-	       nophys_pad[rnk-1] = niphys[rnk-1] / 2
-		    + (niphys[rnk-1] == n[rnk-1]);
 	       nophys = nophys_pad;
 	  }
      }
