@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.7 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: timer.c,v 1.8 2002-06-12 22:57:19 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdio.h>
@@ -91,13 +91,7 @@ static double measure(plan *pln, const problem *p, int iter)
      return elapsed(t1, t0);
 }
 
-/*
- * This routine measures the execution time of a plan.
- * If SECONDSP, the returned runtime is in seconds.  This
- * choice may require the use of slow timers.  Otherwise,
- * the time is returned in some arbitrary unit if this
- * allows the use of fast timers.
- */
+
 double X(measure_execution_time)(plan *pln, const problem *p)
 {
      seconds begin, now;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.9 2002-06-12 11:47:41 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.10 2002-06-12 22:57:19 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -227,7 +227,7 @@ void X(dft_rank_geq2_register)(planner *p)
 {
      uint i;
 #if CLASSIC_MODE
-     static const int buddies[] = { -1 };
+     static const int buddies[] = { 0 };
 #else
      static const int buddies[] = { 1, -1, 0 };
 #endif

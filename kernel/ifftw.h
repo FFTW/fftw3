@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.27 2002-06-12 22:19:48 athena Exp $ */
+/* $Id: ifftw.h,v 1.28 2002-06-12 22:57:19 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -294,7 +294,7 @@ struct planner_s {
      const planner_adt *adt;
      uint nplan;    /* number of plans evaluated */
      uint nprob;    /* number of problems evaluated */
-     void (*hook)(plan *plan, problem *p);
+     void (*hook)(const plan *plan, const problem *p);
 
      pair *solvers;
      solutions **sols;
@@ -303,6 +303,8 @@ struct planner_s {
      uint hashsiz;
      uint cnt;
      int estimatep;             /* if TRUE, use estimate of execution time */
+     int timeallp;              /* if TRUE, always time and ignore cost 
+				   estimate */
 };
 
 planner *X(mkplanner)(size_t sz,
@@ -310,8 +312,9 @@ planner *X(mkplanner)(size_t sz,
 				     plan **, solver **),
                       void (*destroy) (planner *), int estimatep);
 void X(planner_destroy)(planner *ego);
-void X(planner_set_hook)(planner *p, void (*hook)(plan *, problem *));
-double X(evaluate_plan)(planner *ego, plan *pln, const problem *p);
+void X(planner_set_hook)(planner *p, void (*hook)(const plan *,
+						  const problem *));
+void X(evaluate_plan)(planner *ego, plan *pln, const problem *p);
 
 #ifdef FFTW_DEBUG
 void X(planner_dump)(planner *ego, int verbose);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.11 2002-06-12 22:19:48 athena Exp $ */
+/* $Id: planner.c,v 1.12 2002-06-12 22:57:19 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -72,7 +72,7 @@ static void register_solver(planner *ego, solver *s)
      ego->solvers = cons(s, ego->solvers);
 }
 
-static void hooknil(plan *plan, problem *p)
+static void hooknil(const plan *plan, const problem *p)
 {
      UNUSED(plan);
      UNUSED(p);
@@ -245,6 +245,7 @@ planner *X(mkplanner)(size_t sz,
      p->hashsiz = 0;
      p->cnt = 0;
      p->estimatep = estimatep;
+     p->timeallp = !CLASSIC_MODE;
      rehash(p);			/* so that hashsiz > 0 */
 
      return p;
@@ -272,22 +273,28 @@ void X(planner_destroy)(planner *ego)
 }
 
 /* set planner hook */
-void X(planner_set_hook)(planner *p, void (*hook)(plan *, problem *))
+void X(planner_set_hook)(planner *p, 
+			 void (*hook)(const plan *, const problem *))
 {
      p->hook = hook;
 }
 
-double X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
+void X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
 {
-     if (ego->estimatep) {
-	  /* heuristic */
-	  return 0
-	       + pln->ops.add
-	       + pln->ops.mul
-	       + 2 * pln->ops.fma
-	       + pln->ops.other;
-     } else {
-	  return X(measure_execution_time)(pln, p);
+     ego->hook(pln, p);
+
+     if (ego->timeallp || pln->pcost == 0.0) {
+	  ego->nplan++;
+	  if (ego->estimatep) {
+	       /* heuristic */
+	       pln->pcost = 0
+		    + pln->ops.add
+		    + pln->ops.mul
+		    + 2 * pln->ops.fma
+		    + pln->ops.other;
+	  } else {
+	       pln->pcost = X(measure_execution_time)(pln, p);
+	  }
      }
 }
 

@@ -38,7 +38,7 @@ static void putchr(printer *p, char c)
      putchar(c);
 }
 
-static void debug_hook(plan *pln, fftw_problem *p_)
+static void debug_hook(const plan *pln, const fftw_problem *p_)
 {
      problem_dft *p = (problem_dft *) p_;
      printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
