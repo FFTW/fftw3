@@ -143,7 +143,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      const problem_dft *p = (const problem_dft *) p_;
      P *pln = 0;
      uint n, r, m;
-     int is, os, 
+     int is, os;
      plan *cld = (plan *) 0;
 
      static const plan_adt padt = {
