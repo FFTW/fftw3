@@ -506,6 +506,9 @@ static void bluestein(int n, N *a)
 	  if (y) bench_free(y);
 	  w = (N *)bench_malloc(2 * n * sizeof(N));
 	  y = (N *)bench_malloc(2 * nb * sizeof(N));
+	  cached_bluestein_n = n;
+	  cached_bluestein_w = w;
+	  cached_bluestein_y = y;
 
 	  bluestein_sequence(n, w);
 	  for (i = 0; i < 2*nb; ++i)  cpy(zero, y[i]);
@@ -520,9 +523,6 @@ static void bluestein(int n, N *a)
 	  }
 
 	  fft0(nb, y, -1);
-	  cached_bluestein_n = n;
-	  cached_bluestein_w = w;
-	  cached_bluestein_y = y;
      }
 
      for (i = 0; i < 2*nb; ++i)  cpy(zero, b[i]);
@@ -635,4 +635,7 @@ void fftaccuracy_done(void)
 {
      if (cached_bluestein_w) bench_free(cached_bluestein_w);
      if (cached_bluestein_y) bench_free(cached_bluestein_y);
+     cached_bluestein_w = 0;
+     cached_bluestein_y = 0;
+     cached_bluestein_n = -1;
 }
