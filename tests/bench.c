@@ -72,8 +72,6 @@ void rdwisdom(void)
      FFTW(plan_with_nthreads)(nthreads);
 #endif
 
-     install_hook();
-
      if (!usewisdom) return;
 
      timer_start();
@@ -659,6 +657,7 @@ void setup(bench_problem *p)
 	  p->destroy_input = 1; /* default for c2r out-of-place transforms */
 
      rdwisdom();
+     install_hook();
 
 #ifdef HAVE_THREADS
      if (verbose > 1 && nthreads > 1) printf("NTHREADS = %d\n", nthreads);
