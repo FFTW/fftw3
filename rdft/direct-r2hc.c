@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct-r2hc.c,v 1.1 2002-07-21 06:06:53 stevenj Exp $ */
+/* $Id: direct-r2hc.c,v 1.2 2002-07-21 22:43:12 stevenj Exp $ */
 
 /* direct RDFT R2HC solver, if we have a codelet */
 
@@ -125,6 +125,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      iodim *d, *vd;
      const kr2hc_desc *e = ego->desc;
+     uint nr;
 
      static const plan_adt padt = {
 	  X(rdft_solve), X(null_awake), print, destroy
@@ -143,10 +144,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      vd = p->vecsz.dims;
 
      pln->k = ego->k;
-     pln->n = d[0].n;
+     pln->n = (p->kind == R2HC) ? d[0].n : /* R2HCII */ (d[0].n - 1);
+
+     nr = (p->kind == R2HC) ? (d[0].n + 2) / 2 : /* R2HCII */ (d[0].n + 1) / 2;
      pln->is = X(mkstride)(e->sz, d[0].is);
-     pln->ros = X(mkstride)(e->sz, d[0].os);
-     pln->ios = X(mkstride)(e->sz, -d[0].os);
+     pln->ros = X(mkstride)(nr, d[0].os);
+     pln->ios = X(mkstride)(e->sz - nr + 1, -d[0].os);
 
      if (p->vecsz.rnk == 0) {
           pln->vl = 1;
