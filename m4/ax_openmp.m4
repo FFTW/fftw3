@@ -27,7 +27,7 @@ dnl flag is found, and ACTION-IF-NOT-FOUND is a list of commands
 dnl to run it if it is not found.  If ACTION-IF-FOUND is not specified,
 dnl the default action will define HAVE_OPENMP.
 dnl
-dnl @version $Id: ax_openmp.m4,v 1.1 2004-11-08 22:49:42 stevenj Exp $
+dnl @version $Id: ax_openmp.m4,v 1.2 2004-11-09 02:59:33 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([AX_OPENMP], [
@@ -37,7 +37,11 @@ AC_CACHE_CHECK([for OpenMP flag of _AC_LANG compiler], ax_cv_[]_AC_LANG_ABBREV[]
 ax_cv_[]_AC_LANG_ABBREV[]_openmp=unknown
 # Flags to try:
 #  -openmp (icc), -mp (SGI), -xopenmp (Sun), -omp (Tru64), -qsmp=omp (AIX), none
-for ax_openmp_flag in "$OPENMP[]_AC_LANG_PREFIX[]FLAGS" -openmp -mp -xopenmp -omp -qsmp=omp none; do
+ax_openmp_flags="-openmp -mp -xopenmp -omp -qsmp=omp none"
+if test "x$OPENMP_[]_AC_LANG_PREFIX[]FLAGS" != x; then
+  ax_openmp_flags="$OPENMP_[]_AC_LANG_PREFIX[]FLAGS $ax_openmp_flags"
+fi
+for ax_openmp_flag in $ax_openmp_flags; do
   case $ax_openmp_flag in
     none) []_AC_LANG_PREFIX[]FLAGS=$save[]_AC_LANG_PREFIX[] ;;
     *) []_AC_LANG_PREFIX[]FLAGS="$save[]_AC_LANG_PREFIX[]FLAGS $ax_openmp_flag" ;;
