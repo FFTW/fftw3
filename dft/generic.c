@@ -36,13 +36,15 @@ static void cdot(int n, const E *x, const R *w, int ws,
 {
      int wp, i;
 
-     E rr = x[0], ri = 0, ir = x[1], ii = 0;
+     E rr = x[0], ri = 0, ir = x[1], ii = 0; 
+     x += 2;
      for (wp = 0, i = 1; i + i < n; ++i) {
 	  wp += ws; if (wp >= n) wp -= n;
-	  rr += x[2 * i]           * w[2*wp];
-	  ri += x[2 * (n - i)]     * w[2*wp+1];
-	  ii += x[2 * (n - i) + 1] * w[2*wp+1];
-	  ir += x[2 * i + 1]       * w[2*wp];
+	  rr += x[0] * w[2*wp];
+	  ir += x[1] * w[2*wp];
+	  ri += x[2] * w[2*wp+1];
+	  ii += x[3] * w[2*wp+1];
+	  x += 4;
      }
      *or0 = rr - ii;
      *oi0 = ir + ri;
@@ -50,29 +52,21 @@ static void cdot(int n, const E *x, const R *w, int ws,
      *oi1 = ir - ri;
 }
 
-static void csum(int n, const E *x, R *or, R *oi)
+static void hartley(int n, const R *xr, const R *xi, int xs, E *o,
+		    R *pr, R *pi)
 {
      int i;
-
-     E rr = x[0], ir = x[1];
+     E sr, si;
+     o[0] = sr = xr[0]; o[1] = si = xi[0]; o += 2;
      for (i = 1; i + i < n; ++i) {
-	  rr += x[2 * i];
-	  ir += x[2 * i + 1];
+	  sr += (o[0] = xr[i * xs] + xr[(n - i) * xs]);
+	  si += (o[1] = xi[i * xs] + xi[(n - i) * xs]);
+	  o[2] = xr[i * xs] - xr[(n - i) * xs];
+	  o[3] = xi[i * xs] - xi[(n - i) * xs];
+	  o += 4;
      }
-     *or = rr;
-     *oi = ir;
-}
-
-static void hartley(int n, const R *xr, const R *xi, int xs, E *o)
-{
-     int i;
-     o[0] = xr[0]; o[1] = xi[0];
-     for (i = 1; i + i < n; ++i) {
-	  o[2 * i]           = xr[i * xs] + xr[(n - i) * xs];
-	  o[2 * i + 1]       = xi[i * xs] + xi[(n - i) * xs];
-	  o[2 * (n - i)]     = xr[i * xs] - xr[(n - i) * xs];
-	  o[2 * (n - i) + 1] = xi[i * xs] - xi[(n - i) * xs];
-     }
+     *pr = sr;
+     *pi = si;
 }
 		    
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
@@ -84,9 +78,8 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      E *buf;
 
      STACK_MALLOC(E *, buf, n * 2 * sizeof(E));
-     hartley(n, ri, ii, is, buf);
+     hartley(n, ri, ii, is, buf, ro, io);
 
-     csum(n, buf, ro, io);
      for (i = 1; i + i < n; ++i) 
 	  cdot(n, buf, W, i,
 	       ro + i * os, io + i * os,
@@ -162,9 +155,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->os = p->sz->dims[0].os;
      pln->td = 0;
 
-     pln->super.super.ops.add = (n-1) * (2 /* hartley */ 
-					 + 1 /* csum */ 
-					 + 2 /* cdot */);
+     pln->super.super.ops.add = (n-1) * 5;
      pln->super.super.ops.mul = 0;
      pln->super.super.ops.fma = (n-1) * (n-1) ;
      pln->super.super.ops.other = (n-1)*(4 + 1 + 2 * (n-1));  /* approximate */
