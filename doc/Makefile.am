@@ -29,7 +29,7 @@ html: $(fftw3_TEXINFOS) $(EQN_IMAGES) rfftwnd.png
 	$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
 		--html --number-sections -o html fftw3.texi
 	for i in $(EQN_IMAGES); do cp -f ${srcdir}/$$i html; done
-	cp -f rfftwnd.png html
+	cp -f ${srcdir}/rfftwnd.png html
 
 clean-local:
 	rm -f *.html
