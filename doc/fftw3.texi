@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.199 2003-08-26 12:22:38 athena Exp $
+@comment $Id: fftw3.texi,v 1.200 2003-09-02 13:04:19 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1862,7 +1862,8 @@ The following two routines are provided purely for academic purposes
 (that is, for entertainment).
 
 @example
-void fftw_flops(const fftw_plan plan, double *add, double *mul, double *fma);
+void fftw_flops(const fftw_plan plan, 
+                double *add, double *mul, double *fma);
 @end example
 @findex fftw_flops
 
@@ -2581,6 +2582,9 @@ For in-place transforms, the input and output @code{stride} and
 @code{dist} parameters should be the same; otherwise, the planner may
 return @code{NULL}.
 
+Arrays @code{n}, @code{inembed}, and @code{onembed} are not used after
+this function returns.  You can safely free or reuse them.
+
 So, for example, to transform a sequence of contiguous arrays, stored
 one after another, one would use a @code{stride} of 1 and a @code{dist}
 of @math{N}, where @math{N} is the product of the dimensions.  In
@@ -2635,6 +2639,9 @@ as for @code{fftw_plan_many_dft}.  In this case, each dimension of
 @code{nembed} should be @code{>=} what it would be in the basic
 interface (e.g. the halved or padded @code{n}).
 
+Arrays @code{n}, @code{inembed}, and @code{onembed} are not used after
+this function returns.  You can safely free or reuse them.
+
 @c =========>
 @node Advanced Real-to-real Transforms,  , Advanced Real-data DFTs, Advanced Interface
 @subsection Advanced Real-to-real Transforms
@@ -2656,6 +2663,9 @@ basic interface.  The interpretation of those additional parameters are
 the same as for @code{fftw_plan_many_dft}.  (Of course, the
 @code{stride} and @code{dist} parameters are now in units of
 @code{double}, not @code{fftw_complex}.)
+
+Arrays @code{n}, @code{inembed}, @code{onembed}, and @code{kind} are not
+used after this function returns.  You can safely free or reuse them.
 
 @c ------------------------------------------------------------
 @node Guru Interface, Wisdom, Advanced Interface, FFTW Reference
