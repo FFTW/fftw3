@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.176 2003-01-16 21:57:06 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.177 2003-01-17 06:44:44 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -224,8 +224,6 @@ void X(ops_madd2)(int m, const opcnt *a, opcnt *dst);
 /* minmax.c: */
 int X(imax)(int a, int b);
 int X(imin)(int a, int b);
-int X(uimax)(int a, int b);
-int X(uimin)(int a, int b);
 
 /*-----------------------------------------------------------------------*/
 /* iabs.c: */

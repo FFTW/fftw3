@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.27 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: buffered2.c,v 1.28 2003-01-17 06:44:44 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -247,8 +247,8 @@ static int min_nbuf(const problem_rdft2 *p, int n, int vl)
 	 && (n/2 + 1) * X(iabs)(os) <= X(iabs)(ovs)
 	 && X(iabs)((int) (p->rio - p->iio)) <= X(iabs)(os)
 	 && ivs > 0 && ovs > 0) {
-	  int vsmin = X(uimin)(ivs, ovs);
-	  int vsmax = X(uimax)(ivs, ovs);
+	  int vsmin = X(imin)(ivs, ovs);
+	  int vsmax = X(imax)(ivs, ovs);
 	  return(((vsmax - vsmin) * vl + vsmin - 1) / vsmin);
      }
 
@@ -315,7 +315,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      n = p->sz->dims[0].n;
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
-     nbuf = X(uimax)(compute_nbuf(n, vl, ego), min_nbuf(p, n, vl));
+     nbuf = X(imax)(compute_nbuf(n, vl, ego), min_nbuf(p, n, vl));
      A(nbuf > 0);
 
      /*

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.21 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.22 2003-01-17 06:44:44 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -129,7 +129,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	       iodim *d = p->vecsz->dims + *dp;
 	       if (1
 		   && p->sz->rnk > 1 
-		   && X(uimin)(X(iabs)(d->is), X(iabs)(d->os))
+		   && X(imin)(X(iabs)(d->is), X(iabs)(d->os))
 		   < X(tensor_max_index)(p->sz)
 		    )
 		    return 0;

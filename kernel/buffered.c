@@ -27,7 +27,7 @@ int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz)
      int i; 
 
      if (nbuf * n > maxbufsz)
-          nbuf = X(uimax)((int)1, maxbufsz / n);
+          nbuf = X(imax)((int)1, maxbufsz / n);
 
      /*
       * Look for a buffer number (not too big) that divides the
@@ -38,7 +38,7 @@ int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz)
                return i;
 
      /* whatever... */
-     nbuf = X(uimin)(nbuf, vl);
+     nbuf = X(imin)(nbuf, vl);
      return nbuf;
 }
 

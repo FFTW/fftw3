@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-tensor-max-index.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: rdft2-tensor-max-index.c,v 1.4 2003-01-17 06:44:44 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -32,15 +32,15 @@ int X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k)
      A(FINITE_RNK(sz->rnk));
      for (i = 0; i + 1 < sz->rnk; ++i) {
           const iodim *p = sz->dims + i;
-          n += (p->n - 1) * X(uimax)(X(iabs)(p->is), X(iabs)(p->os));
+          n += (p->n - 1) * X(imax)(X(iabs)(p->is), X(iabs)(p->os));
      }
      if (i < sz->rnk) {
 	  const iodim *p = sz->dims + i;
 	  if (k == R2HC)
-	       n += X(uimax)((p->n - 1) * X(iabs)(p->is),
+	       n += X(imax)((p->n - 1) * X(iabs)(p->is),
 			     (p->n/2) * X(iabs)(p->os));
 	  else /* HC2R */
-	       n += X(uimax)((p->n - 1) * X(iabs)(p->os),
+	       n += X(imax)((p->n - 1) * X(iabs)(p->os),
 			     (p->n/2) * X(iabs)(p->is));
      }
      return n;

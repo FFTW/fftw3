@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.23 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.24 2003-01-17 06:44:44 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -142,7 +142,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	     probably want to use a rank>=2 plan first in order to combine
 	     this vector with the transform-dimension vectors. */
 	  if (p->sz->rnk > 1
-	      && X(uimin)(X(iabs)(d->is), X(iabs)(d->os))
+	      && X(imin)(X(iabs)(d->is), X(iabs)(d->os))
 	      < X(rdft2_tensor_max_index)(p->sz, p->kind)
 	       )
 	       return 0;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-inplace-strides.c,v 1.2 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: rdft2-inplace-strides.c,v 1.3 2003-01-17 06:44:44 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -64,5 +64,5 @@ int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim)
      }
      return(p->vecsz->dims[vdim].is == p->vecsz->dims[vdim].os
 	    && X(iabs)(p->vecsz->dims[vdim].os)
-	    >= X(uimax)(Nc * X(iabs)(os), N * X(iabs)(is)));
+	    >= X(imax)(Nc * X(iabs)(os), N * X(iabs)(is)));
 }

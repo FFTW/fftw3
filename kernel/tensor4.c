@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor4.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: tensor4.c,v 1.4 2003-01-17 06:44:44 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -30,7 +30,7 @@ int X(tensor_max_index)(const tensor *sz)
      A(FINITE_RNK(sz->rnk));
      for (i = 0; i < sz->rnk; ++i) {
           const iodim *p = sz->dims + i;
-          n += (p->n - 1) * X(uimax)(X(iabs)(p->is), X(iabs)(p->os));
+          n += (p->n - 1) * X(imax)(X(iabs)(p->is), X(iabs)(p->os));
      }
      return n;
 }
@@ -42,7 +42,7 @@ int X(tensor_max_index)(const tensor *sz)
           int i;						\
           int s = X(iabs)(sz->dims[0].xs);			\
           for (i = 1; i < sz->rnk; ++i)				\
-               s = X(uimin)(s, X(iabs)(sz->dims[i].xs));	\
+               s = X(imin)(s, X(iabs)(sz->dims[i].xs));	\
           return s;						\
      }								\
 }
@@ -52,7 +52,7 @@ int X(tensor_min_ostride)(const tensor *sz) tensor_min_xstride(sz, os)
 
 int X(tensor_min_stride)(const tensor *sz)
 {
-     return X(uimin)(X(tensor_min_istride)(sz), X(tensor_min_ostride)(sz));
+     return X(imin)(X(tensor_min_istride)(sz), X(tensor_min_ostride)(sz));
 }
 
 int X(tensor_inplace_strides)(const tensor *sz)
