@@ -348,9 +348,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->super.super.ops.add += (npad/2-1)*2 + 2 + (n-1) * ego->pad;
      pln->super.super.ops.mul += (npad/2-1)*4 + 2 + ego->pad;
 #if R2HC_ONLY_CONV
-     /* FIXME */
-     pln->super.super.ops.other += 0;
-     pln->super.super.ops.add += 0;
+     pln->super.super.ops.other += n-2 - ego->pad;
+     pln->super.super.ops.add += (npad/2-1)*2 + (n-2) - ego->pad;
 #endif
 
      return &(pln->super.super);
