@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.57 2002-09-02 19:02:11 athena Exp $ */
+/* $Id: planner.c,v 1.58 2002-09-03 13:03:46 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -26,8 +26,11 @@
 #define BLESS(s) (s)->flags |= BLESSING
 #define BLESSEDP(s) ((s)->flags & BLESSING)
 
-/* Entry in the solutions hash table */
-
+/* 
+   liber scriptus proferetur
+   in quo totum continetur
+   unde mundus iudicetur
+*/
 struct solutions_s {
      md5uint s[4];
      uint flags;
@@ -271,6 +274,7 @@ static void forget(planner *ego, amnesia a)
 	       }
 	  }
      }
+     /* nihil in ultum remanebit */
 }
 
 static void htab_destroy(planner *ego)
