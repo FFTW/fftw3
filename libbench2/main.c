@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: main.c,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: main.c,v 1.2 2003-02-09 23:08:26 athena Exp $ */
 
 #include "bench.h"
 
@@ -36,5 +36,5 @@
 /* in a separate file so that the user can override it */
 int main(int argc, char *argv[])
 {
-     return bench_main(argc, argv);
+     return aligned_main(argc, argv);
 }
