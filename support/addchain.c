@@ -32,7 +32,7 @@ if (k >= 0 && k < n) {				\
 
 static int optimize(int n, int *A)
 {
-     int i, j, k, changed, cst;
+     int i, j, k, changed, cst, cstmax;
 
      do {
 	  changed = 0;
@@ -51,9 +51,12 @@ static int optimize(int n, int *A)
 
      } while (changed);
 
-     cst = 0;
-     for (i = 0; i < n; ++i)
+     cst = cstmax = 0;
+     for (i = 0; i < n; ++i) {
 	  cst += A[i];
+	  if (A[i] > cstmax) cstmax = A[i];
+     }
+/*     return cstmax; */
      return cst;
 }
 
@@ -139,7 +142,7 @@ int main(int argc, char *argv[])
 
      if (all) {
 	  for (n = 4; n <= 64; n *= 2) {
-	       int n1 = n - 1; if (n1 > 5) n1 = 5;
+	       int n1 = n - 1; if (n1 > 6) n1 = 6;
 	       for (t = 1; t <= n1; ++t)
 		    doit(n, t);
 	  }
