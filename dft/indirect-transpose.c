@@ -26,8 +26,6 @@
 
 #include "dft.h"
 
-typedef problem *(*mkcld_t) (const problem_dft *p);
-
 typedef struct {
      solver super;
      int transpose_inplace;
