@@ -11,6 +11,10 @@ dnl Also sets PTHREAD_CC to any special C compiler that is needed for
 dnl multi-threaded programs (defaults to the value of CC otherwise).
 dnl (This is necessary on AIX to use the special cc_r compiler alias.)
 dnl
+dnl NOTE: You are assumed to not only compile your program with these
+dnl flags, but also link it with them as well.  e.g. you should link
+dnl with $PTHREAD_CC $CFLAGS $PTHREAD_CFLAGS $LDFLAGS ... $PTHREAD_LIBS $LIBS
+dnl
 dnl If you are only building threads programs, you may wish to
 dnl use these variables in your default LIBS, CFLAGS, and CC:
 dnl
@@ -34,7 +38,7 @@ dnl (with help from M. Frigo), as well as ac_pthread and hb_pthread
 dnl macros posted by AFC to the autoconf macro repository.  We are also
 dnl grateful for the helpful feedback of numerous users.
 dnl
-dnl @version $Id: acx_pthread.m4,v 1.2 2002-09-17 04:40:04 stevenj Exp $
+dnl @version $Id: acx_pthread.m4,v 1.3 2003-05-15 01:57:39 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Alejandro Forero Cuervo <bachue@bachue.com>
 
 AC_DEFUN([ACX_PTHREAD], [
