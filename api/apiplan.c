@@ -22,8 +22,7 @@
 
 double X(timelimit) = 1e30;
 
-static plan *mkplan(planner *plnr, int sign, unsigned flags, problem *prb,
-		    int bless)
+static plan *mkplan(planner *plnr, unsigned flags, problem *prb, int bless)
 WITH_ALIGNED_STACK({
      plan *pln;
      double timelimit = plnr->timelimit;
@@ -50,7 +49,8 @@ WITH_ALIGNED_STACK({
 apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 {
      apiplan *p = 0;
-     plan *pln = 0;
+     plan *pln;
+     unsigned flags_used_for_planning;
      planner *plnr = X(the_planner)();
      unsigned int pats[] = {FFTW_ESTIMATE, FFTW_MEASURE,
 			    FFTW_PATIENT, FFTW_EXHAUSTIVE};
@@ -67,18 +67,21 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 				       ? X(timelimit) : 1e30);
 	  
      /* plan at incrementally increasing patience until we run out of time */
-     do {
-	  plan *pln1 = mkplan(plnr, sign, flags | pats[pat], prb, 0);
+     for (pln = 0, flags_used_for_planning = 0; pat <= pat_max; ++pat) {
+	  plan *pln1;
+	  unsigned tmpflags = flags | pats[pat];
+	  pln1 = mkplan(plnr, tmpflags, prb, 0);
 
-	  if (pln1) {
-	       X(plan_destroy_internal)(pln);
-	       pln = pln1;
-	  }
-	  else { /* don't bother continuing if planner failed or timed out */
+	  if (!pln1) {
+	       /* don't bother continuing if planner failed or timed out */
 	       A(!pln || plnr->timed_out);
 	       break;
 	  }
-     } while (++pat <= pat_max);
+
+	  X(plan_destroy_internal)(pln);
+	  pln = pln1;
+	  flags_used_for_planning = tmpflags;
+     }
 
      if (pln) {
 	  /* build apiplan */
@@ -87,14 +90,13 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	  p->sign = sign; /* cache for execute_dft */
 	  
 	  /* re-create plan from wisdom, adding blessing */
-	  p->pln = mkplan(plnr, sign, flags | pats[pat - 1], prb, 1);
+	  p->pln = mkplan(plnr, flags_used_for_planning, prb, 1);
 	  AWAKE(p->pln, 1);
 	  
 	  /* we don't use pln for p->pln, above, since by re-creating the
 	     plan we might use more patient wisdom from a timed-out mkplan */
 	  X(plan_destroy_internal)(pln);
-     }
-     else
+     } else
 	  X(problem_destroy)(prb);
      
      /* discard all information not necessary to reconstruct the plan */
