@@ -18,13 +18,33 @@
  *
  */
 
-/* $Id: debug.c,v 1.3 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: debug.c,v 1.4 2003-01-11 16:07:24 athena Exp $ */
 #include "ifftw.h"
+
+#include <stdio.h>
+
+typedef struct {
+     printer super;
+     FILE *f;
+} P_file;
+
+static void putchr_file(printer *p_, char c)
+{
+     P_file *p = (P_file *) p_;
+     fputc(c, p->f);
+}
+
+static printer *mkprinter_file(FILE *f)
+{
+     P_file *p = (P_file *) X(mkprinter)(sizeof(P_file), putchr_file);
+     p->f = f;
+     return &p->super;
+}
 
 void X(debug)(const char *format, ...)
 {
      va_list ap;
-     printer *p = X(mkprinter_file)(stderr);
+     printer *p = mkprinter_file(stderr);
      va_start(ap, format);
      p->vprint(p, format, ap);
      va_end(ap);

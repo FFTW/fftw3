@@ -18,11 +18,12 @@
  *
  */
 
-/* $Id: print.c,v 1.16 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: print.c,v 1.17 2003-01-11 16:07:24 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #define BSZ 64
 

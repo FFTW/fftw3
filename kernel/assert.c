@@ -18,9 +18,9 @@
  *
  */
 
-/* $Id: assert.c,v 1.4 2002-09-14 03:07:39 stevenj Exp $ */
+/* $Id: assert.c,v 1.5 2003-01-11 16:07:24 athena Exp $ */
 #include "ifftw.h"
-
+#include <stdio.h>
 #include <stdlib.h>
 
 void X(assertion_failed)(const char *s, int line, const char *file)

@@ -23,10 +23,45 @@ int can_do(struct problem *p)
 
 static FFTW(plan) the_plan;
 
+static const char *wisdat = "wis.dat";
+
+void rdwisdom(void)
+{
+     FILE *f;
+     double tim;
+
+     timer_start();
+     if ((f = fopen(wisdat, "r"))) {
+	  if (!FFTW(import_wisdom_from_file)(f))
+	       fprintf(stderr, "bench: ERROR reading wisdom\n");
+	  fclose(f);
+     }
+
+     tim = timer_stop();
+
+     if (verbose) printf("READ WISDOM (%g seconds): ", tim);
+
+     if (verbose > 3)
+	  FFTW(export_wisdom_to_file)(stdout);
+     if (verbose)
+	  printf("\n");
+}
+
+void wrwisdom(void)
+{
+     FILE *f;
+     if ((f = fopen(wisdat, "w"))) {
+	  FFTW(export_wisdom_to_file)(f);
+	  fclose(f);
+     }
+}
+
 void setup(struct problem *p)
 {
      const unsigned flags = 0;
      double tim;
+
+     rdwisdom();
 
      timer_start();
      switch (p->kind) {
@@ -80,6 +115,7 @@ void done(struct problem *p)
      UNUSED(p);
 
      FFTW(plan_destroy)(the_plan);
+     wrwisdom();
      FFTW(cleanup)();
 
 #    ifdef FFTW_DEBUG
@@ -133,9 +169,9 @@ extern double timer_stop(void);
 #include "rdft.h"
 #include "reodft.h"
 #include "threads.h"
-void X(dft_verify)(plan *pln, const problem_dft *p, uint rounds);
-void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds);
-void X(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds);
+void FFTW(dft_verify)(plan *pln, const problem_dft *p, uint rounds);
+void FFTW(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds);
+void FFTW(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds);
 #define FFTW X
 #define fftw_real R
 #undef problem
@@ -244,10 +280,10 @@ static void hook(plan *pln, const fftw_problem *p_, int optimalp)
 
      if (paranoid) {
 	  if (DFTP(p_))
-	       X(dft_verify)(pln, (const problem_dft *) p_, 5);
+	       FFTW(dft_verify)(pln, (const problem_dft *) p_, 5);
 	  else if (RDFTP(p_)) {
-	       X(rdft_verify)(pln, (const problem_rdft *) p_, 5);
-	       X(reodft_verify)(pln, (const problem_rdft *) p_, 5);
+	       FFTW(rdft_verify)(pln, (const problem_rdft *) p_, 5);
+	       FFTW(reodft_verify)(pln, (const problem_rdft *) p_, 5);
 	  }
      }
 }
@@ -292,23 +328,23 @@ void setup(struct problem *p)
 	  FILE *f;
 	  timer_start();
 	  if ((f = fopen("wis.dat", "r"))) {
-	       scanner *sc = X(mkscanner_file)(f);
+	       scanner *sc = FFTW(mkscanner_file)(f);
 	       if (!plnr->adt->imprt(plnr, sc))
 		    fprintf(stderr, "bench: ERROR reading wis.dat!\n");
-	       X(scanner_destroy)(sc);
+	       FFTW(scanner_destroy)(sc);
 	       fclose(f);
 	  }
 
 	  tplan = timer_stop();
 	  {
-               printer *pr = X(mkprinter_file)(stdout);
+               printer *pr = FFTW(mkprinter_file)(stdout);
 	       if (verbose)
 		    pr->print(pr, "READ WISDOM (%g seconds): ", tplan);
                if (verbose > 3)
 		    plnr->adt->exprt(plnr, pr);
 	       if (verbose)
 		    pr->print(pr, "\n");
-               X(printer_destroy)(pr);
+               FFTW(printer_destroy)(pr);
           }
      }
 #endif
@@ -413,7 +449,7 @@ void setup(struct problem *p)
 	  plan *pln0;
 	  plnr->planner_flags |= BLESSING;
 	  pln0 = plnr->adt->mkplan(plnr, prblm);
-	  X(plan_destroy_internal)(pln0);
+	  FFTW(plan_destroy_internal)(pln0);
 	  plnr->planner_flags &= ~BLESSING;
      }
 	  
@@ -466,9 +502,9 @@ void done(struct problem *p)
      {
 	  FILE *f;
 	  if ((f = fopen("wis.dat", "w"))) {
-	       printer *pr = X(mkprinter_file)(f);
+	       printer *pr = FFTW(mkprinter_file)(f);
 	       plnr->adt->exprt(plnr, pr);
-	       X(printer_destroy)(pr);
+	       FFTW(printer_destroy)(pr);
 	       fclose(f);
 	  }
      }

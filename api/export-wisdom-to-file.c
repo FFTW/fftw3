@@ -31,7 +31,7 @@ static void putchr_file(printer *p_, char c)
      fputc(c, p->f);
 }
 
-printer *X(mkprinter_file)(FILE *f)
+static printer *mkprinter_file(FILE *f)
 {
      P_file *p = (P_file *) X(mkprinter)(sizeof(P_file), putchr_file);
      p->f = f;
@@ -40,7 +40,7 @@ printer *X(mkprinter_file)(FILE *f)
 
 void X(export_wisdom_to_file)(FILE *output_file)
 {
-     printer *p = X(mkprinter_file)(output_file);
+     printer *p = mkprinter_file(output_file);
      planner *plnr = X(the_planner)();
      plnr->adt->exprt(plnr, p);
      X(printer_destroy)(p);

@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.8 2003-01-11 14:49:30 athena Exp $ */
+/* $Id: fftw3.h,v 1.9 2003-01-11 16:07:24 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -27,6 +27,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+#include <stdio.h>
 
 /* If <complex.h> is included, use the C99 complex type.  Otherwise
    define a type bit-compatible with C99 complex */
@@ -69,7 +71,16 @@ X(plan) X(plan_dft_3d)(unsigned int nx, unsigned int ny, unsigned int nz, \
 		       C *in, C *out, int sign, unsigned int flags);	  \
 									  \
 void X(plan_destroy)(X(plan) p);					  \
-void X(cleanup)(void);
+void X(cleanup)(void);							  \
+									  \
+void X(export_wisdom_to_file)(FILE *output_file);			  \
+char *X(export_wisdom_to_string)(void);					  \
+void X(export_wisdom)(void (*absorber)(char c, void *), void *data);	  \
+void X(forget_wisdom)(void);						  \
+int X(import_system_wisdom)(void);					  \
+int X(import_wisdom_from_file)(FILE *input_file);			  \
+int X(import_wisdom_from_string)(const char *input_string);		  \
+int X(import_wisdom)(int (*emitter)(void *), void *data);
 
 /* end of FFTW_DEFINE_API macro */
 

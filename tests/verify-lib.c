@@ -18,11 +18,12 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.5 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: verify-lib.c,v 1.6 2003-01-11 16:07:25 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 /*
  * Utility functions:

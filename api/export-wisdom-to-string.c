@@ -32,7 +32,7 @@ static void putchr_cnt(printer *p_, char c)
      ++*p->cnt;
 }
 
-printer *X(mkprinter_cnt)(uint *cnt)
+static printer *mkprinter_cnt(uint *cnt)
 {
      P_cnt *p = (P_cnt *) X(mkprinter)(sizeof(P_cnt), putchr_cnt);
      p->cnt = cnt;
@@ -52,7 +52,7 @@ static void putchr_str(printer *p_, char c)
      *p->s = 0;
 }
 
-printer *X(mkprinter_str)(char *s)
+static printer *mkprinter_str(char *s)
 {
      P_str *p = (P_str *) X(mkprinter)(sizeof(P_str), putchr_str);
      p->s = s;
@@ -67,13 +67,13 @@ char *X(export_wisdom_to_string)(void)
      uint cnt;
      char *s;
 
-     p = X(mkprinter_cnt)(&cnt);
+     p = mkprinter_cnt(&cnt);
      plnr->adt->exprt(plnr, p);
      X(printer_destroy)(p);
 
      s = (char *) non_fftw_malloc(sizeof(char) * (cnt + 1), OTHER);
 
-     p = X(mkprinter_str)(s);
+     p = mkprinter_str(s);
      plnr->adt->exprt(plnr, p);
      X(printer_destroy)(p);
 

@@ -18,12 +18,13 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.10 2003-01-09 23:10:19 stevenj Exp $ */
+/* $Id: verify-reodft.c,v 1.11 2003-01-11 16:07:25 athena Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 typedef struct {
      plan *pln;

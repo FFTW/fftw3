@@ -33,7 +33,7 @@ static int getchr_str(scanner *sc_)
      return *sc->s++;
 }
 
-scanner *X(mkscanner_str)(const char *s)
+static scanner *mkscanner_str(const char *s)
 {
      S_str *sc = (S_str *) X(mkscanner)(sizeof(S_str), getchr_str);
      sc->s = s;
@@ -42,7 +42,7 @@ scanner *X(mkscanner_str)(const char *s)
 
 int X(import_wisdom_from_string)(const char *input_string)
 {
-     scanner *s = X(mkscanner_str)(input_string);
+     scanner *s = mkscanner_str(input_string);
      planner *plnr = X(the_planner)();
      int ret = plnr->adt->imprt(plnr, s);
      X(scanner_destroy)(s);

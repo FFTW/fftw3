@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.167 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: ifftw.h,v 1.168 2003-01-11 16:07:24 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -28,7 +28,6 @@
 
 #include <stdlib.h>		/* size_t */
 #include <stdarg.h>		/* va_list */
-#include <stdio.h>              /* FILE */
 #include <stddef.h>             /* ptrdiff_t */
 
 #if HAVE_SYS_TYPES_H
@@ -334,13 +333,6 @@ printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c));
 void X(printer_destroy)(printer *p);
 
 /*-----------------------------------------------------------------------*/
-/* printers.c */
-
-printer *X(mkprinter_file)(FILE *f);
-printer *X(mkprinter_cnt)(uint *cnt);
-printer *X(mkprinter_str)(char *s);
-
-/*-----------------------------------------------------------------------*/
 /* scan.c */
 struct scanner_s {
      int (*scan)(scanner *sc, const char *format, ...);
@@ -351,12 +343,6 @@ struct scanner_s {
 
 scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc));
 void X(scanner_destroy)(scanner *sc);
-
-/*-----------------------------------------------------------------------*/
-/* scanners.c */
-
-scanner *X(mkscanner_file)(FILE *f);
-scanner *X(mkscanner_str)(const char *s);
 
 /*-----------------------------------------------------------------------*/
 /* plan.c: */

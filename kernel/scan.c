@@ -18,12 +18,13 @@
  *
  */
 
-/* $Id: scan.c,v 1.10 2002-09-23 15:49:32 athena Exp $ */
+/* $Id: scan.c,v 1.11 2003-01-11 16:07:24 athena Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <ctype.h>
 
 static int mygetc(scanner *sc)
