@@ -109,6 +109,8 @@ sub small_1d {
     do_size (256, 1);
     do_size (512, 1);
     do_size (1024, 1);
+    do_size (2048, 1);
+    do_size (4096, 1);
 }
 
 sub small_2d {
