@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.3 2002-06-22 02:19:20 athena Exp $ *)
+(* $Id: simd.ml,v 1.4 2002-06-22 13:36:47 athena Exp $ *)
 
 open Expr
 open List
@@ -120,15 +120,11 @@ and unparse_store_transposed vardeclinfo  dst src_expr =
           myname = (if is_real dst then "r" else "i") and
           mystride = (!transform_length / !vector_length) in
       (if !vector_length = 4 then
-	sprintf "ST4(%so + %d, %so + %d + %s, %so + %d + %s, %so + %d + %s, %s);\n"
-	  myname mybase
+	sprintf "ST4(%so + %d, %s, %s);\n"
 	  myname mybase "ovs"
-          myname mybase "2 * ovs"
-          myname mybase "3 * ovs"
 	  (listToString unparse_expr ", " (map snd zs'))
       else
-	sprintf "ST2(%so + %d, %so + %d + %s, %s);\n"
-	  myname mybase
+	sprintf "ST2(%so + %d, %s, %s);\n"
 	  myname mybase "ovs"
 	  (listToString unparse_expr ", " (map snd zs'))
       )
