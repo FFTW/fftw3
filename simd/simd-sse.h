@@ -176,11 +176,15 @@ static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
      *(V *)x = v;
 }
 
-static __inline__ void STPAIR(R *x, V v0, V v1, int ovs)
+#if 0
+static __inline__ void STPAIR2(R *x, V v0, V v1, int ovs)
 {
      STA(x, SHUFPS(v0, v1, SHUFVAL(0, 1, 0, 1)), ovs, 0);
      STA(x + ovs, SHUFPS(v0, v1, SHUFVAL(2, 3, 2, 3)), ovs, 0);
 }
+#endif
+#define STPAIR1 ST
+#define STPAIR2(x, v0, v1, ovs) /* nop */
 
 static __inline__ V FLIP_RI(V x)
 {
@@ -264,6 +268,7 @@ static __inline__ V BYTWJ(const R *t, V sr)
 extern int RIGHT_CPU(void);
 
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2)
+#define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 #define BEGIN_SIMD()
 #define END_SIMD()
 

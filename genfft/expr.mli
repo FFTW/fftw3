@@ -18,9 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.mli,v 1.9 2005-02-10 02:35:01 athena Exp $ *)
+(* $Id: expr.mli,v 1.10 2005-02-11 02:47:38 athena Exp $ *)
 
-type transcendent = I | CPLX | CPLXJ | PAIR
+type transcendent = I | CPLX | CPLXJ | PAIR1 | PAIR2
 
 type expr =
   | Num of Number.number

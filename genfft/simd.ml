@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.17 2005-02-10 02:35:01 athena Exp $ *)
+(* $Id: simd.ml,v 1.18 2005-02-11 02:47:38 athena Exp $ *)
 
 open Expr
 open List
@@ -45,8 +45,12 @@ let rec unparse_by_twiddle nam tw src =
   sprintf "%s(&(%s),%s)" nam (Variable.unparse tw) (unparse_expr src)
 
 and unparse_store dst = function
-  | Times (NaN PAIR, Plus [even; odd]) ->
-      sprintf "STPAIR(&(%s),%s,%s,%s);\n" 
+  | Times (NaN PAIR1, x) ->
+      sprintf "STPAIR1(&(%s),%s,%s,&(%s));\n" 
+	(Variable.unparse dst) (unparse_expr x) !ovs
+	(Variable.unparse_for_alignment alignment_mod dst)
+  | Times (NaN PAIR2, Plus [even; odd]) ->
+      sprintf "STPAIR2(&(%s),%s,%s,%s);\n" 
 	(Variable.unparse dst) (unparse_expr even) (unparse_expr odd) !ovs
   | src_expr -> 
       sprintf "ST(&(%s),%s,%s,&(%s));\n" 

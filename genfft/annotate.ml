@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.15 2005-02-10 02:35:01 athena Exp $ *)
+(* $Id: annotate.ml,v 1.16 2005-02-11 02:47:38 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.15 2005-02-10 02:35:01 athena Exp $ *)
+(* $Id: annotate.ml,v 1.16 2005-02-11 02:47:38 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -183,19 +183,21 @@ let pair_stores buddy_list sched =
 		  in 
 		  let tmp = Variable.make_temporary () in
 		  let a = Instr (Assign (tmp, x)) in
-		  let ninsn = 
+		  let pair1 = Instr (Assign (v, Times (NaN PAIR1, Load tmp)))
+		  and pair2 = 
 		    if (v == even) then
 		      Instr (Assign (v, 
-				     Times (NaN PAIR,
+				     Times (NaN PAIR2,
 					    Plus [Load tmp; xbuddy])))
 		    else 
 		      Instr (Assign (vbuddy, 
-				     Times (NaN PAIR,
+				     Times (NaN PAIR2,
 					    Plus [xbuddy; Load tmp])))
-		  in Seq (a, ninsn), delayed_stores
+		  in Seq (a, Seq(pair1, pair2)), delayed_stores
 		with Not_found ->
 		  let tmp = Variable.make_temporary () in
-		    (Instr (Assign (tmp, x))),
+		    (Seq ((Instr (Assign (tmp, x))),
+		          (Instr (Assign (v, Times (NaN PAIR1, Load tmp)))))),
 		    (v, Load tmp) :: delayed_stores
 	end
     | Seq (a, b) ->
