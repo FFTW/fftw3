@@ -18,9 +18,11 @@
  *
  */
 
-/* $Id: nop2.c,v 1.7 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: nop2.c,v 1.8 2003-01-09 01:02:35 stevenj Exp $ */
 
-/* plans for vrank -infty RDFT2s (nothing to do) */
+/* plans for vrank -infty RDFT2s (nothing to do), as well as in-place
+   rank-0 HC2R.  Note that in-place rank-0 R2HC is *not* a no-op, because
+   we have to set the imaginary parts of the output to zero. */
 
 #include "rdft.h"
 
@@ -41,8 +43,9 @@ static int applicable(const solver *ego_, const problem *p_)
 		 /* case 1 : -infty vector rank */
 		 || (p->vecsz->rnk == RNK_MINFTY)
 		 
-		 /* case 2 : rank-0 in-place rdft */
+		 /* case 2 : rank-0 in-place HC2R rdft */
 		 || (1
+		     && p->kind == HC2R
 		     && p->sz->rnk == 0
 		     && FINITE_RNK(p->vecsz->rnk)
 		     && (p->r == p->rio || p->r == p->iio)

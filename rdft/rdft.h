@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.31 2003-01-08 21:46:24 stevenj Exp $ */
+/* $Id: rdft.h,v 1.32 2003-01-09 01:02:35 stevenj Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -148,6 +148,7 @@ solver *X(mksolver_rdft2_hc2r_direct)(khc2r k, const khc2r_desc *desc);
 void X(rdft2_vrank_geq1_register)(planner *p);
 void X(rdft2_buffered_register)(planner *p);
 void X(rdft2_nop_register)(planner *p);
+void X(rdft2_rank0_register)(planner *p);
 void X(rdft2_rank_geq2_register)(planner *p);
 void X(rdft2_radix2_register)(planner *p);
 
