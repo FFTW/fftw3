@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.30 2003-05-06 16:17:56 stevenj Exp $ */
+/* $Id: cycle.h,v 1.31 2003-05-07 02:50:07 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -90,6 +90,11 @@
 # endif
 #endif
 
+#define INLINE_ELAPSED(INL) static INL double elapsed(ticks t1, ticks t0) \
+{									  \
+     return (double)(t1 - t0);						  \
+}
+
 /*----------------------------------------------------------------*/
 /* Solaris */
 #if defined(HAVE_GETHRTIME) && defined(HAVE_HRTIME_T) && !defined(HAVE_TICK_COUNTER)
@@ -97,10 +102,7 @@ typedef hrtime_t ticks;
 
 #define getticks gethrtime
 
-static inline double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(inline)
 
 #define HAVE_TICK_COUNTER
 #endif
@@ -147,10 +149,7 @@ static __inline__ ticks getticks(void)
      return (((unsigned long long)tbu0) << 32) | tbl;
 }
 
-static __inline__ double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(__inline__)
 
 #define HAVE_TICK_COUNTER
 #endif
@@ -170,13 +169,37 @@ static __inline__ ticks getticks(void)
      return ret;
 }
 
-static __inline__ double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(__inline__)
 
 #define HAVE_TICK_COUNTER
 #endif
+
+/* Visual C++ -- thanks to Morten Nissov for his help with this */
+#if _MSC_VER >= 1200 && _M_IX86 >= 500 && defined(__WIN32__) \
+    && !defined(HAVE_TICK_COUNTER)
+typedef LARGE_INTEGER ticks;
+#define RDTSC __asm __emit 0fh __asm __emit 031h /* hack for VC++ 5.0 */
+
+static __inline ticks getticks(void)
+{
+     LARGE_INTEGER ret;
+
+     __asm {
+	  RDTSC
+	  mov ret.HighPart, edx
+	  mov ret.LowPart, eax
+     }
+     return ret;
+}
+
+static __inline double elapsed(ticks t1, ticks t0)
+{  
+     return (double)(t1.QuadPart - t0.QuadPart);
+}  
+
+#define HAVE_TICK_COUNTER
+#endif
+
 /*----------------------------------------------------------------*/
 /*
  * X86-64 cycle counter
@@ -191,13 +214,22 @@ static __inline__ ticks getticks(void)
      return ((ticks)a) | (((ticks)d) << 32); 
 }
 
-static __inline__ double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(__inline__)
 
 #define HAVE_TICK_COUNTER
 #endif
+
+/* Visual C++ (FIXME: how to detect compilation for x86-64?) */
+#if _MSC_VER >= 1400 && !defined(HAVE_TICK_COUNTER)
+typedef ULONG64 ticks;
+
+#define getticks __rdtsc
+
+INLINE_ELAPSED(inline)
+
+#define HAVE_TICK_COUNTER
+#endif
+
 /*----------------------------------------------------------------*/
 /*
  * IA64 cycle counter
@@ -213,10 +245,7 @@ static __inline__ ticks getticks(void)
      return ret;
 }
 
-static __inline__ double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(__inline__)
 
 #define HAVE_TICK_COUNTER
 #endif
@@ -234,10 +263,7 @@ static inline ticks getticks(void)
      return ret;
 }
 
-static inline double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(inline)
 
 #define HAVE_TICK_COUNTER
 #endif
@@ -252,10 +278,7 @@ static __inline__ ticks getticks(void)
      return __getReg(_IA64_REG_AR_ITC);
 }
  
-static __inline__ double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(__inline__)
  
 #define HAVE_TICK_COUNTER
 #endif
@@ -286,10 +309,7 @@ static inline unsigned long getticks(void)
 }
 #  endif
 
-static inline double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(inline)
 
 #define HAVE_TICK_COUNTER
 #endif
@@ -306,10 +326,7 @@ static __inline__ ticks getticks(void)
      return cycles;
 }
 
-static __inline__ double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(__inline__)
 
 #define HAVE_TICK_COUNTER
 #endif
@@ -328,10 +345,7 @@ static __inline__ ticks getticks(void)
      return (cc & 0xFFFFFFFF);
 }
 
-static __inline__ double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(__inline__)
 
 #define HAVE_TICK_COUNTER
 #endif
@@ -347,10 +361,7 @@ static __inline__ ticks getticks(void)
      return ret;
 }
 
-static __inline__ double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(__inline__)
 
 #define HAVE_TICK_COUNTER
 #endif
@@ -367,10 +378,7 @@ static __inline ticks getticks(void)
      return (cc & 0xFFFFFFFF);
 }
 
-static __inline double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(__inline)
 
 #define HAVE_TICK_COUNTER
 #endif
@@ -405,10 +413,7 @@ typedef long long ticks;
 
 #define getticks _rtc
 
-static inline double elapsed(ticks t1, ticks t0)
-{
-     return (double)(t1 - t0);
-}
+INLINE_ELAPSED(inline)
 
 #define HAVE_TICK_COUNTER
 #endif
