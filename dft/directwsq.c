@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: directwsq.c,v 1.1 2003-05-15 23:09:07 athena Exp $ */
+/* $Id: directwsq.c,v 1.2 2003-05-19 19:41:09 athena Exp $ */
 
 /* direct DFTW transposed solver */
 
@@ -72,7 +72,7 @@ static void print(const plan *ego_, printer *p)
 }
 
 static int applicable(const solver *ego_, const problem *p_,
-		       const planner *plnr)
+		      const planner *plnr)
 {
      if (DFTWP(p_)) {
           const S *ego = (const S *) ego_;

@@ -143,7 +143,7 @@ static int applicable2(const problem *p_, const planner *plnr)
 /**************************************************************/
 static void mktwiddle1(P *ego, int flg)
 {
-     static const tw_instr tw_template[] = { { TW_FULL, 1, 0 }, 
+     static const tw_instr tw_template[] = { { TW_FULL, 0, 0 }, 
 					     { TW_NEXT, 1, 0 } };
 
      tw_instr tw[2];
@@ -154,7 +154,7 @@ static void mktwiddle1(P *ego, int flg)
      tw[1] = tw_template[1];
      tw[0].i = ego->m;
 
-     X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->m, ego->r - 1);
+     X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->m, ego->r);
 }
 
 static void bytwiddle1(const P *ego, R *rio, R *iio)
@@ -170,7 +170,7 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
 	  /* loop invariant: p = rio + s * (j * m + k) + i * vs. */
 	  p = rio + i * vs;
 
-	  for (j = 1, p += s * m; j < r; ++j) {
+	  for (j = 1, p += s * m, W += 2 * (m - 1); j < r; ++j) {
 	       for (k = 1, p += s; k < m; ++k, p += s) {
 		    E xr = p[0];
 		    E xi = p[ip];
@@ -192,6 +192,82 @@ static int applicable1(const problem *p_, const planner *plnr)
 		  /* in-place only */
 		  && p->s == p->ws
 		  && p->vs == p->wvs
+		  && (NO_UGLYP(plnr) || (p->m * p->r <= 16384))
+	       );
+     }
+     return 0;
+}
+
+/**************************************************************/
+static void bytwiddle1tr(const P *ego, R *rio, R *iio)
+{
+     int i, j, k;
+     int r = ego->r, m = ego->m, s = ego->s, vs = ego->vs;
+     int ip = iio - rio;
+     const R *W = ego->td->W;
+
+     for (j = 0; j < r; ++j) {
+	  {
+	       /* special case j = i */
+	       R *p = rio + j * (s * m) + j * vs;
+	       const R *wp = W + j * (2 * (m - 1));
+
+	       p += s;
+	       for (k = 1; k < m; ++k) {
+		    R xr = p[0], xi = p[ip];
+		    R wr = wp[0], wi = wp[1];
+		    p[0] = xr * wr + xi * wi;
+		    p[ip] = xi * wr - xr * wi;
+		    p += s; wp += 2;
+	       }
+	  }
+	  
+	  for (i = j + 1; i < r; ++i) {
+	       R *p = rio + j * (s * m) + i * vs;
+	       const R *wp = W + j * (2 * (m - 1));
+	       R *q = rio + i * (s * m) + j * vs;
+	       const R *wq = W + i * (2 * (m - 1));
+
+	       {
+		    R xr = p[0], xi = p[ip];
+		    R yr = q[0], yi = q[ip];
+		    q[0] = xr; q[ip] = xi;
+		    p[0] = yr; p[ip] = yi;
+		    p += s; q += s;
+	       }
+
+	       for (k = 1; k < m; ++k) {
+		    R yr = q[0], yi = q[ip];
+		    R xr = p[0], xi = p[ip];
+		    {
+			 R wr = wp[0], wi = wp[1];
+			 q[0] = xr * wr + xi * wi;
+			 q[ip] = xi * wr - xr * wi;
+		    }
+		    {
+			 R wr = wq[0], wi = wq[1];
+			 p[0] = yr * wr + yi * wi;
+			 p[ip] = yi * wr - yr * wi;
+		    }
+		    p += s; q += s; wp += 2; wq += 2;
+	       }
+	  }
+     }
+}
+
+static int applicable1tr(const problem *p_, const planner *plnr)
+{
+     if (DFTWP(p_)) {
+          const problem_dftw *p = (const problem_dftw *) p_;
+          return (1 
+		  /* transposed only */
+		  && p->vl == p->r
+		  && p->ws == p->vs
+		  && p->wvs == p->m * p->s
+
+		  /* DIT is not defined or implemented */
+		  && p->dec == DECDIF
+
 		  && (NO_UGLYP(plnr) || (p->m * p->r <= 16384))
 	       );
      }
@@ -306,9 +382,13 @@ static solver *mksolver(const wadt *adt)
 
 void X(dftw_dft_register)(planner *p)
 {
-     static const wadt a[2] = 
-	  { { bytwiddle1, mktwiddle1, applicable1, "dftw-dft1" },
-	    { bytwiddle2, mktwiddle2, applicable2, "dftw-dft2" } };
-     int i;
-     for (i = 0; i < 2; ++i) REGISTER_SOLVER(p, mksolver(&a[i]));
+     static const wadt a[] = {
+	  { bytwiddle1, mktwiddle1, applicable1, "dftw-dft1" },
+	  { bytwiddle2, mktwiddle2, applicable2, "dftw-dft2" },
+	  { bytwiddle1tr, mktwiddle1, applicable1tr, "dftw-dft1tr" }
+     };
+     unsigned i;
+
+     for (i = 0; i < sizeof(a) / sizeof(a[0]); ++i) 
+	  REGISTER_SOLVER(p, mksolver(&a[i]));
 }
