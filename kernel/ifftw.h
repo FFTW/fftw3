@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.192 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.193 2003-03-16 15:26:28 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -162,7 +162,7 @@ extern void *X(malloc_plain)(size_t sz);
 
 #endif
 
-#if defined(FFTW_DEBUG) && defined(HAVE_THREADS)
+#if defined(FFTW_DEBUG) && defined(FFTW_DEBUG_MALLOC) && defined(HAVE_THREADS)
 extern int X(in_thread);
 #  define IN_THREAD X(in_thread)
 #  define THREAD_ON { int in_thread_save = X(in_thread); X(in_thread) = 1
