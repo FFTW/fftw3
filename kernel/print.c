@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.23 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: print.c,v 1.24 2005-02-22 04:29:52 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -34,15 +34,20 @@ static void myputs(printer *p, const char *s)
           p->putchr(p, c);
 }
 
+static void newline(printer *p)
+{
+     int i;
+
+     p->putchr(p, '\n');
+     for (i = 0; i < p->indent; ++i)
+	  p->putchr(p, ' ');
+}
+
 static void vprint(printer *p, const char *format, va_list ap)
 {
      char buf[BSZ];
      const char *s = format;
      char c;
-     int i;
-
-     for (i = 0; i < p->indent; ++i)
-          p->putchr(p, ' ');
 
      while ((c = *s++)) {
           switch (c) {
@@ -125,8 +130,8 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       }
 		       case '(': {
 			    /* newline, augment indent level */
-			    p->putchr(p, '\n');
 			    p->indent += p->indent_incr;
+			    newline(p);
 			    break;
 		       }
 		       case ')': {
