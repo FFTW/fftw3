@@ -21,6 +21,8 @@
 #include "api.h"
 #include "dft.h"
 
+#define N0(nembed) ((nembed) ? (nembed) : n)
+
 X(plan) X(plan_many_dft)(unsigned int rank, const unsigned int *n,
 			 unsigned int howmany,
 			 C *in, const unsigned int *inembed,
@@ -36,7 +38,8 @@ X(plan) X(plan_many_dft)(unsigned int rank, const unsigned int *n,
      
      return X(mkapiplan)(
 	  flags,
-	  X(mkproblem_dft_d)(X(mktensor_rowmajor)(rank, n, inembed, onembed,
+	  X(mkproblem_dft_d)(X(mktensor_rowmajor)(rank, n, 
+						  N0(inembed), N0(onembed),
 						  2*istride, 2*ostride),
 			     X(mktensor_1d)(howmany, 2*idist, 2*odist), 
 			     ri, ii, ro, io));
