@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.h,v 1.1 2002-07-22 02:34:28 stevenj Exp $ */
+/* $Id: hc2hc.h,v 1.2 2002-08-05 03:57:51 stevenj Exp $ */
 
 typedef struct {
      solver super;
@@ -46,7 +46,8 @@ typedef struct
      void (*mkcldrn)(const solver_hc2hc *, const problem_rdft *p,
 		     problem **cldp, problem **cld0p, problem **cldmp);
      void (*finish)(plan_hc2hc *ego);
-     int (*applicable)(const solver_hc2hc *ego, const problem *p);
+     int (*applicable)(const solver_hc2hc *ego, const problem *p,
+		       const planner *plnr);
      rdftapply apply;
 } hc2hcadt;
 

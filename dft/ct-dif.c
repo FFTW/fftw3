@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.16 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: ct-dif.c,v 1.17 2002-08-05 03:57:51 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -44,7 +44,8 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      }
 }
 
-static int applicable(const solver_ct *ego, const problem *p_)
+static int applicable(const solver_ct *ego, const problem *p_,
+		      const planner *plnr)
 {
      if (X(dft_ct_applicable)(ego, p_)) {
 	  int ivs, ovs;
@@ -56,7 +57,7 @@ static int applicable(const solver_ct *ego, const problem *p_)
 	  X(dft_ct_vecstrides)(p, &vl, &ivs, &ovs);
           return (1
                   /* DIF destroys the input and we don't like it */
-                  && p->ri == p->ro
+                  && (p->ri == p->ro || (plnr->flags & DESTROY_INPUT))
 
 		  && (e->genus->okp(e, p->ri, p->ii,
 				    (int)m * d[0].is, 0, m, d[0].is))
@@ -82,7 +83,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      const problem_dft *p = (const problem_dft *) p_;
      uint n;
      
-     if (!applicable(ego, p_))
+     if (!applicable(ego, p_, plnr))
           return BAD;
 
      n = p->sz.dims[0].n;

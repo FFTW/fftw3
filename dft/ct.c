@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.16 2002-07-15 19:13:19 stevenj Exp $ */
+/* $Id: ct.c,v 1.17 2002-08-05 03:57:51 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -118,7 +118,7 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
      const problem_dft *p;
      const ct_desc *e = ego->desc;
 
-     if (!adt->applicable(ego, p_))
+     if (!adt->applicable(ego, p_, plnr))
           return (plan *) 0;
 
      p = (const problem_dft *) p_;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.2 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: hc2hc-dif.c,v 1.3 2002-08-05 03:57:51 stevenj Exp $ */
 
 /* decimation in frequency Cooley-Tukey */
 #include "rdft.h"
@@ -49,7 +49,8 @@ static void apply(plan *ego_, R *I, R *O)
      }
 }
 
-static int applicable(const solver_hc2hc *ego, const problem *p_)
+static int applicable(const solver_hc2hc *ego, const problem *p_,
+		      const planner *plnr)
 {
      if (X(rdft_hc2hc_applicable)(ego, p_)) {
 	  int ivs, ovs;
@@ -60,6 +61,7 @@ static int applicable(const solver_hc2hc *ego, const problem *p_)
 	  uint m = d[0].n / e->radix;
 	  X(rdft_hc2hc_vecstrides)(p, &vl, &ivs, &ovs);
           return (1
+		  && (p->I == p->O || (plnr->flags & DESTROY_INPUT))
 		  && (e->genus->okp(e, p->I + d[0].is,
 				    p->I + (e->radix * m - 1) * d[0].is, 
 				    (int)m * d[0].is, 0, m, d[0].is))
@@ -90,7 +92,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      const problem_rdft *p;
      uint n;
 
-     if (!applicable(ego, p_))
+     if (!applicable(ego, p_, plnr))
           return BAD;
 
      p = (const problem_rdft *) p_;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-buf.c,v 1.2 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: hc2hc-buf.c,v 1.3 2002-08-05 03:57:51 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -153,7 +153,8 @@ static void apply_dif(plan *ego_, R *I, R *O)
      }
 }
 
-static int applicable(const solver_hc2hc *ego, const problem *p_)
+static int applicable(const solver_hc2hc *ego, const problem *p_,
+		      const planner *plnr)
 {
      if (X(rdft_hc2hc_applicable)(ego, p_)) {
           const hc2hc_desc *e = ego->desc;
@@ -161,6 +162,8 @@ static int applicable(const solver_hc2hc *ego, const problem *p_)
           iodim *d = p->sz.dims;
 	  uint r = e->radix, m = d[0].n / e->radix;
           return (1
+		  && (p->kind == R2HC || p->I == p->O 
+		      || (plnr->flags & DESTROY_INPUT))
                   /* check both batch size and remainder */
                   && (m < BATCHSZ ||
                       (e->genus->okp(e, 0, ((R *)0) + 2*BATCHSZ*r-1, 1, 0, 
@@ -196,7 +199,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      const problem_rdft *p;
      uint n;
 
-     if (!applicable(ego, p_))
+     if (!applicable(ego, p_, plnr))
           return BAD;
 
      p = (const problem_rdft *) p_;

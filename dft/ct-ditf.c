@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.10 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: ct-ditf.c,v 1.11 2002-08-05 03:57:51 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -38,8 +38,10 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      cld->apply(cld0, ri, ii, ri, ii);
 }
 
-static int applicable(const solver_ct *ego, const problem *p_)
+static int applicable(const solver_ct *ego, const problem *p_,
+		      const planner *plnr)
 {
+     UNUSED(plnr);
      if (X(dft_ct_applicable)(ego, p_)) {
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
@@ -88,7 +90,7 @@ static int score(const solver *ego_, const problem *p, const planner *plnr)
 {
      const solver_ct *ego = (const solver_ct *) ego_;
      UNUSED(plnr);
-     return (applicable(ego, p)) ? GOOD : BAD;
+     return (applicable(ego, p, plnr)) ? GOOD : BAD;
 }
 
 

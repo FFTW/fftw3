@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.18 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: ct-dit.c,v 1.19 2002-08-05 03:57:51 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -42,8 +42,10 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      }
 }
 
-static int applicable(const solver_ct *ego, const problem *p_)
+static int applicable(const solver_ct *ego, const problem *p_,
+		      const planner *plnr)
 {
+     UNUSED(plnr);
      if (X(dft_ct_applicable)(ego, p_)) {
 	  int ivs, ovs;
 	  uint vl;
@@ -77,7 +79,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      const problem_dft *p;
      uint n;
 
-     if (!applicable(ego, p_))
+     if (!applicable(ego, p_, plnr))
           return BAD;
 
      p = (const problem_dft *) p_;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: r2hc-hc2r.c,v 1.6 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: r2hc-hc2r.c,v 1.7 2002-08-05 03:57:51 stevenj Exp $ */
 
 /* Solve an HC2R problem by using an R2HC problem of the same size.
    The two problems can be expressed in terms of one another by
@@ -38,7 +38,7 @@ typedef struct {
 } P;
 
 /* 1 to destroy input array (like our ordinary hb/hc2r algorithm): */
-#define DESTROY_INPUT 1
+#define MUNGE_INPUT 0
 
 static void apply(plan *ego_, R *I, R *O)
 {
@@ -46,7 +46,7 @@ static void apply(plan *ego_, R *I, R *O)
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
 
-#if DESTROY_INPUT
+#if MUNGE_INPUT
 #  define O1 I
 #  define os1 is
 #else
@@ -61,7 +61,7 @@ static void apply(plan *ego_, R *I, R *O)
 	  O1[os1 * i] = a + b;
 	  O1[os1 * (n - i)] = a - b;
      }
-#if !DESTROY_INPUT
+#if !MUNGE_INPUT
      if (2*i == n)
 	  O[os * i] = I[is * i];
 #endif
@@ -101,15 +101,22 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(rdft-r2hc-hc2r-%u%(%p%))", ego->n, ego->cld);
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable(const solver *ego_, const problem *p_,
+		      const planner *plnr)
 {
      UNUSED(ego_);
+#if !MUNGE_INPUT
+     UNUSED(plnr);
+#endif
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
-	       && p->sz.rnk == 1
-	       && p->vecsz.rnk == 0
-	       && p->kind == HC2R
+#if MUNGE_INPUT
+		  && (p->I == p->O || (plnr->flags & DESTROY_INPUT))
+#endif
+		  && p->sz.rnk == 1
+		  && p->vecsz.rnk == 0
+		  && p->kind == HC2R
 	       );
      }
 
@@ -119,7 +126,7 @@ static int applicable(const solver *ego_, const problem *p_)
 static int score(const solver *ego, const problem *p, const planner *plnr)
 {
      UNUSED(plnr);
-     return (applicable(ego, p)) ? UGLY : BAD;
+     return (applicable(ego, p, plnr)) ? UGLY : BAD;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -133,16 +140,16 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(rdft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_))
+     if (!applicable(ego_, p_, plnr))
           return (plan *)0;
 
      p = (const problem_rdft *) p_;
 
-#if DESTROY_INPUT
+#if MUNGE_INPUT
      cldp = X(mkproblem_rdft)(p->sz, p->vecsz, p->I, p->O, R2HC);
 #else
      {
-	  tensor sz = X(tensor_copy)(sz);
+	  tensor sz = X(tensor_copy)(p->sz);
 	  sz.dims[0].is = sz.dims[0].os;
 	  cldp = X(mkproblem_rdft)(sz, p->vecsz, p->O, p->O, R2HC);
 	  X(tensor_destroy)(sz);
@@ -164,7 +171,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->super.super.ops = cld->ops;
      pln->super.super.ops.other += 8 * ((pln->n - 1)/2);
      pln->super.super.ops.add += 4 * ((pln->n - 1)/2);
-#if !DESTROY_INPUT
+#if !MUNGE_INPUT
      pln->super.super.ops.other += 2 + (pln->n % 2 ? 0 : 2);
 #endif
 

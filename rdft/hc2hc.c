@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.5 2002-07-25 04:25:06 stevenj Exp $ */
+/* $Id: hc2hc.c,v 1.6 2002-08-05 03:57:51 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -124,7 +124,7 @@ plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
      const problem_rdft *p;
      const hc2hc_desc *e = ego->desc;
 
-     if (!adt->applicable(ego, p_))
+     if (!adt->applicable(ego, p_, plnr))
           return (plan *) 0;
 
      p = (const problem_rdft *) p_;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.72 2002-08-05 02:50:19 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.73 2002-08-05 03:57:51 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -382,7 +382,8 @@ typedef struct solutions_s solutions; /* opaque */
 
 /* planner flags */
 enum { ESTIMATE = 0x2, IMPATIENT = 0x1, PATIENT = 0x0,
-       CLASSIC_VRECURSE = 0x4, FORCE_VRECURSE = 0x8 };
+       CLASSIC_VRECURSE = 0x4, FORCE_VRECURSE = 0x8, 
+       DESTROY_INPUT = 0x10 };
 
 #define IMPATIENCE(flags) ((flags) & (ESTIMATE | IMPATIENT | PATIENT))
 

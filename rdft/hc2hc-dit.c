@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dit.c,v 1.3 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: hc2hc-dit.c,v 1.4 2002-08-05 03:57:51 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -48,8 +48,10 @@ static void apply(plan *ego_, R *I, R *O)
      }
 }
 
-static int applicable(const solver_hc2hc *ego, const problem *p_)
+static int applicable(const solver_hc2hc *ego, const problem *p_,
+		      const planner *plnr)
 {
+     UNUSED(plnr);
      if (X(rdft_hc2hc_applicable)(ego, p_)) {
 	  int ivs, ovs;
 	  uint vl;
@@ -89,7 +91,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      const problem_rdft *p;
      uint n;
 
-     if (!applicable(ego, p_))
+     if (!applicable(ego, p_, plnr))
           return BAD;
 
      p = (const problem_rdft *) p_;
