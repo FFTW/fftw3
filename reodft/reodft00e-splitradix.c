@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.3 2005-02-05 21:22:39 stevenj Exp $ */
+/* $Id: reodft00e-splitradix.c,v 1.4 2005-02-05 21:26:58 stevenj Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.
@@ -237,6 +237,7 @@ static int applicable0(const solver *ego_, const problem *p_)
           return (1
 		  && p->sz->rnk == 1
 		  && p->vecsz->rnk <= 1
+		  && (p->kind[0] == REDFT00 || p->kind[0] == RODFT00)
 		  && p->sz->dims[0].n > 1  /* don't create size-0 sub-plans */
 		  && p->sz->dims[0].n % 2  /* odd: 4 divides "logical" DFT */
 	       );
