@@ -23,7 +23,7 @@ where each command is as follows:
         separated by the character 'x'.
 
     (The syntax for problems is actually richer, but we do not document
-    it here.)
+    it here.  See the man page for fftw-wisdom for more information.)
 
     Example:
 
