@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-directw.c,v 1.1 2003-07-05 17:05:51 athena Exp $ */
+/* $Id: ct-directw.c,v 1.2 2004-03-21 15:38:18 athena Exp $ */
 
 #include "ct.h"
 
@@ -129,7 +129,7 @@ static plan *mkcldw(const ct_solver *ego_,
      pln = MKPLAN_DFTW(P, &padt, apply);
 
      pln->k = ego->k;
-     pln->ios = X(mkstride)(e->radix, m * s);
+     pln->ios = X(mkstride)(r, m * s);
      pln->td = 0;
      pln->r = r;
      pln->m = m;
