@@ -18,9 +18,9 @@
  *
  */
 
-/* $Id: planner.c,v 1.84 2002-09-14 16:19:13 athena Exp $ */
+/* $Id: planner.c,v 1.85 2002-09-14 20:35:28 stevenj Exp $ */
 #include "ifftw.h"
-#include <string.h> /* strlen */
+#include <string.h>
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
 #define BLESSEDP(solution) ((solution)->flags & BLESSING)
