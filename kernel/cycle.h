@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.16 2003-03-07 05:07:12 stevenj Exp $ */
+/* $Id: cycle.h,v 1.17 2003-03-15 19:00:17 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -133,7 +133,7 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 
 /* HP/UX IA64 compiler, courtesy Teresa L. Johnson: */
 #if defined(__hpux) && defined(__ia64) && !defined(HAVE_TICK_COUNTER)
-#include <machine/inline.h>
+#include <machine/sys/inline.h>
 typedef unsigned long ticks;
 
 static inline ticks getticks(void)
