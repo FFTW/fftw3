@@ -1,12 +1,10 @@
 * implement verify for rdft2 n-dimensional problems
 
-* threads/mpi
+* mpi
 
 * DCT/DST codelets?  which kinds?
 
 * user interface (& manual)
-
-* implement fftw2 buffering: copy to buffers, transform in-place, copy back
 
 * --enable-long-double fails in verify().  The problem appears
   to be a bug in gcc-2.95 -malign-double.  The problem disappears
@@ -48,3 +46,5 @@ TODO before FFTW-$2\pi$:
   genfft-k7 was written by Stefan Kral based on the fftw-2.1 genfft.
 
 * implement rdft/problem2 for even radices other than 2.
+
+* convolution problem type(s)
