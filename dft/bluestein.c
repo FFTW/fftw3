@@ -54,8 +54,8 @@ static void mktwiddle(P *p)
      R *w, *W;
      E nbf = nb;
 
-     p->w = w = MALLOC(2 * n * sizeof(R), TWIDDLES);
-     p->W = W = MALLOC(2 * nb * sizeof(R), TWIDDLES);
+     p->w = w = (R *) MALLOC(2 * n * sizeof(R), TWIDDLES);
+     p->W = W = (R *) MALLOC(2 * nb * sizeof(R), TWIDDLES);
      bluestein_sequence(n, w);
 
      for (i = 0; i < nb; ++i)
