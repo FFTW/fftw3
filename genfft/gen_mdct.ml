@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_mdct.ml,v 1.2 2003-06-01 00:41:15 stevenj Exp $ *)
+(* $Id: gen_mdct.ml,v 1.3 2003-06-01 00:43:31 stevenj Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_mdct.ml,v 1.2 2003-06-01 00:41:15 stevenj Exp $"
+let cvsid = "$Id: gen_mdct.ml,v 1.3 2003-06-01 00:43:31 stevenj Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -193,7 +193,7 @@ let generate n mode =
 	       (if stride_fixed !uovstride then [] else 
 	       [Decl ("int", !Simd.ovs)]))
 	  @ (if (not (window_param mode)) then [] 
-	       else [Decl (C.realtypep, window)])
+	       else [Decl (C.constrealtypep, window)])
 	 ),
 	 add_constants (Asch annot))
 
