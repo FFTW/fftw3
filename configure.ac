@@ -135,11 +135,9 @@ dnl Checks for programs.
 AC_PROG_CC
 AMX_PROG_AS     dnl AM_PROG_AS breaks at least one version of libtool
 AC_PROG_CC_STDC
-ACX_PROG_CC_EGCS
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
 AM_PROG_LIBTOOL
 
 AC_CHECK_PROG(OCAMLC, ocamlc, ocamlc)
@@ -152,28 +150,46 @@ AC_SUBST(OCAMLDEFS)
 AC_SUBST(OCAMLLDFLAGS)
 
 dnl determine CFLAGS first
-ACX_PROG_CC_MAXOPT(fftw)
+AX_CC_MAXOPT(fftw)
+
+# the egcs scheduler is too smart and destroys our own schedule.
+# Disable the first instruction scheduling pass.  The second
+# scheduling pass (after register reload) is ok.
+AX_GCC_VERSION(2,90, [test "$1" = fftw && test "$ac_test_CFLAGS" != "set" && CFLAGS="$CFLAGS -fno-schedule-insns"])
+
+# tweak codelet optimization level to avoid gcc bugs (sigh)
+if test "x$CODELET_OPTIM" = x -a "$ac_test_CFLAGS" != "set"; then
+     if test $GCC = "yes"; then
+        case "${host_cpu}" in
+           i586*|i686*) 
+              AX_GCC_VERSION(3,4, CODELET_OPTIM=-O2, CODELET_OPTIM=-O) ;;
+        esac
+     fi
+fi
+AC_SUBST(CODELET_OPTIM)
 
 if test "x$SIMD_CFLAGS" = x; then
 if test "$GCC" = "yes"; then
     if test "$have_sse" = "yes"; then
-	ACX_CHECK_CC_FLAGS(-msse, msse,
+	AX_CHECK_CC_FLAGS(-msse, msse,
 	    SIMD_CFLAGS="-msse",
 	    [AC_MSG_ERROR([Need a version of gcc with -msse])])
     elif test "$have_sse2" = "yes"; then
-	ACX_CHECK_CC_FLAGS(-msse2, msse2,
+	AX_CHECK_CC_FLAGS(-msse2, msse2,
 	    SIMD_CFLAGS="-msse2",
 	    [AC_MSG_ERROR([Need a version of gcc with -msse2])])
     elif test "$have_3dnow" = "yes"; then
-	ACX_CHECK_CC_FLAGS(-m3dnow, m3dnow,
+	AX_CHECK_CC_FLAGS(-m3dnow, m3dnow,
 	    SIMD_CFLAGS="-m3dnow",
 	    [AC_MSG_ERROR([Need a version of gcc with -m3dnow])])
     elif test "$have_altivec" = "yes"; then
-	ACX_CHECK_CC_FLAGS(-faltivec, faltivec,
+	AX_CHECK_CC_FLAGS(-faltivec, faltivec,
 	    SIMD_CFLAGS="-faltivec",
-	    [ACX_CHECK_CC_FLAGS(-maltivec -mabi=altivec, maltivec,
+	    [AX_CHECK_CC_FLAGS(-maltivec -mabi=altivec, maltivec,
 		SIMD_CFLAGS="-maltivec -mabi=altivec",
-		[AC_MSG_ERROR([Need a version of gcc with -maltivec])])])
+	        [AX_CHECK_CC_FLAGS(-fvec, fvec,
+		    SIMD_CFLAGS="-fvec",
+		    [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
     fi
 fi
 fi
@@ -251,7 +267,7 @@ fi
 AC_MSG_RESULT(${ok})
 
 dnl TODO
-ACX_GCC_ALIGNS_STACK()
+AX_GCC_ALIGNS_STACK()
 
 dnl override CFLAGS selection when debugging
 if test "${enable_debug}" = "yes"; then
@@ -343,7 +359,6 @@ if test "$enable_threads" = "yes"; then
 
 	# POSIX threads, the default choice:
 	if test -z "$THREADLIBS"; then
-		sinclude(acx_pthread.m4)
 		ACX_PTHREAD([THREADLIBS="$PTHREAD_LIBS "
 	                     CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 	                     CC="$PTHREAD_CC"

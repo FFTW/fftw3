@@ -39,7 +39,7 @@ dnl macros posted by Alejandro Forero Cuervo to the autoconf macro
 dnl repository.  We are also grateful for the helpful feedback of
 dnl numerous users.
 dnl
-dnl @version $Id: acx_pthread.m4,v 1.6 2004-06-15 00:08:27 stevenj Exp $
+dnl @version $Id: acx_pthread.m4,v 1.1 2004-10-27 17:14:22 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([ACX_PTHREAD], [
