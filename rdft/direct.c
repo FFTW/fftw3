@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.1 2002-07-25 02:46:39 stevenj Exp $ */
+/* $Id: direct.c,v 1.2 2002-08-04 21:03:45 stevenj Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -141,9 +141,9 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p, int flags)
+static int score(const solver *ego, const problem *p, const planner *plnr)
 {
-     UNUSED(flags);
+     UNUSED(plnr);
      return (applicable(ego, p)) ? GOOD : BAD;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop2.c,v 1.1 2002-07-28 20:10:59 stevenj Exp $ */
+/* $Id: nop2.c,v 1.2 2002-08-04 21:03:45 stevenj Exp $ */
 
 /* plans for vrank -infty RDFT2s (nothing to do) */
 
@@ -53,9 +53,9 @@ static void print(plan *ego, printer *p)
      p->print(p, "(rdft2-nop)");
 }
 
-static int score(const solver *ego, const problem *p, int flags)
+static int score(const solver *ego, const problem *p, const planner *plnr)
 {
-     UNUSED(flags);
+     UNUSED(plnr);
      return applicable(ego, p) ? GOOD : BAD;
 }
 

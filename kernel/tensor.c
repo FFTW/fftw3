@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.15 2002-08-01 18:56:02 stevenj Exp $ */
+/* $Id: tensor.c,v 1.16 2002-08-04 21:03:45 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -352,7 +352,7 @@ void X(tensor_split)(const tensor sz, tensor *a, uint arnk, tensor *b)
 
 void X(tensor_print)(tensor x, printer *p)
 {
-     p->print(p, "(t:%d", FINITE_RNK(x.rnk) ? x.rnk : -1);
+     p->print(p, "(t:%d", FINITE_RNK(x.rnk) ? (int) x.rnk : -1);
      if (FINITE_RNK(x.rnk)) {
 	  uint i;
 	  for (i = 0; i < x.rnk; ++i) {
@@ -370,7 +370,7 @@ int X(tensor_scan)(tensor *x, scanner *sc)
 	  return 0;
      if (r < 0 && r != -1)
 	  return 0;
-     talloc(x, r == -1 ? RNK_MINFTY : r);
+     talloc(x, r < 0 ? RNK_MINFTY : (uint) r);
      if (FINITE_RNK(x->rnk)) {
 	  uint i;
 	  for (i = 0; i < x->rnk; ++i) {

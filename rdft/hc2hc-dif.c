@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.1 2002-07-25 04:25:06 stevenj Exp $ */
+/* $Id: hc2hc-dif.c,v 1.2 2002-08-04 21:03:45 stevenj Exp $ */
 
 /* decimation in frequency Cooley-Tukey */
 #include "rdft.h"
@@ -84,7 +84,7 @@ static void finish(plan_hc2hc *ego)
 				d->ops));
 }
 
-static int score(const solver *ego_, const problem *p_, int flags)
+static int score(const solver *ego_, const problem *p_, const planner *plnr)
 {
      const solver_hc2hc *ego = (const solver_hc2hc *) ego_;
      const problem_rdft *p;
@@ -96,7 +96,7 @@ static int score(const solver *ego_, const problem *p_, int flags)
      p = (const problem_rdft *) p_;
 
      /* emulate fftw2 behavior */
-     if ((p->vecsz.rnk > 0) && NO_VRECURSE(flags))
+     if ((p->vecsz.rnk > 0) && NO_VRECURSE(plnr->flags))
 	  return BAD;
 
      n = p->sz.dims[0].n;

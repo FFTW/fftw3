@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.69 2002-08-03 19:09:56 athena Exp $ */
+/* $Id: ifftw.h,v 1.70 2002-08-04 21:03:45 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -353,7 +353,7 @@ enum {
 
 typedef struct {
      plan *(*mkplan)(const solver *ego, const problem *p, planner *plnr);
-     int (*score)(const solver *ego, const problem *p, int flags);
+     int (*score)(const solver *ego, const problem *p, const planner *plnr);
 } solver_adt;
 
 struct solver_s {

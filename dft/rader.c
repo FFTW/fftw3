@@ -406,9 +406,9 @@ static int applicable_dit(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, int flags)
+static int score(const solver *ego_, const problem *p_, const planner *plnr)
 {
-     UNUSED(flags);
+     UNUSED(plnr);
      if (applicable(ego_, p_)) {
 	  const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
@@ -420,9 +420,9 @@ static int score(const solver *ego_, const problem *p_, int flags)
      return BAD;
 }
 
-static int score_dit(const solver *ego_, const problem *p_, int flags)
+static int score_dit(const solver *ego_, const problem *p_, const planner *plnr)
 {
-     UNUSED(flags);
+     UNUSED(plnr);
      if (applicable_dit(ego_, p_)) {
 	  const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;

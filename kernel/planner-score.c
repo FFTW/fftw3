@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.13 2002-07-31 11:52:53 athena Exp $ */
+/* $Id: planner-score.c,v 1.14 2002-08-04 21:03:45 stevenj Exp $ */
 #include "ifftw.h"
 
 typedef struct {
@@ -45,20 +45,19 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvpair **pairp)
 {
      plan *best = 0;
      int best_score;
-     int flags = ego->flags;
      int best_not_yet_timed = 1;
 
      *pairp = 0;
      best_score = BAD;
      FORALL_SOLVERS(ego, s, sp, {
-	  int sc = s->adt->score(s, p, flags);
+	  int sc = s->adt->score(s, p, ego);
 	  if (sc > best_score) 
 	       best_score = sc;
      });
 
      for (; best_score > BAD; --best_score) {
           FORALL_SOLVERS(ego, s, sp, {
-	       if (s->adt->score(s, p, flags) == best_score) {
+	       if (s->adt->score(s, p, ego) == best_score) {
 		    plan *pln = ego->adt->slv_mkplan(ego, p, s);
 
 		    if (pln) {

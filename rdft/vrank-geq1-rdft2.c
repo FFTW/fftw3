@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.1 2002-07-28 20:10:59 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.2 2002-08-04 21:03:45 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -166,7 +166,7 @@ static int applicable(const solver *ego_, const problem *p_, uint *dp)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, int flags)
+static int score(const solver *ego_, const problem *p_, const planner *plnr)
 {
      const S *ego = (const S *)ego_;
      const problem_rdft2 *p;
@@ -176,14 +176,14 @@ static int score(const solver *ego_, const problem *p_, int flags)
           return BAD;
 
      /* fftw2 behavior */
-     if ((flags & CLASSIC) && (ego->vecloop_dim != ego->buddies[0]))
+     if ((plnr->flags & CLASSIC) && (ego->vecloop_dim != ego->buddies[0]))
 	  return BAD;
 
      p = (const problem_rdft2 *) p_;
 
      /* fftw2-like heuristic: once we've started vector-recursing,
 	don't stop (unless we have to) */
-     if ((flags & FORCE_VRECURSE) && p->vecsz.rnk == 1)
+     if ((plnr->flags & FORCE_VRECURSE) && p->vecsz.rnk == 1)
 	  return UGLY;
 
      return GOOD;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.15 2002-07-12 05:22:38 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.16 2002-08-04 21:03:45 stevenj Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -135,7 +135,7 @@ static int applicable(const solver *ego_, const problem *p_, uint *rp)
 }
 
 /* TODO: revise this. */
-static int score(const solver *ego_, const problem *p_, int flags)
+static int score(const solver *ego_, const problem *p_, const planner *plnr)
 {
      const S *ego = (const S *)ego_;
      const problem_dft *p = (const problem_dft *) p_;
@@ -145,7 +145,7 @@ static int score(const solver *ego_, const problem *p_, int flags)
           return BAD;
 
      /* fftw2 behavior */
-     if ((flags & CLASSIC) && (ego->spltrnk != ego->buddies[0]))
+     if ((plnr->flags & CLASSIC) && (ego->spltrnk != ego->buddies[0]))
 	  return BAD;
 
      /* Heuristic: if the vector stride is greater than the transform

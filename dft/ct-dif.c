@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.15 2002-07-25 03:27:45 stevenj Exp $ */
+/* $Id: ct-dif.c,v 1.16 2002-08-04 21:03:45 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -76,12 +76,11 @@ static void finish(plan_ct *ego)
 		     X(ops_mul)(ego->vl * ego->m / d->genus->vl, d->ops));
 }
 
-static int score(const solver *ego_, const problem *p_, int flags)
+static int score(const solver *ego_, const problem *p_, const planner *plnr)
 {
      const solver_ct *ego = (const solver_ct *) ego_;
      const problem_dft *p = (const problem_dft *) p_;
      uint n;
-     UNUSED(flags);
      
      if (!applicable(ego, p_))
           return BAD;
@@ -89,7 +88,7 @@ static int score(const solver *ego_, const problem *p_, int flags)
      n = p->sz.dims[0].n;
 
      /* emulate fftw2 behavior */
-     if ((p->vecsz.rnk > 0) && NO_VRECURSE(flags))
+     if ((p->vecsz.rnk > 0) && NO_VRECURSE(plnr->flags))
 	  return BAD;
 
      if (n <= 16 || n / ego->desc->radix <= 4)

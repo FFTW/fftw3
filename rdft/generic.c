@@ -291,9 +291,9 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, int flags)
+static int score(const solver *ego_, const problem *p_, const planner *plnr)
 {
-     UNUSED(flags);
+     UNUSED(plnr);
      if (applicable(ego_, p_))
 	  return UGLY;
      return BAD;

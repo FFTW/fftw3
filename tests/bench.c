@@ -125,7 +125,7 @@ static void hook(plan *pln, const fftw_problem *p_)
 int can_do(struct problem *p)
 {
      return (sizeof(fftw_real) == sizeof(bench_real) &&
-	     p->kind == PROBLEM_COMPLEX || p->kind == PROBLEM_REAL);
+	     (p->kind == PROBLEM_COMPLEX || p->kind == PROBLEM_REAL));
 }
 
 static planner *plnr;

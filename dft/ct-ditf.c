@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.9 2002-07-02 14:30:58 athena Exp $ */
+/* $Id: ct-ditf.c,v 1.10 2002-08-04 21:03:45 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -84,10 +84,10 @@ static problem *mkcld(const solver_ct *ego, const problem_dft *p)
 	  p->ro, p->io, p->ro, p->io);
 }
 
-static int score(const solver *ego_, const problem *p, int flags)
+static int score(const solver *ego_, const problem *p, const planner *plnr)
 {
      const solver_ct *ego = (const solver_ct *) ego_;
-     UNUSED(flags);
+     UNUSED(plnr);
      return (applicable(ego, p)) ? GOOD : BAD;
 }
 

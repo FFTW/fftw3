@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.22 2002-07-02 14:30:58 athena Exp $ */
+/* $Id: direct.c,v 1.23 2002-08-04 21:03:45 stevenj Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -106,9 +106,9 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p, int flags)
+static int score(const solver *ego, const problem *p, const planner *plnr)
 {
-     UNUSED(flags);
+     UNUSED(plnr);
      return (applicable(ego, p)) ? GOOD : BAD;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.5 2002-07-28 04:54:59 stevenj Exp $ */
+/* $Id: dft-r2hc.c,v 1.6 2002-08-04 21:03:45 stevenj Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -106,11 +106,11 @@ static int split(R *r, R *i, uint n, int s)
      return ((r > i ? r - i : i - r) >= ((int)n) * (s > 0 ? s : -s));
 }
 
-static int score(const solver *ego, const problem *p_, int flags)
+static int score(const solver *ego, const problem *p_, const planner *plnr)
 {
      if (applicable(ego, p_)) {
 	  const problem_dft *p = (const problem_dft *) p_;
-	  if (flags & CLASSIC)
+	  if (plnr->flags & CLASSIC)
 	       return UGLY;
 	  if (split(p->ri, p->ii, p->sz.dims[0].n, p->sz.dims[0].is) &&
 	      split(p->ro, p->io, p->sz.dims[0].n, p->sz.dims[0].os))
