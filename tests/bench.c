@@ -36,6 +36,22 @@ void setup(struct problem *p)
 		       the_plan = FFTW(plan_dft_1d)(p->n[0], p->in, p->out, 
 						    p->sign, flags);
 		       break;
+		  case 2:
+		       the_plan = FFTW(plan_dft_2d)(p->n[0], p->n[1],
+						    p->in, p->out, 
+						    p->sign, flags);
+		       break;
+		  case 3:
+		       the_plan = FFTW(plan_dft_3d)(p->n[0], p->n[1], p->n[2],
+						    p->in, p->out, 
+						    p->sign, flags);
+		       break;
+		  default:
+		       the_plan = FFTW(plan_dft)(p->rank, p->n,
+						 p->in, p->n,
+						 p->out, p->n,
+						 p->sign, flags);
+		       break;
 	      }
 	      break;
 	 case PROBLEM_REAL:	      
@@ -44,6 +60,8 @@ void setup(struct problem *p)
      tim = timer_stop();
      if (verbose)
 	  printf("planner time: %g s\n", tim);
+
+     BENCH_ASSERT(the_plan);
 }
 
 

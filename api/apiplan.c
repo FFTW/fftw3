@@ -46,7 +46,7 @@ apiplan *X(mkapiplan)(unsigned int flags, problem *prb)
 	  pln0 = plnr->adt->mkplan(plnr, prb);
 	  X(plan_destroy_internal)(pln0);
      } else {
-	  X(problem_destroy)(p->prb);
+	  X(problem_destroy)(prb);
      }
 
      /* discard all information not necessary to reconstruct the

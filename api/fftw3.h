@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.7 2003-01-11 14:21:53 athena Exp $ */
+/* $Id: fftw3.h,v 1.8 2003-01-11 14:49:30 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -45,18 +45,30 @@ extern "C" {
   C: complex data type
 */
 
-#define FFTW_DEFINE_API(X, R, C)				\
-								\
-FFTW_DEFINE_COMPLEX(R, C);					\
-								\
-typedef struct X(plan_s) *X(plan);				\
-								\
-void X(execute)(X(plan) p);					\
-								\
-X(plan) X(plan_dft_1d)(unsigned int n, C *in, C *out, int sign,	\
-		       unsigned int flags);			\
-								\
-void X(plan_destroy)(X(plan) p);				\
+#define FFTW_DEFINE_API(X, R, C)					  \
+									  \
+FFTW_DEFINE_COMPLEX(R, C);						  \
+									  \
+typedef struct X(plan_s) *X(plan);					  \
+									  \
+void X(execute)(X(plan) p);						  \
+									  \
+X(plan) X(plan_dft)(unsigned int rank, const unsigned int *n,		  \
+		    C *in, const unsigned int *inembed,			  \
+		    C *out, const unsigned int *onembed,		  \
+		    int sign, unsigned int flags);			  \
+									  \
+X(plan) X(plan_dft_1d)(unsigned int n, C *in, C *out, int sign,		  \
+		       unsigned int flags);				  \
+									  \
+									  \
+X(plan) X(plan_dft_2d)(unsigned int nx, unsigned int ny,		  \
+		       C *in, C *out, int sign, unsigned int flags);	  \
+									  \
+X(plan) X(plan_dft_3d)(unsigned int nx, unsigned int ny, unsigned int nz, \
+		       C *in, C *out, int sign, unsigned int flags);	  \
+									  \
+void X(plan_destroy)(X(plan) p);					  \
 void X(cleanup)(void);
 
 /* end of FFTW_DEFINE_API macro */
