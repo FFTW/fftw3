@@ -96,7 +96,7 @@ existing licensees.
 \question 26aug:systems  Which systems does FFTW run on?
 
 FFTW is written in ANSI C, and should work on any system with a decent
-C compiler.  (See also \qref runOnWindows and \qref compilerCrashes.)
+C compiler.  (See also \qref runOnWindows, \qref compilerCrashes.)
 FFTW can also take advantage of certain hardware-specific features,
 such as cycle counters and SIMD instructions, but this is optional.
 
@@ -106,18 +106,19 @@ It should.  FFTW was not developed on Windows, but the source code is
 essentially straight ANSI C.  Many users have reported using FFTW 2 in
 the past on Windows with various compilers; we are currently awaiting
 reports for FFTW 3.  See also the \docref{FFTW Windows installation
-notes\} and \qref compilerCrashes
+notes\}, \qref compilerCrashes, and \qref vbetalia.
 
 \question 26aug:compilerCrashes  My compiler has trouble with FFTW.
 
 Complain fiercely to the vendor of the compiler. 
 
-FFTW is likely to push compilers to their limits.  We have
-successfully used \courier{gcc\} 3.2.x on x86 and PPC, a recent Compaq
-C compiler for Alpha, version 6 of IBM's \courier{xlc\} compiler for
-AIX, Intel's \courier{icc\} versions 5-7, and Sun WorkShop
-\courier{cc\} version 6.  Several compiler bugs have been exposed by
-FFTW, however.  A partial list follows.
+We have successfully used \courier{gcc\} 3.2.x on x86 and PPC, a
+recent Compaq C compiler for Alpha, version 6 of IBM's \courier{xlc\}
+compiler for AIX, Intel's \courier{icc\} versions 5-7, and Sun
+WorkShop \courier{cc\} version 6.  
+
+FFTW is likely to push compilers to their limits, however, and several
+compiler bugs have been exposed by FFTW.  A partial list follows.
 
 \courier{gcc\} 2.95.x for Solaris/SPARC produces incorrect code for
 the test program (workaround: recompile the \courier{libbench2\}
@@ -128,7 +129,7 @@ miscompiles the test program. (Please report a workaround if you know
 one.)
 
 \courier{gcc\} 3.2.3 for ARM reportedly crashes during compilation.
-(Please report a workaround if you know one.)
+This bug is reportedly fixed in later versions of \courier{gcc\}.
 
 Intel's \courier{icc-7.1\} compiler build 20030402Z appears to produce
 incorrect dependencies, causing the compilation to fail.
@@ -155,10 +156,14 @@ by the \courier{configure\} script.
 Some 3.0.x and 3.1.x versions of \courier{gcc\} on \courier{x86\} may
 crash.  \courier{gcc\} so-called 2.96 shipping with RedHat 7.3 crashes
 when compiling SIMD code.  In both cases, please upgrade to
-\courier{gcc-3.2\}.
+\courier{gcc-3.2\} or later.
 
 Intel's \courier{icc\} 6.0 misaligns SSE constants, but FFTW has a
 workaround.
+
+Visual C++ 6.0 reportedly produces incorrect code for SSE/SSE2 when
+compiling FFTW.  People who tried using VC++ reportedly had switch to
+the Intel compiler in order to get the SIMD code to work.
 
 \courier{gcc\} 2.95 on MacOS X miscompiles AltiVec code (fixed in
 later versions).  \courier{gcc\} 3.2.x miscompiles AltiVec
@@ -444,6 +449,13 @@ You should initialize your input array \italic{after\} creating the
 plan, unless you use \courier{FFTW_ESTIMATE\}: planning with
 \courier{FFTW_MEASURE\} or \courier{FFTW_PATIENT\} overwrites the
 input/output arrays, as described in the manual.
+
+\question 05sep:vbetalia How do I call FFTW from the Microsoft language du jour?
+
+Please \italic{do not\} ask us Windows-specific questions.  We do not
+use Windows.  We know nothing about Visual Basic, Visual C++, or .Net.
+Plese find the appropriate Usenet discussion group and ask your
+question there.
 
 \comment ######################################################################
 
