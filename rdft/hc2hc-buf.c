@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-ditbuf.c,v 1.1 2002-07-22 23:43:39 stevenj Exp $ */
+/* $Id: hc2hc-buf.c,v 1.1 2002-07-25 04:51:45 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -64,7 +64,7 @@ static const R *doit(khc2hc k, R *rA, R *iA, const R *W, int ios, int dist,
 
 #define BATCHSZ 4 /* FIXME: parametrize? */
 
-static void apply(plan *ego_, R *I, R *O)
+static void apply_dit(plan *ego_, R *I, R *O)
 {
      plan_hc2hc *ego = (plan_hc2hc *) ego_;
 
@@ -108,6 +108,51 @@ static void apply(plan *ego_, R *I, R *O)
      }
 }
 
+static void apply_dif(plan *ego_, R *I, R *O)
+{
+     plan_hc2hc *ego = (plan_hc2hc *) ego_;
+     R *I0 = I;
+
+     {
+          plan_rdft *cld0 = (plan_rdft *) ego->cld0;
+          plan_rdft *cldm = (plan_rdft *) ego->cldm;
+          uint i, j, r = ego->r, m = ego->m, vl = ego->vl;
+          int is = ego->is, ivs = ego->ivs, ios = ego->iios;
+	  R *buf;
+
+	  STACK_MALLOC(R *, buf, r * BATCHSZ * 2 * sizeof(R));
+
+          for (i = 0; i < vl; ++i, I += ivs) {
+	       R *rA, *iA;
+	       const R *W;
+
+	       cld0->apply((plan *) cld0, I, I);
+	       
+	       rA = I + is; iA = I + (r * m - 1) * is;
+	       W = ego->W;
+	       for (j = (m-1)/2; j >= BATCHSZ; j -= BATCHSZ) {
+		    W = doit(ego->k, rA, iA, W, ios, is, r, BATCHSZ, buf,
+			     ego->vs);
+		    rA += is * (int)BATCHSZ;
+		    iA -= is * (int)BATCHSZ;
+	       }
+	       /* do remaining j calls, if any */
+               if (j > 0)
+                    doit(ego->k, rA, iA, W, ios, is, r, j, buf, ego->vs);
+
+	       cldm->apply((plan *) cldm, I + is*(m/2), I + is*(m/2));
+	  }
+
+	  STACK_FREE(buf);
+     }
+
+     /* two-dimensional r x vl sub-transform: */
+     {
+	  plan_rdft *cld = (plan_rdft *) ego->cld;
+	  cld->apply((plan *) cld, I0, O);
+     }
+}
+
 static int applicable(const solver_hc2hc *ego, const problem *p_)
 {
      if (X(rdft_hc2hc_applicable)(ego, p_)) {
@@ -132,7 +177,7 @@ static int applicable(const solver_hc2hc *ego, const problem *p_)
 static void finish(plan_hc2hc *ego)
 {
      const hc2hc_desc *d = ego->slv->desc;
-     ego->iios = ego->m * ego->os;
+     ego->iios = ego->m * (R2HC_KINDP(d->genus->kind) ? ego->os : ego->is);
      ego->vs = X(mkstride)(ego->r, 1);
      ego->super.super.ops =
           X(ops_add3)(X(ops_add)(ego->cld->ops,
@@ -170,20 +215,34 @@ static int score(const solver *ego_, const problem *p_, int flags)
      return GOOD;
 }
 
-
-static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
+static plan *mkplan_ditbuf(const solver *ego, const problem *p, planner *plnr)
 {
      static const hc2hcadt adt = {
-	  X(rdft_mkcldrn_dit), finish, applicable, apply
+	  X(rdft_mkcldrn_dit), finish, applicable, apply_dit
      };
      return X(mkplan_rdft_hc2hc)((const solver_hc2hc *) ego, p, plnr, &adt);
 }
 
-
 solver *X(mksolver_rdft_hc2hc_ditbuf)(khc2hc codelet, const hc2hc_desc *desc)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan_ditbuf, score };
      static const char name[] = "rdft-ditbuf";
+
+     return X(mksolver_rdft_hc2hc)(codelet, desc, name, &sadt);
+}
+
+static plan *mkplan_difbuf(const solver *ego, const problem *p, planner *plnr)
+{
+     static const hc2hcadt adt = {
+	  X(rdft_mkcldrn_dif), finish, applicable, apply_dif
+     };
+     return X(mkplan_rdft_hc2hc)((const solver_hc2hc *) ego, p, plnr, &adt);
+}
+
+solver *X(mksolver_rdft_hc2hc_difbuf)(khc2hc codelet, const hc2hc_desc *desc)
+{
+     static const solver_adt sadt = { mkplan_difbuf, score };
+     static const char name[] = "rdft-difbuf";
 
      return X(mksolver_rdft_hc2hc)(codelet, desc, name, &sadt);
 }
