@@ -116,10 +116,9 @@ void setup(struct problem *p)
      BENCH_ASSERT(can_do(p));
 
      plnr = FFTW(mkplanner_score)(0);
-     
      FFTW(dft_conf_standard) (plnr);
-
      FFTW(planner_set_hook) (plnr, hook);
+     /* plnr->flags |= CLASSIC | CLASSIC_VRECURSE; */
 
      if (p->split) {
 	  is = os = 1;

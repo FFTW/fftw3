@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.14 2002-07-14 19:08:29 stevenj Exp $ */
+/* $Id: ct.c,v 1.15 2002-07-15 19:07:41 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -127,6 +127,10 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
      n = d[0].n;
      r = e->radix;
      m = n / r;
+
+     /* fftw2 vector recursion: once it turns on, it goes all the way down */
+     if ((plnr->flags & CLASSIC_VRECURSE) && p->vecsz.rnk > 0)
+	  plnr->flags |= FORCE_VRECURSE;
 
      cldp = adt->mkcld(ego, p);
      cld = MKPLAN(plnr, cldp);

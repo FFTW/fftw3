@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.13 2002-07-04 00:32:28 athena Exp $ */
+/* $Id: ct-dif.c,v 1.14 2002-07-15 19:07:41 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -85,6 +85,11 @@ static int score(const solver *ego_, const problem *p_, int flags)
           return BAD;
 
      n = p->sz.dims[0].n;
+
+     /* emulate fftw2 behavior */
+     if ((p->vecsz.rnk > 0) && NO_VRECURSE(flags))
+	  return BAD;
+
      if (n <= 16 || n / ego->desc->radix <= 4)
           return UGLY;
 

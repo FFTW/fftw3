@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.16 2002-07-04 00:32:28 athena Exp $ */
+/* $Id: ct-dit.c,v 1.17 2002-07-15 19:07:41 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -83,7 +83,7 @@ static int score(const solver *ego_, const problem *p_, int flags)
      p = (const problem_dft *) p_;
 
      /* emulate fftw2 behavior */
-     if ((flags & CLASSIC) && (p->vecsz.rnk > 0))
+     if ((p->vecsz.rnk > 0) && NO_VRECURSE(flags))
 	  return BAD;
 
      n = p->sz.dims[0].n;

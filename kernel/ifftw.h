@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.51 2002-07-14 21:12:14 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.52 2002-07-15 19:07:41 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -329,7 +329,8 @@ typedef struct pair_s pair; /* opaque */
 typedef struct solutions_s solutions; /* opaque */
 
 /* planner flags */
-enum { ESTIMATE = 0x1, CLASSIC = 0x2 };
+enum { ESTIMATE = 0x1, CLASSIC = 0x2,
+       CLASSIC_VRECURSE = 0x4, FORCE_VRECURSE = 0x8 };
 
 typedef enum { FORGET_PLANS, FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
@@ -398,6 +399,9 @@ void X(planner_dump)(planner *ego, int verbose);
 /* various planners */
 planner *X(mkplanner_naive)(int flags);
 planner *X(mkplanner_score)(int flags);
+
+#define NO_VRECURSE(flags) (((flags) & CLASSIC) && !((flags) & (CLASSIC_VRECURSE | FORCE_VRECURSE)))
+#define CLASSIC_VRECURSE_RESET(plnr) { if ((plnr)->flags & CLASSIC_VRECURSE) (plnr)->flags &= ~FORCE_VRECURSE; }
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.9 2002-07-12 19:09:19 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.10 2002-07-15 19:07:41 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -165,6 +165,11 @@ static int score(const solver *ego_, const problem *p_, int flags)
 
      p = (const problem_dft *) p_;
 
+     /* fftw2-like heuristic: once we've started vector-recursing,
+	don't stop (unless we have to) */
+     if ((flags & FORCE_VRECURSE) && p->vecsz.rnk == 1)
+	  return UGLY;
+
      /* Heuristic: if the transform is multi-dimensional, and the
         vector stride is less than the transform size, then we
         probably want to use an rank>=2 plan first in order to combine
@@ -201,10 +206,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(dft_solve), awake, print, destroy
      };
 
-
      if (!applicable(ego_, p_, &vdim))
           return (plan *) 0;
      p = (const problem_dft *) p_;
+
+     /* fftw2 vector recursion: use it or lose it */
+     if (p->vecsz.rnk == 1 && (plnr->flags & CLASSIC_VRECURSE))
+	  plnr->flags &= ~CLASSIC_VRECURSE & ~FORCE_VRECURSE;
 
      cldp = X(mkproblem_dft_d)(X(tensor_copy)(p->sz),
 			       X(tensor_copy_except)(p->vecsz, vdim),
