@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.144 2003-03-15 16:29:12 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.145 2003-03-15 16:40:30 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -744,7 +744,7 @@ implementations therefore store the Nyquist element where the DC
 imaginary part would go, in order to make the input and output arrays
 the same size.  Such packing, however, does not generalize well to
 multi-dimensional transforms, and the space savings are miniscule in
-any case.  FFTW does not support packed arrays.
+any case; FFTW does not support it.
 
 An alternate interface for one-dimensional r2c and c2r DFTs can be
 found in the @samp{r2r} interface (@pxref{The Halfcomplex-format
