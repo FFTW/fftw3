@@ -22,7 +22,7 @@
 
 /* if F77_FUNC is not defined, then we don't know how to mangle identifiers
    for the Fortran linker, and we must omit the f77 API. */
-#ifdef F77_FUNC
+#if defined(F77_FUNC) || defined(WINDOWS_F77_MANGLING)
 
 /*-----------------------------------------------------------------------*/
 /* some internal functions used by the f77 api */
@@ -100,9 +100,14 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
 
 #include "x77.h"
 
-#define F77x(a, A) F77_FUNC(a, A)
 #define F77(a, A) F77x(x77(a), X77(A))
-#include "f77funcs.c"
+
+#ifndef WINDOWS_F77_MANGLING
+
+#if defined(F77_FUNC)
+#  define F77x(a, A) F77_FUNC(a, A)
+#  include "f77funcs.c"
+#endif
 
 /* If identifiers with underscores are mangled differently than those
    without underscores, then we include *both* mangling versions.  The
@@ -118,5 +123,31 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
 #  define F77x(a, A) F77_FUNC_(a, A)
 #  include "f77funcs.c"
 #endif
+
+#else /* WINDOWS_F77_MANGLING */
+
+/* Various mangling conventions common (?) under Windows. */
+
+/* g77 */
+#  define WINDOWS_F77_FUNC(a, A) a ## __
+#  define F77x(a, A) WINDOWS_F77_FUNC(a, A)
+#  include "f77funcs.c"
+
+/* Digital/Compaq/HP Visual Fortran, Intel Fortran.  stdcall attribute
+   is apparently required to adjust for calling conventions (callee
+   pops stack in stdcall).  See also:
+       http://msdn.microsoft.com/library/en-us/vccore98/html/_core_mixed.2d.language_programming.3a_.overview.asp
+*/
+#  undef WINDOWS_F77_FUNC
+#  if defined(__GNUC__)
+#    define WINDOWS_F77_FUNC(a, A) __attribute__((stdcall)) A
+#  elif defined(_MSC_VER) || defined(_ICC) || defined(_STDCALL_SUPPORTED)
+#    define WINDOWS_F77_FUNC(a, A) __stdcall A
+#  else
+#    define WINDOWS_F77_FUNC(a, A) A /* oh well */
+#  endif
+#  include "f77funcs.c"
+
+#endif /* WINDOWS_F77_MANGLING */
 
 #endif				/* F77_FUNC */

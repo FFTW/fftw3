@@ -90,6 +90,11 @@ if test "$with_our_malloc16" = "yes"; then
 	AC_DEFINE(WITH_OUR_MALLOC16,1,[Use our own 16-byte aligned malloc routine; mainly helpful for Windows systems lacking aligned allocation system-library routines.])
 fi
 
+AC_ARG_WITH(windows-f77-mangling, [AC_HELP_STRING([--with-windows-f77-mangling],[use common Win32 Fortran interface styles])], with_windows_f77_mangling=$withval, with_windows_f77_mangling=no)
+if test "$with_windows_f77_mangling" = "yes"; then
+	AC_DEFINE(WINDOWS_F77_MANGLING,1,[Use common Windows Fortran mangling styles for the Fortran interfaces.])
+fi
+
 AC_ARG_ENABLE(unsafe-mulmod, [AC_HELP_STRING([--enable-unsafe-mulmod],[risk overflow for large prime sizes])], enable_unsafe_mulmod=$enableval, enable_unsafe_mulmod=no)
 if test "$enable_unsafe_mulmod" = "yes"; then
         AC_DEFINE([FFTW_ENABLE_UNSAFE_MULMOD],1,[enable fast, unsafe modular multiplications, risking overflow for large prime sizes])
