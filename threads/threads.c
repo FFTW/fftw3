@@ -188,14 +188,15 @@ typedef MPQueueID fftw_thr_id;
 
 /************************** Win32 Threads ****************************/
 
-#elif defined(USING_WIN32_THREADS)
+#elif defined(__WIN32__) || defined(_WIN32) || defined(_WINDOWS)
 
 /* Win32 threads glue.  We have not tested this code!  (I just implemented
    it by looking at a Win32 threads manual.)  Users have reported that this
    code works under NT using Microsoft compilers.
    
-   To use it, you should #define the symbol USING_WIN32_THREADS.  You
-   must also link to the thread-safe version of the C runtime library. */
+   This code should be automatically used on Windows, assuming that
+   one of the above macros is defined by your compiler.  You must also
+   link to the thread-safe version of the C runtime library. */
 
 #include <windows.h>
 #include <process.h>
