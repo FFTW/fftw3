@@ -1,17 +1,10 @@
-* audit the implementation of RNK_MINFTY
-
-* wisdom interaction with planner flags
-
 * simd
 
 * threads/mpi
 
-* DCT/DST ?  Idea: only implement the small cases as codelets,
-  and reduce the rest to DFT via some known formula.  Multidimensional
-  case is easy.  E.g., a fast 8x8 or 16x16 is still quite useful even
-  if we cannot handle the general case efficiently.
+* DCT/DST codelets?  which kinds?
 
-* user interface
+* user interface (& manual)
 
 * implement fftw2 buffering: copy to buffers, transform in-place, copy back
 
@@ -22,11 +15,17 @@
 
 * still too much code duplication in rader
 
+* rdft/rank-geq2 (and per-dimension kind's) needs to be tested
+
 * cleanup reodft/verify.c using kernel/verify-lib.c
 
 * it may be a good idea to unify all those little loops that do
   copying, (X[i], X[n-i]) <- (X[i] + X[n-i], X[i] - X[n-i]),
   and multiplication of vectors by twiddle factors.
+
+* better test program (need syntax for real even/odd transforms, too)
+
+* $prefix/bin/fftw_wisdom to generate/update /etc/fftw/wisdom and wisdom_conf.c
 
 TODO before/at release:
 
