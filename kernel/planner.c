@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.72 2002-09-12 19:11:21 athena Exp $ */
+/* $Id: planner.c,v 1.73 2002-09-12 19:46:56 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -278,7 +278,8 @@ static void forget(planner *ego, amnesia a)
 	  if (l->state == H_VALID) {
 	       if (a == FORGET_EVERYTHING ||
 		   (a == FORGET_ACCURSED && !BLESSEDP(l))) {
-		    /* confutatis maledictis flammis acribus addictis */
+		    /* confutatis maledictis
+		       flammis acribus addictis */
 		    l->state = H_DELETED;
 		    --ego->cnt;
 	       }
