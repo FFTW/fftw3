@@ -54,6 +54,13 @@ static __inline__ V PFACC(V b, V a)
      return ret;
 }
 
+static __inline__ V PFNACC(V b, V a)
+{
+     V ret;
+     __asm__("pfnacc %2, %0" : "=y"(ret) : "0"(a), "ym"(b));
+     return ret;
+}
+
 static __inline__ V PFPNACC(V b, V a)
 {
      V ret;
@@ -136,7 +143,11 @@ static __inline__ V VBYI(V x)
 #define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 
-static __inline__ V BYTW(const R *t, V ri)
+/* twiddle storage #1: compact, slower */
+#define VTW1(x) {TW_COS, 0, x}, {TW_SIN, 0, x}
+#define TWVL1 1
+
+static __inline__ V BYTW1(const R *t, V ri)
 {
      V tri = LD(t, 1, t);
      V ir = FLIP_RI(ri);
@@ -145,7 +156,7 @@ static __inline__ V BYTW(const R *t, V ri)
      return PFPNACC(riir, rrii);
 }
 
-static __inline__ V BYTWJ(const R *t, V ri)
+static __inline__ V BYTWJ1(const R *t, V ri)
 {
      V tri = LD(t, 1, t);
      V ir = FLIP_RI(ri);
@@ -154,11 +165,30 @@ static __inline__ V BYTWJ(const R *t, V ri)
      return FLIP_RI(PFPNACC(rrii, riir));
 }
 
+/* twiddle storage #2: twice the space, faster (when in cache) */
+#define VTW2(x)								\
+  {TW_COS, 0, x}, {TW_COS, 0, x}, {TW_SIN, 0, -x}, {TW_SIN, 0, x}
+#define TWVL2 2
+
+static __inline__ V BYTW2(const R *t, V sr)
+{
+     const V *twp = (const V *)t;
+     V si = FLIP_RI(sr);
+     V tr = twp[0], ti = twp[1];
+     return VADD(VMUL(tr, sr), VMUL(ti, si));
+}
+
+static __inline__ V BYTWJ2(const R *t, V sr)
+{
+     const V *twp = (const V *)t;
+     V si = FLIP_RI(sr);
+     V tr = twp[0], ti = twp[1];
+     return VSUB(VMUL(tr, sr), VMUL(ti, si));
+}
+
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
 #define VFMS(a, b, c) VSUB(VMUL(a, b), c)
-#define VTW(x) {TW_COS, 0, x}, {TW_SIN, 0, x}
-#define TWVL 1
 
 #define RIGHT_CPU X(have_3dnow)
 extern int RIGHT_CPU(void);

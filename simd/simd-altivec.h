@@ -150,10 +150,11 @@ static inline V VFNMSI(V b, V c)
      return VFNMS(FLIP_RI(b), X(altivec_chsr_sgn), c);
 }
 
-#define VTW(x) {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
-#define TWVL (VL)
+/* twiddle storage #1: compact, slower */
+#define VTW1(x) {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
+#define TWVL1 (VL)
 
-static inline V BYTW(const R *t, V sr)
+static inline V BYTW1(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V si = VBYI(sr);
@@ -163,13 +164,35 @@ static inline V BYTW(const R *t, V sr)
      return VFMA(ti, si, VMUL(tr, sr));
 }
 
-static inline V BYTWJ(const R *t, V sr)
+static inline V BYTWJ1(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V si = VBYI(sr);
      V tx = twp[0];
      V tr = vec_mergeh(tx, tx);
      V ti = vec_mergel(tx, tx);
+     return VFNMS(ti, si, VMUL(tr, sr));
+}
+
+/* twiddle storage #2: twice the space, faster (when in cache) */
+#define VTW2(x)								\
+  {TW_COS, 0, x}, {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_COS, 1, x},	\
+  {TW_SIN, 0, -x}, {TW_SIN, 0, x}, {TW_SIN, 1, -x}, {TW_SIN, 1, x}
+#define TWVL2 (2 * VL)
+
+static __inline__ V BYTW2(const R *t, V sr)
+{
+     const V *twp = (const V *)t;
+     V si = FLIP_RI(sr);
+     V tr = twp[0], ti = twp[1];
+     return VFMA(ti, si, VMUL(tr, sr));
+}
+
+static __inline__ V BYTWJ2(const R *t, V sr)
+{
+     const V *twp = (const V *)t;
+     V si = FLIP_RI(sr);
+     V tr = twp[0], ti = twp[1];
      return VFNMS(ti, si, VMUL(tr, sr));
 }
 
