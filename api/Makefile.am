@@ -4,9 +4,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft		\
 include_HEADERS = fftw3.h
 noinst_LTLIBRARIES = libapi.la
 
-WISDOM_SRC = export-wisdom-to-file.c export-wisdom-to-string.c	\
-export-wisdom.c forget-wisdom.c import-wisdom-from-file.c	\
-import-wisdom-from-string.c import-wisdom.c
+WISDOM_SRC = export-wisdom-to-file.c export-wisdom-to-string.c		\
+export-wisdom.c forget-wisdom.c import-wisdom-from-file.c		\
+import-wisdom-from-string.c import-wisdom.c import-system-wisdom.c
 
 libapi_la_SOURCES = $(WISDOM_SRC) apiplan.c configure.c dfthelp.c	\
 execute.c mapflags.c plan-dft-1d.c the-planner.c api.h fftw3.h

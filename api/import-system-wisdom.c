@@ -20,27 +20,27 @@
 
 #include "api.h"
 
-typedef struct {
-     scanner super;
-     int (*emitter)(void *);
-     void *data;
-} S;
+#if defined(FFTW_SINGLE)
+#  define WISDOM_NAME "wisdomf"
+#elif defined(FFTW_LDOUBLE)
+#  define WISDOM_NAME "wisdoml"
+#else
+#  define WISDOM_NAME "wisdom"
+#endif
 
-static int getchr_generic(scanner *s_)
+int X(import_system_wisdom)(void)
 {
-     S *s = (S *) s_;
-     return (s->emitter)(s->data);
-}
-
-int X(import_wisdom)(int (*emitter)(void *), void *data)
-{
-     S *s = (S *) X(mkscanner)(sizeof(S), getchr_generic);
-     planner *plnr = X(the_planner)();
-     int ret;
-
-     s->emitter = emitter;
-     s->data = data;
-     ret = plnr->adt->imprt(plnr, (scanner *) s);
-     X(scanner_destroy)((scanner *) s);
-     return ret;
+#ifdef WINDOWS_AND_SO_ON /* TODO */
+     return 0;
+#else
+     FILE *f;
+     f = fopen("/etc/fftw/" WISDOM_NAME, "r");
+     if (f) {
+	  int ret = X(import_wisdom_from_file)(f);
+	  fclose(f);
+	  return ret;
+     }
+     else
+	  return 0;
+#endif
 }

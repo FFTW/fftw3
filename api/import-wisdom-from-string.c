@@ -40,10 +40,11 @@ scanner *X(mkscanner_str)(const char *s)
      return &sc->super;
 }
 
-void X(import_wisdom_from_string)(char *input_string)
+int X(import_wisdom_from_string)(const char *input_string)
 {
-     scanner *s = X(mkscanner_string)(input_string);
+     scanner *s = X(mkscanner_str)(input_string);
      planner *plnr = X(the_planner)();
-     plnr->adt->imprt(plnr, s);
+     int ret = plnr->adt->imprt(plnr, s);
      X(scanner_destroy)(s);
+     return ret;
 }

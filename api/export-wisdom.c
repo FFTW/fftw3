@@ -39,6 +39,6 @@ void X(export_wisdom)(void (*absorber)(char c, void *), void *data)
 
      p->absorber = absorber;
      p->data = data;
-     plnr->adt->exprt(plnr, p);
-     X(printer_destroy)(p);
+     plnr->adt->exprt(plnr, (printer *) p);
+     X(printer_destroy)((printer *) p);
 }

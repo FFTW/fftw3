@@ -38,10 +38,11 @@ scanner *X(mkscanner_file)(FILE *f)
      return &sc->super;
 }
 
-void X(import_wisdom_from_file)(FILE *input_file)
+int X(import_wisdom_from_file)(FILE *input_file)
 {
      scanner *s = X(mkscanner_file)(input_file);
      planner *plnr = X(the_planner)();
-     plnr->adt->imprt(plnr, s);
+     int ret = plnr->adt->imprt(plnr, s);
      X(scanner_destroy)(s);
+     return ret;
 }
