@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.90 2003-03-04 05:25:57 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.91 2003-03-04 07:22:14 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2219,6 +2219,10 @@ that the (@code{j},@code{k})-th element is at @code{j*stride+k*dist}.
 (The basic @code{fftw_plan_dft} interface corresponds to a stride of 1.)
 @cindex stride
 
+For in-place transforms, the input and output @code{stride} and
+@code{dist} parameters should be the same; otherwise, the planner may
+return @code{NULL}.
+
 So, for example, to transform a sequence of contiguous arrays, stored
 one after another, one would use a @code{stride} of 1 and a @code{dist}
 of @math{N}, where @math{N} is the product of the dimensions.  In
@@ -2294,6 +2298,111 @@ the same as for @code{fftw_plan_many_dft}.  (Of course, the
 @section Guru Interface
 @cindex guru interface
 
+The ``guru'' interface to FFTW is intended to expose as much as possible
+of the flexibility in the underlying FFTW architecture.  It allows one
+to compute multi-dimensional ``vectors'' of multi-dimensional
+transforms, where each vector/transform dimension has an independent
+size and stride.
+@cindex vector
+One can also use more general complex-number formats, e.g. separate real
+and imaginary arrays.  In addition to the more-flexible planner
+interface, there are also generalizations of @code{fftw_execute} that
+allow a given plan to be executed on a different array (sufficiently
+similar to the original).
+
+For those users who require the flexibility of the guru interface, it is
+important that they pay special attention to the documentation lest they
+shoot themselves in the foot.
+
+@subsubheading Vector and transform sizes
+
+The guru interface introduces one basic new data structure,
+@code{fftw_iodim}, that is used to specify sizes and strides for
+multi-dimensional transforms and vectors:
+
+@example
+typedef struct {
+     int n;
+     int is;
+     int os;
+} fftw_iodim;
+@end example
+@tindex fftw_iodim
+
+Here, @code{n} is the size of the dimension, and @code{is} and @code{os}
+are the strides (in units of @code{double}) of that dimension for the
+input and output arrays.
+@cindex stride
+
+The guru planner interfaces all take a (@code{rank}, @code{dims[rank]})
+pair describing the transform size, and a (@code{howmany_rank},
+@code{howmany_dims[rank]}) pair describing the ``vector'' size (a
+multi-dimensional loop of transforms to perform), where @code{dims} and
+@code{howmany_dims} are arrays of @code{fftw_iodim}.
+
+For example, the @code{howmany} parameter in the advanced complex-DFT
+interface corresponds to @code{howmany_rank} = 1,
+@code{howmany_dims[0].n} = @code{howmany}, @code{howmany_dims[0].is} =
+@code{2*idist}, and @code{howmany_dims[0].os} = @code{2*odist}.  Here,
+the factors of 2 in the strides are because the advanced complex-DFT
+interface measures all strides in units of @code{fftw_complex}, whereas
+here we use units of @code{double}.
+@cindex howmany loop
+@cindex dist
+
+A row-major multidimensional array with dimensions @code{n[rank]}
+(@pxref{Row-major Format}) corresponds to @code{dims[i].n} = @code{n[i]}
+and the recurrence @code{dims[i].is} = @code{n[i+1] * dims[i+1].is}
+(similarly for @code{os}).  The stride of the last (@code{i=rank-1})
+dimension is the overall stride of the array.  e.g. to be equivalent to
+the advanced complex-DFT interface, you would have
+@code{dims[rank-1].is} = @code{2*istride} and @code{dims[rank-1].os} =
+@code{2*ostride}.
+
+In general, we only guarantee FFTW to return a non-@code{NULL} plan if
+the vector and transform dimensions correspond to a set of distinct
+indices, and for in-place transforms the input/output strides should be
+the same.
+
+@subsubheading Complex DFTs
+@example
+fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
+                             int howmany_rank,
+                             const fftw_iodim *howmany_dims,
+                             double *ri, double *ii,
+                             double *ro, double *io,
+                             unsigned flags);
+@end example
+@findex fftw_plan_guru_dft
+
+@subsubheading Real-data DFTs
+@example
+fftw_plan fftw_plan_guru_dft_r2c(int rank, const fftw_iodim *dims,
+                                 int howmany_rank,
+                                 const fftw_iodim *howmany_dims,
+                                 double *in,
+                                 double *ro, double *io,
+                                 unsigned flags);
+fftw_plan fftw_plan_guru_dft_c2r(int rank, const fftw_iodim *dims,
+                                 int howmany_rank,
+                                 const fftw_iodim *howmany_dims,
+                                 double *ri, double *ii,
+                                 double *out,
+                                 unsigned flags);
+@end example
+@findex fftw_plan_guru_dft_r2c
+@findex fftw_plan_guru_dft_c2r
+
+@subsubheading Real-to-real transforms
+@example
+fftw_plan fftw_plan_guru_r2r(int rank, const fftw_iodim *dims,
+                             int howmany_rank,
+                             const fftw_iodim *howmany_dims,
+                             double *in, double *out,
+                             const fftw_r2r_kind *kind,
+                             unsigned flags);
+@end example
+@findex fftw_plan_guru_r2r
 
 @c ------------------------------------------------------------
 @node What FFTW Really Computes,  , Guru Interface, FFTW Reference
