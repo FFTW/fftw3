@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.215 2005-01-15 17:57:07 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.216 2005-01-15 19:57:56 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -267,7 +267,7 @@ transform (DFT) and various special cases thereof.
        FFTW employs @Onlogn{} algorithms for all lengths, including
        prime numbers.
 
-@item  FFTW supports arbitrary @math{n}-dimensional data.
+@item  FFTW supports arbitrary multi-dimensional data.
 
 @item  FFTW supports the SSE, SSE2, 3DNow!, and Altivec instruction
        sets.
@@ -336,7 +336,7 @@ generality.
       transform of contiguous data.
 @item The @dfn{advanced interface} computes transforms 
       of multiple or strided arrays.
-@item The @dfn{guru} interface supports the most general data 
+@item The @dfn{guru interface} supports the most general data 
       layouts, multiplicities, and strides.
 @end itemize
 We expect that most users will be best served by the basic interface,
