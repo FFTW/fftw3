@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.130 2003-01-16 12:58:28 athena Exp $ */
+/* $Id: planner.c,v 1.131 2003-01-19 12:28:27 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -114,7 +114,7 @@ static void md5hash(md5 *m, const problem *p, const planner *plnr)
 {
      X(md5begin)(m);
      X(md5unsigned)(m, sizeof(R)); /* so we don't mix different precisions */
-     X(md5int)(m, plnr->problem_flags);
+     X(md5unsigned)(m, plnr->problem_flags);
      X(md5int)(m, plnr->nthr);
      p->adt->hash(p, m);
      X(md5end)(m);
@@ -194,7 +194,7 @@ static void rehash(planner *ego, unsigned nsiz)
      unsigned osiz = ego->hashsiz, h;
      solution *osol = ego->solutions, *nsol;
 
-     nsiz = (unsigned)X(next_prime)(nsiz);
+     nsiz = (unsigned)X(next_prime)((int)nsiz);
      nsol = (solution *)MALLOC(nsiz * sizeof(solution), HASHT);
      ++ego->nrehash;
 
@@ -314,7 +314,7 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
 			   unsigned short nflags)
 {
      unsigned short planner_flags = ego->planner_flags;
-     int problem_flags = ego->problem_flags;
+     unsigned problem_flags = ego->problem_flags;
      int nthr = ego->nthr;
      plan *pln;
      ego->planner_flags = nflags;
