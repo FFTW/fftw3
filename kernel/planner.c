@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.97 2002-09-16 20:36:12 athena Exp $ */
+/* $Id: planner.c,v 1.98 2002-09-16 21:13:45 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -627,12 +627,19 @@ void X(planner_destroy)(planner *ego)
 
 void X(planner_dump)(planner *ego, int verbose)
 {
-     uint valid = 0, empty = 0;
+     uint valid = 0, empty = 0, infeasible = 0;
      uint h;
      UNUSED(verbose); /* historical */
 
-     for (h = 0; h < ego->hashsiz; ++h) 
-	  if (VALIDP(ego->solutions + h)) ++valid; else ++empty;
+     for (h = 0; h < ego->hashsiz; ++h) {
+	  solution *l = ego->solutions + h; 
+	  if (VALIDP(l)) {
+	       ++valid; 
+	       if (l->slvndx < 0) ++infeasible;
+	  } else
+	       ++empty;
+	  
+     }
 
      D("nplan = %u\n", ego->nplan);
      D("nprob = %u\n", ego->nprob);
@@ -646,6 +653,7 @@ void X(planner_dump)(planner *ego, int verbose)
      D("hashsiz = %d\n", ego->hashsiz);
      D("empty = %d\n", empty);
      D("valid = %d\n", valid);
+     D("infeasible = %d\n", infeasible);
      A(ego->nelem == valid);
 }
 #endif
