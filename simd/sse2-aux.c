@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse2-aux.c,v 1.3 2005-03-18 00:20:54 athena Exp $ */
+/* $Id: sse2-aux.c,v 1.4 2005-03-18 02:48:19 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -35,7 +35,7 @@ const union dvec X(sse2_mp) = { {-0.0, 0.0} };
 #endif
 
 const union uvec X(sse2_mp) = {
-     { 0x80000000, 0x00000000, 0x80000000, 0x00000000 }
+     { 0x00000000, 0x80000000, 0x00000000, 0x00000000 }
 };
 #endif
 
