@@ -10,7 +10,7 @@ else
 LIBFFTWTHREADS = 
 endif
 
-bench_SOURCES = bench.c
+bench_SOURCES = bench.c hook.c
 bench_LDADD = $(LIBFFTWTHREADS)				\
 $(top_builddir)/libfftw3@PREC_SUFFIX@.la		\
 $(top_builddir)/libbench2/libbench2.a $(THREADLIBS)

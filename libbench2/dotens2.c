@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dotens2.c,v 1.2 2003-01-18 21:13:15 athena Exp $ */
+/* $Id: dotens2.c,v 1.3 2003-01-18 22:27:15 athena Exp $ */
 
 #include "verify.h"
 
@@ -46,7 +46,7 @@ static void recur(int rnk, const bench_iodim *dims0, const bench_iodim *dims1,
      }
 }
 
-void dotens2(const bench_tensor *sz0, const bench_tensor *sz1, dotens2_closure *k)
+void bench_dotens2(const bench_tensor *sz0, const bench_tensor *sz1, dotens2_closure *k)
 {
      BENCH_ASSERT(sz0->rnk == sz1->rnk);
      if (sz0->rnk == RNK_MINFTY)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.5 2003-01-18 21:13:15 athena Exp $ */
+/* $Id: bench-user.h,v 1.6 2003-01-18 22:27:15 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -122,13 +122,6 @@ extern void problem_zero(bench_problem *p);
 extern int power_of_two(int n);
 extern int log_2(int n);
 
-
-typedef struct dotens2_closure_s {
-     void (*apply)(struct dotens2_closure_s *k, 
-		   int indx0, int ondx0, int indx1, int ondx1);
-} dotens2_closure;
-
-void dotens2(const bench_tensor *sz0, const bench_tensor *sz1, dotens2_closure *k);
 
 #define CASSIGN(out, in) (c_re(out) = c_re(in), c_im(out) = c_im(in))
 

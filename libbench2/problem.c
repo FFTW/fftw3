@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.5 2003-01-18 21:13:15 athena Exp $ */
+/* $Id: problem.c,v 1.6 2003-01-18 22:27:15 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -27,29 +27,26 @@
 #include <ctype.h>
 
 /* do what I mean */
-static void dwim(bench_tensor *t)
+static void dwim(bench_tensor *t, bench_iodim *last_iodim)
 {
      int i;
-     bench_iodim *d;
+     bench_iodim *d, *d1;
      if (!FINITE_RNK(t->rnk) || t->rnk < 1)
 	  return;
 
      i = t->rnk;
-
-     /* default last dimension strides */
-     --i; d = t->dims + i;
-     if (!d->is)
-	  d->is = 1; 
-     if (!d->os)
-	  d->os = 1; 
+     d1 = last_iodim;
 
      while (--i >= 0) {
 	  d = t->dims + i;
-	  if (!d[0].is) 
-	       d[0].is = d[1].is * d[1].n; 
-	  if (!d[0].os)
-	       d[0].os = d[1].os * d[1].n; 
+	  if (!d->is) 
+	       d->is = d1->is * d1->n; 
+	  if (!d->os) 
+	       d->os = d1->os * d1->n; 
+	  d1 = d;
      }
+
+     *last_iodim = *d1;
 }
 
 static const char *parseint(const char *s, int *n)
@@ -78,7 +75,8 @@ static const char *parseint(const char *s, int *n)
 
 struct dimlist { bench_iodim car; struct dimlist *cdr; };
 
-static const char *parsetensor(const char *s, bench_tensor **tp)
+static const char *parsetensor(const char *s, bench_tensor **tp,
+			       bench_iodim *last_iodim)
 {
      struct dimlist *l = 0, *m;
      bench_tensor *t;
@@ -126,7 +124,7 @@ static const char *parsetensor(const char *s, bench_tensor **tp)
 	  bench_free(m);
      }
 
-     dwim(t);
+     dwim(t, last_iodim);
 
      *tp = tensor_compress(t);
      tensor_destroy(t);
@@ -137,6 +135,10 @@ static const char *parsetensor(const char *s, bench_tensor **tp)
 bench_problem *problem_parse(const char *s)
 {
      bench_problem *p;
+     bench_iodim last_iodim;
+
+     last_iodim.n = 1;
+     last_iodim.is = last_iodim.os = 1;
 
      p = bench_malloc(sizeof(bench_problem));
 
@@ -163,16 +165,17 @@ bench_problem *problem_parse(const char *s)
 	 default : ;
      }
 
-     s = parsetensor(s, &p->sz);
+     s = parsetensor(s, &p->sz, &last_iodim);
 
      if (*s == '/' || *s == 'v' || *s == 'V') {
 	  ++s;
-	  s = parsetensor(s, &p->vecsz);
+	  s = parsetensor(s, &p->vecsz, &last_iodim);
      } else {
 	  p->vecsz = mktensor(0);
      }
 
      BENCH_ASSERT(p->sz && p->vecsz);
+     BENCH_ASSERT(!*s);
      return p;
 }
 

@@ -18,10 +18,9 @@
  *
  */
 
-/* $Id: bench.h,v 1.3 2003-01-18 21:13:15 athena Exp $ */
+/* $Id: bench.h,v 1.4 2003-01-18 22:27:15 athena Exp $ */
 
 /* benchmark program definitions */
-#include "config.h"
 #include "bench-user.h"
 
 extern double time_min;

@@ -18,9 +18,8 @@
  *
  */
 
-/* $Id: info.c,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: info.c,v 1.2 2003-01-18 22:27:15 athena Exp $ */
 
-#include "config.h"
 #include "bench.h"
 #include <stdio.h>
 #include <string.h>

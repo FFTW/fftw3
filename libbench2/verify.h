@@ -48,3 +48,10 @@ void tf_shift(dofft_closure *k, int realp, const bench_tensor *sz,
 	      C *inA, C *inB, C *outA, C *outB, C *tmp,
 	      int rounds, double tol, int which_shift);
 
+typedef struct dotens2_closure_s {
+     void (*apply)(struct dotens2_closure_s *k, 
+		   int indx0, int ondx0, int indx1, int ondx1);
+} dotens2_closure;
+
+void bench_dotens2(const bench_tensor *sz0, 
+		   const bench_tensor *sz1, dotens2_closure *k);

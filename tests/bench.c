@@ -21,12 +21,15 @@ static FFTW(plan) the_plan;
 
 static const char *wisdat = "wis.dat";
 unsigned the_flags = 0;
+int paranoid;
+extern void install_hook(void);  /* in hook.c */
 
 void useropt(const char *arg)
 {
      if (!strcmp(arg, "patient")) the_flags |= FFTW_PATIENT;
      else if (!strcmp(arg, "estimate")) the_flags |= FFTW_ESTIMATE;
      else if (!strcmp(arg, "exhaustive")) the_flags |= FFTW_EXHAUSTIVE;
+     else if (!strcmp(arg, "paranoid")) paranoid = 1;
 
      else fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);
 }
@@ -205,6 +208,7 @@ void setup(bench_problem *p)
      BENCH_ASSERT(FFTW(init_threads)());
      FFTW(plan_with_nthreads)(1);
 #endif
+     install_hook();
 
      rdwisdom();
 

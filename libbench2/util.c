@@ -18,7 +18,6 @@
  *
  */
 
-#include "config.h"
 #include "bench.h"
 #include <stdlib.h>
 #include <stdio.h>

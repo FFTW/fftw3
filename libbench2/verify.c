@@ -18,13 +18,12 @@
  *
  */
 
-/* $Id: verify.c,v 1.4 2003-01-18 21:13:15 athena Exp $ */
+/* $Id: verify.c,v 1.5 2003-01-18 22:27:15 athena Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "config.h"
-#include "bench.h"
+#include "verify.h"
 
 /**************************************************************/
 /* DFT code: */
@@ -48,7 +47,7 @@ static void dftcpy(bench_complex *a, const bench_tensor *sza,
      dftcpy_closure k;
      k.k.apply = dftcpy0; 
      k.a = a; k.b = b;
-     dotens2(sza, szb, &k.k);
+     bench_dotens2(sza, szb, &k.k);
 }
 
 typedef struct {

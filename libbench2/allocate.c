@@ -1,8 +1,7 @@
 /* not worth copyrighting */
 
-/* $Id: allocate.c,v 1.3 2003-01-18 21:13:15 athena Exp $ */
+/* $Id: allocate.c,v 1.4 2003-01-18 22:27:15 athena Exp $ */
 
-#include "config.h"
 #include "bench.h"
 
 static void bounds(bench_problem *p, int *ilb, int *iub, int *olb, int *oub)

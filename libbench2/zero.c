@@ -18,9 +18,8 @@
  *
  */
 
-/* $Id: zero.c,v 1.3 2003-01-18 21:13:15 athena Exp $ */
+/* $Id: zero.c,v 1.4 2003-01-18 22:27:15 athena Exp $ */
 
-#include "config.h"
 #include "bench.h"
 
 /* set I/O arrays to zero.  Default routine */

@@ -18,9 +18,8 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.2 2003-01-18 13:03:07 athena Exp $ */
+/* $Id: bench-main.c,v 1.3 2003-01-18 22:27:15 athena Exp $ */
 
-#include "config.h"
 #include "getopt.h"
 #include "bench.h"
 #include <stdio.h>
