@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.16 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: rank0.c,v 1.17 2002-08-27 00:14:56 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -88,33 +88,11 @@ static void apply_vec(plan *ego_, R *ri, R *ii, R *ro, R *io)
      P *ego = (P *) ego_;
      uint i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
-
-     for (i = 4; i <= vl; i += 4) {
-          R r0, r1, r2, r3;
-          R i0, i1, i2, i3;
-          r0 = *ri; ri += ivs;
-          i0 = *ii; ii += ivs;
-          r1 = *ri; ri += ivs;
-          i1 = *ii; ii += ivs;
-          r2 = *ri; ri += ivs;
-          i2 = *ii; ii += ivs;
-          r3 = *ri; ri += ivs;
-          i3 = *ii; ii += ivs;
-          *ro = r0; ro += ovs;
-          *io = i0; io += ovs;
-          *ro = r1; ro += ovs;
-          *io = i1; io += ovs;
-          *ro = r2; ro += ovs;
-          *io = i2; io += ovs;
-	  *ro = r3; ro += ovs;
-          *io = i3; io += ovs;
-     }
-     for (; i < vl + 4; ++i) {
-          R r0, i0;
-          r0 = *ri; ri += ivs;
-          i0 = *ii; ii += ivs;
-          *ro = r0; ro += ovs;
-          *io = i0; io += ovs;
+     int imi = ii - ri, imo = io - ro;
+     for (i = vl; i > 0; --i) {
+          R r0 = ri[0], i0 = ri[imi];
+          ro[0] = r0; ro[imo] = i0; 
+	  ri += ivs; ro += ovs;
      }
 }
 
