@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.25 2003-01-16 05:44:45 stevenj Exp $ */
+/* $Id: alloc.c,v 1.26 2003-01-16 06:03:31 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -55,6 +55,12 @@ void *X(malloc)(size_t n)
      p = (void *) _mm_malloc(n, MIN_ALIGNMENT);
 #    undef real_free
 #    define real_free _mm_free
+#elif defined(HAVE_SIMD) && defined(_MSC_VER)
+     /* MS Visual C++ 6.0 with a "Processor Pack" supports SIMD
+	and _aligned_malloc/free (uses malloc.h) */
+     p = (void *) _aligned_malloc(n, MIN_ALIGNMENT);
+#    undef real_free
+#    define real_free _aligned_free
 #else
      p = malloc(n);
 #endif
