@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.247 2005-02-22 15:06:13 athena Exp $ */
+/* $Id: ifftw.h,v 1.248 2005-02-23 03:32:06 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -741,6 +741,16 @@ void X(cpy2d_recbuf)(R *I, R *O,
 		     int n0, int is0, int os0,
 		     int n1, int is1, int os1,
 		     int vl);
+void X(cpy2d_pair)(R *I0, R *I1, R *O0, R *O1,
+		   int n0, int is0, int os0,
+		   int n1, int is1, int os1);
+void X(cpy2d_pair_ci)(R *I0, R *I1, R *O0, R *O1,
+		      int n0, int is0, int os0,
+		      int n1, int is1, int os1);
+void X(cpy2d_pair_co)(R *I0, R *I1, R *O0, R *O1,
+		      int n0, int is0, int os0,
+		      int n1, int is1, int os1);
+
 void X(transpose)(R *I, int n, int s0, int s1, int vl);
 void X(transpose_rec)(R *I, int n, int s0, int s1, int vl) ;
 void X(transpose_recbuf)(R *I, int n, int s0, int s1, int vl) ;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-directbuf.c,v 1.4 2005-02-19 14:31:14 athena Exp $ */
+/* $Id: dftw-directbuf.c,v 1.5 2005-02-23 03:32:06 athena Exp $ */
 
 #include "ct.h"
 
@@ -41,37 +41,16 @@ typedef struct {
      const S *slv;
 } P;
 
-/*
-   Copy A -> B, where A and B are n0 x n1 complex matrices
-   such that the (i0, i1) element has index (i0 * s0 + i1 * s1). 
-*/
-static void cpy(int n0, int n1, 
-		const R *rA, const R *iA, int sa0, int sa1, 
-		R *rB, R *iB, int sb0, int sb1)
-{
-     int i0, i1;
-     ptrdiff_t ima = iA - rA, imb = iB - rB;
-
-     for (i0 = 0; i0 < n0; ++i0) {
-	  const R *pa; 
-	  R *pb;
-
-	  pa = rA; rA += sa0;
-	  pb = rB; rB += sb0;
-	  for (i1 = 0; i1 < n1; ++i1) {
-	       R xr = pa[0], xi = pa[ima];
-	       pb[0] = xr; pb[imb] = xi; 
-	       pa += sa1; pb += sb1;
-	  }
-     }
-}
-
 static const R *doit(kdftw k, R *rA, R *iA, const R *W, int ios, int dist, 
 		     int r, int batchsz, R *buf, stride bufstride)
 {
-     cpy(r, batchsz, rA, iA, ios, dist, buf, buf + 1, 2, 2 * r);
+     X(cpy2d_pair_ci)(rA, iA, buf, buf + 1, 
+		      r, ios, 2,
+		      batchsz, dist, 2 * r);
      W = k(buf, buf + 1, W, bufstride, batchsz, 2 * r);
-     cpy(r, batchsz, buf, buf + 1, 2, 2 * r, rA, iA, ios, dist);
+     X(cpy2d_pair_co)(buf, buf + 1, rA, iA,
+		      r, 2, ios,
+		      batchsz, 2 * r, dist);
      return W;
 }
 
