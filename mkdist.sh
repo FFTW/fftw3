@@ -16,7 +16,7 @@ make -j 8
 make -j 8 dist
 
 make maintainer-clean
-./configure --enable-maintainer-mode --disable-fma
+./configure --enable-maintainer-mode --disable-fma --enable-float --enable-sse --enable-k7
 make -j 8
 make -j 8 dist
 
