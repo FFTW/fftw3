@@ -35,6 +35,8 @@ planner *X(the_planner)(void)
 
 void X(cleanup)(void)
 {
-     if (plnr) 
+     if (plnr) {
 	  X(planner_destroy)(plnr);
+	  plnr = 0;
+     }
 }
