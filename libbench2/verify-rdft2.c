@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft2.c,v 1.3 2003-02-11 01:37:54 athena Exp $ */
+/* $Id: verify-rdft2.c,v 1.4 2003-02-11 22:32:56 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -274,7 +274,7 @@ void accuracy_rdft2(bench_problem *p, int rounds, double t[6])
 
      a = (C *) bench_malloc(n * sizeof(C));
      b = (C *) bench_malloc(n * sizeof(C));
-     accuracy_test(&k.k, p->sign < 0, p->sign > 0, p->sign, 
+     accuracy_test(&k.k, p->sign < 0 ? mkreal : mkhermitian1, p->sign, 
 		   n, a, b, rounds, t);
      bench_free(b);
      bench_free(a);

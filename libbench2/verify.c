@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.13 2003-02-11 01:37:54 athena Exp $ */
+/* $Id: verify.c,v 1.14 2003-02-11 22:32:56 stevenj Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,7 +63,7 @@ static void do_accuracy(bench_problem *p, int rounds)
      switch (p->kind) {
 	 case PROBLEM_COMPLEX: accuracy_dft(p, rounds, t); break;
 	 case PROBLEM_REAL: accuracy_rdft2(p, rounds, t); break;
-	 case PROBLEM_R2R: BENCH_ASSERT(0); break;
+	 case PROBLEM_R2R: accuracy_r2r(p, rounds, t); break;
      }
 
      /* t[0] : L1 error

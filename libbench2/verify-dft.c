@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.9 2003-02-11 01:37:54 athena Exp $ */
+/* $Id: verify-dft.c,v 1.10 2003-02-11 22:32:56 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -159,7 +159,7 @@ void accuracy_dft(bench_problem *p, int rounds, double t[6])
 
      a = (C *) bench_malloc(n * sizeof(C));
      b = (C *) bench_malloc(n * sizeof(C));
-     accuracy_test(&k.k, 0, 0, p->sign, n, a, b, rounds, t);
+     accuracy_test(&k.k, 0, p->sign, n, a, b, rounds, t);
      bench_free(b);
      bench_free(a);
 }

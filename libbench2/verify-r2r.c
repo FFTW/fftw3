@@ -633,3 +633,106 @@ void verify_r2r(bench_problem *p, int rounds, double tol, errors *e)
      bench_free(inA);
      bench_free(d);
 }
+
+
+typedef struct {
+     dofft_closure k;
+     bench_problem *p;
+} dofft_r2r_closure;
+
+static void cpyr1(int n, R *in, int is, R *out, int os, R scale)
+{
+     int i;
+     for (i = 0; i < n; ++i)
+	  out[i * os] = in[i * is] * scale;
+}
+
+static void mkre00(C *a, int n)
+{
+     int i;
+     mkreal(a, n);
+     for (i = 1; i + i < n; ++i)
+	  c_re(a[n - i]) = c_re(a[i]);
+}
+
+static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
+{
+     dofft_r2r_closure *k = (dofft_r2r_closure *)k_;
+     bench_problem *p = k->p;
+     bench_real *ri, *ro;
+     int n, is, os;
+
+     n = p->sz->dims[0].n;
+     is = p->sz->dims[0].is;
+     os = p->sz->dims[0].os;
+
+     ri = (bench_real *) p->in;
+     ro = (bench_real *) p->out;
+
+     switch (p->k[0]) {
+	 case R2R_R2HC:
+	      cpyr1(n, &c_re(in[0]), 2, ri, is, 1.0);
+	      break;
+	 case R2R_HC2R:
+	      cpyr1(n/2 + 1, &c_re(in[0]), 2, ri, is, 1.0);
+	      cpyr1((n+1)/2 - 1, &c_im(in[n-1]), -2, ri + is*(n-1), -is, 1.0);
+	      break;
+	 case R2R_REDFT00:
+	      cpyr1(n, &c_re(in[0]), 2, ri, is, 1.0);
+	      break;
+	 default:
+	      BENCH_ASSERT(0); /* not yet implemented */
+     }
+
+     doit(1, p);
+
+     switch (p->k[0]) {
+	 case R2R_R2HC:
+	      cpyr1(n/2 + 1, ro, os, &c_re(out[0]), 2, 1.0);
+	      cpyr1((n+1)/2 - 1, ro + os*(n-1), -os, &c_im(out[1]), 2, 1.0);
+	      c_im(out[0]) = 0.0;
+	      if (n % 2 == 0)
+		   c_im(out[n/2]) = 0.0;
+	      mkhermitian1(out, n);
+	      break;
+	 case R2R_HC2R:
+	      cpyr1(n, ro, os, &c_re(out[0]), 2, 1.0);
+	      mkreal(out, n);
+	      break;
+	 case R2R_REDFT00:
+	      cpyr1(n, ro, os, &c_re(out[0]), 2, 1.0);
+	      mkre00(out, 2*(n-1));
+	      break;
+	 default:
+	      BENCH_ASSERT(0); /* not yet implemented */
+     }
+}
+
+void accuracy_r2r(bench_problem *p, int rounds, double t[6])
+{
+     dofft_r2r_closure k;
+     int n, n0;
+     C *a, *b;
+     aconstrain constrain = 0;
+
+     BENCH_ASSERT(p->kind == PROBLEM_R2R);
+     BENCH_ASSERT(p->sz->rnk == 1);
+     BENCH_ASSERT(p->vecsz->rnk == 0);
+
+     k.k.apply = r2r_apply;
+     k.p = p;
+     n = tensor_sz(p->sz);
+     
+     switch (p->k[0]) {
+         case R2R_R2HC: constrain = mkreal; n0 = n; break;
+         case R2R_HC2R: constrain = mkhermitian1; n0 = n; break;
+         case R2R_REDFT00: constrain = mkre00; n0 = 2*(n-1); break;
+	 default: BENCH_ASSERT(0); /* not yet implemented */
+     }
+
+     a = (C *) bench_malloc(n0 * sizeof(C));
+     b = (C *) bench_malloc(n0 * sizeof(C));
+     accuracy_test(&k.k, constrain, -1, n0, a, b, rounds, t);
+     bench_free(b);
+     bench_free(a);
+}

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.8 2003-02-11 01:37:54 athena Exp $ */
+/* $Id: verify-lib.c,v 1.9 2003-02-11 22:32:56 stevenj Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -126,6 +126,15 @@ void mkhermitian(C *A, int rank, const bench_iodim *dim, int stride)
           if (2*i == n0)
                mkhermitian(A + i * s, rank, dim, stride);
      }
+}
+
+void mkhermitian1(C *a, int n)
+{
+     bench_iodim d;
+
+     d.n = n;
+     d.is = d.os = 1;
+     mkhermitian(a, 1, &d, 1);
 }
 
 /* C = A */
@@ -436,26 +445,20 @@ bench_tensor *verify_pack(const bench_tensor *sz, int s)
      return x;
 }
 
-void accuracy_test(dofft_closure *k, int realp, int hermitianp, 
+void accuracy_test(dofft_closure *k, aconstrain constrain,
 		   int sign, int n, C *a, C *b, int rounds,
 		   double t[6])
 {
      int r, i;
      double err[6];
-     bench_iodim d;
-
-     d.n = n;
-     d.is = d.os = 1;
 
      for (i = 0; i < 6; ++i) t[i] = 0.0;
 
      for (r = 0; r < rounds; ++r) {
 	  arand(a, n);
 
-	  if (realp)
-	       mkreal(a, n);
-	  if (hermitianp)
-	       mkhermitian(a, 1, &d, 1);
+	  if (constrain)
+	       constrain(a, n);
 	  
 	  k->apply(k, a, b);
 	  fftaccuracy(n, a, b, sign, err);
