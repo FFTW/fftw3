@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vecloop.c,v 1.6 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: vecloop.c,v 1.7 2002-06-09 15:01:41 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -142,6 +142,7 @@ static int applicable(const solver *ego_, const problem *p_, uint *dp)
 	  const problem_dft *p = (const problem_dft *) p_;
 
 	  return (1
+		  && FINITE_RNK(p->vecsz.rnk)
 		  && p->vecsz.rnk > 0
 		  && pickdim(ego, p->vecsz, p->ri != p->ro, dp)
 	       );

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.4 2002-06-09 12:20:13 athena Exp $ */
+/* $Id: tensor.c,v 1.5 2002-06-09 15:01:41 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -35,7 +35,7 @@ static inline int imin(int a, int b)
 static void talloc(tensor *x, uint rnk)
 {
      x->rnk = rnk;
-     if (rnk) /* don't malloc(0), just in case */
+     if (FINITE_RNK(rnk) && rnk > 0)
 	  x->dims = (iodim *)fftw_malloc(sizeof(iodim) * rnk, TENSORS);
      else
 	  x->dims = 0;
@@ -84,7 +84,7 @@ tensor fftw_mktensor_rowmajor(uint rnk, const uint *n, const uint *nphys,
      tensor x;
      talloc(&x, rnk);
 
-     if (rnk > 0) {
+     if (FINITE_RNK(rnk) && rnk > 0) {
 	  uint i;
 
 	  A(n && nphys);
@@ -107,6 +107,9 @@ int fftw_tensor_equal(const tensor a, const tensor b)
      if (a.rnk != b.rnk)
 	  return 0;
 
+     if (!FINITE_RNK(a.rnk))
+	  return 1;
+
      for (i = 0; i < a.rnk; ++i) {
 	  iodim *ad = a.dims + i, *bd = b.dims + i;
 	  if (ad->n != bd->n || ad->is != bd->is || ad->os != bd->os)
@@ -118,6 +121,10 @@ int fftw_tensor_equal(const tensor a, const tensor b)
 uint fftw_tensor_sz(const tensor sz)
 {
      uint i, n = 1;
+
+     if (!FINITE_RNK(sz.rnk))
+	  return 0;
+
      for (i = 0; i < sz.rnk; ++i)
 	  n *= sz.dims[i].n;
      return n;
@@ -127,6 +134,9 @@ uint fftw_tensor_hash(const tensor t)
 {
      uint i;
      uint h = 1023 * t.rnk;
+
+     if (!FINITE_RNK(t.rnk))
+	  return h;
 
      /* FIXME: find a decent hash function */
      for (i = 0; i < t.rnk; ++i) {
@@ -141,6 +151,8 @@ int fftw_tensor_max_index(const tensor sz)
 {
      uint i;
      int n = 0;
+
+     A(FINITE_RNK(sz.rnk));
      for (i = 0; i < sz.rnk; ++i) {
 	  iodim *p = sz.dims + i;
 	  n += (p->n - 1) * imax(p->is, p->os);
@@ -150,6 +162,7 @@ int fftw_tensor_max_index(const tensor sz)
 
 int fftw_tensor_min_stride(const tensor sz)
 {
+     A(FINITE_RNK(sz.rnk));
      if (sz.rnk == 0)
 	  return 0;
      else {
@@ -166,6 +179,7 @@ int fftw_tensor_min_stride(const tensor sz)
 int fftw_tensor_inplace_strides(const tensor sz)
 {
      uint i;
+     A(FINITE_RNK(sz.rnk));
      for (i = 0; i < sz.rnk; ++i) {
 	  iodim *p = sz.dims + i;
 	  if (p->is != p->os)
@@ -174,11 +188,12 @@ int fftw_tensor_inplace_strides(const tensor sz)
      return 1;
 }
 
-static void dimcpy(iodim *dst, const iodim *src, uint n)
+static void dimcpy(iodim *dst, const iodim *src, uint rnk)
 {
      uint i;
-     for (i = 0; i < n; ++i)
-	  dst[i] = src[i];
+     if (FINITE_RNK(rnk))
+	  for (i = 0; i < rnk; ++i)
+	       dst[i] = src[i];
 }
 
 tensor fftw_tensor_copy(const tensor sz)
@@ -196,7 +211,7 @@ tensor fftw_tensor_copy_except(const tensor sz, uint except_dim)
 {
      tensor x;
 
-     A(sz.rnk >= 1 && except_dim < sz.rnk);
+     A(FINITE_RNK(sz.rnk) && sz.rnk >= 1 && except_dim < sz.rnk);
      talloc(&x, sz.rnk - 1);
      dimcpy(x.dims, sz.dims, except_dim);
      dimcpy(x.dims + except_dim, sz.dims + except_dim + 1, 
@@ -210,7 +225,7 @@ tensor fftw_tensor_copy_sub(const tensor sz, uint start_dim, uint rnk)
 {
      tensor x;
 
-     A(start_dim + rnk <= sz.rnk);
+     A(FINITE_RNK(sz.rnk) && start_dim + rnk <= sz.rnk);
      talloc(&x, rnk);
      dimcpy(x.dims, sz.dims + start_dim, rnk);
      return x;
@@ -246,6 +261,7 @@ tensor fftw_tensor_compress(const tensor sz)
      uint i, rnk;
      tensor x;
 
+     A(FINITE_RNK(sz.rnk));
      for (i = rnk = 0; i < sz.rnk; ++i) {
 	  A(sz.dims[i].n > 0);
 	  if (sz.dims[i].n != 1)
@@ -279,7 +295,13 @@ tensor fftw_tensor_compress_contiguous(const tensor sz)
      uint i, rnk;
      tensor sz2, x;
 
+     if (fftw_tensor_sz(sz) == 0) {
+	  talloc(&x, RNK_MINFTY);
+	  return x;
+     }
+
      sz2 = fftw_tensor_compress(sz);
+     A(FINITE_RNK(sz2.rnk));
 
      if (sz2.rnk < 2)		/* nothing to compress */
 	  return sz2;
@@ -309,9 +331,13 @@ tensor fftw_tensor_append(const tensor a, const tensor b)
 {
      tensor x;
 
-     talloc(&x, a.rnk + b.rnk);
-     dimcpy(x.dims, a.dims, a.rnk);
-     dimcpy(x.dims + a.rnk, b.dims, b.rnk);
+     if (!FINITE_RNK(a.rnk) || !FINITE_RNK(b.rnk)) {
+	  talloc(&x, RNK_MINFTY);
+     } else {
+	  talloc(&x, a.rnk + b.rnk);
+	  dimcpy(x.dims, a.dims, a.rnk);
+	  dimcpy(x.dims + a.rnk, b.dims, b.rnk);
+     }
      return x;
 }
 
@@ -319,6 +345,8 @@ tensor fftw_tensor_append(const tensor a, const tensor b)
    tensor a followed by tensor b, where a's rank is arnk. */
 void fftw_tensor_split(const tensor sz, tensor *a, uint arnk, tensor *b)
 {
+     A(FINITE_RNK(sz.rnk) && FINITE_RNK(arnk));
+
      *a = fftw_tensor_copy_sub(sz, 0, arnk);
      *b = fftw_tensor_copy_sub(sz, arnk, sz.rnk - arnk);
 }

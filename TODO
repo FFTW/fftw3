@@ -1,0 +1,4 @@
+* audit the implementation of RNK_MINFTY
+
+* dft/buffered.c is still wrong, because there is no sharing of
+  buffers.  Maybe should malloc() the buffer in apply().

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.11 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: dft.h,v 1.12 2002-06-09 15:01:41 athena Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -67,6 +67,7 @@ void fftw_dft_indirect_register(planner *p);
 void fftw_dft_vrank2_transpose_register(planner *p);
 void fftw_dft_vrank3_transpose_register(planner *p);
 void fftw_dft_buffered_register(planner *p);
+void fftw_dft_nop_register(planner *p);
 
 /* configurations */
 void fftw_dft_conf_standard(planner *p);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.15 2002-06-08 19:11:09 athena Exp $ */
+/* $Id: ifftw.h,v 1.16 2002-06-09 15:01:41 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -134,6 +134,16 @@ typedef struct {
      uint rnk;
      iodim *dims;
 } tensor;
+
+/*
+   Definition of rank -infinity.
+   This definition has the property that if you want rank 0 or 1,
+   you can simply test for rank <= 1.  This is a common case.
+
+   A tensor of rank -infinity has size 0.
+*/
+#define RNK_MINFTY  ((uint) -1)
+#define FINITE_RNK(rnk) ((rnk) != RNK_MINFTY)
 
 tensor fftw_mktensor(uint rnk);
 tensor fftw_mktensor_1d(uint n, int is, int os);

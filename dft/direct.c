@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.9 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: direct.c,v 1.10 2002-06-09 15:01:41 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -79,7 +79,8 @@ static int applicable(const solver *ego_, const problem *p_)
 
 	  return (
 	       1
-	       && p->sz.rnk == 1 && p->vecsz.rnk <= 1
+	       && p->sz.rnk == 1 
+	       && p->vecsz.rnk <= 1
 	       && p->sz.dims[0].n == d->sz
 	       && (!d->is || d->is == p->sz.dims[0].is)
 	       && (!d->os || d->os == p->sz.dims[0].os)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.4 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: rank0.c,v 1.5 2002-06-09 15:01:41 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -90,7 +90,11 @@ static void apply_nop(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 static int applicable_nop(const problem_dft *p)
 {
-     return (p->ro == p->ri && fftw_tensor_inplace_strides(p->vecsz));
+     return (1
+	     && FINITE_RNK(p->vecsz.rnk)
+	     && p->ro == p->ri 
+	     && fftw_tensor_inplace_strides(p->vecsz)
+	     );
 }
 
 static const rnk0adt adt_nop = { apply_nop, applicable_nop, "dft-rank0-nop" };
@@ -152,7 +156,11 @@ static void apply_io1(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 static int applicable_io1(const problem_dft *p)
 {
-     return (p->vecsz.dims[0].is == 1 && p->vecsz.dims[0].os == 1);
+     return (1
+	     && applicable_vec(p)
+	     && p->vecsz.dims[0].is == 1
+	     && p->vecsz.dims[0].os == 1
+	  );
 }
 
 static const rnk0adt adt_io1 = {
@@ -173,6 +181,7 @@ static void apply_io2(plan *ego_, R *ri, R *ii, R *ro, R *io)
 static int applicable_io2(const problem_dft *p)
 {
      return (1
+	     && applicable_vec(p)
 	     && p->vecsz.dims[0].is == 2
 	     && p->vecsz.dims[0].os == 2 
 	     && p->ii == p->ri + 1 && p->io == p->ro + 1

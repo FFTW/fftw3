@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.3 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: indirect.c,v 1.4 2002-06-09 15:01:41 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -146,6 +146,7 @@ static int applicable(const solver *ego_, const problem *p_)
      if (DFTP(p_)) {
 	  const problem_dft *p = (const problem_dft *) p_;
 	  return (1
+		  && FINITE_RNK(p->vecsz.rnk)
 
 		  /* problem must be in-place */
 		  && p->ri == p->ro

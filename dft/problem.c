@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.4 2002-06-04 21:49:39 athena Exp $ */
+/* $Id: problem.c,v 1.5 2002-06-09 15:01:41 athena Exp $ */
 
 #include "dft.h"
 
@@ -52,7 +52,9 @@ static int equal(const problem *ego_, const problem *problem_)
 
 static void zerotens(tensor sz, R *ri, R *ii)
 {
-     if (sz.rnk == 0)
+     if (sz.rnk == RNK_MINFTY)
+	  return;
+     else if (sz.rnk == 0)
 	  ri[0] = ii[0] = 0.0;
      else if (sz.rnk == 1) {
 	  /* this case is redundant but faster */
@@ -108,6 +110,7 @@ problem *fftw_mkproblem_dft(const tensor sz, const tensor vecsz,
      ego->ro = ro;
      ego->io = io;
 
+     A(FINITE_RNK(ego->sz.rnk));
      return &(ego->super);
 }
 
