@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-vrank-geq1.c,v 1.15 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: dft-vrank-geq1.c,v 1.16 2003-04-03 07:17:58 stevenj Exp $ */
 
 #include "threads.h"
 
@@ -56,6 +56,8 @@ static void *spawn_apply(spawn_data *d)
      return 0;
 }
 
+SPAWN_APPLY0(spawn_apply)
+
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
@@ -66,7 +68,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      d.cldrn = ego->cldrn;
      d.ri = ri; d.ii = ii; d.ro = ro; d.io = io;
 
-     X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*) &d);
+     X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply0, (void*) &d);
 }
 
 static void awake(plan *ego_, int flg)

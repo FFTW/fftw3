@@ -38,6 +38,11 @@ int X(ithreads_init)(void);
 void X(threads_cleanup)(void);
 void X(threads_setmax)(int nthreads_max);
 
+#define SPAWN_APPLY0(apply) static void * apply ## 0 (spawn_data *d)	      \
+{									      \
+     return X(with_aligned_stack)((with_aligned_stack_func) apply, (void*)d); \
+}
+
 /* configurations */
 
 void X(dft_thr_vrank_geq1_register)(planner *p);

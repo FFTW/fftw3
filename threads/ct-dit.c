@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.11 2003-04-03 06:58:32 stevenj Exp $ */
+/* $Id: ct-dit.c,v 1.12 2003-04-03 07:17:58 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -54,6 +54,8 @@ static void *spawn_apply(spawn_data *d)
      return 0;
 }
 
+SPAWN_APPLY0(spawn_apply)
+
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const plan_ct *ego = (const plan_ct *) ego_;
@@ -75,7 +77,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  d.os = ego->os;
 	  d.vl = ego_thr->vl;
 
-	  X(spawn_loop)(ego_thr->mloop, ego_thr->nthr, spawn_apply, (void*)&d);
+	  X(spawn_loop)(ego_thr->mloop, ego_thr->nthr, spawn_apply0,(void*)&d);
      }
 }
 

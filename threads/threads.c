@@ -334,28 +334,6 @@ typedef spinlock_t fftw_sem_id;
 #endif /* 0 */
 
 /***********************************************************************/
-/* entry function for thread spawning, in order to properly align the
-   stack of the thread (thanks to broken alignment in glibc etc., ugh!). */
-
-typedef struct {
-     fftw_thr_function f;
-     void *d;
-} entry_data;
-
-static void *entry(void *ed_)
-{
-     entry_data *ed = (entry_data *) ed_;
-     return X(with_aligned_stack)(ed->f, ed->d);
-}
-
-#define spawn(tid_ptr, proc, data) {					\
-     entry_data ed;							\
-     ed.f = proc;							\
-     ed.d = data;							\
-     fftw_thr_spawn(tid_ptr, (fftw_thr_function) entry, (void *) &ed);	\
-}
-
-/***********************************************************************/
 
 #ifdef HAVE_THREADS
 
@@ -396,7 +374,7 @@ static void minimum_workforce(int nworkers)
 	  w->next = workers;
 	  fftw_sem_init(&w->sid_ready);
 	  fftw_sem_init(&w->sid_done);
-	  spawn(&w->tid, (fftw_thr_function) do_work, (void *) w);
+	  fftw_thr_spawn(&w->tid, (fftw_thr_function) do_work, (void *) w);
 	  workers = w;
      }
 }
@@ -517,7 +495,8 @@ void X(spawn_loop)(int loopmax, int nthr,
 	       d[i].max = (d[i].min = i * block_size) + block_size;
 	       d[i].thr_num = i;
 	       d[i].data = data;
-	       spawn(&tid[i], (fftw_thr_function) proc, (void *) (d + i));
+	       fftw_thr_spawn(&tid[i], (fftw_thr_function) proc,
+			      (void *) (d + i));
 	  }
 	  d[i].min = i * block_size;
 	  d[i].max = loopmax;
