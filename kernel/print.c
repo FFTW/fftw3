@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.10 2002-07-30 00:51:01 stevenj Exp $ */
+/* $Id: print.c,v 1.11 2002-07-30 03:42:27 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -65,7 +65,8 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       }
 		       case 't': {
 			    ptrdiff_t x;
-			    A(*s++ == 'd');
+			    A(*s == 'd');
+			    s += 1;
 			    x = va_arg(ap, ptrdiff_t);
 			    /* should use C99 %td here, but
 			       this is not yet widespread enough */
