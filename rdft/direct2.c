@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.3 2002-08-12 17:31:37 stevenj Exp $ */
+/* $Id: direct2.c,v 1.4 2002-08-15 17:32:24 stevenj Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -175,8 +175,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln->k = ego->k;
 
-     pln->is = X(mkstride)(ego->sz, d.is);
-     pln->os = X(mkstride)(d.n/2 + 1, d.os);
+     pln->is = X(mkstride)(ego->sz, r2hc_kindp ? d.is : d.os);
+     pln->os = X(mkstride)(d.n/2 + 1, r2hc_kindp ? d.os : d.is);
 
      if (p->vecsz.rnk == 0) {
           pln->vl = 1;
