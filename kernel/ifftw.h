@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.197 2003-03-28 08:05:15 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.198 2003-03-28 17:31:32 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -83,6 +83,50 @@ typedef struct solver_s solver;
 typedef struct planner_s planner;
 typedef struct printer_s printer;
 typedef struct scanner_s scanner;
+
+/*-----------------------------------------------------------------------*/
+/* alloca: */
+
+#ifdef __GNUC__
+# define alloca __builtin_alloca
+#else
+# ifdef _MSC_VER
+#  include <malloc.h>
+#  define alloca _alloca
+# else
+#  if HAVE_ALLOCA_H
+#   include <alloca.h>
+#  else
+#   ifdef _AIX
+ #pragma alloca
+#   else
+#    ifndef alloca /* predefined by HP cc +Olibcalls */
+void *alloca(size_t);
+#    endif
+#   endif
+#  endif
+# endif
+#endif
+
+#ifdef HAVE_ALLOCA
+   /* use alloca if available */
+#  ifdef MIN_ALIGNMENT
+#    define STACK_MALLOC(T, p, x)				\
+     {								\
+         p = (T)alloca((x) + MIN_ALIGNMENT);			\
+         p = (T)(((uintptr_t)p + (MIN_ALIGNMENT - 1)) &	\
+               (~(uintptr_t)(MIN_ALIGNMENT - 1)));		\
+     }
+#    define STACK_FREE(x) 
+#  else /* HAVE_ALLOCA && !defined(MIN_ALIGNMENT) */
+#    define STACK_MALLOC(T, p, x) p = (T)alloca(x) 
+#    define STACK_FREE(x) 
+#  endif
+#else /* ! HAVE_ALLOCA */
+   /* use malloc instead of alloca */
+#  define STACK_MALLOC(T, p, x) p = (T)MALLOC(x, OTHER)
+#  define STACK_FREE(x) X(ifree)(x)
+#endif /* ! HAVE_ALLOCA */
 
 /*-----------------------------------------------------------------------*/
 /* define uintptr_t if it is not already defined */
@@ -172,33 +216,6 @@ extern int X(in_thread);
 #  define THREAD_ON 
 #  define THREAD_OFF 
 #endif
-
-/*-----------------------------------------------------------------------*/
-/* alloca: */
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#endif /* HAVE_ALLOCA_H */
-
-#ifdef HAVE_ALLOCA
-   /* use alloca if available */
-#  ifdef MIN_ALIGNMENT
-#    define STACK_MALLOC(T, p, x)				\
-     {								\
-         p = (T)alloca((x) + MIN_ALIGNMENT);			\
-         p = (T)(((uintptr_t)p + (MIN_ALIGNMENT - 1)) &	\
-               (~(uintptr_t)(MIN_ALIGNMENT - 1)));		\
-     }
-#    define STACK_FREE(x) 
-#  else /* HAVE_ALLOCA && !defined(MIN_ALIGNMENT) */
-#    define STACK_MALLOC(T, p, x) p = (T)alloca(x) 
-#    define STACK_FREE(x) 
-#  endif
-#else /* ! HAVE_ALLOCA */
-   /* use malloc instead of alloca */
-#  define STACK_MALLOC(T, p, x) p = (T)MALLOC(x, OTHER)
-#  define STACK_FREE(x) X(ifree)(x)
-#endif /* ! HAVE_ALLOCA */
-
 
 /*-----------------------------------------------------------------------*/
 /* ops.c: */
