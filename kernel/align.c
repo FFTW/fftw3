@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.4 2002-08-01 12:04:01 athena Exp $ */
+/* $Id: align.c,v 1.5 2002-08-02 01:06:22 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -26,7 +26,13 @@
 #if HAVE_SIMD
 #include "simd.h"
 #define ALGN SIMD_ALIGNMENT
-#else
+#endif
+
+#if HAVE_K7
+#define ALGN 8
+#endif
+
+#ifndef ALGN
 #define ALGN (sizeof(R))
 #endif
 

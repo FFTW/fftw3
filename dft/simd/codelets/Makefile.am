@@ -12,10 +12,10 @@ n1bv_9.c n1bv_10.c n1bv_11.c n1bv_12.c n1bv_13.c n1bv_14.c n1bv_15.c	\
 n1bv_16.c n1bv_32.c n1bv_64.c
 
 T1F = t1fv_2.c t1fv_3.c t1fv_4.c t1fv_5.c t1fv_6.c t1fv_7.c t1fv_8.c	\
-t1fv_9.c t1fv_10.c t1fv_16.c t1fv_32.c t1fv_64.c
+t1fv_9.c t1fv_10.c t1fv_12.c t1fv_15.c t1fv_16.c t1fv_32.c t1fv_64.c
 
 T1B = t1bv_2.c t1bv_3.c t1bv_4.c t1bv_5.c t1bv_6.c t1bv_7.c t1bv_8.c	\
-t1bv_9.c t1bv_10.c t1bv_16.c t1bv_32.c t1bv_64.c
+t1bv_9.c t1bv_10.c t1bv_12.c t1bv_15.c t1bv_16.c t1bv_32.c t1bv_64.c
 
 SIMD_CODELETS = $(N1F) $(N1B) $(T1F) $(T1B)
 

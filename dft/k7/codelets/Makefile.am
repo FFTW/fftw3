@@ -16,11 +16,12 @@ n1k7i_13.S n1k7i_14.S n1k7i_15.S n1k7i_16.S n1k7i_32.S n1k7i_64.S	\
 n1k7i_128.S
 
 T1_CODELETS = t1k7_2.S t1k7_3.S t1k7_4.S t1k7_5.S t1k7_6.S t1k7_7.S	\
-t1k7_8.S t1k7_9.S t1k7_10.S t1k7_16.S t1k7_32.S t1k7_64.S
+t1k7_8.S t1k7_9.S t1k7_10.S t1k7_12.S t1k7_15.S t1k7_16.S t1k7_32.S	\
+t1k7_64.S
 
 T1I_CODELETS = t1k7i_2.S t1k7i_3.S t1k7i_4.S t1k7i_5.S t1k7i_6.S	\
-t1k7i_7.S t1k7i_8.S t1k7i_9.S t1k7i_10.S t1k7i_16.S t1k7i_32.S		\
-t1k7i_64.S
+t1k7i_7.S t1k7i_8.S t1k7i_9.S t1k7i_10.S t1k7i_12.S t1k7i_15.S		\
+t1k7i_16.S t1k7i_32.S t1k7i_64.S
 
 F1_CODELETS = f1k7_2.S f1k7_4.S f1k7_8.S f1k7_16.S f1k7_32.S f1k7_64.S
 

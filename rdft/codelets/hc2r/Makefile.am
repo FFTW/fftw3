@@ -8,11 +8,11 @@ hc2r_9.c hc2r_10.c hc2r_11.c hc2r_12.c hc2r_13.c hc2r_14.c hc2r_15.c	\
 hc2r_16.c hc2r_32.c hc2r_64.c hc2r_128.c
 
 HB = hb_2.c hb_3.c hb_4.c hb_5.c hb_6.c hb_7.c hb_8.c hb_9.c	\
-hb_10.c hb_16.c hb_32.c hb_64.c
+hb_10.c hb_12.c hb_15.c hb_16.c hb_32.c hb_64.c
 
 HC2RIII = hc2rIII_2.c hc2rIII_3.c hc2rIII_4.c hc2rIII_5.c hc2rIII_6.c	\
-hc2rIII_7.c hc2rIII_8.c hc2rIII_9.c hc2rIII_10.c hc2rIII_16.c		\
-hc2rIII_32.c hc2rIII_64.c
+hc2rIII_7.c hc2rIII_8.c hc2rIII_9.c hc2rIII_10.c hc2rIII_12.c		\
+hc2rIII_15.c hc2rIII_16.c hc2rIII_32.c hc2rIII_64.c
 
 ALL_CODELETS = $(HC2R) $(HB) $(HC2RIII)
 

@@ -4,7 +4,7 @@ CFLAGS = @CFLAGS@ @CODELET_OPTIM@
 noinst_LTLIBRARIES = libdft_inplace.la
 
 F1_CODELETS = f1_2.c f1_3.c f1_4.c f1_5.c f1_6.c f1_7.c f1_8.c f1_9.c	\
-f1_10.c f1_16.c f1_32.c f1_64.c
+f1_10.c f1_12.c f1_15.c f1_16.c f1_32.c f1_64.c
 
 F2_CODELETS = f2_4.c f2_8.c f2_16.c f2_32.c f2_64.c
 
