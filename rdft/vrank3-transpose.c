@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.27 2005-02-24 14:40:30 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.28 2005-02-25 01:07:38 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
+
+#include "rdft.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>		/* for memcpy() */
 #endif
-
-#include "rdft.h"
 
 typedef struct {
      rdftapply apply;
