@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.61 2003-03-02 06:37:19 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.62 2003-03-02 06:37:41 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1577,10 +1577,14 @@ familiar with the usage of FFTW in C, as described elsewhere in this
 manual.
 
 @menu
+* Fortran-interface routines::  
+* FFTW Constants in Fortran::   
+* Fortran Examples::            
+* Wisdom of Fortran?::          
 @end menu
 
 @c -------------------------------------------------------
-@node Fortran-interface routines
+@node Fortran-interface routines, FFTW Constants in Fortran, Calling FFTW from Fortran, Calling FFTW from Fortran
 @section Fortran-interface routines
 
 Nearly all of the FFTW functions have Fortran-callable equivalents.  The
@@ -1636,7 +1640,7 @@ should be compatible with @code{fftw_complex}/@code{fftwf_complex}.
 Such simple correspondences are assumed in the examples below.
 
 @c -------------------------------------------------------
-@node  FFTW Constants in Fortran, Fortran Examples, Wrapper Routines, Calling FFTW from Fortran
+@node  FFTW Constants in Fortran, Fortran Examples, Fortran-interface routines, Calling FFTW from Fortran
 @section FFTW Constants in Fortran
 
 When creating plans in FFTW, a number of constants are used to specify
@@ -1659,7 +1663,7 @@ should just use @samp{@code{+}}.  (Take care not to add in the same flag
 more than once, though.)
 
 @c -------------------------------------------------------
-@node Fortran Examples,  , FFTW Constants in Fortran, Calling FFTW from Fortran
+@node Fortran Examples, Wisdom of Fortran?, FFTW Constants in Fortran, Calling FFTW from Fortran
 @section Fortran Examples
 
 In C you might have something like the following to transform a
@@ -1769,7 +1773,7 @@ Fortran program can use its ordinary column-major order.
 @cindex r2c/c2r multi-dimensional array format
 
 @c -------------------------------------------------------
-@node Wisdom of Fortran?
+@node Wisdom of Fortran?,  , Fortran Examples, Calling FFTW from Fortran
 @section Wisdom of Fortran?
 
 @c ************************************************************
