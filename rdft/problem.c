@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.16 2002-08-06 17:35:28 athena Exp $ */
+/* $Id: problem.c,v 1.17 2002-08-12 18:07:18 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -90,33 +90,19 @@ void X(rdft_zerotens)(tensor sz, R *I)
      }
 }
 
+#define KSTR_LEN 8
+
 const char *X(rdft_kind_str)(rdft_kind kind)
 {
-     switch (kind) {
-	 case R2HC00: return "r2hc";
-	 case R2HC01: return "r2hc01";
-	 case R2HC10: return "r2hc10";
-	 case R2HC11: return "r2hc11";
-
-	 case HC2R00: return "hc2r";
-	 case HC2R01: return "hc2r01";
-	 case HC2R10: return "hc2r10";
-	 case HC2R11: return "hc2r11";
-
-	 case DHT: return "dht";
-
-	 case REDFT00: return "redft00";
-	 case REDFT01: return "redft01";
-	 case REDFT10: return "redft10";
-	 case REDFT11: return "redft11";
-
-	 case RODFT00: return "rodft00";
-	 case RODFT01: return "rodft01";
-	 case RODFT10: return "rodft10";
-	 case RODFT11: return "rodft11";
-
-	 default: A(0); return 0;
-     }
+     static const char kstr[][KSTR_LEN] = {
+	  "r2hc", "r2hc01", "r2hc10", "r2hc11",
+	  "hc2r", "hc2r01", "hc2r10", "hc2r11",
+	  "dht",
+	  "redft00", "redft01", "redft10", "redft11",
+	  "rodft00", "rodft01", "rodft10", "rodft11"
+     };
+     A(kind >= 0 && kind <= sizeof(kstr) / KSTR_LEN);
+     return kstr[kind];
 }
 
 /* for a given transform order n, return the actual number of
