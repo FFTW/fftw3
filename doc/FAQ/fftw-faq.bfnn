@@ -275,9 +275,9 @@ process (because FFTW computes the unnormalized transform).
 You almost certainly have a bug in your code.  For example, you could
 be passing invalid arguments (such as wrongly-sized arrays) to FFTW,
 or you could simply have memory corruption elsewhere in your program
-that causes random crashes later on.  Learn to debug, and don't
-complain to us unless you can come up with a minimal program
-(preferably under 30 lines) that illustrates the problem.
+that causes random crashes later on.  Please don't complain to us
+unless you can come up with a minimal program (preferably under 30
+lines) that illustrates the problem.
 
 \question 22oct:fortran64 My Fortran program crashes when calling FFTW.
 
