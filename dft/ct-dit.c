@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.10 2002-06-11 15:45:41 athena Exp $ */
+/* $Id: ct-dit.c,v 1.11 2002-06-11 18:22:49 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -52,7 +52,7 @@ static int applicable(const solver_ct *ego, const problem *p_)
           return (1
 
 		  /* emulate fftw-2 behavior */
-		  && (RESEARCH_MODE || p->vecsz.rnk == 0)
+		  && !(CLASSIC_MODE && p->vecsz.rnk > 0)
 
                   /* if hardwired strides, test whether they match */
                   && (!e->is || e->is == (int)(d[0].n / e->radix) * d[0].os)

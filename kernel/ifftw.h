@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.25 2002-06-11 18:06:06 athena Exp $ */
+/* $Id: ifftw.h,v 1.26 2002-06-11 18:22:49 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -46,8 +46,8 @@ typedef fftw_real R;
 typedef unsigned int uint;
 #endif
 
-#ifndef RESEARCH_MODE
-#define RESEARCH_MODE 0
+#ifndef CLASSIC_MODE
+#define CLASSIC_MODE 0
 #endif
 
 /* forward declarations */

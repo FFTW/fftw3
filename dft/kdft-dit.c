@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: kdft-dit.c,v 1.5 2002-06-11 15:45:41 athena Exp $ */
+/* $Id: kdft-dit.c,v 1.6 2002-06-11 18:22:49 athena Exp $ */
 
 #include "dft.h"
 
@@ -26,6 +26,6 @@ void X(kdft_dit_register)(planner *p, kdft_dit codelet, const ct_desc *desc)
 {
      REGISTER_SOLVER(p, X(mksolver_dft_ct_dit)(codelet, desc));
 
-     if (RESEARCH_MODE) 
+     if (!CLASSIC_MODE) 
 	  REGISTER_SOLVER(p, X(mksolver_dft_ct_ditbuf)(codelet, desc));
 }

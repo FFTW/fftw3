@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.7 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.8 2002-06-11 18:22:49 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -234,10 +234,10 @@ static solver *mksolver(int spltrnk, const int *buddies, uint nbuddies)
 void X(dft_rank_geq2_register)(planner *p)
 {
      uint i;
-#if RESEARCH_MODE
-     static const int buddies[] = { 1, -1, 0 };
-#else
+#if CLASSIC_MODE
      static const int buddies[] = { 0 };
+#else
+     static const int buddies[] = { 1, -1, 0 };
 #endif
 
      const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);

@@ -21,25 +21,25 @@ else
 fi
 AC_SUBST(PRECISION)
 
-AC_ARG_ENABLE(research-mode,
- [  --enable-research-mode      enable research code], 
+AC_ARG_ENABLE(classic-mode,
+ [  --enable-classic-mode      behave like fftw-2], 
  [case "${enableval}" in
-       yes) research_mode=true  ;;
-       no)  research_mode=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-research-mode);;
+       yes) classic_mode=true  ;;
+       no)  classic_mode=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-classic-mode);;
   esac],
- [dnl Enable/disable research mode depending on the presence of file
-  dnl RESEARCH-MODE.  In this way, we can distribute two versions
+ [dnl Enable/disable classic mode depending on the presence of file
+  dnl CLASSIC-MODE.  In this way, we can distribute two versions
   dnl of FFTW and configure does the right thing by default.
-  if test -f ${srcdir}/RESEARCH-MODE; then
-     research_mode=true
+  if test -f ${srcdir}/CLASSIC-MODE; then
+     classic_mode=true
   else
-     research_mode=false
+     classic_mode=false
   fi
  ])
-AM_CONDITIONAL(RESEARCH_MODE, test x$research_mode = xtrue)
-if test x$research_mode = xtrue; then
-    AC_DEFINE(RESEARCH_MODE, 1, [Define to enable experimental code])
+AM_CONDITIONAL(CLASSIC_MODE, test x$classic_mode = xtrue)
+if test x$classic_mode = xtrue; then
+    AC_DEFINE(CLASSIC_MODE, 1, [Define to behave like fftw-2])
 fi
 
 OCAML_INIT_PATHS

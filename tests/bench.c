@@ -56,7 +56,7 @@ static planner *plnr;
 static fftw_problem *prblm;
 static plan *pln;
 
-#define ESTIMATE 1
+#define ESTIMATE 0
 
 void setup(struct problem *p)
 {

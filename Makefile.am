@@ -8,17 +8,17 @@ else
 GENFFT =
 endif
 
-# distribute file RESEARCH-MODE if research mode is true
-if RESEARCH_MODE
-RESEARCH_DIST = RESEARCH-MODE
-distdir = $(PACKAGE)-$(VERSION)-research
-else
-RESEARCH_DIST = 
+# distribute file CLASSIC-MODE if classic mode is true
+if CLASSIC_MODE
+CLASSIC_DIST = CLASSIC-MODE
 distdir = $(PACKAGE)-$(VERSION)-classic
+else
+CLASSIC_DIST = 
+distdir = $(PACKAGE)-$(VERSION)-pro
 endif
 
 SUBDIRS=$(GENFFT) kernel dft libbench . tests
-EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS $(RESEARCH_DIST)
+EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS $(CLASSIC_DIST)
 
 lib@PRECISION@fftw3_la_SOURCES = 
 

@@ -1,7 +1,7 @@
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft
 noinst_LTLIBRARIES = libdft_inplace.la
 
-if RESEARCH_MODE
+if !CLASSIC_MODE
 F1_CODELETS = Kf1_2.c Kf1_3.c Kf1_4.c Kf1_5.c Kf1_6.c Kf1_7.c Kf1_8.c	\
 Kf1_9.c Kf1_10.c Kf1_16.c Kf1_32.c Kf1_64.c
 
