@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.20 2003-02-07 21:28:55 stevenj Exp $ */
+/* $Id: rdft2-radix2.c,v 1.21 2003-02-08 18:31:14 stevenj Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -79,7 +79,9 @@ static int applicable_f_dft(const problem *p_, const planner *plnr)
      UNUSED(plnr);
      if (applicable_f(p_, plnr)) {
 	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  return(p->r != p->rio || p->iio == p->rio + p->sz->dims[0].is);
+	  return(p->r != p->rio
+		 || (p->iio == p->rio + p->sz->dims[0].is
+		     && p->sz->dims[0].os == 2 * p->sz->dims[0].is));
      }
      return 0;
 }
@@ -106,7 +108,9 @@ static int applicable_b_dft(const problem *p_, const planner *plnr)
      UNUSED(plnr);
      if (applicable_b(p_, plnr)) {
 	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  return(p->r != p->rio || p->iio == p->rio + p->sz->dims[0].os);
+	  return(p->r != p->rio
+		 || (p->iio == p->rio + p->sz->dims[0].os
+		     && p->sz->dims[0].is == 2 * p->sz->dims[0].os));
      }
      return 0;
 }
