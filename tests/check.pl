@@ -43,8 +43,28 @@ sub flush_problems {
 	}
 	print "Executing \"$program $options $problist\"\n" 
 	    if $verbose;
-	if (system("$program $options $problist") != 0) {
+	
+	system("$program $options $problist");
+	$exit_value  = $? >> 8;
+	$signal_num  = $? & 127;
+	$dumped_core = $? & 128;
+
+	if ($signal_num == 1) {
+	    print "hangup\n";
+	    exit 0;
+	}
+	if ($signal_num == 2) {
+	    print "interrupted\n";
+	    exit 0;
+	}
+	if ($signal_num == 9) {
+	    print "killed\n";
+	    exit 0;
+	}
+
+	if ($exit_value != 0 || $dumped_core || $signal_num) {
 	    print "FAILED $program: $problist\n";
+	    if ($signal_num) { print "received signal $signal_num\n"; }
 	    exit 1 unless $keepgoing;
 	}
 	@list_of_problems = ();
