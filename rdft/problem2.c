@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.9 2002-08-03 19:39:49 athena Exp $ */
+/* $Id: problem2.c,v 1.10 2002-08-06 17:35:28 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -107,7 +107,7 @@ static int scan(scanner *sc, problem **p)
 	  X(tensor_destroy)(vecsz);
 	  return 0;
      }
-     r = (R *) ((char *) 0 + align);
+     r = X(ptr_with_alignment)(align);
      *p = X(mkproblem_rdft2_d)(sz.dims[0], vecsz, r, r + offr, r + offi, kind);
      X(tensor_destroy)(sz);
      return 1;
