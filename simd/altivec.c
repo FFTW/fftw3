@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: altivec.c,v 1.5 2003-10-23 15:34:11 athena Exp $ */
+/* $Id: altivec.c,v 1.6 2005-01-11 02:09:30 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -26,16 +26,13 @@
 #if HAVE_ALTIVEC
 
 const vector unsigned int X(altivec_ld_selmsk) = 
-   (vector unsigned int)VLIT(0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
+   VLIT_UNSIGNED(0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
 
 const vector unsigned int X(altivec_flipri_perm) = 
-   (vector unsigned int)VLIT(0x04050607, 0x00010203,
-			     0x0c0d0e0f, 0x08090a0b);
+   VLIT_UNSIGNED(0x04050607, 0x00010203, 0x0c0d0e0f, 0x08090a0b);
 
-const vector float X(altivec_chsr_sgn) = 
-   (vector float)VLIT(-1.0, 1.0, -1.0, 1.0);
-const vector float X(altivec_chsr_msk) = 
-   (vector float)VLIT(-0.0, 0.0, -0.0, 0.0);
+const vector float X(altivec_chsr_sgn) = VLIT(-1.0, 1.0, -1.0, 1.0);
+const vector float X(altivec_chsr_msk) = VLIT(-0.0, 0.0, -0.0, 0.0);
 
 #if HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>

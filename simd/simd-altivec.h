@@ -26,79 +26,15 @@
 #define ALIGNMENT 8     /* alignment for LD/ST */
 #define ALIGNMENTA 16   /* alignment for LDA/STA */
 
+#include <altivec.h>
+
+
 #ifndef __VEC__
-
-/* simulate altivec spec by means of gcc-3.1 builtins */
-#define vector __attribute__((vector_size(16)))
-#define vec_add __builtin_altivec_vaddfp
-#define vec_sub __builtin_altivec_vsubfp
-#define vec_madd __builtin_altivec_vmaddfp
-#define vec_nmsub __builtin_altivec_vnmsubfp
-#define vec_lvsl(a1, a2) ((vector unsigned char) __builtin_altivec_lvsl ((a1), (a2)))
-
-#define vec_lvsr(a1, a2) ((vector unsigned char) __builtin_altivec_lvsr ((a1), (a2)))
-
-static inline vector float
-vec_perm (vector float a1, vector float a2, vector unsigned char a3)
-{
-     return (vector float) __builtin_altivec_vperm_4si ((vector signed int) a1, (vector signed int) a2, (vector signed char) a3);
-}
-
-static inline vector float
-vec_sel (vector float a1, vector float a2, vector unsigned int a3)
-{
-     return (vector float) __builtin_altivec_vsel_4si ((vector signed int) a1, (vector signed int) a2, (vector signed int) a3);
-}
-
-static inline vector float
-vec_ld (int a1, float *a2)
-{
-     return (vector float) __builtin_altivec_lvx (a1, (void *) a2);
-}
-
-static inline void
-vec_ste (vector float a1, int a2, void *a3)
-{
-     __builtin_altivec_stvewx ((vector signed int) a1, a2, (void *) a3);
-}
-
-static inline void
-vec_st (vector float a1, int a2, void *a3)
-{
-     __builtin_altivec_stvx ((vector signed int) a1, a2, (void *) a3);
-}
-
-static inline vector float
-vec_mergeh (vector float a1, vector float a2)
-{
-     return (vector float) __builtin_altivec_vmrghw ((vector signed int) a1, (vector signed int) a2);
-}
-
-static inline vector float
-vec_mergel (vector float a1, vector float a2)
-{
-#if 1 /* gcc bug */
-     vector float ret;
-     __asm__("vmrglw %0, %1, %2" : "=v"(ret) : "v"(a1), "v"(a2));
-     return ret;
-#else
-     return (vector float) __builtin_altivec_vmrglw ((vector signed int) a1, (vector signed int) a2);
+#error "Need version of gcc that supports altivec"
 #endif
-}
-
-static inline vector float
-vec_xor (vector float a1, vector float a2)
-{
-  return (vector float) __builtin_altivec_vxor ((vector signed int) a1, (vector signed int) a2);
-}
 
 #define VLIT(x0, x1, x2, x3) {x0, x1, x2, x3}
-
-#else /* !__VEC__ */
-
-#define VLIT(x0, x1, x2, x3) (x0, x1, x2, x3)
-
-#endif
+#define VLIT_UNSIGNED(x0, x1, x2, x3) {x0, x1, x2, x3}
 
 typedef vector float V;
 #define VADD(a, b) vec_add(a, b)
@@ -106,7 +42,7 @@ typedef vector float V;
 #define VFMA(a, b, c) vec_madd(a, b, c)
 #define VFNMS(a, b, c) vec_nmsub(a, b, c)
 #define LDK(x) x
-#define DVK(var, val) const V var = (vector float)VLIT(val, val, val, val)
+#define DVK(var, val) const V var = VLIT(val, val, val, val)
 
 static inline V VMUL(V a, V b)
 {
