@@ -61,7 +61,7 @@ if test "$have_altivec" = "yes"; then
 	have_simd="yes"
 fi
 
-if test "$PRECISION" = "l" -a "$have_simd" = "yes"; then
+if test "$PRECISION" = "l" && test "$have_simd" = "yes"; then
 	AC_MSG_ERROR([cannot use SIMD optimizations with long double])
 fi
 
