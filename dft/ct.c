@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.43 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: ct.c,v 1.44 2005-03-09 01:30:42 athena Exp $ */
 
 #include "ct.h"
 
@@ -94,7 +94,7 @@ static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
 		      p->ri == p->ro || 
 		      DESTROY_INPUTP(plnr))
 		  
-		  && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 0)
+		  && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 1)
 		  && p->sz->dims[0].n > r);
      }
      return 0;
