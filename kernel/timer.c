@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.10 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: timer.c,v 1.11 2002-09-02 21:33:49 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -69,6 +69,21 @@ static double elapsed_sec(seconds t1, seconds t0)
 {
      return (double)(t1.tv_sec - t0.tv_sec) +
 	  (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6;
+}
+
+#  define HAVE_SECONDS_TIMER
+#endif
+
+#ifndef HAVE_SECONDS_TIMER
+#  include <time.h>
+
+typedef clock_t seconds;
+
+static seconds getseconds(void) { return clock(); }
+
+static double elapsed_sec(seconds t1, seconds t0)
+{
+     return ((double) (t1 - t0)) / CLOCKS_PER_SEC;
 }
 
 #  define HAVE_SECONDS_TIMER
