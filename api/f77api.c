@@ -69,15 +69,15 @@ static void write_char(char c, void *d)
 }
 
 typedef struct {
-     void (*f77_emitter)(int *, void *);
+     void (*f77_read_char)(int *, void *);
      void *data;
-} emitter_data;
+} read_char_data;
 
-static int emitter(void *d)
+static int read_char(void *d)
 {
-     emitter_data *ed = (emitter_data *) d;
+     read_char_data *ed = (read_char_data *) d;
      int c;
-     ed->f77_emitter(&c, ed->data);
+     ed->f77_read_char(&c, ed->data);
      return (c < 0 ? EOF : c);
 }
 

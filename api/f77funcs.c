@@ -53,13 +53,13 @@ void F77(export_wisdom, EXPORT_WISDOM)(void (*f77_write_char)(char *, void *),
 }
 
 void F77(import_wisdom, IMPORT_WISDOM)(int *isuccess,
-				       void (*f77_emitter)(int *, void *),
+				       void (*f77_read_char)(int *, void *),
 				       void *data)
 {
-     emitter_data ed;
-     ed.f77_emitter = f77_emitter;
+     read_char_data ed;
+     ed.f77_read_char = f77_read_char;
      ed.data = data;
-     *isuccess = X(import_wisdom)(emitter, (void *) &ed);
+     *isuccess = X(import_wisdom)(read_char, (void *) &ed);
 }
 
 void F77(import_system_wisdom, IMPORT_SYSTEM_WISDOM)(int *isuccess)
