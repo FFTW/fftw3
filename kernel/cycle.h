@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.29 2003-05-06 00:42:30 stevenj Exp $ */
+/* $Id: cycle.h,v 1.30 2003-05-06 16:17:56 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -56,14 +56,13 @@
    
    dnl ---------------------------------------------------------------------
 
+   AC_C_INLINE
    AC_HEADER_TIME
-
    AC_CHECK_HEADERS([sys/time.h c_asm.h intrinsics.h])
 
    AC_CHECK_TYPE([hrtime_t],[AC_DEFINE(HAVE_HRTIME_T, 1, [Define to 1 if hrtime_t is defined in <sys/time.h>])],,[#if HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif])
-
 
    AC_CHECK_FUNCS([gethrtime read_real_time time_base_to_time clock_gettime])
 
@@ -79,6 +78,17 @@
 */
 
 /***************************************************************************/
+
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
 
 /*----------------------------------------------------------------*/
 /* Solaris */

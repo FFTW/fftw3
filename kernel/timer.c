@@ -18,24 +18,31 @@
  *
  */
 
-/* $Id: timer.c,v 1.13 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: timer.c,v 1.14 2003-05-06 16:17:56 stevenj Exp $ */
 
 #include "ifftw.h"
 
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+
+#ifndef WITHOUT_CYCLE_COUNTER
+#  include "cycle.h"
+#else
+#  if TIME_WITH_SYS_TIME
+#   include <sys/time.h>
+#   include <time.h>
+#  else
+#   if HAVE_SYS_TIME_H
+#    include <sys/time.h>
+#   else
+#    include <time.h>
+#   endif
+#  endif
+#endif
+
 #ifndef FFTW_TIME_LIMIT
 #define FFTW_TIME_LIMIT 2.0  /* don't run for more than two seconds */
-#endif
-
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 
 #ifdef HAVE_BSDGETTIMEOFDAY
@@ -43,10 +50,6 @@
 #define gettimeofday BSDgettimeofday
 #define HAVE_GETTIMEOFDAY 1
 #endif
-#endif
-
-#ifndef WITHOUT_CYCLE_COUNTER
-#  include "cycle.h"
 #endif
 
 #if defined(HAVE_GETTIMEOFDAY) && !defined(HAVE_SECONDS_TIMER)
