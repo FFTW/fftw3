@@ -55,8 +55,15 @@ static void hartley_r2hc(int n, const R *xr, int xs, E *o, R *pr)
      E sr;
      o[0] = sr = xr[0]; o += 1;
      for (i = 1; i + i < n; ++i) {
-	  sr += (o[0] = xr[i * xs] + xr[(n - i) * xs]);
-	  o[1] = xr[(n - i) * xs] - xr[i * xs];
+	  R a, b;
+	  a = xr[i * xs];
+	  b =  xr[(n - i) * xs];
+	  sr += (o[0] = a + b);
+#if FFT_SIGN == -1
+	  o[1] = b - a;
+#else
+	  o[1] = a - b;
+#endif
 	  o += 2;
      }
      *pr = sr;
@@ -93,8 +100,13 @@ static void cdot_hc2r(int n, const E *x, const R *w, R *or0, R *or1)
 	  ii += x[1] * w[1];
 	  x += 2; w += 2;
      }
+#if FFT_SIGN == -1
      *or0 = rr - ii;
      *or1 = rr + ii;
+#else
+     *or0 = rr + ii;
+     *or1 = rr - ii;
+#endif
 }
 
 static void hartley_hc2r(int n, const R *x, int xs, E *o, R *pr)
