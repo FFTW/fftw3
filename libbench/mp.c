@@ -464,7 +464,7 @@ static void cmulj(N r0, N i0, N r1, N i1, N r2, N i2)
 
 static void bluestein(unsigned int n, bench_complex *a)
 {
-     unsigned int nb = pow2_atleast(3 * n);
+     unsigned int nb = pow2_atleast(2 * n);
      REAL nbinv = 1.0 / nb; /* exact because nb = 2^k */
      N *w = (N *)bench_malloc(2 * n * sizeof(N));
      N *y = (N *)bench_malloc(2 * nb * sizeof(N));
