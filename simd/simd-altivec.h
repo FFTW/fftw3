@@ -97,7 +97,7 @@ typedef vector float V;
 #define VADD(a, b) vec_add(a, b)
 #define VSUB(a, b) vec_sub(a, b)
 #define VFMA(a, b, c) vec_madd(a, b, c)
-#define VFNMS(a, b, c) vec_nmsub(a, b, c) 
+#define VFNMS(a, b, c) vec_nmsub(a, b, c)
 #define LDK(x) x
 #define DVK(var, val) const V var = (vector float)VLIT(val, val, val, val)
 
@@ -113,14 +113,14 @@ static inline V VFMS(V a, V b, V c)
 }
 
 /* load lower half */
-static inline V LDL(const float *x, int ivs) 
+static inline V LDL(const float *x, int ivs)
 {
      int fivs = 4 * ivs;
      V v = vec_ld(fivs, (float *)x);
      return vec_perm(v, v, vec_lvsl(fivs, (float *)x));
 }
 
-static inline V LDH(const float *x) 
+static inline V LDH(const float *x)
 {
      V v = vec_ld(0, (float *)x);
      return vec_perm(v, v, vec_lvsl(8, (float *)x));
@@ -128,7 +128,7 @@ static inline V LDH(const float *x)
 
 extern const vector unsigned int X(altivec_ld_selmsk);
 
-static inline V LD(const float *x, int ivs) 
+static inline V LD(const float *x, int ivs)
 {
      V l = LDL(x, ivs);
      V h = LDH(x);
@@ -151,8 +151,8 @@ static inline void STH(float *x, V v)
      vec_ste(v, 4, x);
 }
 
-static inline void ST(float *x, V v, int ovs) 
-{			
+static inline void ST(float *x, V v, int ovs)
+{
      STL(x, v, ovs);
      STH(x, v);
 }
