@@ -65,8 +65,7 @@ out-of-place transforms of size 1024 (also saving the wisdom itself in
 
 Alternatively, you can run your actual program, export wisdom for all
 plans that were created (ideally in FFTW_PATIENT or FFTW_EXHAUSTIVE
-mode), use this as input for
-.I fftw-wisdom-to-conf
+mode), use this as input for \fIfftw-wisdom-to-conf\fR,
 and then re-link your program with the resulting configuration routine.
 
 Note that the configuration routine does not contain the wisdom, only
