@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.12 2002-08-01 23:50:53 stevenj Exp $ */
+/* $Id: cycle.h,v 1.13 2002-08-03 18:33:40 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -178,7 +178,7 @@ static inline ticks getticks(void)
 }
 #  endif
 
-static __inline__ double elapsed(ticks t1, ticks t0)
+static inline double elapsed(ticks t1, ticks t0)
 {
      return (double)(t1 - t0);
 }

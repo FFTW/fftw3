@@ -10,27 +10,19 @@ $(CODLIST): Makefile
 	(								\
 	echo "#include \"ifftw.h\"";					\
 	echo;								\
-	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))) NIL; do	\
+	for i in $(ALL_CODELETS) NIL; do				\
 	   if test "$$i" != NIL; then					\
-             echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
-           fi								\
-	done;								\
-	for i in $(subst .S,,$(filter %.S,$(ALL_CODELETS))) NIL; do	\
-	   if test "$$i" != NIL; then					\
-             echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
+	     j=`echo $$i | sed -e 's/[.][cS]$$//g'`;			\
+             echo "extern void X($(CODELET_NAME)$$j)(planner *);";	\
            fi								\
 	done;								\
 	echo;								\
 	echo;								\
 	echo "const solvtab $(SOLVTAB_NAME) = {";			\
-	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))) NIL; do	\
+	for i in $(ALL_CODELETS) NIL; do				\
 	   if test "$$i" != NIL; then					\
-	     echo "   SOLVTAB(X($(CODELET_NAME)$$i)),";			\
-	   fi								\
-	done;								\
-	for i in $(subst .S,,$(filter %.S,$(ALL_CODELETS))) NIL; do	\
-	   if test "$$i" != NIL; then					\
-	     echo "   SOLVTAB(X($(CODELET_NAME)$$i)),";			\
+	     j=`echo $$i | sed -e 's/[.][cS]$$//g'`;			\
+	     echo "   SOLVTAB(X($(CODELET_NAME)$$j)),";			\
 	   fi								\
 	done;								\
 	echo "   SOLVTAB_END";						\

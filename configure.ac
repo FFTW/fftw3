@@ -96,6 +96,9 @@ AC_SUBST(OCAMLOPTCFLAGS)
 AC_SUBST(OCAMLDEFS)
 AC_SUBST(OCAMLLDFLAGS)
 
+dnl determine CFLAGS first
+ACX_PROG_CC_MAXOPT(fftw)
+
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h limits.h])
@@ -154,10 +157,6 @@ AC_MSG_RESULT(${ok})
 
 dnl TODO
 ACX_GCC_ALIGNS_STACK()
-
-
-dnl check for optimization options
-ACX_PROG_CC_MAXOPT(fftw)
 
 dnl override CFLAGS selection when debugging
 if test "${enable_debug}" = "yes"; then

@@ -194,7 +194,7 @@ if test "$ac_test_CFLAGS" != "set"; then
                 fi;;
 
   hppa*-hpux*)  if test "$ac_compiler_gnu" != yes; then
-                    CFLAGS="-Ae +O3 +Oall +Ofltacc"
+                    CFLAGS="+O3 +Oall +Ofltacc"
                 fi;;
 
    *-aix*)

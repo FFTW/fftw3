@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.67 2002-08-02 19:26:37 athena Exp $ */
+/* $Id: ifftw.h,v 1.68 2002-08-03 18:33:40 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -42,7 +42,7 @@
 typedef fftw_real R;
 #define X FFTW
 
-#define FFT_SIGN -1  /* sign convention for forward transforms */
+#define FFT_SIGN (-1)  /* sign convention for forward transforms */
 
 /* get rid of that object-oriented stink: */
 #define DESTROY(thing) ((thing)->adt->destroy)(thing)
