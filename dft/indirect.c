@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.21 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: indirect.c,v 1.22 2002-09-17 06:50:15 stevenj Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -169,11 +169,12 @@ static int applicable(const solver *ego_, const problem *p_,
      return 0;
 }
 
+#define OP(p) (((problem_dft *) (p))->ri != ((problem_dft *) (p))->ro)
+
 static int score(const solver *ego, const problem *p, const planner *plnr)
 {
-     if (NO_INDIRECTP(plnr))
-	  return BAD;
-     return (applicable(ego, p, plnr)) ? GOOD : BAD;
+     return (applicable(ego, p, plnr)
+	     && !(NO_INDIRECT_OP_P(plnr) && OP(p))) ? GOOD : BAD;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

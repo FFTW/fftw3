@@ -157,7 +157,7 @@ void setup(struct problem *p)
      plnr->hook = hook;
 
      /* plnr->planner_flags |= IMPATIENT; */
-     /* plnr->planner_flags |= ESTIMATE; */
+     /* plnr->planner_flags |= ESTIMATE | IMPATIENT | NO_INDIRECT_OP; */
 
      if (p->kind == PROBLEM_REAL)
 	  plnr->problem_flags |= DESTROY_INPUT;
