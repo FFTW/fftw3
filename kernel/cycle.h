@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.8 2002-07-14 02:17:29 stevenj Exp $ */
+/* $Id: cycle.h,v 1.9 2002-07-30 23:34:16 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -130,6 +130,28 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 
 #define HAVE_TICK_COUNTER
 #endif
+
+/* HP/UX IA64 compiler: */
+#if defined(__hpux) && defined(__ia64) && !defined(HAVE_TICK_COUNTER)
+#include <machine/inline.h>
+typedef unsigned long ticks;
+
+static inline ticks getticks(void)
+{
+     ticks ret;
+
+     ret = _Asm_mov_from_ar (_AREG_ITC);
+     return ret;
+}
+
+static __inline__ double elapsed(ticks t1, ticks t0)
+{
+     return (double)(t1 - t0);
+}
+
+#define HAVE_TICK_COUNTER
+#endif
+
 /*----------------------------------------------------------------*/
 /*
  * PA-RISC cycle counter 
