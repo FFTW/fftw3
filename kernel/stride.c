@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002 Matteo Frigo
- * Copyright (c) 2002 Steven G. Johnson
+ * Copyright (c) 2003 Matteo Frigo
+ * Copyright (c) 2003 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: stride.c,v 1.6 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: stride.c,v 1.7 2003-03-15 20:29:43 stevenj Exp $ */
 #include "ifftw.h"
 
 #ifdef PRECOMPUTE_ARRAY_INDICES

@@ -1,7 +1,7 @@
 (*
  * Copyright (c) 1997-1999 Massachusetts Institute of Technology
- * Copyright (c) 2000 Matteo Frigo
- * Copyright (c) 2000 Steven G. Johnson
+ * Copyright (c) 2003 Matteo Frigo
+ * Copyright (c) 2003 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twidsq.ml,v 1.13 2003-01-15 02:10:25 athena Exp $ *)
+(* $Id: gen_twidsq.ml,v 1.14 2003-03-15 20:29:42 stevenj Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twidsq.ml,v 1.13 2003-01-15 02:10:25 athena Exp $"
+let cvsid = "$Id: gen_twidsq.ml,v 1.14 2003-03-15 20:29:42 stevenj Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 

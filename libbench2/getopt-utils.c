@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2001 Matteo Frigo
- * Copyright (c) 2001 Steven G. Johnson
+ * Copyright (c) 2001 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: getopt-utils.c,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: getopt-utils.c,v 1.2 2003-03-15 20:29:43 stevenj Exp $ */
 #include "bench.h"
 #include "getopt.h"
 #include <ctype.h>

@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.153 2003-03-15 18:36:56 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.154 2003-03-15 20:29:42 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -68,9 +68,9 @@ $n_1 \\times n_2 \\times n_3 \\times \\cdots \\times (n_d/2 + 1)$
 This manual is for FFTW
 (version @value{VERSION}, @value{UPDATED}).
 
-Copyright @copyright{} 2002 Matteo Frigo.
+Copyright @copyright{} 2003 Matteo Frigo.
 
-Copyright @copyright{} 2002 Steven G. Johnson.
+Copyright @copyright{} 2003 Massachusetts Institute of Technology.
 
 @quotation
 Permission is granted to make and distribute verbatim copies of this
@@ -4628,7 +4628,7 @@ FFTW.}
 @chapter License and Copyright
 
 
-FFTW is Copyright @copyright{} 2002 Matteo Frigo, Copyright
+FFTW is Copyright @copyright{} 2003 Matteo Frigo, Copyright
 @copyright{} 2002 Steven G. Johnson.
 
 FFTW is free software; you can redistribute it and/or modify

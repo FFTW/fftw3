@@ -8,12 +8,6 @@ TODO before/at release:
   final release.  This flag speeds up the generator but produces worse
   codelets
 
-* remember to thank/acknowledge: Franz and Stefan, Aurora project
-  in Vienna, MIT Lincoln Labs, Compaq/HP testdrive program,
-  sourceforge, AMD for the athlon box.
-
-* Copyright SGJ should probably be copyright MIT.  Update years to 2003 (sigh).
-
 TODO before FFTW-$2\pi$:
 
 * MPI version

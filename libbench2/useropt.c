@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000 Matteo Frigo
- * Copyright (c) 2000 Steven G. Johnson
+ * Copyright (c) 2000 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: useropt.c,v 1.1 2003-01-18 13:03:07 athena Exp $ */
+/* $Id: useropt.c,v 1.2 2003-03-15 20:29:43 stevenj Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>

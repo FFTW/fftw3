@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002 Matteo Frigo
- * Copyright (c) 2002 Steven G. Johnson
+ * Copyright (c) 2003 Matteo Frigo
+ * Copyright (c) 2003 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.19 2003-03-01 21:34:21 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.20 2003-03-15 20:29:43 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:

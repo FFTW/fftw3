@@ -1,7 +1,7 @@
 (*
  * Copyright (c) 1997-1999 Massachusetts Institute of Technology
- * Copyright (c) 2000 Matteo Frigo
- * Copyright (c) 2000 Steven G. Johnson
+ * Copyright (c) 2003 Matteo Frigo
+ * Copyright (c) 2003 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.ml,v 1.4 2002-08-18 20:02:37 athena Exp $ *)
+(* $Id: complex.ml,v 1.5 2003-03-15 20:29:42 stevenj Exp $ *)
 
 (* abstraction layer for complex operations *)
 open Littlesimp

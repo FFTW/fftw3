@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002 Matteo Frigo
- * Copyright (c) 2002 Steven G. Johnson
+ * Copyright (c) 2003 Matteo Frigo
+ * Copyright (c) 2003 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.50 2003-03-15 16:29:12 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.51 2003-03-15 20:29:42 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H

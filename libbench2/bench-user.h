@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2001 Matteo Frigo
- * Copyright (c) 2001 Steven G. Johnson
+ * Copyright (c) 2001 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.15 2003-02-26 22:36:13 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.16 2003-03-15 20:29:43 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002 Matteo Frigo
- * Copyright (c) 2002 Steven G. Johnson
+ * Copyright (c) 2003 Matteo Frigo
+ * Copyright (c) 2003 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.35 2003-03-10 22:41:35 stevenj Exp $ */
+/* $Id: indirect.c,v 1.36 2003-03-15 20:29:42 stevenj Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done

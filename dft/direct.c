@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2002 Matteo Frigo
- * Copyright (c) 2002 Steven G. Johnson
+ * Copyright (c) 2003 Matteo Frigo
+ * Copyright (c) 2003 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.36 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: direct.c,v 1.37 2003-03-15 20:29:42 stevenj Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 

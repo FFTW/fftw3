@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2000 Matteo Frigo
- * Copyright (c) 2000 Steven G. Johnson
+ * Copyright (c) 2000 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.16 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: verify.c,v 1.17 2003-03-15 20:29:43 stevenj Exp $ */
 
 #include <math.h>
 #include <stdio.h>

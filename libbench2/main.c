@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2001 Matteo Frigo
- * Copyright (c) 2001 Steven G. Johnson
+ * Copyright (c) 2001 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: main.c,v 1.2 2003-02-09 23:08:26 athena Exp $ */
+/* $Id: main.c,v 1.3 2003-03-15 20:29:43 stevenj Exp $ */
 
 #include "bench.h"
 
