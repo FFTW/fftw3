@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft.c,v 1.4 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: verify-rdft.c,v 1.5 2003-01-05 07:31:56 stevenj Exp $ */
 
 #include "rdft.h"
 #include "debug.h"
@@ -32,6 +32,9 @@ typedef struct {
      tensor *totalsz;
      tensor *pckdsz;
      tensor *pckdvecsz;
+     tensor *probsz2;
+     tensor *totalsz2;
+     tensor *pckdsz2;
 } info;
 
 
@@ -269,12 +272,12 @@ static void dofft(void *n_, C *in, C *out)
 	      case R2HC:
 		   cpyr(&in->r, n->pckdsz, n->p2->r, n->totalsz);
 		   n->pln->adt->solve(n->pln, &(n->p2->super));
-		   cpyhc2(n->p2->rio, n->p2->iio, n->probsz, n->p2->vecsz, 
-			  &out->r, &out->i, n->pckdvecsz);
+		   cpyhc2(n->p2->rio, n->p2->iio, n->probsz2, n->totalsz2, 
+			  &out->r, &out->i, n->pckdsz2);
 		   break;
 	      case HC2R:
-		   icpyhc2(n->p2->rio, n->p2->iio, n->probsz, n->p2->vecsz, 
-			   &in->r, &in->i, n->pckdvecsz);
+		   icpyhc2(n->p2->rio, n->p2->iio, n->probsz2, n->totalsz2, 
+			   &in->r, &in->i, n->pckdsz2);
 		   n->pln->adt->solve(n->pln, &(n->p2->super));
 		   mkreal(out, X(tensor_sz)(n->pckdsz));
 		   cpyr(n->p2->r, n->totalsz, &out->r, n->pckdsz);
@@ -319,6 +322,7 @@ static void really_verify(plan *pln, const problem_rdft *p,
      nfo.totalsz = X(tensor_append)(p->vecsz, p->sz);
      nfo.pckdsz = verify_pack(nfo.totalsz, 2);
      nfo.pckdvecsz = verify_pack(p->vecsz, 2 * X(tensor_sz)(p->sz));
+     nfo.probsz2 = nfo.totalsz2 = nfo.pckdsz2 = 0;
 
      impulse(dofft, &nfo, 
 	     n, vecn, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
@@ -375,6 +379,9 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
      nfo.totalsz = X(tensor_append)(p->vecsz, p->sz);
      nfo.pckdsz = verify_pack(nfo.totalsz, 2);
      nfo.pckdvecsz = verify_pack(p->vecsz, 2 * X(tensor_sz)(p->sz));
+     nfo.probsz2 = X(tensor_copy_sub)(p->sz, p->sz->rnk - 1, 1);
+     nfo.totalsz2 = X(tensor_copy_sub)(nfo.totalsz, 0, nfo.totalsz->rnk - 1);
+     nfo.pckdsz2 = X(tensor_copy_sub)(nfo.pckdsz, 0, nfo.pckdsz->rnk - 1);
 
      impulse(dofft, &nfo, 
 	     n, vecn, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
@@ -394,6 +401,9 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
      X(tensor_destroy)(nfo.totalsz);
      X(tensor_destroy)(nfo.pckdsz);
      X(tensor_destroy)(nfo.pckdvecsz);
+     X(tensor_destroy)(nfo.probsz2);
+     X(tensor_destroy)(nfo.totalsz2);
+     X(tensor_destroy)(nfo.pckdsz2);
      X(free)(tmp);
      X(free)(outC);
      X(free)(outB);

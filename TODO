@@ -1,7 +1,3 @@
-* implement verify for rdft2 n-dimensional problems
-
-* mpi
-
 * DCT/DST codelets?  which kinds?
 
 * user interface (& manual)
@@ -42,6 +38,8 @@ TODO before/at release:
   sourceforge, AMD for the athlon box.
 
 TODO before FFTW-$2\pi$:
+
+* MPI version
 
 * investigate the addition-chain trig computation
 
