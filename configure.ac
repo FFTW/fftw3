@@ -1,10 +1,12 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(fftw, 3.0, fftw@fftw.org)
 AC_CONFIG_SRCDIR(kernel/fftw3.h)
+SHARED_VERSION_INFO="3:0:0"
 
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
+AC_SUBST(SHARED_VERSION_INFO)
 
 dnl configure options
 AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)

@@ -28,3 +28,5 @@ lib@PRECISION@fftw3_la_LIBADD =				\
 	rdft/codelets/librdft_codelets.la		\
 	rdft/codelets/r2hc/librdft_codelets_r2hc.la	\
 	rdft/codelets/hc2r/librdft_codelets_hc2r.la
+
+lib@PRECISION@fftw3_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
