@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.14 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: buffered.c,v 1.15 2002-09-22 15:08:57 athena Exp $ */
 
 #include "rdft.h"
 
@@ -194,7 +194,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld = (plan *) 0;
      plan *cldcpy = (plan *) 0;
      plan *cldrest = (plan *) 0;
-     problem *cldp = 0;
      const problem_rdft *p = (const problem_rdft *) p_;
      R *bufs = (R *) 0;
      uint nbuf = 0, bufdist, n, vl;
@@ -234,43 +233,34 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) fftw_malloc(sizeof(R) * nbuf * bufdist, BUFFERS);
 
-     cldp =
-          X(mkproblem_rdft_d)(
-               X(mktensor_1d)(n, p->sz->dims[0].is, 1),
-               X(mktensor_1d)(nbuf, ivs, bufdist),
-               p->I, bufs, p->kind);
-
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld)
-          goto nada;
+     cld = X(mkplan_d)(plnr, 
+		       X(mkproblem_rdft_d)(
+			    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
+			    X(mktensor_1d)(nbuf, ivs, bufdist),
+			    p->I, bufs, p->kind));
+     if (!cld) goto nada;
 
      /* copying back from the buffer is a rank-0 transform: */
-     cldp =
-          X(mkproblem_rdft_d)(
-               X(mktensor)(0),
-               X(mktensor_2d)(nbuf, bufdist, ovs,
-			      X(rdft_real_n)(p->kind[0], n),
-			      1, p->sz->dims[0].os),
-               bufs, p->O, (rdft_kind *) 0);
-
-     cldcpy = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cldcpy)
-          goto nada;
+     cldcpy = X(mkplan_d)(plnr, 
+			  X(mkproblem_rdft_d)(
+			       X(mktensor)(0),
+			       X(mktensor_2d)(nbuf, bufdist, ovs,
+					      X(rdft_real_n)(p->kind[0], n),
+					      1, p->sz->dims[0].os),
+			       bufs, p->O, (rdft_kind *) 0));
+     if (!cldcpy) goto nada;
 
      /* deallocate buffers, let apply() allocate them for real */
      X(free)(bufs);
      bufs = 0;
 
      /* plan the leftover transforms (cldrest): */
-     cldp = X(mkproblem_rdft_d)(X(tensor_copy)(p->sz),
+     cldrest = X(mkplan_d)(plnr, 
+			   X(mkproblem_rdft_d)(
+				X(tensor_copy)(p->sz),
 				X(mktensor_1d)(vl % nbuf, ivs, ovs),
-				p->I, p->O, p->kind);
-     cldrest = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cldrest)
-          goto nada;
+				p->I, p->O, p->kind));
+     if (!cldrest) goto nada;
 
      pln = MKPLAN_RDFT(P, &padt, apply);
      pln->cld = cld;

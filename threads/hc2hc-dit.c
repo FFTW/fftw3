@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dit.c,v 1.3 2002-09-21 11:58:11 athena Exp $ */
+/* $Id: hc2hc-dit.c,v 1.4 2002-09-22 15:08:57 athena Exp $ */
 
 /* decimation in time Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -92,10 +92,10 @@ static int applicable0(const solver_hc2hc *ego, const problem *p_,
      if (plnr->nthr > 1 && X(rdft_hc2hc_applicable)(ego, p_)) {
           const hc2hc_desc *e = ego->desc;
           const problem_rdft *p = (const problem_rdft *) p_;
-          iodim *d = p->sz.dims;
+          iodim *d = p->sz->dims;
 	  uint m = d[0].n / e->radix;
           return (1
-		  && p->vecsz.rnk == 0
+		  && p->vecsz->rnk == 0
 		  && (e->genus->okp(e, p->O + d[0].os,
 				    p->O + (e->radix * m - 1) * d[0].os, 
 				    (int)m * d[0].os, 0, m, d[0].os))
@@ -113,7 +113,7 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
 
      p = (const problem_rdft *) p_;
 
-     if (NO_UGLYP(plnr) && X(ct_uglyp)(16, p->sz.dims[0].n, ego->desc->radix))
+     if (NO_UGLYP(plnr) && X(ct_uglyp)(16, p->sz->dims[0].n, ego->desc->radix))
 	  return 0;
 
      return 1;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.116 2002-09-21 11:58:11 athena Exp $ */
+/* $Id: planner.c,v 1.117 2002-09-22 15:08:57 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -586,6 +586,13 @@ void X(planner_destroy)(planner *ego)
 	  X(free)(ego->slvdescs);
 
      X(free)(ego); /* dona eis requiem */
+}
+
+plan *X(mkplan_d)(planner *ego, problem *p)
+{
+     plan *pln = ego->adt->mkplan(ego, p);
+     X(problem_destroy)(p);
+     return pln;
 }
 
 /*

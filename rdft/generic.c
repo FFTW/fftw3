@@ -324,10 +324,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				     X(mktensor_1d)(r, m * is, os),
 				     p->I, p->O, p->kind);
      }
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld)
-	  goto nada;
+     if (!(cld = X(mkplan_d)(plnr, cldp))) goto nada;
 
      pln = MKPLAN_RDFT(P, &padt, R2HC_KINDP(p->kind[0]) ? apply_dit:apply_dif);
 

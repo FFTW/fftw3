@@ -387,31 +387,21 @@ static int mkP(P *pln, uint r, R *O, int ios, rdft_kind kind, planner *plnr)
 {
      plan *cldr = (plan *) 0;
      plan *cldr0 = (plan *) 0;
-     problem *cldp = 0;
      R *buf = (R *) 0;
 
-     cldp =
-          X(mkproblem_rdft_1_d)(
-               X(mktensor_1d)(r, ios, ios),
-               X(mktensor_1d)(1, 0, 0),
-	       O, O, kind);
-     cldr0 = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cldr0)
-          goto nada;
+     cldr0 = X(mkplan_d)(plnr, 
+			 X(mkproblem_rdft_1_d)(X(mktensor_1d)(r, ios, ios),
+					       X(mktensor_1d)(1, 0, 0),
+					       O, O, kind));
+     if (!cldr0) goto nada;
 
      /* initial allocation for the purpose of planning */
      buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
 
-     cldp =
-          X(mkproblem_dft_d)(
-               X(mktensor_1d)(r - 1, 2, 2),
-               X(mktensor_1d)(1, 0, 0),
-               buf, buf + 1, buf, buf + 1);
-     cldr = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cldr)
-          goto nada;
+     cldr = X(mkplan_d)(plnr, X(mkproblem_dft_d)(X(mktensor_1d)(r - 1, 2, 2),
+						 X(mktensor_1d)(1, 0, 0),
+						 buf, buf + 1, buf, buf + 1));
+     if (!cldr) goto nada;
 
      X(free)(buf);
 
@@ -462,16 +452,12 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
      r = X(first_divisor)(n);
      m = n / r;
 
-     {
-	  problem *cldp;
-	  cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, r * is, os),
-				     X(mktensor_1d)(r, is, m * os),
-				     p->I, p->O, p->kind);
-	  cld = MKPLAN(plnr, cldp);
-	  X(problem_destroy)(cldp);
-	  if (!cld)
-	       goto nada;
-     }
+
+     cld = X(mkplan_d)(plnr, 
+		       X(mkproblem_rdft_d)(X(mktensor_1d)(m, r * is, os),
+					   X(mktensor_1d)(r, is, m * os),
+					   p->I, p->O, p->kind));
+     if (!cld) goto nada;
 
      pln = MKPLAN_RDFT(P, &padt, apply_dit);
      if (!mkP(pln, r, p->O, os*m, p->kind[0], plnr))
@@ -518,20 +504,14 @@ static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
      r = X(first_divisor)(n);
      m = n / r;
 
-     {
-	  problem *cldp;
-	  cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, is, r * os),
-				     X(mktensor_1d)(r, m * is, os),
-				     p->I, p->O, p->kind);
-	  cld = MKPLAN(plnr, cldp);
-	  X(problem_destroy)(cldp);
-	  if (!cld)
-	       goto nada;
-     }
+     cld = X(mkplan_d)(plnr,
+		       X(mkproblem_rdft_d)(X(mktensor_1d)(m, is, r * os),
+					   X(mktensor_1d)(r, m * is, os),
+					   p->I, p->O, p->kind));
+     if (!cld) goto nada;
 
      pln = MKPLAN_RDFT(P, &padt, apply_dif);
-     if (!mkP(pln, r, p->I, is*m, p->kind[0], plnr))
-	  goto nada;
+     if (!mkP(pln, r, p->I, is*m, p->kind[0], plnr)) goto nada;
 
      pln->ios = is*m;
      pln->os = is;

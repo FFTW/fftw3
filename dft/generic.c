@@ -160,16 +160,11 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      r = X(first_divisor)(n);
      m = n / r;
 
-     {
-	  problem *cldp;
-	  cldp = X(mkproblem_dft_d)(X(mktensor_1d)(m, r * is, os),
-				    X(mktensor_1d)(r, is, m * os),
-				    p->ri, p->ii, p->ro, p->io);
-	  cld = MKPLAN(plnr, cldp);
-	  X(problem_destroy)(cldp);
-	  if (!cld)
-	       goto nada;
-     }
+     cld = X(mkplan_d)(plnr, 
+		       X(mkproblem_dft_d)(X(mktensor_1d)(m, r * is, os),
+					  X(mktensor_1d)(r, is, m * os),
+					  p->ri, p->ii, p->ro, p->io));
+     if (!cld) goto nada;
 
      pln = MKPLAN_DFT(P, &padt, apply);
 

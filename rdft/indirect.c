@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.18 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: indirect.c,v 1.19 2002-09-22 15:08:57 athena Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
@@ -186,7 +186,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p = (const problem_rdft *) p_;
      const S *ego = (const S *) ego_;
      P *pln;
-     problem *cldp;
      plan *cld = 0, *cldcpy = 0;
 
      static const plan_adt padt = {
@@ -200,21 +199,17 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      {
 	  tensor *sz_real = X(rdft_real_sz)(p->kind, p->sz);
-	  cldp = X(mkproblem_rdft_d)(X(mktensor)(0),
-				     X(tensor_append)(p->vecsz, sz_real),
-				     p->I, p->O, (rdft_kind *) 0);
+	  cldcpy = X(mkplan_d)(plnr, 
+			       X(mkproblem_rdft_d)(
+				    X(mktensor)(0),
+				    X(tensor_append)(p->vecsz, sz_real),
+				    p->I, p->O, (rdft_kind *) 0));
 	  X(tensor_destroy)(sz_real);
      }
-     cldcpy = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cldcpy)
-          goto nada;
+     if (!cldcpy) goto nada;
 
-     cldp = ego->adt->mkcld(p);
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld)
-          goto nada;
+     cld = X(mkplan_d)(plnr, ego->adt->mkcld(p));
+     if (!cld) goto nada;
 
      pln = MKPLAN_RDFT(P, &padt, ego->adt->apply);
      pln->cld = cld;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.14 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.15 2002-09-22 15:08:57 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -125,7 +125,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      P *pln;
      const problem_dft *p;
-     problem *cldp;
      plan *cld;
 
      static const plan_adt padt = {
@@ -141,13 +140,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      {
 	  tensor *ri_vec = X(mktensor_1d)(2, p->ii - p->ri, p->io - p->ro);
 	  tensor *cld_vec = X(tensor_append)(ri_vec, p->vecsz);
-	  cldp = X(mkproblem_rdft_1)(p->sz, cld_vec, p->ri, p->ro, R2HC);
+	  cld = X(mkplan_d)(plnr, 
+			    X(mkproblem_rdft_1)(p->sz, cld_vec, 
+						p->ri, p->ro, R2HC));
 	  X(tensor_destroy)(ri_vec); X(tensor_destroy)(cld_vec);
      }
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld)
-          return (plan *)0;
+     if (!cld) return (plan *)0;
 
      pln = MKPLAN_DFT(P, &padt, apply);
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.15 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: hc2hc.c,v 1.16 2002-09-22 15:08:57 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -94,9 +94,9 @@ static const plan_adt padt =
 };
 
 plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
-                       const problem *p_,
-                       planner *plnr,
-                       const hc2hcadt *adt)
+			   const problem *p_,
+			   planner *plnr,
+			   const hc2hcadt *adt)
 {
      plan_hc2hc *pln;
      plan *cld = 0, *cld0 = 0, *cldm = 0;
@@ -117,20 +117,14 @@ plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
 
      adt->mkcldrn(ego, p, &cldp, &cld0p, &cldmp);
 
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp); cldp = 0;
-     if (!cld)
-	  goto nada;
+     cld = X(mkplan_d)(plnr, cldp); cldp = 0;
+     if (!cld) goto nada;
 
-     cld0 = MKPLAN(plnr, cld0p);
-     X(problem_destroy)(cld0p); cld0p = 0;
-     if (!cld0)
-	  goto nada;
+     cld0 = X(mkplan_d)(plnr, cld0p); cld0p = 0;
+     if (!cld0) goto nada;
 
-     cldm = MKPLAN(plnr, cldmp);
-     X(problem_destroy)(cldmp); cldmp = 0;
-     if (!cldm)
-	  goto nada;
+     cldm = X(mkplan_d)(plnr, cldmp); cldmp = 0;
+     if (!cldm) goto nada;
 
      A(adt->pln_size >= sizeof(plan_hc2hc));
      pln = (plan_hc2hc *) X(mkplan_rdft)(adt->pln_size, &padt, adt->apply);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.16 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: buffered2.c,v 1.17 2002-09-22 15:08:57 athena Exp $ */
 
 #include "rdft.h"
 
@@ -369,10 +369,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 		    X(mktensor_1d)(nbuf, bufdist, ovs),
 		    bufs, p->r, &p->kind);
      }
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld)
-          goto nada;
+     if (!(cld = X(mkplan_d)(plnr, cldp))) goto nada;
 
      /* plan the leftover transforms (cldrest): */
      if (R2HC_KINDP(p->kind))
@@ -387,10 +384,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 		    X(mktensor_1d)(n, 1, p->sz->dims[0].os),
 		    X(mktensor_1d)(vl % nbuf, bufdist, ovs),
 		    bufs, p->r, &p->kind);
-     cldrest = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cldrest)
-          goto nada;
+     if (!(cldrest = X(mkplan_d)(plnr, cldp))) goto nada;
 
      /* deallocate buffers, let apply() allocate them for real */
      X(free)(bufs);

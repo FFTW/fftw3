@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.9 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.10 2002-09-22 15:08:57 athena Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
 
@@ -156,7 +156,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      plan *cld1 = 0, *cld2 = 0;
      tensor *sz1, *rsz1, *sz2, *vecszi, *sz2i, *rsz2i;
-     problem *cldp;
      uint spltrnk;
 
      static const plan_adt padt = {
@@ -173,21 +172,18 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      rsz1 = X(rdft_real_sz)(p->kind, sz1);
      rsz2i = X(rdft_real_sz)(p->kind + spltrnk, sz2i);
 
-     cldp = X(mkproblem_rdft_d)(X(tensor_copy)(sz2),
-				X(tensor_append)(p->vecsz, rsz1),
-				p->I, p->O, p->kind + spltrnk);
-     cld1 = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld1)
-          goto nada;
+     cld1 = X(mkplan_d)(plnr, 
+			X(mkproblem_rdft_d)(X(tensor_copy)(sz2),
+					    X(tensor_append)(p->vecsz, rsz1),
+					    p->I, p->O, p->kind + spltrnk));
+     if (!cld1) goto nada;
 
-     cldp = X(mkproblem_rdft_d)(X(tensor_copy_inplace)(sz1, INPLACE_OS),
-				X(tensor_append)(vecszi, rsz2i),
-				p->O, p->O, p->kind);
-     cld2 = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld2)
-          goto nada;
+     cld2 = X(mkplan_d)(plnr, 
+			X(mkproblem_rdft_d)(
+			     X(tensor_copy_inplace)(sz1, INPLACE_OS),
+			     X(tensor_append)(vecszi, rsz2i),
+			     p->O, p->O, p->kind));
+     if (!cld2) goto nada;
 
      pln = MKPLAN_RDFT(P, &padt, apply);
 

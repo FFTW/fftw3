@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.32 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: buffered.c,v 1.33 2002-09-22 15:08:57 athena Exp $ */
 
 #include "dft.h"
 
@@ -180,14 +180,11 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 
 static int applicable(const problem *p_, const S *ego, const planner *plnr)
 {
-     const problem_dft *p;
-     UNUSED(plnr);
-
      if (NO_BUFFERINGP(plnr)) return 0;
      if (!applicable0(p_, ego, plnr)) return 0;
 
-     p = (const problem_dft *) p_;
      if (NO_UGLYP(plnr)) {
+	  const problem_dft *p = (const problem_dft *) p_;
 	  if (p->ri != p->ro) return 0;
 	  if (toobig(p->sz->dims[0].n, ego)) return 0;
      }
@@ -203,7 +200,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld = (plan *) 0;
      plan *cldcpy = (plan *) 0;
      plan *cldrest = (plan *) 0;
-     problem *cldp = 0;
      const problem_dft *p = (const problem_dft *) p_;
      R *bufs = (R *) 0;
      uint nbuf = 0, bufdist, n, vl;
@@ -212,7 +208,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
      };
-
 
      if (!applicable(p_, ego, plnr))
           goto nada;
@@ -251,27 +246,21 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) fftw_malloc(sizeof(R) * nbuf * bufdist * 2, BUFFERS);
 
-     cldp =
-          X(mkproblem_dft_d)(
-               X(mktensor_1d)(n, p->sz->dims[0].is, 2),
-               X(mktensor_1d)(nbuf, ivs, bufdist * 2),
-               p->ri, p->ii, bufs + roffset, bufs + ioffset);
-
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
+     cld = X(mkplan_d)(plnr,
+		       X(mkproblem_dft_d)(
+			    X(mktensor_1d)(n, p->sz->dims[0].is, 2),
+			    X(mktensor_1d)(nbuf, ivs, bufdist * 2),
+			    p->ri, p->ii, bufs + roffset, bufs + ioffset));
      if (!cld)
           goto nada;
 
      /* copying back from the buffer is a rank-0 transform: */
-     cldp =
-          X(mkproblem_dft_d)(
-               X(mktensor)(0),
-               X(mktensor_2d)(nbuf, bufdist * 2, ovs,
-                              n, 2, p->sz->dims[0].os),
-               bufs + roffset, bufs + ioffset, p->ro, p->io);
-
-     cldcpy = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
+     cldcpy = X(mkplan_d)(plnr,
+			  X(mkproblem_dft_d)(
+			       X(mktensor)(0),
+			       X(mktensor_2d)(nbuf, bufdist * 2, ovs,
+					      n, 2, p->sz->dims[0].os),
+			       bufs + roffset, bufs + ioffset, p->ro, p->io));
      if (!cldcpy)
           goto nada;
 
@@ -280,13 +269,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      bufs = 0;
 
      /* plan the leftover transforms (cldrest): */
-     cldp =
-          X(mkproblem_dft_d)(
-               X(tensor_copy)(p->sz),
-               X(mktensor_1d)(vl % nbuf, ivs, ovs),
-               p->ri, p->ii, p->ro, p->io);
-     cldrest = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
+     cldrest = X(mkplan_d)(plnr, 
+			   X(mkproblem_dft_d)(
+				X(tensor_copy)(p->sz),
+				X(mktensor_1d)(vl % nbuf, ivs, ovs),
+				p->ri, p->ii, p->ro, p->io));
      if (!cldrest)
           goto nada;
 

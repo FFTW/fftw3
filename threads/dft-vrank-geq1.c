@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-vrank-geq1.c,v 1.6 2002-09-21 22:04:05 athena Exp $ */
+/* $Id: dft-vrank-geq1.c,v 1.7 2002-09-22 15:08:57 athena Exp $ */
 
 #include "threads.h"
 
@@ -114,9 +114,9 @@ static int applicable0(const solver *ego_, const problem *p_,
           const problem_dft *p = (const problem_dft *) p_;
 
           return (1
-                  && FINITE_RNK(p->vecsz.rnk)
-                  && p->vecsz.rnk > 0
-                  && pickdim(ego, &p->vecsz, p->ri != p->ro, dp)
+                  && FINITE_RNK(p->vecsz->rnk)
+                  && p->vecsz->rnk > 0
+                  && pickdim(ego, p->vecsz, p->ri != p->ro, dp)
 	       );
      }
 
@@ -148,7 +148,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan **cldrn = (plan **) 0;
      uint i, block_size, nthr;
      int its, ots;
-     tensor vecsz = {0, 0};
+     tensor *vecsz = 0;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -157,7 +157,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(ego_, p_, plnr, &vdim))
           return (plan *) 0;
      p = (const problem_dft *) p_;
-     d = p->vecsz.dims + vdim;
+     d = p->vecsz->dims + vdim;
 
      block_size = (d->n + plnr->nthr - 1) / plnr->nthr;
      nthr = (d->n + block_size - 1) / block_size;
@@ -170,15 +170,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      
      vecsz = X(tensor_copy)(p->vecsz);
      for (i = 0; i < nthr; ++i) {
-	  vecsz.dims[vdim].n =
+	  vecsz->dims[vdim].n =
 	       (i == nthr - 1) ? (d->n - i*block_size) : block_size;
-	  cldp = X(mkproblem_dft)(&p->sz, &vecsz,
+	  cldp = X(mkproblem_dft)(p->sz, vecsz,
 				  p->ri + i*its, p->ii + i*its, 
 				  p->ro + i*ots, p->io + i*ots);
-	  cldrn[i] = MKPLAN(plnr, cldp);
-	  X(problem_destroy)(cldp);
-	  if (!cldrn[i])
-	       goto nada;
+	  cldrn[i] = X(mkplan_d)(plnr, cldp);
+	  if (!cldrn[i]) goto nada;
      }
      X(tensor_destroy)(vecsz);
 

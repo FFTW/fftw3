@@ -245,9 +245,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld1 = (plan *) 0;
      plan *cld2 = (plan *) 0;
      plan *cld_omega = (plan *) 0;
-     problem *cldp = 0;
      R *buf = (R *) 0;
      R *O;
+     problem *cldp;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -264,15 +264,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      buf = (R *) fftw_malloc(sizeof(R) * (n - 1), BUFFERS);
 
-     cldp =
-          X(mkproblem_rdft_1_d)(
-               X(mktensor_1d)(n - 1, 1, os),
-               X(mktensor_1d)(1, 0, 0),
-               buf, O + os, R2HC);
-     cld1 = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld1)
-          goto nada;
+     cld1 = X(mkplan_d)(plnr, 
+			X(mkproblem_rdft_1_d)(X(mktensor_1d)(n - 1, 1, os),
+					      X(mktensor_1d)(1, 0, 0),
+					      buf, O + os, R2HC));
+     if (!cld1) goto nada;
 
      cldp =
           X(mkproblem_rdft_1_d)(
@@ -285,23 +281,16 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	       HC2R
 #endif
 	       );
-     cld2 = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld2)
-          goto nada;
+     if (!(cld2 = X(mkplan_d)(plnr, cldp))) goto nada;
 
 
      /* plan for omega */
      plnr->planner_flags |= ESTIMATE;
-     cldp =
-          X(mkproblem_rdft_1_d)(
-               X(mktensor_1d)(n - 1, 1, 1),
-               X(mktensor_1d)(1, 0, 0),
-	       buf, buf, R2HC);
-     cld_omega = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld_omega)
-          goto nada;
+     cld_omega = X(mkplan_d)(plnr, 
+			     X(mkproblem_rdft_1_d)(X(mktensor_1d)(n - 1, 1, 1),
+						   X(mktensor_1d)(1, 0, 0),
+						   buf, buf, R2HC));
+     if (!cld_omega) goto nada;
 
      /* deallocate buffers; let awake() or apply() allocate them for real */
      X(free)(buf);

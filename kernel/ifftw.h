@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.148 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: ifftw.h,v 1.149 2002-09-22 15:08:57 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -60,7 +60,6 @@ typedef fftw_real R;
 /* get rid of that object-oriented stink: */
 #define DESTROY(thing) ((thing)->adt->destroy)(thing)
 #define REGISTER_SOLVER(p, s) ((p)->adt->register_solver)((p), (s))
-#define MKPLAN(plnr, prblm) ((plnr)->adt->mkplan)((plnr), (prblm))
 
 #define STRINGIZEx(x) #x
 #define STRINGIZE(x) STRINGIZEx(x)
@@ -527,6 +526,9 @@ void X(planner_dump)(planner *ego, int verbose);
 	  what;						\
      }							\
 }
+
+/* make plan, destroy problem */
+plan *X(mkplan_d)(planner *ego, problem *p);
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.25 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: ct.c,v 1.26 2002-09-22 15:08:57 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -89,7 +89,6 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
      plan_ct *pln;
      plan *cld;
      uint n, r, m;
-     problem *cldp;
      iodim *d;
      const problem_dft *p;
      const ct_desc *e = ego->desc;
@@ -103,9 +102,7 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
      r = e->radix;
      m = n / r;
 
-     cldp = adt->mkcld(ego, p);
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
+     cld = X(mkplan_d)(plnr, adt->mkcld(ego, p));
 
      if (!cld)
           return (plan *) 0;

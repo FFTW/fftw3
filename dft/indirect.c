@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.27 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: indirect.c,v 1.28 2002-09-22 15:08:57 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -183,7 +183,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_dft *p = (const problem_dft *) p_;
      const S *ego = (const S *) ego_;
      P *pln;
-     problem *cldp;
      plan *cld = 0, *cldcpy = 0;
 
      static const plan_adt padt = {
@@ -195,19 +194,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      plnr->planner_flags |= NO_BUFFERING;
 
-     cldp = X(mkproblem_dft_d)(X(mktensor)(0),
-                               X(tensor_append)(p->vecsz, p->sz),
-                               p->ri, p->ii, p->ro, p->io);
-     cldcpy = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cldcpy)
-          goto nada;
+     cldcpy = X(mkplan_d)(plnr, 
+			  X(mkproblem_dft_d)(X(mktensor)(0),
+					     X(tensor_append)(p->vecsz, p->sz),
+					     p->ri, p->ii, p->ro, p->io));
+     if (!cldcpy) goto nada;
 
-     cldp = ego->adt->mkcld(p);
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld)
-          goto nada;
+     cld = X(mkplan_d)(plnr, ego->adt->mkcld(p));
+     if (!cld) goto nada;
 
      pln = MKPLAN_DFT(P, &padt, ego->adt->apply);
      pln->cld = cld;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.11 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.12 2002-09-22 15:08:57 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -242,8 +242,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(tensor_destroy)(sz);
      }
 
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
+     cld = X(mkplan_d)(plnr, cldp);
      X(free)(buf);
      if (!cld)
           return (plan *)0;
