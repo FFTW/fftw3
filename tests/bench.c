@@ -45,12 +45,15 @@ extern void uninstall_hook(void);  /* in hook.c */
 
 void useropt(const char *arg)
 {
+     int x;
+
      if (!strcmp(arg, "patient")) the_flags |= FFTW_PATIENT;
      else if (!strcmp(arg, "estimate")) the_flags |= FFTW_ESTIMATE;
      else if (!strcmp(arg, "exhaustive")) the_flags |= FFTW_EXHAUSTIVE;
      else if (!strcmp(arg, "unaligned")) the_flags |= FFTW_UNALIGNED;
      else if (!strcmp(arg, "paranoid")) paranoid = 1;
      else if (!strcmp(arg, "nowisdom")) usewisdom = 0;
+     else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
 
      else fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);
 }
@@ -63,6 +66,11 @@ void rdwisdom(void)
 
      if (!usewisdom) return;
      if (havewisdom) return;
+
+#ifdef HAVE_THREADS
+     BENCH_ASSERT(FFTW(init_threads)());
+     FFTW(plan_with_nthreads)(nthreads);
+#endif
 
      timer_start();
      if ((f = fopen(wisdat, "r"))) {
@@ -615,10 +623,6 @@ void setup(bench_problem *p)
      if (p->kind == PROBLEM_REAL && p->sign > 0 && !p->in_place)
 	  p->destroy_input = 1; /* default for c2r out-of-place transforms */
 
-#ifdef HAVE_THREADS
-     BENCH_ASSERT(FFTW(init_threads)());
-     FFTW(plan_with_nthreads)(nthreads);
-#endif
      install_hook();
 
      rdwisdom();
