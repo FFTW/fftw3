@@ -198,7 +198,7 @@ routines.
 
 \question 18apr:fma What's the difference between the fma and the non-fma versions?
 
-The fma version tries to exploit the fused multiply-add instruction
+The fma version tries to exploit the fused multiply-add instructions
 implemented in many processors such as PowerPC, ia-64, and MIPS.
 The two FFTW packages are otherwise identical.
 
