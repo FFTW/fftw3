@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.4 2002-08-22 15:29:29 athena Exp $ */
+/* $Id: verify-lib.c,v 1.5 2002-09-02 01:30:58 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -199,7 +199,8 @@ double acmp(C *a, C *b, uint n, const char *test, double tol)
 	  {
 	       uint i;
 	       for (i = 0; i < n; ++i) 
-		    printf("%8d %16.12f %16.12f   %16.12f %16.12f\n", i, 
+		    fprintf(stderr,
+			    "%8d %16.12f %16.12f   %16.12f %16.12f\n", i, 
 			   (double) a[i].r, (double) a[i].i,
 			   (double) b[i].r, (double) b[i].i);
 	  }
