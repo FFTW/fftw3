@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.24 2003-04-08 20:48:08 stevenj Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.25 2005-01-15 06:41:58 stevenj Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing.
 
@@ -36,7 +36,9 @@
    similar numerical difficulties seems to be the direct adaptation of
    the Cooley-Tukey decomposition for symmetric data, but this would
    require a whole new set of codelets and it's not clear that it's
-   worth it at this point. */
+   worth it at this point.  However, we did implement the latter
+   algorithm for the specific case of odd n (logically adapting the
+   split-radix algorithm); see reodft00e-splitradix.c. */
 
 #include "reodft.h"
 

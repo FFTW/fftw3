@@ -1,0 +1,337 @@
+/*
+ * Copyright (c) 2005 Matteo Frigo
+ * Copyright (c) 2005 Massachusetts Institute of Technology
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+/* $Id: reodft00e-splitradix.c,v 1.1 2005-01-15 06:41:58 stevenj Exp $ */
+
+/* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
+   R{E,O}DFT00 problem and an RDFT problem of half the length.
+
+   This works by "logically" expanding the array to a real-even/odd DFT of
+   length 2n-/+2 and then applying the split-radix algorithm.
+
+   In this way, we can avoid having to pad to twice the length
+   (ala redft00-r2hc-pad), saving a factor of ~2 for n=2^m+/-1,
+   but don't incur the accuracy loss that the "ordinary" algorithm
+   sacrifices (ala redft00-r2hc.c).
+*/
+
+#include "reodft.h"
+
+typedef struct {
+     solver super;
+} S;
+
+typedef struct {
+     plan_rdft super;
+     plan *clde, *cldo;
+     twid *td;
+     int is, os;
+     int n;
+     int vl;
+     int ivs, ovs;
+} P;
+
+/* redft00 */
+static void apply_e(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     int is = ego->is, os = ego->os;
+     int i, j, n = ego->n + 1, n2 = (n-1)/2;
+     int iv, vl = ego->vl;
+     int ivs = ego->ivs, ovs = ego->ovs;
+     R *W = ego->td->W - 2;
+     R *buf, *buf2;
+
+     buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
+     buf2 = buf + n2;
+
+     for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
+	  /* do size (n+1)/2 redft00 of the even-indexed elements,
+	     writing to buf2: */
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->clde;
+	       cld->apply((plan *) cld, I, buf2);
+	  }
+
+	  /* do size (n-1)/2 r2hc transform of odd-indexed elements
+	     with stride 4, "wrapping around" end of array with even
+	     boundary conditions */
+	  for (j = 0, i = 1; i < n; i += 4)
+	       buf[j++] = I[is * i];
+	  for (i = 2*n-2-i; i > 0; i -= 4)
+	       buf[j++] = I[is * i];
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->cldo;
+	       cld->apply((plan *) cld, buf, buf);
+	  }
+
+	  /* combine the results with the twiddle factors to get output */
+	  { /* DC element */
+	       E b20 = buf2[0], b0 = K(2.0) * buf[0];
+	       O[0] = b20 + b0;
+	       O[2*(n2*os)] = b20 - b0;
+	       O[n2*os] = buf2[n2];
+	  }
+	  for (i = 1; i < n2 - i; ++i) {
+	       E ap, am, br, bi, wr, wi, wbr, wbi;
+	       br = buf[i];
+	       bi = buf[n2 - i];
+	       wr = W[2*i];
+	       wi = W[2*i+1];
+#if FFT_SIGN == -1
+	       wbr = K(2.0) * (wr*br + wi*bi);
+	       wbi = K(2.0) * (wr*bi - wi*br);
+#else
+	       wbr = K(2.0) * (wr*br - wi*bi);
+	       wbi = K(2.0) * (wr*bi + wi*br);
+#endif
+	       ap = buf2[i];
+	       O[i*os] = ap + wbr;
+	       O[(2*n2 - i)*os] = ap - wbr;
+	       am = buf2[n2 - i];
+#if FFT_SIGN == -1
+	       O[(n2 - i)*os] = am - wbi;
+	       O[(n2 + i)*os] = am + wbi;
+#else
+	       O[(n2 - i)*os] = am + wbi;
+	       O[(n2 + i)*os] = am - wbi;
+#endif
+	  }
+	  if (i == n2 - i) { /* Nyquist element */
+	       E ap, wbr;
+	       wbr = K(2.0) * (W[2*i] * buf[i]);
+	       ap = buf2[i];
+	       O[i*os] = ap + wbr;
+	       O[(2*n2 - i)*os] = ap - wbr;
+	  }
+     }
+
+     X(ifree)(buf);
+}
+
+/* rodft00 */
+static void apply_o(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     int is = ego->is, os = ego->os;
+     int i, j, n = ego->n - 1, n2 = (n+1)/2;
+     int iv, vl = ego->vl;
+     int ivs = ego->ivs, ovs = ego->ovs;
+     R *W = ego->td->W - 2;
+     R *buf, *buf2;
+
+     buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
+     buf2 = buf + n2;
+
+     for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
+	  /* do size (n-1)/2 rodft00 of the odd-indexed elements,
+	     writing to buf2: */
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->clde;
+	       cld->apply((plan *) cld, I + is, buf2);
+	  }
+
+	  /* do size (n+1)/2 r2hc transform of even-indexed elements
+	     with stride 4, "wrapping around" end of array with odd
+	     boundary conditions */
+	  for (j = 0, i = 0; i < n; i += 4)
+	       buf[j++] = I[is * i];
+	  for (i = 2*n-i; i > 0; i -= 4)
+	       buf[j++] = -I[is * i];
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->cldo;
+	       cld->apply((plan *) cld, buf, buf);
+	  }
+
+	  /* combine the results with the twiddle factors to get output */
+	  O[(n2-1)*os] = K(2.0) * buf[0];
+	  for (i = 1; i < n2 - i; ++i) {
+	       E ap, am, br, bi, wr, wi, wbr, wbi;
+	       br = buf[i];
+	       bi = buf[n2 - i];
+	       wr = W[2*i];
+	       wi = W[2*i+1];
+#if FFT_SIGN == -1
+	       wbr = K(2.0) * (wr*br + wi*bi);
+	       wbi = K(2.0) * (wi*br - wr*bi);
+#else
+	       wbr = K(2.0) * (wr*br - wi*bi);
+	       wbi = K(2.0) * (wr*bi + wi*br);
+#endif
+	       ap = buf2[i-1];
+	       O[(i-1)*os] = wbi + ap;
+	       O[(2*n2-1 - i)*os] = wbi - ap;
+	       am = buf2[n2-1 - i];
+#if FFT_SIGN == -1
+	       O[(n2-1 - i)*os] = wbr + am;
+	       O[(n2-1 + i)*os] = wbr - am;
+#else
+	       O[(n2-1 - i)*os] = wbr + am;
+	       O[(n2-1 + i)*os] = wbr - am;
+#endif
+	  }
+	  if (i == n2 - i) { /* Nyquist element */
+	       E ap, wbi;
+	       wbi = K(2.0) * (W[2*i+1] * buf[i]);
+	       ap = buf2[(i-1)];
+	       O[(i-1)*os] = wbi + ap;
+	       O[(2*n2-1 - i)*os] = wbi - ap;
+	  }
+     }
+
+     X(ifree)(buf);
+}
+
+static void awake(plan *ego_, int flg)
+{
+     P *ego = (P *) ego_;
+     static const tw_instr reodft00e_tw[] = {
+          { TW_COS, 1, 1 },
+          { TW_SIN, 1, 1 },
+          { TW_NEXT, 1, 0 }
+     };
+
+     AWAKE(ego->clde, flg);
+     AWAKE(ego->cldo, flg);
+     X(twiddle_awake)(flg, &ego->td, reodft00e_tw, 2*ego->n, 1, ego->n/4);
+}
+
+static void destroy(plan *ego_)
+{
+     P *ego = (P *) ego_;
+     X(plan_destroy_internal)(ego->cldo);
+     X(plan_destroy_internal)(ego->clde);
+}
+
+static void print(const plan *ego_, printer *p)
+{
+     const P *ego = (const P *) ego_;
+     if (ego->super.apply == apply_e)
+	  p->print(p, "(redft00e-splitradix-%d%v%(%p%)%(%p%))", 
+		   ego->n + 1, ego->vl, ego->clde, ego->cldo);
+     else
+	  p->print(p, "(rodft00e-splitradix-%d%v%(%p%)%(%p%))", 
+		   ego->n - 1, ego->vl, ego->clde, ego->cldo);
+}
+
+static int applicable0(const solver *ego_, const problem *p_)
+{
+     UNUSED(ego_);
+     if (RDFTP(p_)) {
+          const problem_rdft *p = (const problem_rdft *) p_;
+          return (1
+		  && p->sz->rnk == 1
+		  && p->vecsz->rnk <= 1
+		  && ((p->kind[0] == REDFT00 && p->sz->dims[0].n > 1)
+		      || p->kind[0] == RODFT00)
+		  && p->sz->dims[0].n % 2  /* odd: 4 divides "logical" DFT */
+	       );
+     }
+
+     return 0;
+}
+
+static int applicable(const solver *ego, const problem *p, const planner *plnr)
+{
+     return (!NO_UGLYP(plnr) && applicable0(ego, p));
+}
+
+static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
+{
+     P *pln;
+     const problem_rdft *p;
+     plan *clde, *cldo;
+     R *buf;
+     int n, n0;
+     opcnt ops;
+
+     static const plan_adt padt = {
+	  X(rdft_solve), awake, print, destroy
+     };
+
+     if (!applicable(ego_, p_, plnr))
+          return (plan *)0;
+
+     p = (const problem_rdft *) p_;
+
+     n = (n0 = p->sz->dims[0].n) + (p->kind[0] == REDFT00 ? -1 : 1);
+     A(n > 0 && n % 2 == 0);
+     buf = (R *) MALLOC(sizeof(R) * n0, BUFFERS);
+
+     clde = X(mkplan_d)(plnr, X(mkproblem_rdft_1_d)(
+			     X(mktensor_1d)(n0-n/2, 2*p->sz->dims[0].is, 1), 
+			     X(mktensor_0d)(), 
+			     TAINT(p->I 
+				   + p->sz->dims[0].is * (p->kind[0]==RODFT00),
+				   p->vecsz->rnk ? p->vecsz->dims[0].is : 0),
+			     buf + n/2, p->kind[0]));
+     if (!clde) {
+	  X(ifree)(buf);
+          return (plan *)0;
+     }
+
+     cldo = X(mkplan_d)(plnr, X(mkproblem_rdft_1_d)(
+			     X(mktensor_1d)(n/2, 1, 1), 
+			     X(mktensor_0d)(), 
+			     buf, buf, R2HC));
+     X(ifree)(buf);
+     if (!cldo)
+          return (plan *)0;
+
+     pln = MKPLAN_RDFT(P, &padt, p->kind[0] == REDFT00 ? apply_e : apply_o);
+
+     pln->n = n;
+     pln->is = p->sz->dims[0].is;
+     pln->os = p->sz->dims[0].os;
+     pln->clde = clde;
+     pln->cldo = cldo;
+     pln->td = 0;
+
+     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
+     
+     X(ops_zero)(&ops);
+     ops.other = n/2;
+     ops.add = (p->kind[0]==REDFT00 ? 2:0) + (n/2-1)/2 * 6 + ((n/2)%2==0) * 2;
+     ops.mul = 1 + (n/2-1)/2 * 6 + ((n/2)%2==0) * 2;
+
+     /* tweak ops.other so that r2hc-pad is used for small sizes, which
+	seems to be a lot faster on my machine: */
+     ops.other += 256;
+
+     X(ops_zero)(&pln->super.super.ops);
+     X(ops_madd2)(pln->vl, &ops, &pln->super.super.ops);
+     X(ops_madd2)(pln->vl, &clde->ops, &pln->super.super.ops);
+     X(ops_madd2)(pln->vl, &cldo->ops, &pln->super.super.ops);
+
+     return &(pln->super.super);
+}
+
+/* constructor */
+static solver *mksolver(void)
+{
+     static const solver_adt sadt = { mkplan };
+     S *slv = MKSOLVER(S, &sadt);
+     return &(slv->super);
+}
+
+void X(reodft00e_splitradix_register)(planner *p)
+{
+     REGISTER_SOLVER(p, mksolver());
+}
