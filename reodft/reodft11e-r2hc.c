@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.21 2003-02-26 01:42:08 stevenj Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.22 2003-02-26 22:40:54 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -29,7 +29,7 @@
    to re-express as an REDFT01 (DCT-III) problem.
 
    NOTE: We no longer use this algorithm, because it turns out to suffer
-   a catastrophic loss of precision for certain inputs, apparently because
+   a catastrophic loss of accuracy for certain inputs, apparently because
    its post-processing multiplies the output by a cosine.  Near the zero
    of the cosine, the REDFT01 must produce a near-singular output.
 */
