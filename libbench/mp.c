@@ -381,14 +381,14 @@ static void sin2pi(REAL m, REAL n, N a)
 }
 
 /* FFT stuff */
-static void bitrev(unsigned int n, bench_complex *a)
+static void bitrev(unsigned int n, N *a)
 {
      unsigned int i, j, m;
      for (i = j = 0; i < n - 1; ++i) {
 	  if (i < j) {
-	       bench_real t;
-	       t = c_re(a[i]); c_re(a[i]) = c_re(a[j]); c_re(a[j]) = t;
-	       t = c_im(a[i]); c_im(a[i]) = c_im(a[j]); c_im(a[j]) = t;
+	       N t;
+	       cpy(a[2*i], t); cpy(a[2*j], a[2*i]); cpy(t, a[2*j]);
+	       cpy(a[2*i+1], t); cpy(a[2*j+1], a[2*i+1]); cpy(t, a[2*j+1]);
 	  }
 
 	  /* bit reversed counter */
@@ -400,6 +400,7 @@ static void fft0(unsigned int n, N *a, int sign)
 {
      unsigned int i, j, k;
 
+     bitrev(n, a);
      for (i = 1; i < n; i = 2 * i) {
 	  for (j = 0; j < i; ++j) {
 	       N wr, wi;
@@ -420,12 +421,108 @@ static void fft0(unsigned int n, N *a, int sign)
      }
 }
 
-void mfft(unsigned int n, bench_complex *a, int sign)
+/* a[2*k]+i*a[2*k+1] = exp(2*pi*i*k^2/(2*n)) */
+static void bluestein_sequence(unsigned int n, N *a)
+{
+     unsigned int k, ksq, n2 = 2 * n;
+
+     ksq = 1; /* (-1)^2 */
+     for (k = 0; k < n; ++k) {
+	  /* careful with overflow */
+	  ksq = ksq + 2*k - 1; while (ksq > n2) ksq -= n2;
+	  cos2pi(ksq, n2, a[2*k]);
+	  sin2pi(ksq, n2, a[2*k+1]);
+     }
+}
+
+static unsigned int pow2_atleast(unsigned int x)
+{
+     unsigned int h;
+     for (h = 1; h < x; h = 2 * h)
+	  ;
+     return h;
+}
+
+/* (r0 + i i0)(r1 + i i1) */
+static void cmul(N r0, N i0, N r1, N i1, N r2, N i2)
+{
+     N s, t, q;
+     mul(r0, r1, s);
+     mul(i0, i1, t);
+     sub(s, t, q);
+     mul(r0, i1, s);
+     mul(i0, r1, t);
+     add(s, t, i2);
+     cpy(q, r2);
+}
+
+/* (r0 - i i0)(r1 + i i1) */
+static void cmulj(N r0, N i0, N r1, N i1, N r2, N i2)
+{
+     N s, t, q;
+     mul(r0, r1, s);
+     mul(i0, i1, t);
+     add(s, t, q);
+     mul(r0, i1, s);
+     mul(i0, r1, t);
+     sub(s, t, i2);
+     cpy(q, r2);
+}
+
+static void bluestein(unsigned int n, bench_complex *a)
+{
+     unsigned int nb = pow2_atleast(3 * n);
+     REAL nbinv = 1.0 / nb; /* exact because nb = 2^k */
+     N *w = (N *)bench_malloc(2 * n * sizeof(N));
+     N *y = (N *)bench_malloc(2 * nb * sizeof(N));
+     N *b = (N *)bench_malloc(2 * nb * sizeof(N));
+     unsigned int i;
+
+     bluestein_sequence(n, w);
+
+     for (i = 0; i < 2*nb; ++i)  cpy(zero, y[i]);
+     for (i = 0; i < 2*nb; ++i)  cpy(zero, b[i]);
+     
+     for (i = 0; i < n; ++i) {
+	  N c, s;
+	  fromreal(c_re(a[i]), c);
+	  fromreal(c_im(a[i]), s);
+	  cmulj(w[2*i], w[2*i+1], c, s, b[2*i], b[2*i+1]);
+     }
+
+     for (i = 0; i < n; ++i) {
+	  cpy(w[2*i], y[2*i]);
+	  cpy(w[2*i+1], y[2*i+1]);
+     }
+     for (i = 1; i < n; ++i) {
+	  cpy(w[2*i], y[2*(nb-i)]);
+	  cpy(w[2*i+1], y[2*(nb-i)+1]);
+     }
+
+     /* scaled convolution b * y */
+     fft0(nb, b, -1);
+     fft0(nb, y, -1);
+     for (i = 0; i < nb; ++i) 
+	  cmul(b[2*i], b[2*i+1], y[2*i], y[2*i+1], b[2*i], b[2*i+1]);
+     fft0(nb, b, 1);
+
+     for (i = 0; i < n; ++i) {
+	  N c, s;
+	  cmulj(w[2*i], w[2*i+1], b[2*i], b[2*i+1], c, s);
+	  c_re(a[i]) = nbinv * toreal(c);
+	  c_im(a[i]) = nbinv * toreal(s);
+     }
+
+     bench_free(w);
+     bench_free(y);
+     bench_free(b);
+}
+
+static void mfft0(unsigned int n, bench_complex *a, int sign)
 {
      N *b = (N *)bench_malloc(2 * n * sizeof(N));
      int i;
 
-     bitrev(n, a);
      for (i = 0; i < n; ++i) {
 	  fromreal(c_re(a[i]), b[2 * i]);
 	  fromreal(c_im(a[i]), b[2 * i + 1]);
@@ -436,4 +533,24 @@ void mfft(unsigned int n, bench_complex *a, int sign)
 	  c_im(a[i]) = toreal(b[2 * i + 1]);
      }
      bench_free(b);
+}
+
+static void swapri(unsigned int n, bench_complex *a)
+{
+     int i;
+     for (i = 0; i < n; ++i) {
+	  bench_real t = c_re(a[i]);
+	  c_re(a[i]) = c_im(a[i]);
+	  c_im(a[i]) = t;
+     }
+}
+void mfft(unsigned int n, bench_complex *a, int sign)
+{
+     if (power_of_two(n)) {
+	  mfft0(n, a, sign);
+     } else {
+	  if (sign == 1) swapri(n, a);
+	  bluestein(n, a);
+	  if (sign == 1) swapri(n, a);
+     }
 }

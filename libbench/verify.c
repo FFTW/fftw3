@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.7 2002-08-15 21:25:37 athena Exp $ */
+/* $Id: verify.c,v 1.8 2002-08-16 10:42:02 athena Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -458,7 +458,6 @@ static void do_accuracy(struct problem *p)
      /* only works for these cases */
      BENCH_ASSERT(p->rank == 1);
      BENCH_ASSERT(p->vrank == 0);
-     BENCH_ASSERT(problem_power_of_two(p, 0) || problem_power_of_two(p, 1));
 
      n = p->n[0],
      a = (bench_complex *) bench_malloc(n * sizeof(bench_complex));
