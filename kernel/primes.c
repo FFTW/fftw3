@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.14 2005-02-25 02:17:23 athena Exp $ */
+/* $Id: primes.c,v 1.15 2005-03-04 22:50:29 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -68,6 +68,7 @@ static int get_prime_factors(int n, int *primef)
      int i;
      int size = 0;
 
+     A(n % 2 == 0); /* this routine is designed only for even n */
      primef[size++] = 2;
      do
 	  n >>= 1;
@@ -158,12 +159,6 @@ int X(isqrt)(int n)
      return guess;
 }
 
-static int isqrt_maybe(int n)
-{
-     int guess = X(isqrt(n));
-     return (guess * guess == n) ? guess : 0;
-}
-
 #define divides(a, b) (((int)(b) % (int)(a)) == 0)
 int X(choose_radix)(int r, int n)
 {
@@ -175,6 +170,6 @@ int X(choose_radix)(int r, int n)
      } else {
 	  /* r is negative.  If n = (-r) * q^2, take q as the radix */
 	  r = -r;
-	  return (n > r && divides(r, n)) ? isqrt_maybe(n / r) : 0;
+	  return (n > r && divides(r, n)) ? X(isqrt)(n / r) : 0;
      }
 }
