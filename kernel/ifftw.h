@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.222 2003-04-12 18:32:22 athena Exp $ */
+/* $Id: ifftw.h,v 1.223 2003-04-13 20:46:12 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -771,6 +771,13 @@ static __inline__ E FMS(E a, E b, E c)
      return x;
 }
 
+static __inline__ E FNMA(E a, E b, E c)
+{
+     E x = a * b;
+     x = - (x + c);
+     return x;
+}
+
 static __inline__ E FNMS(E a, E b, E c)
 {
      E x = a * b;
@@ -780,6 +787,7 @@ static __inline__ E FNMS(E a, E b, E c)
 #else
 #define FMA(a, b, c) (((a) * (b)) + (c))
 #define FMS(a, b, c) (((a) * (b)) - (c))
+#define FNMA(a, b, c) (- (((a) * (b)) + (c)))
 #define FNMS(a, b, c) ((c) - ((a) * (b)))
 #endif
 

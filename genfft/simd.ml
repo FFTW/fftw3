@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.14 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: simd.ml,v 1.15 2003-04-13 20:46:12 athena Exp $ *)
 
 open Expr
 open List
@@ -132,7 +132,7 @@ and unparse_ast ast =
 	|	[v] -> (Variable.unparse v) ^ ";\n"
 	| a :: b -> (Variable.unparse a) ^ ", " ^ (uvar b)
       in let rec vvar l = 
-	let s = if !Magic.compact then 10 else 1 in
+	let s = if !Magic.compact then 15 else 1 in
 	if (List.length l <= s) then
 	  match l with
 	    [] -> ""

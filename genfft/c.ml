@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.18 2003-03-26 22:16:19 athena Exp $ *)
+(* $Id: c.ml,v 1.19 2003-04-13 20:46:12 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -82,6 +82,10 @@ let rec unparse_expr =
     let maybep = maybe " + " and maybem = maybe " - " in
     function
     | [] -> ""
+    | (Uminus (Times (a, b))) :: (Uminus c) :: d -> 
+	maybep ^ (op "FNMA" a b c) ^ (unparse_plus yes d)
+    | (Uminus c) :: (Uminus (Times (a, b))) :: d -> 
+	maybep ^ (op "FNMA" a b c) ^ (unparse_plus yes d)
     | (Uminus (Times (a, b))) :: c :: d -> 
 	maybep ^ (op "FNMS" a b c) ^ (unparse_plus yes d)
     | c :: (Uminus (Times (a, b))) :: d -> 
@@ -131,7 +135,7 @@ and unparse_annotated force_bracket =
       |	[v] -> (Variable.unparse v) ^ ";\n"
       | a :: b -> (Variable.unparse a) ^ ", " ^ (uvar b)
     in let rec vvar l = 
-      let s = if !Magic.compact then 10 else 1 in
+      let s = if !Magic.compact then 15 else 1 in
       if (List.length l <= s) then
 	match l with
 	  [] -> ""
