@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.12 2002-06-16 21:15:18 stevenj Exp $ */
+/* $Id: tensor.c,v 1.13 2002-07-12 04:59:29 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -253,7 +253,7 @@ static int cmp_iodim(const void *av, const void *bv)
    in the same order as is (for e.g. multi-dimensional
    transforms) or will be in opposite order (e.g. for Cooley-Tukey
    recursion).  (Both forward and backwards traversal of the tensor
-   are considered e.g. by ridft-vecloop, so sorting in increasing
+   are considered e.g. by vrank-geq1, so sorting in increasing
    vs. decreasing order is not really important.) */
 tensor X(tensor_compress)(const tensor sz)
 {
