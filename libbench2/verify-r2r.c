@@ -72,7 +72,7 @@ static double raerror(R *a, R *b, int n)
  * before multiplication by 2 * PI.
  */
 
-static trigreal sincos(trigreal m, trigreal n, int sinp)
+static trigreal bench_sincos(trigreal m, trigreal n, int sinp)
 {
      /* waiting for C to get tail recursion... */
      trigreal half_n = n * 0.5;
@@ -98,12 +98,12 @@ static trigreal sincos(trigreal m, trigreal n, int sinp)
 
 static trigreal cos2pi(int m, int n)
 {
-     return sincos((trigreal)m, (trigreal)n, 0);
+     return bench_sincos((trigreal)m, (trigreal)n, 0);
 }
 
 static trigreal sin2pi(int m, int n)
 {
-     return sincos((trigreal)m, (trigreal)n, 1);
+     return bench_sincos((trigreal)m, (trigreal)n, 1);
 }
 
 static trigreal cos00(int i, int j, int n)
