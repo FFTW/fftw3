@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.2 2002-07-21 06:06:53 stevenj Exp $ */
+/* $Id: conf.c,v 1.3 2002-07-22 23:57:16 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -30,9 +30,9 @@ static const solvtab s =
      X(rdft_vrank2_transpose_register),
      X(rdft_vrank3_transpose_register),
      X(rdft_nop_register),
+     X(rdft_buffered_register),
 /*
      X(rdft_rank_geq2_register),
-     X(rdft_buffered_register),
      X(rdft_generic_register),
      X(rdft_rader_register),
 */
