@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.3 2002-06-30 18:37:55 athena Exp $ */
+/* $Id: problem.c,v 1.4 2002-07-01 13:26:42 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -51,7 +51,7 @@ struct problem *problem_parse(const char *s)
      switch (tolower(*s)) {
 	 case 'i': p->in_place = 1; ++s; goto L1;
 	 case 'o': p->in_place = 0; ++s; goto L1;
-	 case 's': p->split = 1; ++s; goto L1;
+	 case '/': p->split = 1; ++s; goto L1;
 	 case 'f': 
 	 case '-': p->sign = -1; ++s; goto L1;
 	 case 'b': 
