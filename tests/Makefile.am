@@ -43,4 +43,10 @@ if THREADS
 endif
 
 paranoid-check: bench
-	perl -w $(srcdir)/check.pl -a --paranoid `pwd`/bench
+if THREADS
+	perl -w $(srcdir)/check.pl -a -o=exhaustive --nthreads=10 --paranoid `pwd`/bench
+	perl -w $(srcdir)/check.pl -a -o=exhaustive --nthreads=7 --paranoid `pwd`/bench
+	perl -w $(srcdir)/check.pl -a -o=exhaustive --nthreads=3 --paranoid `pwd`/bench
+	perl -w $(srcdir)/check.pl -a -o=exhaustive --nthreads=2 --paranoid `pwd`/bench
+endif
+	perl -w $(srcdir)/check.pl -a -o=exhaustive --paranoid `pwd`/bench
