@@ -170,13 +170,6 @@ is specified).  Multiple wisdom files can be read via multiple
 options.  If
 .I file
 is "-", then read wisdom from standard input.
-.TP
-\fB\-t\fR \fInthreads\fR, \fB\--threads\fR=\fInthreads\fR
-Plan transforms using
-.I nthreads
-parallel threads.  You can only use this option if FFTW was compiled
-with threads support, and you normally would only use it on a
-multi-processor machine where different threads run on different CPUs.
 .SH BUGS
 Send bug reports to fftw@fftw.org.
 .SH AUTHORS

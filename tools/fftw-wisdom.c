@@ -49,6 +49,11 @@ static void do_file(FILE *f)
 	  do_problem(s);
 }
 
+/* By default, don't allow fftw-wisdom tool to use threads; we don't
+   want users to put threads wisdom in the system wisdom, which would
+   break the wisdom for any non-threads program trying to use it. */
+#define USE_THREADS 0
+
 static struct option long_options[] =
 {
   {"help", no_argument, 0, 'h'},
@@ -66,7 +71,9 @@ static struct option long_options[] =
   {"no-system-wisdom", no_argument, 0, 'n'},
   {"wisdom-file", required_argument, 0, 'w'},
 
+#if USE_THREADS && defined(HAVE_THREADS)
   {"threads", required_argument, 0, 't'},
+#endif
 
   /* options to restrict configuration to rdft-only, etcetera? */
   
@@ -91,7 +98,7 @@ static void help(FILE *f, const char *program_name)
  "             -x, --exhaustive: plan in EXHAUSTIVE mode (may be slow)\n"
  "       -n, --no-system-wisdom: don't read /etc/fftw/ system wisdom file\n"
  "  -w FILE, --wisdom-file=FILE: read wisdom from FILE (stdin if -)\n"
-#ifdef HAVE_THREADS
+#if USE_THREADS && defined(HAVE_THREADS)
  "            -t N, --threads=N: plan with N threads\n"
 #endif
 	  "\nSize syntax: <type><inplace><direction><geometry>\n"
@@ -138,7 +145,7 @@ int bench_main(int argc, char *argv[])
      usewisdom = 0;
 
      bench_srand(1);
-#ifdef HAVE_THREADS
+#if USE_THREADS && defined(HAVE_THREADS)
      BENCH_ASSERT(FFTW(init_threads)());
 #endif
 
@@ -232,16 +239,16 @@ int bench_main(int argc, char *argv[])
 		   break;
 	      }
 
+#if USE_THREADS && defined(HAVE_THREADS)
 	      case 't':
 		   nthreads = atoi(optarg);
-#ifndef HAVE_THREADS
 		   if (nthreads > 1) {
 			fprintf(stderr, "fftw-wisdom: "
 				"not compiled with thread support\n");
 			exit(EXIT_FAILURE);
 		   }
-#endif
 		   break;
+#endif
 
 	      case '?':
 		   /* `getopt_long' already printed an error message. */
