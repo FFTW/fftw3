@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: aligned-main.c,v 1.4 2003-04-02 01:57:39 athena Exp $ */
+/* $Id: aligned-main.c,v 1.5 2003-04-02 02:11:31 athena Exp $ */
 
 #include "bench.h"
 
@@ -26,9 +26,7 @@ int aligned_main(int argc, char *argv[])
 {
 #if defined(__GNUC__) && defined(__i386__)
      /*
-      * horrible hack to align the stack so that double precision
-      * numbers are 8-bytes aligned on x86 processors.  If not,
-      * the benchmark is totally useless.
+      * horrible hack to align the stack to a 16-byte boundary.
       *
       * We assume a gcc version >= 2.95 so that
       * -mpreferred-stack-boundary works.  Otherwise, all bets are
@@ -38,8 +36,6 @@ int aligned_main(int argc, char *argv[])
       * initial stack alignment, with the result that the code is now
       * pessimally aligned instead of having a 50% chance of being
       * correct.
-      *
-      * Here, we align the stack pointer to a multiple of 16 bytes.
       */
      {
 	  /*
