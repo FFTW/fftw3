@@ -111,7 +111,7 @@ $(CODLIST): Makefile
 	done;								\
 	echo;								\
 	echo;								\
-	echo "solvtab $(SOLVTAB_NAME) = {";				\
+	echo "const solvtab $(SOLVTAB_NAME) = {";                       \
 	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))); do		\
 	   echo "   X($(CODELET_NAME)$$i),";				\
 	done;								\

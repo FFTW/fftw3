@@ -54,11 +54,15 @@ let vect_optimize varinfo n expr =
   let code1 = AssignmentsToVfpinstrs.assignmentsToVfpinstrs varinfo code0 in
   let _ = info "vectorizing..." in
   let (operandsize,code2) = K7Vectorization.vectorize varinfo n code1 in
+
   let _ = info "optimizing..." in
   let code3 = VK7Optimization.apply_optrules code2 in
+
   let code4 = vect_schedule code3 in
+
   let _ = info "improving..." in
-     (operandsize, VImproveSchedule.improve_schedule code4)
+  let code5 = VImproveSchedule.improve_schedule code4 in
+  (operandsize, code5)
 
 
 (****************************************************************************)
@@ -79,12 +83,12 @@ let get2ndhalfcode base one dst ld_n =
 let loadfnargs xs = map (fun (src,dst) -> (dst, [K7V_IntLoadMem(src,dst)])) xs
 
 (****************************************************************************)
+let asmline x = print_string ("asm(\"" ^ x ^ "\");\n")
 
 (* Warning: this function produces side-effects. *)
 let emit_instr (_,_,instr) = 
   k7rinstrAdaptStackPointerAdjustment instr;
-  print_string (K7Unparsing.k7rinstrToString instr);
-  print_newline ()
+  asmline (K7Unparsing.k7rinstrToString instr)
 
 let emit_instr' (t,cplen,i) = 
   k7rinstrAdaptStackPointerAdjustment i;
@@ -312,9 +316,7 @@ let procedure_proepilog fn_name stackframe_size_bytes code =
 let compileToAsm_with_fixedstride (n, dir, ctype, initcode, k7vinstrs) 
 				  (istride,ostride) =
   let _ = info "compileToAsm..." in
-  let fn_name = codeletinfoToFnname n (ctype,dir) ^ 
-		"_i" ^ (string_of_int istride) ^
-		"_o" ^ (string_of_int ostride) in
+  let fn_name = !Magic.name in
   let realcode = K7RegisterAllocator.regalloc initcode k7vinstrs in
   let stackframe_size_bytes = getStackFrameSize realcode in
   let realcode = procedure_proepilog fn_name stackframe_size_bytes realcode in
@@ -335,17 +337,23 @@ let compileToAsm_with_fixedstride (n, dir, ctype, initcode, k7vinstrs)
           "\t" ^ (listToString myconst_to_decl "\n\t" all_consts) ^ "\n\n" in
   begin
     print_string datasection;
-    print_string (".text\n\t.balign 64\n\t.globl\t" ^ fn_name ^ "\n");
-    print_string ("\t.type\t" ^ fn_name ^ ", @function\n");
-    print_string (fn_name ^ ":\n");
+    asmline (".text");
     k7rinstrInitStackPointerAdjustment 0;
     iter emit_instr realcode'
   end
 
 
+let datasection all_consts =
+  if all_consts <> [] then begin
+    asmline (".section .rodata");
+    asmline ("\t" ^ ".balign 64");
+    List.iter (fun c -> asmline (myconst_to_decl c)) all_consts;
+    asmline (".text");
+  end
+
 let compileToAsm (n, dir, ctype, initcode, k7vinstrs) =
   let _ = info "compileToAsm..." in
-  let fn_name = codeletinfoToFnname n (ctype,dir) in
+  let fn_name = !Magic.name in
   let realcode = K7RegisterAllocator.regalloc initcode k7vinstrs in
   let stackframe_size_bytes = getStackFrameSize realcode in
   let realcode = procedure_proepilog fn_name stackframe_size_bytes realcode in
@@ -357,21 +365,8 @@ let compileToAsm (n, dir, ctype, initcode, k7vinstrs) =
 
   let _ = info "before unparseToAsm" in
   let all_consts = k7rinstrsToConstants (map get3of3 realcode') in
-  let datasection = 
-	if all_consts = [] then 
-	  ""
-	else
-	  ".section .rodata" ^ "\n" ^
-          "\t" ^ ".balign 64" ^ "\n" ^
-          "\t" ^ (listToString myconst_to_decl "\n\t" all_consts) ^ "\n\n" in
   begin
-    print_string datasection;
-    print_string (".text\n\t.balign 64\n\t.globl\t" ^ fn_name ^ "\n");
-    print_string ("\t.type\t" ^ fn_name ^ ", @function\n");
-    print_string (fn_name ^ ":\n");
     k7rinstrInitStackPointerAdjustment 0;
     iter emit_instr realcode';
-    print_newline ();
-    print_newline ();
-    print_string (codelet_description n dir ctype);
+    datasection all_consts;
   end

@@ -58,8 +58,12 @@ let undocumented = " Undocumented voodoo parameter"
 let fixed_istride = ref 1
 let fixed_ostride = ref 1
 
+let set_string var = Arg.String(fun s -> var := s)
+
 let main () =
   Arg.parse [
+  "-name", set_string Magic.name, " set codelet name";
+
   "-notwiddle", 
     Arg.Int(fun i -> mode := GEN_NOTWID i), 
     "<n> : Generate a no twiddle codelet of size <n>";

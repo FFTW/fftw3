@@ -57,6 +57,7 @@ let collect_common_inputs = ref true
 
 let verbose = ref false
 
+let name = ref "UNNAMED"
 
 (****************************************************************************
  * K7/FFTW-GEL SPECIFIC VALUES 						    *

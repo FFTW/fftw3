@@ -1,5 +1,6 @@
-(*
- * Copyright (c) 2001 Stefan Kral
+/*
+ * Copyright (c) 2002 Matteo Frigo
+ * Copyright (c) 2002 Steven G. Johnson
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +16,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *)
+ */
 
+/* $Id: kdft-k7.c,v 1.1 2002-06-14 19:54:29 athena Exp $ */
 
+#include "dft.h"
 
-type codelet_type =
-    TWIDDLE
-  | NO_TWIDDLE
-  | REAL2HC
-  | HC2HC
-  | HC2REAL
-  | REALEVEN
-  | REALODD
-  | REALEVEN2
-  | REALODD2
-  | REALEVEN_TWIDDLE
-  | REALODD_TWIDDLE
+void X(kdft_k7_register)(planner *p, kdft_k7 codelet, const kdft_k7_desc *desc)
+{
+     solver *s = X(mksolver_dft_direct_k7)(codelet, desc);
+     REGISTER_SOLVER(p, s);
+}

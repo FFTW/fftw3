@@ -43,6 +43,7 @@ val enable_fma_expansion : bool ref
 val collect_common_twiddle : bool ref
 val collect_common_inputs : bool ref
 val verbose : bool ref
+val name : string ref
 
 val imul_to_lea_limit : int ref
 val do_debug_output : bool ref

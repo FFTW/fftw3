@@ -34,7 +34,11 @@ let no_twiddle_gen n dir =
 
   let _ = info "generating k7vinstrs..." in
   let (fnarg_input,  fnarg_istride) = (K7_MFunArg 1, K7_MFunArg 3)
-  and (fnarg_output, fnarg_ostride) = (K7_MFunArg 2, K7_MFunArg 4) in
+  and (fnarg_output, fnarg_ostride) = (K7_MFunArg 2, K7_MFunArg 4) 
+  and fnarg_vl = K7_MFunArg 5
+  and fnarg_ivs = K7_MFunArg 6
+  and fnarg_ovs = K7_MFunArg 7
+  in
 
   let (input,input2), (output,output2) = makeNewVintreg2 (), makeNewVintreg2 ()
   and (istride4p, ostride4p) = makeNewVintreg2 () in
@@ -60,5 +64,43 @@ let no_twiddle_gen n dir =
     else
       (([], strided_complex_unparser (input,istride4p)),
        ([], strided_complex_unparser (output,ostride4p))) in
+
   let unparser = make_asm_unparser_notwiddle in_unparser' out_unparser' in
-    (n, dir, NO_TWIDDLE, initcode, vsimdinstrsToK7vinstrs unparser code')
+
+  let body = 
+    if do_split then
+      [
+       K7V_RefInts([input; input2; output; output2; istride4p; ostride4p]);
+       K7V_IntUnaryOpMem(K7_IShlImm 2, fnarg_ivs);
+       K7V_IntUnaryOpMem(K7_IShlImm 2, fnarg_ovs);
+       K7V_Label(".L0")
+     ]  @
+      (vsimdinstrsToK7vinstrs unparser code') @
+      [
+       K7V_IntBinOpMem(K7_IAdd, fnarg_ivs, input);
+       K7V_IntBinOpMem(K7_IAdd, fnarg_ivs, input2);
+       K7V_IntBinOpMem(K7_IAdd, fnarg_ovs, output);
+       K7V_IntBinOpMem(K7_IAdd, fnarg_ovs, output2);
+       K7V_IntUnaryOpMem(K7_IDec, fnarg_vl);
+       K7V_RefInts([input; input2; output; output2; istride4p; ostride4p]);
+       K7V_CondBranch(K7_BCond_NotZero, K7V_BTarget_Named ".L0")
+     ] 
+    else
+      [
+       K7V_RefInts([input; output; istride4p; ostride4p]);
+       K7V_IntUnaryOpMem(K7_IShlImm 2, fnarg_ivs);
+       K7V_IntUnaryOpMem(K7_IShlImm 2, fnarg_ovs);
+       K7V_Label(".L0")
+     ]  @
+      (vsimdinstrsToK7vinstrs unparser code') @
+      [
+       K7V_IntBinOpMem(K7_IAdd, fnarg_ivs, input);
+       K7V_IntBinOpMem(K7_IAdd, fnarg_ovs, output);
+       K7V_IntUnaryOpMem(K7_IDec, fnarg_vl);
+       K7V_RefInts([input; output; istride4p; ostride4p]);
+       K7V_CondBranch(K7_BCond_NotZero, K7V_BTarget_Named ".L0")
+
+     ] 
+  
+  in 
+  (n, dir, NO_TWIDDLE, initcode, body)

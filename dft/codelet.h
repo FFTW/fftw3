@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.8 2002-06-14 18:18:15 athena Exp $ */
+/* $Id: codelet.h,v 1.9 2002-06-14 19:54:29 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -105,4 +105,16 @@ void X(kdft_dif_register)(planner *p, kdft_dif codelet, const ct_desc *desc);
 extern solvtab X(solvtab_dft_standard);
 extern solvtab X(solvtab_dft_inplace);
 
+/*
+ * K7-specific stuff 
+ */
+typedef struct {
+     uint sz;    /* size of transform computed */
+     int sign;
+} kdft_k7_desc;
+
+typedef void (*kdft_k7)(const R *ri, R *ro, int is, int os,
+			uint vl, int ivs, int ovs);
+void X(kdft_k7_register)(planner *p, kdft_k7 codelet, 
+			 const kdft_k7_desc *desc);
 #endif				/* __CODELET_H__ */

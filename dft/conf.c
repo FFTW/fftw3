@@ -18,20 +18,26 @@
  *
  */
 
-/* $Id: conf.c,v 1.10 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: conf.c,v 1.11 2002-06-14 19:54:29 athena Exp $ */
 
 #include "dft.h"
 
+static const solvtab s =
+{
+     X(dft_indirect_register),
+     X(dft_rank0_register),
+     X(dft_rank_geq2_register),
+     X(dft_vrank_geq1_register),
+     X(dft_vrank2_transpose_register),
+     X(dft_vrank3_transpose_register),
+     X(dft_buffered_register),
+     X(dft_nop_register),
+     0
+};
+
 void X(dft_conf_standard)(planner *p)
 {
-     X(dft_indirect_register)(p);
-     X(dft_rank0_register)(p);
-     X(dft_rank_geq2_register)(p);
-     X(dft_vrank_geq1_register)(p);
-     X(dft_vrank2_transpose_register)(p);
-     X(dft_vrank3_transpose_register)(p);
-     X(dft_buffered_register)(p);
-     X(dft_nop_register)(p);
+     X(solvtab_exec)(s, p);
      X(solvtab_exec)(X(solvtab_dft_standard), p);
      X(solvtab_exec)(X(solvtab_dft_inplace), p);
 }

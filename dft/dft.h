@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.17 2002-06-13 12:59:53 athena Exp $ */
+/* $Id: dft.h,v 1.18 2002-06-14 19:54:29 athena Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -56,6 +56,7 @@ plan *X(mkplan_dft)(size_t size, const plan_adt *adt, dftapply apply);
 
 /* various solvers */
 solver *X(mksolver_dft_direct)(kdft k, const kdft_desc *desc);
+solver *X(mksolver_dft_direct_k7)(kdft_k7 k, const kdft_k7_desc *desc);
 solver *X(mksolver_dft_ct_dit)(kdft_dit codelet, const ct_desc *desc);
 solver *X(mksolver_dft_ct_ditbuf)(kdft_dit codelet, const ct_desc *desc);
 solver *X(mksolver_dft_ct_dif)(kdft_dif codelet, const ct_desc *desc);
