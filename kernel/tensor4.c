@@ -18,21 +18,22 @@
  *
  */
 
-/* $Id: tensor4.c,v 1.7 2005-02-25 05:03:14 stevenj Exp $ */
+/* $Id: tensor4.c,v 1.8 2005-02-26 23:14:11 stevenj Exp $ */
 
 #include "ifftw.h"
 
 int X(tensor_max_index)(const tensor *sz)
 {
      int i;
-     int n = 0;
+     int ni = 0, no = 0;
 
      A(FINITE_RNK(sz->rnk));
      for (i = 0; i < sz->rnk; ++i) {
           const iodim *p = sz->dims + i;
-          n += (p->n - 1) * X(imax)(X(iabs)(p->is), X(iabs)(p->os));
+          ni += (p->n - 1) * X(iabs)(p->is);
+          no += (p->n - 1) * X(iabs)(p->os);
      }
-     return n;
+     return X(imax)(ni, no);
 }
 
 #define tensor_min_xstride(sz, xs) {			\
