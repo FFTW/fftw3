@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.17 2002-08-31 01:29:10 athena Exp $ */
+/* $Id: planner-score.c,v 1.18 2002-09-01 23:22:53 athena Exp $ */
 #include "ifftw.h"
 
 typedef struct {
@@ -48,14 +48,19 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
      int best_not_yet_timed = 1;
      slvdesc *sp;
 
+     *bestp = 0;
+
      /* if a solver is suggested (by wisdom) use it */
      if ((sp = *descp)) {
 	  solver *s = sp->slv;
 	  best = ego->adt->slv_mkplan(ego, p, s);
-	  best->score = s->adt->score(s, p, ego);
-	  adjust_score(best);
-	  *bestp = best;
-	  return;
+	  if (best) {
+	       best->score = s->adt->score(s, p, ego);
+	       adjust_score(best);
+	       *bestp = best;
+	       return;
+	  }
+	  /* BEST may be 0 in case of md5 collision */
      }
 
      best_score = BAD;
@@ -97,12 +102,11 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  if (best) {
 	       best->score = best_score;
 	       adjust_score(best);
+	       *bestp = best;
 	       if (best->score >= best_score)
 		    break;
 	  }
      };
-
-     *bestp = best;
 }
 
 /* constructor */

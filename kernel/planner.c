@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.50 2002-08-31 18:00:04 athena Exp $ */
+/* $Id: planner.c,v 1.51 2002-09-01 23:22:53 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -29,9 +29,8 @@
 /* Entry in the solutions hash table */
 
 struct solutions_s {
-     problem *p;
+     md5uint s[4];
      uint flags;
-     uint nthr;
      slvdesc *sp;
      solutions *cdr;
 };
@@ -73,13 +72,28 @@ static void register_problem(planner *ego, const problem_adt *adt)
 }
 
 /* memoization routines */
-static uint hash(planner *ego, const problem *p, uint flags, uint nthr)
+static uint sig_to_hash_index(planner *ego, md5uint *s)
 {
-     return ((0
-	      ^ p->adt->hash(p)
-	      ^ (MODULO_EQV(flags) * 317227) 
-	      ^ (nthr * 252143))
-	     % ego->hashsiz);
+     return s[0] % ego->hashsiz;
+}
+
+static void hash(md5 *m, const problem *p, uint flags, uint nthr)
+{
+     X(md5begin)(m);
+     X(md5uint)(m, MODULO_EQV(flags));
+     X(md5uint)(m, nthr);
+     p->adt->hash(p, m);
+     X(md5end)(m);
+}
+
+static int hasheq(md5uint *a, md5uint *b)
+{
+     return a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3];
+}
+
+static void hashcpy(md5uint *a, md5uint *b)
+{
+     b[0] = a[0]; b[1] = a[1]; b[2] = a[2]; b[3] = a[3];
 }
 
 static void merge_flags(solutions *l, uint flags)
@@ -89,24 +103,25 @@ static void merge_flags(solutions *l, uint flags)
 	  );
 }
 
-static int solvedby(problem *p, uint flags, uint nthr, solutions *l)
+static int solvedby(md5uint *s, uint flags, solutions *l)
 {
      return (IMPATIENCE(flags) >= IMPATIENCE(l->flags)
-	     && MODULO_EQV(flags) == MODULO_EQV(l->flags)
-	     && nthr == l->nthr
-	     && p->adt->equal(p, l->p));
+	     /* other flags are included in md5 */
+	     && hasheq(s, l->s));
 }
 
 static solutions *lookup(planner *ego, problem *p)
 {
      solutions *l;
      uint h;
+     md5 m;
 
-     h = hash(ego, p, ego->flags, ego->nthr);
+     hash(&m, p, ego->flags, ego->nthr);
+     h = sig_to_hash_index(ego, m.s);
 
      ++ego->access;
      for (l = ego->sols[h]; l; l = l->cdr) 
-          if (solvedby(p, ego->flags, ego->nthr, l)) {
+          if (solvedby(m.s, ego->flags, l)) {
 	       ++ego->hit;
 	       return l;
 	  }
@@ -116,7 +131,6 @@ static solutions *lookup(planner *ego, problem *p)
 
 static void solution_destroy(solutions *s)
 {
-     X(problem_destroy)(s->p);
      X(free)(s);
 }
 
@@ -126,7 +140,7 @@ static void remove_equivalent(solutions *newsol, solutions **ps)
      solutions *s;
 
      while ((s = *ps)) {
-	  if (solvedby(s->p, s->flags, s->nthr, newsol)) {
+	  if (solvedby(s->s, s->flags, newsol)) {
 	       /* destroy solution but keep relevant planner flags */
 	       merge_flags(newsol, s->flags);
 	       *ps = s->cdr;
@@ -134,7 +148,7 @@ static void remove_equivalent(solutions *newsol, solutions **ps)
 	  } else {
 	       /* ensure that we are not replacing a solution with a
 		  worse solution */
-	       A(!solvedby(newsol->p, newsol->flags, newsol->nthr, s));
+	       A(!solvedby(newsol->s, newsol->flags, s));
 	       ps = &s->cdr;
 	  }
      }
@@ -142,7 +156,7 @@ static void remove_equivalent(solutions *newsol, solutions **ps)
 
 static void insert0(planner *ego, solutions *l)
 {
-     uint h = hash(ego, l->p, l->flags, l->nthr);
+     uint h = l->s[0] % ego->hashsiz;
      solutions **ps = ego->sols + h;
 
      /* remove old, less impatient solutions */
@@ -183,15 +197,16 @@ static solutions *insert(planner *ego, uint flags, uint nthr,
 			 problem *p, slvdesc *sp)
 {
      solutions *l = (solutions *)fftw_malloc(sizeof(solutions), HASHT);
+     md5 m;
 
      ++ego->cnt;
      if (ego->cnt > ego->hashsiz)
           rehash(ego);
 
+     hash(&m, p, flags, nthr);
      l->flags = flags;
-     l->nthr = nthr;
      l->sp = sp; 
-     l->p = X(problem_dup)(p);
+     hashcpy(m.s, l->s);
      insert0(ego, l);
      return l;
 }
@@ -218,8 +233,9 @@ static plan *mkplan(planner *ego, problem *p)
 	       /* call solver to create plan */
 	       ego->inferior_mkplan(ego, p, &pln, &sp);
 
-	       /* solver must be applicable or something is screwed up */
-	       A(sp && pln); 
+	       /* PLN = 0 in the unlikely case of MD5 collision */ 
+	       if (!pln) goto search;
+
 	       X(plan_use)(pln);
 
 	       /* inherit blessings etc. from planner */
@@ -229,6 +245,7 @@ static plan *mkplan(planner *ego, problem *p)
 	       pln = 0;
 	  }
      } else {
+     search:
 	  /* not in table.  Run inferior planner */
 	  ++ego->nprob;
 	  ego->inferior_mkplan(ego, p, &pln, &sp);
@@ -284,8 +301,8 @@ static void exprt(planner *ego, printer *p)
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
 	       if (BLESSEDP(s))
-		    p->print(p, "(s %d %d %u %P)", 
-			     s->sp ? s->sp->id : 0, s->flags, s->nthr, s->p);
+		    p->print(p, "(s %d %d)", 
+			     s->sp ? s->sp->id : 0, s->flags);
      p->print(p, ")");
 }
 
@@ -370,7 +387,9 @@ static void exprt_conf(planner *ego, printer *p)
           for (s = ego->sols[h]; s; s = s->cdr) {
                if (BLESSEDP(s) && s->sp && s->sp->reg_nam && s->sp->id > 0) {
 		    s->sp->id = 0; /* mark to prevent duplicates */
+#if 0
 		    mark_problem(ego, s->p);
+#endif
 		    p->print(p, "          extern void %s(planner*);\n",
 			     s->sp->reg_nam);
 	       }
@@ -542,12 +561,13 @@ void X(planner_dump)(planner *ego, int verbose)
      int cnt = 0, cnt_null = 0, max_len = 0, empty = 0;
      solutions *s;
      uint h;
-     if (verbose > 4) {
+
+     if (verbose > 2) {
           for (h = 0; h < ego->hashsiz; ++h) {
                D("\nbucket %d:\n", h);
 
                for (s = ego->sols[h]; s; s = s->cdr) 
-		    D("%P %s\n", s->p, s->sp ? s->sp->reg_nam : 0);
+		    D("%u %s\n", s->s[0], s->sp ? s->sp->reg_nam : 0);
           }
      }
 

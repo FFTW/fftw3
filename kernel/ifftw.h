@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.101 2002-08-31 18:00:04 athena Exp $ */
+/* $Id: ifftw.h,v 1.102 2002-09-01 23:22:53 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -29,6 +29,7 @@
 #include <stdlib.h>		/* size_t */
 #include <stdarg.h>		/* va_list */
 #include <stdio.h>              /* FILE */
+#include <stddef.h>             /* ptrdiff_t */
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>		/* uint, maybe */
@@ -205,6 +206,31 @@ uint X(uimin)(uint a, uint b);
 uint X(iabs)(int a);
 
 /*-----------------------------------------------------------------------*/
+/* md5.c */
+
+#if SIZEOF_UNSIGNED_INT >= 4
+typedef unsigned int md5uint;
+#else
+typedef unsigned long md5uint; /* at least 32 bits as per C standard */
+#endif
+
+typedef struct {
+     md5uint s[4]; /* state and signature */
+
+     /* fields not meant to be used outside md5.c: */
+     unsigned char c[64]; /* stuff not yet processed */
+     uint l;  /* total length.  Should be 64 bits long, but this is
+		 good enough for us */
+} md5;
+
+void X(md5begin)(md5 *p);
+void X(md5puts)(md5 *p, const void *d_, uint len);
+void X(md5uint)(md5 *p, uint i);
+void X(md5int)(md5 *p, int i);
+void X(md5ptrdiff)(md5 *p, ptrdiff_t d);
+void X(md5end)(md5 *p);
+
+/*-----------------------------------------------------------------------*/
 /* tensor.c: */
 typedef struct {
      uint n;
@@ -236,7 +262,7 @@ tensor X(mktensor_rowmajor)(uint rnk, const uint *n,
                             int is, int os);
 int X(tensor_equal)(const tensor a, const tensor b);
 uint X(tensor_sz)(const tensor sz);
-uint X(tensor_hash)(const tensor t);
+void X(tensor_md5)(md5 *p, const tensor t);
 uint X(tensor_max_index)(const tensor sz);
 uint X(tensor_min_istride)(const tensor sz);
 uint X(tensor_min_ostride)(const tensor sz);
@@ -276,7 +302,7 @@ void X(dotens2)(tensor sz0, tensor sz1, dotens2_closure *k);
 /* problem.c: */
 typedef struct {
      int (*equal) (const problem *ego, const problem *p);
-     uint (*hash) (const problem *ego);
+     void (*hash) (const problem *ego, md5 *p);
      void (*zero) (const problem *ego);
      void (*print) (problem *ego, printer *p);
      void (*destroy) (problem *ego);

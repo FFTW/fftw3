@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.23 2002-08-30 02:55:29 stevenj Exp $ */
+/* $Id: tensor.c,v 1.24 2002-09-01 23:22:53 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -121,20 +121,18 @@ uint X(tensor_sz)(const tensor sz)
      return n;
 }
 
-uint X(tensor_hash)(const tensor t)
+void X(tensor_md5)(md5 *p, const tensor t)
 {
      uint i;
-     uint h = 1023 * t.rnk;
-
-     /* FIXME: find a decent hash function */
+     X(md5uint)(p, t.rnk);
      if (FINITE_RNK(t.rnk)) {
 	  for (i = 0; i < t.rnk; ++i) {
-	       iodim *p = t.dims + i;
-	       h = (h * 17) ^ p->n ^ (7 * p->is) ^ (13 * p->os);
+	       iodim *q = t.dims + i;
+	       X(md5uint)(p, q->n);
+	       X(md5int)(p, q->is);
+	       X(md5int)(p, q->os);
 	  }
      }
-
-     return h;
 }
 
 uint X(tensor_max_index)(const tensor sz)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.22 2002-08-28 03:34:00 stevenj Exp $ */
+/* $Id: problem.c,v 1.23 2002-09-01 23:22:54 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -31,23 +31,22 @@ static void destroy(problem *ego_)
      X(free)(ego_);
 }
 
-static uint kind_hash(const rdft_kind *kind, uint rnk)
+static void kind_hash(md5 *m, const rdft_kind *kind, uint rnk)
 {
-     uint i, h = 9349 * rnk;
+     uint i;
      for (i = 0; i < rnk; ++i)
-	  h = (h * 41) ^ (kind[i] * 37);
-     return h;
+	  X(md5int)(m, kind[i]);
 }
 
-static uint hash(const problem *p_)
+static void hash(const problem *p_, md5 *m)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
-     return (0xDEADBEEF
-	     ^ ((p->I == p->O) * 31)
-	     ^ kind_hash(p->kind, p->sz.rnk)
-	     ^ (X(tensor_hash)(p->sz) * 10487)
-             ^ (X(tensor_hash)(p->vecsz) * 27197)
-	  );
+     X(md5int)(m, p->I == p->O);
+     kind_hash(m, p->kind, p->sz.rnk);
+     X(md5uint)(m, X(alignment_of)(p->I));
+     X(md5uint)(m, X(alignment_of)(p->O));
+     X(tensor_md5)(m, p->sz);
+     X(tensor_md5)(m, p->vecsz);
 }
 
 static int kind_equal(const rdft_kind *k1, const rdft_kind *k2, uint rnk)

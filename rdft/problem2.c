@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.13 2002-08-29 21:58:35 stevenj Exp $ */
+/* $Id: problem2.c,v 1.14 2002-09-01 23:22:54 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -32,17 +32,18 @@ static void destroy(problem *ego_)
      X(free)(ego_);
 }
 
-static unsigned int hash(const problem *p_)
+static void hash(const problem *p_, md5 *m)
 {
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
-     return (0xBEEFDEAD
-	     ^ ((p->r == p->rio) * 31)
-	     ^ ((p->r == p->iio) * 29)
-	     ^ ((p->iio - p->rio) * 23)
-	     ^ (p->kind * 37)
-	     ^ (X(tensor_hash)(p->sz) * 10487)
-             ^ (X(tensor_hash)(p->vecsz) * 27197)
-	  );
+     X(md5int)(m, p->r == p->rio);
+     X(md5int)(m, p->r == p->iio);
+     X(md5ptrdiff)(m, p->iio - p->rio);  /* (1) */
+     X(md5uint)(m, X(alignment_of)(p->r));
+     X(md5uint)(m, X(alignment_of)(p->rio)); 
+             /* alignment of imag is implied by (1) */
+     X(md5int)(m, p->kind);
+     X(tensor_md5)(m, p->sz);
+     X(tensor_md5)(m, p->vecsz);
 }
 
 static int equal(const problem *ego_, const problem *problem_)
