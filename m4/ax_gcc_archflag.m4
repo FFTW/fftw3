@@ -22,7 +22,7 @@ dnl called unless the user specified --with-gcc-arch manually.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.14 2005-01-14 00:21:58 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.15 2005-01-14 21:57:36 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -98,18 +98,16 @@ case $host_cpu in
      ;;
 
   sparc*)
-     case $host_os in
-       *linux*)
-          cputype=`grep cpu /proc/cpuinfo | head -n 1 | cut -d: -f2 | tr -d ' '`
-	  case $cputype in
-	    *UltraSparcIV*) ax_gcc_arch="ultrasparc4 ultrasparc v9" ;;
-	    *UltraSparcIII*) ax_gcc_arch="ultrasparc3 ultrasparc v9" ;;
-	    *UltraSparc*) ax_gcc_arch="ultrasparc3 ultrasparc v9" ;;
-	    *SuperSparc*) ax_gcc_arch="supersparc v8" ;;
-	    *HyperSparc*) ax_gcc_arch="hypersparc v8" ;;
-            *Cypress*) ax_gcc_arch=cypress ;;
-          esac ;;
-       *) ax_gcc_arch=ultrasparc ;; # FIXME: how to guess on Solaris?
+     AC_PATH_PROG([PRTDIAG], [prtdiag], [prtdiag], [$PATH:/usr/platform/`uname -i`/sbin/:/usr/platform/`uname -m`/sbin/])
+     cputype=`(((grep cpu /proc/cpuinfo | cut -d: -f2) ; ($PRTDIAG -v |grep -i sparc) ) | head -n 1) 2> /dev/null`
+     cputype=`echo "$cputype" | tr -d ' -' |tr $as_cr_LETTERS $as_cr_letters`
+     case $cputype in
+         *ultrasparciv*) ax_gcc_arch="ultrasparc4 ultrasparc v9" ;;
+         *ultrasparciii*) ax_gcc_arch="ultrasparc3 ultrasparc v9" ;;
+         *ultrasparc*) ax_gcc_arch="ultrasparc v9" ;;
+         *supersparc*) ax_gcc_arch="supersparc v8" ;;
+         *hypersparc*) ax_gcc_arch="hypersparc v8" ;;
+         *cypress*) ax_gcc_arch=cypress ;;
      esac ;;
 
   alphaev5) ax_gcc_arch=ev5 ;;
