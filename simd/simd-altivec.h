@@ -151,7 +151,7 @@ static inline void STL(float *x, V v, int ovs, const float *aligned_like)
 }
 
 static inline void ST(float *x, V v, int ovs, const float *aligned_like) 
-{			
+{
      STH(x, v, aligned_like);
      STL(x, v, ovs, aligned_like);
 }
@@ -210,3 +210,4 @@ static inline V BYTWJ(const R *t, V sr)
 
 #define RIGHT_CPU() 1
 
+#define VEC_OKSTRIDE(x) ((x % 2) == 0)

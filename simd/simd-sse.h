@@ -232,3 +232,5 @@ static __inline__ V BYTWJ(const R *t, V sr)
 
 #define RIGHT_CPU X(have_sse)
 extern int RIGHT_CPU(void);
+
+#define VEC_OKSTRIDE(x) ((x % 2) == 0)
