@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.12 2002-09-16 19:28:47 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.13 2002-09-16 19:31:39 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -287,11 +287,8 @@ static int applicable(const problem *p_, const S *ego, const planner *plnr)
      UNUSED(ego);
      if (RDFT2P(p_)) {
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  if (p->vecsz.rnk <= 1 && p->sz.rnk == 1) {
-               if (toobig(p->sz.dims[0].n, ego) && CONSERVE_MEMORYP(plnr))
-                    return 0;
-	       return 1;
-	  }
+	  return(p->vecsz.rnk <= 1 && p->sz.rnk == 1
+		 && !(toobig(p->sz.dims[0].n, ego) && CONSERVE_MEMORYP(plnr)));
      }
      return 0;
 }
