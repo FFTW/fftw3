@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.4 2002-08-01 18:56:02 stevenj Exp $ */
+/* $Id: scan.c,v 1.5 2002-08-01 18:56:45 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -94,7 +94,7 @@ static long getlong(scanner *sc, int *ret)
 #define BSZ 64
 #define BUF(b, ch) {if (b - buf < BSZ - 1) *b++ = ch; else {*ret=0; return 0;}}
 
-static R mygetR(scanner *sc, int *ret)
+static R getR(scanner *sc, int *ret)
 {
      char buf[BSZ], *b = buf;
      double x;
@@ -210,7 +210,7 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 		       }
 		       case 'f': case 'e': case 'g': {
 			    R *x = va_arg(ap, R *);
-			    *x = mygetR(sc, &ch);
+			    *x = getR(sc, &ch);
 			    if (!ch) return 0;
 			    break;
 		       }
