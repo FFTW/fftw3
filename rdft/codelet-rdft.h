@@ -120,7 +120,7 @@ struct hc2hc_desc_s {
 
 typedef const R *(*khc2hc) (R *rioarray, R *iioarray, const R *W,
                               stride ios, int m, int dist);
-void X(khc2hc_dit_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc);
+void X(khc2hc_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc);
 
 extern const solvtab X(solvtab_rdft_r2hc);
 
@@ -156,8 +156,6 @@ typedef khc2r_desc khc2rIII_desc;
 typedef khc2r_genus khc2rIII_genus;
 typedef khc2r khc2rIII;
 #define khc2rIII_register khc2r_register
-
-void X(khc2hc_dif_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc);
 
 extern const solvtab X(solvtab_rdft_hc2r);
 

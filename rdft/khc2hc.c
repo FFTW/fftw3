@@ -18,16 +18,15 @@
  *
  */
 
-/* $Id: khc2hc-dif.c,v 1.6 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: khc2hc.c,v 1.1 2004-03-21 17:38:45 athena Exp $ */
 
-#include "rdft.h"
+#include "ct.h"
 
-void (*X(khc2hc_dif_register_hook))(planner *, khc2hc, const hc2hc_desc *)=0;
+void (*X(khc2hc_register_hook))(planner *, khc2hc, const hc2hc_desc *)=0;
 
-void X(khc2hc_dif_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc)
+void X(khc2hc_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc)
 {
-     REGISTER_SOLVER(p, X(mksolver_rdft_hc2hc_dif)(codelet, desc));
-     REGISTER_SOLVER(p, X(mksolver_rdft_hc2hc_difbuf)(codelet, desc));
-     if (X(khc2hc_dif_register_hook))
-	  X(khc2hc_dif_register_hook)(p, codelet, desc);
+     REGISTER_SOLVER(p, X(mksolver_rdft_hc2hc_direct)(codelet, desc));
+     if (X(khc2hc_register_hook))
+	  X(khc2hc_register_hook)(p, codelet, desc);
 }

@@ -18,39 +18,37 @@
  *
  */
 
-#include "dft.h"
+#include "rdft.h"
 
-typedef void (*dftwapply) (const plan *ego, R *rio, R *iio);
+typedef void (*hc2hcapply) (const plan *ego, R *IO);
 typedef struct ct_solver_s ct_solver;
 typedef plan *(*mkinferior)(const ct_solver *ego,
-			    int dec, int r, int m, int s, int vl, int vs, 
-			    R *rio, R *iio,
-			    planner *plnr);
+			    rdft_kind kind, int r, int m, int s, 
+			    int vl, int vs, 
+			    R *IO, planner *plnr);
 
 typedef struct {
      plan super;
-     dftwapply apply;
-} plan_dftw;
+     hc2hcapply apply;
+} plan_hc2hc;
 
-extern plan *X(mkplan_dftw)(size_t size, const plan_adt *adt, dftwapply apply);
+extern plan *X(mkplan_hc2hc)(size_t size, const plan_adt *adt, 
+			     hc2hcapply apply);
 
-#define MKPLAN_DFTW(type, adt, apply) \
-  (type *)X(mkplan_dftw)(sizeof(type), adt, apply)
+#define MKPLAN_HC2HC(type, adt, apply) \
+  (type *)X(mkplan_hc2hc)(sizeof(type), adt, apply)
 
 struct ct_solver_s {
      solver super;
      int r;
-     int dec;
-#    define DECDIF 0
-#    define DECDIT 1
 
      mkinferior mkcldw;
 };
 
-ct_solver *X(mksolver_dft_ct)(size_t size, int r, int dec, mkinferior mkcldw);
+ct_solver *X(mksolver_rdft_ct)(size_t size, int r, mkinferior mkcldw);
 
-solver *X(mksolver_dft_ct_directw)(kdftw codelet, const ct_desc *desc, 
-				   int dec);
-solver *X(mksolver_dft_ct_directwbuf)(kdftw codelet, 
-				      const ct_desc *desc, int dec);
-solver *X(mksolver_dft_ctsq)(kdftwsq codelet, const ct_desc *desc, int dec);
+solver *X(mksolver_rdft_hc2hc_direct)(khc2hc codelet, const hc2hc_desc *desc);
+
+int X(rdft_ct_mkcldrn)(rdft_kind kind, int r, int m, int s, 
+		       R *IO, planner *plnr,
+		       plan **cld0p, plan **cldmp);
