@@ -1,3 +1,464 @@
+2002-07-29  Matteo Frigo  <athena@ab-initio>
+
+	* dft/simd/n1b.c, dft/simd/n1f.c, dft/simd/t1b.c, dft/simd/t1f.c,
+	simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h: Also check
+	strides in SIMD codelets
+
+	* simd/simd-altivec.h: Minor changes, mostly for consistency with
+	the big-endian processor
+
+2002-07-29  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/rader-dht.c: added comment
+
+	* configure.ac, kernel/alloc.c: added code for icc's _mm_malloc
+	(memalign replacement)
+
+2002-07-28  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/problem2.c, rdft/verify.c, tests/bench.c: slight fixes
+
+	* rdft/problem2.c: whoops
+
+2002-07-28  Matteo Frigo  <athena@ab-initio>
+
+	* simd/altivec.c, simd/simd-altivec.h: Use vec_xor to change sign
+
+2002-07-28  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/Makefile.am, rdft/buffered2.c, rdft/conf.c, rdft/direct2.c,
+	rdft/khc2r.c, rdft/kr2hc.c, rdft/nop2.c, rdft/plan2.c,
+	rdft/problem2.c, rdft/rdft.h, rdft/solve2.c, rdft/verify.c,
+	rdft/vrank-geq1-rdft2.c, tests/bench.c: added rdft2
+
+2002-07-28  Matteo Frigo  <athena@ab-initio>
+
+	* simd/simd-altivec.h: Optimized
+
+	* simd/simd-altivec.h: Changed ALIGNMENT
+
+	* simd/simd-sse.h: alignment := 8
+
+	* simd/simd-altivec.h: Avoid warning
+
+	* simd/simd-sse2.h: Oops
+
+	* genfft/annotate.ml, genfft/genutil.ml, genfft/simd.ml,
+	genfft/variable.ml, genfft/variable.mli, simd/simd-altivec.h,
+	simd/simd-sse.h, simd/simd-sse2.h: New altivec experiment
+
+	* simd/simd-altivec.h: Nothing
+
+	* simd/simd-altivec.h: Oops
+
+	* simd/simd-altivec.h: Nothing
+
+	* simd/Makefile.am, simd/altivec.c, simd/simd-altivec.h: Constants
+	are now in separate file.
+
+	* simd/simd-altivec.h: More precise comment
+
+	* simd/simd-altivec.h: gcc-3.1 bug workaround
+
+2002-07-28  Steven G. Johnson  <stevenj@ab-initio>
+
+	* dft/buffered.c, dft/dft.h, dft/problem.c, rdft/buffered.c,
+	rdft/problem.c, rdft/rdft.h: slight optimization, and exported
+	zerotens functions
+
+	* rdft/dft-r2hc.c: should be a plan_dft, not a plan_rdft
+
+2002-07-28  Matteo Frigo  <athena@ab-initio>
+
+	* simd/simd-altivec.h: Optimizations.  Make it work with vanilla
+	non-Apple gcc.
+
+2002-07-27  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/generic.c: whoops
+
+	* rdft/generic.c: added hc2r (dif)
+
+	* rdft/rader-hc2hc.c: add hc2r (dif) case
+
+2002-07-27  Matteo Frigo  <athena@ab-initio>
+
+	* simd/simd-altivec.h, support/Makefile.codelets: Altivec port
+
+	* kernel/twiddle.c: Fixed signed/unsigned bug.
+
+2002-07-26  Matteo Frigo  <athena@ab-initio>
+
+	* dft/rank0.c, rdft/rank0.c: Make rank0 unapplicable to in-place
+	problems.
+
+2002-07-25  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/generic.c: only works for r odd
+
+2002-07-25  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/planner-score.c: Reinserted much better timing-avoidance
+	heuristic
+
+	* dft/buffered.c, kernel/ifftw.h, kernel/plan.c,
+	kernel/planner-score.c, kernel/traverse.c, rdft/buffered.c,
+	tests/bench.c: Score is now a property of the plan, not of the
+	solver.  Revised representation of closures.
+
+	* genfft/gen_hc2r.ml, genfft/gen_r2hc.ml,
+	rdft/codelets/hc2r/Makefile.am: Cosmetic changes.  Added
+	hc2r_128.c
+
+2002-07-25  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/rader-dht.c: added hc2r
+
+	* rdft/Makefile.am, rdft/hc2hc-buf.c, rdft/hc2hc-ditbuf.c,
+	rdft/khc2hc-dif.c: added hc2hc-difbuf
+
+	* rdft/Makefile.am, rdft/hc2hc-dif.c, rdft/hc2hc.c,
+	rdft/khc2hc-dif.c, rdft/rdft.h: added rdft-dif
+
+	* rdft/verify.c: whoops, hc2r must be conjugated to have right
+	sign
+
+	* dft/ct-dif.c: slight change
+
+	* rdft/verify.c: whoops
+
+	* rdft/Makefile.am, rdft/codelet.h, rdft/direct-r2hc.c,
+	rdft/direct.c, rdft/khc2r.c, rdft/rdft.h: support hc2r codelets
+
+	* rdft/dft-r2hc.c: use vector plan for r/i instead of two separate
+	plans
+
+	* dft/buffered.c, dft/rader.c, kernel/ifftw.h, rdft/buffered.c,
+	rdft/rader-dht.c, rdft/rader-hc2hc.c: hack to allow rader/generic
+	to work in-place for small prime sizes, instead of always using
+	buffered
+
+2002-07-24  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/Makefile.am, rdft/conf.c, rdft/generic.c: added
+	rdft-generic
+
+	* dft/generic.c: fixed add count
+
+	* rdft/rader-hc2hc.c: again
+
+	* rdft/rader-hc2hc.c: slight fix
+
+	* rdft/rader-hc2hc.c: fixed comment
+
+	* tests/bench.c: whoops
+
+	* rdft/Makefile.am, rdft/conf.c, rdft/rader-hc2hc.c, rdft/rdft.h,
+	tests/bench.c: added rader-hc2hc
+
+	* dft/rader.c: whoops, initialize W
+
+	* rdft/rader-dht.c: strides should not be unsigned
+
+	* dft/rader.c: more stride sign fixes
+
+	* dft/rader.c: strides should not be unsigned!
+
+2002-07-23  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/dft-r2hc.c: added comment
+
+	* rdft/r2hc-hc2r.c: another fix to op count
+
+	* rdft/r2hc-hc2r.c: whoops
+
+	* rdft/dft-r2hc.c, rdft/r2hc-hc2r.c: slight fix to op counts
+
+	* rdft/conf.c, rdft/dft-r2hc.c, rdft/rdft.h, rdft/Makefile.am:
+	added dft-r2hc
+
+	* rdft/rader-dht.c: better comment and var. name
+
+	* rdft/Makefile.am, rdft/conf.c, rdft/r2hc-hc2r.c, rdft/rdft.h,
+	rdft/verify.c, tests/bench.c: fixed tests for hc2r, and added
+	r2hc-hc2r
+
+	* rdft/Makefile.am, rdft/conf.c, rdft/rader-dht.c, rdft/rdft.h:
+	added rader-dht
+
+2002-07-23  Matteo Frigo  <athena@ab-initio>
+
+	* rdft/codelets/r2hc/Makefile.am: Added r2hc_128, what the hell.
+
+	* rdft/codelets/r2hc/Makefile.am: Added codelets that compute
+	twiddle factors
+
+2002-07-22  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/Makefile.am, rdft/buffered.c, rdft/conf.c: added
+	rdft-buffered
+
+	* rdft/Makefile.am, rdft/hc2hc-ditbuf.c, rdft/khc2hc-dit.c: added
+	hc2hc-ditbuf
+
+	* dft/generic.c: use STACK_MALLOC (alloca), since generic radix is
+	always small
+
+	* rdft/hc2hc-dit.c: small cleanup
+
+2002-07-22  Matteo Frigo  <athena@ab-initio>
+
+	* rdft/problem.c: What the hell was I thinking?
+
+	* rdft/problem.c: Reduced code size by using table instead of
+	switch statement.
+
+	* rdft/problem.c: Changed hash function to avoid collisions with
+	DFT.
+
+2002-07-22  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/hc2hc-dit.c: added missing file, whoops
+
+	* rdft/hc2hc.c: whoops, generate enough twiddles for odd m
+
+	* rdft/verify.c: don't try to verify R2HCII or HC2RIII plans
+
+	* rdft/hc2hc.c: recursive case now works, I think
+
+	* rdft/verify.c: add extra impulse test for debugging
+
+	* rdft/direct-r2hc.c: whoops, multiply ios offset by stride (and
+	rename to ioffset)
+
+	* rdft/verify.c: whoops
+
+	* genfft/gen_hc2hc.ml, rdft/Makefile.am, rdft/hc2hc.c,
+	rdft/khc2hc-dit.c: added hc2hc-dit
+
+	* kernel/twiddle.c: twiddles can be shared with smaller m's
+
+	* rdft/Makefile.am, rdft/codelet.h, rdft/codelets/hfb.c,
+	rdft/hc2hc.c, rdft/hc2hc.h: preparing for recursive rdft...
+
+2002-07-21  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/verify.c: slight fix, to match libbench/verify.c
+
+	* rdft/direct-r2hc.c: r2hcII has imag parts offset by n-1, not n.
+	We can also allocate fewer strides.
+
+	* rdft/rank0.c: delete unused var
+
+	* rdft/Makefile.am, rdft/codelet.h, rdft/codelets/hc2r.c,
+	rdft/codelets/r2hc.c, rdft/conf.c, rdft/direct-r2hc.c,
+	rdft/indirect.c, rdft/khc2rIII.c, rdft/kr2hc.c, rdft/kr2hcII.c,
+	rdft/nop.c, rdft/problem.c, rdft/rank0.c, rdft/rdft.h,
+	rdft/vrank-geq1.c, rdft/vrank2-transpose.c,
+	rdft/vrank3-transpose.c: added some rdft solvers
+
+	* kernel/fftw3.h: pass identifier in FFTW() through another macro
+	so that the mangled name can itself be a preprocessor symbol
+
+	* dft/vrank-geq1.c: fix in comment
+
+	* Makefile.am, rdft/rdft.h, tests/bench.c: bench tests rdft plans
+
+	* rdft/codelet.h, tests/Makefile.am, tests/bench.c: make rdft.h
+	and dft.h compatible
+
+	* rdft/Makefile.am, rdft/problem.c, rdft/rdft.h, rdft/verify.c:
+	first-draft rdft verify
+
+	* rdft/khc2hc-dif.c, rdft/khc2hc-dit.c, rdft/khc2r.c,
+	rdft/khc2rIII.c, rdft/kr2hc.c, rdft/kr2hcII.c: got rid of annoying
+	warnings
+
+	* rdft/Makefile.am, rdft/khc2hc-dif.c, rdft/khc2hc-dit.c,
+	rdft/khc2r.c, rdft/khc2rIII.c, rdft/kr2hc.c, rdft/kr2hcII.c,
+	rdft/rdft.h: added stub codelet registration for linking purposes
+
+	* rdft/Makefile.am, rdft/conf.c, rdft/plan.c, rdft/problem.c,
+	rdft/rdft.h, rdft/solve.c: basic rdft stuff
+
+	* Makefile.am, configure.ac, dft/codelet.h, genfft/gen_hc2hc.ml,
+	kernel/ifftw.h, rdft/Makefile.am, rdft/codelet.h,
+	rdft/codelets/Makefile.am, rdft/codelets/hb.h,
+	rdft/codelets/hc2r.c, rdft/codelets/hc2r.h,
+	rdft/codelets/hc2r/Makefile.am, rdft/codelets/hc2rIII.h,
+	rdft/codelets/hf.h, rdft/codelets/hfb.c, rdft/codelets/r2hc.c,
+	rdft/codelets/r2hc.h, rdft/codelets/r2hc/Makefile.am,
+	rdft/codelets/r2hcII.h: rdft codelets now compile
+
+2002-07-20  Matteo Frigo  <athena@ab-initio>
+
+	* genfft/gen_hc2r.ml: Oops, was generating rdfts instead of hdfts
+
+	* TODO, configure.ac, genfft-k7/twiddle.ml, genfft/twiddle.ml,
+	kernel/twiddle.c, rdft/codelets/hc2r/Makefile.am: Added hc2r
+	codelets
+
+	* genfft/gen_hc2hc.ml: return W in hc2hc codelets
+
+	* configure.ac, dft/codelets/inplace/Makefile.am,
+	dft/codelets/standard/Makefile.am, dft/simd/codelets/Makefile.am,
+	genfft/gen_hc2hc.ml, genfft/gen_hc2r.ml, genfft/gen_r2hc.ml,
+	genfft/trig.ml, rdft/codelets/r2hc/Makefile.am,
+	support/Makefile.codelets: Some work on rdft codelets
+
+2002-07-16  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/fftw3.h: fix const
+
+	* acinclude.m4, configure.ac, dft/codelets/inplace/Makefile.am,
+	dft/codelets/standard/Makefile.am, dft/indirect.c, dft/rank0.c,
+	dft/simd/codelets/Makefile.am, kernel/version.c, tests/bench.c:
+	Separate CFLAGS in codelets.  Fix const in certain places.
+
+2002-07-16  Steven G. Johnson  <stevenj@ab-initio>
+
+	* TODO: note buffering problem
+
+2002-07-16  Matteo Frigo  <athena@ab-initio>
+
+	* dft/generic.c: Removed unpredictable branch from inner loop
+
+2002-07-15  Steven G. Johnson  <stevenj@ab-initio>
+
+	* TODO: update
+
+	* dft/generic.c: optimization
+
+	* dft/Makefile.am, dft/conf.c, dft/dft.h, dft/generic.c,
+	kernel/ifftw.h, kernel/twiddle.c: added generic dit
+
+	* dft/rader.c: whoops, mksolver should be static
+
+2002-07-15  Matteo Frigo  <athena@ab-initio>
+
+	* genfft/c.mli, genfft/gen_hc2hc.ml, genfft/gen_hc2r.ml,
+	genfft/gen_r2hc.ml, genfft/genutil.ml, genfft/Makefile.am,
+	genfft/algsimp.ml, genfft/c.ml: First implementation of gen_hc2hc,
+	probably still buggy.
+
+2002-07-15  Steven G. Johnson  <stevenj@ab-initio>
+
+	* dft/rader.c: don't count loading of twiddle factors in
+	ops.other, since it isn't counted for the codelets
+
+	* dft/ct.c, dft/rader.c, kernel/plan.c: plan_destroy puts plan to
+	sleep before deallocating it, to eliminate duplicate free calls in
+	solvers
+
+	* dft/ct-dif.c, dft/ct-dit.c, dft/ct-ditbuf.c, dft/ct.c,
+	dft/vrank-geq1.c, kernel/ifftw.h, tests/bench.c: fftw2-like vector
+	recursion flag
+
+2002-07-15  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/planner.c: More jokes
+
+	* tests/bench.c: Bless plan for testing purposes
+
+	* kernel/planner.c: Canonical linked-list deletion (hope it is
+	right)
+
+2002-07-14  Steven G. Johnson  <stevenj@ab-initio>
+
+	* dft/rader.c: use estimating planner for cld_omega
+
+	* dft/rader.c: better internal naming
+
+	* dft/rader.c: printing should really be fixed now, grrr
+
+	* dft/rader.c: print all distinct child plans
+
+	* tests/bench.c: whoops
+
+	* dft/rader.c: whoops, destroy should delete twiddle/omega from
+	list
+
+	* kernel/planner.c: whoops
+
+	* kernel/ifftw.h, kernel/plan.c, kernel/planner.c: added
+	plan_bless and FORGET_ACCURSED
+
+	* kernel/traverse.c: further cleanup
+
+	* kernel/traverse.c: slight cleanup
+
+	* kernel/Makefile.am, kernel/ifftw.h, kernel/traverse.c,
+	tests/bench.c: added traverse_plan via print (ugh)
+
+	* dft/ct.c, kernel/ifftw.h, kernel/twiddle.c: added TW_FULL, and
+	additional n parameter for twiddles
+
+	* kernel/planner.c: whoops
+
+	* kernel/ifftw.h, kernel/planner-naive.c, kernel/planner-score.c,
+	kernel/planner.c: save flags before invoking solver mkplan
+
+2002-07-14  Matteo Frigo  <athena@ab-initio>
+
+	* TODO: *** empty log message ***
+
+2002-07-14  Steven G. Johnson  <stevenj@ab-initio>
+
+	* configure.ac, kernel/cycle.h: added support for UNICOS _rtc()
+	real-time-clock intrinsic function
+
+	* kernel/timer.c: fixed typo: HAVE_TIME_H should include time.h,
+	not sys/time.h
+
+	* configure.ac, kernel/cycle.h: support AIX read_real_time timer
+
+2002-07-13  Steven G. Johnson  <stevenj@ab-initio>
+
+	* configure.ac: use && instead of the (sigh) unportable -a
+
+	* configure.ac: use AC_HELP_STRING
+
+	* configure.ac, dft/codelet.h, dft/verify.c, kernel/Makefile.am,
+	kernel/dfftw3.h, kernel/fftw3.h, kernel/ifftw.h, kernel/lfftw3.h,
+	kernel/sfftw3.h, libbench/bench-main.c, libbench/bench-user.h,
+	libbench/info.c, libbench/verify.c, simd/simd-sse2.h: support
+	long-double precision
+
+	* dft/rader.c: whoops whoops
+
+	* dft/rader.c: whoops
+
+	* TODO: buffered solver strides have been fixed
+
+	* dft/rader.c: convention
+
+	* TODO, dft/rader.c: share twiddle arrays in Rader
+
+	* libbench/verify.c: call done() after verify
+
+2002-07-12  Steven G. Johnson  <stevenj@ab-initio>
+
+	* tests/bench.c: output planner time with -v
+
+	* kernel/print.c: support double outputs
+
+	* dft/vrank-geq1.c: removed extraneous parens
+
+	* dft/buffered.c: increase maxbufsz to 64k; makes a big difference
+	for large 2d transforms
+
+2002-07-12  Matteo Frigo  <athena@ab-initio>
+
+	* dft/vrank-geq1.c: Fix
+
+2002-07-12  Steven G. Johnson  <stevenj@ab-initio>
+
+	* dft/rank-geq2.c: fix comment
+
+	* kernel/tensor.c: fix in comment
+
+	* ChangeLog: updated
+
 2002-07-12  Steven G. Johnson  <stevenj@ab-initio>
 
 	* TODO: buffered malloc's buffers
