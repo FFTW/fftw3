@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.24 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: alloc.c,v 1.25 2003-01-16 05:44:45 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -34,9 +34,11 @@ extern void *memalign(size_t, size_t);
 extern int posix_memalign(void **, size_t, size_t);
 #endif
 
+#define real_malloc X(malloc)
 #define real_free free /* memalign and malloc use ordinary free */
 
-static void *real_malloc(size_t n)
+/* part of user-callable API */
+void *X(malloc)(size_t n)
 {
      void *p;
 
@@ -57,6 +59,12 @@ static void *real_malloc(size_t n)
      p = malloc(n);
 #endif
      return p;
+}
+
+/* part of user-callable API */
+void X(free)(void *p)
+{
+     real_free(p);
 }
 
 /**********************************************************
