@@ -163,6 +163,7 @@ void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl)
      k.s0 = s0;
      k.s1 = s1;
      k.vl = vl;
+     /* two blocks must be in cache, to be swapped */
      k.tilesz = X(compute_tilesz)(vl, 2);
      k.buf0 = k.buf1 = 0; /* unused */
      transpose_rec(I, n, dotile, &k);
@@ -171,12 +172,16 @@ void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl)
 void X(transpose_tiledbuf)(R *I, int n, int s0, int s1, int vl) 
 {
      struct transpose_closure k;
-     R buf0[CACHESIZE / (4 * sizeof(R))];
-     R buf1[CACHESIZE / (4 * sizeof(R))];
+     /* Assume that the the rows of I conflict into the same cache
+        lines, and therefore we don't need to reserve cache space for
+        the input.  If the rows don't conflict, there is no reason
+	to use tiledbuf at all.*/
+     R buf0[CACHESIZE / (2 * sizeof(R))];
+     R buf1[CACHESIZE / (2 * sizeof(R))];
      k.s0 = s0;
      k.s1 = s1;
      k.vl = vl;
-     k.tilesz = X(compute_tilesz)(vl, 4);
+     k.tilesz = X(compute_tilesz)(vl, 2);
      k.buf0 = buf0;
      k.buf1 = buf1;
      A(k.tilesz * k.tilesz * vl * sizeof(R) <= sizeof(buf0));
