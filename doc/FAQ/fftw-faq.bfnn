@@ -136,7 +136,7 @@ on Irix, we suggest deleting it from your system and replacing it with
 a symbolic link to \courier{/bin/echo\}.
 
 If support for SIMD instructions is enabled in FFTW, further compiler
-problems may appear.  
+problems may appear:
 
 Some 3.0.x and 3.1.x versions of \courier{gcc\} on \courier{x86\} may
 crash, although the problem is fixed in version 3.2.  \courier{gcc\}
