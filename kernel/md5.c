@@ -71,13 +71,13 @@ static const struct roundtab {
      {  4,  6}, { 11, 10}, {  2, 15}, {  9, 21}
 };
 
-#define rol(a, s) ((a << s) | (a >> (32 - s)))
+#define rol(a, s) ((a << (int)(s)) | (a >> (32 - (int)(s))))
 
 static void doblock(md5sig state, const unsigned char *data)
 {
      md5uint a, b, c, d, t, x[16];
      const md5uint msk = 0xffffffffUL;
-     uint i;
+     int i;
 
      /* encode input bytes into md5uint */
      for (i = 0; i < 16; ++i) {
@@ -88,7 +88,7 @@ static void doblock(md5sig state, const unsigned char *data)
      a = state[0]; b = state[1]; c = state[2]; d = state[3];
      for (i = 0; i < 64; ++i) {
 	  const struct roundtab *p = roundtab + i;
-	  uint round = i / 16;
+	  int round = i / 16;
 	  switch (round) {
 	      case 0: a += (b & c) | (~b & d); break;
 	      case 1: a += (b & d) | (c & ~d); break;
@@ -125,7 +125,7 @@ void X(md5putc)(md5 *p, unsigned char c)
 
 void X(md5end)(md5 *p)
 {
-     uint l, i;
+     unsigned l, i;
 
      l = 8 * p->l; /* length before padding, in bits */
 

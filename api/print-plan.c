@@ -20,10 +20,10 @@
 
 #include "api.h"
 
-void X(print_plan)(X(plan) p, FILE *output_file)
+void X(print_plan) (X(plan) p, FILE * output_file)
 {
-     printer *pr = X(mkprinter_file)(output_file);
+     printer *pr = X(mkprinter_file) (output_file);
      plan *pln = p->pln;
      pln->adt->print(pln, pr);
-     X(printer_destroy)(pr);
+     X(printer_destroy) (pr);
 }

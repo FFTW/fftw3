@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.h,v 1.13 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: ct.h,v 1.14 2003-01-15 02:10:25 athena Exp $ */
 
 /* Cooley-Tukey variants */
 union kct {
@@ -39,7 +39,7 @@ typedef struct {
      union kct k;
      plan *cld;
      twid *td;
-     uint r, m, vl;
+     int r, m, vl;
      int is, os, ivs, ovs, iios;
      stride ios, vs;
      const solver_ct *slv;

@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: k7.c,v 1.3 2002-07-02 14:30:58 athena Exp $ */
+/* $Id: k7.c,v 1.4 2003-01-15 02:10:25 athena Exp $ */
 
 #include "dft.h"
 
 #if HAVE_K7
 
-static inline uint cpuid_edx(uint op)
+static inline int cpuid_edx(int op)
 {
-     uint eax, ecx, edx;
+     int eax, ecx, edx;
 
      __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
 	     : "=a" (eax), "=c" (ecx), "=d" (edx)
@@ -34,9 +34,9 @@ static inline uint cpuid_edx(uint op)
      return edx;
 }
 
-static inline uint cpuid_eax(uint op)
+static inline int cpuid_eax(int op)
 {
-     uint eax, ecx, edx;
+     int eax, ecx, edx;
 
      __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
 	     : "=a" (eax), "=c" (ecx), "=d" (edx)
@@ -62,7 +62,7 @@ static int k7p(void)
 
 static int nmokp(const kdft_desc *d,
 		 const R *ri, const R *ii, const R *ro, const R *io,
-		 int is, int os, uint vl, int ivs, int ovs)
+		 int is, int os, int vl, int ivs, int ovs)
 {
      return (k7p()
 	     && ii == ri + 1 
@@ -76,7 +76,7 @@ const kdft_genus X(kdft_k7_mgenus) = { nmokp, 1 };
 
 static int npokp(const kdft_desc *d,
 		 const R *ri, const R *ii, const R *ro, const R *io,
-		 int is, int os, uint vl, int ivs, int ovs)
+		 int is, int os, int vl, int ivs, int ovs)
 {
      return (k7p()
 	     && ri == ii + 1 
@@ -90,7 +90,7 @@ const kdft_genus X(kdft_k7_pgenus) = { npokp, 1 };
 
 static int cmokp(const ct_desc *d,
 		 const R *rio, const R *iio, 
-		 int ios, int vs, uint m, int dist)
+		 int ios, int vs, int m, int dist)
 {
      return (k7p()
 	     && iio == rio + 1
@@ -103,7 +103,7 @@ const ct_genus X(kdft_ct_k7_mgenus) = { cmokp, 1 };
 
 static int cpokp(const ct_desc *d,
 		 const R *rio, const R *iio, 
-		 int ios, int vs, uint m, int dist)
+		 int ios, int vs, int m, int dist)
 {
      return (k7p()
 	     && rio == iio + 1

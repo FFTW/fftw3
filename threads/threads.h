@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: threads.h,v 1.1 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: threads.h,v 1.2 2003-01-15 02:10:25 athena Exp $ */
 
 #ifndef __THREADS_H__
 #define __THREADS_H__
@@ -28,13 +28,13 @@
 #include "rdft.h"
 
 typedef struct {
-     uint min, max, thr_num;
+     int min, max, thr_num;
      void *data;
 } spawn_data;
 
 typedef void *(*spawn_function) (spawn_data *);
 
-void X(spawn_loop)(uint loopmax, uint nthreads,
+void X(spawn_loop)(int loopmax, int nthreads,
 		   spawn_function proc, void *data);
 int X(threads_init)(void);
 

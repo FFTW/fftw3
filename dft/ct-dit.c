@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.30 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: ct-dit.c,v 1.31 2003-01-15 02:10:25 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -34,7 +34,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      cld->apply(cld0, ri, ii, ro, io);
 
      {
-          uint i, m = ego->m, vl = ego->vl;
+          int i, m = ego->m, vl = ego->vl;
           int os = ego->os, ovs = ego->ovs;
 
           for (i = 0; i < vl; ++i)
@@ -49,11 +49,11 @@ static int applicable0(const solver_ct *ego, const problem *p_,
      UNUSED(plnr);
      if (X(dft_ct_applicable)(ego, p_)) {
 	  int ivs, ovs;
-	  uint vl;
+	  int vl;
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
           iodim *d = p->sz->dims;
-	  uint m = d[0].n / e->radix;
+	  int m = d[0].n / e->radix;
 	  X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
           return (1
 		  && (e->genus->okp(e, p->ro, p->io, 

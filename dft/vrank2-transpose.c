@@ -18,16 +18,16 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.15 2002-09-26 19:06:38 athena Exp $ */
+/* $Id: vrank2-transpose.c,v 1.16 2003-01-15 02:10:25 athena Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
 #include "dft.h"
 
 /* transposition routine. TODO: optimize? */
-static void t(R *rA, R *iA, uint n, int is, int js)
+static void t(R *rA, R *iA, int n, int is, int js)
 {
-     uint i, j;
+     int i, j;
      int im = iA - rA;
 
      for (i = 1; i < n; ++i) {
@@ -46,7 +46,7 @@ typedef solver S;
 
 typedef struct {
      plan_dft super;
-     uint n;
+     int n;
      int s0, s1;
 } P;
 

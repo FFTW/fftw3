@@ -18,19 +18,19 @@
  *
  */
 
-/* $Id: zero.c,v 1.2 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: zero.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
 
 #include "dft.h"
 
 /* fill a complex array with zeros. */
-static void recur(const iodim *dims, uint rnk, R *ri, R *ii)
+static void recur(const iodim *dims, int rnk, R *ri, R *ii)
 {
      if (rnk == RNK_MINFTY)
           return;
      else if (rnk == 0)
           ri[0] = ii[0] = 0.0;
      else if (rnk > 0) {
-          uint i, n = dims[0].n;
+          int i, n = dims[0].n;
           int is = dims[0].is;
 
 	  if (rnk == 1) {

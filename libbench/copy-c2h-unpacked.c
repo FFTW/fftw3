@@ -8,7 +8,7 @@
 void copy_c2h_unpacked(struct problem *p, bench_complex *in,
 		       bench_real sign_of_r2h_transform)
 {
-     unsigned int k, n, k0, n0, ld;
+     int k, n, k0, n0, ld;
      bench_complex *pin = p->in;
 
      BENCH_ASSERT(p->rank >= 1);

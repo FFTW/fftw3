@@ -41,7 +41,7 @@ typedef struct {
      plan *cld;
      R *W;
      R *omega;
-     uint m, r, g, ginv;
+     int m, r, g, ginv;
      int os, ios;
      rdft_kind kind;
 } P;
@@ -55,11 +55,11 @@ static rader_tl *twiddles = 0;
    obviate the necessity of having separate forward and backward
    plans. */
 
-static void apply_aux(uint r, plan_dft *cldr, const R *omega,
+static void apply_aux(int r, plan_dft *cldr, const R *omega,
 		      R *buf, R *ro, R i0, R *io)
 {
      R r0;
-     uint k;
+     int k;
 
      /* compute DFT of buf, operating in-place */
      cldr->apply((plan *) cldr, buf, buf+1, buf, buf+1);
@@ -92,7 +92,7 @@ static void apply_dit(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      plan_dft *cldr;
      int os, ios;
-     uint j, k, gpower, g, ginv, r, m;
+     int j, k, gpower, g, ginv, r, m;
      R *buf, *rio, *ii, *io;
      const R *omega, *W;
 
@@ -170,7 +170,7 @@ static void apply_dif(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      plan_dft *cldr;
      int is, ios;
-     uint j, k, gpower, g, ginv, r, m;
+     int j, k, gpower, g, ginv, r, m;
      R *buf, *rio, *ii, *io;
      const R *omega, *W;
 
@@ -254,10 +254,10 @@ static void apply_dif(plan *ego_, R *I, R *O)
      }
 }
 
-static R *mktwiddle(uint m, uint r, uint g)
+static R *mktwiddle(int m, int r, int g)
 {
-     uint i, j, gpower;
-     uint n = r * m;
+     int i, j, gpower;
+     int n = r * m;
      R *W;
 
      if ((W = X(rader_tl_find)(m, r, g, twiddles)))
@@ -267,7 +267,7 @@ static R *mktwiddle(uint m, uint r, uint g)
      for (i = 1; i < (m+1)/2; ++i) {
 	  for (gpower = 1, j = 0; j < r - 1;
 	       ++j, gpower = MULMOD(gpower, g, r)) {
-	       uint k = (i - 1) * (r - 1) + j;
+	       int k = (i - 1) * (r - 1) + j;
 	       W[2*k] = X(cos2pi)(i * gpower, n);
 	       W[2*k+1] = FFT_SIGN * X(sin2pi)(i * gpower, n);
 	  }
@@ -347,7 +347,7 @@ static int applicable(const solver *ego_, const problem *p_,
      return (!NO_UGLYP(plnr) && applicable0(ego_, p_));
 }
 
-static int mkP(P *pln, uint r, R *O, int ios, rdft_kind kind, planner *plnr)
+static int mkP(P *pln, int r, R *O, int ios, rdft_kind kind, planner *plnr)
 {
      plan *cldr = (plan *) 0;
      plan *cldr0 = (plan *) 0;
@@ -396,7 +396,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
      P *pln = 0;
-     uint n, is, os, r, m;
+     int n, is, os, r, m;
      plan *cld = (plan *) 0;
 
      static const plan_adt padt = {
@@ -445,7 +445,7 @@ static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
      P *pln = 0;
-     uint n, is, os, r, m;
+     int n, is, os, r, m;
      plan *cld = (plan *) 0;
 
      static const plan_adt padt = {

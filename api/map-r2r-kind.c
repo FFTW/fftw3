@@ -21,27 +21,50 @@
 #include "api.h"
 #include "rdft.h"
 
-rdft_kind *X(map_r2r_kind)(uint rank, const X(r2r_kind) *kind)
+rdft_kind *X(map_r2r_kind) (int rank, const X(r2r_kind) * kind)
 {
-     uint i;
+     int i;
      rdft_kind *k;
 
      A(FINITE_RNK(rank));
      k = (rdft_kind *) MALLOC(rank * sizeof(rdft_kind), PROBLEMS);
-     for (i = 0; i < rank; ++i) 
-	  switch (kind[i]) {
-	      case FFTW_R2HC: k[i] = R2HC; break;
-	      case FFTW_HC2R: k[i] = HC2R; break;
-	      case FFTW_DHT: k[i] = DHT; break;
-	      case FFTW_REDFT00: k[i] = REDFT00; break;
-	      case FFTW_REDFT01: k[i] = REDFT01; break;
-	      case FFTW_REDFT10: k[i] = REDFT10; break;
-	      case FFTW_REDFT11: k[i] = REDFT11; break;
-	      case FFTW_RODFT00: k[i] = RODFT00; break;
-	      case FFTW_RODFT01: k[i] = RODFT01; break;
-	      case FFTW_RODFT10: k[i] = RODFT10; break;
-	      case FFTW_RODFT11: k[i] = RODFT11; break;
-	      default: A(0);
-	  }
+     for (i = 0; i < rank; ++i)
+          switch (kind[i]) {
+          case FFTW_R2HC:
+               k[i] = R2HC;
+               break;
+          case FFTW_HC2R:
+               k[i] = HC2R;
+               break;
+          case FFTW_DHT:
+               k[i] = DHT;
+               break;
+          case FFTW_REDFT00:
+               k[i] = REDFT00;
+               break;
+          case FFTW_REDFT01:
+               k[i] = REDFT01;
+               break;
+          case FFTW_REDFT10:
+               k[i] = REDFT10;
+               break;
+          case FFTW_REDFT11:
+               k[i] = REDFT11;
+               break;
+          case FFTW_RODFT00:
+               k[i] = RODFT00;
+               break;
+          case FFTW_RODFT01:
+               k[i] = RODFT01;
+               break;
+          case FFTW_RODFT10:
+               k[i] = RODFT10;
+               break;
+          case FFTW_RODFT11:
+               k[i] = RODFT11;
+               break;
+          default:
+               A(0);
+          }
      return k;
 }

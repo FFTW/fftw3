@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: tensor5.c,v 1.1 2002-09-22 14:21:36 athena Exp $ */
+/* $Id: tensor5.c,v 1.2 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 
-static void dimcpy(iodim *dst, const iodim *src, uint rnk)
+static void dimcpy(iodim *dst, const iodim *src, int rnk)
 {
-     uint i;
+     int i;
      if (FINITE_RNK(rnk))
           for (i = 0; i < rnk; ++i)
                dst[i] = src[i];
@@ -43,7 +43,7 @@ tensor *X(tensor_copy_inplace)(const tensor *sz, inplace_kind k)
 {
      tensor *x = X(tensor_copy)(sz);
      if (FINITE_RNK(x->rnk)) {
-	  uint i;
+	  int i;
 	  if (k == INPLACE_OS)
 	       for (i = 0; i < x->rnk; ++i)
 		    x->dims[i].is = x->dims[i].os;
@@ -56,7 +56,7 @@ tensor *X(tensor_copy_inplace)(const tensor *sz, inplace_kind k)
 
 /* Like X(tensor_copy), but copy all of the dimensions *except*
    except_dim. */
-tensor *X(tensor_copy_except)(const tensor *sz, uint except_dim)
+tensor *X(tensor_copy_except)(const tensor *sz, int except_dim)
 {
      tensor *x;
 
@@ -70,7 +70,7 @@ tensor *X(tensor_copy_except)(const tensor *sz, uint except_dim)
 
 /* Like X(tensor_copy), but copy only rnk dimensions starting
    with start_dim. */
-tensor *X(tensor_copy_sub)(const tensor *sz, uint start_dim, uint rnk)
+tensor *X(tensor_copy_sub)(const tensor *sz, int start_dim, int rnk)
 {
      tensor *x;
 

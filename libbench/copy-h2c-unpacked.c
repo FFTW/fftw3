@@ -6,16 +6,16 @@
  */
 
 static void cp(bench_complex *in, bench_complex *out,
-	       unsigned int rank,
-	       unsigned int *n,
-	       unsigned int nb,
-	       unsigned int mnb,
+	       int rank,
+	       int *n,
+	       int nb,
+	       int mnb,
 	       bench_real sign)
 {
      if (rank == 1) {
-	  unsigned int k0;
-	  unsigned int n0 = n[0];
-	  unsigned int ld = 1 + (n[0] / 2);
+	  int k0;
+	  int n0 = n[0];
+	  int ld = 1 + (n[0] / 2);
 
 	  for (k0 = 0; k0 < n0; ++k0) {
 	       bench_complex a;
@@ -29,8 +29,8 @@ static void cp(bench_complex *in, bench_complex *out,
 	       out[n0 * nb + k0] = a;
 	  }
      } else {
-	  unsigned int ki;
-	  unsigned int ni = n[0];
+	  int ki;
+	  int ni = n[0];
 	  cp(in, out, rank - 1, n + 1, nb * ni, mnb * ni, sign);
 	  for (ki = 1; ki < ni; ++ki) {
 	       cp(in, out, rank - 1, n + 1, nb * ni + ki, 

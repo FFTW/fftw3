@@ -20,14 +20,14 @@
 
 #include "api.h"
 
-tensor *X(mktensor_rowmajor)(uint rnk, const ulong *n,
-			     const ulong *niphys, const ulong *nophys,
-			     long is, long os)
+tensor *X(mktensor_rowmajor) (int rnk, const int *n,
+                              const int *niphys, const int *nophys,
+                              int is, int os)
 {
-     tensor *x = X(mktensor)(rnk);
+     tensor *x = X(mktensor) (rnk);
 
      if (FINITE_RNK(rnk) && rnk > 0) {
-          uint i;
+          int i;
 
           A(n && niphys && nophys);
           x->dims[rnk - 1].is = is;
@@ -41,4 +41,3 @@ tensor *X(mktensor_rowmajor)(uint rnk, const ulong *n,
      }
      return x;
 }
-

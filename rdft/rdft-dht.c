@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.12 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: rdft-dht.c,v 1.13 2003-01-15 02:10:25 athena Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime
@@ -35,14 +35,14 @@ typedef struct {
      plan_rdft super;
      plan *cld;
      int is, os;
-     uint n;
+     int n;
 } P;
 
 static void apply_r2hc(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
      int os;
-     uint i, n;
+     int i, n;
 
      {
 	  plan_rdft *cld = (plan_rdft *) ego->cld;
@@ -69,7 +69,7 @@ static void apply_hc2r(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
      int is = ego->is;
-     uint i, n = ego->n;
+     int i, n = ego->n;
 
      for (i = 1; i < n - i; ++i) {
 	  E a, b;
@@ -95,7 +95,7 @@ static void apply_hc2r_save(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
-     uint i, n = ego->n;
+     int i, n = ego->n;
 
      O[0] = I[0];
      for (i = 1; i < n - i; ++i) {

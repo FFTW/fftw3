@@ -21,10 +21,12 @@
 #include "api.h"
 #include "dft.h"
 
-X(plan) X(plan_dft_3d)(unsigned long nx, unsigned long ny, unsigned long nz,
-		       C *in, C *out, int sign, unsigned int flags)
+X(plan) X(plan_dft_3d) (int nx, int ny, int nz,
+                        C *in, C *out, int sign, int flags)
 {
-     unsigned long n[3];
-     n[0] = nx; n[1] = ny; n[2] = nz;
-     return X(plan_dft)(3, n, in, out, sign, flags);
+     int n[3];
+     n[0] = nx;
+     n[1] = ny;
+     n[2] = nz;
+     return X(plan_dft) (3, n, in, out, sign, flags);
 }

@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: buffered.c,v 1.42 2003-01-13 09:20:36 athena Exp $ */
+/* $Id: buffered.c,v 1.43 2003-01-15 02:10:25 athena Exp $ */
 
 #include "dft.h"
 
 typedef struct {
-     uint nbuf;
-     uint maxbufsz;
-     uint skew_alignment;
-     uint skew;
+     int nbuf;
+     int maxbufsz;
+     int skew_alignment;
+     int skew;
      const char *nam;
 } bufadt;
 
@@ -39,7 +39,7 @@ typedef struct {
      plan_dft super;
 
      plan *cld, *cldcpy, *cldrest;
-     uint n, vl, nbuf, bufdist;
+     int n, vl, nbuf, bufdist;
      int ivs, ovs;
      int roffset, ioffset;
 
@@ -50,13 +50,13 @@ typedef struct {
 static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
-     uint nbuf = ego->nbuf;
+     int nbuf = ego->nbuf;
      R *bufs = (R *)MALLOC(sizeof(R) * nbuf * ego->bufdist * 2, BUFFERS);
 
      plan_dft *cld = (plan_dft *) ego->cld;
      plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
      plan_dft *cldrest;
-     uint i, vl = ego->vl;
+     int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      int roffset = ego->roffset, ioffset = ego->ioffset;
 
@@ -110,12 +110,12 @@ static void print(plan *ego_, printer *p)
               ego->cld, ego->cldcpy, ego->cldrest);
 }
 
-static uint compute_nbuf(uint n, uint vl, const S *ego)
+static int compute_nbuf(int n, int vl, const S *ego)
 {
      return X(compute_nbuf)(n, vl, ego->adt->nbuf, ego->adt->maxbufsz);
 }
 
-static int toobig(uint n, const S *ego)
+static int toobig(int n, const S *ego)
 {
      return (n > ego->adt->maxbufsz);
 }
@@ -184,7 +184,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cldrest = (plan *) 0;
      const problem_dft *p = (const problem_dft *) p_;
      R *bufs = (R *) 0;
-     uint nbuf = 0, bufdist, n, vl;
+     int nbuf = 0, bufdist, n, vl;
      int ivs, ovs, roffset, ioffset;
 
      static const plan_adt padt = {

@@ -18,16 +18,16 @@
  *
  */
 
-/* $Id: 3dnow.c,v 1.1 2002-08-07 21:14:09 athena Exp $ */
+/* $Id: 3dnow.c,v 1.2 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
 
 #if HAVE_3DNOW
 
-static inline uint cpuid_edx(uint op)
+static inline int cpuid_edx(int op)
 {
-     uint eax, ecx, edx;
+     int eax, ecx, edx;
 
      __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
 	     : "=a" (eax), "=c" (ecx), "=d" (edx)
@@ -35,9 +35,9 @@ static inline uint cpuid_edx(uint op)
      return edx;
 }
 
-static inline uint cpuid_eax(uint op)
+static inline int cpuid_eax(int op)
 {
-     uint eax, ecx, edx;
+     int eax, ecx, edx;
 
      __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
 	     : "=a" (eax), "=c" (ecx), "=d" (edx)

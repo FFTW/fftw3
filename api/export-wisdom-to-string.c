@@ -22,19 +22,19 @@
 
 typedef struct {
      printer super;
-     uint *cnt;
+     int *cnt;
 } P_cnt;
 
-static void putchr_cnt(printer *p_, char c)
+static void putchr_cnt(printer * p_, char c)
 {
      P_cnt *p = (P_cnt *) p_;
      UNUSED(c);
      ++*p->cnt;
 }
 
-static printer *mkprinter_cnt(uint *cnt)
+static printer *mkprinter_cnt(int *cnt)
 {
-     P_cnt *p = (P_cnt *) X(mkprinter)(sizeof(P_cnt), putchr_cnt);
+     P_cnt *p = (P_cnt *) X(mkprinter) (sizeof(P_cnt), putchr_cnt);
      p->cnt = cnt;
      *cnt = 0;
      return &p->super;
@@ -45,7 +45,7 @@ typedef struct {
      char *s;
 } P_str;
 
-static void putchr_str(printer *p_, char c)
+static void putchr_str(printer * p_, char c)
 {
      P_str *p = (P_str *) p_;
      *p->s++ = c;
@@ -54,28 +54,28 @@ static void putchr_str(printer *p_, char c)
 
 static printer *mkprinter_str(char *s)
 {
-     P_str *p = (P_str *) X(mkprinter)(sizeof(P_str), putchr_str);
+     P_str *p = (P_str *) X(mkprinter) (sizeof(P_str), putchr_str);
      p->s = s;
      *s = 0;
      return &p->super;
 }
 
-char *X(export_wisdom_to_string)(void)
+char *X(export_wisdom_to_string) (void)
 {
      printer *p;
-     planner *plnr = X(the_planner)();
-     uint cnt;
+     planner *plnr = X(the_planner) ();
+     int cnt;
      char *s;
 
      p = mkprinter_cnt(&cnt);
      plnr->adt->exprt(plnr, p);
-     X(printer_destroy)(p);
+     X(printer_destroy) (p);
 
      s = (char *) NATIVE_MALLOC(sizeof(char) * (cnt + 1), OTHER);
      if (s) {
-	  p = mkprinter_str(s);
-	  plnr->adt->exprt(plnr, p);
-	  X(printer_destroy)(p);
+          p = mkprinter_str(s);
+          plnr->adt->exprt(plnr, p);
+          X(printer_destroy) (p);
      }
 
      return s;

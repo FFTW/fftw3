@@ -20,11 +20,8 @@
 
 #include "api.h"
 
-X(plan) X(plan_dft_r2c)(unsigned int rank, const unsigned long *n,
-			R *in, C *out, unsigned int flags)
+X(plan) X(plan_dft_r2c) (int rank, const int *n, R *in, C *out, int flags)
 {
-     return X(plan_many_dft_r2c)(rank, n, 1,
-				 in, 0, 1, 1,
-				 out, 0, 1, 1,
-				 flags);
+     return X(plan_many_dft_r2c) (rank, n, 1,
+                                  in, 0, 1, 1, out, 0, 1, 1, flags);
 }

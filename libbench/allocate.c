@@ -1,6 +1,6 @@
 /* not worth copyrighting */
 
-/* $Id: allocate.c,v 1.2 2002-06-10 10:49:55 athena Exp $ */
+/* $Id: allocate.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -25,7 +25,7 @@ void problem_alloc(struct problem *p)
 	       p->out = bench_malloc(s * sizeof(bench_complex));
      } else {
 	  size_t s = p->vsize;
-	  unsigned int i;
+	  int i;
 
 	  for (i = 0; i < p->rank; ++i)
 	       /* slightly overallocate to account for unpacked formats */

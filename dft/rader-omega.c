@@ -22,11 +22,11 @@
 
 static rader_tl *omegas = 0;
 
-R *X(dft_rader_mkomega)(plan *p_, uint n, uint ginv)
+R *X(dft_rader_mkomega)(plan *p_, int n, int ginv)
 {
      plan_dft *p = (plan_dft *) p_;
      R *omega;
-     uint i, gpower;
+     int i, gpower;
      trigreal scale;
 
      if ((omega = X(rader_tl_find)(n, n, ginv, omegas)))

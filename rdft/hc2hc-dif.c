@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.12 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: hc2hc-dif.c,v 1.13 2003-01-15 02:10:25 athena Exp $ */
 
 /* decimation in frequency Cooley-Tukey */
 #include "rdft.h"
@@ -32,7 +32,7 @@ static void apply(plan *ego_, R *I, R *O)
      {
           plan_rdft *cld0 = (plan_rdft *) ego->cld0;
           plan_rdft *cldm = (plan_rdft *) ego->cldm;
-          uint i, r = ego->r, m = ego->m, vl = ego->vl;
+          int i, r = ego->r, m = ego->m, vl = ego->vl;
           int is = ego->is, ivs = ego->ivs;
 	  
           for (i = 0; i < vl; ++i, I += ivs) {
@@ -54,11 +54,11 @@ static int applicable0(const solver_hc2hc *ego, const problem *p_,
 {
      if (X(rdft_hc2hc_applicable)(ego, p_)) {
 	  int ivs, ovs;
-	  uint vl;
+	  int vl;
           const hc2hc_desc *e = ego->desc;
           const problem_rdft *p = (const problem_rdft *) p_;
           iodim *d = p->sz->dims;
-	  uint m = d[0].n / e->radix;
+	  int m = d[0].n / e->radix;
 	  X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
           return (1
 		  && (p->I == p->O || DESTROY_INPUTP(plnr))

@@ -18,19 +18,19 @@
  *
  */
 
-/* $Id: dotens2.c,v 1.2 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: dotens2.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 #include "debug.h"
 
-static void recur(uint rnk, const iodim *dims0, const iodim *dims1,
+static void recur(int rnk, const iodim *dims0, const iodim *dims1,
 		  dotens2_closure *k, 
 		  int indx0, int ondx0, int indx1, int ondx1)
 {
      if (rnk == 0)
           k->apply(k, indx0, ondx0, indx1, ondx1);
      else {
-          uint i, n = dims0[0].n;
+          int i, n = dims0[0].n;
           int is0 = dims0[0].is;
           int os0 = dims0[0].os;
           int is1 = dims1[0].is;

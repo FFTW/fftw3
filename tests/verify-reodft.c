@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.12 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: verify-reodft.c,v 1.13 2003-01-15 02:10:25 athena Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -43,12 +43,12 @@ static double dabs(double x) { return (x < 0.0) ? -x : x; }
 static double dmax(double x, double y) { return (x > y) ? x : y; }
 static double dmin(double x, double y) { return (x < y) ? x : y; }
 
-static double aerror(R *a, R *b, uint n)
+static double aerror(R *a, R *b, int n)
 {
      if (n > 0) {
           /* compute the relative Linf error */
           double e = 0.0, mag = 0.0;
-          uint i;
+          int i;
 
           for (i = 0; i < n; ++i) {
                e = dmax(e, dabs(a[i] - b[i]));
@@ -80,51 +80,51 @@ static double mydrand(void)
 }
 #endif
 
-static trigreal cos00(int i, int j, uint n)
+static trigreal cos00(int i, int j, int n)
 {
      return X(cos2pi)(i * j, n);
 }
 
-static trigreal cos01(int i, int j, uint n)
+static trigreal cos01(int i, int j, int n)
 {
      return cos00(i, 2*j + 1, 2*n);
 }
 
-static trigreal cos10(int i, int j, uint n)
+static trigreal cos10(int i, int j, int n)
 {
      return cos00(2*i + 1, j, 2*n);
 }
 
-static trigreal cos11(int i, int j, uint n)
+static trigreal cos11(int i, int j, int n)
 {
      return cos00(2*i + 1, 2*j + 1, 4*n);
 }
 
-static trigreal sin00(int i, int j, uint n)
+static trigreal sin00(int i, int j, int n)
 {
      return X(sin2pi)(i * j, n);
 }
 
-static trigreal sin01(int i, int j, uint n)
+static trigreal sin01(int i, int j, int n)
 {
      return sin00(i, 2*j + 1, 2*n);
 }
 
-static trigreal sin10(int i, int j, uint n)
+static trigreal sin10(int i, int j, int n)
 {
      return sin00(2*i + 1, j, 2*n);
 }
 
-static trigreal sin11(int i, int j, uint n)
+static trigreal sin11(int i, int j, int n)
 {
      return sin00(2*i + 1, 2*j + 1, 4*n);
 }
 
-typedef trigreal (*trigfun)(int, int, uint);
+typedef trigreal (*trigfun)(int, int, int);
 
-static void arand(R *a, uint n)
+static void arand(R *a, int n)
 {
-     uint i;
+     int i;
 
      /* generate random inputs */
      for (i = 0; i < n; ++i) {
@@ -133,9 +133,9 @@ static void arand(R *a, uint n)
 }
 
 /* C = A + B */
-static void aadd(R *c, R *a, R *b, uint n)
+static void aadd(R *c, R *a, R *b, int n)
 {
-     uint i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  c[i] = a[i] + b[i];
@@ -143,9 +143,9 @@ static void aadd(R *c, R *a, R *b, uint n)
 }
 
 /* C = A - B */
-static void asub(R *c, R *a, R *b, uint n)
+static void asub(R *c, R *a, R *b, int n)
 {
-     uint i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  c[i] = a[i] - b[i];
@@ -153,10 +153,10 @@ static void asub(R *c, R *a, R *b, uint n)
 }
 
 /* B = rotate left A + rotate right A */
-static void arolr(R *b, R *a, uint n, uint nb, uint na, 
+static void arolr(R *b, R *a, int n, int nb, int na, 
 		  int isL0, int isL1, int isR0, int isR1)
 {
-     uint i, ib, ia;
+     int i, ib, ia;
 
      for (ib = 0; ib < nb; ++ib) {
 	  for (i = 0; i < n - 1; ++i)
@@ -181,26 +181,26 @@ static void arolr(R *b, R *a, uint n, uint nb, uint na,
      }
 }
 
-static void aphase_shift(R *b, R *a, uint n, uint nb, uint na,
-			 uint n0, int k0, trigfun t)
+static void aphase_shift(R *b, R *a, int n, int nb, int na,
+			 int n0, int k0, trigfun t)
 {
-     uint j, jb, ja;
+     int j, jb, ja;
  
      for (jb = 0; jb < nb; ++jb)
           for (j = 0; j < n; ++j) {
                trigreal c = 2.0 * t(1, j + k0, n0);
 
                for (ja = 0; ja < na; ++ja) {
-                    uint k = (jb * n + j) * na + ja;
+                    int k = (jb * n + j) * na + ja;
                     b[k] = a[k] * c;
                }
           }
 }
 
 /* A = alpha * A  (real, in place) */
-static void ascale(R *a, R alpha, uint n)
+static void ascale(R *a, R alpha, int n)
 {
-     uint i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  a[i] *= alpha;
@@ -241,13 +241,13 @@ static void dofft(info *n, R *in, R *out)
      cpyr(n->p->O, n->totalsz, out, n->pckdsz);
 }
 
-static double acmp(R *a, R *b, uint n, const char *test, double tol)
+static double acmp(R *a, R *b, int n, const char *test, double tol)
 {
      double d = aerror(a, b, n);
      if (d > tol) {
 	  fprintf(stderr, "Found relative error %e (%s)\n", d, test);
 	  {
-	       uint i;
+	       int i;
 	       for (i = 0; i < n; ++i)
 		    fprintf(stderr, "%8d %16.12f   %16.12f\n", i, 
 			    (double) a[i],
@@ -269,10 +269,10 @@ static double acmp(R *a, R *b, uint n, const char *test, double tol)
  * Nevada, 29 May--1 June 1995.
  */
 
-static void linear(uint n, info *nfo, R *inA, R *inB, R *inC, R *outA,
-		   R *outB, R *outC, R *tmp, uint rounds, double tol)
+static void linear(int n, info *nfo, R *inA, R *inB, R *inC, R *outA,
+		   R *outB, R *outC, R *tmp, int rounds, double tol)
 {
-     uint j;
+     int j;
 
      for (j = 0; j < rounds; ++j) {
 	  R alpha, beta;
@@ -296,15 +296,15 @@ static void linear(uint n, info *nfo, R *inA, R *inB, R *inC, R *outA,
 
 }
 
-static void impulse(uint n0, int i0, int k0, trigfun t, R impulse_amp,
-		    uint n, uint vecn, info *nfo, 
+static void impulse(int n0, int i0, int k0, trigfun t, R impulse_amp,
+		    int n, int vecn, info *nfo, 
 		    R *inA, R *inB, R *inC,
 		    R *outA, R *outB, R *outC,
-		    R *tmp, uint rounds, double tol)
+		    R *tmp, int rounds, double tol)
 {
-     uint N = n * vecn;
-     uint i;
-     uint j;
+     int N = n * vecn;
+     int i;
+     int j;
 
      /* test 2: check that the unit impulse is transformed properly */
 
@@ -333,15 +333,15 @@ static void impulse(uint n0, int i0, int k0, trigfun t, R impulse_amp,
 
 enum { TIME_SHIFT, FREQ_SHIFT };
 
-static void tf_shift(uint n, uint vecn, info *nfo, 
+static void tf_shift(int n, int vecn, info *nfo, 
 		     R *inA, R *inB, R *outA, R *outB, R *tmp,
-		     uint rounds, double tol, int which_shift,
+		     int rounds, double tol, int which_shift,
 		     int isL0, int isL1, int isR0, int isR1, 
-		     uint n0, int k0, trigfun t)
+		     int n0, int k0, trigfun t)
 {
      double sign;
-     uint nb, na, dim, N = n * vecn;
-     uint i, j;
+     int nb, na, dim, N = n * vecn;
+     int i, j;
      const tensor *sz = nfo->probsz;
 
      sign = -1.0;
@@ -354,7 +354,7 @@ static void tf_shift(uint n, uint vecn, info *nfo,
 
      /* check shifts across all SZ dimensions */
      for (dim = 0; dim < sz->rnk; ++dim) {
-	  uint ncur = sz->dims[dim].n;
+	  int ncur = sz->dims[dim].n;
 
 	  na /= ncur;
 
@@ -398,7 +398,7 @@ static tensor *pack(const tensor *sz, int s)
 {
      tensor *x = X(tensor_copy)(sz);
      if (FINITE_RNK(x->rnk) && x->rnk > 0) {
-	  uint i;
+	  int i;
 	  x->dims[x->rnk - 1].is = s;
 	  x->dims[x->rnk - 1].os = s;
 	  for (i = x->rnk - 1; i > 0; --i) {
@@ -410,12 +410,12 @@ static tensor *pack(const tensor *sz, int s)
 }
 
 static void really_verify(plan *pln, const problem_rdft *p, 
-			  uint rounds, double tol)
+			  int rounds, double tol)
 {
      R *inA, *inB, *inC, *outA, *outB, *outC, *tmp;
      info nfo;
-     uint n, vecn, N;
-     uint n0;
+     int n, vecn, N;
+     int n0;
      int i0, k0;
      int isL0t = 0, isL1t = 0, isR0t = 0, isR1t = 0;
      int isL0f = 0, isL1f = 0, isR0f = 0, isR1f = 0;
@@ -529,7 +529,7 @@ static void really_verify(plan *pln, const problem_rdft *p,
      X(ifree)(inA);
 }
 
-void X(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds)
+void X(reodft_verify)(plan *pln, const problem_rdft *p, int rounds)
 {
      if (p->sz->rnk == 1 && REODFT_KINDP(p->kind[0])) {
 	  AWAKE(pln, 1);

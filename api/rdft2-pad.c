@@ -21,20 +21,19 @@
 #include <string.h>
 #include "api.h"
 
-const ulong *X(rdft2_pad)(uint rnk, const ulong *n, const ulong *nembed,
-			 int inplace, int cmplx, ulong **nfree)
+const int *X(rdft2_pad) (int rnk, const int *n, const int *nembed,
+                         int inplace, int cmplx, int **nfree)
 {
      A(FINITE_RNK(rnk));
      *nfree = 0;
      if (!nembed && rnk > 0) {
-	  if (inplace || cmplx) {
-	       ulong *np = (ulong *) MALLOC(sizeof(ulong) * rnk, PROBLEMS);
-	       memcpy(np, n, sizeof(ulong) * rnk);
-	       np[rnk-1] = (n[rnk-1]/2 + 1) * (1 + !cmplx);
-	       nembed = *nfree = np;
-	  }
-	  else
-	       nembed = n;
+          if (inplace || cmplx) {
+               int *np = (int *) MALLOC(sizeof(int) * rnk, PROBLEMS);
+               memcpy(np, n, sizeof(int) * rnk);
+               np[rnk - 1] = (n[rnk - 1] / 2 + 1) * (1 + !cmplx);
+               nembed = *nfree = np;
+          } else
+               nembed = n;
      }
      return nembed;
 }

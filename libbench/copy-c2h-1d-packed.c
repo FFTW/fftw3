@@ -11,12 +11,12 @@
  * Works only for even N.
  */
 
-void copy_c2h_1d_packed_strided(unsigned int n,
+void copy_c2h_1d_packed_strided(int n,
 				bench_real *pin, int rstride,
 				bench_complex *in, int cstride,
 				bench_real sign_of_r2h_transform)
 {
-     unsigned int k;
+     int k;
 
      BENCH_ASSERT((n & 1) == 0); /* even n */
 

@@ -23,16 +23,16 @@
 
 static int threads_inited = 0;
 
-int X(plan_with_nthreads)(unsigned int nthreads)
+int X(plan_with_nthreads) (int nthreads)
 {
-     planner *plnr = X(the_planner)();
-     
+     planner *plnr = X(the_planner) ();
+
      if (!nthreads)
-	  return 0;
+          return 0;
      if (nthreads > 1 && !threads_inited) {
-	  if (X(threads_init)())
-	       return 0;
-	  threads_inited = 1;
+          if (X(threads_init) ())
+               return 0;
+          threads_inited = 1;
      }
      plnr->nthr = nthreads;
      return 1;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.12 2002-09-25 11:37:38 athena Exp $ */
+/* $Id: direct.c,v 1.13 2003-01-15 02:10:25 athena Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -36,7 +36,7 @@ typedef struct {
 	  const khc2r_desc *hc2r;
      } desc;
      kodelet k;
-     uint sz;
+     int sz;
      rdft_kind kind;
      const char *nam;
 } S;
@@ -46,7 +46,7 @@ typedef struct {
 
      stride is, ros, ios;
      int ioffset;
-     uint vl;
+     int vl;
      int ivs, ovs;
      kodelet k;
      const S *slv;
@@ -83,7 +83,7 @@ static void print(plan *ego_, printer *p)
 	      X(rdft_kind_str)(s->kind), s->sz, ego->vl, s->nam);
 }
 
-static int ioffset(rdft_kind kind, uint sz, int s)
+static int ioffset(rdft_kind kind, int sz, int s)
 {
      return(s * ((kind == R2HC || kind == HC2R) ? sz : (sz - 1)));
 }
@@ -93,7 +93,7 @@ static int applicable(const solver *ego_, const problem *p_)
      if (RDFTP(p_)) {
           const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
-	  uint vl;
+	  int vl;
 	  int ivs, ovs;
 
           return (
@@ -144,7 +144,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      const problem_rdft *p;
      iodim *d, *vd;
-     uint nr;
+     int nr;
      int r2hc_kindp;
 
      static const plan_adt padt = {

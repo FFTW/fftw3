@@ -18,23 +18,23 @@
  *
  */
 
-/* $Id: trig.c,v 1.12 2003-01-09 10:40:34 athena Exp $ */
+/* $Id: trig.c,v 1.13 2003-01-15 02:10:25 athena Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
 #include <math.h>
 
-trigreal X(cos2pi)(int m, uint n)
+trigreal X(cos2pi)(int m, int n)
 {
      return X(sincos)((trigreal)m, (trigreal)n, 0);
 }
 
-trigreal X(sin2pi)(int m, uint n)
+trigreal X(sin2pi)(int m, int n)
 {
      return X(sincos)((trigreal)m, (trigreal)n, 1);
 }
 
-trigreal X(tan2pi)(int m, uint n)
+trigreal X(tan2pi)(int m, int n)
 {
 #if 0      /* unimplemented, unused */
      trigreal dm = m, dn = n;

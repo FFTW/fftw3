@@ -20,11 +20,11 @@
 
 #include "ifftw.h"
 
-uint X(hash)(const char *s)
+unsigned X(hash)(const char *s)
 {
-     uint h = 0xDEADBEEFu;
+     unsigned h = 0xDEADBEEFu;
      do {
-	  h = h * 17 + *s;
+	  h = h * 17 + (int)*s;
      } while (*s++);
      return h;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.17 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: ct-ditf.c,v 1.18 2003-01-15 02:10:25 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -46,7 +46,7 @@ static int applicable(const solver_ct *ego, const problem *p_,
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
           iodim *d = p->sz->dims, *vd = p->vecsz->dims;
-	  uint m = d[0].n / e->radix;
+	  int m = d[0].n / e->radix;
 
           return (1
                   && p->ri == p->ro  /* inplace only */

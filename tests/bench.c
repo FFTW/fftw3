@@ -90,15 +90,9 @@ void setup(struct problem *p)
 			    break;
 		       default:
 		       {
-			    unsigned int i;
-			    unsigned long *nl;
-			    nl = bench_malloc(p->rank * sizeof(unsigned long));
-			    for (i = 0; i < p->rank; ++i)
-				 nl[i] = p->n[i];
-			    the_plan = FFTW(plan_dft)(p->rank, nl,
+			    the_plan = FFTW(plan_dft)(p->rank, p->n,
 						      p->in, p->out,
 						      p->sign, flags);
-			    bench_free(nl);
 			    break;
 		       }
 		   }
@@ -188,9 +182,9 @@ extern double timer_stop(void);
 #include "rdft.h"
 #include "reodft.h"
 #include "threads.h"
-void FFTW(dft_verify)(plan *pln, const problem_dft *p, uint rounds);
-void FFTW(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds);
-void FFTW(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds);
+void FFTW(dft_verify)(plan *pln, const problem_dft *p, int rounds);
+void FFTW(rdft_verify)(plan *pln, const problem_rdft *p, int rounds);
+void FFTW(reodft_verify)(plan *pln, const problem_rdft *p, int rounds);
 #define FFTW X
 #define fftw_real R
 #undef problem
@@ -438,9 +432,9 @@ void setup(struct problem *p)
 			  inside #if */
      }
      else {
-	  uint i, *npadr, *npadc;
-	  npadr = (uint *) bench_malloc(p->rank * sizeof(uint));
-	  npadc = (uint *) bench_malloc(p->rank * sizeof(uint));
+	  int i, *npadr, *npadc;
+	  npadr = (int *) bench_malloc(p->rank * sizeof(int));
+	  npadc = (int *) bench_malloc(p->rank * sizeof(int));
 	  for (i = 0; i < p->rank; ++i) npadr[i] = npadc[i] = p->n[i];
 	  if (p->rank > 0)
 	       npadr[p->rank-1] = 2*(npadc[p->rank-1] = npadr[p->rank-1]/2+1);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.10 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.11 2003-01-15 02:10:25 athena Exp $ */
 
 
 #include "threads.h"
@@ -27,7 +27,7 @@ typedef struct {
      solver super;
      int vecloop_dim;
      const int *buddies;
-     uint nbuddies;
+     int nbuddies;
 } S;
 
 typedef struct {
@@ -35,7 +35,7 @@ typedef struct {
 
      plan **cldrn;
      int its, ots;
-     uint nthr;
+     int nthr;
      const S *solver;
 } P;
 
@@ -49,7 +49,7 @@ static void *spawn_apply(spawn_data *d)
 {
      PD *ego = (PD *) d->data;
      int its = ego->its, ots = ego->ots;
-     uint thr_num = d->thr_num;
+     int thr_num = d->thr_num;
      plan_rdft2 *cld = (plan_rdft2 *) ego->cldrn[d->thr_num];
 
      cld->apply((plan *) cld,
@@ -87,7 +87,7 @@ static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
-     uint i;
+     int i;
      for (i = 0; i < ego->nthr; ++i)
 	  AWAKE(ego->cldrn[i], flg);
 }
@@ -95,7 +95,7 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     uint i;
+     int i;
      for (i = 0; i < ego->nthr; ++i)
 	  X(plan_destroy_internal)(ego->cldrn[i]);
      X(ifree)(ego->cldrn);
@@ -105,7 +105,7 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
      const S *s = ego->solver;
-     uint i;
+     int i;
      p->print(p, "(rdft2-thr-vrank>=1-x%u/%d)", ego->nthr, s->vecloop_dim);
      for (i = 0; i < ego->nthr; ++i)
 	  if (i == 0 || (ego->cldrn[i] != ego->cldrn[i-1] &&
@@ -114,14 +114,14 @@ static void print(plan *ego_, printer *p)
      p->putchr(p, ')');
 }
 
-static int pickdim(const S *ego, const tensor *vecsz, int oop, uint *dp)
+static int pickdim(const S *ego, const tensor *vecsz, int oop, int *dp)
 {
      return X(pickdim)(ego->vecloop_dim, ego->buddies, ego->nbuddies,
 		       vecsz, oop, dp);
 }
 
 static int applicable0(const solver *ego_, const problem *p_,
-		       const planner *plnr, uint *dp)
+		       const planner *plnr, int *dp)
 {
      if (RDFT2P(p_) && plnr->nthr > 1) {
           const S *ego = (const S *) ego_;
@@ -141,7 +141,7 @@ static int applicable0(const solver *ego_, const problem *p_,
 }
 
 static int applicable(const solver *ego_, const problem *p_,
-		      const planner *plnr, uint *dp)
+		      const planner *plnr, int *dp)
 {
      const S *ego = (const S *)ego_;
 
@@ -160,10 +160,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft2 *p;
      P *pln;
      problem *cldp;
-     uint vdim;
+     int vdim;
      iodim *d;
      plan **cldrn = (plan **) 0;
-     uint i, block_size, nthr;
+     int i, block_size, nthr;
      int its, ots;
      tensor *vecsz;
 
@@ -226,7 +226,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(int vecloop_dim, const int *buddies, uint nbuddies)
+static solver *mksolver(int vecloop_dim, const int *buddies, int nbuddies)
 {
      static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
@@ -238,12 +238,12 @@ static solver *mksolver(int vecloop_dim, const int *buddies, uint nbuddies)
 
 void X(rdft2_thr_vrank_geq1_register)(planner *p)
 {
-     uint i;
+     int i;
 
      /* FIXME: Should we try other vecloop_dim values? */
      static const int buddies[] = { 1, -1 };
 
-     const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
+     const int nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 
      for (i = 0; i < nbuddies; ++i)
           REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));

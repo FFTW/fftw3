@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.26 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.27 2003-01-15 02:10:25 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -32,11 +32,11 @@
    Copy A -> B, where A and B are n0 x n1 complex matrices
    such that the (i0, i1) element has index (i0 * s0 + i1 * s1). 
 */
-static void cpy(uint n0, uint n1, 
+static void cpy(int n0, int n1, 
 		const R *rA, const R *iA, int sa0, int sa1, 
 		R *rB, R *iB, int sb0, int sb1)
 {
-     uint i0, i1;
+     int i0, i1;
      int ima = iA - rA, imb = iB - rB;
 
      for (i0 = 0; i0 < n0; ++i0) {
@@ -54,7 +54,7 @@ static void cpy(uint n0, uint n1,
 }
 
 static const R *doit(kdft_dit k, R *rA, R *iA, const R *W, int ios, int dist, 
-		     uint r, uint batchsz, R *buf, stride bufstride)
+		     int r, int batchsz, R *buf, stride bufstride)
 {
      cpy(r, batchsz, rA, iA, ios, dist, buf, buf + 1, 2, 2 * r);
      W = k(buf, buf + 1, W, bufstride, batchsz, 2 * r);
@@ -74,7 +74,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      cld->apply(cld0, ri, ii, ro, io);
 
      {
-          uint i, j, m = ego->m, vl = ego->vl, r = ego->r;
+          int i, j, m = ego->m, vl = ego->vl, r = ego->r;
           int os = ego->os, ovs = ego->ovs, ios = ego->iios;
 	  R *buf;
 
@@ -109,7 +109,7 @@ static int applicable0(const solver_ct *ego, const problem *p_,
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
           iodim *d = p->sz->dims;
-	  uint m = d[0].n / e->radix;
+	  int m = d[0].n / e->radix;
           return (1
 
                   /* check both batch size and remainder */

@@ -22,12 +22,12 @@
 
 #include "ifftw.h"
 
-uint X(compute_nbuf)(uint n, uint vl, uint nbuf, uint maxbufsz)
+int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz)
 {
-     uint i; 
+     int i; 
 
      if (nbuf * n > maxbufsz)
-          nbuf = X(uimax)((uint)1, maxbufsz / n);
+          nbuf = X(uimax)((int)1, maxbufsz / n);
 
      /*
       * Look for a buffer number (not too big) that divides the

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.170 2003-01-13 22:35:20 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.171 2003-01-15 02:10:25 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -31,7 +31,7 @@
 #include <stddef.h>             /* ptrdiff_t */
 
 #if HAVE_SYS_TYPES_H
-#include <sys/types.h>		/* uint, maybe */
+#include <sys/types.h>		/* int, maybe */
 #endif
 
 /* determine precision and name-mangling scheme */
@@ -177,36 +177,36 @@ extern int X(in_thread);
  * Total flops = add + mul + 2 * fma
  */
 typedef struct {
-     uint add;
-     uint mul;
-     uint fma;
-     uint other;
+     int add;
+     int mul;
+     int fma;
+     int other;
 } opcnt;
 
 void X(ops_zero)(opcnt *dst);
-void X(ops_other)(uint o, opcnt *dst);
+void X(ops_other)(int o, opcnt *dst);
 void X(ops_cpy)(const opcnt *src, opcnt *dst);
 
 void X(ops_add)(const opcnt *a, const opcnt *b, opcnt *dst);
 void X(ops_add2)(const opcnt *a, opcnt *dst);
 
 /* dst = m * a + b */
-void X(ops_madd)(uint m, const opcnt *a, const opcnt *b, opcnt *dst);
+void X(ops_madd)(int m, const opcnt *a, const opcnt *b, opcnt *dst);
 
 /* dst += m * a */
-void X(ops_madd2)(uint m, const opcnt *a, opcnt *dst);
+void X(ops_madd2)(int m, const opcnt *a, opcnt *dst);
 
 
 /*-----------------------------------------------------------------------*/
 /* minmax.c: */
 int X(imax)(int a, int b);
 int X(imin)(int a, int b);
-uint X(uimax)(uint a, uint b);
-uint X(uimin)(uint a, uint b);
+int X(uimax)(int a, int b);
+int X(uimin)(int a, int b);
 
 /*-----------------------------------------------------------------------*/
 /* iabs.c: */
-uint X(iabs)(int a);
+int X(iabs)(int a);
 
 /*-----------------------------------------------------------------------*/
 /* md5.c */
@@ -224,16 +224,16 @@ typedef struct {
 
      /* fields not meant to be used outside md5.c: */
      unsigned char c[64]; /* stuff not yet processed */
-     uint l;  /* total length.  Should be 64 bits long, but this is
-		 good enough for us */
+     unsigned l;  /* total length.  Should be 64 bits long, but this is
+		     good enough for us */
 } md5;
 
 void X(md5begin)(md5 *p);
-void X(md5putb)(md5 *p, const void *d_, uint len);
+void X(md5putb)(md5 *p, const void *d_, int len);
 void X(md5puts)(md5 *p, const char *s);
 void X(md5putc)(md5 *p, unsigned char c);
-void X(md5uint)(md5 *p, uint i);
 void X(md5int)(md5 *p, int i);
+void X(md5unsigned)(md5 *p, unsigned i);
 void X(md5ptrdiff)(md5 *p, ptrdiff_t d);
 void X(md5end)(md5 *p);
 
@@ -243,13 +243,13 @@ void X(md5end)(md5 *p);
 #undef STRUCT_HACK_C99
 
 typedef struct {
-     uint n;
+     int n;
      int is;			/* input stride */
      int os;			/* output stride */
 } iodim;
 
 typedef struct {
-     uint rnk;
+     int rnk;
 #if defined(STRUCT_HACK_KR)
      iodim dims[1];
 #elif defined(STRUCT_HACK_C99)
@@ -266,34 +266,34 @@ typedef struct {
  
   A tensor of rank -infinity has size 0.
 */
-#define RNK_MINFTY  ((uint) -1)
+#define RNK_MINFTY  ((int)(((unsigned) -1) >> 1))
 #define FINITE_RNK(rnk) ((rnk) != RNK_MINFTY)
 
 typedef enum { INPLACE_IS, INPLACE_OS } inplace_kind;
 
-tensor *X(mktensor)(uint rnk);
+tensor *X(mktensor)(int rnk);
 tensor *X(mktensor_0d)(void);
-tensor *X(mktensor_1d)(uint n, int is, int os);
-tensor *X(mktensor_2d)(uint n0, int is0, int os0,
-                      uint n1, int is1, int os1);
-uint X(tensor_sz)(const tensor *sz);
+tensor *X(mktensor_1d)(int n, int is, int os);
+tensor *X(mktensor_2d)(int n0, int is0, int os0,
+                      int n1, int is1, int os1);
+int X(tensor_sz)(const tensor *sz);
 void X(tensor_md5)(md5 *p, const tensor *t);
-uint X(tensor_max_index)(const tensor *sz);
-uint X(tensor_min_istride)(const tensor *sz);
-uint X(tensor_min_ostride)(const tensor *sz);
-uint X(tensor_min_stride)(const tensor *sz);
+int X(tensor_max_index)(const tensor *sz);
+int X(tensor_min_istride)(const tensor *sz);
+int X(tensor_min_ostride)(const tensor *sz);
+int X(tensor_min_stride)(const tensor *sz);
 int X(tensor_inplace_strides)(const tensor *sz);
 int X(tensor_inplace_strides2)(const tensor *a, const tensor *b);
 tensor *X(tensor_copy)(const tensor *sz);
 
 tensor *X(tensor_copy_inplace)(const tensor *sz, inplace_kind k);
-tensor *X(tensor_copy_except)(const tensor *sz, uint except_dim);
-tensor *X(tensor_copy_sub)(const tensor *sz, uint start_dim, uint rnk);
+tensor *X(tensor_copy_except)(const tensor *sz, int except_dim);
+tensor *X(tensor_copy_sub)(const tensor *sz, int start_dim, int rnk);
 tensor *X(tensor_compress)(const tensor *sz);
 tensor *X(tensor_compress_contiguous)(const tensor *sz);
 tensor *X(tensor_append)(const tensor *a, const tensor *b);
-void X(tensor_split)(const tensor *sz, tensor **a, uint a_rnk, tensor **b);
-int X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os);
+void X(tensor_split)(const tensor *sz, tensor **a, int a_rnk, tensor **b);
+int X(tensor_tornk1)(const tensor *t, int *n, int *is, int *os);
 void X(tensor_destroy)(tensor *sz);
 void X(tensor_destroy2)(tensor *a, tensor *b);
 void X(tensor_destroy4)(tensor *a, tensor *b, tensor *c, tensor *d);
@@ -322,8 +322,8 @@ struct printer_s {
      void (*print)(printer *p, const char *format, ...);
      void (*vprint)(printer *p, const char *format, va_list ap);
      void (*putchr)(printer *p, char c);
-     uint indent;
-     uint indent_incr;
+     int indent;
+     int indent_incr;
 };
 
 printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c));
@@ -390,7 +390,7 @@ void X(solver_register)(planner *plnr, solver *s);
 typedef struct slvdesc_s {
      solver *slv;
      const char *reg_nam;
-     uint nam_hash;
+     unsigned nam_hash;
      int reg_id;
 } slvdesc;
 
@@ -464,25 +464,25 @@ struct planner_s {
 
      /* solver descriptors */
      slvdesc *slvdescs;
-     uint nslvdesc, slvdescsiz;
+     unsigned nslvdesc, slvdescsiz;
      const char *cur_reg_nam;
      int cur_reg_id;
 
      /* hash table of solutions */
      solution *solutions;
-     uint hashsiz, nelem;
+     unsigned hashsiz, nelem;
 
-     uint nthr;
-     uint problem_flags;
+     int nthr;
+     int problem_flags;
      unsigned short planner_flags; /* matches type of solution.flags in
 				      planner.c */
      /* various statistics */
-     uint nplan;    /* number of plans evaluated */
+     int nplan;    /* number of plans evaluated */
      double pcost, epcost; /* total pcost of measured/estimated plans */
-     uint nprob;    /* number of problems evaluated */
-     uint lookup, succ_lookup, lookup_iter;
-     uint insert, insert_iter, insert_unknown;
-     uint nrehash;
+     int nprob;    /* number of problems evaluated */
+     int lookup, succ_lookup, lookup_iter;
+     int insert, insert_iter, insert_unknown;
+     int nrehash;
 };
 
 planner *X(mkplanner)(void);
@@ -506,7 +506,7 @@ void X(planner_dump)(planner *ego, int verbose);
 */
 #define FORALL_SOLVERS(ego, s, p, what)			\
 {							\
-     uint _cnt;						\
+     unsigned _cnt;					\
      for (_cnt = 0; _cnt < ego->nslvdesc; ++_cnt) {	\
 	  slvdesc *p = ego->slvdescs + _cnt;		\
 	  solver *s = p->slv;				\
@@ -555,8 +555,8 @@ void X(solvtab_exec)(const solvtab tbl, planner *p);
 
 /*-----------------------------------------------------------------------*/
 /* pickdim.c */
-int X(pickdim)(int which_dim, const int *buddies, uint nbuddies,
-	       const tensor *sz, int oop, uint *dp);
+int X(pickdim)(int which_dim, const int *buddies, int nbuddies,
+	       const tensor *sz, int oop, int *dp);
 
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */
@@ -572,17 +572,17 @@ typedef struct {
 
 typedef struct twid_s {
      R *W;                     /* array of twiddle factors */
-     uint n, r, m;                /* transform order, radix, # twiddle rows */
+     int n, r, m;                /* transform order, radix, # twiddle rows */
      int refcnt;
      const tw_instr *instr;
      struct twid_s *cdr;
 } twid;
 
-void X(mktwiddle)(twid **pp, const tw_instr *instr, uint n, uint r, uint m);
+void X(mktwiddle)(twid **pp, const tw_instr *instr, int n, int r, int m);
 void X(twiddle_destroy)(twid **pp);
-uint X(twiddle_length)(uint r, const tw_instr *p);
+int X(twiddle_length)(int r, const tw_instr *p);
 void X(twiddle_awake)(int flg, twid **pp, 
-		      const tw_instr *instr, uint n, uint r, uint m);
+		      const tw_instr *instr, int n, int r, int m);
 
 /*-----------------------------------------------------------------------*/
 /* trig.c */
@@ -592,9 +592,9 @@ typedef long double trigreal;
 typedef double trigreal;
 #endif
 
-extern trigreal X(cos2pi)(int, uint);
-extern trigreal X(sin2pi)(int, uint);
-extern trigreal X(tan2pi)(int, uint);
+extern trigreal X(cos2pi)(int, int);
+extern trigreal X(sin2pi)(int, int);
+extern trigreal X(tan2pi)(int, int);
 extern trigreal X(sincos)(trigreal m, trigreal n, int sinp);
 
 /*-----------------------------------------------------------------------*/
@@ -602,21 +602,20 @@ extern trigreal X(sincos)(trigreal m, trigreal n, int sinp);
 
 #if defined(FFTW_ENABLE_UNSAFE_MULMOD)
 #  define MULMOD(x,y,p) (((x) * (y)) % (p))
-#elif ((SIZEOF_UNSIGNED_INT != 0) && (SIZEOF_UNSIGNED_LONG_LONG >= 2 * SIZEOF_UNSIGNED_INT))
-#  define MULMOD(x,y,p) ((uint) ((((unsigned long long) (x))    \
-                                  * ((unsigned long long) (y))) \
-				 % ((unsigned long long) (p))))
+#elif ((SIZEOF_INT != 0) && (SIZEOF_LONG_LONG >= 2 * SIZEOF_INT))
+#  define MULMOD(x,y,p) ((int) ((((long long) (x)) * ((long long) (y))) \
+				 % ((long long) (p))))
 #else /* 'long long' unavailable */
 #  define SAFE_MULMOD 1
-uint X(safe_mulmod)(uint x, uint y, uint p);
+int X(safe_mulmod)(int x, int y, int p);
 #  define MULMOD(x,y,p) X(safe_mulmod)(x,y,p)
 #endif
 
-uint X(power_mod)(uint n, uint m, uint p);
-uint X(find_generator)(uint p);
-uint X(first_divisor)(uint n);
-int X(is_prime)(uint n);
-uint X(next_prime)(uint n);
+int X(power_mod)(int n, int m, int p);
+int X(find_generator)(int p);
+int X(first_divisor)(int n);
+int X(is_prime)(int n);
+int X(next_prime)(int n);
 
 #define GENERIC_MIN_BAD 71 /* min prime for which generic becomes bad */
 
@@ -624,8 +623,8 @@ uint X(next_prime)(uint n);
 /* rader.c: */
 typedef struct rader_tls rader_tl;
 
-void X(rader_tl_insert)(uint k1, uint k2, uint k3, R *W, rader_tl **tl);
-R *X(rader_tl_find)(uint k1, uint k2, uint k3, rader_tl *t);
+void X(rader_tl_insert)(int k1, int k2, int k3, R *W, rader_tl **tl);
+R *X(rader_tl_find)(int k1, int k2, int k3, rader_tl *t);
 void X(rader_tl_delete)(R *W, rader_tl **tl);
 
 /*-----------------------------------------------------------------------*/
@@ -633,11 +632,11 @@ void X(rader_tl_delete)(R *W, rader_tl **tl);
 void X(null_awake)(plan *ego, int awake);
 int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
-uint X(alignment_of)(R *p);
-uint X(stride_aligned_p)(int s);
-uint X(hash)(const char *s);
-uint X(compute_nbuf)(uint n, uint vl, uint nbuf, uint maxbufsz);
-extern int X(ct_uglyp)(uint min_n, uint n, uint r);
+int X(alignment_of)(R *p);
+int X(stride_aligned_p)(int s);
+unsigned X(hash)(const char *s);
+int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz);
+extern int X(ct_uglyp)(int min_n, int n, int r);
 extern const char *const X(version);
 extern const char *const X(cc);
 extern const char *const X(codelet_optim);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.6 2003-01-11 16:07:25 athena Exp $ */
+/* $Id: verify-lib.c,v 1.7 2003-01-15 02:10:25 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -33,12 +33,12 @@ static double dmax(double x, double y) { return (x > y) ? x : y; }
 static double dmin(double x, double y) { return (x < y) ? x : y; }
 static double norm2(double x, double y) { return dmax(dabs(x), dabs(y)); }
 
-static double aerror(C *a, C *b, uint n)
+static double aerror(C *a, C *b, int n)
 {
      if (n > 0) {
 	  /* compute the relative Linf error */
 	  double e = 0.0, mag = 0.0;
-	  uint i;
+	  int i;
 
 	  for (i = 0; i < n; ++i) {
 	       e = dmax(e, norm2(a[i].r - b[i].r, a[i].i - b[i].i));
@@ -72,9 +72,9 @@ double mydrand(void)
 }
 #endif
 
-void arand(C *a, uint n)
+void arand(C *a, int n)
 {
-     uint i;
+     int i;
 
      /* generate random inputs */
      for (i = 0; i < n; ++i) {
@@ -84,23 +84,23 @@ void arand(C *a, uint n)
 }
 
 /* make array real */
-void mkreal(C *A, uint n)
+void mkreal(C *A, int n)
 {
-     uint i;
+     int i;
 
      for (i = 0; i < n; ++i) {
           A[i].i = 0.0;
      }
 }
 
-static void assign_conj(C *Ac, C *A, uint rank, const iodim *dim, int size)
+static void assign_conj(C *Ac, C *A, int rank, const iodim *dim, int size)
 {
      if (rank == 0) {
           Ac->r = A->r;
           Ac->i = -A->i;
      }
      else {
-          uint i, n0 = dim[0].n;
+          int i, n0 = dim[0].n;
           rank -= 1;
           dim += 1;
           size /= n0;
@@ -111,12 +111,12 @@ static void assign_conj(C *Ac, C *A, uint rank, const iodim *dim, int size)
 }
 
 /* make array hermitian */
-void mkhermitian(C *A, uint rank, const iodim *dim)
+void mkhermitian(C *A, int rank, const iodim *dim)
 {
      if (rank == 0)
           A->i = 0.0;
      else {
-          uint i, n0 = dim[0].n, size;
+          int i, n0 = dim[0].n, size;
           rank -= 1;
           dim += 1;
           mkhermitian(A, rank, dim);
@@ -130,9 +130,9 @@ void mkhermitian(C *A, uint rank, const iodim *dim)
 }
 
 /* C = A + B */
-void aadd(C *c, C *a, C *b, uint n)
+void aadd(C *c, C *a, C *b, int n)
 {
-     uint i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  c[i].r = a[i].r + b[i].r;
@@ -141,9 +141,9 @@ void aadd(C *c, C *a, C *b, uint n)
 }
 
 /* C = A - B */
-void asub(C *c, C *a, C *b, uint n)
+void asub(C *c, C *a, C *b, int n)
 {
-     uint i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  c[i].r = a[i].r - b[i].r;
@@ -152,9 +152,9 @@ void asub(C *c, C *a, C *b, uint n)
 }
 
 /* B = rotate left A (complex) */
-void arol(C *b, C *a, uint n, uint nb, uint na)
+void arol(C *b, C *a, int n, int nb, int na)
 {
-     uint i, ib, ia;
+     int i, ib, ia;
 
      for (ib = 0; ib < nb; ++ib) {
 	  for (i = 0; i < n - 1; ++i)
@@ -167,9 +167,9 @@ void arol(C *b, C *a, uint n, uint nb, uint na)
      }
 }
 
-void aphase_shift(C *b, C *a, uint n, uint nb, uint na, double sign)
+void aphase_shift(C *b, C *a, int n, int nb, int na, double sign)
 {
-     uint j, jb, ja;
+     int j, jb, ja;
 
      for (jb = 0; jb < nb; ++jb)
 	  for (j = 0; j < n; ++j) {
@@ -177,7 +177,7 @@ void aphase_shift(C *b, C *a, uint n, uint nb, uint na, double sign)
 	       trigreal s = sign * X(sin2pi)(j, n);
 
 	       for (ja = 0; ja < na; ++ja) {
-		    uint k = (jb * n + j) * na + ja;
+		    int k = (jb * n + j) * na + ja;
 		    b[k].r = a[k].r * c - a[k].i * s;
 		    b[k].i = a[k].r * s + a[k].i * c;
 	       }
@@ -185,9 +185,9 @@ void aphase_shift(C *b, C *a, uint n, uint nb, uint na, double sign)
 }
 
 /* A = alpha * A  (complex, in place) */
-void ascale(C *a, C alpha, uint n)
+void ascale(C *a, C alpha, int n)
 {
-     uint i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  C x = a[i];
@@ -197,14 +197,14 @@ void ascale(C *a, C alpha, uint n)
 }
 
 
-double acmp(C *a, C *b, uint n, const char *test, double tol)
+double acmp(C *a, C *b, int n, const char *test, double tol)
 {
      double d = aerror(a, b, n);
      if (d > tol) {
 	  fprintf(stderr, "Found relative error %e (%s)\n", d, test);
 
 	  {
-	       uint i;
+	       int i;
 	       for (i = 0; i < n; ++i) 
 		    fprintf(stderr,
 			    "%8d %16.12f %16.12f   %16.12f %16.12f\n", i, 
@@ -229,13 +229,13 @@ double acmp(C *a, C *b, uint n, const char *test, double tol)
 
 static void impulse0(void (*dofft)(void *nfo, C *in, C *out),
 		     void *nfo, 
-		     uint n, uint vecn, 
+		     int n, int vecn, 
 		     C *inA, C *inB, C *inC,
 		     C *outA, C *outB, C *outC,
-		     C *tmp, uint rounds, double tol)
+		     C *tmp, int rounds, double tol)
 {
-     uint N = n * vecn;
-     uint j;
+     int N = n * vecn;
+     int j;
 
      dofft(nfo, inA, tmp);
      acmp(tmp, outA, N, "impulse 1", tol);
@@ -252,14 +252,14 @@ static void impulse0(void (*dofft)(void *nfo, C *in, C *out),
 
 void impulse(void (*dofft)(void *nfo, C *in, C *out),
 	     void *nfo, 
-	     uint n, uint vecn, 
+	     int n, int vecn, 
 	     C *inA, C *inB, C *inC,
 	     C *outA, C *outB, C *outC,
-	     C *tmp, uint rounds, double tol)
+	     C *tmp, int rounds, double tol)
 {
-     uint N = n * vecn;
+     int N = n * vecn;
      C pls;
-     uint i;
+     int i;
 
      /* check that the unit impulse is transformed properly */
      pls.r = 1.0;
@@ -286,10 +286,10 @@ void impulse(void (*dofft)(void *nfo, C *in, C *out),
 
 void linear(void (*dofft)(void *nfo, C *in, C *out),
 	    void *nfo, int realp,
-	    uint n, C *inA, C *inB, C *inC, C *outA,
-	    C *outB, C *outC, C *tmp, uint rounds, double tol)
+	    int n, C *inA, C *inB, C *inC, C *outA,
+	    C *outB, C *outC, C *tmp, int rounds, double tol)
 {
-     uint j;
+     int j;
 
      for (j = 0; j < rounds; ++j) {
 	  C alpha, beta;
@@ -319,13 +319,13 @@ void linear(void (*dofft)(void *nfo, C *in, C *out),
 
 void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
 	      void *nfo, int realp, const tensor *sz,
-	      uint n, uint vecn,
+	      int n, int vecn,
 	      C *inA, C *inB, C *outA, C *outB, C *tmp,
-	      uint rounds, double tol, int which_shift)
+	      int rounds, double tol, int which_shift)
 {
      double sign;
-     uint nb, na, dim, N = n * vecn;
-     uint i, j;
+     int nb, na, dim, N = n * vecn;
+     int i, j;
 
      sign = -1.0;
 
@@ -337,7 +337,7 @@ void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
 
      /* check shifts across all SZ dimensions */
      for (dim = 0; dim < sz->rnk; ++dim) {
-	  uint ncur = sz->dims[dim].n;
+	  int ncur = sz->dims[dim].n;
 
 	  na /= ncur;
 
@@ -382,7 +382,7 @@ tensor *verify_pack(const tensor *sz, int s)
 {
      tensor *x = X(tensor_copy)(sz);
      if (FINITE_RNK(x->rnk) && x->rnk > 0) {
-	  uint i;
+	  int i;
 	  x->dims[x->rnk - 1].is = s;
 	  x->dims[x->rnk - 1].os = s;
 	  for (i = x->rnk - 1; i > 0; --i) {

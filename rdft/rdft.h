@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.33 2003-01-09 06:43:13 stevenj Exp $ */
+/* $Id: rdft.h,v 1.34 2003-01-15 02:10:25 athena Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -119,11 +119,11 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
 			    R *r, R *rio, R *iio, rdft_kind kind);
 problem *X(mkproblem_rdft2_d)(tensor *sz, tensor *vecsz,
 			      R *r, R *rio, R *iio, rdft_kind kind);
-int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim);
-uint X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k);
+int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim);
+int X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k);
 
 /* verify.c: */
-void X(rdft2_verify)(plan *pln, const problem_rdft2 *p, uint rounds);
+void X(rdft2_verify)(plan *pln, const problem_rdft2 *p, int rounds);
 
 /* solve.c: */
 void X(rdft2_solve)(plan *ego_, const problem *p_);

@@ -95,17 +95,17 @@ static trigreal sin2pi0(trigreal m, trigreal n)
      return SIN(by2pi(m, n));
 }
 
-trigreal cos2pi(int m, uint n)
+trigreal cos2pi(int m, int n)
 {
      return cos2pi0((trigreal)m, (trigreal)n);
 }
 
-trigreal sin2pi(int m, uint n)
+trigreal sin2pi(int m, int n)
 {
      return sin2pi0((trigreal)m, (trigreal)n);
 }
 
-trigreal tan2pi(int m, uint n)
+trigreal tan2pi(int m, int n)
 {
      trigreal dm = m, dn = n;
      /* unimplemented, unused */
@@ -114,12 +114,12 @@ trigreal tan2pi(int m, uint n)
 
 /**************************************************************/
 /* test code */
-trigreal naive_sin2pi(int m, uint n)
+trigreal naive_sin2pi(int m, int n)
 {
      return SIN(MYK2PI * ((trigreal) m / (trigreal) n));
 }
 
-trigreal naive_cos2pi(int m, uint n)
+trigreal naive_cos2pi(int m, int n)
 {
      return COS(MYK2PI * ((trigreal) m / (trigreal) n));
 }
@@ -130,7 +130,7 @@ trigreal naive_cos2pi(int m, uint n)
 
 long prec = 25;
 
-double ck(long m, long n, double (*cf) (int, uint), GEN(*gf) (GEN, long))
+double ck(long m, long n, double (*cf) (int, int), GEN(*gf) (GEN, long))
 {
      GEN gv, gcval, err, arg;
      double cerr, cval;
@@ -150,7 +150,7 @@ double ck(long m, long n, double (*cf) (int, uint), GEN(*gf) (GEN, long))
 }
 #else
 
-double ck(long m, long n, double (*cf) (int, uint), 
+double ck(long m, long n, double (*cf) (int, int), 
 	  long double(*gf) (long double))
 {
      long double l2pi = 6.2831853071795864769252867665590057683943388L;

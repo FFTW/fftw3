@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.4 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: verify-dft.c,v 1.5 2003-01-15 02:10:25 athena Exp $ */
 
 #include "dft.h"
 #include "debug.h"
@@ -73,11 +73,11 @@ static void dofft(void *n_, C *in, C *out)
 /***************************************************************************/
 
 static void really_verify(plan *pln, const problem_dft *p, 
-			  uint rounds, double tol)
+			  int rounds, double tol)
 {
      C *inA, *inB, *inC, *outA, *outB, *outC, *tmp;
      info nfo;
-     uint n, vecn, N;
+     int n, vecn, N;
 
      if (rounds == 0)
 	  rounds = 20;  /* default value */
@@ -123,7 +123,7 @@ static void really_verify(plan *pln, const problem_dft *p,
      X(ifree)(inA);
 }
 
-void X(dft_verify)(plan *pln, const problem_dft *p, uint rounds)
+void X(dft_verify)(plan *pln, const problem_dft *p, int rounds)
 {
      AWAKE(pln, 1);
      really_verify(pln, p, rounds, 

@@ -20,14 +20,17 @@
 
 #include "api.h"
 
-X(plan) X(plan_r2r_3d)(unsigned long nx, unsigned long ny, unsigned long nz,
-		       R *in, R *out, X(r2r_kind) kindx,
-		       X(r2r_kind) kindy, X(r2r_kind) kindz,
-		       unsigned int flags)
+X(plan) X(plan_r2r_3d) (int nx, int ny, int nz,
+                        R *in, R *out, X(r2r_kind) kindx,
+                        X(r2r_kind) kindy, X(r2r_kind) kindz, int flags)
 {
-     unsigned long n[3];
+     int n[3];
      X(r2r_kind) kind[3];
-     n[0] = nx; n[1] = ny; n[2] = nz;
-     kind[0] = kindx; kind[1] = kindy; kind[2] = kindz;
-     return X(plan_r2r)(3, n, in, out, kind, flags);
+     n[0] = nx;
+     n[1] = ny;
+     n[2] = nz;
+     kind[0] = kindx;
+     kind[1] = kindy;
+     kind[2] = kindz;
+     return X(plan_r2r) (3, n, in, out, kind, flags);
 }

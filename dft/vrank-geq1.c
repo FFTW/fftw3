@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.28 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.29 2003-01-15 02:10:25 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -40,14 +40,14 @@ typedef struct {
      solver super;
      int vecloop_dim;
      const int *buddies;
-     uint nbuddies;
+     int nbuddies;
 } S;
 
 typedef struct {
      plan_dft super;
 
      plan *cld;
-     uint vl;
+     int vl;
      int ivs, ovs;
      const S *solver;
 } P;
@@ -55,7 +55,7 @@ typedef struct {
 static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
-     uint i, vl = ego->vl;
+     int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      dftapply cldapply = ((plan_dft *) ego->cld)->apply;
 
@@ -85,13 +85,13 @@ static void print(plan *ego_, printer *p)
 	      ego->vl, s->vecloop_dim, ego->cld);
 }
 
-static int pickdim(const S *ego, const tensor *vecsz, int oop, uint *dp)
+static int pickdim(const S *ego, const tensor *vecsz, int oop, int *dp)
 {
      return X(pickdim)(ego->vecloop_dim, ego->buddies, ego->nbuddies,
 		       vecsz, oop, dp);
 }
 
-static int applicable0(const solver *ego_, const problem *p_, uint *dp)
+static int applicable0(const solver *ego_, const problem *p_, int *dp)
 {
      if (DFTP(p_)) {
           const S *ego = (const S *) ego_;
@@ -108,7 +108,7 @@ static int applicable0(const solver *ego_, const problem *p_, uint *dp)
 }
 
 static int applicable(const solver *ego_, const problem *p_, 
-		      const planner *plnr, uint *dp)
+		      const planner *plnr, int *dp)
 {
      const S *ego = (const S *)ego_;
      const problem_dft *p;
@@ -153,7 +153,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_dft *p;
      P *pln;
      plan *cld;
-     uint vdim;
+     int vdim;
      iodim *d;
 
      static const plan_adt padt = {
@@ -193,7 +193,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 }
 
-static solver *mksolver(int vecloop_dim, const int *buddies, uint nbuddies)
+static solver *mksolver(int vecloop_dim, const int *buddies, int nbuddies)
 {
      static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
@@ -205,12 +205,12 @@ static solver *mksolver(int vecloop_dim, const int *buddies, uint nbuddies)
 
 void X(dft_vrank_geq1_register)(planner *p)
 {
-     uint i;
+     int i;
 
      /* FIXME: Should we try other vecloop_dim values? */
      static const int buddies[] = { 1, -1 };
 
-     const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
+     const int nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 
      for (i = 0; i < nbuddies; ++i)
           REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));

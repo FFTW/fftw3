@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.4 2002-07-01 13:26:42 athena Exp $ */
+/* $Id: problem.c,v 1.5 2003-01-15 02:10:25 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -123,7 +123,7 @@ void problem_destroy(struct problem *p)
 /* predicates for common cases */
 int problem_power_of_two(struct problem *p, int in_place)
 {
-     unsigned int i;
+     int i;
 
      for (i = 0; i < p->rank; ++i) {
 	  if (p->n[i] == 1)

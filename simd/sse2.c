@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse2.c,v 1.7 2003-01-08 12:20:47 athena Exp $ */
+/* $Id: sse2.c,v 1.8 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -28,9 +28,9 @@
 #include <signal.h>
 #include <setjmp.h>
 
-static inline uint cpuid_edx(uint op)
+static inline int cpuid_edx(int op)
 {
-     uint eax, ecx, edx;
+     int eax, ecx, edx;
 
      __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
 	     : "=a" (eax), "=c" (ecx), "=d" (edx)

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle_c.ml,v 1.3 2002-09-28 17:03:53 athena Exp $ *)
+(* $Id: gen_twiddle_c.ml,v 1.4 2003-01-15 02:10:25 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle_c.ml,v 1.3 2002-09-28 17:03:53 athena Exp $"
+let cvsid = "$Id: gen_twiddle_c.ml,v 1.4 2003-01-15 02:10:25 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -103,7 +103,7 @@ let generate n =
   let annot = standard_optimizer odag in
 
   let body = Block (
-    [Decl ("uint", i);
+    [Decl ("int", i);
      Decl (C.realtypep, rioarray);],
     [Stmt_assign (CVar rioarray,
 		  CVar (if (sign < 0) then "ri" else "ii"));
@@ -128,7 +128,7 @@ let generate n =
 	  Decl (C.realtypep, "ii");
 	  Decl (C.constrealtypep, twarray);
 	  Decl (C.stridetype, iostride);
-	  Decl ("uint", m);
+	  Decl ("int", m);
 	  Decl ("int", dist)],
          add_constants body)
   in

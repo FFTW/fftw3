@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ops.c,v 1.2 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: ops.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -32,13 +32,13 @@ void X(ops_cpy)(const opcnt *src, opcnt *dst)
      *dst = *src;
 }
 
-void X(ops_other)(uint o, opcnt *dst)
+void X(ops_other)(int o, opcnt *dst)
 {
      X(ops_zero)(dst);
      dst->other = o;
 }
 
-void X(ops_madd)(uint m, const opcnt *a, const opcnt *b, opcnt *dst)
+void X(ops_madd)(int m, const opcnt *a, const opcnt *b, opcnt *dst)
 {
      dst->add = m * a->add + b->add;
      dst->mul = m * a->mul + b->mul;
@@ -56,7 +56,7 @@ void X(ops_add2)(const opcnt *a, opcnt *dst)
      X(ops_add)(a, dst, dst);
 }
 
-void X(ops_madd2)(uint m, const opcnt *a, opcnt *dst)
+void X(ops_madd2)(int m, const opcnt *a, opcnt *dst)
 {
      X(ops_madd)(m, a, dst, dst);
 }

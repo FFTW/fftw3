@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2hc.ml,v 1.6 2002-08-15 20:29:16 athena Exp $ *)
+(* $Id: gen_hc2hc.ml,v 1.7 2003-01-15 02:10:25 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2hc.ml,v 1.6 2002-08-15 20:29:16 athena Exp $"
+let cvsid = "$Id: gen_hc2hc.ml,v 1.7 2003-01-15 02:10:25 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -119,7 +119,7 @@ let generate n =
   and vi = CVar i  and vm = CVar m 
   in
   let body = Block (
-    [Decl ("uint", i)],
+    [Decl ("int", i)],
     [For (Expr_assign (vi, Integer 2),
 	  Binop (" < ", vi, vm),
 	  list_to_comma 
@@ -140,7 +140,7 @@ let generate n =
 	  Decl (C.realtypep, iioarray);
 	  Decl (C.constrealtypep, twarray);
 	  Decl (C.stridetype, iostride);
-	  Decl ("uint", m);
+	  Decl ("int", m);
 	  Decl ("int", dist)],
          add_constants body)
   in

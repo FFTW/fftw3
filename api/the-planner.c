@@ -23,20 +23,20 @@
 static planner *plnr = 0;
 
 /* create the planner for the rest of the API */
-planner *X(the_planner)(void)
+planner *X(the_planner) (void)
 {
      if (!plnr) {
-	  plnr = X(mkplanner)();
-	  X(configure_planner)(plnr);
+          plnr = X(mkplanner) ();
+          X(configure_planner) (plnr);
      }
-     
+
      return plnr;
 }
 
-void X(cleanup)(void)
+void X(cleanup) (void)
 {
      if (plnr) {
-	  X(planner_destroy)(plnr);
-	  plnr = 0;
+          X(planner_destroy) (plnr);
+          plnr = 0;
      }
 }

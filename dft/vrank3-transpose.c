@@ -18,16 +18,16 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.18 2002-09-26 19:06:38 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.19 2003-01-15 02:10:25 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
 #include "dft.h"
 
 /* transposition routine. TODO: optimize? */
-static void t(R *rA, R *iA, uint n, int is, int js, uint vn, int vs)
+static void t(R *rA, R *iA, int n, int is, int js, int vn, int vs)
 {
-     uint i, j, iv;
+     int i, j, iv;
      int im = iA - rA;
 
      for (i = 1; i < n; ++i) {
@@ -48,7 +48,7 @@ typedef solver S;
 
 typedef struct {
      plan_dft super;
-     uint n, vl;
+     int n, vl;
      int s0, s1, vs;
 } P;
 
@@ -60,9 +60,9 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      t(ri, ii, ego->n, ego->s0, ego->s1, ego->vl, ego->vs);
 }
 
-static int pickdim(const tensor *s, uint *pdim0, uint *pdim1)
+static int pickdim(const tensor *s, int *pdim0, int *pdim1)
 {
-     uint dim0, dim1;
+     int dim0, dim1;
 
      for (dim0 = 0; dim0 < s->rnk; ++dim0)
           for (dim1 = dim0 + 1; dim1 < s->rnk; ++dim1)
@@ -75,13 +75,13 @@ static int pickdim(const tensor *s, uint *pdim0, uint *pdim1)
 }
 
 /* For dim0 != dim1 in {0,1,2}, return the third element. */
-static int other_dim(uint *dim0, uint *dim1, uint *dim2)
+static int other_dim(int *dim0, int *dim1, int *dim2)
 {
      *dim2 = 3 - (*dim0 + *dim1);
      return 1;
 }
 
-static int applicable0(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
+static int applicable0(const problem *p_, int *dim0, int *dim1, int *dim2)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *)p_;
@@ -100,7 +100,7 @@ static int applicable0(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
 }
 
 static int applicable(const problem *p_, const planner *plnr, 
-		      uint *dim0, uint *dim1, uint *dim2)
+		      int *dim0, int *dim1, int *dim2)
 {
      const problem_dft *p;
 
@@ -128,7 +128,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p;
      P *pln;
-     uint dim0, dim1, dim2;
+     int dim0, dim1, dim2;
 
      static const plan_adt padt = {
 	  X(dft_solve), X(null_awake), print, X(plan_null_destroy)

@@ -24,7 +24,7 @@
 #if HAVE_SIMD
 static int okp(const ct_desc *d,
 	       const R *rio, const R *iio, 
-	       int ios, int vs, uint m, int dist, 
+	       int ios, int vs, int m, int dist, 
 	       const planner *plnr)
 {
      return (RIGHT_CPU()

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft.c,v 1.8 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: verify-rdft.c,v 1.9 2003-01-15 02:10:25 athena Exp $ */
 
 #include "rdft.h"
 #include "debug.h"
@@ -69,7 +69,7 @@ static void cpyr(R *ra, const tensor *sza, R *rb, const tensor *szb)
    of A and input stride of B */
 typedef struct {
      dotens2_closure k;
-     uint n;
+     int n;
      int as;
      R *a;
      R *rb, *ib;
@@ -79,7 +79,7 @@ static void cpyhc0(dotens2_closure *k_,
 		  int indxa, int ondxa, int indxb, int ondxb)
 {
      cpyhc_closure *k = (cpyhc_closure *)k_;
-     uint i, n = k->n;
+     int i, n = k->n;
      int as = k->as;
      R *a = k->a + ondxa, *rb = k->rb + indxb, *ib = k->ib + indxb;
      UNUSED(indxa); UNUSED(ondxb);
@@ -121,7 +121,7 @@ static void icpyhc0(dotens2_closure *k_,
 		  int indxa, int ondxa, int indxb, int ondxb)
 {
      cpyhc_closure *k = (cpyhc_closure *)k_;
-     uint i, n = k->n;
+     int i, n = k->n;
      int as = k->as;
      R *a = k->a + indxa, *rb = k->rb + ondxb, *ib = k->ib + ondxb;
      UNUSED(ondxa); UNUSED(indxb);
@@ -157,7 +157,7 @@ static void icpyhc(R *a, const tensor *sza, const tensor *vecsza,
    of A and input stride of B */
 typedef struct {
      dotens2_closure k;
-     uint n;
+     int n;
      int as;
      R *ra, *ia;
      R *rb, *ib;
@@ -167,7 +167,7 @@ static void cpyhc20(dotens2_closure *k_,
 		  int indxa, int ondxa, int indxb, int ondxb)
 {
      cpyhc2_closure *k = (cpyhc2_closure *)k_;
-     uint i, n = k->n;
+     int i, n = k->n;
      int as = k->as;
      R *ra = k->ra + ondxa, *ia = k->ia + ondxa;
      R *rb = k->rb + indxb, *ib = k->ib + indxb;
@@ -210,7 +210,7 @@ static void icpyhc20(dotens2_closure *k_,
 		  int indxa, int ondxa, int indxb, int ondxb)
 {
      cpyhc2_closure *k = (cpyhc2_closure *)k_;
-     uint i, n = k->n;
+     int i, n = k->n;
      int as = k->as;
      R *ra = k->ra + indxa, *ia = k->ia + indxa;
      R *rb = k->rb + ondxb, *ib = k->ib + ondxb;
@@ -294,11 +294,11 @@ static void dofft(void *n_, C *in, C *out)
 /***************************************************************************/
 
 static void really_verify(plan *pln, const problem_rdft *p, 
-			  uint rounds, double tol)
+			  int rounds, double tol)
 {
      C *inA, *inB, *inC, *outA, *outB, *outC, *tmp;
      info nfo;
-     uint n, vecn, N;
+     int n, vecn, N;
 
      if (rounds == 0)
 	  rounds = 20;  /* default value */
@@ -351,11 +351,11 @@ static void really_verify(plan *pln, const problem_rdft *p,
 }
 
 static void really_verify2(plan *pln, const problem_rdft2 *p, 
-			   uint rounds, double tol)
+			   int rounds, double tol)
 {
      C *inA, *inB, *inC, *outA, *outB, *outC, *tmp;
      info nfo;
-     uint n, vecn, N;
+     int n, vecn, N;
      
      if (rounds == 0)
 	  rounds = 20;  /* default value */
@@ -413,7 +413,7 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
      X(ifree)(inA);
 }
 
-void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds)
+void X(rdft_verify)(plan *pln, const problem_rdft *p, int rounds)
 {
      if (p->sz->rnk == 1 && (p->kind[0] == R2HC || p->kind[0] == HC2R)) {
 	  AWAKE(pln, 1);
@@ -423,7 +423,7 @@ void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds)
      }
 }
 
-void X(rdft2_verify)(plan *pln, const problem_rdft2 *p, uint rounds)
+void X(rdft2_verify)(plan *pln, const problem_rdft2 *p, int rounds)
 {
      if (p->kind == R2HC || p->kind == HC2R) {
 	  AWAKE(pln, 1);

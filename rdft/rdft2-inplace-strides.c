@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-inplace-strides.c,v 1.1 2003-01-09 06:51:45 stevenj Exp $ */
+/* $Id: rdft2-inplace-strides.c,v 1.2 2003-01-15 02:10:25 athena Exp $ */
 
 #include "rdft.h"
 
@@ -28,11 +28,11 @@
    because rdft transforms have the unfortunate property of
    differing input and output sizes.   This routine is not
    exhaustive; we only return 1 for the most common case.  */
-int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim)
+int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim)
 {
-     uint N, Nc;
+     int N, Nc;
      int is, os;
-     uint i;
+     int i;
      
      for (i = 0; i + 1 < p->sz->rnk; ++i)
 	  if (p->sz->dims[i].is != p->sz->dims[i].os)

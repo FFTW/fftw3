@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.23 2002-09-25 01:27:49 athena Exp $ */
+/* $Id: rank0.c,v 1.24 2003-01-15 02:10:25 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -42,7 +42,7 @@ typedef struct {
 
 typedef struct {
      plan_dft super;
-     uint vl;
+     int vl;
      int ivs, ovs;
      const S *slv;
 } P;
@@ -86,7 +86,7 @@ static const rnk0adt adt_cpy1 =
 static void apply_vec(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
-     uint i, vl = ego->vl;
+     int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      int imi = ii - ri, imo = io - ro;
      for (i = vl; i > 0; --i) {
@@ -111,7 +111,7 @@ static const rnk0adt adt_vec =
 static void apply_io1(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
-     uint vl = ego->vl;
+     int vl = ego->vl;
      memcpy(ro, ri, vl * sizeof(R));
      memcpy(io, ii, vl * sizeof(R));
 }
@@ -135,7 +135,7 @@ static const rnk0adt adt_io1 =
 static void apply_io2r(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
-     uint vl = ego->vl;
+     int vl = ego->vl;
      UNUSED(ii);
      UNUSED(io);		/* i{in,out}put == r{in,out}put + 1 */
      memcpy(ro, ri, vl * sizeof(R) * 2);
@@ -159,7 +159,7 @@ static const rnk0adt adt_io2r =
 static void apply_io2i(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
-     uint vl = ego->vl;
+     int vl = ego->vl;
      UNUSED(ri);
      UNUSED(ro);		/* r{in,out}put == i{in,out}put + 1 */
      memcpy(io, ii, vl * sizeof(R) * 2);
@@ -225,7 +225,7 @@ static solver *mksolver(const rnk0adt *adt)
 
 void X(dft_rank0_register)(planner *p)
 {
-     uint i;
+     unsigned i;
      static const rnk0adt *const adts[] = {
 	  &adt_cpy1, &adt_vec, &adt_io1, &adt_io2r, &adt_io2i
      };

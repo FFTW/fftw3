@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.11 2002-09-25 11:37:38 athena Exp $ */
+/* $Id: direct2.c,v 1.12 2003-01-15 02:10:25 athena Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -36,7 +36,7 @@ typedef struct {
 	  const khc2r_desc *hc2r;
      } desc;
      kodelet k;
-     uint sz;
+     int sz;
      rdft_kind kind;
      const char *nam;
 } S;
@@ -45,7 +45,7 @@ typedef struct {
      plan_rdft2 super;
 
      stride is, os;
-     uint vl;
+     int vl;
      int ivs, ovs;
      kodelet k;
      const S *slv;
@@ -55,7 +55,7 @@ typedef struct {
 static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
 {
      P *ego = (P *) ego_;
-     uint i, vl = ego->vl, ovs = ego->ovs;
+     int i, vl = ego->vl, ovs = ego->ovs;
      ego->k.r2hc(r, rio, iio, ego->is, ego->os, ego->os,
 		 vl, ego->ivs, ovs);
      for (i = 0; i < vl; ++i, iio += ovs)
@@ -90,7 +90,7 @@ static int applicable(const solver *ego_, const problem *p_)
      if (RDFT2P(p_)) {
           const S *ego = (const S *) ego_;
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  uint vl;
+	  int vl;
 	  int ivs, ovs;
 
           return (

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.28 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: ct.c,v 1.29 2003-01-15 02:10:25 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -54,7 +54,7 @@ static void print(plan *ego_, printer *p)
 	      ego->vl, e->nam, ego->cld);
 }
 
-#define divides(a, b) (((uint)(b) % (uint)(a)) == 0)
+#define divides(a, b) (((int)(b) % (int)(a)) == 0)
 
 int X(dft_ct_applicable)(const solver_ct *ego, const problem *p_)
 {
@@ -87,7 +87,7 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
 {
      plan_ct *pln;
      plan *cld;
-     uint n, r, m;
+     int n, r, m;
      iodim *d;
      const problem_dft *p;
      const ct_desc *e = ego->desc;
@@ -145,7 +145,7 @@ problem *X(dft_mkcld_dit)(const solver_ct *ego, const problem_dft *p)
 {
      iodim *d = p->sz->dims;
      const ct_desc *e = ego->desc;
-     uint m = d[0].n / e->radix;
+     int m = d[0].n / e->radix;
 
      tensor *radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
      tensor *cld_vec = X(tensor_append)(radix, p->vecsz);
@@ -159,7 +159,7 @@ problem *X(dft_mkcld_dif)(const solver_ct *ego, const problem_dft *p)
 {
      iodim *d = p->sz->dims;
      const ct_desc *e = ego->desc;
-     uint m = d[0].n / e->radix;
+     int m = d[0].n / e->radix;
 
      tensor *radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
      tensor *cld_vec = X(tensor_append)(radix, p->vecsz);

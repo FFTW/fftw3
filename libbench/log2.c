@@ -1,8 +1,8 @@
 #include "bench.h"
 
-int log_2(unsigned int n)
+int log_2(int n)
 {
-     unsigned int m = 0;
+     int m = 0;
 
      while (n > 1) {
 	  ++m;

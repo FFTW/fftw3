@@ -30,7 +30,7 @@ typedef struct {
      plan *cld;
      twid *td;
      int os;
-     uint r, m;
+     int r, m;
      rdft_kind kind;
 } P;
 
@@ -39,14 +39,14 @@ typedef struct {
 static void apply_dit(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
-     uint n, m, r;
-     uint i, j, k;
+     int n, m, r;
+     int i, j, k;
      int os, osm;
      E *buf;
      const R *W;
      R *X, *YO, *YI;
      E rsum, isum;
-     uint wp, wincr;
+     int wp, wincr;
 
      {
 	  plan_rdft *cld = (plan_rdft *) ego->cld;
@@ -135,14 +135,14 @@ static void apply_dit(plan *ego_, R *I, R *O)
 static void apply_dif(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
-     uint n, m, r;
-     uint i, j, k;
+     int n, m, r;
+     int i, j, k;
      int is, ism;
      E *buf;
      const R *W;
      R *X, *YO, *YI;
      E rsum, isum;
-     uint wp, wincr;
+     int wp, wincr;
 
      r = ego->r;
 
@@ -295,7 +295,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
      P *pln = 0;
-     uint n, r, m;
+     int n, r, m;
      int is, os;
      plan *cld = (plan *) 0;
      problem *cldp;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.5 2003-01-14 20:14:29 stevenj Exp $ */
+/* $Id: primes.c,v 1.6 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -33,12 +33,12 @@
 
 /* compute (x * y) mod p, but watch out for integer overflows; we must
    have x, y >= 0, p > 0.  This routine is slow. */
-uint X(safe_mulmod)(uint x, uint y, uint p)
+int X(safe_mulmod)(int x, int y, int p)
 {
-     if (y == 0 || x <= UINT_MAX / y)
+     if (y == 0 || x <= INT_MAX / y)
 	  return((x * y) % p);
      else {
-	  uint y2 = y/2;
+	  int y2 = y/2;
 	  return((fftw_safe_mulmod(x, y2, p) +
 		  fftw_safe_mulmod(x, y - y2, p)) % p);
      }
@@ -49,13 +49,13 @@ uint X(safe_mulmod)(uint x, uint y, uint p)
 
 /* Compute n^m mod p, where m >= 0 and p > 0.  If we really cared, we
    could make this tail-recursive. */
-uint X(power_mod)(uint n, uint m, uint p)
+int X(power_mod)(int n, int m, int p)
 {
      A(p > 0);
      if (m == 0)
 	  return 1;
      else if (m % 2 == 0) {
-	  uint x = X(power_mod)(n, m / 2, p);
+	  int x = X(power_mod)(n, m / 2, p);
 	  return MULMOD(x, x, p);
      }
      else
@@ -64,9 +64,9 @@ uint X(power_mod)(uint n, uint m, uint p)
 
 /* Find the period of n in the multiplicative group mod p (p prime).
    That is, return the smallest m such that n^m == 1 mod p. */
-static uint period(uint n, uint p)
+static int period(int n, int p)
 {
-     uint prod = n, per = 1;
+     int prod = n, per = 1;
 
      while (prod != 1) {
 	  prod = MULMOD(prod, n, p);
@@ -80,9 +80,9 @@ static uint period(uint n, uint p)
    prime.  The generators are dense enough that this takes O(p)
    time, not O(p^2) as you might naively expect.   (There are
    asymptotically faster ways to find a generator; c.f. Knuth.) */
-uint X(find_generator)(uint p)
+int X(find_generator)(int p)
 {
-     uint g;
+     int g;
 
      for (g = 1; g < p; ++g)
 	  if (period(g, p) == p - 1)
@@ -93,9 +93,9 @@ uint X(find_generator)(uint p)
 
 /* Return first prime divisor of n  (It would be at best slightly faster to
    search a static table of primes; there are 6542 primes < 2^16.)  */
-uint X(first_divisor)(uint n)
+int X(first_divisor)(int n)
 {
-     uint i;
+     int i;
      if (n <= 1)
 	  return n;
      if (n % 2 == 0)
@@ -106,12 +106,12 @@ uint X(first_divisor)(uint n)
      return n;
 }
 
-int X(is_prime)(uint n)
+int X(is_prime)(int n)
 {
      return(n > 1 && X(first_divisor)(n) == n);
 }
 
-uint X(next_prime)(uint n)
+int X(next_prime)(int n)
 {
      while (!X(is_prime)(n)) ++n;
      return n;

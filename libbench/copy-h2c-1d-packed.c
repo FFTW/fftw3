@@ -5,12 +5,12 @@
  * Works only for even N.
  */
 
-void copy_h2c_1d_packed_strided(unsigned int n,
+void copy_h2c_1d_packed_strided(int n,
 				bench_real *pout, int rstride,
 				bench_complex *out, int cstride,
 				bench_real sign_of_r2h_transform)
 {
-     unsigned int k;
+     int k;
 
      BENCH_ASSERT((n & 1) == 0); /* even n */
 

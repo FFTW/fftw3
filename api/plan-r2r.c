@@ -20,8 +20,9 @@
 
 #include "api.h"
 
-X(plan) X(plan_r2r)(unsigned int rank, const unsigned long *n, R *in, R *out, 
-		    const X(r2r_kind) *kind, unsigned int flags)
+X(plan) X(plan_r2r) (int rank, const int *n, R *in, R *out,
+                     const X(r2r_kind) * kind, int flags)
 {
-     return X(plan_many_r2r)(rank, n, 1, in,0,1,1, out,0,1,1, kind, flags);
+     return X(plan_many_r2r) (rank, n, 1, in, 0, 1, 1, out, 0, 1, 1, kind,
+                              flags);
 }

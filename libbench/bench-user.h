@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.10 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: bench-user.h,v 1.11 2003-01-15 02:10:25 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -64,13 +64,13 @@ typedef enum { PROBLEM_COMPLEX, PROBLEM_REAL } problem_kind_t;
 #define MAX_RANK 20
 struct problem {
      problem_kind_t kind;
-     unsigned int rank;
-     unsigned int n[MAX_RANK];  
-     unsigned int size;  /* total size of input = PROD n[i] */
-     unsigned int vrank;
-     unsigned int vn[MAX_RANK];  
-     unsigned int vsize;  /* total vector size of input = PROD vn[i] */
-     unsigned int phys_size;  /* total size of allocated input */
+     int rank;
+     int n[MAX_RANK];  
+     int size;  /* total size of input = PROD n[i] */
+     int vrank;
+     int vn[MAX_RANK];  
+     int vsize;  /* total vector size of input = PROD vn[i] */
+     int phys_size;  /* total size of allocated input */
      int sign;
      int in_place;
      int split;
@@ -106,13 +106,13 @@ void copy_r2c_packed(struct problem *p, bench_complex *out);
 void copy_c2h(struct problem *p, bench_complex *in);
 void copy_h2c(struct problem *p, bench_complex *out);
 
-void copy_c2h_1d_packed_strided(unsigned int n,
+void copy_c2h_1d_packed_strided(int n,
                                 bench_real *pin, int rstride,
                                 bench_complex *in, int cstride,
                                 bench_real sign_of_r2h_transform);
 void copy_c2h_1d_packed(struct problem *p, bench_complex *in,
 			bench_real sign_of_r2h_transform);
-void copy_h2c_1d_packed_strided(unsigned int n,
+void copy_h2c_1d_packed_strided(int n,
                                 bench_real *pout, int rstride,
                                 bench_complex *out, int cstride,
                                 bench_real sign_of_r2h_transform);
@@ -135,34 +135,34 @@ void copy_h2c_1d_halfcomplex(struct problem *p, bench_complex *out,
 void copy_c2h_1d_halfcomplex(struct problem *p, bench_complex *in,
 			     bench_real sign_of_r2h_transform);
 void copy_ri2c(bench_real *rin, bench_real *rout, bench_complex *out,
-	       unsigned int n);
+	       int n);
 void copy_c2ri(bench_complex *in, bench_real *rout, bench_real *iout,
-	       unsigned int n);
+	       int n);
 void unnormalize(struct problem *p, bench_complex *out, int which_sign);
 void copy_c2c_from(struct problem *p, bench_complex *in);
 void copy_c2c_to(struct problem *p, bench_complex *out);
 
-extern int power_of_two(unsigned int n);
+extern int power_of_two(int n);
 extern int problem_power_of_two(struct problem *p, int in_place);
 extern int problem_complex_power_of_two(struct problem *p, int in_place);
 extern int problem_real_power_of_two(struct problem *p, int in_place);
 extern int problem_in_place(struct problem *p);
-extern int log_2(unsigned int n);
+extern int log_2(int n);
 
-extern void aset(bench_real *A, unsigned int n, bench_real x);
-extern void caset(bench_complex *A, unsigned int n, bench_complex x);
-extern void acopy(bench_real *A, bench_real *B, unsigned int n);
-extern void cacopy(bench_complex *A, bench_complex *B, unsigned int n);
+extern void aset(bench_real *A, int n, bench_real x);
+extern void caset(bench_complex *A, int n, bench_complex x);
+extern void acopy(bench_real *A, bench_real *B, int n);
+extern void cacopy(bench_complex *A, bench_complex *B, int n);
 
-extern void cascale(bench_complex *A, unsigned int n, bench_complex alpha);
-extern void ascale(bench_real *A, unsigned int n, bench_real alpha);
+extern void cascale(bench_complex *A, int n, bench_complex alpha);
+extern void ascale(bench_real *A, int n, bench_real alpha);
 
 extern void caadd(bench_complex *C, bench_complex *A, 
-		  bench_complex *B, unsigned int n);
+		  bench_complex *B, int n);
 extern void casub(bench_complex *C, bench_complex *A, 
-		  bench_complex *B, unsigned int n);
+		  bench_complex *B, int n);
 
-extern int check_prime_factors(unsigned int n, unsigned int maxprime);
+extern int check_prime_factors(int n, int maxprime);
 
 /**************************************************************
  * malloc

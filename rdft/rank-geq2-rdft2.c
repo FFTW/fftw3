@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.16 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.17 2003-01-15 02:10:25 athena Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -29,7 +29,7 @@ typedef struct {
      solver super;
      int spltrnk;
      const int *buddies;
-     uint nbuddies;
+     int nbuddies;
 } S;
 
 typedef struct {
@@ -91,7 +91,7 @@ static void print(plan *ego_, printer *p)
 	      s->spltrnk, ego->cldr, ego->cldc);
 }
  
-static int picksplit(const S *ego, const tensor *sz, uint *rp)
+static int picksplit(const S *ego, const tensor *sz, int *rp)
 {
      A(sz->rnk > 1); /* cannot split rnk <= 1 */
      if (!X(pickdim)(ego->spltrnk, ego->buddies, ego->nbuddies, sz, 1, rp))
@@ -102,7 +102,7 @@ static int picksplit(const S *ego, const tensor *sz, uint *rp)
      return 1;
 }
 
-static int applicable0(const solver *ego_, const problem *p_, uint *rp,
+static int applicable0(const solver *ego_, const problem *p_, int *rp,
 		       const planner *plnr)
 {
      if (RDFT2P(p_)) {
@@ -129,7 +129,7 @@ static int applicable0(const solver *ego_, const problem *p_, uint *rp,
 
 /* TODO: revise this. */
 static int applicable(const solver *ego_, const problem *p_, 
-		      const planner *plnr, uint *rp)
+		      const planner *plnr, int *rp)
 {
      const S *ego = (const S *)ego_;
 
@@ -163,7 +163,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      plan *cldr = 0, *cldc = 0;
      tensor *sz1, *sz2, *vecszi, *sz2i;
-     uint spltrnk;
+     int spltrnk;
      inplace_kind k;
      problem *cldp;
 
@@ -220,7 +220,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(int spltrnk, const int *buddies, uint nbuddies)
+static solver *mksolver(int spltrnk, const int *buddies, int nbuddies)
 {
      static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
@@ -232,10 +232,10 @@ static solver *mksolver(int spltrnk, const int *buddies, uint nbuddies)
 
 void X(rdft2_rank_geq2_register)(planner *p)
 {
-     uint i;
+     int i;
      static const int buddies[] = { 0, 1, -2 };
 
-     const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
+     const int nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 
      for (i = 0; i < nbuddies; ++i)
           REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));

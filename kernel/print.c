@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.18 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: print.c,v 1.19 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -39,7 +39,7 @@ static void vprint(printer *p, const char *format, va_list ap)
      char buf[BSZ];
      const char *s = format;
      char c;
-     uint i;
+     int i;
 
      for (i = 0; i < p->indent; ++i)
           p->putchr(p, ' ');
@@ -92,7 +92,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       }
 		       case 'v': {
 			    /* print optional vector length */
-			    uint x = va_arg(ap, uint);
+			    int x = va_arg(ap, int);
 			    if (x > 1) {
 				 sprintf(buf, "-x%u", x);
 				 goto putbuf;
@@ -114,12 +114,12 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    break;
 		       }
 		       case 'u': {
-			    uint x = va_arg(ap, uint);
+			    int x = va_arg(ap, int);
 			    sprintf(buf, "%u", x);
 			    goto putbuf;
 		       }
 		       case 'x': {
-			    uint x = va_arg(ap, uint);
+			    int x = va_arg(ap, int);
 			    sprintf(buf, "%x", x);
 			    goto putbuf;
 		       }

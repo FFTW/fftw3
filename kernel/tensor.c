@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: tensor.c,v 1.33 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: tensor.c,v 1.34 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 
-tensor *X(mktensor)(uint rnk) 
+tensor *X(mktensor)(int rnk) 
 {
      tensor *x;
 
@@ -58,9 +58,9 @@ void X(tensor_destroy)(tensor *sz)
      X(ifree)(sz);
 }
 
-uint X(tensor_sz)(const tensor *sz)
+int X(tensor_sz)(const tensor *sz)
 {
-     uint i, n = 1;
+     int i, n = 1;
 
      if (!FINITE_RNK(sz->rnk))
           return 0;
@@ -72,12 +72,12 @@ uint X(tensor_sz)(const tensor *sz)
 
 void X(tensor_md5)(md5 *p, const tensor *t)
 {
-     uint i;
-     X(md5uint)(p, t->rnk);
+     int i;
+     X(md5int)(p, t->rnk);
      if (FINITE_RNK(t->rnk)) {
 	  for (i = 0; i < t->rnk; ++i) {
 	       const iodim *q = t->dims + i;
-	       X(md5uint)(p, q->n);
+	       X(md5int)(p, q->n);
 	       X(md5int)(p, q->is);
 	       X(md5int)(p, q->os);
 	  }
@@ -86,7 +86,7 @@ void X(tensor_md5)(md5 *p, const tensor *t)
 
 /* treat a (rank <= 1)-tensor as a rank-1 tensor, extracting
    appropriate n, is, and os components */
-int X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os)
+int X(tensor_tornk1)(const tensor *t, int *n, int *is, int *os)
 {
      A(t->rnk <= 1);
      if (t->rnk == 1) {
@@ -105,7 +105,7 @@ void X(tensor_print)(const tensor *x, printer *p)
 {
      p->print(p, "(t:%d", FINITE_RNK(x->rnk) ? (int) x->rnk : -1);
      if (FINITE_RNK(x->rnk)) {
-	  uint i;
+	  int i;
 	  for (i = 0; i < x->rnk; ++i) {
 	       const iodim *d = x->dims + i;
 	       p->print(p, " (%u %d %d)", d->n, d->is, d->os);

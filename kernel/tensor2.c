@@ -18,12 +18,12 @@
  *
  */
 
-/* $Id: tensor2.c,v 1.1 2002-09-22 14:21:36 athena Exp $ */
+/* $Id: tensor2.c,v 1.2 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 
-tensor *X(mktensor_2d)(uint n0, int is0, int os0,
-                      uint n1, int is1, int os1)
+tensor *X(mktensor_2d)(int n0, int is0, int os0,
+                      int n1, int is1, int os1)
 {
      tensor *x = X(mktensor)(2);
      x->dims[0].n = n0;

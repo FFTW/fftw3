@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.17 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.18 2003-01-15 02:10:25 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -39,8 +39,8 @@ typedef struct {
      plan *cld;
      twid *td, *td2;
      int is, os;
-     uint n;
-     uint vl;
+     int n;
+     int vl;
      int ivs, ovs;
      rdft_kind kind;
 } P;
@@ -49,8 +49,8 @@ static void apply_re11(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
-     uint i, n = ego->n;
-     uint iv, vl = ego->vl;
+     int i, n = ego->n;
+     int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      R *W;
      R *buf;
@@ -93,7 +93,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	  O[0] = W[0] * buf[0];
 	  for (i = 1; i < n - i; ++i) {
 	       E a, b;
-	       uint k;
+	       int k;
 	       a = buf[i];
 	       b = buf[n - i];
 	       k = i + i;
@@ -114,8 +114,8 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
-     uint i, n = ego->n;
-     uint iv, vl = ego->vl;
+     int i, n = ego->n;
+     int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      R *W;
      R *buf;
@@ -158,7 +158,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 	  O[0] = W[0] * buf[0];
 	  for (i = 1; i < n - i; ++i) {
 	       E a, b;
-	       uint k;
+	       int k;
 	       a = buf[i];
 	       b = buf[n - i];
 	       k = i + i;
@@ -231,7 +231,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      plan *cld;
      R *buf;
-     uint n;
+     int n;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy

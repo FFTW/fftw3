@@ -20,10 +20,10 @@
 
 #include "api.h"
 
-X(plan) X(plan_dft_c2r_2d)(unsigned long nx, unsigned long ny,
-			   C *in, R *out, unsigned int flags)
+X(plan) X(plan_dft_c2r_2d) (int nx, int ny, C *in, R *out, int flags)
 {
-     unsigned long n[2];
-     n[0] = nx; n[1] = ny;
-     return X(plan_dft_c2r)(2, n, in, out, flags);
+     int n[2];
+     n[0] = nx;
+     n[1] = ny;
+     return X(plan_dft_c2r) (2, n, in, out, flags);
 }

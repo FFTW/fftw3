@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dit.c,v 1.5 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: hc2hc-dit.c,v 1.6 2003-01-15 02:10:25 athena Exp $ */
 
 /* decimation in time Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -26,8 +26,8 @@
 
 typedef struct {
      plan_hc2hc super;
-     uint nthr;
-     uint mloop;
+     int nthr;
+     int mloop;
      int sW;
 } P;
 
@@ -43,7 +43,7 @@ typedef struct {
 static void *spawn_apply(spawn_data *d)
 {
      PD *ego = (PD *) d->data;
-     uint min = d->min, max = d->max;
+     int min = d->min, max = d->max;
      int os = ego->os;
 
      ego->k(ego->ro + min * os, ego->io - min * os,
@@ -68,7 +68,7 @@ static void apply(plan *ego_, R *I, R *O)
 
      {
 	  plan_rdft *cldm = (plan_rdft *) ego->cldm;
-          uint r = ego->r, m = ego->m;
+          int r = ego->r, m = ego->m;
           int os = ego->os;
 	  P *ego_thr = (P *) ego_;
 	  PD d;
@@ -93,7 +93,7 @@ static int applicable0(const solver_hc2hc *ego, const problem *p_,
           const hc2hc_desc *e = ego->desc;
           const problem_rdft *p = (const problem_rdft *) p_;
           iodim *d = p->sz->dims;
-	  uint m = d[0].n / e->radix;
+	  int m = d[0].n / e->radix;
           return (1
 		  && p->vecsz->rnk == 0
 		  && (e->genus->okp(e, p->O + d[0].os,

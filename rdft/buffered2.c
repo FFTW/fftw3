@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.25 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: buffered2.c,v 1.26 2003-01-15 02:10:25 athena Exp $ */
 
 #include "rdft.h"
 
 typedef struct {
-     uint nbuf;
-     uint maxbufsz;
-     uint skew_alignment;
-     uint skew;
+     int nbuf;
+     int maxbufsz;
+     int skew_alignment;
+     int skew;
      const char *nam;
 } bufadt;
 
@@ -39,7 +39,7 @@ typedef struct {
      plan_rdft2 super;
 
      plan *cld, *cldrest;
-     uint n, vl, nbuf, bufdist;
+     int n, vl, nbuf, bufdist;
      int os, ivs, ovs;
 
      const S *slv;
@@ -51,10 +51,10 @@ typedef struct {
    the n loops? */
 
 /* copy halfcomplex array r (contiguous) to complex (strided) array rio/iio. */
-static void hc2c(uint n, R *r, R *rio, R *iio, int os)
+static void hc2c(int n, R *r, R *rio, R *iio, int os)
 {
-     uint n2 = (n + 1) / 2;
-     uint i;
+     int n2 = (n + 1) / 2;
+     int i;
 
      rio[0] = r[0];
      iio[0] = 0;
@@ -89,10 +89,10 @@ static void hc2c(uint n, R *r, R *rio, R *iio, int os)
 }
 
 /* reverse of hc2c */
-static void c2hc(uint n, R *rio, R *iio, int is, R *r)
+static void c2hc(int n, R *rio, R *iio, int is, R *r)
 {
-     uint n2 = (n + 1) / 2;
-     uint i;
+     int n2 = (n + 1) / 2;
+     int i;
 
      r[0] = rio[0];
      for (i = 1; i < ((n2 - 1) & 3) + 1; ++i) {
@@ -129,8 +129,8 @@ static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
 {
      P *ego = (P *) ego_;
      plan_rdft *cld = (plan_rdft *) ego->cld;
-     uint i, j, vl = ego->vl, nbuf = ego->nbuf, bufdist = ego->bufdist;
-     uint n = ego->n;
+     int i, j, vl = ego->vl, nbuf = ego->nbuf, bufdist = ego->bufdist;
+     int n = ego->n;
      int ivs = ego->ivs, ovs = ego->ovs, os = ego->os;
      R *bufs;
 
@@ -162,8 +162,8 @@ static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
 {
      P *ego = (P *) ego_;
      plan_rdft *cld = (plan_rdft *) ego->cld;
-     uint i, j, vl = ego->vl, nbuf = ego->nbuf, bufdist = ego->bufdist;
-     uint n = ego->n;
+     int i, j, vl = ego->vl, nbuf = ego->nbuf, bufdist = ego->bufdist;
+     int n = ego->n;
      int ivs = ego->ivs, ovs = ego->ovs, is = ego->os;
      R *bufs;
 
@@ -218,7 +218,7 @@ static void print(plan *ego_, printer *p)
               ego->cld, ego->cldrest);
 }
 
-static uint min_nbuf(const problem_rdft2 *p, uint n, uint vl)
+static int min_nbuf(const problem_rdft2 *p, int n, int vl)
 {
      int is, os, ivs, ovs;
 
@@ -247,20 +247,20 @@ static uint min_nbuf(const problem_rdft2 *p, uint n, uint vl)
 	 && (n/2 + 1) * X(iabs)(os) <= X(iabs)(ovs)
 	 && X(iabs)((int) (p->rio - p->iio)) <= X(iabs)(os)
 	 && ivs > 0 && ovs > 0) {
-	  uint vsmin = X(uimin)(ivs, ovs);
-	  uint vsmax = X(uimax)(ivs, ovs);
+	  int vsmin = X(uimin)(ivs, ovs);
+	  int vsmax = X(uimax)(ivs, ovs);
 	  return(((vsmax - vsmin) * vl + vsmin - 1) / vsmin);
      }
 
      return vl; /* punt: just buffer the whole vector */
 }
 
-static uint compute_nbuf(uint n, uint vl, const S *ego)
+static int compute_nbuf(int n, int vl, const S *ego)
 {
      return X(compute_nbuf)(n, vl, ego->adt->nbuf, ego->adt->maxbufsz);
 }
 
-static int toobig(uint n, const S *ego)
+static int toobig(int n, const S *ego)
 {
      return (n > ego->adt->maxbufsz);
 }
@@ -301,7 +301,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      problem *cldp = 0;
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
      R *bufs = (R *) 0;
-     uint nbuf = 0, bufdist, n, vl;
+     int nbuf = 0, bufdist, n, vl;
      int ivs, ovs;
 
      static const plan_adt padt = {

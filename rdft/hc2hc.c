@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.19 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: hc2hc.c,v 1.20 2003-01-15 02:10:25 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -65,7 +65,7 @@ static void print(plan *ego_, printer *p)
 	      ego->vl, e->nam, ego->cld0, ego->cldm, ego->cld);
 }
 
-#define divides(a, b) (((uint)(b) % (uint)(a)) == 0)
+#define divides(a, b) (((int)(b) % (int)(a)) == 0)
 
 int X(rdft_hc2hc_applicable)(const solver_hc2hc *ego, const problem *p_)
 {
@@ -99,7 +99,7 @@ plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
 {
      plan_hc2hc *pln;
      plan *cld = 0, *cld0 = 0, *cldm = 0;
-     uint n, r, m;
+     int n, r, m;
      problem *cldp = 0, *cld0p = 0, *cldmp = 0;
      iodim *d;
      const problem_rdft *p;
@@ -177,7 +177,7 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
 {
      iodim *d = p->sz->dims;
      const hc2hc_desc *e = ego->desc;
-     uint m = d[0].n / e->radix;
+     int m = d[0].n / e->radix;
      int omid = d[0].os * (m/2);
 
      tensor *null, *radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
@@ -202,7 +202,7 @@ void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
 {
      iodim *d = p->sz->dims;
      const hc2hc_desc *e = ego->desc;
-     uint m = d[0].n / e->radix;
+     int m = d[0].n / e->radix;
      int imid = d[0].is * (m/2);
 
      tensor *null, *radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);

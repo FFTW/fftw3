@@ -20,16 +20,16 @@
 
 #include "ifftw.h"
 
-/* $Id: pickdim.c,v 1.2 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: pickdim.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
 
 /* Given a solver which_dim, a vector sz, and whether or not the
    transform is out-of-place, return the actual dimension index that
    it corresponds to.  The basic idea here is that we return the
    which_dim'th valid dimension, starting from the end if
    which_dim < 0. */
-static int really_pickdim(int which_dim, const tensor *sz, int oop, uint *dp)
+static int really_pickdim(int which_dim, const tensor *sz, int oop, int *dp)
 {
-     uint i;
+     int i;
      int count_ok = 0;
      if (which_dim > 0) {
           for (i = 0; i < sz->rnk; ++i) {
@@ -61,10 +61,10 @@ static int really_pickdim(int which_dim, const tensor *sz, int oop, uint *dp)
 
 /* Like really_pickdim, but only returns 1 if no previous "buddy"
    which_dim in the buddies list would give the same dim. */
-int X(pickdim)(int which_dim, const int *buddies, uint nbuddies,
-	       const tensor *sz, int oop, uint *dp)
+int X(pickdim)(int which_dim, const int *buddies, int nbuddies,
+	       const tensor *sz, int oop, int *dp)
 {
-     uint i, d1;
+     int i, d1;
 
      if (!really_pickdim(which_dim, sz, oop, dp))
           return 0;

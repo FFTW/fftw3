@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.35 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: problem.c,v 1.36 2003-01-15 02:10:25 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -33,9 +33,9 @@ static void destroy(problem *ego_)
      X(ifree)(ego_);
 }
 
-static void kind_hash(md5 *m, const rdft_kind *kind, uint rnk)
+static void kind_hash(md5 *m, const rdft_kind *kind, int rnk)
 {
-     uint i;
+     int i;
      for (i = 0; i < rnk; ++i)
 	  X(md5int)(m, kind[i]);
 }
@@ -46,20 +46,20 @@ static void hash(const problem *p_, md5 *m)
      X(md5puts)(m, "rdft");
      X(md5int)(m, p->I == p->O);
      kind_hash(m, p->kind, p->sz->rnk);
-     X(md5uint)(m, X(alignment_of)(p->I));
-     X(md5uint)(m, X(alignment_of)(p->O));
+     X(md5int)(m, X(alignment_of)(p->I));
+     X(md5int)(m, X(alignment_of)(p->O));
      X(tensor_md5)(m, p->sz);
      X(tensor_md5)(m, p->vecsz);
 }
 
-static void recur(const iodim *dims, uint rnk, R *I)
+static void recur(const iodim *dims, int rnk, R *I)
 {
      if (rnk == RNK_MINFTY)
           return;
      else if (rnk == 0)
           I[0] = 0.0;
      else if (rnk > 0) {
-          uint i, n = dims[0].n;
+          int i, n = dims[0].n;
           int is = dims[0].is;
 
 	  if (rnk == 1) {
@@ -96,7 +96,7 @@ const char *X(rdft_kind_str)(rdft_kind kind)
 static void print(problem *ego_, printer *p)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
-     uint i;
+     int i;
      p->print(p, "(rdft %u %td %T %T", 
 	      X(alignment_of)(ego->I),
 	      ego->O - ego->I, 
@@ -141,8 +141,8 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 			   R *I, R *O, const rdft_kind *kind)
 {
      problem_rdft *ego;
-     uint rnk = sz->rnk;
-     uint i;
+     int rnk = sz->rnk;
+     int i;
 
      A(FINITE_RNK(sz->rnk));
      for (i = rnk = 0; i < sz->rnk; ++i) {
@@ -173,7 +173,7 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 	  }
      }
      for (i = 0; i + 1 < rnk; ++i) {
-	  uint j;
+	  int j;
 	  for (j = i + 1; j < rnk; ++j)
 	       if (X(dimcmp)(ego->sz->dims + i, ego->sz->dims + j) > 0) {
 		    iodim dswap;

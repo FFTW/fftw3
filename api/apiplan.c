@@ -20,48 +20,48 @@
 
 #include "api.h"
 
-apiplan *X(mkapiplan)(unsigned int flags, problem *prb)
+apiplan *X(mkapiplan) (int flags, problem *prb)
 {
      plan *pln, *pln0;
      apiplan *p = 0;
-     planner *plnr = X(the_planner)();
+     planner *plnr = X(the_planner) ();
 
      /* map API flags into FFTW flags */
-     X(mapflags)(plnr, flags);
+     X(mapflags) (plnr, flags);
 
      /* create plan */
      plnr->planner_flags &= ~BLESSING;
      pln = plnr->adt->mkplan(plnr, prb);
 
      if (pln) {
-	  AWAKE(pln, 1);
+          AWAKE(pln, 1);
 
-	  /* build apiplan */
-	  p = (apiplan *)MALLOC(sizeof(apiplan), PLANS);
-	  p->pln = pln;
-	  p->prb = prb;
+          /* build apiplan */
+          p = (apiplan *) MALLOC(sizeof(apiplan), PLANS);
+          p->pln = pln;
+          p->prb = prb;
 
-	  /* blessing protocol */
-	  plnr->planner_flags |= BLESSING;
-	  pln0 = plnr->adt->mkplan(plnr, prb);
-	  X(plan_destroy_internal)(pln0);
+          /* blessing protocol */
+          plnr->planner_flags |= BLESSING;
+          pln0 = plnr->adt->mkplan(plnr, prb);
+          X(plan_destroy_internal) (pln0);
      } else {
-	  X(problem_destroy)(prb);
+          X(problem_destroy) (prb);
      }
 
      /* discard all information not necessary to reconstruct the
-	plan */
+        plan */
      plnr->adt->forget(plnr, FORGET_ACCURSED);
 
      return p;
 }
 
-void X(destroy_plan)(X(plan) p)
+void X(destroy_plan) (X(plan) p)
 {
      if (p) {
-	  AWAKE(p->pln, 0);
-	  X(plan_destroy_internal)(p->pln);
-	  X(problem_destroy)(p->prb);
-	  X(ifree)(p);
+          AWAKE(p->pln, 0);
+          X(plan_destroy_internal) (p->pln);
+          X(problem_destroy) (p->prb);
+          X(ifree) (p);
      }
 }

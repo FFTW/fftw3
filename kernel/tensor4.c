@@ -18,14 +18,14 @@
  *
  */
 
-/* $Id: tensor4.c,v 1.2 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: tensor4.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 
-uint X(tensor_max_index)(const tensor *sz)
+int X(tensor_max_index)(const tensor *sz)
 {
-     uint i;
-     uint n = 0;
+     int i;
+     int n = 0;
 
      A(FINITE_RNK(sz->rnk));
      for (i = 0; i < sz->rnk; ++i) {
@@ -39,25 +39,25 @@ uint X(tensor_max_index)(const tensor *sz)
      A(FINITE_RNK(sz->rnk));					\
      if (sz->rnk == 0) return 0;				\
      else {							\
-          uint i;						\
-          uint s = X(iabs)(sz->dims[0].xs);			\
+          int i;						\
+          int s = X(iabs)(sz->dims[0].xs);			\
           for (i = 1; i < sz->rnk; ++i)				\
                s = X(uimin)(s, X(iabs)(sz->dims[i].xs));	\
           return s;						\
      }								\
 }
 
-uint X(tensor_min_istride)(const tensor *sz) tensor_min_xstride(sz, is)
-uint X(tensor_min_ostride)(const tensor *sz) tensor_min_xstride(sz, os)
+int X(tensor_min_istride)(const tensor *sz) tensor_min_xstride(sz, is)
+int X(tensor_min_ostride)(const tensor *sz) tensor_min_xstride(sz, os)
 
-uint X(tensor_min_stride)(const tensor *sz)
+int X(tensor_min_stride)(const tensor *sz)
 {
      return X(uimin)(X(tensor_min_istride)(sz), X(tensor_min_ostride)(sz));
 }
 
 int X(tensor_inplace_strides)(const tensor *sz)
 {
-     uint i;
+     int i;
      A(FINITE_RNK(sz->rnk));
      for (i = 0; i < sz->rnk; ++i) {
           const iodim *p = sz->dims + i;

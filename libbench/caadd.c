@@ -3,9 +3,9 @@
 #include "bench.h"
 
 /* C = A + B */
-void caadd(bench_complex *C, bench_complex *A, bench_complex *B, unsigned int n)
+void caadd(bench_complex *C, bench_complex *A, bench_complex *B, int n)
 {
-     unsigned int i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  c_re(C[i]) = c_re(A[i]) + c_re(B[i]);

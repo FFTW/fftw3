@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.126 2003-01-13 09:20:36 athena Exp $ */
+/* $Id: planner.c,v 1.127 2003-01-15 02:10:25 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -50,10 +50,10 @@
 */
 static void sgrow(planner *ego)
 {
-     uint osiz = ego->slvdescsiz, nsiz = 1 + osiz + osiz / 4;
+     unsigned osiz = ego->slvdescsiz, nsiz = 1 + osiz + osiz / 4;
      slvdesc *ntab = (slvdesc *)MALLOC(nsiz * sizeof(slvdesc), SLVDESCS);
      slvdesc *otab = ego->slvdescs;
-     uint i;
+     unsigned i;
 
      ego->slvdescs = ntab;
      ego->slvdescsiz = nsiz;
@@ -84,7 +84,7 @@ static void register_solver(planner *ego, solver *s)
 
 static short slookup(planner *ego, char *nam, int id)
 {
-     uint h = X(hash)(nam); /* used to avoid strcmp in the common case */
+     unsigned h = X(hash)(nam); /* used to avoid strcmp in the common case */
      FORALL_SOLVERS(ego, s, sp, {
 	  UNUSED(s);
 	  if (sp->reg_id == id && sp->nam_hash == h
@@ -99,23 +99,23 @@ static short slookup(planner *ego, char *nam, int id)
 */
 
 /* first hash function */
-static uint h1(planner *ego, const md5sig s)
+static unsigned h1(planner *ego, const md5sig s)
 {
      return s[0] % ego->hashsiz;
 }
 
 /* second hash function (for double hashing) */
-static uint h2(planner *ego, const md5sig s)
+static unsigned h2(planner *ego, const md5sig s)
 {
-     return 1 + s[1] % (ego->hashsiz - 1);
+     return 1U + s[1] % (ego->hashsiz - 1);
 }
 
 static void md5hash(md5 *m, const problem *p, const planner *plnr)
 {
      X(md5begin)(m);
-     X(md5uint)(m, sizeof(R)); /* so we don't mix different precisions */
-     X(md5uint)(m, plnr->problem_flags);
-     X(md5uint)(m, plnr->nthr);
+     X(md5unsigned)(m, sizeof(R)); /* so we don't mix different precisions */
+     X(md5int)(m, plnr->problem_flags);
+     X(md5int)(m, plnr->nthr);
      p->adt->hash(p, m);
      X(md5end)(m);
 }
@@ -147,7 +147,7 @@ struct solution_s {
 
 static solution *hlookup(planner *ego, const md5sig s, unsigned short flags)
 {
-     uint g, h = h1(ego, s), d = h2(ego, s);
+     unsigned g, h = h1(ego, s), d = h2(ego, s);
 
      ++ego->lookup;
 
@@ -173,7 +173,7 @@ static void hinsert0(planner *ego, const md5sig s, unsigned short flags,
      ++ego->insert;
      if (!l) { 	 
 	  /* search for nonfull slot */
-	  uint g, h = h1(ego, s), d = h2(ego, s); 
+	  unsigned g, h = h1(ego, s), d = h2(ego, s); 
 	  ++ego->insert_unknown;
 	  for (g = h; ; g = (g + d) % ego->hashsiz) {
 	       ++ego->insert_iter;
@@ -189,9 +189,9 @@ static void hinsert0(planner *ego, const md5sig s, unsigned short flags,
      sigcpy(s, l->s);
 }
 
-static void rehash(planner *ego, uint nsiz)
+static void rehash(planner *ego, unsigned nsiz)
 {
-     uint osiz = ego->hashsiz, h;
+     unsigned osiz = ego->hashsiz, h;
      solution *osol = ego->solutions, *nsol;
 
      nsiz = X(next_prime)(nsiz);
@@ -216,26 +216,26 @@ static void rehash(planner *ego, uint nsiz)
      X(ifree0)(osol);
 }
 
-static uint minsz(uint nelem)
+static unsigned minsz(unsigned nelem)
 {
-     return 1 + nelem + nelem / 8;
+     return 1U + nelem + nelem / 8U;
 }
 
-static uint nextsz(uint nelem)
+static unsigned nextsz(unsigned nelem)
 {
      return minsz(minsz(nelem));
 }
 
 static void hgrow(planner *ego)
 {
-     uint nelem = ego->nelem;
+     unsigned nelem = ego->nelem;
      if (minsz(nelem) >= ego->hashsiz)
 	  rehash(ego, nextsz(nelem));
 }
 
 static void hshrink(planner *ego)
 {
-     uint nelem = ego->nelem;
+     unsigned nelem = ego->nelem;
      /* always rehash after deletions */
      rehash(ego, nextsz(nelem));
 }
@@ -262,14 +262,14 @@ static void hinsert(planner *ego, const md5sig s,
 
 static void hcurse_subsumed(planner *ego)
 {
-     uint h;
+     unsigned h;
 
      /* unbless any entries that are unreachable because they
         are subsumed by less-impatient ones.  */
      for (h = 0; h < ego->hashsiz; ++h) {
 	  solution *l = ego->solutions + h;
 	  if (VALIDP(l)) {
-	       uint d = h2(ego, l->s), g = (h + d) % ego->hashsiz;
+	       unsigned d = h2(ego, l->s), g = (h + d) % ego->hashsiz;
 	       for (; ; g = (g + d) % ego->hashsiz) {
 		    solution *m = ego->solutions + g;
 		    if (VALIDP(m)) {
@@ -314,8 +314,8 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
 			   unsigned short nflags)
 {
      unsigned short planner_flags = ego->planner_flags;
-     uint problem_flags = ego->problem_flags;
-     uint nthr = ego->nthr;
+     int problem_flags = ego->problem_flags;
+     int nthr = ego->nthr;
      plan *pln;
      ego->planner_flags = nflags;
      pln = s->adt->mkplan(s, p, ego);
@@ -432,7 +432,7 @@ static plan *mkplan(planner *ego, problem *p)
    table.  If FORGET_ACCURSED, then destroy entries that are not blessed. */
 static void forget(planner *ego, amnesia a)
 {
-     uint h;
+     unsigned h;
 
      /* garbage-collect while we are at it */ 
      if (a != FORGET_EVERYTHING)
@@ -459,7 +459,7 @@ static void htab_destroy(planner *ego)
 {
      forget(ego, FORGET_EVERYTHING);
      X(ifree)(ego->solutions);
-     ego->nelem = 0;
+     ego->nelem = 0U;
 }
 
 /* FIXME: what sort of version information should we write? */
@@ -468,7 +468,7 @@ static void htab_destroy(planner *ego)
 /* tantus labor non sit cassus */
 static void exprt(planner *ego, printer *p)
 {
-     uint h;
+     unsigned h;
 
      hcurse_subsumed(ego);
 
@@ -480,7 +480,7 @@ static void exprt(planner *ego, printer *p)
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
 	       p->print(p, "(%s %d #x%x #x%M #x%M #x%M #x%M)\n",
-			sp->reg_nam, sp->reg_id, (uint)l->flags,
+			sp->reg_nam, sp->reg_id, (int)l->flags,
 			l->s[0], l->s[1], l->s[2], l->s[3]);
 	  }
      }
@@ -493,7 +493,7 @@ static int imprt(planner *ego, scanner *sc)
 {
      char buf[MAXNAM + 1];
      md5uint sig[4];
-     uint flags;
+     int flags;
      int reg_id;
      short slvndx;
      solution *sol;
@@ -503,7 +503,7 @@ static int imprt(planner *ego, scanner *sc)
 
      /* make a backup copy of the hash table (cache the hash) */
      {
-	  uint h, hsiz = ego->hashsiz;
+	  int h, hsiz = ego->hashsiz;
 	  sol = (solution *)MALLOC(hsiz * sizeof(solution), HASHT);
 	  for (h = 0; h < hsiz; ++h)
 	       sol[h] = ego->solutions[h];
@@ -567,7 +567,7 @@ planner *X(mkplanner)(void)
      p->nslvdesc = p->slvdescsiz = 0;
 
      p->solutions = 0;
-     p->hashsiz = p->nelem = 0;
+     p->hashsiz = p->nelem = 0U;
 
      p->problem_flags = 0;
      p->planner_flags = 0;
@@ -606,8 +606,8 @@ plan *X(mkplan_d)(planner *ego, problem *p)
 
 void X(planner_dump)(planner *ego, int verbose)
 {
-     uint valid = 0, empty = 0, infeasible = 0;
-     uint h;
+     unsigned valid = 0, empty = 0, infeasible = 0;
+     int h;
      UNUSED(verbose); /* historical */
 
      for (h = 0; h < ego->hashsiz; ++h) {

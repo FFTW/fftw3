@@ -29,7 +29,7 @@ typedef struct {
      plan *cld;
      twid *td;
      int os;
-     uint r, m;
+     int r, m;
 } P;
 
 /***************************************************************************/
@@ -37,7 +37,7 @@ typedef struct {
 static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
-     uint n, m, r, j;
+     int n, m, r, j;
      int os, osm;
      E *buf;
      const R *W;
@@ -55,10 +55,10 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      n = m * r;
      W = ego->td->W;
      for (j = 0; j < m; ++j, ro += os, io += os) {
-	  uint k;
+	  int k;
 	  for (k = 0; k < r; ++k) {
 	       E rb = ro[0], ib = io[0];
-	       uint i, iw, iw_inc = j + m * k;
+	       int i, iw, iw_inc = j + m * k;
 	       for (i = 1, iw = iw_inc; i < r; ++i) {
 		    E xr = ro[i*osm], xi = io[i*osm];
 		    E wr = W[2*iw], wi = W[2*iw+1];
@@ -142,7 +142,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
      P *pln = 0;
-     uint n, r, m;
+     int n, r, m;
      int is, os;
      plan *cld = (plan *) 0;
 

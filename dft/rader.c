@@ -36,7 +36,7 @@ typedef struct {
 
      plan *cld1, *cld2;
      R *omega;
-     uint n, g, ginv;
+     int n, g, ginv;
      int is, os;
      plan *cld_omega;
 } P;
@@ -46,7 +46,7 @@ typedef struct {
      plan *cld;
      R *W;
      int os;
-     uint m;
+     int m;
 } P_dit;
 
 
@@ -65,10 +65,10 @@ static rader_tl *twiddles = 0;
    fft(r,i) = ifft(i,r) form of this identity, but it was easier to
    reuse the code from our old version. */
 
-static void apply_aux(uint r, uint ginv, plan *cld1,plan *cld2, const R *omega,
+static void apply_aux(int r, int ginv, plan *cld1,plan *cld2, const R *omega,
 		      R *buf, R r0, R i0, R *ro, R *io, int os)
 {
-     uint gpower, k;
+     int gpower, k;
 
      /* compute DFT of buf, storing in output (except DC): */
      {
@@ -114,7 +114,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
      int is;
-     uint k, gpower, g, r;
+     int k, gpower, g, r;
      R *buf;
 
      r = ego->n; is = ego->is; g = ego->g; 
@@ -141,7 +141,7 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
      P *ego;
      plan *cld1, *cld2;
      int os, osm;
-     uint j, k, gpower, g, ginv, r, m;
+     int j, k, gpower, g, ginv, r, m;
      R *buf;
      const R *omega, *W;
 
@@ -187,10 +187,10 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
      X(ifree)(buf);
 }
 
-static R *mktwiddle(uint m, uint r, uint g)
+static R *mktwiddle(int m, int r, int g)
 {
-     uint i, j, gpower;
-     uint n = r * m;
+     int i, j, gpower;
+     int n = r * m;
      R *W;
 
      if ((W = X(rader_tl_find)(m, r, g, twiddles)))
@@ -200,7 +200,7 @@ static R *mktwiddle(uint m, uint r, uint g)
      for (i = 0; i < m; ++i) {
 	  for (gpower = 1, j = 0; j < r - 1;
 	       ++j, gpower = MULMOD(gpower, g, r)) {
-	       uint k = i * (r - 1) + j;
+	       int k = i * (r - 1) + j;
 	       W[2*k] = X(cos2pi)(i * gpower, n);
 	       W[2*k+1] = FFT_SIGN * X(sin2pi)(i * gpower, n);
 	  }
@@ -330,7 +330,7 @@ static int applicable_dit(const solver *ego_, const problem *p_,
      return (!NO_UGLYP(plnr) && applicable0_dit(ego_, p_));
 }
 
-static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
+static int mkP(P *pln, int n, int is, int os, R *ro, R *io,
 	       planner *plnr)
 {
      plan *cld1 = (plan *) 0;
@@ -395,7 +395,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
      P *pln;
-     uint n;
+     int n;
      int is, os;
 
      static const plan_adt padt = {
@@ -421,7 +421,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
      P_dit *pln = 0;
-     uint n, r, m;
+     int n, r, m;
      int is, os;
      plan *cld = (plan *) 0;
 

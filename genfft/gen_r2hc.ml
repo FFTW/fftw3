@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2hc.ml,v 1.8 2002-07-25 10:36:51 athena Exp $ *)
+(* $Id: gen_r2hc.ml,v 1.9 2003-01-15 02:10:25 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2hc.ml,v 1.8 2002-07-25 10:36:51 athena Exp $"
+let cvsid = "$Id: gen_r2hc.ml,v 1.9 2003-01-15 02:10:25 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -137,9 +137,9 @@ let generate n =
     C.stridetype ^ " is, " ^ 
     C.stridetype ^ " ros, " ^ 
     C.stridetype ^ " ios, " ^ 
-      " uint v, int ivs, int ovs)\n" ^
+      " int v, int ivs, int ovs)\n" ^
     "{\n" ^
-    "uint i;\n" ^
+    "int i;\n" ^
     "for (i = 0; i < v; ++i) {\n" ^
       name0 ^ "(I, ro, io" ^
        (if stride_fixed !uistride then "" else ", is") ^ 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.8 2003-01-07 10:09:42 athena Exp $ */
+/* $Id: align.c,v 1.9 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -36,13 +36,13 @@
 #define ALGN (sizeof(R))
 #endif
 
-uint X(stride_aligned_p)(int s)
+int X(stride_aligned_p)(int s)
 {
-     return !((s * sizeof(R)) % ALGN);
+     return !(((unsigned)s * sizeof(R)) % ALGN);
 }
 
 /* NONPORTABLE */
-uint X(alignment_of)(R *p)
+int X(alignment_of)(R *p)
 {
-     return (uint)(((unsigned long) p) % ALGN);
+     return (int)(((unsigned long) p) % ALGN);
 }

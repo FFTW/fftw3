@@ -24,13 +24,14 @@
    a mask, in which case xm == x; using this we can compactly code
    the various bit operations via (flags & x) ^ xm or (flags | x) ^ xm. */
 typedef struct {
-     uint x, xm;
+     unsigned x, xm;
 } flagmask;
 
 typedef struct {
      flagmask flag;
      flagmask op;
 } flagop;
+
 #define FLAGP(f, msk) (((f) & (msk).x) ^ (msk).xm)
 #define OP(f, msk) (((f) | (msk).x) ^ (msk).xm)
 
@@ -40,22 +41,22 @@ typedef struct {
 #define EQV(a, b) IMPLIES(YES(a), YES(b)), IMPLIES(NO(a), NO(b))
 #define NEQV(a, b) IMPLIES(YES(a), NO(b)), IMPLIES(NO(a), YES(b))
 
-static uint map_flags(uint iflags, uint oflags,
-		      const flagop flagmap[], int nmap)
+static int map_flags(int iflags, int oflags,
+                     const flagop flagmap[], int nmap)
 {
      int i;
      for (i = 0; i < nmap; ++i)
-	  if (FLAGP(iflags, flagmap[i].flag))
-	       oflags = OP(oflags, flagmap[i].op);
+          if (FLAGP(iflags, flagmap[i].flag))
+               oflags = OP(oflags, flagmap[i].op);
      return oflags;
 }
 
 #define NMAP(flagmap) (sizeof(flagmap) / sizeof(flagop))
 
-void X(mapflags)(planner *plnr, unsigned int flags)
+void X(mapflags) (planner *plnr, int flags)
 {
      /* map of api flags -> api flags, to implement consistency rules
-	and combination flags */
+        and combination flags */
      const flagop self_flagmap[] = {
 	  /* in some cases (notably for halfcomplex->real transforms),
 	     DESTROY_INPUT is the default, so we need to support
@@ -65,19 +66,18 @@ void X(mapflags)(planner *plnr, unsigned int flags)
 	  IMPLIES(YES(FFTW_EXHAUSTIVE), YES(FFTW_PATIENT)),
 
 	  IMPLIES(YES(FFTW_ESTIMATE), NO(FFTW_PATIENT)),
-	  IMPLIES(YES(FFTW_ESTIMATE), 
+	  IMPLIES(YES(FFTW_ESTIMATE),
 		  YES(FFTW_ESTIMATE_PATIENT | FFTW_NO_INDIRECT_OP)),
-	  
+
 	  /* a canonical set of fftw2-like impatience flags */
-	  IMPLIES(NO(FFTW_PATIENT), 
+	  IMPLIES(NO(FFTW_PATIENT),
 		  YES(FFTW_NO_VRECURSE
 		      | FFTW_NO_RANK_SPLITS
 		      | FFTW_NO_VRANK_SPLITS
 		      | FFTW_NONTHREADED_ICKY
-		      | FFTW_DFT_R2HC_ICKY
-		      | FFTW_BELIEVE_PCOST))
+		      | FFTW_DFT_R2HC_ICKY | FFTW_BELIEVE_PCOST))
      };
-     
+
      /* map of (processed) api flags to internal problem/planner flags */
      const flagop problem_flagmap[] = {
 	  EQV(FFTW_DESTROY_INPUT, DESTROY_INPUT),
@@ -103,9 +103,9 @@ void X(mapflags)(planner *plnr, unsigned int flags)
 
      flags = map_flags(flags, flags, self_flagmap, NMAP(self_flagmap));
 
-     plnr->problem_flags = map_flags(flags, 0, problem_flagmap, 
-				     NMAP(problem_flagmap));
-     
-     plnr->planner_flags = map_flags(flags, 0, planner_flagmap, 
-				     NMAP(planner_flagmap));
+     plnr->problem_flags = map_flags(flags, 0, problem_flagmap,
+                                     NMAP(problem_flagmap));
+
+     plnr->planner_flags = map_flags(flags, 0, planner_flagmap,
+                                     NMAP(planner_flagmap));
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: minmax.c,v 1.3 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: minmax.c,v 1.4 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -32,12 +32,12 @@ int X(imin)(int a, int b)
      return (a < b) ? a : b;
 }
 
-uint X(uimax)(uint a, uint b)
+int X(uimax)(int a, int b)
 {
      return (a > b) ? a : b;
 }
 
-uint X(uimin)(uint a, uint b)
+int X(uimin)(int a, int b)
 {
      return (a < b) ? a : b;
 }

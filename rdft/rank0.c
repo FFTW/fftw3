@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.9 2002-09-25 01:27:49 athena Exp $ */
+/* $Id: rank0.c,v 1.10 2003-01-15 02:10:25 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -42,7 +42,7 @@ typedef struct {
 
 typedef struct {
      plan_rdft super;
-     uint vl;
+     int vl;
      int ivs, ovs;
      const S *slv;
 } P;
@@ -85,7 +85,7 @@ static const rnk0adt adt_cpy1 =
 static void apply_vec(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
-     uint i, vl = ego->vl;
+     int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
 
      for (i = 4; i <= vl; i += 4) {
@@ -121,7 +121,7 @@ static const rnk0adt adt_vec =
 static void apply_io1(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
-     uint vl = ego->vl;
+     int vl = ego->vl;
      memcpy(O, I, vl * sizeof(R));
 }
 
@@ -184,7 +184,7 @@ static solver *mksolver(const rnk0adt *adt)
 
 void X(rdft_rank0_register)(planner *p)
 {
-     uint i;
+     unsigned i;
      static const rnk0adt *const adts[] = {
 	  &adt_cpy1, &adt_vec, &adt_io1
      };

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.13 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: scan.c,v 1.14 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -124,8 +124,8 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 			    break;
 		       }
 		       case 'x': {
-			    uint *x = va_arg(ap, uint *);
-			    *x = (uint) getlong(sc, 16, &ch);
+			    int *x = va_arg(ap, int *);
+			    *x = (int) getlong(sc, 16, &ch);
 			    if (!ch) return 0;
 			    break;
 		       }

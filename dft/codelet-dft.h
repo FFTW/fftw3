@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet-dft.h,v 1.1 2003-01-07 21:22:39 athena Exp $ */
+/* $Id: codelet-dft.h,v 1.2 2003-01-15 02:10:25 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -41,13 +41,13 @@ typedef struct {
      int (*okp)(
 	  const kdft_desc *desc,
 	  const R *ri, const R *ii, const R *ro, const R *io,
-	  int is, int os, uint vl, int ivs, int ovs,
+	  int is, int os, int vl, int ivs, int ovs,
 	  const planner *plnr);
-     uint vl;
+     int vl;
 } kdft_genus;
 
 struct kdft_desc_s {
-     uint sz;    /* size of transform computed */
+     int sz;    /* size of transform computed */
      const char *nam;
      opcnt ops;
      const kdft_genus *genus;
@@ -58,7 +58,7 @@ struct kdft_desc_s {
 };
 
 typedef void (*kdft) (const R *ri, const R *ii, R *ro, R *io,
-                      stride is, stride os, uint vl, int ivs, int ovs);
+                      stride is, stride os, int vl, int ivs, int ovs);
 void X(kdft_register)(planner *p, kdft codelet, const kdft_desc *desc);
 
 
@@ -67,13 +67,13 @@ typedef struct ct_desc_s ct_desc;
 typedef struct {
      int (*okp)(
 	  const struct ct_desc_s *desc,
-	  const R *rio, const R *iio, int ios, int vs, uint m, int dist,
+	  const R *rio, const R *iio, int ios, int vs, int m, int dist,
 	  const planner *plnr);
-     uint vl;
+     int vl;
 } ct_genus;
 
 struct ct_desc_s {
-     uint radix;
+     int radix;
      const char *nam;
      const tw_instr *tw;
      opcnt ops;
@@ -84,19 +84,19 @@ struct ct_desc_s {
 };
 
 typedef const R *(*kdft_dit) (R *rioarray, R *iioarray, const R *W,
-                              stride ios, uint m, int dist);
+                              stride ios, int m, int dist);
 void X(kdft_dit_register)(planner *p, kdft_dit codelet, const ct_desc *desc);
 
 
 typedef const R *(*kdft_difsq) (R *rioarray, R *iioarray,
                                 const R *W, stride is, stride vs,
-                                uint m, int dist);
+                                int m, int dist);
 void X(kdft_difsq_register)(planner *p, kdft_difsq codelet,
                             const ct_desc *desc);
 
 
 typedef const R *(*kdft_dif) (R *rioarray, R *iioarray, const R *W,
-                              stride ios, uint m, int dist);
+                              stride ios, int m, int dist);
 void X(kdft_dif_register)(planner *p, kdft_dif codelet, const ct_desc *desc);
 
 extern const solvtab X(solvtab_dft_standard);

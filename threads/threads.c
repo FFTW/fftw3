@@ -291,10 +291,10 @@ typedef pthread_t fftw_thr_id;
    the same as the data parameter passed to X(spawn_loop).
 
    This function returns only after all the threads have completed. */
-void X(spawn_loop)(uint loopmax, uint nthr,
+void X(spawn_loop)(int loopmax, int nthr,
 		   spawn_function proc, void *data)
 {
-     uint block_size;
+     int block_size;
 
      A(loopmax > 0);
      A(nthr > 0);
@@ -321,7 +321,7 @@ void X(spawn_loop)(uint loopmax, uint nthr,
 	  spawn_data *d;
 	  fftw_thr_id *tid;
 #endif
-	  uint i;
+	  int i;
 	  
 	  THREAD_ON; /* prevent debugging mode from failing under threads */
 
@@ -377,7 +377,7 @@ void X(spawn_loop)(uint loopmax, uint nthr,
 }
 
 #else /* ! HAVE_THREADS */
-void X(spawn_loop)(uint loopmax, uint nthr,
+void X(spawn_loop)(int loopmax, int nthr,
 		   spawn_function proc, void *data)
 {
      spawn_data d;

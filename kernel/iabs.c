@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: iabs.c,v 1.1 2002-08-29 21:58:35 stevenj Exp $ */
+/* $Id: iabs.c,v 1.2 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 
-uint X(iabs)(int a)
+int X(iabs)(int a)
 {
-     return (uint) (a < 0 ? -a : a);
+     return (int) (a < 0 ? -a : a);
 }

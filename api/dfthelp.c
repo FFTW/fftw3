@@ -25,13 +25,13 @@
    Flip real and imaginary if there the sign does not match
    FFTW's idea of what the sign should be */
 
-void X(extract_reim)(int sign, C *c, R **r, R **i)
+void X(extract_reim) (int sign, C *c, R **r, R **i)
 {
      if (sign == FFT_SIGN) {
-	  *r = c[0] + 0;
-	  *i = c[0] + 1;
+          *r = c[0] + 0;
+          *i = c[0] + 1;
      } else {
-	  *r = c[0] + 1;
-	  *i = c[0] + 0;
+          *r = c[0] + 1;
+          *i = c[0] + 0;
      }
 }

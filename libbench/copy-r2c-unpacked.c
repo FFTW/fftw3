@@ -3,7 +3,7 @@
 void copy_r2c_unpacked(struct problem *p, bench_complex *out)
 {
      bench_real *pout = p->out;
-     unsigned int k, n, k0, n0, ld;
+     int k, n, k0, n0, ld;
 
      BENCH_ASSERT(p->rank >= 1);
      BENCH_ASSERT(p->kind == PROBLEM_REAL);

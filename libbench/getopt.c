@@ -659,8 +659,8 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
       for (p = longopts, option_index = 0; p->name; p++, option_index++)
 	if (!strncmp (p->name, nextchar, nameend - nextchar))
 	  {
-	    if ((unsigned int) (nameend - nextchar)
-		== (unsigned int) strlen (p->name))
+	    if ((int) (nameend - nextchar)
+		== (int) strlen (p->name))
 	      {
 		/* Exact match found.  */
 		pfound = p;
@@ -851,7 +851,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	for (p = longopts, option_index = 0; p->name; p++, option_index++)
 	  if (!strncmp (p->name, nextchar, nameend - nextchar))
 	    {
-	      if ((unsigned int) (nameend - nextchar) == strlen (p->name))
+	      if ((int) (nameend - nextchar) == strlen (p->name))
 		{
 		  /* Exact match found.  */
 		  pfound = p;

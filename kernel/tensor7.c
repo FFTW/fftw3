@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor7.c,v 1.2 2002-09-26 19:06:38 athena Exp $ */
+/* $Id: tensor7.c,v 1.3 2003-01-15 02:10:25 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -48,7 +48,7 @@ int X(dimcmp)(const iodim *a, const iodim *b)
    vs. decreasing order is not really important.) */
 tensor *X(tensor_compress)(const tensor *sz)
 {
-     uint i, rnk;
+     int i, rnk;
      tensor *x;
 
      A(FINITE_RNK(sz->rnk));
@@ -83,7 +83,7 @@ static int strides_contig(iodim *a, iodim *b)
    some stride.  (This can safely be done for transform vector sizes.) */
 tensor *X(tensor_compress_contiguous)(const tensor *sz)
 {
-     uint i, rnk;
+     int i, rnk;
      tensor *sz2, *x;
 
      if (X(tensor_sz)(sz) == 0) 
@@ -118,7 +118,7 @@ tensor *X(tensor_compress_contiguous)(const tensor *sz)
 
 /* The inverse of X(tensor_append): splits the sz tensor into
    tensor a followed by tensor b, where a's rank is arnk. */
-void X(tensor_split)(const tensor *sz, tensor **a, uint arnk, tensor **b)
+void X(tensor_split)(const tensor *sz, tensor **a, int arnk, tensor **b)
 {
      A(FINITE_RNK(sz->rnk) && FINITE_RNK(arnk));
 

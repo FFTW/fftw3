@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.4 2003-01-14 05:23:04 stevenj Exp $ */
+/* $Id: timer.c,v 1.5 2003-01-15 02:10:25 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -183,7 +183,7 @@ static int find_n(double tmin)
 static int acceptable(double tmin)
 {
      int n;
-     unsigned int i;
+     unsigned i;
      static const double test_points[] = { 1.015, 1.02, 1.035 };
      double baseline;
      

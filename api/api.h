@@ -22,8 +22,8 @@
 #ifndef __API_H__
 #define __API_H__
 
-#undef _Complex_I  /* just in case: force <fftw3.h> not to use C99
-		      complex numbers */
+/* just in case: force <fftw3.h> not to use C99 complex numbers */
+#undef _Complex_I
 
 #include "fftw3.h"
 #include "ifftw.h"
@@ -35,26 +35,26 @@ struct X(plan_s) {
 };
 
 /* shorthand */
-typedef struct X(plan_s) apiplan;
+typedef struct X (plan_s) apiplan;
 
 /* complex type for internal use */
 typedef R C[2];
 
-void X(extract_reim)(int sign, C *c, R **r, R **i);
-tensor *X(mktensor_rowmajor)(uint rnk, const ulong *n,
-			     const ulong *niphys, const ulong *nophys,
-			     long is, long os);
-tensor *X(mktensor_iodims)(unsigned int rank, const X(iodim) *dims);
-const ulong *X(rdft2_pad)(uint rnk, const ulong *n, const ulong *nembed,
-                         int inplace, int cmplx, ulong **nfree);
+void X(extract_reim) (int sign, C *c, R **r, R **i);
+tensor *X(mktensor_rowmajor) (int rnk, const int *n,
+			      const int *niphys, const int *nophys,
+			      int is, int os);
+tensor *X(mktensor_iodims) (int rank, const X(iodim) * dims);
+const int *X(rdft2_pad) (int rnk, const int *n, const int *nembed,
+			 int inplace, int cmplx, int **nfree);
 
-printer *X(mkprinter_file)(FILE *f);
+printer *X(mkprinter_file) (FILE * f);
 
-planner *X(the_planner)(void);
-void X(configure_planner)(planner *plnr);
+planner *X(the_planner) (void);
+void X(configure_planner) (planner *plnr);
 
-void X(mapflags)(planner *, unsigned int);
+void X(mapflags) (planner *, int);
 
-apiplan *X(mkapiplan)(unsigned int flags, problem *prb);
+apiplan *X(mkapiplan) (int flags, problem *prb);
 
-#endif /* __API_H__ */
+#endif				/* __API_H__ */

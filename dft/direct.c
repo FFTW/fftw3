@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.33 2002-09-25 11:37:38 athena Exp $ */
+/* $Id: direct.c,v 1.34 2003-01-15 02:10:25 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -34,7 +34,7 @@ typedef struct {
      plan_dft super;
 
      stride is, os;
-     uint vl;
+     int vl;
      int ivs, ovs;
      kdft k;
      const S *slv;
@@ -69,7 +69,7 @@ static int applicable(const solver *ego_, const problem *p_,
           const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
           const kdft_desc *d = ego->desc;
-	  uint vl;
+	  int vl;
 	  int ivs, ovs;
 
           return (

@@ -26,31 +26,31 @@ typedef struct {
 } C;
 
 #define arand X(arand)
-void arand(C *a, uint n);
+void arand(C *a, int n);
 
 #define mkreal X(mkreal)
-void mkreal(C *A, uint n);
+void mkreal(C *A, int n);
 
 #define mkhermitian X(mkhermitian)
-void mkhermitian(C *A, uint rank, const iodim *dim);
+void mkhermitian(C *A, int rank, const iodim *dim);
 
 #define aadd X(aadd)
-void aadd(C *c, C *a, C *b, uint n);
+void aadd(C *c, C *a, C *b, int n);
 
 #define asub X(asub)
-void asub(C *c, C *a, C *b, uint n);
+void asub(C *c, C *a, C *b, int n);
 
 #define arol X(arol)
-void arol(C *b, C *a, uint n, uint nb, uint na);
+void arol(C *b, C *a, int n, int nb, int na);
 
 #define aphase_shift X(aphase_shift)
-void aphase_shift(C *b, C *a, uint n, uint nb, uint na, double sign);
+void aphase_shift(C *b, C *a, int n, int nb, int na, double sign);
 
 #define ascale X(ascale)
-void ascale(C *a, C alpha, uint n);
+void ascale(C *a, C alpha, int n);
 
 #define acmp X(acmp)
-double acmp(C *a, C *b, uint n, const char *test, double tol);
+double acmp(C *a, C *b, int n, const char *test, double tol);
 
 #define mydrand X(mydrand)
 double mydrand(void);
@@ -58,25 +58,25 @@ double mydrand(void);
 #define impulse X(impulse)
 void impulse(void (*dofft)(void *nfo, C *in, C *out),
 		  void *nfo, 
-		  uint n, uint vecn, 
+		  int n, int vecn, 
 		  C *inA, C *inB, C *inC,
 		  C *outA, C *outB, C *outC,
-		  C *tmp, uint rounds, double tol);
+		  C *tmp, int rounds, double tol);
 
 #define linear X(linear)
 void linear(void (*dofft)(void *nfo, C *in, C *out),
 		    void *nfo, int realp,
-		    uint n, C *inA, C *inB, C *inC, C *outA,
-		    C *outB, C *outC, C *tmp, uint rounds, double tol);
+		    int n, C *inA, C *inB, C *inC, C *outA,
+		    C *outB, C *outC, C *tmp, int rounds, double tol);
 
 enum { TIME_SHIFT, FREQ_SHIFT };
 
 #define tf_shift X(tf_shift)
 void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
 	      void *nfo, int realp, const tensor *sz,
-	      uint n, uint vecn,
+	      int n, int vecn,
 	      C *inA, C *inB, C *outA, C *outB, C *tmp,
-	      uint rounds, double tol, int which_shift);
+	      int rounds, double tol, int which_shift);
 
 
 #define verify_pack X(verify_pack)

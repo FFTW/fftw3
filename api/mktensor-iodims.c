@@ -20,17 +20,17 @@
 
 #include "api.h"
 
-tensor *X(mktensor_iodims)(unsigned int rank, const X(iodim) *dims)
+tensor *X(mktensor_iodims) (int rank, const X(iodim) * dims)
 {
-     unsigned int i;
-     tensor *x = X(mktensor)(rank);
-     
+     int i;
+     tensor *x = X(mktensor) (rank);
+
      if (FINITE_RNK(rank)) {
-	  for (i = 0; i < rank; ++i) {
-	       x->dims[i].n = dims[i].n;
-	       x->dims[i].is = dims[i].is;
-	       x->dims[i].os = dims[i].os;
-	  }
+          for (i = 0; i < rank; ++i) {
+               x->dims[i].n = dims[i].n;
+               x->dims[i].is = dims[i].is;
+               x->dims[i].os = dims[i].os;
+          }
      }
      return x;
 }

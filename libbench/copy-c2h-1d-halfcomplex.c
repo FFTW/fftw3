@@ -8,7 +8,7 @@
 void copy_c2h_1d_halfcomplex(struct problem *p, bench_complex *in,
 			     bench_real sign_of_r2h_transform)
 {
-     unsigned int k, n;
+     int k, n;
      bench_real *pin = p->in;
 
      BENCH_ASSERT(p->rank == 1);

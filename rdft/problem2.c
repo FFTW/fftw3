@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.25 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: problem2.c,v 1.26 2003-01-15 02:10:25 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -38,8 +38,8 @@ static void hash(const problem *p_, md5 *m)
      X(md5int)(m, p->r == p->rio);
      X(md5int)(m, p->r == p->iio);
      X(md5ptrdiff)(m, p->iio - p->rio);  /* (1) */
-     X(md5uint)(m, X(alignment_of)(p->r));
-     X(md5uint)(m, X(alignment_of)(p->rio)); 
+     X(md5int)(m, X(alignment_of)(p->r));
+     X(md5int)(m, X(alignment_of)(p->rio)); 
              /* alignment of imag is implied by (1) */
      X(md5int)(m, p->kind);
      X(tensor_md5)(m, p->sz);

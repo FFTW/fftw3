@@ -2,9 +2,9 @@
 
 #include "bench.h"
 
-void aset(bench_real *A, unsigned int n, bench_real x)
+void aset(bench_real *A, int n, bench_real x)
 {
-     unsigned int i;
+     int i;
      for (i = 0; i < n; ++i)
 	  A[i] = x;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.15 2002-09-14 03:07:39 stevenj Exp $ */
+/* $Id: verify.c,v 1.16 2003-01-15 02:10:25 athena Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -35,11 +35,11 @@ static double dmax(double x, double y) { return (x > y) ? x : y; }
 static double dmin(double x, double y) { return (x < y) ? x : y; }
 static double norm2(double x, double y) { return dmax(dabs(x), dabs(y)); }
 
-static double cerror(bench_complex *A, bench_complex *B, unsigned int n)
+static double cerror(bench_complex *A, bench_complex *B, int n)
 {
      /* compute the relative error */
      double error = 0.0;
-     unsigned int i;
+     int i;
      double mag = 0.0;
 
      for (i = 0; i < n; ++i) {
@@ -60,9 +60,9 @@ static double cerror(bench_complex *A, bench_complex *B, unsigned int n)
 }
 
 /* generate random inputs */
-static void arand(bench_complex *A, unsigned int n)
+static void arand(bench_complex *A, int n)
 {
-     unsigned int i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  c_re(A[i]) = bench_drand();
@@ -71,9 +71,9 @@ static void arand(bench_complex *A, unsigned int n)
 }
 
 /* make array real */
-static void mkreal(bench_complex *A, unsigned int n)
+static void mkreal(bench_complex *A, int n)
 {
-     unsigned int i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  c_im(A[i]) = 0.0;
@@ -81,14 +81,14 @@ static void mkreal(bench_complex *A, unsigned int n)
 }
 
 static void assign_conj(bench_complex *Ac, bench_complex *A,
-			unsigned int rank, unsigned int *n, int size)
+			int rank, int *n, int size)
 {
      if (rank == 0) {
 	  c_re(*Ac) = c_re(*A);
 	  c_im(*Ac) = -c_im(*A);
      }
      else {
-	  unsigned int i, n0 = n[0];
+	  int i, n0 = n[0];
 	  rank -= 1;
 	  n += 1;
 	  size /= n0;
@@ -100,12 +100,12 @@ static void assign_conj(bench_complex *Ac, bench_complex *A,
 
 /* make array hermitian */
 static void mkhermitian(bench_complex *A, 
-			unsigned int rank, unsigned int *n)
+			int rank, int *n)
 {
      if (rank == 0)
 	  c_im(*A) = 0.0;
      else {
-	  unsigned int i, n0 = n[0], size;
+	  int i, n0 = n[0], size;
 	  rank -= 1;
 	  n += 1;
 	  mkhermitian(A, rank, n);
@@ -120,9 +120,9 @@ static void mkhermitian(bench_complex *A,
 
 
 /* C = A - B */
-static void asub(bench_complex *C, bench_complex *A, bench_complex *B, unsigned int n)
+static void asub(bench_complex *C, bench_complex *A, bench_complex *B, int n)
 {
-     unsigned int i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  c_re(C[i]) = c_re(A[i]) - c_re(B[i]);
@@ -132,9 +132,9 @@ static void asub(bench_complex *C, bench_complex *A, bench_complex *B, unsigned 
 
 /* B = rotate left A */
 static void arol(bench_complex *B, bench_complex *A,
-		 unsigned int n, unsigned int n_before, unsigned int n_after)
+		 int n, int n_before, int n_after)
 {
-     unsigned int i, ib, ia;
+     int i, ib, ia;
 
      for (ib = 0; ib < n_before; ++ib) {
 	  for (i = 0; i < n - 1; ++i)
@@ -163,11 +163,11 @@ static void arol(bench_complex *B, bench_complex *A,
 #define K2PI KTRIG(6.2831853071795864769252867665590057683943388)
 
 static void aphase_shift(bench_complex *B, bench_complex *A,
-			 unsigned int n, 
-			 unsigned int n_before, unsigned int n_after,
+			 int n, 
+			 int n_before, int n_after,
 			 bench_real sign)
 {
-     unsigned int j, jb, ja;
+     int j, jb, ja;
      trigreal twopin;
      twopin = K2PI / n;
 
@@ -177,14 +177,14 @@ static void aphase_shift(bench_complex *B, bench_complex *A,
 	       trigreal c = COS(j * twopin);
 
 	       for (ja = 0; ja < n_after; ++ja) {
-		    unsigned int index = (jb * n + j) * n_after + ja;
+		    int index = (jb * n + j) * n_after + ja;
 		    c_re(B[index]) = c_re(A[index]) * c - c_im(A[index]) * s;
 		    c_im(B[index]) = c_re(A[index]) * s + c_im(A[index]) * c;
 	       }
 	  }
 }
 
-static double acmp(bench_complex *A, bench_complex *B, unsigned int n, 
+static double acmp(bench_complex *A, bench_complex *B, int n, 
 		   const char *test, double tol)
 {
      double d = cerror(A, B, n);
@@ -192,7 +192,7 @@ static double acmp(bench_complex *A, bench_complex *B, unsigned int n,
 	  fprintf(stderr, "Found relative error %e (%s)\n", d, test);
 
 	  {
-	       unsigned int i;
+	       int i;
 	       for (i = 0; i < n; ++i) 
 		    fprintf(stderr,
 			    "%8d %12.8f %12.8f   %12.8f %12.8f  %12.8f\n", i, 
@@ -231,11 +231,11 @@ static double linear(struct problem *p,
 		     bench_complex *outB,
 		     bench_complex *outC,
 		     bench_complex *tmp,
-		     unsigned int rounds,
+		     int rounds,
 		     double tol)
 {
-     unsigned int N = p->size;
-     unsigned int i;
+     int N = p->size;
+     int i;
      double e = 0.0;
 
      /* test 1: check linearity */
@@ -276,11 +276,11 @@ static double impulse0(struct problem *p,
 		      bench_complex *outB,
 		      bench_complex *outC,
 		      bench_complex *tmp,
-		      unsigned int rounds,
+		      int rounds,
 		      double tol)
 {
-     unsigned int n = p->size;
-     unsigned int i;
+     int n = p->size;
+     int i;
      double e = 0.0;
 
      /* a simple test first, to help with debugging: */
@@ -306,13 +306,13 @@ static double impulse(struct problem *p,
 		      bench_complex *outB,
 		      bench_complex *outC,
 		      bench_complex *tmp,
-		      unsigned int rounds,
+		      int rounds,
 		      double tol)
 {
      double e;
      const bench_complex one = {1.0, 0.0};
      const bench_complex zero = {0.0, 0.0};
-     unsigned int n = p->size;
+     int n = p->size;
 
      /* test 2: check that the unit impulse is transformed properly */
      caset(inA, n, zero);
@@ -338,13 +338,13 @@ static double tf_shift(struct problem *p,
 		       bench_complex *outA,
 		       bench_complex *outB,
 		       bench_complex *tmp,
-		       unsigned int rounds,
+		       int rounds,
 		       double tol,
 		       int which_shift)
 {
      double sign;
-     unsigned int n, n_before, n_after, dim;
-     unsigned int i;
+     int n, n_before, n_after, dim;
+     int i;
      double e = 0.0;
 
      n = p->size;
@@ -356,7 +356,7 @@ static double tf_shift(struct problem *p,
      n_before = 1;
      n_after = n;
      for (dim = 0; dim < p->rank; ++dim) {
-	  unsigned int n_cur = p->n[dim];
+	  int n_cur = p->n[dim];
 
 	  n_after /= n_cur;
 
@@ -389,10 +389,10 @@ static double tf_shift(struct problem *p,
      return e;
 }
 
-static void do_verify(struct problem *p, unsigned int rounds, double tol)
+static void do_verify(struct problem *p, int rounds, double tol)
 {
      bench_complex *inA, *inB, *inC, *outA, *outB, *outC, *tmp;
-     unsigned int n = p->size;
+     int n = p->size;
      double el, ei, es = 0.0;
 
      if (rounds == 0)
@@ -429,7 +429,7 @@ static void do_verify(struct problem *p, unsigned int rounds, double tol)
 
 static void do_accuracy(struct problem *p, int rounds)
 {
-     unsigned int n, i;
+     int n, i;
      int r;
      bench_complex *a, *b;
      /* err[0] : L1 error

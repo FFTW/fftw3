@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: getopt-utils.c,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: getopt-utils.c,v 1.2 2003-01-15 02:10:25 athena Exp $ */
 #include "bench.h"
 #include "getopt.h"
 #include <ctype.h>
@@ -84,7 +84,7 @@ void usage(const char *progname, const struct option *opt)
 	}
 	fprintf(stdout, " [--%s", opt[i].name);
 	col += (option_len + 4);
-	if ((unsigned int) (opt[i].val) < 256) {
+	if ((int) (opt[i].val) < 256) {
 	    fprintf(stdout, " | -%c", opt[i].val);
 	    col += 5;
 	}

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-buf.c,v 1.11 2003-01-09 19:23:51 stevenj Exp $ */
+/* $Id: hc2hc-buf.c,v 1.12 2003-01-15 02:10:25 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -29,11 +29,11 @@
    such that the (i0, i1) element has index (i0 * s0 + i1 * s1).
    The imaginary strides are of opposite signs to the real strides.
 */
-static void cpy(uint n0, uint n1,
+static void cpy(int n0, int n1,
                 const R *rA, const R *iA, int sa0, int sa1,
                 R *rB, R *iB, int sb0, int sb1)
 {
-     uint i0, i1;
+     int i0, i1;
 
      for (i0 = 0; i0 < n0; ++i0) {
           const R *pra, *pia;
@@ -54,7 +54,7 @@ static void cpy(uint n0, uint n1,
 }
 
 static const R *doit(khc2hc k, R *rA, R *iA, const R *W, int ios, int dist,
-                     uint r, uint batchsz, R *buf, stride bufstride)
+                     int r, int batchsz, R *buf, stride bufstride)
 {
      cpy(r, batchsz, rA, iA, ios, dist, buf, buf + 2*batchsz*r-1, 1, r);
      W = k(buf, buf + 2*batchsz*r-1, W, bufstride, 2*batchsz + 1, r);
@@ -77,7 +77,7 @@ static void apply_dit(plan *ego_, R *I, R *O)
      {
           plan_rdft *cld0 = (plan_rdft *) ego->cld0;
           plan_rdft *cldm = (plan_rdft *) ego->cldm;
-          uint i, j, r = ego->r, m = ego->m, vl = ego->vl;
+          int i, j, r = ego->r, m = ego->m, vl = ego->vl;
           int os = ego->os, ovs = ego->ovs, ios = ego->iios;
 	  R *buf;
 
@@ -116,7 +116,7 @@ static void apply_dif(plan *ego_, R *I, R *O)
      {
           plan_rdft *cld0 = (plan_rdft *) ego->cld0;
           plan_rdft *cldm = (plan_rdft *) ego->cldm;
-          uint i, j, r = ego->r, m = ego->m, vl = ego->vl;
+          int i, j, r = ego->r, m = ego->m, vl = ego->vl;
           int is = ego->is, ivs = ego->ivs, ios = ego->iios;
 	  R *buf;
 
@@ -160,7 +160,7 @@ static int applicable0(const solver_hc2hc *ego, const problem *p_,
           const hc2hc_desc *e = ego->desc;
           const problem_rdft *p = (const problem_rdft *) p_;
           iodim *d = p->sz->dims;
-	  uint r = e->radix, m = d[0].n / e->radix;
+	  int r = e->radix, m = d[0].n / e->radix;
           return (1
 		  && (p->kind[0]==R2HC || p->I == p->O || DESTROY_INPUTP(plnr))
                   /* check both batch size and remainder */

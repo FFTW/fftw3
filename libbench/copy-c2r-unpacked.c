@@ -2,7 +2,7 @@
 
 void copy_c2r_unpacked(struct problem *p, bench_complex *in)
 {
-     unsigned int k, n, k0, n0, ld;
+     int k, n, k0, n0, ld;
      bench_real *pin = p->in;
 
      BENCH_ASSERT(p->rank >= 1);

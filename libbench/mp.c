@@ -372,9 +372,9 @@ static void sin2pi(REAL m, REAL n, N a)
 
 /*----------------------------------------------------------------------*/
 /* FFT stuff */
-static void bitrev(unsigned int n, N *a)
+static void bitrev(int n, N *a)
 {
-     unsigned int i, j, m;
+     int i, j, m;
      for (i = j = 0; i < n - 1; ++i) {
 	  if (i < j) {
 	       N t;
@@ -387,9 +387,9 @@ static void bitrev(unsigned int n, N *a)
      }
 }
 
-static void fft0(unsigned int n, N *a, int sign)
+static void fft0(int n, N *a, int sign)
 {
-     unsigned int i, j, k;
+     int i, j, k;
 
      bitrev(n, a);
      for (i = 1; i < n; i = 2 * i) {
@@ -413,9 +413,9 @@ static void fft0(unsigned int n, N *a, int sign)
 }
 
 /* a[2*k]+i*a[2*k+1] = exp(2*pi*i*k^2/(2*n)) */
-static void bluestein_sequence(unsigned int n, N *a)
+static void bluestein_sequence(int n, N *a)
 {
-     unsigned int k, ksq, n2 = 2 * n;
+     int k, ksq, n2 = 2 * n;
 
      ksq = 1; /* (-1)^2 */
      for (k = 0; k < n; ++k) {
@@ -426,9 +426,9 @@ static void bluestein_sequence(unsigned int n, N *a)
      }
 }
 
-static unsigned int pow2_atleast(unsigned int x)
+static int pow2_atleast(int x)
 {
-     unsigned int h;
+     int h;
      for (h = 1; h < x; h = 2 * h)
 	  ;
      return h;
@@ -460,14 +460,14 @@ static void cmulj(N r0, N i0, N r1, N i1, N r2, N i2)
      cpy(q, r2);
 }
 
-static void bluestein(unsigned int n, N *a)
+static void bluestein(int n, N *a)
 {
-     unsigned int nb = pow2_atleast(2 * n);
+     int nb = pow2_atleast(2 * n);
      N *w = (N *)bench_malloc(2 * n * sizeof(N));
      N *y = (N *)bench_malloc(2 * nb * sizeof(N));
      N *b = (N *)bench_malloc(2 * nb * sizeof(N));
      N nbinv;
-     unsigned int i;
+     int i;
 
      fromreal(1.0 / nb, nbinv); /* exact because nb = 2^k */
      bluestein_sequence(n, w);
@@ -506,9 +506,9 @@ static void bluestein(unsigned int n, N *a)
 }
 
 
-static void swapri(unsigned int n, N *a)
+static void swapri(int n, N *a)
 {
-     unsigned int i;
+     int i;
      for (i = 0; i < n; ++i) {
 	  N t;
 	  cpy(a[2 * i], t);
@@ -517,7 +517,7 @@ static void swapri(unsigned int n, N *a)
      }
 }
 
-static void fft1(unsigned int n, N *a, int sign)
+static void fft1(int n, N *a, int sign)
 {
      if (power_of_two(n)) {
 	  fft0(n, a, sign);
@@ -528,9 +528,9 @@ static void fft1(unsigned int n, N *a, int sign)
      }
 }
 
-static void fromrealv(unsigned int n, bench_complex *a, N *b)
+static void fromrealv(int n, bench_complex *a, N *b)
 {
-     unsigned int i;
+     int i;
 
      for (i = 0; i < n; ++i) {
 	  fromreal(c_re(a[i]), b[2 * i]);
@@ -538,9 +538,9 @@ static void fromrealv(unsigned int n, bench_complex *a, N *b)
      }
 }
 
-static void compare(unsigned int n, N *a, N *b, double *err)
+static void compare(int n, N *a, N *b, double *err)
 {
-     unsigned int i;
+     int i;
      double e1, e2, einf;
      double n1, n2, ninf;
 
@@ -566,13 +566,13 @@ static void compare(unsigned int n, N *a, N *b, double *err)
      err[2] = einf / ninf;
 }
 
-void fftaccuracy(unsigned int n, bench_complex *a, bench_complex *ffta,
+void fftaccuracy(int n, bench_complex *a, bench_complex *ffta,
 		 int sign, double err[6])
 {
      N *b = (N *)bench_malloc(2 * n * sizeof(N));
      N *fftb = (N *)bench_malloc(2 * n * sizeof(N));
      N mn, ninv;
-     unsigned int i;
+     int i;
 
      fromreal(n, mn); inv(mn, ninv);
 

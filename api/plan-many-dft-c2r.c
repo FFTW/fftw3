@@ -21,35 +21,48 @@
 #include "api.h"
 #include "rdft.h"
 
-X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned long *n,
-			     unsigned long howmany,
-			     C *in, const unsigned long *inembed,
-			     long istride, long idist,
-			     R *out, const unsigned long *onembed,
-			     long ostride, long odist,
-			     unsigned int flags)
+X(plan) X(plan_many_dft_c2r) (int rank, const int *n,
+                              int howmany,
+                              C *in, const int *inembed,
+                              int istride, int idist,
+                              R *out, const int *onembed,
+                              int ostride, int odist, int flags)
 {
      R *ri, *ii;
-     ulong *nfi, *nfo;
+     int *nfi, *nfo;
      int inplace;
      X(plan) p;
 
-     X(extract_reim)(FFT_SIGN, in, &ri, &ii);
+     X(extract_reim) (FFT_SIGN, in, &ri, &ii);
      inplace = out == ri;
-     
-     p = X(mkapiplan)(
-	  flags,
-	  X(mkproblem_rdft2_d)(
-	       X(mktensor_rowmajor)(rank, n,
-				    X(rdft2_pad)(rank, n, inembed,
-						 inplace, 1, &nfi),
-				    X(rdft2_pad)(rank, n, onembed,
-						 inplace, 0, &nfo),
-				    2*istride, ostride),
-	       X(mktensor_1d)(howmany, 2*idist, odist), 
-	       out, ri, ii, HC2R));
 
-     X(ifree0)(nfi);
-     X(ifree0)(nfo);
+     p = X(mkapiplan) (flags,
+                       X(mkproblem_rdft2_d) (X(mktensor_rowmajor) (rank, n,
+                                             X
+                                             (rdft2_pad)
+                                             (rank,
+                                              n,
+                                              inembed,
+                                              inplace,
+                                              1,
+                                              &nfi),
+                                             X
+                                             (rdft2_pad)
+                                             (rank,
+                                              n,
+                                              onembed,
+                                              inplace,
+                                              0,
+                                              &nfo),
+                                             2 *
+                                             istride,
+                                             ostride),
+                                             X(mktensor_1d) (howmany,
+                                                             2 * idist,
+                                                             odist), out,
+                                             ri, ii, HC2R));
+
+     X(ifree0) (nfi);
+     X(ifree0) (nfo);
      return p;
 }

@@ -127,12 +127,6 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
-AC_CHECK_TYPE([uint],, 
-   [AC_DEFINE([uint], [unsigned int],
-          [Define to `unsigned int' if <sys/types.h> does not define.])])
-AC_CHECK_TYPE([ulong],, 
-   [AC_DEFINE([ulong], [unsigned long],
-          [Define to `unsigned long' if <sys/types.h> does not define.])])
 AC_HEADER_TIME
 AC_CHECK_TYPE([hrtime_t],[AC_DEFINE(HAVE_HRTIME_T, 1, [Define to 1 if hrtime_t is defined in <sys/time.h>])],,
 [
@@ -141,9 +135,10 @@ AC_CHECK_TYPE([hrtime_t],[AC_DEFINE(HAVE_HRTIME_T, 1, [Define to 1 if hrtime_t i
 #endif
 ])
 
+AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(unsigned int)
-AC_CHECK_SIZEOF(unsigned long)
-AC_CHECK_SIZEOF(unsigned long long)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(long long)
 
 AC_CHECK_SIZEOF(double)
 AC_CHECK_SIZEOF(long double)
@@ -158,7 +153,6 @@ fi
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
-AC_FUNC_MALLOC
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)

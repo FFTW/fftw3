@@ -1006,7 +1006,7 @@
 	* /home/fftw/Repository/fftw3/kernel/planner.c: Oops.
 
 	* /home/fftw/Repository/fftw3/kernel/planner.c: Keep less
-	impatient solution in case of conflict.  Paranoid cast to uint in
+	impatient solution in case of conflict.  Paranoid cast to int in
 	certain places.
 
 	* /home/fftw/Repository/fftw3/kernel/ifftw.h,

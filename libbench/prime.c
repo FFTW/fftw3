@@ -18,22 +18,22 @@
  *
  */
 
-/* $Id: prime.c,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: prime.c,v 1.2 2003-01-15 02:10:25 athena Exp $ */
 
 #include "bench.h"
 
-int check_prime_factors(unsigned int n, unsigned int maxprime)
+int check_prime_factors(int n, int maxprime)
 /* returns 1 of the maximum prime factor of n is <= maxprime, and 0
    otherwise. */
 {
-     static const unsigned int primes[] = {
+     static const int primes[] = {
 	  2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 
 	  37, 41, 43, 47, 53, 59, 61, 67, 71, 73,
 	  79, 83, 89, 97, 101, 103, 107, 109, 113 
      };
 
      int i;
-     int nprimes = sizeof(primes) / sizeof(unsigned int);
+     int nprimes = sizeof(primes) / sizeof(int);
 
      BENCH_ASSERT(maxprime <= primes[nprimes - 1]);
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.h,v 1.4 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: hc2hc.h,v 1.5 2003-01-15 02:10:25 athena Exp $ */
 
 typedef struct {
      solver super;
@@ -33,7 +33,7 @@ typedef struct {
      plan *cld0, *cldm; /* children for 0th and middle butterflies */
      plan *cld;
      R *W;
-     uint n, r, m, vl;
+     int n, r, m, vl;
      int is, os, ivs, ovs, iios;
      stride ios, vs;
      const solver_hc2hc *slv;

@@ -35,7 +35,7 @@ typedef struct {
 
      plan *cld1, *cld2;
      R *omega;
-     uint n, g, ginv;
+     int n, g, ginv;
      int is, os;
      plan *cld_omega;
 } P;
@@ -53,9 +53,9 @@ static rader_tl *omegas = 0;
 static void apply(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
-     uint r = ego->n;
+     int r = ego->n;
      int is = ego->is, os;
-     uint k, gpower, g;
+     int k, gpower, g;
      R *buf, *omega;
      R r0;
 
@@ -142,11 +142,11 @@ static void apply(plan *ego_, R *I, R *O)
      X(ifree)(buf);
 }
 
-static R *mkomega(plan *p_, uint n, uint ginv)
+static R *mkomega(plan *p_, int n, int ginv)
 {
      plan_rdft *p = (plan_rdft *) p_;
      R *omega;
-     uint i, gpower;
+     int i, gpower;
      trigreal scale;
 
      if ((omega = X(rader_tl_find)(n, n, ginv, omegas))) 
@@ -239,7 +239,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
      P *pln;
-     uint n;
+     int n;
      int is, os;
      plan *cld1 = (plan *) 0;
      plan *cld2 = (plan *) 0;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.17 2003-01-13 09:20:37 athena Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.18 2003-01-15 02:10:25 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -33,8 +33,8 @@ typedef struct {
      plan *cld;
      twid *td;
      int is, os;
-     uint n;
-     uint vl;
+     int n;
+     int vl;
      int ivs, ovs;
 } P;
 
@@ -45,8 +45,8 @@ static void apply(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
-     uint i, n = ego->n;
-     uint iv, vl = ego->vl;
+     int i, n = ego->n;
+     int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W;
      R *buf;
@@ -80,7 +80,7 @@ static void apply(plan *ego_, R *I, R *O)
 	  O[0] = buf[0];
 	  O[os] = csum;
 	  for (i = 1; i + i < n; ++i) {
-	       uint k = i + i;
+	       int k = i + i;
 	       O[os * k] = buf[i];
 	       O[os * (k + 1)] = O[os * (k - 1)] - buf[n - i];
 	  }
@@ -144,7 +144,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      plan *cld;
      R *buf;
-     uint n;
+     int n;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
