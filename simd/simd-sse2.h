@@ -144,7 +144,9 @@ static __inline__ V CHS_R(V x)
 
 static __inline__ V VBYI(V x)
 {
-     return CHS_R(FLIP_RI(x));
+     x = FLIP_RI(x);
+     x = CHS_R(x);
+     return x;
 }
 
 #define VFMAI(b, c) VADD(c, VBYI(b))
@@ -156,7 +158,7 @@ static __inline__ V BYTW(const R *t, V sr)
      V tx = LD(t, 1, t);
      V tr = UNPCKL(tx, tx);
      V ti = UNPCKH(tx, tx);
-     tr = VMUL(tr, sr);
+     tr = VMUL(sr, tr);
      sr = VBYI(sr);
      return VADD(tr, VMUL(ti, sr));
 }
@@ -166,7 +168,7 @@ static __inline__ V BYTWJ(const R *t, V sr)
      V tx = LD(t, 1, t);
      V tr = UNPCKL(tx, tx);
      V ti = UNPCKH(tx, tx);
-     tr = VMUL(tr, sr);
+     tr = VMUL(sr, tr);
      sr = VBYI(sr);
      return VSUB(tr, VMUL(ti, sr));
 }
