@@ -43,3 +43,9 @@ TODO before FFTW-$2\pi$:
 * Modify generator to produce integer FFTs (etc.) of small sizes.
 
 * dif, difsq simd codelets
+
+* Bluestein's algorithm for prime sizes (and sizes with large prime factors).
+
+* Generate assembly directly for more processors, or maybe fork gcc.  =)
+
+* Find a better DCT-I algorithm.
