@@ -8,6 +8,7 @@ touch genfft-k7/.depend
 echo "PLEASE IGNORE WARNINGS AND ERRORS"
 
 # paranoia: sometimes autoconf doesn't get things right the first time
+rm -rf autom4te.cache
 autoreconf --verbose --install --symlink --force
 autoreconf --verbose --install --symlink --force
 autoreconf --verbose --install --symlink --force
