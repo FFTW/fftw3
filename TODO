@@ -26,6 +26,8 @@
   with gcc-3.1, icc, and without -malign-double.  I couldn't figure
   out exactly what the problem is. 
 
+* still too much code duplication in rader
+
 
 TODO before/at release:
 
