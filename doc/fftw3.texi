@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.136 2003-03-12 07:42:33 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.137 2003-03-14 10:38:26 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -116,7 +116,7 @@ This manual documents FFTW version @value{VERSION}.
 @menu
 * Introduction::                
 * Tutorial::                    
-* Other Stuff You Should Know::  
+* Other Important Topics::      
 * FFTW Reference::              
 * Parallel FFTW::               
 * Calling FFTW from Fortran::   
@@ -125,98 +125,227 @@ This manual documents FFTW version @value{VERSION}.
 * Acknowledgments::             
 * License and Copyright::       
 * Concept Index::               
-* Library Index::               Tutorial
+* Library Index::               
 
+@detailmenu
+ --- The Detailed Node Listing ---
 
-Other Stuff You Should Know
+Tutorial
 
+* Complex One-Dimensional DFTs::  
+* Complex Multi-Dimensional DFTs::  
+* One-Dimensional DFTs of Real Data::  
+* Multi-Dimensional DFTs of Real Data::  
+* More DFTs of Real Data::      
+
+More DFTs of Real Data
+
+* The Halfcomplex-format DFT::  
+* Real even/odd DFTs (cosine/sine transforms)::  
+* The Discrete Hartley Transform::  
+
+Other Important Topics
+
+* Data Alignment::              
+* Multi-dimensional Array Format::  
+* Words of Wisdom-Saving Plans::  
+
+Data Alignment
+
+* SIMD alignment and fftw_malloc::  
+* Stack alignment on x86::      
+
+Multi-dimensional Array Format
+
+* Row-major Format::            
+* Column-major Format::         
+* Static Arrays in C::          
+* Dynamic Arrays in C::         
+* Dynamic Arrays in C-The Wrong Way::  
+
+FFTW Reference
+
+* Data Types and Files::        
+* Using Plans::                 
+* Basic Interface::             
+* Advanced Interface::          
+* Guru Interface::              
+* Wisdom::                      
+* What FFTW Really Computes::   
+
+Data Types and Files
+
+* Complex numbers::             
+* Precision::                   
+* Memory Allocation::           
+
+Basic Interface
+
+* Complex DFTs::                
+* Planner Flags::               
+* Real-data DFTs::              
+* Real-data DFT Array Format::  
+* Real-to-Real Transforms::     
+* Real-to-Real Transform Kinds::  
+
+Advanced Interface
+
+* Advanced Complex DFTs::       
+* Advanced Real-data DFTs::     
+* Advanced Real-to-real Transforms::  
+
+Guru Interface
+
+* Guru vector and transform sizes::  
+* Guru Complex DFTs::           
+* Guru Real-data DFTs::         
+* Guru Real-to-real Transforms::  
+* Guru Execution of Plans::     
+
+What FFTW Really Computes
+
+* The 1d Discrete Fourier Transform (DFT)::  
+* The 1d Real-data DFT::        
+* 1d Real-even DFTs (discrete cosine transforms::  
+* 1d Real-odd DFTs (discrete sine transforms::  
+* 1d Discrete Hartley Transforms (DHTs)::  
+* Multi-dimensional Transforms::  
+
+Parallel FFTW
+
+* Multi-threaded FFTW::         
+* Thread safety::               
+
+Multi-threaded FFTW
+
+* Installation and Supported Hardware/Software::  
+* Usage of Multi-threaded FFTW::  
+* How Many Threads to Use?::    
+
+Calling FFTW from Fortran
+
+* Fortran-interface routines::  
+* FFTW Constants in Fortran::   
+* Fortran Examples::            
+* Wisdom of Fortran?::          
+
+Installation and Customization
+
+* Installation on Unix::        
+* Installation on non-Unix systems::  
+* Cycle Counters::              
+* Generating your own code::    
+
+@end detailmenu
 @end menu
 
 @c ************************************************************
 @node    Introduction, Tutorial, Top, Top
 @chapter Introduction
-This manual documents version @value{VERSION} of FFTW, the @emph{Fastest
-Fourier Transform in the West}.  FFTW is a comprehensive collection of
-fast C routines for computing the discrete Fourier transform (DFT) in
+This manual documents version @value{VERSION} of FFTW, the
+@emph{Fastest Fourier Transform in the West}.  FFTW is a comprehensive
+collection of fast C routines for computing the discrete Fourier
+transform (DFT) and various special cases thereof.
 @cindex discrete Fourier transform
 @cindex DFT
-one or more dimensions, of both real and complex data, and of arbitrary
-input size.  It also includes specialized transforms for real even/odd
-data (a.k.a. discrete cosine/sine transforms), as well as the discrete
-Hartley transform (DHT).  We assume herein that the reader is already
-familiar with the properties and uses of the DFT that are relevant to
-her application.  Otherwise, see e.g. @cite{The Fast Fourier Transform}
-by E. O. Brigham (Prentice-Hall, Englewood Cliffs, NJ, 1974).
+@itemize @bullet
+@item FFTW computes the DFT of complex data, real data, even-
+  or odd-symmetric real data (these symmetric transforms are usually
+  known as the discrete cosine or sine transform, respectively), and the
+  discrete Hartley transform (DHT) of real data.
+
+@item  The input data can have arbitrary size.  
+       FFTW employs @Onlogn{} algorithms for all sizes, including
+       prime numbers.
+
+@item  FFTW supports arbitrary @math{n}-dimensional data.
+
+@item  FFTW @value{VERSION} includes parallel (multi-threaded) transforms
+  for shared-memory systems.
+  FFTW @value{VERSION} does not include distributed-memory parallel
+  transforms, but we plan to implement an MPI version soon.  (Meanwhile,
+  you can use the MPI implementation from FFTW 2.1.3.)
+@end itemize
+
+We assume herein that the reader is familiar with the properties and
+uses of the DFT that are relevant to her application.  Otherwise, see
+e.g. @cite{The Fast Fourier Transform} by E. O. Brigham
+(Prentice-Hall, Englewood Cliffs, NJ, 1974).
 @uref{http://www.fftw.org, Our web page} also has links to FFT-related
 information online.
 @cindex FFTW
 
-FFTW @value{VERSION} also includes parallel (multi-threaded) transforms
-for shared-memory systems.  We currently provide distributed-memory
-parallel (MPI) transforms separately, as part of FFTW 2.x.
+@c TODO: revise.  We don't need to brag any longer
+@c
+@c FFTW is usually faster (and sometimes much faster) than all other
+@c freely-available Fourier transform programs found on the Net.  It is
+@c competitive with (and often faster than) the FFT codes in Sun's
+@c Performance Library, IBM's ESSL library, HP's CXML library, and
+@c Intel's MKL library, which are targeted at specific machines.
+@c Moreover, FFTW's performance is @emph{portable}.  Indeed, FFTW is
+@c unique in that it automatically adapts itself to your machine, your
+@c cache, the size of your memory, your number of registers, and all the
+@c other factors that normally make it impossible to optimize a program
+@c for more than one machine.  An extensive comparison of FFTW's
+@c performance with that of other Fourier transform codes has been made,
+@c and the results are available on the Web at
+@c @uref{http://fftw.org/~benchfft, the benchFFT home page}.
+@c @cindex benchmark
+@c @fpindex benchfft
 
-FFTW is usually faster (and sometimes much faster) than all other
-freely-available Fourier transform programs found on the Net.  It is
-competitive with (and often faster than) the FFT codes in Sun's
-Performance Library, IBM's ESSL library, HP's CXML library, and Intel's
-MKL library, which are targeted at specific machines.  Moreover, FFTW's
-performance is @emph{portable}.  Indeed, FFTW is unique in that it
-automatically adapts itself to your machine, your cache, the size of
-your memory, your number of registers, and all the other factors that
-normally make it impossible to optimize a program for more than one
-machine.  An extensive comparison of FFTW's performance with that of
-other Fourier transform codes has been made, and the results are
-available on the Web at @uref{http://fftw.org/~benchfft, the benchFFT
-home page}.
-@cindex benchmark
-@fpindex benchfft
-
-In order to use FFTW effectively, you need to learn one basic concept of
-FFTW's internal structure: FFTW does not used a fixed algorithm for
-computing the transform, but instead it can adapt the DFT algorithm to
-details of the underlying hardware in order to achieve the best
-performance.  Hence, the computation of the transform is split into two
-phases.  First, FFTW's @dfn{planner} is called, which ``learns'' the
-fastest way to compute the transform on your machine.  The planner
+In order to use FFTW effectively, you need to learn one basic concept
+of FFTW's internal structure: FFTW does not use a fixed algorithm for
+computing the transform, but instead it adapts the DFT algorithm to
+details of the underlying hardware in order to maximize performance.
+Hence, the computation of the transform is split into two phases.
+First, FFTW's @dfn{planner} ``learns'' the fastest way to compute the
+transform on your machine.  The planner
 @cindex planner
 produces a data structure called a @dfn{plan} that contains this
 @cindex plan
 information.  Subsequently, the plan is @dfn{executed}
 @cindex execute
-to transform the array of input data as dictated by the plan.  The plan
-can be reused as many times as needed.  In typical high-performance
-applications, many transforms of the same size are computed, and
-consequently a relatively-expensive initialization of this sort is
-acceptable.  On the other hand, if you need a single transform of a
-given size, the one-time cost of the planner becomes significant.  For
-this case, FFTW provides fast planners based on heuristics or on
-previously computed plans (``wisdom'').
+to transform the array of input data as dictated by the plan.  The
+plan can be reused as many times as needed.  In typical
+high-performance applications, many transforms of the same size are
+computed, and consequently a relatively expensive initialization of
+this sort is acceptable.  On the other hand, if you need a single
+transform of a given size, the one-time cost of the planner becomes
+significant.  For this case, FFTW provides fast planners based on
+heuristics or on previously computed plans (``wisdom'').
 @cindex wisdom
 
-FFTW supports transforms of data with arbitrary size, rank, multiplicity,
-and a very general memory layout.  This generality can be confusing
-and hard to use, however.  Consequently, we organized the interface to
-FFTW into three levels.  The @dfn{basic interface} allows you to compute
-a single transforms of contiguous data.  The @dfn{advanced interface}
-computes efficient transforms of multiple or strided arrays.  The
-@dfn{guru} interface supports the most general data
-layouts/multiplicities/strides.  We expect that most users will be best
-served by the basic interface, whereas the guru interface requires
-careful attention to the documentation to avoid problems.
+FFTW supports transforms of data with arbitrary size, rank,
+multiplicity, and a general memory layout.  In simple cases, however,
+this generality may be unnecessary and confusing.  Consequently, we
+organized the interface to FFTW into three levels of increasing
+generality.
+@itemize @bullet
+@item The @dfn{basic interface} computes a single 
+      transform of contiguous data.
+@item The @dfn{advanced interface} computes transforms 
+      of multiple or strided arrays.
+@item The @dfn{guru} interface supports the most general data 
+      layouts, multiplicities, and strides.
+@end itemize
+We expect that most users will be best served by the basic interface,
+whereas the guru interface requires careful attention to the
+documentation to avoid problems.
 @cindex basic interface
 @cindex advanced interface
 @cindex guru interface 
 
 Besides the automatic performance adaptation performed by the planner,
-it is also possible for advanced users to customize FFTW for their
-needs.  For example, we provide a tool so that users who only require a
-limited set of transform types/sizes can link to just those parts of
-FFTW that are required for the optimal plans, greatly reducing the size
-of statically linked executables.  Moreover, as distributed, FFTW works
-most efficiently for arrays whose size can be factored into small primes
-(@math{2}, @math{3}, @math{5}, and @math{7}), and uses a slower
-general-purpose routine for other factors.  FFTW, however, comes with a
-code generator that can produce fast C programs for any particular array
+it is also possible for advanced users to customize FFTW manually.
+For example, if code space is a concern, we provide a tool that links
+only the subset of FFTW needed by your application.  Conversely, you
+may need to extend FFTW because the standard distribution is not
+sufficient for your needs.  For example, the standard FFTW
+distribution works most efficiently for arrays whose size can be
+factored into small primes (@math{2}, @math{3}, @math{5}, and
+@math{7}), and otherwise it uses a slower general-purpose routine.  If
+you need efficient transforms of other sizes, you can use FFTW's code
+generator, which produces fast C programs for any particular array
 size you may care about.
 @cindex code generator
 For example, if you need transforms of size
@@ -248,10 +377,10 @@ FFTW, the FAQ, benchmarks, and other links, are available at
 
 The current version of FFTW incorporates many good ideas from the past
 thirty years of FFT literature.  In one way or another, FFTW uses the
-Cooley-Tukey algorithm, the Prime Factor algorithm, Rader's algorithm
-for prime sizes, and the split-radix algorithm (with a variation due to
-Dan Bernstein).  Our code generator also produces new algorithms that we
-do not completely understand.
+Cooley-Tukey algorithm, the prime factor algorithm, Rader's algorithm
+for prime sizes, and a split-radix algorithm (with a variation due to
+Dan Bernstein).  FFTW's code generator also produces new algorithms
+that we do not completely understand.
 @cindex algorithm
 The reader is referred to the cited papers for the appropriate
 references.
@@ -273,7 +402,7 @@ given in @ref{License and Copyright}.  Finally, we thank all the people
 who helped us in @ref{Acknowledgments}.
 
 @c ************************************************************
-@node  Tutorial, Other Stuff You Should Know, Introduction, Top
+@node  Tutorial, Other Important Topics, Introduction, Top
 @chapter Tutorial
 @menu
 * Complex One-Dimensional DFTs::  
@@ -311,7 +440,7 @@ Plan: To bother about the best method of accomplishing an accidental result.
 @end quotation
 
 The basic usage of FFTW to compute a one-dimensional DFT of size
-@code{N} is simple, and it typically looks something like:
+@code{N} is simple, and it typically looks something like this code:
 
 @example
 #include <fftw3.h>
@@ -346,7 +475,7 @@ The data is an array of type @code{fftw_complex}, which is by default a
 (@code{in[i][1]}) parts of a complex number.
 @tindex fftw_complex
 
-The next thing is to create a @dfn{plan}, which is an object
+The next step is to create a @dfn{plan}, which is an object
 @cindex plan
 that contains all the data that FFTW needs to compute the FFT, using the
 following function:
@@ -434,17 +563,19 @@ Really Computes}.
 @cindex DFT
 @cindex normalization
 
-If you have a C compiler, such as @code{gcc}, supporting the recent C99
-standard, and you @code{#include <complex.h>} @emph{before}
+If you have a C compiler, such as @code{gcc}, that supportis the
+recent C99 standard, and you @code{#include <complex.h>} @emph{before}
 @code{<fftw3.h>}, then @code{fftw_complex} is the native
 double-precision complex type and you can manipulate it with ordinary
-arithmetic.  (The C++ @code{<complex>} template class may also be usable
-via a typecast.)  @xref{Complex numbers}.
+arithmetic.  Otherwise, FFTW defines its own complex type, which is
+bit-compatible with the C99 complex type. @xref{Complex numbers}.
+(The C++ @code{<complex>} template class may also be usable via a
+typecast.)
 
-Single and long-double precision versions of FFTW may also be installed;
-to use them, replace the @code{fftw_} prefix by @code{fftwf_} or
-@code{fftwl_} and link with @code{-lfftw3f} or @code{-lfftw3l}, but use
-the @emph{same} @code{<fftw3.h>} header file.
+Single and long-double precision versions of FFTW may be installed; to
+use them, replace the @code{fftw_} prefix by @code{fftwf_} or
+@code{fftwl_} and link with @code{-lfftw3f} or @code{-lfftw3l}, but
+use the @emph{same} @code{<fftw3.h>} header file.
 @cindex precision
 
 Many more flags exist besides @code{FFTW_MEASURE} and
@@ -489,11 +620,11 @@ third case, @code{n} is a pointer to an array @code{n[rank]} denoting
 an @code{n[0]} by @code{n[1]} by @dots{} by @code{n[rank-1]}
 transform.  All of these transforms operate on contiguous arrays in
 the C-standard @dfn{row-major} order, so that the last dimension has
-the fastest-varying index in the array; this is described further in
-@ref{Multi-dimensional Array Format}.
+the fastest-varying index in the array.  This layout is described
+further in @ref{Multi-dimensional Array Format}.
 
-You might have noticed that all the planner routines so far have
-overlapping functionality.  For example, you can plan a 1d or 2d
+You might have noticed that all the planner routines described so far
+have overlapping functionality.  For example, you can plan a 1d or 2d
 transform by using @code{fftw_plan_dft} with a @code{rank} of @code{1}
 or @code{2}, or even by calling @code{fftw_plan_dft_3d} with @code{nx}
 and/or @code{ny} equal to @code{1} (with no loss in efficiency).  This
@@ -591,13 +722,14 @@ unfortunately some sacrifice in performance.
 This flag is also not currently supported for multi-dimensional real
 DFTs (next section).
 
-Readers familiar with DFTs of real data will recall that the 0th (DC)
-and @code{n/2}-th (Nyquist, for even @code{n}) elements of the complex
-output are purely real.  Some implementations therefore store the
-Nyquist element where the DC imaginary part would go, in order to make
-the input and output arrays the same size.  Such packing, however, does
-not generalize well to multi-dimensional transforms, and the space
-savings are miniscule in any case.
+Readers familiar with DFTs of real data will recall that the 0th (the
+``DC'') and @code{n/2}-th (the ``Nyquist'' frequency, when @code{n} is
+even) elements of the complex output are purely real.  Some
+implementations therefore store the Nyquist element where the DC
+imaginary part would go, in order to make the input and output arrays
+the same size.  Such packing, however, does not generalize well to
+multi-dimensional transforms, and the space savings are miniscule in
+any case.
 
 An alternate interface for one-dimensional r2c and c2r DFTs can be
 found in the @samp{r2r} interface (@pxref{The Halfcomplex-format
@@ -696,32 +828,14 @@ must @emph{pad} the input array so that it is of size @code{nx} by
 @code{2*(ny/2+1)}.  If @code{ny} is even, then there are two padding
 elements at the end of each row (which need not be initialized, as they
 are only used for output).
-@html
+
+@ifnotinfo
 The following illustration depicts the input and output arrays just
 described, for both the out-of-place and in-place transforms (with the
 arrows indicating consecutive memory locations):
 
-<p align=center><img src="rfftwnd.gif" width=389 height=583>
-@end html
-
-@tex
-Figure 1 depicts the input and output arrays just
-described, for both the out-of-place and in-place transforms (with the
-arrows indicating consecutive memory locations).
-
-{
-\pageinsert
-\vfill
-\vskip405pt
-\hskip40pt
-\special{psfile="rfftwnd.eps" 
-}
-\vskip 24pt
-Figure 1: Illustration of the data layout for real to complex (r2c)
-transforms.  
-\vfill
-\endinsert}
-@end tex
+@image{rfftwnd}
+@end ifnotinfo
 
 These transforms are unnormalized, so an r2c followed by a c2r
 transform (or vice versa) will result in the original data scaled by
@@ -747,7 +861,7 @@ complex transforms.)
 FFTW supports several other transform types via a unified @dfn{r2r}
 (real-to-real) interface,
 @cindex r2r
-so-called because it takes a real (@code{double}) array and outputs a
+so called because it takes a real (@code{double}) array and outputs a
 real array of the same size.  These r2r transforms currently fall into
 three categories: DFTs of real input and complex-Hermitian output in
 halfcomplex format, DFTs of real input with even/odd symmetry
@@ -755,7 +869,7 @@ halfcomplex format, DFTs of real input with even/odd symmetry
 Hartley transforms (DHTs), all described in more detail by the
 following sections.
 
-The r2r transforms follow the by-now familiar interface of creating an
+The r2r transforms follow the by now familiar interface of creating an
 @code{fftw_plan}, executing it with @code{fftw_execute(plan)}, and
 destroying it with @code{fftw_destroy_plan(plan)}.  Furthermore, all
 r2r transforms share the same planner interface:
@@ -800,29 +914,31 @@ where @code{kind[i]} is the transform kind for the dimension
 @code{n[i]}.)  The kind can be one of a set of predefined constants,
 defined in the following subsections.
 
-That is, FFTW computes the separable product of the specified r2r
-transforms over each dimension, which can be used e.g. for partial
+In other words, FFTW computes the separable product of the specified
+r2r transforms over each dimension, which can be used e.g. for partial
 differential equations with mixed boundary conditions.  (For some r2r
 kinds, notably the halfcomplex DFT and the DHT, such a separable
 product is somewhat problematic in more than one dimension, however,
 as is described below.)
 
 In the current version of FFTW, all r2r transforms except for the
-halfcomplex type are computed via pre-/post-processing of halfcomplex
-transforms, and are therefore not entirely optimal.  Since most other
-general DCT/DST codes employ the same trick, however, FFTW's
-implementation should provide at least competitive performance.
+halfcomplex type are computed via pre- or post-processing of
+halfcomplex transforms, and are therefore they are not as fast as they
+could be.  Since most other general DCT/DST codes employ a similar
+algorithm, however, FFTW's implementation should provide at least
+competitive performance.
 
 @c =========>
 @node The Halfcomplex-format DFT, Real even/odd DFTs (cosine/sine transforms), More DFTs of Real Data, More DFTs of Real Data
 @subsection The Halfcomplex-format DFT
 
-An r2r kind of @code{FFTW_R2HC} (@dfn{r2hc})corresponds to an r2c DFT
+An r2r kind of @code{FFTW_R2HC} (@dfn{r2hc}) corresponds to an r2c DFT
 @ctindex FFTW_R2HC
 @cindex r2c
 @cindex r2hc
 (@pxref{One-Dimensional DFTs of Real Data}) but with ``halfcomplex''
-format output, and may sometimes be faster than the latter.
+format output, and may sometimes be faster and/or more convenient than
+the latter.
 @cindex halfcomplex format
 The inverse @dfn{hc2r} transform is of kind @code{FFTW_HC2R}.
 @ctindex FFTW_HC2R
@@ -1014,11 +1130,11 @@ DFT of size @math{N}.)
 
 The discrete Hartley transform (DHT) is an invertible linear transform
 closely related to the DFT.  In the DFT, one multiplies each input by
-cos - i sin (a complex exponential), whereas in the DHT each input is
-multiplied by simply cos + sin.  Thus, the DHT transforms @code{n} real
-numbers to @code{n} real numbers, and has the convenient property of
-being its own inverse.  In FFTW, a DHT (of any positive @code{n}) can be
-specified by an r2r kind of @code{FFTW_DHT}.
+@math{cos - i * sin} (a complex exponential), whereas in the DHT each
+input is multiplied by simply @math{cos + sin}.  Thus, the DHT
+transforms @code{n} real numbers to @code{n} real numbers, and has the
+convenient property of being its own inverse.  In FFTW, a DHT (of any
+positive @code{n}) can be specified by an r2r kind of @code{FFTW_DHT}.
 @ctindex FFTW_DHT
 @cindex discrete Hartley transform
 @cindex DHT
@@ -1052,17 +1168,17 @@ For the precise mathematical definition of the DHT as used by FFTW, see
 @ref{What FFTW Really Computes}.
 
 @c ************************************************************
-@node Other Stuff You Should Know, FFTW Reference, Tutorial, Top
-@chapter Other Stuff You Should Know
+@node Other Important Topics, FFTW Reference, Tutorial, Top
+@chapter Other Important Topics
 @menu
-* The Importance of Alignment::  
+* Data Alignment::              
 * Multi-dimensional Array Format::  
 * Words of Wisdom-Saving Plans::  
 @end menu
 
 @c ------------------------------------------------------------
-@node The Importance of Alignment, Multi-dimensional Array Format, Other Stuff You Should Know, Other Stuff You Should Know
-@section The Importance of Alignment
+@node Data Alignment, Multi-dimensional Array Format, Other Important Topics, Other Important Topics
+@section Data Alignment
 @cindex alignment
 
 @menu
@@ -1071,13 +1187,12 @@ For the precise mathematical definition of the DHT as used by FFTW, see
 @end menu
 
 In order to get the best performance from FFTW, one needs to be
-somewhat aware of a couple of alignment issues that can cause
-problems, primarily on x86 (Pentia) architectures.  In particular,
-there are two areas of concern: alignment of allocated arrays (for use
-with SIMD acceleration) and stack alignment.
+somewhat aware of two problems related to data alignment on x86
+(Pentia) architectures: alignment of allocated arrays (for use with
+SIMD acceleration), and alignment of the stack.
 
 @c =========>
-@node SIMD alignment and fftw_malloc, Stack alignment on x86, The Importance of Alignment, The Importance of Alignment
+@node SIMD alignment and fftw_malloc, Stack alignment on x86, Data Alignment, Data Alignment
 @subsection SIMD alignment and fftw_malloc
 
 SIMD, which stands for ``Single Instruction Multiple Data,'' is a set
@@ -1117,18 +1232,19 @@ that the returned pointer has the necessary alignment (by calling
 You are not @emph{required} to use @code{fftw_malloc}.  You can
 allocate your data in any way that you like, from @code{malloc} to
 @code{new} (in C++) to a static array declaration.  If the array
-happens not to be properly aligned, FFTW will simply behave as if SIMD
-were not available.
+happens not to be properly aligned, FFTW will not use the SIMD
+extensions.
 
 @c =========>
-@node Stack alignment on x86,  , SIMD alignment and fftw_malloc, The Importance of Alignment
+@node Stack alignment on x86,  , SIMD alignment and fftw_malloc, Data Alignment
 @subsection Stack alignment on x86
 
-On Pentium+ x86 processors, there is a substantial performance penalty
-if double-precision variables are not stored 8-byte aligned; a factor
-of two or more is not unusual.  Unfortunately, the stack (the place
-that local variables and subroutine arguments live) is not guaranteed
-by the Intel ABI to be 8-byte aligned.
+On the Pentium and subsequent x86 processors, there is a substantial
+performance penalty if double-precision variables are not stored
+8-byte aligned; a factor of two or more is not unusual.
+Unfortunately, the stack (the place that local variables and
+subroutine arguments live) is not guaranteed by the Intel ABI to be
+8-byte aligned.
 
 Recent versions of @code{gcc} (as well as most other compilers, we are
 told, such as Intel's, Metrowerks', and Microsoft's) are able to keep
@@ -1149,7 +1265,7 @@ can copy the code from FFTW's @code{libbench2/aligned-main.c} to
 guarantee alignment of your @code{main} function (with @code{gcc}).
 
 @c ------------------------------------------------------------
-@node Multi-dimensional Array Format, Words of Wisdom-Saving Plans, The Importance of Alignment, Other Stuff You Should Know
+@node Multi-dimensional Array Format, Words of Wisdom-Saving Plans, Data Alignment, Other Important Topics
 @section Multi-dimensional Array Format
 
 This section describes the format in which multi-dimensional arrays
@@ -1351,13 +1467,13 @@ see the @code{comp.lang.c}
 @uref{http://www.eskimo.com/~scs/C-faq/s6.html, FAQ}.
 
 @c ------------------------------------------------------------
-@node Words of Wisdom-Saving Plans,  , Multi-dimensional Array Format, Other Stuff You Should Know
+@node Words of Wisdom-Saving Plans,  , Multi-dimensional Array Format, Other Important Topics
 @section Words of Wisdom---Saving Plans
 @cindex wisdom
 @cindex saving plans to disk
 
 @c ************************************************************
-@node FFTW Reference, Parallel FFTW, Other Stuff You Should Know, Top
+@node FFTW Reference, Parallel FFTW, Other Important Topics, Top
 @chapter FFTW Reference
 
 This chapter provides a complete reference for all sequential (i.e.,
@@ -1440,7 +1556,7 @@ be working.''  To the extent that this is true, if you have a variable
 @subsection Precision
 @cindex precision
 
-You can also install single and long-double precision versions of FFTW,
+You can install single and long-double precision versions of FFTW,
 which replace @code{double} with @code{float} and @code{long double},
 respectively (@pxref{Installation and Customization}).  To use these
 interfaces, you:
@@ -1456,13 +1572,13 @@ Link to the single/long-double libraries; on Unix, @code{-lfftw3f} or
 Include the @emph{same} @code{<fftw3.h>} header file.
 
 @item
-In all data types and subroutine names, replace @samp{fftw_} with
+Replace all lowercase instances of @samp{fftw_} with
 @samp{fftwf_} or @code{fftwl_} for single or long-double precision,
-respectively
+respectively.
 
 @item
-All-uppercase names, i.e. constants beginning with @samp{FFTW_}, remain
-the same.
+Uppercase names, i.e. names beginning with @samp{FFTW_}, remain the
+same.
 
 @item
 Replace @code{double} with @code{float} or @code{long double} for
@@ -1546,8 +1662,7 @@ void fftw_cleanup(void);
 @findex fftw_cleanup
 
 (This function does not destroy or invalidate any plans you have lying
-around, however.)  Normally, @code{fftw_cleanup} should not be
-necessary.
+around, however.)  
 
 The following two routines are provided purely for academic purposes
 (that is, for entertainment).
@@ -1665,8 +1780,8 @@ $2^a 3^b 5^c 7^d 11^e 13^f$,
 where @math{e+f} is either @math{0} or @math{1}, and the other exponents
 are arbitrary.  Other sizes are computed by means of a slow,
 general-purpose algorithm (which nevertheless retains @Onlogn
-performance even for prime sizes).  (It is possible to customize FFTW
-for different array sizes; see @ref{Installation and Customization}.)
+performance even for prime sizes).  It is possible to customize FFTW
+for different array sizes; see @ref{Installation and Customization}.
 Transforms whose sizes are powers of @math{2} are especially fast.
 @end itemize
 
@@ -1726,9 +1841,9 @@ seconds).  @code{FFTW_MEASURE} is the default planning option.
 @item
 @ctindex FFTW_PATIENT
 @code{FFTW_PATIENT} is like @code{FFTW_MEASURE}, but considers a wider
-range of algorithms and often produces a more optimal plan (especially
-for large transforms), but at the expense of several times longer
-planning time (especially for large transforms).
+range of algorithms and often produces a ``more optimal'' plan
+(especially for large transforms), but at the expense of several times
+longer planning time (especially for large transforms).
 
 @item
 @ctindex FFTW_EXHAUSTIVE
@@ -2348,7 +2463,7 @@ size and stride.
 One can also use more general complex-number formats, e.g. separate real
 and imaginary arrays.
 
-In addition to the more-flexible planner interface, there are also guru
+In addition to the more flexible planner interface, there are also guru
 generalizations of @code{fftw_execute} that allow a given plan to be
 executed on a different array (sufficiently similar to the original).
 
@@ -4018,7 +4133,7 @@ related chips; this will increase the size of the FFTW library by
 including special generated-assembly routines for that chip.  The code
 should still run on other x86 CPUs (for which the K7 codelets are
 automatically disabled, although the FFTW library is still larger).
-This option only works in double precision (the default).
+This option only works in single precision.
 
 @item
 @code{--enable-sse}, @code{--enable-sse2}, @code{--enable-3dnow},
