@@ -54,3 +54,6 @@ TODO before FFTW-$2\pi$:
 * implement rdft/problem2 for even radices other than 2.
 
 * convolution problem type(s)
+
+* Explore the idea of having n < 0 in tensors, possibly to mean
+  inverse DFT.
