@@ -1,0 +1,37 @@
+#! /bin/sh
+
+read preamble fftw_wisdom
+
+case "$preamble $fftw_wisdom" in
+	\(@PACKAGE@-@VERSION@\ *_wisdom)
+		prefix=`echo $fftw_wisdom | cut -d_ -f1`_
+		;;
+	*)
+		echo "fftw-wisdom2c: invalid wisdom"
+		exit 1
+		;;
+esac
+
+cat <<EOF
+void ${prefix}configure_planner(void *plnr)
+{
+    struct solvtab_s { void (*reg)(void *); const char *reg_nam; };
+    extern void ${prefix}solvtab_exec(struct solvtab_s s[], void *);
+EOF
+
+tmp=`tempfile`
+sed 's/ *(//' | cut -d" " -f1 | grep -v -- - | egrep -v '^ *\)*$' > $tmp
+
+cat $tmp | sort | uniq | while read reg_nam; do
+    echo "    extern void $reg_nam(void *);"
+done
+
+echo "    struct solvtab_s s[] = {" 
+cat $tmp | sort | uniq | while read reg_nam; do
+    echo "        { $reg_nam, \"$reg_nam\" },"
+done
+echo "        { 0, 0 }"
+echo "    };"
+
+echo "    ${prefix}solvtab_exec(s, plnr);"
+echo "}"

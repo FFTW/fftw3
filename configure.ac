@@ -302,6 +302,9 @@ AC_CONFIG_FILES([
    tests/Makefile
    doc/Makefile
 
+   tools/Makefile
+   tools/fftw-wisdom-to-conf
+
 ])
 
 AC_OUTPUT

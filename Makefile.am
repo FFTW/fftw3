@@ -9,7 +9,7 @@ GENFFT =
 endif
 
 SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft threads api	\
-libbench . tests doc
+libbench . tests doc tools
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS
 
 libfftw3@PREC_SUFFIX@_la_SOURCES = 
