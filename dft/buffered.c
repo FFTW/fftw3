@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.1 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: buffered.c,v 1.2 2002-06-09 12:08:13 athena Exp $ */
 
 #include "dft.h"
 
@@ -41,8 +41,8 @@ typedef struct {
      plan_dft super;
 
      plan *cld, *cldcpy, *cld_rest;
-     uint n, vl, nbuf;
-     int ivs, ovs, bufdist;
+     uint n, vl, nbuf, bufdist;
+     int ivs, ovs;
      R *bufs;
 
      const S *slv;
@@ -144,7 +144,7 @@ static void print(plan *ego_, plan_printf prntf)
      prntf(")");
 }
 
-static int compute_nbuf(int n, int vl, const S *ego)
+static uint compute_nbuf(uint n, uint vl, const S *ego)
 {
      uint i, nbuf = ego->adt->nbuf, maxbufsz = ego->adt->maxbufsz;
 
@@ -233,7 +233,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      problem *cldp = 0;
      const problem_dft *p = (const problem_dft *) p_;
      R *bufs = (R *) 0;
-     int nbuf = 0, bufdist, n, vl;
+     uint nbuf = 0, bufdist, n, vl;
 
      static const plan_adt padt = { 
 	  fftw_dft_solve, awake, print, destroy 
@@ -265,12 +265,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      bufs = (R *) fftw_malloc(sizeof(R) * nbuf * bufdist * 2, BUFFERS);
 
      cldp = 
-	  fftw_mkproblem_dft_d(fftw_mktensor_1d(n, p->sz.dims[0].is, 2),
-			       (p->vecsz.rnk == 0 ? 
-				fftw_mktensor(0) :
-				fftw_mktensor_1d(nbuf, p->vecsz.dims[0].is,
-						 bufdist * 2)),
-			       p->ri, p->ii, bufs, bufs + 1);
+	  fftw_mkproblem_dft_d(
+	       fftw_mktensor_1d(n, p->sz.dims[0].is, 2),
+	       (p->vecsz.rnk == 0 ? 
+		fftw_mktensor(0) :
+		fftw_mktensor_1d(nbuf, p->vecsz.dims[0].is, bufdist * 2)),
+	       p->ri, p->ii, bufs, bufs + 1);
 
      cld = plnr->adt->mkplan(plnr, cldp);
      fftw_problem_destroy(cldp);
