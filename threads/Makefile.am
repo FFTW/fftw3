@@ -7,6 +7,8 @@ endif
 
 libfftw3@PREC_SUFFIX@_threads_la_SOURCES = api.c conf.c threads.c	\
 threads.h dft-vrank-geq1.c ct-dit.c rdft-vrank-geq1.c hc2hc-dit.c	\
-hc2hc-dif.c vrank-geq1-rdft2.c f77api.c f77funcs.c
+hc2hc-dif.c vrank-geq1-rdft2.c f77api.c
+
+EXTRA_DIST = f77funcs.c
 
 libfftw3@PREC_SUFFIX@_threads_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
