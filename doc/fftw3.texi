@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.172 2003-03-25 18:03:47 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.173 2003-03-26 04:33:03 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4585,7 +4585,7 @@ extremely slow (you may just want to use @code{FFTW_ESTIMATE}).
 @section Generating your own code
 @cindex code generator
 
-The directory @code{gensrc} contains the programs that were used to
+The directory @code{genfft} contains the programs that were used to
 generate FFTW's ``codelets,'' which are hard-coded transforms of small
 sizes.
 @cindex codelet
