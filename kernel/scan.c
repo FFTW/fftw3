@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.9 2002-09-14 03:07:39 stevenj Exp $ */
+/* $Id: scan.c,v 1.10 2002-09-23 15:49:32 athena Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -111,13 +111,6 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 	      case '%':
 	  getformat:
 		   switch ((c = *s++)) {
-		       case 'c': {
-			    char *x = va_arg(ap, char *);
-			    ch = GETCHR(sc);
-			    if (ch == EOF) return 0;
-			    *x = ch;
-			    break;
-		       }
 		       case 's': {
 			    char *x = va_arg(ap, char *);
 			    mygets(sc, x, fmt_len);
@@ -126,12 +119,6 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 		       case 'd': {
 			    int *x = va_arg(ap, int *);
 			    *x = (int) getlong(sc, 10, &ch);
-			    if (!ch) return 0;
-			    break;
-		       }
-		       case 'u': {
-			    uint *x = va_arg(ap, uint *);
-			    *x = (uint) getlong(sc, 10, &ch);
 			    if (!ch) return 0;
 			    break;
 		       }
@@ -146,14 +133,6 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 			    *x = 0xffffffffUL & getlong(sc, 16, &ch);
 			    if (!ch) return 0;
 			    break;
-		       }
-		       case '0': case '1': case '2': case '3': case '4':
-		       case '5': case '6': case '7': case '8': case '9': {
-			    fmt_len = c - '0';
-			    while (isdigit(c = *s++))
-				 fmt_len = fmt_len * 10 + c - '0';
-			    UNGETCHR(sc, c);
-			    goto getformat;
 		       }
 		       case '*': {
 			    if ((fmt_len = va_arg(ap, int)) <= 0) return 0;

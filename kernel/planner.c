@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.117 2002-09-22 15:08:57 athena Exp $ */
+/* $Id: planner.c,v 1.118 2002-09-23 15:49:32 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -48,15 +48,6 @@
 /*
   slvdesc management:
 */
-static uint hash_regnam(const char *s)
-{
-     uint h = 0xDEADBEEFul;
-     do {
-	  h = h * 17 + *s;
-     } while (*s++);
-     return h;
-}
-
 static void sgrow(planner *ego)
 {
      uint osiz = ego->slvdescsiz, nsiz = 1 + osiz + osiz / 4;
@@ -88,13 +79,13 @@ static void register_solver(planner *ego, solver *s)
 	  n->reg_id = ego->cur_reg_id++;
 	  
 	  A(strlen(n->reg_nam) < MAXNAM);
-	  n->nam_hash = hash_regnam(n->reg_nam);
+	  n->nam_hash = X(hash)(n->reg_nam);
      }
 }
 
 static short slookup(planner *ego, char *nam, int id)
 {
-     uint h = hash_regnam(nam); /* used to avoid strcmp in the common case */
+     uint h = X(hash)(nam); /* used to avoid strcmp in the common case */
      FORALL_SOLVERS(ego, s, sp, {
 	  UNUSED(s);
 	  if (sp->reg_id == id && sp->nam_hash == h

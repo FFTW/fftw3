@@ -20,35 +20,12 @@
 
 #include "ifftw.h"
 
-
-void X(md5putb)(md5 *p, const void *d_, uint len)
+uint X(hash)(const char *s)
 {
-     uint i;
-     const unsigned char *d = d_;
-     for (i = 0; i < len; ++i)
-	  X(md5putc)(p, d[i]);
-}
-
-void X(md5puts)(md5 *p, const char *s)
-{
-     /* also hash final '\0' */
+     uint h = 0xDEADBEEFu;
      do {
-	  X(md5putc)(p, *s);
-     } while(*s++);
-}
-
-void X(md5int)(md5 *p, int i)
-{
-     X(md5putb)(p, &i, sizeof(i));
-}
-
-void X(md5uint)(md5 *p, uint i)
-{
-     X(md5putb)(p, &i, sizeof(i));
-}
-
-void X(md5ptrdiff)(md5 *p, ptrdiff_t d)
-{
-     X(md5putb)(p, &d, sizeof(d));
+	  h = h * 17 + *s;
+     } while (*s++);
+     return h;
 }
 
