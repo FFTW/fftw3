@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.28 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: problem.c,v 1.29 2002-09-22 19:00:59 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -26,8 +26,7 @@
 static void destroy(problem *ego_)
 {
      problem_rdft *ego = (problem_rdft *) ego_;
-     X(tensor_destroy)(ego->vecsz);
-     X(tensor_destroy)(ego->sz);
+     X(tensor_destroy2)(ego->vecsz, ego->sz);
      X(free)(ego_);
 }
 
@@ -141,8 +140,7 @@ static void zero(const problem *ego_)
      tensor *rsz = X(rdft_real_sz)(ego->kind, ego->sz);
      tensor *sz = X(tensor_append)(ego->vecsz, rsz);
      X(rdft_zerotens)(sz, ego->I);
-     X(tensor_destroy)(sz);
-     X(tensor_destroy)(rsz);
+     X(tensor_destroy2)(sz, rsz);
 }
 
 static const problem_adt padt =
@@ -190,8 +188,7 @@ problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
 {
      problem *p;
      p = X(mkproblem_rdft)(sz, vecsz, I, O, kind);
-     X(tensor_destroy)(vecsz);
-     X(tensor_destroy)(sz);
+     X(tensor_destroy2)(vecsz, sz);
      return p;
 }
 

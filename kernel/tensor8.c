@@ -18,20 +18,18 @@
  *
  */
 
-/* $Id: tensor1.c,v 1.2 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: tensor8.c,v 1.1 2002-09-22 19:00:59 athena Exp $ */
 
 #include "ifftw.h"
 
-tensor *X(mktensor_0d)(void)
+void X(tensor_destroy2)(tensor *a, tensor *b)
 {
-     return X(mktensor(0));
+     X(tensor_destroy)(a);
+     X(tensor_destroy)(b);
 }
 
-tensor *X(mktensor_1d)(uint n, int is, int os)
+void X(tensor_destroy4)(tensor *a, tensor *b, tensor *c, tensor *d)
 {
-     tensor *x = X(mktensor)(1);
-     x->dims[0].n = n;
-     x->dims[0].is = is;
-     x->dims[0].os = os;
-     return x;
+     X(tensor_destroy2)(a, b);
+     X(tensor_destroy2)(c, d);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.16 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: buffered.c,v 1.17 2002-09-22 19:00:59 athena Exp $ */
 
 #include "rdft.h"
 
@@ -161,8 +161,7 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 		* If the problem is in place, the input/output strides must
 		* be the same or the whole thing must fit in the buffer.
 		*/
-               return ((X(tensor_inplace_strides)(p->sz) &&
-                        X(tensor_inplace_strides)(p->vecsz))
+               return ((X(tensor_inplace_strides2)(p->sz, p->vecsz))
                        || (compute_nbuf(d[0].n, p->vecsz->dims[0].n, ego)
                            == p->vecsz->dims[0].n));
           }
@@ -242,7 +241,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* copying back from the buffer is a rank-0 transform: */
      cldcpy = X(mkplan_d)(plnr, 
 			  X(mkproblem_rdft_d)(
-			       X(mktensor)(0),
+			       X(mktensor_0d)(),
 			       X(mktensor_2d)(nbuf, bufdist, ovs,
 					      X(rdft_real_n)(p->kind[0], n),
 					      1, p->sz->dims[0].os),

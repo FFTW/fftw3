@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.28 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: direct.c,v 1.29 2002-09-22 19:00:59 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -97,8 +97,7 @@ static int applicable(const solver *ego_, const problem *p_,
 		   || p->vecsz->rnk == 0
 
 		   /* can operate in-place as long as strides are the same */
-		   || (X(tensor_inplace_strides)(p->sz) &&
-		       X(tensor_inplace_strides)(p->vecsz))
+		   || (X(tensor_inplace_strides2)(p->sz, p->vecsz))
 		    )
 	       );
      }

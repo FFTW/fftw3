@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.19 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: problem2.c,v 1.20 2002-09-22 19:00:59 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -27,8 +27,7 @@
 static void destroy(problem *ego_)
 {
      problem_rdft2 *ego = (problem_rdft2 *) ego_;
-     X(tensor_destroy)(ego->vecsz);
-     X(tensor_destroy)(ego->sz);
+     X(tensor_destroy2)(ego->vecsz, ego->sz);
      X(free)(ego_);
 }
 
@@ -115,8 +114,7 @@ problem *X(mkproblem_rdft2_d)(tensor *sz, tensor *vecsz,
 {
      problem *p;
      p = X(mkproblem_rdft2)(sz, vecsz, r, rio, iio, kind);
-     X(tensor_destroy)(vecsz);
-     X(tensor_destroy)(sz);
+     X(tensor_destroy2)(vecsz, sz);
      return p;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.17 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: hc2hc.c,v 1.18 2002-09-22 19:00:59 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -189,13 +189,13 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
 				 cld_vec, p->I, p->O, p->kind);
 
      radix = X(mktensor_1d)(e->radix, m * d[0].os, m * d[0].os);
-     null = X(mktensor)(0);
+     null = X(mktensor_0d)();
      *cld0p = X(mkproblem_rdft_1)(radix, null, p->O, p->O, R2HC);
      *cldmp = X(mkproblem_rdft_1)(m%2 ? null : radix, null,
 				  p->O + omid, p->O + omid, R2HCII);
-     X(tensor_destroy)(null);
-     X(tensor_destroy)(radix);
+     X(tensor_destroy2)(null, radix);
 }
+
 
 void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
                          problem **cldp, problem **cld0p, problem **cldmp)
@@ -214,10 +214,9 @@ void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
 				 cld_vec, p->I, p->O, p->kind);
 
      radix = X(mktensor_1d)(e->radix, m * d[0].is, m * d[0].is);
-     null = X(mktensor)(0);
+     null = X(mktensor_0d)();
      *cld0p = X(mkproblem_rdft_1)(radix, null, p->I, p->I, HC2R);
      *cldmp = X(mkproblem_rdft_1)(m%2 ? null : radix, null, 
 				  p->I + imid, p->I + imid, HC2RIII);
-     X(tensor_destroy)(null);
-     X(tensor_destroy)(radix);
+     X(tensor_destroy2)(null, radix);
 }

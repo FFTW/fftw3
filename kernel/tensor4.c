@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor4.c,v 1.1 2002-09-22 14:21:36 athena Exp $ */
+/* $Id: tensor4.c,v 1.2 2002-09-22 19:00:59 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -65,4 +65,9 @@ int X(tensor_inplace_strides)(const tensor *sz)
                return 0;
      }
      return 1;
+}
+
+int X(tensor_inplace_strides2)(const tensor *a, const tensor *b)
+{
+     return X(tensor_inplace_strides(a)) && X(tensor_inplace_strides(b));
 }

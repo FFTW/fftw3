@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.11 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.12 2002-09-22 19:00:59 athena Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
 
@@ -192,24 +192,16 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->solver = ego;
      pln->super.super.ops = X(ops_add)(cld1->ops, cld2->ops);
 
-     X(tensor_destroy)(rsz2i);
-     X(tensor_destroy)(rsz1);
-     X(tensor_destroy)(sz2);
-     X(tensor_destroy)(sz1);
-     X(tensor_destroy)(vecszi);
-     X(tensor_destroy)(sz2i);
+     X(tensor_destroy4)(rsz2i, rsz1, sz2, sz1);
+     X(tensor_destroy2)(vecszi, sz2i);
 
      return &(pln->super.super);
 
  nada:
      X(plan_destroy)(cld2);
      X(plan_destroy)(cld1);
-     X(tensor_destroy)(rsz2i);
-     X(tensor_destroy)(rsz1);
-     X(tensor_destroy)(sz2);
-     X(tensor_destroy)(sz1);
-     X(tensor_destroy)(vecszi);
-     X(tensor_destroy)(sz2i);
+     X(tensor_destroy4)(rsz2i, rsz1, sz2, sz1);
+     X(tensor_destroy2)(vecszi, sz2i);
      return (plan *) 0;
 }
 

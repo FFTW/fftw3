@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.23 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: problem.c,v 1.24 2002-09-22 19:00:59 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -26,8 +26,7 @@
 static void destroy(problem *ego_)
 {
      problem_dft *ego = (problem_dft *) ego_;
-     X(tensor_destroy)(ego->vecsz);
-     X(tensor_destroy)(ego->sz);
+     X(tensor_destroy2)(ego->vecsz, ego->sz);
      X(free)(ego_);
 }
 
@@ -103,7 +102,6 @@ problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
 {
      problem *p;
      p = X(mkproblem_dft)(sz, vecsz, ri, ii, ro, io);
-     X(tensor_destroy)(vecsz);
-     X(tensor_destroy)(sz);
+     X(tensor_destroy2)(vecsz, sz);
      return p;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.151 2002-09-22 17:27:46 athena Exp $ */
+/* $Id: ifftw.h,v 1.152 2002-09-22 19:00:59 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -267,6 +267,7 @@ typedef struct {
 typedef enum { INPLACE_IS, INPLACE_OS } inplace_kind;
 
 tensor *X(mktensor)(uint rnk);
+tensor *X(mktensor_0d)(void);
 tensor *X(mktensor_1d)(uint n, int is, int os);
 tensor *X(mktensor_2d)(uint n0, int is0, int os0,
                       uint n1, int is1, int os1);
@@ -280,6 +281,7 @@ uint X(tensor_min_istride)(const tensor *sz);
 uint X(tensor_min_ostride)(const tensor *sz);
 uint X(tensor_min_stride)(const tensor *sz);
 int X(tensor_inplace_strides)(const tensor *sz);
+int X(tensor_inplace_strides2)(const tensor *a, const tensor *b);
 tensor *X(tensor_copy)(const tensor *sz);
 
 tensor *X(tensor_copy_inplace)(const tensor *sz, inplace_kind k);
@@ -291,6 +293,8 @@ tensor *X(tensor_append)(const tensor *a, const tensor *b);
 void X(tensor_split)(const tensor *sz, tensor **a, uint a_rnk, tensor **b);
 void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os);
 void X(tensor_destroy)(tensor *sz);
+void X(tensor_destroy2)(tensor *a, tensor *b);
+void X(tensor_destroy4)(tensor *a, tensor *b, tensor *c, tensor *d);
 void X(tensor_print)(const tensor *sz, printer *p);
 
 /*-----------------------------------------------------------------------*/

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.20 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: indirect.c,v 1.21 2002-09-22 19:00:59 athena Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
@@ -144,8 +144,7 @@ static int applicable0(const solver *ego_, const problem *p_,
 		      /* problem must be in-place & require some
 		         rearrangement of the data */
 		      || (p->I == p->O
-			  && !(X(tensor_inplace_strides)(p->sz)
-			       && X(tensor_inplace_strides)(p->vecsz)))
+			  && !(X(tensor_inplace_strides2)(p->sz, p->vecsz)))
 
 		      /* or problem must be out of place, transforming
 			 from stride 1/2 to bigger stride, for apply_after */
@@ -200,7 +199,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  tensor *sz_real = X(rdft_real_sz)(p->kind, p->sz);
 	  cldcpy = X(mkplan_d)(plnr, 
 			       X(mkproblem_rdft_d)(
-				    X(mktensor)(0),
+				    X(mktensor_0d)(),
 				    X(tensor_append)(p->vecsz, sz_real),
 				    p->I, p->O, (rdft_kind *) 0));
 	  X(tensor_destroy)(sz_real);
