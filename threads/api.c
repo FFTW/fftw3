@@ -29,7 +29,7 @@ int X(init_threads)(void)
      if (!threads_inited) {
 	  planner *plnr;
 
-          if (X(threads_init)())
+          if (X(ithreads_init)())
                return 0;
 
 	  /* this should be the first time the_planner is called,

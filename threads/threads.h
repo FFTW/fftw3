@@ -34,7 +34,7 @@ typedef void *(*spawn_function) (spawn_data *);
 
 void X(spawn_loop)(int loopmax, int nthreads,
 		   spawn_function proc, void *data);
-int X(threads_init)(void);
+int X(ithreads_init)(void);
 void X(threads_cleanup)(void);
 void X(threads_setmax)(int nthreads_max);
 
