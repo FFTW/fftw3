@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ctsq.c,v 1.1 2003-05-15 23:09:07 athena Exp $ */
+/* $Id: ctsq.c,v 1.2 2003-05-17 11:01:42 athena Exp $ */
 
 /* special ``square transpose'' in-place cooley-tukey solver */
 /* FIXME: do out-of-place too? */
@@ -26,7 +26,6 @@
 
 typedef struct {
      solver super;
-     int r;
      int dec;
 } S;
 
@@ -35,6 +34,7 @@ typedef struct {
      plan *cld;
      plan *cldw;
      const S *slv;
+     int r;
 } P;
 
 #if 0
@@ -84,12 +84,13 @@ static void print(const plan *ego_, printer *p)
      const P *ego = (const P *) ego_;
      p->print(p, "(dft-ctsq-%s/%d%(%p%)%(%p%))",
 	      ego->slv->dec == DECDIT ? "dit" : "dif",
-	      ego->slv->r, ego->cldw, ego->cld);
+	      ego->r, ego->cldw, ego->cld);
 }
 
 #define divides(a, b) (((int)(b) % (int)(a)) == 0)
 static int applicable(const S *ego, const problem *p_, planner *plnr)
 {
+     UNUSED(ego); UNUSED(plnr);
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
           iodim *d = p->sz->dims, *vd = p->vecsz->dims;
@@ -106,13 +107,13 @@ static int applicable(const S *ego, const problem *p_, planner *plnr)
                   && p->sz->rnk == 1
                   && p->vecsz->rnk == 1
 
-		  && d[0].n > ego->r
-                  && divides(ego->r, d[0].n)
+		  /* radix == vd[0].n */
+		  && d[0].n > vd[0].n
+                  && divides(vd[0].n, d[0].n)
 
 		  /* strides must be transposed */
-                  && vd[0].n == ego->r
                   && d[0].os == vd[0].is
-                  && d[0].is == ego->r * vd[0].is
+                  && d[0].is == vd[0].n * vd[0].is
                   && vd[0].os == d[0].n * vd[0].is
 	       );
      }
@@ -140,7 +141,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      d = p->sz->dims;
      vd = p->vecsz->dims;
      n = d[0].n;
-     r = ego->r;
+     r = vd[0].n;
      m = n / r;
 
 
@@ -179,6 +180,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cld = cld;
      pln->cldw = cldw;
      pln->slv = ego;
+     pln->r = r;
      X(ops_add)(&cld->ops, &cldw->ops, &pln->super.super.ops);
      return &(pln->super.super);
 
@@ -188,26 +190,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(int r, int dec)
+static solver *mksolver(int dec)
 {
      static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
-     slv->r = r;
      slv->dec = dec;
      return &(slv->super);
 }
 
 void X(dft_ctsq_register)(planner *p)
 {
-     unsigned i;
-     /* FIXME: add general radices */
-     static const int r[] = {
-	  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64
-
-	  ,128,256
-     };
-
-     for (i = 0; i < sizeof(r) / sizeof(r[0]); ++i) {
-          REGISTER_SOLVER(p, mksolver(r[i], DECDIF));
-     }
+     REGISTER_SOLVER(p, mksolver(DECDIF));
 }
