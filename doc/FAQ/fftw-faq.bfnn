@@ -172,7 +172,7 @@ have an Objective Caml compiler in order to use FFTW.
 \courier{genfft\} is provided with the FFTW sources, which means that
 you can play with the code generator if you want.  In this case, you
 need a working Objective Caml system.  Objective Caml is available
-from \ftpon ftp.inria.fr in the directory \ftpin /lang/caml-light.
+from \docref{the Caml web page\}.
 
 \question 26aug:fortran  Can I call FFTW from FORTRAN?
 
@@ -331,8 +331,9 @@ The libraries must be listed in the correct order (\courier{-lfftw3
 
 \question 15mar:linkheader I included your header but linking fails
 
-You have to compile the FFTW and link it into your program, not just
-\courier{#include <fftw3.h>\}.  (Yes, this is really a FAQ.)
+You're a C++ programmer, aren't you?  You have to compile the FFTW
+library and link it into your program, not just \courier{#include
+<fftw3.h>\}.  (Yes, this is really a FAQ.)
 
 \question 22oct:nostack My program crashes, complaining about stack space.
 
@@ -384,10 +385,6 @@ For more details (albeit somewhat outdated), see the paper "FFTW: An
 Adaptive Software Architecture for the FFT", by M. Frigo and
 S. G. Johnson, \italic{Proc. ICASSP\} 3, 1381 (1998),
 available along with other references at \docref{the FFTW web page\}.
-
-For more details on these three topics, see the paper "The Fastest
-Fourier Transform in the West", by M. Frigo and S. G. Johnson,
-available at \docref{the FFTW web page\}.
 
 \comment ######################################################################
 
