@@ -37,33 +37,28 @@ let no_twiddle_gen n dir =
   and (fnarg_output, fnarg_ostride) = (K7_MFunArg 2, K7_MFunArg 4) in
 
   let (input,input2), (output,output2) = makeNewVintreg2 (), makeNewVintreg2 ()
-  and (istride8p, istride8n) = makeNewVintreg2 ()
-  and (ostride8p, ostride8n) = makeNewVintreg2 () in
+  and (istride4p, ostride4p) = makeNewVintreg2 () in
   let int_initcode = 
 	loadfnargs [(fnarg_input, input); (fnarg_output, output)] @
         [
-         (input2,    get2ndhalfcode input  istride8p input2  (pred (msb n)));
-         (output2,   get2ndhalfcode output ostride8p output2 (pred (msb n)));
-	 (istride8p, [K7V_IntLoadMem(fnarg_istride,istride8p);
-		      K7V_IntLoadEA(K7V_SID(istride8p,8,0), istride8p)]);
-         (ostride8p, [K7V_IntLoadMem(fnarg_ostride,ostride8p);
-		      K7V_IntLoadEA(K7V_SID(ostride8p,8,0), ostride8p)]);
-         (istride8n, [K7V_IntCpyUnaryOp(K7_ICopy, istride8p, istride8n);
-		      K7V_IntUnaryOp(K7_INegate, istride8n)]);
-         (ostride8n, [K7V_IntCpyUnaryOp(K7_ICopy, ostride8p, ostride8n);
-		      K7V_IntUnaryOp(K7_INegate, ostride8n)]);
+         (input2,    get2ndhalfcode input  istride4p input2  (pred (msb n)));
+         (output2,   get2ndhalfcode output ostride4p output2 (pred (msb n)));
+	 (istride4p, [K7V_IntLoadMem(fnarg_istride,istride4p);
+		      K7V_IntLoadEA(K7V_SID(istride4p,4,0), istride4p)]);
+         (ostride4p, [K7V_IntLoadMem(fnarg_ostride,ostride4p);
+		      K7V_IntLoadEA(K7V_SID(ostride4p,4,0), ostride4p)]);
 	] in
   let initcode = map (fun (d,xs) -> AddIntOnDemandCode(d,xs)) int_initcode in
   let do_split = n >= 16 in
   let (in_unparser',out_unparser') =
     if do_split then
       let splitPt = 1 lsl (pred (msb n)) in
-        (([K7V_RefInts [istride8p; istride8n]],
-          strided_complex_split2_unparser (input,input2,splitPt,istride8p)),
-	 ([K7V_RefInts [ostride8p; ostride8n]],
-	  strided_complex_split2_unparser (output,output2,splitPt,ostride8p)))
+        (([K7V_RefInts [istride4p]],
+          strided_complex_split2_unparser (input,input2,splitPt,istride4p)),
+	 ([K7V_RefInts [ostride4p]],
+	  strided_complex_split2_unparser (output,output2,splitPt,ostride4p)))
     else
-      (([], strided_complex_unparser (input,istride8p)),
-       ([], strided_complex_unparser (output,ostride8p))) in
+      (([], strided_complex_unparser (input,istride4p)),
+       ([], strided_complex_unparser (output,ostride4p))) in
   let unparser = make_asm_unparser_notwiddle in_unparser' out_unparser' in
     (n, dir, NO_TWIDDLE, initcode, vsimdinstrsToK7vinstrs unparser code')
