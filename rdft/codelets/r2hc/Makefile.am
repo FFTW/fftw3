@@ -5,7 +5,7 @@ noinst_LTLIBRARIES = librdft_codelets_r2hc.la
 
 R2HC = r2hc_2.c r2hc_3.c r2hc_4.c r2hc_5.c r2hc_6.c r2hc_7.c r2hc_8.c	\
 r2hc_9.c r2hc_10.c r2hc_11.c r2hc_12.c r2hc_13.c r2hc_14.c r2hc_15.c	\
-r2hc_16.c r2hc_32.c r2hc_64.c
+r2hc_16.c r2hc_32.c r2hc_64.c r2hc_128.c
 
 HF = hf_2.c hf_3.c hf_4.c hf_5.c hf_6.c hf_7.c hf_8.c hf_9.c	\
 hf_10.c hf_16.c hf_32.c hf_64.c
