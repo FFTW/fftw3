@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.5 2002-08-26 04:05:52 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.6 2002-08-29 21:31:39 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -147,10 +147,12 @@ static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
      }
 
      /* Do the remaining transforms, if any: */
-     cld = (plan_rdft *) ego->cldrest;
-     cld->apply((plan *) cld, r, bufs);
-     for (i -= nbuf; i < vl; ++i, rio += ovs, iio += ovs) {
-	  hc2c(n, bufs, rio, iio, os);
+     {
+	  plan_rdft *cldrest = (plan_rdft *) ego->cldrest;
+	  R *b = bufs;
+	  cldrest->apply((plan *) cldrest, r, bufs);
+	  for (i -= nbuf; i < vl; ++i, rio += ovs, iio += ovs, b += bufdist)
+	       hc2c(n, b, rio, iio, os);
      }
 
      X(free)(bufs);
@@ -178,11 +180,14 @@ static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
      }
 
      /* Do the remaining transforms, if any: */
-     for (i -= nbuf; i < vl; ++i, rio += ivs, iio += ivs) {
-	  c2hc(n, rio, iio, is, bufs);
+     {
+	  plan_rdft *cldrest;
+	  R *b = bufs;
+	  for (i -= nbuf; i < vl; ++i, rio += ivs, iio += ivs, b += bufdist)
+	       c2hc(n, rio, iio, is, b);
+	  cldrest = (plan_rdft *) ego->cldrest;
+	  cldrest->apply((plan *) cldrest, bufs, r);
      }
-     cld = (plan_rdft *) ego->cldrest;
-     cld->apply((plan *) cld, bufs, r);
 
      X(free)(bufs);
 }
