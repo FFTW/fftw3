@@ -61,19 +61,19 @@ static inline V VMRGH(V a, V b)
 }
 
 
-#define ST4(a, ovs, r0, r1, r2, r3)			\
-{							\
-     R *_b = &(a);					\
-     V _t0, _t1, _t2, _t3;				\
-     _t0 = VMRGH(r0, r2);				\
-     _t1 = VMRGH(r1, r3);				\
-     _t2 = VMRGL(r0, r2);				\
-     _t3 = VMRGL(r1, r3);				\
-							\
-     ST(_b[0 * ovs], VMRGH(_t0,_t1));			\
-     ST(_b[1 * ovs], VMRGL(_t0,_t1));			\
-     ST(_b[2 * ovs], VMRGH(_t2,_t3));			\
-     ST(_b[3 * ovs], VMRGL(_t2,_t3));			\
+#define ST4(a, ovs, r0, r1, r2, r3)		\
+{						\
+     R *_b = &(a);				\
+     V _t0, _t1, _t2, _t3;			\
+     _t0 = VMRGH(r0, r2);			\
+     _t1 = VMRGH(r1, r3);			\
+     _t2 = VMRGL(r0, r2);			\
+     _t3 = VMRGL(r1, r3);			\
+						\
+     ST(_b[0 * ovs], VMRGH(_t0,_t1));		\
+     ST(_b[1 * ovs], VMRGL(_t0,_t1));		\
+     ST(_b[2 * ovs], VMRGH(_t2,_t3));		\
+     ST(_b[3 * ovs], VMRGL(_t2,_t3));		\
 }
 
 #endif

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.17 2002-07-04 00:32:28 athena Exp $ */
+/* $Id: buffered.c,v 1.18 2002-07-05 21:32:09 athena Exp $ */
 
 #include "dft.h"
 
@@ -339,7 +339,7 @@ void X(dft_buffered_register)(planner *p)
 	  /* nbuf */           8,
 	  /* maxbufsz */       (8192 / sizeof(R)),
 	  /* skew_alignment */ 8,
-	  /* skew */           5,
+	  /* skew */           6,
 	  /* nam */            "dft-buffered"
      };
 

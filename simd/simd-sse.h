@@ -135,32 +135,19 @@ typedef __m128 V;
 #define SHUFVAL(fp3,fp2,fp1,fp0) \
    (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
-#define VTR4(r0, r1, r2, r3)			\
-{						\
-     V _t0, _t1, _t2, _t3;			\
-						\
-						\
-     _t0 = SHUFPS((r0), (r1), 0x44);		\
-     _t2 = SHUFPS((r0), (r1), 0xEE);		\
-     _t1 = SHUFPS((r2), (r3), 0x44);		\
-     _t3 = SHUFPS((r2), (r3), 0xEE);		\
-						\
-     r0 = SHUFPS(_t0, _t1, 0x88);		\
-     r1 = SHUFPS(_t0, _t1, 0xDD);		\
-     r2 = SHUFPS(_t2, _t3, 0x88);		\
-     r3 = SHUFPS(_t2, _t3, 0xDD);		\
-}
-
-#define ST4(a, ovs, v0, v1, v2, v3)		\
+#define ST4(a, ovs, r0, r1, r2, r3)		\
 {						\
      R *_b = &(a);				\
+     V _t0, _t1, _t2, _t3;			\
+     _t0 = UNPCKL(r0, r2);			\
+     _t1 = UNPCKL(r1, r3);			\
+     _t2 = UNPCKH(r0, r2);			\
+     _t3 = UNPCKH(r1, r3);			\
 						\
-     VTR4(v0, v1, v2, v3);			\
-						\
-     ST(_b[0 * ovs], v0);			\
-     ST(_b[1 * ovs], v1);			\
-     ST(_b[2 * ovs], v2);			\
-     ST(_b[3 * ovs], v3);			\
+     ST(_b[0 * ovs], UNPCKL(_t0,_t1));		\
+     ST(_b[1 * ovs], UNPCKH(_t0,_t1));		\
+     ST(_b[2 * ovs], UNPCKL(_t2,_t3));		\
+     ST(_b[3 * ovs], UNPCKH(_t2,_t3));		\
 }
 
 #define LDRI(r, i, a, ivs)			\
