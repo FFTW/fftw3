@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.1 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: hc2hc-dif.c,v 1.2 2002-09-12 20:18:51 athena Exp $ */
 
 /* decimation in frequency Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -97,7 +97,7 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
 	  uint m = d[0].n / e->radix;
           return (1
 		  && p->vecsz.rnk == 0
-		  && (p->I == p->O || (plnr->flags & DESTROY_INPUT))
+		  && (p->I == p->O || (plnr->problem_flags & DESTROY_INPUT))
 		  && (e->genus->okp(e, p->I + d[0].is,
 				    p->I + (e->radix * m - 1) * d[0].is, 
 				    (int)m * d[0].is, 0, m, d[0].is))
