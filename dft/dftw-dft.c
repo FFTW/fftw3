@@ -122,13 +122,18 @@ static void bytwiddle2(const P *ego, R *rio, R *iio)
 
 static void mktwiddle1(P *ego, int flg)
 {
-     static const tw_instr generic_tw[] = {
-	  { TW_GENERIC, 0, 0 },
-	  { TW_NEXT, 1, 0 }
-     };
+     static const tw_instr tw_template[] = { { TW_FULL, 1, 0 }, 
+					     { TW_NEXT, 1, 0 } };
 
-     X(twiddle_awake)(flg, &ego->td, generic_tw,
-		      ego->r * ego->m, ego->r, ego->m);
+     tw_instr tw[2];
+
+     /* note that R and M are swapped, to allow for sequential
+	access both to data and twiddles */
+     tw[0] = tw_template[0];
+     tw[1] = tw_template[1];
+     tw[0].i = ego->m;
+
+     X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->m, ego->r - 1);
 }
 
 static void bytwiddle1(const P *ego, R *rio, R *iio)
@@ -136,17 +141,24 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
      int j, k;
      int r = ego->r, m = ego->m, s = ego->s;
      const R *W = ego->td->W;
+     int ip = iio - rio;
+     R *p;
+
+     /* loop invariant: p = rio + s * (j * m + k). */
+     p = rio + s * (m + 1);
 
      for (j = 1; j < r; ++j) {
 	  for (k = 1; k < m; ++k) {
-	       unsigned jk = j * k;
-	       E xr = rio[s * (j * m + k)];
-	       E xi = iio[s * (j * m + k)];
-	       E wr = W[2 * jk];
-	       E wi = W[2 * jk + 1];
-	       rio[s * (j * m + k)] = xr * wr - xi * wi;
-	       iio[s * (j * m + k)] = xi * wr + xr * wi;
+	       E xr = p[0];
+	       E xi = p[ip];
+	       E wr = W[0];
+	       E wi = W[1];
+	       p[0] = xr * wr + xi * wi;
+	       p[ip] = xi * wr - xr * wi;
+	       W += 2;
+	       p += s;
 	  }
+	  p += s;
      }
 }
 
