@@ -211,8 +211,8 @@ implemented in many processors such as PowerPC, ia-64, and MIPS.
 The two FFTW packages are otherwise identical.
 
 Definitely use the fma version if you have a PowerPC-based system with
-\courier{gcc\}.  This includes all GNU/Linux systems for PowerPC and
-all MacOS X systems.
+\courier{gcc\} (or IBM \courier{xlc\}).  This includes all GNU/Linux
+systems for PowerPC and all MacOS X systems.
 
 Definitely do not use the fma version if you have an ia-32 processor
 (Intel, AMD, etcetera).
