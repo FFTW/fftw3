@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.9 2003-01-09 04:40:48 stevenj Exp $ */
+/* $Id: verify-reodft.c,v 1.10 2003-01-09 23:10:19 stevenj Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -312,7 +312,7 @@ static void impulse(uint n0, int i0, int k0, trigfun t, R impulse_amp,
 	  inA[i] = 0.0;
 	  
 	  /* transform of the pls */
-	  outA[i] = impulse_amp * t(i0, i + k0, n0);
+	  outA[i] = impulse_amp * t(i0, (i % n) + k0, n0);
      }
      for (i = 0; i < vecn; ++i)
 	  inA[i * n] = 1.0;
