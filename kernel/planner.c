@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.143 2003-03-26 22:31:16 athena Exp $ */
+/* $Id: planner.c,v 1.144 2003-03-30 21:40:26 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -46,9 +46,11 @@
 #define ORDERED(f1, f2) (SUBSUMES(f1, f2) || SUBSUMES(f2, f1))
 #define SUBSUMES(f1, f2) ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1))
 
-/* #define ADDMOD(a, b, p)  (((a) + (b)) % (p)) */
-/* likely faster: */
+#define ADDMOD(a, b, p)  (((a) + (b)) % (p))
+
+/* likely faster, but triggers gcc bugs: 
 #define ADDMOD(a, b, p) (((a) + (b)) - (((a) + (b)) >= (p)) * (p))
+*/
 
 /*
   slvdesc management:
