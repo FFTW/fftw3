@@ -22,7 +22,7 @@ dnl called unless the user specified --with-gcc-arch manually.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.13 2005-01-13 23:09:52 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.14 2005-01-14 00:21:58 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -57,7 +57,7 @@ case $host_cpu in
 	    *6a?:*[[234]]:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
 	    *6[[789b]]?:*:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
 	    *6??:*:*:*) ax_gcc_arch=pentiumpro ;;
-            *f33:*:*:*) ax_gcc_arch="prescott pentium4 pentiumpro";;
+            *f3[[37]]:*:*:*) ax_gcc_arch="prescott pentium4 pentiumpro";;
             *f34:*:*:*) ax_gcc_arch="nocona prescott pentium4 pentiumpro";;
             *f??:*:*:*) ax_gcc_arch="pentium4 pentiumpro";;
           esac ;;
