@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.159 2005-01-15 21:35:42 stevenj Exp $ */
+/* $Id: planner.c,v 1.160 2005-02-05 23:39:55 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -345,7 +345,7 @@ double X(iestimate_cost)(const plan *pln)
 
 static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 {
-     if (!BELIEVE_PCOSTP(ego) || pln->pcost == 0.0) {
+     if (ESTIMATEP(ego) || !BELIEVE_PCOSTP(ego) || pln->pcost == 0.0) {
 	  ego->nplan++;
 
 	  if (ESTIMATEP(ego)) {
