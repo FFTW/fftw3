@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.206 2003-03-29 08:07:34 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.207 2003-03-29 13:05:41 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -86,6 +86,9 @@ typedef struct scanner_s scanner;
 
 /*-----------------------------------------------------------------------*/
 /* alloca: */
+#if HAVE_SIMD
+#define MIN_ALIGNMENT 16
+#endif
 
 #ifdef HAVE_ALLOCA
    /* use alloca if available */
@@ -170,9 +173,6 @@ extern void X(debug)(const char *format, ...);
 
 /*-----------------------------------------------------------------------*/
 /* alloc.c: */
-#if HAVE_SIMD
-#define MIN_ALIGNMENT 16
-#endif
 
 /* objects allocated by malloc, for statistical purposes */
 enum malloc_tag {
