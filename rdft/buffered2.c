@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.34 2003-04-04 23:14:14 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.35 2003-06-11 10:55:21 athena Exp $ */
 
 #include "rdft.h"
 
@@ -235,7 +235,8 @@ static int min_nbuf(const problem_rdft2 *p, int n, int vl)
 	complex arrays, which overlap because of the differing sizes. */
      if (n * X(iabs)(is) <= X(iabs)(ivs)
 	 && (n/2 + 1) * X(iabs)(os) <= X(iabs)(ovs)
-	 && X(iabs)((int) (p->rio - p->iio)) <= X(iabs)(os)
+	 && ( (p->rio - p->iio <= X(iabs)(os)) || 
+	      (p->iio - p->rio <= X(iabs)(os)) )
 	 && ivs > 0 && ovs > 0) {
 	  int vsmin = X(imin)(ivs, ovs);
 	  int vsmax = X(imax)(ivs, ovs);

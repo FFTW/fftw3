@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.24 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: rdft2-radix2.c,v 1.25 2003-06-11 10:55:21 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -122,7 +122,7 @@ static void k_f_dft(R *rio, R *iio, const R *W, int n, int dist)
 {
      int i;
      R *pp = rio, *pm = rio + n * dist;
-     int im = iio - rio;
+     ptrdiff_t im = iio - rio;
 
      /* i = 0 and i = n */
      {
@@ -194,7 +194,7 @@ static void k_f_rdft(R *rio, R *iio, const R *W, int n, int dist)
 {
      int i;
      R *pp = rio, *pm = rio + n * dist;
-     int im = iio - rio;
+     ptrdiff_t im = iio - rio;
 
      /* i = 0 and i = n */
      {
@@ -266,7 +266,7 @@ static void k_b_dft(R *rio, R *iio, const R *W, int n, int dist)
 {
      int i;
      R *pp = rio, *pm = rio + n * dist;
-     int im = iio - rio;
+     ptrdiff_t im = iio - rio;
 
      /* i = 0 and i = n */
      {
@@ -334,7 +334,7 @@ static void k_b_rdft(R *rio, R *iio, const R *W, int n, int dist)
 {
      int i;
      R *pp = rio, *pm = rio + n * dist;
-     int im = iio - rio;
+     ptrdiff_t im = iio - rio;
 
      /* i = 0 and i = n */
      {
