@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.108 2003-03-07 03:39:36 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.109 2003-03-07 04:01:47 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3244,6 +3244,9 @@ new plans from scratch more often than FFTW 2 (in FFTW 2, planning
 e.g. one transform of size 1024 also created wisdom for all smaller
 powers of 2, but this no longer occurs).
 
+FFTW 3 also has the new routine @code{fftw_import_system_wisdom} to
+import wisdom from a standard system-wide location.
+
 @subsubheading Memory allocation
 
 In FFTW 3, we recommend allocating your arrays with @code{fftw_malloc}
@@ -3261,6 +3264,28 @@ FFTW 3; those few users who require this functionality can simply
 directly modify the memory-allocation routines in FFTW (they are defined
 in @code{kernel/alloc.c}).
 
+@subsubheading Fortran interface
+
+In FFTW 2, the subroutine names were obtained by replacing @samp{fftw_}
+with @samp{fftw_f77}; in FFTW 3, you replace @samp{fftw_} with
+@samp{dfftw_} (or @samp{sfftw_} or @samp{lfftw_}, depending upon the
+precision).
+
+In FFTW 3, we have begun recommending that you always declare the type
+used to store plans as @code{integer*8}.  (Too many people didn't notice
+our instruction to switch from @code{integer} to @code{integer*8} for
+64-bit machines.)
+
+In FFTW 3, we provide a @code{fftw3.f} ``header file'' to include in
+your code (and which is officially installed on Unix systems).  (In FFTW
+2, we supplied a @code{fftw_f77.i} file, but it was not installed.)
+
+Otherwise, the C-Fortran interface relationship is much the same as it
+was before (e.g. return values become initial parameters, and
+multi-dimensional arrays are in column-major order).  Unlike FFTW 2, we
+do provide some support for wisdom import/export in Fortran
+(@pxref{Wisdom of Fortran?}).
+
 @subsubheading Threads
 
 Like FFTW 2, only the execution routines are thread-safe.  All planner
@@ -3276,6 +3301,11 @@ now stored in the plan, and is specified before the planner is called by
 to be called @code{fftw_threads_init} and would return zero on success;
 the new routine is called @code{fftw_init_threads} and returns zero on
 failure.  @xref{Multi-threaded FFTW}.
+
+There is no separate threads header file in FFTW 3; all the function
+prototypes are in @code{<fftw3.h>}.  However, you still have to link to
+a separate library (@code{-lfftw3_threads -lfftw3 -lm} on Unix), as well as
+to the threading library (e.g. POSIX threads on Unix).
 
 @c ************************************************************
 @node Installation and Customization, Acknowledgments, Upgrading from FFTW version 2, Top
