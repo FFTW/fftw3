@@ -54,3 +54,10 @@ TODO before FFTW-$2\pi$:
 * Timed planner: run as ESTIMATE, then IMPATIENT, then PATIENT, then naive?
   PATIENT then IMPATIENT then ESTIMATE would allow the less-patient planners
   to benefit from more-patient sub-plans, on the other hand.
+
+* Pruned FFTs (basically, a vecloop that skips zeros).
+
+* Try FFTPACK-style back-and-forth (Stockham) FFT.  (We tried this a
+  few years ago and it was slower, but perhaps matters have changed.)
+
+* Modify generator to produce integer FFTs (etc.) of small sizes.
