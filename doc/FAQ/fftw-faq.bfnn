@@ -124,6 +124,11 @@ directory with \courier{-O2\}).  NetBSD/macppc 1.5 comes with a
 \courier{gcc\} version that also miscompiles the test program (we
 haven't tried to find a workaround).
 
+\courier{ranlib\} on Irix 6.5 corrupts the FFTW libraries, causing a
+link failure when FFTW is compiled.  Since \courier{ranlib\} is
+completely superfluous on Irix, we suggest deleting it from your
+system and replacing it with a symbolic link to \courier{/bin/echo\}.
+
 If support for SIMD instructions is enabled in FFTW, further compiler
 problems may appear.  Some 3.0.x and 3.1.x versions of \courier{gcc\}
 may crash, although the problem is fixed in version
