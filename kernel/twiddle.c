@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.22 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: twiddle.c,v 1.23 2003-05-16 12:19:38 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -68,6 +68,9 @@ static int twlen0(int r, const tw_instr **pp)
 	      case TW_FULL:
 		   ntwiddle += (r - 1) * 2;
 		   break;
+	      case TW_HALF:
+		   ntwiddle += (r - 1);
+		   break;
 	      case TW_GENERIC:
 		   ntwiddle += r * 2;
 		   break;
@@ -107,9 +110,21 @@ static R *compute(const tw_instr *instr, int n, int r, int m)
 		   {
 			int i;
 			A((int)p->i == r); /* consistency check */
+			A(m * r <= n);
 			for (i = 1; i < r; ++i) {
 			     *W++ = f[TW_COS]((j + p->v) * i, n);
 			     *W++ = f[TW_SIN]((j + p->v) * i, n);
+			}
+			break;
+		   }
+
+		   case TW_HALF:
+		   {
+			int i;
+			A((r % 2) == 1);
+			for (i = 1; i + i < r; ++i) {
+			     *W++ = f[TW_COS](MULMOD(i, (j + p->v), n), n);
+			     *W++ = f[TW_SIN](MULMOD(i, (j + p->v), n), n);
 			}
 			break;
 		   }
@@ -119,6 +134,7 @@ static R *compute(const tw_instr *instr, int n, int r, int m)
 			int i;
 			A(p->v == 0); /* unused */
 			A(p->i == 0); /* unused */
+			A(m * r <= n);
 			for (i = 0; i < r; ++i) {
 			     int k = j * r + i;
 			     *W++ = f[TW_COS](k, n);
@@ -128,6 +144,7 @@ static R *compute(const tw_instr *instr, int n, int r, int m)
 		   }
 		   
 		   default:
+			A(m * r <= n);
 			*W++ = f[p->op](((signed int)(j + p->v)) * p->i, n);
 			break;
 	       }

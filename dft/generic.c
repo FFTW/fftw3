@@ -31,25 +31,24 @@ typedef struct {
 } P;
 
 
-static void cdot(int n, const E *x, const R *w, int ws,
+static void cdot(int n, const E *x, const R *w, 
 		 R *or0, R *oi0, R *or1, R *oi1)
 {
-     int wp, i;
+     int i;
 
      E rr = x[0], ri = 0, ir = x[1], ii = 0; 
      x += 2;
-     for (wp = 0, i = 1; i + i < n; ++i) {
-	  wp += ws; if (wp >= n) wp -= n;
-	  rr += x[0] * w[2*wp];
-	  ir += x[1] * w[2*wp];
-	  ri += x[2] * w[2*wp+1];
-	  ii += x[3] * w[2*wp+1];
-	  x += 4;
+     for (i = 1; i + i < n; ++i) {
+	  rr += x[0] * w[0];
+	  ir += x[1] * w[0];
+	  ri += x[2] * w[1];
+	  ii += x[3] * w[1];
+	  x += 4; w += 2;
      }
-     *or0 = rr - ii;
-     *oi0 = ir + ri;
-     *or1 = rr + ii;
-     *oi1 = ir - ri;
+     *or0 = rr + ii;
+     *oi0 = ir - ri;
+     *or1 = rr - ii;
+     *oi1 = ir + ri;
 }
 
 static void hartley(int n, const R *xr, const R *xi, int xs, E *o,
@@ -80,10 +79,12 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      STACK_MALLOC(E *, buf, n * 2 * sizeof(E));
      hartley(n, ri, ii, is, buf, ro, io);
 
-     for (i = 1; i + i < n; ++i) 
-	  cdot(n, buf, W, i,
+     for (i = 1; i + i < n; ++i) {
+	  cdot(n, buf, W,
 	       ro + i * os, io + i * os,
 	       ro + (n - i) * os, io + (n - i) * os);
+	  W += n - 1;
+     }
 
      STACK_FREE(buf);
 }
@@ -91,12 +92,13 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
-     static const tw_instr generic_tw[] = {
-	  { TW_GENERIC, 0, 0 },
+     static const tw_instr half_tw[] = {
+	  { TW_HALF, 1, 0 },
 	  { TW_NEXT, 1, 0 }
      };
 
-     X(twiddle_awake)(flg, &ego->td, generic_tw, ego->n, 1, ego->n);
+     X(twiddle_awake)(flg, &ego->td, half_tw, ego->n, ego->n,
+		      (ego->n - 1) / 2);
 }
 
 static void print(const plan *ego_, printer *p)
