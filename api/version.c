@@ -18,10 +18,9 @@
  *
  */
 
-/* $Id: version.c,v 1.8 2005-02-14 23:51:05 athena Exp $ */
+/* $Id: version.c,v 1.9 2005-02-15 00:07:14 athena Exp $ */
 
 #include "api.h"
-#include "version.h"
 
 const char X(cc)[] = FFTW_CC;
 const char X(codelet_optim)[] = CODELET_OPTIM;
