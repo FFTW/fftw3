@@ -187,7 +187,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->W = 0;
 
      pln->super.super.ops = X(ops_zero);
-     pln->super.super.ops.add = 2 * r * (r-1);
+     pln->super.super.ops.add = 4 * r * (r-1);
      pln->super.super.ops.mul = 4 * r * (r-1);
      /* loads + stores, minus loads + stores for all DIT codelets */
      pln->super.super.ops.other = 4 * r + 4 * r * r - (6*r - 2);
