@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.5 2005-02-05 23:51:08 stevenj Exp $ */
+/* $Id: reodft00e-splitradix.c,v 1.6 2005-02-08 03:36:42 stevenj Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.
@@ -133,7 +133,6 @@ static void apply_o(const plan *ego_, R *I, R *O)
      int i, j, n = ego->n - 1, n2 = (n+1)/2;
      int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
-     int inplace = I == O;
      R *W = ego->td->W - 2;
      R *buf;
 
@@ -156,13 +155,14 @@ static void apply_o(const plan *ego_, R *I, R *O)
 	     writing to O: */
 	  {
 	       plan_rdft *cld = (plan_rdft *) ego->clde;
-	       if (inplace) {
-		    /* can't use I+is and O, subplan would lose in-placeness */
-		    cld->apply((plan *) cld, I + is, O + os);
+	       if (I == O) {
+		    /* can't use I+is and I, subplan would lose in-placeness */
+		    cld->apply((plan *) cld, I + is, I + is);
 		    /* we could maybe avoid this copy by modifying the
 		       twiddle loop, but currently I can't be bothered. */
+		    A(is >= os);
 		    for (i = 0; i < n2-1; ++i)
-			 O[os*i] = O[os*(i+1)];
+			 O[os*i] = I[is*(i+1)];
 	       }
 	       else
 		    cld->apply((plan *) cld, I + is, O);
@@ -252,6 +252,8 @@ static int applicable0(const solver *ego_, const problem *p_)
 		  && p->sz->dims[0].n % 2  /* odd: 4 divides "logical" DFT */
 		  && (p->I != p->O || p->vecsz->rnk == 0
 		      || p->vecsz->dims[0].is == p->vecsz->dims[0].os)
+		  && (p->kind[0] != RODFT00 || p->I != p->O || 
+		      p->sz->dims[0].is >= p->sz->dims[0].os) /* laziness */
 	       );
      }
 
@@ -271,6 +273,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      R *buf;
      int n, n0;
      opcnt ops;
+     int inplace_odd;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -285,16 +288,17 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      A(n > 0 && n % 2 == 0);
      buf = (R *) MALLOC(sizeof(R) * (n/2), BUFFERS);
 
+     inplace_odd = p->kind[0]==RODFT00 && p->I == p->O;
      clde = X(mkplan_d)(plnr, X(mkproblem_rdft_1_d)(
 			     X(mktensor_1d)(n0-n/2, 2*p->sz->dims[0].is, 
-					    p->sz->dims[0].os), 
+					    inplace_odd ? p->sz->dims[0].is
+					    : p->sz->dims[0].os), 
 			     X(mktensor_0d)(), 
 			     TAINT(p->I 
 				   + p->sz->dims[0].is * (p->kind[0]==RODFT00),
 				   p->vecsz->rnk ? p->vecsz->dims[0].is : 0),
 			     TAINT(p->O
-				   + p->sz->dims[0].os
-				   * (p->kind[0]==RODFT00 && p->I == p->O),
+				   + p->sz->dims[0].is * inplace_odd,
 				   p->vecsz->rnk ? p->vecsz->dims[0].os : 0),
 			     p->kind[0]));
      if (!clde) {
