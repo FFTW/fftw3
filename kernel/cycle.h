@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.38 2003-09-24 02:59:29 stevenj Exp $ */
+/* $Id: cycle.h,v 1.39 2003-09-24 03:25:52 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -151,6 +151,16 @@ static __inline__ ticks getticks(void)
 
 INLINE_ELAPSED(__inline__)
 
+#define HAVE_TICK_COUNTER
+#endif
+
+/* MacOS/Mach (Darwin) time-base register interface (unlike UpTime, below,
+   requires no additional libraries). */
+#if defined(HAVE_MACH_ABSOLUTE_TIME) && defined(HAVE_MACH_MACH_TIME_H) && !defined(HAVE_TICK_COUNTER)
+#include <mach/mach_time.h>
+typedef uint64_t ticks;
+#define getticks mach_absolute_time
+INLINE_ELAPSED(__inline__)
 #define HAVE_TICK_COUNTER
 #endif
 
