@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.1 2002-08-19 23:40:18 stevenj Exp $ */
+/* $Id: verify.c,v 1.2 2002-08-20 23:44:43 stevenj Exp $ */
 
 #include "reodft.h"
 #include <math.h>
@@ -450,6 +450,13 @@ static void really_verify(plan *pln, const problem_rdft *p,
 	      tst = cos00;
 	      tsf = cos01;
 	      break;
+	 case REDFT11:
+	      isL0t = isL0f = 1;
+	      isR0t = isR0f = -1;
+	      i0 = k0 = 0;
+	      ti = cos11; impulse_amp = 2.0;
+	      tst = tsf = cos01;
+	      break;
 	 case RODFT01:
 	      isR1t = 1;
 	      isL0f = isR0f = -1;
@@ -465,6 +472,13 @@ static void really_verify(plan *pln, const problem_rdft *p,
 	      ti = sin10; impulse_amp = 2.0;
 	      tst = cos00;
 	      tsf = cos01;
+	      break;
+	 case RODFT11:
+	      isL0t = isL0f = -1;
+	      isR0t = isR0f = 1;
+	      i0 = k0 = 0;
+	      ti = sin11; impulse_amp = 2.0;
+	      tst = tsf = cos01;
 	      break;
 	 default:
 	      A(0);

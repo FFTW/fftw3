@@ -249,7 +249,7 @@ void setup(struct problem *p)
 #if 1
 		    p->sign == FFT_SIGN ? R2HC : HC2R);
 #else
-                    RODFT01);
+                    RODFT11);
 #endif
      else {
 	  uint i, *npadr, *npadc;
@@ -301,6 +301,10 @@ void setup(struct problem *p)
 	  FFTW(printer_destroy)(pr);
      }
      AWAKE(pln, 1);
+#if 0
+     if (pln)
+          hook(pln, prblm);
+#endif
 }
 
 void doit(int iter, struct problem *p)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.2 2002-08-20 19:31:54 stevenj Exp $ */
+/* $Id: conf.c,v 1.3 2002-08-20 23:44:43 stevenj Exp $ */
 
 #include "reodft.h"
 
@@ -27,6 +27,7 @@ static const solvtab s =
      SOLVTAB(X(redft00e_r2hc_register)),
      SOLVTAB(X(rodft00e_r2hc_register)),
      SOLVTAB(X(reodft010e_r2hc_register)),
+     SOLVTAB(X(reodft11e_r2hc_register)),
 
      SOLVTAB_END
 };
