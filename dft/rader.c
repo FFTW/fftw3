@@ -357,8 +357,13 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
 
-     p->print(p, "(dft-rader-%u%ois=%oos=%(%p%)%(%p%))", 
-	      ego->n, ego->is, ego->os, ego->cld1, ego->cld2);
+     p->print(p, "(dft-rader-%u%ois=%oos=%(%p%)",
+	      ego->n, ego->is, ego->os, ego->cld1);
+     if (ego->cld2 != ego->cld1)
+	  p->print(p, "%(%p%)", ego->cld2);
+     if (ego->cld_omega != ego->cld1 && ego->cld_omega != ego->cld2)
+	  p->print(p, "%(%p%)", ego->cld_omega);
+     p->putchr(p, ')');
 }
 
 static void print_dit(plan *ego_, printer *p)
