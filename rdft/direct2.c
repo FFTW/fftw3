@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.2 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: direct2.c,v 1.3 2002-08-12 17:31:37 stevenj Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -55,9 +55,11 @@ typedef struct {
 static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
 {
      P *ego = (P *) ego_;
+     uint i, vl = ego->vl, ovs = ego->ovs;
      ego->k.r2hc(r, rio, iio, ego->is, ego->os, ego->os,
-		 ego->vl, ego->ivs, ego->ovs);
-     iio[0] = iio[ego->ilast] = 0;
+		 vl, ego->ivs, ovs);
+     for (i = 0; i < vl; ++i, iio += ovs)
+	  iio[0] = iio[ego->ilast] = 0;
 }
 
 static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
@@ -97,22 +99,25 @@ static int applicable(const solver *ego_, const problem *p_)
 
           return (
 	       1
+	       && p->sz.rnk == 1
 	       && p->vecsz.rnk <= 1
-	       && p->sz.n == ego->sz
+	       && p->sz.dims[0].n == ego->sz
 	       && p->kind == ego->kind
 
 	       /* check strides etc */
 	       && (!R2HC_KINDP(ego->kind) ||
 		   ego->desc.r2hc->genus->okp(ego->desc.r2hc, 
 					      p->r, p->rio, p->rio,
-					      p->sz.is,
-					      p->sz.os, p->sz.os,
+					      p->sz.dims[0].is,
+					      p->sz.dims[0].os,
+					      p->sz.dims[0].os,
 					      vl, ivs, ovs))
 	       && (!HC2R_KINDP(ego->kind) ||
 		   ego->desc.hc2r->genus->okp(ego->desc.hc2r,
 					      p->rio, p->rio, p->r,
-					      p->sz.os, p->sz.os,
-					      p->sz.is,
+					      p->sz.dims[0].is,
+					      p->sz.dims[0].is,
+					      p->sz.dims[0].os,
 					      vl, ivs, ovs))
 	       
 	       && (0
@@ -165,7 +170,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_RDFT2(P, &padt, r2hc_kindp ? apply_r2hc : apply_hc2r);
 
-     d = p->sz;
+     d = p->sz.dims[0];
      vd = p->vecsz.dims;
 
      pln->k = ego->k;

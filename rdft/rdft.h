@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.15 2002-08-05 18:17:58 stevenj Exp $ */
+/* $Id: rdft.h,v 1.16 2002-08-12 17:31:37 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -87,12 +87,13 @@ void X(rdft_nop_register)(planner *p);
 
 /****************************************************************************/
 /* problem2.c: */
-/* an RDFT2 problem transforms a 1d real array r[sz.n] with stride
-   sz.is to/from an "unpacked" complex array {rio,iio}[sz.n/2 + 1]
-   with stride sz.os.  vecsz has the usual interpretation.  */
+/* an RDFT2 problem transforms a 1d real array r[n] with stride is/os
+   to/from an "unpacked" complex array {rio,iio}[n/2 + 1] with stride
+   os/is.  Multidimensional transforms use complex DFTs for the
+   noncontiguous dimensions.  vecsz has the usual interpretation.  */
 typedef struct {
      problem super;
-     iodim sz;
+     tensor sz;
      tensor vecsz;
      R *r, *rio, *iio;
      rdft_kind kind; /* R2HC or HC2R */
@@ -101,9 +102,9 @@ typedef struct {
 int X(problem_rdft2_p)(const problem *p);
 #define RDFT2P X(problem_rdft2_p)  /* shorthand */
 
-problem *X(mkproblem_rdft2)(iodim sz, const tensor vecsz,
+problem *X(mkproblem_rdft2)(const tensor sz, const tensor vecsz,
 			    R *r, R *rio, R *iio, rdft_kind kind);
-problem *X(mkproblem_rdft2_d)(iodim sz, tensor vecsz,
+problem *X(mkproblem_rdft2_d)(tensor sz, tensor vecsz,
 			      R *r, R *rio, R *iio, rdft_kind kind);
 int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim);
 
@@ -134,6 +135,7 @@ solver *X(mksolver_rdft2_hc2r_direct)(khc2r k, const khc2r_desc *desc);
 void X(rdft2_vrank_geq1_register)(planner *p);
 void X(rdft2_buffered_register)(planner *p);
 void X(rdft2_nop_register)(planner *p);
+void X(rdft2_rank_geq2_register)(planner *p);
 
 /****************************************************************************/
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.3 2002-08-05 02:50:19 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.4 2002-08-12 17:31:37 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -151,15 +151,13 @@ static int applicable(const solver *ego_, const problem *p_, uint *dp)
      if (RDFT2P(p_)) {
           const S *ego = (const S *) ego_;
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  uint vdim;
 	  if (FINITE_RNK(p->vecsz.rnk)
 	      && p->vecsz.rnk > 0
-	      && (vdim = pickdim(ego, p->vecsz, 
-				 p->r != p->rio && p->r != p->iio, dp))) {
+	      && pickdim(ego,p->vecsz, p->r != p->rio && p->r != p->iio, dp)) {
 	       if (p->r != p->rio && p->r != p->iio)
 		    return 1;  /* can always operate out-of-place */
 
-	       return(X(rdft2_inplace_strides)(p, vdim));
+	       return(X(rdft2_inplace_strides)(p, *dp));
 	  }
      }
 
@@ -186,6 +184,25 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      if ((plnr->flags & FORCE_VRECURSE) && p->vecsz.rnk == 1)
 	  return UGLY;
 
+     /* Heuristic: if the transform is multi-dimensional, and the
+        vector stride is less than the transform size, then we
+        probably want to use a rank>=2 plan first in order to combine
+        this vector with the transform-dimension vectors. */
+     {
+          iodim *d = p->vecsz.dims + vdim;
+          if (1
+              && p->sz.rnk > 1
+              && X(imin)(d->is, d->os) < X(tensor_max_index)(p->sz)
+               )
+          return UGLY;
+     }
+
+     /* Heuristic: don't use a vrank-geq1 for rank-0 vrank-1
+        transforms, since this case is better handled by rank-0
+        solvers. */
+     if (p->sz.rnk == 0 && p->vecsz.rnk == 1)
+          return UGLY;
+
      return GOOD;
 }
 
@@ -211,7 +228,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (p->vecsz.rnk == 1 && (plnr->flags & CLASSIC_VRECURSE))
 	  plnr->flags &= ~CLASSIC_VRECURSE & ~FORCE_VRECURSE;
 
-     cldp = X(mkproblem_rdft2_d)(p->sz,
+     cldp = X(mkproblem_rdft2_d)(X(tensor_copy)(p->sz),
 				 X(tensor_copy_except)(p->vecsz, vdim),
 				 p->r, p->rio, p->iio, p->kind);
      cld = MKPLAN(plnr, cldp);

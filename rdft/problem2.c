@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.10 2002-08-06 17:35:28 athena Exp $ */
+/* $Id: problem2.c,v 1.11 2002-08-12 17:31:37 stevenj Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -28,20 +28,19 @@ static void destroy(problem *ego_)
 {
      problem_rdft2 *ego = (problem_rdft2 *) ego_;
      X(tensor_destroy)(ego->vecsz);
+     X(tensor_destroy)(ego->sz);
      X(free)(ego_);
 }
 
 static unsigned int hash(const problem *p_)
 {
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
-     tensor psz = {1, 0};
-     psz.dims = (iodim *) &p->sz;
      return (0xBEEFDEAD
 	     ^ ((p->r == p->rio) * 31)
 	     ^ ((p->r == p->iio) * 29)
 	     ^ ((p->iio - p->rio) * 23)
 	     ^ (p->kind * 37)
-	     ^ (X(tensor_hash)(psz) * 10487)
+	     ^ (X(tensor_hash)(p->sz) * 10487)
              ^ (X(tensor_hash)(p->vecsz) * 27197)
 	  );
 }
@@ -51,10 +50,6 @@ static int equal(const problem *ego_, const problem *problem_)
      if (ego_->adt == problem_->adt) {
           const problem_rdft2 *e = (const problem_rdft2 *) ego_;
           const problem_rdft2 *p = (const problem_rdft2 *) problem_;
-	  tensor psz = {1, 0};
-	  tensor esz = {1, 0};
-	  psz.dims = (iodim *) &p->sz;
-	  esz.dims = (iodim *) &e->sz;
 
           return (1
 
@@ -72,7 +67,7 @@ static int equal(const problem *ego_, const problem *problem_)
 
 		  && p->kind == e->kind
 
-		  && X(tensor_equal)(psz, esz)
+		  && X(tensor_equal)(p->sz, e->sz)
                   && X(tensor_equal)(p->vecsz, e->vecsz)
 	       );
      }
@@ -82,14 +77,12 @@ static int equal(const problem *ego_, const problem *problem_)
 static void print(problem *ego_, printer *p)
 {
      problem_rdft2 *ego = (problem_rdft2 *) ego_;
-     tensor psz = {1, 0};
-     psz.dims = &ego->sz;
      p->print(p, "(rdft2 %u %td %td %d %T %T)", 
 	      X(alignment_of)(ego->r),
 	      ego->rio - ego->r, 
 	      ego->iio - ego->r,
 	      (int)(ego->kind),
-	      &psz,
+	      &ego->sz,
 	      &ego->vecsz);
 }
 
@@ -108,8 +101,7 @@ static int scan(scanner *sc, problem **p)
 	  return 0;
      }
      r = X(ptr_with_alignment)(align);
-     *p = X(mkproblem_rdft2_d)(sz.dims[0], vecsz, r, r + offr, r + offi, kind);
-     X(tensor_destroy)(sz);
+     *p = X(mkproblem_rdft2_d)(sz, vecsz, r, r + offr, r + offi, kind);
      return 1;
 }
 
@@ -118,20 +110,16 @@ static void zero(const problem *ego_)
      const problem_rdft2 *ego = (const problem_rdft2 *) ego_;
      tensor sz;
      if (ego->kind == R2HC) {
-	  tensor psz = {1, 0};
-	  psz.dims = (iodim *) &ego->sz;
-	  sz = X(tensor_append)(ego->vecsz, psz);
+	  sz = X(tensor_append)(ego->vecsz, ego->sz);
 	  X(rdft_zerotens)(sz, ego->r);
      }
      else {
-	  iodim sz2;
-	  tensor psz2;
-	  psz2.rnk = 1;
-	  psz2.dims = &sz2;
-	  sz2 = ego->sz;
-	  sz2.n = sz2.n/2 + 1; /* ~half as many complex outputs */
-	  sz2.is = sz2.os; /* sz.os is complex stride */
-	  sz = X(tensor_append)(ego->vecsz, psz2);
+	  tensor sz2;
+	  sz2 = X(tensor_copy)(ego->sz);
+	  if (sz2.rnk > 0) /* ~half as many complex outputs */
+	       sz2.dims[0].n = sz2.dims[0].n / 2 + 1;
+	  sz = X(tensor_append)(ego->vecsz, sz2);
+	  X(tensor_destroy)(sz2);
 	  X(dft_zerotens)(sz, ego->rio, ego->iio);
      }
      X(tensor_destroy)(sz);
@@ -153,15 +141,13 @@ int X(problem_rdft2_p)(const problem *p)
      return (p->adt == &padt);
 }
 
-problem *X(mkproblem_rdft2)(iodim sz, const tensor vecsz,
-			   R *r, R *rio, R *iio, rdft_kind kind)
+problem *X(mkproblem_rdft2)(const tensor sz, const tensor vecsz,
+			    R *r, R *rio, R *iio, rdft_kind kind)
 {
      problem_rdft2 *ego =
           (problem_rdft2 *)X(mkproblem)(sizeof(problem_rdft2), &padt);
 
-     if (sz.n == 1)
-	  sz.is = sz.os = 0;
-     ego->sz = sz;
+     ego->sz = X(tensor_compress)(sz);
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->r = r;
      ego->rio = rio;
@@ -169,17 +155,18 @@ problem *X(mkproblem_rdft2)(iodim sz, const tensor vecsz,
      ego->kind = kind;
 
      A(kind == R2HC || kind == HC2R);
-     A(sz.n > 0);
+     A(FINITE_RNK(ego->sz.rnk));
      return &(ego->super);
 }
 
 /* Same as X(mkproblem_rdft2), but also destroy input tensors. */
-problem *X(mkproblem_rdft2_d)(iodim sz, tensor vecsz,
-			     R *r, R *rio, R *iio, rdft_kind kind)
+problem *X(mkproblem_rdft2_d)(tensor sz, tensor vecsz,
+			      R *r, R *rio, R *iio, rdft_kind kind)
 {
      problem *p;
      p = X(mkproblem_rdft2)(sz, vecsz, r, rio, iio, kind);
      X(tensor_destroy)(vecsz);
+     X(tensor_destroy)(sz);
      return p;
 }
 
@@ -196,17 +183,35 @@ static uint iabs(int i)
    exhaustive; we only return 1 for the most common case.  */
 int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim)
 {
+     uint N, Nc;
+     int is, os;
+
      if (!FINITE_RNK(p->vecsz.rnk) || p->vecsz.rnk == 0)
 	  return 1;
      if (!FINITE_RNK(vdim)) { /* check all vector dimensions */
 	  for (vdim = 0; vdim < p->vecsz.rnk; ++vdim)
-	       X(rdft2_inplace_strides)(p, vdim);
+	       if (!X(rdft2_inplace_strides)(p, vdim))
+		    return 0;
+	  return 1;
      }
+
      A(vdim < p->vecsz.rnk);
+     if (p->sz.rnk == 0)
+	  return(p->vecsz.dims[vdim].is == p->vecsz.dims[vdim].os);
+
+     N = X(tensor_sz)(p->sz);
+     Nc = (N / p->sz.dims[0].n) * (p->sz.dims[0].n/2 + 1);
+     if (p->kind == R2HC) {
+	  is = p->sz.dims[0].is;
+	  os = p->sz.dims[0].os;
+     }
+     else {
+	  is = p->sz.dims[0].os;
+	  os = p->sz.dims[0].is;
+     }
      return(p->vecsz.dims[vdim].is == p->vecsz.dims[vdim].os
 	    && iabs(p->vecsz.dims[vdim].os)
-	     >= X(uimax)((p->sz.n/2 + 1) * iabs(p->sz.os),
-			 p->sz.n * iabs(p->sz.is)));
+	    >= X(uimax)(Nc * iabs(os), N * iabs(is)));
 }
 
 void X(problem_rdft2_register)(planner *p)

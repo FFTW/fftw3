@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.17 2002-08-10 23:28:07 stevenj Exp $ */
+/* $Id: tensor.c,v 1.18 2002-08-12 17:31:37 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -78,7 +78,8 @@ tensor X(mktensor_2d)(uint n0, int is0, int os0,
      return x;
 }
 
-tensor X(mktensor_rowmajor)(uint rnk, const uint *n, const uint *nphys,
+tensor X(mktensor_rowmajor)(uint rnk, const uint *n,
+			    const uint *niphys, const uint *nophys,
                             int is, int os)
 {
      tensor x;
@@ -87,13 +88,13 @@ tensor X(mktensor_rowmajor)(uint rnk, const uint *n, const uint *nphys,
      if (FINITE_RNK(rnk) && rnk > 0) {
           uint i;
 
-          A(n && nphys);
+          A(n && niphys && nophys);
           x.dims[rnk - 1].is = is;
           x.dims[rnk - 1].os = os;
           x.dims[rnk - 1].n = n[rnk - 1];
           for (i = rnk - 1; i > 0; --i) {
-               x.dims[i - 1].is = x.dims[i].is * nphys[i];
-               x.dims[i - 1].os = x.dims[i].os * nphys[i];
+               x.dims[i - 1].is = x.dims[i].is * niphys[i];
+               x.dims[i - 1].os = x.dims[i].os * nophys[i];
                x.dims[i - 1].n = n[i - 1];
           }
      }

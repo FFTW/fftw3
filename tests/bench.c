@@ -93,6 +93,23 @@ void copy_c2h(struct problem *p, bench_complex *in)
 	  copy_c2h_unpacked(p, in, FFT_SIGN);
 }
 
+void copy_r2c(struct problem *p, bench_complex *out)
+{
+     if (!p->split)
+          copy_r2c_unpacked(p, out);
+     else
+          copy_r2c_packed(p, out);
+}
+
+void copy_c2r(struct problem *p, bench_complex *in)
+{
+     if (!p->split)
+          copy_c2r_unpacked(p, in);
+     else
+          copy_c2r_packed(p, in);
+}
+
+
 typedef struct {
      visit_closure super;
      int count;
@@ -214,30 +231,38 @@ void setup(struct problem *p)
      if (p->kind == PROBLEM_COMPLEX)
 	  prblm = 
 	       FFTW(mkproblem_dft_d)(
-		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, is, os),
-		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
+		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, p->n, is, os),
+		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn, p->vn,
 					     is * p->size, os * p->size), 
 		    ri, ii, ro, io);
      else if (p->split)
 	  prblm = 
 	       FFTW(mkproblem_rdft_d)(
-		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, is, os),
-		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
+		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, p->n, is, os),
+		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn, p->vn,
 					     is * p->size, os * p->size), 
 		    ri, ro, p->sign == FFT_SIGN ? R2HC : HC2R);
-     else if (p->rank == 1) {
-	  iodim sz = { 0, 1, 2 };
-	  sz.n = p->n[0];
+     else {
+	  uint i, *npadr, *npadc;
+	  npadr = (uint *) bench_malloc(p->rank * sizeof(uint));
+	  npadc = (uint *) bench_malloc(p->rank * sizeof(uint));
+	  for (i = 0; i < p->rank; ++i) npadr[i] = npadc[i] = p->n[i];
+	  if (p->rank > 0)
+	       npadr[p->rank-1] = 2*(npadc[p->rank-1] = npadr[p->rank-1]/2+1);
 	  prblm = 
 	       FFTW(mkproblem_rdft2_d)(
-		    sz,
-		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
+		    p->sign == FFT_SIGN
+		    ? FFTW(mktensor_rowmajor)(p->rank, p->n, npadr, npadc, 
+					      is, os)
+		    : FFTW(mktensor_rowmajor)(p->rank, p->n, npadc, npadr, 
+					      is, os),
+		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn, p->vn,
 					     is * p->size, os * p->size), 
 		    ri, ro, io, 
 		    p->sign == FFT_SIGN ? R2HC : HC2R);
+	  bench_free(npadc);
+	  bench_free(npadr);
      }
-     else
-	  BENCH_ASSERT(0);
      timer_start();
      pln = plnr->adt->mkplan(plnr, prblm);
      tplan = timer_stop();

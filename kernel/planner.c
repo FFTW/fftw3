@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.41 2002-08-06 14:32:53 athena Exp $ */
+/* $Id: planner.c,v 1.42 2002-08-12 17:31:37 stevenj Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -54,6 +54,7 @@ static void register_solver(planner *ego, solver *s)
 {
      if (s) { /* add s to end of solver list */
 	  slvpair *n;
+	  A(s);
 	  X(solver_use)(s);
 	  n = mkpair(s, ego->cur_reg_nam, ego->idcnt++);
 	  *ego->last_solver_cdr = n;

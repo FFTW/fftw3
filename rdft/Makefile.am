@@ -3,8 +3,8 @@ SUBDIRS = codelets
 
 noinst_LTLIBRARIES = librdft.la
 
-RDFT2 = buffered2.c direct2.c nop2.c plan2.c problem2.c solve2.c	\
-vrank-geq1-rdft2.c
+RDFT2 = buffered2.c direct2.c nop2.c rank-geq2-rdft2.c plan2.c	\
+problem2.c solve2.c vrank-geq1-rdft2.c
 
 librdft_la_SOURCES = dft-r2hc.c buffered.c codelet.h conf.c direct.c	\
 generic.c khc2hc-dif.c khc2hc-dit.c khc2r.c kr2hc.c hc2hc.c hc2hc.h	\

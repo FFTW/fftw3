@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.3 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.4 2002-08-12 17:31:37 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -221,7 +221,7 @@ static uint iabs(int i)
 
 static uint min_nbuf(const problem_rdft2 *p, uint n, uint vl)
 {
-     int ivs, ovs;
+     int is, os, ivs, ovs;
 
      if (p->r != p->rio && p->r != p->iio)
 	  return 1;
@@ -231,18 +231,22 @@ static uint min_nbuf(const problem_rdft2 *p, uint n, uint vl)
 
      if (R2HC_KINDP(p->kind)) {
 	  ivs =  p->vecsz.dims[0].is; /* real stride */
+	  is = p->sz.dims[0].is;
 	  ovs =  p->vecsz.dims[0].os; /* complex stride */
+	  os = p->sz.dims[0].os;
      }
      else {
 	  ivs =  p->vecsz.dims[0].os; /* real stride */
+	  is = p->sz.dims[0].os;
 	  ovs =  p->vecsz.dims[0].is; /* complex stride */
+	  os = p->sz.dims[0].is;
      }
      
      /* handle one potentially common case: "contiguous" real and
 	complex arrays, which overlap because of the differing sizes. */
-     if (n * iabs(p->sz.is) <= iabs(ivs)
-	 && (n/2 + 1) * iabs(p->sz.os) <= iabs(ovs)
-	 && iabs((int) (p->rio - p->iio)) <= iabs(p->sz.os)
+     if (n * iabs(is) <= iabs(ivs)
+	 && (n/2 + 1) * iabs(os) <= iabs(ovs)
+	 && iabs((int) (p->rio - p->iio)) <= iabs(os)
 	 && ivs > 0 && ovs > 0) {
 	  uint vsmin = X(uimin)(ivs, ovs);
 	  uint vsmax = X(uimax)(ivs, ovs);
@@ -283,7 +287,7 @@ static int applicable(const problem *p_, const S *ego)
      UNUSED(ego);
      if (RDFT2P(p_)) {
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  return(p->vecsz.rnk <= 1);
+	  return(p->vecsz.rnk <= 1 && p->sz.rnk == 1);
      }
      return 0;
 }
@@ -301,7 +305,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      if (p->r != p->rio && p->r != p->iio)
 	  return UGLY;
 
-     if (toobig(p->sz.n, ego))
+     if (toobig(p->sz.dims[0].n, ego))
 	 return UGLY;
 
      return GOOD;
@@ -328,7 +332,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(p_, ego))
           goto nada;
 
-     n = p->sz.n;
+     n = p->sz.dims[0].n;
      vl = X(tensor_sz)(p->vecsz);
 
      nbuf = X(uimax)(compute_nbuf(n, vl, ego), min_nbuf(p, n, vl));
@@ -357,13 +361,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (R2HC_KINDP(p->kind))
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, p->sz.is, 1),
+		    X(mktensor_1d)(n, p->sz.dims[0].is, 1),
 		    X(mktensor_1d)(nbuf, ivs, bufdist),
 		    p->r, bufs, p->kind);
      else
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, 1, p->sz.is),
+		    X(mktensor_1d)(n, 1, p->sz.dims[0].os),
 		    X(mktensor_1d)(nbuf, bufdist, ovs),
 		    bufs, p->r, p->kind);
      cld = MKPLAN(plnr, cldp);
@@ -375,13 +379,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (R2HC_KINDP(p->kind))
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, p->sz.is, 1),
+		    X(mktensor_1d)(n, p->sz.dims[0].is, 1),
 		    X(mktensor_1d)(vl % nbuf, ivs, bufdist),
 		    p->r, bufs, p->kind);
      else
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, 1, p->sz.is),
+		    X(mktensor_1d)(n, 1, p->sz.dims[0].os),
 		    X(mktensor_1d)(vl % nbuf, bufdist, ovs),
 		    bufs, p->r, p->kind);
      cldrest = MKPLAN(plnr, cldp);
@@ -402,13 +406,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (R2HC_KINDP(p->kind)) {
 	  pln->ivs = ivs * nbuf;
 	  pln->ovs = ovs;
+	  pln->os = p->sz.dims[0].os; /* stride of rio/iio  */
      }
      else {
 	  pln->ivs = ivs;
 	  pln->ovs = ovs * nbuf;
+	  pln->os = p->sz.dims[0].is; /* stride of rio/iio  */
      }
 
-     pln->os = p->sz.os; /* stride of rio/iio, for c2hc & hc2c */
 
      pln->nbuf = nbuf;
      pln->bufdist = bufdist;
