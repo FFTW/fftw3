@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.2 2002-06-02 23:49:03 athena Exp $ */
+/* $Id: ifftw.h,v 1.3 2002-06-03 12:09:05 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -42,8 +42,14 @@ typedef struct solver_s solver;
 typedef struct planner_s planner;
 
 /* assert.c: */
-#ifdef FFTW_DEBUG
 extern void fftw_assertion_failed(const char *s, int line, char *file);
+
+/* always check */
+#define CK(ex)						 \
+      (void)((ex) || (fftw_assertion_failed(#ex, __LINE__, __FILE__), 0))
+
+#ifdef FFTW_DEBUG
+/* check only if debug enabled */
 #define A(ex)						 \
       (void)((ex) || (fftw_assertion_failed(#ex, __LINE__, __FILE__), 0))
 #else
@@ -161,6 +167,8 @@ problem *fftw_problem_dup(problem *ego);
 
 /* plan.c: */
 typedef int (*plan_printf)(const char *format, ...);
+
+enum awake { SLEEP, AWAKE };
 
 typedef struct {
      void (*solve)(plan *ego, const problem *p);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.2 2002-06-02 23:49:03 athena Exp $ */
+/* $Id: problem.c,v 1.3 2002-06-03 12:09:05 athena Exp $ */
 
 #include "dft.h"
 
@@ -97,7 +97,7 @@ problem *fftw_mkproblem_dft(const tensor sz, const tensor vecsz,
 	  (problem_dft *)fftw_mkproblem(sizeof(problem_dft), &padt);
 
      /* both in place or both out of place */
-     A((ri == ro) == (ii == io));
+     CK((ri == ro) == (ii == io));
 
      ego->sz = fftw_tensor_compress(sz);
      ego->vecsz = fftw_tensor_compress_contiguous(vecsz);

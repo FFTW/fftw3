@@ -17,6 +17,7 @@ NAMES: keep them short.  Shorter than you think.  The Bible was written
    ri, ii  : real/imag input 
    ro, io  : real/imag output
    A       : assert
+   CK      : check
    S       : solver, defined internally to each solver file
    P       : plan, defined internally to each solver file
    k       : codelet

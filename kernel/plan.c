@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.1.1.1 2002-06-02 18:42:32 athena Exp $ */
+/* $Id: plan.c,v 1.2 2002-06-03 12:09:05 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -45,6 +45,8 @@ void fftw_plan_use(plan *ego)
  */
 void fftw_plan_destroy(plan *ego)
 {
-     if ((--ego->refcnt) == 0)
+     if ((--ego->refcnt) == 0) {
+	  A(ego->adt->destroy);
 	  ego->adt->destroy(ego);
+     }
 }

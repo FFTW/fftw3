@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.1.1.1 2002-06-02 18:42:31 athena Exp $ */
+/* $Id: alloc.c,v 1.2 2002-06-03 12:09:05 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -205,7 +205,7 @@ void *fftw_malloc_plain(size_t n)
      if (n == 0)
 	  n = 1;
      p = malloc(n);
-     A(p);
+     CK(p);
      return p;
 }
 
