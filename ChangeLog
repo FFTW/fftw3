@@ -1,3 +1,622 @@
+2002-08-27  Matteo Frigo  <athena@ab-initio>
+
+	* dft/rank0.c: Loop unroll is useless
+
+	* dft/ct-ditbuf.c: Use indexed addressing
+
+2002-08-26  Matteo Frigo  <athena@ab-initio>
+
+	* dft/vrank2-transpose.c, dft/vrank3-transpose.c: Use indexed
+	addressing in transpose routines.  (Seems to be slightly better on
+	athlon.)
+
+2002-08-26  Steven G. Johnson  <stevenj@ab-initio>
+
+	* reodft/redft00e-r2hc.c, reodft/reodft11e-r2hc.c,
+	reodft/rodft00e-r2hc.c: added comment about stability
+
+2002-08-26  Matteo Frigo  <athena@ab-initio>
+
+	* rdft/rdft2-radix2.c: Approximate opcount
+
+	* dft/rank-geq2.c, rdft/rank-geq2.c, rdft/rdft2-radix2.c: Finished
+	rdft2 via dft/rdft
+
+2002-08-26  Steven G. Johnson  <stevenj@ab-initio>
+
+	* TODO: some updates
+
+	* rdft/dft-r2hc.c, rdft/direct.c, rdft/generic.c, rdft/hc2hc.c,
+	rdft/indirect.c, rdft/problem.c, rdft/r2hc-hc2r.c,
+	rdft/rader-dht.c, rdft/rader-hc2hc.c, rdft/rank-geq2.c,
+	rdft/rdft.h, rdft/rdft2-radix2.c, rdft/verify.c,
+	reodft/redft00e-r2hc.c, reodft/reodft010e-r2hc.c,
+	reodft/reodft11e-r2hc.c, reodft/rodft00e-r2hc.c, reodft/verify.c,
+	tests/bench.c, rdft/Makefile.am, rdft/buffered.c,
+	rdft/buffered2.c, rdft/conf.c: rdft kind is now per-dimension,
+	added rdft/rank-geq2
+
+	* rdft/problem.c: added note
+
+	* rdft/problem.c: must zero real sz
+
+	* dft/rank-geq2.c, dft/vrank-geq1.c, kernel/Makefile.am,
+	kernel/ifftw.h, kernel/pickdim.c, rdft/vrank-geq1-rdft2.c,
+	rdft/vrank-geq1.c, tests/bench.c: unified pickdim funcs
+
+2002-08-25  FFTW Maintainers  <fftw@ab-initio>
+
+	* libbench/mp.c, rdft/codelet.h, rdft/indirect.c,
+	rdft/rank-geq2-rdft2.c, rdft/verify.c, reodft/reodft010e-r2hc.c,
+	reodft/reodft11e-r2hc.c, reodft/verify.c: silence warnings
+
+2002-08-25  Matteo Frigo  <athena@ab-initio>
+
+	* dft/codelet.h, dft/codelets/n.c, dft/codelets/t.c, dft/ct-dif.c,
+	dft/ct-dit.c, dft/ct-ditbuf.c, dft/ct-ditf.c, dft/direct.c,
+	dft/simd/n1b.c, dft/simd/n1f.c, dft/simd/t1b.c, dft/simd/t1f.c,
+	dft/vrank-geq1.c, kernel/ifftw.h, rdft/vrank-geq1-rdft2.c,
+	rdft/vrank-geq1.c: I had to add another planner flag to record
+	whether pointers could become unaligned because of vrank-geq1
+	solvers (these solvers only plan the first element of a vector
+	problem, but the second element may have a different alignment).
+	This addition is ugly, but I don't see any way around it.
+
+	* TODO: Added thoughts
+
+	* rdft/Makefile.am, rdft/conf.c, rdft/rdft.h, rdft/rdft2-dft.c,
+	rdft/rdft2-radix2.c: Implemented rdft2 via vector rdft + radix2
+	step
+
+2002-08-24  Matteo Frigo  <athena@ab-initio>
+
+	* rdft/rdft2-dft.c: Stylistic changes
+
+	* dft/ct.c, dft/generic.c, kernel/ifftw.h, kernel/twiddle.c,
+	rdft/generic.c, rdft/rdft2-dft.c, reodft/redft00e-r2hc.c,
+	reodft/reodft010e-r2hc.c, reodft/reodft11e-r2hc.c,
+	reodft/rodft00e-r2hc.c: Simplified mktwiddle interface
+
+	* dft/ct-dif.c, dft/ct-dit.c, dft/ct.c, dft/ct.h, kernel/ifftw.h,
+	kernel/tensor.c, rdft/hc2hc-dif.c, rdft/hc2hc-dit.c, rdft/hc2hc.c,
+	rdft/hc2hc.h, rdft/rdft2-dft.c: Unification of certain vector
+	computations.  rdft2-dft is now a vector transform.
+
+	* configure.ac, simd/sse.c, simd/sse2.c: Intel compiler seems to
+	be still buggy
+
+2002-08-23  Matteo Frigo  <athena@ab-initio>
+
+	* dft/ct-dif.c, dft/ct-dit.c, dft/ct-ditbuf.c, dft/ct-ditf.c,
+	dft/ct.c, dft/ct.h, dft/generic.c, dft/indirect.c, kernel/ifftw.h,
+	kernel/twiddle.c, rdft/generic.c, rdft/hc2hc.c, rdft/rdft2-dft.c,
+	reodft/redft00e-r2hc.c, reodft/reodft010e-r2hc.c,
+	reodft/reodft11e-r2hc.c, reodft/rodft00e-r2hc.c: Streamlined
+	twiddle protocol
+
+	* libbench/verify.c, rdft/Makefile.am, rdft/conf.c, rdft/rdft.h,
+	rdft/rdft2-dft.c: Implemented rdft2 via dft (forward only for now)
+
+2002-08-22  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/verify-lib.c, libbench/verify.c: More cleanup of verify
+
+	* kernel/verify-lib.c: Changed error criterion because old one was
+	too strict
+
+	* bootstrap.sh: Disable shared
+
+	* TODO: Added thoughts
+
+	* dft/generic.c: Oops
+
+	* dft/generic.c, kernel/alloc.c, kernel/planner-score.c,
+	kernel/tensor.c: Do not use inline.  Minor changes.
+
+2002-08-21  Steven G. Johnson  <stevenj@ab-initio>
+
+	* tests/bench.c: more commented flags
+
+2002-08-20  Steven G. Johnson  <stevenj@ab-initio>
+
+	* reodft/Makefile.am, reodft/conf.c, reodft/reodft11e-r2hc.c,
+	reodft/verify.c, tests/bench.c: added DCT-IV and DST-IV
+
+2002-08-20  Matteo Frigo  <athena@ab-initio>
+
+	* genfft/twiddle.ml: Slight improvement in twiddle scheme
+
+2002-08-20  Steven G. Johnson  <stevenj@ab-initio>
+
+	* reodft/conf.c, reodft/reodft.h, reodft/reodft010e-r2hc.c: name
+	fix
+
+	* reodft/reodft010e-r2hc.c: removed extraneous variable
+
+2002-08-20  Matteo Frigo  <athena@ab-initio>
+
+	* libbench/mp.c, libbench/verify.c: Oops
+
+	* genfft/twiddle.ml, kernel/trig.c: Still playing around
+
+2002-08-19  Matteo Frigo  <athena@ab-initio>
+
+	* TODO, genfft/algsimp.ml, genfft/expr.ml, genfft/expr.mli,
+	genfft/twiddle.ml, support/addchain.c: Playing around with
+	addition chain
+
+2002-08-19  Steven G. Johnson  <stevenj@ab-initio>
+
+	* reodft/redft00e-r2hc.c, reodft/rodft00e-r2hc.c: comments
+
+	* reodft/reodft010e-r2hc.c: comment fixes
+
+	* Makefile.am, configure.ac, dft/dft.h, rdft/rdft.h,
+	reodft/Makefile.am, reodft/conf.c, reodft/redft00e-r2hc.c,
+	reodft/reodft.h, reodft/reodft010e-r2hc.c, reodft/rodft00e-r2hc.c,
+	reodft/verify.c, tests/Makefile.am, tests/bench.c: added reodft
+	stuff
+
+2002-08-18  Matteo Frigo  <athena@ab-initio>
+
+	* libbench/Makefile.am, libbench/verify.c: Sync with nbenchfft
+
+	* genfft/complex.ml, genfft/complex.mli, genfft/twiddle.ml:
+	Economy of thought
+
+2002-08-17  Steven G. Johnson  <stevenj@ab-initio>
+
+	* support/Makefile.am: distribute addchain.c
+
+2002-08-17  Matteo Frigo  <athena@ab-initio>
+
+	* support/addchain.c: Nothing serious
+
+	* genfft/twiddle.ml, support/addchain.c: New twiddle policy
+	(disabled for now)
+
+2002-08-17  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/rank-geq2-rdft2.c: bug fix for hc2r (must use inverse dft)
+
+2002-08-17  Matteo Frigo  <athena@ab-initio>
+
+	* dft/codelets/inplace/Makefile.am,
+	dft/codelets/standard/Makefile.am, genfft/twiddle.ml,
+	rdft/codelets/hc2r/Makefile.am, rdft/codelets/r2hc/Makefile.am:
+	New log3 twiddle policy
+
+2002-08-16  Matteo Frigo  <athena@ab-initio>
+
+	* dft/verify.c, kernel/verify-lib.c, kernel/verify.h,
+	rdft/verify.c: More verify cleanup
+
+	* rdft/verify.c: Oops
+
+	* dft/verify.c, kernel/Makefile.am, kernel/verify-lib.c,
+	kernel/verify.h, rdft/verify.c: Economy of thought (and code)
+
+	* TODO: Added comment
+
+	* libbench/mp.c: Cleaner rounding algorithm
+
+	* libbench/mp.c: Can get away with shorter length in bluestein (I
+	think).
+
+	* libbench/mp.c: Portability improvements
+
+	* libbench/bench-main.c, libbench/bench.h, libbench/verify.c:
+	Optionally average accuracy test over many rounds
+
+	* dft/rader.c, rdft/rader-dht.c, rdft/rader-hc2hc.c: More accurate
+	formula for trig tables
+
+	* libbench/mp.c, libbench/verify.c: Implemented accuracy test for
+	all integers
+
+2002-08-15  Matteo Frigo  <athena@ab-initio>
+
+	* libbench/mp.c: inv, neg: make static
+
+	* libbench/verify.c: Verify was not complete for real transforms
+
+	* libbench/verify.c: Oops
+
+	* genfft/gen_hc2hc.ml, libbench/verify.c: Fixed hb codelets
+
+	* dft/codelets/inplace/Makefile.am,
+	dft/codelets/standard/Makefile.am, rdft/codelets/r2hc/Makefile.am:
+	Changed twiddle policy
+
+2002-08-15  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/direct2.c: whoops
+
+2002-08-15  Matteo Frigo  <athena@ab-initio>
+
+	* libbench/Makefile.am, tests/Makefile.am: No point in libbench
+	being a shared library
+
+	* libbench/Makefile.am, libbench/bench-main.c, libbench/bench.h,
+	libbench/mp.c, libbench/util.c, libbench/verify.c,
+	tests/Makefile.am, tests/accuracy.c, tests/mp.c: Moved accuracy
+	test to libbench
+
+2002-08-14  Matteo Frigo  <athena@ab-initio>
+
+	* tests/accuracy.c: Modified accuracy test
+
+	* tests/accuracy.c, tests/mp.c: Fixes for long double
+
+	* tests/accuracy.c: Normalize input
+
+	* tests/accuracy.c: Oops
+
+	* tests/accuracy.c: Also compute relative error
+
+	* tests/accuracy.c: Loop over N
+
+	* tests/Makefile.am, tests/accuracy.c, tests/mp.c: simple-minded
+	accuracy test
+
+2002-08-14  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/rank-geq2-rdft2.c: whoops
+
+2002-08-13  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/trig.c: fma() stuff is too nonportable, removed
+
+2002-08-12  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/problem.c: slight fix
+
+	* rdft/problem.c: use table for rdft_kind_str
+
+	* rdft/problem2.c: slight fixes
+
+	* kernel/ifftw.h, kernel/planner.c, kernel/tensor.c,
+	rdft/Makefile.am, rdft/buffered2.c, rdft/conf.c, rdft/direct2.c,
+	rdft/nop2.c, rdft/problem2.c, rdft/rdft.h,
+	rdft/vrank-geq1-rdft2.c, tests/bench.c: multidimensional rdft2
+
+2002-08-10  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/indirect.c: use tensor_copy_inplace
+
+	* dft/rank-geq2.c: bugfix, use tensor_copy_inplace
+
+	* dft/indirect.c: use tensor_copy_inplace
+
+	* kernel/ifftw.h, kernel/tensor.c: added tensor_copy_inplace
+
+	* kernel/twiddle.c: fixed trig-function table type
+
+2002-08-10  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/trig.c, tests/trigtest.c: Improved trig scheme
+
+	* tests/trigtest.c: Allow for testing using long double instead of
+	pari
+
+	* kernel/trig.c, tests/trigtest.c: Yet another trig scheme.
+
+	* kernel/trig.c, tests/trigtest.c: Yet another scheme
+
+	* kernel/ifftw.h, kernel/trig.c, tests/trigtest.c: Careful with
+	overflow
+
+	* kernel/ifftw.h, kernel/trig.c, tests/trigtest.c: Avoid overflow
+
+2002-08-09  Matteo Frigo  <athena@ab-initio>
+
+	* dft/rader.c, dft/verify.c, kernel/ifftw.h, kernel/trig.c,
+	kernel/twiddle.c, rdft/rader-dht.c, rdft/rader-hc2hc.c,
+	rdft/verify.c, tests/trigtest.c: New(er) trig routines
+
+	* tests/bench.c: Oops
+
+	* tests/trigtest.c: New file
+
+	* TODO: Commented about likely gcc bug
+
+	* dft/rader.c, dft/verify.c, kernel/Makefile.am, kernel/ifftw.h,
+	kernel/trig.c, kernel/twiddle.c, rdft/rader-dht.c,
+	rdft/rader-hc2hc.c, rdft/verify.c, tests/bench.c: Improved
+	accuracy of twiddle factors
+
+2002-08-08  Matteo Frigo  <athena@ab-initio>
+
+	* simd/simd-3dnow.h: Wrong comment
+
+2002-08-07  Matteo Frigo  <athena@ab-initio>
+
+	* configure.ac, genfft/gen_notw_c.ml, genfft/gen_twiddle_c.ml,
+	kernel/ifftw.h, simd/3dnow.c, simd/Makefile.am, simd/simd-3dnow.h,
+	simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h,
+	simd/simd.h: Experimental 3dnow port using gcc, to compare it with
+	Stefan's stuff.
+
+	* genfft/c.ml, kernel/ifftw.h: End of AREF experiment
+
+	* configure.ac: Oops
+
+	* configure.ac: Pathetic attempt to reduce size of configure
+	script
+
+	* genfft/c.ml, kernel/ifftw.h: Changed array syntax for
+	experiments.
+
+2002-08-06  Matteo Frigo  <athena@ab-initio>
+
+	* simd/simd-sse2.h: Fix warning
+
+	* dft/problem.c, kernel/align.c, kernel/ifftw.h, rdft/problem.c,
+	rdft/problem2.c: Move nonportable stuff in one place.
+
+	* kernel/planner.c: Economy of thought: I didn't like having two
+	algorithms for removing solutions, both correct.  At least now we
+	have the same algorithm copied twice.
+
+	* TODO: Added things to do
+
+2002-08-05  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/ifftw.h, kernel/planner.c: improved interaction of
+	planner with patience flags
+
+	* rdft/buffered.c, rdft/codelet.h, rdft/indirect.c,
+	rdft/problem.c, rdft/rader-hc2hc.c, rdft/rdft.h, tests/bench.c:
+	set up for real-even/odd DFTs, where n is not the size of the data
+
+	* dft/ct-dif.c, dft/ct-dit.c, dft/ct-ditbuf.c, dft/ct-ditf.c,
+	dft/ct.c, dft/ct.h, kernel/ifftw.h, rdft/hc2hc-buf.c,
+	rdft/hc2hc-dif.c, rdft/hc2hc-dit.c, rdft/hc2hc.c, rdft/hc2hc.h,
+	rdft/r2hc-hc2r.c, tests/bench.c: DESTROY_INPUT flag
+
+	* dft/rank-geq2.c, dft/vrank-geq1.c, kernel/ifftw.h,
+	kernel/planner.c, rdft/dft-r2hc.c, rdft/vrank-geq1-rdft2.c,
+	rdft/vrank-geq1.c, tests/bench.c: CLASSIC -> IMPATIENT
+
+2002-08-04  Matteo Frigo  <athena@ab-initio>
+
+	* genfft-k7/Makefile.am, genfft/Makefile.am: Require make
+	maintainer-clean to remove the generator, as opposed to make
+	clean.  In this way we can type make clean without regenerating
+	all codelets.
+
+2002-08-04  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/planner.c: ESTIMATE plans are not blessed
+
+	* kernel/ifftw.h, kernel/planner.c: use flags in wisdom
+
+	* dft/buffered.c, dft/ct-dif.c, dft/ct-dit.c, dft/ct-ditbuf.c,
+	dft/ct-ditf.c, dft/direct.c, dft/generic.c, dft/indirect.c,
+	dft/nop.c, dft/rader.c, dft/rank-geq2.c, dft/rank0.c,
+	dft/vrank-geq1.c, dft/vrank2-transpose.c, dft/vrank3-transpose.c,
+	kernel/ifftw.h, kernel/planner-score.c, kernel/tensor.c,
+	rdft/buffered.c, rdft/buffered2.c, rdft/dft-r2hc.c, rdft/direct.c,
+	rdft/direct2.c, rdft/generic.c, rdft/hc2hc-buf.c,
+	rdft/hc2hc-dif.c, rdft/hc2hc-dit.c, rdft/indirect.c, rdft/nop.c,
+	rdft/nop2.c, rdft/r2hc-hc2r.c, rdft/rader-dht.c,
+	rdft/rader-hc2hc.c, rdft/rank0.c, rdft/vrank-geq1-rdft2.c,
+	rdft/vrank-geq1.c, rdft/vrank2-transpose.c,
+	rdft/vrank3-transpose.c, tests/bench.c: score now takes plnr, not
+	flags, as arg
+
+	* acinclude.m4: align initial stack in alignment check, which
+	should now pass for gcc 3.1.1
+
+2002-08-04  Matteo Frigo  <athena@ab-initio>
+
+	* acinclude.m4: Detect ultrasparc (sort of)
+
+2002-08-03  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/codelet.h: added solvtab_rdft_r2r placeholder
+
+2002-08-03  Matteo Frigo  <athena@ab-initio>
+
+	* support/Makefile.codelets: Damn solaris
+
+2002-08-03  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/problem.c: use E extended precision in solvers
+
+	* rdft/codelet.h: an alternative notation for D{C,S}T: DXTio,
+	where i/o are {0,1} according to whether the input/output are
+	shifted, respectively.  Alternatively, io is the binary
+	representation of the usual DXT-{I,II,III,IV} nomenclature, minus
+	1.
+
+	* dft/generic.c, dft/rader.c, rdft/generic.c, rdft/r2hc-hc2r.c,
+	rdft/rader-dht.c: use E extended precision in solvers
+
+2002-08-03  Matteo Frigo  <athena@ab-initio>
+
+	* configure.ac, kernel/cycle.h, kernel/planner.c, rdft/problem2.c:
+	More portability fixes, compiler bugs workarounds, etc.
+
+	* configure.ac, kernel/cycle.h, kernel/ifftw.h: More portability
+	work
+
+	* acinclude.m4, configure.ac, kernel/cycle.h, kernel/ifftw.h,
+	support/Makefile.codelets: Improved portability, removed gnu make
+	dependencies
+
+	* TODO: Remember to thank XXX
+
+2002-08-02  Matteo Frigo  <athena@ab-initio>
+
+	* simd/simd-altivec.h: Multiplication on altivec requires FMA with
+	-0.0 to be IEEE754 compliant.
+
+	* genfft/c.ml, kernel/ifftw.h: Allow for extended precision in
+	codelets
+
+	* dft/codelets/inplace/Makefile.am: Shortened names
+
+2002-08-02  Steven G. Johnson  <stevenj@ab-initio>
+
+	* TODO, rdft/codelet.h, rdft/problem.c: added infrastructure for
+	future r2r transforms
+
+2002-08-02  Matteo Frigo  <athena@ab-initio>
+
+	* Makefile.am, configure.ac: Version info
+
+	* dft/codelets/inplace/Makefile.am,
+	dft/codelets/standard/Makefile.am, dft/k7/codelets/Makefile.am,
+	dft/simd/codelets/Makefile.am, kernel/align.c,
+	rdft/codelets/hc2r/Makefile.am, rdft/codelets/r2hc/Makefile.am:
+	Listened to one customer and added radix-12.  Added radix-15 for
+	consistency (whatever that is)
+
+2002-08-01  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/cycle.h: whoops again, fixed the wrong line
+
+	* kernel/cycle.h: whoops
+
+	* configure.ac, kernel/planner.c: use new AC_INIT and add VERSION
+	to wisdom
+
+	* kernel/scan.c: mygetR -> getR
+
+	* dft/problem.c, kernel/planner.c, kernel/scan.c, kernel/tensor.c,
+	rdft/problem.c, rdft/problem2.c, tests/bench.c: scanner cleanups:
+	just return 0/1, simplify integer reads
+
+2002-08-01  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/align.c: Reverted back to casting pointer to ulong
+
+	* kernel/ifftw.h: Cast to unsigned long, not long
+
+2002-08-01  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/scan.c: additional comment
+
+	* kernel/scan.c: added comment
+
+	* dft/conf.c, dft/dft.h, dft/problem.c, dft/verify.c,
+	kernel/Makefile.am, kernel/alloc.c, kernel/assert.c,
+	kernel/debug.c, kernel/ifftw.h, kernel/planner.c, kernel/print.c,
+	kernel/printers.c, kernel/problem.c, kernel/scan.c,
+	kernel/scanners.c, kernel/tensor.c, kernel/timer.c, rdft/conf.c,
+	rdft/problem.c, rdft/problem2.c, rdft/rdft.h, rdft/verify.c,
+	tests/bench.c: added wisdom import
+
+	* kernel/align.c: whoops
+
+	* dft/problem.c, rdft/problem.c, rdft/problem2.c: use %u for
+	alignment_of
+
+	* kernel/align.c: ptrdiff_t form
+
+2002-08-01  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/ifftw.h: Cast to avoid warning from C++ compiler
+
+2002-07-31  Matteo Frigo  <athena@ab-initio>
+
+	* dft/problem.c, kernel/Makefile.am, kernel/align.c,
+	kernel/ifftw.h, rdft/problem.c, rdft/problem2.c, simd/simd.h: Make
+	problem equality depend on alignments.
+
+	* dft/simd/codelets/Makefile.am: Shorter names
+
+	* simd/simd-sse.h: Oops
+
+	* simd/simd-sse.h: Fix warning
+
+	* kernel/alloc.c, kernel/ifftw.h, kernel/planner-naive.c,
+	kernel/planner-score.c, kernel/planner.c: Removed silly
+	abstraction barrier.  Also, cons() terminology was no longer
+	appropriate.
+
+2002-07-31  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/ifftw.h, kernel/planner.c, kernel/solvtab.c: removed
+	register_registrar and solvtab_exec_reverse hacks
+
+2002-07-30  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/planner.c: register_registrar doesn't search whole solver
+	list (maybe we should change register_solver instead)
+
+	* kernel/cycle.h: credit
+
+	* kernel/cycle.h: added HP/UX ia64 support, courtesy of Teresa
+	L. Johnson
+
+2002-07-30  Matteo Frigo  <athena@ab-initio>
+
+	* dft/simd/n1b.c, dft/simd/n1f.c, dft/simd/t1b.c, dft/simd/t1f.c,
+	kernel/alloc.c: Fixed alignment checks
+
+2002-07-30  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/ifftw.h, kernel/planner.c, kernel/solvtab.c: ugh, wisdom
+	id fixes in exprt_conf
+
+	* kernel/ifftw.h, kernel/planner.c, tests/bench.c:
+	exprt_registrars -> exprt_conf, added missing SOLVTAB_END
+
+	* kernel/planner.c: exprt_registrars should output self-contained
+	configuration
+
+	* dft/conf.c, kernel/ifftw.h, kernel/planner.c, kernel/solvtab.c,
+	rdft/conf.c, support/Makefile.codelets, tests/bench.c: added
+	exprt_registrars
+
+	* kernel/print.c: whoops
+
+2002-07-30  Matteo Frigo  <athena@ab-initio>
+
+	* dft/simd/n1b.c, dft/simd/n1b.h, dft/simd/n1f.c, dft/simd/n1f.h,
+	dft/simd/t1b.c, dft/simd/t1b.h, dft/simd/t1f.c, dft/simd/t1f.h,
+	simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h,
+	simd/simd.h: More stringent requirements on strides for SIMD
+	codelets
+
+2002-07-30  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/buffered2.c: remove warning
+
+	* rdft/problem.c, rdft/problem2.c, dft/problem.c, kernel/print.c,
+	kernel/traverse.c: use %td for ptrdiff_t and %T for tensors
+
+2002-07-29  Matteo Frigo  <athena@ab-initio>
+
+	* dft/buffered.c: Fix for SIMD
+
+	* kernel/ifftw.h: Missing lfftw_mkstride and lfftw_stride_destroy
+
+	* simd/simd-altivec.h: Implement LDA/STA
+
+	* dft/simd/n1b.c, dft/simd/n1f.c, dft/simd/t1b.c, dft/simd/t1f.c, simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h, simd/simd.h:
+	More SIMD work
+
+	* simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h: Cleanup
+
+2002-07-29  Steven G. Johnson  <stevenj@ab-initio>
+
+	* ChangeLog: update
+
+2002-07-29  Matteo Frigo  <athena@ab-initio>
+
+	* dft/simd/n1b.c, dft/simd/n1f.c, dft/simd/t1b.c, dft/simd/t1f.c, simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h:
+	Also check strides in SIMD codelets
+
+	* simd/simd-altivec.h:
+	Minor changes, mostly for consistency with the big-endian processor
+
+2002-07-29  Steven G. Johnson  <stevenj@ab-initio>
+
+	* rdft/rader-dht.c: added comment
+
 2002-07-29  Matteo Frigo  <athena@ab-initio>
 
 	* dft/simd/n1b.c, dft/simd/n1f.c, dft/simd/t1b.c, dft/simd/t1f.c,
