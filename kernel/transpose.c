@@ -64,12 +64,12 @@ static int gcd(int a, int b)
      return a;
 }
 
-/* all of the solvers need to extract n, m, d, n/d, and m/d from the
+/* all of the solvers need to extract n, m, d, n/d, m/d, and nbuf from the
    two iodims, so we put it here to save code space */
 void X(transpose_dims)(const iodim *a, const iodim *b,
-		       int *n, int *m, int *d, int *nd, int *md)
+		       int *n, int *m, int *d, int *nd, int *md, int *nbuf)
 {
-     int n0, m0, d0;
+     int n0, m0, d0, diff;
      /* matrix should be n x m, row-major */
      if (a->is < b->is) {
 	  *n = n0 = b->n;
@@ -79,9 +79,20 @@ void X(transpose_dims)(const iodim *a, const iodim *b,
 	  *n = n0 = a->n;
 	  *m = m0 = b->n;
      }
-     *d = d0 = gcd(n0, m0);
-     *nd = n0 / d0;
-     *md = m0 / d0;
+     d0 = gcd(n0, m0);
+     diff = n0 > m0 ? n0 - m0 : m0 - n0;
+     if (diff * d0 < X(imax)(n0, m0)) {
+	  *nd = n0;
+	  *md = m0;
+	  *d = 0;
+	  *nbuf = diff * X(imin)(n0, m0);
+     }
+     else {
+	  *nd = n0 / d0;
+	  *md = m0 / d0;
+	  *d = d0;
+	  *nbuf = *nd * *md * d0;
+     }
 }
 
 /* use the simple square transpose in the solver for square matrices
@@ -99,8 +110,9 @@ int X(transpose_simplep)(const iodim *a, const iodim *b, int vl, int s,
    (FIXME: use the CONSERVE_MEMORY flag?) */
 int X(transpose_slowp)(const iodim *a, const iodim *b, int N)
 {
-     int d = gcd(a->n, b->n);
-     return (d < 8 && (a->n * b->n * N) / d > 65536);
+     int n, m, d, nd, md, nbuf;
+     X(transpose_dims)(a, b, &n, &m, &d, &nd, &md, &nbuf);
+     return (nbuf * N > 65536 && nbuf * 8 > n * m); 
 }
 
 /*************************************************************************/
@@ -273,12 +285,44 @@ static void rec_transpose_sq_ip_Ntuple(R *A, int n, int fda, int N)
 }
 
 /*************************************************************************/
+
+/* Convert an n x n square matrix A between "packed" (n x n) and
+   "unpacked" (n x fda) formats.  The "padding" elements at the ends
+   of the rows are not preserved. */
+
+static void pack(R *A, int n, int fda, int N)
+{
+     int i;
+     for (i = 0; i < n; ++i)
+	  memmove(A + (n*N) * i, A + (fda*N) * i, sizeof(R) * (n*N));
+}
+
+static void unpack(R *A, int n, int fda, int N)
+{
+     int i;
+     for (i = n-1; i >= 0; --i)
+	  memmove(A + (fda*N) * i, A + (n*N) * i, sizeof(R) * (n*N));
+}
+
+/*************************************************************************/
 /* In-place transposes of non-square matrices: */
 
+/* This algorithm is related to algorithm V5 from Murray Dow,
+   "Transposing a matrix on a vector computer," Parallel Computing 21
+   (12), 1997-2005 (1995), with the modification that we use
+   cache-oblivious recursive transpose subroutines (and was derived
+   independently).  The d == 0 algorithm is related to algorithm V3,
+   idem. */
+
 /* Transpose the matrix A in-place, where A is an (n*d) x (m*d) matrix
-   of N-tuples and buf contains at least n*m*d*N elements.  In
-   general, to transpose a p x q matrix, you should call this routine
-   with d = gcd(p, q), n = p/d, and m = q/d. */
+   of N-tuples and buf contains n*m*d*N elements.  
+
+   Alternatively, if d == 0, then A is an n x m matrix of N-tuples,
+   and buf contains min(n,m) * |n-m| * N elements. 
+
+   In general, to transpose a p x q matrix, you should call this
+   routine with d = gcd(p, q), n = p/d, and m = q/d, OR with d = 0,
+   n = p, m = q.  Probably the latter if |p-q| * gcd(p,q) < max(p,q). */
 void X(transpose)(R *A, int n, int m, int d, int N, R *buf)
 {
      A(n > 0 && m > 0 && N > 0 && d > 0);
@@ -286,8 +330,21 @@ void X(transpose)(R *A, int n, int m, int d, int N, R *buf)
 	  rec_transpose_Ntuple(A, buf, n,m, m,n, N);
 	  memcpy(A, buf, m*n*N*sizeof(R));
      }
-     else if (n*m == 1) {
-	  rec_transpose_sq_ip_Ntuple(A, d, d, N);
+     else if (d == 0) {
+	  if (n > m) {
+	       memcpy(buf, A + m*(m*N), (n-m)*(m*N)*sizeof(R));
+	       rec_transpose_sq_ip_Ntuple(A, m, m, N);
+	       unpack(A, m, n, N);
+	       rec_transpose_Ntuple(buf, A + m*N, n-m,m, m,n, N);
+	  }
+	  else if (m > n) {
+	       rec_transpose_Ntuple(A + n*N, buf, n,m-n, m,n, N);
+	       pack(A, n, m, N);
+	       rec_transpose_sq_ip_Ntuple(A, n, n, N);
+	       memcpy(A + n*(n*N), buf, (m-n)*(n*N)*sizeof(R));
+	  }
+	  else /* n == m */
+	       rec_transpose_sq_ip_Ntuple(A, n, n, N);
      }
      else {
 	  int i, num_el = n*m*d*N;
@@ -328,14 +385,15 @@ void X(transpose)(R *A, int n, int m, int d, int N, R *buf)
    of requiring less buffer space for the case of gcd(nx,ny) small. */
 
 /*
- * TOMS Transpose.  Revised version of algorithm 380.
+ * TOMS Transpose.  Algorithm 513 (Revised version of algorithm 380).
  * 
  * These routines do in-place transposes of arrays.
  * 
  * [ Cate, E.G. and Twigg, D.W., ACM Transactions on Mathematical Software, 
  *   vol. 3, no. 1, 104-110 (1977) ]
  * 
- * C version by Steven G. Johnson. February 1997.
+ * C version by Steven G. Johnson (February 1997), based on Fortran
+ * code by Cate and Twigg, above.
  */
 
 /*

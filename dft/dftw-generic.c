@@ -294,4 +294,5 @@ void X(dft_ct_generic_register)(planner *p)
 	  REGISTER_SOLVER(p, mksolver(&a[i], 0, DECDIT));
 	  REGISTER_SOLVER(p, mksolver(&a[i], 0, DECDIF));
      }
+/*   REGISTER_SOLVER(p, mksolver(&a[1], -1, DECDIT)); 4-step? */
 }

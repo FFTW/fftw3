@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.28 2003-06-11 02:15:41 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.29 2004-03-31 00:44:54 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -52,7 +52,7 @@ typedef struct {
      int s0, s1, vs;
      int m;
      int offset;
-     int nd, md, d; /* d = gcd(n,m), nd = n / d, md = m / d */
+     int nd, md, d, nbuf; /* X(transpose) params and bufsize */
 } P;
 
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
@@ -68,7 +68,7 @@ static void apply_general(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
      int nd = ego->nd, md = ego->md, d = ego->d, vl = ego->vl;
-     R *buf = (R *)MALLOC((sizeof(R) * 2) * vl * nd * md * d, BUFFERS);
+     R *buf = (R *)MALLOC((sizeof(R) * 2) * vl * ego->nbuf, BUFFERS);
 
      UNUSED(ii); UNUSED(ro); UNUSED(io);
      X(transpose)(ri + ego->offset, nd, md, d, 2*vl, buf);
@@ -150,7 +150,7 @@ static int applicable(const problem *p_, const planner *plnr,
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dft-transpose-%dx%d%v)", ego->n, ego->m, ego->vl);
+     p->print(p, "(dft-transpose-%dx%d-%d%v)", ego->n,ego->m, ego->d, ego->vl);
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
@@ -180,8 +180,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 					   p->ri, p->ii) ? apply :
                       (X(transpose_slowp)(d+dim0, d+dim1, 2*vl) ? apply_slow
                        : apply_general));
-     X(transpose_dims)(d+dim0, d+dim1, 
-		       &pln->n, &pln->m, &pln->d, &pln->nd, &pln->md);
+     X(transpose_dims)(d+dim0, d+dim1, &pln->n, &pln->m,
+		       &pln->d, &pln->nd, &pln->md, &pln->nbuf);
+     if (pln->super.apply != apply_general) pln->d = -1; /* for printing */
      pln->offset = (p->ri - p->ii == 1) ? -1 : 0;
      pln->s0 = d[dim0].is;
      pln->s1 = d[dim0].os;

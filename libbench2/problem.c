@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.25 2003-03-29 03:49:04 stevenj Exp $ */
+/* $Id: problem.c,v 1.26 2004-03-31 00:44:54 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -289,8 +289,10 @@ bench_problem *problem_parse(const char *s)
 	  p->vecsz = mktensor(0);
      }
 
-     if (transpose)
+     if (transpose) {
 	  transpose_tensor(p->sz);
+	  transpose_tensor(p->vecsz);
+     }
 
      if (!p->in_place)
 	  p->out = ((bench_real *) p->in) + (1 << 20);  /* whatever */

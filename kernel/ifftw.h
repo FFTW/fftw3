@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.236 2004-02-13 12:20:31 athena Exp $ */
+/* $Id: ifftw.h,v 1.237 2004-03-31 00:44:54 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -706,7 +706,7 @@ void X(transpose_slow)(R *a, int nx, int ny, int N,
 int X(transposable)(const iodim *a, const iodim *b,
 		    int vl, int s, R *ri, R *ii);
 void X(transpose_dims)(const iodim *a, const iodim *b,
-                       int *n, int *m, int *d, int *nd, int *md);
+                       int *n, int *m, int *d, int *nd, int *md, int *nbuf);
 int X(transpose_simplep)(const iodim *a, const iodim *b, int vl, int s,
 			 R *ri, R *ii);
 int X(transpose_slowp)(const iodim *a, const iodim *b, int N);
