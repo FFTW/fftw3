@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.26 2003-04-15 18:51:50 stevenj Exp $ */
+/* $Id: cycle.h,v 1.27 2003-04-19 13:18:25 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -200,6 +200,24 @@ static inline double elapsed(ticks t1, ticks t0)
      return (double)(t1 - t0);
 }
 
+#define HAVE_TICK_COUNTER
+#endif
+
+/* intel's ecc compiler */
+#if defined(__ECC) && defined(__ia64__) && !defined(HAVE_TICK_COUNTER)
+typedef unsigned long ticks;
+#include <ia64intrin.h>
+
+static __inline__ ticks getticks(void)
+{
+     return __getReg(_IA64_REG_AR_ITC);
+}
+ 
+static __inline__ double elapsed(ticks t1, ticks t0)
+{
+     return (double)(t1 - t0);
+}
+ 
 #define HAVE_TICK_COUNTER
 #endif
 
