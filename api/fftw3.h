@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.41 2003-01-19 01:23:12 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.42 2003-01-20 12:03:38 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -200,7 +200,9 @@ int X(import_wisdom)(int (*emitter)(void *), void *data);		\
 void X(print_plan)(X(plan) p, FILE *output_file);			\
 									\
 void *X(malloc)(size_t n);						\
-void X(free)(void *p);
+void X(free)(void *p);							\
+									\
+void X(flops)(X(plan) p, int *add, int *mul, int *fma);
 
 /* end of FFTW_DEFINE_API macro */
 

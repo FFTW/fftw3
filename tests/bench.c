@@ -314,8 +314,11 @@ void setup(bench_problem *p)
      BENCH_ASSERT(the_plan);
 
      if (verbose > 1) {
+	  int add, mul, fma;
 	  FFTW(print_plan)(the_plan, stdout);
 	  printf("\n");
+	  FFTW(flops)(the_plan, &add, &mul, &fma);
+	  printf("flops: %d add, %d mul, %d fma\n", add, mul, fma);
      }
 }
 
