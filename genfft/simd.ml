@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.18 2005-02-11 02:47:38 athena Exp $ *)
+(* $Id: simd.ml,v 1.19 2005-02-13 23:15:37 athena Exp $ *)
 
 open Expr
 open List
@@ -203,8 +203,8 @@ and unparse_function = function
 let extract_constants f =
   let constlist = flatten (map expr_to_constants (C.ast_to_expr_list f))
   in map
-    (fun n ->
-      Tdecl 
-	("DVK(" ^ (Number.to_konst n) ^ ", " ^ (Number.to_string n) ^ ")"))
-    (unique_constants constlist)
-
+       (fun n ->
+	  Tdecl 
+	    ("DVK(" ^ (Number.to_konst n) ^ ", " ^ (Number.to_string n) ^ 
+	       ");\n"))
+       (unique_constants constlist)

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.mli,v 1.10 2005-02-13 15:29:32 athena Exp $ *)
+(* $Id: c.mli,v 1.11 2005-02-13 23:15:37 athena Exp $ *)
 
 type stride = 
   | SVar of string
@@ -39,7 +39,6 @@ val stridetype : string
 
 type c_decl = 
   | Decl of string * string
-  | Idecl of string * string * string (* decl with initializer *)
   | Tdecl of string                (* arbitrary text declaration *)
 
 and c_ast =

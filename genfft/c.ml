@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.25 2005-02-13 15:29:32 athena Exp $ *)
+(* $Id: c.ml,v 1.26 2005-02-13 23:15:37 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -43,7 +43,6 @@ let stridetype = "stride"
  ***********************************)
 type c_decl = 
   | Decl of string * string
-  | Idecl of string * string * string (* decl with initializer *)
   | Tdecl of string                (* arbitrary text declaration *)
 
 and c_ast =
@@ -188,8 +187,7 @@ and unparse_annotated force_bracket =
 
 and unparse_decl = function
   | Decl (a, b) -> a ^ " " ^ b ^ ";\n"
-  | Idecl (a, b, c) -> a ^ " " ^ b ^ " = " ^ c ^ ";\n"
-  | Tdecl x -> x ^ ";\n"
+  | Tdecl x -> x
 
 and unparse_ast = 
   let rec unparse_plus = function
@@ -275,25 +273,13 @@ and ast_to_expr_list = function
 
 let extract_constants f =
   let constlist = flatten (map expr_to_constants (ast_to_expr_list f))
-  in let u = unique_constants constlist
-  in let use_const () = 
-    map 
-      (fun n ->
-	Idecl (("const " ^ extended_realtype), (Number.to_konst n),
-	       "K(" ^ (Number.to_string n) ^ ")"))
-      u
-  and use_compact () = 
-    map
-      (fun n ->
-	Tdecl 
-	  ("DK(" ^ (Number.to_konst n) ^ ", " ^ (Number.to_string n) ^ ")"))
-      u
-  in 
-  if !Magic.compact then 
-    use_compact ()
-  else
-    use_const ()
-
+  in map
+       (fun n ->
+	  Tdecl 
+	    ("DK(" ^ (Number.to_konst n) ^ ", " ^ (Number.to_string n) ^ 
+	       ");\n"))
+       (unique_constants constlist)
+       
 (******************************
    Extracting operation counts 
  ******************************)
