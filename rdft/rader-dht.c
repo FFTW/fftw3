@@ -108,6 +108,7 @@ static int apply_aux(P *ego, uint r, int is, R *I, R *O)
 	  O[((r-1) - k + 1) * os] = rW * iB + iW * rB;
      }
 #endif
+     /* Nyquist component: */
      O[(k + 1) * os] *= omega[k]; /* k == (r-1)/2, since r-1 is even */
      
      /* this will add input[0] to all of the outputs after the ifft */
