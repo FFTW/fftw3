@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.19 2002-07-05 19:49:14 athena Exp $ */
+/* $Id: planner.c,v 1.20 2002-07-14 17:49:20 stevenj Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -142,6 +142,13 @@ static void insert(planner *ego, problem *p, plan *pln, pair *sp)
      really_insert(ego, l);
 }
 
+static plan *slv_mkplan(planner *ego, problem *p, solver *s)
+{
+     int flags = ego->flags;
+     s->adt->mkplan(s, p, ego);
+     ego->flags = flags;
+}
+
 static plan *mkplan(planner *ego, problem *p)
 {
      solutions *sol;
@@ -155,7 +162,7 @@ static plan *mkplan(planner *ego, problem *p)
 	  if ((sp = sol->sp)) {
 	       /* call solver to create plan */
 	       solver *slv = sp->slv;
-	       pln = sol->pln = slv->adt->mkplan(slv, p, ego);
+	       pln = sol->pln = ego->adt->slv_mkplan(ego, p, slv);
 	       X(plan_use)(pln);
 
 	       A(pln);  /* solver must be applicable or something
@@ -236,7 +243,7 @@ planner *X(mkplanner)(size_t sz,
 		      int flags)
 {
      static const planner_adt padt = {
-	  slv, cdr, solvers, register_solver, mkplan, forget, exprt
+	  slv, cdr, solvers, register_solver, mkplan, forget, exprt, slv_mkplan
      };
 
      planner *p = (planner *) fftw_malloc(sz, PLANNERS);

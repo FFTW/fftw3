@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.9 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: planner-score.c,v 1.10 2002-07-14 17:49:20 stevenj Exp $ */
 #include "ifftw.h"
 
 static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
@@ -43,7 +43,7 @@ static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
      for (; best_score > BAD; --best_score) {
           FORALL_SOLVERS(ego, s, sp, {
 	       if (s->adt->score(s, p, flags) == best_score) {
-		    plan *pln = s->adt->mkplan(s, p, ego);
+		    plan *pln = ego->adt->slv_mkplan(ego, p, s);
 
 		    if (pln) {
 			 X(plan_use)(pln);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-naive.c,v 1.12 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: planner-naive.c,v 1.13 2002-07-14 17:49:20 stevenj Exp $ */
 #include "ifftw.h"
 
 /* naive planner with no memoization */
@@ -30,7 +30,7 @@ static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
      *pairp = 0;
 
      FORALL_SOLVERS(ego, s, sp, {
-	  plan *pln = s->adt->mkplan(s, p, ego);
+	  plan *pln = ego->adt->slv_mkplan(ego, p, s);
 
 	  if (pln) {
 	       X(plan_use)(pln);
