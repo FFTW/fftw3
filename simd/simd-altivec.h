@@ -26,8 +26,10 @@
 #define ALIGNMENT 16
 
 #if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
-typedef float V __attribute__((vector_size(16)));
+
+typedef float __attribute__((aligned(16), vector_size(16))) V;
 typedef int Vint __attribute__((vector_size(16)));
+
 #define VADD(a, b) __builtin_altivec_vaddfp(a, b)
 #define VSUB(a, b) __builtin_altivec_vsubfp(a, b)
 #define VFMA(a, b, c) __builtin_altivec_vmaddfp(a, b, c)
@@ -43,8 +45,20 @@ static inline V VMUL(V a, V b)
      return VFMA(a, b, zero);
 }
 
-#define VMRGL(a, b)  (V)__builtin_altivec_vmrglw((Vint)(a), (Vint)(b))
-#define VMRGH(a, b)  (V)__builtin_altivec_vmrghw((Vint)(a), (Vint)(b))
+static inline V VMRGL(V a, V b)
+{
+     V ret;
+     __asm__("vmrglw %0, %1, %2" : "=v"(ret) : "v"(a), "v"(b));
+     return ret;
+}
+
+static inline V VMRGH(V a, V b)
+{
+     V ret;
+     __asm__("vmrghw %0, %1, %2" : "=v"(ret) : "v"(a), "v"(b));
+     return ret;
+}
+
 
 #define ST4(a, ovs, r0, r1, r2, r3)			\
 {							\
