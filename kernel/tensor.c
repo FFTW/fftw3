@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.31 2002-09-25 11:37:38 athena Exp $ */
+/* $Id: tensor.c,v 1.32 2002-09-26 19:14:38 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -90,7 +90,7 @@ int X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os)
 {
      A(t->rnk <= 1);
      if (t->rnk == 1) {
-	  iodim *vd = t->dims;
+	  const iodim *vd = t->dims;
           *n = vd[0].n;
           *is = vd[0].is;
           *os = vd[0].os;
