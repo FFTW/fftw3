@@ -202,6 +202,7 @@ static void rarolr(R *b, R *a, int n, int nb, int na,
 
 	  /* ugly switch to do boundary conditions for various r2r types */
 	  switch (k) {
+	       /* periodic boundaries */
 	      case R2R_DHT:
 	      case R2R_R2HC:
 		   for (ia = 0; ia < na; ++ia) {
@@ -212,7 +213,7 @@ static void rarolr(R *b, R *a, int n, int nb, int na,
 		   }
 		   break;
 		   
-	      case R2R_HC2R: /* ugh */
+	      case R2R_HC2R: /* ugh (hermitian halfcomplex boundaries) */
 		   if (n > 2) {
 			if (n % 2 == 0)
 			     for (ia = 0; ia < na; ++ia) {
@@ -247,6 +248,7 @@ static void rarolr(R *b, R *a, int n, int nb, int na,
 		   }
 		   break;
 		   
+	      /* various even/odd boundary conditions */
 	      case R2R_REDFT00:
 		   isL1 = isR1 = 1;
 		   goto mirrors;
