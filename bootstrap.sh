@@ -21,6 +21,6 @@ rm -f config.cache
 #    mkdir OBJ
 #    cd OBJ
 #    ../configure --enable-maintainer-mode
-    ./configure --enable-maintainer-mode
+    ./configure --enable-maintainer-mode --enable-debug
     cd genfft; make depend
 )

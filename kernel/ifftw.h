@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.8 2002-06-05 00:03:56 athena Exp $ */
+/* $Id: ifftw.h,v 1.9 2002-06-05 00:22:23 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -305,24 +305,23 @@ void fftw_solvtab_exec(solvtab tbl, planner *p);
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */
 /* little language to express twiddle factors computation */
-enum { TW_COS, TW_SIN, TW_TAN, TW_NEXT };
+enum { TW_COS = 0, TW_SIN = 1, TW_TAN = 2, TW_NEXT = 3};
 
 typedef struct {
-     unsigned int op:3;
-     unsigned int v:4;
+     uint op:3;
+     uint v:4;
      int i:25;
 } tw_instr;
 
 typedef struct twid_s {
      R *W;                     /* array of twiddle factors */
+     uint r, m;                /* radix, N / r */
      int refcnt;
-     uint r;                   /* radix */
-     int m;                    /* N / r */
      const tw_instr *instr;
      struct twid_s *cdr;
 } twid;
 
-twid *fftw_mktwiddle(const tw_instr *instr, uint r, int m);
+twid *fftw_mktwiddle(const tw_instr *instr, uint r, uint m);
 void fftw_twiddle_destroy(twid *p);
 
 /*-----------------------------------------------------------------------*/

@@ -45,6 +45,8 @@ REPEATED CODE:  favor a table.  E.g., do not write
       };
 
     and loop over footab.  Rationale: it saves code space.
+    Similarly, replace a switch statement with a table whenever
+    possible.
 
 C++: The code should compile as a C++ program. Run the code through
     gcc -xc++ .  The extra C++ restrictions are unnecessary, of
