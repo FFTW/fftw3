@@ -33,6 +33,8 @@
 #  define X77(NAME) CONCAT(DFFTW_, NAME)
 #endif
 
+#ifdef F77_FUNC_
+
 #define F77x(a, A) F77_FUNC_(a, A)
 #define F77(a, A) F77x(x77(a), X77(A))
 
@@ -150,3 +152,5 @@ void F77(execute_dft, EXECUTE_DFT)(X(plan) *p, R *ri, R *ii, R *ro, R *io)
 {
      X(execute_dft)(*p, ri, ii, ro, io);
 }
+
+#endif /* F77_FUNC_ */
