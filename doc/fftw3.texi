@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.139 2003-03-14 17:26:04 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.140 2003-03-14 23:20:44 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1661,8 +1661,10 @@ void fftw_cleanup(void);
 @end example
 @findex fftw_cleanup
 
-(This function does not destroy or invalidate any plans you have lying
-around, however.)  
+This does not deallocate your plans; you should still call
+@code{fftw_destroy_plan} if you want to do this.  You should not execute
+any previously created plans after calling @code{fftw_cleanup}, however.
+
 
 The following two routines are provided purely for academic purposes
 (that is, for entertainment).
@@ -3459,10 +3461,16 @@ threads specified when the plan was created.  When done, you destroy it
 as usual with @code{fftw_destroy_plan}.
 
 There is one additional routine: if you want to get rid of all memory
-allocated internally by FFTW, you can call @code{fftw_cleanup_threads()},
-which is exactly like the @code{fftw_cleanup()} function except that it
-also gets rid of threads-related data.
+and other resources allocated internally by FFTW, you can call:
+
+@example
+void fftw_cleanup_threads(void);
+@end example
 @findex fftw_cleanup_threads
+
+which is much like the @code{fftw_cleanup()} function except that it
+also gets rid of threads-related data.  You must @emph{not} execute any
+previously created plans after calling this function.
 
 We should also mention one other restriction: if you save wisdom from a
 program using the multi-threaded FFTW, that wisdom @emph{cannot be used}
