@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.25 2005-02-27 03:19:16 athena Exp $ */
+/* $Id: rank0.c,v 1.26 2005-02-27 03:21:03 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -128,6 +128,7 @@ static void apply_iter(const plan *ego_, R *I, R *O)
 
 static int applicable_iter(const P *pln, const problem_rdft *p)
 {
+     UNUSED(pln);
      return (p->I != p->O);
 }
 
@@ -146,7 +147,7 @@ static int applicable_tiled(const P *pln, const problem_rdft *p)
 	     && pln->rnk >= 2
 
 	     /* somewhat arbitrary */
-	     && pln->vl < CACHESIZE / (16 * sizeof(R))
+	     && pln->vl < (int)(CACHESIZE / (16 * sizeof(R)))
 	  );
 }
 
@@ -223,7 +224,7 @@ static int applicable_ip_sq_tiled(const P *pln, const problem_rdft *p)
 	     && applicable_ip_sq(pln, p)
 
 	     /* somewhat arbitrary */
-	     && pln->vl * 2 < CACHESIZE / (16 * sizeof(R))
+	     && pln->vl * 2 < (int)(CACHESIZE / (16 * sizeof(R)))
 	  );
 }
 
@@ -301,7 +302,7 @@ void X(rdft_rank0_register)(planner *p)
      unsigned i;
      static struct {
 	  rdftapply apply;
-	  int (*applicable)(const P *pln, const problem_rdft *p);
+	  int (*applicable)(const P *, const problem_rdft *);
 	  const char *nam;
      } tab[] = {
 	  { apply_memcpy,   applicable_memcpy,   "rdft-rank0-memcpy" },
