@@ -34,7 +34,7 @@ static void do_problem(bench_problem *p)
 {
      if (verbose > 0)
 	  printf("PLANNING PROBLEM: %s\n", p->pstring);
-     BENCH_ASSERT(can_do(p));
+     /* BENCH_ASSERT(can_do(p)); */
      problem_alloc(p);
      setup(p);
      done(p);
