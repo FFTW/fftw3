@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.13 2002-08-23 17:22:17 athena Exp $ */
+/* $Id: verify.c,v 1.14 2002-08-29 12:20:55 athena Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -194,9 +194,12 @@ static double acmp(bench_complex *A, bench_complex *B, unsigned int n,
 	  {
 	       unsigned int i;
 	       for (i = 0; i < n; ++i) 
-		    printf("%8d %16.12f %16.12f   %16.12f %16.12f\n", i, 
+		    fprintf(stderr,
+			    "%8d %12.8f %12.8f   %12.8f %12.8f  %12.8f\n", i, 
 			   (double) c_re(A[i]), (double) c_im(A[i]),
-			   (double) c_re(B[i]), (double) c_im(B[i]));
+			   (double) c_re(B[i]), (double) c_im(B[i]),
+			    norm2(c_re(A[i]) - c_re(B[i]),
+				  c_im(A[i]) - c_im(B[i])));
 	  }
 
 	  exit(EXIT_FAILURE);

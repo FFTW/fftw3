@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.4 2002-08-26 11:43:53 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.5 2002-08-29 12:20:55 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -277,7 +277,8 @@ static void apply_b_dft(plan *ego_, R *r, R *rio, R *iio)
           uint i, vl = ego->vl, n2 = ego->n / 2;
           int ivs = ego->ivs, is = ego->is;
           const R *W = ego->td->W;
-          for (i = 0; i < vl; ++i, rio += ivs, iio += ivs)
+	  R *rio1 = rio, *iio1 = iio;
+          for (i = 0; i < vl; ++i, rio1 += ivs, iio1 += ivs)
                k_b_dft(rio, iio, W, n2, is);
      }
 
@@ -291,6 +292,7 @@ static void apply_b_dft(plan *ego_, R *r, R *rio, R *iio)
 static problem *mkcld_b_dft(const problem_rdft2 *p)
 {
      const iodim *d = p->sz.dims;
+
      return X(mkproblem_dft_d) (
 	  X(mktensor_1d)(d[0].n / 2, d[0].is, 2 * d[0].os),
 	  X(tensor_copy)(p->vecsz), 
@@ -343,8 +345,9 @@ static void apply_b_rdft(plan *ego_, R *r, R *rio, R *iio)
           uint i, vl = ego->vl, n2 = ego->n / 2;
           int ivs = ego->ivs, is = ego->is;
           const R *W = ego->td->W;
-          for (i = 0; i < vl; ++i, rio += ivs, iio += ivs)
-               k_b_rdft(rio, iio, W, n2, is);
+	  R *rio1 = rio, *iio1 = iio;
+          for (i = 0; i < vl; ++i, rio1 += ivs, iio1 += ivs)
+               k_b_rdft(rio1, iio1, W, n2, is);
      }
 
      {
