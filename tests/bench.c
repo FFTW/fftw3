@@ -28,8 +28,13 @@ static const char *mkcc(void)
 }
 
 BEGIN_BENCH_DOC
-BENCH_DOC("name", "fftw3")
-BENCH_DOCF("version", mkvers) BENCH_DOCF("fftw-compiled-by", mkcc)
+#if CLASSIC_MODE
+BENCH_DOC("name", "fftw3-classic")
+#else
+BENCH_DOC("name", "fftw3-pro")
+#endif
+BENCH_DOCF("version", mkvers) 
+BENCH_DOCF("fftw-compiled-by", mkcc)
 END_BENCH_DOC 
 
 static void putchr(printer *p, char c)
