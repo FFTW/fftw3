@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.12 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: verify-lib.c,v 1.13 2003-05-04 23:37:09 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -527,4 +527,6 @@ void accuracy_test(dofft_closure *k, aconstrain constrain,
      t[1] = sqrt(t[1] / ntests);
      t[3] /= ntests;
      t[4] = sqrt(t[4] / ntests);
+
+     fftaccuracy_done();
 }

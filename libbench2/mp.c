@@ -372,67 +372,6 @@ static void sin2pi(REAL m, REAL n, N a)
 
 /*----------------------------------------------------------------------*/
 /* FFT stuff */
-static void bitrev(int n, N *a)
-{
-     int i, j, m;
-     for (i = j = 0; i < n - 1; ++i) {
-	  if (i < j) {
-	       N t;
-	       cpy(a[2*i], t); cpy(a[2*j], a[2*i]); cpy(t, a[2*j]);
-	       cpy(a[2*i+1], t); cpy(a[2*j+1], a[2*i+1]); cpy(t, a[2*j+1]);
-	  }
-
-	  /* bit reversed counter */
-	  m = n; do { m >>= 1; j ^= m; } while (!(j & m));
-     }
-}
-
-static void fft0(int n, N *a, int sign)
-{
-     int i, j, k;
-
-     bitrev(n, a);
-     for (i = 1; i < n; i = 2 * i) {
-	  for (j = 0; j < i; ++j) {
-	       N wr, wi;
-	       cos2pi(sign * (int)j, 2.0 * i, wr);
-	       sin2pi(sign * (int)j, 2.0 * i, wi);
-	       for (k = j; k < n; k += 2 * i) {
-		    N *a0 = a + 2 * k;
-		    N *a1 = a0 + 2 * i;
-		    N r0, i0, r1, i1, t0, t1, xr, xi;
-		    cpy(a0[0], r0); cpy(a0[1], i0);
-		    cpy(a1[0], r1); cpy(a1[1], i1);
-		    mul(r1, wr, t0); mul(i1, wi, t1); sub(t0, t1, xr);
-		    mul(r1, wi, t0); mul(i1, wr, t1); add(t0, t1, xi);
-		    add(r0, xr, a0[0]);  add(i0, xi, a0[1]);
-		    sub(r0, xr, a1[0]);  sub(i0, xi, a1[1]);
-	       }
-	  }
-     }
-}
-
-/* a[2*k]+i*a[2*k+1] = exp(2*pi*i*k^2/(2*n)) */
-static void bluestein_sequence(int n, N *a)
-{
-     int k, ksq, n2 = 2 * n;
-
-     ksq = 1; /* (-1)^2 */
-     for (k = 0; k < n; ++k) {
-	  /* careful with overflow */
-	  ksq = ksq + 2*k - 1; while (ksq > n2) ksq -= n2;
-	  cos2pi(ksq, n2, a[2*k]);
-	  sin2pi(ksq, n2, a[2*k+1]);
-     }
-}
-
-static int pow2_atleast(int x)
-{
-     int h;
-     for (h = 1; h < x; h = 2 * h)
-	  ;
-     return h;
-}
 
 /* (r0 + i i0)(r1 + i i1) */
 static void cmul(N r0, N i0, N r1, N i1, N r2, N i2)
@@ -460,36 +399,140 @@ static void cmulj(N r0, N i0, N r1, N i1, N r2, N i2)
      cpy(q, r2);
 }
 
+static void cexp(int m, int n, N r, N i)
+{
+     static int cached_n = -1;
+     static N w[64][2];
+     int k, j;
+     if (n != cached_n) {
+	  for (j = 1, k = 0; j < n; j += j, ++k) {
+	       cos2pi(j, n, w[k][0]);
+	       sin2pi(j, n, w[k][1]);
+	  }
+	  cached_n = n;
+     }
+
+     fromshort(1, r);
+     fromshort(0, i);
+     if (m > 0) {
+	  for (k = 0; m; ++k, m >>= 1) 
+	       if (m & 1)
+		    cmul(w[k][0], w[k][1], r, i, r, i);
+     } else {
+	  m = -m;
+	  for (k = 0; m; ++k, m >>= 1) 
+	       if (m & 1)
+		    cmulj(w[k][0], w[k][1], r, i, r, i);
+     }
+}
+
+static void bitrev(int n, N *a)
+{
+     int i, j, m;
+     for (i = j = 0; i < n - 1; ++i) {
+	  if (i < j) {
+	       N t;
+	       cpy(a[2*i], t); cpy(a[2*j], a[2*i]); cpy(t, a[2*j]);
+	       cpy(a[2*i+1], t); cpy(a[2*j+1], a[2*i+1]); cpy(t, a[2*j+1]);
+	  }
+
+	  /* bit reversed counter */
+	  m = n; do { m >>= 1; j ^= m; } while (!(j & m));
+     }
+}
+
+static void fft0(int n, N *a, int sign)
+{
+     int i, j, k;
+
+     bitrev(n, a);
+     for (i = 1; i < n; i = 2 * i) {
+	  for (j = 0; j < i; ++j) {
+	       N wr, wi;
+	       cexp(sign * (int)j, 2 * i, wr, wi);
+	       for (k = j; k < n; k += 2 * i) {
+		    N *a0 = a + 2 * k;
+		    N *a1 = a0 + 2 * i;
+		    N r0, i0, r1, i1, t0, t1, xr, xi;
+		    cpy(a0[0], r0); cpy(a0[1], i0);
+		    cpy(a1[0], r1); cpy(a1[1], i1);
+		    mul(r1, wr, t0); mul(i1, wi, t1); sub(t0, t1, xr);
+		    mul(r1, wi, t0); mul(i1, wr, t1); add(t0, t1, xi);
+		    add(r0, xr, a0[0]);  add(i0, xi, a0[1]);
+		    sub(r0, xr, a1[0]);  sub(i0, xi, a1[1]);
+	       }
+	  }
+     }
+}
+
+/* a[2*k]+i*a[2*k+1] = exp(2*pi*i*k^2/(2*n)) */
+static void bluestein_sequence(int n, N *a)
+{
+     int k, ksq, n2 = 2 * n;
+
+     ksq = 1; /* (-1)^2 */
+     for (k = 0; k < n; ++k) {
+	  /* careful with overflow */
+	  ksq = ksq + 2*k - 1; while (ksq > n2) ksq -= n2;
+	  cexp(ksq, n2, a[2*k], a[2*k+1]);
+     }
+}
+
+static int pow2_atleast(int x)
+{
+     int h;
+     for (h = 1; h < x; h = 2 * h)
+	  ;
+     return h;
+}
+
+static N *cached_bluestein_w = 0;
+static N *cached_bluestein_y = 0;
+static int cached_bluestein_n = -1;
+
 static void bluestein(int n, N *a)
 {
      int nb = pow2_atleast(2 * n);
-     N *w = (N *)bench_malloc(2 * n * sizeof(N));
-     N *y = (N *)bench_malloc(2 * nb * sizeof(N));
      N *b = (N *)bench_malloc(2 * nb * sizeof(N));
+     N *w = cached_bluestein_w;
+     N *y = cached_bluestein_y;
      N nbinv;
      int i;
 
      fromreal(1.0 / nb, nbinv); /* exact because nb = 2^k */
-     bluestein_sequence(n, w);
 
-     for (i = 0; i < 2*nb; ++i)  cpy(zero, y[i]);
+     if (cached_bluestein_n != n) {
+	  if (w) bench_free(w);
+	  if (y) bench_free(y);
+	  w = (N *)bench_malloc(2 * n * sizeof(N));
+	  y = (N *)bench_malloc(2 * nb * sizeof(N));
+
+	  bluestein_sequence(n, w);
+	  for (i = 0; i < 2*nb; ++i)  cpy(zero, y[i]);
+
+	  for (i = 0; i < n; ++i) {
+	       cpy(w[2*i], y[2*i]);
+	       cpy(w[2*i+1], y[2*i+1]);
+	  }
+	  for (i = 1; i < n; ++i) {
+	       cpy(w[2*i], y[2*(nb-i)]);
+	       cpy(w[2*i+1], y[2*(nb-i)+1]);
+	  }
+
+	  fft0(nb, y, -1);
+	  cached_bluestein_n = n;
+	  cached_bluestein_w = w;
+	  cached_bluestein_y = y;
+     }
+
      for (i = 0; i < 2*nb; ++i)  cpy(zero, b[i]);
      
      for (i = 0; i < n; ++i) 
 	  cmulj(w[2*i], w[2*i+1], a[2*i], a[2*i+1], b[2*i], b[2*i+1]);
 
-     for (i = 0; i < n; ++i) {
-	  cpy(w[2*i], y[2*i]);
-	  cpy(w[2*i+1], y[2*i+1]);
-     }
-     for (i = 1; i < n; ++i) {
-	  cpy(w[2*i], y[2*(nb-i)]);
-	  cpy(w[2*i+1], y[2*(nb-i)+1]);
-     }
-
      /* scaled convolution b * y */
      fft0(nb, b, -1);
-     fft0(nb, y, -1);
+
      for (i = 0; i < nb; ++i) 
 	  cmul(b[2*i], b[2*i+1], y[2*i], y[2*i+1], b[2*i], b[2*i+1]);
      fft0(nb, b, 1);
@@ -500,11 +543,8 @@ static void bluestein(int n, N *a)
 	  mul(nbinv, a[2*i+1], a[2*i+1]);
      }
 
-     bench_free(w);
-     bench_free(y);
      bench_free(b);
 }
-
 
 static void swapri(int n, N *a)
 {
@@ -589,4 +629,10 @@ void fftaccuracy(int n, bench_complex *a, bench_complex *ffta,
 
      bench_free(fftb);
      bench_free(b);
+}
+
+void fftaccuracy_done(void)
+{
+     if (cached_bluestein_w) bench_free(cached_bluestein_w);
+     if (cached_bluestein_y) bench_free(cached_bluestein_y);
 }

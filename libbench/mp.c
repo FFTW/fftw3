@@ -463,33 +463,45 @@ static void cmulj(N r0, N i0, N r1, N i1, N r2, N i2)
 static void bluestein(int n, N *a)
 {
      int nb = pow2_atleast(2 * n);
-     N *w = (N *)bench_malloc(2 * n * sizeof(N));
-     N *y = (N *)bench_malloc(2 * nb * sizeof(N));
+     static N *w = 0;
+     static N *y = 0;
+     static int cached_n = -1;
      N *b = (N *)bench_malloc(2 * nb * sizeof(N));
      N nbinv;
      int i;
 
      fromreal(1.0 / nb, nbinv); /* exact because nb = 2^k */
-     bluestein_sequence(n, w);
 
-     for (i = 0; i < 2*nb; ++i)  cpy(zero, y[i]);
+     if (cached_n != n) {
+	  if (w) bench_free(w);
+	  if (y) bench_free(w);
+	  w = (N *)bench_malloc(2 * n * sizeof(N));
+	  y = (N *)bench_malloc(2 * nb * sizeof(N));
+
+	  bluestein_sequence(n, w);
+	  for (i = 0; i < 2*nb; ++i)  cpy(zero, y[i]);
+
+	  for (i = 0; i < n; ++i) {
+	       cpy(w[2*i], y[2*i]);
+	       cpy(w[2*i+1], y[2*i+1]);
+	  }
+	  for (i = 1; i < n; ++i) {
+	       cpy(w[2*i], y[2*(nb-i)]);
+	       cpy(w[2*i+1], y[2*(nb-i)+1]);
+	  }
+
+	  fft0(nb, y, -1);
+	  cached_n = n;
+     }
+
      for (i = 0; i < 2*nb; ++i)  cpy(zero, b[i]);
      
      for (i = 0; i < n; ++i) 
 	  cmulj(w[2*i], w[2*i+1], a[2*i], a[2*i+1], b[2*i], b[2*i+1]);
 
-     for (i = 0; i < n; ++i) {
-	  cpy(w[2*i], y[2*i]);
-	  cpy(w[2*i+1], y[2*i+1]);
-     }
-     for (i = 1; i < n; ++i) {
-	  cpy(w[2*i], y[2*(nb-i)]);
-	  cpy(w[2*i+1], y[2*(nb-i)+1]);
-     }
-
      /* scaled convolution b * y */
      fft0(nb, b, -1);
-     fft0(nb, y, -1);
+
      for (i = 0; i < nb; ++i) 
 	  cmul(b[2*i], b[2*i+1], y[2*i], y[2*i+1], b[2*i], b[2*i+1]);
      fft0(nb, b, 1);
@@ -500,8 +512,6 @@ static void bluestein(int n, N *a)
 	  mul(nbinv, a[2*i+1], a[2*i+1]);
      }
 
-     bench_free(w);
-     bench_free(y);
      bench_free(b);
 }
 

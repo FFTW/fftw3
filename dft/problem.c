@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.33 2003-04-10 19:36:15 athena Exp $ */
+/* $Id: problem.c,v 1.34 2003-05-04 23:37:09 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -96,9 +96,8 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
 	  ii = io = JOIN_TAINT(ii, io);
 
      /* more correctness conditions: */
-     /* FIXME: use A instead of CK */
-     CK(TAINTOF(ri) == TAINTOF(ii));
-     CK(TAINTOF(ro) == TAINTOF(io));
+     A(TAINTOF(ri) == TAINTOF(ii));
+     A(TAINTOF(ro) == TAINTOF(io));
 
      ego->sz = X(tensor_compress)(sz);
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
@@ -108,8 +107,6 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
      ego->io = io;
 
      A(FINITE_RNK(ego->sz->rnk));
-     CK((((long)ri) & 3) == (((long)ii) & 3));
-     CK((((long)ro) & 3) == (((long)io) & 3));
      return &(ego->super);
 }
 
