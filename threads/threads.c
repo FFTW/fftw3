@@ -78,9 +78,11 @@
       -- #define fftw_sem_destroy(&id) to destroy the id
 
       -- #define fftw_sem_wait(&id) to the equivalent of
-         the POSIX sem_wait
+         the SYSV sem_wait
 
-      -- #define fftw_sem_post(&id) the equivalent of POSIX sem_post
+      -- #define fftw_sem_post(&id) the equivalent of SYSV sem_post
+
+     THIS IS CURRENTLY EXPERIMENTAL ONLY.
 
    * If you need to perform any initialization before using threads,
      put your initialization code in the X(threads_init)() function
@@ -291,8 +293,10 @@ typedef pthread_t fftw_thr_id;
 
 #define fftw_thr_wait(tid) CK(!pthread_join(tid,0))
 
-/* POSIX semaphores are disabled for now because, at least on
-   my Linux machine, they don't seem to offer much performance advantage. */
+/* SYSV semaphores are disabled for now because, at least on my Linux
+   machine, they don't seem to offer much performance advantage.  We
+   should problably use pthread mutices or condition variables
+   instead, for portability. */
 #if 0
 #define HAVE_SEMAPHORES 1
 
