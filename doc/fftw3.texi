@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.102 2003-03-06 07:52:30 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.103 2003-03-06 23:00:43 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -120,6 +120,7 @@ This manual documents FFTW version @value{VERSION}.
 * FFTW Reference::              
 * Parallel FFTW::               
 * Calling FFTW from Fortran::   
+* Converting from FFTW 2::      
 * Installation and Customization::  
 * Acknowledgments::             
 * License and Copyright::       
@@ -2840,7 +2841,7 @@ involves a separate address-space and global variables for each process,
 and is not susceptible to problems of this sort.)
 
 @c ************************************************************
-@node Calling FFTW from Fortran, Installation and Customization, Parallel FFTW, Top
+@node Calling FFTW from Fortran, Converting from FFTW 2, Parallel FFTW, Top
 @chapter Calling FFTW from Fortran
 @cindex Fortran interface
 
@@ -3110,7 +3111,21 @@ cannot be compiled into the FFTW library itself, lest all FFTW-using
 programs be required to link with the Fortran I/O library.)
 
 @c ************************************************************
-@node Installation and Customization, Acknowledgments, Calling FFTW from Fortran, Top
+@node Converting from FFTW 2, Installation and Customization, Calling FFTW from Fortran, Top
+@chapter Converting from FFTW 2
+
+In this chapter, we outline the process for updating codes designed for
+the older FFTW 2 interface to work with FFTW 3.  The interface for FFTW
+3 is not backwards-compatible with the interface for FFTW 2 and earlier
+versions; codes written to use those versions will fail to link with
+FFTW 3.  Nor is it possible to write ``compatibility wrappers'' to
+bridge the gap (at least not efficiently), because FFTW 3 has different
+semantics from previous versions.  However, upgrading should be a
+straightforward process because the data formats are identical and the
+overall style of planning/execution is essentially the same.
+
+@c ************************************************************
+@node Installation and Customization, Acknowledgments, Converting from FFTW 2, Top
 @chapter Installation and Customization
 
 @menu
