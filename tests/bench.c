@@ -188,7 +188,12 @@ static FFTW(plan) mkplan(problem *p, int flags)
 
 int can_do(problem *p)
 {
-     return (p->kind == PROBLEM_COMPLEX || p->kind == PROBLEM_REAL);
+     the_plan = mkplan(p, the_flags | FFTW_ESTIMATE);
+     if (the_plan) {
+	  FFTW(destroy_plan)(the_plan);
+	  return 1;
+     }
+     return 0;
 }
 
 
