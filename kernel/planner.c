@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.98 2002-09-16 21:13:45 athena Exp $ */
+/* $Id: planner.c,v 1.99 2002-09-16 22:37:06 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -319,16 +319,18 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 }
 
 /* maintain dynamic scoping of flags, nthr: */
-static plan *invoke_solver(planner *ego, problem *p, solver *s)
+static plan *invoke_solver(planner *ego, problem *p, solver *s, 
+			   unsigned short nflags)
 {
+     unsigned short saveflags = ego->planner_flags;
      uint problem_flags = ego->problem_flags;
-     unsigned short planner_flags = ego->planner_flags;
      uint nthr = ego->nthr;
      plan *pln;
+     ego->planner_flags |= nflags;
      pln = s->adt->mkplan(s, p, ego);
      ego->problem_flags = problem_flags;
-     ego->planner_flags = planner_flags;
      ego->nthr = nthr;
+     ego->planner_flags = saveflags;
      return pln;
 }
 
@@ -340,29 +342,11 @@ static int compute_score(planner *ego, problem *p, solver *s)
 }
 
 
-/* 
-   The usage of the planner->score field is nonobvious.
-  
-   We want to compute the score of a plan as the minimum of the
-   ``natural'' score of the plan (as determined by solver->score) and
-   the score of all children.  We do not want to have each solver
-   compute this quantity.
-
-   Instead, planner->score initially holds the natural score of the
-   parent.  The child planner updates planner->score to the minimum of
-   planner->score and the score of the child.  The parent planner
-   reads this value when the child planner returns.
-
-   In effect, planner->score is a hidden additional function argument
-   that we are too lazy to push around.
-*/
-
 static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 {
      plan *best = 0;
-     int best_score;
      int best_not_yet_timed = 1;
-     int parent_score = ego->score; /* save for later */
+     int pass;
 
      *bestp = 0;
 
@@ -371,39 +355,36 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  slvdesc *sp;
 	  if ((sp = *descp)) {
 	       solver *s = sp->slv;
-	       ego->score = compute_score(ego, p, s); /* natural score */
-	       best = invoke_solver(ego, p, s);
+	       best = invoke_solver(ego, p, s, NO_UGLY);
 	       if (best) {
 		    X(plan_use)(best);
-		    best->score = ego->score;
 		    goto done;
 	       }
-	       /* BEST may be 0 in case of md5 collision */
 	  }
      }
 
-     /* find highest score */
-     best_score = BAD;
-     FORALL_SOLVERS(ego, s, sp, {
-	  int sc = compute_score(ego, p, s);
-	  if (sc > best_score) 
-	       best_score = sc;
-     });
+     for (pass = 0; pass < 2; ++pass) {
+	  unsigned short nflags;
+	  int minscore;
 
-     for (; best_score > BAD; --best_score) {
+	  switch (pass) {
+	      case 0: 
+		   minscore = GOOD;
+		   nflags = NO_UGLY;
+		   break;
+	      case 1:
+		   if (NO_UGLYP(ego)) goto done;
+		   minscore = UGLY;
+		   nflags = 0;
+		   break;
+	  }
+
           FORALL_SOLVERS(ego, s, sp, {
-	       if (compute_score(ego, p, s) == best_score) {
+	       if (compute_score(ego, p, s) >= minscore) {
 		    plan *pln;
-
-		    ego->score = best_score; /* natural score of this solver */
-		    pln = invoke_solver(ego, p, s);
-
+		    pln = invoke_solver(ego, p, s, nflags);
 		    if (pln) {
-			 pln->score = ego->score; /* min of natural score
-						     and score of children */
-
 			 X(plan_use)(pln);
-
 			 if (best) {
 			      if (best_not_yet_timed) {
 				   evaluate_plan(ego, best, p);
@@ -425,14 +406,10 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	       }
 	  });
 
-
-	  /* condition may be false if children have lower score */
-	  if (best && best->score >= best_score)
-	       break;
-     };
+	  if (best) goto done;
+     }
 
  done:
-     ego->score = X(imin)(parent_score, best ? best->score : GOOD);
      *bestp = best;
 }
 
@@ -459,6 +436,7 @@ static plan *mkplan(planner *ego, problem *p)
      }
 
      mkplan0(ego, p, &pln, &sp);
+
      hinsert(ego, m.s, ego->planner_flags, 
 	     sp ? sp - ego->slvdescs : -1);
 
@@ -594,7 +572,6 @@ planner *X(mkplanner)(void)
      p->solutions = 0;
      p->hashsiz = p->nelem = 0;
 
-     p->score = BAD;            /* unused, but we initialize it anyway */
      p->problem_flags = 0;
      p->planner_flags = 0;
      p->nthr = 1;

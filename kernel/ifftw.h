@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.128 2002-09-16 19:40:46 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.129 2002-09-16 22:37:06 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -352,7 +352,6 @@ struct plan_s {
      int awake_refcnt;
      opcnt ops;
      double pcost;
-     int score;
 };
 
 plan *X(mkplan)(size_t size, const plan_adt *adt);
@@ -411,7 +410,7 @@ enum {
 
 /* values for planner_flags: */
 enum {
-     /* impatience flags: at most 12 (for now) to fit in 16-bit int,
+     /* impatience flags: at most 13 (for now) to fit in 16-bit int,
         not including ESTIMATE and EXHAUSTIVE. */
 
      NO_VRECURSE = 0x1,
@@ -423,6 +422,7 @@ enum {
      NO_INDIRECT = 0x40,
      BELIEVE_PCOST = 0x80,
      NO_DHT_R2HC = 0x100,
+     NO_UGLY = 0x200,
 
      /* a canonical set of fftw2-like impatient flags */
      IMPATIENT = (0
@@ -455,6 +455,7 @@ enum {
 #define NO_INDIRECTP(plnr) ((plnr)->planner_flags & NO_INDIRECT)
 #define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
 #define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
+#define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
 
 #define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
 #define EXHAUSTIVEP(plnr) ((plnr)->planner_flags & EXHAUSTIVE)
@@ -495,8 +496,6 @@ struct planner_s {
      uint lookup, succ_lookup, lookup_iter;
      uint insert, insert_iter, insert_unknown;
      uint nrehash;
-
-     int score;
 };
 
 planner *X(mkplanner)(void);

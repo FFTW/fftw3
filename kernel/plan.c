@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.13 2002-09-09 20:56:03 stevenj Exp $ */
+/* $Id: plan.c,v 1.14 2002-09-16 22:37:06 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -36,10 +36,6 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
      p->ops = X(ops_zero);
      p->pcost = 0.0;
      
-     /* default value. The scoring planner sets this field but the
-	naive planner does not. */
-     p->score = GOOD;
-
      return p;
 }
 

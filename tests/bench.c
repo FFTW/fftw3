@@ -113,15 +113,11 @@ void copy_c2r(struct problem *p, bench_complex *in)
 
 static void hook(plan *pln, const fftw_problem *p_, int optimalp)
 {
-     if (verbose > 2 && optimalp)
-	  if (pln->score == UGLY)
-	       D("Optimal UGLY plan %P\n%p\n", p_, pln);
-
      if (verbose > 5) {
 	  printer *pr = FFTW(mkprinter_file) (stdout);
 	  pr->print(pr, "%P:%(%p%)\n", p_, pln);
 	  FFTW(printer_destroy) (pr);
-	  printf("cost %g  score %d\n\n", pln->pcost, pln->score);
+	  printf("cost %g  \n\n", pln->pcost);
      }
 
      if (paranoid) {
@@ -159,6 +155,7 @@ void setup(struct problem *p)
      FFTW(threads_conf_standard) (plnr);
      plnr->nthr = 1;
      plnr->hook = hook;
+
      /* plnr->planner_flags |= IMPATIENT; */
      /* plnr->planner_flags |= ESTIMATE; */
 
