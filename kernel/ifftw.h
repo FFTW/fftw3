@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.136 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: ifftw.h,v 1.137 2002-09-18 22:03:18 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -430,7 +430,8 @@ enum {
      IMPATIENCE_FLAGS = (ESTIMATE | (ESTIMATE - 1)),
      
      BLESSING = 0x4000,  /* save this entry */
-     H_VALID = 0x8000    /* valid hastable entry */
+     H_VALID = 0x8000,    /* valid hastable entry */
+     NONIMPATIENCE_FLAGS = BLESSING
 };
 
 #define NO_VRECURSEP(plnr) ((plnr)->planner_flags & NO_VRECURSE)
