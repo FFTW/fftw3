@@ -40,6 +40,7 @@ GENFFTDIR = ${top_builddir}/genfft
 K7GENFFTDIR = ${top_builddir}/genfft-k7
 GEN_NOTW = ${GENFFTDIR}/gen_notw
 GEN_NOTW_C = ${GENFFTDIR}/gen_notw_c
+GEN_NOTW_NOINLINE_C = ${GENFFTDIR}/gen_notw_noinline_c
 K7GEN_NOTW = ${K7GENFFTDIR}/gen_notw
 GEN_TWIDDLE = ${GENFFTDIR}/gen_twiddle
 GEN_TWIDDLE_C = ${GENFFTDIR}/gen_twiddle_c
@@ -67,7 +68,7 @@ else
 FLAGS_FMA =
 endif
 
-FLAGS_COMMON = -compact -variables 4 $(FLAGS_FMA) #-no-randomized-cse
+FLAGS_COMMON = -compact -variables 4 $(FLAGS_FMA) -no-randomized-cse
 DFT_FLAGS_COMMON = $(FLAGS_COMMON) 
 RDFT_FLAGS_COMMON = $(FLAGS_COMMON)
 
