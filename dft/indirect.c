@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.36 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: indirect.c,v 1.37 2005-02-25 05:03:13 stevenj Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -145,9 +145,16 @@ static int applicable0(const solver *ego_, const problem *p_,
                   && (0
 
 		      /* problem must be in-place & require some
-		         rearrangement of the data */
+		         rearrangement of the data; to prevent
+		         infinite loops with indirect-transpose, we
+		         further require that at least some transform
+		         strides must decrease */
 		      || (p->ri == p->ro
-			  && !(X(tensor_inplace_strides2)(p->sz, p->vecsz)))
+			  && !X(tensor_inplace_strides2)(p->sz, p->vecsz)
+			  && X(tensor_strides_decrease)(
+				   p->sz, p->vecsz,
+				   ego->adt->apply == apply_after ? 
+				   INPLACE_IS : INPLACE_OS))
 
 		      /* or problem must be out of place, transforming
 			 from stride 1/2 to bigger stride, for apply_after */

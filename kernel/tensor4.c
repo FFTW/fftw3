@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor4.c,v 1.6 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: tensor4.c,v 1.7 2005-02-25 05:03:14 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -70,4 +70,35 @@ int X(tensor_inplace_strides)(const tensor *sz)
 int X(tensor_inplace_strides2)(const tensor *a, const tensor *b)
 {
      return X(tensor_inplace_strides(a)) && X(tensor_inplace_strides(b));
+}
+
+/* return true (1) iff *any* strides of sz decrease when we
+   tensor_inplace_copy(sz, k). */
+static int tensor_strides_decrease(const tensor *sz, inplace_kind k)
+{
+     if (FINITE_RNK(sz->rnk)) {
+          int i;
+          for (i = 0; i < sz->rnk; ++i)
+               if ((sz->dims[i].os - sz->dims[i].is)
+                   * (k == INPLACE_OS ? 1 : -1) < 0)
+                    return 1;
+     }
+     return 0;
+}
+
+/* Return true (1) iff *any* strides of sz decrease when we
+   tensor_inplace_copy(k) *or* if *all* strides of sz are unchanged
+   but *any* strides of vecsz decrease.  This is used in indirect.c
+   to determine whether to use INPLACE_IS or INPLACE_OS.
+
+   Note: X(tensor_strides_decrease)(sz, vecsz, INPLACE_IS)
+         || X(tensor_strides_decrease)(sz, vecsz, INPLACE_OS)
+         || X(tensor_inplace_strides2)(p->sz, p->vecsz)
+   must always be true. */
+int X(tensor_strides_decrease)(const tensor *sz, const tensor *vecsz,
+			       inplace_kind k)
+{
+     return(tensor_strides_decrease(sz, k)
+	    || (X(tensor_inplace_strides)(sz)
+		&& tensor_strides_decrease(vecsz, k)));
 }

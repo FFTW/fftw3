@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.41 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: dft.h,v 1.42 2005-02-25 05:03:13 stevenj Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -64,6 +64,7 @@ solver *X(mksolver_dft_direct)(kdft k, const kdft_desc *desc);
 void X(dft_rank0_register)(planner *p);
 void X(dft_rank_geq2_register)(planner *p);
 void X(dft_indirect_register)(planner *p);
+void X(dft_indirect_transpose_register)(planner *p);
 void X(dft_vrank_geq1_register)(planner *p);
 void X(dft_vrank2_transpose_register)(planner *p);
 void X(dft_vrank3_transpose_register)(planner *p);
