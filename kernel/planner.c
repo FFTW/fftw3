@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.60 2002-09-03 18:52:45 athena Exp $ */
+/* $Id: planner.c,v 1.61 2002-09-03 19:11:06 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -274,7 +274,7 @@ static void forget(planner *ego, amnesia a)
 	       }
 	  }
      }
-     /* nil in ultum remanebit */
+     /* nil inultum remanebit */
 }
 
 static void htab_destroy(planner *ego)
