@@ -237,7 +237,9 @@ static R *mkomega(plan *p_, R *buf, uint n, uint ginv)
 
      omega = (R *)fftw_malloc(sizeof(R) * (n - 1) * 2, TWIDDLES);
 
+     AWAKE(p_, 1);
      p->apply(p_, buf, buf + 1, omega, omega + 1);
+     AWAKE(p_, 0);
      return omega;
 }
 
@@ -276,18 +278,8 @@ static void awake(plan *ego_, int flg)
           if (!ego->buf)
                ego->buf = 
 		    (R *)fftw_malloc(sizeof(R) * (ego->n - 1) * 2, BUFFERS);
-	  if (!ego->omega) {
+	  if (!ego->omega) 
 	       ego->omega = mkomega(ego->cld_omega,ego->buf,ego->n,ego->ginv);
-#if 0
-	       /* HACK ALERT!  We'd really like to put the cld_omega
-		  plan to sleep here, since we don't need it any more.
-	          However, doing so causes crashes since cld_omega may
-	          be the same as cld1/cld2 or (worse) some other plan
-	          entirely (e.g. a rader-dit plan that is parent or child
-	          to this one). */
-	       AWAKE(ego->cld_omega, 0);
-#endif
-	  }
      } else {
 	  if (ego->omega)
 	       X(free)(ego->omega);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.34 2002-06-17 06:30:16 fftw Exp $ */
+/* $Id: ifftw.h,v 1.35 2002-06-18 12:13:55 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -40,7 +40,6 @@ typedef fftw_real R;
 
 /* get rid of that object-oriented stink: */
 #define DESTROY(thing) ((thing)->adt->destroy)(thing)
-#define AWAKE(plan, flag) ((plan)->adt->awake)(plan, flag)
 #define REGISTER_SOLVER(p, s) ((p)->adt->register_solver)((p), (s))
 #define MKPLAN(plnr, prblm) ((plnr)->adt->mkplan)((plnr), (prblm))
 
@@ -244,7 +243,7 @@ void X(printer_destroy)(printer *p);
 /* plan.c: */
 typedef struct {
      void (*solve)(plan *ego, const problem *p);
-     void (*awake)(plan *ego, int awaken);
+     void (*awake)(plan *ego, int flag);
      void (*print)(plan *ego, printer *p);
      void (*destroy)(plan *ego);
 } plan_adt;
@@ -252,6 +251,7 @@ typedef struct {
 struct plan_s {
      const plan_adt *adt;
      int refcnt;
+     int awake_refcnt;
      opcnt ops;
      double pcost;
 };
@@ -259,6 +259,8 @@ struct plan_s {
 plan *X(mkplan)(size_t size, const plan_adt *adt);
 void X(plan_use)(plan *ego);
 void X(plan_destroy)(plan *ego);
+void X(plan_awake)(plan *ego, int flag);
+#define AWAKE(plan, flag) X(plan_awake)(plan, flag)
 
 /*-----------------------------------------------------------------------*/
 /* solver.c: */
@@ -301,7 +303,8 @@ typedef struct {
      void (*register_solver)(planner *ego, solver *s);
      plan *(*mkplan)(planner *ego, problem *p);
      void (*forget)(planner *ego, int everythingp);
-     void (*export)(planner *ego, printer *pr);
+     void (*exprt)(planner *ego, printer *pr); /* export is a reserved word
+						  in C++.  Idiots. */
 } planner_adt;
 
 struct planner_s {

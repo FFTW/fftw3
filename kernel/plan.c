@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.6 2002-06-12 22:19:48 athena Exp $ */
+/* $Id: plan.c,v 1.7 2002-06-18 12:13:55 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -27,7 +27,7 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
      plan *p = (plan *)fftw_malloc(size, PLANS);
 
      A(adt->destroy);
-     p->refcnt = 0;
+     p->refcnt = p->awake_refcnt = 0;
      p->adt = adt;
      p->ops = X(ops_zero);
      p->pcost = 0.0;
@@ -49,4 +49,17 @@ void X(plan_destroy)(plan *ego)
 {
      if ((--ego->refcnt) == 0) 
           DESTROY(ego);
+}
+
+void X(plan_awake)(plan *ego, int flag)
+{
+     if (flag) {
+	  if (!ego->awake_refcnt)
+	       ego->adt->awake(ego, flag);
+	  ++ego->awake_refcnt;
+     } else {
+	  --ego->awake_refcnt;
+	  if (!ego->awake_refcnt)
+	       ego->adt->awake(ego, flag);
+     }
 }

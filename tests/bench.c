@@ -97,10 +97,10 @@ void setup(struct problem *p)
 	  pr->print(pr, "%p\nnprob %u  nplan %u\n",
 		    pln, plnr->nprob, plnr->nplan);
 	  if (verbose > 3) 
-	       plnr->adt->export(plnr, pr);
+	       plnr->adt->exprt(plnr, pr);
 	  FFTW(printer_destroy)(pr);
      }
-     pln->adt->awake(pln, 1);
+     AWAKE(pln, 1);
 }
 
 void doit(int iter, struct problem *p)
@@ -124,6 +124,7 @@ void done(struct problem *p)
 	  FFTW(planner_dump)(plnr, verbose - 2);
 #    endif
 
+     AWAKE(pln, 0);
      FFTW(plan_destroy) (pln);
      FFTW(problem_destroy) (prblm);
      FFTW(planner_destroy) (plnr);

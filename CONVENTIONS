@@ -36,7 +36,7 @@ NAME MANGLING: use X(foo) for external names instead of fftw_foo.
     precision.  (Unfortunately, this is a ugly form of hungarian
     notation.  Grrr...)  Names that are not exported do not need to be
     mangled.
-  
+
 REPEATED CODE:  favor a table.  E.g., do not write
 
     foo("xxx", 1);

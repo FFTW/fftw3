@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.16 2002-06-17 01:30:42 athena Exp $ */
+/* $Id: planner.c,v 1.17 2002-06-18 12:13:55 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -214,7 +214,7 @@ static void print_solution(solutions *s, printer *p)
      p->print(p, "(s %d %P)\n", s->sp ? s->sp->id : 0, s->p);
 }
 
-static void export(planner *ego, printer *p)
+static void exprt(planner *ego, printer *p)
 {
      solutions *s;
      uint h;
@@ -234,7 +234,7 @@ planner *X(mkplanner)(size_t sz,
 		      int flags)
 {
      static const planner_adt padt = {
-	  slv, cdr, solvers, register_solver, mkplan, forget, export
+	  slv, cdr, solvers, register_solver, mkplan, forget, exprt
      };
 
      planner *p = (planner *) fftw_malloc(sz, PLANNERS);
