@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: problem.c,v 1.2 2003-01-17 13:20:57 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -27,11 +27,11 @@
 #include <ctype.h>
 
 /* do what I mean */
-static const dwim(tensor *t)
+static void dwim(tensor *t)
 {
      int i;
      iodim *d;
-     if (!FINITE_RNK(t) || t->rnk < 1)
+     if (!FINITE_RNK(t->rnk) || t->rnk < 1)
 	  return;
 
      i = t->rnk;
@@ -54,12 +54,25 @@ static const dwim(tensor *t)
 
 static const char *parseint(const char *s, int *n)
 {
+     int sign = 1;
+
      *n = 0;
+
+     if (*s == '-') { 
+	  sign = -1;
+	  ++s;
+     } else if (*s == '+') { 
+	  sign = +1; 
+	  ++s; 
+     }
+
      BENCH_ASSERT(isdigit(*s));
      while (isdigit(*s)) {
 	  *n = *n * 10 + (*s - '0');
 	  ++s;
      }
+     
+     *n *= sign;
      return s;
 }
 
@@ -86,7 +99,7 @@ static const char *parsetensor(const char *s, tensor **tp)
 	  if (*s == ':') {
 	       /* read output stride */
 	       ++s;
-	       s = parseint(s, &m->car.is);
+	       s = parseint(s, &m->car.os);
 	  } else {
 	       /* default */
 	       m->car.os = m->car.is;
