@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.23 2003-01-12 04:36:26 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.24 2003-01-12 04:46:34 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -134,6 +134,17 @@ X(plan) X(plan_dft_c2r_2d)(unsigned int nx, unsigned int ny,		      \
 			   C *in, R *out, unsigned int flags);		      \
 X(plan) X(plan_dft_c2r_3d)(unsigned int nx, unsigned int ny, unsigned int nz, \
 			   C *in, R *out, unsigned int flags);		      \
+									      \
+X(plan) X(plan_guru_dft_r2c)(unsigned int rank, const X(iodim) *dims,	      \
+			     unsigned int howmany_rank,			      \
+			     const X(iodim) *howmany_dims,		      \
+			     R *in, R *ro, R *io,			      \
+			     unsigned int flags);			      \
+X(plan) X(plan_guru_dft_c2r)(unsigned int rank, const X(iodim) *dims,	      \
+			     unsigned int howmany_rank,			      \
+			     const X(iodim) *howmany_dims,		      \
+			     R *ri, R *ii, R *out,			      \
+			     unsigned int flags);			      \
 									      \
 void X(destroy_plan)(X(plan) p);					      \
 void X(forget_wisdom)(void);						      \
