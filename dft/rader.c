@@ -353,26 +353,28 @@ static void destroy_dit(plan *ego_)
      destroy(ego_);
 }
 
+static void print1(char *name, P *ego, printer *p)
+{
+     p->print(p, "(%s-%u%ois=%oos=%(%p%)",
+              name, ego->n, ego->is, ego->os, ego->cld1);
+     if (ego->cld2 != ego->cld1)
+          p->print(p, "%(%p%)", ego->cld2);
+     if (ego->cld_omega != ego->cld1 && ego->cld_omega != ego->cld2)
+          p->print(p, "%(%p%)", ego->cld_omega);
+}
+
 static void print(plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
-
-     p->print(p, "(dft-rader-%u%ois=%oos=%(%p%)",
-	      ego->n, ego->is, ego->os, ego->cld1);
-     if (ego->cld2 != ego->cld1)
-	  p->print(p, "%(%p%)", ego->cld2);
-     if (ego->cld_omega != ego->cld1 && ego->cld_omega != ego->cld2)
-	  p->print(p, "%(%p%)", ego->cld_omega);
+     print1("dft-rader", (P *) ego_, p);
      p->putchr(p, ')');
 }
 
 static void print_dit(plan *ego_, printer *p)
 {
-     P *ego = (P *) ego_;
      P_dit *ego_dit = (P_dit *) ego_;
 
-     p->print(p, "(dft-rader-dit-%u%(%p%)%(%p%)%(%p%))", 
-	      ego->n, ego->cld1, ego->cld2, ego_dit->cld);
+     print1("dft-rader-dit", (P *) ego_, p);
+     p->print(p, "%(%p%))", ego_dit->cld);
 }
 
 static int applicable(const solver *ego_, const problem *p_)
