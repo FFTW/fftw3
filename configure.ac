@@ -46,7 +46,7 @@ fi
 AM_CONDITIONAL(LDOUBLE, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 
-AC_ARG_ENABLE(k7, [AC_HELP_STRING([--enable-k7],[enable AMD K7 optimizations])], have_k7=$enableval, have_k7=no)
+AC_ARG_ENABLE(k7, [AC_HELP_STRING([--enable-k7],[enable AMD K7 optimizations, including 3dNow!])], have_k7=$enableval, have_k7=no)
 if test "$PRECISION" != "s"; then have_k7=no; fi
 if test "$have_k7" = "yes"; then
 	AC_DEFINE(HAVE_K7,1,[Define to enable AMD K7 optimizations.])
@@ -73,7 +73,7 @@ if test "$have_altivec" = "yes"; then
 	have_simd="yes"
 fi
 
-AC_ARG_ENABLE(3dnow, [AC_HELP_STRING([--enable-3dnow],[enable 3DNow! optimizations])], have_3dnow=$enableval, have_3dnow=no)
+AC_ARG_ENABLE(3dnow, [AC_HELP_STRING([--enable-3dnow],[enable 3DNow! optimizations (fallback for non-k7-compatible)])], have_3dnow=$enableval, have_3dnow=no)
 if test "$have_3dnow" = "yes"; then
 	AC_DEFINE(HAVE_3DNOW,1,[Define to enable 3DNow! optimizations.])
 	have_simd="yes"
