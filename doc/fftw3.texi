@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.111 2003-03-07 04:10:41 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.112 2003-03-07 05:38:48 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3310,10 +3310,36 @@ to the threading library (e.g. POSIX threads on Unix).
 @c ************************************************************
 @node Installation and Customization, Acknowledgments, Upgrading from FFTW version 2, Top
 @chapter Installation and Customization
+@cindex installation
+
+This chapter describes the installation and customization of FFTW, the
+latest version of which may be downloaded from
+@uref{http://www.fftw.org, the FFTW home page}.
+
+In principle, FFTW should work on any system with an ANSI C compiler
+(@code{gcc} is fine).  However, planner time is drastically reduced if
+FFTW can exploit a hardware cycle counter; FFTW comes with cycle-counter
+support for all modern general-purpose CPUs, but you may need to add a
+couple of lines of code if your compiler is not yet supported
+(@pxref{Cycle Counters}).
+@cindex cycle counter
+@cindex compiler
+
+Installation of FFTW is simplest if you have a Unix or a GNU system,
+such as Linux, and we describe this case in the first section below.
+Compilation on non-Unix systems is a more manual process, but we outline
+the procedure in the second section; it is also likely that we will post
+pre-compiled binaries for the last few remaining non-Unix operating
+systems in widespread use.
+
+Finally, we describe how you can customize FFTW for special needs by
+generating @emph{codelets} for fast transforms of sizes not supported
+efficiently by the standard FFTW distribution.
 
 @menu
 * Installation on Unix::        
 * Installation on non-Unix systems::  
+* Cycle Counters::              
 * Generating your own code::    
 @end menu
 
@@ -3323,11 +3349,15 @@ to the threading library (e.g. POSIX threads on Unix).
 @section Installation on Unix
 
 @c ------------------------------------------------------------
-@node Installation on non-Unix systems, Generating your own code, Installation on Unix, Installation and Customization
+@node Installation on non-Unix systems, Cycle Counters, Installation on Unix, Installation and Customization
 @section Installation on non-Unix systems
 
 @c ------------------------------------------------------------
-@node Generating your own code,  , Installation on non-Unix systems, Installation and Customization
+@node Cycle Counters, Generating your own code, Installation on non-Unix systems, Installation and Customization
+@section Cycle Counters
+
+@c ------------------------------------------------------------
+@node Generating your own code,  , Cycle Counters, Installation and Customization
 @section Generating your own code
 
 @c ************************************************************
