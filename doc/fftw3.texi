@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.133 2003-03-12 07:24:37 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.134 2003-03-12 07:28:51 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3689,7 +3689,7 @@ Unlike FFTW 2, there are no separate header files for real and complex
 transforms (or even for different precisions) in FFTW 3; all interfaces
 are defined in the @code{<fftw3.h>} header file.
 
-@subsubheading Numeric Types
+@heading Numeric Types
 
 The main difference in data types is that @code{fftw_complex} in FFTW 2
 was defined as a @code{struct} with macros @code{c_re} and @code{c_im}
@@ -3710,7 +3710,7 @@ Also, FFTW 2 had an @code{fftw_real} typedef that was an alias for
 @code{double} (in double precision).  In FFTW 3 you should just use
 @code{double} (or whatever precision you are employing).
 
-@subsubheading Plans
+@heading Plans
 
 The major difference between FFTW 2 and FFTW 3 is in the
 planning/execution division of labor.  In FFTW 2, plans were found for a
@@ -3778,7 +3778,7 @@ Instead of @code{rfftwnd_create_plan} (or @code{rfftw2d_create_plan} or
 specified in the advanced planner routines,
 @code{fftw_plan_many_dft_r2c} or @code{fftw_plan_many_dft_c2r}.
 
-@subsubheading Wisdom
+@heading Wisdom
 
 In FFTW 2, you had to supply the @code{FFTW_USE_WISDOM} flag in order to
 use wisdom; in FFTW 3, wisdom is always used.  (You could simulate the
@@ -3807,7 +3807,7 @@ powers of 2, but this no longer occurs).
 FFTW 3 also has the new routine @code{fftw_import_system_wisdom} to
 import wisdom from a standard system-wide location.
 
-@subsubheading Memory allocation
+@heading Memory allocation
 
 In FFTW 3, we recommend allocating your arrays with @code{fftw_malloc}
 and deallocating them with @code{fftw_free}; this is not required, but
@@ -3824,7 +3824,7 @@ FFTW 3; those few users who require this functionality can just
 directly modify the memory-allocation routines in FFTW (they are defined
 in @code{kernel/alloc.c}).
 
-@subsubheading Fortran interface
+@heading Fortran interface
 
 In FFTW 2, the subroutine names were obtained by replacing @samp{fftw_}
 with @samp{fftw_f77}; in FFTW 3, you replace @samp{fftw_} with
@@ -3846,7 +3846,7 @@ multi-dimensional arrays are in column-major order).  Unlike FFTW 2, we
 do provide some support for wisdom import/export in Fortran
 (@pxref{Wisdom of Fortran?}).
 
-@subsubheading Threads
+@heading Threads
 
 Like FFTW 2, only the execution routines are thread-safe.  All planner
 routines, etcetera, should be called by only a single thread at a time
