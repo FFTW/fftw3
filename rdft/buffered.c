@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.25 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: buffered.c,v 1.26 2003-01-15 11:51:34 athena Exp $ */
 
 #include "rdft.h"
 
@@ -96,7 +96,7 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(%s-%u%v/%u-%u%(%p%)%(%p%)%(%p%))",
+     p->print(p, "(%s-%d%v/%d-%d%(%p%)%(%p%)%(%p%))",
               ego->slv->adt->nam,
               ego->n, ego->nbuf,
               ego->vl, ego->bufdist % ego->n,

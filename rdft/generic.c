@@ -256,7 +256,7 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
 
-     p->print(p, "(rdft-generic-%s-%u%(%p%))", 
+     p->print(p, "(rdft-generic-%s-%d%(%p%))", 
 	      ego->kind == R2HC ? "r2hc-dit" : "hc2r-dif",
 	      ego->r, ego->cld);
 }

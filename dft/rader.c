@@ -266,7 +266,7 @@ static void destroy_dit(plan *ego_)
 
 static void print_aux(const char *name, P *ego, printer *p)
 {
-     p->print(p, "(%s-%u%ois=%oos=%(%p%)",
+     p->print(p, "(%s-%d%ois=%oos=%(%p%)",
               name, ego->n, ego->is, ego->os, ego->cld1);
      if (ego->cld2 != ego->cld1)
           p->print(p, "%(%p%)", ego->cld2);

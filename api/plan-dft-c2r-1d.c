@@ -20,7 +20,7 @@
 
 #include "api.h"
 
-X(plan) X(plan_dft_c2r_1d) (int n, C *in, R *out, int flags)
+X(plan) X(plan_dft_c2r_1d)(int n, C *in, R *out, int flags)
 {
-     return X(plan_dft_c2r) (1, &n, in, out, flags);
+     return X(plan_dft_c2r)(1, &n, in, out, flags);
 }

@@ -35,26 +35,33 @@ struct X(plan_s) {
 };
 
 /* shorthand */
-typedef struct X (plan_s) apiplan;
+typedef struct X(plan_s) apiplan;
 
 /* complex type for internal use */
 typedef R C[2];
 
-void X(extract_reim) (int sign, C *c, R **r, R **i);
-tensor *X(mktensor_rowmajor) (int rnk, const int *n,
-			      const int *niphys, const int *nophys,
-			      int is, int os);
-tensor *X(mktensor_iodims) (int rank, const X(iodim) * dims);
-const int *X(rdft2_pad) (int rnk, const int *n, const int *nembed,
-			 int inplace, int cmplx, int **nfree);
+void X(extract_reim)(int sign, C *c, R **r, R **i);
 
-printer *X(mkprinter_file) (FILE * f);
+tensor *X(mktensor_rowmajor)(int rnk, const int *n,
+			     const int *niphys, const int *nophys,
+			     int is, int os);
 
-planner *X(the_planner) (void);
-void X(configure_planner) (planner *plnr);
+tensor *X(mktensor_iodims)(int rank, const X(iodim) *dims);
+const int *X(rdft2_pad)(int rnk, const int *n, const int *nembed,
+			int inplace, int cmplx, int **nfree);
 
-void X(mapflags) (planner *, int);
+int X(many_kosherp)(int rnk, const int *n, int howmany);
+int X(guru_kosherp)(int rank, const X(iodim) *dims,
+		    int howmany_rank, const X(iodim) *howmany_dims);
 
-apiplan *X(mkapiplan) (int flags, problem *prb);
+
+printer *X(mkprinter_file)(FILE *f);
+
+planner *X(the_planner)(void);
+void X(configure_planner)(planner *plnr);
+
+void X(mapflags)(planner *, int);
+
+apiplan *X(mkapiplan)(int flags, problem *prb);
 
 #endif				/* __API_H__ */

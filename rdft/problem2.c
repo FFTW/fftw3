@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.26 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: problem2.c,v 1.27 2003-01-15 11:51:34 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -49,7 +49,7 @@ static void hash(const problem *p_, md5 *m)
 static void print(problem *ego_, printer *p)
 {
      problem_rdft2 *ego = (problem_rdft2 *) ego_;
-     p->print(p, "(rdft2 %u %td %td %d %T %T)", 
+     p->print(p, "(rdft2 %d %td %td %d %T %T)", 
 	      X(alignment_of)(ego->r),
 	      ego->rio - ego->r, 
 	      ego->iio - ego->r,
@@ -96,7 +96,10 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
      problem_rdft2 *ego =
           (problem_rdft2 *)X(mkproblem)(sizeof(problem_rdft2), &padt);
 
+     A(X(tensor_kosherp)(sz));
+     A(X(tensor_kosherp)(vecsz));
      A(FINITE_RNK(sz->rnk));
+
      if (sz->rnk > 1) { /* have to compress rnk-1 dims separately, ugh */
 	  tensor *szc = X(tensor_copy_except)(sz, sz->rnk - 1);
 	  tensor *szr = X(tensor_copy_sub)(sz, sz->rnk - 1, 1);

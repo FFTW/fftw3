@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.11 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.12 2003-01-15 11:51:34 athena Exp $ */
 
 
 #include "threads.h"
@@ -106,7 +106,7 @@ static void print(plan *ego_, printer *p)
      P *ego = (P *) ego_;
      const S *s = ego->solver;
      int i;
-     p->print(p, "(rdft2-thr-vrank>=1-x%u/%d)", ego->nthr, s->vecloop_dim);
+     p->print(p, "(rdft2-thr-vrank>=1-x%d/%d)", ego->nthr, s->vecloop_dim);
      for (i = 0; i < ego->nthr; ++i)
 	  if (i == 0 || (ego->cldrn[i] != ego->cldrn[i-1] &&
 			 (i <= 1 || ego->cldrn[i] != ego->cldrn[i-2])))

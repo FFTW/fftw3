@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.18 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.19 2003-01-15 11:51:34 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -201,7 +201,7 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(%se-r2hc-%u%v%(%p%))",
+     p->print(p, "(%se-r2hc-%d%v%(%p%))",
 	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }
 

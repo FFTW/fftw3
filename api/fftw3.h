@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.33 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: fftw3.h,v 1.34 2003-01-15 11:51:34 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -44,23 +44,12 @@ extern "C"
 #define FFTW_MANGLE_FLOAT(name) FFTW_CONCAT(fftwf_, name)
 #define FFTW_MANGLE_LONG_DOUBLE(name) FFTW_CONCAT(fftwl_, name)
 
-typedef struct {
-     int n;
-     int is;			/* input stride */
-     int os;			/* output stride */
-}
-FFTW_MANGLE_DOUBLE(iodim);
-typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_FLOAT(iodim);
-typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_LONG_DOUBLE(iodim);
 
-typedef enum {
+enum FFTW_R2R_KIND {
      FFTW_R2HC=0, FFTW_HC2R=1, FFTW_DHT=2,
      FFTW_REDFT00=3, FFTW_REDFT01=4, FFTW_REDFT10=5, FFTW_REDFT11=6,
      FFTW_RODFT00=7, FFTW_RODFT01=8, FFTW_RODFT10=9, FFTW_RODFT11=10
-} FFTW_MANGLE_DOUBLE(r2r_kind);
-typedef FFTW_MANGLE_DOUBLE(r2r_kind) FFTW_MANGLE_FLOAT(r2r_kind);
-typedef FFTW_MANGLE_DOUBLE(r2r_kind) FFTW_MANGLE_LONG_DOUBLE(r2r_kind);
-
+};
 
 /*
   huge second-order macro that defines prototypes for all API
@@ -76,6 +65,14 @@ typedef FFTW_MANGLE_DOUBLE(r2r_kind) FFTW_MANGLE_LONG_DOUBLE(r2r_kind);
 FFTW_DEFINE_COMPLEX(R, C);						\
 									\
 typedef struct X(plan_s) *X(plan);					\
+									\
+typedef struct {							\
+     int n;								\
+     int is;			/* input stride */			\
+     int os;			/* output stride */			\
+} X(iodim);								\
+									\
+typedef enum FFTW_R2R_KIND X(r2r_kind);					\
 									\
 void X(execute)(X(plan) p);						\
 									\

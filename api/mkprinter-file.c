@@ -31,9 +31,9 @@ static void putchr_file(printer * p_, char c)
      fputc(c, p->f);
 }
 
-printer *X(mkprinter_file) (FILE * f)
+printer *X(mkprinter_file)(FILE *f)
 {
-     P_file *p = (P_file *) X(mkprinter) (sizeof(P_file), putchr_file);
+     P_file *p = (P_file *) X(mkprinter)(sizeof(P_file), putchr_file);
      p->f = f;
      return &p->super;
 }

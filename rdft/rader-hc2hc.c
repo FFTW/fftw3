@@ -318,7 +318,7 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
 
-     p->print(p, "(rdft-rader-%s-%u%(%p%)%(%p%)%(%p%))",
+     p->print(p, "(rdft-rader-%s-%d%(%p%)%(%p%)%(%p%))",
 	      ego->kind == R2HC ? "r2hc-dit" : "hc2r-dif",
               ego->r, ego->cldr0, ego->cldr, ego->cld);
 }

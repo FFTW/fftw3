@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.128 2003-01-15 05:23:36 stevenj Exp $ */
+/* $Id: planner.c,v 1.129 2003-01-15 11:51:34 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -620,18 +620,18 @@ void X(planner_dump)(planner *ego, int verbose)
 	  
      }
 
-     D("nplan = %u\n", ego->nplan);
-     D("nprob = %u\n", ego->nprob);
+     D("nplan = %d\n", ego->nplan);
+     D("nprob = %d\n", ego->nprob);
      D("pcost = %g\n", ego->pcost);
      D("epcost = %g\n", ego->epcost);
-     D("lookup = %u\n", ego->lookup);
-     D("succ_lookup = %u\n", ego->succ_lookup);
-     D("lookup_iter = %u\n", ego->lookup_iter);
-     D("insert = %u\n", ego->insert);
-     D("insert_iter = %u\n", ego->insert_iter);
-     D("insert_unknown = %u\n", ego->insert_unknown);
+     D("lookup = %d\n", ego->lookup);
+     D("succ_lookup = %d\n", ego->succ_lookup);
+     D("lookup_iter = %d\n", ego->lookup_iter);
+     D("insert = %d\n", ego->insert);
+     D("insert_iter = %d\n", ego->insert_iter);
+     D("insert_unknown = %d\n", ego->insert_unknown);
      D("nrehash = %d\n", ego->nrehash);
-     D("hashsiz = %d\n", ego->hashsiz);
+     D("hashsiz = %u\n", ego->hashsiz);
      D("empty = %d\n", empty);
      D("valid = %d\n", valid);
      D("infeasible = %d\n", infeasible);

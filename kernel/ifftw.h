@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.171 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: ifftw.h,v 1.172 2003-01-15 11:51:34 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -285,6 +285,7 @@ int X(tensor_min_stride)(const tensor *sz);
 int X(tensor_inplace_strides)(const tensor *sz);
 int X(tensor_inplace_strides2)(const tensor *a, const tensor *b);
 tensor *X(tensor_copy)(const tensor *sz);
+int X(tensor_kosherp)(const tensor *x);
 
 tensor *X(tensor_copy_inplace)(const tensor *sz, inplace_kind k);
 tensor *X(tensor_copy_except)(const tensor *sz, int except_dim);

@@ -31,18 +31,18 @@ static int getchr_file(scanner * sc_)
      return fgetc(sc->f);
 }
 
-static scanner *mkscanner_file(FILE * f)
+static scanner *mkscanner_file(FILE *f)
 {
-     S_file *sc = (S_file *) X(mkscanner) (sizeof(S_file), getchr_file);
+     S_file *sc = (S_file *) X(mkscanner)(sizeof(S_file), getchr_file);
      sc->f = f;
      return &sc->super;
 }
 
-int X(import_wisdom_from_file) (FILE * input_file)
+int X(import_wisdom_from_file)(FILE *input_file)
 {
      scanner *s = mkscanner_file(input_file);
-     planner *plnr = X(the_planner) ();
+     planner *plnr = X(the_planner)();
      int ret = plnr->adt->imprt(plnr, s);
-     X(scanner_destroy) (s);
+     X(scanner_destroy)(s);
      return ret;
 }

@@ -22,7 +22,7 @@
 #include "rdft.h"
 
 /* guru interface: requires care in alignment, r - i, etcetera. */
-void X(execute_dft_c2r) (X(plan) p, R *ri, R *ii, R *out)
+void X(execute_dft_c2r)(X(plan) p, R *ri, R *ii, R *out)
 {
      plan_rdft2 *pln = (plan_rdft2 *) p->pln;
      pln->apply((plan *) pln, out, ri, ii);

@@ -21,23 +21,25 @@
 #include "api.h"
 #include "rdft.h"
 
-rdft_kind *X(map_r2r_kind) (int rank, const X(r2r_kind) * kind);
+rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind);
 
-X(plan) X(plan_guru_r2r) (int rank, const X(iodim) * dims,
-                          int howmany_rank,
-                          const X(iodim) * howmany_dims,
-                          R *in, R *out,
-                          const X(r2r_kind) * kind, int flags)
+X(plan) X(plan_guru_r2r)(int rank, const X(iodim) *dims,
+			 int howmany_rank,
+			 const X(iodim) *howmany_dims,
+			 R *in, R *out,
+			 const X(r2r_kind) * kind, int flags)
 {
      X(plan) p;
-     rdft_kind *k = X(map_r2r_kind) (rank, kind);
+     rdft_kind *k;
 
-     p = X(mkapiplan) (flags, X(mkproblem_rdft_d) (X(mktensor_iodims)
-                       (rank, dims),
-                       X(mktensor_iodims)
-                       (howmany_rank,
-                        howmany_dims), in, out,
-                       k));
-     X(ifree0) (k);
+     if (!X(guru_kosherp)(rank, dims, howmany_rank, howmany_dims)) return 0;
+
+     k = X(map_r2r_kind)(rank, kind);
+     p = X(mkapiplan)(
+	  flags,
+	  X(mkproblem_rdft_d)(X(mktensor_iodims)(rank, dims),
+			      X(mktensor_iodims)(howmany_rank, howmany_dims), 
+			      in, out, k));
+     X(ifree0)(k);
      return p;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.36 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: problem.c,v 1.37 2003-01-15 11:51:34 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -97,7 +97,7 @@ static void print(problem *ego_, printer *p)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
      int i;
-     p->print(p, "(rdft %u %td %T %T", 
+     p->print(p, "(rdft %d %td %T %T", 
 	      X(alignment_of)(ego->I),
 	      ego->O - ego->I, 
 	      ego->sz,
@@ -144,7 +144,10 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
      int rnk = sz->rnk;
      int i;
 
+     A(X(tensor_kosherp)(sz));
+     A(X(tensor_kosherp)(vecsz));
      A(FINITE_RNK(sz->rnk));
+
      for (i = rnk = 0; i < sz->rnk; ++i) {
           A(sz->dims[i].n > 0);
           if (nontrivial(sz->dims + i, kind[i]))
@@ -192,6 +195,7 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
      ego->O = O;
 
      A(FINITE_RNK(ego->sz->rnk));
+
      return &(ego->super);
 }
 

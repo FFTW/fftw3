@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.23 2003-01-13 09:20:36 athena Exp $ */
+/* $Id: alloc.c,v 1.24 2003-01-15 11:51:34 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -281,7 +281,7 @@ void X(malloc_print_minfo)(void)
 
      for (h = 0; h < HASHSZ; ++h) 
 	  for (info = minfo[h]; info; info = info->next) {
-	       printf("%s:%d:  %u bytes at %p\n",
+	       printf("%s:%d:  %d bytes at %p\n",
 		      info->file, info->line, info->n, info->p);
 	  }
 }

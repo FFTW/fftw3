@@ -20,11 +20,11 @@
 
 #include "api.h"
 
-tensor *X(mktensor_rowmajor) (int rnk, const int *n,
-                              const int *niphys, const int *nophys,
-                              int is, int os)
+tensor *X(mktensor_rowmajor)(int rnk, const int *n,
+			     const int *niphys, const int *nophys,
+			     int is, int os)
 {
-     tensor *x = X(mktensor) (rnk);
+     tensor *x = X(mktensor)(rnk);
 
      if (FINITE_RNK(rnk) && rnk > 0) {
           int i;
@@ -40,4 +40,20 @@ tensor *X(mktensor_rowmajor) (int rnk, const int *n,
           }
      }
      return x;
+}
+
+static int rowmajor_kosherp(int rnk, const int *n)
+{
+     int i;
+     if (rnk < 0) return 0;
+     if (FINITE_RNK(rnk)) {
+	  for (i = 0; i < rnk; ++i)
+	       if (n[i] < 0) return 0;
+     }
+     return 1;
+}
+
+int X(many_kosherp)(int rnk, const int *n, int howmany)
+{
+     return (howmany >= 0) && rowmajor_kosherp(rnk, n);
 }

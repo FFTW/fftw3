@@ -107,7 +107,7 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
 
-     p->print(p, "(dft-generic-dit-%u%(%p%))", ego->r, ego->cld);
+     p->print(p, "(dft-generic-dit-%d%(%p%))", ego->r, ego->cld);
 }
 
 static int applicable0(const problem *p_)

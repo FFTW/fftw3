@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.27 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: problem.c,v 1.28 2003-01-15 11:51:34 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -46,7 +46,7 @@ static void hash(const problem *p_, md5 *m)
 static void print(problem *ego_, printer *p)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
-     p->print(p, "(dft %u %td %td %td %T %T)", 
+     p->print(p, "(dft %d %td %td %td %T %T)", 
 	      X(alignment_of)(ego->ri),
 	      ego->ro - ego->ri, 
 	      ego->ii - ego->ri, 
@@ -82,8 +82,9 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
      problem_dft *ego =
           (problem_dft *)X(mkproblem)(sizeof(problem_dft), &padt);
 
-     /* both in place or both out of place */
-     CK((ri == ro) == (ii == io));
+     A((ri == ro) == (ii == io)); /* both in place or both out of place */
+     A(X(tensor_kosherp)(sz));
+     A(X(tensor_kosherp)(vecsz));
 
      ego->sz = X(tensor_compress)(sz);
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);

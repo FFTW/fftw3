@@ -21,15 +21,16 @@
 #include "api.h"
 #include "dft.h"
 
-X(plan) X(plan_guru_dft) (int rank, const X(iodim) * dims,
-                          int howmany_rank,
-                          const X(iodim) * howmany_dims,
-                          R *ri, R *ii, R *ro, R *io, int flags)
+X(plan) X(plan_guru_dft)(int rank, const X(iodim) *dims,
+			 int howmany_rank,
+			 const X(iodim) *howmany_dims,
+			 R *ri, R *ii, R *ro, R *io, int flags)
 {
-     return X(mkapiplan) (flags, X(mkproblem_dft_d) (X(mktensor_iodims)
-                          (rank, dims),
-                          X(mktensor_iodims)
-                          (howmany_rank,
-                           howmany_dims), ri,
-                          ii, ro, io));
+     if (!X(guru_kosherp)(rank, dims, howmany_rank, howmany_dims)) return 0;
+
+     return X(mkapiplan)(
+	  flags,
+	  X(mkproblem_dft_d)(X(mktensor_iodims)(rank, dims),
+			     X(mktensor_iodims)(howmany_rank, howmany_dims),
+			     ri, ii, ro, io));
 }

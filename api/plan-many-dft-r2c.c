@@ -21,48 +21,35 @@
 #include "api.h"
 #include "rdft.h"
 
-X(plan) X(plan_many_dft_r2c) (int rank, const int *n,
-                              int howmany,
-                              R *in, const int *inembed,
-                              int istride, int idist,
-                              C *out, const int *onembed,
-                              int ostride, int odist, int flags)
+X(plan) X(plan_many_dft_r2c)(int rank, const int *n,
+			     int howmany,
+			     R *in, const int *inembed,
+			     int istride, int idist,
+			     C *out, const int *onembed,
+			     int ostride, int odist, int flags)
 {
      R *ro, *io;
      int *nfi, *nfo;
      int inplace;
      X(plan) p;
 
-     X(extract_reim) (FFT_SIGN, out, &ro, &io);
+     if (!X(many_kosherp)(rank, n, howmany)) return 0;
+
+     X(extract_reim)(FFT_SIGN, out, &ro, &io);
      inplace = in == ro;
 
-     p = X(mkapiplan) (flags,
-                       X(mkproblem_rdft2_d) (X(mktensor_rowmajor) (rank, n,
-                                             X
-                                             (rdft2_pad)
-                                             (rank,
-                                              n,
-                                              inembed,
-                                              inplace,
-                                              0,
-                                              &nfi),
-                                             X
-                                             (rdft2_pad)
-                                             (rank,
-                                              n,
-                                              onembed,
-                                              inplace,
-                                              1,
-                                              &nfo),
-                                             istride,
-                                             2 *
-                                             ostride),
-                                             X(mktensor_1d) (howmany,
-                                                             idist,
-                                                             2 * odist),
-                                             in, ro, io, R2HC));
+     p = X(mkapiplan)(
+	  flags, 
+	  X(mkproblem_rdft2_d)(
+	       X(mktensor_rowmajor)(
+		    rank, n,
+		    X(rdft2_pad)(rank, n, inembed, inplace, 0, &nfi),
+		    X(rdft2_pad)(rank, n, onembed, inplace, 1, &nfo),
+		    istride, 2 * ostride), 
+	       X(mktensor_1d)(howmany, idist, 2 * odist),
+	       in, ro, io, R2HC));
 
-     X(ifree0) (nfi);
-     X(ifree0) (nfo);
+     X(ifree0)(nfi);
+     X(ifree0)(nfo);
      return p;
 }

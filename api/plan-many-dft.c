@@ -21,27 +21,28 @@
 #include "api.h"
 #include "dft.h"
 
-#define N0(nembed) ((nembed) ? (nembed) : n)
+#define N0(nembed)((nembed) ? (nembed) : n)
 
-X(plan) X(plan_many_dft) (int rank, const int *n,
-                          int howmany,
-                          C *in, const int *inembed,
-                          int istride, int idist,
-                          C *out, const int *onembed,
-                          int ostride, int odist, int sign, int flags)
+X(plan) X(plan_many_dft)(int rank, const int *n,
+			 int howmany,
+			 C *in, const int *inembed,
+			 int istride, int idist,
+			 C *out, const int *onembed,
+			 int ostride, int odist, int sign, int flags)
 {
      R *ri, *ii, *ro, *io;
 
-     X(extract_reim) (sign, in, &ri, &ii);
-     X(extract_reim) (sign, out, &ro, &io);
+     if (!X(many_kosherp)(rank, n, howmany)) return 0;
 
-     return X(mkapiplan) (flags,
-                          X(mkproblem_dft_d) (X(mktensor_rowmajor)
-                                              (rank, n, N0(inembed),
-                                               N0(onembed), 2 * istride,
-                                               2 * ostride),
-                                              X(mktensor_1d) (howmany,
-                                                              2 * idist,
-                                                              2 * odist),
-                                              ri, ii, ro, io));
+     X(extract_reim)(sign, in, &ri, &ii);
+     X(extract_reim)(sign, out, &ro, &io);
+
+     return 
+	  X(mkapiplan)(flags,
+		       X(mkproblem_dft_d)(
+			    X(mktensor_rowmajor)(rank, n, 
+						 N0(inembed), N0(onembed),
+						 2 * istride, 2 * ostride),
+			    X(mktensor_1d)(howmany, 2 * idist, 2 * odist),
+			    ri, ii, ro, io));
 }

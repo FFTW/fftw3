@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.20 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: hc2hc.c,v 1.21 2003-01-15 11:51:34 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -60,7 +60,7 @@ static void print(plan *ego_, printer *p)
      const solver_hc2hc *slv = ego->slv;
      const hc2hc_desc *e = slv->desc;
 
-     p->print(p, "(%s-%u/%u%v \"%s\"%(%p%)%(%p%)%(%p%))",
+     p->print(p, "(%s-%d/%d%v \"%s\"%(%p%)%(%p%)%(%p%))",
               slv->nam, ego->r, X(twiddle_length)(ego->r, e->tw),
 	      ego->vl, e->nam, ego->cld0, ego->cldm, ego->cld);
 }

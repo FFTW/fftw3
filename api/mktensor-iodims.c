@@ -20,10 +20,10 @@
 
 #include "api.h"
 
-tensor *X(mktensor_iodims) (int rank, const X(iodim) * dims)
+tensor *X(mktensor_iodims)(int rank, const X(iodim) *dims)
 {
      int i;
-     tensor *x = X(mktensor) (rank);
+     tensor *x = X(mktensor)(rank);
 
      if (FINITE_RNK(rank)) {
           for (i = 0; i < rank; ++i) {
@@ -33,4 +33,25 @@ tensor *X(mktensor_iodims) (int rank, const X(iodim) * dims)
           }
      }
      return x;
+}
+
+static int iodims_kosherp(int rank, const X(iodim) *dims)
+{
+     int i;
+
+     if (rank < 0) return 0;
+
+     if (FINITE_RNK(rank)) {
+	  for (i = 0; i < rank; ++i)
+	       if (dims[i].n < 0) return 0;
+     }
+
+     return 1;
+}
+
+int X(guru_kosherp)(int rank, const X(iodim) *dims,
+		    int howmany_rank, const X(iodim) *howmany_dims)
+{
+     return (iodims_kosherp(rank, dims) &&
+	     iodims_kosherp(howmany_rank, howmany_dims));
 }

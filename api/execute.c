@@ -20,7 +20,7 @@
 
 #include "api.h"
 
-void X(execute) (X(plan) p)
+void X(execute)(X(plan) p)
 {
      plan *pln = p->pln;
      pln->adt->solve(pln, p->prb);

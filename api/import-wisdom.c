@@ -23,7 +23,7 @@
 typedef struct
 {
      scanner super;
-     int (*emitter) (void *);
+     int (*emitter)(void *);
      void *data;
 }
 S;
@@ -31,18 +31,18 @@ S;
 static int getchr_generic(scanner * s_)
 {
      S *s = (S *) s_;
-     return (s->emitter) (s->data);
+     return (s->emitter)(s->data);
 }
 
-int X(import_wisdom) (int (*emitter) (void *), void *data)
+int X(import_wisdom)(int (*emitter)(void *), void *data)
 {
-     S *s = (S *) X(mkscanner) (sizeof(S), getchr_generic);
-     planner *plnr = X(the_planner) ();
+     S *s = (S *) X(mkscanner)(sizeof(S), getchr_generic);
+     planner *plnr = X(the_planner)();
      int ret;
 
      s->emitter = emitter;
      s->data = data;
      ret = plnr->adt->imprt(plnr, (scanner *) s);
-     X(scanner_destroy) ((scanner *) s);
+     X(scanner_destroy)((scanner *) s);
      return ret;
 }

@@ -18,13 +18,15 @@
  *
  */
 
-/* $Id: tensor.c,v 1.34 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: tensor.c,v 1.35 2003-01-15 11:51:34 athena Exp $ */
 
 #include "ifftw.h"
 
 tensor *X(mktensor)(int rnk) 
 {
      tensor *x;
+
+     A(rnk >= 0);
 
 #if defined(STRUCT_HACK_KR)
      if (FINITE_RNK(rnk) && rnk > 1)
@@ -108,7 +110,7 @@ void X(tensor_print)(const tensor *x, printer *p)
 	  int i;
 	  for (i = 0; i < x->rnk; ++i) {
 	       const iodim *d = x->dims + i;
-	       p->print(p, " (%u %d %d)", d->n, d->is, d->os);
+	       p->print(p, " (%d %d %d)", d->n, d->is, d->os);
 	  }
      }
      p->print(p, ")");

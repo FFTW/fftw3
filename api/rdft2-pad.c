@@ -21,8 +21,8 @@
 #include <string.h>
 #include "api.h"
 
-const int *X(rdft2_pad) (int rnk, const int *n, const int *nembed,
-                         int inplace, int cmplx, int **nfree)
+const int *X(rdft2_pad)(int rnk, const int *n, const int *nembed,
+			int inplace, int cmplx, int **nfree)
 {
      A(FINITE_RNK(rnk));
      *nfree = 0;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.19 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.20 2003-01-15 11:51:34 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -83,7 +83,7 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(dft-r2hc-%u%(%p%))", ego->n, ego->cld);
+     p->print(p, "(dft-r2hc-%d%(%p%))", ego->n, ego->cld);
 }
 
 static int applicable0(const problem *p_)

@@ -20,12 +20,12 @@
 
 #include "api.h"
 
-X(plan) X(plan_dft_c2r_3d) (int nx, int ny, int nz,
-                            C *in, R *out, int flags)
+X(plan) X(plan_dft_c2r_3d)(int nx, int ny, int nz,
+			   C *in, R *out, int flags)
 {
      int n[3];
      n[0] = nx;
      n[1] = ny;
      n[2] = nz;
-     return X(plan_dft_c2r) (3, n, in, out, flags);
+     return X(plan_dft_c2r)(3, n, in, out, flags);
 }

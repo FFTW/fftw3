@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.16 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: vrank2-transpose.c,v 1.17 2003-01-15 11:51:34 athena Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -76,7 +76,7 @@ static int applicable(const problem *p_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(dft-transpose-%u)", ego->n);
+     p->print(p, "(dft-transpose-%d)", ego->n);
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)

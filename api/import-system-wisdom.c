@@ -28,7 +28,7 @@
 #  define WISDOM_NAME "wisdom"
 #endif
 
-int X(import_system_wisdom) (void)
+int X(import_system_wisdom)(void)
 {
 #ifdef WINDOWS_AND_SO_ON	/* TODO */
      return 0;
@@ -37,7 +37,7 @@ int X(import_system_wisdom) (void)
      FILE *f;
      f = fopen("/etc/fftw/" WISDOM_NAME, "r");
      if (f) {
-          int ret = X(import_wisdom_from_file) (f);
+          int ret = X(import_wisdom_from_file)(f);
           fclose(f);
           return ret;
      } else

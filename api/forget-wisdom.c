@@ -20,8 +20,8 @@
 
 #include "api.h"
 
-void X(forget_wisdom) (void)
+void X(forget_wisdom)(void)
 {
-     planner *plnr = X(the_planner) ();
+     planner *plnr = X(the_planner)();
      plnr->adt->forget(plnr, FORGET_EVERYTHING);
 }

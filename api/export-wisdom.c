@@ -22,23 +22,23 @@
 
 typedef struct {
      printer super;
-     void (*absorber) (char c, void *);
+     void (*absorber)(char c, void *);
      void *data;
 } P;
 
 static void putchr_generic(printer * p_, char c)
 {
      P *p = (P *) p_;
-     (p->absorber) (c, p->data);
+     (p->absorber)(c, p->data);
 }
 
-void X(export_wisdom) (void (*absorber) (char c, void *), void *data)
+void X(export_wisdom)(void (*absorber)(char c, void *), void *data)
 {
-     P *p = (P *) X(mkprinter) (sizeof(P), putchr_generic);
-     planner *plnr = X(the_planner) ();
+     P *p = (P *) X(mkprinter)(sizeof(P), putchr_generic);
+     planner *plnr = X(the_planner)();
 
      p->absorber = absorber;
      p->data = data;
      plnr->adt->exprt(plnr, (printer *) p);
-     X(printer_destroy) ((printer *) p);
+     X(printer_destroy)((printer *) p);
 }

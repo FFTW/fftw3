@@ -18,12 +18,20 @@
  *
  */
 
-#include "api.h"
-#include "rdft.h"
+/* $Id: tensor9.c,v 1.1 2003-01-15 11:51:34 athena Exp $ */
 
-/* guru interface: requires care in alignment, r - i, etcetera. */
-void X(execute_dft_r2c)(X(plan) p, R *in, R *ro, R *io)
+#include "ifftw.h"
+
+int X(tensor_kosherp)(const tensor *x)
 {
-     plan_rdft2 *pln = (plan_rdft2 *) p->pln;
-     pln->apply((plan *) pln, in, ro, io);
+     int i;
+
+     if (x->rnk < 0) return 0;
+
+     if (FINITE_RNK(x->rnk)) {
+	  for (i = 0; i < x->rnk; ++i)
+	       if (x->dims[i].n < 0)
+		    return 0;
+     }
+     return 1;
 }

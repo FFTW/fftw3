@@ -32,8 +32,8 @@ typedef struct {
      flagmask op;
 } flagop;
 
-#define FLAGP(f, msk) (((f) & (msk).x) ^ (msk).xm)
-#define OP(f, msk) (((f) | (msk).x) ^ (msk).xm)
+#define FLAGP(f, msk)(((f) & (msk).x) ^ (msk).xm)
+#define OP(f, msk)(((f) | (msk).x) ^ (msk).xm)
 
 #define YES(x) {x, 0}
 #define NO(x) {x, x}
@@ -51,9 +51,9 @@ static int map_flags(int iflags, int oflags,
      return oflags;
 }
 
-#define NMAP(flagmap) (sizeof(flagmap) / sizeof(flagop))
+#define NMAP(flagmap)(sizeof(flagmap) / sizeof(flagop))
 
-void X(mapflags) (planner *plnr, int flags)
+void X(mapflags)(planner *plnr, int flags)
 {
      /* map of api flags -> api flags, to implement consistency rules
         and combination flags */

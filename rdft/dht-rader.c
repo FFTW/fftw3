@@ -204,7 +204,7 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
 
-     p->print(p, "(dht-rader-%u%ois=%oos=%(%p%)",
+     p->print(p, "(dht-rader-%d%ois=%oos=%(%p%)",
               ego->n, ego->is, ego->os, ego->cld1);
      if (ego->cld2 != ego->cld1)
           p->print(p, "%(%p%)", ego->cld2);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.19 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: rodft00e-r2hc.c,v 1.20 2003-01-15 11:51:34 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -110,7 +110,7 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(rodft00e-r2hc-%u%v%(%p%))", ego->n - 1, ego->vl, ego->cld);
+     p->print(p, "(rodft00e-r2hc-%d%v%(%p%))", ego->n - 1, ego->vl, ego->cld);
 }
 
 static int applicable0(const solver *ego_, const problem *p_)

@@ -20,8 +20,8 @@
 
 #include "api.h"
 
-X(plan) X(plan_r2r_2d) (int nx, int ny, R *in, R *out,
-                        X(r2r_kind) kindx, X(r2r_kind) kindy, int flags)
+X(plan) X(plan_r2r_2d)(int nx, int ny, R *in, R *out,
+		       X(r2r_kind) kindx, X(r2r_kind) kindy, int flags)
 {
      int n[2];
      X(r2r_kind) kind[2];
@@ -29,5 +29,5 @@ X(plan) X(plan_r2r_2d) (int nx, int ny, R *in, R *out,
      n[1] = ny;
      kind[0] = kindx;
      kind[1] = kindy;
-     return X(plan_r2r) (2, n, in, out, kind, flags);
+     return X(plan_r2r)(2, n, in, out, kind, flags);
 }
