@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.13 2003-01-19 01:07:33 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.14 2003-01-19 01:21:09 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -330,11 +330,11 @@ input is initialized.  The fourth argument, @code{sign}, can be either
 @ctindex FFTW_BACKWARD
 and indicates the direction of the transform you are interested in;
 technically, it is the sign of the exponent in the transform.  The
-@code{flags} argument is usually either @code{FFTW_DEFAULTS} or
+@code{flags} argument is usually either @code{FFTW_MEASURE} or
 @cindex flags
-@code{FFTW_ESTIMATE}.  @code{FFTW_DEFAULTS} indicates the default
-options, in which FFTW actually runs
-@ctindex FFTW_DEFAULTS
+@code{FFTW_ESTIMATE}.  @code{FFTW_MEASURE} means that FFTW actually
+runs
+@ctindex FFTW_MEASURE
 and measures the execution time of several FFTs in order to find the
 best way to compute the transform of size @code{n}.  This may take
 some time (usually a few seconds), depending on your machine and on
@@ -343,7 +343,7 @@ does not run any computation and just builds a
 @ctindex FFTW_ESTIMATE
 reasonable plan that is probably sub-optimal.  In other words, if your
 program performs many transforms of the same size and initialization
-time is not important, use @code{FFTW_DEFAULTS}; otherwise use the
+time is not important, use @code{FFTW_MEASURE}; otherwise use the
 estimate.  (There are other options too; see @ref{FFTW Reference}.  For
 example, use @code{FFTW_PATIENT} if you're willing to wait even longer
 for a more optimal plan.
