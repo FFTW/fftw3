@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.20 2002-07-14 17:49:20 stevenj Exp $ */
+/* $Id: planner.c,v 1.21 2002-07-14 19:03:51 stevenj Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -145,8 +145,10 @@ static void insert(planner *ego, problem *p, plan *pln, pair *sp)
 static plan *slv_mkplan(planner *ego, problem *p, solver *s)
 {
      int flags = ego->flags;
-     s->adt->mkplan(s, p, ego);
+     plan *pln;
+     pln = s->adt->mkplan(s, p, ego);
      ego->flags = flags;
+     return pln;
 }
 
 static plan *mkplan(planner *ego, problem *p)
