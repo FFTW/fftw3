@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.4 2003-05-15 23:09:07 athena Exp $ */
+/* $Id: plan.c,v 1.5 2003-05-15 23:13:03 athena Exp $ */
 
 #include "dft.h"
 
@@ -36,7 +36,7 @@ plan *X(mkplan_dftw)(size_t size, const plan_adt *adt, dftwapply apply)
 {
      plan_dftw *ego;
 
-     ego = (plan_dft *) X(mkplan)(size, adt);
+     ego = (plan_dftw *) X(mkplan)(size, adt);
      ego->apply = apply;
 
      return &(ego->super);
