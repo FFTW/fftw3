@@ -18,58 +18,49 @@
  *
  */
 
-/* $Id: planner.c,v 1.12 2002-06-12 22:57:19 athena Exp $ */
+/* $Id: planner.c,v 1.13 2002-06-13 15:04:24 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
-     solver *car;
+     solver *slv;
+     int id;
      pair *cdr;
 };
 
 /* Entry in the solutions hash table */
 /*
-   The meaning of PLN and SLV is as follows:
+   The meaning of PLN and SP is as follows:
    
     if (PLN)          then PLN solves PROBLEM
-    else if (SOLVER)  then SOLVER can be called to yield a plan 
+    else if (SP)      then SP->SOLVER can be called to yield a plan 
     else                   PROBLEM has been seen before and cannot be solved.
 */
 
 struct solutions_s {
      problem *p;
      plan *pln;
-     solver *slv;
+     pair *sp;
      solutions *cdr;
 };
 
 /* pair management */
-static inline pair *cons(solver *car, pair *cdr)
+static inline pair *cons(solver *slv, int id, pair *cdr)
 {
      pair *n = (pair *) fftw_malloc(sizeof(pair), PAIRS);
-     n->car = car;
+     n->slv = slv;
+     n->id = id;
      n->cdr = cdr;
      return n;
 }
 
-static solver *car(pair *n)
-{
-     return n->car;
-}
-
-static pair *cdr(pair *n)
-{
-     return n->cdr;
-}
-
-static pair *solvers(planner *ego)
-{
-     return ego->solvers;
-}
+static solver *slv(pair *n) { return n->slv; }
+static pair *cdr(pair *n) { return n->cdr; }
+static pair *solvers(planner *ego) { return ego->solvers; }
 
 static void register_solver(planner *ego, solver *s)
 {
      X(solver_use)(s);
-     ego->solvers = cons(s, ego->solvers);
+     ego->solvers = cons(s, ego->idcnt++, ego->solvers);
 }
 
 static void hooknil(const plan *plan, const problem *p)
@@ -100,20 +91,20 @@ static solutions *lookup(planner *ego, problem *p)
 
 static void really_insert(planner *ego, solutions *l)
 {
-     unsigned int h = hash(ego, l->p);
+     uint h = hash(ego, l->p);
      l->cdr = ego->sols[h];
      ego->sols[h] = l;
 }
 
 static void rehash(planner *ego)
 {
-     unsigned int osiz = ego->hashsiz;
-     unsigned int nsiz = 2 * osiz + 1;
+     uint osiz = ego->hashsiz;
+     uint nsiz = 2 * osiz + 1;
      solutions **osol = ego->sols;
      solutions **nsol =
           (solutions **)fftw_malloc(nsiz * sizeof(solutions *), HASHT);
      solutions *s, *s_cdr;
-     unsigned int h;
+     uint h;
 
      for (h = 0; h < nsiz; ++h) 
           nsol[h] = 0;
@@ -132,7 +123,7 @@ static void rehash(planner *ego)
           X(free)(osol);
 }
 
-static void insert(planner *ego, problem *p, plan *pln, solver *slv)
+static void insert(planner *ego, problem *p, plan *pln, pair *sp)
 {
      solutions *l = (solutions *)fftw_malloc(sizeof(solutions), HASHT);
 
@@ -143,8 +134,7 @@ static void insert(planner *ego, problem *p, plan *pln, solver *slv)
      if (pln)
           X(plan_use)(pln);
      l->pln = pln;
-     l->slv = slv;  /* no need to X(solver_use)(slv) because SLV is in
-		       SOLVER_LIST */
+     l->sp = sp; 
      l->p = X(problem_dup)(p);
 
      really_insert(ego, l);
@@ -154,16 +144,15 @@ static plan *mkplan(planner *ego, problem *p)
 {
      solutions *sol;
      plan *pln;
-     solver *slv;
+     pair *sp;
 
      if ((sol = lookup(ego, p))) {
-	  pln = sol->pln;
-          if (pln)
+          if ((pln = sol->pln))
 	       goto use_plan_and_return; /* we have a plan */
 
-	  slv = sol->slv;
-	  if (slv) {
+	  if ((sp = sol->sp)) {
 	       /* call solver to create plan */
+	       solver *slv = sp->slv;
 	       pln = sol->pln = slv->adt->mkplan(slv, p, ego);
 	       X(plan_use)(pln);
 
@@ -181,8 +170,8 @@ static plan *mkplan(planner *ego, problem *p)
      } else {
 	  /* not in table.  Run inferior planner */
 	  ++ego->nprob;
-	  ego->inferior_mkplan(ego, p, &pln, &slv);
-	  insert(ego, p, pln, slv);
+	  ego->inferior_mkplan(ego, p, &pln, &sp);
+	  insert(ego, p, pln, sp);
 	  return pln;  /* plan already USEd by inferior */
      }
 }
@@ -192,7 +181,7 @@ static plan *mkplan(planner *ego, problem *p)
 static void forget(planner *ego, int everythingp)
 {
      solutions *s;
-     unsigned int h;
+     uint h;
 
      for (h = 0; h < ego->hashsiz; ++h) {
 	  s = ego->sols[h];
@@ -220,17 +209,32 @@ static void htab_destroy(planner *ego)
      X(free)(ego->sols);
 }
 
+static void print_solution(solutions *s, printer *p)
+{
+     p->print(p, "(s %P %d)\n", s->p, s->sp ? s->sp->id : 0);
+}
+
+static void export(planner *ego, printer *p)
+{
+     solutions *s;
+     uint h;
+
+     for (h = 0; h < ego->hashsiz; ++h) 
+	  for (s = ego->sols[h]; s; s = s->cdr) 
+	       print_solution(s, p);
+} 
+
 /*
  * create a planner
  */
 planner *X(mkplanner)(size_t sz,
 		      void (*infmkplan)(planner *ego, problem *p, 
-					plan **, solver **),
+					plan **, pair **),
                       void (*destroy) (planner *),
 		      int estimatep)
 {
      static const planner_adt padt = {
-	  car, cdr, solvers, register_solver, mkplan, forget
+	  slv, cdr, solvers, register_solver, mkplan, forget, export
      };
 
      planner *p = (planner *) fftw_malloc(sz, PLANNERS);
@@ -246,6 +250,7 @@ planner *X(mkplanner)(size_t sz,
      p->cnt = 0;
      p->estimatep = estimatep;
      p->timeallp = !CLASSIC_MODE;
+     p->idcnt = 1;              /* ID == 0 means no solution */
      rehash(p);			/* so that hashsiz > 0 */
 
      return p;
@@ -264,8 +269,8 @@ void X(planner_destroy)(planner *ego)
 
      /* destroy all solvers */
      for (l = ego->solvers; l; l = l0) {
-          l0 = cdr(l);
-          X(solver_destroy)(car(l));
+          l0 = l->cdr;
+          X(solver_destroy)(l->slv);
           X(free)(l);
      }
 
@@ -314,7 +319,7 @@ void X(planner_dump)(planner *ego, int verbose)
 {
      int cnt = 0, cnt_null = 0, max_len = 0, empty = 0;
      solutions *s;
-     unsigned int h;
+     uint h;
      if (verbose) {
           printer *pr = X(mkprinter)(sizeof(printer), putchr);
           for (h = 0; h < ego->hashsiz; ++h) {

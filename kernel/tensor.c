@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.9 2002-06-11 21:24:09 athena Exp $ */
+/* $Id: tensor.c,v 1.10 2002-06-13 15:04:24 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -353,15 +353,15 @@ void X(tensor_split)(const tensor sz, tensor *a, uint arnk, tensor *b)
 
 void X(tensor_print)(tensor x, printer *p)
 {
-     p->print(p, "(");
+     p->print(p, "(t");
      if (FINITE_RNK(x.rnk)) {
 	  uint i;
 	  for (i = 0; i < x.rnk; ++i) {
 	       iodim *d = x.dims + i;
-	       p->print(p, "(%u %d %d)", d->n, d->is, d->os);
+	       p->print(p, " (%u %d %d)", d->n, d->is, d->os);
 	  }
      } else {
-	  p->print(p, "(0 0 0)");
+	  p->print(p, " (0 0 0)");
      }
      p->print(p, ")");
 }

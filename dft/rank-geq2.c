@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.10 2002-06-12 22:57:19 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.11 2002-06-13 15:04:24 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -123,7 +123,7 @@ static int applicable(const solver *ego_, const problem *p_, uint *rp)
                       || p->ri != p->ro
 
                       /* Can operate in-place as long as all dimension
-			 strides are the same, provided that the cld
+			 strides are the same, provided that the child
 			 plans work in-place.  (This condition is
 			 sufficient, but is it necessary?) */
                       || X(tensor_inplace_strides)(p->sz)

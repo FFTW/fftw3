@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.7 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: problem.c,v 1.8 2002-06-13 15:04:24 athena Exp $ */
 
 #include "dft.h"
 
@@ -43,9 +43,20 @@ static int equal(const problem *ego_, const problem *problem_)
           const problem_dft *e = (const problem_dft *) ego_;
           const problem_dft *p = (const problem_dft *) problem_;
 
-          return (X(tensor_equal)(p->sz, e->sz) &&
-                  X(tensor_equal)(p->vecsz, e->vecsz) &&
-                  ((p->ri == p->ro) == (e->ri == e->ro)));
+          return (1
+
+		  /* both in-place or both out-of-place */
+                  && ((p->ri == p->ro) == (e->ri == e->ro))
+
+		  /* distance between real and imag must be the same */
+		  && p->ii - p->ri == e->ii - e->ri
+
+		  /* idem for output */
+		  && p->io - p->ro == e->io - e->ro
+
+		  && X(tensor_equal)(p->sz, e->sz)
+                  && X(tensor_equal)(p->vecsz, e->vecsz)
+	       );
      }
      return 0;
 }
@@ -77,12 +88,12 @@ static void zerotens(tensor sz, R *ri, R *ii)
 static void print(problem *ego_, printer *p)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
-     if (ego->ri == ego->ro) p->print(p, "i");
-     X(tensor_print)(ego->sz, p);
-     if (X(tensor_sz(ego->vecsz)) > 1) {
-	  p->print(p, "/");
-	  X(tensor_print)(ego->vecsz, p);
-     }
+     p->print(p, "(dft %d %d %d %t %t)", 
+	      ego->ri == ego->ro, 
+	      ego->ii - ego->ri, 
+	      ego->io - ego->ro,
+	      &ego->sz,
+	      &ego->vecsz);
 }
 
 static void zero(const problem *ego_)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.28 2002-06-12 22:57:19 athena Exp $ */
+/* $Id: ifftw.h,v 1.29 2002-06-13 15:04:24 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -282,12 +282,13 @@ typedef struct pair_s pair; /* opaque */
 typedef struct solutions_s solutions; /* opaque */
 
 typedef struct {
-     solver *(*car)(pair *cons);
+     solver *(*slv)(pair *cons);
      pair *(*cdr)(pair *cons);
      pair *(*solvers)(planner *ego);
      void (*register_solver)(planner *ego, solver *s);
      plan *(*mkplan)(planner *ego, problem *p);
      void (*forget)(planner *ego, int everythingp);
+     void (*export)(planner *ego, printer *pr);
 } planner_adt;
 
 struct planner_s {
@@ -299,17 +300,18 @@ struct planner_s {
      pair *solvers;
      solutions **sols;
      void (*destroy)(planner *ego);
-     void (*inferior_mkplan)(planner *ego, problem *p, plan **, solver **);
+     void (*inferior_mkplan)(planner *ego, problem *p, plan **, pair **);
      uint hashsiz;
      uint cnt;
      int estimatep;             /* if TRUE, use estimate of execution time */
      int timeallp;              /* if TRUE, always time and ignore cost 
 				   estimate */
+     int idcnt;
 };
 
 planner *X(mkplanner)(size_t sz,
 		      void (*mkplan)(planner *ego, problem *p, 
-				     plan **, solver **),
+				     plan **, pair **),
                       void (*destroy) (planner *), int estimatep);
 void X(planner_destroy)(planner *ego);
 void X(planner_set_hook)(planner *p, void (*hook)(const plan *,
@@ -332,13 +334,13 @@ void X(planner_dump)(planner *ego, int verbose);
   pages = "18--25"
   }
 */
-#define FORALL_SOLVERS(ego, s, what)					 \
-{									 \
-     pair *_l_;								 \
-     for (_l_ = ego->adt->solvers(ego); _l_; _l_ = ego->adt->cdr(_l_)) { \
-	  solver *s = ego->adt->car(_l_);				 \
-	  what;								 \
-     }									 \
+#define FORALL_SOLVERS(ego, s, p, what)					\
+{									\
+     pair *p;								\
+     for (p = ego->adt->solvers(ego); p; p = ego->adt->cdr(p)) {	\
+	  solver *s = ego->adt->slv(p);					\
+	  what;								\
+     }									\
 }
 
 /* various planners */

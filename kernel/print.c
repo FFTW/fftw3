@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.6 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: print.c,v 1.7 2002-06-13 15:04:24 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
@@ -49,6 +49,11 @@ static void print(printer *p, const char *format, ...)
           switch (c) {
 	      case '%':
 		   switch ((c = *s++)) {
+		       case 'c': {
+			    int x = va_arg(ap, int);
+			    p->putchr(p, x);
+			    break;
+		       }
 		       case 's': {
 			    char *x = va_arg(ap, char *);
 			    myputs(p, x);
@@ -100,20 +105,29 @@ static void print(printer *p, const char *format, ...)
 		       }
 		       case 'p': {
 			    /* print plan */
-			    plan *pln = va_arg(ap, plan *);
-			    if (pln) 
-				 pln->adt->print(pln, p);
+			    plan *x = va_arg(ap, plan *);
+			    if (x) 
+				 x->adt->print(x, p);
 			    else 
-				 myputs(p, "(null)");
+				 goto putnull;
 			    break;
 		       }
 		       case 'P': {
 			    /* print problem */
-			    problem *prb = va_arg(ap, problem *);
-			    if (prb)
-				 prb->adt->print(prb, p);
+			    problem *x = va_arg(ap, problem *);
+			    if (x)
+				 x->adt->print(x, p);
 			    else
-				 myputs(p, "(null)");
+				 goto putnull;
+			    break;
+		       }
+		       case 't': {
+			    /* print tensor */
+			    tensor *x = va_arg(ap, tensor *);
+			    if (x)
+				 X(tensor_print)(*x, p);
+			    else
+				 goto putnull;
 			    break;
 		       }
 		       default:
@@ -122,6 +136,10 @@ static void print(printer *p, const char *format, ...)
 
 		   putbuf:
 			    myputs(p, buf);
+			    break;
+		   putnull:
+			    myputs(p, "(null)");
+			    break;
 		   }
 		   break;
 	      default:

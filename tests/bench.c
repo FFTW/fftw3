@@ -47,7 +47,7 @@ static void debug_hook(const plan *pln, const fftw_problem *p_)
 {
      problem_dft *p = (problem_dft *) p_;
      printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
-     pr->print(pr, "%P:\n%p\n", p, pln);
+     pr->print(pr, "%P:%(%p%)\n", p, pln);
      FFTW(printer_destroy) (pr);
 }
 
@@ -103,10 +103,11 @@ void setup(struct problem *p)
 
      if (verbose) {
 	  printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
-	  pln->adt->print(pln, pr);
-	  FFTW(printer_destroy) (pr);
-	  printf("\n");
-	  printf("nprob %u  nplan %u\n", plnr->nprob, plnr->nplan);
+	  pr->print(pr, "%p\nnprob %u  nplan %u\n",
+		    pln, plnr->nprob, plnr->nplan);
+	  if (verbose > 3) 
+	       plnr->adt->export(plnr, pr);
+	  FFTW(printer_destroy)(pr);
      }
      pln->adt->awake(pln, 1);
 }
