@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.7 2003-01-19 00:54:55 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.8 2003-01-19 00:59:28 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -251,6 +251,11 @@ added capabilities exist.  For more complete information, see
 @ref{FFTW Reference}.  (Note that you need to compile and install FFTW
 before you can use it in a program.  For the details of the
 installation, see @ref{Installation and Customization}.)
+
+We recommend that you read this tutorial in order.  At the least, read
+the first section (@pxref{Complex One-Dimensional DFTs}) before
+reading any of the others, even if your main interest lies in one of
+the other transform types.
 
 @c ------------------------------------------------------------
 @node Complex One-Dimensional DFTs, Complex Multi-Dimensional DFTs, Tutorial, Tutorial
