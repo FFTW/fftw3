@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.138 2002-09-18 22:26:58 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.139 2002-09-19 00:47:31 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -415,6 +415,7 @@ enum {
      BELIEVE_PCOST = 0x80,
      NO_DHT_R2HC = 0x100,
      NO_UGLY = 0x200,  /* avoid plans we are 99% sure are suboptimal */
+     NO_EXHAUSTIVE = 0x400,
 
      /* a canonical set of fftw2-like impatient flags */
      IMPATIENT = (0
@@ -446,6 +447,7 @@ enum {
 #define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
 #define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
 #define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
+#define NO_EXHAUSTIVEP(plnr) ((plnr)->planner_flags & NO_EXHAUSTIVE)
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
