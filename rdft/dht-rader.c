@@ -53,7 +53,7 @@ static rader_tl *omegas = 0;
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int n = ego->n;
+     int n = ego->n; /* prime */
      int npad = ego->npad; /* == n - 1 for unpadded Rader; always even */
      int is = ego->is, os;
      int k, gpower, g;
