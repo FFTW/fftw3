@@ -14,7 +14,9 @@ int main(int argc, char *argv[])
      plan *pln;
      R *a, *a0;
      int i;
-     R e1, e2, einf, re1, re2, reinf;
+     R e1, e2, einf, re1, re2, reinf, mag;
+
+     srand48(1);
 
      if (argc > 1)
 	  nmin = atoi(argv[1]);
@@ -22,6 +24,9 @@ int main(int argc, char *argv[])
 	  nmax = atoi(argv[2]);
      else
 	  nmax = nmin;
+
+     if (argc > 3)
+	  srand48(atoi(argv[3]));
 
      plnr = FFTW(mkplanner_score)(ESTIMATE);
      FFTW(dft_conf_standard)(plnr);
@@ -34,8 +39,17 @@ int main(int argc, char *argv[])
 		    FFTW(mktensor_1d)(n, 2, 2), FFTW(mktensor)(0), a, a+1, a, a+1);
 	  pln = plnr->adt->mkplan(plnr, prblm);
 	  AWAKE(pln, 1);
-	  for (i = 0; i < 2 * n; ++i) 
-	       a0[i] = a[i] = drand48();
+	  mag = 0.0;
+	  for (i = 0; i < 2 * n; ++i) {
+	       a[i] = drand48() - 0.5;
+	       mag += a[i] * a[i];
+	  }
+
+	  /* normalize */
+	  mag = 1.0 / sqrt(mag);
+	  for (i = 0; i < 2 * n; ++i)
+	       a0[i] = a[i] = mag * a[i];
+	  
 	  pln->adt->solve(pln, prblm);
 	  mfft(n, a0, -1);
      
