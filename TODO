@@ -20,3 +20,5 @@
 
 * merge genfft-k7 generator with the main genfft branch.
   genfft-k7 was written by Stefan Kral based on the fftw-2.1 genfft.
+
+* implement fftw2 buffering: copy to buffers, transform in-place, copy back
