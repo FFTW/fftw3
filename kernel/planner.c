@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.7 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: planner.c,v 1.8 2002-06-10 14:55:40 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -252,7 +252,7 @@ static void putchr(printer *p, char c)
      putchar(c);
 }
 
-void fftw_planner_dump(planner *ego, int verbose)
+void X(planner_dump)(planner *ego, int verbose)
 {
      int cnt = 0, cnt_null = 0, max_len = 0, empty = 0;
      solutions *s;

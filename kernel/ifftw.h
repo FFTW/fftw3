@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.18 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: ifftw.h,v 1.19 2002-06-10 14:55:40 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -278,7 +278,7 @@ void X(planner_destroy)(planner *ego);
 void X(planner_set_hook)(planner *p, void (*hook)(plan *, problem *));
 
 #ifdef FFTW_DEBUG
-void fftw_planner_dump(planner *ego, int verbose);
+void X(planner_dump)(planner *ego, int verbose);
 #endif
 
 /*
