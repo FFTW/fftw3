@@ -1,4 +1,4 @@
-Code conventions used in fftw3:
+Code conventions used internally by fftw3 (not in API):
 
 LEARN FROM THE MASTERS: read Ken Thompson's C compiler in Plan 9.
    Avoid learning from C++/Java programs.
