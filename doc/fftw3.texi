@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.203 2003-09-27 21:42:30 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.204 2003-09-27 21:43:57 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4778,7 +4778,7 @@ If a cycle counter is not available on your system (e.g. some embedded
 processor), and you don't want to use estimated plans, as a last resort
 you can use the @code{--with-slow-timer} option to @code{configure} (on
 Unix) or @code{#define WITH_SLOW_TIMER} in @code{config.h} (elsewhere).
-This will use the much slower @code{gettimeofday} function, or even
+This will use the much lower-resolution @code{gettimeofday} function, or even
 @code{clock} if the former is unavailable, and planning will be
 extremely slow.
 
