@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.67 2002-09-09 21:10:45 athena Exp $ */
+/* $Id: planner.c,v 1.68 2002-09-12 11:58:45 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -89,7 +89,7 @@ static uint sig_to_hash_index(planner *ego, md5uint *s)
      return s[0] % ego->hashsiz;
 }
 
-static void hash(md5 *m, const problem *p, uint flags, uint nthr)
+static void md5hash(md5 *m, const problem *p, uint flags, uint nthr)
 {
      X(md5begin)(m);
      X(md5uint)(m, sizeof(R)); /* so we don't mix different precisions */
@@ -99,12 +99,12 @@ static void hash(md5 *m, const problem *p, uint flags, uint nthr)
      X(md5end)(m);
 }
 
-static int hasheq(md5uint *a, md5uint *b)
+static int md5eq(md5uint *a, md5uint *b)
 {
      return a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3];
 }
 
-static void hashcpy(md5uint *a, md5uint *b)
+static void sigcpy(md5uint *a, md5uint *b)
 {
      b[0] = a[0]; b[1] = a[1]; b[2] = a[2]; b[3] = a[3];
 }
@@ -120,7 +120,7 @@ static int solvedby(md5uint *s, uint flags, solutions *l)
 {
      return (IMPATIENCE(flags) >= IMPATIENCE(l->flags)
 	     /* other flags are included in md5 */
-	     && hasheq(s, l->s));
+	     && md5eq(s, l->s));
 }
 
 static solutions *lookup(planner *ego, problem *p)
@@ -129,7 +129,7 @@ static solutions *lookup(planner *ego, problem *p)
      uint h;
      md5 m;
 
-     hash(&m, p, ego->flags, ego->nthr);
+     md5hash(&m, p, ego->flags, ego->nthr);
      h = sig_to_hash_index(ego, m.s);
 
      ++ego->access;
@@ -142,13 +142,14 @@ static solutions *lookup(planner *ego, problem *p)
      return 0;
 }
 
-static void solution_destroy(solutions *s)
+static void solution_destroy(planner *ego, solutions *s)
 {
+     --ego->cnt;
      X(free)(s);
 }
 
 /* remove solutions from *ps that are equivalent to newsol */
-static void remove_equivalent(solutions *newsol, solutions **ps)
+static void remove_equivalent(planner *ego, solutions *newsol, solutions **ps)
 {
      solutions *s;
 
@@ -157,7 +158,7 @@ static void remove_equivalent(solutions *newsol, solutions **ps)
 	       /* destroy solution but keep relevant planner flags */
 	       merge_flags(newsol, s->flags);
 	       *ps = s->cdr;
-	       solution_destroy(s);
+	       solution_destroy(ego, s);
 	  } else {
 	       /* ensure that we are not replacing a solution with a
 		  worse solution */
@@ -173,7 +174,7 @@ static void insert0(planner *ego, solutions *l)
      solutions **ps = ego->sols + h;
 
      /* remove old, less impatient solutions */
-     remove_equivalent(l, ps);
+     remove_equivalent(ego, l, ps);
 
      /* insert new solution */
      l->cdr = *ps; *ps = l;
@@ -216,7 +217,7 @@ static solutions *insert1(planner *ego, md5uint *hsh, uint flags, slvdesc *sp)
 
      l->flags = flags;
      l->sp = sp;
-     hashcpy(hsh, l->s);
+     sigcpy(hsh, l->s);
      insert0(ego, l);
      return l;
 }
@@ -225,7 +226,7 @@ static solutions *insert(planner *ego, uint flags, uint nthr,
 			 problem *p, slvdesc *sp)
 {
      md5 m;
-     hash(&m, p, flags, nthr);
+     md5hash(&m, p, flags, nthr);
      return insert1(ego, m.s, flags, sp);
 }
 
@@ -269,7 +270,7 @@ static void forget(planner *ego, amnesia a)
 		   (a == FORGET_ACCURSED && !BLESSEDP(s))) {
 		    /* confutatis maledictis flammis acribus addictis */
 		    *ps = s->cdr;
-		    solution_destroy(s);
+		    solution_destroy(ego, s);
 	       } else {
 		    /* voca me cum benedictis */
 		    ps = &s->cdr;
