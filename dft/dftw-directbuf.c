@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-directbuf.c,v 1.3 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: dftw-directbuf.c,v 1.4 2005-02-19 14:31:14 athena Exp $ */
 
 #include "ct.h"
 
@@ -75,26 +75,27 @@ static const R *doit(kdftw k, R *rA, R *iA, const R *W, int ios, int dist,
      return W;
 }
 
-#define BATCHSZ 4 /* FIXME: parametrize? */
+#define BATCHSZ(radix)  (((radix) + 3) & (-4))
 
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      int i, j, mcount = ego->mcount, vl = ego->vl, r = ego->r;
      int s = ego->s, vs = ego->vs, ios = ego->ios;
+     int batchsz = BATCHSZ(r);
      R *buf;
 
-     STACK_MALLOC(R *, buf, r * BATCHSZ * 2 * sizeof(R));
+     STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
 
      for (i = 0; i < vl; ++i) {
 	  R *rA = rio + i * vs, *iA = iio + i * vs;
 	  const R *W = ego->tdW;
 
-	  for (j = mcount; j >= BATCHSZ; j -= BATCHSZ) {
-	       W = doit(ego->k, rA, iA, W, ios, s, r, BATCHSZ, 
+	  for (j = mcount; j >= batchsz; j -= batchsz) {
+	       W = doit(ego->k, rA, iA, W, ios, s, r, batchsz, 
 			buf, ego->bufstride);
-	       rA += s * (int)BATCHSZ;
-	       iA += s * (int)BATCHSZ;
+	       rA += s * batchsz;
+	       iA += s * batchsz;
 	  }
 
 	  /* do remaining j calls, if any */
@@ -126,9 +127,11 @@ static void print(const plan *ego_, printer *p)
      const P *ego = (const P *) ego_;
      const S *slv = ego->slv;
      const ct_desc *e = slv->desc;
+     int batchsz = BATCHSZ(ego->r);
 
-     p->print(p, "(dftw-directbuf-%d/%d%v \"%s\")",
-              ego->r, X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam);
+     p->print(p, "(dftw-directbuf/%d-%d/%d%v \"%s\")",
+              batchsz, ego->r, X(twiddle_length)(ego->r, e->tw), 
+	      ego->vl, e->nam);
 }
 
 static int applicable0(const S *ego, 
@@ -137,6 +140,7 @@ static int applicable0(const S *ego,
 		       const planner *plnr)
 {
      const ct_desc *e = ego->desc;
+     int batchsz;
      UNUSED(vl); UNUSED(s); UNUSED(vs); UNUSED(rio); UNUSED(iio);
 
      return (
@@ -147,10 +151,11 @@ static int applicable0(const S *ego,
 
 	  /* check for alignment/vector length restrictions, both for
 	     batchsize and for the remainder */
-	  && (m < BATCHSZ ||
-	      (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, BATCHSZ,
+	  && (batchsz = BATCHSZ(r), 1)
+	  && (m < batchsz ||
+	      (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, batchsz,
 			     2 * e->radix, plnr)))
-	  && (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, m % BATCHSZ,
+	  && (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, m % batchsz,
 			    2 * e->radix, plnr))
 	  );
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-directbuf.c,v 1.3 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: hc2hc-directbuf.c,v 1.4 2005-02-19 14:31:14 athena Exp $ */
 
 #include "hc2hc.h"
 
@@ -79,7 +79,7 @@ static const R *doit(khc2hc k, R *rA, R *iA, const R *W, int ios, int dist,
      return W;
 }
 
-#define BATCHSZ 4 /* FIXME: parametrize? */
+#define BATCHSZ(radix)  (((radix) + 3) & (-4))
 
 static void apply(const plan *ego_, R *IO)
 {
@@ -89,9 +89,10 @@ static void apply(const plan *ego_, R *IO)
      int i, j, m = ego->m, vl = ego->vl, r = ego->r;
      int mstart1 = ego->mstart1, mcount2 = ego->mcount2;
      int s = ego->s, vs = ego->vs, ios = ego->ios;
+     int batchsz = BATCHSZ(r);
      R *buf;
 
-     STACK_MALLOC(R *, buf, r * BATCHSZ * 2 * sizeof(R));
+     STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
 
      for (i = 0; i < vl; ++i, IO += vs) {
 	  R *rA, *iA;
@@ -101,11 +102,11 @@ static void apply(const plan *ego_, R *IO)
 	       
 	  rA = IO + s*mstart1; iA = IO + (r * m - mstart1) * s;
 	  W = ego->tdW;
-	  for (j = (mcount2-1)/2; j >= BATCHSZ; j -= BATCHSZ) {
-	       W = doit(ego->k, rA, iA, W, ios, s, r, BATCHSZ,
+	  for (j = (mcount2-1)/2; j >= batchsz; j -= batchsz) {
+	       W = doit(ego->k, rA, iA, W, ios, s, r, batchsz,
 			buf, ego->bufstride);
-	       rA += s * (int)BATCHSZ;
-	       iA -= s * (int)BATCHSZ;
+	       rA += s * batchsz;
+	       iA -= s * batchsz;
 	  }
 	  /* do remaining j calls, if any */
 	  if (j > 0)
@@ -141,10 +142,11 @@ static void print(const plan *ego_, printer *p)
      const P *ego = (const P *) ego_;
      const S *slv = ego->slv;
      const hc2hc_desc *e = slv->desc;
+     int batchsz = BATCHSZ(ego->r);
 
-     p->print(p, "(hc2hc-directbuf-%d/%d%v \"%s\"%(%p%)%(%p%))",
-              ego->r, X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam,
-	      ego->cld0, ego->cldm);
+     p->print(p, "(hc2hc-directbuf/%d-%d/%d%v \"%s\"%(%p%)%(%p%))",
+	      batchsz, ego->r, X(twiddle_length)(ego->r, e->tw), 
+	      ego->vl, e->nam, ego->cld0, ego->cldm);
 }
 
 static int applicable0(const S *ego, 
@@ -153,6 +155,7 @@ static int applicable0(const S *ego,
 		       R *IO)
 {
      const hc2hc_desc *e = ego->desc;
+     int batchsz;
      int mc = (mcount2 - 1) / 2;
      UNUSED(vl); UNUSED(s); UNUSED(vs); UNUSED(IO); UNUSED(mstart1);
 
@@ -163,12 +166,13 @@ static int applicable0(const S *ego,
 	  && kind == e->genus->kind
 
 	  /* check for alignment/vector length restrictions */
-	  && (m < BATCHSZ ||
-	      (e->genus->okp(e, 0, ((const R *)0) + 2*BATCHSZ*r - 1, 
-			     1, 0, 2*BATCHSZ + 1, r)))
-	  && (m < BATCHSZ ||
-	      (e->genus->okp(e, 0, ((const R *)0) + 2*(mc%BATCHSZ)*r - 1,
-			     1, 0, 2*(mc%BATCHSZ) + 1, r)))
+	  && (batchsz = BATCHSZ(r), 1)
+	  && (m < batchsz ||
+	      (e->genus->okp(e, 0, ((const R *)0) + 2*batchsz*r - 1, 
+			     1, 0, 2*batchsz + 1, r)))
+	  && (m < batchsz ||
+	      (e->genus->okp(e, 0, ((const R *)0) + 2*(mc%batchsz)*r - 1,
+			     1, 0, 2*(mc%batchsz) + 1, r)))
 				 
 	  );
 }
