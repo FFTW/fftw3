@@ -52,6 +52,18 @@ Other enhancements:
 
 * Authors' good looks have greatly improved with age.
 
+Changes from 3.0beta3:
+
+* Separate FMA distribution to better exploit fused multiply-add instructions
+  on PowerPC (and possibly other) architectures.
+
+* Performance improvements via some inlining tweaks.
+
+* fftw_flops now returns double arguments, not int, to avoid overflows
+  for large sizes.
+
+* Workarounds for automake bugs.
+
 Changes from 3.0beta2:
 
 * The standard REDFT00/RODFT00 (DCT-I/DST-I) algorithm (used in
