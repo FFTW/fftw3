@@ -18,16 +18,10 @@
  *
  */
 
-/* $Id: verify.c,v 1.14 2002-08-09 23:26:57 athena Exp $ */
+/* $Id: verify.c,v 1.15 2002-08-16 19:22:36 athena Exp $ */
 
 #include "rdft.h"
-#include <math.h>
-#include <stdlib.h>
-
-typedef struct {
-     R r;
-     R i;
-} C;
+#include "verify.h"
 
 typedef struct {
      plan *pln;
@@ -39,196 +33,6 @@ typedef struct {
      tensor pckdvecsz;
 } info;
 
-/*
- * Utility functions:
- */
-#ifdef FFTW_LDOUBLE
-#  ifndef HAVE_HYPOTL
-static double hypotl(double a, double b)
-{
-     return sqrt(a * a + b * b);
-}
-#  else /* HAVE_HYPOTL */
-#    if !defined(HAVE_DECL_HYPOTL) || !HAVE_DECL_HYPOTL
-extern long double hypotl(long double a, long double b);
-#    endif
-#  endif
-#  define hypot hypotl
-#else /* !FFTW_LDOUBLE */
-#  ifndef HAVE_HYPOT
-static double hypot(double a, double b)
-{
-     return sqrt(a * a + b * b);
-}
-#  else /* HAVE_HYPOT */
-#    if !defined(HAVE_DECL_HYPOT) || !HAVE_DECL_HYPOT
-extern double hypot(double a, double b);
-#    endif
-#  endif
-#endif /* !FFTW_LDOUBLE */
-
-static inline double cerror(C a, C b, double tol)
-{
-     double x;
-     double mag;
-     x = hypot(a.r - b.r, a.i - b.i);
-     mag = 0.5 * (hypot(a.r, a.i) + hypot(b.r, b.i)) + tol;
-     x /= mag;
-#ifdef HAVE_ISNAN
-     A(!isnan(x));
-#endif
-     return x;
-}
-
-static double aerror(C *a, C *b, uint n, double tol)
-{
-     /* compute the relative error */
-     double e = 0.0;
-     uint i;
-
-     for (i = 0; i < n; ++i) {
-	  double x = cerror(a[i], b[i], tol);
-	  if (x > e) e = x;
-     }
-     return e;
-}
-
-#ifdef HAVE_DRAND48
-static double mydrand(void)
-{
-     return drand48() - 0.5;
-}
-#else
-static double mydrand(void)
-{
-     double d = rand();
-     return (d / (double) RAND_MAX) - 0.5;
-}
-#endif
-
-static void arand(C *a, uint n)
-{
-     uint i;
-
-     /* generate random inputs */
-     for (i = 0; i < n; ++i) {
-	  a[i].r = mydrand();
-	  a[i].i = mydrand();
-     }
-}
-
-/* make array real */
-static void mkreal(C *A, uint n)
-{
-     uint i;
-
-     for (i = 0; i < n; ++i) {
-          A[i].i = 0.0;
-     }
-}
-
-static void assign_conj(C *Ac, C *A, uint rank, iodim *dim, int size)
-{
-     if (rank == 0) {
-          Ac->r = A->r;
-          Ac->i = -A->i;
-     }
-     else {
-          uint i, n0 = dim[0].n;
-          rank -= 1;
-          dim += 1;
-          size /= n0;
-          assign_conj(Ac, A, rank, dim, size);
-          for (i = 1; i < n0; ++i)
-               assign_conj(Ac + (n0 - i) * size, A + i * size, rank, dim,size);
-     }
-}
-
-/* make array hermitian */
-static void mkhermitian(C *A, uint rank, iodim *dim)
-{
-     if (rank == 0)
-          A->i = 0.0;
-     else {
-          uint i, n0 = dim[0].n, size;
-          rank -= 1;
-          dim += 1;
-          mkhermitian(A, rank, dim);
-          for (i = 0, size = 1; i < rank; ++i)
-               size *= dim[i].n;
-          for (i = 1; 2*i < n0; ++i)
-               assign_conj(A + (n0 - i) * size, A + i * size, rank, dim, size);
-          if (2*i == n0)
-               mkhermitian(A + i*size, rank, dim);
-     }
-}
-
-/* C = A + B */
-static void aadd(C *c, C *a, C *b, uint n)
-{
-     uint i;
-
-     for (i = 0; i < n; ++i) {
-	  c[i].r = a[i].r + b[i].r;
-	  c[i].i = a[i].i + b[i].i;
-     }
-}
-
-/* C = A - B */
-static void asub(C *c, C *a, C *b, uint n)
-{
-     uint i;
-
-     for (i = 0; i < n; ++i) {
-	  c[i].r = a[i].r - b[i].r;
-	  c[i].i = a[i].i - b[i].i;
-     }
-}
-
-/* B = rotate left A (complex) */
-static void arol(C *b, C *a, uint n, uint nb, uint na)
-{
-     uint i, ib, ia;
-
-     for (ib = 0; ib < nb; ++ib) {
-	  for (i = 0; i < n - 1; ++i)
-	       for (ia = 0; ia < na; ++ia)
-		    b[(ib * n + i) * na + ia] =
-			 a[(ib * n + i + 1) * na + ia];
-
-	  for (ia = 0; ia < na; ++ia)
-	       b[(ib * n + n - 1) * na + ia] = a[ib * n * na + ia];
-     }
-}
-
-static void aphase_shift(C *b, C *a, uint n, uint nb, uint na, double sign)
-{
-     uint j, jb, ja;
-
-     for (jb = 0; jb < nb; ++jb)
-	  for (j = 0; j < n; ++j) {
-	       trigreal c = X(cos2pi)(j, n);
-	       trigreal s = sign * X(sin2pi)(j, n);
-
-	       for (ja = 0; ja < na; ++ja) {
-		    uint k = (jb * n + j) * na + ja;
-		    b[k].r = a[k].r * c - a[k].i * s;
-		    b[k].i = a[k].r * s + a[k].i * c;
-	       }
-	  }
-}
-
-/* A = alpha * A  (complex, in place) */
-static void ascale(C *a, C alpha, uint n)
-{
-     uint i;
-
-     for (i = 0; i < n; ++i) {
-	  C x = a[i];
-	  a[i].r = x.r * alpha.r - x.i * alpha.i;
-	  a[i].i = x.r * alpha.i + x.i * alpha.r;
-     }
-}
 
 /*
  * compute rdft:
@@ -433,8 +237,9 @@ static void icpyhc2(R *ra, R *ia, tensor sza, tensor vecsza, R *rb, R *ib, tenso
      X(dotens2)(vecsza, szb, &k.k);
 }
 
-static void dofft(info *n, C *in, C *out)
+static void dofft(void *n_, C *in, C *out)
 {
+     info *n = (info *)n_;
      if (n->p) {
 	  switch (n->p->kind) {
 	      case R2HC:
@@ -478,162 +283,7 @@ static void dofft(info *n, C *in, C *out)
      }
 }
 
-static double acmp(info *nfo, C *a, C *b, uint n, const char *test, double tol)
-{
-     double d = aerror(a, b, n, tol);
-     if (d > tol) {
-	  fprintf(stderr, "Found relative error %e (%s)\n", d, test);
-	  D("%P\n", nfo->p);
-	  D("%p\n", nfo->pln);
-	  {
-	       uint i;
-	       for (i = 0; i < n; ++i) 
-		    printf("%8d %16.12f %16.12f   %16.12f %16.12f %e\n", i, 
-			   (double) a[i].r, (double) a[i].i,
-			   (double) b[i].r, (double) b[i].i,
-			   cerror(a[i], b[i], tol));
-	  }
-	  exit(EXIT_FAILURE);
-     }
-     return d;
-}
-
 /***************************************************************************/
-
-/*
- * Implementation of the FFT tester described in
- *
- * Funda Ergün. Testing multivariate linear functions: Overcoming the
- * generator bottleneck. In Proceedings of the Twenty-Seventh Annual
- * ACM Symposium on the Theory of Computing, pages 407-416, Las Vegas,
- * Nevada, 29 May--1 June 1995.
- */
-
-static void linear(uint n, info *nfo, C *inA, C *inB, C *inC, C *outA,
-		   C *outB, C *outC, C *tmp, uint rounds, double tol)
-{
-     uint j;
-
-     for (j = 0; j < rounds; ++j) {
-	  C alpha, beta;
-	  alpha.r = mydrand();
-	  alpha.i = 0;
-	  beta.r = mydrand();
-	  beta.i = 0;
-	  arand(inA, n);
-	  arand(inB, n);
-	  dofft(nfo, inA, outA);
-	  dofft(nfo, inB, outB);
-
-	  ascale(outA, alpha, n);
-	  ascale(outB, beta, n);
-	  aadd(tmp, outA, outB, n);
-	  ascale(inA, alpha, n);
-	  ascale(inB, beta, n);
-	  aadd(inC, inA, inB, n);
-	  dofft(nfo, inC, outC);
-
-	  acmp(nfo, outC, tmp, n, "linear", tol);
-     }
-
-}
-
-static void impulse(uint n, uint vecn, info *nfo, 
-		    C *inA, C *inB, C *inC,
-		    C *outA, C *outB, C *outC,
-		    C *tmp, uint rounds, double tol)
-{
-     uint N = n * vecn;
-     C pls;
-     uint i;
-     uint j;
-
-     /* test 2: check that the unit impulse is transformed properly */
-
-     pls.r = 1.0;
-     pls.i = 0.0;
-     
-     for (i = 0; i < N; ++i) {
-	  /* pls */
-	  inA[i].r = inA[i].i = 0.0;
-	  
-	  /* transform of the pls */
-	  outA[i] = pls;
-     }
-     for (i = 0; i < vecn; ++i)
-	  inA[i * n] = pls;
-
-     dofft(nfo, inA, tmp);
-     acmp(nfo, tmp, outA, N, "impulse 1", tol);
-
-     for (j = 0; j < rounds; ++j) {
-	  arand(inB, N);
-	  asub(inC, inA, inB, N);
-	  dofft(nfo, inB, outB);
-	  dofft(nfo, inC, outC);
-	  aadd(tmp, outB, outC, N);
-	  acmp(nfo, tmp, outA, N, "impulse", tol);
-     }
-}
-
-
-enum { TIME_SHIFT, FREQ_SHIFT };
-
-static void tf_shift(uint n, uint vecn, info *nfo, 
-		     C *inA, C *inB, C *outA, C *outB, C *tmp,
-		     uint rounds, double tol, int which_shift)
-{
-     double sign;
-     uint nb, na, dim, N = n * vecn;
-     uint i, j;
-     tensor sz = nfo->probsz;
-
-     sign = -1.0;
-
-     /* test 3: check the time-shift property */
-     /* the paper performs more tests, but this code should be fine too */
-
-     nb = 1;
-     na = n;
-
-     /* check shifts across all SZ dimensions */
-     for (dim = 0; dim < sz.rnk; ++dim) {
-	  uint ncur = sz.dims[dim].n;
-
-	  na /= ncur;
-
-	  for (j = 0; j < rounds; ++j) {
-	       arand(inA, N);
-
-	       if (which_shift == TIME_SHIFT) {
-		    for (i = 0; i < vecn; ++i) {
-			 mkreal(inA + i * n, n);
-			 arol(inB + i * n, inA + i * n, ncur, nb, na);
-		    }
-		    dofft(nfo, inA, outA);
-		    dofft(nfo, inB, outB);
-		    for (i = 0; i < vecn; ++i) 
-			 aphase_shift(tmp + i * n, outB + i * n, ncur, 
-				      nb, na, sign);
-		    acmp(nfo, tmp, outA, N, "time shift", tol);
-	       } else {
-		    for (i = 0; i < vecn; ++i) {
-			 mkhermitian(inA + i * n, sz.rnk, sz.dims);
-			 aphase_shift(inB + i * n, inA + i * n, ncur,
-				      nb, na, -sign);
-		    }
-		    dofft(nfo, inA, outA);
-		    dofft(nfo, inB, outB);
-		    for (i = 0; i < vecn; ++i) 
-			 arol(tmp + i * n, outB + i * n, ncur, nb, na);
-		    acmp(nfo, tmp, outA, N, "freq shift", tol);
-	       }
-	  }
-
-	  nb *= ncur;
-     }
-}
-
 
 /* Make a copy of the size tensor, with the same dimensions, but with
    the strides corresponding to a "packed" row-major array with the
@@ -683,14 +333,18 @@ static void really_verify(plan *pln, const problem_rdft *p,
      nfo.pckdsz = pack(nfo.totalsz, 2);
      nfo.pckdvecsz = pack(p->vecsz, 2 * X(tensor_sz)(p->sz));
 
-     impulse(n, vecn, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
-     linear(N, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
+     impulse(dofft, &nfo, 
+	     n, vecn, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
+     linear(dofft, &nfo, 1,
+	    N, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
 
      if (nfo.p->kind == R2HC)
-	  tf_shift(n, vecn, &nfo, inA, inB, outA, outB, tmp, 
+	  tf_shift(dofft, &nfo, 0, p->sz,
+		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, TIME_SHIFT);
      if (nfo.p->kind == HC2R)
-	  tf_shift(n, vecn, &nfo, inA, inB, outA, outB, tmp, 
+	  tf_shift(dofft, &nfo, 0, p->sz,
+		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, FREQ_SHIFT);
 
      X(tensor_destroy)(nfo.totalsz);
@@ -738,14 +392,19 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
      nfo.pckdsz = pack(nfo.totalsz, 2);
      nfo.pckdvecsz = pack(p->vecsz, 2 * X(tensor_sz)(psz));
 
-     impulse(n, vecn, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
-     linear(N, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
+     impulse(dofft, &nfo, 
+	     n, vecn, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
+     linear(dofft, &nfo, 1,
+	    N, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
 
-     if (nfo.p2->kind == R2HC)
-	  tf_shift(n, vecn, &nfo, inA, inB, outA, outB, tmp, 
+
+     if (nfo.p->kind == R2HC)
+	  tf_shift(dofft, &nfo, 0, psz,
+		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, TIME_SHIFT);
-     if (nfo.p2->kind == HC2R)
-	  tf_shift(n, vecn, &nfo, inA, inB, outA, outB, tmp, 
+     if (nfo.p->kind == HC2R)
+	  tf_shift(dofft, &nfo, 0, psz,
+		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, FREQ_SHIFT);
 
      X(tensor_destroy)(nfo.totalsz);
