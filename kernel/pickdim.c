@@ -20,7 +20,7 @@
 
 #include "ifftw.h"
 
-/* $Id: pickdim.c,v 1.4 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: pickdim.c,v 1.5 2005-02-24 03:21:19 athena Exp $ */
 
 /* Given a solver which_dim, a vector sz, and whether or not the
    transform is out-of-place, return the actual dimension index that
@@ -41,17 +41,17 @@ static int really_pickdim(int which_dim, const tensor *sz, int oop, int *dp)
           }
      }
      else if (which_dim < 0) {
-          for (i = sz->rnk; i > 0; --i) {
-               if (oop || sz->dims[i - 1].is == sz->dims[i - 1].os)
+          for (i = sz->rnk - 1; i >= 0; --i) {
+               if (oop || sz->dims[i].is == sz->dims[i].os)
                     if (++count_ok == -which_dim) {
-                         *dp = i - 1;
+                         *dp = i;
                          return 1;
                     }
           }
      }
      else { /* zero: pick the middle, if valid */
-	  i = sz->rnk / 2 - 1;
-	  if (i < sz->rnk && (oop || sz->dims[i].is == sz->dims[i].os)) {
+	  i = (sz->rnk - 1) / 2;
+	  if (i >= 0 && (oop || sz->dims[i].is == sz->dims[i].os)) {
 	       *dp = i;
 	       return 1;
 	  }
