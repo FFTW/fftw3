@@ -74,6 +74,7 @@ let is_twiddle = function
   | _ -> false
 
 let is_locative x = (is_input x) || (is_output x)
+let is_constant = is_twiddle
 
 let same = (=)
 

@@ -15,11 +15,13 @@ K7GEN_NOTW = ${K7GENFFTDIR}/gen_notw
 GEN_TWIDDLE = ${GENFFTDIR}/gen_twiddle
 GEN_TWIDSQ = ${GENFFTDIR}/gen_twidsq
 PRELUDE = ${top_srcdir}/support/codelet_prelude
+ASMPRELUDE = ${top_srcdir}/support/codelet_asmprelude
 ADD_DATE = sed -e s/@DATE@/"`date`"/
 
 COPYRIGHT=${top_srcdir}/COPYRIGHT
-CODELET_DEPS=$(COPYRIGHT) $(PRELUDE)
+CODELET_DEPS=$(COPYRIGHT) $(PRELUDE) $(ASMPRELUDE)
 PRELUDE_COMMANDS=cat $(COPYRIGHT) $(PRELUDE)
+ASMPRELUDE_COMMANDS=cat $(COPYRIGHT) $(ASMPRELUDE)
 
 FLAGS_COMMON = -compact -variables 4 -no-randomized-cse
 FLAGS_N1=$(FLAGS_COMMON)
@@ -113,10 +115,20 @@ $(CODLIST): Makefile
              echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
            fi								\
 	done;								\
+	for i in $(subst .S,,$(filter %.S,$(ALL_CODELETS))) NIL; do	\
+	   if test "$$i" != NIL; then					\
+             echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
+           fi								\
+	done;								\
 	echo;								\
 	echo;								\
 	echo "const solvtab $(SOLVTAB_NAME) = {";			\
 	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))) NIL; do	\
+	   if test "$$i" != NIL; then					\
+	     echo "   X($(CODELET_NAME)$$i),";				\
+	   fi								\
+	done;								\
+	for i in $(subst .S,,$(filter %.S,$(ALL_CODELETS))) NIL; do	\
 	   if test "$$i" != NIL; then					\
 	     echo "   X($(CODELET_NAME)$$i),";				\
 	   fi								\

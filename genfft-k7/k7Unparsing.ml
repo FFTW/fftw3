@@ -108,7 +108,7 @@ let k7mmxstackcellToString c = k7memopToString (K7_MStackCell(K7_MMXStack,c))
 
 let k7simdunaryopToArgstring = function
   | K7_FPChs p		 -> vsimdposToChsconstnamestring p
-  | K7_FPMulConst(n1,n2) -> Number.unparse n1 ^ Number.unparse n2
+  | K7_FPMulConst(n1,n2) -> Number.to_konst n1 ^ Number.to_konst n2
 
 let k7intunaryopToArgstrings = function
   | K7_IAddImm c    -> ["$" ^ intToString c]
@@ -295,7 +295,7 @@ let k7rinstrToInstrstring = function
   | K7R_Label _			  -> failwith "k7rinstrToInstrstring: label!"
 
 let k7rinstrToString = function
-  | K7R_Label lbl -> sprintf "\t.p2align 4,,7\\n\"\n\"%s:" lbl
+  | K7R_Label lbl -> sprintf "\t.p2align 4,,7\n%s:" lbl
   | i ->
       "\t" ^ k7rinstrToInstrstring i ^ 
 	" " ^ (stringlistToString ", " (k7rinstrToArgstrings i))

@@ -1,5 +1,7 @@
 (*
  * Copyright (c) 1997-1999 Massachusetts Institute of Technology
+ * Copyright (c) 2000 Matteo Frigo
+ * Copyright (c) 2000 Steven G. Johnson
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,49 +18,78 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-
-(* $Id: expr.ml,v 1.2 2002-06-15 17:51:39 athena Exp $ *)
+(* $Id: expr.ml,v 1.3 2002-06-15 22:23:40 athena Exp $ *)
 
 (* Here, we define the data type encapsulating a symbolic arithmetic
-   expression, and provide some routines for manipulating it.  (See
-   also simplify.ml for functions to do symbolic simplifications.) *)
+   expression, and provide some routines for manipulating it. *)
 
 type expr =
-  | Num of Number.number
-  | Var of Variable.variable
+    Num of Number.number
   | Plus of expr list
   | Times of expr * expr
   | Uminus of expr
-  | Integer of int
+  | Load of Variable.variable
+  | Store of Variable.variable * expr
 
 type assignment = Assign of Variable.variable * expr
 
-(* find all variables within a given expression. *)
-let find_vars =
-  let rec find_vars' xs = function
-    | Var x      -> x::xs
-    | Plus ps    -> List.fold_left find_vars' xs ps
-    | Times(a,b) -> find_vars' (find_vars' xs b) a
-    | Uminus a   -> find_vars' xs a
-    | Num _	 -> xs 
-    | Integer _	 -> xs
-  in find_vars' []
+(* various hash functions *)
+let hash_float x = 
+  let (mantissa, exponent) = frexp x
+  in truncate (float_of_int(exponent) *. 1234.567 +. mantissa *. 10000.0)
 
-(* debugging stuff *)
+let sum_list l = List.fold_right (+) l 0
+
+let rec hash = function
+    Num x -> hash_float (Number.to_float x)
+  | Load v -> 1 + 1237 * Variable.hash v
+  | Store (v, x) -> 2 * Variable.hash v - 2345 * hash x
+  | Plus l -> 5 + 23451 * sum_list (List.map Hashtbl.hash l)
+  | Times (a, b) -> 41 + 31415 * (Hashtbl.hash a +  Hashtbl.hash b)
+  | Uminus x -> 42 + 12345 * (hash x)
+
+(* find all variables *)
+let rec find_vars x =
+  match x with
+  | Load y -> [y]
+  | Plus l -> List.flatten (List.map find_vars l)
+  | Times (a, b) -> (find_vars a) @ (find_vars b)
+  | Uminus a -> find_vars a
+  | _ -> []
+
+
+(* TRUE if expression is a constant *)
+let is_constant = function
+  | Num _ -> true
+  | Load v -> Variable.is_constant v
+  | _ -> false
+
+(* expr to string, used for debugging *)
 let rec foldr_string_concat l = 
   match l with
     [] -> ""
   | [a] -> a
   | a :: b -> a ^ " " ^ (foldr_string_concat b)
 
-let rec expr_to_string = function
-  | Var v -> Variable.unparse v
+let rec to_string = function
+  | Load v -> Variable.unparse v
   | Num n -> string_of_float (Number.to_float n)
-  | Plus x -> "(+ " ^ (foldr_string_concat (List.map expr_to_string x)) ^ ")"
-  | Times (a, b) -> "(* " ^ (expr_to_string a) ^ " " ^ (expr_to_string b) ^ ")"
-  | Uminus a -> "(- " ^ (expr_to_string a) ^ ")"
-  | Integer x -> string_of_int x
+  | Plus x -> "(+ " ^ (foldr_string_concat (List.map to_string x)) ^ ")"
+  | Times (a, b) -> "(* " ^ (to_string a) ^ " " ^ (to_string b) ^ ")"
+  | Uminus a -> "(- " ^ (to_string a) ^ ")"
+  | Store (v, a) -> "(:= " ^ (Variable.unparse v) ^ " " ^
+      (to_string a) ^ ")"
 
-and assignment_to_string = function
-  | Assign (v, a) -> "(:= " ^ (Variable.unparse v) ^ " " ^
-      (expr_to_string a) ^ ")"
+let rec to_string_a d x = 
+  if (d = 0) then "..." else match x with
+  | Load v -> Variable.unparse v
+  | Num n -> Number.to_konst n
+  | Plus x -> "(+ " ^ (foldr_string_concat (List.map (to_string_a (d - 1)) x)) ^ ")"
+  | Times (a, b) -> "(* " ^ (to_string_a (d - 1) a) ^ " " ^ (to_string_a (d - 1) b) ^ ")"
+  | Uminus a -> "(- " ^ (to_string_a (d-1) a) ^ ")"
+  | Store (v, a) -> "(:= " ^ (Variable.unparse v) ^ " " ^
+      (to_string_a (d-1) a) ^ ")"
+
+let to_string = to_string_a 10
+let assignment_to_string = function
+  | Assign (v, a) -> "(:= " ^ (Variable.unparse v) ^ " " ^ (to_string a) ^ ")"

@@ -1,5 +1,7 @@
 (*
  * Copyright (c) 1997-1999 Massachusetts Institute of Technology
+ * Copyright (c) 2000 Matteo Frigo
+ * Copyright (c) 2000 Steven G. Johnson
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,26 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
+(* $Id: algsimp.mli,v 1.1 2002-06-15 22:23:40 athena Exp $ *)
 
-type node =
-  | Num of Number.number
-  | Load of Variable.variable
-  | Store of Variable.variable * node
-  | Plus of node list
-  | Times of node * node
-  | Uminus of node
-type dag
-
-val algsimp : dag -> dag
-val simplify_to_alist : dag -> Expr.assignment list
-val make : node list -> dag
+val algsimp : Expr.expr list -> Expr.expr list
 val cvsid : string
-
-module LittleSimplifier :
-  sig
-    val makeNum : Number.number -> node
-    val makeUminus : node -> node
-    val makeTimes : node * node -> node
-    val makePlus : node list -> node
-  end
-

@@ -1,30 +1,34 @@
 noinst_SCRIPTS = gen_notw
 
-EXTRA_DIST = .depend assignmentsToVfpinstrs.ml balanceVfpinstrs.ml	\
-complex.ml expr.ml exprdag.ml fft.ml genUtil.ml gen_notw.ml id.ml	\
-k7Basics.ml k7ExecutionModel.ml k7FlatInstructionScheduling.ml		\
-k7InstructionSchedulingBasics.ml k7RegisterAllocationBasics.ml		\
-k7RegisterAllocator.ml k7RegisterAllocatorEATranslation.ml		\
-k7RegisterAllocatorInit.ml k7RegisterReallocation.ml k7Translate.ml	\
-k7Unparsing.ml k7Vectorization.ml magic.ml memoMonad.ml nonDetMonad.ml	\
-nullVectorization.ml number.ml stateMonad.ml twiddle.ml util.ml		\
-vAnnotatedScheduler.ml vDag.ml vFpBasics.ml vFpUnparsing.ml		\
-vImproveSchedule.ml vK7Optimization.ml vScheduler.ml vSimdBasics.ml	\
-vSimdIndexing.ml vSimdUnparsing.ml variable.ml				\
-assignmentsToVfpinstrs.mli balanceVfpinstrs.mli complex.mli expr.mli	\
-exprdag.mli fft.mli id.mli k7Basics.mli k7ExecutionModel.mli		\
-k7FlatInstructionScheduling.mli k7InstructionSchedulingBasics.mli	\
-k7RegisterAllocationBasics.mli k7RegisterAllocator.mli			\
-k7RegisterAllocatorEATranslation.mli k7RegisterAllocatorInit.mli	\
-k7RegisterReallocation.mli k7Translate.mli k7Unparsing.mli		\
-k7Vectorization.mli memoMonad.mli nonDetMonad.mli			\
-nullVectorization.mli number.mli stateMonad.mli util.mli		\
-vAnnotatedScheduler.mli vDag.mli vFpBasics.mli vFpUnparsing.mli		\
-vImproveSchedule.mli vK7Optimization.mli vScheduler.mli			\
-vSimdBasics.mli vSimdIndexing.mli vSimdUnparsing.mli variable.mli
+EXTRA_DIST = .depend algsimp.ml algsimp.mli assignmentsToVfpinstrs.ml	\
+assignmentsToVfpinstrs.mli assoctable.ml assoctable.mli			\
+balanceVfpinstrs.ml balanceVfpinstrs.mli complex.ml complex.mli		\
+expr.ml expr.mli fft.ml fft.mli genUtil.ml gen_notw.ml id.ml id.mli	\
+k7Basics.ml k7Basics.mli k7ExecutionModel.ml k7ExecutionModel.mli	\
+k7FlatInstructionScheduling.ml k7FlatInstructionScheduling.mli		\
+k7InstructionSchedulingBasics.ml k7InstructionSchedulingBasics.mli	\
+k7RegisterAllocationBasics.ml k7RegisterAllocationBasics.mli		\
+k7RegisterAllocator.ml k7RegisterAllocator.mli				\
+k7RegisterAllocatorEATranslation.ml					\
+k7RegisterAllocatorEATranslation.mli k7RegisterAllocatorInit.ml		\
+k7RegisterAllocatorInit.mli k7RegisterReallocation.ml			\
+k7RegisterReallocation.mli k7Translate.ml k7Translate.mli		\
+k7Unparsing.ml k7Unparsing.mli k7Vectorization.ml k7Vectorization.mli	\
+littlesimp.ml littlesimp.mli magic.ml memoMonad.ml memoMonad.mli	\
+monads.ml nonDetMonad.ml nonDetMonad.mli nullVectorization.ml		\
+nullVectorization.mli number.ml number.mli oracle.ml oracle.mli		\
+stateMonad.ml stateMonad.mli to_alist.ml to_alist.mli twiddle.ml	\
+twiddle.mli util.ml util.mli vAnnotatedScheduler.ml			\
+vAnnotatedScheduler.mli vDag.ml vDag.mli vFpBasics.ml vFpBasics.mli	\
+vFpUnparsing.ml vFpUnparsing.mli vImproveSchedule.ml			\
+vImproveSchedule.mli vK7Optimization.ml vK7Optimization.mli		\
+vScheduler.ml vScheduler.mli vSimdBasics.ml vSimdBasics.mli		\
+vSimdIndexing.ml vSimdIndexing.mli vSimdUnparsing.ml			\
+vSimdUnparsing.mli variable.ml variable.mli
 
 libgenfft_objects = magic.cmo util.cmo number.cmo variable.cmo		\
-expr.cmo stateMonad.cmo memoMonad.cmo exprdag.cmo complex.cmo		\
+expr.cmo stateMonad.cmo memoMonad.cmo monads.cmo littlesimp.cmo		\
+assoctable.cmo oracle.cmo to_alist.cmo algsimp.cmo complex.cmo		\
 twiddle.cmo fft.cmo nonDetMonad.cmo vFpBasics.cmo balanceVfpinstrs.cmo	\
 vSimdBasics.cmo assignmentsToVfpinstrs.cmo k7Basics.cmo id.cmo		\
 k7ExecutionModel.cmo k7InstructionSchedulingBasics.cmo			\

@@ -40,7 +40,7 @@ let vfpaccessToString = function
   | V_FPReal	      -> "real"
 
 let vfpunaryopToString = function
-  | V_FPMulConst n -> sprintf "mulconst(%s)" (numberToString n)
+  | V_FPMulConst n -> sprintf "mulconst(%s)" (Number.to_string n)
   | V_FPNegate	   -> "negate"
   | V_FPId	   -> "fp_copy"
 

@@ -17,10 +17,10 @@
  *
  *)
 
-(* $Id: complex.mli,v 1.2 2002-06-15 17:51:39 athena Exp $ *)
+(* $Id: complex.mli,v 1.3 2002-06-15 22:23:40 athena Exp $ *)
 
 type expr
-val make : (Exprdag.node * Exprdag.node) -> expr
+val make : (Expr.expr * Expr.expr) -> expr
 val one : expr
 val zero : expr
 val i : expr
@@ -36,11 +36,12 @@ val conj : expr -> expr
 val sigma : int -> int -> (int -> expr) -> expr
 val wsquare : expr -> expr
 val wthree : expr -> expr -> expr -> expr
+val wreflect : expr -> expr -> expr -> expr
 type variable
 val load_var : variable -> expr
-val store_var : variable -> expr -> Exprdag.node list
-val store_real : variable -> expr -> Exprdag.node list
-val store_imag : variable -> expr -> Exprdag.node list
+val store_var : variable -> expr -> Expr.expr list
+val store_real : variable -> expr -> Expr.expr list
+val store_imag : variable -> expr -> Expr.expr list
 val access_input : int -> variable
 val access_output : int -> variable
 val access_twiddle : int -> variable

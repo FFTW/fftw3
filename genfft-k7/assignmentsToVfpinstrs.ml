@@ -119,22 +119,22 @@ let plusexprToChecked = function
 
 let rec exprToNegated = function
   | Uminus x 	   -> x
-  | Var x 	   -> Uminus (Var x)
+  | Load x 	   -> Uminus (Load x)
   | Plus xs 	   -> Plus (map exprToNegated (plusexprToChecked xs))
   | Times(Num n,x) -> Times(Num (Number.negate n), x)
   | Times(x,Num n) -> Times(x, Num (Number.negate n))
   | Times(x,y) 	   -> Times(exprToNegated x, y) 
-  | Integer i 	   -> Integer (-i)
   | Num n 	   -> Num (Number.negate n)
+  | Store(_,_)     -> failwith "exprToNegated"
 
 (****************************************************************************)
 
 let rec summandCmp a b = match (a,b) with
   | (Uminus x, y) -> summandCmp x y
   | (x, Uminus y) -> summandCmp x y
-  | (Var x, Var y) -> compare x y
-  | (Var _, Times _) -> -1
-  | (Times _, Var _) -> 1
+  | (Load x, Load y) -> compare x y
+  | (Load _, Times _) -> -1
+  | (Times _, Load _) -> 1
   | (Times(Num _, Num _), _) -> failwith "summandCmp: not supported (1)!"
   | (_, Times(Num _, Num _)) -> failwith "summandCmp: not supported (2)!"
   | (Times(x, Num n), y) -> summandCmp (Times(Num n, x)) y
@@ -148,14 +148,13 @@ let rec exprToVfpinstrsM expr =
   exprToVfpinstrsM' expr None
 
 and exprToVfpinstrsM' = function
-  | Var (Temporary _ as x) -> conditionallyCopyVarM (varexprToVfpreg x)
-  | Var x      -> extractUseReturnVfpregM (loadToVfpinstrsM x)
+  | Load (Temporary _ as x) -> conditionallyCopyVarM (varexprToVfpreg x)
+  | Load x      -> extractUseReturnVfpregM (loadToVfpinstrsM x)
   | Times(x,y) -> timesexprToVfpinstrsM (timesexprToNormalized (x,y))
   | Plus xs    -> plusexprToVfpinstrsM (plusexprToChecked xs)
-  | Uminus (Var v) -> extractUseReturnVfpregM (uminusvarexprToVfpinstrM v)
+  | Uminus (Load v) -> extractUseReturnVfpregM (uminusvarexprToVfpinstrM v)
   | Uminus x   -> exprToVfpinstrsM' (exprToNegated x)
-  | Num _      -> failwith "exprToVfpinstrsM: Num _ not supported!"
-  | Integer _  -> failwith "exprToVfpinstrsM: Integer _ not supported!"
+  | _      -> failwith "exprToVfpinstrsM: _ not supported!"
 
 and uminusvarexprToVfpinstrM v dst' =
   addVfpinstrM (V_FPUnaryOp(V_FPNegate,varexprToVfpreg v,dst'))
@@ -192,7 +191,7 @@ and storeToVfpinstrsM dst src' =
 (****************************************************************************)
 
 let assignmentToVfpinstrsM = function
-  | Assign(v,Var e) when is_input e || is_twiddle e ->
+  | Assign(v,Load e) when is_input e || is_twiddle e ->
       if is_output v then
 	extractUseReturnVfpregM (loadToVfpinstrsM e) None >>= 
 	  storeToVfpinstrsM v

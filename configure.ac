@@ -53,6 +53,7 @@ OCAML_INIT_PATHS
 
 dnl Checks for programs.
 AC_PROG_CC
+AMX_PROG_AS     dnl AM_PROG_AS breaks libtool
 AC_PROG_CC_STDC
 ACX_PROG_CC_EGCS
 AC_PROG_INSTALL

@@ -17,15 +17,15 @@
  *
  *)
 
-(* $Id: complex.ml,v 1.2 2002-06-15 17:51:39 athena Exp $ *)
+(* $Id: complex.ml,v 1.3 2002-06-15 22:23:40 athena Exp $ *)
 
 (* abstraction layer for complex operations *)
 
 (* type of complex expressions *)
-open Exprdag
-open Exprdag.LittleSimplifier
+open Littlesimp
+open Expr
 
-type expr = CE of node * node
+type expr = CE of Expr.expr * Expr.expr
 
 let make (r, i) = CE (r, i)
 
@@ -157,6 +157,21 @@ let wthree (CE (an1, bn1)) wn2 (CE (a, b)) =
   in let twoa_wn1 = CE (makeTimes (twoa, an1), 
 			makeTimes (twoa, bn1))
   in plus [twoa_wn1; (uminus wn2)]
+
+
+(* 
+ * compute w^{x+y} given w^{x-y}, w^x, and w^y, using
+ * the ``reflection'' formulas
+ *
+ * cos(x+y)-cos(x-y) = - 2 sin(x) sin(y)
+ * sin(x+y)-sin(x-y) = 2 cos(x) sin(y)
+ *
+ * The common factor 2 sin(y) can be grouped.
+ *)
+let wreflect (CE (cxmy, sxmy)) (CE (cx, sx)) (CE (cy, sy)) =
+  let tsy = makeTimes (makeNum Number.two, sy) in
+  CE (makePlus [cxmy; makeUminus (makeTimes (tsy, sx))],
+      makePlus [sxmy; makeTimes (tsy, cx)])
 
 (* abstraction of sum_{i=0}^{n-1} *)
 let sigma a b f = plus (List.map f (Util.interval a b))

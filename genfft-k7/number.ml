@@ -1,5 +1,7 @@
 (*
  * Copyright (c) 1997-1999 Massachusetts Institute of Technology
+ * Copyright (c) 2000 Matteo Frigo
+ * Copyright (c) 2000 Steven G. Johnson
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-
-(* $Id: number.ml,v 1.1 2002-06-14 10:56:15 athena Exp $ *)
+(* $Id: number.ml,v 1.2 2002-06-15 22:23:40 athena Exp $ *)
 
 (* The generator keeps track of numeric constants in symbolic
    expressions using the abstract number type, defined in this file.
@@ -39,14 +40,11 @@ open Num
 
 type number = N of num
 
-let eq_number  (N n) (N m) = n =/ m
-let cmp_number (N n) (N m) = compare n m
-
 let makeNum n = N n
 
 (* decimal digits of precision to maintain internally, and to print out: *)
 let precision = 50
-let print_precision = 16
+let print_precision = 45
 
 let inveps = (Int 10) **/ (Int precision)
 let epsilon = (Int 1) // inveps
@@ -136,7 +134,7 @@ let cexp n i =
       in let (c,s) = ipow_cnum (primitive_root_of_unity n2) i2
       in (makeNum c, makeNum s)
 
-let unparse (N n) =
+let to_konst (N n) =
   let f = float_of_num n in
   let f' = if f < 0.0 then f *. (-1.0) else f in
   let f2 = if (f' >= 1.0) then (f' -. (float (truncate f'))) else f'
@@ -154,5 +152,3 @@ let to_string (N n) = approx_num_fix print_precision n
 
 let to_float (N n) = float_of_num n
 
-let numberToString n = "number(" ^ (unparse n) ^ ")"
-let numberToFloat (N n) = float_of_num n

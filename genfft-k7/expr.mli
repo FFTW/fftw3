@@ -1,5 +1,7 @@
 (*
  * Copyright (c) 1997-1999 Massachusetts Institute of Technology
+ * Copyright (c) 2000 Matteo Frigo
+ * Copyright (c) 2000 Steven G. Johnson
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,17 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
+(* $Id: expr.mli,v 1.3 2002-06-15 22:23:40 athena Exp $ *)
 
-(* $Id: expr.mli,v 1.2 2002-06-15 17:51:39 athena Exp $ *)
 type expr =
   | Num of Number.number
-  | Var of Variable.variable
   | Plus of expr list
   | Times of expr * expr
   | Uminus of expr
-  | Integer of int
-val find_vars : expr -> Variable.variable list
+  | Load of Variable.variable
+  | Store of Variable.variable * expr
 
 type assignment = Assign of Variable.variable * expr
 
+val hash_float : float -> int
+val hash : expr -> int
+val to_string : expr -> string
 val assignment_to_string : assignment -> string
+
+val find_vars : expr -> Variable.variable list
+val is_constant : expr -> bool

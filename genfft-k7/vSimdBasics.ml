@@ -151,7 +151,8 @@ let eq_vsimdunaryop a b = match (a,b) with
   | (V_Id, V_Id) -> true
   | (V_Swap, V_Swap) -> true
   | (V_Chs p1, V_Chs p2) -> p1=p2
-  | (V_MulConst(n,m), V_MulConst(n',m')) -> eq_number n n' && eq_number m m'
+  | (V_MulConst(n,m), V_MulConst(n',m')) -> 
+      Number.equal n n' && Number.equal m m'
   | _ -> false
 
 let vsimdbinopIsParallel = function	(* inter-operand parallel binary-op *)
@@ -233,7 +234,7 @@ let vsimdposToSrcoperand = function
   | V_LoHi -> V_SimdNConst "chslh"
 
 let vsimdunaryopToSrcoperands = function
-  | V_MulConst(n,m) -> [V_SimdNumConst(numberToFloat n, numberToFloat m)]
+  | V_MulConst(n,m) -> [V_SimdNumConst(Number.to_float n, Number.to_float m)]
   | V_Chs p	    -> [vsimdposToSrcoperand p]
   | V_Id	    -> []
   | V_Swap	    -> []

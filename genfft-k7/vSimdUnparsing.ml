@@ -40,7 +40,7 @@ let vsimdfpunaryopToString = function
   | V_Chs p -> 
       vsimdposToChsconstnamestring p
   | V_MulConst(n,m) -> 
-      sprintf "mulconst(%s,%s)" (numberToString n) (numberToString m)
+      sprintf "mulconst(%s,%s)" (Number.to_string n) (Number.to_string m)
 
 let vsimdfpbinopToString = function
   | V_Add     -> "add"

@@ -28,8 +28,8 @@ open AssignmentsToVfpinstrs
 open Complex
 
 let store_array_c n f =
-  let a = Array.init n (fun i -> store_var (access_output i) (f i))
-  in Exprdag.make (List.flatten (Array.to_list a))
+  List.flatten
+    (List.map (fun i -> store_var (access_output i) (f i)) (iota n))
 
 let no_twiddle_gen n sign =
   let _ = info "generating..." in
@@ -109,28 +109,43 @@ let no_twiddle_gen n sign =
   
   in ((initcode, body), k7vFlops body)
 
-let cvsid = "$Id: gen_notw.ml,v 1.1 2002-06-15 17:51:39 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.2 2002-06-15 22:23:40 athena Exp $"
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let generate n =
-  let name = !Magic.name
+  let name = !Magic.codelet_name
   and sign = !GenUtil.sign
   in
   let (code, (add, mul)) = no_twiddle_gen n sign in
+  let p = Printf.printf in
   begin
     boilerplate cvsid;
-    Printf.printf "#if FFTW_SINGLE && K7_MODE\n";
-    Printf.printf
-      "static void %s(const R *ri, R *ro, int is, int os, uint v, int ivs, int ovs)\n"
-      name;
-    Printf.printf "{ UNUSED(ri); UNUSED(ro); UNUSED(is); UNUSED(os);\n";
-    Printf.printf "  UNUSED(v); UNUSED(ivs); UNUSED(ovs);\n";
-    compileToAsm code;
-    Printf.printf "}\n\n";
-    Printf.printf "static const kdft_k7_desc desc = { %d, %d, { %d, %d, 0, 0} };\n"
-      n sign add mul;
-    Printf.printf "%s { X(kdft_k7_register)(p, %s, &desc); }"
-      (declare_register_fcn name) name;
+    p "#if defined(FFTW_SINGLE) && defined(K7_MODE)\n";
+    compileToAsm name code;
+    p "\n";
+    p ".section .rodata\n";
+    p "desc:\n";
+    p "\t.long %d\n" n;
+    p "\t.long %d\n" sign;
+    p "\t.long %d\n" add;
+    p "\t.long %d\n" mul;
+    p "\t.long 0\n";  (* fma *)
+    p "\t.long 0\n";  (* other *)
+    p "\n";
+    p ".text\n";
+    p "\t.align 4\n";
+    p ".globl %s\n" (register_fcn name);
+    p "%s:\n" (register_fcn name);
+    p "\tsubl $12,%%esp\n";
+    p "\taddl $-4,%%esp\n";
+    p "\tpushl $desc\n";
+    p "\tpushl $%s\n" name;
+    p "\tpushl 28(%%esp)\n";
+    p "\tcall sfftw_kdft_k7_register\n";
+    p "\taddl $16,%%esp\n";
+    p "\taddl $12,%%esp\n";
+    p "\tret\n";
+    p "\n";
     Printf.printf "#endif\n";
   end
 

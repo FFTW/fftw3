@@ -85,9 +85,9 @@ let rec pow_mod x n p =
 (******************************************
  * auxiliary functions 
  ******************************************)
-let rec forall combiner a b f =
-    if (a >= b) then []
-    else combiner (f a) (forall combiner (a + 1) b f)
+let rec forall id combiner a b f =
+    if (a >= b) then id
+    else combiner (f a) (forall id combiner (a + 1) b f)
 
 let sum_list l = fold_right (+) l 0
 let max_list l = fold_right (max) l (-999999)
@@ -330,7 +330,7 @@ let array n f =
   in fun i -> Lazy.force a.(i)
 
 (* iota n produces the list [0; 1; ...; n - 1] *)
-let iota n = forall cons 0 n identity
+let iota n = forall [] cons 0 n identity
 
 (* interval a b produces the list [a; 1; ...; b - 1] *)
 let interval a b = List.map ((+) a) (iota (b - a))

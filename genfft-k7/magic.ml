@@ -38,8 +38,6 @@ let rader_list = ref [5]
 
 let alternate_convolution = ref 17
 
-let times_3_3 = ref false
-
 let enable_fma = ref false
 let enable_fma_expansion = ref false
 
@@ -47,10 +45,12 @@ let collect_common_twiddle = ref true
 let collect_common_inputs = ref true
 let strength_reduce_mul = ref false
 let verbose = ref false
+let randomized_cse = ref true
 
-let name = ref "UNNAMED"
-
+let codelet_name = ref "unnamed"
 let dif_split_radix = ref false
+let deep_collect_depth = ref 1
+let network_transposition = ref true
 
 (****************************************************************************
  * K7/FFTW-GEL SPECIFIC VALUES 						    *
@@ -72,6 +72,7 @@ type amd_processor =
 
 let target_processor = ref AMD_K7
 
+(* command-line parsing *)
 let set_bool var = Arg.Unit (fun () -> var := true)
 let unset_bool var = Arg.Unit (fun () -> var := false)
 let set_int var = Arg.Int(fun i -> var := i)
@@ -80,23 +81,47 @@ let set_string var = Arg.String(fun s -> var := s)
 let undocumented = " Undocumented voodoo parameter"
 
 let speclist =  [
-  "-name", set_string name, " set codelet name";
+  "-name", set_string codelet_name, " set codelet name";
 
-  "-verbose", set_bool verbose, 
-  " Enable verbose logging messages to stderr";
+  "-verbose", set_bool verbose, " Enable verbose logging messages to stderr";
 
-  "-rader-min", Arg.Int(fun i -> rader_min := i),
-    "<n> : Use Rader's algorithm for prime sizes >= <n>";
+  "-rader-min", set_int rader_min,
+  "<n> : Use Rader's algorithm for prime sizes >= <n>";
 
-  "-magic-loopo", set_bool loopo, undocumented;
-  "-magic-loopi", unset_bool loopo, undocumented;
+  "-alternate-convolution", set_int alternate_convolution, undocumented;
+  "-deep-collect-depth", set_int deep_collect_depth, undocumented;
 
-  "-magic-times-3-3", set_bool times_3_3, undocumented;
-  "-magic-times-4-2", unset_bool times_3_3, undocumented;
+  "-dif-split-radix", set_bool dif_split_radix, undocumented;
+  "-dit-split-radix", unset_bool dif_split_radix, undocumented;
 
-  "-magic-vectsteps-limit", 
-    Arg.Int(fun i -> vectsteps_limit := i), 
-    undocumented;
+  "-inline-single", set_bool inline_single, undocumented;
+  "-no-inline-single", unset_bool inline_single, undocumented;
+
+  "-inline-loads", set_bool inline_loads, undocumented;
+  "-no-inline-loads", unset_bool inline_loads, undocumented;
+
+  "-inline-loads-constants", set_bool inline_loads_constants, undocumented;
+  "-no-inline-loads-constants",
+     unset_bool inline_loads_constants, undocumented;
+
+  "-inline-constants", set_bool inline_constants, undocumented;
+  "-no-inline-constants", unset_bool inline_constants, undocumented;
+
+  "-randomized-cse", set_bool randomized_cse, undocumented;
+  "-no-randomized-cse", unset_bool randomized_cse, undocumented;
+
+  "-network-transposition", set_bool network_transposition, undocumented;
+  "-no-network-transposition", unset_bool network_transposition, undocumented;
+
+  "-fma", set_bool enable_fma, undocumented;
+  "-no-fma", unset_bool enable_fma, undocumented;
+
+  "-variables", set_int number_of_variables, undocumented;
+
+  "-strength-reduce-mul", set_bool strength_reduce_mul, undocumented;
+  "-no-strength-reduce-mul", unset_bool strength_reduce_mul, undocumented;
+
+  "-magic-vectsteps-limit", set_int vectsteps_limit, undocumented;
 
   "-magic-target-processor-k6",
     Arg.Unit(fun () -> target_processor := AMD_K6),

@@ -26,8 +26,7 @@ exception No_Generator
 val find_generator : int -> int
 exception Negative_Power
 val pow_mod : int -> int -> int -> int
-val forall :
-  ('a -> 'b list -> 'b list) -> int -> int -> (int -> 'a) -> 'b list
+val forall : 'a -> ('b -> 'a -> 'a) -> int -> int -> (int -> 'b) -> 'a
 val sum_list : int list -> int
 val max_list : int list -> int
 val min_list : int list -> int

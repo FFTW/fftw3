@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: number.ml,v 1.1.1.1 2002-06-02 18:42:30 athena Exp $ *)
+(* $Id: number.ml,v 1.2 2002-06-15 22:23:40 athena Exp $ *)
 
 (* The generator keeps track of numeric constants in symbolic
    expressions using the abstract number type, defined in this file.
@@ -136,16 +136,17 @@ let cexp n i =
 
 let to_konst (N n) =
   let f = float_of_num n in
-  let f2 = if (f >= 1.0) then (f -. (float (truncate f))) else f
+  let f' = if f < 0.0 then f *. (-1.0) else f in
+  let f2 = if (f' >= 1.0) then (f' -. (float (truncate f'))) else f'
   in let q = string_of_int (truncate(f2 *. 1.0E9))
   in let r = "0000000000" ^ q
-  in let l = String.length r
-  in
-  if (f >= 1.0) then
-    ("K" ^ (string_of_int (truncate f)) ^ "_" ^ 
+  in let l = String.length r 
+  in let prefix = if (f < 0.0) then "NK" else "PK" in
+  if (f' >= 1.0) then
+    (prefix ^ (string_of_int (truncate f')) ^ "_" ^ 
      (String.sub r (l - 9) 9))
   else
-    ("K" ^ (String.sub r (l - 9) 9))
+    (prefix ^ (String.sub r (l - 9) 9))
 
 let to_string (N n) = approx_num_fix print_precision n
 

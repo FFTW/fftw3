@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.3 2002-06-15 17:51:39 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.4 2002-06-15 22:23:40 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -53,10 +53,6 @@ let load_reim sign w i =
   if sign = 1 then x else Complex.conj x
   
 (* various policies for computing/loading twiddle factors *)
-
-let rec forall id combiner a b f =
-    if (a >= b) then id
-    else combiner (f a) (forall id combiner (a + 1) b f)
 
 (* load all twiddle factors *)
 let twiddle_policy_load_all =
@@ -131,6 +127,26 @@ let twiddle_policy_square3 =
 	square (self (i / 2))
       else times (self (i / 2)) (self (i - i / 2))))
 
+(*
+ * twiddle policy used by Takuya Ooura in his code.
+ * if i is a power of two, then w^i = (w^(i/2)) ^2
+ * else let x = largest power of 2 less than i in
+ *      let y = i - x in
+ *      compute w^{x+y} from w^{x-y}, w^{x}, and w^{y} using
+ *      reflection formula
+ *)
+let twiddle_policy_ooura =
+  policy_one (fun n ltw ->
+    rec_array n (fun self i ->
+      if i = 0 then Complex.one
+      else if (i == 1) then ltw (i - 1)
+      else if (is_pow_2 i) then
+	square (self (i / 2))
+      else
+	let x = largest_power_of_2_smaller_than i in
+	let y = i - x in
+	wreflect (self (x - y)) (self x) (self y)))
+
 let current_twiddle_policy = ref twiddle_policy_load_all
 
 let twiddle_policy () = !current_twiddle_policy
@@ -145,4 +161,5 @@ let speclist = [
   "-twiddle-square1", set_policy twiddle_policy_square1, undocumented;
   "-twiddle-square2", set_policy twiddle_policy_square2, undocumented;
   "-twiddle-square3", set_policy twiddle_policy_square3, undocumented;
+  "-twiddle-ooura", set_policy twiddle_policy_ooura, undocumented;
 ] 

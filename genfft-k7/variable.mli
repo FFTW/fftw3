@@ -37,6 +37,7 @@ val is_output : variable -> bool
 val is_input : variable -> bool
 val is_twiddle : variable -> bool
 val is_locative : variable -> bool
+val is_constant : variable -> bool
 
 val same : 'a -> 'a -> bool
 val hash : variable -> int
