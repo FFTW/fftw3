@@ -73,7 +73,7 @@ static const struct roundtab {
 
 #define rol(a, s) ((a << s) | (a >> (32 - s)))
 
-static void doblock(md5uint *state, const unsigned char *data)
+static void doblock(md5sig state, const unsigned char *data)
 {
      md5uint a, b, c, d, t, x[16];
      const md5uint msk = 0xffffffffUL;
