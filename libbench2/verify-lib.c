@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.16 2005-02-19 21:55:29 athena Exp $ */
+/* $Id: verify-lib.c,v 1.17 2005-02-19 22:28:43 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -294,7 +294,7 @@ double impulse(dofft_closure *k,
 
      /* check impulsive input */
      for (i = 0; i < vecn; ++i) {
-	  R xr = mydrand(), xi = mydrand();
+	  R xr = mydrand(), xi = 0;
 	  for (j = 0; j < n; ++j) {
 	       c_re(inA[j + i * n]) = 0;
 	       c_im(inA[j + i * n]) = 0;
@@ -310,7 +310,7 @@ double impulse(dofft_closure *k,
 
      /* check constant input */
      for (i = 0; i < vecn; ++i) {
-	  R xr = mydrand(), xi = mydrand();
+	  R xr = mydrand(), xi = 0;
 	  for (j = 0; j < n; ++j) {
 	       c_re(inA[j + i * n]) = xr;
 	       c_im(inA[j + i * n]) = xi;
