@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.8 2002-07-25 03:24:24 stevenj Exp $ */
+/* $Id: verify.c,v 1.9 2002-07-25 04:22:36 stevenj Exp $ */
 
 #include "rdft.h"
 #include <math.h>
@@ -308,7 +308,7 @@ static void cpyhc(R *a, tensor sza, tensor vecsza, R *rb, R *ib, tensor szb)
      X(dotens2)(vecsza, szb, &k.k);
 }
 
-/* icpyhc is the inverse of cpyhc */
+/* icpyhc is the inverse of cpyhc, conjugated for hc2r transform */
 
 static void icpyhc0(dotens2_closure *k_, 
 		  int indxa, int ondxa, int indxb, int ondxb)
@@ -324,7 +324,7 @@ static void icpyhc0(dotens2_closure *k_,
      }
      for (i = 1; i < (n + 1) / 2; ++i) {
 	  a[as*i] = rb[2*i];
-	  a[as*(n-i)] = ib[2*i];
+	  a[as*(n-i)] = -ib[2*i];
      }
      if (2 * i == n) {
 	  a[as*i] = rb[2*i];
