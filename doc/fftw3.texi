@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.65 2003-03-03 00:03:23 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.66 2003-03-03 02:54:13 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1347,6 +1347,11 @@ see the @code{comp.lang.c}
 @c ************************************************************
 @node FFTW Reference, Parallel FFTW, Other Stuff You Should Know, Top
 @chapter FFTW Reference
+
+This chapter provides a complete reference for all sequential (i.e.,
+one-processor) FFTW functions.  For parallel transforms, @xref{Parallel
+FFTW}.
+
 @menu
 * Data Types and Files::        
 * Using Plans::                 
@@ -1372,6 +1377,7 @@ means adding @code{-lfftw3 -lm} at the @emph{end} of the link command.
 @menu
 * Complex numbers::             
 * Precision::                   
+* Allocation::                  
 @end menu
 
 @c =========>
@@ -1402,7 +1408,7 @@ imaginary unit);
 @cindex C99
 
 @c =========>
-@node Precision,  , Complex numbers, Data Types and Files
+@node Precision, Allocation, Complex numbers, Data Types and Files
 @subsection Precision
 @cindex precision
 
@@ -1440,6 +1446,32 @@ be any more precise than @code{double} (or may not be supported at all,
 although it is standard in C99).
 @cindex C99
 
+@c =========>
+@node Allocation,  , Precision, Data Types and Files
+@subsection Allocation
+
+@example
+void *fftw_malloc(size_t n);
+void fftw_free(void *p);
+@end example
+@findex fftw_malloc
+@findex fftw_free
+
+These are functions that behave identically to @code{malloc} and
+@code{free}, except that they guarantee that the returned pointer obeys
+any special alignment restrictions imposed by any algorithm in FFTW
+(e.g. for SIMD acceleration).  @xref{The Importance of Alignment}.
+@cindex alignment
+
+Data allocated by @code{fftw_malloc} @emph{must} be deallocated by
+@code{fftw_free} and not by the ordinary @code{free}.
+
+These routines simply call through to your operating system's
+@code{malloc} or, if necessary, its aligned equivalent
+(e.g. @code{memalign}), so you normally need not worry about any
+significant time or space overhead.  You are @emph{not required} to use
+them to allocate your data, but we strongly recommend it.
+
 @c ------------------------------------------------------------
 @node Using Plans, Basic Interface, Data Types and Files, FFTW Reference
 @section Using Plans
@@ -1448,6 +1480,8 @@ Plans for all transform types in FFTW are stored as type
 @code{fftw_plan} (an opaque pointer type), and are created by one of the
 various planning routines described in the following sections.
 @tindex fftw_plan
+An @code{fftw_plan} contains all information necessary to compute the
+transform, including the pointers to the input and output arrays.
 
 @example
 void fftw_execute(const fftw_plan plan);
@@ -1471,6 +1505,20 @@ void fftw_destroy_plan(fftw_plan plan);
 @findex fftw_destroy_plan
 
 This deallocates the @code{plan} and all its associated data.
+
+FFTW's planner saves some other persistent data, like the accumulated
+wisdom and a list of algorithms available in the current configuration.
+If you want to deallocate all of that and reset FFTW to the pristine
+state it was in when you started your program, you can call:
+
+@example
+void fftw_cleanup(void);
+@end example
+@findex fftw_cleanup
+
+(This function does not destroy or invalidate any plans you have lying
+around, however.)  Normally, @code{fftw_cleanup} should not be
+necessary.
 
 The following two routines are provided purely for academic purposes
 (that is, for entertainment).
@@ -1500,6 +1548,194 @@ the given file.
 @node Basic Interface, Advanced Interface, Using Plans, FFTW Reference
 @section Basic Interface
 @cindex basic interface
+
+The basic interface, which we expect to satisfy the needs of most users,
+provides planner routines for transforms of a single contiguous array
+with any of FFTW's supported transform types.
+
+@c =========>
+@menu
+* Complex DFTs::                
+* Planner Flags::               
+@end menu
+
+@node Complex DFTs, Planner Flags, Basic Interface, Basic Interface
+@subsection Complex DFTs
+
+@example
+fftw_plan fftw_plan_dft_1d(int n,
+                           fftw_complex *in, fftw_complex *out,
+                           int sign, unsigned flags);
+fftw_plan fftw_plan_dft_2d(int nx, int ny,
+                           fftw_complex *in, fftw_complex *out,
+                           int sign, unsigned flags);
+fftw_plan fftw_plan_dft_3d(int nx, int ny, int nz,
+                           fftw_complex *in, fftw_complex *out,
+                           int sign, unsigned flags);
+fftw_plan fftw_plan_dft(int rank, const int *n,
+                        fftw_complex *in, fftw_complex *out,
+                        int sign, unsigned flags);
+@end example
+@findex fftw_plan_dft_1d
+@findex fftw_plan_dft_2d
+@findex fftw_plan_dft_3d
+@findex fftw_plan_dft
+
+Plan a complex input/output discrete Fourier transform (DFT) in zero or
+more dimensions, returning an @code{fftw_plan} (@pxref{Using Plans}).
+
+Once you have created a plan for a certain transform type and
+parameters, then creating another plan of the same type and parameters,
+but for different arrays, is fast and shares constant data with the
+first plan (if it still exists).
+
+The planner returns @code{NULL} if the plan cannot be created.  A
+non-@code{NULL} plan is always returned by the basic interface unless
+you are using a customized FFTW configuration supporting a restricted
+set of transforms.
+
+@subsubheading Arguments
+@itemize @bullet
+
+@item
+@code{n}, or @code{nx}/@code{ny}/@code{nz}, or @code{n[rank]},
+respectively, gives the size of the transform dimensions.  They can be
+any positive integer.
+ 
+@itemize @minus
+@item
+FFTW is best at handling sizes of the form
+@ifinfo
+@math{2^a 3^b 5^c 7^d 11^e 13^f},
+@end ifinfo
+@tex
+$2^a 3^b 5^c 7^d 11^e 13^f$,
+@end tex
+@ifhtml
+2<sup>a</sup> 3<sup>b</sup> 5<sup>c</sup> 7<sup>d</sup>
+        11<sup>e</sup> 13<sup>f</sup>,
+@end ifhtml
+where @math{e+f} is either @math{0} or @math{1}, and the other exponents
+are arbitrary.  Other sizes are computed by means of a slow,
+general-purpose algorithm (which nevertheless retains @Onlogn
+performance even for prime sizes).  (It is possible to customize FFTW
+for different array sizes; see @ref{Installation and Customization}.)
+Transforms whose sizes are powers of @math{2} are especially fast.
+@end itemize
+
+@item
+@code{rank} is the dimensionality of the transform (it should be the
+size of the array @code{*n}), and can be any non-negative integer.  A
+@code{rank} of zero is equivalent to a transform of size 1, i.e. a copy
+of one number from input to output.
+
+@item
+@code{in} and @code{out} point to the input and output arrays of the
+transform, which may be the same (yielding an in-place transform).
+@cindex in-place
+These arrays are overwritten during planning, unless
+@code{FFTW_ESTIMATE} is used in the flags.  (The arrays need not be
+initialized, but they must be allocated.)
+@itemize @minus
+@item
+Multi-dimensional arrays are stored in row major order with dimensions;
+@code{nx} x @code{ny}; or @code{nx} x @code{ny} x @code{nz}; or
+@code{n[0]} x @code{n[1]} x ... x @code{n[rank-1]}.
+@xref{Multi-dimensional Array Format}.
+@end itemize
+
+@item
+@code{sign} is the sign of the exponent in the formula that defines the
+Fourier transform.  It can be @math{-1} (= @code{FFTW_FORWARD}) or
+@math{+1} (= @code{FFTW_BACKWARD}).
+
+@item
+@cindex flags
+@code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
+as defined in @ref{Planner Flags}.
+
+@end itemize
+
+@c =========>
+@node Planner Flags,  , Complex DFTs, Basic Interface
+@subsection Planner Flags
+
+All of the planner routines in FFTW accept an integer @code{flags}
+argument, which is a bitwise OR (@samp{|}) of zero or more of the flag
+constants defined below.  These flags control the rigor (and time) of
+the planning process, and can also impose (or lift) restrictions on the
+type of transform algorithm that is employed.
+
+@subsubheading Planning-time flags
+@itemize @bullet
+
+@item
+@ctindex FFTW_ESTIMATE
+@code{FFTW_ESTIMATE} specifies that, instead of actual measurements of
+different algorithms, a simple heuristic is used to pick a (probably
+sub-optimal) plan quickly.  With this flag, the input/output arrays are
+not overwritten during planning.
+
+@item
+@ctindex FFTW_MEASURE
+@code{FFTW_MEASURE} tells FFTW to find an optimized plan by actually
+@emph{computing} several FFTs and measuring their execution time.
+Depending on your machine, this can take some time (often a few
+seconds).  @code{FFTW_MEASURE} is the default planning option.
+
+@item
+@ctindex FFTW_PATIENT
+@code{FFTW_PATIENT} is like @code{FFTW_MEASURE}, but considers a wider
+range of algorithms and often produces a more optimal plan (especially
+for large transforms), but at the expense of several times longer
+planning time (especially for large transforms).
+
+@item
+@ctindex FFTW_EXHAUSTIVE
+@code{FFTW_EXHAUSTIVE} is like @code{FFTW_PATIENT}, but considers an
+even wider range of algorithms, including many that we think are
+unlikely to be fast, to produce the most optimal plan but with a
+substantially increased planning time.
+
+@end itemize
+
+@subsubheading Algorithm-restriction flags
+@itemize @bullet
+
+@item
+@ctindex FFTW_DESTROY_INPUT
+@code{FFTW_DESTROY_INPUT} specifies that an out-of-place transform is
+allowed to @emph{overwrite its input} array with arbitrary data; this
+can sometimes allow more efficient algorithms to be employed.
+@cindex out-of-place
+
+@item
+@ctindex FFTW_PRESERVE_INPUT
+@code{FFTW_PRESERVE_INPUT} specifies that an out-of-place transform must
+@emph{not change its input} array.  This is ordinarily the
+@emph{default}, except for c2r and hc2r (i.e. complex-to-real)
+transforms for which @code{FFTW_DESTROY_INPUT} is the default.  In the
+latter cases, passing @code{FFTW_PRESERVE_INPUT} will attempt to use
+algorithms that do not destroy the input, at the expense of worse
+performance; for multi-dimensional c2r transforms, however, no
+input-preserving algorithms are implemented and the planner will return
+@code{NULL} if one is requested.
+@cindex c2r
+@cindex hc2r
+
+@item
+@ctindex FFTW_POSSIBLY_UNALIGNED
+@cindex alignment
+@code{FFTW_POSSIBLY_UNALIGNED} specifies that the algorithm may not
+impose any unusual alignment requirements on the input/output arrays
+(i.e. no SIMD may be used).  This flag is normally @emph{not necessary},
+since the planner automatically detects misaligned arrays.  The only use
+for this flag is if you want to use the guru interface to execute a
+given plan on a different array that may not be aligned like the
+original.  (Using @code{fftw_malloc} makes this flag unnecessary even
+then.)
+
+@end itemize
 
 @c ------------------------------------------------------------
 @node Advanced Interface, Guru Interface, Basic Interface, FFTW Reference
