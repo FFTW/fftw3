@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.7 2002-07-02 20:13:24 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.8 2002-07-12 09:59:26 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -128,7 +128,7 @@ static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
      for (i = 0; i < ego->nbuddies; ++i) {
 	  if (ego->buddies[i] == ego->vecloop_dim)
 	       break;  /* found self */
-          if ((really_pickdim(ego->buddies[i], vecsz, oop, &d1), *dp == d1))
+          if ((really_pickdim(ego->buddies[i], vecsz, oop, &d1) && *dp == d1))
                return 0; /* found equivalent buddy */
      }
      return 1;
