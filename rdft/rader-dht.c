@@ -431,5 +431,5 @@ static solver *mksolver(uint min_prime)
 void X(rdft_rader_dht_register)(planner *p)
 {
      /* FIXME: what are good defaults? */
-     REGISTER_SOLVER(p, mksolver(53));
+     REGISTER_SOLVER(p, mksolver(RADER_MIN_GOOD));
 }

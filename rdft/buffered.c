@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.1 2002-07-22 23:57:16 stevenj Exp $ */
+/* $Id: buffered.c,v 1.2 2002-07-25 00:36:34 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -183,6 +183,10 @@ static int score(const solver *ego_, const problem *p_, int flags)
 
      if (toobig(p->sz.dims[0].n, ego))
 	 return UGLY;
+
+     /* Hack to allow Rader & generic to work in-place for small prime sizes */
+     if (p->sz.dims[0].n < RADER_MIN_GOOD && X(is_prime)(p->sz.dims[0].n))
+	  return UGLY;
 
      return GOOD;
 }
