@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: tensor3.c,v 1.1 2002-09-22 14:21:36 athena Exp $ */
+/* $Id: tensor3.c,v 1.2 2003-01-11 20:44:37 stevenj Exp $ */
 
 #include "ifftw.h"
 
 tensor *X(mktensor_rowmajor)(uint rnk, const uint *n,
-			    const uint *niphys, const uint *nophys,
-                            int is, int os)
+			     const uint *niphys, const uint *nophys,
+			     int is, int os)
 {
      tensor *x = X(mktensor)(rnk);
 
