@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.241 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.242 2005-01-09 13:15:36 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -495,12 +495,12 @@ enum {
      NO_UGLY = 0x400,  /* avoid plans we are 99% sure are suboptimal */
 
      ESTIMATE = 0x1000,
+
      IMPATIENCE_FLAGS = (ESTIMATE | (ESTIMATE - 1)),
-     
+
      BLESSING = 0x2000,   /* save this entry */
      H_VALID = 0x4000,    /* valid hastable entry */
-     H_LIVE = 0x8000,     /* entry is nonempty, implies H_VALID */
-     NONIMPATIENCE_FLAGS = BLESSING
+     H_LIVE = 0x8000      /* entry is nonempty, implies H_VALID */
 };
 
 #define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
@@ -528,6 +528,17 @@ typedef struct {
      int (*imprt)(planner *ego, scanner *sc);
 } planner_adt;
 
+/* hash table of solutions */
+typedef struct {
+     solution *solutions;
+     unsigned hashsiz, nelem;
+
+     /* statistics */
+     int lookup, succ_lookup, lookup_iter;
+     int insert, insert_iter, insert_unknown;
+     int nrehash;
+} hashtab;
+
 struct planner_s {
      const planner_adt *adt;
      void (*hook)(struct planner_s *plnr, plan *pln, 
@@ -539,9 +550,8 @@ struct planner_s {
      const char *cur_reg_nam;
      int cur_reg_id;
 
-     /* hash table of solutions */
-     solution *solutions;
-     unsigned hashsiz, nelem;
+     hashtab htab_blessed;
+     hashtab htab_unblessed;
 
      int nthr;
      unsigned problem_flags;
@@ -551,17 +561,10 @@ struct planner_s {
      int nplan;    /* number of plans evaluated */
      double pcost, epcost; /* total pcost of measured/estimated plans */
      int nprob;    /* number of problems evaluated */
-     int lookup, succ_lookup, lookup_iter;
-     int insert, insert_iter, insert_unknown;
-     int nrehash;
 };
 
 planner *X(mkplanner)(void);
 void X(planner_destroy)(planner *ego);
-
-#ifdef FFTW_DEBUG
-void X(planner_dump)(planner *ego, int vrbose);
-#endif
 
 /*
   Iterate over all solvers.   Read:
