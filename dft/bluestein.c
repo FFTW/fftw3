@@ -30,7 +30,7 @@ typedef struct {
      int nb;    /* size of convolution */
      R *w;      /* lambda k . exp(2*pi*i*k^2/(2*n)) */
      R *W;      /* DFT(w) */
-     plan *cldf, *cldb;
+     plan *cldf;
      int is, os;
 } P;
 
@@ -103,19 +103,19 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      for (i = 0; i < nb; ++i) {
 	  E xr = b[2*i], xi = b[2*i+1];
           E wr = W[2*i], wi = W[2*i+1];
-          b[2*i] = xr * wr - xi * wi;
-          b[2*i+1] = xi * wr + xr * wi;
+          b[2*i] = xi * wr + xr * wi;
+          b[2*i+1] = xr * wr - xi * wi;
      }
 
-     /* convolution: IFFT */
+     /* convolution: IFFT by FFT with real/imag input/output swapped */
      {
-          plan_dft *cldb = (plan_dft *)ego->cldb;
-          cldb->apply(ego->cldb, b+1, b, b+1, b);
+          plan_dft *cldf = (plan_dft *)ego->cldf;
+          cldf->apply(ego->cldf, b, b+1, b, b+1);
      }
 
      /* multiply output by conjugate bluestein sequence */
      for (i = 0; i < n; ++i) {
-	  E xr = b[2*i], xi = b[2*i+1];
+	  E xi = b[2*i], xr = b[2*i+1];
           E wr = w[2*i], wi = w[2*i+1];
           ro[i*os] = xr * wr + xi * wi;
           io[i*os] = xi * wr - xr * wi;
@@ -129,7 +129,6 @@ static void awake(plan *ego_, int flg)
      P *ego = (P *) ego_;
 
      AWAKE(ego->cldf, flg);
-     AWAKE(ego->cldb, flg);
 
      if (flg) {
 	  A(!ego->w);
@@ -168,14 +167,13 @@ static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      X(plan_destroy_internal)(ego->cldf);
-     X(plan_destroy_internal)(ego->cldb);
 }
 
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *)ego_;
-     p->print(p, "(dft-bluestein-%d/%d%(%p%)%(%p%))",
-              ego->n, ego->nb, ego->cldf, ego->cldb);
+     p->print(p, "(dft-bluestein-%d/%d%(%p%))",
+              ego->n, ego->nb, ego->cldf);
 }
 
 static int choose_transform_size(int minsz)
@@ -197,7 +195,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      const problem_dft *p = (const problem_dft *) p_;
      P *pln;
      int n, nb;
-     plan *cldf = 0, *cldb = 0;
+     plan *cldf = 0;
      R *buf = (R *) 0;
 
      static const plan_adt padt = {
@@ -218,13 +216,6 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 					   buf, buf+1));
      if (!cldf) goto nada;
 
-     cldb = X(mkplan_d)(plnr, 
-			X(mkproblem_dft_d)(X(mktensor_1d)(nb, 2, 2),
-					   X(mktensor_1d)(1, 0, 0),
-  					   buf+1, buf, 
-					   buf+1, buf));
-     if (!cldb) goto nada;
-
      X(ifree)(buf);
 
      pln = MKPLAN_DFT(P, &padt, apply);
@@ -234,11 +225,10 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->w = 0;
      pln->W = 0;
      pln->cldf = cldf;
-     pln->cldb = cldb;
      pln->is = p->sz->dims[0].is;
      pln->os = p->sz->dims[0].os;
 
-     X(ops_add)(&cldf->ops, &cldb->ops, &pln->super.super.ops);
+     X(ops_add)(&cldf->ops, &cldf->ops, &pln->super.super.ops);
      pln->super.super.ops.add += 4 * n + 2 * nb;
      pln->super.super.ops.mul += 8 * n + 4 * nb;
      pln->super.super.ops.other += 6 * (n + nb);
@@ -248,7 +238,6 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
  nada:
      X(ifree0)(buf);
      X(plan_destroy_internal)(cldf);
-     X(plan_destroy_internal)(cldb);
      return (plan *)0;
 }
 
