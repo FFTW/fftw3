@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.18 2002-08-23 17:22:17 athena Exp $ */
+/* $Id: rdft.h,v 1.19 2002-08-25 14:08:59 athena Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -139,7 +139,7 @@ void X(rdft2_vrank_geq1_register)(planner *p);
 void X(rdft2_buffered_register)(planner *p);
 void X(rdft2_nop_register)(planner *p);
 void X(rdft2_rank_geq2_register)(planner *p);
-void X(rdft2_dft_register)(planner *p);
+void X(rdft2_radix2_register)(planner *p);
 
 /****************************************************************************/
 
