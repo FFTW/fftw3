@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.21 2003-01-09 00:49:05 stevenj Exp $ */
+/* $Id: problem2.c,v 1.22 2003-01-09 01:12:00 stevenj Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -100,8 +100,11 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
      if (sz->rnk > 1) { /* have to compress rnk-1 dims separately, ugh */
 	  tensor *szc = X(tensor_copy_except)(sz, sz->rnk - 1);
 	  tensor *szr = X(tensor_copy_sub)(sz, sz->rnk - 1, 1);
-	  tensor *szcc = X(tensor_compress)(szc); 
-	  ego->sz = X(tensor_append)(szcc, szr);
+	  tensor *szcc = X(tensor_compress)(szc);
+	  if (szcc->rnk > 0)
+	       ego->sz = X(tensor_append)(szcc, szr);
+	  else
+	       ego->sz = X(tensor_compress)(szr);
 	  X(tensor_destroy2)(szc, szr); X(tensor_destroy)(szcc);
      }
      else
