@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.21 2003-01-16 12:58:28 athena Exp $ */
+/* $Id: print.c,v 1.22 2003-01-29 20:41:56 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -188,12 +188,15 @@ static void print(printer *p, const char *format, ...)
      va_end(ap);
 }
 
-printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c))
+printer *X(mkprinter)(size_t size, 
+		      void (*putchr)(printer *p, char c),
+		      void (*cleanup)(printer *p))
 {
      printer *s = (printer *)MALLOC(size, OTHER);
      s->print = print;
      s->vprint = vprint;
      s->putchr = putchr;
+     s->cleanup = cleanup;
      s->indent = 0;
      s->indent_incr = 2;
      return s;
@@ -201,5 +204,7 @@ printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c))
 
 void X(printer_destroy)(printer *p)
 {
+     if (p->cleanup)
+	  p->cleanup(p);
      X(ifree)(p);
 }

@@ -34,7 +34,7 @@ static void putchr_cnt(printer * p_, char c)
 
 static printer *mkprinter_cnt(int *cnt)
 {
-     P_cnt *p = (P_cnt *) X(mkprinter)(sizeof(P_cnt), putchr_cnt);
+     P_cnt *p = (P_cnt *) X(mkprinter)(sizeof(P_cnt), putchr_cnt, 0);
      p->cnt = cnt;
      *cnt = 0;
      return &p->super;
@@ -54,7 +54,7 @@ static void putchr_str(printer * p_, char c)
 
 static printer *mkprinter_str(char *s)
 {
-     P_str *p = (P_str *) X(mkprinter)(sizeof(P_str), putchr_str);
+     P_str *p = (P_str *) X(mkprinter)(sizeof(P_str), putchr_str, 0);
      p->s = s;
      *s = 0;
      return &p->super;

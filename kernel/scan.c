@@ -18,14 +18,33 @@
  *
  */
 
-/* $Id: scan.c,v 1.14 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: scan.c,v 1.15 2003-01-29 20:41:56 athena Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdio.h>
+
+#ifdef USE_CTYPE
 #include <ctype.h>
+#else
+/* Screw ctype. On linux, the is* functions call a routine that gets
+   the ctype map in the current locale.  Because this operation is
+   expensive, the map is cached on a per-thread basis.  I am not
+   willing to link this crap with FFTW.  Not over my dead body.
+
+   Sic transit gloria mundi.
+*/
+#undef isspace
+#define isspace(x) ((x) <= ' ')
+#undef isdigit
+#define isdigit(x) ((x) >= '0' && (x) <= '9')
+#undef isupper
+#define isupper(x) ((x) >= 'A' && (x) <= 'Z')
+#undef islower
+#define islower(x) ((x) >= 'a' && (x) <= 'z')
+#endif
 
 static int mygetc(scanner *sc)
 {
@@ -49,7 +68,7 @@ static void myungetc(scanner *sc, int c)
 static void eat_blanks(scanner *sc)
 {
      int ch;
-     while (isspace(ch = GETCHR(sc)))
+     while (ch = GETCHR(sc), isspace(ch))
           ;
      UNGETCHR(sc, ch);
 }
@@ -80,8 +99,10 @@ static long getlong(scanner *sc, int base, int *ret)
      for (count = 0; ; ++count) {
 	  if (isdigit(ch)) 
 	       ch -= '0';
-	  else if (isalpha(ch))
-	       ch -= isupper(ch) ? 'A' - 10 : 'a' - 10;
+	  else if (isupper(ch))
+	       ch -= 'A' - 10;
+	  else if (islower(ch))
+	       ch -= 'a' - 10;
 	  else
 	       break;
 	  x = x * base + ch;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.182 2003-01-27 11:59:40 athena Exp $ */
+/* $Id: ifftw.h,v 1.183 2003-01-29 20:41:56 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -352,11 +352,14 @@ struct printer_s {
      void (*print)(printer *p, const char *format, ...);
      void (*vprint)(printer *p, const char *format, va_list ap);
      void (*putchr)(printer *p, char c);
+     void (*cleanup)(printer *p);
      int indent;
      int indent_incr;
 };
 
-printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c));
+printer *X(mkprinter)(size_t size, 
+		      void (*putchr)(printer *p, char c),
+		      void (*cleanup)(printer *p));
 void X(printer_destroy)(printer *p);
 
 /*-----------------------------------------------------------------------*/

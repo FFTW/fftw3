@@ -34,7 +34,7 @@ static void putchr_generic(printer * p_, char c)
 
 void X(export_wisdom)(void (*absorber)(char c, void *), void *data)
 {
-     P *p = (P *) X(mkprinter)(sizeof(P), putchr_generic);
+     P *p = (P *) X(mkprinter)(sizeof(P), putchr_generic, 0);
      planner *plnr = X(the_planner)();
 
      p->absorber = absorber;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.138 2003-01-29 00:36:51 athena Exp $ */
+/* $Id: planner.c,v 1.139 2003-01-29 20:41:56 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -45,6 +45,10 @@
 #define NONIMPATIENCE(flags) ((flags) & NONIMPATIENCE_FLAGS)
 #define ORDERED(f1, f2) (SUBSUMES(f1, f2) || SUBSUMES(f2, f1))
 #define SUBSUMES(f1, f2) ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1))
+
+/* #define ADDMOD(a, b, p)  (((a) + (b)) % (p)) */
+/* likely faster: */
+#define ADDMOD(a, b, p) (((a) + (b)) - (((a) + (b)) >= (p)) * (p))
 
 /*
   slvdesc management:
@@ -152,7 +156,7 @@ static solution *hlookup(planner *ego, const md5sig s, unsigned short flags)
 
      ++ego->lookup;
 
-     for (g = h; ; g = (g + d) % ego->hashsiz) {
+     for (g = h; ; g = ADDMOD(g, d, ego->hashsiz)) {
 	  solution *l = ego->solutions + g;
 	  ++ego->lookup_iter;
 	  if (VALIDP(l)) {
@@ -176,7 +180,7 @@ static void hinsert0(planner *ego, const md5sig s, unsigned short flags,
 	  /* search for nonfull slot */
 	  unsigned g, h = h1(ego, s), d = h2(ego, s); 
 	  ++ego->insert_unknown;
-	  for (g = h; ; g = (g + d) % ego->hashsiz) {
+	  for (g = h; ; g = ADDMOD(g, d, ego->hashsiz)) {
 	       ++ego->insert_iter;
 	       l = ego->solutions + g;
 	       if (!VALIDP(l)) break;
@@ -280,8 +284,8 @@ static void hcurse_subsumed(planner *ego)
      for (h = 0; h < ego->hashsiz; ++h) {
 	  solution *l = ego->solutions + h;
 	  if (VALIDP(l)) {
-	       unsigned d = h2(ego, l->s), g = (h + d) % ego->hashsiz;
-	       for (; ; g = (g + d) % ego->hashsiz) {
+	       unsigned d = h2(ego, l->s), g = ADDMOD(h, d, ego->hashsiz);
+	       for (; ; g = ADDMOD(g, d, ego->hashsiz)) {
 		    solution *m = ego->solutions + g;
 		    if (VALIDP(m)) {
 			 if (md5eq(l->s, m->s) &&

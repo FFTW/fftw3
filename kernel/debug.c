@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: debug.c,v 1.5 2003-01-11 19:47:31 athena Exp $ */
+/* $Id: debug.c,v 1.6 2003-01-29 20:41:56 athena Exp $ */
 #include "ifftw.h"
 
 #ifdef FFTW_DEBUG
@@ -37,7 +37,7 @@ static void putchr_file(printer *p_, char c)
 
 static printer *mkprinter_file(FILE *f)
 {
-     P_file *p = (P_file *) X(mkprinter)(sizeof(P_file), putchr_file);
+     P_file *p = (P_file *) X(mkprinter)(sizeof(P_file), putchr_file, 0);
      p->f = f;
      return &p->super;
 }

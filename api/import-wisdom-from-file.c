@@ -19,22 +19,45 @@
  */
 
 #include "api.h"
+#include <stdio.h>
+
+/* getc()/putc() and *unbelievably* slow on linux.  Looks like glibc
+   is grabbing a lock for each call to getc()/putc(), or something
+   like that.  You pay the price for these idiotic posix threads
+   whether you use them or not.
+
+   So, we do our own buffering.  This completely defeats the purpose
+   of having stdio in the first place, of course.
+*/
+  
+#define BUFSZ 256
 
 typedef struct {
      scanner super;
      FILE *f;
-} S_file;
+     char buf[BUFSZ];
+     char *bufr, *bufw;
+} S;
 
 static int getchr_file(scanner * sc_)
 {
-     S_file *sc = (S_file *) sc_;
-     return fgetc(sc->f);
+     S *sc = (S *) sc_;
+
+     if (sc->bufr >= sc->bufw) {
+	  sc->bufr = sc->buf;
+	  sc->bufw = sc->buf + fread(sc->buf, 1, BUFSZ, sc->f);
+	  if (sc->bufr >= sc->bufw)
+	       return EOF;
+     }
+
+     return *(sc->bufr++);
 }
 
 static scanner *mkscanner_file(FILE *f)
 {
-     S_file *sc = (S_file *) X(mkscanner)(sizeof(S_file), getchr_file);
+     S *sc = (S *) X(mkscanner)(sizeof(S), getchr_file);
      sc->f = f;
+     sc->bufr = sc->bufw = sc->buf;
      return &sc->super;
 }
 

@@ -52,7 +52,6 @@ void rdwisdom(void)
 	       fprintf(stderr, "bench: ERROR reading wisdom\n");
 	  fclose(f);
      }
-
      tim = timer_stop();
 
      if (verbose > 1) printf("READ WISDOM (%g seconds): ", tim);
@@ -67,11 +66,16 @@ void rdwisdom(void)
 void wrwisdom(void)
 {
      FILE *f;
+     double tim;
      if (!usewisdom) return;
+
+     timer_start();
      if ((f = fopen(wisdat, "w"))) {
 	  FFTW(export_wisdom_to_file)(f);
 	  fclose(f);
      }
+     tim = timer_stop();
+     if (verbose > 1) printf("write wisdom took %g seconds\n", tim);
 }
 
 static FFTW(iodim) *bench_tensor_to_fftw_iodim(
