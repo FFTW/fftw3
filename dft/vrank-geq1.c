@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.38 2003-04-04 21:15:53 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.39 2003-04-04 22:18:21 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -81,8 +81,8 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      const S *s = ego->solver;
-     p->print(p, "(dft-vrank>=1-x%d/%d%(%p%))",
-	      ego->vl, s->vecloop_dim, ego->cld);
+     p->print(p, "(dft-vrank>=1-x%d/%d%-ivs=%d-ovs=%d(%p%))",
+	      ego->vl, s->vecloop_dim, ego->ivs, ego->ovs, ego->cld);
 }
 
 static int pickdim(const S *ego, const tensor *vecsz, int oop, int *dp)
