@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.76 2002-08-07 00:38:11 athena Exp $ */
+/* $Id: ifftw.h,v 1.77 2002-08-07 16:58:10 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -487,8 +487,6 @@ typedef int stride;
 #define lfftw_stride_destroy(p) {}
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
-
-#define AREF(a, i) ((a)[i])
 
 /*-----------------------------------------------------------------------*/
 /* solvtab.c */

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.13 2002-08-07 00:38:11 athena Exp $ *)
+(* $Id: c.ml,v 1.14 2002-08-07 16:58:10 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -395,7 +395,7 @@ let rec cstride_to_string = function
   | Composite (s, i) -> "WS(" ^ s ^ ", " ^ (string_of_int i) ^ ")"
   | Negative x -> "-" ^ cstride_to_string x
 
-let aref name index = Printf.sprintf "AREF(%s, %s)"  name index
+let aref name index = Printf.sprintf "%s[%s]"  name index
 
 let array_subscript name stride k = 
   aref name (cstride_to_string (simplify_stride stride k))
