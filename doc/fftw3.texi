@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.216 2005-01-15 19:57:56 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.217 2005-01-27 20:48:28 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1090,12 +1090,13 @@ array (@code{n} real numbers @code{in[j=0..n-1]}), are:
 @ctindex FFTW_REDFT00
 
 @item
-@code{FFTW_REDFT10} (DCT-II): even around @math{j=-0.5} and even around @math{j=n-0.5}.
+@code{FFTW_REDFT10} (DCT-II, ``the'' DCT): even around @math{j=-0.5} and even around @math{j=n-0.5}.
 @ctindex FFTW_REDFT10
 
 @item
-@code{FFTW_REDFT01} (DCT-III): even around @math{j=0} and odd around @math{j=n}.
+@code{FFTW_REDFT01} (DCT-III, ``the'' IDCT): even around @math{j=0} and odd around @math{j=n}.
 @ctindex FFTW_REDFT01
+@cindex IDCT
 
 @item
 @code{FFTW_REDFT11} (DCT-IV): even around @math{j=-0.5} and odd around @math{j=n-0.5}.
@@ -1128,13 +1129,15 @@ data @math{abcde}, it corresponds to the DFT of the logical even array
 @math{abcddcba}, shifted by half a sample.
 
 All of these transforms are invertible.  The inverse of R*DFT00 is
-R*DFT00; of R*DFT10 is R*DFT01 and vice versa; and of R*DFT11 is
-R*DFT11.  However, the transforms computed by FFTW are unnormalized,
-exactly like the corresponding real and complex DFTs, so computing a
-transform followed by its inverse yields the original array scaled by
-@math{N}, where @math{N} is the @emph{logical} DFT size.  For REDFT00,
+R*DFT00; of R*DFT10 is R*DFT01 and vice versa (these are often called
+simply ``the'' DCT and IDCT, respectively); and of R*DFT11 is R*DFT11.
+However, the transforms computed by FFTW are unnormalized, exactly
+like the corresponding real and complex DFTs, so computing a transform
+followed by its inverse yields the original array scaled by @math{N},
+where @math{N} is the @emph{logical} DFT size.  For REDFT00,
 @math{N=2(n-1)}; for RODFT00, @math{N=2(n+1)}; otherwise, @math{N=2n}.
 @cindex normalization
+@cindex IDCT
 
 Note that the boundary conditions of the transform output array are
 given by the input boundary conditions of the inverse transform.
@@ -2505,13 +2508,14 @@ r<sub>0</sub>, r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>n/2</sub>, i<sub>(n+1)/2
 
 @item
 @ctindex FFTW_REDFT10
-@code{FFTW_REDFT10} computes an REDFT10 transform, i.e. a DCT-II.
+@code{FFTW_REDFT10} computes an REDFT10 transform, i.e. a DCT-II (sometimes called ``the'' DCT).
 (Logical @code{N=2*n}, inverse is @code{FFTW_REDFT01}.)
 
 @item
 @ctindex FFTW_REDFT01
-@code{FFTW_REDFT01} computes an REDFT01 transform, i.e. a DCT-III.
+@code{FFTW_REDFT01} computes an REDFT01 transform, i.e. a DCT-III (sometimes called ``the'' IDCT, being the inverse of DCT-II).
 (Logical @code{N=2*n}, inverse is @code{FFTW_REDFT=10}.)
+@cindex IDCT
 
 @item
 @ctindex FFTW_REDFT11
@@ -3484,7 +3488,7 @@ the summation term above is dropped as you might expect.
 
 @subsubheading REDFT10 (DCT-II)
 @ctindex REDFT10
-An @code{REDFT10} transform (type-II DCT) in FFTW is defined by:
+An @code{REDFT10} transform (type-II DCT, sometimes called ``the'' DCT) in FFTW is defined by:
 @tex
 $$
 Y_k = 2 \sum_{j=0}^{n-1} X_j \cos [\pi (j+1/2) k / n].
@@ -3521,6 +3525,8 @@ Y[0] = X[0].
 @html
 <i>Y</i><sub>0</sub> = <i>X</i><sub>0</sub>.
 @end html
+Up to a scale factor (see below), this is the inverse of @code{REDFT10} (``the'' DCT), and so the @code{REDFT01} (DCT-III) is sometimes called the ``IDCT''.
+@cindex IDCT
 
 @subsubheading REDFT11 (DCT-IV)
 @ctindex REDFT11
