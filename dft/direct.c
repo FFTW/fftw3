@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.4 2002-06-05 23:02:56 athena Exp $ */
+/* $Id: direct.c,v 1.5 2002-06-06 12:07:33 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -62,11 +62,11 @@ static void print(plan *ego_, plan_printf prntf)
      const S *s = ego->solver;
      const kdft_desc *d = s->desc;
 
-     prntf("(DFT-DIRECT-%d", d->sz);
+     prntf("(DFT-DIRECT-%u", d->sz);
      if (d->is || d->os)
 	  prntf("/is=%d/os=%d", d->is, d->os);
      if (ego->vl > 1)
-	  prntf("-x%d", ego->vl);
+	  prntf("-x%u", ego->vl);
      prntf(")");
 }
 
@@ -158,10 +158,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
 solver *fftw_mksolver_dft_direct(kdft k, const kdft_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
-     S *solver;
-     
-     solver = MKSOLVER(S, &sadt);
-     solver->k = k;
-     solver->desc = desc;
-     return &(solver->super);
+     S *slv = MKSOLVER(S, &sadt);
+     slv->k = k;
+     slv->desc = desc;
+     return &(slv->super);
 }

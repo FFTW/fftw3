@@ -55,6 +55,7 @@ void setup(struct problem *p)
      fftw_configuration_dft_standard(plnr);
 #endif
      fftw_solvtab_exec(fftw_solvtab_dft_standard, plnr);
+     fftw_dft_vecloop_register(plnr);
 
      if (p->sign == -1) {
 	  ri = p->in; ii = ri + 1; ro = p->out; io = ro + 1;
@@ -90,4 +91,8 @@ void done(struct problem *p)
      fftw_plan_destroy(pln);
      fftw_problem_destroy(prblm);
      fftw_planner_destroy(plnr);
+
+#    ifdef FFTW_DEBUG
+        fftw_malloc_print_minfo();
+#    endif
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.1 2002-06-03 22:10:12 athena Exp $ */
+/* $Id: planner.c,v 1.2 2002-06-06 12:07:33 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -30,7 +30,7 @@ static pair *const nil = 0;
 
 static inline pair *cons(solver *car, pair *cdr)
 {
-     pair *n = (pair *) fftw_malloc(sizeof(pair), PLANNERS);
+     pair *n = (pair *) fftw_malloc(sizeof(pair), PAIRS);
      n->car = car;
      n->cdr = cdr;
      return n;

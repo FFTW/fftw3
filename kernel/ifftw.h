@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.11 2002-06-05 20:03:44 athena Exp $ */
+/* $Id: ifftw.h,v 1.12 2002-06-06 12:07:33 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -66,6 +66,7 @@ extern void fftw_assertion_failed(const char *s, int line, char *file);
 
 /* objects allocated by malloc, for statistical purposes */
 enum fftw_malloc_what {
+     EVERYTHING,
      PLANS,
      SOLVERS,
      PROBLEMS,
@@ -73,6 +74,7 @@ enum fftw_malloc_what {
      HASHT,
      TENSORS,
      PLANNERS,
+     PAIRS,
      TWIDDLES,
      OTHER,
      MALLOC_WHAT_LAST		/* must be last */
@@ -291,7 +293,7 @@ void fftw_stride_destroy(stride p);
 
 typedef int stride;
 #define WS(stride, i)  (stride * i)
-#define fftw_stride_make(n, stride) stride
+#define fftw_mkstride(n, stride) stride
 #define fftw_stride_destroy(p) {}
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
