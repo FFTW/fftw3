@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.202 2003-09-27 21:29:04 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.203 2003-09-27 21:42:30 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4710,7 +4710,7 @@ characteristics, and then compile all the @samp{.c} files in the
 relevant directories.  
 
 The @code{config.h} header contains about 100 options to set, each one
-initially an @code{#undef}, all documented with a comment, and most of
+initially an @code{#undef}, each documented with a comment, and most of
 them fairly obvious.  For most of the options, you should simply
 @code{#define} them to @code{1} if they are applicable, although a few
 options require a particular value (e.g. @code{SIZEOF_LONG_LONG} should
