@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.2 2002-06-08 19:11:09 athena Exp $ */
+/* $Id: indirect.c,v 1.3 2002-06-09 11:52:22 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -76,7 +76,7 @@ static problem *mkcld_before(const problem_dft *p)
 }
 
 static const ndrct_adt adt_before = { 
-     apply_before, mkcld_before, "DFT-INDIRECT-BEFORE"
+     apply_before, mkcld_before, "dft-indirect-before"
 };
 
 /*-----------------------------------------------------------------------*/
@@ -110,7 +110,7 @@ static problem *mkcld_after(const problem_dft *p)
 }
 
 static const ndrct_adt adt_after = { 
-     apply_after, mkcld_after, "DFT-INDIRECT-AFTER"
+     apply_after, mkcld_after, "dft-indirect-after"
 };
 
 /*-----------------------------------------------------------------------*/

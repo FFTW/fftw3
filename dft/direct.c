@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.8 2002-06-08 19:51:46 athena Exp $ */
+/* $Id: direct.c,v 1.9 2002-06-09 11:52:22 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -62,7 +62,7 @@ static void print(plan *ego_, plan_printf prntf)
      const S *s = ego->slv;
      const kdft_desc *d = s->desc;
 
-     prntf("(DFT-DIRECT-%u", d->sz);
+     prntf("(dft-direct-%u", d->sz);
      if (d->is || d->os)
 	  prntf("/is=%d/os=%d", d->is, d->os);
      if (ego->vl > 1)

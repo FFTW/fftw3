@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: bench-main.c,v 1.2 2002-06-09 11:52:22 athena Exp $ */
 
 #include "config.h"
 #include "getopt.h"
@@ -28,6 +28,7 @@
 #include <ctype.h>
 
 int verbose;
+int paranoid;
 
 static struct option long_options[] =
 {
@@ -48,6 +49,7 @@ static struct option long_options[] =
   {"time-min", required_argument, 0, 't'},
   {"time-repeat", required_argument, 0, 'r'},
   {"verbose", no_argument, 0, 'v'},
+  {"paranoid", no_argument, 0, 'p'},
   {"verify", required_argument, 0, 'y'},
   {"verify-rounds", required_argument, 0, 401},
   {"verify-tolerance", required_argument, 0, 403},
@@ -65,7 +67,7 @@ static int bench_main1(int argc, char *argv[])
      char *short_options = make_short_options(long_options);
 
      report = report_time; /* default */
-     verbose = 0;
+     verbose = paranoid = 0;
 
      tol = SINGLE_PRECISION ? 1.0e-3 : 1.0e-10;
 
@@ -87,6 +89,9 @@ static int bench_main1(int argc, char *argv[])
 		   break;
 	      case 'v':
 		   ++verbose;
+		   break;
+	      case 'p':
+		   ++paranoid;
 		   break;
 	      case 'y':
 		   verify(optarg, rounds, tol);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.1 2002-06-08 19:51:46 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.2 2002-06-09 11:52:22 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -72,7 +72,7 @@ static void print(plan *ego_, plan_printf prntf)
 {
      P *ego = (P *) ego_;
      const S *s = ego->solver;
-     prntf("(DFT-RANK>=2/%d ", s->spltrnk);
+     prntf("(dft-rank>=2/%d ", s->spltrnk);
      ego->cld1->adt->print(ego->cld1, prntf);
      prntf(" ");
      ego->cld2->adt->print(ego->cld2, prntf);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.3 2002-06-08 19:51:46 athena Exp $ */
+/* $Id: rank0.c,v 1.4 2002-06-09 11:52:22 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -75,7 +75,7 @@ static int applicable_1(const problem_dft *p)
      return (p->vecsz.rnk == 0);
 }
 
-static const rnk0adt adt_1 = { apply_1, applicable_1, "DFT-RANK0-1" };
+static const rnk0adt adt_1 = { apply_1, applicable_1, "dft-rank0-1" };
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 in-place dft: no-op */
@@ -93,7 +93,7 @@ static int applicable_nop(const problem_dft *p)
      return (p->ro == p->ri && fftw_tensor_inplace_strides(p->vecsz));
 }
 
-static const rnk0adt adt_nop = { apply_nop, applicable_nop, "DFT-RANK0-NOP" };
+static const rnk0adt adt_nop = { apply_nop, applicable_nop, "dft-rank0-nop" };
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 dft, vl > 1: just a copy loop (unroll 4) */
@@ -138,7 +138,7 @@ static int applicable_vec(const problem_dft *p)
      return (p->vecsz.rnk == 1 && p->ro != p->ri);
 }
 
-static const rnk0adt adt_vec = { apply_vec, applicable_vec, "DFT-RANK0-VEC" };
+static const rnk0adt adt_vec = { apply_vec, applicable_vec, "dft-rank0-vec" };
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 dft, vl > 1, [io]vs == 1, using memcpy */
@@ -156,7 +156,7 @@ static int applicable_io1(const problem_dft *p)
 }
 
 static const rnk0adt adt_io1 = {
-     apply_io1, applicable_io1, "DFT-RANK0-IO1-MEMCPY"
+     apply_io1, applicable_io1, "dft-rank0-io1-memcpy"
 };
 
 /*-----------------------------------------------------------------------*/
@@ -180,7 +180,7 @@ static int applicable_io2(const problem_dft *p)
 }
 
 static const rnk0adt adt_io2 = { 
-     apply_io2, applicable_io2, "DFT-RANK0-IO1-MEMCPY" 
+     apply_io2, applicable_io2, "dft-rank0-io2-memcpy" 
 };
 
 /*-----------------------------------------------------------------------*/

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.4 2002-06-08 19:11:09 athena Exp $ */
+/* $Id: ct-dit.c,v 1.5 2002-06-09 11:52:22 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -109,7 +109,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 solver *fftw_mksolver_dft_ct_dit(kdft_dit codelet, const ct_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
-     static const char name[] = "DFT-DIT";
+     static const char name[] = "dft-dit";
      union kct k;
      k.dit = codelet;
 

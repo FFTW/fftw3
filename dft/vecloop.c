@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vecloop.c,v 1.5 2002-06-08 19:11:09 athena Exp $ */
+/* $Id: vecloop.c,v 1.6 2002-06-09 11:52:22 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -82,7 +82,7 @@ static void print(plan *ego_, plan_printf prntf)
 {
      P *ego = (P *) ego_;
      const S *s = ego->solver;
-     prntf("(DFT-VECLOOP-x%u/%d ", ego->vl, s->vecloop_dim);
+     prntf("(dft-vecloop-x%u/%d ", ego->vl, s->vecloop_dim);
      ego->cld->adt->print(ego->cld, prntf);
      prntf(")");
 }
