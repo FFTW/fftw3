@@ -430,6 +430,14 @@ You cannot declare large arrays statically (e.g. via
 \courier{fftw_malloc\} (or equivalent) to allocate the arrays you want
 to transform if they are larger than a few hundred elements.
 
+\question 13may:leaks FFTW seems to have a memory leak
+
+After you create a plan, FFTW caches the information required to
+quickly recreate the plan.  (See \qref savePlans) It also maintains a
+small amount of other persistent memory.  You can deallocate all of
+FFTW's internally allocated memory, if you wish, by calling
+\courier{fftw_cleanup()\}, as documented in the manual.
+
 \comment ######################################################################
 
 \section  Internals of FFTW
