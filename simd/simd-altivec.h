@@ -172,7 +172,7 @@ static inline void ST(R *x, V v, int ovs, const R *aligned_like)
 extern const vector unsigned int X(altivec_flipri_perm);
 static inline V FLIP_RI(V x)
 {
-     return vec_perm(x, x, (vector unsigned char)X(altivec_flipri_perm));
+     return vec_perm(x, x, (const vector unsigned char)X(altivec_flipri_perm));
 }
 
 extern const vector float X(altivec_chsr_msk);
