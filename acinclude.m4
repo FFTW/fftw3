@@ -271,6 +271,9 @@ if test "$ac_test_CFLAGS" != "set"; then
 	            CPU_OPTIM=-O2
                   fi
 		  ;;
+	  sparc*)  ACX_CHECK_CC_FLAGS(-mcpu=ultrasparc,cpu_ultrasparc,
+			[CPU_FLAGS=-mcpu=ultrasparc])
+		  ;;
 	  alphaev67)  ACX_CHECK_CC_FLAGS(-mcpu=ev67,cpu_ev67,
 			[CPU_FLAGS=-mcpu=ev67])
 		  ;;
