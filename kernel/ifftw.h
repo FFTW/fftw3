@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.160 2002-09-26 19:06:38 athena Exp $ */
+/* $Id: ifftw.h,v 1.161 2003-01-07 10:09:42 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -662,6 +662,7 @@ void X(null_awake)(plan *ego, int awake);
 int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
 uint X(alignment_of)(R *p);
+uint X(stride_aligned_p)(int s);
 uint X(hash)(const char *s);
 uint X(compute_nbuf)(uint n, uint vl, uint nbuf, uint maxbufsz);
 extern int X(ct_uglyp)(uint min_n, uint n, uint r);
