@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.13 2002-08-02 07:49:09 stevenj Exp $ */
+/* $Id: problem.c,v 1.14 2002-08-03 21:55:44 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -98,12 +98,14 @@ const char *X(rdft_kind_str)(rdft_kind kind)
 	 case HC2R: return "hc2r";
 	 case HC2RIII: return "hc2riii";
 	 case DHT: return "dht";
-	 case DST: return "dst";
-	 case DST2: return "dst2";
-	 case DST2I: return "dst2i";
-	 case DCT: return "dct";
-	 case DCT2: return "dct2";
-	 case DCT2I: return "dct2i";
+	 case DST00: return "dst00";
+	 case DST01: return "dst01";
+	 case DST10: return "dst10";
+	 case DST11: return "dst11";
+	 case DCT00: return "dct00";
+	 case DCT01: return "dct01";
+	 case DCT10: return "dct10";
+	 case DCT11: return "dct11";
 	 default: A(0); return 0;
      }
 }
