@@ -62,4 +62,5 @@ void X(plan_with_nthreads)(int nthreads)
      A(threads_inited);
      plnr = X(the_planner)();
      plnr->nthr = X(imax)(1, nthreads);
+     X(threads_setmax)(plnr->nthr);
 }

@@ -64,13 +64,14 @@ void rdwisdom(void)
      double tim;
      int success = 0;
 
-     if (!usewisdom) return;
      if (havewisdom) return;
 
 #ifdef HAVE_THREADS
      BENCH_ASSERT(FFTW(init_threads)());
      FFTW(plan_with_nthreads)(nthreads);
 #endif
+
+     if (!usewisdom) return;
 
      timer_start();
      if ((f = fopen(wisdat, "r"))) {
@@ -627,6 +628,10 @@ void setup(bench_problem *p)
 
      rdwisdom();
 
+#ifdef HAVE_THREADS
+     if (verbose > 1 && nthreads > 1) printf("NTHREADS = %d\n", nthreads);
+#endif
+
      timer_start();
      the_plan = mkplan(p, the_flags);
      tim = timer_stop();
@@ -667,7 +672,11 @@ void done(bench_problem *p)
 void cleanup(void)
 {
      wrwisdom();
+#ifdef HAVE_THREADS
+     FFTW(cleanup_threads)();
+#else
      FFTW(cleanup)();
+#endif
 
 #    ifdef FFTW_DEBUG_MALLOC
      {

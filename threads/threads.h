@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: threads.h,v 1.3 2003-01-17 19:53:28 stevenj Exp $ */
+/* $Id: threads.h,v 1.4 2003-03-15 03:11:23 stevenj Exp $ */
 
 #ifndef __THREADS_H__
 #define __THREADS_H__
@@ -38,6 +38,7 @@ void X(spawn_loop)(int loopmax, int nthreads,
 		   spawn_function proc, void *data);
 int X(threads_init)(void);
 void X(threads_cleanup)(void);
+void X(threads_setmax)(int nthreads_max);
 
 /* configurations */
 

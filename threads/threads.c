@@ -67,6 +67,21 @@
 	
 	 void fftw_thr_wait(fftw_thr_id tid);
 
+   * If semaphores are supported (which allows FFTW to pre-spawn the
+     threads), then you should #define HAVE_SEMAPHORES and:
+  
+      -- typedef fftw_sem_id to the type for a semaphore id
+
+      -- #define fftw_sem_init(&id) to initialize the semaphore
+         id to zero (or equivalent)
+
+      -- #define fftw_sem_destroy(&id) to destroy the id
+
+      -- #define fftw_sem_wait(&id) to the equivalent of
+         the POSIX sem_wait
+
+      -- #define fftw_sem_post(&id) the equivalent of POSIX sem_post
+
    * If you need to perform any initialization before using threads,
      put your initialization code in the X(threads_init)() function
      in threads.c, bracketed by the appropriate #ifdef of course.
@@ -271,19 +286,114 @@ static pthread_attr_t *fftw_pthread_attributes_p = 0;
 
 typedef pthread_t fftw_thr_id;
 
-#define fftw_thr_spawn(tid_ptr, proc, data) { \
-     CK(!pthread_create(tid_ptr,fftw_pthread_attributes_p,proc,data)); \
-}
+#define fftw_thr_spawn(tid_ptr, proc, data)  \
+     CK(!pthread_create(tid_ptr,fftw_pthread_attributes_p,proc,data))
 
-#define fftw_thr_wait(tid) { CK(!pthread_join(tid,0)); }
+#define fftw_thr_wait(tid) CK(!pthread_join(tid,0))
+
+/* POSIX semaphores are disabled for now because, at least on
+   my Linux machine, they don't seem to offer much performance advantage. */
+#if 0
+
+#define HAVE_SEMAPHORES 1
+
+#include <semaphore.h>
+
+typedef sem_t fftw_sem_id;
+#define fftw_sem_init(pid) CK(!sem_init(pid, 0, 0))
+#define fftw_sem_destroy(pid)  CK(!sem_destroy(pid))
+#define fftw_sem_wait(pid) CK(!sem_wait(pid))
+#define fftw_sem_post(pid) CK(!sem_post(pid))
+
+#endif /* 0 */
 
 #elif defined(HAVE_THREADS)
 #  error HAVE_THREADS is defined without any USING_*_THREADS
 #endif
 
+
+#if 0 /* change to 1 to enable pre-spawned threads via Linux spinlocks */
+#ifndef HAVE_SEMAPHORES
+
+#define HAVE_SEMAPHORES 1
+
+/* from linux/kernel.h */
+/* Optimization barrier */
+/* The "volatile" is due to gcc bugs */
+#define barrier() __asm__ __volatile__("": : :"memory")
+
+#include <asm/spinlock.h>
+
+typedef spinlock_t fftw_sem_id;
+#define fftw_sem_init(pid) spin_lock_init(pid)
+#define fftw_sem_destroy(pid) (void) (pid)
+#define fftw_sem_wait(pid) spin_unlock_wait(pid)
+#define fftw_sem_post(pid) spin_unlock(pid)
+
+#endif
+#endif
+
 /***********************************************************************/
 
 #ifdef HAVE_THREADS
+
+#ifdef HAVE_SEMAPHORES
+
+typedef struct worker_data_s {
+     fftw_thr_id tid;
+     fftw_sem_id sid_ready;
+     fftw_sem_id sid_done;
+     spawn_function proc;
+     spawn_data d;
+     struct worker_data_s *next;
+} worker_data;
+
+static void do_work(worker_data *w)
+{
+     while (1) {
+	  fftw_sem_wait(&w->sid_ready);
+	  if (!w->proc) break;
+	  w->proc(&w->d);
+	  fftw_sem_post(&w->sid_done);
+     }
+}
+
+worker_data *workers = (worker_data *) 0;
+
+/* make sure at least nworkers exist */
+static void minimum_workforce(int nworkers)
+{
+     worker_data *w = workers;
+
+     while (w) {
+	  --nworkers;
+	  w = w->next;
+     }
+     while (nworkers-- > 0) {
+	  w = (worker_data *) MALLOC(sizeof(worker_data), OTHER);
+	  w->next = workers;
+	  fftw_sem_init(&w->sid_ready);
+	  fftw_sem_init(&w->sid_done);
+	  fftw_thr_spawn(&w->tid, (fftw_thr_function) do_work, (void *) w);
+	  workers = w;
+     }
+}
+
+static void kill_workforce(void)
+{
+     while (workers) {
+	  worker_data *w = workers;
+	  workers = w->next;
+	  w->proc = (spawn_function) 0;
+	  fftw_sem_post(&w->sid_ready);
+	  fftw_thr_wait(w->tid);
+	  fftw_sem_destroy(&w->sid_ready);
+	  fftw_sem_destroy(&w->sid_done);
+	  X(ifree)(w);
+     }
+}
+
+#endif /* HAVE_SEMAPHORES */
 
 /* Distribute a loop from 0 to loopmax-1 over nthreads threads.
    proc(d) is called to execute a block of iterations from d->min
@@ -299,6 +409,7 @@ void X(spawn_loop)(int loopmax, int nthr,
 
      A(loopmax > 0);
      A(nthr > 0);
+     A(proc);
 
      /* Choose the block size and number of threads in order to (1)
         minimize the critical path and (2) use the fewest threads that
@@ -316,8 +427,11 @@ void X(spawn_loop)(int loopmax, int nthr,
 	  proc(&d);
      }
      else {
-#ifdef USING_COMPILER_THREADS
+#if defined(USING_COMPILER_THREADS)
 	  spawn_data d;
+#elif defined(HAVE_SEMAPHORES)
+	  spawn_data d;
+	  worker_data *w;
 #else
 	  spawn_data *d;
 	  fftw_thr_id *tid;
@@ -326,7 +440,7 @@ void X(spawn_loop)(int loopmax, int nthr,
 	  
 	  THREAD_ON; /* prevent debugging mode from failing under threads */
 
-#ifdef USING_COMPILER_THREADS
+#if defined(USING_COMPILER_THREADS)
 	  
 #if defined(USING_SGIMP_THREADS)
 #pragma parallel local(d,i)
@@ -347,7 +461,30 @@ void X(spawn_loop)(int loopmax, int nthr,
 	  }
 #endif
 
-#else /* ! USING_COMPILER_THREADS, i.e. explicit thread spawning: */
+#elif defined(HAVE_SEMAPHORES)
+
+	  --nthr;
+	  for (w = workers, i = 0; i < nthr; ++i) {
+	       A(w);
+	       w->d.max = (w->d.min = i * block_size) + block_size;
+	       w->d.thr_num = i;
+	       w->d.data = data;
+	       w->proc = proc;
+	       fftw_sem_post(&w->sid_ready);
+	       w = w->next;
+	  }
+	  d.min = i * block_size;
+	  d.max = loopmax;
+	  d.thr_num = i;
+	  d.data = data;
+	  proc(&d);
+
+	  for (w = workers, i = 0; i < nthr; ++i) {
+	       A(w);
+	       fftw_sem_wait(&w->sid_done);
+	  }
+
+#else /* explicit thread spawning: */
 
 	  STACK_MALLOC(spawn_data *, d, sizeof(spawn_data) * nthr);
 	  STACK_MALLOC(fftw_thr_id *, tid, sizeof(fftw_thr_id) * (--nthr));
@@ -474,6 +611,17 @@ int X(threads_init)(void)
 #endif
 }
 
+/* This function must be called before using nthreads > 1, with
+   the maximum number of threads that will be used. */
+void X(threads_setmax)(int nthreads_max)
+{
+#ifdef HAVE_SEMAPHORES
+     minimum_workforce(nthreads_max - 1);
+#else
+     UNUSED(nthreads_max);
+#endif
+}
+
 void X(threads_cleanup)(void)
 {
 #ifdef USING_POSIX_THREADS
@@ -483,10 +631,13 @@ void X(threads_cleanup)(void)
      }
 #endif /* USING_POSIX_THREADS */
 
+#ifdef HAVE_SEMAPHORES
+     kill_workforce();
+#endif
+
 #ifdef HAVE_THREADS
      X(kdft_dit_register_hook) = 0;
      X(khc2hc_dit_register_hook) = 0;
      X(khc2hc_dif_register_hook) = 0;
-     return 0; /* no error */
 #endif
 }
