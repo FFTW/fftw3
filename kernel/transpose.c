@@ -107,7 +107,7 @@ int X(transpose_slowp)(const iodim *a, const iodim *b, int N)
 /* Out-of-place transposes: */
 
 /* Transpose A (n x m) to B (m x n), where A and B are stored
-   as n x fda and m x fda arrays, respectively, operating on N-tuples: */
+   as n x fda and m x fdb arrays, respectively, operating on N-tuples: */
 static void rec_transpose_Ntuple(R *A, R *B, int n, int m, int fda, int fdb,
 			  int N)
 {
