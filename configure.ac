@@ -150,7 +150,7 @@ AC_SUBST(OCAMLDEFS)
 AC_SUBST(OCAMLLDFLAGS)
 
 dnl determine CFLAGS first
-AX_CC_MAXOPT(fftw)
+AX_CC_MAXOPT
 
 # some additional FFTW-specific tweaks to the flags
 if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
@@ -178,24 +178,19 @@ AC_SUBST(CODELET_OPTIM)
 if test "x$SIMD_CFLAGS" = x; then
 if test "$GCC" = "yes"; then
     if test "$have_sse" = "yes"; then
-	AX_CHECK_CC_FLAGS(-msse, msse,
-	    SIMD_CFLAGS="-msse",
+	AX_CHECK_COMPILER_FLAGS(-msse, [SIMD_CFLAGS="-msse"],
 	    [AC_MSG_ERROR([Need a version of gcc with -msse])])
     elif test "$have_sse2" = "yes"; then
-	AX_CHECK_CC_FLAGS(-msse2, msse2,
-	    SIMD_CFLAGS="-msse2",
+	AX_CHECK_COMPILER_FLAGS(-msse2, [SIMD_CFLAGS="-msse2"],
 	    [AC_MSG_ERROR([Need a version of gcc with -msse2])])
     elif test "$have_3dnow" = "yes"; then
-	AX_CHECK_CC_FLAGS(-m3dnow, m3dnow,
-	    SIMD_CFLAGS="-m3dnow",
+	AX_CHECK_COMPILER_FLAGS(-m3dnow, [SIMD_CFLAGS="-m3dnow"],
 	    [AC_MSG_ERROR([Need a version of gcc with -m3dnow])])
     elif test "$have_altivec" = "yes"; then
-	AX_CHECK_CC_FLAGS(-faltivec, faltivec,
-	    SIMD_CFLAGS="-faltivec",
-	    [AX_CHECK_CC_FLAGS(-maltivec -mabi=altivec, maltivec,
-		SIMD_CFLAGS="-maltivec -mabi=altivec",
-	        [AX_CHECK_CC_FLAGS(-fvec, fvec,
-		    SIMD_CFLAGS="-fvec",
+	AX_CHECK_COMPILER_FLAGS(-faltivec, [SIMD_CFLAGS="-faltivec"],
+	    [AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
+		[SIMD_CFLAGS="-maltivec -mabi=altivec"],
+	        [AX_CHECK_COMPILER_FLAGS(-fvec, [SIMD_CFLAGS="-fvec"],
 		    [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
     fi
 fi

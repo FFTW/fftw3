@@ -13,9 +13,9 @@ dnl Note also that the flags assume that ANSI C aliasing rules are
 dnl followed by the code (e.g. for gcc's -fstrict-aliasing), and that
 dnl floating-point computations can be re-ordered as needed.
 dnl
-dnl Requires macros: AX_CHECK_CC_FLAGS, AX_GCC_ARCHFLAG
+dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_ARCHFLAG
 dnl
-dnl @version $Id: ax_cc_maxopt.m4,v 1.2 2004-11-08 22:49:42 stevenj Exp $
+dnl @version $Id: ax_cc_maxopt.m4,v 1.3 2004-11-09 02:46:50 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
 [
@@ -69,7 +69,7 @@ if test "$ac_test_CFLAGS" != "set"; then
 		else
                 	xlc_opt="-qtune=auto"
 		fi
-                AX_CHECK_CC_FLAGS($xlc_opt, qarch_auto,
+                AX_CHECK_COMPILER_FLAGS($xlc_opt,
                         CFLAGS="-O3 -qansialias -w $xlc_opt",
                         [CFLAGS="-O3 -qansialias -w"
                 echo "*******************************************************"
@@ -92,10 +92,9 @@ if test "$ac_test_CFLAGS" != "set"; then
 
      # test for gcc-specific flags:
      #   -malign-double for x86 systems
-     AX_CHECK_CC_FLAGS(-malign-double,align_double,
-	 CFLAGS="$CFLAGS -malign-double")
+     AX_CHECK_COMPILER_FLAGS(-malign-double, CFLAGS="$CFLAGS -malign-double")
      #  -fstrict-aliasing for gcc-2.95+
-     AX_CHECK_CC_FLAGS(-fstrict-aliasing,fstrict_aliasing,
+     AX_CHECK_COMPILER_FLAGS(-fstrict-aliasing,
 	 CFLAGS="$CFLAGS -fstrict-aliasing")
 
      AX_GCC_ARCHFLAG($acx_maxopt_portable)
@@ -113,7 +112,7 @@ if test "$ac_test_CFLAGS" != "set"; then
         CFLAGS="-O3"
   fi
 
-  AX_CHECK_CC_FLAGS(${CFLAGS}, guessed_cflags, [], [
+  AX_CHECK_COMPILER_FLAGS($CFLAGS, [], [
 	echo ""
         echo "********************************************************"
         echo "* WARNING: The guessed CFLAGS don't seem to work with  *"

@@ -20,9 +20,9 @@ dnl
 dnl When cross-compiling, or if $CC is not gcc, then ACTION-FAILURE is
 dnl called unless the user specified --with-gcc-arch manually.
 dnl
-dnl Requires macros: AX_CHECK_CC_FLAGS, AX_GCC_X86_CPUID
+dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.4 2004-10-28 04:09:38 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.5 2004-11-09 02:46:50 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -142,7 +142,7 @@ for arch in $ax_gcc_arch; do
     flags="-march=$arch -mcpu=$arch -m$arch"
   fi
   for flag in $flags; do
-    AX_CHECK_CC_FLAGS($flag, [], [ax_cv_gcc_archflag=$flag; break])
+    AX_CHECK_COMPILER_FLAGS($flag, [ax_cv_gcc_archflag=$flag; break])
   done
   test "x$ax_cv_gcc_archflag" = xunknown || break
 done
