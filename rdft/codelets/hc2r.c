@@ -29,7 +29,7 @@ static int okp(const khc2r_desc *d,
      UNUSED(ri); UNUSED(ii); UNUSED(O); UNUSED(vl);
      return (1
 	     && (!d->ris || (d->ris == ris))
-	     && (!d->iis || (d->ris == iis))
+	     && (!d->iis || (d->iis == iis))
 	     && (!d->os || (d->os == os))
 	     && (!d->ivs || (d->ivs == ivs))
 	     && (!d->ovs || (d->ovs == ovs))
