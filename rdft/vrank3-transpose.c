@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.20 2004-10-01 19:59:17 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.21 2005-02-19 20:24:03 athena Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -77,191 +77,95 @@ static int gcd(int a, int b)
 /*************************************************************************/
 /* Out-of-place transposes: */
 
-/* Transpose A (n x m) to B (m x n), where A and B are stored
-   as n x fda and m x fdb arrays, respectively, operating on N-tuples: */
-static void rec_transpose_Ntuple(R *A, R *B, int n, int m, int fda, int fdb,
-			  int N)
+/* B[j0..j1][i0..i1] = (A[i0..i1][j0..j1])^T */
+static void rec_transpose(R *A, R *B, int i0, int i1, int j0, int j1,
+			  int lda, int ldb, int vl)
 {
-     if (n == 1 || m == 1 || (n + m) * N < CUTOFF*2) {
-	  switch (N) {
-	      case 1: {
-		   int i, j;
-		   for (i = 0; i < n; ++i) {
-			for (j = 0; j < m; ++j) {
-			     B[j*fdb + i] = A[i*fda + j];
-			}
-		   }
-		   break;
-	      }
-	      case 2: {
-		   int i, j;
-		   for (i = 0; i < n; ++i) {
-			for (j = 0; j < m; ++j) {
-#if 0 && FFTW_2R_IS_DOUBLE
-			     double *Bd = (double *) (B + (j*fdb + i) * 2);
-			     double *Ad = (double *) (A + (i*fda + j) * 2);
-			     *Bd = *Ad;
-#else
-			     B[(j*fdb + i) * 2] = A[(i*fda + j) * 2];
-			     B[(j*fdb + i) * 2 + 1] = A[(i*fda + j) * 2 + 1];
-#endif
-			}
-		   }
-		   break;
-	      }
-	      default: {
-		   int i, j, k;
-		   for (i = 0; i < n; ++i) {
-			for (j = 0; j < m; ++j) {
-			     for (k = 0; k < N; ++k) {
-				  B[(j*fdb + i) * N + k]
-				       = A[(i*fda + j) * N + k];
-			     }
-			}
-		   }
-	      }
-	  }
-     }
-     else if (n > m) {
-	  int n2 = n / 2;
-	  rec_transpose_Ntuple(A, B, n2, m, fda, fdb, N);
-	  rec_transpose_Ntuple(A + n2*N*fda, B + n2*N, n - n2, m, fda, fdb, N);
-     }
-     else {
-	  int m2 = m / 2;
-	  rec_transpose_Ntuple(A, B, n, m2, fda, fdb, N);
-	  rec_transpose_Ntuple(A + m2*N, B + m2*N*fdb, n, m - m2, fda, fdb, N);
+     int di = i1 - i0;
+     int dj = j1 - j0;
+
+     if (di >= dj && di > CUTOFF) {
+	  int im = (i0 + i1) / 2;
+	  rec_transpose(A, B, i0, im, j0, j1, lda, ldb, vl);
+	  rec_transpose(A, B, im, i1, j0, j1, lda, ldb, vl);
+     } else if (dj >= di && dj > CUTOFF) {
+	  int jm = (j0 + j1) / 2;
+	  rec_transpose(A, B, i0, i1, j0, jm, lda, ldb, vl);
+	  rec_transpose(A, B, i0, i1, jm, j1, lda, ldb, vl);
+     } else {
+	  int i, j, k;
+	  for (i = i0; i < i1; ++i)
+	       for (j = j0; j < j1; ++j)
+		    for (k = 0; k < vl; ++k) 
+			 B[(j * ldb + i) * vl + k] = A[(i * lda + j) * vl + k];
      }
 }
 
 /*************************************************************************/
 /* In-place transposes of square matrices of N-tuples: */
 
-/* Transpose both A and B, where A is n x m and B is m x n, storing
-   the transpose of A in B and the transpose of B in A.  A and B
-   are actually stored as n x fda and m x fda arrays. */
-static void rec_transpose_swap_Ntuple(R *A, R *B, int n, int m, int fda, int N)
+/* swap M[i0..i1][j0..j1] <=> (M[j0..j1][i0..i1])^T */
+static void rec_transpose_swap(R *M, int i0, int i1, int j0, int j1, 
+			       int lda, int vl)
 {
-     if (n == 1 || m == 1 || (n + m) * N <= CUTOFF*2) {
-	  switch (N) {
-	      case 1: {
-		   int i, j;
-		   for (i = 0; i < n; ++i) {
-			for (j = 0; j < m; ++j) {
-			     R a = A[(i*fda + j)];
-			     A[(i*fda + j)] = B[(j*fda + i)];
-			     B[(j*fda + i)] = a;
+     int di = i1 - i0;
+     int dj = j1 - j0;
+
+     if (di >= dj && di > CUTOFF) {
+	  int im = (i0 + i1) / 2;
+	  rec_transpose_swap(M, i0, im, j0, j1, lda, vl);
+	  rec_transpose_swap(M, im, i1, j0, j1, lda, vl);
+     } else if (dj >= di && dj > CUTOFF) {
+	  int jm = (j0 + j1) / 2;
+	  rec_transpose_swap(M, i0, i1, j0, jm, lda, vl);
+	  rec_transpose_swap(M, i0, i1, jm, j1, lda, vl);
+     } else {
+	  int i, j, k;
+	  switch (vl) {
+	      case 1:
+		   for (i = i0; i < i1; ++i)
+			for (j = j0; j < j1; ++j) {
+			     R a = M[i * lda + j];
+			     R b = M[i * lda + j];
+			     M[j * lda + i] = a;
+			     M[i * lda + j] = b;
 			}
-		   }
 		   break;
-	      }
-	      case 2: {
-		   int i, j;
-		   for (i = 0; i < n; ++i) {
-			for (j = 0; j < m; ++j) {
-#if 0 && FFTW_2R_IS_DOUBLE
-			     double *Bd = (double *) (B + (j*fda + i) * 2);
-			     double *Ad = (double *) (A + (i*fda + j) * 2);
-			     double ad = *Ad;
-			     *Ad = *Bd;
-			     *Bd = ad;
-#else
-			     R a0 = A[(i*fda + j) * 2 + 0];
-			     R a1 = A[(i*fda + j) * 2 + 1];
-			     A[(i*fda + j) * 2 + 0] = B[(j*fda + i) * 2 + 0];
-			     A[(i*fda + j) * 2 + 1] = B[(j*fda + i) * 2 + 1];
-			     B[(j*fda + i) * 2 + 0] = a0;
-			     B[(j*fda + i) * 2 + 1] = a1;
-#endif
+	      case 2:
+		   for (i = i0; i < i1; ++i)
+			for (j = j0; j < j1; ++j) {
+			     R a0 = M[(i * lda + j) * 2 + 0];
+			     R a1 = M[(i * lda + j) * 2 + 1];
+			     R b0 = M[(i * lda + j) * 2 + 0];
+			     R b1 = M[(i * lda + j) * 2 + 1];
+			     M[(j * lda + i) * 2 + 0] = a0;
+			     M[(j * lda + i) * 2 + 1] = a1;
+			     M[(i * lda + j) * 2 + 0] = b0;
+			     M[(i * lda + j) * 2 + 1] = b1;
 			}
-		   }
 		   break;
-	      }
-	      default: {
-		   int i, j, k;
-		   for (i = 0; i < n; ++i) {
-			for (j = 0; j < m; ++j) {
-			     for (k = 0; k < N; ++k) {
-				  R a = A[(i*fda + j) * N + k];
-				  A[(i*fda + j) * N + k] = 
-				       B[(j*fda + i) * N + k];
-				  B[(j*fda + i) * N + k] = a;
+	      default:
+		   for (i = i0; i < i1; ++i)
+			for (j = j0; j < j1; ++j)
+			     for (k = 0; k < vl; ++k) {
+				  R a = M[(i * lda + j) * vl + k];
+				  R b = M[(i * lda + j) * vl + k];
+				  M[(j * lda + i) * vl + k] = a;
+				  M[(i * lda + j) * vl + k] = b;
 			     }
-			}
-		   }
-	      }
+		   break;
 	  }
-     } else if (n > m) {
-	  int n2 = n / 2;
-	  rec_transpose_swap_Ntuple(A, B, n2, m, fda, N);
-	  rec_transpose_swap_Ntuple(A + n2*N*fda, B + n2*N, n - n2, m, fda, N);
-     }
-     else {
-	  int m2 = m / 2;
-	  rec_transpose_swap_Ntuple(A, B, n, m2, fda, N);
-	  rec_transpose_swap_Ntuple(A + m2*N, B + m2*N*fda, n, m - m2, fda, N);
      }
 }
 
-/* Transpose A, an n x n matrix (stored as n x fda), in-place. */
-static void rec_transpose_sq_ip_Ntuple(R *A, int n, int fda, int N)
+/* transpose M[n0..n1][n0..n1] */
+static void rec_transpose_sq_ip(R *M, int n0, int n1, int lda, int vl)
 {
-     if (n == 1)
-	  return;
-     else if (n*N <= CUTOFF) {
-	  switch (N) {
-	      case 1: {
-		   int i, j;
-		   for (i = 0; i < n; ++i) {
-			for (j = i + 1; j < n; ++j) {
-			     R a = A[(i*fda + j)];
-			     A[(i*fda + j)] = A[(j*fda + i)];
-			     A[(j*fda + i)] = a;
-			}
-		   }
-		   break;
-	      }
-	      case 2: {
-		   int i, j;
-		   for (i = 0; i < n; ++i) {
-			for (j = i + 1; j < n; ++j) {
-#if 0 && FFTW_2R_IS_DOUBLE
-			     double *Bd = (double *) (A + (j*fda + i) * 2);
-			     double *Ad = (double *) (A + (i*fda + j) * 2);
-			     double ad = *Ad;
-			     *Ad = *Bd;
-			     *Bd = ad;
-#else
-			     R a0 = A[(i*fda + j) * 2 + 0];
-			     R a1 = A[(i*fda + j) * 2 + 1];
-			     A[(i*fda + j) * 2 + 0] = A[(j*fda + i) * 2 + 0];
-			     A[(i*fda + j) * 2 + 1] = A[(j*fda + i) * 2 + 1];
-			     A[(j*fda + i) * 2 + 0] = a0;
-			     A[(j*fda + i) * 2 + 1] = a1;
-#endif
-			}
-		   }
-		   break;
-	      }
-	      default: {
-		   int i, j, k;
-		   for (i = 0; i < n; ++i) {
-			for (j = i + 1; j < n; ++j) {
-			     for (k = 0; k < N; ++k) {
-				  R a = A[(i*fda + j) * N + k];
-				  A[(i*fda + j) * N + k] = 
-				       A[(j*fda + i) * N + k];
-				  A[(j*fda + i) * N + k] = a;
-			     }
-			}
-		   }
-	      }
-	  }
-     } else {
-	  int n2 = n / 2;
-	  rec_transpose_sq_ip_Ntuple(A, n2, fda, N);
-	  rec_transpose_sq_ip_Ntuple((A + n2*N) + n2*N*fda, n - n2, fda, N);
-	  rec_transpose_swap_Ntuple(A + n2*N, A + n2*N*fda, n2, n - n2, fda,N);
+     if (n1 - n0 > 1) {
+	  int nm = (n1 + n0) / 2;
+	  rec_transpose_sq_ip(M, n0, nm, lda, vl);
+	  rec_transpose_sq_ip(M, nm, n1, lda, vl);
+	  rec_transpose_swap(M, n0, nm, nm, n1, lda, vl);
      }
 }
 
@@ -306,7 +210,7 @@ static void transpose_gcd(R *A, int n, int m, int d, int N, R *buf)
 {
      A(n > 0 && m > 0 && N > 0 && d > 0);
      if (d == 1) {
-	  rec_transpose_Ntuple(A, buf, n,m, m,n, N);
+	  rec_transpose(A, buf, 0, n, 0, m, m, n, N);
 	  memcpy(A, buf, m*n*N*sizeof(R));
      }
      else {
@@ -319,23 +223,22 @@ static void transpose_gcd(R *A, int n, int m, int d, int N, R *buf)
 	     of contiguous n x d' matrices of m-tuples. */
 	  if (n > 1) {
 	       for (i = 0; i < d; ++i) {
-		    rec_transpose_Ntuple(A + i*num_el, buf,
-					 n,d, d,n, m*N);
+		    rec_transpose(A + i*num_el, buf,
+				  0, n, 0, d, d, n, m*N);
 		    memcpy(A + i*num_el, buf, num_el*sizeof(R));
 	       }
 	  }
 	  
 	  /* Now, transpose (d x d') x (n x m) to (d' x d) x (n x m), which
 	     is a square in-place transpose of n*m-tuples: */
-	  rec_transpose_sq_ip_Ntuple(A, d, d, n*m*N);
+	  rec_transpose_sq_ip(A, 0, d, d, n*m*N);
 
 	  /* Finally, transpose d' x ((d x n) x m) to d' x (m x (d x n)),
 	     using the buf matrix.  This consists of d' transposes
 	     of contiguous d*n x m matrices. */
 	  if (m > 1) {
 	       for (i = 0; i < d; ++i) {
-		    rec_transpose_Ntuple(A + i*num_el, buf,
-					 d*n,m, m,d*n, N);
+		    rec_transpose(A + i*num_el, buf, 0, d*n, 0, m, m, d*n, N);
 		    memcpy(A + i*num_el, buf, num_el*sizeof(R));
 	       }
 	  }
@@ -361,18 +264,18 @@ static void transpose_cut(R *A, int n, int m, int N, R *buf)
      A(n > 0 && m > 0 && N > 0);
      if (n > m) {
 	  memcpy(buf, A + m*(m*N), (n-m)*(m*N)*sizeof(R));
-	  rec_transpose_sq_ip_Ntuple(A, m, m, N);
+	  rec_transpose_sq_ip(A, 0, m, m, N);
 	  unpack(A, m, n, N);
-	  rec_transpose_Ntuple(buf, A + m*N, n-m,m, m,n, N);
+	  rec_transpose(buf, A + m*N, 0, n-m, 0, m, m, n, N);
      }
      else if (m > n) {
-	  rec_transpose_Ntuple(A + n*N, buf, n,m-n, m,n, N);
+	  rec_transpose(A + n*N, buf, 0, n, 0, m-n, m, n, N);
 	  pack(A, n, m, N);
-	  rec_transpose_sq_ip_Ntuple(A, n, n, N);
+	  rec_transpose_sq_ip(A, 0, n, n, N);
 	  memcpy(A + n*(n*N), buf, (m-n)*(n*N)*sizeof(R));
      }
      else /* n == m */
-	  rec_transpose_sq_ip_Ntuple(A, n, n, N);
+	  rec_transpose_sq_ip(A, 0, n, n, N);
 }
 
 /*************************************************************************/
@@ -691,13 +594,6 @@ static void apply_simple_consecpairs(const plan *ego_, R *I, R *O)
      UNUSED(O);
      for (i = 1; i < n; ++i) {
           for (j = 0; j < i; ++j) {
-#if 0 && FFTW_2R_IS_DOUBLE
-	       double *p0 = (double *) (I + i * s0 + j * s1);
-	       double *p1 = (double *) (I + j * s0 + i * s1);
-	       double t0 = p0[0];
-	       p0[0] = p1[0];
-	       p1[0] = t0;
-#else
 	       R *p0 = I + i * s0 + j * s1;
 	       R *p1 = I + j * s0 + i * s1;
 	       R t0 = p0[0], t1 = p0[1];
@@ -705,7 +601,6 @@ static void apply_simple_consecpairs(const plan *ego_, R *I, R *O)
 	       p0[1] = p1[1];
 	       p1[0] = t0;
 	       p1[1] = t1;
-#endif
           }
      }
 }
@@ -782,7 +677,7 @@ static void apply_recsq(const plan *ego_, R *I, R *O)
      int vl = ego->vl;
      A(ego->vs == 1 && ego->m == n && ego->s1 == vl);
      UNUSED(O);
-     rec_transpose_sq_ip_Ntuple(I, n, fd, vl);
+     rec_transpose_sq_ip(I, 0, n, fd, vl);
 }
 
 static int applicable_recsq(const problem_rdft *p, planner *plnr,
