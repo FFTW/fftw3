@@ -38,7 +38,7 @@ TODO before/at release:
   in Vienna, MIT Lincoln Labs, Compaq/HP testdrive program,
   sourceforge, AMD for the athlon box.
 
-TODO in the next release:
+TODO before FFTW-$2\pi$:
 
 * investigate the addition-chain trig computation
 
@@ -47,3 +47,5 @@ TODO in the next release:
 
 * merge genfft-k7 generator with the main genfft branch.
   genfft-k7 was written by Stefan Kral based on the fftw-2.1 genfft.
+
+* implement rdft/problem2 for even radices other than 2.
