@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.14 2002-08-03 19:09:56 athena Exp $ */
+/* $Id: cycle.h,v 1.15 2002-08-03 19:39:49 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -170,7 +170,7 @@ static __inline__ ticks getticks(void)
 }
 #  else
 #  include <machine/inline.h>
-static inline ticks getticks(void)
+static inline unsigned long getticks(void)
 {
      register ticks ret;
      _MFCTL(16, ret);

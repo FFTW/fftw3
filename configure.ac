@@ -113,10 +113,12 @@ AC_CHECK_TYPE([uint],,
    [AC_DEFINE([uint], [unsigned int],
           [Define to `unsigned int' if <sys/types.h> does not define.])])
 AC_HEADER_TIME
-AC_CHECK_TYPE([hrtime_t],,,[
+AC_CHECK_TYPE([hrtime_t],[AC_DEFINE(HAVE_HRTIME_T, 1, [Define to 1 if hrtime_t is defined in <sys/time.h>])],,
+[
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif])
+#endif
+])
 
 AC_CHECK_SIZEOF(unsigned int, 0)
 AC_CHECK_SIZEOF(unsigned long long, 0)

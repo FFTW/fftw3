@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.8 2002-08-01 18:56:02 stevenj Exp $ */
+/* $Id: problem2.c,v 1.9 2002-08-03 19:39:49 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -125,7 +125,9 @@ static void zero(const problem *ego_)
      }
      else {
 	  iodim sz2;
-	  tensor psz2 = {1, &sz2};
+	  tensor psz2;
+	  psz2.rnk = 1;
+	  psz2.dims = &sz2;
 	  sz2 = ego->sz;
 	  sz2.n = sz2.n/2 + 1; /* ~half as many complex outputs */
 	  sz2.is = sz2.os; /* sz.os is complex stride */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.35 2002-08-01 20:01:15 stevenj Exp $ */
+/* $Id: planner.c,v 1.36 2002-08-03 19:39:49 athena Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -39,7 +39,7 @@ struct solutions_s {
 };
 
 /* slvpair management */
-static inline slvpair *mkpair(solver *slv, const char *reg_nam, int id)
+static slvpair *mkpair(solver *slv, const char *reg_nam, int id)
 {
      slvpair *n = (slvpair *) fftw_malloc(sizeof(slvpair), SLVPAIRS);
      n->slv = slv;
