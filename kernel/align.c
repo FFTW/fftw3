@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.20 2003-04-02 02:11:31 athena Exp $ */
+/* $Id: align.c,v 1.21 2003-04-02 10:25:56 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -76,49 +76,4 @@ void X(most_unaligned_complex)(R *r, R *i, R **rp, R **ip, int s)
 	  else
                *rp = r + (*ip - i);
      }
-}
-
-
-void X(with_aligned_stack)(void (*f)(void *), void *p)
-{
-#if defined(__GNUC__) && defined(__i386__)
-     /*
-      * horrible hack to align the stack to a 16-byte boundary.
-      *
-      * We assume a gcc version >= 2.95 so that
-      * -mpreferred-stack-boundary works.  Otherwise, all bets are
-      * off.  However, -mpreferred-stack-boundary does not create a
-      * stack alignment, but it only preserves it.  Unfortunately,
-      * many versions of libc on linux call main() with the wrong
-      * initial stack alignment, with the result that the code is now
-      * pessimally aligned instead of having a 50% chance of being
-      * correct.
-      */
-     {
-	  /*
-	   * Use alloca to allocate some memory on the stack.
-	   * This alerts gcc that something funny is going
-	   * on, so that it does not omit the frame pointer
-	   * etc.
-	   */
-	  (void)__builtin_alloca(16); 
-
-	  /*
-	   * Now align the stack pointer
-	   */
-	  __asm__ __volatile__ ("andl $-16, %esp");
-     }
-#endif
-
-#ifdef __ICC /* Intel's compiler for ia32 */
-     {
-	  /*
-	   * Simply calling alloca seems to do the right thing. 
-	   * The size of the allocated block seems to be irrelevant.
-	   */
-	  _alloca(16);
-     }
-#endif
-
-     f(p);
 }
