@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.3 2002-07-21 06:06:53 stevenj Exp $ */
+/* $Id: codelet.h,v 1.4 2002-07-22 02:34:28 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -78,6 +78,7 @@ typedef struct {
      int (*okp)(
 	  const struct hc2hc_desc_s *desc,
 	  const R *rio, const R *iio, int ios, int vs, uint m, int dist);
+     rdft_kind kind;
      uint vl;
 } hc2hc_genus;
 

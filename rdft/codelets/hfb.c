@@ -33,9 +33,9 @@ static int okp(const hc2hc_desc *d,
 	  );
 }
 
-const hc2hc_genus GENUS = { okp, 1 };
+const hc2hc_genus GENUS = { okp, R2HC, 1 };
 
 #undef GENUS
 #include "hb.h"
 
-const hc2hc_genus GENUS = { okp, 1 };
+const hc2hc_genus GENUS = { okp, HC2R, 1 };
