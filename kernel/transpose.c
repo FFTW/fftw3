@@ -163,7 +163,7 @@ void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl)
      k.s0 = s0;
      k.s1 = s1;
      k.vl = vl;
-     k.tilesz = X(isqrt)((CACHESIZE / 2 / sizeof(R)) / vl);
+     k.tilesz = X(compute_tilesz)(vl, 2);
      k.buf0 = k.buf1 = 0; /* unused */
      transpose_rec(I, n, dotile, &k);
 }
@@ -171,14 +171,16 @@ void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl)
 void X(transpose_tiledbuf)(R *I, int n, int s0, int s1, int vl) 
 {
      struct transpose_closure k;
-     R buf0[CACHESIZE / 2];
-     R buf1[CACHESIZE / 2];
+     R buf0[CACHESIZE / 4];
+     R buf1[CACHESIZE / 4];
      k.s0 = s0;
      k.s1 = s1;
      k.vl = vl;
-     k.tilesz = X(isqrt)((CACHESIZE / 2 / sizeof(R)) / vl);
+     k.tilesz = X(compute_tilesz)(vl, 4);
      k.buf0 = buf0;
      k.buf1 = buf1;
+     A(k.tilesz * k.tilesz * vl * sizeof(R) <= sizeof(buf0));
+     A(k.tilesz * k.tilesz * vl * sizeof(R) <= sizeof(buf1));
      transpose_rec(I, n, dotile_buf, &k);
 }
 

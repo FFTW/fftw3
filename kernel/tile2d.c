@@ -67,3 +67,8 @@ void X(tile2d)(int n0l, int n0u, int n1l, int n1u, int tilesz,
 	  f(n0l, n0u, n1l, n1u, args);
      }
 }
+
+int X(compute_tilesz)(int vl, int how_many_tiles_in_cache)
+{
+     return X(isqrt)(CACHESIZE / (sizeof(R) * vl * how_many_tiles_in_cache));
+}

@@ -123,7 +123,9 @@ void X(cpy2d_tiled)(R *I, R *O,
 		    int n0, int is0, int os0,
 		    int n1, int is1, int os1, int vl) 
 {
-     int tilesz = X(isqrt)((CACHESIZE / sizeof(R)) / vl);
+     int tilesz = X(compute_tilesz)(vl, 
+				    1 /* input array */
+				    + 1 /* ouput array */);
      struct cpy2d_closure k;
      k.I = I;
      k.O = O;
@@ -140,8 +142,10 @@ void X(cpy2d_tiledbuf)(R *I, R *O,
 		       int n0, int is0, int os0,
 		       int n1, int is1, int os1, int vl) 
 {
-     R buf[CACHESIZE];
-     int tilesz = X(isqrt)((CACHESIZE / sizeof(R)) / vl);
+     R buf[CACHESIZE / 2];
+     /* input and buffer in cache, or
+	output and buffer in cache */
+     int tilesz = X(compute_tilesz)(vl, 2);
      struct cpy2d_closure k;
      k.I = I;
      k.O = O;
@@ -151,6 +155,7 @@ void X(cpy2d_tiledbuf)(R *I, R *O,
      k.os1 = os1;
      k.vl = vl;
      k.buf = buf;
+     A(tilesz * tilesz * vl * sizeof(R) <= sizeof(buf));
      X(tile2d)(0, n0, 0, n1, tilesz, dotile_buf, &k);
 }
 

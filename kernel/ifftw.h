@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.250 2005-02-24 14:40:30 athena Exp $ */
+/* $Id: ifftw.h,v 1.251 2005-02-24 16:19:01 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -724,6 +724,8 @@ void X(rader_tl_delete)(R *W, rader_tl **tl);
 
 /* lower bound to the cache size, for tiled routines */
 #define CACHESIZE 8192
+
+int X(compute_tilesz)(int vl, int how_many_tiles_in_cache);
 
 void X(tile2d)(int n0l, int n0u, int n1l, int n1u, int tilesz,
 	       void (*f)(int n0l, int n0u, int n1l, int n1u, void *args),

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.21 2005-02-24 14:40:30 athena Exp $ */
+/* $Id: rank0.c,v 1.22 2005-02-24 16:19:01 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -117,7 +117,6 @@ static void apply_tiled(const plan *ego_, R *I, R *O)
      int vl = ego->vl;
 
      A(ego->rnk == 2);
-     A(vl <= 2);
      X(cpy2d_tiled)(I, O, 
 		     ego->d[0].n, ego->d[0].is, ego->d[0].os,
 		     ego->d[1].n, ego->d[1].is, ego->d[1].os,
@@ -143,7 +142,6 @@ static void apply_tiledbuf(const plan *ego_, R *I, R *O)
      int vl = ego->vl;
 
      A(ego->rnk == 2);
-     A(vl <= 2);
      X(cpy2d_tiled)(I, O, 
 		     ego->d[0].n, ego->d[0].is, ego->d[0].os,
 		     ego->d[1].n, ego->d[1].is, ego->d[1].os,
