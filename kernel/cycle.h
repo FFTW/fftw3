@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.41 2003-09-24 03:36:19 stevenj Exp $ */
+/* $Id: cycle.h,v 1.42 2004-07-16 17:55:25 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -380,7 +380,7 @@ INLINE_ELAPSED(__inline__)
 #endif
 
 /*----------------------------------------------------------------*/
-#if defined(__DECC) && defined(__alpha) && defined(HAVE_C_ASM_H) && !defined(HAVE_TICK_COUNTER)
+#if (defined(__DECC) || defined(__DECCXX_LIBCXX_RH70)) && defined(__alpha) && defined(HAVE_C_ASM_H) && !defined(HAVE_TICK_COUNTER)
 #  include <c_asm.h>
 typedef unsigned int ticks;
 
