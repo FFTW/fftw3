@@ -7,7 +7,7 @@ dnl flag and ACTION-SUCCESS is executed; otherwise $ax_cv_gcc_archflag is
 dnl is set to "unknown" and ACTION-FAILURE is executed.  The default
 dnl ACTION-SUCCESS is to add $ax_cv_gcc_archflag to the end of $CFLAGS.
 dnl
-dnl PORTABLE? should be either [yes] or [no].  In the former case,
+dnl PORTABLE? should be either [yes] (default) or [no].  In the former case,
 dnl the flag is set to -mtune (or equivalent) so that the architecture
 dnl is only used for tuning, but the instruction set used is still
 dnl portable.  In the latter case, the flag is set to -march (or equivalent)
@@ -22,7 +22,7 @@ dnl called unless the user specified --with-gcc-arch manually.
 dnl
 dnl Requires macros: AX_CHECK_CC_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.2 2004-10-27 17:41:57 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.3 2004-10-27 17:44:08 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
