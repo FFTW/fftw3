@@ -18,8 +18,8 @@
  *
  */
 
-/***************************** NOTE TO USERS *********************************/
-/*
+/***************************** NOTE TO USERS *********************************
+ *
  *                 THIS IS A HEADER FILE, NOT A MANUAL
  *
  *    If you want to know how to use FFTW, please read the manual,
@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.66 2004-10-01 01:12:47 athena Exp $ */
+/* $Id: fftw3.h,v 1.67 2004-10-01 20:06:59 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
