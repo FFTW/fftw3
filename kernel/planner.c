@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.127 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: planner.c,v 1.128 2003-01-15 05:23:36 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -463,7 +463,7 @@ static void htab_destroy(planner *ego)
 }
 
 /* FIXME: what sort of version information should we write? */
-#define WISDOM_PREAMBLE PACKAGE "-" VERSION "-wisdom "
+#define WISDOM_PREAMBLE PACKAGE "-" VERSION " " STRINGIZE(X(wisdom))
 
 /* tantus labor non sit cassus */
 static void exprt(planner *ego, printer *p)
