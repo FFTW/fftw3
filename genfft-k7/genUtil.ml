@@ -402,7 +402,7 @@ let check_size () =
   | Some i -> i
   | None -> failwith "must specify -n"
 
-let register_fcn name =  "sfftw_codelet_" ^ name
+let register_fcn name =  "fftwf_codelet_" ^ name
 
 (* output the command line *)
 let cmdline () =

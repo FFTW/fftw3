@@ -27,7 +27,7 @@ open K7Translate
 open AssignmentsToVfpinstrs
 open Complex
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.11 2002-07-04 00:32:28 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.12 2002-09-12 20:33:49 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -150,7 +150,7 @@ let generate n =
     p "\t.long %d\n" mul;
     p "\t.long 0\n";  (* fma *)
     p "\t.long 0\n";  (* other *)
-    p "\t.long sfftw_kdft_ct_k7_%sgenus\n" (choose sign "m" "p");
+    p "\t.long fftwf_kdft_ct_k7_%sgenus\n" (choose sign "m" "p");
     p "\t.long 0\n";  (* s1 *)
     p "\t.long 0\n";  (* s2 *)
     p "\t.long 0\n";  (* dist *)
@@ -167,8 +167,8 @@ let generate n =
     p "\tpushl %%eax\n";
     begin
       match !ditdif with
-      | DIT -> p "\tcall sfftw_kdft_dit_register\n"
-      | DIF -> p "\tcall sfftw_kdft_dif_register\n"
+      | DIT -> p "\tcall fftwf_kdft_dit_register\n"
+      | DIF -> p "\tcall fftwf_kdft_dif_register\n"
     end;
     p "\taddl $16,%%esp\n";
     p "\taddl $12,%%esp\n";
