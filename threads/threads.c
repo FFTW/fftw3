@@ -294,7 +294,7 @@ typedef pthread_t fftw_thr_id;
 
 /* POSIX semaphores are disabled for now because, at least on my Linux
    machine, they don't seem to offer much performance advantage. */
-#if 1
+#if 0
 #define HAVE_SEMAPHORES 1
 
 #include <semaphore.h>
