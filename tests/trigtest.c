@@ -17,6 +17,7 @@ typedef double trigreal;
 static const trigreal K2PI =
     KTRIG(6.2831853071795864769252867665590057683943388);
 
+static const uint MAXN = 1 << ((8 * sizeof(int)) - 3);
 
 trigreal naive_sin2pi(int m, uint n)
 {
@@ -37,6 +38,9 @@ static trigreal cos2pi(int m, uint n)
      if (n % 4 == 0) {
 	  if (m > n / 4) return -sin2pi(m - n / 4, n);
 	  if (2 * m > n / 4) return sin2pi(n / 4 - m, n);
+     } else if (n < MAXN) {
+	  if (4 * m > n) return -sin2pi(4 * m - n, 4 * n);
+	  if (8 * m > n) return sin2pi(n - 4 * m, 4 * n);
      }
      return COS(K2PI * ((trigreal)m / (trigreal)n));
 }
@@ -48,6 +52,9 @@ static trigreal sin2pi(int m, uint n)
      if (n % 4 == 0) {
 	  if (m > n / 4) return cos2pi(m - n / 4, n);
 	  if (2 * m > n / 4) return cos2pi(n / 4 - m, n);
+     } else if (n < MAXN) {
+	  if (4 * m > n) return cos2pi(4 * m - n, 4 * n);
+	  if (8 * m > n) return cos2pi(n - 4 * m, 4 * n);
      }
      return SIN(K2PI * ((trigreal)m / (trigreal)n));
 }

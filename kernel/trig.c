@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: trig.c,v 1.4 2002-08-10 00:31:16 athena Exp $ */
+/* $Id: trig.c,v 1.5 2002-08-10 00:38:07 athena Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
@@ -48,25 +48,33 @@
 static const trigreal K2PI =
     KTRIG(6.2831853071795864769252867665590057683943388);
 
-trigreal sin2pi(int m, uint n);
-trigreal cos2pi(int m, uint n)
+static const uint MAXN = 1 << ((8 * sizeof(int)) - 3);
+
+static trigreal sin2pi(int m, uint n);
+static trigreal cos2pi(int m, uint n)
 {
      if (m < 0) return cos2pi(-m, n);
      if (m > n / 2) return cos2pi(n - m, n);
      if (n % 4 == 0) {
 	  if (m > n / 4) return -sin2pi(m - n / 4, n);
 	  if (2 * m > n / 4) return sin2pi(n / 4 - m, n);
+     } else if (n < MAXN) {
+	  if (4 * m > n) return -sin2pi(4 * m - n, 4 * n);
+	  if (8 * m > n) return sin2pi(n - 4 * m, 4 * n);
      }
      return COS(K2PI * ((trigreal)m / (trigreal)n));
 }
 
-trigreal sin2pi(int m, uint n)
+static trigreal sin2pi(int m, uint n)
 {
      if (m < 0) return -sin2pi(-m, n);
      if (m > n / 2) return -sin2pi(n - m, n);
      if (n % 4 == 0) {
 	  if (m > n / 4) return cos2pi(m - n / 4, n);
 	  if (2 * m > n / 4) return cos2pi(n / 4 - m, n);
+     } else if (n < MAXN) {
+	  if (4 * m > n) return cos2pi(4 * m - n, 4 * n);
+	  if (8 * m > n) return cos2pi(n - 4 * m, 4 * n);
      }
      return SIN(K2PI * ((trigreal)m / (trigreal)n));
 }
