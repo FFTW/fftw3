@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.19 2003-02-09 07:36:25 stevenj Exp $ */
+/* $Id: problem.c,v 1.20 2003-02-09 08:15:28 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -181,7 +181,7 @@ static const char *parsetensor(const char *s, bench_tensor **tp,
 
      if (k && rnk > 0) {
 	  int i;
-	  *k = bench_malloc(sizeof(r2r_kind_t) * t->rnk);
+	  *k = bench_malloc(sizeof(r2r_kind_t) * rnk);
 	  for (m = l, i = rnk - 1; i >= 0; --i, m = m->cdr) {
 	       BENCH_ASSERT(m);
 	       (*k)[i] = m->k;

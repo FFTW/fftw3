@@ -374,6 +374,31 @@ static double racmp(R *a, R *b, int n, const char *test, double tol)
      return d;
 }
 
+/***********************************************************************/
+
+typedef struct {
+     int n; /* physical size */
+     int n0; /* "logical" transform size */
+     int i0, k0; /* shifts of input/output */
+     trigfun ti, ts;  /* impulse/shift trig functions */
+} dim_stuff;
+
+static void impulse_response(int rnk, dim_stuff *d, R impulse_amp,
+			     R *A, int N)
+{
+     if (rnk == 0)
+	  A[0] = impulse_amp;
+     else {
+	  int i;
+	  N /= d->n;
+	  for (i = 0; i < d->n; ++i) {
+	       impulse_response(rnk - 1, d + 1,
+				impulse_amp * d->ti(d->i0, d->k0 + i, d->n0),
+				A + i * N, N);
+	  }
+     }
+}
+
 /***************************************************************************/
 
 /*
@@ -413,11 +438,11 @@ static double linear0(int n, info *nfo, R *inA, R *inB, R *inC, R *outA,
      return e;
 }
 
-static double impulse0(int n0, int i0, int k0, trigfun t, R impulse_amp,
-		    int n, int vecn, info *nfo, 
-		    R *inA, R *inB, R *inC,
-		    R *outA, R *outB, R *outC,
-		    R *tmp, int rounds, double tol)
+static double impulse0(dim_stuff *d, R impulse_amp,
+		       int n, int vecn, info *nfo, 
+		       R *inA, R *inB, R *inC,
+		       R *outA, R *outB, R *outC,
+		       R *tmp, int rounds, double tol)
 {
      double e = 0.0;
      int N = n * vecn;
@@ -429,12 +454,13 @@ static double impulse0(int n0, int i0, int k0, trigfun t, R impulse_amp,
      for (i = 0; i < N; ++i) {
 	  /* pls */
 	  inA[i] = 0.0;
-	  
-	  /* transform of the pls */
-	  outA[i] = impulse_amp * t(i0, (i % n) + k0, n0);
      }
-     for (i = 0; i < vecn; ++i)
+     for (i = 0; i < vecn; ++i) {
 	  inA[i * n] = 1.0;
+     
+	  /* transform of the pls */
+	  impulse_response(nfo->probsz->rnk, d, impulse_amp, outA + i * n, n);
+     }
 
      dofft(nfo, inA, tmp);
      e = dmax(e, racmp(tmp, outA, N, "impulse 1", tol));
@@ -453,7 +479,7 @@ static double impulse0(int n0, int i0, int k0, trigfun t, R impulse_amp,
 static double t_shift(int n, int vecn, info *nfo, 
 		      R *inA, R *inB, R *outA, R *outB, R *tmp,
 		      int rounds, double tol,
-		      int n0, int k0, trigfun t)
+		      dim_stuff *d)
 {
      double e = 0.0;
      double sign;
@@ -486,7 +512,7 @@ static double t_shift(int n, int vecn, info *nfo,
 	       dofft(nfo, inB, outB);
 	       for (i = 0; i < vecn; ++i) 
 		    raphase_shift(tmp + i * n, outA + i * n, ncur, 
-				 nb, na, n0, k0, t);
+				 nb, na, d[dim].n0, d[dim].k0, d[dim].ts);
 	       e = dmax(e, racmp(tmp, outB, N, "time shift", tol));
 	  }
 
@@ -502,82 +528,93 @@ void verify_r2r(bench_problem *p, int rounds, double tol, errors *e)
      R *inA, *inB, *inC, *outA, *outB, *outC, *tmp;
      info nfo;
      int n, vecn, N;
-     int n0;
-     int i0, k0;
      double impulse_amp = 1.0;
-     trigfun ti, ts;
+     dim_stuff *d;
+     int i;
 
      if (rounds == 0)
 	  rounds = 20;  /* default value */
 
-     BENCH_ASSERT(p->sz->rnk == 1);
-     n = p->sz->dims[0].n;
-     if (p->k[0] <= R2R_DHT)
-	  n0 = n;
-     else
-	  n0 = 2 * (n + (p->k[0] == R2R_REDFT00 ? -1 : 
-			 (p->k[0] == R2R_RODFT00 ? 1 : 0)));
+     n = tensor_sz(p->sz);
      vecn = tensor_sz(p->vecsz);
      N = n * vecn;
 
-     switch (p->k[0]) {
-	 case R2R_R2HC:
-	      i0 = k0 = 0;
-	      ti = realhalf;
-	      ts = coshalf;
-	      break;
-	 case R2R_DHT:
-	      i0 = k0 = 0;
-	      ti = unity;
-	      ts = cos00;
-	      break;
-	 case R2R_HC2R:
-	      i0 = k0 = 0;
-	      ti = unity;
-	      ts = cos00;
-	      break;
-	 case R2R_REDFT00:
-	      i0 = k0 = 0;
-	      ti = ts = cos00;
-	      break;
-	 case R2R_REDFT01:
-	      i0 = k0 = 0;
-	      ti = ts = cos01;
-	      break;
-	 case R2R_REDFT10:
-	      i0 = k0 = 0;
-	      ti = cos10; impulse_amp = 2.0;
-	      ts = cos00;
-	      break;
-	 case R2R_REDFT11:
-	      i0 = k0 = 0;
-	      ti = cos11; impulse_amp = 2.0;
-	      ts = cos01;
-	      break;
-	 case R2R_RODFT00:
-	      i0 = k0 = 1;
-	      ti = sin00; impulse_amp = 2.0;
-	      ts = cos00;
-	      break;
-	 case R2R_RODFT01:
-	      i0 = 1; k0 = 0;
-	      ti = sin01; impulse_amp = n == 1 ? 1.0 : 2.0;
-	      ts = cos01;
-	      break;
-	 case R2R_RODFT10:
-	      i0 = 0; k0 = 1;
-	      ti = sin10; impulse_amp = 2.0;
-	      ts = cos00;
-	      break;
-	 case R2R_RODFT11:
-	      i0 = k0 = 0;
-	      ti = sin11; impulse_amp = 2.0;
-	      ts = cos01;
-	      break;
-	 default:
-	      BENCH_ASSERT(0);
-	      return;
+     d = bench_malloc(sizeof(dim_stuff) * p->sz->rnk);
+     for (i = 0; i < p->sz->rnk; ++i) {
+	  int n0, i0, k0;
+	  trigfun ti, ts;
+
+	  d[i].n = n0 = p->sz->dims[i].n;
+	  if (p->k[i] > R2R_DHT)
+	       n0 = 2 * (n0 + (p->k[i] == R2R_REDFT00 ? -1 : 
+			       (p->k[i] == R2R_RODFT00 ? 1 : 0)));
+	  
+	  switch (p->k[i]) {
+	      case R2R_R2HC:
+		   i0 = k0 = 0;
+		   ti = realhalf;
+		   ts = coshalf;
+		   break;
+	      case R2R_DHT:
+		   i0 = k0 = 0;
+		   ti = unity;
+		   ts = cos00;
+		   break;
+	      case R2R_HC2R:
+		   i0 = k0 = 0;
+		   ti = unity;
+		   ts = cos00;
+		   break;
+	      case R2R_REDFT00:
+		   i0 = k0 = 0;
+		   ti = ts = cos00;
+		   break;
+	      case R2R_REDFT01:
+		   i0 = k0 = 0;
+		   ti = ts = cos01;
+		   break;
+	      case R2R_REDFT10:
+		   i0 = k0 = 0;
+		   ti = cos10; impulse_amp *= 2.0;
+		   ts = cos00;
+		   break;
+	      case R2R_REDFT11:
+		   i0 = k0 = 0;
+		   ti = cos11; impulse_amp *= 2.0;
+		   ts = cos01;
+		   break;
+	      case R2R_RODFT00:
+		   i0 = k0 = 1;
+		   ti = sin00; impulse_amp *= 2.0;
+		   ts = cos00;
+		   break;
+	      case R2R_RODFT01:
+		   i0 = 1; k0 = 0;
+		   ti = sin01; impulse_amp *= n == 1 ? 1.0 : 2.0;
+		   ts = cos01;
+		   break;
+	      case R2R_RODFT10:
+		   i0 = 0; k0 = 1;
+		   ti = sin10; impulse_amp *= 2.0;
+		   ts = cos00;
+		   break;
+	      case R2R_RODFT11:
+		   i0 = k0 = 0;
+		   ti = sin11; impulse_amp *= 2.0;
+		   ts = cos01;
+		   break;
+	      default:
+		   BENCH_ASSERT(0);
+		   return;
+	  }
+
+	  d[i].n0 = n0;
+	  d[i].i0 = i0;
+	  d[i].k0 = k0;
+	  d[i].ti = ti;
+	  d[i].ts = ts;
      }
+
 
      inA = (R *) bench_malloc(N * sizeof(R));
      inB = (R *) bench_malloc(N * sizeof(R));
@@ -593,12 +630,11 @@ void verify_r2r(bench_problem *p, int rounds, double tol, errors *e)
      nfo.pckdsz = verify_pack(nfo.totalsz, 1);
      nfo.pckdvecsz = verify_pack(p->vecsz, tensor_sz(nfo.probsz));
 
-     e->i = impulse0(n0, i0, k0, ti, impulse_amp,
-		     n, vecn, &nfo,
+     e->i = impulse0(d, impulse_amp, n, vecn, &nfo,
 		     inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
      e->l = linear0(N, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds,tol);
      e->s = t_shift(n, vecn, &nfo, inA, inB, outA, outB, tmp, 
-		    rounds, tol, n0, k0, ts);
+		    rounds, tol, d);
 
      tensor_destroy(nfo.totalsz);
      tensor_destroy(nfo.pckdsz);
@@ -610,4 +646,5 @@ void verify_r2r(bench_problem *p, int rounds, double tol, errors *e)
      bench_free(inC);
      bench_free(inB);
      bench_free(inA);
+     bench_free(d);
 }
