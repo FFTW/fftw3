@@ -25,7 +25,7 @@
 
 struct P_s;
 typedef struct {
-     void (*bytwiddle)(const struct P_s *ego, R *rio, R *iio);
+     void (*bytwiddle)(const struct P_s *ego, R *rio, R *iio, int vl, int vs);
      void (*mktwiddle)(struct P_s *ego, int flg);
      const char *nam;
 } wadt;
@@ -93,30 +93,34 @@ static void mktwiddle2(P *ego, int flg)
      }
 }
 
-static void bytwiddle2(const P *ego, R *rio, R *iio)
+static void bytwiddle2(const P *ego, R *rio, R *iio, int vl, int vs)
 {
-     int j, k;
+     int i, j, k;
      int r = ego->r, m = ego->m, s = ego->s;
      int twshft = ego->log2_twradix;
      int twmsk = (1 << twshft) - 1;
 
      const R *W0 = ego->W0, *W1 = ego->W1;
-     for (j = 1; j < r; ++j) {
-	  for (k = 1; k < m; ++k) {
-	       unsigned jk = j * k;
-	       int jk0 = jk & twmsk;
-	       int jk1 = jk >> twshft;
-	       E xr = rio[s * (j * m + k)];
-	       E xi = iio[s * (j * m + k)];
-	       E wr0 = W0[2 * jk0];
-	       E wi0 = W0[2 * jk0 + 1];
-	       E wr1 = W1[2 * jk1];
-	       E wi1 = W1[2 * jk1 + 1];
-	       E wr = wr1 * wr0 - wi1 * wi0;
-	       E wi = wi1 * wr0 + wr1 * wi0;
-	       rio[s * (j * m + k)] = xr * wr + xi * wi;
-	       iio[s * (j * m + k)] = xi * wr - xr * wi;
+     for (i = 0; i < vl; ++i) {
+	  for (j = 1; j < r; ++j) {
+	       for (k = 1; k < m; ++k) {
+		    unsigned jk = j * k;
+		    int jk0 = jk & twmsk;
+		    int jk1 = jk >> twshft;
+		    E xr = rio[s * (j * m + k)];
+		    E xi = iio[s * (j * m + k)];
+		    E wr0 = W0[2 * jk0];
+		    E wi0 = W0[2 * jk0 + 1];
+		    E wr1 = W1[2 * jk1];
+		    E wi1 = W1[2 * jk1 + 1];
+		    E wr = wr1 * wr0 - wi1 * wi0;
+		    E wi = wi1 * wr0 + wr1 * wi0;
+		    rio[s * (j * m + k)] = xr * wr + xi * wi;
+		    iio[s * (j * m + k)] = xi * wr - xr * wi;
+	       }
 	  }
+	  rio += vs;
+	  iio += vs;
      }
 }
 
@@ -136,26 +140,29 @@ static void mktwiddle1(P *ego, int flg)
      X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->m, ego->r - 1);
 }
 
-static void bytwiddle1(const P *ego, R *rio, R *iio)
+static void bytwiddle1(const P *ego, R *rio, R *iio, int vl, int vs)
 {
-     int j, k;
+     int i, j, k;
      int r = ego->r, m = ego->m, s = ego->s;
-     const R *W = ego->td->W;
      int ip = iio - rio;
      R *p;
 
-     /* loop invariant: p = rio + s * (j * m + k). */
-     p = rio;
+     for (i = 0; i < vl; ++i) {
+	  const R *W = ego->td->W;
 
-     for (j = 1, p += s * m; j < r; ++j) {
-	  for (k = 1, p += s; k < m; ++k, p += s) {
-	       E xr = p[0];
-	       E xi = p[ip];
-	       E wr = W[0];
-	       E wi = W[1];
-	       p[0] = xr * wr + xi * wi;
-	       p[ip] = xi * wr - xr * wi;
-	       W += 2;
+	  /* loop invariant: p = rio + s * (j * m + k) + i * vs. */
+	  p = rio + i * vs;
+
+	  for (j = 1, p += s * m; j < r; ++j) {
+	       for (k = 1, p += s; k < m; ++k, p += s) {
+		    E xr = p[0];
+		    E xi = p[ip];
+		    E wr = W[0];
+		    E wi = W[1];
+		    p[0] = xr * wr + xi * wi;
+		    p[ip] = xi * wr - xr * wi;
+		    W += 2;
+	       }
 	  }
      }
 }
@@ -165,10 +172,8 @@ static void apply_dit(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
-     int i, vl = ego->vl, vs = ego->vs;
 
-     for (i = 0; i < vl; ++i)
-	  ego->adt->bytwiddle(ego, rio + i * vs, iio + i * vs);
+     ego->adt->bytwiddle(ego, rio, iio, ego->vl, ego->vs);
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
@@ -178,13 +183,11 @@ static void apply_dif(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
-     int i, vl = ego->vl, vs = ego->vs;
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
 
-     for (i = 0; i < vl; ++i)
-	  ego->adt->bytwiddle(ego, rio + i * vs, iio + i * vs);
+     ego->adt->bytwiddle(ego, rio, iio, ego->vl, ego->vs);
 }
 
 static void awake(plan *ego_, int flg)
