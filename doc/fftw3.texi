@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.167 2003-03-25 17:29:52 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.168 2003-03-25 17:30:56 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4588,9 +4588,9 @@ at @uref{http://pauillac.inria.fr/ocaml/}.
 @cindex Caml
 
 If you have Objective Caml installed (along with recent versions of GNU
-@code{autoconf} and @code{automake}), then you can change the set of
-codelets that are generated or play with the generation options.  The
-set of generated codelets is specified by the
+@code{autoconf}, @code{automake}, and @code{libtool}), then you can
+change the set of codelets that are generated or play with the
+generation options.  The set of generated codelets is specified by the
 @code{dft/codelets/*/Makefile.am}, @code{dft/simd/codelets/Makefile.am},
 @code{dft/k7/codelets/Makefile.am}, and
 @code{rdft/codelets/*/Makefile.am} files.  For example, you can add
