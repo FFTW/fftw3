@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: schedule.ml,v 1.3 2003-07-03 20:47:42 athena Exp $ *)
+(* $Id: schedule.ml,v 1.4 2003-07-04 10:36:02 athena Exp $ *)
 
 (* This file contains the instruction scheduler, which finds an
    efficient ordering for a given list of instructions.
@@ -177,12 +177,13 @@ let list_schedule alist =
     while !changed do
       changed := false;
       Dag.for_all dag (fun node ->
-	List.iter (fun s ->
-	    if (s.label < node.label + 1) then begin
-	          node.label <- s.label - 1;
-	          changed := true
-		        end)
-	    node.successors);
+	List.iter (fun s -> 
+	  let q = 100 + Random.int(20) in
+	  if (s.label < node.label + q) then begin
+	    node.label <- s.label - q;
+	    changed := true
+	  end)
+	  node.successors);
     done;
 
     let order a b = a.label < b.label in
