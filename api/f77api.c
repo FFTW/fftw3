@@ -138,7 +138,7 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
    reason is that the only Fortran compiler that does such differing
    mangling is currently g77 (which adds an extra underscore to names
    with underscores), whereas other compilers running on the same
-   machine are likely to use g77's non-underscored mangling.  (I'm sick
+   machine are likely to use non-underscored mangling.  (I'm sick
    of users complaining that FFTW works with g77 but not with e.g.
    pgf77 or ifc on the same machine.)  Note that all FFTW identifiers
    contain underscores, and configure picks g77 by default. */
