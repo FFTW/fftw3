@@ -261,7 +261,8 @@ static void print(const plan *ego_, printer *p)
 	      ego->r, ego->cld);
 }
 
-static int applicable0(const solver *ego_, const problem *p_)
+static int applicable0(const solver *ego_, const problem *p_,
+		       const planner *plnr)
 {
      if (RDFTP(p_)) {
 	  const S *ego = (const S *) ego_;
@@ -272,6 +273,19 @@ static int applicable0(const solver *ego_, const problem *p_)
 		  && p->sz->dims[0].n > 1
                   && p->sz->dims[0].n % 2 /* ensure r and n/r odd */
                   && p->kind[0] == ego->kind
+
+		  && (0
+
+		      /* the user does not care about the input, or */
+		      || DESTROY_INPUTP(plnr) 
+
+		      /* R2HC is DIT and does not destroy input, or */
+		      || ego->kind == R2HC
+
+		      /* in-place is allowed to destroy input by definition */
+		      || p->I == p->O         
+		       )
+
 	       );
      }
 
@@ -282,7 +296,7 @@ static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
      if (NO_UGLYP(plnr)) return 0; /* always ugly */
-     if (!applicable0(ego_, p_)) return 0;
+     if (!applicable0(ego_, p_, plnr)) return 0;
 
      if (NO_LARGE_GENERICP(plnr)) {
           const problem_rdft *p = (const problem_rdft *) p_;
