@@ -26,15 +26,8 @@ X(plan) X(plan_dft)(unsigned int rank, const unsigned int *n,
 		    C *out, const unsigned int *onembed,
 		    int sign, unsigned int flags)
 {
-     R *ri, *ii, *ro, *io;
-
-     X(extract_reim)(sign, in, &ri, &ii);
-     X(extract_reim)(sign, out, &ro, &io);
-     
-     return X(mkapiplan)(
-	  flags,
-	  X(mkproblem_dft_d)(X(mktensor_rowmajor)(rank, n, inembed, onembed,
-						  2, 2),
-			     X(mktensor_0d)(), 
-			     ri, ii, ro, io));
+     return X(plan_many_dft)(rank, n, 1,
+			     in, inembed, 1, 1,
+			     out, onembed, 1, 1,
+			     sign, flags);
 }
