@@ -224,6 +224,7 @@ static void rec_transpose_sq_ip_Ntuple(R *A, int n, int fda, int N)
 			     A[(j*fda + i) * 2 + 1] = a1;
 			}
 		   }
+		   break;
 	      }
 	      default: {
 		   int i, j, k;
