@@ -45,12 +45,6 @@ static rader_tl *omegas = 0;
 
 /***************************************************************************/
 
-/* If R2HC_ONLY_CONV is 1, we use a trick to perform the convolution
-   purely in terms of R2HC transforms, as opposed to R2HC followed by H2RC.
-   This requires a few more operations, but allows us to share the same
-   plan/codelets for both Rader children. */
-#define R2HC_ONLY_CONV 0
-
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
@@ -89,19 +83,6 @@ static void apply(const plan *ego_, R *I, R *O)
      omega = ego->omega;
 
      buf[0] *= omega[0];
-#if R2HC_ONLY_CONV
-     for (k = 1; k < rpad/2; ++k) {
-	  E rB, iB, rW, iW, a, b;
-	  rW = omega[k];
-	  iW = omega[rpad - k];
-	  rB = buf[k];
-	  iB = buf[rpad - k];
-	  a = rW * rB - iW * iB;
-	  b = rW * iB + iW * rB;
-	  buf[k] = a + b;
-	  buf[rpad - k] = a - b;
-     }
-#else
      for (k = 1; k < rpad/2; ++k) {
 	  E rB, iB, rW, iW;
 	  rW = omega[k];
@@ -111,7 +92,6 @@ static void apply(const plan *ego_, R *I, R *O)
 	  buf[k] = rW * rB - iW * iB;
 	  buf[rpad - k] = rW * iB + iW * rB;
      }
-#endif
      /* Nyquist component: */
      A(k + k == rpad); /* since rpad is even */
      buf[k] *= omega[k];
@@ -129,23 +109,6 @@ static void apply(const plan *ego_, R *I, R *O)
 	also "fold" padded outputs (if any) back to get cyclic convolution */
      A(gpower == 1);
      A(r - 1 == rpad || rpad >= 2*(r - 1) - 1);
-#if R2HC_ONLY_CONV
-     if (rpad == r - 1) {
-	  O[os] = buf[0];
-	  gpower = g = ego->ginv;
-	  for (k = 1; k < rpad/2; ++k, gpower = MULMOD(gpower, g, r)) {
-	       O[gpower * os] = buf[k] + buf[rpad - k];
-	  }
-	  O[gpower * os] = buf[k];
-	  ++k, gpower = MULMOD(gpower, g, r);
-	  for (; k < rpad; ++k, gpower = MULMOD(gpower, g, r)) {
-	       O[gpower * os] = buf[rpad - k] - buf[k];
-	  }
-     }
-     else {
-#error FIXME: R2HC_ONLY_CONV not yet implemented for padded Rader
-     }
-#else
      g = ego->ginv;
      if (rpad == r - 1) {
 	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
@@ -157,7 +120,6 @@ static void apply(const plan *ego_, R *I, R *O)
 	       O[gpower * os] = buf[k] + buf[k + (r - 1)];
 	  }
      }
-#endif
      A(gpower == 1);
 
      X(ifree)(buf);
@@ -313,11 +275,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
                X(mktensor_1d)(npad, 1, 1),
                X(mktensor_1d)(1, 0, 0),
 	       buf, buf, 
-#if R2HC_ONLY_CONV
-	       R2HC
-#else
 	       HC2R
-#endif
 	       );
      if (!(cld2 = X(mkplan_d)(plnr, cldp))) goto nada;
 
@@ -351,10 +309,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->super.super.ops.other += (npad/2-1)*6 + npad + n + (n-1) * ego->pad;
      pln->super.super.ops.add += (npad/2-1)*2 + 2 + (n-1) * ego->pad;
      pln->super.super.ops.mul += (npad/2-1)*4 + 2 + ego->pad;
-#if R2HC_ONLY_CONV
-     pln->super.super.ops.other += (n - 2) + 4;
-     pln->super.super.ops.add += (n - 3) * 1 + (n - 2) * 1;
-#endif
 
      return &(pln->super.super);
 
