@@ -10,6 +10,13 @@ AC_SUBST(SHARED_VERSION_INFO)
 AM_ENABLE_SHARED(no) dnl to hell with shared libraries
 
 dnl configure options
+AC_ARG_ENABLE(fma, [AC_HELP_STRING([--enable-fma],[build a fma-style distribution])], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+ 	VERSION=${VERSION}-fma
+ 	PACKAGE_VERSION=${PACKAGE_VERSION}-fma
+fi
+AM_CONDITIONAL(FMA, test "$ok" = "yes")
+
 AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_DEBUG,1,[Define to enable extra FFTW debugging code.])
