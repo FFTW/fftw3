@@ -168,6 +168,7 @@ void setup(struct problem *p)
      FFTW(threads_conf_standard) (plnr);
      plnr->nthr = 1;
      FFTW(planner_set_hook) (plnr, hook);
+     /* plnr->flags |= IMPATIENT; */
      /* plnr->flags |= IMPATIENT | CLASSIC_VRECURSE; */
      /* plnr->flags |= ESTIMATE | IMPATIENT; */
      if (p->kind == PROBLEM_REAL)
