@@ -224,7 +224,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
 
-     p->print(p, "(dht-rader-%d-%d%ois=%oos=%(%p%)",
+     p->print(p, "(dht-rader-%d/%d%ois=%oos=%(%p%)",
               ego->n, ego->npad, ego->is, ego->os, ego->cld1);
      if (ego->cld2 != ego->cld1)
           p->print(p, "%(%p%)", ego->cld2);
