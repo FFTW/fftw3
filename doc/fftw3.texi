@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.29 2003-02-27 21:19:16 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.30 2003-02-27 22:07:45 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -509,8 +509,8 @@ For an in-place transform,
 @code{in} and @code{out} are aliased to the same array, which must be
 big enough to hold both; so, the real array would actually have
 @code{2*(n/2+1)} elements, where the elements beyond the first @code{n}
-are unused padding.  The i-th element of the complex array is exactly
-the same as the i-th element of the corresponding complex DFT.
+are unused padding.  The @math{k}th element of the complex array is exactly
+the same as the @math{k}th element of the corresponding complex DFT.
 
 As noted above, the c2r transform destroys its input array even for
 out-of-place transforms.  This can be prevented, if necessary, by
@@ -518,7 +518,7 @@ including @code{FFTW_PRESERVE_INPUT} in the @code{flags}, with
 unfortunately some sacrifice in performance.
 @cindex flags
 @ctindex FFTW_PRESERVE_INPUT
-This flag is also not currently supported for multidimensional real
+This flag is also not currently supported for multi-dimensional real
 DFTs (next section).
 
 Readers familiar with DFTs of real data will recall that the 0th (DC)
@@ -526,7 +526,7 @@ and @code{n/2}-th (Nyquist, for even @code{n}) elements of the complex
 output are purely real.  Some implementations therefore store the
 Nyquist element where the DC imaginary part would go, in order to make
 the input and output arrays the same size.  Such packing, however, does
-not generalize well to multidimensional transforms, and the space
+not generalize well to multi-dimensional transforms, and the space
 savings are miniscule in any case.
 
 An alternate interface for one-dimensional r2c and c2r DFTs can be
@@ -534,7 +534,7 @@ found in the @samp{r2r} interface (@pxref{The Halfcomplex-format
 DFT}), with ``halfcomplex''-format output that @emph{is} the same size
 (and type) as the input array.
 @cindex halfcomplex format
-That interface, although it is not very useful for multidimensional
+That interface, although it is not very useful for multi-dimensional
 transforms, may sometimes yield better performance.
 
 @c ------------------------------------------------------------
@@ -760,6 +760,86 @@ implementation should provide at least competitive performance.
 @c =========>
 @node The Halfcomplex-format DFT, Real even/odd DFTs (cosine/sine transforms), More DFTs of Real Data, More DFTs of Real Data
 @subsection The Halfcomplex-format DFT
+
+An r2r kind of @code{FFTW_R2HC} corresponds to an r2c DFT
+@ctindex FFTW_R2HC
+@cindex r2c
+(@pxref{One-Dimensional DFTs of Real Data}) but with ``halfcomplex''
+format output.
+@cindex halfcomplex format
+The inverse c2r transform is of kind @code{FFTW_HC2R}.
+@ctindex FFTW_HC2R
+@cindex c2r
+This consists of the non-redundant half of the complex output for a 1d
+transform of size @code{n}, stored as a sequence of @code{n} real
+numbers (@code{double}) in the format:
+
+@tex
+$$
+r_0, r_1, r_2, \ldots, r_{n/2}, i_{(n+1)/2-1}, \ldots, i_2, i_1
+$$
+@end tex
+@ifinfo
+r0, r1, r2, r(n/2), i((n+1)/2-1), ..., i2, i1
+@end ifinfo
+@ifhtml
+<p align=center>
+r<sub>0</sub>, r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>n/2</sub>, i<sub>(n+1)/2-1</sub>, ..., i<sub>2</sub>, i<sub>1</sub>
+</p>
+@end ifhtml
+
+Here,
+@ifinfo
+rk
+@end ifinfo
+@tex
+$r_k$
+@end tex
+@ifhtml
+r<sub>k</sub>
+@end ifhtml
+is the real part of the @math{k}th output, and
+@ifinfo
+ik
+@end ifinfo
+@tex
+$i_k$
+@end tex
+@ifhtml
+i<sub>k</sub>
+@end ifhtml
+is the imaginary part.  (Division by 2 is rounded down.) For a
+halfcomplex array @code{hc[]}, the @math{k}th component thus has its
+real part in @code{hc[k]} and its imaginary part in @code{hc[n-k]}, with
+the exception of @code{k} @code{==} @code{0} or @code{n/2} (the latter
+only if @code{n} is even)---in these two cases, the imaginary part is
+zero due to symmetries of the real-complex transform, and is not stored.
+Thus, the r2c transform of @code{n} real values is a halfcomplex array of
+length @code{n}, and vice versa for c2r.
+
+Aside from the differing format, the output of
+@code{FFTW_R2HC}/@code{FFTW_HC2R} is otherwise exactly the same as for
+the corresponding 1d r2c/c2r transform, and correspond also to
+@code{FFTW_FORWARD}/@code{FFTW_BACKWARD} transforms, respectively.
+Recall that these transforms are unnormalized, so @code{FFTW_R2HC}
+followed by @code{FFTW_HC2R} will result in the original data multiplied
+by @code{n}.  Furthermore, like the c2r transform, an out-of-place
+@code{FFTW_HC2R} will @emph{destroy its input} array.
+
+Although these halfcomplex transforms can be used with the
+multi-dimensional r2r interface, the interpretation of such a separable
+product of transforms along each dimension is problematic.  For example,
+consider a two-dimensional @code{nx} by @code{ny}, @code{FFTW_R2HC} by
+@code{FFTW_R2HC} r2r transform planned by @code{fftw_plan_r2r_2d(nx, ny,
+in, out, FFTW_R2HC, FFTW_R2HC, FFTW_MEASURE)}.  Conceptually, FFTW first
+transforms the rows, each of size @code{ny}, to produce halfcomplex
+rows, and then transforms the columns (of size @code{nx}).  Half of
+these column transforms, however, are of imaginary parts, and should
+therefore be multiplied by @math{i} and combined with the halfcomplex
+transforms of the real columns to produce the 2d DFT amplitudes; FFTW's
+r2r transform does @emph{not} perform this combination for you.  Thus,
+if a multi-dimensional real-input/output DFT is required, we recommend
+using the ordinary r2c/c2r interface. (@pxref{Multi-Dimensional DFTs of Real Data})
 
 @c =========>
 @node Real even/odd DFTs (cosine/sine transforms), The Discrete Hartley Transform, The Halfcomplex-format DFT, More DFTs of Real Data
