@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.4 2002-06-05 23:02:56 athena Exp $ */
+/* $Id: twiddle.c,v 1.5 2002-06-09 20:07:12 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -63,7 +63,7 @@ static twid *lookup(const tw_instr *q, uint r, uint m)
      return p;
 }
 
-uint twlen0(const tw_instr **pp)
+static uint twlen0(const tw_instr **pp)
 {
      uint ntwiddle = 0;
      const tw_instr *p = *pp;
