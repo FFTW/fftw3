@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.45 2003-03-02 23:50:58 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.46 2003-03-03 22:07:27 fftw Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -217,7 +217,7 @@ FFTW_DEFINE_APIx(FFTW_MANGLE_LONG_DOUBLE, long double)
 /* documented flags */
 #define FFTW_MEASURE (0U)
 #define FFTW_DESTROY_INPUT (1U << 0)
-#define FFTW_POSSIBLY_UNALIGNED (1U << 1)
+#define FFTW_UNALIGNED (1U << 1)
 #define FFTW_CONSERVE_MEMORY (1U << 2)
 #define FFTW_EXHAUSTIVE (1U << 3) /* NO_EXHAUSTIVE is default */
 #define FFTW_PRESERVE_INPUT (1U << 4) /* cancels FFTW_DESTROY_INPUT */

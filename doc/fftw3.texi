@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.83 2003-03-03 18:28:12 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.84 2003-03-03 22:07:27 fftw Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1738,9 +1738,9 @@ input-preserving algorithms are implemented and the planner will return
 @cindex hc2r
 
 @item
-@ctindex FFTW_POSSIBLY_UNALIGNED
+@ctindex FFTW_UNALIGNED
 @cindex alignment
-@code{FFTW_POSSIBLY_UNALIGNED} specifies that the algorithm may not
+@code{FFTW_UNALIGNED} specifies that the algorithm may not
 impose any unusual alignment requirements on the input/output arrays
 (i.e. no SIMD may be used).  This flag is normally @emph{not necessary},
 since the planner automatically detects misaligned arrays.  The only use
