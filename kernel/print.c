@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.2 2002-06-09 19:27:24 athena Exp $ */
+/* $Id: print.c,v 1.3 2002-06-09 19:30:13 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
@@ -92,6 +92,7 @@ static void print(printer *p, const char *format, ...)
 			    p->indent += 2;
 			    pln->adt->print(pln, p);
 			    p->indent -= 2;
+			    break;
 		       }
 		       default:
 			    A(0 /* unknown format */);
