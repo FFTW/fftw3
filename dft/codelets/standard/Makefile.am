@@ -51,27 +51,8 @@ FLAGS_T2=$(DFT_FLAGS_COMMON) -twiddle-log3
 n1_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW) $(FLAGS_N1) -n $* -name n1_$* -include "n.h") | $(ADD_DATE) | $(INDENT) >$@
 
-sn1_%.cod:  $(CODELET_DEPS) $(GEN_NOTW)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW) $(FLAGS_N1) -n $* -name "" -with-istride ISTRIDE -with-ostride OSTRIDE -include "n.h") | $(ADD_DATE) | $(INDENT) >$@
-
-sn1_%.c:  $(CODELET_DEPS)
-	echo "$*" | tr '_' \\n | (read n; read is; read os;	\
-        echo "#define ISTRIDE $$is";				\
-        echo "#define OSTRIDE $$os";				\
-        echo "#define NAME X(codelet_sn1_$${n}_$${is}_$${os})";\
-        echo "#include \"sn1_$${n}.cod\"") >$@
-
 t1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T1) -n $* -name t1_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
-
-st1_%.cod:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T1) -n $* -name "" -with-iostride IOSTRIDE -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
-
-st1_%.c:  $(CODELET_DEPS)
-	echo "$*" | tr '_' \\n | (read n; read ios;	\
-        echo "#define IOSTRIDE $$ios";				\
-        echo "#define NAME X(codelet_st1_$${n}_$${ios})";\
-        echo "#include \"st1_$${n}.cod\"") >$@
 
 t2_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T2) -n $* -name t2_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
