@@ -30,7 +30,7 @@ static int okp(const kr2hc_desc *d,
      return (1
 	     && (!d->is || (d->is == is))
 	     && (!d->ros || (d->ros == ros))
-	     && (!d->ios || (d->ros == ios))
+	     && (!d->ios || (d->ios == ios))
 	     && (!d->ivs || (d->ivs == ivs))
 	     && (!d->ovs || (d->ovs == ovs))
 	  );
