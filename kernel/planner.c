@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.82 2002-09-13 19:36:07 athena Exp $ */
+/* $Id: planner.c,v 1.83 2002-09-14 01:54:50 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -74,9 +74,17 @@ static slvdesc *slvdesc_lookup(planner *ego, char *nam, int id)
 /*
   md5-related stuff:
 */
-static uint sig_to_hash_index(planner *ego, md5uint *s)
+
+/* first hash function */
+static uint h1(planner *ego, md5uint *s)
 {
      return s[0] % ego->hashsiz;
+}
+
+/* second hash function (for double hashing) */
+static uint h2(planner *ego, md5uint *s)
+{
+     return 1 + s[1] % (ego->hashsiz - 1);
 }
 
 static void md5hash(md5 *m, const problem *p, const planner *plnr)
@@ -118,28 +126,13 @@ struct solution_s {
 /* states: */
 enum { H_EMPTY, H_VALID, H_DELETED };
 
-
-/* maintain invariant lb(nelem) <= hashsz < ub(nelem) */
-static uint lb(uint nelem) 
-{
-     nelem += 4;
-     return nelem + (nelem / 2);
-}
-
-static uint ub(uint nelem) 
-{
-     uint a = lb(nelem);
-     return a + (a / 2);
-}
-
 static solution *hlookup(planner *ego, md5uint *s)
 {
-     uint h, g;
+     uint g, h = h1(ego, s), d = h2(ego, s);
 
      ++ego->lookup;
-     h = sig_to_hash_index(ego, s);
 
-     for (g = h; ; g = (g + 1) % ego->hashsiz) {
+     for (g = h; ; g = (g + d) % ego->hashsiz) {
 	  solution *l = ego->sols + g;
 	  ++ego->lookup_iter;
 	  switch (l->state) {
@@ -147,7 +140,7 @@ static solution *hlookup(planner *ego, md5uint *s)
 	      case H_VALID: 
 		   if (md5eq(s, l->s)) { ++ego->succ_lookup; return l; }
 	  }
-	  A((g + 1) % ego->hashsiz != h);
+	  A((g + d) % ego->hashsiz != h);
      }
 }
 
@@ -158,13 +151,13 @@ static void hinsert0(planner *ego, md5uint *s, unsigned short flags,
      ++ego->insert;
      if (!l) { 	 
 	  /* search for nonfull slot */
-	  uint g, h = sig_to_hash_index(ego, s); 
+	  uint g, h = h1(ego, s), d = h2(ego, s); 
 	  ++ego->insert_unknown;
-	  for (g = h; ; g = (g + 1) % ego->hashsiz) {
+	  for (g = h; ; g = (g + d) % ego->hashsiz) {
 	       ++ego->insert_iter;
 	       l = ego->sols + g;
 	       if (l->state != H_VALID) break;
-	       A((g + 1) % ego->hashsiz != h);
+	       A((g + d) % ego->hashsiz != h);
 	  }
      }
 
@@ -175,48 +168,61 @@ static void hinsert0(planner *ego, md5uint *s, unsigned short flags,
      sigcpy(s, l->s);
 }
 
-static void rehash(planner *ego)
+static void rehash(planner *ego, uint nsiz)
 {
-     uint osiz = ego->hashsiz, nsiz, bl, bu;
+     uint osiz = ego->hashsiz, h;
+     solution *osol = ego->sols, *nsol;
 
-     bl = lb(ego->nelem); bu = ub(ego->nelem);
-     if (bl <= osiz && osiz < bu)
-	  return;  /* nothing to do */
+     nsiz = X(next_prime)(nsiz);
+     nsol = (solution *)fftw_malloc(nsiz * sizeof(solution), HASHT);
+     ++ego->nrehash;
 
-     nsiz = (bl + bu + 1) / 2;
-
-     if (nsiz != osiz) {
-	  solution *osol = ego->sols;
-	  solution *nsol =
-	       (solution *)fftw_malloc(nsiz * sizeof(solution), HASHT);
-	  uint h;
-
-	  ++ego->nrehash;
-
-	  /* init new table */
-	  for (h = 0; h < nsiz; ++h) {
-	       solution *l = nsol + h;
-	       l->state = H_EMPTY;
-	       l->flags = 0;  /* redundant initializations */
-	       l->sp = 0;
-	  }
-
-	  /* install new table */
-	  ego->hashsiz = nsiz;
-	  ego->sols = nsol;
-
-	  /* copy table */
-	  for (h = 0; h < osiz; ++h) {
-	       solution *l = osol + h;
-	       if (l->state == H_VALID)
-		    hinsert0(ego, l->s, l->flags, l->sp, 0);
-	  }
-
-	  if (osol)
-	       X(free)(osol);
+     /* init new table */
+     for (h = 0; h < nsiz; ++h) {
+	  solution *l = nsol + h;
+	  l->state = H_EMPTY;
+	  l->flags = 0;  /* redundant initializations */
+	  l->sp = 0;
      }
+
+     /* install new table */
+     ego->hashsiz = nsiz;
+     ego->sols = nsol;
+
+     /* copy table */
+     for (h = 0; h < osiz; ++h) {
+	  solution *l = osol + h;
+	  if (l->state == H_VALID)
+	       hinsert0(ego, l->s, l->flags, l->sp, 0);
+     }
+
+     if (osol)
+	  X(free)(osol);
 }
 
+static uint minsz(uint nelem)
+{
+     return 1 + nelem + nelem / 8;
+}
+
+static uint nextsz(uint nelem)
+{
+     return minsz(minsz(nelem));
+}
+
+static void grow(planner *ego)
+{
+     uint nelem = ego->nelem;
+     if (minsz(nelem) >= ego->hashsiz)
+	  rehash(ego, nextsz(nelem));
+}
+
+static void shrink(planner *ego)
+{
+     uint nelem = ego->nelem;
+     /* always rehash after deletions */
+     rehash(ego, nextsz(nelem));
+}
 
 static void hinsert(planner *ego, md5uint *s, 
 		    unsigned short flags, slvdesc *sp)
@@ -231,7 +237,7 @@ static void hinsert(planner *ego, md5uint *s,
 	  flags |= l->flags & BLESSING; /* ne me perdas illa die */
      } else {
 	  ++ego->nelem;
-	  rehash(ego);
+	  grow(ego);
      }
      hinsert0(ego, s, flags, sp, l);
 }
@@ -300,7 +306,7 @@ static void forget(planner *ego, amnesia a)
      }
      /* nil inultum remanebit */
 
-     rehash(ego);
+     shrink(ego);
 }
 
 static void htab_destroy(planner *ego)
@@ -403,7 +409,7 @@ planner *X(mkplanner)(size_t sz,
      p->problem_flags = 0;
      p->planner_flags = 0;
      p->nthr = 1;
-     rehash(p);			/* so that hashsiz > 0 */
+     grow(p);			/* so that hashsiz > 0 */
 
      return p;
 }

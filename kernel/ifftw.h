@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.116 2002-09-13 18:58:22 athena Exp $ */
+/* $Id: ifftw.h,v 1.117 2002-09-14 01:54:50 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -596,6 +596,7 @@ uint X(power_mod)(uint n, uint m, uint p);
 uint X(find_generator)(uint p);
 uint X(first_divisor)(uint n);
 int X(is_prime)(uint n);
+uint X(next_prime)(uint n);
 
 #define RADER_MIN_GOOD 71 /* min prime for which Rader becomes GOOD */
 

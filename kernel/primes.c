@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.2 2002-06-18 21:48:41 athena Exp $ */
+/* $Id: primes.c,v 1.3 2002-09-14 01:54:50 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -109,4 +109,10 @@ uint X(first_divisor)(uint n)
 int X(is_prime)(uint n)
 {
      return(n > 1 && X(first_divisor)(n) == n);
+}
+
+uint X(next_prime)(uint n)
+{
+     while (!X(is_prime)(n)) ++n;
+     return n;
 }
