@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: altivec.c,v 1.4 2003-10-23 15:28:28 athena Exp $ */
+/* $Id: altivec.c,v 1.5 2003-10-23 15:34:11 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -53,6 +53,7 @@ static int really_have_altivec(void)
      return altivecp;
 #else
      return 1;  /* what the hell */
+#endif
 }
 
 int RIGHT_CPU(void)
