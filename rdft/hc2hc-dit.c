@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dit.c,v 1.1 2002-07-22 05:37:06 stevenj Exp $ */
+/* $Id: hc2hc-dit.c,v 1.2 2002-07-22 18:22:43 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -79,7 +79,7 @@ static void finish(plan_hc2hc *ego)
 				X(ops_mul)(ego->vl,
 					   X(ops_add)(ego->cld0->ops,
 						      ego->cldm->ops))),
-		     X(ops_mul)(ego->vl * ((ego->m + 1)/2 - 1) / d->genus->vl,
+		     X(ops_mul)(ego->vl * ((ego->m - 1)/2) / d->genus->vl,
 				d->ops));
 }
 
