@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.17 2003-01-11 21:34:56 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.18 2003-01-11 21:43:54 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -37,6 +37,19 @@ extern "C" {
 #else
 #  define FFTW_DEFINE_COMPLEX(R, C) typedef R C[2]
 #endif
+
+#define FFTW_CONCAT(prefix, name) prefix ## name
+#define FFTW_MANGLE_DOUBLE(name) FFTW_CONCAT(fftw_, name)
+#define FFTW_MANGLE_FLOAT(name) FFTW_CONCAT(fftwf_, name)
+#define FFTW_MANGLE_LONG_DOUBLE(name) FFTW_CONCAT(fftwl_, name)
+
+typedef struct {
+     unsigned int n;
+     int is;			/* input stride */
+     int os;			/* output stride */
+} FFTW_MANGLE_DOUBLE(iodim);
+typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_FLOAT(iodim);
+typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_LONG_DOUBLE(iodim);
 
 /*
   huge second-order macro that defines prototypes for all API
@@ -99,19 +112,6 @@ int X(import_wisdom)(int (*emitter)(void *), void *data);		  \
 void X(print_plan)(X(plan) p, FILE *output_file);
 
 /* end of FFTW_DEFINE_API macro */
-
-#define FFTW_CONCAT(prefix, name) prefix ## name
-#define FFTW_MANGLE_DOUBLE(name) FFTW_CONCAT(fftw_, name)
-#define FFTW_MANGLE_FLOAT(name) FFTW_CONCAT(fftwf_, name)
-#define FFTW_MANGLE_LONG_DOUBLE(name) FFTW_CONCAT(fftwl_, name)
-
-typedef struct {
-     unsigned int n;
-     int is;			/* input stride */
-     int os;			/* output stride */
-} FFTW_MANGLE_DOUBLE(iodim);
-typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_FLOAT(iodim);
-typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_LONG_DOUBLE(iodim);
 
 FFTW_DEFINE_API(FFTW_MANGLE_DOUBLE, double, fftw_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_FLOAT, float, fftwf_complex)
