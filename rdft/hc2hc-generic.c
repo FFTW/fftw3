@@ -37,10 +37,11 @@ typedef struct {
 /**************************************************************/
 static void mktwiddle(P *ego, int flg)
 {
-     static const tw_instr tw[] = { { TW_FULL, 0, 0 }, { TW_NEXT, 1, 0 } };
+     static const tw_instr tw[] = { { TW_HALF, 0, 0 }, { TW_NEXT, 1, 0 } };
 
-     X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->r, 
-		      (ego->m + 1) / 2);
+     /* note that R and M are swapped, to allow for sequential
+	access both to data and twiddles */
+     X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->m, ego->r);
 }
 
 static void bytwiddle(const P *ego, R *IO)
@@ -50,18 +51,23 @@ static void bytwiddle(const P *ego, R *IO)
      int ms = m * s;
 
      for (i = 0; i < vl; ++i, IO += vs) {
-	  const R *W = ego->td->W + 2 * (r - 1);
-	  R *pr = IO + s;
-	  R *pi = IO + (m - 1) * s;
+	  const R *W = ego->td->W;
 
-	  for (j = 1; j + j < m; ++j, pr += s, pi -= s) {
-	       for (k = 1; k < r; ++k) {
-		    E xr = pr[k * ms];
-		    E xi = pi[k * ms];
+	  A(m % 2 == 1);
+	  for (k = 1, W += (m - 1); k < r; ++k) {
+	       /* pr := IO + j * s + k * ms */
+	       R *pr = IO + s + k * ms;
+
+	       /* pi := IO + (m - j) * s + k * ms */
+	       R *pi = IO - s + (k + 1) * ms;
+
+	       for (j = 1; j + j < m; ++j, pr += s, pi -= s) {
+		    E xr = *pr;
+		    E xi = *pi;
 		    E wr = W[0];
 		    E wi = W[1];
-		    pr[k * ms] = xr * wr + xi * wi;
-		    pi[k * ms] = xi * wr - xr * wi;
+		    *pr = xr * wr + xi * wi;
+		    *pi = xi * wr - xr * wi;
 		    W += 2;
 	       }
 	  }
