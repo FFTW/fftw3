@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.9 2003-02-04 08:18:28 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.10 2003-02-04 08:25:36 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -145,9 +145,7 @@ typedef struct {
      double s;
 } errors;
 
-void verify_dft(dofft_closure *k, bench_tensor *sz, bench_tensor *vecsz, 
-		int sign, int rounds, double tol, errors *e);
-
+void verify_dft(bench_problem *p, int rounds, double tol, errors *e);
 
 /**************************************************************
  * malloc
