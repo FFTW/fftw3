@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.13 2005-02-24 02:51:50 athena Exp $ */
+/* $Id: primes.c,v 1.14 2005-02-25 02:17:23 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -175,6 +175,6 @@ int X(choose_radix)(int r, int n)
      } else {
 	  /* r is negative.  If n = (-r) * q^2, take q as the radix */
 	  r = -r;
-	  return (n > r && divides(r, n)) ? X(isqrt)(n / r) : 0;
+	  return (n > r && divides(r, n)) ? isqrt_maybe(n / r) : 0;
      }
 }
