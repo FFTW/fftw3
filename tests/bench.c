@@ -64,33 +64,42 @@ void setup(struct problem *p)
      rdwisdom();
 
      timer_start();
-     switch (p->kind) {
-	 case PROBLEM_COMPLEX:
-	      switch (p->rank) {
-		  case 1:
-		       the_plan = FFTW(plan_dft_1d)(p->n[0], p->in, p->out, 
-						    p->sign, flags);
-		       break;
-		  case 2:
-		       the_plan = FFTW(plan_dft_2d)(p->n[0], p->n[1],
-						    p->in, p->out, 
-						    p->sign, flags);
-		       break;
-		  case 3:
-		       the_plan = FFTW(plan_dft_3d)(p->n[0], p->n[1], p->n[2],
-						    p->in, p->out, 
-						    p->sign, flags);
-		       break;
-		  default:
-		       the_plan = FFTW(plan_dft)(p->rank, p->n,
-						 p->in, p->n,
-						 p->out, p->n,
-						 p->sign, flags);
-		       break;
-	      }
-	      break;
-	 case PROBLEM_REAL:	      
-	      break;
+     if (p->split) { 
+	  /* TODO */
+     } else { /* !p->split */
+	  switch (p->kind) {
+	      case PROBLEM_COMPLEX:
+		   switch (p->rank) {
+		       case 1:
+			    the_plan = 
+				 FFTW(plan_dft_1d)(p->n[0], 
+						   p->in, p->out, 
+						   p->sign, flags);
+			    break;
+		       case 2:
+			    the_plan = 
+				 FFTW(plan_dft_2d)(p->n[0], p->n[1],
+						   p->in, p->out, 
+						   p->sign, flags);
+			    break;
+		       case 3:
+			    the_plan = 
+				 FFTW(plan_dft_3d)(p->n[0], p->n[1], p->n[2],
+						   p->in, p->out, 
+						   p->sign, flags);
+			    break;
+		       default:
+			    the_plan = FFTW(plan_dft)(p->rank, p->n,
+						      p->in, p->n,
+						      p->out, p->n,
+						      p->sign, flags);
+			    break;
+		   }
+		   break;
+	      case PROBLEM_REAL:	      
+		   /* TODO */
+		   break;
+	  }
      }
      tim = timer_stop();
      if (verbose)
