@@ -123,22 +123,6 @@ void X(md5putc)(md5 *p, unsigned char c)
      if (((++p->l) % 64) == 0) doblock(p->s, p->c);
 }
 
-void X(md5putb)(md5 *p, const void *d_, uint len)
-{
-     uint i;
-     const unsigned char *d = d_;
-     for (i = 0; i < len; ++i)
-	  X(md5putc)(p, d[i]);
-}
-
-void X(md5puts)(md5 *p, const char *s)
-{
-     /* also hash final '\0' */
-     do {
-	  X(md5putc)(p, *s);
-     } while(*s++);
-}
-
 void X(md5end)(md5 *p)
 {
      uint l, i;
@@ -156,19 +140,4 @@ void X(md5end)(md5 *p)
      }
 
      /* Now p->l % 64 == 0 and signature is in p->s */
-}
-
-void X(md5int)(md5 *p, int i)
-{
-     X(md5putb)(p, &i, sizeof(i));
-}
-
-void X(md5uint)(md5 *p, uint i)
-{
-     X(md5putb)(p, &i, sizeof(i));
-}
-
-void X(md5ptrdiff)(md5 *p, ptrdiff_t d)
-{
-     X(md5putb)(p, &d, sizeof(d));
 }

@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: tensor.c,v 1.27 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: tensor.c,v 1.28 2002-09-22 14:21:36 athena Exp $ */
 
 #include "ifftw.h"
 
-static tensor *talloc(uint rnk)
+tensor *X(mktensor)(uint rnk) 
 {
      tensor *x;
 
@@ -61,55 +61,6 @@ void X(tensor_destroy)(tensor *sz)
      X(free)(sz);
 }
 
-tensor *X(mktensor)(uint rnk)
-{
-     return talloc(rnk);
-}
-
-tensor *X(mktensor_1d)(uint n, int is, int os)
-{
-     tensor *x = talloc(1);
-     x->dims[0].n = n;
-     x->dims[0].is = is;
-     x->dims[0].os = os;
-     return x;
-}
-
-tensor *X(mktensor_2d)(uint n0, int is0, int os0,
-                      uint n1, int is1, int os1)
-{
-     tensor *x = talloc(2);
-     x->dims[0].n = n0;
-     x->dims[0].is = is0;
-     x->dims[0].os = os0;
-     x->dims[1].n = n1;
-     x->dims[1].is = is1;
-     x->dims[1].os = os1;
-     return x;
-}
-
-tensor *X(mktensor_rowmajor)(uint rnk, const uint *n,
-			    const uint *niphys, const uint *nophys,
-                            int is, int os)
-{
-     tensor *x = talloc(rnk);
-
-     if (FINITE_RNK(rnk) && rnk > 0) {
-          uint i;
-
-          A(n && niphys && nophys);
-          x->dims[rnk - 1].is = is;
-          x->dims[rnk - 1].os = os;
-          x->dims[rnk - 1].n = n[rnk - 1];
-          for (i = rnk - 1; i > 0; --i) {
-               x->dims[i - 1].is = x->dims[i].is * niphys[i];
-               x->dims[i - 1].os = x->dims[i].os * nophys[i];
-               x->dims[i - 1].n = n[i - 1];
-          }
-     }
-     return x;
-}
-
 uint X(tensor_sz)(const tensor *sz)
 {
      uint i, n = 1;
@@ -136,215 +87,6 @@ void X(tensor_md5)(md5 *p, const tensor *t)
      }
 }
 
-uint X(tensor_max_index)(const tensor *sz)
-{
-     uint i;
-     uint n = 0;
-
-     A(FINITE_RNK(sz->rnk));
-     for (i = 0; i < sz->rnk; ++i) {
-          const iodim *p = sz->dims + i;
-          n += (p->n - 1) * X(uimax)(X(iabs)(p->is), X(iabs)(p->os));
-     }
-     return n;
-}
-
-#define tensor_min_xstride(sz, xs) {				\
-     A(FINITE_RNK(sz->rnk));					\
-     if (sz->rnk == 0) return 0;				\
-     else {							\
-          uint i;						\
-          uint s = X(iabs)(sz->dims[0].xs);			\
-          for (i = 1; i < sz->rnk; ++i)				\
-               s = X(uimin)(s, X(iabs)(sz->dims[i].xs));	\
-          return s;						\
-     }								\
-}
-
-uint X(tensor_min_istride)(const tensor *sz) tensor_min_xstride(sz, is)
-uint X(tensor_min_ostride)(const tensor *sz) tensor_min_xstride(sz, os)
-
-uint X(tensor_min_stride)(const tensor *sz)
-{
-     return X(uimin)(X(tensor_min_istride)(sz), X(tensor_min_ostride)(sz));
-}
-
-int X(tensor_inplace_strides)(const tensor *sz)
-{
-     uint i;
-     A(FINITE_RNK(sz->rnk));
-     for (i = 0; i < sz->rnk; ++i) {
-          const iodim *p = sz->dims + i;
-          if (p->is != p->os)
-               return 0;
-     }
-     return 1;
-}
-
-static void dimcpy(iodim *dst, const iodim *src, uint rnk)
-{
-     uint i;
-     if (FINITE_RNK(rnk))
-          for (i = 0; i < rnk; ++i)
-               dst[i] = src[i];
-}
-
-tensor *X(tensor_copy)(const tensor *sz)
-{
-     tensor *x = talloc(sz->rnk);
-     dimcpy(x->dims, sz->dims, sz->rnk);
-     return x;
-}
-
-/* like X(tensor_copy), but makes strides in-place by
-   setting os = is if k == INPLACE_IS or is = os if k == INPLACE_OS. */
-tensor *X(tensor_copy_inplace)(const tensor *sz, inplace_kind k)
-{
-     tensor *x = X(tensor_copy)(sz);
-     if (FINITE_RNK(x->rnk)) {
-	  uint i;
-	  if (k == INPLACE_OS)
-	       for (i = 0; i < x->rnk; ++i)
-		    x->dims[i].is = x->dims[i].os;
-	  else
-	       for (i = 0; i < x->rnk; ++i)
-		    x->dims[i].os = x->dims[i].is;
-     }
-     return x;
-}
-
-/* Like X(tensor_copy), but copy all of the dimensions *except*
-   except_dim. */
-tensor *X(tensor_copy_except)(const tensor *sz, uint except_dim)
-{
-     tensor *x;
-
-     A(FINITE_RNK(sz->rnk) && sz->rnk >= 1 && except_dim < sz->rnk);
-     x = talloc(sz->rnk - 1);
-     dimcpy(x->dims, sz->dims, except_dim);
-     dimcpy(x->dims + except_dim, sz->dims + except_dim + 1,
-            x->rnk - except_dim);
-     return x;
-}
-
-/* Like X(tensor_copy), but copy only rnk dimensions starting
-   with start_dim. */
-tensor *X(tensor_copy_sub)(const tensor *sz, uint start_dim, uint rnk)
-{
-     tensor *x;
-
-     A(FINITE_RNK(sz->rnk) && start_dim + rnk <= sz->rnk);
-     x = talloc(rnk);
-     dimcpy(x->dims, sz->dims + start_dim, rnk);
-     return x;
-}
-
-/* qsort comparison function */
-static int cmp_iodim(const void *av, const void *bv)
-{
-     const iodim *a = (const iodim *) av, *b = (const iodim *) bv;
-     if (b->is != a->is)
-          return (b->is - a->is);	/* shorter strides go later */
-     if (b->os != a->os)
-          return (b->os - a->os);	/* shorter strides go later */
-     return (int)(a->n - b->n);	        /* larger n's go later */
-}
-
-/* Like tensor_copy, but eliminate n == 1 dimensions, which
-   never affect any transform or transform vector.
- 
-   Also, we sort the tensor into a canonical order of decreasing
-   is.  In general, processing a loop/array in order of
-   decreasing stride will improve locality; sorting also makes the
-   analysis in fftw_tensor_contiguous (below) easier.  The choice
-   of is over os is mostly arbitrary, and hopefully
-   shouldn't affect things much.  Normally, either the os will be
-   in the same order as is (for e.g. multi-dimensional
-   transforms) or will be in opposite order (e.g. for Cooley-Tukey
-   recursion).  (Both forward and backwards traversal of the tensor
-   are considered e.g. by vrank-geq1, so sorting in increasing
-   vs. decreasing order is not really important.) */
-tensor *X(tensor_compress)(const tensor *sz)
-{
-     uint i, rnk;
-     tensor *x;
-
-     A(FINITE_RNK(sz->rnk));
-     for (i = rnk = 0; i < sz->rnk; ++i) {
-          A(sz->dims[i].n > 0);
-          if (sz->dims[i].n != 1)
-               ++rnk;
-     }
-
-     x = talloc(rnk);
-     for (i = rnk = 0; i < sz->rnk; ++i) {
-          if (sz->dims[i].n != 1)
-               x->dims[rnk++] = sz->dims[i];
-     }
-
-     qsort(x->dims, (size_t)x->rnk, sizeof(iodim), cmp_iodim);
-
-     return x;
-}
-
-/* Return whether the strides of a and b are such that they form an
-   effective contiguous 1d array.  Assumes that a.is >= b.is. */
-static int strides_contig(iodim *a, iodim *b)
-{
-     return (a->is == b->is * (int)b->n &&
-             a->os == b->os * (int)b->n);
-}
-
-/* Like tensor_compress, but also compress into one dimension any
-   group of dimensions that form a contiguous block of indices with
-   some stride.  (This can safely be done for transform vector sizes.) */
-tensor *X(tensor_compress_contiguous)(const tensor *sz)
-{
-     uint i, rnk;
-     tensor *sz2, *x;
-
-     if (X(tensor_sz)(sz) == 0) 
-	  return talloc(RNK_MINFTY);
-
-     sz2 = X(tensor_compress)(sz);
-     A(FINITE_RNK(sz2->rnk));
-
-     if (sz2->rnk < 2)		/* nothing to compress */
-          return sz2;
-
-     for (i = rnk = 1; i < sz2->rnk; ++i)
-          if (!strides_contig(sz2->dims + i - 1, sz2->dims + i))
-               ++rnk;
-
-     x = talloc(rnk);
-     x->dims[0] = sz2->dims[0];
-     for (i = rnk = 1; i < sz2->rnk; ++i) {
-          if (strides_contig(sz2->dims + i - 1, sz2->dims + i)) {
-               x->dims[rnk - 1].n *= sz2->dims[i].n;
-               x->dims[rnk - 1].is = sz2->dims[i].is;
-               x->dims[rnk - 1].os = sz2->dims[i].os;
-          } else {
-               A(rnk < x->rnk);
-               x->dims[rnk++] = sz2->dims[i];
-          }
-     }
-
-     X(tensor_destroy)(sz2);
-     return x;
-}
-
-tensor *X(tensor_append)(const tensor *a, const tensor *b)
-{
-     if (!FINITE_RNK(a->rnk) || !FINITE_RNK(b->rnk)) {
-          return talloc(RNK_MINFTY);
-     } else {
-	  tensor *x = talloc(a->rnk + b->rnk);
-          dimcpy(x->dims, a->dims, a->rnk);
-          dimcpy(x->dims + a->rnk, b->dims, b->rnk);
-	  return x;
-     }
-}
-
 /* treat a (rank <= 1)-tensor as a rank-1 tensor, extracting
    appropriate n, is, and os components */
 void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os)
@@ -359,16 +101,6 @@ void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os)
           *n = 1;
           *is = *os = 0;
      }
-}
-
-/* The inverse of X(tensor_append): splits the sz tensor into
-   tensor a followed by tensor b, where a's rank is arnk. */
-void X(tensor_split)(const tensor *sz, tensor **a, uint arnk, tensor **b)
-{
-     A(FINITE_RNK(sz->rnk) && FINITE_RNK(arnk));
-
-     *a = X(tensor_copy_sub)(sz, 0, arnk);
-     *b = X(tensor_copy_sub)(sz, arnk, sz->rnk - arnk);
 }
 
 void X(tensor_print)(const tensor *x, printer *p)
