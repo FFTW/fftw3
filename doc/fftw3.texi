@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.109 2003-03-07 04:01:47 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.110 2003-03-07 04:03:03 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3173,7 +3173,7 @@ formerly specified at execution time is now specified at planning time.
 FFTW 2 had separate data types @code{fftw_plan}, @code{fftwnd_plan},
 @code{rfftw_plan}, and @code{rfftwnd_plan} for complex and real one- and
 multi-dimensional transforms, and each type had its own @samp{destroy}
-function.  In FFTW 3, all plans are of type @code{fftw_plan} and are all
+function.  In FFTW 3, all plans are of type @code{fftw_plan} and all are
 destroyed by @code{fftw_destroy_plan(plan)}.
 
 Where you formerly used @code{fftw_create_plan} and @code{fftw_one} to
