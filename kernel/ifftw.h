@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.125 2002-09-16 18:58:26 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.126 2002-09-16 18:59:14 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -403,7 +403,7 @@ enum {
      DESTROY_INPUT = 0x1,
      POSSIBLY_UNALIGNED = 0x2,
      NO_DHT_R2HC = 0x4,
-     CONSERVE_MEMORY = 0x8,
+     CONSERVE_MEMORY = 0x8
 };
 
 #define DESTROY_INPUTP(plnr) ((plnr)->problem_flags & DESTROY_INPUT)
@@ -421,7 +421,7 @@ enum {
      NO_VRANK_SPLITS = 0x4,
      NONTHREADED_ICKY = 0x8,
      DFT_R2HC_ICKY = 0x10,
-     NO_BUFFERING = 0x20
+     NO_BUFFERING = 0x20,
      NO_INDIRECT = 0x40,
      BELIEVE_PCOST = 0x80,
 
