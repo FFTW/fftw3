@@ -145,11 +145,6 @@ static void apply_dif(plan *ego_, R *I, R *O)
      R rsum, isum;
      uint wp, wincr;
 
-     {
-	  plan_rdft *cld = (plan_rdft *) ego->cld;
-	  cld->apply((plan *) cld, I, O);
-     }
-
      r = ego->r;
 
      STACK_MALLOC(R *, buf, r * 2 * sizeof(R));
