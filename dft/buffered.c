@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.4 2002-06-09 15:01:41 athena Exp $ */
+/* $Id: buffered.c,v 1.5 2002-06-09 15:37:07 athena Exp $ */
 
 #include "dft.h"
 
@@ -304,15 +304,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->bufs = 0;		/* let awake() reallocate buffer space */
 
      pln->super.super.cost =
-	 +(cldcpy->cost + cld->cost) * (vl / nbuf)
-	 + (cld_rest ? cld_rest->cost : 0);
+	  (cldcpy->cost + cld->cost) * (vl / nbuf) + cld_rest->cost;
      pln->super.super.flops =
 	 fftw_flops_add(fftw_flops_mul((vl / nbuf), cld->flops),
-			(cld_rest ? cld_rest->flops :
-			 /* the Sun compiler does not like the obvious
-			    fftw_flops_zero and we have to use this contorsion
-			  */
-			 *(flopcnt *) &fftw_flops_zero));
+			cld_rest->flops);
 
      return &(pln->super.super);
 

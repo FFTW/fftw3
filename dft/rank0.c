@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.5 2002-06-09 15:01:41 athena Exp $ */
+/* $Id: rank0.c,v 1.6 2002-06-09 15:37:07 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -75,29 +75,7 @@ static int applicable_1(const problem_dft *p)
      return (p->vecsz.rnk == 0);
 }
 
-static const rnk0adt adt_1 = { apply_1, applicable_1, "dft-rank0-1" };
-
-/*-----------------------------------------------------------------------*/
-/* rank-0 in-place dft: no-op */
-static void apply_nop(plan *ego_, R *ri, R *ii, R *ro, R *io)
-{
-     UNUSED(ego_);
-     UNUSED(ri);
-     UNUSED(ii);
-     UNUSED(ro);
-     UNUSED(io);
-}
-
-static int applicable_nop(const problem_dft *p)
-{
-     return (1
-	     && FINITE_RNK(p->vecsz.rnk)
-	     && p->ro == p->ri 
-	     && fftw_tensor_inplace_strides(p->vecsz)
-	     );
-}
-
-static const rnk0adt adt_nop = { apply_nop, applicable_nop, "dft-rank0-nop" };
+static const rnk0adt adt_cpy1 = { apply_1, applicable_1, "dft-rank0-cpy1" };
 
 /*-----------------------------------------------------------------------*/
 /* rank-0 dft, vl > 1: just a copy loop (unroll 4) */
@@ -264,7 +242,7 @@ void fftw_dft_rank0_register(planner *p)
 {
      uint i;
      static const rnk0adt *adts[] = {
-	  &adt_1, &adt_nop, &adt_vec, &adt_io1, &adt_io2
+	  &adt_cpy1, &adt_vec, &adt_io1, &adt_io2
      };
 
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
