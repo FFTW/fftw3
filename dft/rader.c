@@ -41,16 +41,6 @@ typedef struct {
      plan *cld_omega;
 } P;
 
-typedef struct {
-     P super;
-     plan *cld;
-     R *W;
-     int os;
-     int m;
-} P_dit;
-
-
-static rader_tl *twiddles = 0;
 
 /***************************************************************************/
 
@@ -135,87 +125,6 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      X(ifree)(buf);
 }
 
-static void apply_dit(const plan *ego_, R *ri, R *ii, R *ro, R *io)
-{
-     const P_dit *ego_dit = (const P_dit *) ego_;
-     const P *ego;
-     plan *cld1, *cld2;
-     int os, osm;
-     int j, k, gpower, g, ginv, r, m;
-     R *buf;
-     const R *omega, *W;
-
-     {
-	   plan *cld0 = ego_dit->cld;
-	   plan_dft *cld = (plan_dft *) cld0;
-	   cld->apply(cld0, ri, ii, ro, io);
-     }
-
-     ego = (const P *) ego_;
-     cld1 = ego->cld1;
-     cld2 = ego->cld2;
-     r = ego->n;
-     m = ego_dit->m;
-     g = ego->g; 
-     ginv = ego->ginv;
-     omega = ego->omega;
-     W = ego_dit->W;
-     os = ego_dit->os;
-     osm = ego->os;
-     gpower = 1;
-
-     buf = (R *) MALLOC(sizeof(R) * (r - 1) * 2, BUFFERS);
-
-     for (j = 0; j < m; ++j, ro += os, io += os, W += 2*(r - 1)) {
-	  /* First, permute the input and multiply by W, storing in buf: */
-	  A(gpower == 1);
-	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
-	       E rA, iA, rW, iW;
-	       rA = ro[gpower * osm];
-	       iA = io[gpower * osm];
-	       rW = W[2*k];
-	       iW = W[2*k+1];
-	       buf[2*k] = rW * rA - iW * iA;
-	       buf[2*k + 1] = rW * iA + iW * rA;
-	  }
-	  /* gpower == g^(r-1) mod r == 1 */;
-	  
-	  apply_aux(r, ginv, cld1, cld2, omega, 
-		    buf, ro[0], io[0], ro, io, osm);
-     }
-
-     X(ifree)(buf);
-}
-
-static R *mktwiddle(int m, int r, int g)
-{
-     int i, j, gpower;
-     int n = r * m;
-     R *W;
-
-     if ((W = X(rader_tl_find)(m, r, g, twiddles)))
-	  return W;
-
-     W = (R *)MALLOC(sizeof(R) * (r - 1) * m * 2, TWIDDLES);
-     for (i = 0; i < m; ++i) {
-	  for (gpower = 1, j = 0; j < r - 1;
-	       ++j, gpower = MULMOD(gpower, g, r)) {
-	       int k = i * (r - 1) + j;
-	       W[2*k] = X(cos2pi)(i * gpower, n);
-	       W[2*k+1] = FFT_SIGN * X(sin2pi)(i * gpower, n);
-	  }
-	  A(gpower == 1);
-     }
-
-     X(rader_tl_insert)(m, r, g, W, &twiddles);
-     return W;
-}
-
-static void free_twiddle(R *twiddle)
-{
-     X(rader_tl_delete)(twiddle, &twiddles);
-}
-
 /***************************************************************************/
 
 static void awake(plan *ego_, int flg)
@@ -234,34 +143,12 @@ static void awake(plan *ego_, int flg)
      }
 }
 
-static void awake_dit(plan *ego_, int flg)
-{
-     P_dit *ego = (P_dit *) ego_;
-
-     AWAKE(ego->cld, flg);
-     if (flg)
-	  ego->W = mktwiddle(ego->m, ego->super.n, ego->super.g);
-     else {
-	  free_twiddle(ego->W);
-	  ego->W = 0;
-     }
-
-     awake(ego_, flg);
-}
-
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      X(plan_destroy_internal)(ego->cld_omega);
      X(plan_destroy_internal)(ego->cld2);
      X(plan_destroy_internal)(ego->cld1);
-}
-
-static void destroy_dit(plan *ego_)
-{
-     P_dit *ego = (P_dit *) ego_;
-     X(plan_destroy_internal)(ego->cld);
-     destroy(ego_);
 }
 
 static void print_aux(const char *name, const P *ego, printer *p)
@@ -280,14 +167,6 @@ static void print(const plan *ego_, printer *p)
      p->putchr(p, ')');
 }
 
-static void print_dit(const plan *ego_, printer *p)
-{
-     const P_dit *ego_dit = (const P_dit *) ego_;
-
-     print_aux("dft-rader-dit", (const P *) ego_, p);
-     p->print(p, "%(%p%))", ego_dit->cld);
-}
-
 static int applicable0(const solver *ego_, const problem *p_)
 {
      UNUSED(ego_);
@@ -303,31 +182,10 @@ static int applicable0(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int applicable0_dit(const solver *ego_, const problem *p_)
-{
-     UNUSED(ego_);
-     if (DFTP(p_)) {
-          const problem_dft *p = (const problem_dft *) p_;
-          return (1
-	       && p->sz->rnk == 1
-	       && p->vecsz->rnk == 0
-	       && p->sz->dims[0].n > 1
-	       );
-     }
-
-     return 0;
-}
-
 static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
      return (!NO_UGLYP(plnr) && applicable0(ego_, p_));
-}
-
-static int applicable_dit(const solver *ego_, const problem *p_, 
-			  const planner *plnr)
-{
-     return (!NO_UGLYP(plnr) && applicable0_dit(ego_, p_));
 }
 
 static int mkP(P *pln, int n, int is, int os, R *ro, R *io,
@@ -418,56 +276,6 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      return &(pln->super.super);
 }
 
-static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
-{
-     const problem_dft *p = (const problem_dft *) p_;
-     P_dit *pln = 0;
-     int n, r, m;
-     int is, os;
-     plan *cld = (plan *) 0;
-
-     static const plan_adt padt = {
-	  X(dft_solve), awake_dit, print_dit, destroy_dit
-     };
-
-     if (!applicable_dit(ego, p_, plnr))
-          goto nada;
-
-     n = p->sz->dims[0].n;
-     is = p->sz->dims[0].is;
-     os = p->sz->dims[0].os;
-
-     r = X(first_divisor)(n);
-     m = n / r;
-
-     cld = X(mkplan_d)(plnr, 
-		       X(mkproblem_dft_d)(X(mktensor_1d)(m, r * is, os),
-					  X(mktensor_1d)(r, is, m * os),
-					  p->ri, p->ii, p->ro, p->io));
-     if (!cld) goto nada;
-
-     pln = MKPLAN_DFT(P_dit, &padt, apply_dit);
-     if (!mkP(&pln->super, r, os*m, os*m, p->ro, p->io, plnr))
-	  goto nada;
-
-     pln->os = os;
-     pln->m = m;
-     pln->cld = cld;
-     pln->W = 0;
-
-     pln->super.super.super.ops.add += 2 * (r-1);
-     pln->super.super.super.ops.mul += 4 * (r-1);
-     X(ops_madd)(m, &pln->super.super.super.ops, &cld->ops,
-		 &pln->super.super.super.ops);
-
-     return &(pln->super.super.super);
-
- nada:
-     X(plan_destroy_internal)(cld);
-     X(ifree0)(pln);
-     return (plan *) 0;
-}
-
 /* constructors */
 
 static solver *mksolver(void)
@@ -477,15 +285,7 @@ static solver *mksolver(void)
      return &(slv->super);
 }
 
-static solver *mksolver_dit(void)
-{
-     static const solver_adt sadt = { mkplan_dit };
-     S *slv = MKSOLVER(S, &sadt);
-     return &(slv->super);
-}
-
 void X(dft_rader_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
-//     REGISTER_SOLVER(p, mksolver_dit());
 }
