@@ -41,7 +41,7 @@ sub flush_problems {
 	print "Executing \"$program $options $problist\"\n" 
 	    if $verbose;
 	if (system("$program $options $problist") != 0) {
-	    print "FAILED: $problist\n";
+	    print "FAILED $program: $problist\n";
 	    exit 1 unless $keepgoing;
 	}
 	@list_of_problems = ();
@@ -60,7 +60,7 @@ sub do_problem {
 	print "Executing \"$program $options --can-do $problem\"\n" 
 	    if $verbose;
 	if (`$program $options --can-do $problem` ne "#f\n") {
-	    print "FAILED: $problem is not undoable\n";
+	    print "FAILED $program: $problem is not undoable\n";
 	    exit 1 unless $keepgoing;
 	}
     }
