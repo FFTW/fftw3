@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.9 2003-01-19 01:00:24 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.10 2003-01-19 01:03:18 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -131,10 +131,10 @@ home page}.
 
 In order to use FFTW effectively, you need to understand one basic
 concept of FFTW's internal structure.  FFTW does not used a fixed
-algorithm for computing the transform, but it can adapt the DFT
+algorithm for computing the transform, but instead can adapt the DFT
 algorithm to details of the underlying hardware in order to achieve
-best performance.  Hence, the computation of the transform is split
-into two phases.  First, FFTW's @dfn{planner} is called, which
+the best performance.  Hence, the computation of the transform is
+split into two phases.  First, FFTW's @dfn{planner} is called, which
 ``learns'' the fastest way to compute the transform on your machine.
 The planner
 @cindex planner
