@@ -22,9 +22,9 @@
 #include "n4.h"
 
 #if HAVE_SIMD
-int OKP(const kdft_desc *d,
-	const R *ri, const R *ii, const R *ro, const R *io,
-	int is, int os, uint vl, int ivs, int ovs)
+static int okp(const kdft_desc *d,
+	       const R *ri, const R *ii, const R *ro, const R *io,
+	       int is, int os, uint vl, int ivs, int ovs)
 {
      return (RIGHT_CPU()
 	     && ALIGNED(ri)
@@ -36,4 +36,6 @@ int OKP(const kdft_desc *d,
 	     && os == 1
 	  );
 }
+
+const kdft_genus GENUS = { okp, VL };
 #endif

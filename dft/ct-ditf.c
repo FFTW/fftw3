@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.8 2002-06-30 18:37:55 athena Exp $ */
+/* $Id: ct-ditf.c,v 1.9 2002-07-02 14:30:58 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -54,7 +54,8 @@ static int applicable(const solver_ct *ego, const problem *p_)
                   && d[0].is == (int)e->radix * vd[0].is
                   && vd[0].os == (int)d[0].n * vd[0].is
 
-		  && (e->okp(e, p->ri, p->ii, vd[0].os, vd[0].is, m, d[0].is))
+		  && (e->genus->okp(e, p->ri, p->ii, 
+				    vd[0].os, vd[0].is, m, d[0].is))
 	       );
      }
      return 0;
@@ -62,10 +63,12 @@ static int applicable(const solver_ct *ego, const problem *p_)
 
 static void finish(plan_ct *ego)
 {
+     const ct_desc *d = ego->slv->desc;
      ego->ios = X(mkstride)(ego->r, ego->ovs);
      ego->vs = X(mkstride)(ego->r, ego->ivs);
      ego->super.super.ops =
-          X(ops_add)(ego->cld->ops, X(ops_mul)(ego->m, ego->slv->desc->ops));
+          X(ops_add)(ego->cld->ops, X(ops_mul)(ego->m / d->genus->vl,
+					       ego->slv->desc->ops));
 }
 
 static problem *mkcld(const solver_ct *ego, const problem_dft *p)

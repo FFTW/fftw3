@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.12 2002-06-30 18:37:55 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.13 2002-07-02 14:30:58 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.12 2002-06-30 18:37:55 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.13 2002-07-02 14:30:58 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -112,7 +112,7 @@ let generate n =
 
   and desc = 
     Printf.sprintf 
-      "static const kdft_desc desc = { %d, \"%s\", %s, OKP, %s, %s };\n"
+      "static const kdft_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s };\n"
       n name (flops_of tree0) 
       (stride_to_solverparm !uistride) (stride_to_solverparm !uostride)
 

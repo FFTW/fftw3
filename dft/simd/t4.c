@@ -22,9 +22,9 @@
 #include "t4.h"
 
 #if HAVE_SIMD
-int OKP(const ct_desc *d,
-	const R *rio, const R *iio, 
-	int ios, int vs, uint m, int dist)
+static int okp(const ct_desc *d,
+	       const R *rio, const R *iio, 
+	       int ios, int vs, uint m, int dist)
 {
      return (RIGHT_CPU()
 	     && ALIGNED(rio)
@@ -33,4 +33,6 @@ int OKP(const ct_desc *d,
 	     && dist == 1
 	  );
 }
+
+const ct_genus GENUS = { okp, VL };
 #endif

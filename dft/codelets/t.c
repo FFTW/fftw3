@@ -21,12 +21,14 @@
 #include "codelet.h"
 #include "t.h"
 
-int OKP(const ct_desc *d,
-	const R *rio, const R *iio, 
-	int ios, int vs, uint m, int dist)
+static int okp(const ct_desc *d,
+	       const R *rio, const R *iio, 
+	       int ios, int vs, uint m, int dist)
 {
      return (1
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))
 	  );
 }
+
+const ct_genus GENUS = { okp, 1 };

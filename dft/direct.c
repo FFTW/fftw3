@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.21 2002-07-01 18:05:56 athena Exp $ */
+/* $Id: direct.c,v 1.22 2002-07-02 14:30:58 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -82,9 +82,9 @@ static int applicable(const solver *ego_, const problem *p_)
 	       && p->sz.dims[0].n == d->sz
 
 	       /* check strides etc */
-	       && (d->okp(d, p->ri, p->ii, p->ro, p->io,
-			  p->sz.dims[0].is, p->sz.dims[0].os,
-			  vl, ivs, ovs))
+	       && (d->genus->okp(d, p->ri, p->ii, p->ro, p->io,
+				 p->sz.dims[0].is, p->sz.dims[0].os,
+				 vl, ivs, ovs))
 
 	       && (0
 		   /* can operate out-of-place */
@@ -150,7 +150,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
 
      pln->slv = ego;
-     pln->super.super.ops = X(ops_mul)(pln->vl, e->ops);
+     pln->super.super.ops = X(ops_mul)(pln->vl / e->genus->vl, e->ops);
 
      return &(pln->super.super);
 }

@@ -20,7 +20,6 @@
 
 #include "simd.h"
 
-#define OKP X(dft_simd_t4_okp)
 
-extern int OKP(const ct_desc *d, const R *rio, const R *iio, 
-	       int ios, int vs, uint m, int dist);
+#define GENUS X(dft_simd_t4_genus)
+extern const ct_genus GENUS;

@@ -19,9 +19,5 @@
  */
 
 
-#define OKP X(dft_n_okp)
-
-extern int OKP(const kdft_desc *d,
-	       const R *ri, const R *ii, 
-	       const R *ro, const R *io,
-	       int is, int os, uint vl, int ivs, int ovs);
+#define GENUS X(dft_n_genus)
+extern const kdft_genus GENUS;

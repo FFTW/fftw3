@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.15 2002-06-30 18:37:55 athena Exp $ */
+/* $Id: codelet.h,v 1.16 2002-07-02 14:30:58 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -64,35 +64,48 @@ static __inline__ R FNMS(R a, R b, R c)
  **************************************************************/
 
 /* DFT codelets */
+typedef struct kdft_desc_s kdft_desc;
 
-typedef struct kdft_desc_s {
+typedef struct {
+     int (*okp)(
+	  const kdft_desc *desc,
+	  const R *ri, const R *ii, const R *ro, const R *io,
+	  int is, int os, uint vl, int ivs, int ovs);
+     uint vl;
+} kdft_genus;
+
+struct kdft_desc_s {
      uint sz;    /* size of transform computed */
      const char *nam;
      opcnt ops;
-     int (*okp)(
-	  const struct kdft_desc_s *desc,
-	  const R *ri, const R *ii, const R *ro, const R *io,
-	  int is, int os, uint vl, int ivs, int ovs);
+     const kdft_genus *genus;
      int is;
      int os;
-} kdft_desc;
+};
 
 typedef void (*kdft) (const R *ri, const R *ii, R *ro, R *io,
                       stride is, stride os, uint vl, int ivs, int ovs);
 void X(kdft_register)(planner *p, kdft codelet, const kdft_desc *desc);
 
 
-typedef struct ct_desc_s {
+typedef struct ct_desc_s ct_desc;
+
+typedef struct {
+     int (*okp)(
+	  const struct ct_desc_s *desc,
+	  const R *rio, const R *iio, int ios, int vs, uint m, int dist);
+     uint vl;
+} ct_genus;
+
+struct ct_desc_s {
      uint radix;
      const char *nam;
      const tw_instr *tw;
      opcnt ops;
-     int (*okp)(
-	  const struct ct_desc_s *desc,
-	  const R *rio, const R *iio, int ios, int vs, uint m, int dist);
+     const ct_genus *genus;
      int s1;
      int s2;
-} ct_desc;
+};
 
 typedef const R *(*kdft_dit) (R *rioarray, R *iioarray, const R *W,
                               stride ios, uint m, int dist);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: k7.c,v 1.2 2002-07-01 18:05:56 athena Exp $ */
+/* $Id: k7.c,v 1.3 2002-07-02 14:30:58 athena Exp $ */
 
 #include "dft.h"
 
@@ -53,14 +53,16 @@ static int k7p(void)
 	  res = 0;
 
 	  if (cpuid_eax(0x80000000) >= 0x80000001) 
-	       res = (cpuid_edx(0x80000001) >> 31) & 1;
+	       res =  (cpuid_edx(0x80000001) >> 31)
+		    & (cpuid_edx(0x80000001) >> 30) 
+		    & 1;
      }
      return res;
 }
 
-int X(kdft_k7_mokp)(const kdft_desc *d,
-		    const R *ri, const R *ii, const R *ro, const R *io,
-		    int is, int os, uint vl, int ivs, int ovs)
+static int nmokp(const kdft_desc *d,
+		 const R *ri, const R *ii, const R *ro, const R *io,
+		 int is, int os, uint vl, int ivs, int ovs)
 {
      return (k7p()
 	     && ii == ri + 1 
@@ -70,9 +72,11 @@ int X(kdft_k7_mokp)(const kdft_desc *d,
 	  );
 }
 
-int X(kdft_k7_pokp)(const kdft_desc *d,
-		    const R *ri, const R *ii, const R *ro, const R *io,
-		    int is, int os, uint vl, int ivs, int ovs)
+const kdft_genus X(kdft_k7_mgenus) = { nmokp, 1 };
+
+static int npokp(const kdft_desc *d,
+		 const R *ri, const R *ii, const R *ro, const R *io,
+		 int is, int os, uint vl, int ivs, int ovs)
 {
      return (k7p()
 	     && ri == ii + 1 
@@ -82,9 +86,11 @@ int X(kdft_k7_pokp)(const kdft_desc *d,
 	  );
 }
 
-int X(kdft_ct_k7_mokp)(const ct_desc *d,
-		       const R *rio, const R *iio, 
-		       int ios, int vs, uint m, int dist)
+const kdft_genus X(kdft_k7_pgenus) = { npokp, 1 };
+
+static int cmokp(const ct_desc *d,
+		 const R *rio, const R *iio, 
+		 int ios, int vs, uint m, int dist)
 {
      return (k7p()
 	     && iio == rio + 1
@@ -93,9 +99,11 @@ int X(kdft_ct_k7_mokp)(const ct_desc *d,
 	  );
 }
 
-int X(kdft_ct_k7_pokp)(const ct_desc *d,
-		       const R *rio, const R *iio, 
-		       int ios, int vs, uint m, int dist)
+const ct_genus X(kdft_ct_k7_mgenus) = { cmokp, 1 };
+
+static int cpokp(const ct_desc *d,
+		 const R *rio, const R *iio, 
+		 int ios, int vs, uint m, int dist)
 {
      return (k7p()
 	     && rio == iio + 1
@@ -104,4 +112,5 @@ int X(kdft_ct_k7_pokp)(const ct_desc *d,
 	  );
 }
 
+const ct_genus X(kdft_ct_k7_pgenus) = { cpokp, 1 };
 #endif
