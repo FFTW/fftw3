@@ -292,8 +292,8 @@ static solver *mksolver(const wadt *adt, int r, int dec)
 void X(dft_ct_generic_register)(planner *p)
 {
      static const wadt a[] = {
-	  { bytwiddle1, mktwiddle1, applicable1, "dft-ct-generic1" },
-	  { bytwiddle2, mktwiddle2, applicable2, "dft-ct-generic2" },
+	  { bytwiddle1, mktwiddle1, applicable1, "dftw-generic1" },
+	  { bytwiddle2, mktwiddle2, applicable2, "dftw-generic2" },
      };
      unsigned i;
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-directwbuf.c,v 1.2 2004-03-21 15:59:42 athena Exp $ */
+/* $Id: dftw-direct.c,v 1.1 2004-03-21 22:56:15 athena Exp $ */
 
 #include "ct.h"
 
@@ -33,74 +33,18 @@ typedef struct {
      kdftw k;
      twid *td;
      int r, m, vl;
-     int s, vs, ios;
-     stride bufstride;
+     int s, vs;
+     stride ios;
      const S *slv;
 } P;
-
-/*
-   Copy A -> B, where A and B are n0 x n1 complex matrices
-   such that the (i0, i1) element has index (i0 * s0 + i1 * s1). 
-*/
-static void cpy(int n0, int n1, 
-		const R *rA, const R *iA, int sa0, int sa1, 
-		R *rB, R *iB, int sb0, int sb1)
-{
-     int i0, i1;
-     ptrdiff_t ima = iA - rA, imb = iB - rB;
-
-     for (i0 = 0; i0 < n0; ++i0) {
-	  const R *pa; 
-	  R *pb;
-
-	  pa = rA; rA += sa0;
-	  pb = rB; rB += sb0;
-	  for (i1 = 0; i1 < n1; ++i1) {
-	       R xr = pa[0], xi = pa[ima];
-	       pb[0] = xr; pb[imb] = xi; 
-	       pa += sa1; pb += sb1;
-	  }
-     }
-}
-
-static const R *doit(kdftw k, R *rA, R *iA, const R *W, int ios, int dist, 
-		     int r, int batchsz, R *buf, stride bufstride)
-{
-     cpy(r, batchsz, rA, iA, ios, dist, buf, buf + 1, 2, 2 * r);
-     W = k(buf, buf + 1, W, bufstride, batchsz, 2 * r);
-     cpy(r, batchsz, buf, buf + 1, 2, 2 * r, rA, iA, ios, dist);
-     return W;
-}
-
-#define BATCHSZ 4 /* FIXME: parametrize? */
 
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     int i, j, m = ego->m, vl = ego->vl, r = ego->r;
-     int s = ego->s, vs = ego->vs, ios = ego->ios;
-     R *buf;
-
-     STACK_MALLOC(R *, buf, r * BATCHSZ * 2 * sizeof(R));
-
-     for (i = 0; i < vl; ++i) {
-	  R *rA = rio + i * vs, *iA = iio + i * vs;
-	  const R *W = ego->td->W;
-
-	  for (j = m; j >= BATCHSZ; j -= BATCHSZ) {
-	       W = doit(ego->k, rA, iA, W, ios, s, r, BATCHSZ, 
-			buf, ego->bufstride);
-	       rA += s * (int)BATCHSZ;
-	       iA += s * (int)BATCHSZ;
-	  }
-
-	  /* do remaining j calls, if any */
-	  if (j > 0)
-	       doit(ego->k, rA, iA, W, ios, s, r, j, buf, ego->bufstride);
-
-     }
-
-     STACK_FREE(buf);
+     int i, m = ego->m, vl = ego->vl, s = ego->s, vs = ego->vs;
+     ASSERT_ALIGNED_DOUBLE;
+     for (i = 0; i < vl; ++i)
+	  ego->k(rio + i * vs, iio + i * vs, ego->td->W, ego->ios, m, s);
 }
 
 static void awake(plan *ego_, int flg)
@@ -114,7 +58,7 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(stride_destroy)(ego->bufstride);
+     X(stride_destroy)(ego->ios);
 }
 
 static void print(const plan *ego_, printer *p)
@@ -123,7 +67,7 @@ static void print(const plan *ego_, printer *p)
      const S *slv = ego->slv;
      const ct_desc *e = slv->desc;
 
-     p->print(p, "(dft-directw-buf-%d/%d%v \"%s\")",
+     p->print(p, "(dftw-direct-%d/%d%v \"%s\")",
               ego->r, X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam);
 }
 
@@ -133,7 +77,7 @@ static int applicable0(const S *ego,
 		       const planner *plnr)
 {
      const ct_desc *e = ego->desc;
-     UNUSED(vl); UNUSED(s); UNUSED(vs); UNUSED(rio); UNUSED(iio);
+     UNUSED(vl);
 
      return (
 	  1
@@ -141,13 +85,10 @@ static int applicable0(const S *ego,
 	  && dec == ego->super.dec
 	  && r == e->radix
 
-	  /* check for alignment/vector length restrictions, both for
-	     batchsize and for the remainder */
-	  && (m < BATCHSZ ||
-	      (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, BATCHSZ,
-			     2 * e->radix, plnr)))
-	  && (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, m % BATCHSZ,
-			    2 * e->radix, plnr))
+	  /* check for alignment/vector length restrictions */
+	  && (e->genus->okp(e, rio, iio, m * s, 0, m, s, plnr))
+	  && (e->genus->okp(e, rio + vs, iio + vs, m * s, 0, m, s, plnr))
+				 
 	  );
 }
 
@@ -160,7 +101,9 @@ static int applicable(const S *ego,
           return 0;
 
      if (NO_UGLYP(plnr)) {
-	  if (X(ct_uglyp)(512, m * r, r)) return 0;
+	  if (X(ct_uglyp)(16, m * r, r)) return 0;
+	  if (NONTHREADED_ICKYP(plnr))
+	       return 0; /* prefer threaded version */
      }
 
      return 1;
@@ -179,13 +122,14 @@ static plan *mkcldw(const ct_solver *ego_,
 	  0, awake, print, destroy
      };
 
+
      if (!applicable(ego, dec, r, m, s, vl, vs, rio, iio, plnr))
           return (plan *)0;
 
      pln = MKPLAN_DFTW(P, &padt, apply);
 
      pln->k = ego->k;
-     pln->ios = m * s;
+     pln->ios = X(mkstride)(r, m * s);
      pln->td = 0;
      pln->r = r;
      pln->m = m;
@@ -193,18 +137,14 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->vl = vl;
      pln->vs = vs;
      pln->slv = ego;
-     pln->bufstride = X(mkstride)(e->radix, 2);
 
      X(ops_zero)(&pln->super.super.ops);
-     X(ops_madd2)(m * (vl / e->genus->vl), &e->ops, &pln->super.super.ops);
-     /* 4 load/stores * N * VL */
-     pln->super.super.ops.other += 4 * r * m * vl;
+     X(ops_madd2)(vl * (m / e->genus->vl), &e->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 }
 
-solver *X(mksolver_dft_ct_directwbuf)(kdftw codelet, 
-				      const ct_desc *desc, int dec)
+solver *X(mksolver_dft_ct_directw)(kdftw codelet, const ct_desc *desc, int dec)
 {
      S *slv = (S *)X(mksolver_dft_ct)(sizeof(S), desc->radix, dec, mkcldw);
      slv->k = codelet;
