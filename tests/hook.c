@@ -54,10 +54,10 @@ static bench_problem *fftw_problem_to_bench_problem(const problem *p_)
 	  bp->kind = PROBLEM_COMPLEX;
 	  bp->sign = FFT_SIGN;
 	  bp->split = 1; /* tensor strides are in R's, not C's */
-	  bp->in = p->ri;
-	  bp->out = p->ro;
-	  bp->ini = p->ii;
-	  bp->outi = p->io;
+	  bp->in = UNTAINT(p->ri);
+	  bp->out = UNTAINT(p->ro);
+	  bp->ini = UNTAINT(p->ii);
+	  bp->outi = UNTAINT(p->io);
 	  bp->inphys = bp->outphys = 0;
 	  bp->iphyssz = bp->ophyssz = 0;
 	  bp->in_place = p->ri == p->ro;
