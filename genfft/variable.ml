@@ -18,24 +18,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: variable.ml,v 1.3 2002-06-20 22:51:33 athena Exp $ *)
-
-type info =
-  | Real of int
-  | Imag of int 
-  | Unknown
+(* $Id: variable.ml,v 1.4 2002-07-28 18:50:09 athena Exp $ *)
 
 type variable = 
       (* temporary variables generated automatically *)
   | Temporary of int
       (* memory locations, e.g., array elements *)
-  | Locative of (info * Unique.unique * Unique.unique * string)
+  | Locative of (Unique.unique * Unique.unique * (int -> string) * int)
       (* constant values, e.g., twiddle factors *)
-  | Constant of (info * Unique.unique * string)
+  | Constant of (Unique.unique * string)
 
 let hash v = Hashtbl.hash v
 
-let same = (==)
+let same a b = (a == b)
 
 let is_constant = function
   | Constant _ -> true
@@ -49,22 +44,17 @@ let is_locative = function
   | Locative _ -> true
   | _ -> false
 
-let info = function
-  | Locative (i, _, _, _) -> i
-  | Constant (i, _, _) -> i
-  | _ -> failwith "info"
-
 let same_location a b = 
   match (a, b) with
-  | (Locative (_, location_a, _, _), Locative (_, location_b, _, _)) ->
+  | (Locative (location_a, _, _, _), Locative (location_b, _, _, _)) ->
       Unique.same location_a location_b
   | _ -> false
 
 let same_class a b = 
   match (a, b) with
-  | (Locative (_, _, class_a, _), Locative (_, _, class_b, _)) ->
+  | (Locative (_, class_a, _, _), Locative (_, class_b, _, _)) ->
       Unique.same class_a class_b
-  | (Constant (_, class_a, _), Constant (_, class_b, _)) ->
+  | (Constant (class_a, _), Constant (class_b, _)) ->
       Unique.same class_a class_b
   | _ -> false
 
@@ -75,11 +65,11 @@ let make_temporary =
     Temporary !tmp_count
   end
 
-let make_constant info class_token name = 
-  Constant (info, class_token, name)
+let make_constant class_token name = 
+  Constant (class_token, name)
 
-let make_locative info location_token class_token name =
-  Locative (info, location_token, class_token, name)
+let make_locative location_token class_token name i =
+  Locative (location_token, class_token, name, i)
 
 (* special naming conventions for variables *)
 let rec base62_of_int k = 
@@ -105,22 +95,10 @@ let varname_of_int k =
 
 let unparse = function
   | Temporary k -> "t" ^ (varname_of_int k)
-  | Constant (_, _, name) -> name
-  | Locative (_, _, _, name) -> name
+  | Constant (_, name) -> name
+  | Locative (_, _, name, i) -> name i
 
+let unparse_for_alignment m = function
+  | Locative (_, _, name, i) -> name (i mod m)
+  | _ -> failwith "unparse_for_alignment"
 
-let is_real v =
-  match info v with
-  | Real _ -> true
-  | _ -> false
-
-let is_imag v =
-  match info v with
-  | Imag _ -> true
-  | _ -> false
-
-let var_index v = 
-  match info v with
-  | Real x -> x
-  | Imag x -> x
-  | _ -> failwith "var_index"

@@ -18,10 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: variable.mli,v 1.3 2002-06-20 22:51:33 athena Exp $ *)
+(* $Id: variable.mli,v 1.4 2002-07-28 18:50:09 athena Exp $ *)
 
 type variable
-type info = Real of int | Imag of int | Unknown
 
 val hash : variable -> int
 val same : variable -> variable -> bool
@@ -31,11 +30,8 @@ val is_locative : variable -> bool
 val same_location : variable -> variable -> bool
 val same_class : variable -> variable -> bool
 val make_temporary : unit -> variable
-val make_constant : info -> Unique.unique -> string -> variable
+val make_constant : Unique.unique -> string -> variable
 val make_locative :
-  info -> Unique.unique -> Unique.unique -> string -> variable
+    Unique.unique -> Unique.unique -> (int -> string) -> int -> variable
 val unparse : variable -> string
-val info : variable -> info
-val is_real : variable -> bool
-val is_imag : variable -> bool
-val var_index : variable -> int
+val unparse_for_alignment : int -> variable -> string

@@ -105,8 +105,8 @@ union dvec {
      V v;
 };
 
-#define LD(loc, ivs) (*(const V *)(loc))
-#define ST(loc, var, ovs) *(V *)(loc) = var
+#define LD(loc, ivs, aligned_like) (*(const V *)(loc))
+#define ST(loc, var, ovs, aligned_like) *(V *)(loc) = var
 
 static __inline__ V FLIP_RI(V x)
 {

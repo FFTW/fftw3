@@ -113,48 +113,48 @@ static inline V VFMS(V a, V b, V c)
 }
 
 /* load lower half */
-static inline V LDL(const float *x, int ivs)
+static inline V LDL(const float *x, int ivs, const float *aligned_like) 
 {
      int fivs = 4 * ivs;
      V v = vec_ld(fivs, (float *)x);
-     return vec_perm(v, v, vec_lvsl(fivs, (float *)x));
+     return vec_perm(v, v, vec_lvsl(fivs, (float *)aligned_like));
 }
 
-static inline V LDH(const float *x)
+static inline V LDH(const float *x, const float *aligned_like) 
 {
      V v = vec_ld(0, (float *)x);
-     return vec_perm(v, v, vec_lvsl(8, (float *)x));
+     return vec_perm(v, v, vec_lvsl(8, (float *)aligned_like));
 }
 
 extern const vector unsigned int X(altivec_ld_selmsk);
 
-static inline V LD(const float *x, int ivs)
+static inline V LD(const float *x, int ivs, const float *aligned_like) 
 {
-     V l = LDL(x, ivs);
-     V h = LDH(x);
+     V l = LDL(x, ivs, aligned_like);
+     V h = LDH(x, aligned_like);
      return vec_sel(l, h, X(altivec_ld_selmsk));
 }
 
 /* store lower half */
-static inline void STL(float *x, V v, int ovs)
+static inline void STL(float *x, V v, int ovs, const float *aligned_like)
 {
      int fovs = 4 * ovs;
-     v = vec_perm(v, v, vec_lvsr(fovs, x));
+     v = vec_perm(v, v, vec_lvsr(fovs, (float *)aligned_like));
      vec_ste(v, fovs, x);
      vec_ste(v, 4 + fovs, x);
 }
 
-static inline void STH(float *x, V v)
+static inline void STH(float *x, V v, const float *aligned_like)
 {
-     v = vec_perm(v, v, vec_lvsr(8, x));
+     v = vec_perm(v, v, vec_lvsr(8, aligned_like));
      vec_ste(v, 0, x);
      vec_ste(v, 4, x);
 }
 
-static inline void ST(float *x, V v, int ovs)
-{
-     STL(x, v, ovs);
-     STH(x, v);
+static inline void ST(float *x, V v, int ovs, const float *aligned_like) 
+{			
+     STL(x, v, ovs, aligned_like);
+     STH(x, v, aligned_like);
 }
 
 extern const vector unsigned int X(altivec_flipri_perm);

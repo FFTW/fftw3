@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.13 2002-07-15 20:46:36 athena Exp $ *)
+(* $Id: genutil.ml,v 1.14 2002-07-28 18:50:09 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -38,16 +38,16 @@ let locative_array_c n rarr iarr loc =
   array n (fun i -> 
     let klass = Unique.make () in
     let (rloc, iloc) = loc i in
-    (Variable.make_locative (Variable.Real i) rloc klass (rarr i),
-     Variable.make_locative (Variable.Imag i) iloc klass (iarr i)))
+    (Variable.make_locative rloc klass rarr i,
+     Variable.make_locative iloc klass iarr i))
 
 let locative_v_array_c veclen n rarr iarr loc = 
   array veclen (fun v ->
     array n (fun i -> 
       let klass = Unique.make () in
       let (rloc, iloc) = loc v i in
-      (Variable.make_locative (Variable.Real i) rloc klass (rarr v i),
-       Variable.make_locative (Variable.Imag i) iloc klass (iarr v i))))
+      (Variable.make_locative rloc klass (rarr v) i,
+       Variable.make_locative iloc klass (iarr v) i)))
 
 let temporary_array n = 
   array n (fun i -> Variable.make_temporary ())
@@ -77,8 +77,8 @@ let twiddle_array nt w =
     let (refr, refi) = (C.array_subscript w stride (2 * i),
 			C.array_subscript w stride (2 * i + 1))
     in
-    let (kr, ki) = (Variable.make_constant (Variable.Real i) klass refr,
-		    Variable.make_constant (Variable.Imag i) klass refi)  
+    let (kr, ki) = (Variable.make_constant klass refr,
+		    Variable.make_constant klass refi)  
     in
     load_c (kr, ki))
 

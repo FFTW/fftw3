@@ -139,16 +139,18 @@ union fvec {
    (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
 
-static __inline__ V LD(const float *x, int ivs) 
+static __inline__ V LD(const float *x, int ivs, const float *aligned_like) 
 {
      V var;
+     (void)aligned_like; /* UNUSED */
      var = LOADL0(x, var);		
      var = LOADH(x + ivs, var);
      return var;
 }
 
-static __inline__ void ST(float *x, V v, int ovs) 
-{						
+static __inline__ void ST(float *x, V v, int ovs, const float *aligned_like) 
+{					
+     (void)aligned_like; /* UNUSED */	
      STOREL(x, v);
      STOREH(x + ovs, v);
 }

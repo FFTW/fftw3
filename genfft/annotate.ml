@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.7 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: annotate.ml,v 1.8 2002-07-28 18:50:09 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.7 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: annotate.ml,v 1.8 2002-07-28 18:50:09 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -42,13 +42,13 @@ and aschedule =
   | AInstr of assignment
   | ASeq of (annotated_schedule * annotated_schedule)
 
-let addelem a set = if not (List.mem a set) then a :: set else set
+let addelem a set = if not (List.memq a set) then a :: set else set
 let union l = 
   let f x = addelem x   (* let is source of polymorphism *)
   in List.fold_right f l
 
 (* set difference a - b *)
-let diff a b = List.filter (fun x -> not (List.mem x b)) a
+let diff a b = List.filter (fun x -> not (List.memq x b)) a
 
 let rec minimize f = function
     [] -> failwith "minimize"
@@ -65,7 +65,7 @@ let rec find_block_vars = function
   | Seq (a, b) -> (find_block_vars a) @ (find_block_vars b)
 
 let uniq l = 
-  List.fold_right (fun a b -> if List.mem a b then b else a :: b) l []
+  List.fold_right (fun a b -> if List.memq a b then b else a :: b) l []
 
 let has_related x = List.exists (Variable.same_class x)
 

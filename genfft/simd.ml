@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.12 2002-07-08 13:42:08 athena Exp $ *)
+(* $Id: simd.ml,v 1.13 2002-07-28 18:50:09 athena Exp $ *)
 
 open Expr
 open List
@@ -34,6 +34,7 @@ let constrealtype = "const " ^ realtype
 let constrealtypep = constrealtype ^ " *"
 let ivs = ref "ivs"
 let ovs = ref "ovs"
+let alignment_mod = 2
 
 (*
  * SIMD C AST unparser 
@@ -44,8 +45,9 @@ let rec unparse_by_twiddle nam tw src =
   sprintf "%s(&(%s),%s)" nam (Variable.unparse tw) (unparse_expr src)
 
 and unparse_store dst src_expr =
-  sprintf "ST(&(%s),%s,%s);\n" 
+  sprintf "ST(&(%s),%s,%s,&(%s));\n" 
     (Variable.unparse dst) (unparse_expr src_expr) !ovs
+    (Variable.unparse_for_alignment alignment_mod dst)
 
 and unparse_expr =
   let rec unparse_plus = function
@@ -94,7 +96,8 @@ and unparse_expr =
     | Times(Times(NaN CPLXJ, Load tw), src) when Variable.is_constant tw ->
 	unparse_by_twiddle "BYTWJ" tw src
     | Load v when is_locative(v) ->
-	sprintf "LD(&(%s),%s)" (Variable.unparse v) !ivs
+	sprintf "LD(&(%s),%s,&(%s))" (Variable.unparse v) !ivs
+	  (Variable.unparse_for_alignment alignment_mod v)
     | Load v  -> Variable.unparse v
     | Num n -> sprintf "LDK(%s)" (Number.to_konst n)
     | NaN n -> failwith "NaN in unparse_expr"
