@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.6 2003-02-27 05:27:00 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.7 2003-02-27 06:05:39 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -74,19 +74,21 @@ static void apply_re11(plan *ego_, R *I, R *O)
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
-	  /* FIXME: split this loop to eliminate if-else statements and % */
-	  for (i = 0; i < n; ++i) {
-	       int m = (8 * i + n) % (8*n); /* n odd => m odd */
-	       if (m < 2*n)
-		    buf[i] = I[is * ((m - 1) / 2)];
-	       else if (m < 4*n)
-		    buf[i] = -I[is * ((4*n - m - 1) / 2)];
-	       else if (m < 6*n)
-		    buf[i] = -I[is * ((m - 4*n - 1) / 2)];
-	       else
-		    buf[i] = I[is * ((8*n - m - 1) / 2)];
+	  {
+	       int m;
+	       for (i = 0, m = n; m < 2 * n; ++i, m += 8)
+		    buf[i] = I[is * (m / 2)];
+	       for (; m < 4 * n; ++i, m += 8)
+		    buf[i] = -I[is * ((4*n - m) / 2)];
+	       for (; m < 6 * n; ++i, m += 8)
+		    buf[i] = -I[is * ((m - 4*n) / 2)];
+	       for (; m < 8 * n; ++i, m += 8)
+		    buf[i] = I[is * ((8*n - m) / 2)];
+	       m -= 8 * n;
+	       for (; i < n; ++i, m += 8)
+		    buf[i] = I[is * (m / 2)];
 	  }
-	  
+
 	  { /* child plan: R2HC of size n */
 	       plan_rdft *cld = (plan_rdft *) ego->cld;
 	       cld->apply((plan *) cld, buf, buf);
@@ -166,7 +168,6 @@ static void apply_re11(plan *ego_, R *I, R *O)
 
 /* like for rodft01, rodft11 is obtained from redft11 by
    reversing the input and flipping the sign of every other output. */
-/* FIXME: clean up after addressing FIXME's in apply_re11 */
 static void apply_ro11(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
@@ -180,17 +181,19 @@ static void apply_ro11(plan *ego_, R *I, R *O)
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
-	  /* FIXME: split this loop to eliminate if-else statements and % */
-	  for (i = 0; i < n; ++i) {
-	       int m = (8 * i + n) % (8*n); /* n odd => m odd */
-	       if (m < 2*n)
-		    buf[i] = I[is * (n - 1 - (m - 1) / 2)];
-	       else if (m < 4*n)
-		    buf[i] = -I[is * (n - 1 - (4*n - m - 1) / 2)];
-	       else if (m < 6*n)
-		    buf[i] = -I[is * (n - 1 - (m - 4*n - 1) / 2)];
-	       else
-		    buf[i] = I[is * (n - 1 - (8*n - m - 1) / 2)];
+	  {
+	       int m;
+	       for (i = 0, m = n; m < 2 * n; ++i, m += 8)
+		    buf[i] = I[is * (n - 1 - m / 2)];
+	       for (; m < 4 * n; ++i, m += 8)
+		    buf[i] = -I[is * (n - 1 - (4*n - m) / 2)];
+	       for (; m < 6 * n; ++i, m += 8)
+		    buf[i] = -I[is * (n - 1 - (m - 4*n) / 2)];
+	       for (; m < 8 * n; ++i, m += 8)
+		    buf[i] = I[is * (n - 1 - (8*n - m) / 2)];
+	       m -= 8 * n;
+	       for (; i < n; ++i, m += 8)
+		    buf[i] = I[is * (n - 1 - m / 2)];
 	  }
 	  
 	  { /* child plan: R2HC of size n */
