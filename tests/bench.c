@@ -160,9 +160,10 @@ void setup(struct problem *p)
      plnr->nthr = 1;
      FFTW(planner_set_hook) (plnr, hook);
      /* plnr->planner_flags |= IMPATIENT; */
-     /* plnr->planner_flags |= IMPATIENT | CLASSIC_VRECURSE; */
      /* plnr->planner_flags |= ESTIMATE | IMPATIENT; */
      /* plnr->planner_flags |= ESTIMATE; */
+
+     /* plnr->problem_flags |= CLASSIC_VRECURSE; */
 
      if (p->kind == PROBLEM_REAL)
 	  plnr->problem_flags |= DESTROY_INPUT;
@@ -183,7 +184,8 @@ void setup(struct problem *p)
 	  {
                printer *pr = X(mkprinter_file)(stdout);
 	       pr->print(pr, "READ WISDOM (%g seconds): ", tplan);
-               plnr->adt->exprt(plnr, pr);
+               if (verbose > 3)
+		    plnr->adt->exprt(plnr, pr);
 	       pr->print(pr, "\n");
                X(printer_destroy)(pr);
           }
