@@ -1,17 +1,14 @@
-noinst_SCRIPTS = gen_notwiddle
+noinst_SCRIPTS = gen_notw
 
 EXTRA_DIST = .depend assignmentsToVfpinstrs.ml balanceVfpinstrs.ml	\
-complex.ml expr.ml exprdag.ml fft.ml genUtil.ml gen_hc2hc.ml		\
-gen_hc2real.ml gen_notwiddle.ml gen_notwiddle_fixedstride.ml		\
-gen_real2hc.ml gen_realeven.ml gen_realeven2.ml gen_realodd.ml		\
-gen_realodd2.ml gen_twiddle.ml id.ml k7Basics.ml k7ExecutionModel.ml	\
-k7FlatInstructionScheduling.ml k7InstructionSchedulingBasics.ml		\
-k7RegisterAllocationBasics.ml k7RegisterAllocator.ml			\
-k7RegisterAllocatorEATranslation.ml k7RegisterAllocatorInit.ml		\
-k7RegisterReallocation.ml k7Translate.ml k7Unparsing.ml			\
-k7Vectorization.ml magic.ml memoMonad.ml nonDetMonad.ml			\
-nullVectorization.ml number.ml stateMonad.ml symmetry.ml twiddle.ml	\
-util.ml vAnnotatedScheduler.ml vDag.ml vFpBasics.ml vFpUnparsing.ml	\
+complex.ml expr.ml exprdag.ml fft.ml genUtil.ml gen_notw.ml id.ml	\
+k7Basics.ml k7ExecutionModel.ml k7FlatInstructionScheduling.ml		\
+k7InstructionSchedulingBasics.ml k7RegisterAllocationBasics.ml		\
+k7RegisterAllocator.ml k7RegisterAllocatorEATranslation.ml		\
+k7RegisterAllocatorInit.ml k7RegisterReallocation.ml k7Translate.ml	\
+k7Unparsing.ml k7Vectorization.ml magic.ml memoMonad.ml nonDetMonad.ml	\
+nullVectorization.ml number.ml stateMonad.ml twiddle.ml util.ml		\
+vAnnotatedScheduler.ml vDag.ml vFpBasics.ml vFpUnparsing.ml		\
 vImproveSchedule.ml vK7Optimization.ml vScheduler.ml vSimdBasics.ml	\
 vSimdIndexing.ml vSimdUnparsing.ml variable.ml				\
 assignmentsToVfpinstrs.mli balanceVfpinstrs.mli complex.mli expr.mli	\
@@ -28,16 +25,16 @@ vSimdBasics.mli vSimdIndexing.mli vSimdUnparsing.mli variable.mli
 
 libgenfft_objects = magic.cmo util.cmo number.cmo variable.cmo		\
 expr.cmo stateMonad.cmo memoMonad.cmo exprdag.cmo complex.cmo		\
-symmetry.cmo twiddle.cmo fft.cmo nonDetMonad.cmo vFpBasics.cmo		\
-balanceVfpinstrs.cmo vSimdBasics.cmo assignmentsToVfpinstrs.cmo		\
-k7Basics.cmo id.cmo k7ExecutionModel.cmo				\
-k7InstructionSchedulingBasics.cmo k7FlatInstructionScheduling.cmo	\
-k7RegisterAllocationBasics.cmo vFpUnparsing.cmo vSimdUnparsing.cmo	\
-k7Unparsing.cmo k7RegisterAllocatorEATranslation.cmo			\
-k7RegisterAllocatorInit.cmo k7RegisterAllocator.cmo			\
-k7RegisterReallocation.cmo k7Translate.cmo nullVectorization.cmo	\
-k7Vectorization.cmo vDag.cmo vScheduler.cmo vAnnotatedScheduler.cmo	\
-vImproveSchedule.cmo vSimdIndexing.cmo vK7Optimization.cmo genUtil.cmo
+twiddle.cmo fft.cmo nonDetMonad.cmo vFpBasics.cmo balanceVfpinstrs.cmo	\
+vSimdBasics.cmo assignmentsToVfpinstrs.cmo k7Basics.cmo id.cmo		\
+k7ExecutionModel.cmo k7InstructionSchedulingBasics.cmo			\
+k7FlatInstructionScheduling.cmo k7RegisterAllocationBasics.cmo		\
+vFpUnparsing.cmo vSimdUnparsing.cmo k7Unparsing.cmo			\
+k7RegisterAllocatorEATranslation.cmo k7RegisterAllocatorInit.cmo	\
+k7RegisterAllocator.cmo k7RegisterReallocation.cmo k7Translate.cmo	\
+nullVectorization.cmo k7Vectorization.cmo vDag.cmo vScheduler.cmo	\
+vAnnotatedScheduler.cmo vImproveSchedule.cmo vSimdIndexing.cmo		\
+vK7Optimization.cmo genUtil.cmo
 
 libgenfft.cma: $(libgenfft_objects)
 	$(OCAMLC) -a -o $@ $^
@@ -46,13 +43,13 @@ libgenfft.cmxa libgenfft.a: $(libgenfft_objects:.cmo=.cmx)
 	$(OCAMLOPT) -a -o libgenfft.cmxa $^
 	$(RANLIB) libgenfft.a
 
-gen_notwiddle_OBJECTS = gen_notwiddle.cmo
-gen_notwiddle: libgenfft.cmxa $(gen_notwiddle_OBJECTS:.cmo=.cmx)
+gen_notw_OBJECTS = gen_notw.cmo
+gen_notw: libgenfft.cmxa $(gen_notw_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-gen_notwiddle.nonopt: libgenfft.cma $(gen_notwiddle_OBJECTS)
+gen_notw.nonopt: libgenfft.cma $(gen_notw_OBJECTS)
 	$(OCAMLLINK)
 clean-local::
-	rm -f gen_notwiddle gen_notw.nonopt
+	rm -f gen_notw gen_notw.nonopt
 
 SUFFIXES = .mli .ml .cmi .cmo .cmx .p.cmx .c .o .cma .cmxa .a
 

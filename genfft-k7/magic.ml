@@ -28,17 +28,9 @@ let wsquare = ref false
 
 let inline_single = ref true
 
-type twiddle_policy =
-    TWIDDLE_LOAD_ALL
-  | TWIDDLE_ITER
-  | TWIDDLE_LOAD_ODD
-  | TWIDDLE_SQUARE1
-  | TWIDDLE_SQUARE2
-  | TWIDDLE_SQUARE3
-
-let twiddle_policy = ref TWIDDLE_LOAD_ALL
-
 let inline_loads = ref false
+let inline_loads_constants = ref false
+let inline_constants = ref true
 let loopo = ref false
 
 let rader_min = ref 13
@@ -53,10 +45,12 @@ let enable_fma_expansion = ref false
 
 let collect_common_twiddle = ref true
 let collect_common_inputs = ref true
-
+let strength_reduce_mul = ref false
 let verbose = ref false
 
 let name = ref "UNNAMED"
+
+let dif_split_radix = ref false
 
 (****************************************************************************
  * K7/FFTW-GEL SPECIFIC VALUES 						    *
@@ -78,3 +72,33 @@ type amd_processor =
 
 let target_processor = ref AMD_K7
 
+let set_bool var = Arg.Unit (fun () -> var := true)
+let unset_bool var = Arg.Unit (fun () -> var := false)
+let set_int var = Arg.Int(fun i -> var := i)
+let set_string var = Arg.String(fun s -> var := s)
+
+let undocumented = " Undocumented voodoo parameter"
+
+let speclist =  [
+  "-name", set_string name, " set codelet name";
+
+  "-verbose", set_bool verbose, 
+  " Enable verbose logging messages to stderr";
+
+  "-rader-min", Arg.Int(fun i -> rader_min := i),
+    "<n> : Use Rader's algorithm for prime sizes >= <n>";
+
+  "-magic-loopo", set_bool loopo, undocumented;
+  "-magic-loopi", unset_bool loopo, undocumented;
+
+  "-magic-times-3-3", set_bool times_3_3, undocumented;
+  "-magic-times-4-2", unset_bool times_3_3, undocumented;
+
+  "-magic-vectsteps-limit", 
+    Arg.Int(fun i -> vectsteps_limit := i), 
+    undocumented;
+
+  "-magic-target-processor-k6",
+    Arg.Unit(fun () -> target_processor := AMD_K6),
+    " Produce code to run on an AMD K6-II+ (K6-III)";
+]

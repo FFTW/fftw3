@@ -17,7 +17,7 @@
  *
  *)
 
-(* $Id: expr.ml,v 1.1 2002-06-14 10:56:15 athena Exp $ *)
+(* $Id: expr.ml,v 1.2 2002-06-15 17:51:39 athena Exp $ *)
 
 (* Here, we define the data type encapsulating a symbolic arithmetic
    expression, and provide some routines for manipulating it.  (See
@@ -44,3 +44,21 @@ let find_vars =
     | Integer _	 -> xs
   in find_vars' []
 
+(* debugging stuff *)
+let rec foldr_string_concat l = 
+  match l with
+    [] -> ""
+  | [a] -> a
+  | a :: b -> a ^ " " ^ (foldr_string_concat b)
+
+let rec expr_to_string = function
+  | Var v -> Variable.unparse v
+  | Num n -> string_of_float (Number.to_float n)
+  | Plus x -> "(+ " ^ (foldr_string_concat (List.map expr_to_string x)) ^ ")"
+  | Times (a, b) -> "(* " ^ (expr_to_string a) ^ " " ^ (expr_to_string b) ^ ")"
+  | Uminus a -> "(- " ^ (expr_to_string a) ^ ")"
+  | Integer x -> string_of_int x
+
+and assignment_to_string = function
+  | Assign (v, a) -> "(:= " ^ (Variable.unparse v) ^ " " ^
+      (expr_to_string a) ^ ")"

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.mli,v 1.1.1.1 2002-06-02 18:42:28 athena Exp $ *)
+(* $Id: expr.mli,v 1.2 2002-06-15 17:51:39 athena Exp $ *)
 
 type expr =
   | Num of Number.number
@@ -33,6 +33,7 @@ type assignment = Assign of Variable.variable * expr
 val hash_float : float -> int
 val hash : expr -> int
 val to_string : expr -> string
+val assignment_to_string : assignment -> string
 
 val find_vars : expr -> Variable.variable list
 val is_constant : expr -> bool

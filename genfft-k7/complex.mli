@@ -17,11 +17,13 @@
  *
  *)
 
-(* $Id: complex.mli,v 1.1 2002-06-14 10:56:15 athena Exp $ *)
+(* $Id: complex.mli,v 1.2 2002-06-15 17:51:39 athena Exp $ *)
 
 type expr
+val make : (Exprdag.node * Exprdag.node) -> expr
 val one : expr
 val zero : expr
+val i : expr
 val inverse_int : int -> expr
 val times : expr -> expr -> expr
 val uminus : expr -> expr
@@ -42,3 +44,11 @@ val store_imag : variable -> expr -> Exprdag.node list
 val access_input : int -> variable
 val access_output : int -> variable
 val access_twiddle : int -> variable
+
+val (@*) : expr -> expr -> expr
+val (@+) : expr -> expr -> expr
+val (@-) : expr -> expr -> expr
+
+(* a signal is a map from integers to expressions *)
+type signal = int -> expr
+val infinite : int -> signal -> signal

@@ -25,10 +25,16 @@ open K7Basics
 open K7RegisterAllocationBasics
 open K7Translate
 open AssignmentsToVfpinstrs
+open Complex
 
-let no_twiddle_gen n dir =
+let store_array_c n f =
+  let a = Array.init n (fun i -> store_var (access_output i) (f i))
+  in Exprdag.make (List.flatten (Array.to_list a))
+
+let no_twiddle_gen n sign =
   let _ = info "generating..." in
-  let code = Fft.no_twiddle_gen_expr n Symmetry.no_sym dir in
+  let expr = Fft.dft sign n (load_var @@ access_input) in
+  let code = store_array_c n expr in
   let code' = vect_optimize varinfo_notwiddle n code in
 
   let _ = info "generating k7vinstrs..." in
@@ -103,15 +109,14 @@ let no_twiddle_gen n dir =
   
   in ((initcode, body), k7vFlops body)
 
-let cvsid = "$Id: gen_notwiddle.ml,v 1.7 2002-06-15 01:11:16 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.1 2002-06-15 17:51:39 athena Exp $"
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let generate n =
   let name = !Magic.name
-  and dir = !GenUtil.dir
-  and sign = Fft.sign_of_dir !GenUtil.dir
+  and sign = !GenUtil.sign
   in
-  let (code, (add, mul)) = no_twiddle_gen n dir in
+  let (code, (add, mul)) = no_twiddle_gen n sign in
   begin
     boilerplate cvsid;
     Printf.printf "#if FFTW_SINGLE && K7_MODE\n";

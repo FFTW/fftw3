@@ -36,6 +36,7 @@ val is_imag : variable -> bool
 val is_output : variable -> bool
 val is_input : variable -> bool
 val is_twiddle : variable -> bool
+val is_locative : variable -> bool
 
 val same : 'a -> 'a -> bool
 val hash : variable -> int
@@ -51,3 +52,5 @@ val access_input : int -> variable * variable
 val access_output : int -> variable * variable
 val access_twiddle : int -> variable * variable
 val make_named : string -> variable
+
+val unparse : variable -> string

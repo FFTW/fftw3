@@ -73,6 +73,8 @@ let is_twiddle = function
   | ImagArrayElem (Twiddle, _) -> true
   | _ -> false
 
+let is_locative x = (is_input x) || (is_output x)
+
 let same = (=)
 
 let hash = function
@@ -117,3 +119,12 @@ let access_output = access Output
 let access_twiddle = access Twiddle
 
 let make_named name = Named name
+
+let unparse = function
+  | Temporary x -> "t" ^ (string_of_int x)
+  | Named s -> s
+  | RealArrayElem (a, x) -> "Re(" ^ (arrayToString a) ^ "[" ^
+      (string_of_int x) ^ "])"
+  | ImagArrayElem (a, x) -> "Im(" ^ (arrayToString a) ^ "[" ^
+      (string_of_int x) ^ "])"
+							  

@@ -17,7 +17,7 @@
  *
  *)
 
-(* $Id: expr.mli,v 1.1 2002-06-14 10:56:15 athena Exp $ *)
+(* $Id: expr.mli,v 1.2 2002-06-15 17:51:39 athena Exp $ *)
 type expr =
   | Num of Number.number
   | Var of Variable.variable
@@ -29,6 +29,4 @@ val find_vars : expr -> Variable.variable list
 
 type assignment = Assign of Variable.variable * expr
 
-(*
-val print_assignments: assignment list -> unit
-*)
+val assignment_to_string : assignment -> string

@@ -27,7 +27,6 @@ type node =
 type dag
 
 val algsimp : dag -> dag
-val to_assignments : dag -> (Variable.variable * Expr.expr) list
 val simplify_to_alist : dag -> Expr.assignment list
 val make : node list -> dag
 val cvsid : string

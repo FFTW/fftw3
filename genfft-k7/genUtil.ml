@@ -49,6 +49,14 @@ let vect_schedule vect_optimized =
 let vect_optimize varinfo n expr =
   let _ = info "simplifying..." in
   let code0 = Exprdag.simplify_to_alist expr in
+(*
+  let _ = 
+    List.iter
+      (fun x -> Printf.printf "%s\n" (Expr.assignment_to_string x)) 
+      code0
+  in 
+*)
+
   let _ = info "mapping assignments to vfpinstrs..." in
   let code1 = AssignmentsToVfpinstrs.assignmentsToVfpinstrs varinfo code0 in
   let _ = info "vectorizing..." in
@@ -61,6 +69,22 @@ let vect_optimize varinfo n expr =
 
   let _ = info "improving..." in
   let code5 = VImproveSchedule.improve_schedule code4 in
+
+(*
+  let _ = 
+    List.iter
+      (fun x -> Printf.printf "%s\n" (VFpUnparsing.vfpinstrToString x)) 
+      code1
+  in
+*)
+
+(*
+  let _ = 
+    List.iter
+      (fun x -> Printf.printf "%s\n" (VSimdUnparsing.vsimdinstrToString x)) 
+      code2
+  in
+*)
   (operandsize, code5)
 
 
@@ -374,73 +398,26 @@ let compileToAsm (initcode, k7vinstrs) =
 
 let standard_arg_parse_fail _ = failwith "too many arguments"
 
-let set_bool var = Arg.Unit (fun () -> var := true)
-let unset_bool var = Arg.Unit (fun () -> var := false)
-let set_int var = Arg.Int(fun i -> var := i)
-let set_string var = Arg.String(fun s -> var := s)
-
-let undocumented = " Undocumented voodoo parameter"
-
-let speclist =  [
-  "-name", set_string Magic.name, " set codelet name";
-
-  "-verbose", set_bool Magic.verbose, 
-  " Enable verbose logging messages to stderr";
-
-  "-rader-min", Arg.Int(fun i -> Magic.rader_min := i),
-    "<n> : Use Rader's algorithm for prime sizes >= <n>";
-
-  "-magic-loopo", set_bool Magic.loopo, undocumented;
-  "-magic-loopi", unset_bool Magic.loopo, undocumented;
-
-  "-magic-times-3-3", set_bool Magic.times_3_3, undocumented;
-  "-magic-times-4-2", unset_bool Magic.times_3_3, undocumented;
-
-  "-magic-vectsteps-limit", 
-    Arg.Int(fun i -> Magic.vectsteps_limit := i), 
-    undocumented;
-
-  "-magic-target-processor-k6",
-    Arg.Unit(fun () -> Magic.target_processor := Magic.AMD_K6),
-    " Produce code to run on an AMD K6-II+ (K6-III)";
-
-  "-magic-twiddle-load-all", 
-    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_LOAD_ALL),
-    undocumented;
-  "-magic-twiddle-iter", 
-    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_ITER),
-    undocumented;
-  "-magic-twiddle-load-odd", 
-    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_LOAD_ODD),
-    undocumented;
-  "-magic-twiddle-square1", 
-    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_SQUARE1),
-    undocumented;
-  "-magic-twiddle-square2", 
-    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_SQUARE2),
-    undocumented;
-  "-magic-twiddle-square3", 
-    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_SQUARE3),
-    undocumented;
-]
-
-let parse user_list usage =
-  Arg.parse (user_list @ speclist) standard_arg_parse_fail usage
-
 
 let size = ref None
-let dir = ref Fft.FORWARD
+let sign = ref (-1)
 
 let speclist = [
   "-n", Arg.Int(fun i -> size := Some i), " generate a codelet of size <n>";
   "-sign",
   Arg.Int(fun i -> 
     if (i > 0) then
-      dir := Fft.BACKWARD
+      sign := 1
     else
-      dir := Fft.FORWARD),
+      sign := (-1)),
   " sign of transform";
 ]
+
+let parse user_speclist usage =
+  Arg.parse 
+    (user_speclist @ speclist @ Magic.speclist)
+    standard_arg_parse_fail 
+    usage
 
 let check_size () =
   match !size with

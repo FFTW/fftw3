@@ -320,3 +320,17 @@ let rec list_last = function
   | [] -> failwith "list_last"
   | [x] -> x
   | x::xs -> list_last xs
+
+(*
+ * freeze a function, i.e., compute it only once on demand, and
+ * cache it into an array.
+ *)
+let array n f =
+  let a = Array.init n (fun i -> lazy (f i))
+  in fun i -> Lazy.force a.(i)
+
+(* iota n produces the list [0; 1; ...; n - 1] *)
+let iota n = forall cons 0 n identity
+
+(* interval a b produces the list [a; 1; ...; b - 1] *)
+let interval a b = List.map ((+) a) (iota (b - a))

@@ -17,8 +17,8 @@
  *
  *)
 
-(* $Id: exprdag.ml,v 1.1 2002-06-14 10:56:15 athena Exp $ *)
-let cvsid = "$Id: exprdag.ml,v 1.1 2002-06-14 10:56:15 athena Exp $"
+(* $Id: exprdag.ml,v 1.2 2002-06-15 17:51:39 athena Exp $ *)
+let cvsid = "$Id: exprdag.ml,v 1.2 2002-06-15 17:51:39 athena Exp $"
 
 open List
 open Util
@@ -86,18 +86,19 @@ module LittleSimplifier = struct
 
   and makePlus l = 
     let rec reduceSum x = match x with
-	[] -> []
-      | [Num a] -> if Number.is_zero a then [] else x
-      | (Num a) :: (Num b) :: c -> 
-	  reduceSum ((makeNum (Number.add a b)) :: c)
-      | ((Num _) as a') :: b :: c -> b :: reduceSum (a' :: c)
-      | a :: s -> a :: reduceSum s
+      [] -> []
+    | [Num a] -> if Number.is_zero a then [] else x
+    | (Num a) :: (Num b) :: c -> 
+	reduceSum ((makeNum (Number.add a b)) :: c)
+    | ((Num _) as a') :: b :: c -> b :: reduceSum (a' :: c)
+    | a :: s -> a :: reduceSum s
+
     in match reduceSum l with
       [] -> makeNum (Number.zero)
     | [a] -> a 
     | [a; b] when a == b -> makeTimes (Num Number.two, a)
     | [Times (Num a, b); Times (Num c, d)] when b == d ->
- 	makeTimes (makePlus [Num a; Num c], b)
+	makeTimes (makePlus [Num a; Num c], b)
     | a -> Plus a
 end
 
@@ -714,14 +715,16 @@ let make nodes = Dag nodes
  * produce the output.
  *)
 module Destructor :  sig
-  val to_assignments : dag -> (Variable.variable * Expr.expr) list
+  val to_assignments : dag -> Expr.assignment list
 end = struct
-
   open StateMonad
   open MemoMonad
   open AssocTable
 
   let fresh = Variable.make_temporary
+  let node_insert x =  AssocTable.insert hash_node x
+  let node_lookup x =  AssocTable.lookup hash_node (==) x
+  let empty = AssocTable.empty
 
   let fetchAl = 
     fetchStateM >>= (fun (al, _, _) -> unitM al)
@@ -742,23 +745,28 @@ end = struct
       storeStateM (al, visited, visited'))
   let lookupVisitedM' key =
     fetchVisited' >>= fun table ->
-      unitM (AssocTable.lookup hash_node (==) key table)
+      unitM (node_lookup key table)
   let insertVisitedM' key value =
     fetchVisited' >>= fun table ->
-      storeVisited' (AssocTable.insert hash_node key value table)
+      storeVisited' (node_insert key value table)
 
   let counting f x =
     fetchVisited >>= (fun v ->
-      match AssocTable.lookup hash_node (==) x v with
+      match node_lookup x v with
 	Some count -> 
-	  fetchVisited >>= (fun v' ->
-	    storeVisited (AssocTable.insert hash_node 
-			    x (count + 1) v'))
-      |	None ->
-	  f x >>= fun () ->
+	  let incr_cnt = 
 	    fetchVisited >>= (fun v' ->
-	      storeVisited (AssocTable.insert hash_node 
-			      x 1 v')))
+	      storeVisited (node_insert x (count + 1) v'))
+	  in
+	  begin
+	    match x with
+	    (* Uminus is always inlined.  Visit child *)
+	      Uminus y -> f y >> incr_cnt
+	    | _ -> incr_cnt
+	  end
+      | None ->
+          f x >> fetchVisited >>= (fun v' ->
+            storeVisited (node_insert x 1 v')))
 
   let with_varM v x = 
     fetchAl >>= (fun al -> storeAl ((v, x) :: al)) >> unitM (Expr.Var v)
@@ -767,18 +775,17 @@ end = struct
 
   let with_tempM x = with_varM (fresh ()) x
 
-  (* declare a temporary only if node is used more than once *)
+(* declare a temporary only if node is used more than once *)
   let with_temp_maybeM node x =
     fetchVisited >>= (fun v ->
-      match AssocTable.lookup hash_node (==) node v with
+      match node_lookup node v with
 	Some count -> 
-	  if (count = 1 && !Magic.inline_single) then
-	    inlineM x
-	  else
-	    with_tempM x
-      |	None ->
-	  failwith "with_temp_maybeM")
-
+          if (count = 1 && !Magic.inline_single) then
+            inlineM x
+          else
+            with_tempM x
+      | None ->
+          failwith "with_temp_maybeM")
   type fma = 
       NO_FMA
     | FMA of node * node * node   (* FMA (a, b, c) => a + b * c *)
@@ -786,7 +793,7 @@ end = struct
     | FNMS of node * node * node  (* FNMS (a, b, c) => a - b * c *)
 
   let build_fma l = 
-    if (not !Magic.enable_fma_expansion) then NO_FMA
+    if (not !Magic.enable_fma) then NO_FMA
     else match l with
     | [Uminus a; Times (b, c)] -> FMS (a, b, c)
     | [Times (b, c); Uminus a] -> FMS (a, b, c)
@@ -802,66 +809,84 @@ end = struct
   | FNMS (a, b, c) -> Some (a, b, c)
   | NO_FMA -> None
 
+
   let rec visitM x =
     counting (function
 	Load v -> unitM ()
-      |	Num a -> unitM ()
-      |	Store (v, x) -> visitM x
-      |	Plus a -> (match children_fma a with
+      | Num a -> unitM ()
+      | Store (v, x) -> visitM x
+      | Plus a -> (match children_fma a with
 	  None -> mapM visitM a >> unitM ()
 	| Some (a, b, c) -> 
-          (* visit fma's arguments twice to make sure they get a variable *)
+          (* visit fma's arguments twice to make sure they are not inlined *)
 	    visitM a >> visitM a >>
 	    visitM b >> visitM b >>
 	    visitM c >> visitM c)
-      |	Times (a, b) ->
-	  visitM a >> visitM b
-      |	Uminus a ->  visitM a)
+      | Times (a, b) -> visitM a >> visitM b
+      | Uminus a -> visitM a)
       x
 
   let visit_rootsM = mapM visitM
 
+
   let rec expr_of_nodeM x =
     memoizingM lookupVisitedM' insertVisitedM'
       (function x -> match x with
-	Load v -> 
-	  if (!Magic.inline_loads) then
+      | Load v -> 
+	  if (Variable.is_temporary v) then
 	    inlineM (Expr.Var v)
+	  else if (Variable.is_locative v && !Magic.inline_loads) then
+            inlineM (Expr.Var v)
+          else if (Variable.is_twiddle v && !Magic.inline_loads_constants) then
+            inlineM (Expr.Var v)
 	  else
-	    with_tempM (Expr.Var v)
+            with_tempM (Expr.Var v)
       | Num a ->
-	  inlineM (Expr.Num a)
+          if !Magic.inline_constants then
+            inlineM (Expr.Num a)
+	  else
+            with_temp_maybeM x (Expr.Num a)
       | Store (v, x) -> 
-	  expr_of_nodeM x >>= 
-	  with_varM v 
-      | Plus a -> (match build_fma a with
-	  FMA (a, b, c) ->	  
-	    expr_of_nodeM a >>= fun a' ->
-	      expr_of_nodeM b >>= fun b' ->
-		expr_of_nodeM c >>= fun c' ->
-		  with_temp_maybeM x (Expr.Plus [a'; Expr.Times (b', c')])
-	| FMS (a, b, c) ->	  
-	    expr_of_nodeM a >>= fun a' ->
-	      expr_of_nodeM b >>= fun b' ->
-		expr_of_nodeM c >>= fun c' ->
-		  with_temp_maybeM x 
-		    (Expr.Plus [Expr.Times (b', c'); Expr.Uminus a'])
-	| FNMS (a, b, c) ->	  
-	    expr_of_nodeM a >>= fun a' ->
-	      expr_of_nodeM b >>= fun b' ->
-		expr_of_nodeM c >>= fun c' ->
-		  with_temp_maybeM x 
-		    (Expr.Plus [a'; Expr.Uminus (Expr.Times (b', c'))])
-	| NO_FMA ->
-	    mapM expr_of_nodeM a >>= fun a' ->
-	      with_temp_maybeM x (Expr.Plus a'))
+          expr_of_nodeM x >>= 
+          with_varM v 
+
+      | Plus a -> 
+	  begin
+	    match build_fma a with
+	      FMA (a, b, c) ->	  
+		expr_of_nodeM a >>= fun a' ->
+		  expr_of_nodeM b >>= fun b' ->
+		    expr_of_nodeM c >>= fun c' ->
+		      with_temp_maybeM x (Expr.Plus [a'; Expr.Times (b', c')])
+	    | FMS (a, b, c) ->	  
+		expr_of_nodeM a >>= fun a' ->
+		  expr_of_nodeM b >>= fun b' ->
+		    expr_of_nodeM c >>= fun c' ->
+		      with_temp_maybeM x 
+			(Expr.Plus [Expr.Times (b', c'); Expr.Uminus a'])
+	    | FNMS (a, b, c) ->	  
+		expr_of_nodeM a >>= fun a' ->
+		  expr_of_nodeM b >>= fun b' ->
+		    expr_of_nodeM c >>= fun c' ->
+		      with_temp_maybeM x 
+			(Expr.Plus [a'; Expr.Uminus (Expr.Times (b', c'))])
+	    | NO_FMA ->
+		mapM expr_of_nodeM a >>= fun a' ->
+		  with_temp_maybeM x (Expr.Plus a')
+	  end
       | Times (a, b) ->
-	  expr_of_nodeM a >>= fun a' ->
-	    expr_of_nodeM b >>= fun b' ->
-	      with_temp_maybeM x (Expr.Times (a', b'))
+          expr_of_nodeM a >>= fun a' ->
+            expr_of_nodeM b >>= fun b' ->
+	      begin
+		match a' with
+		  Expr.Num a'' when !Magic.strength_reduce_mul && Number.is_two a'' ->
+		    (with_tempM b' >>= fun b'' ->
+		      with_temp_maybeM x (Expr.Plus [b''; b'']))
+		| _ -> with_temp_maybeM x (Expr.Times (a', b'))
+	      end
       | Uminus a ->
-	  expr_of_nodeM a >>= fun a' ->
-	    inlineM (Expr.Uminus a'))
+          expr_of_nodeM a >>= fun a' ->
+            inlineM (Expr.Uminus a'))
       x
 
   let expr_of_rootsM = mapM expr_of_nodeM
@@ -869,11 +894,16 @@ end = struct
   let peek_alistM roots =
     visit_rootsM roots >> expr_of_rootsM roots >> fetchAl
 
+  let wrap_assign (a, b) = Expr.Assign (a, b)
+
   let to_assignments (Dag dag) =
-    List.rev (runM ([], empty, empty) peek_alistM dag)
+    let () = Util.info "begin to_alist" in
+    let al = List.rev (runM ([], empty, empty) peek_alistM dag) in
+    let res = List.map wrap_assign al in
+    let () = Util.info "end to_alist" in
+    res
 end
 
 let to_assignments = Destructor.to_assignments
 
-let wrap_assign (a, b) = Expr.Assign (a, b)
-let simplify_to_alist dag = List.map wrap_assign (to_assignments (algsimp dag))
+let simplify_to_alist dag = to_assignments (algsimp dag)

@@ -122,3 +122,6 @@ val toZero : 'a -> int
 val info : string -> unit
 val debugOutputString : string -> unit
 val list_last : 'a list -> 'a
+val array : int -> (int -> 'a) -> int -> 'a
+val iota : int -> int list
+val interval : int -> int -> int list

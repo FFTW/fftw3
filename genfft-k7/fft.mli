@@ -19,32 +19,4 @@
 
 
 val cvsid : string
-
-val ( @* ) : Complex.expr -> Complex.expr -> Complex.expr
-val ( @+ ) : Complex.expr -> Complex.expr -> Complex.expr
-val ( @- ) : Complex.expr -> Complex.expr -> Complex.expr
-
-val choose_factor : int -> int
-val freeze : int -> (int -> 'a) -> int -> 'a
-
-val fftgen_prime : int -> (int -> Complex.expr) -> int -> int -> Complex.expr
-val fftgen_rader : int -> (int -> Complex.expr) -> int -> int -> Complex.expr
-
-val fftgen :
-  int ->
-  Symmetry.symmetry -> (int -> Complex.expr) -> int -> int -> Complex.expr
-
-type direction = FORWARD | BACKWARD
-
-val sign_of_dir : direction -> int
-val conj_of_dir : direction -> Complex.expr -> Complex.expr
-val dagify : int -> Symmetry.symmetry -> (int -> Complex.expr) -> Exprdag.dag
-
-val no_twiddle_gen_expr :
-  int -> Symmetry.symmetry -> direction -> Exprdag.dag
-
-val twiddle_dit_gen_expr :
-  int -> Symmetry.symmetry -> Symmetry.symmetry -> direction -> Exprdag.dag
-
-val twiddle_dif_gen_expr :
-  int -> Symmetry.symmetry -> Symmetry.symmetry -> direction -> Exprdag.dag
+val dft : int -> int -> Complex.signal -> Complex.signal
