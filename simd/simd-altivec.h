@@ -123,6 +123,8 @@ extern const vector unsigned int X(altivec_ld_selmsk);
 
 static inline V LDA(const R *x, int ivs, const R *aligned_like) 
 {
+     UNUSED(ivs);
+     UNUSED(aligned_like);
      return vec_ld(0, (R *)x);
 }
 
