@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.126 2003-03-12 02:17:54 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.127 2003-03-12 04:50:43 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2657,9 +2657,440 @@ parts for the input and output, as described in @ref{Guru Complex DFTs}.
 @c ------------------------------------------------------------
 @node What FFTW Really Computes,  , Wisdom, FFTW Reference
 @section What FFTW Really Computes
+
+In this section, we provide precise mathematical definitions for the
+transforms that FFTW computes.  These transform definitions are fairly
+standard, but some authors follow slightly different conventions for the
+normalization of the transform (the constant factor in front) and the
+sign of the complex exponent.  We begin by presenting the
+one-dimensional (1d) transform definitions, and then give the
+straightforward extension of the multi-dimensional transforms.
+
+@menu
+* The 1d Discrete Fourier Transform (DFT)::  
+* The 1d Real-data DFT::        
+* 1d Real-even DFTs (discrete cosine transforms::  
+* 1d Real-odd DFTs (discrete sine transforms::  
+* 1d Discrete Hartley Transforms (DHTs)::  
+@end menu
+
+@c =========>
+@node The 1d Discrete Fourier Transform (DFT), The 1d Real-data DFT, What FFTW Really Computes, What FFTW Really Computes
+@subsection The 1d Discrete Fourier Transform (DFT)
+
 @cindex discrete Fourier transform
 @cindex DFT
+The forward (@code{FFTW_FORWARD}) discrete Fourier transform (DFT) of a
+1d complex array @math{X} of size @math{n} computes an array @math{Y},
+where:
+@tex
+$$
+Y_k = \sum_{j = 0}^{n - 1} X_j e^{-2\pi j k \sqrt{-1}/n} \ .
+$$
+@end tex
+@ifinfo
+@center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(-2 pi j k sqrt(-1)/n) .
+@end ifinfo
+@ifhtml
+<center><img src="equation-dft.gif" align="top"></center>
+@end ifhtml
+The backward (@code{FFTW_BACKWARD}) DFT computes:
+@tex
+$$
+Y_k = \sum_{j = 0}^{n - 1} X_j e^{2\pi j k \sqrt{-1}/n} \ .
+$$
+@end tex
+@ifinfo
+@center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(2 pi j k sqrt(-1)/n) .
+@end ifinfo
+@ifhtml
+<center><img src="equation-idft.gif" align="top"></center>
+@end ifhtml
 
+@cindex normalization
+FFTW computes an unnormalized transform, in that there is no coefficient
+in front of the summation in the DFT.  In other words, applying the
+forward and then the backward transform will multiply the input by
+@math{n}.
+
+@cindex frequency
+From above, an @code{FFTW_FORWARD} transform corresponds to a sign of
+@math{-1} in the exponent of the DFT.  Note also that we use the
+standard ``in-order'' output ordering---the @math{k}-th output
+corresponds to the frequency @math{k/n} (or @math{k/T}, where @math{T}
+is your total sampling period).  For those who like to think in terms of
+positive and negative frequencies, this means that the positive
+frequencies are stored in the first half of the output and the negative
+frequencies are stored in backwards order in the second half of the
+output.  (The frequency @math{-k/n} is the same as the frequency
+@math{(n-k)/n}.)
+
+@c =========>
+@node The 1d Real-data DFT, 1d Real-even DFTs (discrete cosine transforms, The 1d Discrete Fourier Transform (DFT), What FFTW Really Computes
+@subsection The 1d Real-data DFT
+
+The real-input (r2c) DFT in FFTW computes the @emph{forward} transform
+@math{Y} of the size-n @code{n} real array @math{X}, exactly as defined
+above, i.e.
+@tex
+$$
+Y_k = \sum_{j = 0}^{n - 1} X_j e^{-2\pi j k \sqrt{-1}/n} \ .
+$$
+@end tex
+@ifinfo
+@center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(-2 pi j k sqrt(-1)/n) .
+@end ifinfo
+@ifhtml
+<center><img src="equation-dft.gif" align="top"></center>
+@end ifhtml
+This output array @math{Y} can easily be shown to possess the
+``Hermitian'' symmetry
+@cindex Hermitian
+@tex
+$Y_k = Y_{n-k}^*$,
+@end tex
+@ifinfo
+Y[k] = Y[n-k]*,
+@end ifinfo
+@ifhtml
+<i>Y<sub>k</sub> = Y<sub>n-k</sub></i><sup>*</sup>,
+@end ifhtml
+where we take @math{Y} to be periodic so that
+@tex
+$Y_n = Y_0$.
+@end tex
+@ifinfo
+Y[n] = Y[0].
+@end ifinfo
+@ifhtml
+<i>Y<sub>n</sub> = Y</i><sub>0</sub>.
+@end ifhtml
+
+As a result of this symmetry, half of the output @math{Y} is redundant
+(being the complex conjugate of the other half), and so the 1d r2c
+transforms only output elements @math{0}@dots{}@math{n/2} of @math{Y}
+(@math{n/2+1} complex numbers), where the division by @math{2} is
+rounded down.
+
+Moreover, the Hermitian symmetry implies that
+@tex
+$Y_0$
+@end tex
+@ifinfo
+Y[0]
+@end ifinfo
+@ifhtml
+<i>Y</i><sub>0</sub>
+@end ifhtml
+and, if @math{n} is even, the
+@tex
+$Y_{n/2}$
+@end tex
+@ifinfo
+Y[n/2]
+@end ifinfo
+@ifhtml
+<i>Y</i><sub><i>n</i>/2</sub>
+@end ifhtml
+element, are purely real.  So, for the @code{R2HC} r2r transform, these
+elements are not stored in the halfcomplex output format.
+@cindex r2r
+@ctindex R2HC
+@cindex halfcomplex format
+
+The c2r and @code{H2RC} r2r transforms compute the backward DFT of the
+@emph{complex} array @math{X} with Hermitian symmetry, stored in the
+r2c/@code{R2HC} output formats, respectively, where the backward
+transform is defined exactly as for the complex case:
+@tex
+$$
+Y_k = \sum_{j = 0}^{n - 1} X_j e^{2\pi j k \sqrt{-1}/n} \ .
+$$
+@end tex
+@ifinfo
+@center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(2 pi j k sqrt(-1)/n) .
+@end ifinfo
+@ifhtml
+<center><img src="equation-idft.gif" align="top"></center>
+@end ifhtml
+The outputs @code{Y} of this transform can easily be seen to be purely
+real, and are stored as an array of real numbers.
+
+@cindex normalization
+Like FFTW's complex DFT, these transforms are unnormalized.  In other
+words, applying the real-to-complex (forward) and then the
+complex-to-real (backward) transform will multiply the input by
+@math{n}.
+
+@c =========>
+@node 1d Real-even DFTs (discrete cosine transforms, 1d Real-odd DFTs (discrete sine transforms, The 1d Real-data DFT, What FFTW Really Computes
+@subsection 1d Real-even DFTs (discrete cosine transforms, DCTs)
+
+The Real-even DFTs in FFTW are exactly equivalent to the unnormalized
+forward (and backward) DFTs as defined above, where the input array
+@math{X} of length @math{N} is purely real and is also @dfn{even}.
+@cindex real-even DFT
+@cindex REDFT
+
+@ctindex REDFT00
+For the case of @code{REDFT00}, this even symmetry means that
+@tex
+$X_j = X_{N-j}$,
+@end tex
+@ifinfo
+X[j] = X[N-j],
+@end ifinfo
+@ifhtml
+<i>X<sub>j</sub> = X<sub>N-j</sub></i>,
+@end ifhtml
+where we take @math{X} to be periodic so that
+@tex
+$X_N = X_0$.
+@end tex
+@ifinfo
+X[N] = X[0].
+@end ifinfo
+@ifhtml
+<i>X<sub>N</sub> = X</i><sub>0</sub>.
+@end ifhtml
+Because of this redundancy, only the first @math{n} real numbers are
+actually stored, where @math{N = 2(n-1)}.
+
+The proper definition of even symmetry for @code{REDFT10},
+@code{REDFT01}, and @code{REDFT11} transforms is somewhat more intricate
+because of the shifts by @math{1/2} of the input and/or output, although
+the corresponding boundary conditions are given in @ref{Real even/odd
+DFTs (cosine/sine transforms)}.  Because of the even symmetry, however,
+the sine terms in the DFT all cancel and the remaining cosine terms are
+written explicitly below.  This formulation often leads people to call
+such a transform a @dfn{discrete cosine transform} (DCT), although it is
+really just a special case of the DFT.
+@cindex discrete cosine transform
+@cindex DCT
+
+In each of the definitions below, we transform a real array @math{X} of
+length @math{n} to a real array @math{Y} of length @math{n}:
+
+@subsubheading REDFT00 (DCT-I)
+@ctindex REDFT00
+An @code{REDFT00} transform (type-I DCT) in FFTW is defined by:
+@tex
+$$
+Y_k = X_0 + (-1)^k X_{n-1}
+       + 2 \sum_{j=1}^{n-2} X_j \cos [ \pi j k / (n-1)]
+$$
+@end tex
+@ifinfo
+Y[k] = X[0] + (-1)^k X[n-1] + 2 (sum for j = 1 to n-2 of X[j] cos(pi jk /(n-1)))
+@end ifinfo
+@ifhtml
+<center><img src="equation-redft00.gif" align="top"></center>
+@end ifhtml
+
+@subsubheading REDFT10 (DCT-II)
+@ctindex REDFT10
+An @code{REDFT10} transform (type-II DCT) in FFTW is defined by:
+@tex
+$$
+Y_k = 2 \sum_{j=0}^{n-1} X_j \cos [\pi (j+1/2) k / n]
+$$
+@end tex
+@ifinfo
+Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) k / n))
+@end ifinfo
+@ifhtml
+<center><img src="equation-redft10.gif" align="top"></center>
+@end ifhtml
+
+@subsubheading REDFT01 (DCT-III)
+@ctindex REDFT01
+An @code{REDFT01} transform (type-III DCT) in FFTW is defined by:
+@tex
+$$
+Y_k = X_0 + 2 \sum_{j=1}^{n-1} X_j \cos [\pi j (k+1/2) / n]
+$$
+@end tex
+@ifinfo
+Y[k] = X[0] + 2 (sum for j = 1 to n-1 of X[j] cos(pi j (k+1/2) / n))
+@end ifinfo
+@ifhtml
+<center><img src="equation-redft01.gif" align="top"></center>
+@end ifhtml
+
+@subsubheading REDFT11 (DCT-IV)
+@ctindex REDFT11
+An @code{REDFT11} transform (type-IV DCT) in FFTW is defined by:
+@tex
+$$
+Y_k = 2 \sum_{0=1}^{n-1} X_j \cos [\pi (j+1/2) (k+1/2) / n]
+$$
+@end tex
+@ifinfo
+Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) (k+1/2) / n))
+@end ifinfo
+@ifhtml
+<center><img src="equation-redft11.gif" align="top"></center>
+@end ifhtml
+
+@subsubheading Inverses and Normalization
+
+These definitions correspond directly to the unnormalized DFTs used
+elsewhere in FFTW (hence the factors of @math{2} in front of the
+summations).  The unnormalized inverse of @code{REDFT00} is
+@code{REDFT00}, of @code{REDFT10} is @code{REDFT01} and vice versa, and
+of @code{REDFT11} is @code{REDFT11}.  Each unnormalized inverse results
+in the original array multiplied by @math{N}, where @math{N} is the
+@emph{logical} DFT size.  For @code{REDFT00}, @math{N=2(n-1)} (note that
+@math{n=1} is not defined); otherwise, @math{N=2n}.
+@cindex normalization
+
+@c =========>
+@node 1d Real-odd DFTs (discrete sine transforms, 1d Discrete Hartley Transforms (DHTs), 1d Real-even DFTs (discrete cosine transforms, What FFTW Really Computes
+@subsection 1d Real-odd DFTs (discrete sine transforms, DSTs)
+
+The Real-odd DFTs in FFTW are exactly equivalent to the unnormalized
+forward (and backward) DFTs as defined above, where the input array
+@math{X} of length @math{N} is purely real and is also @dfn{odd}.
+@cindex real-odd DFT
+@cindex RODFT
+
+@ctindex RODFT00
+For the case of @code{RODFT00}, this odd symmetry means that
+@tex
+$X_j = -X_{N-j}$,
+@end tex
+@ifinfo
+X[j] = -X[N-j],
+@end ifinfo
+@ifhtml
+<i>X<sub>j</sub> = -X<sub>N-j</sub></i>,
+@end ifhtml
+where we take @math{X} to be periodic so that
+@tex
+$X_N = X_0$.
+@end tex
+@ifinfo
+X[N] = X[0].
+@end ifinfo
+@ifhtml
+<i>X<sub>N</sub> = X</i><sub>0</sub>.
+@end ifhtml
+Because of this redundancy, only the first @math{n} real numbers
+starting at @math{j=1} are actually stored (the @math{j=0} element is
+zero), where @math{N = 2(n+1)}.
+
+The proper definition of odd symmetry for @code{RODFT10},
+@code{RODFT01}, and @code{RODFT11} transforms is somewhat more intricate
+because of the shifts by @math{1/2} of the input and/or output, although
+the corresponding boundary conditions are given in @ref{Real even/odd
+DFTs (cosine/sine transforms)}.  Because of the odd symmetry, however,
+the cosine terms in the DFT all cancel and the remaining sine terms are
+written explicitly below.  This formulation often leads people to call
+such a transform a @dfn{discrete sine transform} (DST), although it is
+really just a special case of the DFT.
+@cindex discrete sine transform
+@cindex DST
+
+In each of the definitions below, we transform a real array @math{X} of
+length @math{n} to a real array @math{Y} of length @math{n}:
+
+@subsubheading RODFT00 (DST-I)
+@ctindex RODFT00
+An @code{RODFT00} transform (type-I DST) in FFTW is defined by:
+@tex
+$$
+Y_k = 2 \sum_{j=0}^{n-1} X_j \sin [ \pi (j+1) (k+1) / (n+1)]
+$$
+@end tex
+@ifinfo
+Y[k] = 2 (sum for j = 1 to n-2 of X[j] sin(pi (j+1)(k+1) / (n+1)))
+@end ifinfo
+@ifhtml
+<center><img src="equation-rodft00.gif" align="top"></center>
+@end ifhtml
+
+@subsubheading RODFT10 (DST-II)
+@ctindex RODFT10
+An @code{RODFT10} transform (type-II DST) in FFTW is defined by:
+@tex
+$$
+Y_k = 2 \sum_{j=0}^{n-1} X_j \sin [\pi (j+1/2) (k+1) / n]
+$$
+@end tex
+@ifinfo
+Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1) / n))
+@end ifinfo
+@ifhtml
+<center><img src="equation-rodft10.gif" align="top"></center>
+@end ifhtml
+
+@subsubheading RODFT01 (DST-III)
+@ctindex RODFT01
+An @code{RODFT01} transform (type-III DST) in FFTW is defined by:
+@tex
+$$
+Y_k = 2 \sum_{j=1}^{n-1} X_j \sin [\pi (j+1) (k+1/2) / n]
+$$
+@end tex
+@ifinfo
+Y[k] = 2 (sum for j = 1 to n-1 of X[j] sin(pi (j+1) (k+1/2) / n))
+@end ifinfo
+@ifhtml
+<center><img src="equation-rodft01.gif" align="top"></center>
+@end ifhtml
+
+@subsubheading RODFT11 (DST-IV)
+@ctindex RODFT11
+An @code{RODFT11} transform (type-IV DST) in FFTW is defined by:
+@tex
+$$
+Y_k = 2 \sum_{0=1}^{n-1} X_j \sin [\pi (j+1/2) (k+1/2) / n]
+$$
+@end tex
+@ifinfo
+Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1/2) / n))
+@end ifinfo
+@ifhtml
+<center><img src="equation-rodft11.gif" align="top"></center>
+@end ifhtml
+
+@subsubheading Inverses and Normalization
+
+These definitions correspond directly to the unnormalized DFTs used
+elsewhere in FFTW (hence the factors of @math{2} in front of the
+summations).  The unnormalized inverse of @code{RODFT00} is
+@code{RODFT00}, of @code{RODFT10} is @code{RODFT01} and vice versa, and
+of @code{RODFT11} is @code{RODFT11}.  Each unnormalized inverse results
+in the original array multiplied by @math{N}, where @math{N} is the
+@emph{logical} DFT size.  For @code{RODFT00}, @math{N=2(n+1)};
+otherwise, @math{N=2n}.
+@cindex normalization
+
+@c =========>
+@node 1d Discrete Hartley Transforms (DHTs),  , 1d Real-odd DFTs (discrete sine transforms, What FFTW Really Computes
+@subsection 1d Discrete Hartley Transforms (DHTs)
+
+@cindex discrete Hartley transform
+@cindex DHT
+The discrete Hartley transform (DHT) of a 1d real array @math{X} of size
+@math{n} computes a real array @math{Y}, where:
+@tex
+$$
+Y_k = \sum_{j = 0}^{n - 1} X_j [ \cos(2\pi j k / n) + \sin(2\pi j k / n)] \ .
+$$
+@end tex
+@ifinfo
+@center Y[k] = sum for j = 0 to (n - 1) of X[j] * [cos(2 pi j k / n) + sin(2 pi j k / n)].
+@end ifinfo
+@ifhtml
+<center><img src="equation-dht.gif" align="top"></center>
+@end ifhtml
+
+@cindex normalization
+FFTW computes an unnormalized transform, in that there is no coefficient
+in front of the summation in the DHT.  In other words, applying the
+forward and then the backward transform will multiply the input by
+@math{n}.
 
 @c ************************************************************
 @node Parallel FFTW, Calling FFTW from Fortran, FFTW Reference, Top
