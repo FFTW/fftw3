@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.6 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.7 2002-07-02 20:13:24 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -124,12 +124,12 @@ static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
 
      /* check whether some buddy solver would produce the same dim.
         If so, consider this solver unapplicable and let the buddy
-        take care of it.  The smallest buddy is applicable. */
+        take care of it.  The smallest-indexed buddy is applicable. */
      for (i = 0; i < ego->nbuddies; ++i) {
-          if (ego->buddies[i] < ego->vecloop_dim &&
-	      (really_pickdim(ego->buddies[i], vecsz, oop, &d1),
-	       *dp == d1))
-               return 0;
+	  if (ego->buddies[i] == ego->vecloop_dim)
+	       break;  /* found self */
+          if ((really_pickdim(ego->buddies[i], vecsz, oop, &d1), *dp == d1))
+               return 0; /* found equivalent buddy */
      }
      return 1;
 }
