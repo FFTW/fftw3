@@ -1,27 +1,1644 @@
+2003-02-09  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c: removed
+	overzealous inplace check, which caused problems for rdft2
+
+2003-02-09  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/tensor.c: Consistent syntax
+	for RNK_MINFTY tensors
+
+	* /home/fftw/Repository/fftw3/kernel/tensor.c: lisply-correct
+	tensor print.  We no longer need to parse tensors.
+
+2003-02-09  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/TODO: removed completed items
+
+	* /home/fftw/Repository/fftw3/libbench2/verify-r2r.c: slight
+	renaming
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-r2r.c:
+	multi-dimensional r2r verifier
+
+	* /home/fftw/Repository/fftw3/libbench2/verify-r2r.c: comments
+
+	* /home/fftw/Repository/fftw3/libbench2/verify-r2r.c: slight
+	simplification
+
+	* /home/fftw/Repository/fftw3/libbench2/Makefile.am,
+	/home/fftw/Repository/fftw3/libbench2/allocate.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/mflops.c,
+	/home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-r2r.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c,
+	/home/fftw/Repository/fftw3/libbench2/zero.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: added 1d r2r verifier
+	(triple ugh)
+
+	* /home/fftw/Repository/fftw3/tests/check.pl: added vector
+	transforms to random tests
+
+	* /home/fftw/Repository/fftw3/rdft/direct2.c: whoops
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c: fixed
+	interaction between dwims for sz/vecsz with rdft2 transforms
+
+	* /home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-dft.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-lib.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-rdft2.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.h,
+	/home/fftw/Repository/fftw3/tests/bench.c: added destroy_input
+	flag/check
+
+	* /home/fftw/Repository/fftw3/libbench2/Makefile.am,
+	/home/fftw/Repository/fftw3/libbench2/allocate.c,
+	/home/fftw/Repository/fftw3/libbench2/aset.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/bench.h,
+	/home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/tensor.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-dft.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-lib.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-rdft2.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.h,
+	/home/fftw/Repository/fftw3/libbench2/zero.c,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/tests/check.pl,
+	/home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/dfthelp.c,
+	/home/fftw/Repository/fftw3/api/extract-reim.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c: added rdft2
+	verifier
+
+2003-02-08  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/rdft/rdft2-radix2.c: an additional
+	check for in-place case
+
+2003-02-07  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/rdft/rank0-rdft2.c: slight fix: hc2r
+	constraints are mostly determined by sub-plan
+
+	* /home/fftw/Repository/fftw3/rdft/rdft2-radix2.c: make radix2-dft
+	inapplicable to in-place/split case (r == rio, iio >= rio + n/2+1
+	!= r + 1)
+
+2003-02-04  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/tests/hook.c: Allow plnr->hook to be 0
+
+2003-02-04  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/verify-dft.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c: moved dft stuff
+	into verify-dft
+
+	* /home/fftw/Repository/fftw3/tests/hook.c: cruft
+
+	* /home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/tests/hook.c: further unify libbench2
+	and paranoid verifiers
+
+2003-02-02  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/import-wisdom-from-file.c: typo
+	in comment
+
+2003-02-01  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/primes.c: Fixed p==2 case
+
+	* /home/fftw/Repository/fftw3/kernel/primes.c: Incorporated new
+	find_generator by Greg Dionne.
+
+	* /home/fftw/Repository/fftw3/libbench2/getopt.c: Removed
+	nonportable call to gettext()
+
+2003-01-30  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: uintptr_t is in
+	<inttypes.h> in openbsd
+
+2003-01-29  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/export-wisdom-to-string.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-file.c,
+	/home/fftw/Repository/fftw3/api/mkprinter-file.c,
+	/home/fftw/Repository/fftw3/kernel/debug.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/kernel/print.c,
+	/home/fftw/Repository/fftw3/kernel/scan.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Huge speedups in wisdom
+	I/O.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Added appropriate
+	warning against likely future bug.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Don't attempt to
+	remove bogus wisdom entries.
+
+2003-01-28  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Fixed a couple of
+	very very very nasty bugs---pointers became invalid after the hash
+	table was relocated.
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: Read wisdom at
+	can_do() time, otherwise wisdom is destroyed.
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: More conservative
+	inheritance of blessings
+
+	* /home/fftw/Repository/fftw3/dft/problem.c: Print the same info
+	as it is hashed
+
+	* /home/fftw/Repository/fftw3/tests/check.pl: Print name of
+	executable when FAILURE
+
+2003-01-27  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c: New NO_SEARCH
+	planner flag, which avoids searching altogether.  A wisdom entry
+	must lead to a NO_SEARCH-grade plan, or else the wisdom entry is
+	bogus.
+
+	* /home/fftw/Repository/fftw3/libbench2/verify-lib.c: Use
+	cosl()/sinl() when appropriate
+
+2003-01-26  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/speed.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c: Use null pointers
+	when estimating.  The estimator should never time anything.
+
+2003-01-26  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/f77api.c: note
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/f77api.c,
+	/home/fftw/Repository/fftw3/api/f77funcs.c,
+	/home/fftw/Repository/fftw3/configure.ac: support multiple
+	mangling schemes with g77
+
+	* /home/fftw/Repository/fftw3/tests/check.pl: fixed verbose, made
+	random tests only use selected rank, use rank <= 4, fixed final
+	flush_problems call
+
+	* /home/fftw/Repository/fftw3/tests/check.pl: fixed typo (count
+	instead of maxcount)
+
+	* /home/fftw/Repository/fftw3/configure.ac: hypot is no longer
+	used
+
+	* /home/fftw/Repository/fftw3/configure.ac,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h: check for _alloca
+	(MSVC)
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c: slight fix in assert
+
+2003-01-26  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/speed.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Allocate problem in all
+	cases--- can_do may need correct pointers.
+
+	* /home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/tests/check.pl: Nastier checks
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/plan.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c: X(use_plan) is a
+	relic.
+
+	* /home/fftw/Repository/fftw3/tests/Makefile.am: Print full
+	pathname of the bench executable, so that I don't get confused
+	when running multiple tests for different configurations.
+
+	* /home/fftw/Repository/fftw3/libbench2/bench-main.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/tests/bench.c: Split done() into
+	done() and cleanup(), in order to test multiple problems with the
+	same planner from the command line.
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c: Improved readability
+
+2003-01-26  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c: comment
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c: added macos9
+	mpallocatealigned function
+
+2003-01-25  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c: sometimes __APPLE__
+	is defined instead of __MACOSX__
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c: macos x malloc is
+	already 16-byte aligned
+
+2003-01-25  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: Include
+	<sys/types.h> because uintptr_t is defined there on solaris.
+
+	* /home/fftw/Repository/fftw3/libbench2/Makefile.am,
+	/home/fftw/Repository/fftw3/libbench2/getopt1.c: Oops---forgot
+	getopt_long
+
+	* /home/fftw/Repository/fftw3/configure.ac: Include default
+	includes when checking for uintptr_t.  (Otherwise solaris breaks.)
+
+	* /home/fftw/Repository/fftw3/tests/Makefile.am: distribute
+	check.pl
+
+	* /home/fftw/Repository/fftw3/tests/check.pl: Check split format,
+	too.
+
+	* /home/fftw/Repository/fftw3/tests/Makefile.am,
+	/home/fftw/Repository/fftw3/tests/check.pl: New tests, added make
+	check
+
+2003-01-23  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/tests/check.pl: More tests
+
+2003-01-22  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/api/mktensor-iodims.c,
+	/home/fftw/Repository/fftw3/api/mktensor-rowmajor.c: Deal with
+	rnk(sz)=-infinity
+
+2003-01-21  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/TODO: Crazy idea
+
+	* /home/fftw/Repository/fftw3/tests/check.pl: Test program, still
+	barely worthy of the name.
+
+2003-01-20  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c: Stylistic
+	changes
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/flops.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Implemented flops api
+
+2003-01-19  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c: cleanup
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c: 'v' syntax now
+	defaults to an 'internal' (stride 1) vector, which is a more
+	interesting case and corresponds more closely to the intuitive
+	notion of a 'vector' transform, while '*' does the old 'external'
+	(stride n) vector
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c: removed '/'
+	overloading
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c: get rid of '*'
+	and ',' synonyms for 'x' in problem parser; there's no need to
+	clutter the namespace with syntax we never use
+
+2003-01-19  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Signed/unsigned
+	fixes.
+
+	* /home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/verify-dft.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.h,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/tests/hook.c: Test split arrays.
+
+2003-01-19  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: clarification
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: caps
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: brackets
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: quote
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: referencing
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: fix
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: slight change
+
+2003-01-19  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/libbench2/verify-dft.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-lib.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.h,
+	/home/fftw/Repository/fftw3/tests/bench.c: Print errors when
+	--verify.
+
+2003-01-19  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: improved
+	description, noted that FFTW_ESTIMATE does not destroy arrays
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h: FFTW_DEFAULTS isn't
+	really needed
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/doc/fftw3.texi: added FFTW_MEASURE
+	synonym for FFTW_DEFAULTS
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c: slight change
+
+2003-01-19  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: Clearer name
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/libbench2/tensor.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Completed dft api test
+
+2003-01-19  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: index
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: fix
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: parallel structure
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: fix
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: joke
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: recommendation to
+	read tutorial in-order
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: expanded outline
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: clarification
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: draft complex-dft
+	tutorial
+
+2003-01-18  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/libbench2/allocate.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-main.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/bench.h,
+	/home/fftw/Repository/fftw3/libbench2/can-do.c,
+	/home/fftw/Repository/fftw3/libbench2/dotens2.c,
+	/home/fftw/Repository/fftw3/libbench2/info.c,
+	/home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/report.c,
+	/home/fftw/Repository/fftw3/libbench2/speed.c,
+	/home/fftw/Repository/fftw3/libbench2/timer.c,
+	/home/fftw/Repository/fftw3/libbench2/util.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.h,
+	/home/fftw/Repository/fftw3/libbench2/zero.c,
+	/home/fftw/Repository/fftw3/tests/Makefile.am,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/tests/hook.c: Paranoid mode is back.
+	Fixed dwim to do what I mean.
+
+2003-01-18  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: started tut.
+
+2003-01-18  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/libbench2/allocate.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/bench.h,
+	/home/fftw/Repository/fftw3/libbench2/can-do.c,
+	/home/fftw/Repository/fftw3/libbench2/dotens2.c,
+	/home/fftw/Repository/fftw3/libbench2/mflops.c,
+	/home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/report.c,
+	/home/fftw/Repository/fftw3/libbench2/speed.c,
+	/home/fftw/Repository/fftw3/libbench2/tensor.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-dft.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-lib.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.h,
+	/home/fftw/Repository/fftw3/libbench2/zero.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Great renaming, so that
+	we can include both bench-user.h and ifftw.h to implement the
+	paranoid-mode hook.
+
+	* /home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-dft.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-lib.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.h: Trying to tweak
+	the verifier so that I can use it in bench.c for paranoid mode
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: Added stride_factor
+	for complex arrays.
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: can_do now calls the
+	planner.
+
+	* /home/fftw/Repository/fftw3/api/plan-guru-dft.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Call guru api in
+	bench.c
+
+	* /home/fftw/Repository/fftw3/libbench2/bench.h,
+	/home/fftw/Repository/fftw3/libbench2/zero.c: Fixed prototype.
+
+	* /home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/mapflags.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-many-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h: Attempt to make the
+	signed/unsigned use of flags consistent.
+
+	* /home/fftw/Repository/fftw3/libbench2/Makefile.am,
+	/home/fftw/Repository/fftw3/libbench2/bench-main.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/useropt.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Implemented useropt.
+
+	* /home/fftw/Repository/fftw3/api/mapflags.c: The first map_flags
+	pass must be transitive, i.e., always use the latest flags value
+	as opposed to the original value. (I think.)
+
+	* /home/fftw/Repository/fftw3/tests/Makefile.am,
+	/home/fftw/Repository/fftw3/libbench2/Makefile.am,
+	/home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/dotens2.c,
+	/home/fftw/Repository/fftw3/libbench2/tensor.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-dft.c,
+	/home/fftw/Repository/fftw3/libbench2/verify-lib.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.h: Started working on
+	verifier
+
+2003-01-17  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/threads/api.c,
+	/home/fftw/Repository/fftw3/threads/threads.c,
+	/home/fftw/Repository/fftw3/threads/threads.h: added
+	X(threads_cleanup)
+
+2003-01-17  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/libbench2/allocate.c,
+	/home/fftw/Repository/fftw3/libbench2/tensor.c: Use C style for
+	upper and lower array bounds.  Free tensors properly.
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c: Fixed ambiguous
+	syntax
+
+	* /home/fftw/Repository/fftw3/libbench2/problem.c: Parse minus
+	sign, bugfixes
+
+	* /home/fftw/Repository/fftw3/Makefile.am,
+	/home/fftw/Repository/fftw3/configure.ac,
+	/home/fftw/Repository/fftw3/libbench2/Makefile.am,
+	/home/fftw/Repository/fftw3/libbench2/allocate.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-main.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench2/bench.h,
+	/home/fftw/Repository/fftw3/libbench2/can-do.c,
+	/home/fftw/Repository/fftw3/libbench2/caset.c,
+	/home/fftw/Repository/fftw3/libbench2/getopt-utils.c,
+	/home/fftw/Repository/fftw3/libbench2/getopt.c,
+	/home/fftw/Repository/fftw3/libbench2/getopt.h,
+	/home/fftw/Repository/fftw3/libbench2/info.c,
+	/home/fftw/Repository/fftw3/libbench2/main.c,
+	/home/fftw/Repository/fftw3/libbench2/mflops.c,
+	/home/fftw/Repository/fftw3/libbench2/ovtpvt.c,
+	/home/fftw/Repository/fftw3/libbench2/pow2.c,
+	/home/fftw/Repository/fftw3/libbench2/problem.c,
+	/home/fftw/Repository/fftw3/libbench2/report.c,
+	/home/fftw/Repository/fftw3/libbench2/speed.c,
+	/home/fftw/Repository/fftw3/libbench2/tensor.c,
+	/home/fftw/Repository/fftw3/libbench2/timer.c,
+	/home/fftw/Repository/fftw3/libbench2/util.c,
+	/home/fftw/Repository/fftw3/libbench2/verify.c,
+	/home/fftw/Repository/fftw3/libbench2/zero.c,
+	/home/fftw/Repository/fftw3/tests/Makefile.am,
+	/home/fftw/Repository/fftw3/tests/bench.c: Skeleton libbench2
+	implemented (probably still buggy)
+
+	* /home/fftw/Repository/fftw3/kernel/tensor4.c: Formatting
+
+2003-01-17  FFTW Maintainers  <fftw@ab-initio>
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: slight updates
+
+2003-01-17  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/kernel/buffered.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/minmax.c,
+	/home/fftw/Repository/fftw3/kernel/tensor4.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-inplace-strides.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-tensor-max-index.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c: eliminated obsolete
+	uimin/uimax
+
+	* /home/fftw/Repository/fftw3/Makefile.am,
+	/home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/configure.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/plan-with-nthreads.c,
+	/home/fftw/Repository/fftw3/tests/Makefile.am,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/threads/Makefile.am,
+	/home/fftw/Repository/fftw3/threads/api.c,
+	/home/fftw/Repository/fftw3/threads/threads.c: threads needs to
+	have its own library, lest all programs linking to libfftw3.so
+	need -lpthread
+
+	* /home/fftw/Repository/fftw3/api/f77api.c: whoops
+
+	* /home/fftw/Repository/fftw3/api/f77api.c: better name
+
+	* /home/fftw/Repository/fftw3/api/f77api.c: added more functions
+
+2003-01-16  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: if 'long' is big
+	enough, use it for mulmod in preference to 'long long'
+
+	* /home/fftw/Repository/fftw3/configure.ac,
+	/home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h: use uintptr_t for
+	pointer alignment arithmetic
+
+2003-01-16  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/kernel/print.c,
+	/home/fftw/Repository/fftw3/kernel/tensor.c,
+	/home/fftw/Repository/fftw3/kernel/twiddle.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c: More signed/unsigned
+	cleanup
+
+	* /home/fftw/Repository/fftw3/kernel/solvtab.c: null function
+	pointers are technically nonportable
+
+	* /home/fftw/Repository/fftw3/libbench/bench-main.c: Free
+	short_options
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/tests/bench.c: Oops, forgot STACK_FREE
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h: Do not require
+	memalign() unless HAVE_SIMD
+
+2003-01-16  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c: MS VC++
+	_aligned_malloc
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/kernel/alloc.c: added api
+	fftw_malloc/free
+
+	* /home/fftw/Repository/fftw3/api/map-r2r-kind.c: silence warning
+
+	* /home/fftw/Repository/fftw3/tools/fftw-wisdom-to-conf.in: send
+	error output to stderr
+
+2003-01-15  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/tensor7.c: Pure paranoia.
+
+	* /home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/configure.c,
+	/home/fftw/Repository/fftw3/api/dfthelp.c,
+	/home/fftw/Repository/fftw3/api/execute-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/execute-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/execute-dft.c,
+	/home/fftw/Repository/fftw3/api/execute-r2r.c,
+	/home/fftw/Repository/fftw3/api/execute.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom-to-file.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom-to-string.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom.c,
+	/home/fftw/Repository/fftw3/api/f77api.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/forget-wisdom.c,
+	/home/fftw/Repository/fftw3/api/import-system-wisdom.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-file.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-string.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom.c,
+	/home/fftw/Repository/fftw3/api/map-r2r-kind.c,
+	/home/fftw/Repository/fftw3/api/mapflags.c,
+	/home/fftw/Repository/fftw3/api/mkprinter-file.c,
+	/home/fftw/Repository/fftw3/api/mktensor-iodims.c,
+	/home/fftw/Repository/fftw3/api/mktensor-rowmajor.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-many-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-with-nthreads.c,
+	/home/fftw/Repository/fftw3/api/print-plan.c,
+	/home/fftw/Repository/fftw3/api/rdft2-pad.c,
+	/home/fftw/Repository/fftw3/api/the-planner.c,
+	/home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/ct.c,
+	/home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/dft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/dft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/alloc.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/kernel/print.c,
+	/home/fftw/Repository/fftw3/kernel/tensor.c,
+	/home/fftw/Repository/fftw3/kernel/tensor9.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct2.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/rdft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/rdft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c: Fixed
+	formatting that was messed up by the conversion uint->int.  Ensure
+	that iodims etc are kosher.
+
+2003-01-15  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/tools/fftw-wisdom-to-conf.in: added
+	version stamp
+
+	* /home/fftw/Repository/fftw3/tools/fftw-wisdom-to-conf.in: added
+	warning
+
+	* /home/fftw/Repository/fftw3/tools/Makefile.am: add
+	fftw-wisdom-to-conf to BUILT_SOURCES
+
+	* /home/fftw/Repository/fftw3/tools/fftw-wisdom-to-conf.in: added
+	const
+
+	* /home/fftw/Repository/fftw3/Makefile.am,
+	/home/fftw/Repository/fftw3/configure.ac,
+	/home/fftw/Repository/fftw3/tools/Makefile.am,
+	/home/fftw/Repository/fftw3/tools/fftw-wisdom-to-conf.in: added
+	wisdom-to-conf
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: include type
+	prefix in wisdom preamble
+
+	* /home/fftw/Repository/fftw3/TODO: updates
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: check the_plan before
+	printing
+
+2003-01-15  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/ChangeLog,
+	/home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/configure.c,
+	/home/fftw/Repository/fftw3/api/dfthelp.c,
+	/home/fftw/Repository/fftw3/api/execute-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/execute-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/execute-dft.c,
+	/home/fftw/Repository/fftw3/api/execute-r2r.c,
+	/home/fftw/Repository/fftw3/api/execute.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom-to-file.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom-to-string.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom.c,
+	/home/fftw/Repository/fftw3/api/f77api.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/forget-wisdom.c,
+	/home/fftw/Repository/fftw3/api/import-system-wisdom.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-file.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-string.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom.c,
+	/home/fftw/Repository/fftw3/api/map-r2r-kind.c,
+	/home/fftw/Repository/fftw3/api/mapflags.c,
+	/home/fftw/Repository/fftw3/api/mkprinter-file.c,
+	/home/fftw/Repository/fftw3/api/mktensor-iodims.c,
+	/home/fftw/Repository/fftw3/api/mktensor-rowmajor.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-many-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-with-nthreads.c,
+	/home/fftw/Repository/fftw3/api/print-plan.c,
+	/home/fftw/Repository/fftw3/api/rdft2-pad.c,
+	/home/fftw/Repository/fftw3/api/the-planner.c,
+	/home/fftw/Repository/fftw3/configure.ac,
+	/home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/codelet-dft.h,
+	/home/fftw/Repository/fftw3/dft/codelets/n.c,
+	/home/fftw/Repository/fftw3/dft/codelets/t.c,
+	/home/fftw/Repository/fftw3/dft/ct-dif.c,
+	/home/fftw/Repository/fftw3/dft/ct-dit.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditbuf.c,
+	/home/fftw/Repository/fftw3/dft/ct-ditf.c,
+	/home/fftw/Repository/fftw3/dft/ct.c,
+	/home/fftw/Repository/fftw3/dft/ct.h,
+	/home/fftw/Repository/fftw3/dft/dft.h,
+	/home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/k7/k7.c,
+	/home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/dft/rader-omega.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/rank0.c,
+	/home/fftw/Repository/fftw3/dft/simd/n1b.c,
+	/home/fftw/Repository/fftw3/dft/simd/n1f.c,
+	/home/fftw/Repository/fftw3/dft/simd/t1b.c,
+	/home/fftw/Repository/fftw3/dft/simd/t1f.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/dft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/dft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/dft/zero.c,
+	/home/fftw/Repository/fftw3/genfft/gen_hc2hc.ml,
+	/home/fftw/Repository/fftw3/genfft/gen_hc2r.ml,
+	/home/fftw/Repository/fftw3/genfft/gen_notw.ml,
+	/home/fftw/Repository/fftw3/genfft/gen_notw_c.ml,
+	/home/fftw/Repository/fftw3/genfft/gen_r2hc.ml,
+	/home/fftw/Repository/fftw3/genfft/gen_twiddle.ml,
+	/home/fftw/Repository/fftw3/genfft/gen_twiddle_c.ml,
+	/home/fftw/Repository/fftw3/genfft/gen_twidsq.ml,
+	/home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/kernel/buffered.c,
+	/home/fftw/Repository/fftw3/kernel/ct.c,
+	/home/fftw/Repository/fftw3/kernel/hash.c,
+	/home/fftw/Repository/fftw3/kernel/iabs.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/md5-1.c,
+	/home/fftw/Repository/fftw3/kernel/md5.c,
+	/home/fftw/Repository/fftw3/kernel/minmax.c,
+	/home/fftw/Repository/fftw3/kernel/ops.c,
+	/home/fftw/Repository/fftw3/kernel/pickdim.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/kernel/primes.c,
+	/home/fftw/Repository/fftw3/kernel/print.c,
+	/home/fftw/Repository/fftw3/kernel/rader.c,
+	/home/fftw/Repository/fftw3/kernel/scan.c,
+	/home/fftw/Repository/fftw3/kernel/tensor.c,
+	/home/fftw/Repository/fftw3/kernel/tensor1.c,
+	/home/fftw/Repository/fftw3/kernel/tensor2.c,
+	/home/fftw/Repository/fftw3/kernel/tensor4.c,
+	/home/fftw/Repository/fftw3/kernel/tensor5.c,
+	/home/fftw/Repository/fftw3/kernel/tensor7.c,
+	/home/fftw/Repository/fftw3/kernel/trig.c,
+	/home/fftw/Repository/fftw3/kernel/twiddle.c,
+	/home/fftw/Repository/fftw3/libbench/acopy.c,
+	/home/fftw/Repository/fftw3/libbench/allocate.c,
+	/home/fftw/Repository/fftw3/libbench/ascale.c,
+	/home/fftw/Repository/fftw3/libbench/aset.c,
+	/home/fftw/Repository/fftw3/libbench/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench/bench.h,
+	/home/fftw/Repository/fftw3/libbench/caadd.c,
+	/home/fftw/Repository/fftw3/libbench/cacopy.c,
+	/home/fftw/Repository/fftw3/libbench/cascale.c,
+	/home/fftw/Repository/fftw3/libbench/caset.c,
+	/home/fftw/Repository/fftw3/libbench/casub.c,
+	/home/fftw/Repository/fftw3/libbench/copy-c2h-1d-fftpack.c,
+	/home/fftw/Repository/fftw3/libbench/copy-c2h-1d-halfcomplex.c,
+	/home/fftw/Repository/fftw3/libbench/copy-c2h-1d-packed.c,
+	/home/fftw/Repository/fftw3/libbench/copy-c2h-1d-unpacked-ri.c,
+	/home/fftw/Repository/fftw3/libbench/copy-c2h-unpacked.c,
+	/home/fftw/Repository/fftw3/libbench/copy-c2r-packed.c,
+	/home/fftw/Repository/fftw3/libbench/copy-c2r-unpacked.c,
+	/home/fftw/Repository/fftw3/libbench/copy-c2ri.c,
+	/home/fftw/Repository/fftw3/libbench/copy-h2c-1d-fftpack.c,
+	/home/fftw/Repository/fftw3/libbench/copy-h2c-1d-halfcomplex.c,
+	/home/fftw/Repository/fftw3/libbench/copy-h2c-1d-packed.c,
+	/home/fftw/Repository/fftw3/libbench/copy-h2c-1d-unpacked-ri.c,
+	/home/fftw/Repository/fftw3/libbench/copy-h2c-unpacked.c,
+	/home/fftw/Repository/fftw3/libbench/copy-r2c-packed.c,
+	/home/fftw/Repository/fftw3/libbench/copy-r2c-unpacked.c,
+	/home/fftw/Repository/fftw3/libbench/copy-ri2c.c,
+	/home/fftw/Repository/fftw3/libbench/getopt-utils.c,
+	/home/fftw/Repository/fftw3/libbench/getopt.c,
+	/home/fftw/Repository/fftw3/libbench/log2.c,
+	/home/fftw/Repository/fftw3/libbench/mp.c,
+	/home/fftw/Repository/fftw3/libbench/pow2.c,
+	/home/fftw/Repository/fftw3/libbench/prime.c,
+	/home/fftw/Repository/fftw3/libbench/problem.c,
+	/home/fftw/Repository/fftw3/libbench/timer.c,
+	/home/fftw/Repository/fftw3/libbench/verify.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/codelet-rdft.h,
+	/home/fftw/Repository/fftw3/rdft/codelets/hc2r.c,
+	/home/fftw/Repository/fftw3/rdft/codelets/hfb.c,
+	/home/fftw/Repository/fftw3/rdft/codelets/r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct2.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-buf.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.h,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rank0-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank0.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft.h,
+	/home/fftw/Repository/fftw3/rdft/rdft2-inplace-strides.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-tensor-max-index.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/rdft/vrank2-transpose.c,
+	/home/fftw/Repository/fftw3/rdft/vrank3-transpose.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/simd/3dnow.c,
+	/home/fftw/Repository/fftw3/simd/sse.c,
+	/home/fftw/Repository/fftw3/simd/sse2.c,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/tests/dotens.c,
+	/home/fftw/Repository/fftw3/tests/dotens2.c,
+	/home/fftw/Repository/fftw3/tests/trigtest.c,
+	/home/fftw/Repository/fftw3/tests/verify-dft.c,
+	/home/fftw/Repository/fftw3/tests/verify-lib.c,
+	/home/fftw/Repository/fftw3/tests/verify-rdft.c,
+	/home/fftw/Repository/fftw3/tests/verify-reodft.c,
+	/home/fftw/Repository/fftw3/tests/verify.h,
+	/home/fftw/Repository/fftw3/threads/ct-dit.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/threads.c,
+	/home/fftw/Repository/fftw3/threads/threads.h,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c: Eliminated
+	those unsigned values that would break LP64 machines.
+
+2003-01-14  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/primes.c: comments
+
+2003-01-14  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c: Oops
+
+	* /home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c: int/uint confusion
+
+2003-01-14  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: updated introduction
+	and some organization
+
+	* /home/fftw/Repository/fftw3/api/f77api.c: whoops
+
+	* /home/fftw/Repository/fftw3/Makefile.am: newline
+
+	* /home/fftw/Repository/fftw3/libbench/timer.c: added win32 timer
+
+	* /home/fftw/Repository/fftw3/libbench/util.c: sync with
+	kernel/alloc.c
+
+	* /home/fftw/Repository/fftw3/api/f77api.c: handle missing
+	F77_FUNC_
+
+2003-01-13  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/f77api.c: used fint instead of
+	int to make Fortran integer type easier to change
+
+	* /home/fftw/Repository/fftw3/api/f77api.c: slight abbreviation
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/f77api.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/mktensor-rowmajor.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-many-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r.c,
+	/home/fftw/Repository/fftw3/api/rdft2-pad.c,
+	/home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/tensor3.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: the great lengthening,
+	part I: int -> long in api; mv mktensor-rowmajor to api
+
+	* /home/fftw/Repository/fftw3/configure.ac: long types
+
+2003-01-13  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/print.c,
+	/home/fftw/Repository/fftw3/kernel/problem.c,
+	/home/fftw/Repository/fftw3/kernel/rader.c,
+	/home/fftw/Repository/fftw3/kernel/scan.c,
+	/home/fftw/Repository/fftw3/kernel/solver.c,
+	/home/fftw/Repository/fftw3/kernel/stride.c,
+	/home/fftw/Repository/fftw3/kernel/tensor.c,
+	/home/fftw/Repository/fftw3/kernel/twiddle.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/tests/verify-dft.c,
+	/home/fftw/Repository/fftw3/tests/verify-rdft.c,
+	/home/fftw/Repository/fftw3/tests/verify-reodft.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/threads.c,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom-to-string.c,
+	/home/fftw/Repository/fftw3/api/f77api.c,
+	/home/fftw/Repository/fftw3/api/map-r2r-kind.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-many-r2r.c,
+	/home/fftw/Repository/fftw3/api/rdft2-pad.c,
+	/home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/dft/rader-omega.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/kernel/alloc.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/plan.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c: Renamed fftw_malloc
+	-> MALLOC, X(free) -> X(ifree), X(free0) -> X(ifree0),
+	non_fftw_malloc -> NATIVE_MALLOC
+
+2003-01-13  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/f77api.c: added beginning of
+	Fortran interface
+
+	* /home/fftw/Repository/fftw3/configure.ac: add fortran mangling
+	check
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/execute-r2r.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/plan-guru-r2r.c: added guru r2r
+	interface
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/plan-r2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-3d.c: whoops
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/map-r2r-kind.c,
+	/home/fftw/Repository/fftw3/api/plan-many-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-r2r.c: added r2r planner
+
+	* /home/fftw/Repository/fftw3/configure.ac: more long-double
+	checks
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: slight regrouping
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: added joke
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/mktensor-rowmajor-pad.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/rdft2-pad.c: simplified rdft2
+	padding
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h: added comment
+
+2003-01-12  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: use latest api
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/plan-dft-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-dft.c: nembed should only be
+	in advanced (many) interface, not basic interface...only a handful
+	of people over the years have ever requested that functionality.
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/mapflags.c: impatient is default;
+	generalize mapping functions using xor trick
+
+	* /home/fftw/Repository/fftw3/api/plan-dft-r2c-3d.c,
+	/home/fftw/Repository/fftw3/api/mktensor-rowmajor-pad.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-2d.c: use NULL nembed
+	to signal padding
+
+	* /home/fftw/Repository/fftw3/api/plan-many-dft.c: accept NULL
+	nembed
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/execute-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/execute-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h: added execute-dft-r2c/c2r
+
+	* /home/fftw/Repository/fftw3/api/plan-dft.c: don't need dft.h
+
+	* /home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c: tensors are
+	compressed in the problem, duh
+
+	* /home/fftw/Repository/fftw3/kernel/alloc.c: noted that
+	posix_memalign bug is now fixed, thanks to bug report by yours
+	truly
+
+2003-01-12  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/plan-dft-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-3d.c: Bug: n[3]
+	instead of n[2].  Bug was propagated by copy-and-paste.  Grrr...
+
+	* /home/fftw/Repository/fftw3/api/plan-dft.c: Express plan_dft()
+	in terms of plan_many_dft()
+
+2003-01-12  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/plan-guru-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft.c: whoops
+
+2003-01-12  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/Makefile.am,
+	/home/fftw/Repository/fftw3/configure.ac,
+	/home/fftw/Repository/fftw3/doc/Makefile.am,
+	/home/fftw/Repository/fftw3/doc/fftw3.texi,
+	/home/fftw/Repository/fftw3/genfft-k7/vK7Optimization.ml: Manual
+	skeleton.
+
+2003-01-12  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/fftw3.h: added r2c/c2r guru api
+
+	* /home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c:
+	FFTW_DESTROY_INPUT is default for c2r transforms
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-1d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-r2c.c: added more of
+	r2c/c2r api
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c: r2c doesn't
+	have adjustible sign
+
+	* /home/fftw/Repository/fftw3/TODO: note that copyright year is
+	out of date
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h: updated api for r2c
+
+	* /home/fftw/Repository/fftw3/api/mktensor-rowmajor-pad.c: removed
+	annoying nophys == niphys case
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/mktensor-rowmajor-pad.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c: added basic
+	r2c/c2r planner
+
+	* /home/fftw/Repository/fftw3/api/plan-many-dft.c: dist should be
+	in terms of complex values
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h: added
+	plan-with-nthreads
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/plan-with-nthreads.c: added
+	function to set nthr
+
+2003-01-11  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h: slight cleanup
+
+	* /home/fftw/Repository/fftw3/api/mktensor-iodims.c: whoops
+
+	* /home/fftw/Repository/fftw3/kernel/scan.c: maxlen is maximum
+	string length, not including null termination
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: imprt reverts
+	hashtable on failure
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h: slight move
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h: stdio.h should be
+	inlcuded outside of extern "C"
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/fftw3.h: added guru planner API
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h: added
+	FFTW_FORWARD/BACKWARD
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/plan-many-dft.c: added
+	plan_many_dft
+
+	* /home/fftw/Repository/fftw3/kernel/tensor3.c: indenting
+
+2003-01-11  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: Final \n
+
+	* /home/fftw/Repository/fftw3/kernel/debug.c: Do not compile if
+	not defined(FFTW_DEBUG), in order to avoid unused code in the
+	shared library.
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/export-wisdom-to-file.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/mkprinter-file.c,
+	/home/fftw/Repository/fftw3/api/print-plan.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Implemented
+	print_plan()
+
+2003-01-11  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/tests/bench.c: changed the OOP-like
+	plan_destroy to the more-grammatical destroy_plan
+
+	* /home/fftw/Repository/fftw3/api/execute-dft.c,
+	/home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/fftw3.h: added guru execute_dft
+
+	* /home/fftw/Repository/fftw3/api/export-wisdom-to-string.c: allow
+	for malloc errors in wisdom string, since non-fftw-malloc
+
+	* /home/fftw/Repository/fftw3/api/the-planner.c: cleanup should
+	reset plnr to zero so that fftw can be restarted
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/mapflags.c: NO_UGLY is an internal
+	planner flag
+
+2003-01-11  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/plan-dft-1d.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Written 1d api in terms
+	of generic n-d api.  The code is less compact but easier to test
+
+	* /home/fftw/Repository/fftw3/tests/verify-lib.c,
+	/home/fftw/Repository/fftw3/tests/verify-reodft.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom-to-file.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom-to-string.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-file.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-string.c,
+	/home/fftw/Repository/fftw3/kernel/alloc.c,
+	/home/fftw/Repository/fftw3/kernel/assert.c,
+	/home/fftw/Repository/fftw3/kernel/debug.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/print.c,
+	/home/fftw/Repository/fftw3/kernel/scan.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Added wisdom to header
+	file, made scanners/printer static.  stdio.h no longer needed in
+	fftw.h, removed.  Probably the printer_file should be reintroduced
+	in a separate file if we ever want to print plans...
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/plan-dft-2d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-3d.c,
+	/home/fftw/Repository/fftw3/api/plan-dft.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Implemented more APIs
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/the-planner.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Added cleanup() to API
+
+	* /home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/ct.c,
+	/home/fftw/Repository/fftw3/dft/generic.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/plan.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/libbench/bench-user.h,
+	/home/fftw/Repository/fftw3/libbench/bench.h,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dft-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/generic.c,
+	/home/fftw/Repository/fftw3/rdft/hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rank0-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft-dht.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-radix2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/tests/Makefile.am,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c: Started
+	new bench.c.  I had to rename plan_destroy ->
+	plan_destroy_internal to avoid conflicts with API
+
+2003-01-11  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/export-wisdom.c,
+	/home/fftw/Repository/fftw3/api/import-system-wisdom.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-file.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-string.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom.c: fix types
+
+	* /home/fftw/Repository/fftw3/api/export-wisdom-to-string.c:
+	whoops
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/export-wisdom-to-file.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom-to-string.c,
+	/home/fftw/Repository/fftw3/api/export-wisdom.c,
+	/home/fftw/Repository/fftw3/api/forget-wisdom.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-file.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom-from-string.c,
+	/home/fftw/Repository/fftw3/api/import-wisdom.c,
+	/home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/printers.c,
+	/home/fftw/Repository/fftw3/kernel/scanners.c: added wisdom api
+
+	* /home/fftw/Repository/fftw3/api/mapflags.c: grammar
+
+	* /home/fftw/Repository/fftw3/api/mapflags.c: slight change
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/mapflags.c: implemented
+	api/mapflags
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: IMPATIENT is an api
+	issue
+
+2003-01-10  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/the-planner.c: removed un-needed
+	headers
+
+	* /home/fftw/Repository/fftw3/api/the-planner.c: mkplanner
+	initializes nthr to 1 already
+
+2003-01-09  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h: boilerplate
+
+	* /home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c: fold vecloop
+	into r{e,o}dft apply function to share buffer, etcetera
+
+	* /home/fftw/Repository/fftw3/tests/verify-reodft.c: whoops,
+	bugfix in impulse test for vecn > 1
+
+	* /home/fftw/Repository/fftw3/rdft/hc2hc-buf.c: bugfix, grr
+
+	* /home/fftw/Repository/fftw3/rdft/codelet-rdft.h: fixed
+	signed-ness enum problem
+
+2003-01-09  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/md5-1.c: Explicit cast
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/configure.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/the-planner.c: Added
+	configure_planner().  mkplan() behaves properly when plan is null.
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/execute.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/mapflags.c,
+	/home/fftw/Repository/fftw3/api/plan-dft-1d.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: More API work
+
+	* /home/fftw/Repository/fftw3/Makefile.am,
+	/home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/dfthelp.c,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/plan-dft-1d.c,
+	/home/fftw/Repository/fftw3/api/the-planner.c,
+	/home/fftw/Repository/fftw3/configure.ac,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/trig.c,
+	/home/fftw/Repository/fftw3/tests/Makefile.am: First skeleton of
+	API infrastructure
+
+2003-01-09  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/rdft/rdft2-tensor-max-index.c:
+	unsigned strikes again
+
+	* /home/fftw/Repository/fftw3/rdft/Makefile.am,
+	/home/fftw/Repository/fftw3/rdft/problem2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-inplace-strides.c,
+	/home/fftw/Repository/fftw3/rdft/rdft2-tensor-max-index.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c: put
+	rdft2_inplace_strides and rdft2_tensor_max_index in their own
+	files for tighter linking
+
+	* /home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft.h,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c: added
+	rdft2_tensor_max_index...incorrect use of tensor_max_index was
+	preventing proper loop ordering for rnk > 2 rdft2
+
+	* /home/fftw/Repository/fftw3/rdft/rank-geq2-rdft2.c: arbitrary
+	spltrnk in rdft2 rank-geq2
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: don't mention wisdom
+	when non-verbose
+
+	* /home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c: bug fix: printing %T
+	should pass tensor *, not tensor **
+
+	* /home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/tests/verify-reodft.c: correct(?)
+	normalization for rodft00 ... all of the even/odd transforms
+	should be normalized according to the expanded'' DFT of ~twice the
+	length
+
+	* /home/fftw/Repository/fftw3/tests/verify-reodft.c: fixed tests
+	for n=1
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: fixed bug in vector
+	tests for rdft(2)
+
+	* /home/fftw/Repository/fftw3/rdft/problem2.c: fixed handling when
+	first rnk-1 dimensions compress to nothing (ugh)
+
+	* /home/fftw/Repository/fftw3/rdft/Makefile.am,
+	/home/fftw/Repository/fftw3/rdft/conf.c,
+	/home/fftw/Repository/fftw3/rdft/nop2.c,
+	/home/fftw/Repository/fftw3/rdft/rank0-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft.h: fixed incorrect/missing
+	rdft2 rank-0 handling
+
+	* /home/fftw/Repository/fftw3/rdft/problem2.c: bug fix: for rnk >
+	1, must compress rnk-1 dims separately (ugh)
+
 2003-01-08  Steven G. Johnson  <stevenj@ab-initio>
 
-	* /home/fftw/Repository/fftw3/rdft/problem.c:
-	got rid of compiler warning
+	* /home/fftw/Repository/fftw3/configure.ac: added trailing newline
 
-	* /home/fftw/Repository/fftw3/tests/bench.c:
-	whoops, test r2hc and not rodft00 by default
+	* /home/fftw/Repository/fftw3/ChangeLog: updated
 
-	* /home/fftw/Repository/fftw3/rdft/buffered.c, /home/fftw/Repository/fftw3/rdft/indirect.c, /home/fftw/Repository/fftw3/rdft/problem.c, /home/fftw/Repository/fftw3/rdft/rank-geq2.c, /home/fftw/Repository/fftw3/rdft/rdft.h, /home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c, /home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c, /home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c, /home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c, /home/fftw/Repository/fftw3/tests/bench.c, /home/fftw/Repository/fftw3/tests/verify-reodft.c:
-	got rid of real_n...use physical n everywhere in rdft; fixed rdft sz compression; fixed rodft00 verify bug
+	* /home/fftw/Repository/fftw3/rdft/problem.c: got rid of compiler
+	warning
+
+	* /home/fftw/Repository/fftw3/tests/bench.c: whoops, test r2hc and
+	not rodft00 by default
+
+	* /home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rdft.h,
+	/home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft010e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/reodft11e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/tests/verify-reodft.c: got rid of
+	real_n...use physical n everywhere in rdft; fixed rdft sz
+	compression; fixed rodft00 verify bug
 
 2003-01-08  Matteo Frigo  <athena@ab-initio>
 
-	* /home/fftw/Repository/fftw3/simd/Makefile.am, /home/fftw/Repository/fftw3/simd/sse-aux.c, /home/fftw/Repository/fftw3/simd/sse.c, /home/fftw/Repository/fftw3/simd/sse2-aux.c, /home/fftw/Repository/fftw3/simd/sse2.c:
-	icc-6.0 bug workaround
+	* /home/fftw/Repository/fftw3/simd/Makefile.am,
+	/home/fftw/Repository/fftw3/simd/sse-aux.c,
+	/home/fftw/Repository/fftw3/simd/sse.c,
+	/home/fftw/Repository/fftw3/simd/sse2-aux.c,
+	/home/fftw/Repository/fftw3/simd/sse2.c: icc-6.0 bug workaround
 
-	* /home/fftw/Repository/fftw3/kernel/ifftw.h, /home/fftw/Repository/fftw3/rdft/buffered2.c, /home/fftw/Repository/fftw3/rdft/rader-hc2hc.c, /home/fftw/Repository/fftw3/tests/bench.c:
-	Reclaimed the fftw_real identifier, because I need it for the API
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/rader-hc2hc.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: Reclaimed the fftw_real
+	identifier, because I need it for the API
 
-	* /home/fftw/Repository/fftw3/configure.ac:
-	Use recommended AC_OUTPUT syntax
+	* /home/fftw/Repository/fftw3/configure.ac: Use recommended
+	AC_OUTPUT syntax
 
-	* /home/fftw/Repository/fftw3/kernel/ifftw.h, /home/fftw/Repository/fftw3/tests/bench.c:
-	Removed FFTW(foo) as a synonym for X(foo).  This is an API issue.
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/tests/bench.c: Removed FFTW(foo) as a
+	synonym for X(foo).  This is an API issue.
 
 2003-01-07  Steven G. Johnson  <stevenj@ab-initio>
 
@@ -29,8 +1646,34 @@
 
 2003-01-07  Matteo Frigo  <athena@ab-initio>
 
-	* /home/fftw/Repository/fftw3/dft/Makefile.am, /home/fftw/Repository/fftw3/dft/codelet-dft.h, /home/fftw/Repository/fftw3/dft/codelet.h, /home/fftw/Repository/fftw3/dft/codelets/inplace/Makefile.am, /home/fftw/Repository/fftw3/dft/codelets/n.c, /home/fftw/Repository/fftw3/dft/codelets/standard/Makefile.am, /home/fftw/Repository/fftw3/dft/codelets/t.c, /home/fftw/Repository/fftw3/dft/dft.h, /home/fftw/Repository/fftw3/dft/simd/codelets/Makefile.am, /home/fftw/Repository/fftw3/dft/simd/n1b.c, /home/fftw/Repository/fftw3/dft/simd/n1f.c, /home/fftw/Repository/fftw3/dft/simd/t1b.c, /home/fftw/Repository/fftw3/dft/simd/t1f.c, /home/fftw/Repository/fftw3/rdft/Makefile.am, /home/fftw/Repository/fftw3/rdft/codelet-rdft.h, /home/fftw/Repository/fftw3/rdft/codelet.h, /home/fftw/Repository/fftw3/rdft/codelets/hc2r.c, /home/fftw/Repository/fftw3/rdft/codelets/hc2r/Makefile.am, /home/fftw/Repository/fftw3/rdft/codelets/hfb.c, /home/fftw/Repository/fftw3/rdft/codelets/r2hc.c, /home/fftw/Repository/fftw3/rdft/codelets/r2hc/Makefile.am, /home/fftw/Repository/fftw3/rdft/rdft.h, /home/fftw/Repository/fftw3/support/Makefile.am, /home/fftw/Repository/fftw3/support/Makefile.codelets, /home/fftw/Repository/fftw3/support/codelet_prelude, /home/fftw/Repository/fftw3/support/codelet_prelude.dft, /home/fftw/Repository/fftw3/support/codelet_prelude.rdft:
-	Renamed conflicting files */codelet.h into dft/codelet-dft.h and
+	* /home/fftw/Repository/fftw3/dft/Makefile.am,
+	/home/fftw/Repository/fftw3/dft/codelet-dft.h,
+	/home/fftw/Repository/fftw3/dft/codelet.h,
+	/home/fftw/Repository/fftw3/dft/codelets/inplace/Makefile.am,
+	/home/fftw/Repository/fftw3/dft/codelets/n.c,
+	/home/fftw/Repository/fftw3/dft/codelets/standard/Makefile.am,
+	/home/fftw/Repository/fftw3/dft/codelets/t.c,
+	/home/fftw/Repository/fftw3/dft/dft.h,
+	/home/fftw/Repository/fftw3/dft/simd/codelets/Makefile.am,
+	/home/fftw/Repository/fftw3/dft/simd/n1b.c,
+	/home/fftw/Repository/fftw3/dft/simd/n1f.c,
+	/home/fftw/Repository/fftw3/dft/simd/t1b.c,
+	/home/fftw/Repository/fftw3/dft/simd/t1f.c,
+	/home/fftw/Repository/fftw3/rdft/Makefile.am,
+	/home/fftw/Repository/fftw3/rdft/codelet-rdft.h,
+	/home/fftw/Repository/fftw3/rdft/codelet.h,
+	/home/fftw/Repository/fftw3/rdft/codelets/hc2r.c,
+	/home/fftw/Repository/fftw3/rdft/codelets/hc2r/Makefile.am,
+	/home/fftw/Repository/fftw3/rdft/codelets/hfb.c,
+	/home/fftw/Repository/fftw3/rdft/codelets/r2hc.c,
+	/home/fftw/Repository/fftw3/rdft/codelets/r2hc/Makefile.am,
+	/home/fftw/Repository/fftw3/rdft/rdft.h,
+	/home/fftw/Repository/fftw3/support/Makefile.am,
+	/home/fftw/Repository/fftw3/support/Makefile.codelets,
+	/home/fftw/Repository/fftw3/support/codelet_prelude,
+	/home/fftw/Repository/fftw3/support/codelet_prelude.dft,
+	/home/fftw/Repository/fftw3/support/codelet_prelude.rdft: Renamed
+	conflicting files */codelet.h into dft/codelet-dft.h and
 	rdft/codelet-rdft.h
 
 2003-01-07  Steven G. Johnson  <stevenj@ab-initio>
@@ -39,18 +1682,22 @@
 
 2003-01-07  Matteo Frigo  <athena@ab-initio>
 
-	* /home/fftw/Repository/fftw3/simd/simd-3dnow.h, /home/fftw/Repository/fftw3/simd/simd-sse.h, /home/fftw/Repository/fftw3/simd/simd-sse2.h, /home/fftw/Repository/fftw3/simd/sse2.c:
-	Silence warnings
+	* /home/fftw/Repository/fftw3/simd/simd-3dnow.h,
+	/home/fftw/Repository/fftw3/simd/simd-sse.h,
+	/home/fftw/Repository/fftw3/simd/simd-sse2.h,
+	/home/fftw/Repository/fftw3/simd/sse2.c: Silence warnings
 
 2003-01-07  Steven G. Johnson  <stevenj@ab-initio>
 
-	* /home/fftw/Repository/fftw3/dft/rank-geq2.c, /home/fftw/Repository/fftw3/rdft/rank-geq2.c:
-	fftw2 used spltrnk=1
+	* /home/fftw/Repository/fftw3/dft/rank-geq2.c,
+	/home/fftw/Repository/fftw3/rdft/rank-geq2.c: fftw2 used spltrnk=1
 
 2003-01-07  Matteo Frigo  <athena@ab-initio>
 
-	* /home/fftw/Repository/fftw3/dft/codelet.h, /home/fftw/Repository/fftw3/rdft/codelet.h, /home/fftw/Repository/fftw3/simd/simd-sse.h, /home/fftw/Repository/fftw3/simd/sse.c:
-	Silence warning
+	* /home/fftw/Repository/fftw3/dft/codelet.h,
+	/home/fftw/Repository/fftw3/rdft/codelet.h,
+	/home/fftw/Repository/fftw3/simd/simd-sse.h,
+	/home/fftw/Repository/fftw3/simd/sse.c: Silence warning
 
 2003-01-07  Steven G. Johnson  <stevenj@ab-initio>
 
@@ -58,11 +1705,14 @@
 
 2003-01-07  Matteo Frigo  <athena@ab-initio>
 
-	* /home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c, /home/fftw/Repository/fftw3/rdft/vrank-geq1.c:
-	Strengthened conditions for a problem to be POSSIBLY_UNALIGNED
+	* /home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c: Strengthened
+	conditions for a problem to be POSSIBLY_UNALIGNED
 
-	* /home/fftw/Repository/fftw3/dft/vrank-geq1.c, /home/fftw/Repository/fftw3/kernel/align.c, /home/fftw/Repository/fftw3/kernel/ifftw.h:
-	Strengthened conditions for a plan to be POSSIBLY_UNALIGNED
+	* /home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h: Strengthened
+	conditions for a plan to be POSSIBLY_UNALIGNED
 
 2003-01-07  Matteo Frigo  <athena@superjdj4>
 
@@ -1084,46 +2734,81 @@
 
 	* /home/fftw/Repository/fftw3/ChangeLog: updated
 
-	* /home/fftw/Repository/fftw3/kernel/timer.c:
-	added clock() getseconds timer
+	* /home/fftw/Repository/fftw3/kernel/timer.c: added clock()
+	getseconds timer
 
 2002-09-02  Matteo Frigo  <athena@ab-initio>
 
 	* /home/fftw/Repository/fftw3/rdft/indirect.c: Oops
 
-	* /home/fftw/Repository/fftw3/dft/indirect.c, /home/fftw/Repository/fftw3/kernel/ifftw.h, /home/fftw/Repository/fftw3/rdft/indirect.c:
-	Experimental INDIRECT_VERBOTEN flag (not used)
+	* /home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/rdft/indirect.c: Experimental
+	INDIRECT_VERBOTEN flag (not used)
 
-	* /home/fftw/Repository/fftw3/dft/buffered.c, /home/fftw/Repository/fftw3/dft/indirect.c, /home/fftw/Repository/fftw3/kernel/ifftw.h, /home/fftw/Repository/fftw3/rdft/buffered.c, /home/fftw/Repository/fftw3/rdft/buffered2.c, /home/fftw/Repository/fftw3/rdft/indirect.c:
-	Do not allow buffering in children of indirect solvers.
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/indirect.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/indirect.c: Do not allow
+	buffering in children of indirect solvers.
 
 	* /home/fftw/Repository/fftw3/kernel/planner.c: Oops
 
-	* /home/fftw/Repository/fftw3/kernel/planner.c:
-	Hash sizeof(R) as part of wisdom.
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Hash sizeof(R) as
+	part of wisdom.
 
 2002-09-02  Steven G. Johnson  <stevenj@ab-initio>
 
-	* /home/fftw/Repository/fftw3/configure.ac:
-	added --enable-float synonym for --enable-single (since with have --enable-long-double)
+	* /home/fftw/Repository/fftw3/configure.ac: added --enable-float
+	synonym for --enable-single (since with have --enable-long-double)
 
 2002-09-02  Matteo Frigo  <athena@ab-initio>
 
-	* /home/fftw/Repository/fftw3/dft/Makefile.am, /home/fftw/Repository/fftw3/dft/problem.c, /home/fftw/Repository/fftw3/dft/zero.c:
-	zerotens is now in its own file, so it does not cause dft to be linked
-	in if only rdft is used.
+	* /home/fftw/Repository/fftw3/dft/Makefile.am,
+	/home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/dft/zero.c: zerotens is now in its own
+	file, so it does not cause dft to be linked in if only rdft is
+	used.
 
-	* /home/fftw/Repository/fftw3/kernel/planner.c: Removed unused var.
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Removed unused
+	var.
 
-	* /home/fftw/Repository/fftw3/kernel/planner.c:
-	Split insert() in preparation for wisdom import
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Split insert() in
+	preparation for wisdom import
 
-	* /home/fftw/Repository/fftw3/dft/Makefile.am, /home/fftw/Repository/fftw3/dft/dft.h, /home/fftw/Repository/fftw3/dft/verify.c, /home/fftw/Repository/fftw3/kernel/Makefile.am, /home/fftw/Repository/fftw3/kernel/dotens.c, /home/fftw/Repository/fftw3/kernel/dotens2.c, /home/fftw/Repository/fftw3/kernel/ifftw.h, /home/fftw/Repository/fftw3/kernel/verify-lib.c, /home/fftw/Repository/fftw3/kernel/verify.h, /home/fftw/Repository/fftw3/rdft/Makefile.am, /home/fftw/Repository/fftw3/rdft/rdft.h, /home/fftw/Repository/fftw3/rdft/verify.c, /home/fftw/Repository/fftw3/reodft/Makefile.am, /home/fftw/Repository/fftw3/reodft/reodft.h, /home/fftw/Repository/fftw3/reodft/verify.c, /home/fftw/Repository/fftw3/tests/Makefile.am, /home/fftw/Repository/fftw3/tests/bench.c, /home/fftw/Repository/fftw3/tests/debug.h, /home/fftw/Repository/fftw3/tests/dotens.c, /home/fftw/Repository/fftw3/tests/dotens2.c, /home/fftw/Repository/fftw3/tests/verify-dft.c, /home/fftw/Repository/fftw3/tests/verify-lib.c, /home/fftw/Repository/fftw3/tests/verify-rdft.c, /home/fftw/Repository/fftw3/tests/verify-reodft.c, /home/fftw/Repository/fftw3/tests/verify.h:
-	Moved debugging infrastructure to test directory so that it is not
-	linked into the shared library.
+	* /home/fftw/Repository/fftw3/dft/Makefile.am,
+	/home/fftw/Repository/fftw3/dft/dft.h,
+	/home/fftw/Repository/fftw3/dft/verify.c,
+	/home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/dotens.c,
+	/home/fftw/Repository/fftw3/kernel/dotens2.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/verify-lib.c,
+	/home/fftw/Repository/fftw3/kernel/verify.h,
+	/home/fftw/Repository/fftw3/rdft/Makefile.am,
+	/home/fftw/Repository/fftw3/rdft/rdft.h,
+	/home/fftw/Repository/fftw3/rdft/verify.c,
+	/home/fftw/Repository/fftw3/reodft/Makefile.am,
+	/home/fftw/Repository/fftw3/reodft/reodft.h,
+	/home/fftw/Repository/fftw3/reodft/verify.c,
+	/home/fftw/Repository/fftw3/tests/Makefile.am,
+	/home/fftw/Repository/fftw3/tests/bench.c,
+	/home/fftw/Repository/fftw3/tests/debug.h,
+	/home/fftw/Repository/fftw3/tests/dotens.c,
+	/home/fftw/Repository/fftw3/tests/dotens2.c,
+	/home/fftw/Repository/fftw3/tests/verify-dft.c,
+	/home/fftw/Repository/fftw3/tests/verify-lib.c,
+	/home/fftw/Repository/fftw3/tests/verify-rdft.c,
+	/home/fftw/Repository/fftw3/tests/verify-reodft.c,
+	/home/fftw/Repository/fftw3/tests/verify.h: Moved debugging
+	infrastructure to test directory so that it is not linked into the
+	shared library.
 
-	* /home/fftw/Repository/fftw3/kernel/print.c, /home/fftw/Repository/fftw3/kernel/planner.c:
-	Reactivated wisdom export
+	* /home/fftw/Repository/fftw3/kernel/print.c,
+	/home/fftw/Repository/fftw3/kernel/planner.c: Reactivated wisdom
+	export
 
 2002-09-02  Steven G. Johnson  <stevenj@ab-initio>
 
@@ -1916,8 +3601,9 @@
 
 	* simd/simd-altivec.h: Implement LDA/STA
 
-	* dft/simd/n1b.c, dft/simd/n1f.c, dft/simd/t1b.c, dft/simd/t1f.c, simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h, simd/simd.h:
-	More SIMD work
+	* dft/simd/n1b.c, dft/simd/n1f.c, dft/simd/t1b.c, dft/simd/t1f.c,
+	simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h,
+	simd/simd.h: More SIMD work
 
 	* simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h: Cleanup
 
@@ -1927,11 +3613,12 @@
 
 2002-07-29  Matteo Frigo  <athena@ab-initio>
 
-	* dft/simd/n1b.c, dft/simd/n1f.c, dft/simd/t1b.c, dft/simd/t1f.c, simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h:
-	Also check strides in SIMD codelets
+	* dft/simd/n1b.c, dft/simd/n1f.c, dft/simd/t1b.c, dft/simd/t1f.c,
+	simd/simd-altivec.h, simd/simd-sse.h, simd/simd-sse2.h: Also check
+	strides in SIMD codelets
 
-	* simd/simd-altivec.h:
-	Minor changes, mostly for consistency with the big-endian processor
+	* simd/simd-altivec.h: Minor changes, mostly for consistency with
+	the big-endian processor
 
 2002-07-29  Steven G. Johnson  <stevenj@ab-initio>
 
