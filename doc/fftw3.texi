@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.45 2003-02-28 20:05:48 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.46 2003-02-28 20:07:03 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -995,6 +995,7 @@ specified by an r2r kind of @code{FFTW_DHT}.
 Like the DFT, in FFTW the DHT is unnormalized, so computing a DHT of
 size @code{n} followed by another DHT of the same size will result in
 the original array multiplied by @code{n}.
+@cindex normalization
 
 The DHT was originally proposed as a more-efficient alternative to the
 DFT for real data, but it was subsequently shown that a specialized DFT
