@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.119 2002-09-14 16:19:13 athena Exp $ */
+/* $Id: ifftw.h,v 1.120 2002-09-14 23:47:56 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -404,7 +404,8 @@ enum {
      POSSIBLY_UNALIGNED = 0x8,
      DHT_R2HC_VERBOTEN = 0x10,
      BUFFERING_VERBOTEN = 0x20,
-     INDIRECT_VERBOTEN = 0x40
+     INDIRECT_VERBOTEN = 0x40,
+     IGNORE_SCORE = 0x80  /* everything is GOOD */
 };
 
 
@@ -427,13 +428,11 @@ typedef struct {
      void (*exprt)(planner *ego, printer *p); /* ``export'' is a reserved
 						 word in C++. */
      int (*imprt)(planner *ego, scanner *sc);
-     plan *(*slv_mkplan)(planner *ego, problem *p, solver *s);
 } planner_adt;
 
 struct planner_s {
      const planner_adt *adt;
      void (*hook)(plan *pln, const problem *p, int optimalp);
-     void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvdesc **);
 
      /* solver descriptors */
      slvdesc *slvdescs;
@@ -457,16 +456,11 @@ struct planner_s {
      uint insert, insert_iter, insert_unknown;
      uint nrehash;
 
-     int score;  /* see planner-score.c */
+     int score;
 };
 
-planner *X(mkplanner)(size_t sz,
-		      void (*mkplan)(planner *ego, problem *p, 
-				     plan **, slvdesc **));
+planner *X(mkplanner)(void);
 void X(planner_destroy)(planner *ego);
-void X(planner_set_hook)(planner *p, 
-			 void (*hook)(plan *, const problem *, int));
-void X(evaluate_plan)(planner *ego, plan *pln, const problem *p);
 
 #ifdef FFTW_DEBUG
 void X(planner_dump)(planner *ego, int verbose);
@@ -493,10 +487,6 @@ void X(planner_dump)(planner *ego, int verbose);
 	  what;						\
      }							\
 }
-
-/* various planners */
-planner *X(mkplanner_naive)(void);
-planner *X(mkplanner_score)(void);
 
 #define NO_VRECURSE(plnr) \
    ((plnr->planner_flags & IMPATIENT) && \

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.85 2002-09-14 20:35:28 stevenj Exp $ */
+/* $Id: planner.c,v 1.86 2002-09-14 23:47:56 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -251,8 +251,26 @@ static void hinsert(planner *ego, md5uint *s,
      hinsert0(ego, s, flags, slvndx, l);
 }
 
+static void evaluate_plan(planner *ego, plan *pln, const problem *p)
+{
+     if (!(ego->planner_flags & IMPATIENT) || pln->pcost == 0.0) {
+	  ego->nplan++;
+	  if (ego->planner_flags & ESTIMATE) {
+	       /* heuristic */
+	       pln->pcost = 0
+		    + pln->ops.add
+		    + pln->ops.mul
+		    + 2 * pln->ops.fma
+		    + pln->ops.other;
+	  } else {
+	       pln->pcost = X(measure_execution_time)(pln, p);
+	  }
+     }
+     ego->hook(pln, p, 0);
+}
+
 /* maintain dynamic scoping of flags, nthr: */
-static plan *slv_mkplan(planner *ego, problem *p, solver *s)
+static plan *invoke_solver(planner *ego, problem *p, solver *s)
 {
      uint problem_flags = ego->problem_flags;
      unsigned short planner_flags = ego->planner_flags;
@@ -263,6 +281,110 @@ static plan *slv_mkplan(planner *ego, problem *p, solver *s)
      ego->planner_flags = planner_flags;
      ego->nthr = nthr;
      return pln;
+}
+
+static int compute_score(planner *ego, problem *p, solver *s)
+{
+     if (ego->problem_flags & IGNORE_SCORE)
+	  return GOOD;
+     return s->adt->score(s, p, ego);
+}
+
+
+/* 
+   The usage of the planner->score field is nonobvious.
+  
+   We want to compute the score of a plan as the minimum of the
+   ``natural'' score of the plan (as determined by solver->score) and
+   the score of all children.  We do not want to have each solver
+   compute this quantity.
+
+   Instead, planner->score initially holds the natural score of the
+   parent.  The child planner updates planner->score to the minimum of
+   planner->score and the score of the child.  The parent planner
+   reads this value when the child planner returns.
+
+   In effect, planner->score is a hidden additional function argument
+   that we are too lazy to push around.
+*/
+
+static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
+{
+     plan *best = 0;
+     int best_score;
+     int best_not_yet_timed = 1;
+     int parent_score = ego->score; /* save for later */
+
+     *bestp = 0;
+
+     /* if a solver is suggested (by wisdom) use it */
+     {
+	  slvdesc *sp;
+	  if ((sp = *descp)) {
+	       solver *s = sp->slv;
+	       ego->score = compute_score(ego, p, s); /* natural score */
+	       best = invoke_solver(ego, p, s);
+	       if (best) {
+		    X(plan_use)(best);
+		    best->score = ego->score;
+		    goto done;
+	       }
+	       /* BEST may be 0 in case of md5 collision */
+	  }
+     }
+
+     /* find highest score */
+     best_score = BAD;
+     FORALL_SOLVERS(ego, s, sp, {
+	  int sc = compute_score(ego, p, s);
+	  if (sc > best_score) 
+	       best_score = sc;
+     });
+
+     for (; best_score > BAD; --best_score) {
+          FORALL_SOLVERS(ego, s, sp, {
+	       if (compute_score(ego, p, s) == best_score) {
+		    plan *pln;
+
+		    ego->score = best_score; /* natural score of this solver */
+		    pln = invoke_solver(ego, p, s);
+
+		    if (pln) {
+			 pln->score = ego->score; /* min of natural score
+						     and score of children */
+
+			 X(plan_use)(pln);
+
+			 if (best) {
+			      if (best_not_yet_timed) {
+				   evaluate_plan(ego, best, p);
+				   best_not_yet_timed = 0;
+			      }
+			      evaluate_plan(ego, pln, p);
+			      if (pln->pcost < best->pcost) {
+				   X(plan_destroy)(best);
+				   best = pln;
+				   *descp = sp;
+			      } else {
+				   X(plan_destroy)(pln);
+			      }
+			 } else {
+			      best = pln;
+			      *descp = sp;
+			 }
+		    }
+	       }
+	  });
+
+
+	  /* condition may be false if children have lower score */
+	  if (best && best->score >= best_score)
+	       break;
+     };
+
+ done:
+     ego->score = X(imin)(parent_score, best ? best->score : GOOD);
+     *bestp = best;
 }
 
 static plan *mkplan(planner *ego, problem *p)
@@ -287,7 +409,7 @@ static plan *mkplan(planner *ego, problem *p)
 	  sp = 0; /* nothing known about this problem */
      }
 
-     ego->inferior_mkplan(ego, p, &pln, &sp);
+     mkplan0(ego, p, &pln, &sp);
      hinsert(ego, m.s, ego->planner_flags, 
 	     sp ? sp - ego->slvdescs : -1);
 
@@ -393,19 +515,15 @@ static void hooknil(plan *pln, const problem *p, int optimalp)
 /*
  * create a planner
  */
-planner *X(mkplanner)(size_t sz,
-		      void (*infmkplan)(planner *ego, problem *p,
-					plan **, slvdesc **))
+planner *X(mkplanner)(void)
 {
      static const planner_adt padt = {
-	  register_solver,
-	  mkplan, forget, exprt, imprt, slv_mkplan
+	  register_solver, mkplan, forget, exprt, imprt
      };
 
-     planner *p = (planner *) fftw_malloc(sz, PLANNERS);
+     planner *p = (planner *) fftw_malloc(sizeof(planner), PLANNERS);
 
      p->adt = &padt;
-     p->inferior_mkplan = infmkplan;
      p->nplan = p->nprob = p->nrehash = 0;
      p->succ_lookup = p->lookup = p->lookup_iter = 0;
      p->insert = p->insert_iter = p->insert_unknown = 0;
@@ -442,31 +560,6 @@ void X(planner_destroy)(planner *ego)
 	  X(free)(ego->slvdescs);
 
      X(free)(ego);
-}
-
-/* set planner hook */
-void X(planner_set_hook)(planner *p,
-			 void (*hook)(plan *, const problem *, int))
-{
-     p->hook = hook;
-}
-
-void X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
-{
-     if (!(ego->planner_flags & IMPATIENT) || pln->pcost == 0.0) {
-	  ego->nplan++;
-	  if (ego->planner_flags & ESTIMATE) {
-	       /* heuristic */
-	       pln->pcost = 0
-		    + pln->ops.add
-		    + pln->ops.mul
-		    + 2 * pln->ops.fma
-		    + pln->ops.other;
-	  } else {
-	       pln->pcost = X(measure_execution_time)(pln, p);
-	  }
-     }
-     ego->hook(pln, p, 0);
 }
 
 /*

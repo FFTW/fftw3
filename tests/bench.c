@@ -152,13 +152,13 @@ void setup(struct problem *p)
 
      FFTW(threads_init)();
 
-     plnr = FFTW(mkplanner_score)();
+     plnr = FFTW(mkplanner)();
      FFTW(dft_conf_standard) (plnr);
      FFTW(rdft_conf_standard) (plnr);
      FFTW(reodft_conf_standard) (plnr);
      FFTW(threads_conf_standard) (plnr);
      plnr->nthr = 1;
-     FFTW(planner_set_hook) (plnr, hook);
+     plnr->hook = hook;
      /* plnr->planner_flags |= IMPATIENT; */
      /* plnr->planner_flags |= ESTIMATE | IMPATIENT; */
      /* plnr->planner_flags |= ESTIMATE; */
