@@ -2,6 +2,8 @@
 #include <math.h>
 #include <stdio.h>
 
+extern void timer_start(void);
+extern double timer_stop(void);
 
 /*
   horrible hack for now.  This will go away once we define an interface
@@ -102,6 +104,8 @@ static plan *pln;
 
 void setup(struct problem *p)
 {
+     double tplan;
+
      BENCH_ASSERT(can_do(p));
 
      plnr = FFTW(mkplanner_score)(0);
@@ -144,7 +148,9 @@ void setup(struct problem *p)
 	       FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
 					is * p->size, os * p->size), 
 	       ri, ii, ro, io);
+     timer_start();
      pln = plnr->adt->mkplan(plnr, prblm);
+     tplan = timer_stop();
      BENCH_ASSERT(pln);
 
      if (verbose) {
@@ -153,6 +159,7 @@ void setup(struct problem *p)
 		    pln, plnr->nprob, plnr->nplan);
 	  pr->print(pr, "%d add, %d mul, %d fma, %d other\n",
 		    pln->ops.add, pln->ops.mul, pln->ops.fma, pln->ops.other);
+	  pr->print(pr, "planner time: %g s\n", tplan);
 	  if (verbose > 3) 
 	       plnr->adt->exprt(plnr, pr);
 	  FFTW(printer_destroy)(pr);
