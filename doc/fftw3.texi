@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.174 2003-03-27 01:07:11 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.175 2003-03-30 00:11:10 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1118,9 +1118,9 @@ array (@code{n} real numbers @code{in[j=0..n-1]}), are:
 @end itemize
 
 Note that these symmetries apply to the ``logical'' array being
-transformed; @strong{there are no constraints on your input data}.  So,
-for example, if you specify a size-5 REDFT00 (DCT-I) of the data
-@math{abcde}, it corresponds to the DFT of the logical even array
+transformed; @strong{there are no constraints on your physical input
+data}.  So, for example, if you specify a size-5 REDFT00 (DCT-I) of the
+data @math{abcde}, it corresponds to the DFT of the logical even array
 @math{abcdedcb} of size 8.  A size-4 REDFT10 (DCT-II) of the data
 @math{abcd} corresponds to the size-8 logical DFT of the even array
 @math{abcddcba}, shifted by half a sample.
