@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.123 2003-01-11 22:50:49 stevenj Exp $ */
+/* $Id: planner.c,v 1.124 2003-01-13 00:58:46 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -502,7 +502,7 @@ static int imprt(planner *ego, scanner *sc)
      if (!sc->scan(sc, "(" WISDOM_PREAMBLE))
 	  return 0; /* don't need to restore hashtable */
 
-     /* make a backup copy of the hash table */
+     /* make a backup copy of the hash table (cache the hash) */
      sol = (solution *)fftw_malloc(hsiz * sizeof(solution), HASHT);
      for (h = 0; h < hsiz; ++h)
 	  sol[h] = ego->solutions[h];
