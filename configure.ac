@@ -78,7 +78,7 @@ AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE2 optimizations])
 if test "$have_sse2" = "yes"; then
 	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
 	have_simd="yes"
-	simd_precision = "d"
+	simd_precision="d"
 	if test "$have_sse" = "yes"; then
 		AC_MSG_ERROR([you cannot use SSE and SSE2 at the same time])
 	fi
