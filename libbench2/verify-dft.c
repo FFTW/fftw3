@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.8 2003-02-09 00:35:56 stevenj Exp $ */
+/* $Id: verify-dft.c,v 1.9 2003-02-11 01:37:54 athena Exp $ */
 
 #include "verify.h"
 
@@ -142,3 +142,24 @@ void verify_dft(bench_problem *p, int rounds, double tol, errors *e)
      bench_free(inA);
 }
 
+
+void accuracy_dft(bench_problem *p, int rounds, double t[6])
+{
+     dofft_dft_closure k;
+     int n;
+     C *a, *b;
+
+     BENCH_ASSERT(p->kind == PROBLEM_COMPLEX);
+     BENCH_ASSERT(p->sz->rnk == 1);
+     BENCH_ASSERT(p->vecsz->rnk == 0);
+
+     k.k.apply = dft_apply;
+     k.p = p;
+     n = tensor_sz(p->sz);
+
+     a = (C *) bench_malloc(n * sizeof(C));
+     b = (C *) bench_malloc(n * sizeof(C));
+     accuracy_test(&k.k, 0, 0, p->sign, n, a, b, rounds, t);
+     bench_free(b);
+     bench_free(a);
+}

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.13 2003-02-09 07:36:25 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.14 2003-02-11 01:37:54 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -140,12 +140,6 @@ extern int log_2(int n);
 
 
 #define CASSIGN(out, in) (c_re(out) = c_re(in), c_im(out) = c_im(in))
-
-typedef struct dofft_closure_s {
-     void (*apply)(struct dofft_closure_s *k,
-		   bench_complex *in, bench_complex *out);
-     
-} dofft_closure;
 
 bench_tensor *verify_pack(const bench_tensor *sz, int s);
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.12 2003-02-09 07:36:25 stevenj Exp $ */
+/* $Id: verify.c,v 1.13 2003-02-11 01:37:54 athena Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,6 +55,25 @@ void verify(const char *param, int rounds, double tol)
      problem_destroy(p);
 }
 
+
+static void do_accuracy(bench_problem *p, int rounds)
+{
+     double t[6];
+
+     switch (p->kind) {
+	 case PROBLEM_COMPLEX: accuracy_dft(p, rounds, t); break;
+	 case PROBLEM_REAL: accuracy_rdft2(p, rounds, t); break;
+	 case PROBLEM_R2R: BENCH_ASSERT(0); break;
+     }
+
+     /* t[0] : L1 error
+	t[1] : L2 error
+	t[2] : Linf error
+	t[3..5]: L1, L2, Linf backward error */
+     ovtpvt("%6.2e %6.2e %6.2e %6.2e %6.2e %6.2e\n", 
+	    t[0], t[1], t[2], t[3], t[4], t[5]);
+}
+
 void accuracy(const char *param, int rounds)
 {
      bench_problem *p;
@@ -63,7 +82,7 @@ void accuracy(const char *param, int rounds)
      problem_alloc(p);
      problem_zero(p);
      setup(p);
-     BENCH_ASSERT(0); /* TODO */
+     do_accuracy(p, rounds);
      done(p);
      problem_destroy(p);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.7 2003-02-09 00:35:56 stevenj Exp $ */
+/* $Id: verify-lib.c,v 1.8 2003-02-11 01:37:54 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -183,21 +183,6 @@ void arol(C *b, C *a, int n, int nb, int na)
 	  }
      }
 }
-
-#if defined(BENCHFFT_LDOUBLE) && HAVE_COSL
-   typedef long double trigreal;
-#  define COS cosl
-#  define SIN sinl
-#  define TAN tanl
-#  define KTRIG(x) (x##L)
-#else
-   typedef double trigreal;
-#  define COS cos
-#  define SIN sin
-#  define TAN tan
-#  define KTRIG(x) (x)
-#endif
-#define K2PI KTRIG(6.2831853071795864769252867665590057683943388)
 
 void aphase_shift(C *b, C *a, int n, int nb, int na, double sign)
 {
@@ -449,4 +434,42 @@ bench_tensor *verify_pack(const bench_tensor *sz, int s)
 	  }
      }
      return x;
+}
+
+void accuracy_test(dofft_closure *k, int realp, int hermitianp, 
+		   int sign, int n, C *a, C *b, int rounds,
+		   double t[6])
+{
+     int r, i;
+     double err[6];
+     bench_iodim d;
+
+     d.n = n;
+     d.is = d.os = 1;
+
+     for (i = 0; i < 6; ++i) t[i] = 0.0;
+
+     for (r = 0; r < rounds; ++r) {
+	  arand(a, n);
+
+	  if (realp)
+	       mkreal(a, n);
+	  if (hermitianp)
+	       mkhermitian(a, 1, &d, 1);
+	  
+	  k->apply(k, a, b);
+	  fftaccuracy(n, a, b, sign, err);
+
+	  t[0] += err[0];
+	  t[1] += err[1] * err[1];
+	  t[2] = dmax(t[2], err[2]);
+	  t[3] += err[3];
+	  t[4] += err[4] * err[4];
+	  t[5] = dmax(t[5], err[5]);
+     }
+
+     t[0] /= rounds;
+     t[1] = sqrt(t[1] / rounds);
+     t[3] /= rounds;
+     t[4] = sqrt(t[4] / rounds);
 }

@@ -65,27 +65,12 @@ static double aerror(R *a, R *b, int n)
           return 0.0;
 }
 
-#if defined(BENCHFFT_LDOUBLE) && HAVE_COSL
-typedef long double trigreal;
-#  define COS cosl
-#  define SIN sinl
-#  define TAN tanl
-#  define KTRIG(x) (x##L)
-#else
-typedef double trigreal;
-#  define COS cos
-#  define SIN sin
-#  define TAN tan
-#  define KTRIG(x) (x)
-#endif
-#define K2PI KTRIG(6.2831853071795864769252867665590057683943388)
-
-trigreal cos2pi(int m, int n)
+static trigreal cos2pi(int m, int n)
 {
      return COS((K2PI * m) / n);
 }
 
-trigreal sin2pi(int m, int n)
+static trigreal sin2pi(int m, int n)
 {
      return SIN((K2PI * m) / n);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft2.c,v 1.2 2003-02-09 00:35:56 stevenj Exp $ */
+/* $Id: verify-rdft2.c,v 1.3 2003-02-11 01:37:54 athena Exp $ */
 
 #include "verify.h"
 
@@ -256,4 +256,26 @@ void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e)
      bench_free(inC);
      bench_free(inB);
      bench_free(inA);
+}
+
+void accuracy_rdft2(bench_problem *p, int rounds, double t[6])
+{
+     dofft_rdft2_closure k;
+     int n;
+     C *a, *b;
+
+     BENCH_ASSERT(p->kind == PROBLEM_REAL);
+     BENCH_ASSERT(p->sz->rnk == 1);
+     BENCH_ASSERT(p->vecsz->rnk == 0);
+
+     k.k.apply = rdft2_apply;
+     k.p = p;
+     n = tensor_sz(p->sz);
+
+     a = (C *) bench_malloc(n * sizeof(C));
+     b = (C *) bench_malloc(n * sizeof(C));
+     accuracy_test(&k.k, p->sign < 0, p->sign > 0, p->sign, 
+		   n, a, b, rounds, t);
+     bench_free(b);
+     bench_free(a);
 }
