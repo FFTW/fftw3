@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.18 2002-06-18 21:48:41 athena Exp $ */
+/* $Id: planner.c,v 1.19 2002-07-05 19:49:14 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -65,9 +65,9 @@ static void register_solver(planner *ego, solver *s)
      }
 }
 
-static void hooknil(const plan *plan, const problem *p)
+static void hooknil(plan *pln, const problem *p)
 {
-     UNUSED(plan);
+     UNUSED(pln);
      UNUSED(p);
      /* do nothing */
 }
@@ -279,8 +279,7 @@ void X(planner_destroy)(planner *ego)
 }
 
 /* set planner hook */
-void X(planner_set_hook)(planner *p, 
-			 void (*hook)(const plan *, const problem *))
+void X(planner_set_hook)(planner *p, void (*hook)(plan *, const problem *))
 {
      p->hook = hook;
 }

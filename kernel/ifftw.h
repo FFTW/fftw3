@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.44 2002-07-05 18:49:59 athena Exp $ */
+/* $Id: ifftw.h,v 1.45 2002-07-05 19:49:14 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -136,17 +136,17 @@ extern void *X(malloc_plain)(size_t sz);
 
 #ifdef HAVE_ALLOCA
 /* use alloca if available */
-#define STACK_MALLOC(p, x)				\
-{							\
-     p = alloca((x) + MIN_ALIGNMENT);			\
-     p = (void *)(((long)p + (MIN_ALIGNMENT - 1)) & 	\
-           (~(long)(MIN_ALIGNMENT - 1)));		\
+#define STACK_MALLOC(T, p, x)			\
+{						\
+     p = alloca((x) + MIN_ALIGNMENT);		\
+     p = (T)(((long)p + (MIN_ALIGNMENT - 1)) &	\
+           (~(long)(MIN_ALIGNMENT - 1)));	\
 }
 #define STACK_FREE(x) 
 
 #else /* ! HAVE_ALLOCA */
 /* use malloc instead of alloca */
-#define STACK_MALLOC(p, x) p = fftw_malloc(x, OTHER)
+#define STACK_MALLOC(T, p, x) p = (T)fftw_malloc(x, OTHER)
 #define STACK_FREE(x) X(free)(x)
 #endif /* ! HAVE_ALLOCA */
 
@@ -343,7 +343,7 @@ struct planner_s {
      const planner_adt *adt;
      uint nplan;    /* number of plans evaluated */
      uint nprob;    /* number of problems evaluated */
-     void (*hook)(const plan *plan, const problem *p);
+     void (*hook)(plan *plan, const problem *p);
 
      pair *solvers;
      solutions **sols;
@@ -361,8 +361,7 @@ planner *X(mkplanner)(size_t sz,
                       void (*destroy) (planner *), 
 		      int flags);
 void X(planner_destroy)(planner *ego);
-void X(planner_set_hook)(planner *p, void (*hook)(const plan *,
-						  const problem *));
+void X(planner_set_hook)(planner *p, void (*hook)(plan *, const problem *));
 void X(evaluate_plan)(planner *ego, plan *pln, const problem *p);
 
 #ifdef FFTW_DEBUG

@@ -74,9 +74,9 @@ static void putchr(printer *p, char c)
      putchar(c);
 }
 
-static void hook(const plan *pln, const fftw_problem *p_)
+static void hook(plan *pln, const fftw_problem *p_)
 {
-     problem_dft *p = (problem_dft *) p_;
+     const problem_dft *p = (const problem_dft *) p_;
 
      if (verbose > 5) {
 	  printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);

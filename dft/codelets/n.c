@@ -26,6 +26,7 @@ static int okp(const kdft_desc *d,
 	       const R *ro, const R *io,
 	       int is, int os, uint vl, int ivs, int ovs)
 {
+     UNUSED(ri); UNUSED(ii); UNUSED(ro); UNUSED(io); UNUSED(vl);
      return (1
 	     && (!d->is || (d->is == is))
 	     && (!d->os || (d->os == os))

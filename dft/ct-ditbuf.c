@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.12 2002-07-04 00:32:28 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.13 2002-07-05 19:49:14 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -81,7 +81,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
           int os = ego->os, ovs = ego->ovs, ios = ego->iios;
 	  R *buf;
 
-	  STACK_MALLOC(buf, r * BATCHSZ * 2 * sizeof(R));
+	  STACK_MALLOC(R *, buf, r * BATCHSZ * 2 * sizeof(R));
 
           for (i = 0; i < vl; ++i) {
 	       R *rA = ro + i * ovs, *iA = io + i * ovs;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.1 2002-07-05 18:49:59 athena Exp $ */
+/* $Id: verify.c,v 1.2 2002-07-05 19:49:14 athena Exp $ */
 
 #include "dft.h"
 #include <math.h>
@@ -75,9 +75,6 @@ static double aerror(C *a, C *b, uint n, double tol)
 }
 
 #ifdef HAVE_DRAND48
-#  if !defined(HAVE_DECL_DRAND48) || !HAVE_DECL_DRAND48
-extern double drand48(void);
-#  endif
 static double mydrand(void)
 {
      return drand48() - 0.5;
