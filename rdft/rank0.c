@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.15 2005-02-21 03:18:59 athena Exp $ */
+/* $Id: rank0.c,v 1.16 2005-02-21 15:07:24 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -27,15 +27,6 @@
 #ifdef HAVE_STRING_H
 #include <string.h>		/* for memcpy() */
 #endif
-
-typedef struct {
-     solver super;
-     rdftapply apply;
-     const char *nam;
-     int minrnk;
-     int maxrnk;
-     int maxvl;
-} S;
 
 #define MAXRNK 2
 
@@ -46,6 +37,13 @@ typedef struct {
      iodim d[MAXRNK];
      const char *nam;
 } P;
+
+typedef struct {
+     solver super;
+     rdftapply apply;
+     int (*applicable)(const P *pln, const problem_rdft *p);
+     const char *nam;
+} S;
 
 /* copy up to MAXRNK dimensions from problem into plan.  If a
    contiguous dimension exists, save its length in pln->vl */
@@ -209,6 +207,8 @@ static void cpy2d_recbuf(R *I, R *O,
      }
 }
 
+/**************************************************************/
+/* rank 0,1,2, out of place, iterative */
 static void apply_iter(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
@@ -235,6 +235,13 @@ static void apply_iter(const plan *ego_, R *I, R *O)
      }
 }
 
+static int applicable_iter(const P *pln, const problem_rdft *p)
+{
+     return (p->I != p->O) && (pln->rnk <= 2);
+}
+
+/**************************************************************/
+/* rank 2, out of place, recursive */
 static void apply_rec(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
@@ -247,6 +254,13 @@ static void apply_rec(const plan *ego_, R *I, R *O)
 	       vl);
 }
 
+static int applicable_rec(const P *pln, const problem_rdft *p)
+{
+     return (p->I != p->O) && (pln->rnk == 2);
+}
+
+/**************************************************************/
+/* rank 2, out of place, recursive with buffer, vl <= 2 */
 static void apply_recbuf(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
@@ -260,6 +274,13 @@ static void apply_recbuf(const plan *ego_, R *I, R *O)
 		  vl);
 }
 
+static int applicable_recbuf(const P *pln, const problem_rdft *p)
+{
+     return (p->I != p->O) && (pln->rnk == 2) && (pln->vl <= 2);
+}
+
+/**************************************************************/
+/* rank 0, out of place, using memcpy */
 static void apply_memcpy(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
@@ -269,23 +290,27 @@ static void apply_memcpy(const plan *ego_, R *I, R *O)
      memcpy(O, I, vl * sizeof(R));
 }
 
+static int applicable_memcpy(const P *pln, const problem_rdft *p)
+{
+     return (p->I != p->O) && (pln->rnk == 0);
+}
+
+/**************************************************************/
 static int applicable(const S *ego, const problem *p_)
 {
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
 	  P pln;
           return (1
-		  && p->I != p->O
                   && p->sz->rnk == 0
 		  && FINITE_RNK(p->vecsz->rnk)
 		  && fill_iodim(&pln, p)
-		  && pln.rnk >= ego->minrnk
-		  && pln.rnk <= ego->maxrnk
-		  && (!ego->maxvl || pln.vl <= ego->maxvl)
+		  && ego->applicable(&pln, p)
 	       );
      }
      return 0;
 }
+
 
 static void print(const plan *ego_, printer *p)
 {
@@ -328,24 +353,20 @@ void X(rdft_rank0_register)(planner *p)
      unsigned i;
      static struct {
 	  rdftapply apply;
-	  int minrnk;
-	  int maxrnk;
-	  int maxvl;
+	  int (*applicable)(const P *pln, const problem_rdft *p);
 	  const char *nam;
      } tab[] = {
-	  { apply_iter,    0, 2, 0, "rdft-rank0" },
-	  { apply_rec ,    2, 2, 0, "rdft-rank0-rec" },
-	  { apply_recbuf , 2, 2, 2, "rdft-rank0-recbuf" },
-	  { apply_memcpy , 0, 0, 0, "rdft-rank0-memcpy" },
+	  { apply_iter,    applicable_iter,   "rdft-rank0" },
+	  { apply_rec ,    applicable_rec,    "rdft-rank0-rec" },
+	  { apply_recbuf , applicable_recbuf, "rdft-rank0-recbuf" },
+	  { apply_memcpy , applicable_memcpy, "rdft-rank0-memcpy" },
      };
 
      for (i = 0; i < sizeof(tab) / sizeof(tab[0]); ++i) {
 	  static const solver_adt sadt = { mkplan };
 	  S *slv = MKSOLVER(S, &sadt);
 	  slv->apply = tab[i].apply;
-	  slv->minrnk = tab[i].minrnk;
-	  slv->maxrnk = tab[i].maxrnk;
-	  slv->maxvl = tab[i].maxvl;
+	  slv->applicable = tab[i].applicable;
 	  slv->nam = tab[i].nam;
 	  REGISTER_SOLVER(p, &(slv->super));
      }
