@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.92 2002-08-29 11:45:37 athena Exp $ */
+/* $Id: ifftw.h,v 1.93 2002-08-29 21:58:35 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -198,6 +198,10 @@ int X(imax)(int a, int b);
 int X(imin)(int a, int b);
 uint X(uimax)(uint a, uint b);
 uint X(uimin)(uint a, uint b);
+
+/*-----------------------------------------------------------------------*/
+/* iabs.c: */
+uint X(iabs)(int a);
 
 /*-----------------------------------------------------------------------*/
 /* tensor.c: */

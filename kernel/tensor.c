@@ -18,19 +18,13 @@
  *
  */
 
-/* $Id: tensor.c,v 1.20 2002-08-24 15:05:08 athena Exp $ */
+/* $Id: tensor.c,v 1.21 2002-08-29 21:58:35 stevenj Exp $ */
 
 #include "ifftw.h"
 
-static int imax(int a, int b)
-{
-     return (a > b) ? a : b;
-}
-
-static int imin(int a, int b)
-{
-     return (a < b) ? a : b;
-}
+#define imin X(imin)
+#define imax X(imax)
+#define iabs X(iabs)
 
 static void talloc(tensor *x, uint rnk)
 {
@@ -167,10 +161,10 @@ int X(tensor_min_stride)(const tensor sz)
           return 0;
      else {
           uint i;
-          int s = imin(sz.dims[0].is, sz.dims[0].os);
+          int s = imin(iabs(sz.dims[0].is), iabs(sz.dims[0].os));
           for (i = 1; i < sz.rnk; ++i) {
                iodim *p = sz.dims + i;
-               s = imin(s, imin(p->is, p->os));
+               s = imin(s, imin(iabs(p->is), iabs(p->os)));
           }
           return s;
      }

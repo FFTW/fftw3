@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.6 2002-08-29 21:31:39 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.7 2002-08-29 21:58:35 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -219,11 +219,6 @@ static void print(plan *ego_, printer *p)
               ego->cld, ego->cldrest);
 }
 
-static uint iabs(int i)
-{
-     return(i > 0 ? i : -i);
-}
-
 static uint min_nbuf(const problem_rdft2 *p, uint n, uint vl)
 {
      int is, os, ivs, ovs;
@@ -249,9 +244,9 @@ static uint min_nbuf(const problem_rdft2 *p, uint n, uint vl)
      
      /* handle one potentially common case: "contiguous" real and
 	complex arrays, which overlap because of the differing sizes. */
-     if (n * iabs(is) <= iabs(ivs)
-	 && (n/2 + 1) * iabs(os) <= iabs(ovs)
-	 && iabs((int) (p->rio - p->iio)) <= iabs(os)
+     if (n * X(iabs)(is) <= X(iabs)(ivs)
+	 && (n/2 + 1) * X(iabs)(os) <= X(iabs)(ovs)
+	 && X(iabs)((int) (p->rio - p->iio)) <= X(iabs)(os)
 	 && ivs > 0 && ovs > 0) {
 	  uint vsmin = X(uimin)(ivs, ovs);
 	  uint vsmax = X(uimax)(ivs, ovs);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.12 2002-08-12 17:43:08 stevenj Exp $ */
+/* $Id: problem2.c,v 1.13 2002-08-29 21:58:35 stevenj Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -170,11 +170,6 @@ problem *X(mkproblem_rdft2_d)(tensor sz, tensor vecsz,
      return p;
 }
 
-static uint iabs(int i)
-{
-     return(i > 0 ? i : -i);
-}
-
 /* Check if the vecsz/sz strides are consistent with the problem
    being in-place for vecsz.dim[vdim], or for all dimensions
    if vdim == RNK_MINFTY.  We can't just use tensor_inplace_strides
@@ -215,8 +210,8 @@ int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim)
 	  os = p->sz.dims[p->sz.rnk-1].is;
      }
      return(p->vecsz.dims[vdim].is == p->vecsz.dims[vdim].os
-	    && iabs(p->vecsz.dims[vdim].os)
-	    >= X(uimax)(Nc * iabs(os), N * iabs(is)));
+	    && X(iabs)(p->vecsz.dims[vdim].os)
+	    >= X(uimax)(Nc * X(iabs)(os), N * X(iabs)(is)));
 }
 
 void X(problem_rdft2_register)(planner *p)
