@@ -163,6 +163,7 @@ if test "${enable_debug}" = "yes"; then
 fi
 
 AC_DEFINE_UNQUOTED(FFTW_CC, "$CC $CFLAGS", [C compiler name and flags])
+AC_DEFINE_UNQUOTED(CODELET_OPTIM, "$CODELET_OPTIM", [extra CFLAGS for codelets])
 
 AC_OUTPUT([
    Makefile

@@ -18,10 +18,11 @@
  *
  */
 
-/* $Id: version.c,v 1.4 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: version.c,v 1.5 2002-07-16 11:00:10 athena Exp $ */
 
 #include "config.h"
 #include "ifftw.h"
 
-const char *X(version) = PACKAGE "-" VERSION;
-const char *X(cc) = FFTW_CC;
+const char *const X(version) = PACKAGE "-" VERSION;
+const char *const X(cc) = FFTW_CC;
+const char *const X(codelet_optim) = CODELET_OPTIM;

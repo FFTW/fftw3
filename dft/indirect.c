@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.11 2002-06-18 14:33:58 athena Exp $ */
+/* $Id: indirect.c,v 1.12 2002-07-16 11:00:10 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -228,7 +228,7 @@ static solver *mksolver(const ndrct_adt *adt)
 void X(dft_indirect_register)(planner *p)
 {
      uint i;
-     static const ndrct_adt *adts[] = {
+     static const ndrct_adt *const adts[] = {
 	  &adt_before, &adt_after
      };
 

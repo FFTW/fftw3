@@ -1,5 +1,6 @@
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 -I$(top_srcdir)/dft/codelets
+CFLAGS = @CFLAGS@ @CODELET_OPTIM@
 noinst_LTLIBRARIES = libdft_inplace.la
 
 F1_CODELETS = f1_2.c f1_3.c f1_4.c f1_5.c f1_6.c f1_7.c f1_8.c f1_9.c	\

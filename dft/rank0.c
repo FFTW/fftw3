@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.13 2002-06-16 23:05:58 athena Exp $ */
+/* $Id: rank0.c,v 1.14 2002-07-16 11:00:10 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -271,7 +271,7 @@ static solver *mksolver(const rnk0adt *adt)
 void X(dft_rank0_register)(planner *p)
 {
      uint i;
-     static const rnk0adt *adts[] = {
+     static const rnk0adt *const adts[] = {
 	  &adt_cpy1, &adt_vec, &adt_io1, &adt_io2r, &adt_io2i
      };
 

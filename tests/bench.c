@@ -14,8 +14,9 @@ extern double timer_stop(void);
 #include "dft.h"
 #include "codelet.h"
 #undef problem
-extern const char *FFTW(version);
-extern const char *FFTW(cc);
+extern const char *const FFTW(version);
+extern const char *const FFTW(cc);
+extern const char *const FFTW(codelet_optim);
 
 /* END HACKS */
 
@@ -29,10 +30,16 @@ static const char *mkcc(void)
      return FFTW(cc);
 }
 
+static const char *mkcodelet_optim(void)
+{
+     return FFTW(codelet_optim);
+}
+
 BEGIN_BENCH_DOC
 BENCH_DOC("name", "fftw3")
 BENCH_DOCF("version", mkvers) 
 BENCH_DOCF("fftw-compiled-by", mkcc)
+BENCH_DOCF("codelet-optim", mkcodelet_optim)
 END_BENCH_DOC 
 
 static bench_real *ri, *ii, *ro, *io;

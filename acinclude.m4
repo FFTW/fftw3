@@ -243,8 +243,10 @@ if test "$ac_test_CFLAGS" != "set"; then
 
   CPU_FLAGS=""
   CPU_OPTIM=""
+  CODELET_OPTIM=""
   if test "$GCC" = "yes"; then
 	  CPU_OPTIM=-O3
+	  CODELET_OPTIM=-O3
 	  dnl try to guess correct CPU flags, at least for linux
 	  case "${host_cpu}" in
 	  i586*)  ACX_CHECK_CC_FLAGS(-mcpu=pentium,cpu_pentium,
@@ -252,7 +254,7 @@ if test "$ac_test_CFLAGS" != "set"; then
 			[ACX_CHECK_CC_FLAGS(-mpentium,pentium,
 				[CPU_FLAGS=-mpentium])])
 		  if test "$1" = fftw; then
-	            CPU_OPTIM=-O
+	            CODELET_OPTIM=-O
                   fi
 		  if test "$1" = benchfft; then
 	            CPU_OPTIM=-O2
@@ -263,7 +265,7 @@ if test "$ac_test_CFLAGS" != "set"; then
 			[ACX_CHECK_CC_FLAGS(-mpentiumpro,pentiumpro,
 				[CPU_FLAGS=-mpentiumpro])])
 		  if test "$1" = fftw; then
-	            CPU_OPTIM=-O
+	            CODELET_OPTIM=-O
                   fi
 		  if test "$1" = benchfft; then
 	            CPU_OPTIM=-O2
@@ -316,6 +318,8 @@ if test "$ac_test_CFLAGS" != "set"; then
   if test -n "$CPU_FLAGS"; then
         CFLAGS="$CFLAGS $CPU_FLAGS"
   fi
+
+  AC_SUBST(CODELET_OPTIM)
 
   if test -z "$CFLAGS"; then
 	echo ""
