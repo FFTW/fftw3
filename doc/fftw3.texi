@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.57 2003-03-02 00:14:54 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.58 2003-03-02 01:42:23 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1266,7 +1266,7 @@ straightforward for multi-dimensional arrays as it is for
 one-dimensional arrays.
 
 Creating the array is simple: using a dynamic-allocation routine like
-@code{fftw_malloc}, allocate an array big enough to store the N
+@code{fftw_malloc}, allocate an array big enough to store N
 @code{fftw_complex} values (for a complex DFT), where N is the product
 of the sizes of the array dimensions (i.e. the total number of complex
 values in the array).  For example, here is code to allocate a 5x12x27
