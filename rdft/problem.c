@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.18 2002-08-12 18:07:44 stevenj Exp $ */
+/* $Id: problem.c,v 1.19 2002-08-26 02:28:12 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -169,9 +169,11 @@ static int scan(scanner *sc, problem **p)
 static void zero(const problem *ego_)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
-     tensor sz = X(tensor_append)(ego->vecsz, ego->sz);
+     tensor rsz = X(rdft_real_sz)(ego->kind, ego->sz);
+     tensor sz = X(tensor_append)(ego->vecsz, rsz);
      X(rdft_zerotens)(sz, ego->I);
      X(tensor_destroy)(sz);
+     X(tensor_destroy)(rsz);
 }
 
 static const problem_adt padt =
