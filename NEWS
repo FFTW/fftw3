@@ -18,7 +18,7 @@ Since FFTW 3.0.1:
   mainly for people distributing compiled binaries of FFTW (see manual).
 
 * Automatic detection of Altivec under Linux with gcc 3.4 (so that
-  same library should work on both Altivec and non-Altivec PowerPCs).
+  same binary should work on both Altivec and non-Altivec PowerPCs).
 
 * Compiler-specific tweaks/flags/workarounds for gcc 3.4, xlc, HP/UX,
   Solaris/Intel.
@@ -31,6 +31,9 @@ Since FFTW 3.0.1:
 * Fixed bug that caused HC2R transforms to destroy the input in
   certain cases, even if the user specified FFTW_PRESERVE_INPUT.
 
+* Fixed bug where wisdom would be lost under rare circumstances,
+  causing excessive planning time.
+
 * FAQ notes bug in gcc-3.4.[1-3] that causes FFTW to crash with SSE/SSE2.
 
 * Fixed accidentally exported symbol that prohibited simultaneous
@@ -38,20 +41,17 @@ Since FFTW 3.0.1:
 
 * Support Win32 threads under MinGW (thanks to Alessio Massaro).
 
-* Fix build failure if no Fortran compiler is found (Charles Radley
-  for the bug report).
+* Fix build failure if no Fortran compiler is found (thanks to Charles
+  Radley for the bug report).
 
 * Fixed compilation failure with icc 8.0 and SSE/SSE2.
 
 * Fixed compilation with OpenMP on AIX (thanks to Greg Bauer).
 
-* Fixed bug where wisdom would be lost under rare circumstances,
-  causing excessive planning time.
-
 * Fixed compilation failure on x86-64 with gcc (thanks to Orion Poplawski).
 
 * Incorporated patch from FreeBSD ports (FreeBSD does not have memalign,
-  but its malloc is 16-byte aligned.
+  but its malloc is 16-byte aligned).
 
 * Cycle-counter compilation fixes for Itanium, Alpha, x86-64, Sparc,
   MacOS (thanks to Matt Boman, John Bowman, and James A. Treacy for
