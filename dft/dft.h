@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.36 2003-05-15 23:09:07 athena Exp $ */
+/* $Id: dft.h,v 1.37 2003-05-16 17:02:06 athena Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -114,6 +114,7 @@ void X(dft_vrank3_transpose_register)(planner *p);
 void X(dft_buffered_register)(planner *p);
 void X(dft_generic_register)(planner *p);
 void X(dft_rader_register)(planner *p);
+void X(dft_bluestein_register)(planner *p);
 void X(dft_nop_register)(planner *p);
 void X(dftw_dft_register)(planner *p);
 
