@@ -227,21 +227,24 @@ static __inline__ V BYTW(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V tx = twp[0];
-     V si = VBYI(sr);
-     V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
-     return VADD(VMUL(tr, sr), VMUL(ti, si));
+     V ti = UNPCKH(tx, tx);
+     tr = VMUL(tr, sr);
+     sr = VBYI(sr);
+     return VADD(tr, VMUL(ti, sr));
 }
 
 static __inline__ V BYTWJ(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V tx = twp[0];
-     V si = VBYI(sr);
-     V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
-     return VSUB(VMUL(tr, sr), VMUL(ti, si));
+     V ti = UNPCKH(tx, tx);
+     tr = VMUL(tr, sr);
+     sr = VBYI(sr);
+     return VSUB(tr, VMUL(ti, sr));
 }
+
 
 #endif /* FAST_AND_BLOATED_TWIDDLES */
 

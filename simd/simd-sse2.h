@@ -150,22 +150,25 @@ static __inline__ V VBYI(V x)
 #define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 
+
 static __inline__ V BYTW(const R *t, V sr)
 {
      V tx = LD(t, 1, t);
-     V si = VBYI(sr);
-     V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
-     return VADD(VMUL(tr, sr), VMUL(ti, si));
+     V ti = UNPCKH(tx, tx);
+     tr = VMUL(tr, sr);
+     sr = VBYI(sr);
+     return VADD(tr, VMUL(ti, sr));
 }
 
 static __inline__ V BYTWJ(const R *t, V sr)
 {
      V tx = LD(t, 1, t);
-     V si = VBYI(sr);
-     V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
-     return VSUB(VMUL(tr, sr), VMUL(ti, si));
+     V ti = UNPCKH(tx, tx);
+     tr = VMUL(tr, sr);
+     sr = VBYI(sr);
+     return VSUB(tr, VMUL(ti, sr));
 }
 
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
