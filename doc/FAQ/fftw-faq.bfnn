@@ -457,6 +457,17 @@ use Windows.  We know nothing about Visual Basic, Visual C++, or .NET.
 Please find the appropriate Usenet discussion group and ask your
 question there.
 
+\question 15oct:pruned Can I compute only a subset of the DFT outputs?
+
+No, an FFT intrinsically computes all outputs from all inputs.  In
+principle, there is something called a \italic{pruned FFT\} that can
+do what you want, but to compute K outputs out of N the complexity is
+in general O(N log K) instead of O(N log N), thus saving only a small
+additive factor in the log.  (The same argument holds if you instead
+have only K nonzero inputs.)  There are also some algorithms that
+compute pruned transforms \italic{approximately\}, but they are beyond
+the scope of this FAQ.
+
 \comment ######################################################################
 
 \section  Internals of FFTW
