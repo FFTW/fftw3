@@ -85,8 +85,10 @@ AC_DEFINE_UNQUOTED(FFTW_CC, "$CC $CFLAGS", [C compiler name and flags])
 AC_OUTPUT([
    Makefile
    genfft/Makefile
-   codelets/Makefile
-   codelets/dft-standard/Makefile
    kernel/Makefile
    dft/Makefile
+
+   codelets/Makefile
+   codelets/dft-standard/Makefile
+   codelets/dft-inplace/Makefile
 ])
