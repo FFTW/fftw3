@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.4 2003-01-09 23:53:09 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.5 2003-01-11 05:52:04 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -68,6 +68,28 @@ FFTW_DEFINE_API(FFTW_MANGLE_DOUBLE, double, fftw_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_FLOAT, float, fftwf_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 
+/* documented flags */
+#define FFTW_DEFAULTS (0U)
+#define FFTW_DESTROY_INPUT (1U << 0)
+#define FFTW_POSSIBLY_UNALIGNED (1U << 1)
+#define FFTW_CONSERVE_MEMORY (1U << 2)
+#define FFTW_EXHAUSTIVE (1U << 3) /* NO_EXHAUSTIVE is default */
+#define FFTW_PRESERVE_INPUT (1U << 4) /* cancels FFTW_DESTROY_INPUT */
+#define FFTW_IMPATIENT (1U << 5)
+#define FFTW_ESTIMATE (1U << 6)
+
+/* undocumented beyond-guru flags */
+#define FFTW_ESTIMATE_PATIENT (1U << 7)
+#define FFTW_BELIEVE_PCOST (1U << 8)
+#define FFTW_DFT_R2HC_ICKY (1U << 9)
+#define FFTW_NONTHREADED_ICKY (1U << 10)
+#define FFTW_NO_BUFFERING (1U << 11)
+#define FFTW_NO_INDIRECT_OP (1U << 12)
+#define FFTW_ALLOW_LARGE_GENERIC (1U << 13) /* NO_LARGE_GENERIC is default */
+#define FFTW_NO_RANK_SPLITS (1U << 14)
+#define FFTW_ALLOW_UGLY (1U << 15) /* NO_UGLY is default */
+#define FFTW_NO_VRANK_SPLITS (1U << 16)
+#define FFTW_NO_VRECURSE (1U << 17)
 
 #ifdef __cplusplus
 }  /* extern "C" */
