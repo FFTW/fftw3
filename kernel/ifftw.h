@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.238 2004-04-03 02:30:17 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.239 2004-04-07 04:16:49 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -151,6 +151,16 @@ void *alloca(size_t);
 #    error no unsigned integer type matches void* sizeof!
 #  endif
 #endif
+
+/*-----------------------------------------------------------------------*/
+/* We can do an optimization for copying pairs of (aligned) floats
+   when in single precision if 2*float = double. */
+
+#define FFTW_2R_IS_DOUBLE (defined(FFTW_SINGLE) \
+                           && SIZEOF_FLOAT != 0 \
+                           && SIZEOF_DOUBLE == 2*SIZEOF_FLOAT)
+
+#define DOUBLE_ALIGNED(p) ((((uintptr_t)(p)) % sizeof(double)) == 0)
 
 /*-----------------------------------------------------------------------*/
 /* assert.c: */

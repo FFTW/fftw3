@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-vrank2.c,v 1.1 2004-04-03 02:18:27 stevenj Exp $ */
+/* $Id: rank0-vrank2.c,v 1.2 2004-04-07 04:16:49 stevenj Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations), with vector rank 2;
    these plans are not strictly necessary, but are an optimization
@@ -87,28 +87,29 @@ static void apply_consecpairs(const plan *ego_, R *I, R *O)
      int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
 
-#if defined(FFTW_SINGLE) && SIZEOF_FLOAT != 0 && SIZEOF_DOUBLE==2*SIZEOF_FLOAT
-     /* copy floats two at a time, copying as double */
-     double *dI = (double *) I;
-     double *dO = (double *) O;
-     for (i = 4; i <= vl; i += 4) {
-          double r0, r1, r2, r3;
-          r0 = *dI; dI += ivs;
-          r1 = *dI; dI += ivs;
-          r2 = *dI; dI += ivs;
-          r3 = *dI; dI += ivs;
-          *dO = r0; dO += ovs;
-          *dO = r1; dO += ovs;
-          *dO = r2; dO += ovs;
-	  *dO = r3; dO += ovs;
+#if FFTW_2R_IS_DOUBLE
+     if (DOUBLE_ALIGNED(I) && DOUBLE_ALIGNED(O)) {
+	  /* copy floats two at a time, copying as double */
+	  for (i = 4; i <= vl; i += 4) {
+	       double r0, r1, r2, r3;
+	       r0 = *((double *) I); I += ivs;
+	       r1 = *((double *) I); I += ivs;
+	       r2 = *((double *) I); I += ivs;
+	       r3 = *((double *) I); I += ivs;
+	       *((double *) O) = r0; O += ovs;
+	       *((double *) O) = r1; O += ovs;
+	       *((double *) O) = r2; O += ovs;
+	       *((double *) O) = r3; O += ovs;
+	  }
+	  for (; i < vl + 4; ++i) {
+	       double r0;
+	       r0 = *((double *) I); I += ivs;
+	       *((double *) O) = r0; O += ovs;
+	  }
+	  /* TODO: add SSE2 version for 2 doubles at a time? */
      }
-     for (; i < vl + 4; ++i) {
-          double r0;
-          r0 = *dI; dI += ivs;
-          *dO = r0; dO += ovs;
-     }
-     /* TODO: add SSE2 version for 2 doubles at a time? */
-#else
+     else {
+#endif
      for (i = 4; i <= vl; i += 4) {
           R r0, r1, r2, r3;
           R i0, i1, i2, i3;
@@ -125,6 +126,8 @@ static void apply_consecpairs(const plan *ego_, R *I, R *O)
           R r0, i0;
           r0 = *I; i0 = I[1]; I += ivs;
           *O = r0; O[1] = i0; O += ovs;
+     }
+#if FFTW_2R_IS_DOUBLE
      }
 #endif
 }

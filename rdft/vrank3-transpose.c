@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.17 2004-04-06 00:18:29 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.18 2004-04-07 04:16:49 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -50,7 +50,7 @@ typedef struct {
 
 /**************************************************************************/
 
-/* FIXME: what is the best value for these cutoffs? */
+/* FIXME: what are the best values for these cutoffs? */
 
 #define CUTOFF 8 /* size below which we do a naive transpose */
 #define CUTOFF_UGLY 2000 /* size at which naive transpose is UGLY */
@@ -97,7 +97,7 @@ static void rec_transpose_Ntuple(R *A, R *B, int n, int m, int fda, int fdb,
 		   int i, j;
 		   for (i = 0; i < n; ++i) {
 			for (j = 0; j < m; ++j) {
-#if defined(FFTW_SINGLE) && SIZEOF_FLOAT != 0 && SIZEOF_DOUBLE==2*SIZEOF_FLOAT
+#if 0 && FFTW_2R_IS_DOUBLE
 			     double *Bd = (double *) (B + (j*fdb + i) * 2);
 			     double *Ad = (double *) (A + (i*fda + j) * 2);
 			     *Bd = *Ad;
@@ -159,7 +159,7 @@ static void rec_transpose_swap_Ntuple(R *A, R *B, int n, int m, int fda, int N)
 		   int i, j;
 		   for (i = 0; i < n; ++i) {
 			for (j = 0; j < m; ++j) {
-#if defined(FFTW_SINGLE) && SIZEOF_FLOAT != 0 && SIZEOF_DOUBLE==2*SIZEOF_FLOAT
+#if 0 && FFTW_2R_IS_DOUBLE
 			     double *Bd = (double *) (B + (j*fda + i) * 2);
 			     double *Ad = (double *) (A + (i*fda + j) * 2);
 			     double ad = *Ad;
@@ -225,7 +225,7 @@ static void rec_transpose_sq_ip_Ntuple(R *A, int n, int fda, int N)
 		   int i, j;
 		   for (i = 0; i < n; ++i) {
 			for (j = i + 1; j < n; ++j) {
-#if defined(FFTW_SINGLE) && SIZEOF_FLOAT != 0 && SIZEOF_DOUBLE==2*SIZEOF_FLOAT
+#if 0 && FFTW_2R_IS_DOUBLE
 			     double *Bd = (double *) (A + (j*fda + i) * 2);
 			     double *Ad = (double *) (A + (i*fda + j) * 2);
 			     double ad = *Ad;
@@ -691,7 +691,7 @@ static void apply_simple_consecpairs(const plan *ego_, R *I, R *O)
      UNUSED(O);
      for (i = 1; i < n; ++i) {
           for (j = 0; j < i; ++j) {
-#if defined(FFTW_SINGLE) && SIZEOF_FLOAT != 0 && SIZEOF_DOUBLE==2*SIZEOF_FLOAT
+#if 0 && FFTW_2R_IS_DOUBLE
 	       double *p0 = (double *) (I + i * s0 + j * s1);
 	       double *p1 = (double *) (I + j * s0 + i * s1);
 	       double t0 = p0[0];
