@@ -18,7 +18,7 @@
  *
  */
 
-#include "codelet.h"
+#include "codelet-dft.h"
 #include "t.h"
 
 static int okp(const ct_desc *d,

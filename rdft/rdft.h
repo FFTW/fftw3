@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: rdft.h,v 1.29 2002-09-24 23:39:22 stevenj Exp $ */
+/* $Id: rdft.h,v 1.30 2003-01-07 21:22:39 athena Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
 
 #include "ifftw.h"
-#include "codelet.h"
+#include "codelet-rdft.h"
 
 /* problem.c: */
 typedef struct {

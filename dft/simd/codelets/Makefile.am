@@ -84,10 +84,10 @@ if MAINTAINER_MODE
 GFLAGS = -simd -trivial-stores $(FLAGS_COMMON)
 
 n1fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS); $(GEN_NOTW_C) $(GFLAGS) -n $* -name n1fv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name n1fv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 sn1fv_%.cod:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS); $(GEN_NOTW_C) $(GFLAGS) -n $* -name "" -with-istride ISTRIDE -with-ostride OSTRIDE -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name "" -with-istride ISTRIDE -with-ostride OSTRIDE -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 sn1fv_%.c:  $(CODELET_DEPS)
 	echo "$*" | tr '_' \\n | (read n; read is; read os;	\
@@ -97,13 +97,13 @@ sn1fv_%.c:  $(CODELET_DEPS)
         echo "#include \"sn1fv_$${n}.cod\"") >$@
 
 n1bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name n1bv_$* -include "n1b.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name n1bv_$* -include "n1b.h") | $(ADD_DATE) | $(INDENT) >$@
 
 t1fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
-	($(PRELUDE_COMMANDS); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1fv_$* -include "t1f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1fv_$* -include "t1f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 st1fv_%.cod:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
-	($(PRELUDE_COMMANDS); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name "" -with-iostride IOSTRIDE -include "t1f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name "" -with-iostride IOSTRIDE -include "t1f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 st1fv_%.c:  $(CODELET_DEPS)
 	echo "$*" | tr '_' \\n | (read n; read ios;	\
@@ -113,6 +113,6 @@ st1fv_%.c:  $(CODELET_DEPS)
 
 
 t1bv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
-	($(PRELUDE_COMMANDS); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1bv_$* -include "t1b.h" -sign 1) | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1bv_$* -include "t1b.h" -sign 1) | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE

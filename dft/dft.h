@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: dft.h,v 1.31 2002-09-22 16:50:36 athena Exp $ */
+/* $Id: dft.h,v 1.32 2003-01-07 21:22:39 athena Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
 
 #include "ifftw.h"
-#include "codelet.h"
+#include "codelet-dft.h"
 
 /* problem.c: */
 typedef struct {

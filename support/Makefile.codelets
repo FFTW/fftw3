@@ -47,13 +47,15 @@ GEN_TWIDSQ = ${GENFFTDIR}/gen_twidsq
 GEN_R2HC = ${GENFFTDIR}/gen_r2hc
 GEN_HC2HC = ${GENFFTDIR}/gen_hc2hc
 GEN_HC2R = ${GENFFTDIR}/gen_hc2r
-PRELUDE = ${top_srcdir}/support/codelet_prelude
+PRELUDE_DFT = ${top_srcdir}/support/codelet_prelude.dft
+PRELUDE_RDFT = ${top_srcdir}/support/codelet_prelude.rdft
 ASMPRELUDE = ${top_srcdir}/support/codelet_asmprelude
 ADD_DATE = sed -e s/@DATE@/"`date`"/
 
 COPYRIGHT=${top_srcdir}/COPYRIGHT
 CODELET_DEPS=$(COPYRIGHT) $(PRELUDE) $(ASMPRELUDE)
-PRELUDE_COMMANDS=cat $(COPYRIGHT) $(PRELUDE)
+PRELUDE_COMMANDS_DFT=cat $(COPYRIGHT) $(PRELUDE_DFT)
+PRELUDE_COMMANDS_RDFT=cat $(COPYRIGHT) $(PRELUDE_RDFT)
 ASMPRELUDE_COMMANDS=cat $(COPYRIGHT) $(ASMPRELUDE)
 
 FLAGS_COMMON = -compact -variables 4 -no-randomized-cse

@@ -18,7 +18,7 @@
  *
  */
 
-#include "codelet.h"
+#include "codelet-rdft.h"
 #include "r2hc.h"
 
 static int okp(const kr2hc_desc *d,

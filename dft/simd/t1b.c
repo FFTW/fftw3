@@ -18,7 +18,7 @@
  *
  */
 
-#include "codelet.h"
+#include "codelet-dft.h"
 #include "t1b.h"
 
 #if HAVE_SIMD

@@ -18,7 +18,7 @@
  *
  */
 
-#include "codelet.h"
+#include "codelet-dft.h"
 #include "n.h"
 
 static int okp(const kdft_desc *d,
