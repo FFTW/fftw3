@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.18 2003-01-13 09:20:36 athena Exp $ */
+/* $Id: plan.c,v 1.19 2003-01-26 16:51:16 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -31,7 +31,7 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
      plan *p = (plan *)MALLOC(size, PLANS);
 
      A(adt->destroy);
-     p->refcnt = p->awake_refcnt = 0;
+     p->awake_refcnt = 0;
      p->adt = adt;
      X(ops_zero)(&p->ops);
      p->pcost = 0.0;
@@ -40,19 +40,11 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
 }
 
 /*
- * use a plan
- */
-void X(plan_use)(plan *ego)
-{
-     ++ego->refcnt;
-}
-
-/*
  * destroy a plan
  */
 void X(plan_destroy_internal)(plan *ego)
 {
-     if (ego && --ego->refcnt == 0) {
+     if (ego) {
 	  if (ego->awake_refcnt > 0)
 	       ego->adt->awake(ego, 0);
           ego->adt->destroy(ego);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.131 2003-01-19 12:28:27 athena Exp $ */
+/* $Id: planner.c,v 1.132 2003-01-26 16:51:16 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -352,7 +352,6 @@ static plan *mkplan0(planner *ego, problem *p, slvdesc **descp)
 	       plan *pln = invoke_solver(ego, p, s, nflags);
 
 	       if (pln) {
-		    X(plan_use)(pln);
 		    if (best) {
 			 if (best_not_yet_timed) {
 			      evaluate_plan(ego, best, p);
@@ -408,9 +407,7 @@ static plan *mkplan(planner *ego, problem *p)
      }
 
 
-     if (pln)
-	  X(plan_use)(pln);
-     else
+     if (!pln)
 	  pln = mkplan0(ego, p, &sp);
 
      flags = ego->planner_flags;
