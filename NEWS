@@ -1,0 +1,47 @@
+FFTW 3.0
+
+Major goals of this release:
+
+* Speed: often 20% or more faster than FFTW 2.x, even without SIMD (see below).
+
+* Complete rewrite, to make it easier to add new algorithms and transforms.
+
+* New API, to support more general semantics.
+
+Other enhancements:
+
+* SIMD acceleration on supporting CPUs (SSE, SSE2, 3DNow!, and AltiVec).
+ (With special thanks to Franz Franchetti for many experimental prototypes
+  and to Stefan Kral for the vectorizing generator from fftwgel.)
+
+* True in-place 1d transforms of large sizes (as well as compressed
+  twiddle tables for additional memory/cache savings).
+
+* More arbitrary placement of real & imaginary data, e.g. including
+  interleaved (as in FFTW 2.x) as well as separate real/imag arrays.
+
+* Efficient prime-size transforms of real data.
+
+* Multidimensional transforms can operate on a subset of a larger matrix.
+
+* By popular demand, simultanteous linking to double precision (fftw),
+  single precision (fftwf), and long-double precision (fftwl) versions
+  of FFTW is now supported.
+
+* Cycle counters (on all modern CPUs) are exploited to speed planning.
+
+* Efficient transforms of real even/odd arrays, a.k.a. discrete
+  cosine/sine transforms (types I-IV).  (Currently work via pre/post
+  processing of real transforms, ala FFTPACK, so are not optimal.)
+
+* DHTs (Discrete Hartley Transforms), again via post-processing
+  of real transforms (and thus suboptimal, for now).
+
+* Support for linking to just those parts of FFTW that you need,
+  greatly reducing the size of statically linked programs when
+  only a limited set of transform sizes/types are required.
+
+* Canonical global wisdom file (/etc/fftw/wisdom) on Unix, along
+  with a command-line tool (fftw-wisdom) to generate/update it.
+
+* Authors' good looks have greatly improved with age.
