@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.2 2002-06-08 15:10:44 athena Exp $ */
+/* $Id: ct-dif.c,v 1.3 2002-06-08 19:11:09 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -85,7 +85,7 @@ static problem *mkcld(const solver_ct *ego, const problem_dft *p)
 	       cld_vec, p->ri, p->ii, p->ro, p->io);
 }
 
-static enum score score(const solver *ego_, const problem *p_)
+static int score(const solver *ego_, const problem *p_)
 {
      const solver_ct *ego = (const solver_ct *) ego_;
      const problem_dft *p = (const problem_dft *) p_;

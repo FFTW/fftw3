@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank_geq2.c,v 1.2 2002-06-08 15:10:44 athena Exp $ */
+/* $Id: rank_geq2.c,v 1.3 2002-06-08 19:11:09 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -138,7 +138,7 @@ static int applicable(const solver *ego_, const problem *p_, uint *rp)
 }
 
 /* TODO: revise this. */
-static enum score score(const solver *ego_, const problem *p_)
+static int score(const solver *ego_, const problem *p_)
 {
      const problem_dft *p = (const problem_dft *) p_;
      const S *ego = (const S *) ego_;

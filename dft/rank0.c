@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.1 2002-06-07 11:07:46 athena Exp $ */
+/* $Id: rank0.c,v 1.2 2002-06-08 19:11:09 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -200,7 +200,7 @@ static void print(plan *ego_, plan_printf prntf)
      prntf(")");
 }
 
-static enum score score(const solver *ego, const problem *p)
+static int score(const solver *ego, const problem *p)
 {
     return (applicable(ego, p)) ? GOOD : BAD;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.14 2002-06-07 22:07:53 athena Exp $ */
+/* $Id: ifftw.h,v 1.15 2002-06-08 19:11:09 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -200,7 +200,7 @@ void fftw_plan_destroy(plan *ego);
 
 /*-----------------------------------------------------------------------*/
 /* solver.c: */
-enum score {
+enum {
      BAD,   /* solver cannot solve problem */
      UGLY,  /* we are 99% sure that this solver is suboptimal */
      GOOD
@@ -208,7 +208,7 @@ enum score {
 
 typedef struct {
      plan *(*mkplan)(const solver *ego, const problem *p, planner *plnr);
-     enum score (*score)(const solver *ego, const problem *p);
+     int (*score)(const solver *ego, const problem *p);
 } solver_adt;
 
 struct solver_s {
@@ -243,7 +243,7 @@ struct planner_s {
      void (*hook)(plan *plan, problem *p); 
 
      pair *solvers;
-     solutions **solutions;
+     solutions **sols;
      void (*destroy)(planner *ego);
      plan *(*inferior_mkplan)(planner *ego, problem *p);
      uint hashsiz;
@@ -286,6 +286,7 @@ void fftw_planner_set_hook(planner *p, void (*hook)(plan *, problem *));
 /* various planners */
 planner *fftw_mkplanner_naive(void);
 planner *fftw_mkplanner_estimate(void);
+planner *fftw_mkplanner_score(void);
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */

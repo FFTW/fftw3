@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.4 2002-06-07 22:07:53 athena Exp $ */
+/* $Id: planner.c,v 1.5 2002-06-08 19:11:09 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -82,7 +82,7 @@ static int lookup(planner *ego, problem *p, plan **pln)
 
      h = hash(ego, p);
 
-     for (l = ego->solutions[h]; l; l = l->cdr) {
+     for (l = ego->sols[h]; l; l = l->cdr) {
 	  if (p->adt->equal(p, l->p)) {
 	       *pln = l->pln;
 	       return 1;
@@ -94,16 +94,17 @@ static int lookup(planner *ego, problem *p, plan **pln)
 static void really_insert(planner *ego, solutions *l)
 {
      unsigned int h = hash(ego, l->p);
-     l->cdr = ego->solutions[h];
-     ego->solutions[h] = l;
+     l->cdr = ego->sols[h];
+     ego->sols[h] = l;
 }
 
 static void rehash(planner *ego)
 {
      unsigned int osiz = ego->hashsiz;
      unsigned int nsiz = 2 * osiz + 1;
-     solutions **osol = ego->solutions;
-     solutions **nsol = fftw_malloc(nsiz * sizeof(solutions *), HASHT);
+     solutions **osol = ego->sols;
+     solutions **nsol = 
+	  (solutions **)fftw_malloc(nsiz * sizeof(solutions *), HASHT);
      solutions *s, *s_cdr;
      unsigned int h;
 
@@ -112,7 +113,7 @@ static void rehash(planner *ego)
      }
 
      ego->hashsiz = nsiz;
-     ego->solutions = nsol;
+     ego->sols = nsol;
 
      for (h = 0; h < osiz; ++h) {
 	  for (s = osol[h]; s; s = s_cdr) {
@@ -168,7 +169,7 @@ static void htab_destroy(planner *ego)
 	  unsigned int h;
 
 	  for (h = 0; h < ego->hashsiz; ++h) {
-	       s = ego->solutions[h];
+	       s = ego->sols[h];
 	       while (s) {
 		    solutions *s_cdr = s->cdr;
 		    if (s->pln)
@@ -179,7 +180,7 @@ static void htab_destroy(planner *ego)
 	       }
 	  }
 
-	  fftw_free(ego->solutions);
+	  fftw_free(ego->sols);
      }
 }
 
@@ -202,7 +203,7 @@ planner *fftw_mkplanner(size_t sz,
      p->ntry = 0;
      p->hook = hooknil;
      p->solvers = 0;
-     p->solutions = 0;
+     p->sols = 0;
      p->hashsiz = 0;
      p->cnt = 0;
      p->memoize = 1;
@@ -256,7 +257,7 @@ void fftw_planner_dump(planner *ego, int verbose)
 	  for (h = 0; h < ego->hashsiz; ++h) {
 	       printf("bucket %d\n", h);
 
-	       for (s = ego->solutions[h]; s; s = s->cdr) {
+	       for (s = ego->sols[h]; s; s = s->cdr) {
 		    if (s->pln) {
 			 s->pln->adt->print(s->pln, printf);
 		    } else {
@@ -271,7 +272,7 @@ void fftw_planner_dump(planner *ego, int verbose)
      for (h = 0; h < ego->hashsiz; ++h) {
 	  int l = 0;
 
-	  for (s = ego->solutions[h]; s; s = s->cdr) {
+	  for (s = ego->sols[h]; s; s = s->cdr) {
 	       ++l;
 	       ++cnt;
 	       if (!s->pln)

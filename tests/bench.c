@@ -51,6 +51,9 @@ void setup(struct problem *p)
      BENCH_ASSERT(can_do(p));
 
      plnr = fftw_mkplanner_naive();
+#if 0
+     plnr = fftw_mkplanner_score();
+#endif
      fftw_dft_conf_standard(plnr);
 
      if (p->sign == -1) {
@@ -71,7 +74,7 @@ void setup(struct problem *p)
 	  pln->adt->print(pln, printf);
 	  printf("\n");
      }
-
+     printf("%d\n", plnr->ntry);
      pln->adt->awake(pln, AWAKE);
 }
 
