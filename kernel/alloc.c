@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.4 2002-06-06 12:07:33 athena Exp $ */
+/* $Id: alloc.c,v 1.5 2002-06-07 11:12:25 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -208,7 +208,7 @@ void fftw_malloc_print_minfo(void)
 
      for (what = 0; what < MALLOC_WHAT_LAST; ++what) {
 	  struct mstat *stat = mstat + what;
-	  printf("%10s %8d %8d %10d %10d\n",
+	  printf("%12s %8d %8d %10d %10d\n",
 		 names[what], stat->cnt, stat->maxcnt, 
 		 stat->siz, stat->maxsiz);
      }
