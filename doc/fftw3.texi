@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.28 2003-02-17 08:42:19 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.29 2003-02-27 21:19:16 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -216,12 +216,12 @@ The reader is referred to the cited papers for the appropriate
 references.
 
 The rest of this manual is organized as follows.  We first discuss the
-sequential (one-processor) implementation.  We start by describing the
+sequential (single-processor) implementation.  We start by describing the
 basic interface/features of FFTW in @ref{Tutorial}.  The following
 chapter discusses @ref{Other Stuff You Should Know}, including
 @ref{The Importance of Alignment}, the storage scheme of
-multi-dimensional arrays (@ref{Multi-dimensional Array Format}), and
-FFTW's mechanism for storing plans on disk (@ref{Words of Wisdom}).
+multi-dimensional arrays (@pxref{Multi-dimensional Array Format}), and
+FFTW's mechanism for storing plans on disk (@pxref{Words of Wisdom}).
 Next, @ref{FFTW Reference} provides comprehensive documentation of all
 FFTW's features.  Parallel transforms are discussed in their own
 chapter @ref{Parallel FFTW}.  Fortran programmers can also use FFTW,
@@ -496,6 +496,9 @@ Instead, r2c DFTs are always @code{FFTW_FORWARD} and c2r DFTs are
 always @code{FFTW_BACKWARD}.
 @ctindex FFTW_FORWARD
 @ctindex FFTW_BACKWARD
+(For single/long-double precision
+@code{fftwf} and @code{fftwl}, @code{double} should be replaced by
+@code{float} and @code{long double}, respectively.)
 
 Here, @code{n} is the ``logical'' size of the DFT, not necessarily the
 physical size of the array.  In particular, the real (@code{double})
@@ -505,10 +508,9 @@ For an in-place transform,
 @cindex in-place
 @code{in} and @code{out} are aliased to the same array, which must be
 big enough to hold both; so, the real array would actually have
-@code{2*(n/2+1)} elements, where the elements beyond the first
-@code{n} are unused padding.  (For single/long-double precision
-@code{fftwf} and @code{fftwl}, @code{double} should be replaced by
-@code{float} and @code{long double}, respectively.)
+@code{2*(n/2+1)} elements, where the elements beyond the first @code{n}
+are unused padding.  The i-th element of the complex array is exactly
+the same as the i-th element of the corresponding complex DFT.
 
 As noted above, the c2r transform destroys its input array even for
 out-of-place transforms.  This can be prevented, if necessary, by
@@ -523,8 +525,8 @@ Readers familiar with DFTs of real data will recall that the 0th (DC)
 and @code{n/2}-th (Nyquist, for even @code{n}) elements of the complex
 output are purely real.  Some implementations therefore store the
 Nyquist element where the DC imaginary part would go, in order to make
-the input and output arrays the same size.  Such packing, however,
-does not generalize well to multidimensional transforms, and the space
+the input and output arrays the same size.  Such packing, however, does
+not generalize well to multidimensional transforms, and the space
 savings are miniscule in any case.
 
 An alternate interface for one-dimensional r2c and c2r DFTs can be
@@ -558,8 +560,8 @@ fftw_plan fftw_plan_dft_r2c(int rank, const int *n,
 
 as well as the corresponding @code{c2r} routines with the input/output
 types swapped.  These routines work similarly to their complex
-analogues, except for the fact that here the complex output array is
-cut in ~half and the real array requires padding for in-place
+analogues, except for the fact that here the complex output array is cut
+roughly in half and the real array requires padding for in-place
 transforms (as in 1d, above).
 
 As before, @code{n} is the logical size of the array, and the
@@ -588,9 +590,9 @@ n1 x n2 x ... x (nd/2+1)
 n<sub>1</sub> x n<sub>2</sub> x ... x (n<sub>d</sub>/2+1)
 @end ifhtml
 array of @code{fftw_complex} values in row-major order, corresponding to
-slightly over half of the output of the corresponding complex DFT.
-(Recall that the division is rounded down.)  The ordering of the data is
-otherwise exactly the same as in the complex-DFT case.
+slightly over half of the output of the corresponding complex DFT.  (The
+division is rounded down.)  The ordering of the data is otherwise
+exactly the same as in the complex-DFT case.
 
 Since the complex data is slightly larger than the real data, some
 complications arise for in-place transforms.  In this case, the final
@@ -608,7 +610,7 @@ $2 (n_d/2+1)$
 @ifhtml
 2 * (n<sub>d</sub>/2+1)
 @end ifhtml
-@code{fftw_real} values (exactly enough to hold the complex data).
+@code{double} values (exactly enough to hold the complex data).
 This physical array size does not, however, change the @emph{logical}
 array size---only
 @tex
@@ -634,15 +636,15 @@ is the last dimension passed to the plan-creation routine.
 
 For example, consider the transform of a two-dimensional real array of
 size @code{nx} by @code{ny}.  The output of the r2c transform is a
-two-dimensional complex array of size @code{nx} by @code{ny/2+1},
-where the @code{y} dimension has been cut nearly in half because of
+two-dimensional complex array of size @code{nx} by @code{ny/2+1}, where
+the @code{y} dimension has been cut nearly in half because of
 redundancies in the output.  Because @code{fftw_complex} is twice the
-size of @code{fftw_real}, the output array is slightly bigger than the
+size of @code{double}, the output array is slightly bigger than the
 input array.  Thus, if we want to compute the transform in place, we
 must @emph{pad} the input array so that it is of size @code{nx} by
 @code{2*(ny/2+1)}.  If @code{ny} is even, then there are two padding
-elements at the end of each row (which need not be initialized, as
-they are only used for output).
+elements at the end of each row (which need not be initialized, as they
+are only used for output).
 @ifhtml
 The following illustration depicts the input and output arrays just
 described, for both the out-of-place and in-place transforms (with the
@@ -699,7 +701,7 @@ real array of the same size.  These r2r transforms currently fall into
 three categories: DFTs of real input and complex-Hermitian output in
 halfcomplex format, DFTs of real input with even/odd symmetry
 (a.k.a. discrete cosine/sine transforms, DCTs/DSTs), and discrete
-Hartley transform (DHTs), all described in more detail by the
+Hartley transforms (DHTs), all described in more detail by the
 following sections.
 
 The r2r transforms follow the by-now familiar interface of creating an
@@ -751,9 +753,9 @@ as is described below.)
 
 In the current version of FFTW, all r2r transforms except for the
 halfcomplex type are computed via pre-/post-processing of halfcomplex
-transforms, and are therefore not entirely optimal.  (Since most other
+transforms, and are therefore not entirely optimal.  Since most other
 general DCT/DST codes employ the same trick, however, FFTW's
-implementation should provide competitive performance.)
+implementation should provide at least competitive performance.
 
 @c =========>
 @node The Halfcomplex-format DFT, Real even/odd DFTs (cosine/sine transforms), More DFTs of Real Data, More DFTs of Real Data
