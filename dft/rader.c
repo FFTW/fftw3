@@ -23,8 +23,7 @@
 /*
  * Compute transforms of prime sizes using Rader's trick: turn them
  * into convolutions of size n - 1, which you then perform via a pair
- * of FFTs.   This file contains both nontwiddle (direct) and 
- * twiddle (DIT Cooley-Tukey) solvers.
+ * of FFTs.
  */
 
 typedef struct {
@@ -55,59 +54,15 @@ typedef struct {
    fft(r,i) = ifft(i,r) form of this identity, but it was easier to
    reuse the code from our old version. */
 
-static void apply_aux(int r, int ginv, plan *cld1,plan *cld2, const R *omega,
-		      R *buf, R r0, R i0, R *ro, R *io, int os)
-{
-     int gpower, k;
-
-     /* compute DFT of buf, storing in output (except DC): */
-     {
-	    plan_dft *cld = (plan_dft *) cld1;
-	    cld->apply(cld1, buf, buf+1, ro+os, io+os);
-     }
-
-     /* set output DC component: */
-     ro[0] = r0 + ro[os];
-     io[0] = i0 + io[os];
-
-     /* now, multiply by omega: */
-     for (k = 0; k < r - 1; ++k) {
-	  E rB, iB, rW, iW;
-	  rW = omega[2*k];
-	  iW = omega[2*k+1];
-	  rB = ro[(k+1)*os];
-	  iB = io[(k+1)*os];
-	  ro[(k+1)*os] = rW * rB - iW * iB;
-	  io[(k+1)*os] = -(rW * iB + iW * rB);
-     }
-     
-     /* this will add input[0] to all of the outputs after the ifft */
-     ro[os] += r0;
-     io[os] -= i0;
-
-     /* inverse FFT: */
-     {
-	    plan_dft *cld = (plan_dft *) cld2;
-	    cld->apply(cld2, ro+os, io+os, buf, buf+1);
-     }
-     
-     /* finally, do inverse permutation to unshuffle the output: */
-     gpower = 1;
-     for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, ginv, r)) {
-	  ro[gpower * os] = buf[2*k];
-	  io[gpower * os] = -buf[2*k+1];
-     }
-     A(gpower == 1);
-}
-
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
-     int is;
+     int is, os;
      int k, gpower, g, r;
      R *buf;
+     R r0 = ri[0], i0 = ii[0];
 
-     r = ego->n; is = ego->is; g = ego->g; 
+     r = ego->n; is = ego->is; os = ego->os; g = ego->g; 
      buf = (R *) MALLOC(sizeof(R) * (r - 1) * 2, BUFFERS);
 
      /* First, permute the input, storing in buf: */
@@ -119,8 +74,54 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      }
      /* gpower == g^(r-1) mod r == 1 */;
 
-     apply_aux(r, ego->ginv, ego->cld1, ego->cld2, ego->omega, 
-	       buf, ri[0], ii[0], ro, io, ego->os);
+
+     /* compute DFT of buf, storing in output (except DC): */
+     {
+	    plan_dft *cld = (plan_dft *) ego->cld1;
+	    cld->apply(ego->cld1, buf, buf+1, ro+os, io+os);
+     }
+
+     /* set output DC component: */
+     {
+	  ro[0] = r0 + ro[os];
+	  io[0] = i0 + io[os];
+     }
+
+     /* now, multiply by omega: */
+     {
+	  const R *omega = ego->omega;
+	  for (k = 0; k < r - 1; ++k) {
+	       E rB, iB, rW, iW;
+	       rW = omega[2*k];
+	       iW = omega[2*k+1];
+	       rB = ro[(k+1)*os];
+	       iB = io[(k+1)*os];
+	       ro[(k+1)*os] = rW * rB - iW * iB;
+	       io[(k+1)*os] = -(rW * iB + iW * rB);
+	  }
+     }
+     
+     /* this will add input[0] to all of the outputs after the ifft */
+     ro[os] += r0;
+     io[os] -= i0;
+
+     /* inverse FFT: */
+     {
+	    plan_dft *cld = (plan_dft *) ego->cld2;
+	    cld->apply(ego->cld2, ro+os, io+os, buf, buf+1);
+     }
+     
+     /* finally, do inverse permutation to unshuffle the output: */
+     {
+	  int ginv = ego->ginv;
+	  gpower = 1;
+	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, ginv, r)) {
+	       ro[gpower * os] = buf[2*k];
+	       io[gpower * os] = -buf[2*k+1];
+	  }
+	  A(gpower == 1);
+     }
+
 
      X(ifree)(buf);
 }
@@ -151,19 +152,15 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld1);
 }
 
-static void print_aux(const char *name, const P *ego, printer *p)
+static void print(const plan *ego_, printer *p)
 {
-     p->print(p, "(%s-%d%ois=%oos=%(%p%)",
-              name, ego->n, ego->is, ego->os, ego->cld1);
+     const P *ego = (const P *)ego_;
+     p->print(p, "(dft-rader-%d%ois=%oos=%(%p%)",
+              ego->n, ego->is, ego->os, ego->cld1);
      if (ego->cld2 != ego->cld1)
           p->print(p, "%(%p%)", ego->cld2);
      if (ego->cld_omega != ego->cld1 && ego->cld_omega != ego->cld2)
           p->print(p, "%(%p%)", ego->cld_omega);
-}
-
-static void print(const plan *ego_, printer *p)
-{
-     print_aux("dft-rader", (const P *) ego_, p);
      p->putchr(p, ')');
 }
 
