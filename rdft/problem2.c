@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.11 2002-08-12 17:31:37 stevenj Exp $ */
+/* $Id: problem2.c,v 1.12 2002-08-12 17:43:08 stevenj Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -185,6 +185,11 @@ int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim)
 {
      uint N, Nc;
      int is, os;
+     uint i;
+     
+     for (i = 0; i + 1 < p->sz.rnk; ++i)
+	  if (p->sz.dims[i].is != p->sz.dims[i].os)
+	       return 0;
 
      if (!FINITE_RNK(p->vecsz.rnk) || p->vecsz.rnk == 0)
 	  return 1;
@@ -200,14 +205,14 @@ int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim)
 	  return(p->vecsz.dims[vdim].is == p->vecsz.dims[vdim].os);
 
      N = X(tensor_sz)(p->sz);
-     Nc = (N / p->sz.dims[0].n) * (p->sz.dims[0].n/2 + 1);
+     Nc = (N / p->sz.dims[p->sz.rnk-1].n) * (p->sz.dims[p->sz.rnk-1].n/2 + 1);
      if (p->kind == R2HC) {
-	  is = p->sz.dims[0].is;
-	  os = p->sz.dims[0].os;
+	  is = p->sz.dims[p->sz.rnk-1].is;
+	  os = p->sz.dims[p->sz.rnk-1].os;
      }
      else {
-	  is = p->sz.dims[0].os;
-	  os = p->sz.dims[0].is;
+	  is = p->sz.dims[p->sz.rnk-1].os;
+	  os = p->sz.dims[p->sz.rnk-1].is;
      }
      return(p->vecsz.dims[vdim].is == p->vecsz.dims[vdim].os
 	    && iabs(p->vecsz.dims[vdim].os)
