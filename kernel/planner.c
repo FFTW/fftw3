@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.139 2003-01-29 20:41:56 athena Exp $ */
+/* $Id: planner.c,v 1.140 2003-02-04 11:36:29 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -306,6 +306,13 @@ static void hcurse_subsumed(planner *ego)
 }
 
 
+static void invoke_hook(planner *ego, plan *pln, const problem *p, 
+			int optimalp)
+{
+     if (ego->hook)
+	  ego->hook(pln, p, optimalp);
+}
+
 static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 {
      if (!BELIEVE_PCOSTP(ego) || pln->pcost == 0.0) {
@@ -323,7 +330,8 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 	       ego->pcost += pln->pcost;
 	  }
      }
-     ego->hook(pln, p, 0);
+     
+     invoke_hook(ego, pln, p, 0);
 }
 
 /* maintain dynamic scoping of flags, nthr: */
@@ -458,7 +466,7 @@ static plan *mkplan(planner *ego, problem *p)
      hinsert(ego, m.s, flags, pln ? sp - ego->slvdescs : -1);
 
      if (pln)
-	  ego->hook(pln, p, 1);
+	  invoke_hook(ego, pln, p, 1);
      return pln;
 }
 
@@ -570,14 +578,6 @@ static int imprt(planner *ego, scanner *sc)
      return 0;
 }
 
-static void hooknil(plan *pln, const problem *p, int optimalp)
-{
-     UNUSED(pln);
-     UNUSED(p);
-     UNUSED(optimalp);
-     /* do nothing */
-}
-
 /*
  * create a planner
  */
@@ -594,7 +594,7 @@ planner *X(mkplanner)(void)
      p->pcost = p->epcost = 0.0;
      p->succ_lookup = p->lookup = p->lookup_iter = 0;
      p->insert = p->insert_iter = p->insert_unknown = 0;
-     p->hook = hooknil;
+     p->hook = 0;
      p->cur_reg_nam = 0;
 
      p->slvdescs = 0;

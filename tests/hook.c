@@ -71,16 +71,11 @@ static bench_problem *fftw_problem_to_bench_problem(const problem *p_)
      return bp;
 }
 
-static int use_hook = 0;
-
 static void hook(plan *pln, const problem *p_, int optimalp)
 {
      int rounds = 5;
      double tol = SINGLE_PRECISION ? 1.0e-3 : 1.0e-10;
      UNUSED(optimalp);
-
-     if (!use_hook)
-	  return;
 
      if (verbose > 5) {
 	  printer *pr = X(mkprinter_file)(stdout);
@@ -117,10 +112,10 @@ void install_hook(void)
 {
      planner *plnr = X(the_planner)();
      plnr->hook = hook;
-     use_hook = 1;
 }
 
 void uninstall_hook(void)
 {
-     use_hook = 0;
+     planner *plnr = X(the_planner)();
+     plnr->hook = 0;
 }
