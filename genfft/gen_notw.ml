@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.19 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: gen_notw.ml,v 1.20 2003-03-21 20:10:00 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.19 2003-03-15 20:29:42 stevenj Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.20 2003-03-21 20:10:00 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -62,7 +62,8 @@ let generate n =
 
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
-  let name0 = name ^ "_0" in
+  let ename = expand_name name in
+  let name0 = ename ^ "_0" in
 
   let vl = choose_simd "1" "VL"
   in
@@ -109,7 +110,7 @@ let generate n =
 	 add_constants (Asch annot))
 
   in let loop =
-    "static void " ^ name ^
+    "static void " ^ ename ^
       "(const " ^ C.realtype ^ " *ri, const " ^ C.realtype ^ " *ii, "
       ^ C.realtype ^ " *ro, " ^ C.realtype ^ " *io,\n" ^ 
       C.stridetype ^ " is, " ^  C.stridetype ^ " os, " ^ 
@@ -146,7 +147,7 @@ let generate n =
   and init =
     (declare_register_fcn name) ^
     "{" ^
-    "  X(kdft_register)(p, " ^ name ^ ", &desc);\n" ^
+    "  X(kdft_register)(p, " ^ ename ^ ", &desc);\n" ^
     "}\n"
 
   in ((unparse cvsid tree0) ^ "\n" ^ 

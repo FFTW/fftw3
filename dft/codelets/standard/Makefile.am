@@ -11,9 +11,46 @@ t1_10.c t1_12.c t1_15.c t1_16.c t1_32.c t1_64.c
 
 T2 = t2_4.c t2_8.c t2_16.c t2_32.c t2_64.c
 
-ALL_CODELETS = $(N1) $(T1) $(T2)
+SN1 = sn1_2_2_2.c sn1_2_4_2.c sn1_2_8_2.c sn1_2_16_2.c sn1_2_32_2.c	\
+sn1_2_64_2.c sn1_2_128_2.c sn1_2_256_2.c sn1_2_512_2.c sn1_2_1024_2.c	\
+sn1_4_2_2.c sn1_4_4_2.c sn1_4_8_2.c sn1_4_16_2.c sn1_4_32_2.c		\
+sn1_4_64_2.c sn1_4_128_2.c sn1_4_256_2.c sn1_4_512_2.c sn1_4_1024_2.c	\
+sn1_8_2_2.c sn1_8_4_2.c sn1_8_8_2.c sn1_8_16_2.c sn1_8_32_2.c		\
+sn1_8_64_2.c sn1_8_128_2.c sn1_8_256_2.c sn1_8_512_2.c sn1_8_1024_2.c	\
+sn1_16_2_2.c sn1_16_4_2.c sn1_16_8_2.c sn1_16_16_2.c sn1_16_32_2.c	\
+sn1_16_64_2.c sn1_16_128_2.c sn1_16_256_2.c sn1_16_512_2.c		\
+sn1_16_1024_2.c sn1_32_2_2.c sn1_32_4_2.c sn1_32_8_2.c sn1_32_16_2.c	\
+sn1_32_32_2.c sn1_32_64_2.c sn1_32_128_2.c sn1_32_256_2.c		\
+sn1_32_512_2.c sn1_32_1024_2.c sn1_64_2_2.c sn1_64_4_2.c sn1_64_8_2.c	\
+sn1_64_16_2.c sn1_64_32_2.c sn1_64_64_2.c sn1_64_128_2.c		\
+sn1_64_256_2.c sn1_64_512_2.c sn1_64_1024_2.c
 
-BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
+SN1COD = sn1_16.cod sn1_2.cod sn1_32.cod sn1_4.cod sn1_64.cod	\
+sn1_8.cod
+
+ST1 = st1_2_4.c st1_2_8.c st1_2_16.c st1_2_32.c st1_2_64.c		\
+st1_2_128.c st1_2_256.c st1_2_512.c st1_2_1024.c st1_4_4.c st1_4_8.c	\
+st1_4_16.c st1_4_32.c st1_4_64.c st1_4_128.c st1_4_256.c st1_4_512.c	\
+st1_4_1024.c st1_8_4.c st1_8_8.c st1_8_16.c st1_8_32.c st1_8_64.c	\
+st1_8_128.c st1_8_256.c st1_8_512.c st1_8_1024.c st1_16_4.c st1_16_8.c	\
+st1_16_16.c st1_16_32.c st1_16_64.c st1_16_128.c st1_16_256.c		\
+st1_16_512.c st1_16_1024.c st1_32_4.c st1_32_8.c st1_32_16.c		\
+st1_32_32.c st1_32_64.c st1_32_128.c st1_32_256.c st1_32_512.c		\
+st1_32_1024.c st1_64_4.c st1_64_8.c st1_64_16.c st1_64_32.c		\
+st1_64_64.c st1_64_128.c st1_64_256.c st1_64_512.c st1_64_1024.c
+
+ST1COD = st1_16.cod st1_2.cod st1_32.cod st1_4.cod st1_64.cod	\
+st1_8.cod
+
+#FRANZ_CODELETS = $(SN1) $(ST1)
+#FRANZ_EXTRA = $(SN1COD) $(ST1COD)
+
+FRANZ_CODELETS =
+FRANZ_EXTRA =
+
+ALL_CODELETS = $(N1) $(T1) $(T2) $(FRANZ_CODELETS)
+
+BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST) $(FRANZ_EXTRA)
 
 libdft_standard_la_SOURCES = $(BUILT_SOURCES)
 
@@ -30,8 +67,28 @@ FLAGS_T2=$(DFT_FLAGS_COMMON) -twiddle-log3
 n1_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW) $(FLAGS_N1) -n $* -name n1_$* -include "n.h") | $(ADD_DATE) | $(INDENT) >$@
 
+
+sn1_%.cod:  $(CODELET_DEPS) $(GEN_NOTW)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW) $(FLAGS_N1) -n $* -name "" -with-istride ISTRIDE -with-ostride OSTRIDE -include "n.h") | $(ADD_DATE) | $(INDENT) >$@
+
+sn1_%.c:  $(CODELET_DEPS)
+	echo "$*" | tr '_' \\n | (read n; read is; read os;	\
+        echo "#define ISTRIDE $$is";				\
+        echo "#define OSTRIDE $$os";				\
+        echo "#define NAME X(codelet_sn1_$${n}_$${is}_$${os})";\
+        echo "#include \"sn1_$${n}.cod\"") >$@
+
 t1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T1) -n $* -name t1_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
+
+st1_%.cod:  $(CODELET_DEPS) $(GEN_TWIDDLE)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T1) -n $* -name "" -with-iostride IOSTRIDE -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
+
+st1_%.c:  $(CODELET_DEPS)
+	echo "$*" | tr '_' \\n | (read n; read ios;	\
+        echo "#define IOSTRIDE $$ios";				\
+        echo "#define NAME X(codelet_st1_$${n}_$${ios})";\
+        echo "#include \"st1_$${n}.cod\"") >$@
 
 t2_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T2) -n $* -name t2_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle.ml,v 1.14 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: gen_twiddle.ml,v 1.15 2003-03-21 20:10:00 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.14 2003-03-15 20:29:42 stevenj Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.15 2003-03-21 20:10:00 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -63,6 +63,7 @@ let generate n =
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name 
   and byvl x = choose_simd x (ctimes (CVar "VL", x)) in
+  let ename = expand_name name in
 
   let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
   let nt = num_twiddles n in
@@ -112,7 +113,7 @@ let generate n =
   in
 
   let tree = 
-    Fcn (("static " ^ C.constrealtypep), name,
+    Fcn (("static " ^ C.constrealtypep), ename,
 	 [Decl (C.realtypep, rioarray);
 	  Decl (C.realtypep, iioarray);
 	  Decl (C.constrealtypep, twarray);
@@ -141,7 +142,7 @@ let generate n =
     twinstr ^ 
     desc ^
     (declare_register_fcn name) ^
-    (Printf.sprintf "{\n%s(p, %s, &desc);\n}" register name)
+    (Printf.sprintf "{\n%s(p, %s, &desc);\n}" register ename)
   in
 
   (unparse cvsid tree) ^ "\n" ^ init
