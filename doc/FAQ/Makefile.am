@@ -9,6 +9,8 @@ $(FAQ): $(BFNNCONV_SRC) fftw-faq.bfnn
 	@echo converting again...
 	perl bfnnconv.pl fftw-faq.bfnn
 
+faq: $(FAQ)
+
 clean-local:
 	rm -f *~ core a.out *.lout *.ps *.info *.ascii *.xrefdb *.post
 	rm -rf *.html
