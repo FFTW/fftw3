@@ -21,7 +21,7 @@ c     This is an example implementation of Fortran wisdom export/import
 c     to/from a Fortran unit (file), exploiting the generic
 c     dfftw_export_wisdom/dfftw_import_wisdom functions.
 c     
-c     We cannot compile this file into the FFTW library, lest all
+c     We cannot compile this file into the FFTW library itself, lest all
 c     FFTW-calling programs be required to link to the Fortran I/O
 c     libraries.
 c     
