@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.152 2003-03-15 18:34:05 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.153 2003-03-15 18:36:56 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4572,8 +4572,9 @@ run on that machine.
 We are thankful to the AMD corporation for donating an AMD Athlon XP 1700+
 computer to the FFTW project.
 
-We thank the Compaq/HP testdrive program and Sourceforge for providing
-remote access to machines that were used to test FFTW.
+We thank the Compaq/HP testdrive program and VA Software Corporation
+(SourceForge.net) for providing remote access to machines that were used
+to test FFTW.
 
 The @code{genfft} suite of code generators was written using Objective
 Caml, a dialect of ML.  Objective Caml is a small and elegant language
