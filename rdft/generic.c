@@ -133,6 +133,109 @@ static void apply_dit(plan *ego_, R *I, R *O)
      STACK_FREE(buf);
 }
 
+static void apply_dif(plan *ego_, R *I, R *O)
+{
+     P *ego = (P *) ego_;
+     uint n, m, r;
+     uint i, j, k;
+     int is, ism;
+     R *buf;
+     const R *W;
+     R *X, *YO, *YI;
+     R rsum, isum;
+     uint wp, wincr;
+
+     {
+	  plan_rdft *cld = (plan_rdft *) ego->cld;
+	  cld->apply((plan *) cld, I, O);
+     }
+
+     r = ego->r;
+
+     STACK_MALLOC(R *, buf, r * 2 * sizeof(R));
+     
+     ism = (m = ego->m) * (is = ego->os);
+     n = m * r;
+     W = ego->W;
+
+     X = I;
+     YI = I + r * ism;
+     YO = I + ism;
+
+     /* 
+      * compute the transform of the r 0th elements (which are halfcomplex)
+      * yielding real numbers
+      */
+     /* copy the input into the temporary array */
+     buf[0] = X[0];
+     for (i = 1; i + i < r; ++i) {
+	  buf[2*i] = X[i * ism];
+	  buf[2*i+1] = YI[-i * ism];
+     }
+
+     for (i = 0; i < r; ++i) {
+	  rsum = 0.0;
+	  wincr = m * i;
+	  for (j = 1, wp = wincr; j + j < r; ++j) {
+	       R tw_r = W[2*wp];
+	       R tw_i = W[2*wp+1];
+	       R re = buf[2*j];
+	       R im = buf[2*j+1];
+	       rsum += re * tw_r + im * tw_i;
+	       wp += wincr;
+	       if (wp >= n)
+		    wp -= n;
+	  }
+	  X[i * ism] = 2.0 * rsum + buf[0];
+     }
+
+     X += is;
+     YI -= is;
+     YO -= is;
+
+     /* compute the transform of the middle elements (which are complex) */
+     for (k = 1; k + k < m; ++k, X += is, YI -= is, YO -= is) {
+	  /* copy the input into the temporary array */
+	  for (i = 0; i + i < r; ++i) {
+	       buf[2*i] = X[i * ism];
+	       buf[2*i+1] = YI[-i * ism];
+	  }
+	  for (; i < r; ++i) {
+	       buf[2*i+1] = -X[i * ism];
+	       buf[2*i] = YI[-i * ism];
+	  }
+
+	  for (i = 0; i < r; ++i) {
+	       rsum = 0.0;
+	       isum = 0.0;
+	       wincr = m * i;
+	       for (j = 0, wp = k * i; j < r; ++j) {
+		    R tw_r = W[2*wp];
+		    R tw_i = W[2*wp+1];
+		    R re = buf[2*j];
+		    R im = buf[2*j+1];
+		    rsum += re * tw_r + im * tw_i;
+		    isum += im * tw_r - re * tw_i;
+		    wp += wincr;
+		    if (wp >= n)
+			 wp -= n;
+	       }
+	       X[i * ism] = rsum;
+	       YO[i * ism] = isum;
+	  }
+     }
+
+     /* no final element, since m is odd */
+
+     STACK_FREE(buf);
+
+     {
+	  plan_rdft *cld = (plan_rdft *) ego->cld;
+	  cld->apply((plan *) cld, I, O);
+     }
+
+}
+
 /***************************************************************************/
 
 static void awake(plan *ego_, int flg)
@@ -201,12 +304,13 @@ static int score(const solver *ego_, const problem *p_, int flags)
      return BAD;
 }
 
-static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
+static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
      P *pln = 0;
      uint n, is, os, r, m;
      plan *cld = (plan *) 0;
+     problem *cldp;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -222,20 +326,24 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
      r = X(first_divisor)(n);
      m = n / r;
 
-     {
-	  problem *cldp;
+     if (R2HC_KINDP(p->kind)) {
 	  cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, r * is, os),
 				     X(mktensor_1d)(r, is, m * os),
 				     p->I, p->O, p->kind);
-	  cld = MKPLAN(plnr, cldp);
-	  X(problem_destroy)(cldp);
-	  if (!cld)
-	       goto nada;
      }
+     else {
+	  cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, is, r * os),
+				     X(mktensor_1d)(r, m * is, os),
+				     p->I, p->O, p->kind);
+     }
+     cld = MKPLAN(plnr, cldp);
+     X(problem_destroy)(cldp);
+     if (!cld)
+	  goto nada;
 
-     pln = MKPLAN_RDFT(P, &padt, apply_dit);
+     pln = MKPLAN_RDFT(P, &padt, R2HC_KINDP(p->kind) ? apply_dit : apply_dif);
 
-     pln->os = os;
+     pln->os = R2HC_KINDP(p->kind) ? os : is;
      pln->r = r;
      pln->m = m;
      pln->cld = cld;
@@ -267,15 +375,16 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 
 /* constructors */
 
-static solver *mksolver_dit(void)
+static solver *mksolver(rdft_kind kind)
 {
-     static const solver_adt sadt = { mkplan_dit, score };
+     static const solver_adt sadt = { mkplan, score };
      S *slv = MKSOLVER(S, &sadt);
-     slv->kind = R2HC;
+     slv->kind = kind;
      return &(slv->super);
 }
 
 void X(rdft_generic_register)(planner *p)
 {
-     REGISTER_SOLVER(p, mksolver_dit());
+     REGISTER_SOLVER(p, mksolver(R2HC));
+     REGISTER_SOLVER(p, mksolver(HC2R));
 }
