@@ -146,11 +146,19 @@ a symbolic link to \courier{/bin/echo\}.
 If support for SIMD instructions is enabled in FFTW, further compiler
 problems may appear:
 
+\courier{gcc-3.2\} for x86 produces incorrect SIMD code if
+\courier{-O3\} is used.  The same compiler produces incorrect SIMD
+code if no optimization is used, too.  When using \courier{gcc-3.2\},
+it is a good idea not to change the default \courier{CFLAGS\} selected
+by the \courier{configure\} script.
+
 Some 3.0.x and 3.1.x versions of \courier{gcc\} on \courier{x86\} may
-crash, although the problem is fixed in version 3.2.  \courier{gcc\}
-so-called 2.96 shipping with RedHat 7.3 crashes when compiling SIMD
-code. Intel's \courier{icc\} 6.0 misaligns SSE constants, but FFTW has
-a workaround.
+crash.  \courier{gcc\} so-called 2.96 shipping with RedHat 7.3 crashes
+when compiling SIMD code.  In both cases, please upgrade to
+\courier{gcc-3.2\}.
+
+Intel's \courier{icc\} 6.0 misaligns SSE constants, but FFTW has a
+workaround.
 
 \courier{gcc\} 2.95 on MacOS X miscompiles AltiVec code (fixed in
 later versions).  \courier{gcc\} 3.2.x miscompiles AltiVec
