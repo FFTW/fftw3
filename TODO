@@ -25,6 +25,8 @@
 
 * $prefix/bin/fftw_wisdom to generate/update /etc/fftw/wisdom and wisdom_conf.c
 
+* fma codelets?
+
 TODO before/at release:
 
 * remember to remove -no-randomized-cse from rdft codelets before
