@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.62 2003-09-23 19:42:29 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.63 2003-09-27 21:07:18 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -264,6 +264,7 @@ FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 #define FFTW_NO_VRECURSE (1U << 16)
 
 #define FFTW_NO_SIMD (1U << 17)
+#define FFTW_WISDOM_ONLY (1U << 18)
 
 #ifdef __cplusplus
 }  /* extern "C" */
