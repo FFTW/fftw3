@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.85 2003-03-03 22:16:17 fftw Exp $
+@comment $Id: fftw3.texi,v 1.86 2003-03-04 04:26:12 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2174,6 +2174,7 @@ array.  Other than these additional features, the planner operates in
 the same fashion as in the basic interface, and the resulting
 @code{fftw_plan} is used in the same way (@pxref{Using Plans}).
 
+@subsubheading Advanced complex DFTs
 @example
 fftw_plan fftw_plan_many_dft(int rank, const int *n, int howmany,
                              fftw_complex *in, const int *inembed,
@@ -2184,6 +2185,49 @@ fftw_plan fftw_plan_many_dft(int rank, const int *n, int howmany,
 @end example
 @findex fftw_plan_many_dft
 
+This plans multidimensional complex DFTs, and is exactly the same as
+@code{fftw_plan_dft} except for the new parameters @code{howmany},
+@{@code{i},@code{o}@}@code{nembed}, @{@code{i},@code{o}@}@code{stride},
+and @{@code{i},@code{o}@}@code{dist}.
+
+@code{howmany} is the number of transforms to compute, where the
+@code{k}-th transform is of the arrays starting at @code{in+k*idist} and
+@code{out+k*odist}.  The resulting plans can often be faster than
+calling FFTW multiple times for the individual transforms.  The basic
+@code{fftw_plan_dft} interface corresponds to @code{howmany=1} (in which
+case the @code{dist} parameters are ignored).
+@cindex howmany parameter
+@cindex dist
+
+The two @code{nembed} parameters (which should be arrays of length
+@code{rank}) indicate the sizes of the input and output arrays
+dimensions, respectively, where the transform is of a subarray of size
+@code{n}.  (Each dimension of @code{n} should be @code{<=} the
+corresponding dimension of the @code{nembed} arrays.)  That is, the
+input and output arrays are stored in row-major order with size given by
+@code{nembed} (not counting the strides and howmany multiplicities).
+Passing @code{NULL} for an @code{nembed} parameter is equivalent to
+passing @code{n} (i.e. same physical and logical dimensions, as in the
+basic interface.)
+
+The @code{stride} parameters indicate that the @code{j}-th element of
+the input or output arrays is located at @code{j*istride} or
+@code{j*ostride}, respectively.  (For a multi-dimensional array,
+@code{j} is the ordinary row-major index.)  When combined with the
+@code{k}-th transform in a @code{howmany} loop, from above, this means
+that the (@code{j},@code{k})-th element is at @code{j*stride+k*dist}.
+(The basic @code{fftw_plan_dft} interface corresponds to a stride of 1.)
+@cindex stride
+
+So, for example, to transform a sequence of contiguous arrays, stored
+one after another, one would use a @code{stride} of 1 and a @code{dist}
+of @math{N}, where @math{N} is the product of the dimensions.  In
+another example, to transform an array of contiguous ``vectors'' of
+length @math{M}, one would use a @code{howmany} of @math{M}, a
+@code{stride} of @math{M}, and a @code{dist} of 1.
+@cindex vector
+
+@subsubheading Advanced real DFTs
 @example
 fftw_plan fftw_plan_many_dft_r2c(int rank, const int *n, int howmany,
                                  fftw_complex *in, const int *inembed,
@@ -2201,6 +2245,7 @@ fftw_plan fftw_plan_many_dft_c2r(int rank, const int *n, int howmany,
 @findex fftw_plan_many_dft_r2c
 @findex fftw_plan_many_dft_c2r
 
+@subsubheading Advanced real-to-real transforms
 @example
 fftw_plan fftw_plan_many_r2r(int rank, const int *n, int howmany,
                              double *in, const int *inembed,
