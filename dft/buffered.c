@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.2 2002-06-09 12:08:13 athena Exp $ */
+/* $Id: buffered.c,v 1.3 2002-06-09 12:36:27 athena Exp $ */
 
 #include "dft.h"
 
@@ -276,7 +276,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      fftw_problem_destroy(cldp);
      if (!cld) goto nada;
 
-     /* copying back from the buffer is a rnk-0 transform: */
+     /* copying back from the buffer is a rank-0 transform: */
      cldp = 
 	  fftw_mkproblem_dft_d(
 	       fftw_mktensor(0),
