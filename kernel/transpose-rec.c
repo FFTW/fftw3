@@ -113,19 +113,19 @@ static void transpose_and_swapbuf(R *I, int i0, int i1, int j0, int j1,
 
 	  /* copy I[(i0..i1)*s0+(j0..j1)*s1] into buf0 */
 	  X(cpy2d_ci) (I + i0 * s0 + j0 * s1, buf0,
-		       i1 - i0, s0, 2, j1 - j0, s1, 2 * CUTOFF, vl);
+		       i1 - i0, s0, vl, j1 - j0, s1, vl * CUTOFF, vl);
 
 	  /* copy I[(i0..i1)*s1+(j0..j1)*s0] into buf1 */
 	  X(cpy2d_ci) (I + i0 * s1 + j0 * s0, buf1,
-		       i1 - i0, s1, 2, j1 - j0, s0, 2 * CUTOFF, vl);
+		       i1 - i0, s1, vl, j1 - j0, s0, vl * CUTOFF, vl);
 
 	  /* copy buf1 into I[(i0..i1)*s0+(j0..j1)*s1] */
 	  X(cpy2d_co) (buf1, I + i0 * s0 + j0 * s1,
-		       i1 - i0, 2, s0, j1 - j0, 2 * CUTOFF, s1, vl);
+		       i1 - i0, vl, s0, j1 - j0, vl * CUTOFF, s1, vl);
 
 	  /* copy buf0 into I[(i0..i1)*s1+(j0..j1)*s0] */
 	  X(cpy2d_co) (buf0, I + i0 * s1 + j0 * s0,
-		       i1 - i0, 2, s1, j1 - j0, 2 * CUTOFF, s0, vl);
+		       i1 - i0, vl, s1, j1 - j0, vl * CUTOFF, s0, vl);
 
      }
 }

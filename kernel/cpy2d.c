@@ -146,9 +146,9 @@ void X(cpy2d_recbuf)(R *I, R *O,
 	  R buf[CUTOFF * CUTOFF * 2];
 
 	  /* copy from I to buf */
-	  X(cpy2d_ci) (I, buf, n0, is0, 2, n1, is1, 2 * CUTOFF, vl);
+	  X(cpy2d_ci) (I, buf, n0, is0, vl, n1, is1, vl * CUTOFF, vl);
 
 	  /* copy from buf to O */
-	  X(cpy2d_co) (buf, O, n0, 2, os0, n1, 2 * CUTOFF, os1, vl);
+	  X(cpy2d_co) (buf, O, n0, vl, os0, n1, vl * CUTOFF, os1, vl);
      }
 }
