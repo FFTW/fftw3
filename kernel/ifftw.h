@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.107 2002-09-02 19:58:19 athena Exp $ */
+/* $Id: ifftw.h,v 1.108 2002-09-04 00:57:03 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -390,7 +390,7 @@ void X(solver_destroy)(solver *ego);
 typedef struct slvdesc_s {
      solver *slv;
      const char *reg_nam;
-     int id;
+     int reg_id;
      struct slvdesc_s *cdr;
 } slvdesc;
 
@@ -425,7 +425,6 @@ typedef struct {
      void (*exprt)(planner *ego, printer *p); /* export is a reserved
 						 word in C++. */
      int (*imprt)(planner *ego, scanner *sc);
-     void (*exprt_conf)(planner *ego, printer *p);
      plan *(*slv_mkplan)(planner *ego, problem *p, solver *s);
 } planner_adt;
 
@@ -437,7 +436,9 @@ struct planner_s {
      void (*hook)(plan *plan, const problem *p, int optimalp);
 
      const char *cur_reg_nam;
-     slvdesc *solvers, **solvers_tail;
+     int cur_reg_id;
+
+     slvdesc *solvers;
      solutions **sols;
      void (*destroy)(planner *ego);
      void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvdesc **);
@@ -446,7 +447,6 @@ struct planner_s {
      uint flags;
      uint nthr;
      int score;  /* see planner-score.c */
-     int idcnt;
 };
 
 planner *X(mkplanner)(size_t sz,

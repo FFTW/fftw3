@@ -301,12 +301,10 @@ void setup(struct problem *p)
 	  pr->print(pr, "%d add, %d mul, %d fma, %d other\n",
 		    pln->ops.add, pln->ops.mul, pln->ops.fma, pln->ops.other);
 	  pr->print(pr, "planner time: %g s\n", tplan);
-	  if (verbose > 3) {
+	  if (verbose > 1) {
 	       plnr->adt->exprt(plnr, pr);
 	       pr->print(pr, "\n");
 	  }
-	  if (verbose > 4) 
-	       plnr->adt->exprt_conf(plnr, pr);
 	  FFTW(printer_destroy)(pr);
      }
      AWAKE(pln, 1);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.61 2002-09-03 19:11:06 athena Exp $ */
+/* $Id: planner.c,v 1.62 2002-09-04 00:57:03 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -26,7 +26,7 @@
 #define BLESS(s) (s)->flags |= BLESSING
 #define BLESSEDP(s) ((s)->flags & BLESSING)
 
-/* 
+/*
    liber scriptus proferetur
    in quo totum continetur
    unde mundus iudicetur
@@ -39,25 +39,19 @@ struct solutions_s {
 };
 
 /* slvdesc management */
-static slvdesc *mkslvdesc(solver *slv, const char *reg_nam, int id)
-{
-     slvdesc *n = (slvdesc *) fftw_malloc(sizeof(slvdesc), SLVDESCS);
-     n->slv = slv;
-     n->reg_nam = reg_nam;
-     n->id = id;
-     n->cdr = 0;
-     return n;
-}
-
 static void register_solver(planner *ego, solver *s)
 {
-     if (s) { /* add s to end of solver list */
-	  slvdesc *n;
-	  A(s);
+     slvdesc *n;
+     if (s) { /* add s to solver list */
 	  X(solver_use)(s);
-	  n = mkslvdesc(s, ego->cur_reg_nam, ego->idcnt++);
-	  *ego->solvers_tail = n;
-	  ego->solvers_tail = &n->cdr;
+	  n = (slvdesc *) fftw_malloc(sizeof(slvdesc), SLVDESCS);
+	  n->slv = s;
+	  n->reg_nam = ego->cur_reg_nam;
+	  n->reg_id = ego->cur_reg_id++;
+
+	  /* cons! onto solvers list */
+	  n->cdr = ego->solvers;
+	  ego->solvers = n;
      }
 }
 
@@ -111,7 +105,7 @@ static solutions *lookup(planner *ego, problem *p)
      h = sig_to_hash_index(ego, m.s);
 
      ++ego->access;
-     for (l = ego->sols[h]; l; l = l->cdr) 
+     for (l = ego->sols[h]; l; l = l->cdr)
           if (solvedby(m.s, ego->flags, l)) {
 	       ++ego->hit;
 	       return l;
@@ -167,7 +161,7 @@ static void rehash(planner *ego)
      solutions *s, *s_cdr;
      uint h;
 
-     for (h = 0; h < nsiz; ++h) 
+     for (h = 0; h < nsiz; ++h)
           nsol[h] = 0;
 
      ego->hashsiz = nsiz;
@@ -193,7 +187,7 @@ static solutions *insert1(planner *ego, md5uint *hsh, uint flags, slvdesc *sp)
           rehash(ego);
 
      l->flags = flags;
-     l->sp = sp; 
+     l->sp = sp;
      hashcpy(hsh, l->s);
      insert0(ego, l);
      return l;
@@ -229,7 +223,7 @@ static plan *mkplan(planner *ego, problem *p)
 	       /* call solver to create plan */
 	       ego->inferior_mkplan(ego, p, &pln, &sp);
 
-	       /* PLN = 0 in the unlikely case of MD5 collision */ 
+	       /* PLN = 0 in the unlikely case of MD5 collision */
 	       if (!pln) goto search;
 
 	       X(plan_use)(pln);
@@ -292,17 +286,23 @@ static void exprt(planner *ego, printer *p)
      solutions *s;
      uint h;
 
-     p->print(p, "(" WISDOM_PREAMBLE);
-     for (h = 0; h < ego->hashsiz; ++h) 
+     p->print(p, "(" WISDOM_PREAMBLE "%(");
+     for (h = 0; h < ego->hashsiz; ++h)
 	  for (s = ego->sols[h]; s; s = s->cdr)
 	       if (BLESSEDP(s)) {
+		    const char *nam;
+		    int id;
+
+		    nam = s->sp ? s->sp->reg_nam : "0";
+		    id = s->sp ? s->sp->reg_id : 0;
+
 		    /* qui salvandos salvas gratis
 		       salva me fons pietatis */
-		    p->print(p, "(%d #x%x #x%5 #x%5 #x%5 #x%5)", 
-			     s->sp ? s->sp->id : 0, s->flags,
+		    p->print(p, "(%s %d #x%x #x%5 #x%5 #x%5 #x%5)\n",
+			     nam, id, s->flags,
 			     s->s[0], s->s[1], s->s[2], s->s[3]);
-		    p->print(p, ")");
 	       }
+     p->print(p, "%))\n");
 }
 
 static int imprt(planner *ego, scanner *sc)
@@ -350,80 +350,6 @@ static int imprt(planner *ego, scanner *sc)
 #endif
 }
 
-static void exprt_conf(planner *ego, printer *p)
-{
-     solutions *s;
-     uint h;
-     const char *prev_reg_nam = (const char *) 0;
-     int idcnt = 0, reg_nam_cnt = 1, blessed_reg_nam = 0;
-
-     /* FIXME: need to use external API */
-
-     p->print(p, "void wisdom_conf(planner *p)\n{\n");
-
-#ifndef __cplusplus
-     p->print(p, "#ifdef __cplusplus\n     extern \"C\" {\n#endif\n");
-#endif
-
-     for (h = 0; h < ego->hashsiz; ++h)
-          for (s = ego->sols[h]; s; s = s->cdr) {
-               if (BLESSEDP(s) && s->sp && s->sp->reg_nam && s->sp->id > 0) {
-		    s->sp->id = 0; /* mark to prevent duplicates */
-		    p->print(p, "          extern void %s(planner*);\n",
-			     s->sp->reg_nam);
-	       }
-	  }
-
-#ifndef __cplusplus
-     p->print(p, "#ifdef __cplusplus\n     }\n#endif\n");
-#endif
-
-     p->print(p, "     static const solvtab s = {\n");
-
-     /* output solvtab entries, and compute correct id's of blessed
-	entries as they will appear in the generated table (ugh). */
-     FORALL_SOLVERS(ego, s, sp, {
-	  UNUSED(s);
-	  if (prev_reg_nam && sp->reg_nam == prev_reg_nam)
-	       ++reg_nam_cnt;
-	  else {
-	       if (blessed_reg_nam)
-		    idcnt += reg_nam_cnt;
-	       prev_reg_nam = sp->reg_nam;
-	       reg_nam_cnt = 1;
-	       blessed_reg_nam = 0;
-	  }
-	  if (sp->id == 0) {
-	       if (!blessed_reg_nam) /* i.e., not already printed */
-		    p->print(p, "          SOLVTAB(%s),\n", sp->reg_nam);
-	       blessed_reg_nam = 1;
-	       sp->id = idcnt + reg_nam_cnt;
-	  }
-     });
-     if (blessed_reg_nam)
-	  idcnt += reg_nam_cnt;
-     
-     p->print(p, "          SOLVTAB_END\n"
-	      "     }; /* yields %d solvers */\n", idcnt);
-
-     /* export wisdom as hard-coded string, w/ids corresponding to solvtab */
-     p->print(p, "     static const char * const wisdom = \"");
-     ego->adt->exprt(ego, p);
-     p->print(p, "\";\n");
-
-     /* reset ids: */
-     idcnt = 1;
-     FORALL_SOLVERS(ego, s, sp, {
-	  UNUSED(s);
-          sp->id = idcnt++;
-     });
-
-     p->print(p, "\n"
-	      "     %s(s, p);\n"
-	      "     /* FIXME: import wisdom */\n"
-	      "}\n", STRINGIZE(X(solvtab_exec)));
-}
-
 static void hooknil(plan *pln, const problem *p, int optimalp)
 {
      UNUSED(pln);
@@ -436,14 +362,14 @@ static void hooknil(plan *pln, const problem *p, int optimalp)
  * create a planner
  */
 planner *X(mkplanner)(size_t sz,
-		      void (*infmkplan)(planner *ego, problem *p, 
+		      void (*infmkplan)(planner *ego, problem *p,
 					plan **, slvdesc **),
                       void (*destroy) (planner *),
 		      uint flags)
 {
      static const planner_adt padt = {
-	  register_solver, 
-	  mkplan, forget, exprt, imprt, exprt_conf, slv_mkplan
+	  register_solver,
+	  mkplan, forget, exprt, imprt, slv_mkplan
      };
 
      planner *p = (planner *) fftw_malloc(sz, PLANNERS);
@@ -455,14 +381,12 @@ planner *X(mkplanner)(size_t sz,
      p->hook = hooknil;
      p->cur_reg_nam = 0;
      p->solvers = 0;
-     p->solvers_tail = &p->solvers;
      p->sols = 0;
      p->hashsiz = 0;
      p->cnt = 0;
      p->score = BAD;            /* unused, but we initialize it anyway */
      p->flags = flags;
      p->nthr = 1;
-     p->idcnt = 1;              /* ID == 0 means no solution */
      rehash(p);			/* so that hashsiz > 0 */
 
      return p;
@@ -490,7 +414,7 @@ void X(planner_destroy)(planner *ego)
 }
 
 /* set planner hook */
-void X(planner_set_hook)(planner *p, 
+void X(planner_set_hook)(planner *p,
 			 void (*hook)(plan *, const problem *, int))
 {
      p->hook = hook;
@@ -529,7 +453,7 @@ void X(planner_dump)(planner *ego, int verbose)
           for (h = 0; h < ego->hashsiz; ++h) {
                D("\nbucket %d:\n", h);
 
-               for (s = ego->sols[h]; s; s = s->cdr) 
+               for (s = ego->sols[h]; s; s = s->cdr)
 		    D("%u %s\n", s->s[0], s->sp ? s->sp->reg_nam : 0);
           }
      }
