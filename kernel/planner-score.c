@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.11 2002-07-25 19:21:13 athena Exp $ */
+/* $Id: planner-score.c,v 1.12 2002-07-25 19:30:06 athena Exp $ */
 #include "ifftw.h"
 
 typedef struct {
@@ -46,6 +46,7 @@ static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
      plan *best = 0;
      int best_score;
      int flags = ego->flags;
+     int best_not_yet_timed = 1;
 
      *pairp = 0;
      best_score = BAD;
@@ -62,9 +63,13 @@ static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
 
 		    if (pln) {
 			 X(plan_use)(pln);
-			 X(evaluate_plan)(ego, pln, p);
 
 			 if (best) {
+			      if (best_not_yet_timed) {
+				   X(evaluate_plan)(ego, best, p);
+				   best_not_yet_timed = 0;
+			      }
+			      X(evaluate_plan)(ego, pln, p);
 			      if (pln->pcost < best->pcost) {
 				   X(plan_destroy)(best);
 				   best = pln;
