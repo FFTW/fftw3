@@ -28,12 +28,12 @@ void F77(plan_with_nthreads, PLAN_WITH_NTHREADS)(int *nthreads)
      X(plan_with_nthreads)(*nthreads);
 }
 
-void F77(init_threads, INIT_THREADS)(int *nthreads)
+void F77(init_threads, INIT_THREADS)(void)
 {
      X(init_threads)();
 }
 
-void F77(cleanup_threads, CLEANUP_THREADS)(int *nthreads)
+void F77(cleanup_threads, CLEANUP_THREADS)(void)
 {
      X(cleanup_threads)();
 }
