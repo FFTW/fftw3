@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: aligned-main.c,v 1.3 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: aligned-main.c,v 1.4 2003-04-02 01:57:39 athena Exp $ */
 
 #include "bench.h"
 
@@ -39,33 +39,21 @@ int aligned_main(int argc, char *argv[])
       * pessimally aligned instead of having a 50% chance of being
       * correct.
       *
-      * Here, we check the alignment of a double variable and restore
-      * the proper alignment if it is wrong.
+      * Here, we align the stack pointer to a multiple of 16 bytes.
       */
      {
-	  double x;
-	  if (((long)&x) & 0x7) {
-	       /* wrong alignment. */
+	  /*
+	   * Use alloca to allocate some memory on the stack.
+	   * This alerts gcc that something funny is going
+	   * on, so that it does not omit the frame pointer
+	   * etc.
+	   */
+	  (void)__builtin_alloca(16); 
 
-	       /* 
-		* You would imagine that __builtin_alloca(4) would
-		* solve the problem.  However, the overzealous gcc
-		* aligns it to __builtin_alloca(8) so that we
-		* accomplish nothing.  So here is what we do:
-		*/
-               /*
-		* Use alloca to allocate some memory on the stack.
-		* This alerts gcc that something funny is going
-		* on, so that it does not omit the frame pointer
-		* etc.
-		*/
-	       (void)__builtin_alloca(16); 
-
-	       /*
-		* Now allocate 4 stack bytes using inline asm.
-		*/
-	       __asm__ __volatile__ ("addl $-4, %esp");
-	  }
+	  /*
+	   * Now align the stack pointer
+	   */
+	  __asm__ __volatile__ ("andl $-16, %esp");
      }
 #endif
 
@@ -75,7 +63,7 @@ int aligned_main(int argc, char *argv[])
 	   * Simply calling alloca seems to do the right thing. 
 	   * The size of the allocated block seems to be irrelevant.
 	   */
-	  _alloca(8);
+	  _alloca(16);
      }
 #endif
 

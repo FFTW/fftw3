@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.208 2003-03-29 18:45:13 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.209 2003-04-02 01:57:39 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -710,7 +710,8 @@ R *X(most_unaligned)(R *p1, R *p2);
 void X(most_unaligned_complex)(R *r, R *i, R **rp, R **ip, int s);
 unsigned X(hash)(const char *s);
 int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz);
-extern int X(ct_uglyp)(int min_n, int n, int r);
+int X(ct_uglyp)(int min_n, int n, int r);
+void X(with_aligned_stack)(void (*f)(void *), void *p);
 
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */
