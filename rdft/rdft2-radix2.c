@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.5 2002-08-29 12:20:55 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.6 2002-08-29 12:36:36 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -98,22 +98,22 @@ static int applicable_b(const problem *p_, const planner *plnr)
 static void k_f_dft(R *rio, R *iio, const R *W, uint n, int dist)
 {
      uint i;
-     R *riop, *iiop, *riom, *iiom;
-
-     riop = rio; iiop = iio; riom = rio + n * dist; iiom = iio + n * dist;
+     R *pp = rio, *pm = rio + n * dist;
+     int im = iio - rio;
 
      /* i = 0 and i = n */
      {
-          E rop = *riop, iop = *iiop;
-          *riop = rop + iop;      riop += dist;
-          *riom = rop - iop;      riom -= dist;
-          *iiop = 0.0;            iiop += dist;
-          *iiom = 0.0;            iiom -= dist;
+          E rop = pp[0], iop = pp[im];
+          pp[0] = rop + iop;
+          pm[0] = rop - iop;
+          pp[im] = 0.0;
+          pm[im] = 0.0;
+	  pp += dist; pm -= dist;
      }
 
      /* middle elements */
      for (W += 2, i = 2; i < n; i += 2, W += 2) {
-          E rop = *riop, iop = *iiop, rom = *riom, iom = *iiom;
+          E rop = pp[0], iop = pp[im], rom = pm[0], iom = pm[im];
           E wr = W[0], wi = W[1];
           E re = rop + rom;
           E ie = iop - iom;
@@ -121,14 +121,15 @@ static void k_f_dft(R *rio, R *iio, const R *W, uint n, int dist)
           E id = iop + iom;
           E tr = rd * wr - id * wi;
           E ti = id * wr + rd * wi;
-          *riop = 0.5 * (re + ti);          riop += dist;
-          *iiop = 0.5 * (ie + tr);          iiop += dist;
-          *riom = 0.5 * (re - ti);          riom -= dist;
-          *iiom = 0.5 * (tr - ie);          iiom -= dist;
+          pp[0] = 0.5 * (re + ti);
+          pp[im] = 0.5 * (ie + tr);
+          pm[0] = 0.5 * (re - ti);
+          pm[im] = 0.5 * (tr - ie);
+	  pp += dist; pm -= dist;
      }
 
      /* i = n/2 when n is even */
-     if (!(n & 1)) *iiop = -(*iiop);
+     if (!(n & 1)) pp[im] = -pp[im];
 }
 
 static void apply_f_dft(plan *ego_, R *r, R *rio, R *iio)
@@ -155,7 +156,7 @@ static problem *mkcld_f_dft(const problem_rdft2 *p)
      const iodim *d = p->sz.dims;
      return X(mkproblem_dft_d) (
 	  X(mktensor_1d)(d[0].n / 2, d[0].is * 2, d[0].os),
-	  X(tensor_copy)(p->vecsz), 
+	  X(tensor_copy)(p->vecsz),
 	  p->r, p->r + d[0].is, p->rio, p->iio);
 }
 
@@ -169,33 +170,34 @@ static const madt adt_f_dft = {
 static void k_f_rdft(R *rio, R *iio, const R *W, uint n, int dist)
 {
      uint i;
-     R *riop, *iiop, *riom, *iiom;
-
-     riop = rio; iiop = iio; riom = rio + n * dist; iiom = iio + n * dist;
+     R *pp = rio, *pm = rio + n * dist;
+     int im = iio - rio;
 
      /* i = 0 and i = n */
      {
-          E rop = *riop, iop = *iiop;
-          *riop = rop + iop;      riop += dist;
-          *riom = rop - iop;      riom -= dist;
-          *iiop = 0.0;            iiop += dist;
-          *iiom = 0.0;            iiom -= dist;
+          E rop = pp[0], iop = pp[im];
+          pp[0] = rop + iop;
+          pm[0] = rop - iop;
+          pp[im] = 0.0;
+          pm[im] = 0.0;
+	  pp += dist; pm -= dist;
      }
 
      /* middle elements */
      for (W += 2, i = 2; i < n; i += 2, W += 2) {
-          E r0 = *riop, r1 = *iiop, i0 = *riom, i1 = *iiom;
+          E r0 = pp[0], r1 = pp[im], i0 = pm[0], i1 = pm[im];
           E wr = W[0], wi = W[1];
           E tr = r1 * wr + i1 * wi;
           E ti = i1 * wr - r1 * wi;
-          *riop = (r0 + tr);          riop += dist;
-          *iiop = (i0 + ti);          iiop += dist;
-          *riom = (r0 - tr);          riom -= dist;
-          *iiom = (ti - i0);          iiom -= dist;
+          pp[0] = r0 + tr;
+          pp[im] = i0 + ti;
+          pm[0] = r0 - tr;
+          pm[im] = ti - i0;
+	  pp += dist; pm -= dist;
      }
 
      /* i = n/2 when n is even */
-     if (!(n & 1)) *iiop = -(*iiop);
+     if (!(n & 1)) pp[im] = -pp[im];
 }
 
 static void apply_f_rdft(plan *ego_, R *r, R *rio, R *iio)
@@ -240,34 +242,33 @@ static const madt adt_f_rdft = {
 static void k_b_dft(R *rio, R *iio, const R *W, uint n, int dist)
 {
      uint i;
-     R *riop, *iiop, *riom, *iiom;
-
-     riop = rio; iiop = iio; riom = rio + n * dist; iiom = iio + n * dist;
+     R *pp = rio, *pm = rio + n * dist;
+     int im = iio - rio;
 
      /* i = 0 and i = n */
      {
-          E rop = *riop, iop = *riom;
-          *riop = rop + iop;      riop += dist;
-          *iiop = rop - iop;      riom -= dist;
-                                  iiop += dist;
-                                  iiom -= dist;
+          E rop = pp[0], iop = pm[0];
+          pp[0] = rop + iop;
+          pp[im] = rop - iop;
+	  pp += dist; pm -= dist;
      }
 
      /* middle elements */
      for (W += 2, i = 2; i < n; i += 2, W += 2) {
-          E a = *riop, b = *iiop, c = *riom, d = *iiom;
+          E a = pp[0], b = pp[im], c = pm[0], d = pm[im];
           E wr = W[0], wi = W[1];
 	  E re = a + c, ti = a - c, ie = b - d, tr = b + d;
 	  E rd = tr * wr + ti * wi;
 	  E id = ti * wr - tr * wi;
-	  *riop = re - rd;          riop += dist;
-	  *iiop = ie + id;          iiop += dist;
-	  *riom = re + rd;          riom -= dist;
-	  *iiom = id - ie;          iiom -= dist;
+	  pp[0] = re - rd;
+	  pp[im] = ie + id;
+	  pm[0] = re + rd;
+	  pm[im] = id - ie;
+	  pp += dist; pm -= dist;
      }
 
      /* i = n/2 when n is even */
-     if (!(n & 1)) { *riop *= 2.0; *iiop *= -2.0; }
+     if (!(n & 1)) { pp[0] *= 2.0; pp[im] *= -2.0; }
 }
 
 static void apply_b_dft(plan *ego_, R *r, R *rio, R *iio)
@@ -295,7 +296,7 @@ static problem *mkcld_b_dft(const problem_rdft2 *p)
 
      return X(mkproblem_dft_d) (
 	  X(mktensor_1d)(d[0].n / 2, d[0].is, 2 * d[0].os),
-	  X(tensor_copy)(p->vecsz), 
+	  X(tensor_copy)(p->vecsz),
 	  p->iio, p->rio, p->r + d[0].os, p->r);
 }
 
@@ -309,32 +310,31 @@ static const madt adt_b_dft = {
 static void k_b_rdft(R *rio, R *iio, const R *W, uint n, int dist)
 {
      uint i;
-     R *riop, *iiop, *riom, *iiom;
-
-     riop = rio; iiop = iio; riom = rio + n * dist; iiom = iio + n * dist;
+     R *pp = rio, *pm = rio + n * dist;
+     int im = iio - rio;
 
      /* i = 0 and i = n */
      {
-          E rop = *riop, iop = *riom;
-          *riop = rop + iop;      riop += dist;
-          *iiop = rop - iop;      riom -= dist;
-                                  iiop += dist;
-                                  iiom -= dist;
+          E rop = pp[0], iop = pm[0];
+          pp[0] = rop + iop;
+          pp[im] = rop - iop;
+	  pp += dist; pm -= dist;
      }
 
      /* middle elements */
      for (W += 2, i = 2; i < n; i += 2, W += 2) {
-          E a = *riop, b = *iiop, c = *riom, d = *iiom;
+          E a = pp[0], b = pp[im], c = pm[0], d = pm[im];
           E wr = W[0], wi = W[1];
 	  E r0 = a + c, r1 = a - c, i0 = b - d, i1 = b + d;
-	  *riop = r0;                 riop += dist;
-	  *riom = i0;		      riom -= dist;
-	  *iiop = r1 * wr - i1 * wi;  iiop += dist;
-	  *iiom = i1 * wr + r1 * wi;  iiom -= dist;
+	  pp[0] = r0;
+	  pm[0] = i0;
+	  pp[im] = r1 * wr - i1 * wi;
+	  pm[im] = i1 * wr + r1 * wi;
+	  pp += dist; pm -= dist;
      }
 
      /* i = n/2 when n is even */
-     if (!(n & 1)) { *riop *= 2.0; *iiop *= -2.0; }
+     if (!(n & 1)) { pp[0] *= 2.0; pp[im] *= -2.0; }
 }
 
 static void apply_b_rdft(plan *ego_, R *r, R *rio, R *iio)
@@ -374,7 +374,7 @@ static const madt adt_b_rdft = {
 };
 
 /*
- * common stuff 
+ * common stuff
  */
 static void awake(plan *ego_, int flg)
 {
@@ -463,7 +463,7 @@ void X(rdft2_radix2_register)(planner *p)
 {
      uint i;
      static const madt *const adts[] = {
-	  &adt_f_dft, &adt_f_rdft, 
+	  &adt_f_dft, &adt_f_rdft,
 	  &adt_b_dft, &adt_b_rdft
      };
 
