@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.174 2003-01-16 10:48:30 athena Exp $ */
+/* $Id: ifftw.h,v 1.175 2003-01-16 19:53:41 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -30,8 +30,8 @@
 #include <stdarg.h>		/* va_list */
 #include <stddef.h>             /* ptrdiff_t */
 
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>		/* int, maybe */
+#if HAVE_STDINT_H
+#include <stdint.h>             /* uintptr_t, maybe */
 #endif
 
 /* determine precision and name-mangling scheme */
@@ -75,6 +75,23 @@ typedef struct solver_s solver;
 typedef struct planner_s planner;
 typedef struct printer_s printer;
 typedef struct scanner_s scanner;
+
+/*-----------------------------------------------------------------------*/
+/* define uintptr_t if it is not already defined */
+
+#ifndef HAVE_UINTPTR_T
+#  if SIZEOF_VOID_P == 0
+#    error sizeof void* is unknown!
+#  elif SIZEOF_UNSIGNED_INT == SIZEOF_VOID_P
+     typedef unsigned int uintptr_t;
+#  elif SIZEOF_UNSIGNED_LONG == SIZEOF_VOID_P
+     typedef unsigned long uintptr_t;
+#  elif SIZEOF_UNSIGNED_LONG_LONG == SIZEOF_VOID_P
+     typedef unsigned long long uintptr_t;
+#  else
+#    error no unsigned integer type matches void* sizeof!
+#  endif
+#endif
 
 /*-----------------------------------------------------------------------*/
 /* assert.c: */
@@ -160,8 +177,8 @@ extern int X(in_thread);
 #    define STACK_MALLOC(T, p, x)				\
      {								\
          p = (T)alloca((x) + MIN_ALIGNMENT);			\
-         p = (T)(((unsigned long)p + (MIN_ALIGNMENT - 1)) &	\
-               (~(unsigned long)(MIN_ALIGNMENT - 1)));		\
+         p = (T)(((uintptr_t)p + (MIN_ALIGNMENT - 1)) &	\
+               (~(uintptr_t)(MIN_ALIGNMENT - 1)));		\
      }
 #    define STACK_FREE(x) 
 #  else /* HAVE_ALLOCA && !defined(MIN_ALIGNMENT) */
