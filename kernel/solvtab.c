@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: solvtab.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: solvtab.c,v 1.3 2002-06-22 17:01:33 athena Exp $ */
 
 #include "ifftw.h"
 
-void X(solvtab_exec)(solvtab tbl, planner *p)
+void X(solvtab_exec)(const solvtab tbl, planner *p)
 {
      for (; *tbl; ++tbl)
           (*tbl)(p);

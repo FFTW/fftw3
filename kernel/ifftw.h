@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.40 2002-06-22 15:45:48 athena Exp $ */
+/* $Id: ifftw.h,v 1.41 2002-06-22 17:01:33 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -401,7 +401,7 @@ typedef int stride;
 /* solvtab.c */
 
 typedef void (*solvtab[])(planner *);
-void X(solvtab_exec)(solvtab tbl, planner *p);
+void X(solvtab_exec)(const solvtab tbl, planner *p);
 
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */
