@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.96 2002-09-16 19:40:46 stevenj Exp $ */
+/* $Id: planner.c,v 1.97 2002-09-16 20:36:12 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -271,6 +271,35 @@ static void hinsert(planner *ego, const md5sig s,
      hinsert0(ego, s, flags, slvndx, l);
 }
 
+static void hcurse_subsumed(planner *ego)
+{
+     uint h;
+
+     /* unbless any entries that are unreachable because they
+        are subsumed by less-impatient ones.  */
+     for (h = 0; h < ego->hashsiz; ++h) {
+	  solution *l = ego->solutions + h;
+	  if (VALIDP(l)) {
+	       uint d = h2(ego, l->s), g = (h + d) % ego->hashsiz;
+	       for (; ; g = (g + d) % ego->hashsiz) {
+		    solution *m = ego->solutions + g;
+		    if (VALIDP(m)) {
+			 if (md5eq(l->s, m->s) 
+			     && SUBSUMES(l->flags, m->flags)) {
+			      /* quidquid latet apparebit */
+			      l->flags |= m->flags & BLESSING;
+			      /* cum vix justus sit securus */
+			      m->flags &= ~BLESSING;
+			 }
+		    }
+		    else break;
+		    A((g + d) % ego->hashsiz != h);
+	       }
+	  }
+     }
+}
+
+
 static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 {
      if (!BELIEVE_PCOSTP(ego) || pln->pcost == 0.0) {
@@ -444,32 +473,9 @@ static void forget(planner *ego, amnesia a)
 {
      uint h;
 
-     /* First, delete any entries that are unreachable because they
-        are subsumed by less-impatient ones.  We must do this via the
-        BLESSING flag; setting ~H_VALID here could make other entries
-        unreachable in the inner loop. */
-     if (a != FORGET_EVERYTHING) {
-	  for (h = 0; h < ego->hashsiz; ++h) {
-	       solution *l = ego->solutions + h;
-	       if (VALIDP(l)) {
-		    uint d = h2(ego, l->s), g = (h + d) % ego->hashsiz;
-		    for (; ; g = (g + d) % ego->hashsiz) {
-			 solution *m = ego->solutions + g;
-			 if (VALIDP(m)) {
-			      if (md5eq(l->s, m->s) 
-				  && SUBSUMES(l->flags, m->flags)) {
-				   /* quidquid latet apparebit */
-				   l->flags |= m->flags & BLESSING;
-				   /* cum vix justus sit securus */
-				   m->flags &= ~BLESSING;
-			      }
-			 }
-			 else break;
-			 A((g + d) % ego->hashsiz != h);
-		    }
-	       }
-	  }
-     }
+     /* garbage-collect while we are at it */ 
+     if (a != FORGET_EVERYTHING)
+	  hcurse_subsumed(ego);
 
      for (h = 0; h < ego->hashsiz; ++h) {
 	  solution *l = ego->solutions + h;
@@ -503,6 +509,8 @@ static void htab_destroy(planner *ego)
 static void exprt(planner *ego, printer *p)
 {
      uint h;
+
+     hcurse_subsumed(ego);
 
      p->print(p, "(" WISDOM_PREAMBLE "%(");
      for (h = 0; h < ego->hashsiz; ++h) {
