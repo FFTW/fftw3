@@ -1,8 +1,6 @@
 * audit the implementation of RNK_MINFTY
 
-* wisdom I/O
-
-* real transforms
+* wisdom interaction with planner flags
 
 * I can't believe that there isn't a closed form for the omega
   array in Rader.

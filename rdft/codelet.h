@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.5 2002-07-25 02:46:39 stevenj Exp $ */
+/* $Id: codelet.h,v 1.6 2002-08-02 07:49:09 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -35,10 +35,14 @@
  * types of codelets
  **************************************************************/
 
-typedef enum { R2HC = FFT_SIGN, HC2R = -FFT_SIGN, 
-	       R2HCII, HC2RIII } rdft_kind;
+typedef enum {
+     R2HC = FFT_SIGN, HC2R = -FFT_SIGN, 
+     R2HCII, HC2RIII,
+     DHT, DST, DST2, DST2I, DCT, DCT2, DCT2I
+} rdft_kind;
 #define R2HC_KINDP(k) ((k) == R2HC || (k) == R2HCII) /* uses kr2hc_genus */
 #define HC2R_KINDP(k) ((k) == HC2R || (k) == HC2RIII) /* uses khc2r_genus */
+#define R2R_KINDP(k) ((k) >= DHT)
 
 /* real-input DFT codelets */
 typedef struct kr2hc_desc_s kr2hc_desc;
@@ -137,5 +141,31 @@ typedef khc2r khc2rIII;
 void X(khc2hc_dif_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc);
 
 extern const solvtab X(solvtab_rdft_hc2r);
+
+/* real-input & output DFT-like codelets (DHT, etc.) */
+typedef struct kr2r_desc_s kr2r_desc;
+
+typedef struct {
+     int (*okp)(
+	  const kr2r_desc *desc,
+	  const R *I, const R *O,
+	  int is, int os, uint vl, int ivs, int ovs);
+     rdft_kind kind;
+     uint vl;
+} kr2r_genus;
+
+struct kr2r_desc_s {
+     uint sz;    /* size of transform computed */
+     const char *nam;
+     opcnt ops;
+     const kr2r_genus *genus;
+     int is, os;
+     int ivs;
+     int ovs;
+};
+
+typedef void (*kr2r) (const R *I, R *O, stride is, stride os,
+		      uint vl, int ivs, int ovs);
+void X(kr2r_register)(planner *p, kr2r codelet, const kr2r_desc *desc);
 
 #endif				/* __RDFT_CODELET_H__ */
