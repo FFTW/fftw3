@@ -49,8 +49,8 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      }
 
      r = ego->r;
-     /* FIXME: use alloca? (generic is only used for small r) */
-     buf = (R *) fftw_malloc(sizeof(R) * r * 2, BUFFERS);
+
+     STACK_MALLOC(R *, buf, r * 2 * sizeof(R));
      
      osm = (m = ego->m) * (os = ego->os);
      n = m * r;
@@ -79,7 +79,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  }
      }
 
-     X(free)(buf);
+     STACK_FREE(buf);
 }
 
 /***************************************************************************/
