@@ -9,3 +9,18 @@
   plan.
 
 * adapt verify() to vecsz.rnk > 0 .
+
+* real transforms
+
+* rader/generic-radix cooley-tukey
+
+* simd
+
+* threads/mpi
+
+* DCT/DST ?  Idea: only implement the small cases as codelets,
+  and reduce the rest to DFT via some known formula.  Multidimensional
+  case is easy.  E.g., a fast 8x8 or 16x16 is still quite useful even
+  if we cannot handle the general case efficiently.
+
+* user interface
