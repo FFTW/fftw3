@@ -145,10 +145,10 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
      R *p;
 
      /* loop invariant: p = rio + s * (j * m + k). */
-     p = rio + s * (m + 1);
+     p = rio;
 
-     for (j = 1; j < r; ++j) {
-	  for (k = 1; k < m; ++k) {
+     for (j = 1, p += s * m; j < r; ++j) {
+	  for (k = 1, p += s; k < m; ++k, p += s) {
 	       E xr = p[0];
 	       E xi = p[ip];
 	       E wr = W[0];
@@ -156,9 +156,7 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
 	       p[0] = xr * wr + xi * wi;
 	       p[ip] = xi * wr - xr * wi;
 	       W += 2;
-	       p += s;
 	  }
-	  p += s;
      }
 }
 
