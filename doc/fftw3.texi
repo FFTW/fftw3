@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.158 2003-03-16 19:27:45 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.159 2003-03-16 19:28:22 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1216,7 +1216,7 @@ of special operations supported by some processors to perform a single
 operation on several numbers (usually 2 or 4) simultaneously.  SIMD
 floating-point instructions are available on several popular CPUs:
 SSE/SSE2 (single/double precision) on Pentium III/IV and higher,
-3DNow! (double precision) on the AMD K7 and higher, and AltiVec
+3DNow! (single precision) on the AMD K7 and higher, and AltiVec
 (single precision) on the PowerPC G4 and higher.  FFTW can be compiled
 to support the SIMD instructions on any of these systems.
 @cindex SIMD
