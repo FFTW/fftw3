@@ -112,27 +112,20 @@ static inline V VFMS(V a, V b, V c)
      return VSUB(VMUL(a, b), c);
 }
 
-/* load lower half */
-static inline V LDL(const float *x, int ivs, const float *aligned_like) 
-{
-     int fivs = 4 * ivs;
-     V v = vec_ld(fivs, (float *)x);
-     return vec_perm(v, v, vec_lvsl(fivs, (float *)aligned_like));
-}
-
-static inline V LDH(const float *x, const float *aligned_like) 
-{
-     V v = vec_ld(0, (float *)x);
-     return vec_perm(v, v, vec_lvsl(8, (float *)aligned_like));
-}
-
 extern const vector unsigned int X(altivec_ld_selmsk);
 
 static inline V LD(const float *x, int ivs, const float *aligned_like) 
 {
-     V l = LDL(x, ivs, aligned_like);
-     V h = LDH(x, aligned_like);
-     return vec_sel(l, h, X(altivec_ld_selmsk));
+     /* common subexpressions */
+     int fivs = 4 * ivs;
+     vector unsigned char ml = vec_lvsl(fivs, (float *)aligned_like);
+       /* you are not expected to understand this: */
+     vector unsigned char mh = vec_lvsr(8, (float *)aligned_like);
+     vector unsigned char msk =
+	  (vector unsigned char)vec_sel((V)ml, (V)mh, X(altivec_ld_selmsk));
+     /* end of common subexpressions */
+
+     return vec_perm(vec_ld(fivs, (float *)x), vec_ld(0, (float *)x), msk);
 }
 
 /* store lower half */
