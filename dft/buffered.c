@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.47 2003-04-04 18:12:52 athena Exp $ */
+/* $Id: buffered.c,v 1.48 2003-04-04 21:15:53 athena Exp $ */
 
 #include "dft.h"
 
@@ -223,12 +223,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist * 2, BUFFERS);
 
-     X(check_strides_alignment)(plnr, ivs * nbuf, ovs * nbuf);
      cld = X(mkplan_d)(plnr,
 		       X(mkproblem_dft_d)(
 			    X(mktensor_1d)(n, p->sz->dims[0].is, 2),
 			    X(mktensor_1d)(nbuf, ivs, bufdist * 2),
-			    p->ri, p->ii, bufs + roffset, bufs + ioffset));
+			    TAINT(p->ri, ivs * nbuf),
+			    TAINT(p->ii, ivs * nbuf),
+			    bufs + roffset, 
+			    bufs + ioffset));
      if (!cld)
           goto nada;
 
@@ -238,7 +240,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 			       X(mktensor_0d)(),
 			       X(mktensor_2d)(nbuf, bufdist * 2, ovs,
 					      n, 2, p->sz->dims[0].os),
-			       bufs + roffset, bufs + ioffset, p->ro, p->io));
+			       bufs + roffset, 
+			       bufs + ioffset, 
+			       TAINT(p->ro, ovs * nbuf), 
+			       TAINT(p->io, ovs * nbuf)));
      if (!cldcpy)
           goto nada;
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.213 2003-04-04 18:12:56 athena Exp $ */
+/* $Id: ifftw.h,v 1.214 2003-04-04 21:15:53 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -706,10 +706,17 @@ void X(null_awake)(plan *ego, int awake);
 int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
 int X(alignment_of)(R *p);
-int X(check_strides_alignment)(planner *plnr, int is, int os);
 unsigned X(hash)(const char *s);
 int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz);
 int X(ct_uglyp)(int min_n, int n, int r);
+
+#if HAVE_SIMD
+#define TAINT(p, s) X(taint)(p, s)
+#define UNTAINT(p) ((R *) (((uintptr_t) (p)) & -2))
+#else
+#define TAINT(p, s) (p)
+#define UNTAINT(p) (p)
+#endif
 
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */

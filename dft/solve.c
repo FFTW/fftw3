@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: solve.c,v 1.4 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: solve.c,v 1.5 2003-04-04 21:15:53 athena Exp $ */
 
 #include "dft.h"
 
@@ -27,5 +27,7 @@ void X(dft_solve)(const plan *ego_, const problem *p_)
 {
      const plan_dft *ego = (const plan_dft *) ego_;
      const problem_dft *p = (const problem_dft *) p_;
-     ego->apply(ego_, p->ri, p->ii, p->ro, p->io);
+     ego->apply(ego_, 
+		UNTAINT(p->ri), UNTAINT(p->ii), 
+		UNTAINT(p->ro), UNTAINT(p->io));
 }

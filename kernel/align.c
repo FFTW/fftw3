@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.22 2003-04-04 18:12:56 athena Exp $ */
+/* $Id: align.c,v 1.23 2003-04-04 21:15:53 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -43,10 +43,8 @@ static int stride_aligned_p(int s)
      return !(((unsigned)s * sizeof(R)) % ALGN);
 }
 
-int X(check_strides_alignment)(planner *plnr, int is, int os)
+R *X(taint)(R *p, int s)
 {
-     if (!stride_aligned_p(is))
-	  plnr->problem_flags |= UNALIGNED;
-     if (!stride_aligned_p(os))
-	  plnr->problem_flags |= UNALIGNED;
+     if (!stride_aligned_p(s))
+	  p = (R *) (((uintptr_t) p) | 1);
 }

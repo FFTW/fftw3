@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.32 2003-04-04 18:12:58 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.33 2003-04-04 21:15:53 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -170,13 +170,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      A(d->n > 1);  /* or else, p->ri + d->is etc. are invalid */
 
      X(rdft2_strides)(p->kind, d, &ivs, &ovs);
-     X(check_strides_alignment)(plnr, ivs, ovs);
 
      cld = X(mkplan_d)(plnr, 
 		       X(mkproblem_rdft2_d)(
 			    X(tensor_copy)(p->sz),
 			    X(tensor_copy_except)(p->vecsz, vdim),
-			    p->r, p->rio, p->iio, p->kind));
+			    TAINT(p->r, ivs), 
+			    TAINT(p->rio, ovs), TAINT(p->iio, ovs),
+			    p->kind));
      if (!cld) return (plan *) 0;
 
      pln = MKPLAN_RDFT2(P, &padt, apply);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: solve.c,v 1.3 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: solve.c,v 1.4 2003-04-04 21:15:53 athena Exp $ */
 
 #include "rdft.h"
 
@@ -27,5 +27,5 @@ void X(rdft_solve)(const plan *ego_, const problem *p_)
 {
      const plan_rdft *ego = (const plan_rdft *) ego_;
      const problem_rdft *p = (const problem_rdft *) p_;
-     ego->apply(ego_, p->I, p->O);
+     ego->apply(ego_, UNTAINT(p->I), UNTAINT(p->O));
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.29 2003-04-04 18:12:58 athena Exp $ */
+/* $Id: buffered.c,v 1.30 2003-04-04 21:15:53 athena Exp $ */
 
 #include "rdft.h"
 
@@ -213,12 +213,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
-     X(check_strides_alignment)(plnr, ivs * nbuf, ovs * nbuf);
      cld = X(mkplan_d)(plnr, 
 		       X(mkproblem_rdft_d)(
 			    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
 			    X(mktensor_1d)(nbuf, ivs, bufdist),
-			    p->I, bufs, p->kind));
+			    TAINT(p->I, ivs * nbuf), bufs, p->kind));
      if (!cld) goto nada;
 
      /* copying back from the buffer is a rank-0 transform: */
@@ -227,7 +226,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 			       X(mktensor_0d)(),
 			       X(mktensor_2d)(nbuf, bufdist, ovs,
 					      n, 1, p->sz->dims[0].os),
-			       bufs, p->O, (rdft_kind *) 0));
+			       bufs, TAINT(p->O, ovs * nbuf), 
+			       (rdft_kind *) 0));
      if (!cldcpy) goto nada;
 
      /* deallocate buffers, let apply() allocate them for real */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.32 2003-04-04 18:12:58 athena Exp $ */
+/* $Id: buffered2.c,v 1.33 2003-04-04 21:15:53 athena Exp $ */
 
 #include "rdft.h"
 
@@ -325,8 +325,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
-     /* conservative, ignore nbuf: */
-     X(check_strides_alignment)(plnr, ivs, ovs); 
+     plnr->problem_flags |= UNALIGNED; /* FIXME */
 
      if (p->kind == R2HC)
 	  cldp =
