@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.8 2002-06-11 18:22:49 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.9 2002-06-12 11:47:41 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -144,14 +144,6 @@ static int score(const solver *ego_, const problem *p_)
      if (!applicable(ego_, p_, &dummy))
           return BAD;
 
-     /* Prefer spltrnk values within the dimension range.  Also
-        prefer positive spltrnk to negative (assuming that they
-        come in positive/negative pairs.  We do this to discourage the
-        planner from trying effectively duplicate plans. */
-     if ((ego->spltrnk > 0 && ego->spltrnk >= (int)p->sz.rnk) ||
-	 (ego->spltrnk < 0 && -2 * ego->spltrnk >= (int)p->sz.rnk))
-          return UGLY;
-
      /* Heuristic: if the vector stride is greater than the transform
         sz, don't use (prefer to do the vector loop first with a
         vecloop plan). */
@@ -235,7 +227,7 @@ void X(dft_rank_geq2_register)(planner *p)
 {
      uint i;
 #if CLASSIC_MODE
-     static const int buddies[] = { 0 };
+     static const int buddies[] = { -1 };
 #else
      static const int buddies[] = { 1, -1, 0 };
 #endif
@@ -247,12 +239,12 @@ void X(dft_rank_geq2_register)(planner *p)
 
      /* FIXME:
 
-     Should we try more buddies? 
+        Should we try more buddies? 
 
-     Another possible variant is to swap cld1 and cld2 (or
-     rather, to swap their problems; they are not interchangeable
-     because cld2 must be in-place).  In past versions of FFTW,
-     however, I seem to recall that such rearrangements have made
-     little or no difference. 
+        Another possible variant is to swap cld1 and cld2 (or rather,
+        to swap their problems; they are not interchangeable because
+        cld2 must be in-place).  In past versions of FFTW, however, I
+        seem to recall that such rearrangements have made little or no
+        difference.
      */
 }

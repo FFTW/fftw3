@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.3 2002-06-11 18:22:49 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.4 2002-06-12 11:47:41 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -239,7 +239,7 @@ void X(dft_vrank_geq1_register)(planner *p)
 
      /* FIXME: Should we try other vecloop_dim values? */
 #if CLASSIC_MODE
-     static const int buddies[] = { 1 };
+     static const int buddies[] = { -1 };
 #else
      static const int buddies[] = { 1, -1 };
 #endif

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.10 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: rank0.c,v 1.11 2002-06-12 11:47:41 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -91,30 +91,29 @@ static void apply_vec(plan *ego_, R *ri, R *ii, R *ro, R *io)
      for (i = 4; i <= vl; i += 4) {
           R r0, r1, r2, r3;
           R i0, i1, i2, i3;
-
-          r0 = ri[(i - 4) * ivs];
-          i0 = ii[(i - 4) * ivs];
-          r1 = ri[(i - 3) * ivs];
-          i1 = ii[(i - 3) * ivs];
-          r2 = ri[(i - 2) * ivs];
-          i2 = ii[(i - 2) * ivs];
-          r3 = ri[(i - 1) * ivs];
-          i3 = ii[(i - 1) * ivs];
-          ro[(i - 4) * ovs] = r0;
-          io[(i - 4) * ovs] = i0;
-          ro[(i - 3) * ovs] = r1;
-          io[(i - 3) * ovs] = i1;
-          ro[(i - 2) * ovs] = r2;
-          io[(i - 2) * ovs] = i2;
-          ro[(i - 1) * ovs] = r3;
-          io[(i - 1) * ovs] = i3;
+          r0 = *ri; ri += ivs;
+          i0 = *ii; ii += ivs;
+          r1 = *ri; ri += ivs;
+          i1 = *ii; ii += ivs;
+          r2 = *ri; ri += ivs;
+          i2 = *ii; ii += ivs;
+          r3 = *ri; ri += ivs;
+          i3 = *ii; ii += ivs;
+          *ro = r0; ro += ovs;
+          *io = i0; io += ovs;
+          *ro = r1; ro += ovs;
+          *io = i1; io += ovs;
+          *ro = r2; ro += ovs;
+          *io = i2; io += ovs;
+	  *ro = r3; ro += ovs;
+          *io = i3; io += ovs;
      }
-     for (i -= 4; i < vl; ++i) {
+     for (; i < vl + 4; ++i) {
           R r0, i0;
-          r0 = ri[i * ivs];
-          i0 = ii[i * ivs];
-          ro[i * ovs] = r0;
-          io[i * ovs] = i0;
+          r0 = *ri; ri += ivs;
+          i0 = *ii; ii += ivs;
+          *ro = r0; ro += ovs;
+          *io = i0; io += ovs;
      }
 }
 
