@@ -5,5 +5,6 @@ libkernel_la_SOURCES = align.c alloc.c assert.c awake.c debug.c		\
 dotens.c dotens2.c minmax.c ops.c pickdim.c plan.c planner-naive.c	\
 planner-score.c planner.c primes.c print.c printers.c problem.c scan.c	\
 scanners.c solver.c solvtab.c square.c stride.c tensor.c timer.c	\
-traverse.c trig.c twiddle.c verify-lib.c version.c cycle.h dfftw3.h	\
-fftw3.h ifftw.h lfftw3.h sfftw3.h verify.h
+traverse.c trig.c twiddle.c verify-lib.c version.c cycle.h ifftw.h	\
+verify.h
+
