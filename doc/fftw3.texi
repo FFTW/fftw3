@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.218 2005-01-28 05:04:58 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.219 2005-02-09 00:37:09 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4627,6 +4627,21 @@ Note especially @code{--help} to list all flags and
 @itemize @bullet
 
 @item
+@code{--with-portable-binary}: Disable compiler optimizations that
+would produce unportable binaries. @b{Important:} Use this if you are
+distributing compiled binaries to people who many not use exactly the
+same processor as you.
+
+@item
+@code{--with-gcc-arch=}@i{arch}: When compiling with @code{gcc}, FFTW
+tries to guess the current CPU in order to tell @code{gcc} what
+architecture to tune for (i.e. @i{arch} should be a valid argument for
+@code{gcc}'s @code{-march} or @code{-mtune} flags).  In this way,
+you can override the @code{configure} script's guess, either because the
+guess was wrong or because you want to tune for a different CPU than
+the one you are compiling with.
+
+@item
 @cindex precision
 @code{--enable-float}: Produces a single-precision version of FFTW
 (@code{float}) instead of the default double-precision (@code{double}).
@@ -4666,11 +4681,13 @@ not compiled.)
 
 @item
 @cindex Fortran-callable wrappers
-@code{--disable-fortran}: Disables inclusion of Fortran-callable wrapper
-routines (@pxref{Calling FFTW from Fortran}) in the standard FFTW
-libraries.  These wrapper routines increase the library size by only a
-negligible amount, so they are included by default as long as the
-@code{configure} script finds a Fortran compiler on your system.
+@code{--disable-fortran}: Disables inclusion of Fortran-callable
+wrapper routines (@pxref{Calling FFTW from Fortran}) in the standard
+FFTW libraries.  These wrapper routines increase the library size by
+only a negligible amount, so they are included by default as long as
+the @code{configure} script finds a Fortran compiler on your system.
+(To specify a particular Fortran compiler @i{foo}, pass
+@code{F77=}@i{foo} to @code{configure}.)
 
 @item
 @code{--with-slow-timer}: Disables the use of hardware cycle counters,
@@ -4692,12 +4709,8 @@ although the FFTW library is still larger).
 @item
 These options, with the exception of @code{--enable-k7} (which uses
 assembly), require a compiler supporting SIMD extensions, and compiler
-support is still a bit flaky.  We have tested SIMD with @code{gcc}
-versions 3.x (which miscompile AltiVec permutations on Linux, but we
-have an assembly workaround) and with Intel's @code{icc} 6.0 (which
-misaligns SSE constants, but we have a workaround).  Some 3.x versions
-of @code{gcc} crash during compilation, and @code{gcc} 2.95 miscompiles
-AltiVec on MacOS X.
+support is still a bit flaky: see the FFTW FAQ for a list of compiler
+versions that have problems compiling FFTW.
 @item
 With the Linux kernel, you may have to recompile the kernel with the
 option to support SSE/SSE2/AltiVec (see the ``Processor type and
@@ -4711,17 +4724,17 @@ it tries to use an AltiVec feature.  (This is not necessary on MacOS X.)
 With SSE/SSE2 and @code{gcc}, you should use a version of gcc that
 properly aligns the stack when compiling any code that links to FFTW.
 By default, @code{gcc} 2.95 and later versions align the stack as
-needed, but you should not use the @code{-Os} option or the
+needed, but you should not compile FFTW with the @code{-Os} option or the
 @code{-mpreferred-stack-boundary} option with an argument less than 4.
 @end itemize
 
 @end itemize
 
-To force @code{configure} to use a particular C compiler (instead of the
 @cindex compiler
-default, usually @code{gcc}), set the environment variable @code{CC} to
-the name of the desired compiler before running @code{configure}; you
-may also need to set the flags via the variable @code{CFLAGS}.
+To force @code{configure} to use a particular C compiler @i{foo}
+(instead of the default, usually @code{gcc}), pass @code{CC=}@i{foo} to the 
+@code{configure} script; you may also need to set the flags via the variable
+@code{CFLAGS} as described above.
 @cindex compiler flags
 
 @c ------------------------------------------------------------
