@@ -325,9 +325,9 @@ typedef sem_t fftw_sem_id;
 #include <asm/spinlock.h>
 
 typedef spinlock_t fftw_sem_id;
-#define fftw_sem_init(pid) spin_lock_init(pid)
+#define fftw_sem_init(pid) { spin_lock_init(pid); spin_lock(pid); }
 #define fftw_sem_destroy(pid) (void) (pid)
-#define fftw_sem_wait(pid) spin_unlock_wait(pid)
+#define fftw_sem_wait(pid) { spin_unlock_wait(pid); spin_lock(pid); }
 #define fftw_sem_post(pid) spin_unlock(pid)
 
 #endif
