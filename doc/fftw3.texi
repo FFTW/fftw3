@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.86 2003-03-04 04:26:12 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.87 2003-03-04 05:17:23 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2245,6 +2245,31 @@ fftw_plan fftw_plan_many_dft_c2r(int rank, const int *n, int howmany,
 @findex fftw_plan_many_dft_r2c
 @findex fftw_plan_many_dft_c2r
 
+Like @code{fftw_plan_many_dft}, these two functions add @code{howmany},
+@code{nembed}, @code{stride}, and @code{dist} parameters to the
+@code{fftw_plan_dft_r2c} and @code{fftw_plan_dft_c2r} functions, but
+otherwise behave the same as the basic interface.
+
+The interpretation of @code{howmany}, @code{stride}, and @code{dist} are
+the same as for @code{fftw_plan_many_dft}, above.  Note that the
+@code{stride} and @code{dist} for the real array are in units of
+@code{double}, and for the complex array are in units of
+@code{fftw_complex}.
+
+If an @code{nembed} parameter is @code{NULL}, it is interpreted as what
+it would be in the basic interface, as described in @ref{Real-data DFT
+Array Format}.  That is, for the complex array the size is assumed to be
+the same as @code{n}, but with the last dimension cut roughly in half.
+For the real array, the size is assumed to be @code{n} if the transform
+is out-of-place, or @code{n} with the last dimension ``padded'' if the
+transform is in-place.
+
+If an @code{nembed} parameter is non-@code{NULL}, it is interpreted as
+the physical size of the corresponding array, in row-major order, just
+as for @code{fftw_plan_many_dft}.  In this case, each dimension of
+@code{nembed} should be @code{>=} what it would be in the basic
+interface (e.g. the halved or padded @code{n}).
+
 @subsubheading Advanced real-to-real transforms
 @example
 fftw_plan fftw_plan_many_r2r(int rank, const int *n, int howmany,
@@ -2255,6 +2280,14 @@ fftw_plan fftw_plan_many_r2r(int rank, const int *n, int howmany,
                              const fftw_r2r_kind *kind, unsigned flags);
 @end example
 @findex fftw_plan_many_r2r
+
+Like @code{fftw_plan_many_dft}, this functions adds @code{howmany},
+@code{nembed}, @code{stride}, and @code{dist} parameters to the
+@code{fftw_plan_r2r} function, but otherwise behave the same as the
+basic interface.  The interpretation of those additional parameters are
+the same as for @code{fftw_plan_many_dft}.  (Of course, the
+@code{stride} and @code{dist} parameters are now in units of
+@code{double}, not @code{fftw_complex}.)
 
 @c ------------------------------------------------------------
 @node Guru Interface, What FFTW Really Computes, Advanced Interface, FFTW Reference
