@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.27 2003-01-12 23:49:58 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.28 2003-01-13 00:02:09 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -176,7 +176,7 @@ FFTW_DEFINE_APIx(FFTW_MANGLE_LONG_DOUBLE, long double)
 #define FFTW_CONSERVE_MEMORY (1U << 2)
 #define FFTW_EXHAUSTIVE (1U << 3) /* NO_EXHAUSTIVE is default */
 #define FFTW_PRESERVE_INPUT (1U << 4) /* cancels FFTW_DESTROY_INPUT */
-#define FFTW_PATIENT (1U << 5)
+#define FFTW_PATIENT (1U << 5) /* IMPATIENT is default */
 #define FFTW_ESTIMATE (1U << 6)
 
 /* undocumented beyond-guru flags */
