@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.198 2003-08-19 14:08:07 athena Exp $
+@comment $Id: fftw3.texi,v 1.199 2003-08-26 12:22:38 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2752,7 +2752,7 @@ which case pointer arithmetic operates in units of
 
 The guru planner interfaces all take a (@code{rank}, @code{dims[rank]})
 pair describing the transform size, and a (@code{howmany_rank},
-@code{howmany_dims[rank]}) pair describing the ``vector'' size (a
+@code{howmany_dims[howmany_rank]}) pair describing the ``vector'' size (a
 multi-dimensional loop of transforms to perform), where @code{dims} and
 @code{howmany_dims} are arrays of @code{fftw_iodim}.
 
