@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.10 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: annotate.ml,v 1.11 2003-07-09 12:09:53 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.10 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: annotate.ml,v 1.11 2003-07-09 12:09:53 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -95,6 +95,68 @@ let reorder l =
       let l'' = Util.remove m l' in
       loop (m :: l'')
 
+(* remove Par blocks *)
+let rec linearize = function
+  | Seq (a, Done) -> linearize a
+  | Seq (Done, a) -> linearize a
+  | Seq (a, b) -> Seq (linearize a, linearize b)
+
+  (* try to balance nested Par blocks *)
+  | Par [a] -> linearize a
+  | Par l -> 
+      let n2 = (List.length l) / 2 in
+      let rec loop n a b =
+	if n = 0 then
+	  (List.rev b, a)
+	else
+	  match a with
+	    [] -> failwith "loop"
+	  | x :: y -> loop (n - 1) y (x :: b)
+      in let (a, b) = loop n2 (reorder l) []
+      in linearize (Seq (Par a, Par b))
+
+  | x -> x 
+
+(* true if A and B are friends.  Two instructions are friends if they
+   have the same set of input variables *)
+let friendp a b =
+  let subset a b =
+    List.for_all (fun x -> List.exists (fun y -> x == y) b) a
+  in
+  let Assign (_, ax) = a and Assign (_, bx) = b in
+  let va = Expr.find_vars ax and vb = Expr.find_vars bx in
+  subset va vb && subset vb va
+
+(* extract instructions from schedule *)
+let rec sched_to_ilist = function
+  | Done -> []
+  | Instr a -> [a]
+  | Seq (a, b) -> (sched_to_ilist a) @ (sched_to_ilist b)
+  | _ -> failwith "sched_to_ilist" (* Par blocks removed by linearize *)
+
+let rec move_friends sched =
+  let rec find_friends insn friends foes = function
+    | [] -> (friends, foes)
+    | a :: b -> 
+	if friendp a insn then
+	  find_friends insn (a :: friends) foes b
+	else
+	  find_friends insn friends (a :: foes) b
+  in
+  let rec recur insns = function
+    | Done -> (Done, insns)
+    | Instr a ->
+	let (friends, foes) = find_friends a [] [] insns in
+	(Schedule.sequentially friends), foes
+    | Seq (a, b) ->
+	let (a', insnsa) = recur insns a in
+	let (b', insnsb) = recur insnsa b in
+	(Seq (a', b')), insnsb
+    | _ -> failwith "move_friends"
+  in match recur (sched_to_ilist sched) sched with
+  | (s, []) -> s (* assert that all insns have been used *)
+  | _ -> failwith "move_friends"
+
 let rec rewrite_declarations force_declarations 
     (Annotate (_, _, declared, _, what)) =
   let m = !Magic.number_of_variables in
@@ -121,7 +183,7 @@ let rec rewrite_declarations force_declarations
 let annotate schedule =
   let m = !Magic.number_of_variables in
 
-  let rec really_analyze live_at_end = function
+  let rec analyze live_at_end = function
       Done -> Annotate (live_at_end, [], [], 0, ADone)
     | Instr i -> (match i with
 	Assign (v, x) -> 
@@ -142,37 +204,13 @@ let annotate schedule =
 		  ASeq (aa, ab))
     | _ -> failwith "really_analyze"
 
-  (* the pick_best machinery is currently unused. Too slow, and
-     I don't know what `best' means *)
-  and analyze l =
-    let pick_best w = 
-      minimize 
-	(function Annotate (_, _, _, depth, _) -> depth)
-	(List.map (really_analyze l) w)
-    in function
-
-      |	Seq (a, Done) -> analyze l a
-      |	Seq (Done, a) -> analyze l a
-
-       (* try to balance nested Par blocks *)
-      |	Par [a] -> pick_best [a]
-      |	Par l -> 
-	  let n2 = (List.length l) / 2 in
-	  let rec loop n a b =
-	    if n = 0 then
-	      (List.rev b, a)
-	    else
-	      match a with
-		[] -> failwith "loop"
-	      |	x :: y -> loop (n - 1) y (x :: b)
-	  in let (a, b) = loop n2 (reorder l) []
-	  in pick_best [Seq (Par a, Par b)]
-
-      | x -> pick_best [x]
-
   in 
   let () = Util.info "begin annotate" in
-  let res = rewrite_declarations true (analyze [] schedule) in
+  let x = linearize schedule in
+  let x = move_friends x in
+  let x = linearize x in
+  let x = analyze [] x in
+  let res = rewrite_declarations true x in
   let () = Util.info "end annotate" in
   res
 
