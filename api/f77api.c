@@ -111,7 +111,7 @@ static int emitter(void *d)
    machine are likely to use g77's non-underscored mangling.  (I'm sick
    of users complaining that FFTW works with g77 but not with e.g.
    pgf77 or ifc on the same machine.)  Note that all FFTW identifiers
-   contain underscores. */
+   contain underscores, and configure picks g77 by default. */
 #if defined(F77_FUNC_) && !defined(F77_FUNC_EQUIV)
 #  undef F77x
 #  define F77x(a, A) F77_FUNC_(a, A)
