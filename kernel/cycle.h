@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.36 2003-07-04 10:56:26 athena Exp $ */
+/* $Id: cycle.h,v 1.37 2003-07-24 22:58:10 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -359,7 +359,7 @@ typedef unsigned long ticks;
 static __inline__ ticks getticks(void)
 {
      ticks ret;
-     __asm__("rd %%tick, %0" : "=r" (ret));
+     __asm__ __volatile__("rd %%tick, %0" : "=r" (ret));
      return ret;
 }
 
