@@ -74,13 +74,20 @@ static void putchr(printer *p, char c)
      putchar(c);
 }
 
-static void debug_hook(const plan *pln, const fftw_problem *p_)
+static void hook(const plan *pln, const fftw_problem *p_)
 {
      problem_dft *p = (problem_dft *) p_;
-     printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
-     pr->print(pr, "%P:%(%p%)\n", p, pln);
-     FFTW(printer_destroy) (pr);
-     printf("%g\n", pln->pcost);
+
+     if (verbose > 5) {
+	  printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
+	  pr->print(pr, "%P:%(%p%)\n", p, pln);
+	  FFTW(printer_destroy) (pr);
+	  printf("%g\n", pln->pcost);
+     }
+
+     if (paranoid) {
+	  X(dft_verify)(pln, p, 5);
+     }
 }
 
 int can_do(struct problem *p)
@@ -97,12 +104,11 @@ void setup(struct problem *p)
 {
      BENCH_ASSERT(can_do(p));
 
-     plnr = FFTW(mkplanner_score)(0);
+     plnr = FFTW(mkplanner_naive)(0);
      
      FFTW(dft_conf_standard) (plnr);
 
-     if (verbose > 5)
-	  FFTW(planner_set_hook) (plnr, debug_hook);
+     FFTW(planner_set_hook) (plnr, hook);
 
      if (p->split) {
 	  is = os = 1;

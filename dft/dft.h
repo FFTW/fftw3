@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.20 2002-06-17 03:50:16 fftw Exp $ */
+/* $Id: dft.h,v 1.21 2002-07-05 18:49:59 athena Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -37,6 +37,9 @@ problem *X(mkproblem_dft)(const tensor sz, const tensor vecsz,
                           R *ri, R *ii, R *ro, R *io);
 problem *X(mkproblem_dft_d)(tensor sz, tensor vecsz,
                             R *ri, R *ii, R *ro, R *io);
+
+/* verify.c: */
+void X(dft_verify)(plan *pln, const problem_dft *p, uint rounds);
 
 /* solve.c: */
 void X(dft_solve)(plan *ego_, const problem *p_);

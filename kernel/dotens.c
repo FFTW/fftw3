@@ -18,22 +18,30 @@
  *
  */
 
-/* $Id: debug.c,v 1.2 2002-07-05 18:49:59 athena Exp $ */
-#include "ifftw.h"
-#include <stdio.h>
+/* $Id: dotens.c,v 1.1 2002-07-05 18:49:59 athena Exp $ */
 
-static void putchr(printer *p, char c)
+#include "ifftw.h"
+
+static void recur(uint rnk, const iodim *dims, dotens_closure *k, 
+		  int indx, int ondx)
 {
-     UNUSED(p);
-     putc(c, stderr);
+     if (rnk == 0)
+          k->apply(k, indx, ondx);
+     else {
+          uint i, n = dims[0].n;
+          int is = dims[0].is;
+          int os = dims[0].os;
+
+          for (i = 0; i < n; ++i) {
+               recur(rnk - 1, dims + 1, k, indx, ondx);
+	       indx += is; ondx += os;
+	  }
+     }
 }
 
-void X(debug)(const char *format, ...)
+void X(dotens)(tensor sz, dotens_closure *k)
 {
-     va_list ap;
-     printer *p = X(mkprinter)(sizeof(printer), putchr);
-     va_start(ap, format);
-     p->vprint(p, format, ap);
-     va_end(ap);
-     X(printer_destroy)(p);
+     if (sz.rnk == RNK_MINFTY)
+          return;
+     recur(sz.rnk, sz.dims, k, 0, 0);
 }

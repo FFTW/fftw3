@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.43 2002-07-04 00:32:28 athena Exp $ */
+/* $Id: ifftw.h,v 1.44 2002-07-05 18:49:59 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -88,8 +88,8 @@ extern void X(assertion_failed)(const char *s, int line, char *file);
 #define A(ex) /* nothing */
 #endif
 
-extern void X(fftw_debug)(const char *format, ...);
-#define D X(fftw_debug)
+extern void X(debug)(const char *format, ...);
+#define D X(debug)
 
 /*-----------------------------------------------------------------------*/
 /* alloc.c: */
@@ -130,17 +130,17 @@ extern void *X(malloc_plain)(size_t sz);
 
 /*-----------------------------------------------------------------------*/
 /* alloca: */
-
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif /* HAVE_ALLOCA_H */
 
 #ifdef HAVE_ALLOCA
 /* use alloca if available */
-#define STACK_MALLOC(p, x)						     \
-{									     \
-     p = alloca((x) + MIN_ALIGNMENT);					     \
-     p = (void *)(((long)p + (MIN_ALIGNMENT - 1)) & (~(MIN_ALIGNMENT - 1))); \
+#define STACK_MALLOC(p, x)				\
+{							\
+     p = alloca((x) + MIN_ALIGNMENT);			\
+     p = (void *)(((long)p + (MIN_ALIGNMENT - 1)) & 	\
+           (~(long)(MIN_ALIGNMENT - 1)));		\
 }
 #define STACK_FREE(x) 
 
@@ -223,6 +223,22 @@ void X(tensor_split)(const tensor sz, tensor *a, uint a_rnk, tensor *b);
 void X(tensor_destroy)(tensor sz);
 void X(tensor_print)(tensor sz, printer *p);
 
+/*-----------------------------------------------------------------------*/
+/* dotens.c: */
+typedef struct dotens_closure_s {
+     void (*apply)(struct dotens_closure_s *k, int indx, int ondx);
+} dotens_closure;
+
+void X(dotens)(tensor sz, dotens_closure *k);
+
+/*-----------------------------------------------------------------------*/
+/* dotens2.c: */
+typedef struct dotens2_closure_s {
+     void (*apply)(struct dotens2_closure_s *k, 
+		   int indx0, int ondx0, int indx1, int ondx1);
+} dotens2_closure;
+
+void X(dotens2)(tensor sz0, tensor sz1, dotens2_closure *k);
 /*-----------------------------------------------------------------------*/
 /* problem.c: */
 typedef struct {

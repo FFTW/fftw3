@@ -11,6 +11,7 @@ NAMES: keep them short.  Shorter than you think.  The Bible was written
    Common names:
 
    R       : real type, aka fftw_real
+   C       : complex type
    sz      : size
    vecsz   : vector size
    is, os  : input/output stride
