@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet-k7.h,v 1.1 2002-06-16 12:05:17 athena Exp $ */
+/* $Id: codelet-k7.h,v 1.2 2002-06-16 19:35:02 athena Exp $ */
 
 /* K7 codelet stuff */
 
@@ -36,5 +36,6 @@ void X(kdft_k7_register)(planner *p, kdft_k7 codelet,
 			 const kdft_k7_desc *desc);
 
 extern solvtab X(solvtab_dft_k7);
+solver *X(mksolver_dft_direct_k7)(kdft_k7 k, const kdft_k7_desc *desc);
 
 #endif /* K7_MODE */
