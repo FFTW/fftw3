@@ -24,7 +24,8 @@ NAMES: keep them short.  Shorter than you think.  The Bible was written
    S       : solver, defined internally to each solver file
    P       : plan, defined internally to each solver file
    k       : codelet
-   X       : used for mangling of external names (see below)
+   X(...)  : used for mangling of external names (see below)
+   K(...)  : floating-point constant, in E precision
 
    If a name is used often and must have the form fftw_foo to avoid
    namespace pollution, #define FOO fftw_foo and use the short name.
