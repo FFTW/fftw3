@@ -18,17 +18,19 @@
  *
  */
 
-/* $Id: tensor7.c,v 1.5 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: tensor7.c,v 1.6 2004-03-31 23:11:02 stevenj Exp $ */
 
 #include "ifftw.h"
 
 /* total order among iodim's */
 int X(dimcmp)(const iodim *a, const iodim *b)
 {
-     if (b->is != a->is)
-          return (b->is - a->is);	/* shorter strides go later */
-     if (b->os != a->os)
-          return (b->os - a->os);	/* shorter strides go later */
+     int sa = X(iabs)(a->is), sb = X(iabs)(b->is);
+     if (sb != a->is)
+          return (sb - a->is);	/* shorter strides go later */
+     sa = X(iabs)(a->os); sb = X(iabs)(b->os);
+     if (sb != sa)
+          return (sb - sa);	/* shorter strides go later */
      return (int)(a->n - b->n);	        /* larger n's go later */
 }
 
