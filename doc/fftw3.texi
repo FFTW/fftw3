@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.80 2003-03-03 06:44:00 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.81 2003-03-03 17:55:57 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -21,6 +21,11 @@
 @defcodeindex fp
 @syncodeindex fp cp
 @comment %**end of header
+
+@iftex
+@paragraphindent 0
+@parskip=@medskipamount
+@end iftex
 
 @macro Onlogn
 @ifinfo
