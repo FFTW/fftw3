@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.124 2003-01-13 00:58:46 stevenj Exp $ */
+/* $Id: planner.c,v 1.125 2003-01-13 01:01:51 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -491,7 +491,6 @@ static void exprt(planner *ego, printer *p)
    cum resurget creatura */
 static int imprt(planner *ego, scanner *sc)
 {
-     uint h, hsiz = ego->hashsiz;
      char buf[MAXNAM + 1];
      md5uint sig[4];
      uint flags;
@@ -503,9 +502,12 @@ static int imprt(planner *ego, scanner *sc)
 	  return 0; /* don't need to restore hashtable */
 
      /* make a backup copy of the hash table (cache the hash) */
-     sol = (solution *)fftw_malloc(hsiz * sizeof(solution), HASHT);
-     for (h = 0; h < hsiz; ++h)
-	  sol[h] = ego->solutions[h];
+     {
+	  uint h, hsiz = ego->hashsiz;
+	  sol = (solution *)fftw_malloc(hsiz * sizeof(solution), HASHT);
+	  for (h = 0; h < hsiz; ++h)
+	       sol[h] = ego->solutions[h];
+     }
 
      while (1) {
 	  if (sc->scan(sc, ")"))
