@@ -21,32 +21,9 @@
 #include "api.h"
 #include "rdft.h"
 
-rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind);
-
-#define N0(nembed)((nembed) ? (nembed) : n)
-
-X(plan) X(plan_many_r2r)(int rank, const int *n,
-			 int howmany,
-			 R *in, const int *inembed,
-			 int istride, int idist,
-			 R *out, const int *onembed,
-			 int ostride, int odist,
-			 const X(r2r_kind) * kind, unsigned flags)
-{
-     X(plan) p;
-     rdft_kind *k;
-
-     if (!X(many_kosherp)(rank, n, howmany)) return 0;
-
-     k = X(map_r2r_kind)(rank, kind);
-     p = X(mkapiplan)(
-	  0, flags,
-	  X(mkproblem_rdft_d)(X(mktensor_rowmajor)(rank, n, 
-						   N0(inembed), N0(onembed),
-						   istride, ostride),
-			      X(mktensor_1d)(howmany, idist, odist),
-			      TAINT_UNALIGNED(in, flags), 
-			      TAINT_UNALIGNED(out, flags), k));
-     X(ifree0)(k);
-     return p;
-}
+/* guru interface: requires care in alignment, r - i, etcetera. */
+void X(execute_split_dft_r2c)(const X(plan) p, R *in, R *ro, R *io)
+WITH_ALIGNED_STACK({
+     plan_rdft2 *pln = (plan_rdft2 *) p->pln;
+     pln->apply((plan *) pln, in, ro, io);
+})

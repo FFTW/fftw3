@@ -131,18 +131,41 @@ void F77(plan_guru_dft, PLAN_GURU_DFT)(X(plan) *p, int *rank, const int *n,
 				       const int *is, const int *os,
 				       int *howmany_rank, const int *h_n,
 				       const int *h_is, const int *h_os,
-				       R *ri, R *ii, R *ro, R *io, int *flags)
+				       C *in, C *out, int *sign, int *flags)
 {
      X(iodim) *dims = make_dims(*rank, n, is, os);
      X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
      *p = X(plan_guru_dft)(*rank, dims, *howmany_rank, howmany_dims,
+			   in, out, *sign, *flags);
+     X(ifree0)(howmany_dims);
+     X(ifree0)(dims);
+}
+
+void F77(plan_guru_split_dft, PLAN_GURU_SPLIT_DFT)(X(plan) *p, int *rank, const int *n,
+				       const int *is, const int *os,
+				       int *howmany_rank, const int *h_n,
+				       const int *h_is, const int *h_os,
+				       R *ri, R *ii, R *ro, R *io, int *flags)
+{
+     X(iodim) *dims = make_dims(*rank, n, is, os);
+     X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
+     *p = X(plan_guru_split_dft)(*rank, dims, *howmany_rank, howmany_dims,
 			   ri, ii, ro, io, *flags);
      X(ifree0)(howmany_dims);
      X(ifree0)(dims);
 }
 
-void F77(execute_dft, EXECUTE_DFT)(X(plan) * const p,
-				   R *ri, R *ii, R *ro, R *io)
+void F77(execute_dft, EXECUTE_DFT)(X(plan) * const p, C *in, C *out)
+WITH_ALIGNED_STACK({
+     plan_dft *pln = (plan_dft *) (*p)->pln;
+     if ((*p)->sign == FFT_SIGN)
+          pln->apply((plan *) pln, in[0], in[0]+1, out[0], out[0]+1);
+     else
+          pln->apply((plan *) pln, in[0]+1, in[0], out[0]+1, out[0]);
+})
+
+void F77(execute_split_dft, EXECUTE_SPLIT_DFT)(X(plan) * const p,
+					       R *ri, R *ii, R *ro, R *io)
 WITH_ALIGNED_STACK({
      plan_dft *pln = (plan_dft *) (*p)->pln;
      pln->apply((plan *) pln, ri, ii, ro, io);
@@ -202,18 +225,39 @@ void F77(plan_guru_dft_r2c, PLAN_GURU_DFT_R2C)(
      const int *is, const int *os,
      int *howmany_rank, const int *h_n,
      const int *h_is, const int *h_os,
-     R *in, R *ro, R *io, int *flags)
+     R *in, C *out, int *flags)
 {
      X(iodim) *dims = make_dims(*rank, n, is, os);
      X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
      *p = X(plan_guru_dft_r2c)(*rank, dims, *howmany_rank, howmany_dims,
+			       in, out, *flags);
+     X(ifree0)(howmany_dims);
+     X(ifree0)(dims);
+}
+
+void F77(plan_guru_split_dft_r2c, PLAN_GURU_SPLIT_DFT_R2C)(
+     X(plan) *p, int *rank, const int *n,
+     const int *is, const int *os,
+     int *howmany_rank, const int *h_n,
+     const int *h_is, const int *h_os,
+     R *in, R *ro, R *io, int *flags)
+{
+     X(iodim) *dims = make_dims(*rank, n, is, os);
+     X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
+     *p = X(plan_guru_split_dft_r2c)(*rank, dims, *howmany_rank, howmany_dims,
 			       in, ro, io, *flags);
      X(ifree0)(howmany_dims);
      X(ifree0)(dims);
 }
 
-void F77(execute_dft_r2c, EXECUTE_DFT_R2C)(X(plan) * const p,
-					   R *in, R *ro, R *io)
+void F77(execute_dft_r2c, EXECUTE_DFT_R2C)(X(plan) * const p, R *in, C *out)
+WITH_ALIGNED_STACK({
+     plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
+     pln->apply((plan *) pln, in, out[0], out[0]+1);
+})
+
+void F77(execute_split_dft_r2c, EXECUTE_SPLIT_DFT_R2C)(X(plan) * const p,
+						       R *in, R *ro, R *io)
 WITH_ALIGNED_STACK({
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
      pln->apply((plan *) pln, in, ro, io);
@@ -273,17 +317,38 @@ void F77(plan_guru_dft_c2r, PLAN_GURU_DFT_C2R)(
      const int *is, const int *os,
      int *howmany_rank, const int *h_n,
      const int *h_is, const int *h_os,
-     R *ri, R *ii, R *out, int *flags)
+     C *in, R *out, int *flags)
 {
      X(iodim) *dims = make_dims(*rank, n, is, os);
      X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
      *p = X(plan_guru_dft_c2r)(*rank, dims, *howmany_rank, howmany_dims,
+			       in, out, *flags);
+     X(ifree0)(howmany_dims);
+     X(ifree0)(dims);
+}
+
+void F77(plan_guru_split_dft_c2r, PLAN_GURU_SPLIT_DFT_C2R)(
+     X(plan) *p, int *rank, const int *n,
+     const int *is, const int *os,
+     int *howmany_rank, const int *h_n,
+     const int *h_is, const int *h_os,
+     R *ri, R *ii, R *out, int *flags)
+{
+     X(iodim) *dims = make_dims(*rank, n, is, os);
+     X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
+     *p = X(plan_guru_split_dft_c2r)(*rank, dims, *howmany_rank, howmany_dims,
 			       ri, ii, out, *flags);
      X(ifree0)(howmany_dims);
      X(ifree0)(dims);
 }
 
-void F77(execute_dft_c2r, EXECUTE_DFT_C2R)(X(plan) * const p,
+void F77(execute_dft_c2r, EXECUTE_DFT_C2R)(X(plan) * const p, C *in, R *out)
+WITH_ALIGNED_STACK({
+     plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
+     pln->apply((plan *) pln, out, in[0], in[0]+1);
+})
+
+void F77(execute_split_dft_c2r, EXECUTE_SPLIT_DFT_C2R)(X(plan) * const p,
 					   R *ri, R *ii, R *out)
 WITH_ALIGNED_STACK({
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;

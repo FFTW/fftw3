@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.58 2003-04-05 00:30:37 athena Exp $ */
+/* $Id: fftw3.h,v 1.59 2003-04-05 01:58:20 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -99,10 +99,16 @@ X(plan) X(plan_many_dft)(int rank, const int *n,			\
 X(plan) X(plan_guru_dft)(int rank, const X(iodim) *dims,		\
 			 int howmany_rank,				\
 			 const X(iodim) *howmany_dims,			\
+			 C *in, C *out,					\
+			 int sign, unsigned flags);			\
+X(plan) X(plan_guru_split_dft)(int rank, const X(iodim) *dims,		\
+			 int howmany_rank,				\
+			 const X(iodim) *howmany_dims,			\
 			 R *ri, R *ii, R *ro, R *io,			\
 			 unsigned flags);				\
 									\
-void X(execute_dft)(const X(plan) p, R *ri, R *ii, R *ro, R *io);	\
+void X(execute_dft)(const X(plan) p, C *in, C *out);			\
+void X(execute_split_dft)(const X(plan) p, R *ri, R *ii, R *ro, R *io);	\
 									\
 X(plan) X(plan_many_dft_r2c)(int rank, const int *n,			\
                              int howmany,				\
@@ -144,16 +150,30 @@ X(plan) X(plan_dft_c2r_3d)(int nx, int ny,				\
 X(plan) X(plan_guru_dft_r2c)(int rank, const X(iodim) *dims,		\
 			     int howmany_rank,				\
 			     const X(iodim) *howmany_dims,		\
-			     R *in, R *ro, R *io,			\
+			     R *in, C *out,				\
 			     unsigned flags);				\
 X(plan) X(plan_guru_dft_c2r)(int rank, const X(iodim) *dims,		\
+			     int howmany_rank,				\
+			     const X(iodim) *howmany_dims,		\
+			     C *in, R *out,				\
+			     unsigned flags);				\
+									\
+X(plan) X(plan_guru_split_dft_r2c)(int rank, const X(iodim) *dims,	\
+			     int howmany_rank,				\
+			     const X(iodim) *howmany_dims,		\
+			     R *in, R *ro, R *io,			\
+			     unsigned flags);				\
+X(plan) X(plan_guru_split_dft_c2r)(int rank, const X(iodim) *dims,	\
 			     int howmany_rank,				\
 			     const X(iodim) *howmany_dims,		\
 			     R *ri, R *ii, R *out,			\
 			     unsigned flags);				\
 									\
-void X(execute_dft_r2c)(const X(plan) p, R *in, R *ro, R *io);		\
-void X(execute_dft_c2r)(const X(plan) p, R *ri, R *ii, R *out);		\
+void X(execute_dft_r2c)(const X(plan) p, R *in, C *out);		\
+void X(execute_dft_c2r)(const X(plan) p, C *in, R *out);		\
+									\
+void X(execute_split_dft_r2c)(const X(plan) p, R *in, R *ro, R *io);	\
+void X(execute_split_dft_c2r)(const X(plan) p, R *ri, R *ii, R *out);	\
 									\
 X(plan) X(plan_many_r2r)(int rank, const int *n,			\
                          int howmany,					\

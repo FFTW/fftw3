@@ -36,9 +36,10 @@ X(plan) X(plan_guru_r2r)(int rank, const X(iodim) *dims,
 
      k = X(map_r2r_kind)(rank, kind);
      p = X(mkapiplan)(
-	  flags,
-	  X(mkproblem_rdft_d)(X(mktensor_iodims)(rank, dims),
-			      X(mktensor_iodims)(howmany_rank, howmany_dims), 
+	  0, flags,
+	  X(mkproblem_rdft_d)(X(mktensor_iodims)(rank, dims, 1, 1),
+			      X(mktensor_iodims)(howmany_rank, howmany_dims,
+						 1, 1), 
 			      TAINT_UNALIGNED(in, flags),
 			      TAINT_UNALIGNED(out, flags), k));
      X(ifree0)(k);

@@ -38,7 +38,7 @@ X(plan) X(plan_many_dft)(int rank, const int *n,
      X(extract_reim)(sign, out, &ro, &io);
 
      return 
-	  X(mkapiplan)(flags,
+	  X(mkapiplan)(sign, flags,
 		       X(mkproblem_dft_d)(
 			    X(mktensor_rowmajor)(rank, n, 
 						 N0(inembed), N0(onembed),

@@ -41,7 +41,7 @@ X(plan) X(plan_many_dft_c2r)(int rank, const int *n,
      if (!inplace)
 	  flags |= FFTW_DESTROY_INPUT;
      p = X(mkapiplan)(
-	  flags,
+	  0, flags,
 	  X(mkproblem_rdft2_d)(
 	       X(mktensor_rowmajor)(
 		    rank, n, 

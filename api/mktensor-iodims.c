@@ -20,7 +20,7 @@
 
 #include "api.h"
 
-tensor *X(mktensor_iodims)(int rank, const X(iodim) *dims)
+tensor *X(mktensor_iodims)(int rank, const X(iodim) *dims, int is, int os)
 {
      int i;
      tensor *x = X(mktensor)(rank);
@@ -28,8 +28,8 @@ tensor *X(mktensor_iodims)(int rank, const X(iodim) *dims)
      if (FINITE_RNK(rank)) {
           for (i = 0; i < rank; ++i) {
                x->dims[i].n = dims[i].n;
-               x->dims[i].is = dims[i].is;
-               x->dims[i].os = dims[i].os;
+               x->dims[i].is = dims[i].is * is;
+               x->dims[i].os = dims[i].os * os;
           }
      }
      return x;

@@ -21,32 +21,20 @@
 #include "api.h"
 #include "rdft.h"
 
-rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind);
-
-#define N0(nembed)((nembed) ? (nembed) : n)
-
-X(plan) X(plan_many_r2r)(int rank, const int *n,
-			 int howmany,
-			 R *in, const int *inembed,
-			 int istride, int idist,
-			 R *out, const int *onembed,
-			 int ostride, int odist,
-			 const X(r2r_kind) * kind, unsigned flags)
+X(plan) X(plan_guru_split_dft_c2r)(int rank, const X(iodim) *dims,
+			     int howmany_rank, const X(iodim) *howmany_dims,
+			     R *ri, R *ii, R *out, unsigned flags)
 {
-     X(plan) p;
-     rdft_kind *k;
+     if (!X(guru_kosherp)(rank, dims, howmany_rank, howmany_dims)) return 0;
 
-     if (!X(many_kosherp)(rank, n, howmany)) return 0;
-
-     k = X(map_r2r_kind)(rank, kind);
-     p = X(mkapiplan)(
-	  0, flags,
-	  X(mkproblem_rdft_d)(X(mktensor_rowmajor)(rank, n, 
-						   N0(inembed), N0(onembed),
-						   istride, ostride),
-			      X(mktensor_1d)(howmany, idist, odist),
-			      TAINT_UNALIGNED(in, flags), 
-			      TAINT_UNALIGNED(out, flags), k));
-     X(ifree0)(k);
-     return p;
+     if (out != ri)
+	  flags |= FFTW_DESTROY_INPUT;
+     return X(mkapiplan)(
+	  0, flags, 
+	  X(mkproblem_rdft2_d)(X(mktensor_iodims)(rank, dims, 1, 1),
+			       X(mktensor_iodims)(howmany_rank, howmany_dims,
+						  1, 1),
+			       TAINT_UNALIGNED(out, flags),
+			       TAINT_UNALIGNED(ri, flags),
+			       TAINT_UNALIGNED(ii, flags), HC2R));
 }

@@ -23,14 +23,20 @@
 
 X(plan) X(plan_guru_dft)(int rank, const X(iodim) *dims,
 			 int howmany_rank, const X(iodim) *howmany_dims,
-			 R *ri, R *ii, R *ro, R *io, unsigned flags)
+			 C *in, C *out, int sign, unsigned flags)
 {
+     R *ri, *ii, *ro, *io;
+
      if (!X(guru_kosherp)(rank, dims, howmany_rank, howmany_dims)) return 0;
 
+     X(extract_reim)(sign, in, &ri, &ii);
+     X(extract_reim)(sign, out, &ro, &io);
+
      return X(mkapiplan)(
-	  flags,
-	  X(mkproblem_dft_d)(X(mktensor_iodims)(rank, dims),
-			     X(mktensor_iodims)(howmany_rank, howmany_dims),
+	  sign, flags,
+	  X(mkproblem_dft_d)(X(mktensor_iodims)(rank, dims, 2, 2),
+			     X(mktensor_iodims)(howmany_rank, howmany_dims,
+						2, 2),
 			     TAINT_UNALIGNED(ri, flags),
 			     TAINT_UNALIGNED(ii, flags), 
 			     TAINT_UNALIGNED(ro, flags),

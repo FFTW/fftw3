@@ -17,7 +17,9 @@ plan-dft-r2c-1d.c plan-dft-r2c-2d.c plan-dft-r2c-3d.c			\
 plan-guru-dft-c2r.c plan-guru-dft-r2c.c map-r2r-kind.c plan-many-r2r.c	\
 plan-r2r-1d.c plan-r2r-2d.c plan-r2r-3d.c plan-r2r.c plan-guru-r2r.c	\
 print-plan.c the-planner.c rdft2-pad.c version.c api.h fftw3.h		\
-f77api.c f77funcs.h x77.h
+execute-split-dft-c2r.c execute-split-dft-r2c.c execute-split-dft.c	\
+plan-guru-split-dft-c2r.c plan-guru-split-dft-r2c.c			\
+plan-guru-split-dft.c f77api.c f77funcs.h x77.h
 
 BUILT_SOURCES = fftw3.f
 

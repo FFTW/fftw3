@@ -23,16 +23,21 @@
 
 X(plan) X(plan_guru_dft_c2r)(int rank, const X(iodim) *dims,
 			     int howmany_rank, const X(iodim) *howmany_dims,
-			     R *ri, R *ii, R *out, unsigned flags)
+			     C *in, R *out, unsigned flags)
 {
+     R *ri, *ii;
+
      if (!X(guru_kosherp)(rank, dims, howmany_rank, howmany_dims)) return 0;
+
+     X(extract_reim)(FFT_SIGN, in, &ri, &ii);
 
      if (out != ri)
 	  flags |= FFTW_DESTROY_INPUT;
      return X(mkapiplan)(
-	  flags, 
-	  X(mkproblem_rdft2_d)(X(mktensor_iodims)(rank, dims),
-			       X(mktensor_iodims)(howmany_rank, howmany_dims),
+	  0, flags, 
+	  X(mkproblem_rdft2_d)(X(mktensor_iodims)(rank, dims, 2, 1),
+			       X(mktensor_iodims)(howmany_rank, howmany_dims,
+						  2, 1),
 			       TAINT_UNALIGNED(out, flags),
 			       TAINT_UNALIGNED(ri, flags),
 			       TAINT_UNALIGNED(ii, flags), HC2R));

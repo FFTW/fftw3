@@ -32,6 +32,7 @@
 struct X(plan_s) {
      plan *pln;
      problem *prb;
+     int sign;
 };
 
 /* shorthand */
@@ -48,7 +49,7 @@ tensor *X(mktensor_rowmajor)(int rnk, const int *n,
 			     const int *niphys, const int *nophys,
 			     int is, int os);
 
-tensor *X(mktensor_iodims)(int rank, const X(iodim) *dims);
+tensor *X(mktensor_iodims)(int rank, const X(iodim) *dims, int is, int os);
 const int *X(rdft2_pad)(int rnk, const int *n, const int *nembed,
 			int inplace, int cmplx, int **nfree);
 
@@ -64,6 +65,6 @@ void X(configure_planner)(planner *plnr);
 
 void X(mapflags)(planner *, unsigned);
 
-apiplan *X(mkapiplan)(unsigned flags, problem *prb);
+apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb);
 
 #endif				/* __API_H__ */

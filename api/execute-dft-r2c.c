@@ -22,8 +22,8 @@
 #include "rdft.h"
 
 /* guru interface: requires care in alignment, r - i, etcetera. */
-void X(execute_dft_r2c)(const X(plan) p, R *in, R *ro, R *io)
+void X(execute_dft_r2c)(const X(plan) p, R *in, C *out)
 WITH_ALIGNED_STACK({
      plan_rdft2 *pln = (plan_rdft2 *) p->pln;
-     pln->apply((plan *) pln, in, ro, io);
+     pln->apply((plan *) pln, in, out[0], out[0]+1);
 })

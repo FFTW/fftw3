@@ -20,7 +20,7 @@
 
 #include "api.h"
 
-static apiplan *mkapiplan0(unsigned flags, problem *prb)
+static apiplan *mkapiplan0(int sign, unsigned flags, problem *prb)
 {
      plan *pln, *pln0;
      apiplan *p = 0;
@@ -40,6 +40,7 @@ static apiplan *mkapiplan0(unsigned flags, problem *prb)
 	  p = (apiplan *) MALLOC(sizeof(apiplan), PLANS);
 	  p->pln = pln;
 	  p->prb = prb;
+	  p->sign = sign; /* cache for execute_dft */
 	  
 	  /* blessing protocol */
 	  plnr->planner_flags |= BLESSING;
@@ -56,9 +57,9 @@ static apiplan *mkapiplan0(unsigned flags, problem *prb)
      return p;
 }
 
-apiplan *X(mkapiplan)(unsigned flags, problem *prb)
+apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 WITH_ALIGNED_STACK({
-     return mkapiplan0(flags, prb);
+     return mkapiplan0(sign, flags, prb);
 })
 
 void X(destroy_plan)(X(plan) p)

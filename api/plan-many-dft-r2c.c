@@ -39,7 +39,7 @@ X(plan) X(plan_many_dft_r2c)(int rank, const int *n,
      inplace = in == ro;
 
      p = X(mkapiplan)(
-	  flags, 
+	  0, flags, 
 	  X(mkproblem_rdft2_d)(
 	       X(mktensor_rowmajor)(
 		    rank, n,
