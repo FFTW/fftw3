@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.43 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: planner.c,v 1.44 2002-08-30 16:09:48 athena Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -175,6 +175,17 @@ static void rehash(planner *ego)
           X(free)(osol);
 }
 
+static void record_plan(solutions *l, plan *pln)
+{
+     l->pln = pln;
+     if (pln) {
+          X(plan_use)(pln);
+	  l->blessed = pln->blessed;
+     }
+     else
+	  l->blessed = 0;
+}
+
 static solutions *insert(planner *ego, int flags, uint nthr,
 			 problem *p, plan *pln, slvpair *sp)
 {
@@ -184,18 +195,12 @@ static solutions *insert(planner *ego, int flags, uint nthr,
      if (ego->cnt > ego->hashsiz)
           rehash(ego);
 
-     if (pln) {
-          X(plan_use)(pln);
-	  l->blessed = pln->blessed;
-     }
-     else
-	  l->blessed = 0;
+
      l->flags = flags;
      l->nthr = nthr;
-     l->pln = pln;
      l->sp = sp; 
      l->p = X(problem_dup)(p);
-
+     record_plan(l, pln);
      really_insert(ego, l);
      return l;
 }
@@ -215,7 +220,7 @@ static plan *mkplan(planner *ego, problem *p)
 {
      solutions *sol;
      plan *pln;
-     slvpair *sp;
+     slvpair *sp = 0;
 
      if ((sol = lookup(ego, p))) {
           if ((pln = sol->pln))
@@ -224,11 +229,11 @@ static plan *mkplan(planner *ego, problem *p)
 	  if ((sp = sol->sp)) {
 	       /* call solver to create plan */
 	       solver *slv = sp->slv;
-	       pln = sol->pln = ego->adt->slv_mkplan(ego, p, slv);
-	       X(plan_use)(pln);
-
+	       ego->inferior_mkplan(ego, p, &pln, &sp);
 	       A(pln);  /* solver must be applicable or something
 			   is screwed up */
+	       record_plan(sol, pln);
+
 	       goto use_plan_and_return;
 	  }
 
