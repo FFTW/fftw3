@@ -131,9 +131,9 @@ void F77(import_wisdom, IMPORT_WISDOM)(int *isuccess,
      *isuccess = X(import_wisdom)(emitter, (void *) &ed);
 }
 
-void F77(import_system_wisdom, IMPORT_SYSTEM_WISDOM)(void)
+void F77(import_system_wisdom, IMPORT_SYSTEM_WISDOM)(int *isuccess)
 {
-     X(import_system_wisdom)();
+     *isuccess = X(import_system_wisdom)();
 }
 
 void F77(print_plan, PRINT_PLAN)(X(plan) *p)
