@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.45 2005-01-21 19:22:50 stevenj Exp $ */
+/* $Id: cycle.h,v 1.46 2005-01-21 19:42:04 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -294,6 +294,26 @@ static inline ticks getticks(void)
 }
 
 INLINE_ELAPSED(inline)
+
+#define HAVE_TICK_COUNTER
+#endif
+
+/* Microsoft Visual C++ */
+#if defined(_MSC_VER) && defined(_M_IA64) && !defined(HAVE_TICK_COUNTER)
+typedef unsigned __int64 ticks;
+
+#  ifdef __cplusplus
+extern "C"
+#  endif
+ticks __getReg(int whichReg);
+#pragma intrinsic(__getReg)
+
+static __inline ticks getticks(void)
+{
+     volatile ticks temp;
+     temp = __getReg(3116);
+     return temp;
+}
 
 #define HAVE_TICK_COUNTER
 #endif
