@@ -26,7 +26,7 @@
 #define ALIGNMENT 8     /* alignment for LD/ST */
 #define ALIGNMENTA 16   /* alignment for LDA/STA */
 
-#if defined(__GNUC__) && defined(__i386__)
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 typedef R V __attribute__ ((mode(V4SF),aligned(16)));
 
 /* gcc-3.1 seems to generate slower code when we use SSE builtins.

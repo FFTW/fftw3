@@ -26,7 +26,7 @@
 #define ALIGNMENT 16
 #define ALIGNMENTA 16
 
-#if defined(__GNUC__) && defined(__i386__)
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 
 /* horrible hack because gcc does not support sse2 yet */
 typedef float V __attribute__ ((mode(V4SF),aligned(16)));
