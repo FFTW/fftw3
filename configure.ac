@@ -23,6 +23,11 @@ if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_DEBUG_MALLOC,1,[Define to enable debugging malloc.])
 fi
 
+AC_ARG_ENABLE(debug-alignment, [AC_HELP_STRING([--enable-debug-alignment],[enable alignment debugging hacks])], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+	AC_DEFINE(FFTW_DEBUG_ALIGNMENT,1,[Define to enable alignment debugging hacks.])
+fi
+
 AC_ARG_ENABLE(single, [AC_HELP_STRING([--enable-single],[compile fftw in single precision])], ok=$enableval, ok=no)
 AC_ARG_ENABLE(float, [AC_HELP_STRING([--enable-float],[synonym for --enable-single])], ok=$enableval)
 if test "$ok" = "yes"; then

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: aligned-main.c,v 1.5 2003-04-02 02:11:31 athena Exp $ */
+/* $Id: aligned-main.c,v 1.6 2003-04-04 21:48:32 stevenj Exp $ */
 
 #include "bench.h"
 
@@ -50,6 +50,12 @@ int aligned_main(int argc, char *argv[])
 	   * Now align the stack pointer
 	   */
 	  __asm__ __volatile__ ("andl $-16, %esp");
+
+#  ifdef FFTW_DEBUG_ALIGNMENT
+	  /* pessimally align the stack, in order to check whether the
+	     stack re-alignment hacks in FFTW3 work */
+	  __asm__ __volatile__ ("addl $-4, %esp");
+#  endif
      }
 #endif
 
