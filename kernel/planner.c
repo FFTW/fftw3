@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.34 2002-08-01 18:56:02 stevenj Exp $ */
+/* $Id: planner.c,v 1.35 2002-08-01 20:01:15 stevenj Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -240,14 +240,16 @@ static void htab_destroy(planner *ego)
      X(free)(ego->sols);
 }
 
+/* FIXME: what sort of version information should we write? */
+#define WISDOM_PREAMBLE "fftw-wisdom " PACKAGE "-" VERSION " "
+
 /* tantus labor non sit cassus */
 static void exprt(planner *ego, printer *p)
 {
      solutions *s;
      uint h;
 
-     /* FIXME: what sort of version information should we write? */
-     p->print(p, "(fftw-wisdom " PACKAGE_VERSION " ");
+     p->print(p, "(" WISDOM_PREAMBLE);
      for (h = 0; h < ego->hashsiz; ++h) 
 	  for (s = ego->sols[h]; s; s = s->cdr)
 	       /* qui salvandos salvas gratis
@@ -274,7 +276,7 @@ static int imprt(planner *ego, scanner *sc)
      });
      for (i = 0; i + 1 < ego->idcnt; ++i) { A(slvrs[i]); }
 
-     if (!sc->scan(sc, "(fftw-wisdom " PACKAGE_VERSION " "))
+     if (!sc->scan(sc, "(" WISDOM_PREAMBLE))
 	  goto done;
 
      while (1) {
