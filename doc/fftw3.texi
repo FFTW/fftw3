@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.168 2003-03-25 17:30:56 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.169 2003-03-25 17:31:49 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4583,8 +4583,8 @@ sizes.
 We do not expect casual users to employ the generator, which is a rather
 sophisticated program that generates directed acyclic graphs of FFT
 algorithms and performs algebraic simplifications on them.  It was
-written in Objective Caml, a dialect of ML.  Objective Caml is available
-at @uref{http://pauillac.inria.fr/ocaml/}.
+written in Objective Caml, a dialect of ML, which is available at
+@uref{http://pauillac.inria.fr/ocaml/}.
 @cindex Caml
 
 If you have Objective Caml installed (along with recent versions of GNU
