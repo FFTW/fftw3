@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.145 2003-03-15 16:40:30 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.146 2003-03-15 16:41:32 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -790,7 +790,7 @@ Then, after an r2c transform, the output is an @ndimshalf array of
 @code{fftw_complex} values in row-major order, corresponding to slightly
 over half of the output of the corresponding complex DFT.  (The division
 is rounded down.)  The ordering of the data is otherwise exactly the
-same as in the complex DFT case.
+same as in the complex-DFT case.
 
 Since the complex data is slightly larger than the real data, some
 complications arise for in-place transforms.  In this case, the final
