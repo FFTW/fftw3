@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.33 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: planner.c,v 1.34 2002-08-01 18:56:02 stevenj Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -246,6 +246,7 @@ static void exprt(planner *ego, printer *p)
      solutions *s;
      uint h;
 
+     /* FIXME: what sort of version information should we write? */
      p->print(p, "(fftw-wisdom " PACKAGE_VERSION " ");
      for (h = 0; h < ego->hashsiz; ++h) 
 	  for (s = ego->sols[h]; s; s = s->cdr)
@@ -260,45 +261,42 @@ static int imprt(planner *ego, scanner *sc)
 {
      slvpair **slvrs;
      problem *p = 0;
-     int ret;
+     int i, ret = 0;
 
      /* need to cache an array of solvers for fast lookup by id */
      slvrs = (slvpair **) fftw_malloc(sizeof(slvpair *) * (ego->idcnt - 1),
 				      OTHER);
-     for (ret = 0; ret + 1 < ego->idcnt; ++ret) slvrs[ret] = 0;
+     for (i = 0; i + 1 < ego->idcnt; ++i) slvrs[i] = 0;
      FORALL_SOLVERS(ego, s, p, {
 	  UNUSED(s);
 	  A(p->id > 0 && p->id < ego->idcnt);
 	  slvrs[p->id - 1] = p;
      });
-     for (ret = 0; ret + 1 < ego->idcnt; ++ret) { A(slvrs[ret]); }
+     for (i = 0; i + 1 < ego->idcnt; ++i) { A(slvrs[i]); }
 
-     if (!(ret = sc->scan(sc, "(fftw-wisdom " PACKAGE_VERSION " "))
-	 || ret == EOF)
+     if (!sc->scan(sc, "(fftw-wisdom " PACKAGE_VERSION " "))
 	  goto done;
 
      while (1) {
 	  solutions *s;
 	  int id;
 
-	  if ((ret = sc->scan(sc, ")")) || ret == EOF)
-	      goto done;
-	  if (!(ret = sc->scan(sc, "(s %d %P)", &id, &p) == 2))
+	  if (sc->scan(sc, ")"))
+	       break;
+	  if (!sc->scan(sc, "(s %d %P)", &id, &p))
 	       goto done;
-	  if (id < 1 || id >= ego->idcnt) {
-	       ret = 0;
+	  if (id < 1 || id >= ego->idcnt)
 	       goto done;
-	  }
 	  s = insert(ego, p, (plan *) 0, slvrs[id - 1]);
 	  s->blessed = 1;
 	  X(problem_destroy)(p); p = 0;
      }
-
+     ret = 1;
  done:
      X(free)(slvrs);
      if (p)
 	  X(problem_destroy)(p);
-     return(!ret || ret == EOF ? 0 : 1);
+     return ret;
 }
 
 static void clear_problem_marks(planner *ego)

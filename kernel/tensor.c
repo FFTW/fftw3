@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.14 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: tensor.c,v 1.15 2002-08-01 18:56:02 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -365,9 +365,9 @@ void X(tensor_print)(tensor x, printer *p)
 
 int X(tensor_scan)(tensor *x, scanner *sc)
 {
-     int ret, r;
-     if (1 > (ret = sc->scan(sc, "(t:%d", &r)) || ret == EOF)
-	  return ret;
+     int r;
+     if (!sc->scan(sc, "(t:%d", &r))
+	  return 0;
      if (r < 0 && r != -1)
 	  return 0;
      talloc(x, r == -1 ? RNK_MINFTY : r);
@@ -375,18 +375,17 @@ int X(tensor_scan)(tensor *x, scanner *sc)
 	  uint i;
 	  for (i = 0; i < x->rnk; ++i) {
 	       iodim *d = x->dims + i;
-	       ret = sc->scan(sc, " (%u %d %d)", &d->n, &d->is, &d->os);
-	       if (ret < 3 || ret == EOF) {
+	       if (!sc->scan(sc, " (%u %d %d)", &d->n, &d->is, &d->os)) {
 		    X(tensor_destroy)(*x);
 		    x->dims = 0;
-		    return(ret == EOF ? EOF : 0);
+		    return 0;
 	       }
 	  }
      }
-     if (!(ret = sc->scan(sc, ")")) || ret == EOF) {
+     if (!sc->scan(sc, ")")) {
 	  X(tensor_destroy)(*x);
 	  x->dims = 0;
-	  return ret;
+	  return 0;
      }
      return 1;
 }

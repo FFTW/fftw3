@@ -154,6 +154,13 @@ void setup(struct problem *p)
 	       X(scanner_destroy)(sc);
 	       fclose(f);
 	  }
+	  {
+               printer *pr = X(mkprinter_file)(stdout);
+	       pr->print(pr, "READ WISDOM: ");
+               plnr->adt->exprt(plnr, pr);
+	       pr->print(pr, "\n");
+               X(printer_destroy)(pr);
+          }
      }
 #endif
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.3 2002-08-01 07:14:50 stevenj Exp $ */
+/* $Id: scan.c,v 1.4 2002-08-01 18:56:02 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -67,10 +67,10 @@ static void mygets(scanner *sc, char *s, size_t maxlen)
      UNGETCHR(sc, ch);
 }
 
-static int mygetlong(scanner *sc, long *x)
+static long getlong(scanner *sc, int *ret)
 {
-     int sign = 1;
-     int ch;
+     int sign = 1, ch;
+     long x = 0;     
 
      eat_blanks(sc);
      ch = GETCHR(sc);
@@ -78,54 +78,27 @@ static int mygetlong(scanner *sc, long *x)
 	  sign = ch == '-' ? -1 : 1;
 	  ch = GETCHR(sc);
      }
-     if (!isdigit(ch))
-	  return(ch == EOF ? EOF : 0);
-     *x = ch - '0';
-     while (isdigit(ch = GETCHR(sc)))
-	  *x = *x * 10 + ch - '0';
-     *x = sign * *x;
-     UNGETCHR(sc, ch);
-     return 1;
-}
-
-static int mygetint(scanner *sc, int *x)
-{
-     long xl = 0;
-     int ret;
-     ret = mygetlong(sc, &xl);
-     *x = xl;
-     return ret;
-}
-
-static int mygetuint(scanner *sc, uint *x)
-{
-     long xl = 0;
-     int ret;
-     ret = mygetlong(sc, &xl);
-     if (xl >= 0) {
-	  *x = xl;
-	  return ret;
+     if (!isdigit(ch)) {
+	  *ret = 0;
+	  return x;
      }
-     return 0;
-}
-
-static int mygetptrdiff(scanner *sc, ptrdiff_t *x)
-{
-     long xl = 0;
-     int ret;
-     ret = mygetlong(sc, &xl);
-     *x = xl;
-     return ret;
+     do {
+	  x = x * 10 + ch - '0';
+     } while (isdigit(ch = GETCHR(sc)));
+     x *= sign;
+     UNGETCHR(sc, ch);
+     *ret = 1;
+     return x;
 }
 
 #define BSZ 64
-#define BUF(b, ch) { if (b - buf < BSZ - 1) *b++ = ch; else return 0; }
+#define BUF(b, ch) {if (b - buf < BSZ - 1) *b++ = ch; else {*ret=0; return 0;}}
 
-static int mygetR(scanner *sc, R *x)
+static R mygetR(scanner *sc, int *ret)
 {
      char buf[BSZ], *b = buf;
-     double xd;
-     int ch, ret;
+     double x;
+     int ch;
 
      eat_blanks(sc);
      /* read into buf: [+|-]ddd[.ddd][(e|E)[+|-]ddd] */
@@ -157,20 +130,17 @@ static int mygetR(scanner *sc, R *x)
      }
      UNGETCHR(sc, ch);
      *b = 0; /* terminate */
-     ret = sscanf(buf, "%lf", &xd);
-     *x = xd;
-     return(ret == EOF ? (ch == EOF ? EOF : 0) : ret);
+     *ret = sscanf(buf, "%lf", &x) == 1;
+     return x;
 }
 
 static int getproblem(scanner *sc, problem **p)
 {
      char buf[BSZ];
-     int ret;
 
      *p = (problem *) 0;
 
-     if (!sc->scan(sc, "(%*s", BSZ, buf))
-	  return 0;
+     if (!sc->scan(sc, "(%*s", BSZ, buf)) return 0;
 
      if (!strcmp(buf, "null"))
 	  return sc->scan(sc, ")");
@@ -180,27 +150,24 @@ static int getproblem(scanner *sc, problem **p)
 	       ;
 	  if (!pp)
 	       return 0;
-	  if (!(ret = pp->adt->scan(sc, p)) || ret == EOF)
-	       return ret;
+	  if (!pp->adt->scan(sc, p)) return 0;
      }
      
      return sc->scan(sc, ")");
 }
 
 /* vscan is mostly scanf-like, with our additional format specifiers,
-   but with a few twists.  It returns the number of items successfully
-   scanned, but even if there were no items scanned it returns 1 if
-   it matched all the format characters.  '(' and ')' in the format
-   string match those characters preceded by any whitespace.  Finally,
-   if a character match fails, it will ungetchr() the last character
-   back onto the stream. */
+   but with a few twists.  It returns simply 0 or 1 indicating whether
+   the match was successful. '(' and ')' in the format string match
+   those characters preceded by any whitespace.  Finally, if a
+   character match fails, it will ungetchr() the last character back
+   onto the stream. */
 static int vscan(scanner *sc, const char *format, va_list ap)
 {
      const char *s = format;
      char c;
      int ch = 0;
      int fmt_len;
-     int num_scanned = 0;
 
      while ((c = *s++)) {
 	  fmt_len = 0;
@@ -211,8 +178,7 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 		       case 'c': {
 			    char *x = va_arg(ap, char *);
 			    ch = GETCHR(sc);
-			    if (ch == EOF)
-				 return(num_scanned ? num_scanned : EOF);
+			    if (ch == EOF) return 0;
 			    *x = ch;
 			    break;
 		       }
@@ -223,14 +189,14 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 		       }
 		       case 'd': {
 			    int *x = va_arg(ap, int *);
-			    if (!(ch = mygetint(sc, x)) || ch == EOF)
-				 return(num_scanned ? num_scanned : ch);
+			    *x = (int) getlong(sc, &ch);
+			    if (!ch) return 0;
 			    break;
 		       }
 		       case 'u': {
 			    uint *x = va_arg(ap, uint *);
-			    if (!(ch = mygetuint(sc, x)) || ch == EOF)
-				 return(num_scanned ? num_scanned : ch);
+			    *x = (uint) getlong(sc, &ch);
+			    if (!ch) return 0;
 			    break;
 		       }
 		       case 't': {
@@ -238,14 +204,14 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 			    A(*s == 'd');
 			    s += 1;
 			    x = va_arg(ap, ptrdiff_t *);
-			    if (!(ch = mygetptrdiff(sc, x)) || ch == EOF)
-				 return(num_scanned ? num_scanned : ch);
+			    *x = (ptrdiff_t) getlong(sc, &ch);
+			    if (!ch) return 0;
 			    break;
 		       }
 		       case 'f': case 'e': case 'g': {
 			    R *x = va_arg(ap, R *);
-			    if (!(ch = mygetR(sc, x)) || ch == EOF)
-				 return(num_scanned ? num_scanned : ch);
+			    *x = mygetR(sc, &ch);
+			    if (!ch) return 0;
 			    break;
 		       }
 		       case '(': case ')':
@@ -254,20 +220,19 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 		       case 'P': {
 			    /* scan problem */
 			    problem **x = va_arg(ap, problem **);
-			    if (!(ch = getproblem(sc, x)) || ch == EOF) {
+			    if (!getproblem(sc, x)) {
 				 if (*x) {
 				      X(problem_destroy)(*x);
 				      *x = 0;
 				 }
-				 return(num_scanned ? num_scanned : ch);
+				 return 0;
 			    }
 			    break;
 		       }
 		       case 'T': {
 			    /* scan tensor */
 			    tensor *x = va_arg(ap, tensor *);
-			    if (!(ch = X(tensor_scan)(x, sc)) || ch == EOF)
-				 return(num_scanned ? num_scanned : ch);
+			    if (!X(tensor_scan)(x, sc)) return 0;
 			    break;
 		       }
 		       case '0': case '1': case '2': case '3': case '4':
@@ -279,26 +244,25 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 			    goto getformat;
 		       }
 		       case '*': {
-			    fmt_len = va_arg(ap, int);
+			    if ((fmt_len = va_arg(ap, int)) <= 0) return 0;
 			    goto getformat;
 		       }
 		       default:
 			    A(0 /* unknown format */);
 			    break;
 		   }
-		   ++num_scanned;
 		   break;
 	      default:
 		   if (isspace(c) || c == '(' || c == ')')
 			eat_blanks(sc);
 		   if (!isspace(c) && (ch = GETCHR(sc)) != c) {
 			UNGETCHR(sc, ch);
-			return((num_scanned || ch != EOF) ? num_scanned : EOF);
+			return 0;
 		   }
 		   break;
           }
      }
-     return(num_scanned ? num_scanned : 1);
+     return 1;
 }
 
 static int scan(scanner *sc, const char *format, ...)

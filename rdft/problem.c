@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.11 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: problem.c,v 1.12 2002-08-01 18:56:02 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -119,14 +119,12 @@ static int scan(scanner *sc, problem **p)
      ptrdiff_t offio;
      int kind;
      R *I;
-     int ret;
-
-     ret = sc->scan(sc, "%u %td %d %T %T",
-		    &align, &offio, &kind, &sz, &vecsz);
-     if (ret == EOF || ret < 5) {
+     
+     if (!sc->scan(sc, "%u %td %d %T %T",
+		   &align, &offio, &kind, &sz, &vecsz)) {
 	  X(tensor_destroy)(sz);
 	  X(tensor_destroy)(vecsz);
-	  return(ret == EOF ? EOF : 0);
+	  return 0;
      }
      I = (R *) ((char *) 0 + align);
      *p = X(mkproblem_rdft_d)(sz, vecsz, I, I + offio, kind);

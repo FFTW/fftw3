@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.14 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: problem.c,v 1.15 2002-08-01 18:56:02 stevenj Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -114,14 +114,12 @@ static int scan(scanner *sc, problem **p)
      uint align;
      ptrdiff_t offio, offi, offo;
      R *ri, *ro;
-     int ret;
 
-     ret = sc->scan(sc, "%u %td %td %td %T %T",
-		    &align, &offio, &offi, &offo, &sz, &vecsz);
-     if (ret == EOF || ret < 6) {
+     if (!sc->scan(sc, "%u %td %td %td %T %T",
+		   &align, &offio, &offi, &offo, &sz, &vecsz)) {
 	  X(tensor_destroy)(sz);
 	  X(tensor_destroy)(vecsz);
-	  return(ret == EOF ? EOF : 0);
+	  return 0;
      }
      ri = (R *) ((char *) 0 + align);
      ro = ri + offio;
