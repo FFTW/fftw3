@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.2 2002-09-16 23:04:41 athena Exp $ */
+/* $Id: verify-reodft.c,v 1.3 2002-09-18 23:31:05 stevenj Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -235,7 +235,7 @@ static void dofft(info *n, R *in, R *out)
      cpyr(n->p->O, n->totalsz, out, n->pckdsz);
 }
 
-static double acmp(info *nfo, R *a, R *b, uint n, const char *test, double tol)
+static double acmp(R *a, R *b, uint n, const char *test, double tol)
 {
      double d = aerror(a, b, n, tol);
      if (d > tol) {
@@ -286,7 +286,7 @@ static void linear(uint n, info *nfo, R *inA, R *inB, R *inC, R *outA,
 	  aadd(inC, inA, inB, n);
 	  dofft(nfo, inC, outC);
 
-	  acmp(nfo, outC, tmp, n, "linear", tol);
+	  acmp(outC, tmp, n, "linear", tol);
      }
 
 }
@@ -314,7 +314,7 @@ static void impulse(uint n0, int i0, int k0, trigfun t, R impulse_amp,
 	  inA[i * n] = 1.0;
 
      dofft(nfo, inA, tmp);
-     acmp(nfo, tmp, outA, N, "impulse 1", tol);
+     acmp(tmp, outA, N, "impulse 1", tol);
 
      for (j = 0; j < rounds; ++j) {
           arand(inB, N);
@@ -322,7 +322,7 @@ static void impulse(uint n0, int i0, int k0, trigfun t, R impulse_amp,
           dofft(nfo, inB, outB);
           dofft(nfo, inC, outC);
           aadd(tmp, outB, outC, N);
-          acmp(nfo, tmp, outA, N, "impulse", tol);
+          acmp(tmp, outA, N, "impulse", tol);
      }
 }
 
@@ -366,7 +366,7 @@ static void tf_shift(uint n, uint vecn, info *nfo,
 		    for (i = 0; i < vecn; ++i) 
 			 aphase_shift(tmp + i * n, outA + i * n, ncur, 
 				      nb, na, n0, k0, t);
-		    acmp(nfo, tmp, outB, N, "time shift", tol);
+		    acmp(tmp, outB, N, "time shift", tol);
 	       } else {
 		    for (i = 0; i < vecn; ++i) {
 			 aphase_shift(inB + i * n, inA + i * n, ncur,
@@ -377,7 +377,7 @@ static void tf_shift(uint n, uint vecn, info *nfo,
 		    for (i = 0; i < vecn; ++i) 
 			 arolr(tmp + i * n, outA + i*n, ncur, nb,na,
 			       isL0, isL1, isR0, isR1);
-		    acmp(nfo, tmp, outB, N, "freq shift", tol);
+		    acmp(tmp, outB, N, "freq shift", tol);
 	       }
 	  }
 

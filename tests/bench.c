@@ -113,6 +113,8 @@ void copy_c2r(struct problem *p, bench_complex *in)
 
 static void hook(plan *pln, const fftw_problem *p_, int optimalp)
 {
+     UNUSED(optimalp);
+
      if (verbose > 5) {
 	  printer *pr = FFTW(mkprinter_file) (stdout);
 	  pr->print(pr, "%P:%(%p%)\n", p_, pln);
