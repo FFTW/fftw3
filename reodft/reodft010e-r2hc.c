@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.29 2003-11-21 03:00:53 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.30 2004-01-07 19:16:16 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -75,7 +75,7 @@ typedef struct {
    algorithm is also described in:
 
       John Makhoul, "A fast cosine transform in one and two dimensions,"
-      IEEE Trans. on Acoust. Speech and Sig. Proc., ASSP-28 (1), 27--34.
+      IEEE Trans. on Acoust. Speech and Sig. Proc., ASSP-28 (1), 27--34 (1980).
 
    Note that Numerical Recipes suggests a different algorithm that
    requires more operations and uses trig. functions for both the pre-
