@@ -33,3 +33,13 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	api/libapi.la
 
 libfftw3@PREC_SUFFIX@_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
+
+WISDOM_DIR = /etc/fftw
+WISDOM = wisdom@PREC_SUFFIX@
+
+wisdom:
+	tools/fftw@PREC_SUFFIX@-wisdom --verbose --canonical -o $@
+
+install-wisdom: wisdom
+	$(mkinstalldirs) $(WISDOM_DIR)
+	$(INSTALL_DATA) wisdom $(WISDOM_DIR)/$(WISDOM)
