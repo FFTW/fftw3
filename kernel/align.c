@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: align.c,v 1.2 2002-08-01 01:47:15 stevenj Exp $ */
+/* $Id: align.c,v 1.3 2002-08-01 03:12:05 stevenj Exp $ */
 
 #include "ifftw.h"
+#include <stddef.h>
 
 #if HAVE_SIMD
 #include "simd.h"
