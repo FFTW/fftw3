@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.118 2002-09-14 03:07:39 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.119 2002-09-14 16:19:13 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -392,7 +392,6 @@ typedef struct slvdesc_s {
      const char *reg_nam;
      uint nam_hash;
      int reg_id;
-     struct slvdesc_s *cdr;
 } slvdesc;
 
 typedef struct solution_s solution; /* opaque */
@@ -415,7 +414,8 @@ enum {
      ESTIMATE = 0x2,
      IMPATIENCE_MASK = IMPATIENT | ESTIMATE,
 
-     BLESSING = 0x4
+     BLESSING = 0x4,  /* save this entry */
+     H_VALID = 0x8    /* valid hastable entry */
 };
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
@@ -435,17 +435,20 @@ struct planner_s {
      void (*hook)(plan *pln, const problem *p, int optimalp);
      void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvdesc **);
 
+     /* solver descriptors */
+     slvdesc *slvdescs;
+     uint nslvdesc, slvdescsiz;
      const char *cur_reg_nam;
      int cur_reg_id;
 
-     slvdesc *solvers;
-     solution *sols;
+     /* hash table of solutions */
+     solution *solutions;
      uint hashsiz, nelem;
 
+     uint nthr;
      uint problem_flags;
      unsigned short planner_flags; /* matches type of solution.flags in
 				      planner.c */
-     uint nthr;
 
      /* various statistics */
      uint nplan;    /* number of plans evaluated */
@@ -481,13 +484,14 @@ void X(planner_dump)(planner *ego, int verbose);
   pages = "18--25"
   }
 */
-#define FORALL_SOLVERS(ego, s, p, what)		\
-{						\
-     slvdesc *p;				\
-     for (p = ego->solvers; p; p = p->cdr) {	\
-	  solver *s = p->slv;			\
-	  what;					\
-     }						\
+#define FORALL_SOLVERS(ego, s, p, what)			\
+{							\
+     uint _cnt;						\
+     for (_cnt = 0; _cnt < ego->nslvdesc; ++_cnt) {	\
+	  slvdesc *p = ego->slvdescs + _cnt;		\
+	  solver *s = p->slv;				\
+	  what;						\
+     }							\
 }
 
 /* various planners */

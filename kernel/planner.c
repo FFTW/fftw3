@@ -18,12 +18,13 @@
  *
  */
 
-/* $Id: planner.c,v 1.83 2002-09-14 01:54:50 athena Exp $ */
+/* $Id: planner.c,v 1.84 2002-09-14 16:19:13 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
 #define BLESSEDP(solution) ((solution)->flags & BLESSING)
+#define VALIDP(solution) ((solution)->flags & H_VALID)
 
 #define MAXNAM 64  /* maximum length of registrar's name.
 		      Used for reading wisdom.  There is no point
@@ -41,34 +42,51 @@ static uint hash_regnam(const char *s)
      return h;
 }
 
+static void sgrow(planner *ego)
+{
+     uint osiz = ego->slvdescsiz, nsiz = 1 + osiz + osiz / 4;
+     slvdesc *ntab = (slvdesc *)fftw_malloc(nsiz * sizeof(slvdesc), SLVDESCS);
+     slvdesc *otab = ego->slvdescs;
+     uint i;
+
+     ego->slvdescs = ntab;
+     ego->slvdescsiz = nsiz;
+     for (i = 0; i < osiz; ++i)
+	  ntab[i] = otab[i];
+     if (otab) 
+	  X(free)(otab);
+}
+
 static void register_solver(planner *ego, solver *s)
 {
      slvdesc *n;
      if (s) { /* add s to solver list */
 	  X(solver_use)(s);
-	  n = (slvdesc *) fftw_malloc(sizeof(slvdesc), SLVDESCS);
+
+	  if (ego->nslvdesc >= ego->slvdescsiz)
+	       sgrow(ego);
+
+	  n = ego->slvdescs + ego->nslvdesc++;
+
 	  n->slv = s;
 	  n->reg_nam = ego->cur_reg_nam;
 	  n->reg_id = ego->cur_reg_id++;
-
+	  
 	  A(strlen(n->reg_nam) < MAXNAM);
 	  n->nam_hash = hash_regnam(n->reg_nam);
-
-	  /* cons! onto solvers list */
-	  n->cdr = ego->solvers;
-	  ego->solvers = n;
      }
 }
 
-static slvdesc *slvdesc_lookup(planner *ego, char *nam, int id)
+static short slookup(planner *ego, char *nam, int id)
 {
-     slvdesc *sp;
      uint h = hash_regnam(nam); /* used to avoid strcmp in the common case */
-     for (sp = ego->solvers; sp; sp = sp->cdr)
-	  if (sp->reg_id == id && sp->nam_hash == h 
+     FORALL_SOLVERS(ego, s, sp, {
+	  UNUSED(s);
+	  if (sp->reg_id == id && sp->nam_hash == h
 	      && !strcmp(sp->reg_nam, nam))
-	       break;
-     return sp;
+	       return sp - ego->slvdescs;
+     });
+     return -1;
 }
 
 /*
@@ -118,13 +136,9 @@ static void sigcpy(md5uint *a, md5uint *b)
 */
 struct solution_s {
      md5uint s[4];
-     slvdesc *sp;
      unsigned short flags;
-     short state;
+     short slvndx;
 };
-
-/* states: */
-enum { H_EMPTY, H_VALID, H_DELETED };
 
 static solution *hlookup(planner *ego, md5uint *s)
 {
@@ -133,12 +147,12 @@ static solution *hlookup(planner *ego, md5uint *s)
      ++ego->lookup;
 
      for (g = h; ; g = (g + d) % ego->hashsiz) {
-	  solution *l = ego->sols + g;
+	  solution *l = ego->solutions + g;
 	  ++ego->lookup_iter;
-	  switch (l->state) {
-	      case H_EMPTY: return 0;
-	      case H_VALID: 
-		   if (md5eq(s, l->s)) { ++ego->succ_lookup; return l; }
+	  if (VALIDP(l)) {
+	       if (md5eq(s, l->s)) { ++ego->succ_lookup; return l; }
+	  } else {
+	       return 0;
 	  }
 	  A((g + d) % ego->hashsiz != h);
      }
@@ -146,7 +160,7 @@ static solution *hlookup(planner *ego, md5uint *s)
 
 
 static void hinsert0(planner *ego, md5uint *s, unsigned short flags,
-		     slvdesc *sp, solution *l)
+		     short slvndx, solution *l)
 {
      ++ego->insert;
      if (!l) { 	 
@@ -155,45 +169,40 @@ static void hinsert0(planner *ego, md5uint *s, unsigned short flags,
 	  ++ego->insert_unknown;
 	  for (g = h; ; g = (g + d) % ego->hashsiz) {
 	       ++ego->insert_iter;
-	       l = ego->sols + g;
-	       if (l->state != H_VALID) break;
+	       l = ego->solutions + g;
+	       if (!VALIDP(l)) break;
 	       A((g + d) % ego->hashsiz != h);
 	  }
      }
 
      /* fill slot */
-     l->state = H_VALID;
-     l->flags = flags;
-     l->sp = sp;
+     l->flags = flags | H_VALID;
+     l->slvndx = slvndx;
      sigcpy(s, l->s);
 }
 
 static void rehash(planner *ego, uint nsiz)
 {
      uint osiz = ego->hashsiz, h;
-     solution *osol = ego->sols, *nsol;
+     solution *osol = ego->solutions, *nsol;
 
      nsiz = X(next_prime)(nsiz);
      nsol = (solution *)fftw_malloc(nsiz * sizeof(solution), HASHT);
      ++ego->nrehash;
 
      /* init new table */
-     for (h = 0; h < nsiz; ++h) {
-	  solution *l = nsol + h;
-	  l->state = H_EMPTY;
-	  l->flags = 0;  /* redundant initializations */
-	  l->sp = 0;
-     }
+     for (h = 0; h < nsiz; ++h) 
+	  nsol[h].flags = 0;
 
      /* install new table */
      ego->hashsiz = nsiz;
-     ego->sols = nsol;
+     ego->solutions = nsol;
 
      /* copy table */
      for (h = 0; h < osiz; ++h) {
 	  solution *l = osol + h;
-	  if (l->state == H_VALID)
-	       hinsert0(ego, l->s, l->flags, l->sp, 0);
+	  if (VALIDP(l))
+	       hinsert0(ego, l->s, l->flags, l->slvndx, 0);
      }
 
      if (osol)
@@ -210,14 +219,14 @@ static uint nextsz(uint nelem)
      return minsz(minsz(nelem));
 }
 
-static void grow(planner *ego)
+static void hgrow(planner *ego)
 {
      uint nelem = ego->nelem;
      if (minsz(nelem) >= ego->hashsiz)
 	  rehash(ego, nextsz(nelem));
 }
 
-static void shrink(planner *ego)
+static void hshrink(planner *ego)
 {
      uint nelem = ego->nelem;
      /* always rehash after deletions */
@@ -225,7 +234,7 @@ static void shrink(planner *ego)
 }
 
 static void hinsert(planner *ego, md5uint *s, 
-		    unsigned short flags, slvdesc *sp)
+		    unsigned short flags, short slvndx)
 {
      solution *l;
 
@@ -237,9 +246,9 @@ static void hinsert(planner *ego, md5uint *s,
 	  flags |= l->flags & BLESSING; /* ne me perdas illa die */
      } else {
 	  ++ego->nelem;
-	  grow(ego);
+	  hgrow(ego);
      }
-     hinsert0(ego, s, flags, sp, l);
+     hinsert0(ego, s, flags, slvndx, l);
 }
 
 /* maintain dynamic scoping of flags, nthr: */
@@ -268,8 +277,8 @@ static plan *mkplan(planner *ego, problem *p)
      md5hash(&m, p, ego);
 
      if ((sol = hlookup(ego, m.s))) {
-	  sp = sol->sp;
-	  if (!sp) return 0; 	  /* known to be infeasible */
+	  if (sol->slvndx < 0) return 0;   /* known to be infeasible */
+	  sp = ego->slvdescs + sol->slvndx;
 
 	  /* reject wisdom if too impatient */
 	  if (IMPATIENCE(sol->flags) > IMPATIENCE(ego->planner_flags))
@@ -279,7 +288,8 @@ static plan *mkplan(planner *ego, problem *p)
      }
 
      ego->inferior_mkplan(ego, p, &pln, &sp);
-     hinsert(ego, m.s, ego->planner_flags, sp);
+     hinsert(ego, m.s, ego->planner_flags, 
+	     sp ? sp - ego->slvdescs : -1);
 
      if (pln)
 	  ego->hook(pln, p, 1);
@@ -293,26 +303,26 @@ static void forget(planner *ego, amnesia a)
      uint h;
 
      for (h = 0; h < ego->hashsiz; ++h) {
-	  solution *l = ego->sols + h;
-	  if (l->state == H_VALID) {
+	  solution *l = ego->solutions + h;
+	  if (VALIDP(l)) {
 	       if (a == FORGET_EVERYTHING ||
 		   (a == FORGET_ACCURSED && !BLESSEDP(l))) {
 		    /* confutatis maledictis
 		       flammis acribus addictis */
-		    l->state = H_DELETED;
+		    l->flags &= ~H_VALID;
 		    --ego->nelem;
 	       }
 	  }
      }
      /* nil inultum remanebit */
 
-     shrink(ego);
+     hshrink(ego);
 }
 
 static void htab_destroy(planner *ego)
 {
      forget(ego, FORGET_EVERYTHING);
-     X(free)(ego->sols);
+     X(free)(ego->solutions);
      ego->nelem = 0;
 }
 
@@ -326,12 +336,13 @@ static void exprt(planner *ego, printer *p)
 
      p->print(p, "(" WISDOM_PREAMBLE "%(");
      for (h = 0; h < ego->hashsiz; ++h) {
-	  solution *l = ego->sols + h;
-	  if (l->state == H_VALID && BLESSEDP(l) && l->sp) {
+	  solution *l = ego->solutions + h;
+	  if (VALIDP(l) && BLESSEDP(l) && l->slvndx >= 0) {
+	       slvdesc *sp = ego->slvdescs + l->slvndx;
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
 	       p->print(p, "(%s %d #x%x #x%M #x%M #x%M #x%M)\n",
-			l->sp->reg_nam, l->sp->reg_id, (uint)l->flags,
+			sp->reg_nam, sp->reg_id, (uint)l->flags,
 			l->s[0], l->s[1], l->s[2], l->s[3]);
 	  }
      }
@@ -344,7 +355,7 @@ static int imprt(planner *ego, scanner *sc)
      md5uint sig[4];
      uint flags;
      int reg_id;
-     slvdesc *sp;
+     short slvndx;
 
      if (!sc->scan(sc, "(" WISDOM_PREAMBLE))
 	  goto bad;
@@ -359,12 +370,11 @@ static int imprt(planner *ego, scanner *sc)
 			sig + 0, sig + 1, sig + 2, sig + 3))
 	       goto bad;
 
-	  sp = slvdesc_lookup(ego, buf, reg_id);
-	  if (!sp)
+	  if ((slvndx = slookup(ego, buf, reg_id)) < 0)
 	       goto bad; /* TODO: panic? */
 
 	  /* inter oves locum praesta */
-	  hinsert(ego, sig, (unsigned short)flags, sp);
+	  hinsert(ego, sig, (unsigned short)flags, slvndx);
      }
      return 1;
 
@@ -401,32 +411,35 @@ planner *X(mkplanner)(size_t sz,
      p->insert = p->insert_iter = p->insert_unknown = 0;
      p->hook = hooknil;
      p->cur_reg_nam = 0;
-     p->solvers = 0;
-     p->sols = 0;
-     p->hashsiz = 0;
-     p->nelem = 0;
+
+     p->slvdescs = 0;
+     p->nslvdesc = p->slvdescsiz = 0;
+
+     p->solutions = 0;
+     p->hashsiz = p->nelem = 0;
+
      p->score = BAD;            /* unused, but we initialize it anyway */
      p->problem_flags = 0;
      p->planner_flags = 0;
      p->nthr = 1;
-     grow(p);			/* so that hashsiz > 0 */
+     hgrow(p);			/* so that hashsiz > 0 */
 
      return p;
 }
 
 void X(planner_destroy)(planner *ego)
 {
-     slvdesc *l, *l0;
-
      /* destroy hash table */
      htab_destroy(ego);
 
-     /* destroy all solvers */
-     for (l = ego->solvers; l; l = l0) {
-          l0 = l->cdr;
-          X(solver_destroy)(l->slv);
-          X(free)(l);
-     }
+     /* destroy solvdesc table */
+     FORALL_SOLVERS(ego, s, sp, {
+	  UNUSED(sp);
+	  X(solver_destroy)(s);
+     });
+
+     if (ego->slvdescs)
+	  X(free)(ego->slvdescs);
 
      X(free)(ego);
 }
@@ -463,17 +476,12 @@ void X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
 
 void X(planner_dump)(planner *ego, int verbose)
 {
-     uint valid = 0, deleted = 0, empty = 0;
+     uint valid = 0, empty = 0;
      uint h;
      UNUSED(verbose); /* historical */
 
      for (h = 0; h < ego->hashsiz; ++h) 
-	  switch (ego->sols[h].state) {
-	      case H_EMPTY: ++empty; break;
-	      case H_DELETED: ++deleted; break;
-	      case H_VALID: ++valid; break;
-	      default: A(0);
-	  }
+	  if (VALIDP(ego->solutions + h)) ++valid; else ++empty;
 
      D("nplan = %u\n", ego->nplan);
      D("nprob = %u\n", ego->nprob);
@@ -486,7 +494,6 @@ void X(planner_dump)(planner *ego, int verbose)
      D("nrehash = %d\n", ego->nrehash);
      D("hashsiz = %d\n", ego->hashsiz);
      D("empty = %d\n", empty);
-     D("deleted = %d\n", deleted);
      D("valid = %d\n", valid);
      A(ego->nelem == valid);
 }
