@@ -18,12 +18,13 @@
  *
  */
 
-/* $Id: problem.c,v 1.21 2003-02-26 22:36:13 stevenj Exp $ */
+/* $Id: problem.c,v 1.22 2003-03-04 23:22:48 fftw Exp $ */
 
 #include "config.h"
 #include "bench.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 
 typedef enum {
