@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.41 2004-01-01 20:44:09 athena Exp $ */
+/* $Id: ct.c,v 1.42 2004-03-21 15:20:06 athena Exp $ */
 
 #include "ct.h"
 
@@ -26,7 +26,6 @@ typedef struct {
      plan_dft super;
      plan *cld;
      plan *cldw;
-     const ct_solver *slv;
      int r;
 } P;
 
@@ -74,7 +73,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      p->print(p, "(dft-ct-%s/%d%(%p%)%(%p%))",
-	      ego->slv->dec == DECDIT ? "dit" : "dif",
+	      ego->super.apply == apply_dit ? "dit" : "dif",
 	      ego->r, ego->cldw, ego->cld);
 }
 
@@ -191,7 +190,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln->cld = cld;
      pln->cldw = cldw;
-     pln->slv = ego;
      pln->r = r;
      X(ops_add)(&cld->ops, &cldw->ops, &pln->super.super.ops);
      return &(pln->super.super);
