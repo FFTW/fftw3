@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_noinline.ml,v 1.1 2003-04-17 11:07:19 athena Exp $ *)
+(* $Id: gen_notw_noinline.ml,v 1.2 2005-01-10 01:05:55 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_noinline.ml,v 1.1 2003-04-17 11:07:19 athena Exp $"
+let cvsid = "$Id: gen_notw_noinline.ml,v 1.2 2005-01-10 01:05:55 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -63,7 +63,7 @@ let generate n =
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
   let ename = expand_name name in
-  let name0 = ename ^ "_0" in
+  let name_noinline = "X(" ^ ename ^ "_noinline)" in
 
   let vl = choose_simd "1" "VL"
   in
@@ -91,7 +91,7 @@ let generate n =
   let annot = standard_optimizer odag in
 
   let tree0 =
-    Fcn ("static void", name0,
+    Fcn ("void", name_noinline,
 	 ([Decl (C.constrealtypep, riarray);
 	   Decl (C.constrealtypep, iiarray);
 	   Decl (C.realtypep, roarray);
@@ -118,7 +118,7 @@ let generate n =
     "{\n" ^
     "int i;\n" ^
     "for (i = v; i > 0; i -= " ^ vl ^ ") {\n" ^
-      name0 ^ 
+      name_noinline ^ 
         "(ri, ii, ro, io" ^
            (if stride_fixed !uistride then "" else ", is") ^ 
            (if stride_fixed !uostride then "" else ", os") ^ 

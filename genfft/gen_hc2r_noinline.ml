@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r_noinline.ml,v 1.1 2003-04-17 19:25:50 athena Exp $ *)
+(* $Id: gen_hc2r_noinline.ml,v 1.2 2005-01-10 01:05:55 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r_noinline.ml,v 1.1 2003-04-17 19:25:50 athena Exp $"
+let cvsid = "$Id: gen_hc2r_noinline.ml,v 1.2 2005-01-10 01:05:55 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -88,7 +88,7 @@ let generate n =
   let ns = string_of_int n
   and sign = !Genutil.sign 
   and name = !Magic.codelet_name in
-  let name0 = name ^ "_0" in
+  let name_noinline = "X(" ^ name ^ "_noinline)" in
 
   let vristride = either_stride (!uristride) (C.SVar ristride)
   and viistride = either_stride (!uiistride) (C.SVar iistride)
@@ -114,7 +114,7 @@ let generate n =
   let annot = standard_optimizer odag in
 
   let tree0 =
-    Fcn ("static void", name0,
+    Fcn ("static void", name_noinline,
 	 ([Decl (C.constrealtypep, riarray);
 	   Decl (C.constrealtypep, iiarray);
 	   Decl (C.realtypep, oarray)]
@@ -145,7 +145,7 @@ let generate n =
     "{\n" ^
     "int i;\n" ^
     "for (i = v; i > 0; --i) {\n" ^
-      name0 ^ "(ri, ii, O" ^
+      name_noinline ^ "(ri, ii, O" ^
        (if stride_fixed !uristride then "" else ", ris") ^ 
        (if stride_fixed !uiistride then "" else ", iis") ^ 
        (if stride_fixed !uostride then "" else ", os") ^ 
