@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.219 2005-02-09 00:37:09 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.221 2005-02-09 01:10:19 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4634,12 +4634,12 @@ same processor as you.
 
 @item
 @code{--with-gcc-arch=}@i{arch}: When compiling with @code{gcc}, FFTW
-tries to guess the current CPU in order to tell @code{gcc} what
-architecture to tune for (i.e. @i{arch} should be a valid argument for
-@code{gcc}'s @code{-march} or @code{-mtune} flags).  In this way,
-you can override the @code{configure} script's guess, either because the
-guess was wrong or because you want to tune for a different CPU than
-the one you are compiling with.
+tries to deduce the current CPU in order to tell @code{gcc} what
+architecture to tune for; this option overrides that guess
+(i.e. @i{arch} should be a valid argument for @code{gcc}'s
+@code{-march} or @code{-mtune} flags).  You might do this because the
+deduced architecture was wrong or because you want to tune for a
+different CPU than the one you are compiling with.
 
 @item
 @cindex precision
