@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.15 2002-08-03 19:39:49 athena Exp $ */
+/* $Id: cycle.h,v 1.16 2003-03-07 05:07:12 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -26,7 +26,7 @@
 #if defined(HAVE_GETHRTIME) && defined(HAVE_HRTIME_T) && !defined(HAVE_TICK_COUNTER)
 typedef hrtime_t ticks;
 
-#define getticks() gethrtime()
+#define getticks gethrtime
 
 static inline double elapsed(ticks t1, ticks t0)
 {
@@ -276,7 +276,7 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 
 typedef long long ticks;
 
-#define getticks() _rtc()
+#define getticks _rtc
 
 static inline double elapsed(ticks t1, ticks t0)
 {
