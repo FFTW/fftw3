@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.mli,v 1.3 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: complex.mli,v 1.4 2002-08-18 20:02:37 athena Exp $ *)
 
 type expr
 val make : (Expr.expr * Expr.expr) -> expr
@@ -43,8 +43,8 @@ val (@+) : expr -> expr -> expr
 val (@-) : expr -> expr -> expr
 
 val wsquare : expr -> expr
-val wthree : expr -> expr -> expr -> expr
-val wreflect : expr -> expr -> expr -> expr
+val wreflectc : expr -> expr -> expr -> expr
+val wreflects : expr -> expr -> expr -> expr
 
 (* a signal is a map from integers to expressions *)
 type signal = int -> expr

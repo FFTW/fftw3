@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.8 2002-08-17 14:47:59 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.9 2002-08-18 20:02:37 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -294,7 +294,7 @@ let twiddle_policy_iter2 =
       else if i = 2 then
 	square (self (i / 2))
       else 
-	wthree (self (i - 1)) (self (i - 2)) (self 1)))
+	wreflects (self (i - 2)) (self (i - 1)) (self 1)))
 
 
 (*
@@ -322,7 +322,7 @@ let twiddle_policy_square2 =
       else if ((i mod 2) == 0) then
 	square (self (i / 2))
       else 
-	wthree (self (i - 1)) (self (i - 2)) (self 1)))
+	wreflectc (self (i - 2)) (self (i - 1)) (self 1)))
 
 (*
  * if n is even, compute w^n = (w^{n/2})^2, else
@@ -343,7 +343,7 @@ let twiddle_policy_square3 =
  * else let x = largest power of 2 less than i in
  *      let y = i - x in
  *      compute w^{x+y} from w^{x-y}, w^{x}, and w^{y} using
- *      reflection formula
+ *      sine reflection formula
  *)
 let twiddle_policy_ooura =
   policy_one (fun n ltw ->
@@ -355,7 +355,7 @@ let twiddle_policy_ooura =
       else
 	let x = largest_power_smaller_than 2 i in
 	let y = i - x in
-	wreflect (self (x - y)) (self x) (self y)))
+	wreflects (self (x - y)) (self x) (self y)))
 
 let current_twiddle_policy = ref twiddle_policy_load_all
 

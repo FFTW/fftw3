@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.ml,v 1.3 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: complex.ml,v 1.4 2002-08-18 20:02:37 athena Exp $ *)
 
 (* abstraction layer for complex operations *)
 open Littlesimp
@@ -159,31 +159,20 @@ let wsquare (CE (a, b)) =
   and twoab = makeTimes (twob, a) in
   CE (makePlus [makeNum Number.one; makeUminus (twobsq)], twoab)
 
-(*
- * compute w^n given w^{n-1}, w^{n-2}, and w, using the identity 
- * 
- * w^n + w^{n-2} = w^{n-1} (w + w^{-1}) = 2 w^{n-1} Re(w)
- *)
-let wthree (CE (an1, bn1)) wn2 (CE (a, b)) =
-  let twoa = makeTimes (makeNum Number.two, a)
-  in let twoa_wn1 = CE (makeTimes (twoa, an1), 
-			makeTimes (twoa, bn1))
-  in plus [twoa_wn1; (uminus wn2)]
-
 (* 
- * compute w^{x+y} given w^{x-y}, w^x, and w^y, using
- * the ``reflection'' formulas
- *
- * cos(x+y)-cos(x-y) = - 2 sin(x) sin(y)
- * sin(x+y)-sin(x-y) = 2 cos(x) sin(y)
- *
- * The common factor 2 sin(y) can be grouped.
- *)
-let wreflect (CE (cxmy, sxmy)) (CE (cx, sx)) (CE (cy, sy)) =
-  let tsy = makeTimes (makeNum Number.two, sy) in
-  CE (makePlus [cxmy; makeUminus (makeTimes (tsy, sx))],
-      makePlus [sxmy; makeTimes (tsy, cx)])
+   ``reflection'' formulas
+   
+   w^{x+y} +- w^{x-y} = w^x (w^y +- w^{-y})
 
+   Compute w^{x+y} from w^x and w^y
+ *)
+
+let wreflectc wxmy wx wy = 
+   plus [uminus wxmy; times wx (plus [wy; (conj wy)])]
+
+let wreflects wxmy wx wy = 
+   plus [wxmy; times wx (plus [wy; uminus (conj wy)])]
+  
 
 (************************
    shortcuts 
