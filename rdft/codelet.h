@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.2 2002-07-21 04:22:14 stevenj Exp $ */
+/* $Id: codelet.h,v 1.3 2002-07-21 06:06:53 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -35,6 +35,9 @@
  * types of codelets
  **************************************************************/
 
+typedef enum { R2HC = FFT_SIGN, HC2R = -FFT_SIGN, 
+	       R2HCII, HC2RIII } rdft_kind;
+
 /* real-input DFT codelets */
 typedef struct kr2hc_desc_s kr2hc_desc;
 
@@ -43,6 +46,7 @@ typedef struct {
 	  const kr2hc_desc *desc,
 	  const R *I, const R *ro, const R *io,
 	  int is, int ios, int ros, uint vl, int ivs, int ovs);
+     rdft_kind kind;
      uint vl;
 } kr2hc_genus;
 
@@ -65,7 +69,7 @@ void X(kr2hc_register)(planner *p, kr2hc codelet, const kr2hc_desc *desc);
 typedef kr2hc_desc kr2hcII_desc;
 typedef kr2hc_genus kr2hcII_genus;
 typedef kr2hc kr2hcII;
-void X(kr2hcII_register)(planner *p, kr2hcII codelet, const kr2hcII_desc *desc);
+#define kr2hcII_register kr2hc_register
 
 /* half-complex to half-complex DIT/DIF codelets: */
 typedef struct hc2hc_desc_s hc2hc_desc;
@@ -102,6 +106,7 @@ typedef struct {
 	  const khc2r_desc *desc,
 	  const R *ri, const R *ii, const R *O,
 	  int ris, int iis, int os, uint vl, int ivs, int ovs);
+     rdft_kind kind;
      uint vl;
 } khc2r_genus;
 
@@ -124,7 +129,7 @@ void X(khc2r_register)(planner *p, khc2r codelet, const khc2r_desc *desc);
 typedef khc2r_desc khc2rIII_desc;
 typedef khc2r_genus khc2rIII_genus;
 typedef khc2r khc2rIII;
-void X(khc2rIII_register)(planner *p, khc2rIII codelet, const khc2rIII_desc *desc);
+#define khc2rIII_register khc2r_register
 
 void X(khc2hc_dif_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc);
 

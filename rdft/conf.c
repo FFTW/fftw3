@@ -18,23 +18,23 @@
  *
  */
 
-/* $Id: conf.c,v 1.1 2002-07-21 01:46:03 stevenj Exp $ */
+/* $Id: conf.c,v 1.2 2002-07-21 06:06:53 stevenj Exp $ */
 
 #include "rdft.h"
 
 static const solvtab s =
 {
-/*
      X(rdft_indirect_register),
      X(rdft_rank0_register),
-     X(rdft_rank_geq2_register),
      X(rdft_vrank_geq1_register),
      X(rdft_vrank2_transpose_register),
      X(rdft_vrank3_transpose_register),
+     X(rdft_nop_register),
+/*
+     X(rdft_rank_geq2_register),
      X(rdft_buffered_register),
      X(rdft_generic_register),
      X(rdft_rader_register),
-     X(rdft_nop_register),
 */
      0
 };

@@ -18,13 +18,10 @@
  *
  */
 
-/* $Id: rdft.h,v 1.4 2002-07-21 04:47:03 stevenj Exp $ */
+/* $Id: rdft.h,v 1.5 2002-07-21 06:06:53 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
-
-typedef enum { R2HC = FFT_SIGN, HC2R = -FFT_SIGN, 
-	       R2HCII, HC2RIII } rdft_kind;
 
 /* problem.c: */
 typedef struct {
@@ -41,6 +38,7 @@ problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
 			   R *I, R *O, rdft_kind kind);
 problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
 			     R *I, R *O, rdft_kind kind);
+const char *X(rdft_kind_str)(rdft_kind kind);
 
 /* verify.c: */
 void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds);
@@ -63,7 +61,8 @@ plan *X(mkplan_rdft)(size_t size, const plan_adt *adt, rdftapply apply);
 
 /* various solvers */
 
-solver *X(mksolver_rdft_direct)(kr2hc k, const kr2hc_desc *desc);
+solver *X(mksolver_rdft_r2hc_direct)(kr2hc k, const kr2hc_desc *desc);
+solver *X(mksolver_rdft_hc2r_direct)(kr2hc k, const kr2hc_desc *desc);
 solver *X(mksolver_rdft_hc2hc_dit)(khc2hc k, const hc2hc_desc *desc);
 solver *X(mksolver_rdft_hc2hc_ditbuf)(khc2hc k, const hc2hc_desc *desc);
 

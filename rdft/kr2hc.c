@@ -18,15 +18,12 @@
  *
  */
 
-/* $Id: kr2hc.c,v 1.2 2002-07-21 02:09:15 stevenj Exp $ */
+/* $Id: kr2hc.c,v 1.3 2002-07-21 06:06:53 stevenj Exp $ */
 
 #include "rdft.h"
 
 void X(kr2hc_register)(planner *p, kr2hc codelet, const kr2hc_desc *desc)
 {
-     UNUSED(p); UNUSED(codelet); UNUSED(desc);
-/* TODO
-     solver *s = X(mksolver_rdft_direct)(codelet, desc);
+     solver *s = X(mksolver_rdft_r2hc_direct)(codelet, desc);
      REGISTER_SOLVER(p, s);
-*/
 }

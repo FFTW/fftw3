@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.2 2002-07-21 04:12:19 stevenj Exp $ */
+/* $Id: problem.c,v 1.3 2002-07-21 06:06:53 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -85,12 +85,29 @@ static void zerotens(tensor sz, R *I)
      }
 }
 
+const char *X(rdft_kind_str)(rdft_kind kind)
+{
+     static const char s[][8] = { "r2hc", "hc2r", "r2hcII", "hc2rIII" };
+     switch (kind) {
+	 case R2HC:
+	      return s[0];
+	 case HC2R:
+	      return s[1];
+	 case R2HCII:
+	      return s[2];
+	 case HC2RIII:
+	      return s[3];
+     }
+     A(0);
+     return 0;
+}
+
 static void print(problem *ego_, printer *p)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
-     p->print(p, "(rdft %d %d %t %t)", 
+     p->print(p, "(rdft %d %s %t %t)", 
 	      ego->I == ego->O, 
-	      ego->kind,
+	      X(rdft_kind_str)(ego->kind),
 	      &ego->sz,
 	      &ego->vecsz);
 }
