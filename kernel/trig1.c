@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: trig1.c,v 1.1 2002-09-23 22:49:10 athena Exp $ */
+/* $Id: trig1.c,v 1.2 2003-03-02 00:15:18 stevenj Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
@@ -48,10 +48,10 @@ static const trigreal K2PI =
 trigreal X(sincos)(trigreal m, trigreal n, int sinp)
 {
      /* waiting for C to get tail recursion... */
-     trigreal half_n = n * 0.5;
-     trigreal quarter_n = half_n * 0.5;
-     trigreal eighth_n = quarter_n * 0.5;
-     trigreal sgn = 1.0;
+     trigreal half_n = n * KTRIG(0.5);
+     trigreal quarter_n = half_n * KTRIG(0.5);
+     trigreal eighth_n = quarter_n * KTRIG(0.5);
+     trigreal sgn = KTRIG(1.0);
 
      if (sinp) goto sin;
  cos:

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.5 2003-03-01 00:01:20 stevenj Exp $ */
+/* $Id: reodft11e-radix2.c,v 1.6 2003-03-02 00:15:18 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:
@@ -71,8 +71,8 @@ static void apply_re11(const plan *ego_, R *I, R *O)
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
-	  buf[0] = 2.0 * I[0];
-	  buf[n2] = 2.0 * I[is * (n - 1)];
+	  buf[0] = K(2.0) * I[0];
+	  buf[n2] = K(2.0) * I[is * (n - 1)];
 	  for (i = 1; i + i < n2; ++i) {
 	       int k = i + i;
 	       E a, b, a2, b2;
@@ -114,8 +114,8 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 	       E u, v;
 	       u = I[is * (n2 - 1)];
 	       v = I[is * n2];
-	       buf[i] = 2.0 * (u + v) * W[2*i];
-	       buf[n - i] = 2.0 * (u - v) * W[2*i];
+	       buf[i] = K(2.0) * (u + v) * W[2*i];
+	       buf[n - i] = K(2.0) * (u - v) * W[2*i];
 	  }
 
 
@@ -204,8 +204,8 @@ static void apply_re11(const plan *ego_, R *I, R *O)
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
-	  buf[0] = 2.0 * I[0];
-	  buf[n/2] = 2.0 * I[is * (n - 1)];
+	  buf[0] = K(2.0) * I[0];
+	  buf[n/2] = K(2.0) * I[is * (n - 1)];
 	  for (i = 1; i + i < n; ++i) {
 	       int k = i + i;
 	       E a, b;
@@ -279,8 +279,8 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
-	  buf[0] = 2.0 * I[is * (n - 1)];
-	  buf[n2] = 2.0 * I[0];
+	  buf[0] = K(2.0) * I[is * (n - 1)];
+	  buf[n2] = K(2.0) * I[0];
 	  for (i = 1; i + i < n2; ++i) {
 	       int k = i + i;
 	       E a, b, a2, b2;
@@ -322,8 +322,8 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
 	       E u, v;
 	       u = I[is * n2];
 	       v = I[is * (n2 - 1)];
-	       buf[i] = 2.0 * (u + v) * W[2*i];
-	       buf[n - i] = 2.0 * (u - v) * W[2*i];
+	       buf[i] = K(2.0) * (u + v) * W[2*i];
+	       buf[n - i] = K(2.0) * (u - v) * W[2*i];
 	  }
 
 

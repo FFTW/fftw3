@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.40 2003-02-27 18:44:19 stevenj Exp $ */
+/* $Id: problem.c,v 1.41 2003-03-02 00:15:18 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -57,7 +57,7 @@ static void recur(const iodim *dims, int rnk, R *I)
      if (rnk == RNK_MINFTY)
           return;
      else if (rnk == 0)
-          I[0] = 0.0;
+          I[0] = K(0.0);
      else if (rnk > 0) {
           int i, n = dims[0].n;
           int is = dims[0].is;
@@ -65,7 +65,7 @@ static void recur(const iodim *dims, int rnk, R *I)
 	  if (rnk == 1) {
 	       /* this case is redundant but faster */
 	       for (i = 0; i < n; ++i)
-		    I[i * is] = 0.0;
+		    I[i * is] = K(0.0);
 	  } else {
 	       for (i = 0; i < n; ++i)
 		    recur(dims + 1, rnk - 1, I + i * is);

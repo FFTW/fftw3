@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.22 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: rodft00e-r2hc.c,v 1.23 2003-03-02 00:15:18 stevenj Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -59,13 +59,13 @@ static void apply(const plan *ego_, R *I, R *O)
 	       E a, b, apb, amb;
 	       a = I[is * (i - 1)];
 	       b = I[is * ((n - i) - 1)];
-	       apb =  2.0 * W[i] * (a + b);
+	       apb =  K(2.0) * W[i] * (a + b);
 	       amb = (a - b);
 	       buf[i] = apb + amb;
 	       buf[n - i] = apb - amb;
 	  }
 	  if (i == n - i) {
-	       buf[i] = 4.0 * I[is * (i - 1)];
+	       buf[i] = K(4.0) * I[is * (i - 1)];
 	  }
 	  
 	  {

@@ -67,8 +67,8 @@ static void apply_dit(const plan *ego_, R *I, R *O)
 
      /* compute the transform of the r 0th elements (which are real) */
      for (i = 0; i + i < r; ++i) {
-	  rsum = 0.0;
-	  isum = 0.0;
+	  rsum = K(0.0);
+	  isum = K(0.0);
 	  wincr = m * i;
 	  for (j = 0, wp = 0; j < r; ++j) {
 	       E tw_r = W[2*wp];
@@ -98,8 +98,8 @@ static void apply_dit(const plan *ego_, R *I, R *O)
      /* compute the transform of the middle elements (which are complex) */
      for (k = 1; k + k < m; ++k, X += os, YI -= os, YO -= os) {
 	  for (i = 0; i < r; ++i) {
-	       rsum = 0.0;
-	       isum = 0.0;
+	       rsum = K(0.0);
+	       isum = K(0.0);
 	       wincr = k + m * i;
 	       for (j = 0, wp = 0; j < r; ++j) {
 		    E tw_r = W[2*wp];
@@ -168,7 +168,7 @@ static void apply_dif(const plan *ego_, R *I, R *O)
      }
 
      for (i = 0; i < r; ++i) {
-	  rsum = 0.0;
+	  rsum = K(0.0);
 	  wincr = m * i;
 	  for (j = 1, wp = wincr; j + j < r; ++j) {
 	       E tw_r = W[2*wp];
@@ -180,7 +180,7 @@ static void apply_dif(const plan *ego_, R *I, R *O)
 	       if (wp >= n)
 		    wp -= n;
 	  }
-	  X[i * ism] = 2.0 * rsum + buf[0];
+	  X[i * ism] = K(2.0) * rsum + buf[0];
      }
 
      X += is;
@@ -200,8 +200,8 @@ static void apply_dif(const plan *ego_, R *I, R *O)
 	  }
 
 	  for (i = 0; i < r; ++i) {
-	       rsum = 0.0;
-	       isum = 0.0;
+	       rsum = K(0.0);
+	       isum = K(0.0);
 	       wincr = m * i;
 	       for (j = 0, wp = k * i; j < r; ++j) {
 		    E tw_r = W[2*wp];

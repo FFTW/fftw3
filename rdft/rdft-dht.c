@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.15 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: rdft-dht.c,v 1.16 2003-03-02 00:15:18 stevenj Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime
@@ -53,8 +53,8 @@ static void apply_r2hc(const plan *ego_, R *I, R *O)
      os = ego->os;
      for (i = 1; i < n - i; ++i) {
 	  E a, b;
-	  a = 0.5 * O[os * i];
-	  b = 0.5 * O[os * (n - i)];
+	  a = K(0.5) * O[os * i];
+	  b = K(0.5) * O[os * (n - i)];
 	  O[os * i] = a + b;
 #if FFT_SIGN == -1
 	  O[os * (n - i)] = b - a;

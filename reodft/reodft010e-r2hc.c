@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.24 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.25 2003-03-02 00:15:18 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -100,7 +100,7 @@ static void apply_re01(const plan *ego_, R *I, R *O)
 	       buf[n - i] = wa * apb - wb * amb; 
 	  }
 	  if (i == n - i) {
-	       buf[i] = 2.0 * I[is * i] * W[2*i];
+	       buf[i] = K(2.0) * I[is * i] * W[2*i];
 	  }
 	  
 	  {
@@ -154,7 +154,7 @@ static void apply_ro01(const plan *ego_, R *I, R *O)
 	       buf[n - i] = wa * apb - wb * amb; 
 	  }
 	  if (i == n - i) {
-	       buf[i] = 2.0 * I[is * (i - 1)] * W[2*i];
+	       buf[i] = K(2.0) * I[is * (i - 1)] * W[2*i];
 	  }
 	  
 	  {
@@ -211,18 +211,18 @@ static void apply_re10(const plan *ego_, R *I, R *O)
 	       cld->apply((plan *) cld, buf, buf);
 	  }
 	  
-	  O[0] = 2.0 * buf[0];
+	  O[0] = K(2.0) * buf[0];
 	  for (i = 1; i < n - i; ++i) {
 	       E a, b, wa, wb;
-	       a = 2.0 * buf[i];
-	       b = 2.0 * buf[n - i];
+	       a = K(2.0) * buf[i];
+	       b = K(2.0) * buf[n - i];
 	       wa = W[2*i];
 	       wb = W[2*i + 1];
 	       O[os * i] = wa * a + wb * b;
 	       O[os * (n - i)] = wb * a - wa * b;
 	  }
 	  if (i == n - i) {
-	       O[os * i] = 2.0 * buf[i] * W[2*i];
+	       O[os * i] = K(2.0) * buf[i] * W[2*i];
 	  }
      }
 
@@ -262,18 +262,18 @@ static void apply_ro10(const plan *ego_, R *I, R *O)
 	       cld->apply((plan *) cld, buf, buf);
 	  }
 	  
-	  O[os * (n - 1)] = 2.0 * buf[0];
+	  O[os * (n - 1)] = K(2.0) * buf[0];
 	  for (i = 1; i < n - i; ++i) {
 	       E a, b, wa, wb;
-	       a = 2.0 * buf[i];
-	       b = 2.0 * buf[n - i];
+	       a = K(2.0) * buf[i];
+	       b = K(2.0) * buf[n - i];
 	       wa = W[2*i];
 	       wb = W[2*i + 1];
 	       O[os * (n - 1 - i)] = wa * a + wb * b;
 	       O[os * (i - 1)] = wb * a - wa * b;
 	  }
 	  if (i == n - i) {
-	       O[os * (i - 1)] = 2.0 * buf[i] * W[2*i];
+	       O[os * (i - 1)] = K(2.0) * buf[i] * W[2*i];
 	  }
      }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.23 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.24 2003-03-02 00:15:18 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -67,10 +67,10 @@ static void apply_re11(const plan *ego_, R *I, R *O)
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  /* I wish that this didn't require an extra pass. */
 	  /* FIXME: use recursive/cascade summation for better stability? */
-	  buf[n - 1] = cur = 2.0 * I[is * (n - 1)];
+	  buf[n - 1] = cur = K(2.0) * I[is * (n - 1)];
 	  for (i = n - 1; i > 0; --i) {
 	       E curnew;
-	       buf[(i - 1)] = curnew = 2.0 * I[is * (i - 1)] - cur;
+	       buf[(i - 1)] = curnew = K(2.0) * I[is * (i - 1)] - cur;
 	       cur = curnew;
 	  }
 	  
@@ -87,7 +87,7 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 	       buf[n - i] = wa * apb - wb * amb; 
 	  }
 	  if (i == n - i) {
-	       buf[i] = 2.0 * buf[i] * W[2*i];
+	       buf[i] = K(2.0) * buf[i] * W[2*i];
 	  }
 	  
 	  {
@@ -132,10 +132,10 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  /* I wish that this didn't require an extra pass. */
 	  /* FIXME: use recursive/cascade summation for better stability? */
-	  buf[n - 1] = cur = 2.0 * I[0];
+	  buf[n - 1] = cur = K(2.0) * I[0];
 	  for (i = n - 1; i > 0; --i) {
 	       E curnew;
-	       buf[(i - 1)] = curnew = 2.0 * I[is * (n - i)] - cur;
+	       buf[(i - 1)] = curnew = K(2.0) * I[is * (n - i)] - cur;
 	       cur = curnew;
 	  }
 	  
@@ -152,7 +152,7 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
 	       buf[n - i] = wa * apb - wb * amb; 
 	  }
 	  if (i == n - i) {
-	       buf[i] = 2.0 * buf[i] * W[2*i];
+	       buf[i] = K(2.0) * buf[i] * W[2*i];
 	  }
 	  
 	  {

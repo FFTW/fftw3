@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.22 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: rdft2-radix2.c,v 1.23 2003-03-02 00:15:18 stevenj Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -129,8 +129,8 @@ static void k_f_dft(R *rio, R *iio, const R *W, int n, int dist)
           E rop = pp[0], iop = pp[im];
           pp[0] = rop + iop;
           pm[0] = rop - iop;
-          pp[im] = 0.0;
-          pm[im] = 0.0;
+          pp[im] = K(0.0);
+          pm[im] = K(0.0);
 	  pp += dist; pm -= dist;
      }
 
@@ -144,10 +144,10 @@ static void k_f_dft(R *rio, R *iio, const R *W, int n, int dist)
           E id = iop + iom;
           E tr = rd * wr - id * wi;
           E ti = id * wr + rd * wi;
-          pp[0] = 0.5 * (re + ti);
-          pp[im] = 0.5 * (ie + tr);
-          pm[0] = 0.5 * (re - ti);
-          pm[im] = 0.5 * (tr - ie);
+          pp[0] = K(0.5) * (re + ti);
+          pp[im] = K(0.5) * (ie + tr);
+          pm[0] = K(0.5) * (re - ti);
+          pm[im] = K(0.5) * (tr - ie);
 	  pp += dist; pm -= dist;
      }
 
@@ -201,8 +201,8 @@ static void k_f_rdft(R *rio, R *iio, const R *W, int n, int dist)
           E rop = pp[0], iop = pp[im];
           pp[0] = rop + iop;
           pm[0] = rop - iop;
-          pp[im] = 0.0;
-          pm[im] = 0.0;
+          pp[im] = K(0.0);
+          pm[im] = K(0.0);
 	  pp += dist; pm -= dist;
      }
 
@@ -291,7 +291,7 @@ static void k_b_dft(R *rio, R *iio, const R *W, int n, int dist)
      }
 
      /* i = n/2 when n is even */
-     if (!(n & 1)) { pp[0] *= 2.0; pp[im] *= -2.0; }
+     if (!(n & 1)) { pp[0] *= K(2.0); pp[im] *= -K(2.0); }
 }
 
 static void apply_b_dft(const plan *ego_, R *r, R *rio, R *iio)
@@ -357,7 +357,7 @@ static void k_b_rdft(R *rio, R *iio, const R *W, int n, int dist)
      }
 
      /* i = n/2 when n is even */
-     if (!(n & 1)) { pp[0] *= 2.0; pp[im] *= -2.0; }
+     if (!(n & 1)) { pp[0] *= K(2.0); pp[im] *= -K(2.0); }
 }
 
 static void apply_b_rdft(const plan *ego_, R *r, R *rio, R *iio)

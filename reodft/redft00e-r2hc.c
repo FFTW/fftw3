@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.21 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.22 2003-03-02 00:15:18 stevenj Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -61,14 +61,14 @@ static void apply(const plan *ego_, R *I, R *O)
 	       E a, b, apb, amb;
 	       a = I[is * i];
 	       b = I[is * (n - i)];
-	       csum += W[2*i] * (amb = 2.0*(a - b));
+	       csum += W[2*i] * (amb = K(2.0)*(a - b));
 	       amb = W[2*i+1] * amb;
 	       apb = (a + b);
 	       buf[i] = apb - amb;
 	       buf[n - i] = apb + amb;
 	  }
 	  if (i == n - i) {
-	       buf[i] = 2.0 * I[is * i];
+	       buf[i] = K(2.0) * I[is * i];
 	  }
 	  
 	  {
