@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.133 2002-09-17 11:27:17 athena Exp $ */
+/* $Id: ifftw.h,v 1.134 2002-09-17 13:09:56 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -453,9 +453,6 @@ enum {
 #define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
 #define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
 #define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
-#define USE_SCOREP(plnr) ((plnr)->planner_flags & USE_SCORE)
-
-#define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 

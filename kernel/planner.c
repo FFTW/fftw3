@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.105 2002-09-17 11:29:00 athena Exp $ */
+/* $Id: planner.c,v 1.106 2002-09-17 13:09:57 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -34,17 +34,29 @@
 #define BLESSEDP(solution) ((solution)->flags & BLESSING)
 #define VALIDP(solution) ((solution)->flags & H_VALID)
 
-/* Flags f1 subsumes flags f2 iff f1 is less/equally impatient than
-   f2, defining a partial ordering. */
-#define IMPATIENCE(flags) ((flags) & IMPATIENCE_FLAGS)
-#define SUBSUMES(f1,f2) 			\
-  ((f2 & ESTIMATE) || !(f1 & USE_SCORE) || \
-   ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1)))
-#define ORDERED(f1, f2) (SUBSUMES(f1, f2) || SUBSUMES(f2, f1))
-
 #define MAXNAM 64  /* maximum length of registrar's name.
 		      Used for reading wisdom.  There is no point
 		      in doing this right */
+
+/* Flags f1 subsumes flags f2 iff f1 is less/equally impatient than
+   f2, defining a partial ordering. */
+#define IMPATIENCE(flags) ((flags) & IMPATIENCE_FLAGS)
+#define ORDERED(f1, f2) (subsumes(f1, f2) || subsumes(f2, f1))
+
+static unsigned short canonicalize(unsigned short x)
+{
+     if (x & ESTIMATE) x |= IMPATIENCE_FLAGS;
+     if (!(x & USE_SCORE)) x &= ~IMPATIENCE_FLAGS;
+     return x;
+}
+
+static int subsumes(unsigned short f1, unsigned short f2)
+{
+     f1 = canonicalize(f1);
+     f2 = canonicalize(f2);
+     return (IMPATIENCE(f1) & f2) == IMPATIENCE(f1);
+}
+
 
 /*
   slvdesc management:
@@ -258,11 +270,11 @@ static void hinsert(planner *ego, const md5sig s,
      solution *l;
 
      if ((l = hlookup(ego, s, flags))) {
-	  if (SUBSUMES(flags, l->flags)) {
+	  if (subsumes(flags, l->flags)) {
 	       /* overwrite old solution */
 	       flags |= l->flags & BLESSING; /* ne me perdas illa die */
 	  } else {
-	       A(SUBSUMES(l->flags, flags));
+	       A(subsumes(l->flags, flags));
 	       return;
 	  }
      } else {
@@ -286,7 +298,7 @@ static void hcurse_subsumed(planner *ego)
 		    solution *m = ego->solutions + g;
 		    if (VALIDP(m)) {
 			 if (md5eq(l->s, m->s) 
-			     && SUBSUMES(l->flags, m->flags)) {
+			     && subsumes(l->flags, m->flags)) {
 			      /* quidquid latet apparebit */
 			      l->flags |= m->flags & BLESSING;
 			      /* cum vix justus sit securus */
@@ -305,7 +317,7 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 {
      if (!BELIEVE_PCOSTP(ego) || pln->pcost == 0.0) {
 	  ego->nplan++;
-	  if (ESTIMATEP(ego)) {
+	  if (canonicalize(ego->planner_flags) & ESTIMATE) {
 	       /* heuristic */
 	       pln->pcost = 0
 		    + pln->ops.add
@@ -337,7 +349,10 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
 
 static int compute_score(planner *ego, problem *p, solver *s)
 {
-     return (USE_SCOREP(ego)) ? s->adt->score(s, p, ego) : GOOD;
+     if (canonicalize(ego->planner_flags) & USE_SCORE) 
+	  return s->adt->score(s, p, ego);
+     else  
+	  return GOOD;
 }
 
 
@@ -414,13 +429,13 @@ static plan *mkplan(planner *ego, problem *p)
 
      sp = 0; /* nothing known about this problem, yet */
      if ((sol = hlookup(ego, m.s, ego->planner_flags))) {
-	  if (SUBSUMES(sol->flags, ego->planner_flags)) {
+	  if (subsumes(sol->flags, ego->planner_flags)) {
 	       /* wisdom is acceptable */
 	       if (sol->slvndx < 0)
 		    return 0;   /* known to be infeasible */
 	       sp = ego->slvdescs + sol->slvndx;
 	  } else {
-	       A(SUBSUMES(ego->planner_flags, sol->flags));
+	       A(subsumes(ego->planner_flags, sol->flags));
 	  }
      }
 
@@ -590,12 +605,35 @@ void X(planner_destroy)(planner *ego)
  * Debugging code:
  */
 #ifdef FFTW_DEBUG
+#define IMPLIES(a, b) ((b) || !(a))
+
+static void check_partial_order(void)
+{
+     unsigned short a, b, c;
+     for (a = 0; a <= IMPATIENCE_FLAGS; ++a) {
+	  /* reflexive */
+	  CK(subsumes(a, a));
+	  for (b = 0; b <= IMPATIENCE_FLAGS; ++b) {
+	       /* antisymmetric */
+	       CK(IMPLIES(subsumes(a, b) && subsumes(b, a),
+			  canonicalize(a) == canonicalize(b)));
+	       for (c = 0; c <= IMPATIENCE_FLAGS; ++c) {
+		    /* transitive */
+		    CK(IMPLIES(subsumes(a, b) && subsumes(b, c),
+			       subsumes(a, c)));
+	       }
+	  }
+     }
+}
 
 void X(planner_dump)(planner *ego, int verbose)
 {
      uint valid = 0, empty = 0, infeasible = 0;
      uint h;
      UNUSED(verbose); /* historical */
+
+     if (0)
+	  check_partial_order();
 
      for (h = 0; h < ego->hashsiz; ++h) {
 	  solution *l = ego->solutions + h; 
@@ -622,4 +660,5 @@ void X(planner_dump)(planner *ego, int verbose)
      D("infeasible = %d\n", infeasible);
      A(ego->nelem == valid);
 }
+
 #endif
