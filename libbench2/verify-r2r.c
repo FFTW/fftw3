@@ -424,6 +424,9 @@ static void impulse_response(int rnk, dim_stuff *d, R impulse_amp,
  * generator bottleneck. In Proceedings of the Twenty-Seventh Annual
  * ACM Symposium on the Theory of Computing, pages 407-416, Las Vegas,
  * Nevada, 29 May--1 June 1995.
+ *
+ * Also: F. Ergun, S. R. Kumar, and D. Sivakumar, "Self-testing without
+ * the generator bottleneck," SIAM J. on Computing 29 (5), 1630-51 (2000).
  */
 
 static double rlinear(int n, info *nfo, R *inA, R *inB, R *inC, R *outA,
