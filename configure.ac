@@ -38,7 +38,7 @@ AC_SUBST(OCAMLLDFLAGS)
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(malloc.h sys/time.h time.h unistd.h)
+AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h])
 dnl Header file for enabling asm() on Digital Unix  
 AC_CHECK_HEADERS(c_asm.h) 
 
@@ -57,6 +57,8 @@ AC_CHECK_FUNCS(gettimeofday)
 AC_CHECK_FUNCS(gethrtime)
 AC_CHECK_FUNCS(drand48)
 AC_CHECK_FUNCS(hypot)
+AC_CHECK_FUNCS(sqrt)
+AC_CHECK_FUNCS(memset)
 dnl high-resolution clock on SGI machines
 AC_CHECK_FUNCS(clock_gettime)  
 
@@ -87,6 +89,7 @@ AC_OUTPUT([
    genfft/Makefile
    kernel/Makefile
    dft/Makefile
+   libbench/Makefile
 
    codelets/Makefile
    codelets/dft-standard/Makefile
