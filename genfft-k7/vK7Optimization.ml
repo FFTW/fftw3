@@ -523,7 +523,8 @@ let optimization_rules =
 	    isUnusedM i3_s >>
 	      unitM ([i2_id; i3_id],
 		     [V_SimdUnaryOp(V_Swap,i2_s1,i2_d);
-		      V_SimdBinOp(i2_op,i1_s,i2_d,i3_d)]));
+		      V_SimdBinOp(i2_op,i2_d,i1_s,i3_d)]));
+
     ]
 
 (***************************************************************************)
