@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.155 2003-03-15 22:41:25 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.156 2003-03-16 18:39:07 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4341,21 +4341,27 @@ to run ``@code{make distclean}'' before trying again; this ensures that
 you don't have any stale files left over from previous compilation
 attempts.
 
+The @code{configure} script chooses the @code{gcc} compiler by default,
+if it is available; you can select some other compiler with:
+@example
+./configure CC="@r{@i{<the name of your C compiler>}}"
+@end example
+
 The @code{configure} script knows good @code{CFLAGS} (C compiler flags)
 @cindex compiler flags
 for a few systems.  If your system is not known, the @code{configure}
 script will print out a warning.  In this case, you should re-configure
 FFTW with the command
 @example
-./configure CFLAGS="<write your CFLAGS here>"
+./configure CFLAGS="@r{@i{<write your CFLAGS here>}}"
 @end example
 and then compile as usual.  If you do find an optimal set of
 @code{CFLAGS} for your system, please let us know what they are (along
 with the output of @code{config.guess}) so that we can include them in
 future releases.
 
-The @code{configure} program supports all the standard flags defined by
-the GNU Coding Standards; see the @code{INSTALL} file in FFTW or
+@code{configure} supports all the standard flags defined by the GNU
+Coding Standards; see the @code{INSTALL} file in FFTW or
 @uref{http://www.gnu.org/prep/standards_toc.html, the GNU web page}.
 Note especially @code{--help} to list all flags and
 @code{--enable-shared} to create shared, rather than static, libraries.
