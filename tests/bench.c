@@ -157,6 +157,7 @@ void setup(struct problem *p)
      FFTW(threads_conf_standard) (plnr);
      plnr->nthr = 1;
      plnr->hook = hook;
+     plnr->planner_flags |= NO_EXHAUSTIVE;
 
      /* plnr->planner_flags |= IMPATIENT; */
      /* plnr->planner_flags |= ESTIMATE | IMPATIENT | NO_INDIRECT_OP; */

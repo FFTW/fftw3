@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.139 2002-09-19 00:47:31 athena Exp $ */
+/* $Id: ifftw.h,v 1.140 2002-09-19 01:47:17 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -394,7 +394,8 @@ typedef struct solution_s solution; /* opaque */
 enum { 
      DESTROY_INPUT = 0x1,
      POSSIBLY_UNALIGNED = 0x2,
-     CONSERVE_MEMORY = 0x4
+     CONSERVE_MEMORY = 0x4,
+     NO_DHT_R2HC = 0x8
 };
 
 #define DESTROY_INPUTP(plnr) ((plnr)->problem_flags & DESTROY_INPUT)
@@ -413,9 +414,8 @@ enum {
      NO_BUFFERING = 0x20,
      NO_INDIRECT_OP = 0x40,
      BELIEVE_PCOST = 0x80,
-     NO_DHT_R2HC = 0x100,
-     NO_UGLY = 0x200,  /* avoid plans we are 99% sure are suboptimal */
-     NO_EXHAUSTIVE = 0x400,
+     NO_UGLY = 0x100,  /* avoid plans we are 99% sure are suboptimal */
+     NO_EXHAUSTIVE = 0x200,
 
      /* a canonical set of fftw2-like impatient flags */
      IMPATIENT = (0
@@ -427,7 +427,7 @@ enum {
 		  | BELIEVE_PCOST
 	  ),
 
-     ESTIMATE = 0x800, /* subsumed by all other impatience flags */
+     ESTIMATE = 0x400, /* subsumed by all other impatience flags */
      IMPATIENCE_FLAGS = (ESTIMATE | (ESTIMATE - 1)),
      
      BLESSING = 0x4000,  /* save this entry */
@@ -444,7 +444,6 @@ enum {
 #define NO_BUFFERINGP(plnr) ((plnr)->planner_flags & NO_BUFFERING)
 #define NO_INDIRECT_OP_P(plnr) ((plnr)->planner_flags & NO_INDIRECT_OP)
 #define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
-#define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
 #define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
 #define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
 #define NO_EXHAUSTIVEP(plnr) ((plnr)->planner_flags & NO_EXHAUSTIVE)

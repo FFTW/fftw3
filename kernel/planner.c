@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.113 2002-09-19 00:47:31 athena Exp $ */
+/* $Id: planner.c,v 1.114 2002-09-19 01:47:17 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -341,7 +341,7 @@ static plan *mkplan0(planner *ego, problem *p, slvdesc **descp)
      int pass;
 
      for (pass = 0; pass < 2; ++pass) {
-	  unsigned short nflags = 0; /* initialize, avoid warning */
+	  unsigned short nflags = ego->planner_flags;
 	  
 	  if (best) break;
 
@@ -349,18 +349,16 @@ static plan *mkplan0(planner *ego, problem *p, slvdesc **descp)
 	      case 0: 
 		   /* skip pass 0 during exhaustive search */
 		   if (!NO_EXHAUSTIVEP(ego)) continue;
-		   nflags = NO_UGLY;
+		   nflags |= NO_UGLY;
 		   break;
 	      case 1:
 		   /* skip pass 1 if NO_UGLY */
 		   if (NO_UGLYP(ego)) continue;
-		   nflags = 0;
 		   break;
 	  }
 
           FORALL_SOLVERS(ego, s, sp, {
-	       plan *pln = invoke_solver(ego, p, s, 
-					 ego->planner_flags | nflags);
+	       plan *pln = invoke_solver(ego, p, s, nflags);
 
 	       if (pln) {
 		    X(plan_use)(pln);
@@ -396,10 +394,8 @@ static plan *mkplan(planner *ego, problem *p)
      slvdesc *sp;
      unsigned short flags;
 
-     /* Canonical form.  The invariant ``NO_UGLY -> NO_EXHAUSTIVEP''
-	is preserved by the planner, but the user may pass inconsistent
-	flags initially. */
-     if (NO_UGLYP(ego)) ego->planner_flags |= NO_EXHAUSTIVE;
+     /* Canonical form. */
+     if (~NO_EXHAUSTIVEP(ego)) ego->planner_flags &= ~NO_UGLY;
 	  
      ++ego->nprob;
      md5hash(&m, p, ego);
