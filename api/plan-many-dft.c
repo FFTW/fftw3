@@ -38,6 +38,6 @@ X(plan) X(plan_many_dft)(unsigned int rank, const unsigned int *n,
 	  flags,
 	  X(mkproblem_dft_d)(X(mktensor_rowmajor)(rank, n, inembed, onembed,
 						  2*istride, 2*ostride),
-			     X(mktensor_1d)(howmany, idist, odist), 
+			     X(mktensor_1d)(howmany, 2*idist, 2*odist), 
 			     ri, ii, ro, io));
 }
