@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.19 2003-01-09 06:43:13 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.20 2003-01-09 06:51:45 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -120,30 +120,6 @@ static int applicable0(const solver *ego_, const problem *p_, uint *dp)
      }
 
      return 0;
-}
-
-/* like X(tensor_max_index), but takes into account the special n/2+1
-   final dimension for the complex output/input of an R2HC/HC2R transform. */
-uint X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k)
-{
-     uint i;
-     uint n = 0;
-
-     A(FINITE_RNK(sz->rnk));
-     for (i = 0; i < sz->rnk - 1; ++i) {
-          const iodim *p = sz->dims + i;
-          n += (p->n - 1) * X(uimax)(X(iabs)(p->is), X(iabs)(p->os));
-     }
-     if (sz->rnk > 0) {
-	  const iodim *p = sz->dims + i;
-	  if (k == R2HC)
-	       n += X(uimax)((p->n - 1) * X(iabs)(p->is),
-			     (p->n/2) * X(iabs)(p->os));
-	  else /* HC2R */
-	       n += X(uimax)((p->n - 1) * X(iabs)(p->os),
-			     (p->n/2) * X(iabs)(p->is));
-     }
-     return n;
 }
 
 static int applicable(const solver *ego_, const problem *p_,
