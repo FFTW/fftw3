@@ -173,6 +173,7 @@ void setup(struct problem *p)
 #if 1
      {
 	  FILE *f;
+	  timer_start();
 	  if ((f = fopen("wis.dat", "r"))) {
 	       scanner *sc = X(mkscanner_file)(f);
 	       if (!plnr->adt->imprt(plnr, sc))
@@ -180,9 +181,11 @@ void setup(struct problem *p)
 	       X(scanner_destroy)(sc);
 	       fclose(f);
 	  }
+
+	  tplan = timer_stop();
 	  {
                printer *pr = X(mkprinter_file)(stdout);
-	       pr->print(pr, "READ WISDOM: ");
+	       pr->print(pr, "READ WISDOM (%g seconds): ", tplan);
                plnr->adt->exprt(plnr, pr);
 	       pr->print(pr, "\n");
                X(printer_destroy)(pr);
@@ -293,7 +296,6 @@ void setup(struct problem *p)
 	  plnr->flags |= ~BLESSING;
      }
 	  
-
      if (verbose) {
 	  printer *pr = FFTW(mkprinter_file) (stdout);
 	  pr->print(pr, "%p\nnprob %u  nplan %u\n",

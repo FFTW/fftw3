@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.110 2002-09-09 19:04:47 athena Exp $ */
+/* $Id: ifftw.h,v 1.111 2002-09-12 14:02:51 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -395,9 +395,11 @@ typedef struct slvdesc_s {
      struct slvdesc_s *cdr;
 } slvdesc;
 
-typedef struct solutions_s solutions; /* opaque */
+typedef struct solution_s solution; /* opaque */
 
-/* planner flags */
+/* planner flags. */
+/* make sure that flags fit in 16 bits, or otherwise change 
+   struct solution_s in planner.c */
 enum { 
      /* flags that influence whether problems are equivalent or not */
      CLASSIC_VRECURSE = 0x1,
@@ -440,11 +442,10 @@ struct planner_s {
      int cur_reg_id;
 
      slvdesc *solvers;
-     solutions **sols;
+     solution *sols;
      void (*destroy)(planner *ego);
      void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvdesc **);
-     uint hashsiz;
-     uint cnt;
+     uint hashsiz, cnt, nrehash;
      uint flags;
      uint nthr;
      int score;  /* see planner-score.c */
