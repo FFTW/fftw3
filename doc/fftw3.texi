@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.71 2003-03-03 04:39:54 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.73 2003-03-03 04:42:52 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1902,13 +1902,13 @@ any other dimension, but implementation turns out to be simpler if the
 last, contiguous, dimension is used.)
 
 @cindex out-of-place
-For an out-of-place transform, the real-data is simply an array with
+For an out-of-place transform, the real data is simply an array with
 physical dimensions @ndims in row-major order.
 
 @cindex in-place
 @cindex padding
-Since the complex data is slightly larger than the real data, some
-complications arise for in-place transforms.  In this case, the final
+For an in-place transform, some complications arise since the complex data
+is slightly larger than the real data.  In this case, the final
 dimension of the real data must be @emph{padded} with extra values to
 accommodate the size of the complex data---two extra if the last
 dimension is even and one if it is odd.  That is, the last dimension of
