@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.10 2002-08-19 23:56:29 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.11 2002-08-20 12:37:45 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -191,45 +191,70 @@ let twiddle_policy_load_all =
   and twdesc r = [(TW_FULL, 0, r);(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
+let load_set t n = match (n, t) with
+| (4, 1) -> [1;] (* 38 *)
+| (4, 2) -> [1;3;] (* 16 *)
+| (4, 3) -> [1;2;3;] (* 6 *)
+| (8, 1) -> [1;] (* 238 *)
+| (8, 2) -> [2;3;] (* 104 *)
+| (8, 3) -> [1;3;4;] (* 58 *)
+| (8, 4) -> [1;2;3;5;] (* 46 *)
+| (8, 5) -> [1;2;3;5;7;] (* 34 *)
+| (8, 6) -> [1;2;3;4;5;7;] (* 24 *)
+| (8, 7) -> [1;2;3;4;5;6;7;] (* 14 *)
+| (16, 1) -> [1;] (* 1150 *)
+| (16, 2) -> [3;5;] (* 366 *)
+| (16, 3) -> [1;4;5;] (* 244 *)
+| (16, 4) -> [1;5;6;7;] (* 192 *)
+| (16, 5) -> [1;2;5;6;7;] (* 152 *)
+| (16, 6) -> [1;2;3;5;7;8;] (* 130 *)
+| (16, 7) -> [1;3;4;5;6;7;9;] (* 116 *)
+| (32, 1) -> [1;] (* 4980 *)
+| (32, 2) -> [5;6;] (* 1154 *)
+| (32, 3) -> [7;8;10;] (* 832 *)
+| (32, 4) -> [2;7;9;10;] (* 646 *)
+| (32, 5) -> [1;8;9;10;14;] (* 542 *)
+| (32, 6) -> [1;4;10;11;14;15;] (* 460 *)
+| (32, 7) -> [1;3;4;11;12;14;15;] (* 386 *)
+| (64, 1) -> [1;] (* 20482 *)
+| (64, 2) -> [7;9;] (* 3466 *)
+| (64, 3) -> [8;15;18;] (* 2338 *)
+| (64, 4) -> [4;11;15;21;] (* 1848 *)
+| (64, 5) -> [2;15;17;20;29;] (* 1566 *)
+| (64, 6) -> [3;4;16;17;20;21;] (* 1384 *)
+| _ -> failwith "unknown addition chain"
+
+let load_set_log3 n = 
+  let t = match n with
+    | 2 -> 1
+    | 4 -> 2
+    | 8 -> 3
+    | 16 -> 4
+    | 32 -> 4
+    | 64 -> 5
+    | _ -> failwith "unknown addition chain"
+  in load_set t n
+
 let twiddle_policy_addition_chain t =
-  let load_set n = match (n, t) with
-  | (4, 1) -> [1;] (* 38 *)
-  | (4, 2) -> [1;3;] (* 16 *)
-  | (4, 3) -> [1;2;3;] (* 6 *)
-  | (8, 1) -> [1;] (* 238 *)
-  | (8, 2) -> [2;3;] (* 104 *)
-  | (8, 3) -> [1;3;4;] (* 58 *)
-  | (8, 4) -> [1;2;3;5;] (* 46 *)
-  | (8, 5) -> [1;2;3;5;7;] (* 34 *)
-  | (8, 6) -> [1;2;3;4;5;7;] (* 24 *)
-  | (8, 7) -> [1;2;3;4;5;6;7;] (* 14 *)
-  | (16, 1) -> [1;] (* 1150 *)
-  | (16, 2) -> [3;5;] (* 366 *)
-  | (16, 3) -> [1;4;5;] (* 244 *)
-  | (16, 4) -> [1;5;6;7;] (* 192 *)
-  | (16, 5) -> [1;2;5;6;7;] (* 152 *)
-  | (16, 6) -> [1;2;3;5;7;8;] (* 130 *)
-  | (16, 7) -> [1;3;4;5;6;7;9;] (* 116 *)
-  | (32, 1) -> [1;] (* 4980 *)
-  | (32, 2) -> [5;6;] (* 1154 *)
-  | (32, 3) -> [7;8;10;] (* 832 *)
-  | (32, 4) -> [2;7;9;10;] (* 646 *)
-  | (32, 5) -> [1;8;9;10;14;] (* 542 *)
-  | (32, 6) -> [1;4;10;11;14;15;] (* 460 *)
-  | (32, 7) -> [1;3;4;11;12;14;15;] (* 386 *)
-  | (64, 1) -> [1;] (* 20482 *)
-  | (64, 2) -> [7;9;] (* 3466 *)
-  | (64, 3) -> [8;15;18;] (* 2338 *)
-  | (64, 4) -> [4;11;15;21;] (* 1848 *)
-  | _ -> failwith "unknown addition chain"
-  in
   let bytwiddle n sign w f =
-    let g = addition_chain n (load_set n) (load_reim sign w) 2 18 10 8 in
+    let g = addition_chain n (load_set t n) (load_reim sign w) 2 18 10 8 in
     fun i -> Complex.times (g i) (f i)    
-  and twidlen n = 2 * List.length (load_set n)
+  and twidlen n = 2 * List.length (load_set t n)
   and twdesc r = 
     List.flatten (List.map (fun i -> [(TW_COS, 0, i); (TW_SIN, 0, i)])
-		    (load_set r))
+		    (load_set t r))
+    @ [(TW_NEXT, 1, 0)]
+  in bytwiddle, twidlen, twdesc
+
+let twiddle_policy_addition_chain_log3 =
+  let bytwiddle n sign w f =
+    let g = addition_chain n 
+	(load_set_log3 n) (load_reim sign w) 2 18 10 8 in
+    fun i -> Complex.times (g i) (f i)    
+  and twidlen n = 2 * List.length (load_set_log3 n)
+  and twdesc r = 
+    List.flatten (List.map (fun i -> [(TW_COS, 0, i); (TW_SIN, 0, i)])
+		    (load_set_log3 r))
     @ [(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
@@ -395,5 +420,7 @@ let speclist = [
   "-twiddle-square3", set_policy twiddle_policy_square3, undocumented;
   "-twiddle-ooura", set_policy twiddle_policy_ooura, undocumented;
   "-twiddle-addchain", set_policy_int twiddle_policy_addition_chain, 
+  undocumented;
+  "-twiddle-addchain-log3", set_policy twiddle_policy_addition_chain_log3, 
   undocumented;
 ] 

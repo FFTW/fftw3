@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: trig.c,v 1.8 2002-08-13 15:42:41 athena Exp $ */
+/* $Id: trig.c,v 1.9 2002-08-20 12:37:45 athena Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
@@ -53,6 +53,7 @@ static trigreal sin2pi0(trigreal m, trigreal n);
 static trigreal cos2pi0(trigreal m, trigreal n)
 {
      if (m < 0) return cos2pi0(-m, n);
+     while (m >= n) m -= n;
      if (m > n * 0.5) return cos2pi0(n - m, n);
      if (m > n * 0.25) return -sin2pi0(m - n * 0.25, n);
      if (m > n * 0.125) return sin2pi0(n * 0.25 - m, n);
@@ -62,6 +63,7 @@ static trigreal cos2pi0(trigreal m, trigreal n)
 static trigreal sin2pi0(trigreal m, trigreal n)
 {
      if (m < 0) return -sin2pi0(-m, n);
+     while (m >= n) m -= n;
      if (m > n * 0.5) return -sin2pi0(n - m, n);
      if (m > n * 0.25) return cos2pi0(m - n * 0.25, n);
      if (m > n * 0.125) return cos2pi0(n * 0.25 - m, n);
