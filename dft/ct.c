@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.36 2003-05-20 00:12:36 athena Exp $ */
+/* $Id: ct.c,v 1.37 2003-05-24 11:05:34 athena Exp $ */
 
 #include "dft.h"
 
@@ -85,19 +85,52 @@ static void print(const plan *ego_, printer *p)
 	      ego->r, ego->cldw, ego->cld);
 }
 
-#define divides(a, b) (((int)(b) % (int)(a)) == 0)
-static int choose_radix(const S *ego, int n, int *rp)
+static int isqrt(int n)
 {
-     int r = ego->r;
-     const int *p;
-     if (r == 0) {
-	  r = X(first_divisor)(n);
-	  for (p = ego->buddies; *p; ++p)
-	       if (*p == r) return 0; /* ignore if buddy exists with
-					 the same radix */
+     int guess, iguess;
+
+     A(n >= 1);
+     guess = n; iguess = 1;
+
+     do {
+          guess = (guess + iguess) / 2;
+	  iguess = n / guess;
+     } while (guess > iguess);
+
+     return (guess * guess == n) ? guess : 0;
+}
+
+#define divides(a, b) (((int)(b) % (int)(a)) == 0)
+static int really_choose_radix(int r, int n)
+{
+     if (r > 0) {
+	  if (divides(r, n)) return r;
+	  return 0;
+     } else if (r == 0) {
+	  return X(first_divisor)(n);
+     } else {
+	  /* r is negative.  If n = (-r) * q^2, take q as the radix */
+	  r = -r;
+	  return (n > r && divides(r, n)) ? isqrt(n / r) : 0;
      }
-     *rp = r;
-     return 1;
+}
+
+static int choose_radix(const S *ego, int n)
+{
+     const int *p;
+     int r = really_choose_radix(ego->r, n);
+
+     /* see if a buddy with a lower index would produce the same
+	radix.  If so, fail */
+     if (r) {
+	  for (p = ego->buddies; *p != ego->r; ++p)
+	       if (really_choose_radix(*p, n) == r) 
+		    return 0; 
+     }
+
+     A(r >= 0);
+     A(r || divides(r, n));
+     return r;
 }
 
 static int applicable0(const S *ego, const problem *p_, planner *plnr)
@@ -115,9 +148,8 @@ static int applicable0(const S *ego, const problem *p_, planner *plnr)
 		      p->ri == p->ro || 
 		      DESTROY_INPUTP(plnr))
 		  
-		  && choose_radix(ego, p->sz->dims[0].n, &r)
-		  && p->sz->dims[0].n > r
-                  && divides(r, p->sz->dims[0].n));
+		  && ((r = choose_radix(ego, p->sz->dims[0].n)) > 0)
+		  && p->sz->dims[0].n > r);
      }
      return 0;
 }
@@ -159,7 +191,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_dft *) p_;
      d = p->sz->dims;
      n = d[0].n;
-     choose_radix(ego, n, &r);
+     r = choose_radix(ego, n);
      m = n / r;
 
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
@@ -244,14 +276,16 @@ void X(dft_ct_register)(planner *p)
      const int *q;
      static const int r[] = {
 	  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64, 
-	  0
+
+	  0,  /* smallest prime factor */
+	  -1, /* 4-step */
+
+	  -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15,
+	  -16, -32, -64
      };
 
-     /* r = 0 : choose smallest prime factor */
-     REGISTER_SOLVER(p, mksolver(0, r, DECDIT));
-     REGISTER_SOLVER(p, mksolver(0, r, DECDIF));
 
-     for (q = r; *q; ++q) {
+     for (q = r; q < r + sizeof(r) / sizeof(r[0]); ++q) {
           REGISTER_SOLVER(p, mksolver(*q, r, DECDIT));
           REGISTER_SOLVER(p, mksolver(*q, r, DECDIF));
      }
