@@ -206,7 +206,7 @@ Definitely use the fma version if you have a PowerPC-based system with
 \courier{gcc\}.  This includes all GNU/Linux systems for PowerPC and
 all MacOS X systems.
 
-Definitely do not use the fma version if you have a ia-32 processor
+Definitely do not use the fma version if you have an ia-32 processor
 (Intel, AMD, etcetera).
 
 On other architectures, the situation is not so clear.  For example,
