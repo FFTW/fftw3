@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.13 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.14 2003-01-09 05:44:45 stevenj Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -27,11 +27,15 @@
 
 typedef struct {
      solver super;
+     int spltrnk;
+     const int *buddies;
+     uint nbuddies;
 } S;
 
 typedef struct {
      plan_dft super;
      plan *cldr, *cldc;
+     const S *solver;
 } P;
 
 static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
@@ -82,17 +86,31 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(rdft2-rank>=2%(%p%)%(%p%))", ego->cldr, ego->cldc);
+     const S *s = ego->solver;
+     p->print(p, "(rdft2-rank>=2/%d%(%p%)%(%p%))", 
+	      s->spltrnk, ego->cldr, ego->cldc);
 }
  
-static int applicable0(const solver *ego_, const problem *p_, 
+static int picksplit(const S *ego, const tensor *sz, uint *rp)
+{
+     A(sz->rnk > 1); /* cannot split rnk <= 1 */
+     if (!X(pickdim)(ego->spltrnk, ego->buddies, ego->nbuddies, sz, 1, rp))
+          return 0;
+     *rp += 1; /* convert from dim. index to rank */
+     if (*rp >= sz->rnk) /* split must reduce rank */
+          return 0;
+     return 1;
+}
+
+static int applicable0(const solver *ego_, const problem *p_, uint *rp,
 		       const planner *plnr)
 {
-     UNUSED(ego_);
      if (RDFT2P(p_)) {
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
+	  const S *ego = (const S *)ego_;
           return (1
                   && p->sz->rnk >= 2
+		  && picksplit(ego, p->sz, rp)
                   && (0
 
 		      /* can work out-of-place, but HC2R destroys input */
@@ -111,9 +129,17 @@ static int applicable0(const solver *ego_, const problem *p_,
 
 /* TODO: revise this. */
 static int applicable(const solver *ego_, const problem *p_, 
-		      const planner *plnr)
+		      const planner *plnr, uint *rp)
 {
-     if (!applicable0(ego_, p_, plnr)) return 0;
+     const S *ego = (const S *)ego_;
+
+     if (!applicable0(ego_, p_, rp, plnr)) return 0;
+
+     /* fixed spltrnk (unlike fftw2's spltrnk=1, default buddies[0] is
+        spltrnk=0, which is an asymptotic "theoretical optimum" for
+        an ideal cache; it's equivalent to spltrnk=1 for rnk < 4). */
+     if (NO_RANK_SPLITSP(plnr) && (ego->spltrnk != ego->buddies[0]))
+          return 0;
 
      if (NO_UGLYP(plnr)) {
 	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
@@ -131,10 +157,12 @@ static int applicable(const solver *ego_, const problem *p_,
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
+     const S *ego = (const S *) ego_;
      const problem_rdft2 *p;
      P *pln;
      plan *cldr = 0, *cldc = 0;
      tensor *sz1, *sz2, *vecszi, *sz2i;
+     uint spltrnk;
      inplace_kind k;
      problem *cldp;
 
@@ -142,16 +170,18 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(rdft2_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_, plnr))
+     if (!applicable(ego_, p_, plnr, &spltrnk))
           return (plan *) 0;
 
      p = (const problem_rdft2 *) p_;
-     X(tensor_split)(p->sz, &sz1, p->sz->rnk - 1, &sz2);
+     X(tensor_split)(p->sz, &sz1, spltrnk, &sz2);
 
      k = p->kind == R2HC ? INPLACE_OS : INPLACE_IS;
      vecszi = X(tensor_copy_inplace)(p->vecsz, k);
      sz2i = X(tensor_copy_inplace)(sz2, k);
-     sz2i->dims[0].n = sz2i->dims[0].n/2 + 1; /* complex data is ~half of real */
+
+     /* complex data is ~half of real */
+     sz2i->dims[sz2i->rnk - 1].n = sz2i->dims[sz2i->rnk - 1].n/2 + 1;
 
      cldr = X(mkplan_d)(plnr, 
 		       X(mkproblem_rdft2_d)(X(tensor_copy)(sz2),
@@ -175,6 +205,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cldr = cldr;
      pln->cldc = cldc;
 
+     pln->solver = ego;
      X(ops_add)(&cldr->ops, &cldc->ops, &pln->super.super.ops);
 
      X(tensor_destroy4)(sz2i, vecszi, sz2, sz1);
@@ -188,14 +219,25 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(void)
+static solver *mksolver(int spltrnk, const int *buddies, uint nbuddies)
 {
      static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
+     slv->spltrnk = spltrnk;
+     slv->buddies = buddies;
+     slv->nbuddies = nbuddies;
      return &(slv->super);
 }
 
 void X(rdft2_rank_geq2_register)(planner *p)
 {
-     REGISTER_SOLVER(p, mksolver());
+     uint i;
+     static const int buddies[] = { 0, 1, -2 };
+
+     const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
+
+     for (i = 0; i < nbuddies; ++i)
+          REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));
+
+     /* FIXME: Should we try more buddies?  See also dft/rank-geq2. */
 }
