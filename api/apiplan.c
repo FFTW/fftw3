@@ -34,7 +34,6 @@ WITH_ALIGNED_STACK({
      X(mapflags)(plnr, flags);
 
      /* create plan */
-     plnr->planner_flags &= ~BLESSING;
      pln = plnr->adt->mkplan(plnr, prb);
 
      plnr->timelimit = timelimit;
@@ -61,6 +60,8 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
      plnr->timelimit = X(seconds)() + ((flags & FFTW_TIMELIMIT)
 				       ? X(timelimit) : 1e30);
 	  
+     plnr->planner_flags &= ~BLESSING;
+
      /* plan at incrementally increasing patience until we run out of time */
      do {
 	  plan *pln1 = mkplan(plnr, sign, flags | pats[pat], prb);
