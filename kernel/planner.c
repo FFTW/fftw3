@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.158 2005-01-09 13:52:40 athena Exp $ */
+/* $Id: planner.c,v 1.159 2005-01-15 21:35:42 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -334,6 +334,15 @@ static void invoke_hook(planner *ego, plan *pln, const problem *p,
 	  ego->hook(ego, pln, p, optimalp);
 }
 
+double X(iestimate_cost)(const plan *pln)
+{
+     return 0.0
+	  + pln->ops.add
+	  + pln->ops.mul
+	  + 2 * pln->ops.fma
+	  + pln->ops.other;
+}
+
 static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 {
      if (!BELIEVE_PCOSTP(ego) || pln->pcost == 0.0) {
@@ -342,11 +351,7 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 	  if (ESTIMATEP(ego)) {
 	  estimate:
 	       /* heuristic */
-	       pln->pcost = 0.0
-		    + pln->ops.add
-		    + pln->ops.mul
-		    + 2 * pln->ops.fma
-		    + pln->ops.other;
+	       pln->pcost = X(iestimate_cost)(pln);
 	       ego->epcost += pln->pcost;
 	  } else {
 	       double t = X(measure_execution_time)(pln, p);

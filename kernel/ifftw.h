@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.242 2005-01-09 13:15:36 athena Exp $ */
+/* $Id: ifftw.h,v 1.243 2005-01-15 21:35:42 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -712,6 +712,7 @@ void X(rader_tl_delete)(R *W, rader_tl **tl);
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
 void X(null_awake)(plan *ego, int awake);
+double X(iestimate_cost)(const plan *pln);
 double X(measure_execution_time)(plan *pln, const problem *p);
 int X(alignment_of)(R *p);
 unsigned X(hash)(const char *s);

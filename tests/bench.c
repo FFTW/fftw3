@@ -650,7 +650,6 @@ int can_do(bench_problem *p)
      return 0;
 }
 
-
 void setup(bench_problem *p)
 {
      double tim;
@@ -682,6 +681,7 @@ void setup(bench_problem *p)
 	  printf("\n");
 	  FFTW(flops)(the_plan, &add, &mul, &fma);
 	  printf("flops: %0.0f add, %0.0f mul, %0.0f fma\n", add, mul, fma);
+	  printf("estimated cost: %f\n", FFTW(estimate_cost)(the_plan));
      }
 }
 

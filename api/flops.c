@@ -25,3 +25,8 @@ void X(flops)(const X(plan) p, double *add, double *mul, double *fma)
      opcnt *o = &p->pln->ops;
      *add = o->add; *mul = o->mul; *fma = o->fma;
 }
+
+double X(estimate_cost)(const X(plan) p)
+{
+     return X(iestimate_cost)(p->pln);
+}
