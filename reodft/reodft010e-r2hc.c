@@ -18,9 +18,9 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.1 2002-08-19 23:40:18 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.2 2002-08-19 23:45:35 stevenj Exp $ */
 
-/* Do a R{E,O}DFT{01,10} problem via an R2HC problem, with some
+/* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
 
 #include "reodft.h"
@@ -245,9 +245,6 @@ static void apply_ro10(plan *ego_, R *I, R *O)
 	  buf[i] = -I[is * (n - 1)];
      }
 
-     /* r2hc transform (would normally be hc2r, but used trick
-	from r2hc-hc2r.c to re-express in terms of r2hc so that
-	child plans can be shared with apply01). */
      {
 	  plan_rdft *cld = (plan_rdft *) ego->cld;
 	  cld->apply((plan *) cld, buf, buf);
