@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.14 2003-05-06 16:17:56 stevenj Exp $ */
+/* $Id: timer.c,v 1.15 2003-05-07 18:24:46 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -95,75 +95,85 @@ typedef seconds ticks;
 #  define elapsed elapsed_sec
 #  define TIME_MIN TIME_MIN_SEC
 #  define TIME_REPEAT 4 /* from fftw2 */
+#  define HAVE_TICK_COUNTER
 #endif
 
-#if !defined(HAVE_TICK_COUNTER) && !defined(WITHOUT_CYCLE_COUNTER)
-#  error "Don't know a cycle counter for this system."
+#ifdef HAVE_TICK_COUNTER
+
+#  ifndef TIME_MIN
+#    define TIME_MIN 100.0
+#  endif
+
+#  ifndef TIME_REPEAT
+#    define TIME_REPEAT 8
+#  endif
+
+  static double measure(plan *pln, const problem *p, int iter)
+  {
+       ticks t0, t1;
+       int i;
+
+       t0 = getticks();
+       for (i = 0; i < iter; ++i) 
+	    pln->adt->solve(pln, p);
+       t1 = getticks();
+       return elapsed(t1, t0);
+  }
+
+
+  double X(measure_execution_time)(plan *pln, const problem *p)
+  {
+       seconds begin, now;
+       double t, tmax, tmin;
+       int iter;
+       int repeat;
+
+       AWAKE(pln, 1);
+       p->adt->zero(p);
+
+  start_over:
+       for (iter = 1; iter; iter *= 2) {
+	    tmin = 1.0E10;
+	    tmax = -1.0E10;
+
+	    begin = getseconds();
+	    /* repeat the measurement TIME_REPEAT times */
+	    for (repeat = 0; repeat < TIME_REPEAT; ++repeat) {
+		 t = measure(pln, p, iter);
+
+		 if (t < 0)
+		      goto start_over;
+
+		 if (t < tmin)
+		      tmin = t;
+		 if (t > tmax)
+		      tmax = t;
+
+		 /* do not run for too long */
+		 now = getseconds();
+		 t = elapsed_sec(now, begin);
+
+		 if (t > FFTW_TIME_LIMIT)
+		      break;
+	    }
+
+	    if (tmin >= TIME_MIN) {
+		 tmin /= (double) iter;
+		 tmax /= (double) iter;
+		 AWAKE(pln, 0);
+		 return tmin;
+	    }
+       }
+       goto start_over; /* may happen if timer is screwed up */
+  }
+
+#else /* no cycle counter */
+
+  double X(measure_execution_time)(plan *pln, const problem *p)
+  {
+       UNUSED(p);
+       UNUSED(pln);
+       return -1.0;
+  }
+
 #endif
-
-#ifndef TIME_MIN
-#  define TIME_MIN 100.0
-#endif
-
-#ifndef TIME_REPEAT
-#  define TIME_REPEAT 8
-#endif
-
-static double measure(plan *pln, const problem *p, int iter)
-{
-     ticks t0, t1;
-     int i;
-
-     t0 = getticks();
-     for (i = 0; i < iter; ++i) 
-          pln->adt->solve(pln, p);
-     t1 = getticks();
-     return elapsed(t1, t0);
-}
-
-
-double X(measure_execution_time)(plan *pln, const problem *p)
-{
-     seconds begin, now;
-     double t, tmax, tmin;
-     int iter;
-     int repeat;
-
-     AWAKE(pln, 1);
-     p->adt->zero(p);
-
- start_over:
-     for (iter = 1; iter; iter *= 2) {
-          tmin = 1.0E10;
-          tmax = -1.0E10;
-
-          begin = getseconds();
-          /* repeat the measurement TIME_REPEAT times */
-          for (repeat = 0; repeat < TIME_REPEAT; ++repeat) {
-               t = measure(pln, p, iter);
-
-               if (t < 0)
-                    goto start_over;
-
-               if (t < tmin)
-                    tmin = t;
-               if (t > tmax)
-                    tmax = t;
-
-               /* do not run for too long */
-               now = getseconds();
-               t = elapsed_sec(now, begin);
-
-               if (t > FFTW_TIME_LIMIT)
-                    break;
-          }
-
-          if (tmin >= TIME_MIN) {
-               tmin /= (double) iter;
-               tmax /= (double) iter;
-               AWAKE(pln, 0);
-	       return tmin;
-          }
-     }
-     goto start_over; /* may happen if timer is screwed up */
-}

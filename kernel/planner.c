@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.151 2003-04-09 14:13:00 athena Exp $ */
+/* $Id: planner.c,v 1.152 2003-05-07 18:24:46 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -326,7 +326,9 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 {
      if (!BELIEVE_PCOSTP(ego) || pln->pcost == 0.0) {
 	  ego->nplan++;
+
 	  if (ESTIMATEP(ego)) {
+	  estimate:
 	       /* heuristic */
 	       pln->pcost = 0.0
 		    + pln->ops.add
@@ -335,8 +337,15 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 		    + pln->ops.other;
 	       ego->epcost += pln->pcost;
 	  } else {
-	       pln->pcost = X(measure_execution_time)(pln, p);
-	       ego->pcost += pln->pcost;
+	       double t = X(measure_execution_time)(pln, p);
+
+	       if (t < 0) {  /* unavailable cycle counter */
+		    /* Real programmers can write FORTRAN in any language */
+		    goto estimate;
+	       }
+
+	       pln->pcost = t;
+	       ego->pcost += t;
 	  }
      }
      
@@ -616,6 +625,7 @@ planner *X(mkplanner)(void)
      p->problem_flags = 0;
      p->planner_flags = 0;
      p->nthr = 1;
+
      hgrow(p);			/* so that hashsiz > 0 */
 
      return p;
