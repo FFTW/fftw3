@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: taint.c,v 1.2 2003-04-05 00:36:46 athena Exp $ */
+/* $Id: taint.c,v 1.3 2003-04-10 19:36:18 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -34,4 +34,11 @@ R *X(taint)(R *p, int s)
      return p;
 }
 
+/* join the taint of two pointers that are supposed to be
+   the same modulo the taint */
+R *X(join_taint)(R *p1, R *p2)
+{
+     A(UNTAINT(p1) == UNTAINT(p2));
+     return (R *)(PTRINT(p1) | PTRINT(p2));
+}
 #endif

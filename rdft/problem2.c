@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.30 2003-04-05 14:29:11 athena Exp $ */
+/* $Id: problem2.c,v 1.31 2003-04-10 19:36:17 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -100,11 +100,14 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
      A(X(tensor_kosherp)(vecsz));
      A(FINITE_RNK(sz->rnk));
 
-     /* conditions for correctness. */
+     if (UNTAINT(r) == UNTAINT(rio))
+	  r = rio = JOIN_TAINT(r, rio);
+     if (UNTAINT(r) == UNTAINT(iio))
+	  r = iio = JOIN_TAINT(r, iio);
+
+     /* correctness condition: */
      /* FIXME: use A instead of CK */
      CK(TAINTOF(rio) == TAINTOF(iio));
-     CK(UNTAINT(r) != UNTAINT(rio) || r == rio);
-     CK(UNTAINT(r) != UNTAINT(iio) || r == iio);
 
      if (sz->rnk > 1) { /* have to compress rnk-1 dims separately, ugh */
 	  tensor *szc = X(tensor_copy_except)(sz, sz->rnk - 1);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.46 2003-04-05 14:29:11 athena Exp $ */
+/* $Id: problem.c,v 1.47 2003-04-10 19:36:17 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -149,9 +149,8 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
      A(X(tensor_kosherp)(vecsz));
      A(FINITE_RNK(sz->rnk));
 
-     /* conditions for correctness. */
-     /* FIXME: use A instead of CK */
-     CK(UNTAINT(I) != UNTAINT(O) || I == O);
+     if (UNTAINT(I) == UNTAINT(O))
+	  I = O = JOIN_TAINT(I, O);
 
      for (i = rnk = 0; i < sz->rnk; ++i) {
           A(sz->dims[i].n > 0);

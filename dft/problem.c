@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.32 2003-04-05 14:29:11 athena Exp $ */
+/* $Id: problem.c,v 1.33 2003-04-10 19:36:15 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -89,12 +89,16 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
      A(X(tensor_kosherp)(sz));
      A(X(tensor_kosherp)(vecsz));
 
-     /* conditions for correctness. */
+     /* enforce pointer equality if untainted pointers are equal */
+     if (UNTAINT(ri) == UNTAINT(ro))
+	  ri = ro = JOIN_TAINT(ri, ro);
+     if (UNTAINT(ii) == UNTAINT(io))
+	  ii = io = JOIN_TAINT(ii, io);
+
+     /* more correctness conditions: */
      /* FIXME: use A instead of CK */
      CK(TAINTOF(ri) == TAINTOF(ii));
      CK(TAINTOF(ro) == TAINTOF(io));
-     CK(UNTAINT(ri) != UNTAINT(ro) || ri == ro);
-     CK(UNTAINT(ii) != UNTAINT(io) || ii == io);
 
      ego->sz = X(tensor_compress)(sz);
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
