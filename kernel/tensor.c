@@ -18,16 +18,16 @@
  *
  */
 
-/* $Id: tensor.c,v 1.18 2002-08-12 17:31:37 stevenj Exp $ */
+/* $Id: tensor.c,v 1.19 2002-08-22 13:11:34 athena Exp $ */
 
 #include "ifftw.h"
 
-static inline int imax(int a, int b)
+static int imax(int a, int b)
 {
      return (a > b) ? a : b;
 }
 
-static inline int imin(int a, int b)
+static int imin(int a, int b)
 {
      return (a < b) ? a : b;
 }

@@ -68,7 +68,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 		    rb += xr * wr - xi * wi;
 		    ib += xr * wi + xi * wr;
 		    iw += iw_inc;
-		    iw -= n & (- (iw > n));
+		    if (iw > n) iw -= n;
 	       }
 	       buf[2*k] = rb;
 	       buf[2*k+1] = ib;

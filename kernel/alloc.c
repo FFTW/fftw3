@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.14 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: alloc.c,v 1.15 2002-08-22 13:11:34 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -28,7 +28,7 @@
 
 #define real_free free /* memalign and malloc use ordinary free */
 
-static inline void *real_malloc(size_t n)
+static void *real_malloc(size_t n)
 {
      void *p;
 

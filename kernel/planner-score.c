@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.14 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: planner-score.c,v 1.15 2002-08-22 13:11:34 athena Exp $ */
 #include "ifftw.h"
 
 typedef struct {
@@ -32,7 +32,7 @@ static void visit(visit_closure *k_, plan *p)
      if (p->score < k->sc) k->sc = p->score; 
 }
 
-static inline void adjust_score(plan *pln)
+static void adjust_score(plan *pln)
 {
      adjclosure k;
      k.super.visit = visit;
