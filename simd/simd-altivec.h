@@ -23,7 +23,7 @@
 #endif
 
 #define VL 2            /* SIMD complex vector length */
-#define ALIGNMENT 16
+#define ALIGNMENT 8     /* we do our own alignment */
 
 #ifndef __VEC__
 
