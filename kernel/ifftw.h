@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.188 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.189 2003-03-02 12:11:56 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -718,5 +718,7 @@ static __inline__ E FNMS(E a, E b, E c)
 #define FMS(a, b, c) (((a) * (b)) - (c))
 #define FNMS(a, b, c) ((c) - ((a) * (b)))
 #endif
+
+#define MAYBE_INLINE
 
 #endif /* __IFFTW_H__ */
