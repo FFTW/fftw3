@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.182 2003-04-03 01:30:10 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.183 2003-04-03 01:32:07 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3319,7 +3319,8 @@ Y[k] = X[0] + (-1)^k X[n-1] + 2 (sum for j = 1 to n-2 of X[j] cos(pi jk /(n-1)))
 @html
 <center><img src="equation-redft00.png" align="top">.</center>
 @end html
-Note that this transform is not defined for @math{n=1}.
+Note that this transform is not defined for @math{n=1}.  For @math{n=2},
+the summation term above is dropped as you might expect.
 
 @subsubheading REDFT10 (DCT-II)
 @ctindex REDFT10
