@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.137 2003-03-14 10:38:26 athena Exp $
+@comment $Id: fftw3.texi,v 1.138 2003-03-14 10:58:53 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -388,18 +388,18 @@ references.
 The rest of this manual is organized as follows.  We first discuss the
 sequential (single-processor) implementation.  We start by describing
 the basic interface/features of FFTW in @ref{Tutorial}.  The following
-chapter discusses @ref{Other Stuff You Should Know}, including @ref{The
-Importance of Alignment}, the storage scheme of multi-dimensional arrays
+chapter discusses @ref{Other Important Topics}, including @ref{Data
+Alignment}, the storage scheme of multi-dimensional arrays
 (@pxref{Multi-dimensional Array Format}), and FFTW's mechanism for
 storing plans on disk (@pxref{Words of Wisdom-Saving Plans}).  Next,
-@ref{FFTW Reference} provides comprehensive documentation of all FFTW's
-features.  Parallel transforms are discussed in their own chapter
-@ref{Parallel FFTW}.  Fortran programmers can also use FFTW, as
-described in @ref{Calling FFTW from Fortran}.  @ref{Installation and
-Customization} explains how to install FFTW in your computer system and
-how to adapt FFTW to your needs.  License and copyright information is
-given in @ref{License and Copyright}.  Finally, we thank all the people
-who helped us in @ref{Acknowledgments}.
+@ref{FFTW Reference} provides comprehensive documentation of all
+FFTW's features.  Parallel transforms are discussed in their own
+chapter @ref{Parallel FFTW}.  Fortran programmers can also use FFTW,
+as described in @ref{Calling FFTW from Fortran}.  @ref{Installation
+and Customization} explains how to install FFTW in your computer
+system and how to adapt FFTW to your needs.  License and copyright
+information is given in @ref{License and Copyright}.  Finally, we
+thank all the people who helped us in @ref{Acknowledgments}.
 
 @c ************************************************************
 @node  Tutorial, Other Important Topics, Introduction, Top
@@ -1605,7 +1605,7 @@ void fftw_free(void *p);
 These are functions that behave identically to @code{malloc} and
 @code{free}, except that they guarantee that the returned pointer obeys
 any special alignment restrictions imposed by any algorithm in FFTW
-(e.g. for SIMD acceleration).  @xref{The Importance of Alignment}.
+(e.g. for SIMD acceleration).  @xref{Data Alignment}.
 @cindex alignment
 
 Data allocated by @code{fftw_malloc} @emph{must} be deallocated by
@@ -3588,9 +3588,9 @@ Fortran?}.
 
 @item
 Fortran cannot use the @code{fftw_malloc} dynamic-allocation routine.
-If you want to exploit the SIMD FFTW (@pxref{The Importance of
-Alignment}), you'll need to figure out some other way to ensure that
-your arrays are at least 16-byte aligned.
+If you want to exploit the SIMD FFTW (@pxref{Data Alignment}), you'll
+need to figure out some other way to ensure that your arrays are at
+least 16-byte aligned.
 
 @item
 @tindex fftw_iodim
