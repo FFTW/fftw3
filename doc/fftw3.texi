@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.43 2003-02-28 19:12:15 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.44 2003-02-28 19:36:45 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -21,6 +21,18 @@
 @defcodeindex fp
 @syncodeindex fp cp
 @comment %**end of header
+
+@macro Onlogn
+@ifinfo
+O(n log n)
+@end ifinfo
+@ifhtml
+<i>O</i>(<i>n</i>&nbsp;log&nbsp;<i>n</i>)
+@end ifhtml
+@tex
+$O(n \\log n)$
+@end tex
+@end macro
 
 @copying
 This manual is for FFTW
@@ -324,7 +336,7 @@ fftw_plan fftw_plan_dft_1d(int n, fftw_complex *in, fftw_complex *out,
 The first argument, @code{n}, is the size of the transform you are
 trying to compute.  The size @code{n} can be any positive integer, but
 sizes that are products of small factors are transformed most
-efficiently (although prime sizes still use an @math{O(n lg n)}
+efficiently (although prime sizes still use an @Onlogn
 algorithm).  The next two arguments are the input and output arrays of
 the transform; they can be the same, indicating an @dfn{in-place}
 transform.
@@ -523,7 +535,7 @@ big enough to hold both; so, the real array would actually have
 are unused padding.  The @math{k}th element of the complex array is
 exactly the same as the @math{k}th element of the corresponding complex
 DFT.  All positive @code{n} are supported; products of small factors are
-most efficient, but an @math{O(n lg n)} algorithm is used even for prime
+most efficient, but an @Onlogn algorithm is used even for prime
 sizes.
 
 As noted above, the c2r transform destroys its input array even for
@@ -751,7 +763,7 @@ supported (with the exception of @code{n=1} for the @code{FFTW_REDFT00}
 kind, noted in the real-even subsection below); products of small
 factors are most efficient (factorizing @code{n-1} and @code{n+1} for
 @code{FFTW_REDFT00} and @code{FFTW_RODFT00} kinds, described below), but
-an @math{O(n lg n)} algorithm is used even for prime sizes.
+an @Onlogn algorithm is used even for prime sizes.
 
 Each dimension has a @dfn{kind} parameter, of type
 @code{fftw_r2r_kind}, specifying the kind of r2r transform to be used
