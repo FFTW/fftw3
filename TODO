@@ -1,8 +1,4 @@
-* DCT/DST codelets?  which kinds?
-
 * user interface (& manual)
-
-* rdft2 rank-geq2 solver needs to use an arbitrary spltrnk.
 
 * --enable-long-double fails in verify().  The problem appears
   to be a bug in gcc-2.95 -malign-double.  The problem disappears
@@ -44,6 +40,8 @@ TODO before/at release:
 TODO before FFTW-$2\pi$:
 
 * MPI version
+
+* DCT/DST codelets?  which kinds?
 
 * investigate the addition-chain trig computation
 
