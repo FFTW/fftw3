@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.84 2003-03-03 22:07:27 fftw Exp $
+@comment $Id: fftw3.texi,v 1.85 2003-03-03 22:16:17 fftw Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1806,7 +1806,7 @@ of one number (with zero imaginary part) from input to output.
 respectively, gives the size of the @emph{logical} transform dimensions.
 They can be any positive integer.  This is different in general from the
 @emph{physical} array dimensions, which are described in @ref{Real-data
-DFT array format}.
+DFT Array Format}.
  
 @itemize @minus
 @item
@@ -1839,7 +1839,7 @@ These arrays are overwritten during planning, unless
 @code{FFTW_ESTIMATE} is used in the flags.  (The arrays need not be
 initialized, but they must be allocated.)  For an in-place transform, it
 is important to remember that the real array will require padding,
-described in @ref{Real-data DFT array format}.
+described in @ref{Real-data DFT Array Format}.
 @cindex padding
 
 @item
