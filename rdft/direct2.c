@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.6 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: direct2.c,v 1.7 2002-09-22 16:25:20 athena Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -74,7 +74,6 @@ static void destroy(plan *ego_)
      P *ego = (P *) ego_;
      X(stride_destroy)(ego->is);
      X(stride_destroy)(ego->os);
-     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)

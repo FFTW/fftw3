@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.24 2002-09-22 15:08:57 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.25 2002-09-22 16:25:20 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -75,7 +75,6 @@ static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      X(plan_destroy)(ego->cld);
-     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop.c,v 1.5 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: nop.c,v 1.6 2002-09-22 16:25:20 athena Exp $ */
 
 /* plans for vrank -infty RDFTs (nothing to do) */
 
@@ -51,11 +51,6 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static void destroy(plan *ego)
-{
-     X(free)(ego);
-}
-
 static void print(plan *ego, printer *p)
 {
      UNUSED(ego);
@@ -65,7 +60,7 @@ static void print(plan *ego, printer *p)
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
      static const plan_adt padt = {
-	  X(rdft_solve), X(null_awake), print, destroy
+	  X(rdft_solve), X(null_awake), print, X(plan_null_destroy)
      };
      plan_rdft *pln;
 

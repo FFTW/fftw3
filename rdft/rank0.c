@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.6 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: rank0.c,v 1.7 2002-09-22 16:25:20 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -141,11 +141,6 @@ static const rnk0adt adt_io1 =
 
 /*-----------------------------------------------------------------------*/
 /* generic stuff: */
-static void destroy(plan *ego_)
-{
-     P *ego = (P *) ego_;
-     X(free)(ego);
-}
 
 static void print(plan *ego_, printer *p)
 {
@@ -162,7 +157,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      int is, os;
 
      static const plan_adt padt = {
-	  X(rdft_solve), X(null_awake), print, destroy
+	  X(rdft_solve), X(null_awake), print, X(plan_null_destroy)
      };
 
      UNUSED(plnr);

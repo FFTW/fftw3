@@ -198,7 +198,6 @@ static void destroy(plan *ego_)
      X(plan_destroy)(ego->cld_omega);
      X(plan_destroy)(ego->cld2);
      X(plan_destroy)(ego->cld1);
-     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)
@@ -323,12 +322,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
  nada:
      if (buf)
           X(free)(buf);
-     if (cld_omega)
-          X(plan_destroy)(cld_omega);
-     if (cld2)
-          X(plan_destroy)(cld2);
-     if (cld1)
-          X(plan_destroy)(cld1);
+     X(plan_destroy)(cld_omega);
+     X(plan_destroy)(cld2);
+     X(plan_destroy)(cld1);
      return 0;
 }
 

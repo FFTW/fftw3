@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.14 2002-09-22 15:08:57 athena Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.15 2002-09-22 16:25:20 athena Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -280,7 +280,6 @@ static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      X(plan_destroy)(ego->cld);
-     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)

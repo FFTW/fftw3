@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.27 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: direct.c,v 1.28 2002-09-22 16:25:20 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -51,7 +51,6 @@ static void destroy(plan *ego_)
      P *ego = (P *) ego_;
      X(stride_destroy)(ego->is);
      X(stride_destroy)(ego->os);
-     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)

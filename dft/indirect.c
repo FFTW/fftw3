@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.28 2002-09-22 15:08:57 athena Exp $ */
+/* $Id: indirect.c,v 1.29 2002-09-22 16:25:20 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -111,7 +111,6 @@ static void destroy(plan *ego_)
      P *ego = (P *) ego_;
      X(plan_destroy)(ego->cld);
      X(plan_destroy)(ego->cldcpy);
-     X(free)(ego);
 }
 
 static void awake(plan *ego_, int flg)
@@ -212,10 +211,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     if (cld)
-          X(plan_destroy)(cld);
-     if (cldcpy)
-          X(plan_destroy)(cldcpy);
+     X(plan_destroy)(cld);
+     X(plan_destroy)(cldcpy);
      return (plan *)0;
 }
 

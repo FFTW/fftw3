@@ -250,7 +250,6 @@ static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      X(plan_destroy)(ego->cld);
-     X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)
@@ -350,8 +349,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     if (cld)
-          X(plan_destroy)(cld);
+     X(plan_destroy)(cld);
      if (pln)
 	  X(free)(pln);
      return (plan *) 0;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.149 2002-09-22 15:08:57 athena Exp $ */
+/* $Id: ifftw.h,v 1.150 2002-09-22 16:25:20 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -58,7 +58,6 @@ typedef fftw_real R;
 #define FFT_SIGN (-1)  /* sign convention for forward transforms */
 
 /* get rid of that object-oriented stink: */
-#define DESTROY(thing) ((thing)->adt->destroy)(thing)
 #define REGISTER_SOLVER(p, s) ((p)->adt->register_solver)((p), (s))
 
 #define STRINGIZEx(x) #x
@@ -369,6 +368,7 @@ void X(plan_use)(plan *ego);
 void X(plan_destroy)(plan *ego);
 void X(plan_awake)(plan *ego, int flag);
 #define AWAKE(plan, flag) X(plan_awake)(plan, flag)
+void X(plan_null_destroy)(plan *ego);
 
 /*-----------------------------------------------------------------------*/
 /* solver.c: */

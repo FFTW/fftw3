@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.12 2002-09-22 15:08:57 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.13 2002-09-22 16:25:20 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -388,7 +388,6 @@ static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      X(plan_destroy) (ego->cld);
-     X(free) (ego);
 }
 
 static void print(plan *ego_, printer * p)

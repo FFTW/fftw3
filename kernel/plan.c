@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.14 2002-09-16 22:37:06 athena Exp $ */
+/* $Id: plan.c,v 1.15 2002-09-22 16:25:20 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -52,11 +52,19 @@ void X(plan_use)(plan *ego)
  */
 void X(plan_destroy)(plan *ego)
 {
-     if ((--ego->refcnt) == 0) {
+     if (ego && --ego->refcnt == 0) {
 	  if (ego->awake_refcnt > 0)
 	       ego->adt->awake(ego, 0);
-          DESTROY(ego);
+          ego->adt->destroy(ego);
+	  X(free)(ego);
      }
+}
+
+/* dummy destroy routine for plans with no local state */
+void X(plan_null_destroy)(plan *ego)
+{
+     UNUSED(ego);
+     /* nothing */
 }
 
 void X(plan_awake)(plan *ego, int flag)
