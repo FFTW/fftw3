@@ -199,6 +199,24 @@ fi
 
 dnl -----------------------------------------------------------------------
 
+AC_ARG_ENABLE(fortran, [  --disable-fortran       don't include fortran-callable wrappers], enable_fortran=$enableval, enable_fortran=yes)
+
+if test "$enable_fortran" = "yes"; then
+        AC_PROG_F77
+        if test -z "$F77"; then
+                enable_fortran=no
+                AC_MSG_WARN([*** Couldn't find f77 compiler; switching to --disable-fortran.])
+        fi
+	AC_F77_DUMMY_MAIN([], [enable_fortran=no
+		AC_MSG_WARN([*** Couldn't figure out how to link C and Fortran; switching to --disable-fortran.])])
+fi
+
+if test "x$enable_fortran" = xyes; then
+        AC_F77_WRAPPERS
+fi
+
+dnl -----------------------------------------------------------------------
+
 AC_ARG_ENABLE(threads, [AC_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
 
 AC_ARG_WITH(openmp, [AC_HELP_STRING([--with-openmp],[use OpenMP directives instead of a threads library])], with_openmp=$withval, with_openmp=no)
