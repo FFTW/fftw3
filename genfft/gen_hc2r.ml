@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r.ml,v 1.7 2002-07-20 21:51:06 athena Exp $ *)
+(* $Id: gen_hc2r.ml,v 1.8 2002-07-20 22:40:31 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r.ml,v 1.7 2002-07-20 21:51:06 athena Exp $"
+let cvsid = "$Id: gen_hc2r.ml,v 1.8 2002-07-20 22:40:31 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -82,7 +82,7 @@ let generate n =
   and iistride = "iis"
   and ostride = "os" 
   and (transform, kind) =
-    if !dftIII_flag then(hcdftIII, "hc2rIII") else (Trig.rdft, "hc2r")
+    if !dftIII_flag then(hcdftIII, "hc2rIII") else (Trig.hdft, "hc2r")
   in
 
   let ns = string_of_int n
