@@ -23,5 +23,8 @@ lib@PRECISION@fftw3_la_LIBADD =				\
 	dft/k7/libdft_k7.la				\
 	dft/k7/codelets/libdft_codelets_k7.la		\
 	dft/simd/libdft_simd.la				\
-	dft/simd/codelets/libdft_codelets_simd.la
-
+	dft/simd/codelets/libdft_codelets_simd.la	\
+	rdft/librdft.la					\
+	rdft/codelets/librdft_codelets.la		\
+	rdft/codelets/r2hc/librdft_codelets_r2hc.la	\
+	rdft/codelets/hc2r/librdft_codelets_hc2r.la

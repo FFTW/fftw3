@@ -48,7 +48,7 @@ static int is, os;
 void copy_c2c_from(struct problem *p, bench_complex *in)
 {
      unsigned int i;
-     if (p->sign == -1) {
+     if (p->sign == FFT_SIGN) {
 	  for (i = 0; i < p->size; ++i) {
 	       ri[i * is] = c_re(in[i]);
 	       ii[i * is] = c_im(in[i]);
@@ -64,7 +64,7 @@ void copy_c2c_from(struct problem *p, bench_complex *in)
 void copy_c2c_to(struct problem *p, bench_complex *out)
 {
      unsigned int i;
-     if (p->sign == -1) {
+     if (p->sign == FFT_SIGN) {
 	  for (i = 0; i < p->size; ++i) {
 	       c_re(out[i]) = ro[i * os];
 	       c_im(out[i]) = io[i * os];
@@ -75,6 +75,16 @@ void copy_c2c_to(struct problem *p, bench_complex *out)
 	       c_im(out[i]) = ro[i * os];
 	  }
      }
+}
+
+void copy_h2c(struct problem *p, bench_complex *out)
+{
+     copy_h2c_1d_halfcomplex(p, out, FFT_SIGN);
+}
+
+void copy_c2h(struct problem *p, bench_complex *in)
+{
+     copy_c2h_1d_halfcomplex(p, in, FFT_SIGN);
 }
 
 static void putchr(printer *p, char c)
@@ -92,24 +102,25 @@ static void increment(plan *p, void *closure)
 
 static void hook(plan *pln, const fftw_problem *p_)
 {
-     const problem_dft *p = (const problem_dft *) p_;
-
      if (verbose > 5) {
 	  printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
-	  pr->print(pr, "%P:%(%p%)\n", p, pln);
+	  pr->print(pr, "%P:%(%p%)\n", p_, pln);
 	  FFTW(printer_destroy) (pr);
 	  printf("%g\n", pln->pcost);
      }
 
      if (paranoid) {
-	  X(dft_verify)(pln, p, 5);
+	  if (DFTP(p_))
+	       X(dft_verify)(pln, (const problem_dft *) p_, 5);
+	  else if (RDFTP(p_))
+	       X(rdft_verify)(pln, (const problem_rdft *) p_, 5);
      }
 }
 
 int can_do(struct problem *p)
 {
      return (sizeof(fftw_real) == sizeof(bench_real) &&
-	     p->kind == PROBLEM_COMPLEX);
+	     p->kind == PROBLEM_COMPLEX || p->kind == PROBLEM_REAL);
 }
 
 static planner *plnr;
@@ -124,12 +135,13 @@ void setup(struct problem *p)
 
      plnr = FFTW(mkplanner_score)(0);
      FFTW(dft_conf_standard) (plnr);
+     FFTW(rdft_conf_standard) (plnr);
      FFTW(planner_set_hook) (plnr, hook);
      /* plnr->flags |= CLASSIC | CLASSIC_VRECURSE; */
 
-     if (p->split) {
+     if (p->split || p->kind == PROBLEM_REAL) {
 	  is = os = 1;
-	  if (p->sign == -1) {
+	  if (p->sign == FFT_SIGN) {
 	       ri = p->in;
 	       ii = ri + p->size;
 	       ro = p->out;
@@ -142,7 +154,7 @@ void setup(struct problem *p)
 	  }
      } else {
 	  is = os = 2;
-	  if (p->sign == -1) {
+	  if (p->sign == FFT_SIGN) {
 	       ri = p->in;
 	       ii = ri + 1;
 	       ro = p->out;
@@ -155,12 +167,20 @@ void setup(struct problem *p)
 	  }
      }
 
-     prblm = 
-	  FFTW(mkproblem_dft_d)(
-	       FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, is, os),
-	       FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
-					is * p->size, os * p->size), 
-	       ri, ii, ro, io);
+     if (p->kind == PROBLEM_COMPLEX)
+	  prblm = 
+	       FFTW(mkproblem_dft_d)(
+		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, is, os),
+		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
+					     is * p->size, os * p->size), 
+		    ri, ii, ro, io);
+     else
+	  prblm = 
+	       FFTW(mkproblem_rdft_d)(
+		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, is, os),
+		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
+					     is * p->size, os * p->size), 
+		    ri, ro, p->sign);
      timer_start();
      pln = plnr->adt->mkplan(plnr, prblm);
      tplan = timer_stop();

@@ -18,12 +18,13 @@
  *
  */
 
-/* $Id: rdft.h,v 1.3 2002-07-21 04:12:19 stevenj Exp $ */
+/* $Id: rdft.h,v 1.4 2002-07-21 04:47:03 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
 
-typedef enum { R2HC = 0, HC2R = 1, R2HCII = 2, HC2RIII = 3 } rdft_kind;
+typedef enum { R2HC = FFT_SIGN, HC2R = -FFT_SIGN, 
+	       R2HCII, HC2RIII } rdft_kind;
 
 /* problem.c: */
 typedef struct {
