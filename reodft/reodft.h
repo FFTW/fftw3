@@ -27,7 +27,9 @@
 #define REODFT_KINDP(k) ((k) >= REDFT00 && (k) <= RODFT11)
 
 void X(redft00e_r2hc_register)(planner *p);
+void X(redft00e_r2hc_pad_register)(planner *p);
 void X(rodft00e_r2hc_register)(planner *p);
+void X(rodft00e_r2hc_pad_register)(planner *p);
 void X(reodft010e_r2hc_register)(planner *p);
 void X(reodft11e_r2hc_register)(planner *p);
 void X(reodft11e_radix2_r2hc_register)(planner *p);
