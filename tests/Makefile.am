@@ -17,10 +17,15 @@ $(top_builddir)/libfftw3@PREC_SUFFIX@.la		\
 $(top_builddir)/libbench2/libbench2.a $(THREADLIBS)
 
 check-local: bench
+	perl -w $(srcdir)/check.pl -r -c=10 -v --nowisdom `pwd`/bench
+if THREADS
+	perl -w $(srcdir)/check.pl -r -c=10 -v --nthreads=2 --nowisdom `pwd`/bench
+endif
+
+bigcheck: bench
 	perl -w $(srcdir)/check.pl -a -v --nowisdom `pwd`/bench
 if THREADS
 	perl -w $(srcdir)/check.pl -a -v --nthreads=2 --nowisdom `pwd`/bench
 	perl -w $(srcdir)/check.pl -a -v --nthreads=3 --nowisdom `pwd`/bench
 	perl -w $(srcdir)/check.pl -a -v --nthreads=10 --nowisdom `pwd`/bench
 endif
-
