@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.175 2003-03-30 00:11:10 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.177 2003-03-30 20:51:59 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1727,9 +1727,10 @@ can link to the different-precision libraries simultaneously.)
 Include the @emph{same} @code{<fftw3.h>} header file.
 
 @item
-Replace all lowercase instances of @samp{fftw_} with
-@samp{fftwf_} or @code{fftwl_} for single or long-double precision,
-respectively.
+Replace all lowercase instances of @samp{fftw_} with @samp{fftwf_} or
+@code{fftwl_} for single or long-double precision, respectively.
+(@code{fftw_complex} becomes @code{fftwf_complex}, @code{fftw_execute}
+becomes @code{fftwf_execute}, etcetera.)
 
 @item
 Uppercase names, i.e. names beginning with @samp{FFTW_}, remain the
