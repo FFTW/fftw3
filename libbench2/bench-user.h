@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.16 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.17 2003-03-30 14:41:27 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -116,6 +116,9 @@ typedef struct {
 
      /* internal hack so that we can use verifier in FFTW test program */
      void *ini, *outi; /* if nonzero, point to imag. parts for dft */
+
+     /* another internal hack to avoid passing around too many parameters */
+     double setup_time;
 } bench_problem;
 
 extern int verbose;
