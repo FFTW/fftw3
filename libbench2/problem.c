@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.17 2003-02-09 00:35:56 stevenj Exp $ */
+/* $Id: problem.c,v 1.18 2003-02-09 00:52:58 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -42,29 +42,29 @@ static int transform_n(int n, n_transform nt)
 }
 
 /* do what I mean */
-static bench_tensor *dwim(bench_tensor *t, bench_iodim *last_iodim,
-			  n_transform nti, n_transform nto)
+static bench_tensor *dwim(bench_tensor *t, bench_iodim **last_iodim,
+			  n_transform nti, n_transform nto,
+			  bench_iodim *dt)
 {
      int i;
-     bench_iodim *d, *d1, *dL;
+     bench_iodim *d, *d1;
 
      if (!FINITE_RNK(t->rnk) || t->rnk < 1)
 	  return t;
 
      i = t->rnk;
-     d1 = last_iodim;
-     dL = t->dims + i-1;
+     d1 = *last_iodim;
 
      while (--i >= 0) {
 	  d = t->dims + i;
 	  if (!d->is) 
-	       d->is = d1->is * transform_n(d1->n, d1==dL ? nti : SAME); 
+	       d->is = d1->is * transform_n(d1->n, d1==dt ? nti : SAME); 
 	  if (!d->os) 
-	       d->os = d1->os * transform_n(d1->n, d1==dL ? nto : SAME); 
+	       d->os = d1->os * transform_n(d1->n, d1==dt ? nto : SAME); 
 	  d1 = d;
      }
 
-     *last_iodim = *d1;
+     *last_iodim = d1;
      return t;
 }
 
@@ -150,7 +150,8 @@ static const char *parsetensor(const char *s, bench_tensor **tp)
 bench_problem *problem_parse(const char *s)
 {
      bench_problem *p;
-     bench_iodim last_iodim = {1,1,1};
+     bench_iodim last_iodim0 = {1,1,1}, *last_iodim = &last_iodim0;
+     bench_iodim *sz_last_iodim;
      bench_tensor *sz;
      n_transform nti = SAME, nto = SAME;
 
@@ -195,19 +196,20 @@ bench_problem *problem_parse(const char *s)
 	  }
      }
 
+     sz_last_iodim = sz->dims + sz->rnk - 1;
      if (*s == '*') { /* "external" vector */
 	  ++s;
-	  p->sz = dwim(sz, &last_iodim, nti, nto);
+	  p->sz = dwim(sz, &last_iodim, nti, nto, sz_last_iodim);
 	  s = parsetensor(s, &sz);
-	  p->vecsz = dwim(sz, &last_iodim, SAME, SAME);
+	  p->vecsz = dwim(sz, &last_iodim, nti, nto, sz_last_iodim);
      } else if (*s == 'v' || *s == 'V') { /* "internal" vector */
 	  bench_tensor *vecsz;
 	  ++s;
 	  s = parsetensor(s, &vecsz);
-	  p->vecsz = dwim(vecsz, &last_iodim, SAME, SAME);
-	  p->sz = dwim(sz, &last_iodim, nti, nto);
+	  p->vecsz = dwim(vecsz, &last_iodim, nti, nto, sz_last_iodim);
+	  p->sz = dwim(sz, &last_iodim, nti, nto, sz_last_iodim);
      } else {
-	  p->sz = dwim(sz, &last_iodim, nti, nto);
+	  p->sz = dwim(sz, &last_iodim, nti, nto, sz_last_iodim);
 	  p->vecsz = mktensor(0);
      }
 
