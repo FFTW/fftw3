@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.38 2003-02-28 05:54:09 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.39 2003-02-28 05:55:50 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -894,8 +894,10 @@ whether the physical size @code{n} is odd, but we do not support these
 variants.}
 
 The r2r kinds for the various REDFT and RODFT types supported by FFTW,
-along with the boundary conditions at both ends of the @emph{input} array
-(@code{n} real numbers @code{in[j=0..n-1]}), are:
+along with the boundary conditions at both ends of the @emph{input}
+array@footnote{Note that the boundary conditions of the transform output
+array are given by the input boundary conditions of the inverse
+transform.} (@code{n} real numbers @code{in[j=0..n-1]}), are:
 
 @itemize @bullet
 
