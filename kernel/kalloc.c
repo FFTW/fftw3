@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: kalloc.c,v 1.2 2004-12-10 02:41:09 stevenj Exp $ */
+/* $Id: kalloc.c,v 1.3 2005-03-15 02:43:53 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -131,7 +131,7 @@ void *X(kernel_malloc)(size_t n)
 #    error "Don't know how to malloc() aligned memory."
 #  endif
 
-#else /* !defined(MIN_ALIGMENT) */
+#else /* !defined(MIN_ALIGNMENT) */
      p = malloc(n);
 #endif
 
