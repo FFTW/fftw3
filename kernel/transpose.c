@@ -392,8 +392,7 @@ void X(transpose)(R *A, int n, int m, int d, int N, R *buf)
  * [ Cate, E.G. and Twigg, D.W., ACM Transactions on Mathematical Software, 
  *   vol. 3, no. 1, 104-110 (1977) ]
  * 
- * C version by Steven G. Johnson (February 1997), based on Fortran
- * code by Cate and Twigg, above.
+ * C version by Steven G. Johnson (February 1997).
  */
 
 /*
