@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.28 2003-03-20 21:12:56 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.29 2003-11-21 03:00:53 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -71,7 +71,11 @@ typedef struct {
    the sign of the odd outputs.  Vice-versa for real-odd-10.
 
    The FFTPACK source code was very helpful in working this out.
-   (They do unnecessary passes over the array, though.)
+   (They do unnecessary passes over the array, though.)  The same
+   algorithm is also described in:
+
+      John Makhoul, "A fast cosine transform in one and two dimensions,"
+      IEEE Trans. on Acoust. Speech and Sig. Proc., ASSP-28 (1), 27--34.
 
    Note that Numerical Recipes suggests a different algorithm that
    requires more operations and uses trig. functions for both the pre-
