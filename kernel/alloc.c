@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.21 2003-01-11 16:07:24 athena Exp $ */
+/* $Id: alloc.c,v 1.22 2003-01-12 17:45:26 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -44,7 +44,8 @@ static void *real_malloc(size_t n)
      p = memalign(MIN_ALIGNMENT, n);
 #elif defined(HAVE_POSIX_MEMALIGN)
      /* note: posix_memalign is broken in glibc 2.2.5: it constrains
-	the size, not the alignment, to be (power of two) * sizeof(void*). */
+	the size, not the alignment, to be (power of two) * sizeof(void*).
+        The bug seems to have been fixed as of glibc 2.3.1. */
      if (posix_memalign(&p, MIN_ALIGNMENT, n))
 	  p = (void*) 0;
 #elif defined(__ICC) || defined(__INTEL_COMPILER) || defined(HAVE__MM_MALLOC)
