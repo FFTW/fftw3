@@ -61,6 +61,7 @@ static bench_problem *fftw_problem_to_bench_problem(const problem *p_)
 	  bp->inphys = bp->outphys = 0;
 	  bp->iphyssz = bp->ophyssz = 0;
 	  bp->in_place = p->ri == p->ro;
+	  bp->destroy_input = 0;
 	  bp->userinfo = 0;
 	  bp->sz = fftw_tensor_to_bench_tensor(p->sz);
 	  bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
