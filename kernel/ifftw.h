@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.221 2003-04-10 19:36:16 athena Exp $ */
+/* $Id: ifftw.h,v 1.222 2003-04-12 18:32:22 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -750,21 +750,33 @@ typedef R E;  /* internal precision of codelets. */
 /* FMA macros */
 
 #if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
+/* this peculiar coding seems to do the right thing on all of
+   gcc-2.95, gcc-3.1, and gcc-3.2.  
+
+   The obvious expression a * b + c does not work.  If both x = a * b
+   + c and y = a * b - c appear in the source, gcc computes t = a * b,
+   x = t + c, y = t - c, thus destroying the fma.
+*/
 static __inline__ E FMA(E a, E b, E c)
 {
-     return a * b + c;
+     E x = a * b;
+     x = x + c;
+     return x;
 }
 
 static __inline__ E FMS(E a, E b, E c)
 {
-     return a * b - c;
+     E x = a * b;
+     x = x - c;
+     return x;
 }
 
 static __inline__ E FNMS(E a, E b, E c)
 {
-     return -(a * b - c);
+     E x = a * b;
+     x = - (x - c);
+     return x;
 }
-
 #else
 #define FMA(a, b, c) (((a) * (b)) + (c))
 #define FMS(a, b, c) (((a) * (b)) - (c))
