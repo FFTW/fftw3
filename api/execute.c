@@ -21,7 +21,7 @@
 #include "api.h"
 
 void X(execute)(const X(plan) p)
-{
+WITH_ALIGNED_STACK({
      plan *pln = p->pln;
      pln->adt->solve(pln, p->prb);
-}
+})

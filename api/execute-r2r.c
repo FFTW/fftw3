@@ -23,7 +23,7 @@
 
 /* guru interface: requires care in alignment, etcetera. */
 void X(execute_r2r)(const X(plan) p, R *in, R *out)
-{
+WITH_ALIGNED_STACK({
      plan_rdft *pln = (plan_rdft *) p->pln;
      pln->apply((plan *) pln, in, out);
-}
+})

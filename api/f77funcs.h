@@ -24,10 +24,10 @@
    compiler manglings (via redefinition of F77). */
 
 void F77(execute, EXECUTE)(X(plan) * const p)
-{
+WITH_ALIGNED_STACK({
      plan *pln = (*p)->pln;
      pln->adt->solve(pln, (*p)->prb);
-}
+})
 
 void F77(destroy_plan, DESTROY_PLAN)(X(plan) *p)
 {
@@ -143,10 +143,10 @@ void F77(plan_guru_dft, PLAN_GURU_DFT)(X(plan) *p, int *rank, const int *n,
 
 void F77(execute_dft, EXECUTE_DFT)(X(plan) * const p,
 				   R *ri, R *ii, R *ro, R *io)
-{
+WITH_ALIGNED_STACK({
      plan_dft *pln = (plan_dft *) (*p)->pln;
      pln->apply((plan *) pln, ri, ii, ro, io);
-}
+})
 
 /****************************** DFT r2c *********************************/
 
@@ -214,10 +214,10 @@ void F77(plan_guru_dft_r2c, PLAN_GURU_DFT_R2C)(
 
 void F77(execute_dft_r2c, EXECUTE_DFT_R2C)(X(plan) * const p,
 					   R *in, R *ro, R *io)
-{
+WITH_ALIGNED_STACK({
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
      pln->apply((plan *) pln, in, ro, io);
-}
+})
 
 /****************************** DFT c2r *********************************/
 
@@ -285,10 +285,10 @@ void F77(plan_guru_dft_c2r, PLAN_GURU_DFT_C2R)(
 
 void F77(execute_dft_c2r, EXECUTE_DFT_C2R)(X(plan) * const p,
 					   R *ri, R *ii, R *out)
-{
+WITH_ALIGNED_STACK({
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
      pln->apply((plan *) pln, out, ri, ii);
-}
+})
 
 /****************************** r2r *********************************/
 
@@ -367,7 +367,7 @@ void F77(plan_guru_r2r, PLAN_GURU_R2R)(
 }
 
 void F77(execute_r2r, EXECUTE_R2R)(X(plan) * const p, R *in, R *out)
-{
+WITH_ALIGNED_STACK({
      plan_rdft *pln = (plan_rdft *) (*p)->pln;
      pln->apply((plan *) pln, in, out);
-}
+})
