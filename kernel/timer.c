@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.16 2003-05-08 00:46:10 stevenj Exp $ */
+/* $Id: timer.c,v 1.17 2003-06-08 13:52:57 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -101,7 +101,7 @@ typedef seconds ticks;
 #ifdef HAVE_TICK_COUNTER
 
 #  ifndef TIME_MIN
-#    define TIME_MIN 100.0
+#    define TIME_MIN 5000.0
 #  endif
 
 #  ifndef TIME_REPEAT
