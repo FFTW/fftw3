@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.13 2003-02-27 07:22:03 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.14 2003-02-27 07:25:04 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -128,7 +128,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 			 SQRT2 * (SGN_SET(c, i/2) -
 				  SGN_SET(s, (i+3)/2));
 	       }
-	       O[os * i] = SQRT2 * buf[0] * MINUS1_POW((i+1)/2);
+	       O[os * i] = SQRT2 * SGN_SET(buf[0], (i+1)/2);
 	  }
 	  else /* n2odd */ {
 	       for (i = 0; i + i + 1 <= n/2; ++i) {
@@ -161,7 +161,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 			 SQRT2 * (SGN_SET(c, (i+2)/2) -
 				  SGN_SET(s, (i+1)/2));
 	       }
-	       O[os * i] = SQRT2 * buf[0] * MINUS1_POW((i+1)/2);
+	       O[os * i] = SQRT2 * SGN_SET(buf[0], (i+1)/2);
 	  }
      }
 
@@ -255,7 +255,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 				       SGN_SET(s, (i+3)/2));
 		    }
 	       }
-	       O[os * i] = SQRT2 * buf[0] * MINUS1_POW((i+1)/2);
+	       O[os * i] = SQRT2 * SGN_SET(buf[0], (i+1)/2);
 	  }
 	  else /* n2odd */ {
 	       for (i = 0; i + i + 1 <= n/2; ++i) {
@@ -308,7 +308,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 				       SGN_SET(s, (i+1)/2));
 		    }
 	       }
-	       O[os * i] = SQRT2 * buf[0] * MINUS1_POW((i+3)/2);
+	       O[os * i] = SQRT2 * SGN_SET(buf[0], (i+3)/2);
 	  }
      }
 
