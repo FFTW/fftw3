@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft.c,v 1.1 2002-09-02 15:46:57 athena Exp $ */
+/* $Id: verify-rdft.c,v 1.2 2002-09-21 16:03:46 athena Exp $ */
 
 #include "rdft.h"
 #include "debug.h"
@@ -401,7 +401,7 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
 
 void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds)
 {
-     if ((p->kind[0] == R2HC || p->kind[0] == HC2R) && p->sz.rnk == 1) {
+     if (p->sz.rnk == 1 && (p->kind[0] == R2HC || p->kind[0] == HC2R)) {
 	  AWAKE(pln, 1);
 	  really_verify(pln, p, rounds, 
 			sizeof(R) == sizeof(float) ? 1.0e-2 : 1.0e-7);

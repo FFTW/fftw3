@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.3 2002-09-18 23:31:05 stevenj Exp $ */
+/* $Id: verify-reodft.c,v 1.4 2002-09-21 16:03:46 athena Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -525,7 +525,7 @@ static void really_verify(plan *pln, const problem_rdft *p,
 
 void X(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds)
 {
-     if (REODFT_KINDP(p->kind[0]) && p->sz.rnk == 1) {
+     if (p->sz.rnk == 1 && REODFT_KINDP(p->kind[0])) {
 	  AWAKE(pln, 1);
 	  really_verify(pln, p, rounds, 
 			sizeof(R) == sizeof(float) ? 1.0e-2 : 1.0e-7);
