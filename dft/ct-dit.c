@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.24 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: ct-dit.c,v 1.25 2002-09-16 02:30:26 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -86,7 +86,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      p = (const problem_dft *) p_;
 
      /* emulate fftw2 behavior */
-     if ((p->vecsz.rnk > 0) && NO_VRECURSE(plnr))
+     if ((p->vecsz.rnk > 0) && NO_VRECURSEP(plnr))
 	  return BAD;
 
      n = p->sz.dims[0].n;
@@ -96,7 +96,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 	  )
           return UGLY;
 
-     if ((plnr->planner_flags & IMPATIENT) && plnr->nthr > 1)
+     if (NONTHREADED_ICKYP(plnr) && plnr->nthr > 1)
           return UGLY; /* prefer threaded version */
 
      return GOOD;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.7 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.8 2002-09-16 02:30:26 stevenj Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -81,7 +81,7 @@ static int applicable_b(const problem *p_, const planner *plnr)
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
           return (1
                   && p->kind == HC2R
-		  && (p->r == p->rio || (plnr->problem_flags & DESTROY_INPUT))
+		  && (p->r == p->rio || DESTROY_INPUTP(plnr))
                   && p->vecsz.rnk <= 1
                   && p->sz.rnk == 1
 		  && (p->sz.dims[0].n % 2) == 0

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.5 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.6 2002-09-16 02:30:26 stevenj Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -98,8 +98,7 @@ static int applicable(const solver *ego_, const problem *p_,
 
 		      /* can work out-of-place, but HC2R destroys input */
                       || (p->r != p->rio && p->r != p->iio && 
-			  (p->kind == R2HC || 
-			   (plnr->problem_flags & DESTROY_INPUT)))
+			  (p->kind == R2HC || DESTROY_INPUTP(plnr)))
 
 		      /* FIXME: what are sufficient conditions for inplace? */
                       || (!(p->r != p->rio && p->r != p->iio) &&

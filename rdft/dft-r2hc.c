@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.9 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.10 2002-09-16 02:30:26 stevenj Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -110,7 +110,7 @@ static int score(const solver *ego, const problem *p_, const planner *plnr)
 {
      if (applicable(ego, p_)) {
 	  const problem_dft *p = (const problem_dft *) p_;
-	  if (plnr->planner_flags & IMPATIENT)
+	  if (DFT_R2HC_ICKYP(plnr))
 	       return UGLY;
 	  if (split(p->ri, p->ii, p->sz.dims[0].n, p->sz.dims[0].is) &&
 	      split(p->ro, p->io, p->sz.dims[0].n, p->sz.dims[0].os))

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dht-r2hc.c,v 1.4 2002-09-12 20:32:03 stevenj Exp $ */
+/* $Id: dht-r2hc.c,v 1.5 2002-09-16 02:30:26 stevenj Exp $ */
 
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */
@@ -84,7 +84,7 @@ static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
      UNUSED(ego_);
-     if (RDFTP(p_) && !(plnr->problem_flags & DHT_R2HC_VERBOTEN)) {
+     if (RDFTP(p_) && !NO_DHT_R2HCP(plnr)) {
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
 		  && p->sz.rnk == 1
@@ -118,7 +118,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_rdft *) p_;
 
      /* stop infinite loops with rdft-dht.c */
-     plnr->problem_flags |= DHT_R2HC_VERBOTEN; 
+     plnr->planner_flags |= NO_DHT_R2HC; 
 
      cldp = X(mkproblem_rdft_1)(p->sz, p->vecsz, p->I, p->O, R2HC);
      cld = MKPLAN(plnr, cldp);

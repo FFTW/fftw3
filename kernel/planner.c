@@ -18,13 +18,20 @@
  *
  */
 
-/* $Id: planner.c,v 1.86 2002-09-14 23:47:56 athena Exp $ */
+/* $Id: planner.c,v 1.87 2002-09-16 02:30:26 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
-#define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
 #define BLESSEDP(solution) ((solution)->flags & BLESSING)
 #define VALIDP(solution) ((solution)->flags & H_VALID)
+
+/* Flags f1 subsumes flags f2 iff f1 is less/equally impatient than
+   f2, defining a partial ordering. */
+#define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
+#define SUBSUMES(f1,f2) ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1) || \
+                         (f1 & EXHAUSTIVE))
+#define STRICTLY_SUBSUMES(f1, f2) (SUBSUMES(f1, f2) && !SUBSUMES(f2, f1))
+#define ORDERED(f1, f2) (SUBSUMES(f1, f2) || SUBSUMES(f2, f1))
 
 #define MAXNAM 64  /* maximum length of registrar's name.
 		      Used for reading wisdom.  There is no point
@@ -140,7 +147,7 @@ struct solution_s {
      short slvndx;
 };
 
-static solution *hlookup(planner *ego, md5uint *s)
+static solution *hlookup(planner *ego, md5uint *s, unsigned short flags)
 {
      uint g, h = h1(ego, s), d = h2(ego, s);
 
@@ -150,7 +157,10 @@ static solution *hlookup(planner *ego, md5uint *s)
 	  solution *l = ego->solutions + g;
 	  ++ego->lookup_iter;
 	  if (VALIDP(l)) {
-	       if (md5eq(s, l->s)) { ++ego->succ_lookup; return l; }
+	       if (md5eq(s, l->s) && ORDERED(l->flags, flags)) { 
+		    ++ego->succ_lookup;
+		    return l; 
+	       }
 	  } else {
 	       return 0;
 	  }
@@ -238,9 +248,9 @@ static void hinsert(planner *ego, md5uint *s,
 {
      solution *l;
 
-     if ((l = hlookup(ego, s))) {
+     if ((l = hlookup(ego, s, flags))) {
 	  /* overwrite old solution */
-	  if (IMPATIENCE(flags) > IMPATIENCE(l->flags))
+	  if (STRICTLY_SUBSUMES(l->flags, flags))
 	       return; /* don't overwrite less impatient solution */
 
 	  flags |= l->flags & BLESSING; /* ne me perdas illa die */
@@ -253,9 +263,9 @@ static void hinsert(planner *ego, md5uint *s,
 
 static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 {
-     if (!(ego->planner_flags & IMPATIENT) || pln->pcost == 0.0) {
+     if (!BELIEVE_PCOSTP(ego) || pln->pcost == 0.0) {
 	  ego->nplan++;
-	  if (ego->planner_flags & ESTIMATE) {
+	  if (ESTIMATEP(ego)) {
 	       /* heuristic */
 	       pln->pcost = 0
 		    + pln->ops.add
@@ -285,7 +295,7 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s)
 
 static int compute_score(planner *ego, problem *p, solver *s)
 {
-     if (ego->problem_flags & IGNORE_SCORE)
+     if (EXHAUSTIVEP(ego))
 	  return GOOD;
      return s->adt->score(s, p, ego);
 }
@@ -398,12 +408,12 @@ static plan *mkplan(planner *ego, problem *p)
 
      md5hash(&m, p, ego);
 
-     if ((sol = hlookup(ego, m.s))) {
+     if ((sol = hlookup(ego, m.s, ego->planner_flags))) {
 	  if (sol->slvndx < 0) return 0;   /* known to be infeasible */
 	  sp = ego->slvdescs + sol->slvndx;
 
 	  /* reject wisdom if too impatient */
-	  if (IMPATIENCE(sol->flags) > IMPATIENCE(ego->planner_flags))
+	  if (STRICTLY_SUBSUMES(ego->planner_flags, sol->flags))
 	       sp = 0;
      } else {
 	  sp = 0; /* nothing known about this problem */
@@ -424,6 +434,33 @@ static void forget(planner *ego, amnesia a)
 {
      uint h;
 
+     /* First, delete any entries that are unreachable because they
+        are subsumed by less-impatient ones.  We must do this via the
+        BLESSING flag; setting ~H_VALID here could make other entries
+        unreachable in the inner loop. */
+     if (a != FORGET_EVERYTHING) {
+	  for (h = 0; h < ego->hashsiz; ++h) {
+	       solution *l = ego->solutions + h;
+	       if (VALIDP(l)) {
+		    uint d = h2(ego, l->s), g = (h + d) % ego->hashsiz;
+		    for (; ; g = (g + d) % ego->hashsiz) {
+			 solution *m = ego->solutions + g;
+			 if (VALIDP(m)) {
+			      if (md5eq(l->s, m->s) 
+				  && SUBSUMES(l->flags, m->flags)) {
+				   /* quidquid latet apparebit */
+				   l->flags |= m->flags & BLESSING;
+				   /* cum vix justus sit securus */
+				   m->flags &= ~BLESSING;
+			      }
+			 }
+			 else break;
+			 A((g + d) % ego->hashsiz != h);
+		    }
+	       }
+	  }
+     }
+
      for (h = 0; h < ego->hashsiz; ++h) {
 	  solution *l = ego->solutions + h;
 	  if (VALIDP(l)) {
@@ -436,6 +473,7 @@ static void forget(planner *ego, amnesia a)
 	       }
 	  }
      }
+
      /* nil inultum remanebit */
 
      hshrink(ego);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.11 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: hc2hc.c,v 1.12 2002-09-16 02:30:26 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -114,10 +114,6 @@ plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
      n = d[0].n;
      r = e->radix;
      m = n / r;
-
-     /* fftw2 vector recursion: once it turns on, it goes all the way down */
-     if ((plnr->problem_flags & CLASSIC_VRECURSE) && p->vecsz.rnk > 0)
-	  plnr->problem_flags |= FORCE_VRECURSE;
 
      adt->mkcldrn(ego, p, &cldp, &cld0p, &cldmp);
 

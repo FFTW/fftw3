@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.4 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.5 2002-09-16 02:30:26 stevenj Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
 
@@ -134,8 +134,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
           return BAD;
 
      /* fftw2 behavior */
-     if ((plnr->planner_flags & IMPATIENT) &&
-	 (ego->spltrnk != ego->buddies[0]))
+     if (NO_RANK_SPLITSP(plnr) && (ego->spltrnk != ego->buddies[0]))
 	  return BAD;
 
      /* Heuristic: if the vector stride is greater than the transform

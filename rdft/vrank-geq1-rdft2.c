@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.9 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.10 2002-09-16 02:30:26 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -132,16 +132,10 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
           return BAD;
 
      /* fftw2 behavior */
-     if ((plnr->planner_flags & IMPATIENT) &&
-	 (ego->vecloop_dim != ego->buddies[0]))
+     if (NO_VRANK_SPLITSP(plnr) && (ego->vecloop_dim != ego->buddies[0]))
 	  return BAD;
 
      p = (const problem_rdft2 *) p_;
-
-     /* fftw2-like heuristic: once we've started vector-recursing,
-	don't stop (unless we have to) */
-     if ((plnr->problem_flags & FORCE_VRECURSE) && p->vecsz.rnk == 1)
-	  return UGLY;
 
      /* Heuristic: if the transform is multi-dimensional, and the
         vector stride is less than the transform size, then we
@@ -163,7 +157,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      if (p->sz.rnk == 0 && p->vecsz.rnk == 1)
           return UGLY;
 
-     if ((plnr->planner_flags & IMPATIENT) && plnr->nthr > 1)
+     if (NONTHREADED_ICKYP(plnr) && plnr->nthr > 1)
 	  return UGLY; /* prefer threaded version */
 
      return GOOD;
@@ -186,10 +180,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(ego_, p_, &vdim))
           return (plan *) 0;
      p = (const problem_rdft2 *) p_;
-
-     /* fftw2 vector recursion: use it or lose it */
-     if (p->vecsz.rnk == 1 && (plnr->problem_flags & CLASSIC_VRECURSE))
-	  plnr->problem_flags &= ~CLASSIC_VRECURSE & ~FORCE_VRECURSE;
 
      d = p->vecsz.dims + vdim;
      if (d->n > 0)

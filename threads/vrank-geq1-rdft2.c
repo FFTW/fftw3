@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.2 2002-09-12 20:18:51 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.3 2002-09-16 02:30:26 stevenj Exp $ */
 
 
 #include "threads.h"
@@ -150,16 +150,10 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
           return BAD;
 
      /* fftw2 behavior */
-     if ((plnr->planner_flags & IMPATIENT) &&
-	 (ego->vecloop_dim != ego->buddies[0]))
+     if (NO_VRANK_SPLITSP(plnr) && (ego->vecloop_dim != ego->buddies[0]))
 	  return BAD;
 
      p = (const problem_rdft2 *) p_;
-
-     /* fftw2-like heuristic: once we've started vector-recursing,
-	don't stop (unless we have to) */
-     if ((plnr->problem_flags & FORCE_VRECURSE) && p->vecsz.rnk == 1)
-	  return UGLY;
 
      return GOOD;
 }
@@ -184,10 +178,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(ego_, p_, &vdim, plnr))
           return (plan *) 0;
      p = (const problem_rdft2 *) p_;
-
-     /* fftw2 vector recursion: use it or lose it */
-     if (p->vecsz.rnk == 1 && (plnr->problem_flags & CLASSIC_VRECURSE))
-	  plnr->problem_flags &= ~CLASSIC_VRECURSE & ~FORCE_VRECURSE;
 
      d = p->vecsz.dims + vdim;
 

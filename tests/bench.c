@@ -160,10 +160,7 @@ void setup(struct problem *p)
      plnr->nthr = 1;
      plnr->hook = hook;
      /* plnr->planner_flags |= IMPATIENT; */
-     /* plnr->planner_flags |= ESTIMATE | IMPATIENT; */
      /* plnr->planner_flags |= ESTIMATE; */
-
-     /* plnr->problem_flags |= CLASSIC_VRECURSE; */
 
      if (p->kind == PROBLEM_REAL)
 	  plnr->problem_flags |= DESTROY_INPUT;

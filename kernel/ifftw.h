@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.120 2002-09-14 23:47:56 athena Exp $ */
+/* $Id: ifftw.h,v 1.121 2002-09-16 02:30:26 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -398,26 +398,63 @@ typedef struct solution_s solution; /* opaque */
 
 /* values for problem_flags: */
 enum { 
-     CLASSIC_VRECURSE = 0x1,
-     FORCE_VRECURSE = 0x2, 
-     DESTROY_INPUT = 0x4,
-     POSSIBLY_UNALIGNED = 0x8,
-     DHT_R2HC_VERBOTEN = 0x10,
-     BUFFERING_VERBOTEN = 0x20,
-     INDIRECT_VERBOTEN = 0x40,
-     IGNORE_SCORE = 0x80  /* everything is GOOD */
+     DESTROY_INPUT = 0x1,
+     POSSIBLY_UNALIGNED = 0x2,
+     NO_BUFFERING = 0x4
 };
 
+#define DESTROY_INPUTP(plnr) ((plnr)->problem_flags & DESTROY_INPUT)
+#define POSSIBLY_UNALIGNEDP(plnr) ((plnr)->problem_flags & POSSIBLY_UNALIGNED)
+#define NO_BUFFERINGP(plnr) ((plnr)->problem_flags & NO_BUFFERING)
 
 /* values for planner_flags: */
 enum {
-     IMPATIENT = 0x1, 
-     ESTIMATE = 0x2,
-     IMPATIENCE_MASK = IMPATIENT | ESTIMATE,
+     /* impatience flags: at most 12 (for now) to fit in 16-bit int,
+        not including ESTIMATE and EXHAUSTIVE. */
 
-     BLESSING = 0x4,  /* save this entry */
-     H_VALID = 0x8    /* valid hastable entry */
+     NO_VRECURSE = 0x1,
+     NO_RANK_SPLITS = 0x2,
+     NO_VRANK_SPLITS = 0x4,
+     NONTHREADED_ICKY = 0x8,
+     DFT_R2HC_ICKY = 0x10,
+     NO_DHT_R2HC = 0x20,
+     NO_INDIRECT = 0x40,
+     BELIEVE_PCOST = 0x80,
+
+     /* a canonical set of fftw2-like impatient flags */
+     IMPATIENT = (0
+		  | NO_VRECURSE 
+		  | NO_RANK_SPLITS 
+		  | NO_VRANK_SPLITS 
+		  | NONTHREADED_ICKY 
+		  | DFT_R2HC_ICKY
+		  | BELIEVE_PCOST
+	  ),
+
+     /* ESTIMATE is subsumed by all other impatience flags */
+     ESTIMATE_PATIENT = 0x1000,
+     ESTIMATE = (ESTIMATE_PATIENT | (ESTIMATE_PATIENT - 1)), 
+
+     IMPATIENCE_MASK = ESTIMATE,
+     
+     /* EXHAUSTIVE subsumes all impatience */
+     EXHAUSTIVE = 0x2000, /* ignore scores */
+
+     BLESSING = 0x4000,  /* save this entry */
+     H_VALID = 0x8000    /* valid hastable entry */
 };
+
+#define NO_VRECURSEP(plnr) ((plnr)->planner_flags & NO_VRECURSE)
+#define NO_RANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_RANK_SPLITS)
+#define NO_VRANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_VRANK_SPLITS)
+#define NONTHREADED_ICKYP(plnr) ((plnr)->planner_flags & NONTHREADED_ICKY)
+#define DFT_R2HC_ICKYP(plnr) ((plnr)->planner_flags & DFT_R2HC_ICKY)
+#define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
+#define NO_INDIRECTP(plnr) ((plnr)->planner_flags & NO_INDIRECT)
+#define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
+
+#define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE_PATIENT)
+#define EXHAUSTIVEP(plnr) ((plnr)->planner_flags & EXHAUSTIVE)
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
@@ -487,10 +524,6 @@ void X(planner_dump)(planner *ego, int verbose);
 	  what;						\
      }							\
 }
-
-#define NO_VRECURSE(plnr) \
-   ((plnr->planner_flags & IMPATIENT) && \
-    !(plnr->problem_flags & (CLASSIC_VRECURSE | FORCE_VRECURSE)))
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */

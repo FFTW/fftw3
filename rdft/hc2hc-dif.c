@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.6 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: hc2hc-dif.c,v 1.7 2002-09-16 02:30:26 stevenj Exp $ */
 
 /* decimation in frequency Cooley-Tukey */
 #include "rdft.h"
@@ -61,7 +61,7 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
 	  uint m = d[0].n / e->radix;
 	  X(tensor_tornk1)(&p->vecsz, &vl, &ivs, &ovs);
           return (1
-		  && (p->I == p->O || (plnr->problem_flags & DESTROY_INPUT))
+		  && (p->I == p->O || DESTROY_INPUTP(plnr))
 		  && (e->genus->okp(e, p->I + d[0].is,
 				    p->I + (e->radix * m - 1) * d[0].is, 
 				    (int)m * d[0].is, 0, m, d[0].is))
@@ -98,7 +98,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      p = (const problem_rdft *) p_;
 
      /* emulate fftw2 behavior */
-     if ((p->vecsz.rnk > 0) && NO_VRECURSE(plnr))
+     if ((p->vecsz.rnk > 0) && NO_VRECURSEP(plnr))
 	  return BAD;
 
      n = p->sz.dims[0].n;
@@ -108,7 +108,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 	  )
           return UGLY;
 
-     if ((plnr->planner_flags & IMPATIENT) && plnr->nthr > 1)
+     if (NONTHREADED_ICKYP(plnr) && plnr->nthr > 1)
 	  return UGLY; /* prefer threaded version */
 
      return GOOD;
