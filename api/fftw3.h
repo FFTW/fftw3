@@ -19,7 +19,14 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.3 2003-01-09 18:41:51 athena Exp $ */
+/* $Id: fftw3.h,v 1.4 2003-01-09 23:53:09 stevenj Exp $ */
+
+#ifndef FFTW3_H
+#define FFTW3_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /* If <complex.h> is included, use the C99 complex type.  Otherwise
    define a type bit-compatible with C99 complex */
@@ -61,3 +68,9 @@ FFTW_DEFINE_API(FFTW_MANGLE_DOUBLE, double, fftw_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_FLOAT, float, fftwf_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif /* __cplusplus */
+
+#endif /* FFTW3_H */
