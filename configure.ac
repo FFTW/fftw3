@@ -16,6 +16,7 @@ if test "$ok" = "yes"; then
 fi
 
 AC_ARG_ENABLE(single, [AC_HELP_STRING([--enable-single],[compile fftw in single precision])], ok=$enableval, ok=no)
+AC_ARG_ENABLE(float, [AC_HELP_STRING([--enable-float],[synonym for --enable-single])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_SINGLE,1,[Define to compile in single precision.])
 	AC_DEFINE(BENCHFFT_SINGLE,1,[Define to compile in single precision.])
