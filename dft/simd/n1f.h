@@ -21,8 +21,5 @@
 #include "codelet-dft.h"
 #include "simd.h"
 
-#undef LD
-#define LD LDA
-
 #define GENUS X(dft_n1fsimd_genus)
 extern const kdft_genus GENUS;
