@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.38 2003-03-03 21:52:58 fftw Exp $ */
+/* $Id: alloc.c,v 1.39 2003-03-03 21:58:07 fftw Exp $ */
 
 #include "ifftw.h"
 
@@ -56,14 +56,14 @@ extern int posix_memalign(void **, size_t, size_t);
 static void *our_malloc16(size_t n)
 {
      void *p0, *p;
-     p0 = malloc(n + 16);
+     if (!(p0 = malloc(n + 16))) return (void *) 0;
      p = (void *) (((uintptr_t) p0 + 16) & (~((uintptr_t) 15)));
      *((void **) p - 1) = p0;
      return p;
 }
 static void our_free16(void *p)
 {
-     free(*((void **) p - 1));
+     if (p) free(*((void **) p - 1));
 }
 #endif
 
