@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.1 2002-07-28 20:10:59 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.2 2002-07-30 01:05:49 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -240,7 +240,8 @@ static uint min_nbuf(const problem_rdft2 *p, uint n, uint vl)
      
      /* handle one potentially common case: "contiguous" real and
 	complex arrays, which overlap because of the differing sizes. */
-     if (n * iabs(p->sz.is) <= ivs && (n/2 + 1) * iabs(p->sz.os) <= ovs
+     if (n * iabs(p->sz.is) <= iabs(ivs)
+	 && (n/2 + 1) * iabs(p->sz.os) <= iabs(ovs)
 	 && iabs((int) (p->rio - p->iio)) <= iabs(p->sz.os)
 	 && ivs > 0 && ovs > 0) {
 	  uint vsmin = X(uimin)(ivs, ovs);
