@@ -44,7 +44,7 @@ static void mktwiddle(P *ego, int flg)
      X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->m, ego->r);
 }
 
-static void bytwiddle(const P *ego, R *IO)
+static void bytwiddle(const P *ego, R *IO, R sign)
 {
      int i, j, k;
      int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
@@ -65,16 +65,35 @@ static void bytwiddle(const P *ego, R *IO)
 		    E xr = *pr;
 		    E xi = *pi;
 		    E wr = W[0];
-		    E wi = W[1];
-		    *pr = xr * wr + xi * wi;
-		    *pi = xi * wr - xr * wi;
+		    E wi = sign * W[1];
+		    *pr = xr * wr - xi * wi;
+		    *pi = xi * wr + xr * wi;
 		    W += 2;
 	       }
 	  }
      }
 }
 
-static void reorder(const P *ego, R *IO)
+static void swapri(R *IO, int r, int m, int s)
+{
+     int k;
+     int ms = m * s;
+     for (k = 0; k + k < r; ++k) {
+	  /* pr := IO + (m - j) * s + k * ms */
+	  R *pr = IO + (k + 1) * ms - s;
+	  /* pi := IO + (m - j) * s + (r - 1 - k) * ms */
+	  R *pi = IO + (r - k) * ms - s;
+	  /* twoj := 2 * j */
+	  int twoj;
+	  for (twoj = 2; twoj < m; twoj += 2, pr -= s, pi -= s) {
+	       R t = *pr;
+	       *pr = *pi;
+	       *pi = t;
+	  }
+     }
+}
+
+static void reorder_dit(const P *ego, R *IO)
 {
      int i, k;
      int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
@@ -89,27 +108,45 @@ static void reorder(const P *ego, R *IO)
 	       for (j = 1; j + j < m; ++j) {
 		    E rp, ip, im, rm;
 		    rp = p0[j * s];
-		    ip = p0[ms - j * s];
-		    rm = p1[j * s];
 		    im = p1[ms - j * s];
+		    rm = p1[j * s];
+		    ip = p0[ms - j * s];
 		    p0[j * s] = rp - im;
-		    p0[ms - j * s] = ip + rm;
 		    p1[ms - j * s] = rp + im;
 		    p1[j * s] = rm - ip;
+		    p0[ms - j * s] = ip + rm;
 	       }
 	  }
 
-	  for (k = 0; k + k < r; ++k) {
-	       /* pr := IO + (m - j) * s + k * ms */
-	       R *pr = IO + (k + 1) * ms - s;
-	       /* pi := IO + (m - j) * s + (r - 1 - k) * ms */
-	       R *pi = IO + (r - k) * ms - s;
- 	       /* twoj := 2 * j */
-	       int twoj;
-	       for (twoj = 2; twoj < m; twoj += 2, pr -= s, pi -= s) {
-		    R t = *pr;
-		    *pr = *pi;
-		    *pi = t;
+	  swapri(IO, r, m, s);
+     }
+}
+
+static void reorder_dif(const P *ego, R *IO)
+{
+     int i, k;
+     int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
+     int ms = m * s;
+
+     for (i = 0; i < vl; ++i, IO += vs) {
+	  swapri(IO, r, m, s);
+
+	  for (k = 1; k + k < r; ++k) {
+	       R *p0 = IO + k * ms;
+	       R *p1 = IO + (r - k) * ms;
+	       const R half = K(0.5);
+	       int j;
+
+	       for (j = 1; j + j < m; ++j) {
+		    E rp, ip, im, rm;
+		    rp = half * p0[j * s];
+		    im = half * p1[ms - j * s];
+		    rm = half * p1[j * s];
+		    ip = half * p0[ms - j * s];
+		    p0[j * s] = rp + im;
+		    p1[ms - j * s] = im - rp;
+		    p1[j * s] = rm + ip;
+		    p0[ms - j * s] = ip - rm;
 	       }
 	  }
      }
@@ -119,7 +156,6 @@ static int applicable(rdft_kind kind, int r, int m, const planner *plnr)
 {
      return (1 
 	     && (R2HC_KINDP(kind) || HC2R_KINDP(kind))
-&& (R2HC_KINDP(kind)) /* FIXME: implement HC2R */
 	     && (m % 2)
 	     && (r % 2)
 	     && !NO_UGLYP(plnr)
@@ -133,12 +169,25 @@ static void apply_dit(const plan *ego_, R *IO)
      const P *ego = (const P *) ego_;
      plan_rdft *cld;
 
-     bytwiddle(ego, IO);
+     bytwiddle(ego, IO, K(-1.0));
 
      cld = (plan_rdft *) ego->cld;
      cld->apply(ego->cld, IO, IO);
 
-     reorder(ego, IO);
+     reorder_dit(ego, IO);
+}
+
+static void apply_dif(const plan *ego_, R *IO)
+{
+     const P *ego = (const P *) ego_;
+     plan_rdft *cld;
+
+     reorder_dif(ego, IO);
+
+     cld = (plan_rdft *) ego->cld;
+     cld->apply(ego->cld, IO, IO);
+
+     bytwiddle(ego, IO, K(1.0));
 }
 
 
@@ -158,7 +207,8 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(hc2hc-generic-%d-%d%v%(%p%))", 
+     p->print(p, "(hc2hc-generic-%s-%d-%d%v%(%p%))", 
+	      ego->super.apply == apply_dit ? "dit" : "dif",
 	      ego->r, ego->m, ego->vl, ego->cld);
 }
 
@@ -186,7 +236,8 @@ static plan *mkcldw(const ct_solver *ego_,
 			);
      if (!cld) goto nada;
 
-     pln = MKPLAN_HC2HC(P, &padt, apply_dit);
+     pln = MKPLAN_HC2HC(P, &padt, 
+			R2HC_KINDP(kind) ? apply_dit : apply_dif);
      pln->cld = cld;
      pln->r = r;
      pln->m = m;
@@ -196,12 +247,11 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->td = 0;
 
      {
-	  /* FIXME */
-	  double n0 = (r - 1) * (m - 1) / 2 * vl;
+	  double n0 = 0.5 * (r - 1) * (m - 1) * vl;
 	  pln->super.super.ops = cld->ops;
-	  pln->super.super.ops.mul += 4 * n0;
-	  pln->super.super.ops.add += 4 * n0;
-	  pln->super.super.ops.other += 8 * n0;
+	  pln->super.super.ops.mul += (R2HC_KINDP(kind) ? 5.0 : 7.0) * n0;
+	  pln->super.super.ops.add += 4.0 * n0;
+	  pln->super.super.ops.other += 11.0 * n0;
      }
      return &(pln->super.super);
 
