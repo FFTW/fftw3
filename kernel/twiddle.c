@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.25 2004-03-22 18:22:44 athena Exp $ */
+/* $Id: twiddle.c,v 1.26 2004-03-22 19:43:16 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -34,10 +34,22 @@ static int equal_instr(const tw_instr *p, const tw_instr *q)
           return 1;
 
      for (;; ++p, ++q) {
-          if (p->op != q->op || p->v != q->v || p->i != q->i)
-               return 0;
-          if (p->op == TW_NEXT)  /* == q->op */
-               return 1;
+          if (p->op != q->op)
+	       return 0;
+
+	  switch (p->op) {
+	      case TW_NEXT:
+		   return 1;
+
+	      case TW_FULL:
+	      case TW_HALF:
+		   if (p->v != q->v) return 0; /* p->i is ignored */
+		   break;
+
+	      default:
+		   if (p->v != q->v || p->i != q->i) return 0;
+		   break;
+	  }
      }
      A(0 /* can't happen */);
 }
