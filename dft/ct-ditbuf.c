@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.18 2002-08-25 17:16:49 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.19 2002-08-27 00:00:41 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -37,21 +37,18 @@ static void cpy(uint n0, uint n1,
 		R *rB, R *iB, int sb0, int sb1)
 {
      uint i0, i1;
+     int ima = iA - rA, imb = iB - rB;
 
      for (i0 = 0; i0 < n0; ++i0) {
-	  const R *pra, *pia;
-	  R *prb, *pib;
-	  pra = rA; rA += sa0;
-	  pia = iA; iA += sa0;
-	  prb = rB; rB += sb0;
-	  pib = iB; iB += sb0;
+	  const R *pa; 
+	  R *pb;
 
+	  pa = rA; rA += sa0;
+	  pb = rB; rB += sb0;
 	  for (i1 = 0; i1 < n1; ++i1) {
-	       R xr, xi;
-	       xr = *pra; pra += sa1;
-	       xi = *pia; pia += sa1;
-	       *prb = xr; prb += sb1;
-	       *pib = xi; pib += sb1;
+	       R xr = pa[0], xi = pa[ima];
+	       pb[0] = xr; pb[imb] = xi; 
+	       pa += sa1; pb += sb1;
 	  }
      }
 }
