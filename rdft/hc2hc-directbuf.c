@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-directbuf.c,v 1.1 2004-03-22 13:23:56 athena Exp $ */
+/* $Id: hc2hc-directbuf.c,v 1.2 2004-03-22 14:04:37 athena Exp $ */
 
 #include "ct.h"
 
@@ -149,7 +149,7 @@ static int applicable0(const S *ego,
 		       R *IO)
 {
      const hc2hc_desc *e = ego->desc;
-     UNUSED(vl);
+     UNUSED(vl); UNUSED(s); UNUSED(vs); UNUSED(IO);
 
      return (
 	  1
