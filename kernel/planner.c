@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.88 2002-09-16 02:55:41 stevenj Exp $ */
+/* $Id: planner.c,v 1.89 2002-09-16 03:37:46 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -509,6 +509,8 @@ static void exprt(planner *ego, printer *p)
      p->print(p, "%))\n");
 }
 
+/*  mors stupebit et natura
+    cum resurget creatura */
 static int imprt(planner *ego, scanner *sc)
 {
      char buf[MAXNAM + 1];
@@ -525,6 +527,7 @@ static int imprt(planner *ego, scanner *sc)
 	  if (sc->scan(sc, ")"))
 	       break;
 
+	  /* qua resurget ex favilla */
 	  if (!sc->scan(sc, "(%*s %d #x%x #x%M #x%M #x%M #x%M)",
 			MAXNAM, buf, &reg_id, &flags, 
 			sig + 0, sig + 1, sig + 2, sig + 3))
@@ -597,7 +600,7 @@ void X(planner_destroy)(planner *ego)
      if (ego->slvdescs)
 	  X(free)(ego->slvdescs);
 
-     X(free)(ego);
+     X(free)(ego); /* dona eis requiem */
 }
 
 /*
