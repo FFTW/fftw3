@@ -44,8 +44,9 @@ void X(extract_reim)(int sign, C *c, R **r, R **i);
 
 planner *X(the_planner)(void);
 
-void X(mapflags)(planner *, problem *);
+void X(mapflags)(planner *, unsigned int);
 
-apiplan *X(mkapiplan)(plan *, problem *);
+apiplan *X(mkapiplan)(unsigned int flags, problem *prb);
+void X(apiplan_destroy)(apiplan *p);
 
 #endif /* __API_H__ */

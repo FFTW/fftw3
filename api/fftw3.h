@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.1 2003-01-09 10:40:34 athena Exp $ */
+/* $Id: fftw3.h,v 1.2 2003-01-09 11:48:53 athena Exp $ */
 
 /* If <complex.h> is included, use the C99 complex type.  Otherwise
    define a type bit-compatible with C99 complex */
@@ -28,12 +28,6 @@
 #else
 #  define FFTW_DEFINE_COMPLEX(R, C) typedef R C[2]
 #endif
-
-/* FFT directions */
-enum {
-     FFTW_FORWARD = -1, 
-     FFTW_BACKWARD = 1
-};
 
 /*
   huge macro that defines prototypes for all API functions.
@@ -49,6 +43,8 @@ enum {
 FFTW_DEFINE_COMPLEX(R, C);					\
 								\
 typedef struct X(plan_s) *X(plan);				\
+								\
+void X(execute)(X(plan) p);					\
 								\
 X(plan) X(plan_dft_1d)(unsigned int n, C *in, C *out, int sign,	\
 		       unsigned int flags);			\

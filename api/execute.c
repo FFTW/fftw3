@@ -19,18 +19,9 @@
  */
 
 #include "api.h"
-#include "dft.h"
 
-X(plan) X(plan_dft_1d)(unsigned int n, C *in, C *out, int sign, 
-		       unsigned int flags)
+void X(execute)(X(plan) p)
 {
-     R *ri, *ii, *ro, *io;
-
-     X(extract_reim)(sign, in, &ri, &ii);
-     X(extract_reim)(sign, out, &ro, &io);
-     
-     return X(mkapiplan)(flags,
-			 X(mkproblem_dft_d)(X(mktensor_1d)(n, 2, 2), 
-					    X(mktensor_0d)(), 
-					    ri, ii, ro, io));
+     plan *pln = p->pln;
+     pln->adt->solve(pln, p->prb);
 }

@@ -296,7 +296,7 @@ void setup(struct problem *p)
 	  plnr->planner_flags |= BLESSING;
 	  pln0 = plnr->adt->mkplan(plnr, prblm);
 	  X(plan_destroy)(pln0);
-	  plnr->planner_flags |= ~BLESSING;
+	  plnr->planner_flags &= ~BLESSING;
      }
 	  
      if (verbose) {

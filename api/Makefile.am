@@ -4,7 +4,5 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft		\
 include_HEADERS = fftw3.h
 noinst_LTLIBRARIES = libapi.la
 
-libapi_la_SOURCES = dfthelp.c plan-dft-1d.c the-planner.c api.h	\
-fftw3.h
-
-
+libapi_la_SOURCES = apiplan.c dfthelp.c execute.c mapflags.c	\
+plan-dft-1d.c the-planner.c api.h fftw3.h
