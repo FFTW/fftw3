@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.28 2005-01-10 22:34:41 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.29 2005-02-19 22:23:36 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -94,7 +94,7 @@ static int applicable0(const problem *p_)
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
           return ((p->sz->rnk == 1 && p->vecsz->rnk == 0)
-		  || p->sz->rnk == 0
+		  || (p->sz->rnk == 0 && FINITE_RNK(p->vecsz->rnk))
 	       );
      }
 
