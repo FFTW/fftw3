@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.1 2005-01-15 06:41:58 stevenj Exp $ */
+/* $Id: reodft00e-splitradix.c,v 1.2 2005-01-15 17:03:24 stevenj Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.
@@ -57,17 +57,16 @@ static void apply_e(const plan *ego_, R *I, R *O)
      int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W - 2;
-     R *buf, *buf2;
+     R *buf;
 
-     buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
-     buf2 = buf + n2;
+     buf = (R *) MALLOC(sizeof(R) * n2, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  /* do size (n+1)/2 redft00 of the even-indexed elements,
-	     writing to buf2: */
+	     writing to O: */
 	  {
 	       plan_rdft *cld = (plan_rdft *) ego->clde;
-	       cld->apply((plan *) cld, I, buf2);
+	       cld->apply((plan *) cld, I, O);
 	  }
 
 	  /* do size (n-1)/2 r2hc transform of odd-indexed elements
@@ -84,10 +83,10 @@ static void apply_e(const plan *ego_, R *I, R *O)
 
 	  /* combine the results with the twiddle factors to get output */
 	  { /* DC element */
-	       E b20 = buf2[0], b0 = K(2.0) * buf[0];
+	       E b20 = O[0], b0 = K(2.0) * buf[0];
 	       O[0] = b20 + b0;
 	       O[2*(n2*os)] = b20 - b0;
-	       O[n2*os] = buf2[n2];
+	       /* O[n2*os] = O[n2*os]; */
 	  }
 	  for (i = 1; i < n2 - i; ++i) {
 	       E ap, am, br, bi, wr, wi, wbr, wbi;
@@ -102,10 +101,10 @@ static void apply_e(const plan *ego_, R *I, R *O)
 	       wbr = K(2.0) * (wr*br - wi*bi);
 	       wbi = K(2.0) * (wr*bi + wi*br);
 #endif
-	       ap = buf2[i];
+	       ap = O[i*os];
 	       O[i*os] = ap + wbr;
 	       O[(2*n2 - i)*os] = ap - wbr;
-	       am = buf2[n2 - i];
+	       am = O[(n2 - i)*os];
 #if FFT_SIGN == -1
 	       O[(n2 - i)*os] = am - wbi;
 	       O[(n2 + i)*os] = am + wbi;
@@ -117,7 +116,7 @@ static void apply_e(const plan *ego_, R *I, R *O)
 	  if (i == n2 - i) { /* Nyquist element */
 	       E ap, wbr;
 	       wbr = K(2.0) * (W[2*i] * buf[i]);
-	       ap = buf2[i];
+	       ap = O[i*os];
 	       O[i*os] = ap + wbr;
 	       O[(2*n2 - i)*os] = ap - wbr;
 	  }
@@ -135,17 +134,16 @@ static void apply_o(const plan *ego_, R *I, R *O)
      int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W - 2;
-     R *buf, *buf2;
+     R *buf;
 
-     buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
-     buf2 = buf + n2;
+     buf = (R *) MALLOC(sizeof(R) * n2, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  /* do size (n-1)/2 rodft00 of the odd-indexed elements,
-	     writing to buf2: */
+	     writing to O: */
 	  {
 	       plan_rdft *cld = (plan_rdft *) ego->clde;
-	       cld->apply((plan *) cld, I + is, buf2);
+	       cld->apply((plan *) cld, I + is, O);
 	  }
 
 	  /* do size (n+1)/2 r2hc transform of even-indexed elements
@@ -175,10 +173,10 @@ static void apply_o(const plan *ego_, R *I, R *O)
 	       wbr = K(2.0) * (wr*br - wi*bi);
 	       wbi = K(2.0) * (wr*bi + wi*br);
 #endif
-	       ap = buf2[i-1];
+	       ap = O[(i-1)*os];
 	       O[(i-1)*os] = wbi + ap;
 	       O[(2*n2-1 - i)*os] = wbi - ap;
-	       am = buf2[n2-1 - i];
+	       am = O[(n2-1 - i)*os];
 #if FFT_SIGN == -1
 	       O[(n2-1 - i)*os] = wbr + am;
 	       O[(n2-1 + i)*os] = wbr - am;
@@ -190,7 +188,7 @@ static void apply_o(const plan *ego_, R *I, R *O)
 	  if (i == n2 - i) { /* Nyquist element */
 	       E ap, wbi;
 	       wbi = K(2.0) * (W[2*i+1] * buf[i]);
-	       ap = buf2[(i-1)];
+	       ap = O[(i-1)*os];
 	       O[(i-1)*os] = wbi + ap;
 	       O[(2*n2-1 - i)*os] = wbi - ap;
 	  }
@@ -273,15 +271,18 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      n = (n0 = p->sz->dims[0].n) + (p->kind[0] == REDFT00 ? -1 : 1);
      A(n > 0 && n % 2 == 0);
-     buf = (R *) MALLOC(sizeof(R) * n0, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * (n/2), BUFFERS);
 
      clde = X(mkplan_d)(plnr, X(mkproblem_rdft_1_d)(
-			     X(mktensor_1d)(n0-n/2, 2*p->sz->dims[0].is, 1), 
+			     X(mktensor_1d)(n0-n/2, 2*p->sz->dims[0].is, 
+					    p->sz->dims[0].os), 
 			     X(mktensor_0d)(), 
 			     TAINT(p->I 
 				   + p->sz->dims[0].is * (p->kind[0]==RODFT00),
 				   p->vecsz->rnk ? p->vecsz->dims[0].is : 0),
-			     buf + n/2, p->kind[0]));
+			     TAINT(p->O,
+				   p->vecsz->rnk ? p->vecsz->dims[0].os : 0),
+			     p->kind[0]));
      if (!clde) {
 	  X(ifree)(buf);
           return (plan *)0;
