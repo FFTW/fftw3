@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.12 2002-08-02 19:26:37 athena Exp $ *)
+(* $Id: c.ml,v 1.13 2002-08-07 00:38:11 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -389,14 +389,16 @@ let rec simplify_stride stride i =
 	| Negative y -> y
 	| y -> Negative y
   
-let rec stride_to_string = function
+let rec cstride_to_string = function
   | Simple i -> string_of_int i
   | Constant (s, i) -> s ^ " * " ^ (string_of_int i)
   | Composite (s, i) -> "WS(" ^ s ^ ", " ^ (string_of_int i) ^ ")"
-  | Negative x -> "-" ^ stride_to_string x
+  | Negative x -> "-" ^ cstride_to_string x
+
+let aref name index = Printf.sprintf "AREF(%s, %s)"  name index
 
 let array_subscript name stride k = 
-  name ^ "[" ^ (stride_to_string (simplify_stride stride k)) ^ "]"
+  aref name (cstride_to_string (simplify_stride stride k))
 
 let varray_subscript name vstride stride v i = 
   let vindex = simplify_stride vstride v
@@ -405,10 +407,10 @@ let varray_subscript name vstride stride v i =
   let index = 
     match (vindex, iindex) with
       (Simple vi, Simple ii) -> string_of_int (vi + ii)
-    | (Simple 0, x) -> stride_to_string x
-    | (x, Simple 0) -> stride_to_string x
-    | _ -> (stride_to_string vindex) ^ " + " ^ (stride_to_string iindex)
-  in name ^ "[" ^ index ^ "]"
+    | (Simple 0, x) -> cstride_to_string x
+    | (x, Simple 0) -> cstride_to_string x
+    | _ -> (cstride_to_string vindex) ^ " + " ^ (cstride_to_string iindex)
+  in aref name index
 
 let real_of s = "c_re(" ^ s ^ ")"
 let imag_of s = "c_im(" ^ s ^ ")"
