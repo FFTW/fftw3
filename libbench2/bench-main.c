@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.9 2003-04-05 02:35:49 stevenj Exp $ */
+/* $Id: bench-main.c,v 1.10 2003-04-05 12:11:56 athena Exp $ */
 
 #include "getopt.h"
 #include "bench.h"
@@ -58,11 +58,10 @@ static struct option long_options[] =
   {0, no_argument, 0, 0}
 };
 
-static void check_alignment(void)
+static void check_alignment(double *x)
 {
 #ifndef FFTW_DEBUG_ALIGNMENT
-     double x;
-     BENCH_ASSERT((((long)&x) & 0x7) == 0);
+     BENCH_ASSERT((((long)x) & 0x7) == 0);
 #endif
 }
 
@@ -78,7 +77,7 @@ int bench_main(int argc, char *argv[])
      int index;
      char *short_options = make_short_options(long_options);
 
-     check_alignment();
+     check_alignment(&tol);
 
      report = report_time; /* default */
      verbose = 0;
