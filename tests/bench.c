@@ -645,6 +645,7 @@ int can_do(bench_problem *p)
 
      if (the_plan) {
 	  FFTW(destroy_plan)(the_plan);
+	  FFTW(forget_wisdom)();
 	  return 1;
      }
      return 0;
