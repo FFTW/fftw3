@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.20 2002-07-21 01:06:50 stevenj Exp $ */
+/* $Id: codelet.h,v 1.21 2002-08-25 17:16:49 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -42,7 +42,8 @@ typedef struct {
      int (*okp)(
 	  const kdft_desc *desc,
 	  const R *ri, const R *ii, const R *ro, const R *io,
-	  int is, int os, uint vl, int ivs, int ovs);
+	  int is, int os, uint vl, int ivs, int ovs,
+	  const planner *plnr);
      uint vl;
 } kdft_genus;
 
@@ -67,7 +68,8 @@ typedef struct ct_desc_s ct_desc;
 typedef struct {
      int (*okp)(
 	  const struct ct_desc_s *desc,
-	  const R *rio, const R *iio, int ios, int vs, uint m, int dist);
+	  const R *rio, const R *iio, int ios, int vs, uint m, int dist,
+	  const planner *plnr);
      uint vl;
 } ct_genus;
 

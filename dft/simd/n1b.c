@@ -24,11 +24,13 @@
 #if HAVE_SIMD
 static int okp(const kdft_desc *d,
                const R *ri, const R *ii, const R *ro, const R *io,
-               int is, int os, uint vl, int ivs, int ovs)
+               int is, int os, uint vl, int ivs, int ovs, 
+	       const planner *plnr)
 {
      return (RIGHT_CPU()
              && ALIGNEDA(ii)
              && ALIGNED(io)
+	     && !(plnr->flags & POSSIBLY_UNALIGNED)
 	     && SIMD_STRIDE_OKA(is)
 	     && SIMD_STRIDE_OK(os)
 	     && SIMD_VSTRIDE_OKA(ivs)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.23 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: direct.c,v 1.24 2002-08-25 17:16:49 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -63,7 +63,8 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(dft-direct-%u%v \"%s\")", d->sz, ego->vl, d->nam);
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable(const solver *ego_, const problem *p_,
+		      const planner *plnr)
 {
      if (DFTP(p_)) {
           const S *ego = (const S *) ego_;
@@ -84,7 +85,7 @@ static int applicable(const solver *ego_, const problem *p_)
 	       /* check strides etc */
 	       && (d->genus->okp(d, p->ri, p->ii, p->ro, p->io,
 				 p->sz.dims[0].is, p->sz.dims[0].os,
-				 vl, ivs, ovs))
+				 vl, ivs, ovs, plnr))
 
 	       && (0
 		   /* can operate out-of-place */
@@ -109,7 +110,7 @@ static int applicable(const solver *ego_, const problem *p_)
 static int score(const solver *ego, const problem *p, const planner *plnr)
 {
      UNUSED(plnr);
-     return (applicable(ego, p)) ? GOOD : BAD;
+     return (applicable(ego, p, plnr)) ? GOOD : BAD;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -126,7 +127,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      UNUSED(plnr);
 
-     if (!applicable(ego_, p_))
+     if (!applicable(ego_, p_, plnr))
           return (plan *)0;
 
      p = (const problem_dft *) p_;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.87 2002-08-24 15:19:30 athena Exp $ */
+/* $Id: ifftw.h,v 1.88 2002-08-25 17:16:49 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -385,9 +385,13 @@ typedef struct slvpair_s {
 typedef struct solutions_s solutions; /* opaque */
 
 /* planner flags */
-enum { ESTIMATE = 0x2, IMPATIENT = 0x1, PATIENT = 0x0,
-       CLASSIC_VRECURSE = 0x4, FORCE_VRECURSE = 0x8, 
-       DESTROY_INPUT = 0x10 };
+enum { IMPATIENT = 0x1, PATIENT = 0x0,
+       ESTIMATE = 0x2, 
+       CLASSIC_VRECURSE = 0x4,
+       FORCE_VRECURSE = 0x8, 
+       DESTROY_INPUT = 0x10,
+       POSSIBLY_UNALIGNED = 0x20
+};
 
 #define NONPATIENCE_FLAGS(flags) ((flags) & ~(ESTIMATE | IMPATIENT | PATIENT))
 #define IMPATIENCE(flags) ((flags) & (ESTIMATE | IMPATIENT | PATIENT))

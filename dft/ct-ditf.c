@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.12 2002-08-23 20:07:12 athena Exp $ */
+/* $Id: ct-ditf.c,v 1.13 2002-08-25 17:16:49 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -57,7 +57,7 @@ static int applicable(const solver_ct *ego, const problem *p_,
                   && vd[0].os == (int)d[0].n * vd[0].is
 
 		  && (e->genus->okp(e, p->ri, p->ii, 
-				    vd[0].os, vd[0].is, m, d[0].is))
+				    vd[0].os, vd[0].is, m, d[0].is, plnr))
 	       );
      }
      return 0;

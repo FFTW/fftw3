@@ -23,9 +23,9 @@
 
 static int okp(const ct_desc *d,
 	       const R *rio, const R *iio, 
-	       int ios, int vs, uint m, int dist)
+	       int ios, int vs, uint m, int dist, const planner *plnr)
 {
-     UNUSED(rio); UNUSED(iio); UNUSED(m);
+     UNUSED(rio); UNUSED(iio); UNUSED(m); UNUSED(plnr);
      return (1
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))

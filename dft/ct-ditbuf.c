@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.17 2002-08-23 20:07:12 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.18 2002-08-25 17:16:49 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -118,9 +118,9 @@ static int applicable(const solver_ct *ego, const problem *p_,
                   /* check both batch size and remainder */
 		  && (m < BATCHSZ ||
 		      (e->genus->okp(e, 0, ((R *)0) + 1, 2, 0, BATCHSZ,
-				     2 * e->radix)))
+				     2 * e->radix, plnr)))
 		  && (e->genus->okp(e, 0, ((R *)0) + 1, 2, 0, m % BATCHSZ,
-				    2 * e->radix))
+				    2 * e->radix, plnr))
 	       );
      }
      return 0;

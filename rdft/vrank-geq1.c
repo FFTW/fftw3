@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.3 2002-08-05 02:50:19 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.4 2002-08-25 17:16:49 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -213,9 +213,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (p->vecsz.rnk == 1 && (plnr->flags & CLASSIC_VRECURSE))
 	  plnr->flags &= ~CLASSIC_VRECURSE & ~FORCE_VRECURSE;
 
+     d = p->vecsz.dims + vdim;
+     if (d->n > 0)
+	  if (X(alignment_of)(p->I + d->is) || X(alignment_of)(p->O + d->os))
+	       plnr->flags |= POSSIBLY_UNALIGNED;
+
      cldp = X(mkproblem_rdft_d)(X(tensor_copy)(p->sz),
 				X(tensor_copy_except)(p->vecsz, vdim),
 				p->I, p->O, p->kind);
+
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld)
@@ -224,7 +230,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln = MKPLAN_RDFT(P, &padt, apply);
 
      pln->cld = cld;
-     d = p->vecsz.dims + vdim;
      pln->vl = d->n;
      pln->ivs = d->is;
      pln->ovs = d->os;
