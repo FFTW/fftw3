@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.17 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.18 2003-03-01 01:22:00 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -96,72 +96,59 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 	       cld->apply((plan *) cld, buf, buf);
 	  }
 	  
-	  /* FIXME: strength-reduce loops by 4 to eliminate ugly sgn_set? */
+	  /* FIXME: strength-reduce loop by 4 to eliminate ugly sgn_set? */
 	  if (n2even) {
-	       for (i = 0; i + i + 1 <= n2; ++i) {
-		    int k;
-		    E c, s;
-		    
-		    k = i + i + 1;
-		    c = buf[k];
-		    s = buf[n - k];
-		    
-		    O[os * i] =
-			 SQRT2 * (SGN_SET(c, (i+1)/2) +
-				  SGN_SET(s, i/2));
-		    O[os * (n - 1 - i)] =
-			 SQRT2 * (SGN_SET(c, i/2) +
-				  SGN_SET(s, (i+3)/2));
+	       for (i = 0; i + i + 1 < n2; ++i) {
+		    int k = i + i + 1;
+		    E c1, s1;
+		    E c2, s2;
+		    c1 = buf[k];
+		    c2 = buf[k + 1];
+		    s2 = buf[n - (k + 1)];
+		    s1 = buf[n - k];
+
+		    O[os * i] = SQRT2 * (SGN_SET(c1, (i+1)/2) +
+					 SGN_SET(s1, i/2));
+		    O[os * (n - (i+1))] = SQRT2 * (SGN_SET(c1, i/2) +
+						   SGN_SET(s1, (i+3)/2));
+
+		    O[os * (n2 - (i+1))] = SQRT2 * (SGN_SET(c2, (n2-i)/2) -
+						    SGN_SET(s2, (n2-(i+1))/2));
+		    O[os * (n2 + (i+1))] = SQRT2 * (SGN_SET(c2, (n2-(i+1))/2) -
+						    SGN_SET(s2, (n2-i+2)/2));
 	       }
-	       for (; i + i + 1 < n; ++i) {
-		    int k;
-		    E c, s;
-		    
-		    k = i + i + 1;
-		    c = buf[n - k];
-		    s = buf[k];
-		    
-		    O[os * i] =
-			 SQRT2 * (SGN_SET(c, (i+1)/2) -
-				  SGN_SET(s, i/2));
-		    O[os * (n - 1 - i)] =
-			 SQRT2 * (SGN_SET(c, i/2) -
-				  SGN_SET(s, (i+3)/2));
-	       }
-	       O[os * i] = SQRT2 * SGN_SET(buf[0], (i+1)/2);
+	       O[os * n2] = SQRT2 * SGN_SET(buf[0], (n2+1)/2);
 	  }
 	  else /* n2odd */ {
-	       for (i = 0; i + i + 1 <= n2; ++i) {
-		    int k;
-		    E c, s;
+	       for (i = 0; i + i + 1 < n2; ++i) {
+		    int k = i + i + 1;
+		    E c1, s1;
+		    E c2, s2;
+		    c1 = buf[k];
+		    c2 = buf[k + 1];
+		    s2 = buf[n - (k + 1)];
+		    s1 = buf[n - k];
+
+		    O[os * i] = SQRT2 * (SGN_SET(c1, (i+1)/2) +
+					 SGN_SET(s1, i/2));
+		    O[os * (n - (i+1))] = SQRT2 * (SGN_SET(c1, (i+2)/2) +
+						   SGN_SET(s1, (i+1)/2));
 		    
-		    k = i + i + 1;
-		    c = buf[k];
-		    s = buf[n - k];
-		    
-		    O[os * i] =
-			 SQRT2 * (SGN_SET(c, (i+1)/2) +
-				  SGN_SET(s, i/2));
-		    O[os * (n - 1 - i)] =
-			 SQRT2 * (SGN_SET(c, (i+2)/2) +
-				  SGN_SET(s, (i+1)/2));
+		    O[os * (n2 - (i+1))] = SQRT2 * (SGN_SET(c2, (n2-i)/2) -
+						    SGN_SET(s2, (n2-(i+1))/2));
+		    O[os * (n2 + (i+1))] = SQRT2 * (SGN_SET(c2, (n2-i+1)/2) -
+						    SGN_SET(s2, (n2-i)/2));
 	       }
-	       for (; i + i + 1 < n; ++i) {
-		    int k;
+	       { /* i + i + 1 == n2 */
 		    E c, s;
-		    
-		    k = i + i + 1;
-		    c = buf[n - k];
-		    s = buf[k];
-		    
-		    O[os * i] =
-			 SQRT2 * (SGN_SET(c, (i+1)/2) -
-				  SGN_SET(s, i/2));
-		    O[os * (n - 1 - i)] =
-			 SQRT2 * (SGN_SET(c, (i+2)/2) -
-				  SGN_SET(s, (i+1)/2));
+		    c = buf[n2];
+		    s = buf[n - n2];
+		    O[os * i] = SQRT2 * (SGN_SET(c, (i+1)/2) +
+					 SGN_SET(s, i/2));
+		    O[os * (n - (i+1))] = SQRT2 * (SGN_SET(c, (i+2)/2) +
+						   SGN_SET(s, (i+1)/2));
 	       }
-	       O[os * i] = SQRT2 * SGN_SET(buf[0], (i+1)/2);
+	       O[os * n2] = SQRT2 * SGN_SET(buf[0], (n2+1)/2);
 	  }
      }
 
@@ -197,118 +184,107 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
 	       for (; i < n; ++i, m += 4)
 		    buf[i] = I[is * (n - 1 - m)];
 	  }
-	  
+
 	  { /* child plan: R2HC of size n */
 	       plan_rdft *cld = (plan_rdft *) ego->cld;
 	       cld->apply((plan *) cld, buf, buf);
 	  }
 	  
-	  /* FIXME: strength-reduce loops by 4 to eliminate ugly sgn_set? */
+	  /* FIXME: strength-reduce loop by 4 to eliminate ugly sgn_set? */
 	  if (n2even) {
-	       for (i = 0; i + i + 1 <= n2; ++i) {
-		    int k;
-		    E c, s;
-		    
-		    k = i + i + 1;
-		    c = buf[k];
-		    s = buf[n - k];
-		    
-		    if (i % 2) {
-			 O[os * i] =
-			      SQRT2 * (SGN_SET(c, (i+3)/2) +
-				       SGN_SET(s, (i+2)/2));
-			 O[os * (n - 1 - i)] =
-			      SQRT2 * (SGN_SET(c, (i+2)/2) +
-				       SGN_SET(s, (i+1)/2));
-		    }
-		    else {
-			 O[os * i] =
-			      SQRT2 * (SGN_SET(c, (i+1)/2) +
-				       SGN_SET(s, i/2));
-			 O[os * (n - 1 - i)] =
-			      SQRT2 * (SGN_SET(c, i/2) +
-				       SGN_SET(s, (i+3)/2));
-		    }
-	       }
-	       for (; i + i + 1 < n; ++i) {
-		    int k;
-		    E c, s;
-		    
-		    k = i + i + 1;
-		    c = buf[n - k];
-		    s = buf[k];
+	       for (i = 0; i + i + 1 < n2; ++i) {
+		    int k = i + i + 1;
+		    E c1, s1;
+		    E c2, s2;
+		    c1 = buf[k];
+		    c2 = buf[k + 1];
+		    s2 = buf[n - (k + 1)];
+		    s1 = buf[n - k];
 		    
 		    if (i % 2) {
-			 O[os * i] =
-			      SQRT2 * (SGN_SET(c, (i+3)/2) -
-				       SGN_SET(s, (i+2)/2));
-			 O[os * (n - 1 - i)] =
-			      SQRT2 * (SGN_SET(c, (i+2)/2) -
-				       SGN_SET(s, (i+1)/2));
+			 O[os * i] = SQRT2 * (SGN_SET(c1, (i+3)/2) +
+					      SGN_SET(s1, (i+2)/2));
+			 O[os * (n - (i+1))] = SQRT2 * (SGN_SET(c1, (i+2)/2) +
+							SGN_SET(s1, (i+1)/2));
+			 
+			 O[os * (n2 - (i+1))] =
+			      SQRT2 * (SGN_SET(c2, (n2-i)/2) -
+				       SGN_SET(s2, (n2-(i+1))/2));
+			 O[os * (n2 + (i+1))] =
+			      SQRT2 * (SGN_SET(c2, (n2-(i+1))/2) -
+				       SGN_SET(s2, (n2-i+2)/2));
 		    }
 		    else {
-			 O[os * i] =
-			      SQRT2 * (SGN_SET(c, (i+1)/2) -
-				       SGN_SET(s, i/2));
-			 O[os * (n - 1 - i)] =
-			      SQRT2 * (SGN_SET(c, i/2) -
-				       SGN_SET(s, (i+3)/2));
+			 O[os * i] = SQRT2 * (SGN_SET(c1, (i+1)/2) +
+					      SGN_SET(s1, i/2));
+			 O[os * (n - (i+1))] = SQRT2 * (SGN_SET(c1, i/2) +
+							SGN_SET(s1, (i+3)/2));
+			 
+			 O[os * (n2 - (i+1))] =
+			      SQRT2 * (SGN_SET(c2, (n2-i+2)/2) -
+				       SGN_SET(s2, (n2-i+1)/2));
+			 O[os * (n2 + (i+1))] =
+			      SQRT2 * (SGN_SET(c2, (n2-i+1)/2) -
+				       SGN_SET(s2, (n2-i)/2));
 		    }
 	       }
-	       O[os * i] = SQRT2 * SGN_SET(buf[0], (i+1)/2);
+	       O[os * n2] = SQRT2 * SGN_SET(buf[0], (n2+1)/2);
 	  }
 	  else /* n2odd */ {
-	       for (i = 0; i + i + 1 <= n2; ++i) {
-		    int k;
-		    E c, s;
-		    
-		    k = i + i + 1;
-		    c = buf[k];
-		    s = buf[n - k];
-		    
+	       for (i = 0; i + i + 1 < n2; ++i) {
+		    int k = i + i + 1;
+		    E c1, s1;
+		    E c2, s2;
+		    c1 = buf[k];
+		    c2 = buf[k + 1];
+		    s2 = buf[n - (k + 1)];
+		    s1 = buf[n - k];
+
 		    if (i % 2) {
-			 O[os * i] =
-			      SQRT2 * (SGN_SET(c, (i+3)/2) +
-				       SGN_SET(s, (i+2)/2));
-			 O[os * (n - 1 - i)] =
-			      SQRT2 * (SGN_SET(c, i/2) +
-				       SGN_SET(s, (i+3)/2));
+			 O[os * i] = SQRT2 * (SGN_SET(c1, (i+3)/2) +
+					      SGN_SET(s1, (i+2)/2));
+			 O[os * (n - (i+1))] = SQRT2 * (SGN_SET(c1, i/2) +
+							SGN_SET(s1, (i+3)/2));
+			 
+			 O[os * (n2 - (i+1))] =
+			      SQRT2 * (SGN_SET(c2, (n2-i+2)/2) -
+				       SGN_SET(s2, (n2-i+1)/2));
+			 O[os * (n2 + (i+1))] =
+			      SQRT2 * (SGN_SET(c2, (n2-i+3)/2) -
+				       SGN_SET(s2, (n2-i+2)/2));
 		    }
 		    else {
-			 O[os * i] =
-			      SQRT2 * (SGN_SET(c, (i+1)/2) +
-				       SGN_SET(s, i/2));
-			 O[os * (n - 1 - i)] =
-			      SQRT2 * (SGN_SET(c, (i+2)/2) +
-				       SGN_SET(s, (i+1)/2));
+			 O[os * i] = SQRT2 * (SGN_SET(c1, (i+1)/2) +
+					      SGN_SET(s1, i/2));
+			 O[os * (n - (i+1))] = SQRT2 * (SGN_SET(c1, (i+2)/2) +
+							SGN_SET(s1, (i+1)/2));
+			 
+			 O[os * (n2 - (i+1))] =
+			      SQRT2 * (SGN_SET(c2, (n2-i)/2) -
+				       SGN_SET(s2, (n2-(i+1))/2));
+			 O[os * (n2 + (i+1))] =
+			      SQRT2 * (SGN_SET(c2, (n2-i+1)/2) -
+				       SGN_SET(s2, (n2-i)/2));
 		    }
 	       }
-	       for (; i + i + 1 < n; ++i) {
-		    int k;
+	       { /* i + i + 1 == n2 */
 		    E c, s;
-		    
-		    k = i + i + 1;
-		    c = buf[n - k];
-		    s = buf[k];
-		    
+		    c = buf[n2];
+		    s = buf[n - n2];
 		    if (i % 2) {
-			 O[os * i] =
-			      SQRT2 * (SGN_SET(c, (i+3)/2) -
-				       SGN_SET(s, (i+2)/2));
-			 O[os * (n - 1 - i)] =
-			      SQRT2 * (SGN_SET(c, i/2) -
-				       SGN_SET(s, (i+3)/2));
+			 O[os * i] = SQRT2 * (SGN_SET(c, (i+3)/2) +
+					      SGN_SET(s, (i+2)/2));
+			 O[os * (n - (i+1))] = SQRT2 * (SGN_SET(c, i/2) +
+							SGN_SET(s, (i+3)/2));
 		    }
 		    else {
-			 O[os * i] =
-			      SQRT2 * (SGN_SET(c, (i+1)/2) -
-				       SGN_SET(s, i/2));
-			 O[os * (n - 1 - i)] =
-			      SQRT2 * (SGN_SET(c, (i+2)/2) -
-				       SGN_SET(s, (i+1)/2));
+			 O[os * i] = SQRT2 * (SGN_SET(c, (i+1)/2) +
+					      SGN_SET(s, i/2));
+			 O[os * (n - (i+1))] = SQRT2 * (SGN_SET(c, (i+2)/2) +
+							SGN_SET(s, (i+1)/2));
 		    }
 	       }
-	       O[os * i] = SQRT2 * SGN_SET(buf[0], (i+3)/2);
+	       O[os * n2] = SQRT2 * SGN_SET(buf[0], (n2+3)/2);
 	  }
      }
 
