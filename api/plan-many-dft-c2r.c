@@ -41,11 +41,11 @@ X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,
 			     int istride, int idist,
 			     R *out, const unsigned int *onembed,
 			     int ostride, int odist,
-			     int sign, unsigned int flags)
+			     unsigned int flags)
 {
      R *ri, *ii;
 
-     X(extract_reim)(sign, in, &ri, &ii);
+     X(extract_reim)(FFT_SIGN, in, &ri, &ii);
      
      return X(mkapiplan)(
 	  flags,

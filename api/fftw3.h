@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.21 2003-01-12 02:04:23 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.22 2003-01-12 02:09:41 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -104,7 +104,7 @@ X(plan) X(plan_many_dft_r2c)(unsigned int rank, const unsigned int *n,	  \
                              int istride, int idist,			  \
                              C *out, const unsigned int *onembed,	  \
                              int ostride, int odist,			  \
-                             int sign, unsigned int flags);		  \
+                             unsigned int flags);			  \
 									  \
 X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,	  \
 			     unsigned int howmany,			  \
@@ -112,7 +112,7 @@ X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,	  \
 			     int istride, int idist,			  \
 			     R *out, const unsigned int *onembed,	  \
 			     int ostride, int odist,			  \
-			     int sign, unsigned int flags);		  \
+			     unsigned int flags);			  \
 									  \
 void X(destroy_plan)(X(plan) p);					  \
 void X(forget_wisdom)(void);						  \
