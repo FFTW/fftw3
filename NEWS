@@ -1,3 +1,33 @@
+FFTW 3.0.1
+
+* Some speed improvements in SIMD code.
+
+* --without-cycle-counter option is removed.  If no cycle counter is found,
+  then the estimator is always used.  A --with-slow-timer option is provided
+  to force the use of lower-resolution timers.
+
+* Several fixes for compilation under Visual C++, with help from Stefane Ruel.
+
+* Added x86 cycle counter for Visual C++, with help from Morten Nissov.
+
+* Added S390 cycle counter, courtesy of James Treacy.
+
+* Added missing static keyword that prevented simultaneous linkage
+  of different-precision versions; thanks to Rasmus Larson for the bug report.
+
+* Corrected accidental omission of f77_wisdom.f file; thanks to Alan Watson.
+
+* Support -xopenmp flag for SunOS; thanks to John Lou for the bug report.
+
+* Compilation with HP/UX cc requires -Wp,-H128000 flag to increase
+  preprocessor limits; thanks to Peter Vouras for the bug report.
+
+* Removed non-portable use of 'tempfile' in fftw-wisdom-to-conf script;
+  thanks to Nicolas Decoster for the patch.
+
+* Added 'make smallcheck' target in tests/ directory, at the request of
+  James Treacy.
+
 FFTW 3.0
 
 Major goals of this release:
