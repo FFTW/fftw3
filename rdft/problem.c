@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.24 2002-09-01 23:51:50 athena Exp $ */
+/* $Id: problem.c,v 1.25 2002-09-09 14:14:22 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -41,7 +41,7 @@ static void kind_hash(md5 *m, const rdft_kind *kind, uint rnk)
 static void hash(const problem *p_, md5 *m)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
-     X(md5puts)(m, "rdft", 4);
+     X(md5puts)(m, "rdft");
      X(md5int)(m, p->I == p->O);
      kind_hash(m, p->kind, p->sz.rnk);
      X(md5uint)(m, X(alignment_of)(p->I));

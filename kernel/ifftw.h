@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.108 2002-09-04 00:57:03 athena Exp $ */
+/* $Id: ifftw.h,v 1.109 2002-09-09 14:14:22 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -223,7 +223,9 @@ typedef struct {
 } md5;
 
 void X(md5begin)(md5 *p);
-void X(md5puts)(md5 *p, const void *d_, uint len);
+void X(md5putb)(md5 *p, const void *d_, uint len);
+void X(md5puts)(md5 *p, const char *s);
+void X(md5putc)(md5 *p, const unsigned char c);
 void X(md5uint)(md5 *p, uint i);
 void X(md5int)(md5 *p, int i);
 void X(md5ptrdiff)(md5 *p, ptrdiff_t d);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.15 2002-09-01 23:51:50 athena Exp $ */
+/* $Id: problem2.c,v 1.16 2002-09-09 14:14:22 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -35,7 +35,7 @@ static void destroy(problem *ego_)
 static void hash(const problem *p_, md5 *m)
 {
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
-     X(md5puts)(m, "rdft2", 5);
+     X(md5puts)(m, "rdft2");
      X(md5int)(m, p->r == p->rio);
      X(md5int)(m, p->r == p->iio);
      X(md5ptrdiff)(m, p->iio - p->rio);  /* (1) */

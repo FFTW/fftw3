@@ -117,14 +117,26 @@ void X(md5begin)(md5 *p)
      p->l = 0;
 }
 
-void X(md5puts)(md5 *p, const void *d_, uint len)
+void X(md5putc)(md5 *p, const unsigned char c)
+{
+     p->c[p->l % 64] = c;
+     if (((++p->l) % 64) == 0) doblock(p->s, p->c);
+}
+
+void X(md5putb)(md5 *p, const void *d_, uint len)
 {
      uint i;
-     unsigned const char *d = d_;
-     for (i = 0; i < len; ++i) {
-	  p->c[p->l % 64] = d[i];
-	  if (((++p->l) % 64) == 0) doblock(p->s, p->c);
-     }
+     const unsigned char *d = d_;
+     for (i = 0; i < len; ++i)
+	  X(md5putc)(p, d[i]);
+}
+
+void X(md5puts)(md5 *p, const char *s)
+{
+     /* also hash final '\0' */
+     do {
+	  X(md5putc)(p, *s);
+     } while(*s++);
 }
 
 void X(md5end)(md5 *p)
@@ -135,13 +147,13 @@ void X(md5end)(md5 *p)
      l = 8 * p->l; /* length before padding, in bits */
 
      /* rfc 1321 section 3.1: padding */
-     c = 0x80; X(md5puts)(p, &c, 1);
-     c = 0x00; while ((p->l % 64) != 56) X(md5puts)(p, &c, 1);
+     c = 0x80; X(md5putc)(p, c);
+     c = 0x00; while ((p->l % 64) != 56) X(md5putc)(p, c);
 
      /* rfc 1321 section 3.2: length (little endian) */
      for (i = 0; i < 8; ++i) {
 	  c = l & 0xFF;
-	  X(md5puts)(p, &c, 1);
+	  X(md5putc)(p, c);
 	  l = l >> 8;
      }
 
@@ -150,15 +162,15 @@ void X(md5end)(md5 *p)
 
 void X(md5int)(md5 *p, int i)
 {
-     X(md5puts)(p, &i, sizeof(i));
+     X(md5putb)(p, &i, sizeof(i));
 }
 
 void X(md5uint)(md5 *p, uint i)
 {
-     X(md5puts)(p, &i, sizeof(i));
+     X(md5putb)(p, &i, sizeof(i));
 }
 
 void X(md5ptrdiff)(md5 *p, ptrdiff_t d)
 {
-     X(md5puts)(p, &d, sizeof(d));
+     X(md5putb)(p, &d, sizeof(d));
 }
