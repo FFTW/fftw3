@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.68 2003-03-03 03:44:10 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.69 2003-03-03 04:33:02 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -31,6 +31,30 @@ O(n log n)
 @end ifhtml
 @tex
 $O(n \\log n)$
+@end tex
+@end macro
+
+@macro ndims
+@ifinfo
+n1 x n2 x n3 x ... x nd.
+@end ifinfo
+@ifhtml
+n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x n<sub>d</sub>.
+@end ifhtml
+@tex
+$n_1 \\times n_2 \\times n_3 \\times \\cdots \\times n_d$.
+@end tex
+@end macro
+
+@macro ndimshalf
+@ifinfo
+n1 x n2 x n3 x ... x (nd/2 + 1).
+@end ifinfo
+@ifhtml
+n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x (n<sub>d</sub>/2 + 1).
+@end ifhtml
+@tex
+$n_1 \\times n_2 \\times n_3 \\times \\cdots \\times (n_d/2 + 1)$.
 @end tex
 @end macro
 
@@ -601,31 +625,12 @@ As before, @code{n} is the logical size of the array, and the
 consequences of this on the the format of the complex arrays deserve
 careful attention.
 @cindex r2c/c2r multi-dimensional array format
-Suppose that the real data has dimensions
-@tex
-$n_1 \times n_2 \times \cdots \times n_d$
-@end tex
-@ifinfo
-n1 x n2 x ... x nd
-@end ifinfo
-@ifhtml
-n<sub>1</sub> x n<sub>2</sub> x ... x n<sub>d</sub>
-@end ifhtml
-(in row-major order).  Then, after an r2c transform, the
-output is an
-@tex
-$n_1 \times n_2 \times \cdots \times (n_d/2+1)$
-@end tex
-@ifinfo
-n1 x n2 x ... x (nd/2+1)
-@end ifinfo
-@ifhtml
-n<sub>1</sub> x n<sub>2</sub> x ... x (n<sub>d</sub>/2+1)
-@end ifhtml
-array of @code{fftw_complex} values in row-major order, corresponding to
-slightly over half of the output of the corresponding complex DFT.  (The
-division is rounded down.)  The ordering of the data is otherwise
-exactly the same as in the complex-DFT case.
+Suppose that the real data has dimensions @ndims (in row-major order).
+Then, after an r2c transform, the output is an @ndimshalf array of
+@code{fftw_complex} values in row-major order, corresponding to slightly
+over half of the output of the corresponding complex DFT.  (The division
+is rounded down.)  The ordering of the data is otherwise exactly the
+same as in the complex-DFT case.
 
 Since the complex data is slightly larger than the real data, some
 complications arise for in-place transforms.  In this case, the final
@@ -1156,18 +1161,8 @@ dimension's index varies most slowly and the last dimension's index
 varies most quickly.
 
 To be more explicit, let us consider an array of rank @math{d} whose
-dimensions are
-@tex
-$n_1 \times n_2 \times n_3 \times \cdots \times n_d$.
-@end tex
-@ifinfo
-n1 x n2 x n3 x ... x nd.
-@end ifinfo
-@ifhtml
-n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x n<sub>d</sub>.
-@end ifhtml
-Now, we specify a location in the array by a sequence of (zero-based) indices,
-one for each dimension:
+dimensions are @ndims{}. Now, we specify a location in the array by a
+sequence of (zero-based) indices, one for each dimension:
 @tex
 $(i_1, i_2, i_3, \ldots, i_d)$.
 @end tex
@@ -1553,12 +1548,14 @@ The basic interface, which we expect to satisfy the needs of most users,
 provides planner routines for transforms of a single contiguous array
 with any of FFTW's supported transform types.
 
-@c =========>
 @menu
 * Complex DFTs::                
 * Planner Flags::               
+* Real-data DFTs::              
+* Real-data DFT array format::  
 @end menu
 
+@c =========>
 @node Complex DFTs, Planner Flags, Basic Interface, Basic Interface
 @subsection Complex DFTs
 
@@ -1657,8 +1654,14 @@ as defined in @ref{Planner Flags}.
 
 @end itemize
 
+FFTW computes an unnormalized transform: computing a forward followed by
+a backward transform (or vice versa) will result in the original data
+multiplied by the size of the transform (the product of the dimensions).
+@cindex normalization
+For more information, see @ref{What FFTW Really Computes}.
+
 @c =========>
-@node Planner Flags,  , Complex DFTs, Basic Interface
+@node Planner Flags, Real-data DFTs, Complex DFTs, Basic Interface
 @subsection Planner Flags
 
 All of the planner routines in FFTW accept an integer @code{flags}
@@ -1737,6 +1740,211 @@ original.  (Using @code{fftw_malloc} makes this flag unnecessary even
 then.)
 
 @end itemize
+
+@c =========>
+@node Real-data DFTs, Real-data DFT array format, Planner Flags, Basic Interface
+@subsection Real-data DFTs
+
+@example
+fftw_plan fftw_plan_dft_r2c_1d(int n,
+                               double *in, fftw_complex *out,
+                               unsigned flags);
+fftw_plan fftw_plan_dft_r2c_2d(int nx, int ny,
+                               double *in, fftw_complex *out,
+                               unsigned flags);
+fftw_plan fftw_plan_dft_r2c_3d(int nx, int ny, int nz,
+                               double *in, fftw_complex *out,
+                               unsigned flags);
+fftw_plan fftw_plan_dft_r2c(int rank, const int *n,
+                            double *in, fftw_complex *out,
+                            unsigned flags);
+@end example
+@findex fftw_plan_dft_r2c_1d
+@findex fftw_plan_dft_r2c_2d
+@findex fftw_plan_dft_r2c_3d
+@findex fftw_plan_dft_r2c
+@cindex r2c
+
+Plan a real-input/complex-output discrete Fourier transform (DFT) in
+zero or more dimensions, returning an @code{fftw_plan} (@pxref{Using
+Plans}).
+
+Once you have created a plan for a certain transform type and
+parameters, then creating another plan of the same type and parameters,
+but for different arrays, is fast and shares constant data with the
+first plan (if it still exists).
+
+The planner returns @code{NULL} if the plan cannot be created.  A
+non-@code{NULL} plan is always returned by the basic interface unless
+you are using a customized FFTW configuration supporting a restricted
+set of transforms, or if you use the @code{FFTW_PRESERVE_INPUT} flag
+with a multi-dimensional out-of-place c2r transform (see below).
+
+@subsubheading Arguments
+@itemize @bullet
+
+@item
+@code{rank} is the dimensionality of the transform (it should be the
+size of the array @code{*n}), and can be any non-negative integer.  The
+@samp{_1d}, @samp{_2d}, and @samp{_3d} planners correspond to a
+@code{rank} of @code{1}, @code{2}, and @code{3}, respectively.  A
+@code{rank} of zero is equivalent to a transform of size 1, i.e. a copy
+of one number (with zero imaginary part) from input to output.
+
+@item
+@code{n}, or @code{nx}/@code{ny}/@code{nz}, or @code{n[rank]},
+respectively, gives the size of the @emph{logical} transform dimensions.
+They can be any positive integer.  This is different in general from the
+@emph{physical} array dimensions, which are described in @ref{Real-data
+DFT array format}.
+ 
+@itemize @minus
+@item
+FFTW is best at handling sizes of the form
+@ifinfo
+@math{2^a 3^b 5^c 7^d 11^e 13^f},
+@end ifinfo
+@tex
+$2^a 3^b 5^c 7^d 11^e 13^f$,
+@end tex
+@ifhtml
+2<sup>a</sup> 3<sup>b</sup> 5<sup>c</sup> 7<sup>d</sup>
+        11<sup>e</sup> 13<sup>f</sup>,
+@end ifhtml
+where @math{e+f} is either @math{0} or @math{1}, and the other exponents
+are arbitrary.  Other sizes are computed by means of a slow,
+general-purpose algorithm (which nevertheless retains @Onlogn
+performance even for prime sizes).  (It is possible to customize FFTW
+for different array sizes; see @ref{Installation and Customization}.)
+Transforms whose sizes are powers of @math{2} are especially fast, and
+it is generally beneficial for the @emph{last} dimension of an r2c/c2r
+transform to be @emph{even}.
+@end itemize
+
+@item
+@code{in} and @code{out} point to the input and output arrays of the
+transform, which may be the same (yielding an in-place transform).
+@cindex in-place
+These arrays are overwritten during planning, unless
+@code{FFTW_ESTIMATE} is used in the flags.  (The arrays need not be
+initialized, but they must be allocated.)  For an in-place transform, it
+is important to remember that the real array will require padding,
+described in @ref{Real-data DFT array format}.
+@cindex padding
+
+@item
+@cindex flags
+@code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
+as defined in @ref{Planner Flags}.
+
+@end itemize
+
+The inverse transforms, taking complex input (storing the non-redundant
+half of a logically Hermitian array) to real output, are given by:
+
+@example
+fftw_plan fftw_plan_dft_c2r_1d(int n,
+                               fftw_complex *in, double *out,
+                               unsigned flags);
+fftw_plan fftw_plan_dft_c2r_2d(int nx, int ny,
+                               fftw_complex *in, double *out,
+                               unsigned flags);
+fftw_plan fftw_plan_dft_c2r_3d(int nx, int ny, int nz,
+                               fftw_complex *in, double *out,
+                               unsigned flags);
+fftw_plan fftw_plan_dft_c2r(int rank, const int *n,
+                            fftw_complex *in, double *out,
+                            unsigned flags);
+@end example
+@findex fftw_plan_dft_c2r_1d
+@findex fftw_plan_dft_c2r_2d
+@findex fftw_plan_dft_c2r_3d
+@findex fftw_plan_dft_c2r
+@cindex c2r
+
+The arguments are the same as for the r2c transforms, except that the
+input and output data formats are reversed.
+
+FFTW computes an unnormalized transform: computing an r2c followed by a
+c2r transform (or vice versa) will result in the original data
+multiplied by the size of the transform (the product of the logical
+dimensions).
+@cindex normalization
+An r2c transform produces the same output as a @code{FFTW_FORWARD}
+complex DFT of the same input, and a c2r transform is correspondingly
+equivalent to @code{FFTW_BACKWARD}.  For more information, see @ref{What
+FFTW Really Computes}.
+
+@c =========>
+@node Real-data DFT array format,  , Real-data DFTs, Basic Interface
+@subsection Real-data DFTs array format
+@cindex r2c/c2r multi-dimensional array format
+
+The output of a DFT of real data (r2c) contains symmetries that, in
+principle, make half of the outputs redundant (@pxref{What FFTW Really
+Computes}).  (Similarly for the input of an inverse c2r transform.)  In
+practice, it is not possible to entirely realize these savings in an
+efficient and understandable format that generalizes to
+multi-dimensional transforms.  Instead, the output of the r2c
+transforms is @emph{slightly} over half of the output of the
+corresponding complex transform.  We do not ``pack'' the data in any
+way, but store it as an ordinary array of @code{fftw_complex} values.
+In fact, this data is simply a subsection of what would be the array in
+the corresponding complex transform.
+
+Specifically, for a real transform of @math{d} (= @code{rank})
+dimensions @ndims{}, the complex data is an @ndimshalf array of
+@code{fftw_complex} values in row-major order (with the division rounded
+down).  That is, we only store the @emph{lower} half (non-negative
+frequencies), plus one element, of the last dimension of the data from
+the ordinary complex transform.  (We could have instead taken half of
+any other dimension, but implementation turns out to be simpler if the
+last, contiguous, dimension is used.)
+
+@cindex out-of-place
+For an out-of-place transform, the real-data is simply an array with
+physical dimensions @ndims in row-major order.
+
+@cindex in-place
+@cindex padding
+Since the complex data is slightly larger than the real data, some
+complications arise for in-place transforms.  In this case, the final
+dimension of the real data must be @emph{padded} with extra values to
+accommodate the size of the complex data---two extra if the last
+dimension is even and one if it is odd.  That is, the last dimension of
+the real data must physically contain
+@tex
+$2 (n_d/2+1)$
+@end tex
+@ifinfo
+2 * (nd/2+1)
+@end ifinfo
+@ifhtml
+2 * (n<sub>d</sub>/2+1)
+@end ifhtml
+@code{double} values (exactly enough to hold the complex data).  This
+physical array size does not, however, change the @emph{logical} array
+size---only
+@tex
+$n_d$
+@end tex
+@ifinfo
+nd
+@end ifinfo
+@ifhtml
+n<sub>d</sub>
+@end ifhtml
+values are actually stored in the last dimension, and
+@tex
+$n_d$
+@end tex
+@ifinfo
+nd
+@end ifinfo
+@ifhtml
+n<sub>d</sub>
+@end ifhtml
+is the last dimension passed to the planner.
 
 @c ------------------------------------------------------------
 @node Advanced Interface, Guru Interface, Basic Interface, FFTW Reference
