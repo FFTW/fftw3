@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.178 2003-03-31 22:12:19 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.179 2003-04-02 20:09:08 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4163,6 +4163,9 @@ creating the plan, and the plan is then executed for @emph{those} arrays
 a particular array and stride, but the plan could still be used for
 other arrays and strides.)  That is, much of the information that was
 formerly specified at execution time is now specified at planning time.
+
+Like FFTW 2's specific planner routines, the FFTW 3 planner overwrites
+the input/output arrays unless you use @code{FFTW_ESTIMATE}.
 
 FFTW 2 had separate data types @code{fftw_plan}, @code{fftwnd_plan},
 @code{rfftw_plan}, and @code{rfftwnd_plan} for complex and real one- and
