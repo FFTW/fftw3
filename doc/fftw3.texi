@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.58 2003-03-02 01:42:23 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.59 2003-03-02 05:57:22 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1034,7 +1034,7 @@ For the precise mathematical definition of the DHT as used by FFTW, see
 @menu
 * The Importance of Alignment::  
 * Multi-dimensional Array Format::  
-* Words of Wisdom-Saving Plans::             
+* Words of Wisdom-Saving Plans::  
 @end menu
 
 @c ------------------------------------------------------------
@@ -1142,6 +1142,7 @@ several different formats are common.
 * Dynamic Arrays in C-The Wrong Way::  
 @end menu
 
+@c =========>
 @node Row-major Format, Column-major Format, Multi-dimensional Array Format, Multi-dimensional Array Format
 @subsection Row-major Format
 @cindex row-major
@@ -1204,6 +1205,7 @@ transform a single field. In the basic interface, however, the stride
 is 1.
 @cindex stride
 
+@c =========>
 @node Column-major Format, Static Arrays in C, Row-major Format, Multi-dimensional Array Format
 @subsection Column-major Format
 @cindex column-major
@@ -1224,6 +1226,7 @@ dimensions of the array as if it were an @code{L x M x N} matrix
 (@pxref{Calling FFTW from Fortran}).
 @cindex Fortran interface
 
+@c =========>
 @node Static Arrays in C, Dynamic Arrays in C, Column-major Format, Multi-dimensional Array Format
 @subsection Static Arrays in C
 @cindex C multi-dimensional arrays
@@ -1257,6 +1260,7 @@ align the array if you link with a SIMD FFTW (@pxref{SIMD alignment
 and fftw_malloc}).  Instead, we recommend using @code{fftw_malloc}, as
 described below.
 
+@c =========>
 @node Dynamic Arrays in C, Dynamic Arrays in C-The Wrong Way, Static Arrays in C, Multi-dimensional Array Format
 @subsection Dynamic Arrays in C
 
@@ -1293,6 +1297,7 @@ The recent C99 standard provides a way to dynamically reinterpret the
 array as a static-like multi-dimensional array amenable to @samp{[]},
 but this feature is not yet widely supported by compilers.
 
+@c =========>
 @node Dynamic Arrays in C-The Wrong Way,  , Dynamic Arrays in C, Multi-dimensional Array Format
 @subsection Dynamic Arrays in C---The Wrong Way
 
@@ -1374,13 +1379,214 @@ see the @code{comp.lang.c}
 @node Parallel FFTW, Calling FFTW from Fortran, FFTW Reference, Top
 @chapter Parallel FFTW
 
+@cindex parallel transform
+In this chapter we discuss the use of FFTW in a parallel environment.
+
+Currently, FFTW 3 includes parallel transforms for shared-memory
+machiens with some flavor of threads (e.g. POSIX threads); any program
+using FFTW can be trivially modified to use these transforms, which are
+documented in @ref{Multi-threaded FFTW}.
+
+Users calling FFTW from a multi-threaded program should also consult
+@ref{Thread safety}.  This section tells you which routines of FFTW it
+is safe to call in parallel from different shared-memory threads.
+
+FFTW 2 also contains distributed-memory parallel transforms using the
+MPI message-passing standard.  MPI transforms are not yet available in
+FFTW 3, so users requiring that capability must use FFTW 2 for now.
+
+@menu
+* Multi-threaded FFTW::         
+* Thread safety::               
+@end menu
+
+@c ------------------------------------------------------------
+@node Multi-threaded FFTW, Thread safety, Parallel FFTW, Parallel FFTW
+@section Multi-threaded FFTW
+
+@cindex threads
+In this section we document the parallel FFTW routines for shared-memory
+threads on SMP hardware.  These routines, which support parallel one-
+and multi-dimensional transforms of both real and complex data, are the
+easiest way to take advantage of multiple processors with FFTW.  They
+work just like the corresponding uniprocessor transform routines, except
+that you have an extra initialization routine to call, and there is a
+routine to set the number of threads to employ.  Any program that uses
+the uniprocessor FFTW can therefore be trivially modified to use the
+multi-threaded FFTW.
+
+@menu
+* Installation and Supported Hardware/Software::  
+* Usage of Multi-threaded FFTW::  
+* How Many Threads to Use?::    
+@end menu
+
+@c =========>
+@node Installation and Supported Hardware/Software, Usage of Multi-threaded FFTW, Multi-threaded FFTW, Multi-threaded FFTW
+@subsection Installation and Supported Hardware/Software
+
+All of the FFTW threads code is located in the @code{threads}
+subdirectory of the FFTW package.  On Unix systems, the FFTW threads
+libraries and header files can be automatically configured, compiled,
+and installed along with the uniprocessor FFTW libraries simply by
+including @code{--enable-threads} in the flags to the @code{configure}
+script (@pxref{Installation on Unix}).
+@fpindex configure
+
+The threads routines require your operating system to have some sort of
+shared-memory threads support.  Specifically, the FFTW threads package
+works with POSIX threads (available on most Unix variants, from
+GNU/Linux to MacOS X) and Win32 threads.  We also support using
+@uref{http://www.openmp.org,OpenMP} or SGI MP compiler directives to
+launch threads, enabled by using @code{--with-openmp} or
+@code{--with-sgimp} in addition to @code{--enable-threads}.  (This may
+be useful if you are employing that sort of directive in your own code,
+in order to minimize conflicts.)  If you have a shared-memory machine
+that uses a different threads API, it should be a simple matter of
+programming to include support for it; see the file
+@code{fftw_threads-int.h} for more detail.
+
+Ideally, of course, you should also have multiple processors in order to
+get any benefit from the threaded transforms.
+
+@c =========>
+@node Usage of Multi-threaded FFTW, How Many Threads to Use?, Installation and Supported Hardware/Software, Multi-threaded FFTW
+@subsection Usage of Multi-threaded FFTW
+
+Here, it is assumed that the reader is already familiar with the usage
+of the uniprocessor FFTW routines, described elsewhere in this manual.
+We only describe what one has to change in order to use the
+multi-threaded routines.
+
+First, programs using the parallel complex transforms should be linked with
+@code{-lfftw3_threads -lfftw3 -lm} on Unix. You will also need to link
+with whatever library is responsible for threads on your system
+(e.g. @code{-lpthread} on GNU/Linux).
+@cindex linking on Unix
+
+Second, before calling @emph{any} FFTW routines, you should call the
+function:
+
+@example
+int fftw_init_threads(void);
+@end example
+@findex fftw_init_threads
+
+This function, which need only be called once, performs any one-time
+initialization required to use threads on your system.  It returns zero
+if there was some error (which should not happen under normal
+circumstances) and a non-zero value otherwise.
+
+Third, before creating a plan that you want to parallelize, you should
+call:
+
+@example
+void fftw_plan_with_nthreads(int nthreads);
+@end example
+@findex fftw_plan_with_nthreads
+
+The @code{nthreads} argument indicates the number of threads you want
+FFTW to use (or actually, the maximum number).  All plans subsequently
+created with any planner routine will use that many threads.  You can
+call @code{fftw_plan_with_nthreads}, create some plans, call
+@code{fftw_plan_with_nthreads} again with a different argument, and
+create some more plans for a new number threads.  Plans already created
+before a call to @code{fftw_plan_with_nthreads} are unaffected.  If you
+pass an @code{nthreads} argument of @code{1} (the default), threads are
+disabled for subsequent plans.
+
+Given a plan, you then execute it as usual with
+@code{fftw_execute(plan)}, and the execution will use the number of
+threads specified when the plan was created.  When done, you destroy it
+as usual with @code{fftw_destroy_plan}.
+
+There is one additional routine: if you want to get rid of all memory
+allocated internally by FFTW, you can call @code{fftw_cleanup_threads()},
+which is exactly like the @code{fftw_cleanup()} function except that it
+also gets rid of threads-related data.
+
+We should also mention one other restriction: if you save wisdom from a
+program using the multi-threaded FFTW, that wisdom @emph{cannot be used}
+by a program using only the single-threaded FFTW (i.e. not calling
+@code{fftw_init_threads}).  @xref{Words of Wisdom-Saving Plans}.
+
+@c =========>
+@node How Many Threads to Use?,  , Usage of Multi-threaded FFTW, Multi-threaded FFTW
+@subsection How Many Threads to Use?
+
+@cindex number of threads
+There is a fair amount of overhead involved in spawning and synchronizing
+threads, so the optimal number of threads to use depends upon the size
+of the transform as well as on the number of processors you have.
+
+As a general rule, you don't want to use more threads than you have
+processors.  (Using more threads will work, but there will be extra
+overhead with no benefit.)  In fact, if the problem size is too small,
+you may want to use fewer threads than you have processors.
+
+You will have to experiment with your system to see what level of
+parallelization is best for your problem size.  Typically, the problem
+will have to involve at least a few thousand data points before threads
+become beneficial.
+
+@c ------------------------------------------------------------
+@node Thread safety,  , Multi-threaded FFTW, Parallel FFTW
+@section Thread safety
+
+@cindex threads
+@cindex thread safety
+Users writing multi-threaded programs must concern themselves with the
+@dfn{thread safety} of the libraries they use---that is, whether it is
+safe to call routines in parallel from multiple threads.  FFTW can be
+used in such an environment, but some care must be taken because the
+planner routines share data (e.g. wisdom and trigonometric tables)
+between calls and plans.
+
+The upshot is that the only thread-safe (re-entrant) routine in FFTW is
+@code{fftw_execute} (and the guru variants thereof).  All other routines
+(e.g. the planner) should only be called from one thread at a time.  So,
+for example, you can wrap a semaphore lock around any calls to the
+planner; even more simply, you can just create all of your plans from
+one thread.  We do not think this should be an important restriction
+(FFTW is designed for the situation where the only performance-sensitive
+code is the actual execution of the transform), and the benefits of
+shared data between plans are great.
+
+Note also that, since the plan is not modified by @code{fftw_execute},
+it is safe to execute the @emph{same plan} in parallel by multiple
+threads.
+
+(Users should note that these comments only apply to programs using
+shared-memory threads.  Parallelism using MPI or forked processes
+involves a separate address-space and global variables for each process,
+and is not susceptible to problems of this sort.)
+
 @c ************************************************************
 @node Calling FFTW from Fortran, Installation and Customization, Parallel FFTW, Top
 @chapter Calling FFTW from Fortran
 
 @c ************************************************************
 @node Installation and Customization, Acknowledgments, Calling FFTW from Fortran, Top
-@chapter Installation and Customization
+@chapter Inst]allation and Customization
+
+@menu
+* Installation on Unix::        
+* Installation on non-Unix systems::  
+* Generating your own code::    
+@end menu
+
+@c ------------------------------------------------------------
+
+@node Installation on Unix, Installation on non-Unix systems, Installation and Customization, Installation and Customization
+@section Installation on Unix
+
+@c ------------------------------------------------------------
+@node Installation on non-Unix systems, Generating your own code, Installation on Unix, Installation and Customization
+@section Installation on non-Unix systems
+
+@c ------------------------------------------------------------
+@node Generating your own code,  , Installation on non-Unix systems, Installation and Customization
+@section Generating your own code
 
 @c ************************************************************
 @node Acknowledgments, License and Copyright, Installation and Customization, Top
