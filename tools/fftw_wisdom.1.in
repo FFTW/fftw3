@@ -49,7 +49,7 @@ set of sizes (see below) via:
 .ce
 fftw@PREC_SUFFIX@-wisdom -v -c -o wisdom@PREC_SUFFIX@
 
-(this may take several hours, which can be limited by the 
+(this will take many hours, which can be limited by the 
 .B -t
 option) and the output
 .I wisdom@PREC_SUFFIX@
