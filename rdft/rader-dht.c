@@ -39,7 +39,8 @@ typedef struct {
 
      plan *cld1, *cld2;
      R *omega;
-     uint n, is, os, g, ginv;
+     uint n, g, ginv;
+     int is, os;
      plan *cld_omega;
 } P;
 
@@ -310,7 +311,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
      P *pln;
-     uint n, is, os;
+     uint n;
+     int is, os;
      plan *cld1 = (plan *) 0;
      plan *cld2 = (plan *) 0;
      plan *cld_omega = (plan *) 0;
