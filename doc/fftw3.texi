@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.62 2003-03-02 06:37:41 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.63 2003-03-02 20:52:41 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1775,6 +1775,44 @@ Fortran program can use its ordinary column-major order.
 @c -------------------------------------------------------
 @node Wisdom of Fortran?,  , Fortran Examples, Calling FFTW from Fortran
 @section Wisdom of Fortran?
+
+In this section, we discuss how one can import/export FFTW wisdom
+(saved plans) to/from a Fortran program; we assume that the reader is
+already familiar with wisdom, as described in @ref{Words of
+Wisdom-Saving Plans}.
+
+The basic problem is that is difficult to (portably) pass files and
+strings between Fortran and C, so we cannot provide a direct Fortran
+equivalent to the @code{fftw_export_wisdom_to_file}, etcetera,
+functions.  Fortran interfaces @emph{are} provided for the functions
+that do not take file/string arguments, however:
+@code{dfftw_import_system_wisdom}, @code{dfftw_import_wisdom},
+@code{dfftw_export_wisdom}, and @code{dfftw_forget_wisdom}.
+@findex dfftw_import_system_wisdom
+@findex dfftw_import_wisdom
+@findex dfftw_export_wisdom
+@findex dfftw_forget_wisdom
+
+So, for examplem to import the system-wide wisdom, you would do:
+
+@example
+        integer isuccess
+        call dfftw_import_system_wisdom(isuccess)
+@end example
+
+As usual, the C return value is turned into a first parameter;
+@code{isuccess} is non-zero on success and zero on failure (e.g. if
+there is no system wisdom installed).
+
+If you want to import/export wisdom from/to an arbitrary file or
+elsewhere, you can employ the generic @code{dfftw_import_wisdom} and
+@code{dfftw_export_wisdom} functions, for which you must supply a
+subroutine to read/write one character at a time.  The FFTW package
+contains an example file @code{doc/f77_wisdom.f} demonstrating how to
+implement @code{import_wisdom_from_file} and
+@code{export_wisdom_to_file} subroutines in this way.  (These routines
+cannot be compiled into the FFTW library itself, lest all FFTW-using
+programs be required to link with the Fortran I/O library.)
 
 @c ************************************************************
 @node Installation and Customization, Acknowledgments, Calling FFTW from Fortran, Top
