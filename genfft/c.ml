@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.19 2003-04-13 20:46:12 athena Exp $ *)
+(* $Id: c.ml,v 1.20 2003-06-01 11:01:17 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -79,7 +79,7 @@ let rec unparse_expr =
   let yes x = x and no x = "" in
 
   let rec unparse_plus maybe = 
-    let maybep = maybe " + " and maybem = maybe " - " in
+    let maybep = maybe " + " in
     function
     | [] -> ""
     | (Uminus (Times (a, b))) :: (Uminus c) :: d -> 
@@ -99,7 +99,7 @@ let rec unparse_expr =
     | c :: (Times (a, b)) :: d -> 
 	maybep ^ (op "FMA" a b c) ^ (unparse_plus yes d)
     | (Uminus a :: b) -> 
-	maybem ^ (parenthesize a) ^ (unparse_plus yes b)
+	" - " ^ (parenthesize a) ^ (unparse_plus yes b)
     | (a :: b) -> 
 	maybep ^ (parenthesize a) ^ (unparse_plus yes b)
   and parenthesize x = match x with
