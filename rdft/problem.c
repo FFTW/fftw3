@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.8 2002-07-30 00:51:19 stevenj Exp $ */
+/* $Id: problem.c,v 1.9 2002-07-31 22:57:04 athena Exp $ */
 
 #include "rdft.h"
 
@@ -51,6 +51,10 @@ static int equal(const problem *ego_, const problem *problem_)
 
 		  /* both in-place or both out-of-place */
                   && ((p->I == p->O) == (e->I == e->O))
+
+		  /* aligments must match */
+		  && X(alignment_of)(p->I) == X(alignment_of)(e->I)
+		  && X(alignment_of)(p->O) == X(alignment_of)(e->O)
 
 		  && p->kind == e->kind
 
@@ -99,9 +103,10 @@ const char *X(rdft_kind_str)(rdft_kind kind)
 static void print(problem *ego_, printer *p)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
-     p->print(p, "(rdft %d %s %T %T)", 
-	      ego->I == ego->O, 
-	      X(rdft_kind_str)(ego->kind),
+     p->print(p, "(rdft %d %td %d %T %T)", 
+	      X(alignment_of)(ego->I),
+	      ego->O - ego->I, 
+	      (int)ego->kind,
 	      &ego->sz,
 	      &ego->vecsz);
 }

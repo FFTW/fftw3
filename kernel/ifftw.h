@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.62 2002-07-31 11:52:53 athena Exp $ */
+/* $Id: ifftw.h,v 1.63 2002-07-31 22:57:04 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -519,6 +519,7 @@ int X(is_prime)(uint n);
 void X(null_awake)(plan *ego, int awake);
 int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
+uint X(alignment_of)(R *p);
 
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */

@@ -18,22 +18,18 @@
  *
  */
 
-#ifdef HAVE_SSE
-#include "simd-sse.h"
+/* $Id: align.c,v 1.1 2002-07-31 22:57:04 athena Exp $ */
+
+#include "ifftw.h"
+
+#if HAVE_SIMD
+#include "simd.h"
+#define ALGN SIMD_ALIGNMENT
+#else
+#define ALGN (sizeof(R))
 #endif
 
-#ifdef HAVE_SSE2
-#include "simd-sse2.h"
-#endif
-
-#ifdef HAVE_ALTIVEC
-#include "simd-altivec.h"
-#endif
-
-#define ALIGNED(p) (!(((long)p) % ALIGNMENT))
-#define ALIGNEDA(p) (!(((long)p) % ALIGNMENTA))
-#define SIMD_STRIDE_OK(x) (!(((x) * sizeof(R)) % ALIGNMENT))
-#define SIMD_STRIDE_OKA(x) (!(((x) * sizeof(R)) % ALIGNMENTA))
-#define SIMD_VSTRIDE_OK SIMD_STRIDE_OK
-
-#define SIMD_ALIGNMENT ALIGNMENTA
+uint X(alignment_of)(R *p)
+{
+     return (uint)(((unsigned long)p) % ALGN);
+}

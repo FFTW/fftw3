@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.11 2002-07-30 00:51:10 stevenj Exp $ */
+/* $Id: problem.c,v 1.12 2002-07-31 22:57:04 athena Exp $ */
 
 #include "dft.h"
 
@@ -53,11 +53,16 @@ static int equal(const problem *ego_, const problem *problem_)
 		  /* both in-place or both out-of-place */
                   && ((p->ri == p->ro) == (e->ri == e->ro))
 
-		  /* distance between real and imag must be the same */
+		  /* distance between real and imag must be the same (1) */
 		  && p->ii - p->ri == e->ii - e->ri
 
 		  /* idem for output */
 		  && p->io - p->ro == e->io - e->ro
+
+		  /* aligments must match */
+		  && X(alignment_of)(p->ri) == X(alignment_of)(e->ri)
+		  && X(alignment_of)(p->ro) == X(alignment_of)(e->ro)
+		  /* alignments for imag are implied by (1) */
 
 		  && X(tensor_equal)(p->sz, e->sz)
                   && X(tensor_equal)(p->vecsz, e->vecsz)
@@ -93,8 +98,9 @@ void X(dft_zerotens)(tensor sz, R *ri, R *ii)
 static void print(problem *ego_, printer *p)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
-     p->print(p, "(dft %d %td %td %T %T)", 
-	      ego->ri == ego->ro, 
+     p->print(p, "(dft %d %td %td %td %T %T)", 
+	      (int)X(alignment_of)(ego->ri),
+	      ego->ro - ego->ri, 
 	      ego->ii - ego->ri, 
 	      ego->io - ego->ro,
 	      &ego->sz,

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.4 2002-07-30 00:51:19 stevenj Exp $ */
+/* $Id: problem2.c,v 1.5 2002-07-31 22:57:04 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -35,7 +35,7 @@ static unsigned int hash(const problem *p_)
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
      tensor psz = {1, 0};
      psz.dims = (iodim *) &p->sz;
-     return (0xDEADBEEF
+     return (0xBEEFDEAD
 	     ^ ((p->r == p->rio) * 31)
 	     ^ ((p->r == p->iio) * 29)
 	     ^ ((p->iio - p->rio) * 23)
@@ -61,8 +61,13 @@ static int equal(const problem *ego_, const problem *problem_)
                   && ((p->r == p->rio) == (e->r == e->rio))
                   && ((p->r == p->iio) == (e->r == e->iio))
 
-		  /* distance between real and imag must be the same */
+		  /* distance between real and imag must be the same (1) */
                   && p->iio - p->rio == e->iio - e->rio
+
+		  /* aligments must match */
+		  && X(alignment_of)(p->r) == X(alignment_of)(e->r)
+		  && X(alignment_of)(p->rio) == X(alignment_of)(e->rio)
+		  /* alignment of imag is implied by (1) */
 
 		  && p->kind == e->kind
 
@@ -78,11 +83,11 @@ static void print(problem *ego_, printer *p)
      problem_rdft2 *ego = (problem_rdft2 *) ego_;
      tensor psz = {1, 0};
      psz.dims = &ego->sz;
-     p->print(p, "(rdft2 %d %d %td %s %T %T)", 
-	      ego->r == ego->rio, 
-	      ego->r == ego->iio, 
-	      ego->iio - ego->rio,
-	      X(rdft_kind_str)(ego->kind),
+     p->print(p, "(rdft2 %d %td %td %d %T %T)", 
+	      X(alignment_of)(ego->r),
+	      ego->rio - ego->r, 
+	      ego->iio - ego->r,
+	      (int)(ego->kind),
 	      &psz,
 	      &ego->vecsz);
 }
