@@ -39,6 +39,8 @@ typedef vector float V;
 #define LDK(x) x
 #define DVK(var, val) const V var = VLIT(val, val, val, val)
 
+extern const vector unsigned int X(altivec_constants)[];
+
 static inline V VADD(V a, V b) { return vec_add(a, b); }
 static inline V VSUB(V a, V b) { return vec_sub(a, b); }
 static inline V VFMA(V a, V b, V c) { return vec_madd(a, b, c); }
@@ -51,8 +53,6 @@ static inline V VMUL(V a, V b)
 }
 
 static inline V VFMS(V a, V b, V c) { return VSUB(VMUL(a, b), c); }
-
-extern const vector unsigned int X(altivec_ld_selmsk);
 
 static inline V LDA(const R *x, int ivs, const R *aligned_like) 
 {
@@ -69,7 +69,8 @@ static inline V LD(const R *x, int ivs, const R *aligned_like)
      vector unsigned char ml = vec_lvsr(fivs + 8, (R *)aligned_like);
      vector unsigned char mh = vec_lvsl(0, (R *)aligned_like);
      vector unsigned char msk =
-	  (vector unsigned char)vec_sel((V)mh, (V)ml, X(altivec_ld_selmsk));
+	  (vector unsigned char)vec_sel((V)mh, (V)ml, 
+					X(altivec_constants)[3]);
      /* end of common subexpressions */
 
      return vec_perm(vec_ld(0, (R *)x), vec_ld(fivs, (R *)x), msk);
@@ -104,35 +105,25 @@ static inline void ST(R *x, V v, int ovs, const R *aligned_like)
 
 #define STPAIR1(x, v, ovs, aligned_like) /* no-op */
 
-extern const vector unsigned int X(altivec_select_even_perm);
-extern const vector unsigned int X(altivec_select_odd_perm);
-
 static inline void STPAIR2(R *x, V v0, V v1, int ovs)
 {
-     const vector unsigned int llll =
-	  VLIT(0x00010203, 0x04050607, 0x10111213, 0x14151617);
-     const vector unsigned int hhhh =
-	  VLIT(0x08090a0b, 0x0c0d0e0f, 0x18191a1b, 0x1c1d1e1f);
      STA(x, vec_perm(v0, v1, 
-		     (vector unsigned char)X(altivec_select_even_perm)),
+		     (vector unsigned char)X(altivec_constants)[0]),
 	 ovs, 0);
      STA(x + ovs, vec_perm(v0, v1,
-			   (vector unsigned char)X(altivec_select_odd_perm)),
+			   (vector unsigned char)X(altivec_constants)[1]),
 	 ovs, 0);
 }
 
-extern const vector unsigned int X(altivec_flipri_perm);
 static inline V FLIP_RI(V x)
 {
-     return vec_perm(x, x, (const vector unsigned char)X(altivec_flipri_perm));
+     return vec_perm(x, x, 
+		     (vector unsigned char)X(altivec_constants)[2]);
 }
-
-extern const vector float X(altivec_chsr_msk);
-extern const vector float X(altivec_chsr_sgn);
 
 static inline V CHS_R(V x)
 {
-     return vec_xor(x, X(altivec_chsr_msk));
+     return vec_xor(x, X(altivec_constants)[5]);
 }
 
 static inline V VBYI(V x)
@@ -142,12 +133,12 @@ static inline V VBYI(V x)
 
 static inline V VFMAI(V b, V c)
 {
-     return VFMA(FLIP_RI(b), X(altivec_chsr_sgn), c);
+     return VFMA(FLIP_RI(b), (V)X(altivec_constants)[4], c);
 }
 
 static inline V VFNMSI(V b, V c)
 {
-     return VFNMS(FLIP_RI(b), X(altivec_chsr_sgn), c);
+     return VFNMS(FLIP_RI(b), (V)X(altivec_constants)[4], c);
 }
 
 /* twiddle storage #1: compact, slower */
