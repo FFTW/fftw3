@@ -119,9 +119,9 @@ static __inline__ V FLIP_RI(V x)
      return VSWAP(x);
 }
 
+extern const union fvec X(3dnow_mp);
 static __inline__ V CHS_R(V x)
 {
-     extern const union fvec X(3dnow_mp);
      return VXOR(X(3dnow_mp).v, x);
 }
 

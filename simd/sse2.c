@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse2.c,v 1.4 2002-08-24 00:21:25 athena Exp $ */
+/* $Id: sse2.c,v 1.5 2003-01-07 20:47:24 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -61,7 +61,6 @@ static int sse2_works(void)
 
 int RIGHT_CPU(void)
 {
-     extern const union dvec X(sse2_mp);
      static int init = 0, res;
      CK(ALIGNED(&X(sse2_mp))); /* compiler bug? */
      if (!init) {

@@ -176,7 +176,6 @@ static __inline__ V FLIP_RI(V x)
 }
 
 extern const union fvec X(sse_mpmp);
-
 static __inline__ V CHS_R(V x)
 {
      return VXOR(X(sse_mpmp).v, x);

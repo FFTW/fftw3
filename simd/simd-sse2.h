@@ -128,9 +128,9 @@ static __inline__ V FLIP_RI(V x)
      return SHUFPD(x, x, 1);
 }
 
+extern const union dvec X(sse2_mp);
 static __inline__ V CHS_R(V x)
 {
-     extern const union dvec X(sse2_mp);
      return VXOR(X(sse2_mp).v, x);
 }
 
