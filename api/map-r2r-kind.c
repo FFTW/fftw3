@@ -42,7 +42,7 @@ rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind)
 	      case FFTW_RODFT01: m = RODFT01; break;
 	      case FFTW_RODFT10: m = RODFT10; break;
 	      case FFTW_RODFT11: m = RODFT11; break;
-	      default: A(0);
+	      default: m = R2HC; A(0);
           }
 	  k[i] = m;
      }
