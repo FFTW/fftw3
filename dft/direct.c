@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.38 2003-03-16 20:00:03 stevenj Exp $ */
+/* $Id: direct.c,v 1.39 2003-04-05 02:35:49 stevenj Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -43,6 +43,7 @@ typedef struct {
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
+     ASSERT_ALIGNED_DOUBLE;
      ego->k(ri, ii, ro, io, ego->is, ego->os, ego->vl, ego->ivs, ego->ovs);
 }
 

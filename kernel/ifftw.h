@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.217 2003-04-05 00:30:37 athena Exp $ */
+/* $Id: ifftw.h,v 1.218 2003-04-05 02:35:49 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -718,6 +718,17 @@ R *X(taint)(R *p, int s);
 #define TAINT(p, s) (p)
 #define UNTAINT(p) (p)
 #endif
+
+#ifdef FFTW_DEBUG_ALIGNMENT
+#  define ASSERT_ALIGNED_DOUBLE {		\
+     double __foo;				\
+     CK(0 == ((uintptr_t) &__foo) & 0x7);	\
+}
+#else
+#  define ASSERT_ALIGNED_DOUBLE 
+#endif /* FFTW_DEBUG_ALIGNMENT */
+
+
 
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */

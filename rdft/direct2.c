@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.18 2003-03-29 20:22:28 stevenj Exp $ */
+/* $Id: direct2.c,v 1.19 2003-04-05 02:35:49 stevenj Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -56,6 +56,7 @@ static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      int i, vl = ego->vl, ovs = ego->ovs;
+     ASSERT_ALIGNED_DOUBLE;
      ego->k.r2hc(r, rio, iio, ego->is, ego->os, ego->os,
 		 vl, ego->ivs, ovs);
      for (i = 0; i < vl; ++i, iio += ovs)
@@ -65,6 +66,7 @@ static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
+     ASSERT_ALIGNED_DOUBLE;
      ego->k.hc2r(rio, iio, r, ego->os, ego->os, ego->is,
 		 ego->vl, ego->ivs, ego->ovs);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.147 2003-03-31 12:13:45 athena Exp $ */
+/* $Id: planner.c,v 1.148 2003-04-05 02:35:49 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -420,6 +420,7 @@ static plan *mkplan(planner *ego, problem *p)
      md5 m;
      slvdesc *sp;
      unsigned short flags;
+     ASSERT_ALIGNED_DOUBLE;
 
      /* Canonical form. */
      if (!NO_EXHAUSTIVEP(ego)) ego->planner_flags &= ~NO_UGLY;
