@@ -29,7 +29,7 @@ static int okp(const ct_desc *d,
 {
      return (RIGHT_CPU()
              && ALIGNED(rio)
-	     && !(plnr->problem_flags & POSSIBLY_UNALIGNED)
+	     && !UNALIGNEDP(plnr)
 	     && SIMD_STRIDE_OK(ios)
 	     && SIMD_STRIDE_OK(vs)
 	     && SIMD_VSTRIDE_OK(dist)

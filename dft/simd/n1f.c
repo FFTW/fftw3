@@ -28,12 +28,12 @@ static int okp(const kdft_desc *d,
 	       const planner *plnr)
 {
      return (RIGHT_CPU()
-             && ALIGNEDA(ri)
+             && ALIGNED(ri)
              && ALIGNED(ro)
-	     && !(plnr->problem_flags & POSSIBLY_UNALIGNED)
-	     && SIMD_STRIDE_OKA(is)
+	     && !UNALIGNEDP(plnr)
+	     && SIMD_STRIDE_OK(is)
 	     && SIMD_STRIDE_OK(os)
-	     && SIMD_VSTRIDE_OKA(ivs)
+	     && SIMD_VSTRIDE_OK(ivs)
 	     && SIMD_VSTRIDE_OK(ovs)
              && ii == ri + 1
              && io == ro + 1

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.13 2003-03-27 03:47:58 stevenj Exp $ */
+/* $Id: align.c,v 1.14 2003-03-27 11:37:07 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -32,13 +32,50 @@
 #  define ALGN (sizeof(R))
 #endif
 
-int X(stride_aligned_p)(int s)
-{
-     return !(((unsigned)s * sizeof(R)) % ALGN);
-}
-
 /* NONPORTABLE */
 int X(alignment_of)(R *p)
 {
      return (int)(((uintptr_t) p) % ALGN);
+}
+
+/* NONPORTABLE */
+R *X(most_unaligned)(R *p1, R *p2)
+{
+     uintptr_t a1 = (uintptr_t)p1;
+     uintptr_t a2 = (uintptr_t)p2;
+     
+     if (p1 == p2) return p1;
+
+     for (;;) {
+	  if (a1 & 1) return p1;
+	  if (a2 & 1) return p2;
+	  a1 >>= 1;
+	  a2 >>= 1;
+     }
+}
+
+void X(most_unaligned_complex)(R **rp, R **ip, int s)
+{
+     R *r = *rp, *i = *ip;
+     R *p;
+     if (i == r + 1) {
+	  /* forward complex format.  Choose the worst alignment
+	     for r, adjust i consequently */
+	  *rp = p = X(most_unaligned)(r, r + s);
+	  *ip = i + (p - r);
+     } else if (r == i + 1) {
+	  /* backward complex format.  Choose the worst alignment
+	     for i, adjust r consequently */
+	  *ip = p = X(most_unaligned)(i, i + s);
+	  *rp = r + (p - i);
+     } else {
+	  /* split format.  adjust r/i independently */
+	  *rp = X(most_unaligned)(r, r + s);
+	  *ip = X(most_unaligned)(i, i + s);
+     }
+}
+
+int X(stride_aligned_p)(int s)
+{
+     return !(((unsigned)s * sizeof(R)) % ALGN);
 }

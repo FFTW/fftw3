@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.194 2003-03-16 20:00:04 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.195 2003-03-27 11:37:07 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -434,13 +434,13 @@ typedef struct solution_s solution; /* opaque */
 /* values for problem_flags: */
 enum { 
      DESTROY_INPUT = 0x1,
-     POSSIBLY_UNALIGNED = 0x2,
+     UNALIGNED = 0x2,
      CONSERVE_MEMORY = 0x4,
      NO_DHT_R2HC = 0x8
 };
 
 #define DESTROY_INPUTP(plnr) ((plnr)->problem_flags & DESTROY_INPUT)
-#define POSSIBLY_UNALIGNEDP(plnr) ((plnr)->problem_flags & POSSIBLY_UNALIGNED)
+#define UNALIGNEDP(plnr) ((plnr)->problem_flags & UNALIGNED)
 #define CONSERVE_MEMORYP(plnr) ((plnr)->problem_flags & CONSERVE_MEMORY)
 #define NO_DHT_R2HCP(plnr) ((plnr)->problem_flags & NO_DHT_R2HC)
 
@@ -675,7 +675,9 @@ void X(null_awake)(plan *ego, int awake);
 int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
 int X(alignment_of)(R *p);
+R *X(most_unaligned)(R *p1, R *p2);
 int X(stride_aligned_p)(int s);
+void X(most_unaligned_complex)(R **rp, R **ip, int s);
 unsigned X(hash)(const char *s);
 int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz);
 extern int X(ct_uglyp)(int min_n, int n, int r);

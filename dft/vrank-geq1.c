@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.33 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.34 2003-03-27 11:37:07 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -155,6 +155,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld;
      int vdim;
      iodim *d;
+     R *nri, *nii, *nro, *nio;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -164,18 +165,17 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           return (plan *) 0;
      p = (const problem_dft *) p_;
 
-     /* record whether the vector loop would cause either the input or
-        the output to become unaligned. */
      d = p->vecsz->dims + vdim;
-     if (d->n > 0)
-	  if (!(X(stride_aligned_p)(d->is) && X(stride_aligned_p)(d->os)))
-	       plnr->problem_flags |= POSSIBLY_UNALIGNED;
 
+     A(d->n > 0);  /* or else, p->ri + d->is etc. are invalid */
+     nri = p->ri; nii = p->ii; nro = p->ro; nio = p->io;
+     X(most_unaligned_complex)(&nri, &nii, d->is);
+     X(most_unaligned_complex)(&nro, &nio, d->os);
      cld = X(mkplan_d)(plnr,
 		       X(mkproblem_dft_d)(
 			    X(tensor_copy)(p->sz),
 			    X(tensor_copy_except)(p->vecsz, vdim),
-			    p->ri, p->ii, p->ro, p->io));
+			    nri, nii, nro, nio));
      if (!cld) return (plan *) 0;
 
      pln = MKPLAN_DFT(P, &padt, apply);

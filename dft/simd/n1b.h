@@ -20,8 +20,5 @@
 
 #include "simd.h"
 
-#undef LD
-#define LD LDA
-
 #define GENUS X(dft_n1bsimd_genus)
 extern const kdft_genus GENUS;
