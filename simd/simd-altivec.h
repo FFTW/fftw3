@@ -177,6 +177,7 @@ static inline V BYTWJ(const R *t, V sr)
 extern int RIGHT_CPU(void);
 
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2)
+#define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 #define BEGIN_SIMD()
 #define END_SIMD()
 
