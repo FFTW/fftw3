@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.13 2002-08-31 13:21:48 athena Exp $ */
+/* $Id: print.c,v 1.14 2002-09-02 15:04:54 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -47,6 +47,12 @@ static void vprint(printer *p, const char *format, va_list ap)
           switch (c) {
 	      case '%':
 		   switch ((c = *s++)) {
+		       case '5': {
+			    /* md5 value */
+			    md5uint x = va_arg(ap, md5uint);
+			    sprintf(buf, "%8.8lx", (unsigned long)x);
+			    goto putbuf;
+		       }
 		       case 'c': {
 			    int x = va_arg(ap, int);
 			    p->putchr(p, x);
@@ -108,6 +114,11 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       case 'u': {
 			    uint x = va_arg(ap, uint);
 			    sprintf(buf, "%u", x);
+			    goto putbuf;
+		       }
+		       case 'x': {
+			    uint x = va_arg(ap, uint);
+			    sprintf(buf, "%x", x);
 			    goto putbuf;
 		       }
 		       case '(': {

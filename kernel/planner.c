@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.52 2002-09-01 23:51:50 athena Exp $ */
+/* $Id: planner.c,v 1.53 2002-09-02 15:04:53 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -279,20 +279,20 @@ static void htab_destroy(planner *ego)
 /* tantus labor non sit cassus */
 static void exprt(planner *ego, printer *p)
 {
-#if 0
      solutions *s;
      uint h;
 
      p->print(p, "(" WISDOM_PREAMBLE);
      for (h = 0; h < ego->hashsiz; ++h) 
 	  for (s = ego->sols[h]; s; s = s->cdr)
-	       /* qui salvandos salvas gratis
-		  salva me fons pietatis */
-	       if (BLESSEDP(s))
-		    p->print(p, "(s %d %d)", 
-			     s->sp ? s->sp->id : 0, s->flags);
-     p->print(p, ")");
-#endif
+	       if (BLESSEDP(s)) {
+		    /* qui salvandos salvas gratis
+		       salva me fons pietatis */
+		    p->print(p, "(%d #x%x #x%5 #x%5 #x%5 #x%5)", 
+			     s->sp ? s->sp->id : 0, s->flags,
+			     s->s[0], s->s[1], s->s[2], s->s[3]);
+		    p->print(p, ")");
+	       }
 }
 
 static int imprt(planner *ego, scanner *sc)
@@ -340,30 +340,9 @@ static int imprt(planner *ego, scanner *sc)
 #endif
 }
 
-#if 0
-static void clear_problem_marks(planner *ego)
-{
-     prbdesc *pp;
-     for (pp = ego->problems; pp; pp = pp->cdr)
-	  pp->mark = 0;
-}
-
-static void mark_problem(planner *ego, problem *p)
-{
-     prbdesc *pp;
-     for (pp = ego->problems; pp; pp = pp->cdr)
-	  if (pp->adt == p->adt) {
-	       pp->mark = 1;
-	       return;
-	  }
-}
-#endif
-
 static void exprt_conf(planner *ego, printer *p)
 {
-#if 0
      solutions *s;
-     prbdesc *pp;
      uint h;
      const char *prev_reg_nam = (const char *) 0;
      int idcnt = 0, reg_nam_cnt = 1, blessed_reg_nam = 0;
@@ -376,31 +355,20 @@ static void exprt_conf(planner *ego, printer *p)
      p->print(p, "#ifdef __cplusplus\n     extern \"C\" {\n#endif\n");
 #endif
 
-     clear_problem_marks(ego);
      for (h = 0; h < ego->hashsiz; ++h)
           for (s = ego->sols[h]; s; s = s->cdr) {
                if (BLESSEDP(s) && s->sp && s->sp->reg_nam && s->sp->id > 0) {
 		    s->sp->id = 0; /* mark to prevent duplicates */
-		    mark_problem(ego, s->p);
 		    p->print(p, "          extern void %s(planner*);\n",
 			     s->sp->reg_nam);
 	       }
 	  }
-     for (pp = ego->problems; pp; pp = pp->cdr)
-	  if (pp->mark)
-	       p->print(p, "          extern void %s(planner*),\n", 
-			pp->reg_nam);
 
 #ifndef __cplusplus
      p->print(p, "#ifdef __cplusplus\n     }\n#endif\n");
 #endif
 
      p->print(p, "     static const solvtab s = {\n");
-
-     for (pp = ego->problems; pp; pp = pp->cdr)
-	  if (pp->mark)
-	       p->print(p, "          SOLVTAB(%s),\n", pp->reg_nam);
-     clear_problem_marks(ego);
 
      /* output solvtab entries, and compute correct id's of blessed
 	entries as they will appear in the generated table (ugh). */
@@ -444,7 +412,6 @@ static void exprt_conf(planner *ego, printer *p)
 	      "     %s(s, p);\n"
 	      "     /* FIXME: import wisdom */\n"
 	      "}\n", STRINGIZE(X(solvtab_exec)));
-#endif
 }
 
 static void hooknil(plan *pln, const problem *p, int optimalp)
