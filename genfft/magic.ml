@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.16 2005-02-24 23:59:38 athena Exp $ *)
+(* $Id: magic.ml,v 1.17 2005-03-15 13:44:41 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -56,6 +56,7 @@ let list_schedule_threshold = ref 0
 let reorder_insns = ref false
 let reorder_loads = ref false
 let reorder_stores = ref false
+let precompute_twiddles = ref false
 
 (* command-line parser for magic parameters *)
 let undocumented = " Undocumented voodoo parameter"
@@ -98,6 +99,9 @@ let speclist = [
 
   "-generic-arith", set_bool generic_arith, undocumented;
   "-no-generic-arith", unset_bool generic_arith, undocumented;
+
+  "-precompute-twiddles", set_bool precompute_twiddles, undocumented;
+  "-no-precompute-twiddles", unset_bool precompute_twiddles, undocumented;
 
   "-inline-single", set_bool inline_single, undocumented;
   "-no-inline-single", unset_bool inline_single, undocumented;

@@ -64,11 +64,11 @@ include $(top_srcdir)/support/Makefile.codelets
 if MAINTAINER_MODE
 FLAGS_N1=$(DFT_FLAGS_COMMON)
 FLAGS_T1=$(DFT_FLAGS_COMMON)
-FLAGS_T2=$(DFT_FLAGS_COMMON) -twiddle-log3
+FLAGS_T2=$(DFT_FLAGS_COMMON) -twiddle-log3 -precompute-twiddles
 FLAGS_F1=$(DFT_FLAGS_COMMON)
-FLAGS_F2=$(DFT_FLAGS_COMMON) -twiddle-log3
+FLAGS_F2=$(DFT_FLAGS_COMMON) -twiddle-log3  -precompute-twiddles
 FLAGS_Q1=$(DFT_FLAGS_COMMON) -reload-twiddle
-FLAGS_Q2=$(DFT_FLAGS_COMMON) -twiddle-log3
+FLAGS_Q2=$(DFT_FLAGS_COMMON) -twiddle-log3  -precompute-twiddles
 
 n1_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_NOTW) $(FLAGS_N1) -n $* -name n1_$* -include "n.h") | $(ADD_DATE) | $(INDENT) >$@

@@ -54,7 +54,7 @@ include $(top_srcdir)/support/Makefile.codelets
 if MAINTAINER_MODE
 FLAGS_R2HC=$(RDFT_FLAGS_COMMON)
 FLAGS_HF=$(RDFT_FLAGS_COMMON)
-FLAGS_HF2=$(RDFT_FLAGS_COMMON) -twiddle-log3
+FLAGS_HF2=$(RDFT_FLAGS_COMMON) -twiddle-log3 -precompute-twiddles
 FLAGS_R2HCII=$(RDFT_FLAGS_COMMON)
 
 r2hc_%.c:  $(CODELET_DEPS) $(GEN_R2HC)

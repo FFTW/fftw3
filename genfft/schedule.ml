@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: schedule.ml,v 1.4 2003-07-04 10:36:02 athena Exp $ *)
+(* $Id: schedule.ml,v 1.5 2005-03-15 13:44:41 athena Exp $ *)
 
 (* This file contains the instruction scheduler, which finds an
    efficient ordering for a given list of instructions.
@@ -77,6 +77,11 @@ let single_load node =
       Variable.is_constant x ||
       (!Magic.locations_are_special && Variable.is_locative x)
   | _ -> false
+
+let loads_locative node =
+  match (node.input_variables, node.predecessors) with
+    | ([x], []) -> Variable.is_locative x
+    | _ -> false
 
 let partition alist =
   let dag = makedag alist in
@@ -190,6 +195,8 @@ let list_schedule alist =
     sequentially (List.map to_assignment (Sort.list order (Dag.to_list dag)))
   end
 
+
+
 let schedule =
   let rec schedule_alist = function
       [] -> Done
@@ -211,3 +218,48 @@ let schedule =
     let res = schedule_alist x in
     let () = Util.info "end schedule" in
     res
+
+
+(* partition a dag into two parts:
+
+   1) the set of loads from locatives and their successors,
+   2) all other nodes
+
+   This step separates the ``body'' of the dag, which computes
+   the actual fft, from the ``precomputations'', which computes e.g.
+   twiddle factors.
+*)
+let partition_precomputations alist =
+  let dag = makedag alist in
+  let dag' = Dag.to_list dag in
+  let loads =  List.filter loads_locative dag' in
+    begin
+      
+      Dag.for_all dag (set_color BLUE);
+      Util.for_list loads (set_color RED);
+
+      let rec loop () = 
+	match (List.filter
+		 (fun node -> (has_color RED node) &&
+		    List.exists (has_color BLUE) node.successors)
+		 dag') with
+	    [] -> ()
+	  |	i -> 
+		  begin
+		    Util.for_list i 
+		      (fun node -> 
+			 Util.for_list node.successors (set_color RED));
+		    loop ()
+		  end
+
+      in loop ();
+
+	return
+	  ((List.map to_assignment (List.filter (has_color BLUE) dag')),
+	   (List.map to_assignment (List.filter (has_color RED) dag')))
+    end
+
+let isolate_precomputations_and_schedule alist =
+  let (a, b) = partition_precomputations alist in
+    Seq (schedule a, schedule b)
+  

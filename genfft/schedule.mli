@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: schedule.mli,v 1.2 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: schedule.mli,v 1.3 2005-03-15 13:44:41 athena Exp $ *)
 
 type schedule =
   | Done
@@ -28,3 +28,4 @@ type schedule =
 
 val schedule : Expr.assignment list -> schedule
 val sequentially : Expr.assignment list -> schedule
+val isolate_precomputations_and_schedule : Expr.assignment list -> schedule

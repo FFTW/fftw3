@@ -56,7 +56,7 @@ include $(top_srcdir)/support/Makefile.codelets
 if MAINTAINER_MODE
 FLAGS_HC2R=$(RDFT_FLAGS_COMMON) -sign 1
 FLAGS_HB=$(RDFT_FLAGS_COMMON) -sign 1
-FLAGS_HB2=$(RDFT_FLAGS_COMMON) -sign 1 -twiddle-log3
+FLAGS_HB2=$(RDFT_FLAGS_COMMON) -sign 1 -twiddle-log3 -precompute-twiddles
 FLAGS_HC2RIII=$(RDFT_FLAGS_COMMON) -sign 1
 
 hc2r_%.c:  $(CODELET_DEPS) $(GEN_HC2R)

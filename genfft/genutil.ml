@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.19 2005-02-10 02:35:01 athena Exp $ *)
+(* $Id: genutil.ml,v 1.20 2005-03-15 13:44:41 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -202,8 +202,10 @@ let standard_scheduler dag =
   let alist = To_alist.to_assignments optim in
   let _ = dump_alist alist in
   let _ = dump_dag alist in
-  let sched = Schedule.schedule alist in
-  sched
+    if !Magic.precompute_twiddles then
+      Schedule.isolate_precomputations_and_schedule alist 
+    else
+      Schedule.schedule alist 
 
 let standard_optimizer dag =
   let sched = standard_scheduler dag in
