@@ -64,7 +64,7 @@ typedef struct {
    reuse the code from our old version. */
 
 static void apply_aux(uint r, uint ginv, plan *cld1,plan *cld2, const R *omega,
-		      R *buf, R r0, R i0, R *ro, R *io, uint os)
+		      R *buf, R r0, R i0, R *ro, R *io, int os)
 {
      uint gpower, k;
 
@@ -523,7 +523,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
      P *pln;
-     uint n, is, os;
+     uint n;
+     int is, os;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -548,7 +549,8 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
      P_dit *pln = 0;
-     uint n, is, os, r, m;
+     uint n, r, m;
+     int is, os;
      plan *cld = (plan *) 0;
 
      static const plan_adt padt = {
