@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.3 2002-08-26 10:38:49 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.4 2002-08-26 11:43:53 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -39,6 +39,7 @@ typedef struct {
      int (*applicable) (const problem *p_, const planner *plnr);
      void (*apply) (plan *ego_, R *r, R *rio, R *iio);
      problem *(*mkcld) (const problem_rdft2 *p);
+     opcnt ops;
      const char *nam;
 } madt;
 
@@ -159,7 +160,7 @@ static problem *mkcld_f_dft(const problem_rdft2 *p)
 }
 
 static const madt adt_f_dft = {
-     applicable_f, apply_f_dft, mkcld_f_dft, "r2hc2-dft"
+     applicable_f, apply_f_dft, mkcld_f_dft, {10, 8, 0, 0}, "r2hc2-dft"
 };
 
 /*
@@ -229,7 +230,7 @@ static problem *mkcld_f_rdft(const problem_rdft2 *p)
 }
 
 static const madt adt_f_rdft = {
-     applicable_f, apply_f_rdft, mkcld_f_rdft, "r2hc2-rdft"
+     applicable_f, apply_f_rdft, mkcld_f_rdft, {6, 4, 0, 0}, "r2hc2-rdft"
 };
 
 
@@ -297,7 +298,7 @@ static problem *mkcld_b_dft(const problem_rdft2 *p)
 }
 
 static const madt adt_b_dft = {
-     applicable_b, apply_b_dft, mkcld_b_dft, "hc2r2-dft"
+     applicable_b, apply_b_dft, mkcld_b_dft, {10, 8, 0, 0}, "hc2r2-dft"
 };
 
 /*
@@ -366,7 +367,7 @@ static problem *mkcld_b_rdft(const problem_rdft2 *p)
 }
 
 static const madt adt_b_rdft = {
-     applicable_b, apply_b_rdft, mkcld_b_rdft, "hc2r2-rdft"
+     applicable_b, apply_b_rdft, mkcld_b_rdft, {6, 4, 0, 0}, "hc2r2-rdft"
 };
 
 /*
@@ -439,7 +440,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->td = 0;
      pln->slv = ego;
 
-     pln->super.super.ops = cld->ops;   /* FIXME */
+     pln->super.super.ops =      /* approximately */
+	  X(ops_add)(cld->ops,
+		     X(ops_mul)(pln->vl * ((pln->n/2 + 1) / 2),
+				ego->adt->ops));
 
      return &(pln->super.super);
 }
