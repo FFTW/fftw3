@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: timer.c,v 1.2 2002-06-12 22:57:19 athena Exp $ */
+/* $Id: timer.c,v 1.3 2002-09-14 03:07:39 stevenj Exp $ */
 
 #include "config.h"
+#include "bench.h"
 #include <stdio.h>
 
 /* 

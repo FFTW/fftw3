@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.117 2002-09-14 01:54:50 athena Exp $ */
+/* $Id: ifftw.h,v 1.118 2002-09-14 03:07:39 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -85,7 +85,7 @@ typedef struct scanner_s scanner;
 
 /*-----------------------------------------------------------------------*/
 /* assert.c: */
-extern void X(assertion_failed)(const char *s, int line, char *file);
+extern void X(assertion_failed)(const char *s, int line, const char *file);
 
 /* always check */
 #define CK(ex)						 \
@@ -225,7 +225,7 @@ typedef struct {
 void X(md5begin)(md5 *p);
 void X(md5putb)(md5 *p, const void *d_, uint len);
 void X(md5puts)(md5 *p, const char *s);
-void X(md5putc)(md5 *p, const unsigned char c);
+void X(md5putc)(md5 *p, unsigned char c);
 void X(md5uint)(md5 *p, uint i);
 void X(md5int)(md5 *p, int i);
 void X(md5ptrdiff)(md5 *p, ptrdiff_t d);
@@ -432,7 +432,7 @@ typedef struct {
 
 struct planner_s {
      const planner_adt *adt;
-     void (*hook)(plan *plan, const problem *p, int optimalp);
+     void (*hook)(plan *pln, const problem *p, int optimalp);
      void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvdesc **);
 
      const char *cur_reg_nam;
@@ -509,7 +509,7 @@ planner *X(mkplanner_score)(void);
 #ifdef PRECOMPUTE_ARRAY_INDICES
 typedef int *stride;
 #define WS(stride, i)  (stride[i])
-extern stride X(mkstride)(int n, int stride);
+extern stride X(mkstride)(int n, int s);
 void X(stride_destroy)(stride p);
 
 #else

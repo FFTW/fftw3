@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.1 2002-09-02 15:46:57 athena Exp $ */
+/* $Id: verify-lib.c,v 1.2 2002-09-14 03:07:39 stevenj Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -53,6 +53,9 @@ static double aerror(C *a, C *b, uint n)
 }
 
 #ifdef HAVE_DRAND48
+#  if defined(HAVE_DECL_DRAND48) && !HAVE_DECL_DRAND48
+extern double drand48(void);
+#  endif
 double mydrand(void)
 {
      return drand48() - 0.5;

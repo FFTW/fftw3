@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.14 2002-08-29 12:20:55 athena Exp $ */
+/* $Id: verify.c,v 1.15 2002-09-14 03:07:39 stevenj Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -429,9 +429,6 @@ static void do_verify(struct problem *p, unsigned int rounds, double tol)
 
 static void do_accuracy(struct problem *p, int rounds)
 {
-     extern void fftaccuracy(unsigned int n, 
-			     bench_complex *a, bench_complex *ffta,
-			     int sign, double err[6]);
      unsigned int n, i;
      int r;
      bench_complex *a, *b;

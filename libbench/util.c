@@ -25,24 +25,27 @@
 #include <stddef.h>
 #include <math.h>
 
-#if HAVE_MALLOC_H
-#include <malloc.h>
+#if defined(HAVE_DECL_MEMALIGN) && !HAVE_DECL_MEMALIGN
+#  if defined(HAVE_MALLOC_H)
+#    include <malloc.h>
+#  else
+extern void *memalign(size_t, size_t);
+#  endif
 #endif
 
-void bench_assertion_failed(const char *s, int line, char *file)
+#if defined(HAVE_DECL_POSIX_MEMALIGN) && !HAVE_DECL_POSIX_MEMALIGN
+extern int posix_memalign(void **, size_t, size_t);
+#endif
+
+void bench_assertion_failed(const char *s, int line, const char *file)
 {
      fflush(stdout);
      fprintf(stderr, "bench: %s:%d: assertion failed: %s\n", file, line, s);
      exit(EXIT_FAILURE);
 }
 
-int bench_square(int x) 
-{
-     return x * x;
-}
-
 #ifdef HAVE_DRAND48
-#  if !defined(HAVE_DECL_DRAND48) || !HAVE_DECL_DRAND48
+#  if defined(HAVE_DECL_DRAND48) && !HAVE_DECL_DRAND48
 extern double drand48(void);
 #  endif
 double bench_drand(void)
@@ -170,16 +173,25 @@ void bench_free(void *p)
  **********************************************************/
 /* production version, no hacks */
 
+#define MIN_ALIGNMENT 16
+
 void *bench_malloc(size_t n)
 {
      void *p;
      if (n == 0) n = 1;
 
-#ifdef HAVE_MEMALIGN
-     {
-	  const int alignment = 16; /* power of 2 */
-	  p = memalign(alignment, n);
-     }
+#if defined(HAVE_MEMALIGN)
+     p = memalign(MIN_ALIGNMENT, n);
+#elif defined(HAVE_POSIX_MEMALIGN)
+     /* note: posix_memalign is broken in glibc 2.2.5: it constrains
+	the size, not the alignment, to be (power of two) * sizeof(void*). */
+     if (posix_memalign(&p, MIN_ALIGNMENT, n))
+	  p = (void*) 0;
+#elif defined(__ICC) || defined(__INTEL_COMPILER) || defined(HAVE__MM_MALLOC)
+     /* Intel's C compiler defines _mm_malloc and _mm_free intrinsics */
+     p = (void *) _mm_malloc(n, MIN_ALIGNMENT);
+#    undef real_free
+#    define real_free _mm_free
 #else
      p = malloc(n);
 #endif

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.3 2002-09-14 01:54:50 athena Exp $ */
+/* $Id: primes.c,v 1.4 2002-09-14 03:07:39 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -66,14 +66,14 @@ uint X(power_mod)(uint n, uint m, uint p)
    That is, return the smallest m such that n^m == 1 mod p. */
 static uint period(uint n, uint p)
 {
-     uint prod = n, period = 1;
+     uint prod = n, per = 1;
 
      while (prod != 1) {
 	  prod = MULMOD(prod, n, p);
-	  ++period;
+	  ++per;
 	  A(prod != 0);
      }
-     return period;
+     return per;
 }
 
 /* Find a generator for the multiplicative group mod p, where p is

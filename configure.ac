@@ -144,7 +144,8 @@ AC_FUNC_MALLOC
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
-AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 hypot hypotl sqrt memset memalign _mm_malloc _mm_free clock_gettime])
+AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 hypot hypotl sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime])
+AC_CHECK_DECLS([drand48, memalign, posix_memalign])
 
 dnl Cray UNICOS _rtc() (real-time clock) intrinsic
 AC_MSG_CHECKING([for _rtc intrinsic])
@@ -173,6 +174,13 @@ dnl override CFLAGS selection when debugging
 if test "${enable_debug}" = "yes"; then
 	CFLAGS="-g"
 	LDFLAGS="-static"
+fi
+
+dnl add gcc warnings, in debug/maintainer mode only
+if test "$enable_debug" = yes || test "$USE_MAINTAINER_MODE" = yes; then
+	if test $ac_cv_prog_gcc = yes; then
+		CFLAGS="$CFLAGS -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align -pedantic -Wno-long-long -Wshadow -Wbad-function-cast -Wwrite-strings -Wstrict-prototypes -Wredundant-decls -Wnested-externs" # -Wundef -Wconversion -Wmissing-prototypes -Wmissing-declarations 
+	fi
 fi
 
 dnl -----------------------------------------------------------------------

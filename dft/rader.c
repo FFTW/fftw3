@@ -350,7 +350,7 @@ static void destroy_dit(plan *ego_)
      destroy(ego_);
 }
 
-static void print_aux(char *name, P *ego, printer *p)
+static void print_aux(const char *name, P *ego, printer *p)
 {
      p->print(p, "(%s-%u%ois=%oos=%(%p%)",
               name, ego->n, ego->is, ego->os, ego->cld1);

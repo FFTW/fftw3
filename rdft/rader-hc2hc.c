@@ -150,10 +150,10 @@ static void apply_dit(plan *ego_, R *I, R *O)
 	  /* second half of array must be fiddled to get real/imag
              parts in correct spots: */
 	  for (k = (r+1)/2; k < r; ++k) {
-	       R r;
-	       r = rio[k * ios];
+	       R t;
+	       t = rio[k * ios];
 	       rio[k * ios] = -io[-k * ios];
-	       io[-k * ios] = r;
+	       io[-k * ios] = t;
 	  }
      }
 
@@ -199,10 +199,10 @@ static void apply_dif(plan *ego_, R *I, R *O)
 	  /* second half of array must be unfiddled to get real/imag
              parts from correct spots: */
 	  for (k = (r+1)/2; k < r; ++k) {
-	       R r;
-	       r = rio[k * ios];
+	       R t;
+	       t = rio[k * ios];
 	       rio[k * ios] = ii[-k * ios];
-	       ii[-k * ios] = -r;
+	       ii[-k * ios] = -t;
 	  }
 
 	  /* First, permute the input, storing in buf: */

@@ -18,12 +18,20 @@
  *
  */
 
-/* $Id: alloc.c,v 1.18 2002-08-31 01:29:10 athena Exp $ */
+/* $Id: alloc.c,v 1.19 2002-09-14 03:07:39 stevenj Exp $ */
 
 #include "ifftw.h"
 
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
+#if defined(HAVE_DECL_MEMALIGN) && !HAVE_DECL_MEMALIGN
+#  if defined(HAVE_MALLOC_H)
+#    include <malloc.h>
+#  else
+extern void *memalign(size_t, size_t);
+#  endif
+#endif
+
+#if defined(HAVE_DECL_POSIX_MEMALIGN) && !HAVE_DECL_POSIX_MEMALIGN
+extern int posix_memalign(void **, size_t, size_t);
 #endif
 
 #define real_free free /* memalign and malloc use ordinary free */
@@ -34,6 +42,11 @@ static void *real_malloc(size_t n)
 
 #if defined(HAVE_MEMALIGN)
      p = memalign(MIN_ALIGNMENT, n);
+#elif defined(HAVE_POSIX_MEMALIGN)
+     /* note: posix_memalign is broken in glibc 2.2.5: it constrains
+	the size, not the alignment, to be (power of two) * sizeof(void*). */
+     if (posix_memalign(&p, MIN_ALIGNMENT, n))
+	  p = (void*) 0;
 #elif defined(__ICC) || defined(__INTEL_COMPILER) || defined(HAVE__MM_MALLOC)
      /* Intel's C compiler defines _mm_malloc and _mm_free intrinsics */
      p = (void *) _mm_malloc(n, MIN_ALIGNMENT);

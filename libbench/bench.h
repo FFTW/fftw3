@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.3 2002-08-16 12:06:31 athena Exp $ */
+/* $Id: bench.h,v 1.4 2002-09-14 03:07:39 stevenj Exp $ */
 
 /* benchmark program definitions */
 #include "config.h"
@@ -26,7 +26,6 @@
 
 extern double time_min;
 extern int time_repeat;
-extern int verbose;
 
 extern void timer_init(double tmin, int repeat);
 extern void timer_start(void);
@@ -50,7 +49,6 @@ void report_info_all(void);
 extern int bench_main(int argc, char *argv[]);
 
 extern void speed(const char *param);
-extern void verify(const char *param, int rounds, double tol);
 extern void accuracy(const char *param, int rounds);
 
 extern double mflops(const struct problem *p, double t);
@@ -66,3 +64,6 @@ extern struct problem *problem_parse(const char *desc);
 extern void problem_destroy(struct problem *p);
 
 extern void ovtpvt(const char *format, ...);
+
+extern void fftaccuracy(unsigned int n, bench_complex *a, bench_complex *ffta,
+			int sign, double err[6]);

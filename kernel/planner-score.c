@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.21 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: planner-score.c,v 1.22 2002-09-14 03:07:39 stevenj Exp $ */
 #include "ifftw.h"
 
 /* scoring planner */
@@ -46,21 +46,23 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
      int best_score;
      int best_not_yet_timed = 1;
      int parent_score = ego->score; /* save for later */
-     slvdesc *sp;
 
      *bestp = 0;
 
      /* if a solver is suggested (by wisdom) use it */
-     if ((sp = *descp)) {
-	  solver *s = sp->slv;
-	  ego->score = s->adt->score(s, p, ego); /* natural score of solver */
-	  best = ego->adt->slv_mkplan(ego, p, s);
-	  if (best) {
-	       X(plan_use)(best);
-	       best->score = ego->score;
-	       goto done;
+     {
+	  slvdesc *sp;
+	  if ((sp = *descp)) {
+	       solver *s = sp->slv;
+	       ego->score = s->adt->score(s, p, ego); /* natural score */
+	       best = ego->adt->slv_mkplan(ego, p, s);
+	       if (best) {
+		    X(plan_use)(best);
+		    best->score = ego->score;
+		    goto done;
+	       }
+	       /* BEST may be 0 in case of md5 collision */
 	  }
-	  /* BEST may be 0 in case of md5 collision */
      }
 
      /* find highest score */

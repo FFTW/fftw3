@@ -218,7 +218,7 @@ if test "$ac_test_CFLAGS" != "set"; then
 
   # use default flags for gcc on all systems
   if test $ac_cv_prog_gcc = yes; then
-     CFLAGS="-fomit-frame-pointer -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align -pedantic -Wno-long-long"
+     CFLAGS="-fomit-frame-pointer"
   fi
 
   # the egcs scheduler is too smart and destroys our own schedule.

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: report.c,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: report.c,v 1.2 2002-09-14 03:07:39 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -67,10 +67,10 @@ static void mkstat(double *t, int st, struct stats *a)
      /* compute median --- silly bubblesort algorithm */
      for (i = st - 1; i > 1; --i) {
 	  for (j = 0; j < i - 1; ++j) {
-	       double y0, y1;
-	       if ((y0 = t[j]) > (y1 = t[j + 1])) {
-		    t[j] = y0;
-		    t[j + 1] = y1;
+	       double t0, t1;
+	       if ((t0 = t[j]) > (t1 = t[j + 1])) {
+		    t[j] = t0;
+		    t[j + 1] = t1;
 	       }
 	  } 
      }

@@ -117,7 +117,7 @@ void X(md5begin)(md5 *p)
      p->l = 0;
 }
 
-void X(md5putc)(md5 *p, const unsigned char c)
+void X(md5putc)(md5 *p, unsigned char c)
 {
      p->c[p->l % 64] = c;
      if (((++p->l) % 64) == 0) doblock(p->s, p->c);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.8 2002-07-13 20:05:43 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.9 2002-09-14 03:07:39 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -180,7 +180,7 @@ extern int paranoid;
 /**************************************************************
  * assert
  **************************************************************/
-extern void bench_assertion_failed(const char *s, int line, char *file);
+extern void bench_assertion_failed(const char *s, int line, const char *file);
 #define BENCH_ASSERT(ex)						 \
       (void)((ex) || (bench_assertion_failed(#ex, __LINE__, __FILE__), 0))
 
