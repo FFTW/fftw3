@@ -323,8 +323,8 @@ int bench_main(int argc, char *argv[])
 
      begin = clock();
      for (iproblem = 0; iproblem < nproblems; ++iproblem) {
-	  if (hours > 0
-	      && hours > (clock() - begin) / 3600.0 / CLOCKS_PER_SEC)
+	  if (hours <= 0
+	      || hours > (clock() - begin) / 3600.0 / CLOCKS_PER_SEC)
 	       do_problem(problems[iproblem]);
 	  problem_destroy(problems[iproblem]);
 	  
