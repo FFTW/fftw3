@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.17 2002-08-05 02:50:19 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.18 2002-08-10 23:32:03 stevenj Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -164,7 +164,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_dft *p;
      P *pln;
      plan *cld1 = 0, *cld2 = 0;
-     tensor sz1, sz2;
+     tensor sz1, sz2, vecszi, sz2i;
      problem *cldp;
      uint spltrnk;
 
@@ -177,6 +177,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_dft *) p_;
      X(tensor_split)(p->sz, &sz1, spltrnk, &sz2);
+     vecszi = X(tensor_copy_inplace)(p->vecsz, INPLACE_OS);
+     sz2i = X(tensor_copy_inplace)(sz2, INPLACE_OS);
 
      cldp = X(mkproblem_dft_d)(X(tensor_copy)(sz2),
                                X(tensor_append)(p->vecsz, sz1),
@@ -186,8 +188,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!cld1)
           goto nada;
 
-     cldp = X(mkproblem_dft_d)(X(tensor_copy)(sz1),
-                               X(tensor_append)(p->vecsz, sz2),
+     cldp = X(mkproblem_dft_d)(X(tensor_copy_inplace)(sz1, INPLACE_OS),
+                               X(tensor_append)(vecszi, sz2i),
                                p->ro, p->io, p->ro, p->io);
      cld2 = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
@@ -204,6 +206,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      X(tensor_destroy)(sz1);
      X(tensor_destroy)(sz2);
+     X(tensor_destroy)(vecszi);
+     X(tensor_destroy)(sz2i);
 
      return &(pln->super.super);
 
@@ -214,6 +218,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           X(plan_destroy)(cld1);
      X(tensor_destroy)(sz2);
      X(tensor_destroy)(sz1);
+     X(tensor_destroy)(vecszi);
+     X(tensor_destroy)(sz2i);
      return (plan *) 0;
 }
 
