@@ -54,8 +54,10 @@ sub do_problem {
     my $doablep = shift;
     my $options = &make_options;
 
-    if ($problem =~ /\// && $problem =~ /r/ && $problem =~ /i.*x/) {
-	return; # cannot do real inplace split multidimensional
+    if ($problem =~ /\// && $problem =~ /r/
+	&& ($problem =~ /i.*x/
+	    || $problem =~ /v/ || $problem =~ /\*/)) {
+	return; # cannot do real split inplace-multidimensional or vector
     }
     
     if ($doablep) {
@@ -128,7 +130,8 @@ sub rand_small_factors {
 sub one_random_test {
     my $q = int(2 + rand($maxsize));
     my $rnk = int(1 + rand(4));
-    my $g = int(2 + exp(log($q) / $rnk));
+    my $vtype = int(rand(3));
+    my $g = int(2 + exp(log($q) / ($rnk + ($vtype > 0))));
     my $first = 1;
     my $sz = "";
 
@@ -142,6 +145,11 @@ sub one_random_test {
 	    if ($g > $q) { $g = $q; }
 	    --$rnk;
 	}
+    }
+    if ($vtype > 0 && $g > 1) {
+	my $v = int(1 + rand($g));
+	$sz = "${sz}*${v}" if ($vtype == 1);
+	$sz = "${sz}v${v}" if ($vtype == 2);
     }
     do_size($sz, 1)
 }
