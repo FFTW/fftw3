@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.3 2002-06-06 22:03:17 athena Exp $ */
+/* $Id: ct.c,v 1.4 2002-06-08 20:57:54 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -64,11 +64,10 @@ static void print(plan *ego_, plan_printf prntf)
      const ct_desc *e = slv->desc;
 
      prntf("(%s-%d/%d", slv->nam, ego->r, fftw_twiddle_length(e->tw));
-     if (e->is) {
-	  prntf("/s=%d", e->is);
-	  if (e->vs)
-	       prntf("/s=%d", e->vs);
-     }
+     if (e->is || e->vs)
+	  prntf("/is=%d/vs=%d", e->is, e->vs);
+     if (ego->vl > 1)
+	  prntf("-x%u", ego->vl);
      prntf(" ");
      ego->cld->adt->print(ego->cld, prntf);
      prntf(")");
