@@ -18,8 +18,23 @@
  *
  */
 
+/***************************** NOTE TO USERS ********************************
+/*
+ *                 THIS IS A HEADER FILE, NOT A MANUAL
+ *
+ *    If you want to know how to use FFTW, please read the manual,
+ *    online at http://www.fftw.org/doc/ and also included with FFTW.
+ *    For a quick start, see the manual's tutorial section.
+ *
+ *   (Reading header files to learn how to use a library is a habit
+ *    stemming from code lacking a proper manual.  Arguably, it's a
+ *    *bad* habit in most cases, because header files can contain
+ *    interfaces that are not part of the public, stable API.)
+ *
+ ****************************************************************************/
+
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.63 2003-09-27 21:07:18 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.64 2004-08-19 16:39:50 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
