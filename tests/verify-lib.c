@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.3 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: verify-lib.c,v 1.4 2002-09-21 22:10:07 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -34,22 +34,25 @@ static double norm2(double x, double y) { return dmax(dabs(x), dabs(y)); }
 
 static double aerror(C *a, C *b, uint n)
 {
-     /* compute the relative Linf error */
-     double e = 0.0, mag = 0.0;
-     uint i;
+     if (n > 0) {
+	  /* compute the relative Linf error */
+	  double e = 0.0, mag = 0.0;
+	  uint i;
 
-     for (i = 0; i < n; ++i) {
-	  e = dmax(e, norm2(a[i].r - b[i].r, a[i].i - b[i].i));
-	  mag = dmax(mag, 
-		     dmin(norm2(a[i].r, a[i].i),
-			  norm2(b[i].r, b[i].i)));
-     }
-     e /= mag;
+	  for (i = 0; i < n; ++i) {
+	       e = dmax(e, norm2(a[i].r - b[i].r, a[i].i - b[i].i));
+	       mag = dmax(mag, 
+			  dmin(norm2(a[i].r, a[i].i),
+			       norm2(b[i].r, b[i].i)));
+	  }
+	  e /= mag;
 
 #ifdef HAVE_ISNAN
-     A(!isnan(e));
+	  A(!isnan(e));
 #endif
-     return e;
+	  return e;
+     } else
+	  return 0.0;
 }
 
 #ifdef HAVE_DRAND48
