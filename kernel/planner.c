@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.133 2003-01-26 21:29:18 athena Exp $ */
+/* $Id: planner.c,v 1.134 2003-01-27 11:59:40 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -248,10 +248,16 @@ static void hinsert(planner *ego, const md5sig s,
      if ((l = hlookup(ego, s, flags))) {
 	  if (SUBSUMES(flags, l->flags)) {
 	       /* overwrite old solution */
+#if 0
+	       /* TODO */
 	       flags |= l->flags & BLESSING; /* ne me perdas illa die */
+#endif
 	  } else {
 	       A(SUBSUMES(l->flags, flags));
+#if 0
+	       /* TODO */
 	       l->flags |= flags & BLESSING;
+#endif
 	       return;
 	  }
      } else {
@@ -276,8 +282,11 @@ static void hcurse_subsumed(planner *ego)
 		    if (VALIDP(m)) {
 			 if (md5eq(l->s, m->s) 
 			     && SUBSUMES(l->flags, m->flags)) {
+#if 0
+			      /* TODO */
 			      /* ne cadant in obscurum */
 			      l->flags |= m->flags & BLESSING;
+#endif
 			      /* cum vix justus sit securus */
 			      m->flags &= ~BLESSING;
 			 }
@@ -326,11 +335,14 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
      return pln;
 }
 
-static plan *mkplan0(planner *ego, problem *p, slvdesc **descp)
+static plan *search(planner *ego, problem *p, slvdesc **descp)
 {
      plan *best = 0;
      int best_not_yet_timed = 1;
      int pass;
+
+     if (NO_SEARCHP(ego)) 
+	  return 0;
 
      for (pass = 0; pass < 2; ++pass) {
 	  unsigned short nflags = ego->planner_flags;
@@ -395,17 +407,21 @@ static plan *mkplan(planner *ego, problem *p)
      if ((sol = hlookup(ego, m.s, ego->planner_flags))) {
 	  if (SUBSUMES(sol->flags, ego->planner_flags)) {
 	       /* wisdom is acceptable */
-	       if (sol->slvndx < 0) return 0;   /* known to be infeasible */
+	       if (sol->slvndx < 0) 
+		    return 0;   /* known to be infeasible */
 
 	       /* use solver to obtain a plan */
 	       sp = ego->slvdescs + sol->slvndx;
-#if 0
-/* I don't understand this anymore */
 	       pln = invoke_solver(ego, p, sp->slv, 
-				   (IMPATIENCE(sol->flags) |
-				    NONIMPATIENCE(ego->planner_flags)));
-#endif
-	       pln = invoke_solver(ego, p, sp->slv, ego->planner_flags);
+				   (0
+				    | NO_SEARCH 
+				    | IMPATIENCE(sol->flags)
+				    | NONIMPATIENCE(ego->planner_flags) ));
+
+	       if (!pln) {
+		    /* TODO: delete entry? */
+		    /* D("bogus entry for %P\n", p); */
+	       }
 	  } else {
 	       A(SUBSUMES(ego->planner_flags, sol->flags));
 	  }
@@ -413,14 +429,15 @@ static plan *mkplan(planner *ego, problem *p)
 
 
      if (!pln)
-	  pln = mkplan0(ego, p, &sp);
+	  pln = search(ego, p, &sp);
 
      flags = ego->planner_flags;
 
      if (pln) {
-	  /* hack: postulate de iure that NO_UGLY subsumes ~NO_UGLY 
-	     if the problem is feasible */
-	  flags &= ~NO_UGLY;
+	  /* Postulate de iure that NO_UGLY subsumes ~NO_UGLY if the
+	     problem is feasible. Also postulate that NO_SEARCH
+	     subsumes ~NO_SEARCH. */
+	  flags &= ~(NO_UGLY | NO_SEARCH);
      }
 
      hinsert(ego, m.s, flags, pln ? sp - ego->slvdescs : -1);

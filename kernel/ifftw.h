@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.181 2003-01-26 17:07:43 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.182 2003-01-27 11:59:40 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -449,11 +449,15 @@ enum {
      NO_INDIRECT_OP = 0x20,
      NO_LARGE_GENERIC = 0x40,
      NO_RANK_SPLITS = 0x80,
-     NO_UGLY = 0x100,  /* avoid plans we are 99% sure are suboptimal */
-     NO_VRANK_SPLITS = 0x200,
-     NO_VRECURSE = 0x400,
+     NO_VRANK_SPLITS = 0x100,
+     NO_VRECURSE = 0x200,
+     
+     /* flags that control the search */
+     NO_UGLY = 0x400,  /* avoid plans we are 99% sure are suboptimal */
+     NO_SEARCH = 0x800,  /* avoid searching altogether---use wisdom entries 
+			    only */
 
-     ESTIMATE = 0x800, /* subsumed by all other impatience flags */
+     ESTIMATE = 0x1000,
      IMPATIENCE_FLAGS = (ESTIMATE | (ESTIMATE - 1)),
      
      BLESSING = 0x4000,  /* save this entry */
@@ -472,6 +476,7 @@ enum {
 #define NO_LARGE_GENERICP(plnr) ((plnr)->planner_flags & NO_LARGE_GENERIC)
 #define NO_RANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_RANK_SPLITS)
 #define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
+#define NO_SEARCHP(plnr) ((plnr)->planner_flags & NO_SEARCH)
 #define NO_VRANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_VRANK_SPLITS)
 #define NO_VRECURSEP(plnr) ((plnr)->planner_flags & NO_VRECURSE)
 
