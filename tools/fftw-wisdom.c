@@ -42,6 +42,13 @@ static void do_problem(const char *param)
      problem_destroy(p);
 }
 
+static void do_file(FILE *f)
+{
+     char s[1025];
+     while (1 == fscanf(f, "%1024s", s))
+	  do_problem(s);
+}
+
 static struct option long_options[] =
 {
   {"help", no_argument, 0, 'h'},
@@ -212,8 +219,13 @@ static int bench_main1(int argc, char *argv[])
 	  }
      }
 
-     while (optind < argc)
-	  do_problem(argv[optind++]);
+     while (optind < argc) {
+	  if (!strcmp(argv[optind], "-"))
+	       do_file(stdin);
+	  else
+	       do_problem(argv[optind]);
+	  ++optind;
+     }
      
      if (!output_fname)
 	  output_file = stdout;
