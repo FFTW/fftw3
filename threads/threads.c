@@ -577,7 +577,11 @@ int X(threads_init)(void)
      if (attr != PTHREAD_SCOPE_SYSTEM) {
 	  err = pthread_attr_setscope(&fftw_pthread_attributes,
 				      PTHREAD_SCOPE_SYSTEM);
-	  if (err) return err;
+          /* IRIX lossage: PTHREAD_SCOPE_SYSTEM requires special
+             permissions, giving err == 1, but the default
+             (PTHREAD_SCOPE_PROCESS) already parallelizes over
+             multiple CPUs(?).  So, we ignore err == 1. */
+          if (err && err != 1) return err;
 	  attr_changed = 1;
      }
 
