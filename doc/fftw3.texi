@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.135 2003-03-12 07:35:22 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.136 2003-03-12 07:42:33 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2614,6 +2614,10 @@ general, only arrays allocated with @code{fftw_malloc} are guaranteed to
 be equally aligned.
 
 @end itemize
+
+If you are tempted to use this guru interface because you want to
+transform a known bunch of arrays of the same size, @strong{stop here}
+and go use the advanced interface instead (@pxref{Advanced Interface})).
 
 The guru execute functions are:
 
