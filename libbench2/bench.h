@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.5 2003-02-09 00:11:58 stevenj Exp $ */
+/* $Id: bench.h,v 1.6 2003-02-10 04:22:15 stevenj Exp $ */
 
 /* benchmark program definitions */
 #include "bench-user.h"
@@ -43,6 +43,7 @@ void report_can_do(const char *param);
 void report_info(const char *param);
 void report_info_all(void);
 
+extern int aligned_main(int argc, char *argv[]);
 extern int bench_main(int argc, char *argv[]);
 
 extern void speed(const char *param);
