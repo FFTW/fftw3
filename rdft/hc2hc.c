@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.2 2002-07-22 03:43:03 stevenj Exp $ */
+/* $Id: hc2hc.c,v 1.3 2002-07-22 05:05:00 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -82,6 +82,7 @@ int X(rdft_hc2hc_applicable)(const solver_hc2hc *ego, const problem *p_)
                   && p->vecsz.rnk <= 1
 		  && p->kind == d->genus->kind
                   && divides(d->radix, p->sz.dims[0].n)
+		  && d->radix < p->sz.dims[0].n /* avoid inf. loops in cld0 */
 	       );
      }
      return 0;
@@ -225,10 +226,7 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
      radix = X(mktensor_1d)(e->radix, m * d[0].os, m * d[0].os);
      null = X(mktensor)(0);
      *cld0p = X(mkproblem_rdft)(radix, null, p->O, p->O, R2HC);
-     if (m % 2 == 0)
-	  *cldmp = X(mkproblem_rdft)(radix, null, p->O, p->O, R2HCII);
-     else
-	  *cldmp = X(mkproblem_rdft)(null, null, p->O, p->O, R2HCII);
+     *cldmp = X(mkproblem_rdft)(m%2 ? null : radix, null, p->O,p->O, R2HCII);
      X(tensor_destroy)(null);
      X(tensor_destroy)(radix);
 }
@@ -251,10 +249,7 @@ void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
      radix = X(mktensor_1d)(e->radix, m * d[0].is, m * d[0].is);
      null = X(mktensor)(0);
      *cld0p = X(mkproblem_rdft)(radix, null, p->I, p->I, HC2R);
-     if (m % 2 == 0)
-	  *cldmp = X(mkproblem_rdft)(radix, null, p->I, p->I, HC2RIII);
-     else
-	  *cldmp = X(mkproblem_rdft)(null, null, p->I, p->I, HC2RIII);
+     *cldmp = X(mkproblem_rdft)(m%2 ? null : radix, null, p->I,p->I, HC2RIII);
      X(tensor_destroy)(null);
      X(tensor_destroy)(radix);
 }
