@@ -18,13 +18,9 @@
  *
  */
 
-/* $Id: tensor.c,v 1.21 2002-08-29 21:58:35 stevenj Exp $ */
+/* $Id: tensor.c,v 1.22 2002-08-29 22:08:16 stevenj Exp $ */
 
 #include "ifftw.h"
-
-#define imin X(imin)
-#define imax X(imax)
-#define iabs X(iabs)
 
 static void talloc(tensor *x, uint rnk)
 {
@@ -141,30 +137,30 @@ uint X(tensor_hash)(const tensor t)
      return h;
 }
 
-int X(tensor_max_index)(const tensor sz)
+uint X(tensor_max_index)(const tensor sz)
 {
      uint i;
-     int n = 0;
+     uint n = 0;
 
      A(FINITE_RNK(sz.rnk));
      for (i = 0; i < sz.rnk; ++i) {
           iodim *p = sz.dims + i;
-          n += (p->n - 1) * imax(p->is, p->os);
+          n += (p->n - 1) * X(uimax)(X(iabs)(p->is), X(iabs)(p->os));
      }
      return n;
 }
 
-int X(tensor_min_stride)(const tensor sz)
+uint X(tensor_min_stride)(const tensor sz)
 {
      A(FINITE_RNK(sz.rnk));
      if (sz.rnk == 0)
           return 0;
      else {
           uint i;
-          int s = imin(iabs(sz.dims[0].is), iabs(sz.dims[0].os));
+          uint s = X(uimin)(X(iabs)(sz.dims[0].is), X(iabs)(sz.dims[0].os));
           for (i = 1; i < sz.rnk; ++i) {
                iodim *p = sz.dims + i;
-               s = imin(s, imin(iabs(p->is), iabs(p->os)));
+               s = X(uimin)(s, X(uimin)(X(iabs)(p->is), X(iabs)(p->os)));
           }
           return s;
      }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.7 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.8 2002-08-29 22:08:16 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -150,7 +150,8 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
           iodim *d = p->vecsz.dims + vdim;
           if (1
               && p->sz.rnk > 1
-              && X(imin)(d->is, d->os) < X(tensor_max_index)(p->sz)
+	      && X(uimin)(X(iabs)(d->is), X(iabs)(d->os))
+              < X(tensor_max_index)(p->sz)
                )
           return UGLY;
      }
