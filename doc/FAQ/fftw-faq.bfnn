@@ -198,7 +198,7 @@ from \docref{the Caml web page\}.
 Yes, FFTW (versions 1.3 and higher) contains a Fortran-callable
 interface, documented in the FFTW manual.
 
-By default, FFTW configures its wrapper routines to work with the
+By default, FFTW configures its Fortran interface to work with the
 first compiler it finds, e.g. \courier{g77\}.  To configure for a
 different, incompatible Fortran compiler \courier{foobar\}, use
 \courier{./configure F77=foobar\} when installing FFTW.  (In the case
