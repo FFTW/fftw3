@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2hc.ml,v 1.7 2002-07-20 21:51:06 athena Exp $ *)
+(* $Id: gen_r2hc.ml,v 1.8 2002-07-25 10:36:51 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2hc.ml,v 1.7 2002-07-20 21:51:06 athena Exp $"
+let cvsid = "$Id: gen_r2hc.ml,v 1.8 2002-07-25 10:36:51 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -155,7 +155,7 @@ let generate n =
 
   and desc = 
     Printf.sprintf 
-      "static const kr2hc_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n"
+      "static const kr2hc_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n\n"
       n name (flops_of tree0) 
       (stride_to_solverparm !uistride) 
       (stride_to_solverparm !urostride) (stride_to_solverparm !uiostride)

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r.ml,v 1.8 2002-07-20 22:40:31 athena Exp $ *)
+(* $Id: gen_hc2r.ml,v 1.9 2002-07-25 10:36:51 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r.ml,v 1.8 2002-07-20 22:40:31 athena Exp $"
+let cvsid = "$Id: gen_hc2r.ml,v 1.9 2002-07-25 10:36:51 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -159,7 +159,7 @@ let generate n =
 
   and desc = 
     Printf.sprintf 
-      "static const khc2r_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n"
+      "static const khc2r_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n\n"
       n name (flops_of tree0) 
       (stride_to_solverparm !uristride) (stride_to_solverparm !uiistride)
       (stride_to_solverparm !uostride)

@@ -5,7 +5,7 @@ noinst_LTLIBRARIES = librdft_codelets_hc2r.la
 
 HC2R = hc2r_2.c hc2r_3.c hc2r_4.c hc2r_5.c hc2r_6.c hc2r_7.c hc2r_8.c	\
 hc2r_9.c hc2r_10.c hc2r_11.c hc2r_12.c hc2r_13.c hc2r_14.c hc2r_15.c	\
-hc2r_16.c hc2r_32.c hc2r_64.c
+hc2r_16.c hc2r_32.c hc2r_64.c hc2r_128.c
 
 HB = hb_2.c hb_3.c hb_4.c hb_5.c hb_6.c hb_7.c hb_8.c hb_9.c	\
 hb_10.c hb_16.c hb_32.c hb_64.c
