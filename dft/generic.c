@@ -34,7 +34,8 @@ typedef struct {
 static void cdot(int n,
 		 const R *xr, const R *xi, int xs,
 		 const R *w, int ws,
-		 R *or, R *oi)
+		 R *or0, R *oi0,
+		 R *or1, R *oi1)
 {
      int wp, i;
 
@@ -46,8 +47,25 @@ static void cdot(int n,
 	  ii += xi[i * xs] * w[2*wp+1];
 	  ir += xi[i * xs] * w[2*wp];
      }
-     *or = rr - ii;
-     *oi = ri + ir;
+     *or0 = rr - ii;
+     *oi0 = ir + ri;
+     *or1 = rr + ii;
+     *oi1 = ir - ri;
+}
+
+static void csum(int n,
+		 const R *xr, const R *xi, int xs,
+		 R *or, R *oi)
+{
+     int i;
+
+     E rr = *xr, ir = *xi;
+     for (i = 1; i < n; ++i) {
+	  rr += xr[i * xs];
+	  ir += xi[i * xs];
+     }
+     *or = rr;
+     *oi = ir;
 }
 
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
@@ -57,11 +75,13 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      int n = ego->n, is = ego->is, os = ego->os;
      const R *W = ego->td->W;
 
-     for (i = 0; i < n; ++i) 
+     csum(n, ri, ii, is, ro, io);
+     for (i = 1; i + i < n; ++i) 
 	  cdot(n,
 	       ri, ii, is,
 	       W, i,
-	       ro + i * os, io + i * os);
+	       ro + i * os, io + i * os,
+	       ro + (n - i) * os, io + (n - i) * os);
 }
 
 static void awake(plan *ego_, int flg)
@@ -131,10 +151,11 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->os = p->sz->dims[0].os;
      pln->td = 0;
 
-     X(ops_zero)(&pln->super.super.ops);
-     pln->super.super.ops.add = 4 * n * (n - 1);
-     pln->super.super.ops.mul = 4 * n * (n - 1);
-     pln->super.super.ops.other = 4 * n * n;
+                                 /* csum:             cdot: */
+     pln->super.super.ops.add = 2 * (n-1);
+     pln->super.super.ops.mul = 0;
+     pln->super.super.ops.fma =                   2 * (n-1) * (n-1) ;
+     pln->super.super.ops.other = 2 * (n + 1)  +  2 * (n-1) * (n+1);
 
      return &(pln->super.super);
 }
