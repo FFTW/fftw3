@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.37 2002-08-04 21:24:37 stevenj Exp $ */
+/* $Id: planner.c,v 1.38 2002-08-04 21:34:04 stevenj Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -204,6 +204,12 @@ static plan *mkplan(planner *ego, problem *p)
      }
 }
 
+static int is_blessed(solutions *s)
+{
+     return(!(s->flags & ESTIMATE)
+	    && (s->blessed || (s->pln && s->pln->blessed)));
+}
+
 /* destroy hash table entries.  If FORGET_EVERYTHING, destroy the whole
    table.  If FORGET_ACCURSED, then destroy entries that are not blessed.
    If FORGET_PLANS, then destroy all the plans but remember the solvers. */
@@ -214,12 +220,10 @@ static void forget(planner *ego, amnesia a)
      for (h = 0; h < ego->hashsiz; ++h) {
 	  solutions **ps = ego->sols + h, *s;
 	  while ((s = *ps)) {
-	       if (s->pln) {
-		    s->blessed = s->blessed | s->pln->blessed;
-		    if (a == FORGET_PLANS) {
-			 X(plan_destroy)(s->pln);
-			 s->pln = 0;
-		    }
+	       s->blessed = is_blessed(s); /* remember pln blessing */
+	       if (s->pln && a == FORGET_PLANS) {
+		    X(plan_destroy)(s->pln);
+		    s->pln = 0;
 	       }
 
 	       if (a == FORGET_EVERYTHING ||
@@ -258,7 +262,7 @@ static void exprt(planner *ego, printer *p)
 	  for (s = ego->sols[h]; s; s = s->cdr)
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
-	       if (s->blessed || (s->pln && s->pln->blessed))
+	       if (is_blessed(s))
 		    p->print(p, "(s %d %d %P)", 
 			     s->sp ? s->sp->id : 0, s->flags, s->p);
      p->print(p, ")");
@@ -342,8 +346,7 @@ static void exprt_conf(planner *ego, printer *p)
      clear_problem_marks(ego);
      for (h = 0; h < ego->hashsiz; ++h)
           for (s = ego->sols[h]; s; s = s->cdr) {
-               if ((s->blessed || (s->pln && s->pln->blessed))
-		   && s->sp && s->sp->reg_nam && s->sp->id > 0) {
+               if (is_blessed(s) && s->sp && s->sp->reg_nam && s->sp->id > 0) {
 		    s->sp->id = 0; /* mark to prevent duplicates */
 		    mark_problem(ego, s->p);
 		    p->print(p, "          extern void %s(planner*);\n",
