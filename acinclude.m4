@@ -298,10 +298,8 @@ if test "$ac_test_CFLAGS" != "set"; then
 			ACX_CHECK_CC_FLAGS(-mcpu=$cputype,m_cpu_60x,
 				CPU_FLAGS=-mcpu=$cputype)
 		elif test -n "$is7x0"; then
-			# TODO: why are we testing for gcc 2.95?
-                        ACX_PROG_GCC_VERSION(2,95,
-                                ACX_CHECK_CC_FLAGS(-mcpu=750,m_cpu_750,
-					CPU_FLAGS=-mcpu=750))
+			ACX_CHECK_CC_FLAGS(-mcpu=750,m_cpu_750,
+				CPU_FLAGS=-mcpu=750)
 		fi
 		if test -z "$CPU_FLAGS"; then
 		        ACX_CHECK_CC_FLAGS(-mcpu=powerpc,m_cpu_powerpc,
