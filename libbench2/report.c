@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: report.c,v 1.7 2003-04-11 11:00:53 athena Exp $ */
+/* $Id: report.c,v 1.8 2003-04-11 12:45:37 athena Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -117,7 +117,7 @@ void report_verbose(const bench_problem *p, double *t, int st)
      sprintf_time(time_min, btmin);
      sprintf_time(p->setup_time, bsetup);
 
-     ovtpvt("Problem: %s, setup: %s, time: %s, mflops: %.5g\n",
+     ovtpvt("Problem: %s, setup: %s, time: %s, ``mflops'': %.5g\n",
 	    p->pstring, bsetup, bmin, mflops(p, s.min));
 
      if (verbose) {
