@@ -158,8 +158,7 @@ if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
     # the egcs scheduler is too smart and destroys our own schedule.
     # Disable the first instruction scheduling pass.  The second
     # scheduling pass (after register reload) is ok.
-    AX_GCC_VERSION(2,90,
-	[test "$1" = fftw && CFLAGS="$CFLAGS -fno-schedule-insns"])
+    AX_GCC_VERSION(2,90, [CFLAGS="$CFLAGS -fno-schedule-insns"])
 
     # tweak codelet optimization level to avoid gcc bugs (sigh)
     if test "x$CODELET_OPTIM" = x; then
