@@ -52,7 +52,7 @@ int X(transposable)(const iodim *a, const iodim *b,
 	     || Ntuple_transposable(a, b, vl, s, ri, ii));
 }
 
-int gcd(int a, int b)
+static int gcd(int a, int b)
 {
      int r;
      do {
