@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.120 2002-09-25 00:54:43 athena Exp $ */
+/* $Id: planner.c,v 1.121 2003-01-05 07:37:31 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -511,7 +511,7 @@ static int imprt(planner *ego, scanner *sc)
 	       goto bad;
 
 	  if ((slvndx = slookup(ego, buf, reg_id)) < 0)
-	       goto bad; /* TODO: panic? */
+	       goto bad;
 
 	  /* inter oves locum praesta */
 	  hinsert(ego, sig, (unsigned short)flags, slvndx);
@@ -519,6 +519,7 @@ static int imprt(planner *ego, scanner *sc)
      return 1;
 
  bad:
+     /* TODO: revert to pre-imprt wisdom? */
      return 0;
 }
 
