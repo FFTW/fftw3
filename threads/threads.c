@@ -52,7 +52,7 @@
          new thread should call proc(data) as its starting point,
          and tid_ptr is a pointer to a fftw_thr_id that
          is set to an identifier for the thread.  You can also
-         define this as a subroutine (put it in fftw_thrs.c)
+         define this as a subroutine (put it in threads.c)
 	 if it is too complicated for a macro.  The prototype should
 	 be:
 
