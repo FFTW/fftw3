@@ -104,7 +104,7 @@ Kq2s_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ)
 %: %.S
 
 # rule to build codlist
-$(CODLIST): Makefile							\
+$(CODLIST): Makefile
 	(								\
 	echo "#include \"ifftw.h\"";					\
 	echo;								\
