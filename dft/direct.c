@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.42 2005-03-06 16:33:15 athena Exp $ */
+/* $Id: direct.c,v 1.43 2005-03-10 01:00:02 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -167,11 +167,8 @@ static int applicable_buf(const solver *ego_, const problem *p_,
 		   /* can operate out-of-place */
 		   || p->ri != p->ro
 
-		   /*
-		    * can compute one transform in-place, no matter
-		    * what the strides are.
-		    */
-		   || p->vecsz->rnk == 0
+		   /* any in-place problem that fits in the buffer is ok */
+		   || vl <= batchsz
 
 		   /* can operate in-place as long as strides are the same */
 		   || (X(tensor_inplace_strides2)(p->sz, p->vecsz))
