@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: altivec.c,v 1.7 2005-01-12 00:30:47 athena Exp $ */
+/* $Id: altivec.c,v 1.8 2005-02-04 16:30:30 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -38,9 +38,10 @@ const vector float X(altivec_chsr_msk) = VLIT(-0.0, 0.0, -0.0, 0.0);
 #include <sys/sysctl.h>
 #endif
 
+#if HAVE_SYS_SYSCTL_H && HAVE_SYSCTL && defined(CTL_HW) && defined(HW_VECTORUNIT)
+/* code for darwin */
 static int really_have_altivec(void)
 {
-#if HAVE_SYS_SYSCTL_H && HAVE_SYSCTL && defined(CTL_HW) && defined(HW_VECTORUNIT)
      int mib[2], altivecp;
      size_t len;
      mib[0] = CTL_HW;
@@ -48,10 +49,35 @@ static int really_have_altivec(void)
      len = sizeof(altivecp);
      sysctl(mib, 2, &altivecp, &len, NULL, 0);
      return altivecp;
-#else
-     return 1;  /* what the hell */
-#endif
+} 
+#else /* HAVE_SYS_SYSCTL_H etc. */
+
+#include <signal.h>
+#include <setjmp.h>
+
+static jmp_buf jb;
+static vector int dummy;
+
+static void sighandler(int x)
+{
+     longjmp(jb, 1);
 }
+
+static int really_have_altivec(void)
+{
+     void (*oldsig)(int);
+     oldsig = signal(SIGILL, sighandler);
+     if (setjmp(jb)) {
+	  signal(SIGILL, oldsig);
+	  return 0;
+     } else {
+	  dummy = vec_add(dummy, dummy);
+	  signal(SIGILL, oldsig);
+	  return 1;
+     }
+     return 0;
+}
+#endif
 
 int RIGHT_CPU(void)
 {
