@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.156 2003-03-16 18:39:07 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.157 2003-03-16 19:15:47 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -22,11 +22,10 @@
 @syncodeindex fp cp
 @comment %**end of header
 
-@c I don't like this
-@c @iftex
-@c @paragraphindent 0
-@c @parskip=@medskipamount
-@c @end iftex
+@iftex
+@paragraphindent 0
+@parskip=@medskipamount
+@end iftex
 
 @macro Onlogn
 @ifinfo
@@ -215,8 +214,8 @@ What FFTW Really Computes
 
 * The 1d Discrete Fourier Transform (DFT)::  
 * The 1d Real-data DFT::        
-* 1d Real-even DFTs (discrete cosine transforms::  
-* 1d Real-odd DFTs (discrete sine transforms::  
+* 1d Real-even DFTs (DCTs)::    
+* 1d Real-odd DFTs (DSTs)::     
 * 1d Discrete Hartley Transforms (DHTs)::  
 * Multi-dimensional Transforms::  
 
@@ -3069,8 +3068,8 @@ straightforward extension to multi-dimensional transforms.
 @menu
 * The 1d Discrete Fourier Transform (DFT)::  
 * The 1d Real-data DFT::        
-* 1d Real-even DFTs (discrete cosine transforms::  
-* 1d Real-odd DFTs (discrete sine transforms::  
+* 1d Real-even DFTs (DCTs)::    
+* 1d Real-odd DFTs (DSTs)::     
 * 1d Discrete Hartley Transforms (DHTs)::  
 * Multi-dimensional Transforms::  
 @end menu
@@ -3127,7 +3126,7 @@ output.  (The frequency @math{-k/n} is the same as the frequency
 @math{(n-k)/n}.)
 
 @c =========>
-@node The 1d Real-data DFT, 1d Real-even DFTs (discrete cosine transforms, The 1d Discrete Fourier Transform (DFT), What FFTW Really Computes
+@node The 1d Real-data DFT, 1d Real-even DFTs (DCTs), The 1d Discrete Fourier Transform (DFT), What FFTW Really Computes
 @subsection The 1d Real-data DFT
 
 The real-input (r2c) DFT in FFTW computes the @emph{forward} transform
@@ -3224,8 +3223,8 @@ complex-to-real (backward) transform will multiply the input by
 @math{n}.
 
 @c =========>
-@node 1d Real-even DFTs (discrete cosine transforms, 1d Real-odd DFTs (discrete sine transforms, The 1d Real-data DFT, What FFTW Really Computes
-@subsection 1d Real-even DFTs (discrete cosine transforms, DCTs)
+@node 1d Real-even DFTs (DCTs), 1d Real-odd DFTs (DSTs), The 1d Real-data DFT, What FFTW Really Computes
+@subsection 1d Real-even DFTs (DCTs)
 
 The Real-even DFTs in FFTW are exactly equivalent to the unnormalized
 forward (and backward) DFTs as defined above, where the input array
@@ -3347,8 +3346,8 @@ in the original array multiplied by @math{N}, where @math{N} is the
 @cindex normalization
 
 @c =========>
-@node 1d Real-odd DFTs (discrete sine transforms, 1d Discrete Hartley Transforms (DHTs), 1d Real-even DFTs (discrete cosine transforms, What FFTW Really Computes
-@subsection 1d Real-odd DFTs (discrete sine transforms, DSTs)
+@node 1d Real-odd DFTs (DSTs), 1d Discrete Hartley Transforms (DHTs), 1d Real-even DFTs (DCTs), What FFTW Really Computes
+@subsection 1d Real-odd DFTs (DSTs)
 
 The Real-odd DFTs in FFTW are exactly equivalent to the unnormalized
 forward (and backward) DFTs as defined above, where the input array
@@ -3470,7 +3469,7 @@ otherwise, @math{N=2n}.
 @cindex normalization
 
 @c =========>
-@node 1d Discrete Hartley Transforms (DHTs), Multi-dimensional Transforms, 1d Real-odd DFTs (discrete sine transforms, What FFTW Really Computes
+@node 1d Discrete Hartley Transforms (DHTs), Multi-dimensional Transforms, 1d Real-odd DFTs (DSTs), What FFTW Really Computes
 @subsection 1d Discrete Hartley Transforms (DHTs)
 
 @cindex discrete Hartley transform
