@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.44 2005-03-09 01:30:42 athena Exp $ */
+/* $Id: ct.c,v 1.45 2005-03-20 23:35:53 athena Exp $ */
 
 #include "ct.h"
 
@@ -111,7 +111,9 @@ int X(ct_applicable)(const ct_solver *ego, const problem *p_, planner *plnr)
      p = (const problem_dft *) p_;
 
      /* emulate fftw2 behavior */
-     if (NO_VRECURSEP(plnr) && (p->vecsz->rnk > 0))  return 0;
+     if (NO_VRECURSEP(plnr) && 
+	 (p->vecsz->rnk > 0) &&
+	 (p->ri != p->ro) )  return 0;
 
      return 1;
 }
