@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.5 2002-06-13 12:48:51 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.6 2002-06-14 11:25:28 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.5 2002-06-13 12:48:51 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.6 2002-06-14 11:25:28 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -96,14 +96,16 @@ let generate n =
     "{\n" ^
     "uint i;\n" ^
     "for (i = 0; i < v; ++i) {\n" ^
-    name0 ^ "(ri + i * ivs, ii + i * ivs, ro + i * ovs, io + i * ovs" ^
-       (if stride_fixed !uistride then "" else ", is") ^ 
-       (if stride_fixed !uostride then "" else ", os") ^ 
-            ");\n" ^
+      name0 ^ 
+        "(ri, ii, ro, io" ^
+           (if stride_fixed !uistride then "" else ", is") ^ 
+           (if stride_fixed !uostride then "" else ", os") ^ 
+          ");\n" ^
+      "ri += ivs; ii += ivs; ro += ovs; io += ovs;\n" ^
     "}\n}\n\n"
 
   and desc = 
-    Printf.sprintf "static const kdft_desc desc = { %s, %s, %s, %s };\n"
+    Printf.sprintf "static const kdft_desc desc = { %s, %s, %s, 0, 0, %s };\n"
       ns (stride_to_solverparm !uistride) (stride_to_solverparm !uostride)
       (flops_of tree0)
 
