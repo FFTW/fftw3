@@ -6,7 +6,7 @@ CODLIST = codlist.c
 CODELET_NAME=codelet_
 
 # rule to build codlist
-$(CODLIST): Makefile.am
+$(CODLIST): Makefile
 	(								\
 	echo "#include \"ifftw.h\"";					\
 	echo;								\
