@@ -99,10 +99,10 @@ n2fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name n2fv_$* -with-ostride 2 -include "n2f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 n1bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name n1bv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name n1bv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 n2bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name n2bv_$* -with-ostride 2 -include "n2f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name n2bv_$* -with-ostride 2 -include "n2f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 m1fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_NOINLINE_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE_C) $(GFLAGS) -n $* -name m1fv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
@@ -111,10 +111,10 @@ m2fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_NOINLINE_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE_C) $(GFLAGS) -n $* -name m2fv_$* -with-ostride 2 -include "n2f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 m1bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_NOINLINE_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE_C) $(GFLAGS) -n $* -name m1bv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE_C) $(GFLAGS) -sign 1 -n $* -name m1bv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 m2bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_NOINLINE_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE_C) $(GFLAGS) -n $* -name m2bv_$* -with-ostride 2 -include "n2f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_NOINLINE_C) $(GFLAGS) -sign 1 -n $* -name m2bv_$* -with-ostride 2 -include "n2f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 t1fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1fv_$* -include "t1f.h") | $(ADD_DATE) | $(INDENT) >$@
