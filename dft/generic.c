@@ -100,7 +100,7 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cld);
+     X(plan_destroy_internal)(ego->cld);
 }
 
 static void print(plan *ego_, printer *p)
@@ -183,7 +183,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     X(plan_destroy)(cld);
+     X(plan_destroy_internal)(cld);
      X(free0)(pln);
      return (plan *) 0;
 }

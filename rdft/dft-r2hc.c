@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.17 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.18 2003-01-11 14:17:34 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -77,7 +77,7 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cld);
+     X(plan_destroy_internal)(ego->cld);
 }
 
 static void print(plan *ego_, printer *p)

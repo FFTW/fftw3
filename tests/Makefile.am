@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/libbench	\
 -I$(top_srcdir)/dft -I$(top_srcdir)/rdft -I$(top_srcdir)/reodft	\
--I$(top_srcdir)/threads
+-I$(top_srcdir)/threads -I$(top_srcdir)/api 
 
 noinst_PROGRAMS = bench
 noinst_LIBRARIES=libdebug.a

@@ -48,6 +48,5 @@ void X(configure_planner)(planner *plnr);
 void X(mapflags)(planner *, unsigned int);
 
 apiplan *X(mkapiplan)(unsigned int flags, problem *prb);
-void X(apiplan_destroy)(apiplan *p);
 
 #endif /* __API_H__ */

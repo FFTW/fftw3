@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.20 2003-01-09 06:51:45 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.21 2003-01-11 14:17:34 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -86,7 +86,7 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cld);
+     X(plan_destroy_internal)(ego->cld);
 }
 
 static void print(plan *ego_, printer *p)

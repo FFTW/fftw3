@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.31 2003-01-07 20:00:14 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.32 2003-01-11 14:17:34 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -63,8 +63,8 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cld2);
-     X(plan_destroy)(ego->cld1);
+     X(plan_destroy_internal)(ego->cld2);
+     X(plan_destroy_internal)(ego->cld1);
 }
 
 static void print(plan *ego_, printer *p)
@@ -183,8 +183,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     X(plan_destroy)(cld2);
-     X(plan_destroy)(cld1);
+     X(plan_destroy_internal)(cld2);
+     X(plan_destroy_internal)(cld1);
      X(tensor_destroy4)(sz1, sz2, vecszi, sz2i);
      return (plan *) 0;
 }

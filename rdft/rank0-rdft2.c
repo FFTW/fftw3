@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-rdft2.c,v 1.1 2003-01-09 01:02:35 stevenj Exp $ */
+/* $Id: rank0-rdft2.c,v 1.2 2003-01-11 14:17:34 athena Exp $ */
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
@@ -124,7 +124,7 @@ static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      if (ego->cldcpy)
-	  X(plan_destroy)(ego->cldcpy);
+	  X(plan_destroy_internal)(ego->cldcpy);
 }
 
 static void print(plan *ego_, printer *p)

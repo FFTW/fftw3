@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.23 2003-01-08 09:21:40 athena Exp $ */
+/* $Id: buffered2.c,v 1.24 2003-01-11 14:17:34 athena Exp $ */
 
 #include "rdft.h"
 
@@ -203,8 +203,8 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cldrest);
-     X(plan_destroy)(ego->cld);
+     X(plan_destroy_internal)(ego->cldrest);
+     X(plan_destroy_internal)(ego->cld);
 }
 
 static void print(plan *ego_, printer *p)
@@ -399,8 +399,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
  nada:
      X(free0)(bufs);
-     X(plan_destroy)(cldrest);
-     X(plan_destroy)(cld);
+     X(plan_destroy_internal)(cldrest);
+     X(plan_destroy_internal)(cld);
      return (plan *) 0;
 }
 

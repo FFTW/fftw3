@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.121 2003-01-05 07:37:31 stevenj Exp $ */
+/* $Id: planner.c,v 1.122 2003-01-11 14:17:34 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -360,11 +360,11 @@ static plan *mkplan0(planner *ego, problem *p, slvdesc **descp)
 			 }
 			 evaluate_plan(ego, pln, p);
 			 if (pln->pcost < best->pcost) {
-			      X(plan_destroy)(best);
+			      X(plan_destroy_internal)(best);
 			      best = pln;
 			      *descp = sp;
 			 } else {
-			      X(plan_destroy)(pln);
+			      X(plan_destroy_internal)(pln);
 			 }
 		    } else {
 			 best = pln;

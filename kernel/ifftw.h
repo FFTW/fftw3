@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.166 2003-01-11 07:10:50 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.167 2003-01-11 14:17:34 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -377,7 +377,7 @@ struct plan_s {
 
 plan *X(mkplan)(size_t size, const plan_adt *adt);
 void X(plan_use)(plan *ego);
-void X(plan_destroy)(plan *ego);
+void X(plan_destroy_internal)(plan *ego);
 void X(plan_awake)(plan *ego, int flag);
 #define AWAKE(plan, flag) X(plan_awake)(plan, flag)
 void X(plan_null_destroy)(plan *ego);

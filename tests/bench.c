@@ -1,6 +1,105 @@
 #include "bench-user.h"
 #include <math.h>
 #include <stdio.h>
+#include <fftw3.h>
+
+BEGIN_BENCH_DOC
+BENCH_DOC("name", "fftw3")
+END_BENCH_DOC 
+
+#define CONCAT(prefix, name) prefix ## name
+#if defined(BENCHFFT_SINGLE)
+#define FFTW(x) CONCAT(fftwf_, x)
+#elif defined(BENCHFFT_LDOUBLE)
+#define FFTW(x) CONCAT(fftwl_, x)
+#else
+#define FFTW(x) CONCAT(fftw_, x)
+#endif
+
+int can_do(struct problem *p)
+{
+     return (p->kind == PROBLEM_COMPLEX || p->kind == PROBLEM_REAL);
+}
+
+static FFTW(plan) the_plan;
+
+void setup(struct problem *p)
+{
+     const unsigned flags = 0;
+     double tim;
+
+     timer_start();
+     switch (p->kind) {
+	 case PROBLEM_COMPLEX:
+	      switch (p->rank) {
+		  case 1:
+		       the_plan = FFTW(plan_dft_1d)(p->n[0], p->in, p->out, 
+						    p->sign, flags);
+		       break;
+	      }
+	      break;
+	 case PROBLEM_REAL:	      
+	      break;
+     }
+     tim = timer_stop();
+     if (verbose)
+	  printf("planner time: %g s\n", tim);
+}
+
+
+void doit(int iter, struct problem *p)
+{
+     int i;
+     FFTW(plan) q = the_plan;
+
+     UNUSED(p);
+     for (i = 0; i < iter; ++i) 
+	  FFTW(execute)(q);
+}
+
+void done(struct problem *p)
+{
+     UNUSED(p);
+
+     FFTW(plan_destroy)(the_plan);
+
+#    ifdef FFTW_DEBUG
+     {
+	  /* undocumented memory checker */
+	  extern void FFTW(malloc_print_minfo)(void);
+	  if (verbose >= 1)
+	       FFTW(malloc_print_minfo)();
+     }
+#    endif
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*------------------------------------------------------------*/
+/* old test program, for reference purposes */
+#ifdef OLD_TEST_PROGRAM
+
+#include "bench-user.h"
+#include <math.h>
+#include <stdio.h>
 
 extern void timer_start(void);
 extern double timer_stop(void);
@@ -295,7 +394,7 @@ void setup(struct problem *p)
 	  plan *pln0;
 	  plnr->planner_flags |= BLESSING;
 	  pln0 = plnr->adt->mkplan(plnr, prblm);
-	  X(plan_destroy)(pln0);
+	  X(plan_destroy_internal)(pln0);
 	  plnr->planner_flags &= ~BLESSING;
      }
 	  
@@ -341,7 +440,7 @@ void done(struct problem *p)
 #    endif
 
      AWAKE(pln, 0);
-     FFTW(plan_destroy) (pln);
+     FFTW(plan_destroy_internal) (pln);
      FFTW(problem_destroy) (prblm);
 
 #if 1
@@ -363,3 +462,5 @@ void done(struct problem *p)
 	  FFTW(malloc_print_minfo)();
 #    endif
 }
+
+#endif /* OLD_TEST_PROGRAM */

@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.5 2003-01-11 05:52:04 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.6 2003-01-11 14:17:34 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -55,6 +55,8 @@ void X(execute)(X(plan) p);					\
 								\
 X(plan) X(plan_dft_1d)(unsigned int n, C *in, C *out, int sign,	\
 		       unsigned int flags);			\
+								\
+void X(plan_destroy)(X(plan) p);
 
 
 /* end of FFTW_DEFINE_API macro */

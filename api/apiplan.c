@@ -44,7 +44,7 @@ apiplan *X(mkapiplan)(unsigned int flags, problem *prb)
 	  /* blessing protocol */
 	  plnr->planner_flags |= BLESSING;
 	  pln0 = plnr->adt->mkplan(plnr, prb);
-	  X(plan_destroy)(pln0);
+	  X(plan_destroy_internal)(pln0);
      } else {
 	  X(problem_destroy)(p->prb);
      }
@@ -56,11 +56,11 @@ apiplan *X(mkapiplan)(unsigned int flags, problem *prb)
      return p;
 }
 
-void X(apiplan_destroy)(apiplan *p)
+void X(plan_destroy)(X(plan) p)
 {
      if (p) {
 	  AWAKE(p->pln, 0);
-	  X(plan_destroy)(p->pln);
+	  X(plan_destroy_internal)(p->pln);
 	  X(problem_destroy)(p->prb);
 	  X(free)(p);
      }

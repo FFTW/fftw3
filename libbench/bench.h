@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.4 2002-09-14 03:07:39 stevenj Exp $ */
+/* $Id: bench.h,v 1.5 2003-01-11 14:17:34 athena Exp $ */
 
 /* benchmark program definitions */
 #include "config.h"
@@ -28,8 +28,6 @@ extern double time_min;
 extern int time_repeat;
 
 extern void timer_init(double tmin, int repeat);
-extern void timer_start(void);
-extern double timer_stop(void);
 
 /* report functions */
 extern void (*report)(const struct problem *p, double *t, int st);

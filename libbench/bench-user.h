@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.9 2002-09-14 03:07:39 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.10 2003-01-11 14:17:34 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -78,6 +78,9 @@ struct problem {
      void *out;
      void *userinfo; /* user can store whatever */
 };
+
+extern void timer_start(void);
+extern double timer_stop(void);
 
 extern int can_do(struct problem *p);
 extern void setup(struct problem *p);

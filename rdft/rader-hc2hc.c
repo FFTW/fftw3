@@ -309,9 +309,9 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cld);
-     X(plan_destroy)(ego->cldr);
-     X(plan_destroy)(ego->cldr0);
+     X(plan_destroy_internal)(ego->cld);
+     X(plan_destroy_internal)(ego->cldr);
+     X(plan_destroy_internal)(ego->cldr0);
 }
 
 static void print(plan *ego_, printer *p)
@@ -387,8 +387,8 @@ static int mkP(P *pln, uint r, R *O, int ios, rdft_kind kind, planner *plnr)
 
  nada:
      X(free0)(buf);
-     X(plan_destroy)(cldr);
-     X(plan_destroy)(cldr0);
+     X(plan_destroy_internal)(cldr);
+     X(plan_destroy_internal)(cldr0);
      return 0;
 }
 
@@ -436,7 +436,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     X(plan_destroy)(cld);
+     X(plan_destroy_internal)(cld);
      X(free0)(pln);
      return (plan *) 0;
 }
@@ -483,7 +483,7 @@ static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     X(plan_destroy)(cld);
+     X(plan_destroy_internal)(cld);
      X(free0)(pln);
      return (plan *) 0;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.15 2003-01-09 23:16:39 stevenj Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.16 2003-01-11 14:17:34 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -108,7 +108,7 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cld);
+     X(plan_destroy_internal)(ego->cld);
 }
 
 static void print(plan *ego_, printer *p)

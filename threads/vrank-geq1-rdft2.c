@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.8 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.9 2003-01-11 14:17:34 athena Exp $ */
 
 
 #include "threads.h"
@@ -97,7 +97,7 @@ static void destroy(plan *ego_)
      P *ego = (P *) ego_;
      uint i;
      for (i = 0; i < ego->nthr; ++i)
-	  X(plan_destroy)(ego->cldrn[i]);
+	  X(plan_destroy_internal)(ego->cldrn[i]);
      X(free)(ego->cldrn);
 }
 
@@ -219,7 +219,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
  nada:
      if (cldrn) {
 	  for (i = 0; i < nthr; ++i)
-	       X(plan_destroy)(cldrn[i]);
+	       X(plan_destroy_internal)(cldrn[i]);
 	  X(free)(cldrn);
      }
      X(tensor_destroy)(vecsz);

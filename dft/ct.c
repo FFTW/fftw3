@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.27 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: ct.c,v 1.28 2003-01-11 14:17:34 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -28,7 +28,7 @@ static void destroy(plan *ego_)
 {
      plan_ct *ego = (plan_ct *) ego_;
 
-     X(plan_destroy)(ego->cld);
+     X(plan_destroy_internal)(ego->cld);
      X(stride_destroy)(ego->ios);
      X(stride_destroy)(ego->vs);
 }

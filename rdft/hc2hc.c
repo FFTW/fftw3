@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.18 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: hc2hc.c,v 1.19 2003-01-11 14:17:34 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -28,9 +28,9 @@ static void destroy(plan *ego_)
 {
      plan_hc2hc *ego = (plan_hc2hc *) ego_;
 
-     X(plan_destroy)(ego->cld);
-     X(plan_destroy)(ego->cld0);
-     X(plan_destroy)(ego->cldm);
+     X(plan_destroy_internal)(ego->cld);
+     X(plan_destroy_internal)(ego->cld0);
+     X(plan_destroy_internal)(ego->cldm);
      X(stride_destroy)(ego->ios);
      X(stride_destroy)(ego->vs);
 }
@@ -151,9 +151,9 @@ plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
      X(problem_destroy)(cldmp);
      X(problem_destroy)(cld0p);
      X(problem_destroy)(cldp);
-     X(plan_destroy)(cldm);
-     X(plan_destroy)(cld0);
-     X(plan_destroy)(cld);
+     X(plan_destroy_internal)(cldm);
+     X(plan_destroy_internal)(cld0);
+     X(plan_destroy_internal)(cld);
      return (plan *) 0;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.15 2003-01-09 06:43:13 stevenj Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.16 2003-01-11 14:17:34 athena Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -79,8 +79,8 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cldr);
-     X(plan_destroy)(ego->cldc);
+     X(plan_destroy_internal)(ego->cldr);
+     X(plan_destroy_internal)(ego->cldc);
 }
 
 static void print(plan *ego_, printer *p)
@@ -214,8 +214,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     X(plan_destroy)(cldr);
-     X(plan_destroy)(cldc);
+     X(plan_destroy_internal)(cldr);
+     X(plan_destroy_internal)(cldc);
      X(tensor_destroy4)(sz2i, vecszi, sz2, sz1);
      return (plan *) 0;
 }

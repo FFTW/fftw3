@@ -195,9 +195,9 @@ static void awake(plan *ego_, int flg)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cld_omega);
-     X(plan_destroy)(ego->cld2);
-     X(plan_destroy)(ego->cld1);
+     X(plan_destroy_internal)(ego->cld_omega);
+     X(plan_destroy_internal)(ego->cld2);
+     X(plan_destroy_internal)(ego->cld1);
 }
 
 static void print(plan *ego_, printer *p)
@@ -321,9 +321,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
  nada:
      X(free0)(buf);
-     X(plan_destroy)(cld_omega);
-     X(plan_destroy)(cld2);
-     X(plan_destroy)(cld1);
+     X(plan_destroy_internal)(cld_omega);
+     X(plan_destroy_internal)(cld2);
+     X(plan_destroy_internal)(cld1);
      return 0;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.16 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: plan.c,v 1.17 2003-01-11 14:17:34 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -50,7 +50,7 @@ void X(plan_use)(plan *ego)
 /*
  * destroy a plan
  */
-void X(plan_destroy)(plan *ego)
+void X(plan_destroy_internal)(plan *ego)
 {
      if (ego && --ego->refcnt == 0) {
 	  if (ego->awake_refcnt > 0)
