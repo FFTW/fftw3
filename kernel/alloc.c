@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.37 2003-03-03 21:50:33 fftw Exp $ */
+/* $Id: alloc.c,v 1.38 2003-03-03 21:52:58 fftw Exp $ */
 
 #include "ifftw.h"
 
@@ -43,7 +43,7 @@ extern int posix_memalign(void **, size_t, size_t);
 
 #if defined(WITH_OUR_MALLOC16) && (MIN_ALIGNMENT == 16)
 /* Our own 16-byte aligned malloc/free.  Assumes sizeof(void*) is a
-   power of two <= 8.
+   power of two <= 8 and that malloc is at least sizeof(void*)-aligned.
 
    The main reason for this routine is that, as of this writing,
    Windows does not include any aligned allocation routines in its
