@@ -70,7 +70,7 @@ static void apply(const plan *ego_, R *I, R *O)
      /* gpower == g^(r-1) mod r == 1 */;
 
      A(r - 1 <= rpad);
-     for (k = r - 1; k < rpad; ++k)
+     for (k = r - 1; k < rpad; ++k) /* optionally, zero-pad convolution */
 	  buf[k] = 0;
 
      os = ego->os;
