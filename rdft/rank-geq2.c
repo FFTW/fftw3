@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.13 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.14 2003-01-07 20:00:14 stevenj Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
 
@@ -130,7 +130,9 @@ static int applicable(const solver *ego_, const problem *p_,
 
      if (!applicable0(ego_, p_, rp)) return 0;
 
-     /* fftw2 behavior */
+     /* fixed spltrnk (unlike fftw2's spltrnk=1, default buddies[0] is
+        spltrnk=0, which is an asymptotic "theoretical optimum" for
+        an ideal cache; it's equivalent to spltrnk=1 for rnk < 4). */
      if (NO_RANK_SPLITSP(plnr) && (ego->spltrnk != ego->buddies[0]))
 	  return 0;
 
