@@ -219,11 +219,11 @@ static int applicable0(const problem *p_)
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
-		  && p->sz.rnk == 1
-		  && p->vecsz.rnk == 0
+		  && p->sz->rnk == 1
+		  && p->vecsz->rnk == 0
 		  && p->kind[0] == DHT
-		  && X(is_prime)(p->sz.dims[0].n)
-		  && p->sz.dims[0].n > 2
+		  && X(is_prime)(p->sz->dims[0].n)
+		  && p->sz->dims[0].n > 2
 	       );
      }
 
@@ -256,9 +256,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(ego_, p_, plnr))
 	  return (plan *) 0;
 
-     n = p->sz.dims[0].n;
-     is = p->sz.dims[0].is;
-     os = p->sz.dims[0].os;
+     n = p->sz->dims[0].n;
+     is = p->sz->dims[0].is;
+     os = p->sz->dims[0].os;
      O = p->O;
 
      /* initial allocation for the purpose of planning */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.27 2002-09-21 22:04:05 athena Exp $ */
+/* $Id: problem.c,v 1.28 2002-09-22 13:49:09 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -26,8 +26,8 @@
 static void destroy(problem *ego_)
 {
      problem_rdft *ego = (problem_rdft *) ego_;
-     X(tensor_destroy)(&ego->vecsz);
-     X(tensor_destroy)(&ego->sz);
+     X(tensor_destroy)(ego->vecsz);
+     X(tensor_destroy)(ego->sz);
      X(free)(ego_);
 }
 
@@ -43,35 +43,37 @@ static void hash(const problem *p_, md5 *m)
      const problem_rdft *p = (const problem_rdft *) p_;
      X(md5puts)(m, "rdft");
      X(md5int)(m, p->I == p->O);
-     kind_hash(m, p->kind, p->sz.rnk);
+     kind_hash(m, p->kind, p->sz->rnk);
      X(md5uint)(m, X(alignment_of)(p->I));
      X(md5uint)(m, X(alignment_of)(p->O));
-     X(tensor_md5)(m, &p->sz);
-     X(tensor_md5)(m, &p->vecsz);
+     X(tensor_md5)(m, p->sz);
+     X(tensor_md5)(m, p->vecsz);
 }
 
-void X(rdft_zerotens)(tensor sz, R *I)
+static void recur(const iodim *dims, uint rnk, R *I)
 {
-     if (sz.rnk == RNK_MINFTY)
+     if (rnk == RNK_MINFTY)
           return;
-     else if (sz.rnk == 0)
+     else if (rnk == 0)
           I[0] = 0.0;
-     else if (sz.rnk == 1) {
-          /* this case is redundant but faster */
-          uint i, n = sz.dims[0].n;
-          int is = sz.dims[0].is;
+     else if (rnk > 0) {
+          uint i, n = dims[0].n;
+          int is = dims[0].is;
 
-          for (i = 0; i < n; ++i)
-               I[i * is] = 0.0;
-     } else if (sz.rnk > 0) {
-          uint i, n = sz.dims[0].n;
-          int is = sz.dims[0].is;
-
-          sz.dims++;
-          sz.rnk--;
-          for (i = 0; i < n; ++i)
-               X(rdft_zerotens)(sz, I + i * is);
+	  if (rnk == 1) {
+	       /* this case is redundant but faster */
+	       for (i = 0; i < n; ++i)
+		    I[i * is] = 0.0;
+	  } else {
+	       for (i = 0; i < n; ++i)
+		    recur(dims + 1, rnk - 1, I + i * is);
+	  }
      }
+}
+
+void X(rdft_zerotens)(tensor *sz, R *I)
+{
+     recur(sz->dims, sz->rnk, I);
 }
 
 #define KSTR_LEN 8
@@ -110,13 +112,12 @@ uint X(rdft_real_n)(rdft_kind kind, uint n)
      }
 }
 
-tensor X(rdft_real_sz)(const rdft_kind *kind, const tensor *sz)
+tensor *X(rdft_real_sz)(const rdft_kind *kind, const tensor *sz)
 {
      uint i;
-     tensor sz_real;
-     sz_real = X(tensor_copy)(sz);
+     tensor *sz_real = X(tensor_copy)(sz);
      for (i = 0; i < sz->rnk; ++i)
-	  sz_real.dims[i].n = X(rdft_real_n)(kind[i], sz_real.dims[i].n);
+	  sz_real->dims[i].n = X(rdft_real_n)(kind[i], sz_real->dims[i].n);
      return sz_real;
 }
 
@@ -129,7 +130,7 @@ static void print(problem *ego_, printer *p)
 	      ego->O - ego->I, 
 	      &ego->sz,
 	      &ego->vecsz);
-     for (i = 0; i < ego->sz.rnk; ++i)
+     for (i = 0; i < ego->sz->rnk; ++i)
 	  p->print(p, " %d", (int)ego->kind[i]);
      p->print(p, ")");
 }
@@ -137,11 +138,11 @@ static void print(problem *ego_, printer *p)
 static void zero(const problem *ego_)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
-     tensor rsz = X(rdft_real_sz)(ego->kind, &ego->sz);
-     tensor sz = X(tensor_append)(&ego->vecsz, &rsz);
+     tensor *rsz = X(rdft_real_sz)(ego->kind, ego->sz);
+     tensor *sz = X(tensor_append)(ego->vecsz, rsz);
      X(rdft_zerotens)(sz, ego->I);
-     X(tensor_destroy)(&sz);
-     X(tensor_destroy)(&rsz);
+     X(tensor_destroy)(sz);
+     X(tensor_destroy)(rsz);
 }
 
 static const problem_adt padt =
@@ -179,18 +180,18 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
      for (i = 0; i < sz->rnk; ++i)
 	  ego->kind[i] = kind[i];
 
-     A(FINITE_RNK(ego->sz.rnk));
+     A(FINITE_RNK(ego->sz->rnk));
      return &(ego->super);
 }
 
 /* Same as X(mkproblem_rdft), but also destroy input tensors. */
-problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
+problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
 			     R *I, R *O, const rdft_kind *kind)
 {
      problem *p;
-     p = X(mkproblem_rdft)(&sz, &vecsz, I, O, kind);
-     X(tensor_destroy)(&vecsz);
-     X(tensor_destroy)(&sz);
+     p = X(mkproblem_rdft)(sz, vecsz, I, O, kind);
+     X(tensor_destroy)(vecsz);
+     X(tensor_destroy)(sz);
      return p;
 }
 
@@ -202,9 +203,9 @@ problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
      return X(mkproblem_rdft)(sz, vecsz, I, O, &kind);
 }
 
-problem *X(mkproblem_rdft_1_d)(tensor sz, tensor vecsz,
+problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
 			       R *I, R *O, rdft_kind kind)
 {
-     A(sz.rnk <= 1);
+     A(sz->rnk <= 1);
      return X(mkproblem_rdft_d)(sz, vecsz, I, O, &kind);
 }

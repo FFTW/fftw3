@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.147 2002-09-21 22:24:55 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.148 2002-09-22 13:49:08 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -235,6 +235,9 @@ void X(md5end)(md5 *p);
 
 /*-----------------------------------------------------------------------*/
 /* tensor.c: */
+#define STRUCT_HACK_KR
+#undef STRUCT_HACK_C99
+
 typedef struct {
      uint n;
      int is;			/* input stride */
@@ -243,7 +246,13 @@ typedef struct {
 
 typedef struct {
      uint rnk;
+#if defined(STRUCT_HACK_KR)
+     iodim dims[1];
+#elif defined(STRUCT_HACK_C99)
+     iodim dims[];
+#else
      iodim *dims;
+#endif
 } tensor;
 
 /*
@@ -258,11 +267,11 @@ typedef struct {
 
 typedef enum { INPLACE_IS, INPLACE_OS } inplace_kind;
 
-tensor X(mktensor)(uint rnk);
-tensor X(mktensor_1d)(uint n, int is, int os);
-tensor X(mktensor_2d)(uint n0, int is0, int os0,
+tensor *X(mktensor)(uint rnk);
+tensor *X(mktensor_1d)(uint n, int is, int os);
+tensor *X(mktensor_2d)(uint n0, int is0, int os0,
                       uint n1, int is1, int os1);
-tensor X(mktensor_rowmajor)(uint rnk, const uint *n,
+tensor *X(mktensor_rowmajor)(uint rnk, const uint *n,
 			    const uint *niphys, const uint *nophys,
                             int is, int os);
 uint X(tensor_sz)(const tensor *sz);
@@ -272,15 +281,15 @@ uint X(tensor_min_istride)(const tensor *sz);
 uint X(tensor_min_ostride)(const tensor *sz);
 uint X(tensor_min_stride)(const tensor *sz);
 int X(tensor_inplace_strides)(const tensor *sz);
-tensor X(tensor_copy)(const tensor *sz);
+tensor *X(tensor_copy)(const tensor *sz);
 
-tensor X(tensor_copy_inplace)(const tensor *sz, inplace_kind k);
-tensor X(tensor_copy_except)(const tensor *sz, uint except_dim);
-tensor X(tensor_copy_sub)(const tensor *sz, uint start_dim, uint rnk);
-tensor X(tensor_compress)(const tensor *sz);
-tensor X(tensor_compress_contiguous)(const tensor *sz);
-tensor X(tensor_append)(const tensor *a, const tensor *b);
-void X(tensor_split)(const tensor *sz, tensor *a, uint a_rnk, tensor *b);
+tensor *X(tensor_copy_inplace)(const tensor *sz, inplace_kind k);
+tensor *X(tensor_copy_except)(const tensor *sz, uint except_dim);
+tensor *X(tensor_copy_sub)(const tensor *sz, uint start_dim, uint rnk);
+tensor *X(tensor_compress)(const tensor *sz);
+tensor *X(tensor_compress_contiguous)(const tensor *sz);
+tensor *X(tensor_append)(const tensor *a, const tensor *b);
+void X(tensor_split)(const tensor *sz, tensor **a, uint a_rnk, tensor **b);
 void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os);
 void X(tensor_destroy)(tensor *sz);
 void X(tensor_print)(const tensor *sz, printer *p);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.24 2002-09-21 11:58:11 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.25 2002-09-22 13:49:08 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -108,7 +108,7 @@ static int applicable0(const solver_ct *ego, const problem *p_,
      if (X(dft_ct_applicable)(ego, p_)) {
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
-          iodim *d = p->sz.dims;
+          iodim *d = p->sz->dims;
 	  uint m = d[0].n / e->radix;
           return (1
 
@@ -133,9 +133,10 @@ static int applicable(const solver_ct *ego, const problem *p_,
      p = (const problem_dft *) p_;
 
      /* emulate fftw2 behavior */
-     if (NO_VRECURSEP(plnr) && (p->vecsz.rnk > 0))  return 0;
+     if (NO_VRECURSEP(plnr) && (p->vecsz->rnk > 0))  return 0;
 
-     if (NO_UGLYP(plnr) && X(ct_uglyp)(512, p->sz.dims[0].n, ego->desc->radix))
+     if (NO_UGLYP(plnr) && X(ct_uglyp)(512, p->sz->dims[0].n,
+				       ego->desc->radix))
 	  return 0;
 
      return 1;

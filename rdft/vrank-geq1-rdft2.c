@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.13 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.14 2002-09-22 13:49:09 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -109,9 +109,9 @@ static int applicable0(const solver *ego_, const problem *p_, uint *dp)
      if (RDFT2P(p_)) {
           const S *ego = (const S *) ego_;
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  if (FINITE_RNK(p->vecsz.rnk)
-	      && p->vecsz.rnk > 0
-	      && pickdim(ego, &p->vecsz, 
+	  if (FINITE_RNK(p->vecsz->rnk)
+	      && p->vecsz->rnk > 0
+	      && pickdim(ego, p->vecsz, 
 			 p->r != p->rio && p->r != p->iio, dp)) {
 	       if (p->r != p->rio && p->r != p->iio)
 		    return 1;  /* can always operate out-of-place */
@@ -136,23 +136,23 @@ static int applicable(const solver *ego_, const problem *p_,
 
      if (NO_UGLYP(plnr)) {
 	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  iodim *d = p->vecsz.dims + *dp;
+	  iodim *d = p->vecsz->dims + *dp;
 	       
 	  /* Heuristic: if the transform is multi-dimensional, and the
 	     vector stride is less than the transform size, then we
 	     probably want to use a rank>=2 plan first in order to combine
 	     this vector with the transform-dimension vectors. */
 	  if (1
-	      && p->sz.rnk > 1
+	      && p->sz->rnk > 1
 	      && X(uimin)(X(iabs)(d->is), X(iabs)(d->os))
-	      < X(tensor_max_index)(&p->sz)
+	      < X(tensor_max_index)(p->sz)
 	       )
 	       return 0;
 
 	  /* Heuristic: don't use a vrank-geq1 for rank-0 vrank-1
 	     transforms, since this case is better handled by rank-0
 	     solvers. */
-	  if (p->sz.rnk == 0 && p->vecsz.rnk == 1) return 0;
+	  if (p->sz->rnk == 0 && p->vecsz->rnk == 1) return 0;
 
 	  if (NONTHREADED_ICKYP(plnr)) 
 	       return 0; /* prefer threaded version */
@@ -179,15 +179,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           return (plan *) 0;
      p = (const problem_rdft2 *) p_;
 
-     d = p->vecsz.dims + vdim;
+     d = p->vecsz->dims + vdim;
      if (d->n > 0)
 	  if (X(alignment_of)(p->r + d->is) || 
 	      X(alignment_of)(p->rio + d->os) ||
 	      X(alignment_of)(p->iio + d->os))
 	       plnr->problem_flags |= POSSIBLY_UNALIGNED;
 
-     cldp = X(mkproblem_rdft2_d)(X(tensor_copy)(&p->sz),
-				 X(tensor_copy_except)(&p->vecsz, vdim),
+     cldp = X(mkproblem_rdft2_d)(X(tensor_copy)(p->sz),
+				 X(tensor_copy_except)(p->vecsz, vdim),
 				 p->r, p->rio, p->iio, p->kind);
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);

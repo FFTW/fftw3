@@ -330,9 +330,9 @@ static int applicable0(const solver *ego_, const problem *p_)
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
           return (1
-	       && p->sz.rnk == 1
-	       && p->vecsz.rnk == 0
-	       && X(is_prime)(p->sz.dims[0].n)
+	       && p->sz->rnk == 1
+	       && p->vecsz->rnk == 0
+	       && X(is_prime)(p->sz->dims[0].n)
 	       );
      }
 
@@ -345,9 +345,9 @@ static int applicable0_dit(const solver *ego_, const problem *p_)
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
           return (1
-	       && p->sz.rnk == 1
-	       && p->vecsz.rnk == 0
-	       && p->sz.dims[0].n > 1
+	       && p->sz->rnk == 1
+	       && p->vecsz->rnk == 0
+	       && p->sz->dims[0].n > 1
 	       );
      }
 
@@ -458,9 +458,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      if (!applicable(ego, p_, plnr))
 	  return (plan *) 0;
 
-     n = p->sz.dims[0].n;
-     is = p->sz.dims[0].is;
-     os = p->sz.dims[0].os;
+     n = p->sz->dims[0].n;
+     is = p->sz->dims[0].is;
+     os = p->sz->dims[0].os;
 
      pln = MKPLAN_DFT(P, &padt, apply);
      if (!mkP(pln, n, is, os, p->ro, p->io, plnr)) {
@@ -485,9 +485,9 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
      if (!applicable_dit(ego, p_, plnr))
           goto nada;
 
-     n = p->sz.dims[0].n;
-     is = p->sz.dims[0].is;
-     os = p->sz.dims[0].os;
+     n = p->sz->dims[0].n;
+     is = p->sz->dims[0].is;
+     os = p->sz->dims[0].os;
 
      r = X(first_divisor)(n);
      m = n / r;

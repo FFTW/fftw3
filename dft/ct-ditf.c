@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.15 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: ct-ditf.c,v 1.16 2002-09-22 13:49:08 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -45,12 +45,12 @@ static int applicable(const solver_ct *ego, const problem *p_,
      if (X(dft_ct_applicable)(ego, p_)) {
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
-          iodim *d = p->sz.dims, *vd = p->vecsz.dims;
+          iodim *d = p->sz->dims, *vd = p->vecsz->dims;
 	  uint m = d[0].n / e->radix;
 
           return (1
                   && p->ri == p->ro  /* inplace only */
-                  && p->vecsz.rnk == 1
+                  && p->vecsz->rnk == 1
                   && vd[0].n == e->radix
                   && d[0].os == vd[0].is
                   && d[0].is == (int)e->radix * vd[0].is
@@ -75,8 +75,8 @@ static void finish(plan_ct *ego)
 
 static problem *mkcld(const solver_ct *ego, const problem_dft *p)
 {
-     iodim *d = p->sz.dims;
-     iodim *vd = p->vecsz.dims;
+     iodim *d = p->sz->dims;
+     iodim *vd = p->vecsz->dims;
      const ct_desc *e = ego->desc;
 
      return X(mkproblem_dft_d)(

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.13 2002-09-21 22:04:05 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.14 2002-09-22 13:49:08 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -92,8 +92,8 @@ static int applicable0(const problem *p_)
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
           return (1
-	       && p->sz.rnk == 1
-	       && p->vecsz.rnk == 0
+	       && p->sz->rnk == 1
+	       && p->vecsz->rnk == 0
 	       );
      }
 
@@ -113,8 +113,8 @@ static int applicable(const problem *p_, const planner *plnr)
 	  const problem_dft *p = (const problem_dft *) p_;
 	  if (NO_UGLYP(plnr) && DFT_R2HC_ICKYP(plnr)) return 0;
 
-	  if (split(p->ri, p->ii, p->sz.dims[0].n, p->sz.dims[0].is) &&
-	      split(p->ro, p->io, p->sz.dims[0].n, p->sz.dims[0].os))
+	  if (split(p->ri, p->ii, p->sz->dims[0].n, p->sz->dims[0].is) &&
+	      split(p->ro, p->io, p->sz->dims[0].n, p->sz->dims[0].os))
 	       return 1;
 
 	  return !(NO_UGLYP(plnr));
@@ -139,10 +139,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_dft *) p_;
 
      {
-	  tensor ri_vec = X(mktensor_1d)(2, p->ii - p->ri, p->io - p->ro);
-	  tensor cld_vec = X(tensor_append)(&ri_vec, &p->vecsz);
-	  cldp = X(mkproblem_rdft_1)(&p->sz, &cld_vec, p->ri, p->ro, R2HC);
-	  X(tensor_destroy)(&ri_vec); X(tensor_destroy)(&cld_vec);
+	  tensor *ri_vec = X(mktensor_1d)(2, p->ii - p->ri, p->io - p->ro);
+	  tensor *cld_vec = X(tensor_append)(ri_vec, p->vecsz);
+	  cldp = X(mkproblem_rdft_1)(p->sz, cld_vec, p->ri, p->ro, R2HC);
+	  X(tensor_destroy)(ri_vec); X(tensor_destroy)(cld_vec);
      }
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
@@ -151,8 +151,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_DFT(P, &padt, apply);
 
-     pln->n = p->sz.dims[0].n;
-     pln->os = p->sz.dims[0].os;
+     pln->n = p->sz->dims[0].n;
+     pln->os = p->sz->dims[0].os;
      pln->cld = cld;
      
      pln->super.super.ops = cld->ops;

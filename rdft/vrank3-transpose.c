@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.4 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.5 2002-09-22 13:49:09 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -89,13 +89,13 @@ static int applicable0(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
           const problem_rdft *p = (const problem_rdft *)p_;
           return (1
                   && p->I == p->O
-                  && p->sz.rnk == 0
-                  && p->vecsz.rnk == 3
-                  && pickdim(&p->vecsz, dim0, dim1)
+                  && p->sz->rnk == 0
+                  && p->vecsz->rnk == 3
+                  && pickdim(p->vecsz, dim0, dim1)
                   && other_dim(dim0, dim1, dim2)
 
                   /* non-transpose dimension must be in-place */
-                  && p->vecsz.dims[*dim2].is == p->vecsz.dims[*dim2].os
+                  && p->vecsz->dims[*dim2].is == p->vecsz->dims[*dim2].os
 	       );
      }
      return 0;
@@ -108,8 +108,8 @@ static int applicable(const problem *p_,
 
      if (NO_UGLYP(plnr)) {
 	  const problem_rdft *p = (const problem_rdft *) p_;
-	  if (p->vecsz.dims[*dim2].is > X(imax)(p->vecsz.dims[*dim0].is,
-						p->vecsz.dims[*dim0].os))
+	  if (p->vecsz->dims[*dim2].is > X(imax)(p->vecsz->dims[*dim0].is,
+						p->vecsz->dims[*dim0].os))
 	       return 0; /* loops are in the wrong order for locality */
      }
 
@@ -143,11 +143,11 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      p = (const problem_rdft *) p_;
 
      pln = MKPLAN_RDFT(P, &padt, apply);
-     pln->n = p->vecsz.dims[dim0].n;
-     pln->s0 = p->vecsz.dims[dim0].is;
-     pln->s1 = p->vecsz.dims[dim0].os;
-     pln->vl = p->vecsz.dims[dim2].n;
-     pln->vs = p->vecsz.dims[dim2].is; /* == os */
+     pln->n = p->vecsz->dims[dim0].n;
+     pln->s0 = p->vecsz->dims[dim0].is;
+     pln->s1 = p->vecsz->dims[dim0].os;
+     pln->vl = p->vecsz->dims[dim2].n;
+     pln->vs = p->vecsz->dims[dim2].is; /* == os */
 
      /* pln->vl * (2 loads + 2 stores) * (pln->n \choose 2) */
      pln->super.super.ops = X(ops_other)(2 * pln->vl * pln->n * (pln->n - 1));

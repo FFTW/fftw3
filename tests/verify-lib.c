@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.4 2002-09-21 22:10:07 athena Exp $ */
+/* $Id: verify-lib.c,v 1.5 2002-09-22 13:49:09 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -92,7 +92,7 @@ void mkreal(C *A, uint n)
      }
 }
 
-static void assign_conj(C *Ac, C *A, uint rank, iodim *dim, int size)
+static void assign_conj(C *Ac, C *A, uint rank, const iodim *dim, int size)
 {
      if (rank == 0) {
           Ac->r = A->r;
@@ -110,7 +110,7 @@ static void assign_conj(C *Ac, C *A, uint rank, iodim *dim, int size)
 }
 
 /* make array hermitian */
-void mkhermitian(C *A, uint rank, iodim *dim)
+void mkhermitian(C *A, uint rank, const iodim *dim)
 {
      if (rank == 0)
           A->i = 0.0;
@@ -317,7 +317,7 @@ void linear(void (*dofft)(void *nfo, C *in, C *out),
 
 
 void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
-	      void *nfo, int realp, tensor sz,
+	      void *nfo, int realp, const tensor *sz,
 	      uint n, uint vecn,
 	      C *inA, C *inB, C *outA, C *outB, C *tmp,
 	      uint rounds, double tol, int which_shift)
@@ -335,8 +335,8 @@ void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
      na = n;
 
      /* check shifts across all SZ dimensions */
-     for (dim = 0; dim < sz.rnk; ++dim) {
-	  uint ncur = sz.dims[dim].n;
+     for (dim = 0; dim < sz->rnk; ++dim) {
+	  uint ncur = sz->dims[dim].n;
 
 	  na /= ncur;
 
@@ -356,7 +356,8 @@ void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
 		    acmp(tmp, outA, N, "time shift", tol);
 	       } else {
 		    for (i = 0; i < vecn; ++i) {
-			 if (realp) mkhermitian(inA + i * n, sz.rnk, sz.dims);
+			 if (realp) 
+			      mkhermitian(inA + i * n, sz->rnk, sz->dims);
 			 aphase_shift(inB + i * n, inA + i * n, ncur,
 				      nb, na, -sign);
 		    }
@@ -376,16 +377,16 @@ void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
 /* Make a copy of the size tensor, with the same dimensions, but with
    the strides corresponding to a "packed" row-major array with the
    given stride. */
-tensor verify_pack(tensor sz, int s)
+tensor *verify_pack(const tensor *sz, int s)
 {
-     tensor x = X(tensor_copy)(&sz);
-     if (FINITE_RNK(x.rnk) && x.rnk > 0) {
+     tensor *x = X(tensor_copy)(sz);
+     if (FINITE_RNK(x->rnk) && x->rnk > 0) {
 	  uint i;
-	  x.dims[x.rnk - 1].is = s;
-	  x.dims[x.rnk - 1].os = s;
-	  for (i = x.rnk - 1; i > 0; --i) {
-	       x.dims[i - 1].is = x.dims[i].is * x.dims[i].n;
-	       x.dims[i - 1].os = x.dims[i].os * x.dims[i].n;
+	  x->dims[x->rnk - 1].is = s;
+	  x->dims[x->rnk - 1].os = s;
+	  for (i = x->rnk - 1; i > 0; --i) {
+	       x->dims[i - 1].is = x->dims[i].is * x->dims[i].n;
+	       x->dims[i - 1].os = x->dims[i].os * x->dims[i].n;
 	  }
      }
      return x;

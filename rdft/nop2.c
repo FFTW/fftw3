@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop2.c,v 1.4 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: nop2.c,v 1.5 2002-09-22 13:49:09 athena Exp $ */
 
 /* plans for vrank -infty RDFT2s (nothing to do) */
 
@@ -39,12 +39,12 @@ static int applicable(const solver *ego_, const problem *p_)
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
           return(0
 		 /* case 1 : -infty vector rank */
-		 || (p->vecsz.rnk == RNK_MINFTY)
+		 || (p->vecsz->rnk == RNK_MINFTY)
 		 
 		 /* case 2 : rank-0 in-place rdft */
 		 || (1
-		     && p->sz.rnk == 0
-		     && FINITE_RNK(p->vecsz.rnk)
+		     && p->sz->rnk == 0
+		     && FINITE_RNK(p->vecsz->rnk)
 		     && (p->r == p->rio || p->r == p->iio)
 		     && X(rdft2_inplace_strides)(p, RNK_MINFTY)
 		      ));

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.27 2002-09-21 22:04:05 athena Exp $ */
+/* $Id: rdft.h,v 1.28 2002-09-22 13:49:09 athena Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -29,7 +29,7 @@
 /* problem.c: */
 typedef struct {
      problem super;
-     tensor sz, vecsz;
+     tensor *sz, *vecsz;
      R *I, *O;
      rdft_kind kind[1]; /* C99 allows [0], sigh */
 } problem_rdft;
@@ -37,19 +37,19 @@ typedef struct {
 int X(problem_rdft_p)(const problem *p);
 #define RDFTP X(problem_rdft_p)  /* shorthand */
 
-void X(rdft_zerotens)(tensor sz, R *I);
+void X(rdft_zerotens)(tensor *sz, R *I);
 problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 			   R *I, R *O, const rdft_kind *kind);
-problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
+problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
 			     R *I, R *O, const rdft_kind *kind);
 problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
 			     R *I, R *O, rdft_kind kind);
-problem *X(mkproblem_rdft_1_d)(tensor sz, tensor vecsz,
+problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
 			       R *I, R *O, rdft_kind kind);
 
 const char *X(rdft_kind_str)(rdft_kind kind);
 uint X(rdft_real_n)(rdft_kind kind, uint n);
-tensor X(rdft_real_sz)(const rdft_kind *kind, const tensor *sz);
+tensor *X(rdft_real_sz)(const rdft_kind *kind, const tensor *sz);
 
 /* solve.c: */
 void X(rdft_solve)(plan *ego_, const problem *p_);
@@ -102,8 +102,8 @@ void X(rdft_nop_register)(planner *p);
    noncontiguous dimensions.  vecsz has the usual interpretation.  */
 typedef struct {
      problem super;
-     tensor sz;
-     tensor vecsz;
+     tensor *sz;
+     tensor *vecsz;
      R *r, *rio, *iio;
      rdft_kind kind; /* R2HC or HC2R */
 } problem_rdft2;
@@ -113,7 +113,7 @@ int X(problem_rdft2_p)(const problem *p);
 
 problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
 			    R *r, R *rio, R *iio, rdft_kind kind);
-problem *X(mkproblem_rdft2_d)(tensor sz, tensor vecsz,
+problem *X(mkproblem_rdft2_d)(tensor *sz, tensor *vecsz,
 			      R *r, R *rio, R *iio, rdft_kind kind);
 int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim);
 

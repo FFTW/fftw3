@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.3 2002-09-18 21:16:17 athena Exp $ */
+/* $Id: vrank2-transpose.c,v 1.4 2002-09-22 13:49:09 athena Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -65,11 +65,11 @@ static int applicable(const problem *p_)
           const problem_rdft *p = (const problem_rdft *)p_;
           return (1
                   && p->I == p->O
-                  && p->sz.rnk == 0
-                  && p->vecsz.rnk == 2
-                  && p->vecsz.dims[0].n == p->vecsz.dims[1].n
-                  && p->vecsz.dims[0].is == p->vecsz.dims[1].os
-                  && p->vecsz.dims[0].os == p->vecsz.dims[1].is
+                  && p->sz->rnk == 0
+                  && p->vecsz->rnk == 2
+                  && p->vecsz->dims[0].n == p->vecsz->dims[1].n
+                  && p->vecsz->dims[0].is == p->vecsz->dims[1].os
+                  && p->vecsz->dims[0].os == p->vecsz->dims[1].is
 	       );
      }
      return 0;
@@ -103,9 +103,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      p = (const problem_rdft *) p_;
 
      pln = MKPLAN_RDFT(P, &padt, apply);
-     pln->n = p->vecsz.dims[0].n;
-     pln->s0 = p->vecsz.dims[0].is;
-     pln->s1 = p->vecsz.dims[0].os;
+     pln->n = p->vecsz->dims[0].n;
+     pln->s0 = p->vecsz->dims[0].is;
+     pln->s1 = p->vecsz->dims[0].os;
 
      /* (2 loads + 2 stores) * (pln->n \choose 2) */
      pln->super.super.ops = X(ops_other)(2 * pln->n * (pln->n - 1));

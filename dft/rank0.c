@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.19 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: rank0.c,v 1.20 2002-09-22 13:49:08 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -55,7 +55,7 @@ static int applicable(const solver *ego_, const problem *p_)
           const problem_dft *p = (const problem_dft *) p_;
           return (1
 		  && p->ri != p->ro
-                  && p->sz.rnk == 0
+                  && p->sz->rnk == 0
                   && ego->adt->applicable(p)
 	       );
      }
@@ -73,7 +73,7 @@ static void apply_1(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 static int applicable_1(const problem_dft *p)
 {
-     return (p->vecsz.rnk == 0);
+     return (p->vecsz->rnk == 0);
 }
 
 static const rnk0adt adt_cpy1 =
@@ -98,7 +98,7 @@ static void apply_vec(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 static int applicable_vec(const problem_dft *p)
 {
-     return (p->vecsz.rnk == 1 && p->ro != p->ri);
+     return (p->vecsz->rnk == 1 && p->ro != p->ri);
 }
 
 static const rnk0adt adt_vec =
@@ -120,8 +120,8 @@ static int applicable_io1(const problem_dft *p)
 {
      return (1
              && applicable_vec(p)
-             && p->vecsz.dims[0].is == 1
-             && p->vecsz.dims[0].os == 1
+             && p->vecsz->dims[0].is == 1
+             && p->vecsz->dims[0].os == 1
 	  );
 }
 
@@ -145,8 +145,8 @@ static int applicable_io2r(const problem_dft *p)
 {
      return (1
              && applicable_vec(p)
-             && p->vecsz.dims[0].is == 2
-             && p->vecsz.dims[0].os == 2
+             && p->vecsz->dims[0].is == 2
+             && p->vecsz->dims[0].os == 2
              && p->ii == p->ri + 1 && p->io == p->ro + 1
 	  );
 }
@@ -169,8 +169,8 @@ static int applicable_io2i(const problem_dft *p)
 {
      return (1
              && applicable_vec(p)
-             && p->vecsz.dims[0].is == 2
-             && p->vecsz.dims[0].os == 2
+             && p->vecsz->dims[0].is == 2
+             && p->vecsz->dims[0].os == 2
              && p->ri == p->ii + 1 && p->ro == p->io + 1
 	  );
 }
@@ -212,13 +212,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           return (plan *) 0;
 
      p = (const problem_dft *) p_;
-     if (p->vecsz.rnk == 0) {
+     if (p->vecsz->rnk == 0) {
           vl = 1U;
           is = os = 1;
      } else {
-          vl = p->vecsz.dims[0].n;
-          is = p->vecsz.dims[0].is;
-          os = p->vecsz.dims[0].os;
+          vl = p->vecsz->dims[0].n;
+          is = p->vecsz->dims[0].is;
+          os = p->vecsz->dims[0].os;
      }
 
      pln = MKPLAN_DFT(P, &padt, ego->adt->apply);

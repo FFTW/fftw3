@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.10 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.11 2002-09-22 13:49:09 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -65,9 +65,9 @@ static int applicable_f(const problem *p_, const planner *plnr)
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
           return (1
                   && p->kind == R2HC
-                  && p->vecsz.rnk <= 1
-                  && p->sz.rnk == 1
-		  && (p->sz.dims[0].n % 2) == 0
+                  && p->vecsz->rnk <= 1
+                  && p->sz->rnk == 1
+		  && (p->sz->dims[0].n % 2) == 0
 	       );
      }
 
@@ -82,9 +82,9 @@ static int applicable_b(const problem *p_, const planner *plnr)
           return (1
                   && p->kind == HC2R
 		  && (p->r == p->rio || DESTROY_INPUTP(plnr))
-                  && p->vecsz.rnk <= 1
-                  && p->sz.rnk == 1
-		  && (p->sz.dims[0].n % 2) == 0
+                  && p->vecsz->rnk <= 1
+                  && p->sz->rnk == 1
+		  && (p->sz->dims[0].n % 2) == 0
 	       );
      }
 
@@ -153,10 +153,10 @@ static void apply_f_dft(plan *ego_, R *r, R *rio, R *iio)
 
 static problem *mkcld_f_dft(const problem_rdft2 *p)
 {
-     const iodim *d = p->sz.dims;
+     const iodim *d = p->sz->dims;
      return X(mkproblem_dft_d) (
 	  X(mktensor_1d)(d[0].n / 2, d[0].is * 2, d[0].os),
-	  X(tensor_copy)(&p->vecsz),
+	  X(tensor_copy)(p->vecsz),
 	  p->r, p->r + d[0].is, p->rio, p->iio);
 }
 
@@ -220,11 +220,11 @@ static void apply_f_rdft(plan *ego_, R *r, R *rio, R *iio)
 
 static problem *mkcld_f_rdft(const problem_rdft2 *p)
 {
-     const iodim *d = p->sz.dims;
+     const iodim *d = p->sz->dims;
 
-     tensor radix = X(mktensor_1d)(2, d[0].is, p->iio - p->rio);
-     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
-     X(tensor_destroy)(&radix);
+     tensor *radix = X(mktensor_1d)(2, d[0].is, p->iio - p->rio);
+     tensor *cld_vec = X(tensor_append)(radix, p->vecsz);
+     X(tensor_destroy)(radix);
 
      return X(mkproblem_rdft_1_d) (
 	  X(mktensor_1d)(d[0].n / 2, 2 * d[0].is, d[0].os),
@@ -292,11 +292,11 @@ static void apply_b_dft(plan *ego_, R *r, R *rio, R *iio)
 
 static problem *mkcld_b_dft(const problem_rdft2 *p)
 {
-     const iodim *d = p->sz.dims;
+     const iodim *d = p->sz->dims;
 
      return X(mkproblem_dft_d) (
 	  X(mktensor_1d)(d[0].n / 2, d[0].is, 2 * d[0].os),
-	  X(tensor_copy)(&p->vecsz),
+	  X(tensor_copy)(p->vecsz),
 	  p->iio, p->rio, p->r + d[0].os, p->r);
 }
 
@@ -358,11 +358,11 @@ static void apply_b_rdft(plan *ego_, R *r, R *rio, R *iio)
 
 static problem *mkcld_b_rdft(const problem_rdft2 *p)
 {
-     const iodim *d = p->sz.dims;
+     const iodim *d = p->sz->dims;
 
-     tensor radix = X(mktensor_1d)(2, p->iio - p->rio, d[0].os);
-     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
-     X(tensor_destroy)(&radix);
+     tensor *radix = X(mktensor_1d)(2, p->iio - p->rio, d[0].os);
+     tensor *cld_vec = X(tensor_append)(radix, p->vecsz);
+     X(tensor_destroy)(radix);
 
      return X(mkproblem_rdft_1_d) (
 	  X(mktensor_1d)(d[0].n / 2, d[0].is, 2 * d[0].os),
@@ -424,11 +424,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_RDFT2(P, &padt, ego->adt->apply);
 
-     d = p->sz.dims;
+     d = p->sz->dims;
      pln->n = d[0].n;
      pln->os = d[0].os;
      pln->is = d[0].is;
-     X(tensor_tornk1) (&p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
+     X(tensor_tornk1) (p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      pln->cld = cld;
      pln->td = 0;
      pln->slv = ego;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dht-r2hc.c,v 1.11 2002-09-21 22:04:05 athena Exp $ */
+/* $Id: dht-r2hc.c,v 1.12 2002-09-22 13:49:08 athena Exp $ */
 
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */
@@ -86,8 +86,8 @@ static int applicable0(const problem *p_, const planner *plnr)
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
 		  && !NO_DHT_R2HCP(plnr)
-		  && p->sz.rnk == 1
-		  && p->vecsz.rnk == 0
+		  && p->sz->rnk == 1
+		  && p->vecsz->rnk == 0
 		  && p->kind[0] == DHT
 	       );
      }
@@ -119,7 +119,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* stop infinite loops with rdft-dht.c */
      plnr->problem_flags |= NO_DHT_R2HC; 
 
-     cldp = X(mkproblem_rdft_1)(&p->sz, &p->vecsz, p->I, p->O, R2HC);
+     cldp = X(mkproblem_rdft_1)(p->sz, p->vecsz, p->I, p->O, R2HC);
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld)
@@ -127,8 +127,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_RDFT(P, &padt, apply);
 
-     pln->n = p->sz.dims[0].n;
-     pln->os = p->sz.dims[0].os;
+     pln->n = p->sz->dims[0].n;
+     pln->os = p->sz->dims[0].os;
      pln->cld = cld;
      
      pln->super.super.ops = cld->ops;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-buf.c,v 1.8 2002-09-21 11:58:11 athena Exp $ */
+/* $Id: hc2hc-buf.c,v 1.9 2002-09-22 13:49:08 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -159,7 +159,7 @@ static int applicable0(const solver_hc2hc *ego, const problem *p_,
      if (X(rdft_hc2hc_applicable)(ego, p_)) {
           const hc2hc_desc *e = ego->desc;
           const problem_rdft *p = (const problem_rdft *) p_;
-          iodim *d = p->sz.dims;
+          iodim *d = p->sz->dims;
 	  uint r = e->radix, m = d[0].n / e->radix;
           return (1
 		  && (p->kind == R2HC || p->I == p->O || DESTROY_INPUTP(plnr))
@@ -186,9 +186,10 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
      p = (const problem_rdft *) p_;
 
      /* emulate fftw2 behavior */
-     if (NO_VRECURSEP(plnr) && (p->vecsz.rnk > 0)) return 0;
+     if (NO_VRECURSEP(plnr) && (p->vecsz->rnk > 0)) return 0;
 
-     if (NO_UGLYP(plnr) && X(ct_uglyp)(512, p->sz.dims[0].n, ego->desc->radix))
+     if (NO_UGLYP(plnr) && 
+	 X(ct_uglyp)(512, p->sz->dims[0].n, ego->desc->radix))
 	  return 0;
 
      return 1;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dit.c,v 1.11 2002-09-21 11:58:11 athena Exp $ */
+/* $Id: hc2hc-dit.c,v 1.12 2002-09-22 13:49:08 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -57,9 +57,9 @@ static int applicable0(const solver_hc2hc *ego, const problem *p_,
 	  uint vl;
           const hc2hc_desc *e = ego->desc;
           const problem_rdft *p = (const problem_rdft *) p_;
-          iodim *d = p->sz.dims;
+          iodim *d = p->sz->dims;
 	  uint m = d[0].n / e->radix;
-	  X(tensor_tornk1)(&p->vecsz, &vl, &ivs, &ovs);
+	  X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
           return (1
 		  && (e->genus->okp(e, p->O + d[0].os,
 				    p->O + (e->radix * m - 1) * d[0].os, 
@@ -82,10 +82,10 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
      p = (const problem_rdft *) p_;
 
      /* emulate fftw2 behavior */
-     if (NO_VRECURSEP(plnr) && (p->vecsz.rnk > 0)) return 0;
+     if (NO_VRECURSEP(plnr) && (p->vecsz->rnk > 0)) return 0;
 
      if (NO_UGLYP(plnr)) {
-	  if (X(ct_uglyp)(16, p->sz.dims[0].n, ego->desc->radix)) return 0;
+	  if (X(ct_uglyp)(16, p->sz->dims[0].n, ego->desc->radix)) return 0;
 	  if (NONTHREADED_ICKYP(plnr))
 	       return 0; /* prefer threaded version */
      }

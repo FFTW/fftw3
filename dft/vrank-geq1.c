@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.22 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.23 2002-09-22 13:49:08 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -99,9 +99,9 @@ static int applicable0(const solver *ego_, const problem *p_, uint *dp)
           const problem_dft *p = (const problem_dft *) p_;
 
           return (1
-                  && FINITE_RNK(p->vecsz.rnk)
-                  && p->vecsz.rnk > 0
-                  && pickdim(ego, &p->vecsz, p->ri != p->ro, dp)
+                  && FINITE_RNK(p->vecsz->rnk)
+                  && p->vecsz->rnk > 0
+                  && pickdim(ego, p->vecsz, p->ri != p->ro, dp)
 	       );
      }
 
@@ -128,11 +128,11 @@ static int applicable(const solver *ego_, const problem *p_,
 	     probably want to use a rank>=2 plan first in order to combine
 	     this vector with the transform-dimension vectors. */
 	  {
-	       iodim *d = p->vecsz.dims + *dp;
+	       iodim *d = p->vecsz->dims + *dp;
 	       if (1
-		   && p->sz.rnk > 1 
+		   && p->sz->rnk > 1 
 		   && X(uimin)(X(iabs)(d->is), X(iabs)(d->os)) 
-		   < X(tensor_max_index)(&p->sz)
+		   < X(tensor_max_index)(p->sz)
 		    )
 		    return 0;
 	  }
@@ -140,7 +140,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	  /* Heuristic: don't use a vrank-geq1 for rank-0 vrank-1
 	     transforms, since this case is better handled by rank-0
 	     solvers. */
-	  if (p->sz.rnk == 0 && p->vecsz.rnk == 1) return 0;
+	  if (p->sz->rnk == 0 && p->vecsz->rnk == 1) return 0;
 
 	  if (NONTHREADED_ICKYP(plnr)) return 0; /* prefer threaded version */
      }
@@ -168,7 +168,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      /* record whether the vector loop would cause either the input or
         the output to become unaligned. */
-     d = p->vecsz.dims + vdim;
+     d = p->vecsz->dims + vdim;
      if (d->n > 0)
 	  if (X(alignment_of)(p->ri + d->is) ||
 	      X(alignment_of)(p->ii + d->is) ||
@@ -176,8 +176,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	      X(alignment_of)(p->io + d->os))
 	       plnr->problem_flags |= POSSIBLY_UNALIGNED;
 
-     cldp = X(mkproblem_dft_d)(X(tensor_copy)(&p->sz),
-			       X(tensor_copy_except)(&p->vecsz, vdim),
+     cldp = X(mkproblem_dft_d)(X(tensor_copy)(p->sz),
+			       X(tensor_copy_except)(p->vecsz, vdim),
 			       p->ri, p->ii, p->ro, p->io);
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);

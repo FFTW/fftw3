@@ -268,10 +268,10 @@ static int applicable0(const solver *ego_, const problem *p_)
 	  const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
-		  && p->sz.rnk == 1
-		  && p->vecsz.rnk == 0
-		  && p->sz.dims[0].n > 1
-                  && p->sz.dims[0].n % 2 /* ensure r and n/r odd */
+		  && p->sz->rnk == 1
+		  && p->vecsz->rnk == 0
+		  && p->sz->dims[0].n > 1
+                  && p->sz->dims[0].n % 2 /* ensure r and n/r odd */
                   && p->kind[0] == ego->kind
 	       );
      }
@@ -287,7 +287,7 @@ static int applicable(const solver *ego_, const problem *p_,
 
      if (NO_LARGE_GENERICP(plnr)) {
           const problem_rdft *p = (const problem_rdft *) p_;
-	  if (X(first_divisor)(p->sz.dims[0].n) >= GENERIC_MIN_BAD) return 0; 
+	  if (X(first_divisor)(p->sz->dims[0].n) >= GENERIC_MIN_BAD) return 0; 
      }
      return 1;
 }
@@ -307,9 +307,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      if (!applicable(ego, p_, plnr))
           goto nada;
 
-     n = p->sz.dims[0].n;
-     is = p->sz.dims[0].is;
-     os = p->sz.dims[0].os;
+     n = p->sz->dims[0].n;
+     is = p->sz->dims[0].is;
+     os = p->sz->dims[0].os;
 
      r = X(first_divisor)(n);
      m = n / r;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.22 2002-09-21 22:04:05 athena Exp $ */
+/* $Id: problem.c,v 1.23 2002-09-22 13:49:08 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -26,8 +26,8 @@
 static void destroy(problem *ego_)
 {
      problem_dft *ego = (problem_dft *) ego_;
-     X(tensor_destroy)(&ego->vecsz);
-     X(tensor_destroy)(&ego->sz);
+     X(tensor_destroy)(ego->vecsz);
+     X(tensor_destroy)(ego->sz);
      X(free)(ego_);
 }
 
@@ -40,8 +40,8 @@ static void hash(const problem *p_, md5 *m)
      X(md5ptrdiff)(m, p->io - p->ro);
      X(md5uint)(m, X(alignment_of)(p->ri));
      X(md5uint)(m, X(alignment_of)(p->ro));
-     X(tensor_md5)(m, &p->sz);
-     X(tensor_md5)(m, &p->vecsz);
+     X(tensor_md5)(m, p->sz);
+     X(tensor_md5)(m, p->vecsz);
 }
 
 static void print(problem *ego_, printer *p)
@@ -59,9 +59,9 @@ static void print(problem *ego_, printer *p)
 static void zero(const problem *ego_)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
-     tensor sz = X(tensor_append)(&ego->vecsz, &ego->sz);
+     tensor *sz = X(tensor_append)(ego->vecsz, ego->sz);
      X(dft_zerotens)(sz, ego->ri, ego->ii);
-     X(tensor_destroy)(&sz);
+     X(tensor_destroy)(sz);
 }
 
 static const problem_adt padt =
@@ -93,17 +93,17 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
      ego->ro = ro;
      ego->io = io;
 
-     A(FINITE_RNK(ego->sz.rnk));
+     A(FINITE_RNK(ego->sz->rnk));
      return &(ego->super);
 }
 
 /* Same as X(mkproblem_dft), but also destroy input tensors. */
-problem *X(mkproblem_dft_d)(tensor sz, tensor vecsz,
+problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
                             R *ri, R *ii, R *ro, R *io)
 {
      problem *p;
-     p = X(mkproblem_dft)(&sz, &vecsz, ri, ii, ro, io);
-     X(tensor_destroy)(&vecsz);
-     X(tensor_destroy)(&sz);
+     p = X(mkproblem_dft)(sz, vecsz, ri, ii, ro, io);
+     X(tensor_destroy)(vecsz);
+     X(tensor_destroy)(sz);
      return p;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.10 2002-09-21 22:04:05 athena Exp $ */
+/* $Id: rodft00e-r2hc.c,v 1.11 2002-09-22 13:49:09 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -114,10 +114,10 @@ static int applicable0(const solver *ego_, const problem *p_)
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
-		  && p->sz.rnk == 1
-		  && p->vecsz.rnk == 0
+		  && p->sz->rnk == 1
+		  && p->vecsz->rnk == 0
 		  && p->kind[0] == RODFT00
-		  && p->sz.dims[0].n % 2 == 0
+		  && p->sz->dims[0].n % 2 == 0
 	       );
      }
 
@@ -147,13 +147,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_rdft *) p_;
 
-     n = p->sz.dims[0].n / 2;
+     n = p->sz->dims[0].n / 2;
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
      {
-	  tensor sz = X(mktensor_1d)(n, 1, 1);
-	  cldp = X(mkproblem_rdft_1)(&sz, &p->vecsz, buf, buf, R2HC);
-	  X(tensor_destroy)(&sz);
+	  tensor *sz = X(mktensor_1d)(n, 1, 1);
+	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, buf, buf, R2HC);
+	  X(tensor_destroy)(sz);
      }
 
      cld = MKPLAN(plnr, cldp);
@@ -165,8 +165,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln = MKPLAN_RDFT(P, &padt, apply);
 
      pln->n = n;
-     pln->is = p->sz.dims[0].is;
-     pln->os = p->sz.dims[0].os;
+     pln->is = p->sz->dims[0].is;
+     pln->os = p->sz->dims[0].os;
      pln->cld = cld;
      pln->td = 0;
      

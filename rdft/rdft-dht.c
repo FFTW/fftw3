@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.8 2002-09-21 22:04:05 athena Exp $ */
+/* $Id: rdft-dht.c,v 1.9 2002-09-22 13:49:09 athena Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime
@@ -146,8 +146,8 @@ static int applicable0(const solver *ego_, const problem *p_)
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
-		  && p->sz.rnk == 1
-		  && p->vecsz.rnk == 0
+		  && p->sz->rnk == 1
+		  && p->vecsz->rnk == 0
 		  && (p->kind[0] == R2HC || p->kind[0] == HC2R)
 	       );
      }
@@ -177,11 +177,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_rdft *) p_;
 
      if (p->kind[0] == R2HC || DESTROY_INPUTP(plnr))
-	  cldp = X(mkproblem_rdft_1)(&p->sz, &p->vecsz, p->I, p->O, DHT);
+	  cldp = X(mkproblem_rdft_1)(p->sz, p->vecsz, p->I, p->O, DHT);
      else {
-	  tensor sz = X(tensor_copy_inplace)(&p->sz, INPLACE_OS);
-	  cldp = X(mkproblem_rdft_1)(&sz, &p->vecsz, p->O, p->O, DHT);
-	  X(tensor_destroy)(&sz);
+	  tensor *sz = X(tensor_copy_inplace)(p->sz, INPLACE_OS);
+	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, p->O, p->O, DHT);
+	  X(tensor_destroy)(sz);
      }
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
@@ -191,9 +191,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln = MKPLAN_RDFT(P, &padt, p->kind[0] == R2HC ? 
 		       apply_r2hc : (DESTROY_INPUTP(plnr) ?
 				     apply_hc2r : apply_hc2r_save));
-     pln->n = p->sz.dims[0].n;
-     pln->is = p->sz.dims[0].is;
-     pln->os = p->sz.dims[0].os;
+     pln->n = p->sz->dims[0].n;
+     pln->is = p->sz->dims[0].is;
+     pln->os = p->sz->dims[0].os;
      pln->cld = cld;
      
      pln->super.super.ops = cld->ops;

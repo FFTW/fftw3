@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.24 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: ct.c,v 1.25 2002-09-22 13:49:08 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -63,9 +63,9 @@ int X(dft_ct_applicable)(const solver_ct *ego, const problem *p_)
           const problem_dft *p = (const problem_dft *) p_;
           const ct_desc *d = ego->desc;
           return (1
-                  && p->sz.rnk == 1
-                  && p->vecsz.rnk <= 1
-                  && divides(d->radix, p->sz.dims[0].n)
+                  && p->sz->rnk == 1
+                  && p->vecsz->rnk <= 1
+                  && divides(d->radix, p->sz->dims[0].n)
 	       );
      }
      return 0;
@@ -98,7 +98,7 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
           return (plan *) 0;
 
      p = (const problem_dft *) p_;
-     d = p->sz.dims;
+     d = p->sz->dims;
      n = d[0].n;
      r = e->radix;
      m = n / r;
@@ -123,7 +123,7 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
      pln->os = d[0].os;
 
      pln->ios = pln->vs = 0;
-     X(tensor_tornk1)(&p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
+     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
 
      pln->td = 0;
      adt->finish(pln);
@@ -147,13 +147,13 @@ solver *X(mksolver_dft_ct)(union kct k, const ct_desc *desc,
 /* routines to create children are shared by many solvers */
 problem *X(dft_mkcld_dit)(const solver_ct *ego, const problem_dft *p)
 {
-     iodim *d = p->sz.dims;
+     iodim *d = p->sz->dims;
      const ct_desc *e = ego->desc;
      uint m = d[0].n / e->radix;
 
-     tensor radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
-     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
-     X(tensor_destroy)(&radix);
+     tensor *radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
+     tensor *cld_vec = X(tensor_append)(radix, p->vecsz);
+     X(tensor_destroy)(radix);
 
      return X(mkproblem_dft_d)(X(mktensor_1d)(m, e->radix * d[0].is, d[0].os),
 			       cld_vec, p->ri, p->ii, p->ro, p->io);
@@ -161,13 +161,13 @@ problem *X(dft_mkcld_dit)(const solver_ct *ego, const problem_dft *p)
 
 problem *X(dft_mkcld_dif)(const solver_ct *ego, const problem_dft *p)
 {
-     iodim *d = p->sz.dims;
+     iodim *d = p->sz->dims;
      const ct_desc *e = ego->desc;
      uint m = d[0].n / e->radix;
 
-     tensor radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
-     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
-     X(tensor_destroy)(&radix);
+     tensor *radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
+     tensor *cld_vec = X(tensor_append)(radix, p->vecsz);
+     X(tensor_destroy)(radix);
 
      return X(mkproblem_dft_d)(X(mktensor_1d)(m, d[0].is, e->radix * d[0].os),
 			       cld_vec, p->ri, p->ii, p->ro, p->io);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft.c,v 1.3 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: verify-rdft.c,v 1.4 2002-09-22 13:49:09 athena Exp $ */
 
 #include "rdft.h"
 #include "debug.h"
@@ -28,10 +28,10 @@ typedef struct {
      plan *pln;
      const problem_rdft *p;
      const problem_rdft2 *p2;
-     tensor probsz;
-     tensor totalsz;
-     tensor pckdsz;
-     tensor pckdvecsz;
+     tensor *probsz;
+     tensor *totalsz;
+     tensor *pckdsz;
+     tensor *pckdvecsz;
 } info;
 
 
@@ -54,7 +54,7 @@ static void cpyr0(dotens2_closure *k_,
      UNUSED(indxa); UNUSED(ondxb);
 }
 
-static void cpyr(R *ra, tensor sza, R *rb, tensor szb)
+static void cpyr(R *ra, const tensor *sza, R *rb, const tensor *szb)
 {
      cpyr_closure k;
      k.k.apply = cpyr0;
@@ -97,16 +97,17 @@ static void cpyhc0(dotens2_closure *k_,
      }
 }
 
-static void cpyhc(R *a, tensor sza, tensor vecsza, R *rb, R *ib, tensor szb)
+static void cpyhc(R *a, const tensor *sza, const tensor *vecsza, 
+		  R *rb, R *ib, const tensor *szb)
 {
      cpyhc_closure k;
-     A(sza.rnk <= 1); /* TODO: support multidimensions? */
+     A(sza->rnk <= 1); /* TODO: support multidimensions? */
      k.k.apply = cpyhc0;
-     k.n = X(tensor_sz(&sza));
-     if (!FINITE_RNK(sza.rnk) || sza.rnk == 0)
+     k.n = X(tensor_sz(sza));
+     if (!FINITE_RNK(sza->rnk) || sza->rnk == 0)
 	  k.as = 0;
      else
-	  k.as = sza.dims[0].os;
+	  k.as = sza->dims[0].os;
      k.a = a; k.rb = rb; k.ib = ib;
      X(dotens2)(vecsza, szb, &k.k);
 }
@@ -134,16 +135,17 @@ static void icpyhc0(dotens2_closure *k_,
      }
 }
 
-static void icpyhc(R *a, tensor sza, tensor vecsza, R *rb, R *ib, tensor szb)
+static void icpyhc(R *a, const tensor *sza, const tensor *vecsza,
+		   R *rb, R *ib, const tensor *szb)
 {
      cpyhc_closure k;
-     A(sza.rnk <= 1); /* TODO: support multidimensions? */
+     A(sza->rnk <= 1); /* TODO: support multidimensions? */
      k.k.apply = icpyhc0;
-     k.n = X(tensor_sz(&sza));
-     if (!FINITE_RNK(sza.rnk) || sza.rnk == 0)
+     k.n = X(tensor_sz(sza));
+     if (!FINITE_RNK(sza->rnk) || sza->rnk == 0)
 	  k.as = 0;
      else
-	  k.as = sza.dims[0].is;
+	  k.as = sza->dims[0].is;
      k.a = a; k.rb = rb; k.ib = ib;
      X(dotens2)(vecsza, szb, &k.k);
 }
@@ -184,16 +186,17 @@ static void cpyhc20(dotens2_closure *k_,
      }
 }
 
-static void cpyhc2(R *ra, R *ia, tensor sza, tensor vecsza, R *rb, R *ib, tensor szb)
+static void cpyhc2(R *ra, R *ia, const tensor *sza, const tensor *vecsza, 
+		   R *rb, R *ib, const tensor *szb)
 {
      cpyhc2_closure k;
-     A(sza.rnk <= 1); /* TODO: support multidimensions? */
+     A(sza->rnk <= 1); /* TODO: support multidimensions? */
      k.k.apply = cpyhc20;
-     k.n = X(tensor_sz(&sza));
-     if (!FINITE_RNK(sza.rnk) || sza.rnk == 0)
+     k.n = X(tensor_sz(sza));
+     if (!FINITE_RNK(sza->rnk) || sza->rnk == 0)
 	  k.as = 0;
      else
-	  k.as = sza.dims[0].os;
+	  k.as = sza->dims[0].os;
      k.ra = ra; k.ia = ia; k.rb = rb; k.ib = ib;
      X(dotens2)(vecsza, szb, &k.k);
 }
@@ -224,16 +227,17 @@ static void icpyhc20(dotens2_closure *k_,
      }
 }
 
-static void icpyhc2(R *ra, R *ia, tensor sza, tensor vecsza, R *rb, R *ib, tensor szb)
+static void icpyhc2(R *ra, R *ia, const tensor *sza, const tensor *vecsza,
+		    R *rb, R *ib, const tensor *szb)
 {
      cpyhc2_closure k;
-     A(sza.rnk <= 1); /* TODO: support multidimensions? */
+     A(sza->rnk <= 1); /* TODO: support multidimensions? */
      k.k.apply = icpyhc20;
-     k.n = X(tensor_sz(&sza));
-     if (!FINITE_RNK(sza.rnk) || sza.rnk == 0)
+     k.n = X(tensor_sz(sza));
+     if (!FINITE_RNK(sza->rnk) || sza->rnk == 0)
 	  k.as = 0;
      else
-	  k.as = sza.dims[0].is;
+	  k.as = sza->dims[0].is;
      k.ra = ra; k.ia = ia; k.rb = rb; k.ib = ib;
      X(dotens2)(vecsza, szb, &k.k);
 }
@@ -253,7 +257,7 @@ static void dofft(void *n_, C *in, C *out)
 		   icpyhc(n->p->I, n->probsz, n->p->vecsz, 
 			  &in->r, &in->i, n->pckdvecsz);
 		   n->pln->adt->solve(n->pln, &(n->p->super));
-		   mkreal(out, X(tensor_sz)(&n->pckdsz));
+		   mkreal(out, X(tensor_sz)(n->pckdsz));
 		   cpyr(n->p->O, n->totalsz, &out->r, n->pckdsz);
 		   break;
 	      default:
@@ -272,7 +276,7 @@ static void dofft(void *n_, C *in, C *out)
 		   icpyhc2(n->p2->rio, n->p2->iio, n->probsz, n->p2->vecsz, 
 			   &in->r, &in->i, n->pckdvecsz);
 		   n->pln->adt->solve(n->pln, &(n->p2->super));
-		   mkreal(out, X(tensor_sz)(&n->pckdsz));
+		   mkreal(out, X(tensor_sz)(n->pckdsz));
 		   cpyr(n->p2->r, n->totalsz, &out->r, n->pckdsz);
 		   break;
 	      default:
@@ -296,8 +300,8 @@ static void really_verify(plan *pln, const problem_rdft *p,
      if (rounds == 0)
 	  rounds = 20;  /* default value */
 
-     n = X(tensor_sz)(&p->sz);
-     vecn = X(tensor_sz)(&p->vecsz);
+     n = X(tensor_sz)(p->sz);
+     vecn = X(tensor_sz)(p->vecsz);
      N = n * vecn;
 
      inA = (C *) fftw_malloc(N * sizeof(C), OTHER);
@@ -312,9 +316,9 @@ static void really_verify(plan *pln, const problem_rdft *p,
      nfo.p = p;
      nfo.p2 = 0;
      nfo.probsz = p->sz;
-     nfo.totalsz = X(tensor_append)(&p->vecsz, &p->sz);
+     nfo.totalsz = X(tensor_append)(p->vecsz, p->sz);
      nfo.pckdsz = verify_pack(nfo.totalsz, 2);
-     nfo.pckdvecsz = verify_pack(p->vecsz, 2 * X(tensor_sz)(&p->sz));
+     nfo.pckdvecsz = verify_pack(p->vecsz, 2 * X(tensor_sz)(p->sz));
 
      impulse(dofft, &nfo, 
 	     n, vecn, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
@@ -330,9 +334,9 @@ static void really_verify(plan *pln, const problem_rdft *p,
 		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, FREQ_SHIFT);
 
-     X(tensor_destroy)(&nfo.totalsz);
-     X(tensor_destroy)(&nfo.pckdsz);
-     X(tensor_destroy)(&nfo.pckdvecsz);
+     X(tensor_destroy)(nfo.totalsz);
+     X(tensor_destroy)(nfo.pckdsz);
+     X(tensor_destroy)(nfo.pckdvecsz);
      X(free)(tmp);
      X(free)(outC);
      X(free)(outB);
@@ -352,8 +356,8 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
      if (rounds == 0)
 	  rounds = 20;  /* default value */
 
-     n = X(tensor_sz)(&p->sz);
-     vecn = X(tensor_sz)(&p->vecsz);
+     n = X(tensor_sz)(p->sz);
+     vecn = X(tensor_sz)(p->vecsz);
      N = n * vecn;
 
      inA = (C *) fftw_malloc(N * sizeof(C), OTHER);
@@ -368,9 +372,9 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
      nfo.p = 0;
      nfo.p2 = p;
      nfo.probsz = p->sz;
-     nfo.totalsz = X(tensor_append)(&p->vecsz, &p->sz);
+     nfo.totalsz = X(tensor_append)(p->vecsz, p->sz);
      nfo.pckdsz = verify_pack(nfo.totalsz, 2);
-     nfo.pckdvecsz = verify_pack(p->vecsz, 2 * X(tensor_sz)(&p->sz));
+     nfo.pckdvecsz = verify_pack(p->vecsz, 2 * X(tensor_sz)(p->sz));
 
      impulse(dofft, &nfo, 
 	     n, vecn, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
@@ -387,9 +391,9 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
 		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, FREQ_SHIFT);
 
-     X(tensor_destroy)(&nfo.totalsz);
-     X(tensor_destroy)(&nfo.pckdsz);
-     X(tensor_destroy)(&nfo.pckdvecsz);
+     X(tensor_destroy)(nfo.totalsz);
+     X(tensor_destroy)(nfo.pckdsz);
+     X(tensor_destroy)(nfo.pckdvecsz);
      X(free)(tmp);
      X(free)(outC);
      X(free)(outB);
@@ -401,7 +405,7 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
 
 void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds)
 {
-     if (p->sz.rnk == 1 && (p->kind[0] == R2HC || p->kind[0] == HC2R)) {
+     if (p->sz->rnk == 1 && (p->kind[0] == R2HC || p->kind[0] == HC2R)) {
 	  AWAKE(pln, 1);
 	  really_verify(pln, p, rounds, 
 			sizeof(R) == sizeof(float) ? 1.0e-2 : 1.0e-7);

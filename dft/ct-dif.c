@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.25 2002-09-21 11:58:11 athena Exp $ */
+/* $Id: ct-dif.c,v 1.26 2002-09-22 13:49:08 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -53,9 +53,9 @@ static int applicable0(const solver_ct *ego, const problem *p_,
 	  uint vl;
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
-          iodim *d = p->sz.dims;
+          iodim *d = p->sz->dims;
 	  uint m = d[0].n / e->radix;
-	  X(tensor_tornk1)(&p->vecsz, &vl, &ivs, &ovs);
+	  X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
           return (1
                   /* DIF destroys the input and we don't like it */
                   && (p->ri == p->ro || DESTROY_INPUTP(plnr))
@@ -79,9 +79,9 @@ static int applicable(const solver_ct *ego, const problem *p_,
      p = (const problem_dft *) p_;
 
      /* emulate fftw2 behavior */
-     if (NO_VRECURSEP(plnr) && (p->vecsz.rnk > 0)) return 0;
+     if (NO_VRECURSEP(plnr) && (p->vecsz->rnk > 0)) return 0;
 
-     if (NO_UGLYP(plnr) && X(ct_uglyp)(16, p->sz.dims[0].n, ego->desc->radix))
+     if (NO_UGLYP(plnr) && X(ct_uglyp)(16, p->sz->dims[0].n, ego->desc->radix))
 	  return 0;
 
      return 1;

@@ -18,32 +18,34 @@
  *
  */
 
-/* $Id: zero.c,v 1.1 2002-09-02 17:46:08 athena Exp $ */
+/* $Id: zero.c,v 1.2 2002-09-22 13:49:08 athena Exp $ */
 
 #include "dft.h"
 
 /* fill a complex array with zeros. */
-void X(dft_zerotens)(tensor sz, R *ri, R *ii)
+static void recur(const iodim *dims, uint rnk, R *ri, R *ii)
 {
-     if (sz.rnk == RNK_MINFTY)
+     if (rnk == RNK_MINFTY)
           return;
-     else if (sz.rnk == 0)
+     else if (rnk == 0)
           ri[0] = ii[0] = 0.0;
-     else if (sz.rnk == 1) {
-          /* this case is redundant but faster */
-          uint i, n = sz.dims[0].n;
-          int is = sz.dims[0].is;
+     else if (rnk > 0) {
+          uint i, n = dims[0].n;
+          int is = dims[0].is;
 
-          for (i = 0; i < n; ++i)
-               ri[i * is] = ii[i * is] = 0.0;
-     } else if (sz.rnk > 0) {
-          uint i, n = sz.dims[0].n;
-          int is = sz.dims[0].is;
-
-          sz.dims++;
-          sz.rnk--;
-          for (i = 0; i < n; ++i)
-               X(dft_zerotens)(sz, ri + i * is, ii + i * is);
+	  if (rnk == 1) {
+	       /* this case is redundant but faster */
+	       for (i = 0; i < n; ++i)
+		    ri[i * is] = ii[i * is] = 0.0;
+	  } else {
+	       for (i = 0; i < n; ++i)
+		    recur(dims + 1, rnk - 1, ri + i * is, ii + i * is);
+	  }
      }
 }
 
+
+void X(dft_zerotens)(tensor *sz, R *ri, R *ii)
+{
+     recur(sz->dims, sz->rnk, ri, ii);
+}

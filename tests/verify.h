@@ -32,7 +32,7 @@ void arand(C *a, uint n);
 void mkreal(C *A, uint n);
 
 #define mkhermitian X(mkhermitian)
-void mkhermitian(C *A, uint rank, iodim *dim);
+void mkhermitian(C *A, uint rank, const iodim *dim);
 
 #define aadd X(aadd)
 void aadd(C *c, C *a, C *b, uint n);
@@ -73,11 +73,11 @@ enum { TIME_SHIFT, FREQ_SHIFT };
 
 #define tf_shift X(tf_shift)
 void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
-	      void *nfo, int realp, tensor sz,
+	      void *nfo, int realp, const tensor *sz,
 	      uint n, uint vecn,
 	      C *inA, C *inB, C *outA, C *outB, C *tmp,
 	      uint rounds, double tol, int which_shift);
 
 
 #define verify_pack X(verify_pack)
-tensor verify_pack(tensor sz, int s);
+tensor *verify_pack(const tensor *sz, int s);

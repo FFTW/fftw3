@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.17 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: indirect.c,v 1.18 2002-09-22 13:49:09 athena Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
@@ -66,10 +66,9 @@ static void apply_before(plan *ego_, R *I, R *O)
 
 static problem *mkcld_before(const problem_rdft *p)
 {
-     tensor v, s;
-     v = X(tensor_copy_inplace)(&p->vecsz, INPLACE_OS);
-     s = X(tensor_copy_inplace)(&p->sz, INPLACE_OS);
-     return X(mkproblem_rdft_d)(s, v, p->O, p->O, p->kind);
+     return X(mkproblem_rdft_d)(X(tensor_copy_inplace)(p->sz, INPLACE_OS),
+				X(tensor_copy_inplace)(p->vecsz, INPLACE_OS),
+				p->O, p->O, p->kind);
 }
 
 static const ndrct_adt adt_before =
@@ -96,10 +95,9 @@ static void apply_after(plan *ego_, R *I, R *O)
 
 static problem *mkcld_after(const problem_rdft *p)
 {
-     tensor v, s;
-     v = X(tensor_copy_inplace)(&p->vecsz, INPLACE_IS);
-     s = X(tensor_copy_inplace)(&p->sz, INPLACE_IS);
-     return X(mkproblem_rdft_d)(s, v, p->I, p->I, p->kind);
+     return X(mkproblem_rdft_d)(X(tensor_copy_inplace)(p->sz, INPLACE_IS),
+				X(tensor_copy_inplace)(p->vecsz, INPLACE_IS),
+				p->I, p->I, p->kind);
 }
 
 static const ndrct_adt adt_after =
@@ -137,31 +135,31 @@ static int applicable0(const solver *ego_, const problem *p_,
 	  const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
-                  && FINITE_RNK(p->vecsz.rnk)
+                  && FINITE_RNK(p->vecsz->rnk)
 
                   /* problem must be a nontrivial transform, not just a copy */
-                  && p->sz.rnk > 0
+                  && p->sz->rnk > 0
 
                   && (0
 
 		      /* problem must be in-place & require some
 		         rearrangement of the data */
 		      || (p->I == p->O
-			  && !(X(tensor_inplace_strides)(&p->sz)
-			       && X(tensor_inplace_strides)(&p->vecsz)))
+			  && !(X(tensor_inplace_strides)(p->sz)
+			       && X(tensor_inplace_strides)(p->vecsz)))
 
 		      /* or problem must be out of place, transforming
 			 from stride 1/2 to bigger stride, for apply_after */
 		      || (p->I != p->O && ego->adt->apply == apply_after
 			  && DESTROY_INPUTP(plnr)
-			  && X(tensor_min_istride)(&p->sz) <= 2
-			  && X(tensor_min_ostride)(&p->sz) > 2)
+			  && X(tensor_min_istride)(p->sz) <= 2
+			  && X(tensor_min_ostride)(p->sz) > 2)
 			  
 		      /* or problem must be out of place, transforming
 			 to stride 1/2 from bigger stride, for apply_before */
 		      || (p->I != p->O && ego->adt->apply == apply_before
-			  && X(tensor_min_ostride)(&p->sz) <= 2
-			  && X(tensor_min_istride)(&p->sz) > 2)
+			  && X(tensor_min_ostride)(p->sz) <= 2
+			  && X(tensor_min_istride)(p->sz) > 2)
 			  
 		       )
 	       );
@@ -201,11 +199,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plnr->planner_flags |= NO_BUFFERING;
 
      {
-	  tensor sz_real = X(rdft_real_sz)(p->kind, &p->sz);
+	  tensor *sz_real = X(rdft_real_sz)(p->kind, p->sz);
 	  cldp = X(mkproblem_rdft_d)(X(mktensor)(0),
-				     X(tensor_append)(&p->vecsz, &sz_real),
+				     X(tensor_append)(p->vecsz, sz_real),
 				     p->I, p->O, (rdft_kind *) 0);
-	  X(tensor_destroy)(&sz_real);
+	  X(tensor_destroy)(sz_real);
      }
      cldcpy = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.5 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: direct2.c,v 1.6 2002-09-22 13:49:08 athena Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -91,33 +91,33 @@ static int applicable(const solver *ego_, const problem *p_)
      if (RDFT2P(p_)) {
           const S *ego = (const S *) ego_;
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  uint rnk = p->vecsz.rnk;
-          iodim *vd = p->vecsz.dims;
+	  uint rnk = p->vecsz->rnk;
+          iodim *vd = p->vecsz->dims;
 	  uint vl = rnk == 1 ? vd[0].n : 1;
 	  int ivs = rnk == 1 ? vd[0].is : 0;
 	  int ovs = rnk == 1 ? vd[0].os : 0;
 
           return (
 	       1
-	       && p->sz.rnk == 1
-	       && p->vecsz.rnk <= 1
-	       && p->sz.dims[0].n == ego->sz
+	       && p->sz->rnk == 1
+	       && p->vecsz->rnk <= 1
+	       && p->sz->dims[0].n == ego->sz
 	       && p->kind == ego->kind
 
 	       /* check strides etc */
 	       && (!R2HC_KINDP(ego->kind) ||
 		   ego->desc.r2hc->genus->okp(ego->desc.r2hc, 
 					      p->r, p->rio, p->rio,
-					      p->sz.dims[0].is,
-					      p->sz.dims[0].os,
-					      p->sz.dims[0].os,
+					      p->sz->dims[0].is,
+					      p->sz->dims[0].os,
+					      p->sz->dims[0].os,
 					      vl, ivs, ovs))
 	       && (!HC2R_KINDP(ego->kind) ||
 		   ego->desc.hc2r->genus->okp(ego->desc.hc2r,
 					      p->rio, p->rio, p->r,
-					      p->sz.dims[0].is,
-					      p->sz.dims[0].is,
-					      p->sz.dims[0].os,
+					      p->sz->dims[0].is,
+					      p->sz->dims[0].is,
+					      p->sz->dims[0].os,
 					      vl, ivs, ovs))
 	       
 	       && (0
@@ -129,7 +129,7 @@ static int applicable(const solver *ego_, const problem *p_)
 		    * can compute one transform in-place, no matter
 		    * what the strides are.
 		    */
-		   || p->vecsz.rnk == 0
+		   || p->vecsz->rnk == 0
 
 		   /* can operate in-place as long as strides are the same */
 		   || X(rdft2_inplace_strides)(p, RNK_MINFTY)
@@ -164,15 +164,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_RDFT2(P, &padt, r2hc_kindp ? apply_r2hc : apply_hc2r);
 
-     d = p->sz.dims[0];
-     vd = p->vecsz.dims;
+     d = p->sz->dims[0];
+     vd = p->vecsz->dims;
 
      pln->k = ego->k;
 
      pln->is = X(mkstride)(ego->sz, r2hc_kindp ? d.is : d.os);
      pln->os = X(mkstride)(d.n/2 + 1, r2hc_kindp ? d.os : d.is);
 
-     if (p->vecsz.rnk == 0) {
+     if (p->vecsz->rnk == 0) {
           pln->vl = 1;
           pln->ivs = pln->ovs = 0;
      } else {

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dotens2.c,v 1.1 2002-09-02 15:46:57 athena Exp $ */
+/* $Id: dotens2.c,v 1.2 2002-09-22 13:49:09 athena Exp $ */
 
 #include "ifftw.h"
 #include "debug.h"
@@ -47,10 +47,10 @@ static void recur(uint rnk, const iodim *dims0, const iodim *dims1,
      }
 }
 
-void X(dotens2)(tensor sz0, tensor sz1, dotens2_closure *k)
+void X(dotens2)(const tensor *sz0, const tensor *sz1, dotens2_closure *k)
 {
-     A(sz0.rnk == sz1.rnk);
-     if (sz0.rnk == RNK_MINFTY)
+     A(sz0->rnk == sz1->rnk);
+     if (sz0->rnk == RNK_MINFTY)
           return;
-     recur(sz0.rnk, sz0.dims, sz1.dims, k, 0, 0, 0, 0);
+     recur(sz0->rnk, sz0->dims, sz1->dims, k, 0, 0, 0, 0);
 }

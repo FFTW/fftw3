@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.5 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: direct.c,v 1.6 2002-09-22 13:49:08 athena Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -94,31 +94,31 @@ static int applicable(const solver *ego_, const problem *p_)
      if (RDFTP(p_)) {
           const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
-	  uint rnk = p->vecsz.rnk;
-          iodim *vd = p->vecsz.dims;
+	  uint rnk = p->vecsz->rnk;
+          iodim *vd = p->vecsz->dims;
 	  uint vl = rnk == 1 ? vd[0].n : 1;
 	  int ivs = rnk == 1 ? vd[0].is : 0;
 	  int ovs = rnk == 1 ? vd[0].os : 0;
 
           return (
 	       1
-	       && p->sz.rnk == 1
-	       && p->vecsz.rnk <= 1
-	       && p->sz.dims[0].n == ego->sz
+	       && p->sz->rnk == 1
+	       && p->vecsz->rnk <= 1
+	       && p->sz->dims[0].n == ego->sz
 	       && p->kind[0] == ego->kind
 
 	       /* check strides etc */
 	       && (!R2HC_KINDP(ego->kind) ||
 		   ego->desc.r2hc->genus->okp(ego->desc.r2hc, p->I, p->O, p->O
-					      + ioffset(ego->kind, ego->sz, p->sz.dims[0].os),
-					      p->sz.dims[0].is,
-					      p->sz.dims[0].os, -p->sz.dims[0].os,
+					      + ioffset(ego->kind, ego->sz, p->sz->dims[0].os),
+					      p->sz->dims[0].is,
+					      p->sz->dims[0].os, -p->sz->dims[0].os,
 					      vl, ivs, ovs))
 	       && (!HC2R_KINDP(ego->kind) ||
 		   ego->desc.hc2r->genus->okp(ego->desc.hc2r, p->I, p->I
-					      + ioffset(ego->kind, ego->sz, p->sz.dims[0].is), p->O,
-					      p->sz.dims[0].is, -p->sz.dims[0].is,
-					      p->sz.dims[0].os, 
+					      + ioffset(ego->kind, ego->sz, p->sz->dims[0].is), p->O,
+					      p->sz->dims[0].is, -p->sz->dims[0].is,
+					      p->sz->dims[0].os, 
 					      vl, ivs, ovs))
 	       
 	       && (0
@@ -129,11 +129,11 @@ static int applicable(const solver *ego_, const problem *p_)
 		    * can compute one transform in-place, no matter
 		    * what the strides are.
 		    */
-		   || p->vecsz.rnk == 0
+		   || p->vecsz->rnk == 0
 
 		   /* can operate in-place as long as strides are the same */
-		   || (X(tensor_inplace_strides)(&p->sz) &&
-		       X(tensor_inplace_strides)(&p->vecsz))
+		   || (X(tensor_inplace_strides)(p->sz) &&
+		       X(tensor_inplace_strides)(p->vecsz))
 		    )
 	       );
      }
@@ -166,8 +166,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_RDFT(P, &padt, r2hc_kindp ? apply_r2hc : apply_hc2r);
 
-     d = p->sz.dims;
-     vd = p->vecsz.dims;
+     d = p->sz->dims;
+     vd = p->vecsz->dims;
 
      pln->k = ego->k;
      pln->ioffset = ioffset(ego->kind, d[0].n, r2hc_kindp ? d[0].os : d[0].is);
@@ -177,7 +177,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->ros = X(mkstride)(nr, r2hc_kindp ? d[0].os : d[0].is);
      pln->ios = X(mkstride)(ego->sz - nr + 1, r2hc_kindp ? -d[0].os : -d[0].is);
 
-     if (p->vecsz.rnk == 0) {
+     if (p->vecsz->rnk == 0) {
           pln->vl = 1;
           pln->ivs = pln->ovs = 0;
      } else {

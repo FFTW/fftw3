@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.13 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: buffered.c,v 1.14 2002-09-22 13:49:08 athena Exp $ */
 
 #include "rdft.h"
 
@@ -134,14 +134,14 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 {
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
-          iodim *d = p->sz.dims;
+          iodim *d = p->sz->dims;
 
           if (1
-	      && p->vecsz.rnk <= 1
-	      && p->sz.rnk == 1
+	      && p->vecsz->rnk <= 1
+	      && p->sz->rnk == 1
 	       ) {
 
-	       if (toobig(p->sz.dims[0].n, ego) && CONSERVE_MEMORYP(plnr))
+	       if (toobig(p->sz->dims[0].n, ego) && CONSERVE_MEMORYP(plnr))
 		    return 0;
 
                /*
@@ -155,17 +155,17 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
                     return (d[0].os > 1);
 
                /* We can always do a single transform in-place */
-               if (p->vecsz.rnk == 0)
+               if (p->vecsz->rnk == 0)
                     return 1;
 
                /*
 		* If the problem is in place, the input/output strides must
 		* be the same or the whole thing must fit in the buffer.
 		*/
-               return ((X(tensor_inplace_strides)(&p->sz) &&
-                        X(tensor_inplace_strides)(&p->vecsz))
-                       || (compute_nbuf(d[0].n, p->vecsz.dims[0].n, ego)
-                           == p->vecsz.dims[0].n));
+               return ((X(tensor_inplace_strides)(p->sz) &&
+                        X(tensor_inplace_strides)(p->vecsz))
+                       || (compute_nbuf(d[0].n, p->vecsz->dims[0].n, ego)
+                           == p->vecsz->dims[0].n));
           }
      }
      return 0;
@@ -181,7 +181,7 @@ static int applicable(const problem *p_, const S *ego, const planner *plnr)
      p = (const problem_rdft *) p_;
      if (NO_UGLYP(plnr)) {
 	  if (p->I != p->O) return 0;
-	  if (toobig(p->sz.dims[0].n, ego)) return 0;
+	  if (toobig(p->sz->dims[0].n, ego)) return 0;
      }
      return 1;
 }
@@ -208,8 +208,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(p_, ego, plnr))
           goto nada;
 
-     n = X(tensor_sz)(&p->sz);
-     vl = X(tensor_sz)(&p->vecsz);
+     n = X(tensor_sz)(p->sz);
+     vl = X(tensor_sz)(p->vecsz);
 
      nbuf = compute_nbuf(n, vl, ego);
      A(nbuf > 0);
@@ -226,9 +226,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           bufdist =
                n + ((adt->skew_alignment + adt->skew - n % adt->skew_alignment)
                     % adt->skew_alignment);
-          A(p->vecsz.rnk == 1);
-          ivs = p->vecsz.dims[0].is;
-          ovs = p->vecsz.dims[0].os;
+          A(p->vecsz->rnk == 1);
+          ivs = p->vecsz->dims[0].is;
+          ovs = p->vecsz->dims[0].os;
      }
 
      /* initial allocation for the purpose of planning */
@@ -236,7 +236,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      cldp =
           X(mkproblem_rdft_d)(
-               X(mktensor_1d)(n, p->sz.dims[0].is, 1),
+               X(mktensor_1d)(n, p->sz->dims[0].is, 1),
                X(mktensor_1d)(nbuf, ivs, bufdist),
                p->I, bufs, p->kind);
 
@@ -251,7 +251,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
                X(mktensor)(0),
                X(mktensor_2d)(nbuf, bufdist, ovs,
 			      X(rdft_real_n)(p->kind[0], n),
-			      1 ,p->sz.dims[0].os),
+			      1, p->sz->dims[0].os),
                bufs, p->O, (rdft_kind *) 0);
 
      cldcpy = MKPLAN(plnr, cldp);
@@ -264,11 +264,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      bufs = 0;
 
      /* plan the leftover transforms (cldrest): */
-     cldp =
-          X(mkproblem_rdft_d)(
-               X(tensor_copy)(&p->sz),
-               X(mktensor_1d)(vl % nbuf, ivs, ovs),
-               p->I, p->O, p->kind);
+     cldp = X(mkproblem_rdft_d)(X(tensor_copy)(p->sz),
+				X(mktensor_1d)(vl % nbuf, ivs, ovs),
+				p->I, p->O, p->kind);
      cldrest = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cldrest)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.14 2002-09-21 22:04:05 athena Exp $ */
+/* $Id: hc2hc.c,v 1.15 2002-09-22 13:49:08 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -74,11 +74,11 @@ int X(rdft_hc2hc_applicable)(const solver_hc2hc *ego, const problem *p_)
           const problem_rdft *p = (const problem_rdft *) p_;
           const hc2hc_desc *d = ego->desc;
           return (1
-                  && p->sz.rnk == 1
-                  && p->vecsz.rnk <= 1
+                  && p->sz->rnk == 1
+                  && p->vecsz->rnk <= 1
 		  && p->kind[0] == d->genus->kind
-                  && divides(d->radix, p->sz.dims[0].n)
-		  && d->radix < p->sz.dims[0].n /* avoid inf. loops in cld0 */
+                  && divides(d->radix, p->sz->dims[0].n)
+		  && d->radix < p->sz->dims[0].n /* avoid inf. loops in cld0 */
 	       );
      }
      return 0;
@@ -110,7 +110,7 @@ plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
           return (plan *) 0;
 
      p = (const problem_rdft *) p_;
-     d = p->sz.dims;
+     d = p->sz->dims;
      n = d[0].n;
      r = e->radix;
      m = n / r;
@@ -148,7 +148,7 @@ plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
      pln->os = d[0].os;
 
      pln->ios = pln->vs = 0;
-     X(tensor_tornk1)(&p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
+     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      pln->td = 0;
      adt->finish(pln);
 
@@ -188,14 +188,14 @@ solver *X(mksolver_rdft_hc2hc)(khc2hc k, const hc2hc_desc *desc,
 void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
                          problem **cldp, problem **cld0p, problem **cldmp)
 {
-     iodim *d = p->sz.dims;
+     iodim *d = p->sz->dims;
      const hc2hc_desc *e = ego->desc;
      uint m = d[0].n / e->radix;
      int omid = d[0].os * (m/2);
 
-     tensor null, radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
-     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
-     X(tensor_destroy)(&radix);
+     tensor *null, *radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
+     tensor *cld_vec = X(tensor_append)(radix, p->vecsz);
+     X(tensor_destroy)(radix);
      A(p->kind[0] == R2HC);
 
      *cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, e->radix*d[0].is, d[0].os),
@@ -203,24 +203,24 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
 
      radix = X(mktensor_1d)(e->radix, m * d[0].os, m * d[0].os);
      null = X(mktensor)(0);
-     *cld0p = X(mkproblem_rdft_1)(&radix, &null, p->O, p->O, R2HC);
-     *cldmp = X(mkproblem_rdft_1)(m%2 ? &null : &radix, &null,
+     *cld0p = X(mkproblem_rdft_1)(radix, null, p->O, p->O, R2HC);
+     *cldmp = X(mkproblem_rdft_1)(m%2 ? null : radix, null,
 				  p->O + omid, p->O + omid, R2HCII);
-     X(tensor_destroy)(&null);
-     X(tensor_destroy)(&radix);
+     X(tensor_destroy)(null);
+     X(tensor_destroy)(radix);
 }
 
 void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
                          problem **cldp, problem **cld0p, problem **cldmp)
 {
-     iodim *d = p->sz.dims;
+     iodim *d = p->sz->dims;
      const hc2hc_desc *e = ego->desc;
      uint m = d[0].n / e->radix;
      int imid = d[0].is * (m/2);
 
-     tensor null, radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
-     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
-     X(tensor_destroy)(&radix);
+     tensor *null, *radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
+     tensor *cld_vec = X(tensor_append)(radix, p->vecsz);
+     X(tensor_destroy)(radix);
      A(p->kind[0] == HC2R);
 
      *cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, d[0].is, e->radix*d[0].os),
@@ -228,9 +228,9 @@ void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
 
      radix = X(mktensor_1d)(e->radix, m * d[0].is, m * d[0].is);
      null = X(mktensor)(0);
-     *cld0p = X(mkproblem_rdft_1)(&radix, &null, p->I, p->I, HC2R);
-     *cldmp = X(mkproblem_rdft_1)(m%2 ? &null : &radix, &null, 
+     *cld0p = X(mkproblem_rdft_1)(radix, null, p->I, p->I, HC2R);
+     *cldmp = X(mkproblem_rdft_1)(m%2 ? null : radix, null, 
 				  p->I + imid, p->I + imid, HC2RIII);
-     X(tensor_destroy)(&null);
-     X(tensor_destroy)(&radix);
+     X(tensor_destroy)(null);
+     X(tensor_destroy)(radix);
 }

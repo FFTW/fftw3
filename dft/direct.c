@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.26 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: direct.c,v 1.27 2002-09-22 13:49:08 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -70,21 +70,21 @@ static int applicable(const solver *ego_, const problem *p_,
           const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
           const kdft_desc *d = ego->desc;
-	  uint rnk = p->vecsz.rnk;
-          iodim *vd = p->vecsz.dims;
+	  uint rnk = p->vecsz->rnk;
+          iodim *vd = p->vecsz->dims;
 	  uint vl = rnk == 1 ? vd[0].n : 1;
 	  int ivs = rnk == 1 ? vd[0].is : 0;
 	  int ovs = rnk == 1 ? vd[0].os : 0;
 
           return (
 	       1
-	       && p->sz.rnk == 1
-	       && p->vecsz.rnk <= 1
-	       && p->sz.dims[0].n == d->sz
+	       && p->sz->rnk == 1
+	       && p->vecsz->rnk <= 1
+	       && p->sz->dims[0].n == d->sz
 
 	       /* check strides etc */
 	       && (d->genus->okp(d, p->ri, p->ii, p->ro, p->io,
-				 p->sz.dims[0].is, p->sz.dims[0].os,
+				 p->sz->dims[0].is, p->sz->dims[0].os,
 				 vl, ivs, ovs, plnr))
 
 	       && (0
@@ -95,11 +95,11 @@ static int applicable(const solver *ego_, const problem *p_,
 		    * can compute one transform in-place, no matter
 		    * what the strides are.
 		    */
-		   || p->vecsz.rnk == 0
+		   || p->vecsz->rnk == 0
 
 		   /* can operate in-place as long as strides are the same */
-		   || (X(tensor_inplace_strides)(&p->sz) &&
-		       X(tensor_inplace_strides)(&p->vecsz))
+		   || (X(tensor_inplace_strides)(p->sz) &&
+		       X(tensor_inplace_strides)(p->vecsz))
 		    )
 	       );
      }
@@ -128,14 +128,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_DFT(P, &padt, apply);
 
-     d = p->sz.dims;
-     vd = p->vecsz.dims;
+     d = p->sz->dims;
+     vd = p->vecsz->dims;
 
      pln->k = ego->k;
      pln->is = X(mkstride)(e->sz, d[0].is);
      pln->os = X(mkstride)(e->sz, d[0].os);
 
-     if (p->vecsz.rnk == 0) {
+     if (p->vecsz->rnk == 0) {
           pln->vl = 1;
           pln->ivs = pln->ovs = 0;
      } else {

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.15 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: buffered2.c,v 1.16 2002-09-22 13:49:08 athena Exp $ */
 
 #include "rdft.h"
 
@@ -227,19 +227,19 @@ static uint min_nbuf(const problem_rdft2 *p, uint n, uint vl)
 	  return 1;
      if (X(rdft2_inplace_strides(p, RNK_MINFTY)))
 	  return 1;
-     A(p->vecsz.rnk == 1); /*  rank 0 and MINFTY are inplace */
+     A(p->vecsz->rnk == 1); /*  rank 0 and MINFTY are inplace */
 
      if (R2HC_KINDP(p->kind)) {
-	  ivs =  p->vecsz.dims[0].is; /* real stride */
-	  is = p->sz.dims[0].is;
-	  ovs =  p->vecsz.dims[0].os; /* complex stride */
-	  os = p->sz.dims[0].os;
+	  ivs =  p->vecsz->dims[0].is; /* real stride */
+	  is = p->sz->dims[0].is;
+	  ovs =  p->vecsz->dims[0].os; /* complex stride */
+	  os = p->sz->dims[0].os;
      }
      else {
-	  ivs =  p->vecsz.dims[0].os; /* real stride */
-	  is = p->sz.dims[0].os;
-	  ovs =  p->vecsz.dims[0].is; /* complex stride */
-	  os = p->sz.dims[0].is;
+	  ivs =  p->vecsz->dims[0].os; /* real stride */
+	  is = p->sz->dims[0].os;
+	  ovs =  p->vecsz->dims[0].is; /* complex stride */
+	  os = p->sz->dims[0].is;
      }
      
      /* handle one potentially common case: "contiguous" real and
@@ -287,8 +287,8 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
      UNUSED(ego);
      if (RDFT2P(p_)) {
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  return(p->vecsz.rnk <= 1 && p->sz.rnk == 1
-		 && !(toobig(p->sz.dims[0].n, ego) && CONSERVE_MEMORYP(plnr)));
+	  return(p->vecsz->rnk <= 1 && p->sz->rnk == 1
+		 && !(toobig(p->sz->dims[0].n, ego) && CONSERVE_MEMORYP(plnr)));
      }
      return 0;
 }
@@ -303,7 +303,7 @@ static int applicable(const problem *p_, const S *ego, const planner *plnr)
      p = (const problem_rdft2 *) p_;
      if (NO_UGLYP(plnr)) {
 	  if (p->r != p->rio && p->r != p->iio) return 0;
-	  if (toobig(p->sz.dims[0].n, ego)) return 0;
+	  if (toobig(p->sz->dims[0].n, ego)) return 0;
      }
      return 1;
 }
@@ -329,8 +329,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(p_, ego, plnr))
           goto nada;
 
-     n = p->sz.dims[0].n;
-     vl = X(tensor_sz)(&p->vecsz);
+     n = p->sz->dims[0].n;
+     vl = X(tensor_sz)(p->vecsz);
 
      nbuf = X(uimax)(compute_nbuf(n, vl, ego), min_nbuf(p, n, vl));
      A(nbuf > 0);
@@ -347,9 +347,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           bufdist =
                n + ((adt->skew_alignment + adt->skew - n % adt->skew_alignment)
                     % adt->skew_alignment);
-          A(p->vecsz.rnk == 1);
-          ivs = p->vecsz.dims[0].is;
-          ovs = p->vecsz.dims[0].os;
+          A(p->vecsz->rnk == 1);
+          ivs = p->vecsz->dims[0].is;
+          ovs = p->vecsz->dims[0].os;
      }
 
      /* initial allocation for the purpose of planning */
@@ -358,14 +358,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (R2HC_KINDP(p->kind))
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, p->sz.dims[0].is, 1),
+		    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
 		    X(mktensor_1d)(nbuf, ivs, bufdist),
 		    p->r, bufs, &p->kind);
      else {
 	  plnr->problem_flags |= DESTROY_INPUT; /* always ok to destroy buf */
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, 1, p->sz.dims[0].os),
+		    X(mktensor_1d)(n, 1, p->sz->dims[0].os),
 		    X(mktensor_1d)(nbuf, bufdist, ovs),
 		    bufs, p->r, &p->kind);
      }
@@ -378,13 +378,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (R2HC_KINDP(p->kind))
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, p->sz.dims[0].is, 1),
+		    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
 		    X(mktensor_1d)(vl % nbuf, ivs, bufdist),
 		    p->r, bufs, &p->kind);
      else
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, 1, p->sz.dims[0].os),
+		    X(mktensor_1d)(n, 1, p->sz->dims[0].os),
 		    X(mktensor_1d)(vl % nbuf, bufdist, ovs),
 		    bufs, p->r, &p->kind);
      cldrest = MKPLAN(plnr, cldp);
@@ -405,12 +405,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (R2HC_KINDP(p->kind)) {
 	  pln->ivs = ivs * nbuf;
 	  pln->ovs = ovs;
-	  pln->os = p->sz.dims[0].os; /* stride of rio/iio  */
+	  pln->os = p->sz->dims[0].os; /* stride of rio/iio  */
      }
      else {
 	  pln->ivs = ivs;
 	  pln->ovs = ovs * nbuf;
-	  pln->os = p->sz.dims[0].is; /* stride of rio/iio  */
+	  pln->os = p->sz->dims[0].is; /* stride of rio/iio  */
      }
 
 

@@ -365,12 +365,12 @@ static int applicable0(const solver *ego_, const problem *p_)
 	  const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
-		  && p->sz.rnk == 1
-		  && p->vecsz.rnk == 0
-		  && p->sz.dims[0].n > 1
-		  && p->sz.dims[0].n % 4 /* make sure n / r = m is odd */
+		  && p->sz->rnk == 1
+		  && p->vecsz->rnk == 0
+		  && p->sz->dims[0].n > 1
+		  && p->sz->dims[0].n % 4 /* make sure n / r = m is odd */
 		  && p->kind[0] == ego->kind
-		  && !X(is_prime)(p->sz.dims[0].n) /* avoid inf. loops planning cldr0 */
+		  && !X(is_prime)(p->sz->dims[0].n) /* avoid inf. loops planning cldr0 */
 	       );
      }
 
@@ -455,9 +455,9 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
      if (!applicable(ego, p_, plnr))
           goto nada;
 
-     n = p->sz.dims[0].n;
-     is = p->sz.dims[0].is;
-     os = p->sz.dims[0].os;
+     n = p->sz->dims[0].n;
+     is = p->sz->dims[0].is;
+     os = p->sz->dims[0].os;
 
      r = X(first_divisor)(n);
      m = n / r;
@@ -511,9 +511,9 @@ static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
      if (!applicable(ego, p_, plnr))
           goto nada;
 
-     n = p->sz.dims[0].n;
-     is = p->sz.dims[0].is;
-     os = p->sz.dims[0].os;
+     n = p->sz->dims[0].n;
+     is = p->sz->dims[0].is;
+     os = p->sz->dims[0].os;
 
      r = X(first_divisor)(n);
      m = n / r;

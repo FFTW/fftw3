@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.5 2002-09-21 21:47:35 athena Exp $ */
+/* $Id: verify-reodft.c,v 1.6 2002-09-22 13:49:09 athena Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -28,10 +28,10 @@
 typedef struct {
      plan *pln;
      const problem_rdft *p;
-     tensor probsz;
-     tensor totalsz;
-     tensor pckdsz;
-     tensor pckdvecsz;
+     tensor *probsz;
+     tensor *totalsz;
+     tensor *pckdsz;
+     tensor *pckdvecsz;
 } info;
 
 /*
@@ -220,7 +220,7 @@ static void cpyr0(dotens2_closure *k_,
      UNUSED(indxa); UNUSED(ondxb);
 }
 
-static void cpyr(R *ra, tensor sza, R *rb, tensor szb)
+static void cpyr(R *ra, const tensor *sza, R *rb, const tensor *szb)
 {
      cpyr_closure k;
      k.k.apply = cpyr0;
@@ -337,7 +337,7 @@ static void tf_shift(uint n, uint vecn, info *nfo,
      double sign;
      uint nb, na, dim, N = n * vecn;
      uint i, j;
-     tensor sz = nfo->probsz;
+     const tensor *sz = nfo->probsz;
 
      sign = -1.0;
 
@@ -348,8 +348,8 @@ static void tf_shift(uint n, uint vecn, info *nfo,
      na = n;
 
      /* check shifts across all SZ dimensions */
-     for (dim = 0; dim < sz.rnk; ++dim) {
-	  uint ncur = sz.dims[dim].n;
+     for (dim = 0; dim < sz->rnk; ++dim) {
+	  uint ncur = sz->dims[dim].n;
 
 	  na /= ncur;
 
@@ -389,16 +389,16 @@ static void tf_shift(uint n, uint vecn, info *nfo,
 /* Make a copy of the size tensor, with the same dimensions, but with
    the strides corresponding to a "packed" row-major array with the
    given stride. */
-static tensor pack(tensor sz, int s)
+static tensor *pack(const tensor *sz, int s)
 {
-     tensor x = X(tensor_copy)(&sz);
-     if (FINITE_RNK(x.rnk) && x.rnk > 0) {
+     tensor *x = X(tensor_copy)(sz);
+     if (FINITE_RNK(x->rnk) && x->rnk > 0) {
 	  uint i;
-	  x.dims[x.rnk - 1].is = s;
-	  x.dims[x.rnk - 1].os = s;
-	  for (i = x.rnk - 1; i > 0; --i) {
-	       x.dims[i - 1].is = x.dims[i].is * x.dims[i].n;
-	       x.dims[i - 1].os = x.dims[i].os * x.dims[i].n;
+	  x->dims[x->rnk - 1].is = s;
+	  x->dims[x->rnk - 1].os = s;
+	  for (i = x->rnk - 1; i > 0; --i) {
+	       x->dims[i - 1].is = x->dims[i].is * x->dims[i].n;
+	       x->dims[i - 1].os = x->dims[i].os * x->dims[i].n;
 	  }
      }
      return x;
@@ -420,10 +420,10 @@ static void really_verify(plan *pln, const problem_rdft *p,
      if (rounds == 0)
 	  rounds = 20;  /* default value */
 
-     A(p->sz.rnk == 1);
-     n0 = p->sz.dims[0].n;
+     A(p->sz->rnk == 1);
+     n0 = p->sz->dims[0].n;
      n = X(rdft_real_n)(p->kind[0], n0);
-     vecn = X(tensor_sz)(&p->vecsz);
+     vecn = X(tensor_sz)(p->vecsz);
      N = n * vecn;
 
      switch (p->kind[0]) {
@@ -494,10 +494,10 @@ static void really_verify(plan *pln, const problem_rdft *p,
 
      nfo.pln = pln;
      nfo.p = p;
-     nfo.probsz = X(rdft_real_sz)(p->kind, &p->sz);
-     nfo.totalsz = X(tensor_append)(&p->vecsz, &nfo.probsz);
+     nfo.probsz = X(rdft_real_sz)(p->kind, p->sz);
+     nfo.totalsz = X(tensor_append)(p->vecsz, nfo.probsz);
      nfo.pckdsz = pack(nfo.totalsz, 1);
-     nfo.pckdvecsz = pack(p->vecsz, X(tensor_sz)(&nfo.probsz));
+     nfo.pckdvecsz = pack(p->vecsz, X(tensor_sz)(nfo.probsz));
 
      linear(N, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
      impulse(n0, i0, k0, ti, impulse_amp,
@@ -510,10 +510,10 @@ static void really_verify(plan *pln, const problem_rdft *p,
 	      rounds, tol, FREQ_SHIFT, 
 	      isL0f, isL1f, isR0f, isR1f, n0, i0, tsf);
 
-     X(tensor_destroy)(&nfo.probsz);
-     X(tensor_destroy)(&nfo.totalsz);
-     X(tensor_destroy)(&nfo.pckdsz);
-     X(tensor_destroy)(&nfo.pckdvecsz);
+     X(tensor_destroy)(nfo.probsz);
+     X(tensor_destroy)(nfo.totalsz);
+     X(tensor_destroy)(nfo.pckdsz);
+     X(tensor_destroy)(nfo.pckdvecsz);
      X(free)(tmp);
      X(free)(outC);
      X(free)(outB);
@@ -525,7 +525,7 @@ static void really_verify(plan *pln, const problem_rdft *p,
 
 void X(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds)
 {
-     if (p->sz.rnk == 1 && REODFT_KINDP(p->kind[0])) {
+     if (p->sz->rnk == 1 && REODFT_KINDP(p->kind[0])) {
 	  AWAKE(pln, 1);
 	  really_verify(pln, p, rounds, 
 			sizeof(R) == sizeof(float) ? 1.0e-2 : 1.0e-7);

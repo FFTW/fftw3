@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.5 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: rank0.c,v 1.6 2002-09-22 13:49:09 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -55,7 +55,7 @@ static int applicable(const solver *ego_, const problem *p_)
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
 		  && p->I != p->O
-                  && p->sz.rnk == 0
+                  && p->sz->rnk == 0
                   && ego->adt->applicable(p)
 	       );
      }
@@ -72,7 +72,7 @@ static void apply_1(plan *ego_, R *I, R *O)
 
 static int applicable_1(const problem_rdft *p)
 {
-     return (p->vecsz.rnk == 0);
+     return (p->vecsz->rnk == 0);
 }
 
 static const rnk0adt adt_cpy1 =
@@ -108,7 +108,7 @@ static void apply_vec(plan *ego_, R *I, R *O)
 
 static int applicable_vec(const problem_rdft *p)
 {
-     return (p->vecsz.rnk == 1 && p->O != p->I);
+     return (p->vecsz->rnk == 1 && p->O != p->I);
 }
 
 static const rnk0adt adt_vec =
@@ -129,8 +129,8 @@ static int applicable_io1(const problem_rdft *p)
 {
      return (1
              && applicable_vec(p)
-             && p->vecsz.dims[0].is == 1
-             && p->vecsz.dims[0].os == 1
+             && p->vecsz->dims[0].is == 1
+             && p->vecsz->dims[0].os == 1
 	  );
 }
 
@@ -171,13 +171,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           return (plan *) 0;
 
      p = (const problem_rdft *) p_;
-     if (p->vecsz.rnk == 0) {
+     if (p->vecsz->rnk == 0) {
           vl = 1U;
           is = os = 1;
      } else {
-          vl = p->vecsz.dims[0].n;
-          is = p->vecsz.dims[0].is;
-          os = p->vecsz.dims[0].os;
+          vl = p->vecsz->dims[0].n;
+          is = p->vecsz->dims[0].is;
+          os = p->vecsz->dims[0].os;
      }
 
      pln = MKPLAN_RDFT(P, &padt, ego->adt->apply);
