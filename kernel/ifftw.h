@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.100 2002-08-31 13:55:57 athena Exp $ */
+/* $Id: ifftw.h,v 1.101 2002-08-31 18:00:04 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -447,6 +447,7 @@ struct planner_s {
      const planner_adt *adt;
      uint nplan;    /* number of plans evaluated */
      uint nprob;    /* number of problems evaluated */
+     uint hit, access;  
      void (*hook)(plan *plan, const problem *p, int optimalp);
 
      const char *cur_reg_nam;

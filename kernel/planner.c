@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.49 2002-08-31 16:44:04 athena Exp $ */
+/* $Id: planner.c,v 1.50 2002-08-31 18:00:04 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -104,9 +104,13 @@ static solutions *lookup(planner *ego, problem *p)
 
      h = hash(ego, p, ego->flags, ego->nthr);
 
+     ++ego->access;
      for (l = ego->sols[h]; l; l = l->cdr) 
-          if (solvedby(p, ego->flags, ego->nthr, l))
+          if (solvedby(p, ego->flags, ego->nthr, l)) {
+	       ++ego->hit;
 	       return l;
+	  }
+
      return 0;
 }
 
@@ -458,7 +462,7 @@ planner *X(mkplanner)(size_t sz,
      p->adt = &padt;
      p->inferior_mkplan = infmkplan;
      p->destroy = destroy;
-     p->nplan = p->nprob = 0;
+     p->nplan = p->nprob = p->hit = p->access = 0;
      p->hook = hooknil;
      p->cur_reg_nam = 0;
      p->solvers = 0;
@@ -564,6 +568,8 @@ void X(planner_dump)(planner *ego, int verbose)
 
      D("nplan = %u\n", ego->nplan);
      D("nprob = %u\n", ego->nprob);
+     D("access = %u\n", ego->access);
+     D("hit = %u\n", ego->hit);
      D("hashsiz = %d\n", ego->hashsiz);
      D("cnt = %d\n", cnt);
      D("cnt_null = %d\n", cnt_null);
