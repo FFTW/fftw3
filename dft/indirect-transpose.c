@@ -172,7 +172,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	     transforms of contiguous vectors (since the latter at
 	     least have efficient transpositions) */
 	  if (NO_UGLYP(plnr)
-	      && !(p->vecsz->dims[*pdim0].is == u)
+	      && p->vecsz->dims[*pdim0].is != u
 	      && !(p->vecsz->rnk == 2
 		   && p->vecsz->dims[1-*pdim0].is == u
 		   && p->vecsz->dims[*pdim0].is
@@ -275,6 +275,7 @@ static solver *mksolver(int transpose_inplace)
 
 void X(dft_indirect_transpose_register)(planner *p)
 {
-     REGISTER_SOLVER(p, mksolver(0));
-     REGISTER_SOLVER(p, mksolver(1));
+     int ip;
+     for (ip = 0; ip <= 1; ++ip)
+	  REGISTER_SOLVER(p, mksolver(ip));
 }
