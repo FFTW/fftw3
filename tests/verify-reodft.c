@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.8 2003-01-09 04:18:23 stevenj Exp $ */
+/* $Id: verify-reodft.c,v 1.9 2003-01-09 04:40:48 stevenj Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -459,7 +459,7 @@ static void really_verify(plan *pln, const problem_rdft *p,
 	      break;
 	 case RODFT00:
 	      i0 = k0 = 1;
-	      ti = sin00;
+	      ti = sin00; impulse_amp = 2.0;
 	      tst = tsf = cos00;
 	      break;
 	 case RODFT01:
