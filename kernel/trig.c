@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: trig.c,v 1.2 2002-08-09 23:26:57 athena Exp $ */
+/* $Id: trig.c,v 1.3 2002-08-10 00:16:23 athena Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
@@ -40,35 +40,39 @@
 #  define KTRIG(x) (x)
 #endif
 
-static const trigreal K2PI = 
-    KTRIG(6.2831853071795864769252867665590057683943388);
-
 /*
  * Improve accuracy by reducing x to range [0..1/8]
  * before multiplication by 2 * PI.
  */
 
-trigreal sin2pi(long m, unsigned long n);
-trigreal cos2pi(long m, unsigned long n)
+static const trigreal KPIO2 =
+    KTRIG(1.57079632679489661923132169163975144209858469968);
+
+static trigreal sin2pi1(int m, int n, int k);
+static trigreal cos2pi1(int m, int n, int k)
 {
-     if (m < 0) return cos2pi(-m, n);
-     if (2*m > n) return cos2pi(n-m, n);
-     if (4*m > n) return -sin2pi(4*m - n, 4*n);
-     if (8*m > n) return sin2pi(n - 4*m, 4*n);
-     return COS(K2PI * ((trigreal)m/(trigreal)n));
+     if (m < 0) return cos2pi1(-m, n, -k);
+     if (2 * m > n) return cos2pi1(n - m, n, -k);
+     if (4 * m > n) return -sin2pi1(m - n / 4, n, k + 4 * (n / 4) - n);
+     if (8 * m > n) return sin2pi1(n / 4 - m, n, -k + n - 4 * (n / 4));
+     return COS(KPIO2 * (((trigreal) k + 4.0 * (trigreal)m) / (trigreal)n));
 }
 
-trigreal sin2pi(long m, unsigned long n)
+static trigreal sin2pi1(int m, int n, int k)
 {
-     if (m < 0) return -sin2pi(-m, n);
-     if (2*m > n) return -sin2pi(n-m, n);
-     if (4*m > n) return cos2pi(4*m - n, 4*n);
-     if (8*m > n) return cos2pi(n - 4*m, 4*n);
-     return SIN(K2PI * ((trigreal)m/(trigreal)n));
+     if (m < 0) return -sin2pi1(-m, n, -k);
+     if (2 * m > n) return -sin2pi1(n - m, n, -k);
+     if (4 * m > n) return cos2pi1(m - n / 4, n, k + 4 * (n / 4) - n);
+     if (8 * m > n) return cos2pi1(n / 4 - m, n, -k + n - 4 * (n / 4));
+     return SIN(KPIO2 * (((trigreal) k + 4.0 * (trigreal)m) / (trigreal)n));
 }
 
-trigreal tan2pi(long m, unsigned long n)
+trigreal cos2pi(int m, int n)
 {
-     /* TODO: not implemented, unused */
-     return TAN(K2PI * ((trigreal)m/(trigreal)n));
+     return cos2pi1(m, n, 0);
+}
+
+trigreal sin2pi(int m, int n)
+{
+     return sin2pi1(m, n, 0);
 }
