@@ -42,11 +42,11 @@ st1_64_64.c st1_64_128.c st1_64_256.c st1_64_512.c st1_64_1024.c
 ST1COD = st1_16.cod st1_2.cod st1_32.cod st1_4.cod st1_64.cod	\
 st1_8.cod
 
-#FRANZ_CODELETS = $(SN1) $(ST1)
-#FRANZ_EXTRA = $(SN1COD) $(ST1COD)
-
-FRANZ_CODELETS =
-FRANZ_EXTRA =
+# Uncomment these to include many specialized codelets of fixed
+# strides, which can speed things up on Pentia where stride arithmetic
+# is expensive, at the expense of increased library size.
+FRANZ_CODELETS = # $(SN1) $(ST1)
+FRANZ_EXTRA = # $(SN1COD) $(ST1COD)
 
 ALL_CODELETS = $(N1) $(T1) $(T2) $(FRANZ_CODELETS)
 
