@@ -186,7 +186,47 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 /***************************************************************************/
 
-/* FIXME: share Rader omega and twiddle arrays between plans */
+/* shared twiddle and omega lists, keyed by two/three integers. */
+
+typedef struct TLs { uint k1,k2,k3; R *W; int refcnt; struct TLs *nxt; } TL;
+
+static TL *TL_insrt(uint k1, uint k2, uint k3, R *W, TL *tl)
+{
+     TL *t = (TL *) fftw_malloc(sizeof(TL), TWIDDLES);
+     t->k1 = k1; t->k2 = k2; t->k3 = k3; t->W = W;
+     t->refcnt = 1; t->nxt = tl;
+     return t;
+}
+
+static TL *TL_fnd(uint k1, uint k2, uint k3, TL *tl)
+{
+     TL *t = tl;
+     while (t && (t->k1 != k1 || t->k2 != k2 || t->k3 != k3))
+	  t = t->nxt;
+     return t;
+}
+
+static TL *TL_dlt(R *W, TL *tl)
+{
+     if (W) {
+	  TL *tp = (TL *) 0, *t = tl;
+	  while (t && t->W != W) {
+	       tp = t;
+	       t = t->nxt;
+	  }
+	  if (t && --t->refcnt <= 0) {
+	       if (tp) tp->nxt = t->nxt; else tl = t->nxt;
+	       X(free)(t->W);
+	       X(free)(t);
+	  }
+	  return(tl);
+     }
+}
+
+/***************************************************************************/
+
+static TL *omegas = (TL *) 0;
+static TL *twiddles = (TL *) 0;
 
 static R *mkomega(plan *p_, uint n, uint ginv)
 {
@@ -195,6 +235,12 @@ static R *mkomega(plan *p_, uint n, uint ginv)
      uint i, gpower;
      trigreal scale, twoPiOverN;
      R *buf; 
+     TL *o;
+
+     if ((o = TL_fnd(n, n, ginv, omegas))) {
+	  ++o->refcnt;
+	  return o->W;
+     }
 
      omega = (R *)fftw_malloc(sizeof(R) * (n - 1) * 2, TWIDDLES);
      buf = (R *) fftw_malloc(sizeof(R) * (n - 1) * 2, BUFFERS);
@@ -213,7 +259,14 @@ static R *mkomega(plan *p_, uint n, uint ginv)
      AWAKE(p_, 0);
 
      X(free)(buf);
+
+     omegas = TL_insrt(n, n, ginv, omega, omegas);
      return omega;
+}
+
+static void free_omega(R *omega)
+{
+     omegas = TL_dlt(omega, omegas);
 }
 
 static R *mktwiddle(uint m, uint r, uint g)
@@ -221,6 +274,12 @@ static R *mktwiddle(uint m, uint r, uint g)
      trigreal twoPiOverN;
      uint i, j, gpower;
      R *W;
+     TL *o;
+
+     if ((o = TL_fnd(m, r, g, twiddles))) {
+	  ++o->refcnt;
+	  return o->W;
+     }
 
      twoPiOverN = K2PI / (trigreal) (r * m);
      W = (R *)fftw_malloc(sizeof(R) * (r - 1) * m * 2, TWIDDLES);
@@ -234,7 +293,13 @@ static R *mktwiddle(uint m, uint r, uint g)
 	  A(gpower == 1);
      }
 
+     twiddles = TL_insrt(m, r, g, W, twiddles);
      return W;
+}
+
+static void free_twiddle(R *twiddle)
+{
+     twiddles = TL_dlt(twiddle, twiddles);
 }
 
 /***************************************************************************/
@@ -245,14 +310,12 @@ static void awake(plan *ego_, int flg)
 
      AWAKE(ego->cld1, flg);
      AWAKE(ego->cld2, flg);
-     AWAKE(ego->cld_omega, flg);
 
      if (flg) {
 	  if (!ego->omega) 
 	       ego->omega = mkomega(ego->cld_omega,ego->n,ego->ginv);
      } else {
-	  if (ego->omega)
-	       X(free)(ego->omega);
+	  free_omega(ego->omega);
 	  ego->omega = 0;
      }
 }
@@ -265,7 +328,7 @@ static void awake_dit(plan *ego_, int flg)
      if (flg)
 	  ego->W = mktwiddle(ego->m, ego->super.n, ego->super.g);
      else {
-	  X(free)(ego->W);
+	  free_twiddle(ego->W);
 	  ego->W = 0;
      }
 

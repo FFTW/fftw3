@@ -11,8 +11,6 @@
 
 * generic-radix cooley-tukey
 
-* Rader should share twiddle arrays between plans.
-
 * I can't believe that there isn't a closed form for the omega
   array in Rader.
 
