@@ -64,10 +64,15 @@ static __inline__ V VUNPACKHI(V a, V b)
 
 #define LD(var, loc) var = *(const V *)(&(loc))
 #define ST(loc, var) *(V *)(&(loc)) = var
-#define DVK(var, val) V var = (						\
-{									\
-     static const union { double d[2]; V v; } _var = { {val, val} };	\
-     _var.v;								\
+
+union dvec { 
+     double d[2];
+     V v;
+};
+
+#define DVK(var, val) V var = __extension__ ({		\
+     static const union dvec _var = { {val, val} };	\
+     _var.v;						\
 })
 
 #define ST2(a, ovs, s0, s1)			\

@@ -19,8 +19,8 @@
  *
  *)
 
-(* $Id: algsimp.ml,v 1.2 2002-06-30 22:34:06 athena Exp $ *)
-let cvsid = "$Id: algsimp.ml,v 1.2 2002-06-30 22:34:06 athena Exp $"
+(* $Id: algsimp.ml,v 1.3 2002-07-02 12:51:38 athena Exp $ *)
+let cvsid = "$Id: algsimp.ml,v 1.3 2002-07-02 12:51:38 athena Exp $"
 
 open Util
 open Expr
@@ -303,14 +303,18 @@ end = struct
 		mangleSumM [l''; d''']
 
   and splusM l =
-    let fma_heuristics = function
-      |	[Uminus (Times _); Times _] -> Some false
-      |	[Times _; Uminus (Times _)] -> Some false
-      |	[Uminus (_); Times _] -> Some true
-      |	[Times _; Uminus (Plus _)] -> Some true
-      |	[_; Uminus (Times _)] -> Some false
-      |	[Uminus (Times _); _] -> Some false
-      |	_ -> None
+    let fma_heuristics x = 
+      if !Magic.enable_fma then 
+	match x with
+	| [Uminus (Times _); Times _] -> Some false
+	| [Times _; Uminus (Times _)] -> Some false
+	| [Uminus (_); Times _] -> Some true
+	| [Times _; Uminus (Plus _)] -> Some true
+	| [_; Uminus (Times _)] -> Some false
+	| [Uminus (Times _); _] -> Some false
+	| _ -> None
+      else
+	None
     in
     mangleSumM l >>=  fun l' ->
       (* no terms are negative.  Don't do anything *)
@@ -322,7 +326,7 @@ end = struct
       else match fma_heuristics l' with
       |	Some true -> mapM suminusM l' >>= splusM >>= suminusM
       |	Some false -> canonicalizeM l'
-      |	_ ->
+      |	None ->
          (* Ask the Oracle for the canonical form *)
 	  if Oracle.should_flip_sign (Plus l') then
 	    mapM suminusM l' >>= splusM >>= suminusM
