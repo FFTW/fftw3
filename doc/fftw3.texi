@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.204 2003-09-27 21:43:57 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.205 2003-09-28 00:24:39 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4028,7 +4028,9 @@ shared data between plans are great.
 
 Note also that, since the plan is not modified by @code{fftw_execute},
 it is safe to execute the @emph{same plan} in parallel by multiple
-threads.
+threads.  However, since a given plan operates by default on a fixed
+array, you need to use one of the guru variants (@pxref{Guru Execution
+of Plans}) so that different threads compute FFTs for different data.
 
 (Users should note that these comments only apply to programs using
 shared-memory threads.  Parallelism using MPI or forked processes
