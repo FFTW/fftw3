@@ -79,5 +79,5 @@ Changes from 3.0beta1:
 
 * Workaround for gcc/SPARC bug.
 
-* Fixed multi-threaded initialization failure on Irix due to lack of
+* Fixed multi-threaded initialization failure on IRIX due to lack of
   user-accessible PTHREAD_SCOPE_SYSTEM there.
