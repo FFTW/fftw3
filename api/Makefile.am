@@ -10,5 +10,7 @@ export-wisdom.c forget-wisdom.c import-system-wisdom.c			\
 import-wisdom-from-file.c import-wisdom-from-string.c import-wisdom.c	\
 mapflags.c mkprinter-file.c mktensor-iodims.c mktensor-rowmajor-pad.c	\
 plan-dft-1d.c plan-dft-2d.c plan-dft-3d.c plan-dft.c plan-guru-dft.c	\
-plan-many-dft.c plan-many-dft-c2r.c plan-many-dft-r2c.c			\
+plan-many-dft.c plan-many-dft-c2r.c plan-dft-c2r.c plan-dft-c2r-1d.c	\
+plan-dft-c2r-2d.c plan-dft-c2r-3d.c plan-many-dft-r2c.c plan-dft-r2c.c	\
+plan-dft-r2c-1d.c plan-dft-r2c-2d.c plan-dft-r2c-3d.c			\
 plan-with-nthreads.c print-plan.c the-planner.c api.h fftw3.h

@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.22 2003-01-12 02:09:41 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.23 2003-01-12 04:36:26 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -60,74 +60,95 @@ typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_LONG_DOUBLE(iodim);
   C: complex data type
 */
 
-#define FFTW_DEFINE_API(X, R, C)					  \
-									  \
-FFTW_DEFINE_COMPLEX(R, C);						  \
-									  \
-typedef struct X(plan_s) *X(plan);					  \
-									  \
-void X(execute)(X(plan) p);						  \
-									  \
-X(plan) X(plan_dft)(unsigned int rank, const unsigned int *n,		  \
-		    C *in, const unsigned int *inembed,			  \
-		    C *out, const unsigned int *onembed,		  \
-		    int sign, unsigned int flags);			  \
-									  \
-X(plan) X(plan_dft_1d)(unsigned int n, C *in, C *out, int sign,		  \
-		       unsigned int flags);				  \
-									  \
-X(plan) X(plan_dft_2d)(unsigned int nx, unsigned int ny,		  \
-		       C *in, C *out, int sign, unsigned int flags);	  \
-									  \
-X(plan) X(plan_dft_3d)(unsigned int nx, unsigned int ny, unsigned int nz, \
-		       C *in, C *out, int sign, unsigned int flags);	  \
-									  \
-X(plan) X(plan_many_dft)(unsigned int rank, const unsigned int *n,	  \
-                         unsigned int howmany,				  \
-                         C *in, const unsigned int *inembed,		  \
-                         int istride, int idist,			  \
-                         C *out, const unsigned int *onembed,		  \
-                         int ostride, int odist,			  \
-                         int sign, unsigned int flags);			  \
-									  \
-X(plan) X(plan_guru_dft)(unsigned int rank, const X(iodim) *dims,	  \
-			 unsigned int howmany_rank,			  \
-			 const X(iodim) *howmany_dims,			  \
-			 R *ri, R *ii, R *ro, R *io,			  \
-			 unsigned int flags);				  \
-									  \
-void X(execute_dft)(X(plan) p, R *ri, R *ii, R *ro, R *io);		  \
-									  \
-X(plan) X(plan_many_dft_r2c)(unsigned int rank, const unsigned int *n,	  \
-                             unsigned int howmany,			  \
-                             R *in, const unsigned int *inembed,	  \
-                             int istride, int idist,			  \
-                             C *out, const unsigned int *onembed,	  \
-                             int ostride, int odist,			  \
-                             unsigned int flags);			  \
-									  \
-X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,	  \
-			     unsigned int howmany,			  \
-			     C *in, const unsigned int *inembed,	  \
-			     int istride, int idist,			  \
-			     R *out, const unsigned int *onembed,	  \
-			     int ostride, int odist,			  \
-			     unsigned int flags);			  \
-									  \
-void X(destroy_plan)(X(plan) p);					  \
-void X(forget_wisdom)(void);						  \
-void X(cleanup)(void);							  \
-									  \
-int X(plan_with_nthreads)(unsigned int nthreads);			  \
-									  \
-void X(export_wisdom_to_file)(FILE *output_file);			  \
-char *X(export_wisdom_to_string)(void);					  \
-void X(export_wisdom)(void (*absorber)(char c, void *), void *data);	  \
-int X(import_system_wisdom)(void);					  \
-int X(import_wisdom_from_file)(FILE *input_file);			  \
-int X(import_wisdom_from_string)(const char *input_string);		  \
-int X(import_wisdom)(int (*emitter)(void *), void *data);		  \
-									  \
+#define FFTW_DEFINE_API(X, R, C)					      \
+									      \
+FFTW_DEFINE_COMPLEX(R, C);						      \
+									      \
+typedef struct X(plan_s) *X(plan);					      \
+									      \
+void X(execute)(X(plan) p);						      \
+									      \
+X(plan) X(plan_dft)(unsigned int rank, const unsigned int *n,		      \
+		    C *in, const unsigned int *inembed,			      \
+		    C *out, const unsigned int *onembed,		      \
+		    int sign, unsigned int flags);			      \
+									      \
+X(plan) X(plan_dft_1d)(unsigned int n, C *in, C *out, int sign,		      \
+		       unsigned int flags);				      \
+X(plan) X(plan_dft_2d)(unsigned int nx, unsigned int ny,		      \
+		       C *in, C *out, int sign, unsigned int flags);	      \
+X(plan) X(plan_dft_3d)(unsigned int nx, unsigned int ny, unsigned int nz,     \
+		       C *in, C *out, int sign, unsigned int flags);	      \
+									      \
+X(plan) X(plan_many_dft)(unsigned int rank, const unsigned int *n,	      \
+                         unsigned int howmany,				      \
+                         C *in, const unsigned int *inembed,		      \
+                         int istride, int idist,			      \
+                         C *out, const unsigned int *onembed,		      \
+                         int ostride, int odist,			      \
+                         int sign, unsigned int flags);			      \
+									      \
+X(plan) X(plan_guru_dft)(unsigned int rank, const X(iodim) *dims,	      \
+			 unsigned int howmany_rank,			      \
+			 const X(iodim) *howmany_dims,			      \
+			 R *ri, R *ii, R *ro, R *io,			      \
+			 unsigned int flags);				      \
+									      \
+void X(execute_dft)(X(plan) p, R *ri, R *ii, R *ro, R *io);		      \
+									      \
+X(plan) X(plan_many_dft_r2c)(unsigned int rank, const unsigned int *n,	      \
+                             unsigned int howmany,			      \
+                             R *in, const unsigned int *inembed,	      \
+                             int istride, int idist,			      \
+                             C *out, const unsigned int *onembed,	      \
+                             int ostride, int odist,			      \
+                             unsigned int flags);			      \
+									      \
+X(plan) X(plan_dft_r2c)(unsigned int rank, const unsigned int *n,	      \
+                        R *in, const unsigned int *inembed,		      \
+                        C *out, const unsigned int *onembed,		      \
+                        unsigned int flags);				      \
+									      \
+X(plan) X(plan_dft_r2c_1d)(unsigned int n,R *in,C *out,unsigned int flags);   \
+X(plan) X(plan_dft_r2c_2d)(unsigned int nx, unsigned int ny,		      \
+			   R *in, C *out, unsigned int flags);		      \
+X(plan) X(plan_dft_r2c_3d)(unsigned int nx, unsigned int ny, unsigned int nz, \
+			   R *in, C *out, unsigned int flags);		      \
+									      \
+									      \
+X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,	      \
+			     unsigned int howmany,			      \
+			     C *in, const unsigned int *inembed,	      \
+			     int istride, int idist,			      \
+			     R *out, const unsigned int *onembed,	      \
+			     int ostride, int odist,			      \
+			     unsigned int flags);			      \
+									      \
+X(plan) X(plan_dft_c2r)(unsigned int rank, const unsigned int *n,	      \
+                        C *in, const unsigned int *inembed,		      \
+                        R *out, const unsigned int *onembed,		      \
+                        unsigned int flags);				      \
+									      \
+X(plan) X(plan_dft_c2r_1d)(unsigned int n,C *in,R *out,unsigned int flags);   \
+X(plan) X(plan_dft_c2r_2d)(unsigned int nx, unsigned int ny,		      \
+			   C *in, R *out, unsigned int flags);		      \
+X(plan) X(plan_dft_c2r_3d)(unsigned int nx, unsigned int ny, unsigned int nz, \
+			   C *in, R *out, unsigned int flags);		      \
+									      \
+void X(destroy_plan)(X(plan) p);					      \
+void X(forget_wisdom)(void);						      \
+void X(cleanup)(void);							      \
+									      \
+int X(plan_with_nthreads)(unsigned int nthreads);			      \
+									      \
+void X(export_wisdom_to_file)(FILE *output_file);			      \
+char *X(export_wisdom_to_string)(void);					      \
+void X(export_wisdom)(void (*absorber)(char c, void *), void *data);	      \
+int X(import_system_wisdom)(void);					      \
+int X(import_wisdom_from_file)(FILE *input_file);			      \
+int X(import_wisdom_from_string)(const char *input_string);		      \
+int X(import_wisdom)(int (*emitter)(void *), void *data);		      \
+									      \
 void X(print_plan)(X(plan) p, FILE *output_file);
 
 /* end of FFTW_DEFINE_API macro */
