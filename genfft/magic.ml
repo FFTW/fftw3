@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.9 2002-06-30 22:34:06 athena Exp $ *)
+(* $Id: magic.ml,v 1.10 2002-09-13 21:53:13 stevenj Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -72,7 +72,7 @@ let speclist = [
   "-circular-min", set_int circular_min, undocumented;
 
   "-compact", set_bool compact, 
-  " Mangle variable names to save reduce size of source code";
+  " Mangle variable names to reduce size of source code";
   "-no-compact", unset_bool compact, 
   " Disable -compact";
 
