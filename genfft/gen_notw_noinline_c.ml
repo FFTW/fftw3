@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_noinline_c.ml,v 1.2 2005-01-10 01:05:55 athena Exp $ *)
+(* $Id: gen_notw_noinline_c.ml,v 1.3 2005-01-10 18:51:08 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_noinline_c.ml,v 1.2 2005-01-10 01:05:55 athena Exp $"
+let cvsid = "$Id: gen_notw_noinline_c.ml,v 1.3 2005-01-10 18:51:08 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -91,7 +91,7 @@ let generate n =
   let annot = standard_optimizer odag in
 
   let tree0 =
-    Fcn ("static void", name_noinline,
+    Fcn ("void", name_noinline,
 	 ([Decl (C.constrealtypep, riarray);
 	   Decl (C.realtypep, roarray)]
 	  @ (if stride_fixed !uistride then [] 
