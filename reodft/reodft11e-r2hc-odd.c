@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.7 2003-02-27 06:05:39 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.8 2003-02-27 06:12:05 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -98,7 +98,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	  if (n2even) {
 	       for (i = 0; i + i + 1 <= n/2; ++i) {
 		    int k;
-		    R c, s;
+		    E c, s;
 		    
 		    k = i + i + 1;
 		    c = buf[k];
@@ -113,7 +113,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	       }
 	       for (; i + i + 1 < n; ++i) {
 		    int k;
-		    R c, s;
+		    E c, s;
 		    
 		    k = i + i + 1;
 		    c = buf[n - k];
@@ -131,7 +131,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	  else /* n2odd */ {
 	       for (i = 0; i + i + 1 <= n/2; ++i) {
 		    int k;
-		    R c, s;
+		    E c, s;
 		    
 		    k = i + i + 1;
 		    c = buf[k];
@@ -146,7 +146,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	       }
 	       for (; i + i + 1 < n; ++i) {
 		    int k;
-		    R c, s;
+		    E c, s;
 		    
 		    k = i + i + 1;
 		    c = buf[n - k];
@@ -205,7 +205,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 	  if (n2even) {
 	       for (i = 0; i + i + 1 <= n/2; ++i) {
 		    int k;
-		    R c, s;
+		    E c, s;
 		    
 		    k = i + i + 1;
 		    c = buf[k];
@@ -230,7 +230,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 	       }
 	       for (; i + i + 1 < n; ++i) {
 		    int k;
-		    R c, s;
+		    E c, s;
 		    
 		    k = i + i + 1;
 		    c = buf[n - k];
@@ -258,7 +258,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 	  else /* n2odd */ {
 	       for (i = 0; i + i + 1 <= n/2; ++i) {
 		    int k;
-		    R c, s;
+		    E c, s;
 		    
 		    k = i + i + 1;
 		    c = buf[k];
@@ -283,7 +283,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 	       }
 	       for (; i + i + 1 < n; ++i) {
 		    int k;
-		    R c, s;
+		    E c, s;
 		    
 		    k = i + i + 1;
 		    c = buf[n - k];
