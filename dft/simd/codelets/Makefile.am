@@ -13,7 +13,7 @@
 ###########################################################################
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 -I$(top_srcdir)/dft/simd -I$(top_srcdir)/simd
-CFLAGS = @CFLAGS@ @CODELET_OPTIM@ $(SIMD_CFLAGS)
+AM_CFLAGS = $(SIMD_CFLAGS)
 noinst_LTLIBRARIES = libdft_codelets_simd.la
 
 ###########################################################################

@@ -13,7 +13,6 @@
 ###########################################################################
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 -I$(top_srcdir)/dft/codelets
-CFLAGS = @CFLAGS@ @CODELET_OPTIM@
 noinst_LTLIBRARIES = libdft_standard.la
 
 ###########################################################################

@@ -1,6 +1,11 @@
 # -*- makefile -*-
 # This file contains special make rules to generate codelets.
-# This file requires GNU make .
+# Most of this file requires GNU make .
+
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) $(CODELET_OPTIM)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) $(CODELET_OPTIM)
 
 CODLIST = codlist.c
 CODELET_NAME=codelet_
