@@ -153,8 +153,9 @@ if test "$ac_m_pref_stack_boundary_4" = "yes"; then
 	struct yuck ick(void) { struct yuck y; y.blechh = 3; return y; }
 #       define CHK_ALIGN(x) if ((((long) &(x)) & 0x7)) { fprintf(stderr, "bad alignment of " #x "\n"); exit(1); }
 	void blah(int foo) { double foobar; CHK_ALIGN(foobar); }
-	int main(void) { double ok1; struct yuck y; double ok2; CHK_ALIGN(ok1);
-                         CHK_ALIGN(ok2); y = ick(); blah(one()); return 0; }
+	int main2(void) {double ok1; struct yuck y; double ok2; CHK_ALIGN(ok1);
+                         CHK_ALIGN(ok2); y = ick(); blah(one()); return 0;}
+	int main(void) { if ((((long) (__builtin_alloca(0))) & 0x7)) __builtin_alloca(4); return main2(); }
 	], [acx_gcc_aligns_stack=yes; acx_gcc_stack_align_bug=no], 
 	acx_gcc_stack_align_bug=yes, acx_gcc_stack_align_bug=yes)
 	CFLAGS="$save_CFLAGS"
