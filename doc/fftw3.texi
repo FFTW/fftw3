@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.113 2003-03-07 05:43:40 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.114 2003-03-07 06:53:28 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3326,13 +3326,14 @@ couple of lines of code if your compiler is not yet supported
 @cindex compiler
 
 Installation of FFTW is simplest if you have a Unix or a GNU system,
-such as GNU/Linux, and we describe this case in the first section below.
-Compilation on non-Unix systems is a more manual process, but we outline
-the procedure in the second section; it is also likely that we will post
-pre-compiled binaries for the last few remaining non-Unix operating
-systems in widespread use.
+such as GNU/Linux, and we describe this case in the first section below,
+including the use of special configuration options to exploit
+optimizations for particular architectures (e.g. SIMD).  Compilation on
+non-Unix systems is a more manual process, but we outline the procedure
+in the second section.  It is also likely that pre-compiled binaries
+will be available for popular systems.
 
-Finally, we describe how you can customize FFTW for special needs by
+Finally, we describe how you can customize FFTW for particular needs by
 generating @emph{codelets} for fast transforms of sizes not supported
 efficiently by the standard FFTW distribution.
 
@@ -3347,6 +3348,149 @@ efficiently by the standard FFTW distribution.
 
 @node Installation on Unix, Installation on non-Unix systems, Installation and Customization, Installation and Customization
 @section Installation on Unix
+
+FFTW comes with a @code{configure} program in the GNU style.
+Installation can be as simple as:
+@fpindex configure
+
+@example
+./configure
+make
+make install
+@end example
+
+This will build the uniprocessor complex and real transform libraries
+along with the test programs.  (We recommend that you use GNU
+@code{make} if it is available; on some systems it is called
+@code{gmake}.)  The ``@code{make install}'' command installs the fftw
+and rfftw libraries in standard places, and typically requires root
+privileges (unless you specify a different install directory with the
+@code{--prefix} flag to @code{configure}).  You can also type
+``@code{make check}'' to put the FFTW test programs through their paces.
+If you have problems during configuration or compilation, you may want
+to run ``@code{make distclean}'' before trying again; this ensures that
+you don't have any stale files left over from previous compilation
+attempts.
+
+The @code{configure} script knows good @code{CFLAGS} (C compiler flags)
+@cindex compiler flags
+for a few systems.  If your system is not known, the @code{configure}
+script will print out a warning.  In this case, you should re-configure
+FFTW with the command
+@example
+./configure CFLAGS="<write your CFLAGS here>"
+@end example
+and then compile as usual.  If you do find an optimal set of
+@code{CFLAGS} for your system, please let us know what they are (along
+with the output of @code{config.guess}) so that we can include them in
+future releases.
+
+The @code{configure} program supports all the standard flags defined by
+the GNU Coding Standards; see the @code{INSTALL} file in FFTW or
+@uref{http://www.gnu.org/prep/standards_toc.html, the GNU web page}.
+Note especially @code{--help} to list all flags and
+@code{--enable-shared} to create shared, rather than static, libraries.
+@code{configure} also accepts a few FFTW-specific flags, particularly:
+
+@itemize @bullet
+
+@item
+@cindex precision
+@code{--enable-float}: Produces a single-precision version of FFTW
+(@code{float}) instead of the default double-precision (@code{double}).
+@xref{Precision}.
+
+@item
+@cindex precision
+@code{--enable-long-double}: Produces a long-double precision version of
+FFTW (@code{long double}) instead of the default double-precision
+(@code{double}).  The @code{configure} script will halt with an error
+message is @code{long double} is the same size as @code{double} on your
+machine/compiler.  @xref{Precision}.
+
+@item
+@cindex threads
+@code{--enable-threads}: Enables compilation and installation of the
+FFTW threads library (@pxref{Multi-threaded FFTW}), which provides a
+simple interface to parallel transforms for SMP systems.  (By default,
+the threads routines are not compiled.)
+
+@item
+@code{--with-openmp}, @code{--with-sgimp}: In conjunction with
+@code{--enable-threads}, causes the multi-threaded FFTW library to use
+OpenMP or SGI MP compiler directives in order to induce parallelism,
+rather than spawning its own threads directly.  (Useful especially for
+programs already employing such directives, in order to minimize
+conflicts between different parallelization mechanisms.)
+
+@ignore
+@item
+@cindex MPI
+@code{--enable-mpi}: Enables compilation and installation of the FFTW MPI
+library (@pxref{MPI FFTW}), which provides parallel transforms for
+distributed-memory systems with MPI.  (By default, the MPI routines are
+not compiled.)
+@end ignore
+
+@item
+@cindex Fortran-callable wrappers
+@code{--disable-fortran}: Disables inclusion of Fortran-callable wrapper
+routines (@pxref{Calling FFTW from Fortran}) in the standard FFTW
+libraries.  These wrapper routines increase the library size by only a
+negligible amount, so they are included by default as long as the
+@code{configure} script finds a Fortran compiler on your system.
+
+@item
+@code{--without-cycle-counter}: Disables the use of hardware cycle
+counters, and falls back on @code{gettimeofday} or @code{clock}.  This
+greatly worsens performance, and should not be used if there is any
+chance of getting a cycle counter working on your system.  @xref{Cycle
+Counters}.
+
+@item
+@code{--enable-k7}: Enable special optimizations for the AMD K7 and
+related chips; this will increase the size of the FFTW library by
+including special generated-assembly routines for that chip.  The code
+should still run on other x86 CPUs (for which the K7 codelets are
+automatically disabled, although the FFTW library is still larger).
+This option only works in double precision (the default).
+
+@item
+@code{--enable-sse}, @code{--enable-sse2}, @code{--enable-3dnow},
+@code{--enable-altivec}: Enable the compilation of SIMD code for SSE
+(Pentium III+), SSE2 (Pentium IV+), 3dNow! (AMD K7 and others), or
+AltiVec (PowerPC G4+).  SSE, 3dNow!, and AltiVec only work with
+@code{--enable-float} (above), while SSE2 only works in double precision
+(the default).  The resulting code will @emph{still work} on earlier
+CPUs lacking the SIMD extensions (SIMD is automatically disabled,
+although the FFTW library is still larger).
+@itemize @minus
+@item
+These options require a compiler supporting SIMD extensions, and
+compiler support is still a bit flakey.  We have tested them with
+@code{gcc} versions 3.2.2 (which miscompiles AltiVec permutations on
+Linux, but we have an assembly workaround), and with Intel's @code{icc}
+6.0 (which misaligns SSE constants, but we have a workaround).  Some 3.x
+versions of @code{gcc} crash during compilation, and @code{gcc} 2.95
+miscompiles AltiVec on MacOS X.
+@item
+With the Linux kernel, you may have to recompile the kernel with the
+option to support SSE/SSE2/AltiVec (see the ``Processor type and
+features'' settings).
+@item
+With AltiVec and @code{gcc}, you may have to use the
+@code{-mabi=altivec} to compile any code linking to FFTW, in order to
+properly align the stack.  (This is not necessary on MacOS X.)
+@end itemize
+
+@end itemize
+
+To force @code{configure} to use a particular C compiler (instead of the
+@cindex compiler
+default, usually @code{gcc}), set the environment variable @code{CC} to
+the name of the desired compiler before running @code{configure}; you
+may also need to set the flags via the variable @code{CFLAGS}.
+@cindex compiler flags
 
 @c ------------------------------------------------------------
 @node Installation on non-Unix systems, Cycle Counters, Installation on Unix, Installation and Customization
