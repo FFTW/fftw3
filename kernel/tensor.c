@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.5 2002-06-09 15:01:41 athena Exp $ */
+/* $Id: tensor.c,v 1.6 2002-06-10 01:11:51 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -283,8 +283,8 @@ tensor fftw_tensor_compress(const tensor sz)
    effective contiguous 1d array.  Assumes that a.is >= b.is. */
 static int strides_contig(iodim *a, iodim *b)
 {
-     return ((uint)a->is == b->is * b->n && 
-	     (uint)a->os == b->os * b->n);
+     return (a->is == b->is * (int)b->n && 
+	     a->os == b->os * (int)b->n);
 }
 
 /* Like tensor_compress, but also compress into one dimension any
