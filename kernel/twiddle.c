@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.11 2002-07-22 03:15:12 stevenj Exp $ */
+/* $Id: twiddle.c,v 1.12 2002-07-27 19:06:21 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -127,7 +127,8 @@ static R *compute(const tw_instr *instr, uint n, uint r, uint m)
 		   }
 		   
 		   default:
-			*W++ = f[p->op](twoPiOverN * ((j + p->v) * p->i));
+			*W++ = f[p->op](twoPiOverN * 
+					(((signed int)(j + p->v)) * p->i));
 			break;
 	       }
 	  }
