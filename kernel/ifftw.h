@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.50 2002-07-14 20:09:17 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.51 2002-07-14 21:12:14 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -287,6 +287,7 @@ struct plan_s {
      int awake_refcnt;
      opcnt ops;
      double pcost;
+     int blessed;
 };
 
 plan *X(mkplan)(size_t size, const plan_adt *adt);
@@ -294,6 +295,7 @@ void X(plan_use)(plan *ego);
 void X(plan_destroy)(plan *ego);
 void X(plan_awake)(plan *ego, int flag);
 #define AWAKE(plan, flag) X(plan_awake)(plan, flag)
+void X(plan_bless)(plan *ego);
 
 /*-----------------------------------------------------------------------*/
 /* solver.c: */
@@ -329,13 +331,15 @@ typedef struct solutions_s solutions; /* opaque */
 /* planner flags */
 enum { ESTIMATE = 0x1, CLASSIC = 0x2 };
 
+typedef enum { FORGET_PLANS, FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
+
 typedef struct {
      solver *(*slv)(pair *cons);
      pair *(*cdr)(pair *cons);
      pair *(*solvers)(planner *ego);
      void (*register_solver)(planner *ego, solver *s);
      plan *(*mkplan)(planner *ego, problem *p);
-     void (*forget)(planner *ego, int everythingp);
+     void (*forget)(planner *ego, amnesia a);
      void (*exprt)(planner *ego, printer *pr); /* export is a reserved word
 						  in C++.  Idiots. */
      plan *(*slv_mkplan)(planner *ego, problem *p, solver *s);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.21 2002-07-14 19:03:51 stevenj Exp $ */
+/* $Id: planner.c,v 1.22 2002-07-14 21:12:14 stevenj Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -40,6 +40,7 @@ struct solutions_s {
      problem *p;
      plan *pln;
      pair *sp;
+     int blessed;
      solutions *cdr;
 };
 
@@ -138,6 +139,7 @@ static void insert(planner *ego, problem *p, plan *pln, pair *sp)
      l->pln = pln;
      l->sp = sp; 
      l->p = X(problem_dup)(p);
+     l->blessed = pln->blessed;
 
      really_insert(ego, l);
 }
@@ -187,36 +189,45 @@ static plan *mkplan(planner *ego, problem *p)
      }
 }
 
-/* destroy hash table entries.  If EVERYTHINGP, destroy the whole
-   table.  Otherwise, just destroy plans */
-static void forget(planner *ego, int everythingp)
+/* destroy hash table entries.  If FORGET_EVERYTHING, destroy the whole
+   table.  If FORGET_ACCURSED, then destroy entries that are not blessed.
+   If FORGET_PLANS, then destroy all the plans but remember the solvers. */
+static void forget(planner *ego, amnesia a)
 {
-     solutions *s;
      uint h;
 
      for (h = 0; h < ego->hashsiz; ++h) {
-	  s = ego->sols[h];
+	  solutions *s = ego->sols[h], *sprev = 0;
 	  while (s) {
 	       solutions *s_cdr = s->cdr;
 	       if (s->pln) {
-		    X(plan_destroy)(s->pln);
-		    s->pln = 0;
+		    s->blessed = s->pln->blessed;
+		    if (a == FORGET_PLANS) {
+			 X(plan_destroy)(s->pln);
+			 s->pln = 0;
+		    }
 	       }
-	       if (everythingp) {
+	       if (a == FORGET_EVERYTHING ||
+		   (a == FORGET_ACCURSED && !s->blessed)) {
+		    if (s->pln)
+			 X(plan_destroy)(s->pln);
 		    X(problem_destroy)(s->p);
 		    X(free)(s);
+		    if (sprev)
+			 sprev->cdr = s_cdr;
+		    else
+			 ego->sols[h] = s_cdr;
 	       }
+	       else
+		    sprev = s;
 	       s = s_cdr;
 	  }
-
-	  if (everythingp)
-	       ego->sols[h] = 0;
      }
 }
 
 static void htab_destroy(planner *ego)
 {
-     forget(ego, 1);
+     forget(ego, FORGET_EVERYTHING);
      X(free)(ego->sols);
 }
 
