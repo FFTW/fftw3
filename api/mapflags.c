@@ -41,17 +41,16 @@ typedef struct {
 #define EQV(a, b) IMPLIES(YES(a), YES(b)), IMPLIES(NO(a), NO(b))
 #define NEQV(a, b) IMPLIES(YES(a), NO(b)), IMPLIES(NO(a), YES(b))
 
-static int map_flags(int iflags, int oflags,
-                     const flagop flagmap[], int nmap)
+static void map_flags(int *iflags, int *oflags,
+		      const flagop flagmap[], int nmap)
 {
      int i;
      for (i = 0; i < nmap; ++i)
-          if (FLAGP(iflags, flagmap[i].flag))
-               oflags = OP(oflags, flagmap[i].op);
-     return oflags;
+          if (FLAGP(*iflags, flagmap[i].flag))
+               *oflags = OP(*oflags, flagmap[i].op);
 }
 
-#define NMAP(flagmap)(sizeof(flagmap) / sizeof(flagop))
+#define NELEM(array)(sizeof(array) / sizeof((array)[0]))
 
 void X(mapflags)(planner *plnr, int flags)
 {
@@ -101,11 +100,13 @@ void X(mapflags)(planner *plnr, int flags)
 	  EQV(FFTW_NO_VRECURSE, NO_VRECURSE)
      };
 
-     flags = map_flags(flags, flags, self_flagmap, NMAP(self_flagmap));
+     map_flags(&flags, &flags, self_flagmap, NELEM(self_flagmap));
 
-     plnr->problem_flags = map_flags(flags, 0, problem_flagmap,
-                                     NMAP(problem_flagmap));
+     plnr->problem_flags = 0;
+     map_flags(&flags, &plnr->problem_flags, problem_flagmap, 
+	       NELEM(problem_flagmap));
 
-     plnr->planner_flags = map_flags(flags, 0, planner_flagmap,
-                                     NMAP(planner_flagmap));
+     plnr->planner_flags = 0;
+     map_flags(&flags, &plnr->planner_flags, planner_flagmap, 
+	       NELEM(planner_flagmap));
 }
