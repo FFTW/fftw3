@@ -19,7 +19,7 @@ plan-guru-r2r.c plan-guru-split-dft-c2r.c plan-guru-split-dft-r2c.c	\
 plan-guru-split-dft.c plan-many-dft-c2r.c plan-many-dft-r2c.c		\
 plan-many-dft.c plan-many-r2r.c plan-r2r-1d.c plan-r2r-2d.c		\
 plan-r2r-3d.c plan-r2r.c print-plan.c rdft2-pad.c the-planner.c		\
-version.c version.h api.h f77funcs.h fftw3.h fftw3.f x77.h
+version.c version.h api.h f77funcs.h fftw3.h x77.h
 
 BUILT_SOURCES = fftw3.f version.h
 
