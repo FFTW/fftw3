@@ -66,6 +66,7 @@ fi
 AM_CONDITIONAL(HAVE_K7, test "$have_k7" = "yes")
 
 have_simd="no"
+simd_precision="s"
 
 AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
 if test "$have_sse" = "yes"; then
@@ -77,6 +78,10 @@ AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE2 optimizations])
 if test "$have_sse2" = "yes"; then
 	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
 	have_simd="yes"
+	simd_precision = "d"
+	if test "$have_sse" = "yes"; then
+		AC_MSG_ERROR([you cannot use SSE and SSE2 at the same time])
+	fi
 fi
 
 AC_ARG_ENABLE(altivec, [AC_HELP_STRING([--enable-altivec],[enable Altivec optimizations])], have_altivec=$enableval, have_altivec=no)
@@ -91,8 +96,8 @@ if test "$have_3dnow" = "yes"; then
 	have_simd="yes"
 fi
 
-if test "$PRECISION" = "l" && test "$have_simd" = "yes"; then
-	AC_MSG_ERROR([cannot use SIMD optimizations with long double])
+if test "$PRECISION" != "$simd_precision" && test "$have_simd" = "yes"; then
+	AC_MSG_ERROR([requested SIMD type does not match selected precision])
 fi
 
 AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
