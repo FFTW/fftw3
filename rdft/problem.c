@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.38 2003-01-16 12:58:28 athena Exp $ */
+/* $Id: problem.c,v 1.39 2003-02-27 17:35:33 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -129,12 +129,13 @@ int X(problem_rdft_p)(const problem *p)
 }
 
 /* Dimensions of size 1 that are not REDFT/RODFT are no-ops and can be
-   eliminated.  REDFT/RODFT unit dimensions still have factors of 2.0
+   eliminated.  REDFT/RODFT unit dimensions often have factors of 2.0
    and suchlike from normalization and phases, although in principle
    these constant factors from different dimensions could be combined. */
 static int nontrivial(const iodim *d, rdft_kind kind)
 {
-     return (d->n > 1 || REDFT_KINDP(kind) || RODFT_KINDP(kind));
+     return (d->n > 1 || ((REDFT_KINDP(kind) || RODFT_KINDP(kind))
+			  && kind != REDFT01 && kind != RODFT01));
 }
 
 problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
