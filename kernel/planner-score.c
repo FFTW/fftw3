@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.19 2002-09-02 01:26:38 athena Exp $ */
+/* $Id: planner-score.c,v 1.20 2002-09-04 02:32:43 athena Exp $ */
 #include "ifftw.h"
 
 /* scoring planner */
@@ -56,6 +56,7 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  ego->score = s->adt->score(s, p, ego); /* natural score of solver */
 	  best = ego->adt->slv_mkplan(ego, p, s);
 	  if (best) {
+	       X(plan_use)(best);
 	       best->score = ego->score;
 	       goto done;
 	  }

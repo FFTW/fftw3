@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-naive.c,v 1.17 2002-09-01 23:22:53 athena Exp $ */
+/* $Id: planner-naive.c,v 1.18 2002-09-04 02:32:43 athena Exp $ */
 #include "ifftw.h"
 
 /* naive planner with no memoization */
@@ -31,7 +31,10 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
      if (*descp) {
 	  slvdesc *sp = *descp;
 	  solver *s = sp->slv;
-	  if ((*bestp = ego->adt->slv_mkplan(ego, p, s))) return;
+	  if ((*bestp = ego->adt->slv_mkplan(ego, p, s))) {
+	       X(plan_use)(*bestp);
+	       return;
+	  }
 	  /* wisdom may be wrong because of md5 collisions */
      }
 

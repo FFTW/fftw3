@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.63 2002-09-04 01:08:30 athena Exp $ */
+/* $Id: planner.c,v 1.64 2002-09-04 02:32:43 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -225,8 +225,6 @@ static plan *mkplan(planner *ego, problem *p)
 
 	       /* PLN = 0 in the unlikely case of MD5 collision */
 	       if (!pln) goto search;
-
-	       X(plan_use)(pln);
 
 	       /* inherit blessings etc. from planner */
 	       merge_flags(sol, ego->flags);
