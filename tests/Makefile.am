@@ -3,6 +3,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/libbench2	\
 -I$(top_srcdir)/threads -I$(top_srcdir)/api 
 
 noinst_PROGRAMS = bench
+EXTRA_DIST = check.pl
 
 if THREADS
 LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_threads.la
