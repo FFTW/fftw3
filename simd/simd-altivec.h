@@ -102,14 +102,20 @@ static inline void ST(R *x, V v, int ovs, const R *aligned_like)
      STL(x, v, ovs, aligned_like);
 }
 
+extern const vector unsigned int X(altivec_select_even_perm);
+extern const vector unsigned int X(altivec_select_odd_perm);
 static inline void STPAIR(R *x, V v0, V v1, int ovs)
 {
      const vector unsigned int llll =
-       VLIT(0x00010203, 0x04050607, 0x10111213, 0x14151617);
+	  VLIT(0x00010203, 0x04050607, 0x10111213, 0x14151617);
      const vector unsigned int hhhh =
-       VLIT(0x08090a0b, 0x0c0d0e0f, 0x18191a1b, 0x1c1d1e1f);
-     STA(x, vec_perm(v0, v1, (vector unsigned char)llll), ovs, 0);
-     STA(x + ovs, vec_perm(v0, v1, (vector unsigned char)hhhh), ovs, 0);
+	  VLIT(0x08090a0b, 0x0c0d0e0f, 0x18191a1b, 0x1c1d1e1f);
+     STA(x, vec_perm(v0, v1, 
+		     (vector unsigned char)X(altivec_select_even_perm)),
+	 ovs, 0);
+     STA(x + ovs, vec_perm(v0, v1,
+			   (vector unsigned char)X(altivec_select_odd_perm)),
+	 ovs, 0);
 }
 
 extern const vector unsigned int X(altivec_flipri_perm);

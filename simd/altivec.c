@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: altivec.c,v 1.9 2005-02-07 23:48:36 athena Exp $ */
+/* $Id: altivec.c,v 1.10 2005-02-10 13:53:22 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -30,6 +30,11 @@ const vector unsigned int X(altivec_ld_selmsk) =
 
 const vector unsigned int X(altivec_flipri_perm) = 
    VLIT(0x04050607, 0x00010203, 0x0c0d0e0f, 0x08090a0b);
+
+const vector unsigned int X(altivec_select_even_perm) =
+   VLIT(0x00010203, 0x04050607, 0x10111213, 0x14151617);
+const vector unsigned int X(altivec_select_odd_perm) =
+   VLIT(0x08090a0b, 0x0c0d0e0f, 0x18191a1b, 0x1c1d1e1f);
 
 const vector float X(altivec_chsr_sgn) = VLIT(-1.0, 1.0, -1.0, 1.0);
 const vector float X(altivec_chsr_msk) = VLIT(-0.0, 0.0, -0.0, 0.0);
