@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.249 2005-02-24 02:51:50 athena Exp $ */
+/* $Id: ifftw.h,v 1.250 2005-02-24 14:40:30 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -725,6 +725,9 @@ void X(rader_tl_delete)(R *W, rader_tl **tl);
 /* lower bound to the cache size, for tiled routines */
 #define CACHESIZE 8192
 
+void X(tile2d)(int n0l, int n0u, int n1l, int n1u, int tilesz,
+	       void (*f)(int n0l, int n0u, int n1l, int n1u, void *args),
+	       void *args);
 void X(cpy1d)(R *I, R *O, int n0, int is0, int os0, int vl);
 void X(cpy2d)(R *I, R *O,
 	      int n0, int is0, int os0,
@@ -742,6 +745,10 @@ void X(cpy2d_tiled)(R *I, R *O,
 		    int n0, int is0, int os0,
 		    int n1, int is1, int os1, 
 		    int vl);
+void X(cpy2d_tiledbuf)(R *I, R *O,
+		       int n0, int is0, int os0,
+		       int n1, int is1, int os1, 
+		       int vl);
 void X(cpy2d_pair)(R *I0, R *I1, R *O0, R *O1,
 		   int n0, int is0, int os0,
 		   int n1, int is1, int os1);
@@ -753,7 +760,8 @@ void X(cpy2d_pair_co)(R *I0, R *I1, R *O0, R *O1,
 		      int n1, int is1, int os1);
 
 void X(transpose)(R *I, int n, int s0, int s1, int vl);
-void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl) ;
+void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl);
+void X(transpose_tiledbuf)(R *I, int n, int s0, int s1, int vl);
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */

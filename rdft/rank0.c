@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.20 2005-02-24 02:51:50 athena Exp $ */
+/* $Id: rank0.c,v 1.21 2005-02-24 14:40:30 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -110,7 +110,7 @@ static int applicable_iter(const P *pln, const problem_rdft *p)
 }
 
 /**************************************************************/
-/* rank 2, out of place, tiled, vl <= 2 */
+/* rank 2, out of place, tiled, no buffering */
 static void apply_tiled(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
@@ -134,6 +134,23 @@ static int applicable_tiled(const P *pln, const problem_rdft *p)
 	     && pln->vl < CACHESIZE / (16 * sizeof(R))
 	  );
 }
+
+/**************************************************************/
+/* rank 2, out of place, tiled, with buffer */
+static void apply_tiledbuf(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     int vl = ego->vl;
+
+     A(ego->rnk == 2);
+     A(vl <= 2);
+     X(cpy2d_tiled)(I, O, 
+		     ego->d[0].n, ego->d[0].is, ego->d[0].os,
+		     ego->d[1].n, ego->d[1].is, ego->d[1].os,
+		     vl);
+}
+
+#define applicable_tiledbuf applicable_tiled
 
 /**************************************************************/
 /* rank 0, out of place, using memcpy */
@@ -192,6 +209,18 @@ static int applicable_ip_sq_tiled(const P *pln, const problem_rdft *p)
 	     && pln->vl * 2 < CACHESIZE / (16 * sizeof(R))
 	  );
 }
+
+/**************************************************************/
+/* rank 2, in place, square transpose, tiled, buffered */
+static void apply_ip_sq_tiledbuf(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     UNUSED(O);
+     X(transpose_tiledbuf)(I, ego->d[0].n, ego->d[0].is, ego->d[0].os,
+			   ego->vl);
+}
+
+#define applicable_ip_sq_tiledbuf applicable_ip_sq_tiled
 
 /**************************************************************/
 static int applicable(const S *ego, const problem *p_)
@@ -258,14 +287,20 @@ void X(rdft_rank0_register)(planner *p)
 	  int (*applicable)(const P *pln, const problem_rdft *p);
 	  const char *nam;
      } tab[] = {
-	  { apply_memcpy,  applicable_memcpy,  "rdft-rank0-memcpy" },
-	  { apply_iter,    applicable_iter,    "rdft-rank0-iter" },
-	  { apply_tiled,   applicable_tiled,   "rdft-rank0-tiled" },
-	  { apply_ip_sq,   applicable_ip_sq,   "rdft-rank0-ip-sq" },
+	  { apply_memcpy,   applicable_memcpy,   "rdft-rank0-memcpy" },
+	  { apply_iter,     applicable_iter,     "rdft-rank0-iter" },
+	  { apply_tiled,    applicable_tiled,    "rdft-rank0-tiled" },
+	  { apply_tiledbuf, applicable_tiledbuf, "rdft-rank0-tiledbuf" },
+	  { apply_ip_sq,    applicable_ip_sq,    "rdft-rank0-ip-sq" },
 	  { 
 	       apply_ip_sq_tiled,
 	       applicable_ip_sq_tiled,
 	       "rdft-rank0-ip-sq-tiled" 
+	  },
+	  { 
+	       apply_ip_sq_tiledbuf,
+	       applicable_ip_sq_tiledbuf,
+	       "rdft-rank0-ip-sq-tiledbuf" 
 	  },
      };
 

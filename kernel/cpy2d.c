@@ -82,51 +82,75 @@ void X(cpy2d_co)(R *I, R *O,
 }
 
 
-static void dotile(R *I, R *O,
-		   int n0, int is0, int os0,
-		   int n1, int is1, int os1, 
-		   int vl, R *buf) 
+/* tiled copy routines */
+struct cpy2d_closure {
+     R *I, *O;
+     int is0, os0, is1, os1, vl;
+     R *buf; 
+};
+
+static void dotile(int n0l, int n0u, int n1l, int n1u, void *args)
 {
-     /* copy from I to buf */
-     X(cpy2d_ci) (I, buf, n0, is0, vl, n1, is1, vl * n0, vl);
-     
-     /* copy from buf to O */
-     X(cpy2d_co) (buf, O, n0, vl, os0, n1, vl * n0, os1, vl);
+     struct cpy2d_closure *k = (struct cpy2d_closure *)args;
+     X(cpy2d)(k->I + n0l * k->is0 + n1l * k->is1,
+	      k->O + n0l * k->os0 + n1l * k->os1,
+	      n0u - n0l, k->is0, k->os0,
+	      n1u - n1l, k->is1, k->os1,
+	      k->vl);
 }
+
+static void dotile_buf(int n0l, int n0u, int n1l, int n1u, void *args)
+{
+     struct cpy2d_closure *k = (struct cpy2d_closure *)args;
+
+     /* copy from I to buf */
+     X(cpy2d_ci)(k->I + n0l * k->is0 + n1l * k->is1,
+		 k->buf,
+		 n0u - n0l, k->is0, k->vl,
+		 n1u - n1l, k->is1, k->vl * (n0u - n0l),
+		 k->vl);
+
+     /* copy from buf to O */
+     X(cpy2d_co)(k->buf,
+		 k->O + n0l * k->os0 + n1l * k->os1,		 
+		 n0u - n0l, k->vl, k->os0,
+		 n1u - n1l, k->vl * (n0u - n0l), k->os1,
+		 k->vl);
+}
+
 
 void X(cpy2d_tiled)(R *I, R *O,
 		    int n0, int is0, int os0,
 		    int n1, int is1, int os1, int vl) 
 {
+     int tilesz = X(isqrt)((CACHESIZE / sizeof(R)) / vl);
+     struct cpy2d_closure k;
+     k.I = I;
+     k.O = O;
+     k.is0 = is0;
+     k.os0 = os0;
+     k.is1 = is1;
+     k.os1 = os1;
+     k.vl = vl;
+     k.buf = 0; /* unused */
+     X(tile2d)(0, n0, 0, n1, tilesz, dotile, &k);
+}
+
+void X(cpy2d_tiledbuf)(R *I, R *O,
+		       int n0, int is0, int os0,
+		       int n1, int is1, int os1, int vl) 
+{
      R buf[CACHESIZE];
      int tilesz = X(isqrt)((CACHESIZE / sizeof(R)) / vl);
-     int i0, i1;
-
-     for (i1 = 0; i1 < n1 - tilesz; i1 += tilesz) {
-	  for (i0 = 0; i0 < n0 - tilesz; i0 += tilesz) 
-	       dotile(I + i0 * is0 + i1 * is1,
-		      O + i0 * os0 + i1 * os1,
-		      tilesz, is0, os0,
-		      tilesz, is1, os1,
-		      vl, buf);
-
-	  dotile(I + i0 * is0 + i1 * is1,
-		 O + i0 * os0 + i1 * os1,
-		 n0 - i0, is0, os0,
-		 tilesz, is1, os1,
-		 vl, buf);
-     }
-
-     for (i0 = 0; i0 < n0 - tilesz; i0 += tilesz) 
-	  dotile(I + i0 * is0 + i1 * is1,
-		 O + i0 * os0 + i1 * os1,
-		 tilesz, is0, os0,
-		 n1 - i1, is1, os1,
-		 vl, buf);
-
-     dotile(I + i0 * is0 + i1 * is1,
-	    O + i0 * os0 + i1 * os1,
-	    n0 - i0, is0, os0,
-	    n1 - i1, is1, os1,
-	    vl, buf);
+     struct cpy2d_closure k;
+     k.I = I;
+     k.O = O;
+     k.is0 = is0;
+     k.os0 = os0;
+     k.is1 = is1;
+     k.os1 = os1;
+     k.vl = vl;
+     k.buf = buf;
+     X(tile2d)(0, n0, 0, n1, tilesz, dotile_buf, &k);
 }
+
