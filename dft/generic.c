@@ -33,19 +33,18 @@ typedef struct {
 
 static void cdot(int n,
 		 const R *xr, const R *xi, int xs,
-		 const R *w, int i,
+		 const R *w, int ws,
 		 R *or, R *oi)
 {
-     int i0 = 0, n0 = n;
+     int wp, i;
 
      E rr = *xr, ri = 0, ir = *xi, ii = 0;
-     while (--n0) {
-	  xr += xs; xi += xs;
-	  i0 += i; if (i0 >= n) i0 -= n;
-	  rr += *xr * w[2*i0];
-	  ri += *xr * w[2*i0+1];
-	  ii += *xi * w[2*i0+1];
-	  ir += *xi * w[2*i0];
+     for (wp = 0, i = 1; i < n; ++i) {
+	  wp += ws; if (wp >= n) wp -= n;
+	  rr += xr[i * xs] * w[2*wp];
+	  ri += xr[i * xs] * w[2*wp+1];
+	  ii += xi[i * xs] * w[2*wp+1];
+	  ir += xi[i * xs] * w[2*wp];
      }
      *or = rr - ii;
      *oi = ri + ir;
