@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.40 2002-08-05 23:54:31 stevenj Exp $ */
+/* $Id: planner.c,v 1.41 2002-08-06 14:32:53 athena Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -116,21 +116,31 @@ static void solution_destroy(solutions *s)
      X(free)(s);
 }
 
+/* remove solutions from *sp that are equivalent to newsol */
+static void remove_equivalent(solutions *newsol, solutions **ps)
+{
+     solutions *s;
+
+     while ((s = *ps)) {
+	  if (solvedby(s->p, s->flags, newsol)) {
+	       *ps = s->cdr;
+	       solution_destroy(s);
+	  } else {
+	       ps = &s->cdr;
+	  }
+     }
+}
+
 static void really_insert(planner *ego, solutions *l)
 {
      uint h = hash(ego, l->p, l->flags);
-     l->cdr = ego->sols[h];
-     ego->sols[h] = l;
+     solutions **ps = ego->sols + h;
 
-     { /* remove older, less-patient solutions for the same problem */
-	  solutions *s = l->cdr, *sp = l;
-	  for (; s; s = s->cdr, sp = sp->cdr)
-	       if (solvedby(s->p, s->flags, l)) {
-		    s = s->cdr;
-		    solution_destroy(sp->cdr);
-		    sp->cdr = s;
-	       }
-     }
+     /* remove old, less impatient solutions */
+     remove_equivalent(l, ps);
+
+     /* insert new solution */
+     l->cdr = *ps; *ps = l;
 }
 
 static void rehash(planner *ego)
