@@ -1,6 +1,31 @@
+c     Copyright (c) 2002 Matteo Frigo
+c     Copyright (c) 2002 Steven G. Johnson
+c     
+c     This program is free software; you can redistribute it and/or modify
+c     it under the terms of the GNU General Public License as published by
+c     the Free Software Foundation; either version 2 of the License, or
+c     (at your option) any later version.
+c     
+c     This program is distributed in the hope that it will be useful,
+c     but WITHOUT ANY WARRANTY; without even the implied warranty of
+c     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+c     GNU General Public License for more details.
+c     
+c     You should have received a copy of the GNU General Public License
+c     along with this program; if not, write to the Free Software
+c     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c     
 c     This is an example implementation of Fortran wisdom export/import
 c     to/from a Fortran unit (file), exploiting the generic
 c     dfftw_export_wisdom/dfftw_import_wisdom functions.
+c     
+c     We cannot compile this file into the FFTW library, lest all
+c     FFTW-calling programs be required to link to the Fortran I/O
+c     libraries.
+c     
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 c     Strictly speaking, the '$' format specifier, which allows us to
 c     write a character without a trailing newline, is not standard F77.
