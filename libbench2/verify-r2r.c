@@ -410,7 +410,7 @@ static void impulse_response(int rnk, dim_stuff *d, R impulse_amp,
  * Nevada, 29 May--1 June 1995.
  */
 
-static double linear0(int n, info *nfo, R *inA, R *inB, R *inC, R *outA,
+static double rlinear(int n, info *nfo, R *inA, R *inB, R *inC, R *outA,
 		      R *outB, R *outC, R *tmp, int rounds, double tol)
 {
      double e = 0.0;
@@ -438,7 +438,7 @@ static double linear0(int n, info *nfo, R *inA, R *inB, R *inC, R *outA,
      return e;
 }
 
-static double impulse0(dim_stuff *d, R impulse_amp,
+static double rimpulse(dim_stuff *d, R impulse_amp,
 		       int n, int vecn, info *nfo, 
 		       R *inA, R *inB, R *inC,
 		       R *outA, R *outB, R *outC,
@@ -630,9 +630,9 @@ void verify_r2r(bench_problem *p, int rounds, double tol, errors *e)
      nfo.pckdsz = verify_pack(nfo.totalsz, 1);
      nfo.pckdvecsz = verify_pack(p->vecsz, tensor_sz(nfo.probsz));
 
-     e->i = impulse0(d, impulse_amp, n, vecn, &nfo,
+     e->i = rimpulse(d, impulse_amp, n, vecn, &nfo,
 		     inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
-     e->l = linear0(N, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds,tol);
+     e->l = rlinear(N, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds,tol);
      e->s = t_shift(n, vecn, &nfo, inA, inB, outA, outB, tmp, 
 		    rounds, tol, d);
 
