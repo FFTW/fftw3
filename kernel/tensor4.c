@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor4.c,v 1.4 2003-01-17 06:44:44 stevenj Exp $ */
+/* $Id: tensor4.c,v 1.5 2003-01-17 09:23:37 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -35,16 +35,16 @@ int X(tensor_max_index)(const tensor *sz)
      return n;
 }
 
-#define tensor_min_xstride(sz, xs) {				\
-     A(FINITE_RNK(sz->rnk));					\
-     if (sz->rnk == 0) return 0;				\
-     else {							\
-          int i;						\
-          int s = X(iabs)(sz->dims[0].xs);			\
-          for (i = 1; i < sz->rnk; ++i)				\
+#define tensor_min_xstride(sz, xs) {			\
+     A(FINITE_RNK(sz->rnk));				\
+     if (sz->rnk == 0) return 0;			\
+     else {						\
+          int i;					\
+          int s = X(iabs)(sz->dims[0].xs);		\
+          for (i = 1; i < sz->rnk; ++i)			\
                s = X(imin)(s, X(iabs)(sz->dims[i].xs));	\
-          return s;						\
-     }								\
+          return s;					\
+     }							\
 }
 
 int X(tensor_min_istride)(const tensor *sz) tensor_min_xstride(sz, is)
