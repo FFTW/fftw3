@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.99 2003-03-06 07:25:32 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.100 2003-03-06 07:50:38 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -343,6 +343,7 @@ acceleration is available (@pxref{SIMD alignment and fftw_malloc}).
 The data is an array of type @code{fftw_complex}, which is by default a
 @code{double[2]} composed of the real (@code{in[i][0]}) and imaginary
 (@code{in[i][1]}) parts of a complex number.
+@tindex fftw_complex
 
 The next thing is to create a @dfn{plan}, which is an object
 @cindex plan
@@ -436,8 +437,8 @@ If you have a C compiler, such as @code{gcc}, supporting the recent C99
 standard, and you @code{#include <complex.h>} @emph{before}
 @code{<fftw3.h>}, then @code{fftw_complex} is the native
 double-precision complex type and you can manipulate it with ordinary
-arithmetic.  (To use the C++ @code{<complex>} template class, see the
-FFTW FAQ.)  
+arithmetic.  (The C++ @code{<complex>} template class may also be usable
+via a typecast.)  @xref{Complex numbers}.
 
 Single and long-double precision versions of FFTW may also be installed;
 to use them, replace the @code{fftw_} prefix by @code{fftwf_} or
@@ -1415,6 +1416,20 @@ complex type and you can manipulate it with ordinary arithmetic
 @code{fftw_complex} and @code{I} is the standard symbol for the
 imaginary unit);
 @cindex C99
+
+C++ has its own @code{complex<T>} template class, defined in the
+standard @code{<complex>} header file.  Reportedly, the C++ standards
+committee has recently agreed to mandate that the storage format used
+for this type be binary-compatible with the C99 type, i.e. an array
+@code{T[2]} with consecutive real @code{[0]} and imaginary @code{[1]}
+parts.  (See report
+@uref{http://anubis.dkuug.dk/JTC1/SC22/WG21/docs/papers/2002/1388.pdf,
+WG21/N1388}.)  Although not part of the official standard as of this
+writing, the proposal stated that ``This solution has been tested with
+all current major implementations of the standard library and shown to
+be working.''  To the extent that this is true, if you have a variable
+@code{complex<double> *x}, you can pass it directly to FFTW via
+@code{reinterpret_cast<fftw_complex*>(x)}.
 
 @c =========>
 @node Precision, Memory Allocation, Complex numbers, Data Types and Files
