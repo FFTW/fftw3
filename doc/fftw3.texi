@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.180 2003-04-03 01:14:07 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.181 2003-04-03 01:18:03 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3467,10 +3467,20 @@ Y_k = (-1)^k X_{n-1} + 2 \sum_{j=0}^{n-2} X_j \sin [\pi (j+1) (k+1/2) / n].
 $$
 @end tex
 @ifinfo
-Y[k] = (-1)^k X[n-1] + 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1) (k+1/2) / n)).
+Y[k] = (-1)^k X[n-1] + 2 (sum for j = 0 to n-2 of X[j] sin(pi (j+1) (k+1/2) / n)).
 @end ifinfo
 @html
 <center><img src="equation-rodft01.png" align="top">.</center>
+@end html
+In the case of @math{n=1}, this reduces to
+@tex
+$Y_0 = X_0$.
+@end tex
+@ifinfo
+Y[0] = X[0].
+@end ifinfo
+@html
+<i>Y</i><sub>0</sub> = <i>X</i><sub>0</sub>.
 @end html
 
 @subsubheading RODFT11 (DST-IV)
