@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.79 2003-03-03 06:17:28 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.80 2003-03-03 06:44:00 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -928,9 +928,7 @@ variants.}
 
 The r2r kinds for the various REDFT and RODFT types supported by FFTW,
 along with the boundary conditions at both ends of the @emph{input}
-array@footnote{Note that the boundary conditions of the transform output
-array are given by the input boundary conditions of the inverse
-transform.} (@code{n} real numbers @code{in[j=0..n-1]}), are:
+array (@code{n} real numbers @code{in[j=0..n-1]}), are:
 
 @itemize @bullet
 
@@ -976,6 +974,12 @@ transform followed by its inverse yields the original array scaled by
 @math{N}, where @math{N} is the @emph{logical} DFT size.  For REDFT00,
 @math{N=2(n-1)}; for RODFT00, @math{N=2(n+1)}; otherwise, @math{N=2n}.
 @cindex normalization
+
+Note that the boundary conditions of the transform output array are
+given by the input boundary conditions of the inverse transform.
+Thus, the above transforms are all inequivalent in terms of
+input/output boundary conditions, even neglecting the 0.5 shift
+difference.
 
 FFTW is most efficient when @math{N} is a product of small factors; note
 that this @emph{differs} from the factorization of the physical size
