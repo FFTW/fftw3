@@ -112,7 +112,7 @@ static void cdot_hc2r(int n, const E *x, const R *w, R *or0, R *or1)
 static void hartley_hc2r(int n, const R *x, int xs, E *o, R *pr)
 {
      int i;
-     E sr, si;
+     E sr;
 
      o[0] = sr = x[0]; o += 1;
      for (i = 1; i + i < n; ++i) {
