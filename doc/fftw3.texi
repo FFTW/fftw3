@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.56 2003-03-02 00:14:16 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.57 2003-03-02 00:14:54 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -373,7 +373,7 @@ example, use @code{FFTW_PATIENT} if you're willing to wait even longer
 for a more optimal plan.
 @ctindex FFTW_PATIENT
 One can also save plans for future use, as described by @ref{Words of
-Wisdom}.)
+Wisdom-Saving Plans}.)
 
 @example
 void fftw_execute(const fftw_plan plan);
