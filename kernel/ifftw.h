@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.24 2002-06-11 15:45:41 athena Exp $ */
+/* $Id: ifftw.h,v 1.25 2002-06-11 18:06:06 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -301,14 +301,16 @@ struct planner_s {
      plan *(*inferior_mkplan)(planner *ego, problem *p);
      uint hashsiz;
      uint cnt;
-     int memoize;               /* If TRUE, turn memoization on */
+     int memoize;               /* if TRUE, turn memoization on */
      int memoize_failures;	/* if TRUE, also memoize unfeasible problems */
+     int estimatep;             /* if TRUE, use estimate of execution time */
 };
 
 planner *X(mkplanner)(size_t sz, plan *(*mkplan)(planner *, problem *),
-                      void (*destroy) (planner *));
+                      void (*destroy) (planner *), int estimatep);
 void X(planner_destroy)(planner *ego);
 void X(planner_set_hook)(planner *p, void (*hook)(plan *, problem *));
+double X(evaluate_plan)(planner *ego, plan *pln, const problem *p);
 
 #ifdef FFTW_DEBUG
 void X(planner_dump)(planner *ego, int verbose);
@@ -336,9 +338,8 @@ void X(planner_dump)(planner *ego, int verbose);
 }
 
 /* various planners */
-planner *X(mkplanner_naive)(void);
-planner *X(mkplanner_estimate)(void);
-planner *X(mkplanner_score)(void);
+planner *X(mkplanner_naive)(int estimatep);
+planner *X(mkplanner_score)(int estimatep);
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */

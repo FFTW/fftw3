@@ -56,19 +56,19 @@ static planner *plnr;
 static fftw_problem *prblm;
 static plan *pln;
 
+#define ESTIMATE 1
+
 void setup(struct problem *p)
 {
      bench_real *ri, *ii, *ro, *io;
      BENCH_ASSERT(can_do(p));
 
 #if 0
-     plnr = FFTW(mkplanner_naive) ();
-#elif 1
-     plnr = FFTW(mkplanner_score) ();
+     plnr = FFTW(mkplanner_naive)(ESTIMATE);
 #else
-     plnr = FFTW(mkplanner_estimate) ();
+     plnr = FFTW(mkplanner_score)(ESTIMATE);
 #endif
-
+     
      FFTW(dft_conf_standard) (plnr);
 
      if (verbose > 3)

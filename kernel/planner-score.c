@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.4 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: planner-score.c,v 1.5 2002-06-11 18:06:06 athena Exp $ */
 #include "ifftw.h"
 
 static plan *mkplan(planner *ego, problem *p)
@@ -49,7 +49,7 @@ static plan *mkplan(planner *ego, problem *p)
 
 			 if (cnt > 1) {
 			      ego->nplan++;
-			      pln->pcost = X(measure_execution_time)(pln, p);
+			      pln->pcost = X(evaluate_plan)(ego, pln, p);
 			 } else {
 			      /* no need to time this unique plan */
 			      A(!best);
@@ -77,7 +77,7 @@ static plan *mkplan(planner *ego, problem *p)
 }
 
 /* constructor */
-planner *X(mkplanner_score)(void)
+planner *X(mkplanner_score)(int estimatep)
 {
-     return X(mkplanner)(sizeof(planner), mkplan, 0);
+     return X(mkplanner)(sizeof(planner), mkplan, 0, estimatep);
 }

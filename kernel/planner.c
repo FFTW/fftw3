@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.9 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: planner.c,v 1.10 2002-06-11 18:06:06 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -189,7 +189,8 @@ static void htab_destroy(planner *ego)
  */
 planner *X(mkplanner)(size_t sz,
                       plan *(*inferior_mkplan)(planner *, problem *),
-                      void (*destroy) (planner *))
+                      void (*destroy) (planner *),
+		      int estimatep)
 {
      static const planner_adt padt = {
 	  car, cdr, solvers, register_solver, mkplan
@@ -208,6 +209,7 @@ planner *X(mkplanner)(size_t sz,
      p->cnt = 0;
      p->memoize = 1;
      p->memoize_failures = 1;
+     p->estimatep = estimatep;
      rehash(p);			/* so that hashsiz > 0 */
 
      return p;
@@ -240,6 +242,19 @@ void X(planner_set_hook)(planner *p, void (*hook)(plan *, problem *))
      p->hook = hook;
 }
 
+double X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
+{
+     if (ego->estimatep) {
+	  /* heuristic */
+	  return 0
+	       + pln->ops.add
+	       + pln->ops.mul
+	       + 2 * pln->ops.fma
+	       + pln->ops.other;
+     } else {
+	  return X(measure_execution_time)(pln, p);
+     }
+}
 
 /*
  * Debugging code:
