@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.91 2002-09-16 03:49:50 stevenj Exp $ */
+/* $Id: planner.c,v 1.92 2002-09-16 03:51:14 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -28,7 +28,7 @@
 
                     ingemisco tanquam reus
 		    culpa rubet vultus meus
-		    supplicanti parce deus
+		    supplicanti parce [rms]
 */
 
 #define BLESSEDP(solution) ((solution)->flags & BLESSING)
