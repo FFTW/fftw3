@@ -216,38 +216,3 @@ plan *X(mkplan_hc2hc)(size_t size, const plan_adt *adt, hc2hcapply apply)
 
      return &(ego->super);
 }
-
-/* generic routine that produces cld0 and cldm, used by inferior
-   solvers */
-int X(rdft_ct_mkcldrn)(rdft_kind kind, int r, int m, int s, 
-		       R *IO, planner *plnr,
-		       plan **cld0p, plan **cldmp)
-{
-     tensor *radix = X(mktensor_1d)(r, m * s, m * s);
-     tensor *null = X(mktensor_0d)();
-     int imid = s * (m/2);
-     plan *cld0 = 0, *cldm = 0;
-
-     A(R2HC_KINDP(kind) || HC2R_KINDP(kind));
-
-     cld0 = X(mkplan_d)(plnr, 
-			X(mkproblem_rdft_1)(radix, null, IO, IO, kind));
-     if (!cld0) goto nada;
-
-     cldm = X(mkplan_d)(plnr,
-			X(mkproblem_rdft_1)(
-			     m%2 ? null : radix, null, IO + imid, IO + imid, 
-			     R2HC_KINDP(kind) ? R2HCII : HC2RIII));
-     if (!cldm) goto nada;
-
-     X(tensor_destroy2)(null, radix);
-     *cld0p = cld0;
-     *cldmp = cldm;
-     return 1;
-
- nada:
-     X(tensor_destroy2)(null, radix);
-     X(plan_destroy_internal)(cld0);
-     X(plan_destroy_internal)(cldm);
-     return 0;
-}
