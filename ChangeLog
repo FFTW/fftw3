@@ -1,4 +1,410 @@
+2003-04-09  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/NEWS: updated
+
+	* /home/fftw/Repository/fftw3/tests/README: cross-ref fftw-wisdom
+	man page
+
+2003-04-09  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Undone previous
+	change, committed by mistake.
+
+	* /home/fftw/Repository/fftw3/tests/Makefile.am,
+	/home/fftw/Repository/fftw3/tests/README,
+	/home/fftw/Repository/fftw3/kernel/planner.c: Quick and dirty
+	README for bench
+
+	* /home/fftw/Repository/fftw3/libbench2/bench-main.c,
+	/home/fftw/Repository/fftw3/libbench2/timer.c: Consider additional
+	command-line arguments as problems to be benchmarked.
+
+	* /home/fftw/Repository/fftw3/libbench2/bench-main.c,
+	/home/fftw/Repository/fftw3/libbench2/bench.h,
+	/home/fftw/Repository/fftw3/libbench2/report.c: Default report
+	format is now human-readable.  Removed unnecessary complexity in
+	benchmark reporting.
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: Updated for new
+	interleaved/split api.
+
+2003-04-09  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: updated citation
+
+2003-04-08  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/configure.ac: Time for beta3
+
+2003-04-08  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/reodft/redft00e-r2hc-pad.c: whoops,
+	added
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: more comparison of
+	different R*DFT types
+
+	* /home/fftw/Repository/fftw3/reodft/redft00e-r2hc.c,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc.c: comments
+
+	* /home/fftw/Repository/fftw3/reodft/Makefile.am,
+	/home/fftw/Repository/fftw3/reodft/conf.c,
+	/home/fftw/Repository/fftw3/reodft/reodft.h,
+	/home/fftw/Repository/fftw3/reodft/rodft00e-r2hc-pad.c: more
+	accurate DCT-I and DST-I, at the expense of up to a factor of 2 in
+	speed and memory
+
+2003-04-08  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/planner.c: Workaround
+	gcc/sparc bug
+
+2003-04-08  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: rumors
+
+2003-04-07  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/tests/hook.c: added rdft2 paranoid
+	mode
+
+	* /home/fftw/Repository/fftw3/tests/hook.c: added paranoid mode
+	for r2r
+
+	* /home/fftw/Repository/fftw3/libbench2/verify-r2r.c: whoops,
+	sincos is predefined on some systems
+
+2003-04-05  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/tests/hook.c: bp->destroy_input was
+	not initialized
+
+	* /home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c: Asserted correctness
+	conditions for tainted pointers.
+
+	(For now, use CK() while we test.  They should be changed into A()
+	at some point.)
+
+	* /home/fftw/Repository/fftw3/dft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/problem2.c: Untaint pointers
+	before zero'ing arrays and before hashing
+
+	* /home/fftw/Repository/fftw3/libbench2/bench-main.c: Alignment
+	check did not work with icc, which seems to be confused by the
+	fact that the variable is not used.
+
+	* /home/fftw/Repository/fftw3/tests/Makefile.am: More paranoid
+	paranoid-check
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h: 0 == x & 7 parses as
+	(0 == x) & 7, which is wrong
+
+2003-04-05  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/direct.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/planner.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-main.c,
+	/home/fftw/Repository/fftw3/rdft/direct.c,
+	/home/fftw/Repository/fftw3/rdft/direct2.c: alignment checks
+
+	* /home/fftw/Repository/fftw3/rdft/rdft-dht.c: prevent infinite
+	loops in exhaustive planning
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am,
+	/home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/execute-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/execute-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/execute-dft.c,
+	/home/fftw/Repository/fftw3/api/execute-split-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/execute-split-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/execute-split-dft.c,
+	/home/fftw/Repository/fftw3/api/f77funcs.h,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/mktensor-iodims.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-split-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-split-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-split-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-many-r2r.c,
+	/home/fftw/Repository/fftw3/tests/bench.c: split/unsplit guru
+	interface
+
+2003-04-05  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/tests/hook.c: Need UNTAINT in
+	verifier too.
+
+	* /home/fftw/Repository/fftw3/simd/taint.c: Forgot #if HAVE_SIMD
+
+	* /home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/simd/Makefile.am,
+	/home/fftw/Repository/fftw3/simd/simd.h,
+	/home/fftw/Repository/fftw3/simd/taint.c: Keep track of two
+	separate taint bits
+
+2003-04-05  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/api.h,
+	/home/fftw/Repository/fftw3/api/fftw3.h,
+	/home/fftw/Repository/fftw3/api/mapflags.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-guru-r2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/plan-many-dft.c,
+	/home/fftw/Repository/fftw3/api/plan-many-r2r.c,
+	/home/fftw/Repository/fftw3/dft/k7/k7.c,
+	/home/fftw/Repository/fftw3/dft/simd/n1b.c,
+	/home/fftw/Repository/fftw3/dft/simd/n1f.c,
+	/home/fftw/Repository/fftw3/dft/simd/n2b.c,
+	/home/fftw/Repository/fftw3/dft/simd/n2f.c,
+	/home/fftw/Repository/fftw3/dft/simd/q1b.c,
+	/home/fftw/Repository/fftw3/dft/simd/q1f.c,
+	/home/fftw/Repository/fftw3/dft/simd/t1b.c,
+	/home/fftw/Repository/fftw3/dft/simd/t1f.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/tests/bench.c: added NO_SIMD problem
+	flag, made UNALIGNED an API issue (taints input pointers)
+
+2003-04-04  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c: bugfix in buffered:
+	wrong pointers passed for cldrest; also use TAINT instead of
+	UNALIGNED in buffered2
+
+2003-04-04  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/vrank-geq1.c: Reverted previous
+	change, committed accidentally
+
+	* /home/fftw/Repository/fftw3/kernel/align.c: What was I thinking?
+
+	* /home/fftw/Repository/fftw3/dft/vrank-geq1.c: *** empty log
+	message ***
+
+2003-04-04  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/configure.ac,
+	/home/fftw/Repository/fftw3/libbench2/aligned-main.c: added
+	--enable-debug-alignment
+
+	* /home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h: X(taint) prototype,
+	define corresponding function only if HAVE_SIMD
+
+2003-04-04  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/solve.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/solve.c,
+	/home/fftw/Repository/fftw3/rdft/solve2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c: Initial checkin of
+	tained pointers
+
+	* /home/fftw/Repository/fftw3/rdft/buffered.c,
+	/home/fftw/Repository/fftw3/rdft/buffered2.c,
+	/home/fftw/Repository/fftw3/rdft/dht-rader.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1-rdft2.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c,
+	/home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/dft/simd/n2b.c,
+	/home/fftw/Repository/fftw3/dft/simd/n2f.c,
+	/home/fftw/Repository/fftw3/dft/buffered.c,
+	/home/fftw/Repository/fftw3/dft/rader.c,
+	/home/fftw/Repository/fftw3/dft/vrank-geq1.c: More conservative
+	preservation of alignment
+
+2003-04-04  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/apiplan.c,
+	/home/fftw/Repository/fftw3/api/execute-dft-c2r.c,
+	/home/fftw/Repository/fftw3/api/execute-dft-r2c.c,
+	/home/fftw/Repository/fftw3/api/execute-dft.c,
+	/home/fftw/Repository/fftw3/api/execute-r2r.c,
+	/home/fftw/Repository/fftw3/api/execute.c,
+	/home/fftw/Repository/fftw3/api/f77funcs.h: plan/execute with
+	aligned stack
+
+2003-04-03  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/api/Makefile.am: whoops, missed
+	FFTW_MEASURE in fftw3.f
+
+	* /home/fftw/Repository/fftw3/threads/threads.c: use
+	WITH_ALIGNED_STACK for experimental semaphore stuff, too
+
+2003-04-03  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/stack.c: Removed old file
+
+	* /home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/threads/ct-dit.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/threads.h,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c: Improved
+	stack-alignment hack
+
+2003-04-03  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/threads/threads.c: use aligned stack
+	for experimental semaphores, too
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/stack.c,
+	/home/fftw/Repository/fftw3/threads/ct-dit.c,
+	/home/fftw/Repository/fftw3/threads/dft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/threads/rdft-vrank-geq1.c,
+	/home/fftw/Repository/fftw3/threads/threads.c,
+	/home/fftw/Repository/fftw3/threads/threads.h,
+	/home/fftw/Repository/fftw3/threads/vrank-geq1-rdft2.c: whoops
+
+	* /home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/kernel/stack.c,
+	/home/fftw/Repository/fftw3/threads/ct-dit.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dif.c,
+	/home/fftw/Repository/fftw3/threads/hc2hc-dit.c,
+	/home/fftw/Repository/fftw3/threads/threads.c: fix(?) for SIMD
+	thread problems
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: noted n=1 REDFT01
+	case
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: note about n=2
+	REDFT00 formula
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: note about undefined
+	REDFT00
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: noted n=1 RODFT01
+	case
+
+	* /home/fftw/Repository/fftw3/doc/equation-redft11.png,
+	/home/fftw/Repository/fftw3/doc/equation-rodft01.png,
+	/home/fftw/Repository/fftw3/doc/equation-rodft11.png,
+	/home/fftw/Repository/fftw3/doc/fftw3.texi: corrected definitions
+
+	* /home/fftw/Repository/fftw3/rdft/codelet-rdft.h,
+	/home/fftw/Repository/fftw3/rdft/problem.c,
+	/home/fftw/Repository/fftw3/rdft/vrank-geq1.c: added REODFT_KINDP,
+	fixed nontrivial test for R2HC11 and HC2R11 (not that we support
+	these yet anyway)
+
+	* /home/fftw/Repository/fftw3/rdft/codelets/hc2r/Makefile.am,
+	/home/fftw/Repository/fftw3/rdft/problem.c: size 2 hc2r and dht
+	are equivalent to r2hc
+
+2003-04-02  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: noted overwriting in
+	upgrading section
+
+2003-04-02  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/Makefile.am,
+	/home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/kernel/stack.c: Moved
+	with_aligned_stack to its own file
+
+	* /home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/libbench2/aligned-main.c: Fixed
+	comments
+
+	* /home/fftw/Repository/fftw3/kernel/align.c,
+	/home/fftw/Repository/fftw3/kernel/ifftw.h,
+	/home/fftw/Repository/fftw3/libbench2/aligned-main.c,
+	/home/fftw/Repository/fftw3/libbench2/bench-main.c: Alignment
+	hacks
+
+2003-04-01  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/threads/threads.c: phew, no,
+	previous version was okay
+
+	* /home/fftw/Repository/fftw3/threads/threads.c: whoops, crap
+
+2003-04-01  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/simd/simd-sse2.h: support sse2 in
+	forthcoming gcc-3.3
+
+2003-04-01  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/kernel/cycle.h: comment
+
+	* /home/fftw/Repository/fftw3/kernel/cycle.h: noted
+	ac_check_headers
+
+	* /home/fftw/Repository/fftw3/kernel/cycle.h: comment
+
+	* /home/fftw/Repository/fftw3/kernel/cycle.h: documented autoconf
+	tests, so that cycle.h can be distributed separately
+
+	* /home/fftw/Repository/fftw3/NEWS: IRIX is all-caps
+
+	* /home/fftw/Repository/fftw3/NEWS: noted Irix fix
+
+	* /home/fftw/Repository/fftw3/threads/api.c,
+	/home/fftw/Repository/fftw3/threads/threads.h: whoops
+
+	* /home/fftw/Repository/fftw3/threads/threads.c: use ithreads_init
+	so as not to confuse fftw 2 users
+
+	* /home/fftw/Repository/fftw3/threads/threads.c: IRIX lossage
+
+	* /home/fftw/Repository/fftw3/configure.ac: check for -openmp
+	(icc) among the OpenMP flags (TODO: make this a separate macro,
+	with a loop instead of repeated checks)
+
 2003-03-31  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/doc/fftw3.texi: clarification
+
+2003-03-31  Matteo Frigo  <athena@ab-initio>
+
+	* /home/fftw/Repository/fftw3/acinclude.m4: More liberal test for
+	solaris CC
+
+	* /home/fftw/Repository/fftw3/simd/simd-sse.h,
+	/home/fftw/Repository/fftw3/simd/simd-sse2.h: Allow x86-64 simd
+
+	* /home/fftw/Repository/fftw3/kernel/cycle.h: Added x86-64 timer
+	code
+
+2003-03-31  Steven G. Johnson  <stevenj@ab-initio>
+
+	* /home/fftw/Repository/fftw3/NEWS,
+	/home/fftw/Repository/fftw3/ChangeLog: updated
 
 	* /home/fftw/Repository/fftw3/doc/FAQ/fftw-faq.bfnn: colon
 

@@ -52,6 +52,34 @@ Other enhancements:
 
 * Authors' good looks have greatly improved with age.
 
+Changes from 3.0beta2:
+
+* The standard REDFT00/RODFT00 (DCT-I/DST-I) algorithm (used in
+  FFTPACK, NR, etcetera) turns out to have poor numerical accuracy, so
+  we replaced it with a slower routine that is more accurate.
+
+* The guru planner and execute functions now have two variants, one that
+  takes complex arguments and one that takes separate real/imag pointers.
+
+* Execute and planner routines now automatically align the stack on x86,
+  in case the calling program is misaligned.
+
+* README file for test program.
+
+* Fixed bugs in the combination of SIMD with multi-threaded transforms.
+
+* Eliminated internal fftw_threads_init function, which some people were
+  calling accidentally instead of the fftw_init_threads API function.
+
+* Fixed IRIX threads initialization problems (PTHREAD_SCOPE_SYSTEM is
+  not supported).
+
+* Check for -openmp flag (Intel C compiler) when --enable-openmp is used.
+
+* Support AMD x86-64 SIMD and cycle counter.
+
+* Support SSE2 intrinsics in forthcoming gcc 3.3.
+
 Changes from 3.0beta1:
 
 * Faster in-place 1d transforms of non-power-of-two sizes.
