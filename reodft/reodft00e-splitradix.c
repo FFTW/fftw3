@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.2 2005-01-15 17:03:24 stevenj Exp $ */
+/* $Id: reodft00e-splitradix.c,v 1.3 2005-02-05 21:22:39 stevenj Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.
@@ -62,13 +62,6 @@ static void apply_e(const plan *ego_, R *I, R *O)
      buf = (R *) MALLOC(sizeof(R) * n2, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
-	  /* do size (n+1)/2 redft00 of the even-indexed elements,
-	     writing to O: */
-	  {
-	       plan_rdft *cld = (plan_rdft *) ego->clde;
-	       cld->apply((plan *) cld, I, O);
-	  }
-
 	  /* do size (n-1)/2 r2hc transform of odd-indexed elements
 	     with stride 4, "wrapping around" end of array with even
 	     boundary conditions */
@@ -79,6 +72,13 @@ static void apply_e(const plan *ego_, R *I, R *O)
 	  {
 	       plan_rdft *cld = (plan_rdft *) ego->cldo;
 	       cld->apply((plan *) cld, buf, buf);
+	  }
+
+	  /* do size (n+1)/2 redft00 of the even-indexed elements,
+	     writing to O: */
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->clde;
+	       cld->apply((plan *) cld, I, O);
 	  }
 
 	  /* combine the results with the twiddle factors to get output */
@@ -139,13 +139,6 @@ static void apply_o(const plan *ego_, R *I, R *O)
      buf = (R *) MALLOC(sizeof(R) * n2, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
-	  /* do size (n-1)/2 rodft00 of the odd-indexed elements,
-	     writing to O: */
-	  {
-	       plan_rdft *cld = (plan_rdft *) ego->clde;
-	       cld->apply((plan *) cld, I + is, O);
-	  }
-
 	  /* do size (n+1)/2 r2hc transform of even-indexed elements
 	     with stride 4, "wrapping around" end of array with odd
 	     boundary conditions */
@@ -156,6 +149,13 @@ static void apply_o(const plan *ego_, R *I, R *O)
 	  {
 	       plan_rdft *cld = (plan_rdft *) ego->cldo;
 	       cld->apply((plan *) cld, buf, buf);
+	  }
+
+	  /* do size (n-1)/2 rodft00 of the odd-indexed elements,
+	     writing to O: */
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->clde;
+	       cld->apply((plan *) cld, I + is, O);
 	  }
 
 	  /* combine the results with the twiddle factors to get output */
@@ -237,8 +237,7 @@ static int applicable0(const solver *ego_, const problem *p_)
           return (1
 		  && p->sz->rnk == 1
 		  && p->vecsz->rnk <= 1
-		  && ((p->kind[0] == REDFT00 && p->sz->dims[0].n > 1)
-		      || p->kind[0] == RODFT00)
+		  && p->sz->dims[0].n > 1  /* don't create size-0 sub-plans */
 		  && p->sz->dims[0].n % 2  /* odd: 4 divides "logical" DFT */
 	       );
      }
