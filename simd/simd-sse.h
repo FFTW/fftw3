@@ -157,6 +157,9 @@ static __inline__ V VBYI(V x)
      return SHUFPS(y, y, SHUFVAL(1, 0, 3, 2));
 }
 
+#define VFMAI(b, c) VADD(c, VBYI(b))
+#define VFNMSI(b, c) VSUB(c, VBYI(b))
+
 #undef FAST_AND_BLOATED_TWIDDLES
 
 #ifdef FAST_AND_BLOATED_TWIDDLES

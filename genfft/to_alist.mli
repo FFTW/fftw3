@@ -18,7 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: to_alist.mli,v 1.1.1.1 2002-06-02 18:42:31 athena Exp $ *)
+(* $Id: to_alist.mli,v 1.2 2002-07-08 13:42:08 athena Exp $ *)
 
 val to_assignments : Expr.expr list -> Expr.assignment list
 val dump : (string -> unit) -> Expr.assignment list -> unit
+val good_for_fma : Expr.expr * Expr.expr -> bool

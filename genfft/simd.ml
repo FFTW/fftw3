@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.11 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: simd.ml,v 1.12 2002-07-08 13:42:08 athena Exp $ *)
 
 open Expr
 open List
@@ -50,6 +50,14 @@ and unparse_store dst src_expr =
 and unparse_expr =
   let rec unparse_plus = function
     | [a] -> unparse_expr a
+
+    | (Uminus (Times (NaN I, b))) :: c :: d -> op2 "VFNMSI" [b] (c :: d)
+    | c :: (Uminus (Times (NaN I, b))) :: d -> op2 "VFNMSI" [b] (c :: d)
+    | (Times (NaN I, b)) :: (Uminus c) :: d -> failwith "VFMSI"
+    | (Uminus c) :: (Times (NaN I, b)) :: d -> failwith "VFMSI"
+    | (Times (NaN I, b)) :: c :: d -> op2 "VFMAI" [b] (c :: d)
+    | c :: (Times (NaN I, b)) :: d -> op2 "VFMAI" [b] (c :: d)
+
     | (Uminus (Times (a, b))) :: c :: d when t a ->
 	op3 "VFNMS" a b (c :: d)
     | c :: (Uminus (Times (a, b))) :: d when t a -> 
@@ -60,6 +68,7 @@ and unparse_expr =
         op3 "VFMS" a b (c :: negate d)
     | (Times (a, b)) :: c :: d when t a -> op3 "VFMA" a b (c :: d)
     | c :: (Times (a, b)) :: d when t a -> op3 "VFMA" a b (c :: d)
+
     | (Uminus a :: b)                   -> op2 "VSUB" b [a]
     | (b :: Uminus a :: c)              -> op2 "VSUB" (b :: c) [a]
     | (a :: b)                          -> op2 "VADD" [a] b
@@ -75,7 +84,9 @@ and unparse_expr =
     | [] -> []
     | (Uminus x) :: y -> x :: negate y
     | x :: y -> (Uminus x) :: negate y
-  and t = function Num _ -> true | _ -> false
+  and t = function 
+    | Num _ -> true 
+    | _ -> false
 
   in function
     | Times(Times(NaN CPLX, Load tw), src) when Variable.is_constant tw ->

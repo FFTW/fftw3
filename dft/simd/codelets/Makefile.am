@@ -39,7 +39,7 @@ SOLVTAB_NAME = X(solvtab_dft_simd)
 include $(top_srcdir)/support/Makefile.codelets
 
 if MAINTAINER_MODE
-GFLAGS = -no-randomized-cse -simd -compact -trivial-stores
+GFLAGS = -simd -compact -trivial-stores $(COMMON_GFLAGS)
 
 n1fsimd_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 	($(PRELUDE_COMMANDS); $(GEN_NOTW_C) $(GFLAGS) -n $* -name n1fsimd_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@

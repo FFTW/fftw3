@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.9 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: c.ml,v 1.10 2002-07-08 13:42:08 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -298,12 +298,7 @@ let count_memory_acc f =
   in (count_ast body) + 
     fold_left count_acc_expr_func 0 (fcn_to_expr_list f)
 
-let good_for_fma x = 
-  not !Simdmagic.simd_mode ||
-  match x with
-  | (Num _, _) -> true
-  | (_, Num _) -> true
-  | _ -> false
+let good_for_fma = To_alist.good_for_fma
 
 let build_fma = function
   | [a; Times (b, c)] when good_for_fma (b, c) -> Some (a, b, c)

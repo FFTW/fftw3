@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_c.ml,v 1.1 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: gen_notw_c.ml,v 1.2 2002-07-08 13:42:08 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_c.ml,v 1.1 2002-07-08 00:32:01 athena Exp $"
+let cvsid = "$Id: gen_notw_c.ml,v 1.2 2002-07-08 13:42:08 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -148,6 +148,7 @@ let generate n =
 
 let main () =
   begin
+    Simdmagic.simd_mode := true;
     parse speclist usage;
     print_string (generate (check_size ()));
   end

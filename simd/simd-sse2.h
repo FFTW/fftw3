@@ -109,6 +109,9 @@ static __inline__ V VBYI(V x)
      return SHUFPD(y, y, 1);
 }
 
+#define VFMAI(b, c) VADD(c, VBYI(b))
+#define VFNMSI(b, c) VSUB(c, VBYI(b))
+
 static __inline__ V BYTW(const R *t, V c_d)
 {
      V a_b = LD(t, 1);

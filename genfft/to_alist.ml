@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: to_alist.ml,v 1.6 2002-07-08 00:56:15 athena Exp $ *)
+(* $Id: to_alist.ml,v 1.7 2002-07-08 13:42:08 athena Exp $ *)
 
 (*************************************************************
  * Conversion of the dag to an assignment list
@@ -119,6 +119,8 @@ let good_for_fma x =
   match x with
   | (Num _, _) -> true
   | (_, Num _) -> true
+  | (NaN I, _) -> true
+  | (_, NaN I) -> true
   | _ -> false
 
 let build_fma l = 
