@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.130 2003-03-12 06:25:12 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.131 2003-03-12 06:26:46 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2693,7 +2693,7 @@ $$
 @center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(-2 pi j k sqrt(-1)/n) .
 @end ifinfo
 @ifhtml
-<center><img src="equation-dft.gif" align="top"></center>
+<center><img src="equation-dft.gif" align="top">.</center>
 @end ifhtml
 The backward (@code{FFTW_BACKWARD}) DFT computes:
 @tex
@@ -2705,7 +2705,7 @@ $$
 @center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(2 pi j k sqrt(-1)/n) .
 @end ifinfo
 @ifhtml
-<center><img src="equation-idft.gif" align="top"></center>
+<center><img src="equation-idft.gif" align="top">.</center>
 @end ifhtml
 
 @cindex normalization
@@ -2742,7 +2742,7 @@ $$
 @center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(-2 pi j k sqrt(-1)/n) .
 @end ifinfo
 @ifhtml
-<center><img src="equation-dft.gif" align="top"></center>
+<center><img src="equation-dft.gif" align="top">.</center>
 @end ifhtml
 This output array @math{Y} can easily be shown to possess the
 ``Hermitian'' symmetry
@@ -2812,7 +2812,7 @@ $$
 @center Y[k] = sum for j = 0 to (n - 1) of X[j] * exp(2 pi j k sqrt(-1)/n) .
 @end ifinfo
 @ifhtml
-<center><img src="equation-idft.gif" align="top"></center>
+<center><img src="equation-idft.gif" align="top">.</center>
 @end ifhtml
 The outputs @code{Y} of this transform can easily be seen to be purely
 real, and are stored as an array of real numbers.
@@ -2886,7 +2886,7 @@ $$
 Y[k] = X[0] + (-1)^k X[n-1] + 2 (sum for j = 1 to n-2 of X[j] cos(pi jk /(n-1)))
 @end ifinfo
 @ifhtml
-<center><img src="equation-redft00.gif" align="top"></center>
+<center><img src="equation-redft00.gif" align="top">.</center>
 @end ifhtml
 
 @subsubheading REDFT10 (DCT-II)
@@ -2901,7 +2901,7 @@ $$
 Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) k / n))
 @end ifinfo
 @ifhtml
-<center><img src="equation-redft10.gif" align="top"></center>
+<center><img src="equation-redft10.gif" align="top">.</center>
 @end ifhtml
 
 @subsubheading REDFT01 (DCT-III)
@@ -2916,7 +2916,7 @@ $$
 Y[k] = X[0] + 2 (sum for j = 1 to n-1 of X[j] cos(pi j (k+1/2) / n))
 @end ifinfo
 @ifhtml
-<center><img src="equation-redft01.gif" align="top"></center>
+<center><img src="equation-redft01.gif" align="top">.</center>
 @end ifhtml
 
 @subsubheading REDFT11 (DCT-IV)
@@ -2931,7 +2931,7 @@ $$
 Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) (k+1/2) / n))
 @end ifinfo
 @ifhtml
-<center><img src="equation-redft11.gif" align="top"></center>
+<center><img src="equation-redft11.gif" align="top">.</center>
 @end ifhtml
 
 @subsubheading Inverses and Normalization
@@ -3009,7 +3009,7 @@ $$
 Y[k] = 2 (sum for j = 1 to n-2 of X[j] sin(pi (j+1)(k+1) / (n+1)))
 @end ifinfo
 @ifhtml
-<center><img src="equation-rodft00.gif" align="top"></center>
+<center><img src="equation-rodft00.gif" align="top">.</center>
 @end ifhtml
 
 @subsubheading RODFT10 (DST-II)
@@ -3024,7 +3024,7 @@ $$
 Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1) / n))
 @end ifinfo
 @ifhtml
-<center><img src="equation-rodft10.gif" align="top"></center>
+<center><img src="equation-rodft10.gif" align="top">.</center>
 @end ifhtml
 
 @subsubheading RODFT01 (DST-III)
@@ -3039,7 +3039,7 @@ $$
 Y[k] = 2 (sum for j = 1 to n-1 of X[j] sin(pi (j+1) (k+1/2) / n))
 @end ifinfo
 @ifhtml
-<center><img src="equation-rodft01.gif" align="top"></center>
+<center><img src="equation-rodft01.gif" align="top">.</center>
 @end ifhtml
 
 @subsubheading RODFT11 (DST-IV)
@@ -3054,7 +3054,7 @@ $$
 Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1/2) / n))
 @end ifinfo
 @ifhtml
-<center><img src="equation-rodft11.gif" align="top"></center>
+<center><img src="equation-rodft11.gif" align="top">.</center>
 @end ifhtml
 
 @subsubheading Inverses and Normalization
@@ -3086,7 +3086,7 @@ $$
 @center Y[k] = sum for j = 0 to (n - 1) of X[j] * [cos(2 pi j k / n) + sin(2 pi j k / n)].
 @end ifinfo
 @ifhtml
-<center><img src="equation-dht.gif" align="top"></center>
+<center><img src="equation-dht.gif" align="top">.</center>
 @end ifhtml
 
 @cindex normalization
