@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2000 Matteo Frigo
- * Copyright (c) 2000 Steven G. Johnson
+ * Copyright (c) 2002 Matteo Frigo
+ * Copyright (c) 2002 Steven G. Johnson
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.11 2002-06-15 01:11:16 athena Exp $ */
+/* $Id: codelet.h,v 1.12 2002-06-16 12:05:17 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -58,8 +58,6 @@ static __inline__ R FNMS(R a, R b, R c)
 #define FMS(a, b, c) (((a) * (b)) - (c))
 #define FNMS(a, b, c) ((c) - ((a) * (b)))
 #endif
-
-#define ASM(x) __asm__ __volatile__ (x)
 
 /**************************************************************
  * types of codelets
@@ -107,20 +105,7 @@ void X(kdft_dif_register)(planner *p, kdft_dif codelet, const ct_desc *desc);
 extern solvtab X(solvtab_dft_standard);
 extern solvtab X(solvtab_dft_inplace);
 
-/*
- * K7-specific stuff 
- */
-typedef struct {
-     uint sz;    /* size of transform computed */
-     int sign;
-     opcnt ops;
-} kdft_k7_desc;
-
-typedef void (*kdft_k7)(const R *ri, R *ro, int is, int os,
-			uint vl, int ivs, int ovs);
-void X(kdft_k7_register)(planner *p, kdft_k7 codelet, 
-			 const kdft_k7_desc *desc);
-
-extern solvtab X(solvtab_dft_k7);
+/* extensions */
+#include "codelet-k7.h"
 
 #endif				/* __CODELET_H__ */

@@ -27,10 +27,6 @@ open K7Translate
 open AssignmentsToVfpinstrs
 open Complex
 
-let store_array_c n f =
-  List.flatten
-    (List.map (fun i -> store_var (access_output i) (f i)) (iota n))
-
 let no_twiddle_gen n sign =
   let _ = info "generating..." in
   let expr = Fft.dft sign n (load_var @@ access_input) in
@@ -109,7 +105,7 @@ let no_twiddle_gen n sign =
   
   in ((initcode, body), k7vFlops body)
 
-let cvsid = "$Id: gen_notw.ml,v 1.2 2002-06-15 22:23:40 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.3 2002-06-16 12:05:17 athena Exp $"
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let generate n =

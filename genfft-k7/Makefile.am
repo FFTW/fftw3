@@ -1,4 +1,4 @@
-noinst_SCRIPTS = gen_notw
+noinst_SCRIPTS = gen_notw gen_twiddle
 
 EXTRA_DIST = .depend algsimp.ml algsimp.mli assignmentsToVfpinstrs.ml	\
 assignmentsToVfpinstrs.mli assoctable.ml assoctable.mli			\
@@ -54,6 +54,14 @@ gen_notw.nonopt: libgenfft.cma $(gen_notw_OBJECTS)
 	$(OCAMLLINK)
 clean-local::
 	rm -f gen_notw gen_notw.nonopt
+
+gen_twiddle_OBJECTS = gen_twiddle.cmo
+gen_twiddle: libgenfft.cmxa $(gen_twiddle_OBJECTS:.cmo=.cmx)
+	$(OCAMLOPTLINK)
+gen_twiddle.nonopt: libgenfft.cma $(gen_twiddle_OBJECTS)
+	$(OCAMLLINK)
+clean-local::
+	rm -f gen_twiddle gen_twiddle.nonopt
 
 SUFFIXES = .mli .ml .cmi .cmo .cmx .p.cmx .c .o .cma .cmxa .a
 

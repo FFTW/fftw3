@@ -18,12 +18,14 @@
  *
  */
 
-/* $Id: direct-k7.c,v 1.2 2002-06-14 21:42:35 athena Exp $ */
+/* $Id: direct-k7.c,v 1.3 2002-06-16 12:05:17 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet.  
    This code handles K7-specific codelets */
 
 #include "dft.h"
+
+#if K7_MODE
 
 typedef struct {
      solver super;
@@ -165,3 +167,5 @@ solver *X(mksolver_dft_direct_k7)(kdft_k7 k, const kdft_k7_desc *desc)
      slv->desc = desc;
      return &(slv->super);
 }
+
+#endif /* K7_MODE */

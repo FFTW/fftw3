@@ -17,7 +17,7 @@
  *
  *)
 
-(* $Id: complex.ml,v 1.3 2002-06-15 22:23:40 athena Exp $ *)
+(* $Id: complex.ml,v 1.4 2002-06-16 12:05:17 athena Exp $ *)
 
 (* abstraction layer for complex operations *)
 
@@ -180,6 +180,7 @@ let sigma a b f = plus (List.map f (Util.interval a b))
 type variable = CV of Variable.variable * Variable.variable
 
 let load_var (CV(vr,vi)) = CE (Load vr, Load vi)
+let load_real (CV(vr,vi)) = Load vr
 
 let store_var  (CV(vr,vi)) (CE(xr,xi)) = [Store(vr,xr); Store(vi,xi)]
 let store_real (CV(vr,vi)) (CE(xr,xi)) = [Store(vr,xr)]

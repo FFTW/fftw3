@@ -17,7 +17,7 @@
  *
  *)
 
-(* $Id: complex.mli,v 1.3 2002-06-15 22:23:40 athena Exp $ *)
+(* $Id: complex.mli,v 1.4 2002-06-16 12:05:17 athena Exp $ *)
 
 type expr
 val make : (Expr.expr * Expr.expr) -> expr
@@ -39,6 +39,7 @@ val wthree : expr -> expr -> expr -> expr
 val wreflect : expr -> expr -> expr -> expr
 type variable
 val load_var : variable -> expr
+val load_real : variable -> Expr.expr
 val store_var : variable -> expr -> Expr.expr list
 val store_real : variable -> expr -> Expr.expr list
 val store_imag : variable -> expr -> Expr.expr list

@@ -36,7 +36,7 @@ open K7FlatInstructionScheduling
 open K7InstructionSchedulingBasics
 open Printf
 open AssignmentsToVfpinstrs
-
+open Complex
 
 let vect_schedule vect_optimized =
   let _ = info "vectorized scheduling..." in
@@ -445,3 +445,14 @@ let boilerplate cvsid =
      " * " ^ cvsid ^ "\n" ^
      " */\n\n")
 
+
+
+let store_array_c n f =
+  List.flatten
+    (List.map (fun i -> store_var (access_output i) (f i)) (iota n))
+
+let load_array_c n =
+  array n (fun i -> load_var (access_input i))
+
+let load_constant_array_r n =
+  array n (fun i -> load_real (access_twiddle i))
