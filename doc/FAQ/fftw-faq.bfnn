@@ -212,7 +212,7 @@ at least.)
 Most definitely.  FFTW should compile and/or link under any C++
 compiler.  Moreover, it is likely that the C++ \courier{<complex>\}
 template class is bit-compatible with FFTW's complex-number format
-(see the FFTW manual for more details.)
+(see the FFTW manual for more details).
 
 \question 26aug:whynotfortran  Why isn't FFTW written in FORTRAN/C++?
 
