@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.173 2003-03-26 04:33:03 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.174 2003-03-27 01:07:11 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3503,7 +3503,7 @@ otherwise, @math{N=2n}.
 @cindex discrete Hartley transform
 @cindex DHT
 The discrete Hartley transform (DHT) of a 1d real array @math{X} of size
-@math{n} computes a real array @math{Y}, where:
+@math{n} computes a real array @math{Y} of the same size, where:
 @tex
 $$
 Y_k = \sum_{j = 0}^{n - 1} X_j [ \cos(2\pi j k / n) + \sin(2\pi j k / n)].
@@ -3519,7 +3519,7 @@ $$
 @cindex normalization
 FFTW computes an unnormalized transform, in that there is no coefficient
 in front of the summation in the DHT.  In other words, applying the
-forward and then the backward transform will multiply the input by
+transform twice (the DHT is its own inverse) will multiply the input by
 @math{n}.
 
 @c =========>
