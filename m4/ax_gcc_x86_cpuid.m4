@@ -16,7 +16,7 @@ dnl to the string "unknown".
 dnl
 dnl This macro mainly exists to be used in AX_GCC_ARCHFLAG.
 dnl
-dnl @version $Id: ax_gcc_x86_cpuid.m4,v 1.2 2004-10-27 17:34:25 stevenj Exp $
+dnl @version $Id: ax_gcc_x86_cpuid.m4,v 1.3 2004-11-09 03:09:16 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_X86_CPUID],
 [AC_REQUIRE([AC_PROG_CC])
@@ -33,6 +33,6 @@ AC_CACHE_CHECK(for x86 cpuid $1 output, ax_cv_gcc_x86_cpuid_$1,
      return 0;
 ])], 
      [ax_cv_gcc_x86_cpuid_$1=`cat conftest_cpuid`; rm -f conftest_cpuid],
-     [ax_cv_gcc_x86_cpuid_$1=failed; rm -f conftest_cpuid],
+     [ax_cv_gcc_x86_cpuid_$1=unknown; rm -f conftest_cpuid],
      [ax_cv_gcc_x86_cpuid_$1=unknown])])
 ])
