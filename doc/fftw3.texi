@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.14 2003-01-19 01:21:09 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.15 2003-01-19 01:30:27 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -322,10 +322,8 @@ efficiently.  The next two arguments are the input and output arrays
 of the transform; they can be the same, indicating an @dfn{in-place}
 transform. 
 @cindex in-place
-@emph{The data in these arrays is overwritten during planning,} so the
-planning is typically done soon after allocation, @emph{before} the
-input is initialized.  The fourth argument, @code{sign}, can be either
-@code{FFTW_FORWARD} (@code{-1}) or @code{FFTW_BACKWARD} (@code{+1}),
+The fourth argument, @code{sign}, can be either @code{FFTW_FORWARD}
+(@code{-1}) or @code{FFTW_BACKWARD} (@code{+1}),
 @ctindex FFTW_FORWARD
 @ctindex FFTW_BACKWARD
 and indicates the direction of the transform you are interested in;
@@ -336,7 +334,7 @@ technically, it is the sign of the exponent in the transform.  The
 runs
 @ctindex FFTW_MEASURE
 and measures the execution time of several FFTs in order to find the
-best way to compute the transform of size @code{n}.  This may take
+best way to compute the transform of size @code{n}.  This will take
 some time (usually a few seconds), depending on your machine and on
 the size of the transform.  @code{FFTW_ESTIMATE}, on the contrary,
 does not run any computation and just builds a
@@ -344,7 +342,10 @@ does not run any computation and just builds a
 reasonable plan that is probably sub-optimal.  In other words, if your
 program performs many transforms of the same size and initialization
 time is not important, use @code{FFTW_MEASURE}; otherwise use the
-estimate.  (There are other options too; see @ref{FFTW Reference}.  For
+estimate.  The data in the @code{in}/@code{out} arrays is
+@emph{overwritten} during @code{FFTW_MEASURE} planning, so such
+planning should be done @emph{before} the input is initialized by the
+user.  (There are other options too; see @ref{FFTW Reference}.  For
 example, use @code{FFTW_PATIENT} if you're willing to wait even longer
 for a more optimal plan.
 @ctindex FFTW_PATIENT
