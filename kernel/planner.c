@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.118 2002-09-23 15:49:32 athena Exp $ */
+/* $Id: planner.c,v 1.119 2002-09-24 21:21:09 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -302,8 +302,10 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 		    + pln->ops.mul
 		    + 2 * pln->ops.fma
 		    + pln->ops.other;
+	       ego->epcost += pln->pcost;
 	  } else {
 	       pln->pcost = X(measure_execution_time)(pln, p);
+	       ego->pcost += pln->pcost;
 	  }
      }
      ego->hook(pln, p, 0);
@@ -543,6 +545,7 @@ planner *X(mkplanner)(void)
 
      p->adt = &padt;
      p->nplan = p->nprob = p->nrehash = 0;
+     p->pcost = p->epcost = 0.0;
      p->succ_lookup = p->lookup = p->lookup_iter = 0;
      p->insert = p->insert_iter = p->insert_unknown = 0;
      p->hook = hooknil;
@@ -609,6 +612,8 @@ void X(planner_dump)(planner *ego, int verbose)
 
      D("nplan = %u\n", ego->nplan);
      D("nprob = %u\n", ego->nprob);
+     D("pcost = %g\n", ego->pcost);
+     D("epcost = %g\n", ego->epcost);
      D("lookup = %u\n", ego->lookup);
      D("succ_lookup = %u\n", ego->succ_lookup);
      D("lookup_iter = %u\n", ego->lookup_iter);

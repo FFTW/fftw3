@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.155 2002-09-23 22:37:59 athena Exp $ */
+/* $Id: ifftw.h,v 1.156 2002-09-24 21:21:09 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -505,6 +505,7 @@ struct planner_s {
 				      planner.c */
      /* various statistics */
      uint nplan;    /* number of plans evaluated */
+     double pcost, epcost; /* total pcost of measured/estimated plans */
      uint nprob;    /* number of problems evaluated */
      uint lookup, succ_lookup, lookup_iter;
      uint insert, insert_iter, insert_unknown;
