@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.5 2003-01-19 00:17:27 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.6 2003-01-19 00:35:52 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -401,11 +401,13 @@ fftw_plan fftw_plan_dft(int rank, const int *n,
 
 These routines create plans for @code{nx} by @code{ny} two-dimensional
 (2d) transforms, @code{nx} by @code{ny} by @code{nz} 3d transforms,
-and general @code{rank}-dimensional transforms, respectively.  In the
+and arbitrary @code{rank}-dimensional transforms, respectively.  In the
+@cindex rank
 third case, @code{n} is a pointer to an array @code{n[rank]} denoting
 an @code{n[0]} by @code{n[1]} by @dots{} by @code{n[rank-1]}
 transform.  All of these transforms operate on contiguous arrays in
-the C-standard @dfn{row-major} order, described further in
+the C-standard @dfn{row-major} order, so that the last dimension has
+the fastest-varying index in the array; this is described further in
 @ref{Multi-dimensional Array Format}.
 
 You might have noticed that all the planner routines so far have
