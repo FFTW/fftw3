@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.16 2002-07-02 14:30:58 athena Exp $ */
+/* $Id: codelet.h,v 1.17 2002-07-02 17:15:58 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -81,6 +81,7 @@ struct kdft_desc_s {
      const kdft_genus *genus;
      int is;
      int os;
+     int ovs;
 };
 
 typedef void (*kdft) (const R *ri, const R *ii, R *ro, R *io,

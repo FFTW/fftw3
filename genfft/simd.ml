@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.7 2002-06-30 22:34:06 athena Exp $ *)
+(* $Id: simd.ml,v 1.8 2002-07-02 17:15:58 athena Exp $ *)
 
 open Expr
 open List
@@ -32,8 +32,8 @@ let realtype = "V"
 let realtypep = realtype ^ " *"
 let constrealtype = "const " ^ realtype
 let constrealtypep = constrealtype ^ " *"
-let ivs = "ivs"
-let ovs = "ovs"
+let ivs = ref "ivs"
+let ovs = ref "ovs"
 
 (*
  * SIMD C AST unparser 
@@ -75,7 +75,7 @@ let rec unparse_load vardeclinfo dst src =
 	  else if Variable.is_real v2 then (e2,e1)
 	  else failwith "unparse_load"
 	in sprintf "LDRI(%s,%s,%s,%s);\n" 
-	  (unparse_expr e1) (unparse_expr e2) (Variable.unparse src) ivs
+	  (unparse_expr e1) (unparse_expr e2) (Variable.unparse src) !ivs
     | _ -> ""
 
 and unparse_store vardeclinfo dst src_expr =
@@ -92,7 +92,7 @@ and unparse_store vardeclinfo dst src_expr =
 	  else if Variable.is_real v2 then (e2,e1)
 	  else failwith "unparse_store"
 	in sprintf  "STRI(%s,%s,%s,%s);\n"
-	  (unparse_expr e1) (unparse_expr e2) (Variable.unparse dst) ovs
+	  (unparse_expr e1) (unparse_expr e2) (Variable.unparse dst) !ovs
     | _ -> ""
 
 
@@ -104,10 +104,10 @@ and unparse_store_transposed vardeclinfo  dst src_expr =
 	let dst = fst (List.hd zs') in
 	match !vector_length with
 	| 4 -> sprintf "ST4(%s, %s, %s);\n"
-	      (Variable.unparse dst) ovs
+	      (Variable.unparse dst) !ovs
 	      (listToString unparse_expr ", " (map snd zs'))
 	| 2 -> sprintf "ST2(%s, %s, %s);\n"
-	      (Variable.unparse dst) ovs
+	      (Variable.unparse dst) !ovs
 	      (listToString unparse_expr ", " (map snd zs'))
 	| _ -> failwith "store_transpose"
       end

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.10 2002-06-30 18:37:55 athena Exp $ *)
+(* $Id: genutil.ml,v 1.11 2002-07-02 17:15:58 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -257,6 +257,11 @@ let arg_to_stride s =
 
 let stride_to_solverparm = function
     Stride_variable -> "0"
+  | Fixed_int x -> string_of_int x
+  | Fixed_string x -> x
+
+let stride_to_string s = function
+    Stride_variable -> s
   | Fixed_int x -> string_of_int x
   | Fixed_string x -> x
 

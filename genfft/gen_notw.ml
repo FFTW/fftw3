@@ -18,18 +18,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.13 2002-07-02 14:30:58 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.14 2002-07-02 17:15:58 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.13 2002-07-02 14:30:58 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.14 2002-07-02 17:15:58 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let uistride = ref Stride_variable
 let uostride = ref Stride_variable
+let uovstride = ref Stride_variable
 
 let speclist = [
   "-with-istride",
@@ -38,7 +39,11 @@ let speclist = [
 
   "-with-ostride",
   Arg.String(fun x -> uostride := arg_to_stride x),
-  " specialize for given output stride"
+  " specialize for given output stride";
+
+  "-with-ovstride",
+  Arg.String(fun x -> uovstride := arg_to_stride x),
+  " specialize for given output vector stride"
 ] 
 
 let generate n =
@@ -60,6 +65,8 @@ let generate n =
   let vistride = either_stride (!uistride) (C.SVar istride)
   and vostride = either_stride (!uostride) (C.SVar ostride)
   in
+
+  let _ = Simd.ovs := stride_to_string "ovs" !uovstride in
 
   let locations = unique_array_c n in
   let input = 
@@ -86,7 +93,8 @@ let generate n =
 	       else [Decl (C.stridetype, istride)])
 	  @ (if stride_fixed !uostride then [] 
 	       else [Decl (C.stridetype, ostride)])
-	  @ (choose_simd [] [Decl ("int", "ovs")])
+	  @ (if stride_fixed !uovstride then [] 
+	       else [Decl ("int", !Simd.ovs)])
 	 ),
 	 add_constants (Asch annot))
 
@@ -103,18 +111,23 @@ let generate n =
         "(ri, ii, ro, io" ^
            (if stride_fixed !uistride then "" else ", is") ^ 
            (if stride_fixed !uostride then "" else ", os") ^ 
-           (choose_simd "" ", ovs") ^ 
+           (if stride_fixed !uovstride then "" else ", ovs") ^ 
           ");\n" ^
       (choose_simd
-	"ri += ivs; ii += ivs; ro += ovs; io += ovs;\n"
-	"ri += VL * ivs; ii += VL * ivs; ro += VL * ovs; io += VL * ovs;\n") ^
+	 (Printf.sprintf
+	    "ri += ivs; ii += ivs; ro += %s; io += %s;\n"
+	    !Simd.ovs !Simd.ovs)
+	 (Printf.sprintf
+	    "ri += VL * ivs; ii += VL * ivs; ro += VL * %s; io += VL * %s;\n"
+	    !Simd.ovs !Simd.ovs)) ^
     "}\n}\n\n"
 
   and desc = 
     Printf.sprintf 
-      "static const kdft_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s };\n"
+      "static const kdft_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s };\n"
       n name (flops_of tree0) 
       (stride_to_solverparm !uistride) (stride_to_solverparm !uostride)
+      (stride_to_solverparm !uovstride)
 
   and init =
     (declare_register_fcn name) ^

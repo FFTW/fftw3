@@ -31,6 +31,8 @@ static int okp(const ct_desc *d,
 	     && ALIGNED(iio)
 	     && (m % VL) == 0
 	     && dist == 1
+	     && (!d->s1 || (d->s1 == ios))
+	     && (!d->s2 || (d->s2 == vs))
 	  );
 }
 

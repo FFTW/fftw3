@@ -27,26 +27,63 @@
 
 #if defined(__GNUC__) && defined(__i386__)
 typedef float V __attribute__ ((mode(V4SF)));
-#define VADD(a, b) __builtin_ia32_addps(a, b)
-#define VSUB(a, b) __builtin_ia32_subps(a, b)
-#define VMUL(a, b) __builtin_ia32_mulps(b, a)
+
+/* gcc-3.1 seems to generate slower code when we use SSE builtins.
+   Use asm instead. */
+static __inline__ V VADD(V a, V b) 
+{
+     V ret;
+     __asm__("addps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     return ret;
+}
+static __inline__ V VSUB(V a, V b) 
+{
+     V ret;
+     __asm__("subps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     return ret;
+}
+static __inline__ V VMUL(V a, V b) 
+{
+     V ret;
+     __asm__("mulps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     return ret;
+}
+
+#define SHUFPS(a, b, msk) __extension__ ({				   \
+     V ret;								   \
+     __asm__("shufps %3, %2, %0" : "=x"(ret) : "0"(a), "xm"(b), "i"(msk)); \
+     ret;								   \
+})
+
+union fvec { 
+     float f[4];
+     V v;
+};
+
+#define DVK(var, val) const V var = __extension__ ({			\
+     static const union fvec _var = { {val, val, val, val} };	\
+     _var.v;							\
+})
+
+
 #define LD(var, loc) var = *(const V *)(&(loc))
 #define ST(loc, var) *(V *)(&(loc)) = var
-#define DVK(var, val) static const V var = { val, val, val, val }
 
-#define VTR4(r0, r1, r2, r3)				\
-{							\
-     V _t0, _t1, _t2, _t3;				\
-							\
-     _t0 = __builtin_ia32_shufps((r0), (r1), 0x44);	\
-     _t2 = __builtin_ia32_shufps((r0), (r1), 0xEE);	\
-     _t1 = __builtin_ia32_shufps((r2), (r3), 0x44);	\
-     _t3 = __builtin_ia32_shufps((r2), (r3), 0xEE);	\
-							\
-     r0 = __builtin_ia32_shufps(_t0, _t1, 0x88);	\
-     r1 = __builtin_ia32_shufps(_t0, _t1, 0xDD);	\
-     r2 = __builtin_ia32_shufps(_t2, _t3, 0x88);	\
-     r3 = __builtin_ia32_shufps(_t2, _t3, 0xDD);	\
+
+#define VTR4(r0, r1, r2, r3)			\
+{						\
+     V _t0, _t1, _t2, _t3;			\
+						\
+						\
+     _t0 = SHUFPS((r0), (r1), 0x44);		\
+     _t2 = SHUFPS((r0), (r1), 0xEE);		\
+     _t1 = SHUFPS((r2), (r3), 0x44);		\
+     _t3 = SHUFPS((r2), (r3), 0xEE);		\
+						\
+     r0 = SHUFPS(_t0, _t1, 0x88);		\
+     r1 = SHUFPS(_t0, _t1, 0xDD);		\
+     r2 = SHUFPS(_t2, _t3, 0x88);		\
+     r3 = SHUFPS(_t2, _t3, 0xDD);		\
 }
 
 #define ST4(a, ovs, v0, v1, v2, v3)		\
