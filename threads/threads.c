@@ -328,8 +328,8 @@ typedef spinlock_t fftw_sem_id;
 #define fftw_sem_wait(pid) { spin_unlock_wait(pid); spin_lock(pid); }
 #define fftw_sem_post(pid) spin_unlock(pid)
 
-#endif
-#endif
+#endif /* !HAVE_SEMAPHORES */
+#endif /* 0 */
 
 /***********************************************************************/
 
