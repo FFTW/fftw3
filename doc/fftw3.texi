@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.35 2003-02-28 04:27:48 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.36 2003-02-28 04:43:56 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -737,21 +737,21 @@ Just as for the complex DFT, these plan 1d/2d/3d/multi-dimensional
 transforms for contiguous arrays in row-major order, transforming (real)
 input to output of the same size, where @code{n} specifies the
 @emph{physical} dimensions of the arrays.  All positive @code{n} are
-supported (with the exception of @code{n=1} REDFT00 kinds, noted in the
-real-even subsection below); products of small factors are most
-efficient (factorizing @code{n-1} and @code{n+1} for REDFT00 and RODFT00
-kinds, described below), but an @math{O(n lg n)} algorithm is used even
-for prime sizes.
+supported (with the exception of @code{n=1} for the @code{FFTW_REDFT00}
+kind, noted in the real-even subsection below); products of small
+factors are most efficient (factorizing @code{n-1} and @code{n+1} for
+@code{FFTW_REDFT00} and @code{FFTW_RODFT00} kinds, described below), but
+an @math{O(n lg n)} algorithm is used even for prime sizes.
 
 Each dimension has a @dfn{kind} parameter, of type
 @code{fftw_r2r_kind}, specifying the kind of r2r transform to be used
 for that dimension.
 @cindex kind (r2r)
 @tindex fftw_r2r_kind
-(In the case of @code{fftw_plan_r2r}, this is an array
-@code{kind[rank]} where @code{kind[i]} is the transform kind for the
-dimension @code{n[i]}.)  The various r2r kind constants are defined
-in the following subsections.
+(In the case of @code{fftw_plan_r2r}, this is an array @code{kind[rank]}
+where @code{kind[i]} is the transform kind for the dimension
+@code{n[i]}.)  The kind can be one of a set of predefined constants,
+defined in the following subsections.
 
 That is, FFTW computes the separable product of the specified r2r
 transforms over each dimension, which can be used e.g. for partial
@@ -870,8 +870,14 @@ respectively.
 @cindex REDFT
 @cindex real-odd DFT
 @cindex RODFT
+@cindex discrete cosine transform
 @cindex DCT
+@cindex discrete sine transform
 @cindex DST
+
+(In this section, we describe the 1d transforms; multidimensional
+transforms are just a separable product of these transforms operating
+along each dimension.)
 
 Because of the discrete sampling, one has an additional choice: is the
 data even/odd around a sampling point, or around the point halfway
@@ -882,9 +888,9 @@ variants denoted by REDFT@math{ab} and RODFT@math{ab}: @math{a} and
 (@math{a}) and/or output (@math{b}) are shifted by half a sample.  These
 are also known as types I-IV of the DCT and DST, and all four types are
 supported by FFTW's r2r interface.@footnote{There are also type V-VIII
-transforms, which correspond to a logical DFT of odd size @math{N},
-independent of the physical size @code{n} of the transform, but we do
-not support these.}
+transforms, which correspond to a logical DFT of @emph{odd} size @math{N},
+independent of whether the physical size @code{n} is odd, but we do not
+support these variants.}
 
 The r2r kinds for the various REDFT and RODFT types supported by FFTW,
 along with the boundary conditions at both ends of the @emph{input} array
@@ -932,11 +938,11 @@ transform followed by its inverse yields the original array scaled by
 FFTW is most efficient when @math{N} is a product of small factors; note
 that this @emph{differs} from the factorization of the physical size
 @code{n} for REDFT00 and RODFT00!  There is another oddity: @code{n=1}
-REDFT00 transforms correspond to @code{N=0}, and so are @emph{not
+REDFT00 transforms correspond to @math{N=0}, and so are @emph{not
 defined} (the planner will return @code{NULL}).  Otherwise, any positive
 @code{n} is supported.
 
-For the precise mathematical definitions of these transforms, as used by
+For the precise mathematical definitions of these transforms as used by
 FFTW, see @ref{What FFTW Really Computes}.  (For people accustomed to the
 DCT/DST, FFTW's definitions have a coefficient of @math{2} in front of
 the cos/sin functions so that they correspond precisely to an even/odd
