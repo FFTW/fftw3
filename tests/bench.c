@@ -63,6 +63,36 @@ void wrwisdom(void)
      }
 }
 
+static FFTW(iodim) *tensor_to_fftw_iodim(tensor *t)
+{
+     FFTW(iodim) *d;
+     int i;
+
+     BENCH_ASSERT(t->rnk >= 0);
+     if (t->rnk == 0) return 0;
+     
+     d = (FFTW(iodim) *)bench_malloc(sizeof(FFTW(iodim)) * t->rnk);
+     for (i = 0; i < t->rnk; ++i) {
+	  d[i].n = t->dims[i].n;
+	  d[i].is = t->dims[i].is;
+	  d[i].os = t->dims[i].os;
+     }
+
+     return d;
+}
+
+static void extract_reim(int sign, bench_complex *c, 
+			 bench_real **r, bench_real **i)
+{
+     if (sign == FFTW_FORWARD) {
+          *r = c[0] + 0;
+          *i = c[0] + 1;
+     } else {
+          *r = c[0] + 1;
+          *i = c[0] + 0;
+     }
+}
+
 /* try to use the most appropriate API function.  Big mess. */
 static FFTW(plan) mkplan_real(problem *p, int flags)
 {
@@ -117,12 +147,26 @@ static FFTW(plan) mkplan_complex_interleaved(problem *p, int flags)
      }
 
  api_many:
-     /* TODO */
      return 0;
 
  api_guru:
-     /* TODO */
-     return 0;
+     {
+	  FFTW(iodim) *dims, *howmany_dims;
+	  FFTW(plan) pln;
+	  bench_real *ri, *ii, *ro, *io;
+
+	  extract_reim(p->sign, p->in, &ri, &ii);
+	  extract_reim(p->sign, p->out, &ro, &io);
+
+	  dims = tensor_to_fftw_iodim(sz);
+	  howmany_dims = tensor_to_fftw_iodim(vecsz);
+	  pln = FFTW(plan_guru_dft)(sz->rnk, dims,
+				    vecsz->rnk, howmany_dims,
+				    ri, ii, ro, io, flags);
+	  bench_free(dims);
+	  bench_free(howmany_dims);
+	  return pln;
+     }
 }
 
 static FFTW(plan) mkplan_complex(problem *p, int flags)
