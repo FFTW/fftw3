@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.161 2003-01-07 10:09:42 athena Exp $ */
+/* $Id: ifftw.h,v 1.162 2003-01-08 09:00:22 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -39,13 +39,13 @@
 #define FFTW_MANGLE(prefix, name) prefix ## name
 #if defined(FFTW_SINGLE)
 typedef float fftw_real;
-#define FFTW(name) FFTW_MANGLE(fftwf_, name)
+#define X(name) FFTW_MANGLE(fftwf_, name)
 #elif defined(FFTW_LDOUBLE)
 typedef long double fftw_real;
-#define FFTW(name) FFTW_MANGLE(fftwl_, name)
+#define X(name) FFTW_MANGLE(fftwl_, name)
 #else
 typedef double fftw_real;
-#define FFTW(name) FFTW_MANGLE(fftw_, name)
+#define X(name) FFTW_MANGLE(fftw_, name)
 #endif
 
 /* dummy use of unused parameters to avoid compiler warnings */
@@ -53,7 +53,6 @@ typedef double fftw_real;
 
 /* shorthands */
 typedef fftw_real R;
-#define X FFTW
 
 #define FFT_SIGN (-1)  /* sign convention for forward transforms */
 
@@ -666,9 +665,9 @@ uint X(stride_aligned_p)(int s);
 uint X(hash)(const char *s);
 uint X(compute_nbuf)(uint n, uint vl, uint nbuf, uint maxbufsz);
 extern int X(ct_uglyp)(uint min_n, uint n, uint r);
-extern const char *const FFTW(version);
-extern const char *const FFTW(cc);
-extern const char *const FFTW(codelet_optim);
+extern const char *const X(version);
+extern const char *const X(cc);
+extern const char *const X(codelet_optim);
 
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */

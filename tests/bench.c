@@ -18,6 +18,7 @@ extern double timer_stop(void);
 void X(dft_verify)(plan *pln, const problem_dft *p, uint rounds);
 void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds);
 void X(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds);
+#define FFTW X
 #undef problem
 
 /* END HACKS */
