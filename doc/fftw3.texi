@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.2 2003-01-14 07:25:33 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.3 2003-01-17 08:15:24 fftw Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -75,6 +75,7 @@ This manual documents FFTW version @value{VERSION}.
 @menu
 * Introduction::                
 * Tutorial::                    
+* Other Stuff You Should Know::  
 * FFTW Reference::              
 * Parallel FFTW::               
 * Calling FFTW from Fortran::   
@@ -84,10 +85,10 @@ This manual documents FFTW version @value{VERSION}.
 * Concept Index::               
 * Library Index::               
 
-@detailmenu
- --- The Detailed Node Listing ---
-
 Tutorial
+
+
+Other Stuff You Should Know
 
 * The Importance of Alignment::  
 * Multi-dimensional Array Format::  
@@ -99,7 +100,6 @@ FFTW Reference
 * Advanced Interface::          
 * Guru Interface::              
 
-@end detailmenu
 @end menu
 
 @c ************************************************************
@@ -200,14 +200,14 @@ $513 = 19 \cdot 3^3$,
 @end ifhtml
 you can customize FFTW to support the factor @math{19} efficiently.
 
-For more information regarding FFTW, see the paper, ``The Fastest
-Fourier Transform in the West,'' by M. Frigo and S. G. Johnson, which is
-the technical report MIT-LCS-TR-728 (Sep. '97).  See also, ``FFTW: An
+For more information regarding FFTW, see the paper, ``FFTW: An
 Adaptive Software Architecture for the FFT,'' by M. Frigo and
 S. G. Johnson, which appeared in the 23rd International Conference on
 Acoustics, Speech, and Signal Processing (@cite{Proc. ICASSP 1998}
-@b{3}, p. 1381).  The code generator is described in the paper ``A Fast
-Fourier Transform Compiler'', 
+@b{3}, p. 1381).  See also, ``The Fastest Fourier Transform in the
+West,'' by M. Frigo and S. G. Johnson, which is the technical report
+MIT-LCS-TR-728 (Sep. '97).  The code generator is described in the
+paper ``A Fast Fourier Transform Compiler'',
 @cindex compiler
 by M. Frigo, in the @cite{Proceedings of the 1999 ACM SIGPLAN Conference
 on Programming Language Design and Implementation (PLDI), Atlanta,
@@ -226,22 +226,29 @@ references.
 
 The rest of this manual is organized as follows.  We first discuss the
 sequential (one-processor) implementation.  We start by describing the
-basic interface/features of FFTW in @ref{Tutorial}.  This discussion
-includes the storage scheme of multi-dimensional arrays
-(@ref{Multi-dimensional Array Format}) and FFTW's mechanisms for storing
-plans on disk (@ref{Words of Wisdom}).  Next, @ref{FFTW Reference}
-provides comprehensive documentation of all FFTW's features.  Parallel
-transforms are discussed in their own chapter @ref{Parallel FFTW}.
-Fortran programmers can also use FFTW, as described in @ref{Calling FFTW
-from Fortran}.  @ref{Installation and Customization} explains how to
-install FFTW in your computer system and how to adapt FFTW to your
-needs.  License and copyright information is given in @ref{License and
-Copyright}.  Finally, we thank all the people who helped us in
-@ref{Acknowledgments}.
+basic interface/features of FFTW in @ref{Tutorial}.  The following
+chapter discusses @ref{Other Stuff You Should Know}, including
+@ref{The Importance of Alignment}, the storage scheme of
+multi-dimensional arrays (@ref{Multi-dimensional Array Format}), and
+FFTW's mechanism for storing plans on disk (@ref{Words of Wisdom}).
+Next, @ref{FFTW Reference} provides comprehensive documentation of all
+FFTW's features.  Parallel transforms are discussed in their own
+chapter @ref{Parallel FFTW}.  Fortran programmers can also use FFTW,
+as described in @ref{Calling FFTW from Fortran}.  @ref{Installation
+and Customization} explains how to install FFTW in your computer
+system and how to adapt FFTW to your needs.  License and copyright
+information is given in @ref{License and Copyright}.  Finally, we
+thank all the people who helped us in @ref{Acknowledgments}.
 
 @c ************************************************************
-@node  Tutorial, FFTW Reference, Introduction, Top
+@node  Tutorial, Other Stuff You Should Know, Introduction, Top
 @chapter Tutorial
+@menu
+@end menu
+
+@c ************************************************************
+@node Other Stuff You Should Know, FFTW Reference, Tutorial, Top
+@chapter Other Stuff You Should Know
 @menu
 * The Importance of Alignment::  
 * Multi-dimensional Array Format::  
@@ -249,22 +256,22 @@ Copyright}.  Finally, we thank all the people who helped us in
 @end menu
 
 @c ------------------------------------------------------------
-@node The Importance of Alignment, Multi-dimensional Array Format, Tutorial, Tutorial
+@node The Importance of Alignment, Multi-dimensional Array Format, Other Stuff You Should Know, Other Stuff You Should Know
 @section The Importance of Alignment
 @cindex alignment
 
 @c ------------------------------------------------------------
-@node Multi-dimensional Array Format, Words of Wisdom, The Importance of Alignment, Tutorial
+@node Multi-dimensional Array Format, Words of Wisdom, The Importance of Alignment, Other Stuff You Should Know
 @section Multi-dimensional Array Format
 
 @c ------------------------------------------------------------
-@node Words of Wisdom,  , Multi-dimensional Array Format, Tutorial
+@node Words of Wisdom,  , Multi-dimensional Array Format, Other Stuff You Should Know
 @section Words of Wisdom
 @cindex wisdom
 @cindex saving plans to disk
 
 @c ************************************************************
-@node FFTW Reference, Parallel FFTW, Tutorial, Top
+@node FFTW Reference, Parallel FFTW, Other Stuff You Should Know, Top
 @chapter FFTW Reference
 @menu
 * Basic Interface::             
