@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.9 2002-07-24 18:38:15 stevenj Exp $ */
+/* $Id: rdft.h,v 1.10 2002-07-25 02:46:39 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -62,7 +62,7 @@ plan *X(mkplan_rdft)(size_t size, const plan_adt *adt, rdftapply apply);
 /* various solvers */
 
 solver *X(mksolver_rdft_r2hc_direct)(kr2hc k, const kr2hc_desc *desc);
-solver *X(mksolver_rdft_hc2r_direct)(kr2hc k, const kr2hc_desc *desc);
+solver *X(mksolver_rdft_hc2r_direct)(khc2r k, const khc2r_desc *desc);
 solver *X(mksolver_rdft_hc2hc_dit)(khc2hc k, const hc2hc_desc *desc);
 solver *X(mksolver_rdft_hc2hc_ditbuf)(khc2hc k, const hc2hc_desc *desc);
 

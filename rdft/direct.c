@@ -18,16 +18,27 @@
  *
  */
 
-/* $Id: direct-r2hc.c,v 1.3 2002-07-22 05:02:38 stevenj Exp $ */
+/* $Id: direct.c,v 1.1 2002-07-25 02:46:39 stevenj Exp $ */
 
-/* direct RDFT R2HC solver, if we have a codelet */
+/* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
 #include "rdft.h"
 
+typedef union {
+     kr2hc r2hc;
+     khc2r hc2r;
+} kodelet;
+
 typedef struct {
      solver super;
-     const kr2hc_desc *desc;
-     kr2hc k;
+     union {
+	  const kr2hc_desc *r2hc;
+	  const khc2r_desc *hc2r;
+     } desc;
+     kodelet k;
+     uint sz;
+     rdft_kind kind;
+     const char *nam;
 } S;
 
 typedef struct {
@@ -37,15 +48,22 @@ typedef struct {
      int ioffset;
      uint vl;
      int ivs, ovs;
-     kr2hc k;
+     kodelet k;
      const S *slv;
 } P;
 
-static void apply(plan *ego_, R *I, R *O)
+static void apply_r2hc(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
-     ego->k(I, O, O + ego->ioffset, ego->is, ego->ros, ego->ios,
-	    ego->vl, ego->ivs, ego->ovs);
+     ego->k.r2hc(I, O, O + ego->ioffset, ego->is, ego->ros, ego->ios,
+		 ego->vl, ego->ivs, ego->ovs);
+}
+
+static void apply_hc2r(plan *ego_, R *I, R *O)
+{
+     P *ego = (P *) ego_;
+     ego->k.hc2r(I, I + ego->ioffset, O, ego->ros, ego->ios, ego->is,
+		 ego->vl, ego->ivs, ego->ovs);
 }
 
 static void destroy(plan *ego_)
@@ -61,10 +79,14 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
      const S *s = ego->slv;
-     const kr2hc_desc *d = s->desc;
 
      p->print(p, "(rdft-%s-direct-%u%v \"%s\")", 
-	      X(rdft_kind_str)(s->desc->genus->kind), d->sz, ego->vl, d->nam);
+	      X(rdft_kind_str)(s->kind), s->sz, ego->vl, s->nam);
+}
+
+static int ioffset(rdft_kind kind, uint sz, int s)
+{
+     return(s * ((kind == R2HC || kind == HC2R) ? sz : (sz - 1)));
 }
 
 static int applicable(const solver *ego_, const problem *p_)
@@ -72,7 +94,6 @@ static int applicable(const solver *ego_, const problem *p_)
      if (RDFTP(p_)) {
           const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
-          const kr2hc_desc *d = ego->desc;
 	  uint rnk = p->vecsz.rnk;
           iodim *vd = p->vecsz.dims;
 	  uint vl = rnk == 1 ? vd[0].n : 1;
@@ -83,15 +104,23 @@ static int applicable(const solver *ego_, const problem *p_)
 	       1
 	       && p->sz.rnk == 1
 	       && p->vecsz.rnk <= 1
-	       && p->sz.dims[0].n == d->sz
-	       && p->kind == d->genus->kind
+	       && p->sz.dims[0].n == ego->sz
+	       && p->kind == ego->kind
 
 	       /* check strides etc */
-	       && (d->genus->okp(d, p->I, p->O, p->O + d->sz,
-				 p->sz.dims[0].is,
-				 p->sz.dims[0].os, -p->sz.dims[0].os,
-				 vl, ivs, ovs))
-
+	       && (!R2HC_KINDP(ego->kind) ||
+		   ego->desc.r2hc->genus->okp(ego->desc.r2hc, p->I, p->O, p->O
+					      + ioffset(ego->kind, ego->sz, p->sz.dims[0].os),
+					      p->sz.dims[0].is,
+					      p->sz.dims[0].os, -p->sz.dims[0].os,
+					      vl, ivs, ovs))
+	       && (!HC2R_KINDP(ego->kind) ||
+		   ego->desc.hc2r->genus->okp(ego->desc.hc2r, p->I, p->I
+					      + ioffset(ego->kind, ego->sz, p->sz.dims[0].is), p->O,
+					      p->sz.dims[0].is, -p->sz.dims[0].is,
+					      p->sz.dims[0].os, 
+					      vl, ivs, ovs))
+	       
 	       && (0
 		   /* can operate out-of-place */
 		   || p->I != p->O
@@ -124,8 +153,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      const problem_rdft *p;
      iodim *d, *vd;
-     const kr2hc_desc *e = ego->desc;
      uint nr;
+     int r2hc_kindp;
 
      static const plan_adt padt = {
 	  X(rdft_solve), X(null_awake), print, destroy
@@ -138,19 +167,21 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_rdft *) p_;
 
-     pln = MKPLAN_RDFT(P, &padt, apply);
+     r2hc_kindp = R2HC_KINDP(p->kind);
+     A(r2hc_kindp || HC2R_KINDP(p->kind));
+
+     pln = MKPLAN_RDFT(P, &padt, r2hc_kindp ? apply_r2hc : apply_hc2r);
 
      d = p->sz.dims;
      vd = p->vecsz.dims;
 
      pln->k = ego->k;
-     pln->ioffset = 
-	  d[0].os * ((p->kind == R2HC) ? d[0].n : /* R2HCII */ (d[0].n - 1));
+     pln->ioffset = ioffset(p->kind, d[0].n, r2hc_kindp ? d[0].os : d[0].is);
 
-     nr = (p->kind == R2HC) ? (d[0].n + 2) / 2 : /* R2HCII */ (d[0].n + 1) / 2;
-     pln->is = X(mkstride)(e->sz, d[0].is);
-     pln->ros = X(mkstride)(nr, d[0].os);
-     pln->ios = X(mkstride)(e->sz - nr + 1, -d[0].os);
+     nr = (p->kind == R2HC || p->kind == HC2R) ? (d[0].n + 2) / 2 : /* R2HCII */ (d[0].n + 1) / 2;
+     pln->is = X(mkstride)(ego->sz, r2hc_kindp ? d[0].is : d[0].os);
+     pln->ros = X(mkstride)(nr, r2hc_kindp ? d[0].os : d[0].is);
+     pln->ios = X(mkstride)(ego->sz - nr + 1, r2hc_kindp ? -d[0].os : -d[0].is);
 
      if (p->vecsz.rnk == 0) {
           pln->vl = 1;
@@ -162,7 +193,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
 
      pln->slv = ego;
-     pln->super.super.ops = X(ops_mul)(pln->vl / e->genus->vl, e->ops);
+     if (r2hc_kindp)
+	  pln->super.super.ops = X(ops_mul)(pln->vl/ego->desc.r2hc->genus->vl, ego->desc.r2hc->ops);
+     else
+	  pln->super.super.ops = X(ops_mul)(pln->vl/ego->desc.hc2r->genus->vl, ego->desc.hc2r->ops);
 
      return &(pln->super.super);
 }
@@ -172,7 +206,22 @@ solver *X(mksolver_rdft_r2hc_direct)(kr2hc k, const kr2hc_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
      S *slv = MKSOLVER(S, &sadt);
-     slv->k = k;
-     slv->desc = desc;
+     slv->k.r2hc = k;
+     slv->desc.r2hc = desc;
+     slv->sz = desc->sz;
+     slv->nam = desc->nam;
+     slv->kind = desc->genus->kind;
+     return &(slv->super);
+}
+
+solver *X(mksolver_rdft_hc2r_direct)(khc2r k, const khc2r_desc *desc)
+{
+     static const solver_adt sadt = { mkplan, score };
+     S *slv = MKSOLVER(S, &sadt);
+     slv->k.hc2r = k;
+     slv->desc.hc2r = desc;
+     slv->sz = desc->sz;
+     slv->nam = desc->nam;
+     slv->kind = desc->genus->kind;
      return &(slv->super);
 }

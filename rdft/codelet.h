@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.4 2002-07-22 02:34:28 stevenj Exp $ */
+/* $Id: codelet.h,v 1.5 2002-07-25 02:46:39 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -37,6 +37,8 @@
 
 typedef enum { R2HC = FFT_SIGN, HC2R = -FFT_SIGN, 
 	       R2HCII, HC2RIII } rdft_kind;
+#define R2HC_KINDP(k) ((k) == R2HC || (k) == R2HCII) /* uses kr2hc_genus */
+#define HC2R_KINDP(k) ((k) == HC2R || (k) == HC2RIII) /* uses khc2r_genus */
 
 /* real-input DFT codelets */
 typedef struct kr2hc_desc_s kr2hc_desc;
