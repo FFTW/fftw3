@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle_c.ml,v 1.2 2002-08-07 21:14:09 athena Exp $ *)
+(* $Id: gen_twiddle_c.ml,v 1.3 2002-09-28 17:03:53 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle_c.ml,v 1.2 2002-08-07 21:14:09 athena Exp $"
+let cvsid = "$Id: gen_twiddle_c.ml,v 1.3 2002-09-28 17:03:53 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -63,6 +63,7 @@ let generate n =
   and name = !Magic.codelet_name 
   and byvl x = choose_simd x (ctimes (CVar "VL", x)) 
   and bytwvl x = choose_simd x (ctimes (CVar "TWVL", x)) in
+  let ename = expand_name name in
 
   let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
   let nt = num_twiddles n in
@@ -122,7 +123,7 @@ let generate n =
   in
 
   let tree = 
-    Fcn (("static " ^ C.constrealtypep), name,
+    Fcn (("static " ^ C.constrealtypep), ename,
 	 [Decl (C.realtypep, "ri");
 	  Decl (C.realtypep, "ii");
 	  Decl (C.constrealtypep, twarray);
@@ -136,8 +137,8 @@ let generate n =
       (twinstr_to_string (twdesc n))
   and desc = 
     Printf.sprintf
-      "static const ct_desc desc = {%d, \"%s\", twinstr, %s, &GENUS, %s, %s, %s};\n\n"
-      n name (flops_of tree) 
+      "static const ct_desc desc = {%d, %s, twinstr, %s, &GENUS, %s, %s, %s};\n\n"
+      n (stringify name) (flops_of tree) 
       (stride_to_solverparm !uiostride) "0"
       (stride_to_solverparm !udist) 
   and register = 
@@ -151,7 +152,7 @@ let generate n =
     twinstr ^ 
     desc ^
     (declare_register_fcn name) ^
-    (Printf.sprintf "{\n%s(p, %s, &desc);\n}" register name)
+    (Printf.sprintf "{\n%s(p, %s, &desc);\n}" register ename)
   in
 
   (unparse cvsid tree) ^ "\n" ^ init

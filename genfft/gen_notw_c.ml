@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_c.ml,v 1.3 2002-08-07 21:14:09 athena Exp $ *)
+(* $Id: gen_notw_c.ml,v 1.4 2002-09-28 17:03:53 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_c.ml,v 1.3 2002-08-07 21:14:09 athena Exp $"
+let cvsid = "$Id: gen_notw_c.ml,v 1.4 2002-09-28 17:03:53 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -60,7 +60,8 @@ let generate n =
 
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
-  let name0 = name ^ "_0" in
+  let ename = expand_name name in
+  let name0 = ename ^ "_0" in
 
   let vl = choose_simd "1" "VL"
   in
@@ -106,7 +107,7 @@ let generate n =
   let si = if sign < 0 then "ri" else "ii" in
   let so = if sign < 0 then "ro" else "io" in
   let loop =
-    "static void " ^ name ^
+    "static void " ^ ename ^
       "(const " ^ C.realtype ^ " *ri, const " ^ C.realtype ^ " *ii, "
       ^ C.realtype ^ " *ro, " ^ C.realtype ^ " *io,\n" ^ 
       C.stridetype ^ " is, " ^  C.stridetype ^ " os, " ^ 
@@ -132,8 +133,8 @@ let generate n =
 
   and desc = 
     Printf.sprintf 
-      "static const kdft_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s };\n"
-      n name (flops_of tree0) 
+      "static const kdft_desc desc = { %d, %s, %s, &GENUS, %s, %s, %s, %s };\n"
+      n (stringify name) (flops_of tree0) 
       (stride_to_solverparm !uistride) (stride_to_solverparm !uostride)
       (choose_simd "0" (stride_to_solverparm !uivstride))
       (choose_simd "0" (stride_to_solverparm !uovstride))
@@ -141,7 +142,7 @@ let generate n =
   and init =
     (declare_register_fcn name) ^
     "{" ^
-    "  X(kdft_register)(p, " ^ name ^ ", &desc);\n" ^
+    "  X(kdft_register)(p, " ^ ename ^ ", &desc);\n" ^
     "}\n"
 
   in ((unparse cvsid tree0) ^ "\n" ^ 

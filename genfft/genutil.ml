@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.14 2002-07-28 18:50:09 athena Exp $ *)
+(* $Id: genutil.ml,v 1.15 2002-09-28 17:03:53 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -221,8 +221,16 @@ let check_size () =
   | Some i -> i
   | None -> failwith "must specify -n"
 
+let expand_name name = if name = "" then "noname" else name
+
 let declare_register_fcn name =
-  "void X(codelet_" ^ name ^ ")(planner *p)\n"
+  if name = "" then
+    "void NAME(planner *p)\n"
+  else 
+    "void X(codelet_" ^ name ^ ")(planner *p)\n"
+
+let stringify name = 
+  if name = "" then "STRINGIZE(NAME)" else "\"" ^ name ^ "\""
 
 let parse user_speclist usage =
   Arg.parse
