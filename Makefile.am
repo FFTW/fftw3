@@ -1,5 +1,5 @@
-AUTOMAKE_OPTIONS=gnu
-lib_LTLIBRARIES = lib@PRECISION@fftw3.la
+OPTIONS_AUTOMAKE=gnu
+lib_LTLIBRARIES = libfftw3@PREC_SUFFIX@.la
 
 # recompile genfft if maintainer mode is true
 if MAINTAINER_MODE
@@ -11,9 +11,9 @@ endif
 SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft libbench . tests
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS
 
-lib@PRECISION@fftw3_la_SOURCES = 
+libfftw3@PREC_SUFFIX@_la_SOURCES = 
 
-lib@PRECISION@fftw3_la_LIBADD =				\
+libfftw3@PREC_SUFFIX@_la_LIBADD =				\
 	kernel/libkernel.la				\
 	simd/libsimd.la					\
 	dft/libdft.la					\
@@ -30,4 +30,4 @@ lib@PRECISION@fftw3_la_LIBADD =				\
 	rdft/codelets/hc2r/librdft_codelets_hc2r.la     \
 	reodft/libreodft.la
 
-lib@PRECISION@fftw3_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
+libfftw3@PREC_SUFFIX@_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@

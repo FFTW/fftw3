@@ -1,6 +1,5 @@
 AM_CPPFLAGS = -I$(top_srcdir)/simd
 noinst_LTLIBRARIES = libkernel.la
-include_HEADERS = fftw3.h sfftw3.h dfftw3.h lfftw3.h
 
 libkernel_la_SOURCES = align.c alloc.c assert.c awake.c debug.c		\
 dotens.c dotens2.c minmax.c ops.c pickdim.c plan.c planner-naive.c	\

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(fftw, 3.0, fftw@fftw.org)
-AC_CONFIG_SRCDIR(kernel/fftw3.h)
+AC_CONFIG_SRCDIR(kernel/ifftw.h)
 SHARED_VERSION_INFO="3:0:0"
 
 AM_INIT_AUTOMAKE
@@ -24,7 +24,6 @@ else
 	PRECISION=d
 fi
 AM_CONDITIONAL(SINGLE, test "$ok" = "yes")
-AC_SUBST(PRECISION)
 
 AC_ARG_ENABLE(long-double, [AC_HELP_STRING([--enable-long-double],[compile fftw in long-double precision])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
@@ -82,6 +81,14 @@ if test "$enable_unsafe_mulmod" = "yes"; then
         AC_DEFINE([FFTW_ENABLE_UNSAFE_MULMOD],1,[enable fast, unsafe modular multiplications, risking overflow for large prime sizes])
 fi
 OCAML_INIT_PATHS
+
+dnl compute library suffix
+case "$PRECISION" in
+     s) PREC_SUFFIX=f;;
+     d) PREC_SUFFIX=;;
+     l) PREC_SUFFIX=l;;
+esac
+AC_SUBST(PREC_SUFFIX)
 
 dnl Checks for programs.
 AC_PROG_CC

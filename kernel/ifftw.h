@@ -18,14 +18,13 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.89 2002-08-26 02:06:52 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.90 2002-08-28 18:50:34 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
 #define __IFFTW_H__
 
 #include "config.h"
-#include "fftw3.h"
 
 #include <stdlib.h>		/* size_t */
 #include <stdarg.h>		/* va_list */
@@ -33,6 +32,19 @@
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>		/* uint, maybe */
+#endif
+
+/* determine precision and name-mangling scheme */
+#define FFTW_MANGLE(prefix, name) prefix ## name
+#if defined(FFTW_SINGLE)
+typedef float fftw_real;
+#define FFTW(name) FFTW_MANGLE(fftwf_, name)
+#elif defined(FFTW_LDOUBLE)
+typedef long double fftw_real;
+#define FFTW(name) FFTW_MANGLE(fftwl_, name)
+#else
+typedef double fftw_real;
+#define FFTW(name) FFTW_MANGLE(fftw_, name)
 #endif
 
 /* dummy use of unused parameters to avoid compiler warnings */
@@ -577,6 +589,9 @@ int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
 uint X(alignment_of)(R *p);
 R *X(ptr_with_alignment)(uint algn);
+const char *const FFTW(version);
+const char *const FFTW(cc);
+const char *const FFTW(codelet_optim);
 
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */
