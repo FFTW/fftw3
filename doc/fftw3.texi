@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.194 2003-05-28 00:02:31 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.195 2003-05-28 00:31:25 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2759,6 +2759,8 @@ interface corresponds to @code{howmany_rank} = 1,
 @code{idist}, and @code{howmany_dims[0].os} = @code{odist}.
 @cindex howmany loop
 @cindex dist
+(To compute a single transform, you can just use @code{howmany_rank} = 0.)
+
 
 A row-major multidimensional array with dimensions @code{n[rank]}
 (@pxref{Row-major Format}) corresponds to @code{dims[i].n} =
