@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse.c,v 1.5 2003-01-07 19:32:06 athena Exp $ */
+/* $Id: sse.c,v 1.6 2003-01-08 12:20:47 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -70,6 +70,4 @@ int RIGHT_CPU(void)
      }
      return res;
 }
-
-const union fvec X(sse_mpmp) = {{-0.0, 0.0, -0.0, 0.0}};
 #endif

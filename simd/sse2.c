@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse2.c,v 1.6 2003-01-07 22:45:52 stevenj Exp $ */
+/* $Id: sse2.c,v 1.7 2003-01-08 12:20:47 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -71,7 +71,5 @@ int RIGHT_CPU(void)
      }
      return res;
 }
-
-const union dvec X(sse2_mp) = { {-0.0, 0.0} };
 
 #endif
