@@ -19,16 +19,16 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.16 2003-01-11 21:26:35 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.17 2003-01-11 21:34:56 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
 
+#include <stdio.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#include <stdio.h>
 
 /* If <complex.h> is included, use the C99 complex type.  Otherwise
    define a type bit-compatible with C99 complex */
