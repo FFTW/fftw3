@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.27 2002-09-01 23:51:50 athena Exp $ */
+/* $Id: dft.h,v 1.28 2002-09-02 15:46:57 athena Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -41,9 +41,6 @@ problem *X(mkproblem_dft)(const tensor sz, const tensor vecsz,
                           R *ri, R *ii, R *ro, R *io);
 problem *X(mkproblem_dft_d)(tensor sz, tensor vecsz,
                             R *ri, R *ii, R *ro, R *io);
-
-/* verify.c: */
-void X(dft_verify)(plan *pln, const problem_dft *p, uint rounds);
 
 /* solve.c: */
 void X(dft_solve)(plan *ego_, const problem *p_);

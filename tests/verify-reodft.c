@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: verify.c,v 1.4 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: verify-reodft.c,v 1.1 2002-09-02 15:46:57 athena Exp $ */
 
 #include "reodft.h"
+#include "debug.h"
 #include <math.h>
 #include <stdlib.h>
 

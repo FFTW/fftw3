@@ -15,6 +15,9 @@ extern double timer_stop(void);
 #include "rdft.h"
 #include "reodft.h"
 #include "threads.h"
+void X(dft_verify)(plan *pln, const problem_dft *p, uint rounds);
+void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds);
+void X(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds);
 #undef problem
 extern const char *const FFTW(version);
 extern const char *const FFTW(cc);

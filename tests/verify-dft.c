@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: verify.c,v 1.8 2002-08-16 22:10:33 athena Exp $ */
+/* $Id: verify-dft.c,v 1.1 2002-09-02 15:46:57 athena Exp $ */
 
 #include "dft.h"
+#include "debug.h"
 #include "verify.h"
 
 typedef struct {

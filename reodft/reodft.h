@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft.h,v 1.2 2002-08-20 19:31:54 stevenj Exp $ */
+/* $Id: reodft.h,v 1.3 2002-09-02 15:46:57 athena Exp $ */
 
 #ifndef __REODFT_H__
 #define __REODFT_H__
@@ -27,9 +27,6 @@
 #include "rdft.h"
 
 #define REODFT_KINDP(k) ((k) >= REDFT00 && (k) <= RODFT11)
-
-/* verify.c: */
-void X(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds);
 
 void X(redft00e_r2hc_register)(planner *p);
 void X(rodft00e_r2hc_register)(planner *p);

@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: dotens.c,v 1.1 2002-07-05 18:49:59 athena Exp $ */
+/* $Id: dotens.c,v 1.1 2002-09-02 15:46:57 athena Exp $ */
 
 #include "ifftw.h"
+#include "debug.h"
 
 static void recur(uint rnk, const iodim *dims, dotens_closure *k, 
 		  int indx, int ondx)
