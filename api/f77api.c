@@ -36,9 +36,15 @@
 #define F77x(a, A) F77_FUNC_(a, A)
 #define F77(a, A) F77x(x77(a), X77(A))
 
-static ulong *reverse_n(uint rnk, const uint *n)
+/* C analogues to Fortran integer type: */
+typedef int fint;
+typedef unsigned int ufint;
+
+
+static ulong *reverse_n(ufint rnk, const ufint *n)
 {
-     ulong *nrev, i;
+     ulong *nrev;
+     ufint i;
      A(FINITE_RNK(rnk));
      nrev = MALLOC(sizeof(ulong) * rnk, PROBLEMS);
      for (i = 0; i < rnk; ++i)
@@ -46,11 +52,11 @@ static ulong *reverse_n(uint rnk, const uint *n)
      return nrev;
 }
 
-static X(iodim) *make_dims(uint rnk, const uint *n,
-			   const int *is, const int *os)
+static X(iodim) *make_dims(ufint rnk, const ufint *n,
+			   const fint *is, const fint *os)
 {
      X(iodim) *dims;
-     uint i;
+     ufint i;
      A(FINITE_RNK(rnk));
      dims = MALLOC(sizeof(X(iodim)) * rnk, PROBLEMS);
      for (i = 0; i < rnk; ++i) {
@@ -68,8 +74,8 @@ void F77(execute, EXECUTE)(X(plan) *p)
 }
 
 void F77(plan_dft, PLAN_DFT)(X(plan) *p,
-			     unsigned int *rank, const unsigned int *n,
-			     C *in, C *out, int *sign, unsigned int *flags)
+			     unsigned fint *rank, const unsigned fint *n,
+			     C *in, C *out, fint *sign, unsigned fint *flags)
 {
      ulong *nrev = reverse_n(*rank, n);
      *p = X(plan_dft)(*rank, nrev, in, out, *sign, *flags);
@@ -78,37 +84,37 @@ void F77(plan_dft, PLAN_DFT)(X(plan) *p,
 
 void F77(plan_dft_1d, PLAN_DFT_1D)(
      X(plan) *p,
-     unsigned int *n,
-     C *in, C *out, int *sign, unsigned int *flags)
+     unsigned fint *n,
+     C *in, C *out, fint *sign, unsigned fint *flags)
 {
      *p = X(plan_dft_1d)(*n, in, out, *sign, *flags);
 }
 
 void F77(plan_dft_2d, PLAN_DFT_2D)(
      X(plan) *p,
-     unsigned int *nx, unsigned int *ny,
-     C *in, C *out, int *sign, unsigned int *flags)
+     unsigned fint *nx, unsigned fint *ny,
+     C *in, C *out, fint *sign, unsigned fint *flags)
 {
      *p = X(plan_dft_2d)(*ny, *nx, in, out, *sign, *flags);
 }
 
 void F77(plan_dft_3d, PLAN_DFT_3D)(
      X(plan) *p,
-     unsigned int *nx, unsigned int *ny, unsigned int *nz,
-     C *in, C *out, int *sign, unsigned int *flags)
+     unsigned fint *nx, unsigned fint *ny, unsigned fint *nz,
+     C *in, C *out, fint *sign, unsigned fint *flags)
 {
      *p = X(plan_dft_3d)(*nz, *ny, *nx, in, out, *sign, *flags);
 }
 
 void F77(plan_many_dft, PLAN_MANY_DFT)(
      X(plan) *p,
-     unsigned int *rank, const unsigned int *n,
-     unsigned int *howmany,
-     C *in, const unsigned int *inembed,
-     int *istride, int *idist,
-     C *out, const unsigned int *onembed,
-     int *ostride, int *odist,
-     int *sign, unsigned int *flags)
+     unsigned fint *rank, const unsigned fint *n,
+     unsigned fint *howmany,
+     C *in, const unsigned fint *inembed,
+     fint *istride, fint *idist,
+     C *out, const unsigned fint *onembed,
+     fint *ostride, fint *odist,
+     fint *sign, unsigned fint *flags)
 {
      ulong *nrev = reverse_n(*rank, n);
      ulong *inembedrev = reverse_n(*rank, inembed);
@@ -124,11 +130,12 @@ void F77(plan_many_dft, PLAN_MANY_DFT)(
 
 void F77(plan_guru_dft, PLAN_GURU_DFT)(
      X(plan) *p,
-     unsigned int *rank, const unsigned int *n, const int *is, const int *os,
-     unsigned int *howmany_rank,
-     const unsigned int *h_n, const int *h_is, const int *h_os,
+     unsigned fint *rank,
+     const unsigned fint *n, const fint *is, const fint *os,
+     unsigned fint *howmany_rank,
+     const unsigned fint *h_n, const fint *h_is, const fint *h_os,
      R *ri, R *ii, R *ro, R *io,
-     unsigned int *flags)
+     unsigned fint *flags)
 {
      X(iodim) *dims = make_dims(*rank, n, is, os);
      X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
