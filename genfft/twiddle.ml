@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.11 2002-08-20 12:37:45 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.12 2002-08-20 20:01:36 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -292,11 +292,16 @@ let twiddle_policy_log3 =
     else terms_needed (i + 1) (3 * pi) (s + pi) n
   in
   let rec bytwiddle n sign w f =
+    let nterms = terms_needed 0 1 0 n in
+    let maxterm = pow 3 (nterms - 1) in
     let g = rec_array (3 * n) (fun self i ->
       if i = 0 then Complex.one
       else if is_pow 3 i then load_reim sign w (log 3 i)
+      else if i = (n - 1) && maxterm >= n then
+	load_reim sign w (nterms - 1)
       else let x = smallest_power_larger_than 3 i in
       if (i + i >= x) then
+	let x = min x (n - 1) in
 	Complex.times (self x) (Complex.conj (self (x - i)))
       else let x = largest_power_smaller_than 3 i in
       Complex.times (self x) (self (i - x)))
@@ -305,7 +310,9 @@ let twiddle_policy_log3 =
   and twdesc n =
     (List.flatten 
        (List.map 
-	  (fun i -> [(TW_COS, 0, (pow 3 i)); (TW_SIN, 0, (pow 3 i))])
+	  (fun i -> 
+	    let x = min (pow 3 i) (n - 1) in
+	    [(TW_COS, 0, x); (TW_SIN, 0, x)])
 	  (iota ((twidlen n) / 2))))
     @ [(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
