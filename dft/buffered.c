@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.23 2002-07-28 05:39:54 stevenj Exp $ */
+/* $Id: buffered.c,v 1.24 2002-07-29 20:17:11 athena Exp $ */
 
 #include "dft.h"
 
@@ -339,7 +339,11 @@ void X(dft_buffered_register)(planner *p)
 	  /* nbuf */           8,
 	  /* maxbufsz */       (65536 / sizeof(R)),
 	  /* skew_alignment */ 8,
+#if HAVE_SIMD  /* 5 is odd and screws up the alignment. */
+	  /* skew */           6,
+#else
 	  /* skew */           5,
+#endif
 	  /* nam */            "dft-buffered"
      };
 
