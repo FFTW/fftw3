@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.96 2003-03-06 07:14:21 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.97 2003-03-06 07:20:13 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2338,7 +2338,7 @@ important that they pay special attention to the documentation lest they
 shoot themselves in the foot.
 
 @menu
-* Vector and transform sizes::  
+* Guru vector and transform sizes::  
 * Guru Complex DFTs::           
 * Guru Real-data DFTs::         
 * Guru Real-to-real Transforms::  
@@ -2346,8 +2346,8 @@ shoot themselves in the foot.
 @end menu
 
 @c =========>
-@node Vector and transform sizes, Guru Complex DFTs, Guru Interface, Guru Interface
-@subsection Vector and transform sizes
+@node Guru vector and transform sizes, Guru Complex DFTs, Guru Interface, Guru Interface
+@subsection Guru vector and transform sizes
 
 The guru interface introduces one basic new data structure,
 @code{fftw_iodim}, that is used to specify sizes and strides for
@@ -2398,7 +2398,7 @@ indices, and for in-place transforms the input/output strides should be
 the same.
 
 @c =========>
-@node Guru Complex DFTs, Guru Real-data DFTs, Vector and transform sizes, Guru Interface
+@node Guru Complex DFTs, Guru Real-data DFTs, Guru vector and transform sizes, Guru Interface
 @subsection Guru Complex DFTs
 
 @example
@@ -2894,6 +2894,17 @@ Fortran cannot use the @code{fftw_malloc} dynamic-allocation routine.
 If you want to exploit the SIMD FFTW (@pxref{The Importance of
 Alignment}), you'll need to figure out some other way to ensure that
 your arrays are at least 16-byte aligned.
+
+@item
+@tindex fftw_iodim
+@cindex guru interface
+Since Fortran 77 does not have data structures, the @code{fftw_iodim}
+structure from the guru interface (@pxref{Guru vector and transform
+sizes}) must be split into separate arguments.  In particular, any
+@code{fftw_iodim} array arguments in the C guru interface become three
+integer array arguments (@code{n}, @code{is}, and @code{os}) in the
+Fortran guru interface, all of whose length should be equal to the
+corresponding @code{rank} argument.
 
 @end itemize
 
