@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.10 2002-07-15 19:07:41 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.11 2002-07-21 05:05:21 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -172,7 +172,7 @@ static int score(const solver *ego_, const problem *p_, int flags)
 
      /* Heuristic: if the transform is multi-dimensional, and the
         vector stride is less than the transform size, then we
-        probably want to use an rank>=2 plan first in order to combine
+        probably want to use a rank>=2 plan first in order to combine
         this vector with the transform-dimension vectors. */
      {
 	  iodim *d = p->vecsz.dims + vdim;
