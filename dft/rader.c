@@ -51,105 +51,6 @@ typedef struct {
 
 /***************************************************************************/
 
-/* Rader's algorithm requires lots of modular arithmetic, and if we
-   aren't careful we can have errors due to integer overflows. */
-
-#if defined(FFTW_ENABLE_UNSAFE_MULMOD)
-#  define MULMOD(x,y,p) (((x) * (y)) % (p))
-#elif (HAVE_UINT && ((SIZEOF_UINT != 0) && \
-                     (SIZEOF_UNSIGNED_LONG_LONG >= 2 * SIZEOF_UINT))) \
-   || (!HAVE_UINT && ((SIZEOF_UNSIGNED_INT != 0) && \
-                     (SIZEOF_UNSIGNED_LONG_LONG >= 2 * SIZEOF_UNSIGNED_INT)))
-#  define MULMOD(x,y,p) ((uint) ((((unsigned long long) (x))    \
-                                  * ((unsigned long long) (y))) \
-				 % ((unsigned long long) (p))))
-#else /* 'long long' unavailable */
-#  define MULMOD(x,y,p) safe_mulmod(x,y,p)
-
-#  include <limits.h>
-
-/* compute (x * y) mod p, but watch out for integer overflows; we must
-   have x, y >= 0, p > 0.  This routine is slow. */
-static uint safe_mulmod(uint x, uint y, uint p)
-{
-     if (y == 0 || x <= UINT_MAX / y)
-	  return((x * y) % p);
-     else {
-	  uint y2 = y/2;
-	  return((fftw_safe_mulmod(x, y2, p) +
-		  fftw_safe_mulmod(x, y - y2, p)) % p);
-     }
-}
-#endif /* safe_mulmod ('long long' unavailable) */
-
-/***************************************************************************/
-
-/* Compute n^m mod p, where m >= 0 and p > 0.  If we really cared, we
-   could make this tail-recursive. */
-static uint power_mod(uint n, uint m, uint p)
-{
-     A(p > 0);
-     if (m == 0)
-	  return 1;
-     else if (m % 2 == 0) {
-	  uint x = power_mod(n, m / 2, p);
-	  return MULMOD(x, x, p);
-     }
-     else
-	  return MULMOD(n, power_mod(n, m - 1, p), p);
-}
-
-/* Find the period of n in the multiplicative group mod p (p prime).
-   That is, return the smallest m such that n^m == 1 mod p. */
-static uint period(uint n, uint p)
-{
-     uint prod = n, period = 1;
-
-     while (prod != 1) {
-	  prod = MULMOD(prod, n, p);
-	  ++period;
-	  A(prod != 0);
-     }
-     return period;
-}
-
-/* Find a generator for the multiplicative group mod p, where p is
-   prime.  The generators are dense enough that this takes O(p)
-   time, not O(p^2) as you might naively expect.   (There are even
-   faster ways to find a generator; c.f. Knuth.) */
-static uint find_generator(uint p)
-{
-     uint g;
-
-     for (g = 1; g < p; ++g)
-	  if (period(g, p) == p - 1)
-	       break;
-     A(g != p);
-     return g;
-}
-
-/* Return first prime divisor of n  (It would be only slightly faster to
-   search a static table of primes; there are 6542 primes < 2^16.)  */
-static int first_divisor(uint n)
-{
-     uint i;
-     if (n <= 1)
-	  return n;
-     if (n % 2 == 0)
-	  return 2;
-     for (i = 3; i*i <= n; i += 2)
-	  if (n % i == 0)
-	       return i;
-     return n;
-}
-
-static int isprime(uint n)
-{
-     return(n > 1 && first_divisor(n) == n);
-}
-
-/***************************************************************************/
-
 /* Below, we extensively use the identity that fft(x*)* = ifft(x) in
    order to share data between forward and backward transforms and to
    obviate the necessity of having separate forward and backward
@@ -459,7 +360,7 @@ static int applicable(const solver *ego_, const problem *p_)
           return (1
 	       && p->sz.rnk == 1
 	       && p->vecsz.rnk == 0
-	       && isprime(p->sz.dims[0].n)
+	       && X(is_prime)(p->sz.dims[0].n)
 	       );
      }
 
@@ -501,7 +402,7 @@ static int score_dit(const solver *ego_, const problem *p_, int flags)
      if (applicable_dit(ego_, p_)) {
 	  const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
-	  int r = first_divisor(p->sz.dims[0].n);
+	  int r = X(first_divisor)(p->sz.dims[0].n);
 	  if (r < ego->min_prime || r == p->sz.dims[0].n)
 	       return UGLY;
 	  else
@@ -570,8 +471,8 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      pln->n = n;
      pln->is = is;
      pln->os = os;
-     pln->g = find_generator(n);
-     pln->ginv = power_mod(pln->g, n - 2, n);
+     pln->g = X(find_generator)(n);
+     pln->ginv = X(power_mod)(pln->g, n - 2, n);
      A(MULMOD(pln->g, pln->ginv, n) == 1);
 
      pln->super.super.ops = X(ops_add)(cld1->ops, cld2->ops);
@@ -638,7 +539,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
      is = p->sz.dims[0].is;
      os = p->sz.dims[0].os;
 
-     r = first_divisor(n);
+     r = X(first_divisor)(n);
      m = n / r;
 
      {

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.33 2002-06-17 05:39:55 fftw Exp $ */
+/* $Id: ifftw.h,v 1.34 2002-06-17 06:30:16 fftw Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -420,6 +420,29 @@ typedef double trigreal;
 #define SIN sin
 #define TAN tan
 #define K2PI ((trigreal)6.2831853071795864769252867665590057683943388)
+
+/*-----------------------------------------------------------------------*/
+/* primes.c: */
+
+#if defined(FFTW_ENABLE_UNSAFE_MULMOD)
+#  define MULMOD(x,y,p) (((x) * (y)) % (p))
+#elif (HAVE_UINT && ((SIZEOF_UINT != 0) && \
+                     (SIZEOF_UNSIGNED_LONG_LONG >= 2 * SIZEOF_UINT))) \
+   || (!HAVE_UINT && ((SIZEOF_UNSIGNED_INT != 0) && \
+                     (SIZEOF_UNSIGNED_LONG_LONG >= 2 * SIZEOF_UNSIGNED_INT)))
+#  define MULMOD(x,y,p) ((uint) ((((unsigned long long) (x))    \
+                                  * ((unsigned long long) (y))) \
+				 % ((unsigned long long) (p))))
+#else /* 'long long' unavailable */
+#  define SAFE_MULMOD 1
+uint X(safe_mulmod)(uint x, uint y, uint p);
+#  define MULMOD(x,y,p) X(safe_mulmod)(x,y,p)
+#endif
+
+uint X(power_mod)(uint n, uint m, uint p);
+uint X(find_generator)(uint p);
+int X(first_divisor)(uint n);
+int X(is_prime)(uint n);
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
