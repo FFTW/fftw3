@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.13 2005-02-20 23:22:15 athena Exp $ */
+/* $Id: rank0.c,v 1.14 2005-02-20 23:27:29 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -242,7 +242,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      A(retval);
      pln->nam = ego->nam;
 
-     /* vl loads, vl stores */
+     /* X(tensor_sz)(p->vecsz) loads, X(tensor_sz)(p->vecsz) stores */
      X(ops_other)(2 * X(tensor_sz)(p->vecsz), &pln->super.super.ops);
      return &(pln->super.super);
 }
