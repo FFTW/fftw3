@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.13 2003-07-09 21:39:16 athena Exp $ *)
+(* $Id: annotate.ml,v 1.14 2005-01-12 17:22:13 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.13 2003-07-09 21:39:16 athena Exp $ *)
+(* $Id: annotate.ml,v 1.14 2005-01-12 17:22:13 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -117,15 +117,21 @@ let rec linearize = function
 
   | x -> x 
 
-(* true if A and B are friends.  Two instructions are friends if they
-   have the same set of input variables *)
+(* true if A and B are friends.  Two distinct instructions are friends
+   if they have the same set of input variables, and both assign
+   temporary variables.  We do not move instructions that assign
+   memory locations, because this move may make the program incorrect.
+   An instruction is a friend of itself.  *)
 let friendp a b =
   let subset a b =
     List.for_all (fun x -> List.exists (fun y -> x == y) b) a
   in
-  let Assign (_, ax) = a and Assign (_, bx) = b in
-  let va = Expr.find_vars ax and vb = Expr.find_vars bx in
-  subset va vb && subset vb va
+  a == b ||
+    (let Assign (av, ax) = a and Assign (bv, bx) = b in
+       is_temporary av &&
+       is_temporary bv &&
+       (let va = Expr.find_vars ax and vb = Expr.find_vars bx in
+       subset va vb && subset vb va))
 
 (* extract instructions from schedule *)
 let rec sched_to_ilist = function
