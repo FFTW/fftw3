@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.9 2003-01-19 19:14:49 stevenj Exp $ */
+/* $Id: problem.c,v 1.10 2003-01-19 19:27:21 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -49,6 +49,16 @@ static void dwim(bench_tensor *t, bench_iodim *last_iodim)
      *last_iodim = *d1;
 }
 
+static bench_tensor *dwim_compress_d(bench_tensor *t,
+				     bench_iodim *last_iodim)
+{
+     bench_tensor *tc;
+     dwim(t, last_iodim);
+     tc = tensor_compress(t);
+     tensor_destroy(t);
+     return tc;
+}
+
 static const char *parseint(const char *s, int *n)
 {
      int sign = 1;
@@ -75,9 +85,7 @@ static const char *parseint(const char *s, int *n)
 
 struct dimlist { bench_iodim car; struct dimlist *cdr; };
 
-static const char *parsetensor(const char *s, bench_tensor **tp,
-			       bench_tensor **tp_nodwim,
-			       bench_iodim *last_iodim)
+static const char *parsetensor(const char *s, bench_tensor **tp)
 {
      struct dimlist *l = 0, *m;
      bench_tensor *t;
@@ -125,11 +133,7 @@ static const char *parsetensor(const char *s, bench_tensor **tp,
 	  bench_free(m);
      }
 
-     *tp_nodwim = tensor_copy(t);
-     dwim(t, last_iodim);
-
-     *tp = tensor_compress(t);
-     tensor_destroy(t);
+     *tp = t;
      return s;
 }
 
@@ -137,11 +141,8 @@ static const char *parsetensor(const char *s, bench_tensor **tp,
 bench_problem *problem_parse(const char *s)
 {
      bench_problem *p;
-     bench_iodim last_iodim;
-     bench_tensor *t_nodwim;
-
-     last_iodim.n = 1;
-     last_iodim.is = last_iodim.os = 1;
+     bench_iodim last_iodim = {1,1,1};
+     bench_tensor *sz;
 
      p = bench_malloc(sizeof(bench_problem));
 
@@ -168,29 +169,21 @@ bench_problem *problem_parse(const char *s)
 	 default : ;
      }
 
-     s = parsetensor(s, &p->sz, &t_nodwim, &last_iodim);
+     s = parsetensor(s, &sz);
 
      if (*s == '*') { /* "external" vector */
 	  ++s;
-	  tensor_destroy(t_nodwim);
-	  s = parsetensor(s, &p->vecsz, &t_nodwim, &last_iodim);
-	  tensor_destroy(t_nodwim);
+	  p->sz = dwim_compress_d(sz, &last_iodim);
+	  s = parsetensor(s, &sz);
+	  p->vecsz = dwim_compress_d(sz, &last_iodim);
      } else if (*s == 'v' || *s == 'V') { /* "internal" vector */
+	  bench_tensor *vecsz;
 	  ++s;
-
-	  tensor_destroy(p->sz);
-	  p->sz = t_nodwim;
-
-	  last_iodim.n = 1;
-	  last_iodim.is = last_iodim.os = 1;
-	  s = parsetensor(s, &p->vecsz, &t_nodwim, &last_iodim);
-	  tensor_destroy(t_nodwim);
-
-	  t_nodwim = p->sz;
-	  dwim(t_nodwim, &last_iodim);
-	  p->sz = tensor_compress(t_nodwim);
-	  tensor_destroy(t_nodwim);
+	  s = parsetensor(s, &vecsz);
+	  p->vecsz = dwim_compress_d(vecsz, &last_iodim);
+	  p->sz = dwim_compress_d(sz, &last_iodim);
      } else {
+	  p->sz = dwim_compress_d(sz, &last_iodim);
 	  p->vecsz = mktensor(0);
      }
 
