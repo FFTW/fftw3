@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.155 2004-10-01 01:12:47 athena Exp $ */
+/* $Id: planner.c,v 1.156 2005-01-06 16:02:29 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -370,56 +370,63 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
      return pln;
 }
 
-static plan *search(planner *ego, problem *p, slvdesc **descp,
-		    unsigned short planner_flags)
+static plan *search0(planner *ego, problem *p, slvdesc **descp,
+		     unsigned short planner_flags)
 {
      plan *best = 0;
      int best_not_yet_timed = 1;
-     int pass;
 
-     for (pass = 0; pass < 2; ++pass) {
-	  unsigned short nflags = planner_flags;
-	  
-	  if (best) break;
+     FORALL_SOLVERS(ego, s, sp, {
+	  plan *pln = invoke_solver(ego, p, s, planner_flags);
 
-	  switch (pass) {
-	      case 0: 
-		   /* skip pass 0 during exhaustive search */
-		   if (!(planner_flags & NO_EXHAUSTIVE)) continue;
-		   nflags |= NO_UGLY;
-		   break;
-	      case 1:
-		   /* skip pass 1 if NO_UGLY */
-		   if (planner_flags & NO_UGLY) continue;
-		   break;
-	  }
-
-          FORALL_SOLVERS(ego, s, sp, {
-	       plan *pln = invoke_solver(ego, p, s, nflags);
-
-	       if (pln) {
-		    if (best) {
-			 if (best_not_yet_timed) {
-			      evaluate_plan(ego, best, p);
-			      best_not_yet_timed = 0;
-			 }
-			 evaluate_plan(ego, pln, p);
-			 if (pln->pcost < best->pcost) {
-			      X(plan_destroy_internal)(best);
-			      best = pln;
-			      *descp = sp;
-			 } else {
-			      X(plan_destroy_internal)(pln);
-			 }
-		    } else {
+	  if (pln) {
+	       if (best) {
+		    if (best_not_yet_timed) {
+			 evaluate_plan(ego, best, p);
+			 best_not_yet_timed = 0;
+		    }
+		    evaluate_plan(ego, pln, p);
+		    if (pln->pcost < best->pcost) {
+			 X(plan_destroy_internal)(best);
 			 best = pln;
 			 *descp = sp;
+		    } else {
+			 X(plan_destroy_internal)(pln);
 		    }
+	       } else {
+		    best = pln;
+		    *descp = sp;
 	       }
-	  });
-     }
+	  }
+     });
 
      return best;
+}
+
+static plan *search(planner *ego, problem *p, slvdesc **descp,
+		    unsigned short planner_flags)
+{
+     plan *pln = 0;
+
+     /* try a first search in NO_UGLY mode, unless we are
+	searching exhaustively */
+     if (planner_flags & NO_EXHAUSTIVE) 
+	  pln = search0(ego, p, descp, planner_flags | NO_UGLY);
+     else {
+	  /* assertion holds because of canonicalization in mkplan()
+	     below */
+	  A(!(planner_flags & NO_UGLY));
+     }
+
+     if (!pln) {
+	  /* if we still don't have a plan, try a search in UGLY
+	     mode, unless the mode was NO_UGLY to begin with */
+	  if (!(planner_flags & NO_UGLY)) {
+	       pln = search0(ego, p, descp, planner_flags);
+	  }
+     }
+
+     return pln;
 }
 
 static plan *mkplan(planner *ego, problem *p)
@@ -462,7 +469,7 @@ static plan *mkplan(planner *ego, problem *p)
 
 	  pln = invoke_solver(ego, p, sp->slv, flags_of_solution);	  
 
-	  sol = 0; /* maybe dangling after invoke_solver() */
+	  sol = 0; /* may be dangling after invoke_solver() */
 
 	  /* if (!pln) then the entry is bogus, but
 	     we currently do nothing about it. */
