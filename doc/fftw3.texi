@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.162 2003-03-17 20:17:59 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.163 2003-03-18 20:44:41 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2405,11 +2405,14 @@ r<sub>0</sub>, r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>n/2</sub>, i<sub>(n+1)/2
 @ctindex FFTW_DHT
 @code{FFTW_DHT} computes a discrete Hartley transform.
 (Logical @code{N=n}, inverse is @code{FFTW_DHT}.)
+@cindex discrete Hartley transform
 
 @item
 @ctindex FFTW_REDFT00
 @code{FFTW_REDFT00} computes an REDFT00 transform, i.e. a DCT-I.
 (Logical @code{N=2*(n-1)}, inverse is @code{FFTW_REDFT00}.)
+@cindex discrete cosine transform
+@cindex DCT
 
 @item
 @ctindex FFTW_REDFT10
@@ -2430,6 +2433,8 @@ r<sub>0</sub>, r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>n/2</sub>, i<sub>(n+1)/2
 @ctindex FFTW_RODFT00
 @code{FFTW_RODFT00} computes an RODFT00 transform, i.e. a DST-I.
 (Logical @code{N=2*(n+1)}, inverse is @code{FFTW_RODFT00}.)
+@cindex discrete sine transform
+@cindex DST
 
 @item
 @ctindex FFTW_RODFT10
