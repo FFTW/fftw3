@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.26 2003-03-30 20:34:57 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.27 2003-04-17 23:15:53 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -150,7 +150,7 @@ static int applicable(const problem *p_, const planner *plnr,
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dft-transpose-%dX%d%v)", ego->n, ego->m, ego->vl);
+     p->print(p, "(dft-transpose-%dx%d%v)", ego->n, ego->m, ego->vl);
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
