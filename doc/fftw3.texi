@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.11 2003-01-19 01:04:11 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.12 2003-01-19 01:05:50 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -152,7 +152,7 @@ this case, FFTW provides fast planners based on heuristics or on
 previously computed plans (``wisdom'').
 @cindex wisdom
 
-The pattern of planning/execution applies to all transform types
+This pattern of planning/execution applies to all transform types
 supported by FFTW; each type comes with its own planner routine to
 specify the problem to be solved.  Because FFTW is very flexible in the
 layout and multiplicity of the data to be transformed, these planner
