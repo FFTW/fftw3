@@ -3,7 +3,7 @@ lib_LTLIBRARIES = lib@PRECISION@fftw3.la
 
 # recompile genfft if maintainer mode is true
 if MAINTAINER_MODE
-GENFFT = genfft
+GENFFT = genfft genfft-k7
 else
 GENFFT =
 endif
