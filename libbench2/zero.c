@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: zero.c,v 1.7 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: zero.c,v 1.8 2003-03-17 01:24:31 stevenj Exp $ */
 
 #include "bench.h"
 
@@ -27,17 +27,17 @@ void problem_zero(bench_problem *p)
 {
      bench_complex czero = {0, 0};
      if (p->kind == PROBLEM_COMPLEX) {
-	  caset(p->inphys, p->iphyssz, czero);
-	  caset(p->outphys, p->ophyssz, czero);
+	  caset((bench_complex *) p->inphys, p->iphyssz, czero);
+	  caset((bench_complex *) p->outphys, p->ophyssz, czero);
      } else if (p->kind == PROBLEM_R2R) {
-	  aset(p->inphys, p->iphyssz, 0.0);
-	  aset(p->outphys, p->ophyssz, 0.0);
+	  aset((bench_real *) p->inphys, p->iphyssz, 0.0);
+	  aset((bench_real *) p->outphys, p->ophyssz, 0.0);
      } else if (p->kind == PROBLEM_REAL && p->sign < 0) {
-	  aset(p->inphys, p->iphyssz, 0.0);
-	  caset(p->outphys, p->ophyssz, czero);
+	  aset((bench_real *) p->inphys, p->iphyssz, 0.0);
+	  caset((bench_complex *) p->outphys, p->ophyssz, czero);
      } else if (p->kind == PROBLEM_REAL && p->sign > 0) {
-	  caset(p->inphys, p->iphyssz, czero);
-	  aset(p->outphys, p->ophyssz, 0.0);
+	  caset((bench_complex *) p->inphys, p->iphyssz, czero);
+	  aset((bench_real *) p->outphys, p->ophyssz, 0.0);
      } else {
 	  BENCH_ASSERT(0); /* TODO */
      }

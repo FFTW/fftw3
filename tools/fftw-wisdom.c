@@ -222,7 +222,7 @@ int bench_main(int argc, char *argv[])
 		   if (!strcmp(optarg, "-"))
 			output_fname = 0;
 		   else {
-			output_fname = bench_malloc(sizeof(char) *
+			output_fname = (char *) bench_malloc(sizeof(char) *
 						    (strlen(optarg) + 1));
 			strcpy(output_fname, optarg);
 		   }

@@ -18,17 +18,17 @@
  *
  */
 
-/* $Id: version.c,v 1.3 2003-03-16 14:24:19 athena Exp $ */
+/* $Id: version.c,v 1.4 2003-03-17 01:24:31 stevenj Exp $ */
 
 #include "config.h"
 #include "ifftw.h"
 
 
-const char *const X(cc) = FFTW_CC;
-const char *const X(codelet_optim) = CODELET_OPTIM;
+extern const char *const X(cc) = FFTW_CC;
+extern const char *const X(codelet_optim) = CODELET_OPTIM;
 
 
-const char *const X(version) = PACKAGE "-" VERSION
+extern const char *const X(version) = PACKAGE "-" VERSION
 
 #if HAVE_SSE
    "-sse"

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.23 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: problem.c,v 1.24 2003-03-17 01:24:31 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -182,7 +182,7 @@ static const char *parsetensor(const char *s, bench_tensor **tp,
 
      if (k && rnk > 0) {
 	  int i;
-	  *k = bench_malloc(sizeof(r2r_kind_t) * rnk);
+	  *k = (r2r_kind_t *) bench_malloc(sizeof(r2r_kind_t) * rnk);
 	  for (m = l, i = rnk - 1; i >= 0; --i, m = m->cdr) {
 	       BENCH_ASSERT(m);
 	       (*k)[i] = m->k;
@@ -213,7 +213,7 @@ bench_problem *problem_parse(const char *s)
      bench_tensor *sz;
      n_transform nti = SAME, nto = SAME;
 
-     p = bench_malloc(sizeof(bench_problem));
+     p = (bench_problem *) bench_malloc(sizeof(bench_problem));
 
      p->kind = PROBLEM_COMPLEX;
      p->k = 0;

@@ -302,14 +302,15 @@ void F77(plan_r2r, PLAN_R2R)(X(plan) *p, int *rank, const int *n,
 void F77(plan_r2r_1d, PLAN_R2R_1D)(X(plan) *p, int *n, R *in, R *out,
 				   int *kind, int *flags)
 {
-     *p = X(plan_r2r_1d)(*n, in, out, *kind, *flags);
+     *p = X(plan_r2r_1d)(*n, in, out, (X(r2r_kind)) *kind, *flags);
 }
 
 void F77(plan_r2r_2d, PLAN_R2R_2D)(X(plan) *p, int *nx, int *ny,
 				   R *in, R *out, 
 				   int *kindx, int *kindy, int *flags)
 {
-     *p = X(plan_r2r_2d)(*ny, *nx, in, out, *kindy, *kindx, *flags);
+     *p = X(plan_r2r_2d)(*ny, *nx, in, out,
+			 (X(r2r_kind)) *kindy, (X(r2r_kind)) *kindx, *flags);
 }
 
 void F77(plan_r2r_3d, PLAN_R2R_3D)(X(plan) *p,
@@ -319,7 +320,8 @@ void F77(plan_r2r_3d, PLAN_R2R_3D)(X(plan) *p,
 				   int *flags)
 {
      *p = X(plan_r2r_3d)(*nz, *ny, *nx, in, out,
-			     *kindz, *kindy, *kindx, *flags);
+			 (X(r2r_kind)) *kindz, (X(r2r_kind)) *kindy, 
+			 (X(r2r_kind)) *kindx, *flags);
 }
 
 void F77(plan_many_r2r, PLAN_MANY_R2R)(

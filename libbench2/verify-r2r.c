@@ -368,9 +368,9 @@ static void cpyr(R *ra, bench_tensor *sza, R *rb, bench_tensor *szb)
 
 static void dofft(info *nfo, R *in, R *out)
 {
-     cpyr(in, nfo->pckdsz, nfo->p->in, nfo->totalsz);
+     cpyr(in, nfo->pckdsz, (R *) nfo->p->in, nfo->totalsz);
      doit(1, nfo->p);
-     cpyr(nfo->p->out, nfo->totalsz, out, nfo->pckdsz);
+     cpyr((R *) nfo->p->out, nfo->totalsz, out, nfo->pckdsz);
 }
 
 static double racmp(R *a, R *b, int n, const char *test, double tol)
@@ -552,7 +552,7 @@ void verify_r2r(bench_problem *p, int rounds, double tol, errors *e)
      vecn = tensor_sz(p->vecsz);
      N = n * vecn;
 
-     d = bench_malloc(sizeof(dim_stuff) * p->sz->rnk);
+     d = (dim_stuff *) bench_malloc(sizeof(dim_stuff) * p->sz->rnk);
      for (i = 0; i < p->sz->rnk; ++i) {
 	  int n0, i0, k0;
 	  trigfun ti, ts;

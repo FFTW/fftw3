@@ -1,6 +1,6 @@
 /* not worth copyrighting */
 
-/* $Id: allocate.c,v 1.6 2003-02-09 07:36:25 stevenj Exp $ */
+/* $Id: allocate.c,v 1.7 2003-03-17 01:24:31 stevenj Exp $ */
 
 #include "bench.h"
 
@@ -31,7 +31,7 @@ void problem_alloc(bench_problem *p)
 	  bench_complex *in, *out;
 
 	  p->iphyssz = isz;
-	  p->inphys = in = bench_malloc(isz * sizeof(bench_complex));
+	  p->inphys = in = (bench_complex *) bench_malloc(isz * sizeof(bench_complex));
 	  p->in = in - ilb;
 	  
 	  if (p->in_place) {
@@ -40,14 +40,14 @@ void problem_alloc(bench_problem *p)
 	       p->ophyssz = p->iphyssz;
 	  } else {
 	       p->ophyssz = osz;
-	       p->outphys = out = bench_malloc(osz * sizeof(bench_complex));
+	       p->outphys = out = (bench_complex *) bench_malloc(osz * sizeof(bench_complex));
 	       p->out = out - olb;
 	  }
      } else if (p->kind == PROBLEM_R2R) {
 	  bench_real *in, *out;
 
 	  p->iphyssz = isz;
-	  p->inphys = in = bench_malloc(isz * sizeof(bench_real));
+	  p->inphys = in = (bench_real *) bench_malloc(isz * sizeof(bench_real));
 	  p->in = in - ilb;
 	  
 	  if (p->in_place) {
@@ -56,7 +56,7 @@ void problem_alloc(bench_problem *p)
 	       p->ophyssz = p->iphyssz;
 	  } else {
 	       p->ophyssz = osz;
-	       p->outphys = out = bench_malloc(osz * sizeof(bench_real));
+	       p->outphys = out = (bench_real *) bench_malloc(osz * sizeof(bench_real));
 	       p->out = out - olb;
 	  }
      } else if (p->kind == PROBLEM_REAL && p->sign < 0) { /* R2HC */
@@ -64,7 +64,7 @@ void problem_alloc(bench_problem *p)
 	  bench_complex *out;
 
 	  p->iphyssz = p->in_place ? (isz > osz*2 ? isz : osz*2) : isz;
-	  p->inphys = in = bench_malloc(p->iphyssz * sizeof(bench_real));
+	  p->inphys = in = (bench_real *) bench_malloc(p->iphyssz * sizeof(bench_real));
 	  p->in = in - ilb;
 	  
 	  if (p->in_place) {
@@ -73,7 +73,7 @@ void problem_alloc(bench_problem *p)
 	       p->ophyssz = p->iphyssz / 2;
 	  } else {
 	       p->ophyssz = osz;
-	       p->outphys = out = bench_malloc(osz * sizeof(bench_complex));
+	       p->outphys = out = (bench_complex *) bench_malloc(osz * sizeof(bench_complex));
 	       p->out = out - olb;
 	  }
      } else if (p->kind == PROBLEM_REAL && p->sign > 0) { /* HC2R */
@@ -81,7 +81,7 @@ void problem_alloc(bench_problem *p)
 	  bench_complex *in;
 
 	  p->ophyssz = p->in_place ? (osz > isz*2 ? osz : isz*2) : osz;
-	  p->outphys = out = bench_malloc(p->ophyssz * sizeof(bench_real));
+	  p->outphys = out = (bench_real *) bench_malloc(p->ophyssz * sizeof(bench_real));
 	  p->out = out - olb;
 	  
 	  if (p->in_place) {
@@ -90,7 +90,7 @@ void problem_alloc(bench_problem *p)
 	       p->iphyssz = p->ophyssz / 2;
 	  } else {
 	       p->iphyssz = isz;
-	       p->inphys = in = bench_malloc(isz * sizeof(bench_complex));
+	       p->inphys = in = (bench_complex *) bench_malloc(isz * sizeof(bench_complex));
 	       p->in = in - ilb;
 	  }
      } else {

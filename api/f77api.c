@@ -34,7 +34,7 @@ static int *reverse_n(int rnk, const int *n)
      int *nrev;
      int i;
      A(FINITE_RNK(rnk));
-     nrev = MALLOC(sizeof(int) * rnk, PROBLEMS);
+     nrev = (int *) MALLOC(sizeof(int) * rnk, PROBLEMS);
      for (i = 0; i < rnk; ++i)
           nrev[rnk - i - 1] = n[i];
      return nrev;
@@ -48,7 +48,7 @@ static X(iodim) *make_dims(int rnk, const int *n,
      X(iodim) *dims;
      int i;
      A(FINITE_RNK(rnk));
-     dims = MALLOC(sizeof(X(iodim)) * rnk, PROBLEMS);
+     dims = (X(iodim) *) MALLOC(sizeof(X(iodim)) * rnk, PROBLEMS);
      for (i = 0; i < rnk; ++i) {
           dims[i].n = n[i];
           dims[i].is = is[i];
@@ -89,9 +89,10 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
 	  int i;
 	  X(r2r_kind) *k;
 
-	  k = MALLOC(sizeof(X(r2r_kind)) * rnk, PROBLEMS);
+	  k = (X(r2r_kind) *) MALLOC(sizeof(X(r2r_kind)) * rnk, PROBLEMS);
+	  /* reverse order for Fortran -> C */
 	  for (i = 0; i < rnk; ++i)
-	       k[i] = ik[rnk - 1 - i]; /* reverse order for Fortran -> C */
+	       k[i] = (X(r2r_kind)) ik[rnk - 1 - i];
 	  return k;
      }
 }

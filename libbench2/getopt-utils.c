@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: getopt-utils.c,v 1.2 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: getopt-utils.c,v 1.3 2003-03-17 01:24:31 stevenj Exp $ */
 #include "bench.h"
 #include "getopt.h"
 #include <ctype.h>
@@ -39,7 +39,7 @@ char *make_short_options(const struct option *opt)
     for (p = opt; p->name; ++p)
 	++nopt;
 
-    t = s = bench_malloc(3 * nopt + 1);
+    t = s = (char *) bench_malloc(3 * nopt + 1);
 
     for (p = opt; p->name; ++p) {
 	if (!(p->flag) && isprint(p->val)) {

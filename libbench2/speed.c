@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: speed.c,v 1.6 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: speed.c,v 1.7 2003-03-17 01:24:31 stevenj Exp $ */
 
 #include "bench.h"
 
@@ -29,7 +29,7 @@ void speed(const char *param)
      bench_problem *p;
      double tmin, y;
 
-     t = bench_malloc(time_repeat * sizeof(double));
+     t = (double *) bench_malloc(time_repeat * sizeof(double));
 
      p = problem_parse(param);
      BENCH_ASSERT(can_do(p));

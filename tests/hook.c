@@ -49,7 +49,7 @@ static bench_problem *fftw_problem_to_bench_problem(const problem *p_)
 	  if (!p->ri || !p->ii)
 	       abort();
 
-	  bp = bench_malloc(sizeof(bench_problem));
+	  bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
 
 	  bp->kind = PROBLEM_COMPLEX;
 	  bp->sign = FFT_SIGN;
@@ -91,7 +91,7 @@ static void hook(plan *pln, const problem *p_, int optimalp)
 	  if (bp) {
 	       X(plan) the_plan_save = the_plan;
 
-	       the_plan = MALLOC(sizeof(apiplan), PLANS);
+	       the_plan = (apiplan *) MALLOC(sizeof(apiplan), PLANS);
 	       the_plan->pln = pln;
 	       the_plan->prb = (problem *) p_;
 

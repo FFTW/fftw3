@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.3 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: timer.c,v 1.4 2003-03-17 01:24:31 stevenj Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -171,7 +171,7 @@ static int find_n(double tmin)
 
 	       k /= t;
 	       k *= tmin;
-	       n = k + 1;
+	       n = (int) (k + 1);
 	  }
 	  t = time_n(n);
      }
