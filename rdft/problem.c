@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.7 2002-07-28 05:39:54 stevenj Exp $ */
+/* $Id: problem.c,v 1.8 2002-07-30 00:51:19 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -99,7 +99,7 @@ const char *X(rdft_kind_str)(rdft_kind kind)
 static void print(problem *ego_, printer *p)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
-     p->print(p, "(rdft %d %s %t %t)", 
+     p->print(p, "(rdft %d %s %T %T)", 
 	      ego->I == ego->O, 
 	      X(rdft_kind_str)(ego->kind),
 	      &ego->sz,

@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: traverse.c,v 1.4 2002-07-25 19:21:13 athena Exp $ */
+/* $Id: traverse.c,v 1.5 2002-07-30 00:51:01 stevenj Exp $ */
 
 #include "ifftw.h"
+#include <stddef.h>
 #include <stdarg.h>
 
 typedef struct {
@@ -46,6 +47,10 @@ static void vtraverse(printer *p, const char *format, va_list ap)
 			break;
 		   case 'd':
 			UNUSED(va_arg(ap, int));
+			break;
+		   case 't':
+			A(*s++ == 'd');
+			UNUSED(va_arg(ap, ptrdiff_t));
 			break;
 		   case 'f': case 'e': case 'g':
 			UNUSED(va_arg(ap, double));
@@ -73,7 +78,7 @@ static void vtraverse(printer *p, const char *format, va_list ap)
 		   case 'P':
 			UNUSED(va_arg(ap, problem *));
 			break;
-		   case 't':
+		   case 'T':
 			UNUSED(va_arg(ap, tensor *));
 			break;
 		   default:

@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: print.c,v 1.9 2002-07-12 19:40:14 stevenj Exp $ */
+/* $Id: print.c,v 1.10 2002-07-30 00:51:01 stevenj Exp $ */
 
 #include "ifftw.h"
+#include <stddef.h>
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -60,6 +61,15 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       case 'd': {
 			    int x = va_arg(ap, int);
 			    sprintf(buf, "%d", x);
+			    goto putbuf;
+		       }
+		       case 't': {
+			    ptrdiff_t x;
+			    A(*s++ == 'd');
+			    x = va_arg(ap, ptrdiff_t);
+			    /* should use C99 %td here, but
+			       this is not yet widespread enough */
+			    sprintf(buf, "%ld", (long) x);
 			    goto putbuf;
 		       }
 		       case 'f': case 'e': case 'g': {
@@ -108,7 +118,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    p->indent -= p->indent_incr;
 			    break;
 		       }
-		       case 'p': {
+		       case 'p': {  /* note difference from C's %p */
 			    /* print plan */
 			    plan *x = va_arg(ap, plan *);
 			    if (x) 
@@ -126,7 +136,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 				 goto putnull;
 			    break;
 		       }
-		       case 't': {
+		       case 'T': {
 			    /* print tensor */
 			    tensor *x = va_arg(ap, tensor *);
 			    if (x)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.3 2002-07-28 21:33:07 stevenj Exp $ */
+/* $Id: problem2.c,v 1.4 2002-07-30 00:51:19 stevenj Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -78,7 +78,7 @@ static void print(problem *ego_, printer *p)
      problem_rdft2 *ego = (problem_rdft2 *) ego_;
      tensor psz = {1, 0};
      psz.dims = &ego->sz;
-     p->print(p, "(rdft2 %d %d %d %s %t %t)", 
+     p->print(p, "(rdft2 %d %d %td %s %T %T)", 
 	      ego->r == ego->rio, 
 	      ego->r == ego->iio, 
 	      ego->iio - ego->rio,
