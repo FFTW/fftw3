@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.237 2004-03-31 00:44:54 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.238 2004-04-03 02:30:17 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -696,20 +696,6 @@ typedef struct rader_tls rader_tl;
 void X(rader_tl_insert)(int k1, int k2, int k3, R *W, rader_tl **tl);
 R *X(rader_tl_find)(int k1, int k2, int k3, rader_tl *t);
 void X(rader_tl_delete)(R *W, rader_tl **tl);
-
-/*-----------------------------------------------------------------------*/
-/* transpose.c: */
-
-void X(transpose)(R *A, int n, int m, int d, int N, R *buf);
-void X(transpose_slow)(R *a, int nx, int ny, int N,
-		       char *move, int move_size, R *buf);
-int X(transposable)(const iodim *a, const iodim *b,
-		    int vl, int s, R *ri, R *ii);
-void X(transpose_dims)(const iodim *a, const iodim *b,
-                       int *n, int *m, int *d, int *nd, int *md, int *nbuf);
-int X(transpose_simplep)(const iodim *a, const iodim *b, int vl, int s,
-			 R *ri, R *ii);
-int X(transpose_slowp)(const iodim *a, const iodim *b, int N);
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
