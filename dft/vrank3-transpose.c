@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.25 2003-03-29 18:45:13 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.26 2003-03-30 20:34:57 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -140,6 +140,9 @@ static int applicable(const problem *p_, const planner *plnr,
 						p->vecsz->dims[*dim0].os))
 	       /* loops are in the wrong order for locality */
 	       return 0;	
+
+     if (NO_UGLYP(plnr) && p->vecsz->dims[*dim0].n != p->vecsz->dims[*dim1].n)
+	  return 0;
 
      return 1;
 }

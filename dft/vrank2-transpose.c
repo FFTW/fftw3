@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.22 2003-03-29 18:45:13 stevenj Exp $ */
+/* $Id: vrank2-transpose.c,v 1.23 2003-03-30 20:34:57 stevenj Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -87,7 +87,7 @@ static void apply_slow(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      STACK_FREE(move);
 }
 
-static int applicable(const problem *p_)
+static int applicable(const problem *p_, const planner *plnr)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *)p_;
@@ -98,6 +98,7 @@ static int applicable(const problem *p_)
                   && p->vecsz->rnk == 2
 		  && X(transposable)(d, d+1, 1, X(imin)(d[0].is,d[0].os),
 				     p->ri, p->ii)
+		  && (!NO_UGLYP(plnr) || d[0].n == d[1].n)
 	       );
      }
      return 0;
@@ -120,9 +121,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      };
 
      UNUSED(ego);
-     UNUSED(plnr);
 
-     if (!applicable(p_))
+     if (!applicable(p_, plnr))
           return (plan *) 0;
      p = (const problem_dft *) p_;
 
