@@ -19,8 +19,8 @@
  *
  *)
 
-(* $Id: algsimp.ml,v 1.4 2002-07-08 00:32:01 athena Exp $ *)
-let cvsid = "$Id: algsimp.ml,v 1.4 2002-07-08 00:32:01 athena Exp $"
+(* $Id: algsimp.ml,v 1.5 2002-07-15 20:46:35 athena Exp $ *)
+let cvsid = "$Id: algsimp.ml,v 1.5 2002-07-15 20:46:35 athena Exp $"
 
 open Util
 open Expr
@@ -335,7 +335,8 @@ end = struct
       |	Some false -> canonicalizeM l'
       |	None ->
          (* Ask the Oracle for the canonical form *)
-	  if Oracle.should_flip_sign (Plus l') then
+	  if (not !Magic.randomized_cse) &&
+	    Oracle.should_flip_sign (Plus l') then
 	    mapM suminusM l' >>= splusM >>= suminusM
 	  else
 	    canonicalizeM l'
@@ -497,7 +498,7 @@ end = struct
       | node :: rest ->
 	  loop
 	    (match node with
-	      Load _ -> (load + 1, store, plus, times, uminus, num)
+	    | Load _ -> (load + 1, store, plus, times, uminus, num)
 	    | Store _ -> (load, store + 1, plus, times, uminus, num)
 	    | Plus x -> (load, store, plus + (List.length x - 1), times, uminus, num)
 	    | Times _ -> (load, store, plus, times + 1, uminus, num)

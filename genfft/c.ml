@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.10 2002-07-08 13:42:08 athena Exp $ *)
+(* $Id: c.ml,v 1.11 2002-07-15 20:46:35 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -369,23 +369,30 @@ type stride =
   | SVar of string
   | SConst of string
   | SInteger of int
+  | SNeg of stride
 
 type sstride =
   | Simple of int
   | Constant of (string * int)
   | Composite of (string * int)
+  | Negative of sstride
 
-let simplify_stride stride i =
+let rec simplify_stride stride i =
     match (stride, i) with
       (_, 0) -> Simple 0
     | (SInteger n, i) -> Simple (n * i)
     | (SConst s, i) -> Constant (s, i)
     | (SVar s, i) -> Composite (s, i)
+    | (SNeg x, i) -> 
+	match (simplify_stride x i) with
+	| Negative y -> y
+	| y -> Negative y
   
-let stride_to_string = function
+let rec stride_to_string = function
   | Simple i -> string_of_int i
   | Constant (s, i) -> s ^ " * " ^ (string_of_int i)
   | Composite (s, i) -> "WS(" ^ s ^ ", " ^ (string_of_int i) ^ ")"
+  | Negative x -> "-" ^ stride_to_string x
 
 let array_subscript name stride k = 
   name ^ "[" ^ (stride_to_string (simplify_stride stride k)) ^ "]"

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.12 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: genutil.ml,v 1.13 2002-07-15 20:46:36 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -69,7 +69,6 @@ let temporary_array_c n =
 
 let load_c (vr, vi) = Complex.make (Expr.Load vr, Expr.Load vi)
 let load_r (vr, vi) = Complex.make (Expr.Load vr, Expr.Num (Number.zero))
-let load_hc (vr, _) (vi, _) = load_c (vr, vi)
 
 let twiddle_array nt w =
   array (nt/2) (fun i ->
@@ -88,11 +87,12 @@ let load_array_c n var = array n (fun i -> load_c (var i))
 let load_array_r n var = array n (fun i -> load_r (var i))
 let load_array_hc n var = 
   array n (fun i -> 
-    if (i = 0) then
-      load_r (var i)
-    else if (i <= n - i) then
-      load_hc (var i) (var (n - i))
-    else Complex.conj (load_hc (var (n - i)) (var n)))
+    if (i < n - i) then
+      load_c (var i)
+    else if (i > n - i) then
+      Complex.times Complex.i (load_c (var (n - i)))
+    else
+      load_r (var i))
 
 let load_v_array_c veclen n var =
   array veclen (fun v -> load_array_c n (var v))
@@ -132,12 +132,16 @@ let store_array_c n dst src =
        (fun i -> store_c (dst i) (src i)))
 
 let store_array_hc n dst src =
-  rmap (iota n)
-    (fun i -> 
-      if (i <= n - i) then
-	store_r (dst i) (Complex.real (src i))
-      else
-	store_r (dst i) (Complex.imag (src (n - i))))
+  List.flatten
+    (rmap (iota n)
+       (fun i -> 
+	 if (i < n - i) then
+	   store_c (dst i) (src i)
+	 else if (i > n - i) then
+	   []
+	 else 
+	   [store_r (dst i) (Complex.real (src i))]))
+	
 
 let store_v_array_c veclen n dst src =
   List.flatten

@@ -1,0 +1,220 @@
+(*
+ * Copyright (c) 1997-1999 Massachusetts Institute of Technology
+ * Copyright (c) 2000 Matteo Frigo
+ * Copyright (c) 2000 Steven G. Johnson
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *)
+(* $Id: gen_hc2hc.ml,v 1.1 2002-07-15 20:46:36 athena Exp $ *)
+
+open Util
+open Genutil
+open C
+
+let cvsid = "$Id: gen_hc2hc.ml,v 1.1 2002-07-15 20:46:36 athena Exp $"
+
+type ditdif = DIT | DIF
+let ditdif = ref DIT
+let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number> [ -dit | -dif ]"
+
+let uiostride = ref Stride_variable
+let udist = ref Stride_variable
+
+let speclist = [
+  "-dit",
+  Arg.Unit(fun () -> ditdif := DIT),
+  " generate a DIT codelet";
+
+  "-dif",
+  Arg.Unit(fun () -> ditdif := DIF),
+  " generate a DIF codelet";
+
+  "-with-iostride",
+  Arg.String(fun x -> uiostride := arg_to_stride x),
+  " specialize for given i/o stride";
+
+  "-with-dist",
+  Arg.String(fun x -> udist := arg_to_stride x),
+  " specialize for given dist"
+]
+
+let rioarray = "rio" 
+and iioarray = "iio" 
+
+let genone sign n transform load store viostride =
+  let locations = unique_array_c n in
+  let input = 
+    locative_array_c n 
+      (C.array_subscript rioarray viostride)
+      (C.array_subscript iioarray (SNeg viostride))
+      locations in
+  let output = transform sign n (load n input) in
+  let ioloc = 
+    locative_array_c n 
+      (C.array_subscript rioarray viostride)
+      (C.array_subscript iioarray (SNeg viostride))
+      locations in
+  let odag = store n ioloc output in
+  let annot = standard_optimizer odag 
+  in annot
+
+let byi = Complex.times Complex.i
+
+let sym1 n f i = 
+  Complex.plus [Complex.real (f i); byi (Complex.imag (f (n - 1 - i)))]
+
+let sym2 n f i = if (i < n - i) then f i else byi (f i)
+
+let dftfinal_dit sign n input =
+  let input' i = if i < n then input i else Complex.zero in
+  let f = Fft.dft sign (2 * n) input' in
+  let g i = f (2 * i + 1)
+  in fun i -> 
+    if (i < n - i) then g i
+    else if (2 * i + 1 == n) then Complex.real (g i)
+    else Complex.zero
+
+let dftfinal_dif sign n input =
+  let input' i =
+    if (i mod 2 == 0) then
+      Complex.zero
+    else
+      let i' = (i - 1) / 2 in
+      if (2 * i' < n - 1) then (input i')
+      else if (2 * i' == n - 1) then 
+	Complex.real (input i')
+      else 
+	Complex.conj (input (n - 1 - i')) 
+  in Fft.dft sign (2 * n) input'
+
+(* hack *)
+let flops_of_asch a = flops_of (Fcn ("", "", [], Asch a))
+
+let generate n =
+  let iostride = "ios"
+  and twarray = "W"
+  and i = "i" 
+  and m = "m"
+  and a = "A"
+  and dist = "dist" in
+
+  let sign = !Genutil.sign 
+  and name = !Magic.codelet_name 
+  and byvl x = choose_simd x (ctimes (CVar "VL", x)) in
+
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
+  let nt = num_twiddles n in
+
+  let byw = bytwiddle n sign (twiddle_array nt twarray) in
+
+  let viostride = either_stride (!uiostride) (C.SVar iostride) in
+  let _ = Simd.ovs := stride_to_string "dist" !udist in
+  let _ = Simd.ivs := stride_to_string "dist" !udist in
+
+  let (first, mid, last) = 
+    match !ditdif with
+    | DIT -> 
+	(genone sign n Trig.rdft load_array_r store_array_hc viostride,
+	 genone sign n 
+	   (fun sign n input -> sym2 n (Fft.dft sign n (byw (sym1 n input))))
+	   load_array_c store_array_c viostride,
+	 genone sign n 
+	   dftfinal_dit
+	   load_array_r store_array_c viostride
+	)
+    | DIF -> 
+	(genone sign n Trig.hdft load_array_hc store_array_r viostride,
+	 genone sign n 
+	   (fun sign n input -> sym1 n (byw (Fft.dft sign n (sym2 n input))))
+	   load_array_c store_array_c viostride,
+	 genone sign n 
+	   dftfinal_dif
+	   load_array_c store_array_r viostride
+	)
+  in
+
+  let vdist = CVar !Simd.ivs 
+  and vrioarray = CVar rioarray
+  and viioarray = CVar iioarray
+  and iostridev = CVar iostride
+  and va = CVar a and vi = CVar i  and vm = CVar m 
+  in
+  let body = Block (
+    [Decl ("uint", i);
+     Decl (C.realtypep, rioarray);
+     Decl (C.realtypep, iioarray)],
+    [Stmt_assign (vrioarray, va);
+     Stmt_assign (viioarray, CPlus [va; CTimes (Integer n, iostridev)]);
+     Asch first;
+     Stmt_assign (vrioarray, CPlus [vrioarray; vdist]);
+     Stmt_assign (viioarray, CPlus [viioarray; CUminus vdist]);
+     For (Expr_assign (vi, Integer 0),
+	  Binop (" < ", vi, vm),
+	  list_to_comma 
+	    [Expr_assign (vi, CPlus [vi; byvl (Integer 2)]);
+	     Expr_assign (vrioarray, CPlus [vrioarray; byvl vdist]);
+	     Expr_assign (viioarray, 
+			  CPlus [viioarray; CUminus (byvl vdist)]);
+	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
+					       byvl (Integer nt)])],
+	  Asch mid);
+     If (Binop (" == ", vi, vm), 
+	 Asch last)
+   ])
+  in
+
+  let tree = 
+    Fcn ("static void", name,
+	 [Decl (C.realtypep, a);
+	  Decl (C.constrealtypep, twarray);
+	  Decl (C.stridetype, iostride);
+	  Decl ("uint", m);
+	  Decl ("int", dist)],
+         add_constants body)
+  in
+  let twinstr = 
+    Printf.sprintf "static const tw_instr twinstr[] = %s;\n\n" 
+      (twinstr_to_string (twdesc n))
+  and desc = 
+    Printf.sprintf
+      "static const hc2hc_desc desc = {%d, \"%s\", twinstr, %s, %s, %s, &GENUS, %s, %s, %s};\n\n"
+      n name (flops_of_asch first) (flops_of_asch mid) (flops_of_asch last)
+      (stride_to_solverparm !uiostride) "0"
+      (stride_to_solverparm !udist) 
+  and register = 
+    match !ditdif with
+    | DIT -> "X(khc2hc_dit_register)"
+    | DIF -> "X(khc2hc_dif_register)"
+
+  in
+  let init =
+    "\n" ^
+    twinstr ^ 
+    desc ^
+    (declare_register_fcn name) ^
+    (Printf.sprintf "{\n%s(p, %s, &desc);\n}" register name)
+  in
+
+  (unparse cvsid tree) ^ "\n" ^ init
+
+
+let main () =
+  begin 
+    parse (speclist @ Twiddle.speclist) usage;
+    print_string (generate (check_size ()));
+  end
+
+let _ = main()

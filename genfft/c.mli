@@ -18,12 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.mli,v 1.6 2002-06-30 18:37:55 athena Exp $ *)
+(* $Id: c.mli,v 1.7 2002-07-15 20:46:36 athena Exp $ *)
 
 type stride = 
   | SVar of string
   | SConst of string
   | SInteger of int
+  | SNeg of stride
 val array_subscript : string -> stride -> int -> string
 val varray_subscript : string -> stride -> stride -> int -> int -> string
 

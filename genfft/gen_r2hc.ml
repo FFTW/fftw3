@@ -18,34 +18,51 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2hc.ml,v 1.5 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: gen_r2hc.ml,v 1.6 2002-07-15 20:46:36 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2hc.ml,v 1.5 2002-07-08 00:32:01 athena Exp $"
+let cvsid = "$Id: gen_r2hc.ml,v 1.6 2002-07-15 20:46:36 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let uistride = ref Stride_variable
-let uostride = ref Stride_variable
+let urostride = ref Stride_variable
+let uiostride = ref Stride_variable
+let uivstride = ref Stride_variable
+let uovstride = ref Stride_variable
 
 let speclist = [
   "-with-istride",
   Arg.String(fun x -> uistride := arg_to_stride x),
   " specialize for given input stride";
 
-  "-with-ostride",
-  Arg.String(fun x -> uostride := arg_to_stride x),
-  " specialize for given output stride"
+  "-with-rostride",
+  Arg.String(fun x -> urostride := arg_to_stride x),
+  " specialize for given real output stride";
+
+  "-with-iostride",
+  Arg.String(fun x -> uiostride := arg_to_stride x),
+  " specialize for given imaginary output stride";
+
+  "-with-ivstride",
+  Arg.String(fun x -> uivstride := arg_to_stride x),
+  " specialize for given input vector stride";
+
+  "-with-ovstride",
+  Arg.String(fun x -> uovstride := arg_to_stride x),
+  " specialize for given output vector stride"
 ] 
 
 let generate n =
   let iarray = "I"
-  and oarray = "O"
+  and roarray = "ro"
+  and ioarray = "io"
   and istride = "is"
-  and ostride = "os" 
+  and rostride = "ros" 
+  and iostride = "ios" 
   in
 
   let ns = string_of_int n
@@ -54,8 +71,12 @@ let generate n =
   let name0 = name ^ "_0" in
 
   let vistride = either_stride (!uistride) (C.SVar istride)
-  and vostride = either_stride (!uostride) (C.SVar ostride)
+  and vrostride = either_stride (!urostride) (C.SVar rostride)
+  and viostride = either_stride (!uiostride) (C.SVar iostride)
   in
+
+  let _ = Simd.ovs := stride_to_string "ovs" !uovstride in
+  let _ = Simd.ivs := stride_to_string "ivs" !uivstride in
 
   let locations = unique_array_c n in
   let input = 
@@ -66,8 +87,8 @@ let generate n =
   let output = Trig.rdft sign n (load_array_r n input) in
   let oloc = 
     locative_array_c n 
-      (C.array_subscript oarray vostride)
-      (C.array_subscript "BUG" vostride)
+      (C.array_subscript roarray vrostride)
+      (C.array_subscript ioarray viostride)
       locations in
   let odag = store_array_hc n oloc output in
   let annot = standard_optimizer odag in
@@ -75,32 +96,55 @@ let generate n =
   let tree0 =
     Fcn ("static void", name0,
 	 ([Decl (C.constrealtypep, iarray);
-	   Decl (C.realtypep, oarray)]
+	   Decl (C.realtypep, roarray);
+	   Decl (C.realtypep, ioarray)]
 	  @ (if stride_fixed !uistride then [] 
                else [Decl (C.stridetype, istride)])
-	  @ (if stride_fixed !uostride then [] 
-	       else [Decl (C.stridetype, ostride)])
+	  @ (if stride_fixed !urostride then [] 
+	       else [Decl (C.stridetype, rostride)])
+	  @ (if stride_fixed !uiostride then [] 
+	       else [Decl (C.stridetype, iostride)])
+	  @ (choose_simd []
+	       (if stride_fixed !uivstride then [] else 
+	       [Decl ("int", !Simd.ivs)]))
+	  @ (choose_simd []
+	       (if stride_fixed !uovstride then [] else 
+	       [Decl ("int", !Simd.ovs)]))
 	 ),
 	 add_constants (Asch annot))
 
   in let loop =
     "static void " ^ name ^
-      "(const " ^ C.realtype ^ " *I, " ^ C.realtype ^ " *O, " ^
-      C.stridetype ^ " is, " ^  C.stridetype ^ " os, " ^ 
+    "(const " ^ C.realtype ^ " *I, " ^ 
+    C.realtype ^ " *ro, " ^
+    C.realtype ^ " *io, " ^
+    C.stridetype ^ " is, " ^ 
+    C.stridetype ^ " ros, " ^ 
+    C.stridetype ^ " ios, " ^ 
       " uint v, int ivs, int ovs)\n" ^
     "{\n" ^
     "uint i;\n" ^
     "for (i = 0; i < v; ++i) {\n" ^
-      name0 ^ "(I + i * ivs, O + i * ovs " ^
+      name0 ^ "(I, ro, io" ^
        (if stride_fixed !uistride then "" else ", is") ^ 
-       (if stride_fixed !uostride then "" else ", os") ^ 
-            ");\n" ^
+       (if stride_fixed !urostride then "" else ", ros") ^ 
+       (if stride_fixed !uiostride then "" else ", ios") ^ 
+       (choose_simd ""
+	  (if stride_fixed !uivstride then "" else ", ivs")) ^ 
+       (choose_simd ""
+	  (if stride_fixed !uovstride then "" else ", ovs")) ^ 
+    ");\n" ^
+    "I += ivs; ro += ovs; io += ovs;\n" ^
     "}\n}\n\n"
 
   and desc = 
-    Printf.sprintf "static const kr2hc_desc desc = { %s, %s, %s, %s };\n"
-      ns (stride_to_solverparm !uistride) (stride_to_solverparm !uostride)
-      (flops_of tree0)
+    Printf.sprintf 
+      "static const kr2hc_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n"
+      n name (flops_of tree0) 
+      (stride_to_solverparm !uistride) 
+      (stride_to_solverparm !urostride) (stride_to_solverparm !uiostride)
+      (choose_simd "0" (stride_to_solverparm !uivstride))
+      (choose_simd "0" (stride_to_solverparm !uovstride))
 
   and init =
     (declare_register_fcn name) ^
