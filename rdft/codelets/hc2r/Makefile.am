@@ -19,9 +19,11 @@ noinst_LTLIBRARIES = librdft_codelets_hc2r.la
 ###########################################################################
 # hc2r_<n> is a hard-coded complex-to-real FFT of size <n> (base cases
 # of real-output FFT recursion)
-HC2R = hc2r_2.c hc2r_3.c hc2r_4.c hc2r_5.c hc2r_6.c hc2r_7.c hc2r_8.c	\
-hc2r_9.c hc2r_10.c hc2r_11.c hc2r_12.c hc2r_13.c hc2r_14.c hc2r_15.c	\
-hc2r_16.c hc2r_32.c hc2r_64.c hc2r_128.c
+HC2R = hc2r_3.c hc2r_4.c hc2r_5.c hc2r_6.c hc2r_7.c hc2r_8.c hc2r_9.c	\
+hc2r_10.c hc2r_11.c hc2r_12.c hc2r_13.c hc2r_14.c hc2r_15.c hc2r_16.c	\
+hc2r_32.c hc2r_64.c hc2r_128.c
+
+# (hc2r_2.c is equivalent to r2hc_2.c)
 
 ###########################################################################
 # hb_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIF
