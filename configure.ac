@@ -142,7 +142,7 @@ AC_CHECK_SIZEOF(long long)
 AC_CHECK_TYPES(uintptr_t, [], [AC_CHECK_SIZEOF(unsigned int)
 AC_CHECK_SIZEOF(unsigned long)
 AC_CHECK_SIZEOF(unsigned long long)
-AC_CHECK_SIZEOF(void *)], [#include <stdio.h>
+AC_CHECK_SIZEOF(void *)], [$ac_includes_default
 #ifdef HAVE_STDINT_H
 #  include <stdint.h>
 #endif])
