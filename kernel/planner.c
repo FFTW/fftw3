@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.100 2002-09-17 01:51:06 athena Exp $ */
+/* $Id: planner.c,v 1.101 2002-09-17 01:56:14 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -347,7 +347,7 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 {
      plan *best = 0;
      int best_not_yet_timed = 1;
-     int pass;
+     int pass, lpass;
 
      *bestp = 0;
 
@@ -362,29 +362,20 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  }
      }
 
-     for (pass = 0; pass < 2; ++pass) {
-	  unsigned short nflags;
-	  int minscore;
-	  int nougly;
+     lpass = ego->nougly ? 1 : 2;
 
-	  if (best) goto done;
+     for (pass = 0; pass < lpass; ++pass) {
+	  static const struct {
+	       int minscore;
+	       int nougly;
+	  } info[2] = { {GOOD, 1}, {UGLY, 0} };
 
-	  switch (pass) {
-	      case 0: 
-		   minscore = GOOD;
-		   nougly = 1;
-		   break;
-	      case 1:
-		   if (ego->nougly) goto done;
-		   minscore = UGLY;
-		   nougly = 0;
-		   break;
-	  }
+	  if (best) break;
 
           FORALL_SOLVERS(ego, s, sp, {
-	       if (compute_score(ego, p, s) >= minscore) {
+	       if (compute_score(ego, p, s) >= info[pass].minscore) {
 		    plan *pln;
-		    pln = invoke_solver(ego, p, s, nougly);
+		    pln = invoke_solver(ego, p, s, info[pass].nougly);
 		    if (pln) {
 			 X(plan_use)(pln);
 			 if (best) {
@@ -409,7 +400,6 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  });
      }
 
- done:
      *bestp = best;
 }
 
