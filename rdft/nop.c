@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop.c,v 1.2 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: nop.c,v 1.3 2002-09-18 21:16:16 athena Exp $ */
 
 /* plans for vrank -infty RDFTs (nothing to do) */
 
@@ -62,12 +62,6 @@ static void print(plan *ego, printer *p)
      p->print(p, "(rdft-nop)");
 }
 
-static int score(const solver *ego, const problem *p, const planner *plnr)
-{
-     UNUSED(plnr);
-     return applicable(ego, p) ? GOOD : BAD;
-}
-
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
      static const plan_adt padt = {
@@ -87,7 +81,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      return MKSOLVER(solver, &sadt);
 }
 

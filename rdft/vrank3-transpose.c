@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.2 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.3 2002-09-18 21:16:17 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -83,7 +83,7 @@ static int other_dim(uint *dim0, uint *dim1, uint *dim2)
      return 1;
 }
 
-static int applicable(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
+static int applicable0(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
 {
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *)p_;
@@ -101,21 +101,19 @@ static int applicable(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p_, const planner *plnr)
+static int applicable(const problem *p_, 
+		      const planner *plnr, uint *dim0, uint *dim1, uint *dim2)
 {
-     uint dim0, dim1, dim2;
-     const problem_rdft *p;
-     UNUSED(ego); UNUSED(plnr);
+     if (!applicable0(p_, dim0, dim1, dim2)) return 0;
 
-     if (!applicable(p_, &dim0, &dim1, &dim2))
-          return BAD;
+     if (NO_UGLYP(plnr)) {
+	  const problem_rdft *p = (const problem_rdft *) p_;
+	  if (p->vecsz.dims[*dim2].is > X(imax)(p->vecsz.dims[*dim0].is,
+						p->vecsz.dims[*dim0].os))
+	       return 0; /* loops are in the wrong order for locality */
+     }
 
-     p = (const problem_rdft *) p_;
-     if (p->vecsz.dims[dim2].is > X(imax)(p->vecsz.dims[dim0].is,
-                                          p->vecsz.dims[dim0].os))
-          return UGLY;		/* loops are in the wrong order for locality */
-
-     return GOOD;
+     return 1;
 }
 
 static void destroy(plan *ego)
@@ -139,10 +137,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  X(rdft_solve), X(null_awake), print, destroy
      };
 
-     UNUSED(plnr);
      UNUSED(ego);
-
-     if (!applicable(p_, &dim0, &dim1, &dim2))
+     if (!applicable(p_, plnr, &dim0, &dim1, &dim2))
           return (plan *) 0;
      p = (const problem_rdft *) p_;
 
@@ -161,7 +157,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      return MKSOLVER(S, &sadt);
 }
 

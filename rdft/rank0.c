@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.4 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: rank0.c,v 1.5 2002-09-18 21:16:16 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -153,12 +153,6 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(%s%v)", ego->slv->adt->nam, ego->vl);
 }
 
-static int score(const solver *ego, const problem *p, const planner *plnr)
-{
-     UNUSED(plnr);
-     return (applicable(ego, p)) ? GOOD : BAD;
-}
-
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const S *ego = (const S *) ego_;
@@ -200,7 +194,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(const rnk0adt *adt)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->adt = adt;
      return &(slv->super);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.23 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: ct-dif.c,v 1.24 2002-09-18 21:16:16 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -45,8 +45,8 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      }
 }
 
-static int applicable(const solver_ct *ego, const problem *p_,
-		      const planner *plnr)
+static int applicable0(const solver_ct *ego, const problem *p_,
+		       const planner *plnr)
 {
      if (X(dft_ct_applicable)(ego, p_)) {
 	  int ivs, ovs;
@@ -69,6 +69,26 @@ static int applicable(const solver_ct *ego, const problem *p_,
      return 0;
 }
 
+static int applicable(const solver_ct *ego, const problem *p_,
+		 const planner *plnr)
+{
+     const problem_dft *p;
+     uint n;
+     
+     if (!applicable0(ego, p_, plnr))  return 0;
+
+     p = (const problem_dft *) p_;
+     n = p->sz.dims[0].n;
+
+     /* emulate fftw2 behavior */
+     if (NO_VRECURSEP(plnr) && (p->vecsz.rnk > 0)) return 0;
+
+     if (NO_UGLYP(plnr))
+	  if (n <= 16 || n / ego->desc->radix <= 4) return 0;
+
+     return 1;
+}
+
 static void finish(plan_ct *ego)
 {
      const ct_desc *d = ego->slv->desc;
@@ -77,28 +97,6 @@ static void finish(plan_ct *ego)
           X(ops_add)(ego->cld->ops,
 		     X(ops_mul)(ego->vl * ego->m / d->genus->vl, d->ops));
 }
-
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
-{
-     const solver_ct *ego = (const solver_ct *) ego_;
-     const problem_dft *p = (const problem_dft *) p_;
-     uint n;
-     
-     if (!applicable(ego, p_, plnr))
-          return BAD;
-
-     n = p->sz.dims[0].n;
-
-     /* emulate fftw2 behavior */
-     if ((p->vecsz.rnk > 0) && NO_VRECURSEP(plnr))
-	  return BAD;
-
-     if (n <= 16 || n / ego->desc->radix <= 4)
-          return UGLY;
-
-     return GOOD;
-}
-
 
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
@@ -111,7 +109,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 
 solver *X(mksolver_dft_ct_dif)(kdft_dif codelet, const ct_desc *desc)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      static const char name[] = "dft-dif";
      union kct k;
      k.dif = codelet;

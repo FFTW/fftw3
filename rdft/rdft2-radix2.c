@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.8 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: rdft2-radix2.c,v 1.9 2002-09-18 21:16:16 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -398,16 +398,6 @@ static void print(plan *ego_, printer * p)
               ego->n, ego->vl, ego->cld);
 }
 
-static int score(const solver *ego_, const problem *p_,
-                 const planner *plnr)
-{
-     const S *ego = (const S *) ego_;
-     UNUSED(plnr);
-     if (ego->adt->applicable(p_, plnr))
-          return GOOD;
-     return BAD;
-}
-
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const S *ego = (const S *) ego_;
@@ -453,7 +443,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(const madt *adt)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->adt = adt;
      return &(slv->super);

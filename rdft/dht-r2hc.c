@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dht-r2hc.c,v 1.5 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: dht-r2hc.c,v 1.6 2002-09-18 21:16:16 athena Exp $ */
 
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */
@@ -80,11 +80,10 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(dht-r2hc-%u%(%p%))", ego->n, ego->cld);
 }
 
-static int applicable(const solver *ego_, const problem *p_,
-		      const planner *plnr)
+static int applicable0(const solver *ego_, const problem *p_)
 {
      UNUSED(ego_);
-     if (RDFTP(p_) && !NO_DHT_R2HCP(plnr)) {
+     if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
 		  && p->sz.rnk == 1
@@ -95,10 +94,11 @@ static int applicable(const solver *ego_, const problem *p_,
      return 0;
 }
 
-static int score(const solver *ego, const problem *p, const planner *plnr)
+static int applicable(const solver *ego, const problem *p, const planner *plnr)
 {
-     UNUSED(plnr);
-     return (applicable(ego, p, plnr)) ? UGLY : BAD;
+     if (NO_DHT_R2HCP(plnr)) return 0;
+     if (NO_UGLYP(plnr)) return 0;
+     return (applicable0(ego, p));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -142,7 +142,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

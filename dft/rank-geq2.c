@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.22 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.23 2002-09-18 21:16:16 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -87,7 +87,7 @@ static int picksplit(const S *ego, const tensor sz, uint *rp)
      return 1;
 }
 
-static int applicable(const solver *ego_, const problem *p_, uint *rp)
+static int applicable0(const solver *ego_, const problem *p_, uint *rp)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
@@ -113,27 +113,26 @@ static int applicable(const solver *ego_, const problem *p_, uint *rp)
 }
 
 /* TODO: revise this. */
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable(const solver *ego_, const problem *p_, 
+		      const planner *plnr, uint *rp)
 {
      const S *ego = (const S *)ego_;
      const problem_dft *p = (const problem_dft *) p_;
-     uint dummy;
 
-     if (!applicable(ego_, p_, &dummy))
-          return BAD;
+     if (!applicable0(ego_, p_, rp)) return 0;
 
      /* fftw2 behavior */
-     if (NO_RANK_SPLITSP(plnr) && (ego->spltrnk != ego->buddies[0]))
-	  return BAD;
+     if (NO_RANK_SPLITSP(plnr) && (ego->spltrnk != ego->buddies[0])) return 0;
 
      /* Heuristic: if the vector stride is greater than the transform
         sz, don't use (prefer to do the vector loop first with a
         vrank-geq1 plan). */
-     if (p->vecsz.rnk > 0 &&
-	 X(tensor_min_stride)(p->vecsz) > X(tensor_max_index)(p->sz))
-          return UGLY;
+     if (NO_UGLYP(plnr))
+	  if (p->vecsz.rnk > 0 &&
+	      X(tensor_min_stride)(p->vecsz) > X(tensor_max_index)(p->sz))
+	       return 0;
 
-     return GOOD;
+     return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -150,7 +149,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(dft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_, &spltrnk))
+     if (!applicable(ego_, p_, plnr, &spltrnk))
           return (plan *) 0;
 
      p = (const problem_dft *) p_;
@@ -203,7 +202,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int spltrnk, const int *buddies, uint nbuddies)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->spltrnk = spltrnk;
      slv->buddies = buddies;

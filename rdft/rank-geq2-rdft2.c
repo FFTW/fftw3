@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.6 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.7 2002-09-18 21:16:16 athena Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -86,8 +86,8 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(rdft2-rank>=2%(%p%)%(%p%))", ego->cldr, ego->cldc);
 }
  
-static int applicable(const solver *ego_, const problem *p_, 
-		      const planner *plnr)
+static int applicable0(const solver *ego_, const problem *p_, 
+		       const planner *plnr)
 {
      UNUSED(ego_);
      if (RDFT2P(p_)) {
@@ -111,21 +111,23 @@ static int applicable(const solver *ego_, const problem *p_,
 }
 
 /* TODO: revise this. */
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable(const solver *ego_, const problem *p_, 
+		      const planner *plnr)
 {
-     const problem_rdft2 *p = (const problem_rdft2 *) p_;
+     if (!applicable0(ego_, p_, plnr)) return 0;
 
-     if (!applicable(ego_, p_, plnr))
-          return BAD;
+     if (NO_UGLYP(plnr)) {
+	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
 
-     /* Heuristic: if the vector stride is greater than the transform
-        sz, don't use (prefer to do the vector loop first with a
-        vrank-geq1 plan). */
-     if (p->vecsz.rnk > 0 &&
-	 X(tensor_min_stride)(p->vecsz) > X(tensor_max_index)(p->sz))
-          return UGLY;
+	  /* Heuristic: if the vector stride is greater than the transform
+	     sz, don't use (prefer to do the vector loop first with a
+	     vrank-geq1 plan). */
+	  if (p->vecsz.rnk > 0 &&
+	      X(tensor_min_stride)(p->vecsz) > X(tensor_max_index)(p->sz))
+	       return 0;
+     }
 
-     return GOOD;
+     return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -201,7 +203,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

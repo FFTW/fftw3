@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.3 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: rdft-dht.c,v 1.4 2002-09-18 21:16:16 athena Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime
@@ -140,7 +140,7 @@ static void print(plan *ego_, printer *p)
 	      ego->n, ego->cld);
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable0(const solver *ego_, const problem *p_)
 {
      UNUSED(ego_);
      if (RDFTP(p_)) {
@@ -154,18 +154,20 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p_, const planner *plnr)
+static int applicable(const solver *ego, const problem *p_, 
+		      const planner *plnr)
 {
-     UNUSED(plnr);
-     if (applicable(ego, p_)) {
+     if (!applicable0(ego, p_)) return 0;
+
+     if (NO_UGLYP(plnr)) {
 	  const problem_rdft *p = (const problem_rdft *) p_;
 	  uint n = p->sz.dims[0].n;
 	  if (n >= RADER_MIN_GOOD && X(is_prime)(n))
-	       return GOOD;  /* need to make rader-dht GOOD to exclude
-				generic solver for large primes */
-	  return UGLY;
+	       return 1;  /* need to use rader-dht anyway to exclude
+			     generic solver for large primes */
+	  return 0;
      }
-     return BAD;
+     return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -179,7 +181,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(rdft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_))
+     if (!applicable(ego_, p_, plnr))
           return (plan *)0;
 
      p = (const problem_rdft *) p_;
@@ -218,7 +220,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

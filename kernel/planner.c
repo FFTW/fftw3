@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.109 2002-09-18 18:12:21 athena Exp $ */
+/* $Id: planner.c,v 1.110 2002-09-18 21:16:16 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -45,7 +45,6 @@
 
 static unsigned short canonicalize(unsigned short x)
 {
-     if (!(x & USE_SCORE)) x &= ~IMPATIENCE_FLAGS;
      return x;
 }
 
@@ -350,12 +349,6 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
      return pln;
 }
 
-static int compute_score(planner *ego, problem *p, solver *s)
-{
-     return USE_SCOREP(ego) ?  s->adt->score(s, p, ego) : GOOD;
-}
-
-
 static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 {
      plan *best = 0;
@@ -375,38 +368,33 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  }
      }
 
-     lpass = NO_UGLYP(ego) ? 1 : 2;
+     lpass = 2;
 
      for (pass = 0; pass < lpass; ++pass) {
-	  static const struct {
-	       int minscore;
-	       unsigned short nflags;
-	  } info[2] = { {GOOD, NO_UGLY}, {UGLY, 0} };
+	  static const unsigned short nflags[2] = { NO_UGLY, 0 };
 
 	  if (best) break;
           FORALL_SOLVERS(ego, s, sp, {
-	       if (compute_score(ego, p, s) >= info[pass].minscore) {
-		    plan *pln = invoke_solver(ego, p, s, info[pass].nflags);
+	       plan *pln = invoke_solver(ego, p, s, nflags[pass]);
 
-		    if (pln) {
-			 X(plan_use)(pln);
-			 if (best) {
-			      if (best_not_yet_timed) {
-				   evaluate_plan(ego, best, p);
-				   best_not_yet_timed = 0;
-			      }
-			      evaluate_plan(ego, pln, p);
-			      if (pln->pcost < best->pcost) {
-				   X(plan_destroy)(best);
-				   best = pln;
-				   *descp = sp;
-			      } else {
-				   X(plan_destroy)(pln);
-			      }
-			 } else {
+	       if (pln) {
+		    X(plan_use)(pln);
+		    if (best) {
+			 if (best_not_yet_timed) {
+			      evaluate_plan(ego, best, p);
+			      best_not_yet_timed = 0;
+			 }
+			 evaluate_plan(ego, pln, p);
+			 if (pln->pcost < best->pcost) {
+			      X(plan_destroy)(best);
 			      best = pln;
 			      *descp = sp;
+			 } else {
+			      X(plan_destroy)(pln);
 			 }
+		    } else {
+			 best = pln;
+			 *descp = sp;
 		    }
 	       }
 	  });

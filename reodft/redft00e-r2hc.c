@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.6 2002-08-26 16:59:44 stevenj Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.7 2002-09-18 21:16:17 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -112,7 +112,7 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(redft00e-r2hc-%u%(%p%))", ego->n * 2, ego->cld);
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable0(const solver *ego_, const problem *p_)
 {
      UNUSED(ego_);
      if (RDFTP(p_)) {
@@ -128,10 +128,11 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p, const planner *plnr)
+static int applicable(const solver *ego, const problem *p, const planner *plnr)
 {
      UNUSED(plnr);
-     return (applicable(ego, p)) ? UGLY : BAD;
+     if (NO_UGLYP(plnr)) return 0;
+     return (applicable0(ego, p));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -147,7 +148,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(rdft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_))
+     if (!applicable(ego_, p_, plnr))
           return (plan *)0;
 
      p = (const problem_rdft *) p_;
@@ -184,7 +185,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

@@ -406,7 +406,7 @@ static void print(plan *ego_, printer *p)
               ego->r, ego->cldr0, ego->cldr, ego->cld);
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable0(const solver *ego_, const problem *p_)
 {
      if (RDFTP(p_)) {
 	  const S *ego = (const S *) ego_;
@@ -424,19 +424,18 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable(const solver *ego_, const problem *p_, 
+		      const planner *plnr)
 {
-     UNUSED(plnr);
-     if (applicable(ego_, p_)) {
+     if (!applicable0(ego_, p_)) return 0;
+
+     if (NO_UGLYP(plnr))  {
 	  const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
 	  uint r = X(first_divisor)(p->sz.dims[0].n);
-	  if (r < ego->min_prime || r == p->sz.dims[0].n)
-	       return UGLY;
-	  else
-	       return GOOD;
+	  if (r < ego->min_prime || r == p->sz.dims[0].n) return 0;
      }
-     return BAD;
+     return 1;
 }
 
 static int mkP(P *pln, uint r, R *O, int ios, rdft_kind kind, planner *plnr)
@@ -508,7 +507,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 	  X(rdft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego, p_))
+     if (!applicable(ego, p_, plnr))
           goto nada;
 
      n = p->sz.dims[0].n;
@@ -564,7 +563,7 @@ static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
 	  X(rdft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego, p_))
+     if (!applicable(ego, p_, plnr))
           goto nada;
 
      n = p->sz.dims[0].n;
@@ -613,7 +612,7 @@ static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
 
 static solver *mksolver_dit(uint min_prime)
 {
-     static const solver_adt sadt = { mkplan_dit, score };
+     static const solver_adt sadt = { mkplan_dit };
      S *slv = MKSOLVER(S, &sadt);
      slv->min_prime = min_prime;
      slv->kind = R2HC;
@@ -622,7 +621,7 @@ static solver *mksolver_dit(uint min_prime)
 
 static solver *mksolver_dif(uint min_prime)
 {
-     static const solver_adt sadt = { mkplan_dif, score };
+     static const solver_adt sadt = { mkplan_dif };
      S *slv = MKSOLVER(S, &sadt);
      slv->min_prime = min_prime;
      slv->kind = HC2R;

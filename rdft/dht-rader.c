@@ -263,9 +263,8 @@ static void print(plan *ego_, printer *p)
      p->putchr(p, ')');
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable0(const problem *p_)
 {
-     UNUSED(ego_);
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
@@ -280,18 +279,19 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable(const solver *ego_, const problem *p_, 
+		      const planner *plnr)
 {
-     UNUSED(plnr);
-     if (applicable(ego_, p_)) {
+     if (!applicable0(p_)) return 0;
+
+     {
 	  const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
-	  if (p->sz.dims[0].n < ego->min_prime)
-	       return UGLY;
-	  else
-	       return GOOD;
+	  if (NO_UGLYP(plnr) && p->sz.dims[0].n < ego->min_prime)
+	       return 0;
+
+	  return 1;
      }
-     return BAD;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -311,7 +311,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(rdft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_))
+     if (!applicable(ego_, p_, plnr))
 	  return (plan *) 0;
 
      n = p->sz.dims[0].n;
@@ -410,7 +410,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(uint min_prime)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->min_prime = min_prime;
      return &(slv->super);

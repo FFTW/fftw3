@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.135 2002-09-17 13:36:16 athena Exp $ */
+/* $Id: ifftw.h,v 1.136 2002-09-18 21:16:16 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -362,15 +362,8 @@ void X(plan_awake)(plan *ego, int flag);
 
 /*-----------------------------------------------------------------------*/
 /* solver.c: */
-enum {
-     BAD,   /* solver cannot solve problem */
-     UGLY,  /* we are 99% sure that this solver is suboptimal */
-     GOOD
-};
-
 typedef struct {
      plan *(*mkplan)(const solver *ego, const problem *p, planner *plnr);
-     int (*score)(const solver *ego, const problem *p, const planner *plnr);
 } solver_adt;
 
 struct solver_s {
@@ -410,8 +403,7 @@ enum {
 
 /* values for planner_flags: */
 enum {
-     /* impatience flags: at most 13 (for now) to fit in 16-bit int,
-        not including ESTIMATE and EXHAUSTIVE. */
+     /* impatience flags  */
 
      NO_VRECURSE = 0x1,
      NO_RANK_SPLITS = 0x2,
@@ -423,7 +415,6 @@ enum {
      BELIEVE_PCOST = 0x80,
      NO_DHT_R2HC = 0x100,
      NO_UGLY = 0x200,
-     USE_SCORE = 0x400,
 
      /* a canonical set of fftw2-like impatient flags */
      IMPATIENT = (0
@@ -454,7 +445,6 @@ enum {
 #define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
 #define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
 #define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
-#define USE_SCOREP(plnr) ((plnr)->planner_flags & USE_SCORE)
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 

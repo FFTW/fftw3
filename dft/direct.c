@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.24 2002-08-25 17:16:49 athena Exp $ */
+/* $Id: direct.c,v 1.25 2002-09-18 21:16:16 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -107,12 +107,6 @@ static int applicable(const solver *ego_, const problem *p_,
      return 0;
 }
 
-static int score(const solver *ego, const problem *p, const planner *plnr)
-{
-     UNUSED(plnr);
-     return (applicable(ego, p, plnr)) ? GOOD : BAD;
-}
-
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const S *ego = (const S *) ego_;
@@ -159,7 +153,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 solver *X(mksolver_dft_direct)(kdft k, const kdft_desc *desc)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k = k;
      slv->desc = desc;

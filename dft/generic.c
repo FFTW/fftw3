@@ -111,9 +111,8 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(dft-generic-dit-%u%(%p%))", ego->r, ego->cld);
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable0(const problem *p_)
 {
-     UNUSED(ego_);
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
           return (1
@@ -126,12 +125,11 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable(const solver *ego, const problem *p_, 
+		      const planner *plnr)
 {
-     UNUSED(plnr);
-     if (applicable(ego_, p_))
-	  return UGLY;
-     return BAD;
+     UNUSED(ego);
+     return (NO_UGLYP(plnr) && applicable0(p_));
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
@@ -145,7 +143,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  X(dft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego, p_))
+     if (!applicable(ego, p_, plnr))
           goto nada;
 
      n = p->sz.dims[0].n;
@@ -197,7 +195,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

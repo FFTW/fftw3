@@ -374,7 +374,7 @@ static void print_dit(plan *ego_, printer *p)
      p->print(p, "%(%p%))", ego_dit->cld);
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable0(const solver *ego_, const problem *p_)
 {
      UNUSED(ego_);
      if (DFTP(p_)) {
@@ -389,7 +389,7 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int applicable_dit(const solver *ego_, const problem *p_)
+static int applicable0_dit(const solver *ego_, const problem *p_)
 {
      UNUSED(ego_);
      if (DFTP(p_)) {
@@ -404,33 +404,35 @@ static int applicable_dit(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable(const solver *ego_, const problem *p_,
+		      const planner *plnr)
 {
-     UNUSED(plnr);
-     if (applicable(ego_, p_)) {
+     if (!applicable0(ego_, p_)) return 0;
+
+     {
 	  const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
-	  if (p->sz.dims[0].n < ego->min_prime)
-	       return UGLY;
-	  else
-	       return GOOD;
+	  if (NO_UGLYP(plnr) && p->sz.dims[0].n < ego->min_prime) return 0;
      }
-     return BAD;
+
+     return 1;
 }
 
-static int score_dit(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable_dit(const solver *ego_, const problem *p_, 
+			  const planner *plnr)
 {
-     UNUSED(plnr);
-     if (applicable_dit(ego_, p_)) {
+     if (!applicable0_dit(ego_, p_)) return 0;
+
+     {
 	  const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
-	  uint r = X(first_divisor)(p->sz.dims[0].n);
-	  if (r < ego->min_prime || r == p->sz.dims[0].n)
-	       return UGLY;
-	  else
-	       return GOOD;
+
+	  if (NO_UGLYP(plnr)) {
+	       uint r = X(first_divisor)(p->sz.dims[0].n);
+	       if (r < ego->min_prime || r == p->sz.dims[0].n) return 0;
+	  }
      }
-     return BAD;
+     return 1;
 }
 
 static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
@@ -528,7 +530,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  X(dft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego, p_))
+     if (!applicable(ego, p_, plnr))
 	  return (plan *) 0;
 
      n = p->sz.dims[0].n;
@@ -555,7 +557,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 	  X(dft_solve), awake_dit, print_dit, destroy_dit
      };
 
-     if (!applicable_dit(ego, p_))
+     if (!applicable_dit(ego, p_, plnr))
           goto nada;
 
      n = p->sz.dims[0].n;
@@ -605,7 +607,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 
 static solver *mksolver(uint min_prime)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->min_prime = min_prime;
      return &(slv->super);
@@ -613,7 +615,7 @@ static solver *mksolver(uint min_prime)
 
 static solver *mksolver_dit(uint min_prime)
 {
-     static const solver_adt sadt = { mkplan_dit, score_dit };
+     static const solver_adt sadt = { mkplan_dit };
      S *slv = MKSOLVER(S, &sadt);
      slv->min_prime = min_prime;
      return &(slv->super);

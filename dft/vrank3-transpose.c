@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.12 2002-08-26 23:46:46 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.13 2002-09-18 21:16:16 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -83,7 +83,7 @@ static int other_dim(uint *dim0, uint *dim1, uint *dim2)
      return 1;
 }
 
-static int applicable(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
+static int applicable0(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *)p_;
@@ -101,21 +101,23 @@ static int applicable(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p_, const planner *plnr)
+static int applicable(const problem *p_, const planner *plnr, 
+		      uint *dim0, uint *dim1, uint *dim2)
 {
-     uint dim0, dim1, dim2;
      const problem_dft *p;
-     UNUSED(ego); UNUSED(plnr);
 
-     if (!applicable(p_, &dim0, &dim1, &dim2))
-          return BAD;
+     if (!applicable0(p_, dim0, dim1, dim2))
+          return 0;
 
      p = (const problem_dft *) p_;
-     if (p->vecsz.dims[dim2].is > X(imax)(p->vecsz.dims[dim0].is,
-                                          p->vecsz.dims[dim0].os))
-          return UGLY;		/* loops are in the wrong order for locality */
 
-     return GOOD;
+     if (NO_UGLYP(plnr))
+	  if (p->vecsz.dims[*dim2].is > X(imax)(p->vecsz.dims[*dim0].is,
+						p->vecsz.dims[*dim0].os))
+	       /* loops are in the wrong order for locality */
+	       return 0;	
+
+     return 1;
 }
 
 static void destroy(plan *ego)
@@ -142,7 +144,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      UNUSED(plnr);
      UNUSED(ego);
 
-     if (!applicable(p_, &dim0, &dim1, &dim2))
+     if (!applicable(p_, plnr, &dim0, &dim1, &dim2))
           return (plan *) 0;
      p = (const problem_dft *) p_;
 
@@ -161,7 +163,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      return MKSOLVER(S, &sadt);
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.8 2002-09-16 03:20:14 stevenj Exp $ */
+/* $Id: hc2hc-dif.c,v 1.9 2002-09-18 21:16:16 athena Exp $ */
 
 /* decimation in frequency Cooley-Tukey */
 #include "rdft.h"
@@ -49,8 +49,8 @@ static void apply(plan *ego_, R *I, R *O)
      }
 }
 
-static int applicable(const solver_hc2hc *ego, const problem *p_,
-		      const planner *plnr)
+static int applicable0(const solver_hc2hc *ego, const problem *p_,
+		       const planner *plnr)
 {
      if (X(rdft_hc2hc_applicable)(ego, p_)) {
 	  int ivs, ovs;
@@ -73,6 +73,27 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
      return 0;
 }
 
+static int applicable(const solver_hc2hc *ego, const problem *p_,
+		      const planner *plnr)
+{
+     const problem_rdft *p;
+     uint n;
+
+     if (!applicable0(ego, p_, plnr)) return 0;
+
+     p = (const problem_rdft *) p_;
+
+     /* emulate fftw2 behavior */
+     if (NO_VRECURSEP(plnr) && (p->vecsz.rnk > 0)) return 0;
+
+     if (NO_UGLYP(plnr)) {
+	  n = p->sz.dims[0].n;
+	  if (n <= 16 || n / ego->desc->radix <= 4) return 0;
+	  if (NONTHREADED_ICKYP(plnr)) return 0; /* prefer threaded version */
+     }
+     return 1;
+}
+
 static void finish(plan_hc2hc *ego)
 {
      const hc2hc_desc *d = ego->slv->desc;
@@ -86,35 +107,6 @@ static void finish(plan_hc2hc *ego)
 				d->ops));
 }
 
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
-{
-     const solver_hc2hc *ego = (const solver_hc2hc *) ego_;
-     const problem_rdft *p;
-     uint n;
-
-     if (!applicable(ego, p_, plnr))
-          return BAD;
-
-     p = (const problem_rdft *) p_;
-
-     /* emulate fftw2 behavior */
-     if ((p->vecsz.rnk > 0) && NO_VRECURSEP(plnr))
-	  return BAD;
-
-     n = p->sz.dims[0].n;
-     if (0
-	 || n <= 16 
-	 || n / ego->desc->radix <= 4
-	  )
-          return UGLY;
-
-     if (NONTHREADED_ICKYP(plnr))
-	  return UGLY; /* prefer threaded version */
-
-     return GOOD;
-}
-
-
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
      static const hc2hcadt adt = {
@@ -127,7 +119,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 
 solver *X(mksolver_rdft_hc2hc_dif)(khc2hc codelet, const hc2hc_desc *desc)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      static const char name[] = "rdft-dif";
 
      return X(mksolver_rdft_hc2hc)(codelet, desc, name, &sadt);

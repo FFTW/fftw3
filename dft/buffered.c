@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.29 2002-09-16 19:28:47 stevenj Exp $ */
+/* $Id: buffered.c,v 1.30 2002-09-18 21:16:16 athena Exp $ */
 
 #include "dft.h"
 
@@ -137,7 +137,7 @@ static int toobig(uint n, const S *ego)
      return (n > ego->adt->maxbufsz);
 }
 
-static int applicable(const problem *p_, const S *ego, const planner *plnr)
+static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
@@ -178,26 +178,21 @@ static int applicable(const problem *p_, const S *ego, const planner *plnr)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable(const problem *p_, const S *ego, const planner *plnr)
 {
-     const S *ego = (const S *) ego_;
      const problem_dft *p;
      UNUSED(plnr);
 
-     if (NO_BUFFERINGP(plnr))
-          return BAD;
-	  
-     if (!applicable(p_, ego, plnr))
-          return BAD;
+     if (NO_BUFFERINGP(plnr)) return 0;
+     if (!applicable0(p_, ego, plnr)) return 0;
 
      p = (const problem_dft *) p_;
-     if (p->ri != p->ro)
-	  return UGLY;
+     if (NO_UGLYP(plnr)) {
+	  if (p->ri != p->ro) return 0;
+	  if (toobig(p->sz.dims[0].n, ego)) return 0;
+     }
 
-     if (toobig(p->sz.dims[0].n, ego))
-	 return UGLY;
-
-     return GOOD;
+     return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -331,7 +326,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(const bufadt *adt)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->adt = adt;
      return &(slv->super);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.10 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: dft-r2hc.c,v 1.11 2002-09-18 21:16:16 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -87,9 +87,8 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(dft-r2hc-%u%(%p%))", ego->n, ego->cld);
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable0(const problem *p_)
 {
-     UNUSED(ego_);
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
           return (1
@@ -106,18 +105,20 @@ static int split(R *r, R *i, uint n, int s)
      return ((r > i ? r - i : i - r) >= ((int)n) * (s > 0 ? s : -s));
 }
 
-static int score(const solver *ego, const problem *p_, const planner *plnr)
+static int applicable(const problem *p_, const planner *plnr)
 {
-     if (applicable(ego, p_)) {
+     if (!applicable0(p_)) return 0;
+
+     {
 	  const problem_dft *p = (const problem_dft *) p_;
-	  if (DFT_R2HC_ICKYP(plnr))
-	       return UGLY;
+	  if (NO_UGLYP(plnr) && DFT_R2HC_ICKYP(plnr)) return 0;
+
 	  if (split(p->ri, p->ii, p->sz.dims[0].n, p->sz.dims[0].is) &&
 	      split(p->ro, p->io, p->sz.dims[0].n, p->sz.dims[0].os))
-	       return GOOD;
-	  return UGLY;
+	       return 1;
+
+	  return !(NO_UGLYP(plnr));
      }
-     return BAD;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -131,7 +132,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(dft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_))
+     UNUSED(ego_);
+     if (!applicable(p_, plnr))
           return (plan *)0;
 
      p = (const problem_dft *) p_;
@@ -163,7 +165,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

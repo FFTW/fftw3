@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.3 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: direct.c,v 1.4 2002-09-18 21:16:16 athena Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -141,12 +141,6 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p, const planner *plnr)
-{
-     UNUSED(plnr);
-     return (applicable(ego, p)) ? GOOD : BAD;
-}
-
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const S *ego = (const S *) ego_;
@@ -204,7 +198,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 solver *X(mksolver_rdft_r2hc_direct)(kr2hc k, const kr2hc_desc *desc)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k.r2hc = k;
      slv->desc.r2hc = desc;
@@ -216,7 +210,7 @@ solver *X(mksolver_rdft_r2hc_direct)(kr2hc k, const kr2hc_desc *desc)
 
 solver *X(mksolver_rdft_hc2r_direct)(khc2r k, const khc2r_desc *desc)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k.hc2r = k;
      slv->desc.hc2r = desc;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.10 2002-08-26 23:46:46 athena Exp $ */
+/* $Id: vrank2-transpose.c,v 1.11 2002-09-18 21:16:16 athena Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -74,12 +74,6 @@ static int applicable(const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p, const planner *plnr)
-{
-     UNUSED(ego); UNUSED(plnr);
-     return (applicable(p)) ? GOOD : BAD;
-}
-
 static void destroy(plan *ego)
 {
      X(free)(ego);
@@ -119,7 +113,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      return MKSOLVER(S, &sadt);
 }
 

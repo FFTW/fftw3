@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.13 2002-09-16 19:31:39 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.14 2002-09-18 21:16:16 athena Exp $ */
 
 #include "rdft.h"
 
@@ -282,7 +282,7 @@ static int toobig(uint n, const S *ego)
      return (n > ego->adt->maxbufsz);
 }
 
-static int applicable(const problem *p_, const S *ego, const planner *plnr)
+static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 {
      UNUSED(ego);
      if (RDFT2P(p_)) {
@@ -293,26 +293,19 @@ static int applicable(const problem *p_, const S *ego, const planner *plnr)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable(const problem *p_, const S *ego, const planner *plnr)
 {
-     const S *ego = (const S *) ego_;
      const problem_rdft2 *p;
-     UNUSED(plnr);
 
-     if (NO_BUFFERINGP(plnr))
-          return BAD;
-
-     if (!applicable(p_, ego, plnr))
-          return BAD;
+     if (NO_BUFFERINGP(plnr)) return 0;
+     if (!applicable0(p_, ego, plnr)) return 0;
 
      p = (const problem_rdft2 *) p_;
-     if (p->r != p->rio && p->r != p->iio)
-	  return UGLY;
-
-     if (toobig(p->sz.dims[0].n, ego))
-	 return UGLY;
-
-     return GOOD;
+     if (NO_UGLYP(plnr)) {
+	  if (p->r != p->rio && p->r != p->iio) return 0;
+	  if (toobig(p->sz.dims[0].n, ego)) return 0;
+     }
+     return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -442,7 +435,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(const bufadt *adt)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->adt = adt;
      return &(slv->super);

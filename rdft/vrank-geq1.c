@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.10 2002-09-16 03:20:14 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.11 2002-09-18 21:16:17 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -91,7 +91,7 @@ static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
 		       vecsz, oop, dp);
 }
 
-static int applicable(const solver *ego_, const problem *p_, uint *dp)
+static int applicable0(const solver *ego_, const problem *p_, uint *dp)
 {
      if (RDFTP(p_)) {
           const S *ego = (const S *) ego_;
@@ -107,45 +107,45 @@ static int applicable(const solver *ego_, const problem *p_, uint *dp)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_, const planner *plnr)
+static int applicable(const solver *ego_, const problem *p_, 
+		      const planner *plnr, uint *dp)
 {
      const S *ego = (const S *)ego_;
      const problem_rdft *p;
-     uint vdim;
 
-     if (!applicable(ego_, p_, &vdim))
-          return BAD;
+     if (!applicable0(ego_, p_, dp)) return 0;
 
      /* fftw2 behavior */
      if (NO_VRANK_SPLITSP(plnr) && (ego->vecloop_dim != ego->buddies[0]))
-	  return BAD;
+	  return 0;
 
-     p = (const problem_rdft *) p_;
+     if (NO_UGLYP(plnr)) {
+	  p = (const problem_rdft *) p_;
 
-     /* Heuristic: if the transform is multi-dimensional, and the
-        vector stride is less than the transform size, then we
-        probably want to use a rank>=2 plan first in order to combine
-        this vector with the transform-dimension vectors. */
-     {
-	  iodim *d = p->vecsz.dims + vdim;
-	  if (1
-	      && p->sz.rnk > 1 
-	      && X(uimin)(X(iabs)(d->is), X(iabs)(d->os))
-              < X(tensor_max_index)(p->sz)
-	       )
-          return UGLY;
+	  /* Heuristic: if the transform is multi-dimensional, and the
+	     vector stride is less than the transform size, then we
+	     probably want to use a rank>=2 plan first in order to combine
+	     this vector with the transform-dimension vectors. */
+	  {
+	       iodim *d = p->vecsz.dims + *dp;
+	       if (1
+		   && p->sz.rnk > 1 
+		   && X(uimin)(X(iabs)(d->is), X(iabs)(d->os))
+		   < X(tensor_max_index)(p->sz)
+		    )
+		    return 0;
+	  }
+
+	  /* Heuristic: don't use a vrank-geq1 for rank-0 vrank-1
+	     transforms, since this case is better handled by rank-0
+	     solvers. */
+	  if (p->sz.rnk == 0 && p->vecsz.rnk == 1) return 0;
+
+	  /* prefer threaded version */
+	  if (NONTHREADED_ICKYP(plnr)) return 0;
      }
 
-     /* Heuristic: don't use a vrank-geq1 for rank-0 vrank-1
-	transforms, since this case is better handled by rank-0
-	solvers. */
-     if (p->sz.rnk == 0 && p->vecsz.rnk == 1)
-	  return UGLY;
-
-     if (NONTHREADED_ICKYP(plnr))
-	  return UGLY; /* prefer threaded version */
-
-     return GOOD;
+     return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -162,7 +162,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(rdft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_, &vdim))
+     if (!applicable(ego_, p_, plnr, &vdim))
           return (plan *) 0;
      p = (const problem_rdft *) p_;
 
@@ -196,7 +196,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int vecloop_dim, const int *buddies, uint nbuddies)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->vecloop_dim = vecloop_dim;
      slv->buddies = buddies;

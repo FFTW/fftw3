@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.24 2002-09-17 21:54:07 athena Exp $ */
+/* $Id: indirect.c,v 1.25 2002-09-18 21:16:16 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -130,8 +130,8 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(%s%(%p%)%(%p%))", s->adt->nam, ego->cld, ego->cldcpy);
 }
 
-static int applicable(const solver *ego_, const problem *p_,
-		      const planner *plnr)
+static int applicable0(const solver *ego_, const problem *p_,
+		       const planner *plnr)
 {
      if (DFTP(p_)) {
 	  const S *ego = (const S *) ego_;
@@ -169,12 +169,15 @@ static int applicable(const solver *ego_, const problem *p_,
      return 0;
 }
 
-#define OP(p) (((const problem_dft *) (p))->ri != ((const problem_dft *) (p))->ro)
-
-static int score(const solver *ego, const problem *p, const planner *plnr)
+static int applicable(const solver *ego_, const problem *p_,
+		      const planner *plnr)
 {
-     return (applicable(ego, p, plnr)
-	     && !(NO_INDIRECT_OP_P(plnr) && OP(p))) ? GOOD : BAD;
+     if (!applicable0(ego_, p_, plnr)) return 0;
+     {
+          const problem_dft *p = (const problem_dft *) p_;
+	  if (NO_INDIRECT_OP_P(plnr) && p->ri != p->ro) return 0;
+     }
+     return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -226,7 +229,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(const ndrct_adt *adt)
 {
-     static const solver_adt sadt = { mkplan, score };
+     static const solver_adt sadt = { mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->adt = adt;
      return &(slv->super);

@@ -156,8 +156,6 @@ void setup(struct problem *p)
      plnr->nthr = 1;
      plnr->hook = hook;
 
-     plnr->planner_flags = USE_SCORE;
-
      /* plnr->planner_flags |= IMPATIENT; */
      /* plnr->planner_flags |= ESTIMATE | IMPATIENT | NO_INDIRECT_OP; */
 
