@@ -18,72 +18,25 @@
  *
  */
 
-/* $Id: trig.c,v 1.10 2002-09-23 22:37:59 athena Exp $ */
+/* $Id: trig.c,v 1.11 2002-09-23 22:49:10 athena Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
 #include <math.h>
 
-#define sin2pi X(sin2pi)
-#define cos2pi X(cos2pi)
-#define tan2pi X(tan2pi)
+extern trigreal X(sincos)(trigreal m, trigreal n, int sinp);
 
-#ifdef FFTW_LDOUBLE
-#  define COS cosl
-#  define SIN sinl
-#  define TAN tanl
-#  define KTRIG(x) (x##L)
-#else
-#  define COS cos
-#  define SIN sin
-#  define TAN tan
-#  define KTRIG(x) (x)
-#endif
-
-static const trigreal K2PI =
-    KTRIG(6.2831853071795864769252867665590057683943388);
-#define by2pi(m, n) ((K2PI * (m)) / (n))
-
-/*
- * Improve accuracy by reducing x to range [0..1/8]
- * before multiplication by 2 * PI.
- */
-
-static trigreal doit(trigreal m, trigreal n, int sinp)
+trigreal X(cos2pi)(int m, uint n)
 {
-     /* waiting for C to get tail recursion... */
-     trigreal half_n = n * 0.5;
-     trigreal quarter_n = half_n * 0.5;
-     trigreal eighth_n = quarter_n * 0.5;
-     trigreal sgn = 1.0;
-
-     if (sinp) goto sin;
- cos:
-     if (m < 0) { m = -m; /* goto cos; */ }
-     if (m > half_n) { m = n - m; goto cos; }
-     if (m > eighth_n) { m = quarter_n - m; goto sin; }
-     return sgn * COS(by2pi(m, n));
-
- msin:
-     sgn = -sgn;
- sin:
-     if (m < 0) { m = -m; goto msin; }
-     if (m > half_n) { m = n - m; goto msin; }
-     if (m > eighth_n) { m = quarter_n - m; goto cos; }
-     return sgn * SIN(by2pi(m, n));
+     return X(sincos)((trigreal)m, (trigreal)n, 0);
 }
 
-trigreal cos2pi(int m, uint n)
+trigreal X(sin2pi)(int m, uint n)
 {
-     return doit((trigreal)m, (trigreal)n, 0);
+     return X(sincos)((trigreal)m, (trigreal)n, 1);
 }
 
-trigreal sin2pi(int m, uint n)
-{
-     return doit((trigreal)m, (trigreal)n, 1);
-}
-
-trigreal tan2pi(int m, uint n)
+trigreal X(tan2pi)(int m, uint n)
 {
 #if 0      /* unimplemented, unused */
      trigreal dm = m, dn = n;
