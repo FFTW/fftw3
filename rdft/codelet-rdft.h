@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet-rdft.h,v 1.1 2003-01-07 21:22:39 athena Exp $ */
+/* $Id: codelet-rdft.h,v 1.2 2003-01-09 19:21:16 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -53,7 +53,10 @@ typedef enum {
 #define R2HCII R2HC01
 #define HC2RIII HC2R10
 
-#define R2HC_KINDP(k) (/* (k) >= R2HC00 && */ (k) <= R2HC11) /* uses kr2hc_genus */
+/* (k) >= R2HC00 produces a warning under gcc because checking x >= 0
+   is superfluous for unsigned values...but it is needed because other
+   compilers (e.g. icc) may define the enum to be a signed int...grrr. */
+#define R2HC_KINDP(k) ((k) >= R2HC00 && (k) <= R2HC11) /* uses kr2hc_genus */
 #define HC2R_KINDP(k) ((k) >= HC2R00 && (k) <= HC2R11) /* uses khc2r_genus */
 
 #define R2R_KINDP(k) ((k) >= DHT) /* uses kr2r_genus */
