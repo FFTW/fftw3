@@ -51,7 +51,7 @@ gen_notw: libgenfft.cmxa $(gen_notw_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
 gen_notw.nonopt: libgenfft.cma $(gen_notw_OBJECTS)
 	$(OCAMLLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_notw gen_notw.nonopt
 
 gen_twiddle_OBJECTS = gen_twiddle.cmo
@@ -59,7 +59,7 @@ gen_twiddle: libgenfft.cmxa $(gen_twiddle_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
 gen_twiddle.nonopt: libgenfft.cma $(gen_twiddle_OBJECTS)
 	$(OCAMLLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_twiddle gen_twiddle.nonopt
 
 SUFFIXES = .mli .ml .cmi .cmo .cmx .p.cmx .c .o .cma .cmxa .a
@@ -105,7 +105,7 @@ OCAMLOPTLINK = $(OCAMLOPT) $(OCAMLLDFLAGS) -o $@ $(CMXA) $^ -cclib "${LIBS}"
 	$(OCAMLOPT) -a -o $*.cmxa $^
 	$(RANLIB) $*.a
 
-clean-local::
+maintainer-clean-local::
 	rm -f *.cm* *.o *.a
 	rm -f *~
 

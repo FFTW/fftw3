@@ -30,62 +30,62 @@ libgenfft.cmxa libgenfft.a: $(libgenfft_objects:.cmo=.cmx)
 gen_notw_OBJECTS = gen_notw.cmo
 gen_notw: libgenfft.cmxa $(gen_notw_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_notw
 
 gen_notw_c_OBJECTS = gen_notw_c.cmo
 gen_notw_c: libgenfft.cmxa $(gen_notw_c_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_notw_c
 
 gen_twiddle_OBJECTS = gen_twiddle.cmo
 gen_twiddle: libgenfft.cmxa $(gen_twiddle_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_twiddle
 
 gen_twiddle_c_OBJECTS = gen_twiddle_c.cmo
 gen_twiddle_c: libgenfft.cmxa $(gen_twiddle_c_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_twiddle_c
 
 gen_twidsq_OBJECTS = gen_twidsq.cmo
 gen_twidsq: libgenfft.cmxa $(gen_twidsq_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_twidsq
 
 gen_r2hc_OBJECTS = gen_r2hc.cmo
 gen_r2hc: libgenfft.cmxa $(gen_r2hc_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_r2hc
 
 gen_hc2r_OBJECTS = gen_hc2r.cmo
 gen_hc2r: libgenfft.cmxa $(gen_hc2r_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_hc2r
 
 gen_hc2hc_OBJECTS = gen_hc2hc.cmo
 gen_hc2hc: libgenfft.cmxa $(gen_hc2hc_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_hc2hc
 
 # experimental stuff
 gen_trig_OBJECTS = gen_trig.cmo
 gen_trig: libgenfft.cmxa $(gen_trig_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_trig
 
 gen_conv_OBJECTS = gen_conv.cmo
 gen_conv: libgenfft.cmxa $(gen_conv_OBJECTS:.cmo=.cmx)
 	$(OCAMLOPTLINK)
-clean-local::
+maintainer-clean-local::
 	rm -f gen_conv
 
 
@@ -132,7 +132,7 @@ OCAMLOPTLINK = $(OCAMLOPT) $(OCAMLLDFLAGS) -o $@ $(CMXA) $^ -cclib "${LIBS}"
 	$(OCAMLOPT) -a -o $*.cmxa $^
 	$(RANLIB) $*.a
 
-clean-local::
+maintainer-clean-local::
 	rm -f *.cm* *.o *.a
 	rm -f *~
 
