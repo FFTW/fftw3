@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.7 2003-02-01 14:23:43 athena Exp $ */
+/* $Id: primes.c,v 1.8 2003-02-01 14:30:03 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -94,6 +94,9 @@ int X(find_generator)(int p)
     int n, i, size;
     int primef[16];     /* smallest number = 32589158477190044730 > 2^64 */
     int pm1 = p - 1;
+
+    if (p == 2)
+	 return 1;
 
     size = get_prime_factors(pm1, primef);
     n = 2;
