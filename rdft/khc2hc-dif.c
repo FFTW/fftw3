@@ -18,12 +18,13 @@
  *
  */
 
-/* $Id: khc2hc-dif.c,v 1.1 2002-07-21 02:07:37 stevenj Exp $ */
+/* $Id: khc2hc-dif.c,v 1.2 2002-07-21 02:09:15 stevenj Exp $ */
 
 #include "rdft.h"
 
 void X(khc2hc_dif_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc)
 {
+     UNUSED(p); UNUSED(codelet); UNUSED(desc);
 /* TODO
      REGISTER_SOLVER(p, X(mksolver_rdft_ct_dif)(codelet, desc));
      REGISTER_SOLVER(p, X(mksolver_rdft_ct_difbuf)(codelet, desc));

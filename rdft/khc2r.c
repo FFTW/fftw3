@@ -18,12 +18,13 @@
  *
  */
 
-/* $Id: khc2r.c,v 1.1 2002-07-21 02:07:37 stevenj Exp $ */
+/* $Id: khc2r.c,v 1.2 2002-07-21 02:09:15 stevenj Exp $ */
 
 #include "rdft.h"
 
 void X(khc2r_register)(planner *p, khc2r codelet, const khc2r_desc *desc)
 {
+     UNUSED(p); UNUSED(codelet); UNUSED(desc);
 /* TODO
      solver *s = X(mksolver_rdft_direct)(codelet, desc);
      REGISTER_SOLVER(p, s);
