@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.200 2003-09-02 13:04:19 athena Exp $
+@comment $Id: fftw3.texi,v 1.201 2003-09-27 21:22:48 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1149,10 +1149,23 @@ defined} (the planner will return @code{NULL}).  Otherwise, any positive
 @code{n} is supported.
 
 For the precise mathematical definitions of these transforms as used by
-FFTW, see @ref{What FFTW Really Computes}.  (For people accustomed to the
-DCT/DST, FFTW's definitions have a coefficient of @math{2} in front of
-the cos/sin functions so that they correspond precisely to an even/odd
-DFT of size @math{N}.)
+FFTW, see @ref{What FFTW Really Computes}.  (For people accustomed to
+the DCT/DST, FFTW's definitions have a coefficient of @math{2} in front
+of the cos/sin functions so that they correspond precisely to an
+even/odd DFT of size @math{N}.  Some authors also include additional
+multiplicative factors of 
+@ifinfo
+sqrt(2)
+@end ifinfo
+@html
+&radic;2
+@end html
+@tex
+$\sqrt{2}$
+@end tex
+for selected inputs and outputs; this makes
+the transform orthogonal, but sacrifices the direct equivalence to a
+symmetric DFT.)
 
 @subsubheading Which type do you need?
 
@@ -3518,6 +3531,21 @@ in the original array multiplied by @math{N}, where @math{N} is the
 @math{n=1} is not defined); otherwise, @math{N=2n}.
 @cindex normalization
 
+In defining the discrete cosine transform, some authors also include
+additional factors of
+@ifinfo
+sqrt(2)
+@end ifinfo
+@html
+&radic;2
+@end html
+@tex
+$\sqrt{2}$
+@end tex
+(or its inverse) multiplying selected inputs and/or outputs.  This is a
+mostly cosmetic change that makes the transform orthogonal, but
+sacrifices the direct equivalence to a symmetric DFT.
+
 @c =========>
 @node 1d Real-odd DFTs (DSTs), 1d Discrete Hartley Transforms (DHTs), 1d Real-even DFTs (DCTs), What FFTW Really Computes
 @subsection 1d Real-odd DFTs (DSTs)
@@ -3650,6 +3678,21 @@ in the original array multiplied by @math{N}, where @math{N} is the
 @emph{logical} DFT size.  For @code{RODFT00}, @math{N=2(n+1)};
 otherwise, @math{N=2n}.
 @cindex normalization
+
+In defining the discrete sine transform, some authors also include
+additional factors of
+@ifinfo
+sqrt(2)
+@end ifinfo
+@html
+&radic;2
+@end html
+@tex
+$\sqrt{2}$
+@end tex
+(or its inverse) multiplying selected inputs and/or outputs.  This is a
+mostly cosmetic change that makes the transform orthogonal, but
+sacrifices the direct equivalence to an antisymmetric DFT.
 
 @c =========>
 @node 1d Discrete Hartley Transforms (DHTs), Multi-dimensional Transforms, 1d Real-odd DFTs (DSTs), What FFTW Really Computes
