@@ -18,15 +18,51 @@
  *
  */
 
-/* $Id: k7.c,v 1.1 2002-06-30 18:37:55 athena Exp $ */
+/* $Id: k7.c,v 1.2 2002-07-01 18:05:56 athena Exp $ */
 
 #include "dft.h"
+
+#if HAVE_K7
+
+static inline uint cpuid_edx(uint op)
+{
+     uint eax, ecx, edx;
+
+     __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
+	     : "=a" (eax), "=c" (ecx), "=d" (edx)
+	     : "a" (op));
+     return edx;
+}
+
+static inline uint cpuid_eax(uint op)
+{
+     uint eax, ecx, edx;
+
+     __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
+	     : "=a" (eax), "=c" (ecx), "=d" (edx)
+	     : "a" (op));
+     return eax;
+}
+
+static int k7p(void)
+{
+     static int init = 0, res;
+
+     if (!init) {
+	  init = 1;
+	  res = 0;
+
+	  if (cpuid_eax(0x80000000) >= 0x80000001) 
+	       res = (cpuid_edx(0x80000001) >> 31) & 1;
+     }
+     return res;
+}
 
 int X(kdft_k7_mokp)(const kdft_desc *d,
 		    const R *ri, const R *ii, const R *ro, const R *io,
 		    int is, int os, uint vl, int ivs, int ovs)
 {
-     return (1
+     return (k7p()
 	     && ii == ri + 1 
 	     && io == ro + 1
 	     && (!d->is || (d->is == is))
@@ -38,7 +74,7 @@ int X(kdft_k7_pokp)(const kdft_desc *d,
 		    const R *ri, const R *ii, const R *ro, const R *io,
 		    int is, int os, uint vl, int ivs, int ovs)
 {
-     return (1
+     return (k7p()
 	     && ri == ii + 1 
 	     && ro == io + 1
 	     && (!d->is || (d->is == is))
@@ -50,7 +86,7 @@ int X(kdft_ct_k7_mokp)(const ct_desc *d,
 		       const R *rio, const R *iio, 
 		       int ios, int vs, uint m, int dist)
 {
-     return (1
+     return (k7p()
 	     && iio == rio + 1
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))
@@ -61,9 +97,11 @@ int X(kdft_ct_k7_pokp)(const ct_desc *d,
 		       const R *rio, const R *iio, 
 		       int ios, int vs, uint m, int dist)
 {
-     return (1
+     return (k7p()
 	     && rio == iio + 1
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))
 	  );
 }
+
+#endif

@@ -26,7 +26,7 @@ int OKP(const ct_desc *d,
 	const R *rio, const R *iio, 
 	int ios, int vs, uint m, int dist)
 {
-     return (1
+     return (RIGHT_CPU()
 	     && ALIGNED(rio)
 	     && ALIGNED(iio)
 	     && (m % VL) == 0

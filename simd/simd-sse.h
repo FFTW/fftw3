@@ -91,3 +91,6 @@ typedef __m128 V;
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
 
 #define VTW(op, x) {op, 0, x}, {op, 1, x}, {op, 2, x}, {op, 3, x}
+
+#define RIGHT_CPU X(have_sse)
+extern int RIGHT_CPU(void);

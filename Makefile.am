@@ -15,6 +15,7 @@ lib@PRECISION@fftw3_la_SOURCES =
 
 lib@PRECISION@fftw3_la_LIBADD =				\
 	kernel/libkernel.la				\
+	simd/libsimd.la					\
 	dft/libdft.la					\
 	dft/codelets/libdft_codelets.la			\
 	dft/codelets/standard/libdft_standard.la	\

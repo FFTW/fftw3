@@ -26,7 +26,7 @@ int OKP(const kdft_desc *d,
 	const R *ri, const R *ii, const R *ro, const R *io,
 	int is, int os, uint vl, int ivs, int ovs)
 {
-     return (1
+     return (RIGHT_CPU()
 	     && ALIGNED(ri)
 	     && ALIGNED(ro)
 	     && ALIGNED(ii)

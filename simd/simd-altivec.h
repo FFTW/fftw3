@@ -78,3 +78,5 @@ static inline V VMRGH(V a, V b)
 #endif
 
 #define VTW(op, x) {op, 0, x}, {op, 1, x}, {op, 2, x}, {op, 3, x}
+
+#define RIGHT_CPU() 1  /* TODO */ 
