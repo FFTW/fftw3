@@ -141,19 +141,17 @@ void X(md5puts)(md5 *p, const char *s)
 
 void X(md5end)(md5 *p)
 {
-     unsigned char c;
      uint l, i;
 
      l = 8 * p->l; /* length before padding, in bits */
 
      /* rfc 1321 section 3.1: padding */
-     c = 0x80; X(md5putc)(p, c);
-     c = 0x00; while ((p->l % 64) != 56) X(md5putc)(p, c);
+     X(md5putc)(p, 0x80);
+     while ((p->l % 64) != 56) X(md5putc)(p, 0x00);
 
      /* rfc 1321 section 3.2: length (little endian) */
      for (i = 0; i < 8; ++i) {
-	  c = l & 0xFF;
-	  X(md5putc)(p, c);
+	  X(md5putc)(p, l & 0xFF);
 	  l = l >> 8;
      }
 
