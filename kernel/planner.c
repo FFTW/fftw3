@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.56 2002-09-02 18:32:28 athena Exp $ */
+/* $Id: planner.c,v 1.57 2002-09-02 19:02:11 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -261,7 +261,7 @@ static void forget(planner *ego, amnesia a)
 	  solutions **ps = ego->sols + h, *s;
 	  while ((s = *ps)) {
 	       if (a == FORGET_EVERYTHING ||
-		   (a == FORGET_ACCURSED && BLESSEDP(s))) {
+		   (a == FORGET_ACCURSED && !BLESSEDP(s))) {
 		    /* confutatis maledictis flammis acribus addictis */
 		    *ps = s->cdr;
 		    solution_destroy(s);
