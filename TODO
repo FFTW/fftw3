@@ -19,8 +19,6 @@
 * I can't believe that there isn't a closed form for the omega
   array in Rader.
 
-* Too much code duplication between rader/apply and rader/apply_dit.
-
 * simd
 
 * threads/mpi

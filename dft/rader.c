@@ -62,44 +62,22 @@ typedef struct {
    fft(r,i) = ifft(i,r) form of this identity, but it was easier to
    reuse the code from our old version. */
 
-static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
+static void apply_aux(uint r, uint ginv, plan *cld1,plan *cld2, const R *omega,
+		      R *buf, R r0, R i0, R *ro, R *io, uint os)
 {
-     P *ego = (P *) ego_;
-     int is, os;
-     uint k, gpower, g, r;
-     R *buf;
-     const R *omega;
-     R r0, i0;
-
-     r = ego->n; is = ego->is; g = ego->g; 
-
-     buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
-
-     /* First, permute the input, storing in buf: */
-     for (gpower = 1, k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
-	  R rA, iA;
-	  rA = ri[gpower * is];
-	  iA = ii[gpower * is];
-	  buf[2*k] = rA; buf[2*k + 1] = iA;
-     }
-     /* gpower == g^(r-1) mod r == 1 */;
-
-     os = ego->os;
+     uint gpower, k;
 
      /* compute DFT of buf, storing in output (except DC): */
      {
-	    plan *cld1 = ego->cld1;
 	    plan_dft *cld = (plan_dft *) cld1;
 	    cld->apply(cld1, buf, buf+1, ro+os, io+os);
      }
 
      /* set output DC component: */
-     r0 = ri[0]; i0 = ii[0];
      ro[0] = r0 + ro[os];
      io[0] = i0 + io[os];
 
      /* now, multiply by omega: */
-     omega = ego->omega;
      for (k = 0; k < r - 1; ++k) {
 	  fftw_real rB, iB, rW, iW;
 	  rW = omega[2*k];
@@ -116,19 +94,40 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      /* inverse FFT: */
      {
-	    plan *cld2 = ego->cld2;
 	    plan_dft *cld = (plan_dft *) cld2;
 	    cld->apply(cld2, ro+os, io+os, buf, buf+1);
      }
      
      /* finally, do inverse permutation to unshuffle the output: */
-     g = ego->ginv;
-     A(gpower == 1);
-     for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
+     gpower = 1;
+     for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, ginv, r)) {
 	  ro[gpower * os] = buf[2*k];
 	  io[gpower * os] = -buf[2*k+1];
      }
      A(gpower == 1);
+}
+
+static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
+{
+     P *ego = (P *) ego_;
+     int is;
+     uint k, gpower, g, r;
+     R *buf;
+
+     r = ego->n; is = ego->is; g = ego->g; 
+     buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
+
+     /* First, permute the input, storing in buf: */
+     for (gpower = 1, k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
+	  R rA, iA;
+	  rA = ri[gpower * is];
+	  iA = ii[gpower * is];
+	  buf[2*k] = rA; buf[2*k + 1] = iA;
+     }
+     /* gpower == g^(r-1) mod r == 1 */;
+
+     apply_aux(r, ego->ginv, ego->cld1, ego->cld2, ego->omega, 
+	       buf, ri[0], ii[0], ro, io, ego->os);
 
      X(free)(buf);
 }
@@ -142,7 +141,6 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
      uint j, k, gpower, g, ginv, r, m;
      R *buf;
      const R *omega, *W;
-     R r0, i0;
 
      {
 	   plan *cld0 = ego_dit->cld;
@@ -179,45 +177,8 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  }
 	  /* gpower == g^(r-1) mod r == 1 */;
 	  
-	  
-	  /* compute DFT of buf, storing in output (except DC): */
-	  {
-	       plan_dft *cld = (plan_dft *) cld1;
-	       cld->apply(cld1, buf, buf+1, ro+osm, io+osm);
-	  }
-	  
-	  /* set output DC component: */
-	  ro[0] = (r0 = ro[0]) + ro[osm];
-	  io[0] = (i0 = io[0]) + io[osm];
-
-	  /* now, multiply by omega: */
-	  for (k = 0; k < r - 1; ++k) {
-	       fftw_real rB, iB, rW, iW;
-	       rW = omega[2*k];
-	       iW = omega[2*k+1];
-	       rB = ro[(k+1)*osm];
-	       iB = io[(k+1)*osm];
-	       ro[(k+1)*osm] = rW * rB - iW * iB;
-	       io[(k+1)*osm] = -(rW * iB + iW * rB);
-	  }
-	  
-	  /* this will add input[0] to all of the outputs after the ifft */
-	  ro[osm] += r0;
-	  io[osm] -= i0;
-	  
-	  /* inverse FFT: */
-	  {
-	       plan_dft *cld = (plan_dft *) cld2;
-	       cld->apply(cld2, ro+osm, io+osm, buf, buf+1);
-	  }
-	  
-	  /* finally, do inverse permutation to unshuffle the output: */
-	  A(gpower == 1);
-	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, ginv, r)) {
-	       ro[gpower * osm] = buf[2*k];
-	       io[gpower * osm] = -buf[2*k+1];
-	  }
-	  A(gpower == 1);
+	  apply_aux(r, ginv, cld1, cld2, omega, 
+		    buf, ro[0], io[0], ro, io, osm);
      }
 
      X(free)(buf);
