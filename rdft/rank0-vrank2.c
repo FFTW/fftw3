@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-vrank2.c,v 1.3 2004-04-07 04:46:07 stevenj Exp $ */
+/* $Id: rank0-vrank2.c,v 1.4 2005-01-10 23:57:30 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations), with vector rank 2;
    these plans are not strictly necessary, but are an optimization
@@ -113,19 +113,19 @@ static void apply_consecpairs(const plan *ego_, R *I, R *O)
      for (i = 4; i <= vl; i += 4) {
           R r0, r1, r2, r3;
           R i0, i1, i2, i3;
-          r0 = *I; i0 = I[1]; I += ivs;
-          r1 = *I; i1 = I[1]; I += ivs;
-          r2 = *I; i2 = I[1]; I += ivs;
-          r3 = *I; i3 = I[1]; I += ivs;
-          *O = r0; O[1] = i0; O += ovs;
-          *O = r1; O[1] = i1; O += ovs;
-          *O = r2; O[1] = i2; O += ovs;
-	  *O = r3; O[1] = i3; O += ovs;
+          r0 = I[0]; i0 = I[1]; I += ivs;
+          r1 = I[0]; i1 = I[1]; I += ivs;
+          r2 = I[0]; i2 = I[1]; I += ivs;
+          r3 = I[0]; i3 = I[1]; I += ivs;
+          O[0] = r0; O[1] = i0; O += ovs;
+          O[0] = r1; O[1] = i1; O += ovs;
+          O[0] = r2; O[1] = i2; O += ovs;
+	  O[0] = r3; O[1] = i3; O += ovs;
      }
      for (; i < vl + 4; ++i) {
           R r0, i0;
-          r0 = *I; i0 = I[1]; I += ivs;
-          *O = r0; O[1] = i0; O += ovs;
+          r0 = I[0]; i0 = I[1]; I += ivs;
+          O[0] = r0; O[1] = i0; O += ovs;
      }
 #if FFTW_2R_IS_DOUBLE
      }
@@ -162,19 +162,19 @@ static void apply_pairs(const plan *ego_, R *I, R *O)
      for (i = 4; i <= vl; i += 4) {
           R r0, r1, r2, r3;
           R i0, i1, i2, i3;
-          r0 = *I; i0 = I[ivs2]; I += ivs;
-          r1 = *I; i1 = I[ivs2]; I += ivs;
-          r2 = *I; i2 = I[ivs2]; I += ivs;
-          r3 = *I; i3 = I[ivs2]; I += ivs;
-          *O = r0; O[ovs2] = i0; O += ovs;
-          *O = r1; O[ovs2] = i1; O += ovs;
-          *O = r2; O[ovs2] = i2; O += ovs;
-	  *O = r3; O[ovs2] = i3; O += ovs;
+          r0 = I[0]; i0 = I[ivs2]; I += ivs;
+          r1 = I[0]; i1 = I[ivs2]; I += ivs;
+          r2 = I[0]; i2 = I[ivs2]; I += ivs;
+          r3 = I[0]; i3 = I[ivs2]; I += ivs;
+          O[0] = r0; O[ovs2] = i0; O += ovs;
+          O[0] = r1; O[ovs2] = i1; O += ovs;
+          O[0] = r2; O[ovs2] = i2; O += ovs;
+	  O[0] = r3; O[ovs2] = i3; O += ovs;
      }
      for (; i < vl + 4; ++i) {
           R r0, i0;
-          r0 = *I; i0 = I[ivs2]; I += ivs;
-          *O = r0; O[ovs2] = i0; O += ovs;
+          r0 = I[0]; i0 = I[ivs2]; I += ivs;
+          O[0] = r0; O[ovs2] = i0; O += ovs;
      }
 }
 
