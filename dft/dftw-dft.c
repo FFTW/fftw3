@@ -280,7 +280,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->td = 0;
 
      {
-	  double n0 = (p->r - 1) * (p->m - 1);
+	  double n0 = (p->r - 1) * (p->m - 1) * p->vl;
 	  pln->super.super.ops = cld->ops;
 	  pln->super.super.ops.mul += 8 * n0;
 	  pln->super.super.ops.add += 4 * n0;
