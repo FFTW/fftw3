@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.161 2005-02-16 04:53:53 stevenj Exp $ */
+/* $Id: planner.c,v 1.162 2005-03-07 02:36:05 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -339,7 +339,13 @@ double X(iestimate_cost)(const plan *pln)
      return 0.0
 	  + pln->ops.add
 	  + pln->ops.mul
+
+#if HAVE_FMA
+	  + pln->ops.fma
+#else
 	  + 2 * pln->ops.fma
+#endif
+
 	  + pln->ops.other;
 }
 
