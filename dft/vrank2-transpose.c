@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.20 2003-03-29 03:09:22 stevenj Exp $ */
+/* $Id: vrank2-transpose.c,v 1.21 2003-03-29 07:58:39 stevenj Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -48,6 +48,8 @@ typedef struct {
      plan_dft super;
      int n;
      int s0, s1;
+     int m;
+     int nd, md, d; /* d = gcd(n,m), nd = n / d, md = m / d */
 } P;
 
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
@@ -55,7 +57,33 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      const P *ego = (const P *) ego_;
      UNUSED(ro);
      UNUSED(io);
+     A(ego->n == ego->m);
      t(ri, ii, ego->n, ego->s0, ego->s1);
+}
+
+static void apply_general(const plan *ego_, R *ri, R *ii, R *ro, R *io)
+{
+     const P *ego = (const P *) ego_;
+     int nd = ego->nd, md = ego->md, d = ego->d;
+     R *buf = (R *)MALLOC((sizeof(R) * 2) * nd * md * d, BUFFERS);
+
+     UNUSED(ii); UNUSED(ro); UNUSED(io);
+     X(transpose)(ri, nd, md, d, 2, buf);
+     X(ifree)(buf);
+}
+
+static void apply_slow(const plan *ego_, R *ri, R *ii, R *ro, R *io)
+{
+     const P *ego = (const P *) ego_;
+     int n = ego->n, m = ego->m;
+     R buf[4];
+     int move_size = (n + m) / 2;
+     char *move;
+
+     UNUSED(ii); UNUSED(ro); UNUSED(io);
+     STACK_MALLOC(char *, move, move_size);
+     X(transpose_slow)(ri, n, m, 2, move, move_size, buf);
+     STACK_FREE(move);
 }
 
 static int applicable(const problem *p_)
@@ -67,7 +95,7 @@ static int applicable(const problem *p_)
                   && p->ri == p->ro
                   && p->sz->rnk == 0
                   && p->vecsz->rnk == 2
-                  && X(transposedims)(d + 0, d + 1, 1)
+		  && X(transposable)(d, d+1, 1, 2, 2)
 	       );
      }
      return 0;
@@ -76,13 +104,14 @@ static int applicable(const problem *p_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dft-transpose-%d)", ego->n);
+     p->print(p, "(dft-transpose-%dX%d)", ego->n, ego->m);
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p;
      P *pln;
+     const iodim *d;
 
      static const plan_adt padt = {
 	  X(dft_solve), X(null_awake), print, X(plan_null_destroy)
@@ -95,13 +124,18 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
           return (plan *) 0;
      p = (const problem_dft *) p_;
 
-     pln = MKPLAN_DFT(P, &padt, apply);
-     pln->n = p->vecsz->dims[0].n;
-     pln->s0 = p->vecsz->dims[0].is;
-     pln->s1 = p->vecsz->dims[0].os;
+     d = p->vecsz->dims;
+     pln = MKPLAN_DFT(P, &padt, 
+		      X(transpose_simplep)(d, d+1, 2) ? apply :
+		      (X(transpose_slowp)(d, d+1, 2) ? apply_slow : 
+		       apply_general));
+     X(transpose_dims)(d, d+1, &pln->n, &pln->m, &pln->d, &pln->nd, &pln->md);
+     pln->s0 = d[0].is;
+     pln->s1 = d[0].os;
 
-     /* (4 loads + 4 stores) * (pln->n \choose 2) */
-     X(ops_other)(4 * pln->n * (pln->n - 1), &pln->super.super.ops);
+     /* (4 loads + 4 stores) * (pln->n \choose 2)
+        (FIXME? underestimate for non-square) */
+     X(ops_other)(4 * pln->n * (pln->m - 1), &pln->super.super.ops);
      return &(pln->super.super);
 }
 
