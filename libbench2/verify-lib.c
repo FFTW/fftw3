@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.1 2003-01-18 12:20:18 athena Exp $ */
+/* $Id: verify-lib.c,v 1.2 2003-01-18 20:41:18 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -235,8 +235,7 @@ double acmp(C *a, C *b, int n, const char *test, double tol)
  * Nevada, 29 May--1 June 1995.
  */
 
-static void impulse0(void (*dofft)(void *nfo, C *in, C *out),
-		     void *nfo, 
+static void impulse0(dofft_closure *k,
 		     int n, int vecn, 
 		     C *inA, C *inB, C *inC,
 		     C *outA, C *outB, C *outC,
@@ -245,21 +244,20 @@ static void impulse0(void (*dofft)(void *nfo, C *in, C *out),
      int N = n * vecn;
      int j;
 
-     dofft(nfo, inA, tmp);
+     k->apply(k, inA, tmp);
      acmp(tmp, outA, N, "impulse 1", tol);
 
      for (j = 0; j < rounds; ++j) {
 	  arand(inB, N);
 	  asub(inC, inA, inB, N);
-	  dofft(nfo, inB, outB);
-	  dofft(nfo, inC, outC);
+	  k->apply(k, inB, outB);
+	  k->apply(k, inC, outC);
 	  aadd(tmp, outB, outC, N);
 	  acmp(tmp, outA, N, "impulse", tol);
      }
 }
 
-void impulse(void (*dofft)(void *nfo, C *in, C *out),
-	     void *nfo, 
+void impulse(dofft_closure *k,
 	     int n, int vecn, 
 	     C *inA, C *inB, C *inC,
 	     C *outA, C *outB, C *outC,
@@ -281,19 +279,18 @@ void impulse(void (*dofft)(void *nfo, C *in, C *out),
      for (i = 0; i < vecn; ++i)
 	  CASSIGN(inA[i * n], pls);
 
-     impulse0(dofft, nfo, n, vecn, inA, inB, inC, outA, outB, outC,
+     impulse0(k, n, vecn, inA, inB, inC, outA, outB, outC,
 	      tmp, rounds, tol);
 
      c_re(pls) = n;
      for (i = 0; i < vecn; ++i)
 	  CASSIGN(inA[i * n], pls);
 
-     impulse0(dofft, nfo, n, vecn, outA, inB, inC, inA, outB, outC,
+     impulse0(k, n, vecn, outA, inB, inC, inA, outB, outC,
 	      tmp, rounds, tol);
 }
 
-void linear(void (*dofft)(void *nfo, C *in, C *out),
-	    void *nfo, int realp,
+void linear(dofft_closure *k, int realp,
 	    int n, C *inA, C *inB, C *inC, C *outA,
 	    C *outB, C *outC, C *tmp, int rounds, double tol)
 {
@@ -307,8 +304,8 @@ void linear(void (*dofft)(void *nfo, C *in, C *out),
 	  c_im(beta) = realp ? 0.0 : mydrand();
 	  arand(inA, n);
 	  arand(inB, n);
-	  dofft(nfo, inA, outA);
-	  dofft(nfo, inB, outB);
+	  k->apply(k, inA, outA);
+	  k->apply(k, inB, outB);
 
 	  ascale(outA, alpha, n);
 	  ascale(outB, beta, n);
@@ -316,7 +313,7 @@ void linear(void (*dofft)(void *nfo, C *in, C *out),
 	  ascale(inA, alpha, n);
 	  ascale(inB, beta, n);
 	  aadd(inC, inA, inB, n);
-	  dofft(nfo, inC, outC);
+	  k->apply(k, inC, outC);
 
 	  acmp(outC, tmp, n, "linear", tol);
      }
@@ -325,8 +322,8 @@ void linear(void (*dofft)(void *nfo, C *in, C *out),
 
 
 
-void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
-	      void *nfo, int realp, const tensor *sz,
+void tf_shift(dofft_closure *k,
+	      int realp, const tensor *sz,
 	      int n, int vecn, double sign,
 	      C *inA, C *inB, C *outA, C *outB, C *tmp,
 	      int rounds, double tol, int which_shift)
@@ -354,8 +351,8 @@ void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
 			 if (realp) mkreal(inA + i * n, n);
 			 arol(inB + i * n, inA + i * n, ncur, nb, na);
 		    }
-		    dofft(nfo, inA, outA);
-		    dofft(nfo, inB, outB);
+		    k->apply(k, inA, outA);
+		    k->apply(k, inB, outB);
 		    for (i = 0; i < vecn; ++i) 
 			 aphase_shift(tmp + i * n, outB + i * n, ncur, 
 				      nb, na, sign);
@@ -367,8 +364,8 @@ void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
 			 aphase_shift(inB + i * n, inA + i * n, ncur,
 				      nb, na, -sign);
 		    }
-		    dofft(nfo, inA, outA);
-		    dofft(nfo, inB, outB);
+		    k->apply(k, inA, outA);
+		    k->apply(k, inB, outB);
 		    for (i = 0; i < vecn; ++i) 
 			 arol(tmp + i * n, outB + i * n, ncur, nb, na);
 		    acmp(tmp, outA, N, "freq shift", tol);

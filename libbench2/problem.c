@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.3 2003-01-17 13:50:42 athena Exp $ */
+/* $Id: problem.c,v 1.4 2003-01-18 20:41:18 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -46,9 +46,9 @@ static void dwim(tensor *t)
      while (--i >= 0) {
 	  d = t->dims + i;
 	  if (!d[0].is) 
-	       d[0].is = d[1].is * d[0].n; 
+	       d[0].is = d[1].is * d[1].n; 
 	  if (!d[0].os)
-	       d[0].os = d[1].os * d[0].n; 
+	       d[0].os = d[1].os * d[1].n; 
      }
 }
 

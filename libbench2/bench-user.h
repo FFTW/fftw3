@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.3 2003-01-18 13:03:07 athena Exp $ */
+/* $Id: bench-user.h,v 1.4 2003-01-18 20:41:18 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -123,6 +123,28 @@ extern void problem_zero(struct problem *p);
 
 extern int power_of_two(int n);
 extern int log_2(int n);
+
+
+typedef struct dotens2_closure_s {
+     void (*apply)(struct dotens2_closure_s *k, 
+		   int indx0, int ondx0, int indx1, int ondx1);
+} dotens2_closure;
+
+void dotens2(const tensor *sz0, const tensor *sz1, dotens2_closure *k);
+
+#define CASSIGN(out, in) (c_re(out) = c_re(in), c_im(out) = c_im(in))
+
+typedef struct dofft_closure_s {
+     void (*apply)(struct dofft_closure_s *k,
+		   bench_complex *in, bench_complex *out);
+     
+} dofft_closure;
+
+tensor *verify_pack(const tensor *sz, int s);
+
+void verify_dft(dofft_closure *k, tensor *sz, tensor *vecsz, int sign,
+		int rounds, double tol);
+
 
 /**************************************************************
  * malloc

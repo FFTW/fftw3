@@ -33,33 +33,18 @@ void aphase_shift(C *b, C *a, int n, int nb, int na, double sign);
 void ascale(C *a, C alpha, int n);
 double acmp(C *a, C *b, int n, const char *test, double tol);
 double mydrand(void);
-void impulse(void (*dofft)(void *nfo, C *in, C *out),
-	     void *nfo, 
+void impulse(dofft_closure *k,
 	     int n, int vecn, 
 	     C *inA, C *inB, C *inC,
 	     C *outA, C *outB, C *outC,
 	     C *tmp, int rounds, double tol);
-void linear(void (*dofft)(void *nfo, C *in, C *out),
-	    void *nfo, int realp,
+void linear(dofft_closure *k, int realp,
 	    int n, C *inA, C *inB, C *inC, C *outA,
 	    C *outB, C *outC, C *tmp, int rounds, double tol);
 
 enum { TIME_SHIFT, FREQ_SHIFT };
-void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
-	      void *nfo, int realp, const tensor *sz,
+void tf_shift(dofft_closure *k, int realp, const tensor *sz,
 	      int n, int vecn, double sign,
 	      C *inA, C *inB, C *outA, C *outB, C *tmp,
 	      int rounds, double tol, int which_shift);
 
-tensor *verify_pack(const tensor *sz, int s);
-
-typedef struct dotens2_closure_s {
-     void (*apply)(struct dotens2_closure_s *k, 
-		   int indx0, int ondx0, int indx1, int ondx1);
-} dotens2_closure;
-
-void dotens2(const tensor *sz0, const tensor *sz1, dotens2_closure *k);
-
-#define CASSIGN(out, in) (c_re(out) = c_re(in), c_im(out) = c_im(in))
-
-void verify_dft(problem *p, int rounds, double tol);
