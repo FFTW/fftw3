@@ -42,6 +42,15 @@ int X(init_threads)(void)
      return 1;
 }
 
+void X(cleanup_threads)(void)
+{
+     X(cleanup)();
+     if (threads_inited) {
+	  X(threads_cleanup)();
+	  threads_inited = 0;
+     }
+}
+
 void X(plan_with_nthreads)(int nthreads)
 {
      planner *plnr;

@@ -266,7 +266,8 @@ typedef char fftw_thr_id;  /* dummy */
 /* Thread entry point: */
 typedef void * (*fftw_thr_function) (void *);
 
-extern pthread_attr_t *fftw_pthread_attributes_p;
+static pthread_attr_t fftw_pthread_attributes; /* attrs for POSIX threads */
+static pthread_attr_t *fftw_pthread_attributes_p = 0;
 
 typedef pthread_t fftw_thr_id;
 
@@ -404,11 +405,6 @@ void khc2hc_dif_register_hook(planner *p, khc2hc k, const hc2hc_desc *d)
 }
 #endif /* HAVE_THREADS */
 
-#ifdef USING_POSIX_THREADS
-static pthread_attr_t fftw_pthread_attributes; /* attrs for POSIX threads */
-pthread_attr_t *fftw_pthread_attributes_p = NULL;
-#endif /* USING_POSIX_THREADS */
-
 /* X(threads_init) does any initialization that is necessary to use
    threads.  It must be called before calling any fftw threads functions.
    
@@ -475,5 +471,22 @@ int X(threads_init)(void)
      return 0; /* no error */
 #else
      return 0; /* no threads, no error */
+#endif
+}
+
+void X(threads_cleanup)(void)
+{
+#ifdef USING_POSIX_THREADS
+     if (fftw_pthread_attributes_p) {
+	  pthread_attr_destroy(fftw_pthread_attributes_p);
+	  fftw_pthread_attributes_p = 0;
+     }
+#endif /* USING_POSIX_THREADS */
+
+#ifdef HAVE_THREADS
+     X(kdft_dit_register_hook) = 0;
+     X(khc2hc_dit_register_hook) = 0;
+     X(khc2hc_dif_register_hook) = 0;
+     return 0; /* no error */
 #endif
 }

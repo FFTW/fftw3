@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.36 2003-01-17 06:40:10 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.37 2003-01-17 19:53:28 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -187,6 +187,7 @@ void X(cleanup)(void);							\
 									\
 void X(plan_with_nthreads)(int nthreads);				\
 int X(init_threads)(void);						\
+void X(cleanup_threads)(void);						\
 									\
 void X(export_wisdom_to_file)(FILE *output_file);			\
 char *X(export_wisdom_to_string)(void);					\
