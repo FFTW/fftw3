@@ -349,7 +349,7 @@ typedef struct worker_data_s {
 } worker_data;
 
 static void *do_work(worker_data *w)
-{
+WITH_ALIGNED_STACK({
      while (1) {
 	  fftw_sem_wait(&w->sid_ready);
 	  if (!w->proc) break;
@@ -357,12 +357,7 @@ static void *do_work(worker_data *w)
 	  fftw_sem_post(&w->sid_done);
      }
      return 0;
-}
-
-static void *do_work0(worker_data *w)
-{
-     return X(with_aligned_stack)((with_aligned_stack_func) do_work, (void*)w);
-}
+})
 
 worker_data *workers = (worker_data *) 0;
 
@@ -380,7 +375,7 @@ static void minimum_workforce(int nworkers)
 	  w->next = workers;
 	  fftw_sem_init(&w->sid_ready);
 	  fftw_sem_init(&w->sid_done);
-	  fftw_thr_spawn(&w->tid, (fftw_thr_function) do_work0, (void *) w);
+	  fftw_thr_spawn(&w->tid, (fftw_thr_function) do_work, (void *) w);
 	  workers = w;
      }
 }
