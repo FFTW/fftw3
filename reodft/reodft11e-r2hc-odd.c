@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.5 2003-02-26 22:48:26 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.6 2003-02-27 05:27:00 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -68,6 +68,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
      int i, n = ego->n;
      int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
+     int n2even = (n/2) % 2 == 0;
      R *buf;
 
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
@@ -91,25 +92,72 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	       cld->apply((plan *) cld, buf, buf);
 	  }
 	  
-	  /* FIXME: split/unroll loop to eliminate if-else's and %,
-	     and also to touch each element of buf only once. */
-	  for (i = 0; i < n; ++i) {
-	       int k;
-	       R c, s;
-
-	       k = (2*i + 1) % n;
-	       
-	       if (k < n - k) {
+	  /* FIXME: strength-reduce loops by 4 to eliminate ugly sgn mults? */
+	  if (n2even) {
+	       for (i = 0; i + i + 1 <= n/2; ++i) {
+		    int k;
+		    R c, s;
+		    
+		    k = i + i + 1;
 		    c = buf[k];
-		    s = k == 0 ? 0.0 : -buf[n - k];
+		    s = buf[n - k];
+		    
+		    O[os * i] =
+			 SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) +
+				  s * (1 - 2 * ((i/2) % 2)));
+		    O[os * (n - 1 - i)] =
+			 SQRT2 * (c * (1 - 2 * ((i/2) % 2)) +
+				  s * (1 - 2 * (((i+3)/2) % 2)));
 	       }
-	       else {
+	       for (; i + i + 1 < n; ++i) {
+		    int k;
+		    R c, s;
+		    
+		    k = i + i + 1;
 		    c = buf[n - k];
-		    s = k == n ? 0.0 : buf[k];
+		    s = buf[k];
+		    
+		    O[os * i] =
+			 SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
+				  s * (1 - 2 * ((i/2) % 2)));
+		    O[os * (n - 1 - i)] =
+			 SQRT2 * (c * (1 - 2 * ((i/2) % 2)) -
+				  s * (1 - 2 * (((i+3)/2) % 2)));
 	       }
-
-	       O[os * i] = SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
-				    s * (1 - 2 * ((i/2) % 2)));
+	       O[os * i] = SQRT2 * buf[0] * (1 - 2 * (((i+1)/2) % 2));
+	  }
+	  else /* n2odd */ {
+	       for (i = 0; i + i + 1 <= n/2; ++i) {
+		    int k;
+		    R c, s;
+		    
+		    k = i + i + 1;
+		    c = buf[k];
+		    s = buf[n - k];
+		    
+		    O[os * i] =
+			 SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) +
+				  s * (1 - 2 * ((i/2) % 2)));
+		    O[os * (n - 1 - i)] =
+			 SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) +
+				  s * (1 - 2 * (((i+1)/2) % 2)));
+	       }
+	       for (; i + i + 1 < n; ++i) {
+		    int k;
+		    R c, s;
+		    
+		    k = i + i + 1;
+		    c = buf[n - k];
+		    s = buf[k];
+		    
+		    O[os * i] =
+			 SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
+				  s * (1 - 2 * ((i/2) % 2)));
+		    O[os * (n - 1 - i)] =
+			 SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) -
+				  s * (1 - 2 * (((i+1)/2) % 2)));
+	       }
+	       O[os * i] = SQRT2 * buf[0] * (1 - 2 * (((i+1)/2) % 2));
 	  }
      }
 
@@ -126,6 +174,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
      int i, n = ego->n;
      int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
+     int n2even = (n/2) % 2 == 0;
      R *buf;
 
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
@@ -149,25 +198,112 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 	       cld->apply((plan *) cld, buf, buf);
 	  }
 	  
-	  /* FIXME: split/unroll loop to eliminate if-else's and % */
-	  for (i = 0; i < n; ++i) {
-	       int k;
-	       R c, s;
-
-	       k = (2*i + 1) % n;
-	       
-	       if (k < n - k) {
+	  /* FIXME: strength-reduce loops by 4 to eliminate ugly sgn mults? */
+	  if (n2even) {
+	       for (i = 0; i + i + 1 <= n/2; ++i) {
+		    int k;
+		    R c, s;
+		    
+		    k = i + i + 1;
 		    c = buf[k];
-		    s = k == 0 ? 0.0 : -buf[n - k];
+		    s = buf[n - k];
+		    
+		    if (i % 2) {
+			 O[os * i] =
+			      SQRT2 * (c * (1 - 2 * (((i+3)/2) % 2)) +
+				       s * (1 - 2 * (((i+2)/2) % 2)));
+			 O[os * (n - 1 - i)] =
+			      SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) +
+				       s * (1 - 2 * (((i+1)/2) % 2)));
+		    }
+		    else {
+			 O[os * i] =
+			      SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) +
+				       s * (1 - 2 * ((i/2) % 2)));
+			 O[os * (n - 1 - i)] =
+			      SQRT2 * (c * (1 - 2 * ((i/2) % 2)) +
+				       s * (1 - 2 * (((i+3)/2) % 2)));
+		    }
 	       }
-	       else {
+	       for (; i + i + 1 < n; ++i) {
+		    int k;
+		    R c, s;
+		    
+		    k = i + i + 1;
 		    c = buf[n - k];
-		    s = k == n ? 0.0 : buf[k];
+		    s = buf[k];
+		    
+		    if (i % 2) {
+			 O[os * i] =
+			      SQRT2 * (c * (1 - 2 * (((i+3)/2) % 2)) -
+				       s * (1 - 2 * (((i+2)/2) % 2)));
+			 O[os * (n - 1 - i)] =
+			      SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) -
+				       s * (1 - 2 * (((i+1)/2) % 2)));
+		    }
+		    else {
+			 O[os * i] =
+			      SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
+				       s * (1 - 2 * ((i/2) % 2)));
+			 O[os * (n - 1 - i)] =
+			      SQRT2 * (c * (1 - 2 * ((i/2) % 2)) -
+				       s * (1 - 2 * (((i+3)/2) % 2)));
+		    }
 	       }
-
-	       O[os * i] = SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
-				    s * (1 - 2 * ((i/2) % 2))) *
-		    (1 - 2 * (i % 2));
+	       O[os * i] = SQRT2 * buf[0] * (1 - 2 * (((i+1)/2) % 2));
+	  }
+	  else /* n2odd */ {
+	       for (i = 0; i + i + 1 <= n/2; ++i) {
+		    int k;
+		    R c, s;
+		    
+		    k = i + i + 1;
+		    c = buf[k];
+		    s = buf[n - k];
+		    
+		    if (i % 2) {
+			 O[os * i] =
+			      SQRT2 * (c * (1 - 2 * (((i+3)/2) % 2)) +
+				       s * (1 - 2 * (((i+2)/2) % 2)));
+			 O[os * (n - 1 - i)] =
+			      SQRT2 * (c * (1 - 2 * ((i/2) % 2)) +
+				       s * (1 - 2 * (((i+3)/2) % 2)));
+		    }
+		    else {
+			 O[os * i] =
+			      SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) +
+				       s * (1 - 2 * ((i/2) % 2)));
+			 O[os * (n - 1 - i)] =
+			      SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) +
+				       s * (1 - 2 * (((i+1)/2) % 2)));
+		    }
+	       }
+	       for (; i + i + 1 < n; ++i) {
+		    int k;
+		    R c, s;
+		    
+		    k = i + i + 1;
+		    c = buf[n - k];
+		    s = buf[k];
+		    
+		    if (i % 2) {
+			 O[os * i] =
+			      SQRT2 * (c * (1 - 2 * (((i+3)/2) % 2)) -
+				       s * (1 - 2 * (((i+2)/2) % 2)));
+			 O[os * (n - 1 - i)] =
+			      SQRT2 * (c * (1 - 2 * ((i/2) % 2)) -
+				       s * (1 - 2 * (((i+3)/2) % 2)));
+		    }
+		    else {
+			 O[os * i] =
+			      SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
+				       s * (1 - 2 * ((i/2) % 2)));
+			 O[os * (n - 1 - i)] =
+			      SQRT2 * (c * (1 - 2 * (((i+2)/2) % 2)) -
+				       s * (1 - 2 * (((i+1)/2) % 2)));
+		    }
+	       }
+	       O[os * i] = SQRT2 * buf[0] * (1 - 2 * (((i+3)/2) % 2));
 	  }
      }
 
