@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.95 2003-03-06 03:56:05 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.96 2003-03-06 07:14:21 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2342,6 +2342,7 @@ shoot themselves in the foot.
 * Guru Complex DFTs::           
 * Guru Real-data DFTs::         
 * Guru Real-to-real Transforms::  
+* Guru Execution of Plans::     
 @end menu
 
 @c =========>
@@ -2398,7 +2399,7 @@ the same.
 
 @c =========>
 @node Guru Complex DFTs, Guru Real-data DFTs, Vector and transform sizes, Guru Interface
-@subsection GuruComplex DFTs
+@subsection Guru Complex DFTs
 
 @example
 fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
@@ -2409,6 +2410,54 @@ fftw_plan fftw_plan_guru_dft(int rank, const fftw_iodim *dims,
                              unsigned flags);
 @end example
 @findex fftw_plan_guru_dft
+
+Plan a complex-data, multi-dimensional @code{FFTW_FORWARD} DFT with
+transform dimensions given by (@code{rank}, @code{dims}) over a
+multi-dimensional vector (loop) of dimensions (@code{howmany_rank},
+@code{howmany_dims}).  @code{dims} and @code{howmany_dims} should point
+to @code{fftw_iodim} arrays of length @code{rank} and
+@code{howmany_rank}, respectively.
+
+@code{ri} and @code{ii} point to the real and imaginary input arrays,
+and @code{ro} and @code{io} point to the real and imaginary output
+arrays.  The input and output pointers may be the same, indicating an
+in-place transform.  For example, for @code{fftw_complex} pointers
+@code{in} and @code{out}, the corresponding parameters are:
+
+@example
+ri = (double *) in;
+ii = (double *) in + 1;
+ro = (double *) out;
+io = (double *) out + 1;
+@end example
+
+For a contiguous @code{fftw_complex} array, the overall stride of the
+transform should be 2, the distance between consecutive real parts or
+between consecutive imaginary parts; see @ref{Vector and transform
+sizes}.  Note that the dimension strides are applied equally to the real
+and imaginary parts; real and imaginary arrays with different strides
+are not supported.
+
+@cindex flags
+@code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
+as defined in @ref{Planner Flags}.
+
+To perform an @code{FFTW_BACKWARD} transform, one can exploit the
+identity that the backwards DFT is equal to the forwards DFT with the
+real and imaginary parts swapped.  For example, in the case of the
+@code{fftw_complex} arrays above, the @code{FFTW_BACKWARD} transform is
+computed by the parameters:
+
+@example
+ri = (double *) in + 1;
+ii = (double *) in;
+ro = (double *) out + 1;
+io = (double *) out;
+@end example
+
+Although this interface permits more flexible complex-number formats,
+such as separate real and imaginary arrays, we recommend the interleaved
+@code{fftw_complex} format for optimal performance.
 
 @c =========>
 @node Guru Real-data DFTs, Guru Real-to-real Transforms, Guru Complex DFTs, Guru Interface
@@ -2431,8 +2480,49 @@ fftw_plan fftw_plan_guru_dft_c2r(int rank, const fftw_iodim *dims,
 @findex fftw_plan_guru_dft_r2c
 @findex fftw_plan_guru_dft_c2r
 
+Plan a real-input (r2c) or real-output (c2r), multi-dimensional DFT with
+transform dimensions given by (@code{rank}, @code{dims}) over a
+multi-dimensional vector (loop) of dimensions (@code{howmany_rank},
+@code{howmany_dims}).  @code{dims} and @code{howmany_dims} should point
+to @code{fftw_iodim} arrays of length @code{rank} and
+@code{howmany_rank}, respectively.  As for the basic and advanced
+interfaces, an r2c transform is @code{FFTW_FORWARD} and a c2r transform
+is @code{FFTW_BACKWARD}.
+
+The @emph{last} dimension of @code{dims} is interpreted specially: that
+dimension of the real array has size @code{dims[rank-1].n}, but that
+dimension of the complex array has size @code{dims[rank-1].n/2+1}
+(division rounded down).  The strides, on the other hand, are taken to
+be exactly as specified (and are given in units of @code{double}, as
+usual.  It is up to the user to specify the strides appropriately for
+the peculiar dimensions of the data, and we do not guarantee that the
+planner will succeed (return non-@code{NULL}) for any dimensions other
+than those described in @ref{Real-data DFT Array Format} and generalized
+in @ref{Advanced Real-data DFTs}.  (That is, for an in-place transform,
+each individual dimension should be able to operate in place.)
+@cindex in-place
+
+@code{in} and @code{out} point to the real input and output arrays for
+r2c and c2r transforms, respectively.  @code{ri} and @code{ii} point to
+the real and imaginary input arrays for a c2r transform, and @code{ro}
+and @code{io} point to the real and imaginary output arrays for an r2c
+transform.  @code{in} and @code{ro} or @code{ri} and @code{out} may be
+the same, indicating an in-place transform.  (See also the previous
+section for use with @code{fftw_complex} arrays.)
+
+@cindex flags
+@code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
+as defined in @ref{Planner Flags}.
+
+Although this interface permits more flexible complex-number formats,
+such as separate real and imaginary arrays, we recommend the interleaved
+@code{fftw_complex} format for optimal performance.  Moreover, we should
+note that separate real and imaginary arrays, in particular, are not
+supported for in-place multi-dimensional transforms (the planner will
+return @code{NULL}).
+
 @c =========>
-@node Guru Real-to-real Transforms,  , Guru Real-data DFTs, Guru Interface
+@node Guru Real-to-real Transforms, Guru Execution of Plans, Guru Real-data DFTs, Guru Interface
 @subsection Guru Real-to-real Transforms
 
 @example
@@ -2444,6 +2534,100 @@ fftw_plan fftw_plan_guru_r2r(int rank, const fftw_iodim *dims,
                              unsigned flags);
 @end example
 @findex fftw_plan_guru_r2r
+
+Plan a real-to-real (r2r) multi-dimensional @code{FFTW_FORWARD}
+transform with transform dimensions given by (@code{rank}, @code{dims})
+over a multi-dimensional vector (loop) of dimensions
+(@code{howmany_rank}, @code{howmany_dims}).  @code{dims} and
+@code{howmany_dims} should point to @code{fftw_iodim} arrays of length
+@code{rank} and @code{howmany_rank}, respectively.
+
+The transform kind of each dimension is given by the @code{kind}
+parameter, which should point to an array of length @code{rank}.  Valid
+@code{fftw_r2r_kind} constants are given in @ref{Real-to-Real Transform
+Kinds}.
+
+@code{in} and @code{out} point to the real input and output arrays; they
+may be the same, indicating an in-place transform.
+
+@cindex flags
+@code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
+as defined in @ref{Planner Flags}.
+
+@c =========>
+@node Guru Execution of Plans,  , Guru Real-to-real Transforms, Guru Interface
+@subsection Guru Execution of Plans
+@cindex execute
+
+Normally, one executes a plan for the arrays with which the plan was
+created, by calling @code{fftw_execute(plan)} as described in @ref{Using
+Plans}.
+@findex fftw_execute
+However, it is possible to apply a given plan to a @emph{different}
+array using the guru functions detailed below, provided that the
+following conditions are met:
+
+@itemize @bullet
+
+@item
+The array size, strides, etcetera are the same (since those are set by
+the plan).
+
+@item
+The input and output arrays are the same (in-place) or different
+(out-of-place) if the plan was originally created to be in-place or
+out-of-place, respectively.
+
+@item
+The separations between the real and imaginary parts, @code{ii-ri} and
+@code{io-ro}, are the same as they were for the input and output arrays
+when the plan was created.
+
+@item
+The @dfn{alignment} of the new input/output arrays is the same as that
+of the input/output arrays when the plan was created, unless the plan
+was created with the @code{FFTW_UNALIGNED} flag.
+@ctindex FFTW_UNALIGNED
+Here, the alignment is a platform-dependent quantity (for example, it is
+the address modulo 16 if SSE SIMD instructions are used, but the address
+modulo 4 for non-SIMD single-precision FFTW on the same machine).  In
+general, only arrays allocated with @code{fftw_malloc} are guaranteed to
+be equally aligned.
+
+@end itemize
+
+The guru execute functions are:
+
+@example
+void fftw_execute_dft(const fftw_plan p, 
+                      double *ri, double *ii, double *ro, double *io);
+void fftw_execute_dft_r2c(const fftw_plan p,
+                          double *in, double *ro, double *io);
+void fftw_execute_dft_c2r(const fftw_plan p,
+                          double *ri, double *ii, double *out);
+void fftw_execute_r2r(const fftw_plan p, double *in, double *out);
+@end example
+@findex fftw_execute_dft
+@findex fftw_execute_dft_r2c
+@findex fftw_execute_dft_c2r
+@findex fftw_execute_dft_r2r
+
+These execute the @code{plan} to compute the corresponding transform on
+the input/output arrays specified by the subsequent arguments.  The
+input/output array arguments have the same meanings as the ones passed
+to the guru planner routines in the preceding sections.  The @code{plan}
+is not modified, and these routines can be called as many times as
+desired, or intermixed with calls to the ordinary @code{fftw_execute}.
+
+The @code{plan} @emph{must} have been created for the transform type
+corresponding to the execute function, e.g. it must be a complex-DFT
+plan for @code{fftw_execute_dft}.  Any of the planner routines for that
+transform type, from the basic to the guru interface, could have been
+used to create the plan, however.
+
+Note that @code{FFTW_BACKWARD} complex-DFT plans created by the basic or
+advanced interfaces actually correspond to swapped real and imaginary
+parts for the input and output, as described in @ref{Guru Complex DFTs}.
 
 @c ------------------------------------------------------------
 @node What FFTW Really Computes,  , Guru Interface, FFTW Reference
