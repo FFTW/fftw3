@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.23 2005-02-19 22:15:19 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.24 2005-02-20 20:35:24 athena Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -108,17 +108,20 @@ static void rec_transpose(R *A, R *B, int i0, int i1, int j0, int j1,
 static void rec_transpose_swap(R *M, int i0, int i1, int j0, int j1, 
 			       int lda, int vl)
 {
-     int di = i1 - i0;
-     int dj = j1 - j0;
+     int di, dj;
+
+ tail:
+     di = i1 - i0;
+     dj = j1 - j0;
 
      if (di >= dj && di > CUTOFF) {
 	  int im = (i0 + i1) / 2;
 	  rec_transpose_swap(M, i0, im, j0, j1, lda, vl);
-	  rec_transpose_swap(M, im, i1, j0, j1, lda, vl);
+	  i0 = im; goto tail;
      } else if (dj >= di && dj > CUTOFF) {
 	  int jm = (j0 + j1) / 2;
 	  rec_transpose_swap(M, i0, i1, j0, jm, lda, vl);
-	  rec_transpose_swap(M, i0, i1, jm, j1, lda, vl);
+	  j0 = jm; goto tail;
      } else {
 	  int i, j, k;
 	  switch (vl) {
@@ -161,11 +164,12 @@ static void rec_transpose_swap(R *M, int i0, int i1, int j0, int j1,
 /* transpose M[n0..n1][n0..n1] */
 static void rec_transpose_sq_ip(R *M, int n0, int n1, int lda, int vl)
 {
+ tail:
      if (n1 - n0 > 1) {
 	  int nm = (n1 + n0) / 2;
-	  rec_transpose_sq_ip(M, n0, nm, lda, vl);
-	  rec_transpose_sq_ip(M, nm, n1, lda, vl);
 	  rec_transpose_swap(M, n0, nm, nm, n1, lda, vl);
+	  rec_transpose_sq_ip(M, n0, nm, lda, vl);
+	  n0 = nm; goto tail;
      }
 }
 
