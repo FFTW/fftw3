@@ -1,3 +1,5 @@
+SUBDIRS = FAQ
+
 info_TEXINFOS = fftw3.texi
 fftw3_TEXINFOS = fftw3.texi version.texi
 
@@ -16,10 +18,10 @@ rfftwnd.pdf: rfftwnd.fig
 	fig2dev -L pdf -m .7 ${srcdir}/rfftwnd.fig rfftwnd.pdf
 
 
-EQN_IMAGES = equation-dft.gif equation-dht.gif equation-idft.gif	\
-equation-redft00.gif equation-redft01.gif equation-redft10.gif		\
-equation-redft11.gif equation-rodft00.gif equation-rodft01.gif		\
-equation-rodft10.gif equation-rodft11.gif
+EQN_IMAGES = equation-dft.png equation-dht.png equation-idft.png	\
+equation-redft00.png equation-redft01.png equation-redft10.png		\
+equation-redft11.png equation-rodft00.png equation-rodft01.png		\
+equation-rodft10.png equation-rodft11.png
 
 EXTRA_DIST = fftw3.pdf html rfftwnd.fig $(EQN_IMAGES)
 
