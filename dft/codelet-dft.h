@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: codelet-dft.h,v 1.4 2003-05-15 23:09:07 athena Exp $ */
+/* $Id: codelet-dft.h,v 1.5 2003-05-16 23:52:43 stevenj Exp $ */
 
 /*
  * This header file must include every file or define every
  * type or macro which is required to compile a codelet.
  */
 
-#ifndef __CODELET_H__
-#define __CODELET_H__
+#ifndef __DFT_CODELET_H__
+#define __DFT_CODELET_H__
 
 #include "ifftw.h"
 
@@ -106,4 +106,4 @@ extern const solvtab X(solvtab_dft_k7);
 extern const solvtab X(solvtab_dft_simd);
 #endif
 
-#endif				/* __CODELET_H__ */
+#endif				/* __DFT_CODELET_H__ */
