@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.49 2003-02-28 22:29:40 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.50 2003-02-28 22:51:15 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -372,7 +372,7 @@ One can also save plans for future use, as described by @ref{Words of
 Wisdom}.)
 
 @example
-void fftw_execute(fftw_plan plan);
+void fftw_execute(const fftw_plan plan);
 @end example
 @findex fftw_execute
 

@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.42 2003-01-20 12:03:38 athena Exp $ */
+/* $Id: fftw3.h,v 1.43 2003-02-28 22:51:15 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -74,7 +74,7 @@ typedef struct {							\
 									\
 typedef enum FFTW_R2R_KIND X(r2r_kind);					\
 									\
-void X(execute)(X(plan) p);						\
+void X(execute)(const X(plan) p);					\
 									\
 X(plan) X(plan_dft)(int rank, const int *n,				\
 		    C *in, C *out, int sign, unsigned flags);		\
@@ -100,7 +100,7 @@ X(plan) X(plan_guru_dft)(int rank, const X(iodim) *dims,		\
 			 R *ri, R *ii, R *ro, R *io,			\
 			 unsigned flags);				\
 									\
-void X(execute_dft)(X(plan) p, R *ri, R *ii, R *ro, R *io);		\
+void X(execute_dft)(const X(plan) p, R *ri, R *ii, R *ro, R *io);      	\
 									\
 X(plan) X(plan_many_dft_r2c)(int rank, const int *n,			\
                              int howmany,				\
@@ -150,8 +150,8 @@ X(plan) X(plan_guru_dft_c2r)(int rank, const X(iodim) *dims,		\
 			     R *ri, R *ii, R *out,			\
 			     unsigned flags);				\
 									\
-void X(execute_dft_r2c)(X(plan) p, R *in, R *ro, R *io);		\
-void X(execute_dft_c2r)(X(plan) p, R *ri, R *ii, R *out);		\
+void X(execute_dft_r2c)(const X(plan) p, R *in, R *ro, R *io);		\
+void X(execute_dft_c2r)(const X(plan) p, R *ri, R *ii, R *out);		\
 									\
 X(plan) X(plan_many_r2r)(int rank, const int *n,			\
                          int howmany,					\
@@ -179,7 +179,7 @@ X(plan) X(plan_guru_r2r)(int rank, const X(iodim) *dims,		\
                          const X(iodim) *howmany_dims,			\
                          R *in, R *out,					\
                          const X(r2r_kind) *kind, unsigned flags);	\
-void X(execute_r2r)(X(plan) p, R *in, R *out);				\
+void X(execute_r2r)(const X(plan) p, R *in, R *out);			\
 									\
 void X(destroy_plan)(X(plan) p);					\
 void X(forget_wisdom)(void);						\

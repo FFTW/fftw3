@@ -23,7 +23,7 @@
    f77api.c, possibly multiple times in order to support multiple
    compiler manglings (via redefinition of F77). */
 
-void F77(execute, EXECUTE)(X(plan) *p)
+void F77(execute, EXECUTE)(X(plan) * const p)
 {
      X(execute)(*p);
 }
@@ -140,7 +140,8 @@ void F77(plan_guru_dft, PLAN_GURU_DFT)(X(plan) *p, int *rank, const int *n,
      X(ifree0)(dims);
 }
 
-void F77(execute_dft, EXECUTE_DFT)(X(plan) *p, R *ri, R *ii, R *ro, R *io)
+void F77(execute_dft, EXECUTE_DFT)(X(plan) * const p,
+				   R *ri, R *ii, R *ro, R *io)
 {
      X(execute_dft)(*p, ri, ii, ro, io);
 }
@@ -209,7 +210,7 @@ void F77(plan_guru_dft_r2c, PLAN_GURU_DFT_R2C)(
      X(ifree0)(dims);
 }
 
-void F77(execute_dft_r2c, EXECUTE_DFT_R2C)(X(plan) *p,
+void F77(execute_dft_r2c, EXECUTE_DFT_R2C)(X(plan) * const p,
 					   R *in, R *ro, R *io)
 {
      X(execute_dft_r2c)(*p, in, ro, io);
@@ -279,7 +280,7 @@ void F77(plan_guru_dft_c2r, PLAN_GURU_DFT_C2R)(
      X(ifree0)(dims);
 }
 
-void F77(execute_dft_c2r, EXECUTE_DFT_C2R)(X(plan) *p,
+void F77(execute_dft_c2r, EXECUTE_DFT_C2R)(X(plan) * const p,
 					   R *ri, R *ii, R *out)
 {
      X(execute_dft_c2r)(*p, ri, ii, out);
@@ -359,7 +360,7 @@ void F77(plan_guru_r2r, PLAN_GURU_R2R)(
      X(ifree0)(dims);
 }
 
-void F77(execute_r2r, EXECUTE_R2R)(X(plan) *p, R *in, R *out)
+void F77(execute_r2r, EXECUTE_R2R)(X(plan) * const p, R *in, R *out)
 {
      X(execute_r2r)(*p, in, out);
 }
