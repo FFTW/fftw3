@@ -122,6 +122,5 @@ void install_hook(void)
 
 void uninstall_hook(void)
 {
-     planner *plnr = X(the_planner)();
      use_hook = 0;
 }
