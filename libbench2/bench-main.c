@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.12 2003-04-09 12:50:25 athena Exp $ */
+/* $Id: bench-main.c,v 1.13 2003-07-14 00:57:34 stevenj Exp $ */
 
 #include "getopt.h"
 #include "bench.h"
@@ -57,7 +57,7 @@ static struct option long_options[] =
 
 static void check_alignment(double *x)
 {
-#ifndef FFTW_DEBUG_ALIGNMENT
+#ifdef FFTW_DEBUG_ALIGNMENT
      BENCH_ASSERT((((long)x) & 0x7) == 0);
 #endif
 }
