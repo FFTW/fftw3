@@ -121,14 +121,14 @@ static int emitter(void *d)
      return (c < 0 ? EOF : c);
 }
 
-void F77(import_wisdom, IMPORT_WISDOM)(int *ierr,
+void F77(import_wisdom, IMPORT_WISDOM)(int *isuccess,
 				       void (*f77_emitter)(int *, void *),
 				       void *data)
 {
      emitter_data ed;
      ed.f77_emitter = f77_emitter;
      ed.data = data;
-     *ierr = X(import_wisdom)(emitter, (void *) &ed);
+     *isuccess = X(import_wisdom)(emitter, (void *) &ed);
 }
 
 void F77(import_system_wisdom, IMPORT_SYSTEM_WISDOM)(void)
