@@ -45,11 +45,11 @@ typedef struct {
 
 /***************************************************************************/
 
-/* If DHT_CONV is 1, we use an DHT-based trick to perform the convolution
+/* If R2HC_ONLY_CONV is 1, we use a trick to perform the convolution
    purely in terms of R2HC transforms, as opposed to R2HC followed by H2RC.
    This requires a few more operations, but allows us to share the same
-   plan/codelets for both Rader children. */
-#define DHT_CONV 1
+   plan/codelets for both Rader children.  (See also r2hc-hc2r.c) */
+#define R2HC_ONLY_CONV 1
 
 static void apply(plan *ego_, R *I, R *O)
 {
@@ -83,7 +83,7 @@ static void apply(plan *ego_, R *I, R *O)
      omega = ego->omega;
 
      O[(0 + 1) * os] *= omega[0];
-#if DHT_CONV
+#if R2HC_ONLY_CONV
      for (k = 1; k < (r - 1)/2; ++k) {
 	  fftw_real rB, iB, rW, iW, a, b;
 	  rW = omega[k];
@@ -119,7 +119,7 @@ static void apply(plan *ego_, R *I, R *O)
      
      /* do inverse permutation to unshuffle the output: */
      A(gpower == 1);
-#if DHT_CONV
+#if R2HC_ONLY_CONV
      O[os] = buf[0];
      gpower = g = ego->ginv;
      for (k = 1; k < (r - 1)/2; ++k, gpower = MULMOD(gpower, g, r)) {
@@ -348,7 +348,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
                X(mktensor_1d)(n - 1, os, 1),
                X(mktensor_1d)(1, 0, 0),
                O + os, buf, 
-#if DHT_CONV
+#if R2HC_ONLY_CONV
 	       R2HC
 #else
 	       HC2R
@@ -395,7 +395,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->super.super.ops.other += (n - 1) * (2 + 3 + 2 + 2) + 3;
      pln->super.super.ops.add += (n - 1) * 2;
      pln->super.super.ops.mul += (n - 1) * 3 - 2;
-#if DHT_CONV
+#if R2HC_ONLY_CONV
      pln->super.super.ops.other += (n - 1) - 2;
      pln->super.super.ops.add += 2 * (n - 1) - 4;
 #endif
