@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.40 2003-02-28 19:06:22 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.43 2003-02-28 19:12:15 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -360,9 +360,9 @@ One can also save plans for future use, as described by @ref{Words of
 Wisdom}.)
 
 @example
-void fftw_execute_plan(fftw_plan *plan);
+void fftw_execute(fftw_plan plan);
 @end example
-@findex fftw_execute_plan
+@findex fftw_execute
 
 Once the plan has been created, you can use it as many times as you
 like for transforms on the specified @code{in}/@code{out} arrays,
@@ -376,7 +376,7 @@ given plan to a different array, if sufficient care is taken.
 @xref{FFTW Reference}.)
 
 @example
-void fftw_destroy_plan(fftw_plan *plan);
+void fftw_destroy_plan(fftw_plan plan);
 @end example
 @findex fftw_destroy_plan
 
@@ -915,12 +915,15 @@ transform.} (@code{n} real numbers @code{in[j=0..n-1]}), are:
 @code{FFTW_REDFT00} (DCT-I): even around @math{j=0} and even around @math{j=n-1}.
 @ctindex FFTW_REDFT00
 
+@item
 @code{FFTW_REDFT10} (DCT-II): even around @math{j=-0.5} and even around @math{j=n-0.5}.
 @ctindex FFTW_REDFT10
 
+@item
 @code{FFTW_REDFT01} (DCT-III): even around @math{j=0} and odd around @math{j=n}.
 @ctindex FFTW_REDFT01
 
+@item
 @code{FFTW_REDFT11} (DCT-IV): even around @math{j=-0.5} and odd around @math{j=n-0.5}.
 @ctindex FFTW_REDFT11
 
@@ -928,12 +931,15 @@ transform.} (@code{n} real numbers @code{in[j=0..n-1]}), are:
 @code{FFTW_RODFT00} (DST-I): odd around @math{j=-1} and odd around @math{j=n}.
 @ctindex FFTW_RODFT00
 
+@item
 @code{FFTW_RODFT10} (DST-II): odd around @math{j=-0.5} and odd around @math{j=n-0.5}.
 @ctindex FFTW_RODFT10
 
+@item
 @code{FFTW_RODFT01} (DST-III): odd around @math{j=-1} and even around @math{j=n-1}.
 @ctindex FFTW_RODFT01
 
+@item
 @code{FFTW_RODFT11} (DST-IV): odd around @math{j=-0.5} and even around @math{j=n-0.5}.
 @ctindex FFTW_RODFT11
 
