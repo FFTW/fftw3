@@ -124,36 +124,36 @@ static inline V LD(const float *x, int ivs, const float *aligned_like)
 {
      /* common subexpressions */
      int fivs = 4 * ivs;
-     vector unsigned char ml = vec_lvsl(fivs, (float *)aligned_like);
        /* you are not expected to understand this: */
-     vector unsigned char mh = vec_lvsr(8, (float *)aligned_like);
+     vector unsigned char ml = vec_lvsr(fivs + 8, (float *)aligned_like);
+     vector unsigned char mh = vec_lvsl(0, (float *)aligned_like);
      vector unsigned char msk =
-	  (vector unsigned char)vec_sel((V)ml, (V)mh, X(altivec_ld_selmsk));
+	  (vector unsigned char)vec_sel((V)mh, (V)ml, X(altivec_ld_selmsk));
      /* end of common subexpressions */
 
-     return vec_perm(vec_ld(fivs, (float *)x), vec_ld(0, (float *)x), msk);
+     return vec_perm(vec_ld(0, (float *)x), vec_ld(fivs, (float *)x), msk);
 }
 
 /* store lower half */
-static inline void STL(float *x, V v, int ovs, const float *aligned_like)
-{
-     int fovs = 4 * ovs;
-     v = vec_perm(v, v, vec_lvsr(fovs, (float *)aligned_like));
-     vec_ste(v, fovs, x);
-     vec_ste(v, 4 + fovs, x);
-}
-
 static inline void STH(float *x, V v, const float *aligned_like)
 {
-     v = vec_perm(v, v, vec_lvsr(8, (float *)aligned_like));
+     v = vec_perm(v, v, vec_lvsr(0, (float *)aligned_like));
      vec_ste(v, 0, x);
      vec_ste(v, 4, x);
 }
 
+static inline void STL(float *x, V v, int ovs, const float *aligned_like)
+{
+     int fovs = 4 * ovs;
+     v = vec_perm(v, v, vec_lvsr(fovs + 8, (float *)aligned_like));
+     vec_ste(v, fovs, x);
+     vec_ste(v, 4 + fovs, x);
+}
+
 static inline void ST(float *x, V v, int ovs, const float *aligned_like) 
 {			
-     STL(x, v, ovs, aligned_like);
      STH(x, v, aligned_like);
+     STL(x, v, ovs, aligned_like);
 }
 
 extern const vector unsigned int X(altivec_flipri_perm);
@@ -185,27 +185,27 @@ static inline V VFNMSI(V b, V c)
      return VFNMS(FLIP_RI(b), X(altivec_chsr_sgn), c);
 }
 
-#define VTW(x) {TW_COS, 1, x}, {TW_COS, 0, x}, {TW_SIN, 1, x}, {TW_SIN, 0, x}
+#define VTW(x) {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
 #define TWVL (VL)
 
 static inline V BYTW(const R *t, V sr)
 {
      const V *twp = (const V *)t;
-     V si = FLIP_RI(sr);
+     V si = VBYI(sr);
      V tx = twp[0];
      V tr = vec_mergeh(tx, tx);
      V ti = vec_mergel(tx, tx);
-     return VFMA(CHS_R(ti), si, VMUL(tr, sr));
+     return VFMA(ti, si, VMUL(tr, sr));
 }
 
 static inline V BYTWJ(const R *t, V sr)
 {
      const V *twp = (const V *)t;
-     V si = FLIP_RI(sr);
+     V si = VBYI(sr);
      V tx = twp[0];
      V tr = vec_mergeh(tx, tx);
      V ti = vec_mergel(tx, tx);
-     return VFNMS(CHS_R(ti), si, VMUL(tr, sr));
+     return VFNMS(ti, si, VMUL(tr, sr));
 }
 
 #define RIGHT_CPU() 1
