@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.13 2003-07-14 00:57:34 stevenj Exp $ */
+/* $Id: bench-main.c,v 1.14 2005-02-08 03:58:47 athena Exp $ */
 
 #include "getopt.h"
 #include "bench.h"
@@ -57,6 +57,7 @@ static struct option long_options[] =
 
 static void check_alignment(double *x)
 {
+     UNUSED(x);
 #ifdef FFTW_DEBUG_ALIGNMENT
      BENCH_ASSERT((((long)x) & 0x7) == 0);
 #endif
@@ -71,7 +72,7 @@ int bench_main(int argc, char *argv[])
      int iarounds = 0;
      int arounds = 1; /* this is too low for precise results */
      int c;
-     int index;
+     int ndx;
      char *short_options = make_short_options(long_options);
 
      check_alignment(&tol);
@@ -83,7 +84,7 @@ int bench_main(int argc, char *argv[])
      bench_srand(1);
 
      while ((c = getopt_long (argc, argv, short_options,
-			      long_options, &index)) != -1) {
+			      long_options, &ndx)) != -1) {
 	  switch (c) {
 	      case 't' :
 		   tmin = strtod(optarg, 0);
