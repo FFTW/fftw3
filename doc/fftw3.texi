@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.112 2003-03-07 05:38:48 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.113 2003-03-07 05:43:40 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3326,7 +3326,7 @@ couple of lines of code if your compiler is not yet supported
 @cindex compiler
 
 Installation of FFTW is simplest if you have a Unix or a GNU system,
-such as Linux, and we describe this case in the first section below.
+such as GNU/Linux, and we describe this case in the first section below.
 Compilation on non-Unix systems is a more manual process, but we outline
 the procedure in the second section; it is also likely that we will post
 pre-compiled binaries for the last few remaining non-Unix operating
