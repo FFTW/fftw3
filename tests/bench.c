@@ -76,6 +76,13 @@ static void putchr(printer *p, char c)
      putchar(c);
 }
 
+static void increment(plan *p, void *closure)
+{
+     int *count = (int *) closure;
+     UNUSED(p);
+     ++*count;
+}
+
 static void hook(plan *pln, const fftw_problem *p_)
 {
      const problem_dft *p = (const problem_dft *) p_;
@@ -160,6 +167,11 @@ void setup(struct problem *p)
 	  pr->print(pr, "%d add, %d mul, %d fma, %d other\n",
 		    pln->ops.add, pln->ops.mul, pln->ops.fma, pln->ops.other);
 	  pr->print(pr, "planner time: %g s\n", tplan);
+	  if (verbose > 1) {
+	       int count;
+	       FFTW(traverse_plan)(pln, increment, (void *) &count);
+	       printf("number of child plans: %d\n", count - 1);
+	  }
 	  if (verbose > 3) 
 	       plnr->adt->exprt(plnr, pr);
 	  FFTW(printer_destroy)(pr);

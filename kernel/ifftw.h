@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.49 2002-07-14 19:08:29 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.50 2002-07-14 20:09:17 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -267,6 +267,10 @@ struct printer_s {
 
 printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c));
 void X(printer_destroy)(printer *p);
+
+/*-----------------------------------------------------------------------*/
+/* traverse.c */
+void X(traverse_plan)(plan *p, void (*visit)(plan *, void *), void *closure);
 
 /*-----------------------------------------------------------------------*/
 /* plan.c: */
