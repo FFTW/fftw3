@@ -190,6 +190,8 @@ void setup(struct problem *p)
      pln = plnr->adt->mkplan(plnr, prblm);
      tplan = timer_stop();
      BENCH_ASSERT(pln);
+     if (pln->pcost == 0.0)
+	  hook(pln, prblm);
      X(plan_bless)(pln);
 
      if (verbose) {

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.8 2002-07-23 18:09:19 stevenj Exp $ */
+/* $Id: rdft.h,v 1.9 2002-07-24 18:38:15 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -74,7 +74,7 @@ void X(rdft_vrank2_transpose_register)(planner *p);
 void X(rdft_vrank3_transpose_register)(planner *p);
 void X(rdft_buffered_register)(planner *p);
 void X(rdft_generic_register)(planner *p);
-void X(rdft_rader_register)(planner *p);
+void X(rdft_rader_hc2hc_register)(planner *p);
 void X(rdft_rader_dht_register)(planner *p);
 void X(rdft_r2hc_hc2r_register)(planner *p);
 void X(dft_r2hc_register)(planner *p);
