@@ -21,12 +21,10 @@
 #include "api.h"
 
 X(plan) X(plan_dft_c2r)(unsigned int rank, const unsigned int *n,
-			C *in, const unsigned int *inembed,
-			R *out, const unsigned int *onembed,
-			unsigned int flags)
+			C *in, R *out, unsigned int flags)
 {
      return X(plan_many_dft_c2r)(rank, n, 1,
-				 in, inembed, 1, 1,
-				 out, onembed, 1, 1,
+				 in, 0, 1, 1,
+				 out, 0, 1, 1,
 				 flags);
 }

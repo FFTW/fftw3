@@ -25,5 +25,5 @@ X(plan) X(plan_dft_c2r_3d)(unsigned int nx, unsigned int ny, unsigned int nz,
 {
      unsigned int n[3];
      n[0] = nx; n[1] = ny; n[2] = nz;
-     return X(plan_dft_c2r)(3, n, in, 0, out, 0, flags);
+     return X(plan_dft_c2r)(3, n, in, out, flags);
 }

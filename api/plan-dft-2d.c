@@ -26,5 +26,5 @@ X(plan) X(plan_dft_2d)(unsigned int nx, unsigned int ny,
 {
      unsigned int n[2];
      n[0] = nx; n[1] = ny;
-     return X(plan_dft)(2, n, in, n, out, n, sign, flags);
+     return X(plan_dft)(2, n, in, out, sign, flags);
 }

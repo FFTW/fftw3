@@ -24,5 +24,5 @@
 X(plan) X(plan_dft_1d)(unsigned int n, C *in, C *out, int sign, 
 		       unsigned int flags)
 {
-     return X(plan_dft)(1, &n, in, &n, out, &n, sign, flags);
+     return X(plan_dft)(1, &n, in, out, sign, flags);
 }

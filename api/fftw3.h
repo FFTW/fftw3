@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.26 2003-01-12 23:41:57 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.27 2003-01-12 23:49:58 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -69,9 +69,7 @@ typedef struct X(plan_s) *X(plan);					      \
 void X(execute)(X(plan) p);						      \
 									      \
 X(plan) X(plan_dft)(unsigned int rank, const unsigned int *n,		      \
-		    C *in, const unsigned int *inembed,			      \
-		    C *out, const unsigned int *onembed,		      \
-		    int sign, unsigned int flags);			      \
+		    C *in, C *out, int sign, unsigned int flags);	      \
 									      \
 X(plan) X(plan_dft_1d)(unsigned int n, C *in, C *out, int sign,		      \
 		       unsigned int flags);				      \
@@ -105,9 +103,7 @@ X(plan) X(plan_many_dft_r2c)(unsigned int rank, const unsigned int *n,	      \
                              unsigned int flags);			      \
 									      \
 X(plan) X(plan_dft_r2c)(unsigned int rank, const unsigned int *n,	      \
-                        R *in, const unsigned int *inembed,		      \
-                        C *out, const unsigned int *onembed,		      \
-                        unsigned int flags);				      \
+                        R *in, C *out, unsigned int flags);		      \
 									      \
 X(plan) X(plan_dft_r2c_1d)(unsigned int n,R *in,C *out,unsigned int flags);   \
 X(plan) X(plan_dft_r2c_2d)(unsigned int nx, unsigned int ny,		      \
@@ -125,9 +121,7 @@ X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,	      \
 			     unsigned int flags);			      \
 									      \
 X(plan) X(plan_dft_c2r)(unsigned int rank, const unsigned int *n,	      \
-                        C *in, const unsigned int *inembed,		      \
-                        R *out, const unsigned int *onembed,		      \
-                        unsigned int flags);				      \
+                        C *in, R *out, unsigned int flags);		      \
 									      \
 X(plan) X(plan_dft_c2r_1d)(unsigned int n,C *in,R *out,unsigned int flags);   \
 X(plan) X(plan_dft_c2r_2d)(unsigned int nx, unsigned int ny,		      \
