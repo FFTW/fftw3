@@ -663,11 +663,11 @@ void setup(bench_problem *p)
      BENCH_ASSERT(the_plan);
 
      if (verbose > 1) {
-	  int add, mul, fma;
+	  double add, mul, fma;
 	  FFTW(print_plan)(the_plan);
 	  printf("\n");
 	  FFTW(flops)(the_plan, &add, &mul, &fma);
-	  printf("flops: %d add, %d mul, %d fma\n", add, mul, fma);
+	  printf("flops: %0.0f add, %0.0f mul, %0.0f fma\n", add, mul, fma);
      }
 
      the_flags = save_flags;

@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.188 2003-04-09 10:10:40 athena Exp $
+@comment $Id: fftw3.texi,v 1.189 2003-04-15 18:53:44 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1859,7 +1859,7 @@ The following two routines are provided purely for academic purposes
 (that is, for entertainment).
 
 @example
-void fftw_flops(const fftw_plan plan, int *add, int *mul, int *fma);
+void fftw_flops(const fftw_plan plan, double *add, double *mul, double *fma);
 @end example
 @findex fftw_flops
 
@@ -1869,7 +1869,10 @@ and fused multiply-add operations involved in the plan's execution.  The
 total number of floating-point operations (flops) is @code{add + mul +
 2*fma}, or @code{add + mul + fma} if the hardware supports fused
 multiply-add instructions (although the number of FMA operations is only
-approximate because of compiler voodoo).
+approximate because of compiler voodoo).  (The number of operations
+should be an integer, but we use @code{double} to avoid overflowing
+@code{int} for large transforms; the arguments are of type @code{double}
+even for single and long-double precision versions of FFTW.)
 
 @example
 void fftw_fprint_plan(const fftw_plan plan, FILE *output_file);

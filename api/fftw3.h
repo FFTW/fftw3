@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.59 2003-04-05 01:58:20 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.60 2003-04-15 18:53:44 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -225,7 +225,7 @@ void X(print_plan)(const X(plan) p);					\
 void *X(malloc)(size_t n);						\
 void X(free)(void *p);							\
 									\
-void X(flops)(const X(plan) p, int *add, int *mul, int *fma);		\
+void X(flops)(const X(plan) p, double *add, double *mul, double *fma);	\
 									\
 extern const char X(version)[];						\
 extern const char X(cc)[];						\

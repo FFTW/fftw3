@@ -73,7 +73,7 @@ void F77(print_plan, PRINT_PLAN)(X(plan) * const p)
      X(print_plan)(*p);
 }
 
-void F77(flops,FLOPS)(X(plan) *p, int *add, int *mul, int *fma)
+void F77(flops,FLOPS)(X(plan) *p, double *add, double *mul, double *fma)
 {
      X(flops)(*p, add, mul, fma);
 }

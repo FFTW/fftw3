@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.223 2003-04-13 20:46:12 athena Exp $ */
+/* $Id: ifftw.h,v 1.224 2003-04-15 18:53:44 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -229,10 +229,10 @@ extern int X(in_thread);
  * Total flops = add + mul + 2 * fma
  */
 typedef struct {
-     int add;
-     int mul;
-     int fma;
-     int other;
+     double add;
+     double mul;
+     double fma;
+     double other;
 } opcnt;
 
 void X(ops_zero)(opcnt *dst);

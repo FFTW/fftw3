@@ -20,7 +20,7 @@
 
 #include "api.h"
 
-void X(flops)(const X(plan) p, int *add, int *mul, int *fma)
+void X(flops)(const X(plan) p, double *add, double *mul, double *fma)
 {
      opcnt *o = &p->pln->ops;
      *add = o->add; *mul = o->mul; *fma = o->fma;
