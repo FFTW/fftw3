@@ -317,6 +317,11 @@ if test "$enable_threads" = "yes"; then
 			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
 				omp_enabler="$CC -xopenmp"])
 		fi
+		if test -z "$THREADLIBS"; then # AIX (requires xlc_r/cc_r)
+        		CFLAGS="$save_CFLAGS -qsmp=omp"
+		        AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
+		                omp_enabler="$CC -qsmp=omp"])
+		fi
 		if test -z "$THREADLIBS"; then
 			CFLAGS="$save_CFLAGS"
 			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
