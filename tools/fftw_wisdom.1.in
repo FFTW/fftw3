@@ -18,7 +18,7 @@
 .\"
 .TH FFTW-WISDOM 1 "February, 2003" "fftw" "fftw"
 .SH NAME
-fftw@PREC_SUFFIX@-wisdom \- generate FFTW wisdom (pre-planned transforms)
+fftw@PREC_SUFFIX@-wisdom \- create wisdom (pre-optimized FFTs)
 .SH SYNOPSIS
 .B fftw@PREC_SUFFIX@-wisdom
 [\fIOPTION\fR]... [\fISIZE\fR]...
