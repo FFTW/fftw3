@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.27 2005-01-10 20:00:51 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.28 2005-01-10 22:34:41 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -119,12 +119,10 @@ static int applicable(const problem *p_, const planner *plnr)
 	  /* this solver is UGLY if the user says so */
 	  if (NO_UGLYP(plnr) && DFT_R2HC_ICKYP(plnr)) return 0;
 
+	  /* this solver is non-UGLY for split arrays */
 	  if (p->sz->rnk == 1 &&
 	      split(p->ri, p->ii, p->sz->dims[0].n, p->sz->dims[0].is) &&
 	      split(p->ro, p->io, p->sz->dims[0].n, p->sz->dims[0].os))
-	       return 1;
-
-	  if (p->sz->rnk == 1)
 	       return 1;
 
 	  return !(NO_UGLYP(plnr));
