@@ -585,7 +585,6 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 
      pln->super.super.super.ops.add += 2 * (r-1);
      pln->super.super.super.ops.mul += 4 * (r-1);
-     pln->super.super.super.ops.other += 2 * (r-1);
      pln->super.super.super.ops =
 	  X(ops_add)(X(ops_mul)(m, pln->super.super.super.ops),
 		     cld->ops);
