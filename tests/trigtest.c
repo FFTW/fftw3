@@ -17,8 +17,6 @@ typedef double trigreal;
 static const trigreal K2PI =
     KTRIG(6.2831853071795864769252867665590057683943388);
 
-static const uint MAXN = 1 << ((8 * sizeof(int)) - 3);
-
 trigreal naive_sin2pi(int m, uint n)
 {
      return SIN(K2PI * ((trigreal) m / (trigreal) n));
@@ -30,35 +28,34 @@ trigreal naive_cos2pi(int m, uint n)
 }
 
 
-static trigreal sin2pi(int m, uint n);
-static trigreal cos2pi(int m, uint n)
+static trigreal sin2pi0(trigreal m, trigreal n);
+static trigreal cos2pi0(trigreal m, trigreal n)
 {
-     if (m < 0) return cos2pi(-m, n);
-     if (m > n / 2) return cos2pi(n - m, n);
-     if (n % 4 == 0) {
-	  if (m > n / 4) return -sin2pi(m - n / 4, n);
-	  if (2 * m > n / 4) return sin2pi(n / 4 - m, n);
-     } else if (n < MAXN) {
-	  if (4 * m > n) return -sin2pi(4 * m - n, 4 * n);
-	  if (8 * m > n) return sin2pi(n - 4 * m, 4 * n);
-     }
-     return COS(K2PI * ((trigreal)m / (trigreal)n));
+     if (m < 0) return cos2pi0(-m, n);
+     if (m > n * 0.5) return cos2pi0(n - m, n);
+     if (m > n * 0.25) return -sin2pi0(m - n * 0.25, n);
+     if (m > n * 0.125) return sin2pi0(n * 0.25 - m, n);
+     return COS(K2PI * (m / n));
 }
 
-static trigreal sin2pi(int m, uint n)
+static trigreal sin2pi0(trigreal m, trigreal n)
 {
-     if (m < 0) return -sin2pi(-m, n);
-     if (m > n / 2) return -sin2pi(n - m, n);
-     if (n % 4 == 0) {
-	  if (m > n / 4) return cos2pi(m - n / 4, n);
-	  if (2 * m > n / 4) return cos2pi(n / 4 - m, n);
-     } else if (n < MAXN) {
-	  if (4 * m > n) return cos2pi(4 * m - n, 4 * n);
-	  if (8 * m > n) return cos2pi(n - 4 * m, 4 * n);
-     }
-     return SIN(K2PI * ((trigreal)m / (trigreal)n));
+     if (m < 0) return -sin2pi0(-m, n);
+     if (m > n * 0.5) return -sin2pi0(n - m, n);
+     if (m > n * 0.25) return cos2pi0(m - n * 0.25, n);
+     if (m > n * 0.125) return cos2pi0(n * 0.25 - m, n);
+     return SIN(K2PI * (m / n));
 }
 
+trigreal cos2pi(int m, uint n)
+{
+     return cos2pi0((trigreal)m, (trigreal)n);
+}
+
+trigreal sin2pi(int m, uint n)
+{
+     return sin2pi0((trigreal)m, (trigreal)n);
+}
 
 long prec = 25;
 
