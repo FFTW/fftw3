@@ -86,7 +86,6 @@ static void apply(const plan *ego_, R *I, R *O)
 
      /* now, multiply by omega: */
      omega = ego->omega;
-
      buf[0] *= omega[0];
      for (k = 1; k < rpad/2; ++k) {
 	  E rB, iB, rW, iW;
