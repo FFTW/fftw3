@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.189 2003-04-15 18:53:44 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.190 2003-04-23 04:06:03 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2592,9 +2592,9 @@ length @math{M}, one would use a @code{howmany} of @math{M}, a
 
 @example
 fftw_plan fftw_plan_many_dft_r2c(int rank, const int *n, int howmany,
-                                 fftw_complex *in, const int *inembed,
+                                 double *in, const int *inembed,
                                  int istride, int idist,
-                                 double *out, const int *onembed,
+                                 fftw_complex *out, const int *onembed,
                                  int ostride, int odist,
                                  unsigned flags);
 fftw_plan fftw_plan_many_dft_c2r(int rank, const int *n, int howmany,
