@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: problem.c,v 1.2 2002-06-10 10:49:55 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -28,7 +28,6 @@
 
 
 /* parse a problem description, return a problem */
-/* TODO: only knows about complex for now */
 struct problem *problem_parse(const char *s)
 {
      int n;
@@ -43,7 +42,9 @@ struct problem *problem_parse(const char *s)
      p->in_place = 0;
      p->userinfo = 0;
      p->rank = 0;
+     p->vrank = 0;
      p->size = 1;      /* the product of 0 things is 1 */
+     p->vsize = 1;      /* the product of 0 things is 1 */
 
  L1:
      switch (tolower(*s)) {
@@ -58,6 +59,7 @@ struct problem *problem_parse(const char *s)
 	 default : goto L2;
      }
 
+     /* parse size */
  L2:
      n = 0;
 
@@ -68,6 +70,7 @@ struct problem *problem_parse(const char *s)
 	  ++s;
      }
 
+     BENCH_ASSERT(n > 0);
      p->n[p->rank] = n;
      p->size *= n;
      ++p->rank;
@@ -77,6 +80,32 @@ struct problem *problem_parse(const char *s)
      if (*s == 'x' || *s == 'X' || *s == '*' || *s == ',') {
 	  ++s;
 	  goto L2;
+     }
+
+     if (*s == '-' || *s == '+' || *s == 'v' || *s == 'V') {
+	  /* parse vector size */
+	  ++s;
+     L4:
+	  n = 0;
+
+	  BENCH_ASSERT(isdigit(*s));
+
+	  while (isdigit(*s)) {
+	       n = n * 10 + (*s - '0');
+	       ++s;
+	  }
+
+	  BENCH_ASSERT(n > 0);
+	  p->vn[p->vrank] = n;
+	  p->vsize *= n;
+	  ++p->vrank;
+
+	  BENCH_ASSERT(p->vrank < MAX_RANK);
+
+	  if (*s == 'x' || *s == 'X' || *s == '*' || *s == ',') {
+	       ++s;
+	       goto L4;
+	  }
      }
 
      return p;

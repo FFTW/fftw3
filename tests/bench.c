@@ -84,7 +84,8 @@ void setup(struct problem *p)
      prblm = 
 	  fftw_mkproblem_dft_d(
 	       fftw_mktensor_rowmajor(p->rank, p->n, p->n, 2, 2),
-	       fftw_mktensor_1d(1, 0, 0),
+	       fftw_mktensor_rowmajor(p->vrank, p->vn, p->vn, 
+				      2 * p->size, 2 * p->size),
 	       ri, ii, ro, io);
      pln = plnr->adt->mkplan(plnr, prblm);
      BENCH_ASSERT(pln);

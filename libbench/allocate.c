@@ -1,6 +1,6 @@
 /* not worth copyrighting */
 
-/* $Id: allocate.c,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: allocate.c,v 1.2 2002-06-10 10:49:55 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -14,27 +14,28 @@
 void problem_alloc(struct problem *p)
 {
      if (p->kind == PROBLEM_COMPLEX) {
-	  p->in = bench_malloc(p->size * sizeof(bench_complex));
+	  size_t s = p->size * p->vsize;
+
+	  p->phys_size = s;
+	  p->in = bench_malloc(s * sizeof(bench_complex));
 	  
 	  if (p->in_place)
 	       p->out = p->in;
 	  else
-	       p->out = bench_malloc(p->size * sizeof(bench_complex));
-	  p->phys_size = p->size;
+	       p->out = bench_malloc(s * sizeof(bench_complex));
      } else {
-	  size_t s = 1;
+	  size_t s = p->vsize;
 	  unsigned int i;
 
 	  for (i = 0; i < p->rank; ++i)
 	       /* slightly overallocate to account for unpacked formats */
 	       s *= p->n[i] + 2;
 
+	  p->phys_size = s;
 	  p->in = bench_malloc(s * sizeof(bench_real));
-	  
 	  if (p->in_place)
 	       p->out = p->in;
 	  else
 	       p->out = bench_malloc(s * sizeof(bench_real));
-	  p->phys_size = s;
      }
 }

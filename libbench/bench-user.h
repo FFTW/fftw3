@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.3 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: bench-user.h,v 1.4 2002-06-10 10:49:55 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -59,8 +59,11 @@ typedef enum { PROBLEM_COMPLEX, PROBLEM_REAL } problem_kind_t;
 struct problem {
      problem_kind_t kind;
      unsigned int rank;
-     unsigned n[MAX_RANK];  
+     unsigned int n[MAX_RANK];  
      unsigned int size;  /* total size of input = PROD n[i] */
+     unsigned int vrank;
+     unsigned int vn[MAX_RANK];  
+     unsigned int vsize;  /* total vector size of input = PROD vn[i] */
      unsigned int phys_size;  /* total size of allocated input */
      int sign;
      int in_place;
