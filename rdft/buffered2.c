@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.8 2002-08-30 05:21:37 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.9 2002-09-02 19:36:21 athena Exp $ */
 
 #include "rdft.h"
 
@@ -297,6 +297,9 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      const S *ego = (const S *) ego_;
      const problem_rdft2 *p;
      UNUSED(plnr);
+
+     if (plnr->flags & BUFFERING_VERBOTEN)
+          return BAD;
 
      if (!applicable(p_, ego))
           return BAD;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.105 2002-09-02 15:46:57 athena Exp $ */
+/* $Id: ifftw.h,v 1.106 2002-09-02 19:36:21 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -404,6 +404,7 @@ enum {
      DESTROY_INPUT = 0x4,
      POSSIBLY_UNALIGNED = 0x8,
      FORBID_DHT_R2HC = 0x10,
+     BUFFERING_VERBOTEN = 0x20,
      EQV_MASK = 0xFF,
 
      /* flags that influence the behavior of the planner but not problem

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.25 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: buffered.c,v 1.26 2002-09-02 19:36:21 athena Exp $ */
 
 #include "dft.h"
 
@@ -181,6 +181,9 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      const problem_dft *p;
      UNUSED(plnr);
 
+     if (plnr->flags & BUFFERING_VERBOTEN)
+          return BAD;
+	  
      if (!applicable(p_, ego))
           return BAD;
 

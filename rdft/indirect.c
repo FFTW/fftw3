@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.7 2002-08-30 02:55:29 stevenj Exp $ */
+/* $Id: indirect.c,v 1.8 2002-09-02 19:36:21 athena Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
@@ -191,6 +191,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      if (!applicable(ego_, p_, plnr))
           return (plan *) 0;
+
+     plnr->flags |= BUFFERING_VERBOTEN;
 
      {
 	  tensor sz_real = X(rdft_real_sz)(p->kind, p->sz);
