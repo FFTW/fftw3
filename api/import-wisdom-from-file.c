@@ -21,7 +21,7 @@
 #include "api.h"
 #include <stdio.h>
 
-/* getc()/putc() and *unbelievably* slow on linux.  Looks like glibc
+/* getc()/putc() are *unbelievably* slow on linux.  Looks like glibc
    is grabbing a lock for each call to getc()/putc(), or something
    like that.  You pay the price for these idiotic posix threads
    whether you use them or not.
