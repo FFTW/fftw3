@@ -158,7 +158,7 @@ int bench_main(int argc, char *argv[])
      char *output_fname = 0;
      bench_problem **problems = 0;
      int nproblems = 0, iproblem = 0;
-     clock_t begin;
+     time_t begin;
 
      verbose = 0;
      usewisdom = 0;
@@ -321,10 +321,10 @@ int bench_main(int argc, char *argv[])
      nproblems = iproblem;
      qsort(problems, nproblems, sizeof(bench_problem *), prob_size_cmp);
 
-     begin = clock();
+     begin = time((time_t*)0);
      for (iproblem = 0; iproblem < nproblems; ++iproblem) {
 	  if (hours <= 0
-	      || hours > (clock() - begin) / 3600.0 / CLOCKS_PER_SEC)
+	      || hours > (time((time_t*)0) - begin) / 3600.0)
 	       do_problem(problems[iproblem]);
 	  problem_destroy(problems[iproblem]);
 	  
@@ -332,7 +332,7 @@ int bench_main(int argc, char *argv[])
      free(problems);
      
      if (verbose && hours > 0
-	 && hours < (clock() - begin) / 3600.0 / CLOCKS_PER_SEC)
+	 && hours < (time((time_t*)0) - begin) / 3600.0)
 	  fprintf(stderr, "EXCEEDED TIME LIMIT OF %g HOURS.\n", hours);
 
      if (!output_fname)
