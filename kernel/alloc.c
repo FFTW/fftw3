@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.16 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: alloc.c,v 1.17 2002-08-30 12:20:48 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -72,6 +72,12 @@ static void *real_malloc(size_t n)
 #define MAGIC ((size_t)0xABadCafe)
 #define PAD_FACTOR 2
 #define SZ_HEADER (4 * sizeof(size_t))
+#define HASHSZ 1031
+
+static unsigned int hashaddr(void *p)
+{
+     return ((unsigned long)p) % HASHSZ;
+}
 
 struct mstat {
      int siz;
@@ -90,7 +96,7 @@ struct minfo {
      struct minfo *next;
 };
 
-static struct minfo *minfo = 0;
+static struct minfo *minfo[HASHSZ] = {0};
 
 #ifdef HAVE_THREADS
 int X(in_thread) = 0;
@@ -143,14 +149,15 @@ void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
      p = p + SZ_HEADER;
 
      if (!IN_THREAD) {
+	  unsigned int h = hashaddr(p);
 	  /* record allocation in allocation list */
 	  info = (struct minfo *) malloc(sizeof(struct minfo));
 	  info->n = n;
 	  info->file = file;
 	  info->line = line;
 	  info->p = p;
-	  info->next = minfo;
-	  minfo = info;
+	  info->next = minfo[h];
+	  minfo[h] = info;
      }
 
      return (void *) p;
@@ -211,9 +218,10 @@ void X(free)(void *p)
 
      if (!IN_THREAD) {
           /* delete minfo entry */
+	  unsigned int h = hashaddr(p);
           struct minfo **i;
 
-          for (i = &minfo; *i; i = &((*i)->next)) {
+          for (i = minfo + h; *i; i = &((*i)->next)) {
                if ((*i)->p == p) {
                     struct minfo *i0 = (*i)->next;
                     free(*i);
@@ -230,12 +238,13 @@ void X(malloc_print_minfo)(void)
 {
      struct minfo *info;
      int what;
+     unsigned int h;
 
      static const char *names[MALLOC_WHAT_LAST] = {
 	  "EVERYTHING",
 	  "PLANS", "SOLVERS", "PROBLEMS", "BUFFERS",
 	  "HASHT", "TENSORS", "PLANNERS", "SLVPAIRS", "TWIDDLES",
-	  "OTHER"
+	  "STRIDES", "OTHER"
      };
 
      printf("%12s %8s %8s %10s %10s\n",
@@ -248,13 +257,17 @@ void X(malloc_print_minfo)(void)
                  stat->siz, stat->maxsiz);
      }
 
-     if (minfo)
-          printf("\nUnfreed allocations:\n");
+     for (h = 0; h < HASHSZ; ++h) 
+	  if (minfo[h]) {
+	       printf("\nUnfreed allocations:\n");
+	       break;
+	  }
 
-     for (info = minfo; info; info = info->next) {
-          printf("%s:%d:  %u bytes at %p\n",
-                 info->file, info->line, info->n, info->p);
-     }
+     for (h = 0; h < HASHSZ; ++h) 
+	  for (info = minfo[h]; info; info = info->next) {
+	       printf("%s:%d:  %u bytes at %p\n",
+		      info->file, info->line, info->n, info->p);
+	  }
 }
 
 #else

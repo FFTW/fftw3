@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.96 2002-08-30 05:21:37 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.97 2002-08-30 12:20:48 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -118,6 +118,7 @@ enum fftw_malloc_what {
      PLANNERS,
      SLVPAIRS,
      TWIDDLES,
+     STRIDES,
      OTHER,
      MALLOC_WHAT_LAST		/* must be last */
 };
