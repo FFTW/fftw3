@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.7 2003-01-19 12:09:54 athena Exp $ */
+/* $Id: bench-user.h,v 1.8 2003-01-26 12:35:46 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -112,6 +112,7 @@ extern int can_do(bench_problem *p);
 extern void setup(bench_problem *p);
 extern void doit(int iter, bench_problem *p);
 extern void done(bench_problem *p);
+extern void cleanup(void);
 extern void verify(const char *param, int rounds, double tol);
 extern void useropt(const char *arg);
 

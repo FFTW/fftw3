@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.3 2003-01-18 22:27:15 athena Exp $ */
+/* $Id: bench-main.c,v 1.4 2003-01-26 12:35:46 athena Exp $ */
 
 #include "getopt.h"
 #include "bench.h"
@@ -188,6 +188,7 @@ static int bench_main1(int argc, char *argv[])
 	  fprintf(stderr, "\n");
      }
 
+     cleanup();
      bench_free(short_options);
      return 0;
 }

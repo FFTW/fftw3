@@ -23,6 +23,7 @@ static const char *wisdat = "wis.dat";
 unsigned the_flags = 0;
 int paranoid;
 int usewisdom = 1;
+int havewisdom = 0;
 
 extern void install_hook(void);  /* in hook.c */
 
@@ -42,6 +43,8 @@ void rdwisdom(void)
      FILE *f;
      double tim;
 
+     if (havewisdom) return;
+
      timer_start();
      if ((f = fopen(wisdat, "r"))) {
 	  if (!FFTW(import_wisdom_from_file)(f))
@@ -57,6 +60,7 @@ void rdwisdom(void)
 	  FFTW(export_wisdom_to_file)(stdout);
      if (verbose > 1)
 	  printf("\n");
+     havewisdom = 1;
 }
 
 void wrwisdom(void)
@@ -338,6 +342,10 @@ void done(bench_problem *p)
      UNUSED(p);
 
      FFTW(destroy_plan)(the_plan);
+}
+
+void cleanup(void)
+{
      if (usewisdom) wrwisdom();
      FFTW(cleanup)();
 
@@ -351,7 +359,6 @@ void done(bench_problem *p)
 #    endif
 
 }
-
 
 
 
