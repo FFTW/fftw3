@@ -18,13 +18,11 @@
  *
  */
 
-/* $Id: ct.c,v 1.8 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: ct.c,v 1.9 2002-06-11 14:35:52 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
 #include "ct.h"
-
-#define OPTIMAL_SIZE 12		/* for estimator */
 
 static void destroy(plan *ego_)
 {
@@ -146,9 +144,6 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
      }
 
      pln->td = 0;
-     pln->super.super.cost =
-          1.0 + 0.1 * X(square)(e->radix - OPTIMAL_SIZE) + cld->cost;
-
      adt->finish(pln);
 
      return &(pln->super.super);

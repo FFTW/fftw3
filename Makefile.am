@@ -14,7 +14,7 @@ RESEARCH_DIST = RESEARCH-MODE
 distdir = $(PACKAGE)-research-$(VERSION)
 else
 RESEARCH_DIST = 
-distdir = $(PACKAGE)-$(VERSION)
+distdir = $(PACKAGE)-classic-$(VERSION)
 endif
 
 SUBDIRS=$(GENFFT) kernel dft libbench . tests

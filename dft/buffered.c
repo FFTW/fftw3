@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.10 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: buffered.c,v 1.11 2002-06-11 14:35:52 athena Exp $ */
 
 #include "dft.h"
 
@@ -59,9 +59,9 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      /* note unsigned i:  the obvious statement
 
-     for (i = 0; i <= vl - nbuf; i += nbuf) 
+          for (i = 0; i <= vl - nbuf; i += nbuf) 
 
-     is wrong */
+	is wrong */
      for (i = nbuf; i <= vl; i += nbuf) {
           i1 = i - nbuf;
           /* transform to bufs: */
@@ -304,11 +304,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->bufdist = bufdist;
      pln->bufs = 0;		/* let awake() reallocate buffer space */
 
-     pln->super.super.cost =
-          (cldcpy->cost + cld->cost) * (vl / nbuf) + cldrest->cost;
-     pln->super.super.flops =
-          X(flops_add)(X(flops_mul)((vl / nbuf), cld->flops),
-                       cldrest->flops);
+     pln->super.super.ops =
+	  X(ops_add)(
+	       X(ops_mul)((vl / nbuf), X(ops_add)(cld->ops, cldcpy->ops)),
+	       cldrest->ops);
 
      return &(pln->super.super);
 

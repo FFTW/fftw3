@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.1 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.2 2002-06-11 14:35:52 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -82,7 +82,7 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
      const S *s = ego->solver;
-     p->print(p, "(dft-vrank-geq1-x%u/%d%(%p%))",
+     p->print(p, "(dft-vrank>=1-x%u/%d%(%p%))",
 	      ego->vl, s->vecloop_dim, ego->cld);
 }
 
@@ -154,7 +154,6 @@ static int score(const solver *ego_, const problem *p_)
 {
      const problem_dft *p;
      uint vdim;
-     iodim *d;
 
      if (!applicable(ego_, p_, &vdim))
           return BAD;
@@ -165,13 +164,19 @@ static int score(const solver *ego_, const problem *p_)
         vector stride is less than the transform size, then we
         probably want to use an rank>=2 plan first in order to combine
         this vector with the transform-dimension vectors. */
-     d = p->vecsz.dims + vdim;
-     if (p->sz.rnk > 1 && X(imin)(d->is, d->os) < X(tensor_max_index)(p->sz))
+     {
+	  iodim *d = p->vecsz.dims + vdim;
+	  if (1
+	      && p->sz.rnk > 1 
+	      && X(imin)(d->is, d->os) < X(tensor_max_index)(p->sz)
+	       )
           return UGLY;
+     }
 
-     /* Heuristic: don't use a vrank-geq1 for vrank-1 transforms.  Assume
-	that other solvers can handle vrank-1. */
-     if (p->vecsz.rnk == 1)
+     /* Heuristic: don't use a vrank-geq1 for rank-0 vrank-1
+	transforms, since this case is better handled by rank-0
+	solvers. */
+     if (p->sz.rnk == 0 && p->vecsz.rnk == 1)
 	  return UGLY;
 
      return GOOD;
@@ -213,8 +218,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->ovs = d->os;
 
      pln->solver = ego;
-     pln->super.super.cost = cld->cost * pln->vl;
-     pln->super.super.flops = X(flops_mul)(pln->vl, cld->flops);
+     pln->super.super.ops = X(ops_mul)(pln->vl, cld->ops);
 
      return &(pln->super.super);
 }
@@ -234,7 +238,11 @@ void X(dft_vrank_geq1_register)(planner *p)
      uint i;
 
      /* FIXME: Should we try other vecloop_dim values? */
+#if RESEARCH_MODE
      static const int buddies[] = { 1, -1 };
+#else
+     static const int buddies[] = { 1 };
+#endif
 
      const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 

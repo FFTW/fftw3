@@ -18,26 +18,41 @@
  *
  */
 
-/* $Id: flops.c,v 1.3 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: ops.c,v 1.1 2002-06-11 14:35:52 athena Exp $ */
 
 #include "ifftw.h"
 
-flopcnt X(flops_add)(flopcnt a, flopcnt b)
+opcnt X(ops_add)(opcnt a, opcnt b)
 {
      a.add += b.add;
      a.mul += b.mul;
      a.fma += b.fma;
+     a.other += b.other;
      return a;
 }
 
-flopcnt X(flops_mul)(uint a, flopcnt b)
+opcnt X(ops_add3)(opcnt a, opcnt b, opcnt c)
+{
+     return X(ops_add)(a, X(ops_add)(b, c));
+}
+
+opcnt X(ops_mul)(uint a, opcnt b)
 {
      b.add *= a;
      b.mul *= a;
      b.fma *= a;
+     b.other *= a;
      return b;
 }
 
-const flopcnt X(flops_zero) = {
-     0, 0, 0
+opcnt X(ops_other)(uint o)
+{
+     opcnt x;
+     x.add = x.mul = x.fma = 0;
+     x.other = o;
+     return x;
+}
+
+const opcnt X(ops_zero) = {
+     0, 0, 0, 0
 };

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.1.1.1 2002-06-02 18:42:28 athena Exp $ *)
+(* $Id: c.ml,v 1.2 2002-06-11 14:35:52 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -442,4 +442,4 @@ let imag_of s = "c_im(" ^ s ^ ")"
 
 let flops_of f =
   let (add, mul, fma) = count_flops f in
-  Printf.sprintf "{ %d, %d, %d }" add mul fma
+  Printf.sprintf "{ %d, %d, %d, 0 }" add mul fma

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.4 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: plan.c,v 1.5 2002-06-11 14:35:52 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -29,7 +29,7 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
      A(adt->destroy);
      p->refcnt = 0;
      p->adt = adt;
-     p->cost = 1.0e20;  /* default cost */
+     p->ops = X(ops_zero);
      return p;
 }
 

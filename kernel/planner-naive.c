@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-naive.c,v 1.6 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: planner-naive.c,v 1.7 2002-06-11 14:35:52 athena Exp $ */
 #include "ifftw.h"
 
 /* naive planner with no memoization */
@@ -34,9 +34,9 @@ static plan *mkplan(planner *ego, problem *p)
 	       X(plan_use)(pln);
 	       ego->nplan++;
 	       ego->hook(pln, p);
-	       pln->cost = X(measure_execution_time)(pln, p);
+	       pln->pcost = X(measure_execution_time)(pln, p);
 	       if (best) {
-		    if (pln->cost < best->cost) {
+		    if (pln->pcost < best->pcost) {
 			 X(plan_destroy)(best);
 			 best = pln;
 		    } else {

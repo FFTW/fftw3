@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.13 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: direct.c,v 1.14 2002-06-11 14:35:52 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -144,8 +144,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
 
      pln->slv = ego;
-     pln->super.super.cost = 1.0 + 0.1 * X(square)(e->sz - OPTIMAL_SIZE);
-     pln->super.super.flops = X(flops_mul)(pln->vl, e->flops);
+     pln->super.super.ops = X(ops_mul)(pln->vl, e->ops);
 
      return &(pln->super.super);
 }

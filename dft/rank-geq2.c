@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.6 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.7 2002-06-11 14:35:52 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -204,8 +204,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cld2 = cld2;
 
      pln->solver = ego;
-     pln->super.super.cost = cld1->cost + cld2->cost;
-     pln->super.super.flops = X(flops_add)(cld1->flops, cld2->flops);
+     pln->super.super.ops = X(ops_add)(cld1->ops, cld2->ops);
 
      X(tensor_destroy)(sz1);
      X(tensor_destroy)(sz2);
@@ -235,7 +234,12 @@ static solver *mksolver(int spltrnk, const int *buddies, uint nbuddies)
 void X(dft_rank_geq2_register)(planner *p)
 {
      uint i;
+#if RESEARCH_MODE
      static const int buddies[] = { 1, -1, 0 };
+#else
+     static const int buddies[] = { 0 };
+#endif
+
      const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 
      for (i = 0; i < nbuddies; ++i)

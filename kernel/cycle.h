@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.2 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: cycle.h,v 1.3 2002-06-11 14:35:52 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -167,14 +167,14 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 #  include <c_asm.h>
 typedef unsigned int ticks;
 
-static __inline__ ticks getticks(void)
+static __inline ticks getticks(void)
 {
      unsigned long cc;
      cc = asm("rpcc %v0");
      return (cc & 0xFFFFFFFF);
 }
 
-static __inline__ double elapsed(ticks t1, ticks t0)
+static __inline double elapsed(ticks t1, ticks t0)
 {
      return (double)(t1 - t0);
 }

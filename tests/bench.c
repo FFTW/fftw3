@@ -63,8 +63,10 @@ void setup(struct problem *p)
 
 #if 0
      plnr = FFTW(mkplanner_naive) ();
-#else
+#elif 1
      plnr = FFTW(mkplanner_score) ();
+#else
+     plnr = FFTW(mkplanner_estimate) ();
 #endif
 
      FFTW(dft_conf_standard) (plnr);

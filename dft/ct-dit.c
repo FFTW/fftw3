@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.8 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: ct-dit.c,v 1.9 2002-06-11 14:35:52 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -60,10 +60,9 @@ static int applicable(const solver_ct *ego, const problem *p_)
 static void finish(plan_ct *ego)
 {
      ego->ios = X(mkstride)(ego->r, ego->m * ego->os);
-     ego->super.super.flops =
-          X(flops_add)(ego->cld->flops,
-		       X(flops_mul)(ego->vl * ego->m,
-                                    ego->slv->desc->flops));
+     ego->super.super.ops =
+          X(ops_add)(ego->cld->ops,
+		     X(ops_mul)(ego->vl * ego->m, ego->slv->desc->ops));
 }
 
 static problem *mkcld(const solver_ct *ego, const problem_dft *p)
@@ -95,6 +94,9 @@ static int score(const solver *ego_, const problem *p_)
 	 || n / ego->desc->radix <= 4
 	  )
           return UGLY;
+
+     if (!RESEARCH_MODE && p->vecsz.rnk == 1)
+	  return UGLY;
 
      return GOOD;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.2 2002-06-11 01:35:29 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.3 2002-06-11 14:35:52 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -110,9 +110,11 @@ static void finish(plan_ct *ego)
 {
      ego->ios_for_buf = ego->m * ego->os;
      ego->vs = X(mkstride)(ego->r, 2);
-     ego->super.super.flops =
-          X(flops_add)(ego->cld->flops,
-                       X(flops_mul)(ego->vl * ego->m, ego->slv->desc->flops));
+     ego->super.super.ops =
+	  X(ops_add3)(ego->cld->ops,
+		      /* 4 load/stores * N * VL */
+		      X(ops_other)(4 * ego->r * ego->m * ego->vl),
+		      X(ops_mul)(ego->vl * ego->m, ego->slv->desc->ops));
 }
 
 static problem *mkcld(const solver_ct *ego, const problem_dft *p)
@@ -137,6 +139,9 @@ static int score(const solver *ego_, const problem *p_)
 
      if (!applicable(ego, p_))
           return BAD;
+
+     if (!RESEARCH_MODE)
+	  return UGLY;
 
      n = p->sz.dims[0].n;
 

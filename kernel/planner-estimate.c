@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-estimate.c,v 1.4 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: planner-estimate.c,v 1.5 2002-06-11 14:35:52 athena Exp $ */
 #include "ifftw.h"
 
 static plan *mkplan(planner *ego, problem *p)
@@ -32,8 +32,15 @@ static plan *mkplan(planner *ego, problem *p)
 	       X(plan_use)(pln);
 	       ego->nplan++;
 	       ego->hook(pln, p);
+	       /* heuristic */
+	       pln->pcost = 0
+		    + pln->ops.add
+		    + pln->ops.mul
+		    + 2 * pln->ops.fma
+		    + pln->ops.other;
+		    
 	       if (best) {
-		    if (pln->cost < best->cost) {
+		    if (pln->pcost < best->pcost) {
 			 X(plan_destroy)(best);
 			 best = pln;
 		    } else {

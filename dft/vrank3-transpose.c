@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.7 2002-06-10 21:58:13 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.8 2002-06-11 14:35:52 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -157,8 +157,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->vl = p->vecsz.dims[dim2].n;
      pln->vs = p->vecsz.dims[dim2].is; /* == os */
 
-     pln->super.super.cost = 1.0;	/* FIXME? */
-     pln->super.super.flops = X(flops_zero);
+     /* pln->vl * (4 loads + 4 stores) * (pln->n \choose 2) */
+     pln->super.super.ops = X(ops_other)(4 * pln->vl * pln->n * (pln->n - 1));
+
      return &(pln->super.super);
 }
 

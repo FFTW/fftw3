@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.22 2002-06-11 11:32:20 athena Exp $ */
+/* $Id: ifftw.h,v 1.23 2002-06-11 14:35:52 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -44,6 +44,10 @@ typedef fftw_real R;
 
 #ifndef HAVE_UINT
 typedef unsigned int uint;
+#endif
+
+#ifndef RESEARCH_MODE
+#define RESEARCH_MODE 0
 #endif
 
 /* forward declarations */
@@ -124,21 +128,24 @@ extern void *X(malloc_plain)(size_t sz);
 #endif
 
 /*-----------------------------------------------------------------------*/
-/* flops.c: */
+/* ops.c: */
 /*
- * flops counter.  The total number of additions is add + fma
+ * ops counter.  The total number of additions is add + fma
  * and the total number of multiplications is mul + fma.
  * Total flops = add + mul + 2 * fma
  */
 typedef struct {
-     int add;
-     int mul;
-     int fma;
-} flopcnt;
+     uint add;
+     uint mul;
+     uint fma;
+     uint other;
+} opcnt;
 
-flopcnt X(flops_add)(flopcnt a, flopcnt b);
-flopcnt X(flops_mul)(uint a, flopcnt b);
-extern const flopcnt X(flops_zero);
+opcnt X(ops_add)(opcnt a, opcnt b);
+opcnt X(ops_add3)(opcnt a, opcnt b, opcnt c);
+opcnt X(ops_mul)(uint a, opcnt b);
+opcnt X(ops_other)(uint o);
+extern const opcnt X(ops_zero);
 
 /*-----------------------------------------------------------------------*/
 /* minmax.c: */
@@ -235,8 +242,8 @@ typedef struct {
 struct plan_s {
      const plan_adt *adt;
      int refcnt;
-     flopcnt flops;
-     double cost;
+     opcnt ops;
+     double pcost;
 };
 
 plan *X(mkplan)(size_t size, const plan_adt *adt);
@@ -248,7 +255,8 @@ void X(plan_destroy)(plan *ego);
 enum {
      BAD,   /* solver cannot solve problem */
      UGLY,  /* we are 99% sure that this solver is suboptimal */
-     GOOD
+     GOOD,
+     BETTER
 };
 
 typedef struct {

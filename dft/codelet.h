@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.3 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: codelet.h,v 1.4 2002-06-11 14:35:52 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -80,7 +80,7 @@ typedef struct {
      uint sz;  /* size of transform computed */
      int is;   /* input stride, or 0 if any */
      int os;   /* output stride, or 0 if any */
-     flopcnt flops;
+     opcnt ops;
 } kdft_desc;
 
 typedef void (*kdft) (const R *ri, const R *ii, R *ro, R *io,
@@ -93,7 +93,7 @@ typedef struct {
      const tw_instr *tw;
      int is;
      int vs;
-     flopcnt flops;
+     opcnt ops;
 } ct_desc;
 
 
