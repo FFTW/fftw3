@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.101 2002-09-17 01:56:14 athena Exp $ */
+/* $Id: planner.c,v 1.102 2002-09-17 03:44:47 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -40,7 +40,6 @@
 #define SUBSUMES(f1,f2) ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1) ||    \
                          (f1 & EXHAUSTIVE) ||                            \
 			 ((f2 & ESTIMATE) && !(f1 & ESTIMATE)))
-#define STRICTLY_SUBSUMES(f1, f2) (SUBSUMES(f1, f2) && !SUBSUMES(f2, f1))
 #define ORDERED(f1, f2) (SUBSUMES(f1, f2) || SUBSUMES(f2, f1))
 
 #define MAXNAM 64  /* maximum length of registrar's name.
@@ -259,11 +258,13 @@ static void hinsert(planner *ego, const md5sig s,
      solution *l;
 
      if ((l = hlookup(ego, s, flags))) {
-	  /* overwrite old solution */
-	  if (STRICTLY_SUBSUMES(l->flags, flags))
-	       return; /* don't overwrite less impatient solution */
-
-	  flags |= l->flags & BLESSING; /* ne me perdas illa die */
+	  if (SUBSUMES(flags, l->flags)) {
+	       /* overwrite old solution */
+	       flags |= l->flags & BLESSING; /* ne me perdas illa die */
+	  } else {
+	       A(SUBSUMES(l->flags, flags));
+	       return;
+	  }
      } else {
 	  ++ego->nelem;
 	  hgrow(ego);
@@ -319,19 +320,18 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 }
 
 /* maintain dynamic scoping of flags, nthr: */
-static plan *invoke_solver(planner *ego, problem *p, solver *s, int nougly)
+static plan *invoke_solver(planner *ego, problem *p, solver *s, 
+			   unsigned short nflags)
 {
-     unsigned short saveflags = ego->planner_flags;
+     unsigned short planner_flags = ego->planner_flags;
      uint problem_flags = ego->problem_flags;
      uint nthr = ego->nthr;
-     int onougly = ego->nougly;
      plan *pln;
-     ego->nougly = nougly;
+     ego->planner_flags |= nflags;
      pln = s->adt->mkplan(s, p, ego);
-     ego->nougly = onougly;
      ego->problem_flags = problem_flags;
      ego->nthr = nthr;
-     ego->planner_flags = saveflags;
+     ego->planner_flags = planner_flags;
      return pln;
 }
 
@@ -362,20 +362,19 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  }
      }
 
-     lpass = ego->nougly ? 1 : 2;
+     lpass = NO_UGLYP(ego) ? 1 : 2;
 
      for (pass = 0; pass < lpass; ++pass) {
 	  static const struct {
 	       int minscore;
-	       int nougly;
-	  } info[2] = { {GOOD, 1}, {UGLY, 0} };
+	       unsigned short nflags;
+	  } info[2] = { {GOOD, NO_UGLY}, {UGLY, 0} };
 
 	  if (best) break;
-
           FORALL_SOLVERS(ego, s, sp, {
 	       if (compute_score(ego, p, s) >= info[pass].minscore) {
-		    plan *pln;
-		    pln = invoke_solver(ego, p, s, info[pass].nougly);
+		    plan *pln = invoke_solver(ego, p, s, info[pass].nflags);
+
 		    if (pln) {
 			 X(plan_use)(pln);
 			 if (best) {
@@ -414,15 +413,16 @@ static plan *mkplan(planner *ego, problem *p)
 
      md5hash(&m, p, ego);
 
+     sp = 0; /* nothing known about this problem, yet */
      if ((sol = hlookup(ego, m.s, ego->planner_flags))) {
-	  if (sol->slvndx < 0) return 0;   /* known to be infeasible */
-	  sp = ego->slvdescs + sol->slvndx;
-
-	  /* reject wisdom if too impatient */
-	  if (STRICTLY_SUBSUMES(ego->planner_flags, sol->flags))
-	       sp = 0;
-     } else {
-	  sp = 0; /* nothing known about this problem */
+	  if (SUBSUMES(sol->flags, ego->planner_flags)) {
+	       /* wisdom is acceptable */
+	       if (sol->slvndx < 0)
+		    return 0;   /* known to be infeasible */
+	       sp = ego->slvdescs + sol->slvndx;
+	  } else {
+	       A(SUBSUMES(ego->planner_flags, sol->flags));
+	  }
      }
 
      mkplan0(ego, p, &pln, &sp);
@@ -561,7 +561,6 @@ planner *X(mkplanner)(void)
 
      p->solutions = 0;
      p->hashsiz = p->nelem = 0;
-     p->nougly = 0;
 
      p->problem_flags = 0;
      p->planner_flags = 0;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.130 2002-09-17 01:51:06 athena Exp $ */
+/* $Id: ifftw.h,v 1.131 2002-09-17 03:44:47 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -422,6 +422,7 @@ enum {
      NO_INDIRECT = 0x40,
      BELIEVE_PCOST = 0x80,
      NO_DHT_R2HC = 0x100,
+     NO_UGLY = 0x200,
 
      /* a canonical set of fftw2-like impatient flags */
      IMPATIENT = (0
@@ -454,6 +455,7 @@ enum {
 #define NO_INDIRECTP(plnr) ((plnr)->planner_flags & NO_INDIRECT)
 #define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
 #define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
+#define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
 
 #define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
 #define EXHAUSTIVEP(plnr) ((plnr)->planner_flags & EXHAUSTIVE)
@@ -487,8 +489,6 @@ struct planner_s {
      uint problem_flags;
      unsigned short planner_flags; /* matches type of solution.flags in
 				      planner.c */
-     int nougly;
-
      /* various statistics */
      uint nplan;    /* number of plans evaluated */
      uint nprob;    /* number of problems evaluated */
