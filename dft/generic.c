@@ -67,8 +67,8 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 		       factor and the size-r DFT twiddle factor */
 		    rb += xr * wr - xi * wi;
 		    ib += xr * wi + xi * wr;
-		    if ((iw += iw_inc) > n)
-			 iw -= n;
+		    iw += iw_inc;
+		    iw -= n & (- (iw > n));
 	       }
 	       buf[2*k] = rb;
 	       buf[2*k+1] = ib;
