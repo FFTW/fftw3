@@ -24,7 +24,7 @@
 #include "ifftw.h"
 #include <string.h> /* memcpy */
 
-#define CUTOFF 100 /* size below which we do a naive transpose */
+#define CUTOFF 8 /* size below which we do a naive transpose */
 
 /*************************************************************************/
 /* some utilities for the solvers */
@@ -142,18 +142,47 @@ static void rec_transpose_Ntuple(R *A, R *B, int n, int m, int fda, int fdb,
 static void rec_transpose_swap_Ntuple(R *A, R *B, int n, int m, int fda, int N)
 {
      if (n == 1 || m == 1 || (n + m) * N <= CUTOFF*2) {
-	  int i, j, k;
-	  for (i = 0; i < n; ++i) {
-	       for (j = 0; j < m; ++j) {
-		    for (k = 0; k < N; ++k) { /* FIXME: unroll */
-			 R a = A[(i*fda + j) * N + k];
-			 A[(i*fda + j) * N + k] = B[(j*fda + i) * N + k];
-			 B[(j*fda + i) * N + k] = a;
-		    }
-	       }
+	  switch (N) {
+	      case 1: {
+		   int i, j;
+		   for (i = 0; i < n; ++i) {
+			for (j = 0; j < m; ++j) {
+			     R a = A[(i*fda + j)];
+			     A[(i*fda + j)] = B[(j*fda + i)];
+			     B[(j*fda + i)] = a;
+			}
+		   }
+		   break;
+	      }
+	      case 2: {
+		   int i, j;
+		   for (i = 0; i < n; ++i) {
+			for (j = 0; j < m; ++j) {
+			     R a0 = A[(i*fda + j) * 2 + 0];
+			     R a1 = A[(i*fda + j) * 2 + 1];
+			     A[(i*fda + j) * 2 + 0] = B[(j*fda + i) * 2 + 0];
+			     A[(i*fda + j) * 2 + 1] = B[(j*fda + i) * 2 + 1];
+			     B[(j*fda + i) * 2 + 0] = a0;
+			     B[(j*fda + i) * 2 + 1] = a1;
+			}
+		   }
+		   break;
+	      }
+	      default: {
+		   int i, j, k;
+		   for (i = 0; i < n; ++i) {
+			for (j = 0; j < m; ++j) {
+			     for (k = 0; k < N; ++k) {
+				  R a = A[(i*fda + j) * N + k];
+				  A[(i*fda + j) * N + k] = 
+				       B[(j*fda + i) * N + k];
+				  B[(j*fda + i) * N + k] = a;
+			     }
+			}
+		   }
+	      }
 	  }
-     }
-     else if (n > m) {
+     } else if (n > m) {
 	  int n2 = n / 2;
 	  rec_transpose_swap_Ntuple(A, B, n2, m, fda, N);
 	  rec_transpose_swap_Ntuple(A + n2*N*fda, B + n2*N, n - n2, m, fda, N);
@@ -171,18 +200,46 @@ static void rec_transpose_sq_ip_Ntuple(R *A, int n, int fda, int N)
      if (n == 1)
 	  return;
      else if (n*N <= CUTOFF) {
-	  int i, j, k;
-	  for (i = 0; i < n; ++i) {
-	       for (j = i + 1; j < n; ++j) {
-		    for (k = 0; k < N; ++k) { /* FIXME: unroll */
-			 R a = A[(i*fda + j) * N + k];
-			 A[(i*fda + j) * N + k] = A[(j*fda + i) * N + k];
-			 A[(j*fda + i) * N + k] = a;
-		    }
-	       }
+	  switch (N) {
+	      case 1: {
+		   int i, j;
+		   for (i = 0; i < n; ++i) {
+			for (j = i + 1; j < n; ++j) {
+			     R a = A[(i*fda + j)];
+			     A[(i*fda + j)] = A[(j*fda + i)];
+			     A[(j*fda + i)] = a;
+			}
+		   }
+		   break;
+	      }
+	      case 2: {
+		   int i, j;
+		   for (i = 0; i < n; ++i) {
+			for (j = i + 1; j < n; ++j) {
+			     R a0 = A[(i*fda + j) * 2 + 0];
+			     R a1 = A[(i*fda + j) * 2 + 1];
+			     A[(i*fda + j) * 2 + 0] = A[(j*fda + i) * 2 + 0];
+			     A[(i*fda + j) * 2 + 1] = A[(j*fda + i) * 2 + 1];
+			     A[(j*fda + i) * 2 + 0] = a0;
+			     A[(j*fda + i) * 2 + 1] = a1;
+			}
+		   }
+	      }
+	      default: {
+		   int i, j, k;
+		   for (i = 0; i < n; ++i) {
+			for (j = i + 1; j < n; ++j) {
+			     for (k = 0; k < N; ++k) {
+				  R a = A[(i*fda + j) * N + k];
+				  A[(i*fda + j) * N + k] = 
+				       A[(j*fda + i) * N + k];
+				  A[(j*fda + i) * N + k] = a;
+			     }
+			}
+		   }
+	      }
 	  }
-     }
-     else {
+     } else {
 	  int n2 = n / 2;
 	  rec_transpose_sq_ip_Ntuple(A, n2, fda, N);
 	  rec_transpose_sq_ip_Ntuple((A + n2*N) + n2*N*fda, n - n2, fda, N);
