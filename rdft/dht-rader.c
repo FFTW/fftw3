@@ -101,7 +101,7 @@ static void apply(const plan *ego_, R *I, R *O)
      buf[k] *= omega[k];
      
      /* this will add input[0] to all of the outputs after the ifft */
-     buf[0] += (npad == n - 1) ? r0 : (r0 * 0.5);
+     buf[0] += r0;
 
      /* inverse FFT: */
      {
@@ -109,20 +109,11 @@ static void apply(const plan *ego_, R *I, R *O)
 	    cld->apply((plan *) cld, buf, buf);
      }
 
-     /* do inverse permutation to unshuffle the output;
-	also "fold" padded outputs (if any) back to get cyclic convolution */
+     /* do inverse permutation to unshuffle the output: */
      A(gpower == 1);
      g = ego->ginv;
-     if (npad == n - 1) {
-	  for (k = 0; k < n - 1; ++k, gpower = MULMOD(gpower, g, n)) {
-	       O[gpower * os] = buf[k];
-	  }
-     }
-     else {
-	  A(npad >= 2*(n - 1) - 1);
-	  for (k = 0; k < n - 1; ++k, gpower = MULMOD(gpower, g, n)) {
-	       O[gpower * os] = buf[k] + buf[k + (n - 1)];
-	  }
+     for (k = 0; k < n - 1; ++k, gpower = MULMOD(gpower, g, n)) {
+	  O[gpower * os] = buf[k];
      }
      A(gpower == 1);
 
@@ -148,8 +139,13 @@ static R *mkomega(plan *p_, int n, int npad, int ginv)
      }
      A(gpower == 1);
 
+     A(npad == n - 1 || npad >= 2*(n - 1) - 1);
+
      for (; i < npad; ++i)
 	  omega[i] = 0.0;
+     if (npad > n - 1)
+	  for (i = 1; i < n-1; ++i)
+	       omega[npad - i] = omega[n - 1 - i];
 
      AWAKE(p_, 1);
      p->apply(p_, omega, omega);
