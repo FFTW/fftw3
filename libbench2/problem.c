@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.13 2003-01-26 16:55:39 athena Exp $ */
+/* $Id: problem.c,v 1.14 2003-01-26 21:29:18 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -181,7 +181,6 @@ bench_problem *problem_parse(const char *s)
 
      BENCH_ASSERT(p->sz && p->vecsz);
      BENCH_ASSERT(!*s);
-     problem_alloc(p);
      return p;
 }
 

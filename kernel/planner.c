@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.132 2003-01-26 16:51:16 athena Exp $ */
+/* $Id: planner.c,v 1.133 2003-01-26 21:29:18 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -251,6 +251,7 @@ static void hinsert(planner *ego, const md5sig s,
 	       flags |= l->flags & BLESSING; /* ne me perdas illa die */
 	  } else {
 	       A(SUBSUMES(l->flags, flags));
+	       l->flags |= flags & BLESSING;
 	       return;
 	  }
      } else {
@@ -398,9 +399,13 @@ static plan *mkplan(planner *ego, problem *p)
 
 	       /* use solver to obtain a plan */
 	       sp = ego->slvdescs + sol->slvndx;
+#if 0
+/* I don't understand this anymore */
 	       pln = invoke_solver(ego, p, sp->slv, 
 				   (IMPATIENCE(sol->flags) |
 				    NONIMPATIENCE(ego->planner_flags)));
+#endif
+	       pln = invoke_solver(ego, p, sp->slv, ego->planner_flags);
 	  } else {
 	       A(SUBSUMES(ego->planner_flags, sol->flags));
 	  }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.7 2003-01-26 16:55:39 athena Exp $ */
+/* $Id: verify.c,v 1.8 2003-01-26 21:29:18 athena Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -115,6 +115,7 @@ void verify(const char *param, int rounds, double tol)
 
      p = problem_parse(param);
      BENCH_ASSERT(can_do(p));
+     problem_alloc(p);
      problem_zero(p);
      setup(p);
 
@@ -136,6 +137,7 @@ void accuracy(const char *param, int rounds)
      bench_problem *p;
      p = problem_parse(param);
      BENCH_ASSERT(can_do(p));
+     problem_alloc(p);
      problem_zero(p);
      setup(p);
      BENCH_ASSERT(0); /* TODO */
