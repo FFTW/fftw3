@@ -45,11 +45,13 @@ tensor *X(mktensor_rowmajor)(int rnk, const int *n,
 static int rowmajor_kosherp(int rnk, const int *n)
 {
      int i;
+
+     if (!FINITE_RNK(rnk)) return 0;
      if (rnk < 0) return 0;
-     if (FINITE_RNK(rnk)) {
-	  for (i = 0; i < rnk; ++i)
-	       if (n[i] < 0) return 0;
-     }
+
+     for (i = 0; i < rnk; ++i)
+	  if (n[i] <= 0) return 0;
+
      return 1;
 }
 

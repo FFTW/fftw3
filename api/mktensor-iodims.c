@@ -35,15 +35,20 @@ tensor *X(mktensor_iodims)(int rank, const X(iodim) *dims)
      return x;
 }
 
-static int iodims_kosherp(int rank, const X(iodim) *dims)
+static int iodims_kosherp(int rank, const X(iodim) *dims, int allow_minfty)
 {
      int i;
 
      if (rank < 0) return 0;
 
-     if (FINITE_RNK(rank)) {
+     if (allow_minfty) {
+	  if (!FINITE_RNK(rank)) return 1;
 	  for (i = 0; i < rank; ++i)
 	       if (dims[i].n < 0) return 0;
+     } else {
+	  if (!FINITE_RNK(rank)) return 0;
+	  for (i = 0; i < rank; ++i)
+	       if (dims[i].n <= 0) return 0;
      }
 
      return 1;
@@ -52,6 +57,6 @@ static int iodims_kosherp(int rank, const X(iodim) *dims)
 int X(guru_kosherp)(int rank, const X(iodim) *dims,
 		    int howmany_rank, const X(iodim) *howmany_dims)
 {
-     return (iodims_kosherp(rank, dims) &&
-	     iodims_kosherp(howmany_rank, howmany_dims));
+     return (iodims_kosherp(rank, dims, 0) &&
+	     iodims_kosherp(howmany_rank, howmany_dims, 1));
 }

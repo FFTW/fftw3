@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.11 2003-01-20 13:29:21 athena Exp $ */
+/* $Id: problem.c,v 1.12 2003-01-22 01:32:12 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -31,7 +31,6 @@ static bench_tensor *dwim(bench_tensor *t, bench_iodim *last_iodim)
 {
      int i;
      bench_iodim *d, *d1;
-     bench_tensor *tc;
 
      if (!FINITE_RNK(t->rnk) || t->rnk < 1)
 	  return t;
@@ -49,9 +48,7 @@ static bench_tensor *dwim(bench_tensor *t, bench_iodim *last_iodim)
      }
 
      *last_iodim = *d1;
-     tc = tensor_compress(t);
-     tensor_destroy(t);
-     return tc;
+     return t;
 }
 
 static const char *parseint(const char *s, int *n)
