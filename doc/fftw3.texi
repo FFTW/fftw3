@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.26 2003-02-17 08:39:02 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.27 2003-02-17 08:40:19 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -698,9 +698,9 @@ so-called because it takes a real (@code{double}) array and outputs a
 real array of the same size.  These r2r transforms currently fall into
 three categories: DFTs of real input and complex-Hermitian output in
 halfcomplex format, DFTs of real input with even/odd symmetry
-(a.k.a. discrete cosine/sine transforms, DCT/DST), and the discrete
-Hartley transform (DHT), all described in more detail by the following
-sections.
+(a.k.a. discrete cosine/sine transforms, DCTs/DSTs), and discrete
+Hartley transform (DHTs), all described in more detail by the
+following sections.
 
 The r2r transforms follow the by-now familiar interface of creating an
 @code{fftw_plan}, executing it with @code{fftw_execute(plan)}, and
