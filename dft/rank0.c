@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.14 2002-07-16 11:00:10 athena Exp $ */
+/* $Id: rank0.c,v 1.15 2002-07-26 00:11:26 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -54,6 +54,7 @@ static int applicable(const solver *ego_, const problem *p_)
           const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
           return (1
+		  && p->ri != p->ro
                   && p->sz.rnk == 0
                   && ego->adt->applicable(p)
 	       );

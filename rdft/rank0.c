@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.2 2002-07-21 22:27:09 stevenj Exp $ */
+/* $Id: rank0.c,v 1.3 2002-07-26 00:11:26 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -54,6 +54,7 @@ static int applicable(const solver *ego_, const problem *p_)
           const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
+		  && p->I != p->O
                   && p->sz.rnk == 0
                   && ego->adt->applicable(p)
 	       );
