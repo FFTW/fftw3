@@ -15,6 +15,7 @@ bench_LDADD = $(LIBFFTWTHREADS)				\
 $(top_builddir)/libfftw3@PREC_SUFFIX@.la		\
 $(top_builddir)/libbench2/libbench2.a $(THREADLIBS)
 
-
+check-local: bench
+	perl -w $(srcdir)/check.pl -a -v --nowisdom ./bench
 
 
