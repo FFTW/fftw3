@@ -42,6 +42,19 @@ if THREADS
 	@echo "--------------------------------------------------------------"
 endif
 
+smallcheck: bench
+	perl -w $(srcdir)/check.pl -r -c=1 -v `pwd`/bench
+	perl -w $(srcdir)/check.pl -r --estimate -c=5 -v `pwd`/bench
+	@echo "--------------------------------------------------------------"
+	@echo "         FFTW transforms passed a few tests!"
+	@echo "--------------------------------------------------------------"
+if THREADS
+	perl -w $(srcdir)/check.pl -r --estimate -c=2 -v --nthreads=2 `pwd`/bench
+	@echo "--------------------------------------------------------------"
+	@echo "         FFTW threaded transforms passed a few tests!"
+	@echo "--------------------------------------------------------------"
+endif
+
 paranoid-check: bench
 if THREADS
 	perl -w $(srcdir)/check.pl -a -o=exhaustive --nthreads=10 --paranoid `pwd`/bench
