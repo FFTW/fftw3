@@ -20,6 +20,13 @@
 
 #include "dft.h"
 
+/*
+ * Compute transforms of prime sizes using Rader's trick: turn them
+ * into convolutions of size n - 1, which you then perform via a pair
+ * of FFTs.   This file contains both nontwiddle (direct) and 
+ * twiddle (DIT Cooley-Tukey) solvers.
+ */
+
 typedef struct {
      solver super;
      uint min_prime;
@@ -34,11 +41,12 @@ typedef struct {
      plan *cld_omega;
 } P;
 
-/*
- * Compute transforms of prime sizes using Rader's trick: turn them
- * into convolutions of size n - 1, which you then perform via a pair
- * of FFTs. 
- */
+typedef struct {
+     P super;
+     plan *cld;
+     R *W;
+     int os, m;
+} P_dit;
 
 /***************************************************************************/
 
@@ -119,17 +127,24 @@ static uint find_generator(uint p)
      return g;
 }
 
-/* Return whether n is prime.  (It would be only slightly faster to
+/* Return first prime divisor of n  (It would be only slightly faster to
    search a static table of primes; there are 6542 primes < 2^16.)  */
-static int isprime(uint n)
+static int first_divisor(uint n)
 {
      uint i;
-     if (n <= 1 || (n % 2 == 0 && n > 2))
-	  return 0;
+     if (n <= 1)
+	  return n;
+     if (n % 2 == 0)
+	  return 2;
      for (i = 3; i*i <= n; i += 2)
 	  if (n % i == 0)
-	       return 0;
-     return 1;
+	       return i;
+     return n;
+}
+
+static int isprime(uint n)
+{
+     return(n > 1 && first_divisor(n) == n);
 }
 
 /***************************************************************************/
@@ -150,7 +165,8 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      P *ego = (P *) ego_;
      uint is, os, r;
      uint k, gpower, g;
-     R *buf, *omega;
+     R *buf;
+     const R *omega;
      R r0, i0;
 
      /* First, permute the input, storing in buf: */
@@ -167,9 +183,9 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      /* compute DFT of buf, storing in output (except DC): */
      {
-	    plan *cld0 = ego->cld1;
-	    plan_dft *cld = (plan_dft *) cld0;
-	    cld->apply(cld0, buf, buf+1, ro+os, io+os);
+	    plan *cld1 = ego->cld1;
+	    plan_dft *cld = (plan_dft *) cld1;
+	    cld->apply(cld1, buf, buf+1, ro+os, io+os);
      }
 
      /* set output DC component: */
@@ -195,9 +211,9 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      /* inverse FFT: */
      {
-	    plan *cld0 = ego->cld2;
-	    plan_dft *cld = (plan_dft *) cld0;
-	    cld->apply(cld0, ro+os, io+os, buf, buf+1);
+	    plan *cld2 = ego->cld2;
+	    plan_dft *cld = (plan_dft *) cld2;
+	    cld->apply(cld2, ro+os, io+os, buf, buf+1);
      }
      
      /* finally, do inverse permutation to unshuffle the output: */
@@ -210,36 +226,94 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      A(gpower == 1);
 }
 
-/***************************************************************************/
-
-#if 0
-static fftw_complex *compute_rader_twiddle(int n, uint r, uint g)
+static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
-     fftw_trig_real_t twoPiOverN;
-     uint m = n / r;
-     uint i, j, gpower;
-     fftw_complex *W;
+     P_dit *ego_dit = (P_dit *) ego_;
+     P *ego;
+     plan *cld1, *cld2;
+     uint os, osm, r, m;
+     uint j, k, gpower, g, ginv;
+     R *buf;
+     const R *omega, *W;
+     R r0, i0;
 
-     twoPiOverN = FFTW_K2PI / (fftw_trig_real_t) n;
-     W = (fftw_complex *) fftw_malloc((r - 1) * m * sizeof(fftw_complex));
-     for (i = 0; i < m; ++i)
-	  for (gpower = 1, j = 0; j < r - 1;
-	       ++j, gpower = MULMOD(gpower, g, r)) {
-	       uint k = i * (r - 1) + j;
-	       fftw_trig_real_t ij = (fftw_trig_real_t) (i * gpower);
-	       c_re(W[k]) = FFTW_TRIG_COS(twoPiOverN * ij);
-	       c_im(W[k]) = - FFTW_TRIG_SIN(twoPiOverN * ij);
+     {
+	   plan *cld0 = ego_dit->cld;
+	   plan_dft *cld = (plan_dft *) cld0;
+	   cld->apply(cld0, ri, ii, ro, io);
+     }
+
+     ego = (P *) ego_;
+     cld1 = ego->cld1;
+     cld2 = ego->cld2;
+     r = ego->n;
+     m = ego_dit->m;
+     g = ego->g; 
+     ginv = ego->ginv;
+     buf = ego->buf;
+     omega = ego->omega;
+     W = ego_dit->W;
+     os = ego_dit->os;
+     osm = ego->os;
+     gpower = 1;
+
+     for (j = 0; j < m; ++j, ro += os, io += os, W += 2*(r - 1)) {
+	  /* First, permute the input and multiply by W, storing in buf: */
+	  A(gpower == 1);
+	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
+	       R rA, iA, rW, iW;
+	       rA = ro[gpower * osm];
+	       iA = io[gpower * osm];
+	       rW = W[2*k];
+	       iW = W[2*k+1];
+	       buf[2*k] = rW * rA - iW * iA;
+	       buf[2*k + 1] = rW * iA + iW * rA;
 	  }
+	  /* gpower == g^(r-1) mod r == 1 */;
+	  
+	  
+	  /* compute DFT of buf, storing in output (except DC): */
+	  {
+	       plan_dft *cld = (plan_dft *) cld1;
+	       cld->apply(cld1, buf, buf+1, ro+osm, io+osm);
+	  }
+	  
+	  /* set output DC component: */
+	  ro[0] = (r0 = ro[0]) + ro[osm];
+	  io[0] = (i0 = io[0]) + io[osm];
 
-     return W;
+	  /* now, multiply by omega: */
+	  for (k = 0; k < r - 1; ++k) {
+	       fftw_real rB, iB, rW, iW;
+	       rW = omega[2*k];
+	       iW = omega[2*k+1];
+	       rB = ro[(k+1)*osm];
+	       iB = io[(k+1)*osm];
+	       ro[(k+1)*osm] = rW * rB - iW * iB;
+	       io[(k+1)*osm] = -(rW * iB + iW * rB);
+	  }
+	  
+	  /* this will add input[0] to all of the outputs after the ifft */
+	  ro[osm] += r0;
+	  io[osm] -= i0;
+	  
+	  /* inverse FFT: */
+	  {
+	       plan_dft *cld = (plan_dft *) cld2;
+	       cld->apply(cld2, ro+osm, io+osm, buf, buf+1);
+	  }
+	  
+	  /* finally, do inverse permutation to unshuffle the output: */
+	  A(gpower == 1);
+	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, ginv, r)) {
+	       ro[gpower * osm] = buf[2*k];
+	       io[gpower * osm] = -buf[2*k+1];
+	  }
+	  A(gpower == 1);
+     }
 }
-#endif
 
-/* change here if you need higher precision */
-typedef double trigreal;
-#define COS cos
-#define SIN sin
-#define K2PI ((trigreal)6.2831853071795864769252867665590057683943388)
+/***************************************************************************/
 
 static R *mkomega(plan *p_, R *buf, uint n, uint ginv)
 {
@@ -253,7 +327,7 @@ static R *mkomega(plan *p_, R *buf, uint n, uint ginv)
 
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
 	  buf[2*i] = scale * COS(twoPiOverN * gpower);
-	  buf[2*i+1] = -scale * SIN(twoPiOverN * gpower);
+	  buf[2*i+1] = FFT_SIGN * scale * SIN(twoPiOverN * gpower);
      }
      A(gpower == 1);
 
@@ -261,6 +335,27 @@ static R *mkomega(plan *p_, R *buf, uint n, uint ginv)
 
      p->apply(p_, buf, buf + 1, omega, omega + 1);
      return omega;
+}
+
+static R *mktwiddle(uint m, uint r, uint g)
+{
+     trigreal twoPiOverN;
+     uint i, j, gpower;
+     R *W;
+
+     twoPiOverN = K2PI / (trigreal) (r * m);
+     W = (R *)fftw_malloc(sizeof(R) * (r - 1) * m * 2, TWIDDLES);
+     for (i = 0; i < m; ++i) {
+	  for (gpower = 1, j = 0; j < r - 1;
+	       ++j, gpower = MULMOD(gpower, g, r)) {
+	       uint k = i * (r - 1) + j;
+	       W[2*k] = COS(twoPiOverN * (i * gpower));
+	       W[2*k+1] = FFT_SIGN * SIN(twoPiOverN * (i * gpower));
+	  }
+	  A(gpower == 1);
+     }
+
+     return W;
 }
 
 /***************************************************************************/
@@ -271,16 +366,23 @@ static void awake(plan *ego_, int flg)
 
      AWAKE(ego->cld1, flg);
      AWAKE(ego->cld2, flg);
+     AWAKE(ego->cld_omega, flg);
 
      if (flg) {
           if (!ego->buf)
                ego->buf = 
 		    (R *)fftw_malloc(sizeof(R) * (ego->n - 1) * 2, BUFFERS);
 	  if (!ego->omega) {
-	       AWAKE(ego->cld_omega, 1);
 	       ego->omega = mkomega(ego->cld_omega,ego->buf,ego->n,ego->ginv);
-	       if (ego->cld_omega != ego->cld1) /* HACK ALERT */
-		    AWAKE(ego->cld_omega, 0);
+#if 0
+	       /* HACK ALERT!  We'd really like to put the cld_omega
+		  plan to sleep here, since we don't need it any more.
+	          However, doing so causes crashes since cld_omega may
+	          be the same as cld1/cld2 or (worse) some other plan
+	          entirely (e.g. a rader-dit plan that is parent or child
+	          to this one). */
+	       AWAKE(ego->cld_omega, 0);
+#endif
 	  }
      } else {
 	  if (ego->omega)
@@ -290,6 +392,21 @@ static void awake(plan *ego_, int flg)
 	       X(free)(ego->buf);
 	  ego->buf = 0;
      }
+}
+
+static void awake_dit(plan *ego_, int flg)
+{
+     P_dit *ego = (P_dit *) ego_;
+
+     AWAKE(ego->cld, flg);
+     if (flg)
+	  ego->W = mktwiddle(ego->m, ego->super.n, ego->super.g);
+     else {
+	  X(free)(ego->W);
+	  ego->W = 0;
+     }
+
+     awake(ego_, flg);
 }
 
 static void destroy(plan *ego_)
@@ -305,12 +422,30 @@ static void destroy(plan *ego_)
      X(free)(ego);
 }
 
+static void destroy_dit(plan *ego_)
+{
+     P_dit *ego = (P_dit *) ego_;
+     if (ego->W)
+	  X(free)(ego->W);
+     X(plan_destroy)(ego->cld);
+     destroy(ego_);
+}
+
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
 
      p->print(p, "(dft-rader-%u%ois=%oos=%(%p%)%(%p%))", 
 	      ego->n, ego->is, ego->os, ego->cld1, ego->cld2);
+}
+
+static void print_dit(plan *ego_, printer *p)
+{
+     P *ego = (P *) ego_;
+     P_dit *ego_dit = (P_dit *) ego_;
+
+     p->print(p, "(dft-rader-dit-%u%(%p%)%(%p%)%(%p%))", 
+	      ego->n, ego->cld1, ego->cld2, ego_dit->cld);
 }
 
 static int applicable(const solver *ego_, const problem *p_)
@@ -322,6 +457,21 @@ static int applicable(const solver *ego_, const problem *p_)
 	       && p->sz.rnk == 1
 	       && p->vecsz.rnk == 0
 	       && isprime(p->sz.dims[0].n)
+	       );
+     }
+
+     return 0;
+}
+
+static int applicable_dit(const solver *ego_, const problem *p_)
+{
+     UNUSED(ego_);
+     if (DFTP(p_)) {
+          const problem_dft *p = (const problem_dft *) p_;
+          return (1
+	       && p->sz.rnk == 1
+	       && p->vecsz.rnk == 0
+	       && p->sz.dims[0].n > 1
 	       );
      }
 
@@ -342,27 +492,29 @@ static int score(const solver *ego_, const problem *p_, int flags)
      return BAD;
 }
 
-static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
+static int score_dit(const solver *ego_, const problem *p_, int flags)
 {
-     P *pln;
+     UNUSED(flags);
+     if (applicable_dit(ego_, p_)) {
+	  const S *ego = (const S *) ego_;
+          const problem_dft *p = (const problem_dft *) p_;
+	  int r = first_divisor(p->sz.dims[0].n);
+	  if (r < ego->min_prime || r == p->sz.dims[0].n)
+	       return UGLY;
+	  else
+	       return GOOD;
+     }
+     return BAD;
+}
+
+static int mkP(P *pln, uint n, uint is, uint os, R *ro, R *io,
+	       planner *plnr)
+{
      plan *cld1 = (plan *) 0;
      plan *cld2 = (plan *) 0;
      plan *cld_omega = (plan *) 0;
      problem *cldp = 0;
-     const problem_dft *p = (const problem_dft *) p_;
      R *buf = (R *) 0, *omega = (R *) 0;
-     uint n, is, os;
-
-     static const plan_adt padt = {
-	  X(dft_solve), awake, print, destroy
-     };
-
-     if (!applicable(ego, p_))
-          goto nada;
-
-     n = p->sz.dims[0].n;
-     is = p->sz.dims[0].is;
-     os = p->sz.dims[0].os;
 
      /* initial allocation for the purpose of planning */
      buf = (R *) fftw_malloc(sizeof(R) * (n - 1) * 2, BUFFERS);
@@ -371,7 +523,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
           X(mkproblem_dft_d)(
                X(mktensor_1d)(n - 1, 2, os),
                X(mktensor_1d)(1, 0, 0),
-               buf, buf + 1, p->ro + os, p->io + os);
+               buf, buf + 1, ro + os, io + os);
      cld1 = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld1)
@@ -381,7 +533,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
           X(mkproblem_dft_d)(
                X(mktensor_1d)(n - 1, os, 2),
                X(mktensor_1d)(1, 0, 0),
-               p->ro + os, p->io + os, buf, buf + 1);
+               ro + os, io + os, buf, buf + 1);
      cld2 = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld2)
@@ -407,7 +559,6 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      X(free)(buf);
      buf = 0;
 
-     pln = MKPLAN_DFT(P, &padt, apply);
      pln->cld1 = cld1;
      pln->cld2 = cld2;
      pln->cld_omega = cld_omega;
@@ -425,7 +576,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->super.super.ops.add += (n - 1) * 2 + 4;
      pln->super.super.ops.mul += (n - 1) * 4;
 
-     return &(pln->super.super);
+     return 1;
 
  nada:
      if (buf)
@@ -438,13 +589,103 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
           X(plan_destroy)(cld2);
      if (cld1)
           X(plan_destroy)(cld1);
+     return 0;
+}
+
+static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
+{
+     const problem_dft *p = (const problem_dft *) p_;
+     P *pln;
+     uint n, is, os;
+
+     static const plan_adt padt = {
+	  X(dft_solve), awake, print, destroy
+     };
+
+     if (!applicable(ego, p_))
+	  return (plan *) 0;
+
+     n = p->sz.dims[0].n;
+     is = p->sz.dims[0].is;
+     os = p->sz.dims[0].os;
+
+     pln = MKPLAN_DFT(P, &padt, apply);
+     if (!mkP(pln, n, is, os, p->ro, p->io, plnr)) {
+	  X(free)(pln);
+	  return (plan *) 0;
+     }
+     return &(pln->super.super);
+}
+
+static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
+{
+     const problem_dft *p = (const problem_dft *) p_;
+     P_dit *pln;
+     uint n, is, os, r, m;
+     plan *cld = (plan *) 0;
+
+     static const plan_adt padt = {
+	  X(dft_solve), awake_dit, print_dit, destroy_dit
+     };
+
+     if (!applicable_dit(ego, p_))
+          goto nada;
+
+     n = p->sz.dims[0].n;
+     is = p->sz.dims[0].is;
+     os = p->sz.dims[0].os;
+
+     r = first_divisor(n);
+     m = n / r;
+
+     {
+	  problem *cldp;
+	  cldp = X(mkproblem_dft_d)(X(mktensor_1d)(m, r * is, os),
+				    X(mktensor_1d)(r, is, m * os),
+				    p->ri, p->ii, p->ro, p->io);
+	  cld = MKPLAN(plnr, cldp);
+	  X(problem_destroy)(cldp);
+	  if (!cld)
+	       goto nada;
+     }
+
+     pln = MKPLAN_DFT(P_dit, &padt, apply_dit);
+     if (!mkP(&pln->super, r, os*m, os*m, p->ro, p->io, plnr))
+	  goto nada;
+
+     pln->os = os;
+     pln->m = m;
+     pln->cld = cld;
+
+     pln->super.super.super.ops.add += 2 * (r-1);
+     pln->super.super.super.ops.mul += 4 * (r-1);
+     pln->super.super.super.ops.other += 2 * (r-1);
+     pln->super.super.super.ops =
+	  X(ops_add)(X(ops_mul)(m, pln->super.super.super.ops),
+		     cld->ops);
+
+     return &(pln->super.super.super);
+
+ nada:
+     if (cld)
+          X(plan_destroy)(cld);
+     X(free)(pln);
      return (plan *) 0;
 }
 
-/* constructor */
+/* constructors */
+
 solver *mksolver(uint min_prime)
 {
      static const solver_adt sadt = { mkplan, score };
+     S *slv = MKSOLVER(S, &sadt);
+     slv->min_prime = min_prime;
+     return &(slv->super);
+}
+
+solver *mksolver_dit(uint min_prime)
+{
+     static const solver_adt sadt = { mkplan_dit, score_dit };
      S *slv = MKSOLVER(S, &sadt);
      slv->min_prime = min_prime;
      return &(slv->super);
@@ -454,4 +695,5 @@ void X(dft_rader_register)(planner *p)
 {
      /* FIXME: what are good defaults? */
      REGISTER_SOLVER(p, mksolver(53));
+     REGISTER_SOLVER(p, mksolver_dit(53));
 }

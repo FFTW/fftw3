@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.32 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: ifftw.h,v 1.33 2002-06-17 05:39:55 fftw Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -35,6 +35,8 @@
 /* shorthands */
 typedef fftw_real R;
 #define X FFTW
+
+#define FFT_SIGN -1  /* sign convention for forward transforms */
 
 /* get rid of that object-oriented stink: */
 #define DESTROY(thing) ((thing)->adt->destroy)(thing)
@@ -411,6 +413,13 @@ typedef struct twid_s {
 twid *X(mktwiddle)(const tw_instr *instr, uint r, uint m);
 void X(twiddle_destroy)(twid *p);
 uint X(twiddle_length)(const tw_instr *p);
+
+/* change here if you need higher precision */
+typedef double trigreal;
+#define COS cos
+#define SIN sin
+#define TAN tan
+#define K2PI ((trigreal)6.2831853071795864769252867665590057683943388)
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */

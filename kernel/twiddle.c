@@ -18,19 +18,12 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.6 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: twiddle.c,v 1.7 2002-06-17 05:39:55 fftw Exp $ */
 
 /* Twiddle manipulation */
 
 #include "ifftw.h"
 #include <math.h>
-
-/* change here if you need higher precision */
-typedef double trigreal;
-#define COS cos
-#define SIN sin
-#define TAN tan
-#define K2PI ((trigreal)6.2831853071795864769252867665590057683943388)
 
 /* table of known twiddle factors */
 static twid *twlist = (twid *) 0;
