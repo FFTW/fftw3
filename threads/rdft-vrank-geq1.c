@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-vrank-geq1.c,v 1.15 2003-04-03 07:17:58 stevenj Exp $ */
+/* $Id: rdft-vrank-geq1.c,v 1.16 2003-04-03 12:50:43 athena Exp $ */
 
 #include "threads.h"
 
@@ -44,7 +44,7 @@ typedef struct {
 } PD;
 
 static void *spawn_apply(spawn_data *d)
-{
+WITH_ALIGNED_STACK({
      PD *ego = (PD *) d->data;
      int thr_num = d->thr_num;
      plan_rdft *cld = (plan_rdft *) ego->cldrn[d->thr_num];
@@ -52,9 +52,7 @@ static void *spawn_apply(spawn_data *d)
      cld->apply((plan *) cld,
 		ego->I + thr_num * ego->its, ego->O + thr_num * ego->ots);
      return 0;
-}
-
-SPAWN_APPLY0(spawn_apply)
+})
 
 static void apply(const plan *ego_, R *I, R *O)
 {
@@ -66,7 +64,7 @@ static void apply(const plan *ego_, R *I, R *O)
      d.cldrn = ego->cldrn;
      d.I = I; d.O = O;
 
-     X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply0, (void*) &d);
+     X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*) &d);
 }
 
 static void awake(plan *ego_, int flg)

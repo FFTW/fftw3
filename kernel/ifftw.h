@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.211 2003-04-03 07:17:58 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.212 2003-04-03 12:50:43 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -712,9 +712,6 @@ unsigned X(hash)(const char *s);
 int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz);
 int X(ct_uglyp)(int min_n, int n, int r);
 
-typedef void *(*with_aligned_stack_func)(void *);
-void *X(with_aligned_stack)(with_aligned_stack_func f, void *p);
-
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */
 
@@ -753,5 +750,56 @@ static __inline__ E FNMS(E a, E b, E c)
 
 /* inline nontwiddle codelets, at the discretion of the compiler */
 #define MAYBE_INLINE inline
+
+
+/* stack-alignment hackery */
+#if defined(__GNUC__) && defined(__i386__)
+/*
+ * horrible hack to align the stack to a 16-byte boundary.
+ *
+ * We assume a gcc version >= 2.95 so that
+ * -mpreferred-stack-boundary works.  Otherwise, all bets are
+ * off.  However, -mpreferred-stack-boundary does not create a
+ * stack alignment, but it only preserves it.  Unfortunately,
+ * many versions of libc on linux call main() with the wrong
+ * initial stack alignment, with the result that the code is now
+ * pessimally aligned instead of having a 50% chance of being
+ * correct.
+ */
+
+#define WITH_ALIGNED_STACK(what)				\
+{								\
+     /*								\
+      * Use alloca to allocate some memory on the stack.	\
+      * This alerts gcc that something funny is going		\
+      * on, so that it does not omit the frame pointer		\
+      * etc.							\
+      */							\
+     (void)__builtin_alloca(16);				\
+								\
+     /*								\
+      * Now align the stack pointer				\
+      */							\
+     __asm__ __volatile__ ("andl $-16, %esp");			\
+								\
+     what							\
+}
+#endif
+
+#ifdef __ICC /* Intel's compiler for ia32 */
+#define WITH_ALIGNED_STACK(what)				\
+{								\
+     /*								\
+      * Simply calling alloca seems to do the right thing.	\
+      * The size of the allocated block seems to be irrelevant.	\
+      */							\
+     _alloca(16);						\
+     what							\
+}
+#endif
+
+#ifndef WITH_ALIGNED_STACK
+#define WITH_ALIGNED_STACK(what) what
+#endif
 
 #endif /* __IFFTW_H__ */

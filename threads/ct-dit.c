@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.12 2003-04-03 07:17:58 stevenj Exp $ */
+/* $Id: ct-dit.c,v 1.13 2003-04-03 12:50:43 athena Exp $ */
 
 /* decimation in time Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -43,18 +43,17 @@ typedef struct {
 } PD;
 
 static void *spawn_apply(spawn_data *d)
-{
+WITH_ALIGNED_STACK({
      PD *ego = (PD *) d->data;
-     int min = d->min, max = d->max;
+     int min = d->min;
+     int max = d->max;
      int os = ego->os;
      int vl = ego->vl;
      
      ego->k(ego->ro + min * os * vl, ego->io + min * os * vl,
 	    ego->W + min * ego->sW, ego->ios, (max - min) * vl, os);
      return 0;
-}
-
-SPAWN_APPLY0(spawn_apply)
+})
 
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
@@ -77,7 +76,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  d.os = ego->os;
 	  d.vl = ego_thr->vl;
 
-	  X(spawn_loop)(ego_thr->mloop, ego_thr->nthr, spawn_apply0,(void*)&d);
+	  X(spawn_loop)(ego_thr->mloop, ego_thr->nthr, spawn_apply,(void*)&d);
      }
 }
 
