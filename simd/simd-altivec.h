@@ -121,6 +121,11 @@ static inline V VFMS(V a, V b, V c)
 
 extern const vector unsigned int X(altivec_ld_selmsk);
 
+static inline V LDA(const R *x, int ivs, const R *aligned_like) 
+{
+     return vec_ld(0, (R *)x);
+}
+
 static inline V LD(const R *x, int ivs, const R *aligned_like) 
 {
      /* common subexpressions */
@@ -149,6 +154,11 @@ static inline void STL(R *x, V v, int ovs, const R *aligned_like)
      v = vec_perm(v, v, vec_lvsr(fovs + 8, (R *)aligned_like));
      vec_ste(v, fovs, x);
      vec_ste(v, 4 + fovs, x);
+}
+
+static inline void STA(R *x, V v, int ovs, const R *aligned_like) 
+{
+     vec_st(v, 0, x);
 }
 
 static inline void ST(R *x, V v, int ovs, const R *aligned_like) 
