@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.4 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: reodft11e-radix2.c,v 1.5 2003-03-01 00:01:20 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:
@@ -27,7 +27,7 @@
    IEEE Trans. Acoust. Speech Sig. Proc. ASSP-33 (4), 1341--1344 (1985).
 
    to re-express as a pair of half-size REDFT01 (DCT-III) problems.  Our
-   implementation looks quite a bit different than the algorithm described
+   implementation looks quite a bit different from the algorithm described
    in the paper because we combined the paper's pre/post-processing with
    the pre/post-processing used to turn REDFT01 into R2HC.  (Also, the
    paper uses a DCT/DST pair, but we turn the DST into a DCT via the
