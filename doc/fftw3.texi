@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.51 2003-03-01 00:01:20 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.52 2003-03-01 23:15:22 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -307,19 +307,23 @@ e.g. @code{-lfftw3 -lm} on Unix systems.)
 
 First, of course, you allocate the arrays; you can do this any way that
 you like, but we recommend using @code{fftw_malloc}, which behaves the
+@findex fftw_malloc
 same as @code{malloc} except that it properly aligns the array when SIMD
 acceleration is available (@pxref{The Importance of Alignment}).  The
 data is an array of type @code{fftw_complex}, which is by default a
 @code{double[2]} containing the real (@code{in[i][0]}) and imaginary
-(@code{in[i][1]}) parts.  If you have a C compiler, such as @code{gcc},
-supporting the recent C99 standard, and you @code{#include <complex.h>}
-@emph{before} @code{<fftw3.h>}, then @code{fftw_complex} is the native
+(@code{in[i][1]}) parts.
+@tindex fftw_complex
+If you have a C compiler, such as @code{gcc}, supporting the recent
+C99 standard, and you @code{#include <complex.h>} @emph{before}
+@code{<fftw3.h>}, then @code{fftw_complex} is the native
 double-precision complex type and you can manipulate it with ordinary
 arithmetic.  (To use the C++ @code{<complex>} template class, see the
 FFTW FAQ.)  Single and long-double precision versions of FFTW may also
 be installed; to use them, replace the @code{fftw_} prefix by
 @code{fftwf_} or @code{fftwl_} and link with @code{-lfftw3f} or
 @code{-lfftw3l}, but use the @emph{same} @code{<fftw3.h>} header file.
+@cindex precision
 
 The next thing is to create a @dfn{plan}, which is an object
 @cindex plan
@@ -398,6 +402,7 @@ When you are done with the plan, you deallocate it by calling
 Arrays allocated with @code{fftw_malloc} should be deallocated by
 @code{fftw_free} rather than the ordinary @code{free} (or, heaven
 forbid, @code{delete}).
+@findex fftw_free
 
 The DFT results are stored in-order in the array @code{out}, with the
 zero-frequency (DC) component in @code{out[0]}.
@@ -522,6 +527,7 @@ always @code{FFTW_BACKWARD}.
 (For single/long-double precision
 @code{fftwf} and @code{fftwl}, @code{double} should be replaced by
 @code{float} and @code{long double}, respectively.)
+@cindex precision
 
 Here, @code{n} is the ``logical'' size of the DFT, not necessarily the
 physical size of the array.  In particular, the real (@code{double})
@@ -1035,6 +1041,89 @@ For the precise mathematical definition of the DHT as used by FFTW, see
 @node The Importance of Alignment, Multi-dimensional Array Format, Other Stuff You Should Know, Other Stuff You Should Know
 @section The Importance of Alignment
 @cindex alignment
+
+@menu
+* SIMD alignment and fftw_malloc::  
+* Stack alignment on x86::      
+@end menu
+
+In order to get the best performance from FFTW, one needs to be
+somewhat aware of a couple of alignment issues that can cause
+problems, primarily on x86 (Pentia) architectures.  In particular,
+there are two areas of concern: alignment of allocated arrays (for use
+with SIMD acceleration) and stack alignment.
+
+@c =========>
+@node SIMD alignment and fftw_malloc, Stack alignment on x86, The Importance of Alignment, The Importance of Alignment
+@subsection SIMD alignment and fftw_malloc
+
+SIMD, which stands for ``Single Instruction Multiple Data,'' is a set
+of special operations supported by some processors to perform a single
+operation on several numbers (usually 2 or 4) simultaneously.  SIMD
+floating-point instructions are available on several popular CPUs:
+SSE/SSE2 (single/double precision) on Pentium III/IV and higher,
+3DNow! (double precision) on the AMD K7 and higher, and AltiVec
+(single precision) on the PowerPC G4 and higher.  FFTW can be compiled
+to support the SIMD instructions on any of these systems.
+@cindex SIMD
+@cindex SSE
+@cindex SSE2
+@cindex 3DNow!
+@cindex AltiVec
+@cindex precision
+
+A program linking to an FFTW library compiled with SIMD support can
+obtain a non-negligible speedup for most complex and r2c/c2r
+transforms.  In order to obtain this speedup, however, the arrays of
+complex (or real) data passed to FFTW must be specially aligned in
+memory (typically 16-byte aligned), and often this alignment is more
+stringent than that provided by the usual @code{malloc} (etc.)
+allocation routines.
+
+In order to guarantee proper alignment for SIMD, therefore, in case
+your program is ever linked against a SIMD-using FFTW, we recommend
+allocating your transform data with @code{fftw_malloc} and
+de-allocating it with @code{fftw_free}.
+@findex fftw_malloc
+@findex fftw_free
+These have exactly the same interface and behavior as
+@code{malloc}/@code{free}, except that for a SIMD FFTW they ensure
+that the returned pointer has the necessary alignment (by calling
+@code{memalign} or its equivalent on your OS).
+
+You are not @emph{required} to use @code{fftw_malloc}.  You can
+allocate your data in any way that you like, from @code{malloc} to
+@code{new} (in C++) to a static array declaration.  If the array
+happens not to be properly aligned, FFTW will simply behave as if SIMD
+were not available.
+
+@c =========>
+@node Stack alignment on x86,  , SIMD alignment and fftw_malloc, The Importance of Alignment
+@subsection Stack alignment on x86
+
+On Pentium+ x86 processors, there is a substantial performance penalty
+if double-precision variables are not stored 8-byte aligned; a factor
+of two or more is not unusual.  Unfortunately, the stack (the place
+that local variables and subroutine arguments live) is not guaranteed
+by the Intel ABI to be 8-byte aligned.
+
+Recent versions of @code{gcc} (as well as most other compilers, we are
+told, such as Intel's, Metrowerks', and Microsoft's) are able to keep
+the stack 8-byte aligned; @code{gcc} does this by default (see
+@code{-mpreferred-stack-boundary} in the @code{gcc} documentation).
+If you are not certain whether your compiler maintains stack alignment
+by default, it is a good idea to make sure.
+
+Unfortunately, @code{gcc} only @emph{preserves} the stack
+alignment---as a result, if the stack starts off misaligned, it will
+always be misaligned, with a disastrous effect on performance (in
+double precision).  Fortunately, recent versions of glibc (on
+GNU/Linux) provide a properly-aligned starting stack, but this was not
+the case with a number of older versions, and we are not certain of
+the situation on other operating systems.  Hopefully, as time goes by
+this will become less of a concern, but if you want to be paranoid you
+can copy the code from FFTW's @code{libbench2/aligned-main.c} to
+guarantee alignment of your @code{main} function (with @code{gcc}).
 
 @c ------------------------------------------------------------
 @node Multi-dimensional Array Format, Words of Wisdom, The Importance of Alignment, Other Stuff You Should Know
