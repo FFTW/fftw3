@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.62 2002-09-04 00:57:03 athena Exp $ */
+/* $Id: planner.c,v 1.63 2002-09-04 01:08:30 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -289,17 +289,11 @@ static void exprt(planner *ego, printer *p)
      p->print(p, "(" WISDOM_PREAMBLE "%(");
      for (h = 0; h < ego->hashsiz; ++h)
 	  for (s = ego->sols[h]; s; s = s->cdr)
-	       if (BLESSEDP(s)) {
-		    const char *nam;
-		    int id;
-
-		    nam = s->sp ? s->sp->reg_nam : "0";
-		    id = s->sp ? s->sp->reg_id : 0;
-
+	       if (BLESSEDP(s) && s->sp) {
 		    /* qui salvandos salvas gratis
 		       salva me fons pietatis */
 		    p->print(p, "(%s %d #x%x #x%5 #x%5 #x%5 #x%5)\n",
-			     nam, id, s->flags,
+			     s->sp->reg_nam, s->sp->reg_id, s->flags,
 			     s->s[0], s->s[1], s->s[2], s->s[3]);
 	       }
      p->print(p, "%))\n");
