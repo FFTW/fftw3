@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.15 2003-01-29 20:41:56 athena Exp $ */
+/* $Id: scan.c,v 1.16 2003-03-02 20:36:28 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -37,7 +37,7 @@
    Sic transit gloria mundi.
 */
 #undef isspace
-#define isspace(x) ((x) <= ' ')
+#define isspace(x) ((x) >= 0 && (x) <= ' ')
 #undef isdigit
 #define isdigit(x) ((x) >= '0' && (x) <= '9')
 #undef isupper
