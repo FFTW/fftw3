@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.1 2002-07-21 06:06:53 stevenj Exp $ */
+/* $Id: rank0.c,v 1.2 2002-07-21 22:27:09 stevenj Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -99,7 +99,7 @@ static void apply_vec(plan *ego_, R *I, R *O)
 	  *O = r3; O += ovs;
      }
      for (; i < vl + 4; ++i) {
-          R r0, i0;
+          R r0;
           r0 = *I; I += ivs;
           *O = r0; O += ovs;
      }
