@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.73 2002-08-05 03:57:51 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.74 2002-08-05 23:54:31 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -385,6 +385,7 @@ enum { ESTIMATE = 0x2, IMPATIENT = 0x1, PATIENT = 0x0,
        CLASSIC_VRECURSE = 0x4, FORCE_VRECURSE = 0x8, 
        DESTROY_INPUT = 0x10 };
 
+#define NONPATIENCE_FLAGS(flags) ((flags) & ~(ESTIMATE | IMPATIENT | PATIENT))
 #define IMPATIENCE(flags) ((flags) & (ESTIMATE | IMPATIENT | PATIENT))
 
 typedef enum { FORGET_PLANS, FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;

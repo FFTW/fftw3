@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.39 2002-08-05 02:50:19 stevenj Exp $ */
+/* $Id: planner.c,v 1.40 2002-08-05 23:54:31 stevenj Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -82,30 +82,55 @@ static void hooknil(plan *pln, const problem *p)
 }
 
 /* memoization routines */
-static uint hash(planner *ego, const problem *p)
+static uint hash(planner *ego, const problem *p, int flags)
 {
-     return ((p->adt->hash(p) ^ (ego->flags * 317227)) % ego->hashsiz);
+     return ((p->adt->hash(p) ^ (NONPATIENCE_FLAGS(flags) * 317227))
+	     % ego->hashsiz);
+}
+
+static int solvedby(problem *p, int flags, solutions *l)
+{
+     return (IMPATIENCE(flags) >= IMPATIENCE(l->flags)
+	     && NONPATIENCE_FLAGS(flags) == NONPATIENCE_FLAGS(l->flags)
+	     && p->adt->equal(p, l->p));
 }
 
 static solutions *lookup(planner *ego, problem *p)
 {
      solutions *l;
-     int h;
+     uint h;
 
-     h = hash(ego, p);
+     h = hash(ego, p, ego->flags);
 
      for (l = ego->sols[h]; l; l = l->cdr) 
-          if (IMPATIENCE(ego->flags) >= IMPATIENCE(l->flags)
-	      && p->adt->equal(p, l->p)) 
+          if (solvedby(p, ego->flags, l))
 	       return l;
      return 0;
 }
 
+static void solution_destroy(solutions *s)
+{
+     if (s->pln)
+	  X(plan_destroy)(s->pln);
+     X(problem_destroy)(s->p);
+     X(free)(s);
+}
+
 static void really_insert(planner *ego, solutions *l)
 {
-     uint h = hash(ego, l->p);
+     uint h = hash(ego, l->p, l->flags);
      l->cdr = ego->sols[h];
      ego->sols[h] = l;
+
+     { /* remove older, less-patient solutions for the same problem */
+	  solutions *s = l->cdr, *sp = l;
+	  for (; s; s = s->cdr, sp = sp->cdr)
+	       if (solvedby(s->p, s->flags, l)) {
+		    s = s->cdr;
+		    solution_destroy(sp->cdr);
+		    sp->cdr = s;
+	       }
+     }
 }
 
 static void rehash(planner *ego)
@@ -230,10 +255,7 @@ static void forget(planner *ego, amnesia a)
 		   (a == FORGET_ACCURSED && !s->blessed)) {
 		    /* confutatis maledictis flammis acribus addictis */
 		    *ps = s->cdr;
-		    if (s->pln)
-			 X(plan_destroy)(s->pln);
-		    X(problem_destroy)(s->p);
-		    X(free)(s);
+		    solution_destroy(s);
 	       } else {
 		    /* voca me cum benedictis */
 		    ps = &s->cdr;
