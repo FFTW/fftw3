@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.17 2003-01-07 12:18:51 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.18 2003-01-09 23:16:39 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -142,6 +142,11 @@ static int applicable(const solver *ego_, const problem *p_,
 
 	  /* prefer threaded version */
 	  if (NONTHREADED_ICKYP(plnr)) return 0;
+
+	  /* exploit built-in vecloops of (ugly) r{e,o}dft solvers */
+	  if (p->vecsz->rnk == 1 && p->sz->rnk == 1
+	      && (REDFT_KINDP(p->kind[0]) || RODFT_KINDP(p->kind[0])))
+	       return 0;
      }
 
      return 1;

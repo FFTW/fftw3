@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.14 2003-01-08 21:46:24 stevenj Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.15 2003-01-09 23:16:39 stevenj Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -34,6 +34,8 @@ typedef struct {
      twid *td;
      int is, os;
      uint n;
+     uint vl;
+     int ivs, ovs;
 } P;
 
 /* Use the trick from FFTPACK, also documented in a similar form
@@ -44,43 +46,47 @@ static void apply(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
+     uint iv, vl = ego->vl;
+     int ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W;
      R *buf;
      E csum;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
-     buf[0] = I[0] + I[is * n];
-     csum = I[0] - I[is * n];
-     for (i = 1; i < n - i; ++i) {
-	  E a, b, apb, amb;
-	  a = I[is * i];
-	  b = I[is * (n - i)];
-	  csum += W[2*i] * (2.0*(a - b));
-	  amb = W[2*i+1] * (2.0*(a - b));
-	  apb = (a + b);
-	  buf[i] = apb - amb;
-	  buf[n - i] = apb + amb;
-     }
-     if (i == n - i) {
-	  buf[i] = 2.0 * I[is * i];
-     }
-
-     {
-	  plan_rdft *cld = (plan_rdft *) ego->cld;
-	  cld->apply((plan *) cld, buf, buf);
-     }
-
-     /* FIXME: use recursive/cascade summation for better stability? */
-     O[0] = buf[0];
-     O[os] = csum;
-     for (i = 1; i + i < n; ++i) {
-	  uint k = i + i;
-	  O[os * k] = buf[i];
-	  O[os * (k + 1)] = O[os * (k - 1)] - buf[n - i];
-     }
-     if (i + i == n) {
-	  O[os * n] = buf[i];
+     for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
+	  buf[0] = I[0] + I[is * n];
+	  csum = I[0] - I[is * n];
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b, apb, amb;
+	       a = I[is * i];
+	       b = I[is * (n - i)];
+	       csum += W[2*i] * (2.0*(a - b));
+	       amb = W[2*i+1] * (2.0*(a - b));
+	       apb = (a + b);
+	       buf[i] = apb - amb;
+	       buf[n - i] = apb + amb;
+	  }
+	  if (i == n - i) {
+	       buf[i] = 2.0 * I[is * i];
+	  }
+	  
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->cld;
+	       cld->apply((plan *) cld, buf, buf);
+	  }
+	  
+	  /* FIXME: use recursive/cascade summation for better stability? */
+	  O[0] = buf[0];
+	  O[os] = csum;
+	  for (i = 1; i + i < n; ++i) {
+	       uint k = i + i;
+	       O[os * k] = buf[i];
+	       O[os * (k + 1)] = O[os * (k - 1)] - buf[n - i];
+	  }
+	  if (i + i == n) {
+	       O[os * n] = buf[i];
+	  }
      }
 
      X(free)(buf);
@@ -108,7 +114,7 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(redft00e-r2hc-%u%(%p%))", ego->n + 1, ego->cld);
+     p->print(p, "(redft00e-r2hc-%u%v%(%p%))", ego->n + 1, ego->vl, ego->cld);
 }
 
 static int applicable0(const solver *ego_, const problem *p_)
@@ -118,7 +124,7 @@ static int applicable0(const solver *ego_, const problem *p_)
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
 		  && p->sz->rnk == 1
-		  && p->vecsz->rnk == 0
+		  && p->vecsz->rnk <= 1
 		  && p->kind[0] == REDFT00
 		  && p->sz->dims[0].n > 1  /* n == 1 is not well-defined */
 	       );
@@ -136,7 +142,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      P *pln;
      const problem_rdft *p;
-     problem *cldp;
      plan *cld;
      R *buf;
      uint n;
@@ -154,13 +159,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      A(n > 0);
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
-     {
-	  tensor *sz = X(mktensor_1d)(n, 1, 1);
-	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, buf, buf, R2HC);
-	  X(tensor_destroy)(sz);
-     }
-
-     cld = X(mkplan_d)(plnr, cldp);
+     cld = X(mkplan_d)(plnr, X(mkproblem_rdft_1_d)(X(mktensor_1d)(n, 1, 1), 
+						   X(mktensor_0d)(), 
+						   buf, buf, R2HC));
      X(free)(buf);
      if (!cld)
           return (plan *)0;
@@ -172,6 +173,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->os = p->sz->dims[0].os;
      pln->cld = cld;
      pln->td = 0;
+
+     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      
      pln->super.super.ops = cld->ops;
      /* FIXME */

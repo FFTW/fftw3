@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.14 2003-01-08 21:46:24 stevenj Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.15 2003-01-09 23:16:39 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -40,6 +40,8 @@ typedef struct {
      twid *td, *td2;
      int is, os;
      uint n;
+     uint vl;
+     int ivs, ovs;
      rdft_kind kind;
 } P;
 
@@ -48,54 +50,59 @@ static void apply_re11(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
-     R *W = ego->td->W;
+     uint iv, vl = ego->vl;
+     int ivs = ego->ivs, ovs = ego->ovs;
+     R *W;
      R *buf;
      E cur;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
-     /* I wish that this didn't require an extra pass. */
-     /* FIXME: use recursive/cascade summation for better stability? */
-     buf[n - 1] = cur = 2.0 * I[is * (n - 1)];
-     for (i = n - 1; i > 0; --i) {
-	  E curnew;
-	  buf[(i - 1)] = curnew = 2.0 * I[is * (i - 1)] - cur;
-	  cur = curnew;
-     }
-
-     for (i = 1; i < n - i; ++i) {
-	  E a, b, apb, amb, wa, wb;
-	  a = buf[i];
-	  b = buf[n - i];
-	  apb = a + b;
-	  amb = a - b;
-	  wa = W[2*i];
-	  wb = W[2*i + 1];
-	  buf[i] = wa * amb + wb * apb; 
-	  buf[n - i] = wa * apb - wb * amb; 
-     }
-     if (i == n - i) {
-	  buf[i] = 2.0 * buf[i] * W[2*i];
-     }
-
-     {
-	  plan_rdft *cld = (plan_rdft *) ego->cld;
-	  cld->apply((plan *) cld, buf, buf);
-     }
-
-     W = ego->td2->W;
-     O[0] = W[0] * buf[0];
-     for (i = 1; i < n - i; ++i) {
-	  E a, b;
-	  uint k;
-	  a = buf[i];
-	  b = buf[n - i];
-	  k = i + i;
-	  O[os * (k - 1)] = W[k - 1] * (a - b);
-	  O[os * k] = W[k] * (a + b);
-     }
-     if (i == n - i) {
-	  O[os * (n - 1)] = W[n - 1] * buf[i];
+     for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
+	  /* I wish that this didn't require an extra pass. */
+	  /* FIXME: use recursive/cascade summation for better stability? */
+	  buf[n - 1] = cur = 2.0 * I[is * (n - 1)];
+	  for (i = n - 1; i > 0; --i) {
+	       E curnew;
+	       buf[(i - 1)] = curnew = 2.0 * I[is * (i - 1)] - cur;
+	       cur = curnew;
+	  }
+	  
+	  W = ego->td->W;
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b, apb, amb, wa, wb;
+	       a = buf[i];
+	       b = buf[n - i];
+	       apb = a + b;
+	       amb = a - b;
+	       wa = W[2*i];
+	       wb = W[2*i + 1];
+	       buf[i] = wa * amb + wb * apb; 
+	       buf[n - i] = wa * apb - wb * amb; 
+	  }
+	  if (i == n - i) {
+	       buf[i] = 2.0 * buf[i] * W[2*i];
+	  }
+	  
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->cld;
+	       cld->apply((plan *) cld, buf, buf);
+	  }
+	  
+	  W = ego->td2->W;
+	  O[0] = W[0] * buf[0];
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b;
+	       uint k;
+	       a = buf[i];
+	       b = buf[n - i];
+	       k = i + i;
+	       O[os * (k - 1)] = W[k - 1] * (a - b);
+	       O[os * k] = W[k] * (a + b);
+	  }
+	  if (i == n - i) {
+	       O[os * (n - 1)] = W[n - 1] * buf[i];
+	  }
      }
 
      X(free)(buf);
@@ -108,54 +115,59 @@ static void apply_ro11(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
-     R *W = ego->td->W;
+     uint iv, vl = ego->vl;
+     int ivs = ego->ivs, ovs = ego->ovs;
+     R *W;
      R *buf;
      E cur;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
-     /* I wish that this didn't require an extra pass. */
-     /* FIXME: use recursive/cascade summation for better stability? */
-     buf[n - 1] = cur = 2.0 * I[0];
-     for (i = n - 1; i > 0; --i) {
-	  E curnew;
-	  buf[(i - 1)] = curnew = 2.0 * I[is * (n - i)] - cur;
-	  cur = curnew;
-     }
-
-     for (i = 1; i < n - i; ++i) {
-	  E a, b, apb, amb, wa, wb;
-	  a = buf[i];
-	  b = buf[n - i];
-	  apb = a + b;
-	  amb = a - b;
-	  wa = W[2*i];
-	  wb = W[2*i + 1];
-	  buf[i] = wa * amb + wb * apb; 
-	  buf[n - i] = wa * apb - wb * amb; 
-     }
-     if (i == n - i) {
-	  buf[i] = 2.0 * buf[i] * W[2*i];
-     }
-
-     {
-	  plan_rdft *cld = (plan_rdft *) ego->cld;
-	  cld->apply((plan *) cld, buf, buf);
-     }
-
-     W = ego->td2->W;
-     O[0] = W[0] * buf[0];
-     for (i = 1; i < n - i; ++i) {
-	  E a, b;
-	  uint k;
-	  a = buf[i];
-	  b = buf[n - i];
-	  k = i + i;
-	  O[os * (k - 1)] = W[k - 1] * (b - a);
-	  O[os * k] = W[k] * (a + b);
-     }
-     if (i == n - i) {
-	  O[os * (n - 1)] = -W[n - 1] * buf[i];
+     for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
+	  /* I wish that this didn't require an extra pass. */
+	  /* FIXME: use recursive/cascade summation for better stability? */
+	  buf[n - 1] = cur = 2.0 * I[0];
+	  for (i = n - 1; i > 0; --i) {
+	       E curnew;
+	       buf[(i - 1)] = curnew = 2.0 * I[is * (n - i)] - cur;
+	       cur = curnew;
+	  }
+	  
+	  W = ego->td->W;
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b, apb, amb, wa, wb;
+	       a = buf[i];
+	       b = buf[n - i];
+	       apb = a + b;
+	       amb = a - b;
+	       wa = W[2*i];
+	       wb = W[2*i + 1];
+	       buf[i] = wa * amb + wb * apb; 
+	       buf[n - i] = wa * apb - wb * amb; 
+	  }
+	  if (i == n - i) {
+	       buf[i] = 2.0 * buf[i] * W[2*i];
+	  }
+	  
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->cld;
+	       cld->apply((plan *) cld, buf, buf);
+	  }
+	  
+	  W = ego->td2->W;
+	  O[0] = W[0] * buf[0];
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b;
+	       uint k;
+	       a = buf[i];
+	       b = buf[n - i];
+	       k = i + i;
+	       O[os * (k - 1)] = W[k - 1] * (b - a);
+	       O[os * k] = W[k] * (a + b);
+	  }
+	  if (i == n - i) {
+	       O[os * (n - 1)] = -W[n - 1] * buf[i];
+	  }
      }
 
      X(free)(buf);
@@ -189,8 +201,8 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(%se-r2hc-%u%(%p%))",
-	      X(rdft_kind_str)(ego->kind), ego->n, ego->cld);
+     p->print(p, "(%se-r2hc-%u%v%(%p%))",
+	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }
 
 static int applicable0(const solver *ego_, const problem *p_)
@@ -200,7 +212,7 @@ static int applicable0(const solver *ego_, const problem *p_)
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
 		  && p->sz->rnk == 1
-		  && p->vecsz->rnk == 0
+		  && p->vecsz->rnk <= 1
 		  && (p->kind[0] == REDFT11 || p->kind[0] == RODFT11)
 	       );
      }
@@ -217,7 +229,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      P *pln;
      const problem_rdft *p;
-     problem *cldp;
      plan *cld;
      R *buf;
      uint n;
@@ -234,13 +245,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      n = p->sz->dims[0].n;
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
-     {
-	  tensor *sz = X(mktensor_1d)(n, 1, 1);
-	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, buf, buf, R2HC);
-	  X(tensor_destroy)(sz);
-     }
-
-     cld = X(mkplan_d)(plnr, cldp);
+     cld = X(mkplan_d)(plnr, X(mkproblem_rdft_1_d)(X(mktensor_1d)(n, 1, 1),
+                                                   X(mktensor_0d)(),
+                                                   buf, buf, R2HC));
      X(free)(buf);
      if (!cld)
           return (plan *)0;
@@ -252,6 +259,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cld = cld;
      pln->td = pln->td2 = 0;
      pln->kind = p->kind[0];
+     
+     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      
      pln->super.super.ops = cld->ops;
      /* FIXME */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.16 2003-01-08 21:46:24 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.17 2003-01-09 23:16:39 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -35,6 +35,8 @@ typedef struct {
      twid *td;
      int is, os;
      uint n;
+     uint vl;
+     int ivs, ovs;
      rdft_kind kind;
 } P;
 
@@ -77,44 +79,48 @@ static void apply_re01(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
+     uint iv, vl = ego->vl;
+     int ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W;
      R *buf;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
-     buf[0] = I[0];
-     for (i = 1; i < n - i; ++i) {
-	  E a, b, apb, amb, wa, wb;
-	  a = I[is * i];
-	  b = I[is * (n - i)];
-	  apb = a + b;
-	  amb = a - b;
-	  wa = W[2*i];
-	  wb = W[2*i + 1];
-	  buf[i] = wa * amb + wb * apb; 
-	  buf[n - i] = wa * apb - wb * amb; 
-     }
-     if (i == n - i) {
-	  buf[i] = 2.0 * I[is * i] * W[2*i];
-     }
-
-     {
-	  plan_rdft *cld = (plan_rdft *) ego->cld;
-	  cld->apply((plan *) cld, buf, buf);
-     }
-
-     O[0] = buf[0];
-     for (i = 1; i < n - i; ++i) {
-	  E a, b;
-	  uint k;
-	  a = buf[i];
-	  b = buf[n - i];
-	  k = i + i;
-	  O[os * (k - 1)] = a - b;
-	  O[os * k] = a + b;
-     }
-     if (i == n - i) {
-	  O[os * (n - 1)] = buf[i];
+     for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
+	  buf[0] = I[0];
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b, apb, amb, wa, wb;
+	       a = I[is * i];
+	       b = I[is * (n - i)];
+	       apb = a + b;
+	       amb = a - b;
+	       wa = W[2*i];
+	       wb = W[2*i + 1];
+	       buf[i] = wa * amb + wb * apb; 
+	       buf[n - i] = wa * apb - wb * amb; 
+	  }
+	  if (i == n - i) {
+	       buf[i] = 2.0 * I[is * i] * W[2*i];
+	  }
+	  
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->cld;
+	       cld->apply((plan *) cld, buf, buf);
+	  }
+	  
+	  O[0] = buf[0];
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b;
+	       uint k;
+	       a = buf[i];
+	       b = buf[n - i];
+	       k = i + i;
+	       O[os * (k - 1)] = a - b;
+	       O[os * k] = a + b;
+	  }
+	  if (i == n - i) {
+	       O[os * (n - 1)] = buf[i];
+	  }
      }
 
      X(free)(buf);
@@ -127,44 +133,48 @@ static void apply_ro01(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
+     uint iv, vl = ego->vl;
+     int ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W;
      R *buf;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
-     buf[0] = I[is * (n - 1)];
-     for (i = 1; i < n - i; ++i) {
-	  E a, b, apb, amb, wa, wb;
-	  a = I[is * (n - 1 - i)];
-	  b = I[is * (i - 1)];
-	  apb = a + b;
-	  amb = a - b;
-	  wa = W[2*i];
-	  wb = W[2*i+1];
-	  buf[i] = wa * amb + wb * apb; 
-	  buf[n - i] = wa * apb - wb * amb; 
-     }
-     if (i == n - i) {
-	  buf[i] = 2.0 * I[is * (i - 1)] * W[2*i];
-     }
-
-     {
-	  plan_rdft *cld = (plan_rdft *) ego->cld;
-	  cld->apply((plan *) cld, buf, buf);
-     }
-
-     O[0] = buf[0];
-     for (i = 1; i < n - i; ++i) {
-	  E a, b;
-	  uint k;
-	  a = buf[i];
-	  b = buf[n - i];
-	  k = i + i;
-	  O[os * (k - 1)] = b - a;
-	  O[os * k] = a + b;
-     }
-     if (i == n - i) {
-	  O[os * (n - 1)] = -buf[i];
+     for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
+	  buf[0] = I[is * (n - 1)];
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b, apb, amb, wa, wb;
+	       a = I[is * (n - 1 - i)];
+	       b = I[is * (i - 1)];
+	       apb = a + b;
+	       amb = a - b;
+	       wa = W[2*i];
+	       wb = W[2*i+1];
+	       buf[i] = wa * amb + wb * apb; 
+	       buf[n - i] = wa * apb - wb * amb; 
+	  }
+	  if (i == n - i) {
+	       buf[i] = 2.0 * I[is * (i - 1)] * W[2*i];
+	  }
+	  
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->cld;
+	       cld->apply((plan *) cld, buf, buf);
+	  }
+	  
+	  O[0] = buf[0];
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b;
+	       uint k;
+	       a = buf[i];
+	       b = buf[n - i];
+	       k = i + i;
+	       O[os * (k - 1)] = b - a;
+	       O[os * k] = a + b;
+	  }
+	  if (i == n - i) {
+	       O[os * (n - 1)] = -buf[i];
+	  }
      }
 
      X(free)(buf);
@@ -175,41 +185,45 @@ static void apply_re10(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
+     uint iv, vl = ego->vl;
+     int ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W;
      R *buf;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
-     buf[0] = I[0];
-     for (i = 1; i < n - i; ++i) {
-	  E u, v;
-	  uint k = i + i;
-	  u = I[is * (k - 1)];
-	  v = I[is * k];
-	  buf[n - i] = u;
-	  buf[i] = v;
-     }
-     if (i == n - i) {
-	  buf[i] = I[is * (n - 1)];
-     }
-
-     {
-	  plan_rdft *cld = (plan_rdft *) ego->cld;
-	  cld->apply((plan *) cld, buf, buf);
-     }
-
-     O[0] = 2.0 * buf[0];
-     for (i = 1; i < n - i; ++i) {
-	  E a, b, wa, wb;
-	  a = 2.0 * buf[i];
-	  b = 2.0 * buf[n - i];
-	  wa = W[2*i];
-	  wb = W[2*i + 1];
-	  O[os * i] = wa * a + wb * b;
-	  O[os * (n - i)] = wb * a - wa * b;
-     }
-     if (i == n - i) {
-	  O[os * i] = 2.0 * buf[i] * W[2*i];
+     for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
+	  buf[0] = I[0];
+	  for (i = 1; i < n - i; ++i) {
+	       E u, v;
+	       uint k = i + i;
+	       u = I[is * (k - 1)];
+	       v = I[is * k];
+	       buf[n - i] = u;
+	       buf[i] = v;
+	  }
+	  if (i == n - i) {
+	       buf[i] = I[is * (n - 1)];
+	  }
+	  
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->cld;
+	       cld->apply((plan *) cld, buf, buf);
+	  }
+	  
+	  O[0] = 2.0 * buf[0];
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b, wa, wb;
+	       a = 2.0 * buf[i];
+	       b = 2.0 * buf[n - i];
+	       wa = W[2*i];
+	       wb = W[2*i + 1];
+	       O[os * i] = wa * a + wb * b;
+	       O[os * (n - i)] = wb * a - wa * b;
+	  }
+	  if (i == n - i) {
+	       O[os * i] = 2.0 * buf[i] * W[2*i];
+	  }
      }
 
      X(free)(buf);
@@ -222,41 +236,45 @@ static void apply_ro10(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
+     uint iv, vl = ego->vl;
+     int ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W;
      R *buf;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
-     buf[0] = I[0];
-     for (i = 1; i < n - i; ++i) {
-	  E u, v;
-	  uint k = i + i;
-	  u = -I[is * (k - 1)];
-	  v = I[is * k];
-	  buf[n - i] = u;
-	  buf[i] = v;
-     }
-     if (i == n - i) {
-	  buf[i] = -I[is * (n - 1)];
-     }
-
-     {
-	  plan_rdft *cld = (plan_rdft *) ego->cld;
-	  cld->apply((plan *) cld, buf, buf);
-     }
-
-     O[n - 1] = 2.0 * buf[0];
-     for (i = 1; i < n - i; ++i) {
-	  E a, b, wa, wb;
-	  a = 2.0 * buf[i];
-	  b = 2.0 * buf[n - i];
-	  wa = W[2*i];
-	  wb = W[2*i + 1];
-	  O[os * (n - 1 - i)] = wa * a + wb * b;
-	  O[os * (i - 1)] = wb * a - wa * b;
-     }
-     if (i == n - i) {
-	  O[os * (i - 1)] = 2.0 * buf[i] * W[2*i];
+     for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
+	  buf[0] = I[0];
+	  for (i = 1; i < n - i; ++i) {
+	       E u, v;
+	       uint k = i + i;
+	       u = -I[is * (k - 1)];
+	       v = I[is * k];
+	       buf[n - i] = u;
+	       buf[i] = v;
+	  }
+	  if (i == n - i) {
+	       buf[i] = -I[is * (n - 1)];
+	  }
+	  
+	  {
+	       plan_rdft *cld = (plan_rdft *) ego->cld;
+	       cld->apply((plan *) cld, buf, buf);
+	  }
+	  
+	  O[n - 1] = 2.0 * buf[0];
+	  for (i = 1; i < n - i; ++i) {
+	       E a, b, wa, wb;
+	       a = 2.0 * buf[i];
+	       b = 2.0 * buf[n - i];
+	       wa = W[2*i];
+	       wb = W[2*i + 1];
+	       O[os * (n - 1 - i)] = wa * a + wb * b;
+	       O[os * (i - 1)] = wb * a - wa * b;
+	  }
+	  if (i == n - i) {
+	       O[os * (i - 1)] = 2.0 * buf[i] * W[2*i];
+	  }
      }
 
      X(free)(buf);
@@ -285,8 +303,8 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(%se-r2hc-%u%(%p%))",
-	      X(rdft_kind_str)(ego->kind), ego->n, ego->cld);
+     p->print(p, "(%se-r2hc-%u%v%(%p%))",
+	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }
 
 static int applicable0(const solver *ego_, const problem *p_)
@@ -296,7 +314,7 @@ static int applicable0(const solver *ego_, const problem *p_)
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
 		  && p->sz->rnk == 1
-		  && p->vecsz->rnk == 0
+		  && p->vecsz->rnk <= 1
 		  && (p->kind[0] == REDFT01 || p->kind[0] == REDFT10
 		      || p->kind[0] == RODFT01 || p->kind[0] == RODFT10)
 	       );
@@ -314,7 +332,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      P *pln;
      const problem_rdft *p;
-     problem *cldp;
      plan *cld;
      R *buf;
      uint n;
@@ -331,13 +348,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      n = p->sz->dims[0].n;
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
-     {
-	  tensor *sz = X(mktensor_1d)(n, 1, 1);
-	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, buf, buf, R2HC);
-	  X(tensor_destroy)(sz);
-     }
-
-     cld = X(mkplan_d)(plnr, cldp);
+     cld = X(mkplan_d)(plnr, X(mkproblem_rdft_1_d)(X(mktensor_1d)(n, 1, 1),
+                                                   X(mktensor_0d)(),
+                                                   buf, buf, R2HC));
      X(free)(buf);
      if (!cld)
           return (plan *)0;
@@ -356,6 +369,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cld = cld;
      pln->td = 0;
      pln->kind = p->kind[0];
+     
+     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      
      pln->super.super.ops = cld->ops;
      /* FIXME */
