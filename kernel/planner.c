@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.137 2003-01-29 00:00:24 athena Exp $ */
+/* $Id: planner.c,v 1.138 2003-01-29 00:36:51 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -429,6 +429,9 @@ static plan *mkplan(planner *ego, problem *p)
 
 		    /* if (!pln) then the entry is bogus, but
 		       we currently do nothing about it. */
+		    /* CAVEAS: Do not use ``sol'' here, because the
+		       pointer is possibly dangling after the call to
+		       invoke_solver(). */
 	       } else {
 		    A(SUBSUMES(ego->planner_flags, sol->flags));
 	       }
