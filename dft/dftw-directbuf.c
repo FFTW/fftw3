@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-directbuf.c,v 1.5 2005-02-23 03:32:06 athena Exp $ */
+/* $Id: dftw-directbuf.c,v 1.6 2005-02-27 01:06:49 athena Exp $ */
 
 #include "ct.h"
 
@@ -45,23 +45,32 @@ static const R *doit(kdftw k, R *rA, R *iA, const R *W, int ios, int dist,
 		     int r, int batchsz, R *buf, stride bufstride)
 {
      X(cpy2d_pair_ci)(rA, iA, buf, buf + 1, 
-		      r, ios, 2,
-		      batchsz, dist, 2 * r);
-     W = k(buf, buf + 1, W, bufstride, batchsz, 2 * r);
+		      r, ios, WS(bufstride, 1),
+		      batchsz, dist, 2);
+     W = k(buf, buf + 1, W, bufstride, batchsz, 2);
      X(cpy2d_pair_co)(buf, buf + 1, rA, iA,
-		      r, 2, ios,
-		      batchsz, 2 * r, dist);
+		      r, WS(bufstride, 1), ios,
+		      batchsz, 2, dist);
      return W;
 }
 
-#define BATCHSZ(radix)  (((radix) + 3) & (-4))
+/* must be even for SIMD alignment; should not be 2^k to avoid
+   associativity conflicts */
+static int compute_batchsize(int radix)
+{
+     /* round up to multiple of 4 */
+     radix += 3;
+     radix &= -4;
+
+     return (radix + 2);
+}
 
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      int i, j, mcount = ego->mcount, vl = ego->vl, r = ego->r;
      int s = ego->s, vs = ego->vs, ios = ego->ios;
-     int batchsz = BATCHSZ(r);
+     int batchsz = compute_batchsize(r);
      R *buf;
 
      STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
@@ -70,16 +79,14 @@ static void apply(const plan *ego_, R *rio, R *iio)
 	  R *rA = rio + i * vs, *iA = iio + i * vs;
 	  const R *W = ego->tdW;
 
-	  for (j = mcount; j >= batchsz; j -= batchsz) {
+	  for (j = 0; j < mcount - batchsz; j += batchsz) {
 	       W = doit(ego->k, rA, iA, W, ios, s, r, batchsz, 
 			buf, ego->bufstride);
 	       rA += s * batchsz;
 	       iA += s * batchsz;
 	  }
 
-	  /* do remaining j calls, if any */
-	  if (j > 0)
-	       doit(ego->k, rA, iA, W, ios, s, r, j, buf, ego->bufstride);
+	  doit(ego->k, rA, iA, W, ios, s, r, mcount - j, buf, ego->bufstride);
 
      }
 
@@ -106,7 +113,7 @@ static void print(const plan *ego_, printer *p)
      const P *ego = (const P *) ego_;
      const S *slv = ego->slv;
      const ct_desc *e = slv->desc;
-     int batchsz = BATCHSZ(ego->r);
+     int batchsz = compute_batchsize(ego->r);
 
      p->print(p, "(dftw-directbuf/%d-%d/%d%v \"%s\")",
               batchsz, ego->r, X(twiddle_length)(ego->r, e->tw), 
@@ -130,12 +137,11 @@ static int applicable0(const S *ego,
 
 	  /* check for alignment/vector length restrictions, both for
 	     batchsize and for the remainder */
-	  && (batchsz = BATCHSZ(r), 1)
-	  && (m < batchsz ||
-	      (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, batchsz,
-			     2 * e->radix, plnr)))
-	  && (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, m % batchsz,
-			    2 * e->radix, plnr))
+	  && (batchsz = compute_batchsize(r), 1)
+	  && (e->genus->okp(e, 0, ((const R *)0) + 1, 2 * batchsz, 0,
+			    batchsz, 2, plnr))
+	  && (e->genus->okp(e, 0, ((const R *)0) + 1, 2 * batchsz, 0, 
+			    m % batchsz, 2, plnr))
 	  );
 }
 
@@ -185,7 +191,7 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->mstart = mstart;
      pln->mcount = mcount;
      pln->slv = ego;
-     pln->bufstride = X(mkstride)(r, 2);
+     pln->bufstride = X(mkstride)(r, 2 * compute_batchsize(r));
 
      X(ops_zero)(&pln->super.super.ops);
      X(ops_madd2)(mcount * (vl/e->genus->vl), &e->ops, &pln->super.super.ops);
