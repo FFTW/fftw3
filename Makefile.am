@@ -7,7 +7,7 @@ else
 GENFFT=
 endif
 
-SUBDIRS=$(GENFFT) codelets kernel dft libbench tests
+SUBDIRS=$(GENFFT) kernel dft libbench tests
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS
 
 lib_LTLIBRARIES = libfftw3.la
@@ -16,6 +16,5 @@ libfftw3_la_SOURCES =
 
 libfftw3_la_LIBADD =				\
 	kernel/libkernel.la			\
-	dft/libdft.la				\
-	codelets/libcodelets.la
+	dft/libdft.la
 

@@ -51,12 +51,7 @@ void setup(struct problem *p)
      BENCH_ASSERT(can_do(p));
 
      plnr = fftw_mkplanner_naive();
-#if 0
-     plnr = fftw_plnr_memo_make(plnr);
-     fftw_configuration_dft_standard(plnr);
-#endif
-     fftw_solvtab_exec(fftw_solvtab_dft_standard, plnr);
-     fftw_dft_vecloop_register(plnr);
+     fftw_dft_conf_standard(plnr);
 
      if (p->sign == -1) {
 	  ri = p->in; ii = ri + 1; ro = p->out; io = ro + 1;

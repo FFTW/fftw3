@@ -17,10 +17,6 @@ rm -f config.cache
 # --enable-maintainer-mode enables build of genfft and automatic
 # rebuild of codelets whenever genfft changes
 (
-#    rm -rf OBJ
-#    mkdir OBJ
-#    cd OBJ
-#    ../configure --enable-maintainer-mode
-    ./configure --enable-maintainer-mode --enable-debug
+    ./configure --enable-maintainer-mode --enable-debug --enable-research-mode
     cd genfft; make depend
 )

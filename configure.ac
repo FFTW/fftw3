@@ -10,10 +10,23 @@ AC_ARG_ENABLE(debug, [  --enable-debug          compile fftw with extra runtime 
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_DEBUG,1,[Define to enable extra FFTW debugging code.])
 fi
+
 AC_ARG_ENABLE(single, [  --enable-single        compile fftw in single precision], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_SINGLE,1,[Define to compile in single precision.])
 	AC_DEFINE(BENCHFFT_SINGLE,1,[Define to compile in single precision.])
+fi
+
+AC_ARG_ENABLE(research-mode,
+ [  --enable-research-mode      enable research code], 
+ [case "${enableval}" in
+       yes) research_mode=true  ;;
+       no)  research_mode=false ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-research-mode);;
+  esac],[research_mode=false])
+AM_CONDITIONAL(RESEARCH_MODE, test x$research_mode = xtrue)
+if test x$research_mode = xtrue; then
+    AC_DEFINE(RESEARCH_MODE, 1, [Define to enable experimental code])
 fi
 
 OCAML_INIT_PATHS
@@ -90,11 +103,13 @@ AC_OUTPUT([
    Makefile
    genfft/Makefile
    kernel/Makefile
+
    dft/Makefile
+   dft/codelets/Makefile
+   dft/codelets/standard/Makefile
+   dft/codelets/inplace/Makefile
+
    libbench/Makefile
    tests/Makefile
 
-   codelets/Makefile
-   codelets/dft-standard/Makefile
-   codelets/dft-inplace/Makefile
 ])
