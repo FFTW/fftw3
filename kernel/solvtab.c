@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: solvtab.c,v 1.7 2002-09-04 00:57:03 athena Exp $ */
+/* $Id: solvtab.c,v 1.8 2003-01-16 12:57:40 athena Exp $ */
 
 #include "ifftw.h"
 
 void X(solvtab_exec)(const solvtab tbl, planner *p)
 {
-     for (; tbl->reg; ++tbl) {
+     for (; tbl->reg_nam; ++tbl) {
 	  p->cur_reg_nam = tbl->reg_nam;
 	  p->cur_reg_id = 0;
 	  tbl->reg(p);
