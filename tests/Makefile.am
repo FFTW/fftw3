@@ -18,5 +18,9 @@ $(top_builddir)/libbench2/libbench2.a $(THREADLIBS)
 
 check-local: bench
 	perl -w $(srcdir)/check.pl -a -v --nowisdom `pwd`/bench
-
+if THREADS
+	perl -w $(srcdir)/check.pl -a -v --nthreads=2 --nowisdom `pwd`/bench
+	perl -w $(srcdir)/check.pl -a -v --nthreads=3 --nowisdom `pwd`/bench
+	perl -w $(srcdir)/check.pl -a -v --nthreads=10 --nowisdom `pwd`/bench
+endif
 
