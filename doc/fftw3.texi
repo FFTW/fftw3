@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.10 2003-01-19 01:03:18 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.11 2003-01-19 01:04:11 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -120,7 +120,7 @@ Performance Library, IBM's ESSL library, HP's CXML library, and Intel's
 MKL library, which are targeted at specific machines.  Moreover, FFTW's
 performance is @emph{portable}.  Indeed, FFTW is unique in that it
 automatically adapts itself to your machine, your cache, the size of
-your memory, the number of registers, and all the other factors that
+your memory, your number of registers, and all the other factors that
 normally make it impossible to optimize a program for more than one
 machine.  An extensive comparison of FFTW's performance with that of
 other Fourier transform codes has been made, and the results are
