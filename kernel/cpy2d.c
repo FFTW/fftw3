@@ -142,7 +142,7 @@ void X(cpy2d_tiledbuf)(R *I, R *O,
 		       int n0, int is0, int os0,
 		       int n1, int is1, int os1, int vl) 
 {
-     R buf[CACHESIZE / 2];
+     R buf[CACHESIZE / (2 * sizeof(R))];
      /* input and buffer in cache, or
 	output and buffer in cache */
      int tilesz = X(compute_tilesz)(vl, 2);

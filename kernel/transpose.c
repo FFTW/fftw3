@@ -171,8 +171,8 @@ void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl)
 void X(transpose_tiledbuf)(R *I, int n, int s0, int s1, int vl) 
 {
      struct transpose_closure k;
-     R buf0[CACHESIZE / 4];
-     R buf1[CACHESIZE / 4];
+     R buf0[CACHESIZE / (4 * sizeof(R))];
+     R buf1[CACHESIZE / (4 * sizeof(R))];
      k.s0 = s0;
      k.s1 = s1;
      k.vl = vl;
