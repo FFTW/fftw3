@@ -50,6 +50,12 @@ static rader_tl *omegas = 0;
 
 /***************************************************************************/
 
+/* If R2HC_ONLY_CONV is 1, we use a trick to perform the convolution
+   purely in terms of R2HC transforms, as opposed to R2HC followed by H2RC.
+   This requires a few more operations, but allows us to share the same
+   plan/codelets for both Rader children. */
+#define R2HC_ONLY_CONV 1
+
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
@@ -88,13 +94,20 @@ static void apply(const plan *ego_, R *I, R *O)
      omega = ego->omega;
      buf[0] *= omega[0];
      for (k = 1; k < npad/2; ++k) {
-	  E rB, iB, rW, iW;
+	  E rB, iB, rW, iW, a, b;
 	  rW = omega[k];
 	  iW = omega[npad - k];
 	  rB = buf[k];
 	  iB = buf[npad - k];
-	  buf[k] = rW * rB - iW * iB;
-	  buf[npad - k] = rW * iB + iW * rB;
+	  a = rW * rB - iW * iB;
+	  b = rW * iB + iW * rB;
+#if R2HC_ONLY_CONV
+	  buf[k] = a + b;
+	  buf[npad - k] = a - b;
+#else
+	  buf[k] = a;
+	  buf[npad - k] = b;
+#endif
      }
      /* Nyquist component: */
      A(k + k == npad); /* since npad is even */
@@ -111,10 +124,31 @@ static void apply(const plan *ego_, R *I, R *O)
 
      /* do inverse permutation to unshuffle the output: */
      A(gpower == 1);
+#if R2HC_ONLY_CONV
+     O[os] = buf[0];
+     gpower = g = ego->ginv;
+     A(npad == n - 1 || npad/2 >= n - 1);
+     if (npad == n - 1) {
+	  for (k = 1; k < npad/2; ++k, gpower = MULMOD(gpower, g, n)) {
+	       O[gpower * os] = buf[k] + buf[npad - k];
+	  }
+	  O[gpower * os] = buf[k];
+	  ++k, gpower = MULMOD(gpower, g, n);
+	  for (; k < npad; ++k, gpower = MULMOD(gpower, g, n)) {
+	       O[gpower * os] = buf[npad - k] - buf[k];
+	  }
+     }
+     else {
+	  for (k = 1; k < n - 1; ++k, gpower = MULMOD(gpower, g, n)) {
+	       O[gpower * os] = buf[k] + buf[npad - k];
+	  }
+     }
+#else
      g = ego->ginv;
      for (k = 0; k < n - 1; ++k, gpower = MULMOD(gpower, g, n)) {
 	  O[gpower * os] = buf[k];
      }
+#endif
      A(gpower == 1);
 
      X(ifree)(buf);
@@ -275,7 +309,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
                X(mktensor_1d)(npad, 1, 1),
                X(mktensor_1d)(1, 0, 0),
 	       buf, buf, 
+#if R2HC_ONLY_CONV
+	       R2HC
+#else
 	       HC2R
+#endif
 	       );
      if (!(cld2 = X(mkplan_d)(plnr, cldp))) goto nada;
 
@@ -309,6 +347,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->super.super.ops.other += (npad/2-1)*6 + npad + n + (n-1) * ego->pad;
      pln->super.super.ops.add += (npad/2-1)*2 + 2 + (n-1) * ego->pad;
      pln->super.super.ops.mul += (npad/2-1)*4 + 2 + ego->pad;
+#if R2HC_ONLY_CONV
+     /* FIXME */
+     pln->super.super.ops.other += 0;
+     pln->super.super.ops.add += 0;
+#endif
 
      return &(pln->super.super);
 
