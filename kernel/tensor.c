@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.16 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: tensor.c,v 1.17 2002-08-10 23:28:07 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -201,6 +201,24 @@ tensor X(tensor_copy)(const tensor sz)
 
      talloc(&x, sz.rnk);
      dimcpy(x.dims, sz.dims, sz.rnk);
+     return x;
+}
+
+/* like X(tensor_copy), but makes strides in-place by
+   setting os = is if k == INPLACE_IS or is = os if k == INPLACE_OS. */
+tensor X(tensor_copy_inplace)(const tensor sz, inplace_kind k)
+{
+     tensor x;
+     x = X(tensor_copy)(sz);
+     if (FINITE_RNK(x.rnk)) {
+	  uint i;
+	  if (k == INPLACE_OS)
+	       for (i = 0; i < x.rnk; ++i)
+		    x.dims[i].is = x.dims[i].os;
+	  else
+	       for (i = 0; i < x.rnk; ++i)
+		    x.dims[i].os = x.dims[i].is;
+     }
      return x;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.82 2002-08-10 00:31:16 athena Exp $ */
+/* $Id: ifftw.h,v 1.83 2002-08-10 23:28:07 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -213,6 +213,8 @@ int X(tensor_max_index)(const tensor sz);
 int X(tensor_min_stride)(const tensor sz);
 int X(tensor_inplace_strides)(const tensor sz);
 tensor X(tensor_copy)(const tensor sz);
+typedef enum { INPLACE_IS, INPLACE_OS } inplace_kind;
+tensor X(tensor_copy_inplace)(const tensor sz, inplace_kind k);
 tensor X(tensor_copy_except)(const tensor sz, uint except_dim);
 tensor X(tensor_copy_sub)(const tensor sz, uint start_dim, uint rnk);
 tensor X(tensor_compress)(const tensor sz);
