@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.11 2003-05-18 17:05:51 athena Exp $ */
+/* $Id: primes.c,v 1.12 2004-01-01 20:44:09 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -140,4 +140,35 @@ int X(factors_into)(int n, const int *primes)
 	  while ((n % *primes) == 0) 
 	       n /= *primes;
      return (n == 1);
+}
+
+/* integer square root.  Return sqrt(N), or 0 if N is not a square */
+static int isqrt(int n)
+{
+     int guess, iguess;
+
+     A(n >= 1);
+     guess = n; iguess = 1;
+
+     do {
+          guess = (guess + iguess) / 2;
+	  iguess = n / guess;
+     } while (guess > iguess);
+
+     return (guess * guess == n) ? guess : 0;
+}
+
+#define divides(a, b) (((int)(b) % (int)(a)) == 0)
+int X(choose_radix)(int r, int n)
+{
+     if (r > 0) {
+	  if (divides(r, n)) return r;
+	  return 0;
+     } else if (r == 0) {
+	  return X(first_divisor)(n);
+     } else {
+	  /* r is negative.  If n = (-r) * q^2, take q as the radix */
+	  r = -r;
+	  return (n > r && divides(r, n)) ? isqrt(n / r) : 0;
+     }
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.40 2003-07-05 17:05:51 athena Exp $ */
+/* $Id: ct.c,v 1.41 2004-01-01 20:44:09 athena Exp $ */
 
 #include "ct.h"
 
@@ -78,36 +78,6 @@ static void print(const plan *ego_, printer *p)
 	      ego->r, ego->cldw, ego->cld);
 }
 
-static int isqrt(int n)
-{
-     int guess, iguess;
-
-     A(n >= 1);
-     guess = n; iguess = 1;
-
-     do {
-          guess = (guess + iguess) / 2;
-	  iguess = n / guess;
-     } while (guess > iguess);
-
-     return (guess * guess == n) ? guess : 0;
-}
-
-#define divides(a, b) (((int)(b) % (int)(a)) == 0)
-static int choose_radix(int r, int n)
-{
-     if (r > 0) {
-	  if (divides(r, n)) return r;
-	  return 0;
-     } else if (r == 0) {
-	  return X(first_divisor)(n);
-     } else {
-	  /* r is negative.  If n = (-r) * q^2, take q as the radix */
-	  r = -r;
-	  return (n > r && divides(r, n)) ? isqrt(n / r) : 0;
-     }
-}
-
 static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
 {
      if (DFTP(p_)) {
@@ -123,7 +93,7 @@ static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
 		      p->ri == p->ro || 
 		      DESTROY_INPUTP(plnr))
 		  
-		  && ((r = choose_radix(ego->r, p->sz->dims[0].n)) > 0)
+		  && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 0)
 		  && p->sz->dims[0].n > r);
      }
      return 0;
@@ -166,7 +136,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_dft *) p_;
      d = p->sz->dims;
      n = d[0].n;
-     r = choose_radix(ego->r, n);
+     r = X(choose_radix)(ego->r, n);
      m = n / r;
 
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);

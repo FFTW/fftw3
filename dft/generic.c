@@ -139,7 +139,7 @@ static int applicable(const solver *ego, const problem *p_,
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
-     const problem_dft *p = (const problem_dft *) p_;
+     const problem_dft *p;
      P *pln;
      int n;
 
@@ -152,6 +152,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      pln = MKPLAN_DFT(P, &padt, apply);
 
+     p = (const problem_dft *) p_;
      pln->n = n = p->sz->dims[0].n;
      pln->is = p->sz->dims[0].is;
      pln->os = p->sz->dims[0].os;

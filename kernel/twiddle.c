@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.23 2003-05-16 12:19:38 athena Exp $ */
+/* $Id: twiddle.c,v 1.24 2004-01-01 20:44:09 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -70,9 +70,6 @@ static int twlen0(int r, const tw_instr **pp)
 		   break;
 	      case TW_HALF:
 		   ntwiddle += (r - 1);
-		   break;
-	      case TW_GENERIC:
-		   ntwiddle += r * 2;
 		   break;
 	      default:
 		   ++ntwiddle;
@@ -129,20 +126,6 @@ static R *compute(const tw_instr *instr, int n, int r, int m)
 			break;
 		   }
 
-		   case TW_GENERIC:
-		   {
-			int i;
-			A(p->v == 0); /* unused */
-			A(p->i == 0); /* unused */
-			A(m * r <= n);
-			for (i = 0; i < r; ++i) {
-			     int k = j * r + i;
-			     *W++ = f[TW_COS](k, n);
-			     *W++ = FFT_SIGN * f[TW_SIN](k, n);
-			}
-			break;
-		   }
-		   
 		   default:
 			A(m * r <= n);
 			*W++ = f[p->op](((signed int)(j + p->v)) * p->i, n);

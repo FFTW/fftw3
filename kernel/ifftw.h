@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.234 2004-01-01 17:59:30 athena Exp $ */
+/* $Id: ifftw.h,v 1.235 2004-01-01 20:44:09 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -620,7 +620,7 @@ int X(pickdim)(int which_dim, const int *buddies, int nbuddies,
 /* twiddle.c */
 /* little language to express twiddle factors computation */
 enum { TW_COS = 0, TW_SIN = 1, TW_TAN = 2, TW_NEXT = 3,
-       TW_FULL = 4, TW_GENERIC = 5, TW_HALF = 6 };
+       TW_FULL = 4, TW_HALF = 5 };
 
 typedef struct {
      unsigned char op;
@@ -680,6 +680,7 @@ int X(first_divisor)(int n);
 int X(is_prime)(int n);
 int X(next_prime)(int n);
 int X(factors_into)(int n, const int *primes);
+int X(choose_radix)(int r, int n);
 
 #define GENERIC_MIN_BAD 173 /* min prime for which generic becomes bad */
 
