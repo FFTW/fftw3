@@ -53,24 +53,24 @@ static rader_tl *omegas = 0;
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int r = ego->n;
-     int rpad = ego->npad; /* == r - 1 for unpadded Rader; always even */
+     int n = ego->n;
+     int npad = ego->npad; /* == r - 1 for unpadded Rader; always even */
      int is = ego->is, os;
      int k, gpower, g;
      R *buf, *omega;
      R r0;
 
-     buf = (R *) MALLOC(sizeof(R) * rpad, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * npad, BUFFERS);
 
      /* First, permute the input, storing in buf: */
      g = ego->g; 
-     for (gpower = 1, k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
+     for (gpower = 1, k = 0; k < n - 1; ++k, gpower = MULMOD(gpower, g, n)) {
 	  buf[k] = I[gpower * is];
      }
-     /* gpower == g^(r-1) mod r == 1 */;
+     /* gpower == g^(n-1) mod n == 1 */;
 
-     A(r - 1 <= rpad);
-     for (k = r - 1; k < rpad; ++k) /* optionally, zero-pad convolution */
+     A(n - 1 <= npad);
+     for (k = n - 1; k < npad; ++k) /* optionally, zero-pad convolution */
 	  buf[k] = 0;
 
      os = ego->os;
@@ -87,21 +87,21 @@ static void apply(const plan *ego_, R *I, R *O)
      /* now, multiply by omega: */
      omega = ego->omega;
      buf[0] *= omega[0];
-     for (k = 1; k < rpad/2; ++k) {
+     for (k = 1; k < npad/2; ++k) {
 	  E rB, iB, rW, iW;
 	  rW = omega[k];
-	  iW = omega[rpad - k];
+	  iW = omega[npad - k];
 	  rB = buf[k];
-	  iB = buf[rpad - k];
+	  iB = buf[npad - k];
 	  buf[k] = rW * rB - iW * iB;
-	  buf[rpad - k] = rW * iB + iW * rB;
+	  buf[npad - k] = rW * iB + iW * rB;
      }
      /* Nyquist component: */
-     A(k + k == rpad); /* since rpad is even */
+     A(k + k == npad); /* since npad is even */
      buf[k] *= omega[k];
      
      /* this will add input[0] to all of the outputs after the ifft */
-     buf[0] += (rpad == r - 1) ? r0 : (r0 * 0.5);
+     buf[0] += (npad == n - 1) ? r0 : (r0 * 0.5);
 
      /* inverse FFT: */
      {
@@ -113,15 +113,15 @@ static void apply(const plan *ego_, R *I, R *O)
 	also "fold" padded outputs (if any) back to get cyclic convolution */
      A(gpower == 1);
      g = ego->ginv;
-     if (rpad == r - 1) {
-	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
+     if (npad == n - 1) {
+	  for (k = 0; k < n - 1; ++k, gpower = MULMOD(gpower, g, n)) {
 	       O[gpower * os] = buf[k];
 	  }
      }
      else {
-	  A(rpad >= 2*(r - 1) - 1);
-	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
-	       O[gpower * os] = buf[k] + buf[k + (r - 1)];
+	  A(npad >= 2*(n - 1) - 1);
+	  for (k = 0; k < n - 1; ++k, gpower = MULMOD(gpower, g, n)) {
+	       O[gpower * os] = buf[k] + buf[k + (n - 1)];
 	  }
      }
      A(gpower == 1);
