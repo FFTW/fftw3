@@ -62,6 +62,7 @@ void done(struct problem *p)
      UNUSED(p);
 
      FFTW(plan_destroy)(the_plan);
+     FFTW(cleanup)();
 
 #    ifdef FFTW_DEBUG
      {

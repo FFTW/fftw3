@@ -32,3 +32,9 @@ planner *X(the_planner)(void)
      
      return plnr;
 }
+
+void X(cleanup)(void)
+{
+     if (plnr) 
+	  X(planner_destroy)(plnr);
+}
