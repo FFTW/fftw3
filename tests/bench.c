@@ -652,7 +652,7 @@ void cleanup(void)
      wrwisdom();
      FFTW(cleanup)();
 
-#    ifdef FFTW_DEBUG
+#    ifdef FFTW_DEBUG_MALLOC
      {
 	  /* undocumented memory checker */
 	  extern void FFTW(malloc_print_minfo)(int v);

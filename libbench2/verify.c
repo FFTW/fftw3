@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.14 2003-02-11 22:32:56 stevenj Exp $ */
+/* $Id: verify.c,v 1.15 2003-02-26 01:42:08 stevenj Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,14 +56,17 @@ void verify(const char *param, int rounds, double tol)
 }
 
 
-static void do_accuracy(bench_problem *p, int rounds)
+static void do_accuracy(bench_problem *p, int rounds, int impulse_rounds)
 {
      double t[6];
 
      switch (p->kind) {
-	 case PROBLEM_COMPLEX: accuracy_dft(p, rounds, t); break;
-	 case PROBLEM_REAL: accuracy_rdft2(p, rounds, t); break;
-	 case PROBLEM_R2R: accuracy_r2r(p, rounds, t); break;
+	 case PROBLEM_COMPLEX:
+	      accuracy_dft(p, rounds, impulse_rounds, t); break;
+	 case PROBLEM_REAL:
+	      accuracy_rdft2(p, rounds, impulse_rounds, t); break;
+	 case PROBLEM_R2R:
+	      accuracy_r2r(p, rounds, impulse_rounds, t); break;
      }
 
      /* t[0] : L1 error
@@ -74,7 +77,7 @@ static void do_accuracy(bench_problem *p, int rounds)
 	    t[0], t[1], t[2], t[3], t[4], t[5]);
 }
 
-void accuracy(const char *param, int rounds)
+void accuracy(const char *param, int rounds, int impulse_rounds)
 {
      bench_problem *p;
      p = problem_parse(param);
@@ -82,7 +85,7 @@ void accuracy(const char *param, int rounds)
      problem_alloc(p);
      problem_zero(p);
      setup(p);
-     do_accuracy(p, rounds);
+     do_accuracy(p, rounds, impulse_rounds);
      done(p);
      problem_destroy(p);
 }

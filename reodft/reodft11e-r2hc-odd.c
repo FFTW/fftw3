@@ -18,20 +18,28 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.21 2003-02-26 01:42:08 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.1 2003-02-26 01:42:08 stevenj Exp $ */
 
-/* Do an R{E,O}DFT11 problem via an R2HC problem, with some
-   pre/post-processing ala FFTPACK.  Use a trick from: 
+/* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
+   with some permutations and post-processing, as described in:
 
-     S. C. Chan and K. L. Ho, "Direct methods for computing discrete
-     sinusoidal transforms," IEE Proceedings F 137 (6), 433--442 (1990).
+     S. C. Chan and K. L. Ho, "Fast algorithms for computing the
+     discrete Cosine transform," IEEE Trans. Circuits Systems II:
+     Analog & Digital Sig. Proc. 39 (3), 185--190 (1992).
 
-   to re-express as an REDFT01 (DCT-III) problem.
+   (For even sizes, see reodft11e-radix2.c.)  
 
-   NOTE: We no longer use this algorithm, because it turns out to suffer
-   a catastrophic loss of precision for certain inputs, apparently because
-   its post-processing multiplies the output by a cosine.  Near the zero
-   of the cosine, the REDFT01 must produce a near-singular output.
+   This algorithm is related to the 8 x n prime-factor-algorithm (PFA)
+   decomposition of the size 8n "logical" DFT corresponding to the
+   R{EO}DFT11.
+
+   Aside from very confusing notation (several symbols are redefined
+   from one line to the next), be aware that this paper has some
+   errors.  In particular, the signs are wrong in Eqs. (34-35).  Also
+   Eq. (36-37) should be simply C(k) = C(2k + 1 mod N), and similarly
+   for S.  Note also that in their definition of the DFT, similarly to
+   FFTW's, the exponent's sign is -1, but they forgot to
+   correspondingly multiply S (the sine terms) by -1.
 */
 
 #include "reodft.h"
@@ -43,13 +51,14 @@ typedef struct {
 typedef struct {
      plan_rdft super;
      plan *cld;
-     twid *td, *td2;
      int is, os;
      int n;
      int vl;
      int ivs, ovs;
      rdft_kind kind;
 } P;
+
+static DK(SQRT2, +1.4142135623730950488016887242096980785696718753769);
 
 static void apply_re11(plan *ego_, R *I, R *O)
 {
@@ -58,56 +67,47 @@ static void apply_re11(plan *ego_, R *I, R *O)
      int i, n = ego->n;
      int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
-     R *W;
      R *buf;
-     E cur;
 
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
-	  /* I wish that this didn't require an extra pass. */
-	  /* FIXME: use recursive/cascade summation for better stability? */
-	  buf[n - 1] = cur = 2.0 * I[is * (n - 1)];
-	  for (i = n - 1; i > 0; --i) {
-	       E curnew;
-	       buf[(i - 1)] = curnew = 2.0 * I[is * (i - 1)] - cur;
-	       cur = curnew;
+	  /* FIXME: split this loop to eliminate if-else statements and % */
+	  for (i = 0; i < n; ++i) {
+	       int m = (8 * i + n) % (8*n); /* n odd => m odd */
+	       if (m < 2*n)
+		    buf[i] = I[is * ((m - 1) / 2)];
+	       else if (m < 4*n)
+		    buf[i] = -I[is * ((4*n - m - 1) / 2)];
+	       else if (m < 6*n)
+		    buf[i] = -I[is * ((m - 4*n - 1) / 2)];
+	       else
+		    buf[i] = I[is * ((8*n - m - 1) / 2)];
 	  }
 	  
-	  W = ego->td->W;
-	  for (i = 1; i < n - i; ++i) {
-	       E a, b, apb, amb, wa, wb;
-	       a = buf[i];
-	       b = buf[n - i];
-	       apb = a + b;
-	       amb = a - b;
-	       wa = W[2*i];
-	       wb = W[2*i + 1];
-	       buf[i] = wa * amb + wb * apb; 
-	       buf[n - i] = wa * apb - wb * amb; 
-	  }
-	  if (i == n - i) {
-	       buf[i] = 2.0 * buf[i] * W[2*i];
-	  }
-	  
-	  {
+	  { /* child plan: R2HC of size n */
 	       plan_rdft *cld = (plan_rdft *) ego->cld;
 	       cld->apply((plan *) cld, buf, buf);
 	  }
 	  
-	  W = ego->td2->W;
-	  O[0] = W[0] * buf[0];
-	  for (i = 1; i < n - i; ++i) {
-	       E a, b;
+	  /* FIXME: split/unroll loop to eliminate if-else's and % */
+	  for (i = 0; i < n; ++i) {
 	       int k;
-	       a = buf[i];
-	       b = buf[n - i];
-	       k = i + i;
-	       O[os * (k - 1)] = W[k - 1] * (a - b);
-	       O[os * k] = W[k] * (a + b);
-	  }
-	  if (i == n - i) {
-	       O[os * (n - 1)] = W[n - 1] * buf[i];
+	       R c, s;
+
+	       k = (2*i + 1) % n;
+	       
+	       if (k < n - k) {
+		    c = buf[k];
+		    s = k == 0 ? 0.0 : -buf[n - k];
+	       }
+	       else {
+		    c = buf[n - k];
+		    s = k == n ? 0.0 : buf[k];
+	       }
+
+	       O[os * i] = SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
+				    s * (1 - 2 * ((i/2) % 2)));
 	  }
      }
 
@@ -116,6 +116,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 
 /* like for rodft01, rodft11 is obtained from redft11 by
    reversing the input and flipping the sign of every other output. */
+/* FIXME: clean up after addressing FIXME's in apply_re11 */
 static void apply_ro11(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
@@ -123,56 +124,48 @@ static void apply_ro11(plan *ego_, R *I, R *O)
      int i, n = ego->n;
      int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
-     R *W;
      R *buf;
-     E cur;
 
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
-	  /* I wish that this didn't require an extra pass. */
-	  /* FIXME: use recursive/cascade summation for better stability? */
-	  buf[n - 1] = cur = 2.0 * I[0];
-	  for (i = n - 1; i > 0; --i) {
-	       E curnew;
-	       buf[(i - 1)] = curnew = 2.0 * I[is * (n - i)] - cur;
-	       cur = curnew;
+	  /* FIXME: split this loop to eliminate if-else statements and % */
+	  for (i = 0; i < n; ++i) {
+	       int m = (8 * i + n) % (8*n); /* n odd => m odd */
+	       if (m < 2*n)
+		    buf[i] = I[is * (n - 1 - (m - 1) / 2)];
+	       else if (m < 4*n)
+		    buf[i] = -I[is * (n - 1 - (4*n - m - 1) / 2)];
+	       else if (m < 6*n)
+		    buf[i] = -I[is * (n - 1 - (m - 4*n - 1) / 2)];
+	       else
+		    buf[i] = I[is * (n - 1 - (8*n - m - 1) / 2)];
 	  }
 	  
-	  W = ego->td->W;
-	  for (i = 1; i < n - i; ++i) {
-	       E a, b, apb, amb, wa, wb;
-	       a = buf[i];
-	       b = buf[n - i];
-	       apb = a + b;
-	       amb = a - b;
-	       wa = W[2*i];
-	       wb = W[2*i + 1];
-	       buf[i] = wa * amb + wb * apb; 
-	       buf[n - i] = wa * apb - wb * amb; 
-	  }
-	  if (i == n - i) {
-	       buf[i] = 2.0 * buf[i] * W[2*i];
-	  }
-	  
-	  {
+	  { /* child plan: R2HC of size n */
 	       plan_rdft *cld = (plan_rdft *) ego->cld;
 	       cld->apply((plan *) cld, buf, buf);
 	  }
 	  
-	  W = ego->td2->W;
-	  O[0] = W[0] * buf[0];
-	  for (i = 1; i < n - i; ++i) {
-	       E a, b;
+	  /* FIXME: split/unroll loop to eliminate if-else's and % */
+	  for (i = 0; i < n; ++i) {
 	       int k;
-	       a = buf[i];
-	       b = buf[n - i];
-	       k = i + i;
-	       O[os * (k - 1)] = W[k - 1] * (b - a);
-	       O[os * k] = W[k] * (a + b);
-	  }
-	  if (i == n - i) {
-	       O[os * (n - 1)] = -W[n - 1] * buf[i];
+	       R c, s;
+
+	       k = (2*i + 1) % n;
+	       
+	       if (k < n - k) {
+		    c = buf[k];
+		    s = k == 0 ? 0.0 : -buf[n - k];
+	       }
+	       else {
+		    c = buf[n - k];
+		    s = k == n ? 0.0 : buf[k];
+	       }
+
+	       O[os * i] = SQRT2 * (c * (1 - 2 * (((i+1)/2) % 2)) -
+				    s * (1 - 2 * ((i/2) % 2))) *
+		    (1 - 2 * (i % 2));
 	  }
      }
 
@@ -182,20 +175,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
-     static const tw_instr reodft010e_tw[] = {
-          { TW_COS, 0, 1 },
-          { TW_SIN, 0, 1 },
-          { TW_NEXT, 1, 0 }
-     };
-     static const tw_instr reodft11e_tw[] = {
-          { TW_COS, 1, 1 },
-          { TW_NEXT, 2, 0 }
-     };
-
      AWAKE(ego->cld, flg);
-
-     X(twiddle_awake)(flg, &ego->td, reodft010e_tw, 4*ego->n, 1, ego->n/2+1);
-     X(twiddle_awake)(flg, &ego->td2, reodft11e_tw, 8*ego->n, 1, ego->n * 2);
 }
 
 static void destroy(plan *ego_)
@@ -207,7 +187,7 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(%se-r2hc-%d%v%(%p%))",
+     p->print(p, "(%se-r2hc-odd-%d%v%(%p%))",
 	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }
 
@@ -219,6 +199,7 @@ static int applicable0(const solver *ego_, const problem *p_)
           return (1
 		  && p->sz->rnk == 1
 		  && p->vecsz->rnk <= 1
+		  && p->sz->dims[0].n % 2 == 1
 		  && (p->kind[0] == REDFT11 || p->kind[0] == RODFT11)
 	       );
      }
@@ -264,15 +245,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->is = p->sz->dims[0].is;
      pln->os = p->sz->dims[0].os;
      pln->cld = cld;
-     pln->td = pln->td2 = 0;
      pln->kind = p->kind[0];
      
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      
      X(ops_zero)(&ops);
-     ops.other = 5 + (n-1) * 2 + (n-1)/2 * 12 + (1 - n % 2) * 6;
-     ops.add = (n - 1) * 1 + (n-1)/2 * 6;
-     ops.mul = 2 + (n-1) * 1 + (n-1)/2 * 6 + (1 - n % 2) * 3;
+     /* FIXME */
 
      X(ops_zero)(&pln->super.super.ops);
      X(ops_madd2)(pln->vl, &ops, &pln->super.super.ops);
@@ -289,7 +267,7 @@ static solver *mksolver(void)
      return &(slv->super);
 }
 
-void X(reodft11e_r2hc_register)(planner *p)
+void X(reodft11e_r2hc_odd_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }

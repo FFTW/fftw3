@@ -13,6 +13,14 @@ dnl configure options
 AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_DEBUG,1,[Define to enable extra FFTW debugging code.])
+	debug_malloc=yes
+else
+	debug_malloc=no
+fi
+
+AC_ARG_ENABLE(debug-malloc, [AC_HELP_STRING([--enable-debug-malloc],[enable malloc debugging version])], ok=$enableval, ok=$debug_malloc)
+if test "$ok" = "yes"; then
+	AC_DEFINE(FFTW_DEBUG_MALLOC,1,[Define to enable debugging malloc.])
 fi
 
 AC_ARG_ENABLE(single, [AC_HELP_STRING([--enable-single],[compile fftw in single precision])], ok=$enableval, ok=no)

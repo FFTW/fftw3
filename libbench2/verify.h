@@ -70,12 +70,15 @@ void bench_dotens2(const bench_tensor *sz0,
 		   const bench_tensor *sz1, dotens2_closure *k);
 
 void accuracy_test(dofft_closure *k, aconstrain constrain,
-		   int sign, int n, C *a, C *b, int rounds,
+		   int sign, int n, C *a, C *b, int rounds, int impulse_rounds,
 		   double t[6]);
 
-void accuracy_dft(bench_problem *p, int rounds, double t[6]);
-void accuracy_rdft2(bench_problem *p, int rounds, double t[6]);
-void accuracy_r2r(bench_problem *p, int rounds, double t[6]);
+void accuracy_dft(bench_problem *p, int rounds, int impulse_rounds,
+		  double t[6]);
+void accuracy_rdft2(bench_problem *p, int rounds, int impulse_rounds,
+		    double t[6]);
+void accuracy_r2r(bench_problem *p, int rounds, int impulse_rounds,
+		  double t[6]);
 
 #if defined(BENCHFFT_LDOUBLE) && HAVE_COSL
    typedef long double trigreal;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft.h,v 1.3 2002-09-02 15:46:57 athena Exp $ */
+/* $Id: reodft.h,v 1.4 2003-02-26 01:42:08 stevenj Exp $ */
 
 #ifndef __REODFT_H__
 #define __REODFT_H__
@@ -32,6 +32,8 @@ void X(redft00e_r2hc_register)(planner *p);
 void X(rodft00e_r2hc_register)(planner *p);
 void X(reodft010e_r2hc_register)(planner *p);
 void X(reodft11e_r2hc_register)(planner *p);
+void X(reodft11e_radix2_r2hc_register)(planner *p);
+void X(reodft11e_r2hc_odd_register)(planner *p);
 
 /* configurations */
 void X(reodft_conf_standard)(planner *p);

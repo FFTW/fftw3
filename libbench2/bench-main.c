@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.5 2003-02-09 23:08:26 athena Exp $ */
+/* $Id: bench-main.c,v 1.6 2003-02-26 01:42:08 stevenj Exp $ */
 
 #include "getopt.h"
 #include "bench.h"
@@ -32,6 +32,7 @@ static struct option long_options[] =
 {
   {"accuracy", required_argument, 0, 'a'},
   {"accuracy-rounds", required_argument, 0, 405},
+  {"impulse-accuracy-rounds", required_argument, 0, 406},
   {"can-do", required_argument, 0, 'd'},
   {"help", no_argument, 0, 'h'},
   {"info", required_argument, 0, 'i'},
@@ -63,6 +64,7 @@ int bench_main(int argc, char *argv[])
      double tol;
      int repeat = 0;
      int rounds = 10;
+     int iarounds = 0;
      int arounds = 1; /* this is too low for precise results */
      int c;
      int index;
@@ -103,7 +105,7 @@ int bench_main(int argc, char *argv[])
 		   verify(optarg, rounds, tol);
 		   break;
 	      case 'a':
-		   accuracy(optarg, arounds);
+		   accuracy(optarg, arounds, iarounds);
 		   break;
 	      case 'i':
 		   report_info(optarg);
@@ -169,6 +171,10 @@ int bench_main(int argc, char *argv[])
 
 	      case 405: /* --accuracy-rounds */
 		   arounds = atoi(optarg);
+		   break;
+		   
+	      case 406: /* --impulse-accuracy-rounds */
+		   iarounds = atoi(optarg);
 		   break;
 		   
 	      case '?':

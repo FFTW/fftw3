@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.6 2003-02-10 04:22:15 stevenj Exp $ */
+/* $Id: bench.h,v 1.7 2003-02-26 01:42:08 stevenj Exp $ */
 
 /* benchmark program definitions */
 #include "bench-user.h"
@@ -47,7 +47,7 @@ extern int aligned_main(int argc, char *argv[]);
 extern int bench_main(int argc, char *argv[]);
 
 extern void speed(const char *param);
-extern void accuracy(const char *param, int rounds);
+extern void accuracy(const char *param, int rounds, int impulse_rounds);
 
 extern double mflops(const bench_problem *p, double t);
 

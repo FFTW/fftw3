@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.10 2003-02-15 05:42:48 stevenj Exp $ */
+/* $Id: verify-lib.c,v 1.11 2003-02-26 01:42:08 stevenj Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -439,34 +439,92 @@ bench_tensor *verify_pack(const bench_tensor *sz, int s)
      return x;
 }
 
+static int all_zero(C *a, int n)
+{
+     int i;
+     for (i = 0; i < n; ++i)
+	  if (c_re(a[i]) != 0.0 || c_im(a[i]) != 0.0)
+	       return 0;
+     return 1;
+}
+
+static int one_accuracy_test(dofft_closure *k, aconstrain constrain,
+			     int sign, int n, C *a, C *b, 
+			     double t[6])
+{
+     double err[6];
+
+     if (constrain)
+	  constrain(a, n);
+     
+     if (all_zero(a, n))
+	  return 0;
+     
+     k->apply(k, a, b);
+     fftaccuracy(n, a, b, sign, err);
+     
+     t[0] += err[0];
+     t[1] += err[1] * err[1];
+     t[2] = dmax(t[2], err[2]);
+     t[3] += err[3];
+     t[4] += err[4] * err[4];
+     t[5] = dmax(t[5], err[5]);
+
+     return 1;
+}
+
 void accuracy_test(dofft_closure *k, aconstrain constrain,
-		   int sign, int n, C *a, C *b, int rounds,
+		   int sign, int n, C *a, C *b, int rounds, int impulse_rounds,
 		   double t[6])
 {
      int r, i;
-     double err[6];
+     int ntests = 0;
+     bench_complex czero = {0, 0};
 
      for (i = 0; i < 6; ++i) t[i] = 0.0;
 
      for (r = 0; r < rounds; ++r) {
 	  arand(a, n);
-
-	  if (constrain)
-	       constrain(a, n);
-	  
-	  k->apply(k, a, b);
-	  fftaccuracy(n, a, b, sign, err);
-
-	  t[0] += err[0];
-	  t[1] += err[1] * err[1];
-	  t[2] = dmax(t[2], err[2]);
-	  t[3] += err[3];
-	  t[4] += err[4] * err[4];
-	  t[5] = dmax(t[5], err[5]);
+	  if (one_accuracy_test(k, constrain, sign, n, a, b, t))
+	       ++ntests;
      }
 
-     t[0] /= rounds;
-     t[1] = sqrt(t[1] / rounds);
-     t[3] /= rounds;
-     t[4] = sqrt(t[4] / rounds);
+     /* impulses at beginning of array */
+     for (r = 0; r < impulse_rounds; ++r) {
+	  if (r > n - r - 1)
+	       continue;
+	  
+	  caset(a, n, czero);
+	  c_re(a[r]) = c_im(a[r]) = 1.0;
+	  
+	  if (one_accuracy_test(k, constrain, sign, n, a, b, t))
+	       ++ntests;
+     }
+     
+     /* impulses at end of array */
+     for (r = 0; r < impulse_rounds; ++r) {
+	  if (r <= n - r - 1)
+	       continue;
+	  
+	  caset(a, n, czero);
+	  c_re(a[n - r - 1]) = c_im(a[n - r - 1]) = 1.0;
+	  
+	  if (one_accuracy_test(k, constrain, sign, n, a, b, t))
+	       ++ntests;
+     }
+     
+     /* randomly-located impulses */
+     for (r = 0; r < impulse_rounds; ++r) {
+	  caset(a, n, czero);
+	  i = rand() % n;
+	  c_re(a[i]) = c_im(a[i]) = 1.0;
+	  
+	  if (one_accuracy_test(k, constrain, sign, n, a, b, t))
+	       ++ntests;
+     }
+
+     t[0] /= ntests;
+     t[1] = sqrt(t[1] / ntests);
+     t[3] /= ntests;
+     t[4] = sqrt(t[4] / ntests);
 }

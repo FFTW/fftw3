@@ -41,7 +41,7 @@ typedef struct {
 static double dabs(double x) { return (x < 0.0) ? -x : x; }
 static double dmin(double x, double y) { return (x < y) ? x : y; }
 
-static double aerror(R *a, R *b, int n)
+static double raerror(R *a, R *b, int n)
 {
      if (n > 0) {
           /* compute the relative Linf error */
@@ -65,14 +65,45 @@ static double aerror(R *a, R *b, int n)
           return 0.0;
 }
 
+#define by2pi(m, n) ((K2PI * (m)) / (n))
+
+/*
+ * Improve accuracy by reducing x to range [0..1/8]
+ * before multiplication by 2 * PI.
+ */
+
+static trigreal sincos(trigreal m, trigreal n, int sinp)
+{
+     /* waiting for C to get tail recursion... */
+     trigreal half_n = n * 0.5;
+     trigreal quarter_n = half_n * 0.5;
+     trigreal eighth_n = quarter_n * 0.5;
+     trigreal sgn = 1.0;
+
+     if (sinp) goto sin;
+ cos:
+     if (m < 0) { m = -m; /* goto cos; */ }
+     if (m > half_n) { m = n - m; goto cos; }
+     if (m > eighth_n) { m = quarter_n - m; goto sin; }
+     return sgn * COS(by2pi(m, n));
+
+ msin:
+     sgn = -sgn;
+ sin:
+     if (m < 0) { m = -m; goto msin; }
+     if (m > half_n) { m = n - m; goto msin; }
+     if (m > eighth_n) { m = quarter_n - m; goto cos; }
+     return sgn * SIN(by2pi(m, n));
+}
+
 static trigreal cos2pi(int m, int n)
 {
-     return COS((K2PI * m) / n);
+     return sincos((trigreal)m, (trigreal)n, 0);
 }
 
 static trigreal sin2pi(int m, int n)
 {
-     return SIN((K2PI * m) / n);
+     return sincos((trigreal)m, (trigreal)n, 1);
 }
 
 static trigreal cos00(int i, int j, int n)
@@ -344,7 +375,7 @@ static void dofft(info *nfo, R *in, R *out)
 
 static double racmp(R *a, R *b, int n, const char *test, double tol)
 {
-     double d = aerror(a, b, n);
+     double d = raerror(a, b, n);
      if (d > tol) {
 	  fprintf(stderr, "Found relative error %e (%s)\n", d, test);
 	  {
@@ -848,10 +879,11 @@ static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
      }
 }
 
-void accuracy_r2r(bench_problem *p, int rounds, double t[6])
+void accuracy_r2r(bench_problem *p, int rounds, int impulse_rounds,
+		  double t[6])
 {
      dofft_r2r_closure k;
-     int n, n0;
+     int n, n0 = 1;
      C *a, *b;
      aconstrain constrain = 0;
 
@@ -880,7 +912,7 @@ void accuracy_r2r(bench_problem *p, int rounds, double t[6])
 
      a = (C *) bench_malloc(n0 * sizeof(C));
      b = (C *) bench_malloc(n0 * sizeof(C));
-     accuracy_test(&k.k, constrain, -1, n0, a, b, rounds, t);
+     accuracy_test(&k.k, constrain, -1, n0, a, b, rounds, impulse_rounds, t);
      bench_free(b);
      bench_free(a);
 }

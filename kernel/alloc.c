@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.35 2003-01-26 16:56:53 stevenj Exp $ */
+/* $Id: alloc.c,v 1.36 2003-02-26 01:42:08 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -111,7 +111,7 @@ void X(free)(void *p)
 /**********************************************************
  *   DEBUGGING CODE
  **********************************************************/
-#if defined(FFTW_DEBUG)
+#if defined(FFTW_DEBUG_MALLOC)
 
 #include <stdio.h>
 

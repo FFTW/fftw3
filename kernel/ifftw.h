@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.186 2003-02-11 03:04:18 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.187 2003-02-26 01:42:08 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -146,7 +146,7 @@ enum malloc_tag {
 extern void X(ifree)(void *ptr);
 extern void X(ifree0)(void *ptr);
 
-#ifdef FFTW_DEBUG
+#ifdef FFTW_DEBUG_MALLOC
 
 extern void *X(malloc_debug)(size_t n, enum malloc_tag what,
 			     const char *file, int line);
@@ -154,7 +154,7 @@ extern void *X(malloc_debug)(size_t n, enum malloc_tag what,
 #define NATIVE_MALLOC(n, what) MALLOC(n, what)
 void X(malloc_print_minfo)(int vrbose);
 
-#else /* ! FFTW_DEBUG */
+#else /* ! FFTW_DEBUG_MALLOC */
 
 extern void *X(malloc_plain)(size_t sz);
 #define MALLOC(n, what)  X(malloc_plain)(n)
