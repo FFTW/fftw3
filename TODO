@@ -1,19 +1,15 @@
-* user interface (& manual)
+* add r2r & threads test cases to 'make check'
+
+* manual
 
 * --enable-long-double fails in verify().  The problem appears
   to be a bug in gcc-2.95 -malign-double.  The problem disappears
   with gcc-3.1, icc, and without -malign-double.  I couldn't figure
   out exactly what the problem is. 
 
-* still too much code duplication in rader
-
-* cleanup reodft/verify.c using kernel/verify-lib.c
-
 * it may be a good idea to unify all those little loops that do
   copying, (X[i], X[n-i]) <- (X[i] + X[n-i], X[i] - X[n-i]),
   and multiplication of vectors by twiddle factors.
-
-* $prefix/bin/fftw_wisdom to generate/update /etc/fftw/wisdom and wisdom_conf.c
 
 * fma codelets?
 
@@ -53,3 +49,7 @@ TODO before FFTW-$2\pi$:
 
 * Explore the idea of having n < 0 in tensors, possibly to mean
   inverse DFT.
+
+* still too much code duplication in rader
+
+* cleanup reodft/verify.c using kernel/verify-lib.c
