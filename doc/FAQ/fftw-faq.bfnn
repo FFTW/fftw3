@@ -193,7 +193,7 @@ you can play with the code generator if you want.  In this case, you
 need a working Objective Caml system.  Objective Caml is available
 from \docref{the Caml web page\}.
 
-\question 26aug:fortran  Can I call FFTW from FORTRAN?
+\question 26aug:fortran  Can I call FFTW from Fortran?
 
 Yes, FFTW (versions 1.3 and higher) contains a Fortran-callable
 interface, documented in the FFTW manual.
@@ -214,7 +214,7 @@ compiler.  Moreover, it is likely that the C++ \courier{<complex>\}
 template class is bit-compatible with FFTW's complex-number format
 (see the FFTW manual for more details).
 
-\question 26aug:whynotfortran  Why isn't FFTW written in FORTRAN/C++?
+\question 26aug:whynotfortran  Why isn't FFTW written in Fortran/C++?
 
 Because we don't like those languages, and neither approaches the
 portability of C.
