@@ -63,6 +63,14 @@ AC_TYPE_SIZE_T
 AC_CHECK_TYPES([uint])
 AC_HEADER_TIME
 
+AC_CHECK_SIZEOF(uint, 0)
+AC_CHECK_SIZEOF(unsigned int, 0)
+AC_CHECK_SIZEOF(unsigned long long, 0)
+AC_ARG_ENABLE(unsafe-mulmod, [  --enable-unsafe-mulmod  risk overflow for large prime sizes], enable_unsafe_mulmod=$enableval, enable_unsafe_mulmod=no)
+if test "$enable_unsafe_mulmod" = "yes"; then
+        AC_DEFINE([FFTW_ENABLE_UNSAFE_MULMOD],1,[enable fast, unsafe modular multiplications, risking overflow for large prime sizes])
+fi
+
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
 AC_FUNC_MALLOC
