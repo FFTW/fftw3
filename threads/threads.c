@@ -294,7 +294,6 @@ typedef pthread_t fftw_thr_id;
 /* POSIX semaphores are disabled for now because, at least on
    my Linux machine, they don't seem to offer much performance advantage. */
 #if 0
-
 #define HAVE_SEMAPHORES 1
 
 #include <semaphore.h>
@@ -312,9 +311,8 @@ typedef sem_t fftw_sem_id;
 #endif
 
 
-#if 0 /* change to 1 to enable pre-spawned threads via Linux spinlocks */
+#if 0 /* 1 for experimental pre-spawned threads via Linux spinlocks */
 #ifndef HAVE_SEMAPHORES
-
 #define HAVE_SEMAPHORES 1
 
 /* from linux/kernel.h */
