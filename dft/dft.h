@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.38 2003-05-26 14:21:22 athena Exp $ */
+/* $Id: dft.h,v 1.39 2003-07-05 17:05:51 athena Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -42,65 +42,28 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
 problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
                             R *ri, R *ii, R *ro, R *io);
 
-/* problemw.c: */
-typedef struct {
-     problem super;
-
-     int dec;
-#    define DECDIF 0
-#    define DECDIT 1
-
-     int r, m;
-     int s;
-     int vl, vs;
-     R *rio, *iio;
-} problem_dftw;
-
-int X(problem_dftw_p)(const problem *p);
-#define DFTWP X(problem_dftw_p)  /* shorthand */
-
-problem *X(mkproblem_dftw)(int dec, int r, int m, int s, int vl, int vs, 
-			   R *rio, R *iio);
-
 /* solve.c: */
 void X(dft_solve)(const plan *ego_, const problem *p_);
-void X(dftw_solve)(const plan *ego_, const problem *p_);
 
 /* plan.c: */
 typedef void (*dftapply) (const plan *ego, R *ri, R *ii, R *ro, R *io);
-typedef void (*dftwapply) (const plan *ego, R *rio, R *iio);
 
 typedef struct {
      plan super;
      dftapply apply;
 } plan_dft;
 
-typedef struct {
-     plan super;
-     dftwapply apply;
-} plan_dftw;
-
 plan *X(mkplan_dft)(size_t size, const plan_adt *adt, dftapply apply);
-plan *X(mkplan_dftw)(size_t size, const plan_adt *adt, dftwapply apply);
 
 #define MKPLAN_DFT(type, adt, apply) \
   (type *)X(mkplan_dft)(sizeof(type), adt, apply)
 
-#define MKPLAN_DFTW(type, adt, apply) \
-  (type *)X(mkplan_dftw)(sizeof(type), adt, apply)
-
 /* various solvers */
 solver *X(mksolver_dft_direct)(kdft k, const kdft_desc *desc);
-solver *X(mksolver_dft_directw)(kdftw codelet, const ct_desc *desc, int dec);
-solver *X(mksolver_dft_directwbuf)(kdftw codelet, 
-				   const ct_desc *desc, int dec);
-solver *X(mksolver_dftsq)(kdftwsq codelet, const ct_desc *desc, int dec);
 
 extern void (*X(kdft_dit_register_hook))(planner *, kdftw, const ct_desc *);
 extern void (*X(kdft_dif_register_hook))(planner *, kdftw, const ct_desc *);
 
-void X(dft_ct_register)(planner *p);
-void X(dft_ctsq_register)(planner *p);
 void X(dft_rank0_register)(planner *p);
 void X(dft_rank_geq2_register)(planner *p);
 void X(dft_indirect_register)(planner *p);
@@ -112,7 +75,7 @@ void X(dft_generic_register)(planner *p);
 void X(dft_rader_register)(planner *p);
 void X(dft_bluestein_register)(planner *p);
 void X(dft_nop_register)(planner *p);
-void X(dftw_dft_register)(planner *p);
+void X(dft_ct_generic_register)(planner *p);
 
 /* rader-omega.c: auxiliary stuff for rader */
 R *X(dft_rader_mkomega)(plan *p_, int n, int ginv);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.22 2003-05-26 14:21:22 athena Exp $ */
+/* $Id: conf.c,v 1.23 2003-07-05 17:05:51 athena Exp $ */
 
 #include "dft.h"
 
@@ -34,9 +34,8 @@ static const solvtab s =
      SOLVTAB(X(dft_generic_register)),
      SOLVTAB(X(dft_rader_register)),
      SOLVTAB(X(dft_bluestein_register)),
-     SOLVTAB(X(dft_ct_register)),
      SOLVTAB(X(dft_nop_register)),
-     SOLVTAB(X(dftw_dft_register)),
+     SOLVTAB(X(dft_ct_generic_register)),
      SOLVTAB_END
 };
 

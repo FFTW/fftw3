@@ -165,8 +165,6 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      return &(pln->super.super);
 }
 
-/* constructors */
-
 static solver *mksolver(void)
 {
      static const solver_adt sadt = { mkplan };

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.39 2003-04-05 02:35:49 stevenj Exp $ */
+/* $Id: direct.c,v 1.40 2003-07-05 17:05:51 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -141,7 +141,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 }
 
-/* constructor */
 solver *X(mksolver_dft_direct)(kdft k, const kdft_desc *desc)
 {
      static const solver_adt sadt = { mkplan };

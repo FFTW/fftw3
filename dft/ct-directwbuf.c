@@ -18,17 +18,14 @@
  *
  */
 
-/* $Id: directwbuf.c,v 1.3 2003-06-11 02:15:41 athena Exp $ */
+/* $Id: ct-directwbuf.c,v 1.1 2003-07-05 17:05:51 athena Exp $ */
 
-/* direct DFTW solver, with buffer*/
-
-#include "dft.h"
+#include "ct.h"
 
 typedef struct {
-     solver super;
+     ct_solver super;
      const ct_desc *desc;
      kdftw k;
-     int dec;
 } S;
 
 typedef struct {
@@ -130,97 +127,87 @@ static void print(const plan *ego_, printer *p)
               ego->r, X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam);
 }
 
-static int applicable0(const solver *ego_, const problem *p_,
+static int applicable0(const S *ego, 
+		       int dec, int r, int m, int s, int vl, int vs, 
+		       R *rio, R *iio,
 		       const planner *plnr)
 {
-     if (DFTWP(p_)) {
-          const S *ego = (const S *) ego_;
-          const problem_dftw *p = (const problem_dftw *) p_;
-          const ct_desc *e = ego->desc;
+     const ct_desc *e = ego->desc;
+     UNUSED(vl); UNUSED(s); UNUSED(vs); UNUSED(rio); UNUSED(iio);
 
-          return (
-	       1
+     return (
+	  1
 
-	       && p->dec == ego->dec
-	       && p->r == e->radix
+	  && dec == ego->super.dec
+	  && r == e->radix
 
-	       /* check for alignment/vector length restrictions,
-		  both for batchsize and for the remainer */
-	       && (p->m < BATCHSZ ||
-		   (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, BATCHSZ,
-				  2 * e->radix, plnr)))
-	       && (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, p->m % BATCHSZ,
-				 2 * e->radix, plnr))
-	       );
-     }
-
-     return 0;
+	  /* check for alignment/vector length restrictions, both for
+	     batchsize and for the remainder */
+	  && (m < BATCHSZ ||
+	      (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, BATCHSZ,
+			     2 * e->radix, plnr)))
+	  && (e->genus->okp(e, 0, ((const R *)0)+1, 2, 0, m % BATCHSZ,
+			    2 * e->radix, plnr))
+	  );
 }
 
-static int applicable(const solver *ego_, const problem *p_,
+static int applicable(const S *ego, 
+		      int dec, int r, int m, int s, int vl, int vs, 
+		      R *rio, R *iio,
 		      const planner *plnr)
 {
-     const problem_dftw *p;
-
-     if (!applicable0(ego_, p_, plnr))
+     if (!applicable0(ego, dec, r, m, s, vl, vs, rio, iio, plnr))
           return 0;
 
-     p = (const problem_dftw *) p_;
-
      if (NO_UGLYP(plnr)) {
-	  if (X(ct_uglyp)(512, p->m * p->r, p->r)) return 0;
+	  if (X(ct_uglyp)(512, m * r, r)) return 0;
      }
 
      return 1;
 }
 
-static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
+static plan *mkcldw(const ct_solver *ego_, 
+		    int dec, int r, int m, int s, int vl, int vs, 
+		    R *rio, R *iio,
+		    planner *plnr)
 {
      const S *ego = (const S *) ego_;
      P *pln;
-     const problem_dftw *p;
      const ct_desc *e = ego->desc;
 
      static const plan_adt padt = {
-	  X(dftw_solve), awake, print, destroy
+	  0, awake, print, destroy
      };
 
-     UNUSED(plnr);
-
-     if (!applicable(ego_, p_, plnr))
+     if (!applicable(ego, dec, r, m, s, vl, vs, rio, iio, plnr))
           return (plan *)0;
-
-     p = (const problem_dftw *) p_;
 
      pln = MKPLAN_DFTW(P, &padt, apply);
 
      pln->k = ego->k;
-     pln->ios = p->m * p->s;
+     pln->ios = m * s;
      pln->td = 0;
-     pln->r = p->r;
-     pln->m = p->m;
-     pln->s = p->s; /* == p->ws */
-     pln->vl = p->vl;
-     pln->vs = p->vs; /* == p->wvs */
+     pln->r = r;
+     pln->m = m;
+     pln->s = s;
+     pln->vl = vl;
+     pln->vs = vs;
      pln->slv = ego;
      pln->bufstride = X(mkstride)(e->radix, 2);
 
      X(ops_zero)(&pln->super.super.ops);
-     X(ops_madd2)(pln->m * (pln->vl / e->genus->vl),
-		  &e->ops, &pln->super.super.ops);
+     X(ops_madd2)(m * (vl / e->genus->vl), &e->ops, &pln->super.super.ops);
      /* 4 load/stores * N * VL */
-     pln->super.super.ops.other += 4 * pln->r * pln->m * pln->vl;
+     pln->super.super.ops.other += 4 * r * m * vl;
 
      return &(pln->super.super);
 }
 
-/* constructor */
-solver *X(mksolver_dft_directwbuf)(kdftw codelet, const ct_desc *desc, int dec)
+solver *X(mksolver_dft_ct_directwbuf)(kdftw codelet, 
+				      const ct_desc *desc, int dec)
 {
-     static const solver_adt sadt = { mkplan };
-     S *slv = MKSOLVER(S, &sadt);
+     S *slv = (S *)X(mksolver_dft_ct)(sizeof(S), desc->radix, dec, mkcldw);
      slv->k = codelet;
      slv->desc = desc;
-     slv->dec = dec;
-     return &(slv->super);
+     return &(slv->super.super);
 }

@@ -18,21 +18,21 @@
  *
  */
 
-/* express a dftw problem in terms of dft + multiplication by
+/* express a twiddle problem in terms of dft + multiplication by
    twiddle factors */
 
-#include "dft.h"
+#include "ct.h"
 
 struct P_s;
 typedef struct {
      void (*bytwiddle)(const struct P_s *ego, R *rio, R *iio);
      void (*mktwiddle)(struct P_s *ego, int flg);
-     int (*applicable)(const problem *p_, const planner *plnr);
+     int (*applicable)(int r, int m, const planner *plnr);
      const char *nam;
 } wadt;
 
 typedef struct {
-     solver super;
+     ct_solver super;
      const wadt *adt;
 } S;
 
@@ -126,15 +126,11 @@ static void bytwiddle2(const P *ego, R *rio, R *iio)
      }
 }
 
-static int applicable2(const problem *p_, const planner *plnr)
+static int applicable2(int r, int m, const planner *plnr)
 {
-     if (DFTWP(p_)) {
-          const problem_dftw *p = (const problem_dftw *) p_;
-          return (1 
-		  && (!NO_UGLYP(plnr) || (p->m * p->r > 65536))
-	       );
-     }
-     return 0;
+     return (1 
+	     && (!NO_UGLYP(plnr) || (m * r > 65536))
+	  );
 }
 
 /**************************************************************/
@@ -181,15 +177,12 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
      }
 }
 
-static int applicable1(const problem *p_, const planner *plnr)
+static int applicable1(int r, int m, const planner *plnr)
 {
-     if (DFTWP(p_)) {
-          const problem_dftw *p = (const problem_dftw *) p_;
-          return (1 
-		  && !NO_UGLYP(plnr)
-	       );
-     }
-     return 0;
+     UNUSED(r); UNUSED(m);
+     return (1 
+	     && !NO_UGLYP(plnr)
+	  );
 }
 
 /**************************************************************/
@@ -238,46 +231,45 @@ static void print(const plan *ego_, printer *p)
 	      ego->r, ego->m, ego->vl, ego->cld);
 }
 
-static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
+static plan *mkcldw(const ct_solver *ego_, 
+		    int dec, int r, int m, int s, int vl, int vs, 
+		    R *rio, R *iio,
+		    planner *plnr)
 {
-     const problem_dftw *p;
      const S *ego = (const S *)ego_;
      P *pln;
      plan *cld = 0;
 
      static const plan_adt padt = {
-	  X(dftw_solve), awake, print, destroy
+	  0, awake, print, destroy
      };
 
-     if (!ego->adt->applicable(p_, plnr))
+     if (!ego->adt->applicable(r, m, plnr))
           return (plan *)0;
-
-     p = (const problem_dftw *) p_;
 
      cld = X(mkplan_d)(plnr, 
 			X(mkproblem_dft_d)(
-			     X(mktensor_1d)(p->r, p->m * p->s, p->m * p->s),
-			     X(mktensor_2d)(p->m, p->s, p->s,
-					    p->vl, p->vs, p->vs),
-			     p->rio, p->iio, p->rio, p->iio)
+			     X(mktensor_1d)(r, m * s, m * s),
+			     X(mktensor_2d)(m, s, s, vl, vs, vs),
+			     rio, iio, rio, iio)
 			);
      if (!cld) goto nada;
 
-     pln = MKPLAN_DFTW(P, &padt, p->dec == DECDIT ? apply_dit : apply_dif);
+     pln = MKPLAN_DFTW(P, &padt, dec == DECDIT ? apply_dit : apply_dif);
      pln->slv = ego;
      pln->adt = ego->adt;
      pln->cld = cld;
-     pln->r = p->r;
-     pln->m = p->m;
-     pln->s = p->s;
-     pln->vl = p->vl;
-     pln->vs = p->vs;
-     pln->dec = p->dec;
+     pln->r = r;
+     pln->m = m;
+     pln->s = s;
+     pln->vl = vl;
+     pln->vs = vs;
+     pln->dec = dec;
      pln->W0 = pln->W1 = 0;
      pln->td = 0;
 
      {
-	  double n0 = (p->r - 1) * (p->m - 1) * p->vl;
+	  double n0 = (r - 1) * (m - 1) * vl;
 	  pln->super.super.ops = cld->ops;
 	  pln->super.super.ops.mul += 8 * n0;
 	  pln->super.super.ops.add += 4 * n0;
@@ -290,22 +282,23 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(const wadt *adt)
+static solver *mksolver(const wadt *adt, int r, int dec)
 {
-     static const solver_adt sadt = { mkplan };
-     S *slv = MKSOLVER(S, &sadt);
+     S *slv = (S *)X(mksolver_dft_ct)(sizeof(S), r, dec, mkcldw);
      slv->adt = adt;
-     return &(slv->super);
+     return &(slv->super.super);
 }
 
-void X(dftw_dft_register)(planner *p)
+void X(dft_ct_generic_register)(planner *p)
 {
      static const wadt a[] = {
-	  { bytwiddle1, mktwiddle1, applicable1, "dftw-dft1" },
-	  { bytwiddle2, mktwiddle2, applicable2, "dftw-dft2" },
+	  { bytwiddle1, mktwiddle1, applicable1, "ct-generic1" },
+	  { bytwiddle2, mktwiddle2, applicable2, "ct-generic2" },
      };
      unsigned i;
 
-     for (i = 0; i < sizeof(a) / sizeof(a[0]); ++i) 
-	  REGISTER_SOLVER(p, mksolver(&a[i]));
+     for (i = 0; i < sizeof(a) / sizeof(a[0]); ++i) {
+	  REGISTER_SOLVER(p, mksolver(&a[i], 0, DECDIT));
+	  REGISTER_SOLVER(p, mksolver(&a[i], 0, DECDIF));
+     }
 }

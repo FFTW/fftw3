@@ -18,22 +18,15 @@
  *
  */
 
-/* $Id: ct.c,v 1.39 2003-05-26 14:21:22 athena Exp $ */
+/* $Id: ct.c,v 1.40 2003-07-05 17:05:51 athena Exp $ */
 
-#include "dft.h"
-
-typedef struct {
-     solver super;
-     int r;
-     int dec;
-     const int *buddies;
-} S;
+#include "ct.h"
 
 typedef struct {
      plan_dft super;
      plan *cld;
      plan *cldw;
-     const S *slv;
+     const ct_solver *slv;
      int r;
 } P;
 
@@ -101,7 +94,7 @@ static int isqrt(int n)
 }
 
 #define divides(a, b) (((int)(b) % (int)(a)) == 0)
-static int really_choose_radix(int r, int n)
+static int choose_radix(int r, int n)
 {
      if (r > 0) {
 	  if (divides(r, n)) return r;
@@ -115,25 +108,7 @@ static int really_choose_radix(int r, int n)
      }
 }
 
-static int choose_radix(const S *ego, int n)
-{
-     const int *p;
-     int r = really_choose_radix(ego->r, n);
-
-     /* see if a buddy with a lower index would produce the same
-	radix.  If so, fail */
-     if (r) {
-	  for (p = ego->buddies; *p != ego->r; ++p)
-	       if (really_choose_radix(*p, n) == r) 
-		    return 0; 
-     }
-
-     A(r >= 0);
-     A(r || divides(r, n));
-     return r;
-}
-
-static int applicable0(const S *ego, const problem *p_, planner *plnr)
+static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
@@ -148,14 +123,14 @@ static int applicable0(const S *ego, const problem *p_, planner *plnr)
 		      p->ri == p->ro || 
 		      DESTROY_INPUTP(plnr))
 		  
-		  && ((r = choose_radix(ego, p->sz->dims[0].n)) > 0)
+		  && ((r = choose_radix(ego->r, p->sz->dims[0].n)) > 0)
 		  && p->sz->dims[0].n > r);
      }
      return 0;
 }
 
 
-static int applicable(const S *ego, const problem *p_, planner *plnr)
+static int applicable(const ct_solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p;
 
@@ -173,7 +148,7 @@ static int applicable(const S *ego, const problem *p_, planner *plnr)
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
-     const S *ego = (const S *) ego_;
+     const ct_solver *ego = (const ct_solver *) ego_;
      const problem_dft *p;
      P *pln = 0;
      plan *cld = 0, *cldw = 0;
@@ -191,7 +166,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_dft *) p_;
      d = p->sz->dims;
      n = d[0].n;
-     r = choose_radix(ego, n);
+     r = choose_radix(ego->r, n);
      m = n / r;
 
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
@@ -199,10 +174,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      switch (ego->dec) {
 	 case DECDIT:
 	 {
-	      cldw = X(mkplan_d)(plnr, 
-				 X(mkproblem_dftw)(DECDIT, r, m, 
-						   d[0].os, vl, ovs,
-						   p->ro, p->io) );
+	      cldw = ego->mkcldw(ego, 
+				 DECDIT, r, m, d[0].os, vl, ovs, p->ro, p->io,
+				 plnr);
 	      if (!cldw) goto nada;
 
 	      t1 = X(mktensor_1d)(r, d[0].is, m * d[0].os);
@@ -221,10 +195,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	 }
 	 case DECDIF:
 	 {
-	      cldw = X(mkplan_d)(plnr, 
-				 X(mkproblem_dftw)(DECDIF, r, m, 
-						   d[0].is, vl, ivs,
-						   p->ri, p->ii) );
+	      cldw = ego->mkcldw(ego,
+				 DECDIF, r, m, d[0].is, vl, ivs, p->ri, p->ii,
+				 plnr);
 	      if (!cldw) goto nada;
 
 	      t1 = X(mktensor_1d)(r, m * d[0].is, d[0].os);
@@ -259,33 +232,22 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(int r, const int *buddies, int dec)
+ct_solver *X(mksolver_dft_ct)(size_t size, int r, int dec, mkinferior mkcldw)
 {
      static const solver_adt sadt = { mkplan };
-     S *slv = MKSOLVER(S, &sadt);
+     ct_solver *slv = (ct_solver *)X(mksolver)(size, &sadt);
      slv->r = r;
      slv->dec = dec;
-     slv->buddies = buddies;
-     return &(slv->super);
+     slv->mkcldw = mkcldw;
+     return slv;
 }
 
-void X(dft_ct_register)(planner *p)
+plan *X(mkplan_dftw)(size_t size, const plan_adt *adt, dftwapply apply)
 {
-     const int *q;
-     static const int r[] = {
-	  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64, 
+     plan_dftw *ego;
 
-	  0,  /* smallest prime factor */
-	  -1, /* sqrt(n) */
+     ego = (plan_dftw *) X(mkplan)(size, adt);
+     ego->apply = apply;
 
-	  -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15,
-	  -16, -32, -64
-     };
-
-
-     for (q = r; q < r + sizeof(r) / sizeof(r[0]); ++q) {
-          REGISTER_SOLVER(p, mksolver(*q, r, DECDIT));
-          REGISTER_SOLVER(p, mksolver(*q, r, DECDIF));
-     }
+     return &(ego->super);
 }
-
