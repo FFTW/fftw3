@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.14 2002-08-09 23:26:57 athena Exp $ */
+/* $Id: twiddle.c,v 1.15 2002-08-10 23:25:50 stevenj Exp $ */
 
 /* Twiddle manipulation */
 
@@ -91,7 +91,7 @@ static R *compute(const tw_instr *instr, uint n, uint r, uint m)
      R *W, *W0;
      const tw_instr *p;
 
-     static trigreal (*const f[])(long, unsigned long) = { 
+     static trigreal (*const f[])(int, uint) = { 
 	  X(cos2pi), X(sin2pi), X(tan2pi) 
      };
 
