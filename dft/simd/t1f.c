@@ -27,7 +27,7 @@ static int okp(const ct_desc *d,
 	       int ios, int vs, uint m, int dist)
 {
      return (RIGHT_CPU()
-             && ALIGNED(rio)
+             && ALIGNEDA(rio)
 	     && SIMD_STRIDE_OKA(ios)
 	     && SIMD_VSTRIDE_OKA(dist)
 	     && iio == rio + 1

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.11 2002-07-29 01:19:35 stevenj Exp $ */
+/* $Id: alloc.c,v 1.12 2002-07-30 17:28:33 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -257,6 +257,7 @@ void *X(malloc_plain)(size_t n)
           n = 1;
      p = real_malloc(n);
      CK(p);
+     A((((long)p) % MIN_ALIGNMENT) == 0);
      return p;
 }
 

@@ -27,7 +27,7 @@ static int okp(const kdft_desc *d,
                int is, int os, uint vl, int ivs, int ovs)
 {
      return (RIGHT_CPU()
-             && ALIGNED(ri)
+             && ALIGNEDA(ri)
              && ALIGNED(ro)
 	     && SIMD_STRIDE_OKA(is)
 	     && SIMD_STRIDE_OK(os)
