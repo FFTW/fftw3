@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.24 2003-04-04 21:29:43 stevenj Exp $ */
+/* $Id: align.c,v 1.25 2003-04-04 22:18:39 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -48,5 +48,6 @@ R *X(taint)(R *p, int s)
 {
      if (!stride_aligned_p(s))
 	  p = (R *) (((uintptr_t) p) | 1);
+     return p;
 }
 #endif /* HAVE_SIMD */
