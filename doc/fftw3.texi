@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.149 2003-03-15 18:31:42 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.152 2003-03-15 18:34:05 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4551,7 +4551,7 @@ extremely slow (you may just want to use @code{FFTW_ESTIMATE}).
 Matteo Frigo was supported in part by the Special Research Program SFB
 F011 ``AURORA'' of the Austrian Science Fund FWF and by MIT Lincoln
 Laboratory.  For previous versions of FFTW, he was supported in part by the
-Defense Advanced Research Projects Agency (DARPA) under Grants
+Defense Advanced Research Projects Agency (DARPA), under Grants
 N00014-94-1-0985 and F30602-97-1-0270, and by a Digital Equipment
 Corporation Fellowship.  
 
