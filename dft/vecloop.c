@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vecloop.c,v 1.3 2002-06-07 22:07:53 athena Exp $ */
+/* $Id: vecloop.c,v 1.4 2002-06-08 15:10:44 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -152,7 +152,6 @@ static int applicable(const solver *ego_, const problem *p_, uint *dp)
 
 static enum score score(const solver *ego_, const problem *p_)
 {
-     const S *ego = (const S *) ego_;
      const problem_dft *p = (const problem_dft *) p_;
      uint vdim;
      iodim *d;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.1 2002-06-08 13:34:58 athena Exp $ */
+/* $Id: ct-ditf.c,v 1.2 2002-06-08 15:10:44 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -49,8 +49,9 @@ static int applicable(const solver_ct *ego, const problem *p_)
 		  && p->ri == p->ro  /* inplace only */
 		  && p->vecsz.rnk == 1
 		  && vd[0].n == e->radix
-		  && d[0].is == e->radix * vd[0].is
-		  && d[0].os == vd[0].is && vd[0].os == d[0].n * vd[0].is
+		  && d[0].os == vd[0].is 
+		  && d[0].is == (int)e->radix * vd[0].is
+		  && vd[0].os == (int)d[0].n * vd[0].is
 
 		  /* if specialized strides, then they must match */
 		  && (!e->is || e->is == vd[0].os)
@@ -82,8 +83,9 @@ static problem *mkcld(const solver_ct *ego, const problem_dft *p)
 	  p->ro, p->io, p->ro, p->io);
 }
 
-static enum score score(const solver *ego, const problem *p)
+static enum score score(const solver *ego_, const problem *p)
 {
+     const solver_ct *ego = (const solver_ct *) ego_;
      return (applicable(ego, p)) ? GOOD : BAD;
 }
 

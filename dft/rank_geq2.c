@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank_geq2.c,v 1.1 2002-06-07 22:07:53 athena Exp $ */
+/* $Id: rank_geq2.c,v 1.2 2002-06-08 15:10:44 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -95,7 +95,7 @@ static uint really_picksplit(int spltrnk, uint rnk)
 
 static int picksplit(const S *ego, uint rnk, uint *rp)
 {
-     uint i, r0, r1;
+     uint i, r0;
      r0 = really_picksplit(ego->spltrnk, rnk);
 
      /* check whether some buddy solver would produce the same split.
@@ -116,7 +116,7 @@ static int applicable(const solver *ego_, const problem *p_, uint *rp)
 {
      if (DFTP(p_)) {
 	  const problem_dft *p = (const problem_dft *) p_;
-	  const S *ego = (S *)ego_;
+	  const S *ego = (const S *)ego_;
 	  return (1
 		  && p->sz.rnk >= 2
 		  && picksplit(ego, p->sz.rnk, rp)
@@ -151,8 +151,8 @@ static enum score score(const solver *ego_, const problem *p_)
         prefer positive spltrnk to negative (assuming that they
         come in positive/negative pairs.  We do this to discourage the
         planner from trying effectively duplicate plans. */
-     if ((ego->spltrnk > 0 && ego->spltrnk >= p->sz.rnk) ||
-	 (ego->spltrnk < 0 && -2 * ego->spltrnk >= p->sz.rnk))
+     if ((ego->spltrnk > 0 && ego->spltrnk >= (int)p->sz.rnk) ||
+	 (ego->spltrnk < 0 && -2 * ego->spltrnk >= (int)p->sz.rnk))
 	  return UGLY;
 
      /* Heuristic: if the vector stride is greater than the transform

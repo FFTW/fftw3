@@ -18,13 +18,14 @@
  *
  */
 
-/* $Id: conf.c,v 1.3 2002-06-08 13:34:58 athena Exp $ */
+/* $Id: conf.c,v 1.4 2002-06-08 15:10:44 athena Exp $ */
 
 #include "dft.h"
 
 void fftw_dft_conf_standard(planner *p)
 {
      fftw_dft_vecloop_register(p);
+     fftw_dft_indirect_register(p);
      fftw_dft_rank0_register(p);
      fftw_dft_rank_geq2_register(p);
      fftw_solvtab_exec(fftw_solvtab_dft_standard, p);
