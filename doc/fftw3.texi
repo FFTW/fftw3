@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.27 2003-02-17 08:40:19 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.28 2003-02-17 08:42:19 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -743,7 +743,7 @@ dimension @code{n[i]}.)  The various r2r kind constants are defined
 in the following subsections.
 
 That is, FFTW computes the separable product of the specified r2r
-transforms over each dimension, which can be used e.g. for
+transforms over each dimension, which can be used e.g. for partial
 differential equations with mixed boundary conditions.  (For some r2r
 kinds, notably the halfcomplex DFT and the DHT, such a separable
 product is somewhat problematic in more than one dimension, however,
