@@ -139,6 +139,7 @@ AC_SUBST(PREC_SUFFIX)
 
 dnl Checks for programs.
 AC_PROG_CC
+AX_CC_FAMILY
 AMX_PROG_AS     dnl AM_PROG_AS breaks at least one version of libtool
 AC_PROG_CC_STDC
 AC_PROG_INSTALL
@@ -160,35 +161,38 @@ AX_CC_MAXOPT
 
 # some additional FFTW-specific tweaks to the flags
 if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
+    if test "x$CODELET_OPTIM" = x; then
 
-    if test "$GCC" = "yes"; then
-      # tweak codelet optimization level
-      if test "x$CODELET_OPTIM" = x; then
-         case "${host_cpu}" in
-	    # gcc's ``optimizations'' slow down everything on IA32.
-	    # (not to mention compiler bugs)
-            i?86*) CODELET_OPTIM=-O ;;
-         esac
+      case "${ax_cv_cc_family}" in
+        gnu)
+            case "${host_cpu}" in
+	       # gcc's ``optimizations'' slow down everything on IA32.
+	       # (not to mention compiler bugs)
+               i?86*) CODELET_OPTIM=-O ;;
+            esac
 
-         # disable certain other gcc ``optimizations'' that produce worse 
-	 # codelets
-         AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns,
-		 [CODELET_OPTIM="$CODELET_OPTIM -fno-schedule-insns"])
-         AX_CHECK_COMPILER_FLAGS(-fno-web,
-		 [CODELET_OPTIM="$CODELET_OPTIM -fno-web"])
-         AX_CHECK_COMPILER_FLAGS(-fno-loop-optimize,
-		 [CODELET_OPTIM="$CODELET_OPTIM -fno-loop-optimize"])
+	    # disable certain other gcc ``optimizations'' that produce worse 
+	    # codelets
+	    AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns,
+		    [CODELET_OPTIM="$CODELET_OPTIM -fno-schedule-insns"])
+	    AX_CHECK_COMPILER_FLAGS(-fno-web,
+		    [CODELET_OPTIM="$CODELET_OPTIM -fno-web"])
+	    AX_CHECK_COMPILER_FLAGS(-fno-loop-optimize,
+		    [CODELET_OPTIM="$CODELET_OPTIM -fno-loop-optimize"])
 
-         # The gcc-3.4 inliner is totally broken; it does not inline
-         # small functions like VFMAI.
-         AX_CHECK_COMPILER_FLAGS(
-                 [--param inline-unit-growth=1000],
-		 [CODELET_OPTIM="$CODELET_OPTIM --param inline-unit-growth=1000"])
-         AX_CHECK_COMPILER_FLAGS(
-		 [--param large-function-growth=1000],
-		 [CODELET_OPTIM="$CODELET_OPTIM --param large-function-growth=1000"])
+	    # The gcc-3.4 inliner is totally broken; it does not inline
+	    # small functions like VFMAI.
+	    AX_CHECK_COMPILER_FLAGS(
+		    [--param inline-unit-growth=1000],
+		    [CODELET_OPTIM="$CODELET_OPTIM --param inline-unit-growth=1000"])
+	    AX_CHECK_COMPILER_FLAGS(
+		    [--param large-function-growth=1000],
+		    [CODELET_OPTIM="$CODELET_OPTIM --param large-function-growth=1000"])
+            ;;
 
-      fi
+        xlc) CODELET_OPTIM=-O;;
+
+      esac
     fi
 fi
 
