@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.78 2002-09-13 13:31:46 athena Exp $ */
+/* $Id: planner.c,v 1.79 2002-09-13 14:11:10 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -259,7 +259,6 @@ static plan *mkplan(planner *ego, problem *p)
 	       sp = 0;
      }
 
-     sp = sol ? sol->sp : 0;
      ego->inferior_mkplan(ego, p, &pln, &sp);
      hinsert(ego, m.s, ego->planner_flags, sp);
 
