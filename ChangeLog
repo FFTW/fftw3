@@ -1,0 +1,873 @@
+2002-07-12  Steven G. Johnson  <stevenj@ab-initio>
+
+	* TODO: buffered malloc's buffers
+
+	* TODO, dft/rader.c: share more code between apply and apply_dit
+	in Rader
+
+2002-07-08  Matteo Frigo  <athena@ab-initio>
+
+	* simd/simd-sse.h, simd/simd-sse2.h, simd/sse.c, simd/sse2.c:
+	Polished
+
+	* support/Makefile.codelets: *** empty log message ***
+
+	* dft/simd/codelets/Makefile.am, genfft/c.ml,
+	genfft/gen_notw_c.ml, genfft/simd.ml, genfft/to_alist.ml,
+	genfft/to_alist.mli, simd/simd-sse.h, simd/simd-sse2.h,
+	support/Makefile.codelets: SIMD/FMA stuff
+
+	* simd/simd-sse.h: Avoid code duplication
+
+	* genfft/Makefile.am, genfft/to_alist.ml: Fixes for FMA+SIMD
+
+	* dft/buffered.c, dft/codelets/standard/Makefile.am,
+	dft/simd/Makefile.am, dft/simd/NAMING,
+	dft/simd/codelets/Makefile.am, dft/simd/n1b.c, dft/simd/n1b.h,
+	dft/simd/n1f.c, dft/simd/n1f.h, dft/simd/n2f.c, dft/simd/n2f.h,
+	dft/simd/n3f.h, dft/simd/n4.c, dft/simd/n4.h, dft/simd/t1b.c,
+	dft/simd/t1b.h, dft/simd/t1f.c, dft/simd/t1f.h, dft/simd/t2f.c,
+	dft/simd/t2f.h, dft/simd/t3f.h, dft/simd/t4.c, dft/simd/t4.h,
+	genfft/Makefile.am, genfft/algsimp.ml, genfft/annotate.ml,
+	genfft/annotate.mli, genfft/c.ml, genfft/complex.ml,
+	genfft/complex.mli, genfft/expr.ml, genfft/expr.mli,
+	genfft/gen_athnotw.ml, genfft/gen_athtw.ml, genfft/gen_conv.ml,
+	genfft/gen_hc2r.ml, genfft/gen_notw.ml, genfft/gen_notw_c.ml,
+	genfft/gen_r2hc.ml, genfft/gen_trig.ml, genfft/gen_twiddle.ml,
+	genfft/gen_twiddle_c.ml, genfft/gen_twidsq.ml, genfft/genutil.ml,
+	genfft/oracle.ml, genfft/simd.ml, genfft/simd.mli,
+	genfft/simdmagic.ml, genfft/to_alist.ml, genfft/trig.ml,
+	genfft/trig.mli, genfft/twiddle.ml, kernel/ifftw.h,
+	simd/simd-sse.h, simd/simd-sse2.h, simd/sse.c, simd/sse2.c,
+	support/Makefile.codelets: Major changes in SIMD fftw
+
+2002-07-05  Matteo Frigo  <athena@ab-initio>
+
+	* dft/buffered.c, simd/simd-altivec.h, simd/simd-sse.h: Use unpck
+	instructions instead of shuffles
+
+	* dft/codelets/n.c, dft/codelets/t.c, dft/ct-ditbuf.c,
+	dft/verify.c, kernel/ifftw.h, kernel/planner.c, tests/bench.c:
+	Minor tweaks
+
+	* tests/bench.c: Use score planner
+
+	* CONVENTIONS, dft/Makefile.am, dft/dft.h, dft/verify.c,
+	kernel/Makefile.am, kernel/debug.c, kernel/dotens.c,
+	kernel/dotens2.c, kernel/ifftw.h, tests/bench.c: Added verifier
+
+2002-07-04  Matteo Frigo  <athena@ab-initio>
+
+	* dft/buffered.c, dft/codelet.h, dft/codelets/n.c,
+	dft/codelets/t.c, dft/ct-dif.c, dft/ct-dit.c, dft/ct-ditbuf.c,
+	dft/ct.c, dft/ct.h, dft/simd/Makefile.am, dft/simd/NAMING,
+	dft/simd/codelets/Makefile.am, dft/simd/n2f.c, dft/simd/n2f.h,
+	dft/simd/n3f.h, dft/simd/n4.c, dft/simd/t2f.c, dft/simd/t2f.h,
+	dft/simd/t3f.h, dft/simd/t4.c, genfft-k7/gen_notw.ml,
+	genfft-k7/gen_twiddle.ml, genfft/annotate.ml, genfft/gen_notw.ml,
+	genfft/gen_twiddle.ml, genfft/gen_twidsq.ml, genfft/simd.ml,
+	genfft/simdmagic.ml, kernel/alloc.c, kernel/ifftw.h,
+	simd/simd-sse.h, simd/simd-sse2.h: More simd codelets
+
+2002-07-02  Matteo Frigo  <athena@ab-initio>
+
+	* dft/rank-geq2.c: Oops
+
+	* dft/rank-geq2.c, dft/vrank-geq1.c: Fixed classic mode
+
+	* genfft/simd.ml, simd/simd-altivec.h, simd/simd-sse.h,
+	simd/simd-sse2.h: Use LDK for constants so that we can play games.
+
+	* dft/codelet.h, dft/codelets/n.c, dft/simd/n4.c, dft/simd/t4.c,
+	genfft-k7/gen_notw.ml, genfft/gen_notw.ml, genfft/genutil.ml,
+	genfft/simd.ml, genfft/simd.mli, simd/simd-sse.h: Improved support
+	for fixed strides
+
+	* dft/codelet.h, dft/codelets/n.c, dft/codelets/n.h,
+	dft/codelets/t.c, dft/codelets/t.h, dft/ct-dif.c, dft/ct-dit.c,
+	dft/ct-ditbuf.c, dft/ct-ditf.c, dft/direct.c, dft/k7/k7.c,
+	dft/simd/n4.c, dft/simd/n4.h, dft/simd/t4.c, dft/simd/t4.h,
+	genfft-k7/gen_notw.ml, genfft-k7/gen_twiddle.ml,
+	genfft/gen_notw.ml, genfft/gen_twiddle.ml, genfft/gen_twidsq.ml:
+	Changed accounting of flops
+
+	* genfft-k7/algsimp.ml, genfft-k7/to_alist.ml, genfft/algsimp.ml,
+	simd/simd-sse2.h: Wrong code in non-fma mode
+
+	* genfft/simdmagic.ml, kernel/alloc.c, simd/Makefile.am,
+	simd/simd-sse2.h, simd/sse2.c: sse2 stuff
+
+2002-07-01  Matteo Frigo  <athena@ab-initio>
+
+	* Makefile.am, dft/ct.c, dft/direct.c, dft/k7/k7.c, dft/simd/n4.c,
+	dft/simd/t4.c, kernel/alloc.c, simd/Makefile.am,
+	simd/simd-altivec.h, simd/simd-sse.h, simd/sse.c: Identify CPUs
+	for special codelets
+
+	* libbench/problem.c: Change split problem syntax
+
+	* dft/simd/codelets/Makefile.am: Removed -fma flag
+
+	* simd/simd-altivec.h: Work around gcc bug
+
+2002-06-30  Matteo Frigo  <athena@ab-initio>
+
+	* genfft/algsimp.ml, genfft/magic.ml, genfft/oracle.ml,
+	genfft/simd.ml, genfft/to_alist.ml: New simd stuff
+
+	* dft/simd/codelets/Makefile.am, simd/Makefile.am,
+	simd/simd-altivec.h, simd/simd-sse.h: Added altivec support
+
+	* dft/simd/t4.c: Forgot file
+
+	* Makefile.am, configure.ac, dft/Makefile.am, dft/codelet-k7.h,
+	dft/codelet.h, dft/codelets/Makefile.am, dft/codelets/f.h,
+	dft/codelets/inplace/Makefile.am, dft/codelets/n.c,
+	dft/codelets/n.h, dft/codelets/q.h,
+	dft/codelets/standard/Makefile.am, dft/codelets/t.c,
+	dft/codelets/t.h, dft/conf.c, dft/ct-dif.c, dft/ct-dit.c,
+	dft/ct-ditbuf.c, dft/ct-ditf.c, dft/ct.c, dft/ct.h, dft/direct.c,
+	dft/k7/Makefile.am, dft/k7/codelets/Makefile.am, dft/k7/ct-dif.c,
+	dft/k7/ct-dit.c, dft/k7/ct-ditbuf.c, dft/k7/direct.c, dft/k7/k7.c,
+	dft/k7/kdft-dif.c, dft/k7/kdft-dit.c, dft/k7/kdft.c,
+	dft/simd/Makefile.am, dft/simd/NAMING,
+	dft/simd/codelets/Makefile.am, dft/simd/n4.c, dft/simd/n4.h,
+	dft/simd/t4.h, genfft-k7/genUtil.ml, genfft-k7/gen_notw.ml,
+	genfft-k7/gen_twiddle.ml, genfft/annotate.ml, genfft/c.ml,
+	genfft/c.mli, genfft/gen_notw.ml, genfft/gen_twiddle.ml,
+	genfft/gen_twidsq.ml, genfft/genutil.ml, genfft/magic.ml,
+	genfft/simd.ml, genfft/simd.mli, genfft/simdmagic.ml,
+	genfft/twiddle.ml, genfft/twiddle.mli, kernel/alloc.c,
+	kernel/ifftw.h, libbench/bench-user.h, libbench/problem.c,
+	libbench/util.c, simd/Makefile.am, simd/README, simd/simd-sse.h,
+	simd/simd.h, support/Makefile.codelets, tests/Makefile.am,
+	tests/bench.c: Progress towards simd implementation
+
+2002-06-26  Matteo Frigo  <athena@ab-initio>
+
+	* dft/k7/codelets/Makefile.am: Add 128- codelet
+
+2002-06-23  Matteo Frigo  <athena@ab-initio>
+
+	* configure.ac, genfft-k7/genUtil.ml, genfft-k7/gen_notw.ml,
+	genfft-k7/gen_twiddle.ml, genfft/c.ml, genfft/c.mli,
+	genfft/expr.ml, genfft/expr.mli, genfft/gen_hc2r.ml,
+	genfft/gen_notw.ml, genfft/gen_r2hc.ml, genfft/gen_trig.ml,
+	genfft/gen_twiddle.ml, genfft/gen_twidsq.ml, genfft/genutil.ml,
+	genfft/simd.ml, genfft/simd.mli, libbench/bench-main.c: More simd
+	changes.  Ensure proper stack alignment in k7 codelets.
+
+2002-06-22  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/ifftw.h, kernel/solvtab.c: Fixed prototypes
+
+	* kernel/cycle.h: Sparc cycle counter requires v9
+
+	* configure.ac, kernel/cycle.h, kernel/ifftw.h: Minor fixes
+
+	* acinclude.m4: Fixed ev67 detection
+
+	* tests/bench.c: Print flops
+
+	* genfft/simd.ml: Nothing really
+
+	* dft/codelet-k7.h, dft/codelet.h, genfft-k7/magic.ml,
+	genfft-k7/to_alist.ml, genfft-k7/to_alist.mli, genfft/Makefile.am,
+	genfft/c.ml, genfft/c.mli, genfft/gen_conv.ml, genfft/gen_hc2r.ml,
+	genfft/gen_notw.ml, genfft/gen_r2hc.ml, genfft/gen_trig.ml,
+	genfft/gen_twiddle.ml, genfft/gen_twidsq.ml, genfft/genutil.ml,
+	genfft/magic.ml, genfft/simd.ml, genfft/simd.mli,
+	genfft/simdmagic.ml, genfft/to_alist.ml, kernel/ifftw.h: More simd
+	work
+
+2002-06-21  Matteo Frigo  <athena@ab-initio>
+
+	* genfft/Makefile.am, genfft/annotate.ml, genfft/annotate.mli,
+	genfft/magic.ml, genfft/simd.ml, genfft/simd.mli,
+	genfft/simdmagic.ml: More simd work
+
+2002-06-20  Matteo Frigo  <athena@ab-initio>
+
+	* genfft/Makefile.am, genfft/annotate.ml, genfft/c.ml,
+	genfft/c.mli, genfft/magic.ml, genfft/simd.ml, genfft/variable.ml,
+	genfft/variable.mli: More simd work
+
+	* genfft/annotate.ml, genfft/annotate.mli, genfft/gen_athnotw.ml,
+	genfft/gen_athtw.ml, genfft/gen_conv.ml, genfft/gen_hc2r.ml,
+	genfft/gen_notw.ml, genfft/gen_r2hc.ml, genfft/gen_trig.ml,
+	genfft/gen_twiddle.ml, genfft/gen_twidsq.ml, genfft/genutil.ml,
+	genfft/magic.ml, genfft/twiddle.ml, genfft/twiddle.mli,
+	genfft/variable.ml, genfft/variable.mli: Moving towards
+	incorporation of simd stuff
+
+2002-06-19  Matteo Frigo  <athena@ab-initio>
+
+	* Makefile.am, configure.ac, dft/Makefile.am,
+	dft/codelets/Makefile.am, dft/ct-dif-k7.c, dft/ct-dit-k7.c,
+	dft/ct-ditbuf-k7.c, dft/direct-k7.c, dft/k7/Makefile.am,
+	dft/k7/codelets/Makefile.am, dft/k7/ct-dif.c, dft/k7/ct-dit.c,
+	dft/k7/ct-ditbuf.c, dft/k7/direct.c, dft/k7/kdft-dif.c,
+	dft/k7/kdft-dit.c, dft/k7/kdft.c, dft/kdft-dif-k7.c,
+	dft/kdft-dit-k7.c, dft/kdft-k7.c: Reorganized k7 stuff into own
+	directory
+
+	* genfft-k7/expr.ml, genfft-k7/expr.mli, genfft/expr.ml,
+	genfft/expr.mli, genfft/genutil.ml, genfft/magic.ml: Minor
+	experimental stuff
+
+	* genfft/expr.ml, genfft/expr.mli, genfft/genutil.ml: Cosmetic
+	changes
+
+2002-06-19  FFTW Maintainers  <fftw@ab-initio>
+
+	* dft/buffered.c, dft/rader.c: allocate buffers on the fly
+
+2002-06-18  Matteo Frigo  <athena@ab-initio>
+
+	* dft/Makefile.am, dft/codelet-k7.h, dft/ct-dif-k7.c,
+	dft/ct-dif.c, dft/ct-dit-k7.c, dft/ct-dit.c, dft/ct-ditbuf-k7.c,
+	dft/ct-ditbuf.c, dft/ct.c, dft/ct.h, dft/kdft-dit-k7.c,
+	dft/rader.c, genfft-k7/Makefile.am,
+	genfft-k7/assignmentsToVfpinstrs.ml, genfft-k7/gen_twiddle.ml,
+	genfft-k7/k7Basics.ml, genfft-k7/k7Basics.mli,
+	genfft-k7/k7RegisterAllocationBasics.ml,
+	genfft-k7/k7RegisterAllocationBasics.mli,
+	genfft-k7/k7RegisterAllocator.ml,
+	genfft-k7/k7RegisterAllocatorInit.ml, genfft-k7/number.ml,
+	genfft-k7/to_alist.ml, genfft/number.ml, genfft/to_alist.ml,
+	kernel/ifftw.h, kernel/planner.c, kernel/primes.c: Added
+	ct-ditbuf-k7.c .  Major changes required in generator.
+
+	* genfft-k7/gen_twiddle.ml, kernel/ifftw.h: Nothing, really
+
+	* configure.ac: !SINGLE ==> !K7_MODE (for some reason the
+	contrapositive sounds wrong)
+
+	* dft/buffered.c: Buffer is now symmetric wrt forward/backward
+	transform
+
+	* dft/ct-dif.c, dft/indirect.c, dft/vrank2-transpose.c,
+	dft/vrank3-transpose.c, kernel/Makefile.am, kernel/debug.c,
+	kernel/ifftw.h, kernel/print.c: Fixed applicable() in indirect.c
+
+	* dft/rader.c: Fixed attempt to free() uninitialized pointer.
+
+	* CONVENTIONS, TODO, dft/rader.c, kernel/ifftw.h, kernel/plan.c,
+	kernel/planner.c, tests/bench.c: Added reference counts for
+	awake()
+
+2002-06-18  Steven G. Johnson  <stevenj@ab-initio>
+
+	* dft/rader.c: updated comment
+
+	* TODO: slight update
+
+2002-06-17  FFTW Maintainers  <fftw@ab-initio>
+
+	* dft/rader.c, kernel/Makefile.am, kernel/ifftw.h,
+	kernel/primes.c: moved prime-number stuff into primes.c, so it can
+	be shared with generic codelet and with rfftw rader
+
+	* dft/rader.c: added comment
+
+	* dft/rader.c, kernel/ifftw.h, kernel/twiddle.c: added rader-dit
+
+	* configure.ac, dft/Makefile.am, dft/conf.c, dft/dft.h,
+	dft/rader.c: added initial Rader (no DIT yet)
+
+	* acinclude.m4: don't warn about long long
+
+2002-06-17  Matteo Frigo  <athena@ab-initio>
+
+	* dft/Makefile.am, dft/codelet-k7.h, dft/ct-dif-k7.c, dft/ct.h,
+	dft/kdft-dif-k7.c, genfft-k7/gen_twiddle.ml, kernel/planner.c,
+	tests/bench.c: Added k7 DIF codelets
+
+2002-06-16  Matteo Frigo  <athena@ab-initio>
+
+	* TODO: Added stuff to do
+
+	* dft/rank0.c: Handle dual case R = I + 1
+
+	* bootstrap.sh: Removed useless flag
+
+	* mkdist.sh: Removed useless file
+
+	* CLASSIC-MODE, Makefile.am, configure.ac, dft/Makefile.am,
+	dft/buffered.c, dft/codelet-k7.h, dft/codelet.h,
+	dft/codelets/inplace/Makefile.am, dft/ct-dif.c, dft/ct-dit-k7.c,
+	dft/ct-dit.c, dft/ct-ditbuf.c, dft/ct-ditf.c, dft/ct.h,
+	dft/direct-k7.c, dft/direct.c, dft/indirect.c, dft/kdft-dit-k7.c,
+	dft/kdft-dit.c, dft/nop.c, dft/rank-geq2.c, dft/rank0.c,
+	dft/vrank-geq1.c, dft/vrank2-transpose.c, dft/vrank3-transpose.c,
+	genfft-k7/Makefile.am, genfft-k7/genUtil.ml,
+	genfft-k7/gen_notw.ml, genfft-k7/gen_twiddle.ml,
+	genfft-k7/twiddle.ml, genfft-k7/twiddle.mli,
+	genfft/gen_twiddle.ml, genfft/gen_twidsq.ml, genfft/twiddle.ml,
+	genfft/twiddle.mli, kernel/ifftw.h, kernel/planner-naive.c,
+	kernel/planner-score.c, kernel/planner.c, kernel/version.c,
+	support/Makefile.codelets, tests/bench.c: More k7 work.  Switched
+	to runtime CLASSIC mode.
+
+2002-06-16  Steven G. Johnson  <stevenj@ab-initio>
+
+	* kernel/tensor.c: spelling
+
+2002-06-16  Matteo Frigo  <athena@ab-initio>
+
+	* dft/kdft-k7.c: Do not compile if not K7_MODE
+
+	* dft/codelet-k7.h, dft/dft.h: Do not require K7 definitions to
+	compile
+
+	* dft/Makefile.am, dft/codelet-k7.h, dft/codelet.h,
+	dft/direct-k7.c, genfft-k7/Makefile.am, genfft-k7/complex.ml,
+	genfft-k7/complex.mli, genfft-k7/genUtil.ml,
+	genfft-k7/gen_notw.ml, genfft-k7/gen_twiddle.ml: More k7 stuff
+
+2002-06-15  Matteo Frigo  <athena@ab-initio>
+
+	* acinclude.m4: Try to be compatible with automake-1.6
+
+	* acinclude.m4, configure.ac, genfft-k7/Makefile.am,
+	genfft-k7/algsimp.ml, genfft-k7/algsimp.mli,
+	genfft-k7/assignmentsToVfpinstrs.ml, genfft-k7/assoctable.ml,
+	genfft-k7/assoctable.mli, genfft-k7/complex.ml,
+	genfft-k7/complex.mli, genfft-k7/expr.ml, genfft-k7/expr.mli,
+	genfft-k7/exprdag.ml, genfft-k7/exprdag.mli, genfft-k7/genUtil.ml,
+	genfft-k7/gen_notw.ml, genfft-k7/k7Unparsing.ml,
+	genfft-k7/littlesimp.ml, genfft-k7/littlesimp.mli,
+	genfft-k7/magic.ml, genfft-k7/monads.ml, genfft-k7/number.ml,
+	genfft-k7/number.mli, genfft-k7/oracle.ml, genfft-k7/oracle.mli,
+	genfft-k7/to_alist.ml, genfft-k7/to_alist.mli,
+	genfft-k7/twiddle.ml, genfft-k7/twiddle.mli, genfft-k7/util.ml,
+	genfft-k7/util.mli, genfft-k7/vFpUnparsing.ml,
+	genfft-k7/vSimdBasics.ml, genfft-k7/vSimdUnparsing.ml,
+	genfft-k7/variable.ml, genfft-k7/variable.mli, genfft/number.ml,
+	support/Makefile.am, support/Makefile.codelets,
+	support/codelet_asmprelude: More merging of Stefan's generator
+	with main genfft branch
+
+	* genfft-k7/Makefile.am, genfft-k7/complex.ml,
+	genfft-k7/complex.mli, genfft-k7/expr.ml, genfft-k7/expr.mli,
+	genfft-k7/exprdag.ml, genfft-k7/exprdag.mli, genfft-k7/fft.ml,
+	genfft-k7/fft.mli, genfft-k7/genUtil.ml, genfft-k7/gen_hc2hc.ml,
+	genfft-k7/gen_hc2real.ml, genfft-k7/gen_notw.ml,
+	genfft-k7/gen_notwiddle.ml,
+	genfft-k7/gen_notwiddle_fixedstride.ml, genfft-k7/gen_real2hc.ml,
+	genfft-k7/gen_realeven.ml, genfft-k7/gen_realeven2.ml,
+	genfft-k7/gen_realodd.ml, genfft-k7/gen_realodd2.ml,
+	genfft-k7/gen_twiddle.ml, genfft-k7/magic.ml,
+	genfft-k7/symmetry.ml, genfft-k7/twiddle.ml, genfft-k7/util.ml,
+	genfft-k7/util.mli, genfft-k7/variable.ml, genfft-k7/variable.mli,
+	genfft/expr.ml, genfft/expr.mli, genfft/genutil.ml,
+	support/Makefile.codelets: Slowly merging genfft-k7 with main
+	genfft branch
+
+	* genfft-k7/Makefile.am, genfft-k7/genUtil.ml, genfft-k7/magic.ml,
+	genfft-k7/magic.mli, genfft-k7/twiddle.ml,
+	support/Makefile.codelets: Fixed, really
+
+	* support/Makefile.codelets: Oops...
+
+	* support/Makefile.codelets: Work properly when $(ALL_CODELETS) =
+	""
+
+	* Makefile.am, configure.ac, dft/codelet.h,
+	dft/codelets/Makefile.am, dft/conf.c, genfft-k7/gen_notwiddle.ml,
+	kernel/ifftw.h, support/Makefile.codelets: Fixed k7 build
+	machinery
+
+2002-06-14  Matteo Frigo  <athena@ab-initio>
+
+	* Makefile.am, configure.ac, dft/codelet.h, dft/direct-k7.c,
+	genfft-k7/Makefile.am, genfft-k7/codeletMisc.ml,
+	genfft-k7/codeletMisc.mli, genfft-k7/genUtil.ml,
+	genfft-k7/genUtil.mli, genfft-k7/gen_hc2hc.mli,
+	genfft-k7/gen_hc2real.mli, genfft-k7/gen_notwiddle.ml,
+	genfft-k7/gen_notwiddle.mli, genfft-k7/gen_real2hc.mli,
+	genfft-k7/gen_realeven.mli, genfft-k7/gen_realeven2.mli,
+	genfft-k7/gen_realodd.mli, genfft-k7/gen_realodd2.mli,
+	genfft-k7/gen_twiddle.mli, genfft-k7/genfft.ml,
+	genfft-k7/k7Basics.ml, genfft-k7/k7Basics.mli,
+	genfft-k7/k7Unparsing.ml, genfft-k7/magic.ml, genfft-k7/magic.mli,
+	kernel/ifftw.h, libbench/bench-user.h, support/Makefile.am,
+	dft/Makefile.am, dft/conf.c, dft/dft.h, dft/kdft-k7.c,
+	support/Makefile.codelets: More work on k7 stuff
+
+	* dft/codelet.h, dft/direct.c, genfft/gen_notw.ml: Changed my mind
+	again
+
+	* genfft-k7/gen_notwiddle.ml: Removed some useless stuff.
+
+	* genfft-k7/gen_notwiddle.ml: Hmm...
+
+	* dft/codelet.h, dft/direct.c, genfft-k7/gen_notwiddle.ml,
+	genfft/gen_notw.ml: More work in preparation for k7 stuff
+
+	* TODO, dft/codelet.h, dft/direct.c, genfft/gen_notw.ml: Still
+	preparing to include k7 stuff
+
+	* bootstrap.sh: Create .depend
+
+	* Makefile.am, bootstrap.sh, configure.ac, genfft-k7/Makefile.am,
+	genfft-k7/assignmentsToVfpinstrs.ml,
+	genfft-k7/assignmentsToVfpinstrs.mli,
+	genfft-k7/balanceVfpinstrs.ml, genfft-k7/balanceVfpinstrs.mli,
+	genfft-k7/codeletMisc.ml, genfft-k7/codeletMisc.mli,
+	genfft-k7/complex.ml, genfft-k7/complex.mli, genfft-k7/expr.ml,
+	genfft-k7/expr.mli, genfft-k7/exprdag.ml, genfft-k7/exprdag.mli,
+	genfft-k7/fft.ml, genfft-k7/fft.mli, genfft-k7/genUtil.ml,
+	genfft-k7/genUtil.mli, genfft-k7/gen_hc2hc.ml,
+	genfft-k7/gen_hc2hc.mli, genfft-k7/gen_hc2real.ml,
+	genfft-k7/gen_hc2real.mli, genfft-k7/gen_notwiddle.ml,
+	genfft-k7/gen_notwiddle.mli,
+	genfft-k7/gen_notwiddle_fixedstride.ml, genfft-k7/gen_real2hc.ml,
+	genfft-k7/gen_real2hc.mli, genfft-k7/gen_realeven.ml,
+	genfft-k7/gen_realeven.mli, genfft-k7/gen_realeven2.ml,
+	genfft-k7/gen_realeven2.mli, genfft-k7/gen_realodd.ml,
+	genfft-k7/gen_realodd.mli, genfft-k7/gen_realodd2.ml,
+	genfft-k7/gen_realodd2.mli, genfft-k7/gen_twiddle.ml,
+	genfft-k7/gen_twiddle.mli, genfft-k7/genfft.ml, genfft-k7/id.ml,
+	genfft-k7/id.mli, genfft-k7/k7Basics.ml, genfft-k7/k7Basics.mli,
+	genfft-k7/k7ExecutionModel.ml, genfft-k7/k7ExecutionModel.mli,
+	genfft-k7/k7FlatInstructionScheduling.ml,
+	genfft-k7/k7FlatInstructionScheduling.mli,
+	genfft-k7/k7InstructionSchedulingBasics.ml,
+	genfft-k7/k7InstructionSchedulingBasics.mli,
+	genfft-k7/k7RegisterAllocationBasics.ml,
+	genfft-k7/k7RegisterAllocationBasics.mli,
+	genfft-k7/k7RegisterAllocator.ml,
+	genfft-k7/k7RegisterAllocator.mli,
+	genfft-k7/k7RegisterAllocatorEATranslation.ml,
+	genfft-k7/k7RegisterAllocatorEATranslation.mli,
+	genfft-k7/k7RegisterAllocatorInit.ml,
+	genfft-k7/k7RegisterAllocatorInit.mli,
+	genfft-k7/k7RegisterReallocation.ml,
+	genfft-k7/k7RegisterReallocation.mli, genfft-k7/k7Translate.ml,
+	genfft-k7/k7Translate.mli, genfft-k7/k7Unparsing.ml,
+	genfft-k7/k7Unparsing.mli, genfft-k7/k7Vectorization.ml,
+	genfft-k7/k7Vectorization.mli, genfft-k7/magic.ml,
+	genfft-k7/magic.mli, genfft-k7/memoMonad.ml,
+	genfft-k7/memoMonad.mli, genfft-k7/nonDetMonad.ml,
+	genfft-k7/nonDetMonad.mli, genfft-k7/nullVectorization.ml,
+	genfft-k7/nullVectorization.mli, genfft-k7/number.ml,
+	genfft-k7/number.mli, genfft-k7/stateMonad.ml,
+	genfft-k7/stateMonad.mli, genfft-k7/symmetry.ml,
+	genfft-k7/twiddle.ml, genfft-k7/util.ml, genfft-k7/util.mli,
+	genfft-k7/vAnnotatedScheduler.ml,
+	genfft-k7/vAnnotatedScheduler.mli, genfft-k7/vDag.ml,
+	genfft-k7/vDag.mli, genfft-k7/vFpBasics.ml,
+	genfft-k7/vFpBasics.mli, genfft-k7/vFpUnparsing.ml,
+	genfft-k7/vFpUnparsing.mli, genfft-k7/vImproveSchedule.ml,
+	genfft-k7/vImproveSchedule.mli, genfft-k7/vK7Optimization.ml,
+	genfft-k7/vK7Optimization.mli, genfft-k7/vScheduler.ml,
+	genfft-k7/vScheduler.mli, genfft-k7/vSimdBasics.ml,
+	genfft-k7/vSimdBasics.mli, genfft-k7/vSimdIndexing.ml,
+	genfft-k7/vSimdIndexing.mli, genfft-k7/vSimdUnparsing.ml,
+	genfft-k7/vSimdUnparsing.mli, genfft-k7/variable.ml,
+	genfft-k7/variable.mli, AUTHORS: Imported Stefan's K7 generator
+
+2002-06-13  Matteo Frigo  <athena@ab-initio>
+
+	* genfft/Makefile.am, genfft/c.ml, genfft/complex.ml,
+	genfft/complex.mli, genfft/gen_hc2r.ml, genfft/gen_r2hc.ml,
+	genfft/genutil.ml, genfft/trig.ml: Generator for real->halfcomplex
+	and halfcomplex->real codelets
+
+	* dft/problem.c, kernel/planner.c, kernel/tensor.c, tests/bench.c:
+	Improved hash functions, printers
+
+	* support/Makefile.codelets: Only regenerate codlist.c in
+	maintainer mode
+
+	* dft/problem.c, dft/rank-geq2.c, kernel/ifftw.h,
+	kernel/planner-naive.c, kernel/planner-score.c, kernel/planner.c,
+	kernel/print.c, kernel/tensor.c, tests/bench.c: Planner can export
+	solution list
+
+	* dft/ct-ditbuf.c, dft/dft.h, dft/direct.c, kernel/cycle.h,
+	libbench/bench-user.h: Fixed for intel compiler
+
+	* dft/codelet.h, genfft/c.ml, genfft/c.mli, genfft/gen_notw.ml,
+	genfft/gen_trig.ml, genfft/gen_twiddle.ml, genfft/gen_twidsq.ml,
+	genfft/magic.ml: Revised strategy for constants in codelets
+
+	* tests/bench.c: Enable score planner in classic mode, naive
+	planner in pro mode.
+
+2002-06-12  Matteo Frigo  <athena@ab-initio>
+
+	* tests/bench.c: Report classic/pro
+
+	* dft/buffered.c, tests/bench.c: Fixed behavior of buffered solver
+	for large buffers.
+
+	* dft/rank-geq2.c, dft/vrank-geq1.c, kernel/ifftw.h,
+	kernel/planner-naive.c, kernel/planner-score.c, kernel/planner.c,
+	kernel/timer.c, libbench/timer.c, tests/bench.c: Make assumption
+	COST(vector) = length * COST(scalar) in classic mode.
+
+	* kernel/ifftw.h, kernel/plan.c, kernel/planner-naive.c,
+	kernel/planner-score.c, kernel/planner.c,
+	support/Makefile.codelets: Revised planner implementation in
+	preparation for wisdom.
+
+	* dft/ct-ditbuf.c: Manually hoist loop invariants.
+
+	* dft/rank-geq2.c, dft/rank0.c, dft/vrank-geq1.c: Revised loop to
+	compile better with gcc -O
+
+2002-06-11  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/tensor.c: Changed tensor syntax
+
+	* TODO: Added stuff to do.
+
+	* kernel/version.c: Report classic/pro in version number
+
+	* CLASSIC-MODE, Makefile.am, RESEARCH-MODE, bootstrap.sh,
+	configure.ac, dft/codelets/inplace/Makefile.am, dft/ct-dit.c,
+	dft/ct-ditbuf.c, dft/kdft-dit.c, dft/rank-geq2.c,
+	dft/vrank-geq1.c, kernel/ifftw.h, mkdist.sh, tests/bench.c:
+	Renamed versions into classic/pro
+
+	* kernel/Makefile.am, kernel/ifftw.h, kernel/planner-estimate.c,
+	kernel/planner-naive.c, kernel/planner-score.c, kernel/planner.c,
+	tests/bench.c: Revised planners, estimator
+
+	* Makefile.am, dft/buffered.c, dft/ct-dit.c, dft/ct-ditbuf.c,
+	dft/kdft-dif.c, dft/kdft-difsq.c, dft/kdft-dit.c, kernel/ifftw.h:
+	I don't know what I am doing.
+
+	* Makefile.am, dft/buffered.c, dft/codelet.h, dft/ct-dif.c,
+	dft/ct-dit.c, dft/ct-ditbuf.c, dft/ct-ditf.c, dft/ct.c, dft/dft.h,
+	dft/direct.c, dft/indirect.c, dft/nop.c, dft/rank-geq2.c,
+	dft/rank0.c, dft/vrank-geq1.c, dft/vrank2-transpose.c,
+	dft/vrank3-transpose.c, genfft/c.ml, kernel/Makefile.am,
+	kernel/cycle.h, kernel/flops.c, kernel/ifftw.h, kernel/ops.c,
+	kernel/plan.c, kernel/planner-estimate.c, kernel/planner-naive.c,
+	kernel/planner-score.c, tests/bench.c: Massive revision of
+	estimator
+
+	* dft/Makefile.am, dft/buffered.c,
+	dft/codelets/inplace/Makefile.am,
+	dft/codelets/standard/Makefile.am, dft/conf.c, dft/ct-dit.c,
+	dft/ct.c, dft/dft.h, dft/indirect.c, dft/problem.c,
+	dft/rank-geq2.c, dft/vecloop.c, dft/vrank-geq1.c, kernel/ifftw.h,
+	kernel/planner-estimate.c, kernel/planner-naive.c,
+	kernel/planner-score.c, kernel/planner.c, kernel/print.c,
+	kernel/tensor.c, kernel/timer.c, libbench/bench-main.c,
+	tests/bench.c: Many changes
+
+	* dft/ct-ditbuf.c: Keep it simple, stupid.
+
+2002-06-10  Matteo Frigo  <athena@ab-initio>
+
+	* kernel/ifftw.h: Fixed when #undef PRECOMPUTE_ARRAY_INDICES
+
+	* dft/vrank3-transpose.c, kernel/print.c: Minor changes
+
+	* CONVENTIONS, configure.ac, dft/Makefile.am, dft/buffered.c,
+	dft/ct-dif.c, dft/ct-dit.c, dft/ct-ditbuf.c, dft/ct.c, dft/ct.h,
+	dft/dft.h, dft/direct.c, dft/indirect.c, dft/kdft-dif.c,
+	dft/kdft-difsq.c, dft/kdft-dit.c, dft/kdft.c, dft/nop.c,
+	dft/rank-geq2.c, dft/rank0.c, dft/vecloop.c,
+	dft/vrank2-transpose.c, dft/vrank3-transpose.c, kernel/ifftw.h,
+	kernel/plan.c, kernel/problem.c, kernel/timer.c, tests/bench.c:
+	Added ct-ditbuf.c, many changes everywhere
+
+	* kernel/ifftw.h, kernel/planner.c, tests/bench.c: More name
+	mangling
+
+	* Makefile.am, acinclude.m4, configure.ac, tests/Makefile.am:
+	Fixed build system for single/double precision
+
+	* CONVENTIONS, configure.ac, dft/buffered.c, dft/codelet.h,
+	dft/codelets/inplace/Makefile.am,
+	dft/codelets/standard/Makefile.am, dft/conf.c, dft/ct-dif.c,
+	dft/ct-dit.c, dft/ct-ditf.c, dft/ct.c, dft/ct.h, dft/dft.h,
+	dft/direct.c, dft/indirect.c, dft/kdft-dif.c, dft/kdft-difsq.c,
+	dft/kdft-dit.c, dft/kdft.c, dft/nop.c, dft/plan.c, dft/problem.c,
+	dft/rank-geq2.c, dft/rank0.c, dft/solve.c, dft/vecloop.c,
+	dft/vrank2-transpose.c, dft/vrank3-transpose.c,
+	genfft/gen_notw.ml, genfft/gen_twiddle.ml, genfft/gen_twidsq.ml,
+	genfft/genutil.ml, kernel/Makefile.am, kernel/alloc.c,
+	kernel/assert.c, kernel/awake.c, kernel/cycle.h, kernel/dfftw3.h,
+	kernel/fftw.h, kernel/fftw3.h, kernel/flops.c, kernel/ifftw.h,
+	kernel/minmax.c, kernel/plan.c, kernel/planner-estimate.c,
+	kernel/planner-naive.c, kernel/planner-score.c, kernel/planner.c,
+	kernel/print.c, kernel/problem.c, kernel/sfftw3.h,
+	kernel/solver.c, kernel/solvtab.c, kernel/square.c,
+	kernel/stride.c, kernel/tensor.c, kernel/timer.c,
+	kernel/twiddle.c, kernel/version.c, support/Makefile.codelets,
+	tests/bench.c: Massive renaming to support both single and double
+	precision.  (Must recompile everything twice).
+
+	* libbench/allocate.c, libbench/bench-user.h, libbench/mflops.c,
+	libbench/problem.c, tests/bench.c: Preliminary crude support for
+	vector transforms in benchmark library.
+
+	* kernel/tensor.c: Wrong cast
+
+2002-06-09  Matteo Frigo  <athena@ab-initio>
+
+	* TODO: Added things to do.
+
+	* kernel/twiddle.c: twlen0: make static
+
+	* dft/buffered.c: Nothing
+
+	* kernel/print.c: Forgot break in switch statement.
+
+	* kernel/print.c: Fix for c++ compatibility
+
+	* TODO, dft/buffered.c, dft/ct.c, dft/direct.c, dft/indirect.c,
+	dft/nop.c, dft/rank-geq2.c, dft/rank0.c, dft/vecloop.c,
+	dft/vrank2-transpose.c, dft/vrank3-transpose.c,
+	kernel/Makefile.am, kernel/ifftw.h, kernel/planner.c,
+	kernel/print.c, tests/bench.c: Added printer, changed everything
+
+	* dft/buffered.c, dft/nop.c, dft/rank0.c, tests/bench.c: Removed
+	redundant nop solver
+
+	* TODO: More things to do
+
+	* TODO, dft/Makefile.am, dft/buffered.c, dft/conf.c, dft/dft.h,
+	dft/direct.c, dft/indirect.c, dft/nop.c, dft/problem.c,
+	dft/rank0.c, dft/vecloop.c, kernel/ifftw.h, kernel/tensor.c:
+	Introduced idea of rank -infinity and associated NOP plans
+
+	* dft/buffered.c: Fixed comment
+
+	* kernel/tensor.c: Removed useless assertions.
+
+	* kernel/tensor.c: Don't malloc(0).
+
+	* dft/buffered.c: Fixed signed/unsigned puns
+
+	* dft/Makefile.am, dft/buffered.c, dft/conf.c, dft/ct-dif.c,
+	dft/ct-dit.c, dft/ct-ditf.c, dft/dft.h, dft/direct.c,
+	dft/indirect.c, dft/rank-geq2.c, dft/rank0.c, dft/vecloop.c,
+	dft/vrank2-transpose.c, dft/vrank3-transpose.c,
+	libbench/bench-main.c, libbench/bench-user.h, tests/bench.c: Added
+	buffered.c
+
+2002-06-08  Matteo Frigo  <athena@ab-initio>
+
+	* dft/ct.c: Fixed printout
+
+	* dft/vrank3-transpose.c: Fixed comment
+
+	* dft/Makefile.am, dft/conf.c, dft/dft.h, dft/vrank0-transpose.c,
+	dft/vrank2-transpose.c, dft/vrank3-transpose.c, tests/bench.c:
+	Added vrank3-transpose, renamed vrank0-transpose ->
+	vrank2-transpose
+
+	* bootstrap.sh, dft/Makefile.am, dft/conf.c, dft/direct.c,
+	dft/rank-geq2.c, dft/rank0.c, dft/rank_geq2.c,
+	dft/vrank0-transpose.c, tests/bench.c: Added vrank0-transpose
+
+	* dft/Makefile.am, dft/ct-dif.c, dft/ct-dit.c, dft/ct-ditf.c,
+	dft/direct.c, dft/indirect.c, dft/rank0.c, dft/rank_geq2.c,
+	dft/vecloop.c, kernel/Makefile.am, kernel/ifftw.h,
+	kernel/planner-score.c, kernel/planner.c, tests/bench.c: Added
+	planner-score.c
+
+	* dft/Makefile.am, dft/conf.c, dft/ct-dif.c, dft/ct-dit.c,
+	dft/ct-ditf.c, dft/dft.h, dft/indirect.c, dft/rank_geq2.c,
+	dft/vecloop.c: Added indirect.c
+
+	* Makefile.am, dft/Makefile.am, dft/codelet.h,
+	dft/codelets/Makefile.am, dft/codelets/inplace/Makefile.am,
+	dft/conf.c, dft/ct-dif.c, dft/ct-dit.c, dft/ct-ditf.c, dft/dft.h,
+	dft/direct.c, dft/kdft-dif.c, dft/kdft-difsq.c, mkdist.sh,
+	tests/Makefile.am: dif, ditf solvers
+
+2002-06-07  Matteo Frigo  <athena@ab-initio>
+
+	* Makefile.am, RESEARCH-MODE, bootstrap.sh, configure.ac,
+	dft/Makefile.am, dft/conf.c, dft/dft.h, dft/rank_geq2.c,
+	dft/vecloop.c, kernel/ifftw.h, kernel/minmax.c, kernel/planner.c,
+	support/Makefile.codelets: Implemented rank_geq2.  Revised build
+	system
+
+	* kernel/alloc.c: Fixed printout
+
+	* Makefile.am, bootstrap.sh, configure.ac, dft/Makefile.am,
+	dft/codelet.h, dft/codelets/Makefile.am,
+	dft/codelets/inplace/Makefile.am,
+	dft/codelets/standard/Makefile.am, dft/conf.c, dft/dft.h,
+	dft/rank0.c, genfft/gen_notw.ml, tests/Makefile.am, tests/bench.c:
+	Added rank0.  Revised codelet organization.
+
+2002-06-06  Matteo Frigo  <athena@ab-initio>
+
+	* dft/ct.c, dft/vecloop.c, genfft/trig.ml, kernel/ifftw.h,
+	kernel/planner-estimate.c, kernel/planner-naive.c,
+	kernel/planner.c, libbench/bench-user.h, tests/bench.c: Added
+	memoization
+
+	* dft/Makefile.am, dft/dft.h, dft/direct.c, dft/vecloop.c,
+	kernel/alloc.c, kernel/ifftw.h, kernel/planner.c, tests/bench.c:
+	Added vecloop
+
+2002-06-05  Matteo Frigo  <athena@ab-initio>
+
+	* dft/Makefile.am, dft/ct-dit.c, dft/ct.c, dft/ct.h, dft/dft.h,
+	dft/direct.c, dft/kdft-dit.c, kernel/alloc.c, kernel/twiddle.c:
+	First DIT solver/plan
+
+	* dft/Makefile.am, dft/ct.c, dft/ct.h, kernel/ifftw.h,
+	kernel/stride.c, kernel/twiddle.c: More work on ct
+
+	* kernel/ifftw.h, kernel/planner-naive.c, kernel/timer.c: Only use
+	cycle counters
+
+	* CONVENTIONS, bootstrap.sh, kernel/ifftw.h, kernel/twiddle.c:
+	Signed/unsigned fixup
+
+	* kernel/Makefile.am, kernel/ifftw.h, kernel/twiddle.c: New file
+	twiddle.c
+
+2002-06-04  Matteo Frigo  <athena@ab-initio>
+
+	* configure.ac, dft/Makefile.am, dft/direct.c, dft/kdft-dit.c,
+	dft/problem.c, genfft/gen_notw.ml, genfft/gen_twiddle.ml,
+	genfft/gen_twidsq.ml, kernel/Makefile.am, kernel/codelet.h,
+	kernel/flops.c, kernel/ifftw.h, kernel/tensor.c, kernel/timer.c,
+	tests/bench.c: Made tensor ranks and vector lengths unsigned.
+	Hopefully fixed all places where it matters.
+
+	* Makefile.am, configure.ac, dft/Makefile.am, dft/dft.h,
+	dft/direct.c, dft/kdft.c, kernel/Makefile.am, kernel/codelet.h,
+	kernel/fftw.h, kernel/ifftw.h, kernel/planner-estimate.c,
+	kernel/planner-naive.c, kernel/solvtab.c, libbench/Makefile.am,
+	support/Makefile.codelets, tests/Makefile.am, tests/bench.c:
+	System is in working state now (but very incomplete)
+
+2002-06-03  Matteo Frigo  <athena@ab-initio>
+
+	* CONVENTIONS, kernel/Makefile.am, kernel/ifftw.h,
+	kernel/planner-naive.c, kernel/planner.c: Started implementing
+	planners
+
+	* Makefile.am, configure.ac, libbench/Makefile.am,
+	libbench/accopy-from.c, libbench/accopy-to.c, libbench/acopy.c,
+	libbench/allocate.c, libbench/ascale.c, libbench/aset.c,
+	libbench/bench-main.c, libbench/bench-user.h, libbench/bench.h,
+	libbench/caadd.c, libbench/cacopy.c, libbench/can-do.c,
+	libbench/cascale.c, libbench/caset.c, libbench/casub.c,
+	libbench/ccopy-from.c, libbench/ccopy-to.c,
+	libbench/copy-c2c-from.c, libbench/copy-c2c-to.c,
+	libbench/copy-c2h-1d-fftpack.c,
+	libbench/copy-c2h-1d-halfcomplex.c, libbench/copy-c2h-1d-packed.c,
+	libbench/copy-c2h-1d-unpacked-ri.c, libbench/copy-c2h-unpacked.c,
+	libbench/copy-c2h.c, libbench/copy-c2r-packed.c,
+	libbench/copy-c2r-unpacked.c, libbench/copy-c2r.c,
+	libbench/copy-c2ri.c, libbench/copy-h2c-1d-fftpack.c,
+	libbench/copy-h2c-1d-halfcomplex.c, libbench/copy-h2c-1d-packed.c,
+	libbench/copy-h2c-1d-unpacked-ri.c, libbench/copy-h2c-unpacked.c,
+	libbench/copy-h2c.c, libbench/copy-r2c-packed.c,
+	libbench/copy-r2c-unpacked.c, libbench/copy-r2c.c,
+	libbench/copy-ri2c.c, libbench/deallocate.c,
+	libbench/getopt-utils.c, libbench/getopt.c, libbench/getopt.h,
+	libbench/getopt1.c, libbench/info.c, libbench/log2.c,
+	libbench/main.c, libbench/mflops.c, libbench/ovtpvt.c,
+	libbench/pow2.c, libbench/prime.c, libbench/problem.c,
+	libbench/report.c, libbench/speed.c, libbench/timer.c,
+	libbench/unnormalize.c, libbench/util.c, libbench/verify.c,
+	libbench/zero.c: Imported libbench from the new benchfft.  We will
+	use libbench for benchmarking and testing.
+
+	* kernel/Makefile.am, kernel/ifftw.h, kernel/rand.c,
+	kernel/timer.c: Removed useless rand.c
+
+	* CONVENTIONS, dft/problem.c, kernel/Makefile.am, kernel/alloc.c,
+	kernel/cycle.h, kernel/ifftw.h, kernel/plan.c, kernel/timer.c:
+	Added timer
+
+	* configure.ac: Split codelets into standard and inplace
+
+2002-06-02  Matteo Frigo  <athena@ab-initio>
+
+	* CONVENTIONS, Makefile.am, dft/Makefile.am, dft/dft.h,
+	dft/direct.c, dft/plan.c, dft/problem.c, dft/solve.c,
+	kernel/Makefile.am, kernel/awake.c, kernel/ifftw.h,
+	kernel/square.c: Many many changes
+
+	* kernel/codelet.h: Fixed anachronism
+
+	* kernel/assert.c, kernel/codelet.h, kernel/fftw.h,
+	kernel/flops.c, kernel/ifftw.h, kernel/minmax.c, kernel/plan.c,
+	kernel/problem.c, kernel/rand.c, kernel/solver.c, kernel/stride.c,
+	kernel/tensor.c, kernel/version.c, support/Makefile.am,
+	support/Makefile.codelets, support/codelet_prelude: Initial import
+
+	* kernel/assert.c, kernel/codelet.h, kernel/fftw.h,
+	kernel/flops.c, kernel/ifftw.h, kernel/minmax.c, kernel/plan.c,
+	kernel/problem.c, kernel/rand.c, kernel/solver.c, kernel/stride.c,
+	kernel/tensor.c, kernel/version.c, support/Makefile.am,
+	support/Makefile.codelets, support/codelet_prelude: New file.
+
+	* genfft/to_alist.ml, genfft/to_alist.mli, genfft/trig.ml,
+	genfft/trig.mli, genfft/twiddle.ml, genfft/twiddle.mli,
+	genfft/unique.ml, genfft/unique.mli, genfft/util.ml,
+	genfft/util.mli, genfft/variable.ml, genfft/variable.mli,
+	kernel/Makefile.am, kernel/alloc.c: Initial import
+
+	* genfft/to_alist.ml, genfft/to_alist.mli, genfft/trig.ml,
+	genfft/trig.mli, genfft/twiddle.ml, genfft/twiddle.mli,
+	genfft/unique.ml, genfft/unique.mli, genfft/util.ml,
+	genfft/util.mli, genfft/variable.ml, genfft/variable.mli,
+	kernel/Makefile.am, kernel/alloc.c: New file.
+
+	* genfft/littlesimp.mli, genfft/magic.ml, genfft/monads.ml,
+	genfft/number.ml, genfft/number.mli, genfft/oracle.ml,
+	genfft/oracle.mli, genfft/schedule.ml, genfft/schedule.mli:
+	Initial import
+
+	* genfft/littlesimp.mli, genfft/magic.ml, genfft/monads.ml,
+	genfft/number.ml, genfft/number.mli, genfft/oracle.ml,
+	genfft/oracle.mli, genfft/schedule.ml, genfft/schedule.mli: New
+	file.
+
+	* genfft/gen_athtw.ml, genfft/gen_conv.ml, genfft/gen_notw.ml,
+	genfft/gen_trig.ml, genfft/gen_twiddle.ml, genfft/gen_twidsq.ml,
+	genfft/genutil.ml, genfft/littlesimp.ml: Initial import
+
+	* genfft/gen_athtw.ml, genfft/gen_conv.ml, genfft/gen_notw.ml,
+	genfft/gen_trig.ml, genfft/gen_twiddle.ml, genfft/gen_twidsq.ml,
+	genfft/genutil.ml, genfft/littlesimp.ml: New file.
+
+	* genfft/c.ml, genfft/c.mli, genfft/complex.ml,
+	genfft/complex.mli, genfft/conv.ml, genfft/conv.mli,
+	genfft/dag.ml, genfft/dag.mli, genfft/expr.ml, genfft/expr.mli,
+	genfft/fft.ml, genfft/fft.mli, genfft/gen_athnotw.ml: Initial
+	import
+
+	* genfft/c.ml, genfft/c.mli, genfft/complex.ml,
+	genfft/complex.mli, genfft/conv.ml, genfft/conv.mli,
+	genfft/dag.ml, genfft/dag.mli, genfft/expr.ml, genfft/expr.mli,
+	genfft/fft.ml, genfft/fft.mli, genfft/gen_athnotw.ml: New file.
+
+	* genfft/algsimp.ml, genfft/algsimp.mli, genfft/annotate.ml,
+	genfft/annotate.mli, genfft/assoctable.ml, genfft/assoctable.mli:
+	Initial import
+
+	* genfft/algsimp.ml, genfft/algsimp.mli, genfft/annotate.ml,
+	genfft/annotate.mli, genfft/assoctable.ml, genfft/assoctable.mli:
+	New file.
+
+	* acinclude.m4, bootstrap.sh, configure.ac, dft/Makefile.am,
+	dft/dft.h, dft/problem.c, genfft/Makefile.am: Initial import
+
+	* acinclude.m4, bootstrap.sh, configure.ac, dft/Makefile.am,
+	dft/dft.h, dft/problem.c, genfft/Makefile.am: New file.
+
+	* AUTHORS, COPYRIGHT, ChangeLog, Makefile.am, NEWS, README:
+	Initial import
+
+	* AUTHORS, COPYRIGHT, ChangeLog, Makefile.am, NEWS, README: New
+	file.
+
