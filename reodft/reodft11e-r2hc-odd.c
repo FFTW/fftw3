@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.2 2003-02-26 01:54:57 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.3 2003-02-26 01:56:01 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -91,7 +91,8 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	       cld->apply((plan *) cld, buf, buf);
 	  }
 	  
-	  /* FIXME: split/unroll loop to eliminate if-else's and % */
+	  /* FIXME: split/unroll loop to eliminate if-else's and %,
+	     and also to touch each element of buf only once. */
 	  for (i = 0; i < n; ++i) {
 	       int k;
 	       R c, s;
