@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.66 2003-03-03 02:54:13 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.67 2003-03-03 03:42:29 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1598,11 +1598,25 @@ set of transforms.
 @itemize @bullet
 
 @item
+@code{rank} is the dimensionality of the transform (it should be the
+size of the array @code{*n}), and can be any non-negative integer.  The
+@samp{_1d}, @samp{_2d}, and @samp{_3d} planners correspond to a
+@code{rank} of @code{1}, @code{2}, and @code{3}, respectively.  A
+@code{rank} of zero is equivalent to a transform of size 1, i.e. a copy
+of one number from input to output.
+
+@item
 @code{n}, or @code{nx}/@code{ny}/@code{nz}, or @code{n[rank]},
 respectively, gives the size of the transform dimensions.  They can be
 any positive integer.
  
 @itemize @minus
+@item
+@cindex row-major
+Multi-dimensional arrays are stored in row-major order with dimensions:
+@code{nx} x @code{ny}; or @code{nx} x @code{ny} x @code{nz}; or
+@code{n[0]} x @code{n[1]} x ... x @code{n[rank-1]}.
+@xref{Multi-dimensional Array Format}.
 @item
 FFTW is best at handling sizes of the form
 @ifinfo
@@ -1624,25 +1638,12 @@ Transforms whose sizes are powers of @math{2} are especially fast.
 @end itemize
 
 @item
-@code{rank} is the dimensionality of the transform (it should be the
-size of the array @code{*n}), and can be any non-negative integer.  A
-@code{rank} of zero is equivalent to a transform of size 1, i.e. a copy
-of one number from input to output.
-
-@item
 @code{in} and @code{out} point to the input and output arrays of the
 transform, which may be the same (yielding an in-place transform).
 @cindex in-place
 These arrays are overwritten during planning, unless
 @code{FFTW_ESTIMATE} is used in the flags.  (The arrays need not be
 initialized, but they must be allocated.)
-@itemize @minus
-@item
-Multi-dimensional arrays are stored in row major order with dimensions;
-@code{nx} x @code{ny}; or @code{nx} x @code{ny} x @code{nz}; or
-@code{n[0]} x @code{n[1]} x ... x @code{n[rank-1]}.
-@xref{Multi-dimensional Array Format}.
-@end itemize
 
 @item
 @code{sign} is the sign of the exponent in the formula that defines the
@@ -1666,7 +1667,7 @@ constants defined below.  These flags control the rigor (and time) of
 the planning process, and can also impose (or lift) restrictions on the
 type of transform algorithm that is employed.
 
-@subsubheading Planning-time flags
+@subsubheading Planning-rigor flags
 @itemize @bullet
 
 @item
