@@ -648,12 +648,17 @@ static void cpyr1(int n, R *in, int is, R *out, int os, R scale)
 	  out[i * os] = in[i * is] * scale;
 }
 
-static void mkre00(C *a, int n)
+static void mke00(C *a, int n, int c)
 {
      int i;
-     mkreal(a, n);
      for (i = 1; i + i < n; ++i)
-	  c_re(a[n - i]) = c_re(a[i]);
+	  a[n - i][c] = a[i][c];
+}
+
+static void mkre00(C *a, int n)
+{
+     mkreal(a, n);
+     mke00(a, n, 0);
 }
 
 static void mkimag(C *a, int n)
@@ -720,6 +725,27 @@ static void mkio10(C *a, int n)
      mkio00(a, n);
 }
 
+static void mkre11(C *a, int n)
+{
+     mkoddonly(a, n);
+     mko00(a, n/2, 0);
+     mkre00(a, n);
+}
+
+static void mkro11(C *a, int n)
+{
+     mkoddonly(a, n);
+     mkre00(a, n/2);
+     mkro00(a, n);
+}
+
+static void mkio11(C *a, int n)
+{
+     mkoddonly(a, n);
+     mke00(a, n/2, 1);
+     mkio00(a, n);
+}
+
 static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 {
      dofft_r2r_closure *k = (dofft_r2r_closure *)k_;
@@ -733,17 +759,6 @@ static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 
      ri = (bench_real *) p->in;
      ro = (bench_real *) p->out;
-
-#define DEBUG_ARR 0
-
-#if DEBUG_ARR
-     {
-	  int i;
-	  printf("IN:\n");
-	  for (i = 0; i < k->n0; ++i)
-	       printf("  %g+%gi\n", c_re(in[i]), c_im(in[i]));
-     }
-#endif
 
      switch (p->k[0]) {
 	 case R2R_R2HC:
@@ -770,6 +785,12 @@ static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 	      break;
 	 case R2R_RODFT10:
 	      cpyr1(n, &c_im(in[1]), 4, ri, is, 1.0);
+	      break;
+	 case R2R_REDFT11:
+	      cpyr1(n, &c_re(in[1]), 4, ri, is, 1.0);
+	      break;
+	 case R2R_RODFT11:
+	      cpyr1(n, &c_re(in[1]), 4, ri, is, 1.0);
 	      break;
 	 default:
 	      BENCH_ASSERT(0); /* not yet implemented */
@@ -814,18 +835,17 @@ static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 	      cpyr1(n, ro, os, &c_re(out[1]), 2, 1.0);
 	      mkro01(out, k->n0);
 	      break;
+	 case R2R_REDFT11:
+	      cpyr1(n, ro, os, &c_re(out[1]), 4, 2.0);
+	      mkre11(out, k->n0);
+	      break;
+	 case R2R_RODFT11:
+	      cpyr1(n, ro, os, &c_im(out[1]), 4, -2.0);
+	      mkio11(out, k->n0);
+	      break;
 	 default:
 	      BENCH_ASSERT(0); /* not yet implemented */
      }
-
-#if DEBUG_ARR
-     {
-	  int i;
-	  printf("OUT:\n");
-	  for (i = 0; i < k->n0; ++i)
-	       printf("  %g+%gi\n", c_re(out[i]), c_im(out[i]));
-     }
-#endif
 }
 
 void accuracy_r2r(bench_problem *p, int rounds, double t[6])
@@ -852,6 +872,8 @@ void accuracy_r2r(bench_problem *p, int rounds, double t[6])
          case R2R_REDFT10: constrain = mkre10; n0 = 4*n; break;
          case R2R_RODFT01: constrain = mkro01; n0 = 4*n; break;
          case R2R_RODFT10: constrain = mkio10; n0 = 4*n; break;
+         case R2R_REDFT11: constrain = mkre11; n0 = 8*n; break;
+         case R2R_RODFT11: constrain = mkro11; n0 = 8*n; break;
 	 default: BENCH_ASSERT(0); /* not yet implemented */
      }
      k.n0 = n0;
