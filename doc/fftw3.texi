@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.89 2003-03-04 05:21:49 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.90 2003-03-04 05:25:57 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1380,7 +1380,7 @@ means adding @code{-lfftw3 -lm} at the @emph{end} of the link command.
 @menu
 * Complex numbers::             
 * Precision::                   
-* Allocation::                  
+* Memory Allocation::           
 @end menu
 
 @c =========>
@@ -1411,7 +1411,7 @@ imaginary unit);
 @cindex C99
 
 @c =========>
-@node Precision, Allocation, Complex numbers, Data Types and Files
+@node Precision, Memory Allocation, Complex numbers, Data Types and Files
 @subsection Precision
 @cindex precision
 
@@ -1450,8 +1450,8 @@ although it is standard in C99).
 @cindex C99
 
 @c =========>
-@node Allocation,  , Precision, Data Types and Files
-@subsection Allocation
+@node Memory Allocation,  , Precision, Data Types and Files
+@subsection Memory Allocation
 
 @example
 void *fftw_malloc(size_t n);
