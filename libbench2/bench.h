@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: bench.h,v 1.2 2003-01-18 13:17:23 athena Exp $ */
 
 /* benchmark program definitions */
 #include "config.h"
@@ -65,3 +65,5 @@ extern void ovtpvt(const char *format, ...);
 
 extern void fftaccuracy(int n, bench_complex *a, bench_complex *ffta,
 			int sign, double err[6]);
+
+extern void caset(bench_complex *A, int n, bench_complex x);
