@@ -24,6 +24,11 @@
  * Compute DHTs of prime sizes using Rader's trick: turn them
  * into convolutions of size n - 1, which we then perform via a pair
  * of FFTs.   (We can then do prime real FFTs via rdft-dht.c.)
+ *
+ * Optionally (determined by the "pad" field of the solver), we can
+ * perform the (cyclic) convolution by zero-padding to a size
+ * >= 2*(n-1) - 1.  This is advantageous if n-1 has large prime factors.
+ *
  */
 
 typedef struct {
