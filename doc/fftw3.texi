@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.154 2003-03-15 20:29:42 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.155 2003-03-15 22:41:25 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4508,6 +4508,14 @@ corresponding @code{#define} in @code{config.h}.)
 
 Once these files are all compiled, link them into a library, or a shared
 library, or directly into your program.
+
+To compile the FFTW test program, additionally compile the code in the
+@code{libbench2/} directory, and link it into a library.  Then compile
+the code in the @code{tests/} directory and link it to the
+@code{libbench2} and FFTW libraries.  To compile the @code{fftw-wisdom}
+(command-line) tool (@pxref{Wisdom Utilities}), compile
+@code{tools/fftw-wisdom.c} and link it to the @code{libbench2} and FFTW
+libraries
 
 @c ------------------------------------------------------------
 @node Cycle Counters,  , Installation on non-Unix systems, Installation and Customization
