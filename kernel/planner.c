@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.58 2002-09-03 13:03:46 athena Exp $ */
+/* $Id: planner.c,v 1.59 2002-09-03 13:49:50 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -459,6 +459,7 @@ planner *X(mkplanner)(size_t sz,
      p->sols = 0;
      p->hashsiz = 0;
      p->cnt = 0;
+     p->score = BAD;            /* unused, but we initialize it anyway */
      p->flags = flags;
      p->nthr = 1;
      p->idcnt = 1;              /* ID == 0 means no solution */
