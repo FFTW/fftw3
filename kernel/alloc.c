@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.31 2003-01-25 23:59:55 stevenj Exp $ */
+/* $Id: alloc.c,v 1.32 2003-01-26 00:16:53 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -32,6 +32,10 @@ extern void *memalign(size_t, size_t);
 
 #if defined(HAVE_DECL_POSIX_MEMALIGN) && !HAVE_DECL_POSIX_MEMALIGN
 extern int posix_memalign(void **, size_t, size_t);
+#endif
+
+#if defined(macintosh) || defined(Macintosh)
+#  include <Multiprocessing.h>
 #endif
 
 #define real_malloc X(malloc)
@@ -64,6 +68,20 @@ void *X(malloc)(size_t n)
      p = (void *) _aligned_malloc(n, MIN_ALIGNMENT);
 #    undef real_free
 #    define real_free _aligned_free
+#  elif defined(macintosh)
+     p = (void *) MPAllocateAligned(n,
+#    if MIN_ALIGNMENT == 8
+				    kMPAllocate8ByteAligned,
+#    if MIN_ALIGNMENT == 16
+				    kMPAllocate16ByteAligned,
+#    if MIN_ALIGNMENT == 32
+				    kMPAllocate32ByteAligned,
+#    else
+#      error "Unknown alignment for MPAllocateAligned"
+#    endif
+				    0);
+#    undef real_free
+#    define real_free MPFree
 #  else
      /* Add your machine here and send a patch to fftw@fftw.org */
 #    error "Don't know how to malloc() aligned memory."
