@@ -37,7 +37,8 @@ typedef struct {
 
      plan *cld1, *cld2;
      R *omega;
-     uint n, is, os, g, ginv;
+     uint n, g, ginv;
+     int is, os;
      plan *cld_omega;
 } P;
 
