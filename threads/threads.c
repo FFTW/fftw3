@@ -583,7 +583,7 @@ int X(ithreads_init)(void)
              multiple CPUs(?).  So, we ignore err == 1. */
 	  if (err == 0)
 	       attr_changed = 1;
-          else if (err && err != 1)
+          else if (err != 1)
                return err;
      }
 
