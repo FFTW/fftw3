@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.106 2003-03-07 03:31:00 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.107 2003-03-07 03:32:44 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -120,7 +120,7 @@ This manual documents FFTW version @value{VERSION}.
 * FFTW Reference::              
 * Parallel FFTW::               
 * Calling FFTW from Fortran::   
-* Upgrading from FFTW 2::       
+* Upgrading from FFTW version 2::  
 * Installation and Customization::  
 * Acknowledgments::             
 * License and Copyright::       
@@ -2848,7 +2848,7 @@ involves a separate address-space and global variables for each process,
 and is not susceptible to problems of this sort.)
 
 @c ************************************************************
-@node Calling FFTW from Fortran, Upgrading from FFTW 2, Parallel FFTW, Top
+@node Calling FFTW from Fortran, Upgrading from FFTW version 2, Parallel FFTW, Top
 @chapter Calling FFTW from Fortran
 @cindex Fortran interface
 
@@ -3118,8 +3118,8 @@ cannot be compiled into the FFTW library itself, lest all FFTW-using
 programs be required to link with the Fortran I/O library.)
 
 @c ************************************************************
-@node Upgrading from FFTW 2, Installation and Customization, Calling FFTW from Fortran, Top
-@chapter Upgrading from FFTW 2
+@node Upgrading from FFTW version 2, Installation and Customization, Calling FFTW from Fortran, Top
+@chapter Upgrading from FFTW version 2
 
 In this chapter, we outline the process for updating codes designed for
 the older FFTW 2 interface to work with FFTW 3.  The interface for FFTW
@@ -3270,7 +3270,7 @@ the new routine is called @code{fftw_init_threads} and returns zero on
 failure.  @xref{Multi-threaded FFTW}.
 
 @c ************************************************************
-@node Installation and Customization, Acknowledgments, Upgrading from FFTW 2, Top
+@node Installation and Customization, Acknowledgments, Upgrading from FFTW version 2, Top
 @chapter Installation and Customization
 
 @menu
