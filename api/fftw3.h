@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.15 2003-01-11 20:54:57 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.16 2003-01-11 21:26:35 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -77,6 +77,12 @@ X(plan) X(plan_many_dft)(unsigned int rank, const unsigned int *n,	  \
                          int ostride, int odist,			  \
                          int sign, unsigned int flags);			  \
 									  \
+X(plan) X(plan_guru_dft)(unsigned int rank, const X(iodim) *dims,	  \
+			 unsigned int howmany_rank,			  \
+			 const X(iodim) *howmany_dims,			  \
+			 R *ri, R *ii, R *ro, R *io,			  \
+			 unsigned int flags);				  \
+									  \
 void X(execute_dft)(X(plan) p, R *ri, R *ii, R *ro, R *io);		  \
 									  \
 void X(destroy_plan)(X(plan) p);					  \
@@ -98,6 +104,14 @@ void X(print_plan)(X(plan) p, FILE *output_file);
 #define FFTW_MANGLE_DOUBLE(name) FFTW_CONCAT(fftw_, name)
 #define FFTW_MANGLE_FLOAT(name) FFTW_CONCAT(fftwf_, name)
 #define FFTW_MANGLE_LONG_DOUBLE(name) FFTW_CONCAT(fftwl_, name)
+
+typedef struct {
+     unsigned int n;
+     int is;			/* input stride */
+     int os;			/* output stride */
+} FFTW_MANGLE_DOUBLE(iodim);
+typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_FLOAT(iodim);
+typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_LONG_DOUBLE(iodim);
 
 FFTW_DEFINE_API(FFTW_MANGLE_DOUBLE, double, fftw_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_FLOAT, float, fftwf_complex)

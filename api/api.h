@@ -41,6 +41,7 @@ typedef struct X(plan_s) apiplan;
 typedef R C[2];
 
 void X(extract_reim)(int sign, C *c, R **r, R **i);
+tensor *X(mktensor_iodims)(unsigned int rank, const X(iodim) *dims);
 printer *X(mkprinter_file)(FILE *f);
 
 planner *X(the_planner)(void);
