@@ -167,6 +167,15 @@ if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
       # FMA.  Bottom line: disable the ``web'' pass.
       AX_CHECK_COMPILER_FLAGS(-fno-web, [CFLAGS="$CFLAGS -fno-web"])
 
+      # The gcc-3.4 inliner is totally broken; it does not inline
+      # small functions like VFMAI.
+      AX_CHECK_COMPILER_FLAGS(
+		[--param inline-unit-growth=1000],
+		[CFLAGS="$CFLAGS --param inline-unit-growth=1000"])
+      AX_CHECK_COMPILER_FLAGS(
+		[--param large-function-growth=1000],
+		[CFLAGS="$CFLAGS --param large-function-growth=1000"])
+
       # tweak codelet optimization level
       if test "x$CODELET_OPTIM" = x; then
          case "${host_cpu}" in
