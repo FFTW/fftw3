@@ -39,7 +39,7 @@ typedef struct P_s {
      plan_dft super;
 
      const wadt *adt;
-     int r, m, s;
+     int r, m, s, vl, ws;
      plan *cld;
 
      /* defined only for solver1: */
@@ -50,6 +50,7 @@ typedef struct P_s {
      R *W0, *W1;
 
      const S *slv;
+     int dec;
 } P;
 
 /* approximate log2(sqrt(n)) */
@@ -154,8 +155,10 @@ static void apply_dit(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
+     int i, vl = ego->vl, ws = ego->ws;
 
-     ego->adt->bytwiddle(ego, rio, iio);
+     for (i = 0; i < vl; ++i)
+	  ego->adt->bytwiddle(ego, rio + i * ws, iio + i * ws);
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
@@ -165,11 +168,13 @@ static void apply_dif(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
+     int i, vl = ego->vl, ws = ego->ws;
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
 
-     ego->adt->bytwiddle(ego, rio, iio);
+     for (i = 0; i < vl; ++i)
+	  ego->adt->bytwiddle(ego, rio + i * ws, iio + i * ws);
 }
 
 static void awake(plan *ego_, int flg)
@@ -189,7 +194,9 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s-%d-%d%(%p%))", ego->adt->nam, ego->r, ego->m, ego->cld);
+     p->print(p, "(%s-%s-%d-%d%(%p%))", 
+	      ego->adt->nam, ego->dec == DECDIT ? "dit" : "dif",
+	      ego->r, ego->m, ego->cld);
 }
 
 static int applicable0(const problem *p_)
@@ -197,8 +204,6 @@ static int applicable0(const problem *p_)
      if (DFTWP(p_)) {
           const problem_dftw *p = (const problem_dftw *) p_;
           return (1 
-		  && p->vl == 1 /* FIXME: allow vl > 1 ? */
-
 		  /* in-place only */
 		  && p->s == p->ws
 		  && p->vs == p->wvs
@@ -245,7 +250,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      cld = X(mkplan_d)(plnr, 
 			X(mkproblem_dft_d)(
 			     X(mktensor_1d)(p->r, p->m * p->s, p->m * p->s),
-			     X(mktensor_1d)(p->m, p->s, p->s),
+			     X(mktensor_2d)(p->m, p->s, p->s,
+					    p->vl, p->ws, p->ws),
 			     p->rio, p->iio, p->rio, p->iio)
 			);
      if (!cld) goto nada;
@@ -257,6 +263,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->r = p->r;
      pln->m = p->m;
      pln->s = p->s;
+     pln->vl = p->vl;
+     pln->ws = p->ws;
+     pln->dec = p->dec;
      pln->W0 = pln->W1 = 0;
      pln->td = 0;
 
