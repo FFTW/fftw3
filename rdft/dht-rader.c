@@ -278,10 +278,10 @@ static int applicable0(const problem *p_)
      return 0;
 }
 
-static int applicable(const solver *ego_, const problem *p_, 
-		      const planner *plnr)
+static int applicable(const solver *ego, const problem *p, const planner *plnr)
 {
-     return (!NO_UGLYP(plnr) && applicable0(p_));
+     UNUSED(ego);
+     return (!NO_UGLYP(plnr) && applicable0(p));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

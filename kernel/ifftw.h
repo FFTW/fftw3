@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.143 2002-09-20 20:53:45 athena Exp $ */
+/* $Id: ifftw.h,v 1.144 2002-09-21 11:58:11 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -625,6 +625,7 @@ void X(null_awake)(plan *ego, int awake);
 int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
 uint X(alignment_of)(R *p);
+extern int X(ct_uglyp)(uint min_n, uint n, uint r);
 extern const char *const FFTW(version);
 extern const char *const FFTW(cc);
 extern const char *const FFTW(codelet_optim);

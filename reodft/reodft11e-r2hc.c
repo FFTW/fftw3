@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.7 2002-09-18 21:16:17 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.8 2002-09-21 11:58:11 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -212,9 +212,7 @@ static int applicable0(const solver *ego_, const problem *p_)
 
 static int applicable(const solver *ego, const problem *p, const planner *plnr)
 {
-     UNUSED(plnr);
-     if (NO_UGLYP(plnr)) return 0;
-     return (applicable0(ego, p));
+     return (!NO_UGLYP(plnr) && applicable0(ego, p));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

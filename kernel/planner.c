@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.115 2002-09-20 18:45:54 athena Exp $ */
+/* $Id: planner.c,v 1.116 2002-09-21 11:58:11 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -286,7 +286,7 @@ static void hcurse_subsumed(planner *ego)
 		    if (VALIDP(m)) {
 			 if (md5eq(l->s, m->s) 
 			     && SUBSUMES(l->flags, m->flags)) {
-			      /* quidquid latet apparebit */
+			      /* ne cadant in obscurum */
 			      l->flags |= m->flags & BLESSING;
 			      /* cum vix justus sit securus */
 			      m->flags &= ~BLESSING;
@@ -459,7 +459,6 @@ static void forget(planner *ego, amnesia a)
 	       }
 	  }
      }
-
      /* nil inultum remanebit */
 
      hshrink(ego);

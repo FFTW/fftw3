@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.5 2002-09-20 18:38:13 athena Exp $ */
+/* $Id: rdft-dht.c,v 1.6 2002-09-21 11:58:11 athena Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime
@@ -157,9 +157,7 @@ static int applicable0(const solver *ego_, const problem *p_)
 static int applicable(const solver *ego, const problem *p_, 
 		      const planner *plnr)
 {
-     if (NO_UGLYP(plnr))  return 0;
-     if (!applicable0(ego, p_)) return 0;
-     return 1;
+     return (!NO_UGLYP(plnr) && applicable0(ego, p_));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

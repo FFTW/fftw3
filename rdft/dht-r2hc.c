@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dht-r2hc.c,v 1.9 2002-09-20 18:49:12 athena Exp $ */
+/* $Id: dht-r2hc.c,v 1.10 2002-09-21 11:58:11 athena Exp $ */
 
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */
@@ -96,8 +96,8 @@ static int applicable0(const problem *p_, const planner *plnr)
 
 static int applicable(const solver *ego, const problem *p, const planner *plnr)
 {
-     if (NO_UGLYP(plnr)) return 0;
-     return (applicable0(p, plnr));
+     UNUSED(ego);
+     return (!NO_UGLYP(plnr) && applicable0(p, plnr));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

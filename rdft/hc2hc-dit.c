@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dit.c,v 1.10 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: hc2hc-dit.c,v 1.11 2002-09-21 11:58:11 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -76,7 +76,6 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
 		      const planner *plnr)
 {
      const problem_rdft *p;
-     uint n;
 
      if (!applicable0(ego, p_, plnr)) return 0;
 
@@ -86,8 +85,7 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
      if (NO_VRECURSEP(plnr) && (p->vecsz.rnk > 0)) return 0;
 
      if (NO_UGLYP(plnr)) {
-	  n = p->sz.dims[0].n;
-	  if (n <= 16  || n / ego->desc->radix <= 4) return 0;
+	  if (X(ct_uglyp)(16, p->sz.dims[0].n, ego->desc->radix)) return 0;
 	  if (NONTHREADED_ICKYP(plnr))
 	       return 0; /* prefer threaded version */
      }
