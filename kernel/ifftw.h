@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.95 2002-08-30 02:55:29 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.96 2002-08-30 05:21:37 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -418,7 +418,8 @@ enum { IMPATIENT = 0x1, PATIENT = 0x0,
        CLASSIC_VRECURSE = 0x4,
        FORCE_VRECURSE = 0x8, 
        DESTROY_INPUT = 0x10,
-       POSSIBLY_UNALIGNED = 0x20
+       POSSIBLY_UNALIGNED = 0x20,
+       IN_DHT_R2HC = 0x40
 };
 
 #define NONPATIENCE_FLAGS(flags) ((flags) & ~(ESTIMATE | IMPATIENT | PATIENT))

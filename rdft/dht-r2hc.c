@@ -18,11 +18,10 @@
  *
  */
 
-/* $Id: r2hc-hc2r.c,v 1.8 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: dht-r2hc.c,v 1.1 2002-08-30 05:21:37 stevenj Exp $ */
 
-/* Solve an HC2R problem by using an R2HC problem of the same size.
-   The two problems can be expressed in terms of one another by
-   some pre- and post-processing, inspired by the DHT. */
+/* Solve a DHT problem (Discrete Hartley Transform) via post-processing
+   of an R2HC problem. */
 
 #include "rdft.h"
 
@@ -33,52 +32,32 @@ typedef struct {
 typedef struct {
      plan_rdft super;
      plan *cld;
-     int is, os;
+     int os;
      uint n;
 } P;
-
-/* 1 to destroy input array (like our ordinary hb/hc2r algorithm): */
-#define MUNGE_INPUT 0
 
 static void apply(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
-     int is = ego->is, os = ego->os;
+     int os = ego->os;
      uint i, n = ego->n;
-
-#if MUNGE_INPUT
-#  define O1 I
-#  define os1 is
-#else
-     O[0] = I[0];
-#  define O1 O
-#  define os1 os
-#endif
-     for (i = 1; i < (n + 1)/2; ++i) {
-	  E a, b;
-	  a = I[is * i];
-	  b = I[is * (n - i)];
-	  O1[os1 * i] = a + b;
-	  O1[os1 * (n - i)] = a - b;
-     }
-#if !MUNGE_INPUT
-     if (2*i == n)
-	  O[os * i] = I[is * i];
-#endif
 
      {
 	  plan_rdft *cld = (plan_rdft *) ego->cld;
-	  cld->apply((plan *) cld, O1, O);
+	  cld->apply((plan *) cld, I, O);
      }
-#undef O1
-#undef os1
 
-     for (i = 1; i < (n + 1)/2; ++i) {
+     for (i = 1; i < n - i; ++i) {
 	  E a, b;
 	  a = O[os * i];
 	  b = O[os * (n - i)];
+#if FFT_SIGN == -1
+	  O[os * i] = a - b;
+	  O[os * (n - i)] = a + b;
+#else
 	  O[os * i] = a + b;
 	  O[os * (n - i)] = a - b;
+#endif
      }
 }
 
@@ -98,28 +77,21 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(rdft-r2hc-hc2r-%u%(%p%))", ego->n, ego->cld);
+     p->print(p, "(dht-r2hc-%u%(%p%))", ego->n, ego->cld);
 }
 
 static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
      UNUSED(ego_);
-#if !MUNGE_INPUT
-     UNUSED(plnr);
-#endif
-     if (RDFTP(p_)) {
+     if (RDFTP(p_) && !(plnr->flags & IN_DHT_R2HC)) {
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
-#if MUNGE_INPUT
-		  && (p->I == p->O || (plnr->flags & DESTROY_INPUT))
-#endif
 		  && p->sz.rnk == 1
 		  && p->vecsz.rnk == 0
-		  && p->kind[0] == HC2R
+		  && p->kind[0] == DHT
 	       );
      }
-
      return 0;
 }
 
@@ -145,17 +117,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_rdft *) p_;
 
-#if MUNGE_INPUT
+     plnr->flags |= IN_DHT_R2HC; /* prevent infinite loops with rdft-dht.c */
      cldp = X(mkproblem_rdft_1)(p->sz, p->vecsz, p->I, p->O, R2HC);
-#else
-     {
-	  tensor sz = X(tensor_copy)(p->sz);
-	  sz.dims[0].is = sz.dims[0].os;
-	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, p->O, p->O, R2HC);
-	  X(tensor_destroy)(sz);
-     }
-#endif
-
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld)
@@ -164,16 +127,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln = MKPLAN_RDFT(P, &padt, apply);
 
      pln->n = p->sz.dims[0].n;
-     pln->is = p->sz.dims[0].is;
      pln->os = p->sz.dims[0].os;
      pln->cld = cld;
      
      pln->super.super.ops = cld->ops;
-     pln->super.super.ops.other += 8 * ((pln->n - 1)/2);
-     pln->super.super.ops.add += 4 * ((pln->n - 1)/2);
-#if !MUNGE_INPUT
-     pln->super.super.ops.other += 2 + (pln->n % 2 ? 0 : 2);
-#endif
+     pln->super.super.ops.other += 4 * ((pln->n - 1)/2);
+     pln->super.super.ops.add += 2 * ((pln->n - 1)/2);
 
      return &(pln->super.super);
 }
@@ -186,7 +145,7 @@ static solver *mksolver(void)
      return &(slv->super);
 }
 
-void X(rdft_r2hc_hc2r_register)(planner *p)
+void X(dht_r2hc_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }

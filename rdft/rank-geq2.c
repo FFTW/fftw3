@@ -18,9 +18,20 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.2 2002-08-26 10:38:49 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.3 2002-08-30 05:21:37 stevenj Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
+
+/* FIXME: this solver cannot strictly be applied to multidimensional
+   DHTs, since the latter are not separable...up to rnk-1 additional
+   post-processing passes may be required.  See also:
+
+   R. N. Bracewell, O. Buneman, H. Hao, and J. Villasenor, "Fast
+   two-dimensional Hartley transform," Proc. IEEE 74, 1282-1283 (1986).
+
+   H. Hao and R. N. Bracewell, "A three-dimensional DFT algorithm
+   using the fast Hartley transform," Proc. IEEE 75(2), 264-266 (1987).
+*/
 
 #include "rdft.h"
 

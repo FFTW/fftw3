@@ -21,18 +21,14 @@
 #include "rdft.h"
 
 /*
- * Compute transforms of prime sizes using Rader's trick: turn them
- * into convolutions of size n - 1, which you then perform via a pair
- * of FFTs.   Here, in order to take advantage of real data, we first
- * express the original DFT as a DHT (Discrete Hartley Transform), and
- * apply Rader's trick to the DHT.  This file contains only nontwiddle
- * (direct) solvers.
+ * Compute DHTs of prime sizes using Rader's trick: turn them
+ * into convolutions of size n - 1, which we then perform via a pair
+ * of FFTs.   (We can then do prime real FFTs via rdft-dht.c.)
  */
 
 typedef struct {
      solver super;
      uint min_prime;
-     rdft_kind kind;
 } S;
 
 typedef struct {
@@ -43,7 +39,6 @@ typedef struct {
      uint n, g, ginv;
      int is, os;
      plan *cld_omega;
-     rdft_kind kind;
 } P;
 
 /***************************************************************************/
@@ -51,12 +46,14 @@ typedef struct {
 /* If R2HC_ONLY_CONV is 1, we use a trick to perform the convolution
    purely in terms of R2HC transforms, as opposed to R2HC followed by H2RC.
    This requires a few more operations, but allows us to share the same
-   plan/codelets for both Rader children.  (See also r2hc-hc2r.c) */
+   plan/codelets for both Rader children. */
 #define R2HC_ONLY_CONV 1
 
-static int apply_aux(P *ego, uint r, int is, R *I, R *O)
+static void apply(plan *ego_, R *I, R *O)
 {
-     int os;
+     P *ego = (P *) ego_;
+     uint r = ego->n;
+     int is = ego->is, os;
      uint k, gpower, g;
      R *buf, *omega;
      R r0;
@@ -142,50 +139,6 @@ static int apply_aux(P *ego, uint r, int is, R *I, R *O)
      A(gpower == 1);
 
      X(free)(buf);
-
-     return os;
-}
-
-static void apply_r2hc(plan *ego_, R *I, R *O)
-{
-     P *ego = (P *) ego_;
-     uint r, k;
-     int os;
-
-     r = ego->n;
-     os = apply_aux(ego, r, ego->is, I, O);
-
-     /* finally, unscramble DHT back into DFT:
-        (sucks that this requires an extra pass) */
-     for (k = 1; k < (r+1)/2; ++k) {
-	  E rp, rm;
-	  rp = O[k * os];
-	  rm = O[(r - k) * os];
-	  O[k * os] = 0.5 * (rp + rm);
-	  O[(r - k) * os] = 0.5 * (rp - rm);
-     }
-}
-
-static void apply_hc2r(plan *ego_, R *I, R *O)
-{
-     P *ego = (P *) ego_;
-     uint r, k;
-     int is;
-
-     r = ego->n;
-     is = ego->is;
-
-     /* before everything, scramble DFT into DHT (destroying input):
-        (sucks that this requires an extra pass) */
-     for (k = 1; k < (r+1)/2; ++k) {
-	  E a, b;
-	  a = I[k * is];
-	  b = I[(r - k) * is];
-	  I[k * is] = a + b;
-	  I[(r - k) * is] = a - b;
-     }
-
-     apply_aux(ego, r, is, I, O);
 }
 
 /***************************************************************************/
@@ -251,8 +204,7 @@ static R *mkomega(plan *p_, uint n, uint ginv)
      scale = n - 1.0; /* normalization for convolution */
 
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  buf[i] = (X(cos2pi)(gpower, n) + FFT_SIGN * X(sin2pi)(gpower, n)) 
-	       / scale;
+	  buf[i] = (X(cos2pi)(gpower, n) + X(sin2pi)(gpower, n)) / scale;
      }
      A(gpower == 1);
 
@@ -302,8 +254,8 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
 
-     p->print(p, "(rdft-rader-dht-%s-%u%ois=%oos=%(%p%)",
-              X(rdft_kind_str)(ego->kind), ego->n, ego->is, ego->os, ego->cld1);
+     p->print(p, "(rader-dht-%u%ois=%oos=%(%p%)",
+              ego->n, ego->is, ego->os, ego->cld1);
      if (ego->cld2 != ego->cld1)
           p->print(p, "%(%p%)", ego->cld2);
      if (ego->cld_omega != ego->cld1 && ego->cld_omega != ego->cld2)
@@ -313,13 +265,13 @@ static void print(plan *ego_, printer *p)
 
 static int applicable(const solver *ego_, const problem *p_)
 {
+     UNUSED(ego_);
      if (RDFTP(p_)) {
-	  const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
 		  && p->sz.rnk == 1
 		  && p->vecsz.rnk == 0
-		  && p->kind[0] == ego->kind
+		  && p->kind[0] == DHT
 		  && X(is_prime)(p->sz.dims[0].n)
 		  && p->sz.dims[0].n > 2
 	       );
@@ -344,7 +296,6 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
-     const S *ego = (const S *) ego_;
      const problem_rdft *p = (const problem_rdft *) p_;
      P *pln;
      uint n;
@@ -417,8 +368,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      X(free)(buf);
      buf = 0;
 
-     pln = MKPLAN_RDFT(P, &padt, R2HC_KINDP(ego->kind) ? apply_r2hc : apply_hc2r);
-     pln->kind = ego->kind;
+     pln = MKPLAN_RDFT(P, &padt, apply);
      pln->cld1 = cld1;
      pln->cld2 = cld2;
      pln->cld_omega = cld_omega;
@@ -430,10 +380,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->ginv = X(power_mod)(pln->g, n - 2, n);
      A(MULMOD(pln->g, pln->ginv, n) == 1);
 
+     /* FIXME: recount */
      pln->super.super.ops = X(ops_add)(cld1->ops, cld2->ops);
-     pln->super.super.ops.other += (n - 1) * (2 + 3 + 2 + 2) + 3;
-     pln->super.super.ops.add += (n - 1) * 2;
-     pln->super.super.ops.mul += (n - 1) * (R2HC_KINDP(ego->kind) ? 3 : 2) - 2;
+     pln->super.super.ops.other += (n - 1) * (2 + 3 + 2) + 3;
+     pln->super.super.ops.add += (n - 1) * 1;
+     pln->super.super.ops.mul += (n - 1) * 2 - 2;
 #if R2HC_ONLY_CONV
      pln->super.super.ops.other += (n - 1) - 2;
      pln->super.super.ops.add += 2 * (n - 1) - 4;
@@ -457,18 +408,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 /* constructors */
 
-static solver *mksolver(rdft_kind kind, uint min_prime)
+static solver *mksolver(uint min_prime)
 {
      static const solver_adt sadt = { mkplan, score };
      S *slv = MKSOLVER(S, &sadt);
-     slv->kind = kind;
      slv->min_prime = min_prime;
      return &(slv->super);
 }
 
-void X(rdft_rader_dht_register)(planner *p)
+void X(rader_dht_register)(planner *p)
 {
-     /* FIXME: what are good defaults? */
-     REGISTER_SOLVER(p, mksolver(R2HC, RADER_MIN_GOOD));
-     REGISTER_SOLVER(p, mksolver(HC2R, RADER_MIN_GOOD));
+     REGISTER_SOLVER(p, mksolver(RADER_MIN_GOOD));
 }
