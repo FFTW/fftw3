@@ -41,3 +41,5 @@ TODO before FFTW-$2\pi$:
   few years ago and it was slower, but perhaps matters have changed.)
 
 * Modify generator to produce integer FFTs (etc.) of small sizes.
+
+* dif, difsq simd codelets
