@@ -1,3 +1,8 @@
+Since FFTW 3.0.1:
+
+* Fixed bug that caused HC2R transforms to destroy the input in
+  certain cases, even if the user specified FFTW_PRESERVE_INPUT.
+
 FFTW 3.0.1
 
 * Some speed improvements in SIMD code.

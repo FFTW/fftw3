@@ -323,7 +323,8 @@ static void print(const plan *ego_, printer *p)
               ego->r, ego->cldr0, ego->cldr, ego->cld);
 }
 
-static int applicable0(const solver *ego_, const problem *p_)
+static int applicable0(const solver *ego_, const problem *p_,
+		       const planner *plnr)
 {
      if (RDFTP(p_)) {
 	  const S *ego = (const S *) ego_;
@@ -335,6 +336,17 @@ static int applicable0(const solver *ego_, const problem *p_)
 		  && p->sz->dims[0].n % 4 /* make sure n / r = m is odd */
 		  && p->kind[0] == ego->kind
 		  && !X(is_prime)(p->sz->dims[0].n) /* avoid inf. loops planning cldr0 */
+		  && (0
+
+		      /* the user does not care about the input, or */
+		      || DESTROY_INPUTP(plnr) 
+
+		      /* R2HC is DIT and does not destroy input, or */
+		      || ego->kind == R2HC
+
+		      /* in-place is allowed to destroy input by definition */
+		      || p->I == p->O         
+		      )
 	       );
      }
 
@@ -344,7 +356,7 @@ static int applicable0(const solver *ego_, const problem *p_)
 static int applicable(const solver *ego_, const problem *p_, 
 		      const planner *plnr)
 {
-     return (!NO_UGLYP(plnr) && applicable0(ego_, p_));
+     return (!NO_UGLYP(plnr) && applicable0(ego_, p_, plnr));
 }
 
 static int mkP(P *pln, int r, R *O, int ios, rdft_kind kind, planner *plnr)
