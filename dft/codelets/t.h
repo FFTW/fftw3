@@ -18,13 +18,7 @@
  *
  */
 
-/* $Id: kdft-dif.c,v 1.1 2002-06-19 22:47:55 athena Exp $ */
+#define OKP X(dft_t_okp)
 
-#include "dft.h"
-
-#if K7_MODE
-void X(kdft_dif_k7_register)(planner *p, kdft_dif_k7 k, const ct_desc *desc)
-{
-     REGISTER_SOLVER(p, X(mksolver_dft_ct_dif_k7)(k, desc));
-}
-#endif
+extern int OKP(const ct_desc *d, const R *rio, const R *iio, 
+	       int ios, int vs, uint m, int dist);

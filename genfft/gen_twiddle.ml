@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle.ml,v 1.8 2002-06-23 00:47:28 athena Exp $ *)
+(* $Id: gen_twiddle.ml,v 1.9 2002-06-30 18:37:55 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.8 2002-06-23 00:47:28 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.9 2002-06-30 18:37:55 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -55,9 +55,9 @@ let generate n =
   and m = "m"
   and dist = "dist" in
 
-  let ns = string_of_int n 
-  and sign = !Genutil.sign 
-  and name = !Magic.codelet_name in
+  let sign = !Genutil.sign 
+  and name = !Magic.codelet_name 
+  and byvl x = choose_simd x (ctimes (CVar "VL", x)) in
 
   let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
   let nt = num_twiddles n in
@@ -89,13 +89,16 @@ let generate n =
 
   let body = Block (
     [Decl ("uint", i)],
-    [For (Expr_assign (CVar i, CVar m),
-	  Binop (" > ", CVar i, Integer 0),
+    [For (Expr_assign (CVar i, Integer 0),
+	  Binop (" < ", CVar i, CVar m),
 	  list_to_comma 
-	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
-	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; CVar dist]);
-	     Expr_assign (CVar iioarray, CPlus [CVar iioarray; CVar dist]);
-	     Expr_assign (CVar twarray, CPlus [CVar twarray; Integer nt])],
+	    [Expr_assign (CVar i, CPlus [CVar i; byvl (Integer 1)]);
+	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; 
+						byvl (CVar dist)]);
+	     Expr_assign (CVar iioarray, CPlus [CVar iioarray; 
+						byvl (CVar dist)]);
+	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
+					       byvl (Integer nt)])],
 	  Asch annot);
      Return (CVar twarray)
    ])
@@ -113,11 +116,12 @@ let generate n =
   in
   let twinstr = 
     Printf.sprintf "static const tw_instr twinstr[] = %s;\n\n" 
-      (Twiddle.twinstr_to_c_string (twdesc n))
+      (twinstr_to_string (twdesc n))
   and desc = 
     Printf.sprintf
-      "static const ct_desc desc = { %s, 0, twinstr, %s, 0, %s };\n\n"
-      ns (stride_to_solverparm !uiostride) (flops_of tree)
+      "static const ct_desc desc = {%d, \"%s\", twinstr, %s, OKP, %s, %s};\n\n"
+      n name (flops_of tree) 
+      (stride_to_solverparm !uiostride) "0"
   and register = 
     match !ditdif with
     | DIT -> "X(kdft_dit_register)"

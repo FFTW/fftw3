@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.7 2002-06-22 02:19:20 athena Exp $ *)
+(* $Id: magic.ml,v 1.8 2002-06-30 18:37:55 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -47,6 +47,7 @@ let compact = ref false
 let dag_dump_file = ref ""
 let alist_dump_file = ref ""
 let network_transposition = ref true
+let inklude = ref ""
 
 (* command-line parser for magic parameters *)
 let undocumented = " Undocumented voodoo parameter"
@@ -58,6 +59,7 @@ let set_string var = Arg.String(fun s -> var := s)
 
 let speclist = [
   "-name", set_string codelet_name, " set codelet name";
+  "-include", set_string inklude, undocumented;
 
   "-verbose", set_bool verbose, " Enable verbose logging messages to stderr";
 

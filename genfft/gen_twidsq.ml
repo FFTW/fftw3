@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twidsq.ml,v 1.8 2002-06-23 00:47:28 athena Exp $ *)
+(* $Id: gen_twidsq.ml,v 1.9 2002-06-30 18:37:55 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twidsq.ml,v 1.8 2002-06-23 00:47:28 athena Exp $"
+let cvsid = "$Id: gen_twidsq.ml,v 1.9 2002-06-30 18:37:55 athena Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 
@@ -67,8 +67,7 @@ let generate n =
   and m = "m"
   and dist = "dist" in
 
-  let ns = string_of_int n 
-  and sign = !Genutil.sign 
+  let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
 
   let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
@@ -140,11 +139,12 @@ let generate n =
   let twinstr = 
     Printf.sprintf "static const tw_instr twinstr[] = %s;\n\n" 
       (Twiddle.twinstr_to_c_string (twdesc n))
+
   and desc = 
     Printf.sprintf
-      "static const ct_desc desc = { %s, 0, twinstr, %s, %s, %s};\n\n"
-      ns (stride_to_solverparm !uistride) (stride_to_solverparm !uvstride)
-      (flops_of tree)
+      "static const ct_desc desc = {%d, \"%s\", twinstr, %s, OKP, %s, %s};\n\n"
+      n name (flops_of tree) 
+      (stride_to_solverparm !uistride) (stride_to_solverparm !uvstride)
 
   and register = 
     match !ditdif with

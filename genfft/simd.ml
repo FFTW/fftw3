@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.5 2002-06-23 00:47:28 athena Exp $ *)
+(* $Id: simd.ml,v 1.6 2002-06-30 18:37:55 athena Exp $ *)
 
 open Expr
 open List
@@ -32,7 +32,8 @@ let realtype = "V"
 let realtypep = realtype ^ " *"
 let constrealtype = "const " ^ realtype
 let constrealtypep = constrealtype ^ " *"
-
+let ivs = "ivs"
+let ovs = "ovs"
 
 (*
  * SIMD C AST unparser 
@@ -43,17 +44,9 @@ let first_simd_load v = function
   | MUseReIm(MLoad,v1,e1,v2,e2) -> v == v1	(* wait for 1st load *)
   | _ -> false
 
-let first_simd_twiddle_load v = function
-  | MTwid2(_,s1,_,_) -> s1 == v
-  | _ -> false
-
-let second_simd_store v = function 
+let last_simd_store v = function 
   | MUseReIm(MStore,v1,e1,v2,e2) -> v == v2	(* wait for 2nd store *)
   | _ -> false
-
-let simdLoadString () =  ("LD", "ivs")
-
-let simdStoreString () = ("ST", "ovs")
 
 let cmp_locations v v' = compare (var_index v) (var_index v')
 
@@ -72,70 +65,53 @@ let rec listToString toString separator = function
   | x::xs -> (toString x) ^ separator ^ (listToString toString separator xs)
 
 let rec unparse_load vardeclinfo dst src = 
-  (* TODO *)
-  if true then
+  if !ldvec then
     sprintf "LD(%s,%s);\n" (Variable.unparse dst) (Variable.unparse src)
   else
     match Util.find_elem (first_simd_load src) vardeclinfo with
     | Some (MUseReIm(MLoad,v1,e1,v2,e2)) ->
-	let (macro_name,ivectstride) = simdLoadString () in
-	let (e1',e2') = 
+	let (e1,e2) = 
 	  if Variable.is_real v1 then (e1,e2) 
 	  else if Variable.is_real v2 then (e2,e1)
 	  else failwith "unparse_load"
-	in sprintf 	"%s(%s,%s,%s%s);\n" 
-	  macro_name 
-	  (unparse_expr e1') 
-	  (unparse_expr e2')
-	  (Variable.unparse src)
-	  ivectstride
+	in sprintf "LDRI(%s,%s,%s,%s);\n" 
+	  (unparse_expr e1) (unparse_expr e2) (Variable.unparse src) ivs
     | _ -> ""
 
 and unparse_store vardeclinfo dst src_expr =
-  (* TODO *)
-  if true then
+  if !store_transpose then
+    unparse_store_transposed vardeclinfo dst src_expr
+  else
+  if !stvec then
     sprintf "ST(%s,%s);\n" (Variable.unparse dst) (unparse_expr src_expr)
   else
-    match Util.find_elem (second_simd_store dst) vardeclinfo with
+    match Util.find_elem (last_simd_store dst) vardeclinfo with
     | Some (MUseReIm(MStore,v1,e1,v2,e2)) ->
-	let (macro_name, ovectstride) = simdStoreString () in
-	let (e1',e2') = 
+	let (e1,e2) = 
 	  if Variable.is_real v1 then (e1,e2) 
 	  else if Variable.is_real v2 then (e2,e1)
 	  else failwith "unparse_store"
-	in sprintf  "%s(%s,%s,%s%s);\n"
-	  macro_name
-	  (unparse_expr e1')
-	  (unparse_expr e2')
-	  (Variable.unparse dst)
-	  ovectstride
+	in sprintf  "STRI(%s,%s,%s,%s);\n"
+	  (unparse_expr e1) (unparse_expr e2) (Variable.unparse dst) ovs
     | _ -> ""
 
 
 and unparse_store_transposed vardeclinfo  dst src_expr =
   match Util.find_elem (last_transpose_simd_store dst) vardeclinfo with
   | Some (MTransposes zs) ->
-      let zs' = List.sort (fun (v,_) (v',_) -> cmp_locations v v') zs and
-          mybase = (var_index dst / !vector_length) and
-          myname = (if is_real dst then "r" else "i") and
-          mystride = (!transform_length / !vector_length) in
-      (if !vector_length = 4 then
-	sprintf "ST4(%so + %d, %s, %s);\n"
-	  myname mybase "ovs"
-	  (listToString unparse_expr ", " (map snd zs'))
-      else
-	sprintf "ST2(%so + %d, %s, %s);\n"
-	  myname mybase "ovs"
-	  (listToString unparse_expr ", " (map snd zs'))
-      )
+      begin
+	let zs' = List.sort (fun (v,_) (v',_) -> cmp_locations v v') zs  in
+	let dst = fst (List.hd zs') in
+	match !vector_length with
+	| 4 -> sprintf "ST4(%s, %s, %s);\n"
+	      (Variable.unparse dst) ovs
+	      (listToString unparse_expr ", " (map snd zs'))
+	| 2 -> sprintf "ST2(%s, %s, %s);\n"
+	      (Variable.unparse dst) ovs
+	      (listToString unparse_expr ", " (map snd zs'))
+	| _ -> failwith "store_transpose"
+      end
   | _ -> ""
-
-and unparse_load_twiddle_vect vardeclinfo  dst src = 
-  sprintf "LD(%s,W+2 * (%s)+%s);\n" 
-    (Variable.unparse dst) 
-    (string_of_int (Variable.var_index src))
-    (if Variable.is_real src then "0" else "1")
-
 
 and unparse_expr =
   let rec unparse_plus = function
@@ -146,15 +122,15 @@ and unparse_expr =
     | (Uminus c) :: (Times (a, b)) :: d -> op "VFMS" a b (c :: negate d)
     | (Times (a, b)) :: c :: d          -> op "VFMA" a b (c :: d)
     | c :: (Times (a, b)) :: d          -> op "VFMA" a b (c :: d)
-    | (Uminus a :: b)                   -> op2 "VSUB" a b
-    | (b :: Uminus a :: c)              -> op2 "VSUB" a (b :: c)
-    | (a :: b)                          -> op2 "VADD" a b
+    | (Uminus a :: b)                   -> op2 "VSUB" b [a]
+    | (b :: Uminus a :: c)              -> op2 "VSUB" (b :: c) [a]
+    | (a :: b)                          -> op2 "VADD" [a] b
     | [] -> failwith "unparse_plus"
   and op nam a b c =
     nam ^ "(" ^ (unparse_expr a) ^ ", " ^ (unparse_expr b) ^ ", " ^
     (unparse_plus c) ^ ")"
   and op2 nam a b = 
-    nam ^ "(" ^ (unparse_expr a) ^ ", " ^ (unparse_plus b) ^ ")"
+    nam ^ "(" ^ (unparse_plus a) ^ ", " ^ (unparse_plus b) ^ ")"
   and negate = function
     | [] -> []
     | (Uminus x) :: y -> x :: negate y
@@ -175,18 +151,10 @@ and unparse_decl x = C.unparse_decl x
 and unparse_ast' vardeclinfo ast = 
   let rec unparse_ast ast =
     let rec unparse_assignment = function
-      |	Assign(dst, Load src) when 
-	  Variable.is_constant src && 
-	  (is_real src || is_imag src) &&
-	  (not (Variable.is_locative dst)) -> 
-	    unparse_load_twiddle_vect vardeclinfo dst src
       | Assign(dst, Load src) when (not (Variable.is_locative dst)) -> 
-	    unparse_load vardeclinfo dst src
+	  unparse_load vardeclinfo dst src
       | Assign (v, x) when Variable.is_locative v ->
-	  if !store_transpose then
-	    unparse_store_transposed vardeclinfo v x
-	  else
-	    unparse_store vardeclinfo v x
+	  unparse_store vardeclinfo v x
       | Assign (v, x) -> 
 	  (Variable.unparse v) ^ " = " ^ (unparse_expr x) ^ ";\n"
 

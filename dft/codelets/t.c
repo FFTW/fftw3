@@ -18,14 +18,15 @@
  *
  */
 
-/* $Id: kdft-dit.c,v 1.1 2002-06-19 22:47:55 athena Exp $ */
+#include "codelet.h"
+#include "t.h"
 
-#include "dft.h"
-
-#if K7_MODE
-void X(kdft_dit_k7_register)(planner *p, kdft_dit_k7 k, const ct_desc *desc)
+int OKP(const ct_desc *d,
+	const R *rio, const R *iio, 
+	int ios, int vs, uint m, int dist)
 {
-     REGISTER_SOLVER(p, X(mksolver_dft_ct_dit_k7)(k, desc));
-     REGISTER_SOLVER(p, X(mksolver_dft_ct_ditbuf_k7)(k, desc));
+     return (1
+	     && (!d->s1 || (d->s1 == ios))
+	     && (!d->s2 || (d->s2 == vs))
+	  );
 }
-#endif

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.10 2002-06-18 21:48:41 athena Exp $ */
+/* $Id: ct.c,v 1.11 2002-06-30 18:37:55 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -61,9 +61,9 @@ static void print(plan *ego_, printer *p)
      const solver_ct *slv = ego->slv;
      const ct_desc *e = slv->desc;
 
-     p->print(p, "(%s-%u/%u%ois=%ovs=%v%(%p%))",
-              slv->nam, ego->r, X(twiddle_length)(e->tw),
-              e->is, e->vs, ego->vl, ego->cld);
+     p->print(p, "(%s-%u-%s/%u%v%(%p%))",
+              slv->nam, ego->r, e->nam,
+	      X(twiddle_length)(e->tw), ego->vl, ego->cld);
 }
 
 #define divides(a, b) (((uint)(b) % (uint)(a)) == 0)
@@ -72,11 +72,11 @@ int X(dft_ct_applicable)(const solver_ct *ego, const problem *p_)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
-          const ct_desc *e = ego->desc;
+          const ct_desc *d = ego->desc;
           return (1
                   && p->sz.rnk == 1
                   && p->vecsz.rnk <= 1
-                  && divides(e->radix, p->sz.dims[0].n)
+                  && divides(d->radix, p->sz.dims[0].n)
 	       );
      }
      return 0;

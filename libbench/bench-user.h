@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.6 2002-06-14 21:42:35 athena Exp $ */
+/* $Id: bench-user.h,v 1.7 2002-06-30 18:37:55 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -69,6 +69,7 @@ struct problem {
      unsigned int phys_size;  /* total size of allocated input */
      int sign;
      int in_place;
+     int split;
      void *in;
      void *out;
      void *userinfo; /* user can store whatever */

@@ -18,10 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.9 2002-06-23 00:47:28 athena Exp $ *)
+(* $Id: genutil.ml,v 1.10 2002-06-30 18:37:55 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
+
+let choose_simd a b = if !Simdmagic.simd_mode then b else a
 
 let unique_array n = array n (fun _ -> Unique.make ())
 let unique_array_c n = 
@@ -71,9 +73,10 @@ let load_hc (vr, _) (vi, _) = load_c (vr, vi)
 
 let twiddle_array nt w =
   array (nt/2) (fun i ->
-    let klass = Unique.make () in
-    let (refr, refi) = (C.array_subscript w (C.SInteger 1) (2 * i),
-			C.array_subscript w (C.SInteger 1) (2 * i + 1))
+    let stride = choose_simd (C.SInteger 1) (C.SConst "VL") 
+    and klass = Unique.make () in
+    let (refr, refi) = (C.array_subscript w stride (2 * i),
+			C.array_subscript w stride (2 * i + 1))
     in
     let (kr, ki) = (Variable.make_constant (Variable.Real i) klass refr,
 		    Variable.make_constant (Variable.Imag i) klass refi)  
@@ -270,6 +273,10 @@ let unparse cvsid vardeclinfo tree =
   " * " ^ Fft.cvsid ^ "\n" ^
   " * " ^ cvsid ^ "\n" ^
   " */\n\n" ^
+  (if String.length !Magic.inklude > 0 
+  then
+    (Printf.sprintf "#include \"%s\"\n\n" !Magic.inklude)
+  else "") ^
   (if !Simdmagic.simd_mode then
     Simd.unparse_function vardeclinfo tree
   else
@@ -286,3 +293,9 @@ let add_constants ast =
       C.extract_constants
 	
   in mergedecls (C.Block (extract_constants ast, [ast]))
+
+let twinstr_to_string x =
+  if !Simdmagic.simd_mode then 
+    Twiddle.twinstr_to_simd_string x
+  else
+    Twiddle.twinstr_to_c_string x

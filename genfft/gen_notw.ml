@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.11 2002-06-23 00:47:28 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.12 2002-06-30 18:37:55 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.11 2002-06-23 00:47:28 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.12 2002-06-30 18:37:55 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -50,10 +50,12 @@ let generate n =
   and ostride = "os" 
   in
 
-  let ns = string_of_int n
-  and sign = !Genutil.sign 
+  let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
   let name0 = name ^ "_0" in
+
+  let vl = choose_simd "1" "VL"
+  in
 
   let vistride = either_stride (!uistride) (C.SVar istride)
   and vostride = either_stride (!uostride) (C.SVar ostride)
@@ -84,6 +86,7 @@ let generate n =
 	       else [Decl (C.stridetype, istride)])
 	  @ (if stride_fixed !uostride then [] 
 	       else [Decl (C.stridetype, ostride)])
+	  @ (choose_simd [] [Decl ("int", "ovs")])
 	 ),
 	 add_constants (Asch annot))
 
@@ -95,19 +98,23 @@ let generate n =
       " uint v, int ivs, int ovs)\n" ^
     "{\n" ^
     "uint i;\n" ^
-    "for (i = 0; i < v; ++i) {\n" ^
+    "for (i = 0; i < v; i += " ^ vl ^ ") {\n" ^
       name0 ^ 
         "(ri, ii, ro, io" ^
            (if stride_fixed !uistride then "" else ", is") ^ 
            (if stride_fixed !uostride then "" else ", os") ^ 
+           (choose_simd "" ", ovs") ^ 
           ");\n" ^
-      "ri += ivs; ii += ivs; ro += ovs; io += ovs;\n" ^
+      (choose_simd
+	"ri += ivs; ii += ivs; ro += ovs; io += ovs;\n"
+	"ri += VL * ivs; ii += VL * ivs; ro += VL * ovs; io += VL * ovs;\n") ^
     "}\n}\n\n"
 
   and desc = 
-    Printf.sprintf "static const kdft_desc desc = { %s, %s, %s, %s };\n"
-      ns (stride_to_solverparm !uistride) (stride_to_solverparm !uostride)
-      (flops_of tree0)
+    Printf.sprintf 
+      "static const kdft_desc desc = { %d, \"%s\", %s, OKP, %s, %s };\n"
+      n name (flops_of tree0) 
+      (stride_to_solverparm !uistride) (stride_to_solverparm !uostride)
 
   and init =
     (declare_register_fcn name) ^
@@ -115,9 +122,10 @@ let generate n =
     "  X(kdft_register)(p, " ^ name ^ ", &desc);\n" ^
     "}\n"
 
-  in
-  (unparse cvsid vardeclinfo tree0) ^ "\n" ^ loop ^ desc ^ init
-
+  in ((unparse cvsid vardeclinfo tree0) ^ "\n" ^ 
+      loop ^ 
+      desc ^
+      init)
 
 let main () =
   begin

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.7 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: ct-ditf.c,v 1.8 2002-06-30 18:37:55 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -44,6 +44,7 @@ static int applicable(const solver_ct *ego, const problem *p_)
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
           iodim *d = p->sz.dims, *vd = p->vecsz.dims;
+	  uint m = d[0].n / e->radix;
 
           return (1
                   && p->ri == p->ro  /* inplace only */
@@ -53,9 +54,7 @@ static int applicable(const solver_ct *ego, const problem *p_)
                   && d[0].is == (int)e->radix * vd[0].is
                   && vd[0].os == (int)d[0].n * vd[0].is
 
-                  /* if specialized strides, then they must match */
-                  && (!e->is || e->is == vd[0].os)
-                  && (!e->vs || e->vs == vd[0].is)
+		  && (e->okp(e, p->ri, p->ii, vd[0].os, vd[0].is, m, d[0].is))
 	       );
      }
      return 0;

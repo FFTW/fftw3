@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.7 2002-06-23 00:47:28 athena Exp $ *)
+(* $Id: c.ml,v 1.8 2002-06-30 18:37:55 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -63,6 +63,11 @@ and c_ast =
   | CUminus of c_ast
 and c_fcn = Fcn of string * string * (c_decl list) * c_ast
 
+
+let ctimes = function
+  | (Integer 1), a -> a
+  | a, (Integer 1) -> a
+  | a, b -> CTimes (a, b)
 
 (*
  * C AST unparser 

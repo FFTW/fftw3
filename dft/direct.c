@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.19 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: direct.c,v 1.20 2002-06-30 18:37:55 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -60,7 +60,7 @@ static void print(plan *ego_, printer *p)
      const S *s = ego->slv;
      const kdft_desc *d = s->desc;
 
-     p->print(p, "(dft-direct-%u%ois=%oos=%v)", d->sz, d->is, d->os, ego->vl);
+     p->print(p, "(dft-direct-%u-%s%v)", d->sz, d->nam, ego->vl);
 }
 
 static int applicable(const solver *ego_, const problem *p_)
@@ -69,6 +69,11 @@ static int applicable(const solver *ego_, const problem *p_)
           const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
           const kdft_desc *d = ego->desc;
+	  uint rnk = p->vecsz.rnk;
+          iodim *vd = p->vecsz.dims;
+	  uint vl = rnk == 1 ? vd[0].n : 1;
+	  int ivs = rnk == 1 ? vd[0].is : 0;
+	  int ovs = rnk == 1 ? vd[0].os : 0;
 
           return (
 	       1
@@ -76,9 +81,10 @@ static int applicable(const solver *ego_, const problem *p_)
 	       && p->vecsz.rnk <= 1
 	       && p->sz.dims[0].n == d->sz
 
-	       /* check strides */
-	       && (!d->is || d->is == p->sz.dims[0].is)
-	       && (!d->os || d->os == p->sz.dims[0].os)
+	       /* check strides etc */
+	       && (d->okp(d, p->ri, p->ii, p->ro, p->io,
+			  p->sz.dims[0].is, p->sz.dims[0].os,
+			  vl, ivs, ovs))
 
 	       && (0
 		   /* can operate out-of-place */
@@ -89,7 +95,6 @@ static int applicable(const solver *ego_, const problem *p_)
 		    * what the strides are.
 		    */
 		   || p->vecsz.rnk == 0
-
 
 		   /* can operate in-place as long as strides are the same */
 		   || (X(tensor_inplace_strides)(p->sz) &&

@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.4 2002-06-21 01:22:41 athena Exp $ *)
+(* $Id: annotate.ml,v 1.5 2002-06-30 18:37:55 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -31,7 +31,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.4 2002-06-21 01:22:41 athena Exp $ *)
+(* $Id: annotate.ml,v 1.5 2002-06-30 18:37:55 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -97,10 +97,10 @@ let rec annotatedsched_varpairs = function
   | Annotate (_,_,_,_,asch) -> asch_varpairs asch
 and ainstr_ldvarpairs = function
   | Assign (v, Load v') 
-    when !Simdmagic.collect_load && Variable.is_locative v' -> 
+    when Simdmagic.f_collect_load () && Variable.is_locative v' -> 
       [MUse(MLoad,v',Load v)]
   | Assign (v, Load v')
-    when !Simdmagic.collect_twiddle && Variable.is_constant v' &&
+    when Simdmagic.f_collect_twiddle () && Variable.is_constant v' &&
 	 (is_real v' || is_imag v') -> 
       [MTwid(v, v')]
   | _ -> []
@@ -109,7 +109,7 @@ and ainstr_stvarpairs = function
     when !Simdmagic.store_transpose && Variable.is_locative v ->
       [MTranspose(v,e)]
   | Assign (v, e) 
-    when !Simdmagic.collect_store && Variable.is_locative v -> 
+    when Simdmagic.f_collect_store () && Variable.is_locative v -> 
       [MUse(MStore,v,e)]
   | _ -> []
 and asch_varpairs = function
@@ -127,7 +127,7 @@ let similarpairs a b = match (a,b) with
       t1=t2 && (Variable.same_class v1 v2)
       (* does not work: 
 		(is_real v1 && is_real v2 || is_imag v1 && is_imag v2)
-	*)
+       *)
   | MTranspose(v1,_),  MTranspose(v2,_) -> 
       locativeToArea v1 = locativeToArea v2 && 
       ((is_real v1 && is_real v2) || (is_imag v1 && is_imag v2)) 
@@ -158,7 +158,7 @@ let rec collectpairs = function
 
 let combineuseinfoToDeclvars = function
   | MTwid2(d1,s1,d2,s2)     -> 
-      if !Simdmagic.collect_twiddle then [d1;d2] else []
+      if Simdmagic.f_collect_twiddle () then [d1;d2] else []
   | MUseReIm(_,v1,e1,v2,e2) -> [v1;v2] @ (find_vars e1) @ (find_vars e2)
   | MTransposes vs 	    -> concat (map (fun (_,e) -> find_vars e) vs)
 

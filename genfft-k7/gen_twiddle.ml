@@ -27,7 +27,7 @@ open K7Translate
 open AssignmentsToVfpinstrs
 open Complex
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.8 2002-06-23 00:47:28 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.9 2002-06-30 18:37:55 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -43,6 +43,7 @@ let speclist = [
   " generate a DIF codelet";
 ]
 
+let choose sign m p = if sign > 0 then p else m 
 
 let twiddle_gen n sign nt byw =
   let _ = info "generating..." in
@@ -55,8 +56,11 @@ let twiddle_gen n sign nt byw =
   let code' = vect_optimize varinfo_twiddle n code in
 
   let _ = info "generating k7vinstrs..." in
-  let fnarg_inout,fnarg_iostride  = K7_MFunArg 1, K7_MFunArg 3
-  and fnarg_w,fnarg_m,fnarg_idist = K7_MFunArg 2,K7_MFunArg 4,K7_MFunArg 5 in
+  let fnarg_inout = choose sign (K7_MFunArg 1) (K7_MFunArg 2)
+  and fnarg_w = K7_MFunArg 3
+  and fnarg_iostride = K7_MFunArg 4 
+  and fnarg_m = K7_MFunArg 5 
+  and fnarg_idist = K7_MFunArg 6 in 
 
   let (inout,inout2) = makeNewVintreg2 ()
   and (iostride4p,iostride4n,idist4p) = makeNewVintreg3 ()
@@ -129,24 +133,26 @@ let generate n =
   let p = Printf.printf in
   begin
     boilerplate cvsid;
-    p "#if defined(FFTW_SINGLE) && defined(K7_MODE)\n";
-    compileToAsm name 5 code;
+    compileToAsm name 6 code;
     p "\n";
     p ".section .rodata\n";
-    p "\t.align 2\n";
+    p "nam:\n";
+    p "\t.string \"%s\"\n" name;
+    p "\t.align 4\n";
     p "twinstr:\n";
     p "%s" (Twiddle.twinstr_to_asm_string (twdesc n));
     p "\t.align 4\n";
     p "desc:\n";
     p "\t.long %d\n" n;
-    p "\t.long %d\n" sign;
+    p "\t.long nam\n";
     p "\t.long twinstr\n";
-    p "\t.long 0\n";  (* is *)
-    p "\t.long 0\n";  (* ivs *)
     p "\t.long %d\n" add;
     p "\t.long %d\n" mul;
     p "\t.long 0\n";  (* fma *)
     p "\t.long 0\n";  (* other *)
+    p "\t.long sfftw_kdft_ct_k7_%sokp\n" (choose sign "m" "p");
+    p "\t.long 0\n";  (* s1 *)
+    p "\t.long 0\n";  (* s2 *)
     p "\n";
     p ".text\n";
     p "\t.align 4\n";
@@ -160,14 +166,13 @@ let generate n =
     p "\tpushl %%eax\n";
     begin
       match !ditdif with
-      | DIT -> p "\tcall sfftw_kdft_dit_k7_register\n"
-      | DIF -> p "\tcall sfftw_kdft_dif_k7_register\n"
+      | DIT -> p "\tcall sfftw_kdft_dit_register\n"
+      | DIF -> p "\tcall sfftw_kdft_dif_register\n"
     end;
     p "\taddl $16,%%esp\n";
     p "\taddl $12,%%esp\n";
     p "\tret\n";
     p "\n";
-    Printf.printf "#endif\n";
   end
 
 let main () =

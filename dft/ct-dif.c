@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.10 2002-06-18 21:48:41 athena Exp $ */
+/* $Id: ct-dif.c,v 1.11 2002-06-30 18:37:55 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -48,12 +48,12 @@ static int applicable(const solver_ct *ego, const problem *p_)
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
           iodim *d = p->sz.dims;
+	  uint m = d[0].n / e->radix;
           return (1
                   /* DIF destroys the input and we don't like it */
                   && p->ri == p->ro
 
-                  /* if hardwired strides, test whether they match */
-                  && (!e->is || e->is == (int)(d[0].n / e->radix) * d[0].is)
+		  && (e->okp(e, p->ri, p->ii, (int)m * d[0].is, 0, m, d[0].is))
 	       );
      }
      return 0;

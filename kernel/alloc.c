@@ -18,9 +18,28 @@
  *
  */
 
-/* $Id: alloc.c,v 1.6 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: alloc.c,v 1.7 2002-06-30 18:37:55 athena Exp $ */
 
 #include "ifftw.h"
+
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
+static inline void *real_malloc(size_t n)
+{
+     void *p;
+
+#ifdef HAVE_MEMALIGN
+     {
+	  const int alignment = 16; /* power of 2 */
+	  p = memalign(alignment, n);
+     }
+#else
+     p = malloc(n);
+#endif
+     return p;
+}
 
 /**********************************************************
  *   DEBUGGING CODE
@@ -58,7 +77,7 @@ static struct mstat mstat[MALLOC_WHAT_LAST];
 
 #define MAGIC ((size_t)0xABadCafe)
 #define PAD_FACTOR 2
-#define THREE_SIZE_T (3 * sizeof(size_t))
+#define SZ_HEADER (4 * sizeof(size_t))
 
 struct minfo {
      const char *file;
@@ -89,7 +108,7 @@ void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
      if (estat->siz > estat->maxsiz)
           estat->maxsiz = estat->siz;
 
-     p = (char *) malloc(PAD_FACTOR * n + THREE_SIZE_T);
+     p = (char *) real_malloc(PAD_FACTOR * n + SZ_HEADER);
      A(p);
 
      /* store the sz in a known position */
@@ -99,7 +118,7 @@ void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
 
      /* fill with junk */
      for (i = 0; i < PAD_FACTOR * n; i++)
-          p[i + THREE_SIZE_T] = (char) (i ^ 0xDEADBEEF);
+          p[i + SZ_HEADER] = (char) (i ^ 0xEF);
 
      ++stat->cnt;
      ++estat->cnt;
@@ -111,7 +130,7 @@ void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
 
 
      /* skip the info we stored previously */
-     p = p + THREE_SIZE_T;
+     p = p + SZ_HEADER;
 
      /* record allocation in allocation list */
      info = (struct minfo *) malloc(sizeof(struct minfo));
@@ -131,7 +150,7 @@ void X(free)(void *p)
 
      A(p);
 
-     q = ((char *) p) - THREE_SIZE_T;
+     q = ((char *) p) - SZ_HEADER;
      A(q);
 
      {
@@ -155,11 +174,11 @@ void X(free)(void *p)
 
           /* check for writing past end of array: */
           for (i = n; i < PAD_FACTOR * n; ++i)
-               if (q[i + THREE_SIZE_T] != (char) (i ^ 0xDEADBEEF)) {
+               if (q[i + SZ_HEADER] != (char) (i ^ 0xEF)) {
                     A(0 /* array bounds overwritten */ );
                }
           for (i = 0; i < PAD_FACTOR * n; ++i)
-               q[i + THREE_SIZE_T] = (char) (i ^ 0xBEEFDEAD);
+               q[i + SZ_HEADER] = (char) (i ^ 0xAD);
 
           --stat->cnt;
           --estat->cnt;
@@ -232,7 +251,7 @@ void *X(malloc_plain)(size_t n)
      void *p;
      if (n == 0)
           n = 1;
-     p = malloc(n);
+     p = real_malloc(n);
      CK(p);
      return p;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.13 2002-06-17 03:50:16 fftw Exp $ */
+/* $Id: conf.c,v 1.14 2002-06-30 18:37:55 athena Exp $ */
 
 #include "dft.h"
 
@@ -41,7 +41,10 @@ void X(dft_conf_standard)(planner *p)
      X(solvtab_exec)(s, p);
      X(solvtab_exec)(X(solvtab_dft_standard), p);
      X(solvtab_exec)(X(solvtab_dft_inplace), p);
-#if K7_MODE
+#if HAVE_K7
      X(solvtab_exec)(X(solvtab_dft_k7), p);
+#endif
+#if HAVE_SIMD
+     X(solvtab_exec)(X(solvtab_dft_simd), p);
 #endif
 }

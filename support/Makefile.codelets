@@ -5,9 +5,44 @@
 CODLIST = codlist.c
 CODELET_NAME=codelet_
 
+# rule to build codlist
+$(CODLIST): Makefile
+	(								\
+	echo "#include \"ifftw.h\"";					\
+	echo;								\
+	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))) NIL; do	\
+	   if test "$$i" != NIL; then					\
+             echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
+           fi								\
+	done;								\
+	for i in $(subst .S,,$(filter %.S,$(ALL_CODELETS))) NIL; do	\
+	   if test "$$i" != NIL; then					\
+             echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
+           fi								\
+	done;								\
+	echo;								\
+	echo;								\
+	echo "const solvtab $(SOLVTAB_NAME) = {";			\
+	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))) NIL; do	\
+	   if test "$$i" != NIL; then					\
+	     echo "   X($(CODELET_NAME)$$i),";				\
+	   fi								\
+	done;								\
+	for i in $(subst .S,,$(filter %.S,$(ALL_CODELETS))) NIL; do	\
+	   if test "$$i" != NIL; then					\
+	     echo "   X($(CODELET_NAME)$$i),";				\
+	   fi								\
+	done;								\
+	echo "   0";							\
+	echo "};";							\
+	) >$@
+
+clean-local:
+	rm -f codlist.c
+
 if MAINTAINER_MODE
 
-INDENT = indent -kr -cs -i5 -fca -nfc1 -sc -sob -cli4 -TR -Tplanner
+INDENT = indent -kr -cs -i5 -fca -nfc1 -sc -sob -cli4 -TR -Tplanner -TV
 GENFFTDIR = ${top_builddir}/genfft
 K7GENFFTDIR = ${top_builddir}/genfft-k7
 GEN_NOTW = ${GENFFTDIR}/gen_notw
@@ -105,37 +140,5 @@ Kq2s_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ)
 %: %.s
 %: %.c
 %: %.S
-
-# rule to build codlist
-$(CODLIST): Makefile
-	(								\
-	echo "#include \"ifftw.h\"";					\
-	echo;								\
-	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))) NIL; do	\
-	   if test "$$i" != NIL; then					\
-             echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
-           fi								\
-	done;								\
-	for i in $(subst .S,,$(filter %.S,$(ALL_CODELETS))) NIL; do	\
-	   if test "$$i" != NIL; then					\
-             echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
-           fi								\
-	done;								\
-	echo;								\
-	echo;								\
-	echo "const solvtab $(SOLVTAB_NAME) = {";			\
-	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))) NIL; do	\
-	   if test "$$i" != NIL; then					\
-	     echo "   X($(CODELET_NAME)$$i),";				\
-	   fi								\
-	done;								\
-	for i in $(subst .S,,$(filter %.S,$(ALL_CODELETS))) NIL; do	\
-	   if test "$$i" != NIL; then					\
-	     echo "   X($(CODELET_NAME)$$i),";				\
-	   fi								\
-	done;								\
-	echo "   0";							\
-	echo "};";							\
-	) >$@
 
 endif # MAINTAINER_MODE

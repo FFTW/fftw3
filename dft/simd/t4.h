@@ -1,7 +1,6 @@
-(*
- * Copyright (c) 1997-1999 Massachusetts Institute of Technology
- * Copyright (c) 2000 Matteo Frigo
- * Copyright (c) 2000 Steven G. Johnson
+/*
+ * Copyright (c) 2002 Matteo Frigo
+ * Copyright (c) 2002 Steven G. Johnson
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +16,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *)
-(* $Id: simd.mli,v 1.4 2002-06-30 18:37:55 athena Exp $ *)
+ */
 
-val unparse_function : Annotate.useinfo2 list -> C.c_fcn -> string
-val extract_constants : C.c_ast -> C.c_decl list
-val realtype : string
-val realtypep : string
-val constrealtype : string
-val constrealtypep : string
-val ivs : string
-val ovs : string
+#include "simd.h"
+
+#define OKP X(dft_simd_t4_okp)
+
+extern int OKP(const ct_desc *d, const R *rio, const R *iio, 
+	       int ios, int vs, uint m, int dist);

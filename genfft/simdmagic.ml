@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simdmagic.ml,v 1.2 2002-06-22 02:19:20 athena Exp $ *)
+(* $Id: simdmagic.ml,v 1.3 2002-06-30 18:37:55 athena Exp $ *)
 
 (* SIMD magic parameters *)
 let collect_load = ref false
@@ -28,6 +28,8 @@ let store_transpose = ref false
 let vector_length = ref 4
 let transform_length = ref 0
 let simd_mode = ref false
+let stvec = ref true
+let ldvec = ref true
 
 open Magic
 
@@ -37,5 +39,13 @@ let speclist = [
   "-collect-store", set_bool collect_store, undocumented;
   "-collect-twiddle", set_bool collect_twiddle, undocumented;
   "-store-transpose", set_bool store_transpose, undocumented;
+  "-stvec", set_bool stvec, undocumented;
+  "-stri", unset_bool stvec, undocumented;
+  "-ldvec", set_bool ldvec, undocumented;
+  "-ldri", unset_bool ldvec, undocumented;
   "-vector-length", set_int vector_length, undocumented;
-];
+]
+
+let f_collect_store () = !collect_store || !store_transpose || (not !stvec)
+let f_collect_load () = !collect_load || (not !ldvec)
+let f_collect_twiddle () = !collect_twiddle

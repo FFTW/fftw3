@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.9 2002-06-18 21:48:41 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.10 2002-06-30 18:37:55 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -108,7 +108,7 @@ static int applicable(const solver_ct *ego, const problem *p_)
           return (1
 
                   /* stride is always 2 */
-                  && (!e->is || e->is == 2)
+		  && (e->okp(e, 0, ((R *)0) + 1, 2, 0, 0, 2 * e->radix))
 	       );
      }
      return 0;

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.3 2002-06-20 19:04:37 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.4 2002-06-30 18:37:55 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -42,6 +42,17 @@ type twinstr = (twop * int * int)
 
 let twinstr_to_c_string l =
   let one (op, a, b) = Printf.sprintf "{ %s, %d, %d }" (optostring op) a b
+  in let rec loop first = function
+    | [] -> ""
+    | a :: b ->  (if first then "\n" else ",\n") ^ (one a) ^ (loop false b)
+  in "{" ^ (loop true l) ^ "}"
+
+let twinstr_to_simd_string l =
+  let one = function
+    | (TW_NEXT, 1, 0) -> "{TW_NEXT, VL, 0}"
+    | (TW_NEXT, _, _) -> failwith "twinstr_to_simd_string"
+    | (op, 0, b) -> Printf.sprintf "VTW(%s, %d)" (optostring op) b
+    | _ -> failwith "twinstr_to_simd_string"
   in let rec loop first = function
     | [] -> ""
     | a :: b ->  (if first then "\n" else ",\n") ^ (one a) ^ (loop false b)

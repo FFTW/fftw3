@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.41 2002-06-22 17:01:33 athena Exp $ */
+/* $Id: ifftw.h,v 1.42 2002-06-30 18:37:55 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -52,17 +52,18 @@ typedef fftw_real R;
 typedef unsigned int uint;
 #endif
 
-#ifndef K7_MODE
-#define K7_MODE 0
+#ifndef HAVE_K7
+#define HAVE_K7 0
+#endif
+
+#if defined(HAVE_SSE) || defined(HAVE_SSE2) || defined(HAVE_ALTIVEC)
+#define HAVE_SIMD 1
+#else
+#define HAVE_SIMD 0
 #endif
 
 #undef SINGLE_PRECISION
 #define SINGLE_PRECISION (sizeof(R) == sizeof(float))
-
-#ifndef FFTW_SINGLE
-#undef K7_MODE
-#define K7_MODE 0       /* single precision only */
-#endif
 
 /* forward declarations */
 typedef struct problem_s problem;
@@ -375,12 +376,11 @@ planner *X(mkplanner_score)(int flags);
 /* stride.c: */
 
 /* If PRECOMPUTE_ARRAY_INDICES is defined, precompute all strides. */
-#if defined(__i386__)
+#if defined(__i386__) && !HAVE_K7
 #define PRECOMPUTE_ARRAY_INDICES
 #endif
 
 #ifdef PRECOMPUTE_ARRAY_INDICES
-
 typedef int *stride;
 #define WS(stride, i)  (stride[i])
 extern stride X(mkstride)(int n, int stride);

@@ -321,7 +321,7 @@ let procedure_proepilog stackframe_size_bytes nargs code =
 		(filter (fun r -> exists (k7rinstrUsesK7rintreg r) code) 
 			k7rintregs_calleesaved) in
   let total_stackframe_size = 
-    0 + (if (nargs mod 2 = 1) then 4 else 0)
+    0 + (if true || (nargs mod 2 = 1) then 4 else 0)
       + (if stackframe_size_bytes < 0 then 0 else stackframe_size_bytes) 
       + (if regs_to_save = [] then 0 else 16) in
   [K7R_FEMMS] @

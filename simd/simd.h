@@ -18,14 +18,16 @@
  *
  */
 
-/* $Id: kdft.c,v 1.1 2002-06-19 22:47:55 athena Exp $ */
-
-#include "dft.h"
-
-#if K7_MODE
-void X(kdft_k7_register)(planner *p, kdft_k7 codelet, const kdft_k7_desc *desc)
-{
-     solver *s = X(mksolver_dft_direct_k7)(codelet, desc);
-     REGISTER_SOLVER(p, s);
-}
+#ifdef HAVE_SSE
+#include "simd-sse.h"
 #endif
+
+#ifdef HAVE_SSE2
+#include "simd-sse2.h"
+#endif
+
+#ifdef HAVE_ALTIVEC
+#include "simd-altivec.h"
+#endif
+
+#define ALIGNED(p) (!(((long)p) % ALIGNMENT))

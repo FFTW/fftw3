@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.14 2002-06-22 02:19:20 athena Exp $ */
+/* $Id: codelet.h,v 1.15 2002-06-30 18:37:55 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -65,11 +65,16 @@ static __inline__ R FNMS(R a, R b, R c)
 
 /* DFT codelets */
 
-typedef struct {
+typedef struct kdft_desc_s {
      uint sz;    /* size of transform computed */
-     int is;     /* input stride, or 0 if any */
-     int os;     /* output stride, or 0 if any */
+     const char *nam;
      opcnt ops;
+     int (*okp)(
+	  const struct kdft_desc_s *desc,
+	  const R *ri, const R *ii, const R *ro, const R *io,
+	  int is, int os, uint vl, int ivs, int ovs);
+     int is;
+     int os;
 } kdft_desc;
 
 typedef void (*kdft) (const R *ri, const R *ii, R *ro, R *io,
@@ -77,15 +82,17 @@ typedef void (*kdft) (const R *ri, const R *ii, R *ro, R *io,
 void X(kdft_register)(planner *p, kdft codelet, const kdft_desc *desc);
 
 
-typedef struct {
+typedef struct ct_desc_s {
      uint radix;
-     int sign;   /* used in K7-specific stuff */
+     const char *nam;
      const tw_instr *tw;
-     int is;
-     int vs;
      opcnt ops;
+     int (*okp)(
+	  const struct ct_desc_s *desc,
+	  const R *rio, const R *iio, int ios, int vs, uint m, int dist);
+     int s1;
+     int s2;
 } ct_desc;
-
 
 typedef const R *(*kdft_dit) (R *rioarray, R *iioarray, const R *W,
                               stride ios, uint m, int dist);
@@ -106,7 +113,12 @@ void X(kdft_dif_register)(planner *p, kdft_dif codelet, const ct_desc *desc);
 extern const solvtab X(solvtab_dft_standard);
 extern const solvtab X(solvtab_dft_inplace);
 
-/* extensions */
-#include "codelet-k7.h"
+#if HAVE_K7
+extern const solvtab X(solvtab_dft_k7);
+#endif
+
+#if HAVE_SIMD
+extern const solvtab X(solvtab_dft_simd);
+#endif
 
 #endif				/* __CODELET_H__ */

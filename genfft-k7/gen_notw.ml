@@ -27,6 +27,8 @@ open K7Translate
 open AssignmentsToVfpinstrs
 open Complex
 
+let choose sign m p = if sign > 0 then p else m 
+
 let no_twiddle_gen n sign =
   let _ = info "generating..." in
   let expr = Fft.dft sign n (load_var @@ access_input) in
@@ -34,11 +36,13 @@ let no_twiddle_gen n sign =
   let code' = vect_optimize varinfo_notwiddle n code in
 
   let _ = info "generating k7vinstrs..." in
-  let (fnarg_input,  fnarg_istride) = (K7_MFunArg 1, K7_MFunArg 3)
-  and (fnarg_output, fnarg_ostride) = (K7_MFunArg 2, K7_MFunArg 4) 
-  and fnarg_vl = K7_MFunArg 5
-  and fnarg_ivs = K7_MFunArg 6
-  and fnarg_ovs = K7_MFunArg 7
+  let fnarg_input = choose sign (K7_MFunArg 1) (K7_MFunArg 2)
+  and fnarg_output = choose sign (K7_MFunArg 3) (K7_MFunArg 4)
+  and fnarg_istride = K7_MFunArg 5
+  and fnarg_ostride = K7_MFunArg 6
+  and fnarg_vl = K7_MFunArg 7
+  and fnarg_ivs = K7_MFunArg 8
+  and fnarg_ovs = K7_MFunArg 9
   in
 
   let (input,input2), (output,output2) = makeNewVintreg2 (), makeNewVintreg2 ()
@@ -105,7 +109,7 @@ let no_twiddle_gen n sign =
   
   in ((initcode, body), k7vFlops body)
 
-let cvsid = "$Id: gen_notw.ml,v 1.5 2002-06-23 00:47:28 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.6 2002-06-30 18:37:55 athena Exp $"
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let generate n =
@@ -116,18 +120,22 @@ let generate n =
   let p = Printf.printf in
   begin
     boilerplate cvsid;
-    p "#if defined(FFTW_SINGLE) && defined(K7_MODE)\n";
-    compileToAsm name 7 code;
+    compileToAsm name 9 code;
     p "\n";
     p ".section .rodata\n";
+    p "nam:\n";
+    p "\t.string \"%s\"\n" name;
     p "\t.align 4\n";
     p "desc:\n";
     p "\t.long %d\n" n;
-    p "\t.long %d\n" sign;
+    p "\t.long nam\n";
     p "\t.long %d\n" add;
     p "\t.long %d\n" mul;
     p "\t.long 0\n";  (* fma *)
     p "\t.long 0\n";  (* other *)
+    p "\t.long sfftw_kdft_k7_%sokp\n" (choose sign "m" "p");
+    p "\t.long 0\n";  (* is *)
+    p "\t.long 0\n";  (* os *)
     p "\n";
     p ".text\n";
     p "\t.align 4\n";
@@ -138,12 +146,11 @@ let generate n =
     p "\tpushl $desc\n";
     p "\tpushl $%s\n" name;
     p "\tpushl 28(%%esp)\n";
-    p "\tcall sfftw_kdft_k7_register\n";
+    p "\tcall sfftw_kdft_register\n";
     p "\taddl $16,%%esp\n";
     p "\taddl $12,%%esp\n";
     p "\tret\n";
     p "\n";
-    Printf.printf "#endif\n";
   end
 
 let main () =

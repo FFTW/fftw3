@@ -22,18 +22,40 @@ fi
 AM_CONDITIONAL(SINGLE, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 
-AC_ARG_ENABLE(k7, [  --enable-k7         enable AMD K7 optimizations], k7_mode=$enableval, k7_mode=no)
-if test "$PRECISION" = "d"; then k7_mode=no; fi
-if test "$k7_mode" = "yes"; then
-	AC_DEFINE(K7_MODE,1,[Define to enable AMD K7 optimizations.])
+AC_ARG_ENABLE(k7, [  --enable-k7         enable AMD K7 optimizations], have_k7=$enableval, have_k7=no)
+if test "$PRECISION" = "d"; then have_k7=no; fi
+if test "$have_k7" = "yes"; then
+	AC_DEFINE(HAVE_K7,1,[Define to enable AMD K7 optimizations.])
 fi
-AM_CONDITIONAL(K7_MODE, test "$k7_mode" = "yes")
+AM_CONDITIONAL(HAVE_K7, test "$have_k7" = "yes")
+
+have_simd="no"
+
+AC_ARG_ENABLE(sse, [  --enable-sse         enable SSE optimizations], have_sse=$enableval, have_sse=no)
+if test "$have_sse" = "yes"; then
+	AC_DEFINE(HAVE_SSE,1,[Define to enable SSE optimizations.])
+	have_simd="yes"
+fi
+
+AC_ARG_ENABLE(sse2, [  --enable-sse2         enable SSE2 optimizations], have_sse2=$enableval, have_sse2=no)
+if test "$have_sse2" = "yes"; then
+	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
+	have_simd="yes"
+fi
+
+AC_ARG_ENABLE(altivec, [  --enable-altivec         enable Altivec optimizations], have_altivec=$enableval, have_altivec=no)
+if test "$have_altivec" = "yes"; then
+	AC_DEFINE(HAVE_ALTIVEC,1,[Define to enable Altivec optimizations.])
+	have_simd="yes"
+fi
+
+AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
 
 OCAML_INIT_PATHS
 
 dnl Checks for programs.
 AC_PROG_CC
-AMX_PROG_AS     dnl AM_PROG_AS breaks libtool
+AMX_PROG_AS     dnl AM_PROG_AS breaks at least one version of libtool
 AC_PROG_CC_STDC
 ACX_PROG_CC_EGCS
 AC_PROG_INSTALL
@@ -107,6 +129,7 @@ ACX_PROG_CC_MAXOPT(fftw)
 dnl override CFLAGS selection when debugging
 if test "${enable_debug}" = "yes"; then
 	CFLAGS="-g"
+	LDFLAGS="-static"
 fi
 
 AC_DEFINE_UNQUOTED(FFTW_CC, "$CC $CFLAGS", [C compiler name and flags])
@@ -117,11 +140,14 @@ AC_OUTPUT([
    genfft/Makefile
    genfft-k7/Makefile
    kernel/Makefile
+   simd/Makefile
 
    dft/Makefile
    dft/codelets/Makefile
    dft/codelets/standard/Makefile
    dft/codelets/inplace/Makefile
+   dft/simd/Makefile
+   dft/simd/codelets/Makefile
    dft/k7/Makefile
    dft/k7/codelets/Makefile
 

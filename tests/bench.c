@@ -33,6 +33,41 @@ BENCH_DOCF("version", mkvers)
 BENCH_DOCF("fftw-compiled-by", mkcc)
 END_BENCH_DOC 
 
+static bench_real *ri, *ii, *ro, *io;
+static int is, os;
+
+void copy_c2c_from(struct problem *p, bench_complex *in)
+{
+     unsigned int i;
+     if (p->sign == -1) {
+	  for (i = 0; i < p->size; ++i) {
+	       ri[i * is] = c_re(in[i]);
+	       ii[i * is] = c_im(in[i]);
+	  }
+     } else {
+	  for (i = 0; i < p->size; ++i) {
+	       ii[i * is] = c_re(in[i]);
+	       ri[i * is] = c_im(in[i]);
+	  }
+     }
+}
+
+void copy_c2c_to(struct problem *p, bench_complex *out)
+{
+     unsigned int i;
+     if (p->sign == -1) {
+	  for (i = 0; i < p->size; ++i) {
+	       c_re(out[i]) = ro[i * os];
+	       c_im(out[i]) = io[i * os];
+	  }
+     } else {
+	  for (i = 0; i < p->size; ++i) {
+	       c_re(out[i]) = io[i * os];
+	       c_im(out[i]) = ro[i * os];
+	  }
+     }
+}
+
 static void putchr(printer *p, char c)
 {
      UNUSED(p);
@@ -60,7 +95,6 @@ static plan *pln;
 
 void setup(struct problem *p)
 {
-     bench_real *ri, *ii, *ro, *io;
      BENCH_ASSERT(can_do(p));
 
      plnr = FFTW(mkplanner_score)(0);
@@ -70,24 +104,39 @@ void setup(struct problem *p)
      if (verbose > 5)
 	  FFTW(planner_set_hook) (plnr, debug_hook);
 
-     if (p->sign == -1) {
-	  ri = p->in;
-	  ii = ri + 1;
-	  ro = p->out;
-	  io = ro + 1;
+     if (p->split) {
+	  is = os = 1;
+	  if (p->sign == -1) {
+	       ri = p->in;
+	       ii = ri + p->size;
+	       ro = p->out;
+	       io = ro + p->size;
+	  } else {
+	       ii = p->in;
+	       ri = ii + p->size;
+	       io = p->out;
+	       ro = io + p->size;
+	  }
      } else {
-	  ii = p->in;
-	  ri = ii + 1;
-	  io = p->out;
-	  ro = io + 1;
+	  is = os = 2;
+	  if (p->sign == -1) {
+	       ri = p->in;
+	       ii = ri + 1;
+	       ro = p->out;
+	       io = ro + 1;
+	  } else {
+	       ii = p->in;
+	       ri = ii + 1;
+	       io = p->out;
+	       ro = io + 1;
+	  }
      }
 
      prblm = 
 	  FFTW(mkproblem_dft_d)(
-	       FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, 2, 2),
-	       FFTW(mktensor_rowmajor) (p->vrank, p->vn,
-					p->vn, 2 * p->size,
-					2 * p->size), 
+	       FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, is, os),
+	       FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn,
+					is * p->size, os * p->size), 
 	       ri, ii, ro, io);
      pln = plnr->adt->mkplan(plnr, prblm);
      BENCH_ASSERT(pln);
