@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.199 2003-03-28 17:41:39 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.200 2003-03-28 17:43:23 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -123,6 +123,7 @@ void *alloca(size_t);
 #    define STACK_MALLOC(T, p, x) p = (T)alloca(x) 
 #    define STACK_FREE(x) 
 #  endif
+
 #else /* ! HAVE_ALLOCA */
    /* use malloc instead of alloca */
 #  define STACK_MALLOC(T, p, x) p = (T)MALLOC(x, OTHER)
