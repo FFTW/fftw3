@@ -8,7 +8,7 @@
 \set author     <A href="http://www.fftw.org">Matteo Frigo and Steven G. Johnson</A> / <A href="mailto:fftw@fftw.org">fftw@fftw.org</A>
 \set authormail fftw@fftw.org
 \set title      FFTW Frequently Asked Questions with Answers
-\set copyholder Massachusetts Institute of Technology
+\set copyholder Matteo Frigo and Massachusetts Institute of Technology
 \call-html startup html.refs
 \copyto ASCII
             FFTW FREQUENTLY ASKED QUESTIONS WITH ANSWERS
