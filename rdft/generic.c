@@ -272,7 +272,7 @@ static int applicable(const solver *ego_, const problem *p_)
 		  && p->vecsz.rnk == 0
 		  && p->sz.dims[0].n > 1
                   && p->sz.dims[0].n % 2 /* ensure r and n/r odd */
-                  && p->kind == ego->kind
+                  && p->kind[0] == ego->kind
 	       );
      }
 
@@ -309,7 +309,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      r = X(first_divisor)(n);
      m = n / r;
 
-     if (R2HC_KINDP(p->kind)) {
+     if (R2HC_KINDP(p->kind[0])) {
 	  cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, r * is, os),
 				     X(mktensor_1d)(r, is, m * os),
 				     p->I, p->O, p->kind);
@@ -324,14 +324,14 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      if (!cld)
 	  goto nada;
 
-     pln = MKPLAN_RDFT(P, &padt, R2HC_KINDP(p->kind) ? apply_dit : apply_dif);
+     pln = MKPLAN_RDFT(P, &padt, R2HC_KINDP(p->kind[0]) ? apply_dit:apply_dif);
 
-     pln->os = R2HC_KINDP(p->kind) ? os : is;
+     pln->os = R2HC_KINDP(p->kind[0]) ? os : is;
      pln->r = r;
      pln->m = m;
      pln->cld = cld;
      pln->td = 0;
-     pln->kind = p->kind;
+     pln->kind = p->kind[0];
 
      pln->super.super.ops = X(ops_zero);
      pln->super.super.ops.add = 4 * r * r;

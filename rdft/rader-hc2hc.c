@@ -416,7 +416,7 @@ static int applicable(const solver *ego_, const problem *p_)
 		  && p->vecsz.rnk == 0
 		  && p->sz.dims[0].n > 1
 		  && p->sz.dims[0].n % 4 /* make sure n / r = m is odd */
-		  && p->kind == ego->kind
+		  && p->kind[0] == ego->kind
 		  && !X(is_prime)(p->sz.dims[0].n) /* avoid inf. loops planning cldr0 */
 	       );
      }
@@ -447,7 +447,7 @@ static int mkP(P *pln, uint r, R *O, int ios, rdft_kind kind, planner *plnr)
      R *buf = (R *) 0;
 
      cldp =
-          X(mkproblem_rdft_d)(
+          X(mkproblem_rdft_1_d)(
                X(mktensor_1d)(r, ios, ios),
                X(mktensor_1d)(1, 0, 0),
 	       O, O, kind);
@@ -530,7 +530,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
      }
 
      pln = MKPLAN_RDFT(P, &padt, apply_dit);
-     if (!mkP(pln, r, p->O, os*m, p->kind, plnr))
+     if (!mkP(pln, r, p->O, os*m, p->kind[0], plnr))
 	  goto nada;
 
      pln->ios = os*m;
@@ -586,7 +586,7 @@ static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
      }
 
      pln = MKPLAN_RDFT(P, &padt, apply_dif);
-     if (!mkP(pln, r, p->I, is*m, p->kind, plnr))
+     if (!mkP(pln, r, p->I, is*m, p->kind[0], plnr))
 	  goto nada;
 
      pln->ios = is*m;

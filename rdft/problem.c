@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.20 2002-08-26 02:45:38 stevenj Exp $ */
+/* $Id: problem.c,v 1.21 2002-08-26 04:05:53 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -31,15 +31,32 @@ static void destroy(problem *ego_)
      X(free)(ego_);
 }
 
-static unsigned int hash(const problem *p_)
+static uint kind_hash(const rdft_kind *kind, uint rnk)
+{
+     uint i, h = 9349 * rnk;
+     for (i = 0; i < rnk; ++i)
+	  h = (h * 41) ^ (kind[i] * 37);
+     return h;
+}
+
+static uint hash(const problem *p_)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
      return (0xDEADBEEF
 	     ^ ((p->I == p->O) * 31)
-	     ^ (p->kind * 37)
+	     ^ kind_hash(p->kind, p->sz.rnk)
 	     ^ (X(tensor_hash)(p->sz) * 10487)
              ^ (X(tensor_hash)(p->vecsz) * 27197)
 	  );
+}
+
+static int kind_equal(const rdft_kind *k1, const rdft_kind *k2, uint rnk)
+{
+     uint i;
+     for (i = 0; i < rnk; ++i)
+	  if (k1[i] != k2[i])
+	       return 0;
+     return 1;
 }
 
 static int equal(const problem *ego_, const problem *problem_)
@@ -57,10 +74,10 @@ static int equal(const problem *ego_, const problem *problem_)
 		  && X(alignment_of)(p->I) == X(alignment_of)(e->I)
 		  && X(alignment_of)(p->O) == X(alignment_of)(e->O)
 
-		  && p->kind == e->kind
-
 		  && X(tensor_equal)(p->sz, e->sz)
                   && X(tensor_equal)(p->vecsz, e->vecsz)
+
+		  && kind_equal(p->kind, e->kind, p->sz.rnk)
 	       );
      }
      return 0;
@@ -126,44 +143,62 @@ uint X(rdft_real_n)(rdft_kind kind, uint n)
      }
 }
 
-tensor X(rdft_real_sz)(rdft_kind kind, const tensor sz)
+tensor X(rdft_real_sz)(const rdft_kind *kind, const tensor sz)
 {
      uint i;
      tensor sz_real;
      sz_real = X(tensor_copy)(sz);
      for (i = 0; i < sz.rnk; ++i)
-	  sz_real.dims[i].n = X(rdft_real_n)(kind, sz_real.dims[i].n);
+	  sz_real.dims[i].n = X(rdft_real_n)(kind[i], sz_real.dims[i].n);
      return sz_real;
 }
 
 static void print(problem *ego_, printer *p)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
-     p->print(p, "(rdft %u %td %d %T %T)", 
+     uint i;
+     p->print(p, "(rdft %u %td %T %T", 
 	      X(alignment_of)(ego->I),
 	      ego->O - ego->I, 
-	      (int)ego->kind,
 	      &ego->sz,
 	      &ego->vecsz);
+     for (i = 0; i < ego->sz.rnk; ++i)
+	  p->print(p, " %d", (int)ego->kind[i]);
+     p->print(p, ")");
 }
 
 static int scan(scanner *sc, problem **p)
 {
      tensor sz = { 0, 0 }, vecsz = { 0, 0 };
-     uint align;
+     uint align, i;
      ptrdiff_t offio;
-     int kind;
+     rdft_kind *kind = (rdft_kind *) 0;
      R *I;
      
-     if (!sc->scan(sc, "%u %td %d %T %T",
-		   &align, &offio, &kind, &sz, &vecsz)) {
-	  X(tensor_destroy)(sz);
-	  X(tensor_destroy)(vecsz);
-	  return 0;
+     if (!sc->scan(sc, "%u %td %T %T",
+		   &align, &offio, &sz, &vecsz))
+	  goto nada;
+     kind = (rdft_kind *) fftw_malloc(sizeof(rdft_kind) * sz.rnk, OTHER);
+     for (i = 0; i < sz.rnk; ++i) {
+	  int k;
+	  if (!sc->scan(sc, " %d", &k))
+	       goto nada;
+	  kind[i] = (rdft_kind) k; /* FIXME: check range? */
      }
+     if (!sc->scan(sc,")"))
+	  goto nada;
+     
      I = X(ptr_with_alignment)(align);
      *p = X(mkproblem_rdft_d)(sz, vecsz, I, I + offio, kind);
+     X(free)(kind);
      return 1;
+
+ nada:
+     if (kind)
+	  X(free)(kind);
+     X(tensor_destroy)(sz);
+     X(tensor_destroy)(vecsz);
+     return 0;
 }
 
 static void zero(const problem *ego_)
@@ -193,14 +228,17 @@ int X(problem_rdft_p)(const problem *p)
 }
 
 problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
-			   R *I, R *O, rdft_kind kind)
+			   R *I, R *O, const rdft_kind *kind)
 {
      problem_rdft *ego =
-          (problem_rdft *)X(mkproblem)(sizeof(problem_rdft), &padt);
+          (problem_rdft *)X(mkproblem)(sizeof(problem_rdft)
+				       + sizeof(rdft_kind)
+				       * (X(uimax)(1, sz.rnk) - 1), 
+				       &padt);
 
      uint i, total_n = 1;
      for (i = 0; i < sz.rnk; ++i)
-	  total_n *= X(rdft_real_n)(kind, sz.dims[i].n);
+	  total_n *= X(rdft_real_n)(kind[i], sz.dims[i].n);
      A(total_n > 0); /* or should we use vecsz RNK_MINFTY? */
 
      /* FIXME: how are shifted transforms compressed? */
@@ -208,7 +246,8 @@ problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->I = I;
      ego->O = O;
-     ego->kind = kind;
+     for (i = 0; i < sz.rnk; ++i)
+	  ego->kind[i] = kind[i];
 
      A(FINITE_RNK(ego->sz.rnk));
      return &(ego->super);
@@ -216,13 +255,28 @@ problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
 
 /* Same as X(mkproblem_rdft), but also destroy input tensors. */
 problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
-			     R *I, R *O, rdft_kind kind)
+			     R *I, R *O, const rdft_kind *kind)
 {
      problem *p;
      p = X(mkproblem_rdft)(sz, vecsz, I, O, kind);
      X(tensor_destroy)(vecsz);
      X(tensor_destroy)(sz);
      return p;
+}
+
+/* As above, but for rnk == 1 only and takes a scalar kind parameter */
+problem *X(mkproblem_rdft_1)(const tensor sz, const tensor vecsz,
+			     R *I, R *O, rdft_kind kind)
+{
+     A(sz.rnk == 1);
+     return X(mkproblem_rdft)(sz, vecsz, I, O, &kind);
+}
+
+problem *X(mkproblem_rdft_1_d)(tensor sz, tensor vecsz,
+			       R *I, R *O, rdft_kind kind)
+{
+     A(sz.rnk == 1);
+     return X(mkproblem_rdft_d)(sz, vecsz, I, O, &kind);
 }
 
 void X(problem_rdft_register)(planner *p)

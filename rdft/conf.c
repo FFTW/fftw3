@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.14 2002-08-25 14:08:59 athena Exp $ */
+/* $Id: conf.c,v 1.15 2002-08-26 04:05:52 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -37,9 +37,8 @@ static const solvtab s =
      SOLVTAB(X(rdft_rader_dht_register)),
      SOLVTAB(X(rdft_rader_hc2hc_register)),
      SOLVTAB(X(rdft_generic_register)),
-/*
      SOLVTAB(X(rdft_rank_geq2_register)),
-*/
+
      SOLVTAB(X(rdft_r2hc_hc2r_register)),
 
      SOLVTAB(X(dft_r2hc_register)),

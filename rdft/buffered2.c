@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.4 2002-08-12 17:31:37 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.5 2002-08-26 04:05:52 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -363,13 +363,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, p->sz.dims[0].is, 1),
 		    X(mktensor_1d)(nbuf, ivs, bufdist),
-		    p->r, bufs, p->kind);
+		    p->r, bufs, &p->kind);
      else
 	  cldp =
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, 1, p->sz.dims[0].os),
 		    X(mktensor_1d)(nbuf, bufdist, ovs),
-		    bufs, p->r, p->kind);
+		    bufs, p->r, &p->kind);
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld)
@@ -381,13 +381,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, p->sz.dims[0].is, 1),
 		    X(mktensor_1d)(vl % nbuf, ivs, bufdist),
-		    p->r, bufs, p->kind);
+		    p->r, bufs, &p->kind);
      else
 	  cldp =
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, 1, p->sz.dims[0].os),
 		    X(mktensor_1d)(vl % nbuf, bufdist, ovs),
-		    bufs, p->r, p->kind);
+		    bufs, p->r, &p->kind);
      cldrest = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cldrest)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.19 2002-08-25 14:08:59 athena Exp $ */
+/* $Id: rdft.h,v 1.20 2002-08-26 04:05:53 stevenj Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -31,7 +31,7 @@ typedef struct {
      problem super;
      tensor sz, vecsz;
      R *I, *O;
-     rdft_kind kind;
+     rdft_kind kind[1]; /* C99 allows [0], sigh */
 } problem_rdft;
 
 int X(problem_rdft_p)(const problem *p);
@@ -39,12 +39,17 @@ int X(problem_rdft_p)(const problem *p);
 
 void X(rdft_zerotens)(tensor sz, R *I);
 problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
-			   R *I, R *O, rdft_kind kind);
+			   R *I, R *O, const rdft_kind *kind);
 problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
+			     R *I, R *O, const rdft_kind *kind);
+problem *X(mkproblem_rdft_1)(const tensor sz, const tensor vecsz,
 			     R *I, R *O, rdft_kind kind);
+problem *X(mkproblem_rdft_1_d)(tensor sz, tensor vecsz,
+			       R *I, R *O, rdft_kind kind);
+
 const char *X(rdft_kind_str)(rdft_kind kind);
 uint X(rdft_real_n)(rdft_kind kind, uint n);
-tensor X(rdft_real_sz)(rdft_kind kind, const tensor sz);
+tensor X(rdft_real_sz)(const rdft_kind *kind, const tensor sz);
 
 /* verify.c: */
 void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds);

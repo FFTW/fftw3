@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.6 2002-08-05 18:17:58 stevenj Exp $ */
+/* $Id: buffered.c,v 1.7 2002-08-26 04:05:52 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -251,8 +251,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           X(mkproblem_rdft_d)(
                X(mktensor)(0),
                X(mktensor_2d)(nbuf, bufdist, ovs,
-                              X(rdft_real_n)(p->kind, n), 1, p->sz.dims[0].os),
-               bufs, p->O, R2HC);
+			      X(rdft_real_n)(p->kind[0], n),
+			      1 ,p->sz.dims[0].os),
+               bufs, p->O, (rdft_kind *) 0);
 
      cldcpy = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);

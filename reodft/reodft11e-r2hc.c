@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.4 2002-08-25 18:10:55 fftw Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.5 2002-08-26 04:05:53 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -200,7 +200,7 @@ static int applicable(const solver *ego_, const problem *p_)
           return (1
 		  && p->sz.rnk == 1
 		  && p->vecsz.rnk == 0
-		  && (p->kind == REDFT11 || p->kind == RODFT11)
+		  && (p->kind[0] == REDFT11 || p->kind[0] == RODFT11)
 		  && p->sz.dims[0].n % 2 == 0
 	       );
      }
@@ -237,7 +237,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      {
 	  tensor sz = X(mktensor_1d)(n, 1, 1);
-	  cldp = X(mkproblem_rdft)(sz, p->vecsz, buf, buf, R2HC);
+	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, buf, buf, R2HC);
 	  X(tensor_destroy)(sz);
      }
 
@@ -247,13 +247,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!cld)
           return (plan *)0;
 
-     pln = MKPLAN_RDFT(P, &padt, p->kind == REDFT11 ? apply_re11 : apply_ro11);
+     pln = MKPLAN_RDFT(P, &padt, p->kind[0]==REDFT11 ? apply_re11:apply_ro11);
      pln->n = n;
      pln->is = p->sz.dims[0].is;
      pln->os = p->sz.dims[0].os;
      pln->cld = cld;
      pln->td = pln->td2 = 0;
-     pln->kind = p->kind;
+     pln->kind = p->kind[0];
      
      pln->super.super.ops = cld->ops;
      /* FIXME */

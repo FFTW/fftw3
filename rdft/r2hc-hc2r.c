@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: r2hc-hc2r.c,v 1.7 2002-08-05 03:57:51 stevenj Exp $ */
+/* $Id: r2hc-hc2r.c,v 1.8 2002-08-26 04:05:53 stevenj Exp $ */
 
 /* Solve an HC2R problem by using an R2HC problem of the same size.
    The two problems can be expressed in terms of one another by
@@ -116,7 +116,7 @@ static int applicable(const solver *ego_, const problem *p_,
 #endif
 		  && p->sz.rnk == 1
 		  && p->vecsz.rnk == 0
-		  && p->kind == HC2R
+		  && p->kind[0] == HC2R
 	       );
      }
 
@@ -146,12 +146,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_rdft *) p_;
 
 #if MUNGE_INPUT
-     cldp = X(mkproblem_rdft)(p->sz, p->vecsz, p->I, p->O, R2HC);
+     cldp = X(mkproblem_rdft_1)(p->sz, p->vecsz, p->I, p->O, R2HC);
 #else
      {
 	  tensor sz = X(tensor_copy)(p->sz);
 	  sz.dims[0].is = sz.dims[0].os;
-	  cldp = X(mkproblem_rdft)(sz, p->vecsz, p->O, p->O, R2HC);
+	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, p->O, p->O, R2HC);
 	  X(tensor_destroy)(sz);
      }
 #endif

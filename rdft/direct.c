@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.2 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: direct.c,v 1.3 2002-08-26 04:05:53 stevenj Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -105,7 +105,7 @@ static int applicable(const solver *ego_, const problem *p_)
 	       && p->sz.rnk == 1
 	       && p->vecsz.rnk <= 1
 	       && p->sz.dims[0].n == ego->sz
-	       && p->kind == ego->kind
+	       && p->kind[0] == ego->kind
 
 	       /* check strides etc */
 	       && (!R2HC_KINDP(ego->kind) ||
@@ -167,8 +167,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_rdft *) p_;
 
-     r2hc_kindp = R2HC_KINDP(p->kind);
-     A(r2hc_kindp || HC2R_KINDP(p->kind));
+     r2hc_kindp = R2HC_KINDP(ego->kind);
+     A(r2hc_kindp || HC2R_KINDP(ego->kind));
 
      pln = MKPLAN_RDFT(P, &padt, r2hc_kindp ? apply_r2hc : apply_hc2r);
 
@@ -176,9 +176,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      vd = p->vecsz.dims;
 
      pln->k = ego->k;
-     pln->ioffset = ioffset(p->kind, d[0].n, r2hc_kindp ? d[0].os : d[0].is);
+     pln->ioffset = ioffset(ego->kind, d[0].n, r2hc_kindp ? d[0].os : d[0].is);
 
-     nr = (p->kind == R2HC || p->kind == HC2R) ? (d[0].n + 2) / 2 : /* R2HCII */ (d[0].n + 1) / 2;
+     nr = (ego->kind == R2HC || ego->kind == HC2R) ? (d[0].n + 2) / 2 : /* R2HCII */ (d[0].n + 1) / 2;
      pln->is = X(mkstride)(ego->sz, r2hc_kindp ? d[0].is : d[0].os);
      pln->ros = X(mkstride)(nr, r2hc_kindp ? d[0].os : d[0].is);
      pln->ios = X(mkstride)(ego->sz - nr + 1, r2hc_kindp ? -d[0].os : -d[0].is);

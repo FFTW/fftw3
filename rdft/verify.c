@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.18 2002-08-25 18:10:55 fftw Exp $ */
+/* $Id: verify.c,v 1.19 2002-08-26 04:05:53 stevenj Exp $ */
 
 #include "rdft.h"
 #include "verify.h"
@@ -241,7 +241,7 @@ static void dofft(void *n_, C *in, C *out)
 {
      info *n = (info *)n_;
      if (n->p) {
-	  switch (n->p->kind) {
+	  switch (n->p->kind[0]) {
 	      case R2HC:
 		   cpyr(&in->r, n->pckdsz, n->p->I, n->totalsz);
 		   n->pln->adt->solve(n->pln, &(n->p->super));
@@ -320,11 +320,11 @@ static void really_verify(plan *pln, const problem_rdft *p,
      linear(dofft, &nfo, 1,
 	    N, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
 
-     if (nfo.p->kind == R2HC)
+     if (nfo.p->kind[0] == R2HC)
 	  tf_shift(dofft, &nfo, 0, p->sz,
 		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, TIME_SHIFT);
-     if (nfo.p->kind == HC2R)
+     if (nfo.p->kind[0] == HC2R)
 	  tf_shift(dofft, &nfo, 0, p->sz,
 		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, FREQ_SHIFT);
@@ -400,7 +400,7 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
 
 void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds)
 {
-     if (p->kind == R2HC || p->kind == HC2R) {
+     if ((p->kind[0] == R2HC || p->kind[0] == HC2R) && p->sz.rnk == 1) {
 	  AWAKE(pln, 1);
 	  really_verify(pln, p, rounds, 
 			sizeof(R) == sizeof(float) ? 1.0e-2 : 1.0e-7);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.1 2002-08-25 14:08:59 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.2 2002-08-26 04:05:53 stevenj Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -221,7 +221,7 @@ static problem *mkcld_f_rdft(const problem_rdft2 *p)
      tensor cld_vec = X(tensor_append)(radix, p->vecsz);
      X(tensor_destroy)(radix);
 
-     return X(mkproblem_rdft_d) (
+     return X(mkproblem_rdft_1_d) (
 	  X(mktensor_1d)(d[0].n / 2, 2 * d[0].is, d[0].os),
 	  cld_vec, p->r, p->rio, R2HC);
 }

@@ -241,9 +241,10 @@ void setup(struct problem *p)
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn, p->vn,
 					     is * p->size, os * p->size), 
 		    ri, ii, ro, io);
-     else if (p->split)
+     else if (p->split) {
+	  CK(p->rank == 1);
 	  prblm = 
-	       FFTW(mkproblem_rdft_d)(
+	       FFTW(mkproblem_rdft_1_d)(
 		    FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, p->n, is, os),
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn, p->vn,
 					     is * p->size, os * p->size), 
@@ -253,6 +254,7 @@ void setup(struct problem *p)
 #else
                     RODFT11);
 #endif
+     }
      else {
 	  uint i, *npadr, *npadc;
 	  npadr = (uint *) bench_malloc(p->rank * sizeof(uint));

@@ -319,7 +319,7 @@ static int applicable(const solver *ego_, const problem *p_)
           return (1
 		  && p->sz.rnk == 1
 		  && p->vecsz.rnk == 0
-		  && p->kind == ego->kind
+		  && p->kind[0] == ego->kind
 		  && X(is_prime)(p->sz.dims[0].n)
 		  && p->sz.dims[0].n > 2
 	       );
@@ -372,7 +372,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      buf = (R *) fftw_malloc(sizeof(R) * (n - 1), BUFFERS);
 
      cldp =
-          X(mkproblem_rdft_d)(
+          X(mkproblem_rdft_1_d)(
                X(mktensor_1d)(n - 1, 1, os),
                X(mktensor_1d)(1, 0, 0),
                buf, O + os, R2HC);
@@ -382,7 +382,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           goto nada;
 
      cldp =
-          X(mkproblem_rdft_d)(
+          X(mkproblem_rdft_1_d)(
                X(mktensor_1d)(n - 1, os, 1),
                X(mktensor_1d)(1, 0, 0),
                O + os, buf, 
@@ -402,7 +402,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      plnr->flags |= ESTIMATE;
      cldp =
-          X(mkproblem_rdft_d)(
+          X(mkproblem_rdft_1_d)(
                X(mktensor_1d)(n - 1, 1, 1),
                X(mktensor_1d)(1, 0, 0),
 	       buf, omega, R2HC);

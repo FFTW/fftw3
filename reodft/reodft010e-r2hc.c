@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.7 2002-08-25 18:10:55 fftw Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.8 2002-08-26 04:05:53 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -298,8 +298,8 @@ static int applicable(const solver *ego_, const problem *p_)
           return (1
 		  && p->sz.rnk == 1
 		  && p->vecsz.rnk == 0
-		  && (p->kind == REDFT01 || p->kind == REDFT10
-		      || p->kind == RODFT01 || p->kind == RODFT10)
+		  && (p->kind[0] == REDFT01 || p->kind[0] == REDFT10
+		      || p->kind[0] == RODFT01 || p->kind[0] == RODFT10)
 		  && p->sz.dims[0].n % 2 == 0
 	       );
      }
@@ -336,7 +336,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      {
 	  tensor sz = X(mktensor_1d)(n, 1, 1);
-	  cldp = X(mkproblem_rdft)(sz, p->vecsz, buf, buf, R2HC);
+	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, buf, buf, R2HC);
 	  X(tensor_destroy)(sz);
      }
 
@@ -346,7 +346,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!cld)
           return (plan *)0;
 
-     switch (p->kind) {
+     switch (p->kind[0]) {
 	 case REDFT01: pln = MKPLAN_RDFT(P, &padt, apply_re01); break;
 	 case REDFT10: pln = MKPLAN_RDFT(P, &padt, apply_re10); break;
 	 case RODFT01: pln = MKPLAN_RDFT(P, &padt, apply_ro01); break;
@@ -359,7 +359,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->os = p->sz.dims[0].os;
      pln->cld = cld;
      pln->td = 0;
-     pln->kind = p->kind;
+     pln->kind = p->kind[0];
      
      pln->super.super.ops = cld->ops;
      /* FIXME */

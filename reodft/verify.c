@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.3 2002-08-25 18:10:55 fftw Exp $ */
+/* $Id: verify.c,v 1.4 2002-08-26 04:05:53 stevenj Exp $ */
 
 #include "reodft.h"
 #include <math.h>
@@ -423,11 +423,11 @@ static void really_verify(plan *pln, const problem_rdft *p,
 
      A(p->sz.rnk == 1);
      n0 = p->sz.dims[0].n;
-     n = X(rdft_real_n)(p->kind, n0);
+     n = X(rdft_real_n)(p->kind[0], n0);
      vecn = X(tensor_sz)(p->vecsz);
      N = n * vecn;
 
-     switch (p->kind) {
+     switch (p->kind[0]) {
 	 case RODFT00:
 	      i0 = k0 = 1;
 	      ti = tst = tsf = sin00;
@@ -526,7 +526,7 @@ static void really_verify(plan *pln, const problem_rdft *p,
 
 void X(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds)
 {
-     if (REODFT_KINDP(p->kind)) {
+     if (REODFT_KINDP(p->kind[0]) && p->sz.rnk == 1) {
 	  AWAKE(pln, 1);
 	  really_verify(pln, p, rounds, 
 			sizeof(R) == sizeof(float) ? 1.0e-2 : 1.0e-7);
