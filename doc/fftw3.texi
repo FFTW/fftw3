@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.157 2003-03-16 19:15:47 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.158 2003-03-16 19:27:45 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4422,15 +4422,7 @@ chance of getting a cycle counter working on your system.  @xref{Cycle
 Counters}.
 
 @item
-@code{--enable-k7}: Enable special optimizations for the AMD K7 and
-related chips; this will increase the size of the FFTW library by
-including special generated-assembly routines for that chip.  The code
-should still run on other x86 CPUs (for which the K7 codelets are
-automatically disabled, although the FFTW library is still larger).
-This option only works in single precision.
-
-@item
-@code{--enable-sse}, @code{--enable-sse2}, @code{--enable-3dnow},
+@code{--enable-sse}, @code{--enable-sse2}, @code{--enable-k7},
 @code{--enable-altivec}: Enable the compilation of SIMD code for SSE
 (Pentium III+), SSE2 (Pentium IV+), 3dNow! (AMD K7 and others), or
 AltiVec (PowerPC G4+).  SSE, 3dNow!, and AltiVec only work with
@@ -4440,13 +4432,14 @@ CPUs lacking the SIMD extensions (SIMD is automatically disabled,
 although the FFTW library is still larger).
 @itemize @minus
 @item
-These options require a compiler supporting SIMD extensions, and
-compiler support is still a bit flaky.  We have tested SIMD with
-@code{gcc} versions 3.x (which miscompile AltiVec permutations on
-Linux, but we have an assembly workaround) and with Intel's @code{icc}
-6.0 (which misaligns SSE constants, but we have a workaround).  Some 3.x
-versions of @code{gcc} crash during compilation, and @code{gcc} 2.95
-miscompiles AltiVec on MacOS X.
+These options, with the exception of @code{--enable-k7} (which uses
+assembly), require a compiler supporting SIMD extensions, and compiler
+support is still a bit flaky.  We have tested SIMD with @code{gcc}
+versions 3.x (which miscompile AltiVec permutations on Linux, but we
+have an assembly workaround) and with Intel's @code{icc} 6.0 (which
+misaligns SSE constants, but we have a workaround).  Some 3.x versions
+of @code{gcc} crash during compilation, and @code{gcc} 2.95 miscompiles
+AltiVec on MacOS X.
 @item
 With the Linux kernel, you may have to recompile the kernel with the
 option to support SSE/SSE2/AltiVec (see the ``Processor type and
