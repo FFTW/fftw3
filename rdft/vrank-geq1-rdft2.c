@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.29 2003-03-29 00:12:08 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.30 2003-03-29 19:38:23 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -182,12 +182,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      A(d->n > 1);  /* or else, p->ri + d->is etc. are invalid */
 
      if (R2HC_KINDP(p->kind)) {
-	  nr = X(most_unaligned)(p->r, p->r + d->is);
 	  X(most_unaligned_complex)(p->rio, p->iio, &nrio, &niio, d->os);
+	  nr = p->r == p->rio ? nrio : X(most_unaligned)(p->r, p->r + d->is);
      }
      else {
-	  nr = X(most_unaligned)(p->r, p->r + d->os);
 	  X(most_unaligned_complex)(p->rio, p->iio, &nrio, &niio, d->is);
+	  nr = p->r == p->rio ? nrio : X(most_unaligned)(p->r, p->r + d->os);
      }
 
      cld = X(mkplan_d)(plnr, 
