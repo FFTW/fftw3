@@ -172,7 +172,7 @@ void bench_free(void *p)
  **********************************************************/
 /* production version, no hacks */
 
-#define MIN_ALIGNMENT 16
+#define MIN_ALIGNMENT 16    /* must be power of two */
 
 #define real_free free /* memalign and malloc use ordinary free */
 
@@ -181,7 +181,20 @@ void *bench_malloc(size_t n)
      void *p;
      if (n == 0) n = 1;
 
-#if defined(HAVE_MEMALIGN)
+#if defined(WITH_OUR_MALLOC16) && (MIN_ALIGNMENT == 16)
+     /* Our own 16-byte aligned malloc/free.  Assumes sizeof(void*) is a
+	power of two <= 8 and that malloc is at least sizeof(void*)-aligned. */
+     {
+	  void *p0;
+	  if ((p0 = malloc(n + 16))) {
+	       p = (void *) (((uintptr_t) p0 + 16) & (~((uintptr_t) 15)));
+	       *((void **) p - 1) = p0;
+	  }
+	  else
+	       p = (void *) 0;
+     }
+#    define OUR_FREE16     
+#elif defined(HAVE_MEMALIGN)
      p = memalign(MIN_ALIGNMENT, n);
 #elif defined(HAVE_POSIX_MEMALIGN)
      /* note: posix_memalign is broken in glibc 2.2.5: it constrains
@@ -204,7 +217,11 @@ void *bench_malloc(size_t n)
 
 void bench_free(void *p)
 {
+#ifdef OUR_FREE16
+     if (p) free(*((void **) p - 1));
+#else
      real_free(p);
+#endif
 }
 
 #endif
