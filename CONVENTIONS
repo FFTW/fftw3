@@ -16,8 +16,9 @@ NAMES: keep them short.  Shorter than you think.  The Bible was written
    sz      : size
    vecsz   : vector size
    is, os  : input/output stride
-   ri, ii  : real/imag input 
-   ro, io  : real/imag output
+   ri, ii  : real/imag input (complex data)
+   ro, io  : real/imag output (complex data)
+   I, O    : real input/output (real data)
    A       : assert
    CK      : check
    S       : solver, defined internally to each solver file
@@ -26,7 +27,7 @@ NAMES: keep them short.  Shorter than you think.  The Bible was written
    X       : used for mangling of external names (see below)
 
    If a name is used often and must have the form fftw_foo to avoid
-   namespace pollution, #define FOO FFTW_FOO and use the short name.
+   namespace pollution, #define FOO fftw_foo and use the short name.
 
    Leave that hungarian crap to MS.  foo_t counts as hungarian: use
    foo instead.  foo is lowercase so that it does not look like a DOS
