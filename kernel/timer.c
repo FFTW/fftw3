@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.8 2002-06-12 22:57:19 athena Exp $ */
+/* $Id: timer.c,v 1.9 2002-07-14 02:06:35 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <stdio.h>
@@ -32,7 +32,7 @@
 #endif
 
 #ifdef HAVE_TIME_H
-#include <sys/time.h>
+#include <time.h>
 #endif
 
 #ifdef HAVE_UNISTD_H
