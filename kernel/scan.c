@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.1 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: scan.c,v 1.2 2002-08-01 07:12:37 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -187,6 +187,11 @@ static int getproblem(scanner *sc, problem **p)
      return sc->scan(sc, ")");
 }
 
+/* vscan is mostly scanf-like, with our additional format specifiers,
+   but with a few twists.  It returns the number of items successfully
+   scanned, but even if there were no items scanned it returns 1 if
+   it matched all the format characters.  '(' and ')' in the format
+   string match those characters preceded by any whitespace.  */
 static int vscan(scanner *sc, const char *format, va_list ap)
 {
      const char *s = format;
