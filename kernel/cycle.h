@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.19 2003-03-16 19:18:32 stevenj Exp $ */
+/* $Id: cycle.h,v 1.20 2003-03-16 19:19:10 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -251,14 +251,14 @@ static __inline double elapsed(ticks t1, ticks t0)
 #if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_SGI_CYCLE) && !defined(HAVE_TICK_COUNTER)
 typedef struct timespec ticks;
 
-static __inline__ ticks getticks(void)
+static inline ticks getticks(void)
 {
      struct timespec t;
      clock_gettime(CLOCK_SGI_CYCLE, &t);
      return t;
 }
 
-static __inline__ double elapsed(ticks t1, ticks t0)
+static inline double elapsed(ticks t1, ticks t0)
 {
      return (double)(t1.tv_sec - t0.tv_sec) * 1.0E9 +
 	  (double)(t1.tv_nsec - t0.tv_nsec);
