@@ -218,6 +218,12 @@ fi
 
 if test "x$enable_fortran" = xyes; then
         AC_F77_WRAPPERS
+	AC_F77_FUNC(f77foo)
+	AC_F77_FUNC(f77_foo)
+	f77_foo2=`echo $f77foo | sed 's/77/77_/'`
+	if test "$f77_foo" = "$f77_foo2"; then
+		AC_DEFINE(F77_FUNC_EQUIV, 1, [Define if F77_FUNC and F77_FUNC_ are equivalent.])
+	fi
 fi
 
 dnl -----------------------------------------------------------------------

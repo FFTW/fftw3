@@ -20,27 +20,18 @@
 
 #include "api.h"
 
-/* Fortran-like (e.g. as in BLAS) type prefixes for F77 interface */
-#if defined(FFTW_SINGLE)
-#  define x77(name) CONCAT(sfftw_, name)
-#  define X77(NAME) CONCAT(SFFTW_, NAME)
-#elif defined(FFTW_LDOUBLE)
-/* FIXME: what is best?  BLAS uses D..._X, apparently.  Ugh. */
-#  define x77(name) CONCAT(lfftw_, name)
-#  define X77(NAME) CONCAT(LFFTW_, NAME)
-#else
-#  define x77(name) CONCAT(dfftw_, name)
-#  define X77(NAME) CONCAT(DFFTW_, NAME)
-#endif
-
-#ifdef F77_FUNC_
-
-#define F77x(a, A) F77_FUNC_(a, A)
-#define F77(a, A) F77x(x77(a), X77(A))
+/* if F77_FUNC is not defined, then we don't know how to mangle identifiers
+   for the Fortran linker, and we must omit the f77 API. */
+#ifdef F77_FUNC
 
 /* C analogues to Fortran integer type: */
 typedef int fint;
 
+/*-----------------------------------------------------------------------*/
+/* some internal functions used by the f77 api */
+
+/* in fortran, the natural array ordering is column-major, which
+   corresponds to reversing the dimensions relative to C's row-major */
 static int *reverse_n(fint rnk, const fint *n)
 {
      int *nrev;
@@ -52,6 +43,8 @@ static int *reverse_n(fint rnk, const fint *n)
      return nrev;
 }
 
+/* f77 doesn't have data structures, so we have to pass iodims as
+   parallel arrays */
 static X(iodim) *make_dims(fint rnk, const fint *n,
 			   const fint *is, const fint *os)
 {
@@ -67,27 +60,6 @@ static X(iodim) *make_dims(fint rnk, const fint *n,
      return dims;
 }
 
-
-void F77(execute, EXECUTE)(X(plan) *p)
-{
-     X(execute)(*p);
-}
-
-void F77(destroy_plan, DESTROY_PLAN)(X(plan) *p)
-{
-     X(destroy_plan)(*p);
-}
-
-void F77(cleanup, CLEANUP)(void)
-{
-     X(cleanup)();
-}
-
-void F77(forget_wisdom, FORGET_WISDOM)(void)
-{
-     X(forget_wisdom)();
-}
-
 typedef struct {
      void (*f77_absorber)(char *, void *);
      void *data;
@@ -97,15 +69,6 @@ static void absorber(char c, void *d)
 {
      absorber_data *ad = (absorber_data *) d;
      ad->f77_absorber(&c, ad->data);
-}
-
-void F77(export_wisdom, EXPORT_WISDOM)(void (*f77_absorber)(char *, void *),
-				       void *data)
-{
-     absorber_data ad;
-     ad.f77_absorber = f77_absorber;
-     ad.data = data;
-     X(export_wisdom)(absorber, (void *) &ad);
 }
 
 typedef struct {
@@ -121,90 +84,38 @@ static int emitter(void *d)
      return (c < 0 ? EOF : c);
 }
 
-void F77(import_wisdom, IMPORT_WISDOM)(int *isuccess,
-				       void (*f77_emitter)(int *, void *),
-				       void *data)
-{
-     emitter_data ed;
-     ed.f77_emitter = f77_emitter;
-     ed.data = data;
-     *isuccess = X(import_wisdom)(emitter, (void *) &ed);
-}
+/*-----------------------------------------------------------------------*/
 
-void F77(import_system_wisdom, IMPORT_SYSTEM_WISDOM)(int *isuccess)
-{
-     *isuccess = X(import_system_wisdom)();
-}
+/* Fortran-like (e.g. as in BLAS) type prefixes for F77 interface */
+#if defined(FFTW_SINGLE)
+#  define x77(name) CONCAT(sfftw_, name)
+#  define X77(NAME) CONCAT(SFFTW_, NAME)
+#elif defined(FFTW_LDOUBLE)
+/* FIXME: what is best?  BLAS uses D..._X, apparently.  Ugh. */
+#  define x77(name) CONCAT(lfftw_, name)
+#  define X77(NAME) CONCAT(LFFTW_, NAME)
+#else
+#  define x77(name) CONCAT(dfftw_, name)
+#  define X77(NAME) CONCAT(DFFTW_, NAME)
+#endif
 
-void F77(print_plan, PRINT_PLAN)(X(plan) *p)
-{
-     X(print_plan)(*p, stdout);
-}
+#define F77x(a, A) F77_FUNC(a, A)
+#define F77(a, A) F77x(x77(a), X77(A))
+#include "f77funcs.c"
 
-void F77(plan_dft, PLAN_DFT)(X(plan) *p, fint *rank, const fint *n,
-			     C *in, C *out, fint *sign, fint *flags)
-{
-     int *nrev = reverse_n(*rank, n);
-     *p = X(plan_dft)(*rank, nrev, in, out, *sign, *flags);
-     X(ifree0)(nrev);
-}
+/* If identifiers with underscores are mangled differently than those
+   without underscores, then we include *both* mangling versions.  The
+   reason is that the only Fortran compiler that does such differing
+   mangling is currently g77 (which adds an extra underscore to names
+   with underscores), whereas other compilers running on the same
+   machine are likely to use g77's non-underscored mangling.  (I'm sick
+   of users complaining that FFTW works with g77 but not with e.g.
+   pgf77 or ifc on the same machine.)  Note that all FFTW identifiers
+   contain underscores. */
+#if defined(F77_FUNC_) && !defined(F77_FUNC_EQUIV)
+#  undef F77x
+#  define F77x(a, A) F77_FUNC_(a, A)
+#  include "f77funcs.c"
+#endif
 
-void F77(plan_dft_1d, PLAN_DFT_1D)(X(plan) *p, fint *n, C *in, C *out,
-				   fint *sign, fint *flags)
-{
-     *p = X(plan_dft_1d)(*n, in, out, *sign, *flags);
-}
-
-void F77(plan_dft_2d, PLAN_DFT_2D)(X(plan) *p, fint *nx, fint *ny,
-				   C *in, C *out, fint *sign, fint *flags)
-{
-     *p = X(plan_dft_2d)(*ny, *nx, in, out, *sign, *flags);
-}
-
-void F77(plan_dft_3d, PLAN_DFT_3D)(X(plan) *p, fint *nx, fint *ny, fint *nz,
-				   C *in, C *out,
-				   fint *sign, fint *flags)
-{
-     *p = X(plan_dft_3d)(*nz, *ny, *nx, in, out, *sign, *flags);
-}
-
-void F77(plan_many_dft, PLAN_MANY_DFT)(X(plan) *p, fint *rank, const fint *n,
-				       fint *howmany,
-				       C *in, const fint *inembed,
-				       fint *istride, fint *idist,
-				       C *out, const fint *onembed,
-				       fint *ostride, fint *odist,
-				       fint *sign, fint *flags)
-{
-     int *nrev = reverse_n(*rank, n);
-     int *inembedrev = reverse_n(*rank, inembed);
-     int *onembedrev = reverse_n(*rank, onembed);
-     *p = X(plan_many_dft)(*rank, nrev, *howmany,
-			   in, inembedrev, *istride, *idist,
-			   out, onembedrev, *ostride, *odist,
-			   *sign, *flags);
-     X(ifree0)(onembedrev);
-     X(ifree0)(inembedrev);
-     X(ifree0)(nrev);
-}
-
-void F77(plan_guru_dft, PLAN_GURU_DFT)(X(plan) *p, fint *rank, const fint *n,
-				       const fint *is, const fint *os,
-				       fint *howmany_rank, const fint *h_n,
-				       const fint *h_is, const fint *h_os,
-				       R *ri, R *ii, R *ro, R *io, fint *flags)
-{
-     X(iodim) *dims = make_dims(*rank, n, is, os);
-     X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
-     *p = X(plan_guru_dft)(*rank, dims, *howmany_rank, howmany_dims,
-			   ri, ii, ro, io, *flags);
-     X(ifree0)(howmany_dims);
-     X(ifree0)(dims);
-}
-
-void F77(execute_dft, EXECUTE_DFT)(X(plan) *p, R *ri, R *ii, R *ro, R *io)
-{
-     X(execute_dft)(*p, ri, ii, ro, io);
-}
-
-#endif				/* F77_FUNC_ */
+#endif				/* F77_FUNC */
