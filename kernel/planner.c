@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.108 2002-09-17 20:17:55 athena Exp $ */
+/* $Id: planner.c,v 1.109 2002-09-18 18:12:21 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -369,9 +369,7 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  slvdesc *sp;
 	  if ((sp = *descp)) {
 	       solver *s = sp->slv;
-	       /* hack: allow NO_UGLY wisdom in children, since
-		  we don't know how the wisdom was created */
-	       best = invoke_solver(ego, p, s, NO_UGLY);
+	       best = invoke_solver(ego, p, s, 0);
 	       if (best) 
 		    X(plan_use)(best);
 	  }
@@ -414,6 +412,11 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  });
      }
 
+     if (best) {
+	  /* hack: postulate de iure that NO_UGLY subsumes ~NO_UGLY 
+	     if the problem is feasible */
+	  ego->planner_flags &= ~NO_UGLY;
+     }
      *bestp = best;
 }
 
