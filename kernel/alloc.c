@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.2 2002-06-03 12:09:05 athena Exp $ */
+/* $Id: alloc.c,v 1.3 2002-06-05 23:02:56 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -26,6 +26,7 @@
  *   DEBUGGING CODE
  **********************************************************/
 #ifdef FFTW_DEBUG
+#include <stdio.h>
 
 /*
  * debugging malloc/free.  Initialize every malloced and freed area to

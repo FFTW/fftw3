@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.3 2002-06-04 21:49:39 athena Exp $ */
+/* $Id: direct.c,v 1.4 2002-06-05 23:02:56 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -110,13 +110,6 @@ static enum score score(const solver *ego, const problem *p)
     return (applicable(ego, p)) ? GOOD : BAD;
 }
 
-static const plan_adt padt = {
-     fftw_dft_solve,
-     fftw_null_awake,
-     print,
-     destroy,
-};
-
 static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
 {
      const S *ego = (const S *) ego_;
@@ -124,6 +117,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
      const problem_dft *p;
      iodim *d, *vd;
      const kdft_desc *e = ego->desc;
+
+     static const plan_adt padt = { 
+	  fftw_dft_solve, fftw_null_awake, print, destroy 
+     };
 
      UNUSED(planner);
 
@@ -157,11 +154,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
      return &(pln->super.super);
 }
 
-static const solver_adt sadt = { mkplan, score };
-
 /* constructor */
 solver *fftw_mksolver_dft_direct(kdft k, const kdft_desc *desc)
 {
+     static const solver_adt sadt = { mkplan, score };
      S *solver;
      
      solver = MKSOLVER(S, &sadt);

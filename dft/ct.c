@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.1 2002-06-05 20:03:44 athena Exp $ */
+/* $Id: ct.c,v 1.2 2002-06-05 23:02:56 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -26,7 +26,7 @@
 
 #define OPTIMAL_SIZE 12		/* for estimator */
 
-void fftw_dft_ct_plan_destroy(plan *ego_)
+static void destroy(plan *ego_)
 {
      plan_ct *ego = (plan_ct *) ego_;
 
@@ -37,7 +37,7 @@ void fftw_dft_ct_plan_destroy(plan *ego_)
      fftw_free(ego);
 }
 
-void fftw_dft_ct_plan_awake(plan *ego_, int flg)
+static void awake(plan *ego_, int flg)
 {
      plan_ct *ego = (plan_ct *) ego_;
      plan *cld = ego->cld;
@@ -57,7 +57,7 @@ void fftw_dft_ct_plan_awake(plan *ego_, int flg)
      }
 }
 
-void fftw_dft_ct_plan_print(plan *ego_, plan_printf prntf)
+static void print(plan *ego_, plan_printf prntf)
 {
      plan_ct *ego = (plan_ct *) ego_;
      const solver_ct *slv = ego->slv;
@@ -90,11 +90,18 @@ int fftw_dft_ct_applicable(const solver_ct *ego, const problem *p_)
      return 0;
 }
 
-plan *fftw_dft_ct_mkplan(const solver_ct *ego, 
+
+static const plan_adt padt = {
+     fftw_dft_solve,
+     awake,
+     print,
+     destroy
+};
+
+plan *fftw_mkplan_dft_ct(const solver_ct *ego, 
 			 const problem *p_,
 			 planner *plnr, 
-			 const ctadt *adt,
-			 const plan_adt *padt)
+			 const ctadt *adt)
 {
      plan_ct *pln;
      plan *cld;
@@ -121,7 +128,7 @@ plan *fftw_dft_ct_mkplan(const solver_ct *ego,
      if (!cld)
 	  return (plan *) 0;
 
-     pln = MKPLAN_DFT(plan_ct, padt, adt->apply);
+     pln = MKPLAN_DFT(plan_ct, &padt, adt->apply);
 
      pln->slv = ego;
      pln->cld = cld;
@@ -147,7 +154,7 @@ plan *fftw_dft_ct_mkplan(const solver_ct *ego,
      pln->super.super.cost =
 	 1.0 + 0.1 * fftw_square(e->radix - OPTIMAL_SIZE) + cld->cost;
 
-     adt->mkstrides(pln);
+     adt->finish(pln);
 
      return &(pln->super.super);
 }

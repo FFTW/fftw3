@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.3 2002-06-05 20:03:44 athena Exp $ */
+/* $Id: twiddle.c,v 1.4 2002-06-05 23:02:56 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -63,14 +63,22 @@ static twid *lookup(const tw_instr *q, uint r, uint m)
      return p;
 }
 
-uint fftw_twiddle_length(const tw_instr *p)
+uint twlen0(const tw_instr **pp)
 {
      uint ntwiddle = 0;
+     const tw_instr *p = *pp;
 
      /* compute length of bytecode program */
      for ( ; p->op != TW_NEXT; ++p)
 	  ++ntwiddle;
+
+     *pp = p;
      return ntwiddle;
+}
+
+uint fftw_twiddle_length(const tw_instr *p)
+{
+     return twlen0(&p);
 }
 
 static R *compute(const tw_instr *instr, uint r, uint m)
@@ -82,7 +90,7 @@ static R *compute(const tw_instr *instr, uint r, uint m)
 
      static trigreal (*const f[])(trigreal) = { COS, SIN, TAN };
 
-     ntwiddle = fftw_twiddle_length(instr);
+     p = instr; ntwiddle = twlen0(&p);
 
      W0 = W = (R *)fftw_malloc(ntwiddle * (m / p->v) * sizeof(R), TWIDDLES);
 
