@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.196 2003-06-06 02:29:52 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.197 2003-08-16 07:13:41 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4228,7 +4228,7 @@ that do not take file/string arguments, however:
 @findex dfftw_export_wisdom
 @findex dfftw_forget_wisdom
 
-So, for examplem to import the system-wide wisdom, you would do:
+So, for example, to import the system-wide wisdom, you would do:
 
 @example
         integer isuccess
