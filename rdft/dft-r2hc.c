@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.2 2002-07-23 18:49:43 stevenj Exp $ */
+/* $Id: dft-r2hc.c,v 1.3 2002-07-23 18:55:25 stevenj Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -151,6 +151,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!cldr)
           return (plan *)0;
 
+     /* Make a separate plan for the imaginary parts, in case they are
+	aligned differently or something (for SIMD).  Normally, this
+	will just re-use cldr from the planner lookup table. */
      cldp = X(mkproblem_rdft)(p->sz, p->vecsz, p->ii, p->io, R2HC);
      cldi = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
