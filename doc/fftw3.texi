@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.140 2003-03-14 23:20:44 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.141 2003-03-14 23:23:03 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3494,7 +3494,10 @@ you may want to use fewer threads than you have processors.
 You will have to experiment with your system to see what level of
 parallelization is best for your problem size.  Typically, the problem
 will have to involve at least a few thousand data points before threads
-become beneficial.
+become beneficial.  If you plan with @code{FFTW_PATIENT}, it will
+automatically disable threads for sizes that don't benefit from
+parallelization.
+@ctindex FFTW_PATIENT
 
 @c ------------------------------------------------------------
 @node Thread safety,  , Multi-threaded FFTW, Parallel FFTW
