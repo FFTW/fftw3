@@ -27,6 +27,7 @@ struct P_s;
 typedef struct {
      void (*bytwiddle)(const struct P_s *ego, R *rio, R *iio);
      void (*mktwiddle)(struct P_s *ego, int flg);
+     int (*applicable)(const problem *p_, const planner *plnr);
      const char *nam;
 } wadt;
 
@@ -64,6 +65,7 @@ static int choose_log2_twradix(int n)
      return log2r;
 }
 
+/**************************************************************/
 static void mktwiddle2(P *ego, int flg)
 {
      if (flg) {
@@ -124,6 +126,21 @@ static void bytwiddle2(const P *ego, R *rio, R *iio)
      }
 }
 
+static int applicable2(const problem *p_, const planner *plnr)
+{
+     if (DFTWP(p_)) {
+          const problem_dftw *p = (const problem_dftw *) p_;
+          return (1 
+		  /* in-place only */
+		  && p->s == p->ws
+		  && p->vs == p->wvs
+		  && (NO_UGLYP(plnr) || (p->m * p->r > 65536))
+	       );
+     }
+     return 0;
+}
+
+/**************************************************************/
 static void mktwiddle1(P *ego, int flg)
 {
      static const tw_instr tw_template[] = { { TW_FULL, 1, 0 }, 
@@ -167,6 +184,21 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
      }
 }
 
+static int applicable1(const problem *p_, const planner *plnr)
+{
+     if (DFTWP(p_)) {
+          const problem_dftw *p = (const problem_dftw *) p_;
+          return (1 
+		  /* in-place only */
+		  && p->s == p->ws
+		  && p->vs == p->wvs
+		  && (NO_UGLYP(plnr) || (p->m * p->r <= 16384))
+	       );
+     }
+     return 0;
+}
+
+/**************************************************************/
 
 static void apply_dit(const plan *ego_, R *rio, R *iio)
 {
@@ -212,38 +244,6 @@ static void print(const plan *ego_, printer *p)
 	      ego->r, ego->m, ego->vl, ego->cld);
 }
 
-static int applicable0(const problem *p_)
-{
-     if (DFTWP(p_)) {
-          const problem_dftw *p = (const problem_dftw *) p_;
-          return (1 
-		  /* in-place only */
-		  && p->s == p->ws
-		  && p->vs == p->wvs
-	       );
-     }
-     return 0;
-}
-
-static int applicable(const S *ego, const problem *p_, const planner *plnr)
-{
-     const problem_dftw *p;
-
-     if (!applicable0(p_))
-          return 0;
-
-     p = (const problem_dftw *) p_;
-
-     if (NO_UGLYP(plnr)) {
-	  if (ego->adt->bytwiddle == bytwiddle1) {
-	       if (p->m * p->r > 16384) return 0;
-	  } else {
-	       if (p->m * p->r <= 65536) return 0;
-	  }
-     }
-     return 1;
-}
-
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const problem_dftw *p;
@@ -255,7 +255,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(dftw_solve), awake, print, destroy
      };
 
-     if (!applicable(ego, p_, plnr))
+     if (!ego->adt->applicable(p_, plnr))
           return (plan *)0;
 
      p = (const problem_dftw *) p_;
@@ -307,8 +307,8 @@ static solver *mksolver(const wadt *adt)
 void X(dftw_dft_register)(planner *p)
 {
      static const wadt a[2] = 
-	  { { bytwiddle1, mktwiddle1, "dftw-dft1" },
-	    { bytwiddle2, mktwiddle2, "dftw-dft2" } };
+	  { { bytwiddle1, mktwiddle1, applicable1, "dftw-dft1" },
+	    { bytwiddle2, mktwiddle2, applicable2, "dftw-dft2" } };
      int i;
      for (i = 0; i < 2; ++i) REGISTER_SOLVER(p, mksolver(&a[i]));
 }
