@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.9 2002-09-25 01:13:00 athena Exp $ */
+/* $Id: direct2.c,v 1.10 2002-09-25 01:15:57 athena Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -170,14 +170,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->is = X(mkstride)(ego->sz, r2hc_kindp ? d.is : d.os);
      pln->os = X(mkstride)(d.n/2 + 1, r2hc_kindp ? d.os : d.is);
 
-     if (p->vecsz->rnk == 0) {
-          pln->vl = 1;
-          pln->ivs = pln->ovs = 0;
-     } else {
-          pln->vl = vd[0].n;
-          pln->ivs = vd[0].is;
-          pln->ovs = vd[0].os;
-     }
+     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
 
      pln->ilast = (d.n % 2) ? 0 : (d.n/2) * d.os; /* Nyquist freq., if any */
 

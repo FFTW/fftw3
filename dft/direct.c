@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.31 2002-09-25 01:13:00 athena Exp $ */
+/* $Id: direct.c,v 1.32 2002-09-25 01:15:57 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -132,16 +132,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->is = X(mkstride)(e->sz, d[0].is);
      pln->os = X(mkstride)(e->sz, d[0].os);
 
-     if (p->vecsz->rnk == 0) {
-          pln->vl = 1;
-          pln->ivs = pln->ovs = 0;
-     } else {
-          pln->vl = vd[0].n;
-          pln->ivs = vd[0].is;
-          pln->ovs = vd[0].os;
-     }
-
+     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      pln->slv = ego;
+
      X(ops_zero)(&pln->super.super.ops);
      X(ops_madd2)(pln->vl / e->genus->vl, &e->ops, &pln->super.super.ops);
 
