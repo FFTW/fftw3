@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.29 2002-06-13 15:04:24 athena Exp $ */
+/* $Id: ifftw.h,v 1.30 2002-06-14 21:42:35 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -49,6 +49,9 @@ typedef unsigned int uint;
 #ifndef CLASSIC_MODE
 #define CLASSIC_MODE 0
 #endif
+
+#undef SINGLE_PRECISION
+#define SINGLE_PRECISION (sizeof(R) == sizeof(float))
 
 /* forward declarations */
 typedef struct problem_s problem;

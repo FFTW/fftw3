@@ -116,6 +116,7 @@ AC_DEFINE_UNQUOTED(FFTW_CC, "$CC $CFLAGS", [C compiler name and flags])
 
 AC_OUTPUT([
    Makefile
+   support/Makefile
    genfft/Makefile
    genfft-k7/Makefile
    kernel/Makefile

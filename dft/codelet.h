@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.9 2002-06-14 19:54:29 athena Exp $ */
+/* $Id: codelet.h,v 1.10 2002-06-14 21:42:35 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -58,6 +58,8 @@ static __inline__ R FNMS(R a, R b, R c)
 #define FMS(a, b, c) (((a) * (b)) - (c))
 #define FNMS(a, b, c) ((c) - ((a) * (b)))
 #endif
+
+#define ASM(x) __asm__ __volatile__ (x)
 
 /**************************************************************
  * types of codelets
@@ -111,6 +113,7 @@ extern solvtab X(solvtab_dft_inplace);
 typedef struct {
      uint sz;    /* size of transform computed */
      int sign;
+     opcnt ops;
 } kdft_k7_desc;
 
 typedef void (*kdft_k7)(const R *ri, R *ro, int is, int os,

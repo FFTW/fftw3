@@ -38,7 +38,6 @@ type twiddle_policy =
 
 let twiddle_policy = ref TWIDDLE_LOAD_ALL
 
-let inline_konstants = ref false
 let inline_loads = ref false
 let loopo = ref false
 

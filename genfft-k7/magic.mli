@@ -31,7 +31,6 @@ type twiddle_policy =
   | TWIDDLE_SQUARE2
   | TWIDDLE_SQUARE3
 val twiddle_policy : twiddle_policy ref
-val inline_konstants : bool ref
 val inline_loads : bool ref
 val loopo : bool ref
 val rader_min : int ref

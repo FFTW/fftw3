@@ -24,7 +24,6 @@ open VSimdBasics
 open K7Basics
 open K7RegisterAllocationBasics
 open K7Translate
-open CodeletMisc
 open AssignmentsToVfpinstrs
 
 let no_twiddle_gen n dir =
@@ -102,5 +101,36 @@ let no_twiddle_gen n dir =
 
      ] 
   
-  in 
-  (n, dir, NO_TWIDDLE, initcode, body)
+  in ((initcode, body), k7vFlops body)
+
+let cvsid = "$Id: gen_notwiddle.ml,v 1.6 2002-06-14 21:42:35 athena Exp $"
+let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
+
+let generate n =
+  let name = !Magic.name
+  and dir = !GenUtil.dir
+  and sign = Fft.sign_of_dir !GenUtil.dir
+  in
+  let (code, (add, mul)) = no_twiddle_gen n dir in
+  begin
+    boilerplate cvsid;
+    Printf.printf
+      "static void %s(const R *ri, R *ro, int is, int os, uint v, int ivs, int ovs)\n"
+      name;
+    Printf.printf "{ UNUSED(ri); UNUSED(ro); UNUSED(is); UNUSED(os);\n";
+    Printf.printf "  UNUSED(v); UNUSED(ivs); UNUSED(ovs);\n";
+    compileToAsm code;
+    Printf.printf "}\n\n";
+    Printf.printf "static const kdft_k7_desc desc = { %d, %d, { %d, %d, 0, 0} };\n"
+      n sign add mul;
+    Printf.printf "%s { X(kdft_k7_register)(p, %s, &desc); }"
+      (declare_register_fcn name) name;
+  end
+
+let main () =
+  begin
+    parse speclist usage;
+    generate (check_size());
+  end
+
+let _ = main()

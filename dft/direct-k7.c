@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct-k7.c,v 1.1 2002-06-14 19:54:29 athena Exp $ */
+/* $Id: direct-k7.c,v 1.2 2002-06-14 21:42:35 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet.  
    This code handles K7-specific codelets */
@@ -72,7 +72,7 @@ static void print(plan *ego_, printer *p)
 
 static int applicable(const solver *ego_, const problem *p_)
 {
-     if (DFTP(p_)) {
+     if (SINGLE_PRECISION && DFTP(p_)) {
           const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
           const kdft_k7_desc *d = ego->desc;
@@ -151,7 +151,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
 
      pln->slv = ego;
-     pln->super.super.ops = X(ops_zero); /* TODO */
+     pln->super.super.ops = X(ops_mul)(pln->vl, e->ops);
 
      return &(pln->super.super);
 }

@@ -295,7 +295,7 @@ let k7rinstrToInstrstring = function
   | K7R_Label _			  -> failwith "k7rinstrToInstrstring: label!"
 
 let k7rinstrToString = function
-  | K7R_Label lbl -> sprintf "\t.p2align 4,,7\n%s:" lbl
+  | K7R_Label lbl -> sprintf "\t.p2align 4,,7\\n\"\n\"%s:" lbl
   | i ->
       "\t" ^ k7rinstrToInstrstring i ^ 
 	" " ^ (stringlistToString ", " (k7rinstrToArgstrings i))

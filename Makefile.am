@@ -17,7 +17,7 @@ CLASSIC_DIST =
 distdir = $(PACKAGE)-$(VERSION)-pro
 endif
 
-SUBDIRS=$(GENFFT) kernel dft libbench . tests
+SUBDIRS=$(GENFFT) kernel dft libbench . tests support
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS $(CLASSIC_DIST)
 
 lib@PRECISION@fftw3_la_SOURCES = 

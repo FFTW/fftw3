@@ -94,6 +94,7 @@ and k7rintreg = K7R_IntReg of string
 
 val toK7rintreg : string -> k7rintreg
 val toK7rmmxreg : string -> k7rmmxreg
+val k7vFlops : k7vinstr list -> (int * int)
 
 module RIntRegMap :
   sig
@@ -168,6 +169,7 @@ val k7operandsizeToString : k7operandsize -> string
 val k7operandsizeToInteger : k7operandsize -> int
 
 val k7simdbinopIsParallel : k7simdbinop -> bool
+val k7simdbinopFlops : k7simdbinop -> int * int
 val k7simdbinopToParallel : k7simdbinop -> k7simdbinop
 
 val vsimdunaryopToK7simdcpyunaryop :

@@ -1,1 +1,1 @@
-EXTRA_DIST=Makefile.codelets codelet_prelude
+EXTRA_DIST = Makefile.codelets codelet_prelude

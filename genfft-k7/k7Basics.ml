@@ -321,6 +321,25 @@ let k7simdbinopToParallel = function
   | K7_UnpckLo -> failwith "k7simdbinopToParallel: unpcklo is not parallel!"
   | K7_UnpckHi -> failwith "k7simdbinopToParallel: unpckhi is not parallel!"
 
+let k7simdbinopFlops = function
+  | K7_FPAdd   
+  | K7_FPSub   
+  | K7_FPSubR 
+  | K7_FPPPAcc
+  | K7_FPNPAcc
+  | K7_FPNNAcc -> (1, 0)
+  | K7_FPMul   -> (0, 1)
+  | _          -> (0, 0)
+
+let k7vFlops l =
+  let one = function
+    | K7V_SimdBinOp (x, _, _) -> k7simdbinopFlops x
+    | K7V_SimdBinOpMem (x, _, _) -> k7simdbinopFlops x
+    | K7V_SimdUnaryOp ((K7_FPMulConst _), _) -> (0, 1)
+    | _ -> (0, 0)
+  in
+  List.fold_left (fun (a, m) (a1, m1) -> (a + a1, m + m1)) (0, 0) 
+    (List.map one l)
 
 (* FUNCTIONS OPERATING ON VALUES OF TYPE K7V... *****************************)
 

@@ -36,7 +36,6 @@ open K7FlatInstructionScheduling
 open K7InstructionSchedulingBasics
 open Printf
 open AssignmentsToVfpinstrs
-open CodeletMisc
 
 
 let vect_schedule vect_optimized =
@@ -83,7 +82,7 @@ let get2ndhalfcode base one dst ld_n =
 let loadfnargs xs = map (fun (src,dst) -> (dst, [K7V_IntLoadMem(src,dst)])) xs
 
 (****************************************************************************)
-let asmline x = print_string ("asm(\"" ^ x ^ "\");\n")
+let asmline x = print_string ("ASM(\"" ^ x ^ "\");\n")
 
 (* Warning: this function produces side-effects. *)
 let emit_instr (_,_,instr) = 
@@ -289,7 +288,7 @@ let rec addIndexToListElems i0 = function
   | [] -> []
   | x::xs -> (i0,x)::(addIndexToListElems (succ i0) xs)
 
-let procedure_proepilog fn_name stackframe_size_bytes code = 
+let procedure_proepilog stackframe_size_bytes code = 
   let regs_to_save =
 	addIndexToListElems 1
 		(filter (fun r -> exists (k7rinstrUsesK7rintreg r) code) 
@@ -313,13 +312,11 @@ let procedure_proepilog fn_name stackframe_size_bytes code =
 
 (****************************************************************************)
 
-let compileToAsm_with_fixedstride (n, dir, ctype, initcode, k7vinstrs) 
-				  (istride,ostride) =
+let compileToAsm_with_fixedstride (initcode, k7vinstrs) (istride,ostride) =
   let _ = info "compileToAsm..." in
-  let fn_name = !Magic.name in
   let realcode = K7RegisterAllocator.regalloc initcode k7vinstrs in
   let stackframe_size_bytes = getStackFrameSize realcode in
-  let realcode = procedure_proepilog fn_name stackframe_size_bytes realcode in
+  let realcode = procedure_proepilog stackframe_size_bytes realcode in
   let _ = info "scheduling instructions..." in
   let realcode = fixpoint k7rinstrsToPromiseEarly realcode in
   let realcode' =
@@ -351,12 +348,11 @@ let datasection all_consts =
     asmline (".text");
   end
 
-let compileToAsm (n, dir, ctype, initcode, k7vinstrs) =
+let compileToAsm (initcode, k7vinstrs) =
   let _ = info "compileToAsm..." in
-  let fn_name = !Magic.name in
   let realcode = K7RegisterAllocator.regalloc initcode k7vinstrs in
   let stackframe_size_bytes = getStackFrameSize realcode in
-  let realcode = procedure_proepilog fn_name stackframe_size_bytes realcode in
+  let realcode = procedure_proepilog stackframe_size_bytes realcode in
   let _ = info "scheduling instructions..." in
   let realcode = fixpoint k7rinstrsToPromiseEarly realcode in
   let realcode' =
@@ -366,7 +362,129 @@ let compileToAsm (n, dir, ctype, initcode, k7vinstrs) =
   let _ = info "before unparseToAsm" in
   let all_consts = k7rinstrsToConstants (map get3of3 realcode') in
   begin
+    (* preserve Stefan's copyright, which otherwise does not appear
+       anywhere else *)
+    print_string ("/* The following asm code is Copyright (c) 2000-2001 Stefan Kral */\n");
     k7rinstrInitStackPointerAdjustment 0;
     iter emit_instr realcode';
     datasection all_consts;
   end
+
+(******************************************************************)
+
+let standard_arg_parse_fail _ = failwith "too many arguments"
+
+let set_bool var = Arg.Unit (fun () -> var := true)
+let unset_bool var = Arg.Unit (fun () -> var := false)
+let set_int var = Arg.Int(fun i -> var := i)
+let set_string var = Arg.String(fun s -> var := s)
+
+let undocumented = " Undocumented voodoo parameter"
+
+let speclist =  [
+  "-name", set_string Magic.name, " set codelet name";
+
+  "-verbose", set_bool Magic.verbose, 
+  " Enable verbose logging messages to stderr";
+
+  "-rader-min", Arg.Int(fun i -> Magic.rader_min := i),
+    "<n> : Use Rader's algorithm for prime sizes >= <n>";
+
+  "-magic-alternate-convolution", 
+    Arg.Int(fun i -> Magic.alternate_convolution := i),
+    undocumented;
+
+  "-magic-loopo", set_bool Magic.loopo, undocumented;
+  "-magic-loopi", unset_bool Magic.loopo, undocumented;
+
+  "-magic-times-3-3", set_bool Magic.times_3_3, undocumented;
+  "-magic-times-4-2", unset_bool Magic.times_3_3, undocumented;
+
+  "-magic-collect-common-twiddle", 
+    Arg.Unit(fun () -> Magic.collect_common_twiddle := true),
+    undocumented;
+  "-magic-no-collect-common-twiddle", 
+    Arg.Unit(fun () -> Magic.collect_common_twiddle := false),
+    undocumented;
+
+  "-magic-collect-common-inputs", 
+    Arg.Unit(fun () -> Magic.collect_common_inputs := true),
+    undocumented;
+  "-magic-no-collect-common-inputs", 
+    Arg.Unit(fun () -> Magic.collect_common_inputs := false),
+    undocumented;
+
+  "-magic-use-wsquare", 
+    Arg.Unit(fun () -> Magic.use_wsquare := true),
+    undocumented;
+  "-magic-no-wsquare", 
+    Arg.Unit(fun () -> Magic.use_wsquare := false),
+    undocumented;
+
+  "-magic-vectsteps-limit", 
+    Arg.Int(fun i -> Magic.vectsteps_limit := i), 
+    undocumented;
+
+  "-magic-target-processor-k6",
+    Arg.Unit(fun () -> Magic.target_processor := Magic.AMD_K6),
+    " Produce code to run on an AMD K6-II+ (K6-III)";
+
+  "-magic-twiddle-load-all", 
+    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_LOAD_ALL),
+    undocumented;
+  "-magic-twiddle-iter", 
+    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_ITER),
+    undocumented;
+  "-magic-twiddle-load-odd", 
+    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_LOAD_ODD),
+    undocumented;
+  "-magic-twiddle-square1", 
+    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_SQUARE1),
+    undocumented;
+  "-magic-twiddle-square2", 
+    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_SQUARE2),
+    undocumented;
+  "-magic-twiddle-square3", 
+    Arg.Unit(fun () -> Magic.twiddle_policy := Magic.TWIDDLE_SQUARE3),
+    undocumented;
+]
+
+let parse user_list usage =
+  Arg.parse (user_list @ speclist) standard_arg_parse_fail usage
+
+
+let size = ref None
+let dir = ref Fft.FORWARD
+
+let speclist = [
+  "-n", Arg.Int(fun i -> size := Some i), " generate a codelet of size <n>";
+  "-sign",
+  Arg.Int(fun i -> 
+    if (i > 0) then
+      dir := Fft.BACKWARD
+    else
+      dir := Fft.FORWARD),
+  " sign of transform";
+]
+
+let check_size () =
+  match !size with
+  | Some i -> i
+  | None -> failwith "must specify -n"
+
+let declare_register_fcn name =
+  "void X(codelet_" ^ name ^ ")(planner *p)\n"
+
+(* output the command line *)
+let cmdline () =
+  fold_right (fun a b -> a ^ " " ^ b) (Array.to_list Sys.argv) ""
+
+let boilerplate cvsid =
+  Printf.printf "%s"
+    ("/* Generated by: " ^ (cmdline ()) ^ "*/\n\n" ^
+     "/*\n" ^
+     " * Generator Id's : \n" ^
+     " * " ^ Exprdag.cvsid ^ "\n" ^
+     " * " ^ Fft.cvsid ^ "\n" ^
+     " * " ^ cvsid ^ "\n" ^
+     " */\n\n")

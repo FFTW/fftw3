@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.5 2002-06-13 12:59:53 athena Exp $ */
+/* $Id: bench-user.h,v 1.6 2002-06-14 21:42:35 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -50,7 +50,9 @@ typedef struct {
 #define c_re(c)  ((c).re)
 #define c_im(c)  ((c).im)
 
+#undef SINGLE_PRECISION
 #define SINGLE_PRECISION (sizeof(bench_real) == sizeof(float))
+#undef DOUBLE_PRECISION
 #define DOUBLE_PRECISION (sizeof(bench_real) == sizeof(double))
 
 typedef enum { PROBLEM_COMPLEX, PROBLEM_REAL } problem_kind_t;
