@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.211 2004-10-22 00:44:51 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.212 2004-11-05 21:24:22 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3961,7 +3961,7 @@ FFTW to use (or actually, the maximum number).  All plans subsequently
 created with any planner routine will use that many threads.  You can
 call @code{fftw_plan_with_nthreads}, create some plans, call
 @code{fftw_plan_with_nthreads} again with a different argument, and
-create some more plans for a new number threads.  Plans already created
+create some more plans for a new number of threads.  Plans already created
 before a call to @code{fftw_plan_with_nthreads} are unaffected.  If you
 pass an @code{nthreads} argument of @code{1} (the default), threads are
 disabled for subsequent plans.
