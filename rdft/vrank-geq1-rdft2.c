@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.28 2003-03-27 20:59:01 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.29 2003-03-29 00:12:08 stevenj Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -167,6 +167,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld;
      int vdim;
      iodim *d;
+     R *nr, *nrio, *niio;
 
      static const plan_adt padt = {
 	  X(rdft2_solve), awake, print, destroy
@@ -180,16 +181,20 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      A(d->n > 1);  /* or else, p->ri + d->is etc. are invalid */
 
-     /* FIXME: try to use X(most_unaligned).
-	When done, remove X(stride_aligned_p) from alloc.c, ifftw.h */
-     if (!(X(stride_aligned_p)(d->is) && X(stride_aligned_p)(d->os)))
-	  plnr->problem_flags |= UNALIGNED;
+     if (R2HC_KINDP(p->kind)) {
+	  nr = X(most_unaligned)(p->r, p->r + d->is);
+	  X(most_unaligned_complex)(p->rio, p->iio, &nrio, &niio, d->os);
+     }
+     else {
+	  nr = X(most_unaligned)(p->r, p->r + d->os);
+	  X(most_unaligned_complex)(p->rio, p->iio, &nrio, &niio, d->is);
+     }
 
      cld = X(mkplan_d)(plnr, 
 		       X(mkproblem_rdft2_d)(
 			    X(tensor_copy)(p->sz),
 			    X(tensor_copy_except)(p->vecsz, vdim),
-			    p->r, p->rio, p->iio, p->kind));
+			    nr, nrio, niio, p->kind));
      if (!cld) return (plan *) 0;
 
      pln = MKPLAN_RDFT2(P, &padt,

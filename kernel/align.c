@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.17 2003-03-28 18:45:47 athena Exp $ */
+/* $Id: align.c,v 1.18 2003-03-29 00:12:08 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -76,9 +76,4 @@ void X(most_unaligned_complex)(R *r, R *i, R **rp, R **ip, int s)
 	  else
                *rp = r + (*ip - i);
      }
-}
-
-int X(stride_aligned_p)(int s)
-{
-     return !(((unsigned)s * sizeof(R)) % ALGN);
 }
