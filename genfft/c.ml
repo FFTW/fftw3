@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.22 2003-06-04 23:54:38 athena Exp $ *)
+(* $Id: c.ml,v 1.23 2003-07-09 00:42:22 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -117,6 +117,7 @@ let rec unparse_expr_c =
     | Plus [a] -> " /* bug */ " ^ (unparse_expr_c a)
     | Plus a -> (unparse_plus no a)
     | Times (a, b) -> (parenthesize a) ^ " * " ^ (parenthesize b)
+    | Uminus (Plus [a; Uminus b]) -> unparse_plus no [b; Uminus a]
     | Uminus a -> "- " ^ (parenthesize a)
     | _ -> failwith "unparse_expr_c"
 
