@@ -21,6 +21,14 @@
 
 * implement fftw2 buffering: copy to buffers, transform in-place, copy back
 
+
+
+TODO before/at release:
+
 * remember to remove -no-randomized-cse from rdft codelets before
   final release.  This flag speeds up the generator but produces worse
   codelets
+
+* remember to thank/acknowledge: Franz and Stefan, Aurora project
+  in Vienna, MIT Lincoln Labs, Compaq/HP testdrive program,
+  sourceforge.
