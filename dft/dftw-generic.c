@@ -131,7 +131,7 @@ static void bytwiddle2(const P *ego, R *rio, R *iio)
 static int applicable2(int r, int m, const planner *plnr)
 {
      return (1 
-	     && (!NO_UGLYP(plnr) || (m * r > 65536))
+	     && (!NO_UGLYP(plnr) || (m * r > 65536 && r > 64))
 	  );
 }
 
