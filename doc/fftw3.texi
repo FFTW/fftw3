@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.73 2003-03-03 04:42:52 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.74 2003-03-03 04:47:19 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2217,6 +2217,12 @@ Wisdom import and export is somewhat more tricky because one cannot
 easily pass files or strings between C and Fortran; see @ref{Wisdom of
 Fortran?}.
 
+@item
+Fortran cannot use the @code{fftw_malloc} dynamic-allocation routine.
+If you want to exploit the SIMD FFTW (@pxref{The Importance of
+Alignment}), you'll need to figure out some other way to ensure that
+your arrays are at least 16-byte aligned.
+
 @end itemize
 
 In general, you should take care to use Fortran data types that
@@ -2255,7 +2261,7 @@ more than once, though.)
 @node Fortran Examples, Wisdom of Fortran?, FFTW Constants in Fortran, Calling FFTW from Fortran
 @section Fortran Examples
 
-In C you might have something like the following to transform a
+In C, you might have something like the following to transform a
 one-dimensional complex array:
 
 @example
@@ -2267,7 +2273,7 @@ one-dimensional complex array:
         fftw_destroy_plan(plan);
 @end example
 
-In Fortran, you use the following to accomplish the same thing:
+In Fortran, you would use the following to accomplish the same thing:
 
 @example
         double complex in, out
