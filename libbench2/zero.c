@@ -18,17 +18,23 @@
  *
  */
 
-/* $Id: zero.c,v 1.4 2003-01-18 22:27:15 athena Exp $ */
+/* $Id: zero.c,v 1.5 2003-02-09 00:11:58 stevenj Exp $ */
 
 #include "bench.h"
 
 /* set I/O arrays to zero.  Default routine */
 void problem_zero(bench_problem *p)
 {
+     bench_complex czero = {0, 0};
      if (p->kind == PROBLEM_COMPLEX) {
-	  bench_complex czero = {0, 0};
-	  caset(p->outphys, p->ophyssz, czero);
 	  caset(p->inphys, p->iphyssz, czero);
+	  caset(p->outphys, p->ophyssz, czero);
+     } else if (p->kind == PROBLEM_REAL && p->sign < 0) {
+	  aset(p->inphys, p->iphyssz, 0.0);
+	  caset(p->outphys, p->ophyssz, czero);
+     } else if (p->kind == PROBLEM_REAL && p->sign > 0) {
+	  caset(p->inphys, p->iphyssz, czero);
+	  aset(p->outphys, p->ophyssz, 0.0);
      } else {
 	  BENCH_ASSERT(0); /* TODO */
      }

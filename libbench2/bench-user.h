@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.10 2003-02-04 08:25:36 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.11 2003-02-09 00:11:58 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -76,8 +76,10 @@ int tensor_sz(const bench_tensor *sz);
 bench_tensor *tensor_compress(const bench_tensor *sz);
 int tensor_unitstridep(bench_tensor *t);
 int tensor_rowmajorp(bench_tensor *t);
+int tensor_real_rowmajorp(bench_tensor *t, int sign, int in_place);
 bench_tensor *tensor_append(const bench_tensor *a, const bench_tensor *b);
 bench_tensor *tensor_copy(const bench_tensor *sz);
+bench_tensor *tensor_copy_sub(const bench_tensor *sz, int start_dim, int rnk);
 void tensor_ibounds(bench_tensor *t, int *lbp, int *ubp);
 void tensor_obounds(bench_tensor *t, int *lbp, int *ubp);
 
@@ -146,6 +148,7 @@ typedef struct {
 } errors;
 
 void verify_dft(bench_problem *p, int rounds, double tol, errors *e);
+void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e);
 
 /**************************************************************
  * malloc

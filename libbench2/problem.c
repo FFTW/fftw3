@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.15 2003-02-04 08:18:28 stevenj Exp $ */
+/* $Id: problem.c,v 1.16 2003-02-09 00:11:58 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -26,24 +26,41 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+typedef enum {
+     SAME, PADDED, HALFISH
+} n_transform;
+
+/* funny transformations for last dimension of PROBLEM_REAL */
+static int transform_n(int n, n_transform nt)
+{
+     switch (nt) {
+	 case SAME: return n;
+	 case PADDED: return 2*(n/2+1);
+	 case HALFISH: return (n/2+1);
+	 default: BENCH_ASSERT(0); return 0;
+     }
+}
+
 /* do what I mean */
-static bench_tensor *dwim(bench_tensor *t, bench_iodim *last_iodim)
+static bench_tensor *dwim(bench_tensor *t, bench_iodim *last_iodim,
+			  n_transform nti, n_transform nto)
 {
      int i;
-     bench_iodim *d, *d1;
+     bench_iodim *d, *d1, *dL;
 
      if (!FINITE_RNK(t->rnk) || t->rnk < 1)
 	  return t;
 
      i = t->rnk;
      d1 = last_iodim;
+     dL = t->dims + i-1;
 
      while (--i >= 0) {
 	  d = t->dims + i;
 	  if (!d->is) 
-	       d->is = d1->is * d1->n; 
+	       d->is = d1->is * transform_n(d1->n, d1==dL ? nti : SAME); 
 	  if (!d->os) 
-	       d->os = d1->os * d1->n; 
+	       d->os = d1->os * transform_n(d1->n, d1==dL ? nto : SAME); 
 	  d1 = d;
      }
 
@@ -135,6 +152,7 @@ bench_problem *problem_parse(const char *s)
      bench_problem *p;
      bench_iodim last_iodim = {1,1,1};
      bench_tensor *sz;
+     n_transform nti = SAME, nto = SAME;
 
      p = bench_malloc(sizeof(bench_problem));
 
@@ -164,21 +182,35 @@ bench_problem *problem_parse(const char *s)
 
      s = parsetensor(s, &sz);
 
+     if (p->kind == PROBLEM_REAL) {
+	  if (p->sign < 0) {
+	       nti = p->in_place ? PADDED : SAME;
+	       nto = HALFISH;
+	  }
+	  else {
+	       nti = HALFISH;
+	       nto = p->in_place ? PADDED : SAME;
+	  }
+     }
+
      if (*s == '*') { /* "external" vector */
 	  ++s;
-	  p->sz = dwim(sz, &last_iodim);
+	  p->sz = dwim(sz, &last_iodim, nti, nto);
 	  s = parsetensor(s, &sz);
-	  p->vecsz = dwim(sz, &last_iodim);
+	  p->vecsz = dwim(sz, &last_iodim, SAME, SAME);
      } else if (*s == 'v' || *s == 'V') { /* "internal" vector */
 	  bench_tensor *vecsz;
 	  ++s;
 	  s = parsetensor(s, &vecsz);
-	  p->vecsz = dwim(vecsz, &last_iodim);
-	  p->sz = dwim(sz, &last_iodim);
+	  p->vecsz = dwim(vecsz, &last_iodim, SAME, SAME);
+	  p->sz = dwim(sz, &last_iodim, nti, nto);
      } else {
-	  p->sz = dwim(sz, &last_iodim);
+	  p->sz = dwim(sz, &last_iodim, nti, nto);
 	  p->vecsz = mktensor(0);
      }
+
+     if (!p->in_place)
+	  p->out = ((bench_real *) p->in) + (1 << 20);  /* whatever */
 
      BENCH_ASSERT(p->sz && p->vecsz);
      BENCH_ASSERT(!*s);

@@ -15,6 +15,7 @@ $do_1d = 0;
 $do_2d = 0;
 $do_random = 0;
 $keepgoing = 0;
+$flushcount = 42;
 
 sub make_options {
     my $options = $default_options;
@@ -52,10 +53,14 @@ sub do_problem {
     my $problem = shift;
     my $doablep = shift;
     my $options = &make_options;
+
+    if ($problem =~ /\// && $problem =~ /r/ && $problem =~ /i.*x/) {
+	return; # cannot do real inplace split multidimensional
+    }
     
     if ($doablep) {
 	@list_of_problems = ($problem, @list_of_problems);
-	&flush_problems($options) if ($#list_of_problems > 42);
+	&flush_problems($options) if ($#list_of_problems > $flushcount);
     } else {
 	print "Executing \"$program $options --can-do $problem\"\n" 
 	    if $verbose;
@@ -85,6 +90,7 @@ sub do_size {
     my $size = shift;
     my $doablep = shift;
     do_geometry("c$size", $doablep);
+    do_geometry("r$size", $doablep);
     # TODO: add more 
 }
 

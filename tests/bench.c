@@ -1,3 +1,10 @@
+/**************************************************************************/
+/* NOTE to users: this is the FFTW self-test and benchmark program.
+   It is probably NOT a good place to learn FFTW usage, since it has a
+   lot of added complexity in order to exercise and test the full API,
+   etcetera.  We suggest reading the manual. */
+/**************************************************************************/
+
 #include "bench-user.h"
 #include <math.h>
 #include <stdio.h>
@@ -80,7 +87,7 @@ void wrwisdom(void)
 }
 
 static FFTW(iodim) *bench_tensor_to_fftw_iodim(
-     bench_tensor *t, int stride_factor)
+     bench_tensor *t, int istride_factor, int ostride_factor)
 {
      FFTW(iodim) *d;
      int i;
@@ -91,8 +98,8 @@ static FFTW(iodim) *bench_tensor_to_fftw_iodim(
      d = (FFTW(iodim) *)bench_malloc(sizeof(FFTW(iodim)) * t->rnk);
      for (i = 0; i < t->rnk; ++i) {
 	  d[i].n = t->dims[i].n;
-	  d[i].is = t->dims[i].is * stride_factor;
-	  d[i].os = t->dims[i].os * stride_factor;
+	  d[i].is = t->dims[i].is * istride_factor;
+	  d[i].os = t->dims[i].os * ostride_factor;
      }
 
      return d;
@@ -171,9 +178,183 @@ static void mknembed_many(bench_tensor *t, int **inembedp, int **onembedp)
 }
 
 /* try to use the most appropriate API function.  Big mess. */
+
+static int imax(int a, int b) { return (a > b ? a : b); }
+
+static int halfish_sizeof_problem(bench_problem *p)
+{
+     int n2 = sizeof_problem(p);
+     if (FINITE_RNK(p->sz->rnk) && p->sz->rnk > 0)
+          n2 = (n2 / imax(p->sz->dims[p->sz->rnk - 1].n, 1)) *
+               (p->sz->dims[p->sz->rnk - 1].n / 2 + 1);
+     return n2;
+}
+
+static FFTW(plan) mkplan_real_split(bench_problem *p, int flags)
+{
+     FFTW(plan) pln;
+     bench_tensor *sz = p->sz, *vecsz = p->vecsz;
+     FFTW(iodim) *dims, *howmany_dims;
+     bench_real *ri, *ii, *ro, *io;
+     int n2 = halfish_sizeof_problem(p);
+
+     extract_reim_split(FFTW_FORWARD, n2, p->in, &ri, &ii);
+     extract_reim_split(FFTW_FORWARD, n2, p->out, &ro, &io);
+
+     dims = bench_tensor_to_fftw_iodim(sz, 1, 1);
+     howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 1, 1);
+     if (p->sign < 0) {
+	  if (verbose > 2) printf("using plan_guru_dft_r2c\n");
+	  pln = FFTW(plan_guru_dft_r2c)(sz->rnk, dims,
+					vecsz->rnk, howmany_dims,
+					ri, ro, io, flags);
+     }
+     else {
+	  if (verbose > 2) printf("using plan_guru_dft_c2r\n");
+	  pln = FFTW(plan_guru_dft_c2r)(sz->rnk, dims,
+					vecsz->rnk, howmany_dims,
+					ri, ii, ro, flags);
+     }
+     bench_free(dims);
+     bench_free(howmany_dims);
+     return pln;
+}
+
+static FFTW(plan) mkplan_real_interleaved(bench_problem *p, int flags)
+{
+     FFTW(plan) pln;
+     bench_tensor *sz = p->sz, *vecsz = p->vecsz;
+
+     if (vecsz->rnk == 0 && tensor_unitstridep(sz) 
+	 && tensor_real_rowmajorp(sz, p->sign, p->in_place)) 
+	  goto api_simple;
+     
+     if (vecsz->rnk == 1 && expressible_as_api_many(sz))
+	  goto api_many;
+
+     goto api_guru;
+
+ api_simple:
+     switch (sz->rnk) {
+	 case 1:
+	      if (p->sign < 0) {
+		   if (verbose > 2) printf("using plan_dft_r2c_1d\n");
+		   return FFTW(plan_dft_r2c_1d)(sz->dims[0].n, 
+						p->in, p->out, flags);
+	      }
+	      else {
+		   if (verbose > 2) printf("using plan_dft_c2r_1d\n");
+		   return FFTW(plan_dft_c2r_1d)(sz->dims[0].n, 
+						p->in, p->out, flags);
+	      }
+	      break;
+	 case 2:
+	      if (p->sign < 0) {
+		   if (verbose > 2) printf("using plan_dft_r2c_2d\n");
+		   return FFTW(plan_dft_r2c_2d)(sz->dims[0].n, sz->dims[1].n,
+						p->in, p->out, flags);
+	      }
+	      else {
+		   if (verbose > 2) printf("using plan_dft_c2r_2d\n");
+		   return FFTW(plan_dft_c2r_2d)(sz->dims[0].n, sz->dims[1].n,
+						p->in, p->out, flags);
+	      }
+	      break;
+	 case 3:
+	      if (p->sign < 0) {
+		   if (verbose > 2) printf("using plan_dft_r2c_3d\n");
+		   return FFTW(plan_dft_r2c_3d)(
+			sz->dims[0].n, sz->dims[1].n, sz->dims[2].n,
+			p->in, p->out, flags);
+	      }
+	      else {
+		   if (verbose > 2) printf("using plan_dft_c2r_3d\n");
+		   return FFTW(plan_dft_c2r_3d)(
+			sz->dims[0].n, sz->dims[1].n, sz->dims[2].n,
+			p->in, p->out, flags);
+	      }
+	      break;
+	 default: {
+	      int *n = mkn(sz);
+	      if (p->sign < 0) {
+		   if (verbose > 2) printf("using plan_dft_r2c\n");
+		   pln = FFTW(plan_dft_r2c)(sz->rnk, n, p->in, p->out, flags);
+	      }
+	      else {
+		   if (verbose > 2) printf("using plan_dft_c2r\n");
+		   pln = FFTW(plan_dft_c2r)(sz->rnk, n, p->in, p->out, flags);
+	      }
+	      bench_free(n);
+	      return pln;
+	 }
+     }
+
+ api_many:
+     {
+	  int *n, *inembed, *onembed;
+	  BENCH_ASSERT(vecsz->rnk == 1);
+	  n = mkn(sz);
+	  mknembed_many(sz, &inembed, &onembed);
+	  if (p->sign < 0) {
+	       if (verbose > 2) printf("using plan_many_dft_r2c\n");
+	       pln = FFTW(plan_many_dft_r2c)(
+		    sz->rnk, n, vecsz->dims[0].n, 
+		    p->in, inembed,
+		    sz->dims[sz->rnk - 1].is, vecsz->dims[0].is,
+		    p->out, onembed,
+		    sz->dims[sz->rnk - 1].os, vecsz->dims[0].os,
+		    flags);
+	  }
+	  else {
+	       if (verbose > 2) printf("using plan_many_dft_c2r\n");
+	       pln = FFTW(plan_many_dft_c2r)(
+		    sz->rnk, n, vecsz->dims[0].n, 
+		    p->in, inembed,
+		    sz->dims[sz->rnk - 1].is, vecsz->dims[0].is,
+		    p->out, onembed,
+		    sz->dims[sz->rnk - 1].os, vecsz->dims[0].os,
+		    flags);
+	  }
+	  bench_free(n); bench_free(inembed); bench_free(onembed);
+	  return pln;
+     }
+
+ api_guru:
+     {
+	  FFTW(iodim) *dims, *howmany_dims;
+	  bench_real *ri, *ii, *ro, *io;
+
+	  extract_reim(p->sign, p->in, &ri, &ii);
+	  extract_reim(p->sign, p->out, &ro, &io);
+
+	  if (p->sign < 0) {
+	       dims = bench_tensor_to_fftw_iodim(sz, 1, 2);
+	       howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 1, 2);
+	       if (verbose > 2) printf("using plan_guru_dft_r2c\n");
+	       pln = FFTW(plan_guru_dft_r2c)(sz->rnk, dims,
+					     vecsz->rnk, howmany_dims,
+					     ri, ro, io, flags);
+	  }
+	  else {
+	       dims = bench_tensor_to_fftw_iodim(sz, 2, 1);
+	       howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 2, 1);
+	       if (verbose > 2) printf("using plan_guru_dft_c2r\n");
+	       pln = FFTW(plan_guru_dft_c2r)(sz->rnk, dims,
+					     vecsz->rnk, howmany_dims,
+					     ri, ii, ro, flags);
+	  }
+	  bench_free(dims);
+	  bench_free(howmany_dims);
+	  return pln;
+     }
+}
+
 static FFTW(plan) mkplan_real(bench_problem *p, int flags)
 {
-     return 0; /* TODO */
+     if (p->split)
+	  return mkplan_real_split(p, flags);
+     else
+	  return mkplan_real_interleaved(p, flags);
 }
 
 static FFTW(plan) mkplan_complex_split(bench_problem *p, int flags)
@@ -187,8 +368,8 @@ static FFTW(plan) mkplan_complex_split(bench_problem *p, int flags)
      extract_reim_split(p->sign, n, p->in, &ri, &ii);
      extract_reim_split(p->sign, n, p->out, &ro, &io);
 
-     dims = bench_tensor_to_fftw_iodim(sz, 1);
-     howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 1);
+     dims = bench_tensor_to_fftw_iodim(sz, 1, 1);
+     howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 1, 1);
      if (verbose > 2) printf("using plan_guru_dft\n");
      pln = FFTW(plan_guru_dft)(sz->rnk, dims,
 			       vecsz->rnk, howmany_dims,
@@ -265,8 +446,8 @@ static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
 	  extract_reim(p->sign, p->in, &ri, &ii);
 	  extract_reim(p->sign, p->out, &ro, &io);
 
-	  dims = bench_tensor_to_fftw_iodim(sz, 2);
-	  howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 2);
+	  dims = bench_tensor_to_fftw_iodim(sz, 2, 2);
+	  howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 2, 2);
 	  if (verbose > 2) printf("using plan_guru_dft\n");
 	  pln = FFTW(plan_guru_dft)(sz->rnk, dims,
 				    vecsz->rnk, howmany_dims,

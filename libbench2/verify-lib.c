@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.5 2003-01-27 01:45:21 athena Exp $ */
+/* $Id: verify-lib.c,v 1.6 2003-02-09 00:11:58 stevenj Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -95,39 +95,36 @@ void mkreal(C *A, int n)
      }
 }
 
-static void assign_conj(C *Ac, C *A, int rank, const bench_iodim *dim, int size)
+static void assign_conj(C *Ac, C *A, int rank, const bench_iodim *dim, int stride)
 {
      if (rank == 0) {
           c_re(*Ac) = c_re(*A);
           c_im(*Ac) = -c_im(*A);
      }
      else {
-          int i, n0 = dim[0].n;
+          int i, n0 = dim[rank - 1].n, s = stride;
           rank -= 1;
-          dim += 1;
-          size /= n0;
-          assign_conj(Ac, A, rank, dim, size);
+	  stride *= n0;
+          assign_conj(Ac, A, rank, dim, stride);
           for (i = 1; i < n0; ++i)
-               assign_conj(Ac + (n0 - i) * size, A + i * size, rank, dim,size);
+               assign_conj(Ac + (n0 - i) * s, A + i * s, rank, dim, stride);
      }
 }
 
 /* make array hermitian */
-void mkhermitian(C *A, int rank, const bench_iodim *dim)
+void mkhermitian(C *A, int rank, const bench_iodim *dim, int stride)
 {
      if (rank == 0)
           c_im(*A) = 0.0;
      else {
-          int i, n0 = dim[0].n, size;
+          int i, n0 = dim[rank - 1].n, s = stride;
           rank -= 1;
-          dim += 1;
-          mkhermitian(A, rank, dim);
-          for (i = 0, size = 1; i < rank; ++i)
-               size *= dim[i].n;
+	  stride *= n0;
+          mkhermitian(A, rank, dim, stride);
           for (i = 1; 2*i < n0; ++i)
-               assign_conj(A + (n0 - i) * size, A + i * size, rank, dim, size);
+               assign_conj(A + (n0 - i) * s, A + i * s, rank, dim, stride);
           if (2*i == n0)
-               mkhermitian(A + i*size, rank, dim);
+               mkhermitian(A + i * s, rank, dim, stride);
      }
 }
 
@@ -384,7 +381,7 @@ double tf_shift(dofft_closure *k,
 	       } else {
 		    for (i = 0; i < vecn; ++i) {
 			 if (realp) 
-			      mkhermitian(inA + i * n, sz->rnk, sz->dims);
+			      mkhermitian(inA + i * n, sz->rnk, sz->dims, 1);
 			 aphase_shift(inB + i * n, inA + i * n, ncur,
 				      nb, na, -sign);
 		    }

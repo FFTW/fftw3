@@ -6,10 +6,10 @@ EXTRA_DIST = f77funcs.c
 include_HEADERS = fftw3.h
 noinst_LTLIBRARIES = libapi.la
 
-libapi_la_SOURCES = apiplan.c configure.c dfthelp.c execute.c		\
-execute-dft.c execute-dft-c2r.c execute-dft-r2c.c execute-r2r.c		\
+libapi_la_SOURCES = apiplan.c configure.c execute.c execute-dft.c	\
+execute-dft-c2r.c execute-dft-r2c.c execute-r2r.c			\
 export-wisdom-to-file.c export-wisdom-to-string.c export-wisdom.c	\
-flops.c forget-wisdom.c import-system-wisdom.c				\
+extract-reim.c flops.c forget-wisdom.c import-system-wisdom.c		\
 import-wisdom-from-file.c import-wisdom-from-string.c import-wisdom.c	\
 mapflags.c mkprinter-file.c mktensor-iodims.c mktensor-rowmajor.c	\
 plan-dft-1d.c plan-dft-2d.c plan-dft-3d.c plan-dft.c plan-guru-dft.c	\

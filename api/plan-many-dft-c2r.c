@@ -38,6 +38,8 @@ X(plan) X(plan_many_dft_c2r)(int rank, const int *n,
      X(extract_reim)(FFT_SIGN, in, &ri, &ii);
      inplace = out == ri;
 
+     if (!inplace)
+	  flags |= FFTW_DESTROY_INPUT;
      p = X(mkapiplan)(
 	  flags,
 	  X(mkproblem_rdft2_d)(

@@ -18,7 +18,6 @@
  *
  */
 
-/* support functions for dft API */
 #include "api.h"
 
 /* decompose complex pointer into real and imaginary parts.

@@ -27,7 +27,7 @@ double dmax(double x, double y);
 
 void arand(C *a, int n);
 void mkreal(C *A, int n);
-void mkhermitian(C *A, int rank, const bench_iodim *dim);
+void mkhermitian(C *A, int rank, const bench_iodim *dim, int stride);
 void aadd(C *c, C *a, C *b, int n);
 void asub(C *c, C *a, C *b, int n);
 void arol(C *b, C *a, int n, int nb, int na);

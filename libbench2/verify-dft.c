@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.6 2003-02-04 08:25:36 stevenj Exp $ */
+/* $Id: verify-dft.c,v 1.7 2003-02-09 00:11:58 stevenj Exp $ */
 
 #include "verify.h"
 
@@ -96,6 +96,8 @@ void verify_dft(bench_problem *p, int rounds, double tol, errors *e)
      C *inA, *inB, *inC, *outA, *outB, *outC, *tmp;
      int n, vecn, N;
      dofft_dft_closure k;
+
+     BENCH_ASSERT(p->kind == PROBLEM_COMPLEX);
 
      k.k.apply = dft_apply;
      k.p = p;

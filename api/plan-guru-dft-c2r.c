@@ -27,7 +27,8 @@ X(plan) X(plan_guru_dft_c2r)(int rank, const X(iodim) *dims,
 {
      if (!X(guru_kosherp)(rank, dims, howmany_rank, howmany_dims)) return 0;
 
-     flags |= FFTW_DESTROY_INPUT;
+     if (out != ri)
+	  flags |= FFTW_DESTROY_INPUT;
      return X(mkapiplan)(
 	  flags, 
 	  X(mkproblem_rdft2_d)(X(mktensor_iodims)(rank, dims),

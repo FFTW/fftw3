@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.5 2003-01-19 01:13:14 athena Exp $ */
+/* $Id: tensor.c,v 1.6 2003-02-09 00:11:58 stevenj Exp $ */
 #include "bench.h"
 #include <stdlib.h>
 
@@ -101,6 +101,41 @@ int tensor_unitstridep(bench_tensor *t)
 	     (t->dims[t->rnk - 1].is == 1 && t->dims[t->rnk - 1].os == 1));
 }
 
+/* detect screwy real padded rowmajor... ugh */
+int tensor_real_rowmajorp(bench_tensor *t, int sign, int in_place)
+{
+     int i;
+
+     BENCH_ASSERT(FINITE_RNK(t->rnk));
+
+     i = t->rnk - 1;
+
+     if (--i >= 0) {
+          bench_iodim *d = t->dims + i;
+	  if (sign < 0) {
+	       if (d[0].is != d[1].is * (in_place ? 2*(d[1].n/2 + 1) : d[1].n))
+		    return 0;
+	       if (d[0].os != d[1].os * (d[1].n/2 + 1))
+		    return 0;
+	  }
+	  else {
+	       if (d[0].is != d[1].is * (d[1].n/2 + 1))
+		    return 0;
+	       if (d[0].os != d[1].os * (in_place ? 2*(d[1].n/2 + 1) : d[1].n))
+		    return 0;
+	  }
+     }
+
+     while (--i >= 0) {
+          bench_iodim *d = t->dims + i;
+          if (d[0].is != d[1].is * d[1].n)
+               return 0;
+          if (d[0].os != d[1].os * d[1].n)
+               return 0;
+     }
+     return 1;
+}
+
 int tensor_rowmajorp(bench_tensor *t)
 {
      int i;
@@ -176,5 +211,16 @@ bench_tensor *tensor_copy(const bench_tensor *sz)
 {
      bench_tensor *x = mktensor(sz->rnk);
      dimcpy(x->dims, sz->dims, sz->rnk);
+     return x;
+}
+
+/* Like tensor_copy, but copy only rnk dimensions starting with start_dim. */
+bench_tensor *tensor_copy_sub(const bench_tensor *sz, int start_dim, int rnk)
+{
+     bench_tensor *x;
+
+     BENCH_ASSERT(FINITE_RNK(sz->rnk) && start_dim + rnk <= sz->rnk);
+     x = mktensor(rnk);
+     dimcpy(x->dims, sz->dims + start_dim, rnk);
      return x;
 }
