@@ -152,20 +152,27 @@ AC_SUBST(OCAMLLDFLAGS)
 dnl determine CFLAGS first
 AX_CC_MAXOPT(fftw)
 
-# the egcs scheduler is too smart and destroys our own schedule.
-# Disable the first instruction scheduling pass.  The second
-# scheduling pass (after register reload) is ok.
-AX_GCC_VERSION(2,90, [test "$1" = fftw && test "$ac_test_CFLAGS" != "set" && CFLAGS="$CFLAGS -fno-schedule-insns"])
+# some additional FFTW-specific tweaks to the flags
+if "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
 
-# tweak codelet optimization level to avoid gcc bugs (sigh)
-if test "x$CODELET_OPTIM" = x -a "$ac_test_CFLAGS" != "set"; then
-     if test $GCC = "yes"; then
-        case "${host_cpu}" in
-           i586*|i686*) 
-              AX_GCC_VERSION(3,4, CODELET_OPTIM=-O2, CODELET_OPTIM=-O) ;;
-        esac
-     fi
+    # the egcs scheduler is too smart and destroys our own schedule.
+    # Disable the first instruction scheduling pass.  The second
+    # scheduling pass (after register reload) is ok.
+    AX_GCC_VERSION(2,90,
+	[test "$1" = fftw && CFLAGS="$CFLAGS -fno-schedule-insns"])
+
+    # tweak codelet optimization level to avoid gcc bugs (sigh)
+    if test "x$CODELET_OPTIM" = x; then
+       if test $GCC = "yes"; then
+          case "${host_cpu}" in
+             i586*|i686*) 
+                AX_GCC_VERSION(3,4, CODELET_OPTIM=-O2, CODELET_OPTIM=-O) ;;
+          esac
+       fi
+    fi
+
 fi
+
 AC_SUBST(CODELET_OPTIM)
 
 if test "x$SIMD_CFLAGS" = x; then
