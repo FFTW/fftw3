@@ -136,6 +136,11 @@ static X(r2r_kind) *ints2kinds(int rnk, const int *ik)
 #  define F77x(a, A) WINDOWS_F77_FUNC(a, A)
 #  include "f77funcs.h"
 
+/* Intel, etc. */
+#  undef WINDOWS_F77_FUNC
+#  define WINDOWS_F77_FUNC(a, A) a ## _
+#  include "f77funcs.h"
+
 /* Digital/Compaq/HP Visual Fortran, Intel Fortran.  stdcall attribute
    is apparently required to adjust for calling conventions (callee
    pops stack in stdcall).  See also:
