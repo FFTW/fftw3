@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.23 2003-02-15 20:16:26 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.24 2003-02-15 22:02:07 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -413,7 +413,6 @@ fftw_plan fftw_plan_dft(int rank, const int *n,
 @findex fftw_plan_dft_2d
 @findex fftw_plan_dft_3d
 @findex fftw_plan_dft
-@tindex fftw_plan
 
 These routines create plans for @code{nx} by @code{ny} two-dimensional
 (2d) transforms, @code{nx} by @code{ny} by @code{nz} 3d transforms,
@@ -526,12 +525,41 @@ DFT}), with ``halfcomplex''-format output that @emph{is} the same size
 (and type) as the input array.
 @cindex halfcomplex format
 That interface, although it does not generalize well to
-multidimensional transforms, may sometimes yield better performance
-(especially for odd @code{n}).
+multidimensional transforms, may sometimes yield better performance.
 
 @c ------------------------------------------------------------
 @node Multi-Dimensional DFTs of Real Data, More DFTs of Real Data, One-Dimensional DFTs of Real Data, Tutorial
 @section Multi-Dimensional DFTs of Real Data
+
+Multi-dimensional DFTs to/from real data use the following planner routines:
+
+@example
+fftw_plan fftw_plan_dft_r2c_2d(int nx, int ny,
+                               double *in, fftw_complex *out,
+                               unsigned flags);
+fftw_plan fftw_plan_dft_r2c_3d(int nx, int ny, int nz,
+                               double *in, fftw_complex *out,
+                               unsigned flags);
+fftw_plan fftw_plan_dft_r2c(int rank, const int *n,
+                            double *in, fftw_complex *out,
+                            unsigned flags);
+@end example
+@findex fftw_plan_dft_r2c_2d
+@findex fftw_plan_dft_r2c_3d
+@findex fftw_plan_dft_r2c
+
+as well as the corresponding @code{c2r} routines with the input/output
+types swapped.  These routines work similarly to their complex
+analogues, except for the fact that here the complex output array is
+cut in ~half and the real array requires padding for in-place
+transforms (as in 1d, above).
+
+As before, @code{n} etc. specify the logical size of the transform.
+For an out-of-place transform, this is the same as the physical size
+of the @emph{real} array, but the complex array has its @emph{last}
+dimension @emph{nlast} cut roughly in half to @emph{nlast}/2+1.
+
+To be continued...
 
 @c ------------------------------------------------------------
 @node More DFTs of Real Data,  , Multi-Dimensional DFTs of Real Data, Tutorial
