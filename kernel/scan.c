@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.7 2002-09-01 23:51:50 athena Exp $ */
+/* $Id: scan.c,v 1.8 2002-09-09 19:04:47 athena Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -26,7 +26,7 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-int X(scanner_getchr)(scanner *sc)
+static int mygetc(scanner *sc)
 {
      if (sc->ungotc != EOF) {
 	  int c = sc->ungotc;
@@ -36,14 +36,14 @@ int X(scanner_getchr)(scanner *sc)
      return(sc->getchr(sc));
 }
 
-#define GETCHR(sc) X(scanner_getchr)(sc)
+#define GETCHR(sc) mygetc(sc)
 
-void X(scanner_ungetchr)(scanner *sc, int c)
+static void myungetc(scanner *sc, int c)
 {
      sc->ungotc = c;
 }
 
-#define UNGETCHR(sc, c) X(scanner_ungetchr)(sc, c)
+#define UNGETCHR(sc, c) myungetc(sc, c)
 
 static void eat_blanks(scanner *sc)
 {
@@ -59,7 +59,6 @@ static void mygets(scanner *sc, char *s, size_t maxlen)
      int ch;
 
      A(maxlen > 0);
-     eat_blanks(sc);
      while ((ch = GETCHR(sc)) != EOF && !isspace(ch)
 	    && ch != ')' && ch != '(' && s < s0 + maxlen - 1)
 	  *s++ = ch;
@@ -67,70 +66,29 @@ static void mygets(scanner *sc, char *s, size_t maxlen)
      UNGETCHR(sc, ch);
 }
 
-static long getlong(scanner *sc, int *ret)
+static long getlong(scanner *sc, int base, int *ret)
 {
-     int sign = 1, ch;
+     int sign = 1, ch, count;
      long x = 0;     
 
-     eat_blanks(sc);
      ch = GETCHR(sc);
      if (ch == '-' || ch == '+') {
 	  sign = ch == '-' ? -1 : 1;
 	  ch = GETCHR(sc);
      }
-     if (!isdigit(ch)) {
-	  *ret = 0;
-	  return x;
+     for (count = 0; ; ++count) {
+	  if (isdigit(ch)) 
+	       ch -= '0';
+	  else if (isalpha(ch))
+	       ch -= isupper(ch) ? 'A' - 10 : 'a' - 10;
+	  else
+	       break;
+	  x = x * base + ch;
+	  ch = GETCHR(sc);
      }
-     do {
-	  x = x * 10 + ch - '0';
-     } while (isdigit(ch = GETCHR(sc)));
      x *= sign;
      UNGETCHR(sc, ch);
-     *ret = 1;
-     return x;
-}
-
-#define BSZ 64
-#define BUF(b, ch) {if (b - buf < BSZ - 1) *b++ = ch; else {*ret=0; return 0;}}
-
-static R getR(scanner *sc, int *ret)
-{
-     char buf[BSZ], *b = buf;
-     double x;
-     int ch;
-
-     eat_blanks(sc);
-     /* read into buf: [+|-]ddd[.ddd][(e|E)[+|-]ddd] */
-     ch = GETCHR(sc);
-     if (ch == '+' || ch == '-') {
-	  BUF(b, ch);
-	  ch = GETCHR(sc);
-     }
-     while (isdigit(ch)) {
-	  BUF(b, ch);
-	  ch = GETCHR(sc);
-     }
-     if (ch == '.') {
-	  BUF(b, ch);
-	  while (isdigit(ch = GETCHR(sc)))
-	       BUF(b, ch);
-     }
-     if (tolower(ch) == 'e') {
-	  BUF(b, ch);
-	  ch = GETCHR(sc);
-	  if (ch == '+' || ch == '-') {
-	       BUF(b, ch);
-	       ch = GETCHR(sc);
-	  }
-	  while (isdigit(ch)) {
-	       BUF(b, ch);
-	       ch = GETCHR(sc);
-	  }
-     }
-     UNGETCHR(sc, ch);
-     *b = 0; /* terminate */
-     *ret = sscanf(buf, "%lf", &x) == 1;
+     *ret = count > 0;
      return x;
 }
 
@@ -167,34 +125,28 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 		       }
 		       case 'd': {
 			    int *x = va_arg(ap, int *);
-			    *x = (int) getlong(sc, &ch);
+			    *x = (int) getlong(sc, 10, &ch);
 			    if (!ch) return 0;
 			    break;
 		       }
 		       case 'u': {
 			    uint *x = va_arg(ap, uint *);
-			    *x = (uint) getlong(sc, &ch);
+			    *x = (uint) getlong(sc, 10, &ch);
 			    if (!ch) return 0;
 			    break;
 		       }
-		       case 't': {
-			    ptrdiff_t *x;
-			    A(*s == 'd');
-			    s += 1;
-			    x = va_arg(ap, ptrdiff_t *);
-			    *x = (ptrdiff_t) getlong(sc, &ch);
+		       case 'x': {
+			    uint *x = va_arg(ap, uint *);
+			    *x = (uint) getlong(sc, 16, &ch);
 			    if (!ch) return 0;
 			    break;
 		       }
-		       case 'f': case 'e': case 'g': {
-			    R *x = va_arg(ap, R *);
-			    *x = getR(sc, &ch);
+		       case 'M': {
+			    md5uint *x = va_arg(ap, md5uint *);
+			    *x = 0xffffffffUL & getlong(sc, 16, &ch);
 			    if (!ch) return 0;
 			    break;
 		       }
-		       case '(': case ')':
-			    eat_blanks(sc);
-			    break;
 		       case '0': case '1': case '2': case '3': case '4':
 		       case '5': case '6': case '7': case '8': case '9': {
 			    fmt_len = c - '0';

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.109 2002-09-09 14:14:22 athena Exp $ */
+/* $Id: ifftw.h,v 1.110 2002-09-09 19:04:47 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -328,8 +328,6 @@ struct scanner_s {
 
 scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc));
 void X(scanner_destroy)(scanner *sc);
-int X(scanner_getchr)(scanner *sc);
-void X(scanner_ungetchr)(scanner *sc, int c);
 
 /*-----------------------------------------------------------------------*/
 /* scanners.c */
@@ -392,6 +390,7 @@ void X(solver_destroy)(solver *ego);
 typedef struct slvdesc_s {
      solver *slv;
      const char *reg_nam;
+     uint nam_hash;
      int reg_id;
      struct slvdesc_s *cdr;
 } slvdesc;
@@ -408,13 +407,13 @@ enum {
      FORBID_DHT_R2HC = 0x10,
      BUFFERING_VERBOTEN = 0x20,
      INDIRECT_VERBOTEN = 0x40,
-     EQV_MASK = 0xFFFF,
+     EQV_MASK = 0xFF,
 
      /* flags that influence the behavior of the planner but not problem
 	equivalence */
-     IMPATIENT = 0x10000, 
-     ESTIMATE = 0x20000,
-     BLESSING = 0x40000, 
+     IMPATIENT = 0x100, 
+     ESTIMATE = 0x200,
+     BLESSING = 0x400, 
      IMPATIENCE_MASK = (IMPATIENT | ESTIMATE)
 };
 
@@ -424,7 +423,7 @@ typedef struct {
      void (*register_solver)(planner *ego, solver *s);
      plan *(*mkplan)(planner *ego, problem *p);
      void (*forget)(planner *ego, amnesia a);
-     void (*exprt)(planner *ego, printer *p); /* export is a reserved
+     void (*exprt)(planner *ego, printer *p); /* ``export'' is a reserved
 						 word in C++. */
      int (*imprt)(planner *ego, scanner *sc);
      plan *(*slv_mkplan)(planner *ego, problem *p, solver *s);
@@ -490,8 +489,10 @@ void X(planner_dump)(planner *ego, int verbose);
 planner *X(mkplanner_naive)(uint flags);
 planner *X(mkplanner_score)(uint flags);
 
-#define NO_VRECURSE(flags) (((flags) & IMPATIENT) && !((flags) & (CLASSIC_VRECURSE | FORCE_VRECURSE)))
-#define CLASSIC_VRECURSE_RESET(plnr) { if ((plnr)->flags & CLASSIC_VRECURSE) (plnr)->flags &= ~FORCE_VRECURSE; }
+#define NO_VRECURSE(flags) \
+   (((flags) & IMPATIENT) && !((flags) & (CLASSIC_VRECURSE | FORCE_VRECURSE)))
+#define CLASSIC_VRECURSE_RESET(plnr) \
+   { if ((plnr)->flags & CLASSIC_VRECURSE) (plnr)->flags &= ~FORCE_VRECURSE; }
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */

@@ -170,11 +170,11 @@ void setup(struct problem *p)
      if (p->kind == PROBLEM_REAL)
 	  plnr->flags |= DESTROY_INPUT;
 
-#if 0
+#if 1
      {
 	  FILE *f;
 	  if ((f = fopen("wis.dat", "r"))) {
-	       scanner *sc = X(mkscanner_file)(f, plnr->problems);
+	       scanner *sc = X(mkscanner_file)(f);
 	       if (!plnr->adt->imprt(plnr, sc))
 		    fprintf(stderr, "bench: ERROR reading wis.dat!\n");
 	       X(scanner_destroy)(sc);
@@ -339,7 +339,7 @@ void done(struct problem *p)
      FFTW(plan_destroy) (pln);
      FFTW(problem_destroy) (prblm);
 
-#if 0
+#if 1
      {
 	  FILE *f;
 	  if ((f = fopen("wis.dat", "w"))) {

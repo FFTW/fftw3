@@ -18,14 +18,18 @@
  *
  */
 
-/* $Id: planner.c,v 1.64 2002-09-04 02:32:43 athena Exp $ */
+/* $Id: planner.c,v 1.65 2002-09-09 19:04:47 athena Exp $ */
 #include "ifftw.h"
+#include <string.h> /* strlen */
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
 #define MODULO_EQV(flags) ((flags) & EQV_MASK)
-#define BLESS(s) (s)->flags |= BLESSING
 #define BLESSEDP(s) ((s)->flags & BLESSING)
 
+#define MAXNAM 64  /* maximum length of registrar's name.
+		      Used for reading wisdom.  There is no point
+		      in doing this right */
+		      
 /*
    liber scriptus proferetur
    in quo totum continetur
@@ -39,6 +43,15 @@ struct solutions_s {
 };
 
 /* slvdesc management */
+static uint hash_regnam(char *s)
+{
+     uint h = 0xDEADBEEFul;
+     do {
+	  h = h * 17 + *s;
+     } while (*s++);
+     return h;
+}
+
 static void register_solver(planner *ego, solver *s)
 {
      slvdesc *n;
@@ -49,10 +62,25 @@ static void register_solver(planner *ego, solver *s)
 	  n->reg_nam = ego->cur_reg_nam;
 	  n->reg_id = ego->cur_reg_id++;
 
+	  A(strlen(n->reg_nam) < MAXNAM);
+	  n->nam_hash = hash_regnam(n->reg_nam);
+
 	  /* cons! onto solvers list */
 	  n->cdr = ego->solvers;
 	  ego->solvers = n;
      }
+}
+
+/* TODO: use hash table ? */
+static slvdesc *slvdesc_lookup(planner *ego, char *nam, int id)
+{
+     slvdesc *sp;
+     uint h = hash_regnam(nam); /* used to avoid strcmp in the common case */
+     for (sp = ego->solvers; sp; sp = sp->cdr)
+	  if (sp->reg_id == id && sp->nam_hash == h 
+	      && !strcmp(sp->reg_nam, nam))
+	       break;
+     return sp;
 }
 
 /* memoization routines */
@@ -290,7 +318,7 @@ static void exprt(planner *ego, printer *p)
 	       if (BLESSEDP(s) && s->sp) {
 		    /* qui salvandos salvas gratis
 		       salva me fons pietatis */
-		    p->print(p, "(%s %d #x%x #x%5 #x%5 #x%5 #x%5)\n",
+		    p->print(p, "(%s %d #x%x #x%M #x%M #x%M #x%M)\n",
 			     s->sp->reg_nam, s->sp->reg_id, s->flags,
 			     s->s[0], s->s[1], s->s[2], s->s[3]);
 	       }
@@ -299,47 +327,36 @@ static void exprt(planner *ego, printer *p)
 
 static int imprt(planner *ego, scanner *sc)
 {
-#if 0
-     slvdesc **slvrs;
-     problem *p = 0;
-     int i, ret = 0;
-
-     /* need to cache an array of solvers for fast lookup by id */
-     slvrs = (slvdesc **) fftw_malloc(sizeof(slvdesc *) * (ego->idcnt - 1),
-				      OTHER);
-     for (i = 0; i + 1 < ego->idcnt; ++i) slvrs[i] = 0;
-     FORALL_SOLVERS(ego, s, p, {
-	  UNUSED(s);
-	  A(p->id > 0 && p->id < ego->idcnt);
-	  slvrs[p->id - 1] = p;
-     });
-     for (i = 0; i + 1 < ego->idcnt; ++i) { A(slvrs[i]); }
+     char buf[MAXNAM + 1];
+     md5uint sig[4];
+     uint flags;
+     int reg_id;
+     slvdesc *sp;
 
      if (!sc->scan(sc, "(" WISDOM_PREAMBLE))
-	  goto done;
+	  goto bad;
+
 
      while (1) {
-	  solutions *s;
-	  int id, flags;
-	  uint nthr;
-
 	  if (sc->scan(sc, ")"))
 	       break;
-	  if (!sc->scan(sc, "(s %d %d %u %P)", &id, &flags, &nthr, &p))
-	       goto done;
-	  if (id < 1 || id >= ego->idcnt)
-	       goto done;
-	  s = insert(ego, flags, nthr, p, slvrs[id - 1]);
-	  BLESS(s);
-	  X(problem_destroy)(p); p = 0;
+
+	  if (!sc->scan(sc, "(%*s %d #x%x #x%M #x%M #x%M #x%M)",
+			MAXNAM, buf, &reg_id, &flags, 
+			sig + 0, sig + 1, sig + 2, sig + 3))
+	       goto bad;
+
+	  sp = slvdesc_lookup(ego, buf, reg_id);
+	  if (!sp)
+	       goto bad; /* TODO: panic? */
+
+	  /* inter oves locum praesta */
+	  insert1(ego, sig, flags, sp);
      }
-     ret = 1;
- done:
-     X(free)(slvrs);
-     if (p)
-	  X(problem_destroy)(p);
-     return ret;
-#endif
+     return 1;
+
+ bad:
+     return 0;
 }
 
 static void hooknil(plan *pln, const problem *p, int optimalp)
