@@ -18,7 +18,8 @@ $(CODLIST): Makefile
 	done;								\
 	echo;								\
 	echo;								\
-	echo "extern const solvtab $(SOLVTAB_NAME) = {";		\
+	echo "extern const solvtab $(SOLVTAB_NAME);";		        \
+	echo "const solvtab $(SOLVTAB_NAME) = {";		        \
 	for i in $(ALL_CODELETS) NIL; do				\
 	   if test "$$i" != NIL; then					\
 	     j=`basename $$i | sed -e 's/[.][cS]$$//g'`;		\

@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.52 2003-03-17 08:25:17 athena Exp $ */
+/* $Id: fftw3.h,v 1.53 2003-03-17 09:15:50 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -206,9 +206,9 @@ void X(free)(void *p);							\
 									\
 void X(flops)(const X(plan) p, int *add, int *mul, int *fma);		\
 									\
-extern const char *X(version);						\
-extern const char *X(cc);						\
-extern const char *X(codelet_optim);
+extern const char X(version)[];						\
+extern const char X(cc)[];						\
+extern const char X(codelet_optim)[];
 
 
 /* end of FFTW_DEFINE_API macro */
