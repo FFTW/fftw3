@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.44 2003-04-03 00:43:59 stevenj Exp $ */
+/* $Id: problem.c,v 1.45 2003-04-05 13:18:23 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -44,7 +44,7 @@ static void hash(const problem *p_, md5 *m)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
      X(md5puts)(m, "rdft");
-     X(md5int)(m, p->I == p->O);
+     X(md5int)(m, UNTAINT(p->I) == UNTAINT(p->O));
      kind_hash(m, p->kind, p->sz->rnk);
      X(md5int)(m, X(alignment_of)(p->I));
      X(md5int)(m, X(alignment_of)(p->O));
@@ -99,7 +99,7 @@ static void print(problem *ego_, printer *p)
      int i;
      p->print(p, "(rdft %d %td %T %T", 
 	      X(alignment_of)(ego->I),
-	      ego->O - ego->I, 
+	      UNTAINT(ego->O) - UNTAINT(ego->I), 
 	      ego->sz,
 	      ego->vecsz);
      for (i = 0; i < ego->sz->rnk; ++i)
@@ -111,7 +111,7 @@ static void zero(const problem *ego_)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
      tensor *sz = X(tensor_append)(ego->vecsz, ego->sz);
-     X(rdft_zerotens)(sz, ego->I);
+     X(rdft_zerotens)(sz, UNTAINT(ego->I));
      X(tensor_destroy)(sz);
 }
 

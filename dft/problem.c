@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.30 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: problem.c,v 1.31 2003-04-05 13:18:23 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -34,11 +34,13 @@ static void hash(const problem *p_, md5 *m)
 {
      const problem_dft *p = (const problem_dft *) p_;
      X(md5puts)(m, "dft");
-     X(md5int)(m, p->ri == p->ro);
-     X(md5ptrdiff)(m, p->ii - p->ri);
-     X(md5ptrdiff)(m, p->io - p->ro);
+     X(md5int)(m, UNTAINT(p->ri) == UNTAINT(p->ro));
+     X(md5ptrdiff)(m, UNTAINT(p->ii) - UNTAINT(p->ri));
+     X(md5ptrdiff)(m, UNTAINT(p->io) - UNTAINT(p->ro));
      X(md5int)(m, X(alignment_of)(p->ri));
+     X(md5int)(m, X(alignment_of)(p->ii));
      X(md5int)(m, X(alignment_of)(p->ro));
+     X(md5int)(m, X(alignment_of)(p->io));
      X(tensor_md5)(m, p->sz);
      X(tensor_md5)(m, p->vecsz);
 }
@@ -47,11 +49,11 @@ static void print(problem *ego_, printer *p)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
      p->print(p, "(dft %d %d %d %td %td %T %T)", 
-	      ego->ri == ego->ro,
+	      UNTAINT(ego->ri) == UNTAINT(ego->ro),
 	      X(alignment_of)(ego->ri),
 	      X(alignment_of)(ego->ro),
-	      ego->ii - ego->ri, 
-	      ego->io - ego->ro,
+	      UNTAINT(ego->ii) - UNTAINT(ego->ri), 
+	      UNTAINT(ego->io) - UNTAINT(ego->ro),
 	      ego->sz,
 	      ego->vecsz);
 }
@@ -60,7 +62,7 @@ static void zero(const problem *ego_)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
      tensor *sz = X(tensor_append)(ego->vecsz, ego->sz);
-     X(dft_zerotens)(sz, ego->ri, ego->ii);
+     X(dft_zerotens)(sz, UNTAINT(ego->ri), UNTAINT(ego->ii));
      X(tensor_destroy)(sz);
 }
 

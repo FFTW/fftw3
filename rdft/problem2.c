@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.28 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: problem2.c,v 1.29 2003-04-05 13:18:23 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -35,12 +35,12 @@ static void hash(const problem *p_, md5 *m)
 {
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
      X(md5puts)(m, "rdft2");
-     X(md5int)(m, p->r == p->rio);
-     X(md5int)(m, p->r == p->iio);
-     X(md5ptrdiff)(m, p->iio - p->rio);  /* (1) */
+     X(md5int)(m, UNTAINT(p->r) == UNTAINT(p->rio));
+     X(md5int)(m, UNTAINT(p->r) == UNTAINT(p->iio));
+     X(md5ptrdiff)(m, UNTAINT(p->iio) - UNTAINT(p->rio));
      X(md5int)(m, X(alignment_of)(p->r));
      X(md5int)(m, X(alignment_of)(p->rio)); 
-             /* alignment of imag is implied by (1) */
+     X(md5int)(m, X(alignment_of)(p->iio)); 
      X(md5int)(m, p->kind);
      X(tensor_md5)(m, p->sz);
      X(tensor_md5)(m, p->vecsz);
@@ -51,8 +51,8 @@ static void print(problem *ego_, printer *p)
      problem_rdft2 *ego = (problem_rdft2 *) ego_;
      p->print(p, "(rdft2 %d %td %td %d %T %T)", 
 	      X(alignment_of)(ego->r),
-	      ego->rio - ego->r, 
-	      ego->iio - ego->r,
+	      UNTAINT(ego->rio) - UNTAINT(ego->r), 
+	      UNTAINT(ego->iio) - UNTAINT(ego->r),
 	      (int)(ego->kind),
 	      ego->sz,
 	      ego->vecsz);
@@ -64,7 +64,7 @@ static void zero(const problem *ego_)
      tensor *sz;
      if (ego->kind == R2HC) {
 	  sz = X(tensor_append)(ego->vecsz, ego->sz);
-	  X(rdft_zerotens)(sz, ego->r);
+	  X(rdft_zerotens)(sz, UNTAINT(ego->r));
      }
      else {
 	  tensor *sz2 = X(tensor_copy)(ego->sz);
@@ -72,7 +72,7 @@ static void zero(const problem *ego_)
 	       sz2->dims[0].n = sz2->dims[0].n / 2 + 1;
 	  sz = X(tensor_append)(ego->vecsz, sz2);
 	  X(tensor_destroy)(sz2);
-	  X(dft_zerotens)(sz, ego->rio, ego->iio);
+	  X(dft_zerotens)(sz, UNTAINT(ego->rio), UNTAINT(ego->iio));
      }
      X(tensor_destroy)(sz);
 }
