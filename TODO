@@ -49,3 +49,10 @@ TODO before FFTW-$2\pi$:
 * Find a better DCT-I algorithm.
 
 * export NO_SEARCH flag to the user (i.e. document FFTW_WISDOM_ONLY) (?)
+  (This is currently obsolete)
+
+* Consider splitting the planner hash table into two parts: blessed
+  and unblessed.  FORGET_ACCURSED eliminates the whole unblessed table in
+  O(1) time.  This should speed up the estimator when there are many
+  wisdom entries.
+  
