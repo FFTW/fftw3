@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.24 2003-03-17 01:24:31 stevenj Exp $ */
+/* $Id: problem.c,v 1.25 2003-03-29 03:49:04 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -67,6 +67,18 @@ static bench_tensor *dwim(bench_tensor *t, bench_iodim **last_iodim,
 
      *last_iodim = d1;
      return t;
+}
+
+static void transpose_tensor(bench_tensor *t)
+{
+     int i;
+
+     if (!FINITE_RNK(t->rnk) || t->rnk < 1)
+          return;
+
+     t->dims[0].os = t->dims[t->rnk - 1].os;
+     for (i = 1; i < t->rnk; ++i)
+	  t->dims[i].os = t->dims[i-1].os * t->dims[i-1].n;
 }
 
 static const char *parseint(const char *s, int *n)
@@ -212,6 +224,7 @@ bench_problem *problem_parse(const char *s)
      bench_iodim *sz_last_iodim;
      bench_tensor *sz;
      n_transform nti = SAME, nto = SAME;
+     int transpose = 0;
 
      p = (bench_problem *) bench_malloc(sizeof(bench_problem));
 
@@ -242,6 +255,7 @@ bench_problem *problem_parse(const char *s)
 	 case 'r': p->kind = PROBLEM_REAL; ++s; goto L1;
 	 case 'c': p->kind = PROBLEM_COMPLEX; ++s; goto L1;
 	 case 'k': p->kind = PROBLEM_R2R; ++s; goto L1;
+	 case 't': transpose = 1; ++s; goto L1;
 	 default : ;
      }
 
@@ -274,6 +288,9 @@ bench_problem *problem_parse(const char *s)
 	  p->sz = dwim(sz, &last_iodim, nti, nto, sz_last_iodim);
 	  p->vecsz = mktensor(0);
      }
+
+     if (transpose)
+	  transpose_tensor(p->sz);
 
      if (!p->in_place)
 	  p->out = ((bench_real *) p->in) + (1 << 20);  /* whatever */
