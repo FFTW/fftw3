@@ -95,7 +95,8 @@ int X(transpose_simplep)(const iodim *a, const iodim *b, int vl, int s,
 }
 
 /* use the slow general transpose if the buffer would be more than 1/8
-   the whole transpose and the transpose is fairly big. */
+   the whole transpose and the transpose is fairly big.
+   (FIXME: use the CONSERVE_MEMORY flag?) */
 int X(transpose_slowp)(const iodim *a, const iodim *b, int N)
 {
      int d = gcd(a->n, b->n);
