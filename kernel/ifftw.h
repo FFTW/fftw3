@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.137 2002-09-18 22:03:18 athena Exp $ */
+/* $Id: ifftw.h,v 1.138 2002-09-18 22:26:58 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -414,7 +414,7 @@ enum {
      NO_INDIRECT_OP = 0x40,
      BELIEVE_PCOST = 0x80,
      NO_DHT_R2HC = 0x100,
-     NO_UGLY = 0x200,
+     NO_UGLY = 0x200,  /* avoid plans we are 99% sure are suboptimal */
 
      /* a canonical set of fftw2-like impatient flags */
      IMPATIENT = (0
