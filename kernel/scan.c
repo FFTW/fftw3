@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.5 2002-08-01 18:56:45 stevenj Exp $ */
+/* $Id: scan.c,v 1.6 2002-08-31 01:29:10 athena Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -145,7 +145,7 @@ static int getproblem(scanner *sc, problem **p)
      if (!strcmp(buf, "null"))
 	  return sc->scan(sc, ")");
      else {
-	  const prbpair *pp;
+	  const prbdesc *pp;
 	  for (pp = sc->problems; pp && strcmp(pp->adt->nam,buf); pp = pp->cdr)
 	       ;
 	  if (!pp)
@@ -276,7 +276,7 @@ static int scan(scanner *sc, const char *format, ...)
 }
 
 scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc),
-		      const prbpair *probs)
+		      const prbdesc *probs)
 {
      scanner *s = (scanner *)fftw_malloc(size, OTHER);
      s->scan = scan;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.98 2002-08-30 22:07:52 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.99 2002-08-31 01:29:10 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -116,7 +116,7 @@ enum fftw_malloc_what {
      HASHT,
      TENSORS,
      PLANNERS,
-     SLVPAIRS,
+     SLVDESCS,
      TWIDDLES,
      STRIDES,
      OTHER,
@@ -289,12 +289,12 @@ struct problem_s {
      int refcnt;
 };
 
-typedef struct prbpair_s {
+typedef struct prbdesc_s {
      const problem_adt *adt;
      const char *reg_nam;
      int mark;
-     struct prbpair_s *cdr;
-} prbpair;
+     struct prbdesc_s *cdr;
+} prbdesc;
 
 problem *X(mkproblem)(size_t sz, const problem_adt *adt);
 void X(problem_destroy)(problem *ego);
@@ -327,11 +327,11 @@ struct scanner_s {
      int (*vscan)(scanner *sc, const char *format, va_list ap);
      int (*getchr)(scanner *sc);
      int ungotc;
-     const prbpair *problems;
+     const prbdesc *problems;
 };
 
 scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc),
-		      const prbpair *probs);
+		      const prbdesc *probs);
 void X(scanner_destroy)(scanner *sc);
 int X(scanner_getchr)(scanner *sc);
 void X(scanner_ungetchr)(scanner *sc, int c);
@@ -339,8 +339,8 @@ void X(scanner_ungetchr)(scanner *sc, int c);
 /*-----------------------------------------------------------------------*/
 /* scanners.c */
 
-scanner *X(mkscanner_file)(FILE *f, const prbpair *probs);
-scanner *X(mkscanner_str)(const char *s, const prbpair *probs);
+scanner *X(mkscanner_file)(FILE *f, const prbdesc *probs);
+scanner *X(mkscanner_str)(const char *s, const prbdesc *probs);
 
 /*-----------------------------------------------------------------------*/
 /* traverse.c */
@@ -365,7 +365,6 @@ struct plan_s {
      int awake_refcnt;
      opcnt ops;
      double pcost;
-     int blessed;
      int score;
 };
 
@@ -374,7 +373,6 @@ void X(plan_use)(plan *ego);
 void X(plan_destroy)(plan *ego);
 void X(plan_awake)(plan *ego, int flag);
 #define AWAKE(plan, flag) X(plan_awake)(plan, flag)
-void X(plan_bless)(plan *ego);
 
 /*-----------------------------------------------------------------------*/
 /* solver.c: */
@@ -404,29 +402,34 @@ void X(solver_destroy)(solver *ego);
 /*-----------------------------------------------------------------------*/
 /* planner.c */
 
-typedef struct slvpair_s {
+typedef struct slvdesc_s {
      solver *slv;
      const char *reg_nam;
      int id;
-     struct slvpair_s *cdr;
-} slvpair;
+     struct slvdesc_s *cdr;
+} slvdesc;
 
 typedef struct solutions_s solutions; /* opaque */
 
 /* planner flags */
-enum { IMPATIENT = 0x1, PATIENT = 0x0,
-       ESTIMATE = 0x2, 
-       CLASSIC_VRECURSE = 0x4,
-       FORCE_VRECURSE = 0x8, 
-       DESTROY_INPUT = 0x10,
-       POSSIBLY_UNALIGNED = 0x20,
-       FORBID_DHT_R2HC = 0x40
+enum { 
+     /* flags that influence whether problems are equivalent or not */
+     CLASSIC_VRECURSE = 0x1,
+     FORCE_VRECURSE = 0x2, 
+     DESTROY_INPUT = 0x4,
+     POSSIBLY_UNALIGNED = 0x8,
+     FORBID_DHT_R2HC = 0x10,
+     EQV_MASK = 0xFF,
+
+     /* flags that influence the behavior of the planner but not problem
+	equivalence */
+     IMPATIENT = 0x1000, 
+     ESTIMATE = 0x2000,
+     BLESSING = 0x4000, 
+     IMPATIENCE_MASK = (IMPATIENT | ESTIMATE)
 };
 
-#define NONPATIENCE_FLAGS(flags) ((flags) & ~(ESTIMATE | IMPATIENT | PATIENT))
-#define IMPATIENCE(flags) ((flags) & (ESTIMATE | IMPATIENT | PATIENT))
-
-typedef enum { FORGET_PLANS, FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
+typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
 typedef struct {
      void (*register_solver)(planner *ego, solver *s);
@@ -447,23 +450,23 @@ struct planner_s {
      void (*hook)(plan *plan, const problem *p);
 
      const char *cur_reg_nam;
-     slvpair *solvers, **last_solver_cdr;
+     slvdesc *solvers, **solvers_tail;
      solutions **sols;
-     prbpair *problems;
+     prbdesc *problems;
      void (*destroy)(planner *ego);
-     void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvpair **);
+     void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvdesc **);
      uint hashsiz;
      uint cnt;
-     int flags;
+     uint flags;
      uint nthr;
      int idcnt;
 };
 
 planner *X(mkplanner)(size_t sz,
 		      void (*mkplan)(planner *ego, problem *p, 
-				     plan **, slvpair **),
+				     plan **, slvdesc **),
                       void (*destroy) (planner *), 
-		      int flags);
+		      uint flags);
 void X(planner_destroy)(planner *ego);
 void X(planner_set_hook)(planner *p, void (*hook)(plan *, const problem *));
 void X(evaluate_plan)(planner *ego, plan *pln, const problem *p);
@@ -486,7 +489,7 @@ void X(planner_dump)(planner *ego, int verbose);
 */
 #define FORALL_SOLVERS(ego, s, p, what)		\
 {						\
-     slvpair *p;				\
+     slvdesc *p;				\
      for (p = ego->solvers; p; p = p->cdr) {	\
 	  solver *s = p->slv;			\
 	  what;					\
@@ -494,8 +497,8 @@ void X(planner_dump)(planner *ego, int verbose);
 }
 
 /* various planners */
-planner *X(mkplanner_naive)(int flags);
-planner *X(mkplanner_score)(int flags);
+planner *X(mkplanner_naive)(uint flags);
+planner *X(mkplanner_score)(uint flags);
 
 #define NO_VRECURSE(flags) (((flags) & IMPATIENT) && !((flags) & (CLASSIC_VRECURSE | FORCE_VRECURSE)))
 #define CLASSIC_VRECURSE_RESET(plnr) { if ((plnr)->flags & CLASSIC_VRECURSE) (plnr)->flags &= ~FORCE_VRECURSE; }

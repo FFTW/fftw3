@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.17 2002-08-30 12:20:48 athena Exp $ */
+/* $Id: alloc.c,v 1.18 2002-08-31 01:29:10 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -243,7 +243,7 @@ void X(malloc_print_minfo)(void)
      static const char *names[MALLOC_WHAT_LAST] = {
 	  "EVERYTHING",
 	  "PLANS", "SOLVERS", "PROBLEMS", "BUFFERS",
-	  "HASHT", "TENSORS", "PLANNERS", "SLVPAIRS", "TWIDDLES",
+	  "HASHT", "TENSORS", "PLANNERS", "SLVDSC", "TWIDDLES",
 	  "STRIDES", "OTHER"
      };
 

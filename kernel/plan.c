@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.10 2002-07-25 19:21:13 athena Exp $ */
+/* $Id: plan.c,v 1.11 2002-08-31 01:29:10 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -31,7 +31,6 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
      p->adt = adt;
      p->ops = X(ops_zero);
      p->pcost = 0.0;
-     p->blessed = 0;
      return p;
 }
 
@@ -68,16 +67,3 @@ void X(plan_awake)(plan *ego, int flag)
      }
 }
 
-static void bless(visit_closure *k, plan *p)
-{
-     UNUSED(k);
-     p->blessed = 1;
-}
-
-/* can a blessing be revoked? */
-void X(plan_bless)(plan *ego)
-{
-     visit_closure k;
-     k.visit = bless;
-     X(traverse_plan)(ego, 1, &k);
-}

@@ -18,32 +18,28 @@
  *
  */
 
-/* $Id: planner.c,v 1.45 2002-08-30 22:07:21 stevenj Exp $ */
+/* $Id: planner.c,v 1.46 2002-08-31 01:29:10 athena Exp $ */
 #include "ifftw.h"
 
+#define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
+#define MODULO_EQV(flags) ((flags) & EQV_MASK)
+#define BLESS(s) (s)->flags |= BLESSING
+#define BLESSEDP(s) ((s)->flags & BLESSING)
+
 /* Entry in the solutions hash table */
-/*
-   The meaning of PLN and SP is as follows:
-   
-    if (PLN)          then PLN solves PROBLEM
-    else if (SP)      then SP->SOLVER can be called to yield a plan 
-    else                   PROBLEM has been seen before and cannot be solved.
-*/
 
 struct solutions_s {
      problem *p;
-     int flags;
+     uint flags;
      uint nthr;
-     plan *pln;
-     slvpair *sp;
-     int blessed;
+     slvdesc *sp;
      solutions *cdr;
 };
 
-/* slvpair management */
-static slvpair *mkpair(solver *slv, const char *reg_nam, int id)
+/* slvdesc management */
+static slvdesc *mkslvdesc(solver *slv, const char *reg_nam, int id)
 {
-     slvpair *n = (slvpair *) fftw_malloc(sizeof(slvpair), SLVPAIRS);
+     slvdesc *n = (slvdesc *) fftw_malloc(sizeof(slvdesc), SLVDESCS);
      n->slv = slv;
      n->reg_nam = reg_nam;
      n->id = id;
@@ -54,48 +50,49 @@ static slvpair *mkpair(solver *slv, const char *reg_nam, int id)
 static void register_solver(planner *ego, solver *s)
 {
      if (s) { /* add s to end of solver list */
-	  slvpair *n;
+	  slvdesc *n;
 	  A(s);
 	  X(solver_use)(s);
-	  n = mkpair(s, ego->cur_reg_nam, ego->idcnt++);
-	  *ego->last_solver_cdr = n;
-	  ego->last_solver_cdr = &n->cdr;
+	  n = mkslvdesc(s, ego->cur_reg_nam, ego->idcnt++);
+	  *ego->solvers_tail = n;
+	  ego->solvers_tail = &n->cdr;
      }
 }
 
 static void register_problem(planner *ego, const problem_adt *adt)
 {
-     prbpair *p;
+     prbdesc *p;
      for (p = ego->problems; p; p = p->cdr)
 	  if (p->adt == adt)
 	       return;
-     p = (prbpair *) fftw_malloc(sizeof(prbpair), OTHER);
+     p = (prbdesc *) fftw_malloc(sizeof(prbdesc), OTHER);
      p->adt = adt;
      p->reg_nam = ego->cur_reg_nam;
      p->cdr = ego->problems;
      ego->problems = p;
 }
 
-static void hooknil(plan *pln, const problem *p)
-{
-     UNUSED(pln);
-     UNUSED(p);
-     /* do nothing */
-}
-
 /* memoization routines */
-static uint hash(planner *ego, const problem *p, int flags, uint nthr)
+static uint hash(planner *ego, const problem *p, uint flags, uint nthr)
 {
-     return ((p->adt->hash(p) 
-	      ^ (NONPATIENCE_FLAGS(flags) * 317227)
+     return ((0
+	      ^ p->adt->hash(p)
+	      ^ (MODULO_EQV(flags) * 317227) 
 	      ^ (nthr * 252143))
 	     % ego->hashsiz);
 }
 
-static int solvedby(problem *p, int flags, uint nthr, solutions *l)
+static void merge_flags(solutions *l, uint flags)
+{
+     l->flags |= flags & (0
+			  | BLESSING
+	  );
+}
+
+static int solvedby(problem *p, uint flags, uint nthr, solutions *l)
 {
      return (IMPATIENCE(flags) >= IMPATIENCE(l->flags)
-	     && NONPATIENCE_FLAGS(flags) == NONPATIENCE_FLAGS(l->flags)
+	     && MODULO_EQV(flags) == MODULO_EQV(l->flags)
 	     && nthr == l->nthr
 	     && p->adt->equal(p, l->p));
 }
@@ -115,28 +112,31 @@ static solutions *lookup(planner *ego, problem *p)
 
 static void solution_destroy(solutions *s)
 {
-     if (s->pln)
-	  X(plan_destroy)(s->pln);
      X(problem_destroy)(s->p);
      X(free)(s);
 }
 
-/* remove solutions from *sp that are equivalent to newsol */
+/* remove solutions from *ps that are equivalent to newsol */
 static void remove_equivalent(solutions *newsol, solutions **ps)
 {
      solutions *s;
 
      while ((s = *ps)) {
 	  if (solvedby(s->p, s->flags, s->nthr, newsol)) {
+	       /* destroy solution but keep relevant planner flags */
+	       merge_flags(newsol, s->flags);
 	       *ps = s->cdr;
 	       solution_destroy(s);
 	  } else {
+	       /* ensure that we are not replacing a solution with a
+		  worse solution */
+	       A(!solvedby(newsol->p, newsol->flags, newsol->nthr, s));
 	       ps = &s->cdr;
 	  }
      }
 }
 
-static void really_insert(planner *ego, solutions *l)
+static void insert0(planner *ego, solutions *l)
 {
      uint h = hash(ego, l->p, l->flags, l->nthr);
      solutions **ps = ego->sols + h;
@@ -167,7 +167,7 @@ static void rehash(planner *ego)
      for (h = 0; h < osiz; ++h) {
           for (s = osol[h]; s; s = s_cdr) {
                s_cdr = s->cdr;
-               really_insert(ego, s);
+               insert0(ego, s);
           }
      }
 
@@ -175,19 +175,8 @@ static void rehash(planner *ego)
           X(free)(osol);
 }
 
-static void record_plan(solutions *l, plan *pln)
-{
-     l->pln = pln;
-     if (pln) {
-          X(plan_use)(pln);
-	  l->blessed = pln->blessed;
-     }
-     else
-	  l->blessed = 0;
-}
-
-static solutions *insert(planner *ego, int flags, uint nthr,
-			 problem *p, plan *pln, slvpair *sp)
+static solutions *insert(planner *ego, uint flags, uint nthr,
+			 problem *p, slvdesc *sp)
 {
      solutions *l = (solutions *)fftw_malloc(sizeof(solutions), HASHT);
 
@@ -195,19 +184,17 @@ static solutions *insert(planner *ego, int flags, uint nthr,
      if (ego->cnt > ego->hashsiz)
           rehash(ego);
 
-
      l->flags = flags;
      l->nthr = nthr;
      l->sp = sp; 
      l->p = X(problem_dup)(p);
-     record_plan(l, pln);
-     really_insert(ego, l);
+     insert0(ego, l);
      return l;
 }
 
 static plan *slv_mkplan(planner *ego, problem *p, solver *s)
 {
-     int flags = ego->flags;
+     uint flags = ego->flags;
      uint nthr = ego->nthr;
      plan *pln;
      pln = s->adt->mkplan(s, p, ego);
@@ -220,46 +207,35 @@ static plan *mkplan(planner *ego, problem *p)
 {
      solutions *sol;
      plan *pln;
-     slvpair *sp = 0;
+     slvdesc *sp = 0;
 
      if ((sol = lookup(ego, p))) {
-          if ((pln = sol->pln))
-	       goto use_plan_and_return; /* we have a plan */
-
 	  if ((sp = sol->sp)) {
 	       /* call solver to create plan */
 	       ego->inferior_mkplan(ego, p, &pln, &sp);
-	       A(pln);  /* solver must be applicable or something
-			   is screwed up */
-	       record_plan(sol, pln);
 
-	       goto use_plan_and_return;
+	       /* solver must be applicable or something is screwed up */
+	       A(sp && pln); 
+	       X(plan_use)(pln);
+
+	       /* inherit blessings etc. from planner */
+	       merge_flags(sol, ego->flags);
+	       return pln;
+	  } else {
+	       /* impossible problem */
+	       return 0;
 	  }
-
-	  /* no solution */
-	  return 0;
-
-     use_plan_and_return:
-	  X(plan_use)(pln);
-	  return pln;
      } else {
 	  /* not in table.  Run inferior planner */
 	  ++ego->nprob;
 	  ego->inferior_mkplan(ego, p, &pln, &sp);
-	  insert(ego, ego->flags, ego->nthr, p, pln, sp);
+	  insert(ego, ego->flags, ego->nthr, p, sp);
 	  return pln;  /* plan already USEd by inferior */
      }
 }
 
-static int is_blessed(solutions *s)
-{
-     return(!(s->flags & ESTIMATE)
-	    && (s->blessed || (s->pln && s->pln->blessed)));
-}
-
 /* destroy hash table entries.  If FORGET_EVERYTHING, destroy the whole
-   table.  If FORGET_ACCURSED, then destroy entries that are not blessed.
-   If FORGET_PLANS, then destroy all the plans but remember the solvers. */
+   table.  If FORGET_ACCURSED, then destroy entries that are not blessed. */
 static void forget(planner *ego, amnesia a)
 {
      uint h;
@@ -267,14 +243,8 @@ static void forget(planner *ego, amnesia a)
      for (h = 0; h < ego->hashsiz; ++h) {
 	  solutions **ps = ego->sols + h, *s;
 	  while ((s = *ps)) {
-	       s->blessed = is_blessed(s); /* remember pln blessing */
-	       if (s->pln && a == FORGET_PLANS) {
-		    X(plan_destroy)(s->pln);
-		    s->pln = 0;
-	       }
-
 	       if (a == FORGET_EVERYTHING ||
-		   (a == FORGET_ACCURSED && !s->blessed)) {
+		   (a == FORGET_ACCURSED && BLESSEDP(s))) {
 		    /* confutatis maledictis flammis acribus addictis */
 		    *ps = s->cdr;
 		    solution_destroy(s);
@@ -293,7 +263,7 @@ static void htab_destroy(planner *ego)
 }
 
 /* FIXME: what sort of version information should we write? */
-#define WISDOM_PREAMBLE "fftw-wisdom " PACKAGE "-" VERSION " "
+#define WISDOM_PREAMBLE PACKAGE "-" VERSION "-wisdom "
 
 /* tantus labor non sit cassus */
 static void exprt(planner *ego, printer *p)
@@ -306,7 +276,7 @@ static void exprt(planner *ego, printer *p)
 	  for (s = ego->sols[h]; s; s = s->cdr)
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
-	       if (is_blessed(s))
+	       if (BLESSEDP(s))
 		    p->print(p, "(s %d %d %u %P)", 
 			     s->sp ? s->sp->id : 0, s->flags, s->nthr, s->p);
      p->print(p, ")");
@@ -314,12 +284,12 @@ static void exprt(planner *ego, printer *p)
 
 static int imprt(planner *ego, scanner *sc)
 {
-     slvpair **slvrs;
+     slvdesc **slvrs;
      problem *p = 0;
      int i, ret = 0;
 
      /* need to cache an array of solvers for fast lookup by id */
-     slvrs = (slvpair **) fftw_malloc(sizeof(slvpair *) * (ego->idcnt - 1),
+     slvrs = (slvdesc **) fftw_malloc(sizeof(slvdesc *) * (ego->idcnt - 1),
 				      OTHER);
      for (i = 0; i + 1 < ego->idcnt; ++i) slvrs[i] = 0;
      FORALL_SOLVERS(ego, s, p, {
@@ -343,8 +313,8 @@ static int imprt(planner *ego, scanner *sc)
 	       goto done;
 	  if (id < 1 || id >= ego->idcnt)
 	       goto done;
-	  s = insert(ego, flags, nthr, p, (plan *) 0, slvrs[id - 1]);
-	  s->blessed = 1;
+	  s = insert(ego, flags, nthr, p, slvrs[id - 1]);
+	  BLESS(s);
 	  X(problem_destroy)(p); p = 0;
      }
      ret = 1;
@@ -357,14 +327,14 @@ static int imprt(planner *ego, scanner *sc)
 
 static void clear_problem_marks(planner *ego)
 {
-     prbpair *pp;
+     prbdesc *pp;
      for (pp = ego->problems; pp; pp = pp->cdr)
 	  pp->mark = 0;
 }
 
 static void mark_problem(planner *ego, problem *p)
 {
-     prbpair *pp;
+     prbdesc *pp;
      for (pp = ego->problems; pp; pp = pp->cdr)
 	  if (pp->adt == p->adt) {
 	       pp->mark = 1;
@@ -375,7 +345,7 @@ static void mark_problem(planner *ego, problem *p)
 static void exprt_conf(planner *ego, printer *p)
 {
      solutions *s;
-     prbpair *pp;
+     prbdesc *pp;
      uint h;
      const char *prev_reg_nam = (const char *) 0;
      int idcnt = 0, reg_nam_cnt = 1, blessed_reg_nam = 0;
@@ -391,7 +361,7 @@ static void exprt_conf(planner *ego, printer *p)
      clear_problem_marks(ego);
      for (h = 0; h < ego->hashsiz; ++h)
           for (s = ego->sols[h]; s; s = s->cdr) {
-               if (is_blessed(s) && s->sp && s->sp->reg_nam && s->sp->id > 0) {
+               if (BLESSEDP(s) && s->sp && s->sp->reg_nam && s->sp->id > 0) {
 		    s->sp->id = 0; /* mark to prevent duplicates */
 		    mark_problem(ego, s->p);
 		    p->print(p, "          extern void %s(planner*);\n",
@@ -458,14 +428,21 @@ static void exprt_conf(planner *ego, printer *p)
 	      "}\n", STRINGIZE(X(solvtab_exec)));
 }
 
+static void hooknil(plan *pln, const problem *p)
+{
+     UNUSED(pln);
+     UNUSED(p);
+     /* do nothing */
+}
+
 /*
  * create a planner
  */
 planner *X(mkplanner)(size_t sz,
 		      void (*infmkplan)(planner *ego, problem *p, 
-					plan **, slvpair **),
+					plan **, slvdesc **),
                       void (*destroy) (planner *),
-		      int flags)
+		      uint flags)
 {
      static const planner_adt padt = {
 	  register_solver, register_problem,
@@ -481,7 +458,7 @@ planner *X(mkplanner)(size_t sz,
      p->hook = hooknil;
      p->cur_reg_nam = 0;
      p->solvers = 0;
-     p->last_solver_cdr = &p->solvers;
+     p->solvers_tail = &p->solvers;
      p->problems = 0;
      p->sols = 0;
      p->hashsiz = 0;
@@ -496,8 +473,8 @@ planner *X(mkplanner)(size_t sz,
 
 void X(planner_destroy)(planner *ego)
 {
-     slvpair *l, *l0;
-     prbpair *p, *p0;
+     slvdesc *l, *l0;
+     prbdesc *p, *p0;
 
      /* destroy local state, if any */
      if (ego->destroy)
@@ -569,7 +546,7 @@ void X(planner_dump)(planner *ego, int verbose)
                pr->print(pr, "\nbucket %d:\n", h);
 
                for (s = ego->sols[h]; s; s = s->cdr) 
-		    pr->print(pr, "%P:%(%p%)\n", s->p, s->pln);
+		    pr->print(pr, "%P\n", s->p);
           }
           X(printer_destroy)(pr);
      }
@@ -580,7 +557,7 @@ void X(planner_dump)(planner *ego, int verbose)
           for (s = ego->sols[h]; s; s = s->cdr) {
                ++l;
                ++cnt;
-               if (!s->pln)
+               if (!s->sp)
                     ++cnt_null;
           }
           if (l > max_len)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.16 2002-08-30 16:09:48 athena Exp $ */
+/* $Id: planner-score.c,v 1.17 2002-08-31 01:29:10 athena Exp $ */
 #include "ifftw.h"
 
 typedef struct {
@@ -41,16 +41,15 @@ static void adjust_score(plan *pln)
      pln->score = k.sc;
 }
 
-static void mkplan(planner *ego, problem *p, plan **bestp, slvpair **pairp)
+static void mkplan(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 {
      plan *best = 0;
      int best_score;
      int best_not_yet_timed = 1;
-
+     slvdesc *sp;
 
      /* if a solver is suggested (by wisdom) use it */
-     if (*pairp) {
-	  slvpair *sp = *pairp;
+     if ((sp = *descp)) {
 	  solver *s = sp->slv;
 	  best = ego->adt->slv_mkplan(ego, p, s);
 	  best->score = s->adt->score(s, p, ego);
@@ -83,13 +82,13 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvpair **pairp)
 			      if (pln->pcost < best->pcost) {
 				   X(plan_destroy)(best);
 				   best = pln;
-				   *pairp = sp;
+				   *descp = sp;
 			      } else {
 				   X(plan_destroy)(pln);
 			      }
 			 } else {
 			      best = pln;
-			      *pairp = sp;
+			      *descp = sp;
 			 }
 		    }
 	       }
@@ -107,7 +106,7 @@ static void mkplan(planner *ego, problem *p, plan **bestp, slvpair **pairp)
 }
 
 /* constructor */
-planner *X(mkplanner_score)(int flags)
+planner *X(mkplanner_score)(uint flags)
 {
      return X(mkplanner)(sizeof(planner), mkplan, 0, flags);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scanners.c,v 1.1 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: scanners.c,v 1.2 2002-08-31 01:29:10 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -33,7 +33,7 @@ static int getchr_file(scanner *sc_)
      return fgetc(sc->f);
 }
 
-scanner *X(mkscanner_file)(FILE *f, const prbpair *probs)
+scanner *X(mkscanner_file)(FILE *f, const prbdesc *probs)
 {
      S_file *sc = (S_file *) X(mkscanner)(sizeof(S_file), getchr_file, probs);
      sc->f = f;
@@ -53,7 +53,7 @@ static int getchr_str(scanner *sc_)
      return *sc->s++;
 }
 
-scanner *X(mkscanner_str)(const char *s, const prbpair *probs)
+scanner *X(mkscanner_str)(const char *s, const prbdesc *probs)
 {
      S_str *sc = (S_str *) X(mkscanner)(sizeof(S_str), getchr_str, probs);
      sc->s = s;

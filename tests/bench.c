@@ -171,6 +171,8 @@ void setup(struct problem *p)
      /* plnr->flags |= IMPATIENT; */
      /* plnr->flags |= IMPATIENT | CLASSIC_VRECURSE; */
      /* plnr->flags |= ESTIMATE | IMPATIENT; */
+     /* plnr->flags |= IMPATIENT; */
+
      if (p->kind == PROBLEM_REAL)
 	  plnr->flags |= DESTROY_INPUT;
 
@@ -255,10 +257,12 @@ void setup(struct problem *p)
 					     is * p->size, os * p->size), 
 		    ri, ro, 
 #if 1
-		    p->sign == FFT_SIGN ? R2HC : HC2R);
+		    p->sign == FFT_SIGN ? R2HC : HC2R
 #else
-                    RODFT11);
+                    RODFT11
 #endif
+		    ); /* emacs is confused if you duplicate the paren
+			  inside #if */
      }
      else {
 	  uint i, *npadr, *npadc;
@@ -285,7 +289,16 @@ void setup(struct problem *p)
      pln = plnr->adt->mkplan(plnr, prblm);
      tplan = timer_stop();
      BENCH_ASSERT(pln);
-     X(plan_bless)(pln);
+
+     {
+	  /* tentative blessing protocol (to be implemented by API) */
+	  plan *pln0;
+	  plnr->flags |= BLESSING;
+	  pln0 = plnr->adt->mkplan(plnr, prblm);
+	  X(plan_destroy)(pln0);
+	  plnr->flags |= ~BLESSING;
+     }
+	  
 
      if (verbose) {
 	  printer *pr = FFTW(mkprinter_file) (stdout);
