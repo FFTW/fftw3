@@ -90,8 +90,7 @@ void setup(struct problem *p)
 			    break;
 		       default:
 			    the_plan = FFTW(plan_dft)(p->rank, p->n,
-						      p->in, p->n,
-						      p->out, p->n,
+						      p->in, p->out,
 						      p->sign, flags);
 			    break;
 		   }
