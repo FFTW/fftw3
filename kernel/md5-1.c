@@ -24,7 +24,7 @@
 void X(md5putb)(md5 *p, const void *d_, uint len)
 {
      uint i;
-     const unsigned char *d = d_;
+     const unsigned char *d = (const unsigned char *)d_;
      for (i = 0; i < len; ++i)
 	  X(md5putc)(p, d[i]);
 }
