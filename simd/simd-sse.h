@@ -206,41 +206,11 @@ static __inline__ V VBYI(V x)
 #define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 
-#undef FAST_AND_BLOATED_TWIDDLES
+/* twiddle storage #1: compact, slower */
+#define VTW1(x) {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
+#define TWVL1 (VL)
 
-#ifdef FAST_AND_BLOATED_TWIDDLES
-
-/* avoid twiddle shuffling by storing twiddles twice in the
-   proper format */
-
-#define VTW(x) 								\
-  {TW_COS, 0, x}, {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_COS, 1, x},	\
-  {TW_SIN, 0, -x}, {TW_SIN, 0, x}, {TW_SIN, 1, -x}, {TW_SIN, 1, x}
-#define TWVL (2 * VL)
-
-static __inline__ V BYTW(const R *t, V sr)
-{
-     const V *twp = (const V *)t;
-     V si = FLIP_RI(sr);
-     V tr = twp[0], ti = twp[1];
-     return VADD(VMUL(tr, sr), VMUL(ti, si));
-}
-
-static __inline__ V BYTWJ(const R *t, V sr)
-{
-     const V *twp = (const V *)t;
-     V si = FLIP_RI(sr);
-     V tr = twp[0], ti = twp[1];
-     return VSUB(VMUL(tr, sr), VMUL(ti, si));
-}
-
-#else /* FAST_AND_BLOATED_TWIDDLES */
-
-#define VTW(x) 								\
-  {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
-#define TWVL (VL)
-
-static __inline__ V BYTW(const R *t, V sr)
+static __inline__ V BYTW1(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V tx = twp[0];
@@ -251,7 +221,7 @@ static __inline__ V BYTW(const R *t, V sr)
      return VADD(tr, VMUL(ti, sr));
 }
 
-static __inline__ V BYTWJ(const R *t, V sr)
+static __inline__ V BYTWJ1(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V tx = twp[0];
@@ -262,8 +232,28 @@ static __inline__ V BYTWJ(const R *t, V sr)
      return VSUB(tr, VMUL(ti, sr));
 }
 
+/* twiddle storage #2: twice the space, faster (when in cache) */
+#define VTW2(x)								\
+  {TW_COS, 0, x}, {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_COS, 1, x},	\
+  {TW_SIN, 0, -x}, {TW_SIN, 0, x}, {TW_SIN, 1, -x}, {TW_SIN, 1, x}
+#define TWVL2 (2 * VL)
 
-#endif /* FAST_AND_BLOATED_TWIDDLES */
+static __inline__ V BYTW2(const R *t, V sr)
+{
+     const V *twp = (const V *)t;
+     V si = FLIP_RI(sr);
+     V tr = twp[0], ti = twp[1];
+     return VADD(VMUL(tr, sr), VMUL(ti, si));
+}
+
+static __inline__ V BYTWJ2(const R *t, V sr)
+{
+     const V *twp = (const V *)t;
+     V si = FLIP_RI(sr);
+     V tr = twp[0], ti = twp[1];
+     return VSUB(VMUL(tr, sr), VMUL(ti, si));
+}
+
 
 #define RIGHT_CPU X(have_sse)
 extern int RIGHT_CPU(void);

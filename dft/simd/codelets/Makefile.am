@@ -40,9 +40,15 @@ n2bv_14.c n2bv_16.c n2bv_32.c n2bv_64.c
 T1F = t1fv_2.c t1fv_3.c t1fv_4.c t1fv_5.c t1fv_6.c t1fv_7.c t1fv_8.c	\
 t1fv_9.c t1fv_10.c t1fv_12.c t1fv_15.c t1fv_16.c t1fv_32.c t1fv_64.c
 
+# same as t1fv_*, but with different twiddle storage scheme
+T2F = t2fv_2.c t2fv_4.c t2fv_8.c t2fv_16.c t2fv_32.c t2fv_64.c
+
 # as above, but FFTW_BACKWARD
 T1B = t1bv_2.c t1bv_3.c t1bv_4.c t1bv_5.c t1bv_6.c t1bv_7.c t1bv_8.c	\
 t1bv_9.c t1bv_10.c t1bv_12.c t1bv_15.c t1bv_16.c t1bv_32.c t1bv_64.c
+
+# same as t1bv_*, but with different twiddle storage scheme
+T2B = t2bv_2.c t2bv_4.c t2bv_8.c t2bv_16.c t2bv_32.c t2bv_64.c
 
 ###########################################################################
 # q1fv_<r> is <r> twiddle FFTW_FORWARD FFTs of size <r> (DIF step),
@@ -56,8 +62,8 @@ Q1F = q1fv_2.c q1fv_4.c q1fv_8.c
 Q1B = q1bv_2.c q1bv_4.c q1bv_8.c
 
 ###########################################################################
-SIMD_CODELETS = $(N1F) $(N1B) $(N2F) $(N2B) $(T1F) $(T1B) $(Q1F)	\
-$(Q1B)
+SIMD_CODELETS = $(N1F) $(N1B) $(N2F) $(N2B) $(T1F) $(T2F) $(T1B)	\
+$(T2B) $(Q1F) $(Q1B)
 
 if HAVE_SIMD
 ALL_CODELETS = $(SIMD_CODELETS)
@@ -93,8 +99,14 @@ n2bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 t1fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1fv_$* -include "t1f.h") | $(ADD_DATE) | $(INDENT) >$@
 
+t2fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t2fv_$* -include "t2f.h") | $(ADD_DATE) | $(INDENT) >$@
+
 t1bv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1bv_$* -include "t1b.h" -sign 1) | $(ADD_DATE) | $(INDENT) >$@
+
+t2bv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t2bv_$* -include "t2b.h" -sign 1) | $(ADD_DATE) | $(INDENT) >$@
 
 q1fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDSQ_C) $(GFLAGS) -n $* -dif -name q1fv_$* -include "q1f.h") | $(ADD_DATE) | $(INDENT) >$@

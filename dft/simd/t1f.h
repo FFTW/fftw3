@@ -25,6 +25,11 @@
 #undef ST
 #define ST STA
 
+#define VTW VTW1
+#define TWVL TWVL1
+#define BYTW BYTW1
+#define BYTWJ BYTWJ1
+
 #define GENUS X(dft_t1fsimd_genus)
 extern const ct_genus GENUS;
 

@@ -20,6 +20,11 @@
 
 #include "simd.h"
 
+#define VTW VTW1
+#define TWVL TWVL1
+#define BYTW BYTW1
+#define BYTWJ BYTWJ1
+
 #define GENUS X(dft_q1fsimd_genus)
 extern const ct_genus GENUS;
 
