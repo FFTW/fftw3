@@ -4,6 +4,8 @@
 
 * fma codelets?
 
+* inline codelets?
+
 TODO before/at release:
 
 * remember to remove -no-randomized-cse from rdft codelets before
