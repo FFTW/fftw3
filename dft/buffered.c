@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.49 2003-04-04 23:14:14 stevenj Exp $ */
+/* $Id: buffered.c,v 1.50 2003-05-15 23:09:07 athena Exp $ */
 
 #include "dft.h"
 
@@ -170,7 +170,6 @@ static int applicable(const problem *p_, const S *ego, const planner *plnr)
 	  if (p->ri != p->ro) return 0;
 	  if (toobig(p->sz->dims[0].n, ego)) return 0;
      }
-
      return 1;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: solve.c,v 1.5 2003-04-04 21:15:53 athena Exp $ */
+/* $Id: solve.c,v 1.6 2003-05-15 23:09:07 athena Exp $ */
 
 #include "dft.h"
 
@@ -30,4 +30,11 @@ void X(dft_solve)(const plan *ego_, const problem *p_)
      ego->apply(ego_, 
 		UNTAINT(p->ri), UNTAINT(p->ii), 
 		UNTAINT(p->ro), UNTAINT(p->io));
+}
+
+void X(dftw_solve)(const plan *ego_, const problem *p_)
+{
+     const plan_dftw *ego = (const plan_dftw *) ego_;
+     const problem_dftw *p = (const problem_dftw *) p_;
+     ego->apply(ego_, UNTAINT(p->rio), UNTAINT(p->iio));
 }

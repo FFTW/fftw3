@@ -487,5 +487,5 @@ static solver *mksolver_dit(void)
 void X(dft_rader_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
-     REGISTER_SOLVER(p, mksolver_dit());
+//     REGISTER_SOLVER(p, mksolver_dit());
 }

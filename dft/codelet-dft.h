@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet-dft.h,v 1.3 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: codelet-dft.h,v 1.4 2003-05-15 23:09:07 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -83,21 +83,17 @@ struct ct_desc_s {
      int dist;
 };
 
-typedef const R *(*kdft_dit) (R *rioarray, R *iioarray, const R *W,
-                              stride ios, int m, int dist);
-void X(kdft_dit_register)(planner *p, kdft_dit codelet, const ct_desc *desc);
+typedef const R *(*kdftw) (R *rioarray, R *iioarray, const R *W,
+			   stride ios, int m, int dist);
+void X(kdft_dit_register)(planner *p, kdftw codelet, const ct_desc *desc);
+void X(kdft_dif_register)(planner *p, kdftw codelet, const ct_desc *desc);
 
 
-typedef const R *(*kdft_difsq) (R *rioarray, R *iioarray,
-                                const R *W, stride is, stride vs,
-                                int m, int dist);
-void X(kdft_difsq_register)(planner *p, kdft_difsq codelet,
-                            const ct_desc *desc);
+typedef const R *(*kdftwsq) (R *rioarray, R *iioarray,
+			     const R *W, stride is, stride vs,
+			     int m, int dist);
+void X(kdft_difsq_register)(planner *p, kdftwsq codelet, const ct_desc *desc);
 
-
-typedef const R *(*kdft_dif) (R *rioarray, R *iioarray, const R *W,
-                              stride ios, int m, int dist);
-void X(kdft_dif_register)(planner *p, kdft_dif codelet, const ct_desc *desc);
 
 extern const solvtab X(solvtab_dft_standard);
 extern const solvtab X(solvtab_dft_inplace);

@@ -18,13 +18,23 @@
  *
  */
 
-/* $Id: plan.c,v 1.3 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: plan.c,v 1.4 2003-05-15 23:09:07 athena Exp $ */
 
 #include "dft.h"
 
 plan *X(mkplan_dft)(size_t size, const plan_adt *adt, dftapply apply)
 {
      plan_dft *ego;
+
+     ego = (plan_dft *) X(mkplan)(size, adt);
+     ego->apply = apply;
+
+     return &(ego->super);
+}
+
+plan *X(mkplan_dftw)(size_t size, const plan_adt *adt, dftwapply apply)
+{
+     plan_dftw *ego;
 
      ego = (plan_dft *) X(mkplan)(size, adt);
      ego->apply = apply;

@@ -18,15 +18,16 @@
  *
  */
 
-/* $Id: kdft-dif.c,v 1.6 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: kdft-dif.c,v 1.7 2003-05-15 23:09:07 athena Exp $ */
 
 #include "dft.h"
 
-void (*X(kdft_dif_register_hook))(planner *, kdft_dit, const ct_desc *) = 0;
+void (*X(kdft_dif_register_hook))(planner *, kdftw, const ct_desc *) = 0;
 
-void X(kdft_dif_register)(planner *p, kdft_dif codelet, const ct_desc *desc)
+void X(kdft_dif_register)(planner *p, kdftw codelet, const ct_desc *desc)
 {
-     REGISTER_SOLVER(p, X(mksolver_dft_ct_dif)(codelet, desc));
+     REGISTER_SOLVER(p, X(mksolver_dft_directw)(codelet, desc, DECDIF));
+     REGISTER_SOLVER(p, X(mksolver_dft_directwbuf)(codelet, desc, DECDIF));
      if (X(kdft_dif_register_hook))
 	  X(kdft_dif_register_hook)(p, codelet, desc);
 }

@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: kdft-difsq.c,v 1.5 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: kdft-difsq.c,v 1.6 2003-05-15 23:09:07 athena Exp $ */
 
 #include "dft.h"
 
-void X(kdft_difsq_register)(planner *p, kdft_difsq k, const ct_desc *desc)
+void X(kdft_difsq_register)(planner *p, kdftwsq k, const ct_desc *desc)
 {
-     REGISTER_SOLVER(p, X(mksolver_dft_ct_ditf)(k, desc));
+     REGISTER_SOLVER(p, X(mksolver_dft_directwsq)(k, desc, DECDIF));
 }
