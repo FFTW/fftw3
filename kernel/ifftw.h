@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.228 2003-05-16 12:19:38 athena Exp $ */
+/* $Id: ifftw.h,v 1.229 2003-05-16 18:22:05 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -659,6 +659,9 @@ extern trigreal X(sincos)(trigreal m, trigreal n, int sinp);
 
 #if defined(FFTW_ENABLE_UNSAFE_MULMOD)
 #  define MULMOD(x,y,p) (((x) * (y)) % (p))
+#elif defined(_MSC_VER)
+#  define MULMOD(x,y,p) ((int) ((((__int64) (x)) * ((__int64) > (y))) \
+                                 % ((__int64) (p))))
 #elif ((SIZEOF_INT != 0) && (SIZEOF_LONG >= 2 * SIZEOF_INT))
 #  define MULMOD(x,y,p) ((int) ((((long) (x)) * ((long) (y))) % ((long) (p))))
 #elif ((SIZEOF_INT != 0) && (SIZEOF_LONG_LONG >= 2 * SIZEOF_INT))
