@@ -56,12 +56,16 @@ tensor *X(mktensor_rowmajor_pad)(uint rnk, const uint *n,
      tensor *x;
 
      if (FINITE_RNK(rnk) && rnk > 0) {
-	  if (inplace && n == niphys) {
-	       niphys_pad = copy_n(rnk, n);
-	       niphys_pad[rnk-1] = 2 * (n[rnk-1] / 2 + 1);
-	       niphys = niphys_pad;
+	  if (!niphys) {
+	       if (inplace) {
+		    niphys_pad = copy_n(rnk, n);
+		    niphys_pad[rnk-1] = 2 * (n[rnk-1] / 2 + 1);
+		    niphys = niphys_pad;
+	       }
+	       else
+		    niphys = n;
 	  }
-	  if (nophys == n) {
+	  if (!nophys) {
 	       nophys_pad = copy_n(rnk, n);
 	       nophys_pad[rnk-1] = n[rnk-1] / 2 + 1;
 	       nophys = nophys_pad;
