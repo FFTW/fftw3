@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: altivec.c,v 1.8 2005-02-04 16:30:30 athena Exp $ */
+/* $Id: altivec.c,v 1.9 2005-02-07 23:48:36 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -56,7 +56,7 @@ static int really_have_altivec(void)
 #include <setjmp.h>
 
 static jmp_buf jb;
-static vector int dummy;
+static vector unsigned int dummy;
 
 static void sighandler(int x)
 {
