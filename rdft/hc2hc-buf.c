@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-buf.c,v 1.14 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: hc2hc-buf.c,v 1.15 2003-05-07 21:59:23 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -165,10 +165,10 @@ static int applicable0(const solver_hc2hc *ego, const problem *p_,
 		  && (p->kind[0]==R2HC || p->I == p->O || DESTROY_INPUTP(plnr))
                   /* check both batch size and remainder */
                   && (m < BATCHSZ ||
-                      (e->genus->okp(e, 0, ((R *)0) + 2*BATCHSZ*r-1, 1, 0, 
+                      (e->genus->okp(e, 0, ((const R *)0)+2*BATCHSZ*r-1, 1,0, 
 				     2*BATCHSZ + 1, r)))
                   && (m < BATCHSZ ||
-                      (e->genus->okp(e, 0, ((R *)0) 
+                      (e->genus->okp(e, 0, ((const R *)0) 
 				     + 2*(((m-1)/2) % BATCHSZ)*r-1, 1, 0, 
 				     2*(((m-1)/2) % BATCHSZ) + 1, r)))
 	       );
