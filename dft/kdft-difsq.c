@@ -18,12 +18,12 @@
  *
  */
 
-/* $Id: kdft-difsq.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: kdft-difsq.c,v 1.3 2002-06-10 20:30:37 athena Exp $ */
 
 #include "dft.h"
 
 void X(kdft_difsq_register)(planner *p, kdft_difsq k, const ct_desc *desc)
 {
      solver *s = X(mksolver_dft_ct_ditf)(k, desc);
-     p->adt->register_solver(p, s);
+     REGISTER_SOLVER(p, s);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: problem.c,v 1.3 2002-06-10 20:30:37 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -36,7 +36,7 @@ problem *X(mkproblem)(size_t sz, const problem_adt *adt)
 void X(problem_destroy)(problem *ego)
 {
      if ((--ego->refcnt) == 0)
-          ego->adt->destroy(ego);
+	  DESTROY(ego);
 }
 
 /* ``copy'' the problem */

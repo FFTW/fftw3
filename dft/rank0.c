@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.8 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: rank0.c,v 1.9 2002-06-10 20:30:37 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -251,5 +251,5 @@ void X(dft_rank0_register)(planner *p)
      };
 
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
-          p->adt->register_solver(p, mksolver(adts[i]));
+          REGISTER_SOLVER(p, mksolver(adts[i]));
 }

@@ -33,8 +33,9 @@ NAMES: keep them short.  Shorter than you think.  The Bible was written
 
 NAME MANGLING: use X(foo) for external names instead of fftw_foo.
     X(foo) expands to sfftw_foo or dfftw_foo, depending on the
-    precision.  Names that are not exported do not need to be mangled.
-    (Unfortunately, this is a form of hungarian notation.  Grrr...)
+    precision.  (Unfortunately, this is a ugly form of hungarian
+    notation.  Grrr...)  Names that are not exported do not need to be
+    mangled.
   
 REPEATED CODE:  favor a table.  E.g., do not write
 

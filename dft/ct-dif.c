@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.5 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: ct-dif.c,v 1.6 2002-06-10 20:30:37 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -79,10 +79,8 @@ static problem *mkcld(const solver_ct *ego, const problem_dft *p)
      tensor cld_vec = X(tensor_append)(radix, p->vecsz);
      X(tensor_destroy)(radix);
 
-     return
-          X(mkproblem_dft_d)(
-               X(mktensor_1d)(m, d[0].is, e->radix * d[0].os),
-               cld_vec, p->ri, p->ii, p->ro, p->io);
+     return X(mkproblem_dft_d)(X(mktensor_1d)(m, d[0].is, e->radix * d[0].os),
+			       cld_vec, p->ri, p->ii, p->ro, p->io);
 }
 
 static int score(const solver *ego_, const problem *p_)

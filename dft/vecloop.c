@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vecloop.c,v 1.9 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: vecloop.c,v 1.10 2002-06-10 20:30:37 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -68,7 +68,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
-     ego->cld->adt->awake(ego->cld, flg);
+     AWAKE(ego->cld, flg);
 }
 
 static void destroy(plan *ego_)
@@ -178,7 +178,7 @@ static int score(const solver *ego_, const problem *p_)
      return GOOD;
 }
 
-static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
+static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const S *ego = (const S *) ego_;
      const problem_dft *p;
@@ -197,12 +197,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
           return (plan *) 0;
      p = (const problem_dft *) p_;
 
-     cldp =
-          X(mkproblem_dft_d)(
-               X(tensor_copy)(p->sz),
-               X(tensor_copy_except)(p->vecsz, vdim),
-               p->ri, p->ii, p->ro, p->io);
-     cld = planner->adt->mkplan(planner, cldp);
+     cldp = X(mkproblem_dft_d)(X(tensor_copy)(p->sz),
+			       X(tensor_copy_except)(p->vecsz, vdim),
+			       p->ri, p->ii, p->ro, p->io);
+     cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld)
           return (plan *) 0;
@@ -242,5 +240,5 @@ void X(dft_vecloop_register)(planner *p)
      const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 
      for (i = 0; i < nbuddies; ++i)
-          p->adt->register_solver(p, mksolver(buddies[i], buddies, nbuddies));
+          REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));
 }

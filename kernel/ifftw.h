@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.19 2002-06-10 14:55:40 athena Exp $ */
+/* $Id: ifftw.h,v 1.20 2002-06-10 20:30:37 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -35,6 +35,12 @@
 /* shorthands */
 typedef fftw_real R;
 #define X FFTW
+
+/* get rid of that object-oriented stink: */
+#define DESTROY(thing) ((thing)->adt->destroy)(thing)
+#define AWAKE(plan, flag) ((plan)->adt->awake)(plan, flag)
+#define REGISTER_SOLVER(p, s) ((p)->adt->register_solver)((p), (s))
+#define MKPLAN(plnr, prblm) ((plnr)->adt->mkplan)((plnr), (prblm))
 
 #ifndef HAVE_UINT
 typedef unsigned int uint;
@@ -62,6 +68,24 @@ extern void X(assertion_failed)(const char *s, int line, char *file);
 #else
 #define A(ex) /* nothing */
 #endif
+
+
+/*-----------------------------------------------------------------------*/
+/* alloca: */
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif /* HAVE_ALLOCA_H */
+
+#ifdef HAVE_ALLOCA
+/* use alloca if available */
+#define STACK_MALLOC(x) alloca(x)
+#define STACK_FREE(x) 
+
+#else /* ! HAVE_ALLOCA */
+/* use malloc instead of alloca */
+#define STACK_MALLOC(x) fftw_malloc(x, OTHER)
+#define STACK_FREE(x) fftw_free(x)
+#endif /* ! HAVE_ALLOCA */
 
 /*-----------------------------------------------------------------------*/
 /* alloc.c: */
@@ -198,8 +222,6 @@ void X(printer_destroy)(printer *p);
 
 /*-----------------------------------------------------------------------*/
 /* plan.c: */
-enum awake { SLEEP, AWAKE };
-
 typedef struct {
      void (*solve)(plan *ego, const problem *p);
      void (*awake)(plan *ego, int awaken);

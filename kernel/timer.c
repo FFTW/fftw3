@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.5 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: timer.c,v 1.6 2002-06-10 20:30:37 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdio.h>
@@ -105,7 +105,7 @@ double X(measure_execution_time)(plan *pln, const problem *p)
      int iter;
      int repeat;
 
-     pln->adt->awake(pln, AWAKE);
+     AWAKE(pln, 1);
      p->adt->zero(p);
 
  start_over:
@@ -137,7 +137,7 @@ double X(measure_execution_time)(plan *pln, const problem *p)
           if (tmin >= TIME_MIN) {
                tmin /= (double) iter;
                tmax /= (double) iter;
-               pln->adt->awake(pln, SLEEP);
+               AWAKE(pln, 0);
                return tmin;
           }
      }

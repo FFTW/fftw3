@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.8 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: buffered.c,v 1.9 2002-06-10 20:30:37 athena Exp $ */
 
 #include "dft.h"
 
@@ -84,15 +84,15 @@ static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
 
-     ego->cld->adt->awake(ego->cld, flg);
-     ego->cldcpy->adt->awake(ego->cldcpy, flg);
-     ego->cldrest->adt->awake(ego->cldrest, flg);
+     AWAKE(ego->cld, flg);
+     AWAKE(ego->cldcpy, flg);
+     AWAKE(ego->cldrest, flg);
 
      if (flg) {
           if (!ego->bufs)
-               ego->bufs =
-                    (R *) fftw_malloc(sizeof(R) * ego->nbuf * ego->bufdist * 2,
-                                      BUFFERS);
+               ego->bufs = 
+		    (R *)fftw_malloc(
+			 sizeof(R) * ego->nbuf * ego->bufdist * 2, BUFFERS);
      } else {
           if (ego->bufs)
                X(free)(ego->bufs);
@@ -258,7 +258,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
                X(mktensor_1d)(nbuf, ivs, bufdist * 2),
                p->ri, p->ii, bufs, bufs + 1);
 
-     cld = plnr->adt->mkplan(plnr, cldp);
+     cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld)
           goto nada;
@@ -271,7 +271,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
                               n, 2, p->sz.dims[0].os),
                bufs, bufs + 1, p->ro, p->io);
 
-     cldcpy = plnr->adt->mkplan(plnr, cldp);
+     cldcpy = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cldcpy)
           goto nada;
@@ -286,7 +286,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
                X(tensor_copy)(p->sz),
                X(mktensor_1d)(vl % nbuf, ivs, ovs),
                p->ri, p->ii, p->ro, p->io);
-     cldrest = plnr->adt->mkplan(plnr, cldp);
+     cldrest = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cldrest)
           goto nada;
@@ -345,5 +345,5 @@ void X(dft_buffered_register)(planner *p)
 	  /* nam */            "dft-buffered"
      };
 
-     p->adt->register_solver(p, mksolver(&adt));
+     REGISTER_SOLVER(p, mksolver(&adt));
 }

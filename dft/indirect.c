@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.6 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: indirect.c,v 1.7 2002-06-10 20:30:37 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -132,8 +132,8 @@ static void destroy(plan *ego_)
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
-     ego->cldcpy->adt->awake(ego->cldcpy, flg);
-     ego->cld->adt->awake(ego->cld, flg);
+     AWAKE(ego->cldcpy, flg);
+     AWAKE(ego->cld, flg);
 }
 
 static void print(plan *ego_, printer *p)
@@ -189,13 +189,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      cldp = X(mkproblem_dft_d)(X(mktensor)(0),
                                X(tensor_append)(p->vecsz, p->sz),
                                p->ri, p->ii, p->ri, p->ii);
-     cldcpy = plnr->adt->mkplan(plnr, cldp);
+     cldcpy = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cldcpy)
           goto nada;
 
      cldp = ego->adt->mkcld(p);
-     cld = plnr->adt->mkplan(plnr, cldp);
+     cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld)
           goto nada;
@@ -233,5 +233,5 @@ void X(dft_indirect_register)(planner *p)
      };
 
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
-          p->adt->register_solver(p, mksolver(adts[i]));
+          REGISTER_SOLVER(p, mksolver(adts[i]));
 }

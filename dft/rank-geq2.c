@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.4 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.5 2002-06-10 20:30:37 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -56,8 +56,8 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
-     ego->cld1->adt->awake(ego->cld1, flg);
-     ego->cld2->adt->awake(ego->cld2, flg);
+     AWAKE(ego->cld1, flg);
+     AWAKE(ego->cld2, flg);
 }
 
 static void destroy(plan *ego_)
@@ -184,7 +184,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      cldp = X(mkproblem_dft_d)(X(tensor_copy)(sz2),
                                X(tensor_append)(p->vecsz, sz1),
                                p->ri, p->ii, p->ro, p->io);
-     cld1 = plnr->adt->mkplan(plnr, cldp);
+     cld1 = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld1)
           goto nada;
@@ -192,7 +192,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      cldp = X(mkproblem_dft_d)(X(tensor_copy)(sz1),
                                X(tensor_append)(p->vecsz, sz2),
                                p->ro, p->io, p->ro, p->io);
-     cld2 = plnr->adt->mkplan(plnr, cldp);
+     cld2 = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld2)
           goto nada;
@@ -240,7 +240,7 @@ void X(dft_rank_geq2_register)(planner *p)
      const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 
      for (i = 0; i < nbuddies; ++i)
-          p->adt->register_solver(p, mksolver(buddies[i], buddies, nbuddies));
+          REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));
 
      /* FIXME:
 

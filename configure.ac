@@ -79,6 +79,8 @@ AC_HEADER_TIME
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
 AC_FUNC_MALLOC
+AC_FUNC_STRTOD
+AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
 AC_CHECK_FUNCS(BSDgettimeofday)
 AC_CHECK_FUNCS(gettimeofday)

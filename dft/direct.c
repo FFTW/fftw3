@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.12 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: direct.c,v 1.13 2002-06-10 20:30:37 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -81,12 +81,12 @@ static int applicable(const solver *ego_, const problem *p_)
 	       && (!d->os || d->os == p->sz.dims[0].os)
 	       && (0
 
-		   /* can always operate out-of-place */
+		   /* can operate out-of-place */
 		   || p->ri != p->ro
 
 		   /*
-		    * can always compute one transform in-place, no
-		    * matter what the strides are.
+		    * can compute one transform in-place, no matter
+		    * what the strides are.
 		    */
 		   || p->vecsz.rnk == 0
 
@@ -106,7 +106,7 @@ static int score(const solver *ego, const problem *p)
      return (applicable(ego, p)) ? GOOD : BAD;
 }
 
-static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
+static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const S *ego = (const S *) ego_;
      P *pln;
@@ -118,7 +118,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
 	  X(dft_solve), X(null_awake), print, destroy
      };
 
-     UNUSED(planner);
+     UNUSED(plnr);
 
      if (!applicable(ego_, p_))
           return (plan *)0;

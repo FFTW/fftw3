@@ -18,12 +18,12 @@
  *
  */
 
-/* $Id: kdft.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: kdft.c,v 1.3 2002-06-10 20:30:37 athena Exp $ */
 
 #include "dft.h"
 
 void X(kdft_register)(planner *p, kdft codelet, const kdft_desc *desc)
 {
      solver *s = X(mksolver_dft_direct)(codelet, desc);
-     p->adt->register_solver(p, s);
+     REGISTER_SOLVER(p, s);
 }

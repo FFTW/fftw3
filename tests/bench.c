@@ -84,12 +84,13 @@ void setup(struct problem *p)
 	  ro = io + 1;
      }
 
-     prblm = FFTW(mkproblem_dft_d) (FFTW(mktensor_rowmajor)
-				    (p->rank, p->n, p->n, 2, 2),
-				    FFTW(mktensor_rowmajor) (p->vrank, p->vn,
-							     p->vn, 2 * p->size,
-							     2 * p->size), ri,
-				    ii, ro, io);
+     prblm = 
+	  FFTW(mkproblem_dft_d) (FFTW(mktensor_rowmajor)
+				 (p->rank, p->n, p->n, 2, 2),
+				 FFTW(mktensor_rowmajor) (p->vrank, p->vn,
+							  p->vn, 2 * p->size,
+							  2 * p->size), 
+				 ri, ii, ro, io);
      pln = plnr->adt->mkplan(plnr, prblm);
      BENCH_ASSERT(pln);
 
@@ -100,7 +101,7 @@ void setup(struct problem *p)
 	  printf("\n");
      }
      printf("%d\n", plnr->ntry);
-     pln->adt->awake(pln, AWAKE);
+     pln->adt->awake(pln, 1);
 }
 
 void doit(int iter, struct problem *p)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.6 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: ct.c,v 1.7 2002-06-10 20:30:37 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -42,7 +42,7 @@ static void awake(plan *ego_, int flg)
      plan_ct *ego = (plan_ct *) ego_;
      plan *cld = ego->cld;
 
-     cld->adt->awake(cld, flg);
+     AWAKE(cld, flg);
 
      if (flg) {
           if (!ego->td) {
@@ -117,7 +117,7 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
      m = n / r;
 
      cldp = adt->mkcld(ego, p);
-     cld = plnr->adt->mkplan(plnr, cldp);
+     cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
 
      if (!cld)

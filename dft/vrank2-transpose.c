@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank2-transpose.c,v 1.4 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: vrank2-transpose.c,v 1.5 2002-06-10 20:30:37 athena Exp $ */
 
 /* rank-0, vector-rank-2, square transposition  */
 
@@ -129,5 +129,5 @@ static solver *mksolver(void)
 
 void X(dft_vrank2_transpose_register)(planner *p)
 {
-     p->adt->register_solver(p, mksolver());
+     REGISTER_SOLVER(p, mksolver());
 }
