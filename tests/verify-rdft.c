@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft.c,v 1.5 2003-01-05 07:31:56 stevenj Exp $ */
+/* $Id: verify-rdft.c,v 1.7 2003-01-05 07:34:36 stevenj Exp $ */
 
 #include "rdft.h"
 #include "debug.h"
@@ -104,7 +104,7 @@ static void cpyhc(R *a, const tensor *sza, const tensor *vecsza,
 		  R *rb, R *ib, const tensor *szb)
 {
      cpyhc_closure k;
-     A(sza->rnk <= 1); /* TODO: support multidimensions? */
+     A(sza->rnk <= 1);
      k.k.apply = cpyhc0;
      k.n = X(tensor_sz(sza));
      if (!FINITE_RNK(sza->rnk) || sza->rnk == 0)
@@ -234,7 +234,7 @@ static void icpyhc2(R *ra, R *ia, const tensor *sza, const tensor *vecsza,
 		    R *rb, R *ib, const tensor *szb)
 {
      cpyhc2_closure k;
-     A(sza->rnk <= 1); /* TODO: support multidimensions? */
+     A(sza->rnk <= 1);
      k.k.apply = icpyhc20;
      k.n = X(tensor_sz(sza));
      if (!FINITE_RNK(sza->rnk) || sza->rnk == 0)
