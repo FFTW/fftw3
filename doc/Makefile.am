@@ -23,7 +23,7 @@ equation-redft00.png equation-redft01.png equation-redft10.png		\
 equation-redft11.png equation-rodft00.png equation-rodft01.png		\
 equation-rodft10.png equation-rodft11.png
 
-EXTRA_DIST = fftw3.pdf html rfftwnd.fig rfftwnd.eps $(EQN_IMAGES)
+EXTRA_DIST = f77_wisdom.f fftw3.pdf html rfftwnd.fig rfftwnd.eps $(EQN_IMAGES)
 
 html: $(fftw3_TEXINFOS) $(EQN_IMAGES) rfftwnd.png
 	$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
