@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.9 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: primes.c,v 1.10 2003-05-15 22:47:18 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -39,8 +39,8 @@ int X(safe_mulmod)(int x, int y, int p)
 	  return((x * y) % p);
      else {
 	  int y2 = y/2;
-	  return((fftw_safe_mulmod(x, y2, p) +
-		  fftw_safe_mulmod(x, y - y2, p)) % p);
+	  return((X(safe_mulmod)(x, y2, p) +
+		  X(safe_mulmod)(x, y - y2, p)) % p);
      }
 }
 #endif /* safe_mulmod ('long long' unavailable) */
