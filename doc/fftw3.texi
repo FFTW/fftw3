@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.47 2003-02-28 22:27:10 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.48 2003-02-28 22:28:48 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1008,9 +1008,9 @@ perspective.@footnote{We provide the DHT mainly as a byproduct of some
 internal algorithms. FFTW computes a real input/output DFT of
 @emph{prime} size by re-expressing it as a DHT plus post/pre-processing
 and then using Rader's prime-DFT algorithm adapted to the DHT.}
-However, we have heard that the DHT can be appropriate in its own right
-for certain applications, and we would be very interested to hear from
-anyone who finds it useful.
+However, we have heard that the DHT can be the most appropriate
+transform in its own right for certain applications, and we would be
+very interested to hear from anyone who finds it useful.
 
 If @code{FFTW_DHT} is specified for multiple dimensions of a
 multi-dimensional transform, FFTW computes the separable product of 1d
