@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.3 2002-07-22 03:58:14 stevenj Exp $ */
+/* $Id: verify.c,v 1.4 2002-07-22 04:22:02 stevenj Exp $ */
 
 #include "rdft.h"
 #include <math.h>
@@ -521,7 +521,7 @@ static void really_verify(plan *pln, const problem_rdft *p,
      nfo.probsz = p->sz;
      nfo.totalsz = X(tensor_append)(p->vecsz, p->sz);
      nfo.pckdsz = pack(nfo.totalsz, 2);
-     nfo.pckdvecsz = pack(p->vecsz, 2 * X(tensor_sz(p->sz)));
+     nfo.pckdvecsz = pack(p->vecsz, 2 * X(tensor_sz)(p->sz));
 
      impulse(n, vecn, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
      linear(N, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
