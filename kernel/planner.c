@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.104 2002-09-17 11:27:17 athena Exp $ */
+/* $Id: planner.c,v 1.105 2002-09-17 11:29:00 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -354,6 +354,8 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  slvdesc *sp;
 	  if ((sp = *descp)) {
 	       solver *s = sp->slv;
+	       /* hack: allow NO_UGLY wisdom in children, since
+		  we don't know how the wisdom was created */
 	       best = invoke_solver(ego, p, s, NO_UGLY);
 	       if (best) 
 		    X(plan_use)(best);
