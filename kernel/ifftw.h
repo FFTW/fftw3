@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.126 2002-09-16 18:59:14 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.127 2002-09-16 19:16:16 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -402,13 +402,11 @@ typedef struct solution_s solution; /* opaque */
 enum { 
      DESTROY_INPUT = 0x1,
      POSSIBLY_UNALIGNED = 0x2,
-     NO_DHT_R2HC = 0x4,
-     CONSERVE_MEMORY = 0x8
+     CONSERVE_MEMORY = 0x4
 };
 
 #define DESTROY_INPUTP(plnr) ((plnr)->problem_flags & DESTROY_INPUT)
 #define POSSIBLY_UNALIGNEDP(plnr) ((plnr)->problem_flags & POSSIBLY_UNALIGNED)
-#define NO_DHT_R2HCP(plnr) ((plnr)->problem_flags & NO_DHT_R2HC)
 #define CONSERVE_MEMORYP(plnr) ((plnr)->problem_flags & CONSERVE_MEMORY)
 
 /* values for planner_flags: */
@@ -424,6 +422,7 @@ enum {
      NO_BUFFERING = 0x20,
      NO_INDIRECT = 0x40,
      BELIEVE_PCOST = 0x80,
+     NO_DHT_R2HC = 0x100,
 
      /* a canonical set of fftw2-like impatient flags */
      IMPATIENT = (0
@@ -457,6 +456,7 @@ enum {
 #define NO_BUFFERINGP(plnr) ((plnr)->planner_flags & NO_BUFFERING)
 #define NO_INDIRECTP(plnr) ((plnr)->planner_flags & NO_INDIRECT)
 #define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
+#define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
 
 #define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE_BIT)
 #define EXHAUSTIVEP(plnr) ((plnr)->planner_flags & EXHAUSTIVE)
