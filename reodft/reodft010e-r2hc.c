@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.2 2002-08-19 23:45:35 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.3 2002-08-20 19:16:48 stevenj Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -80,7 +80,6 @@ static void apply_re01(plan *ego_, R *I, R *O)
      uint i, n = ego->n;
      R *W = ego->W;
      R *buf;
-     E csum;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
@@ -131,7 +130,6 @@ static void apply_ro01(plan *ego_, R *I, R *O)
      uint i, n = ego->n;
      R *W = ego->W;
      R *buf;
-     E csum;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
@@ -180,7 +178,6 @@ static void apply_re10(plan *ego_, R *I, R *O)
      uint i, n = ego->n;
      R *W = ego->W;
      R *buf;
-     E csum;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
@@ -228,7 +225,6 @@ static void apply_ro10(plan *ego_, R *I, R *O)
      uint i, n = ego->n;
      R *W = ego->W;
      R *buf;
-     E csum;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
 
