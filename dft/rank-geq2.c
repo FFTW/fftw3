@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.14 2002-07-02 20:18:09 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.15 2002-07-12 05:22:38 stevenj Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -150,7 +150,7 @@ static int score(const solver *ego_, const problem *p_, int flags)
 
      /* Heuristic: if the vector stride is greater than the transform
         sz, don't use (prefer to do the vector loop first with a
-        vecloop plan). */
+        vrank-geq1 plan). */
      if (p->vecsz.rnk > 0 &&
 	 X(tensor_min_stride)(p->vecsz) > X(tensor_max_index)(p->sz))
           return UGLY;
