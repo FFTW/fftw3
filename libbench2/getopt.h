@@ -34,6 +34,32 @@
 # include <ctype.h>
 #endif
 
+/***************************************************************************/
+/* Modification by SGJ for libbench (only), 2005-02-07:
+   When we're compiling getopt ourselves, change the symbol names
+   to avoid conflicts with system-provided getopt functions, which
+   causes link failure on MacOS X. */
+#if !defined _LIBC && defined __GLIBC__ && __GLIBC__ >= 2
+# include <gnu-versions.h>
+# if _GNU_GETOPT_INTERFACE_VERSION == 2
+/* in getopt.c, #define ELIDE_CODE */
+#  define NO_BENCH_GETOPT
+# endif
+#endif
+#ifndef NO_BENCH_GETOPT
+# define optarg bench_optarg
+# define optind bench_optind
+# define opterr bench_opterr
+# define optopt bench_optopt
+# define getopt bench_getopt
+# define getopt_long bench_getopt_long
+# define getopt_long_only bench_getopt_long_only
+# define _getopt_internal bench__getopt_internal
+#endif
+
+/***************************************************************************/
+
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
