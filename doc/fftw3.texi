@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.105 2003-03-07 03:29:38 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.106 2003-03-07 03:31:00 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1370,6 +1370,7 @@ FFTW}.
 * Basic Interface::             
 * Advanced Interface::          
 * Guru Interface::              
+* Wisdom::                      
 * What FFTW Really Computes::   
 @end menu
 
@@ -2333,7 +2334,7 @@ the same as for @code{fftw_plan_many_dft}.  (Of course, the
 @code{double}, not @code{fftw_complex}.)
 
 @c ------------------------------------------------------------
-@node Guru Interface, What FFTW Really Computes, Advanced Interface, FFTW Reference
+@node Guru Interface, Wisdom, Advanced Interface, FFTW Reference
 @section Guru Interface
 @cindex guru interface
 
@@ -2647,7 +2648,13 @@ advanced interfaces actually correspond to swapped real and imaginary
 parts for the input and output, as described in @ref{Guru Complex DFTs}.
 
 @c ------------------------------------------------------------
-@node What FFTW Really Computes,  , Guru Interface, FFTW Reference
+@node Wisdom, What FFTW Really Computes, Guru Interface, FFTW Reference
+@section Wisdom
+@cindex wisdom
+@cindex saving plans to disk
+
+@c ------------------------------------------------------------
+@node What FFTW Really Computes,  , Wisdom, FFTW Reference
 @section What FFTW Really Computes
 @cindex discrete Fourier transform
 @cindex DFT
