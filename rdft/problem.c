@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.19 2002-08-26 02:28:12 stevenj Exp $ */
+/* $Id: problem.c,v 1.20 2002-08-26 02:45:38 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -202,7 +202,8 @@ problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
      for (i = 0; i < sz.rnk; ++i)
 	  total_n *= X(rdft_real_n)(kind, sz.dims[i].n);
      A(total_n > 0); /* or should we use vecsz RNK_MINFTY? */
-     
+
+     /* FIXME: how are shifted transforms compressed? */
      ego->sz = X(tensor_compress)(sz);
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->I = I;
