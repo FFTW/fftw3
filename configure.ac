@@ -162,15 +162,6 @@ AX_CC_MAXOPT
 if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
 
     if test "$GCC" = "yes"; then
-      # The gcc-3.4 inliner is totally broken; it does not inline
-      # small functions like VFMAI.
-      AX_CHECK_COMPILER_FLAGS(
-		[--param inline-unit-growth=1000],
-		[CFLAGS="$CFLAGS --param inline-unit-growth=1000"])
-      AX_CHECK_COMPILER_FLAGS(
-		[--param large-function-growth=1000],
-		[CFLAGS="$CFLAGS --param large-function-growth=1000"])
-
       # tweak codelet optimization level
       if test "x$CODELET_OPTIM" = x; then
          case "${host_cpu}" in
@@ -187,6 +178,16 @@ if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
 		 [CODELET_OPTIM="$CODELET_OPTIM -fno-web"])
          AX_CHECK_COMPILER_FLAGS(-fno-loop-optimize,
 		 [CODELET_OPTIM="$CODELET_OPTIM -fno-loop-optimize"])
+
+         # The gcc-3.4 inliner is totally broken; it does not inline
+         # small functions like VFMAI.
+         AX_CHECK_COMPILER_FLAGS(
+                 [--param inline-unit-growth=1000],
+		 [CODELET_OPTIM="$CODELET_OPTIM --param inline-unit-growth=1000"])
+         AX_CHECK_COMPILER_FLAGS(
+		 [--param large-function-growth=1000],
+		 [CODELET_OPTIM="$CODELET_OPTIM --param large-function-growth=1000"])
+
       fi
     fi
 fi
