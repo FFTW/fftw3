@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.1.1.1 2002-06-02 18:42:32 athena Exp $ */
+/* $Id: codelet.h,v 1.2 2002-06-02 19:00:11 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -38,17 +38,17 @@
 /* FMA macros */
 
 #if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
-static __inline__ RL FMA(RL a, RL b, RL c)
+static __inline__ R FMA(R a, R b, R c)
 {
      return a * b + c;
 }
 
-static __inline__ RL FMS(RL a, RL b, RL c)
+static __inline__ R FMS(R a, R b, R c)
 {
      return a * b - c;
 }
 
-static __inline__ RL FNMS(RL a, RL b, RL c)
+static __inline__ R FNMS(R a, R b, R c)
 {
      return -(a * b - c);
 }
