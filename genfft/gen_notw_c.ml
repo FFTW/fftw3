@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_c.ml,v 1.8 2003-04-16 19:51:27 athena Exp $ *)
+(* $Id: gen_notw_c.ml,v 1.9 2003-04-16 21:21:53 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_c.ml,v 1.8 2003-04-16 19:51:27 athena Exp $"
+let cvsid = "$Id: gen_notw_c.ml,v 1.9 2003-04-16 21:21:53 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -56,12 +56,14 @@ let generate n =
   and roarray = "xo"
   and istride = "is"
   and ostride = "os" 
+  and i = "i" 
+  and v = "v"
   in
 
   let sign = !Genutil.sign 
-  and name = !Magic.codelet_name in
+  and name = !Magic.codelet_name
+  and byvl x = choose_simd x (ctimes (CVar "VL", x))  in
   let ename = expand_name name in
-  let name0 = ename ^ "_0" in
 
   let vl = choose_simd "1" "VL"
   in
@@ -90,51 +92,44 @@ let generate n =
   let odag = store_array_r n oloc output in
   let annot = standard_optimizer odag in
 
-  let tree0 =
-    Fcn ("static MAYBE_INLINE void", name0,
-	 ([Decl (C.constrealtypep, riarray);
-	   Decl (C.realtypep, roarray)]
-	  @ (if stride_fixed !uistride then [] 
-	       else [Decl (C.stridetype, istride)])
-	  @ (if stride_fixed !uostride then [] 
-	       else [Decl (C.stridetype, ostride)])
-	  @ (if stride_fixed !uivstride then [] else [Decl ("int", !Simd.ivs)])
-	  @ (if stride_fixed !uovstride then [] else [Decl ("int", !Simd.ovs)])
-	 ),
-	 add_constants (Asch annot))
+  let body = Block (
+    [Decl ("int", i);
+     Decl (C.constrealtypep, riarray);
+     Decl (C.realtypep, roarray)],
+    [Stmt_assign (CVar riarray, CVar (if (sign < 0) then "ri" else "ii"));
+     Stmt_assign (CVar roarray, CVar (if (sign < 0) then "ro" else "io"));
+     CVar("BEGIN_SIMD();"); (* hack *)
+     For (Expr_assign (CVar i, CVar v),
+	  Binop (" > ", CVar i, Integer 0),
+	  list_to_comma 
+	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (byvl (Integer 1))]);
+	     Expr_assign (CVar riarray, CPlus [CVar riarray; 
+					       byvl (CVar !Simd.ivs)]);
+	     Expr_assign (CVar roarray, CPlus [CVar roarray; 
+					       byvl (CVar !Simd.ovs)])],
+	  Asch annot);
+     CVar("END_SIMD();")
+   ])
+  in
+
+  let tree =
+    Fcn ("static void", ename,
+	 ([Decl (C.constrealtypep, "ri");
+	   Decl (C.constrealtypep, "ii");
+	   Decl (C.realtypep, "ro");
+ 	   Decl (C.realtypep, "io");
+	   Decl (C.stridetype, istride);
+	   Decl (C.stridetype, ostride);
+	   Decl ("int", v);
+	   Decl ("int", "ivs");
+	   Decl ("int", "ovs")]),
+	 add_constants body)
       
   in
-  let si = if sign < 0 then "ri" else "ii" in
-  let so = if sign < 0 then "ro" else "io" in
-  let loop =
-    "static void " ^ ename ^
-      "(const " ^ C.realtype ^ " *ri, const " ^ C.realtype ^ " *ii, "
-      ^ C.realtype ^ " *ro, " ^ C.realtype ^ " *io,\n" ^ 
-      C.stridetype ^ " is, " ^  C.stridetype ^ " os, " ^ 
-      " int v, int ivs, int ovs)\n" ^
-    "{\n" ^
-    "int i;\n" ^
-    "BEGIN_SIMD();\n" ^
-    "for (i = v; i > 0; i -= " ^ vl ^ ") {\n" ^
-      name0 ^ 
-        "(" ^ si ^", " ^ so ^ 
-           (if stride_fixed !uistride then "" else ", is") ^ 
-           (if stride_fixed !uostride then "" else ", os") ^ 
-           (choose_simd ""
-	      (if stride_fixed !uivstride then "" else ", ivs")) ^ 
-           (choose_simd ""
-	      (if stride_fixed !uovstride then "" else ", ovs")) ^ 
-          ");\n" ^
-    (Printf.sprintf 
-       "%s += VL * %s; %s += VL * %s;\n" si !Simd.ivs so !Simd.ovs) ^
-    "}\n" ^ 
-    "END_SIMD();\n" ^
-    "}\n\n"
-
-  and desc = 
+  let desc = 
     Printf.sprintf 
       "static const kdft_desc desc = { %d, %s, %s, &GENUS, %s, %s, %s, %s };\n"
-      n (stringify name) (flops_of tree0) 
+      n (stringify name) (flops_of tree) 
       (stride_to_solverparm !uistride) (stride_to_solverparm !uostride)
       (choose_simd "0" (stride_to_solverparm !uivstride))
       (choose_simd "0" (stride_to_solverparm !uovstride))
@@ -145,8 +140,7 @@ let generate n =
     "  X(kdft_register)(p, " ^ ename ^ ", &desc);\n" ^
     "}\n"
 
-  in ((unparse cvsid tree0) ^ "\n" ^ 
-      loop ^ 
+  in ((unparse cvsid tree) ^ "\n" ^ 
       desc ^
       init)
 
