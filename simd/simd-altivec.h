@@ -146,7 +146,7 @@ static inline void STL(float *x, V v, int ovs, const float *aligned_like)
 
 static inline void STH(float *x, V v, const float *aligned_like)
 {
-     v = vec_perm(v, v, vec_lvsr(8, aligned_like));
+     v = vec_perm(v, v, vec_lvsr(8, (float *)aligned_like));
      vec_ste(v, 0, x);
      vec_ste(v, 4, x);
 }
