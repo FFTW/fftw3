@@ -658,6 +658,10 @@ void setup(bench_problem *p)
      if (amnesia)
 	  FFTW(forget_wisdom)();
 
+     /* Regression test: check that fftw_malloc exists and links
+      * properly */
+     FFTW(free(FFTW(malloc(42))));
+
      rdwisdom();
      install_hook();
 

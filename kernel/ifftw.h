@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.235 2004-01-01 20:44:09 athena Exp $ */
+/* $Id: ifftw.h,v 1.236 2004-02-13 12:20:31 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -170,6 +170,11 @@ extern void X(assertion_failed)(const char *s, int line, const char *file);
 
 extern void X(debug)(const char *format, ...);
 #define D X(debug)
+
+/*-----------------------------------------------------------------------*/
+/* kalloc.c: */
+extern void *X(kernel_malloc)(size_t n);
+extern void X(kernel_free)(void *p);
 
 /*-----------------------------------------------------------------------*/
 /* alloc.c: */
