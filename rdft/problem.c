@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.21 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: problem.c,v 1.22 2002-08-28 03:34:00 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -268,14 +268,14 @@ problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
 problem *X(mkproblem_rdft_1)(const tensor sz, const tensor vecsz,
 			     R *I, R *O, rdft_kind kind)
 {
-     A(sz.rnk == 1);
+     A(sz.rnk <= 1);
      return X(mkproblem_rdft)(sz, vecsz, I, O, &kind);
 }
 
 problem *X(mkproblem_rdft_1_d)(tensor sz, tensor vecsz,
 			       R *I, R *O, rdft_kind kind)
 {
-     A(sz.rnk == 1);
+     A(sz.rnk <= 1);
      return X(mkproblem_rdft_d)(sz, vecsz, I, O, &kind);
 }
 
