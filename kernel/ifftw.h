@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.91 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.92 2002-08-29 11:45:37 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -510,12 +510,12 @@ void X(stride_destroy)(stride p);
 
 typedef int stride;
 #define WS(stride, i)  (stride * i)
-#define sfftw_mkstride(n, stride) stride
-#define dfftw_mkstride(n, stride) stride
-#define lfftw_mkstride(n, stride) stride
-#define sfftw_stride_destroy(p) {}
-#define dfftw_stride_destroy(p) {}
-#define lfftw_stride_destroy(p) {}
+#define fftwf_mkstride(n, stride) stride
+#define fftw_mkstride(n, stride) stride
+#define fftwl_mkstride(n, stride) stride
+#define fftwf_stride_destroy(p) {}
+#define fftw_stride_destroy(p) {}
+#define fftwl_stride_destroy(p) {}
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
 
@@ -600,9 +600,9 @@ int X(square)(int x);
 double X(measure_execution_time)(plan *pln, const problem *p);
 uint X(alignment_of)(R *p);
 R *X(ptr_with_alignment)(uint algn);
-const char *const FFTW(version);
-const char *const FFTW(cc);
-const char *const FFTW(codelet_optim);
+extern const char *const FFTW(version);
+extern const char *const FFTW(cc);
+extern const char *const FFTW(codelet_optim);
 
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */
