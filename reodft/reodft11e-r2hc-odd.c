@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.3 2003-02-26 01:56:01 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.4 2003-02-26 18:24:36 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
 
      S. C. Chan and K. L. Ho, "Fast algorithms for computing the
-     discrete Cosine transform," IEEE Trans. Circuits Systems II:
+     discrete cosine transform," IEEE Trans. Circuits Systems II:
      Analog & Digital Sig. Proc. 39 (3), 185--190 (1992).
 
    (For even sizes, see reodft11e-radix2.c.)  
