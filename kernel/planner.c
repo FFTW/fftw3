@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.136 2003-01-28 23:16:24 athena Exp $ */
+/* $Id: planner.c,v 1.137 2003-01-29 00:00:24 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -267,9 +267,6 @@ static void hinsert(planner *ego, const md5sig s,
      } else {
 	  ++ego->nelem;
 	  hgrow(ego);
-	  if (l) 
-	       /* pointer became invalid because of hgrow() */
-	       l = hlookup(ego, s, flags);
      }
      hinsert0(ego, s, flags, slvndx, l);
 }
@@ -430,12 +427,8 @@ static plan *mkplan(planner *ego, problem *p)
 					| IMPATIENCE(sol->flags)
 					| NONIMPATIENCE(ego->planner_flags) ));
 
-		    if (!pln) {
-			 /* delete bogus entry.  Carefully, because 
-			    sol may no longer be there. */
-			 if ((sol = hlookup(ego, m.s, ego->planner_flags)))
-			      UNBLESS(sol->flags);
-		    }
+		    /* if (!pln) then the entry is bogus, but
+		       we currently do nothing about it. */
 	       } else {
 		    A(SUBSUMES(ego->planner_flags, sol->flags));
 	       }
