@@ -186,7 +186,7 @@ if test "$ac_test_CFLAGS" != "set"; then
 
   *linux*)
 	;;
-  sparc-solaris2*) if test `basename "$CC"` = cc; then
+  *-solaris2*) if test `basename "$CC"` = cc; then
                     CFLAGS="-native -fast -xO5 -dalign"
                  fi;;
 
