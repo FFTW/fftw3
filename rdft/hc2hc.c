@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.1 2002-07-22 02:34:28 stevenj Exp $ */
+/* $Id: hc2hc.c,v 1.2 2002-07-22 03:43:03 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -46,9 +46,10 @@ static void awake(plan *ego_, int flg)
 
      if (flg) {
           if (!ego->td) {
-               ego->td = X(mktwiddle)(ego->slv->desc->tw, 
-				      ego->n, ego->r, ego->m);
-               ego->W = ego->td->W;	/* cache for efficiency */
+	       const tw_instr *tw = ego->slv->desc->tw;
+               ego->td = X(mktwiddle)(tw, ego->n, ego->r, ego->m/2);
+	       /* 0th twiddle is handled by cld0: */
+               ego->W = ego->td->W + X(twiddle_length)(ego->r, tw);
           }
      } else {
           if (ego->td)
@@ -213,7 +214,7 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
      const hc2hc_desc *e = ego->desc;
      uint m = d[0].n / e->radix;
 
-     tensor radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
+     tensor null, radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
      tensor cld_vec = X(tensor_append)(radix, p->vecsz);
      X(tensor_destroy)(radix);
      A(p->kind == R2HC);
@@ -222,8 +223,13 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
 				 cld_vec, p->I, p->O, R2HC);
 
      radix = X(mktensor_1d)(e->radix, m * d[0].os, m * d[0].os);
-     *cld0p = X(mkproblem_rdft)(radix, p->vecsz, p->I, p->O, R2HC);
-     *cldmp = X(mkproblem_rdft)(radix, p->vecsz, p->I, p->O, R2HCII);
+     null = X(mktensor)(0);
+     *cld0p = X(mkproblem_rdft)(radix, null, p->O, p->O, R2HC);
+     if (m % 2 == 0)
+	  *cldmp = X(mkproblem_rdft)(radix, null, p->O, p->O, R2HCII);
+     else
+	  *cldmp = X(mkproblem_rdft)(null, null, p->O, p->O, R2HCII);
+     X(tensor_destroy)(null);
      X(tensor_destroy)(radix);
 }
 
@@ -234,7 +240,7 @@ void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
      const hc2hc_desc *e = ego->desc;
      uint m = d[0].n / e->radix;
 
-     tensor radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
+     tensor null, radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
      tensor cld_vec = X(tensor_append)(radix, p->vecsz);
      X(tensor_destroy)(radix);
      A(p->kind == HC2R);
@@ -243,7 +249,12 @@ void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
 				 cld_vec, p->I, p->O, HC2R);
 
      radix = X(mktensor_1d)(e->radix, m * d[0].is, m * d[0].is);
-     *cld0p = X(mkproblem_rdft)(radix, p->vecsz, p->I, p->O, HC2R);
-     *cldmp = X(mkproblem_rdft)(radix, p->vecsz, p->I, p->O, HC2RIII);
+     null = X(mktensor)(0);
+     *cld0p = X(mkproblem_rdft)(radix, null, p->I, p->I, HC2R);
+     if (m % 2 == 0)
+	  *cldmp = X(mkproblem_rdft)(radix, null, p->I, p->I, HC2RIII);
+     else
+	  *cldmp = X(mkproblem_rdft)(null, null, p->I, p->I, HC2RIII);
+     X(tensor_destroy)(null);
      X(tensor_destroy)(radix);
 }
