@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.5 2002-06-22 15:45:48 athena Exp $ */
+/* $Id: cycle.h,v 1.6 2002-06-22 16:53:26 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -165,7 +165,7 @@ static __inline__ double elapsed(ticks t1, ticks t0)
 #endif
 
 /*----------------------------------------------------------------*/
-#if defined(__GNUC__) && defined(__sparc__) && !defined(HAVE_TICK_COUNTER)
+#if defined(__GNUC__) && defined(__sparc_v9__) && !defined(HAVE_TICK_COUNTER)
 typedef unsigned long ticks;
 
 static __inline__ ticks getticks(void)
