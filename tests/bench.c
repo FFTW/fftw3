@@ -96,6 +96,8 @@ void setup(struct problem *p)
 	  printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
 	  pr->print(pr, "%p\nnprob %u  nplan %u\n",
 		    pln, plnr->nprob, plnr->nplan);
+	  pr->print(pr, "%d add, %d mul, %d fma, %d other\n",
+		    pln->ops.add, pln->ops.mul, pln->ops.fma, pln->ops.other);
 	  if (verbose > 3) 
 	       plnr->adt->exprt(plnr, pr);
 	  FFTW(printer_destroy)(pr);
