@@ -1,6 +1,6 @@
 /* not worth copyrighting */
 
-/* $Id: allocate.c,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: allocate.c,v 1.2 2003-01-17 15:35:56 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -28,7 +28,7 @@ void problem_alloc(problem *p)
 
 	  bounds(p, &ilb, &iub, &olb, &oub);
 
-	  p->iphyssz = isz = iub - ilb + 1;
+	  p->iphyssz = isz = iub - ilb;
 	  p->inphys = in = bench_malloc(isz * sizeof(bench_complex));
 	  p->in = in - ilb;
 	  
@@ -37,7 +37,7 @@ void problem_alloc(problem *p)
 	       p->outphys = p->inphys;
 	       p->ophyssz = p->iphyssz;
 	  } else {
-	       p->ophyssz = osz = oub - olb + 1;
+	       p->ophyssz = osz = oub - olb;
 	       p->outphys = out = bench_malloc(osz * sizeof(bench_complex));
 	       p->out = out - olb;
 	  }
@@ -52,4 +52,6 @@ void problem_free(struct problem *p)
 	  bench_free(p->outphys);
      if (p->inphys)
 	  bench_free(p->inphys);
+     tensor_destroy(p->sz);
+     tensor_destroy(p->vecsz);
 }

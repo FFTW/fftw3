@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: tensor.c,v 1.2 2003-01-17 15:35:56 athena Exp $ */
 #include "bench.h"
 #include <stdlib.h>
 
@@ -152,7 +152,7 @@ static int imin(int a, int b)
 void name(tensor *t, int *lbp, int *ubp)	\
 {						\
      int lb = 0;				\
-     int ub = 0;				\
+     int ub = 1;				\
      int i;					\
 						\
      BENCH_ASSERT(FINITE_RNK(t->rnk));		\
