@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.186 2003-04-08 21:33:47 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.187 2003-04-09 07:01:03 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -280,8 +280,8 @@ transform (DFT) and various special cases thereof.
 
 We assume herein that you are familiar with the properties and uses of
 the DFT that are relevant to your application.  Otherwise, see
-e.g. @cite{The Fast Fourier Transform} by E. O. Brigham
-(Prentice-Hall, Englewood Cliffs, NJ, 1974).
+e.g. @cite{The Fast Fourier Transform and Its Applications} by E. O. Brigham
+(Prentice-Hall, Englewood Cliffs, NJ, 1988).
 @uref{http://www.fftw.org, Our web page} also has links to FFT-related
 information online.
 @cindex FFTW
