@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 	  e1 = e2 = einf = 0.0;
 	  re1 = re2 = reinf = 0.0;
 	  for (i = 0; i < 2 * n; ++i) {
-	       double d = a[i] - a0[i];
+	       R d = a[i] - a0[i];
 	       if (d < 0) d = -d;
 	       e1 += d;
 	       e2 += d * d;
@@ -76,7 +76,8 @@ int main(int argc, char *argv[])
 	  re2 = sqrt(re2 / (2 * n));
 
 	  printf("%10d %6.2e %6.2e %6.2e %6.2e %6.2e %6.2e\n",
-		 n, e1, e2, einf, re1, re2, reinf);
+		 n, (double)e1, (double)e2, (double)einf,
+		 (double)re1, (double)re2, (double)reinf);
 	  X(problem_destroy)(prblm);
      }
 }

@@ -385,7 +385,7 @@ static void bitrev(int n, R *a)
      int i, j, m;
      for (i = j = 0; i < n - 1; ++i) {
 	  if (i < j) {
-	       double tr, ti;
+	       R tr, ti;
 	       tr = a[2*i]; a[2*i] = a[2*j]; a[2*j] = tr;
 	       ti = a[2*i+1]; a[2*i+1] = a[2*j+1]; a[2*j+1] = ti;
 	  }
