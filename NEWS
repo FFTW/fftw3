@@ -78,3 +78,6 @@ Changes from 3.0beta1:
 * Fixed problems with alloca under MinGW, AIX.
 
 * Workaround for gcc/SPARC bug.
+
+* Fixed multi-threaded initialization failure on Irix due to lack of
+  user-accessible PTHREAD_SCOPE_SYSTEM there.
