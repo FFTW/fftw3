@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: report.c,v 1.8 2003-04-11 12:45:37 athena Exp $ */
+/* $Id: report.c,v 1.9 2004-04-03 01:35:35 stevenj Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -79,6 +79,7 @@ void report_mflops(const bench_problem *p, double *t, int st)
 void report_time(const bench_problem *p, double *t, int st)
 {
      struct stats s;
+     UNUSED(p);
      mkstat(t, st, &s);
      ovtpvt("(%g %g %g %g)\n", s.min, s.avg, s.max, s.median);
 }
@@ -107,6 +108,7 @@ void report_verbose(const bench_problem *p, double *t, int st)
      struct stats s;
      char bmin[64], bmax[64], bavg[64], bmedian[64], btmin[64];
      char bsetup[64];
+     int copyp = tensor_sz(p->sz) == 1;
 
      mkstat(t, st, &s);
 
@@ -117,8 +119,10 @@ void report_verbose(const bench_problem *p, double *t, int st)
      sprintf_time(time_min, btmin);
      sprintf_time(p->setup_time, bsetup);
 
-     ovtpvt("Problem: %s, setup: %s, time: %s, ``mflops'': %.5g\n",
-	    p->pstring, bsetup, bmin, mflops(p, s.min));
+     ovtpvt("Problem: %s, setup: %s, time: %s, %s: %.5g\n",
+	    p->pstring, bsetup, bmin, 
+	    copyp ? "fp-move/us" : "``mflops''",
+	    mflops(p, s.min));
 
      if (verbose) {
 	  ovtpvt("Took %d measurements for at least %s each.\n", st, btmin);
