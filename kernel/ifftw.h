@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.9 2002-06-05 00:22:23 athena Exp $ */
+/* $Id: ifftw.h,v 1.10 2002-06-05 15:28:09 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -328,6 +328,6 @@ void fftw_twiddle_destroy(twid *p);
 /* misc stuff */
 void fftw_null_awake(plan *ego, int awake);
 int fftw_square(int x);
-double fftw_measure_execution_time(plan *pln, const problem *p, int secondsp);
+double fftw_measure_execution_time(plan *pln, const problem *p);
 
 #endif /* __IFFTW_H__ */
