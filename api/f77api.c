@@ -71,7 +71,7 @@ void F77(plan_dft, PLAN_DFT)(X(plan) *p,
 			     unsigned int *rank, const unsigned int *n,
 			     C *in, C *out, int *sign, unsigned int *flags)
 {
-     unsigned long *nrev = reverse_n(*rank, n);
+     ulong *nrev = reverse_n(*rank, n);
      *p = X(plan_dft)(*rank, nrev, in, out, *sign, *flags);
      X(ifree0)(nrev);
 }
@@ -110,9 +110,9 @@ void F77(plan_many_dft, PLAN_MANY_DFT)(
      int *ostride, int *odist,
      int *sign, unsigned int *flags)
 {
-     unsigned long *nrev = reverse_n(*rank, n);
-     unsigned long *inembedrev = reverse_n(*rank, inembed);
-     unsigned long *onembedrev = reverse_n(*rank, onembed);
+     ulong *nrev = reverse_n(*rank, n);
+     ulong *inembedrev = reverse_n(*rank, inembed);
+     ulong *onembedrev = reverse_n(*rank, onembed);
      *p = X(plan_many_dft)(*rank, nrev, *howmany,
 			   in, inembedrev, *istride, *idist,
 			   out, onembedrev, *ostride, *odist,
