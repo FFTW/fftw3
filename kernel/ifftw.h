@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.127 2002-09-16 19:16:16 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.128 2002-09-16 19:40:46 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -434,11 +434,9 @@ enum {
 		  | BELIEVE_PCOST
 	  ),
 
-     /* ESTIMATE_BIT is subsumed by all other impatience flags */
-     ESTIMATE_BIT = 0x1000,
-     ESTIMATE = (ESTIMATE_BIT | IMPATIENT), 
+     ESTIMATE = 0x1000, /* subsumed by all other impatience flags */
 
-     IMPATIENCE_MASK = (ESTIMATE_BIT | (ESTIMATE_BIT - 1)),
+     IMPATIENCE_MASK = (ESTIMATE | (ESTIMATE - 1)),
      
      /* EXHAUSTIVE subsumes all impatience */
      EXHAUSTIVE = 0x2000, /* ignore scores */
@@ -458,7 +456,7 @@ enum {
 #define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
 #define NO_DHT_R2HCP(plnr) ((plnr)->planner_flags & NO_DHT_R2HC)
 
-#define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE_BIT)
+#define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
 #define EXHAUSTIVEP(plnr) ((plnr)->planner_flags & EXHAUSTIVE)
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;

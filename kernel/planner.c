@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.95 2002-09-16 18:53:16 stevenj Exp $ */
+/* $Id: planner.c,v 1.96 2002-09-16 19:40:46 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -39,7 +39,7 @@
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
 #define SUBSUMES(f1,f2) ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1) ||    \
                          (f1 & EXHAUSTIVE) ||                            \
-			 ((f2 & ESTIMATE_BIT) && !(f1 & ESTIMATE_BIT)))
+			 ((f2 & ESTIMATE) && !(f1 & ESTIMATE)))
 #define STRICTLY_SUBSUMES(f1, f2) (SUBSUMES(f1, f2) && !SUBSUMES(f2, f1))
 #define ORDERED(f1, f2) (SUBSUMES(f1, f2) || SUBSUMES(f2, f1))
 
