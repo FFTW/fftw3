@@ -83,7 +83,7 @@ void X(mapflags)(planner *plnr, unsigned flags)
      /* map of (processed) api flags to internal problem/planner flags */
      const flagop problem_flagmap[] = {
 	  EQV(FFTW_DESTROY_INPUT, DESTROY_INPUT),
-	  EQV(FFTW_UNALIGNED, UNALIGNED),
+	  EQV(FFTW_NO_SIMD, NO_SIMD),
 	  EQV(FFTW_CONSERVE_MEMORY, CONSERVE_MEMORY)
      };
      const flagop planner_flagmap[] = {

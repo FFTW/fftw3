@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: k7.c,v 1.5 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: k7.c,v 1.6 2003-04-05 00:16:32 stevenj Exp $ */
 
 #include "dft.h"
 
@@ -62,9 +62,11 @@ static int k7p(void)
 
 static int nmokp(const kdft_desc *d,
 		 const R *ri, const R *ii, const R *ro, const R *io,
-		 int is, int os, int vl, int ivs, int ovs)
+		 int is, int os, int vl, int ivs, int ovs,
+		 const planner *plnr)
 {
      return (k7p()
+	     && !NO_SIMDP(plnr)
 	     && ii == ri + 1 
 	     && io == ro + 1
 	     && (!d->is || (d->is == is))
@@ -76,9 +78,11 @@ const kdft_genus X(kdft_k7_mgenus) = { nmokp, 1 };
 
 static int npokp(const kdft_desc *d,
 		 const R *ri, const R *ii, const R *ro, const R *io,
-		 int is, int os, int vl, int ivs, int ovs)
+		 int is, int os, int vl, int ivs, int ovs,
+		 const planner *plnr)
 {
      return (k7p()
+	     && !NO_SIMDP(plnr)
 	     && ri == ii + 1 
 	     && ro == io + 1
 	     && (!d->is || (d->is == is))
@@ -90,9 +94,11 @@ const kdft_genus X(kdft_k7_pgenus) = { npokp, 1 };
 
 static int cmokp(const ct_desc *d,
 		 const R *rio, const R *iio, 
-		 int ios, int vs, int m, int dist)
+		 int ios, int vs, int m, int dist,
+		 const planner *plnr)
 {
      return (k7p()
+	     && !NO_SIMDP(plnr)
 	     && iio == rio + 1
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))
@@ -103,9 +109,11 @@ const ct_genus X(kdft_ct_k7_mgenus) = { cmokp, 1 };
 
 static int cpokp(const ct_desc *d,
 		 const R *rio, const R *iio, 
-		 int ios, int vs, int m, int dist)
+		 int ios, int vs, int m, int dist,
+		 const planner *plnr)
 {
      return (k7p()
+	     && !NO_SIMDP(plnr)
 	     && rio == iio + 1
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))

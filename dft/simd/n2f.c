@@ -30,6 +30,7 @@ static int okp(const kdft_desc *d,
      return (RIGHT_CPU()
              && ALIGNED(ri)
              && ALIGNED(ro)
+	     && !NO_SIMDP(plnr)
 	     && SIMD_STRIDE_OK(is)
 	     && SIMD_STRIDE_OK(os)
 	     && SIMD_VSTRIDE_OK(ivs)

@@ -30,7 +30,7 @@ static int okp(const kdft_desc *d,
      return (RIGHT_CPU()
              && ALIGNEDA(ii)
              && ALIGNED(io)
-	     && !UNALIGNEDP(plnr)
+	     && !NO_SIMDP(plnr)
 	     && SIMD_STRIDE_OKA(is)
 	     && SIMD_STRIDE_OK(os)
 	     && SIMD_VSTRIDE_OKA(ivs)

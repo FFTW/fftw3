@@ -45,7 +45,8 @@ X(plan) X(plan_many_r2r)(int rank, const int *n,
 						   N0(inembed), N0(onembed),
 						   istride, ostride),
 			      X(mktensor_1d)(howmany, idist, odist),
-			      in, out, k));
+			      TAINT_UNALIGNED(in, flags), 
+			      TAINT_UNALIGNED(out, flags), k));
      X(ifree0)(k);
      return p;
 }

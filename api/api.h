@@ -42,6 +42,8 @@ typedef R C[2];
 
 void X(extract_reim)(int sign, C *c, R **r, R **i);
 
+#define TAINT_UNALIGNED(p, flg) TAINT(p, ((flg) & FFTW_UNALIGNED) != 0)
+
 tensor *X(mktensor_rowmajor)(int rnk, const int *n,
 			     const int *niphys, const int *nophys,
 			     int is, int os);

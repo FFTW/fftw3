@@ -52,6 +52,7 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "estimate")) the_flags |= FFTW_ESTIMATE;
      else if (!strcmp(arg, "exhaustive")) the_flags |= FFTW_EXHAUSTIVE;
      else if (!strcmp(arg, "unaligned")) the_flags |= FFTW_UNALIGNED;
+     else if (!strcmp(arg, "nosimd")) the_flags |= FFTW_NO_SIMD;
      else if (sscanf(arg, "flag=%d", &x) == 1) the_flags |= x;
      else if (!strcmp(arg, "paranoid")) paranoid = 1;
      else if (!strcmp(arg, "wisdom")) usewisdom = 1;

@@ -32,5 +32,7 @@ X(plan) X(plan_guru_dft_r2c)(int rank, const X(iodim) *dims,
 	  flags,
 	  X(mkproblem_rdft2_d)(X(mktensor_iodims)(rank, dims),
 			       X(mktensor_iodims)(howmany_rank, howmany_dims),
-			       in, ro, io, R2HC));
+			       TAINT_UNALIGNED(in, flags),
+			       TAINT_UNALIGNED(ro, flags),
+			       TAINT_UNALIGNED(io, flags), R2HC));
 }

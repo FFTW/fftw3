@@ -47,7 +47,9 @@ X(plan) X(plan_many_dft_r2c)(int rank, const int *n,
 		    X(rdft2_pad)(rank, n, onembed, inplace, 1, &nfo),
 		    istride, 2 * ostride), 
 	       X(mktensor_1d)(howmany, idist, 2 * odist),
-	       in, ro, io, R2HC));
+	       TAINT_UNALIGNED(in, flags),
+	       TAINT_UNALIGNED(ro, flags), TAINT_UNALIGNED(io, flags),
+	       R2HC));
 
      X(ifree0)(nfi);
      X(ifree0)(nfo);

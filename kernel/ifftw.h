@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.215 2003-04-04 21:29:43 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.216 2003-04-05 00:16:32 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -451,13 +451,13 @@ typedef struct solution_s solution; /* opaque */
 /* values for problem_flags: */
 enum { 
      DESTROY_INPUT = 0x1,
-     UNALIGNED = 0x2,
+     NO_SIMD = 0x2,
      CONSERVE_MEMORY = 0x4,
      NO_DHT_R2HC = 0x8
 };
 
 #define DESTROY_INPUTP(plnr) ((plnr)->problem_flags & DESTROY_INPUT)
-#define UNALIGNEDP(plnr) ((plnr)->problem_flags & UNALIGNED)
+#define NO_SIMDP(plnr) ((plnr)->problem_flags & NO_SIMD)
 #define CONSERVE_MEMORYP(plnr) ((plnr)->problem_flags & CONSERVE_MEMORY)
 #define NO_DHT_R2HCP(plnr) ((plnr)->problem_flags & NO_DHT_R2HC)
 
