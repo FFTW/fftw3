@@ -27,6 +27,10 @@
 
 * fma codelets?
 
+* Timed planner: run as ESTIMATE, then IMPATIENT, then PATIENT, then naive?
+  PATIENT then IMPATIENT then ESTIMATE would allow the less-patient planners
+  to benefit from more-patient sub-plans, on the other hand.
+
 TODO before/at release:
 
 * remember to remove -no-randomized-cse from rdft codelets before
