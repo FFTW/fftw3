@@ -460,7 +460,7 @@ input/output arrays, as described in the manual.
 Please \italic{do not\} ask us Windows-specific questions.  We do not
 use Windows.  We know nothing about Visual Basic, Visual C++, or .NET.
 Please find the appropriate Usenet discussion group and ask your
-question there.
+question there.  See also \qref runOnWindows.
 
 \question 15oct:pruned Can I compute only a subset of the DFT outputs?
 
