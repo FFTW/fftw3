@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-dft.c,v 1.3 2002-08-24 15:05:08 athena Exp $ */
+/* $Id: rdft2-dft.c,v 1.4 2002-08-24 15:19:30 athena Exp $ */
 
 /* Compute RDFT of even size via a DFT of size n/2 */
 
@@ -107,18 +107,12 @@ static void apply(plan *ego_, R *r, R *rio, R *iio)
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
+     static const tw_instr twinstr[] = { {TW_FULL, 0, 2}, {TW_NEXT, 1, 0} };
+
      AWAKE(ego->cld, flg);
 
-     if (flg) {
-	  static const tw_instr twinstr[] = {
-	       {TW_FULL, 0, 2},
-	       {TW_NEXT, 1, 0}
-	  };
-	  X(mktwiddle)(&ego->td, twinstr, ego->n, 2, 
-		       (ego->n / 2 + 1) / 2);
-     } else {
-	  X(twiddle_destroy)(&ego->td);
-     }
+     X(twiddle_awake)(flg, &ego->td, twinstr, ego->n, 2, 
+		      (ego->n / 2 + 1) / 2);
 }
 
 static void destroy(plan *ego_)

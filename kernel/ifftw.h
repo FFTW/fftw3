@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.86 2002-08-24 15:05:08 athena Exp $ */
+/* $Id: ifftw.h,v 1.87 2002-08-24 15:19:30 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -524,6 +524,8 @@ typedef struct twid_s {
 void X(mktwiddle)(twid **pp, const tw_instr *instr, uint n, uint r, uint m);
 void X(twiddle_destroy)(twid **pp);
 uint X(twiddle_length)(uint r, const tw_instr *p);
+void X(twiddle_awake)(int flg, twid **pp, 
+		      const tw_instr *instr, uint n, uint r, uint m);
 
 /*-----------------------------------------------------------------------*/
 /* trig.c */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.2 2002-08-23 20:07:12 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.3 2002-08-24 15:19:30 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -174,13 +174,8 @@ static void awake(plan *ego_, int flg)
 
      AWAKE(ego->cld, flg);
 
-     if (flg) {
-	  X(mktwiddle)(&ego->td, reodft010e_tw, 4*ego->n, 1, ego->n/2+1);
-	  X(mktwiddle)(&ego->td2, reodft11e_tw, 8*ego->n, 1, ego->n * 2);
-     } else {
-	  X(twiddle_destroy)(&ego->td);
-	  X(twiddle_destroy)(&ego->td2);
-     }
+     X(twiddle_awake)(flg, &ego->td, reodft010e_tw, 4*ego->n, 1, ego->n/2+1);
+     X(twiddle_awake)(flg, &ego->td2, reodft11e_tw, 8*ego->n, 1, ego->n * 2);
 }
 
 static void destroy(plan *ego_)

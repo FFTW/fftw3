@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.16 2002-08-23 20:07:12 athena Exp $ */
+/* $Id: twiddle.c,v 1.17 2002-08-24 15:19:30 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -187,4 +187,14 @@ void X(twiddle_destroy)(twid **pp)
  done:
      *pp = 0; /* destroy pointer */
      return;
+}
+
+
+void X(twiddle_awake)(int flg, twid **pp, 
+		      const tw_instr *instr, uint n, uint r, uint m)
+{
+     if (flg) 
+	  X(mktwiddle)(pp, instr, n, r, m);
+     else 
+	  X(twiddle_destroy)(pp);
 }

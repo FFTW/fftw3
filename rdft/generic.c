@@ -241,12 +241,9 @@ static void awake(plan *ego_, int flg)
      };
 
      AWAKE(ego->cld, flg);
-     if (flg) 
-	  /* FIXME: can we get away with fewer twiddles? */
-	  X(mktwiddle)(&ego->td, generic_tw,
-		       ego->r * ego->m, ego->r, ego->m);
-     else 
-	  X(twiddle_destroy)(&ego->td);
+     /* FIXME: can we get away with fewer twiddles? */
+     X(twiddle_awake)(flg, &ego->td, generic_tw,
+		      ego->r * ego->m, ego->r, ego->m);
 }
 
 static void destroy(plan *ego_)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.3 2002-08-23 20:07:12 athena Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.4 2002-08-24 15:19:30 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -95,11 +95,7 @@ static void awake(plan *ego_, int flg)
      };
 
      AWAKE(ego->cld, flg);
-
-     if (flg) 
-	  X(mktwiddle)(&ego->td, redft00e_tw, 2*ego->n, 1, (ego->n+1)/2);
-     else 
-	  X(twiddle_destroy)(&ego->td);
+     X(twiddle_awake)(flg, &ego->td, redft00e_tw, 2*ego->n, 1, (ego->n+1)/2);
 }
 
 static void destroy(plan *ego_)
