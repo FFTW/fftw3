@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.9 2002-07-15 19:13:19 stevenj Exp $ */
+/* $Id: plan.c,v 1.10 2002-07-25 19:21:13 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -68,14 +68,16 @@ void X(plan_awake)(plan *ego, int flag)
      }
 }
 
-static void bless(plan *p, void *closure)
+static void bless(visit_closure *k, plan *p)
 {
-     UNUSED(closure);
+     UNUSED(k);
      p->blessed = 1;
 }
 
 /* can a blessing be revoked? */
 void X(plan_bless)(plan *ego)
 {
-     X(traverse_plan)(ego, bless, (void *) 0);
+     visit_closure k;
+     k.visit = bless;
+     X(traverse_plan)(ego, 1, &k);
 }

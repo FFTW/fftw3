@@ -18,26 +18,41 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.10 2002-07-14 17:49:20 stevenj Exp $ */
+/* $Id: planner-score.c,v 1.11 2002-07-25 19:21:13 athena Exp $ */
 #include "ifftw.h"
+
+typedef struct {
+     visit_closure super;
+     int sc;
+} adjclosure;
+
+static void visit(visit_closure *k_, plan *p)
+{
+     adjclosure *k = (adjclosure *)k_;
+     if (p->score < k->sc) k->sc = p->score; 
+}
+
+static inline void adjust_score(plan *pln)
+{
+     adjclosure k;
+     k.super.visit = visit;
+     k.sc = pln->score;
+     X(traverse_plan)(pln, 0, &k.super);
+     pln->score = k.sc;
+}
 
 static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
 {
      plan *best = 0;
      int best_score;
-     int cnt = 0; /* count how many solvers have the highest score */
      int flags = ego->flags;
 
      *pairp = 0;
      best_score = BAD;
      FORALL_SOLVERS(ego, s, sp, {
 	  int sc = s->adt->score(s, p, flags);
-	  if (sc == best_score)
-	       ++cnt;
-	  else if (sc > best_score) {
+	  if (sc > best_score) 
 	       best_score = sc;
-	       cnt = 1;
-	  }
      });
 
      for (; best_score > BAD; --best_score) {
@@ -47,14 +62,7 @@ static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
 
 		    if (pln) {
 			 X(plan_use)(pln);
-
-			 if (cnt > 1) {
-			      X(evaluate_plan)(ego, pln, p);
-			 } else {
-			      /* no need to time this unique plan */
-			      A(!best);
-			      pln->pcost = 0.0;
-			 }
+			 X(evaluate_plan)(ego, pln, p);
 
 			 if (best) {
 			      if (pln->pcost < best->pcost) {
@@ -71,8 +79,13 @@ static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
 		    }
 	       }
 	  });
-          if (best)
-               break;
+
+	  if (best) {
+	       best->score = best_score;
+	       adjust_score(best);
+	       if (best->score >= best_score)
+		    break;
+	  }
      };
 
      *bestp = best;

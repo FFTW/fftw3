@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.55 2002-07-25 00:36:34 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.56 2002-07-25 19:21:13 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -270,7 +270,11 @@ void X(printer_destroy)(printer *p);
 
 /*-----------------------------------------------------------------------*/
 /* traverse.c */
-void X(traverse_plan)(plan *p, void (*visit)(plan *, void *), void *closure);
+typedef struct visit_closure_s {
+     void (*visit)(struct visit_closure_s *, plan *);
+} visit_closure;
+
+void X(traverse_plan)(plan *p, int recur, visit_closure *k);
 
 /*-----------------------------------------------------------------------*/
 /* plan.c: */
@@ -288,6 +292,7 @@ struct plan_s {
      opcnt ops;
      double pcost;
      int blessed;
+     int score;
 };
 
 plan *X(mkplan)(size_t size, const plan_adt *adt);

@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: traverse.c,v 1.3 2002-07-14 20:15:43 stevenj Exp $ */
+/* $Id: traverse.c,v 1.4 2002-07-25 19:21:13 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
 
 typedef struct {
-     printer parent;
-     void (*visit)(plan *p, void *closure);
-     void *closure;
+     printer super;
+     visit_closure *k;
+     int recur;
 } traverser;
 
 static void vtraverse(printer *p, const char *format, va_list ap)
@@ -65,8 +65,8 @@ static void vtraverse(printer *p, const char *format, va_list ap)
 			/* traverse plan */
 			plan *x = va_arg(ap, plan *);
 			if (x) {
-			     x->adt->print(x, p);
-			     t->visit(x, t->closure);
+			     if (t->recur) x->adt->print(x, p);
+			     t->k->visit(t->k, x);
 			}
 			break;
 		   }
@@ -94,19 +94,18 @@ static void traverse(printer *p, const char *format, ...)
 
 static void putchr_nop(printer *p, char c) { UNUSED(p); UNUSED(c); }
 
-void X(traverse_plan)(plan *p, void (*visit)(plan *, void *), void *closure)
+void X(traverse_plan)(plan *p, int recur, visit_closure *k)
 {
-     traverser *s = (traverser *)fftw_malloc(sizeof(traverser), OTHER);
-     printer *pr = (printer *) s;
+     traverser s;
+     printer *pr = &s.super;
 
-     s->parent.print = traverse;
-     s->parent.vprint = vtraverse;
-     s->parent.putchr = putchr_nop;
-     s->parent.indent = s->parent.indent_incr = 0;
-     s->visit = visit;
-     s->closure = closure;
+     pr->print = traverse;
+     pr->vprint = vtraverse;
+     pr->putchr = putchr_nop;
+     pr->indent = pr->indent_incr = 0;
+     s.k = k;
+     s.recur = recur;
 
      p->adt->print(p, pr);
-     visit(p, closure);
-     X(free)(pr);
+     k->visit(k, p);
 }

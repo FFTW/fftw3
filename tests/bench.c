@@ -93,11 +93,16 @@ static void putchr(printer *p, char c)
      putchar(c);
 }
 
-static void increment(plan *p, void *closure)
+typedef struct {
+     visit_closure super;
+     int count;
+} increment_closure;
+
+static void increment(visit_closure *k_, plan *p)
 {
-     int *count = (int *) closure;
+     increment_closure *k = (increment_closure *)k_;
      UNUSED(p);
-     ++*count;
+     ++k->count;
 }
 
 static void hook(plan *pln, const fftw_problem *p_)
@@ -106,7 +111,7 @@ static void hook(plan *pln, const fftw_problem *p_)
 	  printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
 	  pr->print(pr, "%P:%(%p%)\n", p_, pln);
 	  FFTW(printer_destroy) (pr);
-	  printf("%g\n", pln->pcost);
+	  printf("cost %g  score %d\n\n", pln->pcost, pln->score);
      }
 
      if (paranoid) {
@@ -200,9 +205,11 @@ void setup(struct problem *p)
 		    pln->ops.add, pln->ops.mul, pln->ops.fma, pln->ops.other);
 	  pr->print(pr, "planner time: %g s\n", tplan);
 	  if (verbose > 1) {
-	       int count = 0;
-	       FFTW(traverse_plan)(pln, increment, (void *) &count);
-	       printf("number of child plans: %d\n", count - 1);
+	       increment_closure k;
+	       k.super.visit = increment;
+	       k.count = 0;
+	       FFTW(traverse_plan)(pln, 0, &k.super);
+	       printf("number of child plans: %d\n", k.count - 1);
 	  }
 	  if (verbose > 3) 
 	       plnr->adt->exprt(plnr, pr);
