@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.4 2002-07-22 05:24:17 stevenj Exp $ */
+/* $Id: hc2hc.c,v 1.5 2002-07-25 04:25:06 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -214,6 +214,7 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
      iodim *d = p->sz.dims;
      const hc2hc_desc *e = ego->desc;
      uint m = d[0].n / e->radix;
+     int omid = d[0].os * (m/2);
 
      tensor null, radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
      tensor cld_vec = X(tensor_append)(radix, p->vecsz);
@@ -226,7 +227,7 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
      radix = X(mktensor_1d)(e->radix, m * d[0].os, m * d[0].os);
      null = X(mktensor)(0);
      *cld0p = X(mkproblem_rdft)(radix, null, p->O, p->O, R2HC);
-     *cldmp = X(mkproblem_rdft)(m%2 ? null : radix, null, p->O,p->O, R2HCII);
+     *cldmp = X(mkproblem_rdft)(m%2 ? null : radix, null, p->O+omid,p->O+omid, R2HCII);
      X(tensor_destroy)(null);
      X(tensor_destroy)(radix);
 }
@@ -237,6 +238,7 @@ void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
      iodim *d = p->sz.dims;
      const hc2hc_desc *e = ego->desc;
      uint m = d[0].n / e->radix;
+     int imid = d[0].is * (m/2);
 
      tensor null, radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
      tensor cld_vec = X(tensor_append)(radix, p->vecsz);
@@ -249,7 +251,7 @@ void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
      radix = X(mktensor_1d)(e->radix, m * d[0].is, m * d[0].is);
      null = X(mktensor)(0);
      *cld0p = X(mkproblem_rdft)(radix, null, p->I, p->I, HC2R);
-     *cldmp = X(mkproblem_rdft)(m%2 ? null : radix, null, p->I,p->I, HC2RIII);
+     *cldmp = X(mkproblem_rdft)(m%2 ? null : radix, null, p->I+imid,p->I+imid, HC2RIII);
      X(tensor_destroy)(null);
      X(tensor_destroy)(radix);
 }
