@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.71 2002-09-12 15:29:16 athena Exp $ */
+/* $Id: planner.c,v 1.72 2002-09-12 19:11:21 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -124,15 +124,7 @@ enum { H_EMPTY, H_VALID, H_DELETED };
 static uint ub(uint cnt) { return 3U * (cnt + 10U); }
 static uint lb(uint cnt) { return ub(cnt) / 2U; }
 
-static int solvedby(md5uint *s, uint flags, solution *l)
-{
-     return (l->state == H_VALID 
-	     && IMPATIENCE(flags) >= IMPATIENCE(((uint)l->flags))
-	     /* other flags are included in md5 */
-	     && md5eq(s, l->s));
-}
-
-static solution *hlookup(planner *ego, md5uint *s, uint flags)
+static solution *hlookup(planner *ego, md5uint *s)
 {
      uint h, g;
 
@@ -141,12 +133,9 @@ static solution *hlookup(planner *ego, md5uint *s, uint flags)
 
      for (g = h; ; g = (g + 1) % ego->hashsiz) {
 	  solution *l = ego->sols + g;
-	  if (l->state == H_EMPTY)
-	       return 0;
-
-          if (solvedby(s, flags, l)) {
-	       ++ego->hit;
-	       return l;
+	  switch (l->state) {
+	      case H_EMPTY: return 0;
+	      case H_VALID: if (md5eq(s, l->s)) { ++ego->hit; return l; }
 	  }
 	  A((g + 1) % ego->hashsiz != h);
      }
@@ -216,7 +205,7 @@ static void hinsert(planner *ego, md5uint *s, uint flags, slvdesc *sp)
 {
      solution *l;
 
-     if ((l = hlookup(ego, s, flags))) {
+     if ((l = hlookup(ego, s))) {
 	  /* overwrite old solution */
 	  if (IMPATIENCE(flags) > IMPATIENCE(((uint)l->flags)))
 	       return; /* don't overwrite less impatient solution */
@@ -230,19 +219,22 @@ static void hinsert(planner *ego, md5uint *s, uint flags, slvdesc *sp)
 }
 
 
-static void insert(planner *ego, uint flags, uint nthr,
-		   problem *p, slvdesc *sp)
+static void insert(planner *ego, problem *p, slvdesc *sp)
 {
      md5 m;
-     md5hash(&m, p, flags, nthr);
-     hinsert(ego, m.s, flags, sp);
+     md5hash(&m, p, ego->flags, ego->nthr);
+     hinsert(ego, m.s, ego->flags, sp);
 }
 
 static solution *lookup(planner *ego, problem *p)
 {
      md5 m;
+     solution *l;
+
      md5hash(&m, p, ego->flags, ego->nthr);
-     return hlookup(ego, m.s, ego->flags);
+     l = hlookup(ego, m.s);
+     return  (l && (IMPATIENCE(ego->flags) >= IMPATIENCE(((uint)l->flags)))) 
+	  ? l : 0;
 }
 
 /*
@@ -268,7 +260,7 @@ static plan *mkplan(planner *ego, problem *p)
      ++ego->nprob;
      sp = (sol = lookup(ego, p)) ? sol->sp : 0;
      ego->inferior_mkplan(ego, p, &pln, &sp);
-     insert(ego, ego->flags, ego->nthr, p, sp);
+     insert(ego, p, sp);
 
      if (pln)
 	  ego->hook(pln, p, 1);
