@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.36 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.37 2005-02-25 01:17:59 stevenj Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -92,6 +92,7 @@ static int applicable0(const solver *ego_, const problem *p_, int *rp)
           const problem_dft *p = (const problem_dft *) p_;
           const S *ego = (const S *)ego_;
           return (1
+		  && FINITE_RNK(p->sz->rnk) && FINITE_RNK(p->vecsz->rnk)
                   && p->sz->rnk >= 2
                   && picksplit(ego, p->sz, rp)
 	       );

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.22 2003-11-15 00:01:14 athena Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.23 2005-02-25 01:18:59 stevenj Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -109,6 +109,7 @@ static int applicable0(const solver *ego_, const problem *p_, int *rp,
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
 	  const S *ego = (const S *)ego_;
           return (1
+		  && FINITE_RNK(p->sz->rnk) && FINITE_RNK(p->vecsz->rnk)
                   && p->sz->rnk >= 2
 		  && picksplit(ego, p->sz, rp)
                   && (0
