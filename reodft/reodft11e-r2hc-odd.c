@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.4 2003-02-26 18:24:36 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.5 2003-02-26 22:48:26 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -35,7 +35,7 @@
 
    Aside from very confusing notation (several symbols are redefined
    from one line to the next), be aware that this paper has some
-   errors.  In particular, the signs are wrong in Eqs. (34-35).  Also
+   errors.  In particular, the signs are wrong in Eqs. (34-35).  Also,
    Eq. (36-37) should be simply C(k) = C(2k + 1 mod N), and similarly
    for S (or, equivalently, the second cases should have N - 2*k - 1
    instead of N - k - 1).  Note also that in their definition of the
