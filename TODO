@@ -2,15 +2,7 @@
 
 * manual
 
-* it may be a good idea to unify all those little loops that do
-  copying, (X[i], X[n-i]) <- (X[i] + X[n-i], X[i] - X[n-i]),
-  and multiplication of vectors by twiddle factors.
-
 * fma codelets?
-
-* Timed planner: run as ESTIMATE, then IMPATIENT, then PATIENT, then naive?
-  PATIENT then IMPATIENT then ESTIMATE would allow the less-patient planners
-  to benefit from more-patient sub-plans, on the other hand.
 
 TODO before/at release:
 
@@ -52,3 +44,11 @@ TODO before FFTW-$2\pi$:
   optimization/fit.
 
 * vector radix, multidimensional codelets
+
+* it may be a good idea to unify all those little loops that do
+  copying, (X[i], X[n-i]) <- (X[i] + X[n-i], X[i] - X[n-i]),
+  and multiplication of vectors by twiddle factors.
+
+* Timed planner: run as ESTIMATE, then IMPATIENT, then PATIENT, then naive?
+  PATIENT then IMPATIENT then ESTIMATE would allow the less-patient planners
+  to benefit from more-patient sub-plans, on the other hand.
