@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.4 2003-01-19 01:31:22 athena Exp $ */
+/* $Id: verify-lib.c,v 1.5 2003-01-27 01:45:21 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -176,14 +176,31 @@ void arol(C *b, C *a, int n, int nb, int na)
      }
 }
 
+#if defined(BENCHFFT_LDOUBLE) && HAVE_COSL
+   typedef long double trigreal;
+#  define COS cosl
+#  define SIN sinl
+#  define TAN tanl
+#  define KTRIG(x) (x##L)
+#else
+   typedef double trigreal;
+#  define COS cos
+#  define SIN sin
+#  define TAN tan
+#  define KTRIG(x) (x)
+#endif
+#define K2PI KTRIG(6.2831853071795864769252867665590057683943388)
+
 void aphase_shift(C *b, C *a, int n, int nb, int na, double sign)
 {
      int j, jb, ja;
+     trigreal twopin;
+     twopin = K2PI / n;
 
      for (jb = 0; jb < nb; ++jb)
 	  for (j = 0; j < n; ++j) {
-	       double c = cos((2*M_PI*j)/n);
-	       double s = sign * sin((2*M_PI*j)/n);
+	       trigreal s = sign * SIN(j * twopin);
+	       trigreal c = COS(j * twopin);
 
 	       for (ja = 0; ja < na; ++ja) {
 		    int k = (jb * n + j) * na + ja;
