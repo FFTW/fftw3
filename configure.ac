@@ -7,6 +7,7 @@ AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AC_SUBST(SHARED_VERSION_INFO)
+AM_ENABLE_SHARED(no) dnl to hell with shared libraries
 
 dnl configure options
 AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
