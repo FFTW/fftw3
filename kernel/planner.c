@@ -18,15 +18,8 @@
  *
  */
 
-/* $Id: planner.c,v 1.31 2002-07-31 02:35:24 stevenj Exp $ */
+/* $Id: planner.c,v 1.32 2002-07-31 11:52:53 athena Exp $ */
 #include "ifftw.h"
-
-struct pair_s {
-     solver *slv;
-     const char *reg_nam;
-     int id;
-     pair *cdr;
-};
 
 /* Entry in the solutions hash table */
 /*
@@ -40,32 +33,28 @@ struct pair_s {
 struct solutions_s {
      problem *p;
      plan *pln;
-     pair *sp;
+     slvpair *sp;
      int blessed;
      solutions *cdr;
 };
 
-/* pair management */
-static inline pair *cons(solver *slv, const char *reg_nam, int id, pair *cdr)
+/* slvpair management */
+static inline slvpair *mkpair(solver *slv, const char *reg_nam, int id)
 {
-     pair *n = (pair *) fftw_malloc(sizeof(pair), PAIRS);
+     slvpair *n = (slvpair *) fftw_malloc(sizeof(slvpair), SLVPAIRS);
      n->slv = slv;
      n->reg_nam = reg_nam;
      n->id = id;
-     n->cdr = cdr;
+     n->cdr = 0;
      return n;
 }
-
-static solver *slv(pair *n) { return n->slv; }
-static pair *cdr(pair *n) { return n->cdr; }
-static pair *solvers(planner *ego) { return ego->solvers; }
 
 static void register_solver(planner *ego, solver *s)
 {
      if (s) { /* add s to end of solver list */
-	  pair *n;
+	  slvpair *n;
 	  X(solver_use)(s);
-	  n = cons(s, ego->cur_reg_nam, ego->idcnt++, 0);
+	  n = mkpair(s, ego->cur_reg_nam, ego->idcnt++);
 	  *ego->last_solver_cdr = n;
 	  ego->last_solver_cdr = &n->cdr;
      }
@@ -131,7 +120,7 @@ static void rehash(planner *ego)
           X(free)(osol);
 }
 
-static void insert(planner *ego, problem *p, plan *pln, pair *sp)
+static void insert(planner *ego, problem *p, plan *pln, slvpair *sp)
 {
      solutions *l = (solutions *)fftw_malloc(sizeof(solutions), HASHT);
 
@@ -165,7 +154,7 @@ static plan *mkplan(planner *ego, problem *p)
 {
      solutions *sol;
      plan *pln;
-     pair *sp;
+     slvpair *sp;
 
      if ((sol = lookup(ego, p))) {
           if ((pln = sol->pln))
@@ -334,7 +323,6 @@ static void exprt_conf(planner *ego, printer *p)
 	  UNUSED(s);
           sp->id = idcnt++;
      });
-     A(idcnt == sp->idcnt);
 
      p->print(p, "\n"
 	      "     %s(s, p);\n"
@@ -347,13 +335,12 @@ static void exprt_conf(planner *ego, printer *p)
  */
 planner *X(mkplanner)(size_t sz,
 		      void (*infmkplan)(planner *ego, problem *p, 
-					plan **, pair **),
+					plan **, slvpair **),
                       void (*destroy) (planner *),
 		      int flags)
 {
      static const planner_adt padt = {
-	  slv, cdr, solvers, register_solver,
-	  mkplan, forget, exprt, exprt_conf, slv_mkplan
+	  register_solver, mkplan, forget, exprt, exprt_conf, slv_mkplan
      };
 
      planner *p = (planner *) fftw_malloc(sz, PLANNERS);
@@ -378,7 +365,7 @@ planner *X(mkplanner)(size_t sz,
 
 void X(planner_destroy)(planner *ego)
 {
-     pair *l, *l0;
+     slvpair *l, *l0;
 
      /* destroy local state, if any */
      if (ego->destroy)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.12 2002-07-25 19:30:06 athena Exp $ */
+/* $Id: planner-score.c,v 1.13 2002-07-31 11:52:53 athena Exp $ */
 #include "ifftw.h"
 
 typedef struct {
@@ -41,7 +41,7 @@ static inline void adjust_score(plan *pln)
      pln->score = k.sc;
 }
 
-static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
+static void mkplan(planner *ego, problem *p, plan **bestp, slvpair **pairp)
 {
      plan *best = 0;
      int best_score;

@@ -18,12 +18,12 @@
  *
  */
 
-/* $Id: planner-naive.c,v 1.13 2002-07-14 17:49:20 stevenj Exp $ */
+/* $Id: planner-naive.c,v 1.14 2002-07-31 11:52:53 athena Exp $ */
 #include "ifftw.h"
 
 /* naive planner with no memoization */
 
-static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
+static void mkplan(planner *ego, problem *p, plan **bestp, slvpair **pairp)
 {
      plan *best = 0;
 

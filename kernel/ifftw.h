@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.61 2002-07-31 02:35:24 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.62 2002-07-31 11:52:53 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -102,7 +102,7 @@ enum fftw_malloc_what {
      HASHT,
      TENSORS,
      PLANNERS,
-     PAIRS,
+     SLVPAIRS,
      TWIDDLES,
      OTHER,
      MALLOC_WHAT_LAST		/* must be last */
@@ -330,7 +330,13 @@ void X(solver_destroy)(solver *ego);
 /*-----------------------------------------------------------------------*/
 /* planner.c */
 
-typedef struct pair_s pair; /* opaque */
+typedef struct slvpair_s {
+     solver *slv;
+     const char *reg_nam;
+     int id;
+     struct slvpair_s *cdr;
+} slvpair;
+
 typedef struct solutions_s solutions; /* opaque */
 
 /* planner flags */
@@ -340,9 +346,6 @@ enum { ESTIMATE = 0x1, CLASSIC = 0x2,
 typedef enum { FORGET_PLANS, FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
 typedef struct {
-     solver *(*slv)(pair *cons);
-     pair *(*cdr)(pair *cons);
-     pair *(*solvers)(planner *ego);
      void (*register_solver)(planner *ego, solver *s);
      plan *(*mkplan)(planner *ego, problem *p);
      void (*forget)(planner *ego, amnesia a);
@@ -359,10 +362,10 @@ struct planner_s {
      void (*hook)(plan *plan, const problem *p);
 
      const char *cur_reg_nam;
-     pair *solvers, **last_solver_cdr;
+     slvpair *solvers, **last_solver_cdr;
      solutions **sols;
      void (*destroy)(planner *ego);
-     void (*inferior_mkplan)(planner *ego, problem *p, plan **, pair **);
+     void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvpair **);
      uint hashsiz;
      uint cnt;
      int flags;
@@ -371,7 +374,7 @@ struct planner_s {
 
 planner *X(mkplanner)(size_t sz,
 		      void (*mkplan)(planner *ego, problem *p, 
-				     plan **, pair **),
+				     plan **, slvpair **),
                       void (*destroy) (planner *), 
 		      int flags);
 void X(planner_destroy)(planner *ego);
@@ -394,13 +397,13 @@ void X(planner_dump)(planner *ego, int verbose);
   pages = "18--25"
   }
 */
-#define FORALL_SOLVERS(ego, s, p, what)					\
-{									\
-     pair *p;								\
-     for (p = ego->adt->solvers(ego); p; p = ego->adt->cdr(p)) {	\
-	  solver *s = ego->adt->slv(p);					\
-	  what;								\
-     }									\
+#define FORALL_SOLVERS(ego, s, p, what)		\
+{						\
+     slvpair *p;				\
+     for (p = ego->solvers; p; p = p->cdr) {	\
+	  solver *s = p->slv;			\
+	  what;					\
+     }						\
 }
 
 /* various planners */
