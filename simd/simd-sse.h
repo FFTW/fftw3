@@ -98,11 +98,8 @@ static __inline__ void STOREL(R *addr, V val)
      __asm__("movlps %1, %0" : "=m"(*addr) : "x"(val));
 }
 
-#define DVK(var, val) const V var = __extension__ ({		\
-     static const union fvec _var = { {val, val, val, val} };	\
-     _var.v;							\
-})
-#define LDK(x) x
+#define DVK(var, val) static const union fvec var = { {val, val, val, val} }
+#define LDK(x) x.v
 
 #endif
 

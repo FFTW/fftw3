@@ -66,11 +66,6 @@ static __inline__ V VXOR(V b, V a)
      return ret;
 }
 
-#define DVK(var, val) V var = __extension__ ({		\
-     static const union dvec _var = { {val, val} };	\
-     _var.v;						\
-})
-
 #define SHUFPD(a, b, msk) __extension__ ({				   \
      V ret;								   \
      __asm__("shufpd %3, %2, %0" : "=x"(ret) : "0"(a), "xm"(b), "i"(msk)); \
@@ -91,7 +86,9 @@ static __inline__ V UNPCKH(V a, V b)
      return ret;
 }
 
-#define LDK(x) x
+#define DVK(var, val) static const union dvec var = { {val, val} }
+#define LDK(x) x.v
+
 #endif
 
 #if defined(__ICC) || defined(_MSC_VER) /* Intel's compiler for ia32 */
