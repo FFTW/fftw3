@@ -19,17 +19,22 @@
  */
 
 #include "codelet.h"
-#include "t.h"
+#include "t2f.h"
 
+#if HAVE_SIMD
 static int okp(const ct_desc *d,
 	       const R *rio, const R *iio, 
 	       int ios, int vs, uint m, int dist)
 {
-     return (1
+     return (RIGHT_CPU()
+	     && ALIGNED(rio)
+	     && iio == rio + 1
+	     && (m % VL) == 0
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))
 	     && (!d->dist || (d->dist == dist))
 	  );
 }
 
-const ct_genus GENUS = { okp, 1 };
+const ct_genus GENUS = { okp, VL };
+#endif

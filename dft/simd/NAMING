@@ -1,17 +1,30 @@
 			  NAMING OF CODELETS
 
-Nontwiddle codelets:  Kn*
+n*: nontwiddle
 
-  Kn1 : Work for arbitrary pointers and strides
+  n1 : arbitrary pointers and strides
 
-  Kn2* : Work for complex numbers, i.e., I = R +/- 1  
+  n2* : complex numbers, i.e., I = R +/- 1  
 
-    Kn2f : I = R + 1
-    Kn2b : I = R - 1
+    n2f : I = R + 1
+    n2b : I = R - 1
 
-  Kn3 : Work for unit vector strides.
+  n3 : complex numbers, unit vector strides.
 
-  Kn4 : output vector stride = 1
+  n4 : output vector stride = 1
         output stride arbitrary
         input vector stride arbitrary
         input vector stride = 1
+
+t*: decimation in time
+
+  t1 : arbitrary pointers and strides
+
+  n2* : complex numbers, i.e., I = R +/- 1  
+
+    t2f : I = R + 1
+    t2b : I = R - 1
+
+  t3 : complex numbers, unit dist.
+
+  t4 : separate R/I, unit dist, arbitrary i/o stride

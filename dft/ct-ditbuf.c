@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.11 2002-07-02 14:30:58 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.12 2002-07-04 00:32:28 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -65,6 +65,8 @@ static const R *doit(kdft_dit k, R *rA, R *iA, const R *W, int ios, int dist,
      return W;
 }
 
+#define BATCHSZ 4 /* FIXME: parametrize? */
+
 static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      plan_ct *ego = (plan_ct *) ego_;
@@ -75,20 +77,21 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      cld->apply(cld0, ri, ii, ro, io);
 
      {
-	  const uint batchsz = 4; /* FIXME: parametrize? */
           uint i, j, m = ego->m, vl = ego->vl, r = ego->r;
           int os = ego->os, ovs = ego->ovs, ios = ego->iios;
-	  R *buf = (R *) STACK_MALLOC(r * batchsz * 2 * sizeof(R));
+	  R *buf;
+
+	  STACK_MALLOC(buf, r * BATCHSZ * 2 * sizeof(R));
 
           for (i = 0; i < vl; ++i) {
 	       R *rA = ro + i * ovs, *iA = io + i * ovs;
 	       const R *W = ego->W;
 
-	       for (j = m; j >= batchsz; j -= batchsz) {
+	       for (j = m; j >= BATCHSZ; j -= BATCHSZ) {
 		    W = doit(ego->k.dit, rA, iA, W, ios, os, r, 
-			     batchsz, buf, ego->vs);
-		    rA += os * (int)batchsz;
-		    iA += os * (int)batchsz;
+			     BATCHSZ, buf, ego->vs);
+		    rA += os * (int)BATCHSZ;
+		    iA += os * (int)BATCHSZ;
 	       }
 
 	       /* do remaining j calls, if any */
@@ -105,10 +108,17 @@ static int applicable(const solver_ct *ego, const problem *p_)
 {
      if (X(dft_ct_applicable)(ego, p_)) {
           const ct_desc *e = ego->desc;
+          const problem_dft *p = (const problem_dft *) p_;
+          iodim *d = p->sz.dims;
+	  uint m = d[0].n / e->radix;
           return (1
 
-                  /* stride is always 2 */
-		  && (e->genus->okp(e, 0, ((R *)0) + 1, 2, 0, 0, 2 * e->radix))
+                  /* check both batch size and remainder */
+		  && (m < BATCHSZ ||
+		      (e->genus->okp(e, 0, ((R *)0) + 1, 2, 0, BATCHSZ,
+				     2 * e->radix)))
+		  && (e->genus->okp(e, 0, ((R *)0) + 1, 2, 0, m % BATCHSZ,
+				    2 * e->radix))
 	       );
      }
      return 0;

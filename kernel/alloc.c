@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.9 2002-07-02 03:17:06 athena Exp $ */
+/* $Id: alloc.c,v 1.10 2002-07-04 00:32:28 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -31,10 +31,7 @@ static inline void *real_malloc(size_t n)
      void *p;
 
 #ifdef HAVE_MEMALIGN
-     {
-	  const int alignment = 16; /* power of 2 */
-	  p = memalign(alignment, n);
-     }
+     p = memalign(MIN_ALIGNMENT, n);
 #else
      p = malloc(n);
 #endif

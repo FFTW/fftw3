@@ -3,4 +3,5 @@ noinst_LTLIBRARIES = libdft_simd.la
 EXTRA_DIST = NAMING
 SUBDIRS = codelets
 
-libdft_simd_la_SOURCES = n4.c t4.c n4.h t4.h
+libdft_simd_la_SOURCES = n2f.c n4.c t2f.c t4.c n2f.h n3f.h n4.h t2f.h	\
+t3f.h t4.h

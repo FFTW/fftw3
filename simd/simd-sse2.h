@@ -63,8 +63,29 @@ static __inline__ V VUNPACKHI(V a, V b)
      return ret;
 }
 
-#define LD(var, loc) var = *(const V *)(&(loc))
-#define ST(loc, var) *(V *)(&(loc)) = var
+
+static __inline__ V LOADH(const R *addr, V val)
+{
+     V ret;
+     __asm__("movhpd %2, %0" : "=x"(ret) : "0"(val), "m"(*addr));
+     return ret;
+}
+
+static __inline__ V LOADL0(const R *addr, V val)
+{
+     __asm__("movlpd %1, %0" : "=x"(val) : "m"(*addr));
+     return val;
+}
+
+
+static __inline__ void STOREH(R *addr, V val)
+{
+     __asm__("movhpd %1, %0" : "=m"(*addr) : "x"(val));
+}
+static __inline__ void STOREL(R *addr, V val)
+{
+     __asm__("movlpd %1, %0" : "=m"(*addr) : "x"(val));
+}
 
 union dvec { 
      double d[2];
@@ -75,7 +96,26 @@ union dvec {
      static const union dvec _var = { {val, val} };	\
      _var.v;						\
 })
+
 #define LDK(x) x
+#endif
+
+
+#ifdef __ICC /* Intel's compiler for ia32 */
+#include <emmintrin.h>
+
+typedef __m128d V;
+#define VADD _mm_add_pd
+#define VSUB _mm_sub_pd
+#define VMUL _mm_mul_pd
+#define DVK(var, val) const R var = K(val)
+#define LDK(x) _mm_set1_pd(x)
+#define VUNPACKLO _mm_unpacklo_pd
+#define VUNPACKHI _mm_unpackhi_pd
+#endif
+
+#define LD(var, loc) var = *(const V *)(&(loc))
+#define ST(loc, var) *(V *)(&(loc)) = var
 
 #define ST2(a, ovs, s0, s1)			\
 {						\
@@ -92,37 +132,20 @@ union dvec {
      ST2((&(a))[2], ovs, v2, v3);		\
 }
 
-#endif
+#define STRI ST2 /* hack */
 
-
-
-#ifdef __ICC /* Intel's compiler for ia32 */
-#include <emmintrin.h>
-
-typedef __m128d V;
-#define VADD _mm_add_pd
-#define VSUB _mm_sub_pd
-#define VMUL _mm_mul_pd
-#define LD(var, loc) var = *(const V *)(&(loc))
-#define ST(loc, var) *(V *)(&(loc)) = var
-#define DVK(var, val) const R var = K(val)
-#define LDK(x) _mm_set1_pd(x)
-
-#define ST2(a, ovs, s0, s1)			\
+#define LDRI(r, i, a, ovs)			\
 {						\
-     R *_b = &(a);				\
-     V _v0 = _mm_unpacklo_pd(s0, s1);		\
-     V _v1 = _mm_unpackhi_pd(s0, s1);		\
-     ST(_b[0 * ovs], _v0);			\
-     ST(_b[1 * ovs], _v1);			\
+     const R *_b = &(a);			\
+     V _v0, _v1;				\
+     LD(_v0, _b[0 * ovs]);			\
+     LD(_v1, _b[1 * ovs]);			\
+     r = VUNPACKLO(_v0, _v1);			\
+     i = VUNPACKHI(_v0, _v1);			\
 }
 
-#define ST4(a, ovs, v0, v1, v2, v3)		\
-{						\
-     ST2(a, ovs, v0, v1);			\
-     ST2((&(a))[2], ovs, v2, v3);		\
-}
-#endif
+#define STRI2(a, r, i) STRI(a, 2, r, i)
+#define LDRI2(r, i, a) LDRI(r, i, a, 2)
 
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))

@@ -18,18 +18,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.14 2002-07-02 17:15:58 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.15 2002-07-04 00:32:28 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.14 2002-07-02 17:15:58 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.15 2002-07-04 00:32:28 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let uistride = ref Stride_variable
 let uostride = ref Stride_variable
+let uivstride = ref Stride_variable
 let uovstride = ref Stride_variable
 
 let speclist = [
@@ -40,6 +41,10 @@ let speclist = [
   "-with-ostride",
   Arg.String(fun x -> uostride := arg_to_stride x),
   " specialize for given output stride";
+
+  "-with-ivstride",
+  Arg.String(fun x -> uivstride := arg_to_stride x),
+  " specialize for given input vector stride";
 
   "-with-ovstride",
   Arg.String(fun x -> uovstride := arg_to_stride x),
@@ -67,6 +72,7 @@ let generate n =
   in
 
   let _ = Simd.ovs := stride_to_string "ovs" !uovstride in
+  let _ = Simd.ivs := stride_to_string "ivs" !uivstride in
 
   let locations = unique_array_c n in
   let input = 
@@ -93,8 +99,12 @@ let generate n =
 	       else [Decl (C.stridetype, istride)])
 	  @ (if stride_fixed !uostride then [] 
 	       else [Decl (C.stridetype, ostride)])
-	  @ (if stride_fixed !uovstride then [] 
-	       else [Decl ("int", !Simd.ovs)])
+	  @ (choose_simd []
+	       (if stride_fixed !uivstride then [] else 
+	       [Decl ("int", !Simd.ivs)]))
+	  @ (choose_simd []
+	       (if stride_fixed !uovstride then [] else 
+	       [Decl ("int", !Simd.ovs)]))
 	 ),
 	 add_constants (Asch annot))
 
@@ -111,23 +121,27 @@ let generate n =
         "(ri, ii, ro, io" ^
            (if stride_fixed !uistride then "" else ", is") ^ 
            (if stride_fixed !uostride then "" else ", os") ^ 
-           (if stride_fixed !uovstride then "" else ", ovs") ^ 
+           (choose_simd ""
+	      (if stride_fixed !uivstride then "" else ", ivs")) ^ 
+           (choose_simd ""
+	      (if stride_fixed !uovstride then "" else ", ovs")) ^ 
           ");\n" ^
       (choose_simd
 	 (Printf.sprintf
 	    "ri += ivs; ii += ivs; ro += %s; io += %s;\n"
 	    !Simd.ovs !Simd.ovs)
 	 (Printf.sprintf
-	    "ri += VL * ivs; ii += VL * ivs; ro += VL * %s; io += VL * %s;\n"
-	    !Simd.ovs !Simd.ovs)) ^
+	    "ri += VL * %s; ii += VL * %s; ro += VL * %s; io += VL * %s;\n"
+	    !Simd.ivs !Simd.ivs !Simd.ovs !Simd.ovs)) ^
     "}\n}\n\n"
 
   and desc = 
     Printf.sprintf 
-      "static const kdft_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s };\n"
+      "static const kdft_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s };\n"
       n name (flops_of tree0) 
       (stride_to_solverparm !uistride) (stride_to_solverparm !uostride)
-      (stride_to_solverparm !uovstride)
+      (choose_simd "0" (stride_to_solverparm !uivstride))
+      (choose_simd "0" (stride_to_solverparm !uovstride))
 
   and init =
     (declare_register_fcn name) ^

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twidsq.ml,v 1.10 2002-07-02 14:30:58 athena Exp $ *)
+(* $Id: gen_twidsq.ml,v 1.11 2002-07-04 00:32:28 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twidsq.ml,v 1.10 2002-07-02 14:30:58 athena Exp $"
+let cvsid = "$Id: gen_twidsq.ml,v 1.11 2002-07-04 00:32:28 athena Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 
@@ -34,6 +34,7 @@ let reload_twiddle = ref false
 
 let uistride = ref Stride_variable
 let uvstride = ref Stride_variable
+let udist = ref Stride_variable
 
 let speclist = [
   "-dit",
@@ -55,6 +56,10 @@ let speclist = [
   "-with-vstride",
   Arg.String(fun x -> uvstride := arg_to_stride x),
   " specialize for given vector stride";
+
+  "-with-dist",
+  Arg.String(fun x -> udist := arg_to_stride x),
+  " specialize for given dist"
 ]
 
 let generate n =
@@ -142,9 +147,10 @@ let generate n =
 
   and desc = 
     Printf.sprintf
-      "static const ct_desc desc = {%d, \"%s\", twinstr, %s, &GENUS, %s, %s};\n\n"
+      "static const ct_desc desc = {%d, \"%s\", twinstr, %s, &GENUS, %s, %s, %s};\n\n"
       n name (flops_of tree) 
       (stride_to_solverparm !uistride) (stride_to_solverparm !uvstride)
+      (stride_to_solverparm !udist) 
 
   and register = 
     match !ditdif with

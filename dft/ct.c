@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.12 2002-07-01 18:05:56 athena Exp $ */
+/* $Id: ct.c,v 1.13 2002-07-04 00:32:28 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -91,6 +91,20 @@ static const plan_adt padt =
      destroy
 };
 
+void X(dft_ct_vecstrides)(const problem_dft *p,
+			  uint *vl, int *ivs, int *ovs)
+{
+     if (p->vecsz.rnk == 1) {
+	  iodim *vd = p->vecsz.dims;
+          *vl = vd[0].n;
+          *ivs = vd[0].is;
+          *ovs = vd[0].os;
+     } else {
+          *vl = 1;
+          *ivs = *ovs = 0;
+     }
+}
+
 plan *X(mkplan_dft_ct)(const solver_ct *ego,
                        const problem *p_,
                        planner *plnr,
@@ -100,7 +114,7 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
      plan *cld;
      uint n, r, m;
      problem *cldp;
-     iodim *d, *vd;
+     iodim *d;
      const problem_dft *p;
      const ct_desc *e = ego->desc;
 
@@ -109,7 +123,6 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
 
      p = (const problem_dft *) p_;
      d = p->sz.dims;
-     vd = p->vecsz.dims;
      n = d[0].n;
      r = e->radix;
      m = n / r;
@@ -134,14 +147,7 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
 
      pln->ios = pln->vs = 0;
 
-     if (p->vecsz.rnk == 1) {
-          pln->vl = vd[0].n;
-          pln->ivs = vd[0].is;
-          pln->ovs = vd[0].os;
-     } else {
-          pln->vl = 1;
-          pln->ivs = pln->ovs = 0;
-     }
+     X(dft_ct_vecstrides)(p, &pln->vl, &pln->ivs, &pln->ovs);
 
      pln->td = 0;
      adt->finish(pln);

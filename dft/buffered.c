@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.16 2002-06-19 05:43:31 fftw Exp $ */
+/* $Id: buffered.c,v 1.17 2002-07-04 00:32:28 athena Exp $ */
 
 #include "dft.h"
 
@@ -296,8 +296,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->slv = ego;
      pln->n = n;
      pln->vl = vl;
-     pln->ivs = ivs;
-     pln->ovs = ovs;
+     pln->ivs = ivs * nbuf;
+     pln->ovs = ovs * nbuf;
      pln->roffset = roffset;
      pln->ioffset = ioffset;
 

@@ -18,18 +18,8 @@
  *
  */
 
-#include "codelet.h"
-#include "t.h"
+#include "simd.h"
 
-static int okp(const ct_desc *d,
-	       const R *rio, const R *iio, 
-	       int ios, int vs, uint m, int dist)
-{
-     return (1
-	     && (!d->s1 || (d->s1 == ios))
-	     && (!d->s2 || (d->s2 == vs))
-	     && (!d->dist || (d->dist == dist))
-	  );
-}
 
-const ct_genus GENUS = { okp, 1 };
+#define GENUS X(dft_simd_n2f_genus)
+extern const kdft_genus GENUS;

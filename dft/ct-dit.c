@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.15 2002-07-02 14:30:58 athena Exp $ */
+/* $Id: ct-dit.c,v 1.16 2002-07-04 00:32:28 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -45,12 +45,17 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 static int applicable(const solver_ct *ego, const problem *p_)
 {
      if (X(dft_ct_applicable)(ego, p_)) {
+	  int ivs, ovs;
+	  uint vl;
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
           iodim *d = p->sz.dims;
 	  uint m = d[0].n / e->radix;
+	  X(dft_ct_vecstrides)(p, &vl, &ivs, &ovs);
           return (1
 		  && (e->genus->okp(e, p->ro, p->io, 
+				    (int)m * d[0].os, 0, m, d[0].os))
+		  && (e->genus->okp(e, p->ro + ovs, p->io + ovs, 
 				    (int)m * d[0].os, 0, m, d[0].os))
 	       );
      }

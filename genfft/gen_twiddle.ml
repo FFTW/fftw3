@@ -18,19 +18,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle.ml,v 1.10 2002-07-02 14:30:58 athena Exp $ *)
+(* $Id: gen_twiddle.ml,v 1.11 2002-07-04 00:32:28 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.10 2002-07-02 14:30:58 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.11 2002-07-04 00:32:28 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number> [ -dit | -dif ]"
 
 let uiostride = ref Stride_variable
+let udist = ref Stride_variable
 
 let speclist = [
   "-dit",
@@ -43,7 +44,11 @@ let speclist = [
 
   "-with-iostride",
   Arg.String(fun x -> uiostride := arg_to_stride x),
-  " specialize for given i/o stride"
+  " specialize for given i/o stride";
+
+  "-with-dist",
+  Arg.String(fun x -> udist := arg_to_stride x),
+  " specialize for given dist"
 ]
 
 let generate n =
@@ -65,6 +70,8 @@ let generate n =
   let byw = bytwiddle n sign (twiddle_array nt twarray) in
 
   let viostride = either_stride (!uiostride) (C.SVar iostride) in
+  let _ = Simd.ovs := stride_to_string "dist" !udist in
+  let _ = Simd.ivs := stride_to_string "dist" !udist in
 
   let locations = unique_array_c n in
   let iloc = 
@@ -94,9 +101,9 @@ let generate n =
 	  list_to_comma 
 	    [Expr_assign (CVar i, CPlus [CVar i; byvl (Integer 1)]);
 	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; 
-						byvl (CVar dist)]);
+						byvl (CVar !Simd.ivs)]);
 	     Expr_assign (CVar iioarray, CPlus [CVar iioarray; 
-						byvl (CVar dist)]);
+						byvl (CVar !Simd.ivs)]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
 					       byvl (Integer nt)])],
 	  Asch annot);
@@ -119,9 +126,10 @@ let generate n =
       (twinstr_to_string (twdesc n))
   and desc = 
     Printf.sprintf
-      "static const ct_desc desc = {%d, \"%s\", twinstr, %s, &GENUS, %s, %s};\n\n"
+      "static const ct_desc desc = {%d, \"%s\", twinstr, %s, &GENUS, %s, %s, %s};\n\n"
       n name (flops_of tree) 
       (stride_to_solverparm !uiostride) "0"
+      (stride_to_solverparm !udist) 
   and register = 
     match !ditdif with
     | DIT -> "X(kdft_dit_register)"

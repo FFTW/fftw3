@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.42 2002-06-30 18:37:55 athena Exp $ */
+/* $Id: ifftw.h,v 1.43 2002-07-04 00:32:28 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -93,6 +93,7 @@ extern void X(fftw_debug)(const char *format, ...);
 
 /*-----------------------------------------------------------------------*/
 /* alloc.c: */
+#define MIN_ALIGNMENT 16
 
 /* objects allocated by malloc, for statistical purposes */
 enum fftw_malloc_what {
@@ -129,18 +130,23 @@ extern void *X(malloc_plain)(size_t sz);
 
 /*-----------------------------------------------------------------------*/
 /* alloca: */
+
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif /* HAVE_ALLOCA_H */
 
 #ifdef HAVE_ALLOCA
 /* use alloca if available */
-#define STACK_MALLOC(x) alloca(x)
+#define STACK_MALLOC(p, x)						     \
+{									     \
+     p = alloca((x) + MIN_ALIGNMENT);					     \
+     p = (void *)(((long)p + (MIN_ALIGNMENT - 1)) & (~(MIN_ALIGNMENT - 1))); \
+}
 #define STACK_FREE(x) 
 
 #else /* ! HAVE_ALLOCA */
 /* use malloc instead of alloca */
-#define STACK_MALLOC(x) fftw_malloc(x, OTHER)
+#define STACK_MALLOC(p, x) p = fftw_malloc(x, OTHER)
 #define STACK_FREE(x) X(free)(x)
 #endif /* ! HAVE_ALLOCA */
 

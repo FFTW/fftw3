@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.5 2002-06-30 18:37:55 athena Exp $ *)
+(* $Id: annotate.ml,v 1.6 2002-07-04 00:32:28 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -31,7 +31,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.5 2002-06-30 18:37:55 athena Exp $ *)
+(* $Id: annotate.ml,v 1.6 2002-07-04 00:32:28 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -106,7 +106,7 @@ and ainstr_ldvarpairs = function
   | _ -> []
 and ainstr_stvarpairs = function
   | Assign (v, e) 
-    when !Simdmagic.store_transpose && Variable.is_locative v ->
+    when Simdmagic.f_store_transpose () && Variable.is_locative v ->
       [MTranspose(v,e)]
   | Assign (v, e) 
     when Simdmagic.f_collect_store () && Variable.is_locative v -> 

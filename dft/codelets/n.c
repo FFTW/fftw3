@@ -29,6 +29,7 @@ static int okp(const kdft_desc *d,
      return (1
 	     && (!d->is || (d->is == is))
 	     && (!d->os || (d->os == os))
+	     && (!d->ivs || (d->ivs == ivs))
 	     && (!d->ovs || (d->ovs == ovs))
 	  );
 }

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.9 2002-07-02 19:38:36 athena Exp $ *)
+(* $Id: simd.ml,v 1.10 2002-07-04 00:32:28 athena Exp $ *)
 
 open Expr
 open List
@@ -64,54 +64,78 @@ let rec listToString toString separator = function
   | [x] -> toString x
   | x::xs -> (toString x) ^ separator ^ (listToString toString separator xs)
 
+let real_imag (v1,e1,v2,e2) = 
+  if Variable.is_real v1 then (v1,e1,v2,e2) 
+  else if Variable.is_real v2 then (v2,e2,v1,e1)
+  else failwith "real_imag"
+
 let rec unparse_load vardeclinfo dst src = 
-  if !ldvec then
-    sprintf "LD(%s,%s);\n" (Variable.unparse dst) (Variable.unparse src)
-  else
-    match Util.find_elem (first_simd_load src) vardeclinfo with
-    | Some (MUseReIm(MLoad,v1,e1,v2,e2)) ->
-	let (e1,e2) = 
-	  if Variable.is_real v1 then (e1,e2) 
-	  else if Variable.is_real v2 then (e2,e1)
-	  else failwith "unparse_load"
-	in sprintf "LDRI(%s,%s,%s,%s);\n" 
-	  (unparse_expr e1) (unparse_expr e2) (Variable.unparse src) !ivs
-    | _ -> ""
+  match !ldmode with
+  | VEC -> sprintf "LD(%s,%s);\n" (Variable.unparse dst) (Variable.unparse src)
+  | RI ->
+      begin
+	match Util.find_elem (first_simd_load src) vardeclinfo with
+	| Some (MUseReIm(MLoad,v1,e1,v2,e2)) ->
+	    let (v1,e1,v2,e2) = real_imag (v1,e1,v2,e2) in
+	    sprintf "LDRI(%s,%s,%s,%s);\n" 
+	      (unparse_expr e1) (unparse_expr e2) (Variable.unparse v1) !ivs
+	| _ -> ""
+      end
+  | RI2 ->
+      begin
+	match Util.find_elem (first_simd_load src) vardeclinfo with
+	| Some (MUseReIm(MLoad,v1,e1,v2,e2)) ->
+	    let (v1,e1,v2,e2) = real_imag (v1,e1,v2,e2) in
+	    sprintf "LDRI2(%s,%s,%s);\n" 
+	      (unparse_expr e1) (unparse_expr e2) (Variable.unparse v1)
+	| _ -> ""
+      end
+  | _ -> failwith "ldmode not implemented"
+
+
+and unparse_load_twiddle vardeclinfo dst src = 
+  sprintf "LD(%s,%s);\n" (Variable.unparse dst) (Variable.unparse src)
 
 and unparse_store vardeclinfo dst src_expr =
-  if !store_transpose then
-    unparse_store_transposed vardeclinfo dst src_expr
-  else
-  if !stvec then
-    sprintf "ST(%s,%s);\n" (Variable.unparse dst) (unparse_expr src_expr)
-  else
-    match Util.find_elem (last_simd_store dst) vardeclinfo with
-    | Some (MUseReIm(MStore,v1,e1,v2,e2)) ->
-	let (e1,e2) = 
-	  if Variable.is_real v1 then (e1,e2) 
-	  else if Variable.is_real v2 then (e2,e1)
-	  else failwith "unparse_store"
-	in sprintf  "STRI(%s,%s,%s,%s);\n"
-	  (unparse_expr e1) (unparse_expr e2) (Variable.unparse dst) !ovs
-    | _ -> ""
-
-
-and unparse_store_transposed vardeclinfo  dst src_expr =
-  match Util.find_elem (last_transpose_simd_store dst) vardeclinfo with
-  | Some (MTransposes zs) ->
+  match !stmode with
+  | VEC -> 
+      sprintf "ST(%s,%s);\n" (Variable.unparse dst) (unparse_expr src_expr)
+  | RI ->
       begin
-	let zs' = List.sort (fun (v,_) (v',_) -> cmp_locations v v') zs  in
-	let dst = fst (List.hd zs') in
-	match !vector_length with
-	| 4 -> sprintf "ST4(%s, %s, %s);\n"
-	      (Variable.unparse dst) !ovs
-	      (listToString unparse_expr ", " (map snd zs'))
-	| 2 -> sprintf "ST2(%s, %s, %s);\n"
-	      (Variable.unparse dst) !ovs
-	      (listToString unparse_expr ", " (map snd zs'))
-	| _ -> failwith "store_transpose"
+	match Util.find_elem (last_simd_store dst) vardeclinfo with
+	| Some (MUseReIm(MStore,v1,e1,v2,e2)) ->
+	    let (v1,e1,v2,e2) = real_imag (v1,e1,v2,e2) in
+	    sprintf  "STRI(%s,%s,%s,%s);\n"
+	      (Variable.unparse v1) !ovs (unparse_expr e1) (unparse_expr e2)
+	| _ -> ""
       end
-  | _ -> ""
+  | RI2 ->
+      begin
+	match Util.find_elem (last_simd_store dst) vardeclinfo with
+	| Some (MUseReIm(MStore,v1,e1,v2,e2)) ->
+	    let (v1,e1,v2,e2) = real_imag (v1,e1,v2,e2) in
+	    sprintf  "STRI2(%s,%s,%s);\n"
+	      (Variable.unparse v1) (unparse_expr e1) (unparse_expr e2)
+	| _ -> ""
+      end
+  | TR ->
+      begin
+	match Util.find_elem (last_transpose_simd_store dst) vardeclinfo with
+	| Some (MTransposes zs) ->
+	    begin
+	      let zs' = List.sort (fun (v,_) (v',_) -> cmp_locations v v') zs  in
+	      let dst = fst (List.hd zs') in
+	      match !vector_length with
+	      | 4 -> sprintf "ST4(%s, %s, %s);\n"
+		    (Variable.unparse dst) !ovs
+		    (listToString unparse_expr ", " (map snd zs'))
+	      | 2 -> sprintf "ST2(%s, %s, %s);\n"
+		    (Variable.unparse dst) !ovs
+		    (listToString unparse_expr ", " (map snd zs'))
+	      | _ -> failwith "store_transpose"
+	    end
+	| _ -> ""
+      end
 
 and unparse_expr =
   let rec unparse_plus = function
@@ -153,6 +177,8 @@ and unparse_decl x = C.unparse_decl x
 and unparse_ast' vardeclinfo ast = 
   let rec unparse_ast ast =
     let rec unparse_assignment = function
+      | Assign(dst, Load src) when (Variable.is_constant src) -> 
+	  unparse_load_twiddle vardeclinfo dst src
       | Assign(dst, Load src) when (not (Variable.is_locative dst)) -> 
 	  unparse_load vardeclinfo dst src
       | Assign (v, x) when Variable.is_locative v ->
