@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.129 2003-03-12 05:14:03 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.130 2003-03-12 06:25:12 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2664,7 +2664,7 @@ standard, but some authors follow slightly different conventions for the
 normalization of the transform (the constant factor in front) and the
 sign of the complex exponent.  We begin by presenting the
 one-dimensional (1d) transform definitions, and then give the
-straightforward extension of the multi-dimensional transforms.
+straightforward extension to multi-dimensional transforms.
 
 @menu
 * The 1d Discrete Fourier Transform (DFT)::  
@@ -2672,6 +2672,7 @@ straightforward extension of the multi-dimensional transforms.
 * 1d Real-even DFTs (discrete cosine transforms::  
 * 1d Real-odd DFTs (discrete sine transforms::  
 * 1d Discrete Hartley Transforms (DHTs)::  
+* Multi-dimensional Transforms::  
 @end menu
 
 @c =========>
@@ -3069,7 +3070,7 @@ otherwise, @math{N=2n}.
 @cindex normalization
 
 @c =========>
-@node 1d Discrete Hartley Transforms (DHTs),  , 1d Real-odd DFTs (discrete sine transforms, What FFTW Really Computes
+@node 1d Discrete Hartley Transforms (DHTs), Multi-dimensional Transforms, 1d Real-odd DFTs (discrete sine transforms, What FFTW Really Computes
 @subsection 1d Discrete Hartley Transforms (DHTs)
 
 @cindex discrete Hartley transform
@@ -3093,6 +3094,126 @@ FFTW computes an unnormalized transform, in that there is no coefficient
 in front of the summation in the DHT.  In other words, applying the
 forward and then the backward transform will multiply the input by
 @math{n}.
+
+@c =========>
+@node Multi-dimensional Transforms,  , 1d Discrete Hartley Transforms (DHTs), What FFTW Really Computes
+@subsection Multi-dimensional Transforms
+
+The multi-dimensional transforms of FFTW, in general, compute simply the
+separable product of the given 1d transform along each dimension of the
+array.  Since each of these transforms is unnormalized, computing the
+forward followed by the backward/inverse multi-dimensional transform
+will result in the original array scaled by the product of the
+normalization factors for each dimension (e.g. the product of the
+dimension sizes, for a multi-dimensional DFT).
+
+@tex
+As an explicit example, consider the following exact mathematical
+definition of our multi-dimensional DFT.  Let $X$ be a $d$-dimensional
+complex array whose elements are $X[j_1, j_2, \ldots, j_d]$, where $0
+\leq j_s < n_s$ for all~$s \in \{ 1, 2, \ldots, d \}$.  Let also
+$\omega_s = e^{2\pi \sqrt{-1}/n_s}$, for all ~$s \in \{ 1, 2, \ldots, d
+\}$.
+
+The forward transform computes a complex array~$Y$, whose
+structure is the same as that of~$X$, defined by
+
+$$
+Y[k_1, k_2, \ldots, k_d] =
+    \sum_{j_1 = 0}^{n_1 - 1}
+        \sum_{j_2 = 0}^{n_2 - 1}
+           \cdots
+              \sum_{j_d = 0}^{n_d - 1}
+                  X[j_1, j_2, \ldots, j_d] 
+                      \omega_1^{-j_1 k_1}
+                      \omega_2^{-j_2 k_2}
+                      \cdots
+                      \omega_d^{-j_d k_d} \ .
+$$
+
+The backward transform computes
+$$
+Y[k_1, k_2, \ldots, k_d] =
+    \sum_{j_1 = 0}^{n_1 - 1}
+        \sum_{j_2 = 0}^{n_2 - 1}
+           \cdots
+              \sum_{j_d = 0}^{n_d - 1}
+                  X[j_1, j_2, \ldots, j_d] 
+                      \omega_1^{j_1 k_1}
+                      \omega_2^{j_2 k_2}
+                      \cdots
+                      \omega_d^{j_d k_d} \ .
+$$
+
+Computing the forward transform followed by the backward transform
+will multiply the array by $\prod_{s=1}^{d} n_d$.
+@end tex
+
+@cindex r2c
+The definition of FFTW's multi-dimensional DFT of real data (r2c)
+deserves special attention.  In this case, we logically compute the full
+multi-dimensional DFT of the input data; since the input data are purely
+real, the output data have the Hermitian symmetry and therefore only one
+non-redundant half need be stored.  More specifically, for an @ndims{}
+multi-dimensional real-input DFT, the full (logical) complex output array
+@tex
+$Y[k_1, k_2, \ldots, k_d]$
+@end tex
+@ifhtml
+<i>Y</i>[<i>k</i><sub>1</sub>, <i>k</i><sub>2</sub>, ...,
+<i>k</i><sub><i>d</i></sub>]
+@end ifhtml
+@ifinfo
+Y[k1, k2, ..., kd]
+@end ifinfo
+has the symmetry:
+@tex
+$$
+Y[k_1, k_2, \ldots, k_d] = Y[n_1 - k_1, n_2 - k_2, \ldots, n_d - k_d]^*
+$$
+@end tex
+@ifhtml
+<i>Y</i>[<i>k</i><sub>1</sub>, <i>k</i><sub>2</sub>, ...,
+<i>k</i><sub><i>d</i></sub>] = <i>Y</i>[<i>n</i><sub>1</sub> -
+<i>k</i><sub>1</sub>, <i>n</i><sub>2</sub> - <i>k</i><sub>2</sub>, ...,
+<i>n</i><sub><i>d</i></sub> - <i>k</i><sub><i>d</i></sub>]<sup>*</sup>
+@end ifhtml
+@ifinfo
+Y[k1, k2, ..., kd] = Y[n1 - k1, n2 - k2, ..., nd - kd]*
+@end ifinfo
+(where each dimension is periodic).  Because of this symmetry, we only
+store the
+@tex
+$k_d = 0 \cdots n_d/2$
+@end tex
+@ifhtml
+<i>k</i><sub><i>d</i></sub> = 0...<i>n</i><sub><i>d</i></sub>/2+1
+@end ifhtml
+@ifinfo
+kd = 0...nd/2
+@end ifinfo
+elements of the @emph{last} dimension (division by @math{2} is rounded
+down).  (We could instead have cut any other dimension in half, but the
+last dimension proved computationally convenient.)  This results in the
+peculiar array format described in more detail by @ref{Real-data DFT
+Array Format}.
+
+The multi-dimensional c2r transform is simply the unnormalized inverse
+of the r2c transform.  i.e. it is the same as FFTW's complex backward
+multi-dimensional DFT, operating on a Hermitian input array in the
+peculiar format mentioned above and outputting a real array (since the
+DFT output is purely real).
+
+We should remind the user that the separable product of 1d transforms
+along each dimension, as computed by FFTW, is not always the same thing
+as the usual multi-dimensional transform.  A multi-dimensional
+@code{R2HC} (or @code{HC2R}) transform is not identical to the
+multi-dimensional DFT, requiring some post-processing to combine the
+requisite real and imaginary parts, as was described in @ref{The
+Halfcomplex-format DFT}.  Likewise, FFTW's multidimensional
+@code{FFTW_DHT} r2r transform is not the same thing as the logical
+multi-dimensional discrete Hartley transform defined in the literature,
+as discussed in @ref{The Discrete Hartley Transform}.
 
 @c ************************************************************
 @node Parallel FFTW, Calling FFTW from Fortran, FFTW Reference, Top
