@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.2 2002-06-04 21:49:39 athena Exp $ */
+/* $Id: tensor.c,v 1.3 2002-06-09 12:19:26 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -35,12 +35,16 @@ static inline int imin(int a, int b)
 static void talloc(tensor *x, uint rnk)
 {
      x->rnk = rnk;
-     x->dims = (iodim *)fftw_malloc(sizeof(iodim) * rnk, TENSORS);
+     if (rnk) /* don't malloc(0), just in case */
+	  x->dims = (iodim *)fftw_malloc(sizeof(iodim) * rnk, TENSORS);
+     else
+	  x->dims = 0;
 }
 
 void fftw_tensor_destroy(tensor sz)
 {
-     fftw_free(sz.dims);
+     if (sz.dims)
+	  fftw_free(sz.dims);
 }
 
 tensor fftw_mktensor(uint rnk)
