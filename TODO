@@ -2,11 +2,6 @@
 
 * manual
 
-* --enable-long-double fails in verify().  The problem appears
-  to be a bug in gcc-2.95 -malign-double.  The problem disappears
-  with gcc-3.1, icc, and without -malign-double.  I couldn't figure
-  out exactly what the problem is. 
-
 * it may be a good idea to unify all those little loops that do
   copying, (X[i], X[n-i]) <- (X[i] + X[n-i], X[i] - X[n-i]),
   and multiplication of vectors by twiddle factors.
