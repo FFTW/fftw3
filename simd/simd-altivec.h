@@ -110,7 +110,7 @@ typedef vector float V;
 
 static inline V VMUL(V a, V b)
 {
-     DVK(zero, 0.0);
+     DVK(zero, -0.0);
      return VFMA(a, b, zero);
 }
 
