@@ -375,7 +375,7 @@ The libraries must be listed in the correct order (\courier{-lfftw3
 (The general rule is that if \italic{A\} uses \italic{B\}, then
 \italic{A\} must be listed before \italic{B\} in the link command.).
 
-\question 15mar:linkheader I included your header but linking fails
+\question 15mar:linkheader I included your header, but linking still fails.
 
 You're a C++ programmer, aren't you?  You have to compile the FFTW
 library and link it into your program, not just \courier{#include
