@@ -380,8 +380,8 @@ static int mkP(P *pln, int r, R *O, int ios, rdft_kind kind, planner *plnr)
 
      X(ops_add)(&cldr->ops, &cldr->ops, &pln->super.super.ops);
      pln->super.super.ops.other += (r - 1) * (4 * 2 + 6) + 6;
-     pln->super.super.ops.add += (r - 1) * 2 + 4;
-     pln->super.super.ops.mul += (r - 1) * 4;
+     pln->super.super.ops.add += 2 * (r - 1) * 2 + 4;
+     pln->super.super.ops.mul += 2 * (r - 1) * 4;
 
      return 1;
 

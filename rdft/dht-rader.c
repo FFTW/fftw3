@@ -307,14 +307,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->ginv = X(power_mod)(pln->g, n - 2, n);
      A(MULMOD(pln->g, pln->ginv, n) == 1);
 
-     /* FIXME: recount */
      X(ops_add)(&cld1->ops, &cld2->ops, &pln->super.super.ops);
-     pln->super.super.ops.other += (n - 1) * (2 + 3 + 2) + 3;
-     pln->super.super.ops.add += (n - 1) * 1;
-     pln->super.super.ops.mul += (n - 1) * 2 - 2;
+     pln->super.super.ops.other += (n - 3) * 3 + (n - 2) * 2 + 5;
+     pln->super.super.ops.add += (n - 3) * 1;
+     pln->super.super.ops.mul += (n - 3) * 2 + 2;
 #if R2HC_ONLY_CONV
-     pln->super.super.ops.other += (n - 1) - 2;
-     pln->super.super.ops.add += 2 * (n - 1) - 4;
+     pln->super.super.ops.other += (n - 2) + 4;
+     pln->super.super.ops.add += (n - 3) * 1 + (n - 2) * 1;
 #endif
 
      return &(pln->super.super);
