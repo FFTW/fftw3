@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.232 2003-07-05 17:30:10 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.233 2003-11-15 01:57:55 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -517,7 +517,8 @@ typedef struct {
 
 struct planner_s {
      const planner_adt *adt;
-     void (*hook)(plan *pln, const problem *p, int optimalp);
+     void (*hook)(struct planner_s *plnr, plan *pln, 
+		  const problem *p, int optimalp);
 
      /* solver descriptors */
      slvdesc *slvdescs;

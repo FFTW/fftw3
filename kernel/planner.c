@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.153 2003-06-11 02:15:42 athena Exp $ */
+/* $Id: planner.c,v 1.154 2003-11-15 01:57:55 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -319,7 +319,7 @@ static void invoke_hook(planner *ego, plan *pln, const problem *p,
 			int optimalp)
 {
      if (ego->hook)
-	  ego->hook(pln, p, optimalp);
+	  ego->hook(ego, pln, p, optimalp);
 }
 
 static void evaluate_plan(planner *ego, plan *pln, const problem *p)

@@ -41,7 +41,8 @@ static bench_tensor *fftw_tensor_to_bench_tensor(tensor *t)
 /*
   transform an fftw problem into a bench_problem.
 */
-static bench_problem *fftw_problem_to_bench_problem(const problem *p_)
+static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
+						    const problem *p_)
 {
      bench_problem *bp = 0;
      if (DFTP(p_)) {
@@ -62,8 +63,6 @@ static bench_problem *fftw_problem_to_bench_problem(const problem *p_)
 	  bp->inphys = bp->outphys = 0;
 	  bp->iphyssz = bp->ophyssz = 0;
 	  bp->in_place = p->ri == p->ro;
-	  bp->destroy_input = 0;
-	  bp->userinfo = 0;
 	  bp->sz = fftw_tensor_to_bench_tensor(p->sz);
 	  bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
      }
@@ -96,8 +95,6 @@ static bench_problem *fftw_problem_to_bench_problem(const problem *p_)
 	  bp->inphys = bp->outphys = 0;
 	  bp->iphyssz = bp->ophyssz = 0;
 	  bp->in_place = p->I == p->O;
-	  bp->destroy_input = 0;
-	  bp->userinfo = 0;
 	  bp->sz = fftw_tensor_to_bench_tensor(p->sz);
 	  bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
 	  bp->k = (r2r_kind_t *) bench_malloc(sizeof(r2r_kind_t) * p->sz->rnk);
@@ -145,18 +142,20 @@ static bench_problem *fftw_problem_to_bench_problem(const problem *p_)
 	  bp->inphys = bp->outphys = 0;
 	  bp->iphyssz = bp->ophyssz = 0;
 	  bp->in_place = p->r == p->rio;
-	  bp->destroy_input = p->kind == HC2R;
-	  bp->userinfo = 0;
 	  bp->sz = fftw_tensor_to_bench_tensor(p->sz);
 	  bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
      }
      else {
 	  /* TODO */
      }
+
+     bp->userinfo = 0;
+     bp->destroy_input = DESTROY_INPUTP(plnr);
+
      return bp;
 }
 
-static void hook(plan *pln, const problem *p_, int optimalp)
+static void hook(planner *plnr, plan *pln, const problem *p_, int optimalp)
 {
      int rounds = 5;
      double tol = SINGLE_PRECISION ? 1.0e-3 : 1.0e-10;
@@ -172,7 +171,7 @@ static void hook(plan *pln, const problem *p_, int optimalp)
      if (paranoid) {
 	  bench_problem *bp;
 
-	  bp = fftw_problem_to_bench_problem(p_);
+	  bp = fftw_problem_to_bench_problem(plnr, p_);
 	  if (bp) {
 	       X(plan) the_plan_save = the_plan;
 
