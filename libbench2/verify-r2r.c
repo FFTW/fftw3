@@ -237,17 +237,12 @@ static void rarolr(R *b, R *a, int n, int nb, int na,
 				       - a[(ib * n + n/2 + 1) * na + ia]
 				       - a[(ib * n + n/2) * na + ia];
 			     }
-		   } else if (n == 2) {
+		   } else /* n <= 2 */ {
 			for (ia = 0; ia < na; ++ia) {
 			     b[(ib * n + n - 1) * na + ia] =
 				  a[(ib * n + 0) * na + ia];
 			     b[(ib * n + 0) * na + ia] += 
-				  a[(ib * n + 1) * na + ia];
-			}
-		   } else /* n == 1 */ {
-			for (ia = 0; ia < na; ++ia) {
-			     b[(ib * n + 0) * na + ia] = 
-				  2 * a[(ib * n + 0) * na + ia];
+				  a[(ib * n + n - 1) * na + ia];
 			}
 		   }
 		   break;
