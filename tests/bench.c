@@ -159,6 +159,7 @@ void setup(struct problem *p)
      pln = plnr->adt->mkplan(plnr, prblm);
      tplan = timer_stop();
      BENCH_ASSERT(pln);
+     X(plan_bless)(pln);
 
      if (verbose) {
 	  printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
