@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.6 2002-06-09 15:37:07 athena Exp $ */
+/* $Id: rank0.c,v 1.7 2002-06-09 19:16:43 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -178,13 +178,10 @@ static void destroy(plan *ego_)
      fftw_free(ego);
 }
 
-static void print(plan *ego_, plan_printf prntf)
+static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     prntf("(%s", ego->slv->adt->nam);
-     if (ego->vl > 1)
-	  prntf("-x%u", ego->vl);
-     prntf(")");
+     p->print(p, "(%s%v)", ego->slv->adt->nam, ego->vl);
 }
 
 static int score(const solver *ego, const problem *p)

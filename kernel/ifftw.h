@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.16 2002-06-09 15:01:41 athena Exp $ */
+/* $Id: ifftw.h,v 1.17 2002-06-09 19:16:43 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -44,6 +44,7 @@ typedef struct problem_s problem;
 typedef struct plan_s plan;
 typedef struct solver_s solver;
 typedef struct planner_s planner;
+typedef struct printer_s printer;
 
 /*-----------------------------------------------------------------------*/
 /* assert.c: */
@@ -185,15 +186,24 @@ void fftw_problem_destroy(problem *ego);
 problem *fftw_problem_dup(problem *ego);
 
 /*-----------------------------------------------------------------------*/
-/* plan.c: */
-typedef int (*plan_printf)(const char *format, ...);
+/* print.c */
+struct printer_s {
+     void (*print)(printer *p, const char *format, ...);
+     void (*putchr)(printer *p, char c);
+     uint indent;
+};
 
+printer *fftw_mkprinter(size_t size, void (*putchr)(printer *p, char c));
+void fftw_printer_destroy(printer *p);
+
+/*-----------------------------------------------------------------------*/
+/* plan.c: */
 enum awake { SLEEP, AWAKE };
 
 typedef struct {
      void (*solve)(plan *ego, const problem *p);
      void (*awake)(plan *ego, int awaken);
-     void (*print)(plan *ego, plan_printf prntf);
+     void (*print)(plan *ego, printer *p);
      void (*destroy)(plan *ego);
 } plan_adt;
 

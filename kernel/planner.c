@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.5 2002-06-08 19:11:09 athena Exp $ */
+/* $Id: planner.c,v 1.6 2002-06-09 19:16:43 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -247,19 +247,25 @@ void fftw_planner_set_hook(planner *p, void (*hook)(plan *, problem *))
 #ifdef FFTW_DEBUG
 #include <stdio.h>
 
+static void putchr(printer *p, char c)
+{
+     UNUSED(p);
+     putchar(c);
+}
+
 void fftw_planner_dump(planner *ego, int verbose)
 {
      int cnt = 0, cnt_null = 0, max_len = 0, empty = 0;
      solutions *s;
      unsigned int h;
-
      if (verbose) {
+	  printer *pr = fftw_mkprinter(sizeof(printer), putchr);
 	  for (h = 0; h < ego->hashsiz; ++h) {
 	       printf("bucket %d\n", h);
 
 	       for (s = ego->sols[h]; s; s = s->cdr) {
 		    if (s->pln) {
-			 s->pln->adt->print(s->pln, printf);
+			 s->pln->adt->print(s->pln, pr);
 		    } else {
 			 printf("(null)");
 		    }
@@ -267,6 +273,7 @@ void fftw_planner_dump(planner *ego, int verbose)
 	       }
 	       printf("\n");
 	  }
+	  fftw_printer_destroy(pr);
      }
 
      for (h = 0; h < ego->hashsiz; ++h) {

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.2 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.3 2002-06-09 19:16:43 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -68,15 +68,11 @@ static void destroy(plan *ego_)
      fftw_free(ego);
 }
 
-static void print(plan *ego_, plan_printf prntf)
+static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
      const S *s = ego->solver;
-     prntf("(dft-rank>=2/%d ", s->spltrnk);
-     ego->cld1->adt->print(ego->cld1, prntf);
-     prntf(" ");
-     ego->cld2->adt->print(ego->cld2, prntf);
-     prntf(")");
+     p->print(p, "(dft-rank>=2/%d%p%p)", s->spltrnk, ego->cld1, ego->cld2);
 }
 
 /* Given a solver spltrnk and a vector rnk, return the actual

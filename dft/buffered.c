@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.5 2002-06-09 15:37:07 athena Exp $ */
+/* $Id: buffered.c,v 1.6 2002-06-09 19:16:43 athena Exp $ */
 
 #include "dft.h"
 
@@ -38,7 +38,7 @@ typedef struct {
 typedef struct {
      plan_dft super;
 
-     plan *cld, *cldcpy, *cld_rest;
+     plan *cld, *cldcpy, *cldrest;
      uint n, vl, nbuf, bufdist;
      int ivs, ovs;
      R *bufs;
@@ -52,7 +52,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      P *ego = (P *) ego_;
      plan_dft *cld = (plan_dft *) ego->cld;
      plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
-     plan_dft *cld_rest;
+     plan_dft *cldrest;
      uint i, i1, vl = ego->vl, nbuf = ego->nbuf;
      int ivs = ego->ivs, ovs = ego->ovs;
      R *bufs = ego->bufs;
@@ -73,9 +73,9 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      }
 
      /* Do the remaining transforms, if any: */
-     cld_rest = (plan_dft *) ego->cld_rest;
+     cldrest = (plan_dft *) ego->cldrest;
      i1 = i - nbuf;
-     cld_rest->apply(ego->cld_rest, ri + i1 * ivs, ii + i1 * ivs,
+     cldrest->apply(ego->cldrest, ri + i1 * ivs, ii + i1 * ivs,
 		     ro + i1 * ovs, io + i1 * ovs);
 }
 
@@ -86,7 +86,7 @@ static void awake(plan *ego_, int flg)
 
      ego->cld->adt->awake(ego->cld, flg);
      ego->cldcpy->adt->awake(ego->cldcpy, flg);
-     ego->cld_rest->adt->awake(ego->cld_rest, flg);
+     ego->cldrest->adt->awake(ego->cldrest, flg);
 
      if (flg) {
 	  if (!ego->bufs)
@@ -103,24 +103,20 @@ static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      if (ego->bufs) fftw_free(ego->bufs);
-     fftw_plan_destroy(ego->cld_rest);
+     fftw_plan_destroy(ego->cldrest);
      fftw_plan_destroy(ego->cldcpy);
      fftw_plan_destroy(ego->cld);
      fftw_free(ego);
 }
 
-static void print(plan *ego_, plan_printf prntf)
+static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     prntf("(%s-%u-x%u/%u-%u ", 
-	   ego->slv->adt->nam, ego->n, ego->nbuf, ego->vl, 
-	   ego->bufdist % ego->n);
-     ego->cld->adt->print(ego->cld, prntf);
-     prntf(" ");
-     ego->cldcpy->adt->print(ego->cldcpy, prntf);
-     prntf(" ");
-     ego->cld_rest->adt->print(ego->cld_rest, prntf);
-     prntf(")");
+     p->print(p, "(%s-%u%v/%u-%u%p%p%p)", 
+	      ego->slv->adt->nam, 
+	      ego->n, ego->nbuf, ego->vl, 
+	      ego->bufdist % ego->n,
+	      ego->cld, ego->cldcpy, ego->cldrest);
 }
 
 static uint compute_nbuf(uint n, uint vl, const S *ego)
@@ -213,7 +209,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      plan *cld = (plan *) 0;
      plan *cldcpy = (plan *) 0;
-     plan *cld_rest = (plan *) 0;
+     plan *cldrest = (plan *) 0;
      problem *cldp = 0;
      const problem_dft *p = (const problem_dft *) p_;
      R *bufs = (R *) 0;
@@ -279,20 +275,20 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* deallocate buffers, let awake() allocate them for real */
      fftw_free(bufs); bufs = 0;
 
-     /* plan the leftover transforms (cld_rest): */
+     /* plan the leftover transforms (cldrest): */
      cldp = 
 	  fftw_mkproblem_dft_d(
 	       fftw_tensor_copy(p->sz),
 	       fftw_mktensor_1d(vl % nbuf, ivs, ovs),
 	       p->ri, p->ii, p->ro, p->io);
-     cld_rest = plnr->adt->mkplan(plnr, cldp);
+     cldrest = plnr->adt->mkplan(plnr, cldp);
      fftw_problem_destroy(cldp);
-     if (!cld_rest) goto nada;
+     if (!cldrest) goto nada;
 
      pln = MKPLAN_DFT(P, &padt, apply);
      pln->cld = cld;
      pln->cldcpy = cldcpy;
-     pln->cld_rest = cld_rest;
+     pln->cldrest = cldrest;
      pln->slv = ego;
      pln->n = n;
      pln->vl = vl;
@@ -304,18 +300,18 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->bufs = 0;		/* let awake() reallocate buffer space */
 
      pln->super.super.cost =
-	  (cldcpy->cost + cld->cost) * (vl / nbuf) + cld_rest->cost;
+	  (cldcpy->cost + cld->cost) * (vl / nbuf) + cldrest->cost;
      pln->super.super.flops =
 	 fftw_flops_add(fftw_flops_mul((vl / nbuf), cld->flops),
-			cld_rest->flops);
+			cldrest->flops);
 
      return &(pln->super.super);
 
    nada:
      if (bufs)
 	  fftw_free(bufs);
-     if (cld_rest)
-	  fftw_plan_destroy(cld_rest);
+     if (cldrest)
+	  fftw_plan_destroy(cldrest);
      if (cldcpy)
 	  fftw_plan_destroy(cldcpy);
      if (cld)

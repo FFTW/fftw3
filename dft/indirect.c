@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.4 2002-06-09 15:01:41 athena Exp $ */
+/* $Id: indirect.c,v 1.5 2002-06-09 19:16:43 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -42,7 +42,7 @@ typedef struct {
 
 typedef struct {
      plan_dft super;
-     plan *cld_copy, *cld;
+     plan *cldcpy, *cld;
      const S *slv;
 } P;
 
@@ -55,8 +55,8 @@ static void apply_before(plan *ego_, R *ri, R *ii, R *ro, R *io)
      UNUSED(ro); UNUSED(io); /* input == output */
 
      {
-	  plan_dft *cld_copy = (plan_dft *) ego->cld_copy;
-	  cld_copy->apply(ego->cld_copy, ri, ii, ri, ii);
+	  plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
+	  cldcpy->apply(ego->cldcpy, ri, ii, ri, ii);
      }
      {
 	  plan_dft *cld = (plan_dft *) ego->cld;
@@ -93,8 +93,8 @@ static void apply_after(plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  cld->apply(ego->cld, ri, ii, ri, ii);
      }
      {
-	  plan_dft *cld_copy = (plan_dft *) ego->cld_copy;
-	  cld_copy->apply(ego->cld_copy, ri, ii, ri, ii);
+	  plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
+	  cldcpy->apply(ego->cldcpy, ri, ii, ri, ii);
      }
 }
 
@@ -118,26 +118,22 @@ static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      fftw_plan_destroy(ego->cld);
-     fftw_plan_destroy(ego->cld_copy);
+     fftw_plan_destroy(ego->cldcpy);
      fftw_free(ego);
 }
 
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
-     ego->cld_copy->adt->awake(ego->cld_copy, flg);
+     ego->cldcpy->adt->awake(ego->cldcpy, flg);
      ego->cld->adt->awake(ego->cld, flg);
 }
 
-static void print(plan *ego_, plan_printf prntf)
+static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
      const S *s = ego->slv;
-     prntf("(%s ", s->adt->nam);
-     ego->cld->adt->print(ego->cld, prntf);
-     prntf(" ");
-     ego->cld_copy->adt->print(ego->cld_copy, prntf);
-     prntf(")");
+     p->print(p, "(%s%p%p)", s->adt->nam, ego->cld, ego->cldcpy);
 }
 
 static int applicable(const solver *ego_, const problem *p_)
@@ -174,7 +170,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      P *pln;
      problem *cldp;
-     plan *cld = 0, *cld_copy = 0;
+     plan *cld = 0, *cldcpy = 0;
 
      static const plan_adt padt = { 
 	  fftw_dft_solve, awake, print, destroy 
@@ -186,9 +182,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      cldp = fftw_mkproblem_dft_d(fftw_mktensor(0),
 				 fftw_tensor_append(p->vecsz, p->sz),
 				 p->ri, p->ii, p->ri, p->ii);
-     cld_copy = plnr->adt->mkplan(plnr, cldp);
+     cldcpy = plnr->adt->mkplan(plnr, cldp);
      fftw_problem_destroy(cldp);
-     if (!cld_copy) goto nada;
+     if (!cldcpy) goto nada;
 
      cldp = ego->adt->mkcld(p);
      cld = plnr->adt->mkplan(plnr, cldp);
@@ -197,16 +193,16 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_DFT(P, &padt, ego->adt->apply);
      pln->cld = cld;
-     pln->cld_copy = cld_copy;
+     pln->cldcpy = cldcpy;
      pln->slv = ego;
-     pln->super.super.cost = cld->cost + cld_copy->cost;
+     pln->super.super.cost = cld->cost + cldcpy->cost;
      pln->super.super.flops = cld->flops;
 
      return &(pln->super.super);
 
  nada:
      if (cld) fftw_plan_destroy(cld);
-     if (cld_copy) fftw_plan_destroy(cld_copy);
+     if (cldcpy) fftw_plan_destroy(cldcpy);
      return (plan *)0;
 }
 

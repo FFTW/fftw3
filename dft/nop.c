@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop.c,v 1.2 2002-06-09 15:37:07 athena Exp $ */
+/* $Id: nop.c,v 1.3 2002-06-09 19:16:43 athena Exp $ */
 
 /* plans for vrank -infty DFTs (nothing to do) */
 
@@ -58,10 +58,10 @@ static void destroy(plan *ego)
      fftw_free(ego);
 }
 
-static void print(plan *ego, plan_printf prntf)
+static void print(plan *ego, printer *p)
 {
      UNUSED(ego);
-     prntf("(dft-nop)");
+     p->print(p, "(dft-nop)");
 }
 
 static int score(const solver *ego, const problem *p)
@@ -74,12 +74,14 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
      static const plan_adt padt = { 
 	  fftw_dft_solve, fftw_null_awake, print, destroy 
      };
+     plan_dft *pln;
 
      UNUSED(plnr);
 
      if (!applicable(ego, p))
 	  return (plan *) 0;
-     return MKPLAN_DFT(plan_dft, &padt, apply);
+     pln = MKPLAN_DFT(plan_dft, &padt, apply);
+     return &(pln->super);
 }
 
 static solver *mksolver(void)

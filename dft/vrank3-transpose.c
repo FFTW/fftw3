@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.3 2002-06-09 11:52:22 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.4 2002-06-09 19:16:43 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -127,10 +127,10 @@ static void destroy(plan *ego)
      fftw_free(ego);
 }
 
-static void print(plan *ego_, plan_printf prntf)
+static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     prntf("(dft-transpose-%u-x%u)", ego->n, ego->vl);
+     p->print(p, "(dft-transpose-%u%v)", ego->n, ego->vl);
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)

@@ -35,6 +35,22 @@ BENCH_DOCF("version", mkvers)
 BENCH_DOCF("fftw-compiled-by", mkcc)
 END_BENCH_DOC
 
+static void putchr(printer *p, char c)
+{
+     UNUSED(p);
+     putchar(c);
+}
+
+static void debug_hook(plan *pln, fftw_problem *p_)
+{
+     problem_dft *p = (problem_dft *)p_;
+     printer *pr = fftw_mkprinter(sizeof(printer), putchr);
+     printf("%d: ", fftw_tensor_sz(p->sz));
+     pln->adt->print(pln, pr);
+     printf("\n");
+     fftw_printer_destroy(pr);
+}
+
 int can_do(struct problem *p)
 {
      return (sizeof(fftw_real) == sizeof(bench_real) && 
@@ -50,12 +66,14 @@ void setup(struct problem *p)
      bench_real *ri, *ii, *ro, *io;
      BENCH_ASSERT(can_do(p));
 
-#if 1
+#if 0
      plnr = fftw_mkplanner_naive();
 #else
      plnr = fftw_mkplanner_score();
 #endif
      fftw_dft_conf_standard(plnr);
+
+//     fftw_planner_set_hook(plnr, debug_hook);
 
      if (p->sign == -1) {
 	  ri = p->in; ii = ri + 1; ro = p->out; io = ro + 1;
@@ -72,7 +90,9 @@ void setup(struct problem *p)
      BENCH_ASSERT(pln);
      
      if (verbose) {
-	  pln->adt->print(pln, printf);
+	  printer *pr = fftw_mkprinter(sizeof(printer), putchr);
+	  pln->adt->print(pln, pr);
+	  fftw_printer_destroy(pr);
 	  printf("\n");
      }
      printf("%d\n", plnr->ntry);

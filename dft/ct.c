@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.4 2002-06-08 20:57:54 athena Exp $ */
+/* $Id: ct.c,v 1.5 2002-06-09 19:16:43 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -57,20 +57,15 @@ static void awake(plan *ego_, int flg)
      }
 }
 
-static void print(plan *ego_, plan_printf prntf)
+static void print(plan *ego_, printer *p)
 {
      plan_ct *ego = (plan_ct *) ego_;
      const solver_ct *slv = ego->slv;
      const ct_desc *e = slv->desc;
 
-     prntf("(%s-%d/%d", slv->nam, ego->r, fftw_twiddle_length(e->tw));
-     if (e->is || e->vs)
-	  prntf("/is=%d/vs=%d", e->is, e->vs);
-     if (ego->vl > 1)
-	  prntf("-x%u", ego->vl);
-     prntf(" ");
-     ego->cld->adt->print(ego->cld, prntf);
-     prntf(")");
+     p->print(p, "(%s-%u/%u%ois=%ovs=%v%p)",
+	      slv->nam, ego->r, fftw_twiddle_length(e->tw),
+	      e->is, e->vs, ego->vl, ego->cld);
 }
 
 #define divides(a, b) (((uint)(b) % (uint)(a)) == 0)
