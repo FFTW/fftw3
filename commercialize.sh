@@ -26,22 +26,29 @@ for name in $d/tools/fftw-wisdom.c; do
 done
 
 for name in $d/configure.ac; do
-    sed -e 's+genfft-k7/Makefile++' $name > ${name}.tmp
+    sed -e 's+genfft-k7/Makefile++' $name | sed -e 's+AC_INIT(fftw,+AC_INIT(commercial-fftw,+' > ${name}.tmp
     chmod --reference=$name ${name}.tmp
     touch --reference=$name ${name}.tmp
     mv ${name}.tmp $name
 done
 
-rm -rf $d/genfft-k7
+for name in $d/Makefile.am; do
+    sed -e 's+genfft-k7++' $name > ${name}.tmp
+    chmod --reference=$name ${name}.tmp
+    touch --reference=$name ${name}.tmp
+    mv ${name}.tmp $name
+done
+
 (
  cd $d; 
- autoconf; 
-
- # WTF?
  rm -rf autom4te.cache
-)
+ autoreconf --verbose --install --symlink --force
+ autoreconf --verbose --install --symlink --force
+ autoreconf --verbose --install --symlink --force
+ rm -f config.cache
 
-cat > $d/COPYING <<EOF
+ rm -f COPYING
+ cat >COPYING <<EOF
 This package is licensed commercially by the MIT Technology Licensing
 Office (TLO); you should have a license agreement describing the terms
 you have negotiated.
@@ -53,8 +60,10 @@ Contact Ms. Magdalen Christian (mchristi@mit.edu) for more information
 regarding licensing.
 EOF
 
-d2=`basename $newtarball .tar.gz`
-rm -rf $d2
-mv $d $d2
-tar cf - $d2 | gzip -9 > $newtarball
-# rm -f $d2
+
+ ./configure
+ make dist
+ mv $newtarball ..
+)
+
+rm -rf $d
