@@ -46,6 +46,9 @@ typedef struct {
      rdft_kind kind;
 } P;
 
+static rader_tl *omegas = 0;
+static rader_tl *twiddles = 0;
+
 /***************************************************************************/
 
 /* Below, we extensively use the identity that fft(x*)* = ifft(x) in
@@ -252,49 +255,6 @@ static void apply_dif(plan *ego_, R *I, R *O)
      }
 }
 
-/***************************************************************************/
-
-/* shared twiddle and omega lists, keyed by two/three integers. */
-
-typedef struct TL_s { uint k1,k2,k3; R *W; int refcnt; struct TL_s *nxt; } TL;
-
-static TL *TL_insrt(uint k1, uint k2, uint k3, R *W, TL *tl)
-{
-     TL *t = (TL *) fftw_malloc(sizeof(TL), TWIDDLES);
-     t->k1 = k1; t->k2 = k2; t->k3 = k3; t->W = W;
-     t->refcnt = 1; t->nxt = tl;
-     return t;
-}
-
-static TL *TL_fnd(uint k1, uint k2, uint k3, TL *tl)
-{
-     TL *t = tl;
-     while (t && (t->k1 != k1 || t->k2 != k2 || t->k3 != k3))
-	  t = t->nxt;
-     return t;
-}
-
-static TL *TL_dlt(R *W, TL *tl)
-{
-     if (W) {
-	  TL *tp = (TL *) 0, *t = tl;
-	  while (t && t->W != W) {
-	       tp = t;
-	       t = t->nxt;
-	  }
-	  if (t && --t->refcnt <= 0) {
-	       if (tp) tp->nxt = t->nxt; else tl = t->nxt;
-	       X(free)(t->W);
-	       X(free)(t);
-	  }
-     }
-     return(tl);
-}
-
-/***************************************************************************/
-
-static TL *omegas = (TL *) 0;
-static TL *twiddles = (TL *) 0;
 
 static R *mkomega(plan *p_, uint n, uint ginv)
 {
@@ -302,12 +262,9 @@ static R *mkomega(plan *p_, uint n, uint ginv)
      R *omega;
      uint i, gpower;
      trigreal scale;
-     TL *o;
 
-     if ((o = TL_fnd(n, n, ginv, omegas))) {
-	  ++o->refcnt;
-	  return o->W;
-     }
+     if ((omega = X(rader_tl_find)(n, n, ginv, omegas)))
+	  return omega;
 
      omega = (R *)fftw_malloc(sizeof(R) * (n - 1) * 2, TWIDDLES);
 
@@ -323,13 +280,13 @@ static R *mkomega(plan *p_, uint n, uint ginv)
      p->apply(p_, omega, omega + 1, omega, omega + 1);
      AWAKE(p_, 0);
 
-     omegas = TL_insrt(n, n, ginv, omega, omegas);
+     X(rader_tl_insert)(n, n, ginv, omega, &omegas);
      return omega;
 }
 
 static void free_omega(R *omega)
 {
-     omegas = TL_dlt(omega, omegas);
+     X(rader_tl_delete)(omega, &omegas);
 }
 
 static R *mktwiddle(uint m, uint r, uint g)
@@ -337,12 +294,9 @@ static R *mktwiddle(uint m, uint r, uint g)
      uint i, j, gpower;
      uint n = r * m;
      R *W;
-     TL *o;
 
-     if ((o = TL_fnd(m, r, g, twiddles))) {
-	  ++o->refcnt;
-	  return o->W;
-     }
+     if ((W = X(rader_tl_find)(m, r, g, twiddles))) 
+	  return W;
 
      W = (R *)fftw_malloc(sizeof(R) * (r - 1) * ((m-1)/2) * 2, TWIDDLES);
      for (i = 1; i < (m+1)/2; ++i) {
@@ -355,13 +309,13 @@ static R *mktwiddle(uint m, uint r, uint g)
 	  A(gpower == 1);
      }
 
-     twiddles = TL_insrt(m, r, g, W, twiddles);
+     X(rader_tl_insert)(m, r, g, W, &twiddles);
      return W;
 }
 
 static void free_twiddle(R *twiddle)
 {
-     twiddles = TL_dlt(twiddle, twiddles);
+     X(rader_tl_delete)(twiddle, &twiddles);
 }
 
 /***************************************************************************/

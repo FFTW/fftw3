@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.144 2002-09-21 11:58:11 athena Exp $ */
+/* $Id: ifftw.h,v 1.145 2002-09-21 15:37:06 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -618,6 +618,14 @@ int X(is_prime)(uint n);
 uint X(next_prime)(uint n);
 
 #define GENERIC_MIN_BAD 71 /* min prime for which generic becomes ugly */
+
+/*-----------------------------------------------------------------------*/
+/* rader.c: */
+typedef struct rader_tls rader_tl;
+
+void X(rader_tl_insert)(uint k1, uint k2, uint k3, R *W, rader_tl **tl);
+R *X(rader_tl_find)(uint k1, uint k2, uint k3, rader_tl *t);
+void X(rader_tl_delete)(R *W, rader_tl **tl);
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */

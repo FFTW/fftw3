@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2002 Matteo Frigo
+ * Copyright (c) 2002 Steven G. Johnson
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+#include "ifftw.h"
+
+/*
+  common routines for Rader solvers 
+*/
+
+
+/* shared twiddle and omega lists, keyed by two/three integers. */
+struct rader_tls {
+     uint k1, k2, k3;
+     R *W;
+     int refcnt;
+     rader_tl *cdr; 
+};
+
+void X(rader_tl_insert)(uint k1, uint k2, uint k3, R *W, rader_tl **tl)
+{
+     rader_tl *t = (rader_tl *) fftw_malloc(sizeof(rader_tl), TWIDDLES);
+     t->k1 = k1; t->k2 = k2; t->k3 = k3; t->W = W;
+     t->refcnt = 1; t->cdr = *tl; *tl = t;
+}
+
+R *X(rader_tl_find)(uint k1, uint k2, uint k3, rader_tl *t)
+{
+     while (t && (t->k1 != k1 || t->k2 != k2 || t->k3 != k3))
+	  t = t->cdr;
+     if (t) {
+	  ++t->refcnt;
+	  return t->W;
+     } else 
+	  return 0;
+}
+
+void X(rader_tl_delete)(R *W, rader_tl **tl)
+{
+     if (W) {
+	  rader_tl **tp, *t;
+
+	  for (tp = tl; (t = *tp) && t->W != W; tp = &t->cdr)
+	       ;
+
+	  if (t && --t->refcnt <= 0) {
+	       *tp = t->cdr;
+	       X(free)(t->W);
+	       X(free)(t);
+	  }
+     }
+}
