@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.54 2002-09-02 15:55:33 athena Exp $ */
+/* $Id: planner.c,v 1.55 2002-09-02 15:56:37 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -183,7 +183,6 @@ static void rehash(planner *ego)
 static solutions *insert1(planner *ego, md5uint *hsh, uint flags, slvdesc *sp)
 {
      solutions *l = (solutions *)fftw_malloc(sizeof(solutions), HASHT);
-     md5 m;
 
      ++ego->cnt;
      if (ego->cnt > ego->hashsiz)
