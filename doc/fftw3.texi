@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.69 2003-03-03 04:33:02 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.71 2003-03-03 04:39:54 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -36,25 +36,25 @@ $O(n \\log n)$
 
 @macro ndims
 @ifinfo
-n1 x n2 x n3 x ... x nd.
+n1 x n2 x n3 x ... x nd
 @end ifinfo
 @ifhtml
-n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x n<sub>d</sub>.
+n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x n<sub>d</sub>
 @end ifhtml
 @tex
-$n_1 \\times n_2 \\times n_3 \\times \\cdots \\times n_d$.
+$n_1 \\times n_2 \\times n_3 \\times \\cdots \\times n_d$
 @end tex
 @end macro
 
 @macro ndimshalf
 @ifinfo
-n1 x n2 x n3 x ... x (nd/2 + 1).
+n1 x n2 x n3 x ... x (nd/2 + 1)
 @end ifinfo
 @ifhtml
-n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x (n<sub>d</sub>/2 + 1).
+n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x (n<sub>d</sub>/2 + 1)
 @end ifhtml
 @tex
-$n_1 \\times n_2 \\times n_3 \\times \\cdots \\times (n_d/2 + 1)$.
+$n_1 \\times n_2 \\times n_3 \\times \\cdots \\times (n_d/2 + 1)$
 @end tex
 @end macro
 
