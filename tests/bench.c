@@ -43,6 +43,7 @@ void rdwisdom(void)
      FILE *f;
      double tim;
 
+     if (!usewisdom) return;
      if (havewisdom) return;
 
      timer_start();
@@ -66,6 +67,7 @@ void rdwisdom(void)
 void wrwisdom(void)
 {
      FILE *f;
+     if (!usewisdom) return;
      if ((f = fopen(wisdat, "w"))) {
 	  FFTW(export_wisdom_to_file)(f);
 	  fclose(f);
@@ -289,6 +291,7 @@ static FFTW(plan) mkplan(bench_problem *p, int flags)
 
 int can_do(bench_problem *p)
 {
+     rdwisdom();
      the_plan = mkplan(p, the_flags | FFTW_ESTIMATE);
 
      if (the_plan) {
@@ -309,7 +312,7 @@ void setup(bench_problem *p)
 #endif
      install_hook();
 
-     if (usewisdom) rdwisdom();
+     rdwisdom();
 
      timer_start();
      the_plan = mkplan(p, the_flags);
@@ -347,7 +350,7 @@ void done(bench_problem *p)
 
 void cleanup(void)
 {
-     if (usewisdom) wrwisdom();
+     wrwisdom();
      FFTW(cleanup)();
 
 #    ifdef FFTW_DEBUG
