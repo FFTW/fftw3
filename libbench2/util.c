@@ -187,7 +187,7 @@ void *bench_malloc(size_t n)
      {
 	  void *p0;
 	  if ((p0 = malloc(n + 16))) {
-	       p = (void *) (((uintptr_t) p0 + 16) & (~((uintptr_t) 15)));
+	       p = (void *) (((size_t) p0 + 16) & (~((size_t) 15)));
 	       *((void **) p - 1) = p0;
 	  }
 	  else
