@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.33 2003-01-26 00:17:26 stevenj Exp $ */
+/* $Id: alloc.c,v 1.34 2003-01-26 01:44:49 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -46,35 +46,42 @@ void *X(malloc)(size_t n)
 {
      void *p;
 
-     /* Note: MacOS X malloc is already 16-byte aligned */
-#if defined(MIN_ALIGNMENT) && (MIN_ALIGNMENT > 16 || \
-                               !(defined(__MACOSX__) || defined(__APPLE__)))
+#if defined(MIN_ALIGNMENT)
+
 #  if defined(HAVE_MEMALIGN)
      p = memalign(MIN_ALIGNMENT, n);
+
 #  elif defined(HAVE_POSIX_MEMALIGN)
      /* note: posix_memalign is broken in glibc 2.2.5: it constrains
 	the size, not the alignment, to be (power of two) * sizeof(void*).
         The bug seems to have been fixed as of glibc 2.3.1. */
      if (posix_memalign(&p, MIN_ALIGNMENT, n))
 	  p = (void*) 0;
+
 #  elif defined(__ICC) || defined(__INTEL_COMPILER) || defined(HAVE__MM_MALLOC)
      /* Intel's C compiler defines _mm_malloc and _mm_free intrinsics */
      p = (void *) _mm_malloc(n, MIN_ALIGNMENT);
 #    undef real_free
 #    define real_free _mm_free
+
 #  elif defined(_MSC_VER)
      /* MS Visual C++ 6.0 with a "Processor Pack" supports SIMD
 	and _aligned_malloc/free (uses malloc.h) */
      p = (void *) _aligned_malloc(n, MIN_ALIGNMENT);
 #    undef real_free
 #    define real_free _aligned_free
+
+#  elif (defined(__MACOSX__) || defined(__APPLE__)) && (MIN_ALIGNMENT <= 16)
+     /* MacOS X malloc is already 16-byte aligned */
+     p = malloc(n);
+
 #  elif defined(macintosh) /* MacOS 9 */
      p = (void *) MPAllocateAligned(n,
 #    if MIN_ALIGNMENT == 8
 				    kMPAllocate8ByteAligned,
-#    if MIN_ALIGNMENT == 16
+#    elif MIN_ALIGNMENT == 16
 				    kMPAllocate16ByteAligned,
-#    if MIN_ALIGNMENT == 32
+#    elif MIN_ALIGNMENT == 32
 				    kMPAllocate32ByteAligned,
 #    else
 #      error "Unknown alignment for MPAllocateAligned"
@@ -82,13 +89,16 @@ void *X(malloc)(size_t n)
 				    0);
 #    undef real_free
 #    define real_free MPFree
+
 #  else
      /* Add your machine here and send a patch to fftw@fftw.org */
 #    error "Don't know how to malloc() aligned memory."
 #  endif
+
 #else /* !defined(MIN_ALIGMENT) */
      p = malloc(n);
 #endif
+
      return p;
 }
 
