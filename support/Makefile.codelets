@@ -69,7 +69,7 @@ else
 FLAGS_FMA =
 endif
 
-FLAGS_COMMON = -compact -variables 4 $(FLAGS_FMA) -no-randomized-cse
+FLAGS_COMMON = -compact -variables 4 $(FLAGS_FMA) #-no-randomized-cse
 DFT_FLAGS_COMMON = $(FLAGS_COMMON) 
 RDFT_FLAGS_COMMON = $(FLAGS_COMMON)
 
