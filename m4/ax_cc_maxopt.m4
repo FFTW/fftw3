@@ -15,7 +15,7 @@ dnl floating-point computations can be re-ordered as needed.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_ARCHFLAG
 dnl
-dnl @version $Id: ax_cc_maxopt.m4,v 1.3 2004-11-09 02:46:50 stevenj Exp $
+dnl @version $Id: ax_cc_maxopt.m4,v 1.4 2005-01-12 03:13:24 athena Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
 [
@@ -29,7 +29,7 @@ AC_ARG_WITH(portable-binary, [AC_HELP_STRING([--with-portable-binary], [disable 
 # line
 if test "$ac_test_CFLAGS" != "set"; then
   CFLAGS=""
-  if test $GCC = no; then
+  if test "$GCC" '!=' "yes"; then
   base_CC=`basename "$CC" | cut -d" " -f1`
   case "${host_cpu}-${host_os}" in
     alpha*linux*)  if test "$base_CC" = ccc; then

@@ -22,7 +22,7 @@ dnl called unless the user specified --with-gcc-arch manually.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.10 2005-01-10 21:09:43 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.11 2005-01-12 03:13:24 athena Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -37,7 +37,7 @@ AC_CACHE_VAL(ax_cv_gcc_archflag,
 [
 ax_cv_gcc_archflag="unknown"
 
-if test $GCC = yes -a $cross_compiling = no; then
+if test "$GCC" = yes -a "$cross_compiling" = no; then
 
 if test "x$ax_gcc_arch" = xyes; then
 ax_gcc_arch=""
