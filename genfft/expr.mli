@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.mli,v 1.6 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: expr.mli,v 1.7 2002-08-19 23:56:29 athena Exp $ *)
 
 type transcendent = I | CPLX | CPLXJ
 
@@ -42,6 +42,7 @@ val string_of_transcendent : transcendent -> string
 
 val find_vars : expr -> Variable.variable list
 val is_constant : expr -> bool
+val is_known_constant : expr -> bool
 
 val dump : (string -> unit) -> assignment list -> unit
 

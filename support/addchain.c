@@ -4,9 +4,10 @@
 #include <unistd.h>
 
 static int verbose;
-static int mulcost = 6;
-static int ldcost = 1;
-static int sqcost = 4;
+static int mulcost = 18;
+static int ldcost = 2;
+static int sqcost = 10;
+static int reflcost = 8;
 #define INFTY 100000
 
 static int *answer;
@@ -22,8 +23,17 @@ static void print_answer(int n, int t)
 }
 
 #define DO(i, j, k, cst)			\
-if (k >= 0 && k < n) {				\
+if (k < n) {					\
      int c = A[i] + A[j] + cst;			\
+     if (c < A[k]) {				\
+	  A[k] = c;				\
+	  changed = 1;				\
+     }						\
+}
+
+#define DO3(i, j, l, k, cst)			\
+if (k < n) {					\
+     int c = A[i] + A[j] + A[l] + cst;		\
      if (c < A[k]) {				\
 	  A[k] = c;				\
 	  changed = 1;				\
@@ -41,13 +51,17 @@ static int optimize(int n, int *A)
 	       DO(i, i, k, sqcost);
 	  }
 
-	  for (i = 0; i < n; ++i)
-	       for (j = 0; j < n; ++j) {
+	  for (i = 0; i < n; ++i) {
+	       for (j = 0; j <= i; ++j) {
 		    k = i + j;
 		    DO(i, j, k, mulcost);
 		    k = i - j;
 		    DO(i, j, k, mulcost);
+
+		    k = i + j;
+		    DO3(i, j, i - j, k, reflcost);
 	       }
+	  }
 
      } while (changed);
 
@@ -111,7 +125,7 @@ int main(int argc, char *argv[])
 
      verbose = 0;
      all = 0;
-     while ((ch = getopt(argc, argv, "n:t:m:l:s:va")) != -1) {
+     while ((ch = getopt(argc, argv, "n:t:m:l:r:s:va")) != -1) {
 	  switch (ch) {
 	  case 'n':
 	       n = atoi(optarg);
@@ -128,6 +142,9 @@ int main(int argc, char *argv[])
 	  case 's':
 	       sqcost = atoi(optarg);
 	       break;
+	  case 'r':
+	       reflcost = atoi(optarg);
+	       break;
 	  case 'v':
 	       ++verbose;
 	       break;
@@ -142,7 +159,7 @@ int main(int argc, char *argv[])
 
      if (all) {
 	  for (n = 4; n <= 64; n *= 2) {
-	       int n1 = n - 1; if (n1 > 6) n1 = 6;
+	       int n1 = n - 1; if (n1 > 7) n1 = 7;
 	       for (t = 1; t <= n1; ++t)
 		    doit(n, t);
 	  }

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.ml,v 1.6 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: expr.ml,v 1.7 2002-08-19 23:56:29 athena Exp $ *)
 
 (* Here, we define the data type encapsulating a symbolic arithmetic
    expression, and provide some routines for manipulating it. *)
@@ -72,6 +72,11 @@ let is_constant = function
   | Num _ -> true
   | NaN _ -> true
   | Load v -> Variable.is_constant v
+  | _ -> false
+
+let is_known_constant = function
+  | Num _ -> true
+  | NaN _ -> true
   | _ -> false
 
 (* expr to string, used for debugging *)

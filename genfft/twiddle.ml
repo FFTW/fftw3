@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.9 2002-08-18 20:02:37 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.10 2002-08-19 23:56:29 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -112,13 +112,13 @@ let load_reim sign w i =
    via dynamic programming 
  *)
    
-let addition_chain n s load cost_load cost_mul cost_sq =
+let addition_chain n s load cost_load cost_mul cost_sq cost_reflect =
   let infty = 100000 in
   let solution = Array.init n (fun i () -> failwith "addition_chain") in
   let solution = Array.init n (fun i () -> failwith (string_of_int i)) in
   let costs = Array.init n (fun i -> infty) in
   let changed = ref false in
-  let update_one i j k how =
+  let update i j k how =
     if (k >= 0 && k < n) then
       let c = if i = j then cost_sq else cost_mul in
       let d = c + costs.(i) + costs.(j) in
@@ -128,6 +128,21 @@ let addition_chain n s load cost_load cost_mul cost_sq =
 	  solution.(k) <- how;
 	  changed := true;
 	end
+  and reflect i j =
+    let l = i - j and k = i + j in
+    if (k >= 0 && k < n && l >= 0 && l < n) then
+      let c = cost_reflect in
+      let d = c + costs.(i) + costs.(j) + costs.(l) in
+      if (d < costs.(k)) then
+	begin
+	  costs.(k) <- d;
+	  solution.(k) <- (fun () ->
+	    Complex.wreflects 
+	      (solution.(l) ()) 
+	      (solution.(i) ()) 
+	      (solution.(j) ()));
+	  changed := true;
+	end
   in
   let update_all () = 
     begin
@@ -135,12 +150,13 @@ let addition_chain n s load cost_load cost_mul cost_sq =
       for i = 0 to n - 1 do
 	for j = 0 to n - 1 do
 	  begin
-	    update_one i j (i + j)
+	    update i j (i + j)
 	      (fun () -> Complex.times (solution.(i) ()) (solution.(j) ()));
-	    update_one i j (i - j)
+	    update i j (i - j)
 	      (fun () -> 
 		Complex.times (solution.(i) ()) 
 		  (Complex.conj (solution.(j) ())));
+	    reflect i j;
 	  end;
 	done
       done
@@ -177,33 +193,38 @@ let twiddle_policy_load_all =
 
 let twiddle_policy_addition_chain t =
   let load_set n = match (n, t) with
-    | (4, 1) -> [1;] (* 20 *)
-    | (4, 2) -> [1;3;] (* 8 *)
-    | (4, _) -> [1;2;3;] (* 3 *)
-    | (8, 1) -> [1;] (* 122 *)
-    | (8, 2) -> [2;3;] (* 43 *)
-    | (8, 3) -> [1;3;4;] (* 31 *)
-    | (8, 4) -> [1;2;3;5;] (* 24 *)
-    | (8, 5) -> [1;2;3;5;7;] (* 17 *)
-    | (16, 1) -> [1;] (* 574 *)
-    | (16, 2) -> [3;5;] (* 162 *)
-    | (16, 3) -> [4;5;7;] (* 108 *)
-    | (16, 4) -> [1;3;7;12;] (* 86 *)
-    | (16, 5) -> [1;3;4;7;12;] (* 77 *)
-    | (32, 1) -> [1;] (* 2454 *)
-    | (32, 2) -> [5;6;] (* 524 *)
-    | (32, 3) -> [7;8;10;] (* 343 *)
-    | (32, 4) -> [6;11;14;15;] (* 271 *)
-    | (32, 5) -> [5;8;12;14;15;] (* 228 *)
-    | (64, 1) -> [1;] (* 10086 *)
-    | (64, 2) -> [7;9;] (* 1614 *)
-    | (64, 3) -> [11;12;19;] (* 975 *)
-    | (64, 4) -> [11;17;20;21;] (* 756 *)
-    | (64, 5) -> [3;17;18;28;30;] (* 644 *)
-    | _ -> failwith "unknown addition chain"
+  | (4, 1) -> [1;] (* 38 *)
+  | (4, 2) -> [1;3;] (* 16 *)
+  | (4, 3) -> [1;2;3;] (* 6 *)
+  | (8, 1) -> [1;] (* 238 *)
+  | (8, 2) -> [2;3;] (* 104 *)
+  | (8, 3) -> [1;3;4;] (* 58 *)
+  | (8, 4) -> [1;2;3;5;] (* 46 *)
+  | (8, 5) -> [1;2;3;5;7;] (* 34 *)
+  | (8, 6) -> [1;2;3;4;5;7;] (* 24 *)
+  | (8, 7) -> [1;2;3;4;5;6;7;] (* 14 *)
+  | (16, 1) -> [1;] (* 1150 *)
+  | (16, 2) -> [3;5;] (* 366 *)
+  | (16, 3) -> [1;4;5;] (* 244 *)
+  | (16, 4) -> [1;5;6;7;] (* 192 *)
+  | (16, 5) -> [1;2;5;6;7;] (* 152 *)
+  | (16, 6) -> [1;2;3;5;7;8;] (* 130 *)
+  | (16, 7) -> [1;3;4;5;6;7;9;] (* 116 *)
+  | (32, 1) -> [1;] (* 4980 *)
+  | (32, 2) -> [5;6;] (* 1154 *)
+  | (32, 3) -> [7;8;10;] (* 832 *)
+  | (32, 4) -> [2;7;9;10;] (* 646 *)
+  | (32, 5) -> [1;8;9;10;14;] (* 542 *)
+  | (32, 6) -> [1;4;10;11;14;15;] (* 460 *)
+  | (32, 7) -> [1;3;4;11;12;14;15;] (* 386 *)
+  | (64, 1) -> [1;] (* 20482 *)
+  | (64, 2) -> [7;9;] (* 3466 *)
+  | (64, 3) -> [8;15;18;] (* 2338 *)
+  | (64, 4) -> [4;11;15;21;] (* 1848 *)
+  | _ -> failwith "unknown addition chain"
   in
   let bytwiddle n sign w f =
-    let g = addition_chain n (load_set n) (load_reim sign w) 1 6 4 in
+    let g = addition_chain n (load_set n) (load_reim sign w) 2 18 10 8 in
     fun i -> Complex.times (g i) (f i)    
   and twidlen n = 2 * List.length (load_set n)
   and twdesc r = 
@@ -230,14 +251,14 @@ let twiddle_policy_log2 =
   and twidlen n = 2 * (log 2 (largest_power_smaller_than 2 (2 * n - 1)))
   and twdesc n =
     (List.flatten 
-      (List.map 
-	 (fun i -> 
-	   if i > 0 && is_pow 2 i then 
-	     [(TW_COS, 0, i); (TW_SIN, 0, i)] 
-	   else 
-	     [])
-	 (iota n)))
-      @ [(TW_NEXT, 1, 0)]
+       (List.map 
+	  (fun i -> 
+	    if i > 0 && is_pow 2 i then 
+	      [(TW_COS, 0, i); (TW_SIN, 0, i)] 
+	    else 
+	      [])
+	  (iota n)))
+    @ [(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
 let twiddle_policy_log3 =
@@ -258,10 +279,10 @@ let twiddle_policy_log3 =
   and twidlen n = 2 * (terms_needed 0 1 0 n)
   and twdesc n =
     (List.flatten 
-      (List.map 
-	 (fun i -> [(TW_COS, 0, (pow 3 i)); (TW_SIN, 0, (pow 3 i))])
-	 (iota ((twidlen n) / 2))))
-      @ [(TW_NEXT, 1, 0)]
+       (List.map 
+	  (fun i -> [(TW_COS, 0, (pow 3 i)); (TW_SIN, 0, (pow 3 i))])
+	  (iota ((twidlen n) / 2))))
+    @ [(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
 
@@ -291,10 +312,7 @@ let twiddle_policy_iter2 =
     rec_array n (fun self i ->
       if i = 0 then Complex.one
       else if i = 1 then ltw (i - 1)
-      else if i = 2 then
-	square (self (i / 2))
-      else 
-	wreflects (self (i - 2)) (self (i - 1)) (self 1)))
+      else wreflects (self (i - 2)) (self (i - 1)) (self 1)))
 
 
 (*

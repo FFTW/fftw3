@@ -2,9 +2,6 @@
 
 * wisdom interaction with planner flags
 
-* I can't believe that there isn't a closed form for the omega
-  array in Rader.
-
 * simd
 
 * threads/mpi
@@ -16,9 +13,6 @@
 
 * user interface
 
-* merge genfft-k7 generator with the main genfft branch.
-  genfft-k7 was written by Stefan Kral based on the fftw-2.1 genfft.
-
 * implement fftw2 buffering: copy to buffers, transform in-place, copy back
 
 * --enable-long-double fails in verify().  The problem appears
@@ -28,6 +22,7 @@
 
 * still too much code duplication in rader
 
+* cleanup reodft/verify.c using kernel/verify-lib.c
 
 TODO before/at release:
 
@@ -38,3 +33,13 @@ TODO before/at release:
 * remember to thank/acknowledge: Franz and Stefan, Aurora project
   in Vienna, MIT Lincoln Labs, Compaq/HP testdrive program,
   sourceforge, AMD for the athlon box.
+
+TODO in the next release:
+
+* investigate the addition-chain trig computation
+
+* I can't believe that there isn't a closed form for the omega
+  array in Rader.
+
+* merge genfft-k7 generator with the main genfft branch.
+  genfft-k7 was written by Stefan Kral based on the fftw-2.1 genfft.

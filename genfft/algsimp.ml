@@ -19,8 +19,8 @@
  *
  *)
 
-(* $Id: algsimp.ml,v 1.5 2002-07-15 20:46:35 athena Exp $ *)
-let cvsid = "$Id: algsimp.ml,v 1.5 2002-07-15 20:46:35 athena Exp $"
+(* $Id: algsimp.ml,v 1.6 2002-08-19 23:56:29 athena Exp $ *)
+let cvsid = "$Id: algsimp.ml,v 1.6 2002-08-19 23:56:29 athena Exp $"
 
 open Util
 open Expr
@@ -119,7 +119,8 @@ end = struct
     | (Num a, b) when Number.is_zero a -> snumM Number.zero
     | (Num a, b) when Number.is_one a -> makeNode b
     | (Num a, b) when Number.is_mone a -> suminusM b
-    | (a, b) when is_constant b && not (is_constant a) -> stimesM (b, a)
+    | (a, b) when is_known_constant b && not (is_known_constant a) -> 
+	stimesM (b, a)
     | (a, b) -> makeNode (Times (a, b))
 
   and reduce_sumM x = match x with
