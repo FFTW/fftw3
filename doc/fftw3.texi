@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.123 2003-03-07 07:30:59 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.124 2003-03-07 08:01:52 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3504,6 +3504,43 @@ may also need to set the flags via the variable @code{CFLAGS}.
 @c ------------------------------------------------------------
 @node Installation on non-Unix systems, Cycle Counters, Installation on Unix, Installation and Customization
 @section Installation on non-Unix systems
+
+It should be relatively straightforward to compile FFTW even on non-Unix
+systems lacking the niceties of a @code{configure} script.  Basically,
+you need to edit the @code{config.h} header (copy it from
+@code{config.h.in}) to @code{#define} the various options and compiler
+characteristics, and then compile all the @samp{.c} files in the
+relevant directories.  
+
+The @code{config.h} header contains about 100 options to set, each one
+initially an @code{#undef}, all documented with a comment, and most of
+them fairly obvious.  For most of the options, you should simply
+@code{#define} them to @code{1} if they are applicable, although a few
+options require a particular value (e.g. @code{SIZEOF_LONG_LONG} should
+be defined to the size of the @code{long long} type, in bytes, or zero
+if it is not supported).  We will likely post some sample
+@code{config.h} files for various operating systems and compilers for
+you to use (at least as a starting point).  Please let us know if you
+have to hand-create a configuration file (and/or a pre-compiled binary)
+that you want to share.
+
+To create the FFTW library, you will then need to compile all of the
+@samp{.c} files in the @code{kernel}, @code{dft}, @code{dft/codelets},
+@code{dft/codelets/standard}, @code{dft/codelets/inplace}, @code{rdft},
+@code{rdft/codelets}, @code{rdft/codelets/r2hc},
+@code{rdft/codelets/hc2r}, @code{reodft}, and @code{api} directories.
+If you are compiling with SIMD support (e.g. you defined
+@code{HAVE_SSE2} in @code{config.h}), then you also need to compile the
+@code{.c} files in the @code{simd}, @code{dft/simd}, and
+@code{dft/simd/codelets} directories.  If you are compiling with AMD K7
+optimizations (i.e. you defined @code{HAVE_K7}), then you also need to
+include the @code{dft/k7} and @code{dft/k7/codelets} directories.  (See
+the previous section for more information on configuration options like
+SIMD and K7 optimization; each Unix configuration option has a
+corresponding @code{#define} in @code{config.h}.)
+
+Once these files are all compiled, link them into a library, or a shared
+library, or directly into your program.
 
 @c ------------------------------------------------------------
 @node Cycle Counters, Generating your own code, Installation on non-Unix systems, Installation and Customization
