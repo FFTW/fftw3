@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.13 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: indirect.c,v 1.14 2002-08-10 23:30:39 stevenj Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -69,12 +69,8 @@ static problem *mkcld_before(const problem_dft *p)
 {
      uint i;
      tensor v, s;
-     v = X(tensor_copy)(p->vecsz);
-     for (i = 0; i < v.rnk; ++i)
-          v.dims[i].is = v.dims[i].os;
-     s = X(tensor_copy)(p->sz);
-     for (i = 0; i < s.rnk; ++i)
-          s.dims[i].is = s.dims[i].os;
+     v = X(tensor_copy_inplace)(p->vecsz, INPLACE_OS);
+     s = X(tensor_copy_inplace)(p->sz, INPLACE_OS);
      return X(mkproblem_dft_d)(s, v, p->ro, p->io, p->ro, p->io);
 }
 
@@ -106,12 +102,8 @@ static problem *mkcld_after(const problem_dft *p)
 {
      uint i;
      tensor v, s;
-     v = X(tensor_copy)(p->vecsz);
-     for (i = 0; i < v.rnk; ++i)
-          v.dims[i].os = v.dims[i].is;
-     s = X(tensor_copy)(p->sz);
-     for (i = 0; i < s.rnk; ++i)
-          s.dims[i].os = s.dims[i].is;
+     v = X(tensor_copy_inplace)(p->vecsz, INPLACE_IS);
+     s = X(tensor_copy_inplace)(p->sz, INPLACE_IS);
      return X(mkproblem_dft_d)(s, v, p->ri, p->ii, p->ri, p->ii);
 }
 
