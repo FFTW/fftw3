@@ -185,7 +185,7 @@ static int applicable(const solver *ego_, const problem *p_)
 		  && p->sz.rnk == 1
 		  && p->vecsz.rnk == 0
 		  && p->sz.dims[0].n > 1
-                  && p->sz.dims[0].n % 4 /* make sure n / r = m is odd */
+                  && p->sz.dims[0].n % 2 /* ensure r and n/r odd */
                   && p->kind == ego->kind
 	       );
      }
