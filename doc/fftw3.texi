@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.141 2003-03-14 23:23:03 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.142 2003-03-15 10:50:50 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -22,10 +22,11 @@
 @syncodeindex fp cp
 @comment %**end of header
 
-@iftex
-@paragraphindent 0
-@parskip=@medskipamount
-@end iftex
+@c I don't like this
+@c @iftex
+@c @paragraphindent 0
+@c @parskip=@medskipamount
+@c @end iftex
 
 @macro Onlogn
 @ifinfo
@@ -149,6 +150,7 @@ Other Important Topics
 * Data Alignment::              
 * Multi-dimensional Array Format::  
 * Words of Wisdom-Saving Plans::  
+* Caveats in Using Wisdom::     
 
 Data Alignment
 
@@ -260,6 +262,9 @@ transform (DFT) and various special cases thereof.
 
 @item  FFTW supports arbitrary @math{n}-dimensional data.
 
+@item  FFTW supports the SSE, SSE2, 3DNow!, and Altivec instruction
+       sets.
+
 @item  FFTW @value{VERSION} includes parallel (multi-threaded) transforms
   for shared-memory systems.
   FFTW @value{VERSION} does not include distributed-memory parallel
@@ -267,8 +272,8 @@ transform (DFT) and various special cases thereof.
   you can use the MPI implementation from FFTW 2.1.3.)
 @end itemize
 
-We assume herein that the reader is familiar with the properties and
-uses of the DFT that are relevant to her application.  Otherwise, see
+We assume herein that you are familiar with the properties and uses of
+the DFT that are relevant to your application.  Otherwise, see
 e.g. @cite{The Fast Fourier Transform} by E. O. Brigham
 (Prentice-Hall, Englewood Cliffs, NJ, 1974).
 @uref{http://www.fftw.org, Our web page} also has links to FFT-related
@@ -312,7 +317,7 @@ computed, and consequently a relatively expensive initialization of
 this sort is acceptable.  On the other hand, if you need a single
 transform of a given size, the one-time cost of the planner becomes
 significant.  For this case, FFTW provides fast planners based on
-heuristics or on previously computed plans (``wisdom'').
+heuristics or on previously computed plans.
 @cindex wisdom
 
 FFTW supports transforms of data with arbitrary size, rank,
@@ -439,6 +444,10 @@ Plan: To bother about the best method of accomplishing an accidental result.
 @cindex Devil
 @end quotation
 
+@iftex
+@medskip
+@end iftex
+
 The basic usage of FFTW to compute a one-dimensional DFT of size
 @code{N} is simple, and it typically looks something like this code:
 
@@ -468,7 +477,8 @@ in any way that you like, but we recommend using @code{fftw_malloc},
 which behaves like
 @findex fftw_malloc
 @code{malloc} except that it properly aligns the array when SIMD
-acceleration is available (@pxref{SIMD alignment and fftw_malloc}).  
+instructions (such as SSE and Altivec) are available (@pxref{SIMD
+alignment and fftw_malloc}).
 
 The data is an array of type @code{fftw_complex}, which is by default a
 @code{double[2]} composed of the real (@code{in[i][0]}) and imaginary
@@ -477,8 +487,8 @@ The data is an array of type @code{fftw_complex}, which is by default a
 
 The next step is to create a @dfn{plan}, which is an object
 @cindex plan
-that contains all the data that FFTW needs to compute the FFT, using the
-following function:
+that contains all the data that FFTW needs to compute the FFT. 
+This function creates the plan:
 
 @example
 fftw_plan fftw_plan_dft_1d(int n, fftw_complex *in, fftw_complex *out,
@@ -506,16 +516,15 @@ technically, it is the sign of the exponent in the transform.
 
 The @code{flags} argument is usually either @code{FFTW_MEASURE} or
 @cindex flags
-@code{FFTW_ESTIMATE}.  @code{FFTW_MEASURE} means that FFTW actually
-runs
+@code{FFTW_ESTIMATE}.  @code{FFTW_MEASURE} instructs FFTW to run
 @ctindex FFTW_MEASURE
-and measures the execution time of several FFTs in order to find the
-best way to compute the transform of size @code{n}.  This will take
+and measure the execution time of several FFTs in order to find the
+best way to compute the transform of size @code{n}.  This process takes
 some time (usually a few seconds), depending on your machine and on
 the size of the transform.  @code{FFTW_ESTIMATE}, on the contrary,
 does not run any computation and just builds a
 @ctindex FFTW_ESTIMATE
-reasonable plan that is probably sub-optimal.  In other words, if your
+reasonable plan that is probably sub-optimal.  In short, if your
 program performs many transforms of the same size and initialization
 time is not important, use @code{FFTW_MEASURE}; otherwise use the
 estimate.  The data in the @code{in}/@code{out} arrays is
@@ -535,8 +544,8 @@ void fftw_execute(const fftw_plan plan);
 If you want to transform a @emph{different} array of the same size, you
 can create a new plan with @code{fftw_plan_dft_1d} and FFTW
 automatically reuses the information from the previous plan, if
-possible.  (Alternatively, there is a guru interface for applying a
-given plan to a different array, if sufficient care is taken.
+possible.  (Alternatively, with the ``guru'' interface you can apply a
+given plan to a different array, if you are careful.
 @xref{FFTW Reference}.)
 
 When you are done with the plan, you deallocate it by calling
@@ -553,13 +562,14 @@ forbid, @code{delete}).
 The DFT results are stored in-order in the array @code{out}, with the
 zero-frequency (DC) component in @code{out[0]}.
 @cindex frequency
-The array @code{in} is not modified for an @dfn{out-of-place}
-@cindex out-of-place
-transform (@code{in != out}).  Users should note that FFTW computes an
-@emph{unnormalized} DFT.  Thus, computing a forward followed by a
-backward transform (or vice versa) results in the original array
-scaled by @code{n}.  For the definition of the DFT, see @ref{What FFTW
-Really Computes}.
+If @code{in != out}, the transform is @dfn{out-of-place} and the input
+array @code{in} is not modified.  Otherwise, the input array is
+overwritten with the transform.
+
+Users should note that FFTW computes an @emph{unnormalized} DFT.
+Thus, computing a forward followed by a backward transform (or vice
+versa) results in the original array scaled by @code{n}.  For the
+definition of the DFT, see @ref{What FFTW Really Computes}.
 @cindex DFT
 @cindex normalization
 
@@ -623,7 +633,7 @@ the C-standard @dfn{row-major} order, so that the last dimension has
 the fastest-varying index in the array.  This layout is described
 further in @ref{Multi-dimensional Array Format}.
 
-You might have noticed that all the planner routines described so far
+You may have noticed that all the planner routines described so far
 have overlapping functionality.  For example, you can plan a 1d or 2d
 transform by using @code{fftw_plan_dft} with a @code{rank} of @code{1}
 or @code{2}, or even by calling @code{fftw_plan_dft_3d} with @code{nx}
@@ -729,7 +739,7 @@ implementations therefore store the Nyquist element where the DC
 imaginary part would go, in order to make the input and output arrays
 the same size.  Such packing, however, does not generalize well to
 multi-dimensional transforms, and the space savings are miniscule in
-any case.
+any case.  FFTW does not support packed arrays.
 
 An alternate interface for one-dimensional r2c and c2r DFTs can be
 found in the @samp{r2r} interface (@pxref{The Halfcomplex-format
@@ -775,12 +785,12 @@ Then, after an r2c transform, the output is an @ndimshalf array of
 @code{fftw_complex} values in row-major order, corresponding to slightly
 over half of the output of the corresponding complex DFT.  (The division
 is rounded down.)  The ordering of the data is otherwise exactly the
-same as in the complex-DFT case.
+same as in the complex DFT case.
 
 Since the complex data is slightly larger than the real data, some
 complications arise for in-place transforms.  In this case, the final
 dimension of the real data must be padded with extra values to
-accommodate the size of the complex data---two extra if the last
+accommodate the size of the complex data---two values if the last
 dimension is even and one if it is odd.
 @cindex padding
 That is, the last dimension of the real data must physically contain
@@ -1144,7 +1154,7 @@ size @code{n} followed by another DHT of the same size will result in
 the original array multiplied by @code{n}.
 @cindex normalization
 
-The DHT was originally proposed as a more-efficient alternative to the
+The DHT was originally proposed as a more efficient alternative to the
 DFT for real data, but it was subsequently shown that a specialized DFT
 (such as FFTW's r2hc or r2c transforms) could be just as fast.  In FFTW,
 the DHT is actually computed by post-processing an r2hc transform, so
@@ -1174,6 +1184,7 @@ For the precise mathematical definition of the DHT as used by FFTW, see
 * Data Alignment::              
 * Multi-dimensional Array Format::  
 * Words of Wisdom-Saving Plans::  
+* Caveats in Using Wisdom::     
 @end menu
 
 @c ------------------------------------------------------------
@@ -1211,7 +1222,7 @@ to support the SIMD instructions on any of these systems.
 @cindex precision
 
 A program linking to an FFTW library compiled with SIMD support can
-obtain a non-negligible speedup for most complex and r2c/c2r
+obtain a nonnegligible speedup for most complex and r2c/c2r
 transforms.  In order to obtain this speedup, however, the arrays of
 complex (or real) data passed to FFTW must be specially aligned in
 memory (typically 16-byte aligned), and often this alignment is more
@@ -1270,8 +1281,8 @@ guarantee alignment of your @code{main} function (with @code{gcc}).
 
 This section describes the format in which multi-dimensional arrays
 are stored in FFTW.  We felt that a detailed discussion of this topic
-was necessary, since it is often a source of confusion among users and
-several different formats are common.
+was necessary.  Since several different formats are common, this topic
+is often a source of confusion among users.
 
 @menu
 * Row-major Format::            
@@ -1322,7 +1333,7 @@ must be of type @code{fftw_complex}; i.e. a (real, imaginary) pair of
 (double-precision) numbers. 
 
 In the advanced FFTW interface, the physical dimensions @math{n} from
-which the indices are computed can be different from (bigger than)
+which the indices are computed can be different from (larger than)
 the logical dimensions of the transform to be computed, in order to
 transform a subset of a larger array.
 @cindex advanced interface
@@ -1467,10 +1478,94 @@ see the @code{comp.lang.c}
 @uref{http://www.eskimo.com/~scs/C-faq/s6.html, FAQ}.
 
 @c ------------------------------------------------------------
-@node Words of Wisdom-Saving Plans,  , Multi-dimensional Array Format, Other Important Topics
+@node Words of Wisdom-Saving Plans, Caveats in Using Wisdom, Multi-dimensional Array Format, Other Important Topics
 @section Words of Wisdom---Saving Plans
 @cindex wisdom
 @cindex saving plans to disk
+
+FFTW implements a method for saving plans to disk and restoring them.
+In fact, what FFTW does is more general than just saving and loading
+plans.  The mechanism is called @dfn{wisdom}.  Here, we describe
+this feature at a high level. @xref{FFTW Reference}, for a less casual
+but more complete discussion of how to use wisdom in FFTW.
+
+Plans created with the @code{FFTW_MEASURE}, @code{FFTW_PATIENT}, or
+@code{FFTW_EXHAUSTIVE} options produce near-optimal FFT performance,
+but may require a long time to compute because FFTW must measure the
+runtime of many possible plans and select the best one.  This setup is
+designed for the situations where so many transforms of the same size
+must be computed that the start-up time is irrelevant.  For short
+initialization times but slightly slower transforms, we have provided
+@code{FFTW_ESTIMATE}.  The @code{wisdom} mechanism is a way to get the
+best of both worlds: You compute a good plan once, you save it to
+disk, and you reload it as many times as necessary.  The wisdom
+mechanism can actually save and reload many plans at once, not just
+one.
+
+Whenever you create a plan, the FFTW planner accumulates wisdom, which
+is sufficient information to reconstruct the plan.  After planning,
+you can save this information to disk by means of this function:
+@example
+     void fftw_export_wisdom_to_file(FILE *output_file);
+@end example
+@findex fftw_export_wisdom_to_file
+
+The next time you run the program, you can restore the wisdom with
+@code{fftw_import_wisdom_from_file}, and then recreate the plan using
+the same flags as before.  
+@example
+     void fftw_import_wisdom_from_file(FILE *output_file);
+@end example
+
+The @code{wisdom} is cumulative, and is stored in a global, private
+data structure managed internally by FFTW.  The storage space required
+is minimal, proportional to the logarithm of the sizes the wisdom was
+generated from.  If memory usage is a concern, however, the wisdom can
+be forgotten and its associated memory freed by calling
+@example
+     void fftw_forget_wisdom(void);
+@end example
+
+Wisdom can be exported to a file, a string, or any other medium.
+@xref{Wisdom}, for details.
+
+@node Caveats in Using Wisdom,  , Words of Wisdom-Saving Plans, Other Important Topics
+@section Caveats in Using Wisdom
+@cindex wisdom, problems with
+
+@quotation
+@ifhtml
+<i>
+@end ifhtml
+For in much wisdom is much grief, and he that increaseth knowledge
+increaseth sorrow.
+@ifhtml
+</i>
+@end ifhtml
+[Ecclesiastes 1:18]
+@cindex Ecclesiastes
+@end quotation
+
+There are pitfalls to using wisdom, in that it can negate FFTW's
+ability to adapt to changing hardware and other conditions. For
+example, it would be perfectly possible to export wisdom from a
+program running on one processor and import it into a program running
+on another processor.  Doing so, however, would mean that the second
+program would use plans optimized for the first processor, instead of
+the one it is running on.
+
+It should be safe to reuse wisdom as long as the hardware and program
+binaries remain unchanged. (Actually, the optimal plan may change even
+between runs of the same binary on identical hardware, due to
+differences in the virtual memory environment, etcetera.  Users
+seriously interested in performance should worry about this problem,
+too.)  It is likely that, if the same wisdom is used for two
+different program binaries, even running on the same machine, the
+plans may be sub-optimal because of differing code alignments.  It is
+therefore wise to recreate wisdom every time an application is
+recompiled.  The more the underlying hardware and software changes
+between the creation of wisdom and its use, the greater grows
+the risk of sub-optimal plans.
 
 @c ************************************************************
 @node FFTW Reference, Parallel FFTW, Other Important Topics, Top
@@ -1500,7 +1595,7 @@ All programs using FFTW should include its header file:
 #include <fftw3.h>
 @end example
 
-You will @emph{also} need to link to the FFTW library.  On Unix, this
+You must also link to the FFTW library.  On Unix, this
 means adding @code{-lfftw3 -lm} at the @emph{end} of the link command.
 
 @menu
@@ -1566,7 +1661,7 @@ interfaces, you:
 @item
 Link to the single/long-double libraries; on Unix, @code{-lfftw3f} or
 @code{-lfftw3l} instead of (or in addition to) @code{-lfftw3}.  (You
-@emph{can} link to the different-precision libraries simultaneously.)
+can link to the different-precision libraries simultaneously.)
 
 @item
 Include the @emph{same} @code{<fftw3.h>} header file.
@@ -1642,19 +1737,20 @@ desired.
 different array, if sufficient care is taken.  @xref{Guru Interface}.)
 
 @code{fftw_execute} (and equivalents) is the only function in FFTW
-guaranteed to be re-entrant; see @ref{Thread safety}.
+guaranteed to be thread-safe; see @ref{Thread safety}.
 
+This function:
 @example
 void fftw_destroy_plan(fftw_plan plan);
 @end example
 @findex fftw_destroy_plan
+deallocates the @code{plan} and all its associated data.
 
-This deallocates the @code{plan} and all its associated data.
-
-FFTW's planner saves some other persistent data, like the accumulated
-wisdom and a list of algorithms available in the current configuration.
-If you want to deallocate all of that and reset FFTW to the pristine
-state it was in when you started your program, you can call:
+FFTW's planner saves some other persistent data, such as the
+accumulated wisdom and a list of algorithms available in the current
+configuration.  If you want to deallocate all of that and reset FFTW
+to the pristine state it was in when you started your program, you can
+call:
 
 @example
 void fftw_cleanup(void);
@@ -1794,6 +1890,10 @@ transform, which may be the same (yielding an in-place transform).
 These arrays are overwritten during planning, unless
 @code{FFTW_ESTIMATE} is used in the flags.  (The arrays need not be
 initialized, but they must be allocated.)
+
+If @code{in == out}, the transform is @dfn{in-place}, and the input
+array is overwritten. If @code{in != out}, the two arrays must
+not overlap (but FFTW does not check for this condition).
 
 @item
 @code{sign} is the sign of the exponent in the formula that defines the
@@ -4273,6 +4373,81 @@ extremely slow (you may just want to use @code{FFTW_ESTIMATE}).
 @c ************************************************************
 @node Acknowledgments, License and Copyright, Installation and Customization, Top
 @chapter Acknowledgments
+
+Matteo Frigo was supported in part by the Special Research Program SFB
+F011 ``AURORA'' of the Austrian Science Fund FWF and by MIT Lincoln
+Labs.  For previous versions of FFTW, he was supported in part by the
+Defense Advanced Research Projects Agency (DARPA) under Grants
+N00014-94-1-0985 and F30602-97-1-0270, and by a Digital Equipment
+Corporation Fellowship.  
+
+Steven G. Johnson was supported in part by a DoD NDSEG Fellowship, an
+MIT Karl Taylor Compton Fellowship, and by the Materials Research
+Science and Engineering Center program of the National Science
+Foundation under award DMR-9400334.
+
+We are grateful to SUN Microsystems Inc.@ for its donation of a
+cluster of 9 8-processor Ultra HPC 5000 SMPs (24 Gflops peak). These
+machines served as the primary platform for the development of early
+versions of FFTW.
+
+We thank Intel Corporation for donating a four-processor Pentium Pro
+machine.  We thank the Linux community for giving us a decent OS to run
+on that machine.
+
+We are thankful to AMD Corporation for donating an AMD Athlon XP 1700+
+computer to the FFTW project.
+
+We thank the Compaq/HP testdrive program and Sourceforge for providing
+remote access to machines that were used to test FFTW.
+
+The @code{genfft} program was written using Objective Caml, a dialect of
+ML.  Objective Caml is a small and elegant language developed by Xavier
+Leroy.  The implementation is available from @code{ftp.inria.fr} in the
+directory @code{lang/caml-light}.  We used versions 1.07 and 2.00 of the
+software.  In previous releases of FFTW, @code{genfft} was written in
+Caml Light, by the same authors.  An even earlier implementation of
+@code{genfft} was written in Scheme, but Caml is definitely better for
+this kind of application.
+@pindex genfft
+@cindex Caml
+@cindex LISP
+
+FFTW uses many tools from the GNU project, including @code{automake},
+@code{texinfo}, and @code{libtool}.
+
+Prof.@ Charles E.@ Leiserson of MIT provided continuous support and
+encouragement.  This program would not exist without him.  Charles also
+proposed the name ``codelets'' for the basic FFT blocks.
+
+Prof.@ John D.@ Joannopoulos of MIT demonstrated continuing tolerance of
+Steven's ``extra-curricular'' computer-science activities.  Steven's
+chances at a physics degree would not exist without him.
+
+Franz Franchetti wrote SIMD extensions to FFTW 2, which eventually
+became the SIMD support in FFTW 3.
+
+Stefan Kral wrote most of the K7 code distributed with FFTW 3.
+
+Andrew Sterian contributed the Windows timing code in FFTW 2.  
+
+Didier Miras reported a bug in the test procedure used in FFTW 1.2.  We
+now use a completely different test algorithm by Funda Ergun that does
+not require a separate FFT program to compare against.
+
+Wolfgang Reimer contributed the Pentium cycle counter and a few fixes
+that help portability.
+
+Ming-Chang Liu uncovered a well-hidden bug in the complex transforms of
+FFTW 2.0 and supplied a patch to correct it.
+
+The FFTW FAQ was written in @code{bfnn} (Bizarre Format With No Name)
+and formatted using the tools developed by Ian Jackson for the Linux
+FAQ.
+
+@emph{We are especially thankful to all of our users for their
+continuing support, feedback, and interest during our development of
+FFTW.}
 
 @c ************************************************************
 @node License and Copyright, Concept Index, Acknowledgments, Top
