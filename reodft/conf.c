@@ -18,19 +18,22 @@
  *
  */
 
-/* $Id: conf.c,v 1.7 2005-01-15 06:41:58 stevenj Exp $ */
+/* $Id: conf.c,v 1.8 2005-01-15 17:31:28 stevenj Exp $ */
 
 #include "reodft.h"
 
 static const solvtab s =
 {
-     /* SOLVTAB(X(redft00e_r2hc_register)),
-	SOLVTAB(X(rodft00e_r2hc_register)), */
+#if 0 /* 1 to enable "standard" algorithms with substandard accuracy;
+         you must also add them to Makefile.am to compile these files*/
+     SOLVTAB(X(redft00e_r2hc_register)),
+     SOLVTAB(X(rodft00e_r2hc_register)),
+     SOLVTAB(X(reodft11e_r2hc_register)),
+#endif
      SOLVTAB(X(redft00e_r2hc_pad_register)),
      SOLVTAB(X(rodft00e_r2hc_pad_register)),
      SOLVTAB(X(reodft00e_splitradix_register)),
      SOLVTAB(X(reodft010e_r2hc_register)),
-     /* SOLVTAB(X(reodft11e_r2hc_register)), */
      SOLVTAB(X(reodft11e_radix2_r2hc_register)),
      SOLVTAB(X(reodft11e_r2hc_odd_register)),
 
