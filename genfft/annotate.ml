@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.3 2002-06-20 22:51:33 athena Exp $ *)
+(* $Id: annotate.ml,v 1.4 2002-06-21 01:22:41 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -31,7 +31,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.3 2002-06-20 22:51:33 athena Exp $ *)
+(* $Id: annotate.ml,v 1.4 2002-06-21 01:22:41 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -75,11 +75,6 @@ let rec overlap a b = Util.count (fun y -> has_related y b) a
 
 
 (* skral starts ------------------------------------------------------------ *)
-
-(* for transposed store, we need to have all scalar stores to n adjacent
- * numbers in one block. (n=|simd_vector|, typically 2 or 4).
- *)
-
 type ldst =
   | MLoad
   | MStore
@@ -94,23 +89,27 @@ type useinfo2 =
   | MTransposes of (Variable.variable * Expr.expr) list
   | MTwid2 of Variable.variable * Variable.variable * Variable.variable * Variable.variable
 
+(* for transposed store, we need to have all scalar stores to n adjacent
+ * numbers in one block. (n=|simd_vector|, typically 2 or 4).
+ *)
+
 let rec annotatedsched_varpairs = function
   | Annotate (_,_,_,_,asch) -> asch_varpairs asch
 and ainstr_ldvarpairs = function
   | Assign (v, Load v') 
-    when !Magic.collect_load && Variable.is_locative v' -> 
+    when !Simdmagic.collect_load && Variable.is_locative v' -> 
       [MUse(MLoad,v',Load v)]
   | Assign (v, Load v')
-    when !Magic.collect_twiddle && Variable.is_constant v' &&
+    when !Simdmagic.collect_twiddle && Variable.is_constant v' &&
 	 (is_real v' || is_imag v') -> 
       [MTwid(v, v')]
   | _ -> []
 and ainstr_stvarpairs = function
   | Assign (v, e) 
-    when !Magic.store_transpose && Variable.is_locative v ->
+    when !Simdmagic.store_transpose && Variable.is_locative v ->
       [MTranspose(v,e)]
   | Assign (v, e) 
-    when !Magic.collect_store && Variable.is_locative v -> 
+    when !Simdmagic.collect_store && Variable.is_locative v -> 
       [MUse(MStore,v,e)]
   | _ -> []
 and asch_varpairs = function
@@ -118,7 +117,7 @@ and asch_varpairs = function
   | AInstr i -> (ainstr_ldvarpairs i) @ (ainstr_stvarpairs i)
   | ASeq (a,b) -> (annotatedsched_varpairs a) @ (annotatedsched_varpairs b)
 
-let locativeToArea v = var_index v / !Magic.vector_length 
+let locativeToArea v = var_index v / !Simdmagic.vector_length 
 
 let similarpairs a b = match (a,b) with
   | MTwid(d1,s1), MTwid(d2,s2) ->
@@ -158,7 +157,8 @@ let rec collectpairs = function
 	| (xs, zs) -> (combineuseinfos (x::xs))::(collectpairs zs)
 
 let combineuseinfoToDeclvars = function
-  | MTwid2(d1,s1,d2,s2)     -> if !Magic.collect_twiddle then [d1;d2] else []
+  | MTwid2(d1,s1,d2,s2)     -> 
+      if !Simdmagic.collect_twiddle then [d1;d2] else []
   | MUseReIm(_,v1,e1,v2,e2) -> [v1;v2] @ (find_vars e1) @ (find_vars e2)
   | MTransposes vs 	    -> concat (map (fun (_,e) -> find_vars e) vs)
 

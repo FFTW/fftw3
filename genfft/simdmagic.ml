@@ -18,35 +18,26 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.mli,v 1.3 2002-06-21 01:22:41 athena Exp $ *)
+(* $Id: simdmagic.ml,v 1.1 2002-06-21 01:22:41 athena Exp $ *)
 
-open Variable
-open Expr
+(* SIMD magic parameters *)
+let collect_load = ref false
+let collect_store = ref false
+let collect_twiddle = ref false
+let store_transpose = ref false
+let vector_length = ref 4
+let transform_length = ref 0
+let simd_mode = ref false
+let simd_use_load_vect = ref false
+let simd_use_store_vect = ref false
+let simd_store_transpose = ref false
 
-type annotated_schedule = 
-    Annotate of variable list * variable list * variable list *
-	int * aschedule
-and aschedule = 
-    ADone
-  | AInstr of assignment
-  | ASeq of (annotated_schedule * annotated_schedule)
+open Magic
 
-
-type ldst = 
-  | MLoad 
-  | MStore
-
-type useinfo = 
-  | MUse of ldst * Variable.variable * Expr.expr
-  | MTranspose of Variable.variable * Expr.expr
-  | MTwid of Variable.variable * Variable.variable
-
-type useinfo2 = 
-  | MUseReIm of ldst * Variable.variable * Expr.expr * Variable.variable * Expr.expr
-  | MTransposes of (Variable.variable * Expr.expr) list
-  | MTwid2 of Variable.variable * Variable.variable * Variable.variable * Variable.variable
-
-val annotate : Schedule.schedule -> useinfo2 list * annotated_schedule
-
-
-
+let speclist = [
+  "-collect-load", set_bool collect_load, undocumented;
+  "-collect-store", set_bool collect_store, undocumented;
+  "-collect-twiddle", set_bool collect_twiddle, undocumented;
+  "-store-transpose", set_bool store_transpose, undocumented;
+  "-vector-length", set_int vector_length, undocumented;
+];

@@ -18,35 +18,26 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.1 2002-06-20 22:51:33 athena Exp $ *)
-
-(*
- * This module contains the definition of a C-like abstract
- * syntax tree, and functions to convert ML values into C
- * programs
- *)
+(* $Id: simd.ml,v 1.2 2002-06-21 01:22:41 athena Exp $ *)
 
 open Expr
-open Annotate
 open List
 open Printf
 open Variable
 open C
-
+open Annotate
+open Simdmagic
 
 let realtype = "V"
 let realtypep = realtype ^ " *"
 let constrealtype = "const " ^ realtype
 let constrealtypep = constrealtype ^ " *"
 
+
 (*
  * SIMD C AST unparser 
  *)
 let foldr_string_concat l = fold_right (^) l ""
-
-(* output the command line *)
-let cmdline () =
-  fold_right (fun a b -> a ^ " " ^ b) (Array.to_list Sys.argv) ""
 
 let first_simd_load v = function 
   | MUseReIm(MLoad,v1,e1,v2,e2) -> v == v1	(* wait for 1st load *)
@@ -59,8 +50,6 @@ let first_simd_twiddle_load v = function
 let second_simd_store v = function 
   | MUseReIm(MStore,v1,e1,v2,e2) -> v == v2	(* wait for 2nd store *)
   | _ -> false
-
-let backwardToString () = "" 
 
 let simdLoadString () =  ("LD", "ivs")
 
@@ -83,7 +72,7 @@ let rec listToString toString separator = function
   | x::xs -> (toString x) ^ separator ^ (listToString toString separator xs)
 
 let unparse_load vardeclinfo dst src = 
-  if !Magic.simd_use_load_vect then
+  if !simd_use_load_vect then
     sprintf "LD(%s,%s);\n" (Variable.unparse dst) (Variable.unparse src)
   else
     match Util.find_elem (first_simd_load src) vardeclinfo with
@@ -102,7 +91,7 @@ let unparse_load vardeclinfo dst src =
     | _ -> ""
 
 let unparse_store vardeclinfo dst src_expr =
-  if !Magic.simd_use_store_vect then
+  if !simd_use_store_vect then
     sprintf "ST(%s,%s);\n" (Variable.unparse dst) (unparse_expr src_expr)
   else
     match Util.find_elem (second_simd_store dst) vardeclinfo with
@@ -125,10 +114,10 @@ let unparse_store_transposed vardeclinfo  dst src_expr =
   match Util.find_elem (last_transpose_simd_store dst) vardeclinfo with
   | Some (MTransposes zs) ->
       let zs' = List.sort (fun (v,_) (v',_) -> cmp_locations v v') zs and
-          mybase = (var_index dst / !Magic.vector_length) and
+          mybase = (var_index dst / !vector_length) and
           myname = (if is_real dst then "r" else "i") and
-          mystride = (!Magic.transform_length / !Magic.vector_length) in
-      (if !Magic.vector_length = 4 then
+          mystride = (!transform_length / !vector_length) in
+      (if !vector_length = 4 then
 	sprintf "ST4(%so + %d, %so + %d + %s, %so + %d + %s, %so + %d + %s, %s);\n"
 	  myname mybase
 	  myname mybase "ovs"
@@ -196,7 +185,7 @@ and unparse_ast' vardeclinfo ast =
       | Assign(dst, Load src) when (not (Variable.is_locative dst)) -> 
 	    unparse_load vardeclinfo dst src
       | Assign (v, x) when Variable.is_locative v ->
-	  if !Magic.simd_store_transpose then
+	  if !simd_store_transpose then
 	    unparse_store_transposed vardeclinfo v x
 	  else
 	    unparse_store vardeclinfo v x

@@ -4,11 +4,12 @@ EXTRA_DIST = .depend algsimp.ml annotate.ml assoctable.ml c.ml		\
 complex.ml conv.ml dag.ml expr.ml fft.ml gen_athnotw.ml gen_athtw.ml	\
 gen_conv.ml gen_hc2r.ml gen_notw.ml gen_r2hc.ml gen_trig.ml		\
 gen_twiddle.ml gen_twidsq.ml genutil.ml littlesimp.ml magic.ml		\
-monads.ml number.ml oracle.ml schedule.ml simd.ml to_alist.ml trig.ml	\
-twiddle.ml unique.ml util.ml variable.ml algsimp.mli annotate.mli	\
-assoctable.mli c.mli complex.mli conv.mli dag.mli expr.mli fft.mli	\
-littlesimp.mli number.mli oracle.mli schedule.mli to_alist.mli		\
-trig.mli twiddle.mli unique.mli util.mli variable.mli
+monads.ml number.ml oracle.ml schedule.ml simd.ml simdmagic.ml		\
+to_alist.ml trig.ml twiddle.ml unique.ml util.ml variable.ml		\
+algsimp.mli annotate.mli assoctable.mli c.mli complex.mli conv.mli	\
+dag.mli expr.mli fft.mli littlesimp.mli number.mli oracle.mli		\
+schedule.mli simd.mli to_alist.mli trig.mli twiddle.mli unique.mli	\
+util.mli variable.mli
 
 noinst_SCRIPTS=gen_notw gen_twiddle gen_twidsq gen_trig gen_conv	\
 gen_r2hc gen_hc2r
@@ -16,8 +17,8 @@ gen_r2hc gen_hc2r
 libgenfft_objects = unique.cmo magic.cmo util.cmo number.cmo		\
 variable.cmo expr.cmo littlesimp.cmo monads.cmo complex.cmo		\
 assoctable.cmo oracle.cmo algsimp.cmo to_alist.cmo dag.cmo		\
-schedule.cmo annotate.cmo twiddle.cmo fft.cmo conv.cmo c.cmo simd.cmo	\
-genutil.cmo trig.cmo
+schedule.cmo simdmagic.cmo annotate.cmo simd.cmo twiddle.cmo fft.cmo	\
+conv.cmo c.cmo genutil.cmo trig.cmo
 
 libgenfft.cma: $(libgenfft_objects)
 	$(OCAMLC) -a -o $@ $^

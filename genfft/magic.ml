@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.5 2002-06-20 22:51:33 athena Exp $ *)
+(* $Id: magic.ml,v 1.6 2002-06-21 01:22:41 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -46,19 +46,6 @@ let compact = ref false
 let dag_dump_file = ref ""
 let alist_dump_file = ref ""
 let network_transposition = ref true
-
-
-(* SIMD magic parameters *)
-let collect_load = ref false
-let collect_store = ref false
-let collect_twiddle = ref false
-let store_transpose = ref false
-let vector_length = ref 4
-let transform_length = ref 0
-let simd_mode = ref false
-let simd_use_load_vect = ref false
-let simd_use_store_vect = ref false
-let simd_store_transpose = ref false
 
 (* command-line parser for magic parameters *)
 let undocumented = " Undocumented voodoo parameter"
@@ -127,13 +114,6 @@ let speclist = [
 
   "-wsquare", set_bool wsquare, undocumented;
   "-no-wsquare", unset_bool wsquare, undocumented;
-
-  (* simd stuff *)
-  "-collect-load", set_bool collect_load, undocumented;
-  "-collect-store", set_bool collect_store, undocumented;
-  "-collect-twiddle", set_bool collect_twiddle, undocumented;
-  "-store-transpose", set_bool store_transpose, undocumented;
-  "-vector-length", set_int vector_length, undocumented;
 ] 
    
 
