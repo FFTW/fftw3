@@ -34,8 +34,22 @@
 #include "simd-3dnow.h"
 #endif
 
-#define ALIGNED(p) (!(((long)p) % ALIGNMENT))
-#define ALIGNEDA(p) (!(((long)p) % ALIGNMENTA))
+/* TAINT_BIT is set if pointers are not guaranteed to be multiples of
+   ALIGNMENT */
+#define TAINT_BIT 1    
+
+/* TAINT_BITA is set if pointers are not guaranteed to be multiples of
+   ALIGNMENTA */
+#define TAINT_BITA 2
+
+#define PTRINT(p) ((uintptr_t)(p))
+
+#define ALIGNED(p) \
+  (((PTRINT(UNTAINT(p)) % ALIGNMENT) == 0) && !(PTRINT(p) & TAINT_BIT))
+
+#define ALIGNEDA(p) \
+  (((PTRINT(UNTAINT(p)) % ALIGNMENTA) == 0) && !(PTRINT(p) & TAINT_BITA))
+
 #define SIMD_STRIDE_OK(x) (!(((x) * sizeof(R)) % ALIGNMENT))
 #define SIMD_STRIDE_OKA(x) (!(((x) * sizeof(R)) % ALIGNMENTA))
 #define SIMD_VSTRIDE_OK SIMD_STRIDE_OK

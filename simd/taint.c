@@ -18,22 +18,16 @@
  *
  */
 
-/* $Id: align.c,v 1.26 2003-04-05 00:30:37 athena Exp $ */
+/* $Id: taint.c,v 1.1 2003-04-05 00:30:37 athena Exp $ */
 
 #include "ifftw.h"
+#include "simd.h"
 
-#if HAVE_3DNOW
-#  define ALGN 8
-#elif HAVE_SIMD
-#  define ALGN 16
-#elif HAVE_K7
-#  define ALGN 8
-#else
-#  define ALGN (sizeof(R))
-#endif
-
-/* NONPORTABLE */
-int X(alignment_of)(R *p)
+R *X(taint)(R *p, int s)
 {
-     return (int)(((uintptr_t) p) % ALGN);
+     if (((unsigned)s * sizeof(R)) % ALIGNMENT)
+	  p = (R *) (PTRINT(p) | TAINT_BIT);
+     if (((unsigned)s * sizeof(R)) % ALIGNMENTA)
+	  p = (R *) (PTRINT(p) | TAINT_BITA);
+     return p;
 }
