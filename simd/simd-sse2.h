@@ -109,12 +109,14 @@ union dvec {
 static __inline__ V LDA(const R *x, int ivs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
+     (void)ivs; /* UNUSED */
      return *(const V *)x;
 }
 
 static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
+     (void)ovs; /* UNUSED */
      *(V *)x = v;
 }
 
