@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
      plan *pln;
      R *a, *a0;
      int i;
-     R e1, e2, einf;
+     R e1, e2, einf, re1, re2, reinf;
 
      if (argc > 1)
 	  nmin = atoi(argv[1]);
@@ -40,17 +40,28 @@ int main(int argc, char *argv[])
 	  mfft(n, a0, -1);
      
 	  e1 = e2 = einf = 0.0;
+	  re1 = re2 = reinf = 0.0;
 	  for (i = 0; i < 2 * n; ++i) {
 	       double d = a[i] - a0[i];
 	       if (d < 0) d = -d;
 	       e1 += d;
 	       e2 += d * d;
 	       if (d > einf) einf = d;
+
+	       if (a0[i]) {
+		    d /= a0[i];
+	       }
+	       re1 += d;
+	       re2 += d * d;
+	       if (d > reinf) reinf = d;
 	  }
 	  e1 /= 2 * n;
 	  e2 = sqrt(e2 / (2 * n));
+	  re1 /= 2 * n;
+	  re2 = sqrt(re2 / (2 * n));
 
-	  printf("n: %d e1: %g e2: %g einf: %g\n", n, e1, e2, einf);
+	  printf("%10d %6.2e %6.2e %6.2e %6.2e %6.2e %6.2e\n",
+		 n, e1, e2, einf, re1, re2, reinf);
 	  X(problem_destroy)(prblm);
      }
 }
