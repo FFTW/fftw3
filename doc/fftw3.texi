@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.75 2003-03-03 04:51:21 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.76 2003-03-03 05:52:02 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1552,6 +1552,8 @@ with any of FFTW's supported transform types.
 * Planner Flags::               
 * Real-data DFTs::              
 * Real-data DFT array format::  
+* Real-to-Real Transforms::     
+* Real-to-Real Transform Kinds::  
 @end menu
 
 @c =========>
@@ -1875,7 +1877,7 @@ equivalent to @code{FFTW_BACKWARD}.  For more information, see @ref{What
 FFTW Really Computes}.
 
 @c =========>
-@node Real-data DFT array format,  , Real-data DFTs, Basic Interface
+@node Real-data DFT array format, Real-to-Real Transforms, Real-data DFTs, Basic Interface
 @subsection Real-data DFTs array format
 @cindex r2c/c2r multi-dimensional array format
 
@@ -1944,6 +1946,211 @@ nd
 n<sub>d</sub>
 @end ifhtml
 is the last dimension passed to the planner.
+
+@c =========>
+@node Real-to-Real Transforms, Real-to-Real Transform Kinds, Real-data DFT array format, Basic Interface
+@subsection Real-to-Real Transforms
+@cindex r2r
+
+@example
+fftw_plan fftw_plan_r2r_1d(int n, double *in, double *out,
+                           fftw_r2r_kind kind, unsigned flags);
+fftw_plan fftw_plan_r2r_2d(int nx, int ny, double *in, double *out,
+                           fftw_r2r_kind kindx, fftw_r2r_kind kindy,
+                           unsigned flags);
+fftw_plan fftw_plan_r2r_3d(int nx, int ny, int nz,
+                           double *in, double *out,
+                           fftw_r2r_kind kindx,
+                           fftw_r2r_kind kindy,
+                           fftw_r2r_kind kindz,
+                           unsigned flags);
+fftw_plan fftw_plan_r2r(int rank, const int *n, double *in, double *out,
+                        const fftw_r2r_kind *kind, unsigned flags);
+@end example
+@findex fftw_plan_r2r_1d
+@findex fftw_plan_r2r_2d
+@findex fftw_plan_r2r_3d
+@findex fftw_plan_r2r
+
+Plan a real input/output (r2r) transform of various kinds in zero or
+more dimensions, returning an @code{fftw_plan} (@pxref{Using Plans}).
+
+Once you have created a plan for a certain transform type and
+parameters, then creating another plan of the same type and parameters,
+but for different arrays, is fast and shares constant data with the
+first plan (if it still exists).
+
+The planner returns @code{NULL} if the plan cannot be created.  A
+non-@code{NULL} plan is always returned by the basic interface unless
+you are using a customized FFTW configuration supporting a restricted
+set of transforms, or for size-1 @code{FFTW_REDFT00} kinds (which are
+not defined).
+@ctindex FFTW_REDFT00
+
+@subsubheading Arguments
+@itemize @bullet
+
+@item
+@code{rank} is the dimensionality of the transform (it should be the
+size of the array @code{*n}), and can be any non-negative integer.  The
+@samp{_1d}, @samp{_2d}, and @samp{_3d} planners correspond to a
+@code{rank} of @code{1}, @code{2}, and @code{3}, respectively.  A
+@code{rank} of zero is equivalent to a copy of one number from input to
+output.
+
+@item
+@code{n}, or @code{nx}/@code{ny}/@code{nz}, or @code{n[rank]},
+respectively, gives the (physical) size of the transform dimensions.
+They can be any positive integer.
+ 
+@itemize @minus
+@item
+@cindex row-major
+Multi-dimensional arrays are stored in row-major order with dimensions:
+@code{nx} x @code{ny}; or @code{nx} x @code{ny} x @code{nz}; or
+@code{n[0]} x @code{n[1]} x ... x @code{n[rank-1]}.
+@xref{Multi-dimensional Array Format}.
+@item
+FFTW is generally best at handling sizes of the form
+@ifinfo
+@math{2^a 3^b 5^c 7^d 11^e 13^f},
+@end ifinfo
+@tex
+$2^a 3^b 5^c 7^d 11^e 13^f$,
+@end tex
+@ifhtml
+2<sup>a</sup> 3<sup>b</sup> 5<sup>c</sup> 7<sup>d</sup>
+        11<sup>e</sup> 13<sup>f</sup>,
+@end ifhtml
+where @math{e+f} is either @math{0} or @math{1}, and the other exponents
+are arbitrary.  Other sizes are computed by means of a slow,
+general-purpose algorithm (which nevertheless retains @Onlogn
+performance even for prime sizes).  (It is possible to customize FFTW
+for different array sizes; see @ref{Installation and Customization}.)
+Transforms whose sizes are powers of @math{2} are especially fast.
+@item
+For a @code{REDFT00} or @code{RODFT00} transform kind in a dimension of
+size @math{n}, it is @math{n-1} or @math{n+1}, respectively, that
+should be factorizable in the above form.
+@end itemize
+
+@item
+@code{in} and @code{out} point to the input and output arrays of the
+transform, which may be the same (yielding an in-place transform).
+@cindex in-place
+These arrays are overwritten during planning, unless
+@code{FFTW_ESTIMATE} is used in the flags.  (The arrays need not be
+initialized, but they must be allocated.)
+
+@item
+@code{kind}, or @code{kindx}/@code{kindy}/@code{kindz}, or
+@code{kind[rank]}, is the kind of r2r transform used for the
+corresponding dimension.  The valid kind constants are described in
+@ref{Real-to-Real Transform Kinds}.  In a multi-dimensional transform,
+what is computed is the separable product formed by taking each
+transform kind along the corresponding dimension, one dimension after
+another.
+
+@item
+@cindex flags
+@code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
+as defined in @ref{Planner Flags}.
+
+@end itemize
+
+@c =========>
+@node Real-to-Real Transform Kinds,  , Real-to-Real Transforms, Basic Interface
+@subsection Real-to-Real Transform Kinds
+@cindex kind (r2r)
+
+FFTW currently supports 11 different r2r transform kinds, specified by
+one of the constants below.  For the precise definitions of these
+transforms, see @ref{What FFTW Really Computes}.  For a more colloquial
+introduction to these transform kinds, see @ref{More DFTs of Real Data}.
+
+For dimension of size @code{n}, there is a corresponding ``logical''
+dimension @code{N} that determines the normalization (and the optimal
+factorization); the formula for @code{N} is given for each kind below.
+Also, with each transform kind is listed its corrsponding inverse
+transform.  FFTW computes unnormalized transforms: a transform followed
+by its inverse will result in the original data multiplied by @code{N}
+(or the product of the @code{N}'s for each dimension, in
+multi-dimensions).
+@cindex normalization
+
+@itemize @bullet
+
+@item
+@ctindex FFTW_R2HC
+@code{FFTW_R2HC} computes a real-input DFT with output in
+``halfcomplex'' format, i.e. real and imaginary parts for a transform of
+size @code{n} stored as:
+@tex
+$$
+r_0, r_1, r_2, \ldots, r_{n/2}, i_{(n+1)/2-1}, \ldots, i_2, i_1
+$$
+@end tex
+@ifinfo
+r0, r1, r2, r(n/2), i((n+1)/2-1), ..., i2, i1
+@end ifinfo
+@ifhtml
+<p align=center>
+r<sub>0</sub>, r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>n/2</sub>, i<sub>(n+1)/2-1</sub>, ..., i<sub>2</sub>, i<sub>1</sub>
+</p>
+@end ifhtml
+(Logical @code{N=n}, inverse is @code{FFTW_HC2R}.)
+
+@item
+@ctindex FFTW_HC2R
+@code{FFTW_HC2R} computes the reverse of @code{FFTW_R2HC}, above.
+(Logical @code{N=n}, inverse is @code{FFTW_R2HC}.)
+
+@item
+@ctindex FFTW_DHT
+@code{FFTW_DHT} computes a discrete Hartley transform.
+(Logical @code{N=n}, inverse is @code{FFTW_DHT}.)
+
+@item
+@ctindex FFTW_REDFT00
+@code{FFTW_REDFT00} computes an REDFT00 transform, i.e. a DCT-I.
+(Logical @code{N=2*(n-1)}, inverse is @code{FFTW_REDFT00}.)
+
+@item
+@ctindex FFTW_REDFT10
+@code{FFTW_REDFT10} computes an REDFT10 transform, i.e. a DCT-II.
+(Logical @code{N=2*n}, inverse is @code{FFTW_REDFT01}.)
+
+@item
+@ctindex FFTW_REDFT01
+@code{FFTW_REDFT01} computes an REDFT01 transform, i.e. a DCT-III.
+(Logical @code{N=2*n}, inverse is @code{FFTW_REDFT=10}.)
+
+@item
+@ctindex FFTW_REDFT11
+@code{FFTW_REDFT11} computes an REDFT11 transform, i.e. a DCT-IV.
+(Logical @code{N=2*n}, inverse is @code{FFTW_REDFT11}.)
+
+@item
+@ctindex FFTW_RODFT00
+@code{FFTW_RODFT00} computes an RODFT00 transform, i.e. a DST-I.
+(Logical @code{N=2*(n+1)}, inverse is @code{FFTW_RODFT00}.)
+
+@item
+@ctindex FFTW_RODFT10
+@code{FFTW_RODFT10} computes an RODFT10 transform, i.e. a DST-II.
+(Logical @code{N=2*n}, inverse is @code{FFTW_RODFT01}.)
+
+@item
+@ctindex FFTW_RODFT01
+@code{FFTW_RODFT01} computes an RODFT01 transform, i.e. a DST-III.
+(Logical @code{N=2*n}, inverse is @code{FFTW_RODFT=10}.)
+
+@item
+@ctindex FFTW_RODFT11
+@code{FFTW_RODFT11} computes an RODFT11 transform, i.e. a DST-IV.
+(Logical @code{N=2*n}, inverse is @code{FFTW_RODFT11}.)
+
+@end itemize
 
 @c ------------------------------------------------------------
 @node Advanced Interface, Guru Interface, Basic Interface, FFTW Reference
