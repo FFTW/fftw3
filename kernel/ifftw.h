@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.20 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: ifftw.h,v 1.21 2002-06-10 23:24:28 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -348,8 +348,10 @@ void X(stride_destroy)(stride p);
 
 typedef int stride;
 #define WS(stride, i)  (stride * i)
-#define X(mkstride)(n, stride) stride
-#define X(stride_destroy)(p) {}
+#define sfftw_mkstride(n, stride) stride
+#define dfftw_mkstride(n, stride) stride
+#define sfftw_stride_destroy(p) {}
+#define dfftw_stride_destroy(p) {}
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
 
