@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct-r2hc.c,v 1.2 2002-07-21 22:43:12 stevenj Exp $ */
+/* $Id: direct-r2hc.c,v 1.3 2002-07-22 05:02:38 stevenj Exp $ */
 
 /* direct RDFT R2HC solver, if we have a codelet */
 
@@ -34,7 +34,7 @@ typedef struct {
      plan_rdft super;
 
      stride is, ros, ios;
-     uint n;
+     int ioffset;
      uint vl;
      int ivs, ovs;
      kr2hc k;
@@ -44,7 +44,7 @@ typedef struct {
 static void apply(plan *ego_, R *I, R *O)
 {
      P *ego = (P *) ego_;
-     ego->k(I, O, O + ego->n, ego->is, ego->ros, ego->ios,
+     ego->k(I, O, O + ego->ioffset, ego->is, ego->ros, ego->ios,
 	    ego->vl, ego->ivs, ego->ovs);
 }
 
@@ -144,7 +144,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      vd = p->vecsz.dims;
 
      pln->k = ego->k;
-     pln->n = (p->kind == R2HC) ? d[0].n : /* R2HCII */ (d[0].n - 1);
+     pln->ioffset = 
+	  d[0].os * ((p->kind == R2HC) ? d[0].n : /* R2HCII */ (d[0].n - 1));
 
      nr = (p->kind == R2HC) ? (d[0].n + 2) / 2 : /* R2HCII */ (d[0].n + 1) / 2;
      pln->is = X(mkstride)(e->sz, d[0].is);
