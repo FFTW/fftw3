@@ -107,7 +107,7 @@ such as cycle counters and SIMD instructions, but this is optional.
 
 \question 26aug:runOnWindows  Does FFTW run on Windows?
 
-Yes, many users have reported successfully using FFTW on Windows with
+Yes, many people have reported successfully using FFTW on Windows with
 various compilers.  FFTW was not developed on Windows, but the source
 code is essentially straight ANSI C.  See also the \docref{FFTW
 Windows installation notes\}, \qref compilerCrashes, and \qref
