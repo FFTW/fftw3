@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.9 2003-01-11 16:07:24 athena Exp $ */
+/* $Id: fftw3.h,v 1.10 2003-01-11 17:13:18 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -112,9 +112,8 @@ FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 #define FFTW_NO_INDIRECT_OP (1U << 12)
 #define FFTW_ALLOW_LARGE_GENERIC (1U << 13) /* NO_LARGE_GENERIC is default */
 #define FFTW_NO_RANK_SPLITS (1U << 14)
-#define FFTW_ALLOW_UGLY (1U << 15) /* NO_UGLY is default */
-#define FFTW_NO_VRANK_SPLITS (1U << 16)
-#define FFTW_NO_VRECURSE (1U << 17)
+#define FFTW_NO_VRANK_SPLITS (1U << 15)
+#define FFTW_NO_VRECURSE (1U << 16)
 
 #ifdef __cplusplus
 }  /* extern "C" */

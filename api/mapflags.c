@@ -59,8 +59,6 @@ void X(mapflags)(planner *plnr, unsigned int flags)
 	     an inverse flag to disable it: */
 	  { FFTW_PRESERVE_INPUT, ~FFTW_DESTROY_INPUT },
 
-	  { FFTW_EXHAUSTIVE, FFTW_ALLOW_UGLY }, /* exhaustive includes ugly */
-
 	  { FFTW_ESTIMATE, (FFTW_ESTIMATE_PATIENT
 			    | FFTW_IMPATIENT /* map is processed in order */
 			    | FFTW_NO_INDIRECT_OP) },
@@ -93,7 +91,6 @@ void X(mapflags)(planner *plnr, unsigned int flags)
 	  { FFTW_NO_INDIRECT_OP, NO_INDIRECT_OP },
 	  { FFTW_ALLOW_LARGE_GENERIC, ~NO_LARGE_GENERIC },
 	  { FFTW_NO_RANK_SPLITS, NO_RANK_SPLITS },
-	  { FFTW_ALLOW_UGLY, ~NO_UGLY },
 	  { FFTW_NO_VRANK_SPLITS, NO_VRANK_SPLITS },
 	  { FFTW_NO_VRECURSE, NO_VRECURSE }
      };
