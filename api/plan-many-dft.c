@@ -28,7 +28,7 @@ X(plan) X(plan_many_dft)(int rank, const int *n,
 			 C *in, const int *inembed,
 			 int istride, int idist,
 			 C *out, const int *onembed,
-			 int ostride, int odist, int sign, int flags)
+			 int ostride, int odist, int sign, unsigned flags)
 {
      R *ri, *ii, *ro, *io;
 

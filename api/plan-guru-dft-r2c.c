@@ -24,7 +24,7 @@
 X(plan) X(plan_guru_dft_r2c)(int rank, const X(iodim) *dims,
 			     int howmany_rank,
 			     const X(iodim) *howmany_dims,
-			     R *in, R *ro, R *io, int flags)
+			     R *in, R *ro, R *io, unsigned flags)
 {
      if (!X(guru_kosherp)(rank, dims, howmany_rank, howmany_dims)) return 0;
 

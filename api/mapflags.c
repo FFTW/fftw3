@@ -41,7 +41,7 @@ typedef struct {
 #define EQV(a, b) IMPLIES(YES(a), YES(b)), IMPLIES(NO(a), NO(b))
 #define NEQV(a, b) IMPLIES(YES(a), NO(b)), IMPLIES(NO(a), YES(b))
 
-static void map_flags(int *iflags, int *oflags,
+static void map_flags(unsigned *iflags, unsigned *oflags,
 		      const flagop flagmap[], int nmap)
 {
      int i;
@@ -52,8 +52,10 @@ static void map_flags(int *iflags, int *oflags,
 
 #define NELEM(array)(sizeof(array) / sizeof((array)[0]))
 
-void X(mapflags)(planner *plnr, int flags)
+void X(mapflags)(planner *plnr, unsigned flags)
 {
+     unsigned tmpflags;
+
      /* map of api flags -> api flags, to implement consistency rules
         and combination flags */
      const flagop self_flagmap[] = {
@@ -102,11 +104,11 @@ void X(mapflags)(planner *plnr, int flags)
 
      map_flags(&flags, &flags, self_flagmap, NELEM(self_flagmap));
 
-     plnr->problem_flags = 0;
-     map_flags(&flags, &plnr->problem_flags, problem_flagmap, 
-	       NELEM(problem_flagmap));
+     tmpflags = 0;
+     map_flags(&flags, &tmpflags, problem_flagmap, NELEM(problem_flagmap));
+     plnr->problem_flags = tmpflags;
 
-     plnr->planner_flags = 0;
-     map_flags(&flags, &plnr->planner_flags, planner_flagmap, 
-	       NELEM(planner_flagmap));
+     tmpflags = 0;
+     map_flags(&flags, &tmpflags, planner_flagmap, NELEM(planner_flagmap));
+     plnr->planner_flags = tmpflags;
 }

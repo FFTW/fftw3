@@ -26,7 +26,7 @@ X(plan) X(plan_many_dft_r2c)(int rank, const int *n,
 			     R *in, const int *inembed,
 			     int istride, int idist,
 			     C *out, const int *onembed,
-			     int ostride, int odist, int flags)
+			     int ostride, int odist, unsigned flags)
 {
      R *ro, *io;
      int *nfi, *nfo;

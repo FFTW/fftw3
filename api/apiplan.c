@@ -20,7 +20,7 @@
 
 #include "api.h"
 
-apiplan *X(mkapiplan)(int flags, problem *prb)
+apiplan *X(mkapiplan)(unsigned flags, problem *prb)
 {
      plan *pln, *pln0;
      apiplan *p = 0;

@@ -27,7 +27,7 @@ X(plan) X(plan_guru_r2r)(int rank, const X(iodim) *dims,
 			 int howmany_rank,
 			 const X(iodim) *howmany_dims,
 			 R *in, R *out,
-			 const X(r2r_kind) * kind, int flags)
+			 const X(r2r_kind) * kind, unsigned flags)
 {
      X(plan) p;
      rdft_kind *k;

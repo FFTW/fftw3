@@ -22,7 +22,7 @@
 
 X(plan) X(plan_r2r_3d)(int nx, int ny, int nz,
 		       R *in, R *out, X(r2r_kind) kindx,
-		       X(r2r_kind) kindy, X(r2r_kind) kindz, int flags)
+		       X(r2r_kind) kindy, X(r2r_kind) kindz, unsigned flags)
 {
      int n[3];
      X(r2r_kind) kind[3];

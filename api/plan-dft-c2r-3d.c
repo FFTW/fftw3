@@ -21,7 +21,7 @@
 #include "api.h"
 
 X(plan) X(plan_dft_c2r_3d)(int nx, int ny, int nz,
-			   C *in, R *out, int flags)
+			   C *in, R *out, unsigned flags)
 {
      int n[3];
      n[0] = nx;

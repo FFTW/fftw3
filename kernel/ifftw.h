@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.177 2003-01-17 06:44:44 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.178 2003-01-18 13:14:48 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -495,7 +495,7 @@ struct planner_s {
      unsigned hashsiz, nelem;
 
      int nthr;
-     int problem_flags;
+     unsigned problem_flags;
      unsigned short planner_flags; /* matches type of solution.flags in
 				      planner.c */
      /* various statistics */

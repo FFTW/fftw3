@@ -20,7 +20,7 @@
 
 #include "api.h"
 
-X(plan) X(plan_dft_r2c_2d)(int nx, int ny, R *in, C *out, int flags)
+X(plan) X(plan_dft_r2c_2d)(int nx, int ny, R *in, C *out, unsigned flags)
 {
      int n[2];
      n[0] = nx;

@@ -60,8 +60,8 @@ printer *X(mkprinter_file)(FILE *f);
 planner *X(the_planner)(void);
 void X(configure_planner)(planner *plnr);
 
-void X(mapflags)(planner *, int);
+void X(mapflags)(planner *, unsigned);
 
-apiplan *X(mkapiplan)(int flags, problem *prb);
+apiplan *X(mkapiplan)(unsigned flags, problem *prb);
 
 #endif				/* __API_H__ */

@@ -31,7 +31,7 @@ X(plan) X(plan_many_r2r)(int rank, const int *n,
 			 int istride, int idist,
 			 R *out, const int *onembed,
 			 int ostride, int odist,
-			 const X(r2r_kind) * kind, int flags)
+			 const X(r2r_kind) * kind, unsigned flags)
 {
      X(plan) p;
      rdft_kind *k;
