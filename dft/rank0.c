@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.11 2002-06-12 11:47:41 athena Exp $ */
+/* $Id: rank0.c,v 1.12 2002-06-16 22:30:18 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -191,8 +191,9 @@ static void print(plan *ego_, printer *p)
      p->print(p, "(%s%v)", ego->slv->adt->nam, ego->vl);
 }
 
-static int score(const solver *ego, const problem *p)
+static int score(const solver *ego, const problem *p, int flags)
 {
+     UNUSED(flags);
      return (applicable(ego, p)) ? GOOD : BAD;
 }
 

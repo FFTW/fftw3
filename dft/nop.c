@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop.c,v 1.6 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: nop.c,v 1.7 2002-06-16 22:30:18 athena Exp $ */
 
 /* plans for vrank -infty DFTs (nothing to do) */
 
@@ -64,8 +64,9 @@ static void print(plan *ego, printer *p)
      p->print(p, "(dft-nop)");
 }
 
-static int score(const solver *ego, const problem *p)
+static int score(const solver *ego, const problem *p, int flags)
 {
+     UNUSED(flags);
      return applicable(ego, p) ? GOOD : BAD;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.12 2002-06-16 12:05:17 athena Exp $ */
+/* $Id: codelet.h,v 1.13 2002-06-16 22:30:18 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -79,6 +79,7 @@ void X(kdft_register)(planner *p, kdft codelet, const kdft_desc *desc);
 
 typedef struct {
      uint radix;
+     int sign;   /* used in K7-specific stuff */
      const tw_instr *tw;
      int is;
      int vs;

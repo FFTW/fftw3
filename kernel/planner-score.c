@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.8 2002-06-13 15:04:24 athena Exp $ */
+/* $Id: planner-score.c,v 1.9 2002-06-16 22:30:18 athena Exp $ */
 #include "ifftw.h"
 
 static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
@@ -26,11 +26,12 @@ static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
      plan *best = 0;
      int best_score;
      int cnt = 0; /* count how many solvers have the highest score */
+     int flags = ego->flags;
 
      *pairp = 0;
      best_score = BAD;
      FORALL_SOLVERS(ego, s, sp, {
-	  int sc = s->adt->score(s, p);
+	  int sc = s->adt->score(s, p, flags);
 	  if (sc == best_score)
 	       ++cnt;
 	  else if (sc > best_score) {
@@ -41,7 +42,7 @@ static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
 
      for (; best_score > BAD; --best_score) {
           FORALL_SOLVERS(ego, s, sp, {
-	       if (s->adt->score(s, p) == best_score) {
+	       if (s->adt->score(s, p, flags) == best_score) {
 		    plan *pln = s->adt->mkplan(s, p, ego);
 
 		    if (pln) {
@@ -78,7 +79,7 @@ static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
 }
 
 /* constructor */
-planner *X(mkplanner_score)(int estimatep)
+planner *X(mkplanner_score)(int flags)
 {
-     return X(mkplanner)(sizeof(planner), mkplan, 0, estimatep);
+     return X(mkplanner)(sizeof(planner), mkplan, 0, flags);
 }

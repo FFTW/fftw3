@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-naive.c,v 1.11 2002-06-13 15:04:24 athena Exp $ */
+/* $Id: planner-naive.c,v 1.12 2002-06-16 22:30:18 athena Exp $ */
 #include "ifftw.h"
 
 /* naive planner with no memoization */
@@ -54,7 +54,7 @@ static void mkplan(planner *ego, problem *p, plan **bestp, pair **pairp)
 }
 
 /* constructor */
-planner *X(mkplanner_naive)(int estimatep)
+planner *X(mkplanner_naive)(int flags)
 {
-     return X(mkplanner)(sizeof(planner), mkplan, 0, estimatep);
+     return X(mkplanner)(sizeof(planner), mkplan, 0, flags);
 }

@@ -105,7 +105,7 @@ let no_twiddle_gen n sign =
   
   in ((initcode, body), k7vFlops body)
 
-let cvsid = "$Id: gen_notw.ml,v 1.3 2002-06-16 12:05:17 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.4 2002-06-16 22:30:18 athena Exp $"
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let generate n =
@@ -120,6 +120,7 @@ let generate n =
     compileToAsm name code;
     p "\n";
     p ".section .rodata\n";
+    p "\t.align 4\n";
     p "desc:\n";
     p "\t.long %d\n" n;
     p "\t.long %d\n" sign;

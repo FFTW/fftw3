@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.14 2002-06-13 15:54:02 athena Exp $ */
+/* $Id: planner.c,v 1.15 2002-06-16 22:30:18 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -231,7 +231,7 @@ planner *X(mkplanner)(size_t sz,
 		      void (*infmkplan)(planner *ego, problem *p, 
 					plan **, pair **),
                       void (*destroy) (planner *),
-		      int estimatep)
+		      int flags)
 {
      static const planner_adt padt = {
 	  slv, cdr, solvers, register_solver, mkplan, forget, export
@@ -248,8 +248,7 @@ planner *X(mkplanner)(size_t sz,
      p->sols = 0;
      p->hashsiz = 0;
      p->cnt = 0;
-     p->estimatep = estimatep;
-     p->timeallp = !CLASSIC_MODE;
+     p->flags = flags;
      p->idcnt = 1;              /* ID == 0 means no solution */
      rehash(p);			/* so that hashsiz > 0 */
 
@@ -288,9 +287,9 @@ void X(evaluate_plan)(planner *ego, plan *pln, const problem *p)
 {
      ego->hook(pln, p);
 
-     if (ego->timeallp || pln->pcost == 0.0) {
+     if (!(ego->flags & CLASSIC) || pln->pcost == 0.0) {
 	  ego->nplan++;
-	  if (ego->estimatep) {
+	  if (ego->flags & ESTIMATE) {
 	       /* heuristic */
 	       pln->pcost = 0
 		    + pln->ops.add

@@ -8,17 +8,8 @@ else
 GENFFT =
 endif
 
-# distribute file CLASSIC-MODE if classic mode is true
-if CLASSIC_MODE
-CLASSIC_DIST = CLASSIC-MODE
-distdir = $(PACKAGE)-$(VERSION)-classic
-else
-CLASSIC_DIST = 
-distdir = $(PACKAGE)-$(VERSION)-pro
-endif
-
 SUBDIRS=$(GENFFT) kernel dft libbench . tests support
-EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS $(CLASSIC_DIST)
+EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS
 
 lib@PRECISION@fftw3_la_SOURCES = 
 

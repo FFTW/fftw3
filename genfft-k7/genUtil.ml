@@ -394,6 +394,7 @@ let compileToAsm name (initcode, k7vinstrs) =
     print_string ("/* The following asm code is Copyright (c) 2000-2001 Stefan Kral */\n");
     datasection all_consts;
     k7rinstrInitStackPointerAdjustment 0;
+    asmline ".text";
     asmline "\t.balign 64";
     asmline (name ^ ":");
     iter emit_instr realcode';
@@ -454,5 +455,5 @@ let store_array_c n f =
 let load_array_c n =
   array n (fun i -> load_var (access_input i))
 
-let load_constant_array_r n =
-  array n (fun i -> load_real (access_twiddle i))
+let load_constant_array_c n =
+  array n (fun i -> load_var (access_twiddle i))

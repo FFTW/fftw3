@@ -18,12 +18,40 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.4 2002-06-15 22:23:40 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.5 2002-06-16 22:30:18 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
 open Util
 
+type twop = TW_COS | TW_SIN | TW_TAN | TW_NEXT
+
+let optoint = function
+  | TW_COS -> 0
+  | TW_SIN -> 1
+  | TW_TAN -> 2
+  | TW_NEXT -> 3
+
+let optostring = function
+  | TW_COS -> "TW_COS"
+  | TW_SIN -> "TW_SIN"
+  | TW_TAN -> "TW_TAN"
+  | TW_NEXT -> "TW_NEXT"
+
+type twinstr = (twop * int * int)
+
+let twinstr_to_c_string l =
+  let one (op, a, b) = Printf.sprintf "{ %s, %d, %d }" (optostring op) a b
+  in let rec loop first = function
+    | [] -> ""
+    | a :: b ->  (if first then "\n" else ",\n") ^ (one a) ^ (loop false b)
+  in "{" ^ (loop true l) ^ "}"
+
+let twinstr_to_asm_string l =
+  let one (op, a, b) = 
+    Printf.sprintf "\t.byte %d\n\t.byte %d\n\t.value %d\n" (optoint op) a b
+  in List.fold_left (^) "" (List.map one l)
+  
 let square x = 
   if (!Magic.wsquare) then
     wsquare x
@@ -48,9 +76,12 @@ let rec_array n f =
     h
   end
 
+(*
 let load_reim sign w i = 
   let x = Complex.make (w (2 * i), w (2 * i + 1)) in
   if sign = 1 then x else Complex.conj x
+*)
+let load_reim sign w i = if sign = 1 then w i else Complex.conj (w i)
   
 (* various policies for computing/loading twiddle factors *)
 
@@ -63,10 +94,9 @@ let twiddle_policy_load_all =
       Complex.times (load_reim sign w (i - 1)) (f i)
   and twidlen n = 2 * (n - 1)
   and twdesc n =
-    "{\n" ^
-    (forall "" (^) 1 n (fun i ->
-      Printf.sprintf "{ TW_COS, 0, %d }, { TW_SIN, 0, %d },\n" i i)) ^
-    "{ TW_NEXT, 1, 0 }\n}"
+    (List.flatten
+      (forall [] cons 1 n (fun i -> [(TW_COS, 0, i); (TW_SIN, 0, i)])))
+    @ [(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
 (* shorthand for policies that only load W[0] *)
@@ -75,8 +105,7 @@ let policy_one mktw =
     let g = (mktw n (load_reim sign w)) in
     fun i -> Complex.times (g i) (f i)
   and twidlen n = 2
-  and twdesc n =
-    "{{ TW_COS, 0, 1 }, { TW_SIN, 0, 1 }, { TW_NEXT, 1, 0 }}"
+  and twdesc n = [(TW_COS, 0, 1); (TW_SIN, 0, 1); (TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
     
 (* compute w^n = w w^{n-1} *)

@@ -13,6 +13,7 @@ K7GENFFTDIR = ${top_builddir}/genfft-k7
 GEN_NOTW = ${GENFFTDIR}/gen_notw
 K7GEN_NOTW = ${K7GENFFTDIR}/gen_notw
 GEN_TWIDDLE = ${GENFFTDIR}/gen_twiddle
+K7GEN_TWIDDLE = ${K7GENFFTDIR}/gen_twiddle
 GEN_TWIDSQ = ${GENFFTDIR}/gen_twidsq
 PRELUDE = ${top_srcdir}/support/codelet_prelude
 ASMPRELUDE = ${top_srcdir}/support/codelet_asmprelude

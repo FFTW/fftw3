@@ -18,13 +18,14 @@
  *
  */
 
-/* $Id: ct.h,v 1.4 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: ct.h,v 1.5 2002-06-16 22:30:18 athena Exp $ */
 
 /* Cooley-Tukey variants */
 union kct {
      kdft_dit dit;
      kdft_dif dif;
      kdft_difsq difsq;
+     kdft_dit_k7 dit_k7;
 };
 
 typedef struct {
@@ -40,11 +41,8 @@ typedef struct {
      plan *cld;
      R *W;
      uint r, m, vl;
-     int is, os, ivs, ovs;
+     int is, os, ivs, ovs, iios;
      stride ios, vs;
-
-     int ios_for_buf; 
-
      const solver_ct *slv;
      twid *td;
 } plan_ct;

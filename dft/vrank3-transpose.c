@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.8 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.9 2002-06-16 22:30:18 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -105,11 +105,11 @@ static int applicable(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p_)
+static int score(const solver *ego, const problem *p_, int flags)
 {
      uint dim0, dim1, dim2;
      const problem_dft *p;
-     UNUSED(ego);
+     UNUSED(ego); UNUSED(flags);
 
      if (!applicable(p_, &dim0, &dim1, &dim2))
           return BAD;

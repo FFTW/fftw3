@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct-k7.c,v 1.3 2002-06-16 12:05:17 athena Exp $ */
+/* $Id: direct-k7.c,v 1.4 2002-06-16 22:30:18 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet.  
    This code handles K7-specific codelets */
@@ -110,8 +110,9 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p)
+static int score(const solver *ego, const problem *p, int flags)
 {
+     UNUSED(flags);
      return (applicable(ego, p)) ? GOOD : BAD;
 }
 

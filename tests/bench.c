@@ -28,11 +28,7 @@ static const char *mkcc(void)
 }
 
 BEGIN_BENCH_DOC
-#if CLASSIC_MODE
-BENCH_DOC("name", "fftw3-classic")
-#else
-BENCH_DOC("name", "fftw3-pro")
-#endif
+BENCH_DOC("name", "fftw3")
 BENCH_DOCF("version", mkvers) 
 BENCH_DOCF("fftw-compiled-by", mkcc)
 END_BENCH_DOC 
@@ -61,18 +57,12 @@ static planner *plnr;
 static fftw_problem *prblm;
 static plan *pln;
 
-#define ESTIMATE 0
-
 void setup(struct problem *p)
 {
      bench_real *ri, *ii, *ro, *io;
      BENCH_ASSERT(can_do(p));
 
-#if CLASSIC_MODE
-     plnr = FFTW(mkplanner_score)(ESTIMATE);
-#else
-     plnr = FFTW(mkplanner_naive)(ESTIMATE);
-#endif
+     plnr = FFTW(mkplanner_score)(0);
      
      FFTW(dft_conf_standard) (plnr);
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.11 2002-06-13 15:04:24 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.12 2002-06-16 22:30:18 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -135,14 +135,18 @@ static int applicable(const solver *ego_, const problem *p_, uint *rp)
 }
 
 /* TODO: revise this. */
-static int score(const solver *ego_, const problem *p_)
+static int score(const solver *ego_, const problem *p_, int flags)
 {
+     const S *ego = (const S *)ego_;
      const problem_dft *p = (const problem_dft *) p_;
-     const S *ego = (const S *) ego_;
      uint dummy;
 
      if (!applicable(ego_, p_, &dummy))
           return BAD;
+
+     /* fftw2 behavior */
+     if ((flags & CLASSIC) && (ego->spltrnk != ego->buddies[0]))
+	  return BAD;
 
      /* Heuristic: if the vector stride is greater than the transform
         sz, don't use (prefer to do the vector loop first with a
@@ -226,11 +230,7 @@ static solver *mksolver(int spltrnk, const int *buddies, uint nbuddies)
 void X(dft_rank_geq2_register)(planner *p)
 {
      uint i;
-#if CLASSIC_MODE
-     static const int buddies[] = { 0 };
-#else
-     static const int buddies[] = { 1, -1, 0 };
-#endif
+     static const int buddies[] = { 0, 1, -1 };
 
      const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 

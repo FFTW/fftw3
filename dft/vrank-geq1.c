@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.5 2002-06-12 22:57:19 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.6 2002-06-16 22:30:18 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -150,13 +150,18 @@ static int applicable(const solver *ego_, const problem *p_, uint *dp)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_)
+static int score(const solver *ego_, const problem *p_, int flags)
 {
+     const S *ego = (const S *)ego_;
      const problem_dft *p;
      uint vdim;
 
      if (!applicable(ego_, p_, &vdim))
           return BAD;
+
+     /* fftw2 behavior */
+     if ((flags & CLASSIC) && (ego->vecloop_dim != ego->buddies[0]))
+	  return BAD;
 
      p = (const problem_dft *) p_;
 
@@ -239,11 +244,7 @@ void X(dft_vrank_geq1_register)(planner *p)
      uint i;
 
      /* FIXME: Should we try other vecloop_dim values? */
-#if CLASSIC_MODE
-     static const int buddies[] = { -1 };
-#else
      static const int buddies[] = { 1, -1 };
-#endif
 
      const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 

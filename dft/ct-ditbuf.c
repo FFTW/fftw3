@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditbuf.c,v 1.7 2002-06-13 12:59:53 athena Exp $ */
+/* $Id: ct-ditbuf.c,v 1.8 2002-06-16 22:30:18 athena Exp $ */
 
 /* decimation in time Cooley-Tukey.  Codelet operates on
    contiguous buffer rather than directly on the output array.  */
@@ -77,7 +77,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      {
 	  const uint batchsz = 4; /* FIXME: parametrize? */
           uint i, j, m = ego->m, vl = ego->vl, r = ego->r;
-          int os = ego->os, ovs = ego->ovs, ios = ego->ios_for_buf;
+          int os = ego->os, ovs = ego->ovs, ios = ego->iios;
 	  R *buf = (R *) STACK_MALLOC(r * batchsz * 2 * sizeof(R));
 
           for (i = 0; i < vl; ++i) {
@@ -105,11 +105,7 @@ static int applicable(const solver_ct *ego, const problem *p_)
 {
      if (X(dft_ct_applicable)(ego, p_)) {
           const ct_desc *e = ego->desc;
-          const problem_dft *p = (const problem_dft *)p_;
           return (1
-
-		  /* emulate fftw-2 behavior */
-		  && !(CLASSIC_MODE && p->vecsz.rnk > 0)
 
                   /* stride is always 2 */
                   && (!e->is || e->is == 2)
@@ -120,7 +116,7 @@ static int applicable(const solver_ct *ego, const problem *p_)
 
 static void finish(plan_ct *ego)
 {
-     ego->ios_for_buf = ego->m * ego->os;
+     ego->iios = ego->m * ego->os;
      ego->vs = X(mkstride)(ego->r, 2);
      ego->super.super.ops =
 	  X(ops_add3)(ego->cld->ops,
@@ -143,14 +139,20 @@ static problem *mkcld(const solver_ct *ego, const problem_dft *p)
 			       cld_vec, p->ri, p->ii, p->ro, p->io);
 }
 
-static int score(const solver *ego_, const problem *p_)
+static int score(const solver *ego_, const problem *p_, int flags)
 {
      const solver_ct *ego = (const solver_ct *) ego_;
-     const problem_dft *p = (const problem_dft *) p_;
+     const problem_dft *p;
      uint n;
 
      if (!applicable(ego, p_))
           return BAD;
+
+     p = (const problem_dft *) p_;
+
+     /* emulate fftw2 behavior */
+     if ((flags & CLASSIC) && (p->vecsz.rnk > 0))
+	  return BAD;
 
      n = p->sz.dims[0].n;
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.31 2002-06-15 01:11:16 athena Exp $ */
+/* $Id: ifftw.h,v 1.32 2002-06-16 22:30:18 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -44,10 +44,6 @@ typedef fftw_real R;
 
 #ifndef HAVE_UINT
 typedef unsigned int uint;
-#endif
-
-#ifndef CLASSIC_MODE
-#define CLASSIC_MODE 0
 #endif
 
 #ifndef K7_MODE
@@ -272,7 +268,7 @@ enum {
 
 typedef struct {
      plan *(*mkplan)(const solver *ego, const problem *p, planner *plnr);
-     int (*score)(const solver *ego, const problem *p);
+     int (*score)(const solver *ego, const problem *p, int flags);
 } solver_adt;
 
 struct solver_s {
@@ -292,6 +288,9 @@ void X(solver_destroy)(solver *ego);
 
 typedef struct pair_s pair; /* opaque */
 typedef struct solutions_s solutions; /* opaque */
+
+/* planner flags */
+enum { ESTIMATE = 0x1, CLASSIC = 0x2 };
 
 typedef struct {
      solver *(*slv)(pair *cons);
@@ -315,16 +314,15 @@ struct planner_s {
      void (*inferior_mkplan)(planner *ego, problem *p, plan **, pair **);
      uint hashsiz;
      uint cnt;
-     int estimatep;             /* if TRUE, use estimate of execution time */
-     int timeallp;              /* if TRUE, always time and ignore cost 
-				   estimate */
+     int flags;
      int idcnt;
 };
 
 planner *X(mkplanner)(size_t sz,
 		      void (*mkplan)(planner *ego, problem *p, 
 				     plan **, pair **),
-                      void (*destroy) (planner *), int estimatep);
+                      void (*destroy) (planner *), 
+		      int flags);
 void X(planner_destroy)(planner *ego);
 void X(planner_set_hook)(planner *p, void (*hook)(const plan *,
 						  const problem *));
@@ -356,8 +354,8 @@ void X(planner_dump)(planner *ego, int verbose);
 }
 
 /* various planners */
-planner *X(mkplanner_naive)(int estimatep);
-planner *X(mkplanner_score)(int estimatep);
+planner *X(mkplanner_naive)(int flags);
+planner *X(mkplanner_score)(int flags);
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */
@@ -397,9 +395,9 @@ void X(solvtab_exec)(solvtab tbl, planner *p);
 enum { TW_COS = 0, TW_SIN = 1, TW_TAN = 2, TW_NEXT = 3};
 
 typedef struct {
-     uint op:3;
-     uint v:4;
-     int i:25;
+     unsigned char op;
+     unsigned char v;
+     unsigned short i;
 } tw_instr;
 
 typedef struct twid_s {

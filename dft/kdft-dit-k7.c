@@ -18,26 +18,13 @@
  *
  */
 
-/* $Id: codelet-k7.h,v 1.3 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: kdft-dit-k7.c,v 1.1 2002-06-16 22:30:18 athena Exp $ */
 
-/* K7 codelet stuff */
+#include "dft.h"
 
-typedef struct {
-     uint sz;    /* size of transform computed */
-     int sign;
-     opcnt ops;
-} kdft_k7_desc;
-
-typedef void (*kdft_k7)(const R *ri, R *ro, int is, int os,
-			uint vl, int ivs, int ovs);
-void X(kdft_k7_register)(planner *p, kdft_k7 codelet, 
-			 const kdft_k7_desc *desc);
-
-
-typedef const R *(*kdft_dit_k7)(R *io, const R *W, int ios, uint m, int dist);
-void X(kdft_dit_register)(planner *p, kdft_dit codelet, const ct_desc *desc);
-
-extern solvtab X(solvtab_dft_k7);
-
-solver *X(mksolver_dft_direct_k7)(kdft_k7 k, const kdft_k7_desc *desc);
-solver *X(mksolver_dft_ct_dit_k7)(kdft_dit_k7 codelet, const ct_desc *desc);
+#if K7_MODE
+void X(kdft_dit_k7_register)(planner *p, kdft_dit_k7 k, const ct_desc *desc)
+{
+     REGISTER_SOLVER(p, X(mksolver_dft_ct_dit_k7)(k, desc));
+}
+#endif

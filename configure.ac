@@ -22,27 +22,6 @@ fi
 AM_CONDITIONAL(SINGLE, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 
-AC_ARG_ENABLE(classic-mode,
- [  --enable-classic-mode      behave like fftw-2], 
- [case "${enableval}" in
-       yes) classic_mode=true  ;;
-       no)  classic_mode=false ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-classic-mode);;
-  esac],
- [dnl Enable/disable classic mode depending on the presence of file
-  dnl CLASSIC-MODE.  In this way, we can distribute two versions
-  dnl of FFTW and configure does the right thing by default.
-  if test -f ${srcdir}/CLASSIC-MODE; then
-     classic_mode=true
-  else
-     classic_mode=false
-  fi
- ])
-AM_CONDITIONAL(CLASSIC_MODE, test x$classic_mode = xtrue)
-if test x$classic_mode = xtrue; then
-    AC_DEFINE(CLASSIC_MODE, 1, [Define to behave like fftw-2])
-fi
-
 AC_ARG_ENABLE(k7, [  --enable-k7         enable AMD K7 optimizations], k7_mode=$enableval, k7_mode=no)
 if test "$k7_mode" = "yes"; then
 	AC_DEFINE(K7_MODE,1,[Define to enable AMD K7 optimizations.])

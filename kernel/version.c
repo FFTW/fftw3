@@ -18,15 +18,10 @@
  *
  */
 
-/* $Id: version.c,v 1.3 2002-06-11 20:28:14 athena Exp $ */
+/* $Id: version.c,v 1.4 2002-06-16 22:30:18 athena Exp $ */
 
 #include "config.h"
 #include "ifftw.h"
 
-#if CLASSIC_MODE
-const char *X(version) = PACKAGE "-" VERSION "-classic";
-#else
-const char *X(version) = PACKAGE "-" VERSION "-pro";
-#endif
-
+const char *X(version) = PACKAGE "-" VERSION;
 const char *X(cc) = FFTW_CC;

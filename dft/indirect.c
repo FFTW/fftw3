@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.9 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: indirect.c,v 1.10 2002-06-16 22:30:18 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -166,8 +166,9 @@ static int applicable(const solver *ego_, const problem *p_)
      return 0;
 }
 
-static int score(const solver *ego, const problem *p)
+static int score(const solver *ego, const problem *p, int flags)
 {
+     UNUSED(flags);
      return (applicable(ego, p)) ? GOOD : BAD;
 }
 

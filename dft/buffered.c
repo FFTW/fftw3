@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.13 2002-06-12 23:07:48 athena Exp $ */
+/* $Id: buffered.c,v 1.14 2002-06-16 22:30:18 athena Exp $ */
 
 #include "dft.h"
 
@@ -185,10 +185,12 @@ static int applicable(const problem *p_, const S *ego)
      return 0;
 }
 
-static int score(const solver *ego_, const problem *p_)
+static int score(const solver *ego_, const problem *p_, int flags)
 {
      const S *ego = (const S *) ego_;
      const problem_dft *p;
+     UNUSED(flags);
+
      if (!applicable(p_, ego))
           return BAD;
 
