@@ -71,6 +71,8 @@ void rdwisdom(void)
      FFTW(plan_with_nthreads)(nthreads);
 #endif
 
+     install_hook();
+
      if (!usewisdom) return;
 
      timer_start();
@@ -654,8 +656,6 @@ void setup(bench_problem *p)
 	  the_flags |= FFTW_DESTROY_INPUT;
      if (p->kind == PROBLEM_REAL && p->sign > 0 && !p->in_place)
 	  p->destroy_input = 1; /* default for c2r out-of-place transforms */
-
-     install_hook();
 
      rdwisdom();
 
