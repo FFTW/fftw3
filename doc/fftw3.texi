@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.25 2003-02-17 07:31:50 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.26 2003-02-17 08:39:02 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -690,6 +690,70 @@ complex transforms.)
 * Real even/odd DFTs (cosine/sine transforms)::  
 * The Discrete Hartley Transform::  
 @end menu
+
+FFTW supports several other transform types via a unified @dfn{r2r}
+(real-to-real) interface,
+@cindex r2r
+so-called because it takes a real (@code{double}) array and outputs a
+real array of the same size.  These r2r transforms currently fall into
+three categories: DFTs of real input and complex-Hermitian output in
+halfcomplex format, DFTs of real input with even/odd symmetry
+(a.k.a. discrete cosine/sine transforms, DCT/DST), and the discrete
+Hartley transform (DHT), all described in more detail by the following
+sections.
+
+The r2r transforms follow the by-now familiar interface of creating an
+@code{fftw_plan}, executing it with @code{fftw_execute(plan)}, and
+destroying it with @code{fftw_destroy_plan(plan)}.  Furthermore, all
+r2r transforms share the same planner interface:
+
+@example
+fftw_plan fftw_plan_r2r_1d(int n, double *in, double *out,
+                           fftw_r2r_kind kind, unsigned flags);
+fftw_plan fftw_plan_r2r_2d(int nx, int ny, double *in, double *out,
+                           fftw_r2r_kind kindx, fftw_r2r_kind kindy,
+                           unsigned flags);
+fftw_plan fftw_plan_r2r_3d(int nx, int ny, int nz,
+                           double *in, double *out,
+                           fftw_r2r_kind kindx,
+                           fftw_r2r_kind kindy,
+                           fftw_r2r_kind kindz,
+                           unsigned flags);
+fftw_plan fftw_plan_r2r(int rank, const int *n, double *in, double *out,
+                        const fftw_r2r_kind *kind, unsigned flags);
+@end example
+@findex fftw_plan_r2r_1d
+@findex fftw_plan_r2r_2d
+@findex fftw_plan_r2r_3d
+@findex fftw_plan_r2r
+
+Just as for the complex DFT, these plan 1d/2d/3d/multi-dimensional
+transforms for contiguous arrays in row-major order, transforming
+(real) input to output of the same size, where @code{n} specifies the
+@emph{physical} dimensions of the arrays.
+
+Each dimension has a @dfn{kind} parameter, of type
+@code{fftw_r2r_kind}, specifying the kind of r2r transform to be used
+for that dimension.
+@cindex kind (r2r)
+@tindex fftw_r2r_kind
+(In the case of @code{fftw_plan_r2r}, this is an array
+@code{kind[rank]} where @code{kind[i]} is the transform kind for the
+dimension @code{n[i]}.)  The various r2r kind constants are defined
+in the following subsections.
+
+That is, FFTW computes the separable product of the specified r2r
+transforms over each dimension, which can be used e.g. for
+differential equations with mixed boundary conditions.  (For some r2r
+kinds, notably the halfcomplex DFT and the DHT, such a separable
+product is somewhat problematic in more than one dimension, however,
+as is described below.)
+
+In the current version of FFTW, all r2r transforms except for the
+halfcomplex type are computed via pre-/post-processing of halfcomplex
+transforms, and are therefore not entirely optimal.  (Since most other
+general DCT/DST codes employ the same trick, however, FFTW's
+implementation should provide competitive performance.)
 
 @c =========>
 @node The Halfcomplex-format DFT, Real even/odd DFTs (cosine/sine transforms), More DFTs of Real Data, More DFTs of Real Data
