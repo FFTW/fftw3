@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.23 2005-02-24 16:52:25 athena Exp $ */
+/* $Id: rank0.c,v 1.24 2005-02-27 02:28:39 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -28,7 +28,7 @@
 #include <string.h>		/* for memcpy() */
 #endif
 
-#define MAXRNK 2
+#define MAXRNK 3
 
 typedef struct {
      plan_rdft super;
@@ -65,16 +65,44 @@ static int fill_iodim(P *pln, const problem_rdft *p)
 	       pln->d[pln->rnk++] = vecsz->dims[i];
      }
 
-     /* canonicalize vrank-1 in-place problems so that rnk == 2,
-	because this is the only case considered in this file. */
-     if (p->I == p->O && pln->rnk == 1 && pln->vl > 1) {
-	  pln->d[0].n = pln->vl;
-	  pln->d[0].is = pln->d[0].os = 1;
-	  pln->rnk++;
-	  pln->vl = 1;
-     }
-     
      return 1;
+}
+
+/* generic higher-rank copy routine, calls cpy2d() to do the real work */
+		 
+/* note that this routine is not subsumed by vrank-geq1, because
+   vrank-geq1 first optimizes the subproblem, which is definitely
+   the wrong thing to do for copies. */
+static void copy(const P *ego, R *I, R *O,
+		 void (*cpy2d)(R *I, R *O,
+			       int n0, int is0, int os0,
+			       int n1, int is1, int os1, int vl))
+{
+     switch (ego->rnk) {
+	 case 2:
+	      cpy2d(I, O, 
+		    ego->d[0].n, ego->d[0].is, ego->d[0].os,
+		    ego->d[1].n, ego->d[1].is, ego->d[1].os,
+		    ego->vl);
+	      break;
+	 case 3:
+	 {
+	      int n1;
+	      /* loop over n1 is the right thing for transpositions.
+		 Otherwise, let the planner pick the right loop order.
+	      */
+	      for (n1 = 0; n1 < ego->d[1].n; 
+		   ++n1, I += ego->d[1].is, O += ego->d[1].os) {
+		   cpy2d(I, O, 
+			 ego->d[0].n, ego->d[0].is, ego->d[0].os,
+			 ego->d[1].n, ego->d[1].is, ego->d[1].os,
+			 ego->vl);
+	      }
+	      break;
+	 }
+	 default:
+	      A(0 /* can't happen */); 
+     }
 }
 
 /**************************************************************/
@@ -82,52 +110,40 @@ static int fill_iodim(P *pln, const problem_rdft *p)
 static void apply_iter(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int vl = ego->vl;
 
      switch (ego->rnk) {
 	 case 0: 
-	      X(cpy1d)(I, O, vl, 1, 1, 1);
+	      X(cpy1d)(I, O, ego->vl, 1, 1, 1);
 	      break;
 	 case 1:
 	      X(cpy1d)(I, O, 
 		       ego->d[0].n, ego->d[0].is, ego->d[0].os, 
-		       vl);
-	      break;
-	 case 2:
-	      X(cpy2d)(I, O, 
-		       ego->d[0].n, ego->d[0].is, ego->d[0].os,
-		       ego->d[1].n, ego->d[1].is, ego->d[1].os,
-		       vl);
+		       ego->vl);
 	      break;
 	 default:
-	      A(0 /* can't happen */); 
+	      copy(ego, I, O, X(cpy2d));
+	      break;
      }
 }
 
 static int applicable_iter(const P *pln, const problem_rdft *p)
 {
-     return (p->I != p->O) && (pln->rnk <= 2);
+     return (p->I != p->O);
 }
 
 /**************************************************************/
-/* rank 2, out of place, tiled, no buffering */
+/* out of place, tiled, no buffering */
 static void apply_tiled(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int vl = ego->vl;
-
-     A(ego->rnk == 2);
-     X(cpy2d_tiled)(I, O, 
-		     ego->d[0].n, ego->d[0].is, ego->d[0].os,
-		     ego->d[1].n, ego->d[1].is, ego->d[1].os,
-		     vl);
+     copy(ego, I, O, X(cpy2d_tiled));
 }
 
 static int applicable_tiled(const P *pln, const problem_rdft *p)
 {
      return (1
 	     && p->I != p->O
-	     && pln->rnk == 2
+	     && pln->rnk >= 2
 
 	     /* somewhat arbitrary */
 	     && pln->vl < CACHESIZE / (16 * sizeof(R))
@@ -135,17 +151,11 @@ static int applicable_tiled(const P *pln, const problem_rdft *p)
 }
 
 /**************************************************************/
-/* rank 2, out of place, tiled, with buffer */
+/* out of place, tiled, with buffer */
 static void apply_tiledbuf(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int vl = ego->vl;
-
-     A(ego->rnk == 2);
-     X(cpy2d_tiledbuf)(I, O, 
-		       ego->d[0].n, ego->d[0].is, ego->d[0].os,
-		       ego->d[1].n, ego->d[1].is, ego->d[1].os,
-		       vl);
+     copy(ego, I, O, X(cpy2d_tiledbuf));
 }
 
 #define applicable_tiledbuf applicable_tiled
@@ -155,10 +165,9 @@ static void apply_tiledbuf(const plan *ego_, R *I, R *O)
 static void apply_memcpy(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int vl = ego->vl;
 
      A(ego->rnk == 0);
-     memcpy(O, I, vl * sizeof(R));
+     memcpy(O, I, ego->vl * sizeof(R));
 }
 
 static int applicable_memcpy(const P *pln, const problem_rdft *p)
@@ -179,14 +188,24 @@ static void apply_ip_sq(const plan *ego_, R *I, R *O)
      X(transpose)(I, ego->d[0].n, ego->d[0].is, ego->d[0].os, ego->vl);
 }
 
+static int transposep(const P *pln)
+{
+     int i;
+     for (i = 0; i < pln->rnk; ++i) {
+	  const iodim *a = pln->d + i;
+	  const iodim *b = pln->d + pln->rnk - i - 1;
+	  if (a->n != b->n || a->is != b->os)
+	       return 0;
+     }
+     return 1;
+}
+
 static int applicable_ip_sq(const P *pln, const problem_rdft *p)
 {
      return (1
 	     && p->I == p->O
 	     && pln->rnk == 2
-	     && pln->d[0].n == pln->d[1].n
-	     && pln->d[0].is == pln->d[1].os
-	     && pln->d[0].os == pln->d[1].is);
+	     && transposep(pln));
 }
 
 /**************************************************************/
