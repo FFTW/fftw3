@@ -96,6 +96,49 @@ static void extract_reim(int sign, bench_complex *c,
      }
 }
 
+/* ouch */
+static int kosher_for_api_many(bench_tensor *t)
+{
+     int i;
+
+     BENCH_ASSERT(FINITE_RNK(t->rnk));
+
+     i = t->rnk - 1;
+     while (--i >= 0) {
+	  bench_iodim *d = t->dims + i;
+	  if (d[0].is % d[1].is) return 0;
+	  if (d[0].os % d[1].os) return 0;
+     }
+     return 1;
+}
+
+static int *mkn(bench_tensor *t)
+{
+     int *n = bench_malloc(sizeof(int *) * t->rnk);
+     int i;
+     for (i = 0; i < t->rnk; ++i) 
+	  n[i] = t->dims[i].n;
+     return n;
+}
+
+static void mknembed_many(bench_tensor *t, int **inembedp, int **onembedp)
+{
+     int i;
+     bench_iodim *d;
+     int *inembed = bench_malloc(sizeof(int *) * t->rnk);
+     int *onembed = bench_malloc(sizeof(int *) * t->rnk);
+
+     BENCH_ASSERT(FINITE_RNK(t->rnk));
+     *inembedp = inembed; *onembedp = onembed;
+
+     i = t->rnk - 1;
+     while (--i >= 0) {
+	  d = t->dims + i;
+	  inembed[i+1] = d[0].is / d[1].is;
+	  onembed[i+1] = d[0].os / d[1].os;
+     }
+}
+
 /* try to use the most appropriate API function.  Big mess. */
 static FFTW(plan) mkplan_real(bench_problem *p, int flags)
 {
@@ -109,12 +152,13 @@ static FFTW(plan) mkplan_complex_split(bench_problem *p, int flags)
 
 static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
 {
+     FFTW(plan) pln;
      bench_tensor *sz = p->sz, *vecsz = p->vecsz;
 
      if (vecsz->rnk == 0 && tensor_unitstridep(sz) && tensor_rowmajorp(sz)) 
 	  goto api_simple;
      
-     if (0)
+     if (vecsz->rnk == 1 && kosher_for_api_many(sz))
 	  goto api_many;
 
      goto api_guru;
@@ -122,27 +166,27 @@ static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
  api_simple:
      switch (sz->rnk) {
 	 case 1:
+	      if (verbose > 2) ovtpvt("using plan_dft_1d\n");
 	      return FFTW(plan_dft_1d)(sz->dims[0].n, 
 				       p->in, p->out, 
 				       p->sign, flags);
 	      break;
 	 case 2:
+	      if (verbose > 2) ovtpvt("using plan_dft_2d\n");
 	      return FFTW(plan_dft_2d)(sz->dims[0].n, sz->dims[1].n,
 				       p->in, p->out, 
 				       p->sign, flags);
 	      break;
 	 case 3:
+	      if (verbose > 2) ovtpvt("using plan_dft_3d\n");
 	      return FFTW(plan_dft_3d)(
 		   sz->dims[0].n, sz->dims[1].n, sz->dims[2].n,
 		   p->in, p->out, 
 		   p->sign, flags);
 	      break;
 	 default: {
-	      int *n = bench_malloc(sizeof(int *) * sz->rnk);
-	      int i;
-	      FFTW(plan) pln;
-
-	      for (i = 0; i < sz->rnk; ++i) n[i] = sz->dims[i].n;
+	      int *n = mkn(sz);
+	      if (verbose > 2) ovtpvt("using plan_dft\n");
 	      pln = FFTW(plan_dft)(sz->rnk, n, p->in, p->out, p->sign, flags);
 	      bench_free(n);
 	      return pln;
@@ -150,12 +194,24 @@ static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
      }
 
  api_many:
-     return 0;
+     {
+	  int *n, *inembed, *onembed;
+	  BENCH_ASSERT(vecsz->rnk == 1);
+	  n = mkn(sz);
+	  mknembed_many(sz, &inembed, &onembed);
+	  if (verbose > 2) ovtpvt("using plan_many_dft\n");
+	  pln = FFTW(plan_many_dft)(
+	       sz->rnk, n, vecsz->dims[0].n, 
+	       p->in, inembed, sz->dims[sz->rnk - 1].is, vecsz->dims[0].is,
+	       p->out, onembed, sz->dims[sz->rnk - 1].os, vecsz->dims[0].os,
+	       p->sign, flags);
+	  bench_free(n); bench_free(inembed); bench_free(onembed);
+	  return pln;
+     }
 
  api_guru:
      {
 	  FFTW(iodim) *dims, *howmany_dims;
-	  FFTW(plan) pln;
 	  bench_real *ri, *ii, *ro, *io;
 
 	  extract_reim(p->sign, p->in, &ri, &ii);
@@ -163,6 +219,7 @@ static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
 
 	  dims = bench_tensor_to_fftw_iodim(sz, 2);
 	  howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 2);
+	  if (verbose > 2) ovtpvt("using plan_guru_dft\n");
 	  pln = FFTW(plan_guru_dft)(sz->rnk, dims,
 				    vecsz->rnk, howmany_dims,
 				    ri, ii, ro, io, flags);

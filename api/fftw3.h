@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.38 2003-01-18 13:14:48 athena Exp $ */
+/* $Id: fftw3.h,v 1.39 2003-01-19 01:13:14 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -82,9 +82,9 @@ X(plan) X(plan_dft)(int rank, const int *n,				\
 X(plan) X(plan_dft_1d)(int n, C *in, C *out, int sign,			\
 		       unsigned flags);					\
 X(plan) X(plan_dft_2d)(int nx, int ny,					\
-		       C *in, C *out, int sign, unsigned flags);		\
+		       C *in, C *out, int sign, unsigned flags);	\
 X(plan) X(plan_dft_3d)(int nx, int ny, int nz,				\
-		       C *in, C *out, int sign, unsigned flags);		\
+		       C *in, C *out, int sign, unsigned flags);	\
 									\
 X(plan) X(plan_many_dft)(int rank, const int *n,			\
                          int howmany,					\
@@ -92,13 +92,13 @@ X(plan) X(plan_many_dft)(int rank, const int *n,			\
                          int istride, int idist,			\
                          C *out, const int *onembed,			\
                          int ostride, int odist,			\
-                         int sign, unsigned flags);				\
+                         int sign, unsigned flags);			\
 									\
 X(plan) X(plan_guru_dft)(int rank, const X(iodim) *dims,		\
 			 int howmany_rank,				\
 			 const X(iodim) *howmany_dims,			\
 			 R *ri, R *ii, R *ro, R *io,			\
-			 unsigned flags);					\
+			 unsigned flags);				\
 									\
 void X(execute_dft)(X(plan) p, R *ri, R *ii, R *ro, R *io);		\
 									\
@@ -115,10 +115,10 @@ X(plan) X(plan_dft_r2c)(int rank, const int *n,				\
 									\
 X(plan) X(plan_dft_r2c_1d)(int n,R *in,C *out,unsigned flags);		\
 X(plan) X(plan_dft_r2c_2d)(int nx, int ny,				\
-			   R *in, C *out, unsigned flags);			\
+			   R *in, C *out, unsigned flags);		\
 X(plan) X(plan_dft_r2c_3d)(int nx, int ny,				\
 			   int nz,					\
-			   R *in, C *out, unsigned flags);			\
+			   R *in, C *out, unsigned flags);		\
 									\
 									\
 X(plan) X(plan_many_dft_c2r)(int rank, const int *n,			\
@@ -134,10 +134,10 @@ X(plan) X(plan_dft_c2r)(int rank, const int *n,				\
 									\
 X(plan) X(plan_dft_c2r_1d)(int n,C *in,R *out,unsigned flags);		\
 X(plan) X(plan_dft_c2r_2d)(int nx, int ny,				\
-			   C *in, R *out, unsigned flags);			\
+			   C *in, R *out, unsigned flags);		\
 X(plan) X(plan_dft_c2r_3d)(int nx, int ny,				\
 			   int nz,					\
-			   C *in, R *out, unsigned flags);			\
+			   C *in, R *out, unsigned flags);		\
 									\
 X(plan) X(plan_guru_dft_r2c)(int rank, const X(iodim) *dims,		\
 			     int howmany_rank,				\
@@ -159,13 +159,13 @@ X(plan) X(plan_many_r2r)(int rank, const int *n,			\
                          int istride, int idist,			\
                          R *out, const int *onembed,			\
                          int ostride, int odist,			\
-                         const X(r2r_kind) *kind, unsigned flags);		\
+                         const X(r2r_kind) *kind, unsigned flags);	\
 									\
 X(plan) X(plan_r2r)(int rank, const int *n, R *in, R *out,		\
                     const X(r2r_kind) *kind, unsigned flags);		\
 									\
 X(plan) X(plan_r2r_1d)(int n, R *in, R *out,				\
-                       X(r2r_kind) kind, unsigned flags);			\
+                       X(r2r_kind) kind, unsigned flags);		\
 X(plan) X(plan_r2r_2d)(int nx, int ny, R *in, R *out,			\
                        X(r2r_kind) kindx, X(r2r_kind) kindy,		\
                        unsigned flags);					\
@@ -178,7 +178,7 @@ X(plan) X(plan_guru_r2r)(int rank, const X(iodim) *dims,		\
                          int howmany_rank,				\
                          const X(iodim) *howmany_dims,			\
                          R *in, R *out,					\
-                         const X(r2r_kind) *kind, unsigned flags);		\
+                         const X(r2r_kind) *kind, unsigned flags);	\
 void X(execute_r2r)(X(plan) p, R *in, R *out);				\
 									\
 void X(destroy_plan)(X(plan) p);					\

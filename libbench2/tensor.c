@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.4 2003-01-18 21:13:15 athena Exp $ */
+/* $Id: tensor.c,v 1.5 2003-01-19 01:13:14 athena Exp $ */
 #include "bench.h"
 #include <stdlib.h>
 
@@ -110,9 +110,9 @@ int tensor_rowmajorp(bench_tensor *t)
      i = t->rnk - 1;
      while (--i >= 0) {
 	  bench_iodim *d = t->dims + i;
-	  if (d[0].is != d[1].is * d[0].n)
+	  if (d[0].is != d[1].is * d[1].n)
 	       return 0;
-	  if (d[0].os != d[1].os * d[0].n)
+	  if (d[0].os != d[1].os * d[1].n)
 	       return 0;
      }
      return 1;
