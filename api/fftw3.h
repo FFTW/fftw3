@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.19 2003-01-11 23:04:57 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.20 2003-01-12 00:14:24 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -99,16 +99,19 @@ X(plan) X(plan_guru_dft)(unsigned int rank, const X(iodim) *dims,	  \
 void X(execute_dft)(X(plan) p, R *ri, R *ii, R *ro, R *io);		  \
 									  \
 void X(destroy_plan)(X(plan) p);					  \
+void X(forget_wisdom)(void);						  \
 void X(cleanup)(void);							  \
+									  \
+int X(plan_with_nthreads)(unsigned int nthreads);			  \
 									  \
 void X(export_wisdom_to_file)(FILE *output_file);			  \
 char *X(export_wisdom_to_string)(void);					  \
 void X(export_wisdom)(void (*absorber)(char c, void *), void *data);	  \
-void X(forget_wisdom)(void);						  \
 int X(import_system_wisdom)(void);					  \
 int X(import_wisdom_from_file)(FILE *input_file);			  \
 int X(import_wisdom_from_string)(const char *input_string);		  \
 int X(import_wisdom)(int (*emitter)(void *), void *data);		  \
+									  \
 void X(print_plan)(X(plan) p, FILE *output_file);
 
 /* end of FFTW_DEFINE_API macro */
