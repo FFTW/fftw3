@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.3 2002-07-23 18:55:25 stevenj Exp $ */
+/* $Id: dft-r2hc.c,v 1.4 2002-07-25 02:01:53 stevenj Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -35,8 +35,7 @@ typedef struct {
 
 typedef struct {
      plan_rdft super;
-     plan *cldr;
-     plan *cldi;
+     plan *cld;
      int os;
      uint n;
 } P;
@@ -47,14 +46,11 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      int os;
      uint i, n;
 
-     {
-	  plan_rdft *cld = (plan_rdft *) ego->cldr;
-	  cld->apply((plan *) cld, ri, ro);
-     }
+     UNUSED(ii);
 
-     {
-	  plan_rdft *cld = (plan_rdft *) ego->cldi;
-	  cld->apply((plan *) cld, ii, io);
+     { /* transform vector of real & imag parts: */
+	  plan_rdft *cld = (plan_rdft *) ego->cld;
+	  cld->apply((plan *) cld, ri, ro);
      }
 
      os = ego->os;
@@ -75,25 +71,20 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cldr, flg);
-     AWAKE(ego->cldi, flg);
+     AWAKE(ego->cld, flg);
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cldi);
-     X(plan_destroy)(ego->cldr);
+     X(plan_destroy)(ego->cld);
      X(free)(ego);
 }
 
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(dft-r2hc-%u%(%p%)", ego->n, ego->cldr);
-     if (ego->cldi != ego->cldr)
-	  p->print(p, "%(%p%)", ego->cldi);
-     p->putchr(p, ')');
+     p->print(p, "(dft-r2hc-%u%(%p%))", ego->n, ego->cld);
 }
 
 static int applicable(const solver *ego_, const problem *p_)
@@ -134,7 +125,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      const problem_dft *p;
      problem *cldp;
-     plan *cldr, *cldi;
+     plan *cld;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -145,31 +136,24 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_dft *) p_;
 
-     cldp = X(mkproblem_rdft)(p->sz, p->vecsz, p->ri, p->ro, R2HC);
-     cldr = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cldr)
-          return (plan *)0;
-
-     /* Make a separate plan for the imaginary parts, in case they are
-	aligned differently or something (for SIMD).  Normally, this
-	will just re-use cldr from the planner lookup table. */
-     cldp = X(mkproblem_rdft)(p->sz, p->vecsz, p->ii, p->io, R2HC);
-     cldi = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cldi) {
-	  X(plan_destroy)(cldr);
-          return (plan *)0;
+     {
+	  tensor ri_vec = X(mktensor_1d)(2, p->ii - p->ri, p->io - p->ro);
+	  tensor cld_vec = X(tensor_append)(ri_vec, p->vecsz);
+	  cldp = X(mkproblem_rdft)(p->sz, cld_vec, p->ri, p->ro, R2HC);
+	  X(tensor_destroy)(ri_vec); X(tensor_destroy)(cld_vec);
      }
+     cld = MKPLAN(plnr, cldp);
+     X(problem_destroy)(cldp);
+     if (!cld)
+          return (plan *)0;
 
      pln = MKPLAN_DFT(P, &padt, apply);
 
      pln->n = p->sz.dims[0].n;
      pln->os = p->sz.dims[0].os;
-     pln->cldr = cldr;
-     pln->cldi = cldi;
+     pln->cld = cld;
      
-     pln->super.super.ops = X(ops_add)(cldr->ops, cldi->ops);
+     pln->super.super.ops = cld->ops;
      pln->super.super.ops.other += 8 * ((pln->n - 1)/2);
      pln->super.super.ops.add += 4 * ((pln->n - 1)/2);
 
