@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: trig.c,v 1.9 2002-08-20 12:37:45 athena Exp $ */
+/* $Id: trig.c,v 1.10 2002-09-23 22:37:59 athena Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
@@ -49,40 +49,46 @@ static const trigreal K2PI =
  * before multiplication by 2 * PI.
  */
 
-static trigreal sin2pi0(trigreal m, trigreal n);
-static trigreal cos2pi0(trigreal m, trigreal n)
+static trigreal doit(trigreal m, trigreal n, int sinp)
 {
-     if (m < 0) return cos2pi0(-m, n);
-     while (m >= n) m -= n;
-     if (m > n * 0.5) return cos2pi0(n - m, n);
-     if (m > n * 0.25) return -sin2pi0(m - n * 0.25, n);
-     if (m > n * 0.125) return sin2pi0(n * 0.25 - m, n);
-     return COS(by2pi(m, n));
-}
+     /* waiting for C to get tail recursion... */
+     trigreal half_n = n * 0.5;
+     trigreal quarter_n = half_n * 0.5;
+     trigreal eighth_n = quarter_n * 0.5;
+     trigreal sgn = 1.0;
 
-static trigreal sin2pi0(trigreal m, trigreal n)
-{
-     if (m < 0) return -sin2pi0(-m, n);
-     while (m >= n) m -= n;
-     if (m > n * 0.5) return -sin2pi0(n - m, n);
-     if (m > n * 0.25) return cos2pi0(m - n * 0.25, n);
-     if (m > n * 0.125) return cos2pi0(n * 0.25 - m, n);
-     return SIN(by2pi(m, n));
+     if (sinp) goto sin;
+ cos:
+     if (m < 0) { m = -m; /* goto cos; */ }
+     if (m > half_n) { m = n - m; goto cos; }
+     if (m > eighth_n) { m = quarter_n - m; goto sin; }
+     return sgn * COS(by2pi(m, n));
+
+ msin:
+     sgn = -sgn;
+ sin:
+     if (m < 0) { m = -m; goto msin; }
+     if (m > half_n) { m = n - m; goto msin; }
+     if (m > eighth_n) { m = quarter_n - m; goto cos; }
+     return sgn * SIN(by2pi(m, n));
 }
 
 trigreal cos2pi(int m, uint n)
 {
-     return cos2pi0((trigreal)m, (trigreal)n);
+     return doit((trigreal)m, (trigreal)n, 0);
 }
 
 trigreal sin2pi(int m, uint n)
 {
-     return sin2pi0((trigreal)m, (trigreal)n);
+     return doit((trigreal)m, (trigreal)n, 1);
 }
 
 trigreal tan2pi(int m, uint n)
 {
+#if 0      /* unimplemented, unused */
      trigreal dm = m, dn = n;
-     /* unimplemented, unused */
      return TAN(by2pi(dm, dn));
+#endif
+     UNUSED(m); UNUSED(n);
+     return 0.0;
 }
