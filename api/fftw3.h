@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.46 2003-03-03 22:07:27 fftw Exp $ */
+/* $Id: fftw3.h,v 1.47 2003-03-04 06:44:09 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -51,6 +51,12 @@ enum FFTW_R2R_KIND {
      FFTW_RODFT00=7, FFTW_RODFT01=8, FFTW_RODFT10=9, FFTW_RODFT11=10
 };
 
+typedef struct {
+     int n;                     /* dimension size */
+     int is;			/* input stride */
+     int os;			/* output stride */
+} FFTW_IODIM;
+
 /*
   huge second-order macro that defines prototypes for all API
   functions.  We expand this macro for each supported precision
@@ -66,11 +72,7 @@ FFTW_DEFINE_COMPLEX(R, C);						\
 									\
 typedef struct X(plan_s) *X(plan);					\
 									\
-typedef struct {							\
-     int n;								\
-     int is;			/* input stride */			\
-     int os;			/* output stride */			\
-} X(iodim);								\
+typedef FFTW_IODIM X(iodim);						\
 									\
 typedef enum FFTW_R2R_KIND X(r2r_kind);					\
 									\
