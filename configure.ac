@@ -316,6 +316,7 @@ AC_CONFIG_FILES([
    doc/Makefile
 
    tools/Makefile
+   tools/fftw_wisdom.1
    tools/fftw-wisdom-to-conf
 
 ])
