@@ -18,14 +18,44 @@
  *
  */
 
-/* $Id: assert.c,v 1.3 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: scanners.c,v 1.1 2002-08-01 07:03:18 stevenj Exp $ */
+
 #include "ifftw.h"
 
-#include <stdlib.h>
+typedef struct {
+     scanner super;
+     FILE *f;
+} S_file;
 
-void X(assertion_failed)(const char *s, int line, char *file)
+static int getchr_file(scanner *sc_)
 {
-     fflush(stdout);
-     fprintf(stderr, "fftw: %s:%d: assertion failed: %s\n", file, line, s);
-     exit(EXIT_FAILURE);
+     S_file *sc = (S_file *) sc_;
+     return fgetc(sc->f);
+}
+
+scanner *X(mkscanner_file)(FILE *f, const prbpair *probs)
+{
+     S_file *sc = (S_file *) X(mkscanner)(sizeof(S_file), getchr_file, probs);
+     sc->f = f;
+     return &sc->super;
+}
+
+typedef struct {
+     scanner super;
+     const char *s;
+} S_str;
+
+static int getchr_str(scanner *sc_)
+{
+     S_str *sc = (S_str *) sc_;
+     if (!*sc->s)
+	  return EOF;
+     return *sc->s++;
+}
+
+scanner *X(mkscanner_str)(const char *s, const prbpair *probs)
+{
+     S_str *sc = (S_str *) X(mkscanner)(sizeof(S_str), getchr_str, probs);
+     sc->s = s;
+     return &sc->super;
 }

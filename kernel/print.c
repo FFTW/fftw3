@@ -18,12 +18,11 @@
  *
  */
 
-/* $Id: print.c,v 1.11 2002-07-30 03:42:27 stevenj Exp $ */
+/* $Id: print.c,v 1.12 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
 #include <stdarg.h>
-#include <stdio.h>
 
 #define BSZ 64
 

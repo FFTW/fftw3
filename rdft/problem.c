@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: problem.c,v 1.10 2002-08-01 02:06:46 stevenj Exp $ */
+/* $Id: problem.c,v 1.11 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "rdft.h"
+#include <stddef.h>
 
 static void destroy(problem *ego_)
 {
@@ -111,6 +112,27 @@ static void print(problem *ego_, printer *p)
 	      &ego->vecsz);
 }
 
+static int scan(scanner *sc, problem **p)
+{
+     tensor sz = { 0, 0 }, vecsz = { 0, 0 };
+     uint align;
+     ptrdiff_t offio;
+     int kind;
+     R *I;
+     int ret;
+
+     ret = sc->scan(sc, "%u %td %d %T %T",
+		    &align, &offio, &kind, &sz, &vecsz);
+     if (ret == EOF || ret < 5) {
+	  X(tensor_destroy)(sz);
+	  X(tensor_destroy)(vecsz);
+	  return(ret == EOF ? EOF : 0);
+     }
+     I = (R *) ((char *) 0 + align);
+     *p = X(mkproblem_rdft_d)(sz, vecsz, I, I + offio, kind);
+     return 1;
+}
+
 static void zero(const problem *ego_)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
@@ -125,7 +147,9 @@ static const problem_adt padt =
      hash,
      zero,
      print,
-     destroy
+     destroy,
+     scan,
+     "rdft"
 };
 
 int X(problem_rdft_p)(const problem *p)
@@ -159,3 +183,9 @@ problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
      X(tensor_destroy)(sz);
      return p;
 }
+
+void X(problem_rdft_register)(planner *p)
+{
+     REGISTER_PROBLEM(p, &padt);
+}
+

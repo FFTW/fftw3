@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.64 2002-08-01 01:33:35 athena Exp $ */
+/* $Id: ifftw.h,v 1.65 2002-08-01 07:03:18 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -29,6 +29,7 @@
 
 #include <stdlib.h>		/* size_t */
 #include <stdarg.h>		/* va_list */
+#include <stdio.h>              /* FILE */
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>		/* uint, maybe */
@@ -46,7 +47,11 @@ typedef fftw_real R;
 /* get rid of that object-oriented stink: */
 #define DESTROY(thing) ((thing)->adt->destroy)(thing)
 #define REGISTER_SOLVER(p, s) ((p)->adt->register_solver)((p), (s))
+#define REGISTER_PROBLEM(p, padt) ((p)->adt->register_problem)((p), (padt))
 #define MKPLAN(plnr, prblm) ((plnr)->adt->mkplan)((plnr), (prblm))
+
+#define STRINGIZEx(x) #x
+#define STRINGIZE(x) STRINGIZEx(x)
 
 #ifndef HAVE_UINT
 typedef unsigned int uint;
@@ -68,6 +73,7 @@ typedef struct plan_s plan;
 typedef struct solver_s solver;
 typedef struct planner_s planner;
 typedef struct printer_s printer;
+typedef struct scanner_s scanner;
 
 /*-----------------------------------------------------------------------*/
 /* assert.c: */
@@ -219,6 +225,7 @@ tensor X(tensor_append)(const tensor a, const tensor b);
 void X(tensor_split)(const tensor sz, tensor *a, uint a_rnk, tensor *b);
 void X(tensor_destroy)(tensor sz);
 void X(tensor_print)(tensor sz, printer *p);
+int X(tensor_scan)(tensor *x, scanner *sc);
 
 /*-----------------------------------------------------------------------*/
 /* dotens.c: */
@@ -244,12 +251,21 @@ typedef struct {
      void (*zero) (const problem *ego);
      void (*print) (problem *ego, printer *p);
      void (*destroy) (problem *ego);
+     int (*scan)(scanner *sc, problem **p);
+     const char *nam;
 } problem_adt;
 
 struct problem_s {
      const problem_adt *adt;
      int refcnt;
 };
+
+typedef struct prbpair_s {
+     const problem_adt *adt;
+     const char *reg_nam;
+     int mark;
+     struct prbpair_s *cdr;
+} prbpair;
 
 problem *X(mkproblem)(size_t sz, const problem_adt *adt);
 void X(problem_destroy)(problem *ego);
@@ -267,6 +283,35 @@ struct printer_s {
 
 printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c));
 void X(printer_destroy)(printer *p);
+
+/*-----------------------------------------------------------------------*/
+/* printers.c */
+
+printer *X(mkprinter_file)(FILE *f);
+printer *X(mkprinter_cnt)(uint *cnt);
+printer *X(mkprinter_str)(char *s);
+
+/*-----------------------------------------------------------------------*/
+/* scan.c */
+struct scanner_s {
+     int (*scan)(scanner *sc, const char *format, ...);
+     int (*vscan)(scanner *sc, const char *format, va_list ap);
+     int (*getchr)(scanner *sc);
+     int ungotc;
+     const prbpair *problems;
+};
+
+scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc),
+		      const prbpair *probs);
+void X(scanner_destroy)(scanner *sc);
+int X(scanner_getchr)(scanner *sc);
+void X(scanner_ungetchr)(scanner *sc, int c);
+
+/*-----------------------------------------------------------------------*/
+/* scanners.c */
+
+scanner *X(mkscanner_file)(FILE *f, const prbpair *probs);
+scanner *X(mkscanner_str)(const char *s, const prbpair *probs);
 
 /*-----------------------------------------------------------------------*/
 /* traverse.c */
@@ -347,11 +392,13 @@ typedef enum { FORGET_PLANS, FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
 typedef struct {
      void (*register_solver)(planner *ego, solver *s);
+     void (*register_problem)(planner *ego, const problem_adt *adt);
      plan *(*mkplan)(planner *ego, problem *p);
      void (*forget)(planner *ego, amnesia a);
-     void (*exprt)(planner *ego, printer *pr); /* export is a reserved word
-						  in C++.  Idiots. */
-     void (*exprt_conf)(planner *ego, printer *pr);
+     void (*exprt)(planner *ego, printer *p); /* export is a reserved word
+						 in C++.  Idiots. */
+     int (*imprt)(planner *ego, scanner *sc);
+     void (*exprt_conf)(planner *ego, printer *p);
      plan *(*slv_mkplan)(planner *ego, problem *p, solver *s);
 } planner_adt;
 
@@ -364,6 +411,7 @@ struct planner_s {
      const char *cur_reg_nam;
      slvpair *solvers, **last_solver_cdr;
      solutions **sols;
+     prbpair *problems;
      void (*destroy)(planner *ego);
      void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvpair **);
      uint hashsiz;
@@ -446,8 +494,7 @@ typedef int stride;
 struct solvtab_s { void (*reg)(planner *); const char *reg_nam; };
 typedef struct solvtab_s solvtab[];
 void X(solvtab_exec)(const solvtab tbl, planner *p);
-#define SOLVTABx(s) { s, #s }
-#define SOLVTAB(s) SOLVTABx(s) /* indirection so # works on macros */
+#define SOLVTAB(s) { s, STRINGIZE(s) }
 #define SOLVTAB_END { 0, 0 }
 
 /*-----------------------------------------------------------------------*/

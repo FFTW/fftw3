@@ -18,10 +18,9 @@
  *
  */
 
-/* $Id: timer.c,v 1.9 2002-07-14 02:06:35 stevenj Exp $ */
+/* $Id: timer.c,v 1.10 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "ifftw.h"
-#include <stdio.h>
 
 #ifndef FFTW_TIME_LIMIT
 #define FFTW_TIME_LIMIT 2.0  /* don't run for more than two seconds */

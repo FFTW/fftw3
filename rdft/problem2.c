@@ -18,10 +18,11 @@
  *
  */
 
-/* $Id: problem2.c,v 1.6 2002-08-01 02:06:46 stevenj Exp $ */
+/* $Id: problem2.c,v 1.7 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
+#include <stddef.h>
 
 static void destroy(problem *ego_)
 {
@@ -92,6 +93,28 @@ static void print(problem *ego_, printer *p)
 	      &ego->vecsz);
 }
 
+static int scan(scanner *sc, problem **p)
+{
+     tensor sz = { 0, 0 }, vecsz = { 0, 0 };
+     uint align;
+     ptrdiff_t offr, offi;
+     int kind;
+     R *r;
+     int ret;
+
+     ret = sc->scan(sc, "%u %td %td %d %T %T",
+		    &align, &offr, &offi, &kind, &sz, &vecsz);
+     if (ret == EOF || ret < 6 || sz.rnk == 1) {
+	  X(tensor_destroy)(sz);
+	  X(tensor_destroy)(vecsz);
+	  return(ret == EOF ? EOF : 0);
+     }
+     r = (R *) ((char *) 0 + align);
+     *p = X(mkproblem_rdft2_d)(sz.dims[0], vecsz, r, r + offr, r + offi, kind);
+     X(tensor_destroy)(sz);
+     return 1;
+}
+
 static void zero(const problem *ego_)
 {
      const problem_rdft2 *ego = (const problem_rdft2 *) ego_;
@@ -120,7 +143,9 @@ static const problem_adt padt =
      hash,
      zero,
      print,
-     destroy
+     destroy,
+     scan,
+     "rdft2"
 };
 
 int X(problem_rdft2_p)(const problem *p)
@@ -182,4 +207,9 @@ int X(rdft2_inplace_strides)(const problem_rdft2 *p, uint vdim)
 	    && iabs(p->vecsz.dims[vdim].os)
 	     >= X(uimax)((p->sz.n/2 + 1) * iabs(p->sz.os),
 			 p->sz.n * iabs(p->sz.is)));
+}
+
+void X(problem_rdft2_register)(planner *p)
+{
+     REGISTER_PROBLEM(p, &padt);
 }

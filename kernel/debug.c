@@ -18,20 +18,13 @@
  *
  */
 
-/* $Id: debug.c,v 1.2 2002-07-05 18:49:59 athena Exp $ */
+/* $Id: debug.c,v 1.3 2002-08-01 07:03:18 stevenj Exp $ */
 #include "ifftw.h"
-#include <stdio.h>
-
-static void putchr(printer *p, char c)
-{
-     UNUSED(p);
-     putc(c, stderr);
-}
 
 void X(debug)(const char *format, ...)
 {
      va_list ap;
-     printer *p = X(mkprinter)(sizeof(printer), putchr);
+     printer *p = X(mkprinter_file)(stderr);
      va_start(ap, format);
      p->vprint(p, format, ap);
      va_end(ap);

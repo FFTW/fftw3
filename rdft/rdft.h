@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.13 2002-07-28 20:10:59 stevenj Exp $ */
+/* $Id: rdft.h,v 1.14 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -134,6 +134,9 @@ void X(rdft2_buffered_register)(planner *p);
 void X(rdft2_nop_register)(planner *p);
 
 /****************************************************************************/
+
+void X(problem_rdft_register)(planner *p);
+void X(problem_rdft2_register)(planner *p);
 
 /* configurations */
 void X(rdft_conf_standard)(planner *p);

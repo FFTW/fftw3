@@ -93,12 +93,6 @@ void copy_c2h(struct problem *p, bench_complex *in)
 	  copy_c2h_unpacked(p, in, FFT_SIGN);
 }
 
-static void putchr(printer *p, char c)
-{
-     UNUSED(p);
-     putchar(c);
-}
-
 typedef struct {
      visit_closure super;
      int count;
@@ -114,7 +108,7 @@ static void increment(visit_closure *k_, plan *p)
 static void hook(plan *pln, const fftw_problem *p_)
 {
      if (verbose > 5) {
-	  printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
+	  printer *pr = FFTW(mkprinter_file) (stdout);
 	  pr->print(pr, "%P:%(%p%)\n", p_, pln);
 	  FFTW(printer_destroy) (pr);
 	  printf("cost %g  score %d\n\n", pln->pcost, pln->score);
@@ -149,6 +143,19 @@ void setup(struct problem *p)
      FFTW(rdft_conf_standard) (plnr);
      FFTW(planner_set_hook) (plnr, hook);
      /* plnr->flags |= CLASSIC | CLASSIC_VRECURSE; */
+
+#if 0
+     {
+	  FILE *f;
+	  if ((f = fopen("wis.dat", "r"))) {
+	       scanner *sc = X(mkscanner_file)(f, plnr->problems);
+	       if (!plnr->adt->imprt(plnr, sc))
+		    fprintf(stderr, "bench: ERROR reading wis.dat!\n");
+	       X(scanner_destroy)(sc);
+	       fclose(f);
+	  }
+     }
+#endif
 
      if (p->kind == PROBLEM_REAL) {
 	  if (p->split) {
@@ -228,7 +235,7 @@ void setup(struct problem *p)
      X(plan_bless)(pln);
 
      if (verbose) {
-	  printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
+	  printer *pr = FFTW(mkprinter_file) (stdout);
 	  pr->print(pr, "%p\nnprob %u  nplan %u\n",
 		    pln, plnr->nprob, plnr->nplan);
 	  pr->print(pr, "%d add, %d mul, %d fma, %d other\n",
@@ -241,8 +248,10 @@ void setup(struct problem *p)
 	       FFTW(traverse_plan)(pln, 0, &k.super);
 	       printf("number of child plans: %d\n", k.count - 1);
 	  }
-	  if (verbose > 3) 
+	  if (verbose > 3) {
 	       plnr->adt->exprt(plnr, pr);
+	       pr->print(pr, "\n");
+	  }
 	  if (verbose > 4) 
 	       plnr->adt->exprt_conf(plnr, pr);
 	  FFTW(printer_destroy)(pr);
@@ -274,6 +283,19 @@ void done(struct problem *p)
      AWAKE(pln, 0);
      FFTW(plan_destroy) (pln);
      FFTW(problem_destroy) (prblm);
+
+#if 0
+     {
+	  FILE *f;
+	  if ((f = fopen("wis.dat", "w"))) {
+	       printer *pr = X(mkprinter_file)(f);
+	       plnr->adt->exprt(plnr, pr);
+	       X(printer_destroy)(pr);
+	       fclose(f);
+	  }
+     }
+#endif
+
      FFTW(planner_destroy) (plnr);
 
 #    ifdef FFTW_DEBUG

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.23 2002-07-28 05:39:54 stevenj Exp $ */
+/* $Id: dft.h,v 1.24 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -75,6 +75,8 @@ void X(dft_buffered_register)(planner *p);
 void X(dft_generic_register)(planner *p);
 void X(dft_rader_register)(planner *p);
 void X(dft_nop_register)(planner *p);
+
+void X(problem_dft_register)(planner *p);
 
 /* configurations */
 void X(dft_conf_standard)(planner *p);

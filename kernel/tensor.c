@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.13 2002-07-12 04:59:29 stevenj Exp $ */
+/* $Id: tensor.c,v 1.14 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -352,15 +352,41 @@ void X(tensor_split)(const tensor sz, tensor *a, uint arnk, tensor *b)
 
 void X(tensor_print)(tensor x, printer *p)
 {
-     p->print(p, "(t");
+     p->print(p, "(t:%d", FINITE_RNK(x.rnk) ? x.rnk : -1);
      if (FINITE_RNK(x.rnk)) {
 	  uint i;
 	  for (i = 0; i < x.rnk; ++i) {
 	       iodim *d = x.dims + i;
 	       p->print(p, " (%u %d %d)", d->n, d->is, d->os);
 	  }
-     } else {
-	  p->print(p, " (0 0 0)");
      }
      p->print(p, ")");
+}
+
+int X(tensor_scan)(tensor *x, scanner *sc)
+{
+     int ret, r;
+     if (1 > (ret = sc->scan(sc, "(t:%d", &r)) || ret == EOF)
+	  return ret;
+     if (r < 0 && r != -1)
+	  return 0;
+     talloc(x, r == -1 ? RNK_MINFTY : r);
+     if (FINITE_RNK(x->rnk)) {
+	  uint i;
+	  for (i = 0; i < x->rnk; ++i) {
+	       iodim *d = x->dims + i;
+	       ret = sc->scan(sc, " (%u %d %d)", &d->n, &d->is, &d->os);
+	       if (ret < 3 || ret == EOF) {
+		    X(tensor_destroy)(*x);
+		    x->dims = 0;
+		    return(ret == EOF ? EOF : 0);
+	       }
+	  }
+     }
+     if (!(ret = sc->scan(sc, ")")) || ret == EOF) {
+	  X(tensor_destroy)(*x);
+	  x->dims = 0;
+	  return ret;
+     }
+     return 1;
 }

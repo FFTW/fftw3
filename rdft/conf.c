@@ -18,12 +18,15 @@
  *
  */
 
-/* $Id: conf.c,v 1.10 2002-07-30 03:52:07 stevenj Exp $ */
+/* $Id: conf.c,v 1.11 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "rdft.h"
 
 static const solvtab s =
 {
+     SOLVTAB(X(problem_rdft_register)),
+     SOLVTAB(X(problem_rdft2_register)),
+
      SOLVTAB(X(rdft_indirect_register)),
      SOLVTAB(X(rdft_rank0_register)),
      SOLVTAB(X(rdft_vrank_geq1_register)),

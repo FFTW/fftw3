@@ -18,11 +18,10 @@
  *
  */
 
-/* $Id: verify.c,v 1.11 2002-07-28 21:33:07 stevenj Exp $ */
+/* $Id: verify.c,v 1.12 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "rdft.h"
 #include <math.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 typedef struct {

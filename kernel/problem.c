@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.3 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: problem.c,v 1.4 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -45,3 +45,4 @@ problem *X(problem_dup)(problem *ego)
      ++ego->refcnt;
      return ego;
 }
+

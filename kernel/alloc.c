@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.13 2002-07-31 11:52:53 athena Exp $ */
+/* $Id: alloc.c,v 1.14 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -49,7 +49,6 @@ static inline void *real_malloc(size_t n)
  *   DEBUGGING CODE
  **********************************************************/
 #ifdef FFTW_DEBUG
-#include <stdio.h>
 
 /*
   debugging malloc/free. 

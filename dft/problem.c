@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: problem.c,v 1.13 2002-08-01 02:06:46 stevenj Exp $ */
+/* $Id: problem.c,v 1.14 2002-08-01 07:03:18 stevenj Exp $ */
 
 #include "dft.h"
+#include <stddef.h>
 
 static void destroy(problem *ego_)
 {
@@ -107,6 +108,27 @@ static void print(problem *ego_, printer *p)
 	      &ego->vecsz);
 }
 
+static int scan(scanner *sc, problem **p)
+{
+     tensor sz = { 0, 0 }, vecsz = { 0, 0 };
+     uint align;
+     ptrdiff_t offio, offi, offo;
+     R *ri, *ro;
+     int ret;
+
+     ret = sc->scan(sc, "%u %td %td %td %T %T",
+		    &align, &offio, &offi, &offo, &sz, &vecsz);
+     if (ret == EOF || ret < 6) {
+	  X(tensor_destroy)(sz);
+	  X(tensor_destroy)(vecsz);
+	  return(ret == EOF ? EOF : 0);
+     }
+     ri = (R *) ((char *) 0 + align);
+     ro = ri + offio;
+     *p = X(mkproblem_dft_d)(sz, vecsz, ri, ri + offi, ro, ro + offo);
+     return 1;
+}
+
 static void zero(const problem *ego_)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
@@ -121,7 +143,9 @@ static const problem_adt padt =
      hash,
      zero,
      print,
-     destroy
+     destroy,
+     scan,
+     "dft"
 };
 
 int X(problem_dft_p)(const problem *p)
@@ -158,4 +182,9 @@ problem *X(mkproblem_dft_d)(tensor sz, tensor vecsz,
      X(tensor_destroy)(vecsz);
      X(tensor_destroy)(sz);
      return p;
+}
+
+void X(problem_dft_register)(planner *p)
+{
+     REGISTER_PROBLEM(p, &padt);
 }
