@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.15 2002-08-22 13:11:34 athena Exp $ */
+/* $Id: alloc.c,v 1.16 2002-08-29 05:44:33 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -48,7 +48,7 @@ static void *real_malloc(size_t n)
 /**********************************************************
  *   DEBUGGING CODE
  **********************************************************/
-#ifdef FFTW_DEBUG
+#if defined(FFTW_DEBUG)
 
 /*
   debugging malloc/free. 
@@ -69,6 +69,10 @@ static void *real_malloc(size_t n)
  
 */
 
+#define MAGIC ((size_t)0xABadCafe)
+#define PAD_FACTOR 2
+#define SZ_HEADER (4 * sizeof(size_t))
+
 struct mstat {
      int siz;
      int maxsiz;
@@ -77,10 +81,6 @@ struct mstat {
 };
 
 static struct mstat mstat[MALLOC_WHAT_LAST];
-
-#define MAGIC ((size_t)0xABadCafe)
-#define PAD_FACTOR 2
-#define SZ_HEADER (4 * sizeof(size_t))
 
 struct minfo {
      const char *file;
@@ -91,6 +91,10 @@ struct minfo {
 };
 
 static struct minfo *minfo = 0;
+
+#ifdef HAVE_THREADS
+int X(in_thread) = 0;
+#endif
 
 void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
                       const char *file, int line)
@@ -104,12 +108,14 @@ void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
      if (n == 0)
           n = 1;
 
-     stat->siz += n;
-     if (stat->siz > stat->maxsiz)
-          stat->maxsiz = stat->siz;
-     estat->siz += n;
-     if (estat->siz > estat->maxsiz)
-          estat->maxsiz = estat->siz;
+     if (!IN_THREAD) {
+	  stat->siz += n;
+	  if (stat->siz > stat->maxsiz)
+	       stat->maxsiz = stat->siz;
+	  estat->siz += n;
+	  if (estat->siz > estat->maxsiz)
+	       estat->maxsiz = estat->siz;
+     }
 
      p = (char *) real_malloc(PAD_FACTOR * n + SZ_HEADER);
      A(p);
@@ -123,26 +129,29 @@ void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
      for (i = 0; i < PAD_FACTOR * n; i++)
           p[i + SZ_HEADER] = (char) (i ^ 0xEF);
 
-     ++stat->cnt;
-     ++estat->cnt;
-
-     if (stat->cnt > stat->maxcnt)
-          stat->maxcnt = stat->cnt;
-     if (estat->cnt > estat->maxcnt)
-          estat->maxcnt = estat->cnt;
-
+     if (!IN_THREAD) {
+	  ++stat->cnt;
+	  ++estat->cnt;
+	  
+	  if (stat->cnt > stat->maxcnt)
+	       stat->maxcnt = stat->cnt;
+	  if (estat->cnt > estat->maxcnt)
+	       estat->maxcnt = estat->cnt;
+     }
 
      /* skip the info we stored previously */
      p = p + SZ_HEADER;
 
-     /* record allocation in allocation list */
-     info = (struct minfo *) malloc(sizeof(struct minfo));
-     info->n = n;
-     info->file = file;
-     info->line = line;
-     info->p = p;
-     info->next = minfo;
-     minfo = info;
+     if (!IN_THREAD) {
+	  /* record allocation in allocation list */
+	  info = (struct minfo *) malloc(sizeof(struct minfo));
+	  info->n = n;
+	  info->file = file;
+	  info->line = line;
+	  info->p = p;
+	  info->next = minfo;
+	  minfo = info;
+     }
 
      return (void *) p;
 }
@@ -170,10 +179,12 @@ void X(free)(void *p)
           A(magic == MAGIC);
           ((size_t *) q)[1] = ~MAGIC;
 
-          stat->siz -= n;
-          A(stat->siz >= 0);
-          estat->siz -= n;
-          A(estat->siz >= 0);
+	  if (!IN_THREAD) {
+	       stat->siz -= n;
+	       A(stat->siz >= 0);
+	       estat->siz -= n;
+	       A(estat->siz >= 0);
+	  }
 
           /* check for writing past end of array: */
           for (i = n; i < PAD_FACTOR * n; ++i)
@@ -183,20 +194,22 @@ void X(free)(void *p)
           for (i = 0; i < PAD_FACTOR * n; ++i)
                q[i + SZ_HEADER] = (char) (i ^ 0xAD);
 
-          --stat->cnt;
-          --estat->cnt;
-
-          A(stat->cnt >= 0);
-          A((stat->cnt == 0 && stat->siz == 0) ||
-            (stat->cnt > 0 && stat->siz > 0));
-          A(estat->cnt >= 0);
-          A((estat->cnt == 0 && estat->siz == 0) ||
-            (estat->cnt > 0 && estat->siz > 0));
+	  if (!IN_THREAD) {
+	       --stat->cnt;
+	       --estat->cnt;
+	       
+	       A(stat->cnt >= 0);
+	       A((stat->cnt == 0 && stat->siz == 0) ||
+		 (stat->cnt > 0 && stat->siz > 0));
+	       A(estat->cnt >= 0);
+	       A((estat->cnt == 0 && estat->siz == 0) ||
+		 (estat->cnt > 0 && estat->siz > 0));
+	  }
 
           real_free(q);
      }
 
-     {
+     if (!IN_THREAD) {
           /* delete minfo entry */
           struct minfo **i;
 
@@ -243,6 +256,7 @@ void X(malloc_print_minfo)(void)
                  info->file, info->line, info->n, info->p);
      }
 }
+
 #else
 /**********************************************************
  *   NON DEBUGGING CODE

@@ -18,52 +18,75 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.21 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: ct-dit.c,v 1.1 2002-08-29 05:44:33 stevenj Exp $ */
 
-/* decimation in time Cooley-Tukey */
-#include "dft.h"
+/* decimation in time Cooley-Tukey, with codelet divided among threads */
+#include "threads.h"
 #include "ct.h"
+
+typedef struct {
+     plan_ct super;
+     uint nthr;
+     uint mloop;
+     int sW;
+} P;
+
+typedef struct {
+     R *ro, *io;
+     kdft_dit k;
+     R *W;
+     int sW;
+     stride ios;
+     int os;
+} PD;
+
+static void *spawn_apply(spawn_data *d)
+{
+     PD *ego = (PD *) d->data;
+     uint min = d->min, max = d->max;
+     int os = ego->os;
+
+     ego->k(ego->ro + min * os, ego->io + min * os,
+	    ego->W + min * ego->sW, ego->ios, max - min, os);
+     return 0;
+}
 
 static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      plan_ct *ego = (plan_ct *) ego_;
-
-     {
-          uint i, m = ego->m, vl = ego->vl;
-          int is = ego->is, ivs = ego->ivs;
-
-          for (i = 0; i < vl; ++i)
-               ego->k.dif(ri + i * ivs, ii + i * ivs, ego->td->W,
-			  ego->ios, m, is);
-     }
+     plan *cld0 = ego->cld;
+     plan_dft *cld = (plan_dft *) cld0;
 
      /* two-dimensional r x vl sub-transform: */
+     cld->apply(cld0, ri, ii, ro, io);
+
      {
-	  plan *cld0 = ego->cld;
-	  plan_dft *cld = (plan_dft *) cld0;
-	  cld->apply(cld0, ri, ii, ro, io);
+	  P *ego_thr = (P *) ego_;
+	  PD d;
+	  
+	  d.ro = ro; d.io = io;
+	  d.k = ego->k.dit;
+	  d.W = ego->td->W;
+	  d.sW = ego_thr->sW;
+	  d.ios = ego->ios;
+	  d.os = ego->os;
+
+	  X(spawn_loop)(ego_thr->mloop, ego_thr->nthr, spawn_apply, (void*)&d);
      }
 }
 
 static int applicable(const solver_ct *ego, const problem *p_,
 		      const planner *plnr)
 {
-     if (X(dft_ct_applicable)(ego, p_)) {
-	  int ivs, ovs;
-	  uint vl;
+     if (plnr->nthr > 1 && X(dft_ct_applicable)(ego, p_)) {
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
           iodim *d = p->sz.dims;
 	  uint m = d[0].n / e->radix;
-	  X(tensor_tornk1)(&p->vecsz, &vl, &ivs, &ovs);
           return (1
-                  /* DIF destroys the input and we don't like it */
-                  && (p->ri == p->ro || (plnr->flags & DESTROY_INPUT))
-
-		  && (e->genus->okp(e, p->ri, p->ii,
-				    (int)m * d[0].is, 0, m, d[0].is, plnr))
-		  && (e->genus->okp(e, p->ri + ivs, p->ii + ivs,
-				    (int)m * d[0].is, 0, m, d[0].is, plnr))
+		  && p->vecsz.rnk == 0
+		  && (e->genus->okp(e, p->ro, p->io, 
+				    (int)m * d[0].os, 0, m, d[0].os, plnr))
 	       );
      }
      return 0;
@@ -72,7 +95,7 @@ static int applicable(const solver_ct *ego, const problem *p_,
 static void finish(plan_ct *ego)
 {
      const ct_desc *d = ego->slv->desc;
-     ego->ios = X(mkstride)(ego->r, ego->m * ego->is);
+     ego->ios = X(mkstride)(ego->r, ego->m * ego->os);
      ego->super.super.ops =
           X(ops_add)(ego->cld->ops,
 		     X(ops_mul)(ego->vl * ego->m / d->genus->vl, d->ops));
@@ -81,40 +104,48 @@ static void finish(plan_ct *ego)
 static int score(const solver *ego_, const problem *p_, const planner *plnr)
 {
      const solver_ct *ego = (const solver_ct *) ego_;
-     const problem_dft *p = (const problem_dft *) p_;
+     const problem_dft *p;
      uint n;
-     
+
      if (!applicable(ego, p_, plnr))
           return BAD;
 
+     p = (const problem_dft *) p_;
+
      n = p->sz.dims[0].n;
-
-     /* emulate fftw2 behavior */
-     if ((p->vecsz.rnk > 0) && NO_VRECURSE(plnr->flags))
-	  return BAD;
-
-     if (n <= 16 || n / ego->desc->radix <= 4)
+     if (0
+	 || n <= 16 
+	 || n / ego->desc->radix <= 4
+	  )
           return UGLY;
 
      return GOOD;
 }
 
-
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
+     plan *pln;
      static const ctadt adt = {
-	  sizeof(plan_ct), X(dft_mkcld_dif), finish, applicable, apply
+	  sizeof(P), X(dft_mkcld_dit), finish, applicable, apply
      };
-     return X(mkplan_dft_ct)((const solver_ct *) ego, p, plnr, &adt);
+     pln = X(mkplan_dft_ct)((const solver_ct *) ego, p, plnr, &adt);
+     if (pln) {
+	  P *pln_thr = (P *) pln;
+	  pln_thr->nthr = plnr->nthr;
+	  pln_thr->mloop = 
+	       pln_thr->super.m / pln_thr->super.slv->desc->genus->vl;
+	  pln_thr->sW = X(twiddle_length)(pln_thr->super.r, 
+					  pln_thr->super.slv->desc->tw);
+     }
+     return pln;
 }
 
-
-solver *X(mksolver_dft_ct_dif)(kdft_dif codelet, const ct_desc *desc)
+solver *X(mksolver_dft_ct_dit_thr)(kdft_dit codelet, const ct_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
-     static const char name[] = "dft-dif";
+     static const char name[] = "dft-dit-thr";
      union kct k;
-     k.dif = codelet;
+     k.dit = codelet;
 
      return X(mksolver_dft_ct)(k, desc, name, &sadt);
 }

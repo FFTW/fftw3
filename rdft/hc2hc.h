@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.h,v 1.3 2002-08-24 15:05:08 athena Exp $ */
+/* $Id: hc2hc.h,v 1.4 2002-08-29 05:44:33 stevenj Exp $ */
 
 typedef struct {
      solver super;
@@ -43,6 +43,7 @@ typedef struct {
 /* data type describing a generic Cooley-Tukey solver */
 typedef struct
 {
+     size_t pln_size;
      void (*mkcldrn)(const solver_hc2hc *, const problem_rdft *p,
 		     problem **cldp, problem **cld0p, problem **cldmp);
      void (*finish)(plan_hc2hc *ego);

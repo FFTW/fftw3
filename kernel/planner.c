@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.42 2002-08-12 17:31:37 stevenj Exp $ */
+/* $Id: planner.c,v 1.43 2002-08-29 05:44:33 stevenj Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -33,6 +33,7 @@
 struct solutions_s {
      problem *p;
      int flags;
+     uint nthr;
      plan *pln;
      slvpair *sp;
      int blessed;
@@ -83,16 +84,19 @@ static void hooknil(plan *pln, const problem *p)
 }
 
 /* memoization routines */
-static uint hash(planner *ego, const problem *p, int flags)
+static uint hash(planner *ego, const problem *p, int flags, uint nthr)
 {
-     return ((p->adt->hash(p) ^ (NONPATIENCE_FLAGS(flags) * 317227))
+     return ((p->adt->hash(p) 
+	      ^ (NONPATIENCE_FLAGS(flags) * 317227)
+	      ^ (nthr * 252143))
 	     % ego->hashsiz);
 }
 
-static int solvedby(problem *p, int flags, solutions *l)
+static int solvedby(problem *p, int flags, uint nthr, solutions *l)
 {
      return (IMPATIENCE(flags) >= IMPATIENCE(l->flags)
 	     && NONPATIENCE_FLAGS(flags) == NONPATIENCE_FLAGS(l->flags)
+	     && nthr == l->nthr
 	     && p->adt->equal(p, l->p));
 }
 
@@ -101,10 +105,10 @@ static solutions *lookup(planner *ego, problem *p)
      solutions *l;
      uint h;
 
-     h = hash(ego, p, ego->flags);
+     h = hash(ego, p, ego->flags, ego->nthr);
 
      for (l = ego->sols[h]; l; l = l->cdr) 
-          if (solvedby(p, ego->flags, l))
+          if (solvedby(p, ego->flags, ego->nthr, l))
 	       return l;
      return 0;
 }
@@ -123,7 +127,7 @@ static void remove_equivalent(solutions *newsol, solutions **ps)
      solutions *s;
 
      while ((s = *ps)) {
-	  if (solvedby(s->p, s->flags, newsol)) {
+	  if (solvedby(s->p, s->flags, s->nthr, newsol)) {
 	       *ps = s->cdr;
 	       solution_destroy(s);
 	  } else {
@@ -134,7 +138,7 @@ static void remove_equivalent(solutions *newsol, solutions **ps)
 
 static void really_insert(planner *ego, solutions *l)
 {
-     uint h = hash(ego, l->p, l->flags);
+     uint h = hash(ego, l->p, l->flags, l->nthr);
      solutions **ps = ego->sols + h;
 
      /* remove old, less impatient solutions */
@@ -171,8 +175,8 @@ static void rehash(planner *ego)
           X(free)(osol);
 }
 
-static solutions *insert(planner *ego, 
-			 int flags, problem *p, plan *pln, slvpair *sp)
+static solutions *insert(planner *ego, int flags, uint nthr,
+			 problem *p, plan *pln, slvpair *sp)
 {
      solutions *l = (solutions *)fftw_malloc(sizeof(solutions), HASHT);
 
@@ -187,6 +191,7 @@ static solutions *insert(planner *ego,
      else
 	  l->blessed = 0;
      l->flags = flags;
+     l->nthr = nthr;
      l->pln = pln;
      l->sp = sp; 
      l->p = X(problem_dup)(p);
@@ -198,9 +203,11 @@ static solutions *insert(planner *ego,
 static plan *slv_mkplan(planner *ego, problem *p, solver *s)
 {
      int flags = ego->flags;
+     uint nthr = ego->nthr;
      plan *pln;
      pln = s->adt->mkplan(s, p, ego);
      ego->flags = flags;
+     ego->nthr = nthr;
      return pln;
 }
 
@@ -235,7 +242,7 @@ static plan *mkplan(planner *ego, problem *p)
 	  /* not in table.  Run inferior planner */
 	  ++ego->nprob;
 	  ego->inferior_mkplan(ego, p, &pln, &sp);
-	  insert(ego, ego->flags, p, pln, sp);
+	  insert(ego, ego->flags, ego->nthr, p, pln, sp);
 	  return pln;  /* plan already USEd by inferior */
      }
 }
@@ -296,8 +303,8 @@ static void exprt(planner *ego, printer *p)
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
 	       if (is_blessed(s))
-		    p->print(p, "(s %d %d %P)", 
-			     s->sp ? s->sp->id : 0, s->flags, s->p);
+		    p->print(p, "(s %d %d %u %P)", 
+			     s->sp ? s->sp->id : 0, s->flags, s->nthr, s->p);
      p->print(p, ")");
 }
 
@@ -324,14 +331,15 @@ static int imprt(planner *ego, scanner *sc)
      while (1) {
 	  solutions *s;
 	  int id, flags;
+	  uint nthr;
 
 	  if (sc->scan(sc, ")"))
 	       break;
-	  if (!sc->scan(sc, "(s %d %d %P)", &id, &flags, &p))
+	  if (!sc->scan(sc, "(s %d %d %u %P)", &id, &flags, &nthr, &p))
 	       goto done;
 	  if (id < 1 || id >= ego->idcnt)
 	       goto done;
-	  s = insert(ego, flags, p, (plan *) 0, slvrs[id - 1]);
+	  s = insert(ego, flags, nthr, p, (plan *) 0, slvrs[id - 1]);
 	  s->blessed = 1;
 	  X(problem_destroy)(p); p = 0;
      }
@@ -475,6 +483,7 @@ planner *X(mkplanner)(size_t sz,
      p->hashsiz = 0;
      p->cnt = 0;
      p->flags = flags;
+     p->nthr = 1;
      p->idcnt = 1;              /* ID == 0 means no solution */
      rehash(p);			/* so that hashsiz > 0 */
 

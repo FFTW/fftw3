@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-buf.c,v 1.3 2002-08-05 03:57:51 stevenj Exp $ */
+/* $Id: hc2hc-buf.c,v 1.4 2002-08-29 05:44:33 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -221,6 +221,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 static plan *mkplan_ditbuf(const solver *ego, const problem *p, planner *plnr)
 {
      static const hc2hcadt adt = {
+	  sizeof(plan_hc2hc), 
 	  X(rdft_mkcldrn_dit), finish, applicable, apply_dit
      };
      return X(mkplan_rdft_hc2hc)((const solver_hc2hc *) ego, p, plnr, &adt);
@@ -237,6 +238,7 @@ solver *X(mksolver_rdft_hc2hc_ditbuf)(khc2hc codelet, const hc2hc_desc *desc)
 static plan *mkplan_difbuf(const solver *ego, const problem *p, planner *plnr)
 {
      static const hc2hcadt adt = {
+	  sizeof(plan_hc2hc), 
 	  X(rdft_mkcldrn_dif), finish, applicable, apply_dif
      };
      return X(mkplan_rdft_hc2hc)((const solver_hc2hc *) ego, p, plnr, &adt);

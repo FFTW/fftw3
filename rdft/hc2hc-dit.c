@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dit.c,v 1.5 2002-08-24 15:05:08 athena Exp $ */
+/* $Id: hc2hc-dit.c,v 1.6 2002-08-29 05:44:33 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -107,6 +107,9 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 	  )
           return UGLY;
 
+     if ((plnr->flags & IMPATIENT) && plnr->nthr > 1)
+	  return UGLY; /* prefer threaded version */
+
      return GOOD;
 }
 
@@ -114,6 +117,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
      static const hc2hcadt adt = {
+	  sizeof(plan_hc2hc), 
 	  X(rdft_mkcldrn_dit), finish, applicable, apply
      };
      return X(mkplan_rdft_hc2hc)((const solver_hc2hc *) ego, p, plnr, &adt);

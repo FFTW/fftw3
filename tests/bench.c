@@ -14,6 +14,7 @@ extern double timer_stop(void);
 #include "dft.h"
 #include "rdft.h"
 #include "reodft.h"
+#include "threads.h"
 #undef problem
 extern const char *const FFTW(version);
 extern const char *const FFTW(cc);
@@ -158,12 +159,15 @@ void setup(struct problem *p)
 
      BENCH_ASSERT(can_do(p));
 
+     FFTW(threads_init)();
+
      plnr = FFTW(mkplanner_score)(0);
      FFTW(dft_conf_standard) (plnr);
      FFTW(rdft_conf_standard) (plnr);
      FFTW(reodft_conf_standard) (plnr);
+     FFTW(threads_conf_standard) (plnr);
+     plnr->nthr = 1;
      FFTW(planner_set_hook) (plnr, hook);
-     /* plnr->flags |= IMPATIENT; */
      /* plnr->flags |= IMPATIENT | CLASSIC_VRECURSE; */
      /* plnr->flags |= ESTIMATE | IMPATIENT; */
      if (p->kind == PROBLEM_REAL)

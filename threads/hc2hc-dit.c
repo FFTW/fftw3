@@ -18,56 +18,87 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.5 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: hc2hc-dit.c,v 1.1 2002-08-29 05:44:33 stevenj Exp $ */
 
-/* decimation in frequency Cooley-Tukey */
-#include "rdft.h"
+/* decimation in time Cooley-Tukey, with codelet divided among threads */
+#include "threads.h"
 #include "hc2hc.h"
+
+typedef struct {
+     plan_hc2hc super;
+     uint nthr;
+     uint mloop;
+     int sW;
+} P;
+
+typedef struct {
+     R *ro, *io;
+     khc2hc k;
+     R *W;
+     int sW;
+     stride ios;
+     int os;
+} PD;
+
+static void *spawn_apply(spawn_data *d)
+{
+     PD *ego = (PD *) d->data;
+     uint min = d->min, max = d->max;
+     int os = ego->os;
+
+     ego->k(ego->ro + min * os, ego->io - min * os,
+	    ego->W + min * ego->sW, ego->ios, 2 * (max - min) + 1, os);
+     return 0;
+}
 
 static void apply(plan *ego_, R *I, R *O)
 {
      plan_hc2hc *ego = (plan_hc2hc *) ego_;
-     R *I0 = I;
-
-     {
-          plan_rdft *cld0 = (plan_rdft *) ego->cld0;
-          plan_rdft *cldm = (plan_rdft *) ego->cldm;
-          uint i, r = ego->r, m = ego->m, vl = ego->vl;
-          int is = ego->is, ivs = ego->ivs;
-	  
-          for (i = 0; i < vl; ++i, I += ivs) {
-	       cld0->apply((plan *) cld0, I, I);
-               ego->k(I + is, I + (r * m - 1) * is, ego->W, ego->ios, m, is);
-	       cldm->apply((plan *) cldm, I + is*(m/2), I + is*(m/2));
-	  }
-     }
 
      /* two-dimensional r x vl sub-transform: */
      {
 	  plan_rdft *cld = (plan_rdft *) ego->cld;
-	  cld->apply((plan *) cld, I0, O);
+	  cld->apply((plan *) cld, I, O);
+     }
+
+     {
+	  plan_rdft *cld0 = (plan_rdft *) ego->cld0;
+	  cld0->apply((plan *) cld0, O, O);
+     }
+
+     {
+	  plan_rdft *cldm = (plan_rdft *) ego->cldm;
+          uint r = ego->r, m = ego->m;
+          int os = ego->os;
+	  P *ego_thr = (P *) ego_;
+	  PD d;
+	  
+	  cldm->apply((plan *) cldm, O + os*(m/2), O + os*(m/2));
+
+	  d.ro = O + os; d.io = O + (r * m - 1) * os;
+	  d.k = ego->k;
+	  d.W = ego->W;
+	  d.sW = ego_thr->sW;
+	  d.ios = ego->ios;
+	  d.os = ego->os;
+
+	  X(spawn_loop)(ego_thr->mloop, ego_thr->nthr, spawn_apply, (void*)&d);
      }
 }
 
 static int applicable(const solver_hc2hc *ego, const problem *p_,
 		      const planner *plnr)
 {
-     if (X(rdft_hc2hc_applicable)(ego, p_)) {
-	  int ivs, ovs;
-	  uint vl;
+     if (plnr->nthr > 1 && X(rdft_hc2hc_applicable)(ego, p_)) {
           const hc2hc_desc *e = ego->desc;
           const problem_rdft *p = (const problem_rdft *) p_;
           iodim *d = p->sz.dims;
 	  uint m = d[0].n / e->radix;
-	  X(tensor_tornk1)(&p->vecsz, &vl, &ivs, &ovs);
           return (1
-		  && (p->I == p->O || (plnr->flags & DESTROY_INPUT))
-		  && (e->genus->okp(e, p->I + d[0].is,
-				    p->I + (e->radix * m - 1) * d[0].is, 
-				    (int)m * d[0].is, 0, m, d[0].is))
-		  && (e->genus->okp(e, p->I + ivs + d[0].is,
-				    p->I + ivs + (e->radix * m - 1) * d[0].is, 
-				    (int)m * d[0].is, 0, m, d[0].is))
+		  && p->vecsz.rnk == 0
+		  && (e->genus->okp(e, p->O + d[0].os,
+				    p->O + (e->radix * m - 1) * d[0].os, 
+				    (int)m * d[0].os, 0, m, d[0].os))
 	       );
      }
      return 0;
@@ -76,7 +107,7 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
 static void finish(plan_hc2hc *ego)
 {
      const hc2hc_desc *d = ego->slv->desc;
-     ego->ios = X(mkstride)(ego->r, ego->m * ego->is);
+     ego->ios = X(mkstride)(ego->r, ego->m * ego->os);
      ego->super.super.ops =
           X(ops_add)(X(ops_add)(ego->cld->ops,
 				X(ops_mul)(ego->vl,
@@ -97,10 +128,6 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 
      p = (const problem_rdft *) p_;
 
-     /* emulate fftw2 behavior */
-     if ((p->vecsz.rnk > 0) && NO_VRECURSE(plnr->flags))
-	  return BAD;
-
      n = p->sz.dims[0].n;
      if (0
 	 || n <= 16 
@@ -108,27 +135,32 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 	  )
           return UGLY;
 
-     if ((plnr->flags & IMPATIENT) && plnr->nthr > 1)
-	  return UGLY; /* prefer threaded version */
-
      return GOOD;
 }
 
-
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
+     plan *pln;
      static const hc2hcadt adt = {
-	  sizeof(plan_hc2hc), 
-	  X(rdft_mkcldrn_dif), finish, applicable, apply
+	  sizeof(P), 
+	  X(rdft_mkcldrn_dit), finish, applicable, apply
      };
-     return X(mkplan_rdft_hc2hc)((const solver_hc2hc *) ego, p, plnr, &adt);
+     pln = X(mkplan_rdft_hc2hc)((const solver_hc2hc *) ego, p, plnr, &adt);
+     if (pln) {
+	  P *pln_thr = (P *) pln;
+	  pln_thr->nthr = plnr->nthr;
+	  pln_thr->mloop = 
+	       ((pln_thr->super.m-1)/2) / pln_thr->super.slv->desc->genus->vl;
+	  pln_thr->sW = X(twiddle_length)(pln_thr->super.r, 
+					  pln_thr->super.slv->desc->tw);
+     }
+     return pln;
 }
 
-
-solver *X(mksolver_rdft_hc2hc_dif)(khc2hc codelet, const hc2hc_desc *desc)
+solver *X(mksolver_rdft_hc2hc_dit_thr)(khc2hc codelet, const hc2hc_desc *desc)
 {
      static const solver_adt sadt = { mkplan, score };
-     static const char name[] = "rdft-dif";
+     static const char name[] = "rdft-dit-thr";
 
      return X(mksolver_rdft_hc2hc)(codelet, desc, name, &sadt);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.9 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: hc2hc.c,v 1.10 2002-08-29 05:44:33 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -136,7 +136,8 @@ plan *X(mkplan_rdft_hc2hc)(const solver_hc2hc *ego,
      if (!cldm)
 	  goto nada;
 
-     pln = MKPLAN_RDFT(plan_hc2hc, &padt, adt->apply);
+     A(adt->pln_size >= sizeof(plan_hc2hc));
+     pln = (plan_hc2hc *) X(mkplan_rdft)(adt->pln_size, &padt, adt->apply);
 
      pln->slv = ego;
      pln->cld = cld;

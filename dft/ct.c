@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.20 2002-08-24 15:19:30 athena Exp $ */
+/* $Id: ct.c,v 1.21 2002-08-29 05:44:33 stevenj Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -114,7 +114,8 @@ plan *X(mkplan_dft_ct)(const solver_ct *ego,
      if (!cld)
           return (plan *) 0;
 
-     pln = MKPLAN_DFT(plan_ct, &padt, adt->apply);
+     A(adt->pln_size >= sizeof(plan_ct));
+     pln = (plan_ct *) X(mkplan_dft)(adt->pln_size, &padt, adt->apply);
 
      pln->slv = ego;
      pln->cld = cld;

@@ -18,15 +18,24 @@
  *
  */
 
-/* $Id: kdft-dif.c,v 1.5 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: conf.c,v 1.1 2002-08-29 05:44:33 stevenj Exp $ */
 
-#include "dft.h"
+#include "threads.h"
 
-void (*X(kdft_dif_register_hook))(planner *, kdft_dit, const ct_desc *) = 0;
-
-void X(kdft_dif_register)(planner *p, kdft_dif codelet, const ct_desc *desc)
+static const solvtab s =
 {
-     REGISTER_SOLVER(p, X(mksolver_dft_ct_dif)(codelet, desc));
-     if (X(kdft_dif_register_hook))
-	  X(kdft_dif_register_hook)(p, codelet, desc);
+#ifdef HAVE_THREADS
+
+     SOLVTAB(X(dft_thr_vrank_geq1_register)),
+     SOLVTAB(X(rdft_thr_vrank_geq1_register)),
+     SOLVTAB(X(rdft2_thr_vrank_geq1_register)),
+
+#endif /* HAVE_THREADS */
+
+     SOLVTAB_END
+};
+
+void X(threads_conf_standard)(planner *p)
+{
+     X(solvtab_exec)(s, p);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.25 2002-08-19 23:40:18 stevenj Exp $ */
+/* $Id: dft.h,v 1.26 2002-08-29 05:44:33 stevenj Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -67,6 +67,9 @@ solver *X(mksolver_dft_ct_dit)(kdft_dit codelet, const ct_desc *desc);
 solver *X(mksolver_dft_ct_ditbuf)(kdft_dit codelet, const ct_desc *desc);
 solver *X(mksolver_dft_ct_dif)(kdft_dif codelet, const ct_desc *desc);
 solver *X(mksolver_dft_ct_ditf)(kdft_difsq codelet, const ct_desc *desc);
+
+extern void (*X(kdft_dit_register_hook))(planner *, kdft_dit, const ct_desc *);
+extern void (*X(kdft_dif_register_hook))(planner *, kdft_dif, const ct_desc *);
 
 void X(dft_rank0_register)(planner *p);
 void X(dft_rank_geq2_register)(planner *p);

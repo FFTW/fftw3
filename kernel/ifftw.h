@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.90 2002-08-28 18:50:34 athena Exp $ */
+/* $Id: ifftw.h,v 1.91 2002-08-29 05:44:33 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -125,18 +125,28 @@ enum fftw_malloc_what {
 extern void X(free)(void *ptr);
 
 #ifdef FFTW_DEBUG
+
 extern void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
 			     const char *file, int line);
-
-#define fftw_malloc(n, what) \
-     X(malloc_debug)(n, what, __FILE__, __LINE__)
-
+#define fftw_malloc(n, what) X(malloc_debug)(n, what, __FILE__, __LINE__)
 void X(malloc_print_minfo)(void);
 
-#else
-extern void *X(malloc_plain)(size_t sz);
+#else /* ! FFTW_DEBUG */
 
+extern void *X(malloc_plain)(size_t sz);
 #define fftw_malloc(n, what)  X(malloc_plain)(n)
+
+#endif
+
+#if defined(FFTW_DEBUG) && defined(HAVE_THREADS)
+extern int X(in_thread);
+#  define IN_THREAD X(in_thread)
+#  define THREAD_ON { int in_thread_save = X(in_thread); X(in_thread) = 1
+#  define THREAD_OFF X(in_thread) = in_thread_save; }
+#else
+#  define IN_THREAD 0
+#  define THREAD_ON 
+#  define THREAD_OFF 
 #endif
 
 /*-----------------------------------------------------------------------*/
@@ -437,6 +447,7 @@ struct planner_s {
      uint hashsiz;
      uint cnt;
      int flags;
+     uint nthr;
      int idcnt;
 };
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.h,v 1.12 2002-08-24 15:05:08 athena Exp $ */
+/* $Id: ct.h,v 1.13 2002-08-29 05:44:33 stevenj Exp $ */
 
 /* Cooley-Tukey variants */
 union kct {
@@ -48,6 +48,7 @@ typedef struct {
 /* data type describing a generic Cooley-Tukey solver */
 typedef struct
 {
+     size_t pln_size;
      problem *(*mkcld)(const solver_ct *, const problem_dft *p);
      void (*finish)(plan_ct *ego);
      int (*applicable)(const solver_ct *ego, const problem *p,

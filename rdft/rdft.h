@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.20 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: rdft.h,v 1.21 2002-08-29 05:44:33 stevenj Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -78,6 +78,9 @@ solver *X(mksolver_rdft_hc2hc_dit)(khc2hc k, const hc2hc_desc *desc);
 solver *X(mksolver_rdft_hc2hc_ditbuf)(khc2hc k, const hc2hc_desc *desc);
 solver *X(mksolver_rdft_hc2hc_dif)(khc2hc k, const hc2hc_desc *desc);
 solver *X(mksolver_rdft_hc2hc_difbuf)(khc2hc k, const hc2hc_desc *desc);
+
+extern void (*X(khc2hc_dit_register_hook))(planner *, khc2hc, const hc2hc_desc *);
+extern void (*X(khc2hc_dif_register_hook))(planner *, khc2hc, const hc2hc_desc *);
 
 void X(rdft_rank0_register)(planner *p);
 void X(rdft_rank_geq2_register)(planner *p);

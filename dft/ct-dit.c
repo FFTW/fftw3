@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.22 2002-08-25 17:16:49 athena Exp $ */
+/* $Id: ct-dit.c,v 1.23 2002-08-29 05:44:33 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -96,6 +96,9 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 	  )
           return UGLY;
 
+     if ((plnr->flags & IMPATIENT) && plnr->nthr > 1)
+          return UGLY; /* prefer threaded version */
+
      return GOOD;
 }
 
@@ -103,7 +106,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 {
      static const ctadt adt = {
-	  X(dft_mkcld_dit), finish, applicable, apply
+	  sizeof(plan_ct), X(dft_mkcld_dit), finish, applicable, apply
      };
      return X(mkplan_dft_ct)((const solver_ct *) ego, p, plnr, &adt);
 }

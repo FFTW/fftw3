@@ -18,24 +18,10 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.7 2002-08-29 05:44:33 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.1 2002-08-29 05:44:33 stevenj Exp $ */
 
 
-/* Plans for handling vector transform loops.  These are *just* the
-   loops, and rely on child plans for the actual RDFT2s.
- 
-   They form a wrapper around solvers that don't have apply functions
-   for non-null vectors.
- 
-   vrank-geq1-rdft2 plans also recursively handle the case of
-   multi-dimensional vectors, obviating the need for most solvers to
-   deal with this.  We can also play games here, such as reordering
-   the vector loops.
- 
-   Each vrank-geq1-rdft2 plan reduces the vector rank by 1, picking out a
-   dimension determined by the vecloop_dim field of the solver. */
-
-#include "rdft.h"
+#include "threads.h"
 
 typedef struct {
      solver super;
@@ -47,46 +33,72 @@ typedef struct {
 typedef struct {
      plan_rdft2 super;
 
-     plan *cld;
-     uint vl;
-     int ivs, ovs;
+     plan **cldrn;
+     int its, ots;
+     uint nthr;
      const S *solver;
 } P;
+
+typedef struct {
+     int its, ots;
+     R *r, *rio, *iio;
+     plan **cldrn;
+} PD;
+
+static void *spawn_apply(spawn_data *d)
+{
+     PD *ego = (PD *) d->data;
+     int its = ego->its, ots = ego->ots;
+     uint thr_num = d->thr_num;
+     plan_rdft2 *cld = (plan_rdft2 *) ego->cldrn[d->thr_num];
+
+     cld->apply((plan *) cld,
+		ego->r + thr_num * its,
+		ego->rio + thr_num * ots, ego->iio + thr_num * ots);
+     return 0;
+}
 
 static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
 {
      P *ego = (P *) ego_;
-     uint i, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
-     rdft2apply cldapply = ((plan_rdft2 *) ego->cld)->apply;
+     PD d;
 
-     for (i = 0; i < vl; ++i) {
-          cldapply(ego->cld, r + i * ivs, rio + i * ovs, iio + i * ovs);
-     }
+     d.its = ego->its;
+     d.ots = ego->ots;
+     d.cldrn = ego->cldrn;
+     d.r = r; d.rio = rio; d.iio = iio;
+
+     X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*) &d);
 }
 
 static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
 {
      P *ego = (P *) ego_;
-     uint i, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
-     rdft2apply cldapply = ((plan_rdft2 *) ego->cld)->apply;
+     PD d;
 
-     for (i = 0; i < vl; ++i) {
-          cldapply(ego->cld, r + i * ovs, rio + i * ivs, iio + i * ivs);
-     }
+     d.its = ego->ots;
+     d.ots = ego->its;
+     d.cldrn = ego->cldrn;
+     d.r = r; d.rio = rio; d.iio = iio;
+
+     X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*) &d);
 }
 
 static void awake(plan *ego_, int flg)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, flg);
+     uint i;
+     for (i = 0; i < ego->nthr; ++i)
+	  AWAKE(ego->cldrn[i], flg);
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(plan_destroy)(ego->cld);
+     uint i;
+     for (i = 0; i < ego->nthr; ++i)
+	  X(plan_destroy)(ego->cldrn[i]);
+     X(free)(ego->cldrn);
      X(free)(ego);
 }
 
@@ -94,8 +106,13 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
      const S *s = ego->solver;
-     p->print(p, "(rdft2-vrank>=1-x%u/%d%(%p%))",
-	      ego->vl, s->vecloop_dim, ego->cld);
+     uint i;
+     p->print(p, "(rdft2-thr-vrank>=1-x%u/%d)", ego->nthr, s->vecloop_dim);
+     for (i = 0; i < ego->nthr; ++i)
+	  if (i == 0 || (ego->cldrn[i] != ego->cldrn[i-1] &&
+			 (i <= 1 || ego->cldrn[i] != ego->cldrn[i-2])))
+	       p->print(p, "%(%p%)", ego->cldrn[i]);
+     p->putchr(p, ')');
 }
 
 static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
@@ -104,9 +121,10 @@ static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
 		       vecsz, oop, dp);
 }
 
-static int applicable(const solver *ego_, const problem *p_, uint *dp)
+static int applicable(const solver *ego_, const problem *p_, uint *dp,
+		      const planner *plnr)
 {
-     if (RDFT2P(p_)) {
+     if (RDFT2P(p_) && plnr->nthr > 1) {
           const S *ego = (const S *) ego_;
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
 	  if (FINITE_RNK(p->vecsz.rnk)
@@ -128,7 +146,7 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      const problem_rdft2 *p;
      uint vdim;
 
-     if (!applicable(ego_, p_, &vdim))
+     if (!applicable(ego_, p_, &vdim, plnr))
           return BAD;
 
      /* fftw2 behavior */
@@ -142,28 +160,6 @@ static int score(const solver *ego_, const problem *p_, const planner *plnr)
      if ((plnr->flags & FORCE_VRECURSE) && p->vecsz.rnk == 1)
 	  return UGLY;
 
-     /* Heuristic: if the transform is multi-dimensional, and the
-        vector stride is less than the transform size, then we
-        probably want to use a rank>=2 plan first in order to combine
-        this vector with the transform-dimension vectors. */
-     {
-          iodim *d = p->vecsz.dims + vdim;
-          if (1
-              && p->sz.rnk > 1
-              && X(imin)(d->is, d->os) < X(tensor_max_index)(p->sz)
-               )
-          return UGLY;
-     }
-
-     /* Heuristic: don't use a vrank-geq1 for rank-0 vrank-1
-        transforms, since this case is better handled by rank-0
-        solvers. */
-     if (p->sz.rnk == 0 && p->vecsz.rnk == 1)
-          return UGLY;
-
-     if ((plnr->flags & IMPATIENT) && plnr->nthr > 1)
-	  return UGLY; /* prefer threaded version */
-
      return GOOD;
 }
 
@@ -172,16 +168,19 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      const problem_rdft2 *p;
      P *pln;
-     plan *cld;
      problem *cldp;
      uint vdim;
      iodim *d;
+     plan **cldrn = (plan **) 0;
+     uint i, block_size, nthr;
+     int its, ots;
+     tensor vecsz = {0, 0};
 
      static const plan_adt padt = {
 	  X(rdft2_solve), awake, print, destroy
      };
 
-     if (!applicable(ego_, p_, &vdim))
+     if (!applicable(ego_, p_, &vdim, plnr))
           return (plan *) 0;
      p = (const problem_rdft2 *) p_;
 
@@ -190,33 +189,58 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  plnr->flags &= ~CLASSIC_VRECURSE & ~FORCE_VRECURSE;
 
      d = p->vecsz.dims + vdim;
-     if (d->n > 0)
-	  if (X(alignment_of)(p->r + d->is) || 
-	      X(alignment_of)(p->rio + d->os) ||
-	      X(alignment_of)(p->iio + d->os))
-	       plnr->flags |= POSSIBLY_UNALIGNED;
 
-     cldp = X(mkproblem_rdft2_d)(X(tensor_copy)(p->sz),
-				 X(tensor_copy_except)(p->vecsz, vdim),
-				 p->r, p->rio, p->iio, p->kind);
-     cld = MKPLAN(plnr, cldp);
-     X(problem_destroy)(cldp);
-     if (!cld)
-          return (plan *) 0;
+     block_size = (d->n + plnr->nthr - 1) / plnr->nthr;
+     nthr = (d->n + block_size - 1) / block_size;
+     plnr->nthr = (plnr->nthr + nthr - 1) / nthr;
+     its = d->is * block_size;
+     ots = d->os * block_size;
+
+     cldrn = fftw_malloc(sizeof(plan *) * nthr, PLANS);
+     for (i = 0; i < nthr; ++i) cldrn[i] = (plan *) 0;
+     
+     vecsz = X(tensor_copy)(p->vecsz);
+     for (i = 0; i < nthr; ++i) {
+	  vecsz.dims[vdim].n =
+	       (i == nthr - 1) ? (d->n - i*block_size) : block_size;
+	  cldp = X(mkproblem_rdft2)(p->sz, vecsz,
+				    p->r + i*its,
+				    p->rio + i*ots, p->iio + i*ots, p->kind);
+	  cldrn[i] = MKPLAN(plnr, cldp);
+	  X(problem_destroy)(cldp);
+	  if (!cldrn[i])
+	       goto nada;
+     }
+     X(tensor_destroy)(vecsz);
 
      pln = MKPLAN_RDFT2(P, &padt,
 			R2HC_KINDP(p->kind) ? apply_r2hc : apply_hc2r);
 
-     pln->cld = cld;
-     pln->vl = d->n;
-     pln->ivs = d->is;
-     pln->ovs = d->os;
+     pln->cldrn = cldrn;
+     pln->its = its;
+     pln->ots = ots;
+     pln->nthr = nthr;
 
      pln->solver = ego;
-     pln->super.super.ops = X(ops_mul)(pln->vl, cld->ops);
-     pln->super.super.pcost = pln->vl * cld->pcost;
+     pln->super.super.ops = X(ops_zero);
+     pln->super.super.pcost = 0;
+     for (i = 0; i < nthr; ++i) {
+	  pln->super.super.ops = X(ops_add)(pln->super.super.ops,
+					    cldrn[i]->ops);
+	  pln->super.super.pcost += cldrn[i]->pcost;
+     }
 
      return &(pln->super.super);
+
+ nada:
+     if (cldrn) {
+	  for (i = 0; i < nthr; ++i)
+	       if (cldrn[i])
+		    X(plan_destroy)(cldrn[i]);
+	  X(free)(cldrn);
+     }
+     X(tensor_destroy)(vecsz);
+     return (plan *) 0;
 }
 
 static solver *mksolver(int vecloop_dim, const int *buddies, uint nbuddies)
@@ -229,7 +253,7 @@ static solver *mksolver(int vecloop_dim, const int *buddies, uint nbuddies)
      return &(slv->super);
 }
 
-void X(rdft2_vrank_geq1_register)(planner *p)
+void X(rdft2_thr_vrank_geq1_register)(planner *p)
 {
      uint i;
 
