@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.13 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.14 2002-09-22 16:35:30 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -28,7 +28,7 @@
 
   The right thing is: 1) get rid of reduction to DFT, and 2) implement
   arbitrary even-radix reduction to RDFT.  We currently reduce to DFT
-  so as to exploit the SIMD code.  We currently do radix-2 only in
+  so as to exploit the SIMD code.  We currently do only radix-2 in
   order to avoid generating yet another set of codelets.
 */
 
