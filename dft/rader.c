@@ -54,8 +54,8 @@ typedef struct {
 /* Below, we extensively use the identity that fft(x*)* = ifft(x) in
    order to share data between forward and backward transforms and to
    obviate the necessity of having separate forward and backward
-   plans.  (Although we compute separate plans in principle anyway due
-   to the differing strides, etcetera.)
+   plans.  (Although we often compute separate plans these days anyway
+   due to the differing strides, etcetera.)
 
    Of course, since the new FFTW gives us separate pointers to
    the real and imaginary parts, we could have instead used the
