@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.1 2002-08-14 07:26:06 stevenj Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.2 2002-08-17 03:44:28 stevenj Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -55,7 +55,7 @@ static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
 
      {
 	  plan_dft *cldc = (plan_dft *) ego->cldc;
-	  cldc->apply((plan *) cldc, rio, iio, rio, iio);
+	  cldc->apply((plan *) cldc, iio, rio, iio, rio);
      }
 
      {
