@@ -195,27 +195,23 @@ static R *mkomega(plan *p_, uint n, uint ginv)
      R *omega;
      uint i, gpower;
      trigreal scale;
-     R *buf; 
 
      if ((omega = X(rader_tl_find)(n, n, ginv, omegas)))
 	  return omega;
 
      omega = (R *)fftw_malloc(sizeof(R) * (n - 1) * 2, TWIDDLES);
-     buf = (R *) fftw_malloc(sizeof(R) * (n - 1) * 2, BUFFERS);
 
      scale = n - 1.0; /* normalization for convolution */
 
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  buf[2*i] = X(cos2pi)(gpower, n) / scale;
-	  buf[2*i+1] = FFT_SIGN * X(sin2pi)(gpower, n) / scale;
+	  omega[2*i] = X(cos2pi)(gpower, n) / scale;
+	  omega[2*i+1] = FFT_SIGN * X(sin2pi)(gpower, n) / scale;
      }
      A(gpower == 1);
 
      AWAKE(p_, 1);
-     p->apply(p_, buf, buf + 1, omega, omega + 1);
+     p->apply(p_, omega, omega + 1, omega, omega + 1);
      AWAKE(p_, 0);
-
-     X(free)(buf);
 
      X(rader_tl_insert)(n, n, ginv, omega, &omegas);
      return omega;
@@ -377,7 +373,7 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      plan *cld2 = (plan *) 0;
      plan *cld_omega = (plan *) 0;
      problem *cldp = 0;
-     R *buf = (R *) 0, *omega = (R *) 0;
+     R *buf = (R *) 0;
 
      /* initial allocation for the purpose of planning */
      buf = (R *) fftw_malloc(sizeof(R) * (n - 1) * 2, BUFFERS);
@@ -402,30 +398,26 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      if (!cld2)
           goto nada;
 
-     /* initial allocation for the purpose of planning */
-     omega = (R *) fftw_malloc(sizeof(R) * (n - 1) * 2, BUFFERS);
-
+     /* plan for omega array */
      plnr->planner_flags |= ESTIMATE;
      cldp =
           X(mkproblem_dft_d)(
                X(mktensor_1d)(n - 1, 2, 2),
                X(mktensor_1d)(1, 0, 0),
-	       buf, buf + 1, omega, omega + 1);
+	       buf, buf + 1, buf, buf + 1);
      cld_omega = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld_omega)
           goto nada;
 
      /* deallocate buffers; let awake() or apply() allocate them for real */
-     X(free)(omega);
-     omega = 0;
      X(free)(buf);
      buf = 0;
 
      pln->cld1 = cld1;
      pln->cld2 = cld2;
      pln->cld_omega = cld_omega;
-     pln->omega = omega;
+     pln->omega = 0;
      pln->n = n;
      pln->is = is;
      pln->os = os;
@@ -443,8 +435,6 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
  nada:
      if (buf)
           X(free)(buf);
-     if (omega)
-          X(free)(omega);
      if (cld_omega)
           X(plan_destroy)(cld_omega);
      if (cld2)

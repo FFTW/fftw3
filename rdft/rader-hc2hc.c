@@ -295,7 +295,7 @@ static R *mktwiddle(uint m, uint r, uint g)
      uint n = r * m;
      R *W;
 
-     if ((W = X(rader_tl_find)(m, r, g, twiddles))) 
+     if ((W = X(rader_tl_find)(m, r, g, twiddles)))
 	  return W;
 
      W = (R *)fftw_malloc(sizeof(R) * (r - 1) * ((m-1)/2) * 2, TWIDDLES);
