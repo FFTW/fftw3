@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.8 2002-07-14 19:08:29 stevenj Exp $ */
+/* $Id: twiddle.c,v 1.9 2002-07-15 23:28:30 stevenj Exp $ */
 
 /* Twiddle manipulation */
 
@@ -66,6 +66,8 @@ static uint twlen0(uint r, const tw_instr **pp)
      for ( ; p->op != TW_NEXT; ++p) {
 	  if (p->op == TW_FULL)
 	       ntwiddle += (r - 1) * 2;
+	  else if (p->op == TW_GENERIC)
+	       ntwiddle += r * 2;
 	  else
 	       ++ntwiddle;
      }
@@ -101,6 +103,16 @@ static R *compute(const tw_instr *instr, uint n, uint r, uint m)
 		    for (i = 1; i < r; ++i) {
 			 *W++ = COS(twoPiOverN * ((j + p->v) * i));
 			 *W++ = SIN(twoPiOverN * ((j + p->v) * i));
+		    }
+	       }
+	       else if (p->op == TW_GENERIC) {
+		    uint i;
+		    A(p->v == 0); /* unused */
+		    A(p->i == 0); /* unused */
+		    for (i = 0; i < r; ++i) {
+			 uint k = j * r + i;
+			 *W++ = COS(twoPiOverN * k);
+			 *W++ = FFT_SIGN * SIN(twoPiOverN * k);
 		    }
 	       }
 	       else

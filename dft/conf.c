@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.14 2002-06-30 18:37:55 athena Exp $ */
+/* $Id: conf.c,v 1.15 2002-07-15 23:28:30 stevenj Exp $ */
 
 #include "dft.h"
 
@@ -31,6 +31,7 @@ static const solvtab s =
      X(dft_vrank2_transpose_register),
      X(dft_vrank3_transpose_register),
      X(dft_buffered_register),
+     X(dft_generic_register),
      X(dft_rader_register),
      X(dft_nop_register),
      0

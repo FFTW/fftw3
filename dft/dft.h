@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.21 2002-07-05 18:49:59 athena Exp $ */
+/* $Id: dft.h,v 1.22 2002-07-15 23:28:30 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -71,6 +71,7 @@ void X(dft_vrank_geq1_register)(planner *p);
 void X(dft_vrank2_transpose_register)(planner *p);
 void X(dft_vrank3_transpose_register)(planner *p);
 void X(dft_buffered_register)(planner *p);
+void X(dft_generic_register)(planner *p);
 void X(dft_rader_register)(planner *p);
 void X(dft_nop_register)(planner *p);
 

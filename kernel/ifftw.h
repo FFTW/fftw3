@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.52 2002-07-15 19:07:41 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.53 2002-07-15 23:28:30 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -437,7 +437,8 @@ void X(solvtab_exec)(const solvtab tbl, planner *p);
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */
 /* little language to express twiddle factors computation */
-enum { TW_COS = 0, TW_SIN = 1, TW_TAN = 2, TW_NEXT = 3, TW_FULL = 4 };
+enum { TW_COS = 0, TW_SIN = 1, TW_TAN = 2, TW_NEXT = 3,
+       TW_FULL = 4, TW_GENERIC = 5 };
 
 typedef struct {
      unsigned char op;
