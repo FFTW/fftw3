@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.198 2003-03-28 17:31:32 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.199 2003-03-28 17:41:39 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -87,6 +87,9 @@ typedef struct scanner_s scanner;
 /*-----------------------------------------------------------------------*/
 /* alloca: */
 
+#ifdef HAVE_ALLOCA
+   /* use alloca if available */
+
 #ifdef __GNUC__
 # define alloca __builtin_alloca
 #else
@@ -108,8 +111,6 @@ void *alloca(size_t);
 # endif
 #endif
 
-#ifdef HAVE_ALLOCA
-   /* use alloca if available */
 #  ifdef MIN_ALIGNMENT
 #    define STACK_MALLOC(T, p, x)				\
      {								\
