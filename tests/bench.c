@@ -39,6 +39,7 @@ int paranoid = 0;
 int usewisdom = 0;
 int havewisdom = 0;
 int nthreads = 1;
+int amnesia = 0;
 
 extern void install_hook(void);  /* in hook.c */
 extern void uninstall_hook(void);  /* in hook.c */
@@ -54,6 +55,7 @@ void useropt(const char *arg)
      else if (sscanf(arg, "flag=%d", &x) == 1) the_flags |= x;
      else if (!strcmp(arg, "paranoid")) paranoid = 1;
      else if (!strcmp(arg, "wisdom")) usewisdom = 1;
+     else if (!strcmp(arg, "amnesia")) amnesia = 1;
      else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
 
      else fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);
@@ -655,6 +657,9 @@ void setup(bench_problem *p)
 	  the_flags |= FFTW_DESTROY_INPUT;
      if (p->kind == PROBLEM_REAL && p->sign > 0 && !p->in_place)
 	  p->destroy_input = 1; /* default for c2r out-of-place transforms */
+
+     if (amnesia)
+	  FFTW(forget_wisdom)();
 
      rdwisdom();
      install_hook();
