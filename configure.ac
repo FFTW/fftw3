@@ -305,7 +305,7 @@ AC_CONFIG_FILES([
 
    api/Makefile
 
-   libbench/Makefile
+   libbench2/Makefile
    tests/Makefile
    doc/Makefile
 

@@ -16,11 +16,6 @@ END_BENCH_DOC
 #define FFTW(x) CONCAT(fftw_, x)
 #endif
 
-int can_do(struct problem *p)
-{
-     return (p->kind == PROBLEM_COMPLEX || p->kind == PROBLEM_REAL);
-}
-
 static FFTW(plan) the_plan;
 
 static const char *wisdat = "wis.dat";
@@ -56,7 +51,86 @@ void wrwisdom(void)
      }
 }
 
-void setup(struct problem *p)
+/* try to use the most appropriate API function.  Big mess. */
+static FFTW(plan) mkplan_real(problem *p, int flags)
+{
+     return 0; /* TODO */
+}
+
+static FFTW(plan) mkplan_complex_split(problem *p, int flags)
+{
+     return 0; /* TODO */
+}
+
+static FFTW(plan) mkplan_complex_interleaved(problem *p, int flags)
+{
+     tensor *sz = p->sz, *vecsz = p->vecsz;
+
+     if (vecsz->rnk == 0 && sz->rnk >= 1 && sz->rnk <= 3 && 
+	 tensor_unitstridep(sz) && tensor_rowmajorp(sz)) 
+	  goto api_simple;
+     
+     if (0)
+	  goto api_many;
+
+     goto api_guru;
+
+ api_simple:
+     switch (sz->rnk) {
+	 case 1:
+	      return FFTW(plan_dft_1d)(sz->dims[0].n, 
+				       p->in, p->out, 
+				       p->sign, flags);
+	      break;
+	 case 2:
+	      return FFTW(plan_dft_2d)(sz->dims[0].n, sz->dims[1].n,
+				       p->in, p->out, 
+				       p->sign, flags);
+	      break;
+	 case 3:
+	      return FFTW(plan_dft_3d)(
+		   sz->dims[0].n, sz->dims[1].n, sz->dims[2].n,
+		   p->in, p->out, 
+		   p->sign, flags);
+	      break;
+	 default:
+	      /* TODO */
+	      return 0;
+     }
+
+ api_many:
+     /* TODO */
+     return 0;
+
+ api_guru:
+     /* TODO */
+     return 0;
+}
+
+static FFTW(plan) mkplan_complex(problem *p, int flags)
+{
+     if (p->split)
+	  return mkplan_complex_split(p, flags);
+     else
+	  return mkplan_complex_interleaved(p, flags);
+}
+
+static FFTW(plan) mkplan(problem *p, int flags)
+{
+     switch (p->kind) {
+	 case PROBLEM_COMPLEX:	  return mkplan_complex(p, flags);
+	 case PROBLEM_REAL:	  return mkplan_real(p, flags);
+	 default: BENCH_ASSERT(0); return 0;
+     }
+}
+
+int can_do(problem *p)
+{
+     return (p->kind == PROBLEM_COMPLEX || p->kind == PROBLEM_REAL);
+}
+
+
+void setup(problem *p)
 {
      const unsigned flags = 0;
      double tim;
@@ -69,44 +143,7 @@ void setup(struct problem *p)
      rdwisdom();
 
      timer_start();
-     if (p->split) { 
-	  /* TODO */
-     } else { /* !p->split */
-	  switch (p->kind) {
-	      case PROBLEM_COMPLEX:
-		   switch (p->rank) {
-		       case 1:
-			    the_plan = 
-				 FFTW(plan_dft_1d)(p->n[0], 
-						   p->in, p->out, 
-						   p->sign, flags);
-			    break;
-		       case 2:
-			    the_plan = 
-				 FFTW(plan_dft_2d)(p->n[0], p->n[1],
-						   p->in, p->out, 
-						   p->sign, flags);
-			    break;
-		       case 3:
-			    the_plan = 
-				 FFTW(plan_dft_3d)(p->n[0], p->n[1], p->n[2],
-						   p->in, p->out, 
-						   p->sign, flags);
-			    break;
-		       default:
-		       {
-			    the_plan = FFTW(plan_dft)(p->rank, p->n,
-						      p->in, p->out,
-						      p->sign, flags);
-			    break;
-		       }
-		   }
-		   break;
-	      case PROBLEM_REAL:	      
-		   /* TODO */
-		   break;
-	  }
-     }
+     the_plan = mkplan(p, flags);
      tim = timer_stop();
      if (verbose) printf("planner time: %g s\n", tim);
 
@@ -119,7 +156,7 @@ void setup(struct problem *p)
 }
 
 
-void doit(int iter, struct problem *p)
+void doit(int iter, problem *p)
 {
      int i;
      FFTW(plan) q = the_plan;
@@ -129,7 +166,7 @@ void doit(int iter, struct problem *p)
 	  FFTW(execute)(q);
 }
 
-void done(struct problem *p)
+void done(problem *p)
 {
      UNUSED(p);
 
@@ -222,7 +259,7 @@ END_BENCH_DOC
 static bench_real *ri, *ii, *ro, *io;
 static int is, os;
 
-void copy_c2c_from(struct problem *p, bench_complex *in)
+void copy_c2c_from(problem *p, bench_complex *in)
 {
      unsigned int i;
      if (p->sign == FFT_SIGN) {
@@ -238,7 +275,7 @@ void copy_c2c_from(struct problem *p, bench_complex *in)
      }
 }
 
-void copy_c2c_to(struct problem *p, bench_complex *out)
+void copy_c2c_to(problem *p, bench_complex *out)
 {
      unsigned int i;
      if (p->sign == FFT_SIGN) {
@@ -254,7 +291,7 @@ void copy_c2c_to(struct problem *p, bench_complex *out)
      }
 }
 
-void copy_h2c(struct problem *p, bench_complex *out)
+void copy_h2c(problem *p, bench_complex *out)
 {
      if (p->split)
 	  copy_h2c_1d_halfcomplex(p, out, FFT_SIGN);
@@ -262,7 +299,7 @@ void copy_h2c(struct problem *p, bench_complex *out)
 	  copy_h2c_unpacked(p, out, FFT_SIGN);
 }
 
-void copy_c2h(struct problem *p, bench_complex *in)
+void copy_c2h(problem *p, bench_complex *in)
 {
      if (p->split)
 	  copy_c2h_1d_halfcomplex(p, in, FFT_SIGN);
@@ -270,7 +307,7 @@ void copy_c2h(struct problem *p, bench_complex *in)
 	  copy_c2h_unpacked(p, in, FFT_SIGN);
 }
 
-void copy_r2c(struct problem *p, bench_complex *out)
+void copy_r2c(problem *p, bench_complex *out)
 {
      if (!p->split)
           copy_r2c_unpacked(p, out);
@@ -278,7 +315,7 @@ void copy_r2c(struct problem *p, bench_complex *out)
           copy_r2c_packed(p, out);
 }
 
-void copy_c2r(struct problem *p, bench_complex *in)
+void copy_c2r(problem *p, bench_complex *in)
 {
      if (!p->split)
           copy_c2r_unpacked(p, in);
@@ -307,7 +344,7 @@ static void hook(plan *pln, const fftw_problem *p_, int optimalp)
      }
 }
 
-int can_do(struct problem *p)
+int can_do(problem *p)
 {
      return (sizeof(fftw_real) == sizeof(bench_real) &&
 	     (p->kind == PROBLEM_COMPLEX || p->kind == PROBLEM_REAL));
@@ -317,7 +354,7 @@ static planner *plnr;
 static fftw_problem *prblm;
 static plan *pln;
 
-void setup(struct problem *p)
+void setup(problem *p)
 {
      double tplan;
      size_t nsize;
@@ -492,7 +529,7 @@ void setup(struct problem *p)
 #endif
 }
 
-void doit(int iter, struct problem *p)
+void doit(int iter, problem *p)
 {
      int i;
      plan *PLN = pln;
@@ -504,7 +541,7 @@ void doit(int iter, struct problem *p)
      }
 }
 
-void done(struct problem *p)
+void done(problem *p)
 {
      UNUSED(p);
 
