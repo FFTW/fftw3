@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.18 2002-09-01 23:51:50 athena Exp $ */
+/* $Id: problem.c,v 1.19 2002-09-02 17:46:08 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -42,30 +42,6 @@ static void hash(const problem *p_, md5 *m)
      X(md5uint)(m, X(alignment_of)(p->ro));
      X(tensor_md5)(m, p->sz);
      X(tensor_md5)(m, p->vecsz);
-}
-
-void X(dft_zerotens)(tensor sz, R *ri, R *ii)
-{
-     if (sz.rnk == RNK_MINFTY)
-          return;
-     else if (sz.rnk == 0)
-          ri[0] = ii[0] = 0.0;
-     else if (sz.rnk == 1) {
-          /* this case is redundant but faster */
-          uint i, n = sz.dims[0].n;
-          int is = sz.dims[0].is;
-
-          for (i = 0; i < n; ++i)
-               ri[i * is] = ii[i * is] = 0.0;
-     } else if (sz.rnk > 0) {
-          uint i, n = sz.dims[0].n;
-          int is = sz.dims[0].is;
-
-          sz.dims++;
-          sz.rnk--;
-          for (i = 0; i < n; ++i)
-               X(dft_zerotens)(sz, ri + i * is, ii + i * is);
-     }
 }
 
 static void print(problem *ego_, printer *p)
