@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.18 2005-02-22 15:13:02 athena Exp $ */
+/* $Id: rank0.c,v 1.19 2005-02-22 22:08:48 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -161,7 +161,11 @@ static void apply_memcpy(const plan *ego_, R *I, R *O)
 
 static int applicable_memcpy(const P *pln, const problem_rdft *p)
 {
-     return (p->I != p->O) && (pln->rnk == 0);
+     return (1
+	     && p->I != p->O 
+	     && pln->rnk == 0
+	     && pln->vl > 2 /* do not bother memcpy-ing complex numbers */
+	     );
 }
 
 /**************************************************************/
