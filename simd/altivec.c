@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: altivec.c,v 1.3 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: altivec.c,v 1.4 2003-10-23 15:28:28 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -37,4 +37,31 @@ const vector float X(altivec_chsr_sgn) =
 const vector float X(altivec_chsr_msk) = 
    (vector float)VLIT(-0.0, 0.0, -0.0, 0.0);
 
+#if HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
+
+static int really_have_altivec(void)
+{
+#if HAVE_SYS_SYSCTL_H && HAVE_SYSCTL && defined(CTL_HW) && defined(HW_VECTORUNIT)
+     int mib[2], altivecp;
+     size_t len;
+     mib[0] = CTL_HW;
+     mib[1] = HW_VECTORUNIT;
+     len = sizeof(altivecp);
+     sysctl(mib, 2, &altivecp, &len, NULL, 0);
+     return altivecp;
+#else
+     return 1;  /* what the hell */
+}
+
+int RIGHT_CPU(void)
+{
+     static int init = 0, res;
+     if (!init) {
+	  res = really_have_altivec();
+	  init = 1;
+     }
+     return res;
+}
 #endif

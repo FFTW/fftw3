@@ -221,7 +221,8 @@ static inline V BYTWJ(const R *t, V sr)
      return VFNMS(ti, si, VMUL(tr, sr));
 }
 
-#define RIGHT_CPU() 1
+#define RIGHT_CPU X(have_altivec)
+extern int RIGHT_CPU(void);
 
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2)
 #define BEGIN_SIMD()
