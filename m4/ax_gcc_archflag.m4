@@ -22,7 +22,7 @@ dnl called unless the user specified --with-gcc-arch manually.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.11 2005-01-12 03:13:24 athena Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.12 2005-01-13 22:59:55 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -44,45 +44,49 @@ ax_gcc_arch=""
 case $host_cpu in
   i386*) ax_gcc_arch=i386 ;;
   i486*) ax_gcc_arch=i486 ;;
-  i[[56]]86*) # use cpuid codes, extracted from x86info-1.12b by Dave Jones
+  i[[56]]86*) # use cpuid codes, extracted from x86info-1.7 by Dave Jones
      AX_GCC_X86_CPUID(0)
      AX_GCC_X86_CPUID(1)
      case $ax_cv_gcc_x86_cpuid_0 in
        *:756e6547:*:*) # Intel
           case $ax_cv_gcc_x86_cpuid_1 in
-	    5[[48]]*:*) ax_gcc_arch="pentium-mmx pentium" ;;
-	    5*:*) ax_gcc_arch=pentium ;;
-	    6[[3456]]*:*) ax_gcc_arch="pentium2 pentiumpro" ;;
-	    6a*:*0:*) ax_gcc_arch="pentium2 pentiumpro" ;;
-	    6a*:*[[234]]:*) ax_gcc_arch="pentium3 pentiumpro" ;;
-	    6[[789b]]*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
-	    6*:*) ax_gcc_arch=pentiumpro ;;
-            f33:*) ax_gcc_arch="prescott pentium4 pentiumpro";;
-            f*:*) ax_gcc_arch="pentium4 pentiumpro";;
+	    *5[[48]]?:*:*:*) ax_gcc_arch="pentium-mmx pentium" ;;
+	    *5??:*:*:*) ax_gcc_arch=pentium ;;
+	    *6[[3456]]?:*:*:*) ax_gcc_arch="pentium2 pentiumpro" ;;
+	    *6a?:*[[01]]:*:*) ax_gcc_arch="pentium2 pentiumpro" ;;
+	    *6a?:*[[234]]:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
+	    *6[[789b]]?:*:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
+	    *6??:*:*:*) ax_gcc_arch=pentiumpro ;;
+            *f33:*:*:*) ax_gcc_arch="prescott pentium4 pentiumpro";;
+            *f34:*:*:*) ax_gcc_arch="nocona prescott pentium4 pentiumpro";;
+            *f??:*:*:*) ax_gcc_arch="pentium4 pentiumpro";;
           esac ;;
        *:68747541:*:*) # AMD
           case $ax_cv_gcc_x86_cpuid_1 in
-	    5[[67]]*:*) ax_gcc_arch=k6 ;;
-	    5[[8c]]*:*) ax_gcc_arch="k6-2 k6" ;;
-	    5[[9d]]*:*) ax_gcc_arch="k6-3 k6" ;;
-	    60*:*) ax_gcc_arch=k7 ;;
-	    6[[12]]*:*) ax_gcc_arch="athlon k7" ;;
-	    6[[34]]*:*) ax_gcc_arch="athlon-tbird k7" ;;
-	    67*:*) ax_gcc_arch="athlon-4 athlon k7" ;;
-	    6[[68]]*:*) 
+	    *5[[67]]?:*:*:*) ax_gcc_arch=k6 ;;
+	    *5[[8c]]?:*:*:*) ax_gcc_arch="k6-2 k6" ;;
+	    *5[[9d]]?:*:*:*) ax_gcc_arch="k6-3 k6" ;;
+	    *60?:*:*:*) ax_gcc_arch=k7 ;;
+	    *6[[12]]?:*:*:*) ax_gcc_arch="athlon k7" ;;
+	    *6[[34]]?:*:*:*) ax_gcc_arch="athlon-tbird k7" ;;
+	    *67?:*:*:*) ax_gcc_arch="athlon-4 athlon k7" ;;
+	    *6[[68]]?:*:*:*) 
 	       AX_GCC_X86_CPUID(0x80000006) # L2 cache size
 	       case $ax_cv_gcc_x86_cpuid_0x80000006 in
                  *:*:*[[1-9a-f]]??????:*) # (L2 = ecx >> 16) >= 256
 			ax_gcc_arch="athlon-xp athlon-4 athlon k7" ;;
                  *) ax_gcc_arch="athlon-4 athlon k7" ;;
 	       esac ;;
+	    *f[[4cef8b]]?:*:*:*) ax_gcc_arch="athlon64 k8" ;;
+	    *f5?:*:*:*) ax_gcc_arch="opteron k8" ;;
+	    *f??:*:*:*) ax_gcc_arch="k8" ;;
           esac ;;
 	*:746e6543:*:*) # IDT
 	   case $ax_cv_gcc_x86_cpuid_1 in
-	     54*:*) ax_gcc_arch=winchip-c6 ;;
-	     58*:*) ax_gcc_arch=winchip2 ;;
-	     6[[78]]*:*) ax_gcc_arch=c3 ;;
-	     69*:*) ax_gcc_arch="c3-2 c3" ;;
+	     *54?:*:*:*) ax_gcc_arch=winchip-c6 ;;
+	     *58?:*:*:*) ax_gcc_arch=winchip2 ;;
+	     *6[[78]]?:*:*:*) ax_gcc_arch=c3 ;;
+	     *69?:*:*:*) ax_gcc_arch="c3-2 c3" ;;
 	   esac ;;
      esac
      if test x"$ax_gcc_arch" = x; then # fallback
