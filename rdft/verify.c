@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.7 2002-07-23 06:39:11 stevenj Exp $ */
+/* $Id: verify.c,v 1.8 2002-07-25 03:24:24 stevenj Exp $ */
 
 #include "rdft.h"
 #include <math.h>
@@ -320,8 +320,7 @@ static void icpyhc0(dotens2_closure *k_,
      UNUSED(ondxa); UNUSED(indxb);
 
      if (n > 0) {
-	  rb[0] = a[0];
-	  ib[0] = 0;
+	  a[0] = rb[0];
      }
      for (i = 1; i < (n + 1) / 2; ++i) {
 	  a[as*i] = rb[2*i];
