@@ -52,8 +52,8 @@ static void do_file(FILE *f)
 static struct option long_options[] =
 {
   {"help", no_argument, 0, 'h'},
-  {"verbose", optional_argument, 0, 'v'},
   {"version", optional_argument, 0, 'V'},
+  {"verbose", optional_argument, 0, 'v'},
 
   {"canonical", no_argument, 0, 'c'},
 
@@ -72,6 +72,38 @@ static struct option long_options[] =
   
   {0, no_argument, 0, 0}
 };
+
+static void help(FILE *f, const char *program_name)
+{
+     fprintf(
+	  f, 
+	  "Usage: %s [options] [sizes]\n"
+"    Create wisdom (pre-planned/optimized transforms) for specified sizes,\n"
+"    writing wisdom to stdout (or to a file, using -o).\n"
+	  "\nOptions:\n"
+ "                   -h, --help: print this help\n"
+ "                -V, --version: print version/copyright info\n"
+ "                -v, --verbose: verbose output\n"
+ "              -c, --canonical: plan/optimize canonical set of sizes\n"
+ "  -o FILE, --output-file=FILE: output to FILE instead of stdout\n"
+ "              -i, --impatient: plan in IMPATIENT mode (PATIENT is default)\n"
+ "               -e, --estimate: plan in ESTIMATE mode (not recommended)\n"
+ "             -x, --exhaustive: plan in EXHAUSTIVE mode (may be slow)\n"
+ "       -n, --no-system-wisdom: don't read /etc/fftw/ system wisdom file\n"
+ "  -w FILE, --wisdom-file=FILE: read wisdom from FILE (stdin if -)\n"
+#ifdef HAVE_THREADS
+ "            -t N, --threads=N: plan with N threads\n"
+#endif
+	  "\nSize syntax: <type><inplace><direction><geometry>\n"
+ "      <type> = c/r/k for complex/real(r2c,c2r)/r2r\n" 
+ "   <inplace> = i/o for in/out-of place\n"
+ " <direction> = f/b for forward/backward, omitted for k transforms\n"
+ "  <geometry> = <n1>[x<n2>[x...]], e.g. 10x12x14\n"
+ "               -- for k transforms, after each dimension is a <kind>:\n"
+ "                     <kind> = f/b/h/e00/e01/e10/e11/o00/o01/o10/o11\n"
+ "                              for R2HC/HC2R/DHT/REDFT00/.../RODFT11\n"
+	  , program_name);
+}
 
 /* powers of two and ten up to 2^20, for now */
 static char canonical_sizes[][32] = {
@@ -114,16 +146,10 @@ int bench_main(int argc, char *argv[])
 			      long_options, &ind)) != -1) {
 	  switch (c) {
 	      case 'h':
-		   usage(argv[0], long_options); /* FIXME: better help? */
+		   help(stdout, argv[0]);
+		   exit(EXIT_SUCCESS);
 		   break;
 
-	      case 'v':
-		   if (optarg)
-			verbose = atoi(optarg);
-		   else
-			++verbose;
-		   break;
-		   
 	      case 'V':
 		   printf("fftw-wisdom tool for FFTW version " VERSION ".\n");
 		   printf(
@@ -145,7 +171,14 @@ int bench_main(int argc, char *argv[])
 "along with this program; if not, write to the Free Software\n"
 "Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA\n"
 			);
-
+		   exit(EXIT_SUCCESS);
+		   break;
+		   
+	      case 'v':
+		   if (optarg)
+			verbose = atoi(optarg);
+		   else
+			++verbose;
 		   break;
 		   
 	      case 'c':
