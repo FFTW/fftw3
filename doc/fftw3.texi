@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.201 2003-09-27 21:22:48 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.202 2003-09-27 21:29:04 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1618,14 +1618,14 @@ For details, see @ref{Wisdom}.
 @cindex wisdom, problems with
 
 @quotation
-@ifhtml
+@html
 <i>
-@end ifhtml
+@end html
 For in much wisdom is much grief, and he that increaseth knowledge
 increaseth sorrow.
-@ifhtml
+@html
 </i>
-@end ifhtml
+@end html
 [Ecclesiastes 1:18]
 @cindex Ecclesiastes
 @end quotation
