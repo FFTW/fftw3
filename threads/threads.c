@@ -180,18 +180,36 @@ typedef MPQueueID fftw_thr_id;
    it by looking at a Win32 threads manual.)  Users have reported that this
    code works under NT using Microsoft compilers.
    
-   To use it, you should #define the symbol USING_WIN32_THREADS. */
+   To use it, you should #define the symbol USING_WIN32_THREADS.  You
+   must also link to the thread-safe version of the C runtime library. */
 
 #include <windows.h>
+#include <process.h>
 
 typedef LPTHREAD_START_ROUTINE fftw_thr_function;
 typedef HANDLE fftw_thr_id;
 
+/* The following macros are based on a recommendation in the
+   July 1999 Microsoft Systems Journal (online), to substitute
+   a call to _beginthreadex for CreateThread.  The former is
+   needed in order to make the C runtime library thread-safe
+   (in particular, our threads may call malloc/free). */
+typedef unsigned (__stdcall *PTHREAD_START) (void *);
+#define chBEGINTHREADEX(psa, cbStack, pfnStartAddr, \
+    pvParam, fdwCreate, pdwThreadID)                \
+      ((HANDLE) _beginthreadex(                     \
+         (void *) (psa),                            \
+         (unsigned) (cbStack),                      \
+         (PTHREAD_START) (pfnStartAddr),            \
+         (void *) (pvParam),                        \
+         (unsigned) (fdwCreate),                    \
+         (unsigned *) (pdwThreadID))) 
+
 #define fftw_thr_spawn(tid_ptr, proc, data) { \
      DWORD thrid; \
-     *(tid_ptr) = CreateThread((LPSECURITY_ATTRIBUTES) NULL, 0, \
-			       (fftw_thr_function) proc, (LPVOID) data, \
-			       0, &thrid); \
+     *(tid_ptr) = chBEGINTHREADEX((LPSECURITY_ATTRIBUTES) NULL, 0, \
+			          (fftw_thr_function) proc, (LPVOID) data, \
+			          0, &thrid); \
 }
 
 #define fftw_thr_wait(tid) { \
