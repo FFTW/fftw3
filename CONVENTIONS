@@ -1,6 +1,6 @@
 Code conventions used in fftw3:
 
-LEARN FROM THE MASTERS:  read Ken Thompson's C compiler in Plan 9.
+LEARN FROM THE MASTERS: read Ken Thompson's C compiler in Plan 9.
    Avoid learning from C++/Java programs.
 
 INDENTATION: K&R, 5 spaces/tab.  In case of doubt, indent -kr -i5.
@@ -11,6 +11,7 @@ NAMES: keep them short.  Shorter than you think.  The Bible was written
    Common names:
 
    R       : real type, aka fftw_real
+   E       : real type for local variables (possibly extra precision)
    C       : complex type
    sz      : size
    vecsz   : vector size
@@ -33,12 +34,12 @@ NAMES: keep them short.  Shorter than you think.  The Bible was written
    typedef struct foo {...} foo;  for C++ compatibility.
 
 NAME MANGLING: use X(foo) for external names instead of fftw_foo.
-    X(foo) expands to sfftw_foo or dfftw_foo, depending on the
+    X(foo) expands to fftwf_foo or fftw_foo, depending on the
     precision.  (Unfortunately, this is a ugly form of hungarian
     notation.  Grrr...)  Names that are not exported do not need to be
     mangled.
 
-REPEATED CODE:  favor a table.  E.g., do not write
+REPEATED CODE: favor a table.  E.g., do not write
 
     foo("xxx", 1);
     foo("yyy", 2);
