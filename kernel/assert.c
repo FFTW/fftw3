@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: assert.c,v 1.6 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: assert.c,v 1.7 2005-02-25 04:04:43 stevenj Exp $ */
 #include "ifftw.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,5 +27,9 @@ void X(assertion_failed)(const char *s, int line, const char *file)
 {
      fflush(stdout);
      fprintf(stderr, "fftw: %s:%d: assertion failed: %s\n", file, line, s);
+#ifdef HAVE_ABORT
+     abort();
+#else
      exit(EXIT_FAILURE);
+#endif
 }
