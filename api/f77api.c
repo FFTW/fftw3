@@ -73,6 +73,74 @@ void F77(execute, EXECUTE)(X(plan) *p)
      X(execute)(*p);
 }
 
+void F77(destroy_plan, DESTROY_PLAN)(X(plan) *p)
+{
+     X(destroy_plan)(*p);
+}
+
+void F77(cleanup, CLEANUP)(void)
+{
+     X(cleanup)();
+}
+
+void F77(forget_wisdom, FORGET_WISDOM)(void)
+{
+     X(forget_wisdom)();
+}
+
+typedef struct {
+     void (*f77_absorber)(char *, void *);
+     void *data;
+} absorber_data;
+
+static void absorber(char c, void *d)
+{
+     absorber_data *ad = (absorber_data *) d;
+     ad->f77_absorber(&c, ad->data);
+}
+
+void F77(export_wisdom, EXPORT_WISDOM)(void (*f77_absorber)(char *, void *),
+				       void *data)
+{
+     absorber_data ad;
+     ad.f77_absorber = f77_absorber;
+     ad.data = data;
+     X(export_wisdom)(absorber, (void *) &ad);
+}
+
+typedef struct {
+     void (*f77_emitter)(int *, void *);
+     void *data;
+} emitter_data;
+
+static int emitter(void *d)
+{
+     emitter_data *ed = (emitter_data *) d;
+     int c;
+     ed->f77_emitter(&c, ed->data);
+     return (c < 0 ? EOF : c);
+}
+
+void F77(import_wisdom, IMPORT_WISDOM)(int *ierr,
+				       void (*f77_emitter)(int *, void *),
+				       void *data)
+{
+     emitter_data ed;
+     ed.f77_emitter = f77_emitter;
+     ed.data = data;
+     *ierr = X(import_wisdom)(emitter, (void *) &ed);
+}
+
+void F77(import_system_wisdom, IMPORT_SYSTEM_WISDOM)(void)
+{
+     X(import_system_wisdom)();
+}
+
+void F77(print_plan, PRINT_PLAN)(X(plan) *p)
+{
+     X(print_plan)(*p, stdout);
+}
+
 void F77(plan_dft, PLAN_DFT)(X(plan) *p, fint *rank, const fint *n,
 			     C *in, C *out, fint *sign, fint *flags)
 {
