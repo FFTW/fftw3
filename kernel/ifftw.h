@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.13 2002-06-06 22:03:17 athena Exp $ */
+/* $Id: ifftw.h,v 1.14 2002-06-07 22:07:53 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -119,6 +119,8 @@ extern const flopcnt fftw_flops_zero;
 /* minmax.c: */
 int fftw_imax(int a, int b);
 int fftw_imin(int a, int b);
+uint fftw_uimax(uint a, uint b);
+uint fftw_uimin(uint a, uint b);
 
 /*-----------------------------------------------------------------------*/
 /* tensor.c: */

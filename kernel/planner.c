@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.3 2002-06-06 22:03:17 athena Exp $ */
+/* $Id: planner.c,v 1.4 2002-06-07 22:07:53 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -283,6 +283,7 @@ void fftw_planner_dump(planner *ego, int verbose)
 	       ++empty;
      }
 
+     printf("ntry = %d\n", ego->ntry);
      printf("hashsiz = %d\n", ego->hashsiz);
      printf("cnt = %d\n", cnt);
      printf("cnt_null = %d\n", cnt_null);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vecloop.c,v 1.2 2002-06-06 22:03:17 athena Exp $ */
+/* $Id: vecloop.c,v 1.3 2002-06-07 22:07:53 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -92,53 +92,59 @@ static void print(plan *ego_, plan_printf prntf)
    it corresponds to.  The basic idea here is that we return the
    vecloop_dim'th valid dimension, starting from the end if
    vecloop_dim < 0. */
-static int really_pickdim(int vecloop_dim, tensor vecsz, int oop)
+static int really_pickdim(int vecloop_dim, tensor vecsz, int oop, uint *vdim)
 {
      uint i;
      int count_ok = 0;
      if (vecloop_dim > 0) {
 	  for (i = 0; i < vecsz.rnk; ++i) {
 	       if (vecsz.dims[i].is == vecsz.dims[i].os || oop)
-		    if (++count_ok == vecloop_dim)
-			 return (int)i;
+		    if (++count_ok == vecloop_dim) {
+			 *vdim = i;
+			 return 1;
+		    }
 	  }
      } else if (vecloop_dim < 0) {
-	  for (i = vecsz.rnk - 1; i >= 0; --i) {
-	       if (vecsz.dims[i].is == vecsz.dims[i].os || oop)
-		    if (++count_ok == -vecloop_dim)
-			 return (int)i;
+	  for (i = vecsz.rnk; i > 0; --i) {
+	       if (vecsz.dims[i - 1].is == vecsz.dims[i - 1].os || oop)
+		    if (++count_ok == -vecloop_dim) {
+			 *vdim = i - 1;
+			 return 1;
+		    }
 	  }
      }
-     return -1;
+     return 0;
 }
 
-static int pickdim(const S *ego, tensor vecsz, int oop)
+static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
 {
-     uint i;
-     int d = really_pickdim(ego->vecloop_dim, vecsz, oop);
+     uint i, d1;
 
-     /* check whether some buddy solver would have produced the same
-        dim.  If so, consider this solver unapplicable and let the
-        buddy take care of it.  The smallest buddy is applicable. */
+     if (!really_pickdim(ego->vecloop_dim, vecsz, oop, dp))
+	  return 0;
 
+     /* check whether some buddy solver would produce the same dim.
+        If so, consider this solver unapplicable and let the buddy
+        take care of it.  The smallest buddy is applicable. */
      for (i = 0; i < ego->nbuddies; ++i) {
 	  if (ego->buddies[i] < ego->vecloop_dim &&
-	      d == really_pickdim(ego->buddies[i], vecsz, oop))
-	       return -1;
+	      (really_pickdim(ego->buddies[i], vecsz, oop, &d1),
+	       *dp == d1))
+	       return 0;
      }
-
-     return d;
+     return 1;
 }
 
-static int applicable(const solver *ego_, const problem *p_)
+static int applicable(const solver *ego_, const problem *p_, uint *dp)
 {
      if (DFTP(p_)) {
 	  const S *ego = (const S *) ego_;
 	  const problem_dft *p = (const problem_dft *) p_;
 
-	  if (p->vecsz.rnk > 0 &&
-	      pickdim(ego, p->vecsz, p->ri != p->ro) >= 0)
-	       return 1;
+	  return (1
+		  && p->vecsz.rnk > 0
+		  && pickdim(ego, p->vecsz, p->ri != p->ro, dp)
+	       );
      }
 
      return 0;
@@ -148,27 +154,26 @@ static enum score score(const solver *ego_, const problem *p_)
 {
      const S *ego = (const S *) ego_;
      const problem_dft *p = (const problem_dft *) p_;
-     int vecloop_dim;
+     uint vdim;
+     iodim *d;
      int op;
 
-     if (!applicable(ego_, p_))
+     if (!applicable(ego_, p_, &vdim))
 	  return BAD;
 
      op = p->ri != p->ro;	/* out-of-place? */
 
      /* Heuristic: if the transform is multi-dimensional, and the
         vector stride is less than the transform size, then we
-        probably want to use an dft-nd plan first in order to combine
+        probably want to use an rank>=2 plan first in order to combine
         this vector with the transform-dimension vectors. */
-     vecloop_dim = pickdim(ego, p->vecsz, op);
+     d = p->vecsz.dims + vdim;
      if (p->sz.rnk > 1 &&
-	 fftw_imin(p->vecsz.dims[vecloop_dim].is, 
-		   p->vecsz.dims[vecloop_dim].os) <
-	 fftw_tensor_max_index(p->sz))
+	 fftw_imin(d->is, d->os) < fftw_tensor_max_index(p->sz))
 	  return UGLY;
 
-     /* Another heuristic: don't use a vecloop for rnk-0 transforms
-        and a vector rnk-1, since this is handled by apply-null */
+     /* Another heuristic: don't use a vecloop for rank-0 transforms
+        and a vector rank-1, since this is handled by rank0 */
      if (p->sz.rnk == 0 && p->vecsz.rnk == 1)
 	  return UGLY;
 
@@ -182,23 +187,23 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
      P *pln;
      plan *cld;
      problem *cldp;
-     int vecloop_dim;
+     uint vdim;
+     iodim *d;
 
      static const plan_adt padt = { 
 	  fftw_dft_solve, awake, print, destroy 
      };
 
 
-     if (!applicable(ego_, p_))
+     if (!applicable(ego_, p_, &vdim))
 	  return (plan *) 0;
      p = (const problem_dft *) p_;
 
-     vecloop_dim = pickdim(ego, p->vecsz, p->ri != p->ro);
      cldp = 
-	  fftw_mkproblem_dft_d(fftw_tensor_copy(p->sz),
-			       fftw_tensor_copy_except(p->vecsz, 
-						       (uint) vecloop_dim),
-			       p->ri, p->ii, p->ro, p->io);
+	  fftw_mkproblem_dft_d(
+	       fftw_tensor_copy(p->sz),
+	       fftw_tensor_copy_except(p->vecsz, vdim),
+	       p->ri, p->ii, p->ro, p->io);
      cld = planner->adt->mkplan(planner, cldp);
      fftw_problem_destroy(cldp);
      if (!cld)
@@ -207,9 +212,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *planner)
      pln = MKPLAN_DFT(P, &padt, apply);
 
      pln->cld = cld;
-     pln->vl = p->vecsz.dims[vecloop_dim].n;
-     pln->ivs = p->vecsz.dims[vecloop_dim].is;
-     pln->ovs = p->vecsz.dims[vecloop_dim].os;
+     d = p->vecsz.dims + vdim;
+     pln->vl = d->n;
+     pln->ivs = d->is;
+     pln->ovs = d->os;
 
      pln->solver = ego;
      pln->super.super.cost = cld->cost * pln->vl;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: conf.c,v 1.1 2002-06-07 11:07:46 athena Exp $ */
+/* $Id: conf.c,v 1.2 2002-06-07 22:07:53 athena Exp $ */
 
 #include "dft.h"
 
@@ -27,4 +27,5 @@ void fftw_dft_conf_standard(planner *p)
      fftw_solvtab_exec(fftw_solvtab_dft_standard, p);
      fftw_dft_vecloop_register(p);
      fftw_dft_rank0_register(p);
+     fftw_dft_rank_geq2_register(p);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: minmax.c,v 1.1.1.1 2002-06-02 18:42:32 athena Exp $ */
+/* $Id: minmax.c,v 1.2 2002-06-07 22:07:53 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -28,6 +28,16 @@ int fftw_imax(int a, int b)
 }
 
 int fftw_imin(int a, int b)
+{
+     return (a < b) ? a : b;
+}
+
+uint fftw_uimax(uint a, uint b)
+{
+     return (a > b) ? a : b;
+}
+
+uint fftw_uimin(uint a, uint b)
 {
      return (a < b) ? a : b;
 }

@@ -23,7 +23,16 @@ AC_ARG_ENABLE(research-mode,
        yes) research_mode=true  ;;
        no)  research_mode=false ;;
        *) AC_MSG_ERROR(bad value ${enableval} for --enable-research-mode);;
-  esac],[research_mode=false])
+  esac],
+ [dnl Enable/disable research mode depending on the presence of file
+  dnl RESEARCH-MODE.  In this way, we can distribute two versions
+  dnl of FFTW and configure does the right thing by default.
+  if test -f ${srcdir}/RESEARCH-MODE; then
+     research_mode=true
+  else
+     research_mode=false
+  fi
+ ])
 AM_CONDITIONAL(RESEARCH_MODE, test x$research_mode = xtrue)
 if test x$research_mode = xtrue; then
     AC_DEFINE(RESEARCH_MODE, 1, [Define to enable experimental code])

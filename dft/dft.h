@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.6 2002-06-07 11:07:46 athena Exp $ */
+/* $Id: dft.h,v 1.7 2002-06-07 22:07:53 athena Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -60,6 +60,7 @@ solver *fftw_mksolver_dft_ct_dit(kdft_dit codelet, const ct_desc *desc);
 
 void fftw_dft_vecloop_register(planner *p);
 void fftw_dft_rank0_register(planner *p);
+void fftw_dft_rank_geq2_register(planner *p);
 
 /* configurations */
 void fftw_dft_conf_standard(planner *p);
