@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-rdft.c,v 1.7 2003-01-05 07:34:36 stevenj Exp $ */
+/* $Id: verify-rdft.c,v 1.8 2003-01-13 09:20:37 athena Exp $ */
 
 #include "rdft.h"
 #include "debug.h"
@@ -307,13 +307,13 @@ static void really_verify(plan *pln, const problem_rdft *p,
      vecn = X(tensor_sz)(p->vecsz);
      N = n * vecn;
 
-     inA = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     inB = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     inC = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     outA = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     outB = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     outC = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     tmp = (C *) fftw_malloc(N * sizeof(C), OTHER);
+     inA = (C *) MALLOC(N * sizeof(C), OTHER);
+     inB = (C *) MALLOC(N * sizeof(C), OTHER);
+     inC = (C *) MALLOC(N * sizeof(C), OTHER);
+     outA = (C *) MALLOC(N * sizeof(C), OTHER);
+     outB = (C *) MALLOC(N * sizeof(C), OTHER);
+     outC = (C *) MALLOC(N * sizeof(C), OTHER);
+     tmp = (C *) MALLOC(N * sizeof(C), OTHER);
 
      nfo.pln = pln;
      nfo.p = p;
@@ -341,13 +341,13 @@ static void really_verify(plan *pln, const problem_rdft *p,
      X(tensor_destroy)(nfo.totalsz);
      X(tensor_destroy)(nfo.pckdsz);
      X(tensor_destroy)(nfo.pckdvecsz);
-     X(free)(tmp);
-     X(free)(outC);
-     X(free)(outB);
-     X(free)(outA);
-     X(free)(inC);
-     X(free)(inB);
-     X(free)(inA);
+     X(ifree)(tmp);
+     X(ifree)(outC);
+     X(ifree)(outB);
+     X(ifree)(outA);
+     X(ifree)(inC);
+     X(ifree)(inB);
+     X(ifree)(inA);
 }
 
 static void really_verify2(plan *pln, const problem_rdft2 *p, 
@@ -364,13 +364,13 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
      vecn = X(tensor_sz)(p->vecsz);
      N = n * vecn;
 
-     inA = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     inB = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     inC = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     outA = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     outB = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     outC = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     tmp = (C *) fftw_malloc(N * sizeof(C), OTHER);
+     inA = (C *) MALLOC(N * sizeof(C), OTHER);
+     inB = (C *) MALLOC(N * sizeof(C), OTHER);
+     inC = (C *) MALLOC(N * sizeof(C), OTHER);
+     outA = (C *) MALLOC(N * sizeof(C), OTHER);
+     outB = (C *) MALLOC(N * sizeof(C), OTHER);
+     outC = (C *) MALLOC(N * sizeof(C), OTHER);
+     tmp = (C *) MALLOC(N * sizeof(C), OTHER);
 
      nfo.pln = pln;
      nfo.p = 0;
@@ -404,13 +404,13 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
      X(tensor_destroy)(nfo.probsz2);
      X(tensor_destroy)(nfo.totalsz2);
      X(tensor_destroy)(nfo.pckdsz2);
-     X(free)(tmp);
-     X(free)(outC);
-     X(free)(outB);
-     X(free)(outA);
-     X(free)(inC);
-     X(free)(inB);
-     X(free)(inA);
+     X(ifree)(tmp);
+     X(ifree)(outC);
+     X(ifree)(outB);
+     X(ifree)(outA);
+     X(ifree)(inC);
+     X(ifree)(inB);
+     X(ifree)(inA);
 }
 
 void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.168 2003-01-11 16:07:24 athena Exp $ */
+/* $Id: ifftw.h,v 1.169 2003-01-13 09:20:36 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -100,7 +100,7 @@ extern void X(debug)(const char *format, ...);
 #define MIN_ALIGNMENT 16
 
 /* objects allocated by malloc, for statistical purposes */
-enum fftw_malloc_what {
+enum malloc_tag {
      EVERYTHING,
      PLANS,
      SOLVERS,
@@ -116,22 +116,22 @@ enum fftw_malloc_what {
      MALLOC_WHAT_LAST		/* must be last */
 };
 
-extern void X(free)(void *ptr);
-extern void X(free0)(void *ptr);
+extern void X(ifree)(void *ptr);
+extern void X(ifree0)(void *ptr);
 
 #ifdef FFTW_DEBUG
 
-extern void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
+extern void *X(malloc_debug)(size_t n, enum malloc_tag what,
 			     const char *file, int line);
-#define fftw_malloc(n, what) X(malloc_debug)(n, what, __FILE__, __LINE__)
-#define non_fftw_malloc(n, what) fftw_malloc(n, what)
+#define MALLOC(n, what) X(malloc_debug)(n, what, __FILE__, __LINE__)
+#define NATIVE_MALLOC(n, what) MALLOC(n, what)
 void X(malloc_print_minfo)(void);
 
 #else /* ! FFTW_DEBUG */
 
 extern void *X(malloc_plain)(size_t sz);
-#define fftw_malloc(n, what)  X(malloc_plain)(n)
-#define non_fftw_malloc(n, what) malloc(n)
+#define MALLOC(n, what)  X(malloc_plain)(n)
+#define NATIVE_MALLOC(n, what) malloc(n)
 
 #endif
 
@@ -164,8 +164,8 @@ extern int X(in_thread);
 
 #else /* ! HAVE_ALLOCA */
 /* use malloc instead of alloca */
-#define STACK_MALLOC(T, p, x) p = (T)fftw_malloc(x, OTHER)
-#define STACK_FREE(x) X(free)(x)
+#define STACK_MALLOC(T, p, x) p = (T)MALLOC(x, OTHER)
+#define STACK_FREE(x) X(ifree)(x)
 #endif /* ! HAVE_ALLOCA */
 
 

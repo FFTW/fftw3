@@ -43,6 +43,6 @@ X(plan) X(plan_many_r2r)(unsigned int rank, const unsigned int *n,
 						   istride, ostride),
 			      X(mktensor_1d)(howmany, idist, odist), 
 			      in, out, k));
-     X(free0)(k);
+     X(ifree0)(k);
      return p;
 }

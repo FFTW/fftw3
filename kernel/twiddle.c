@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.18 2002-09-14 01:57:50 athena Exp $ */
+/* $Id: twiddle.c,v 1.19 2003-01-13 09:20:37 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -98,7 +98,7 @@ static R *compute(const tw_instr *instr, uint n, uint r, uint m)
      p = instr;
      ntwiddle = twlen0(r, &p);
 
-     W0 = W = (R *)fftw_malloc(ntwiddle * (m / p->v) * sizeof(R), TWIDDLES);
+     W0 = W = (R *)MALLOC(ntwiddle * (m / p->v) * sizeof(R), TWIDDLES);
 
      for (j = 0; j < m; j += p->v) {
           for (p = instr; p->op != TW_NEXT; ++p) {
@@ -149,7 +149,7 @@ void X(mktwiddle)(twid **pp, const tw_instr *instr, uint n, uint r, uint m)
 	  goto done;
      }
 
-     p = (twid *) fftw_malloc(sizeof(twid), TWIDDLES);
+     p = (twid *) MALLOC(sizeof(twid), TWIDDLES);
      p->n = n;
      p->r = r;
      p->m = m;
@@ -176,8 +176,8 @@ void X(twiddle_destroy)(twid **pp)
                for (q = &twlist; *q; q = &((*q)->cdr)) {
                     if (*q == p) {
                          *q = p->cdr;
-                         X(free)(p->W);
-                         X(free)(p);
+                         X(ifree)(p->W);
+                         X(ifree)(p);
 			 goto done;
                     }
                }

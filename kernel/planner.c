@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.125 2003-01-13 01:01:51 stevenj Exp $ */
+/* $Id: planner.c,v 1.126 2003-01-13 09:20:36 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -51,7 +51,7 @@
 static void sgrow(planner *ego)
 {
      uint osiz = ego->slvdescsiz, nsiz = 1 + osiz + osiz / 4;
-     slvdesc *ntab = (slvdesc *)fftw_malloc(nsiz * sizeof(slvdesc), SLVDESCS);
+     slvdesc *ntab = (slvdesc *)MALLOC(nsiz * sizeof(slvdesc), SLVDESCS);
      slvdesc *otab = ego->slvdescs;
      uint i;
 
@@ -59,7 +59,7 @@ static void sgrow(planner *ego)
      ego->slvdescsiz = nsiz;
      for (i = 0; i < osiz; ++i)
 	  ntab[i] = otab[i];
-     X(free0)(otab);
+     X(ifree0)(otab);
 }
 
 static void register_solver(planner *ego, solver *s)
@@ -195,7 +195,7 @@ static void rehash(planner *ego, uint nsiz)
      solution *osol = ego->solutions, *nsol;
 
      nsiz = X(next_prime)(nsiz);
-     nsol = (solution *)fftw_malloc(nsiz * sizeof(solution), HASHT);
+     nsol = (solution *)MALLOC(nsiz * sizeof(solution), HASHT);
      ++ego->nrehash;
 
      /* init new table */
@@ -213,7 +213,7 @@ static void rehash(planner *ego, uint nsiz)
 	       hinsert0(ego, l->s, l->flags, l->slvndx, 0);
      }
 
-     X(free0)(osol);
+     X(ifree0)(osol);
 }
 
 static uint minsz(uint nelem)
@@ -458,7 +458,7 @@ static void forget(planner *ego, amnesia a)
 static void htab_destroy(planner *ego)
 {
      forget(ego, FORGET_EVERYTHING);
-     X(free)(ego->solutions);
+     X(ifree)(ego->solutions);
      ego->nelem = 0;
 }
 
@@ -504,7 +504,7 @@ static int imprt(planner *ego, scanner *sc)
      /* make a backup copy of the hash table (cache the hash) */
      {
 	  uint h, hsiz = ego->hashsiz;
-	  sol = (solution *)fftw_malloc(hsiz * sizeof(solution), HASHT);
+	  sol = (solution *)MALLOC(hsiz * sizeof(solution), HASHT);
 	  for (h = 0; h < hsiz; ++h)
 	       sol[h] = ego->solutions[h];
      }
@@ -526,12 +526,12 @@ static int imprt(planner *ego, scanner *sc)
 	  hinsert(ego, sig, (unsigned short)flags, slvndx);
      }
 
-     X(free0)(sol);
+     X(ifree0)(sol);
      return 1;
 
  bad:
      /* ``The wisdom of FFTW must be above suspicion.'' */
-     X(free0)(ego->solutions);
+     X(ifree0)(ego->solutions);
      ego->solutions = sol;
      return 0;
 }
@@ -553,7 +553,7 @@ planner *X(mkplanner)(void)
 	  register_solver, mkplan, forget, exprt, imprt
      };
 
-     planner *p = (planner *) fftw_malloc(sizeof(planner), PLANNERS);
+     planner *p = (planner *) MALLOC(sizeof(planner), PLANNERS);
 
      p->adt = &padt;
      p->nplan = p->nprob = p->nrehash = 0;
@@ -588,8 +588,8 @@ void X(planner_destroy)(planner *ego)
 	  X(solver_destroy)(s);
      });
 
-     X(free0)(ego->slvdescs);
-     X(free)(ego); /* dona eis requiem */
+     X(ifree0)(ego->slvdescs);
+     X(ifree)(ego); /* dona eis requiem */
 }
 
 plan *X(mkplan_d)(planner *ego, problem *p)

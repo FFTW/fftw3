@@ -40,7 +40,7 @@ static uint *reverse_n(uint rnk, const uint *n)
 {
      uint *nrev, i;
      A(FINITE_RNK(rnk));
-     nrev = fftw_malloc(sizeof(uint) * rnk, PROBLEMS);
+     nrev = MALLOC(sizeof(uint) * rnk, PROBLEMS);
      for (i = 0; i < rnk; ++i)
 	  nrev[rnk-i-1] = n[i];
      return nrev;
@@ -52,7 +52,7 @@ static X(iodim) *make_dims(uint rnk, const uint *n,
      X(iodim) *dims;
      uint i;
      A(FINITE_RNK(rnk));
-     dims = fftw_malloc(sizeof(X(iodim)) * rnk, PROBLEMS);
+     dims = MALLOC(sizeof(X(iodim)) * rnk, PROBLEMS);
      for (i = 0; i < rnk; ++i) {
           dims[i].n = n[i];
           dims[i].is = is[i];
@@ -73,7 +73,7 @@ void F77(plan_dft, PLAN_DFT)(X(plan) *p,
 {
      unsigned int *nrev = reverse_n(*rank, n);
      *p = X(plan_dft)(*rank, nrev, in, out, *sign, *flags);
-     X(free0)(nrev);
+     X(ifree0)(nrev);
 }
 
 void F77(plan_dft_1d, PLAN_DFT_1D)(
@@ -117,9 +117,9 @@ void F77(plan_many_dft, PLAN_MANY_DFT)(
 			   in, inembedrev, *istride, *idist,
 			   out, onembedrev, *ostride, *odist,
 			   *sign, *flags);
-     X(free0)(onembedrev);
-     X(free0)(inembedrev);
-     X(free0)(nrev);
+     X(ifree0)(onembedrev);
+     X(ifree0)(inembedrev);
+     X(ifree0)(nrev);
 }
 
 void F77(plan_guru_dft, PLAN_GURU_DFT)(
@@ -135,8 +135,8 @@ void F77(plan_guru_dft, PLAN_GURU_DFT)(
      *p = X(plan_guru_dft)(*rank, dims, *howmany_rank, howmany_dims,
 			   ri, ii, ro, io,
 			   *flags);
-     X(free0)(howmany_dims);
-     X(free0)(dims);
+     X(ifree0)(howmany_dims);
+     X(ifree0)(dims);
 }
 
 void F77(execute_dft, EXECUTE_DFT)(X(plan) *p, R *ri, R *ii, R *ro, R *io)

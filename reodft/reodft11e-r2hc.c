@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.16 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.17 2003-01-13 09:20:37 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -56,7 +56,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
      R *buf;
      E cur;
 
-     buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  /* I wish that this didn't require an extra pass. */
@@ -105,7 +105,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	  }
      }
 
-     X(free)(buf);
+     X(ifree)(buf);
 }
 
 /* like for rodft01, rodft11 is obtained from redft11 by
@@ -121,7 +121,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
      R *buf;
      E cur;
 
-     buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  /* I wish that this didn't require an extra pass. */
@@ -170,7 +170,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 	  }
      }
 
-     X(free)(buf);
+     X(ifree)(buf);
 }
 
 static void awake(plan *ego_, int flg)
@@ -243,12 +243,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_rdft *) p_;
 
      n = p->sz->dims[0].n;
-     buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      cld = X(mkplan_d)(plnr, X(mkproblem_rdft_1_d)(X(mktensor_1d)(n, 1, 1),
                                                    X(mktensor_0d)(),
                                                    buf, buf, R2HC));
-     X(free)(buf);
+     X(ifree)(buf);
      if (!cld)
           return (plan *)0;
 

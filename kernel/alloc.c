@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.22 2003-01-12 17:45:26 stevenj Exp $ */
+/* $Id: alloc.c,v 1.23 2003-01-13 09:20:36 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -118,7 +118,7 @@ static struct minfo *minfo[HASHSZ] = {0};
 int X(in_thread) = 0;
 #endif
 
-void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
+void *X(malloc_debug)(size_t n, enum malloc_tag what,
                       const char *file, int line)
 {
      char *p;
@@ -179,7 +179,7 @@ void *X(malloc_debug)(size_t n, enum fftw_malloc_what what,
      return (void *) p;
 }
 
-void X(free)(void *p)
+void X(ifree)(void *p)
 {
      char *q;
 
@@ -303,15 +303,15 @@ void *X(malloc_plain)(size_t n)
      return p;
 }
 
-void X(free)(void *p)
+void X(ifree)(void *p)
 {
      real_free(p);
 }
 
 #endif
 
-void X(free0)(void *p)
+void X(ifree0)(void *p)
 {
      /* common pattern */
-     if (p) X(free)(p);
+     if (p) X(ifree)(p);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.32 2002-09-26 19:14:38 athena Exp $ */
+/* $Id: tensor.c,v 1.33 2003-01-13 09:20:37 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -28,20 +28,20 @@ tensor *X(mktensor)(uint rnk)
 
 #if defined(STRUCT_HACK_KR)
      if (FINITE_RNK(rnk) && rnk > 1)
-	  x = (tensor *)fftw_malloc(sizeof(tensor) + (rnk - 1) * sizeof(iodim),
+	  x = (tensor *)MALLOC(sizeof(tensor) + (rnk - 1) * sizeof(iodim),
 				    TENSORS);
      else
-	  x = (tensor *)fftw_malloc(sizeof(tensor), TENSORS);
+	  x = (tensor *)MALLOC(sizeof(tensor), TENSORS);
 #elif defined(STRUCT_HACK_C99)
      if (FINITE_RNK(rnk))
-	  x = (tensor *)fftw_malloc(sizeof(tensor) + rnk * sizeof(iodim),
+	  x = (tensor *)MALLOC(sizeof(tensor) + rnk * sizeof(iodim),
 				    TENSORS);
      else
-	  x = (tensor *)fftw_malloc(sizeof(tensor), TENSORS);
+	  x = (tensor *)MALLOC(sizeof(tensor), TENSORS);
 #else
-     x = (tensor *)fftw_malloc(sizeof(tensor), TENSORS);
+     x = (tensor *)MALLOC(sizeof(tensor), TENSORS);
      if (FINITE_RNK(rnk) && rnk > 0)
-          x->dims = (iodim *)fftw_malloc(sizeof(iodim) * rnk, TENSORS);
+          x->dims = (iodim *)MALLOC(sizeof(iodim) * rnk, TENSORS);
      else
           x->dims = 0;
 #endif
@@ -53,9 +53,9 @@ tensor *X(mktensor)(uint rnk)
 void X(tensor_destroy)(tensor *sz)
 {
 #if !defined(STRUCT_HACK_C99) && !defined(STRUCT_HACK_KR)
-     X(free0)(sz->dims);
+     X(ifree0)(sz->dims);
 #endif
-     X(free)(sz);
+     X(ifree)(sz);
 }
 
 uint X(tensor_sz)(const tensor *sz)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.24 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: buffered2.c,v 1.25 2003-01-13 09:20:37 athena Exp $ */
 
 #include "rdft.h"
 
@@ -134,7 +134,7 @@ static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
      int ivs = ego->ivs, ovs = ego->ovs, os = ego->os;
      R *bufs;
 
-     bufs = (R *)fftw_malloc(sizeof(R) * nbuf * bufdist, BUFFERS);
+     bufs = (R *)MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
      for (i = nbuf; i <= vl; i += nbuf) {
           /* transform to bufs: */
@@ -155,7 +155,7 @@ static void apply_r2hc(plan *ego_, R *r, R *rio, R *iio)
 	       hc2c(n, b, rio, iio, os);
      }
 
-     X(free)(bufs);
+     X(ifree)(bufs);
 }
 
 static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
@@ -167,7 +167,7 @@ static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
      int ivs = ego->ivs, ovs = ego->ovs, is = ego->os;
      R *bufs;
 
-     bufs = (R *)fftw_malloc(sizeof(R) * nbuf * bufdist, BUFFERS);
+     bufs = (R *)MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
      for (i = nbuf; i <= vl; i += nbuf) {
           /* copy to bufs */
@@ -189,7 +189,7 @@ static void apply_hc2r(plan *ego_, R *r, R *rio, R *iio)
 	  cldrest->apply((plan *) cldrest, bufs, r);
      }
 
-     X(free)(bufs);
+     X(ifree)(bufs);
 }
 
 static void awake(plan *ego_, int flg)
@@ -333,7 +333,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
 
      /* initial allocation for the purpose of planning */
-     bufs = (R *) fftw_malloc(sizeof(R) * nbuf * bufdist, BUFFERS);
+     bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
      if (R2HC_KINDP(p->kind))
 	  cldp =
@@ -367,7 +367,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!(cldrest = X(mkplan_d)(plnr, cldp))) goto nada;
 
      /* deallocate buffers, let apply() allocate them for real */
-     X(free)(bufs);
+     X(ifree)(bufs);
      bufs = 0;
 
      pln = MKPLAN_RDFT2(P, &padt, R2HC_KINDP(p->kind) ? apply_r2hc:apply_hc2r);
@@ -398,7 +398,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     X(free0)(bufs);
+     X(ifree0)(bufs);
      X(plan_destroy_internal)(cldrest);
      X(plan_destroy_internal)(cld);
      return (plan *) 0;

@@ -37,6 +37,6 @@ X(plan) X(plan_guru_r2r)(unsigned int rank, const X(iodim) *dims,
 	  X(mkproblem_rdft_d)(X(mktensor_iodims)(rank, dims),
 			      X(mktensor_iodims)(howmany_rank, howmany_dims),
 			      in, out, k));
-     X(free0)(k);
+     X(ifree0)(k);
      return p;
 }

@@ -18,14 +18,14 @@
  *
  */
 
-/* $Id: problem.c,v 1.6 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: problem.c,v 1.7 2003-01-13 09:20:37 athena Exp $ */
 
 #include "ifftw.h"
 
 /* constructor */
 problem *X(mkproblem)(size_t sz, const problem_adt *adt)
 {
-     problem *p = (problem *)fftw_malloc(sz, PROBLEMS);
+     problem *p = (problem *)MALLOC(sz, PROBLEMS);
 
      p->adt = adt;
      return p;

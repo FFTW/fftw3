@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.41 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: buffered.c,v 1.42 2003-01-13 09:20:36 athena Exp $ */
 
 #include "dft.h"
 
@@ -51,7 +51,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
      uint nbuf = ego->nbuf;
-     R *bufs = (R *)fftw_malloc(sizeof(R) * nbuf * ego->bufdist * 2, BUFFERS);
+     R *bufs = (R *)MALLOC(sizeof(R) * nbuf * ego->bufdist * 2, BUFFERS);
 
      plan_dft *cld = (plan_dft *) ego->cld;
      plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
@@ -79,7 +79,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      cldrest = (plan_dft *) ego->cldrest;
      cldrest->apply((plan *) cldrest, ri, ii, ro, io);
 
-     X(free)(bufs);
+     X(ifree)(bufs);
 }
 
 
@@ -221,7 +221,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      ioffset = 1 - roffset;
 
      /* initial allocation for the purpose of planning */
-     bufs = (R *) fftw_malloc(sizeof(R) * nbuf * bufdist * 2, BUFFERS);
+     bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist * 2, BUFFERS);
 
      cld = X(mkplan_d)(plnr,
 		       X(mkproblem_dft_d)(
@@ -242,7 +242,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           goto nada;
 
      /* deallocate buffers, let apply() allocate them for real */
-     X(free)(bufs);
+     X(ifree)(bufs);
      bufs = 0;
 
      /* plan the leftover transforms (cldrest): */
@@ -278,7 +278,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     X(free0)(bufs);
+     X(ifree0)(bufs);
      X(plan_destroy_internal)(cldrest);
      X(plan_destroy_internal)(cldcpy);
      X(plan_destroy_internal)(cld);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.11 2003-01-11 16:07:25 athena Exp $ */
+/* $Id: verify-reodft.c,v 1.12 2003-01-13 09:20:37 athena Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -491,13 +491,13 @@ static void really_verify(plan *pln, const problem_rdft *p,
 	      return;
      }
 
-     inA = (R *) fftw_malloc(N * sizeof(R), OTHER);
-     inB = (R *) fftw_malloc(N * sizeof(R), OTHER);
-     inC = (R *) fftw_malloc(N * sizeof(R), OTHER);
-     outA = (R *) fftw_malloc(N * sizeof(R), OTHER);
-     outB = (R *) fftw_malloc(N * sizeof(R), OTHER);
-     outC = (R *) fftw_malloc(N * sizeof(R), OTHER);
-     tmp = (R *) fftw_malloc(N * sizeof(R), OTHER);
+     inA = (R *) MALLOC(N * sizeof(R), OTHER);
+     inB = (R *) MALLOC(N * sizeof(R), OTHER);
+     inC = (R *) MALLOC(N * sizeof(R), OTHER);
+     outA = (R *) MALLOC(N * sizeof(R), OTHER);
+     outB = (R *) MALLOC(N * sizeof(R), OTHER);
+     outC = (R *) MALLOC(N * sizeof(R), OTHER);
+     tmp = (R *) MALLOC(N * sizeof(R), OTHER);
 
      nfo.pln = pln;
      nfo.p = p;
@@ -520,13 +520,13 @@ static void really_verify(plan *pln, const problem_rdft *p,
      X(tensor_destroy)(nfo.totalsz);
      X(tensor_destroy)(nfo.pckdsz);
      X(tensor_destroy)(nfo.pckdvecsz);
-     X(free)(tmp);
-     X(free)(outC);
-     X(free)(outB);
-     X(free)(outA);
-     X(free)(inC);
-     X(free)(inB);
-     X(free)(inA);
+     X(ifree)(tmp);
+     X(ifree)(outC);
+     X(ifree)(outB);
+     X(ifree)(outA);
+     X(ifree)(inC);
+     X(ifree)(inB);
+     X(ifree)(inA);
 }
 
 void X(reodft_verify)(plan *pln, const problem_rdft *p, uint rounds)

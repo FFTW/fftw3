@@ -37,7 +37,7 @@ apiplan *X(mkapiplan)(unsigned int flags, problem *prb)
 	  AWAKE(pln, 1);
 
 	  /* build apiplan */
-	  p = (apiplan *)fftw_malloc(sizeof(apiplan), PLANS);
+	  p = (apiplan *)MALLOC(sizeof(apiplan), PLANS);
 	  p->pln = pln;
 	  p->prb = prb;
 
@@ -62,6 +62,6 @@ void X(destroy_plan)(X(plan) p)
 	  AWAKE(p->pln, 0);
 	  X(plan_destroy_internal)(p->pln);
 	  X(problem_destroy)(p->prb);
-	  X(free)(p);
+	  X(ifree)(p);
      }
 }

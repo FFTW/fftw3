@@ -122,7 +122,7 @@ static void apply_dit(plan *ego_, R *I, R *O)
      ii = O + (m - 1) * os;
      io = O + (r * m - 1) * os;
 
-     buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * (r - 1) * 2, BUFFERS);
 
      for (j = 2; j < m; j += 2, rio += os, ii -= os, io -= os, W += 2*(r-1)) {
 	  /* First, permute the input and multiply by W, storing in buf: */
@@ -162,7 +162,7 @@ static void apply_dit(plan *ego_, R *I, R *O)
 	happens anyway because all the factors of 2 get divided out
 	first by codelets (Rader is UGLY for small factors). */
 
-     X(free)(buf);
+     X(ifree)(buf);
 }
 
 static void apply_dif(plan *ego_, R *I, R *O)
@@ -194,7 +194,7 @@ static void apply_dif(plan *ego_, R *I, R *O)
      io = I + (m - 1) * is;
      ii = I + (r * m - 1) * is;
 
-     buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * (r - 1) * 2, BUFFERS);
 
      for (j = 2; j < m; j += 2, rio += is, ii -= is, io -= is, W += 2*(r-1)) {
 	  /* second half of array must be unfiddled to get real/imag
@@ -245,7 +245,7 @@ static void apply_dif(plan *ego_, R *I, R *O)
 	happens anyway because all the factors of 2 get divided out
 	first by codelets (Rader is UGLY for small factors). */
 
-     X(free)(buf);
+     X(ifree)(buf);
 
      /* size-m child transforms: */
      {
@@ -263,7 +263,7 @@ static R *mktwiddle(uint m, uint r, uint g)
      if ((W = X(rader_tl_find)(m, r, g, twiddles)))
 	  return W;
 
-     W = (R *)fftw_malloc(sizeof(R) * (r - 1) * ((m-1)/2) * 2, TWIDDLES);
+     W = (R *)MALLOC(sizeof(R) * (r - 1) * ((m-1)/2) * 2, TWIDDLES);
      for (i = 1; i < (m+1)/2; ++i) {
 	  for (gpower = 1, j = 0; j < r - 1;
 	       ++j, gpower = MULMOD(gpower, g, r)) {
@@ -360,14 +360,14 @@ static int mkP(P *pln, uint r, R *O, int ios, rdft_kind kind, planner *plnr)
      if (!cldr0) goto nada;
 
      /* initial allocation for the purpose of planning */
-     buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * (r - 1) * 2, BUFFERS);
 
      cldr = X(mkplan_d)(plnr, X(mkproblem_dft_d)(X(mktensor_1d)(r - 1, 2, 2),
 						 X(mktensor_1d)(1, 0, 0),
 						 buf, buf + 1, buf, buf + 1));
      if (!cldr) goto nada;
 
-     X(free)(buf);
+     X(ifree)(buf);
 
      pln->cldr = cldr;
      pln->cldr0 = cldr0;
@@ -386,7 +386,7 @@ static int mkP(P *pln, uint r, R *O, int ios, rdft_kind kind, planner *plnr)
      return 1;
 
  nada:
-     X(free0)(buf);
+     X(ifree0)(buf);
      X(plan_destroy_internal)(cldr);
      X(plan_destroy_internal)(cldr0);
      return 0;
@@ -437,7 +437,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 
  nada:
      X(plan_destroy_internal)(cld);
-     X(free0)(pln);
+     X(ifree0)(pln);
      return (plan *) 0;
 }
 
@@ -484,7 +484,7 @@ static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
 
  nada:
      X(plan_destroy_internal)(cld);
-     X(free0)(pln);
+     X(ifree0)(pln);
      return (plan *) 0;
 }
 

@@ -32,7 +32,7 @@ R *X(dft_rader_mkomega)(plan *p_, uint n, uint ginv)
      if ((omega = X(rader_tl_find)(n, n, ginv, omegas)))
 	  return omega;
 
-     omega = (R *)fftw_malloc(sizeof(R) * (n - 1) * 2, TWIDDLES);
+     omega = (R *)MALLOC(sizeof(R) * (n - 1) * 2, TWIDDLES);
 
      scale = n - 1.0; /* normalization for convolution */
 

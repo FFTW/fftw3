@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.17 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: rodft00e-r2hc.c,v 1.18 2003-01-13 09:20:37 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -51,7 +51,7 @@ static void apply(plan *ego_, R *I, R *O)
      R *W = ego->td->W;
      R *buf;
 
-     buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  buf[0] = 0;
@@ -85,7 +85,7 @@ static void apply(plan *ego_, R *I, R *O)
 	  }
      }
 
-     X(free)(buf);
+     X(ifree)(buf);
 }
 
 static void awake(plan *ego_, int flg)
@@ -151,12 +151,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_rdft *) p_;
 
      n = p->sz->dims[0].n + 1;
-     buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      cld = X(mkplan_d)(plnr, X(mkproblem_rdft_1_d)(X(mktensor_1d)(n, 1, 1),
                                                    X(mktensor_0d)(),
                                                    buf, buf, R2HC));
-     X(free)(buf);
+     X(ifree)(buf);
      if (!cld)
           return (plan *)0;
 

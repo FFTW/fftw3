@@ -35,7 +35,7 @@ struct rader_tls {
 
 void X(rader_tl_insert)(uint k1, uint k2, uint k3, R *W, rader_tl **tl)
 {
-     rader_tl *t = (rader_tl *) fftw_malloc(sizeof(rader_tl), TWIDDLES);
+     rader_tl *t = (rader_tl *) MALLOC(sizeof(rader_tl), TWIDDLES);
      t->k1 = k1; t->k2 = k2; t->k3 = k3; t->W = W;
      t->refcnt = 1; t->cdr = *tl; *tl = t;
 }
@@ -61,8 +61,8 @@ void X(rader_tl_delete)(R *W, rader_tl **tl)
 
 	  if (t && --t->refcnt <= 0) {
 	       *tp = t->cdr;
-	       X(free)(t->W);
-	       X(free)(t);
+	       X(ifree)(t->W);
+	       X(ifree)(t);
 	  }
      }
 }

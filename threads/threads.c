@@ -459,7 +459,7 @@ int X(threads_init)(void)
      /* FIXME: don't have malloc hooks (yet) in fftw3 */
      /* Must use MPAllocate and MPFree instead of malloc and free: */
      if (MPLibraryIsLoaded()) {
-	  fftw_malloc_hook = MPAllocate;
+	  MALLOC_hook = MPAllocate;
 	  fftw_free_hook = MPFree;
      }
 #endif /* USING_MACOS_THREADS */

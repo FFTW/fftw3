@@ -28,7 +28,7 @@ const uint *X(rdft2_pad)(uint rnk, const uint *n, const uint *nembed,
      *nfree = 0;
      if (!nembed && rnk > 0) {
 	  if (inplace || cmplx) {
-	       uint *np = (uint *) fftw_malloc(sizeof(uint) * rnk, PROBLEMS);
+	       uint *np = (uint *) MALLOC(sizeof(uint) * rnk, PROBLEMS);
 	       memcpy(np, n, sizeof(uint) * rnk);
 	       np[rnk-1] = (n[rnk-1]/2 + 1) * (1 + !cmplx);
 	       nembed = *nfree = np;

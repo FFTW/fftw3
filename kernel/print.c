@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.17 2003-01-11 16:07:24 athena Exp $ */
+/* $Id: print.c,v 1.18 2003-01-13 09:20:37 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -190,7 +190,7 @@ static void print(printer *p, const char *format, ...)
 
 printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c))
 {
-     printer *s = (printer *)fftw_malloc(size, OTHER);
+     printer *s = (printer *)MALLOC(size, OTHER);
      s->print = print;
      s->vprint = vprint;
      s->putchr = putchr;
@@ -201,5 +201,5 @@ printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c))
 
 void X(printer_destroy)(printer *p)
 {
-     X(free)(p);
+     X(ifree)(p);
 }

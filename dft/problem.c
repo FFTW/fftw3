@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.25 2003-01-09 05:02:35 stevenj Exp $ */
+/* $Id: problem.c,v 1.26 2003-01-13 09:20:36 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -27,7 +27,7 @@ static void destroy(problem *ego_)
 {
      problem_dft *ego = (problem_dft *) ego_;
      X(tensor_destroy2)(ego->vecsz, ego->sz);
-     X(free)(ego_);
+     X(ifree)(ego_);
 }
 
 static void hash(const problem *p_, md5 *m)

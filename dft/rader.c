@@ -118,7 +118,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      R *buf;
 
      r = ego->n; is = ego->is; g = ego->g; 
-     buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * (r - 1) * 2, BUFFERS);
 
      /* First, permute the input, storing in buf: */
      for (gpower = 1, k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
@@ -132,7 +132,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      apply_aux(r, ego->ginv, ego->cld1, ego->cld2, ego->omega, 
 	       buf, ri[0], ii[0], ro, io, ego->os);
 
-     X(free)(buf);
+     X(ifree)(buf);
 }
 
 static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
@@ -164,7 +164,7 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
      osm = ego->os;
      gpower = 1;
 
-     buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * (r - 1) * 2, BUFFERS);
 
      for (j = 0; j < m; ++j, ro += os, io += os, W += 2*(r - 1)) {
 	  /* First, permute the input and multiply by W, storing in buf: */
@@ -184,7 +184,7 @@ static void apply_dit(plan *ego_, R *ri, R *ii, R *ro, R *io)
 		    buf, ro[0], io[0], ro, io, osm);
      }
 
-     X(free)(buf);
+     X(ifree)(buf);
 }
 
 static R *mktwiddle(uint m, uint r, uint g)
@@ -196,7 +196,7 @@ static R *mktwiddle(uint m, uint r, uint g)
      if ((W = X(rader_tl_find)(m, r, g, twiddles)))
 	  return W;
 
-     W = (R *)fftw_malloc(sizeof(R) * (r - 1) * m * 2, TWIDDLES);
+     W = (R *)MALLOC(sizeof(R) * (r - 1) * m * 2, TWIDDLES);
      for (i = 0; i < m; ++i) {
 	  for (gpower = 1, j = 0; j < r - 1;
 	       ++j, gpower = MULMOD(gpower, g, r)) {
@@ -339,7 +339,7 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      R *buf = (R *) 0;
 
      /* initial allocation for the purpose of planning */
-     buf = (R *) fftw_malloc(sizeof(R) * (n - 1) * 2, BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * (n - 1) * 2, BUFFERS);
 
      cld1 = X(mkplan_d)(plnr, 
 			X(mkproblem_dft_d)(X(mktensor_1d)(n - 1, 2, os),
@@ -362,7 +362,7 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      if (!cld_omega) goto nada;
 
      /* deallocate buffers; let awake() or apply() allocate them for real */
-     X(free)(buf);
+     X(ifree)(buf);
      buf = 0;
 
      pln->cld1 = cld1;
@@ -384,7 +384,7 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      return 1;
 
  nada:
-     X(free0)(buf);
+     X(ifree0)(buf);
      X(plan_destroy_internal)(cld_omega);
      X(plan_destroy_internal)(cld2);
      X(plan_destroy_internal)(cld1);
@@ -411,7 +411,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      pln = MKPLAN_DFT(P, &padt, apply);
      if (!mkP(pln, n, is, os, p->ro, p->io, plnr)) {
-	  X(free)(pln);
+	  X(ifree)(pln);
 	  return (plan *) 0;
      }
      return &(pln->super.super);
@@ -463,7 +463,7 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 
  nada:
      X(plan_destroy_internal)(cld);
-     X(free0)(pln);
+     X(ifree0)(pln);
      return (plan *) 0;
 }
 

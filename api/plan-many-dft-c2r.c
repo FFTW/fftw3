@@ -49,7 +49,7 @@ X(plan) X(plan_many_dft_c2r)(unsigned int rank, const unsigned int *n,
 	       X(mktensor_1d)(howmany, 2*idist, odist), 
 	       out, ri, ii, HC2R));
 
-     X(free0)(nfi);
-     X(free0)(nfo);
+     X(ifree0)(nfi);
+     X(ifree0)(nfo);
      return p;
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.34 2003-01-09 05:02:35 stevenj Exp $ */
+/* $Id: problem.c,v 1.35 2003-01-13 09:20:37 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -27,10 +27,10 @@ static void destroy(problem *ego_)
 {
      problem_rdft *ego = (problem_rdft *) ego_;
 #if !defined(STRUCT_HACK_C99) && !defined(STRUCT_HACK_KR)
-     X(free0)(ego->kind);
+     X(ifree0)(ego->kind);
 #endif
      X(tensor_destroy2)(ego->vecsz, ego->sz);
-     X(free)(ego_);
+     X(ifree)(ego_);
 }
 
 static void kind_hash(md5 *m, const rdft_kind *kind, uint rnk)
@@ -160,7 +160,7 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 					 + sizeof(rdft_kind) * rnk, &padt);
 #else
      ego = (problem_rdft *) X(mkproblem)(sizeof(problem_rdft), &padt);
-     ego->kind = (rdft_kind *) fftw_malloc(sizeof(rdft_kind) * rnk, PROBLEMS);
+     ego->kind = (rdft_kind *) MALLOC(sizeof(rdft_kind) * rnk, PROBLEMS);
 #endif
 
      /* do compression and sorting as in X(tensor_compress), but take

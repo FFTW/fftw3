@@ -349,7 +349,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
  nada:
      X(plan_destroy_internal)(cld);
-     X(free0)(pln);
+     X(ifree0)(pln);
      return (plan *) 0;
 }
 

@@ -59,7 +59,7 @@ static void apply(plan *ego_, R *I, R *O)
      R *buf, *omega;
      R r0;
 
-     buf = (R *) fftw_malloc(sizeof(R) * (r - 1), BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * (r - 1), BUFFERS);
 
      /* First, permute the input, storing in buf: */
      g = ego->g; 
@@ -139,7 +139,7 @@ static void apply(plan *ego_, R *I, R *O)
 #endif
      A(gpower == 1);
 
-     X(free)(buf);
+     X(ifree)(buf);
 }
 
 static R *mkomega(plan *p_, uint n, uint ginv)
@@ -152,7 +152,7 @@ static R *mkomega(plan *p_, uint n, uint ginv)
      if ((omega = X(rader_tl_find)(n, n, ginv, omegas))) 
 	  return omega;
 
-     omega = (R *)fftw_malloc(sizeof(R) * (n - 1), TWIDDLES);
+     omega = (R *)MALLOC(sizeof(R) * (n - 1), TWIDDLES);
 
      scale = n - 1.0; /* normalization for convolution */
 
@@ -261,7 +261,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      O = p->O;
 
      /* initial allocation for the purpose of planning */
-     buf = (R *) fftw_malloc(sizeof(R) * (n - 1), BUFFERS);
+     buf = (R *) MALLOC(sizeof(R) * (n - 1), BUFFERS);
 
      cld1 = X(mkplan_d)(plnr, 
 			X(mkproblem_rdft_1_d)(X(mktensor_1d)(n - 1, 1, os),
@@ -292,7 +292,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!cld_omega) goto nada;
 
      /* deallocate buffers; let awake() or apply() allocate them for real */
-     X(free)(buf);
+     X(ifree)(buf);
      buf = 0;
 
      pln = MKPLAN_RDFT(P, &padt, apply);
@@ -320,7 +320,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     X(free0)(buf);
+     X(ifree0)(buf);
      X(plan_destroy_internal)(cld_omega);
      X(plan_destroy_internal)(cld2);
      X(plan_destroy_internal)(cld1);

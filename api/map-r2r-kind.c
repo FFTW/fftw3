@@ -27,7 +27,7 @@ rdft_kind *X(map_r2r_kind)(uint rank, const X(r2r_kind) *kind)
      rdft_kind *k;
 
      A(FINITE_RNK(rank));
-     k = (rdft_kind *) fftw_malloc(rank * sizeof(rdft_kind), PROBLEMS);
+     k = (rdft_kind *) MALLOC(rank * sizeof(rdft_kind), PROBLEMS);
      for (i = 0; i < rank; ++i) 
 	  switch (kind[i]) {
 	      case FFTW_R2HC: k[i] = R2HC; break;

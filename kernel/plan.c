@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.17 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: plan.c,v 1.18 2003-01-13 09:20:36 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -28,7 +28,7 @@
 
 plan *X(mkplan)(size_t size, const plan_adt *adt)
 {
-     plan *p = (plan *)fftw_malloc(size, PLANS);
+     plan *p = (plan *)MALLOC(size, PLANS);
 
      A(adt->destroy);
      p->refcnt = p->awake_refcnt = 0;
@@ -56,7 +56,7 @@ void X(plan_destroy_internal)(plan *ego)
 	  if (ego->awake_refcnt > 0)
 	       ego->adt->awake(ego, 0);
           ego->adt->destroy(ego);
-	  X(free)(ego);
+	  X(ifree)(ego);
      }
 }
 

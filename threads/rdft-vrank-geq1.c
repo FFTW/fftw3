@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-vrank-geq1.c,v 1.9 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: rdft-vrank-geq1.c,v 1.10 2003-01-13 09:20:37 athena Exp $ */
 
 #include "threads.h"
 
@@ -81,7 +81,7 @@ static void destroy(plan *ego_)
      uint i;
      for (i = 0; i < ego->nthr; ++i)
 	  X(plan_destroy_internal)(ego->cldrn[i]);
-     X(free)(ego->cldrn);
+     X(ifree)(ego->cldrn);
 }
 
 static void print(plan *ego_, printer *p)
@@ -163,7 +163,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      its = d->is * block_size;
      ots = d->os * block_size;
 
-     cldrn = fftw_malloc(sizeof(plan *) * nthr, PLANS);
+     cldrn = MALLOC(sizeof(plan *) * nthr, PLANS);
      for (i = 0; i < nthr; ++i) cldrn[i] = (plan *) 0;
      
      vecsz = X(tensor_copy)(p->vecsz);
@@ -198,7 +198,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (cldrn) {
 	  for (i = 0; i < nthr; ++i)
 	       X(plan_destroy_internal)(cldrn[i]);
-	  X(free)(cldrn);
+	  X(ifree)(cldrn);
      }
      X(tensor_destroy)(vecsz);
      return (plan *) 0;

@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: solver.c,v 1.3 2002-09-22 17:27:46 athena Exp $ */
+/* $Id: solver.c,v 1.4 2003-01-13 09:20:37 athena Exp $ */
 
 #include "ifftw.h"
 
 solver *X(mksolver)(size_t size, const solver_adt *adt)
 {
-     solver *s = (solver *)fftw_malloc(size, SOLVERS);
+     solver *s = (solver *)MALLOC(size, SOLVERS);
 
      s->adt = adt;
      s->refcnt = 0;
@@ -39,7 +39,7 @@ void X(solver_use)(solver *ego)
 void X(solver_destroy)(solver *ego)
 {
      if ((--ego->refcnt) == 0)
-          X(free)(ego);
+          X(ifree)(ego);
 }
 
 void X(solver_register)(planner *plnr, solver *s)

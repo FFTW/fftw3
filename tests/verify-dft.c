@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.3 2002-09-22 13:49:09 athena Exp $ */
+/* $Id: verify-dft.c,v 1.4 2003-01-13 09:20:37 athena Exp $ */
 
 #include "dft.h"
 #include "debug.h"
@@ -86,13 +86,13 @@ static void really_verify(plan *pln, const problem_dft *p,
      vecn = X(tensor_sz)(p->vecsz);
      N = n * vecn;
 
-     inA = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     inB = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     inC = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     outA = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     outB = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     outC = (C *) fftw_malloc(N * sizeof(C), OTHER);
-     tmp = (C *) fftw_malloc(N * sizeof(C), OTHER);
+     inA = (C *) MALLOC(N * sizeof(C), OTHER);
+     inB = (C *) MALLOC(N * sizeof(C), OTHER);
+     inC = (C *) MALLOC(N * sizeof(C), OTHER);
+     outA = (C *) MALLOC(N * sizeof(C), OTHER);
+     outB = (C *) MALLOC(N * sizeof(C), OTHER);
+     outC = (C *) MALLOC(N * sizeof(C), OTHER);
+     tmp = (C *) MALLOC(N * sizeof(C), OTHER);
 
      nfo.pln = pln;
      nfo.p = p;
@@ -114,13 +114,13 @@ static void really_verify(plan *pln, const problem_dft *p,
 
      X(tensor_destroy)(nfo.totalsz);
      X(tensor_destroy)(nfo.pckdsz);
-     X(free)(tmp);
-     X(free)(outC);
-     X(free)(outB);
-     X(free)(outA);
-     X(free)(inC);
-     X(free)(inB);
-     X(free)(inA);
+     X(ifree)(tmp);
+     X(ifree)(outC);
+     X(ifree)(outB);
+     X(ifree)(outA);
+     X(ifree)(inC);
+     X(ifree)(inB);
+     X(ifree)(inA);
 }
 
 void X(dft_verify)(plan *pln, const problem_dft *p, uint rounds)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.12 2003-01-11 22:55:39 stevenj Exp $ */
+/* $Id: scan.c,v 1.13 2003-01-13 09:20:37 athena Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -169,7 +169,7 @@ static int scan(scanner *sc, const char *format, ...)
 
 scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc))
 {
-     scanner *s = (scanner *)fftw_malloc(size, OTHER);
+     scanner *s = (scanner *)MALLOC(size, OTHER);
      s->scan = scan;
      s->vscan = vscan;
      s->getchr = getchr;
@@ -179,5 +179,5 @@ scanner *X(mkscanner)(size_t size, int (*getchr)(scanner *sc))
 
 void X(scanner_destroy)(scanner *sc)
 {
-     X(free)(sc);
+     X(ifree)(sc);
 }
