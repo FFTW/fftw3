@@ -217,9 +217,9 @@ sub parse_arguments (@)
 
 &parse_arguments (@ARGV);
 
+&random_tests if $do_random;
 &small_1d if $do_1d;
 &small_2d if $do_2d;
-&random_tests if $do_random;
 
 {
     my $options = &make_options;
