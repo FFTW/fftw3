@@ -10,4 +10,4 @@ export-wisdom.c forget-wisdom.c import-system-wisdom.c			\
 import-wisdom-from-file.c import-wisdom-from-string.c import-wisdom.c	\
 mapflags.c mkprinter-file.c mktensor-iodims.c plan-dft-1d.c		\
 plan-dft-2d.c plan-dft-3d.c plan-dft.c plan-guru-dft.c plan-many-dft.c	\
-print-plan.c the-planner.c api.h fftw3.h
+plan-with-nthreads.c print-plan.c the-planner.c api.h fftw3.h
