@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.63 2002-07-31 22:57:04 athena Exp $ */
+/* $Id: ifftw.h,v 1.64 2002-08-01 01:33:35 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -135,7 +135,7 @@ extern void *X(malloc_plain)(size_t sz);
 /* use alloca if available */
 #define STACK_MALLOC(T, p, x)			\
 {						\
-     p = alloca((x) + MIN_ALIGNMENT);		\
+     p = (T)alloca((x) + MIN_ALIGNMENT);	\
      p = (T)(((long)p + (MIN_ALIGNMENT - 1)) &	\
            (~(long)(MIN_ALIGNMENT - 1)));	\
 }
