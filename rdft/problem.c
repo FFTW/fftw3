@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.39 2003-02-27 17:35:33 stevenj Exp $ */
+/* $Id: problem.c,v 1.40 2003-02-27 18:44:19 stevenj Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -190,6 +190,10 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 		    ego->kind[j] = kswap;
 	       }
      }
+
+     for (i = 0; i < rnk; ++i)
+	  if (ego->sz->dims[i].n == 2 && ego->kind[i] == REDFT00)
+	       ego->kind[i] = R2HC;
 
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->I = I;
