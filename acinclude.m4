@@ -292,18 +292,19 @@ if test "$ac_test_CFLAGS" != "set"; then
 
 	  powerpc*)
 		cputype=`((grep cpu /proc/cpuinfo | head -1 | cut -d: -f2 | sed 's/ //g') ; /usr/bin/machine ; /bin/machine) 2> /dev/null`
+		cputype=`echo $cputype | sed -e s/ppc//g`
 		is60x=`echo $cputype | egrep "^60[0-9]e?$"`
 		is750=`echo $cputype | grep "750"`
-		is7400=`echo $cputype | grep "7400"`
+		is74xx=`echo $cputype | egrep "^74[0-9][0-9]$"`
 		if test -n "$is60x"; then
 			ACX_CHECK_CC_FLAGS(-mcpu=$cputype,m_cpu_60x,
 				CPU_FLAGS=-mcpu=$cputype)
 		elif test -n "$is750"; then
 			ACX_CHECK_CC_FLAGS(-mcpu=750,m_cpu_750,
 				CPU_FLAGS=-mcpu=750)
-		elif test -n "$is7400"; then
-			ACX_CHECK_CC_FLAGS(-mcpu=7400,m_cpu_7400,
-				CPU_FLAGS=-mcpu=7400)
+		elif test -n "$is74xx"; then
+			ACX_CHECK_CC_FLAGS(-mcpu=$cputype,m_cpu_74xx,
+				CPU_FLAGS=-mcpu=$cputype)
 		fi
 		if test -z "$CPU_FLAGS"; then
 		        ACX_CHECK_CC_FLAGS(-mcpu=powerpc,m_cpu_powerpc,
