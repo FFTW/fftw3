@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.5 2003-04-09 12:50:25 athena Exp $ */
+/* $Id: timer.c,v 1.6 2003-05-12 22:22:16 stevenj Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -63,7 +63,7 @@ static double elapsed(mytime t1, mytime t0)
 #define HAVE_TIMER
 #endif
 
-#if !defined(HAVE_TIMER) && (defined(__WIN32__) || defined(WIN32) || defined(_WINDOWS))
+#if !defined(HAVE_TIMER) && (defined(__WIN32__) || defined(_WIN32) || defined(_WINDOWS))
 #include <windows.h>
 typedef LARGE_INTEGER mytime;
 
