@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.70 2002-08-04 21:03:45 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.71 2002-08-04 21:24:37 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -381,8 +381,10 @@ typedef struct slvpair_s {
 typedef struct solutions_s solutions; /* opaque */
 
 /* planner flags */
-enum { ESTIMATE = 0x1, CLASSIC = 0x2,
+enum { ESTIMATE = 0x2, CLASSIC = 0x1,
        CLASSIC_VRECURSE = 0x4, FORCE_VRECURSE = 0x8 };
+
+#define IMPATIENCE_FLAGS (ESTIMATE | CLASSIC)
 
 typedef enum { FORGET_PLANS, FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.36 2002-08-03 19:39:49 athena Exp $ */
+/* $Id: planner.c,v 1.37 2002-08-04 21:24:37 stevenj Exp $ */
 #include "ifftw.h"
 
 /* Entry in the solutions hash table */
@@ -32,6 +32,7 @@
 
 struct solutions_s {
      problem *p;
+     int flags;
      plan *pln;
      slvpair *sp;
      int blessed;
@@ -83,7 +84,7 @@ static void hooknil(plan *pln, const problem *p)
 /* memoization routines */
 static uint hash(planner *ego, const problem *p)
 {
-     return (p->adt->hash(p) % ego->hashsiz);
+     return ((p->adt->hash(p) ^ (ego->flags * 317227)) % ego->hashsiz);
 }
 
 static solutions *lookup(planner *ego, problem *p)
@@ -94,7 +95,8 @@ static solutions *lookup(planner *ego, problem *p)
      h = hash(ego, p);
 
      for (l = ego->sols[h]; l; l = l->cdr) 
-          if (p->adt->equal(p, l->p)) 
+          if ((ego->flags & IMPATIENCE_FLAGS) > (l->flags & IMPATIENCE_FLAGS)
+	      && p->adt->equal(p, l->p)) 
 	       return l;
      return 0;
 }
@@ -133,7 +135,8 @@ static void rehash(planner *ego)
           X(free)(osol);
 }
 
-static solutions *insert(planner *ego, problem *p, plan *pln, slvpair *sp)
+static solutions *insert(planner *ego, 
+			 int flags, problem *p, plan *pln, slvpair *sp)
 {
      solutions *l = (solutions *)fftw_malloc(sizeof(solutions), HASHT);
 
@@ -147,6 +150,7 @@ static solutions *insert(planner *ego, problem *p, plan *pln, slvpair *sp)
      }
      else
 	  l->blessed = 0;
+     l->flags = flags;
      l->pln = pln;
      l->sp = sp; 
      l->p = X(problem_dup)(p);
@@ -195,7 +199,7 @@ static plan *mkplan(planner *ego, problem *p)
 	  /* not in table.  Run inferior planner */
 	  ++ego->nprob;
 	  ego->inferior_mkplan(ego, p, &pln, &sp);
-	  insert(ego, p, pln, sp);
+	  insert(ego, ego->flags, p, pln, sp);
 	  return pln;  /* plan already USEd by inferior */
      }
 }
@@ -255,7 +259,8 @@ static void exprt(planner *ego, printer *p)
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
 	       if (s->blessed || (s->pln && s->pln->blessed))
-		    p->print(p, "(s %d %P)", s->sp ? s->sp->id : 0, s->p);
+		    p->print(p, "(s %d %d %P)", 
+			     s->sp ? s->sp->id : 0, s->flags, s->p);
      p->print(p, ")");
 }
 
@@ -281,15 +286,15 @@ static int imprt(planner *ego, scanner *sc)
 
      while (1) {
 	  solutions *s;
-	  int id;
+	  int id, flags;
 
 	  if (sc->scan(sc, ")"))
 	       break;
-	  if (!sc->scan(sc, "(s %d %P)", &id, &p))
+	  if (!sc->scan(sc, "(s %d %d %P)", &id, &flags, &p))
 	       goto done;
 	  if (id < 1 || id >= ego->idcnt)
 	       goto done;
-	  s = insert(ego, p, (plan *) 0, slvrs[id - 1]);
+	  s = insert(ego, flags, p, (plan *) 0, slvrs[id - 1]);
 	  s->blessed = 1;
 	  X(problem_destroy)(p); p = 0;
      }
