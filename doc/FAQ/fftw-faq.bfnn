@@ -116,7 +116,7 @@ FFTW is a heavily-optimized piece of software that is likely to push
 compilers to their limits.  We have successfully used \courier{gcc\}
 3.2.x on x86 and PPC, a recent Compaq C compiler for Alpha, version 6
 of IBM's \courier{xlc\} compiler for AIX, Intel's \courier{icc\}
-versions 5-7, Sun WorkShop \courier{cc\} version 6, for example.
+versions 5-7, and Sun WorkShop \courier{cc\} version 6, for example.
 
 \courier{gcc\} 2.95.3 for Solaris/SPARC produces incorrect code for
 the test program (workaround: recompile the \courier{libbench2\}
