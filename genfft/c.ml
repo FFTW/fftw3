@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.24 2005-02-06 21:59:39 athena Exp $ *)
+(* $Id: c.ml,v 1.25 2005-02-13 15:29:32 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -44,7 +44,6 @@ let stridetype = "stride"
 type c_decl = 
   | Decl of string * string
   | Idecl of string * string * string (* decl with initializer *)
-  | Adecl of string * string * int (* array declaration *)
   | Tdecl of string                (* arbitrary text declaration *)
 
 and c_ast =
@@ -190,7 +189,6 @@ and unparse_annotated force_bracket =
 and unparse_decl = function
   | Decl (a, b) -> a ^ " " ^ b ^ ";\n"
   | Idecl (a, b, c) -> a ^ " " ^ b ^ " = " ^ c ^ ";\n"
-  | Adecl (a, b, n) -> a ^ " " ^ b ^ "[" ^ (string_of_int n) ^ "];\n"
   | Tdecl x -> x ^ ";\n"
 
 and unparse_ast = 
