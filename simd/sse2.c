@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse2.c,v 1.2 2002-07-08 00:32:01 athena Exp $ */
+/* $Id: sse2.c,v 1.3 2002-07-08 16:30:34 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -70,7 +70,6 @@ int RIGHT_CPU(void)
      return res;
 }
 
-const union dvec X(sse2_p1m1) = { {1.0, -1.0} };
-const union dvec X(sse2_m1p1) = { {-1.0, 1.0} };
+const union dvec X(sse2_mp) = { {-0.0, 0.0} };
 
 #endif

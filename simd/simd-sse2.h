@@ -49,6 +49,13 @@ static __inline__ V VMUL(V b, V a)
      return ret;
 }
 
+static __inline__ V VXOR(V b, V a) 
+{
+     V ret;
+     __asm__("xorpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     return ret;
+}
+
 #define DVK(var, val) V var = __extension__ ({		\
      static const union dvec _var = { {val, val} };	\
      _var.v;						\
@@ -85,6 +92,7 @@ typedef __m128d V;
 #define VADD _mm_add_pd
 #define VSUB _mm_sub_pd
 #define VMUL _mm_mul_pd
+#define VXOR _mm_xor_pd
 #define DVK(var, val) const R var = K(val)
 #define LDK(x) _mm_set1_pd(x)
 #define SHUFPD _mm_shuffle_pd
@@ -100,44 +108,42 @@ union dvec {
 #define LD(loc, ivs) (*(const V *)(loc))
 #define ST(loc, var, ovs) *(V *)(loc) = var
 
-extern const union dvec X(sse2_p1m1);
-extern const union dvec X(sse2_m1p1);
+static __inline__ V FLIP_RI(V x)
+{
+     return SHUFPD(x, x, 1);
+}
+
+static __inline__ V CHS_R(V x)
+{
+     extern const union dvec X(sse2_mp);
+     return VXOR(X(sse2_mp).v, x);
+}
 
 static __inline__ V VBYI(V x)
 {
-     V y = VMUL(X(sse2_p1m1).v, x);
-     return SHUFPD(y, y, 1);
+     return CHS_R(FLIP_RI(x));
 }
 
 #define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 
-static __inline__ V BYTW(const R *t, V c_d)
+static __inline__ V BYTW(const R *t, V sr)
 {
-     V a_b = LD(t, 1);
-     V d_c = SHUFPD(c_d, c_d, 1);
-     V ac_bd = VMUL(a_b, c_d);
-     V ad_bc = VMUL(a_b, d_c);
-     V ac_ad = UNPCKL(ac_bd, ad_bc);
-     V bd_bc = UNPCKH(ac_bd, ad_bc);
-     V mbd_bc = VMUL(X(sse2_m1p1).v, bd_bc);
-     V x = VADD(mbd_bc, ac_ad);
-     return x;
+     V tx = LD(t, 1);
+     V ti = UNPCKH(tx, tx);
+     V tr = UNPCKL(tx, tx);
+     V si = FLIP_RI(sr);
+     return VADD(VMUL(tr, sr), VMUL(CHS_R(ti), si));
 }
 
-static __inline__ V BYTWJ(const R *t, V c_d)
+static __inline__ V BYTWJ(const R *t, V sr)
 {
-     V a_mb = LD(t, 1);
-     V d_c = SHUFPD(c_d, c_d, 1);
-     V ac_mbd = VMUL(a_mb, c_d);
-     V ad_mbc = VMUL(a_mb, d_c);
-     V ac_ad = UNPCKL(ac_mbd, ad_mbc);
-     V mbd_mbc = UNPCKH(ac_mbd, ad_mbc);
-     V mbd_bc = VMUL(X(sse2_p1m1).v, mbd_mbc);
-     V x = VADD(mbd_bc, ac_ad);
-     return x;
+     V tx = LD(t, 1);
+     V ti = UNPCKH(tx, tx);
+     V tr = UNPCKL(tx, tx);
+     V si = FLIP_RI(sr);
+     return VSUB(VMUL(tr, sr), VMUL(CHS_R(ti), si));
 }
-
 
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))

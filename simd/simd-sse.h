@@ -48,7 +48,12 @@ static __inline__ V VMUL(V b, V a)
      __asm__("mulps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
      return ret;
 }
-
+static __inline__ V VXOR(V b, V a) 
+{
+     V ret;
+     __asm__("xorps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     return ret;
+}
 static __inline__ V UNPCKL(V a, V b) 
 {
      V ret;
@@ -107,6 +112,7 @@ typedef __m128 V;
 #define VADD _mm_add_ps
 #define VSUB _mm_sub_ps
 #define VMUL _mm_mul_ps
+#define VXOR _mm_xor_ps
 #define SHUFPS _mm_shuffle_ps
 #define LOADH(addr, val) _mm_loadh_pi(val, (const __m64 *)(addr))
 #define LOADL0(addr, val) _mm_loadl_pi(val, (const __m64 *)(addr))
@@ -141,20 +147,26 @@ static __inline__ V LD(const float *x, int ivs)
      return var;
 }
 
-#define ST(loc, var, ovs)			\
-{						\
-     R *loc_ = loc;				\
-     STOREL(loc_, var);				\
-     STOREH(loc_ + ovs, var);			\
+static __inline__ void ST(float *x, V v, int ovs) 
+{						
+     STOREL(x, v);
+     STOREH(x + ovs, v);
 }
 
-extern const union fvec X(sse_p1m1p1m1);
-extern const union fvec X(sse_m1p1m1p1);
+static __inline__ V FLIP_RI(V x)
+{
+     return SHUFPS(x, x, SHUFVAL(1, 0, 3, 2));
+}
+
+static __inline__ V CHS_R(V x)
+{
+     extern const union fvec X(sse_mpmp);
+     return VXOR(X(sse_mpmp).v, x);
+}
 
 static __inline__ V VBYI(V x)
 {
-     V y = VMUL(X(sse_p1m1p1m1).v, x);
-     return SHUFPS(y, y, SHUFVAL(1, 0, 3, 2));
+     return CHS_R(FLIP_RI(x));
 }
 
 #define VFMAI(b, c) VADD(c, VBYI(b))
@@ -175,7 +187,7 @@ static __inline__ V VBYI(V x)
 static __inline__ V BYTW(const R *t, V sr)
 {
      const V *twp = (const V *)t;
-     V si = SHUFPS(sr, sr, SHUFVAL(1, 0, 3, 2));
+     V si = FLIP_RI(sr);
      V tr = twp[0], ti = twp[1];
      return VADD(VMUL(tr, sr), VMUL(ti, si));
 }
@@ -183,7 +195,7 @@ static __inline__ V BYTW(const R *t, V sr)
 static __inline__ V BYTWJ(const R *t, V sr)
 {
      const V *twp = (const V *)t;
-     V si = SHUFPS(sr, sr, SHUFVAL(1, 0, 3, 2));
+     V si = FLIP_RI(sr);
      V tr = twp[0], ti = twp[1];
      return VSUB(VMUL(tr, sr), VMUL(ti, si));
 }
@@ -200,9 +212,8 @@ static __inline__ V BYTW(const R *t, V sr)
      V tx = twp[0];
      V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
-     V si = SHUFPS(sr, sr, SHUFVAL(1, 0, 3, 2));
-     ti = VMUL(X(sse_m1p1m1p1).v, ti);
-     return VADD(VMUL(tr, sr), VMUL(ti, si));
+     V si = FLIP_RI(sr);
+     return VADD(VMUL(tr, sr), VMUL(CHS_R(ti), si));
 }
 
 static __inline__ V BYTWJ(const R *t, V sr)
@@ -211,9 +222,8 @@ static __inline__ V BYTWJ(const R *t, V sr)
      V tx = twp[0];
      V ti = UNPCKH(tx, tx);
      V tr = UNPCKL(tx, tx);
-     V si = SHUFPS(sr, sr, SHUFVAL(1, 0, 3, 2));
-     ti = VMUL(X(sse_m1p1m1p1).v, ti);
-     return VSUB(VMUL(tr, sr), VMUL(ti, si));
+     V si = FLIP_RI(sr);
+     return VSUB(VMUL(tr, sr), VMUL(CHS_R(ti), si));
 }
 
 #endif /* FAST_AND_BLOATED_TWIDDLES */
