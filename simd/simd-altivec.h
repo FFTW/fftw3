@@ -102,9 +102,12 @@ static inline void ST(R *x, V v, int ovs, const R *aligned_like)
      STL(x, v, ovs, aligned_like);
 }
 
+#define STPAIR1(x, v, ovs, aligned_like) /* no-op */
+
 extern const vector unsigned int X(altivec_select_even_perm);
 extern const vector unsigned int X(altivec_select_odd_perm);
-static inline void STPAIR(R *x, V v0, V v1, int ovs)
+
+static inline void STPAIR2(R *x, V v0, V v1, int ovs)
 {
      const vector unsigned int llll =
 	  VLIT(0x00010203, 0x04050607, 0x10111213, 0x14151617);

@@ -177,6 +177,7 @@ static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
 }
 
 #if 0
+/* this should be faster but it isn't. */
 static __inline__ void STPAIR2(R *x, V v0, V v1, int ovs)
 {
      STA(x, SHUFPS(v0, v1, SHUFVAL(0, 1, 0, 1)), ovs, 0);

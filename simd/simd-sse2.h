@@ -138,11 +138,8 @@ static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
 #define LD LDA
 #define ST STA
 
-static __inline__ void STPAIR(R *x, V v0, V v1, int ovs)
-{
-     STA(x, v0, ovs, 0);
-     STA(x + 2, v1, ovs, 0);
-}
+#define STPAIR1 STA
+#define STPAIR2(x, v0, v1, ovs) /* nop */
 
 static __inline__ V FLIP_RI(V x)
 {
@@ -196,6 +193,7 @@ static __inline__ V BYTWJ(const R *t, V sr)
 extern int RIGHT_CPU(void);
 
 #define SIMD_VSTRIDE_OKA(x) 1
+#define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 #define BEGIN_SIMD()
 #define END_SIMD()
 
