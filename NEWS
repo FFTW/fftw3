@@ -71,9 +71,6 @@ Changes from 3.0beta2:
 * Eliminated internal fftw_threads_init function, which some people were
   calling accidentally instead of the fftw_init_threads API function.
 
-* Fixed IRIX threads initialization problems (PTHREAD_SCOPE_SYSTEM is
-  not supported).
-
 * Check for -openmp flag (Intel C compiler) when --enable-openmp is used.
 
 * Support AMD x86-64 SIMD and cycle counter.
