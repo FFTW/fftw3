@@ -28,8 +28,17 @@
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 
-/* horrible hack because gcc does not support sse2 yet */
-typedef float V __attribute__ ((mode(V4SF),aligned(16)));
+#define MY_GNUC_PREREQ(maj, min) \
+   ((__GNUC__ << 16) + __GNUC_MINOR__ >= ((maj) << 16) + (min))
+
+#if MY_GNUC_PREREQ(3, 3)
+  /* FIXME: gcc-3.3 supports Intel intrinsics, but the
+     current gcc-3.3 snapshot crashes when using them. */
+  typedef double V __attribute__ ((mode(V2DF),aligned(16)));
+#else
+  /* horrible hack because gcc-3.2 and earlier does not support sse2 */
+  typedef float V __attribute__ ((mode(V4SF),aligned(16)));
+#endif
 
 static __inline__ V VADD(V a, V b)
 {
@@ -84,7 +93,6 @@ static __inline__ V UNPCKH(V a, V b)
 
 #define LDK(x) x
 #endif
-
 
 #ifdef __ICC /* Intel's compiler for ia32 */
 #include <emmintrin.h>
