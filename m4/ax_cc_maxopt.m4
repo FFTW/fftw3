@@ -15,7 +15,7 @@ dnl floating-point computations can be re-ordered as needed.
 dnl
 dnl Requires macros: AX_CHECK_CC_FLAGS, AX_GCC_ARCHFLAG
 dnl
-dnl @version $Id: ax_cc_maxopt.m4,v 1.1 2004-10-27 17:14:22 stevenj Exp $
+dnl @version $Id: ax_cc_maxopt.m4,v 1.2 2004-11-08 22:49:42 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
 [
@@ -86,6 +86,7 @@ if test "$ac_test_CFLAGS" != "set"; then
   esac
 
   else # using GCC
+
      # default optimization flags for gcc on all systems
      CFLAGS="-O3 -fomit-frame-pointer"
 
@@ -98,7 +99,8 @@ if test "$ac_test_CFLAGS" != "set"; then
 	 CFLAGS="$CFLAGS -fstrict-aliasing")
 
      AX_GCC_ARCHFLAG($acx_maxopt_portable)
-  fi
+
+  fi # using GCC
 
   if test -z "$CFLAGS"; then
 	echo ""
@@ -111,7 +113,7 @@ if test "$ac_test_CFLAGS" != "set"; then
         CFLAGS="-O3"
   fi
 
-  AX_CHECK_CC_FLAGS(${CFLAGS}, guessed_cflags, , [
+  AX_CHECK_CC_FLAGS(${CFLAGS}, guessed_cflags, [], [
 	echo ""
         echo "********************************************************"
         echo "* WARNING: The guessed CFLAGS don't seem to work with  *"

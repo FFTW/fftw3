@@ -153,7 +153,7 @@ dnl determine CFLAGS first
 AX_CC_MAXOPT(fftw)
 
 # some additional FFTW-specific tweaks to the flags
-if "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
+if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
 
     # the egcs scheduler is too smart and destroys our own schedule.
     # Disable the first instruction scheduling pass.  The second
@@ -316,52 +316,18 @@ fi
 
 dnl -----------------------------------------------------------------------
 
-AC_ARG_ENABLE(threads, [AC_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
-
 AC_ARG_WITH(openmp, [AC_HELP_STRING([--with-openmp],[use OpenMP directives instead of a threads library])], with_openmp=$withval, with_openmp=no)
 
-AC_ARG_WITH(sgimp, [AC_HELP_STRING([--with-sgi-mp],[use SGI MP directives instead of a threads library])], with_sgimp=$withval, with_sgimp=no)
+AC_ARG_ENABLE(threads, [AC_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=$with_openmp)
 
 dnl Check for threads library...
 THREADLIBS=""
 if test "$enable_threads" = "yes"; then
 	if test "$with_openmp"x != nox; then
-		AC_MSG_CHECKING(how to enable OpenMP)
-		omp_enabler=unknown
-		save_CFLAGS="$CFLAGS"
-		CFLAGS="$save_CFLAGS -omp"
-		AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
-			omp_enabler="$CC -omp"])
-		if test -z "$THREADLIBS"; then # ICC
-			CFLAGS="$save_CFLAGS -openmp"
-			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
-				omp_enabler="$CC -openmp"])
-		fi
-		if test -z "$THREADLIBS"; then # SGI etc.
-			CFLAGS="$save_CFLAGS -mp"
-			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
-				omp_enabler="$CC -mp"])
-		fi
-		if test -z "$THREADLIBS"; then # Sun
-			CFLAGS="$save_CFLAGS -xopenmp"
-			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
-				omp_enabler="$CC -xopenmp"])
-		fi
-		if test -z "$THREADLIBS"; then # AIX (requires xlc_r/cc_r)
-        		CFLAGS="$save_CFLAGS -qsmp=omp"
-		        AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
-		                omp_enabler="$CC -qsmp=omp"])
-		fi
-		if test -z "$THREADLIBS"; then
-			CFLAGS="$save_CFLAGS"
-			AC_TRY_LINK_FUNC(omp_set_num_threads,[THREADLIBS=" "
-				omp_enabler="automatic"])
-		fi
-		AC_MSG_RESULT($omp_enabler)
-		if test -z "$THREADLIBS"; then
-			AC_MSG_ERROR([don't know how to enable OpenMP])
-		fi
-		AC_DEFINE(USING_OPENMP_THREADS, 1, [Define if we have and are using OpenMP multithreading directives])
+		AX_OPENMP([THREADLIBS=" "
+		  AC_DEFINE(USING_OPENMP_THREADS, 1, [Define if we have and are using OpenMP multithreading directives])
+                  CFLAGS="$CFLAGS $OPENMP_CFLAGS"],
+		  [AC_MSG_ERROR([don't know how to enable OpenMP])])
 	fi
 
 	# POSIX threads, the default choice:
