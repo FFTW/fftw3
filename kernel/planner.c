@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.94 2002-09-16 04:56:29 stevenj Exp $ */
+/* $Id: planner.c,v 1.95 2002-09-16 18:53:16 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -37,8 +37,9 @@
 /* Flags f1 subsumes flags f2 iff f1 is less/equally impatient than
    f2, defining a partial ordering. */
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
-#define SUBSUMES(f1,f2) ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1) || \
-                         (f1 & EXHAUSTIVE))
+#define SUBSUMES(f1,f2) ((IMPATIENCE(f1) & (f2)) == IMPATIENCE(f1) ||    \
+                         (f1 & EXHAUSTIVE) ||                            \
+			 ((f2 & ESTIMATE_BIT) && !(f1 & ESTIMATE_BIT)))
 #define STRICTLY_SUBSUMES(f1, f2) (SUBSUMES(f1, f2) && !SUBSUMES(f2, f1))
 #define ORDERED(f1, f2) (SUBSUMES(f1, f2) || SUBSUMES(f2, f1))
 
