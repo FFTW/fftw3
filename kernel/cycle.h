@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.22 2003-04-01 06:06:53 stevenj Exp $ */
+/* $Id: cycle.h,v 1.23 2003-04-01 06:11:31 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -49,6 +49,7 @@
 */
 
 /*----------------------------------------------------------------*/
+/* Solaris */
 #if defined(HAVE_GETHRTIME) && defined(HAVE_HRTIME_T) && !defined(HAVE_TICK_COUNTER)
 typedef hrtime_t ticks;
 
