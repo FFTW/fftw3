@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.20 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: print.c,v 1.21 2003-01-16 12:58:28 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -114,12 +114,12 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    break;
 		       }
 		       case 'u': {
-			    int x = va_arg(ap, unsigned);
+			    unsigned x = va_arg(ap, unsigned);
 			    sprintf(buf, "%u", x);
 			    goto putbuf;
 		       }
 		       case 'x': {
-			    int x = va_arg(ap, int);
+			    unsigned x = va_arg(ap, unsigned);
 			    sprintf(buf, "%x", x);
 			    goto putbuf;
 		       }

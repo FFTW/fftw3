@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.129 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: planner.c,v 1.130 2003-01-16 12:58:28 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -82,7 +82,7 @@ static void register_solver(planner *ego, solver *s)
      }
 }
 
-static short slookup(planner *ego, char *nam, int id)
+static int slookup(planner *ego, char *nam, int id)
 {
      unsigned h = X(hash)(nam); /* used to avoid strcmp in the common case */
      FORALL_SOLVERS(ego, s, sp, {
@@ -168,7 +168,7 @@ static solution *hlookup(planner *ego, const md5sig s, unsigned short flags)
 
 
 static void hinsert0(planner *ego, const md5sig s, unsigned short flags,
-		     short slvndx, solution *l)
+		     int slvndx, solution *l)
 {
      ++ego->insert;
      if (!l) { 	 
@@ -185,7 +185,7 @@ static void hinsert0(planner *ego, const md5sig s, unsigned short flags,
 
      /* fill slot */
      l->flags = flags | H_VALID;
-     l->slvndx = slvndx;
+     l->slvndx = (short)slvndx;
      sigcpy(s, l->s);
 }
 
@@ -194,7 +194,7 @@ static void rehash(planner *ego, unsigned nsiz)
      unsigned osiz = ego->hashsiz, h;
      solution *osol = ego->solutions, *nsol;
 
-     nsiz = X(next_prime)(nsiz);
+     nsiz = (unsigned)X(next_prime)(nsiz);
      nsol = (solution *)MALLOC(nsiz * sizeof(solution), HASHT);
      ++ego->nrehash;
 
@@ -241,7 +241,7 @@ static void hshrink(planner *ego)
 }
 
 static void hinsert(planner *ego, const md5sig s, 
-		    unsigned short flags, short slvndx)
+		    unsigned short flags, int slvndx)
 {
      solution *l;
 
@@ -295,7 +295,7 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 	  ego->nplan++;
 	  if (ESTIMATEP(ego)) {
 	       /* heuristic */
-	       pln->pcost = 0
+	       pln->pcost = 0.0
 		    + pln->ops.add
 		    + pln->ops.mul
 		    + 2 * pln->ops.fma
@@ -495,7 +495,7 @@ static int imprt(planner *ego, scanner *sc)
      md5uint sig[4];
      int flags;
      int reg_id;
-     short slvndx;
+     int slvndx;
      solution *sol;
 
      if (!sc->scan(sc, "(" WISDOM_PREAMBLE))
@@ -503,7 +503,7 @@ static int imprt(planner *ego, scanner *sc)
 
      /* make a backup copy of the hash table (cache the hash) */
      {
-	  int h, hsiz = ego->hashsiz;
+	  unsigned h, hsiz = ego->hashsiz;
 	  sol = (solution *)MALLOC(hsiz * sizeof(solution), HASHT);
 	  for (h = 0; h < hsiz; ++h)
 	       sol[h] = ego->solutions[h];
@@ -607,7 +607,7 @@ plan *X(mkplan_d)(planner *ego, problem *p)
 void X(planner_dump)(planner *ego, int verbose)
 {
      unsigned valid = 0, empty = 0, infeasible = 0;
-     int h;
+     unsigned h;
      UNUSED(verbose); /* historical */
 
      for (h = 0; h < ego->hashsiz; ++h) {

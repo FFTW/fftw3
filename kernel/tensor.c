@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.35 2003-01-15 11:51:34 athena Exp $ */
+/* $Id: tensor.c,v 1.36 2003-01-16 12:58:28 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -97,7 +97,7 @@ int X(tensor_tornk1)(const tensor *t, int *n, int *is, int *os)
           *is = vd[0].is;
           *os = vd[0].os;
      } else {
-          *n = 1U;
+          *n = 1;
           *is = *os = 0;
      }
      return 1;
