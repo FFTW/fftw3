@@ -199,7 +199,7 @@ if test "$ac_test_CFLAGS" != "set"; then
                 fi;;
 
    *-aix*)
-	if test "$CC" = cc -o "$CC" = xlc; then
+	if test "$CC" = cc -o "$CC" = xlc -o "$CC" = ccc; then
                 ACX_CHECK_CC_FLAGS(-qarch=auto -qtune=auto, qarch_auto,
                         CFLAGS="-O3 -qansialias -w -qarch=auto -qtune=auto",
                         [CFLAGS="-O3 -qansialias -w"
