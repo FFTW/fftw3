@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.162 2005-03-07 02:36:05 athena Exp $ */
+/* $Id: planner.c,v 1.163 2005-03-25 13:59:43 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -397,15 +397,13 @@ static plan *search0(planner *ego, problem *p, int *slvndx,
      plan *best = 0;
      int best_not_yet_timed = 1;
 
-     FORALL_SOLVERS(ego, s, sp, {
-	  plan *pln;
-	  if (X(seconds)() > ego->timelimit) {
-	       X(plan_destroy_internal)(best);
-	       ego->timed_out = 1;
-	       return 0;
-	  }
+     if (X(seconds)() > ego->timelimit) {
+	  ego->timed_out = 1;
+	  return 0;
+     }
 
-	  pln = invoke_solver(ego, p, s, planner_flags);
+     FORALL_SOLVERS(ego, s, sp, {
+	  plan *pln = invoke_solver(ego, p, s, planner_flags);
 	  if (pln) {
 	       if (best) {
 		    if (best_not_yet_timed) {
