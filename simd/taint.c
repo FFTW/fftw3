@@ -18,10 +18,12 @@
  *
  */
 
-/* $Id: taint.c,v 1.1 2003-04-05 00:30:37 athena Exp $ */
+/* $Id: taint.c,v 1.2 2003-04-05 00:36:46 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
+
+#if HAVE_SIMD
 
 R *X(taint)(R *p, int s)
 {
@@ -31,3 +33,5 @@ R *X(taint)(R *p, int s)
 	  p = (R *) (PTRINT(p) | TAINT_BITA);
      return p;
 }
+
+#endif
