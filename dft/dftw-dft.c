@@ -134,7 +134,7 @@ static int applicable2(const problem *p_, const planner *plnr)
 		  /* in-place only */
 		  && p->s == p->ws
 		  && p->vs == p->wvs
-		  && (NO_UGLYP(plnr) || (p->m * p->r > 65536))
+		  && (!NO_UGLYP(plnr) || (p->m * p->r > 65536))
 	       );
      }
      return 0;
@@ -192,7 +192,7 @@ static int applicable1(const problem *p_, const planner *plnr)
 		  /* in-place only */
 		  && p->s == p->ws
 		  && p->vs == p->wvs
-		  && (NO_UGLYP(plnr) || (p->m * p->r <= 16384))
+		  && !NO_UGLYP(plnr)
 	       );
      }
      return 0;
@@ -268,7 +268,7 @@ static int applicable1tr(const problem *p_, const planner *plnr)
 		  /* DIT is not defined or implemented */
 		  && p->dec == DECDIF
 
-		  && (NO_UGLYP(plnr) || (p->m * p->r <= 16384))
+		  && !NO_UGLYP(plnr)
 	       );
      }
      return 0;
