@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.217 2005-01-27 20:48:28 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.218 2005-01-28 05:04:58 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4963,8 +4963,8 @@ any program or publication in which you use FFTW.  (You are not
 @emph{required} to do so; it is up to your common sense to decide
 whether you want to comply with this request or not.)  For general
 publications, we suggest referencing: Matteo Frigo and Steven
-G. Johnson, ``FFTW: An adaptive software architecture for the FFT,''
-@i{Proc. ICASSP 1998} @b{3}, 1381--1384 (1998).
+G. Johnson, ``The design and implementation of FFTW3,''
+@i{Proc. IEEE} @b{93} (2), 216--231 (2005).
 
 Non-free versions of FFTW are available under terms different from those
 of the General Public License. (e.g. they do not require you to
