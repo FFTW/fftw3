@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.14 2002-07-15 19:07:41 stevenj Exp $ */
+/* $Id: ct-dif.c,v 1.15 2002-07-25 03:27:45 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -27,8 +27,6 @@
 static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      plan_ct *ego = (plan_ct *) ego_;
-     plan *cld0 = ego->cld;
-     plan_dft *cld = (plan_dft *) cld0;
 
      {
           uint i, m = ego->m, vl = ego->vl;
@@ -39,7 +37,11 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      }
 
      /* two-dimensional r x vl sub-transform: */
-     cld->apply(cld0, ri, ii, ro, io);
+     {
+	  plan *cld0 = ego->cld;
+	  plan_dft *cld = (plan_dft *) cld0;
+	  cld->apply(cld0, ri, ii, ro, io);
+     }
 }
 
 static int applicable(const solver_ct *ego, const problem *p_)
