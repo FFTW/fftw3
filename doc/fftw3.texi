@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.4 2003-01-18 22:13:51 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.5 2003-01-19 00:17:27 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -96,6 +96,8 @@ Other Stuff You Should Know
 This manual documents version @value{VERSION} of FFTW, the @emph{Fastest
 Fourier Transform in the West}.  FFTW is a comprehensive collection of
 fast C routines for computing the discrete Fourier transform (DFT) in
+@cindex discrete Fourier transform
+@cindex DFT
 one or more dimensions, of both real and complex data, and of arbitrary
 input size.  It also includes specialized transforms for real even/odd
 data (a.k.a. discrete cosine/sine transforms), as well as the discrete
@@ -130,13 +132,14 @@ home page}.
 In order to use FFTW effectively, you need to understand one basic
 concept of FFTW's internal structure.  FFTW does not used a fixed
 algorithm for computing the transform, but it can adapt the DFT
-algorithm to details of the underlying hardware in order to achieve best
-performance.  Hence, the computation of the transform is split into two
-phases.  First, FFTW's @dfn{planner} is called, which ``learns'' the
-@cindex plan
-fastest way to compute the transform on your machine.  The planner
+algorithm to details of the underlying hardware in order to achieve
+best performance.  Hence, the computation of the transform is split
+into two phases.  First, FFTW's @dfn{planner} is called, which
+``learns'' the fastest way to compute the transform on your machine.
+The planner
 @cindex planner
 produces a data structure called a @dfn{plan} that contains this
+@cindex plan
 information.  Subsequently, the plan is @dfn{executed}
 @cindex execute
 to transform the array of input data as dictated by the plan.  The plan
@@ -232,12 +235,23 @@ thank all the people who helped us in @ref{Acknowledgments}.
 @node  Tutorial, Other Stuff You Should Know, Introduction, Top
 @chapter Tutorial
 @menu
-* Complex One-Dimensional Transforms::  
+* Complex One-Dimensional DFT::  
+* Complex Multi-Dimensional DFT::  
 @end menu
 
+This chapter describes the basic usage of FFTW, i.e., how to compute
+the Fourier transform of a single array.  This chapter tells the
+truth, but not the @emph{whole} truth. Specifically, FFTW implements
+additional routines and flags, providing extra functionality, that are
+not documented here, although in many cases we try to indicate where
+added capabilities exist.  For more complete information, see
+@ref{FFTW Reference}.  (Note that you need to compile and install FFTW
+before you can use it in a program.  For the details of the
+installation, see @ref{Installation and Customization}.)
+
 @c ------------------------------------------------------------
-@node Complex One-Dimensional Transforms,  , Tutorial, Tutorial
-@section Complex One-Dimensional Transforms
+@node Complex One-Dimensional DFT, Complex Multi-Dimensional DFT, Tutorial, Tutorial
+@section Complex One-Dimensional DFT
 
 The basic usage of FFTW is simple, and typically looks like:
 
@@ -262,21 +276,157 @@ The basic usage of FFTW is simple, and typically looks like:
 (When you compile, you must also link with the fftw3 library,
 e.g. @code{-lfftw3 -lm} on Unix systems.)
 
-First, of course, you allocate the arrays; you can do this any way that
-you like, but we recommend using @code{fftw_malloc}, which behaves the
-same as @code{malloc} except that it properly aligns the array when SIMD
-acceleration is available (@pxref{The Importance of Alignment}).  The
-data is an array of type @code{fftw_complex}, which is by default an
-array @code{double[2]} containing the real (@code{in[i][0]}) and
-imaginary (@code{in[i][1]}) parts.  If you have a C compiler, such as
-@code{gcc}, supporting the latest C99 standard, and you @code{#include
-<complex.h>} @emph{before} @code{<fftw3.h>}, then @code{fftw_complex} is
-the native double-precision complex type and you can manipulate it with
-ordinary arithmetic.  (To use the C++ @code{<complex>} template class,
-see the FFTW FAQ.)  Single and long-double precision versions of FFTW
-may also be available, with the @code{fftw_} prefix replaced by
-@code{fftwf_} or @code{fftwl_} and linking with @code{-lfftw3f} or
-@code{-lfftw3l}, but using the same @code{<fftw3.h>} header file.
+First, of course, you allocate the arrays; you can do this any way
+that you like, but we recommend using @code{fftw_malloc}, which
+behaves the same as @code{malloc} except that it properly aligns the
+array when SIMD acceleration is available (@pxref{The Importance of
+Alignment}).  The data is an array of type @code{fftw_complex}, which
+is by default a @code{double[2]} containing the real (@code{in[i][0]})
+and imaginary (@code{in[i][1]}) parts.  If you have a C compiler, such
+as @code{gcc}, supporting the latest C99 standard, and you
+@code{#include <complex.h>} @emph{before} @code{<fftw3.h>}, then
+@code{fftw_complex} is the native double-precision complex type and
+you can manipulate it with ordinary arithmetic.  (To use the C++
+@code{<complex>} template class, see the FFTW FAQ.)  Single and
+long-double precision versions of FFTW may also be installed, with the
+@code{fftw_} prefix replaced by @code{fftwf_} or @code{fftwl_} and
+linking with @code{-lfftw3f} or @code{-lfftw3l}, but using the
+@emph{same} @code{<fftw3.h>} header file.
+
+The next thing is to create a @dfn{plan}, which is an object
+@cindex plan
+that contains all the data that FFTW needs to compute the FFT, using the
+following function:
+
+@example
+fftw_plan fftw_plan_dft_1d(int n, fftw_complex *in, fftw_complex *out,
+                           int sign, unsigned flags);
+@end example
+@findex fftw_plan_dft_1d
+@tindex fftw_plan
+
+The first argument, @code{n}, is the size of the transform you are
+trying to compute.  The size @code{n} can be any positive integer, but
+sizes that are products of small factors are transformed most
+efficiently.  The next two arguments are the input and output arrays
+of the transform; they can be the same, indicating an @dfn{in-place}
+transform. 
+@cindex in-place
+@emph{The data in these arrays is overwritten during planning,} so the
+planning is typically done soon after allocation, @emph{before} the
+input is initialized.  The fourth argument, @code{sign}, can be either
+@code{FFTW_FORWARD} (@code{-1}) or @code{FFTW_BACKWARD} (@code{+1}),
+@ctindex FFTW_FORWARD
+@ctindex FFTW_BACKWARD
+and indicates the direction of the transform you are interested in;
+technically, it is the sign of the exponent in the transform.  The
+@code{flags} argument is usually either @code{FFTW_DEFAULTS} or
+@cindex flags
+@code{FFTW_ESTIMATE}.  @code{FFTW_DEFAULTS} indicates the default
+options, in which FFTW actually runs
+@ctindex FFTW_DEFAULTS
+and measures the execution time of several FFTs in order to find the
+best way to compute the transform of size @code{n}.  This may take
+some time (usually a few seconds), depending on your machine and on
+the size of the transform.  @code{FFTW_ESTIMATE}, on the contrary,
+does not run any computation and just builds a
+@ctindex FFTW_ESTIMATE
+reasonable plan that is probably sub-optimal.  In other words, if your
+program performs many transforms of the same size and initialization
+time is not important, use @code{FFTW_DEFAULTS}; otherwise use the
+estimate.  (There are other options too; see @ref{FFTW Reference}.  For
+example, use @code{FFTW_PATIENT} if you're willing to wait even longer
+for a more optimal plan.
+@ctindex FFTW_PATIENT
+One can also save plans for future use, as described by @ref{Words of
+Wisdom}.)
+
+Once the plan has been created, you can use it as many times as you
+like for transforms on the specified @code{in}/@code{out} arrays,
+computing the actual transform via @code{fftw_execute(plan)}.  If you
+@cindex execute
+want to transform a different array of the same size, you can create a
+new plan with @code{fftw_plan_dft_1d} and FFTW will automatically
+reuse the information from the previous plan, if possible.
+(Alternatively, there is a guru interface for applying a given plan to
+a different array, if sufficient care is taken.  @xref{FFTW
+Reference}.)
+
+When you are done with the plan, you deallocate it by calling
+@code{fftw_destroy_plan(plan)}.
+@findex fftw_destroy_plan
+Arrays allocated with @code{fftw_malloc} should be deallocated by
+@code{fftw_free} rather than the ordinary @code{free} (or, heaven
+forbid, @code{delete}).
+
+The DFT results are stored in-order in the array @code{out}, with the
+zero-frequency (DC) component in @code{out[0]}.
+@cindex frequency
+The array @code{in} is not modified for an @dfn{out-of-place}
+@cindex out-of-place
+transform (@code{in != out}).  Users should note that FFTW computes an
+@emph{unnormalized} DFT.  Thus, computing a forward followed by a
+backward transform (or vice versa) results in the original array
+scaled by @code{n}.  For the definition of the DFT, see @ref{What FFTW
+Really Computes}.
+@cindex DFT
+@cindex normalization
+
+@c ------------------------------------------------------------
+@node Complex Multi-Dimensional DFT,  , Complex One-Dimensional DFT, Tutorial
+@section Complex Multi-Dimensional DFT
+
+Multi-dimensional transforms work much the same way as one-dimensional
+transforms: you allocate arrays of @code{fftw_complex} (preferably
+using @code{fftw_malloc}), create an @code{fftw_plan}, execute it as
+many times as you want with @code{fftw_execute(plan)}, and clean up
+with @code{fftw_destroy_plan(plan)} (and @code{fftw_free}).  The only
+difference is the routine you use to create the plan:
+
+@example
+fftw_plan fftw_plan_dft_2d(int nx, int ny,
+                           fftw_complex *in, fftw_complex *out,
+                           int sign, unsigned flags);
+fftw_plan fftw_plan_dft_3d(int nx, int ny, int nz,
+                           fftw_complex *in, fftw_complex *out,
+                           int sign, unsigned flags);
+fftw_plan fftw_plan_dft(int rank, const int *n,
+                        fftw_complex *in, fftw_complex *out,
+                        int sign, unsigned flags);
+@end example
+@findex fftw_plan_dft_2d
+@findex fftw_plan_dft_3d
+@findex fftw_plan_dft
+@tindex fftw_plan
+
+These routines create plans for @code{nx} by @code{ny} two-dimensional
+(2d) transforms, @code{nx} by @code{ny} by @code{nz} 3d transforms,
+and general @code{rank}-dimensional transforms, respectively.  In the
+third case, @code{n} is a pointer to an array @code{n[rank]} denoting
+an @code{n[0]} by @code{n[1]} by @dots{} by @code{n[rank-1]}
+transform.  All of these transforms operate on contiguous arrays in
+the C-standard @dfn{row-major} order, described further in
+@ref{Multi-dimensional Array Format}.
+
+You might have noticed that all the planner routines so far have
+overlapping functionality.  For example, you can plan a 1d or 2d
+transform by using @code{fftw_plan_dft} with a @code{rank} of @code{1}
+or @code{2}, or even by calling @code{fftw_plan_dft_3d} with @code{nx}
+and/or @code{ny} equal to @code{1} (with no loss in efficiency).  This
+pattern continues, and FFTW's planning routines in general form a
+``partial order,'' sequences of
+@cindex partial order
+interfaces with strictly increasing generality but correspondingly
+greater complexity.
+
+@code{fftw_plan_dft} is the most general complex-DFT routine that we
+describe in this tutorial, but there are also the advanced and guru interfaces,
+@cindex advanced interface
+@cindex guru interface 
+which allow one to efficiently combine multiple/strided transforms
+into a single FFTW plan, transform a subset of a larger
+multi-dimensional array, and/or to handle more general complex-number
+formats.  For more information, see @ref{FFTW Reference}.
 
 @c ************************************************************
 @node Other Stuff You Should Know, FFTW Reference, Tutorial, Top
@@ -309,6 +459,7 @@ may also be available, with the @code{fftw_} prefix replaced by
 * Basic Interface::             
 * Advanced Interface::          
 * Guru Interface::              
+* What FFTW Really Computes::   
 @end menu
 
 @c ------------------------------------------------------------
@@ -322,9 +473,16 @@ may also be available, with the @code{fftw_} prefix replaced by
 @cindex advanced interface
 
 @c ------------------------------------------------------------
-@node Guru Interface,  , Advanced Interface, FFTW Reference
+@node Guru Interface, What FFTW Really Computes, Advanced Interface, FFTW Reference
 @section Guru Interface
 @cindex guru interface
+
+
+@c ------------------------------------------------------------
+@node What FFTW Really Computes,  , Guru Interface, FFTW Reference
+@section What FFTW Really Computes
+@cindex discrete Fourier transform
+@cindex DFT
 
 
 @c ************************************************************
