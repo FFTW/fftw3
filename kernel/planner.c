@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.29 2002-07-30 05:20:11 stevenj Exp $ */
+/* $Id: planner.c,v 1.30 2002-07-30 23:54:41 stevenj Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -74,6 +74,8 @@ static void register_registrar(planner *ego, const char *reg_nam)
 	  UNUSED(s);
           if (!sp->reg_nam)
 	       sp->reg_nam = reg_nam;
+	  else
+	       break;
      });
 }
 
