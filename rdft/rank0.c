@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.16 2005-02-21 15:07:24 athena Exp $ */
+/* $Id: rank0.c,v 1.17 2005-02-22 15:06:13 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -64,147 +64,17 @@ static int fill_iodim(P *pln, const problem_rdft *p)
 	  else 
 	       pln->d[pln->rnk++] = vecsz->dims[i];
      }
+
+     /* canonicalize vrank-1 in-place problems so that rnk == 2,
+	because this is the only case considered in this file. */
+     if (p->I == p->O && pln->rnk == 1 && pln->vl > 1) {
+	  pln->d[0].n = pln->vl;
+	  pln->d[0].is = pln->d[0].os = 1;
+	  pln->rnk++;
+	  pln->vl = 1;
+     }
+     
      return 1;
-}
-
-/* execution routines */
-static void cpy1d(R *I, R *O, int n0, int is0, int os0, int vl)
-{
-     int i0, v;
-     switch (vl) {
-	 case 1:
-	      for (; n0 > 0; --n0, I += is0, O += os0) 
-		   *O = *I;
-	      break;
-	 case 2:
-	      for (; n0 > 0; --n0, I += is0, O += os0) {
-		   R x0 = I[0];
-		   R x1 = I[1];
-		   O[0] = x0;
-		   O[1] = x1;
-	      }
-	      break;
-	 default:
-	      for (i0 = 0; i0 < n0; ++i0) 
-		   for (v = 0; v < vl; ++v) {
-			R x0 = I[i0 * is0 + v];
-			O[i0 * os0 + v] = x0;
-		   }
-	      break;
-     }
-}
-
-static void cpy2d(R *I, R *O,
-		  int n0, int is0, int os0,
-		  int n1, int is1, int os1,
-		  int vl)
-{
-     int i0, i1, v;
-     switch (vl) {
-	 case 1:
-	      for (i1 = 0; i1 < n1; ++i1)
-		   for (i0 = 0; i0 < n0; ++i0) {
-			R x0 = I[i0 * is0 + i1 * is1];
-			O[i0 * os0 + i1 * os1] = x0;
-		   }
-	      break;
-	 case 2:
-	      for (i1 = 0; i1 < n1; ++i1)
-		   for (i0 = 0; i0 < n0; ++i0) {
-			R x0 = I[i0 * is0 + i1 * is1];
-			R x1 = I[i0 * is0 + i1 * is1 + 1];
-			O[i0 * os0 + i1 * os1] = x0;
-			O[i0 * os0 + i1 * os1 + 1] = x1;
-		   }
-	      break;
-	 default:
-	      for (i1 = 0; i1 < n1; ++i1)
-		   for (i0 = 0; i0 < n0; ++i0) 
-			for (v = 0; v < vl; ++v) {
-			     R x0 = I[i0 * is0 + i1 * is1 + v];
-			     O[i0 * os0 + i1 * os1 + v] = x0;
-			}
-	      break;
-     }
-}
-
-/*
-  Recursive 2-dimensional copy routines, useful e.g. for
-  transpositions.
-
-  In an ideal world where caches don't suck, the ``cache-oblivious''
-  cpy2d_rec() routine would be sufficient and optimal.
-
-  In a real world of caches with limited associativity, the extra
-  buffering of cpy2d_recbuf() is necessary when stride=2^k (i.e., in the
-  common case.) See
-  
-     K.S. Gatlin and Larry Carter, ``Memory Hierarchy Considerations
-     for Fast Transpose and Bit-Reversals'', HPCA99, January 1999.
-
-*/
-
-/*
-  Ideally:  max CUTOFF s.t.
-    CUTOFF^2 * sizeof(complex double) <= cache size
-    CUTOFF * sizeof(float) >= line size 
-
-  CUTOFF = 16 implies cache size >= 4096, which is reasonable.
-  CUTOFF = 16 fails to exploit 128 bytes lines vl = 1, R = float;
-  however vl = 2 or R = double is ok.
-*/
-#define CUTOFF 16
-
-static void cpy2d_rec(R *I, R *O,
-		      int n0, int is0, int os0,
-		      int n1, int is1, int os1,
-		      int vl)
-{
- tail:
-     if (n0 >= n1 && n0 > CUTOFF) {
-	  int nm = n0 / 2;
-	  cpy2d_rec(I, O, nm, is0, os0, n1, is1, os1, vl);
-	  I += nm * is0; O += nm * os0; n0 -= nm; goto tail;
-     } else if (/* n1 >= n0 && */ n1 > CUTOFF) {
-	  int nm = n1 / 2;
-	  cpy2d_rec(I, O, n0, is0, os0, nm, is1, os1, vl);
-	  I += nm * is1; O += nm * os1; n1 -= nm; goto tail;
-     } else {
-	  cpy2d(I, O, n0, is0, os0, n1, is1, os1, vl);
-     }
-}
-
-static void cpy2d_recbuf(R *I, R *O,
-			 int n0, int is0, int os0,
-			 int n1, int is1, int os1,
-			 int vl)
-{
- tail:
-     if (n0 >= n1 && n0 > CUTOFF) {
-	  int nm = n0 / 2;
-	  cpy2d_recbuf(I, O, nm, is0, os0, n1, is1, os1, vl);
-	  I += nm * is0; O += nm * os0; n0 -= nm; goto tail;
-     } else if (/* n1 >= n0 && */ n1 > CUTOFF) {
-	  int nm = n1 / 2;
-	  cpy2d_recbuf(I, O, n0, is0, os0, nm, is1, os1, vl);
-	  I += nm * is1; O += nm * os1; n1 -= nm; goto tail;
-     } else {
-	  R buf[CUTOFF*CUTOFF*2];
-
-	  /* copy from I to buf; exploit the fact that the inner loop
-	     is for n0 */
-	  if (is0 < is1)
-	       cpy2d(I, buf, n0, is0, 2, n1, is1, 2 * CUTOFF, vl);
-	  else
-	       cpy2d(I, buf, n1, is1, 2 * CUTOFF, n0, is0, 2, vl);
-
-	  /* copy from buf to O; exploit the fact that the inner loop
-	     is for n0 */
-	  if (os0 < os1)
-	       cpy2d(buf, O, n0, 2, os0, n1, 2 * CUTOFF, os1, vl);
-	  else
-	       cpy2d(buf, O, n1, 2 * CUTOFF, os1, n0, 2, os0, vl);
-     }
 }
 
 /**************************************************************/
@@ -220,15 +90,15 @@ static void apply_iter(const plan *ego_, R *I, R *O)
 		   *O = *I;
 	      break;
 	 case 1:
-	      cpy1d(I, O, 
-		    ego->d[0].n, ego->d[0].is, ego->d[0].os, 
-		    vl);
+	      X(cpy1d)(I, O, 
+		       ego->d[0].n, ego->d[0].is, ego->d[0].os, 
+		       vl);
 	      break;
 	 case 2:
-	      cpy2d(I, O, 
-		    ego->d[0].n, ego->d[0].is, ego->d[0].os,
-		    ego->d[1].n, ego->d[1].is, ego->d[1].os,
-		    vl);
+	      X(cpy2d)(I, O, 
+		       ego->d[0].n, ego->d[0].is, ego->d[0].os,
+		       ego->d[1].n, ego->d[1].is, ego->d[1].os,
+		       vl);
 	      break;
 	 default:
 	      A(0 /* can't happen */); 
@@ -248,10 +118,10 @@ static void apply_rec(const plan *ego_, R *I, R *O)
      int vl = ego->vl;
 
      A(ego->rnk == 2);
-     cpy2d_rec(I, O, 
-	       ego->d[0].n, ego->d[0].is, ego->d[0].os,
-	       ego->d[1].n, ego->d[1].is, ego->d[1].os,
-	       vl);
+     X(cpy2d_rec)(I, O, 
+		  ego->d[0].n, ego->d[0].is, ego->d[0].os,
+		  ego->d[1].n, ego->d[1].is, ego->d[1].os,
+		  vl);
 }
 
 static int applicable_rec(const P *pln, const problem_rdft *p)
@@ -268,10 +138,10 @@ static void apply_recbuf(const plan *ego_, R *I, R *O)
 
      A(ego->rnk == 2);
      A(vl <= 2);
-     cpy2d_recbuf(I, O, 
-		  ego->d[0].n, ego->d[0].is, ego->d[0].os,
-		  ego->d[1].n, ego->d[1].is, ego->d[1].os,
-		  vl);
+     X(cpy2d_recbuf)(I, O, 
+		     ego->d[0].n, ego->d[0].is, ego->d[0].os,
+		     ego->d[1].n, ego->d[1].is, ego->d[1].os,
+		     vl);
 }
 
 static int applicable_recbuf(const P *pln, const problem_rdft *p)
@@ -296,6 +166,50 @@ static int applicable_memcpy(const P *pln, const problem_rdft *p)
 }
 
 /**************************************************************/
+/* rank 2, in place, square transpose, iterative */
+static void apply_ip_sq(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     UNUSED(O);
+     X(transpose)(I, ego->d[0].n, ego->d[0].is, ego->d[0].os, ego->vl);
+}
+
+static int applicable_ip_sq(const P *pln, const problem_rdft *p)
+{
+     return (1
+	     && p->I == p->O
+	     && pln->rnk == 2
+	     && pln->d[0].n == pln->d[1].n
+	     && pln->d[0].is == pln->d[1].os
+	     && pln->d[0].os == pln->d[1].is);
+}
+
+/**************************************************************/
+/* rank 2, in place, square transpose, recursive */
+static void apply_ip_sq_rec(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     UNUSED(O);
+     X(transpose_rec)(I, ego->d[0].n, ego->d[0].is, ego->d[0].os, ego->vl);
+}
+
+#define applicable_ip_sq_rec applicable_ip_sq
+
+/**************************************************************/
+/* rank 2, in place, square transpose, recursive with buffer */
+static void apply_ip_sq_recbuf(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     UNUSED(O);
+     X(transpose_recbuf)(I, ego->d[0].n, ego->d[0].is, ego->d[0].os, ego->vl);
+}
+
+static int applicable_ip_sq_recbuf(const P *pln, const problem_rdft *p)
+{
+     return pln->vl <= 2 && applicable_ip_sq_rec(pln, p);
+}
+
+/**************************************************************/
 static int applicable(const S *ego, const problem *p_)
 {
      if (RDFTP(p_)) {
@@ -315,7 +229,11 @@ static int applicable(const S *ego, const problem *p_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s/%d%v)", ego->nam, ego->rnk, ego->vl);
+     int i;
+     p->print(p, "(%s/%d", ego->nam, ego->vl);
+     for (i = 0; i < ego->rnk; ++i)
+	  p->print(p, "%v", ego->d[i].n);
+     p->print(p, ")");
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -356,10 +274,17 @@ void X(rdft_rank0_register)(planner *p)
 	  int (*applicable)(const P *pln, const problem_rdft *p);
 	  const char *nam;
      } tab[] = {
-	  { apply_iter,    applicable_iter,   "rdft-rank0" },
-	  { apply_rec ,    applicable_rec,    "rdft-rank0-rec" },
-	  { apply_recbuf , applicable_recbuf, "rdft-rank0-recbuf" },
-	  { apply_memcpy , applicable_memcpy, "rdft-rank0-memcpy" },
+	  { apply_iter,      applicable_iter,      "rdft-rank0" },
+	  { apply_rec,       applicable_rec,       "rdft-rank0-rec" },
+	  { apply_recbuf,    applicable_recbuf,    "rdft-rank0-recbuf" },
+	  { apply_memcpy,    applicable_memcpy,    "rdft-rank0-memcpy" },
+	  { apply_ip_sq,     applicable_ip_sq,     "rdft-rank0-ip-sq" },
+	  { apply_ip_sq_rec, applicable_ip_sq_rec, "rdft-rank0-ip-sq-rec" },
+	  { 
+	       apply_ip_sq_recbuf,
+	       applicable_ip_sq_recbuf,
+	       "rdft-rank0-ip-sq-recbuf" 
+	  },
      };
 
      for (i = 0; i < sizeof(tab) / sizeof(tab[0]); ++i) {

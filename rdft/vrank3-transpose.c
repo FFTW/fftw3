@@ -18,11 +18,14 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.24 2005-02-20 20:35:24 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.25 2005-02-22 15:06:13 athena Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
-#include <string.h> /* memcpy */
+#ifdef HAVE_STRING_H
+#include <string.h>		/* for memcpy() */
+#endif
+
 #include "rdft.h"
 
 typedef struct {
@@ -48,12 +51,6 @@ typedef struct {
      const S *slv;
 } P;
 
-/**************************************************************************/
-
-/* FIXME: what are the best values for these cutoffs? */
-
-#define CUTOFF 8 /* size below which we do a naive transpose */
-#define CUTOFF_UGLY 2000 /* size at which naive transpose is UGLY */
 
 /*************************************************************************/
 /* some utilities for the solvers */
@@ -74,103 +71,20 @@ static int gcd(int a, int b)
 /********************* Generic Ntuple transposes *************************/
 /*************************************************************************/
 
-/*************************************************************************/
-/* Out-of-place transposes: */
-
-/* B[j0..j1][i0..i1] = (A[i0..i1][j0..j1])^T */
-static void rec_transpose(R *A, R *B, int i0, int i1, int j0, int j1,
+static void rec_transpose(R *A, R *B, int n0, int n1,
 			  int lda, int ldb, int vl)
 {
-     int di = i1 - i0;
-     int dj = j1 - j0;
-
-     if (di >= dj && di > CUTOFF) {
-	  int im = (i0 + i1) / 2;
-	  rec_transpose(A, B, i0, im, j0, j1, lda, ldb, vl);
-	  rec_transpose(A, B, im, i1, j0, j1, lda, ldb, vl);
-     } else if (dj >= di && dj > CUTOFF) {
-	  int jm = (j0 + j1) / 2;
-	  rec_transpose(A, B, i0, i1, j0, jm, lda, ldb, vl);
-	  rec_transpose(A, B, i0, i1, jm, j1, lda, ldb, vl);
-     } else {
-	  int i, j, k;
-	  for (i = i0; i < i1; ++i)
-	       for (j = j0; j < j1; ++j)
-		    for (k = 0; k < vl; ++k) 
-			 B[(j * ldb + i) * vl + k] = A[(i * lda + j) * vl + k];
-     }
+     /* FIXME: inline and get rid of this routine */
+     X(cpy2d_rec)(A, B,
+		  n0, lda * vl, vl, 
+		  n1, vl, ldb * vl,
+		  vl);
 }
 
-/*************************************************************************/
-/* In-place transposes of square matrices of N-tuples: */
-
-/* swap M[i0..i1][j0..j1] <=> (M[j0..j1][i0..i1])^T */
-static void rec_transpose_swap(R *M, int i0, int i1, int j0, int j1, 
-			       int lda, int vl)
+static void rec_transpose_sq_ip(R *M, int n, int vl)
 {
-     int di, dj;
-
- tail:
-     di = i1 - i0;
-     dj = j1 - j0;
-
-     if (di >= dj && di > CUTOFF) {
-	  int im = (i0 + i1) / 2;
-	  rec_transpose_swap(M, i0, im, j0, j1, lda, vl);
-	  i0 = im; goto tail;
-     } else if (dj >= di && dj > CUTOFF) {
-	  int jm = (j0 + j1) / 2;
-	  rec_transpose_swap(M, i0, i1, j0, jm, lda, vl);
-	  j0 = jm; goto tail;
-     } else {
-	  int i, j, k;
-	  switch (vl) {
-	      case 1:
-		   for (i = i0; i < i1; ++i)
-			for (j = j0; j < j1; ++j) {
-			     R a = M[i * lda + j];
-			     R b = M[j * lda + i];
-			     M[j * lda + i] = a;
-			     M[i * lda + j] = b;
-			}
-		   break;
-	      case 2:
-		   for (i = i0; i < i1; ++i)
-			for (j = j0; j < j1; ++j) {
-			     R a0 = M[(i * lda + j) * 2 + 0];
-			     R a1 = M[(i * lda + j) * 2 + 1];
-			     R b0 = M[(j * lda + i) * 2 + 0];
-			     R b1 = M[(j * lda + i) * 2 + 1];
-			     M[(j * lda + i) * 2 + 0] = a0;
-			     M[(j * lda + i) * 2 + 1] = a1;
-			     M[(i * lda + j) * 2 + 0] = b0;
-			     M[(i * lda + j) * 2 + 1] = b1;
-			}
-		   break;
-	      default:
-		   for (i = i0; i < i1; ++i)
-			for (j = j0; j < j1; ++j)
-			     for (k = 0; k < vl; ++k) {
-				  R a = M[(i * lda + j) * vl + k];
-				  R b = M[(j * lda + i) * vl + k];
-				  M[(j * lda + i) * vl + k] = a;
-				  M[(i * lda + j) * vl + k] = b;
-			     }
-		   break;
-	  }
-     }
-}
-
-/* transpose M[n0..n1][n0..n1] */
-static void rec_transpose_sq_ip(R *M, int n0, int n1, int lda, int vl)
-{
- tail:
-     if (n1 - n0 > 1) {
-	  int nm = (n1 + n0) / 2;
-	  rec_transpose_swap(M, n0, nm, nm, n1, lda, vl);
-	  rec_transpose_sq_ip(M, n0, nm, lda, vl);
-	  n0 = nm; goto tail;
-     }
+     /* FIXME: inline and get rid of this routine */
+     X(transpose_rec)(M, n, n * vl, vl, vl);
 }
 
 /*************************************************************************/
@@ -214,7 +128,7 @@ static void transpose_gcd(R *A, int n, int m, int d, int N, R *buf)
 {
      A(n > 0 && m > 0 && N > 0 && d > 0);
      if (d == 1) {
-	  rec_transpose(A, buf, 0, n, 0, m, m, n, N);
+	  rec_transpose(A, buf, n, m, m, n, N);
 	  memcpy(A, buf, m*n*N*sizeof(R));
      }
      else {
@@ -228,21 +142,21 @@ static void transpose_gcd(R *A, int n, int m, int d, int N, R *buf)
 	  if (n > 1) {
 	       for (i = 0; i < d; ++i) {
 		    rec_transpose(A + i*num_el, buf,
-				  0, n, 0, d, d, n, m*N);
+				  n, d, d, n, m*N);
 		    memcpy(A + i*num_el, buf, num_el*sizeof(R));
 	       }
 	  }
 	  
 	  /* Now, transpose (d x d') x (n x m) to (d' x d) x (n x m), which
 	     is a square in-place transpose of n*m-tuples: */
-	  rec_transpose_sq_ip(A, 0, d, d, n*m*N);
+	  rec_transpose_sq_ip(A, d, n*m*N);
 
 	  /* Finally, transpose d' x ((d x n) x m) to d' x (m x (d x n)),
 	     using the buf matrix.  This consists of d' transposes
 	     of contiguous d*n x m matrices. */
 	  if (m > 1) {
 	       for (i = 0; i < d; ++i) {
-		    rec_transpose(A + i*num_el, buf, 0, d*n, 0, m, m, d*n, N);
+		    rec_transpose(A + i*num_el, buf, d*n, m, m, d*n, N);
 		    memcpy(A + i*num_el, buf, num_el*sizeof(R));
 	       }
 	  }
@@ -268,18 +182,18 @@ static void transpose_cut(R *A, int n, int m, int N, R *buf)
      A(n > 0 && m > 0 && N > 0);
      if (n > m) {
 	  memcpy(buf, A + m*(m*N), (n-m)*(m*N)*sizeof(R));
-	  rec_transpose_sq_ip(A, 0, m, m, N);
+	  rec_transpose_sq_ip(A, m, N);
 	  unpack(A, m, n, N);
-	  rec_transpose(buf, A + m*N, 0, n-m, 0, m, m, n, N);
+	  rec_transpose(buf, A + m*N, n-m, m, m, n, N);
      }
      else if (m > n) {
-	  rec_transpose(A + n*N, buf, 0, n, 0, m-n, m, n, N);
+	  rec_transpose(A + n*N, buf, n, m-n, m, n, N);
 	  pack(A, n, m, N);
-	  rec_transpose_sq_ip(A, 0, n, n, N);
+	  rec_transpose_sq_ip(A, n, N);
 	  memcpy(A + n*(n*N), buf, (m-n)*(n*N)*sizeof(R));
      }
      else /* n == m */
-	  rec_transpose_sq_ip(A, 0, n, n, N);
+	  rec_transpose_sq_ip(A, n, N);
 }
 
 /*************************************************************************/
@@ -533,127 +447,6 @@ static void get_transpose_vec(const problem_rdft *p, int dim2, int *vl,int *vs)
 }
 
 
-/* use the simple square transpose in the solver for square matrices
-   that aren't too big or which have non-unit stride */
-static int transpose_simplep(planner *plnr, const problem_rdft *p,
-			     int dim0, int dim1, int dim2)
-{
-     int n = p->vecsz->dims[dim0].n;
-     int vl, vs;
-     get_transpose_vec(p, dim2, &vl, &vs);
-     return (n == p->vecsz->dims[dim1].n
-	     && (!NO_UGLYP(plnr)
-		 || n * vl < CUTOFF_UGLY 
-		 || vs != 1));
-}
-
-/*-----------------------------------------------------------------------*/
-/* simple triple-loop square transpose of vectors, no buffers */
-
-static void apply_simple(const plan *ego_, R *I, R *O)
-{
-     const P *ego = (const P *) ego_;
-     int n = ego->n;
-     int s0 = ego->s0, s1 = ego->s1;
-     int vl = ego->vl, vs = ego->vs;
-     int i, j, iv;
-     A(n == ego->m);
-     UNUSED(O);
-     switch (vl) {
-	 case 1:
-	      for (i = 1; i < n; ++i) {
-		   for (j = 0; j < i; ++j) {
-			R *p0 = I + i * s0 + j * s1;
-			R *p1 = I + j * s0 + i * s1;
-			R t0 = p0[0];
-			R r0 = p1[0];
-			p0[0] = r0;
-			p1[0] = t0;
-		   }
-	      }
-	      break;
-	 case 2:
-	      for (i = 1; i < n; ++i) {
-		   for (j = 0; j < i; ++j) {
-			R *p0 = I + i * s0 + j * s1;
-			R *p1 = I + j * s0 + i * s1;
-			R t0 = p0[0];
-			R t1 = p0[vs];
-			R r0 = p1[0];
-			R r1 = p1[vs];
-			p0[0] = r0;
-			p0[vs] = r1;
-			p1[0] = t0;
-			p1[vs] = t1;
-		   }
-	      }
-	      break;
-	 default:
-	      for (i = 1; i < n; ++i) {
-		   for (j = 0; j < i; ++j) {
-			R *p0 = I + i * s0 + j * s1;
-			R *p1 = I + j * s0 + i * s1;
-			for (iv = 0; iv < vl; ++iv) {
-			     R t0 = p0[0];
-			     R r0 = p1[0];
-			     p0[0] = r0; p0 += vs;
-			     p1[0] = t0; p1 += vs;
-			}
-		   }
-	      }
-	      break;
-     }
-}
-
-static int applicable_simple(const problem_rdft *p, planner *plnr,
-				 int dim0, int dim1, int dim2, int *nbuf)
-{
-     *nbuf = 0;
-     return (1
-	     && (p->vecsz->rnk == 2 || p->vecsz->rnk == 3)
-	     && transpose_simplep(plnr, p, dim0, dim1, dim2)
-	  );
-}
-
-static const transpose_adt adt_simple =
-{
-     apply_simple, applicable_simple, "rdft-transpose-simple"
-};
-
-/*-----------------------------------------------------------------------*/
-/* cache-oblivious square transpose, vector-stride 1 only, handles
-   case where fda > n, no buffers */
-
-static void apply_recsq(const plan *ego_, R *I, R *O)
-{
-     const P *ego = (const P *) ego_;
-     int n = ego->n;
-     int fd = ego->fd;
-     int vl = ego->vl;
-     A(ego->vs == 1 && ego->m == n && ego->s1 == vl);
-     UNUSED(O);
-     rec_transpose_sq_ip(I, 0, n, fd, vl);
-}
-
-static int applicable_recsq(const problem_rdft *p, planner *plnr,
-			    int dim0, int dim1, int dim2, int *nbuf)
-{
-     int vl, vs;
-     UNUSED(plnr);
-     get_transpose_vec(p, dim2, &vl, &vs);
-     *nbuf = 0;
-     return (p->vecsz->dims[dim0].n == p->vecsz->dims[dim1].n
-	     && Ntuple_transposable(p->vecsz->dims + dim0,
-				    p->vecsz->dims + dim1,
-				    vl, vs));
-}
-
-static const transpose_adt adt_recsq =
-{
-     apply_recsq, applicable_recsq,
-     "rdft-transpose-recsq"
-};
-
 /*-----------------------------------------------------------------------*/
 /* cache-oblivious gcd-based non-square transpose, vector-stride 1 only */
 
@@ -823,7 +616,7 @@ void X(rdft_vrank3_transpose_register)(planner *p)
 {
      unsigned i;
      static const transpose_adt *const adts[] = {
-	  &adt_simple, &adt_recsq, &adt_gcd, &adt_cut, &adt_toms513
+	  &adt_gcd, &adt_cut, &adt_toms513
      };
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
           REGISTER_SOLVER(p, mksolver(adts[i]));

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.246 2005-02-18 02:15:42 athena Exp $ */
+/* $Id: ifftw.h,v 1.247 2005-02-22 15:06:13 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -717,6 +717,33 @@ typedef struct rader_tls rader_tl;
 void X(rader_tl_insert)(int k1, int k2, int k3, R *W, rader_tl **tl);
 R *X(rader_tl_find)(int k1, int k2, int k3, rader_tl *t);
 void X(rader_tl_delete)(R *W, rader_tl **tl);
+
+/*-----------------------------------------------------------------------*/
+/* copy/transposition routines */
+void X(cpy1d)(R *I, R *O, int n0, int is0, int os0, int vl);
+void X(cpy2d)(R *I, R *O,
+	      int n0, int is0, int os0,
+	      int n1, int is1, int os1,
+	      int vl);
+void X(cpy2d_ci)(R *I, R *O,
+		 int n0, int is0, int os0,
+		 int n1, int is1, int os1,
+		 int vl);
+void X(cpy2d_co)(R *I, R *O,
+		 int n0, int is0, int os0,
+		 int n1, int is1, int os1,
+		 int vl);
+void X(cpy2d_rec)(R *I, R *O,
+		  int n0, int is0, int os0,
+		  int n1, int is1, int os1,
+		  int vl);
+void X(cpy2d_recbuf)(R *I, R *O,
+		     int n0, int is0, int os0,
+		     int n1, int is1, int os1,
+		     int vl);
+void X(transpose)(R *I, int n, int s0, int s1, int vl);
+void X(transpose_rec)(R *I, int n, int s0, int s1, int vl) ;
+void X(transpose_recbuf)(R *I, int n, int s0, int s1, int vl) ;
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
