@@ -20,7 +20,7 @@
 
 #include "api.h"
 
-X(plan) X(plan_dft_c2r)(unsigned int rank, const unsigned int *n,
+X(plan) X(plan_dft_c2r)(unsigned int rank, const unsigned long *n,
 			C *in, R *out, unsigned int flags)
 {
      return X(plan_many_dft_c2r)(rank, n, 1,

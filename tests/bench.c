@@ -89,10 +89,18 @@ void setup(struct problem *p)
 						   p->sign, flags);
 			    break;
 		       default:
-			    the_plan = FFTW(plan_dft)(p->rank, p->n,
+		       {
+			    unsigned int i;
+			    unsigned long *nl;
+			    nl = bench_malloc(p->rank * sizeof(unsigned long));
+			    for (i = 0; i < p->rank; ++i)
+				 nl[i] = p->n[i];
+			    the_plan = FFTW(plan_dft)(p->rank, nl,
 						      p->in, p->out,
 						      p->sign, flags);
+			    bench_free(nl);
 			    break;
+		       }
 		   }
 		   break;
 	      case PROBLEM_REAL:	      

@@ -18,13 +18,11 @@
  *
  */
 
-/* $Id: tensor3.c,v 1.2 2003-01-11 20:44:37 stevenj Exp $ */
+#include "api.h"
 
-#include "ifftw.h"
-
-tensor *X(mktensor_rowmajor)(uint rnk, const uint *n,
-			     const uint *niphys, const uint *nophys,
-			     int is, int os)
+tensor *X(mktensor_rowmajor)(uint rnk, const ulong *n,
+			     const ulong *niphys, const ulong *nophys,
+			     long is, long os)
 {
      tensor *x = X(mktensor)(rnk);
 

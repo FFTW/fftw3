@@ -21,10 +21,10 @@
 #include "api.h"
 #include "dft.h"
 
-X(plan) X(plan_dft_2d)(unsigned int nx, unsigned int ny,
+X(plan) X(plan_dft_2d)(unsigned long nx, unsigned long ny,
 		       C *in, C *out, int sign, unsigned int flags)
 {
-     unsigned int n[2];
+     unsigned long n[2];
      n[0] = nx; n[1] = ny;
      return X(plan_dft)(2, n, in, out, sign, flags);
 }

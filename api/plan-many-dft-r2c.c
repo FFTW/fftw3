@@ -21,16 +21,16 @@
 #include "api.h"
 #include "rdft.h"
 
-X(plan) X(plan_many_dft_r2c)(unsigned int rank, const unsigned int *n,
-			     unsigned int howmany,
-			     R *in, const unsigned int *inembed,
-			     int istride, int idist,
-			     C *out, const unsigned int *onembed,
-			     int ostride, int odist,
+X(plan) X(plan_many_dft_r2c)(unsigned int rank, const unsigned long *n,
+			     unsigned long howmany,
+			     R *in, const unsigned long *inembed,
+			     long istride, long idist,
+			     C *out, const unsigned long *onembed,
+			     long ostride, long odist,
 			     unsigned int flags)
 {
      R *ro, *io;
-     uint *nfi, *nfo;
+     ulong *nfi, *nfo;
      int inplace;
      X(plan) p;
 

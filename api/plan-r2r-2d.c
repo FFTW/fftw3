@@ -20,11 +20,11 @@
 
 #include "api.h"
 
-X(plan) X(plan_r2r_2d)(unsigned int nx, unsigned int ny, R *in, R *out, 
+X(plan) X(plan_r2r_2d)(unsigned long nx, unsigned long ny, R *in, R *out, 
 		       X(r2r_kind) kindx, X(r2r_kind) kindy,
 		       unsigned int flags)
 {
-     unsigned int n[2];
+     unsigned long n[2];
      X(r2r_kind) kind[2];
      n[0] = nx; n[1] = ny;
      kind[0] = kindx; kind[1] = kindy;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.169 2003-01-13 09:20:36 athena Exp $ */
+/* $Id: ifftw.h,v 1.170 2003-01-13 22:35:20 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -276,9 +276,6 @@ tensor *X(mktensor_0d)(void);
 tensor *X(mktensor_1d)(uint n, int is, int os);
 tensor *X(mktensor_2d)(uint n0, int is0, int os0,
                       uint n1, int is1, int os1);
-tensor *X(mktensor_rowmajor)(uint rnk, const uint *n,
-			    const uint *niphys, const uint *nophys,
-                            int is, int os);
 uint X(tensor_sz)(const tensor *sz);
 void X(tensor_md5)(md5 *p, const tensor *t);
 uint X(tensor_max_index)(const tensor *sz);

@@ -25,12 +25,12 @@ rdft_kind *X(map_r2r_kind)(uint rank, const X(r2r_kind) *kind);
 
 #define N0(nembed) ((nembed) ? (nembed) : n)
 
-X(plan) X(plan_many_r2r)(unsigned int rank, const unsigned int *n,
-			 unsigned int howmany,
-			 R *in, const unsigned int *inembed,
-			 int istride, int idist,
-			 R *out, const unsigned int *onembed,
-			 int ostride, int odist,
+X(plan) X(plan_many_r2r)(unsigned int rank, const unsigned long *n,
+			 unsigned long howmany,
+			 R *in, const unsigned long *inembed,
+			 long istride, long idist,
+			 R *out, const unsigned long *onembed,
+			 long ostride, long odist,
 			 const X(r2r_kind) *kind, unsigned int flags)
 {
      X(plan) p;

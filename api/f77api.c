@@ -36,11 +36,11 @@
 #define F77x(a, A) F77_FUNC_(a, A)
 #define F77(a, A) F77x(x77(a), X77(A))
 
-static uint *reverse_n(uint rnk, const uint *n)
+static ulong *reverse_n(uint rnk, const uint *n)
 {
-     uint *nrev, i;
+     ulong *nrev, i;
      A(FINITE_RNK(rnk));
-     nrev = MALLOC(sizeof(uint) * rnk, PROBLEMS);
+     nrev = MALLOC(sizeof(ulong) * rnk, PROBLEMS);
      for (i = 0; i < rnk; ++i)
 	  nrev[rnk-i-1] = n[i];
      return nrev;
@@ -71,7 +71,7 @@ void F77(plan_dft, PLAN_DFT)(X(plan) *p,
 			     unsigned int *rank, const unsigned int *n,
 			     C *in, C *out, int *sign, unsigned int *flags)
 {
-     unsigned int *nrev = reverse_n(*rank, n);
+     unsigned long *nrev = reverse_n(*rank, n);
      *p = X(plan_dft)(*rank, nrev, in, out, *sign, *flags);
      X(ifree0)(nrev);
 }
@@ -110,9 +110,9 @@ void F77(plan_many_dft, PLAN_MANY_DFT)(
      int *ostride, int *odist,
      int *sign, unsigned int *flags)
 {
-     unsigned int *nrev = reverse_n(*rank, n);
-     unsigned int *inembedrev = reverse_n(*rank, inembed);
-     unsigned int *onembedrev = reverse_n(*rank, onembed);
+     unsigned long *nrev = reverse_n(*rank, n);
+     unsigned long *inembedrev = reverse_n(*rank, inembed);
+     unsigned long *onembedrev = reverse_n(*rank, onembed);
      *p = X(plan_many_dft)(*rank, nrev, *howmany,
 			   in, inembedrev, *istride, *idist,
 			   out, onembedrev, *ostride, *odist,

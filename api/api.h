@@ -41,9 +41,12 @@ typedef struct X(plan_s) apiplan;
 typedef R C[2];
 
 void X(extract_reim)(int sign, C *c, R **r, R **i);
+tensor *X(mktensor_rowmajor)(uint rnk, const ulong *n,
+			     const ulong *niphys, const ulong *nophys,
+			     long is, long os);
 tensor *X(mktensor_iodims)(unsigned int rank, const X(iodim) *dims);
-const uint *X(rdft2_pad)(uint rnk, const uint *n, const uint *nembed,
-                         int inplace, int cmplx, uint **nfree);
+const ulong *X(rdft2_pad)(uint rnk, const ulong *n, const ulong *nembed,
+                         int inplace, int cmplx, ulong **nfree);
 
 printer *X(mkprinter_file)(FILE *f);
 

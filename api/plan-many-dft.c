@@ -23,12 +23,12 @@
 
 #define N0(nembed) ((nembed) ? (nembed) : n)
 
-X(plan) X(plan_many_dft)(unsigned int rank, const unsigned int *n,
-			 unsigned int howmany,
-			 C *in, const unsigned int *inembed,
-			 int istride, int idist,
-			 C *out, const unsigned int *onembed,
-			 int ostride, int odist,
+X(plan) X(plan_many_dft)(unsigned int rank, const unsigned long *n,
+			 unsigned long howmany,
+			 C *in, const unsigned long *inembed,
+			 long istride, long idist,
+			 C *out, const unsigned long *onembed,
+			 long ostride, long odist,
 			 int sign, unsigned int flags)
 {
      R *ri, *ii, *ro, *io;

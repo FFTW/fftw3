@@ -21,15 +21,15 @@
 #include <string.h>
 #include "api.h"
 
-const uint *X(rdft2_pad)(uint rnk, const uint *n, const uint *nembed,
-			 int inplace, int cmplx, uint **nfree)
+const ulong *X(rdft2_pad)(uint rnk, const ulong *n, const ulong *nembed,
+			 int inplace, int cmplx, ulong **nfree)
 {
      A(FINITE_RNK(rnk));
      *nfree = 0;
      if (!nembed && rnk > 0) {
 	  if (inplace || cmplx) {
-	       uint *np = (uint *) MALLOC(sizeof(uint) * rnk, PROBLEMS);
-	       memcpy(np, n, sizeof(uint) * rnk);
+	       ulong *np = (ulong *) MALLOC(sizeof(ulong) * rnk, PROBLEMS);
+	       memcpy(np, n, sizeof(ulong) * rnk);
 	       np[rnk-1] = (n[rnk-1]/2 + 1) * (1 + !cmplx);
 	       nembed = *nfree = np;
 	  }
