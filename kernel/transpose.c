@@ -112,13 +112,37 @@ static void rec_transpose_Ntuple(R *A, R *B, int n, int m, int fda, int fdb,
 			  int N)
 {
      if (n == 1 || m == 1 || (n + m) * N < CUTOFF*2) {
-	  int i, j, k;
-	  for (i = 0; i < n; ++i) {
-	       for (j = 0; j < m; ++j) {
-		    for (k = 0; k < N; ++k) { /* FIXME: unroll */
-			 B[(j*fdb + i) * N + k] = A[(i*fda + j) * N + k];
-		    }
-	       }
+	  switch (N) {
+	      case 1: {
+		   int i, j;
+		   for (i = 0; i < n; ++i) {
+			for (j = 0; j < m; ++j) {
+			     B[j*fdb + i] = A[i*fda + j];
+			}
+		   }
+		   break;
+	      }
+	      case 2: {
+		   int i, j;
+		   for (i = 0; i < n; ++i) {
+			for (j = 0; j < m; ++j) {
+			     B[(j*fdb + i) * 2] = A[(i*fda + j) * 2];
+			     B[(j*fdb + i) * 2 + 1] = A[(i*fda + j) * 2 + 1];
+			}
+		   }
+		   break;
+	      }
+	      default: {
+		   int i, j, k;
+		   for (i = 0; i < n; ++i) {
+			for (j = 0; j < m; ++j) {
+			     for (k = 0; k < N; ++k) {
+				  B[(j*fdb + i) * N + k]
+				       = A[(i*fda + j) * N + k];
+			     }
+			}
+		   }
+	      }
 	  }
      }
      else if (n > m) {
