@@ -59,6 +59,9 @@ sub do_problem {
 	    || $problem =~ /v/ || $problem =~ /\*/)) {
 	return; # cannot do real split inplace-multidimensional or vector
     }
+
+    # size-1 redft00 is not defined/doable
+    return if ($problem =~ /[^0-9]1e00/);
     
     if ($doablep) {
 	@list_of_problems = ($problem, @list_of_problems);
@@ -93,7 +96,6 @@ sub do_size {
     my $doablep = shift;
     do_geometry("c$size", $doablep);
     do_geometry("r$size", $doablep);
-    # TODO: add more 
 }
 
 sub small_1d {
@@ -134,6 +136,9 @@ sub one_random_test {
     my $g = int(2 + exp(log($q) / ($rnk + ($vtype > 0))));
     my $first = 1;
     my $sz = "";
+    my $is_r2r = shift;
+    my @r2r_kinds = ("f", "b", "h",
+		     "e00", "e01", "e10", "e11", "o00", "o01", "o10", "o11");
 
     while ($q > 1 && $rnk > 0) {
 	my $r = rand_small_factors(int(rand($g) + 10));
@@ -141,6 +146,10 @@ sub one_random_test {
 	    $sz = "${sz}x" if (!$first);
 	    $first = 0;
 	    $sz = "${sz}${r}";
+	    if ($is_r2r) {
+		my $k = $r2r_kinds[int(1 + rand($#r2r_kinds))];
+		$sz = "${sz}${k}";
+	    }
 	    $q = int($q / $r);
 	    if ($g > $q) { $g = $q; }
 	    --$rnk;
@@ -151,13 +160,20 @@ sub one_random_test {
 	$sz = "${sz}*${v}" if ($vtype == 1);
 	$sz = "${sz}v${v}" if ($vtype == 2);
     }
-    do_size($sz, 1)
+    if ($is_r2r) {
+	do_problem("ik$sz", 1);
+	do_problem("ok$sz", 1);
+    }
+    else {
+	do_size($sz, 1);
+    }
 }
 
 sub random_tests {
     my $i;
     for ($i = 0; $i < $maxcount; ++$i) {
-	&one_random_test;
+	&one_random_test(0);
+	&one_random_test(1);
     }
 }
 
