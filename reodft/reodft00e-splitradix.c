@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.4 2005-02-05 21:26:58 stevenj Exp $ */
+/* $Id: reodft00e-splitradix.c,v 1.5 2005-02-05 23:51:08 stevenj Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.
@@ -133,6 +133,7 @@ static void apply_o(const plan *ego_, R *I, R *O)
      int i, j, n = ego->n - 1, n2 = (n+1)/2;
      int iv, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
+     int inplace = I == O;
      R *W = ego->td->W - 2;
      R *buf;
 
@@ -155,7 +156,16 @@ static void apply_o(const plan *ego_, R *I, R *O)
 	     writing to O: */
 	  {
 	       plan_rdft *cld = (plan_rdft *) ego->clde;
-	       cld->apply((plan *) cld, I + is, O);
+	       if (inplace) {
+		    /* can't use I+is and O, subplan would lose in-placeness */
+		    cld->apply((plan *) cld, I + is, O + os);
+		    /* we could maybe avoid this copy by modifying the
+		       twiddle loop, but currently I can't be bothered. */
+		    for (i = 0; i < n2-1; ++i)
+			 O[os*i] = O[os*(i+1)];
+	       }
+	       else
+		    cld->apply((plan *) cld, I + is, O);
 	  }
 
 	  /* combine the results with the twiddle factors to get output */
@@ -240,6 +250,8 @@ static int applicable0(const solver *ego_, const problem *p_)
 		  && (p->kind[0] == REDFT00 || p->kind[0] == RODFT00)
 		  && p->sz->dims[0].n > 1  /* don't create size-0 sub-plans */
 		  && p->sz->dims[0].n % 2  /* odd: 4 divides "logical" DFT */
+		  && (p->I != p->O || p->vecsz->rnk == 0
+		      || p->vecsz->dims[0].is == p->vecsz->dims[0].os)
 	       );
      }
 
@@ -280,7 +292,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 			     TAINT(p->I 
 				   + p->sz->dims[0].is * (p->kind[0]==RODFT00),
 				   p->vecsz->rnk ? p->vecsz->dims[0].is : 0),
-			     TAINT(p->O,
+			     TAINT(p->O
+				   + p->sz->dims[0].os
+				   * (p->kind[0]==RODFT00 && p->I == p->O),
 				   p->vecsz->rnk ? p->vecsz->dims[0].os : 0),
 			     p->kind[0]));
      if (!clde) {
