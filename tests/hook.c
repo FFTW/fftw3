@@ -117,6 +117,39 @@ static bench_problem *fftw_problem_to_bench_problem(const problem *p_)
 		   default: CK(0);
 	  }
      }
+     else if (RDFT2P(p_)) {
+	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
+	  
+	  if (!p->r || !p->rio || !p->iio)
+	       abort();
+
+	  bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
+
+	  bp->kind = PROBLEM_REAL;
+	  bp->sign = p->kind == R2HC ? FFT_SIGN : -FFT_SIGN;
+	  bp->split = 1; /* tensor strides are in R's, not C's */
+	  if (p->kind == R2HC) {
+	       bp->sign = FFT_SIGN;
+	       bp->in = UNTAINT(p->r);
+	       bp->out = UNTAINT(p->rio);
+	       bp->ini = 0;
+	       bp->outi = UNTAINT(p->iio);
+	  }
+	  else {
+	       bp->sign = -FFT_SIGN;
+	       bp->out = UNTAINT(p->r);
+	       bp->in = UNTAINT(p->rio);
+	       bp->outi = 0;
+	       bp->ini = UNTAINT(p->iio);
+	  }
+	  bp->inphys = bp->outphys = 0;
+	  bp->iphyssz = bp->ophyssz = 0;
+	  bp->in_place = p->r == p->rio;
+	  bp->destroy_input = p->kind == HC2R;
+	  bp->userinfo = 0;
+	  bp->sz = fftw_tensor_to_bench_tensor(p->sz);
+	  bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
+     }
      else {
 	  /* TODO */
      }
