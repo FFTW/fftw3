@@ -65,7 +65,7 @@ void X(mapflags)(planner *plnr, unsigned int flags)
 			    | FFTW_IMPATIENT /* map is processed in order */
 			    | FFTW_NO_INDIRECT_OP) },
 	  
-	  /* a canonical set of fftw2-like impatient flags */
+	  /* a canonical set of fftw2-like impatience flags */
 	  { FFTW_IMPATIENT, (FFTW_NO_VRECURSE
 			     | FFTW_NO_RANK_SPLITS
 			     | FFTW_NO_VRANK_SPLITS
