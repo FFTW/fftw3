@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.8 2003-01-26 21:29:18 athena Exp $ */
+/* $Id: verify.c,v 1.9 2003-02-04 08:18:28 stevenj Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,7 +63,6 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 {
      dofft_dft_closure *k = (dofft_dft_closure *)k_;
      bench_problem *p = k->p;
-     bench_complex *pin = p->in, *pout = p->out;
      bench_tensor *totalsz, *pckdsz;
      bench_real *ri, *ii, *ro, *io;
      int n, totalscale;
@@ -71,19 +70,19 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
      totalsz = tensor_append(p->vecsz, p->sz);
      pckdsz = verify_pack(totalsz, 2);
      n = tensor_sz(totalsz);
-     ri = &c_re(pin[0]);
-     ro = &c_re(pout[0]);
+     ri = (bench_real *) p->in;
+     ro = (bench_real *) p->out;
 
      /* confusion: the stride is the distance between complex elements
 	when using interleaved format, but it is the distance between
 	real elements when using split format */
      if (p->split) {
-	  ii = ri + n;
-	  io = ro + n;
+	  ii = p->ini ? (bench_real *) p->ini : ri + n;
+	  io = p->outi ? (bench_real *) p->outi : ro + n;
 	  totalscale = 1;
      } else {
-	  ii = ri + 1;
-	  io = ro + 1;
+	  ii = p->ini ? (bench_real *) p->ini : ri + 1;
+	  io = p->outi ? (bench_real *) p->outi : ro + 1;
 	  totalscale = 2;
      }
 
@@ -108,16 +107,9 @@ static void dodft(bench_problem *p, int rounds, double tol, errors *e)
 /* end DFT code */
 /**************************************************************/
 
-void verify(const char *param, int rounds, double tol)
+void verify_problem(bench_problem *p, int rounds, double tol)
 {
-     bench_problem *p;
      errors e;
-
-     p = problem_parse(param);
-     BENCH_ASSERT(can_do(p));
-     problem_alloc(p);
-     problem_zero(p);
-     setup(p);
 
      switch (p->kind) {
 	 case PROBLEM_COMPLEX: dodft(p, rounds, tol, &e); break;
@@ -127,6 +119,19 @@ void verify(const char *param, int rounds, double tol)
 
      if (verbose)
 	  ovtpvt("%g %g %g\n", e.l, e.i, e.s);
+}
+
+void verify(const char *param, int rounds, double tol)
+{
+     bench_problem *p;
+
+     p = problem_parse(param);
+     BENCH_ASSERT(can_do(p));
+     problem_alloc(p);
+     problem_zero(p);
+     setup(p);
+
+     verify_problem(p, rounds, tol);
 
      done(p);
      problem_destroy(p);

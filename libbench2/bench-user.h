@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.8 2003-01-26 12:35:46 athena Exp $ */
+/* $Id: bench-user.h,v 1.9 2003-02-04 08:18:28 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -102,6 +102,9 @@ typedef struct {
      void *inphys, *outphys;
      int iphyssz, ophyssz;
      void *userinfo; /* user can store whatever */
+
+     /* internal hack so that we can use verifier in FFTW test program */
+     void *ini, *outi; /* if nonzero, point to imag. parts for dft */
 } bench_problem;
 
 extern int verbose;
@@ -115,6 +118,8 @@ extern void done(bench_problem *p);
 extern void cleanup(void);
 extern void verify(const char *param, int rounds, double tol);
 extern void useropt(const char *arg);
+
+extern void verify_problem(bench_problem *p, int rounds, double tol);
 
 extern void problem_alloc(bench_problem *p);
 extern void problem_free(bench_problem *p);

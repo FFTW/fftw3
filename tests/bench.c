@@ -17,7 +17,7 @@ END_BENCH_DOC
 #define FFTW(x) CONCAT(fftw_, x)
 #endif
 
-static FFTW(plan) the_plan;
+FFTW(plan) the_plan = 0;
 
 static const char *wisdat = "wis.dat";
 unsigned the_flags = 0;
@@ -26,6 +26,7 @@ int usewisdom = 1;
 int havewisdom = 0;
 
 extern void install_hook(void);  /* in hook.c */
+extern void uninstall_hook(void);  /* in hook.c */
 
 void useropt(const char *arg)
 {
@@ -350,6 +351,7 @@ void done(bench_problem *p)
      UNUSED(p);
 
      FFTW(destroy_plan)(the_plan);
+     uninstall_hook();
 }
 
 void cleanup(void)
@@ -360,9 +362,9 @@ void cleanup(void)
 #    ifdef FFTW_DEBUG
      {
 	  /* undocumented memory checker */
-	  extern void FFTW(malloc_print_minfo)(void);
+	  extern void FFTW(malloc_print_minfo)(int verbose);
 	  if (verbose > 2)
-	       FFTW(malloc_print_minfo)();
+	       FFTW(malloc_print_minfo)(verbose);
      }
 #    endif
 

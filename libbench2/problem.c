@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.14 2003-01-26 21:29:18 athena Exp $ */
+/* $Id: problem.c,v 1.15 2003-02-04 08:18:28 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -146,6 +146,7 @@ bench_problem *problem_parse(const char *s)
      p->split = 0;
      p->userinfo = 0;
      p->sz = p->vecsz = 0;
+     p->ini = p->outi = 0;
 
  L1:
      switch (tolower(*s)) {
