@@ -269,9 +269,10 @@ if test "$enable_fortran" = "yes"; then
         if test -z "$F77"; then
                 enable_fortran=no
                 AC_MSG_WARN([*** Couldn't find f77 compiler; switching to --disable-fortran.])
+	else
+		AC_F77_DUMMY_MAIN([], [enable_fortran=no
+			AC_MSG_WARN([*** Couldn't figure out how to link C and Fortran; switching to --disable-fortran.])])
         fi
-	AC_F77_DUMMY_MAIN([], [enable_fortran=no
-		AC_MSG_WARN([*** Couldn't figure out how to link C and Fortran; switching to --disable-fortran.])])
 fi
 
 if test "x$enable_fortran" = xyes; then
