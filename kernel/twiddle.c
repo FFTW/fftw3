@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.12 2002-07-27 19:06:21 athena Exp $ */
+/* $Id: twiddle.c,v 1.13 2002-08-09 17:01:49 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -90,9 +90,11 @@ static R *compute(const tw_instr *instr, uint n, uint r, uint m)
      uint ntwiddle, j;
      R *W, *W0;
      const tw_instr *p;
-     trigreal twoPiOverN = K2PI / (trigreal) n;
+     trigreal ninv = 1.0 / (trigreal) n;
 
-     static trigreal (*const f[])(trigreal) = { COS, SIN, TAN };
+     static trigreal (*const f[])(trigreal) = { 
+	  X(cos2pi), X(sin2pi), X(tan2pi) 
+     };
 
      p = instr;
      ntwiddle = twlen0(r, &p);
@@ -107,8 +109,8 @@ static R *compute(const tw_instr *instr, uint n, uint r, uint m)
 			uint i;
 			A(p->i == r); /* consistency check */
 			for (i = 1; i < r; ++i) {
-			     *W++ = COS(twoPiOverN * ((j + p->v) * i));
-			     *W++ = SIN(twoPiOverN * ((j + p->v) * i));
+			     *W++ = f[TW_COS](ninv * ((j + p->v) * i));
+			     *W++ = f[TW_SIN](ninv * ((j + p->v) * i));
 			}
 			break;
 		   }
@@ -120,14 +122,14 @@ static R *compute(const tw_instr *instr, uint n, uint r, uint m)
 			A(p->i == 0); /* unused */
 			for (i = 0; i < r; ++i) {
 			     uint k = j * r + i;
-			     *W++ = COS(twoPiOverN * k);
-			     *W++ = FFT_SIGN * SIN(twoPiOverN * k);
+			     *W++ = f[TW_COS](ninv * k);
+			     *W++ = FFT_SIGN * f[TW_SIN](ninv * k);
 			}
 			break;
 		   }
 		   
 		   default:
-			*W++ = f[p->op](twoPiOverN * 
+			*W++ = f[p->op](ninv * 
 					(((signed int)(j + p->v)) * p->i));
 			break;
 	       }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.12 2002-08-01 07:03:18 stevenj Exp $ */
+/* $Id: verify.c,v 1.13 2002-08-09 17:01:49 athena Exp $ */
 
 #include "rdft.h"
 #include <math.h>
@@ -204,13 +204,12 @@ static void arol(C *b, C *a, uint n, uint nb, uint na)
 static void aphase_shift(C *b, C *a, uint n, uint nb, uint na, double sign)
 {
      uint j, jb, ja;
-     trigreal twopin;
-     twopin = K2PI / n;
+     trigreal ninv = 1.0 / n;
 
      for (jb = 0; jb < nb; ++jb)
 	  for (j = 0; j < n; ++j) {
-	       trigreal s = sign * SIN(j * twopin);
-	       trigreal c = COS(j * twopin);
+	       trigreal c = X(cos2pi)(j * ninv);
+	       trigreal s = sign * X(sin2pi)(j * ninv);
 
 	       for (ja = 0; ja < na; ++ja) {
 		    uint k = (jb * n + j) * na + ja;

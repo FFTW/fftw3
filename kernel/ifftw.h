@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.78 2002-08-07 21:14:09 athena Exp $ */
+/* $Id: ifftw.h,v 1.79 2002-08-09 17:01:49 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -521,20 +521,17 @@ twid *X(mktwiddle)(const tw_instr *instr, uint n, uint r, uint m);
 void X(twiddle_destroy)(twid *p);
 uint X(twiddle_length)(uint r, const tw_instr *p);
 
+/*-----------------------------------------------------------------------*/
+/* trig.c */
 #ifdef FFTW_LDOUBLE
 typedef long double trigreal;
-#  define COS cosl
-#  define SIN sinl
-#  define TAN tanl
-#  define KTRIG(x) (x##L)
 #else
 typedef double trigreal;
-#  define COS cos
-#  define SIN sin
-#  define TAN tan
-#  define KTRIG(x) (x)
 #endif
-#define K2PI KTRIG(6.2831853071795864769252867665590057683943388)
+
+extern trigreal X(cos2pi)(trigreal);
+extern trigreal X(sin2pi)(trigreal);
+extern trigreal X(tan2pi)(trigreal);
 
 /*-----------------------------------------------------------------------*/
 /* primes.c: */
