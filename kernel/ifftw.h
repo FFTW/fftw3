@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.164 2003-01-09 10:40:34 athena Exp $ */
+/* $Id: ifftw.h,v 1.165 2003-01-11 05:48:27 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -439,16 +439,6 @@ enum {
      NO_UGLY = 0x100,  /* avoid plans we are 99% sure are suboptimal */
      NO_VRANK_SPLITS = 0x200,
      NO_VRECURSE = 0x400,
-
-     /* a canonical set of fftw2-like impatient flags */
-     IMPATIENT = (0
-		  | NO_VRECURSE 
-		  | NO_RANK_SPLITS 
-		  | NO_VRANK_SPLITS 
-		  | NONTHREADED_ICKY 
-		  | DFT_R2HC_ICKY
-		  | BELIEVE_PCOST
-	  ),
 
      ESTIMATE = 0x800, /* subsumed by all other impatience flags */
      IMPATIENCE_FLAGS = (ESTIMATE | (ESTIMATE - 1)),
