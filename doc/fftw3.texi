@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.183 2003-04-03 01:32:07 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.184 2003-04-03 01:33:12 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3350,6 +3350,16 @@ Y[k] = X[0] + 2 (sum for j = 1 to n-1 of X[j] cos(pi j (k+1/2) / n)).
 @end ifinfo
 @html
 <center><img src="equation-redft01.png" align="top">.</center>
+@end html
+In the case of @math{n=1}, this reduces to
+@tex
+$Y_0 = X_0$.
+@end tex
+@ifinfo
+Y[0] = X[0].
+@end ifinfo
+@html
+<i>Y</i><sub>0</sub> = <i>X</i><sub>0</sub>.
 @end html
 
 @subsubheading REDFT11 (DCT-IV)
