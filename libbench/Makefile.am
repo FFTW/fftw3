@@ -11,7 +11,7 @@ copy-h2c.c copy-r2c.c copy-ri2c.c deallocate.c getopt-utils.c getopt.c	\
 getopt1.c info.c log2.c main.c mflops.c ovtpvt.c pow2.c prime.c		\
 problem.c report.c speed.c timer.c unnormalize.c util.c verify.c	\
 zero.c bench-user.h bench.h getopt.h copy-r2c-unpacked.c		\
-copy-r2c-packed.c copy-c2r-packed.c copy-c2r-unpacked.c
+copy-r2c-packed.c copy-c2r-packed.c copy-c2r-unpacked.c mp.c
 
 
 benchmark: all

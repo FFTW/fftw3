@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.3 2002-07-13 20:05:43 stevenj Exp $ */
+/* $Id: verify.c,v 1.4 2002-08-15 13:48:37 athena Exp $ */
 
 #include <math.h>
 #include <stdio.h>
@@ -181,13 +181,13 @@ static void arol(bench_complex *B, bench_complex *A,
 }
 
 #ifdef BENCHFFT_LDOUBLE
-     typedef long double trigreal;
+   typedef long double trigreal;
 #  define COS cosl
 #  define SIN sinl
 #  define TAN tanl
 #  define KTRIG(x) (x##L)
 #else
-     typedef double trigreal;
+   typedef double trigreal;
 #  define COS cos
 #  define SIN sin
 #  define TAN tan
@@ -423,6 +423,56 @@ static void do_verify(struct problem *p, unsigned int rounds, double tol)
      bench_free(inA);
 }
 
+static void do_accuracy(struct problem *p)
+{
+     extern void mfft(unsigned int n, bench_complex *a, int sign);
+     unsigned int n, i;
+     bench_complex *a, *b;
+     bench_real e1, n1, e2, n2, einf, ninf;
+
+     /* only works for these cases */
+     BENCH_ASSERT(p->rank == 1);
+     BENCH_ASSERT(p->vrank == 0);
+     BENCH_ASSERT(problem_power_of_two(p, 0) || problem_power_of_two(p, 1));
+
+     n = p->n[0],
+     a = (bench_complex *) bench_malloc(n * sizeof(bench_complex));
+     b = (bench_complex *) bench_malloc(n * sizeof(bench_complex));
+     
+     arand(a, n);
+     if (p->kind == PROBLEM_REAL) {
+	  if (p->sign == -1) 
+	       mkreal(a, n); 
+	  else
+	       mkhermitian(a, p->rank, p->n);
+     }
+
+     do_fft(p, a, b);
+     mfft(n, a, p->sign);
+
+     e1 = e2 = einf = 0.0;
+     n1 = n2 = ninf = 0.0;
+     for (i = 0; i < n; ++i) {
+
+#         define DO(x1, x2, xinf, var) {			\
+              bench_real d = var;				\
+	      if (d < 0) d = -d;				\
+	      x1 += d; x2 += d * d; if (d > xinf) xinf = d;	\
+          }
+	  DO(n1, n2, ninf, c_re(b[i]));
+	  DO(n1, n2, ninf, c_im(b[i]));
+	  DO(e1, e2, einf, c_re(a[i]) - c_re(b[i]));
+	  DO(e1, e2, einf, c_im(a[i]) - c_im(b[i]));
+#         undef DO
+     }
+     e1 /= n1;
+     e2 = sqrt(e2 / n1);
+     einf /= ninf;
+
+     printf("%10d %6.2e %6.2e %6.2e\n",
+	    n, (double)e1, (double)e2, (double)einf);
+}
+
 void verify(const char *param, int rounds, double tol)
 {
      struct problem *p;
@@ -432,6 +482,19 @@ void verify(const char *param, int rounds, double tol)
      problem_zero(p);
      setup(p);
      do_verify(p, rounds, tol);
+     done(p);
+     problem_destroy(p);
+}
+
+void accuracy(const char *param)
+{
+     struct problem *p;
+     p = problem_parse(param);
+     BENCH_ASSERT(can_do(p));
+     problem_alloc(p);
+     problem_zero(p);
+     setup(p);
+     do_accuracy(p);
      done(p);
      problem_destroy(p);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.5 2002-07-13 20:05:43 stevenj Exp $ */
+/* $Id: bench-main.c,v 1.6 2002-08-15 13:48:37 athena Exp $ */
 
 #include "config.h"
 #include "getopt.h"
@@ -32,24 +32,26 @@ int paranoid;
 
 static struct option long_options[] =
 {
+  {"accuracy", required_argument, 0, 'a'},
   {"can-do", required_argument, 0, 'd'},
   {"help", no_argument, 0, 'h'},
   {"info", required_argument, 0, 'i'},
   {"info-all", no_argument, 0, 'I'},
-  {"print-time-min", no_argument, 0, 400},
+  {"paranoid", no_argument, 0, 'p'},
   {"print-precision", no_argument, 0, 402},
+  {"print-time-min", no_argument, 0, 400},
+  {"random-seed", required_argument, 0, 404},
   {"report-avg-mflops", no_argument, 0, 302},
   {"report-avg-time", no_argument, 0, 312},
+  {"report-benchmark", no_argument, 0, 320},
   {"report-max-mflops", no_argument, 0, 301},
   {"report-mflops", no_argument, 0, 300},
   {"report-min-time", no_argument, 0, 311},
   {"report-time", no_argument, 0, 310},
-  {"report-benchmark", no_argument, 0, 320},
   {"speed", required_argument, 0, 's'},
   {"time-min", required_argument, 0, 't'},
   {"time-repeat", required_argument, 0, 'r'},
   {"verbose", optional_argument, 0, 'v'},
-  {"paranoid", no_argument, 0, 'p'},
   {"verify", required_argument, 0, 'y'},
   {"verify-rounds", required_argument, 0, 401},
   {"verify-tolerance", required_argument, 0, 403},
@@ -98,6 +100,9 @@ static int bench_main1(int argc, char *argv[])
 		   break;
 	      case 'y':
 		   verify(optarg, rounds, tol);
+		   break;
+	      case 'a':
+		   accuracy(optarg);
 		   break;
 	      case 'i':
 		   report_info(optarg);
@@ -155,6 +160,10 @@ static int bench_main1(int argc, char *argv[])
 
 	      case 403: /* --verify-tolerance */
 		   tol = strtod(optarg, 0);
+		   break;
+
+	      case 404: /* --random-seed */
+		   bench_srand(atoi(optarg));
 		   break;
 		   
 	      case '?':

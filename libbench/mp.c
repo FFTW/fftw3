@@ -1,9 +1,10 @@
-#include "ifftw.h"
-#include <math.h>
+#include "config.h"
+#include "bench.h"
+#include "math.h"
 
 #define DG unsigned short
 #define ACC unsigned long
-#define REAL R
+#define REAL bench_real
 #define BITS_IN_REAL 53 /* mantissa */
 
 #define SHFT 16
@@ -380,14 +381,14 @@ static void sin2pi(REAL m, REAL n, N a)
 }
 
 /* FFT stuff */
-static void bitrev(int n, R *a)
+static void bitrev(unsigned int n, bench_complex *a)
 {
-     int i, j, m;
+     unsigned int i, j, m;
      for (i = j = 0; i < n - 1; ++i) {
 	  if (i < j) {
-	       R tr, ti;
-	       tr = a[2*i]; a[2*i] = a[2*j]; a[2*j] = tr;
-	       ti = a[2*i+1]; a[2*i+1] = a[2*j+1]; a[2*j+1] = ti;
+	       bench_real t;
+	       t = c_re(a[i]); c_re(a[i]) = c_re(a[j]); c_re(a[j]) = t;
+	       t = c_im(a[i]); c_im(a[i]) = c_im(a[j]); c_im(a[j]) = t;
 	  }
 
 	  /* bit reversed counter */
@@ -395,15 +396,15 @@ static void bitrev(int n, R *a)
      }
 }
 
-static void fft0(int n, N *a, int sign)
+static void fft0(unsigned int n, N *a, int sign)
 {
-     int i, j, k;
+     unsigned int i, j, k;
 
      for (i = 1; i < n; i = 2 * i) {
 	  for (j = 0; j < i; ++j) {
 	       N wr, wi;
-	       cos2pi(sign * j, 2.0 * i, wr);
-	       sin2pi(sign * j, 2.0 * i, wi);
+	       cos2pi(sign * (int)j, 2.0 * i, wr);
+	       sin2pi(sign * (int)j, 2.0 * i, wi);
 	       for (k = j; k < n; k += 2 * i) {
 		    N *a0 = a + 2 * k;
 		    N *a1 = a0 + 2 * i;
@@ -419,16 +420,20 @@ static void fft0(int n, N *a, int sign)
      }
 }
 
-void mfft(int n, R *a, int sign)
+void mfft(unsigned int n, bench_complex *a, int sign)
 {
-     N *b = (N *)fftw_malloc(2 * n * sizeof(N), OTHER);
+     N *b = (N *)bench_malloc(2 * n * sizeof(N));
      int i;
 
      bitrev(n, a);
-     for (i = 0; i < 2 * n; ++i)
-	  fromreal(a[i], b[i]);
+     for (i = 0; i < n; ++i) {
+	  fromreal(c_re(a[i]), b[2 * i]);
+	  fromreal(c_im(a[i]), b[2 * i + 1]);
+     }
      fft0(n, b, sign);
-     for (i = 0; i < 2 * n; ++i)
-	  a[i] = toreal(b[i]);
-     X(free)(b);
+     for (i = 0; i < n; ++i) {
+	  c_re(a[i]) = toreal(b[2 * i]);
+	  c_im(a[i]) = toreal(b[2 * i + 1]);
+     }
+     bench_free(b);
 }

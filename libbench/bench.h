@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: bench.h,v 1.2 2002-08-15 13:48:37 athena Exp $ */
 
 /* benchmark program definitions */
 #include "config.h"
@@ -51,10 +51,12 @@ extern int bench_main(int argc, char *argv[]);
 
 extern void speed(const char *param);
 extern void verify(const char *param, int rounds, double tol);
+extern void accuracy(const char *param);
 
 extern double mflops(const struct problem *p, double t);
 
 extern double bench_drand(void);
+extern void bench_srand(int seed);
 
 struct option; /* opaque */
 extern char *make_short_options(const struct option *opt);
