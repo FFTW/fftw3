@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.46 2003-02-28 20:07:03 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.47 2003-02-28 22:27:10 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -983,7 +983,7 @@ DFT of size @math{N}.)
 @node The Discrete Hartley Transform,  , Real even/odd DFTs (cosine/sine transforms), More DFTs of Real Data
 @subsection The Discrete Hartley Transform
 
-The Discrete Hartley Transform (DHT) is an invertible linear transform
+The discrete Hartley transform (DHT) is an invertible linear transform
 closely related to the DFT.  In the DFT, one multiplies each input by
 cos - i sin (a complex exponential), whereas in the DHT each input is
 multiplied by simply cos + sin.  Thus, the DHT transforms @code{n} real
@@ -991,6 +991,8 @@ numbers to @code{n} real numbers, and has the convenient property of
 being its own inverse.  In FFTW, a DHT (of any positive @code{n}) can be
 specified by an r2r kind of @code{FFTW_DHT}.
 @ctindex FFTW_DHT
+@cindex discrete Hartley transform
+@cindex DHT
 
 Like the DFT, in FFTW the DHT is unnormalized, so computing a DHT of
 size @code{n} followed by another DHT of the same size will result in
@@ -1002,10 +1004,13 @@ DFT for real data, but it was subsequently shown that a specialized DFT
 (such as FFTW's r2hc or r2c transforms) could be just as fast.  In FFTW,
 the DHT is actually computed by post-processing an r2hc transform, so
 there is ordinarily no reason to prefer it from a performance
-perspective.  (We provide the DHT mainly as a byproduct of some internal
-algorithms in FFTW.)  However, we have heard that the DHT can be
-appropriate in its own right for certain applications, and we would be
-very interested to hear from anyone who finds it useful.
+perspective.@footnote{We provide the DHT mainly as a byproduct of some
+internal algorithms. FFTW computes a real input/output DFT of
+@emph{prime} size by re-expressing it as a DHT plus post/pre-processing
+and then using Rader's prime-DFT algorithm adapted to the DHT.}
+However, we have heard that the DHT can be appropriate in its own right
+for certain applications, and we would be very interested to hear from
+anyone who finds it useful.
 
 If @code{FFTW_DHT} is specified for multiple dimensions of a
 multi-dimensional transform, FFTW computes the separable product of 1d
@@ -1014,7 +1019,7 @@ thing as a true multi-dimensional DHT; you can compute the latter, if
 necessary, with at most @code{rank-1} post-processing passes
 [see e.g. H. Hao and R. N. Bracewell, @i{Proc. IEEE} @b{75}, 264--266 (1987)].
 
-For the precise mathematical definitions of the DHT as used by FFTW, see
+For the precise mathematical definition of the DHT as used by FFTW, see
 @ref{What FFTW Really Computes}.
 
 @c ************************************************************
