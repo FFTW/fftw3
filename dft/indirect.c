@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.10 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: indirect.c,v 1.11 2002-06-18 14:33:58 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -158,8 +158,8 @@ static int applicable(const solver *ego_, const problem *p_)
                   && p->sz.rnk > 0
 
                   /* problem must require some rearrangement of data */
-                  && !X(tensor_inplace_strides)(p->sz)
-                  && !X(tensor_inplace_strides)(p->vecsz)
+                  && !(X(tensor_inplace_strides)(p->sz)
+		       && X(tensor_inplace_strides)(p->vecsz))
 	       );
      }
 

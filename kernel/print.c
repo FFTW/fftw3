@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.7 2002-06-13 15:04:24 athena Exp $ */
+/* $Id: print.c,v 1.8 2002-06-18 14:33:58 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
@@ -33,18 +33,16 @@ static void myputs(printer *p, const char *s)
           p->putchr(p, c);
 }
 
-static void print(printer *p, const char *format, ...)
+static void vprint(printer *p, const char *format, va_list ap)
 {
      char buf[BSZ];
      const char *s = format;
      char c;
-     va_list ap;
      uint i;
 
      for (i = 0; i < p->indent; ++i)
           p->putchr(p, ' ');
 
-     va_start (ap, format);
      while ((c = *s++)) {
           switch (c) {
 	      case '%':
@@ -147,6 +145,13 @@ static void print(printer *p, const char *format, ...)
 		   break;
           }
      }
+}
+
+static void print(printer *p, const char *format, ...)
+{
+     va_list ap;
+     va_start(ap, format);
+     vprint(p, format, ap);
      va_end(ap);
 }
 
@@ -154,6 +159,7 @@ printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c))
 {
      printer *s = (printer *)fftw_malloc(size, OTHER);
      s->print = print;
+     s->vprint = vprint;
      s->putchr = putchr;
      s->indent = 0;
      s->indent_incr = 2;

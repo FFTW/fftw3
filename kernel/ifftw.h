@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.35 2002-06-18 12:13:55 athena Exp $ */
+/* $Id: ifftw.h,v 1.36 2002-06-18 14:33:58 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -28,6 +28,7 @@
 #include "fftw3.h"
 
 #include <stdlib.h>		/* size_t */
+#include <stdarg.h>		/* va_list */
 
 /* dummy use of unused parameters to avoid compiler warnings */
 #define UNUSED(x) (void)x
@@ -82,6 +83,8 @@ extern void X(assertion_failed)(const char *s, int line, char *file);
 #define A(ex) /* nothing */
 #endif
 
+extern void X(fftw_debug)(const char *format, ...);
+#define D X(fftw_debug)
 
 /*-----------------------------------------------------------------------*/
 /* alloca: */
@@ -231,6 +234,7 @@ problem *X(problem_dup)(problem *ego);
 /* print.c */
 struct printer_s {
      void (*print)(printer *p, const char *format, ...);
+     void (*vprint)(printer *p, const char *format, va_list ap);
      void (*putchr)(printer *p, char c);
      uint indent;
      uint indent_incr;

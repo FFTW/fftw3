@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.8 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: ct-dif.c,v 1.9 2002-06-18 14:33:58 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -48,7 +48,6 @@ static int applicable(const solver_ct *ego, const problem *p_)
           const ct_desc *e = ego->desc;
           const problem_dft *p = (const problem_dft *) p_;
           iodim *d = p->sz.dims;
-
           return (1
                   /* DIF destroys the input and we don't like it */
                   && p->ri == p->ro
