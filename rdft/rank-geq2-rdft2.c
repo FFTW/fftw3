@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.3 2002-08-25 18:10:55 fftw Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.4 2002-08-28 19:09:03 stevenj Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -160,9 +160,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!cldr)
           goto nada;
 
-     cldp = X(mkproblem_dft_d)(X(tensor_copy_inplace)(sz1, k),
-                               X(tensor_append)(vecszi, sz2i),
-                               p->rio, p->iio, p->rio, p->iio);
+     if (p->kind == R2HC)
+	  cldp = X(mkproblem_dft_d)(X(tensor_copy_inplace)(sz1, k),
+				    X(tensor_append)(vecszi, sz2i),
+				    p->rio, p->iio, p->rio, p->iio);
+     else /* HC2R must swap re/im parts to get IDFT */
+	  cldp = X(mkproblem_dft_d)(X(tensor_copy_inplace)(sz1, k),
+				    X(tensor_append)(vecszi, sz2i),
+				    p->iio, p->rio, p->iio, p->rio);
      cldc = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cldc)
