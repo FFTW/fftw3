@@ -39,7 +39,7 @@ typedef struct P_s {
      plan_dft super;
 
      const wadt *adt;
-     int r, m, s, vl, ws;
+     int r, m, s, vl, vs;
      plan *cld;
 
      /* defined only for solver1: */
@@ -155,10 +155,10 @@ static void apply_dit(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
-     int i, vl = ego->vl, ws = ego->ws;
+     int i, vl = ego->vl, vs = ego->vs;
 
      for (i = 0; i < vl; ++i)
-	  ego->adt->bytwiddle(ego, rio + i * ws, iio + i * ws);
+	  ego->adt->bytwiddle(ego, rio + i * vs, iio + i * vs);
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
@@ -168,13 +168,13 @@ static void apply_dif(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
-     int i, vl = ego->vl, ws = ego->ws;
+     int i, vl = ego->vl, vs = ego->vs;
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
 
      for (i = 0; i < vl; ++i)
-	  ego->adt->bytwiddle(ego, rio + i * ws, iio + i * ws);
+	  ego->adt->bytwiddle(ego, rio + i * vs, iio + i * vs);
 }
 
 static void awake(plan *ego_, int flg)
@@ -251,7 +251,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 			X(mkproblem_dft_d)(
 			     X(mktensor_1d)(p->r, p->m * p->s, p->m * p->s),
 			     X(mktensor_2d)(p->m, p->s, p->s,
-					    p->vl, p->ws, p->ws),
+					    p->vl, p->vs, p->vs),
 			     p->rio, p->iio, p->rio, p->iio)
 			);
      if (!cld) goto nada;
@@ -264,7 +264,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->m = p->m;
      pln->s = p->s;
      pln->vl = p->vl;
-     pln->ws = p->ws;
+     pln->vs = p->vs;
      pln->dec = p->dec;
      pln->W0 = pln->W1 = 0;
      pln->td = 0;
