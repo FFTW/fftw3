@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.128 2003-03-12 05:06:34 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.129 2003-03-12 05:14:03 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2828,7 +2828,8 @@ complex-to-real (backward) transform will multiply the input by
 
 The Real-even DFTs in FFTW are exactly equivalent to the unnormalized
 forward (and backward) DFTs as defined above, where the input array
-@math{X} of length @math{N} is purely real and is also @dfn{even}.
+@math{X} of length @math{N} is purely real and is also @dfn{even}.  In
+this case, the output array is likewise real and even.
 @cindex real-even DFT
 @cindex REDFT
 
@@ -2950,7 +2951,8 @@ in the original array multiplied by @math{N}, where @math{N} is the
 
 The Real-odd DFTs in FFTW are exactly equivalent to the unnormalized
 forward (and backward) DFTs as defined above, where the input array
-@math{X} of length @math{N} is purely real and is also @dfn{odd}.
+@math{X} of length @math{N} is purely real and is also @dfn{odd}.  In
+this case, the output is odd and purely imaginary.
 @cindex real-odd DFT
 @cindex RODFT
 
