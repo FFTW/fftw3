@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.19 2002-09-14 03:07:39 stevenj Exp $ */
+/* $Id: alloc.c,v 1.20 2002-09-25 00:54:43 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -306,3 +306,9 @@ void X(free)(void *p)
 }
 
 #endif
+
+void X(free0)(void *p)
+{
+     /* common pattern */
+     if (p) X(free)(p);
+}

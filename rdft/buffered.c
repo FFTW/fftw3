@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.19 2002-09-25 00:08:44 athena Exp $ */
+/* $Id: buffered.c,v 1.20 2002-09-25 00:54:43 athena Exp $ */
 
 #include "rdft.h"
 
@@ -267,8 +267,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     if (bufs)
-          X(free)(bufs);
+     X(free0)(bufs);
      X(plan_destroy)(cldrest);
      X(plan_destroy)(cldcpy);
      X(plan_destroy)(cld);

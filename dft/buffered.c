@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.37 2002-09-25 00:08:44 athena Exp $ */
+/* $Id: buffered.c,v 1.38 2002-09-25 00:54:43 athena Exp $ */
 
 #include "dft.h"
 
@@ -50,15 +50,15 @@ typedef struct {
 static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      P *ego = (P *) ego_;
+     uint nbuf = ego->nbuf;
+     R *bufs = (R *)fftw_malloc(sizeof(R) * nbuf * ego->bufdist * 2, BUFFERS);
+
      plan_dft *cld = (plan_dft *) ego->cld;
      plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
      plan_dft *cldrest;
-     uint i, vl = ego->vl, nbuf = ego->nbuf;
+     uint i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
      int roffset = ego->roffset, ioffset = ego->ioffset;
-     R *bufs;
-
-     bufs = (R *)fftw_malloc(sizeof(R) * nbuf * ego->bufdist * 2, BUFFERS);
 
      /* note unsigned i:  the obvious statement
 
@@ -283,8 +283,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     if (bufs)
-          X(free)(bufs);
+     X(free0)(bufs);
      X(plan_destroy)(cldrest);
      X(plan_destroy)(cldcpy);
      X(plan_destroy)(cld);

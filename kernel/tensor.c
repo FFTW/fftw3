@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.28 2002-09-22 14:21:36 athena Exp $ */
+/* $Id: tensor.c,v 1.29 2002-09-25 00:54:43 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -53,10 +53,7 @@ tensor *X(mktensor)(uint rnk)
 void X(tensor_destroy)(tensor *sz)
 {
 #if !defined(STRUCT_HACK_C99) && !defined(STRUCT_HACK_KR)
-     if (sz->dims) {
-          X(free)(sz->dims);
-	  sz->dims = 0;
-     }
+     X(free0)(sz->dims);
 #endif
      X(free)(sz);
 }

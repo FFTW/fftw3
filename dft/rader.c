@@ -384,8 +384,7 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      return 1;
 
  nada:
-     if (buf)
-          X(free)(buf);
+     X(free0)(buf);
      X(plan_destroy)(cld_omega);
      X(plan_destroy)(cld2);
      X(plan_destroy)(cld1);
@@ -463,10 +462,8 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
      return &(pln->super.super.super);
 
  nada:
-     if (cld)
-          X(plan_destroy)(cld);
-     if (pln)
-	  X(free)(pln);
+     X(plan_destroy)(cld);
+     X(free0)(pln);
      return (plan *) 0;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.30 2002-09-24 23:39:22 stevenj Exp $ */
+/* $Id: problem.c,v 1.31 2002-09-25 00:54:43 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -27,8 +27,7 @@ static void destroy(problem *ego_)
 {
      problem_rdft *ego = (problem_rdft *) ego_;
 #if !defined(STRUCT_HACK_C99) && !defined(STRUCT_HACK_KR)
-     if (ego->kind)
-	  X(free)(ego->kind);
+     X(free0)(ego->kind);
 #endif
      X(tensor_destroy2)(ego->vecsz, ego->sz);
      X(free)(ego_);

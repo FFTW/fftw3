@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.119 2002-09-24 21:21:09 stevenj Exp $ */
+/* $Id: planner.c,v 1.120 2002-09-25 00:54:43 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -59,8 +59,7 @@ static void sgrow(planner *ego)
      ego->slvdescsiz = nsiz;
      for (i = 0; i < osiz; ++i)
 	  ntab[i] = otab[i];
-     if (otab) 
-	  X(free)(otab);
+     X(free0)(otab);
 }
 
 static void register_solver(planner *ego, solver *s)
@@ -214,8 +213,7 @@ static void rehash(planner *ego, uint nsiz)
 	       hinsert0(ego, l->s, l->flags, l->slvndx, 0);
      }
 
-     if (osol)
-	  X(free)(osol);
+     X(free0)(osol);
 }
 
 static uint minsz(uint nelem)
@@ -576,9 +574,7 @@ void X(planner_destroy)(planner *ego)
 	  X(solver_destroy)(s);
      });
 
-     if (ego->slvdescs)
-	  X(free)(ego->slvdescs);
-
+     X(free0)(ego->slvdescs);
      X(free)(ego); /* dona eis requiem */
 }
 

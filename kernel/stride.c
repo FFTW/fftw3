@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: stride.c,v 1.4 2002-08-30 12:20:48 athena Exp $ */
+/* $Id: stride.c,v 1.5 2002-09-25 00:54:43 athena Exp $ */
 #include "ifftw.h"
 
 #ifdef PRECOMPUTE_ARRAY_INDICES
@@ -35,8 +35,7 @@ stride X(mkstride)(int n, int s)
 
 void X(stride_destroy)(stride p)
 {
-     if (p)
-          X(free)(p);
+     X(free0)(p);
 }
 
 #endif

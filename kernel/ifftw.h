@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.157 2002-09-25 00:08:44 athena Exp $ */
+/* $Id: ifftw.h,v 1.158 2002-09-25 00:54:43 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -122,6 +122,7 @@ enum fftw_malloc_what {
 };
 
 extern void X(free)(void *ptr);
+extern void X(free0)(void *ptr);
 
 #ifdef FFTW_DEBUG
 

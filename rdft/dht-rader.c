@@ -320,8 +320,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     if (buf)
-          X(free)(buf);
+     X(free0)(buf);
      X(plan_destroy)(cld_omega);
      X(plan_destroy)(cld2);
      X(plan_destroy)(cld1);

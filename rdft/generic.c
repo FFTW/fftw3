@@ -349,8 +349,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
  nada:
      X(plan_destroy)(cld);
-     if (pln)
-	  X(free)(pln);
+     X(free0)(pln);
      return (plan *) 0;
 }
 
