@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: debug.c,v 1.4 2003-01-11 16:07:24 athena Exp $ */
+/* $Id: debug.c,v 1.5 2003-01-11 19:47:31 athena Exp $ */
 #include "ifftw.h"
 
+#ifdef FFTW_DEBUG
 #include <stdio.h>
 
 typedef struct {
@@ -50,3 +51,4 @@ void X(debug)(const char *format, ...)
      va_end(ap);
      X(printer_destroy)(p);
 }
+#endif
