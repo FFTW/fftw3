@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: to_alist.ml,v 1.5 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: to_alist.ml,v 1.6 2002-07-08 00:56:15 athena Exp $ *)
 
 (*************************************************************
  * Conversion of the dag to an assignment list
@@ -114,15 +114,22 @@ type fma =
   | FMS of expr * expr * expr   (* FMS (a, b, c) => -a + b * c *)
   | FNMS of expr * expr * expr  (* FNMS (a, b, c) => a - b * c *)
 
+let good_for_fma x = 
+  not !Simdmagic.simd_mode ||
+  match x with
+  | (Num _, _) -> true
+  | (_, Num _) -> true
+  | _ -> false
+
 let build_fma l = 
   if (not !Magic.enable_fma) then NO_FMA
   else match l with
-  | [a; Uminus (Times (b, c))] -> FNMS (a, b, c)
-  | [Uminus (Times (b, c)); a] -> FNMS (a, b, c)
-  | [Uminus a; Times (b, c)] -> FMS (a, b, c)
-  | [Times (b, c); Uminus a] -> FMS (a, b, c)
-  | [a; Times (b, c)] -> FMA (a, b, c)
-  | [Times (b, c); a] -> FMA (a, b, c)
+  | [a; Uminus (Times (b, c))] when good_for_fma (b, c) -> FNMS (a, b, c)
+  | [Uminus (Times (b, c)); a] when good_for_fma (b, c) -> FNMS (a, b, c)
+  | [Uminus a; Times (b, c)] when good_for_fma (b, c) -> FMS (a, b, c)
+  | [Times (b, c); Uminus a] when good_for_fma (b, c) -> FMS (a, b, c)
+  | [a; Times (b, c)] when good_for_fma (b, c) -> FMA (a, b, c)
+  | [Times (b, c); a] when good_for_fma (b, c) -> FMA (a, b, c)
   | _ -> NO_FMA
 
 let children_fma l = match build_fma l with

@@ -16,9 +16,9 @@ gen_twidsq gen_trig gen_conv gen_r2hc gen_hc2r
 
 libgenfft_objects = unique.cmo magic.cmo util.cmo number.cmo		\
 variable.cmo expr.cmo littlesimp.cmo monads.cmo complex.cmo		\
-assoctable.cmo oracle.cmo algsimp.cmo to_alist.cmo dag.cmo		\
-schedule.cmo simdmagic.cmo annotate.cmo twiddle.cmo fft.cmo conv.cmo	\
-c.cmo simd.cmo genutil.cmo trig.cmo
+assoctable.cmo oracle.cmo algsimp.cmo simdmagic.cmo to_alist.cmo	\
+dag.cmo schedule.cmo annotate.cmo twiddle.cmo fft.cmo conv.cmo c.cmo	\
+simd.cmo genutil.cmo trig.cmo
 
 libgenfft.cma: $(libgenfft_objects)
 	$(OCAMLC) -a -o $@ $^
