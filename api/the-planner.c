@@ -19,10 +19,6 @@
  */
 
 #include "api.h"
-#include "dft.h"
-#include "rdft.h"
-#include "reodft.h"
-#include "threads.h"
 
 static planner *plnr = 0;
 
