@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.3 2002-08-01 03:12:05 stevenj Exp $ */
+/* $Id: align.c,v 1.4 2002-08-01 12:04:01 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -32,5 +32,5 @@
 
 uint X(alignment_of)(R *p)
 {
-     return (uint)(((ptrdiff_t)((char *)p - (char *)0)) % ALGN);
+     return (uint)(((unsigned long) p) % ALGN);
 }
