@@ -206,7 +206,7 @@ static TL *TL_fnd(uint k1, uint k2, uint k3, TL *tl)
      return t;
 }
 
-static TL *TL_dlt(R *W, TL *tl)
+static void TL_dlt(R *W, TL *tl)
 {
      if (W) {
 	  TL *tp = (TL *) 0, *t = tl;
