@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.39 2003-02-28 05:55:50 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.40 2003-02-28 19:06:22 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -324,7 +324,7 @@ fftw_plan fftw_plan_dft_1d(int n, fftw_complex *in, fftw_complex *out,
 The first argument, @code{n}, is the size of the transform you are
 trying to compute.  The size @code{n} can be any positive integer, but
 sizes that are products of small factors are transformed most
-efficiently (although even prime sizes use an @math{O(n lg n)}
+efficiently (although prime sizes still use an @math{O(n lg n)}
 algorithm).  The next two arguments are the input and output arrays of
 the transform; they can be the same, indicating an @dfn{in-place}
 transform.
@@ -359,6 +359,11 @@ for a more optimal plan.
 One can also save plans for future use, as described by @ref{Words of
 Wisdom}.)
 
+@example
+void fftw_execute_plan(fftw_plan *plan);
+@end example
+@findex fftw_execute_plan
+
 Once the plan has been created, you can use it as many times as you
 like for transforms on the specified @code{in}/@code{out} arrays,
 computing the actual transforms via @code{fftw_execute(plan)}.  If you
@@ -369,6 +374,11 @@ automatically reuse the information from the previous plan, if
 possible.  (Alternatively, there is a guru interface for applying a
 given plan to a different array, if sufficient care is taken.
 @xref{FFTW Reference}.)
+
+@example
+void fftw_destroy_plan(fftw_plan *plan);
+@end example
+@findex fftw_destroy_plan
 
 When you are done with the plan, you deallocate it by calling
 @code{fftw_destroy_plan(plan)}.
