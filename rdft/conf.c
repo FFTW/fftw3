@@ -18,34 +18,34 @@
  *
  */
 
-/* $Id: conf.c,v 1.9 2002-07-28 20:10:59 stevenj Exp $ */
+/* $Id: conf.c,v 1.10 2002-07-30 03:52:07 stevenj Exp $ */
 
 #include "rdft.h"
 
 static const solvtab s =
 {
-     X(rdft_indirect_register),
-     X(rdft_rank0_register),
-     X(rdft_vrank_geq1_register),
-     X(rdft_vrank2_transpose_register),
-     X(rdft_vrank3_transpose_register),
-     X(rdft_nop_register),
-     X(rdft_buffered_register),
-     X(rdft_rader_dht_register),
-     X(rdft_rader_hc2hc_register),
-     X(rdft_generic_register),
+     SOLVTAB(X(rdft_indirect_register)),
+     SOLVTAB(X(rdft_rank0_register)),
+     SOLVTAB(X(rdft_vrank_geq1_register)),
+     SOLVTAB(X(rdft_vrank2_transpose_register)),
+     SOLVTAB(X(rdft_vrank3_transpose_register)),
+     SOLVTAB(X(rdft_nop_register)),
+     SOLVTAB(X(rdft_buffered_register)),
+     SOLVTAB(X(rdft_rader_dht_register)),
+     SOLVTAB(X(rdft_rader_hc2hc_register)),
+     SOLVTAB(X(rdft_generic_register)),
 /*
-     X(rdft_rank_geq2_register),
+     SOLVTAB(X(rdft_rank_geq2_register)),
 */
-     X(rdft_r2hc_hc2r_register),
+     SOLVTAB(X(rdft_r2hc_hc2r_register)),
 
-     X(dft_r2hc_register),
+     SOLVTAB(X(dft_r2hc_register)),
 
-     X(rdft2_vrank_geq1_register),
-     X(rdft2_nop_register),
-     X(rdft2_buffered_register),
+     SOLVTAB(X(rdft2_vrank_geq1_register)),
+     SOLVTAB(X(rdft2_nop_register)),
+     SOLVTAB(X(rdft2_buffered_register)),
 
-     0
+     SOLVTAB_END
 };
 
 void X(rdft_conf_standard)(planner *p)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.57 2002-07-29 19:40:53 athena Exp $ */
+/* $Id: ifftw.h,v 1.58 2002-07-30 03:52:07 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -344,10 +344,12 @@ typedef struct {
      pair *(*cdr)(pair *cons);
      pair *(*solvers)(planner *ego);
      void (*register_solver)(planner *ego, solver *s);
+     void (*register_registrar)(planner *ego, const char *reg_nam);
      plan *(*mkplan)(planner *ego, problem *p);
      void (*forget)(planner *ego, amnesia a);
      void (*exprt)(planner *ego, printer *pr); /* export is a reserved word
 						  in C++.  Idiots. */
+     void (*exprt_registrars)(planner *ego, printer *pr);
      plan *(*slv_mkplan)(planner *ego, problem *p, solver *s);
 } planner_adt;
 
@@ -438,8 +440,11 @@ typedef int stride;
 /*-----------------------------------------------------------------------*/
 /* solvtab.c */
 
-typedef void (*solvtab[])(planner *);
+typedef struct { void (*reg)(planner *); const char *reg_nam; } solvtab[];
 void X(solvtab_exec)(const solvtab tbl, planner *p);
+#define SOLVTABx(s) { s, #s }
+#define SOLVTAB(s) SOLVTABx(s) /* indirection so # works on macros */
+#define SOLVTAB_END { 0, 0 }
 
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */

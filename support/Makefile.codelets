@@ -25,15 +25,15 @@ $(CODLIST): Makefile
 	echo "const solvtab $(SOLVTAB_NAME) = {";			\
 	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))) NIL; do	\
 	   if test "$$i" != NIL; then					\
-	     echo "   X($(CODELET_NAME)$$i),";				\
+	     echo "   SOLVTAB(X($(CODELET_NAME)$$i)),";			\
 	   fi								\
 	done;								\
 	for i in $(subst .S,,$(filter %.S,$(ALL_CODELETS))) NIL; do	\
 	   if test "$$i" != NIL; then					\
-	     echo "   X($(CODELET_NAME)$$i),";				\
+	     echo "   SOLVTAB(X($(CODELET_NAME)$$i)),";			\
 	   fi								\
 	done;								\
-	echo "   0";							\
+	echo "   SOLVTAB_END";						\
 	echo "};";							\
 	) >$@
 

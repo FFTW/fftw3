@@ -18,13 +18,15 @@
  *
  */
 
-/* $Id: solvtab.c,v 1.3 2002-06-22 17:01:33 athena Exp $ */
+/* $Id: solvtab.c,v 1.4 2002-07-30 03:52:07 stevenj Exp $ */
 
 #include "ifftw.h"
 
 void X(solvtab_exec)(const solvtab tbl, planner *p)
 {
-     for (; *tbl; ++tbl)
-          (*tbl)(p);
+     for (; tbl->reg; ++tbl) {
+          tbl->reg(p);
+	  p->adt->register_registrar(p, tbl->reg_nam);
+     }
 }
 

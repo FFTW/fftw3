@@ -18,23 +18,23 @@
  *
  */
 
-/* $Id: conf.c,v 1.15 2002-07-15 23:28:30 stevenj Exp $ */
+/* $Id: conf.c,v 1.16 2002-07-30 03:52:07 stevenj Exp $ */
 
 #include "dft.h"
 
 static const solvtab s =
 {
-     X(dft_indirect_register),
-     X(dft_rank0_register),
-     X(dft_rank_geq2_register),
-     X(dft_vrank_geq1_register),
-     X(dft_vrank2_transpose_register),
-     X(dft_vrank3_transpose_register),
-     X(dft_buffered_register),
-     X(dft_generic_register),
-     X(dft_rader_register),
-     X(dft_nop_register),
-     0
+     SOLVTAB(X(dft_indirect_register)),
+     SOLVTAB(X(dft_rank0_register)),
+     SOLVTAB(X(dft_rank_geq2_register)),
+     SOLVTAB(X(dft_vrank_geq1_register)),
+     SOLVTAB(X(dft_vrank2_transpose_register)),
+     SOLVTAB(X(dft_vrank3_transpose_register)),
+     SOLVTAB(X(dft_buffered_register)),
+     SOLVTAB(X(dft_generic_register)),
+     SOLVTAB(X(dft_rader_register)),
+     SOLVTAB(X(dft_nop_register)),
+     SOLVTAB_END
 };
 
 void X(dft_conf_standard)(planner *p)

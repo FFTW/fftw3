@@ -18,11 +18,12 @@
  *
  */
 
-/* $Id: planner.c,v 1.25 2002-07-15 01:01:44 athena Exp $ */
+/* $Id: planner.c,v 1.26 2002-07-30 03:52:07 stevenj Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
      solver *slv;
+     const char *reg_nam;
      int id;
      pair *cdr;
 };
@@ -49,6 +50,7 @@ static inline pair *cons(solver *slv, int id, pair *cdr)
 {
      pair *n = (pair *) fftw_malloc(sizeof(pair), PAIRS);
      n->slv = slv;
+     n->reg_nam = (char *) 0;
      n->id = id;
      n->cdr = cdr;
      return n;
@@ -64,6 +66,15 @@ static void register_solver(planner *ego, solver *s)
 	  X(solver_use)(s);
 	  ego->solvers = cons(s, ego->idcnt++, ego->solvers);
      }
+}
+
+static void register_registrar(planner *ego, const char *reg_nam)
+{
+     FORALL_SOLVERS(ego, s, sp, {
+	  UNUSED(s);
+          if (!sp->reg_nam)
+	       sp->reg_nam = reg_nam;
+     });
 }
 
 static void hooknil(plan *pln, const problem *p)
@@ -234,7 +245,7 @@ static void htab_destroy(planner *ego)
 
 static void print_solution(solutions *s, printer *p)
 {
-     p->print(p, "(s %d %P)\n", s->sp ? s->sp->id : 0, s->p);
+     p->print(p, "(s %d %P)", s->sp ? s->sp->id : 0, s->p);
 }
 
 /* tantus labor non sit cassus */
@@ -247,9 +258,84 @@ static void exprt(planner *ego, printer *p)
 	  for (s = ego->sols[h]; s; s = s->cdr) 
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
-	       if (s->blessed || (s->pln && s->pln->blessed))
+	       if (s->blessed || (s->pln && s->pln->blessed)) {
 		    print_solution(s, p);
+		    p->putchr(p, '\n');
+	       }
 } 
+
+static void exprt_registrars(planner *ego, printer *p)
+{
+     solutions *s;
+     uint h;
+     const char *prev_reg_nam = (const char *) 0;
+     int idcnt = 0, reg_nam_cnt = 1, blessed_reg_nam = 0;
+
+     /* FIXME: need to use external API */
+
+#ifndef __cplusplus
+     p->print(p, "#ifdef __cplusplus\nextern \"C\" {\n#endif\n");
+#endif
+
+     for (h = 0; h < ego->hashsiz; ++h)
+          for (s = ego->sols[h]; s; s = s->cdr) {
+               if ((s->blessed || (s->pln && s->pln->blessed))
+		   && s->sp && s->sp->reg_nam && s->sp->id > 0) {
+		    s->sp->id = 0; /* mark to prevent duplicates */
+		    p->print(p, "extern void %s(planner*);\n", s->sp->reg_nam);
+	       }
+	  }
+
+#ifndef __cplusplus
+     p->print(p, "#ifdef __cplusplus\n}\n#endif\n");
+#endif
+
+     p->print(p, "\nstatic const solvtab s =\n{\n");
+
+     /* output solvtab entries, and compute correct id's of blessed
+	entries as they will appear in the generated table (ugh). */
+     FORALL_SOLVERS(ego, s, sp, {
+	  UNUSED(s);
+	  if (prev_reg_nam && sp->reg_nam == prev_reg_nam)
+	       ++reg_nam_cnt;
+	  else {
+	       if (blessed_reg_nam)
+		    idcnt += reg_nam_cnt;
+	       prev_reg_nam = sp->reg_nam;
+	       reg_nam_cnt = 1;
+	       blessed_reg_nam = 0;
+	  }
+	  if (sp->id == 0) {
+	       if (!blessed_reg_nam) /* i.e., not already printed */
+		    p->print(p, "     SOLVTAB(%s),\n", sp->reg_nam);
+	       blessed_reg_nam = 1;
+	       sp->id = idcnt + reg_nam_cnt;
+	  }
+     });
+     if (blessed_reg_nam)
+	  idcnt += reg_nam_cnt;
+
+     p->print(p, "}; /* yields %d solvers */\n", idcnt);
+
+     /* export wisdom as hard-coded string, w/ids corresponding to solvtab */
+     p->print(p, "\nstatic const char * const wisdom = \"");
+     for (h = 0; h < ego->hashsiz; ++h)
+          for (s = ego->sols[h]; s; s = s->cdr) {
+               if (s->blessed || (s->pln && s->pln->blessed)) {
+		    if (s->sp)
+			 s->sp->id = idcnt + 1 - s->sp->id;
+		    print_solution(s, p);
+	       }
+	  }
+     p->print(p, "\";\n");
+
+     /* reset ids: */
+     idcnt = ego->idcnt - 1;
+     FORALL_SOLVERS(ego, s, sp, {
+	  UNUSED(s);
+          sp->id = idcnt--;
+     });
+}
 
 /*
  * create a planner
@@ -261,7 +347,8 @@ planner *X(mkplanner)(size_t sz,
 		      int flags)
 {
      static const planner_adt padt = {
-	  slv, cdr, solvers, register_solver, mkplan, forget, exprt, slv_mkplan
+	  slv, cdr, solvers, register_solver, register_registrar,
+	  mkplan, forget, exprt, exprt_registrars, slv_mkplan
      };
 
      planner *p = (planner *) fftw_malloc(sz, PLANNERS);
