@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.25 2002-09-02 15:46:57 athena Exp $ */
+/* $Id: rdft.h,v 1.26 2002-09-21 21:47:35 athena Exp $ */
 
 #ifndef __RDFT_H__
 #define __RDFT_H__
@@ -49,7 +49,7 @@ problem *X(mkproblem_rdft_1_d)(tensor sz, tensor vecsz,
 
 const char *X(rdft_kind_str)(rdft_kind kind);
 uint X(rdft_real_n)(rdft_kind kind, uint n);
-tensor X(rdft_real_sz)(const rdft_kind *kind, const tensor sz);
+tensor X(rdft_real_sz)(const rdft_kind *kind, const tensor *sz);
 
 /* solve.c: */
 void X(rdft_solve)(plan *ego_, const problem *p_);

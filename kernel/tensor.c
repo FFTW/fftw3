@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.25 2002-09-01 23:51:50 athena Exp $ */
+/* $Id: tensor.c,v 1.26 2002-09-21 21:47:35 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -31,10 +31,12 @@ static void talloc(tensor *x, uint rnk)
           x->dims = 0;
 }
 
-void X(tensor_destroy)(tensor sz)
+void X(tensor_destroy)(tensor *sz)
 {
-     if (sz.dims)
-          X(free)(sz.dims);
+     if (sz->dims) {
+          X(free)(sz->dims);
+	  sz->dims = 0;
+     }
 }
 
 tensor X(mktensor)(uint rnk)
@@ -91,25 +93,25 @@ tensor X(mktensor_rowmajor)(uint rnk, const uint *n,
      return x;
 }
 
-uint X(tensor_sz)(const tensor sz)
+uint X(tensor_sz)(const tensor *sz)
 {
      uint i, n = 1;
 
-     if (!FINITE_RNK(sz.rnk))
+     if (!FINITE_RNK(sz->rnk))
           return 0;
 
-     for (i = 0; i < sz.rnk; ++i)
-          n *= sz.dims[i].n;
+     for (i = 0; i < sz->rnk; ++i)
+          n *= sz->dims[i].n;
      return n;
 }
 
-void X(tensor_md5)(md5 *p, const tensor t)
+void X(tensor_md5)(md5 *p, const tensor *t)
 {
      uint i;
-     X(md5uint)(p, t.rnk);
-     if (FINITE_RNK(t.rnk)) {
-	  for (i = 0; i < t.rnk; ++i) {
-	       iodim *q = t.dims + i;
+     X(md5uint)(p, t->rnk);
+     if (FINITE_RNK(t->rnk)) {
+	  for (i = 0; i < t->rnk; ++i) {
+	       iodim *q = t->dims + i;
 	       X(md5uint)(p, q->n);
 	       X(md5int)(p, q->is);
 	       X(md5int)(p, q->os);
@@ -117,45 +119,45 @@ void X(tensor_md5)(md5 *p, const tensor t)
      }
 }
 
-uint X(tensor_max_index)(const tensor sz)
+uint X(tensor_max_index)(const tensor *sz)
 {
      uint i;
      uint n = 0;
 
-     A(FINITE_RNK(sz.rnk));
-     for (i = 0; i < sz.rnk; ++i) {
-          iodim *p = sz.dims + i;
+     A(FINITE_RNK(sz->rnk));
+     for (i = 0; i < sz->rnk; ++i) {
+          iodim *p = sz->dims + i;
           n += (p->n - 1) * X(uimax)(X(iabs)(p->is), X(iabs)(p->os));
      }
      return n;
 }
 
-#define tensor_min_xstride(sz, xs) {                         \
-     A(FINITE_RNK(sz.rnk));                                  \
-     if (sz.rnk == 0) return 0;                              \
-     else {                                                  \
-          uint i;                                            \
-          uint s = X(iabs)(sz.dims[0].xs);                   \
-          for (i = 1; i < sz.rnk; ++i)                       \
-               s = X(uimin)(s, X(iabs)(sz.dims[i].xs));      \
-          return s;                                          \
-     }                                                       \
+#define tensor_min_xstride(sz, xs) {				\
+     A(FINITE_RNK(sz->rnk));					\
+     if (sz->rnk == 0) return 0;				\
+     else {							\
+          uint i;						\
+          uint s = X(iabs)(sz->dims[0].xs);			\
+          for (i = 1; i < sz->rnk; ++i)				\
+               s = X(uimin)(s, X(iabs)(sz->dims[i].xs));	\
+          return s;						\
+     }								\
 }
 
-uint X(tensor_min_istride)(const tensor sz) tensor_min_xstride(sz, is)
-uint X(tensor_min_ostride)(const tensor sz) tensor_min_xstride(sz, os)
+uint X(tensor_min_istride)(const tensor *sz) tensor_min_xstride(sz, is)
+uint X(tensor_min_ostride)(const tensor *sz) tensor_min_xstride(sz, os)
 
-uint X(tensor_min_stride)(const tensor sz)
+uint X(tensor_min_stride)(const tensor *sz)
 {
      return X(uimin)(X(tensor_min_istride)(sz), X(tensor_min_ostride)(sz));
 }
 
-int X(tensor_inplace_strides)(const tensor sz)
+int X(tensor_inplace_strides)(const tensor *sz)
 {
      uint i;
-     A(FINITE_RNK(sz.rnk));
-     for (i = 0; i < sz.rnk; ++i) {
-          iodim *p = sz.dims + i;
+     A(FINITE_RNK(sz->rnk));
+     for (i = 0; i < sz->rnk; ++i) {
+          iodim *p = sz->dims + i;
           if (p->is != p->os)
                return 0;
      }
@@ -170,18 +172,18 @@ static void dimcpy(iodim *dst, const iodim *src, uint rnk)
                dst[i] = src[i];
 }
 
-tensor X(tensor_copy)(const tensor sz)
+tensor X(tensor_copy)(const tensor *sz)
 {
      tensor x;
 
-     talloc(&x, sz.rnk);
-     dimcpy(x.dims, sz.dims, sz.rnk);
+     talloc(&x, sz->rnk);
+     dimcpy(x.dims, sz->dims, sz->rnk);
      return x;
 }
 
 /* like X(tensor_copy), but makes strides in-place by
    setting os = is if k == INPLACE_IS or is = os if k == INPLACE_OS. */
-tensor X(tensor_copy_inplace)(const tensor sz, inplace_kind k)
+tensor X(tensor_copy_inplace)(const tensor *sz, inplace_kind k)
 {
      tensor x;
      x = X(tensor_copy)(sz);
@@ -199,27 +201,27 @@ tensor X(tensor_copy_inplace)(const tensor sz, inplace_kind k)
 
 /* Like X(tensor_copy), but copy all of the dimensions *except*
    except_dim. */
-tensor X(tensor_copy_except)(const tensor sz, uint except_dim)
+tensor X(tensor_copy_except)(const tensor *sz, uint except_dim)
 {
      tensor x;
 
-     A(FINITE_RNK(sz.rnk) && sz.rnk >= 1 && except_dim < sz.rnk);
-     talloc(&x, sz.rnk - 1);
-     dimcpy(x.dims, sz.dims, except_dim);
-     dimcpy(x.dims + except_dim, sz.dims + except_dim + 1,
+     A(FINITE_RNK(sz->rnk) && sz->rnk >= 1 && except_dim < sz->rnk);
+     talloc(&x, sz->rnk - 1);
+     dimcpy(x.dims, sz->dims, except_dim);
+     dimcpy(x.dims + except_dim, sz->dims + except_dim + 1,
             x.rnk - except_dim);
      return x;
 }
 
 /* Like X(tensor_copy), but copy only rnk dimensions starting
    with start_dim. */
-tensor X(tensor_copy_sub)(const tensor sz, uint start_dim, uint rnk)
+tensor X(tensor_copy_sub)(const tensor *sz, uint start_dim, uint rnk)
 {
      tensor x;
 
-     A(FINITE_RNK(sz.rnk) && start_dim + rnk <= sz.rnk);
+     A(FINITE_RNK(sz->rnk) && start_dim + rnk <= sz->rnk);
      talloc(&x, rnk);
-     dimcpy(x.dims, sz.dims + start_dim, rnk);
+     dimcpy(x.dims, sz->dims + start_dim, rnk);
      return x;
 }
 
@@ -248,22 +250,22 @@ static int cmp_iodim(const void *av, const void *bv)
    recursion).  (Both forward and backwards traversal of the tensor
    are considered e.g. by vrank-geq1, so sorting in increasing
    vs. decreasing order is not really important.) */
-tensor X(tensor_compress)(const tensor sz)
+tensor X(tensor_compress)(const tensor *sz)
 {
      uint i, rnk;
      tensor x;
 
-     A(FINITE_RNK(sz.rnk));
-     for (i = rnk = 0; i < sz.rnk; ++i) {
-          A(sz.dims[i].n > 0);
-          if (sz.dims[i].n != 1)
+     A(FINITE_RNK(sz->rnk));
+     for (i = rnk = 0; i < sz->rnk; ++i) {
+          A(sz->dims[i].n > 0);
+          if (sz->dims[i].n != 1)
                ++rnk;
      }
 
      talloc(&x, rnk);
-     for (i = rnk = 0; i < sz.rnk; ++i) {
-          if (sz.dims[i].n != 1)
-               x.dims[rnk++] = sz.dims[i];
+     for (i = rnk = 0; i < sz->rnk; ++i) {
+          if (sz->dims[i].n != 1)
+               x.dims[rnk++] = sz->dims[i];
      }
 
      qsort(x.dims, (size_t)x.rnk, sizeof(iodim), cmp_iodim);
@@ -282,7 +284,7 @@ static int strides_contig(iodim *a, iodim *b)
 /* Like tensor_compress, but also compress into one dimension any
    group of dimensions that form a contiguous block of indices with
    some stride.  (This can safely be done for transform vector sizes.) */
-tensor X(tensor_compress_contiguous)(const tensor sz)
+tensor X(tensor_compress_contiguous)(const tensor *sz)
 {
      uint i, rnk;
      tensor sz2, x;
@@ -315,20 +317,20 @@ tensor X(tensor_compress_contiguous)(const tensor sz)
           }
      }
 
-     X(tensor_destroy)(sz2);
+     X(tensor_destroy)(&sz2);
      return x;
 }
 
-tensor X(tensor_append)(const tensor a, const tensor b)
+tensor X(tensor_append)(const tensor *a, const tensor *b)
 {
      tensor x;
 
-     if (!FINITE_RNK(a.rnk) || !FINITE_RNK(b.rnk)) {
+     if (!FINITE_RNK(a->rnk) || !FINITE_RNK(b->rnk)) {
           talloc(&x, RNK_MINFTY);
      } else {
-          talloc(&x, a.rnk + b.rnk);
-          dimcpy(x.dims, a.dims, a.rnk);
-          dimcpy(x.dims + a.rnk, b.dims, b.rnk);
+          talloc(&x, a->rnk + b->rnk);
+          dimcpy(x.dims, a->dims, a->rnk);
+          dimcpy(x.dims + a->rnk, b->dims, b->rnk);
      }
      return x;
 }
@@ -351,21 +353,21 @@ void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os)
 
 /* The inverse of X(tensor_append): splits the sz tensor into
    tensor a followed by tensor b, where a's rank is arnk. */
-void X(tensor_split)(const tensor sz, tensor *a, uint arnk, tensor *b)
+void X(tensor_split)(const tensor *sz, tensor *a, uint arnk, tensor *b)
 {
-     A(FINITE_RNK(sz.rnk) && FINITE_RNK(arnk));
+     A(FINITE_RNK(sz->rnk) && FINITE_RNK(arnk));
 
      *a = X(tensor_copy_sub)(sz, 0, arnk);
-     *b = X(tensor_copy_sub)(sz, arnk, sz.rnk - arnk);
+     *b = X(tensor_copy_sub)(sz, arnk, sz->rnk - arnk);
 }
 
-void X(tensor_print)(tensor x, printer *p)
+void X(tensor_print)(const tensor *x, printer *p)
 {
-     p->print(p, "(t:%d", FINITE_RNK(x.rnk) ? (int) x.rnk : -1);
-     if (FINITE_RNK(x.rnk)) {
+     p->print(p, "(t:%d", FINITE_RNK(x->rnk) ? (int) x->rnk : -1);
+     if (FINITE_RNK(x->rnk)) {
 	  uint i;
-	  for (i = 0; i < x.rnk; ++i) {
-	       iodim *d = x.dims + i;
+	  for (i = 0; i < x->rnk; ++i) {
+	       iodim *d = x->dims + i;
 	       p->print(p, " (%u %d %d)", d->n, d->is, d->os);
 	  }
      }

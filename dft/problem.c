@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.20 2002-09-09 14:14:22 athena Exp $ */
+/* $Id: problem.c,v 1.21 2002-09-21 21:47:35 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -26,8 +26,8 @@
 static void destroy(problem *ego_)
 {
      problem_dft *ego = (problem_dft *) ego_;
-     X(tensor_destroy)(ego->vecsz);
-     X(tensor_destroy)(ego->sz);
+     X(tensor_destroy)(&ego->vecsz);
+     X(tensor_destroy)(&ego->sz);
      X(free)(ego_);
 }
 
@@ -40,8 +40,8 @@ static void hash(const problem *p_, md5 *m)
      X(md5ptrdiff)(m, p->io - p->ro);
      X(md5uint)(m, X(alignment_of)(p->ri));
      X(md5uint)(m, X(alignment_of)(p->ro));
-     X(tensor_md5)(m, p->sz);
-     X(tensor_md5)(m, p->vecsz);
+     X(tensor_md5)(m, &p->sz);
+     X(tensor_md5)(m, &p->vecsz);
 }
 
 static void print(problem *ego_, printer *p)
@@ -59,9 +59,9 @@ static void print(problem *ego_, printer *p)
 static void zero(const problem *ego_)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
-     tensor sz = X(tensor_append)(ego->vecsz, ego->sz);
+     tensor sz = X(tensor_append)(&ego->vecsz, &ego->sz);
      X(dft_zerotens)(sz, ego->ri, ego->ii);
-     X(tensor_destroy)(sz);
+     X(tensor_destroy)(&sz);
 }
 
 static const problem_adt padt =
@@ -86,8 +86,8 @@ problem *X(mkproblem_dft)(const tensor sz, const tensor vecsz,
      /* both in place or both out of place */
      CK((ri == ro) == (ii == io));
 
-     ego->sz = X(tensor_compress)(sz);
-     ego->vecsz = X(tensor_compress_contiguous)(vecsz);
+     ego->sz = X(tensor_compress)(&sz);
+     ego->vecsz = X(tensor_compress_contiguous)(&vecsz);
      ego->ri = ri;
      ego->ii = ii;
      ego->ro = ro;
@@ -103,7 +103,7 @@ problem *X(mkproblem_dft_d)(tensor sz, tensor vecsz,
 {
      problem *p;
      p = X(mkproblem_dft)(sz, vecsz, ri, ii, ro, io);
-     X(tensor_destroy)(vecsz);
-     X(tensor_destroy)(sz);
+     X(tensor_destroy)(&vecsz);
+     X(tensor_destroy)(&sz);
      return p;
 }

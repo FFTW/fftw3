@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.2 2002-09-14 03:07:39 stevenj Exp $ */
+/* $Id: verify-lib.c,v 1.3 2002-09-21 21:47:35 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -375,7 +375,7 @@ void tf_shift(void (*dofft)(void *nfo, C *in, C *out),
    given stride. */
 tensor verify_pack(tensor sz, int s)
 {
-     tensor x = X(tensor_copy)(sz);
+     tensor x = X(tensor_copy)(&sz);
      if (FINITE_RNK(x.rnk) && x.rnk > 0) {
 	  uint i;
 	  x.dims[x.rnk - 1].is = s;

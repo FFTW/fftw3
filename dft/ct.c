@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.23 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: ct.c,v 1.24 2002-09-21 21:47:35 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -152,8 +152,8 @@ problem *X(dft_mkcld_dit)(const solver_ct *ego, const problem_dft *p)
      uint m = d[0].n / e->radix;
 
      tensor radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
-     tensor cld_vec = X(tensor_append)(radix, p->vecsz);
-     X(tensor_destroy)(radix);
+     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
+     X(tensor_destroy)(&radix);
 
      return X(mkproblem_dft_d)(X(mktensor_1d)(m, e->radix * d[0].is, d[0].os),
 			       cld_vec, p->ri, p->ii, p->ro, p->io);
@@ -166,8 +166,8 @@ problem *X(dft_mkcld_dif)(const solver_ct *ego, const problem_dft *p)
      uint m = d[0].n / e->radix;
 
      tensor radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
-     tensor cld_vec = X(tensor_append)(radix, p->vecsz);
-     X(tensor_destroy)(radix);
+     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
+     X(tensor_destroy)(&radix);
 
      return X(mkproblem_dft_d)(X(mktensor_1d)(m, d[0].is, e->radix * d[0].os),
 			       cld_vec, p->ri, p->ii, p->ro, p->io);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.10 2002-09-21 11:58:11 athena Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.11 2002-09-21 21:47:35 athena Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -336,7 +336,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      {
 	  tensor sz = X(mktensor_1d)(n, 1, 1);
 	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, buf, buf, R2HC);
-	  X(tensor_destroy)(sz);
+	  X(tensor_destroy)(&sz);
      }
 
      cld = MKPLAN(plnr, cldp);

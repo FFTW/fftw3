@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.8 2002-09-21 11:58:11 athena Exp $ */
+/* $Id: rodft00e-r2hc.c,v 1.9 2002-09-21 21:47:35 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -153,7 +153,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      {
 	  tensor sz = X(mktensor_1d)(n, 1, 1);
 	  cldp = X(mkproblem_rdft_1)(sz, p->vecsz, buf, buf, R2HC);
-	  X(tensor_destroy)(sz);
+	  X(tensor_destroy)(&sz);
      }
 
      cld = MKPLAN(plnr, cldp);

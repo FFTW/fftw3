@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.4 2002-09-21 16:03:46 athena Exp $ */
+/* $Id: verify-reodft.c,v 1.5 2002-09-21 21:47:35 athena Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -391,7 +391,7 @@ static void tf_shift(uint n, uint vecn, info *nfo,
    given stride. */
 static tensor pack(tensor sz, int s)
 {
-     tensor x = X(tensor_copy)(sz);
+     tensor x = X(tensor_copy)(&sz);
      if (FINITE_RNK(x.rnk) && x.rnk > 0) {
 	  uint i;
 	  x.dims[x.rnk - 1].is = s;
@@ -423,7 +423,7 @@ static void really_verify(plan *pln, const problem_rdft *p,
      A(p->sz.rnk == 1);
      n0 = p->sz.dims[0].n;
      n = X(rdft_real_n)(p->kind[0], n0);
-     vecn = X(tensor_sz)(p->vecsz);
+     vecn = X(tensor_sz)(&p->vecsz);
      N = n * vecn;
 
      switch (p->kind[0]) {
@@ -494,10 +494,10 @@ static void really_verify(plan *pln, const problem_rdft *p,
 
      nfo.pln = pln;
      nfo.p = p;
-     nfo.probsz = X(rdft_real_sz)(p->kind, p->sz);
-     nfo.totalsz = X(tensor_append)(p->vecsz, nfo.probsz);
+     nfo.probsz = X(rdft_real_sz)(p->kind, &p->sz);
+     nfo.totalsz = X(tensor_append)(&p->vecsz, &nfo.probsz);
      nfo.pckdsz = pack(nfo.totalsz, 1);
-     nfo.pckdvecsz = pack(p->vecsz, X(tensor_sz)(nfo.probsz));
+     nfo.pckdvecsz = pack(p->vecsz, X(tensor_sz)(&nfo.probsz));
 
      linear(N, &nfo, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
      impulse(n0, i0, k0, ti, impulse_amp,
@@ -510,10 +510,10 @@ static void really_verify(plan *pln, const problem_rdft *p,
 	      rounds, tol, FREQ_SHIFT, 
 	      isL0f, isL1f, isR0f, isR1f, n0, i0, tsf);
 
-     X(tensor_destroy)(nfo.probsz);
-     X(tensor_destroy)(nfo.totalsz);
-     X(tensor_destroy)(nfo.pckdsz);
-     X(tensor_destroy)(nfo.pckdvecsz);
+     X(tensor_destroy)(&nfo.probsz);
+     X(tensor_destroy)(&nfo.totalsz);
+     X(tensor_destroy)(&nfo.pckdsz);
+     X(tensor_destroy)(&nfo.pckdvecsz);
      X(free)(tmp);
      X(free)(outC);
      X(free)(outB);

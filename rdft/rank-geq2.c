@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.6 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.7 2002-09-21 21:47:35 athena Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
 
@@ -87,13 +87,13 @@ static void print(plan *ego_, printer *p)
 	      s->spltrnk, ego->cld1, ego->cld2);
 }
 
-static int picksplit(const S *ego, const tensor sz, uint *rp)
+static int picksplit(const S *ego, const tensor *sz, uint *rp)
 {
      A(sz.rnk > 1); /* cannot split rnk <= 1 */
      if (!X(pickdim)(ego->spltrnk, ego->buddies, ego->nbuddies, sz, 1, rp))
 	  return 0;
      *rp += 1; /* convert from dim. index to rank */
-     if (*rp >= sz.rnk) /* split must reduce rank */
+     if (*rp >= sz->rnk) /* split must reduce rank */
 	  return 0;
      return 1;
 }
@@ -105,7 +105,7 @@ static int applicable0(const solver *ego_, const problem *p_, uint *rp)
           const S *ego = (const S *)ego_;
           return (1
                   && p->sz.rnk >= 2
-                  && picksplit(ego, p->sz, rp)
+                  && picksplit(ego, &p->sz, rp)
                   && (0
 
                       /* can always operate out-of-place */
@@ -115,7 +115,7 @@ static int applicable0(const solver *ego_, const problem *p_, uint *rp)
 			 strides are the same, provided that the child
 			 plans work in-place.  (This condition is
 			 sufficient, but is it necessary?) */
-                      || X(tensor_inplace_strides)(p->sz)
+                      || X(tensor_inplace_strides)(&p->sz)
 		       )
 	       );
      }
@@ -142,7 +142,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	  const problem_rdft *p = (const problem_rdft *) p_;
 
 	  if (p->vecsz.rnk > 0 &&
-	      X(tensor_min_stride)(p->vecsz) > X(tensor_max_index)(p->sz))
+	      X(tensor_min_stride)(&p->vecsz) > X(tensor_max_index)(&p->sz))
 	       return 0;
      }
 
@@ -167,22 +167,22 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           return (plan *) 0;
 
      p = (const problem_rdft *) p_;
-     X(tensor_split)(p->sz, &sz1, spltrnk, &sz2);
-     vecszi = X(tensor_copy_inplace)(p->vecsz, INPLACE_OS);
-     sz2i = X(tensor_copy_inplace)(sz2, INPLACE_OS);
-     rsz1 = X(rdft_real_sz)(p->kind, sz1);
-     rsz2i = X(rdft_real_sz)(p->kind + spltrnk, sz2i);
+     X(tensor_split)(&p->sz, &sz1, spltrnk, &sz2);
+     vecszi = X(tensor_copy_inplace)(&p->vecsz, INPLACE_OS);
+     sz2i = X(tensor_copy_inplace)(&sz2, INPLACE_OS);
+     rsz1 = X(rdft_real_sz)(p->kind, &sz1);
+     rsz2i = X(rdft_real_sz)(p->kind + spltrnk, &sz2i);
 
-     cldp = X(mkproblem_rdft_d)(X(tensor_copy)(sz2),
-				X(tensor_append)(p->vecsz, rsz1),
+     cldp = X(mkproblem_rdft_d)(X(tensor_copy)(&sz2),
+				X(tensor_append)(&p->vecsz, &rsz1),
 				p->I, p->O, p->kind + spltrnk);
      cld1 = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
      if (!cld1)
           goto nada;
 
-     cldp = X(mkproblem_rdft_d)(X(tensor_copy_inplace)(sz1, INPLACE_OS),
-				X(tensor_append)(vecszi, rsz2i),
+     cldp = X(mkproblem_rdft_d)(X(tensor_copy_inplace)(&sz1, INPLACE_OS),
+				X(tensor_append)(&vecszi, &rsz2i),
 				p->O, p->O, p->kind);
      cld2 = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
@@ -197,12 +197,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->solver = ego;
      pln->super.super.ops = X(ops_add)(cld1->ops, cld2->ops);
 
-     X(tensor_destroy)(rsz2i);
-     X(tensor_destroy)(rsz1);
-     X(tensor_destroy)(sz2);
-     X(tensor_destroy)(sz1);
-     X(tensor_destroy)(vecszi);
-     X(tensor_destroy)(sz2i);
+     X(tensor_destroy)(&rsz2i);
+     X(tensor_destroy)(&rsz1);
+     X(tensor_destroy)(&sz2);
+     X(tensor_destroy)(&sz1);
+     X(tensor_destroy)(&vecszi);
+     X(tensor_destroy)(&sz2i);
 
      return &(pln->super.super);
 
@@ -211,12 +211,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           X(plan_destroy)(cld2);
      if (cld1)
           X(plan_destroy)(cld1);
-     X(tensor_destroy)(rsz2i);
-     X(tensor_destroy)(rsz1);
-     X(tensor_destroy)(sz2);
-     X(tensor_destroy)(sz1);
-     X(tensor_destroy)(vecszi);
-     X(tensor_destroy)(sz2i);
+     X(tensor_destroy)(&rsz2i);
+     X(tensor_destroy)(&rsz1);
+     X(tensor_destroy)(&sz2);
+     X(tensor_destroy)(&sz1);
+     X(tensor_destroy)(&vecszi);
+     X(tensor_destroy)(&sz2i);
      return (plan *) 0;
 }
 

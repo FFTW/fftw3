@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.21 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.22 2002-09-21 21:47:35 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -86,7 +86,7 @@ static void print(plan *ego_, printer *p)
 	      ego->vl, s->vecloop_dim, ego->cld);
 }
 
-static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
+static int pickdim(const S *ego, const tensor *vecsz, int oop, uint *dp)
 {
      return X(pickdim)(ego->vecloop_dim, ego->buddies, ego->nbuddies,
 		       vecsz, oop, dp);
@@ -101,7 +101,7 @@ static int applicable0(const solver *ego_, const problem *p_, uint *dp)
           return (1
                   && FINITE_RNK(p->vecsz.rnk)
                   && p->vecsz.rnk > 0
-                  && pickdim(ego, p->vecsz, p->ri != p->ro, dp)
+                  && pickdim(ego, &p->vecsz, p->ri != p->ro, dp)
 	       );
      }
 
@@ -132,7 +132,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	       if (1
 		   && p->sz.rnk > 1 
 		   && X(uimin)(X(iabs)(d->is), X(iabs)(d->os)) 
-		   < X(tensor_max_index)(p->sz)
+		   < X(tensor_max_index)(&p->sz)
 		    )
 		    return 0;
 	  }
@@ -176,8 +176,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	      X(alignment_of)(p->io + d->os))
 	       plnr->problem_flags |= POSSIBLY_UNALIGNED;
 
-     cldp = X(mkproblem_dft_d)(X(tensor_copy)(p->sz),
-			       X(tensor_copy_except)(p->vecsz, vdim),
+     cldp = X(mkproblem_dft_d)(X(tensor_copy)(&p->sz),
+			       X(tensor_copy_except)(&p->vecsz, vdim),
 			       p->ri, p->ii, p->ro, p->io);
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);

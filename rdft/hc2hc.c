@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.12 2002-09-16 02:30:26 stevenj Exp $ */
+/* $Id: hc2hc.c,v 1.13 2002-09-21 21:47:35 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -194,8 +194,8 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
      int omid = d[0].os * (m/2);
 
      tensor null, radix = X(mktensor_1d)(e->radix, d[0].is, m * d[0].os);
-     tensor cld_vec = X(tensor_append)(radix, p->vecsz);
-     X(tensor_destroy)(radix);
+     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
+     X(tensor_destroy)(&radix);
      A(p->kind[0] == R2HC);
 
      *cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, e->radix*d[0].is, d[0].os),
@@ -205,8 +205,8 @@ void X(rdft_mkcldrn_dit)(const solver_hc2hc *ego, const problem_rdft *p,
      null = X(mktensor)(0);
      *cld0p = X(mkproblem_rdft_1)(radix, null, p->O, p->O, R2HC);
      *cldmp = X(mkproblem_rdft_1)(m%2 ? null : radix, null, p->O+omid,p->O+omid, R2HCII);
-     X(tensor_destroy)(null);
-     X(tensor_destroy)(radix);
+     X(tensor_destroy)(&null);
+     X(tensor_destroy)(&radix);
 }
 
 void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
@@ -218,8 +218,8 @@ void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
      int imid = d[0].is * (m/2);
 
      tensor null, radix = X(mktensor_1d)(e->radix, m * d[0].is, d[0].os);
-     tensor cld_vec = X(tensor_append)(radix, p->vecsz);
-     X(tensor_destroy)(radix);
+     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
+     X(tensor_destroy)(&radix);
      A(p->kind[0] == HC2R);
 
      *cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, d[0].is, e->radix*d[0].os),
@@ -229,6 +229,6 @@ void X(rdft_mkcldrn_dif)(const solver_hc2hc *ego, const problem_rdft *p,
      null = X(mktensor)(0);
      *cld0p = X(mkproblem_rdft_1)(radix, null, p->I, p->I, HC2R);
      *cldmp = X(mkproblem_rdft_1)(m%2 ? null : radix, null, p->I+imid,p->I+imid, HC2RIII);
-     X(tensor_destroy)(null);
-     X(tensor_destroy)(radix);
+     X(tensor_destroy)(&null);
+     X(tensor_destroy)(&radix);
 }

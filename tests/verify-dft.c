@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.1 2002-09-02 15:46:57 athena Exp $ */
+/* $Id: verify-dft.c,v 1.2 2002-09-21 21:47:35 athena Exp $ */
 
 #include "dft.h"
 #include "debug.h"
@@ -81,8 +81,8 @@ static void really_verify(plan *pln, const problem_dft *p,
      if (rounds == 0)
 	  rounds = 20;  /* default value */
 
-     n = X(tensor_sz)(p->sz);
-     vecn = X(tensor_sz)(p->vecsz);
+     n = X(tensor_sz)(&p->sz);
+     vecn = X(tensor_sz)(&p->vecsz);
      N = n * vecn;
 
      inA = (C *) fftw_malloc(N * sizeof(C), OTHER);
@@ -96,7 +96,7 @@ static void really_verify(plan *pln, const problem_dft *p,
      nfo.pln = pln;
      nfo.p = p;
      nfo.probsz = p->sz;
-     nfo.totalsz = X(tensor_append)(p->vecsz, p->sz);
+     nfo.totalsz = X(tensor_append)(&p->vecsz, &p->sz);
      nfo.pckdsz = verify_pack(nfo.totalsz, 2);
 
      impulse(dofft, &nfo, 
@@ -111,8 +111,8 @@ static void really_verify(plan *pln, const problem_dft *p,
 	      n, vecn, inA, inB, outA, outB, tmp, 
 	      rounds, tol, FREQ_SHIFT);
 
-     X(tensor_destroy)(nfo.totalsz);
-     X(tensor_destroy)(nfo.pckdsz);
+     X(tensor_destroy)(&nfo.totalsz);
+     X(tensor_destroy)(&nfo.pckdsz);
      X(free)(tmp);
      X(free)(outC);
      X(free)(outB);

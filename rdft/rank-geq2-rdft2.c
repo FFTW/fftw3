@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.7 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.8 2002-09-21 21:47:35 athena Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -123,7 +123,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	     sz, don't use (prefer to do the vector loop first with a
 	     vrank-geq1 plan). */
 	  if (p->vecsz.rnk > 0 &&
-	      X(tensor_min_stride)(p->vecsz) > X(tensor_max_index)(p->sz))
+	      X(tensor_min_stride)(&p->vecsz) > X(tensor_max_index)(&p->sz))
 	       return 0;
      }
 
@@ -147,15 +147,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           return (plan *) 0;
 
      p = (const problem_rdft2 *) p_;
-     X(tensor_split)(p->sz, &sz1, p->sz.rnk - 1, &sz2);
+     X(tensor_split)(&p->sz, &sz1, p->sz.rnk - 1, &sz2);
 
      k = p->kind == R2HC ? INPLACE_OS : INPLACE_IS;
-     vecszi = X(tensor_copy_inplace)(p->vecsz, k);
-     sz2i = X(tensor_copy_inplace)(sz2, k);
+     vecszi = X(tensor_copy_inplace)(&p->vecsz, k);
+     sz2i = X(tensor_copy_inplace)(&sz2, k);
      sz2i.dims[0].n = sz2i.dims[0].n/2 + 1; /* complex data is ~half of real */
 
-     cldp = X(mkproblem_rdft2_d)(X(tensor_copy)(sz2),
-				 X(tensor_append)(p->vecsz, sz1),
+     cldp = X(mkproblem_rdft2_d)(X(tensor_copy)(&sz2),
+				 X(tensor_append)(&p->vecsz, &sz1),
 				 p->r, p->rio, p->iio, p->kind);
      cldr = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
@@ -163,12 +163,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           goto nada;
 
      if (p->kind == R2HC)
-	  cldp = X(mkproblem_dft_d)(X(tensor_copy_inplace)(sz1, k),
-				    X(tensor_append)(vecszi, sz2i),
+	  cldp = X(mkproblem_dft_d)(X(tensor_copy_inplace)(&sz1, k),
+				    X(tensor_append)(&vecszi, &sz2i),
 				    p->rio, p->iio, p->rio, p->iio);
      else /* HC2R must swap re/im parts to get IDFT */
-	  cldp = X(mkproblem_dft_d)(X(tensor_copy_inplace)(sz1, k),
-				    X(tensor_append)(vecszi, sz2i),
+	  cldp = X(mkproblem_dft_d)(X(tensor_copy_inplace)(&sz1, k),
+				    X(tensor_append)(&vecszi, &sz2i),
 				    p->iio, p->rio, p->iio, p->rio);
      cldc = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);
@@ -182,10 +182,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln->super.super.ops = X(ops_add)(cldr->ops, cldc->ops);
 
-     X(tensor_destroy)(sz2i);
-     X(tensor_destroy)(vecszi);
-     X(tensor_destroy)(sz2);
-     X(tensor_destroy)(sz1);
+     X(tensor_destroy)(&sz2i);
+     X(tensor_destroy)(&vecszi);
+     X(tensor_destroy)(&sz2);
+     X(tensor_destroy)(&sz1);
 
      return &(pln->super.super);
 
@@ -194,10 +194,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           X(plan_destroy)(cldr);
      if (cldc)
           X(plan_destroy)(cldc);
-     X(tensor_destroy)(sz2i);
-     X(tensor_destroy)(vecszi);
-     X(tensor_destroy)(sz2);
-     X(tensor_destroy)(sz1);
+     X(tensor_destroy)(&sz2i);
+     X(tensor_destroy)(&vecszi);
+     X(tensor_destroy)(&sz2);
+     X(tensor_destroy)(&sz1);
      return (plan *) 0;
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.12 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.13 2002-09-21 21:47:35 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -98,7 +98,7 @@ static void print(plan *ego_, printer *p)
 	      ego->vl, s->vecloop_dim, ego->cld);
 }
 
-static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
+static int pickdim(const S *ego, const tensor *vecsz, int oop, uint *dp)
 {
      return X(pickdim)(ego->vecloop_dim, ego->buddies, ego->nbuddies,
 		       vecsz, oop, dp);
@@ -111,7 +111,8 @@ static int applicable0(const solver *ego_, const problem *p_, uint *dp)
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
 	  if (FINITE_RNK(p->vecsz.rnk)
 	      && p->vecsz.rnk > 0
-	      && pickdim(ego,p->vecsz, p->r != p->rio && p->r != p->iio, dp)) {
+	      && pickdim(ego, &p->vecsz, 
+			 p->r != p->rio && p->r != p->iio, dp)) {
 	       if (p->r != p->rio && p->r != p->iio)
 		    return 1;  /* can always operate out-of-place */
 
@@ -144,7 +145,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	  if (1
 	      && p->sz.rnk > 1
 	      && X(uimin)(X(iabs)(d->is), X(iabs)(d->os))
-	      < X(tensor_max_index)(p->sz)
+	      < X(tensor_max_index)(&p->sz)
 	       )
 	       return 0;
 
@@ -185,8 +186,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	      X(alignment_of)(p->iio + d->os))
 	       plnr->problem_flags |= POSSIBLY_UNALIGNED;
 
-     cldp = X(mkproblem_rdft2_d)(X(tensor_copy)(p->sz),
-				 X(tensor_copy_except)(p->vecsz, vdim),
+     cldp = X(mkproblem_rdft2_d)(X(tensor_copy)(&p->sz),
+				 X(tensor_copy_except)(&p->vecsz, vdim),
 				 p->r, p->rio, p->iio, p->kind);
      cld = MKPLAN(plnr, cldp);
      X(problem_destroy)(cldp);

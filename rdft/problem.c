@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.25 2002-09-09 14:14:22 athena Exp $ */
+/* $Id: problem.c,v 1.26 2002-09-21 21:47:35 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -26,8 +26,8 @@
 static void destroy(problem *ego_)
 {
      problem_rdft *ego = (problem_rdft *) ego_;
-     X(tensor_destroy)(ego->vecsz);
-     X(tensor_destroy)(ego->sz);
+     X(tensor_destroy)(&ego->vecsz);
+     X(tensor_destroy)(&ego->sz);
      X(free)(ego_);
 }
 
@@ -46,8 +46,8 @@ static void hash(const problem *p_, md5 *m)
      kind_hash(m, p->kind, p->sz.rnk);
      X(md5uint)(m, X(alignment_of)(p->I));
      X(md5uint)(m, X(alignment_of)(p->O));
-     X(tensor_md5)(m, p->sz);
-     X(tensor_md5)(m, p->vecsz);
+     X(tensor_md5)(m, &p->sz);
+     X(tensor_md5)(m, &p->vecsz);
 }
 
 void X(rdft_zerotens)(tensor sz, R *I)
@@ -110,12 +110,12 @@ uint X(rdft_real_n)(rdft_kind kind, uint n)
      }
 }
 
-tensor X(rdft_real_sz)(const rdft_kind *kind, const tensor sz)
+tensor X(rdft_real_sz)(const rdft_kind *kind, const tensor *sz)
 {
      uint i;
      tensor sz_real;
      sz_real = X(tensor_copy)(sz);
-     for (i = 0; i < sz.rnk; ++i)
+     for (i = 0; i < sz->rnk; ++i)
 	  sz_real.dims[i].n = X(rdft_real_n)(kind[i], sz_real.dims[i].n);
      return sz_real;
 }
@@ -137,11 +137,11 @@ static void print(problem *ego_, printer *p)
 static void zero(const problem *ego_)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
-     tensor rsz = X(rdft_real_sz)(ego->kind, ego->sz);
-     tensor sz = X(tensor_append)(ego->vecsz, rsz);
+     tensor rsz = X(rdft_real_sz)(ego->kind, &ego->sz);
+     tensor sz = X(tensor_append)(&ego->vecsz, &rsz);
      X(rdft_zerotens)(sz, ego->I);
-     X(tensor_destroy)(sz);
-     X(tensor_destroy)(rsz);
+     X(tensor_destroy)(&sz);
+     X(tensor_destroy)(&rsz);
 }
 
 static const problem_adt padt =
@@ -172,8 +172,8 @@ problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
      A(total_n > 0); /* or should we use vecsz RNK_MINFTY? */
 
      /* FIXME: how are shifted transforms compressed? */
-     ego->sz = X(tensor_compress)(sz);
-     ego->vecsz = X(tensor_compress_contiguous)(vecsz);
+     ego->sz = X(tensor_compress)(&sz);
+     ego->vecsz = X(tensor_compress_contiguous)(&vecsz);
      ego->I = I;
      ego->O = O;
      for (i = 0; i < sz.rnk; ++i)
@@ -189,8 +189,8 @@ problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
 {
      problem *p;
      p = X(mkproblem_rdft)(sz, vecsz, I, O, kind);
-     X(tensor_destroy)(vecsz);
-     X(tensor_destroy)(sz);
+     X(tensor_destroy)(&vecsz);
+     X(tensor_destroy)(&sz);
      return p;
 }
 

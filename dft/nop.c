@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop.c,v 1.9 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: nop.c,v 1.10 2002-09-21 21:47:35 athena Exp $ */
 
 /* plans for vrank -infty DFTs (nothing to do) */
 
@@ -47,7 +47,7 @@ static int applicable(const solver *ego_, const problem *p_)
 		   && p->sz.rnk == 0
 		   && FINITE_RNK(p->vecsz.rnk)
 		   && p->ro == p->ri
-		   && X(tensor_inplace_strides)(p->vecsz)
+		   && X(tensor_inplace_strides)(&p->vecsz)
                     );
      }
      return 0;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.12 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: buffered.c,v 1.13 2002-09-21 21:47:35 athena Exp $ */
 
 #include "rdft.h"
 
@@ -162,8 +162,8 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 		* If the problem is in place, the input/output strides must
 		* be the same or the whole thing must fit in the buffer.
 		*/
-               return ((X(tensor_inplace_strides)(p->sz) &&
-                        X(tensor_inplace_strides)(p->vecsz))
+               return ((X(tensor_inplace_strides)(&p->sz) &&
+                        X(tensor_inplace_strides)(&p->vecsz))
                        || (compute_nbuf(d[0].n, p->vecsz.dims[0].n, ego)
                            == p->vecsz.dims[0].n));
           }
@@ -208,8 +208,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(p_, ego, plnr))
           goto nada;
 
-     n = X(tensor_sz)(p->sz);
-     vl = X(tensor_sz)(p->vecsz);
+     n = X(tensor_sz)(&p->sz);
+     vl = X(tensor_sz)(&p->vecsz);
 
      nbuf = compute_nbuf(n, vl, ego);
      A(nbuf > 0);
@@ -266,7 +266,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* plan the leftover transforms (cldrest): */
      cldp =
           X(mkproblem_rdft_d)(
-               X(tensor_copy)(p->sz),
+               X(tensor_copy)(&p->sz),
                X(mktensor_1d)(vl % nbuf, ivs, ovs),
                p->I, p->O, p->kind);
      cldrest = MKPLAN(plnr, cldp);

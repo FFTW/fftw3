@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.4 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: direct.c,v 1.5 2002-09-21 21:47:35 athena Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -132,8 +132,8 @@ static int applicable(const solver *ego_, const problem *p_)
 		   || p->vecsz.rnk == 0
 
 		   /* can operate in-place as long as strides are the same */
-		   || (X(tensor_inplace_strides)(p->sz) &&
-		       X(tensor_inplace_strides)(p->vecsz))
+		   || (X(tensor_inplace_strides)(&p->sz) &&
+		       X(tensor_inplace_strides)(&p->vecsz))
 		    )
 	       );
      }

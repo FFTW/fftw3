@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.145 2002-09-21 15:37:06 athena Exp $ */
+/* $Id: ifftw.h,v 1.146 2002-09-21 21:47:35 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -256,6 +256,8 @@ typedef struct {
 #define RNK_MINFTY  ((uint) -1)
 #define FINITE_RNK(rnk) ((rnk) != RNK_MINFTY)
 
+typedef enum { INPLACE_IS, INPLACE_OS } inplace_kind;
+
 tensor X(mktensor)(uint rnk);
 tensor X(mktensor_1d)(uint n, int is, int os);
 tensor X(mktensor_2d)(uint n0, int is0, int os0,
@@ -263,25 +265,25 @@ tensor X(mktensor_2d)(uint n0, int is0, int os0,
 tensor X(mktensor_rowmajor)(uint rnk, const uint *n,
 			    const uint *niphys, const uint *nophys,
                             int is, int os);
-uint X(tensor_sz)(const tensor sz);
-void X(tensor_md5)(md5 *p, const tensor t);
-uint X(tensor_max_index)(const tensor sz);
-uint X(tensor_min_istride)(const tensor sz);
-uint X(tensor_min_ostride)(const tensor sz);
-uint X(tensor_min_stride)(const tensor sz);
-int X(tensor_inplace_strides)(const tensor sz);
-tensor X(tensor_copy)(const tensor sz);
-typedef enum { INPLACE_IS, INPLACE_OS } inplace_kind;
-tensor X(tensor_copy_inplace)(const tensor sz, inplace_kind k);
-tensor X(tensor_copy_except)(const tensor sz, uint except_dim);
-tensor X(tensor_copy_sub)(const tensor sz, uint start_dim, uint rnk);
-tensor X(tensor_compress)(const tensor sz);
-tensor X(tensor_compress_contiguous)(const tensor sz);
-tensor X(tensor_append)(const tensor a, const tensor b);
-void X(tensor_split)(const tensor sz, tensor *a, uint a_rnk, tensor *b);
+uint X(tensor_sz)(const tensor *sz);
+void X(tensor_md5)(md5 *p, const tensor *t);
+uint X(tensor_max_index)(const tensor *sz);
+uint X(tensor_min_istride)(const tensor *sz);
+uint X(tensor_min_ostride)(const tensor *sz);
+uint X(tensor_min_stride)(const tensor *sz);
+int X(tensor_inplace_strides)(const tensor *sz);
+tensor X(tensor_copy)(const tensor *sz);
+
+tensor X(tensor_copy_inplace)(const tensor *sz, inplace_kind k);
+tensor X(tensor_copy_except)(const tensor *sz, uint except_dim);
+tensor X(tensor_copy_sub)(const tensor *sz, uint start_dim, uint rnk);
+tensor X(tensor_compress)(const tensor *sz);
+tensor X(tensor_compress_contiguous)(const tensor *sz);
+tensor X(tensor_append)(const tensor *a, const tensor *b);
+void X(tensor_split)(const tensor *sz, tensor *a, uint a_rnk, tensor *b);
 void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os);
-void X(tensor_destroy)(tensor sz);
-void X(tensor_print)(tensor sz, printer *p);
+void X(tensor_destroy)(tensor *sz);
+void X(tensor_print)(const tensor *sz, printer *p);
 
 /*-----------------------------------------------------------------------*/
 /* problem.c: */
@@ -556,7 +558,7 @@ void X(solvtab_exec)(const solvtab tbl, planner *p);
 /*-----------------------------------------------------------------------*/
 /* pickdim.c */
 int X(pickdim)(int which_dim, const int *buddies, uint nbuddies,
-	       const tensor sz, int oop, uint *dp);
+	       const tensor *sz, int oop, uint *dp);
 
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */

@@ -20,20 +20,20 @@
 
 #include "ifftw.h"
 
-/* $Id: pickdim.c,v 1.1 2002-08-26 02:06:52 stevenj Exp $ */
+/* $Id: pickdim.c,v 1.2 2002-09-21 21:47:35 athena Exp $ */
 
 /* Given a solver which_dim, a vector sz, and whether or not the
    transform is out-of-place, return the actual dimension index that
    it corresponds to.  The basic idea here is that we return the
    which_dim'th valid dimension, starting from the end if
    which_dim < 0. */
-static int really_pickdim(int which_dim, const tensor sz, int oop, uint *dp)
+static int really_pickdim(int which_dim, const tensor *sz, int oop, uint *dp)
 {
      uint i;
      int count_ok = 0;
      if (which_dim > 0) {
-          for (i = 0; i < sz.rnk; ++i) {
-               if (oop || sz.dims[i].is == sz.dims[i].os)
+          for (i = 0; i < sz->rnk; ++i) {
+               if (oop || sz->dims[i].is == sz->dims[i].os)
                     if (++count_ok == which_dim) {
                          *dp = i;
                          return 1;
@@ -41,8 +41,8 @@ static int really_pickdim(int which_dim, const tensor sz, int oop, uint *dp)
           }
      }
      else if (which_dim < 0) {
-          for (i = sz.rnk; i > 0; --i) {
-               if (oop || sz.dims[i - 1].is == sz.dims[i - 1].os)
+          for (i = sz->rnk; i > 0; --i) {
+               if (oop || sz->dims[i - 1].is == sz->dims[i - 1].os)
                     if (++count_ok == -which_dim) {
                          *dp = i - 1;
                          return 1;
@@ -50,8 +50,8 @@ static int really_pickdim(int which_dim, const tensor sz, int oop, uint *dp)
           }
      }
      else { /* zero: pick the middle, if valid */
-	  i = sz.rnk / 2 - 1;
-	  if (i < sz.rnk && (oop || sz.dims[i].is == sz.dims[i].os)) {
+	  i = sz->rnk / 2 - 1;
+	  if (i < sz->rnk && (oop || sz->dims[i].is == sz->dims[i].os)) {
 	       *dp = i;
 	       return 1;
 	  }
@@ -62,7 +62,7 @@ static int really_pickdim(int which_dim, const tensor sz, int oop, uint *dp)
 /* Like really_pickdim, but only returns 1 if no previous "buddy"
    which_dim in the buddies list would give the same dim. */
 int X(pickdim)(int which_dim, const int *buddies, uint nbuddies,
-	       const tensor sz, int oop, uint *dp)
+	       const tensor *sz, int oop, uint *dp)
 {
      uint i, d1;
 

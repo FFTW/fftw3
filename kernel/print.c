@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.15 2002-09-09 19:04:47 athena Exp $ */
+/* $Id: print.c,v 1.16 2002-09-21 21:47:35 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -155,7 +155,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    /* print tensor */
 			    tensor *x = va_arg(ap, tensor *);
 			    if (x)
-				 X(tensor_print)(*x, p);
+				 X(tensor_print)(x, p);
 			    else
 				 goto putnull;
 			    break;

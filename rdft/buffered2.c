@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.14 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: buffered2.c,v 1.15 2002-09-21 21:47:35 athena Exp $ */
 
 #include "rdft.h"
 
@@ -330,7 +330,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           goto nada;
 
      n = p->sz.dims[0].n;
-     vl = X(tensor_sz)(p->vecsz);
+     vl = X(tensor_sz)(&p->vecsz);
 
      nbuf = X(uimax)(compute_nbuf(n, vl, ego), min_nbuf(p, n, vl));
      A(nbuf > 0);

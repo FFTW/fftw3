@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.4 2002-09-18 23:31:57 stevenj Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.5 2002-09-21 21:47:36 athena Exp $ */
 
 
 #include "threads.h"
@@ -115,7 +115,7 @@ static void print(plan *ego_, printer *p)
      p->putchr(p, ')');
 }
 
-static int pickdim(const S *ego, tensor vecsz, int oop, uint *dp)
+static int pickdim(const S *ego, const tensor *vecsz, int oop, uint *dp)
 {
      return X(pickdim)(ego->vecloop_dim, ego->buddies, ego->nbuddies,
 		       vecsz, oop, dp);
@@ -129,7 +129,8 @@ static int applicable0(const solver *ego_, const problem *p_,
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
 	  if (FINITE_RNK(p->vecsz.rnk)
 	      && p->vecsz.rnk > 0
-	      && pickdim(ego,p->vecsz, p->r != p->rio && p->r != p->iio, dp)) {
+	      && pickdim(ego, &p->vecsz, 
+			 p->r != p->rio && p->r != p->iio, dp)) {
 	       if (p->r != p->rio && p->r != p->iio)
 		    return 1;  /* can always operate out-of-place */
 

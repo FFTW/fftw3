@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.9 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.10 2002-09-21 21:47:35 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -156,7 +156,7 @@ static problem *mkcld_f_dft(const problem_rdft2 *p)
      const iodim *d = p->sz.dims;
      return X(mkproblem_dft_d) (
 	  X(mktensor_1d)(d[0].n / 2, d[0].is * 2, d[0].os),
-	  X(tensor_copy)(p->vecsz),
+	  X(tensor_copy)(&p->vecsz),
 	  p->r, p->r + d[0].is, p->rio, p->iio);
 }
 
@@ -223,8 +223,8 @@ static problem *mkcld_f_rdft(const problem_rdft2 *p)
      const iodim *d = p->sz.dims;
 
      tensor radix = X(mktensor_1d)(2, d[0].is, p->iio - p->rio);
-     tensor cld_vec = X(tensor_append)(radix, p->vecsz);
-     X(tensor_destroy)(radix);
+     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
+     X(tensor_destroy)(&radix);
 
      return X(mkproblem_rdft_1_d) (
 	  X(mktensor_1d)(d[0].n / 2, 2 * d[0].is, d[0].os),
@@ -296,7 +296,7 @@ static problem *mkcld_b_dft(const problem_rdft2 *p)
 
      return X(mkproblem_dft_d) (
 	  X(mktensor_1d)(d[0].n / 2, d[0].is, 2 * d[0].os),
-	  X(tensor_copy)(p->vecsz),
+	  X(tensor_copy)(&p->vecsz),
 	  p->iio, p->rio, p->r + d[0].os, p->r);
 }
 
@@ -361,8 +361,8 @@ static problem *mkcld_b_rdft(const problem_rdft2 *p)
      const iodim *d = p->sz.dims;
 
      tensor radix = X(mktensor_1d)(2, p->iio - p->rio, d[0].os);
-     tensor cld_vec = X(tensor_append)(radix, p->vecsz);
-     X(tensor_destroy)(radix);
+     tensor cld_vec = X(tensor_append)(&radix, &p->vecsz);
+     X(tensor_destroy)(&radix);
 
      return X(mkproblem_rdft_1_d) (
 	  X(mktensor_1d)(d[0].n / 2, d[0].is, 2 * d[0].os),

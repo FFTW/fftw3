@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.13 2002-09-18 21:16:16 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.14 2002-09-21 21:47:35 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -60,15 +60,15 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      t(ri, ii, ego->n, ego->s0, ego->s1, ego->vl, ego->vs);
 }
 
-static int pickdim(tensor s, uint *pdim0, uint *pdim1)
+static int pickdim(const tensor *s, uint *pdim0, uint *pdim1)
 {
      uint dim0, dim1;
 
-     for (dim0 = 0; dim0 < s.rnk; ++dim0)
-          for (dim1 = dim0 + 1; dim1 < s.rnk; ++dim1)
-               if (s.dims[dim0].n == s.dims[dim1].n &&
-		   s.dims[dim0].is == s.dims[dim1].os &&
-		   s.dims[dim0].os == s.dims[dim1].is) {
+     for (dim0 = 0; dim0 < s->rnk; ++dim0)
+          for (dim1 = dim0 + 1; dim1 < s->rnk; ++dim1)
+               if (s->dims[dim0].n == s->dims[dim1].n &&
+		   s->dims[dim0].is == s->dims[dim1].os &&
+		   s->dims[dim0].os == s->dims[dim1].is) {
                     *pdim0 = dim0;
                     *pdim1 = dim1;
                     return 1;
@@ -91,7 +91,7 @@ static int applicable0(const problem *p_, uint *dim0, uint *dim1, uint *dim2)
                   && p->ri == p->ro
                   && p->sz.rnk == 0
                   && p->vecsz.rnk == 3
-                  && pickdim(p->vecsz, dim0, dim1)
+                  && pickdim(&p->vecsz, dim0, dim1)
                   && other_dim(dim0, dim1, dim2)
 
                   /* non-transpose dimension must be in-place */
