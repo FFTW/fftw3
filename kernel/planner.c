@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.135 2003-01-28 11:54:38 athena Exp $ */
+/* $Id: planner.c,v 1.136 2003-01-28 23:16:24 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -267,6 +267,9 @@ static void hinsert(planner *ego, const md5sig s,
      } else {
 	  ++ego->nelem;
 	  hgrow(ego);
+	  if (l) 
+	       /* pointer became invalid because of hgrow() */
+	       l = hlookup(ego, s, flags);
      }
      hinsert0(ego, s, flags, slvndx, l);
 }
@@ -396,7 +399,6 @@ static plan *search(planner *ego, problem *p, slvdesc **descp)
 
 static plan *mkplan(planner *ego, problem *p)
 {
-     solution *sol;
      plan *pln;
      md5 m;
      slvdesc *sp;
@@ -409,26 +411,34 @@ static plan *mkplan(planner *ego, problem *p)
      md5hash(&m, p, ego);
 
      pln = 0;
-     if ((sol = hlookup(ego, m.s, ego->planner_flags))) {
-	  if (SUBSUMES(sol->flags, ego->planner_flags)) {
-	       /* wisdom is acceptable */
-	       if (sol->slvndx < 0) 
-		    return 0;   /* known to be infeasible */
 
-	       /* use solver to obtain a plan */
-	       sp = ego->slvdescs + sol->slvndx;
-	       pln = invoke_solver(ego, p, sp->slv, 
-				   (0
-				    | NO_SEARCH 
-				    | IMPATIENCE(sol->flags)
-				    | NONIMPATIENCE(ego->planner_flags) ));
+     {
+	  solution *sol; /* new scope for sol */
 
-	       if (!pln) {
-		    /* D("bogus entry for %P %x\n", p, ego->planner_flags); */
-		    UNBLESS(sol->flags);
+	  if ((sol = hlookup(ego, m.s, ego->planner_flags))) {
+	       if (SUBSUMES(sol->flags, ego->planner_flags)) {
+		    /* wisdom is acceptable */
+		    if (sol->slvndx < 0) 
+			 return 0;   /* known to be infeasible */
+
+		    /* use solver to obtain a plan */
+		    sp = ego->slvdescs + sol->slvndx;
+		    pln = 
+			 invoke_solver(ego, p, sp->slv, 
+				       (0
+					| NO_SEARCH 
+					| IMPATIENCE(sol->flags)
+					| NONIMPATIENCE(ego->planner_flags) ));
+
+		    if (!pln) {
+			 /* delete bogus entry.  Carefully, because 
+			    sol may no longer be there. */
+			 if ((sol = hlookup(ego, m.s, ego->planner_flags)))
+			      UNBLESS(sol->flags);
+		    }
+	       } else {
+		    A(SUBSUMES(ego->planner_flags, sol->flags));
 	       }
-	  } else {
-	       A(SUBSUMES(ego->planner_flags, sol->flags));
 	  }
      }
 
