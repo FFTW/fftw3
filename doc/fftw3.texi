@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.30 2003-02-27 22:07:45 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.32 2003-02-27 22:11:54 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -771,7 +771,7 @@ The inverse c2r transform is of kind @code{FFTW_HC2R}.
 @ctindex FFTW_HC2R
 @cindex c2r
 This consists of the non-redundant half of the complex output for a 1d
-transform of size @code{n}, stored as a sequence of @code{n} real
+real-input DFT of size @code{n}, stored as a sequence of @code{n} real
 numbers (@code{double}) in the format:
 
 @tex
@@ -819,8 +819,8 @@ length @code{n}, and vice versa for c2r.
 
 Aside from the differing format, the output of
 @code{FFTW_R2HC}/@code{FFTW_HC2R} is otherwise exactly the same as for
-the corresponding 1d r2c/c2r transform, and correspond also to
-@code{FFTW_FORWARD}/@code{FFTW_BACKWARD} transforms, respectively.
+the corresponding 1d r2c/c2r transform
+(@code{FFTW_FORWARD}/@code{FFTW_BACKWARD} transforms, respectively).
 Recall that these transforms are unnormalized, so @code{FFTW_R2HC}
 followed by @code{FFTW_HC2R} will result in the original data multiplied
 by @code{n}.  Furthermore, like the c2r transform, an out-of-place
