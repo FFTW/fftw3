@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2hc.ml,v 1.1 2002-07-15 20:46:36 athena Exp $ *)
+(* $Id: gen_hc2hc.ml,v 1.2 2002-07-20 21:51:06 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2hc.ml,v 1.1 2002-07-15 20:46:36 athena Exp $"
+let cvsid = "$Id: gen_hc2hc.ml,v 1.2 2002-07-20 21:51:06 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -78,37 +78,11 @@ let sym1 n f i =
 
 let sym2 n f i = if (i < n - i) then f i else byi (f i)
 
-let dftfinal_dit sign n input =
-  let input' i = if i < n then input i else Complex.zero in
-  let f = Fft.dft sign (2 * n) input' in
-  let g i = f (2 * i + 1)
-  in fun i -> 
-    if (i < n - i) then g i
-    else if (2 * i + 1 == n) then Complex.real (g i)
-    else Complex.zero
-
-let dftfinal_dif sign n input =
-  let input' i =
-    if (i mod 2 == 0) then
-      Complex.zero
-    else
-      let i' = (i - 1) / 2 in
-      if (2 * i' < n - 1) then (input i')
-      else if (2 * i' == n - 1) then 
-	Complex.real (input i')
-      else 
-	Complex.conj (input (n - 1 - i')) 
-  in Fft.dft sign (2 * n) input'
-
-(* hack *)
-let flops_of_asch a = flops_of (Fcn ("", "", [], Asch a))
-
 let generate n =
   let iostride = "ios"
   and twarray = "W"
   and i = "i" 
   and m = "m"
-  and a = "A"
   and dist = "dist" in
 
   let sign = !Genutil.sign 
@@ -124,44 +98,27 @@ let generate n =
   let _ = Simd.ovs := stride_to_string "dist" !udist in
   let _ = Simd.ivs := stride_to_string "dist" !udist in
 
-  let (first, mid, last) = 
+  let asch = 
     match !ditdif with
     | DIT -> 
-	(genone sign n Trig.rdft load_array_r store_array_hc viostride,
-	 genone sign n 
-	   (fun sign n input -> sym2 n (Fft.dft sign n (byw (sym1 n input))))
-	   load_array_c store_array_c viostride,
-	 genone sign n 
-	   dftfinal_dit
-	   load_array_r store_array_c viostride
-	)
+	genone sign n 
+	  (fun sign n input -> sym2 n (Fft.dft sign n (byw (sym1 n input))))
+	  load_array_c store_array_c viostride
     | DIF -> 
-	(genone sign n Trig.hdft load_array_hc store_array_r viostride,
-	 genone sign n 
-	   (fun sign n input -> sym1 n (byw (Fft.dft sign n (sym2 n input))))
-	   load_array_c store_array_c viostride,
-	 genone sign n 
-	   dftfinal_dif
-	   load_array_c store_array_r viostride
-	)
+	genone sign n 
+	  (fun sign n input -> sym1 n (byw (Fft.dft sign n (sym2 n input))))
+	  load_array_c store_array_c viostride
   in
 
   let vdist = CVar !Simd.ivs 
   and vrioarray = CVar rioarray
   and viioarray = CVar iioarray
   and iostridev = CVar iostride
-  and va = CVar a and vi = CVar i  and vm = CVar m 
+  and vi = CVar i  and vm = CVar m 
   in
   let body = Block (
-    [Decl ("uint", i);
-     Decl (C.realtypep, rioarray);
-     Decl (C.realtypep, iioarray)],
-    [Stmt_assign (vrioarray, va);
-     Stmt_assign (viioarray, CPlus [va; CTimes (Integer n, iostridev)]);
-     Asch first;
-     Stmt_assign (vrioarray, CPlus [vrioarray; vdist]);
-     Stmt_assign (viioarray, CPlus [viioarray; CUminus vdist]);
-     For (Expr_assign (vi, Integer 0),
+    [Decl ("uint", i)],
+    [For (Expr_assign (vi, Integer 0),
 	  Binop (" < ", vi, vm),
 	  list_to_comma 
 	    [Expr_assign (vi, CPlus [vi; byvl (Integer 2)]);
@@ -170,15 +127,14 @@ let generate n =
 			  CPlus [viioarray; CUminus (byvl vdist)]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
 					       byvl (Integer nt)])],
-	  Asch mid);
-     If (Binop (" == ", vi, vm), 
-	 Asch last)
-   ])
+	  Asch asch)]
+    )
   in
 
   let tree = 
     Fcn ("static void", name,
-	 [Decl (C.realtypep, a);
+	 [Decl (C.realtypep, rioarray);
+	  Decl (C.realtypep, iioarray);
 	  Decl (C.constrealtypep, twarray);
 	  Decl (C.stridetype, iostride);
 	  Decl ("uint", m);
@@ -190,8 +146,8 @@ let generate n =
       (twinstr_to_string (twdesc n))
   and desc = 
     Printf.sprintf
-      "static const hc2hc_desc desc = {%d, \"%s\", twinstr, %s, %s, %s, &GENUS, %s, %s, %s};\n\n"
-      n name (flops_of_asch first) (flops_of_asch mid) (flops_of_asch last)
+      "static const hc2hc_desc desc = {%d, \"%s\", twinstr, %s, &GENUS, %s, %s, %s};\n\n"
+      n name (flops_of tree)
       (stride_to_solverparm !uiostride) "0"
       (stride_to_solverparm !udist) 
   and register = 

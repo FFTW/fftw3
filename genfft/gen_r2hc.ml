@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2hc.ml,v 1.6 2002-07-15 20:46:36 athena Exp $ *)
+(* $Id: gen_r2hc.ml,v 1.7 2002-07-20 21:51:06 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2hc.ml,v 1.6 2002-07-15 20:46:36 athena Exp $"
+let cvsid = "$Id: gen_r2hc.ml,v 1.7 2002-07-20 21:51:06 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -33,6 +33,7 @@ let urostride = ref Stride_variable
 let uiostride = ref Stride_variable
 let uivstride = ref Stride_variable
 let uovstride = ref Stride_variable
+let dftII_flag = ref false
 
 let speclist = [
   "-with-istride",
@@ -53,8 +54,21 @@ let speclist = [
 
   "-with-ovstride",
   Arg.String(fun x -> uovstride := arg_to_stride x),
-  " specialize for given output vector stride"
+  " specialize for given output vector stride";
+
+  "-dft-II",
+  Arg.Unit(fun () -> dftII_flag := true),
+  " produce shifted dftII-style codelets"
 ] 
+
+let rdftII sign n input =
+  let input' i = if i < n then input i else Complex.zero in
+  let f = Fft.dft sign (2 * n) input' in
+  let g i = f (2 * i + 1)
+  in fun i -> 
+    if (i < n - i) then g i
+    else if (2 * i + 1 == n) then Complex.real (g i)
+    else Complex.zero
 
 let generate n =
   let iarray = "I"
@@ -63,6 +77,8 @@ let generate n =
   and istride = "is"
   and rostride = "ros" 
   and iostride = "ios" 
+  and (transform, kind) =
+    if !dftII_flag then(rdftII, "r2hcII") else (Trig.rdft, "r2hc")
   in
 
   let ns = string_of_int n
@@ -84,7 +100,7 @@ let generate n =
       (C.array_subscript iarray vistride)
       (C.array_subscript "BUG" vistride)
       locations in
-  let output = Trig.rdft sign n (load_array_r n input) in
+  let output = transform sign n (load_array_r n input) in
   let oloc = 
     locative_array_c n 
       (C.array_subscript roarray vrostride)
@@ -149,7 +165,7 @@ let generate n =
   and init =
     (declare_register_fcn name) ^
     "{" ^
-    "  X(kr2hc_register)(p, " ^ name ^ ", &desc);\n" ^
+    "  X(k" ^ kind ^ "_register)(p, " ^ name ^ ", &desc);\n" ^
     "}\n"
 
   in

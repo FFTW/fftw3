@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r.ml,v 1.6 2002-07-15 20:46:36 athena Exp $ *)
+(* $Id: gen_hc2r.ml,v 1.7 2002-07-20 21:51:06 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r.ml,v 1.6 2002-07-15 20:46:36 athena Exp $"
+let cvsid = "$Id: gen_hc2r.ml,v 1.7 2002-07-20 21:51:06 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -33,6 +33,7 @@ let uiistride = ref Stride_variable
 let uostride = ref Stride_variable
 let uivstride = ref Stride_variable
 let uovstride = ref Stride_variable
+let dftIII_flag = ref false
 
 let speclist = [
   "-with-ristride",
@@ -53,9 +54,25 @@ let speclist = [
 
   "-with-ovstride",
   Arg.String(fun x -> uovstride := arg_to_stride x),
-  " specialize for given output vector stride"
+  " specialize for given output vector stride";
+
+  "-dft-III",
+  Arg.Unit(fun () -> dftIII_flag := true),
+  " produce shifted dftIII-style codelets"
 ] 
 
+let hcdftIII sign n input =
+  let input' i =
+    if (i mod 2 == 0) then
+      Complex.zero
+    else
+      let i' = (i - 1) / 2 in
+      if (2 * i' < n - 1) then (input i')
+      else if (2 * i' == n - 1) then 
+	Complex.real (input i')
+      else 
+	Complex.conj (input (n - 1 - i')) 
+  in Fft.dft sign (2 * n) input'
 
 let generate n =
   let riarray = "ri"
@@ -64,6 +81,8 @@ let generate n =
   and ristride = "ris"
   and iistride = "iis"
   and ostride = "os" 
+  and (transform, kind) =
+    if !dftIII_flag then(hcdftIII, "hc2rIII") else (Trig.rdft, "hc2r")
   in
 
   let ns = string_of_int n
@@ -85,7 +104,7 @@ let generate n =
       (C.array_subscript riarray vristride)
       (C.array_subscript iiarray viistride)
       locations in
-  let output = Trig.hdft sign n (load_array_hc n input) in
+  let output = transform sign n (load_array_hc n input) in
   let oloc = 
     locative_array_c n 
       (C.array_subscript oarray vostride)
@@ -150,7 +169,7 @@ let generate n =
   and init =
     (declare_register_fcn name) ^
     "{" ^
-    "  X(khc2r_register)(p, " ^ name ^ ", &desc);\n" ^
+    "  X(k" ^ kind ^ "_register)(p, " ^ name ^ ", &desc);\n" ^
     "}\n"
 
   in

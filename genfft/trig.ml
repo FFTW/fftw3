@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: trig.ml,v 1.4 2002-07-08 00:32:01 athena Exp $ *)
+(* $Id: trig.ml,v 1.5 2002-07-20 21:51:06 athena Exp $ *)
 
 (* trigonometric transforms *)
 open Util
@@ -46,7 +46,7 @@ let dht sign n input =
   (fun i ->
     Complex.plus [Complex.real (f i); Complex.imag (f i)])
 
-let dftI n input =
+let trigI n input =
   let twon = 2 * n in
   let input' = array twon (fun i ->
     if (i == 0) then
@@ -60,7 +60,7 @@ let dftI n input =
   in
   Fft.dft 1 twon input'
 
-let dftII n input =
+let trigII n input =
   let twon = 2 * n 
   and fourn = 4 * n in
   let input' = array fourn (fun i ->
@@ -75,7 +75,7 @@ let dftII n input =
   in
   Fft.dft 1 fourn input'
 
-let dftIII n input =
+let trigIII n input =
   let fourn = 4 * n in
   let input' = array fourn (fun i ->
     if (i == 0) then
@@ -90,7 +90,7 @@ let dftIII n input =
   let dft = Fft.dft 1 fourn input'
   in fun k -> dft (2 * k + 1)
 
-let dftIV n input =
+let trigIV n input =
   let fourn = 4 * n
   and eightn = 8 * n in
   let input' = array eightn (fun i ->
@@ -109,59 +109,59 @@ let dftIV n input =
   in fun k -> dft (2 * k + 1)
 
 
-let make_dct dft =
+let make_dct trig =
   fun n input ->
-    dft n (Complex.real (* @@ (Complex.times Complex.half) *) @@ input)
+    trig n (Complex.real (* @@ (Complex.times Complex.half) *) @@ input)
 
 (*
  * DCT-I:  y[k] = sum x[j] cos(pi * j * k / n)
  *)
-let dctI = make_dct dftI
+let dctI = make_dct trigI
 
 (*
  * DCT-II:  y[k] = sum x[j] cos(pi * (j + 1/2) * k / n)
  *)
-let dctII = make_dct dftII
+let dctII = make_dct trigII
 
 (*
  * DCT-III:  y[k] = sum x[j] cos(pi * j * (k + 1/2) / n)
  *)
-let dctIII = make_dct dftIII
+let dctIII = make_dct trigIII
 
 (*
  * DCT-IV  y[k] = sum x[j] cos(pi * (j + 1/2) * (k + 1/2) / n)
  *)
-let dctIV = make_dct dftIV
+let dctIV = make_dct trigIV
 
 
 
-(* DST-x input := DFT-x (input / 2i) *)
-let make_dst dft =
+(* DST-x input := TRIG-x (input / 2i) *)
+let make_dst trig =
   fun n input ->
     Complex.real @@ 
-    (dft n (Complex.uminus @@
-	    (Complex.times Complex.i) @@
-	    (Complex.times Complex.half) @@ 
-	    Complex.real @@ 
-	    input))
+    (trig n (Complex.uminus @@
+	     (Complex.times Complex.i) @@
+	     (Complex.times Complex.half) @@ 
+	     Complex.real @@ 
+	     input))
 
 (*
  * DST-I:  y[k] = sum x[j] sin(pi * j * k / n)
  *)
-let dstI = make_dst dftI
+let dstI = make_dst trigI
 
 (*
  * DST-II:  y[k] = sum x[j] sin(pi * (j + 1/2) * k / n)
  *)
-let dstII = make_dst dftII
+let dstII = make_dst trigII
 
 (*
  * DST-III:  y[k] = sum x[j] sin(pi * j * (k + 1/2) / n)
  *)
-let dstIII = make_dst dftIII
+let dstIII = make_dst trigIII
 
 (*
  * DST-IV  y[k] = sum x[j] sin(pi * (j + 1/2) * (k + 1/2) / n)
  *)
-let dstIV = make_dst dftIV
+let dstIV = make_dst trigIV
 
