@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.1 2002-06-09 19:16:43 athena Exp $ */
+/* $Id: print.c,v 1.2 2002-06-09 19:27:24 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
@@ -83,9 +83,7 @@ static void print(printer *p, const char *format, ...)
 		       case 'u': {
 			    uint x = va_arg(ap, uint);
 			    sprintf(buf, "%u", x);
-		       putbuf:
-			    myputs(p, buf);
-			    break;
+			    goto putbuf;
 		       }
 		       case 'p': {
 			    /* print child plan */
@@ -97,6 +95,10 @@ static void print(printer *p, const char *format, ...)
 		       }
 		       default:
 			    A(0 /* unknown format */);
+			    break;
+
+		       putbuf:
+			    myputs(p, buf);
 		   }
 		   break;
 	      default:
