@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.122 2003-01-11 14:17:34 athena Exp $ */
+/* $Id: planner.c,v 1.123 2003-01-11 22:50:49 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -491,14 +491,21 @@ static void exprt(planner *ego, printer *p)
    cum resurget creatura */
 static int imprt(planner *ego, scanner *sc)
 {
+     uint h, hsiz = ego->hashsiz;
      char buf[MAXNAM + 1];
      md5uint sig[4];
      uint flags;
      int reg_id;
      short slvndx;
+     solution *sol;
 
      if (!sc->scan(sc, "(" WISDOM_PREAMBLE))
-	  goto bad;
+	  return 0; /* don't need to restore hashtable */
+
+     /* make a backup copy of the hash table */
+     sol = (solution *)fftw_malloc(hsiz * sizeof(solution), HASHT);
+     for (h = 0; h < hsiz; ++h)
+	  sol[h] = ego->solutions[h];
 
      while (1) {
 	  if (sc->scan(sc, ")"))
@@ -516,10 +523,14 @@ static int imprt(planner *ego, scanner *sc)
 	  /* inter oves locum praesta */
 	  hinsert(ego, sig, (unsigned short)flags, slvndx);
      }
+
+     X(free0)(sol);
      return 1;
 
  bad:
-     /* TODO: revert to pre-imprt wisdom? */
+     /* ``The wisdom of FFTW must be above suspicion.'' */
+     X(free0)(ego->solutions);
+     ego->solutions = sol;
      return 0;
 }
 
