@@ -6,7 +6,7 @@ dnl
 dnl ACTION-SUCCESS/ACTION-FAILURE are shell commands to execute on
 dnl success/failure.
 dnl
-dnl @version $Id: ax_gcc_version.m4,v 1.2 2005-01-10 02:48:02 stevenj Exp $
+dnl @version $Id: ax_gcc_version.m4,v 1.3 2005-01-10 02:53:08 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_VERSION],
 [
@@ -18,8 +18,8 @@ if test "$GCC" = "yes"; then
 dnl The semicolon after "yes" below is to pacify NeXT's syntax-checking cpp.
 AC_EGREP_CPP(yes, [
 #ifdef __GNUC__
-#  if (__GNUC__ > $1) || (__GNUC__ == $1 && __GNUC_MINOR__ >= $2) \
-   || (__GNUC__ == $1 && __GNUC_MINOR__ == $2 && __GNUC_PATCHLEVEL__ - 0 >= $3)
+#  if (__GNUC__ > $1) || (__GNUC__ == $1 && __GNUC_MINOR__ > $2) \
+   || (__GNUC__ == $1 && __GNUC_MINOR__ == $2 && __GNUC_PATCHLEVEL__ >= $3)
      yes;
 #  endif
 #endif
