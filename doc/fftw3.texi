@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.114 2003-03-07 06:53:28 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.115 2003-03-07 06:57:31 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3327,11 +3327,12 @@ couple of lines of code if your compiler is not yet supported
 
 Installation of FFTW is simplest if you have a Unix or a GNU system,
 such as GNU/Linux, and we describe this case in the first section below,
-including the use of special configuration options to exploit
-optimizations for particular architectures (e.g. SIMD).  Compilation on
-non-Unix systems is a more manual process, but we outline the procedure
-in the second section.  It is also likely that pre-compiled binaries
-will be available for popular systems.
+including the use of special configuration options to e.g. install
+different precisions or exploit optimizations for particular
+architectures (e.g. SIMD).  Compilation on non-Unix systems is a more
+manual process, but we outline the procedure in the second section.  It
+is also likely that pre-compiled binaries will be available for popular
+systems.
 
 Finally, we describe how you can customize FFTW for particular needs by
 generating @emph{codelets} for fast transforms of sizes not supported
@@ -3467,7 +3468,7 @@ although the FFTW library is still larger).
 @itemize @minus
 @item
 These options require a compiler supporting SIMD extensions, and
-compiler support is still a bit flakey.  We have tested them with
+compiler support is still a bit flaky.  We have tested them with
 @code{gcc} versions 3.2.2 (which miscompiles AltiVec permutations on
 Linux, but we have an assembly workaround), and with Intel's @code{icc}
 6.0 (which misaligns SSE constants, but we have a workaround).  Some 3.x
