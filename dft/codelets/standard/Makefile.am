@@ -31,8 +31,15 @@ t1_10.c t1_12.c t1_15.c t1_16.c t1_32.c t1_64.c
 # (this is faster for large sizes).
 T2 = t2_4.c t2_8.c t2_16.c t2_32.c t2_64.c
 
+# f1_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIF step
+F1 = f1_2.c f1_3.c f1_4.c f1_5.c f1_6.c f1_7.c f1_8.c f1_9.c f1_10.c	\
+f1_12.c f1_15.c f1_16.c f1_32.c f1_64.c
+
+# like t2_<r>, but DIF
+F2 = f2_4.c f2_8.c f2_16.c f2_32.c f2_64.c
+
 ###########################################################################
-ALL_CODELETS = $(N1) $(T1) $(T2)
+ALL_CODELETS = $(N1) $(T1) $(T2) # $(F1) $(F2)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
@@ -54,7 +61,13 @@ n1_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
 t1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T1) -n $* -name t1_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
 
+f1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T1) -dif -n $* -name f1_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
+
 t2_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T2) -n $* -name t2_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
+
+f2_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE) $(FLAGS_T2) -dif -n $* -name f2_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE
