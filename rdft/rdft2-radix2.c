@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.15 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.16 2002-09-25 11:36:38 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -280,7 +280,7 @@ static void apply_b_dft(plan *ego_, R *r, R *rio, R *iio)
           const R *W = ego->td->W;
 	  R *rio1 = rio, *iio1 = iio;
           for (i = 0; i < vl; ++i, rio1 += ivs, iio1 += ivs)
-               k_b_dft(rio, iio, W, n2, is);
+               k_b_dft(rio1, iio1, W, n2, is);
      }
 
      {
