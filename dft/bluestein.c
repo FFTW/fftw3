@@ -52,7 +52,7 @@ static void mktwiddle(P *p)
      int i;
      int n = p->n, nb = p->nb;
      R *w, *W;
-     R nbinv = 1.0 / nb;  /* exact because nb = 2^k */
+     E nbf = nb;
 
      p->w = w = MALLOC(2 * n * sizeof(R), TWIDDLES);
      p->W = W = MALLOC(2 * nb * sizeof(R), TWIDDLES);
@@ -60,13 +60,13 @@ static void mktwiddle(P *p)
 
      for (i = 0; i < nb; ++i)
           W[2*i] = W[2*i+1] = 0;
-     for (i = 0; i < n; ++i) {
-          W[2*i] = w[2*i] * nbinv;
-          W[2*i+1] = w[2*i+1] * nbinv;
-     }
+
+     W[0] = w[0] / nbf;
+     W[1] = w[1] / nbf;
+
      for (i = 1; i < n; ++i) {
-          W[2*(nb-i)] = w[2*i] * nbinv;
-          W[2*(nb-i)+1] = w[2*i+1] * nbinv;
+          W[2*i] = W[2*(nb-i)] = w[2*i] / nbf;
+          W[2*i+1] = W[2*(nb-i)+1] = w[2*i+1] / nbf;
      }
 
      {
@@ -174,16 +174,22 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *)ego_;
-     p->print(p, "(dft-bluestein-%d%(%p%)%(%p%))",
-              ego->n, ego->cldf, ego->cldb);
+     p->print(p, "(dft-bluestein-%d/%d%(%p%)%(%p%))",
+              ego->n, ego->nb, ego->cldf, ego->cldb);
 }
 
-static int pow2_atleast(int x)
+static int choose_transform_size(int minsz)
 {
-     int h;
-     for (h = 1; h < x; h = 2 * h)
-	  ;
-     return h;
+     static const int primes[] = { 2, 3, 5, 0 };
+     for (;; ++minsz) {
+	  int n = minsz;
+	  const int *p;
+	  for (p = primes; *p; ++p) 
+	       while ((n % *p) == 0) 
+		    n /= *p;
+	  if (n == 1)
+	       return minsz;
+     }
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
@@ -202,7 +208,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  return (plan *) 0;
 
      n = p->sz->dims[0].n;
-     nb = pow2_atleast(2 * n - 1);
+     nb = choose_transform_size(2 * n - 1);
      buf = (R *) MALLOC(2 * nb * sizeof(R), BUFFERS);
 
      cldf = X(mkplan_d)(plnr, 
