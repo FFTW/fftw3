@@ -18,9 +18,13 @@
  *
  */
 
-/* $Id: plan.c,v 1.12 2002-08-31 13:55:57 athena Exp $ */
+/* $Id: plan.c,v 1.13 2002-09-09 20:56:03 stevenj Exp $ */
 
 #include "ifftw.h"
+
+/* "Plan: To bother about the best method of accomplishing an
+   accidental result."  (Ambrose Bierce, The Enlarged Devil's
+   Dictionary). */
 
 plan *X(mkplan)(size_t size, const plan_adt *adt)
 {
