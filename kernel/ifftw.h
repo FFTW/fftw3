@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.196 2003-03-28 07:58:45 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.197 2003-03-28 08:05:15 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -178,11 +178,6 @@ extern int X(in_thread);
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif /* HAVE_ALLOCA_H */
-
-#if defined(__GNUC__) && !defined(HAVE_ALLOCA)
-#  define alloca __builtin_alloca
-#  define HAVE_ALLOCA 1
-#endif
 
 #ifdef HAVE_ALLOCA
    /* use alloca if available */
