@@ -72,10 +72,11 @@ char *X(export_wisdom_to_string)(void)
      X(printer_destroy)(p);
 
      s = (char *) non_fftw_malloc(sizeof(char) * (cnt + 1), OTHER);
-
-     p = mkprinter_str(s);
-     plnr->adt->exprt(plnr, p);
-     X(printer_destroy)(p);
+     if (s) {
+	  p = mkprinter_str(s);
+	  plnr->adt->exprt(plnr, p);
+	  X(printer_destroy)(p);
+     }
 
      return s;
 }
