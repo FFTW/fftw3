@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.4 2003-03-17 01:24:31 stevenj Exp $ */
+/* $Id: timer.c,v 1.5 2003-04-09 12:50:25 athena Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -214,6 +214,12 @@ static double calibrate(void)
 
 void timer_init(double tmin, int repeat)
 {
+     static int inited = 0;
+
+     if (inited)
+	  return;
+     inited = 1;
+
      if (!repeat)
 	  repeat = 8;
      time_repeat = repeat;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.11 2003-04-09 12:44:13 athena Exp $ */
+/* $Id: bench-main.c,v 1.12 2003-04-09 12:50:25 athena Exp $ */
 
 #include "getopt.h"
 #include "bench.h"
@@ -184,12 +184,11 @@ int bench_main(int argc, char *argv[])
 	  }
      }
 
-     /* Print any remaining command line arguments (not options). */
-     if (optind < argc) {
-	  fprintf(stderr, "unrecognized non-option arguments: ");
-	  while (optind < argc)
-	       fprintf(stderr, "%s ", argv[optind++]);
-	  fprintf(stderr, "\n");
+     /* assume that any remaining arguments are problems to be
+        benchmarked */
+     while (optind < argc) {
+	  timer_init(tmin, repeat);
+	  speed(argv[optind++]);
      }
 
      cleanup();
