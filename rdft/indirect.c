@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.26 2003-02-28 23:28:58 stevenj Exp $ */
+/* $Id: indirect.c,v 1.27 2003-03-10 22:41:35 stevenj Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
@@ -26,6 +26,9 @@
    before or after the transform.  Can also change an out-of-place
    plan into a copy + in-place (where the in-place transform
    is e.g. unit stride). */
+
+/* FIXME: merge with rank-geq2.c(?), since this is just a special case
+   of a rank split where the first/second transform has rank 0. */
 
 #include "rdft.h"
 
