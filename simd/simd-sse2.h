@@ -43,7 +43,7 @@
 static __inline__ V VADD(V a, V b)
 {
      V ret;
-     __asm__("addpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     __asm__("addpd %2, %0" : "=x"(ret) : "%0"(a), "xm"(b));
      return ret;
 }
 static __inline__ V VSUB(V a, V b)
@@ -55,14 +55,14 @@ static __inline__ V VSUB(V a, V b)
 static __inline__ V VMUL(V b, V a)
 {
      V ret;
-     __asm__("mulpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     __asm__("mulpd %2, %0" : "=x"(ret) : "%0"(a), "xm"(b));
      return ret;
 }
 
 static __inline__ V VXOR(V b, V a)
 {
      V ret;
-     __asm__("xorpd %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
+     __asm__("xorpd %2, %0" : "=x"(ret) : "%0"(a), "xm"(b));
      return ret;
 }
 

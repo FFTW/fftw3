@@ -31,7 +31,7 @@ typedef float V __attribute__ ((mode(V2SF),aligned(8)));
 static __inline__ V VADD(V a, V b)
 {
      V ret;
-     __asm__("pfadd %2, %0" : "=y"(ret) : "0"(a), "ym"(b));
+     __asm__("pfadd %2, %0" : "=y"(ret) : "%0"(a), "ym"(b));
      return ret;
 }
 static __inline__ V VSUB(V a, V b)
@@ -43,7 +43,7 @@ static __inline__ V VSUB(V a, V b)
 static __inline__ V VMUL(V b, V a)
 {
      V ret;
-     __asm__("pfmul %2, %0" : "=y"(ret) : "0"(a), "ym"(b));
+     __asm__("pfmul %2, %0" : "=y"(ret) : "%0"(a), "ym"(b));
      return ret;
 }
 
@@ -64,7 +64,7 @@ static __inline__ V PFPNACC(V b, V a)
 static __inline__ V VXOR(V b, V a)
 {
      V ret;
-     __asm__("pxor %2, %0" : "=y"(ret) : "0"(a), "ym"(b));
+     __asm__("pxor %2, %0" : "=y"(ret) : "%0"(a), "ym"(b));
      return ret;
 }
 
