@@ -273,6 +273,7 @@ AC_CONFIG_FILES([
 
    libbench/Makefile
    tests/Makefile
+   doc/Makefile
 
 ])
 

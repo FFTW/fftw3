@@ -457,7 +457,7 @@ let optimization_rules =
 				     V_SimdBinOp(V_NNAcc,i1_s1,i1_d,i2_d)])
 		   | _ -> failM));
 
-     "up2/up3 @ chshi(A,B), swap(A,A') \ chslo(A',B') <=> swap(B,B')",
+     "up2/up3 @ chshi(A,B), swap(A,A') | chslo(A',B') <=> swap(B,B')",
      (fun _ ->
 	getSwapInstrM >>= fun (i2_id,(i2_s,i2_d)) ->
 	  getReaderOfM chsinstrToTupelM i2_d >>= 
