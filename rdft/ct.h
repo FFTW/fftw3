@@ -48,6 +48,8 @@ struct ct_solver_s {
 ct_solver *X(mksolver_rdft_ct)(size_t size, int r, mkinferior mkcldw);
 
 solver *X(mksolver_rdft_hc2hc_direct)(khc2hc codelet, const hc2hc_desc *desc);
+solver *X(mksolver_rdft_hc2hc_directbuf)(khc2hc codelet, 
+					 const hc2hc_desc *desc);
 
 int X(rdft_ct_mkcldrn)(rdft_kind kind, int r, int m, int s, 
 		       R *IO, planner *plnr,

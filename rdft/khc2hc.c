@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: khc2hc.c,v 1.1 2004-03-21 17:38:45 athena Exp $ */
+/* $Id: khc2hc.c,v 1.2 2004-03-22 13:23:56 athena Exp $ */
 
 #include "ct.h"
 
@@ -27,6 +27,7 @@ void (*X(khc2hc_register_hook))(planner *, khc2hc, const hc2hc_desc *)=0;
 void X(khc2hc_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc)
 {
      REGISTER_SOLVER(p, X(mksolver_rdft_hc2hc_direct)(codelet, desc));
+     REGISTER_SOLVER(p, X(mksolver_rdft_hc2hc_directbuf)(codelet, desc));
      if (X(khc2hc_register_hook))
 	  X(khc2hc_register_hook)(p, codelet, desc);
 }

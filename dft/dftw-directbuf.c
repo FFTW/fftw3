@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-directbuf.c,v 1.1 2004-03-21 22:56:15 athena Exp $ */
+/* $Id: dftw-directbuf.c,v 1.2 2004-03-22 13:23:56 athena Exp $ */
 
 #include "ct.h"
 
@@ -193,7 +193,7 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->vl = vl;
      pln->vs = vs;
      pln->slv = ego;
-     pln->bufstride = X(mkstride)(e->radix, 2);
+     pln->bufstride = X(mkstride)(r, 2);
 
      X(ops_zero)(&pln->super.super.ops);
      X(ops_madd2)(m * (vl / e->genus->vl), &e->ops, &pln->super.super.ops);
