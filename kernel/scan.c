@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.11 2003-01-11 16:07:24 athena Exp $ */
+/* $Id: scan.c,v 1.12 2003-01-11 22:55:39 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -61,7 +61,7 @@ static void mygets(scanner *sc, char *s, size_t maxlen)
 
      A(maxlen > 0);
      while ((ch = GETCHR(sc)) != EOF && !isspace(ch)
-	    && ch != ')' && ch != '(' && s < s0 + maxlen - 1)
+	    && ch != ')' && ch != '(' && s < s0 + maxlen)
 	  *s++ = ch;
      *s = 0;
      UNGETCHR(sc, ch);
