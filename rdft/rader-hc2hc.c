@@ -123,7 +123,7 @@ static void apply_dit(plan *ego_, R *I, R *O)
 
      buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
 
-     for (j = 2; j < m; j += 2, rio += os, ii -= os, io -= os, W += 2*(r - 1)) {
+     for (j = 2; j < m; j += 2, rio += os, ii -= os, io -= os, W += 2*(r-1)) {
 	  /* First, permute the input and multiply by W, storing in buf: */
 	  A(gpower == 1);
 	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
@@ -147,7 +147,8 @@ static void apply_dit(plan *ego_, R *I, R *O)
 	  }
 	  A(gpower == 1);
 
-	  /* second half of array must be fiddled to get real/imag parts in correct spots: */
+	  /* second half of array must be fiddled to get real/imag
+             parts in correct spots: */
 	  for (k = (r+1)/2; k < r; ++k) {
 	       R r;
 	       r = rio[k * ios];
@@ -161,6 +162,95 @@ static void apply_dit(plan *ego_, R *I, R *O)
 	first by codelets (Rader is UGLY for small factors). */
 
      X(free)(buf);
+}
+
+static void apply_dif(plan *ego_, R *I, R *O)
+{
+     P *ego = (P *) ego_;
+     plan_dft *cldr;
+     int is, ios;
+     uint j, k, gpower, g, ginv, r, m;
+     R *buf, *rio, *ii, *io;
+     const R *omega, *W;
+
+     /* 0th twiddle transform is just size-r (prime) R2HC: */
+     {
+	   plan_rdft *cldr0 = (plan_rdft *) ego->cldr0;
+	   cldr0->apply((plan *) cldr0, I, I);
+     }
+
+     cldr = (plan_dft *) ego->cldr;
+     r = ego->r;
+     m = ego->m;
+     g = ego->g; 
+     ginv = ego->ginv;
+     omega = ego->omega;
+     W = ego->W + 2*(r-1); /* simplify reverse indexing of W */
+     is = ego->os;
+     ios = ego->ios;
+     gpower = 1;
+     rio = I + is;
+     io = I + (m - 1) * is;
+     ii = I + (r * m - 1) * is;
+
+     buf = (R *) fftw_malloc(sizeof(R) * (r - 1) * 2, BUFFERS);
+
+     for (j = 2; j < m; j += 2, rio += is, ii -= is, io -= is, W += 2*(r-1)) {
+	  /* second half of array must be unfiddled to get real/imag
+             parts from correct spots: */
+	  for (k = (r+1)/2; k < r; ++k) {
+	       R r;
+	       r = rio[k * ios];
+	       rio[k * ios] = ii[-k * ios];
+	       ii[-k * ios] = -r;
+	  }
+
+	  /* First, permute the input, storing in buf: */
+	  A(gpower == 1);
+	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
+	       buf[2*k] = rio[gpower * ios];
+	       buf[2*k+1] = -ii[-gpower * ios];
+	  }
+	  /* gpower == g^(r-1) mod r == 1 */;
+	  A(gpower == 1);
+	  
+	  apply_aux(r, cldr, omega, buf, rio, -ii[0], io);
+	  io[0] = -io[0];
+
+	  /* finally, do inverse permutation to unshuffle the output,
+             also multiplying by the inverse twiddle factors W*.
+	     The twiddle factors are accessed in reverse order W[-k],
+	     because here we exponentiating ginv and not g as in
+	     mktwiddle. */
+	  { /* W[-0] = W[0] case must be handled specially */
+               R rA, iA, rW, iW;
+               rA = buf[0]; iA = buf[1];
+               rW = W[-2*(r-1)]; iW = W[-2*(r-1) + 1];
+               rio[ios] = rA * rW + iA * iW;
+               io[ios] = iA * rW - rA * iW;
+	  }
+	  gpower = ginv;
+	  for (k = 1; k < r - 1; ++k, gpower = MULMOD(gpower, ginv, r)) {
+	       R rA, iA, rW, iW;
+	       rA = buf[2*k]; iA = buf[2*k+1];
+	       rW = W[-2*k]; iW = W[-2*k+1];
+	       rio[gpower * ios] = rA * rW + iA * iW;
+	       io[gpower * ios] = iA * rW - rA * iW;
+	  }
+	  A(gpower == 1);
+     }
+
+     /* Avoid funny m/2-th iter by requiring m odd.  This always
+	happens anyway because all the factors of 2 get divided out
+	first by codelets (Rader is UGLY for small factors). */
+
+     X(free)(buf);
+
+     /* size-m child transforms: */
+     {
+	   plan_rdft *cld = (plan_rdft *) ego->cld;
+	   cld->apply((plan *) cld, I, O);
+     }
 }
 
 /***************************************************************************/
@@ -465,6 +555,62 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
+static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
+{
+     const problem_rdft *p = (const problem_rdft *) p_;
+     P *pln = 0;
+     uint n, is, os, r, m;
+     plan *cld = (plan *) 0;
+
+     static const plan_adt padt = {
+	  X(rdft_solve), awake, print, destroy
+     };
+
+     if (!applicable(ego, p_))
+          goto nada;
+
+     n = p->sz.dims[0].n;
+     is = p->sz.dims[0].is;
+     os = p->sz.dims[0].os;
+
+     r = X(first_divisor)(n);
+     m = n / r;
+
+     {
+	  problem *cldp;
+	  cldp = X(mkproblem_rdft_d)(X(mktensor_1d)(m, is, r * os),
+				     X(mktensor_1d)(r, m * is, os),
+				     p->I, p->O, p->kind);
+	  cld = MKPLAN(plnr, cldp);
+	  X(problem_destroy)(cldp);
+	  if (!cld)
+	       goto nada;
+     }
+
+     pln = MKPLAN_RDFT(P, &padt, apply_dif);
+     if (!mkP(pln, r, p->I, is*m, p->kind, plnr))
+	  goto nada;
+
+     pln->ios = is*m;
+     pln->os = is;
+     pln->m = m;
+     pln->cld = cld;
+     pln->W = 0;
+
+     pln->super.super.ops =
+	  X(ops_add)(X(ops_mul)((m - 1)/2, pln->super.super.ops),
+		     cld->ops);
+
+     return &(pln->super.super);
+
+ nada:
+     if (cld)
+          X(plan_destroy)(cld);
+     if (pln)
+	  X(free)(pln);
+     return (plan *) 0;
+}
+
 /* constructors */
 
 static solver *mksolver_dit(uint min_prime)
@@ -476,8 +622,18 @@ static solver *mksolver_dit(uint min_prime)
      return &(slv->super);
 }
 
+static solver *mksolver_dif(uint min_prime)
+{
+     static const solver_adt sadt = { mkplan_dif, score };
+     S *slv = MKSOLVER(S, &sadt);
+     slv->min_prime = min_prime;
+     slv->kind = HC2R;
+     return &(slv->super);
+}
+
 void X(rdft_rader_hc2hc_register)(planner *p)
 {
      /* FIXME: what are good defaults? */
      REGISTER_SOLVER(p, mksolver_dit(RADER_MIN_GOOD));
+     REGISTER_SOLVER(p, mksolver_dif(RADER_MIN_GOOD));
 }
