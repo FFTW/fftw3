@@ -308,11 +308,13 @@ if test "$enable_fortran" = "yes"; then
         AC_PROG_F77
         if test -z "$F77"; then
                 enable_fortran=no
-                AC_MSG_WARN([*** Couldn't find f77 compiler; switching to --disable-fortran.])
+                AC_MSG_WARN([*** Couldn't find f77 compiler; using default Fortran wrappers.])
 	else
 		AC_F77_DUMMY_MAIN([], [enable_fortran=no
-			AC_MSG_WARN([*** Couldn't figure out how to link C and Fortran; switching to --disable-fortran.])])
+			AC_MSG_WARN([*** Couldn't figure out how to link C and Fortran; using default Fortran wrappers.])])
         fi
+else
+	AC_DEFINE([DISABLE_FORTRAN], 1, [Define to disable Fortran wrappers.])
 fi
 
 if test "x$enable_fortran" = xyes; then
