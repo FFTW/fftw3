@@ -158,7 +158,7 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
 {
      int i, j, k;
      int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
-     int ip = iio - rio;
+     ptrdiff_t ip = iio - rio;
      R *p;
 
      for (i = 0; i < vl; ++i) {

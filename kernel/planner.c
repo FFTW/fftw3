@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.152 2003-05-07 18:24:46 athena Exp $ */
+/* $Id: planner.c,v 1.153 2003-06-11 02:15:42 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -96,7 +96,7 @@ static void register_solver(planner *ego, solver *s)
      }
 }
 
-static int slookup(planner *ego, char *nam, int id)
+static ptrdiff_t slookup(planner *ego, char *nam, int id)
 {
      unsigned h = X(hash)(nam); /* used to avoid strcmp in the common case */
      FORALL_SOLVERS(ego, s, sp, {

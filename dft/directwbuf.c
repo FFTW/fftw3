@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: directwbuf.c,v 1.2 2003-05-26 14:21:22 athena Exp $ */
+/* $Id: directwbuf.c,v 1.3 2003-06-11 02:15:41 athena Exp $ */
 
 /* direct DFTW solver, with buffer*/
 
@@ -50,7 +50,7 @@ static void cpy(int n0, int n1,
 		R *rB, R *iB, int sb0, int sb1)
 {
      int i0, i1;
-     int ima = iA - rA, imb = iB - rB;
+     ptrdiff_t ima = iA - rA, imb = iB - rB;
 
      for (i0 = 0; i0 < n0; ++i0) {
 	  const R *pa; 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.26 2003-03-15 20:29:42 stevenj Exp $ */
+/* $Id: rank0.c,v 1.27 2003-06-11 02:15:41 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -88,7 +88,7 @@ static void apply_vec(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      const P *ego = (const P *) ego_;
      int i, vl = ego->vl;
      int ivs = ego->ivs, ovs = ego->ovs;
-     int imi = ii - ri, imo = io - ro;
+     ptrdiff_t imi = ii - ri, imo = io - ro;
      for (i = vl; i > 0; --i) {
           R r0 = ri[0], i0 = ri[imi];
           ro[0] = r0; ro[imo] = i0; 

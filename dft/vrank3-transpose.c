@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.27 2003-04-17 23:15:53 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.28 2003-06-11 02:15:41 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -28,7 +28,7 @@
 static void t(R *rA, R *iA, int n, int is, int js, int vn, int vs)
 {
      int i, j, iv;
-     int im = iA - rA;
+     ptrdiff_t im = iA - rA;
 
      for (i = 1; i < n; ++i) {
           for (j = 0; j < i; ++j) {
