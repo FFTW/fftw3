@@ -31,6 +31,7 @@ unsigned the_flags = 0;
 int paranoid = 0;
 int usewisdom = 1;
 int havewisdom = 0;
+int nthreads = 1;
 
 extern void install_hook(void);  /* in hook.c */
 extern void uninstall_hook(void);  /* in hook.c */
@@ -594,6 +595,7 @@ int can_do(bench_problem *p)
 void setup(bench_problem *p)
 {
      double tim;
+     int save_flags = the_flags;
 
      if (p->destroy_input)
 	  the_flags |= FFTW_DESTROY_INPUT;
@@ -602,7 +604,7 @@ void setup(bench_problem *p)
 
 #ifdef HAVE_THREADS
      BENCH_ASSERT(FFTW(init_threads)());
-     FFTW(plan_with_nthreads)(1);
+     FFTW(plan_with_nthreads)(nthreads);
 #endif
      install_hook();
 
@@ -622,6 +624,8 @@ void setup(bench_problem *p)
 	  FFTW(flops)(the_plan, &add, &mul, &fma);
 	  printf("flops: %d add, %d mul, %d fma\n", add, mul, fma);
      }
+
+     the_flags = save_flags;
 }
 
 
