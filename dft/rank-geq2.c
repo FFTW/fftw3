@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank_geq2.c,v 1.3 2002-06-08 19:11:09 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.1 2002-06-08 19:51:46 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 

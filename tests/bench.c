@@ -50,8 +50,9 @@ void setup(struct problem *p)
      bench_real *ri, *ii, *ro, *io;
      BENCH_ASSERT(can_do(p));
 
-     plnr = fftw_mkplanner_naive();
 #if 0
+     plnr = fftw_mkplanner_naive();
+#else
      plnr = fftw_mkplanner_score();
 #endif
      fftw_dft_conf_standard(plnr);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.2 2002-06-08 19:11:09 athena Exp $ */
+/* $Id: rank0.c,v 1.3 2002-06-08 19:51:46 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -196,7 +196,7 @@ static void print(plan *ego_, plan_printf prntf)
      P *ego = (P *) ego_;
      prntf("(%s", ego->slv->adt->nam);
      if (ego->vl > 1)
-	  prntf("-x%d", ego->vl);
+	  prntf("-x%u", ego->vl);
      prntf(")");
 }
 
