@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.15 2002-08-16 19:22:36 athena Exp $ */
+/* $Id: verify.c,v 1.16 2002-08-16 20:31:19 athena Exp $ */
 
 #include "rdft.h"
 #include "verify.h"
@@ -398,11 +398,11 @@ static void really_verify2(plan *pln, const problem_rdft2 *p,
 	    N, inA, inB, inC, outA, outB, outC, tmp, rounds, tol);
 
 
-     if (nfo.p->kind == R2HC)
+     if (nfo.p2->kind == R2HC)
 	  tf_shift(dofft, &nfo, 0, psz,
 		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, TIME_SHIFT);
-     if (nfo.p->kind == HC2R)
+     if (nfo.p2->kind == HC2R)
 	  tf_shift(dofft, &nfo, 0, psz,
 		   n, vecn, inA, inB, outA, outB, tmp, 
 		   rounds, tol, FREQ_SHIFT);
