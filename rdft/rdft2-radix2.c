@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.2 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: rdft2-radix2.c,v 1.3 2002-08-26 10:38:49 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -36,7 +36,7 @@
 #include "dft.h"
 
 typedef struct {
-     int (*applicable) (const problem *p_);
+     int (*applicable) (const problem *p_, const planner *plnr);
      void (*apply) (plan *ego_, R *r, R *rio, R *iio);
      problem *(*mkcld) (const problem_rdft2 *p);
      const char *nam;
@@ -57,8 +57,9 @@ typedef struct {
 } P;
 
 /* common applicability function of forward problems */
-static int applicable_f(const problem *p_)
+static int applicable_f(const problem *p_, const planner *plnr)
 {
+     UNUSED(plnr);
      if (RDFT2P(p_)) {
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
           return (1
@@ -73,12 +74,13 @@ static int applicable_f(const problem *p_)
 }
 
 /* common applicability function of backward problems */
-static int applicable_b(const problem *p_)
+static int applicable_b(const problem *p_, const planner *plnr)
 {
      if (RDFT2P(p_)) {
           const problem_rdft2 *p = (const problem_rdft2 *) p_;
           return (1
                   && p->kind == HC2R
+		  && (p->r == p->rio || (plnr->flags & DESTROY_INPUT))
                   && p->vecsz.rnk <= 1
                   && p->sz.rnk == 1
 		  && (p->sz.dims[0].n % 2) == 0
@@ -157,7 +159,7 @@ static problem *mkcld_f_dft(const problem_rdft2 *p)
 }
 
 static const madt adt_f_dft = {
-     applicable_f, apply_f_dft, mkcld_f_dft, "r2hc-dft"
+     applicable_f, apply_f_dft, mkcld_f_dft, "r2hc2-dft"
 };
 
 /*
@@ -227,7 +229,144 @@ static problem *mkcld_f_rdft(const problem_rdft2 *p)
 }
 
 static const madt adt_f_rdft = {
-     applicable_f, apply_f_rdft, mkcld_f_rdft, "r2hc-rdft"
+     applicable_f, apply_f_rdft, mkcld_f_rdft, "r2hc2-rdft"
+};
+
+
+/*
+ * backward rdft2 via dft
+ */
+static void k_b_dft(R *rio, R *iio, const R *W, uint n, int dist)
+{
+     uint i;
+     R *riop, *iiop, *riom, *iiom;
+
+     riop = rio; iiop = iio; riom = rio + n * dist; iiom = iio + n * dist;
+
+     /* i = 0 and i = n */
+     {
+          E rop = *riop, iop = *riom;
+          *riop = rop + iop;      riop += dist;
+          *iiop = rop - iop;      riom -= dist;
+                                  iiop += dist;
+                                  iiom -= dist;
+     }
+
+     /* middle elements */
+     for (W += 2, i = 2; i < n; i += 2, W += 2) {
+          E a = *riop, b = *iiop, c = *riom, d = *iiom;
+          E wr = W[0], wi = W[1];
+	  E re = a + c, ti = a - c, ie = b - d, tr = b + d;
+	  E rd = tr * wr + ti * wi;
+	  E id = ti * wr - tr * wi;
+	  *riop = re - rd;          riop += dist;
+	  *iiop = ie + id;          iiop += dist;
+	  *riom = re + rd;          riom -= dist;
+	  *iiom = id - ie;          iiom -= dist;
+     }
+
+     /* i = n/2 when n is even */
+     if (!(n & 1)) { *riop *= 2.0; *iiop *= -2.0; }
+}
+
+static void apply_b_dft(plan *ego_, R *r, R *rio, R *iio)
+{
+     P *ego = (P *) ego_;
+     {
+          uint i, vl = ego->vl, n2 = ego->n / 2;
+          int ivs = ego->ivs, is = ego->is;
+          const R *W = ego->td->W;
+          for (i = 0; i < vl; ++i, rio += ivs, iio += ivs)
+               k_b_dft(rio, iio, W, n2, is);
+     }
+
+     {
+          plan_dft *cld = (plan_dft *) ego->cld;
+	  /* swap r/i because of backward transform */
+          cld->apply((plan *) cld, iio, rio, r + ego->os, r);
+     }
+}
+
+static problem *mkcld_b_dft(const problem_rdft2 *p)
+{
+     const iodim *d = p->sz.dims;
+     return X(mkproblem_dft_d) (
+	  X(mktensor_1d)(d[0].n / 2, d[0].is, 2 * d[0].os),
+	  X(tensor_copy)(p->vecsz), 
+	  p->iio, p->rio, p->r + d[0].os, p->r);
+}
+
+static const madt adt_b_dft = {
+     applicable_b, apply_b_dft, mkcld_b_dft, "hc2r2-dft"
+};
+
+/*
+ * backward rdft2 via backward rdft
+ */
+static void k_b_rdft(R *rio, R *iio, const R *W, uint n, int dist)
+{
+     uint i;
+     R *riop, *iiop, *riom, *iiom;
+
+     riop = rio; iiop = iio; riom = rio + n * dist; iiom = iio + n * dist;
+
+     /* i = 0 and i = n */
+     {
+          E rop = *riop, iop = *riom;
+          *riop = rop + iop;      riop += dist;
+          *iiop = rop - iop;      riom -= dist;
+                                  iiop += dist;
+                                  iiom -= dist;
+     }
+
+     /* middle elements */
+     for (W += 2, i = 2; i < n; i += 2, W += 2) {
+          E a = *riop, b = *iiop, c = *riom, d = *iiom;
+          E wr = W[0], wi = W[1];
+	  E r0 = a + c, r1 = a - c, i0 = b - d, i1 = b + d;
+	  *riop = r0;                 riop += dist;
+	  *riom = i0;		      riom -= dist;
+	  *iiop = r1 * wr - i1 * wi;  iiop += dist;
+	  *iiom = i1 * wr + r1 * wi;  iiom -= dist;
+     }
+
+     /* i = n/2 when n is even */
+     if (!(n & 1)) { *riop *= 2.0; *iiop *= -2.0; }
+}
+
+static void apply_b_rdft(plan *ego_, R *r, R *rio, R *iio)
+{
+     P *ego = (P *) ego_;
+
+     {
+          uint i, vl = ego->vl, n2 = ego->n / 2;
+          int ivs = ego->ivs, is = ego->is;
+          const R *W = ego->td->W;
+          for (i = 0; i < vl; ++i, rio += ivs, iio += ivs)
+               k_b_rdft(rio, iio, W, n2, is);
+     }
+
+     {
+          plan_rdft *cld = (plan_rdft *) ego->cld;
+          cld->apply((plan *) cld, rio, r);
+     }
+}
+
+static problem *mkcld_b_rdft(const problem_rdft2 *p)
+{
+     const iodim *d = p->sz.dims;
+
+     tensor radix = X(mktensor_1d)(2, p->iio - p->rio, d[0].os);
+     tensor cld_vec = X(tensor_append)(radix, p->vecsz);
+     X(tensor_destroy)(radix);
+
+     return X(mkproblem_rdft_1_d) (
+	  X(mktensor_1d)(d[0].n / 2, d[0].is, 2 * d[0].os),
+	  cld_vec, p->rio, p->r, HC2R);
+}
+
+static const madt adt_b_rdft = {
+     applicable_b, apply_b_rdft, mkcld_b_rdft, "hc2r2-rdft"
 };
 
 /*
@@ -260,7 +399,7 @@ static int score(const solver *ego_, const problem *p_,
 {
      const S *ego = (const S *) ego_;
      UNUSED(plnr);
-     if (ego->adt->applicable(p_))
+     if (ego->adt->applicable(p_, plnr))
           return GOOD;
      return BAD;
 }
@@ -278,7 +417,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           X(rdft2_solve), awake, print, destroy
      };
 
-     if (!ego->adt->applicable(p_))
+     if (!ego->adt->applicable(p_, plnr))
           return (plan *) 0;
 
      p = (const problem_rdft2 *) p_;
@@ -317,7 +456,8 @@ void X(rdft2_radix2_register)(planner *p)
 {
      uint i;
      static const madt *const adts[] = {
-	  &adt_f_dft, &adt_f_rdft
+	  &adt_f_dft, &adt_f_rdft, 
+	  &adt_b_dft, &adt_b_rdft
      };
 
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)

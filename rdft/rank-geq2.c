@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.1 2002-08-26 04:05:53 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.2 2002-08-26 10:38:49 athena Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
 
@@ -78,7 +78,7 @@ static void print(plan *ego_, printer *p)
 
 static int picksplit(const S *ego, const tensor sz, uint *rp)
 {
-     A(rnk > 1); /* cannot split rnk <= 1 */
+     A(sz.rnk > 1); /* cannot split rnk <= 1 */
      if (!X(pickdim)(ego->spltrnk, ego->buddies, ego->nbuddies, sz, 1, rp))
 	  return 0;
      *rp += 1; /* convert from dim. index to rank */
