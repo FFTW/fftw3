@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.164 2003-03-24 20:58:04 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.165 2003-03-24 20:58:44 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1162,7 +1162,7 @@ If you are planning to use the DHT because you've heard that it is
 but enduring misconception that was debunked in 1987: a properly
 designed real-input FFT (such as FFTW's) has no more operations in
 general than an FHT.  Moreover, in FFTW, the DHT is ordinarily
-@emph{slower} than the DFT (see below).
+@emph{slower} than the DFT (see below) for composite sizes.
 
 Like the DFT, in FFTW the DHT is unnormalized, so computing a DHT of
 size @code{n} followed by another DHT of the same size will result in
