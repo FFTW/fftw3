@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.114 2002-09-12 20:32:03 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.115 2002-09-12 22:53:44 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -432,22 +432,27 @@ typedef struct {
 
 struct planner_s {
      const planner_adt *adt;
-     uint nplan;    /* number of plans evaluated */
-     uint nprob;    /* number of problems evaluated */
-     uint hit, access;  
      void (*hook)(plan *plan, const problem *p, int optimalp);
+     void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvdesc **);
 
      const char *cur_reg_nam;
      int cur_reg_id;
 
      slvdesc *solvers;
      solution *sols;
-     void (*inferior_mkplan)(planner *ego, problem *p, plan **, slvdesc **);
-     uint hashsiz, cnt, nrehash;
+     uint hashsiz, nelem;
+
      uint problem_flags;
      unsigned short planner_flags; /* matches type of solution.flags in
 				      planner.c */
      uint nthr;
+
+     /* various statistics */
+     uint nplan;    /* number of plans evaluated */
+     uint nprob;    /* number of problems evaluated */
+     uint lookup, succ_lookup, lookup_iter;
+     uint nrehash;
+
      int score;  /* see planner-score.c */
 };
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.74 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: planner.c,v 1.75 2002-09-12 22:53:44 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -119,22 +119,24 @@ struct solution_s {
 enum { H_EMPTY, H_VALID, H_DELETED };
 
 
-/* maintain invariant lb(cnt) <= hashsz < ub(cnt) */
-static uint ub(uint cnt) { return 3U * (cnt + 10U); }
-static uint lb(uint cnt) { return ub(cnt) / 2U; }
+/* maintain invariant lb(nelem) <= hashsz < ub(nelem) */
+static uint ub(uint nelem) { return 3U * (nelem + 10U); }
+static uint lb(uint nelem) { return ub(nelem) / 2U; }
 
 static solution *hlookup(planner *ego, md5uint *s)
 {
      uint h, g;
 
-     ++ego->access;
+     ++ego->lookup;
      h = sig_to_hash_index(ego, s);
 
      for (g = h; ; g = (g + 1) % ego->hashsiz) {
 	  solution *l = ego->sols + g;
+	  ++ego->lookup_iter;
 	  switch (l->state) {
 	      case H_EMPTY: return 0;
-	      case H_VALID: if (md5eq(s, l->s)) { ++ego->hit; return l; }
+	      case H_VALID: 
+		   if (md5eq(s, l->s)) { ++ego->succ_lookup; return l; }
 	  }
 	  A((g + 1) % ego->hashsiz != h);
      }
@@ -165,7 +167,7 @@ static void rehash(planner *ego)
 {
      uint osiz = ego->hashsiz, nsiz, bl, bu;
 
-     bl = lb(ego->cnt); bu = ub(ego->cnt);
+     bl = lb(ego->nelem); bu = ub(ego->nelem);
      if (bl <= osiz && osiz < bu)
 	  return;  /* nothing to do */
 
@@ -212,30 +214,10 @@ static void hinsert(planner *ego, md5uint *s,
 
 	  flags |= l->flags & BLESSING; /* ne me perdas illa die */
      } else {
-	  ++ego->cnt;
+	  ++ego->nelem;
 	  rehash(ego);
      }
      hinsert0(ego, s, flags, sp, l);
-}
-
-
-static void insert(planner *ego, problem *p, slvdesc *sp)
-{
-     md5 m;
-     md5hash(&m, p, ego);
-     hinsert(ego, m.s, ego->planner_flags, sp);
-}
-
-static solution *lookup(planner *ego, problem *p)
-{
-     md5 m;
-     solution *l;
-
-     md5hash(&m, p, ego);
-     l = hlookup(ego, m.s);
-     return 
-	  (l && (IMPATIENCE(ego->planner_flags) >= IMPATIENCE(l->flags))) ?
-	  l : 0;
 }
 
 /* maintain dynamic scoping of flags, nthr: */
@@ -256,12 +238,22 @@ static plan *mkplan(planner *ego, problem *p)
 {
      solution *sol;
      plan *pln;
-     slvdesc *sp = 0;
+     md5 m;
+     slvdesc *sp;
 
      ++ego->nprob;
-     sp = (sol = lookup(ego, p)) ? sol->sp : 0;
+
+     md5hash(&m, p, ego);
+     sol = hlookup(ego, m.s);
+     
+     /* reject if too impatient */
+     if (sol)
+	  if (IMPATIENCE(sol->flags) > IMPATIENCE(ego->planner_flags))
+	       sol = 0;
+
+     sp = sol ? sol->sp : 0;
      ego->inferior_mkplan(ego, p, &pln, &sp);
-     insert(ego, p, sp);
+     hinsert(ego, m.s, ego->planner_flags, sp);
 
      if (pln)
 	  ego->hook(pln, p, 1);
@@ -282,7 +274,7 @@ static void forget(planner *ego, amnesia a)
 		    /* confutatis maledictis
 		       flammis acribus addictis */
 		    l->state = H_DELETED;
-		    --ego->cnt;
+		    --ego->nelem;
 	       }
 	  }
      }
@@ -295,7 +287,7 @@ static void htab_destroy(planner *ego)
 {
      forget(ego, FORGET_EVERYTHING);
      X(free)(ego->sols);
-     ego->cnt = 0;
+     ego->nelem = 0;
 }
 
 /* FIXME: what sort of version information should we write? */
@@ -378,14 +370,14 @@ planner *X(mkplanner)(size_t sz,
 
      p->adt = &padt;
      p->inferior_mkplan = infmkplan;
-     p->nplan = p->nprob = p->hit = p->access = 0;
+     p->nplan = p->nprob = p->nrehash = 0;
+     p->succ_lookup = p->lookup = p->lookup_iter = 0;
      p->hook = hooknil;
      p->cur_reg_nam = 0;
      p->solvers = 0;
      p->sols = 0;
      p->hashsiz = 0;
-     p->cnt = 0;
-     p->nrehash = 0;
+     p->nelem = 0;
      p->score = BAD;            /* unused, but we initialize it anyway */
      p->problem_flags = 0;
      p->planner_flags = 0;
@@ -458,13 +450,14 @@ void X(planner_dump)(planner *ego, int verbose)
 
      D("nplan = %u\n", ego->nplan);
      D("nprob = %u\n", ego->nprob);
-     D("access = %u\n", ego->access);
-     D("hit = %u\n", ego->hit);
+     D("lookup = %u\n", ego->lookup);
+     D("succ_lookup = %u\n", ego->succ_lookup);
+     D("lookup_iter = %u\n", ego->lookup_iter);
      D("nrehash = %d\n", ego->nrehash);
      D("hashsiz = %d\n", ego->hashsiz);
      D("empty = %d\n", empty);
      D("deleted = %d\n", deleted);
      D("valid = %d\n", valid);
-     A(ego->cnt == valid);
+     A(ego->nelem == valid);
 }
 #endif
