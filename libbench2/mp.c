@@ -399,7 +399,7 @@ static void cmulj(N r0, N i0, N r1, N i1, N r2, N i2)
      cpy(q, r2);
 }
 
-static void cexp(int m, int n, N r, N i)
+static void mcexp(int m, int n, N r, N i)
 {
      static int cached_n = -1;
      static N w[64][2];
@@ -449,7 +449,7 @@ static void fft0(int n, N *a, int sign)
      for (i = 1; i < n; i = 2 * i) {
 	  for (j = 0; j < i; ++j) {
 	       N wr, wi;
-	       cexp(sign * (int)j, 2 * i, wr, wi);
+	       mcexp(sign * (int)j, 2 * i, wr, wi);
 	       for (k = j; k < n; k += 2 * i) {
 		    N *a0 = a + 2 * k;
 		    N *a1 = a0 + 2 * i;
@@ -474,7 +474,7 @@ static void bluestein_sequence(int n, N *a)
      for (k = 0; k < n; ++k) {
 	  /* careful with overflow */
 	  ksq = ksq + 2*k - 1; while (ksq > n2) ksq -= n2;
-	  cexp(ksq, n2, a[2*k], a[2*k+1]);
+	  mcexp(ksq, n2, a[2*k], a[2*k+1]);
      }
 }
 
