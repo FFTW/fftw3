@@ -138,10 +138,10 @@ static void addmag0(int s, const N a, const N b, N c)
      }     
      for (; ia < LEN; ++ia) {
 	  r += (ACC)AD[ia];
-	  d[ia] = r;
+	  d[ia] = LO(r);
 	  r = HI(r);
      }
-     d[ia] = r;
+     d[ia] = LO(r);
      pack(d, EXA + 1, s * SGNA, LEN + 1, c);
 }
 
