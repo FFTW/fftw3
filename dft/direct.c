@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.30 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: direct.c,v 1.31 2002-09-25 01:13:00 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -69,11 +69,10 @@ static int applicable(const solver *ego_, const problem *p_,
           const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
           const kdft_desc *d = ego->desc;
-	  uint rnk = p->vecsz->rnk;
-          iodim *vd = p->vecsz->dims;
-	  uint vl = rnk == 1 ? vd[0].n : 1;
-	  int ivs = rnk == 1 ? vd[0].is : 0;
-	  int ovs = rnk == 1 ? vd[0].os : 0;
+	  uint vl;
+	  int ivs, ovs;
+
+	  X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
           return (
 	       1
