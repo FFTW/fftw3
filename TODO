@@ -1,8 +1,5 @@
 * audit the implementation of RNK_MINFTY
 
-* dft/buffered.c is still wrong, because there is no sharing of
-  buffers.  Maybe should malloc() the buffer in apply().
-
 * define a naming scheme for solvers.  Use it for
   wisdom.  The idea is that wisdom is a map problem -> solver.
   Given problem, look up solver in wisdom, use solver to compute
