@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dit.c,v 1.10 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: hc2hc-dit.c,v 1.11 2003-04-03 06:58:32 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -96,7 +96,7 @@ static int applicable0(const solver_hc2hc *ego, const problem *p_,
 	  int m = d[0].n / e->radix;
           return (1
 		  && p->vecsz->rnk == 0
-		  && ((m-1)/2) / e->genus->vl > 1
+		  && e->genus->vl == 1 /* FIXME when we get SIMD hc codelets */
 		  && (e->genus->okp(e, p->O + d[0].os,
 				    p->O + (e->radix * m - 1) * d[0].os, 
 				    (int)m * d[0].os, 0, m, d[0].os))

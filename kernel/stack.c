@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: stack.c,v 1.1 2003-04-02 10:25:56 athena Exp $ */
+/* $Id: stack.c,v 1.2 2003-04-03 06:58:32 stevenj Exp $ */
 
 #include "ifftw.h"
 
-void X(with_aligned_stack)(void (*f)(void *), void *p)
+void *X(with_aligned_stack)(void *(*f)(void *), void *p)
 {
 #if defined(__GNUC__) && defined(__i386__)
      /*
@@ -63,5 +63,5 @@ void X(with_aligned_stack)(void (*f)(void *), void *p)
      }
 #endif
 
-     f(p);
+     return f(p);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.10 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: ct-dit.c,v 1.11 2003-04-03 06:58:32 stevenj Exp $ */
 
 /* decimation in time Cooley-Tukey, with codelet divided among threads */
 #include "threads.h"
@@ -29,6 +29,7 @@ typedef struct {
      int nthr;
      int mloop;
      int sW;
+     int vl;
 } P;
 
 typedef struct {
@@ -38,6 +39,7 @@ typedef struct {
      int sW;
      stride ios;
      int os;
+     int vl;
 } PD;
 
 static void *spawn_apply(spawn_data *d)
@@ -45,9 +47,10 @@ static void *spawn_apply(spawn_data *d)
      PD *ego = (PD *) d->data;
      int min = d->min, max = d->max;
      int os = ego->os;
-
-     ego->k(ego->ro + min * os, ego->io + min * os,
-	    ego->W + min * ego->sW, ego->ios, max - min, os);
+     int vl = ego->vl;
+     
+     ego->k(ego->ro + min * os * vl, ego->io + min * os * vl,
+	    ego->W + min * ego->sW, ego->ios, (max - min) * vl, os);
      return 0;
 }
 
@@ -70,6 +73,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  d.sW = ego_thr->sW;
 	  d.ios = ego->ios;
 	  d.os = ego->os;
+	  d.vl = ego_thr->vl;
 
 	  X(spawn_loop)(ego_thr->mloop, ego_thr->nthr, spawn_apply, (void*)&d);
      }
@@ -85,7 +89,6 @@ static int applicable0(const solver_ct *ego, const problem *p_,
 	  int m = d[0].n / e->radix;
           return (1
 		  && p->vecsz->rnk == 0
-		  && m / e->genus->vl > 1
 		  && (e->genus->okp(e, p->ro, p->io, 
 				    (int)m * d[0].os, 0, m, d[0].os, plnr))
 	       );
@@ -127,8 +130,8 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
      if (pln) {
 	  P *pln_thr = (P *) pln;
 	  pln_thr->nthr = plnr->nthr;
-	  pln_thr->mloop = 
-	       pln_thr->super.m / pln_thr->super.slv->desc->genus->vl;
+	  pln_thr->vl = pln_thr->super.slv->desc->genus->vl;
+	  pln_thr->mloop = pln_thr->super.m / pln_thr->vl;
 	  pln_thr->sW = X(twiddle_length)(pln_thr->super.r, 
 					  pln_thr->super.slv->desc->tw);
      }
