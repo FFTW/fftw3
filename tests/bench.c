@@ -98,7 +98,7 @@ void wrwisdom(void)
 {
      FILE *f;
      double tim;
-     if (!usewisdom) return;
+     if (!havewisdom) return;
 
      timer_start();
      if ((f = fopen(wisdat, "w"))) {
