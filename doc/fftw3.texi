@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.98 2003-03-06 07:20:38 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.99 2003-03-06 07:25:32 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1290,8 +1290,7 @@ rank 3 array:
 
 @example
 fftw_complex *an_array;
-
-an_array = (fftw_complex *) fftw_malloc(5 * 12 * 27 * sizeof(fftw_complex));
+an_array = fftw_malloc(5*12*27 * sizeof(fftw_complex));
 @end example
 
 Accessing the array elements, however, is more tricky---you can't simply
@@ -2989,7 +2988,8 @@ To transform a three-dimensional array in-place with C, you might do:
         fftw_complex arr[L][M][N];
         fftw_plan plan;
 
-        plan = fftw_plan_dft_3d(L,M,N,arr,arr,FFTW_FORWARD,FFTW_ESTIMATE)
+        plan = fftw_plan_dft_3d(L,M,N, arr,arr,
+                                FFTW_FORWARD, FFTW_ESTIMATE);
         fftw_execute(plan);
         fftw_destroy_plan(plan);
 @end example
@@ -3001,8 +3001,8 @@ In Fortran, you would use this instead:
         dimension arr(L,M,N)
         integer*8 plan
 
-        call dfftw_plan_dft_3d(plan,L,M,N,arr,arr,
-       &                       FFTW_FORWARD,FFTW_ESTIMATE)
+        call dfftw_plan_dft_3d(plan, L,M,N, arr,arr,
+       &                       FFTW_FORWARD, FFTW_ESTIMATE)
         call dfftw_execute(plan)
         call dfftw_destroy_plan(plan)
 @end example
