@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-reodft.c,v 1.7 2003-01-08 21:46:24 stevenj Exp $ */
+/* $Id: verify-reodft.c,v 1.8 2003-01-09 04:18:23 stevenj Exp $ */
 
 #include "reodft.h"
 #include "debug.h"
@@ -53,7 +53,10 @@ static double aerror(R *a, R *b, uint n)
                e = dmax(e, dabs(a[i] - b[i]));
                mag = dmax(mag, dmin(dabs(a[i]), dabs(b[i])));
           }
-          e /= mag;
+	  if (mag == 0.0 && e == 0.0)
+	       e = 0.0;
+	  else
+	       e /= mag;
 
 #ifdef HAVE_ISNAN
           A(!isnan(e));
@@ -463,7 +466,7 @@ static void really_verify(plan *pln, const problem_rdft *p,
 	      isR1t = 1;
 	      isL0f = isR0f = -1;
 	      i0 = 1; k0 = 0;
-	      ti = sin01; impulse_amp = 2.0;
+	      ti = sin01; impulse_amp = n == 1 ? 1.0 : 2.0;
 	      tst = cos01;
 	      tsf = cos00;
 	      break;
