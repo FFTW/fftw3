@@ -296,6 +296,7 @@ if test "$ac_test_CFLAGS" != "set"; then
 		is60x=`echo $cputype | egrep "^60[[0-9]]e?$"`
 		is750=`echo $cputype | grep "750"`
 		is74xx=`echo $cputype | egrep "^74[[0-9]][[0-9]]$"`
+		is970=`echo $cputype | grep "970"`
 		if test -n "$is60x"; then
 			ACX_CHECK_CC_FLAGS(-mcpu=$cputype,m_cpu_60x,
 				CPU_FLAGS=-mcpu=$cputype)
@@ -305,6 +306,11 @@ if test "$ac_test_CFLAGS" != "set"; then
 		elif test -n "$is74xx"; then
 			ACX_CHECK_CC_FLAGS(-mcpu=$cputype,m_cpu_74xx,
 				CPU_FLAGS=-mcpu=$cputype)
+		elif test -n "$is970"; then
+			ACX_CHECK_CC_FLAGS(-mcpu=G5,m_cpu_970, 
+				CPU_FLAGS=-mcpu=G5)
+			ACX_CHECK_CC_FLAGS(-mtune=G5,m_tune_970, 
+				CPU_FLAGS=-mtune=G5)
 		fi
 		if test -z "$CPU_FLAGS"; then
 		        ACX_CHECK_CC_FLAGS(-mcpu=powerpc,m_cpu_powerpc,
