@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.239 2004-04-07 04:16:49 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.240 2004-10-01 01:12:47 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -493,14 +493,13 @@ enum {
      
      /* flags that control the search */
      NO_UGLY = 0x400,  /* avoid plans we are 99% sure are suboptimal */
-     NO_SEARCH = 0x800,  /* avoid searching altogether---use wisdom entries 
-			    only */
 
      ESTIMATE = 0x1000,
      IMPATIENCE_FLAGS = (ESTIMATE | (ESTIMATE - 1)),
      
-     BLESSING = 0x4000,  /* save this entry */
-     H_VALID = 0x8000,    /* valid hastable entry */
+     BLESSING = 0x2000,   /* save this entry */
+     H_VALID = 0x4000,    /* valid hastable entry */
+     H_LIVE = 0x8000,     /* entry is nonempty, implies H_VALID */
      NONIMPATIENCE_FLAGS = BLESSING
 };
 
@@ -515,7 +514,6 @@ enum {
 #define NO_LARGE_GENERICP(plnr) ((plnr)->planner_flags & NO_LARGE_GENERIC)
 #define NO_RANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_RANK_SPLITS)
 #define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
-#define NO_SEARCHP(plnr) ((plnr)->planner_flags & NO_SEARCH)
 #define NO_VRANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_VRANK_SPLITS)
 #define NO_VRECURSEP(plnr) ((plnr)->planner_flags & NO_VRECURSE)
 

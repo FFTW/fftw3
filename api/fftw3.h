@@ -34,7 +34,7 @@
  ****************************************************************************/
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.65 2004-09-30 17:36:43 athena Exp $ */
+/* $Id: fftw3.h,v 1.66 2004-10-01 01:12:47 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -279,7 +279,6 @@ FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 #define FFTW_NO_VRECURSE (1U << 16)
 
 #define FFTW_NO_SIMD (1U << 17)
-#define FFTW_WISDOM_ONLY (1U << 18)
 
 #ifdef __cplusplus
 }  /* extern "C" */

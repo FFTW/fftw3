@@ -84,7 +84,6 @@ void X(mapflags)(planner *plnr, unsigned flags)
      const flagop problem_flagmap[] = {
 	  EQV(FFTW_DESTROY_INPUT, DESTROY_INPUT),
 	  EQV(FFTW_NO_SIMD, NO_SIMD),
-	  EQV(FFTW_WISDOM_ONLY, NO_SEARCH),
 	  EQV(FFTW_CONSERVE_MEMORY, CONSERVE_MEMORY)
      };
      const flagop planner_flagmap[] = {
