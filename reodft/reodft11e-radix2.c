@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.1 2003-02-26 01:42:08 stevenj Exp $ */
+/* $Id: reodft11e-radix2.c,v 1.2 2003-02-26 22:46:17 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:
@@ -36,6 +36,8 @@
 
    NOTE: We originally used a simpler method by S. C. Chan and K. L. Ho
    that turned out to have numerical problems; see reodft11e-r2hc.c.
+
+   (For odd sizes, see reodft11e-r2hc-odd.c.)
 */
 
 #include "reodft.h"
