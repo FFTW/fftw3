@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: schedule.ml,v 1.2 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: schedule.ml,v 1.3 2003-07-03 20:47:42 athena Exp $ *)
 
 (* This file contains the instruction scheduler, which finds an
    efficient ordering for a given list of instructions.
@@ -161,14 +161,45 @@ type schedule =
   | Seq of (schedule * schedule)
   | Par of schedule list
 
+
+
+(* produce a sequential schedule determined by the user *)
+let rec sequentially = function
+    [] -> Done
+  | a :: b -> Seq (Instr a, sequentially b)
+
+let list_schedule alist =
+  let dag = makedag alist in
+  let changed = ref true in
+  begin
+    Dag.for_all dag (fun node -> node.label <- 0);
+
+    while !changed do
+      changed := false;
+      Dag.for_all dag (fun node ->
+	List.iter (fun s ->
+	    if (s.label < node.label + 1) then begin
+	          node.label <- s.label - 1;
+	          changed := true
+		        end)
+	    node.successors);
+    done;
+
+    let order a b = a.label < b.label in
+    sequentially (List.map to_assignment (Sort.list order (Dag.to_list dag)))
+  end
+
 let schedule =
   let rec schedule_alist = function
       [] -> Done
     | [a] -> Instr a
     | alist -> 
-	match connected_components alist with
-	  ([a]) -> schedule_connected a
-	| l -> Par (List.map schedule_alist l)
+	if (List.length alist < !Magic.list_schedule_threshold) then 
+	    list_schedule alist
+	else
+	  match connected_components alist with
+	    ([a]) -> schedule_connected a
+	  | l -> Par (List.map schedule_alist l)
 
   and schedule_connected alist = 
     match partition alist with
@@ -179,8 +210,3 @@ let schedule =
     let res = schedule_alist x in
     let () = Util.info "end schedule" in
     res
-
-(* produce a sequential schedule determined by the user *)
-let rec sequentially = function
-    [] -> Done
-  | a :: b -> Seq (Instr a, sequentially b)

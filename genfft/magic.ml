@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.13 2003-06-04 19:11:29 athena Exp $ *)
+(* $Id: magic.ml,v 1.14 2003-07-03 20:47:42 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -52,6 +52,7 @@ let lisp_syntax = ref false
 let network_transposition = ref true
 let inklude = ref ""
 let generic_arith = ref false
+let list_schedule_threshold = ref 0
 
 (* command-line parser for magic parameters *)
 let undocumented = " Undocumented voodoo parameter"
@@ -87,6 +88,7 @@ let speclist = [
   "-alternate-convolution", set_int alternate_convolution, undocumented;
   "-deep-collect-depth", set_int deep_collect_depth, undocumented;
   "-schedule-type", set_int schedule_type, undocumented;
+  "-list-schedule-threshold", set_int list_schedule_threshold, undocumented;
 
   "-dif-split-radix", set_bool dif_split_radix, undocumented;
   "-dit-split-radix", unset_bool dif_split_radix, undocumented;
