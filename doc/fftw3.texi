@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.97 2003-03-06 07:20:13 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.98 2003-03-06 07:20:38 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2433,7 +2433,7 @@ io = (double *) out + 1;
 
 For a contiguous @code{fftw_complex} array, the overall stride of the
 transform should be 2, the distance between consecutive real parts or
-between consecutive imaginary parts; see @ref{Vector and transform
+between consecutive imaginary parts; see @ref{Guru vector and transform
 sizes}.  Note that the dimension strides are applied equally to the real
 and imaginary parts; real and imaginary arrays with different strides
 are not supported.
