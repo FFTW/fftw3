@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.179 2003-04-02 20:09:08 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.180 2003-04-03 01:14:07 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3355,7 +3355,7 @@ Y[k] = X[0] + 2 (sum for j = 1 to n-1 of X[j] cos(pi j (k+1/2) / n)).
 An @code{REDFT11} transform (type-IV DCT) in FFTW is defined by:
 @tex
 $$
-Y_k = 2 \sum_{0=1}^{n-1} X_j \cos [\pi (j+1/2) (k+1/2) / n].
+Y_k = 2 \sum_{j=0}^{n-1} X_j \cos [\pi (j+1/2) (k+1/2) / n].
 $$
 @end tex
 @ifinfo
@@ -3437,7 +3437,7 @@ Y_k = 2 \sum_{j=0}^{n-1} X_j \sin [ \pi (j+1) (k+1) / (n+1)].
 $$
 @end tex
 @ifinfo
-Y[k] = 2 (sum for j = 1 to n-2 of X[j] sin(pi (j+1)(k+1) / (n+1))).
+Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1)(k+1) / (n+1))).
 @end ifinfo
 @html
 <center><img src="equation-rodft00.png" align="top">.</center>
@@ -3463,11 +3463,11 @@ Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1) / n)).
 An @code{RODFT01} transform (type-III DST) in FFTW is defined by:
 @tex
 $$
-Y_k = 2 \sum_{j=1}^{n-1} X_j \sin [\pi (j+1) (k+1/2) / n].
+Y_k = (-1)^k X_{n-1} + 2 \sum_{j=0}^{n-2} X_j \sin [\pi (j+1) (k+1/2) / n].
 $$
 @end tex
 @ifinfo
-Y[k] = 2 (sum for j = 1 to n-1 of X[j] sin(pi (j+1) (k+1/2) / n)).
+Y[k] = (-1)^k X[n-1] + 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1) (k+1/2) / n)).
 @end ifinfo
 @html
 <center><img src="equation-rodft01.png" align="top">.</center>
@@ -3478,7 +3478,7 @@ Y[k] = 2 (sum for j = 1 to n-1 of X[j] sin(pi (j+1) (k+1/2) / n)).
 An @code{RODFT11} transform (type-IV DST) in FFTW is defined by:
 @tex
 $$
-Y_k = 2 \sum_{0=1}^{n-1} X_j \sin [\pi (j+1/2) (k+1/2) / n].
+Y_k = 2 \sum_{j=0}^{n-1} X_j \sin [\pi (j+1/2) (k+1/2) / n].
 $$
 @end tex
 @ifinfo
