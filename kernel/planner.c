@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.107 2002-09-17 13:36:16 athena Exp $ */
+/* $Id: planner.c,v 1.108 2002-09-17 20:17:55 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -45,7 +45,6 @@
 
 static unsigned short canonicalize(unsigned short x)
 {
-     if (x & ESTIMATE) x |= IMPATIENCE_FLAGS;
      if (!(x & USE_SCORE)) x &= ~IMPATIENCE_FLAGS;
      return x;
 }
