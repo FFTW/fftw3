@@ -1,6 +1,6 @@
 #include "config.h"
 #include "bench.h"
-#include "math.h"
+#include <math.h>
 
 #define DG unsigned short
 #define ACC unsigned long
@@ -214,30 +214,41 @@ static void mul(const N a, const N b, N c)
 
 static REAL toreal(const N a)
 {
-     REAL h, l;
-     int i, sticky, bits, cnth, cntl;
+     REAL h, l, f;
+     int i, bits;
+     ACC r;
+     DG sticky;
 
      if (EXA != ZEROEXP) {
-	  h = l = 0.0;
-	  cnth = cntl = 0;
+	  f = IRADIX;
+	  i = LEN;
 
-	  for (i = LEN - 1, bits = 0;
-	       i >= 0 && bits < BITS_IN_REAL - SHFT + 1; --i, bits += SHFT)
-	       h = h * RADIX + AD[i], ++cnth;
+	  bits = 0;
+	  h = (r = AD[--i]) * f; f *= IRADIX;
+	  for (bits = 0; r > 0; ++bits)
+	       r >>= 1;
 
-	  for (bits = 0; i >= 0 && bits < BITS_IN_REAL - SHFT; 
-	       --i, bits += SHFT)
-	       l = l * RADIX + AD[i], ++cntl;
+	  /* first digit */
+	  while (bits + SHFT <= BITS_IN_REAL) {
+	       h += AD[--i] * f;  f *= IRADIX; bits += SHFT;
+	  }
 
-	  for (sticky = 0; i >= 0; --i)
-	       sticky |= AD[i];
+	  /* guard digit (leave one bit for sticky bit, hence `<' instead
+	     of `<=') */
+	  bits = 0; l = 0.0;
+	  while (bits + SHFT < BITS_IN_REAL) {
+	       l += AD[--i] * f;  f *= IRADIX; bits += SHFT;
+	  }
+	  
+	  /* sticky bit */
+	  sticky = 0;
+	  while (i > 0) 
+	       sticky |= AD[--i];
 
 	  if (sticky)
-	       l += 0.5;
+	       l += (RADIX / 2) * f;
 
-	  while (cntl--) l *= IRADIX;
 	  h += l;
-	  while (cnth--) h *= IRADIX;
 
 	  for (i = 0; i < EXA; ++i) h *= (REAL)RADIX;
 	  for (i = 0; i > EXA; --i) h *= IRADIX;
