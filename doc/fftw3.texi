@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.6 2003-01-19 00:35:52 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.7 2003-01-19 00:54:55 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -235,8 +235,11 @@ thank all the people who helped us in @ref{Acknowledgments}.
 @node  Tutorial, Other Stuff You Should Know, Introduction, Top
 @chapter Tutorial
 @menu
-* Complex One-Dimensional DFT::  
-* Complex Multi-Dimensional DFT::  
+* Complex One-Dimensional DFTs::  
+* Complex Multi-Dimensional DFTs::  
+* One-Dimensional DFTs of Real Data::  
+* Multi-Dimensional DFTs of Real Data::  
+* More DFTs of Real Data::      
 @end menu
 
 This chapter describes the basic usage of FFTW, i.e., how to compute
@@ -250,8 +253,8 @@ before you can use it in a program.  For the details of the
 installation, see @ref{Installation and Customization}.)
 
 @c ------------------------------------------------------------
-@node Complex One-Dimensional DFT, Complex Multi-Dimensional DFT, Tutorial, Tutorial
-@section Complex One-Dimensional DFT
+@node Complex One-Dimensional DFTs, Complex Multi-Dimensional DFTs, Tutorial, Tutorial
+@section Complex One-Dimensional DFTs
 
 The basic usage of FFTW is simple, and typically looks like:
 
@@ -373,8 +376,8 @@ Really Computes}.
 @cindex normalization
 
 @c ------------------------------------------------------------
-@node Complex Multi-Dimensional DFT,  , Complex One-Dimensional DFT, Tutorial
-@section Complex Multi-Dimensional DFT
+@node Complex Multi-Dimensional DFTs, One-Dimensional DFTs of Real Data, Complex One-Dimensional DFTs, Tutorial
+@section Complex Multi-Dimensional DFTs
 
 Multi-dimensional transforms work much the same way as one-dimensional
 transforms: you allocate arrays of @code{fftw_complex} (preferably
@@ -429,6 +432,38 @@ which allow one to efficiently combine multiple/strided transforms
 into a single FFTW plan, transform a subset of a larger
 multi-dimensional array, and/or to handle more general complex-number
 formats.  For more information, see @ref{FFTW Reference}.
+
+@c ------------------------------------------------------------
+@node One-Dimensional DFTs of Real Data, Multi-Dimensional DFTs of Real Data, Complex Multi-Dimensional DFTs, Tutorial
+@section One-Dimensional DFTs of Real Data
+
+@c ------------------------------------------------------------
+@node Multi-Dimensional DFTs of Real Data, More DFTs of Real Data, One-Dimensional DFTs of Real Data, Tutorial
+@section Multi-Dimensional DFTs of Real Data
+
+@c ------------------------------------------------------------
+@node More DFTs of Real Data,  , Multi-Dimensional DFTs of Real Data, Tutorial
+@section More DFTs of Real Data
+@menu
+* The Halfcomplex-format DFT::  
+* Real even/odd DFTs (cosine/sine transforms)::  
+* The Discrete Hartley Transform::  
+@end menu
+
+@c =========>
+@node The Halfcomplex-format DFT, Real even/odd DFTs (cosine/sine transforms), More DFTs of Real Data, More DFTs of Real Data
+@subsection The Halfcomplex-format DFT
+
+@c =========>
+@node Real even/odd DFTs (cosine/sine transforms), The Discrete Hartley Transform, The Halfcomplex-format DFT, More DFTs of Real Data
+@subsection Real even/odd DFTs (cosine/sine transforms)
+
+@c =========>
+@node The Discrete Hartley Transform,  , Real even/odd DFTs (cosine/sine transforms), More DFTs of Real Data
+@subsection The Discrete Hartley Transform
+
+Okay, so this is not really a DFT, but it's close.
+
 
 @c ************************************************************
 @node Other Stuff You Should Know, FFTW Reference, Tutorial, Top
