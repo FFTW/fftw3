@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.112 2002-09-12 20:10:05 athena Exp $ */
+/* $Id: ifftw.h,v 1.113 2002-09-12 20:28:43 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -491,8 +491,6 @@ planner *X(mkplanner_score)(void);
 #define NO_VRECURSE(plnr) \
    ((plnr->planner_flags & IMPATIENT) && \
     !(plnr->problem_flags & (CLASSIC_VRECURSE | FORCE_VRECURSE)))
-#define CLASSIC_VRECURSE_RESET(plnr) \
-   { if ((plnr)->flags & CLASSIC_VRECURSE) (plnr)->flags &= ~FORCE_VRECURSE; }
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */
