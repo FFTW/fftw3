@@ -57,8 +57,8 @@ static int sz(const bench_problem *p)
 
 static int prob_size_cmp(const void *p1_, const void *p2_)
 {
-     const bench_problem **p1 = (const bench_problem **) p1_;
-     const bench_problem **p2 = (const bench_problem **) p2_;
+     const bench_problem * const *p1 = (const bench_problem * const *) p1_;
+     const bench_problem * const *p2 = (const bench_problem * const *) p2_;
      return (sz(*p1) - sz(*p2));
 }
 
