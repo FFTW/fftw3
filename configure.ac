@@ -176,9 +176,10 @@ AC_SUBST(SIMD_CFLAGS)
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h limits.h c_asm.h intrinsics.h stdint.h])
+AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h limits.h c_asm.h intrinsics.h stdint.h DriverServices.h])
 dnl c_asm.h: Header file for enabling asm() on Digital Unix  
 dnl intrinsics.h: cray unicos
+dnl DriverServices.h: MacOS timer functions
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -220,7 +221,7 @@ AC_FUNC_ALLOCA
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
-AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime])
+AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime UpTime])
 AC_CHECK_DECLS([drand48, memalign, posix_memalign])
 
 dnl Cray UNICOS _rtc() (real-time clock) intrinsic

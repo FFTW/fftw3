@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.37 2003-07-24 22:58:10 athena Exp $ */
+/* $Id: cycle.h,v 1.38 2003-09-24 02:59:29 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -150,6 +150,24 @@ static __inline__ ticks getticks(void)
 }
 
 INLINE_ELAPSED(__inline__)
+
+#define HAVE_TICK_COUNTER
+#endif
+
+/* Apple's interface to the PPC time-base register (requires
+   flags -I/Developer/Headers/FlatCarbon/ -framework Carbon 
+   to compile and link, however). */
+#if defined(HAVE_UPTIME) && defined(HAVE_DRIVERSERVICES_H) && !defined(HAVE_TICK_COUNTER)
+#include <DriverServices.h>
+
+typedef AbsoluteTime ticks;
+#define getticks UpTime
+
+static __inline__ double elapsed(ticks t1, ticks t0)
+{
+     ticks td = SubAbsoluteFromAbsolute(t1, t0);
+     return td.lo + td.hi * 4294967296.0; 
+}
 
 #define HAVE_TICK_COUNTER
 #endif
