@@ -18,18 +18,15 @@
  *
  */
 
-/* $Id: conf.c,v 1.23 2003-07-05 17:05:51 athena Exp $ */
+/* $Id: conf.c,v 1.24 2004-04-03 02:18:27 stevenj Exp $ */
 
 #include "dft.h"
 
 static const solvtab s =
 {
      SOLVTAB(X(dft_indirect_register)),
-     SOLVTAB(X(dft_rank0_register)),
      SOLVTAB(X(dft_rank_geq2_register)),
      SOLVTAB(X(dft_vrank_geq1_register)),
-     SOLVTAB(X(dft_vrank2_transpose_register)),
-     SOLVTAB(X(dft_vrank3_transpose_register)),
      SOLVTAB(X(dft_buffered_register)),
      SOLVTAB(X(dft_generic_register)),
      SOLVTAB(X(dft_rader_register)),

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.24 2004-03-23 16:49:01 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.25 2004-04-03 02:18:27 stevenj Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -36,6 +36,7 @@ typedef struct {
 typedef struct {
      plan_dft super;
      plan *cld;
+     int ishift, oshift;
      int os;
      int n;
 } P;
@@ -48,23 +49,29 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      UNUSED(ii);
 
+     ri += ego->ishift;
+     ro += ego->oshift;
+
      { /* transform vector of real & imag parts: */
 	  plan_rdft *cld = (plan_rdft *) ego->cld;
 	  cld->apply((plan *) cld, ri, ro);
      }
 
-     os = ego->os;
      n = ego->n;
-     for (i = 1; i < (n + 1)/2; ++i) {
-	  E rop, iop, iom, rom;
-	  rop = ro[os * i];
-	  iop = io[os * i];
-	  rom = ro[os * (n - i)];
-	  iom = io[os * (n - i)];
-	  ro[os * i] = rop - iom;
-	  io[os * i] = iop + rom;
-	  ro[os * (n - i)] = rop + iom;
-	  io[os * (n - i)] = iop - rom;
+     if (n > 1) {
+	  io += ego->oshift;
+	  os = ego->os;
+	  for (i = 1; i < (n + 1)/2; ++i) {
+	       E rop, iop, iom, rom;
+	       rop = ro[os * i];
+	       iop = io[os * i];
+	       rom = ro[os * (n - i)];
+	       iom = io[os * (n - i)];
+	       ro[os * i] = rop - iom;
+	       io[os * i] = iop + rom;
+	       ro[os * (n - i)] = rop + iom;
+	       io[os * (n - i)] = iop - rom;
+	  }
      }
 }
 
@@ -86,16 +93,13 @@ static void print(const plan *ego_, printer *p)
      p->print(p, "(dft-r2hc-%d%(%p%))", ego->n, ego->cld);
 }
 
-#define ALLOW_RANK0 0 /* disable for now, subject to testing */
 
 static int applicable0(const problem *p_)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
           return ((p->sz->rnk == 1 && p->vecsz->rnk == 0)
-#if ALLOW_RANK0
 		  || p->sz->rnk == 0
-#endif
 	       );
      }
 
@@ -120,6 +124,9 @@ static int applicable(const problem *p_, const planner *plnr)
 	      split(p->ro, p->io, p->sz->dims[0].n, p->sz->dims[0].os))
 	       return 1;
 
+	  if (p->sz->rnk == 1)
+	       return 1;
+
 	  return !(NO_UGLYP(plnr));
      }
 }
@@ -129,6 +136,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      const problem_dft *p;
      plan *cld;
+     int ishift = 0, oshift = 0;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -143,26 +151,34 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      {
 	  tensor *ri_vec = X(mktensor_1d)(2, p->ii - p->ri, p->io - p->ro);
 	  tensor *cld_vec = X(tensor_append)(ri_vec, p->vecsz);
+	  int i;
+	  for (i = 0; i < cld_vec->rnk; ++i) { /* make all istrides > 0 */
+	       if (cld_vec->dims[i].is < 0) {
+		    int nm1 = cld_vec->dims[i].n - 1;
+		    ishift -= nm1 * (cld_vec->dims[i].is *= -1);
+		    oshift -= nm1 * (cld_vec->dims[i].os *= -1);
+	       }
+	  }
 	  cld = X(mkplan_d)(plnr, 
 			    X(mkproblem_rdft_1)(p->sz, cld_vec, 
-						p->ri, p->ro, R2HC));
+						p->ri + ishift, 
+						p->ro + oshift, R2HC));
 	  X(tensor_destroy2)(ri_vec, cld_vec);
      }
      if (!cld) return (plan *)0;
 
      pln = MKPLAN_DFT(P, &padt, apply);
 
-#if ALLOW_RANK0
      if (p->sz->rnk == 0) {
 	  pln->n = 1;
 	  pln->os = 0;
      }
-     else
-#endif
-     {
+     else {
 	  pln->n = p->sz->dims[0].n;
 	  pln->os = p->sz->dims[0].os;
      }
+     pln->ishift = ishift;
+     pln->oshift = oshift;
 
      pln->cld = cld;
      

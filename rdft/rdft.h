@@ -78,11 +78,11 @@ solver *X(mksolver_rdft_r2r_direct)(kr2r k, const kr2r_desc *desc);
 extern void (*X(khc2hc_register_hook))(planner *, khc2hc, const hc2hc_desc *);
 
 void X(rdft_rank0_register)(planner *p);
+void X(rdft_rank0_vrank2_register)(planner *p);
+void X(rdft_vrank3_transpose_register)(planner *p);
 void X(rdft_rank_geq2_register)(planner *p);
 void X(rdft_indirect_register)(planner *p);
 void X(rdft_vrank_geq1_register)(planner *p);
-void X(rdft_vrank2_transpose_register)(planner *p);
-void X(rdft_vrank3_transpose_register)(planner *p);
 void X(rdft_buffered_register)(planner *p);
 void X(rdft_generic_register)(planner *p);
 void X(rdft_rader_hc2hc_register)(planner *p);

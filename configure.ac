@@ -210,6 +210,7 @@ AC_CHECK_SIZEOF(void *)], [$ac_includes_default
 #  include <stdint.h>
 #endif])
 
+AC_CHECK_SIZEOF(float)
 AC_CHECK_SIZEOF(double)
 AC_CHECK_SIZEOF(long double)
 if test $PRECISION = l; then
