@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.2 2002-07-28 20:28:43 stevenj Exp $ */
+/* $Id: problem2.c,v 1.3 2002-07-28 21:33:07 stevenj Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -33,7 +33,8 @@ static void destroy(problem *ego_)
 static unsigned int hash(const problem *p_)
 {
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
-     tensor psz = {1, (iodim *) &p->sz};
+     tensor psz = {1, 0};
+     psz.dims = (iodim *) &p->sz;
      return (0xDEADBEEF
 	     ^ ((p->r == p->rio) * 31)
 	     ^ ((p->r == p->iio) * 29)
@@ -49,8 +50,10 @@ static int equal(const problem *ego_, const problem *problem_)
      if (ego_->adt == problem_->adt) {
           const problem_rdft2 *e = (const problem_rdft2 *) ego_;
           const problem_rdft2 *p = (const problem_rdft2 *) problem_;
-	  tensor psz = {1, (iodim *) &p->sz};
-	  tensor esz = {1, (iodim *) &e->sz};
+	  tensor psz = {1, 0};
+	  tensor esz = {1, 0};
+	  psz.dims = (iodim *) &p->sz;
+	  esz.dims = (iodim *) &e->sz;
 
           return (1
 
@@ -73,7 +76,8 @@ static int equal(const problem *ego_, const problem *problem_)
 static void print(problem *ego_, printer *p)
 {
      problem_rdft2 *ego = (problem_rdft2 *) ego_;
-     tensor psz = {1, &ego->sz};
+     tensor psz = {1, 0};
+     psz.dims = &ego->sz;
      p->print(p, "(rdft2 %d %d %d %s %t %t)", 
 	      ego->r == ego->rio, 
 	      ego->r == ego->iio, 
@@ -88,7 +92,8 @@ static void zero(const problem *ego_)
      const problem_rdft2 *ego = (const problem_rdft2 *) ego_;
      tensor sz;
      if (ego->kind == R2HC) {
-	  tensor psz = {1, (iodim *) &ego->sz};
+	  tensor psz = {1, 0};
+	  psz.dims = (iodim *) &ego->sz;
 	  sz = X(tensor_append)(ego->vecsz, psz);
 	  X(rdft_zerotens)(sz, ego->r);
      }

@@ -210,7 +210,8 @@ void setup(struct problem *p)
 					     is * p->size, os * p->size), 
 		    ri, ro, p->sign);
      else if (p->rank == 1) {
-	  iodim sz = { p->n[0], 1, 2 };
+	  iodim sz = { 0, 1, 2 };
+	  sz.n = p->n[0];
 	  prblm = 
 	       FFTW(mkproblem_rdft2_d)(
 		    sz,

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.10 2002-07-28 20:10:59 stevenj Exp $ */
+/* $Id: verify.c,v 1.11 2002-07-28 21:33:07 stevenj Exp $ */
 
 #include "rdft.h"
 #include <math.h>
@@ -476,8 +476,9 @@ static void dofft(info *n, C *in, C *out)
 		   A(0); /* not implemented */
 	  }
      }
-     else
+     else {
 	  A(0);
+     }
 }
 
 static double acmp(info *nfo, C *a, C *b, uint n, const char *test, double tol)
@@ -708,12 +709,14 @@ static void really_verify(plan *pln, const problem_rdft *p,
 }
 
 static void really_verify2(plan *pln, const problem_rdft2 *p, 
-			  uint rounds, double tol)
+			   uint rounds, double tol)
 {
      C *inA, *inB, *inC, *outA, *outB, *outC, *tmp;
-     tensor psz = {1, (iodim *) &p->sz};
+     tensor psz = {1, 0};
      info nfo;
      uint n, vecn, N;
+     
+     psz.dims = (iodim *) &p->sz;
 
      if (rounds == 0)
 	  rounds = 20;  /* default value */
