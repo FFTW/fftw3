@@ -18,28 +18,28 @@
  *
  */
 
-/* $Id: rdft.h,v 1.2 2002-07-21 02:07:37 stevenj Exp $ */
+/* $Id: rdft.h,v 1.3 2002-07-21 04:12:19 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
 
-typedef enum { R2HC = 0, HC2R = 1, R2HCII = 2, HC2RIII = 3 } rdft_dir;
+typedef enum { R2HC = 0, HC2R = 1, R2HCII = 2, HC2RIII = 3 } rdft_kind;
 
 /* problem.c: */
 typedef struct {
      problem super;
      tensor sz, vecsz;
      R *I, *O;
-     rdft_dir dir;
+     rdft_kind kind;
 } problem_rdft;
 
 int X(problem_rdft_p)(const problem *p);
 #define RDFTP X(problem_rdft_p)  /* shorthand */
 
 problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
-			   R *I, R *O, rdft_dir dir);
+			   R *I, R *O, rdft_kind kind);
 problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
-			     R *I, R *O, rdft_dir dir);
+			     R *I, R *O, rdft_kind kind);
 
 /* verify.c: */
 void X(rdft_verify)(plan *pln, const problem_rdft *p, uint rounds);

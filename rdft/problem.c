@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.1 2002-07-21 01:46:03 stevenj Exp $ */
+/* $Id: problem.c,v 1.2 2002-07-21 04:12:19 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -35,7 +35,7 @@ static unsigned int hash(const problem *p_)
      const problem_rdft *p = (const problem_rdft *) p_;
      return (0
 	     ^ ((p->I == p->O) * 31)
-	     ^ (p->dir * 37)
+	     ^ (p->kind * 37)
 	     ^ (X(tensor_hash)(p->sz) * 10477)
              ^ (X(tensor_hash)(p->vecsz) * 27191)
 	  );
@@ -52,7 +52,7 @@ static int equal(const problem *ego_, const problem *problem_)
 		  /* both in-place or both out-of-place */
                   && ((p->I == p->O) == (e->I == e->O))
 
-		  && p->dir == e->dir
+		  && p->kind == e->kind
 
 		  && X(tensor_equal)(p->sz, e->sz)
                   && X(tensor_equal)(p->vecsz, e->vecsz)
@@ -90,7 +90,7 @@ static void print(problem *ego_, printer *p)
      const problem_rdft *ego = (const problem_rdft *) ego_;
      p->print(p, "(rdft %d %d %t %t)", 
 	      ego->I == ego->O, 
-	      ego->dir,
+	      ego->kind,
 	      &ego->sz,
 	      &ego->vecsz);
 }
@@ -118,7 +118,7 @@ int X(problem_rdft_p)(const problem *p)
 }
 
 problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
-			   R *I, R *O, rdft_dir dir)
+			   R *I, R *O, rdft_kind kind)
 {
      problem_rdft *ego =
           (problem_rdft *)X(mkproblem)(sizeof(problem_rdft), &padt);
@@ -127,7 +127,7 @@ problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
      ego->I = I;
      ego->O = O;
-     ego->dir = dir;
+     ego->kind = kind;
 
      A(FINITE_RNK(ego->sz.rnk));
      return &(ego->super);
@@ -135,10 +135,10 @@ problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
 
 /* Same as X(mkproblem_rdft), but also destroy input tensors. */
 problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,
-			     R *I, R *O, rdft_dir dir)
+			     R *I, R *O, rdft_kind kind)
 {
      problem *p;
-     p = X(mkproblem_rdft)(sz, vecsz, I, O, dir);
+     p = X(mkproblem_rdft)(sz, vecsz, I, O, kind);
      X(tensor_destroy)(vecsz);
      X(tensor_destroy)(sz);
      return p;
