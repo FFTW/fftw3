@@ -18,12 +18,11 @@
  *
  */
 
-/* $Id: kdft-dit.c,v 1.12 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: kdft-dit.c,v 1.13 2005-03-01 03:21:14 athena Exp $ */
 
 #include "ct.h"
 
 void X(kdft_dit_register)(planner *p, kdftw codelet, const ct_desc *desc)
 {
      X(regsolver_ct_directw)(p, codelet, desc, DECDIT);
-     X(regsolver_ct_directwbuf)(p, codelet, desc, DECDIT);
 }
