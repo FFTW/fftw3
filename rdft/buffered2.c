@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.21 2002-09-25 00:54:43 athena Exp $ */
+/* $Id: buffered2.c,v 1.22 2002-09-25 01:27:49 athena Exp $ */
 
 #include "rdft.h"
 
@@ -313,7 +313,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           goto nada;
 
      n = p->sz->dims[0].n;
-     vl = X(tensor_sz)(p->vecsz);
+     X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
      nbuf = X(uimax)(compute_nbuf(n, vl, ego), min_nbuf(p, n, vl));
      A(nbuf > 0);
@@ -325,14 +325,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
       */
      if (vl == 1) {
           bufdist = n;
-          ivs = ovs = 0;
      } else {
           bufdist =
                n + ((adt->skew_alignment + adt->skew - n % adt->skew_alignment)
                     % adt->skew_alignment);
           A(p->vecsz->rnk == 1);
-          ivs = p->vecsz->dims[0].is;
-          ovs = p->vecsz->dims[0].os;
      }
 
      /* initial allocation for the purpose of planning */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.39 2002-09-25 01:08:19 athena Exp $ */
+/* $Id: buffered.c,v 1.40 2002-09-25 01:27:49 athena Exp $ */
 
 #include "dft.h"
 
@@ -195,7 +195,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           goto nada;
 
      n = X(tensor_sz)(p->sz);
-     vl = X(tensor_sz)(p->vecsz);
+
+     X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
      nbuf = compute_nbuf(n, vl, ego);
      A(nbuf > 0);
@@ -207,14 +208,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
       */
      if (vl == 1) {
           bufdist = n;
-          ivs = ovs = 0;
      } else {
           bufdist =
                n + ((adt->skew_alignment + adt->skew - n % adt->skew_alignment)
                     % adt->skew_alignment);
           A(p->vecsz->rnk == 1);
-          ivs = p->vecsz->dims[0].is;
-          ovs = p->vecsz->dims[0].os;
      }
 
      /* attempt to keep real and imaginary part in the same order,

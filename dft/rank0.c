@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.22 2002-09-22 20:03:30 athena Exp $ */
+/* $Id: rank0.c,v 1.23 2002-09-25 01:27:49 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -194,8 +194,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      const problem_dft *p;
      P *pln;
-     uint vl;
-     int is, os;
 
      static const plan_adt padt = {
 	  X(dft_solve), X(null_awake), print, X(plan_null_destroy)
@@ -207,24 +205,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           return (plan *) 0;
 
      p = (const problem_dft *) p_;
-     if (p->vecsz->rnk == 0) {
-          vl = 1U;
-          is = os = 1;
-     } else {
-          vl = p->vecsz->dims[0].n;
-          is = p->vecsz->dims[0].is;
-          os = p->vecsz->dims[0].os;
-     }
-
      pln = MKPLAN_DFT(P, &padt, ego->adt->apply);
 
-     pln->vl = vl;
-     pln->ivs = is;
-     pln->ovs = os;
+     X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      pln->slv = ego;
 
      /* 2*vl loads, 2*vl stores */
-     X(ops_other)(4 * vl, &pln->super.super.ops);
+     X(ops_other)(4 * pln->vl, &pln->super.super.ops);
      return &(pln->super.super);
 }
 
