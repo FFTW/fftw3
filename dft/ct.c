@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.35 2003-05-16 17:34:16 athena Exp $ */
+/* $Id: ct.c,v 1.36 2003-05-20 00:12:36 athena Exp $ */
 
 #include "dft.h"
 
@@ -241,7 +241,7 @@ static solver *mksolver(int r, const int *buddies, int dec)
 
 void X(dft_ct_register)(planner *p)
 {
-     int *q;
+     const int *q;
      static const int r[] = {
 	  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64, 
 	  0
