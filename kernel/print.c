@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.4 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: print.c,v 1.5 2002-06-10 21:58:13 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
@@ -62,7 +62,7 @@ static void print(printer *p, const char *format, ...)
 		       case 'v': {
 			    /* print optional vector length */
 			    uint x = va_arg(ap, uint);
-			    if (x > 0) {
+			    if (x > 1) {
 				 sprintf(buf, "-x%u", x);
 				 goto putbuf;
 			    }

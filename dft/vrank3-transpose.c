@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.6 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.7 2002-06-10 21:58:13 athena Exp $ */
 
 /* rank-0, vector-rank-3, square transposition  */
 
@@ -50,13 +50,11 @@ static void t(R *rA, R *iA, uint n, int is, int js, uint vn, int vs)
 
 typedef solver S;
 
-typedef struct
-{
+typedef struct {
      plan_dft super;
      uint n, vl;
      int s0, s1, vs;
-}
-P;
+} P;
 
 static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
