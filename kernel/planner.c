@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.69 2002-09-12 14:02:51 athena Exp $ */
+/* $Id: planner.c,v 1.70 2002-09-12 14:58:56 athena Exp $ */
 #include "ifftw.h"
 #include <string.h> /* strlen */
 
@@ -203,7 +203,7 @@ static void rehash(planner *ego)
 	  for (h = 0; h < osiz; ++h) {
 	       solution *l = osol + h;
 	       if (l->state == H_VALID)
-		    hinsert0(ego, l->s, l->flags, l->sp, 0);
+		    hinsert0(ego, l->s, (uint)l->flags, l->sp, 0);
 	  }
 
 	  if (osol)
@@ -218,7 +218,8 @@ static void hinsert(planner *ego, md5uint *s, uint flags, slvdesc *sp)
 
      if ((l = hlookup(ego, s, flags))) {
 	  /* overwrite old solution */
-	  A(IMPATIENCE(flags) <= IMPATIENCE(((uint)l->flags)));
+	  if (IMPATIENCE(flags) > IMPATIENCE(((uint)l->flags)))
+	       return; /* don't overwrite less impatient solution */
 
 	  flags |= l->flags & BLESSING; /* ne me perdas illa die */
      } else {
@@ -318,7 +319,7 @@ static void exprt(planner *ego, printer *p)
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
 	       p->print(p, "(%s %d #x%x #x%M #x%M #x%M #x%M)\n",
-			l->sp->reg_nam, l->sp->reg_id, l->flags,
+			l->sp->reg_nam, l->sp->reg_id, (uint)l->flags,
 			l->s[0], l->s[1], l->s[2], l->s[3]);
 	  }
      }
