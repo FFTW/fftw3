@@ -19,6 +19,6 @@ rm -f config.cache
 # rebuild of codelets whenever genfft changes
 (
     ./configure --enable-maintainer-mode --disable-classic-mode #--enable-debug
-    cd genfft; make depend
-    cd genfft-k7; make depend
+    (cd genfft; make depend)
+    (cd genfft-k7; make depend)
 )
