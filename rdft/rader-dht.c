@@ -32,6 +32,7 @@
 typedef struct {
      solver super;
      uint min_prime;
+     rdft_kind kind;
 } S;
 
 typedef struct {
@@ -42,6 +43,7 @@ typedef struct {
      uint n, g, ginv;
      int is, os;
      plan *cld_omega;
+     rdft_kind kind;
 } P;
 
 /***************************************************************************/
@@ -52,18 +54,17 @@ typedef struct {
    plan/codelets for both Rader children.  (See also r2hc-hc2r.c) */
 #define R2HC_ONLY_CONV 1
 
-static void apply(plan *ego_, R *I, R *O)
+static int apply_aux(P *ego, uint r, int is, R *I, R *O)
 {
-     P *ego = (P *) ego_;
-     int is, os;
-     uint k, gpower, g, r;
+     int os;
+     uint k, gpower, g;
      R *buf, *omega;
      R r0;
 
-     r = ego->n; is = ego->is; g = ego->g; 
      buf = (R *) fftw_malloc(sizeof(R) * (r - 1), BUFFERS);
 
      /* First, permute the input, storing in buf: */
+     g = ego->g; 
      for (gpower = 1, k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, g, r)) {
 	  buf[k] = I[gpower * is];
      }
@@ -139,6 +140,20 @@ static void apply(plan *ego_, R *I, R *O)
 #endif
      A(gpower == 1);
 
+     X(free)(buf);
+
+     return os;
+}
+
+static void apply_r2hc(plan *ego_, R *I, R *O)
+{
+     P *ego = (P *) ego_;
+     uint r, k;
+     int os;
+
+     r = ego->n;
+     os = apply_aux(ego, r, ego->is, I, O);
+
      /* finally, unscramble DHT back into DFT:
         (sucks that this requires an extra pass) */
      for (k = 1; k < (r+1)/2; ++k) {
@@ -148,8 +163,28 @@ static void apply(plan *ego_, R *I, R *O)
 	  O[k * os] = 0.5 * (rp + rm);
 	  O[(r - k) * os] = 0.5 * (rp - rm);
      }
+}
 
-     X(free)(buf);
+static void apply_hc2r(plan *ego_, R *I, R *O)
+{
+     P *ego = (P *) ego_;
+     uint r, k;
+     int is;
+
+     r = ego->n;
+     is = ego->is;
+
+     /* before everything, scramble DFT into DHT (destroying input):
+        (sucks that this requires an extra pass) */
+     for (k = 1; k < (r+1)/2; ++k) {
+	  R a, b;
+	  a = I[k * is];
+	  b = I[(r - k) * is];
+	  I[k * is] = a + b;
+	  I[(r - k) * is] = a - b;
+     }
+
+     apply_aux(ego, r, is, I, O);
 }
 
 /***************************************************************************/
@@ -267,8 +302,8 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
 
-     p->print(p, "(rdft-rader-dht-r2hc-%u%ois=%oos=%(%p%)",
-              ego->n, ego->is, ego->os, ego->cld1);
+     p->print(p, "(rdft-rader-dht-%s-%u%ois=%oos=%(%p%)",
+              X(rdft_kind_str)(ego->kind), ego->n, ego->is, ego->os, ego->cld1);
      if (ego->cld2 != ego->cld1)
           p->print(p, "%(%p%)", ego->cld2);
      if (ego->cld_omega != ego->cld1 && ego->cld_omega != ego->cld2)
@@ -278,13 +313,13 @@ static void print(plan *ego_, printer *p)
 
 static int applicable(const solver *ego_, const problem *p_)
 {
-     UNUSED(ego_);
      if (RDFTP(p_)) {
+	  const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
           return (1
 		  && p->sz.rnk == 1
 		  && p->vecsz.rnk == 0
-		  && p->kind == R2HC
+		  && p->kind == ego->kind
 		  && X(is_prime)(p->sz.dims[0].n)
 		  && p->sz.dims[0].n > 2
 	       );
@@ -307,8 +342,9 @@ static int score(const solver *ego_, const problem *p_, int flags)
      return BAD;
 }
 
-static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
+static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
+     const S *ego = (const S *) ego_;
      const problem_rdft *p = (const problem_rdft *) p_;
      P *pln;
      uint n;
@@ -324,7 +360,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  X(rdft_solve), awake, print, destroy
      };
 
-     if (!applicable(ego, p_))
+     if (!applicable(ego_, p_))
 	  return (plan *) 0;
 
      n = p->sz.dims[0].n;
@@ -381,7 +417,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      X(free)(buf);
      buf = 0;
 
-     pln = MKPLAN_RDFT(P, &padt, apply);
+     pln = MKPLAN_RDFT(P, &padt, R2HC_KINDP(ego->kind) ? apply_r2hc : apply_hc2r);
+     pln->kind = ego->kind;
      pln->cld1 = cld1;
      pln->cld2 = cld2;
      pln->cld_omega = cld_omega;
@@ -396,7 +433,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->super.super.ops = X(ops_add)(cld1->ops, cld2->ops);
      pln->super.super.ops.other += (n - 1) * (2 + 3 + 2 + 2) + 3;
      pln->super.super.ops.add += (n - 1) * 2;
-     pln->super.super.ops.mul += (n - 1) * 3 - 2;
+     pln->super.super.ops.mul += (n - 1) * (R2HC_KINDP(ego->kind) ? 3 : 2) - 2;
 #if R2HC_ONLY_CONV
      pln->super.super.ops.other += (n - 1) - 2;
      pln->super.super.ops.add += 2 * (n - 1) - 4;
@@ -420,10 +457,11 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
 /* constructors */
 
-static solver *mksolver(uint min_prime)
+static solver *mksolver(rdft_kind kind, uint min_prime)
 {
      static const solver_adt sadt = { mkplan, score };
      S *slv = MKSOLVER(S, &sadt);
+     slv->kind = kind;
      slv->min_prime = min_prime;
      return &(slv->super);
 }
@@ -431,5 +469,6 @@ static solver *mksolver(uint min_prime)
 void X(rdft_rader_dht_register)(planner *p)
 {
      /* FIXME: what are good defaults? */
-     REGISTER_SOLVER(p, mksolver(RADER_MIN_GOOD));
+     REGISTER_SOLVER(p, mksolver(R2HC, RADER_MIN_GOOD));
+     REGISTER_SOLVER(p, mksolver(HC2R, RADER_MIN_GOOD));
 }
