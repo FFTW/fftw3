@@ -60,6 +60,10 @@ sub do_geometry {
     do_problem("of$geom", $doablep);
     do_problem("ib$geom", $doablep);
     do_problem("ob$geom", $doablep);
+    do_problem("/if$geom", $doablep);
+    do_problem("/of$geom", $doablep);
+    do_problem("/ib$geom", $doablep);
+    do_problem("/ob$geom", $doablep);
 }
 
 # given size, try all transform kinds (complex, real, etc.)
