@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.22 2002-07-14 21:12:14 stevenj Exp $ */
+/* $Id: planner.c,v 1.23 2002-07-14 21:33:02 stevenj Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -134,12 +134,15 @@ static void insert(planner *ego, problem *p, plan *pln, pair *sp)
      if (ego->cnt > ego->hashsiz)
           rehash(ego);
 
-     if (pln)
+     if (pln) {
           X(plan_use)(pln);
+	  l->blessed = pln->blessed;
+     }
+     else
+	  l->blessed = 0;
      l->pln = pln;
      l->sp = sp; 
      l->p = X(problem_dup)(p);
-     l->blessed = pln->blessed;
 
      really_insert(ego, l);
 }
