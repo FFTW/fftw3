@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.14 2002-08-10 23:30:39 stevenj Exp $ */
+/* $Id: indirect.c,v 1.15 2002-08-23 20:07:12 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -67,7 +67,6 @@ static void apply_before(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 static problem *mkcld_before(const problem_dft *p)
 {
-     uint i;
      tensor v, s;
      v = X(tensor_copy_inplace)(p->vecsz, INPLACE_OS);
      s = X(tensor_copy_inplace)(p->sz, INPLACE_OS);
@@ -100,7 +99,6 @@ static void apply_after(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 static problem *mkcld_after(const problem_dft *p)
 {
-     uint i;
      tensor v, s;
      v = X(tensor_copy_inplace)(p->vecsz, INPLACE_IS);
      s = X(tensor_copy_inplace)(p->sz, INPLACE_IS);

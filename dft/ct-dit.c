@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.19 2002-08-05 03:57:51 stevenj Exp $ */
+/* $Id: ct-dit.c,v 1.20 2002-08-23 20:07:12 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -38,7 +38,8 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
           int os = ego->os, ovs = ego->ovs;
 
           for (i = 0; i < vl; ++i)
-               ego->k.dit(ro + i * ovs, io + i * ovs, ego->W, ego->ios, m, os);
+               ego->k.dit(ro + i * ovs, io + i * ovs, ego->td->W,
+			  ego->ios, m, os);
      }
 }
 

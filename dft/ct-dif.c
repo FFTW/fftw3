@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dif.c,v 1.17 2002-08-05 03:57:51 stevenj Exp $ */
+/* $Id: ct-dif.c,v 1.18 2002-08-23 20:07:12 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -33,7 +33,8 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
           int is = ego->is, ivs = ego->ivs;
 
           for (i = 0; i < vl; ++i)
-               ego->k.dif(ri + i * ivs, ii + i * ivs, ego->W, ego->ios, m, is);
+               ego->k.dif(ri + i * ivs, ii + i * ivs, ego->td->W,
+			  ego->ios, m, is);
      }
 
      /* two-dimensional r x vl sub-transform: */

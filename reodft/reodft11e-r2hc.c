@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.1 2002-08-20 23:44:43 stevenj Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.2 2002-08-23 20:07:12 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -38,7 +38,6 @@ typedef struct {
      plan_rdft super;
      plan *cld;
      twid *td, *td2;
-     R *W, *W2;
      int is, os;
      uint n;
      rdft_kind kind;
@@ -49,7 +48,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
-     R *W = ego->W;
+     R *W = ego->td->W;
      R *buf;
      E cur;
 
@@ -83,7 +82,7 @@ static void apply_re11(plan *ego_, R *I, R *O)
 	  cld->apply((plan *) cld, buf, buf);
      }
 
-     W = ego->W2;
+     W = ego->td2->W;
      O[0] = W[0] * buf[0];
      for (i = 1; i < n - i; ++i) {
 	  E a, b;
@@ -108,7 +107,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
-     R *W = ego->W;
+     R *W = ego->td->W;
      R *buf;
      E cur;
 
@@ -142,7 +141,7 @@ static void apply_ro11(plan *ego_, R *I, R *O)
 	  cld->apply((plan *) cld, buf, buf);
      }
 
-     W = ego->W2;
+     W = ego->td2->W;
      O[0] = W[0] * buf[0];
      for (i = 1; i < n - i; ++i) {
 	  E a, b;
@@ -176,21 +175,11 @@ static void awake(plan *ego_, int flg)
      AWAKE(ego->cld, flg);
 
      if (flg) {
-          if (!ego->td) {
-               ego->td = X(mktwiddle)(reodft010e_tw, 4*ego->n, 1, ego->n/2+1);
-               ego->W = ego->td->W;
-          }
-          if (!ego->td2) {
-               ego->td2 = X(mktwiddle)(reodft11e_tw, 8*ego->n, 1, ego->n * 2);
-               ego->W2 = ego->td2->W;
-          }
+	  X(mktwiddle)(&ego->td, reodft010e_tw, 4*ego->n, 1, ego->n/2+1);
+	  X(mktwiddle)(&ego->td2, reodft11e_tw, 8*ego->n, 1, ego->n * 2);
      } else {
-          if (ego->td)
-               X(twiddle_destroy)(ego->td);
-          if (ego->td2)
-               X(twiddle_destroy)(ego->td2);
-          ego->td = ego->td2 = 0;
-          ego->W = ego->W2 = 0;
+	  X(twiddle_destroy)(&ego->td);
+	  X(twiddle_destroy)(&ego->td2);
      }
 }
 
@@ -274,7 +263,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->os = p->sz.dims[0].os;
      pln->cld = cld;
      pln->td = pln->td2 = 0;
-     pln->W = pln->W2 = 0;
      pln->kind = p->kind;
      
      pln->super.super.ops = cld->ops;

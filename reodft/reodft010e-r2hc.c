@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.4 2002-08-20 19:31:54 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.5 2002-08-23 20:07:12 athena Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -33,7 +33,6 @@ typedef struct {
      plan_rdft super;
      plan *cld;
      twid *td;
-     R *W;
      int is, os;
      uint n;
      rdft_kind kind;
@@ -78,7 +77,7 @@ static void apply_re01(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
-     R *W = ego->W;
+     R *W = ego->td->W;
      R *buf;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
@@ -128,7 +127,7 @@ static void apply_ro01(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
-     R *W = ego->W;
+     R *W = ego->td->W;
      R *buf;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
@@ -176,7 +175,7 @@ static void apply_re10(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
-     R *W = ego->W;
+     R *W = ego->td->W;
      R *buf;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
@@ -223,7 +222,7 @@ static void apply_ro10(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
-     R *W = ego->W;
+     R *W = ego->td->W;
      R *buf;
 
      buf = (R *) fftw_malloc(sizeof(R) * n, BUFFERS);
@@ -274,17 +273,10 @@ static void awake(plan *ego_, int flg)
 
      AWAKE(ego->cld, flg);
 
-     if (flg) {
-          if (!ego->td) {
-               ego->td = X(mktwiddle)(reodft010e_tw, 4*ego->n, 1, ego->n/2+1);
-               ego->W = ego->td->W;
-          }
-     } else {
-          if (ego->td)
-               X(twiddle_destroy)(ego->td);
-          ego->td = 0;
-          ego->W = 0;
-     }
+     if (flg) 
+	  X(mktwiddle)(&ego->td, reodft010e_tw, 4*ego->n, 1, ego->n/2+1);
+     else 
+	  X(twiddle_destroy)(&ego->td);
 }
 
 static void destroy(plan *ego_)
@@ -362,7 +354,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	 case REDFT10: pln = MKPLAN_RDFT(P, &padt, apply_re10); break;
 	 case RODFT01: pln = MKPLAN_RDFT(P, &padt, apply_ro01); break;
 	 case RODFT10: pln = MKPLAN_RDFT(P, &padt, apply_ro10); break;
-	 default: A(0);
+	 default: A(0); pln = 0; /* silence compiler */
      }
 
      pln->n = n;
@@ -370,7 +362,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->os = p->sz.dims[0].os;
      pln->cld = cld;
      pln->td = 0;
-     pln->W = 0;
      pln->kind = p->kind;
      
      pln->super.super.ops = cld->ops;

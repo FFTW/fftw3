@@ -28,7 +28,6 @@ typedef struct {
      plan_dft super;
      plan *cld;
      twid *td;
-     R *W;
      int os;
      uint r, m;
 } P;
@@ -54,7 +53,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
      
      osm = (m = ego->m) * (os = ego->os);
      n = m * r;
-     W = ego->W;
+     W = ego->td->W;
      for (j = 0; j < m; ++j, ro += os, io += os) {
 	  uint k;
 	  for (k = 0; k < r; ++k) {
@@ -94,19 +93,11 @@ static void awake(plan *ego_, int flg)
      };
 
      AWAKE(ego->cld, flg);
-     if (flg) {
-          if (!ego->td) {
-               ego->td = X(mktwiddle)(generic_tw,
-                                      ego->r * ego->m, ego->r, ego->m);
-               ego->W = ego->td->W;     /* cache for efficiency */
-          }
-     }
-     else {
-          if (ego->td)
-               X(twiddle_destroy)(ego->td);
-          ego->td = 0;
-	  ego->W = 0;
-     }
+     if (flg)
+	  X(mktwiddle)(&ego->td, generic_tw,
+		       ego->r * ego->m, ego->r, ego->m);
+     else 
+	  X(twiddle_destroy)(&ego->td);
 }
 
 static void destroy(plan *ego_)
@@ -185,7 +176,6 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->m = m;
      pln->cld = cld;
      pln->td = 0;
-     pln->W = 0;
 
      pln->super.super.ops = X(ops_zero);
      pln->super.super.ops.add = 4 * r * (r-1);

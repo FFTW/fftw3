@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.2 2002-08-19 23:48:56 stevenj Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.3 2002-08-23 20:07:12 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing. */
 
@@ -32,7 +32,6 @@ typedef struct {
      plan_rdft super;
      plan *cld;
      twid *td;
-     R *W;
      int is, os;
      uint n;
 } P;
@@ -45,7 +44,7 @@ static void apply(plan *ego_, R *I, R *O)
      P *ego = (P *) ego_;
      int is = ego->is, os = ego->os;
      uint i, n = ego->n;
-     R *W = ego->W;
+     R *W = ego->td->W;
      R *buf;
      E csum;
 
@@ -97,17 +96,10 @@ static void awake(plan *ego_, int flg)
 
      AWAKE(ego->cld, flg);
 
-     if (flg) {
-          if (!ego->td) {
-               ego->td = X(mktwiddle)(redft00e_tw, 2*ego->n, 1, (ego->n+1)/2);
-               ego->W = ego->td->W;
-          }
-     } else {
-          if (ego->td)
-               X(twiddle_destroy)(ego->td);
-          ego->td = 0;
-          ego->W = 0;
-     }
+     if (flg) 
+	  X(mktwiddle)(&ego->td, redft00e_tw, 2*ego->n, 1, (ego->n+1)/2);
+     else 
+	  X(twiddle_destroy)(&ego->td);
 }
 
 static void destroy(plan *ego_)
@@ -185,7 +177,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->os = p->sz.dims[0].os;
      pln->cld = cld;
      pln->td = 0;
-     pln->W = 0;
      
      pln->super.super.ops = cld->ops;
      /* FIXME */

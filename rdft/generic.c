@@ -29,7 +29,6 @@ typedef struct {
      plan_rdft super;
      plan *cld;
      twid *td;
-     R *W;
      int os;
      uint r, m;
      rdft_kind kind;
@@ -60,7 +59,7 @@ static void apply_dit(plan *ego_, R *I, R *O)
      
      osm = (m = ego->m) * (os = ego->os);
      n = m * r;
-     W = ego->W;
+     W = ego->td->W;
 
      X = O;
      YO = O + r * osm;
@@ -151,7 +150,7 @@ static void apply_dif(plan *ego_, R *I, R *O)
      
      ism = (m = ego->m) * (is = ego->os);
      n = m * r;
-     W = ego->W;
+     W = ego->td->W;
 
      X = I;
      YI = I + r * ism;
@@ -242,20 +241,12 @@ static void awake(plan *ego_, int flg)
      };
 
      AWAKE(ego->cld, flg);
-     if (flg) {
-          if (!ego->td) {
-	       /* FIXME: can we get away with fewer twiddles? */
-               ego->td = X(mktwiddle)(generic_tw,
-                                      ego->r * ego->m, ego->r, ego->m);
-	       ego->W = ego->td->W;
-          }
-     }
-     else {
-          if (ego->td)
-               X(twiddle_destroy)(ego->td);
-          ego->td = 0;
-	  ego->W = 0;
-     }
+     if (flg) 
+	  /* FIXME: can we get away with fewer twiddles? */
+	  X(mktwiddle)(&ego->td, generic_tw,
+		       ego->r * ego->m, ego->r, ego->m);
+     else 
+	  X(twiddle_destroy)(&ego->td);
 }
 
 static void destroy(plan *ego_)
@@ -343,7 +334,6 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->m = m;
      pln->cld = cld;
      pln->td = 0;
-     pln->W = 0;
      pln->kind = p->kind;
 
      pln->super.super.ops = X(ops_zero);

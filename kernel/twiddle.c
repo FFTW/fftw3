@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.15 2002-08-10 23:25:50 stevenj Exp $ */
+/* $Id: twiddle.c,v 1.16 2002-08-23 20:07:12 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -138,13 +138,15 @@ static R *compute(const tw_instr *instr, uint n, uint r, uint m)
      return W0;
 }
 
-twid *X(mktwiddle)(const tw_instr *instr, uint n, uint r, uint m)
+void X(mktwiddle)(twid **pp, const tw_instr *instr, uint n, uint r, uint m)
 {
      twid *p;
 
+     if (*pp) return;  /* already created */
+
      if ((p = lookup(instr, n, r, m))) {
           ++p->refcnt;
-          return p;
+	  goto done;
      }
 
      p = (twid *) fftw_malloc(sizeof(twid), TWIDDLES);
@@ -159,11 +161,14 @@ twid *X(mktwiddle)(const tw_instr *instr, uint n, uint r, uint m)
      p->cdr = twlist;
      twlist = p;
 
-     return p;
+ done:
+     *pp = p;
+     return;
 }
 
-void X(twiddle_destroy)(twid *p)
+void X(twiddle_destroy)(twid **pp)
 {
+     twid *p = *pp;
      if (p) {
           twid **q;
           if ((--p->refcnt) == 0) {
@@ -173,11 +178,13 @@ void X(twiddle_destroy)(twid *p)
                          *q = p->cdr;
                          X(free)(p->W);
                          X(free)(p);
-                         return;
+			 goto done;
                     }
                }
-
                A(0 /* can't happen */ );
           }
      }
+ done:
+     *pp = 0; /* destroy pointer */
+     return;
 }

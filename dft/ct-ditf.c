@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-ditf.c,v 1.11 2002-08-05 03:57:51 stevenj Exp $ */
+/* $Id: ct-ditf.c,v 1.12 2002-08-23 20:07:12 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -32,7 +32,7 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      UNUSED(ro);  /* == ri */
      UNUSED(io);  /* == ii */
-     ego->k.difsq(ri, ii, ego->W, ego->ios, ego->vs, ego->m, ego->is);
+     ego->k.difsq(ri, ii, ego->td->W, ego->ios, ego->vs, ego->m, ego->is);
 
      /* two-dimensional r x vl sub-transform: */
      cld->apply(cld0, ri, ii, ri, ii);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc.c,v 1.6 2002-08-05 03:57:51 stevenj Exp $ */
+/* $Id: hc2hc.c,v 1.7 2002-08-23 20:07:12 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "rdft.h"
@@ -45,16 +45,12 @@ static void awake(plan *ego_, int flg)
      AWAKE(ego->cldm, flg);
 
      if (flg) {
-          if (!ego->td) {
-	       const tw_instr *tw = ego->slv->desc->tw;
-               ego->td = X(mktwiddle)(tw, ego->n, ego->r, (ego->m + 1) / 2);
-	       /* 0th twiddle is handled by cld0: */
-               ego->W = ego->td->W + X(twiddle_length)(ego->r, tw);
-          }
+	  const tw_instr *tw = ego->slv->desc->tw;
+	  X(mktwiddle)(&ego->td, tw, ego->n, ego->r, (ego->m + 1) / 2);
+	  /* 0th twiddle is handled by cld0: */
+	  ego->W = ego->td->W + X(twiddle_length)(ego->r, tw);
      } else {
-          if (ego->td)
-               X(twiddle_destroy)(ego->td);
-          ego->td = 0;
+	  X(twiddle_destroy)(&ego->td);
           ego->W = 0;
      }
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-dft.c,v 1.1 2002-08-23 17:22:17 athena Exp $ */
+/* $Id: rdft2-dft.c,v 1.2 2002-08-23 20:07:12 athena Exp $ */
 
 /* Compute RDFT of even size via a DFT of size n/2 */
 
@@ -33,7 +33,6 @@ typedef struct {
      plan_dft super;
      plan *cld;
      twid *td;
-     R *W;
      int is, os;
      uint n;
 } P;
@@ -50,7 +49,7 @@ static void apply(plan *ego_, R *r, R *rio, R *iio)
      }
 
      {
-	  R *W = ego->W;
+	  R *W = ego->td->W;
 	  uint n = ego->n / 2;
 	  uint i;
 	  R *riom, *iiom;
@@ -102,28 +101,20 @@ static void awake(plan *ego_, int flg)
      AWAKE(ego->cld, flg);
 
      if (flg) {
-          if (!ego->td) {
-	       static const tw_instr twinstr[] = {
-		    {TW_FULL, 0, 2},
-		    {TW_NEXT, 1, 0}
-	       };
-               ego->td = X(mktwiddle)(twinstr, ego->n, 2, 
-				      (ego->n / 2 + 1) / 2);
-               ego->W = ego->td->W;
-          }
+	  static const tw_instr twinstr[] = {
+	       {TW_FULL, 0, 2},
+	       {TW_NEXT, 1, 0}
+	  };
+	  X(mktwiddle)(&ego->td, twinstr, ego->n, 2, 
+		       (ego->n / 2 + 1) / 2);
      } else {
-          if (ego->td)
-               X(twiddle_destroy)(ego->td);
-          ego->td = 0;
-          ego->W = 0;
+	  X(twiddle_destroy)(&ego->td);
      }
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     if (ego->td)
-	  X(twiddle_destroy)(ego->td);
      X(plan_destroy) (ego->cld);
      X(free)(ego);
 }
@@ -140,6 +131,7 @@ static int applicable(const solver *ego_, const problem *p_)
      if (RDFT2P(p_)) {
 	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
 	  return (1 
+		  && R2HC_KINDP(p->kind)
 		  && p->sz.rnk == 1
 		  && (p->sz.dims[0].n % 2) == 0
 		  && p->vecsz.rnk == 0
@@ -192,7 +184,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->is = d[0].is;
      pln->cld = cld;
      pln->td = 0;
-     pln->W = 0;
 
      pln->super.super.ops = cld->ops; /* FIXME */
 

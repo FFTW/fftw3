@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.84 2002-08-12 17:31:37 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.85 2002-08-23 20:07:12 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -520,8 +520,8 @@ typedef struct twid_s {
      struct twid_s *cdr;
 } twid;
 
-twid *X(mktwiddle)(const tw_instr *instr, uint n, uint r, uint m);
-void X(twiddle_destroy)(twid *p);
+void X(mktwiddle)(twid **pp, const tw_instr *instr, uint n, uint r, uint m);
+void X(twiddle_destroy)(twid **pp);
 uint X(twiddle_length)(uint r, const tw_instr *p);
 
 /*-----------------------------------------------------------------------*/

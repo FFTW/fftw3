@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.17 2002-08-05 03:57:51 stevenj Exp $ */
+/* $Id: ct.c,v 1.18 2002-08-23 20:07:12 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -41,18 +41,11 @@ static void awake(plan *ego_, int flg)
 
      AWAKE(cld, flg);
 
-     if (flg) {
-          if (!ego->td) {
-               ego->td = X(mktwiddle)(ego->slv->desc->tw, 
-				      ego->r * ego->m, ego->r, ego->m);
-               ego->W = ego->td->W;	/* cache for efficiency */
-          }
-     } else {
-          if (ego->td)
-               X(twiddle_destroy)(ego->td);
-          ego->td = 0;
-          ego->W = 0;
-     }
+     if (flg) 
+	  X(mktwiddle)(&ego->td, ego->slv->desc->tw, 
+		       ego->r * ego->m, ego->r, ego->m);
+     else
+	  X(twiddle_destroy)(&ego->td);
 }
 
 static void print(plan *ego_, printer *p)
