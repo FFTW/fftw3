@@ -122,7 +122,7 @@ let access_twiddle = access Twiddle
 let make_named name = Named name
 
 let unparse = function
-  | Temporary x -> "t" ^ (string_of_int x)
+  | Temporary x -> "T" ^ (string_of_int x)
   | Named s -> s
   | RealArrayElem (a, x) -> "Re(" ^ (arrayToString a) ^ "[" ^
       (string_of_int x) ^ "])"

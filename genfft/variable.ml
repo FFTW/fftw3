@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: variable.ml,v 1.4 2002-07-28 18:50:09 athena Exp $ *)
+(* $Id: variable.ml,v 1.5 2002-09-14 11:56:56 athena Exp $ *)
 
 type variable = 
       (* temporary variables generated automatically *)
@@ -94,7 +94,7 @@ let varname_of_int k =
     string_of_int k
 
 let unparse = function
-  | Temporary k -> "t" ^ (varname_of_int k)
+  | Temporary k -> "T" ^ (varname_of_int k)
   | Constant (_, name) -> name
   | Locative (_, _, name, i) -> name i
 
