@@ -3,14 +3,14 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 CFLAGS = @CFLAGS@ @CODELET_OPTIM@
 noinst_LTLIBRARIES = libdft_inplace.la
 
-F1_CODELETS = f1_2.c f1_3.c f1_4.c f1_5.c f1_6.c f1_7.c f1_8.c f1_9.c	\
-f1_10.c f1_12.c f1_15.c f1_16.c f1_32.c f1_64.c
+F1 = f1_2.c f1_3.c f1_4.c f1_5.c f1_6.c f1_7.c f1_8.c f1_9.c f1_10.c	\
+f1_12.c f1_15.c f1_16.c f1_32.c f1_64.c
 
-F2_CODELETS = f2_4.c f2_8.c f2_16.c f2_32.c f2_64.c
+F2 = f2_4.c f2_8.c f2_16.c f2_32.c f2_64.c
 
-Q1_CODELETS = q1_2.c q1_4.c q1_8.c
+Q1 = q1_2.c q1_4.c q1_8.c
 
-ALL_CODELETS = $(F1_CODELETS) $(F2_CODELETS) $(Q1_CODELETS) 
+ALL_CODELETS = $(F1) $(F2) $(Q1)
 
 BUILT_SOURCES=$(ALL_CODELETS) $(CODLIST)
 
