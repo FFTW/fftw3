@@ -8,7 +8,7 @@ shift
 
 echo "#ifdef HAVE_FMA"
 echo
-  $genfft -fma -scheduler-hack $*
+  $genfft -fma -reorder-insns $*
 echo
 echo "#else /* HAVE_FMA */"
 echo

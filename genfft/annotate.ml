@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.16 2005-02-11 02:47:38 athena Exp $ *)
+(* $Id: annotate.ml,v 1.17 2005-02-24 23:59:38 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.16 2005-02-11 02:47:38 athena Exp $ *)
+(* $Id: annotate.ml,v 1.17 2005-02-24 23:59:38 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -117,21 +117,24 @@ let rec linearize = function
 
   | x -> x 
 
-(* true if A and B are friends.  Two distinct instructions are friends
-   if they have the same set of input variables, and both assign
-   temporary variables.  We do not move instructions that assign
-   memory locations, because this move may make the program incorrect.
-   An instruction is a friend of itself.  *)
-let friendp a b =
-  let subset a b =
-    List.for_all (fun x -> List.exists (fun y -> x == y) b) a
-  in
-  a == b ||
-    (let Assign (av, ax) = a and Assign (bv, bx) = b in
-       is_temporary av &&
-       is_temporary bv &&
-       (let va = Expr.find_vars ax and vb = Expr.find_vars bx in
-       subset va vb && subset vb va))
+let subset a b =
+  List.for_all (fun x -> List.exists (fun y -> x == y) b) a
+
+let use_same_vars (Assign (av, ax)) (Assign (bv, bx)) =
+  let va = Expr.find_vars ax and vb = Expr.find_vars bx in
+  subset va vb && subset vb va
+
+let store_to_same_class (Assign (av, ax)) (Assign (bv, bx)) =
+  is_locative av &&
+  is_locative bv &&
+  Variable.same_class av bv
+
+let loads_from_same_class (Assign (av, ax)) (Assign (bv, bx)) =
+  match (ax, bx) with
+    | (Load a), (Load b) when 
+	Variable.is_locative a && Variable.is_locative b 
+	-> Variable.same_class a b
+    | _ -> false
 
 (* extract instructions from schedule *)
 let rec sched_to_ilist = function
@@ -140,28 +143,49 @@ let rec sched_to_ilist = function
   | Seq (a, b) -> (sched_to_ilist a) @ (sched_to_ilist b)
   | _ -> failwith "sched_to_ilist" (* Par blocks removed by linearize *)
 
-let rec move_friends sched =
-  let rec find_friends insn friends foes = function
-    | [] -> (friends, foes)
-    | a :: b -> 
-	if friendp a insn then
-	  find_friends insn (a :: friends) foes b
-	else
-	  find_friends insn friends (a :: foes) b
-  in
+let rec find_friends friendp insn friends foes = function
+  | [] -> (friends, foes)
+  | a :: b -> 
+      if (a == insn) || (friendp a insn) then
+	find_friends friendp insn (a :: friends) foes b
+      else
+	find_friends friendp insn friends (a :: foes) b
+
+(* schedule all instructions in the equivalence class determined
+   by friendp at the point where the last one
+   is executed *)
+let rec delay_friends friendp sched =
   let rec recur insns = function
     | Done -> (Done, insns)
     | Instr a ->
-	let (friends, foes) = find_friends a [] [] insns in
+	let (friends, foes) = find_friends friendp a [] [] insns in
+	(Schedule.sequentially friends), foes
+    | Seq (a, b) ->
+	let (b', insnsb) = recur insns b in
+	let (a', insnsa) = recur insnsb a in
+	(Seq (a', b')), insnsa
+    | _ -> failwith "delay_friends"
+  in match recur (sched_to_ilist sched) sched with
+  | (s, []) -> s (* assert that all insns have been used *)
+  | _ -> failwith "delay_friends"
+
+(* schedule all instructions in the equivalence class determined
+   by friendp at the point where the first one
+   is executed *)
+let rec anticipate_friends friendp sched =
+  let rec recur insns = function
+    | Done -> (Done, insns)
+    | Instr a ->
+	let (friends, foes) = find_friends friendp a [] [] insns in
 	(Schedule.sequentially friends), foes
     | Seq (a, b) ->
 	let (a', insnsa) = recur insns a in
 	let (b', insnsb) = recur insnsa b in
 	(Seq (a', b')), insnsb
-    | _ -> failwith "move_friends"
+    | _ -> failwith "anticipate_friends"
   in match recur (sched_to_ilist sched) sched with
   | (s, []) -> s (* assert that all insns have been used *)
-  | _ -> failwith "move_friends"
+  | _ -> failwith "anticipate_friends"
 
 let pair_stores buddy_list sched =
   let rec find_buddy v = function
@@ -259,7 +283,29 @@ let annotate list_of_pairable_stores schedule =
   in 
   let () = Util.info "begin annotate" in
   let x = linearize schedule in
-  let x = if !Magic.scheduler_hack then linearize(move_friends x) else x in
+  let x = 
+    if !Magic.reorder_insns then 
+      linearize(anticipate_friends use_same_vars x) 
+    else 
+      x
+  in
+
+  (* delay stores to the real and imaginary parts of the same number *)
+  let x = 
+    if !Magic.reorder_stores then 
+      linearize(delay_friends store_to_same_class x) 
+    else
+      x
+  in
+
+  (* move loads of the real and imaginary parts of the same number *)
+  let x = 
+    if !Magic.reorder_loads then 
+      linearize(anticipate_friends loads_from_same_class x) 
+    else 
+      x
+  in
+
   let x = pair_stores list_of_pairable_stores x in
   let x = analyze [] x in
   let res = rewrite_declarations true x in

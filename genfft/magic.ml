@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.15 2003-07-09 21:39:16 athena Exp $ *)
+(* $Id: magic.ml,v 1.16 2005-02-24 23:59:38 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -53,7 +53,9 @@ let network_transposition = ref true
 let inklude = ref ""
 let generic_arith = ref false
 let list_schedule_threshold = ref 0
-let scheduler_hack = ref false
+let reorder_insns = ref false
+let reorder_loads = ref false
+let reorder_stores = ref false
 
 (* command-line parser for magic parameters *)
 let undocumented = " Undocumented voodoo parameter"
@@ -122,8 +124,12 @@ let speclist = [
   "-network-transposition", set_bool network_transposition, undocumented;
   "-no-network-transposition", unset_bool network_transposition, undocumented;
 
-  "-scheduler-hack", set_bool scheduler_hack, undocumented;
-  "-no-scheduler-hack", unset_bool scheduler_hack, undocumented;
+  "-reorder-insns", set_bool reorder_insns, undocumented;
+  "-no-reorder-insns", unset_bool reorder_insns, undocumented;
+  "-reorder-loads", set_bool reorder_loads, undocumented;
+  "-no-reorder-loads", unset_bool reorder_loads, undocumented;
+  "-reorder-stores", set_bool reorder_stores, undocumented;
+  "-no-reorder-stores", unset_bool reorder_stores, undocumented;
 
   "-vneg", set_bool vneg, undocumented;
   "-fma", set_bool enable_fma, undocumented;
