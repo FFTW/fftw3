@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.16 2004-04-03 02:31:00 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.17 2004-04-06 00:18:29 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -439,10 +439,22 @@ static void transpose_toms513(R *a, int nx, int ny, int N,
 	  
 	  i1 = i;
 	  kmi = k - i;
-	  memcpy(b, &a[N * i1], N * sizeof(R));
 	  i1c = kmi;
-	  memcpy(c, &a[N * i1c], N * sizeof(R));
-	  
+	  switch (N) {
+	      case 1:
+		   b[0] = a[i1];
+		   c[0] = a[i1c];
+		   break;
+	      case 2:
+		   b[0] = a[2*i1];
+		   b[1] = a[2*i1+1];
+		   c[0] = a[2*i1c];
+		   c[1] = a[2*i1c+1];
+		   break;
+	      default:
+		   memcpy(b, &a[N * i1], N * sizeof(R));
+		   memcpy(c, &a[N * i1c], N * sizeof(R));
+	  }
 	  while (1) {
 	       i2 = ny * i1 - k * (i1 / nx);
 	       i2c = k - i2;
@@ -459,16 +471,41 @@ static void transpose_toms513(R *a, int nx, int ny, int N,
 		    c = d;
 		    break;
 	       }
-	       memcpy(&a[N * i1], &a[N * i2], 
-		      N * sizeof(R));
-	       memcpy(&a[N * i1c], &a[N * i2c], 
-		      N * sizeof(R));
+	       switch (N) {
+		   case 1:
+			a[i1] = a[i2];
+			a[i1c] = a[i2c];
+			break;
+		   case 2:
+			a[2*i1] = a[2*i2];
+			a[2*i1+1] = a[2*i2+1];
+			a[2*i1c] = a[2*i2c];
+			a[2*i1c+1] = a[2*i2c+1];
+			break;
+		   default:
+			memcpy(&a[N * i1], &a[N * i2], 
+			       N * sizeof(R));
+			memcpy(&a[N * i1c], &a[N * i2c], 
+			       N * sizeof(R));
+	       }
 	       i1 = i2;
 	       i1c = i2c;
 	  }
-	  memcpy(&a[N * i1], b, N * sizeof(R));
-	  memcpy(&a[N * i1c], c, N * sizeof(R));
-	  
+	  switch (N) {
+	      case 1:
+		   a[i1] = b[0];
+		   a[i1c] = c[0];
+		   break;
+	      case 2:
+		   a[2*i1] = b[0];
+		   a[2*i1+1] = b[1];
+		   a[2*i1c] = c[0];
+		   a[2*i1c+1] = c[1];
+		   break;
+	      default:
+		   memcpy(&a[N * i1], b, N * sizeof(R));
+		   memcpy(&a[N * i1c], c, N * sizeof(R));
+	  }
 	  if (ncount >= mn)
 	       break;	/* we've moved all elements */
 	  
