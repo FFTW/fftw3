@@ -31,6 +31,7 @@ let inline_single = ref true
 let inline_loads = ref false
 let inline_loads_constants = ref false
 let inline_constants = ref true
+let trivial_stores = ref false
 let loopo = ref false
 
 let rader_min = ref 13
@@ -106,6 +107,9 @@ let speclist =  [
 
   "-inline-constants", set_bool inline_constants, undocumented;
   "-no-inline-constants", unset_bool inline_constants, undocumented;
+
+  "-trivial-stores", set_bool trivial_stores, undocumented;
+  "-no-trivial-stores", unset_bool trivial_stores, undocumented;
 
   "-randomized-cse", set_bool randomized_cse, undocumented;
   "-no-randomized-cse", unset_bool randomized_cse, undocumented;

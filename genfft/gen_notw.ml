@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.9 2002-06-20 19:04:37 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.10 2002-06-22 02:19:20 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.9 2002-06-20 19:04:37 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.10 2002-06-22 02:19:20 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -116,7 +116,7 @@ let generate n =
     "}\n"
 
   in
-  (C.unparse cvsid tree0) ^ "\n" ^ loop ^ desc ^ init
+  (unparse cvsid vardeclinfo tree0) ^ "\n" ^ loop ^ desc ^ init
 
 
 let main () =

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: to_alist.ml,v 1.2 2002-06-18 21:48:41 athena Exp $ *)
+(* $Id: to_alist.ml,v 1.3 2002-06-22 02:19:20 athena Exp $ *)
 
 (*************************************************************
  * Conversion of the dag to an assignment list
@@ -93,7 +93,9 @@ let with_varM v x =
 
 let inlineM = returnM
 
-let with_tempM x = with_varM (fresh ()) x
+let with_tempM x = match x with
+| Load v when Variable.is_temporary v -> inlineM x (* avoid trivial moves *)
+|  _ -> with_varM (fresh ()) x
 
 (* declare a temporary only if node is used more than once *)
 let with_temp_maybeM node x =
@@ -168,6 +170,7 @@ let rec expr_of_nodeM x =
           with_temp_maybeM x (Num a)
     | Store (v, x) -> 
         expr_of_nodeM x >>= 
+	(if !Magic.trivial_stores then with_tempM else inlineM) >>=
         with_varM v 
 
     | Plus a -> 

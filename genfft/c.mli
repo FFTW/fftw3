@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.mli,v 1.3 2002-06-20 22:51:33 athena Exp $ *)
+(* $Id: c.mli,v 1.4 2002-06-22 02:19:20 athena Exp $ *)
 
 type stride = 
   | SVar of string
@@ -66,6 +66,6 @@ val unparse_decl : c_decl -> string
 val unparse_ast : c_ast -> string
 val unparse_function : c_fcn -> string
 
-val unparse : string -> c_fcn -> string
 val flops_of : c_fcn -> string
 val add_constants : c_ast -> c_ast
+val print_cost : c_fcn -> string

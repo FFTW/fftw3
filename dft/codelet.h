@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.13 2002-06-16 22:30:18 athena Exp $ */
+/* $Id: codelet.h,v 1.14 2002-06-22 02:19:20 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -103,8 +103,8 @@ typedef const R *(*kdft_dif) (R *rioarray, R *iioarray, const R *W,
                               stride ios, uint m, int dist);
 void X(kdft_dif_register)(planner *p, kdft_dif codelet, const ct_desc *desc);
 
-extern solvtab X(solvtab_dft_standard);
-extern solvtab X(solvtab_dft_inplace);
+extern const solvtab X(solvtab_dft_standard);
+extern const solvtab X(solvtab_dft_inplace);
 
 /* extensions */
 #include "codelet-k7.h"

@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: codelet-k7.h,v 1.5 2002-06-18 21:48:41 athena Exp $ */
+/* $Id: codelet-k7.h,v 1.6 2002-06-22 02:19:20 athena Exp $ */
 
 /* K7 codelet stuff */
 
-extern solvtab X(solvtab_dft_k7);
+extern const solvtab X(solvtab_dft_k7);
 
 typedef struct {
      uint sz;    /* size of transform computed */

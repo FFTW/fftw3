@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_trig.ml,v 1.3 2002-06-20 19:04:37 athena Exp $ *)
+(* $Id: gen_trig.ml,v 1.4 2002-06-22 02:19:20 athena Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_trig.ml,v 1.3 2002-06-20 19:04:37 athena Exp $"
+let cvsid = "$Id: gen_trig.ml,v 1.4 2002-06-22 02:19:20 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -147,7 +147,7 @@ let generate n mode =
     "}\n"
 
   in
-  (C.unparse cvsid tree) ^ "\n" (* ^ init *)
+  (unparse cvsid vardeclinfo tree) ^ "\n" (* ^ init *)
 
 
 let main () =

@@ -18,15 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.2 2002-06-21 01:22:41 athena Exp $ *)
+(* $Id: simd.ml,v 1.3 2002-06-22 02:19:20 athena Exp $ *)
 
 open Expr
 open List
 open Printf
 open Variable
-open C
 open Annotate
 open Simdmagic
+open C
 
 let realtype = "V"
 let realtypep = realtype ^ " *"
@@ -71,8 +71,9 @@ let rec listToString toString separator = function
   | [x] -> toString x
   | x::xs -> (toString x) ^ separator ^ (listToString toString separator xs)
 
-let unparse_load vardeclinfo dst src = 
-  if !simd_use_load_vect then
+let rec unparse_load vardeclinfo dst src = 
+  (* TODO *)
+  if true then
     sprintf "LD(%s,%s);\n" (Variable.unparse dst) (Variable.unparse src)
   else
     match Util.find_elem (first_simd_load src) vardeclinfo with
@@ -90,8 +91,9 @@ let unparse_load vardeclinfo dst src =
 	  ivectstride
     | _ -> ""
 
-let unparse_store vardeclinfo dst src_expr =
-  if !simd_use_store_vect then
+and unparse_store vardeclinfo dst src_expr =
+  (* TODO *)
+  if true then
     sprintf "ST(%s,%s);\n" (Variable.unparse dst) (unparse_expr src_expr)
   else
     match Util.find_elem (second_simd_store dst) vardeclinfo with
@@ -110,7 +112,7 @@ let unparse_store vardeclinfo dst src_expr =
     | _ -> ""
 
 
-let unparse_store_transposed vardeclinfo  dst src_expr =
+and unparse_store_transposed vardeclinfo  dst src_expr =
   match Util.find_elem (last_transpose_simd_store dst) vardeclinfo with
   | Some (MTransposes zs) ->
       let zs' = List.sort (fun (v,_) (v',_) -> cmp_locations v v') zs and
@@ -132,44 +134,44 @@ let unparse_store_transposed vardeclinfo  dst src_expr =
       )
   | _ -> ""
 
-let unparse_load_twiddle_vect vardeclinfo  dst src = 
+and unparse_load_twiddle_vect vardeclinfo  dst src = 
   sprintf "LD(%s,W+2 * (%s)+%s);\n" 
     (Variable.unparse dst) 
     (string_of_int (Variable.var_index src))
     (if Variable.is_real src then "0" else "1")
 
 
-let rec unparse_expr =
-  let rec unparse_plus prev = function		
-	(* unbalanced sums. ok for now *)
-    | []    -> prev
-    | Uminus (Times(a,b) as x)::xs ->
-	unparse_plus 
-	  (sprintf "VNMSUB(%s,%s,%s)" 
-	     (unparse_expr a) (unparse_expr b) prev) xs
-    | Uminus x::xs ->
-        unparse_plus (sprintf "SUB(%s,%s)" prev (unparse_expr x)) xs
-    | Times(a,b)::xs ->
-	unparse_plus (sprintf "VFMA(%s,%s,%s)" 
-			     (unparse_expr a) (unparse_expr b) prev) xs
-    | x::xs ->
-        unparse_plus (sprintf "ADD(%s,%s)" prev (unparse_expr x)) xs
-
-  and parenthesize x = match x with
-  | Load _ -> unparse_expr x
-  | Num _  -> unparse_expr x
-  | _      -> "(" ^ (unparse_expr x) ^ ")"
+and unparse_expr =
+  let rec unparse_plus = function
+    | [a] -> unparse_expr a
+    | (Uminus (Times (a, b))) :: c :: d -> op "VFNMS" a b (c :: d)
+    | c :: (Uminus (Times (a, b))) :: d -> op "VFNMS" a b (c :: d)
+    | (Times (a, b)) :: (Uminus c) :: d -> op "VFMS" a b (c :: negate d)
+    | (Uminus c) :: (Times (a, b)) :: d -> op "VFMS" a b (c :: negate d)
+    | (Times (a, b)) :: c :: d          -> op "VFMA" a b (c :: d)
+    | c :: (Times (a, b)) :: d          -> op "VFMA" a b (c :: d)
+    | (Uminus a :: b)                   -> op2 "VSUB" a b
+    | (b :: Uminus a :: c)              -> op2 "VSUB" a (b :: c)
+    | (a :: b)                          -> op2 "VADD" a b
+    | [] -> failwith "unparse_plus"
+  and op nam a b c =
+    nam ^ "(" ^ (unparse_expr a) ^ ", " ^ (unparse_expr b) ^ ", " ^
+    (unparse_plus c) ^ ")"
+  and op2 nam a b = 
+    nam ^ "(" ^ (unparse_expr a) ^ ", " ^ (unparse_plus b) ^ ")"
+  and negate = function
+    | [] -> []
+    | (Uminus x) :: y -> x :: negate y
+    | x :: y -> (Uminus x) :: negate y
 
   in function
     | Load v -> Variable.unparse v
-    | Num n -> "LDK(V" ^ Number.to_konst n ^ ")"
+    | Num n -> Number.to_konst n
     | Plus [] -> "0.0 /* bug */"
-    | Plus [a] -> " /* bug */ " ^ (unparse_expr a) ^"y"
-    | Plus (x::xs) -> unparse_plus (unparse_expr x) xs
-    | Times(a,b) ->
-	sprintf "MUL(%s,%s)" (unparse_expr a) (unparse_expr b)
-    | Uminus a ->
-	failwith "unparse_expr: Uminus simd not supported!"
+    | Plus [a] -> " /* bug */ " ^ (unparse_expr a)
+    | Plus a -> unparse_plus a
+    | Times(a,b) -> sprintf "VMUL(%s,%s)" (unparse_expr a) (unparse_expr b)
+    | Uminus a -> failwith "SIMD Uminus"
     | _ -> failwith "unparse_expr"
 
 and unparse_decl x = C.unparse_decl x
@@ -185,7 +187,7 @@ and unparse_ast' vardeclinfo ast =
       | Assign(dst, Load src) when (not (Variable.is_locative dst)) -> 
 	    unparse_load vardeclinfo dst src
       | Assign (v, x) when Variable.is_locative v ->
-	  if !simd_store_transpose then
+	  if !store_transpose then
 	    unparse_store_transposed vardeclinfo v x
 	  else
 	    unparse_store vardeclinfo v x
@@ -249,17 +251,7 @@ and unparse_ast' vardeclinfo ast =
           foldr_string_concat (map unparse_decl d)   ^ 
           foldr_string_concat (map unparse_ast s)    ^
           "}\n"      
-    | Binop (op, a, b) -> (unparse_ast a) ^ op ^ (unparse_ast b)
-    | Expr_assign (a, b) -> (unparse_ast a) ^ " = " ^ (unparse_ast b)
-    | Stmt_assign (a, b) -> (unparse_ast a) ^ " = " ^ (unparse_ast b) ^ ";\n"
-    | Comma (a, b) -> (unparse_ast a) ^ ", " ^ (unparse_ast b)
-    | Integer i -> string_of_int i
-    | CVar s -> s
-    | CPlus [] -> "0 /* bug */"
-    | CPlus [a] -> " /* bug */ " ^ (unparse_ast a)
-    | CPlus (a::b) -> (parenthesize a) ^ (unparse_plus b)
-    | CTimes (a, b) -> (parenthesize a) ^ " * " ^ (parenthesize b)
-    | CUminus a -> "- " ^ (parenthesize a)
+    | x -> C.unparse_ast x
 
   in unparse_ast ast
 

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.6 2002-06-21 01:22:41 athena Exp $ *)
+(* $Id: magic.ml,v 1.7 2002-06-22 02:19:20 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -32,6 +32,7 @@ let inline_single = ref true
 let inline_loads = ref false
 let inline_loads_constants = ref false
 let inline_constants = ref true
+let trivial_stores = ref false
 let locations_are_special = ref false
 let wsquare = ref false
 let strength_reduce_mul = ref false
@@ -94,6 +95,9 @@ let speclist = [
 
   "-inline-constants", set_bool inline_constants, undocumented;
   "-no-inline-constants", unset_bool inline_constants, undocumented;
+
+  "-trivial-stores", set_bool trivial_stores, undocumented;
+  "-no-trivial-stores", unset_bool trivial_stores, undocumented;
 
   "-locations-are-special", set_bool locations_are_special, undocumented;
   "-no-locations-are-special", unset_bool locations_are_special, undocumented;
