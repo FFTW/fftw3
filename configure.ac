@@ -243,7 +243,7 @@ dnl -----------------------------------------------------------------------
 AC_DEFINE_UNQUOTED(FFTW_CC, "$CC $CFLAGS", [C compiler name and flags])
 AC_DEFINE_UNQUOTED(CODELET_OPTIM, "$CODELET_OPTIM", [extra CFLAGS for codelets])
 
-AC_OUTPUT([
+AC_CONFIG_FILES([
    Makefile
    support/Makefile
    genfft/Makefile
@@ -273,3 +273,5 @@ AC_OUTPUT([
    tests/Makefile
 
 ])
+
+AC_OUTPUT
