@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.18 2004-04-07 04:16:49 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.20 2004-10-01 19:59:17 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -641,7 +641,7 @@ static int transpose_simplep(planner *plnr, const problem_rdft *p,
 }
 
 /*-----------------------------------------------------------------------*/
-/* simple triple-loop square transpose of vector-length 1, no buffers */
+/* simple double-loop square transpose of vector-length 1, no buffers */
 
 static void apply_simple(const plan *ego_, R *I, R *O)
 {
@@ -679,7 +679,7 @@ static const transpose_adt adt_simple =
 };
 
 /*-----------------------------------------------------------------------*/
-/* simple triple-loop square transpose of consecutive pairs, no buffers */
+/* simple double-loop square transpose of consecutive pairs, no buffers */
 
 static void apply_simple_consecpairs(const plan *ego_, R *I, R *O)
 {
