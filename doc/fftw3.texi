@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.107 2003-03-07 03:32:44 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.108 2003-03-07 03:39:36 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3235,6 +3235,14 @@ the wisdom, so you cannot store other data just beyond it.@footnote{We
 do our own buffering because GNU libc I/O routines are horribly slow for
 single-character I/O, apparently for thread-safety reasons (whether you
 are using threads or not).}
+
+Wisdom has been enhanced by additional humility in FFTW 3: whereas FFTW
+2 would re-use wisdom for a given transform size regardless of the
+stride etc., in FFTW 3 wisdom is only used with the strides etc. for
+which it was created.  Unfortunately, this means FFTW 3 has to create
+new plans from scratch more often than FFTW 2 (in FFTW 2, planning
+e.g. one transform of size 1024 also created wisdom for all smaller
+powers of 2, but this no longer occurs).
 
 @subsubheading Memory allocation
 
