@@ -109,7 +109,8 @@ static int applicable0(const problem *p_)
           return (1
 		  && p->sz->rnk == 1
 		  && p->vecsz->rnk == 0
-		  && p->ri != p->ro  /* out of place only */
+		  && p->ri != p->ro 
+		  && (p->sz->dims[0].n % 2) == 1 
 		  && X(is_prime)(p->sz->dims[0].n)
 	       );
      }
