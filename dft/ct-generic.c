@@ -37,7 +37,7 @@ typedef struct {
 } S;
 
 typedef struct P_s {
-     plan_dft super;
+     plan_dftw super;
 
      const wadt *adt;
      int r, m, s, vl, vs;

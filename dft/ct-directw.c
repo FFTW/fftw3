@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-directw.c,v 1.2 2004-03-21 15:38:18 athena Exp $ */
+/* $Id: ct-directw.c,v 1.3 2004-03-21 15:59:42 athena Exp $ */
 
 #include "ct.h"
 
@@ -29,7 +29,7 @@ typedef struct {
 } S;
 
 typedef struct {
-     plan_dft super;
+     plan_dftw super;
      kdftw k;
      twid *td;
      int r, m, vl;
