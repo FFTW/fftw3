@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.22 2002-07-25 19:21:13 athena Exp $ */
+/* $Id: buffered.c,v 1.23 2002-07-28 05:39:54 stevenj Exp $ */
 
 #include "dft.h"
 
@@ -67,17 +67,17 @@ static void apply(plan *ego_, R *ri, R *ii, R *ro, R *io)
 	is wrong */
      for (i = nbuf; i <= vl; i += nbuf) {
           /* transform to bufs: */
-          cld->apply(ego->cld, ri, ii, bufs + roffset, bufs + ioffset);
+          cld->apply((plan *) cld, ri, ii, bufs + roffset, bufs + ioffset);
 	  ri += ivs; ii += ivs;
 
           /* copy back */
-          cldcpy->apply(ego->cldcpy, bufs + roffset, bufs + ioffset, ro, io);
+          cldcpy->apply((plan *) cldcpy, bufs+roffset, bufs+ioffset, ro, io);
 	  ro += ovs; io += ovs;
      }
 
      /* Do the remaining transforms, if any: */
      cldrest = (plan_dft *) ego->cldrest;
-     cldrest->apply(ego->cldrest, ri, ii, ro, io);
+     cldrest->apply((plan *) cldrest, ri, ii, ro, io);
 
      X(free)(bufs);
 }

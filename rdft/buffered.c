@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.3 2002-07-25 19:21:13 athena Exp $ */
+/* $Id: buffered.c,v 1.4 2002-07-28 05:39:54 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -60,17 +60,17 @@ static void apply(plan *ego_, R *I, R *O)
 
      for (i = nbuf; i <= vl; i += nbuf) {
           /* transform to bufs: */
-          cld->apply(ego->cld, I, bufs);
+          cld->apply((plan *) cld, I, bufs);
 	  I += ivs;
 
           /* copy back */
-          cldcpy->apply(ego->cldcpy, bufs, O);
+          cldcpy->apply((plan *) cldcpy, bufs, O);
 	  O += ovs;
      }
 
      /* Do the remaining transforms, if any: */
      cldrest = (plan_rdft *) ego->cldrest;
-     cldrest->apply(ego->cldrest, I, O);
+     cldrest->apply((plan *) cldrest, I, O);
 
      X(free)(bufs);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.22 2002-07-15 23:28:30 stevenj Exp $ */
+/* $Id: dft.h,v 1.23 2002-07-28 05:39:54 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -33,6 +33,7 @@ typedef struct {
 int X(problem_dft_p)(const problem *p);
 #define DFTP X(problem_dft_p)  /* shorthand */
 
+void X(dft_zerotens)(tensor sz, R *ri, R *ii);
 problem *X(mkproblem_dft)(const tensor sz, const tensor vecsz,
                           R *ri, R *ii, R *ro, R *io);
 problem *X(mkproblem_dft_d)(tensor sz, tensor vecsz,

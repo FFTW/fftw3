@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft.h,v 1.11 2002-07-25 04:25:06 stevenj Exp $ */
+/* $Id: rdft.h,v 1.12 2002-07-28 05:39:54 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -34,6 +34,7 @@ typedef struct {
 int X(problem_rdft_p)(const problem *p);
 #define RDFTP X(problem_rdft_p)  /* shorthand */
 
+void X(rdft_zerotens)(tensor sz, R *I);
 problem *X(mkproblem_rdft)(const tensor sz, const tensor vecsz,
 			   R *I, R *O, rdft_kind kind);
 problem *X(mkproblem_rdft_d)(tensor sz, tensor vecsz,

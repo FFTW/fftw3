@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.6 2002-07-22 11:42:13 athena Exp $ */
+/* $Id: problem.c,v 1.7 2002-07-28 05:39:54 stevenj Exp $ */
 
 #include "rdft.h"
 
@@ -61,7 +61,7 @@ static int equal(const problem *ego_, const problem *problem_)
      return 0;
 }
 
-static void zerotens(tensor sz, R *I)
+void X(rdft_zerotens)(tensor sz, R *I)
 {
      if (sz.rnk == RNK_MINFTY)
           return;
@@ -81,7 +81,7 @@ static void zerotens(tensor sz, R *I)
           sz.dims++;
           sz.rnk--;
           for (i = 0; i < n; ++i)
-               zerotens(sz, I + i * is);
+               X(rdft_zerotens)(sz, I + i * is);
      }
 }
 
@@ -110,7 +110,7 @@ static void zero(const problem *ego_)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
      tensor sz = X(tensor_append)(ego->vecsz, ego->sz);
-     zerotens(sz, ego->I);
+     X(rdft_zerotens)(sz, ego->I);
      X(tensor_destroy)(sz);
 }
 
