@@ -74,3 +74,7 @@ Changes from 3.0beta1:
 * Fixed ability to compile with a C++ compiler.
 
 * Fixed support for C99 complex type under glibc.
+
+* Fixed problems with alloca under MinGW, AIX.
+
+* Workaround for gcc/SPARC bug.
