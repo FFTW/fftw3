@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.192 2003-05-08 00:46:10 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.193 2003-05-21 03:07:43 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4460,7 +4460,8 @@ In principle, FFTW should work on any system with an ANSI C compiler
 FFTW can exploit a hardware cycle counter; FFTW comes with cycle-counter
 support for all modern general-purpose CPUs, but you may need to add a
 couple of lines of code if your compiler is not yet supported
-(@pxref{Cycle Counters}).
+(@pxref{Cycle Counters}).  (On Unix, there will be a warning at the end
+of the @code{configure} output if no cycle counter is found.)
 @cindex cycle counter
 @cindex compiler
 

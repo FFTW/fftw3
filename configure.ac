@@ -347,6 +347,24 @@ AM_CONDITIONAL(THREADS, test x"$THREADLIBS" != x)
 
 dnl -----------------------------------------------------------------------
 
+AC_MSG_CHECKING([whether a cycle counter is available])
+save_CPPFLAGS=$CPPFLAGS
+CPPFLAGS="$CPPFLAGS -I$srcdir/kernel"
+AC_TRY_CPP([#include "cycle.h"
+#ifndef HAVE_TICK_COUNTER
+#  error No cycle counter
+#endif], [ok=yes], [ok=no])
+CPPFLAGS=$save_CPPFLAGS
+AC_MSG_RESULT($ok)
+if test $ok = no && test "x$with_slow_timer" = xno; then
+	echo "***************************************************************"
+	echo "WARNING: No cycle counter found.  FFTW will use ESTIMATE mode  "
+	echo "         for all plans.  See the manual for more information."
+	echo "***************************************************************"
+fi
+
+dnl -----------------------------------------------------------------------
+
 AC_DEFINE_UNQUOTED(FFTW_CC, "$CC $CFLAGS", [C compiler name and flags])
 AC_DEFINE_UNQUOTED(CODELET_OPTIM, "$CODELET_OPTIM", [extra CFLAGS for codelets])
 
