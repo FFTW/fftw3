@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.131 2003-03-12 06:26:46 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.132 2003-03-12 06:43:27 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2879,11 +2879,11 @@ An @code{REDFT00} transform (type-I DCT) in FFTW is defined by:
 @tex
 $$
 Y_k = X_0 + (-1)^k X_{n-1}
-       + 2 \sum_{j=1}^{n-2} X_j \cos [ \pi j k / (n-1)]
+       + 2 \sum_{j=1}^{n-2} X_j \cos [ \pi j k / (n-1)].
 $$
 @end tex
 @ifinfo
-Y[k] = X[0] + (-1)^k X[n-1] + 2 (sum for j = 1 to n-2 of X[j] cos(pi jk /(n-1)))
+Y[k] = X[0] + (-1)^k X[n-1] + 2 (sum for j = 1 to n-2 of X[j] cos(pi jk /(n-1))).
 @end ifinfo
 @ifhtml
 <center><img src="equation-redft00.gif" align="top">.</center>
@@ -2894,11 +2894,11 @@ Y[k] = X[0] + (-1)^k X[n-1] + 2 (sum for j = 1 to n-2 of X[j] cos(pi jk /(n-1)))
 An @code{REDFT10} transform (type-II DCT) in FFTW is defined by:
 @tex
 $$
-Y_k = 2 \sum_{j=0}^{n-1} X_j \cos [\pi (j+1/2) k / n]
+Y_k = 2 \sum_{j=0}^{n-1} X_j \cos [\pi (j+1/2) k / n].
 $$
 @end tex
 @ifinfo
-Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) k / n))
+Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) k / n)).
 @end ifinfo
 @ifhtml
 <center><img src="equation-redft10.gif" align="top">.</center>
@@ -2909,11 +2909,11 @@ Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) k / n))
 An @code{REDFT01} transform (type-III DCT) in FFTW is defined by:
 @tex
 $$
-Y_k = X_0 + 2 \sum_{j=1}^{n-1} X_j \cos [\pi j (k+1/2) / n]
+Y_k = X_0 + 2 \sum_{j=1}^{n-1} X_j \cos [\pi j (k+1/2) / n].
 $$
 @end tex
 @ifinfo
-Y[k] = X[0] + 2 (sum for j = 1 to n-1 of X[j] cos(pi j (k+1/2) / n))
+Y[k] = X[0] + 2 (sum for j = 1 to n-1 of X[j] cos(pi j (k+1/2) / n)).
 @end ifinfo
 @ifhtml
 <center><img src="equation-redft01.gif" align="top">.</center>
@@ -2924,11 +2924,11 @@ Y[k] = X[0] + 2 (sum for j = 1 to n-1 of X[j] cos(pi j (k+1/2) / n))
 An @code{REDFT11} transform (type-IV DCT) in FFTW is defined by:
 @tex
 $$
-Y_k = 2 \sum_{0=1}^{n-1} X_j \cos [\pi (j+1/2) (k+1/2) / n]
+Y_k = 2 \sum_{0=1}^{n-1} X_j \cos [\pi (j+1/2) (k+1/2) / n].
 $$
 @end tex
 @ifinfo
-Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) (k+1/2) / n))
+Y[k] = 2 (sum for j = 0 to n-1 of X[j] cos(pi (j+1/2) (k+1/2) / n)).
 @end ifinfo
 @ifhtml
 <center><img src="equation-redft11.gif" align="top">.</center>
@@ -3002,11 +3002,11 @@ length @math{n} to a real array @math{Y} of length @math{n}:
 An @code{RODFT00} transform (type-I DST) in FFTW is defined by:
 @tex
 $$
-Y_k = 2 \sum_{j=0}^{n-1} X_j \sin [ \pi (j+1) (k+1) / (n+1)]
+Y_k = 2 \sum_{j=0}^{n-1} X_j \sin [ \pi (j+1) (k+1) / (n+1)].
 $$
 @end tex
 @ifinfo
-Y[k] = 2 (sum for j = 1 to n-2 of X[j] sin(pi (j+1)(k+1) / (n+1)))
+Y[k] = 2 (sum for j = 1 to n-2 of X[j] sin(pi (j+1)(k+1) / (n+1))).
 @end ifinfo
 @ifhtml
 <center><img src="equation-rodft00.gif" align="top">.</center>
@@ -3017,11 +3017,11 @@ Y[k] = 2 (sum for j = 1 to n-2 of X[j] sin(pi (j+1)(k+1) / (n+1)))
 An @code{RODFT10} transform (type-II DST) in FFTW is defined by:
 @tex
 $$
-Y_k = 2 \sum_{j=0}^{n-1} X_j \sin [\pi (j+1/2) (k+1) / n]
+Y_k = 2 \sum_{j=0}^{n-1} X_j \sin [\pi (j+1/2) (k+1) / n].
 $$
 @end tex
 @ifinfo
-Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1) / n))
+Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1) / n)).
 @end ifinfo
 @ifhtml
 <center><img src="equation-rodft10.gif" align="top">.</center>
@@ -3032,11 +3032,11 @@ Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1) / n))
 An @code{RODFT01} transform (type-III DST) in FFTW is defined by:
 @tex
 $$
-Y_k = 2 \sum_{j=1}^{n-1} X_j \sin [\pi (j+1) (k+1/2) / n]
+Y_k = 2 \sum_{j=1}^{n-1} X_j \sin [\pi (j+1) (k+1/2) / n].
 $$
 @end tex
 @ifinfo
-Y[k] = 2 (sum for j = 1 to n-1 of X[j] sin(pi (j+1) (k+1/2) / n))
+Y[k] = 2 (sum for j = 1 to n-1 of X[j] sin(pi (j+1) (k+1/2) / n)).
 @end ifinfo
 @ifhtml
 <center><img src="equation-rodft01.gif" align="top">.</center>
@@ -3047,11 +3047,11 @@ Y[k] = 2 (sum for j = 1 to n-1 of X[j] sin(pi (j+1) (k+1/2) / n))
 An @code{RODFT11} transform (type-IV DST) in FFTW is defined by:
 @tex
 $$
-Y_k = 2 \sum_{0=1}^{n-1} X_j \sin [\pi (j+1/2) (k+1/2) / n]
+Y_k = 2 \sum_{0=1}^{n-1} X_j \sin [\pi (j+1/2) (k+1/2) / n].
 $$
 @end tex
 @ifinfo
-Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1/2) / n))
+Y[k] = 2 (sum for j = 0 to n-1 of X[j] sin(pi (j+1/2) (k+1/2) / n)).
 @end ifinfo
 @ifhtml
 <center><img src="equation-rodft11.gif" align="top">.</center>
@@ -3079,7 +3079,7 @@ The discrete Hartley transform (DHT) of a 1d real array @math{X} of size
 @math{n} computes a real array @math{Y}, where:
 @tex
 $$
-Y_k = \sum_{j = 0}^{n - 1} X_j [ \cos(2\pi j k / n) + \sin(2\pi j k / n)] \ .
+Y_k = \sum_{j = 0}^{n - 1} X_j [ \cos(2\pi j k / n) + \sin(2\pi j k / n)].
 $$
 @end tex
 @ifinfo
