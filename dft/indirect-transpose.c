@@ -168,9 +168,11 @@ static int applicable(const solver *ego_, const problem *p_,
           const problem_dft *p = (const problem_dft *) p_;
 	  int u = p->ri == p->ii + 1 || p->ii == p->ri + 1 ? 2 : 1;
 
-	  /* UGLY if does not result in contiguous transforms */
+	  /* UGLY if does not result in contiguous transforms or
+	     transforms of contiguous vectors (since the latter at
+	     least have efficient transpositions) */
 	  if (NO_UGLYP(plnr)
-	      && !(p->vecsz->rnk == 1 && p->vecsz->dims[*pdim0].is == u)
+	      && !(p->vecsz->dims[*pdim0].is == u)
 	      && !(p->vecsz->rnk == 2
 		   && p->vecsz->dims[1-*pdim0].is == u
 		   && p->vecsz->dims[*pdim0].is
