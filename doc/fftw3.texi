@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.3 2003-01-17 08:15:24 fftw Exp $
+@comment $Id: fftw3.texi,v 1.4 2003-01-18 22:13:51 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -83,22 +83,10 @@ This manual documents FFTW version @value{VERSION}.
 * Acknowledgments::             
 * License and Copyright::       
 * Concept Index::               
-* Library Index::               
-
-Tutorial
+* Library Index::               Tutorial
 
 
 Other Stuff You Should Know
-
-* The Importance of Alignment::  
-* Multi-dimensional Array Format::  
-* Words of Wisdom::             
-
-FFTW Reference
-
-* Basic Interface::             
-* Advanced Interface::          
-* Guru Interface::              
 
 @end menu
 
@@ -244,7 +232,51 @@ thank all the people who helped us in @ref{Acknowledgments}.
 @node  Tutorial, Other Stuff You Should Know, Introduction, Top
 @chapter Tutorial
 @menu
+* Complex One-Dimensional Transforms::  
 @end menu
+
+@c ------------------------------------------------------------
+@node Complex One-Dimensional Transforms,  , Tutorial, Tutorial
+@section Complex One-Dimensional Transforms
+
+The basic usage of FFTW is simple, and typically looks like:
+
+@example
+#include <fftw3.h>
+...
+@{
+    fftw_complex *in, *out;
+    fftw_plan p;
+    ...
+    in = fftw_malloc(sizeof(fftw_complex) * N);
+    out = fftw_malloc(sizeof(fftw_complex) * N);
+    p = fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    ...
+    fftw_execute(p);
+    ...
+    fftw_destroy_plan(p);
+    fftw_free(in); fftw_free(out);
+@}
+@end example
+
+(When you compile, you must also link with the fftw3 library,
+e.g. @code{-lfftw3 -lm} on Unix systems.)
+
+First, of course, you allocate the arrays; you can do this any way that
+you like, but we recommend using @code{fftw_malloc}, which behaves the
+same as @code{malloc} except that it properly aligns the array when SIMD
+acceleration is available (@pxref{The Importance of Alignment}).  The
+data is an array of type @code{fftw_complex}, which is by default an
+array @code{double[2]} containing the real (@code{in[i][0]}) and
+imaginary (@code{in[i][1]}) parts.  If you have a C compiler, such as
+@code{gcc}, supporting the latest C99 standard, and you @code{#include
+<complex.h>} @emph{before} @code{<fftw3.h>}, then @code{fftw_complex} is
+the native double-precision complex type and you can manipulate it with
+ordinary arithmetic.  (To use the C++ @code{<complex>} template class,
+see the FFTW FAQ.)  Single and long-double precision versions of FFTW
+may also be available, with the @code{fftw_} prefix replaced by
+@code{fftwf_} or @code{fftwl_} and linking with @code{-lfftw3f} or
+@code{-lfftw3l}, but using the same @code{<fftw3.h>} header file.
 
 @c ************************************************************
 @node Other Stuff You Should Know, FFTW Reference, Tutorial, Top
