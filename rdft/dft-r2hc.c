@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.26 2004-10-01 19:48:09 stevenj Exp $ */
+/* $Id: dft-r2hc.c,v 1.27 2005-01-10 20:00:51 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -112,6 +112,11 @@ static int applicable(const problem *p_, const planner *plnr)
 
      {
 	  const problem_dft *p = (const problem_dft *) p_;
+
+	  /* rank-0 problems are never UGLY */
+	  if (p->sz->rnk == 0) return 1;
+
+	  /* this solver is UGLY if the user says so */
 	  if (NO_UGLYP(plnr) && DFT_R2HC_ICKYP(plnr)) return 0;
 
 	  if (p->sz->rnk == 1 &&
