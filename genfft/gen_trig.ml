@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_trig.ml,v 1.1.1.1 2002-06-02 18:42:29 athena Exp $ *)
+(* $Id: gen_trig.ml,v 1.2 2002-06-13 12:48:51 athena Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_trig.ml,v 1.1.1.1 2002-06-02 18:42:29 athena Exp $"
+let cvsid = "$Id: gen_trig.ml,v 1.2 2002-06-13 12:48:51 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -139,7 +139,7 @@ let generate n mode =
 	  Decl (C.realtypep, roarray);
 	  Decl (C.stridetype, istride);
 	  Decl (C.stridetype, ostride)],
-	 Asch annot)
+	 C.add_constants (Asch annot))
   and init =
     (declare_register_fcn name) ^
     "{" ^

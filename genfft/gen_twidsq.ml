@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twidsq.ml,v 1.3 2002-06-10 13:04:21 athena Exp $ *)
+(* $Id: gen_twidsq.ml,v 1.4 2002-06-13 12:48:51 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twidsq.ml,v 1.3 2002-06-10 13:04:21 athena Exp $"
+let cvsid = "$Id: gen_twidsq.ml,v 1.4 2002-06-13 12:48:51 athena Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 
@@ -136,7 +136,7 @@ let generate n =
 	  Decl (C.stridetype, vstride);
 	  Decl ("uint", m);
 	  Decl ("int", dist)],
-         body)
+         C.add_constants body)
   in
   let twinstr = 
     Printf.sprintf "static const tw_instr twinstr[] = %s;\n\n" 

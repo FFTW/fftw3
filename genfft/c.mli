@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.mli,v 1.1.1.1 2002-06-02 18:42:28 athena Exp $ *)
+(* $Id: c.mli,v 1.2 2002-06-13 12:48:51 athena Exp $ *)
 
 type stride = 
   | SVar of string
@@ -42,7 +42,9 @@ val stridetype : string
 
 type c_decl = 
   | Decl of string * string
+  | Idecl of string * string * string (* decl with initializer *)
   | Adecl of string * string * int (* array declaration *)
+  | Tdecl of string                (* arbitrary text declaration *)
 
 and c_ast =
   | Asch of Annotate.annotated_schedule
@@ -63,3 +65,4 @@ and c_fcn = | Fcn of string * string * c_decl list * c_ast
 
 val unparse : string -> c_fcn -> string
 val flops_of : c_fcn -> string
+val add_constants : c_ast -> c_ast

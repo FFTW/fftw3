@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.4 2002-06-10 13:04:21 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.5 2002-06-13 12:48:51 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.4 2002-06-10 13:04:21 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.5 2002-06-13 12:48:51 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -75,17 +75,17 @@ let generate n =
   let annot = standard_optimizer odag in
 
   let tree0 =
-    Fcn ("static INLINE_KDFT void", name0,
+    Fcn ("static void", name0,
 	 ([Decl (C.constrealtypep, riarray);
 	   Decl (C.constrealtypep, iiarray);
 	   Decl (C.realtypep, roarray);
-	   Decl (C.realtypep, ioarray)] 
+ 	   Decl (C.realtypep, ioarray)] 
 	  @ (if stride_fixed !uistride then [] 
 	       else [Decl (C.stridetype, istride)])
 	  @ (if stride_fixed !uostride then [] 
 	       else [Decl (C.stridetype, ostride)])
 	 ),
-	 Asch annot)
+	 C.add_constants (Asch annot))
 
   in let loop =
     "static void " ^ name ^

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet.h,v 1.4 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: codelet.h,v 1.5 2002-06-13 12:48:51 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -33,7 +33,7 @@
 
 /* macros used in codelets to reduce source code size */
 #define K(x) ((R) x)
-#define DK(name, value) static const R name  = K(value)
+#define DK(name, value) const R name = K(value)
 
 /* FMA macros */
 
@@ -57,17 +57,6 @@ static __inline__ R FNMS(R a, R b, R c)
 #define FMA(a, b, c) (((a) * (b)) + (c))
 #define FMS(a, b, c) (((a) * (b)) - (c))
 #define FNMS(a, b, c) ((c) - ((a) * (b)))
-#endif
-
-#if defined(__GNUC__) && defined(__i386__)
-/*
-  Inline loop in notw codelets.
-  This is a good idea on Pentia and a bad idea everywhere else
-*/
-
-#define INLINE_KDFT __inline__
-#else
-#define INLINE_KDFT
 #endif
 
 /**************************************************************

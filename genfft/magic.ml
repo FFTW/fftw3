@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.1.1.1 2002-06-02 18:42:30 athena Exp $ *)
+(* $Id: magic.ml,v 1.2 2002-06-13 12:48:51 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -36,7 +36,6 @@ let locations_are_special = ref false
 let wsquare = ref false
 let strength_reduce_mul = ref false
 let number_of_variables = ref 4
-let konstant_table = ref false
 let codelet_name = ref "unnamed"
 let randomized_cse = ref true
 let dif_split_radix = ref false
@@ -80,9 +79,6 @@ let speclist = [
 
   "-dif-split-radix", set_bool dif_split_radix, undocumented;
   "-dit-split-radix", unset_bool dif_split_radix, undocumented;
-
-  "-konstant-table", set_bool konstant_table, undocumented;
-  "-no-konstant-table", unset_bool konstant_table, undocumented;
 
   "-inline-single", set_bool inline_single, undocumented;
   "-no-inline-single", unset_bool inline_single, undocumented;
