@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.10 2003-01-19 19:27:21 stevenj Exp $ */
+/* $Id: problem.c,v 1.11 2003-01-20 13:29:21 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -27,12 +27,14 @@
 #include <ctype.h>
 
 /* do what I mean */
-static void dwim(bench_tensor *t, bench_iodim *last_iodim)
+static bench_tensor *dwim(bench_tensor *t, bench_iodim *last_iodim)
 {
      int i;
      bench_iodim *d, *d1;
+     bench_tensor *tc;
+
      if (!FINITE_RNK(t->rnk) || t->rnk < 1)
-	  return;
+	  return t;
 
      i = t->rnk;
      d1 = last_iodim;
@@ -47,13 +49,6 @@ static void dwim(bench_tensor *t, bench_iodim *last_iodim)
      }
 
      *last_iodim = *d1;
-}
-
-static bench_tensor *dwim_compress_d(bench_tensor *t,
-				     bench_iodim *last_iodim)
-{
-     bench_tensor *tc;
-     dwim(t, last_iodim);
      tc = tensor_compress(t);
      tensor_destroy(t);
      return tc;
@@ -173,17 +168,17 @@ bench_problem *problem_parse(const char *s)
 
      if (*s == '*') { /* "external" vector */
 	  ++s;
-	  p->sz = dwim_compress_d(sz, &last_iodim);
+	  p->sz = dwim(sz, &last_iodim);
 	  s = parsetensor(s, &sz);
-	  p->vecsz = dwim_compress_d(sz, &last_iodim);
+	  p->vecsz = dwim(sz, &last_iodim);
      } else if (*s == 'v' || *s == 'V') { /* "internal" vector */
 	  bench_tensor *vecsz;
 	  ++s;
 	  s = parsetensor(s, &vecsz);
-	  p->vecsz = dwim_compress_d(vecsz, &last_iodim);
-	  p->sz = dwim_compress_d(sz, &last_iodim);
+	  p->vecsz = dwim(vecsz, &last_iodim);
+	  p->sz = dwim(sz, &last_iodim);
      } else {
-	  p->sz = dwim_compress_d(sz, &last_iodim);
+	  p->sz = dwim(sz, &last_iodim);
 	  p->vecsz = mktensor(0);
      }
 
