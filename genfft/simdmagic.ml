@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simdmagic.ml,v 1.3 2002-06-30 18:37:55 athena Exp $ *)
+(* $Id: simdmagic.ml,v 1.4 2002-07-02 03:17:06 athena Exp $ *)
 
 (* SIMD magic parameters *)
 let collect_load = ref false
@@ -43,7 +43,7 @@ let speclist = [
   "-stri", unset_bool stvec, undocumented;
   "-ldvec", set_bool ldvec, undocumented;
   "-ldri", unset_bool ldvec, undocumented;
-  "-vector-length", set_int vector_length, undocumented;
+  "-veclen", set_int vector_length, undocumented;
 ]
 
 let f_collect_store () = !collect_store || !store_transpose || (not !stvec)
