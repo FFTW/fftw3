@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.185 2003-04-08 05:34:12 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.186 2003-04-08 21:33:47 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1152,6 +1152,37 @@ FFTW, see @ref{What FFTW Really Computes}.  (For people accustomed to the
 DCT/DST, FFTW's definitions have a coefficient of @math{2} in front of
 the cos/sin functions so that they correspond precisely to an even/odd
 DFT of size @math{N}.)
+
+@subsubheading Which type do you need?
+
+Since the required flavor of even/odd DFT depends upon your problem, you
+are the best judge of this choice, but we can make a few comments on
+relative efficiency to help you in your selection.  In particular,
+R*DFT01 and R*DFT10 tend to be slightly faster than R*DFT11 (especially
+for odd sizes), while the R*DFT00 transforms are significantly
+slower.@footnote{R*DFT00 is slower in FFTW because we discovered that
+the standard algorithm for computing this by a pre/post-processed real
+DFT---the algorithm used in FFTPACK, Numerical Recipes, and other
+sources for decades now---has serious numerical problems: it already
+loses several decimal places of accuracy for 16k sizes.  There seem to
+be only two alternatives in the literature that do not suffer similarly:
+a recursive decomposition into smaller DCTs, which would require a large
+set of codelets for efficiency and generality, or sacrificing a factor
+of two in speed to use a real DFT of twice the size.  We currently
+employ the latter technique.}
+
+Thus, if only the boundary conditions on the transform inputs are
+specified, we generally recommend R*DFT10 over R*DFT00 and R*DFT01 over
+R*DFT11 (unless the half-sample shift or the self-inverse property is
+significant for your problem).
+
+If performance is important to you and you are using only small sizes
+(say @math{n<200}), e.g. for multi-dimensional transforms, then you
+might consider generating hard-coded transforms of those sizes and types
+that you are interested in (@pxref{Generating your own code}).
+
+We are interested in hearing what types of symmetric transforms you find
+most useful.
 
 @c =========>
 @node The Discrete Hartley Transform,  , Real even/odd DFTs (cosine/sine transforms), More DFTs of Real Data
