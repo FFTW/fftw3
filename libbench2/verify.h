@@ -25,7 +25,7 @@ typedef bench_complex C;
 
 void arand(C *a, int n);
 void mkreal(C *A, int n);
-void mkhermitian(C *A, int rank, const iodim *dim);
+void mkhermitian(C *A, int rank, const bench_iodim *dim);
 void aadd(C *c, C *a, C *b, int n);
 void asub(C *c, C *a, C *b, int n);
 void arol(C *b, C *a, int n, int nb, int na);
@@ -43,7 +43,7 @@ void linear(dofft_closure *k, int realp,
 	    C *outB, C *outC, C *tmp, int rounds, double tol);
 
 enum { TIME_SHIFT, FREQ_SHIFT };
-void tf_shift(dofft_closure *k, int realp, const tensor *sz,
+void tf_shift(dofft_closure *k, int realp, const bench_tensor *sz,
 	      int n, int vecn, double sign,
 	      C *inA, C *inB, C *outA, C *outB, C *tmp,
 	      int rounds, double tol, int which_shift);

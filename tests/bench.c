@@ -28,10 +28,9 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "estimate")) the_flags |= FFTW_ESTIMATE;
      else if (!strcmp(arg, "exhaustive")) the_flags |= FFTW_EXHAUSTIVE;
 
-     else {
-     fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);
-     }
+     else fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);
 }
+
 void rdwisdom(void)
 {
      FILE *f;
@@ -63,7 +62,8 @@ void wrwisdom(void)
      }
 }
 
-static FFTW(iodim) *tensor_to_fftw_iodim(tensor *t, int stride_factor)
+static FFTW(iodim) *bench_tensor_to_fftw_iodim(
+     bench_tensor *t, int stride_factor)
 {
      FFTW(iodim) *d;
      int i;
@@ -94,19 +94,19 @@ static void extract_reim(int sign, bench_complex *c,
 }
 
 /* try to use the most appropriate API function.  Big mess. */
-static FFTW(plan) mkplan_real(problem *p, int flags)
+static FFTW(plan) mkplan_real(bench_problem *p, int flags)
 {
      return 0; /* TODO */
 }
 
-static FFTW(plan) mkplan_complex_split(problem *p, int flags)
+static FFTW(plan) mkplan_complex_split(bench_problem *p, int flags)
 {
      return 0; /* TODO */
 }
 
-static FFTW(plan) mkplan_complex_interleaved(problem *p, int flags)
+static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
 {
-     tensor *sz = p->sz, *vecsz = p->vecsz;
+     bench_tensor *sz = p->sz, *vecsz = p->vecsz;
 
      if (vecsz->rnk == 0 && tensor_unitstridep(sz) && tensor_rowmajorp(sz)) 
 	  goto api_simple;
@@ -158,8 +158,8 @@ static FFTW(plan) mkplan_complex_interleaved(problem *p, int flags)
 	  extract_reim(p->sign, p->in, &ri, &ii);
 	  extract_reim(p->sign, p->out, &ro, &io);
 
-	  dims = tensor_to_fftw_iodim(sz, 2);
-	  howmany_dims = tensor_to_fftw_iodim(vecsz, 2);
+	  dims = bench_tensor_to_fftw_iodim(sz, 2);
+	  howmany_dims = bench_tensor_to_fftw_iodim(vecsz, 2);
 	  pln = FFTW(plan_guru_dft)(sz->rnk, dims,
 				    vecsz->rnk, howmany_dims,
 				    ri, ii, ro, io, flags);
@@ -169,7 +169,7 @@ static FFTW(plan) mkplan_complex_interleaved(problem *p, int flags)
      }
 }
 
-static FFTW(plan) mkplan_complex(problem *p, int flags)
+static FFTW(plan) mkplan_complex(bench_problem *p, int flags)
 {
      if (p->split)
 	  return mkplan_complex_split(p, flags);
@@ -177,7 +177,7 @@ static FFTW(plan) mkplan_complex(problem *p, int flags)
 	  return mkplan_complex_interleaved(p, flags);
 }
 
-static FFTW(plan) mkplan(problem *p, int flags)
+static FFTW(plan) mkplan(bench_problem *p, int flags)
 {
      switch (p->kind) {
 	 case PROBLEM_COMPLEX:	  return mkplan_complex(p, flags);
@@ -186,7 +186,7 @@ static FFTW(plan) mkplan(problem *p, int flags)
      }
 }
 
-int can_do(problem *p)
+int can_do(bench_problem *p)
 {
      the_plan = mkplan(p, the_flags | FFTW_ESTIMATE);
      if (the_plan) {
@@ -197,7 +197,7 @@ int can_do(problem *p)
 }
 
 
-void setup(problem *p)
+void setup(bench_problem *p)
 {
      double tim;
 
@@ -222,7 +222,7 @@ void setup(problem *p)
 }
 
 
-void doit(int iter, problem *p)
+void doit(int iter, bench_problem *p)
 {
      int i;
      FFTW(plan) q = the_plan;
@@ -232,7 +232,7 @@ void doit(int iter, problem *p)
 	  FFTW(execute)(q);
 }
 
-void done(problem *p)
+void done(bench_problem *p)
 {
      UNUSED(p);
 
@@ -325,7 +325,7 @@ END_BENCH_DOC
 static bench_real *ri, *ii, *ro, *io;
 static int is, os;
 
-void copy_c2c_from(problem *p, bench_complex *in)
+void copy_c2c_from(bench_problem *p, bench_complex *in)
 {
      unsigned int i;
      if (p->sign == FFT_SIGN) {
@@ -341,7 +341,7 @@ void copy_c2c_from(problem *p, bench_complex *in)
      }
 }
 
-void copy_c2c_to(problem *p, bench_complex *out)
+void copy_c2c_to(bench_problem *p, bench_complex *out)
 {
      unsigned int i;
      if (p->sign == FFT_SIGN) {
@@ -357,7 +357,7 @@ void copy_c2c_to(problem *p, bench_complex *out)
      }
 }
 
-void copy_h2c(problem *p, bench_complex *out)
+void copy_h2c(bench_problem *p, bench_complex *out)
 {
      if (p->split)
 	  copy_h2c_1d_halfcomplex(p, out, FFT_SIGN);
@@ -365,7 +365,7 @@ void copy_h2c(problem *p, bench_complex *out)
 	  copy_h2c_unpacked(p, out, FFT_SIGN);
 }
 
-void copy_c2h(problem *p, bench_complex *in)
+void copy_c2h(bench_problem *p, bench_complex *in)
 {
      if (p->split)
 	  copy_c2h_1d_halfcomplex(p, in, FFT_SIGN);
@@ -373,7 +373,7 @@ void copy_c2h(problem *p, bench_complex *in)
 	  copy_c2h_unpacked(p, in, FFT_SIGN);
 }
 
-void copy_r2c(problem *p, bench_complex *out)
+void copy_r2c(bench_problem *p, bench_complex *out)
 {
      if (!p->split)
           copy_r2c_unpacked(p, out);
@@ -381,7 +381,7 @@ void copy_r2c(problem *p, bench_complex *out)
           copy_r2c_packed(p, out);
 }
 
-void copy_c2r(problem *p, bench_complex *in)
+void copy_c2r(bench_problem *p, bench_complex *in)
 {
      if (!p->split)
           copy_c2r_unpacked(p, in);
@@ -389,7 +389,7 @@ void copy_c2r(problem *p, bench_complex *in)
           copy_c2r_packed(p, in);
 }
 
-static void hook(plan *pln, const fftw_problem *p_, int optimalp)
+static void hook(plan *pln, const fftw_bench_problem *p_, int optimalp)
 {
      UNUSED(optimalp);
 
@@ -410,17 +410,17 @@ static void hook(plan *pln, const fftw_problem *p_, int optimalp)
      }
 }
 
-int can_do(problem *p)
+int can_do(bench_problem *p)
 {
      return (sizeof(fftw_real) == sizeof(bench_real) &&
 	     (p->kind == PROBLEM_COMPLEX || p->kind == PROBLEM_REAL));
 }
 
 static planner *plnr;
-static fftw_problem *prblm;
+static fftw_bench_problem *prblm;
 static plan *pln;
 
-void setup(problem *p)
+void setup(bench_problem *p)
 {
      double tplan;
      size_t nsize;
@@ -595,11 +595,11 @@ void setup(problem *p)
 #endif
 }
 
-void doit(int iter, problem *p)
+void doit(int iter, bench_problem *p)
 {
      int i;
      plan *PLN = pln;
-     fftw_problem *PRBLM = prblm;
+     fftw_bench_problem *PRBLM = prblm;
 
      UNUSED(p);
      for (i = 0; i < iter; ++i) {
@@ -607,7 +607,7 @@ void doit(int iter, problem *p)
      }
 }
 
-void done(problem *p)
+void done(bench_problem *p)
 {
      UNUSED(p);
 

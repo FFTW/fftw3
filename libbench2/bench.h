@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.2 2003-01-18 13:17:23 athena Exp $ */
+/* $Id: bench.h,v 1.3 2003-01-18 21:13:15 athena Exp $ */
 
 /* benchmark program definitions */
 #include "config.h"
@@ -30,15 +30,15 @@ extern int time_repeat;
 extern void timer_init(double tmin, int repeat);
 
 /* report functions */
-extern void (*report)(const struct problem *p, double *t, int st);
+extern void (*report)(const bench_problem *p, double *t, int st);
 
-void report_mflops(const struct problem *p, double *t, int st);
-void report_max_mflops(const struct problem *p, double *t, int st);
-void report_avg_mflops(const struct problem *p, double *t, int st);
-void report_time(const struct problem *p, double *t, int st);
-void report_min_time(const struct problem *p, double *t, int st);
-void report_avg_time(const struct problem *p, double *t, int st);
-void report_benchmark(const struct problem *p, double *t, int st);
+void report_mflops(const bench_problem *p, double *t, int st);
+void report_max_mflops(const bench_problem *p, double *t, int st);
+void report_avg_mflops(const bench_problem *p, double *t, int st);
+void report_time(const bench_problem *p, double *t, int st);
+void report_min_time(const bench_problem *p, double *t, int st);
+void report_avg_time(const bench_problem *p, double *t, int st);
+void report_benchmark(const bench_problem *p, double *t, int st);
 
 void report_can_do(const char *param);
 void report_info(const char *param);
@@ -49,7 +49,7 @@ extern int bench_main(int argc, char *argv[]);
 extern void speed(const char *param);
 extern void accuracy(const char *param, int rounds);
 
-extern double mflops(const struct problem *p, double t);
+extern double mflops(const bench_problem *p, double t);
 
 extern double bench_drand(void);
 extern void bench_srand(int seed);
@@ -58,8 +58,8 @@ struct option; /* opaque */
 extern char *make_short_options(const struct option *opt);
 extern void usage(const char *progname, const struct option *opt);
 
-extern struct problem *problem_parse(const char *desc);
-extern void problem_destroy(struct problem *p);
+extern bench_problem *problem_parse(const char *desc);
+extern void problem_destroy(bench_problem *p);
 
 extern void ovtpvt(const char *format, ...);
 

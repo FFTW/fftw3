@@ -1,13 +1,13 @@
 /* not worth copyrighting */
 
-/* $Id: allocate.c,v 1.2 2003-01-17 15:35:56 athena Exp $ */
+/* $Id: allocate.c,v 1.3 2003-01-18 21:13:15 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
 
-static void bounds(problem *p, int *ilb, int *iub, int *olb, int *oub)
+static void bounds(bench_problem *p, int *ilb, int *iub, int *olb, int *oub)
 {
-     tensor *t = tensor_append(p->sz, p->vecsz);
+     bench_tensor *t = tensor_append(p->sz, p->vecsz);
      tensor_ibounds(t, ilb, iub);
      tensor_obounds(t, olb, oub);
      tensor_destroy(t);
@@ -19,7 +19,7 @@ static void bounds(problem *p, int *ilb, int *iub, int *olb, int *oub)
  * This is the default routine that can be overridden by the user in
  * complicated cases.
  */
-void problem_alloc(problem *p)
+void problem_alloc(bench_problem *p)
 {
      if (p->kind == PROBLEM_COMPLEX) {
 	  int ilb, iub, olb, oub;
@@ -46,7 +46,7 @@ void problem_alloc(problem *p)
      }
 }
 
-void problem_free(struct problem *p)
+void problem_free(bench_problem *p)
 {
      if (p->outphys && p->outphys != p->inphys)
 	  bench_free(p->outphys);

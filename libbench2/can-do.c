@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: can-do.c,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: can-do.c,v 1.2 2003-01-18 21:13:15 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -26,7 +26,7 @@
 
 void report_can_do(const char *param)
 {
-     struct problem *p;
+     bench_problem *p;
      p = problem_parse(param);
      ovtpvt("#%c\n", can_do(p) ? 't' : 'f');
      problem_destroy(p);

@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: zero.c,v 1.2 2003-01-18 13:17:23 athena Exp $ */
+/* $Id: zero.c,v 1.3 2003-01-18 21:13:15 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
 
 /* set I/O arrays to zero.  Default routine */
-void problem_zero(struct problem *p)
+void problem_zero(bench_problem *p)
 {
      if (p->kind == PROBLEM_COMPLEX) {
 	  bench_complex czero = {0, 0};

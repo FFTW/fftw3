@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: speed.c,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: speed.c,v 1.2 2003-01-18 21:13:15 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -27,7 +27,7 @@ void speed(const char *param)
 {
      double *t;
      int iter, k;
-     struct problem *p;
+     bench_problem *p;
      double tmin, y;
 
      t = bench_malloc(time_repeat * sizeof(double));

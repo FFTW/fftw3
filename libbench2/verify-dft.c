@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.2 2003-01-18 20:41:18 athena Exp $ */
+/* $Id: verify-dft.c,v 1.3 2003-01-18 21:13:15 athena Exp $ */
 
 #include "verify.h"
 
-void verify_dft(dofft_closure *k, tensor *sz, tensor *vecsz, int sign,
+void verify_dft(dofft_closure *k, bench_tensor *sz, bench_tensor *vecsz, int sign,
 		int rounds, double tol)
 {
      C *inA, *inB, *inC, *outA, *outB, *outC, *tmp;

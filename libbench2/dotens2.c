@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: dotens2.c,v 1.1 2003-01-18 12:20:18 athena Exp $ */
+/* $Id: dotens2.c,v 1.2 2003-01-18 21:13:15 athena Exp $ */
 
 #include "verify.h"
 
-static void recur(int rnk, const iodim *dims0, const iodim *dims1,
+static void recur(int rnk, const bench_iodim *dims0, const bench_iodim *dims1,
 		  dotens2_closure *k, 
 		  int indx0, int ondx0, int indx1, int ondx1)
 {
@@ -46,7 +46,7 @@ static void recur(int rnk, const iodim *dims0, const iodim *dims1,
      }
 }
 
-void dotens2(const tensor *sz0, const tensor *sz1, dotens2_closure *k)
+void dotens2(const bench_tensor *sz0, const bench_tensor *sz1, dotens2_closure *k)
 {
      BENCH_ASSERT(sz0->rnk == sz1->rnk);
      if (sz0->rnk == RNK_MINFTY)

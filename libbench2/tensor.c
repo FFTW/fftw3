@@ -18,19 +18,19 @@
  *
  */
 
-/* $Id: tensor.c,v 1.3 2003-01-18 12:20:18 athena Exp $ */
+/* $Id: tensor.c,v 1.4 2003-01-18 21:13:15 athena Exp $ */
 #include "bench.h"
 #include <stdlib.h>
 
-tensor *mktensor(int rnk) 
+bench_tensor *mktensor(int rnk) 
 {
-     tensor *x;
+     bench_tensor *x;
 
      BENCH_ASSERT(rnk >= 0);
 
-     x = (tensor *)bench_malloc(sizeof(tensor));
+     x = (bench_tensor *)bench_malloc(sizeof(bench_tensor));
      if (FINITE_RNK(rnk) && rnk > 0)
-          x->dims = (iodim *)bench_malloc(sizeof(iodim) * rnk);
+          x->dims = (bench_iodim *)bench_malloc(sizeof(bench_iodim) * rnk);
      else
           x->dims = 0;
 
@@ -38,13 +38,13 @@ tensor *mktensor(int rnk)
      return x;
 }
 
-void tensor_destroy(tensor *sz)
+void tensor_destroy(bench_tensor *sz)
 {
      bench_free0(sz->dims);
      bench_free(sz);
 }
 
-int tensor_sz(const tensor *sz)
+int tensor_sz(const bench_tensor *sz)
 {
      int i, n = 1;
 
@@ -57,8 +57,8 @@ int tensor_sz(const tensor *sz)
 }
 
 
-/* total order among iodim's */
-static int dimcmp(const iodim *a, const iodim *b)
+/* total order among bench_iodim's */
+static int dimcmp(const bench_iodim *a, const bench_iodim *b)
 {
      if (b->is != a->is)
           return (b->is - a->is);	/* shorter strides go later */
@@ -67,10 +67,10 @@ static int dimcmp(const iodim *a, const iodim *b)
      return (int)(a->n - b->n);	        /* larger n's go later */
 }
 
-tensor *tensor_compress(const tensor *sz)
+bench_tensor *tensor_compress(const bench_tensor *sz)
 {
      int i, rnk;
-     tensor *x;
+     bench_tensor *x;
 
      BENCH_ASSERT(FINITE_RNK(sz->rnk));
      for (i = rnk = 0; i < sz->rnk; ++i) {
@@ -87,21 +87,21 @@ tensor *tensor_compress(const tensor *sz)
 
      if (rnk) {
 	  /* God knows how qsort() behaves if n==0 */
-	  qsort(x->dims, (size_t)x->rnk, sizeof(iodim),
+	  qsort(x->dims, (size_t)x->rnk, sizeof(bench_iodim),
 		(int (*)(const void *, const void *))dimcmp);
      }
 
      return x;
 }
 
-int tensor_unitstridep(tensor *t)
+int tensor_unitstridep(bench_tensor *t)
 {
      BENCH_ASSERT(FINITE_RNK(t->rnk));
      return (t->rnk == 0 ||
 	     (t->dims[t->rnk - 1].is == 1 && t->dims[t->rnk - 1].os == 1));
 }
 
-int tensor_rowmajorp(tensor *t)
+int tensor_rowmajorp(bench_tensor *t)
 {
      int i;
 
@@ -109,7 +109,7 @@ int tensor_rowmajorp(tensor *t)
 
      i = t->rnk - 1;
      while (--i >= 0) {
-	  iodim *d = t->dims + i;
+	  bench_iodim *d = t->dims + i;
 	  if (d[0].is != d[1].is * d[0].n)
 	       return 0;
 	  if (d[0].os != d[1].os * d[0].n)
@@ -118,7 +118,7 @@ int tensor_rowmajorp(tensor *t)
      return 1;
 }
 
-static void dimcpy(iodim *dst, const iodim *src, int rnk)
+static void dimcpy(bench_iodim *dst, const bench_iodim *src, int rnk)
 {
      int i;
      if (FINITE_RNK(rnk))
@@ -126,12 +126,12 @@ static void dimcpy(iodim *dst, const iodim *src, int rnk)
                dst[i] = src[i];
 }
 
-tensor *tensor_append(const tensor *a, const tensor *b)
+bench_tensor *tensor_append(const bench_tensor *a, const bench_tensor *b)
 {
      if (!FINITE_RNK(a->rnk) || !FINITE_RNK(b->rnk)) {
           return mktensor(RNK_MINFTY);
      } else {
-	  tensor *x = mktensor(a->rnk + b->rnk);
+	  bench_tensor *x = mktensor(a->rnk + b->rnk);
           dimcpy(x->dims, a->dims, a->rnk);
           dimcpy(x->dims + a->rnk, b->dims, b->rnk);
 	  return x;
@@ -149,7 +149,7 @@ static int imin(int a, int b)
 }
 
 #define DEFBOUNDS(name, xs)			\
-void name(tensor *t, int *lbp, int *ubp)	\
+void name(bench_tensor *t, int *lbp, int *ubp)	\
 {						\
      int lb = 0;				\
      int ub = 1;				\
@@ -158,7 +158,7 @@ void name(tensor *t, int *lbp, int *ubp)	\
      BENCH_ASSERT(FINITE_RNK(t->rnk));		\
 						\
      for (i = 0; i < t->rnk; ++i) {		\
-	  iodim *d = t->dims + i;		\
+	  bench_iodim *d = t->dims + i;		\
 	  int n = d->n;				\
 	  int s = d->xs;			\
 	  lb = imin(lb, lb + s * (n - 1));	\
@@ -172,9 +172,9 @@ void name(tensor *t, int *lbp, int *ubp)	\
 DEFBOUNDS(tensor_ibounds, is)
 DEFBOUNDS(tensor_obounds, os)
 
-tensor *tensor_copy(const tensor *sz)
+bench_tensor *tensor_copy(const bench_tensor *sz)
 {
-     tensor *x = mktensor(sz->rnk);
+     bench_tensor *x = mktensor(sz->rnk);
      dimcpy(x->dims, sz->dims, sz->rnk);
      return x;
 }

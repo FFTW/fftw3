@@ -3,7 +3,7 @@
 #include "bench.h"
 #include <math.h>
 
-double mflops(const struct problem *p, double t)
+double mflops(const bench_problem *p, double t)
 {
      int size = tensor_sz(p->sz);
      int vsize = tensor_sz(p->vecsz);

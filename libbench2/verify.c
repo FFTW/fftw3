@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.3 2003-01-18 20:41:18 athena Exp $ */
+/* $Id: verify.c,v 1.4 2003-01-18 21:13:15 athena Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,8 +42,8 @@ static void dftcpy0(dotens2_closure *k_,
      UNUSED(indxa); UNUSED(ondxb);
 }
 
-static void dftcpy(bench_complex *a, const tensor *sza, 
-		   bench_complex *b, const tensor *szb)
+static void dftcpy(bench_complex *a, const bench_tensor *sza, 
+		   bench_complex *b, const bench_tensor *szb)
 {
      dftcpy_closure k;
      k.k.apply = dftcpy0; 
@@ -53,15 +53,15 @@ static void dftcpy(bench_complex *a, const tensor *sza,
 
 typedef struct {
      dofft_closure k;
-     problem *p;
+     bench_problem *p;
 } dofft_dft_closure;
 
 static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 {
      dofft_dft_closure *k = (dofft_dft_closure *)k_;
-     problem *p = k->p;
+     bench_problem *p = k->p;
      bench_complex *pin = p->in, *pout = p->out;
-     tensor *totalsz, *pckdsz;
+     bench_tensor *totalsz, *pckdsz;
 
      totalsz = tensor_append(p->vecsz, p->sz);
      pckdsz = verify_pack(totalsz, 1);
@@ -74,7 +74,7 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
      tensor_destroy(pckdsz);
 }
 
-static void dodft(problem *p, int rounds, double tol)
+static void dodft(bench_problem *p, int rounds, double tol)
 {
      dofft_dft_closure k;
      k.k.apply = dft_apply;
@@ -87,7 +87,7 @@ static void dodft(problem *p, int rounds, double tol)
 
 void verify(const char *param, int rounds, double tol)
 {
-     struct problem *p;
+     bench_problem *p;
      p = problem_parse(param);
      BENCH_ASSERT(can_do(p));
      problem_alloc(p);
@@ -105,7 +105,7 @@ void verify(const char *param, int rounds, double tol)
 
 void accuracy(const char *param, int rounds)
 {
-     struct problem *p;
+     bench_problem *p;
      p = problem_parse(param);
      BENCH_ASSERT(can_do(p));
      problem_alloc(p);

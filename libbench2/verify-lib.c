@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.2 2003-01-18 20:41:18 athena Exp $ */
+/* $Id: verify-lib.c,v 1.3 2003-01-18 21:13:15 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -94,7 +94,7 @@ void mkreal(C *A, int n)
      }
 }
 
-static void assign_conj(C *Ac, C *A, int rank, const iodim *dim, int size)
+static void assign_conj(C *Ac, C *A, int rank, const bench_iodim *dim, int size)
 {
      if (rank == 0) {
           c_re(*Ac) = c_re(*A);
@@ -112,7 +112,7 @@ static void assign_conj(C *Ac, C *A, int rank, const iodim *dim, int size)
 }
 
 /* make array hermitian */
-void mkhermitian(C *A, int rank, const iodim *dim)
+void mkhermitian(C *A, int rank, const bench_iodim *dim)
 {
      if (rank == 0)
           c_im(*A) = 0.0;
@@ -323,7 +323,7 @@ void linear(dofft_closure *k, int realp,
 
 
 void tf_shift(dofft_closure *k,
-	      int realp, const tensor *sz,
+	      int realp, const bench_tensor *sz,
 	      int n, int vecn, double sign,
 	      C *inA, C *inB, C *outA, C *outB, C *tmp,
 	      int rounds, double tol, int which_shift)
@@ -380,9 +380,9 @@ void tf_shift(dofft_closure *k,
 /* Make a copy of the size tensor, with the same dimensions, but with
    the strides corresponding to a "packed" row-major array with the
    given stride. */
-tensor *verify_pack(const tensor *sz, int s)
+bench_tensor *verify_pack(const bench_tensor *sz, int s)
 {
-     tensor *x = tensor_copy(sz);
+     bench_tensor *x = tensor_copy(sz);
      if (FINITE_RNK(x->rnk) && x->rnk > 0) {
 	  int i;
 	  x->dims[x->rnk - 1].is = s;

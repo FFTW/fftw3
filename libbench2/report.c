@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: report.c,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: report.c,v 1.2 2003-01-18 21:13:15 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-void (*report)(const struct problem *p, double *t, int st);
+void (*report)(const bench_problem *p, double *t, int st);
 
 /* report WHAT */
 enum {
@@ -77,7 +77,7 @@ static void mkstat(double *t, int st, struct stats *a)
      a->median = t[st / 2];
 }
 
-static void report_generic(const struct problem *p, double *t, int st,
+static void report_generic(const bench_problem *p, double *t, int st,
 			   int what, int how)
 {
      struct stats s;
@@ -121,37 +121,37 @@ static void report_generic(const struct problem *p, double *t, int st,
      }
 }
 
-void report_mflops(const struct problem *p, double *t, int st)
+void report_mflops(const bench_problem *p, double *t, int st)
 {
      report_generic(p, t, st, W_MFLOPS, H_ALL);
 }
 
-void report_max_mflops(const struct problem *p, double *t, int st)
+void report_max_mflops(const bench_problem *p, double *t, int st)
 {
      report_generic(p, t, st, W_MFLOPS, H_MAX);
 }
 
-void report_avg_mflops(const struct problem *p, double *t, int st)
+void report_avg_mflops(const bench_problem *p, double *t, int st)
 {
      report_generic(p, t, st, W_MFLOPS, H_AVG);
 }
 
-void report_time(const struct problem *p, double *t, int st)
+void report_time(const bench_problem *p, double *t, int st)
 {
      report_generic(p, t, st, W_TIME, H_ALL);
 }
 
-void report_min_time(const struct problem *p, double *t, int st)
+void report_min_time(const bench_problem *p, double *t, int st)
 {
      report_generic(p, t, st, W_TIME, H_MIN);
 }
 
-void report_avg_time(const struct problem *p, double *t, int st)
+void report_avg_time(const bench_problem *p, double *t, int st)
 {
      report_generic(p, t, st, W_TIME, H_AVG);
 }
 
-void report_benchmark(const struct problem *p, double *t, int st)
+void report_benchmark(const bench_problem *p, double *t, int st)
 {
      struct stats s;
      mkstat(t, st, &s);

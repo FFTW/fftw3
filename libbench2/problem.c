@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.4 2003-01-18 20:41:18 athena Exp $ */
+/* $Id: problem.c,v 1.5 2003-01-18 21:13:15 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -27,10 +27,10 @@
 #include <ctype.h>
 
 /* do what I mean */
-static void dwim(tensor *t)
+static void dwim(bench_tensor *t)
 {
      int i;
-     iodim *d;
+     bench_iodim *d;
      if (!FINITE_RNK(t->rnk) || t->rnk < 1)
 	  return;
 
@@ -76,12 +76,12 @@ static const char *parseint(const char *s, int *n)
      return s;
 }
 
-struct dimlist { iodim car; struct dimlist *cdr; };
+struct dimlist { bench_iodim car; struct dimlist *cdr; };
 
-static const char *parsetensor(const char *s, tensor **tp)
+static const char *parsetensor(const char *s, bench_tensor **tp)
 {
      struct dimlist *l = 0, *m;
-     tensor *t;
+     bench_tensor *t;
      int rnk = 0;
 
  L1:
@@ -114,10 +114,10 @@ static const char *parsetensor(const char *s, tensor **tp)
 	  goto L1;
      }
      
-     /* now we have a dimlist.  Build tensor */
+     /* now we have a dimlist.  Build bench_tensor */
      t = mktensor(rnk);
      while (--rnk >= 0) {
-	  iodim *d = t->dims + rnk;
+	  bench_iodim *d = t->dims + rnk;
 	  BENCH_ASSERT(l);
 	  m = l; l = m->cdr;
 	  d->n = m->car.n;
@@ -134,11 +134,11 @@ static const char *parsetensor(const char *s, tensor **tp)
 }
 
 /* parse a problem description, return a problem */
-struct problem *problem_parse(const char *s)
+bench_problem *problem_parse(const char *s)
 {
-     struct problem *p;
+     bench_problem *p;
 
-     p = bench_malloc(sizeof(struct problem));
+     p = bench_malloc(sizeof(bench_problem));
 
      p->kind = PROBLEM_COMPLEX;
      p->sign = -1;
@@ -176,7 +176,7 @@ struct problem *problem_parse(const char *s)
      return p;
 }
 
-void problem_destroy(struct problem *p)
+void problem_destroy(bench_problem *p)
 {
      BENCH_ASSERT(p);
      problem_free(p);

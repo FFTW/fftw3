@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.4 2003-01-18 20:41:18 athena Exp $ */
+/* $Id: bench-user.h,v 1.5 2003-01-18 21:13:15 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -63,23 +63,23 @@ typedef struct {
      int n;
      int is;			/* input stride */
      int os;			/* output stride */
-} iodim;
+} bench_iodim;
 
 typedef struct {
      int rnk;
-     iodim *dims;
-} tensor;
+     bench_iodim *dims;
+} bench_tensor;
 
-tensor *mktensor(int rnk);
-void tensor_destroy(tensor *sz);
-int tensor_sz(const tensor *sz);
-tensor *tensor_compress(const tensor *sz);
-int tensor_unitstridep(tensor *t);
-int tensor_rowmajorp(tensor *t);
-tensor *tensor_append(const tensor *a, const tensor *b);
-tensor *tensor_copy(const tensor *sz);
-void tensor_ibounds(tensor *t, int *lbp, int *ubp);
-void tensor_obounds(tensor *t, int *lbp, int *ubp);
+bench_tensor *mktensor(int rnk);
+void tensor_destroy(bench_tensor *sz);
+int tensor_sz(const bench_tensor *sz);
+bench_tensor *tensor_compress(const bench_tensor *sz);
+int tensor_unitstridep(bench_tensor *t);
+int tensor_rowmajorp(bench_tensor *t);
+bench_tensor *tensor_append(const bench_tensor *a, const bench_tensor *b);
+bench_tensor *tensor_copy(const bench_tensor *sz);
+void tensor_ibounds(bench_tensor *t, int *lbp, int *ubp);
+void tensor_obounds(bench_tensor *t, int *lbp, int *ubp);
 
 /*
   Definition of rank -infinity.
@@ -91,10 +91,10 @@ void tensor_obounds(tensor *t, int *lbp, int *ubp);
 #define RNK_MINFTY  ((int)(((unsigned) -1) >> 1))
 #define FINITE_RNK(rnk) ((rnk) != RNK_MINFTY)
 
-struct problem {
+typedef struct {
      problem_kind_t kind;
-     tensor *sz;
-     tensor *vecsz;
+     bench_tensor *sz;
+     bench_tensor *vecsz;
      int sign;
      int in_place;
      int split;
@@ -102,24 +102,22 @@ struct problem {
      void *inphys, *outphys;
      int iphyssz, ophyssz;
      void *userinfo; /* user can store whatever */
-};
-
-typedef struct problem problem;
+} bench_problem;
 
 extern int verbose;
 extern void timer_start(void);
 extern double timer_stop(void);
 
-extern int can_do(struct problem *p);
-extern void setup(struct problem *p);
-extern void doit(int iter, struct problem *p);
-extern void done(struct problem *p);
+extern int can_do(bench_problem *p);
+extern void setup(bench_problem *p);
+extern void doit(int iter, bench_problem *p);
+extern void done(bench_problem *p);
 extern void verify(const char *param, int rounds, double tol);
 extern void useropt(const char *arg);
 
-extern void problem_alloc(struct problem *p);
-extern void problem_free(struct problem *p);
-extern void problem_zero(struct problem *p);
+extern void problem_alloc(bench_problem *p);
+extern void problem_free(bench_problem *p);
+extern void problem_zero(bench_problem *p);
 
 extern int power_of_two(int n);
 extern int log_2(int n);
@@ -130,7 +128,7 @@ typedef struct dotens2_closure_s {
 		   int indx0, int ondx0, int indx1, int ondx1);
 } dotens2_closure;
 
-void dotens2(const tensor *sz0, const tensor *sz1, dotens2_closure *k);
+void dotens2(const bench_tensor *sz0, const bench_tensor *sz1, dotens2_closure *k);
 
 #define CASSIGN(out, in) (c_re(out) = c_re(in), c_im(out) = c_im(in))
 
@@ -140,9 +138,9 @@ typedef struct dofft_closure_s {
      
 } dofft_closure;
 
-tensor *verify_pack(const tensor *sz, int s);
+bench_tensor *verify_pack(const bench_tensor *sz, int s);
 
-void verify_dft(dofft_closure *k, tensor *sz, tensor *vecsz, int sign,
+void verify_dft(dofft_closure *k, bench_tensor *sz, bench_tensor *vecsz, int sign,
 		int rounds, double tol);
 
 
