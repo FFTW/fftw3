@@ -34,9 +34,9 @@
  ****************************************************************************/
 
 /* header file for fftw3 */
-/* The following is the CVS ID for this file, *not* the version
-   number of FFTW. */
-/* $Id: fftw3.h,v 1.68 2005-01-15 02:49:55 stevenj Exp $ */
+/* (The following is the CVS ID for this file, *not* the version
+   number of FFTW:) */
+/* $Id: fftw3.h,v 1.69 2005-01-15 02:50:08 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
