@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.41 2005-03-01 14:19:16 athena Exp $ */
+/* $Id: direct.c,v 1.42 2005-03-06 16:33:15 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -40,6 +40,8 @@ typedef struct {
      const S *slv;
 } P;
 
+#define IABS(x) (((x) < 0) ? (-(x)) : (x))
+
 static void dobatch(kdft k, 
 		    R *ri, R *ii, R *ro, R *io,
 		    int n, stride is, stride os,
@@ -49,7 +51,17 @@ static void dobatch(kdft k,
      X(cpy2d_pair_ci)(ri, ii, buf, buf+1,
 		      n, WS(is, 1), WS(bufstride, 1),
 		      vl, ivs, 2);
-     k(buf, buf+1, ro, io, bufstride, os, vl, 2, ovs);
+     
+     if (IABS(WS(os, 1)) < IABS(ovs)) {
+	  /* transform directly to output */
+	  k(buf, buf+1, ro, io, bufstride, os, vl, 2, ovs);
+     } else {
+	  /* transform to buffer and copy back */
+	  k(buf, buf+1, buf, buf+1, bufstride, bufstride, vl, 2, 2);
+	  X(cpy2d_pair_co)(buf, buf+1, ro, io,
+			   n, WS(bufstride, 1), WS(os, 1), 
+			   vl, 2, ovs);
+     }
 }
 
 static int compute_batchsize(int n)
@@ -137,6 +149,10 @@ static int applicable_buf(const solver *ego_, const problem *p_,
 
 	       /* check strides etc */
 	       && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
+
+	       /* UGLY if IS <= IVS */
+	       && !(NO_UGLYP(plnr) &&
+		    X(iabs)(p->sz->dims[0].is) <= X(iabs)(ivs))
 
 	       && (batchsz = compute_batchsize(d->sz), 1)
 	       && (d->genus->okp(d, 0, ((const R *)0) + 1, p->ro, p->io,
