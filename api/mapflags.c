@@ -55,7 +55,7 @@ void X(mapflags)(planner *plnr, unsigned int flags)
 	and combination flags */
      const uint self_flagmap[][2] = {
 	  /* in some cases (notably for halfcomplex->real transforms),
-	     destroy_input is the default, so we need to support
+	     DESTROY_INPUT is the default, so we need to support
 	     an inverse flag to disable it: */
 	  { FFTW_PRESERVE_INPUT, ~FFTW_DESTROY_INPUT },
 
