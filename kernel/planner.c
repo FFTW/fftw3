@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.102 2002-09-17 03:44:47 athena Exp $ */
+/* $Id: planner.c,v 1.103 2002-09-17 03:54:34 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -356,7 +356,7 @@ static void mkplan0(planner *ego, problem *p, plan **bestp, slvdesc **descp)
 	  slvdesc *sp;
 	  if ((sp = *descp)) {
 	       solver *s = sp->slv;
-	       best = invoke_solver(ego, p, s, 0);
+	       best = invoke_solver(ego, p, s, NO_UGLY);
 	       if (best) 
 		    X(plan_use)(best);
 	  }
