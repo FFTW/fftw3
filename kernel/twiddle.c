@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.2 2002-06-05 00:22:23 athena Exp $ */
+/* $Id: twiddle.c,v 1.3 2002-06-05 20:03:44 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -63,6 +63,16 @@ static twid *lookup(const tw_instr *q, uint r, uint m)
      return p;
 }
 
+uint fftw_twiddle_length(const tw_instr *p)
+{
+     uint ntwiddle = 0;
+
+     /* compute length of bytecode program */
+     for ( ; p->op != TW_NEXT; ++p)
+	  ++ntwiddle;
+     return ntwiddle;
+}
+
 static R *compute(const tw_instr *instr, uint r, uint m)
 {
      uint ntwiddle, j, n = r * m;
@@ -72,16 +82,14 @@ static R *compute(const tw_instr *instr, uint r, uint m)
 
      static trigreal (*const f[])(trigreal) = { COS, SIN, TAN };
 
-     /* compute length of bytecode program */
-     for (ntwiddle = 0, p = instr; p->op != TW_NEXT; ++p)
-	  ++ntwiddle;
-     A(m % p->v == 0);
+     ntwiddle = fftw_twiddle_length(instr);
 
      W0 = W = (R *)fftw_malloc(ntwiddle * (m / p->v) * sizeof(R), TWIDDLES);
 
      for (j = 0; j < m; j += p->v) {
 	  for (p = instr; p->op != TW_NEXT; ++p) 
 	       *W++ = f[p->op](twoPiOverN * ((j + p->v) * p->i));
+	  A(m % p->v == 0);
      }
 
      return W0;
@@ -108,18 +116,20 @@ twid *fftw_mktwiddle(const tw_instr *instr, uint r, uint m)
 
 void fftw_twiddle_destroy(twid *p)
 {
-     twid **q;
-     if ((--p->refcnt) == 0) {
-	  /* remove p from twiddle list */
-	  for (q = &twlist; *q; q = &((*q)->cdr)) {
-	       if (*q == p) {
-		    *q = p->cdr;
-		    fftw_free(p->W);
-		    fftw_free(p);
-		    return;
+     if (p) {
+	  twid **q;
+	  if ((--p->refcnt) == 0) {
+	       /* remove p from twiddle list */
+	       for (q = &twlist; *q; q = &((*q)->cdr)) {
+		    if (*q == p) {
+			 *q = p->cdr;
+			 fftw_free(p->W);
+			 fftw_free(p);
+			 return;
+		    }
 	       }
-	  }
 
-	  A(0 /* can't happen */ );
+	       A(0 /* can't happen */ );
+	  }
      }
 }

@@ -18,25 +18,39 @@
  *
  */
 
-/* $Id: stride.c,v 1.2 2002-06-05 20:03:44 athena Exp $ */
-#include "ifftw.h"
+/* $Id: ct.h,v 1.1 2002-06-05 20:03:44 athena Exp $ */
 
-#ifdef PRECOMPUTE_ARRAY_INDICES
-stride fftw_mkstride(int n, int s)
-{
-     int i;
-     int *p = (int *) fftw_malloc(n * sizeof(int), OTHER);
+/* Cooley-Tukey variants */
+union kct {
+     kdft_dit dit;
+     kdft_dif dif;
+     kdft_difsq difsq;
+};
 
-     for (i = 0; i < n; ++i)
-	  p[i] = s * i;
+typedef struct {
+     solver super;
+     const char *nam;
+     const ct_desc *desc;
+     union kct k;
+} solver_ct;
 
-     return p;
-}
+typedef struct {
+     plan_dft super;
+     union kct k;
+     plan *cld;
+     R *W;
+     uint r, m, vl;
+     int is, os, ivs, ovs;
+     stride ios, vs;
 
-void fftw_stride_destroy(stride p)
-{
-     if (p) 
-	  fftw_free(p);
-}
+     const solver_ct *slv;
+     twid *td;
+} plan_ct;
 
-#endif
+/* data type describing a generic Cooley-Tukey solver */
+typedef struct {
+     problem *(*mkcld)(const solver_ct *, const problem_dft *p);
+     void (*mkstrides) (plan_ct *ego);
+     int (*applicable) (const solver_ct *ego, const problem *p);
+     dftapply apply;
+} ctadt;
