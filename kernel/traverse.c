@@ -18,18 +18,16 @@
  *
  */
 
-/* $Id: traverse.c,v 1.2 2002-07-14 20:14:15 stevenj Exp $ */
+/* $Id: traverse.c,v 1.3 2002-07-14 20:15:43 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
 
-typedef struct traverser_s traverser;
-
-struct traverser_s {
-     struct printer_s parent;
+typedef struct {
+     printer parent;
      void (*visit)(plan *p, void *closure);
      void *closure;
-};
+} traverser;
 
 static void vtraverse(printer *p, const char *format, va_list ap)
 {
