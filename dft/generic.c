@@ -41,7 +41,7 @@ static void cdot(int n,
      E rr = *xr, ri = 0, ir = *xi, ii = 0;
      while (--n) {
 	  xr += xs; xi += xs;
-	  i0 += i; i0 -= (i0 >= n0) * n0;
+	  i0 += i; if (i0 >= n0) i0 -= n0;
 	  rr += *xr * w[2*i0];
 	  ri += *xr * w[2*i0+1];
 	  ii += *xi * w[2*i0+1];
