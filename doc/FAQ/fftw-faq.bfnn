@@ -100,57 +100,37 @@ C compiler.  (See also \qref runOnDOS and \qref compilerCrashes.)
 FFTW can also take advantage of certain hardware-specific features,
 such as cycle counters and SIMD instructions, but this is optional.
 
-\question 26aug:runOnDOS  Does FFTW run on DOS/Windows?
+\question 26aug:runOnWindows  Does FFTW run on Windows?
 
-It should.  FFTW was not developed on DOS or Windows, but the source
-code is essentially straight ANSI C.  Many users have reported using
-FFTW in the past on DOS/Windows using various compilers.  (However,
-starting with FFTW 3.x, we no longer make any attempt to comply with
-DOS 8.3-character filename restrictions.)  See also the \docref{FFTW
-Windows installation notes\} and \qref compilerCrashes
+It should.  FFTW was not developed on Windows, but the source code is
+essentially straight ANSI C.  Many users have reported using FFTW 2 in
+the past on Windows with various compilers; we are currently awaiting
+reports for FFTW 3.  See also the \docref{FFTW Windows installation
+notes\} and \qref compilerCrashes
 
 \question 26aug:compilerCrashes  My compiler has trouble with FFTW.
 
 Complain fiercely to the vendor of the compiler. 
 
 FFTW is a heavily-optimized piece of software that is likely to push
-compilers to their limits.  We had no problems with, for example,
-\courier{gcc 2.7.2\}, \courier{egcs 1.1.x\}, Sun's \courier{SC4.0\},
-and IBM's \courier{XLC\}.  Users have also reported successful
-compilations of FFTW using Borland's C/C++ compilers on Windows.
+compilers to their limits.  We have successfully used \courier{gcc\}
+3.2.x on x86 and PPC, a recent Compaq C compiler for Alpha, version 6
+of IBM's \courier{xlc\} compiler for AIX, Intel's \courier{icc\}
+versions 5-7, Sun WorkShop \courier{cc\} version 6, for example.
 
-The Portland Group PGCC compiler, version 4.0 for Linux/x86,
-reportedly produces incorrect code for FFTW 2.1.3.
-
-Visual C++ 4.0 crashes when compiling FFTW 1.2 with all optimizations
-turned on.  Visual C++ 5.0 reportedly produces incorrect code for the
-real transforms in FFTW 2.x when the option "Maximize speed" is set.
-We are told that Service Pack 3 fixes the bug.
-
-Metrowerks CodeWarrior Pro 4 reportedly generates incorrect code for
-the PowerPC when compiling FFTW 2.x at optimization level 4.
-Supposedly, this bug is fixed in CW Pro 5 with all the latest updates
-applied.  (No problems were reported for previous versions.)
-
-Various problems have also been observed with SGI's MIPSpro compilers
-with FFTW 2.x, versions 7.2.0 and 7.2.1 (you may have to lower the
-optimization level for some files to get them to compile); the bug
-seems to be fixed in version 7.3.  The test program in earlier
-versions of FFTW had problems with the \courier{-xO5\} option in Sun's
-\courier{SC4.0\} C compiler.  \courier{egcs 1.0.2\} produced incorrect
-code for FFTW on the PowerPC (corrected in \courier{egcs 1.1\}).
-
-The DEC C compiler, V5.8-009 on Digital UNIX V4.0 (Rev. 1091) is known
-to have bugs with its EV6 tuning.  Specifically, compiling FFTW 2.x
-with \courier{-arch host\} (the default) or \courier{-arch ev6\} on an
-Alpha EV6 can cause FFTW (e.g. \courier{fftw_test -s 256\}) to crash.
+\courier{gcc\} 2.95.3 for Solaris/SPARC produces incorrect code for
+the test program (workaround: recompile the \courier{libbench2\}
+directory with \courier{-O2\}).  NetBSD/macppc 1.5 comes with a
+\courier{gcc\} version that also miscompiles the test program (we
+haven't tried to find a workaround).
 
 If support for SIMD instructions is enabled in FFTW, further compiler
 problems may appear.  Some 3.0.x and 3.1.x versions of \courier{gcc\}
-crash, although the problem is fixed in versin 3.2. \courier{gcc\} 2.95
-on MacOS X miscompiles AltiVec code.  \courier{gcc\} 3.2.2 and earlier
-miscompile AltiVec permutations, but FFTW has a workaround.  Intel's
-\courier{icc\} 6.0 misaligns SSE constants, but FFTW has a workaround.
+may crash, although the problem is fixed in version
+3.2. \courier{gcc\} 2.95 on MacOS X miscompiles AltiVec code (fixed in
+later version).  \courier{gcc\} 3.2.x miscompiles AltiVec
+permutations, but FFTW has a workaround.  Intel's \courier{icc\} 6.0
+misaligns SSE constants, but FFTW has a workaround.
 
 \question 26aug:solarisSucks FFTW does not compile on Solaris, complaining about \courier{const\}.
 
