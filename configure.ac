@@ -54,11 +54,13 @@ fi
 AM_CONDITIONAL(HAVE_K7, test "$have_k7" = "yes")
 
 have_simd="no"
+have_simd4="no"
 
 AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
 if test "$have_sse" = "yes"; then
 	AC_DEFINE(HAVE_SSE,1,[Define to enable SSE optimizations.])
 	have_simd="yes"
+	have_simd4="yes"
 fi
 
 AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
@@ -71,6 +73,7 @@ AC_ARG_ENABLE(altivec, [AC_HELP_STRING([--enable-altivec],[enable Altivec optimi
 if test "$have_altivec" = "yes"; then
 	AC_DEFINE(HAVE_ALTIVEC,1,[Define to enable Altivec optimizations.])
 	have_simd="yes"
+	have_simd4="yes"
 fi
 
 AC_ARG_ENABLE(3dnow, [AC_HELP_STRING([--enable-3dnow],[enable 3DNow! optimizations (fallback for non-k7-compatible)])], have_3dnow=$enableval, have_3dnow=no)
@@ -84,6 +87,7 @@ if test "$PRECISION" = "l" && test "$have_simd" = "yes"; then
 fi
 
 AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
+AM_CONDITIONAL(HAVE_SIMD4, test "$have_simd4" = "yes")
 
 AC_ARG_WITH(cycle-counter, [AC_HELP_STRING([--without-cycle-counter],[don't use CPU cycle counter (SLOW)])], with_cycle_counter=$withval, with_cycle_counter=yes)
 if test "$with_cycle_counter" = "no"; then

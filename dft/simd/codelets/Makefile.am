@@ -27,6 +27,24 @@ N1B = n1bv_2.c n1bv_3.c n1bv_4.c n1bv_5.c n1bv_6.c n1bv_7.c n1bv_8.c	\
 n1bv_9.c n1bv_10.c n1bv_11.c n1bv_12.c n1bv_13.c n1bv_14.c n1bv_15.c	\
 n1bv_16.c n1bv_32.c n1bv_64.c
 
+# as above, with arbitrary input vector stride
+N2F = n2fv_2.c n2fv_3.c n2fv_4.c n2fv_5.c n2fv_6.c n2fv_7.c n2fv_8.c	\
+n2fv_9.c n2fv_10.c n2fv_11.c n2fv_12.c n2fv_13.c n2fv_14.c n2fv_15.c	\
+n2fv_16.c n2fv_32.c n2fv_64.c
+
+N2B = n2bv_2.c n2bv_3.c n2bv_4.c n2bv_5.c n2bv_6.c n2bv_7.c n2bv_8.c	\
+n2bv_9.c n2bv_10.c n2bv_11.c n2bv_12.c n2bv_13.c n2bv_14.c n2bv_15.c	\
+n2bv_16.c n2bv_32.c n2bv_64.c
+
+# common code to both n1 and n2
+NFCOD = nfv_2.cod nfv_3.cod nfv_4.cod nfv_5.cod nfv_6.cod nfv_7.cod	\
+nfv_8.cod nfv_9.cod nfv_10.cod nfv_11.cod nfv_12.cod nfv_13.cod		\
+nfv_14.cod nfv_15.cod nfv_16.cod nfv_32.cod nfv_64.cod
+
+NBCOD = nbv_2.cod nbv_3.cod nbv_4.cod nbv_5.cod nbv_6.cod nbv_7.cod	\
+nbv_8.cod nbv_9.cod nbv_10.cod nbv_11.cod nbv_12.cod nbv_13.cod		\
+nbv_14.cod nbv_15.cod nbv_16.cod nbv_32.cod nbv_64.cod
+
 ###########################################################################
 # t1fv_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT step
 # for an FFTW_FORWARD transform, using SIMD
@@ -93,16 +111,24 @@ FRANZ_CODELETS = # $(SN1F) $(ST1F)
 FRANZ_EXTRA = # $(SN1FCOD) $(ST1FCOD)
 
 ###########################################################################
+SIMD_EXTRA = $(NFCOD) $(NBCOD)
 SIMD_CODELETS = $(N1F) $(N1B) $(T1F) $(T1B) $(Q1F) $(Q1B) $(FRANZ_CODELETS)
+SIMD4_CODELETS = $(N2F) $(N2B)
+
+if HAVE_SIMD4
+ALL4_CODELETS = $(SIMD4_CODELETS)
+else
+ALL4_CODELETS =
+endif
 
 if HAVE_SIMD
-ALL_CODELETS = $(SIMD_CODELETS)
+ALL_CODELETS = $(SIMD_CODELETS) $(ALL4_CODELETS)
 else
 ALL_CODELETS = 
 endif
 
-EXTRA_DIST = $(SIMD_CODELETS) $(FRANZ_EXTRA)
-BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST) $(FRANZ_EXTRA)
+EXTRA_DIST = $(SIMD_CODELETS) $(SIMD4_CODELETS) $(SIMD_EXTRA) $(FRANZ_EXTRA)
+BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST) $(SIMD_EXTRA) $(FRANZ_EXTRA)
 
 libdft_codelets_simd_la_SOURCES = $(BUILT_SOURCES)
 
@@ -114,8 +140,31 @@ include $(top_srcdir)/support/Makefile.codelets
 if MAINTAINER_MODE
 GFLAGS = -simd -trivial-stores $(FLAGS_COMMON)
 
-n1fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name n1fv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
+nfv_%.cod:  $(CODELET_DEPS) $(GEN_NOTW_C)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name "") | $(ADD_DATE) | $(INDENT) >$@
+
+nbv_%.cod:  $(CODELET_DEPS) $(GEN_NOTW_C)
+	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name "") | $(ADD_DATE) | $(INDENT) >$@
+
+n1fv_%.c:  $(CODELET_DEPS)						
+	(echo "#include \"n1f.h\"";			\
+	n=$*; echo "#define NAME X(codelet_n1fv_$$n)";	\
+        echo "#include \"nfv_$${n}.cod\"") >$@
+
+n2fv_%.c:  $(CODELET_DEPS)						
+	(echo "#include \"n2f.h\"";			\
+	n=$*; echo "#define NAME X(codelet_n2fv_$$n)";	\
+        echo "#include \"nfv_$${n}.cod\"") >$@
+
+n1bv_%.c:  $(CODELET_DEPS)						
+	(echo "#include \"n1b.h\"";			\
+	n=$*; echo "#define NAME X(codelet_n1bv_$$n)";	\
+        echo "#include \"nbv_$${n}.cod\"") >$@
+
+n2bv_%.c:  $(CODELET_DEPS)						
+	(echo "#include \"n2b.h\"";			\
+	n=$*; echo "#define NAME X(codelet_n2bv_$$n)";	\
+        echo "#include \"nbv_$${n}.cod\"") >$@
 
 sn1fv_%.cod:  $(CODELET_DEPS) $(GEN_NOTW_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -n $* -name "" -with-istride ISTRIDE -with-ostride OSTRIDE -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
@@ -126,9 +175,6 @@ sn1fv_%.c:  $(CODELET_DEPS)
         echo "#define OSTRIDE $$os";				\
         echo "#define NAME X(codelet_sn1fv_$${n}_$${is}_$${os})";\
         echo "#include \"sn1fv_$${n}.cod\"") >$@
-
-n1bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
-	($(PRELUDE_COMMANDS_DFT); $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name n1bv_$* -include "n1b.h") | $(ADD_DATE) | $(INDENT) >$@
 
 t1fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1fv_$* -include "t1f.h") | $(ADD_DATE) | $(INDENT) >$@

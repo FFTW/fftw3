@@ -19,10 +19,31 @@
  */
 
 #include "codelet-dft.h"
-#include "simd.h"
+#include "n2b.h"
 
-#undef LD
-#define LD LDA
+#if HAVE_SIMD
+static int okp(const kdft_desc *d,
+               const R *ri, const R *ii, const R *ro, const R *io,
+               int is, int os, int vl, int ivs, int ovs, 
+	       const planner *plnr)
+{
+     return (RIGHT_CPU()
+             && ALIGNED(ii)
+             && ALIGNED(io)
+	     && !UNALIGNEDP(plnr)
+	     && SIMD_STRIDE_OK(is)
+	     && SIMD_STRIDE_OK(os)
+	     && SIMD_VSTRIDE_OK(ivs)
+	     && SIMD_VSTRIDE_OK(ovs)
+             && ri == ii + 1
+             && ro == io + 1
+             && (vl % VL) == 0
+             && (!d->is || (d->is == is))
+             && (!d->os || (d->os == os))
+             && (!d->ivs || (d->ivs == ivs))
+             && (!d->ovs || (d->ovs == ovs))
+          );
+}
 
-#define GENUS X(dft_n1bsimd_genus)
-extern const kdft_genus GENUS;
+const kdft_genus GENUS = { okp, VL };
+#endif
