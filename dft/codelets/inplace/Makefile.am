@@ -23,9 +23,9 @@ include $(top_srcdir)/support/Makefile.codelets
 
 if MAINTAINER_MODE
 FLAGS_F1=$(DFT_FLAGS_COMMON)
-FLAGS_F2=$(DFT_FLAGS_COMMON) -twiddle-square1
+FLAGS_F2=$(DFT_FLAGS_COMMON) -twiddle-log3
 FLAGS_Q1=$(DFT_FLAGS_COMMON) -reload-twiddle
-FLAGS_Q2=$(DFT_FLAGS_COMMON) -twiddle-square1
+FLAGS_Q2=$(DFT_FLAGS_COMMON) -twiddle-log3
 
 f1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS); $(GEN_TWIDDLE) $(FLAGS_F1) -dif -n $* -name f1_$* -include "f.h") | $(ADD_DATE) | $(INDENT) >$@

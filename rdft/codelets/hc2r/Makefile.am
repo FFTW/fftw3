@@ -10,6 +10,8 @@ hc2r_16.c hc2r_32.c hc2r_64.c hc2r_128.c
 HB = hb_2.c hb_3.c hb_4.c hb_5.c hb_6.c hb_7.c hb_8.c hb_9.c	\
 hb_10.c hb_12.c hb_15.c hb_16.c hb_32.c hb_64.c
 
+HB2 = hb2_4.c hb2_8.c hb2_16.c hb2_32.c hb2_64.c
+
 HC2RIII = hc2rIII_2.c hc2rIII_3.c hc2rIII_4.c hc2rIII_5.c hc2rIII_6.c	\
 hc2rIII_7.c hc2rIII_8.c hc2rIII_9.c hc2rIII_10.c hc2rIII_12.c		\
 hc2rIII_15.c hc2rIII_16.c hc2rIII_32.c hc2rIII_64.c
@@ -28,6 +30,7 @@ include $(top_srcdir)/support/Makefile.codelets
 if MAINTAINER_MODE
 FLAGS_HC2R=$(RDFT_FLAGS_COMMON) -sign 1
 FLAGS_HB=$(RDFT_FLAGS_COMMON) -sign 1
+FLAGS_HB2=$(RDFT_FLAGS_COMMON) -sign 1 -twiddle-log3
 FLAGS_HC2RIII=$(RDFT_FLAGS_COMMON) -sign 1
 
 hc2r_%.c:  $(CODELET_DEPS) $(GEN_HC2R)
@@ -35,6 +38,9 @@ hc2r_%.c:  $(CODELET_DEPS) $(GEN_HC2R)
 
 hb_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
 	($(PRELUDE_COMMANDS); $(GEN_HC2HC) $(FLAGS_HB) -n $* -dif -name hb_$* -include "hb.h") | $(ADD_DATE) | $(INDENT) >$@
+
+hb2_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
+	($(PRELUDE_COMMANDS); $(GEN_HC2HC) $(FLAGS_HB2) -n $* -dif -name hb2_$* -include "hb.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hc2rIII_%.c:  $(CODELET_DEPS) $(GEN_HC2R)
 	($(PRELUDE_COMMANDS); $(GEN_HC2R) $(FLAGS_HC2R) -n $* -name hc2rIII_$* -dft-III -include "hc2rIII.h") | $(ADD_DATE) | $(INDENT) >$@

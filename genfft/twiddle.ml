@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.6 2002-07-20 22:25:47 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.7 2002-08-17 00:27:10 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -75,14 +75,22 @@ let square x =
   else
     times x x
 
-let rec is_pow_2 n = 
-  n = 1 || ((n mod 2) = 0 && is_pow_2 (n / 2))
+let rec pow m n =
+  if (n = 0) then 1
+  else m * pow m (n - 1)
 
-let rec log2 n = if n = 1 then 0 else 1 + log2 (n / 2)
+let rec is_pow m n =
+  n = 1 || ((n mod m) = 0 && is_pow m (n / m))
 
-let rec largest_power_of_2_smaller_than i =
-  if (is_pow_2 i) then i
-  else largest_power_of_2_smaller_than (i - 1)
+let rec log m n = if n = 1 then 0 else 1 + log m (n / m)
+
+let rec largest_power_smaller_than m i =
+  if (is_pow m i) then i
+  else largest_power_smaller_than m (i - 1)
+
+let rec smallest_power_larger_than m i =
+  if (is_pow m i) then i
+  else smallest_power_larger_than m (i + 1)
 
 let rec_array n f =
   let g = ref (fun i -> Complex.zero) in
@@ -110,6 +118,59 @@ let twiddle_policy_load_all =
   and twdesc r = [(TW_FULL, 0, r);(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
+(*
+ * if i is a power of two, then load w (log i)
+ * else let x = largest power of 2 less than i in
+ *      let y = i - x in
+ *      compute w^{x+y} = w^x * w^y
+ *)
+let twiddle_policy_log2 =
+  let bytwiddle n sign w f =
+    let g = rec_array n (fun self i ->
+      if i = 0 then Complex.one
+      else if is_pow 2 i then load_reim sign w (log 2 i)
+      else let x = largest_power_smaller_than 2 i in
+      let y = i - x in
+      Complex.times (self x) (self y))
+    in fun i -> Complex.times (g i) (f i)
+  and twidlen n = 2 * (log 2 (largest_power_smaller_than 2 (2 * n - 1)))
+  and twdesc n =
+    (List.flatten 
+      (List.map 
+	 (fun i -> 
+	   if i > 0 && is_pow 2 i then 
+	     [(TW_COS, 0, i); (TW_SIN, 0, i)] 
+	   else 
+	     [])
+	 (iota n)))
+      @ [(TW_NEXT, 1, 0)]
+  in bytwiddle, twidlen, twdesc
+
+let twiddle_policy_log3 =
+  let rec terms_needed i pi s n =
+    if (s >= n - 1) then i
+    else terms_needed (i + 1) (3 * pi) (s + pi) n
+  in
+  let rec bytwiddle n sign w f =
+    let g = rec_array (3 * n) (fun self i ->
+      if i = 0 then Complex.one
+      else if is_pow 3 i then load_reim sign w (log 3 i)
+      else let x = smallest_power_larger_than 3 i in
+      if (i + i >= x) then
+	Complex.times (self x) (Complex.conj (self (x - i)))
+      else let x = largest_power_smaller_than 3 i in
+      Complex.times (self x) (self (i - x)))
+    in fun i -> Complex.times (g i) (f i)
+  and twidlen n = 2 * (terms_needed 0 1 0 n)
+  and twdesc n =
+    (List.flatten 
+      (List.map 
+	 (fun i -> [(TW_COS, 0, (pow 3 i)); (TW_SIN, 0, (pow 3 i))])
+	 (iota ((twidlen n) / 2))))
+      @ [(TW_NEXT, 1, 0)]
+  in bytwiddle, twidlen, twdesc
+
+
 (* shorthand for policies that only load W[0] *)
 let policy_one mktw =
   let bytwiddle n sign w f = 
@@ -126,6 +187,21 @@ let twiddle_policy_iter =
       if i = 0 then Complex.one
       else if i = 1 then ltw (i - 1)
       else times (self (i - 1)) (self 1)))
+
+(*
+ * if n = 2, compute w^n = (w^{n/2})^2, else
+ * compute  w^n from w^{n-1}, w^{n-2}, and w
+ *)
+let twiddle_policy_iter2 =
+  policy_one (fun n ltw ->
+    rec_array n (fun self i ->
+      if i = 0 then Complex.one
+      else if i = 1 then ltw (i - 1)
+      else if i = 2 then
+	square (self (i / 2))
+      else 
+	wthree (self (i - 1)) (self (i - 2)) (self 1)))
+
 
 (*
  * if n is even, compute w^n = (w^{n/2})^2, else
@@ -180,10 +256,10 @@ let twiddle_policy_ooura =
     rec_array n (fun self i ->
       if i = 0 then Complex.one
       else if (i == 1) then ltw (i - 1)
-      else if (is_pow_2 i) then
+      else if (is_pow 2 i) then
 	square (self (i / 2))
       else
-	let x = largest_power_of_2_smaller_than i in
+	let x = largest_power_smaller_than 2 i in
 	let y = i - x in
 	wreflect (self (x - y)) (self x) (self y)))
 
@@ -197,7 +273,10 @@ let undocumented = " Undocumented twiddle policy"
 
 let speclist = [
   "-twiddle-load-all", set_policy twiddle_policy_load_all, undocumented;
+  "-twiddle-log2", set_policy twiddle_policy_log2, undocumented;
+  "-twiddle-log3", set_policy twiddle_policy_log3, undocumented;
   "-twiddle-iter", set_policy twiddle_policy_iter, undocumented;
+  "-twiddle-iter2", set_policy twiddle_policy_iter2, undocumented;
   "-twiddle-square1", set_policy twiddle_policy_square1, undocumented;
   "-twiddle-square2", set_policy twiddle_policy_square2, undocumented;
   "-twiddle-square3", set_policy twiddle_policy_square3, undocumented;

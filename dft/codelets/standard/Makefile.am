@@ -25,7 +25,7 @@ include $(top_srcdir)/support/Makefile.codelets
 if MAINTAINER_MODE
 FLAGS_N1=$(DFT_FLAGS_COMMON)
 FLAGS_T1=$(DFT_FLAGS_COMMON)
-FLAGS_T2=$(DFT_FLAGS_COMMON) -twiddle-square1
+FLAGS_T2=$(DFT_FLAGS_COMMON) -twiddle-log3
 
 n1_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
 	($(PRELUDE_COMMANDS); $(GEN_NOTW) $(FLAGS_N1) -n $* -name n1_$* -include "n.h") | $(ADD_DATE) | $(INDENT) >$@
