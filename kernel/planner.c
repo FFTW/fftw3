@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.55 2002-09-02 15:56:37 athena Exp $ */
+/* $Id: planner.c,v 1.56 2002-09-02 18:32:28 athena Exp $ */
 #include "ifftw.h"
 
 #define IMPATIENCE(flags) ((flags) & IMPATIENCE_MASK)
@@ -67,6 +67,7 @@ static uint sig_to_hash_index(planner *ego, md5uint *s)
 static void hash(md5 *m, const problem *p, uint flags, uint nthr)
 {
      X(md5begin)(m);
+     X(md5uint)(m, sizeof(R)); /* so we don't mix different precisions */
      X(md5uint)(m, MODULO_EQV(flags));
      X(md5uint)(m, nthr);
      p->adt->hash(p, m);
