@@ -252,7 +252,7 @@ void setup(struct problem *p)
 		    FFTW(mktensor_rowmajor) (p->vrank, p->vn, p->vn, p->vn,
 					     is * p->size, os * p->size), 
 		    ri, ro, 
-#if 0
+#if 1
 		    p->sign == FFT_SIGN ? R2HC : HC2R
 #else
                     RODFT00
