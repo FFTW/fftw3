@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.68 2002-08-03 18:33:40 athena Exp $ */
+/* $Id: ifftw.h,v 1.69 2002-08-03 19:09:56 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -52,10 +52,6 @@ typedef fftw_real R;
 
 #define STRINGIZEx(x) #x
 #define STRINGIZE(x) STRINGIZEx(x)
-
-#ifndef HAVE_UINT
-typedef unsigned int uint;
-#endif
 
 #ifndef HAVE_K7
 #define HAVE_K7 0
@@ -541,10 +537,7 @@ typedef double trigreal;
 
 #if defined(FFTW_ENABLE_UNSAFE_MULMOD)
 #  define MULMOD(x,y,p) (((x) * (y)) % (p))
-#elif (HAVE_UINT && ((SIZEOF_UINT != 0) && \
-                     (SIZEOF_UNSIGNED_LONG_LONG >= 2 * SIZEOF_UINT))) \
-   || (!HAVE_UINT && ((SIZEOF_UNSIGNED_INT != 0) && \
-                     (SIZEOF_UNSIGNED_LONG_LONG >= 2 * SIZEOF_UNSIGNED_INT)))
+#elif ((SIZEOF_UNSIGNED_INT != 0) && (SIZEOF_UNSIGNED_LONG_LONG >= 2 * SIZEOF_UNSIGNED_INT))
 #  define MULMOD(x,y,p) ((uint) ((((unsigned long long) (x))    \
                                   * ((unsigned long long) (y))) \
 				 % ((unsigned long long) (p))))

@@ -18,12 +18,12 @@
  *
  */
 
-/* $Id: cycle.h,v 1.13 2002-08-03 18:33:40 athena Exp $ */
+/* $Id: cycle.h,v 1.14 2002-08-03 19:09:56 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
 /*----------------------------------------------------------------*/
-#if defined(HAVE_GETHRTIME) && !defined(HAVE_TICK_COUNTER)
+#if defined(HAVE_GETHRTIME) && defined(HAVE_HRTIME_T) && !defined(HAVE_TICK_COUNTER)
 typedef hrtime_t ticks;
 
 #define getticks() gethrtime()

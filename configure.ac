@@ -109,10 +109,15 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
-AC_CHECK_TYPES([uint])
+AC_CHECK_TYPE([uint],, 
+   [AC_DEFINE([uint], [unsigned int],
+          [Define to `unsigned int' if <sys/types.h> does not define.])])
 AC_HEADER_TIME
+AC_CHECK_TYPE([hrtime_t],,,[
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif])
 
-AC_CHECK_SIZEOF(uint, 0)
 AC_CHECK_SIZEOF(unsigned int, 0)
 AC_CHECK_SIZEOF(unsigned long long, 0)
 
