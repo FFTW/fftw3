@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.14 2003-02-27 07:25:04 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.15 2003-02-27 07:46:31 stevenj Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -393,7 +393,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      
      X(ops_zero)(&ops);
-     ops.add = n;
+     ops.add = n - 1;
      ops.mul = n;
      ops.other = 4*n;
 
