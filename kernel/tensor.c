@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.11 2002-06-13 15:54:02 athena Exp $ */
+/* $Id: tensor.c,v 1.12 2002-06-16 21:15:18 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -242,7 +242,7 @@ static int cmp_iodim(const void *av, const void *bv)
 }
 
 /* Like tensor_copy, but eliminate n == 1 dimensions, which
-   never effect any transform or transform vector.
+   never affect any transform or transform vector.
  
    Also, we sort the tensor into a canonical order of decreasing
    is.  In general, processing a loop/array in order of
