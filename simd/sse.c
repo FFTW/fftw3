@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse.c,v 1.7 2003-01-15 02:10:25 athena Exp $ */
+/* $Id: sse.c,v 1.8 2003-03-05 18:14:04 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -42,6 +42,7 @@ static jmp_buf jb;
 
 static void sighandler(int x)
 {
+     UNUSED(x);
      longjmp(jb, 1);
 }
 
