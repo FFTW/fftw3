@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.8 2002-06-10 14:55:40 athena Exp $ */
+/* $Id: planner.c,v 1.9 2002-06-11 11:32:20 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -152,6 +152,7 @@ static plan *mkplan(planner *ego, problem *p)
           return best;
      }
 
+     ++ego->nprob;
      best = ego->inferior_mkplan(ego, p);
 
      if (ego->memoize && (best || ego->memoize_failures))
@@ -199,14 +200,14 @@ planner *X(mkplanner)(size_t sz,
      p->adt = &padt;
      p->inferior_mkplan = inferior_mkplan;
      p->destroy = destroy;
-     p->ntry = 0;
+     p->nplan = p->nprob = 0;
      p->hook = hooknil;
      p->solvers = 0;
      p->sols = 0;
      p->hashsiz = 0;
      p->cnt = 0;
      p->memoize = 1;
-     p->memoize_failures = 0;
+     p->memoize_failures = 1;
      rehash(p);			/* so that hashsiz > 0 */
 
      return p;
@@ -289,7 +290,8 @@ void X(planner_dump)(planner *ego, int verbose)
                ++empty;
      }
 
-     printf("ntry = %d\n", ego->ntry);
+     printf("nplan = %u\n", ego->nplan);
+     printf("nprob = %u\n", ego->nprob);
      printf("hashsiz = %d\n", ego->hashsiz);
      printf("cnt = %d\n", cnt);
      printf("cnt_null = %d\n", cnt_null);

@@ -18,16 +18,16 @@
  *
  */
 
-/* $Id: conf.c,v 1.9 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: conf.c,v 1.10 2002-06-11 11:32:20 athena Exp $ */
 
 #include "dft.h"
 
 void X(dft_conf_standard)(planner *p)
 {
-     X(dft_vecloop_register)(p);
      X(dft_indirect_register)(p);
      X(dft_rank0_register)(p);
      X(dft_rank_geq2_register)(p);
+     X(dft_vrank_geq1_register)(p);
      X(dft_vrank2_transpose_register)(p);
      X(dft_vrank3_transpose_register)(p);
      X(dft_buffered_register)(p);

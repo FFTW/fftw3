@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.5 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.6 2002-06-11 11:32:20 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -72,7 +72,8 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
      const S *s = ego->solver;
-     p->print(p, "(dft-rank>=2/%d%p%p)", s->spltrnk, ego->cld1, ego->cld2);
+     p->print(p, "(dft-rank>=2/%d%(%p%)%(%p%))",
+	      s->spltrnk, ego->cld1, ego->cld2);
 }
 
 /* Given a solver spltrnk and a vector rnk, return the actual
@@ -234,9 +235,7 @@ static solver *mksolver(int spltrnk, const int *buddies, uint nbuddies)
 void X(dft_rank_geq2_register)(planner *p)
 {
      uint i;
-     static const int buddies[] = {
-	  1, -1, 0
-     };
+     static const int buddies[] = { 1, -1, 0 };
      const uint nbuddies = sizeof(buddies) / sizeof(buddies[0]);
 
      for (i = 0; i < nbuddies; ++i)

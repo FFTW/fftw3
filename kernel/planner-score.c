@@ -18,19 +18,24 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.2 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: planner-score.c,v 1.3 2002-06-11 11:32:20 athena Exp $ */
 #include "ifftw.h"
 
 static plan *mkplan(planner *ego, problem *p)
 {
      plan *best = 0;
      int best_score;
+     int cnt = 0; /* count how many solvers have the highest score */
 
      best_score = BAD;
      FORALL_SOLVERS(ego, s, {
 	  int sc = s->adt->score(s, p);
-	  if (sc > best_score)
+	  if (sc == best_score)
+	       ++cnt;
+	  else if (sc > best_score) {
 	       best_score = sc;
+	       cnt = 1;
+	  }
      });
 
      for (; best_score > BAD; --best_score) {
@@ -40,9 +45,17 @@ static plan *mkplan(planner *ego, problem *p)
 
 		    if (pln) {
 			 X(plan_use)(pln);
-			 ego->ntry++;
 			 ego->hook(pln, p);
-			 pln->cost = X(measure_execution_time)(pln, p);
+
+			 if (cnt > 1) {
+			      ego->nplan++;
+			      pln->cost = X(measure_execution_time)(pln, p);
+			 } else {
+			      /* no need to time this unique plan */
+			      A(!best);
+			      pln->cost = 0;
+			 }
+
 			 if (best) {
 			      if (pln->cost < best->cost) {
 				   X(plan_destroy)(best);

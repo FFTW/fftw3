@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.6 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: timer.c,v 1.7 2002-06-11 11:32:20 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdio.h>
@@ -138,7 +138,7 @@ double X(measure_execution_time)(plan *pln, const problem *p)
                tmin /= (double) iter;
                tmax /= (double) iter;
                AWAKE(pln, 0);
-               return tmin;
+	       return tmin;
           }
      }
      goto start_over; /* may happen if timer is screwed up */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.5 2002-06-10 21:58:13 athena Exp $ */
+/* $Id: print.c,v 1.6 2002-06-11 11:32:20 athena Exp $ */
 
 #include "ifftw.h"
 #include <stdarg.h>
@@ -87,13 +87,33 @@ static void print(printer *p, const char *format, ...)
 			    sprintf(buf, "%u", x);
 			    goto putbuf;
 		       }
-		       case 'p': {
-			    /* print child plan */
-			    plan *pln = va_arg(ap, plan *);
+		       case '(': {
+			    /* newline, augment indent level */
 			    p->putchr(p, '\n');
-			    p->indent += 2;
-			    pln->adt->print(pln, p);
-			    p->indent -= 2;
+			    p->indent += p->indent_incr;
+			    break;
+		       }
+		       case ')': {
+			    /* decrement indent level */
+			    p->indent -= p->indent_incr;
+			    break;
+		       }
+		       case 'p': {
+			    /* print plan */
+			    plan *pln = va_arg(ap, plan *);
+			    if (pln) 
+				 pln->adt->print(pln, p);
+			    else 
+				 myputs(p, "(null)");
+			    break;
+		       }
+		       case 'P': {
+			    /* print problem */
+			    problem *prb = va_arg(ap, problem *);
+			    if (prb)
+				 prb->adt->print(prb, p);
+			    else
+				 myputs(p, "(null)");
 			    break;
 		       }
 		       default:
@@ -118,6 +138,7 @@ printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c))
      s->print = print;
      s->putchr = putchr;
      s->indent = 0;
+     s->indent_incr = 2;
      return s;
 }
 

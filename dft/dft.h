@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.14 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: dft.h,v 1.15 2002-06-11 11:32:20 athena Exp $ */
 
 #include "ifftw.h"
 #include "codelet.h"
@@ -44,12 +44,10 @@ void X(dft_solve)(plan *ego_, const problem *p_);
 /* plan.c: */
 typedef void (*dftapply) (plan *ego, R *ri, R *ii, R *ro, R *io);
 
-typedef struct
-{
+typedef struct {
      plan super;
      dftapply apply;
-}
-plan_dft;
+} plan_dft;
 
 plan *X(mkplan_dft)(size_t size, const plan_adt *adt, dftapply apply);
 
@@ -63,10 +61,10 @@ solver *X(mksolver_dft_ct_ditbuf)(kdft_dit codelet, const ct_desc *desc);
 solver *X(mksolver_dft_ct_dif)(kdft_dif codelet, const ct_desc *desc);
 solver *X(mksolver_dft_ct_ditf)(kdft_difsq codelet, const ct_desc *desc);
 
-void X(dft_vecloop_register)(planner *p);
 void X(dft_rank0_register)(planner *p);
 void X(dft_rank_geq2_register)(planner *p);
 void X(dft_indirect_register)(planner *p);
+void X(dft_vrank_geq1_register)(planner *p);
 void X(dft_vrank2_transpose_register)(planner *p);
 void X(dft_vrank3_transpose_register)(planner *p);
 void X(dft_buffered_register)(planner *p);

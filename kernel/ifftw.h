@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.21 2002-06-10 23:24:28 athena Exp $ */
+/* $Id: ifftw.h,v 1.22 2002-06-11 11:32:20 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -190,6 +190,7 @@ tensor X(tensor_compress_contiguous)(const tensor sz);
 tensor X(tensor_append)(const tensor a, const tensor b);
 void X(tensor_split)(const tensor sz, tensor *a, uint a_rnk, tensor *b);
 void X(tensor_destroy)(tensor sz);
+void X(tensor_print)(tensor sz, printer *p);
 
 /*-----------------------------------------------------------------------*/
 /* problem.c: */
@@ -197,6 +198,7 @@ typedef struct {
      int (*equal) (const problem *ego, const problem *p);
      uint (*hash) (const problem *ego);
      void (*zero) (const problem *ego);
+     void (*print) (problem *ego, printer *p);
      void (*destroy) (problem *ego);
 } problem_adt;
 
@@ -215,6 +217,7 @@ struct printer_s {
      void (*print)(printer *p, const char *format, ...);
      void (*putchr)(printer *p, char c);
      uint indent;
+     uint indent_incr;
 };
 
 printer *X(mkprinter)(size_t size, void (*putchr)(printer *p, char c));
@@ -281,7 +284,8 @@ typedef struct {
 
 struct planner_s {
      const planner_adt *adt;
-     int ntry;  /* number of plans evaluated */
+     uint nplan;    /* number of plans evaluated */
+     uint nprob;    /* number of problems evaluated */
      void (*hook)(plan *plan, problem *p);
 
      pair *solvers;

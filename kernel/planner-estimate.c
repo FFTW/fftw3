@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner-estimate.c,v 1.3 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: planner-estimate.c,v 1.4 2002-06-11 11:32:20 athena Exp $ */
 #include "ifftw.h"
 
 static plan *mkplan(planner *ego, problem *p)
@@ -30,7 +30,7 @@ static plan *mkplan(planner *ego, problem *p)
 
 	  if (pln) {
 	       X(plan_use)(pln);
-	       ego->ntry++;
+	       ego->nplan++;
 	       ego->hook(pln, p);
 	       if (best) {
 		    if (pln->cost < best->cost) {

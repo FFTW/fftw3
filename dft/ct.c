@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.7 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: ct.c,v 1.8 2002-06-11 11:32:20 athena Exp $ */
 
 /* generic Cooley-Tukey routines */
 #include "dft.h"
@@ -63,7 +63,7 @@ static void print(plan *ego_, printer *p)
      const solver_ct *slv = ego->slv;
      const ct_desc *e = slv->desc;
 
-     p->print(p, "(%s-%u/%u%ois=%ovs=%v%p)",
+     p->print(p, "(%s-%u/%u%ois=%ovs=%v%(%p%))",
               slv->nam, ego->r, X(twiddle_length)(e->tw),
               e->is, e->vs, ego->vl, ego->cld);
 }

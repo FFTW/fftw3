@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vecloop.c,v 1.10 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.1 2002-06-11 11:32:20 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -27,11 +27,11 @@
    They form a wrapper around solvers that don't have apply functions
    for non-null vectors.
  
-   vecloop plans also recursively handle the case of multi-dimensional
+   vrank-geq1 plans also recursively handle the case of multi-dimensional
    vectors, obviating the need for most solvers to deal with this.  We
    can also play games here, such as reordering the vector loops.
  
-   Each vecloop plan reduces the vector rank by 1, picking out a
+   Each vrank-geq1 plan reduces the vector rank by 1, picking out a
    dimension determined by the vecloop_dim field of the solver. */
 
 #include "dft.h"
@@ -82,7 +82,8 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
      const S *s = ego->solver;
-     p->print(p, "(dft-vecloop-x%u/%d%p)", ego->vl, s->vecloop_dim, ego->cld);
+     p->print(p, "(dft-vrank-geq1-x%u/%d%(%p%))",
+	      ego->vl, s->vecloop_dim, ego->cld);
 }
 
 /* Given a solver vecloop_dim, a vector sz, and whether or not the
@@ -151,29 +152,27 @@ static int applicable(const solver *ego_, const problem *p_, uint *dp)
 
 static int score(const solver *ego_, const problem *p_)
 {
-     const problem_dft *p = (const problem_dft *) p_;
+     const problem_dft *p;
      uint vdim;
      iodim *d;
-     int op;
 
      if (!applicable(ego_, p_, &vdim))
           return BAD;
 
-     op = p->ri != p->ro;	/* out-of-place? */
+     p = (const problem_dft *) p_;
 
      /* Heuristic: if the transform is multi-dimensional, and the
         vector stride is less than the transform size, then we
         probably want to use an rank>=2 plan first in order to combine
         this vector with the transform-dimension vectors. */
      d = p->vecsz.dims + vdim;
-     if (p->sz.rnk > 1 &&
-	 X(imin)(d->is, d->os) < X(tensor_max_index)(p->sz))
+     if (p->sz.rnk > 1 && X(imin)(d->is, d->os) < X(tensor_max_index)(p->sz))
           return UGLY;
 
-     /* Another heuristic: don't use a vecloop for rank-0 transforms
-        and a vector rank-1, since this is handled by rank0 */
-     if (p->sz.rnk == 0 && p->vecsz.rnk == 1)
-          return UGLY;
+     /* Heuristic: don't use a vrank-geq1 for vrank-1 transforms.  Assume
+	that other solvers can handle vrank-1. */
+     if (p->vecsz.rnk == 1)
+	  return UGLY;
 
      return GOOD;
 }
@@ -230,7 +229,7 @@ static solver *mksolver(int vecloop_dim, const int *buddies, uint nbuddies)
      return &(slv->super);
 }
 
-void X(dft_vecloop_register)(planner *p)
+void X(dft_vrank_geq1_register)(planner *p)
 {
      uint i;
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.9 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: buffered.c,v 1.10 2002-06-11 11:32:20 athena Exp $ */
 
 #include "dft.h"
 
@@ -114,7 +114,7 @@ static void destroy(plan *ego_)
 static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
-     p->print(p, "(%s-%u%v/%u-%u%p%p%p)",
+     p->print(p, "(%s-%u%v/%u-%u%(%p%)%(%p%)%(%p%))",
               ego->slv->adt->nam,
               ego->n, ego->nbuf,
               ego->vl, ego->bufdist % ego->n,
@@ -163,12 +163,11 @@ static int applicable(const problem *p_, const S *ego)
 	       ) {
 
                /*
-		 In principle, the buffered transforms might
-		 be useful when working out of place.
-		 However, in order to prevent infinite loops
-		 in the planner, we require that the output
-		 stride of the buffered transforms be less
-		 than greater than 2.
+		 In principle, the buffered transforms might be useful
+		 when working out of place.  However, in order to
+		 prevent infinite loops in the planner, we require
+		 that the output stride of the buffered transforms be
+		 greater than 2.
                */
                if (p->ri != p->ro)
                     return (d[0].os > 2);
@@ -339,7 +338,7 @@ void X(dft_buffered_register)(planner *p)
      /* FIXME: what are good defaults? */
      static const bufadt adt = {
 	  /* nbuf */           8,
-	  /* maxbufsz */       (16384 / sizeof(R)),
+	  /* maxbufsz */       (8192 / sizeof(R)),
 	  /* skew_alignment */ 8,
 	  /* skew */           5,
 	  /* nam */            "dft-buffered"

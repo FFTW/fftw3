@@ -30,19 +30,19 @@ static const char *mkcc(void)
 BEGIN_BENCH_DOC
 BENCH_DOC("name", "fftw3")
 BENCH_DOCF("version", mkvers) BENCH_DOCF("fftw-compiled-by", mkcc)
-END_BENCH_DOC static void putchr(printer * p, char c)
+END_BENCH_DOC 
+
+static void putchr(printer *p, char c)
 {
      UNUSED(p);
      putchar(c);
 }
 
-static void debug_hook(plan *pln, fftw_problem * p_)
+static void debug_hook(plan *pln, fftw_problem *p_)
 {
      problem_dft *p = (problem_dft *) p_;
      printer *pr = FFTW(mkprinter) (sizeof(printer), putchr);
-     printf("%d: ", FFTW(tensor_sz) (p->sz));
-     pln->adt->print(pln, pr);
-     printf("\n");
+     pr->print(pr, "%P:\n%p\n", p, pln);
      FFTW(printer_destroy) (pr);
 }
 
@@ -68,9 +68,9 @@ void setup(struct problem *p)
 #endif
 
      FFTW(dft_conf_standard) (plnr);
-#if 0
-     FFTW(planner_set_hook) (plnr, debug_hook);
-#endif
+
+     if (verbose > 3)
+	  FFTW(planner_set_hook) (plnr, debug_hook);
 
      if (p->sign == -1) {
 	  ri = p->in;
@@ -85,12 +85,12 @@ void setup(struct problem *p)
      }
 
      prblm = 
-	  FFTW(mkproblem_dft_d) (FFTW(mktensor_rowmajor)
-				 (p->rank, p->n, p->n, 2, 2),
-				 FFTW(mktensor_rowmajor) (p->vrank, p->vn,
-							  p->vn, 2 * p->size,
-							  2 * p->size), 
-				 ri, ii, ro, io);
+	  FFTW(mkproblem_dft_d)(
+	       FFTW(mktensor_rowmajor)(p->rank, p->n, p->n, 2, 2),
+	       FFTW(mktensor_rowmajor) (p->vrank, p->vn,
+					p->vn, 2 * p->size,
+					2 * p->size), 
+	       ri, ii, ro, io);
      pln = plnr->adt->mkplan(plnr, prblm);
      BENCH_ASSERT(pln);
 
@@ -100,7 +100,7 @@ void setup(struct problem *p)
 	  FFTW(printer_destroy) (pr);
 	  printf("\n");
      }
-     printf("%d\n", plnr->ntry);
+     printf("nprob %u  nplan %u\n", plnr->nprob, plnr->nplan);
      pln->adt->awake(pln, 1);
 }
 

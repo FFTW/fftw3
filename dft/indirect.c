@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.7 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: indirect.c,v 1.8 2002-06-11 11:32:20 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -140,7 +140,7 @@ static void print(plan *ego_, printer *p)
 {
      P *ego = (P *) ego_;
      const S *s = ego->slv;
-     p->print(p, "(%s%p%p)", s->adt->nam, ego->cld, ego->cldcpy);
+     p->print(p, "(%s%(%p%)%(%p%))", s->adt->nam, ego->cld, ego->cldcpy);
 }
 
 static int applicable(const solver *ego_, const problem *p_)

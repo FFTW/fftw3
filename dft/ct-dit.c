@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct-dit.c,v 1.7 2002-06-10 20:30:37 athena Exp $ */
+/* $Id: ct-dit.c,v 1.8 2002-06-11 11:32:20 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "dft.h"
@@ -90,7 +90,10 @@ static int score(const solver *ego_, const problem *p_)
           return BAD;
 
      n = p->sz.dims[0].n;
-     if (n <= 16 || n / ego->desc->radix <= 4)
+     if (0
+	 || n <= 16 
+	 || n / ego->desc->radix <= 4
+	  )
           return UGLY;
 
      return GOOD;

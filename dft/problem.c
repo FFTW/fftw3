@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.6 2002-06-10 13:04:21 athena Exp $ */
+/* $Id: problem.c,v 1.7 2002-06-11 11:32:20 athena Exp $ */
 
 #include "dft.h"
 
@@ -74,6 +74,17 @@ static void zerotens(tensor sz, R *ri, R *ii)
      }
 }
 
+static void print(problem *ego_, printer *p)
+{
+     const problem_dft *ego = (const problem_dft *) ego_;
+     if (ego->ri == ego->ro) p->print(p, "i");
+     X(tensor_print)(ego->sz, p);
+     if (X(tensor_sz(ego->vecsz)) > 1) {
+	  p->print(p, "/");
+	  X(tensor_print)(ego->vecsz, p);
+     }
+}
+
 static void zero(const problem *ego_)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
@@ -87,6 +98,7 @@ static const problem_adt padt =
      equal,
      hash,
      zero,
+     print,
      destroy
 };
 
