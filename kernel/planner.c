@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.89 2002-09-16 03:37:46 stevenj Exp $ */
+/* $Id: planner.c,v 1.90 2002-09-16 03:41:01 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -509,8 +509,8 @@ static void exprt(planner *ego, printer *p)
      p->print(p, "%))\n");
 }
 
-/*  mors stupebit et natura
-    cum resurget creatura */
+/* mors stupebit et natura
+   cum resurget creatura */
 static int imprt(planner *ego, scanner *sc)
 {
      char buf[MAXNAM + 1];
