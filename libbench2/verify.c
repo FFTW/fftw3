@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: verify.c,v 1.2 2003-01-18 12:20:18 athena Exp $ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +34,14 @@ void verify(const char *param, int rounds, double tol)
      problem_alloc(p);
      problem_zero(p);
      setup(p);
-     BENCH_ASSERT(0); /* TODO */
+
+     switch (p->kind) {
+	 case PROBLEM_COMPLEX: 
+	      verify_dft(p, rounds, tol);
+	      break;
+	 case PROBLEM_REAL:	  /* TODO */
+	 default: BENCH_ASSERT(0); return 0;
+     }
      done(p);
      problem_destroy(p);
 }

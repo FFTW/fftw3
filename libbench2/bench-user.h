@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.1 2003-01-17 13:11:56 athena Exp $ */
+/* $Id: bench-user.h,v 1.2 2003-01-18 12:20:18 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -77,6 +77,9 @@ tensor *tensor_compress(const tensor *sz);
 int tensor_unitstridep(tensor *t);
 int tensor_rowmajorp(tensor *t);
 tensor *tensor_append(const tensor *a, const tensor *b);
+tensor *tensor_copy(const tensor *sz);
+void tensor_ibounds(tensor *t, int *lbp, int *ubp);
+void tensor_obounds(tensor *t, int *lbp, int *ubp);
 
 /*
   Definition of rank -infinity.

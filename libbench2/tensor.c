@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.2 2003-01-17 15:35:56 athena Exp $ */
+/* $Id: tensor.c,v 1.3 2003-01-18 12:20:18 athena Exp $ */
 #include "bench.h"
 #include <stdlib.h>
 
@@ -171,3 +171,10 @@ void name(tensor *t, int *lbp, int *ubp)	\
 
 DEFBOUNDS(tensor_ibounds, is)
 DEFBOUNDS(tensor_obounds, os)
+
+tensor *tensor_copy(const tensor *sz)
+{
+     tensor *x = mktensor(sz->rnk);
+     dimcpy(x->dims, sz->dims, sz->rnk);
+     return x;
+}
