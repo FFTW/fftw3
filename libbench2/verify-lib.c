@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.15 2003-11-15 01:05:54 stevenj Exp $ */
+/* $Id: verify-lib.c,v 1.16 2005-02-19 21:55:29 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -289,30 +289,39 @@ double impulse(dofft_closure *k,
 	       C *tmp, int rounds, double tol)
 {
      int N = n * vecn;
-     C pls;
-     int i;
+     int i, j;
      double e = 0.0;
 
-     /* check that the unit impulse is transformed properly */
-     c_re(pls) = 1.0;
-     c_im(pls) = 0.0;
-     
-     for (i = 0; i < N; ++i) {
-	  /* pls */
-	  c_re(inA[i]) = c_im(inA[i]) = 0.0;
-	  CASSIGN(outA[i], pls);
+     /* check impulsive input */
+     for (i = 0; i < vecn; ++i) {
+	  R xr = mydrand(), xi = mydrand();
+	  for (j = 0; j < n; ++j) {
+	       c_re(inA[j + i * n]) = 0;
+	       c_im(inA[j + i * n]) = 0;
+	       c_re(outA[j + i * n]) = xr;
+	       c_im(outA[j + i * n]) = xi;
+	  }
+	  c_re(inA[i * n]) = xr;
+	  c_im(inA[i * n]) = xi;
      }
-     for (i = 0; i < vecn; ++i)
-	  CASSIGN(inA[i * n], pls);
 
      e = dmax(e, impulse0(k, n, vecn, inA, inB, inC, outA, outB, outC,
 			  tmp, rounds, tol));
 
-     c_re(pls) = n;
-     for (i = 0; i < vecn; ++i)
-	  CASSIGN(inA[i * n], pls);
+     /* check constant input */
+     for (i = 0; i < vecn; ++i) {
+	  R xr = mydrand(), xi = mydrand();
+	  for (j = 0; j < n; ++j) {
+	       c_re(inA[j + i * n]) = xr;
+	       c_im(inA[j + i * n]) = xi;
+	       c_re(outA[j + i * n]) = 0;
+	       c_im(outA[j + i * n]) = 0;
+	  }
+	  c_re(outA[i * n]) = n * xr;
+	  c_im(outA[i * n]) = n * xi;
+     }
 
-     e = dmax(e, impulse0(k, n, vecn, outA, inB, inC, inA, outB, outC,
+     e = dmax(e, impulse0(k, n, vecn, inA, inB, inC, outA, outB, outC,
 			  tmp, rounds, tol));
      return e;
 }

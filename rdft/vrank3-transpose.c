@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.21 2005-02-19 20:24:03 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.22 2005-02-19 21:55:29 athena Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -126,7 +126,7 @@ static void rec_transpose_swap(R *M, int i0, int i1, int j0, int j1,
 		   for (i = i0; i < i1; ++i)
 			for (j = j0; j < j1; ++j) {
 			     R a = M[i * lda + j];
-			     R b = M[i * lda + j];
+			     R b = M[j * lda + i];
 			     M[j * lda + i] = a;
 			     M[i * lda + j] = b;
 			}
@@ -136,8 +136,8 @@ static void rec_transpose_swap(R *M, int i0, int i1, int j0, int j1,
 			for (j = j0; j < j1; ++j) {
 			     R a0 = M[(i * lda + j) * 2 + 0];
 			     R a1 = M[(i * lda + j) * 2 + 1];
-			     R b0 = M[(i * lda + j) * 2 + 0];
-			     R b1 = M[(i * lda + j) * 2 + 1];
+			     R b0 = M[(j * lda + i) * 2 + 0];
+			     R b1 = M[(j * lda + i) * 2 + 1];
 			     M[(j * lda + i) * 2 + 0] = a0;
 			     M[(j * lda + i) * 2 + 1] = a1;
 			     M[(i * lda + j) * 2 + 0] = b0;
@@ -149,7 +149,7 @@ static void rec_transpose_swap(R *M, int i0, int i1, int j0, int j1,
 			for (j = j0; j < j1; ++j)
 			     for (k = 0; k < vl; ++k) {
 				  R a = M[(i * lda + j) * vl + k];
-				  R b = M[(i * lda + j) * vl + k];
+				  R b = M[(j * lda + i) * vl + k];
 				  M[(j * lda + i) * vl + k] = a;
 				  M[(i * lda + j) * vl + k] = b;
 			     }
