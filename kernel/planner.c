@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.13 2002-06-13 15:04:24 athena Exp $ */
+/* $Id: planner.c,v 1.14 2002-06-13 15:54:02 athena Exp $ */
 #include "ifftw.h"
 
 struct pair_s {
@@ -211,7 +211,7 @@ static void htab_destroy(planner *ego)
 
 static void print_solution(solutions *s, printer *p)
 {
-     p->print(p, "(s %P %d)\n", s->p, s->sp ? s->sp->id : 0);
+     p->print(p, "(s %d %P)\n", s->sp ? s->sp->id : 0, s->p);
 }
 
 static void export(planner *ego, printer *p)
@@ -323,16 +323,10 @@ void X(planner_dump)(planner *ego, int verbose)
      if (verbose) {
           printer *pr = X(mkprinter)(sizeof(printer), putchr);
           for (h = 0; h < ego->hashsiz; ++h) {
-               printf("bucket %d\n", h);
+               pr->print(pr, "\nbucket %d:\n", h);
 
-               for (s = ego->sols[h]; s; s = s->cdr) {
-                    if (s->pln) 
-                         s->pln->adt->print(s->pln, pr);
-		    else 
-                         printf("(null)");
-                    printf("\n");
-               }
-               printf("\n");
+               for (s = ego->sols[h]; s; s = s->cdr) 
+		    pr->print(pr, "%P:%(%p%)\n", s->p, s->pln);
           }
           X(printer_destroy)(pr);
      }

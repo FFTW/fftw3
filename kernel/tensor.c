@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.10 2002-06-13 15:04:24 athena Exp $ */
+/* $Id: tensor.c,v 1.11 2002-06-13 15:54:02 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -135,13 +135,12 @@ uint X(tensor_hash)(const tensor t)
      uint i;
      uint h = 1023 * t.rnk;
 
-     if (!FINITE_RNK(t.rnk))
-          return h;
-
      /* FIXME: find a decent hash function */
-     for (i = 0; i < t.rnk; ++i) {
-          iodim *p = t.dims + i;
-          h = h * 13131 + p->n + 7 * p->is + 13 * p->os;
+     if (FINITE_RNK(t.rnk)) {
+	  for (i = 0; i < t.rnk; ++i) {
+	       iodim *p = t.dims + i;
+	       h = (h * 17) ^ p->n ^ (7 * p->is) ^ (13 * p->os);
+	  }
      }
 
      return h;

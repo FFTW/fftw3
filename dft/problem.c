@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.8 2002-06-13 15:04:24 athena Exp $ */
+/* $Id: problem.c,v 1.9 2002-06-13 15:54:02 athena Exp $ */
 
 #include "dft.h"
 
@@ -30,11 +30,16 @@ static void destroy(problem *ego_)
      X(free)(ego_);
 }
 
-static unsigned int hash(const problem *ego_)
+static unsigned int hash(const problem *p_)
 {
-     const problem_dft *ego = (const problem_dft *) ego_;
-     return (X(tensor_hash)(ego->sz) * 31415 +
-             X(tensor_hash)(ego->vecsz) * 27183);
+     const problem_dft *p = (const problem_dft *) p_;
+     return (0
+	     ^ ((p->ri == p->ro) * 17)
+	     ^ ((p->ii - p->ri) * 19)
+	     ^ ((p->io - p->ro) * 23)
+	     ^ (X(tensor_hash)(p->sz) * 10477)
+             ^ (X(tensor_hash)(p->vecsz) * 27191)
+	  );
 }
 
 static int equal(const problem *ego_, const problem *problem_)

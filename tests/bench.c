@@ -76,7 +76,7 @@ void setup(struct problem *p)
      
      FFTW(dft_conf_standard) (plnr);
 
-     if (verbose > 3)
+     if (verbose > 5)
 	  FFTW(planner_set_hook) (plnr, debug_hook);
 
      if (p->sign == -1) {
