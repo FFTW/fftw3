@@ -12,7 +12,9 @@
 
 * real transforms
 
-* rader/generic-radix cooley-tukey
+* generic-radix cooley-tukey
+
+* Rader should share twiddle arrays between plans.
 
 * simd
 
