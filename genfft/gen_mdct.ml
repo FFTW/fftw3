@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_mdct.ml,v 1.1 2003-05-30 01:31:31 stevenj Exp $ *)
+(* $Id: gen_mdct.ml,v 1.2 2003-06-01 00:41:15 stevenj Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_mdct.ml,v 1.1 2003-05-30 01:31:31 stevenj Exp $"
+let cvsid = "$Id: gen_mdct.ml,v 1.2 2003-06-01 00:41:15 stevenj Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -109,6 +109,8 @@ let window_array n w =
 
 let load_window w n i = w i
 let load_window_sym w n i = w (if (i < n) then i else (2*n - 1 - i))
+
+(* fixme: use same locations for input and output so that it works in-place? *)
 
 (* Note: only correct for even n! *)
 let load_array_mdct window n rarr iarr =
