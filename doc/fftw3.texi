@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.18 2003-01-19 01:53:11 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.19 2003-01-19 02:52:32 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -262,6 +262,12 @@ main interest lies in one of the other transform types.
 @c ------------------------------------------------------------
 @node Complex One-Dimensional DFTs, Complex Multi-Dimensional DFTs, Tutorial, Tutorial
 @section Complex One-Dimensional DFTs
+
+@quotation
+Plan: to bother about the best method of accomplishing an accidental result.
+---Ambrose Bierce, @cite{The Enlarged Devil's Dictionary}
+@cindex Devil
+@end quotation
 
 The basic usage of FFTW is simple, and typically looks like:
 
