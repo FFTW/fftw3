@@ -18,14 +18,15 @@
  *
  */
 
-/* $Id: planner-naive.c,v 1.8 2002-06-11 18:06:06 athena Exp $ */
+/* $Id: planner-naive.c,v 1.9 2002-06-12 22:19:48 athena Exp $ */
 #include "ifftw.h"
 
 /* naive planner with no memoization */
 
-static plan *mkplan(planner *ego, problem *p)
+static void mkplan(planner *ego, problem *p, plan **bestp, solver **solvp)
 {
      plan *best = 0;
+     solver *slv = 0;
 
      FORALL_SOLVERS(ego, s, {
 	  plan *pln = s->adt->mkplan(s, p, ego);
@@ -39,16 +40,19 @@ static plan *mkplan(planner *ego, problem *p)
 		    if (pln->pcost < best->pcost) {
 			 X(plan_destroy)(best);
 			 best = pln;
+			 slv = s;
 		    } else {
 			 X(plan_destroy)(pln);
 		    }
 	       } else {
 		    best = pln;
+		    slv = s;
 	       }
 	  }
      });
 
-     return best;
+     *bestp = best;
+     *solvp = slv;
 }
 
 /* constructor */

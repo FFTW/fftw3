@@ -3,6 +3,25 @@
 # This file requires GNU make .
 
 CODLIST = codlist.c
+CODELET_NAME=codelet_
+
+# rule to build codlist
+$(CODLIST): Makefile
+	(								\
+	echo "#include \"ifftw.h\"";					\
+	echo;								\
+	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))); do		\
+	   echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
+	done;								\
+	echo;								\
+	echo;								\
+	echo "solvtab $(SOLVTAB_NAME) = {";				\
+	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))); do		\
+	   echo "   X($(CODELET_NAME)$$i),";				\
+	done;								\
+	echo "   0";							\
+	echo "};";							\
+	) >$@
 
 if MAINTAINER_MODE
 
@@ -13,7 +32,6 @@ GEN_TWIDDLE = ${GENFFTDIR}/gen_twiddle
 GEN_TWIDSQ = ${GENFFTDIR}/gen_twidsq
 PRELUDE = ${top_srcdir}/support/codelet_prelude
 ADD_DATE = sed -e s/@DATE@/"`date`"/
-CODELET_NAME=codelet_
 
 COPYRIGHT=${top_srcdir}/COPYRIGHT
 CODELET_DEPS=$(COPYRIGHT) $(PRELUDE)
@@ -100,23 +118,5 @@ Kq2s_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ)
 %: %.s
 %: %.c
 %: %.S
-
-# rule to build codlist
-$(CODLIST): Makefile
-	(								\
-	echo "#include \"ifftw.h\"";					\
-	echo;								\
-	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))); do		\
-	   echo "extern void X($(CODELET_NAME)$$i)(planner *);";	\
-	done;								\
-	echo;								\
-	echo;								\
-	echo "solvtab $(SOLVTAB_NAME) = {";				\
-	for i in $(subst .c,,$(filter %.c,$(ALL_CODELETS))); do		\
-	   echo "   X($(CODELET_NAME)$$i),";				\
-	done;								\
-	echo "   0";							\
-	echo "};";							\
-	) >$@
 
 endif # MAINTAINER_MODE

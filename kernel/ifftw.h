@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.26 2002-06-11 18:22:49 athena Exp $ */
+/* $Id: ifftw.h,v 1.27 2002-06-12 22:19:48 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -287,6 +287,7 @@ typedef struct {
      pair *(*solvers)(planner *ego);
      void (*register_solver)(planner *ego, solver *s);
      plan *(*mkplan)(planner *ego, problem *p);
+     void (*forget)(planner *ego, int everythingp);
 } planner_adt;
 
 struct planner_s {
@@ -298,15 +299,15 @@ struct planner_s {
      pair *solvers;
      solutions **sols;
      void (*destroy)(planner *ego);
-     plan *(*inferior_mkplan)(planner *ego, problem *p);
+     void (*inferior_mkplan)(planner *ego, problem *p, plan **, solver **);
      uint hashsiz;
      uint cnt;
-     int memoize;               /* if TRUE, turn memoization on */
-     int memoize_failures;	/* if TRUE, also memoize unfeasible problems */
      int estimatep;             /* if TRUE, use estimate of execution time */
 };
 
-planner *X(mkplanner)(size_t sz, plan *(*mkplan)(planner *, problem *),
+planner *X(mkplanner)(size_t sz,
+		      void (*mkplan)(planner *ego, problem *p, 
+				     plan **, solver **),
                       void (*destroy) (planner *), int estimatep);
 void X(planner_destroy)(planner *ego);
 void X(planner_set_hook)(planner *p, void (*hook)(plan *, problem *));

@@ -18,12 +18,13 @@
  *
  */
 
-/* $Id: planner-score.c,v 1.5 2002-06-11 18:06:06 athena Exp $ */
+/* $Id: planner-score.c,v 1.6 2002-06-12 22:19:48 athena Exp $ */
 #include "ifftw.h"
 
-static plan *mkplan(planner *ego, problem *p)
+static void mkplan(planner *ego, problem *p, plan **bestp, solver **solvp)
 {
      plan *best = 0;
+     solver *slv = 0;
      int best_score;
      int cnt = 0; /* count how many solvers have the highest score */
 
@@ -60,11 +61,13 @@ static plan *mkplan(planner *ego, problem *p)
 			      if (pln->pcost < best->pcost) {
 				   X(plan_destroy)(best);
 				   best = pln;
+				   slv = s;
 			      } else {
 				   X(plan_destroy)(pln);
 			      }
 			 } else {
 			      best = pln;
+			      slv = s;
 			 }
 		    }
 	       }
@@ -73,7 +76,8 @@ static plan *mkplan(planner *ego, problem *p)
                break;
      };
 
-     return best;
+     *bestp = best;
+     *solvp = slv;
 }
 
 /* constructor */
