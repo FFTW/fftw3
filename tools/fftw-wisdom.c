@@ -321,6 +321,16 @@ int bench_main(int argc, char *argv[])
      nproblems = iproblem;
      qsort(problems, nproblems, sizeof(bench_problem *), prob_size_cmp);
 
+     if (!output_fname)
+	  output_file = stdout;
+     else
+	  if (!(output_file = fopen(output_fname, "w"))) {
+	       fprintf(stderr,
+		       "fftw-wisdom: error creating \"%s\"", output_fname);
+	       perror("");
+	       exit(EXIT_FAILURE);
+	  }
+
      begin = time((time_t*)0);
      for (iproblem = 0; iproblem < nproblems; ++iproblem) {
 	  if (hours <= 0
@@ -334,16 +344,6 @@ int bench_main(int argc, char *argv[])
      if (verbose && hours > 0
 	 && hours < (time((time_t*)0) - begin) / 3600.0)
 	  fprintf(stderr, "EXCEEDED TIME LIMIT OF %g HOURS.\n", hours);
-
-     if (!output_fname)
-	  output_file = stdout;
-     else
-	  if (!(output_file = fopen(output_fname, "w"))) {
-	       fprintf(stderr,
-		       "fftw-wisdom: error creating \"%s\"", output_fname);
-	       perror("");
-	       exit(EXIT_FAILURE);
-	  }
 
      FFTW(export_wisdom_to_file)(output_file);
      if (output_file != stdout)
