@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: planner.c,v 1.93 2002-09-16 03:55:44 stevenj Exp $ */
+/* $Id: planner.c,v 1.94 2002-09-16 04:56:29 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
-/* GNU Coding Standards, Sec. 5.2: Please write the comments in a GNU
+/* GNU Coding Standards, Sec. 5.2: "Please write the comments in a GNU
    program in English, because English is the one language that nearly
-   all programmers in all countries can read. 
+   all programmers in all countries can read."
 
                     ingemisco tanquam reus
 		    culpa rubet vultus meus
