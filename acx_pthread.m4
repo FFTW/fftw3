@@ -35,11 +35,12 @@ dnl Please let the authors know if this macro fails on any platform,
 dnl or if you have any other suggestions or comments.  This macro was
 dnl based on work by SGJ on autoconf scripts for FFTW (www.fftw.org)
 dnl (with help from M. Frigo), as well as ac_pthread and hb_pthread
-dnl macros posted by AFC to the autoconf macro repository.  We are also
-dnl grateful for the helpful feedback of numerous users.
+dnl macros posted by Alejandro Forero Cuervo to the autoconf macro
+dnl repository.  We are also grateful for the helpful feedback of
+dnl numerous users.
 dnl
-dnl @version $Id: acx_pthread.m4,v 1.4 2004-02-23 22:42:56 stevenj Exp $
-dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Alejandro Forero Cuervo <bachue@bachue.com>
+dnl @version $Id: acx_pthread.m4,v 1.5 2004-02-24 17:17:06 stevenj Exp $
+dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([ACX_PTHREAD], [
 AC_REQUIRE([AC_CANONICAL_HOST])
