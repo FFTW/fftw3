@@ -30,8 +30,8 @@
 
 int X(import_system_wisdom)(void)
 {
-#ifdef WINDOWS_AND_SO_ON	/* TODO */
-     return 0;
+#ifdef defined(__WIN32__) || defined(WIN32) || defined(_WINDOWS)
+     return 0; /* TODO? */
 #else
 
      FILE *f;
