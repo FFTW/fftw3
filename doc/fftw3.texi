@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.17 2003-01-19 01:33:28 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.18 2003-01-19 01:53:11 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -192,13 +192,13 @@ $513 = 19 \cdot 3^3$,
 you can customize FFTW to support the factor @math{19} efficiently.
 
 For more information regarding FFTW, see the paper, ``FFTW: An
-Adaptive Software Architecture for the FFT,'' by M. Frigo and
+adaptive software architecture for the FFT,'' by M. Frigo and
 S. G. Johnson, which appeared in the 23rd International Conference on
 Acoustics, Speech, and Signal Processing (@cite{Proc. ICASSP 1998}
 @b{3}, p. 1381).  See also, ``The Fastest Fourier Transform in the
 West,'' by M. Frigo and S. G. Johnson, which is the technical report
 MIT-LCS-TR-728 (Sep. '97).  The code generator is described in the
-paper ``A Fast Fourier Transform Compiler'',
+paper ``A fast Fourier transform compiler'',
 @cindex compiler
 by M. Frigo, in the @cite{Proceedings of the 1999 ACM SIGPLAN Conference
 on Programming Language Design and Implementation (PLDI), Atlanta,
@@ -573,7 +573,10 @@ site}.
 In addition, we kindly ask you to acknowledge FFTW and its authors in
 any program or publication in which you use FFTW.  (You are not
 @emph{required} to do so; it is up to your common sense to decide
-whether you want to comply with this request or not.)
+whether you want to comply with this request or not.)  For general
+publications, we suggest referencing: Matteo Frigo and Steven
+G. Johnson, ``FFTW: An adaptive software architecture for the FFT,''
+Proc. ICASSP 1998, vol. 3, p. 1381--1384.
 
 Non-free versions of FFTW are available under terms different than the
 General Public License. (e.g. they do not require you to accompany any
