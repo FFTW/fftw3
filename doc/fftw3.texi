@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.177 2003-03-30 20:51:59 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.178 2003-03-31 22:12:19 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2636,6 +2636,9 @@ and imaginary arrays.
 In addition to the more flexible planner interface, there are also guru
 generalizations of @code{fftw_execute} that allow a given plan to be
 executed on a different array (sufficiently similar to the original).
+Note that in order to use the guru execute functions, you do @emph{not}
+need to use the guru planner interface: you can create plans with the
+basic or advanced interface and execute them with the guru interface.
 
 For those users who require the flexibility of the guru interface, it is
 important that they pay special attention to the documentation lest they
