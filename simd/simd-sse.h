@@ -23,7 +23,7 @@
 #endif
 
 #define VL 2            /* SIMD complex vector length */
-#define ALIGNMENT 16
+#define ALIGNMENT 8     /* loading half vector at the time */
 
 #if defined(__GNUC__) && defined(__i386__)
 typedef R V __attribute__ ((mode(V4SF),aligned(16)));
