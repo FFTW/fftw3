@@ -18,10 +18,9 @@
  *
  */
 
-/* $Id: align.c,v 1.12 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: align.c,v 1.13 2003-03-27 03:47:58 stevenj Exp $ */
 
 #include "ifftw.h"
-#include <stddef.h>
 
 #if HAVE_3DNOW
 #  define ALGN 8
