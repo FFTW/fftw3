@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.60 2003-03-02 05:58:37 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.61 2003-03-02 06:37:19 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1504,6 +1504,7 @@ There is one additional routine: if you want to get rid of all memory
 allocated internally by FFTW, you can call @code{fftw_cleanup_threads()},
 which is exactly like the @code{fftw_cleanup()} function except that it
 also gets rid of threads-related data.
+@findex fftw_cleanup_threads
 
 We should also mention one other restriction: if you save wisdom from a
 program using the multi-threaded FFTW, that wisdom @emph{cannot be used}
@@ -1564,6 +1565,212 @@ and is not susceptible to problems of this sort.)
 @c ************************************************************
 @node Calling FFTW from Fortran, Installation and Customization, Parallel FFTW, Top
 @chapter Calling FFTW from Fortran
+@cindex Fortran interface
+
+This chapter describes the Fortran-callable interface to FFTW, which
+differs from the C interface only in the prefix (@samp{dfftw_} instead
+of @samp{fftw_}), and a few other minor details.  The Fortran interface
+is included in the FFTW libraries by default, unless a Fortran compiler
+isn't found on your system or @code{--disable-fortran} is included in
+the @code{configure} flags.  We assume here that the reader is already
+familiar with the usage of FFTW in C, as described elsewhere in this
+manual.
+
+@menu
+@end menu
+
+@c -------------------------------------------------------
+@node Fortran-interface routines
+@section Fortran-interface routines
+
+Nearly all of the FFTW functions have Fortran-callable equivalents.  The
+name of the Fortran routine is the same as that of the corresponding C
+routine, but with the @samp{fftw_} prefix replaced by @samp{dfftw_}.
+(The single and long-double precision versions use @samp{sfftw_} and
+@samp{lfftw_}, respectively, instead of @samp{fftwf_} and
+@samp{fftwl_}.)@footnote{Technically, Fortran 77 identifiers are
+not allowed to have more than 6 characters, nor may they contain
+underscores.  Any compiler that enforces this limitation doesn't deserve
+to link to FFTW.}
+
+For the most part, all of the arguments to the functions are the same,
+with the following exceptions:
+
+@itemize @bullet
+
+@item
+@code{plan} variables (what would be of type @code{fftw_plan} in C),
+must be declared as a type that is at least as big as a pointer
+(address) on your machine.  We recommend using @code{integer*8}.
+
+@item
+Any function that returns a value (e.g. @code{fftw_plan_dft}) is
+converted into a @emph{subroutine}.  The return value is converted into
+an additional @emph{first} parameter of this subroutine.@footnote{The
+reason for this is that some Fortran implementations seem to have
+trouble with C function return values, and vice versa.}
+
+@item
+@cindex column-major
+The Fortran routines expect multi-dimensional arrays to be in
+@emph{column-major} order, which is the ordinary format of Fortran
+arrays (@pxref{Multi-dimensional Array Format}).  They do this
+transparently and costlessly simply by reversing the order of the
+dimensions passed to FFTW, but this has one important consequence for
+multi-dimensional real-complex transforms, discussed below.
+
+@item
+Wisdom import and export is somewhat more tricky because one cannot
+easily pass files or strings between C and Fortran; see @ref{Wisdom of
+Fortran?}.
+
+@end itemize
+
+In general, you should take care to use Fortran data types that
+correspond to (i.e. are the same size as) the C types used by FFTW.  If
+your C and Fortran compilers are made by the same vendor, the
+correspondence is usually straightforward (i.e. @code{integer}
+corresponds to @code{int}, @code{real} corresponds to @code{float},
+etcetera).  The native Fortran double/single-precision complex type
+should be compatible with @code{fftw_complex}/@code{fftwf_complex}.
+Such simple correspondences are assumed in the examples below.
+
+@c -------------------------------------------------------
+@node  FFTW Constants in Fortran, Fortran Examples, Wrapper Routines, Calling FFTW from Fortran
+@section FFTW Constants in Fortran
+
+When creating plans in FFTW, a number of constants are used to specify
+options, such as @code{FFTW_FORWARD} or @code{FFTW_ESTIMATE}.  The
+same constants must be used with the wrapper routines, but of course the
+C header files where the constants are defined can't be incorporated
+directly into Fortran code.
+
+Instead, we have placed Fortran equivalents of the FFTW constant
+definitions in the file @code{fftw3.f}, which can be found in the same
+directory as @code{fftw3.h}.  If your Fortran compiler supports a
+preprocessor of some sort, you should be able to @code{include} or
+@code{#include} this file; otherwise, you can paste it directly into
+your code.
+
+@cindex flags
+In C, you combine different flags (like @code{FFTW_PRESERVE_INPUT} and
+@code{FFTW_MEASURE}) using the @samp{@code{|}} operator; in Fortran you
+should just use @samp{@code{+}}.  (Take care not to add in the same flag
+more than once, though.)
+
+@c -------------------------------------------------------
+@node Fortran Examples,  , FFTW Constants in Fortran, Calling FFTW from Fortran
+@section Fortran Examples
+
+In C you might have something like the following to transform a
+one-dimensional complex array:
+
+@example
+        fftw_complex in[N], out[N];
+        fftw_plan plan;
+
+        plan = fftw_plan_dft_1d(N,in,out,FFTW_FORWARD,FFTW_ESTIMATE);
+        fftw_execute(plan);
+        fftw_destroy_plan(plan);
+@end example
+
+In Fortran, you use the following to accomplish the same thing:
+
+@example
+        double complex in, out
+        dimension in(N), out(N)
+        integer*8 plan
+
+        call dfftw_plan_dft_1d(plan,N,in,out,FFTW_FORWARD,FFTW_ESTIMATE)
+        call dfftw_execute(plan)
+        call dfftw_destroy_plan(plan)
+@end example
+@findex dfftw_plan_dft_1d
+@findex dfftw_execute
+@findex dfftw_destroy_plan
+
+Notice how all routines are called as Fortran subroutines, and the plan
+is returned via the first argument to @code{dfftw_plan_dft_1d}.  To do
+the same thing, but using 8 threads in parallel (@pxref{Multi-threaded
+FFTW}), you would simply prefix these calls with:
+
+@example
+        call dfftw_init_threads
+        call dfftw_plan_with_nthreads(8)
+@end example
+@findex dfftw_init_threads
+@findex dfftw_plan_with_nthreads
+
+To transform a three-dimensional array in-place with C, you might do:
+
+@example
+        fftw_complex arr[L][M][N];
+        fftw_plan plan;
+
+        plan = fftw_plan_dft_3d(L,M,N,arr,arr,FFTW_FORWARD,FFTW_ESTIMATE)
+        fftw_execute(plan);
+        fftw_destroy_plan(plan);
+@end example
+
+In Fortran, you would use this instead:
+
+@example
+        double complex arr
+        dimension arr(L,M,N)
+        integer*8 plan
+
+        call dfftw_plan_dft_3d(plan,L,M,N,arr,arr,
+       &                       FFTW_FORWARD,FFTW_ESTIMATE)
+        call dfftw_execute(plan)
+        call dfftw_destroy_plan(plan)
+@end example
+@findex dfftw_plan_dft_3d
+
+Note that we pass the array dimensions in the ``natural'' order in both C
+and Fortran.
+
+To transform a one-dimensional real array in Fortran, you might do:
+
+@example
+        double precision in
+        dimension in(N)
+        double complex out
+        dimension out(N/2 + 1)
+        integer*8 plan
+
+        call dfftw_plan_dft_r2c_1d(plan,N,in,out,FFTW_ESTIMATE)
+        call dfftw_execute(plan)
+        call dfftw_destroy_plan(plan)
+@end example
+@findex dfftw_plan_dft_r2c_1d
+
+To transform a two-dimensional real array, out of place, you might use
+the following:
+
+@example
+        double precision in
+        dimension in(M,N)
+        double complex out
+        dimension out(M/2 + 1, N)
+        integer*8 plan
+
+        call dfftw_plan_dft_r2c_2d(plan,M,N,in,out,FFTW_ESTIMATE)
+        call dfftw_execute(plan)
+        call dfftw_destroy_plan(plan)
+@end example
+@findex dfftw_plan_dft_r2c_2d
+
+@strong{Important:} Notice that it is the @emph{first} dimension of the
+complex output array that is cut in half in Fortran, rather than the
+last dimension as in C.  This is a consequence of the interface routines
+reversing the order of the array dimensions passed to FFTW so that the
+Fortran program can use its ordinary column-major order.
+@cindex column-major
+@cindex r2c/c2r multi-dimensional array format
+
+@c -------------------------------------------------------
+@node Wisdom of Fortran?
+@section Wisdom of Fortran?
 
 @c ************************************************************
 @node Installation and Customization, Acknowledgments, Calling FFTW from Fortran, Top
