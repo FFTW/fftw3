@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.20 2003-03-16 19:19:10 stevenj Exp $ */
+/* $Id: cycle.h,v 1.21 2003-03-31 20:13:21 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -99,6 +99,27 @@ static __inline__ ticks getticks(void)
      __asm__ __volatile__("rdtsc": "=A" (ret));
      /* no input, nothing else clobbered */
      return ret;
+}
+
+static __inline__ double elapsed(ticks t1, ticks t0)
+{
+     return (double)(t1 - t0);
+}
+
+#define HAVE_TICK_COUNTER
+#endif
+/*----------------------------------------------------------------*/
+/*
+ * X86-64 cycle counter
+ */
+#if defined(__GNUC__) && defined(__x86_64__)  && !defined(HAVE_TICK_COUNTER)
+typedef unsigned long long ticks;
+
+static __inline__ ticks getticks(void)
+{
+     unsigned a, d; 
+     asm volatile("rdtsc" : "=a" (a), "=d" (d)); 
+     return ((ticks)a) | (((ticks)d) << 32); 
 }
 
 static __inline__ double elapsed(ticks t1, ticks t0)
