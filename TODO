@@ -1,11 +1,6 @@
 * audit the implementation of RNK_MINFTY
 
-* define a naming scheme for solvers.  Use it for
-  wisdom.  The idea is that wisdom is a map problem -> solver.
-  Given problem, look up solver in wisdom, use solver to compute
-  plan.
-
-* adapt verify() to vecsz.rnk > 0 .
+* wisdom I/O
 
 * real transforms
 
