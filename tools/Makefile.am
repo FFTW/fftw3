@@ -10,7 +10,7 @@ dist_man_MANS = fftw-wisdom-to-conf.1 fftw@PREC_SUFFIX@-wisdom.1
 EXTRA_MANS = fftw_wisdom.1.in
 fftw@PREC_SUFFIX@-wisdom.1: fftw_wisdom.1
 	rm -f $@
-	cp $< $@
+	cp $(srcdir)/fftw_wisdom.1 $@
 
 if THREADS
 LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_threads.la
