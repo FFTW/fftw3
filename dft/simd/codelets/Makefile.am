@@ -55,9 +55,10 @@ st1fv_64_512.c st1fv_64_1024.c
 ST1FCOD = st1fv_16.cod st1fv_2.cod st1fv_32.cod st1fv_4.cod	\
 st1fv_64.cod st1fv_8.cod
 
-# Uncomment these to include specialized codelets of many fixed strides,
-# which can speed things up on Pentia where stride arithmetic is expensive,
-# at the expense of increased library size.
+# Uncomment these to include many specialized codelets of fixed
+# strides, which can speed things up on Pentia where stride arithmetic
+# is expensive, as well as improving SIMD utilization for the
+# unit-stride cases, at the expense of increased library size.
 FRANZ_CODELETS = # $(SN1F) $(ST1F)
 FRANZ_EXTRA = # $(SN1FCOD) $(ST1FCOD)
 
