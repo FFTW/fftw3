@@ -31,3 +31,6 @@
 #endif
 
 #define ALIGNED(p) (!(((long)p) % ALIGNMENT))
+#define ALIGNEDA(p) (!(((long)p) % ALIGNMENTA))
+#define VEC_STRIDE_OK(x) (!(((x) * sizeof(R)) % ALIGNMENT))
+#define VEC_STRIDE_OKA(x) (!(((x) * sizeof(R)) % ALIGNMENTA))

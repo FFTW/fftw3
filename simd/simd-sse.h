@@ -23,7 +23,8 @@
 #endif
 
 #define VL 2            /* SIMD complex vector length */
-#define ALIGNMENT 8     /* loading half vector at the time */
+#define ALIGNMENT 8     /* alignment for LD/ST */
+#define ALIGNMENTA 16   /* alignment for LDA/STA */
 
 #if defined(__GNUC__) && defined(__i386__)
 typedef R V __attribute__ ((mode(V4SF),aligned(16)));
@@ -244,5 +245,3 @@ static __inline__ V BYTWJ(const R *t, V sr)
 
 #define RIGHT_CPU X(have_sse)
 extern int RIGHT_CPU(void);
-
-#define VEC_OKSTRIDE(x) ((x % 2) == 0)

@@ -29,10 +29,10 @@ static int okp(const kdft_desc *d,
      return (RIGHT_CPU()
              && ALIGNED(ri)
              && ALIGNED(ro)
-	     && VEC_OKSTRIDE(is)
-	     && VEC_OKSTRIDE(os)
-	     && VEC_OKSTRIDE(ivs)
-	     && VEC_OKSTRIDE(ovs)
+	     && VEC_STRIDE_OK(is)
+	     && VEC_STRIDE_OK(os)
+	     && VEC_STRIDE_OK(ivs)
+	     && VEC_STRIDE_OK(ovs)
              && ii == ri + 1
              && io == ro + 1
              && (vl % VL) == 0

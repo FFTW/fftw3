@@ -24,6 +24,7 @@
 
 #define VL 1            /* SIMD vector length, in term of complex numbers */
 #define ALIGNMENT 16
+#define ALIGNMENTA 16
 
 #if defined(__GNUC__) && defined(__i386__)
 
@@ -165,5 +166,3 @@ static __inline__ V BYTWJ(const R *t, V sr)
 
 #define RIGHT_CPU X(have_sse2)
 extern int RIGHT_CPU(void);
-
-#define VEC_OKSTRIDE(x) ((x % 2) == 0)

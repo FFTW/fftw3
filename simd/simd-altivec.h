@@ -23,7 +23,8 @@
 #endif
 
 #define VL 2            /* SIMD complex vector length */
-#define ALIGNMENT 8     /* we do our own alignment */
+#define ALIGNMENT 8     /* alignment for LD/ST */
+#define ALIGNMENTA 16   /* alignment for LDA/STA */
 
 #ifndef __VEC__
 
@@ -209,5 +210,3 @@ static inline V BYTWJ(const R *t, V sr)
 }
 
 #define RIGHT_CPU() 1
-
-#define VEC_OKSTRIDE(x) ((x % 2) == 0)
