@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.18 2003-07-04 10:56:26 athena Exp $ */
+/* $Id: timer.c,v 1.19 2005-02-16 04:53:53 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -68,6 +68,13 @@ static double elapsed_sec(seconds t1, seconds t0)
 	  (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6;
 }
 
+double X(seconds)(void)
+{
+     struct timeval tv;
+     gettimeofday(&tv, 0);
+     return (double)(tv.tv_sec) + (double)(tv.tv_usec) * 1.0e-6;
+}
+
 #  define TIME_MIN_SEC 1.0e-2 /* from fftw2 */
 #  define HAVE_SECONDS_TIMER
 #endif
@@ -82,6 +89,11 @@ static seconds getseconds(void) { return clock(); }
 static double elapsed_sec(seconds t1, seconds t0)
 {
      return ((double) (t1 - t0)) / CLOCKS_PER_SEC;
+}
+
+double X(seconds)(void)
+{
+     return ((double) (clock())) / CLOCKS_PER_SEC;
 }
 
 #  define TIME_MIN_SEC 2.0e-1 /* from fftw2 */

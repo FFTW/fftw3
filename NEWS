@@ -13,6 +13,9 @@ Since FFTW 3.0.1:
 * Faster prime-size DFTs: implemented Bluestein's algorithm, as well
   as a zero-padded Rader variant to limit recursive use of Rader's algorithm.
 
+* New FFTW_TIMELIMIT option to specify a (rough) upper bound to the planning
+  time.
+
 * Automatic detection of native architecture flag for gcc.  New
   configure options: --with-portable-binary and --with-gcc-arch=<arch>,
   mainly for people distributing compiled binaries of FFTW (see manual).

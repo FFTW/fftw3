@@ -20,44 +20,84 @@
 
 #include "api.h"
 
+double X(timelimit) = 1e30;
 
-apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
+static plan *mkplan(planner *plnr, int sign, unsigned flags, problem *prb)
 WITH_ALIGNED_STACK({
      plan *pln;
-     plan *pln0;
-     apiplan *p = 0;
-     planner *plnr = X(the_planner)();
+     double timelimit = plnr->timelimit;
+     
+     /* never time out of estimator, since it is required as a fallback */
+     if (flags & FFTW_ESTIMATE) plnr->timelimit = X(seconds)() + 1e30;
      
      /* map API flags into FFTW flags */
      X(mapflags)(plnr, flags);
-     
+
      /* create plan */
      plnr->planner_flags &= ~BLESSING;
      pln = plnr->adt->mkplan(plnr, prb);
-     
-     if (pln) {
-	  AWAKE(pln, 1);
+
+     plnr->timelimit = timelimit;
+
+     return pln;
+})
+
+apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
+{
+     apiplan *p = 0;
+     plan *pln = 0;
+     planner *plnr = X(the_planner)();
+     unsigned int pats[] = {FFTW_ESTIMATE, FFTW_MEASURE,
+			    FFTW_PATIENT, FFTW_EXHAUSTIVE};
+     int pat, pat_max;
+
+     pat_max = flags & FFTW_ESTIMATE ? 0 :
+	  (flags & FFTW_EXHAUSTIVE ? 3 :
+	   (flags & FFTW_PATIENT ? 2 : 1));
+     pat = flags & FFTW_TIMELIMIT ? 0 : pat_max;
+
+     flags &= ~(FFTW_ESTIMATE | FFTW_MEASURE | FFTW_PATIENT | FFTW_EXHAUSTIVE);
+
+     plnr->timelimit = X(seconds)() + ((flags & FFTW_TIMELIMIT)
+				       ? X(timelimit) : 1e30);
 	  
+     /* plan at incrementally increasing patience until we run out of time */
+     do {
+	  plan *pln1 = mkplan(plnr, sign, flags | pats[pat], prb);
+
+	  if (pln1) {
+	       X(plan_destroy_internal)(pln);
+	       pln = pln1;
+	  }
+	  else if (!plnr->timed_out) { /* planner really failed */
+	       A(!pln);
+	       break;
+	  }
+     } while (++pat <= pat_max);
+
+     if (pln) {
 	  /* build apiplan */
 	  p = (apiplan *) MALLOC(sizeof(apiplan), PLANS);
-	  p->pln = pln;
 	  p->prb = prb;
 	  p->sign = sign; /* cache for execute_dft */
 	  
 	  /* blessing protocol */
 	  plnr->planner_flags |= BLESSING;
-	  pln0 = plnr->adt->mkplan(plnr, prb);
-	  X(plan_destroy_internal)(pln0);
-     } else {
-	  X(problem_destroy)(prb);
+	  p->pln = mkplan(plnr, sign, flags | FFTW_ESTIMATE, prb);
+	  AWAKE(p->pln, 1);
+	  
+	  /* we don't use pln for p->pln, above, since by re-creating the
+	     plan we might use more patient wisdom from a timed-out mkplan */
+	  X(plan_destroy_internal)(pln);
      }
+     else
+	  X(problem_destroy)(prb);
      
-     /* discard all information not necessary to reconstruct the
-	plan */
+     /* discard all information not necessary to reconstruct the plan */
      plnr->adt->forget(plnr, FORGET_ACCURSED);
      
      return p;
-})
+}
 
 void X(destroy_plan)(X(plan) p)
 {

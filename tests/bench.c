@@ -47,6 +47,7 @@ extern void uninstall_hook(void);  /* in hook.c */
 void useropt(const char *arg)
 {
      int x;
+     double y;
 
      if (!strcmp(arg, "patient")) the_flags |= FFTW_PATIENT;
      else if (!strcmp(arg, "estimate")) the_flags |= FFTW_ESTIMATE;
@@ -58,6 +59,10 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "wisdom")) usewisdom = 1;
      else if (!strcmp(arg, "amnesia")) amnesia = 1;
      else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
+     else if (sscanf(arg, "timelimit=%lg", &y) == 1) {
+	  the_flags |= FFTW_TIMELIMIT;
+	  FFTW(timelimit) = y;
+     }
 
      else fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);
 }

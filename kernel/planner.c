@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.160 2005-02-05 23:39:55 stevenj Exp $ */
+/* $Id: planner.c,v 1.161 2005-02-16 04:53:53 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -392,8 +392,14 @@ static plan *search0(planner *ego, problem *p, int *slvndx,
      int best_not_yet_timed = 1;
 
      FORALL_SOLVERS(ego, s, sp, {
-	  plan *pln = invoke_solver(ego, p, s, planner_flags);
+	  plan *pln;
+	  if (X(seconds)() > ego->timelimit) {
+	       X(plan_destroy_internal)(best);
+	       ego->timed_out = 1;
+	       return 0;
+	  }
 
+	  pln = invoke_solver(ego, p, s, planner_flags);
 	  if (pln) {
 	       if (best) {
 		    if (best_not_yet_timed) {
@@ -459,6 +465,8 @@ static plan *mkplan(planner *ego, problem *p)
      check(&ego->htab_unblessed);
 #endif
 
+     ego->timed_out = 0;
+
      /* Canonical form. */
      if (!NO_EXHAUSTIVEP(ego)) ego->planner_flags &= ~NO_UGLY;
 
@@ -502,6 +510,10 @@ static plan *mkplan(planner *ego, problem *p)
      if (!pln) {
 	  flags_of_solution = ego->planner_flags;
 	  pln = search(ego, p, &slvndx, flags_of_solution);
+	  if (ego->timed_out) {
+	       A(!pln);
+	       return 0; /* no wisdom from timeout */
+	  }
      }
 
      if (pln) {

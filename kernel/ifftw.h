@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.244 2005-02-06 21:59:39 athena Exp $ */
+/* $Id: ifftw.h,v 1.245 2005-02-16 04:53:53 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -557,6 +557,10 @@ struct planner_s {
      unsigned problem_flags;
      unsigned short planner_flags; /* matches type of solution.flags in
 				      planner.c */
+
+     double timelimit; /* X(seconds)() at which to bail out */
+     int timed_out; /* whether most recent search timed out */
+
      /* various statistics */
      int nplan;    /* number of plans evaluated */
      double pcost, epcost; /* total pcost of measured/estimated plans */
@@ -719,6 +723,7 @@ void X(rader_tl_delete)(R *W, rader_tl **tl);
 void X(null_awake)(plan *ego, int awake);
 double X(iestimate_cost)(const plan *pln);
 double X(measure_execution_time)(plan *pln, const problem *p);
+double X(seconds)(void);
 int X(alignment_of)(R *p);
 unsigned X(hash)(const char *s);
 int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz);

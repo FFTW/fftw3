@@ -31,10 +31,6 @@ TODO before FFTW-$2\pi$:
   copying, (X[i], X[n-i]) <- (X[i] + X[n-i], X[i] - X[n-i]),
   and multiplication of vectors by twiddle factors.
 
-* Timed planner: run as ESTIMATE, then IMPATIENT, then PATIENT, then naive?
-  PATIENT then IMPATIENT then ESTIMATE would allow the less-patient planners
-  to benefit from more-patient sub-plans, on the other hand.
-
 * Pruned FFTs (basically, a vecloop that skips zeros).
 
 * Try FFTPACK-style back-and-forth (Stockham) FFT.  (We tried this a
@@ -45,8 +41,6 @@ TODO before FFTW-$2\pi$:
 * dif, difsq simd codelets
 
 * Generate assembly directly for more processors, or maybe fork gcc.  =)
-
-* Find a better DCT-I algorithm.
 
 * export NO_SEARCH flag to the user (i.e. document FFTW_WISDOM_ONLY) (?)
   (This is currently obsolete)
