@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.117 2003-03-07 07:04:45 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.118 2003-03-07 07:08:01 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -3469,7 +3469,7 @@ although the FFTW library is still larger).
 @itemize @minus
 @item
 These options require a compiler supporting SIMD extensions, and
-compiler support is still a bit flaky.  We have tested them with
+compiler support is still a bit flaky.  We have tested SIMD with
 @code{gcc} versions 3.2.2 (which miscompiles AltiVec permutations on
 Linux, but we have an assembly workaround), and with Intel's @code{icc}
 6.0 (which misaligns SSE constants, but we have a workaround).  Some 3.x
