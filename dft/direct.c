@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.32 2002-09-25 01:15:57 athena Exp $ */
+/* $Id: direct.c,v 1.33 2002-09-25 11:37:38 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -72,8 +72,6 @@ static int applicable(const solver *ego_, const problem *p_,
 	  uint vl;
 	  int ivs, ovs;
 
-	  X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
-
           return (
 	       1
 	       && p->sz->rnk == 1
@@ -81,6 +79,8 @@ static int applicable(const solver *ego_, const problem *p_,
 	       && p->sz->dims[0].n == d->sz
 
 	       /* check strides etc */
+	       && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
+
 	       && (d->genus->okp(d, p->ri, p->ii, p->ro, p->io,
 				 p->sz->dims[0].is, p->sz->dims[0].os,
 				 vl, ivs, ovs, plnr))

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.10 2002-09-25 01:15:57 athena Exp $ */
+/* $Id: direct2.c,v 1.11 2002-09-25 11:37:38 athena Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -93,8 +93,6 @@ static int applicable(const solver *ego_, const problem *p_)
 	  uint vl;
 	  int ivs, ovs;
 
-	  X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
-
           return (
 	       1
 	       && p->sz->rnk == 1
@@ -103,6 +101,8 @@ static int applicable(const solver *ego_, const problem *p_)
 	       && p->kind == ego->kind
 
 	       /* check strides etc */
+	       && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
+
 	       && (!R2HC_KINDP(ego->kind) ||
 		   ego->desc.r2hc->genus->okp(ego->desc.r2hc, 
 					      p->r, p->rio, p->rio,

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.158 2002-09-25 00:54:43 athena Exp $ */
+/* $Id: ifftw.h,v 1.159 2002-09-25 11:37:38 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -299,7 +299,7 @@ tensor *X(tensor_compress)(const tensor *sz);
 tensor *X(tensor_compress_contiguous)(const tensor *sz);
 tensor *X(tensor_append)(const tensor *a, const tensor *b);
 void X(tensor_split)(const tensor *sz, tensor **a, uint a_rnk, tensor **b);
-void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os);
+int X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os);
 void X(tensor_destroy)(tensor *sz);
 void X(tensor_destroy2)(tensor *a, tensor *b);
 void X(tensor_destroy4)(tensor *a, tensor *b, tensor *c, tensor *d);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.30 2002-09-25 01:27:49 athena Exp $ */
+/* $Id: tensor.c,v 1.31 2002-09-25 11:37:38 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -86,7 +86,7 @@ void X(tensor_md5)(md5 *p, const tensor *t)
 
 /* treat a (rank <= 1)-tensor as a rank-1 tensor, extracting
    appropriate n, is, and os components */
-void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os)
+int X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os)
 {
      A(t->rnk <= 1);
      if (t->rnk == 1) {
@@ -98,6 +98,7 @@ void X(tensor_tornk1)(const tensor *t, uint *n, int *is, int *os)
           *n = 1U;
           *is = *os = 0;
      }
+     return 1;
 }
 
 void X(tensor_print)(const tensor *x, printer *p)
