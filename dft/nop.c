@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop.c,v 1.12 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: nop.c,v 1.13 2002-09-22 20:03:30 athena Exp $ */
 
 /* plans for vrank -infty DFTs (nothing to do) */
 
@@ -71,7 +71,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
      if (!applicable(ego, p))
           return (plan *) 0;
      pln = MKPLAN_DFT(plan_dft, &padt, apply);
-     pln->super.ops = X(ops_zero);
+     X(ops_zero)(&pln->super.ops);
 
      return &(pln->super);
 }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.21 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: rank0.c,v 1.22 2002-09-22 20:03:30 athena Exp $ */
 
 /* plans for rank-0 DFTs (copy operations) */
 
@@ -224,7 +224,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->slv = ego;
 
      /* 2*vl loads, 2*vl stores */
-     pln->super.super.ops = X(ops_other)(4 * vl);
+     X(ops_other)(4 * vl, &pln->super.super.ops);
      return &(pln->super.super);
 }
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.7 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.8 2002-09-22 20:03:30 athena Exp $ */
 
 
 #include "threads.h"
@@ -207,11 +207,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->nthr = nthr;
 
      pln->solver = ego;
-     pln->super.super.ops = X(ops_zero);
+     X(ops_zero)(&pln->super.super.ops);
      pln->super.super.pcost = 0;
      for (i = 0; i < nthr; ++i) {
-	  pln->super.super.ops = X(ops_add)(pln->super.super.ops,
-					    cldrn[i]->ops);
+	  X(ops_add2)(&cldrn[i]->ops, &pln->super.super.ops);
 	  pln->super.super.pcost += cldrn[i]->pcost;
      }
 

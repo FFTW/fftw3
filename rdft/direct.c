@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.8 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: direct.c,v 1.9 2002-09-22 20:03:30 athena Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -185,10 +185,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
 
      pln->slv = ego;
+     X(ops_zero)(&pln->super.super.ops);
      if (r2hc_kindp)
-	  pln->super.super.ops = X(ops_mul)(pln->vl/ego->desc.r2hc->genus->vl, ego->desc.r2hc->ops);
+	  X(ops_madd2)(pln->vl / ego->desc.r2hc->genus->vl,
+		       &ego->desc.r2hc->ops,
+		       &pln->super.super.ops);
      else
-	  pln->super.super.ops = X(ops_mul)(pln->vl/ego->desc.hc2r->genus->vl, ego->desc.hc2r->ops);
+	  X(ops_madd2)(pln->vl / ego->desc.hc2r->genus->vl,
+		       &ego->desc.hc2r->ops,
+		       &pln->super.super.ops);
 
      return &(pln->super.super);
 }

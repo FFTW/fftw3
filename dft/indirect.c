@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.30 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: indirect.c,v 1.31 2002-09-22 20:03:30 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -205,7 +205,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cld = cld;
      pln->cldcpy = cldcpy;
      pln->slv = ego;
-     pln->super.super.ops = X(ops_add)(cld->ops, cldcpy->ops);
+     X(ops_add)(&cld->ops, &cldcpy->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-dif.c,v 1.11 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: hc2hc-dif.c,v 1.12 2002-09-22 20:03:30 athena Exp $ */
 
 /* decimation in frequency Cooley-Tukey */
 #include "rdft.h"
@@ -95,14 +95,14 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
 static void finish(plan_hc2hc *ego)
 {
      const hc2hc_desc *d = ego->slv->desc;
+     opcnt t;
+
      ego->ios = X(mkstride)(ego->r, ego->m * ego->is);
-     ego->super.super.ops =
-          X(ops_add)(X(ops_add)(ego->cld->ops,
-				X(ops_mul)(ego->vl,
-					   X(ops_add)(ego->cld0->ops,
-						      ego->cldm->ops))),
-		     X(ops_mul)(ego->vl * ((ego->m - 1)/2) / d->genus->vl,
-				d->ops));
+
+     X(ops_add)(&ego->cld0->ops, &ego->cldm->ops, &t);
+     X(ops_madd)(ego->vl, &t, &ego->cld->ops, &ego->super.super.ops);
+     X(ops_madd2)(ego->vl * ((ego->m - 1)/2) / d->genus->vl, &d->ops,
+		  &ego->super.super.ops);
 }
 
 static plan *mkplan(const solver *ego, const problem *p, planner *plnr)

@@ -334,14 +334,13 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->td = 0;
      pln->kind = p->kind[0];
 
-     pln->super.super.ops = X(ops_zero);
+     X(ops_zero)(&pln->super.super.ops);
      pln->super.super.ops.add = 4 * r * r;
      pln->super.super.ops.mul = 4 * r * r;
      /* loads + stores, minus loads + stores for all DIT codelets */
      pln->super.super.ops.other = 4 * r + 4 * r * r - (6*r - 2);
-     pln->super.super.ops =
-	  X(ops_add)(X(ops_mul)((m - 1)/2, pln->super.super.ops),
-		     cld->ops);
+     X(ops_madd)((m - 1)/2, &pln->super.super.ops, &cld->ops,
+		 &pln->super.super.ops);
      pln->super.super.ops.add += 2 * r * r;
      pln->super.super.ops.mul += 2 * r * r;
      pln->super.super.ops.other += 3 * r + 3 * r * r - 2*r;

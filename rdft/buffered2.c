@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.18 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: buffered2.c,v 1.19 2002-09-22 20:03:30 athena Exp $ */
 
 #include "rdft.h"
 
@@ -410,8 +410,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->nbuf = nbuf;
      pln->bufdist = bufdist;
 
-     pln->super.super.ops = X(ops_add)(X(ops_mul)((vl / nbuf), cld->ops),
-				       cldrest->ops);
+     X(ops_madd)(vl / nbuf, &cld->ops, &cldrest->ops,
+		 &pln->super.super.ops);
      pln->super.super.ops.other += (R2HC_KINDP(p->kind) ? (n + 2) : n) * vl;
 
      return &(pln->super.super);

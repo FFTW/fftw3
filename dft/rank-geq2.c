@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.29 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.30 2002-09-22 20:03:30 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -174,7 +174,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cld2 = cld2;
 
      pln->solver = ego;
-     pln->super.super.ops = X(ops_add)(cld1->ops, cld2->ops);
+     X(ops_add)(&cld1->ops, &cld2->ops, &pln->super.super.ops);
 
      X(tensor_destroy4)(sz1, sz2, vecszi, sz2i);
 

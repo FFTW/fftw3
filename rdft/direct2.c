@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.7 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: direct2.c,v 1.8 2002-09-22 20:03:30 athena Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -183,10 +183,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->ilast = (d.n % 2) ? 0 : (d.n/2) * d.os; /* Nyquist freq., if any */
 
      pln->slv = ego;
+     X(ops_zero)(&pln->super.super.ops);
      if (r2hc_kindp)
-	  pln->super.super.ops = X(ops_mul)(pln->vl/ego->desc.r2hc->genus->vl, ego->desc.r2hc->ops);
+	  X(ops_madd2)(pln->vl / ego->desc.r2hc->genus->vl,
+		       &ego->desc.r2hc->ops,
+		       &pln->super.super.ops);
      else {
-	  pln->super.super.ops = X(ops_mul)(pln->vl/ego->desc.hc2r->genus->vl, ego->desc.hc2r->ops);
+	  X(ops_madd2)(pln->vl / ego->desc.hc2r->genus->vl,
+		       &ego->desc.hc2r->ops,
+		       &pln->super.super.ops);
 	  pln->super.super.ops.other += 2 * pln->vl; /* + 2 stores */
      }
 

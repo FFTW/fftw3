@@ -308,7 +308,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      A(MULMOD(pln->g, pln->ginv, n) == 1);
 
      /* FIXME: recount */
-     pln->super.super.ops = X(ops_add)(cld1->ops, cld2->ops);
+     X(ops_add)(&cld1->ops, &cld2->ops, &pln->super.super.ops);
      pln->super.super.ops.other += (n - 1) * (2 + 3 + 2) + 3;
      pln->super.super.ops.add += (n - 1) * 1;
      pln->super.super.ops.mul += (n - 1) * 2 - 2;

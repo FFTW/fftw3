@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.35 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: buffered.c,v 1.36 2002-09-22 20:03:30 athena Exp $ */
 
 #include "dft.h"
 
@@ -290,10 +290,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->nbuf = nbuf;
      pln->bufdist = bufdist;
 
-     pln->super.super.ops =
-	  X(ops_add)(
-	       X(ops_mul)((vl / nbuf), X(ops_add)(cld->ops, cldcpy->ops)),
-	       cldrest->ops);
+     {
+	  opcnt t;
+	  X(ops_add)(&cld->ops, &cldcpy->ops, &t);
+	  X(ops_madd)(vl / nbuf, &t, &cldrest->ops, &pln->super.super.ops);
+     }
 
      return &(pln->super.super);
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop.c,v 1.6 2002-09-22 16:25:20 athena Exp $ */
+/* $Id: nop.c,v 1.7 2002-09-22 20:03:30 athena Exp $ */
 
 /* plans for vrank -infty RDFTs (nothing to do) */
 
@@ -69,7 +69,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
      if (!applicable(ego, p))
           return (plan *) 0;
      pln = MKPLAN_RDFT(plan_rdft, &padt, apply);
-     pln->super.ops = X(ops_zero);
+     X(ops_zero)(&pln->super.ops);
 
      return &(pln->super);
 }

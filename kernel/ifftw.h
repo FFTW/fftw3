@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.152 2002-09-22 19:00:59 athena Exp $ */
+/* $Id: ifftw.h,v 1.153 2002-09-22 20:03:30 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -186,11 +186,19 @@ typedef struct {
      uint other;
 } opcnt;
 
-opcnt X(ops_add)(opcnt a, opcnt b);
-opcnt X(ops_add3)(opcnt a, opcnt b, opcnt c);
-opcnt X(ops_mul)(uint a, opcnt b);
-opcnt X(ops_other)(uint o);
-extern const opcnt X(ops_zero);
+void X(ops_zero)(opcnt *dst);
+void X(ops_other)(uint o, opcnt *dst);
+void X(ops_cpy)(const opcnt *src, opcnt *dst);
+
+void X(ops_add)(const opcnt *a, const opcnt *b, opcnt *dst);
+void X(ops_add2)(const opcnt *a, opcnt *dst);
+
+/* dst = m * a + b */
+void X(ops_madd)(uint m, const opcnt *a, const opcnt *b, opcnt *dst);
+
+/* dst += m * a */
+void X(ops_madd2)(uint m, const opcnt *a, opcnt *dst);
+
 
 /*-----------------------------------------------------------------------*/
 /* minmax.c: */

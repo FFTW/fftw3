@@ -376,7 +376,7 @@ static int mkP(P *pln, uint n, int is, int os, R *ro, R *io,
      pln->ginv = X(power_mod)(pln->g, n - 2, n);
      A(MULMOD(pln->g, pln->ginv, n) == 1);
 
-     pln->super.super.ops = X(ops_add)(cld1->ops, cld2->ops);
+     X(ops_add)(&cld1->ops, &cld2->ops, &pln->super.super.ops);
      pln->super.super.ops.other += (n - 1) * (4 * 2 + 6) + 6;
      pln->super.super.ops.add += (n - 1) * 2 + 4;
      pln->super.super.ops.mul += (n - 1) * 4;
@@ -457,9 +457,8 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
 
      pln->super.super.super.ops.add += 2 * (r-1);
      pln->super.super.super.ops.mul += 4 * (r-1);
-     pln->super.super.super.ops =
-	  X(ops_add)(X(ops_mul)(m, pln->super.super.super.ops),
-		     cld->ops);
+     X(ops_madd)(m, &pln->super.super.super.ops, &cld->ops,
+		 &pln->super.super.super.ops);
 
      return &(pln->super.super.super);
 

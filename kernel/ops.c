@@ -18,41 +18,46 @@
  *
  */
 
-/* $Id: ops.c,v 1.1 2002-06-11 14:35:52 athena Exp $ */
+/* $Id: ops.c,v 1.2 2002-09-22 20:03:30 athena Exp $ */
 
 #include "ifftw.h"
 
-opcnt X(ops_add)(opcnt a, opcnt b)
+void X(ops_zero)(opcnt *dst)
 {
-     a.add += b.add;
-     a.mul += b.mul;
-     a.fma += b.fma;
-     a.other += b.other;
-     return a;
+     dst->add = dst->mul = dst->fma = dst->other = 0;
 }
 
-opcnt X(ops_add3)(opcnt a, opcnt b, opcnt c)
+void X(ops_cpy)(const opcnt *src, opcnt *dst)
 {
-     return X(ops_add)(a, X(ops_add)(b, c));
+     *dst = *src;
 }
 
-opcnt X(ops_mul)(uint a, opcnt b)
+void X(ops_other)(uint o, opcnt *dst)
 {
-     b.add *= a;
-     b.mul *= a;
-     b.fma *= a;
-     b.other *= a;
-     return b;
+     X(ops_zero)(dst);
+     dst->other = o;
 }
 
-opcnt X(ops_other)(uint o)
+void X(ops_madd)(uint m, const opcnt *a, const opcnt *b, opcnt *dst)
 {
-     opcnt x;
-     x.add = x.mul = x.fma = 0;
-     x.other = o;
-     return x;
+     dst->add = m * a->add + b->add;
+     dst->mul = m * a->mul + b->mul;
+     dst->fma = m * a->fma + b->fma;
+     dst->other = m * a->other + b->other;
 }
 
-const opcnt X(ops_zero) = {
-     0, 0, 0, 0
-};
+void X(ops_add)(const opcnt *a, const opcnt *b, opcnt *dst)
+{
+     X(ops_madd)(1, a, b, dst);
+}
+
+void X(ops_add2)(const opcnt *a, opcnt *dst)
+{
+     X(ops_add)(a, dst, dst);
+}
+
+void X(ops_madd2)(uint m, const opcnt *a, opcnt *dst)
+{
+     X(ops_madd)(m, a, dst, dst);
+}
+

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-buf.c,v 1.9 2002-09-22 13:49:08 athena Exp $ */
+/* $Id: hc2hc-buf.c,v 1.10 2002-09-22 20:03:30 athena Exp $ */
 
 /* decimation in time Cooley-Tukey */
 #include "rdft.h"
@@ -198,17 +198,16 @@ static int applicable(const solver_hc2hc *ego, const problem *p_,
 static void finish(plan_hc2hc *ego)
 {
      const hc2hc_desc *d = ego->slv->desc;
+     opcnt t;
+
      ego->iios = ego->m * (R2HC_KINDP(d->genus->kind) ? ego->os : ego->is);
      ego->vs = X(mkstride)(ego->r, 1);
-     ego->super.super.ops =
-          X(ops_add3)(X(ops_add)(ego->cld->ops,
-				 X(ops_mul)(ego->vl,
-					    X(ops_add)(ego->cld0->ops,
-						       ego->cldm->ops))),
-		      /* 4 load/stores * N * VL */
-                      X(ops_other)(4 * ego->r * ((ego->m - 1)/2) * ego->vl),
-		      X(ops_mul)(ego->vl * ((ego->m - 1)/2) / d->genus->vl,
-				 d->ops));
+
+     X(ops_add)(&ego->cld0->ops, &ego->cldm->ops, &t);
+     X(ops_madd)(ego->vl, &t, &ego->cld->ops, &ego->super.super.ops);
+     ego->super.super.ops.other += 4 * ego->r * ((ego->m - 1)/2) * ego->vl;
+     X(ops_madd2)(ego->vl * ((ego->m - 1)/2) / d->genus->vl, &d->ops,
+		  &ego->super.super.ops);
 }
 
 static plan *mkplan_ditbuf(const solver *ego, const problem *p, planner *plnr)

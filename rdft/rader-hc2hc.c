@@ -46,7 +46,6 @@ typedef struct {
      rdft_kind kind;
 } P;
 
-static rader_tl *omegas = 0;
 static rader_tl *twiddles = 0;
 
 /***************************************************************************/
@@ -379,7 +378,7 @@ static int mkP(P *pln, uint r, R *O, int ios, rdft_kind kind, planner *plnr)
      pln->kind = kind;
      A(MULMOD(pln->g, pln->ginv, r) == 1);
 
-     pln->super.super.ops = X(ops_add)(cldr->ops, cldr->ops);
+     X(ops_add)(&cldr->ops, &cldr->ops, &pln->super.super.ops);
      pln->super.super.ops.other += (r - 1) * (4 * 2 + 6) + 6;
      pln->super.super.ops.add += (r - 1) * 2 + 4;
      pln->super.super.ops.mul += (r - 1) * 4;
@@ -432,9 +431,8 @@ static plan *mkplan_dit(const solver *ego, const problem *p_, planner *plnr)
      pln->cld = cld;
      pln->W = 0;
 
-     pln->super.super.ops =
-	  X(ops_add)(X(ops_mul)((m - 1)/2, pln->super.super.ops),
-		     cld->ops);
+     X(ops_madd)((m - 1)/2, &pln->super.super.ops, &cld->ops,
+		 &pln->super.super.ops);
 
      return &(pln->super.super);
 
@@ -481,9 +479,8 @@ static plan *mkplan_dif(const solver *ego, const problem *p_, planner *plnr)
      pln->cld = cld;
      pln->W = 0;
 
-     pln->super.super.ops =
-	  X(ops_add)(X(ops_mul)((m - 1)/2, pln->super.super.ops),
-		     cld->ops);
+     X(ops_madd)((m - 1)/2, &pln->super.super.ops, &cld->ops,
+		 &pln->super.super.ops);
 
      return &(pln->super.super);
 

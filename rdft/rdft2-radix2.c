@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.14 2002-09-22 16:35:30 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.15 2002-09-22 20:03:30 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -428,10 +428,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->td = 0;
      pln->slv = ego;
 
-     pln->super.super.ops =      /* approximately */
-	  X(ops_add)(cld->ops,
-		     X(ops_mul)(pln->vl * ((pln->n/2 + 1) / 2),
-				ego->adt->ops));
+     /* approximately */
+     X(ops_madd)(pln->vl * ((pln->n/2 + 1) / 2), &ego->adt->ops,
+		 &cld->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 }
