@@ -19,7 +19,7 @@
  */
 
 /* header file for fftw3 */
-/* $Id: fftw3.h,v 1.28 2003-01-13 00:02:09 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.29 2003-01-13 05:16:20 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -50,6 +50,15 @@ typedef struct {
 } FFTW_MANGLE_DOUBLE(iodim);
 typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_FLOAT(iodim);
 typedef FFTW_MANGLE_DOUBLE(iodim) FFTW_MANGLE_LONG_DOUBLE(iodim);
+
+typedef enum {
+     FFTW_R2HC=0, FFTW_HC2R=1, FFTW_DHT=2,
+     FFTW_REDFT00=3, FFTW_REDFT01=4, FFTW_REDFT10=5, FFTW_REDFT11=6,
+     FFTW_RODFT00=7, FFTW_RODFT01=8, FFTW_RODFT10=9, FFTW_RODFT11=10
+} FFTW_MANGLE_DOUBLE(r2r_kind);
+typedef FFTW_MANGLE_DOUBLE(r2r_kind) FFTW_MANGLE_FLOAT(r2r_kind);
+typedef FFTW_MANGLE_DOUBLE(r2r_kind) FFTW_MANGLE_LONG_DOUBLE(r2r_kind);
+
 
 /*
   huge second-order macro that defines prototypes for all API
@@ -142,6 +151,25 @@ X(plan) X(plan_guru_dft_c2r)(unsigned int rank, const X(iodim) *dims,	      \
 									      \
 void X(execute_dft_r2c)(X(plan) p, R *in, R *ro, R *io);		      \
 void X(execute_dft_c2r)(X(plan) p, R *ri, R *ii, R *out);		      \
+									      \
+X(plan) X(plan_many_r2r)(unsigned int rank, const unsigned int *n,	      \
+                         unsigned int howmany,				      \
+                         R *in, const unsigned int *inembed,		      \
+                         int istride, int idist,			      \
+                         R *out, const unsigned int *onembed,		      \
+                         int ostride, int odist,			      \
+                         const X(r2r_kind) *kind, unsigned int flags);	      \
+									      \
+X(plan) X(plan_r2r)(unsigned int rank, const unsigned int *n, R *in, R *out,  \
+                    const X(r2r_kind) *kind, unsigned int flags);	      \
+									      \
+X(plan) X(plan_r2r_1d)(unsigned int n, R *in, R *out,			      \
+		       const X(r2r_kind) *kind, unsigned int flags);	      \
+X(plan) X(plan_r2r_2d)(unsigned int nx, unsigned int ny, R *in, R *out,	      \
+		       const X(r2r_kind) *kind, unsigned int flags);	      \
+X(plan) X(plan_r2r_3d)(unsigned int nx, unsigned int ny, unsigned int nz,     \
+		       R *in, R *out,					      \
+		       const X(r2r_kind) *kind, unsigned int flags);	      \
 									      \
 void X(destroy_plan)(X(plan) p);					      \
 void X(forget_wisdom)(void);						      \
