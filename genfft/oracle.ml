@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: oracle.ml,v 1.5 2003-06-01 11:00:54 athena Exp $ *)
+(* $Id: oracle.ml,v 1.6 2003-06-01 13:05:30 athena Exp $ *)
 
 (*
  * the oracle decrees whether the sign of an expression should
@@ -50,16 +50,14 @@ let almost_equal x y =
   (abs_float (x -. y) < epsilon) ||
   (abs_float (x -. y) < epsilon *. (abs_float x +. abs_float y)) 
 
-let memoizing_numbers = make_memoizer 
+let absid = make_memoizer
     (fun x -> Expr.hash_float (abs_float x))
     (fun a b -> almost_equal a b || almost_equal (-. a) b)
+    (fun x -> x)
 
-let absid = memoizing_numbers (fun x -> x)
-
-let memoizing_variables = make_memoizer Variable.hash Variable.same
-
-let make_random_oracle () =
-  memoizing_variables
+let make_random_oracle () = make_memoizer 
+    Variable.hash 
+    Variable.same
     (fun _ -> (float (Random.bits())) /. 1073741824.0)
 
 let the_random_oracle = make_random_oracle ()
