@@ -76,8 +76,8 @@ void F77(execute, EXECUTE)(X(plan) *p)
 }
 
 void F77(plan_dft, PLAN_DFT)(X(plan) *p,
-			     unsigned fint *rank, const unsigned fint *n,
-			     C *in, C *out, fint *sign, unsigned fint *flags)
+			     ufint *rank, const ufint *n,
+			     C *in, C *out, fint *sign, ufint *flags)
 {
      ulong *nrev = reverse_n(*rank, n);
      *p = X(plan_dft)(*rank, nrev, in, out, *sign, *flags);
@@ -86,37 +86,37 @@ void F77(plan_dft, PLAN_DFT)(X(plan) *p,
 
 void F77(plan_dft_1d, PLAN_DFT_1D)(
      X(plan) *p,
-     unsigned fint *n,
-     C *in, C *out, fint *sign, unsigned fint *flags)
+     ufint *n,
+     C *in, C *out, fint *sign, ufint *flags)
 {
      *p = X(plan_dft_1d)(*n, in, out, *sign, *flags);
 }
 
 void F77(plan_dft_2d, PLAN_DFT_2D)(
      X(plan) *p,
-     unsigned fint *nx, unsigned fint *ny,
-     C *in, C *out, fint *sign, unsigned fint *flags)
+     ufint *nx, ufint *ny,
+     C *in, C *out, fint *sign, ufint *flags)
 {
      *p = X(plan_dft_2d)(*ny, *nx, in, out, *sign, *flags);
 }
 
 void F77(plan_dft_3d, PLAN_DFT_3D)(
      X(plan) *p,
-     unsigned fint *nx, unsigned fint *ny, unsigned fint *nz,
-     C *in, C *out, fint *sign, unsigned fint *flags)
+     ufint *nx, ufint *ny, ufint *nz,
+     C *in, C *out, fint *sign, ufint *flags)
 {
      *p = X(plan_dft_3d)(*nz, *ny, *nx, in, out, *sign, *flags);
 }
 
 void F77(plan_many_dft, PLAN_MANY_DFT)(
      X(plan) *p,
-     unsigned fint *rank, const unsigned fint *n,
-     unsigned fint *howmany,
-     C *in, const unsigned fint *inembed,
+     ufint *rank, const ufint *n,
+     ufint *howmany,
+     C *in, const ufint *inembed,
      fint *istride, fint *idist,
-     C *out, const unsigned fint *onembed,
+     C *out, const ufint *onembed,
      fint *ostride, fint *odist,
-     fint *sign, unsigned fint *flags)
+     fint *sign, ufint *flags)
 {
      ulong *nrev = reverse_n(*rank, n);
      ulong *inembedrev = reverse_n(*rank, inembed);
@@ -132,12 +132,12 @@ void F77(plan_many_dft, PLAN_MANY_DFT)(
 
 void F77(plan_guru_dft, PLAN_GURU_DFT)(
      X(plan) *p,
-     unsigned fint *rank,
-     const unsigned fint *n, const fint *is, const fint *os,
-     unsigned fint *howmany_rank,
-     const unsigned fint *h_n, const fint *h_is, const fint *h_os,
+     ufint *rank,
+     const ufint *n, const fint *is, const fint *os,
+     ufint *howmany_rank,
+     const ufint *h_n, const fint *h_is, const fint *h_os,
      R *ri, R *ii, R *ro, R *io,
-     unsigned fint *flags)
+     ufint *flags)
 {
      X(iodim) *dims = make_dims(*rank, n, is, os);
      X(iodim) *howmany_dims = make_dims(*howmany_rank, h_n, h_is, h_os);
