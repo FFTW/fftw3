@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.mli,v 1.6 2003-03-25 16:51:49 stevenj Exp $ *)
+(* $Id: complex.mli,v 1.7 2005-04-07 02:06:21 stevenj Exp $ *)
 
 type expr
 val make : (Expr.expr * Expr.expr) -> expr
@@ -28,9 +28,15 @@ val i : expr
 val zero : expr
 val half : expr
 val inverse_int : int -> expr
+val inverse_int_sqrt : int -> expr
+val int_sqrt : int -> expr
 val times : expr -> expr -> expr
 val uminus : expr -> expr
 val exp : int -> int -> expr
+val sec : int -> int -> expr
+val csc : int -> int -> expr
+val tan : int -> int -> expr
+val cot : int -> int -> expr
 val plus : expr list -> expr
 val real : expr -> expr
 val imag : expr -> expr

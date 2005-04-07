@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_athtw.ml,v 1.4 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: gen_athtw.ml,v 1.5 2005-04-07 02:06:21 stevenj Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_athtw.ml,v 1.4 2003-03-15 20:29:42 stevenj Exp $"
+let cvsid = "$Id: gen_athtw.ml,v 1.5 2005-04-07 02:06:21 stevenj Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -90,7 +90,7 @@ let generate n =
   in
 
   let tree = 
-    Fcn ("static void", name,
+    Fcn ((if !Magic.standalone then "void" else "static void"), name,
 	 [Decl (C.complextypep, a);
 	  Decl (C.constrealtypep, twarray)],
          body)

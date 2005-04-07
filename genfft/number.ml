@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: number.ml,v 1.4 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: number.ml,v 1.5 2005-04-07 02:06:21 stevenj Exp $ *)
 
 (* The generator keeps track of numeric constants in symbolic
    expressions using the abstract number type, defined in this file.
@@ -86,6 +86,20 @@ let negate (N a) = makeNum (minus_num a)
 
 let greater a b = negative (sub b a)
 
+let epsilonsq = epsilon */ epsilon
+let epsilonsq2 =  (Int 100) */ epsilonsq
+
+let sqr a = a */ a
+let almost_equal (N a) (N b) = (sqr (a -/ b)) <=/ epsilonsq2
+
+(* find square root by Newton's method *)
+let sqrt a =
+  let rec sqrt_iter guess =
+    let newguess = div (add guess (div a guess)) two in
+    if (almost_equal newguess guess) then newguess
+    else sqrt_iter newguess
+  in sqrt_iter (div a two)
+
 let csub (xr, xi) (yr, yi) = (round (xr -/ yr), round (xi -/ yi))
 let cdiv (xr, xi) r = (round (xr // r), round (xi // r))
 let cmul (xr, xi) (yr, yi) = (round (xr */ yr -/ xi */ yi),
@@ -94,9 +108,6 @@ let csqr (xr, xi) = (round (xr */ xr -/ xi */ xi), round ((Int 2) */ xr */ xi))
 let cabssq (xr, xi) = xr */ xr +/ xi */ xi
 let cconj (xr, xi) = (xr, minus_num xi)
 let cinv x = cdiv (cconj x) (cabssq x)
-
-let epsilonsq = epsilon */ epsilon
-let epsilonsq2 =  (Int 100) */ epsilonsq
 
 let almost_equal_cnum (xr, xi) (yr, yi) =
     (cabssq (xr -/ yr,xi -/ yi)) <=/ epsilonsq2

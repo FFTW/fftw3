@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.17 2005-03-15 13:44:41 athena Exp $ *)
+(* $Id: magic.ml,v 1.18 2005-04-07 02:06:21 stevenj Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -57,6 +57,8 @@ let reorder_insns = ref false
 let reorder_loads = ref false
 let reorder_stores = ref false
 let precompute_twiddles = ref false
+let newsplit = ref false
+let standalone = ref false
 
 (* command-line parser for magic parameters *)
 let undocumented = " Undocumented voodoo parameter"
@@ -68,6 +70,7 @@ let set_string var = Arg.String(fun s -> var := s)
 
 let speclist = [
   "-name", set_string codelet_name, " set codelet name";
+  "-standalone", set_bool standalone, " standalone codelet (no desc)";
   "-include", set_string inklude, undocumented;
 
   "-verbose", set_bool verbose, " Enable verbose logging messages to stderr";
@@ -134,6 +137,8 @@ let speclist = [
   "-no-reorder-loads", unset_bool reorder_loads, undocumented;
   "-reorder-stores", set_bool reorder_stores, undocumented;
   "-no-reorder-stores", unset_bool reorder_stores, undocumented;
+
+  "-newsplit", set_bool newsplit, undocumented;
 
   "-vneg", set_bool vneg, undocumented;
   "-fma", set_bool enable_fma, undocumented;

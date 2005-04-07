@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r.ml,v 1.15 2005-02-06 21:59:39 athena Exp $ *)
+(* $Id: gen_hc2r.ml,v 1.16 2005-04-07 02:06:21 stevenj Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r.ml,v 1.15 2005-02-06 21:59:39 athena Exp $"
+let cvsid = "$Id: gen_hc2r.ml,v 1.16 2005-04-07 02:06:21 stevenj Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -133,7 +133,7 @@ let generate n =
   in
 
   let tree =
-    Fcn ("static void", name,
+    Fcn ((if !Magic.standalone then "void" else "static void"), name,
 	 ([Decl (C.constrealtypep, riarray);
 	   Decl (C.constrealtypep, iiarray);
 	   Decl (C.realtypep, oarray);
@@ -160,7 +160,7 @@ let generate n =
     "}\n"
 
   in
-  (unparse cvsid tree) ^ "\n" ^ desc ^ init
+  (unparse cvsid tree) ^ "\n" ^ (if !Magic.standalone then "" else desc ^ init)
 
 
 let main () =

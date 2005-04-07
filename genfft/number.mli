@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: number.mli,v 1.2 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: number.mli,v 1.3 2005-04-07 02:06:21 stevenj Exp $ *)
 
 type number
 
@@ -39,6 +39,7 @@ val sub : number -> number -> number
 val negative : number -> bool
 val greater : number -> number -> bool
 val negate : number -> number
+val sqrt : number -> number
 
 (* cexp n i = (cos (2 * pi * i / n), sin (2 * pi * i / n)) *)
 val cexp : int -> int -> (number * number)

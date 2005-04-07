@@ -18,9 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: fft.ml,v 1.2 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: fft.ml,v 1.3 2005-04-07 02:06:21 stevenj Exp $ *)
 
-let cvsid = "$Id: fft.ml,v 1.2 2003-03-15 20:29:42 stevenj Exp $"
+let cvsid = "$Id: fft.ml,v 1.3 2005-04-07 02:06:21 stevenj Exp $"
 
 (* This is the part of the generator that actually computes the FFT
    in symbolic form *)
@@ -50,6 +50,7 @@ let choose_factor n =
   if (i > 1) then i
   else choose2 n
 
+let is_power_of_two n = (n > 0) && ((n - 1) land n == 0)
   
 let rec dft_prime sign n input = 
   let sum filter i =
@@ -160,6 +161,85 @@ and dft_rader sign p input =
 	let i' = suchthat 0 (fun i' -> i = output_perm i')
 	in conv i')
 
+(* our modified version of the conjugate-pair split-radix algorithm,
+   which reduces the number of multiplications by rescaling the 
+   sub-transforms (power-of-two n's only) *)
+and newsplit sign n input =
+  let rec s n k = (* recursive scale factor *)
+    if n <= 4 then
+      one
+    else 
+      let k4 = (abs k) mod (n / 4) in
+      let k4' = if k4 <= (n / 8) then k4 else (n/4 - k4) in
+      (s (n / 4) k4') @* (real (exp n k4'))
+			  
+  and sinv n k = (* 1 / s(n,k) *)
+    if n <= 4 then
+      one
+    else 
+      let k4 = (abs k) mod (n / 4) in
+      let k4' = if k4 <= (n / 8) then k4 else (n/4 - k4) in
+      (sinv (n / 4) k4') @* (sec n k4')
+
+  in let sdiv2 n k = (s n k) @* (sinv (2*n) k) (* s(n,k) / s(2*n,k) *)
+  and sdiv4 n k = (* s(n,k) / s(4*n,k) *)
+    let k4 = (abs k) mod n in
+    sec (4*n) (if k4 <= (n / 2) then k4 else (n - k4))
+      
+  in let t n k = (exp n k) @* (sdiv4 (n/4) k)
+
+  and dft1 input = input
+  and dft2 input = array 2 (fun k -> (input 0) @+ ((input 1) @* exp 2 k))
+
+  in let rec newsplit0 sign n input =
+    if (n == 1) then dft1 input
+    else if (n == 2) then dft2 input
+    else let u = newsplit0 sign (n / 2) (fun i -> input (i*2))
+    and z = newsplitS sign (n / 4) (fun i -> input (i*4 + 1))
+    and z' = newsplitS sign (n / 4) (fun i -> input ((n + i*4 - 1) mod n)) 
+    and twid = array n (fun k -> s (n/4) k @* exp n (sign * k)) in
+    let w = array n (fun k -> twid k @* z (k mod (n / 4)))
+    and w' = array n (fun k -> conj (twid k) @* z' (k mod (n / 4))) in
+    let ww = array n (fun k -> w k @+ w' k) in
+    array n (fun k -> u (k mod (n / 2)) @+ ww k)
+      
+  and newsplitS sign n input =
+    if (n == 1) then dft1 input
+    else if (n == 2) then dft2 input
+    else let u = newsplitS2 sign (n / 2) (fun i -> input (i*2))
+    and z = newsplitS sign (n / 4) (fun i -> input (i*4 + 1))
+    and z' = newsplitS sign (n / 4) (fun i -> input ((n + i*4 - 1) mod n)) in
+    let w = array n (fun k -> t n (sign * k) @* z (k mod (n / 4)))
+    and w' = array n (fun k -> conj (t n (sign * k)) @* z' (k mod (n / 4))) in
+    let ww = array n (fun k -> w k @+ w' k) in
+    array n (fun k -> u (k mod (n / 2)) @+ ww k)
+      
+  and newsplitS2 sign n input =
+    if (n == 1) then dft1 input
+    else if (n == 2) then dft2 input
+    else let u = newsplitS4 sign (n / 2) (fun i -> input (i*2))
+    and z = newsplitS sign (n / 4) (fun i -> input (i*4 + 1))
+    and z' = newsplitS sign (n / 4) (fun i -> input ((n + i*4 - 1) mod n)) in
+    let w = array n (fun k -> t n (sign * k) @* z (k mod (n / 4)))
+    and w' = array n (fun k -> conj (t n (sign * k)) @* z' (k mod (n / 4))) in
+    let ww = array n (fun k -> (w k @+ w' k) @* (sdiv2 n k)) in
+    array n (fun k -> u (k mod (n / 2)) @+ ww k)
+      
+  and newsplitS4 sign n input =
+    if (n == 1) then dft1 input
+    else if (n == 2) then 
+      let f = dft2 input
+      in array 2 (fun k -> (f k) @* (sinv 8 k))
+    else let u = newsplitS2 sign (n / 2) (fun i -> input (i*2))
+    and z = newsplitS sign (n / 4) (fun i -> input (i*4 + 1))
+    and z' = newsplitS sign (n / 4) (fun i -> input ((n + i*4 - 1) mod n)) in
+    let w = array n (fun k -> t n (sign * k) @* z (k mod (n / 4)))
+    and w' = array n (fun k -> conj (t n (sign * k)) @* z' (k mod (n / 4))) in
+    let ww = array n (fun k -> w k @+ w' k) in
+    array n (fun k -> (u (k mod (n / 2)) @+ ww k) @* (sdiv4 n k))
+      
+  in newsplit0 sign n input
+ 
 and dft sign n input =
   let rec cooley_tukey sign n1 n2 input =
     let tmp1 = 
@@ -217,10 +297,12 @@ and dft sign n input =
     else if (gcd r (n / r)) == 1 then
       prime_factor sign r (n / r)
     else if (n mod 4 = 0 && n > 4) then
-      (if !Magic.dif_split_radix then
+      if !Magic.newsplit && is_power_of_two n then
+	newsplit sign n
+      else if !Magic.dif_split_radix then
 	split_radix_dif sign n
       else
-	split_radix_dit sign n)
+	split_radix_dit sign n
     else 
       cooley_tukey sign r (n / r)
   in

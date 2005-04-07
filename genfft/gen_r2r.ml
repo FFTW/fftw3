@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2r.ml,v 1.3 2003-04-17 19:25:50 athena Exp $ *)
+(* $Id: gen_r2r.ml,v 1.4 2005-04-07 02:06:21 stevenj Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2r.ml,v 1.3 2003-04-17 19:25:50 athena Exp $"
+let cvsid = "$Id: gen_r2r.ml,v 1.4 2005-04-07 02:06:21 stevenj Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -50,6 +50,8 @@ type mode =
   | NONE
 
 let mode = ref NONE
+let normsqr = ref 1
+let unitary = ref false
 
 let speclist = [
   "-with-istride",
@@ -111,7 +113,28 @@ let speclist = [
   "-rodft11",
   Arg.Unit(fun () -> mode := RODFT11),
   " generate a DST-IV codelet";
+
+  "-normalization",
+  Arg.String(fun x -> let ix = int_of_string x in normsqr := ix * ix),
+  " normalization integer to divide by";
+
+  "-normsqr",
+  Arg.String(fun x -> normsqr := int_of_string x),
+  " integer square of normalization to divide by";
+
+  "-unitary",
+  Arg.Unit(fun () -> unitary := true),
+  " unitary normalization (up overall scale factor)";
 ]
+
+let sqrt_half = Complex.inverse_int_sqrt 2
+let sqrt_two = Complex.int_sqrt 2
+
+let rescale sc s1 s2 input i = 
+  if ((i == s1 || i == s2) && !unitary) then
+    Complex.times (input i) sc
+  else
+    input i
 
 let generate n mode =
   let iarray = "I"
@@ -131,28 +154,29 @@ let generate n mode =
   let _ = Simd.ovs := stride_to_string "ovs" !uovstride in
   let _ = Simd.ivs := stride_to_string "ivs" !uivstride in
 
-  let (transform, load_input, store_output) = match mode with
-  | RDFT -> Trig.rdft sign, load_array_r, store_array_hc
-  | HDFT -> Trig.hdft sign, load_array_c, store_array_r  (* TODO *)
-  | DHT -> Trig.dht 1, load_array_r, store_array_r
-  | REDFT00 -> Trig.dctI, load_array_r, store_array_r
-  | REDFT10 -> Trig.dctII, load_array_r, store_array_r
-  | REDFT01 -> Trig.dctIII, load_array_r, store_array_r
-  | REDFT11 -> Trig.dctIV, load_array_r, store_array_r
-  | RODFT00 -> Trig.dstI, load_array_r, store_array_r
-  | RODFT10 -> Trig.dstII, load_array_r, store_array_r
-  | RODFT01 -> Trig.dstIII, load_array_r, store_array_r
-  | RODFT11 -> Trig.dstIV, load_array_r, store_array_r
+  let (transform, load_input, store_output, si1,si2,so1,so2) = match mode with
+  | RDFT -> Trig.rdft sign, load_array_r, store_array_hc, -1,-1,-1,-1
+  | HDFT -> Trig.hdft sign, load_array_c, store_array_r, -1,-1,-1,-1 (* TODO *)
+  | DHT -> Trig.dht 1, load_array_r, store_array_r, -1,-1,-1,-1
+  | REDFT00 -> Trig.dctI, load_array_r, store_array_r, 0,n-1,0,n-1
+  | REDFT10 -> Trig.dctII, load_array_r, store_array_r, -1,-1,0,-1
+  | REDFT01 -> Trig.dctIII, load_array_r, store_array_r, 0,-1,-1,-1
+  | REDFT11 -> Trig.dctIV, load_array_r, store_array_r, -1,-1,-1,-1
+  | RODFT00 -> Trig.dstI, load_array_r, store_array_r, -1,-1,-1,-1
+  | RODFT10 -> Trig.dstII, load_array_r, store_array_r, -1,-1,n-1,-1
+  | RODFT01 -> Trig.dstIII, load_array_r, store_array_r, n-1,-1,-1,-1
+  | RODFT11 -> Trig.dstIV, load_array_r, store_array_r, -1,-1,-1,-1
   | _ -> failwith "must specify transform kind"
   in
     
   let locations = unique_array_c n in
-  let input = 
-    locative_array_c n 
+  let input = locative_array_c n 
       (C.array_subscript iarray vistride)
       (C.array_subscript "BUG" vistride)
       locations in
-  let output = transform n (load_array_c n input) in
+  let output = rescale sqrt_half so1 so2
+      ((Complex.times (Complex.inverse_int_sqrt !normsqr))
+       @@ (transform n (rescale sqrt_two si1 si2 (load_array_c n input)))) in
   let oloc = 
     locative_array_c n 
       (C.array_subscript oarray vostride)
@@ -162,7 +186,7 @@ let generate n mode =
   let annot = standard_optimizer odag in
 
   let tree0 =
-    Fcn ("static void", name0,
+    Fcn ((if !Magic.standalone then "void" else "static void"), name0,
 	 ([Decl (C.constrealtypep, iarray);
 	   Decl (C.realtypep, oarray)]
 	  @ (if stride_fixed !uistride then [] 
@@ -228,7 +252,7 @@ let generate n mode =
     "}\n"
 
   in
-  (unparse cvsid tree0) ^ "\n" ^ loop ^ desc ^ init
+  (unparse cvsid tree0) ^ "\n" ^ loop ^ (if !Magic.standalone then "" else desc ^ init)
 
 
 let main () =

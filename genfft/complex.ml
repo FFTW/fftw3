@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.ml,v 1.6 2003-03-25 16:51:49 stevenj Exp $ *)
+(* $Id: complex.ml,v 1.7 2005-04-07 02:06:21 stevenj Exp $ *)
 
 (* abstraction layer for complex operations *)
 open Littlesimp
@@ -37,6 +37,13 @@ let uminus (CE (a, b)) =  CE (makeUminus a, makeUminus b)
 
 let inverse_int n = CE (makeNum (Number.div Number.one (Number.of_int n)),
 			makeNum Number.zero)
+
+let inverse_int_sqrt n = 
+  CE (makeNum (Number.div Number.one (Number.sqrt (Number.of_int n))),
+      makeNum Number.zero)
+let int_sqrt n = 
+  CE (makeNum (Number.sqrt (Number.of_int n)),
+      makeNum Number.zero)
 
 let nan x = CE (NaN x, makeNum Number.zero)
 
@@ -118,6 +125,20 @@ let times = times_4_2
 let exp n i =
   let (c, s) = Number.cexp n i
   in CE (makeNum c, makeNum s)
+
+(* various trig functions evaluated at (2*pi*i/n * m) *)
+let sec n m =
+  let (c, s) = Number.cexp n m
+  in CE (makeNum (Number.div Number.one c), makeNum Number.zero)
+let csc n m =
+  let (c, s) = Number.cexp n m
+  in CE (makeNum (Number.div Number.one s), makeNum Number.zero)
+let tan n m =
+  let (c, s) = Number.cexp n m
+  in CE (makeNum (Number.div s c), makeNum Number.zero)
+let cot n m =
+  let (c, s) = Number.cexp n m
+  in CE (makeNum (Number.div c s), makeNum Number.zero)
     
 (* complex sum *)
 let plus a =
