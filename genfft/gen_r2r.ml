@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2r.ml,v 1.4 2005-04-07 02:06:21 stevenj Exp $ *)
+(* $Id: gen_r2r.ml,v 1.6 2005-04-07 04:11:13 stevenj Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2r.ml,v 1.4 2005-04-07 02:06:21 stevenj Exp $"
+let cvsid = "$Id: gen_r2r.ml,v 1.6 2005-04-07 04:11:13 stevenj Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -203,7 +203,7 @@ let generate n mode =
 	 add_constants (Asch annot))
 
   in let loop =
-    "static void " ^ name ^
+    (if !Magic.standalone then "void" else "static void") ^ " " ^ name ^
     "(const " ^ C.realtype ^ " *I, " ^ 
     C.realtype ^ " *O, " ^
     C.stridetype ^ " is, " ^ 
