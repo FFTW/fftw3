@@ -18,13 +18,18 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.6 2005-02-08 03:36:42 stevenj Exp $ */
+/* $Id: reodft00e-splitradix.c,v 1.7 2005-04-08 03:15:02 stevenj Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.
 
    This works by "logically" expanding the array to a real-even/odd DFT of
    length 2n-/+2 and then applying the split-radix algorithm.
+   Essentially, this is the DIT version of the DIF algorithm in:
+
+      Pierre Duhamel, "Implementation of 'split-radix' FFT algorithms
+      for complex, real, and real-symmetric data," IEEE Trans. 
+      Acoust., Speech, and Sig. Proc. 34 (2), 285-295 (1986).
 
    In this way, we can avoid having to pad to twice the length
    (ala redft00-r2hc-pad), saving a factor of ~2 for n=2^m+/-1,
@@ -228,6 +233,30 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->clde);
 }
 
+static double penalty =  256; /* for ops.other tweak */
+
+static void update_ops(plan *ego_)
+{
+     P *ego = (P *) ego_;
+     int n = ego->n, vl = ego->vl;
+     opcnt ops;
+
+     X(ops_zero)(&ops);
+     ops.other = n/2;
+     ops.add = (ego->super.apply == apply_e ? 2:0) + (n/2-1)/2 * 6 + ((n/2)%2==0) * 2;
+     ops.mul = 1 + (n/2-1)/2 * 6 + ((n/2)%2==0) * 2;
+
+     /* tweak ops.other so that r2hc-pad is used for small sizes, which
+	seems to be a lot faster on my machine: */
+     ops.other += vl * penalty;
+
+     X(ops_zero)(&ego->super.super.ops);
+     X(ops_madd2)(vl, &ops, &ego->super.super.ops);
+     X(update_ops2)(ego->clde, ego->cldo);
+     X(ops_madd2)(vl, &ego->clde->ops, &ego->super.super.ops);
+     X(ops_madd2)(vl, &ego->cldo->ops, &ego->super.super.ops);
+}
+
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
@@ -272,11 +301,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *clde, *cldo;
      R *buf;
      int n, n0;
-     opcnt ops;
      int inplace_odd;
 
      static const plan_adt padt = {
-	  X(rdft_solve), awake, print, destroy
+	  X(rdft_solve), awake, print, destroy, update_ops
      };
 
      if (!applicable(ego_, p_, plnr))
@@ -325,19 +353,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
      
-     X(ops_zero)(&ops);
-     ops.other = n/2;
-     ops.add = (p->kind[0]==REDFT00 ? 2:0) + (n/2-1)/2 * 6 + ((n/2)%2==0) * 2;
-     ops.mul = 1 + (n/2-1)/2 * 6 + ((n/2)%2==0) * 2;
-
-     /* tweak ops.other so that r2hc-pad is used for small sizes, which
-	seems to be a lot faster on my machine: */
-     ops.other += 256;
-
-     X(ops_zero)(&pln->super.super.ops);
-     X(ops_madd2)(pln->vl, &ops, &pln->super.super.ops);
-     X(ops_madd2)(pln->vl, &clde->ops, &pln->super.super.ops);
-     X(ops_madd2)(pln->vl, &cldo->ops, &pln->super.super.ops);
+     update_ops(&(pln->super.super));
 
      return &(pln->super.super);
 }
@@ -353,4 +369,5 @@ static solver *mksolver(void)
 void X(reodft00e_splitradix_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
+     // X(est_tweak_register)(p, "penalty", &penalty);
 }
