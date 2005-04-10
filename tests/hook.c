@@ -150,7 +150,7 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
      }
 
      bp->userinfo = 0;
-     bp->destroy_input = DESTROY_INPUTP(plnr);
+     bp->destroy_input = !NO_DESTROY_INPUTP(plnr);
 
      return bp;
 }

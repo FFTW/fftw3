@@ -182,7 +182,7 @@ static int applicable1(int r, int m, const planner *plnr)
 {
      UNUSED(r); UNUSED(m);
      return (1 
-	     && !NO_UGLYP(plnr)
+	     && !NO_SLOWP(plnr)
 	  );
 }
 
@@ -303,7 +303,9 @@ void X(ct_generic_register)(planner *p)
 {
      static const wadt a[] = {
 	  { bytwiddle1, mktwiddle1, applicable1, "dftw-generic1" },
-	  { bytwiddle2, mktwiddle2, applicable2, "dftw-generic2" },
+#if 0
+	  { bytwiddle2, mktwiddle2, applicable2, "dftw-generic2" }, 
+#endif
      };
      unsigned i;
 

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.29 2005-02-26 15:04:30 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.30 2005-04-10 20:33:24 athena Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -420,8 +420,8 @@ static int applicable(const solver *ego_, const problem *p_, planner *plnr,
 		      < X(imax)(X(iabs)(p->vecsz->dims[*dim0].is),
 				X(iabs)(p->vecsz->dims[*dim0].os)))
 
-		  /* UGLY if non-square */
-		  && (!NO_UGLYP(plnr)
+		  /* SLOW if non-square */
+		  && (!NO_SLOWP(plnr)
 		      || p->vecsz->dims[*dim0].n == p->vecsz->dims[*dim1].n)
 		      
                   && ego->adt->applicable(p, plnr, *dim0,*dim1,*dim2,nbuf)
@@ -471,7 +471,7 @@ static int applicable_gcd(const problem_rdft *p, planner *plnr,
      int vl, vs;
      get_transpose_vec(p, dim2, &vl, &vs);
      *nbuf = n * (m / gcd(n, m)) * vl;
-     return (!NO_UGLYP(plnr) /* FIXME: not really ugly for large 1d ffts */
+     return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts */
 	     && n != m
 	     && Ntuple_transposable(p->vecsz->dims + dim0,
 				    p->vecsz->dims + dim1,
@@ -507,7 +507,7 @@ static int applicable_cut(const problem_rdft *p, planner *plnr,
      int vl, vs;
      get_transpose_vec(p, dim2, &vl, &vs);
      *nbuf = X(imin)(n, m) * X(iabs)(n - m) * vl;
-     return (!NO_UGLYP(plnr) /* FIXME: not really ugly for large 1d ffts? */
+     return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts? */
 	     && n != m
 	     && Ntuple_transposable(p->vecsz->dims + dim0,
 				    p->vecsz->dims + dim1,
@@ -544,7 +544,7 @@ static int applicable_toms513(const problem_rdft *p, planner *plnr,
      get_transpose_vec(p, dim2, &vl, &vs);
      *nbuf = 2*vl 
 	  + ((n + m) / 2 * sizeof(char) + sizeof(R) - 1) / sizeof(R);
-     return (!NO_UGLYP(plnr)
+     return (!NO_SLOWP(plnr)
 	     && n != m
 	     && Ntuple_transposable(p->vecsz->dims + dim0,
 				    p->vecsz->dims + dim1,

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.28 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: indirect.c,v 1.29 2005-04-10 20:33:24 athena Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
@@ -152,7 +152,7 @@ static int applicable0(const solver *ego_, const problem *p_,
 		      /* or problem must be out of place, transforming
 			 from stride 1/2 to bigger stride, for apply_after */
 		      || (p->I != p->O && ego->adt->apply == apply_after
-			  && DESTROY_INPUTP(plnr)
+			  && !NO_DESTROY_INPUTP(plnr)
 			  && X(tensor_min_istride)(p->sz) <= 2
 			  && X(tensor_min_ostride)(p->sz) > 2)
 			  
@@ -196,16 +196,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(ego_, p_, plnr))
           return (plan *) 0;
 
-     plnr->planner_flags |= NO_BUFFERING;
-
-     cldcpy = X(mkplan_d)(plnr, 
+     cldcpy = X(mkplan_d)(plnr,
 			  X(mkproblem_rdft_d)(
 			       X(mktensor_0d)(),
 			       X(tensor_append)(p->vecsz, p->sz),
 			       p->I, p->O, (rdft_kind *) 0));
      if (!cldcpy) goto nada;
 
-     cld = X(mkplan_d)(plnr, ego->adt->mkcld(p));
+     cld = X(mkplan_f_d)(plnr, ego->adt->mkcld(p), NO_BUFFERING, 0, 0);
      if (!cld) goto nada;
 
      pln = MKPLAN_RDFT(P, &padt, ego->adt->apply);

@@ -185,7 +185,7 @@ static int applicable0(const S *ego, const problem *p_)
 static int applicable(const S *ego, const problem *p_, 
 		      const planner *plnr)
 {
-     if (NO_UGLYP(plnr)) return 0; /* always ugly */
+     if (NO_SLOWP(plnr)) return 0;
      if (!applicable0(ego, p_)) return 0;
 
      if (NO_LARGE_GENERICP(plnr)) {

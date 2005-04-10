@@ -127,7 +127,7 @@ static int applicable(const solver *ego, const problem *p_,
 		      const planner *plnr)
 {
      UNUSED(ego);
-     if (NO_UGLYP(plnr)) return 0; /* always ugly */
+     if (NO_SLOWP(plnr)) return 0;
      if (!applicable0(p_)) return 0;
 
      if (NO_LARGE_GENERICP(plnr)) {

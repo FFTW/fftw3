@@ -164,7 +164,7 @@ static int applicable(rdft_kind kind, int r, int m, const planner *plnr)
 	     && (R2HC_KINDP(kind) || HC2R_KINDP(kind))
 	     && (m % 2)
 	     && (r % 2)
-	     && !NO_UGLYP(plnr)
+	     && !NO_SLOWP(plnr)
 	  );
 }
 

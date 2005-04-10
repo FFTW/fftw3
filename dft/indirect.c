@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.37 2005-02-25 05:03:13 stevenj Exp $ */
+/* $Id: indirect.c,v 1.38 2005-04-10 20:33:24 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -159,7 +159,7 @@ static int applicable0(const solver *ego_, const problem *p_,
 		      /* or problem must be out of place, transforming
 			 from stride 1/2 to bigger stride, for apply_after */
 		      || (p->ri != p->ro && ego->adt->apply == apply_after
-			  && DESTROY_INPUTP(plnr)
+			  && !NO_DESTROY_INPUTP(plnr)
 			  && X(tensor_min_istride)(p->sz) <= 2
 			  && X(tensor_min_ostride)(p->sz) > 2)
 			  
@@ -200,15 +200,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!applicable(ego_, p_, plnr))
           return (plan *) 0;
 
-     plnr->planner_flags |= NO_BUFFERING;
+     cldcpy =
+	  X(mkplan_d)(plnr, 
+		      X(mkproblem_dft_d)(X(mktensor_0d)(),
+					 X(tensor_append)(p->vecsz, p->sz),
+					 p->ri, p->ii, p->ro, p->io));
 
-     cldcpy = X(mkplan_d)(plnr, 
-			  X(mkproblem_dft_d)(X(mktensor_0d)(),
-					     X(tensor_append)(p->vecsz, p->sz),
-					     p->ri, p->ii, p->ro, p->io));
      if (!cldcpy) goto nada;
 
-     cld = X(mkplan_d)(plnr, ego->adt->mkcld(p));
+     cld = X(mkplan_f_d)(plnr, ego->adt->mkcld(p), NO_BUFFERING, 0, 0);
      if (!cld) goto nada;
 
      pln = MKPLAN_DFT(P, &padt, ego->adt->apply);

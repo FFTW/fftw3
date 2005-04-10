@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.45 2005-03-20 23:35:53 athena Exp $ */
+/* $Id: ct.c,v 1.46 2005-04-10 20:33:24 athena Exp $ */
 
 #include "ct.h"
 
@@ -92,7 +92,7 @@ static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
                   /* DIF destroys the input and we don't like it */
                   && (ego->dec == DECDIT || 
 		      p->ri == p->ro || 
-		      DESTROY_INPUTP(plnr))
+		      !NO_DESTROY_INPUTP(plnr))
 		  
 		  && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 1)
 		  && p->sz->dims[0].n > r);
@@ -111,9 +111,8 @@ int X(ct_applicable)(const ct_solver *ego, const problem *p_, planner *plnr)
      p = (const problem_dft *) p_;
 
      /* emulate fftw2 behavior */
-     if (NO_VRECURSEP(plnr) && 
-	 (p->vecsz->rnk > 0) &&
-	 (p->ri != p->ro) )  return 0;
+     if (NO_VRECURSEP(plnr) && (p->vecsz->rnk > 0))
+	  return 0;
 
      return 1;
 }
@@ -133,8 +132,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(dft_solve), awake, print, destroy
      };
 
-     if ((NO_UGLYP(plnr) && NONTHREADED_ICKYP(plnr))
-	 || !X(ct_applicable)(ego, p_, plnr))
+     if ((NO_NONTHREADEDP(plnr)) || !X(ct_applicable)(ego, p_, plnr))
           return (plan *) 0;
 
      p = (const problem_dft *) p_;

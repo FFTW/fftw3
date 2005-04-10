@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.52 2004-01-09 20:41:50 stevenj Exp $ */
+/* $Id: buffered.c,v 1.53 2005-04-10 20:33:24 athena Exp $ */
 
 #include "dft.h"
 
@@ -180,7 +180,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      R *bufs = (R *) 0;
      int nbuf = 0, bufdist, n, vl;
      int ivs, ovs, roffset, ioffset;
-     int save_problem_flags;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -218,24 +217,18 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist * 2, BUFFERS);
 
-     save_problem_flags = plnr->problem_flags;
-     if (p->ri == p->ro)
-	  plnr->problem_flags |= DESTROY_INPUT; /* ok to destroy input */
-
-     cld = X(mkplan_d)(plnr,
-		       X(mkproblem_dft_d)(
-			    X(mktensor_1d)(n, p->sz->dims[0].is, 2),
-			    X(mktensor_1d)(nbuf, ivs, bufdist * 2),
-			    TAINT(p->ri, ivs * nbuf),
-			    TAINT(p->ii, ivs * nbuf),
-			    bufs + roffset, 
-			    bufs + ioffset));
+     /* allow destruction of input if problem is in place */
+     cld = X(mkplan_f_d)(plnr,
+			 X(mkproblem_dft_d)(
+			      X(mktensor_1d)(n, p->sz->dims[0].is, 2),
+			      X(mktensor_1d)(nbuf, ivs, bufdist * 2),
+			      TAINT(p->ri, ivs * nbuf),
+			      TAINT(p->ii, ivs * nbuf),
+			      bufs + roffset, 
+			      bufs + ioffset),
+			 0, 0, (p->ri == p->ro) ? NO_DESTROY_INPUT : 0);
      if (!cld)
           goto nada;
-
-     /* don't include DESTROY_INPUT for copy and leftover transforms;
-	it would be correct, but it might inhibit some wisdom sharing. */
-     plnr->problem_flags = save_problem_flags;
 
      /* copying back from the buffer is a rank-0 transform: */
      cldcpy = X(mkplan_d)(plnr,

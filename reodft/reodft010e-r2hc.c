@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.30 2004-01-07 19:16:16 stevenj Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.31 2005-04-10 20:33:24 athena Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -333,7 +333,7 @@ static int applicable0(const solver *ego_, const problem *p_)
 
 static int applicable(const solver *ego, const problem *p, const planner *plnr)
 {
-     return (!NO_UGLYP(plnr) && applicable0(ego, p));
+     return (!NO_SLOWP(plnr) && applicable0(ego, p));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

@@ -34,9 +34,9 @@ WITH_ALIGNED_STACK({
      X(mapflags)(plnr, flags);
 
      if (bless)
-	  plnr->planner_flags |= BLESSING;
+	  plnr->flags.hash_info = BLESSING;
      else
-	  plnr->planner_flags &= ~BLESSING;
+	  plnr->flags.hash_info = 0;
 
      /* create plan */
      pln = plnr->adt->mkplan(plnr, prb);

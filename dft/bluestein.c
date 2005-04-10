@@ -161,7 +161,7 @@ static int applicable(const solver *ego, const problem *p_,
 		      const planner *plnr)
 {
      UNUSED(ego);
-     if (NO_UGLYP(plnr)) return 0; /* always ugly */
+     if (NO_SLOWP(plnr)) return 0;
      if (!applicable0(p_)) return 0;
      return 1;
 }
@@ -206,11 +206,12 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      nb = choose_transform_size(2 * n - 1);
      buf = (R *) MALLOC(2 * nb * sizeof(R), BUFFERS);
 
-     cldf = X(mkplan_d)(plnr, 
-			X(mkproblem_dft_d)(X(mktensor_1d)(nb, 2, 2),
-					   X(mktensor_1d)(1, 0, 0),
-  					   buf, buf+1, 
-					   buf, buf+1));
+     cldf = X(mkplan_f_d)(plnr, 
+			  X(mkproblem_dft_d)(X(mktensor_1d)(nb, 2, 2),
+					     X(mktensor_1d)(1, 0, 0),
+					     buf, buf+1, 
+					     buf, buf+1),
+			  NO_SLOW, 0, 0);
      if (!cldf) goto nada;
 
      X(ifree)(buf);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.43 2005-03-12 20:03:45 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.44 2005-04-10 20:33:24 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -141,7 +141,7 @@ static int applicable(const solver *ego_, const problem *p_,
 		    return 0;
 	  }
 
-	  if (NONTHREADED_ICKYP(plnr)) return 0; /* prefer threaded version */
+	  if (NO_NONTHREADEDP(plnr)) return 0; /* prefer threaded version */
      }
 
      return 1;

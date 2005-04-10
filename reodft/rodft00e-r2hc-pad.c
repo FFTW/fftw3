@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc-pad.c,v 1.1 2003-04-08 20:19:39 stevenj Exp $ */
+/* $Id: rodft00e-r2hc-pad.c,v 1.2 2005-04-10 20:33:24 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, padded antisymmetrically to
    twice the size.  This is asymptotically a factor of ~2 worse than
@@ -115,7 +115,7 @@ static int applicable0(const solver *ego_, const problem *p_)
 
 static int applicable(const solver *ego, const problem *p, const planner *plnr)
 {
-     return (!NO_UGLYP(plnr) && applicable0(ego, p));
+     return (!NO_SLOWP(plnr) && applicable0(ego, p));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

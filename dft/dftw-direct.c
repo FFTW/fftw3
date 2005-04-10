@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.4 2005-03-01 14:19:16 athena Exp $ */
+/* $Id: dftw-direct.c,v 1.5 2005-04-10 20:33:24 athena Exp $ */
 
 #include "ct.h"
 
@@ -203,6 +203,9 @@ static int applicable(const S *ego,
 
      if (NO_UGLYP(plnr) && X(ct_uglyp)((ego->bufferedp? 512 : 16),
 				       m * r, r))
+	  return 0;
+
+     if (m * r > 65536 && NO_FIXED_RADIX_LARGE_NP(plnr))
 	  return 0;
 
      return 1;

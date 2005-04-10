@@ -218,7 +218,7 @@ static int applicable0(const solver *ego_, const problem *p_)
 static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
-     return (!NO_UGLYP(plnr) && applicable0(ego_, p_));
+     return (!NO_SLOWP(plnr) && applicable0(ego_, p_));
 }
 
 static int mkP(P *pln, int n, int is, int os, R *ro, R *io,
@@ -232,25 +232,27 @@ static int mkP(P *pln, int n, int is, int os, R *ro, R *io,
      /* initial allocation for the purpose of planning */
      buf = (R *) MALLOC(sizeof(R) * (n - 1) * 2, BUFFERS);
 
-     cld1 = X(mkplan_d)(plnr, 
-			X(mkproblem_dft_d)(X(mktensor_1d)(n - 1, 2, os),
-					   X(mktensor_1d)(1, 0, 0),
-  					   buf, buf + 1, ro + os, io + os));
+     cld1 = X(mkplan_f_d)(plnr, 
+			  X(mkproblem_dft_d)(X(mktensor_1d)(n - 1, 2, os),
+					     X(mktensor_1d)(1, 0, 0),
+					     buf, buf + 1, ro + os, io + os),
+			  NO_SLOW, 0, 0);
      if (!cld1) goto nada;
 
-     cld2 = X(mkplan_d)(plnr, 
-			X(mkproblem_dft_d)(X(mktensor_1d)(n - 1, os, 2),
-					   X(mktensor_1d)(1, 0, 0),
-  					   ro + os, io + os, buf, buf + 1));
+     cld2 = X(mkplan_f_d)(plnr, 
+			  X(mkproblem_dft_d)(X(mktensor_1d)(n - 1, os, 2),
+					     X(mktensor_1d)(1, 0, 0),
+					     ro + os, io + os, buf, buf + 1),
+			  NO_SLOW, 0, 0);
 
      if (!cld2) goto nada;
 
      /* plan for omega array */
-     plnr->planner_flags |= ESTIMATE;
-     cld_omega = X(mkplan_d)(plnr, 
-			     X(mkproblem_dft_d)(X(mktensor_1d)(n - 1, 2, 2),
-						X(mktensor_1d)(1, 0, 0),
-						buf, buf + 1, buf, buf + 1));
+     cld_omega = X(mkplan_f_d)(plnr, 
+			       X(mkproblem_dft_d)(X(mktensor_1d)(n - 1, 2, 2),
+						  X(mktensor_1d)(1, 0, 0),
+						  buf, buf + 1, buf, buf + 1),
+			       NO_SLOW, ESTIMATE, 0);
      if (!cld_omega) goto nada;
 
      /* deallocate buffers; let awake() or apply() allocate them for real */

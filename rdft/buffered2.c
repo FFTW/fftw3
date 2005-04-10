@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.36 2004-01-09 20:41:50 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.37 2005-04-10 20:33:24 athena Exp $ */
 
 #include "rdft.h"
 
@@ -272,6 +272,7 @@ static int applicable(const problem *p_, const S *ego, const planner *plnr)
      const problem_rdft2 *p;
 
      if (NO_BUFFERINGP(plnr)) return 0;
+
      if (!applicable0(p_, ego, plnr)) return 0;
 
      p = (const problem_rdft2 *) p_;
@@ -294,7 +295,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      R *bufs = (R *) 0;
      int nbuf = 0, bufdist, n, vl;
      int ivs, ovs;
-     int save_problem_flags;
+     unsigned u_reset = 0;
 
      static const plan_adt padt = {
 	  X(rdft2_solve), awake, print, destroy
@@ -327,9 +328,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
-     save_problem_flags = plnr->problem_flags;
      if (p->r == p->rio || p->r == p->iio)
-	  plnr->problem_flags |= DESTROY_INPUT; /* ok to destroy input */
+	  u_reset = NO_DESTROY_INPUT; /* ok to destroy input */
 
      if (p->kind == R2HC)
 	  cldp =
@@ -339,17 +339,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 		    TAINT(p->r, ivs * nbuf), bufs, &p->kind);
      else {
 	  A(p->kind == HC2R);
-	  plnr->problem_flags |= DESTROY_INPUT; /* always ok to destroy buf */
+	  u_reset = NO_DESTROY_INPUT; /* always ok to destroy buf */
 	  cldp =
 	       X(mkproblem_rdft_d)(
 		    X(mktensor_1d)(n, 1, p->sz->dims[0].os),
 		    X(mktensor_1d)(nbuf, bufdist, ovs),
 		    bufs, TAINT(p->r, ovs * nbuf), &p->kind);
      }
-     if (!(cld = X(mkplan_d)(plnr, cldp))) goto nada;
-
-     /* don't include DESTROY_INPUT for leftover transforms */
-     plnr->problem_flags = save_problem_flags;
+     if (!(cld = X(mkplan_f_d)(plnr, cldp, 0, 0, u_reset))) goto nada;
 
      /* plan the leftover transforms (cldrest): */
      if (p->kind == R2HC)

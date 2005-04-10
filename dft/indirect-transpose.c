@@ -142,7 +142,7 @@ static int applicable0(const solver *ego_, const problem *p_,
 
 		  /* transpose_inplace destroys input */
 		  && (!ego->transpose_inplace ||
-		      p->ri == p->ro || DESTROY_INPUTP(plnr))
+		      p->ri == p->ro || !NO_DESTROY_INPUTP(plnr))
 
 		  /* FIXME: can/should we relax this constraint? */
 		  && (ego->transpose_inplace 

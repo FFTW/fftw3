@@ -36,7 +36,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.71 2005-02-16 04:53:53 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.72 2005-04-10 20:33:24 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -274,16 +274,17 @@ FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 /* undocumented beyond-guru flags */
 #define FFTW_ESTIMATE_PATIENT (1U << 7)
 #define FFTW_BELIEVE_PCOST (1U << 8)
-#define FFTW_DFT_R2HC_ICKY (1U << 9)
-#define FFTW_NONTHREADED_ICKY (1U << 10)
+#define FFTW_NO_DFT_R2HC (1U << 9)
+#define FFTW_NO_NONTHREADED (1U << 10)
 #define FFTW_NO_BUFFERING (1U << 11)
 #define FFTW_NO_INDIRECT_OP (1U << 12)
 #define FFTW_ALLOW_LARGE_GENERIC (1U << 13) /* NO_LARGE_GENERIC is default */
 #define FFTW_NO_RANK_SPLITS (1U << 14)
 #define FFTW_NO_VRANK_SPLITS (1U << 15)
 #define FFTW_NO_VRECURSE (1U << 16)
-
 #define FFTW_NO_SIMD (1U << 17)
+#define FFTW_NO_SLOW (1U << 18)
+#define FFTW_NO_FIXED_RADIX_LARGE_N (1U << 19)
 
 #ifdef __cplusplus
 }  /* extern "C" */

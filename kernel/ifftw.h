@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.252 2005-02-25 05:03:13 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.253 2005-04-10 20:33:24 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -465,59 +465,81 @@ typedef struct slvdesc_s {
 
 typedef struct solution_s solution; /* opaque */
 
-/* values for problem_flags: */
-enum { 
-     DESTROY_INPUT = 0x1,
-     NO_SIMD = 0x2,
-     CONSERVE_MEMORY = 0x4,
-     NO_DHT_R2HC = 0x8
-};
+/* interpretation of L and U: 
 
-#define DESTROY_INPUTP(plnr) ((plnr)->problem_flags & DESTROY_INPUT)
-#define NO_SIMDP(plnr) ((plnr)->problem_flags & NO_SIMD)
-#define CONSERVE_MEMORYP(plnr) ((plnr)->problem_flags & CONSERVE_MEMORY)
-#define NO_DHT_R2HCP(plnr) ((plnr)->problem_flags & NO_DHT_R2HC)
+   - if it returns a plan, the planner guarantees that all applicable
+     plans at least as impatient as U have been tried, and that each
+     plan in the solution is at least as impatient as L.
+   
+   - if it returns 0, the planner guarantees to have tried all solvers
+     at least as impatient as L, and that none of them was applicable.
 
-/* values for planner_flags: */
-enum {
-     /* impatience flags  */
+   The structure is packed to fit into 64 bits.
+*/
 
-     BELIEVE_PCOST = 0x1,
-     DFT_R2HC_ICKY = 0x2,
-     NONTHREADED_ICKY = 0x4,
-     NO_BUFFERING = 0x8,
-     NO_EXHAUSTIVE = 0x10,
-     NO_INDIRECT_OP = 0x20,
-     NO_LARGE_GENERIC = 0x40,
-     NO_RANK_SPLITS = 0x80,
-     NO_VRANK_SPLITS = 0x100,
-     NO_VRECURSE = 0x200,
+typedef struct {
+     unsigned l:22;
+     unsigned hash_info:10;
+     unsigned u:22;
      
-     /* flags that control the search */
-     NO_UGLY = 0x400,  /* avoid plans we are 99% sure are suboptimal */
+     /* abstraction break: we store the solver here to pad the
+	structure to 64 bits.  Otherwise, the struct is padded to 64
+	bits anyway, and another word is allocated for slvndx. */
+     int slvndx:10;
+} flags_t;
 
-     ESTIMATE = 0x1000,
-
-     IMPATIENCE_FLAGS = (ESTIMATE | (ESTIMATE - 1)),
-
-     BLESSING = 0x2000,   /* save this entry */
-     H_VALID = 0x4000,    /* valid hastable entry */
-     H_LIVE = 0x8000      /* entry is nonempty, implies H_VALID */
+/* impatience flags  */
+enum {
+     BELIEVE_PCOST = 0x0001,
+     ESTIMATE = 0x0002,
+     NO_DFT_R2HC = 0x0004,
+     NO_SLOW = 0x0008,
+     NO_VRECURSE = 0x0010,
+     NO_INDIRECT_OP = 0x0020,
+     NO_LARGE_GENERIC = 0x0040,
+     NO_RANK_SPLITS = 0x0080,
+     NO_VRANK_SPLITS = 0x0100,
+     NO_NONTHREADED = 0x0200,
+     NO_BUFFERING = 0x0400,
+     NO_FIXED_RADIX_LARGE_N = 0x0800,
+     NO_DESTROY_INPUT = 0x1000,
+     NO_SIMD = 0x2000,
+     CONSERVE_MEMORY = 0x4000,
+     NO_DHT_R2HC = 0x8000,
+     NO_UGLY = 0x10000
 };
 
-#define BELIEVE_PCOSTP(plnr) ((plnr)->planner_flags & BELIEVE_PCOST)
-#define DFT_R2HC_ICKYP(plnr) ((plnr)->planner_flags & DFT_R2HC_ICKY)
-#define ESTIMATEP(plnr) ((plnr)->planner_flags & ESTIMATE)
-#define NONTHREADED_ICKYP(plnr) (((plnr)->planner_flags & NONTHREADED_ICKY) \
-                                  && (plnr)->nthr > 1)
-#define NO_BUFFERINGP(plnr) ((plnr)->planner_flags & NO_BUFFERING)
-#define NO_EXHAUSTIVEP(plnr) ((plnr)->planner_flags & NO_EXHAUSTIVE)
-#define NO_INDIRECT_OP_P(plnr) ((plnr)->planner_flags & NO_INDIRECT_OP)
-#define NO_LARGE_GENERICP(plnr) ((plnr)->planner_flags & NO_LARGE_GENERIC)
-#define NO_RANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_RANK_SPLITS)
-#define NO_UGLYP(plnr) ((plnr)->planner_flags & NO_UGLY)
-#define NO_VRANK_SPLITSP(plnr) ((plnr)->planner_flags & NO_VRANK_SPLITS)
-#define NO_VRECURSEP(plnr) ((plnr)->planner_flags & NO_VRECURSE)
+/* hashtable information */
+enum {
+     BLESSING = 0x1,   /* save this entry */
+     H_VALID = 0x2,    /* valid hastable entry */
+     H_LIVE = 0x4      /* entry is nonempty, implies H_VALID */
+};
+
+#define PLNR_L(plnr) ((plnr)->flags.l)
+#define PLNR_U(plnr) ((plnr)->flags.u)
+
+#define ESTIMATEP(plnr) (PLNR_U(plnr) & ESTIMATE)
+#define BELIEVE_PCOSTP(plnr) (PLNR_U(plnr) & BELIEVE_PCOST)
+
+#define NO_INDIRECT_OP_P(plnr) (PLNR_L(plnr) & NO_INDIRECT_OP)
+#define NO_LARGE_GENERICP(plnr) (PLNR_L(plnr) & NO_LARGE_GENERIC)
+#define NO_RANK_SPLITSP(plnr) (PLNR_L(plnr) & NO_RANK_SPLITS)
+#define NO_VRANK_SPLITSP(plnr) (PLNR_L(plnr) & NO_VRANK_SPLITS)
+#define NO_VRECURSEP(plnr) (PLNR_L(plnr) & NO_VRECURSE)
+#define NO_DFT_R2HCP(plnr) (PLNR_L(plnr) & NO_DFT_R2HC)
+#define NO_SLOWP(plnr) (PLNR_L(plnr) & NO_SLOW)
+#define NO_UGLYP(plnr) (PLNR_L(plnr) & NO_UGLY)
+#define NO_FIXED_RADIX_LARGE_NP(plnr) \
+  (PLNR_L(plnr) & NO_FIXED_RADIX_LARGE_N)
+#define NO_NONTHREADEDP(plnr) \
+  ((PLNR_L(plnr) & NO_NONTHREADED) && (plnr)->nthr > 1)
+
+#define NO_DESTROY_INPUTP(plnr) (PLNR_L(plnr) & NO_DESTROY_INPUT)
+#define NO_SIMDP(plnr) (PLNR_L(plnr) & NO_SIMD)
+#define CONSERVE_MEMORYP(plnr) (PLNR_L(plnr) & CONSERVE_MEMORY)
+#define NO_DHT_R2HCP(plnr) (PLNR_L(plnr) & NO_DHT_R2HC)
+#define NO_BUFFERINGP(plnr) (PLNR_L(plnr) & NO_BUFFERING)
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
@@ -556,9 +578,7 @@ struct planner_s {
      hashtab htab_unblessed;
 
      int nthr;
-     unsigned problem_flags;
-     unsigned short planner_flags; /* matches type of solution.flags in
-				      planner.c */
+     flags_t flags;
 
      double timelimit; /* X(seconds)() at which to bail out */
      int timed_out; /* whether most recent search timed out */
@@ -596,6 +616,8 @@ void X(planner_destroy)(planner *ego);
 
 /* make plan, destroy problem */
 plan *X(mkplan_d)(planner *ego, problem *p);
+plan *X(mkplan_f_d)(planner *ego, problem *p, 
+		    unsigned l_set, unsigned u_set, unsigned u_reset);
 
 /*-----------------------------------------------------------------------*/
 /* stride.c: */

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.20 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.21 2005-04-10 20:33:24 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -238,7 +238,7 @@ static int applicable0(const solver *ego_, const problem *p_)
 
 static int applicable(const solver *ego, const problem *p, const planner *plnr)
 {
-     return (!NO_UGLYP(plnr) && applicable0(ego, p));
+     return (!NO_SLOWP(plnr) && applicable0(ego, p));
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

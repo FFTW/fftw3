@@ -54,15 +54,23 @@ static void map_flags(unsigned *iflags, unsigned *oflags,
 
 void X(mapflags)(planner *plnr, unsigned flags)
 {
-     unsigned tmpflags;
+     unsigned l, u;
 
      /* map of api flags -> api flags, to implement consistency rules
         and combination flags */
      const flagop self_flagmap[] = {
 	  /* in some cases (notably for halfcomplex->real transforms),
 	     DESTROY_INPUT is the default, so we need to support
-	     an inverse flag to disable it: */
+	     an inverse flag to disable it.
+
+	     (PRESERVE, DESTROY)   ->   (PRESERVE, DESTROY)
+               (0, 0)                       (1, 0)
+               (0, 1)                       (0, 1)
+               (1, 0)                       (1, 0)
+               (1, 1)                       (1, 0)
+	  */
 	  IMPLIES(YES(FFTW_PRESERVE_INPUT), NO(FFTW_DESTROY_INPUT)),
+	  IMPLIES(NO(FFTW_DESTROY_INPUT), YES(FFTW_PRESERVE_INPUT)),
 
 	  IMPLIES(YES(FFTW_EXHAUSTIVE), YES(FFTW_PATIENT)),
 
@@ -70,46 +78,54 @@ void X(mapflags)(planner *plnr, unsigned flags)
 	  IMPLIES(YES(FFTW_ESTIMATE),
 		  YES(FFTW_ESTIMATE_PATIENT | FFTW_NO_INDIRECT_OP)),
 
+	  IMPLIES(NO(FFTW_EXHAUSTIVE), 
+		  YES(FFTW_NO_SLOW)),
+
 	  /* a canonical set of fftw2-like impatience flags */
 	  IMPLIES(NO(FFTW_PATIENT),
 		  YES(FFTW_NO_VRECURSE
 		      | FFTW_NO_RANK_SPLITS
 		      | FFTW_NO_VRANK_SPLITS
-		      | FFTW_NONTHREADED_ICKY
-		      | FFTW_DFT_R2HC_ICKY
+		      | FFTW_NO_NONTHREADED
+		      | FFTW_NO_DFT_R2HC
+		      | FFTW_NO_FIXED_RADIX_LARGE_N
 		      | FFTW_BELIEVE_PCOST))
      };
 
      /* map of (processed) api flags to internal problem/planner flags */
-     const flagop problem_flagmap[] = {
-	  EQV(FFTW_DESTROY_INPUT, DESTROY_INPUT),
+     const flagop l_flagmap[] = {
+	  EQV(FFTW_PRESERVE_INPUT, NO_DESTROY_INPUT),
 	  EQV(FFTW_NO_SIMD, NO_SIMD),
-	  EQV(FFTW_CONSERVE_MEMORY, CONSERVE_MEMORY)
+	  EQV(FFTW_CONSERVE_MEMORY, CONSERVE_MEMORY),
+	  EQV(FFTW_NO_BUFFERING, NO_BUFFERING)
      };
-     const flagop planner_flagmap[] = {
-	  NEQV(FFTW_EXHAUSTIVE, NO_EXHAUSTIVE),
+
+     const flagop u_flagmap[] = {
+	  IMPLIES(YES(FFTW_EXHAUSTIVE), NO(0xFFFFFFFF)),
+	  IMPLIES(NO(FFTW_EXHAUSTIVE), YES(NO_UGLY)),
 
 	  /* the following are undocumented, "beyond-guru" flags that
 	     require some understanding of FFTW internals */
 	  EQV(FFTW_ESTIMATE_PATIENT, ESTIMATE),
 	  EQV(FFTW_BELIEVE_PCOST, BELIEVE_PCOST),
-	  EQV(FFTW_DFT_R2HC_ICKY, DFT_R2HC_ICKY),
-	  EQV(FFTW_NONTHREADED_ICKY, NONTHREADED_ICKY),
-	  EQV(FFTW_NO_BUFFERING, NO_BUFFERING),
+	  EQV(FFTW_NO_DFT_R2HC, NO_DFT_R2HC),
+	  EQV(FFTW_NO_NONTHREADED, NO_NONTHREADED),
 	  EQV(FFTW_NO_INDIRECT_OP, NO_INDIRECT_OP),
 	  NEQV(FFTW_ALLOW_LARGE_GENERIC, NO_LARGE_GENERIC),
 	  EQV(FFTW_NO_RANK_SPLITS, NO_RANK_SPLITS),
 	  EQV(FFTW_NO_VRANK_SPLITS, NO_VRANK_SPLITS),
-	  EQV(FFTW_NO_VRECURSE, NO_VRECURSE)
+	  EQV(FFTW_NO_VRECURSE, NO_VRECURSE),
+	  EQV(FFTW_NO_SLOW, NO_SLOW),
+	  EQV(FFTW_NO_FIXED_RADIX_LARGE_N, NO_FIXED_RADIX_LARGE_N)
      };
 
      map_flags(&flags, &flags, self_flagmap, NELEM(self_flagmap));
 
-     tmpflags = 0;
-     map_flags(&flags, &tmpflags, problem_flagmap, NELEM(problem_flagmap));
-     plnr->problem_flags = tmpflags;
+     l = u = 0;
+     map_flags(&flags, &l, l_flagmap, NELEM(l_flagmap));
+     map_flags(&flags, &u, u_flagmap, NELEM(u_flagmap));
 
-     tmpflags = 0;
-     map_flags(&flags, &tmpflags, planner_flagmap, NELEM(planner_flagmap));
-     plnr->planner_flags = tmpflags;
+     /* enforce l <= u  */
+     PLNR_L(plnr) = l;
+     PLNR_U(plnr) = u | l;
 }

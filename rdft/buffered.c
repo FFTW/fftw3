@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.32 2004-01-09 20:41:50 stevenj Exp $ */
+/* $Id: buffered.c,v 1.33 2005-04-10 20:33:24 athena Exp $ */
 
 #include "rdft.h"
 
@@ -159,6 +159,7 @@ static int applicable(const problem *p_, const S *ego, const planner *plnr)
      const problem_rdft *p;
 
      if (NO_BUFFERINGP(plnr)) return 0;
+
      if (!applicable0(p_, ego, plnr)) return 0;
 
      p = (const problem_rdft *) p_;
@@ -181,7 +182,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      R *bufs = (R *) 0;
      int nbuf = 0, bufdist, n, vl;
      int ivs, ovs;
-     int save_problem_flags;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -214,20 +214,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
-     save_problem_flags = plnr->problem_flags;
-     if (p->I == p->O)
-	  plnr->problem_flags |= DESTROY_INPUT; /* ok to destroy I */
-
-     cld = X(mkplan_d)(plnr, 
-		       X(mkproblem_rdft_d)(
-			    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
-			    X(mktensor_1d)(nbuf, ivs, bufdist),
-			    TAINT(p->I, ivs * nbuf), bufs, p->kind));
+     /* allow destruction of input if problem is in place */
+     cld = X(mkplan_f_d)(plnr, 
+			 X(mkproblem_rdft_d)(
+			      X(mktensor_1d)(n, p->sz->dims[0].is, 1),
+			      X(mktensor_1d)(nbuf, ivs, bufdist),
+			      TAINT(p->I, ivs * nbuf), bufs, p->kind),
+			 0, 0, (p->I == p->O) ? NO_DESTROY_INPUT : 0);
      if (!cld) goto nada;
-
-     /* don't include DESTROY_INPUT for copy and leftover transforms;
-	it would be correct, but it might inhibit some wisdom sharing. */
-     plnr->problem_flags = save_problem_flags;
 
      /* copying back from the buffer is a rank-0 transform: */
      cldcpy = X(mkplan_d)(plnr, 

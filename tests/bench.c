@@ -633,7 +633,7 @@ static unsigned preserve_input_flags(bench_problem *p)
 	 !p->in_place && 
 	 p->sz->rnk > 1)
 	  p->destroy_input = 1;
-     
+
      if (p->destroy_input)
 	  return FFTW_DESTROY_INPUT;
      else

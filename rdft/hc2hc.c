@@ -93,7 +93,7 @@ static int applicable0(const hc2hc_solver *ego, const problem *p_, planner *plnr
 		       /* or the problem is HC2R, in which case it is solved
 			  by DIF, which destroys the input */
 		       (p->kind[0] == HC2R && 
-			(p->I == p->O || DESTROY_INPUTP(plnr))))
+			(p->I == p->O || !NO_DESTROY_INPUTP(plnr))))
 		  
 		  && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 0)
 		  && p->sz->dims[0].n > r);
@@ -131,8 +131,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(rdft_solve), awake, print, destroy
      };
 
-     if ((NO_UGLYP(plnr) && NONTHREADED_ICKYP(plnr))
-         || !X(hc2hc_applicable)(ego, p_, plnr))
+     if (NO_NONTHREADEDP(plnr) || !X(hc2hc_applicable)(ego, p_, plnr))
           return (plan *) 0;
 
      p = (const problem_rdft *) p_;
