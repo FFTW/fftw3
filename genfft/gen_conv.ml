@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_conv.ml,v 1.5 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: gen_conv.ml,v 1.6 2005-04-11 17:15:12 stevenj Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_conv.ml,v 1.5 2003-03-15 20:29:42 stevenj Exp $"
+let cvsid = "$Id: gen_conv.ml,v 1.6 2005-04-11 17:15:12 stevenj Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -54,7 +54,6 @@ let generate n =
 	 (C.array_subscript bogus (C.SInteger 1))
 	 (unique_array_c n))
   in
-  let inputB = array 100 (fun i -> Complex.real (Complex.exp 100 (i + 1))) in
   let output = Conv.conv n inputA n inputB in
 
   let oloc = 
