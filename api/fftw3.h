@@ -2,6 +2,9 @@
  * Copyright (c) 2003 Matteo Frigo
  * Copyright (c) 2003 Massachusetts Institute of Technology
  *
+ * The following statement of license applies *only* to this header file,
+ * and *not* to the other files distributed with FFTW or derived therefrom:
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -48,7 +51,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.73 2005-04-20 01:42:51 athena Exp $ */
+/* $Id: fftw3.h,v 1.74 2005-04-20 01:44:57 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
