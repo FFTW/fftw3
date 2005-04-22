@@ -15,7 +15,7 @@ dnl floating-point computations can be re-ordered as needed.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_ARCHFLAG, AX_CC_VENDOR
 dnl
-dnl @version $Id: ax_cc_maxopt.m4,v 1.9 2005-03-07 19:29:43 stevenj Exp $
+dnl @version $Id: ax_cc_maxopt.m4,v 1.10 2005-04-22 23:47:43 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
 [
@@ -73,6 +73,9 @@ if test "$ac_test_CFLAGS" != "set"; then
      #  -fstrict-aliasing for gcc-2.95+
      AX_CHECK_COMPILER_FLAGS(-fstrict-aliasing,
 	CFLAGS="$CFLAGS -fstrict-aliasing")
+
+     # note that we enable "unsafe" fp optimization with other compilers, too
+     AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
 
      AX_GCC_ARCHFLAG($acx_maxopt_portable)
      ;;
