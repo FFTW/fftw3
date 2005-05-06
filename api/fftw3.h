@@ -47,7 +47,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.75 2005-04-20 01:55:13 athena Exp $ */
+/* $Id: fftw3.h,v 1.76 2005-05-06 03:47:55 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -72,6 +72,16 @@ extern "C"
 #define FFTW_MANGLE_FLOAT(name) FFTW_CONCAT(fftwf_, name)
 #define FFTW_MANGLE_LONG_DOUBLE(name) FFTW_CONCAT(fftwl_, name)
 
+/* annoying Windows syntax for shared-library variables */
+#if defined(_WIN32) || defined(__WIN32__)
+#  if defined(COMPILING_FFTW) /* we are compiling FFTW: export symbol */
+#    define FFTW_DECL(type) __declspec(dllexport) type
+#  else /* user is calling FFTW; assume(?) DLL is used and import symbol */
+#    define FFTW_DECL(type) __declspec(dllimport) type
+#  endif
+#else
+#  define FFTW_DECL(type) type
+#endif
 
 enum fftw_r2r_kind_do_not_use_me {
      FFTW_R2HC=0, FFTW_HC2R=1, FFTW_DHT=2,
@@ -99,7 +109,7 @@ struct fftw_iodim_do_not_use_me {
 FFTW_DEFINE_COMPLEX(R, C);						\
 									\
 typedef struct X(plan_s) *X(plan);					\
-extern double X(timelimit);   			                        \
+extern FFTW_DECL(double) X(timelimit);		                        \
 									\
 typedef struct fftw_iodim_do_not_use_me X(iodim);			\
 									\

@@ -34,7 +34,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	reodft/libreodft.la				\
 	api/libapi.la
 
-libfftw3@PREC_SUFFIX@_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
+libfftw3@PREC_SUFFIX@_la_LDFLAGS = -no-undefined -version-info @SHARED_VERSION_INFO@
 
 fftw3@PREC_SUFFIX@.pc: fftw.pc
 	cp -f fftw.pc fftw3@PREC_SUFFIX@.pc
