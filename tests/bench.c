@@ -51,9 +51,11 @@ void useropt(const char *arg)
 
      if (!strcmp(arg, "patient")) the_flags |= FFTW_PATIENT;
      else if (!strcmp(arg, "estimate")) the_flags |= FFTW_ESTIMATE;
+     else if (!strcmp(arg, "estimatepat")) the_flags |= FFTW_ESTIMATE_PATIENT;
      else if (!strcmp(arg, "exhaustive")) the_flags |= FFTW_EXHAUSTIVE;
      else if (!strcmp(arg, "unaligned")) the_flags |= FFTW_UNALIGNED;
      else if (!strcmp(arg, "nosimd")) the_flags |= FFTW_NO_SIMD;
+     else if (!strcmp(arg, "noindirectop")) the_flags |= FFTW_NO_INDIRECT_OP;
      else if (sscanf(arg, "flag=%d", &x) == 1) the_flags |= x;
      else if (!strcmp(arg, "paranoid")) paranoid = 1;
      else if (!strcmp(arg, "wisdom")) usewisdom = 1;
@@ -642,11 +644,16 @@ static unsigned preserve_input_flags(bench_problem *p)
 
 int can_do(bench_problem *p)
 {
+     double tim;
+
      if (verbose > 2 && p->pstring)
 	  printf("Planning %s...\n", p->pstring);
      rdwisdom();
 
+     timer_start();
      the_plan = mkplan(p, preserve_input_flags(p) | the_flags | FFTW_ESTIMATE);
+     tim = timer_stop();
+     if (verbose > 2) printf("estimate-planner time: %g s\n", tim);
 
      if (the_plan) {
 	  FFTW(destroy_plan)(the_plan);
@@ -726,5 +733,4 @@ void cleanup(void)
 	       FFTW(malloc_print_minfo)(verbose);
      }
 #    endif
-
 }
