@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.223 2005-02-27 18:51:24 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.224 2005-05-20 23:36:26 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1605,7 +1605,7 @@ The next time you run the program, you can restore the wisdom with
 @code{fftw_import_wisdom_from_file} (which returns non-zero on success),
 and then recreate the plan using the same flags as before.
 @example
-int fftw_import_wisdom_from_file(FILE *output_file);
+int fftw_import_wisdom_from_file(FILE *input_file);
 @end example
 @findex fftw_import_wisdom_from_file
 
