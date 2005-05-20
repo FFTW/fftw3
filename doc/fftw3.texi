@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.224 2005-05-20 23:36:26 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.225 2005-05-20 23:40:09 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -753,7 +753,7 @@ the same size.  Such packing, however, does not generalize well to
 multi-dimensional transforms, and the space savings are miniscule in
 any case; FFTW does not support it.
 
-An alternate interface for one-dimensional r2c and c2r DFTs can be
+An alternative interface for one-dimensional r2c and c2r DFTs can be
 found in the @samp{r2r} interface (@pxref{The Halfcomplex-format
 DFT}), with ``halfcomplex''-format output that @emph{is} the same size
 (and type) as the input array.
@@ -5008,7 +5008,7 @@ G. Johnson, ``The design and implementation of FFTW3,''
 Non-free versions of FFTW are available under terms different from those
 of the General Public License. (e.g. they do not require you to
 accompany any object code using FFTW with the corresponding source
-code.)  For these alternate terms you must purchase a license from MIT's
+code.)  For these alternative terms you must purchase a license from MIT's
 Technology Licensing Office.  Users interested in such a license should
 contact us (@email{fftw@@fftw.org}) for more information.
 
