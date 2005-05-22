@@ -22,7 +22,10 @@ dnl called unless the user specified --with-gcc-arch manually.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.18 2005-04-22 23:18:23 stevenj Exp $
+dnl (The main emphasis here is on recent CPUs, on the principle that
+dnl  doing high-performance computing on old hardware is uncommon.)
+dnl
+dnl @version $Id: ax_gcc_archflag.m4,v 1.19 2005-05-22 00:22:11 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
