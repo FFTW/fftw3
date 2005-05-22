@@ -25,7 +25,7 @@ dnl
 dnl (The main emphasis here is on recent CPUs, on the principle that
 dnl  doing high-performance computing on old hardware is uncommon.)
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.22 2005-05-22 00:31:41 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.23 2005-05-22 00:34:52 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -126,7 +126,7 @@ case $host_cpu in
 
   powerpc*)
      cputype=`((grep cpu /proc/cpuinfo | head -n 1 | cut -d: -f2 | sed 's/ //g') ; /usr/bin/machine ; /bin/machine) 2> /dev/null`
-     cputype=`echo $cputype | sed -e s/ppc//g`
+     cputype=`echo $cputype | sed -e 's/ppc//g;s/ *//g'`
      case $cputype in
        *750*) ax_gcc_arch="750 G3" ;;
        *74[[0-9]][[0-9]]*) ax_gcc_arch="$cputype G4" ;;
