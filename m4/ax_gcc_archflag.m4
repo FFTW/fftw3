@@ -25,7 +25,7 @@ dnl
 dnl (The main emphasis here is on recent CPUs, on the principle that
 dnl  doing high-performance computing on old hardware is uncommon.)
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.19 2005-05-22 00:22:11 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.20 2005-05-22 00:28:40 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -102,14 +102,14 @@ case $host_cpu in
 
   sparc*)
      AC_PATH_PROG([PRTDIAG], [prtdiag], [prtdiag], [$PATH:/usr/platform/`uname -i`/sbin/:/usr/platform/`uname -m`/sbin/])
-     cputype=`(((grep cpu /proc/cpuinfo | cut -d: -f2) ; ($PRTDIAG -v |grep -i sparc) ) | head -n 1) 2> /dev/null`
+     cputype=`(((grep cpu /proc/cpuinfo | cut -d: -f2) ; ($PRTDIAG -v |grep -i sparc) ; grep -i cpu /var/run/dmesg.boot ) | head -n 1) 2> /dev/null`
      cputype=`echo "$cputype" | tr -d ' -' |tr $as_cr_LETTERS $as_cr_letters`
      case $cputype in
-         *ultrasparciv*) ax_gcc_arch="ultrasparc4 ultrasparc v9" ;;
+         *ultrasparciv*) ax_gcc_arch="ultrasparc4 ultrasparc3 ultrasparc v9" ;;
          *ultrasparciii*) ax_gcc_arch="ultrasparc3 ultrasparc v9" ;;
          *ultrasparc*) ax_gcc_arch="ultrasparc v9" ;;
-         *supersparc*) ax_gcc_arch="supersparc v8" ;;
-         *hypersparc*) ax_gcc_arch="hypersparc v8" ;;
+         *supersparc*|*tms390z5[[05]]*) ax_gcc_arch="supersparc v8" ;;
+         *hypersparc*|*rt62[[056]]*) ax_gcc_arch="hypersparc v8" ;;
          *cypress*) ax_gcc_arch=cypress ;;
      esac ;;
 
