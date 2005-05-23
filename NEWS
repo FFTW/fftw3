@@ -16,6 +16,9 @@ Since FFTW 3.0.1:
 * New FFTW_TIMELIMIT option to specify a (rough) upper bound to the planning
   time.
 
+* FMA (fused multiply-add) version is now included in "standard" FFTW,
+  and is enabled with --enable-fma (the default on PowerPC and Itanium).
+
 * Automatic detection of native architecture flag for gcc.  New
   configure options: --enable-portable-binary and --with-gcc-arch=<arch>,
   for people distributing compiled binaries of FFTW (see manual).
@@ -44,10 +47,13 @@ Since FFTW 3.0.1:
 
 * Support Win32 threads under MinGW (thanks to Alessio Massaro).
 
+* Fixed problem with building DLL under Cygwin; thanks to Stephane Fillod.
+
 * Fix build failure if no Fortran compiler is found (thanks to Charles
   Radley for the bug report).
 
-* Fixed compilation failure with icc 8.0 and SSE/SSE2.
+* Fixed compilation failure with icc 8.0 and SSE/SSE2.  Automatic
+  detection of icc architecture flag (e.g. -xW).
 
 * Fixed compilation with OpenMP on AIX (thanks to Greg Bauer).
 
@@ -66,6 +72,8 @@ Since FFTW 3.0.1:
   Manuel Guerrero).
 
 * Fixed compilation failure on MacOS 10.3 due to getopt conflict.
+
+* Workaround Visual C++ bug in SSE compilation, reported by Eddie Yee.
 
 FFTW 3.0.1
 
