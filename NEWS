@@ -14,7 +14,7 @@ Since FFTW 3.0.1:
   as a zero-padded Rader variant to limit recursive use of Rader's algorithm.
 
 * New FFTW_TIMELIMIT option to specify a (rough) upper bound to the planning
-  time.
+  time (does not affect ESTIMATE mode).
 
 * FMA (fused multiply-add) version is now included in "standard" FFTW,
   and is enabled with --enable-fma (the default on PowerPC and Itanium).
