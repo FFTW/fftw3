@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.226 2005-05-23 01:34:10 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.227 2005-05-23 01:40:59 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1315,6 +1315,7 @@ memory (typically 16-byte aligned), and often this alignment is more
 stringent than that provided by the usual @code{malloc} (etc.)
 allocation routines.
 
+@cindex portability
 In order to guarantee proper alignment for SIMD, therefore, in case
 your program is ever linked against a SIMD-using FFTW, we recommend
 allocating your transform data with @code{fftw_malloc} and
@@ -1649,6 +1650,7 @@ increaseth sorrow.
 @medskip
 @end iftex
 
+@cindex portability
 There are pitfalls to using wisdom, in that it can negate FFTW's
 ability to adapt to changing hardware and other conditions. For
 example, it would be perfectly possible to export wisdom from a
@@ -1766,6 +1768,7 @@ be working.''  To the extent that this is true, if you have a variable
 @code{complex<double> *x}, you can pass it directly to FFTW via
 @code{reinterpret_cast<fftw_complex*>(x)}.
 @cindex C++
+@cindex portability
 
 @c =========>
 @node Precision, Memory Allocation, Complex numbers, Data Types and Files
@@ -3897,7 +3900,7 @@ as discussed in @ref{The Discrete Hartley Transform}.
 In this chapter we discuss the use of FFTW in a parallel environment.
 
 Currently, FFTW 3 includes parallel transforms for shared-memory
-machiens with some flavor of threads (e.g. POSIX threads); any program
+machines with some flavor of threads (e.g. POSIX threads); any program
 using FFTW can be trivially modified to use these transforms, which are
 documented in @ref{Multi-threaded FFTW}.
 
@@ -3947,6 +3950,7 @@ including @code{--enable-threads} in the flags to the @code{configure}
 script (@pxref{Installation on Unix}).
 @fpindex configure
 
+@cindex portability
 The threads routines require your operating system to have some sort of
 shared-memory threads support.  Specifically, the FFTW threads package
 works with POSIX threads (available on most Unix variants, from
@@ -4131,6 +4135,7 @@ with the following exceptions:
 @code{plan} variables (what would be of type @code{fftw_plan} in C),
 must be declared as a type that is at least as big as a pointer
 (address) on your machine.  We recommend using @code{integer*8}.
+@cindex portability
 
 @item
 Any function that returns a value (e.g. @code{fftw_plan_dft}) is
@@ -4180,6 +4185,7 @@ corresponds to @code{int}, @code{real} corresponds to @code{float},
 etcetera).  The native Fortran double/single-precision complex type
 should be compatible with @code{fftw_complex}/@code{fftwf_complex}.
 Such simple correspondences are assumed in the examples below.
+@cindex portability
 
 @c -------------------------------------------------------
 @node  FFTW Constants in Fortran, Fortran Examples, Fortran-interface routines, Calling FFTW from Fortran
@@ -4324,6 +4330,7 @@ In this section, we discuss how one can import/export FFTW wisdom
 already familiar with wisdom, as described in @ref{Words of
 Wisdom-Saving Plans}.
 
+@cindex portability
 The basic problem is that is difficult to (portably) pass files and
 strings between Fortran and C, so we cannot provide a direct Fortran
 equivalent to the @code{fftw_export_wisdom_to_file}, etcetera,
@@ -4574,6 +4581,7 @@ couple of lines of code if your compiler is not yet supported
 of the @code{configure} output if no cycle counter is found.)
 @cindex cycle counter
 @cindex compiler
+@cindex portability
 
 Installation of FFTW is simplest if you have a Unix or a GNU system,
 such as GNU/Linux, and we describe this case in the first section below,
@@ -4653,6 +4661,7 @@ Note especially @code{--help} to list all flags and
 @itemize @bullet
 
 @item
+@cindex portability
 @code{--with-portable-binary}: Disable compiler optimizations that
 would produce unportable binaries. @b{Important:} Use this if you are
 distributing compiled binaries to people who many not use exactly the
