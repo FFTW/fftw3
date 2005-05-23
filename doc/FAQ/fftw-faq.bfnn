@@ -155,6 +155,11 @@ a symbolic link to \courier{/bin/echo\}.
 If support for SIMD instructions is enabled in FFTW, further compiler
 problems may appear:
 
+\courier{gcc\} 3.4.[0123] for x86 produces incorrect SSE2 code for
+FFTW when \courier{-O2\} (the best choice for FFTW) is used, causing
+FFTW to crash (\courier{make check\} will crash).  This bug is fixed
+in \courier{gcc\} 3.4.4.
+
 \courier{gcc-3.2\} for x86 produces incorrect SIMD code if
 \courier{-O3\} is used.  The same compiler produces incorrect SIMD
 code if no optimization is used, too.  When using \courier{gcc-3.2\},
