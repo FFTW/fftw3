@@ -25,7 +25,7 @@ dnl
 dnl (The main emphasis here is on recent CPUs, on the principle that
 dnl  doing high-performance computing on old hardware is uncommon.)
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.24 2005-05-22 15:53:20 stevenj Exp $
+dnl @version $Id: ax_gcc_archflag.m4,v 1.25 2005-05-23 00:54:54 stevenj Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])
@@ -125,7 +125,7 @@ case $host_cpu in
   alphaev79) ax_gcc_arch="ev79 ev7 ev69 ev68 ev67" ;;
 
   powerpc*)
-     cputype=`((grep cpu /proc/cpuinfo | head -n 1 | cut -d: -f2 | sed 's/ //g') ; /usr/bin/machine ; /bin/machine) 2> /dev/null`
+     cputype=`((grep cpu /proc/cpuinfo | head -n 1 | cut -d: -f2 | sed 's/ //g') ; /usr/bin/machine ; /bin/machine; grep CPU /var/run/dmesg.boot | head -n 1 | cut -d" " -f2) 2> /dev/null`
      cputype=`echo $cputype | sed -e 's/ppc//g;s/ *//g'`
      case $cputype in
        *750*) ax_gcc_arch="750 G3" ;;
@@ -133,6 +133,7 @@ case $host_cpu in
        *970*) ax_gcc_arch="970 G5";;
        *POWER4*|*power4*|*gq*) ax_gcc_arch="power4";;
        *POWER5*|*power5*|*gr*|*gs*) ax_gcc_arch="power5 power4";;
+       603ev|8240) ax_gcc_arch="$cputype 603e 603";;
        *) ax_gcc_arch=$cputype ;;
      esac
      ax_gcc_arch="$ax_gcc_arch powerpc"
