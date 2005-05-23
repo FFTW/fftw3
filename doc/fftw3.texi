@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.225 2005-05-20 23:40:09 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.226 2005-05-23 01:34:10 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4665,7 +4665,9 @@ architecture to tune for; this option overrides that guess
 (i.e. @i{arch} should be a valid argument for @code{gcc}'s
 @code{-march} or @code{-mtune} flags).  You might do this because the
 deduced architecture was wrong or because you want to tune for a
-different CPU than the one you are compiling with.
+different CPU than the one you are compiling with.  You can use
+@code{--without-gcc-arch} to disable architecture-specific tuning
+entirely.
 
 @item
 @cindex precision
