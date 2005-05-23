@@ -192,6 +192,8 @@ if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
 		    [CODELET_OPTIM="$CODELET_OPTIM --param large-function-growth=1000"])
             ;;
 
+	intel) AX_CHECK_COMPILER_FLAGS([-no-gcc], [CFLAGS="$CFLAGS -no-gcc"]);;
+
         ibm) CODELET_OPTIM=-O;;
 
         hp) # must (sometimes) manually increase cpp limits to handle fftw3.h
