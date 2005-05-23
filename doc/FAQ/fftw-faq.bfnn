@@ -172,7 +172,9 @@ when compiling SIMD code.  In both cases, please upgrade to
 \courier{gcc-3.2\} or later.
 
 Intel's \courier{icc\} 6.0 misaligns SSE constants, but FFTW has a
-workaround.
+workaround. \courier{icc\} 8.x fails to compile FFTW 3.0.x because it
+falsely claims to be \courier{gcc\}; we believe this to be a bug in
+\courier{icc\}, but FFTW 3.1 has a workaround.
 
 Visual C++ 6.0 reportedly produces incorrect code for SSE/SSE2 when
 compiling FFTW.  People who tried using VC++ reportedly had switch to
