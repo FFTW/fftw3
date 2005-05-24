@@ -47,7 +47,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.76 2005-05-06 03:47:55 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.77 2005-05-24 03:12:22 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -264,7 +264,7 @@ void X(print_plan)(const X(plan) p);					\
 void *X(malloc)(size_t n);						\
 void X(free)(void *p);							\
 									\
-void X(flops)(const X(plan) p, double *add, double *mul, double *fma);	\
+void X(flops)(const X(plan) p, double *add, double *mul, double *fmas);	\
 double X(estimate_cost)(const X(plan) p);				\
 									\
 extern const char X(version)[];						\
