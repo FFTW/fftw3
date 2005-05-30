@@ -16,7 +16,7 @@ dnl Note also that the flags assume that ANSI C aliasing rules are
 dnl followed by the code (e.g. for gcc's -fstrict-aliasing), and that
 dnl floating-point computations can be re-ordered as needed.
 dnl
-dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_CC_VENDOR,
+dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_COMPILER_VENDOR,
 dnl                  AX_GCC_ARCHFLAG, AX_GCC_X86_CPUID
 dnl
 dnl @version 2005-05-30
@@ -25,7 +25,7 @@ dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
 [
 AC_REQUIRE([AC_PROG_CC])
-AC_REQUIRE([AX_CC_VENDOR])
+AC_REQUIRE([AX_COMPILER_VENDOR])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
 AC_ARG_ENABLE(portable-binary, [AC_HELP_STRING([--enable-portable-binary], [disable compiler optimizations that would produce unportable binaries])], 
@@ -34,7 +34,7 @@ AC_ARG_ENABLE(portable-binary, [AC_HELP_STRING([--enable-portable-binary], [disa
 # Try to determine "good" native compiler flags if none specified via CFLAGS
 if test "$ac_test_CFLAGS" != "set"; then
   CFLAGS=""
-  case $ax_cv_cc_vendor in
+  case $ax_cv_c_compiler_vendor in
     dec) CFLAGS="-newc -w0 -O5 -ansi_alias -ansi_args -fp_reorder -tune host"
 	 if test "x$acx_maxopt_portable" = xno; then
            CFLAGS="$CFLAGS -arch host"
@@ -123,7 +123,7 @@ if test "$ac_test_CFLAGS" != "set"; then
 	echo ""
 	echo "********************************************************"
         echo "* WARNING: Don't know the best CFLAGS for this system  *"
-        echo "* Use ./configure CFLAGS=... to specify your own flags *
+        echo "* Use ./configure CFLAGS=... to specify your own flags *"
 	echo "* (otherwise, a default of CFLAGS=-O3 will be used)    *"
 	echo "********************************************************"
 	echo ""
@@ -135,7 +135,7 @@ if test "$ac_test_CFLAGS" != "set"; then
         echo "********************************************************"
         echo "* WARNING: The guessed CFLAGS don't seem to work with  *"
         echo "* your compiler.                                       *"
-        echo "* Use ./configure CFLAGS=... to specify your own flags *
+        echo "* Use ./configure CFLAGS=... to specify your own flags *"
         echo "********************************************************"
         echo ""
         CFLAGS=""

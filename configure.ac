@@ -139,7 +139,7 @@ AC_SUBST(PREC_SUFFIX)
 
 dnl Checks for programs.
 AC_PROG_CC
-AX_CC_VENDOR
+AX_COMPILER_VENDOR
 AMX_PROG_AS     dnl AM_PROG_AS breaks at least one version of libtool
 AC_PROG_CC_STDC
 AC_PROG_INSTALL
@@ -165,7 +165,7 @@ AX_CC_MAXOPT
 if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
     if test "x$CODELET_OPTIM" = x; then
 
-      case "${ax_cv_cc_vendor}" in
+      case "${ax_cv_c_compiler_vendor}" in
         gnu)
             case "${host_cpu}" in
 	       # gcc's ``optimizations'' slow down everything on IA32.
