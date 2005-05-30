@@ -123,7 +123,7 @@ if test "$ac_test_CFLAGS" != "set"; then
 	echo ""
 	echo "********************************************************"
         echo "* WARNING: Don't know the best CFLAGS for this system  *"
-        echo "* Use  make CFLAGS=..., or edit the top level Makefile *"
+        echo "* Use ./configure CFLAGS=... to specify your own flags *
 	echo "* (otherwise, a default of CFLAGS=-O3 will be used)    *"
 	echo "********************************************************"
 	echo ""
@@ -135,7 +135,7 @@ if test "$ac_test_CFLAGS" != "set"; then
         echo "********************************************************"
         echo "* WARNING: The guessed CFLAGS don't seem to work with  *"
         echo "* your compiler.                                       *"
-        echo "* Use  make CFLAGS=..., or edit the top level Makefile *"
+        echo "* Use ./configure CFLAGS=... to specify your own flags *
         echo "********************************************************"
         echo ""
         CFLAGS=""
