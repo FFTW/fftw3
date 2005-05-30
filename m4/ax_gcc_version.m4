@@ -1,4 +1,6 @@
 dnl @synopsis AX_GCC_VERSION(MAJOR, MINOR, PATCHLEVEL, [ACTION-SUCCESS], [ACTION-FAILURE])
+dnl @summary check wither gcc is at least version MAJOR.MINOR.PATCHLEVEL
+dnl @category InstalledPackages
 dnl
 dnl Check whether we are using gcc and, if so, whether its version
 dnl is at least MAJOR.MINOR.PATCHLEVEL
@@ -6,7 +8,8 @@ dnl
 dnl ACTION-SUCCESS/ACTION-FAILURE are shell commands to execute on
 dnl success/failure.
 dnl
-dnl @version $Id: ax_gcc_version.m4,v 1.3 2005-01-10 02:53:08 stevenj Exp $
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_VERSION],
 [

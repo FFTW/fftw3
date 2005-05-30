@@ -1,4 +1,6 @@
 dnl @synopsis ACX_PTHREAD([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
+dnl @summary figure out how to build C programs using POSIX threads
+dnl @category InstalledPackages
 dnl
 dnl This macro figures out how to build C programs using POSIX
 dnl threads.  It sets the PTHREAD_LIBS output variable to the threads
@@ -39,7 +41,8 @@ dnl macros posted by Alejandro Forero Cuervo to the autoconf macro
 dnl repository.  We are also grateful for the helpful feedback of
 dnl numerous users.
 dnl
-dnl @version $Id: acx_pthread.m4,v 1.3 2005-01-19 03:30:27 stevenj Exp $
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([ACX_PTHREAD], [

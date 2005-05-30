@@ -1,4 +1,6 @@
 dnl @synopsis AX_GCC_X86_CPUID(OP)
+dnl @summary run x86 cpuid instruction OP using gcc inline assembler
+dnl @category Misc
 dnl
 dnl On Pentium and later x86 processors, with gcc or a compiler that
 dnl has a compatible syntax for inline assembly instructions, run
@@ -16,7 +18,8 @@ dnl to the string "unknown".
 dnl
 dnl This macro mainly exists to be used in AX_GCC_ARCHFLAG.
 dnl
-dnl @version $Id: ax_gcc_x86_cpuid.m4,v 1.3 2004-11-09 03:09:16 stevenj Exp $
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_X86_CPUID],
 [AC_REQUIRE([AC_PROG_CC])

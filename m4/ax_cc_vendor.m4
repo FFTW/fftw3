@@ -1,8 +1,14 @@
 dnl @synopsis AX_CC_VENDOR
+dnl @summary find the vendor (gnu, intel, etc.) of the C compiler
+dnl @category C
 dnl
 dnl Determine the vendor of the C compiler, e.g., gnu, intel, ibm,
 dnl sun, hp, borland, comeau, dec, cray, kai, lcc, metrowerks, sgi, 
 dnl microsoft, watcom, etc.  Returned in $ax_cv_cc_vendor cache variable.
+dnl
+dnl @version 2005-05-30
+dnl @license GPLWithACException
+dnl @author Steven G. Johnson <stevenj@alum.mit.edu> with Matteo Frigo
 
 AC_DEFUN([AX_CC_VENDOR],
 [

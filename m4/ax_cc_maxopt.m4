@@ -1,8 +1,11 @@
 dnl @synopsis AX_CC_MAXOPT
+dnl @summary turn on optimization flags for the C compiler
+dnl @category C
 dnl
 dnl Try to turn on "good" C optimization flags for various compilers
 dnl and architectures, for some definition of "good".  (In our case,
-dnl good for FFTW and hopefully for other scientific codes.)
+dnl good for FFTW and hopefully for other scientific codes.  Modify 
+dnl as needed.)
 dnl
 dnl The user can override the flags by setting the CFLAGS environment
 dnl variable.  The user can also specify --enable-portable-binary in
@@ -13,9 +16,11 @@ dnl Note also that the flags assume that ANSI C aliasing rules are
 dnl followed by the code (e.g. for gcc's -fstrict-aliasing), and that
 dnl floating-point computations can be re-ordered as needed.
 dnl
-dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_GCC_ARCHFLAG, AX_CC_VENDOR
+dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_CC_VENDOR,
+dnl                  AX_GCC_ARCHFLAG, AX_GCC_X86_CPUID
 dnl
-dnl @version $Id: ax_cc_maxopt.m4,v 1.12 2005-05-23 03:37:08 stevenj Exp $
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
 [
@@ -74,7 +79,7 @@ if test "$ac_test_CFLAGS" != "set"; then
               # icc accepts gcc assembly syntax, so these should work:
 	      AX_GCC_X86_CPUID(0)
               AX_GCC_X86_CPUID(1)
-	      case $ax_cv_gcc_x86_cpuid_0 in
+	      case $ax_cv_gcc_x86_cpuid_0 in # see AX_GCC_ARCHFLAG
                 *:756e6547:*:*) # Intel
                   case $ax_cv_gcc_x86_cpuid_1 in
                     *6a?:*[[234]]:*:*|*6[[789b]]?:*:*:*) icc_flags="-xK";;

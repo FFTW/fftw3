@@ -1,4 +1,6 @@
 dnl @synopsis AX_CHECK_COMPILER_FLAGS(FLAGS, [ACTION-SUCCESS], [ACTION-FAILURE])
+dnl @summary check whether FLAGS are accepted by the compiler
+dnl @category Misc
 dnl
 dnl Check whether the given compiler FLAGS work with the current language's
 dnl compiler, or whether they give an error.  (Warnings, however, are
@@ -7,7 +9,8 @@ dnl
 dnl ACTION-SUCCESS/ACTION-FAILURE are shell commands to execute on
 dnl success/failure.
 dnl
-dnl @version $Id: ax_check_compiler_flags.m4,v 1.1 2004-11-09 02:46:50 stevenj Exp $
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CHECK_COMPILER_FLAGS],
 [AC_PREREQ(2.59) dnl for _AC_LANG_PREFIX

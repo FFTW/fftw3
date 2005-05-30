@@ -1,4 +1,6 @@
 dnl @synopsis AX_GCC_ALIGNS_STACK([ACTION-IF-YES], [ACTION-IF-NO])
+dnl @summary check whether gcc can align stack to 8-byte boundary
+dnl @category Misc
 dnl
 dnl Check to see if we are using a version of gcc that aligns the stack
 dnl (true in gcc-2.95+, which have the -mpreferred-stack-boundary flag).
@@ -11,7 +13,8 @@ dnl using gcc and the stack is/isn't aligned, respectively.
 dnl
 dnl Requires macro: AX_CHECK_COMPILER_FLAGS, AX_GCC_VERSION
 dnl
-dnl @version $Id: ax_gcc_aligns_stack.m4,v 1.7 2005-02-24 23:10:49 stevenj Exp $
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 AC_DEFUN([AX_GCC_ALIGNS_STACK],
 [

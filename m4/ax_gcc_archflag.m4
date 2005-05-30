@@ -1,7 +1,9 @@
 dnl @synopsis AX_GCC_ARCHFLAG([PORTABLE?], [ACTION-SUCCESS], [ACTION-FAILURE])
+dnl @summary find target architecture name for gcc -march/-mtune flags
+dnl @category Misc
 dnl
 dnl This macro tries to guess the "native" arch corresponding to
-dnl the host architecture for use with gcc's -march=arch or -mtune=arch
+dnl the target architecture for use with gcc's -march=arch or -mtune=arch
 dnl flags.  If found, the cache variable $ax_cv_gcc_archflag is set to this
 dnl flag and ACTION-SUCCESS is executed; otherwise $ax_cv_gcc_archflag is
 dnl is set to "unknown" and ACTION-FAILURE is executed.  The default
@@ -25,7 +27,8 @@ dnl
 dnl (The main emphasis here is on recent CPUs, on the principle that
 dnl  doing high-performance computing on old hardware is uncommon.)
 dnl
-dnl @version $Id: ax_gcc_archflag.m4,v 1.25 2005-05-23 00:54:54 stevenj Exp $
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
 [AC_REQUIRE([AC_PROG_CC])

@@ -1,4 +1,6 @@
 dnl @synopsis AX_OPENMP([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
+dnl @summary determine how to compile programs using OpenMP
+dnl @category InstalledPackages
 dnl
 dnl This macro tries to find out how to compile programs that
 dnl use OpenMP a standard API and set of compiler directives for
@@ -27,7 +29,8 @@ dnl flag is found, and ACTION-IF-NOT-FOUND is a list of commands
 dnl to run it if it is not found.  If ACTION-IF-FOUND is not specified,
 dnl the default action will define HAVE_OPENMP.
 dnl
-dnl @version $Id: ax_openmp.m4,v 1.3 2004-11-09 03:00:34 stevenj Exp $
+dnl @version 2005-05-30
+dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([AX_OPENMP], [
