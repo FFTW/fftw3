@@ -176,10 +176,10 @@ workaround. \courier{icc\} 8.x fails to compile FFTW 3.0.x because it
 falsely claims to be \courier{gcc\}; we believe this to be a bug in
 \courier{icc\}, but FFTW 3.1 has a workaround.
 
-Visual C++ 6.0 reportedly produces incorrect code for SSE/SSE2 when
-compiling FFTW.  People who tried using VC++ reportedly had switch to
-the Intel compiler in order to get the SIMD code to work. VC++ 6.0
-also reportedly produces incorrect code for the file
+Visual C++ 2003 reportedly produces incorrect code for SSE/SSE2 when
+compiling FFTW.  This bug was reportedly fixed in VC++ 2005;
+alternatively, you could switch to the Intel compiler. VC++ 6.0 also
+reportedly produces incorrect code for the file
 \courier{reodft11e-r2hc-odd.c\} unless optimizations are disabled for
 that file.
 
