@@ -218,9 +218,11 @@ if test "$GCC" = "yes"; then
 	AX_CHECK_COMPILER_FLAGS(-m3dnow, [SIMD_CFLAGS="-m3dnow"],
 	    [AC_MSG_ERROR([Need a version of gcc with -m3dnow])])
     elif test "$have_altivec" = "yes"; then
+	# -DFAKE__VEC__ is a workaround because gcc-3.3 does not
+	# #define __VEC__ with -maltivec.
 	AX_CHECK_COMPILER_FLAGS(-faltivec, [SIMD_CFLAGS="-faltivec"],
 	    [AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
-		[SIMD_CFLAGS="-maltivec -mabi=altivec"],
+		[SIMD_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
 	        [AX_CHECK_COMPILER_FLAGS(-fvec, [SIMD_CFLAGS="-fvec"],
 		    [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
     fi

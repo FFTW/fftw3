@@ -30,11 +30,11 @@
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2)
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
+#if defined(__VEC__) || defined(FAKE__VEC__)
+
 #ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
-
-#ifdef __VEC__
 
 typedef vector float V;
 #define VLIT(x0, x1, x2, x3) {x0, x1, x2, x3}
