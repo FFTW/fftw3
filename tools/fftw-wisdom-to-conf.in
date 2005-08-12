@@ -55,21 +55,28 @@ void ${prefix}configure_planner(void *plnr)
 {
     struct solvtab_s { void (*reg)(void *); const char *reg_nam; };
     extern void ${prefix}solvtab_exec(const struct solvtab_s s[], void *);
+
+#define DECLARE(name) extern void name(void *);
+#define STRINGIZEx(x) #x
+#define STRINGIZE(x) STRINGIZEx(x)
+#define SOLVTAB(s) { s, STRINGIZE(s) },
+#define DO(X) \\
 EOF
 
-tmp=${TMPDIR-/tmp}/fftw-wisdom-to-conf$$
-sed 's/ *(//' | cut -d" " -f1 | grep -v -- - | egrep -v '^ *\)*$' > $tmp
-
-cat $tmp | sort | uniq | while read reg_nam; do
-    echo "    extern void $reg_nam(void *);"
+sed 's/ *(//' | cut -d" " -f1 | grep -v -- - | egrep -v '^ *\)*$' | sort | uniq | while read reg_nam; do
+    echo "    X($reg_nam)\\"
 done
 
-echo "    const struct solvtab_s s[] = {" 
-cat $tmp | sort | uniq | while read reg_nam; do
-    echo "        { $reg_nam, \"$reg_nam\" },"
-done
-echo "        { 0, 0 }"
-echo "    };"
+cat <<EOF
+    /* end DO(X) */
 
-echo "    ${prefix}solvtab_exec(s, plnr);"
-echo "}"
+    DO(DECLARE)
+
+    const struct solvtab_s s[] = {
+        DO(SOLVTAB)
+        { 0, 0 }
+    };
+
+    ${prefix}solvtab_exec(s, plnr);
+}
+EOF
