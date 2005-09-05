@@ -128,7 +128,7 @@ case $host_cpu in
   alphaev79) ax_gcc_arch="ev79 ev7 ev69 ev68 ev67" ;;
 
   powerpc*)
-     cputype=`((grep cpu /proc/cpuinfo | head -n 1 | cut -d: -f2 | sed 's/ //g') ; /usr/bin/machine ; /bin/machine; grep CPU /var/run/dmesg.boot | head -n 1 | cut -d" " -f2) 2> /dev/null`
+     cputype=`((grep cpu /proc/cpuinfo | head -n 1 | cut -d: -f2 | cut -d, -f1 | sed 's/ //g') ; /usr/bin/machine ; /bin/machine; grep CPU /var/run/dmesg.boot | head -n 1 | cut -d" " -f2) 2> /dev/null`
      cputype=`echo $cputype | sed -e 's/ppc//g;s/ *//g'`
      case $cputype in
        *750*) ax_gcc_arch="750 G3" ;;
