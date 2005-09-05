@@ -19,6 +19,7 @@ libfftw3@PREC_SUFFIX@_la_SOURCES =
 libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	kernel/libkernel.la				\
 	simd/libsimd.la					\
+	simd/nonportable/libsimd_nonportable.la		\
 	dft/libdft.la					\
 	dft/codelets/libdft_codelets.la			\
 	dft/codelets/standard/libdft_standard.la	\

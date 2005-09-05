@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse2.c,v 1.11 2004-12-17 21:08:54 stevenj Exp $ */
+/* $Id: sse2.c,v 1.12 2005-09-05 19:23:27 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -75,7 +75,8 @@ static int sse2_works(void)
 #ifdef _MSC_VER
 	  _asm { xorpd xmm0,xmm0 }
 #else
-	  __asm__ __volatile__ ("xorpd %xmm0, %xmm0");
+	  /* asm volatile ("xorpd %xmm0, %xmm0"); */
+	  asm volatile (".byte 0x66; .byte 0x0f; .byte 0x57; .byte 0xc0");
 #endif
 	  signal(SIGILL, oldsig);
 	  return 1;
@@ -85,11 +86,12 @@ static int sse2_works(void)
 int RIGHT_CPU(void)
 {
      static int init = 0, res;
-     CK(ALIGNED(&X(sse2_mp))); /* compiler bug? */
+     extern void X(check_alignment_of_sse2_mp)(void);
+
      if (!init) {
-	  res =   (cpuid_edx(1) & (1 << 26)) 
-	       && sse2_works();
+	  res = (cpuid_edx(1) & (1 << 26)) && sse2_works();
 	  init = 1;
+	  X(check_alignment_of_sse2_mp)();
      }
      return res;
 }

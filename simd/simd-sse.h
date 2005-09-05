@@ -25,85 +25,14 @@
 #define VL 2            /* SIMD complex vector length */
 #define ALIGNMENT 8     /* alignment for LD/ST */
 #define ALIGNMENTA 16   /* alignment for LDA/STA */
+#define SIMD_VSTRIDE_OKA(x) ((x) == 2)
+#define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
-typedef R V __attribute__ ((mode(V4SF),aligned(16)));
+#define RIGHT_CPU X(have_sse)
+extern int RIGHT_CPU(void);
 
-/* gcc-3.1 seems to generate slower code when we use SSE builtins.
-   Use asm instead. */
-static __inline__ V VADD(V a, V b)
-{
-     V ret;
-     __asm__("addps %2, %0" : "=x"(ret) : "%0"(a), "xm"(b));
-     return ret;
-}
-static __inline__ V VSUB(V a, V b)
-{
-     V ret;
-     __asm__("subps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
-     return ret;
-}
-static __inline__ V VMUL(V b, V a)
-{
-     V ret;
-     __asm__("mulps %2, %0" : "=x"(ret) : "%0"(a), "xm"(b));
-     return ret;
-}
-static __inline__ V VXOR(V b, V a)
-{
-     V ret;
-     __asm__("xorps %2, %0" : "=x"(ret) : "%0"(a), "xm"(b));
-     return ret;
-}
-static __inline__ V UNPCKL(V a, V b)
-{
-     V ret;
-     __asm__("unpcklps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
-     return ret;
-}
-
-static __inline__ V UNPCKH(V a, V b)
-{
-     V ret;
-     __asm__("unpckhps %2, %0" : "=x"(ret) : "0"(a), "xm"(b));
-     return ret;
-}
-
-#define SHUFPS(a, b, msk) __extension__ ({				   \
-     V ret;								   \
-     __asm__("shufps %3, %2, %0" : "=x"(ret) : "0"(a), "xm"(b), "i"(msk)); \
-     ret;								   \
-})
-
-static __inline__ V LOADH(const R *addr, V val)
-{
-     V ret;
-     __asm__("movhps %2, %0" : "=x"(ret) : "0"(val), "m"(*addr));
-     return ret;
-}
-
-static __inline__ V LOADL0(const R *addr, V val)
-{
-     __asm__("movlps %1, %0" : "=x"(val) : "m"(*addr));
-     return val;
-}
-
-
-static __inline__ void STOREH(R *addr, V val)
-{
-     __asm__("movhps %1, %0" : "=m"(*addr) : "x"(val));
-}
-static __inline__ void STOREL(R *addr, V val)
-{
-     __asm__("movlps %1, %0" : "=m"(*addr) : "x"(val));
-}
-
-#define DVK(var, val) static const union fvec var = { {val, val, val, val} }
-#define LDK(x) x.v
-
-#endif
-
-#if defined(__ICC) || defined(_MSC_VER) /* Intel's compiler for ia32 */
+/* gcc compiles the following code only when __SSE__ is defined */
+#if defined(__SSE__) || !defined(__GNUC__)
 
 /* some versions of glibc's sys/cdefs.h define __inline to be empty,
    which is wrong because xmmintrin.h defines several inline
@@ -126,13 +55,7 @@ typedef __m128 V;
 #define UNPCKL _mm_unpacklo_ps
 #define DVK(var, val) const R var = K(val)
 #define LDK(x) _mm_set_ps1(x)
-#endif
 
-#ifdef _MSC_VER
-#  define __inline__ __inline
-#endif
-
-/* common stuff */
 union fvec {
      R f[4];
      V v;
@@ -151,7 +74,7 @@ union uvec {
    (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
 
-static __inline__ V LD(const R *x, int ivs, const R *aligned_like)
+static inline V LD(const R *x, int ivs, const R *aligned_like)
 {
      V var;
      (void)aligned_like; /* UNUSED */
@@ -160,21 +83,21 @@ static __inline__ V LD(const R *x, int ivs, const R *aligned_like)
      return var;
 }
 
-static __inline__ V LDA(const R *x, int ivs, const R *aligned_like)
+static inline V LDA(const R *x, int ivs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
      (void)ivs; /* UNUSED */
      return *(const V *)x;
 }
 
-static __inline__ void ST(R *x, V v, int ovs, const R *aligned_like)
+static inline void ST(R *x, V v, int ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
      STOREL(x, v);
      STOREH(x + ovs, v);
 }
 
-static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
+static inline void STA(R *x, V v, int ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
      (void)ovs; /* UNUSED */
@@ -183,7 +106,7 @@ static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
 
 #if 0
 /* this should be faster but it isn't. */
-static __inline__ void STPAIR2(R *x, V v0, V v1, int ovs)
+static inline void STPAIR2(R *x, V v0, V v1, int ovs)
 {
      STA(x, SHUFPS(v0, v1, SHUFVAL(0, 1, 0, 1)), ovs, 0);
      STA(x + ovs, SHUFPS(v0, v1, SHUFVAL(2, 3, 2, 3)), ovs, 0);
@@ -192,18 +115,18 @@ static __inline__ void STPAIR2(R *x, V v0, V v1, int ovs)
 #define STPAIR1 ST
 #define STPAIR2(x, v0, v1, ovs) /* nop */
 
-static __inline__ V FLIP_RI(V x)
+static inline V FLIP_RI(V x)
 {
      return SHUFPS(x, x, SHUFVAL(1, 0, 3, 2));
 }
 
 extern const union uvec X(sse_mpmp);
-static __inline__ V CHS_R(V x)
+static inline V CHS_R(V x)
 {
      return VXOR(X(sse_mpmp).v, x);
 }
 
-static __inline__ V VBYI(V x)
+static inline V VBYI(V x)
 {
      return CHS_R(FLIP_RI(x));
 }
@@ -215,7 +138,7 @@ static __inline__ V VBYI(V x)
 #define VTW1(x) {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
 #define TWVL1 (VL)
 
-static __inline__ V BYTW1(const R *t, V sr)
+static inline V BYTW1(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V tx = twp[0];
@@ -226,7 +149,7 @@ static __inline__ V BYTW1(const R *t, V sr)
      return VADD(tr, VMUL(ti, sr));
 }
 
-static __inline__ V BYTWJ1(const R *t, V sr)
+static inline V BYTWJ1(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V tx = twp[0];
@@ -243,7 +166,7 @@ static __inline__ V BYTWJ1(const R *t, V sr)
   {TW_SIN, 0, -x}, {TW_SIN, 0, x}, {TW_SIN, 1, -x}, {TW_SIN, 1, x}
 #define TWVL2 (2 * VL)
 
-static __inline__ V BYTW2(const R *t, V sr)
+static inline V BYTW2(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V si = FLIP_RI(sr);
@@ -251,7 +174,7 @@ static __inline__ V BYTW2(const R *t, V sr)
      return VADD(VMUL(tr, sr), VMUL(ti, si));
 }
 
-static __inline__ V BYTWJ2(const R *t, V sr)
+static inline V BYTWJ2(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V si = FLIP_RI(sr);
@@ -259,12 +182,7 @@ static __inline__ V BYTWJ2(const R *t, V sr)
      return VSUB(VMUL(tr, sr), VMUL(ti, si));
 }
 
-
-#define RIGHT_CPU X(have_sse)
-extern int RIGHT_CPU(void);
-
-#define SIMD_VSTRIDE_OKA(x) ((x) == 2)
-#define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 #define BEGIN_SIMD()
 #define END_SIMD()
 
+#endif /* __SSE__ */

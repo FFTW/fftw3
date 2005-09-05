@@ -412,6 +412,7 @@ AC_CONFIG_FILES([
    genfft-k7/Makefile
    kernel/Makefile
    simd/Makefile
+   simd/nonportable/Makefile
 
    dft/Makefile
    dft/codelets/Makefile
