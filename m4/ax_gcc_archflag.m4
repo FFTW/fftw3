@@ -132,6 +132,8 @@ case $host_cpu in
      cputype=`echo $cputype | sed -e 's/ppc//g;s/ *//g'`
      case $cputype in
        *750*) ax_gcc_arch="750 G3" ;;
+       *740[[0-9]]*) ax_gcc_arch="$cputype 7400 G4" ;;
+       *74[[4-5]][[0-9]]*) ax_gcc_arch="$cputype 7450 G4" ;;
        *74[[0-9]][[0-9]]*) ax_gcc_arch="$cputype G4" ;;
        *970*) ax_gcc_arch="970 G5";;
        *POWER4*|*power4*|*gq*) ax_gcc_arch="power4";;
