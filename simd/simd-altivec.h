@@ -30,6 +30,9 @@
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2)
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
+#define RIGHT_CPU X(have_altivec)
+extern int RIGHT_CPU(void);
+
 #if defined(__VEC__) || defined(FAKE__VEC__)
 
 #ifdef HAVE_ALTIVEC_H
@@ -190,9 +193,6 @@ static __inline__ V BYTWJ2(const R *t, V sr)
      V tr = twp[0], ti = twp[1];
      return VFNMS(ti, si, VMUL(tr, sr));
 }
-
-#define RIGHT_CPU X(have_altivec)
-extern int RIGHT_CPU(void);
 
 #define BEGIN_SIMD()
 #define END_SIMD()
