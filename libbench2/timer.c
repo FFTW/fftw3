@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.6 2003-05-12 22:22:16 stevenj Exp $ */
+/* $Id: timer.c,v 1.7 2005-09-06 02:22:50 athena Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -114,7 +114,7 @@ if you find them useful.
 typedef char *TYPE;
 static const double tmin_try = 1.0e-6; /* seconds */
 static const double tmax_try = 1.0;    /* seconds */
-static const double tolerance = 0.001;
+static const double tolerance = 0.01;
 
 static TYPE **work(int n, TYPE **p)
 {
