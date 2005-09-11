@@ -30,7 +30,6 @@
 #define BYTW BYTW2
 #define BYTWJ BYTWJ2
 
-/* genus is the same as t1f */
-#define GENUS X(dft_t1fsimd_genus)
+#define GENUS X(dft_t2fsimd_genus)
 extern const ct_genus GENUS;
 
