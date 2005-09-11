@@ -70,7 +70,7 @@ const ct_genus X(dft_t1bsimd_genus) = { okp_t1b, VL };
    t2* codelets use ~2n twiddle factors (instead of ~n) */
 static int small_enough(const ct_desc *d, int m)
 {
-     return m * d->radix <= 1024;
+     return m * d->radix <= 16384;
 }
 
 static int okp_t2f(const ct_desc *d,
