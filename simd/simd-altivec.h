@@ -61,7 +61,7 @@ static inline V LDA(const R *x, int ivs, const R *aligned_like)
 {
      UNUSED(ivs);
      UNUSED(aligned_like);
-     return vec_ld(0, (R *)x);
+     return vec_ld(0, x);
 }
 
 static inline V LD(const R *x, int ivs, const R *aligned_like) 
@@ -70,19 +70,19 @@ static inline V LD(const R *x, int ivs, const R *aligned_like)
      int fivs = 4 * ivs;
        /* you are not expected to understand this: */
      const vector unsigned int perm = VLIT(0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
-     vector unsigned char ml = vec_lvsr(fivs + 8, (R *)aligned_like);
-     vector unsigned char mh = vec_lvsl(0, (R *)aligned_like);
+     vector unsigned char ml = vec_lvsr(fivs + 8, aligned_like);
+     vector unsigned char mh = vec_lvsl(0, aligned_like);
      vector unsigned char msk = 
 	  (vector unsigned char)vec_sel((V)mh, (V)ml, perm);
      /* end of common subexpressions */
 
-     return vec_perm(vec_ld(0, (R *)x), vec_ld(fivs, (R *)x), msk);
+     return vec_perm(vec_ld(0, x), vec_ld(fivs, x), msk);
 }
 
 /* store lower half */
 static inline void STH(R *x, V v, const R *aligned_like)
 {
-     v = vec_perm(v, v, vec_lvsr(0, (R *)aligned_like));
+     v = vec_perm(v, v, vec_lvsr(0, aligned_like));
      vec_ste(v, 0, x);
      vec_ste(v, 4, x);
 }
@@ -90,7 +90,7 @@ static inline void STH(R *x, V v, const R *aligned_like)
 static inline void STL(R *x, V v, int ovs, const R *aligned_like)
 {
      int fovs = 4 * ovs;
-     v = vec_perm(v, v, vec_lvsr(fovs + 8, (R *)aligned_like));
+     v = vec_perm(v, v, vec_lvsr(fovs + 8, aligned_like));
      vec_ste(v, fovs, x);
      vec_ste(v, 4 + fovs, x);
 }
