@@ -80,14 +80,14 @@ static inline V LD(const R *x, int ivs, const R *aligned_like)
 }
 
 /* store lower half */
-static inline void STH(R *x, V v, const R *aligned_like)
+static inline void STH(R *x, V v, R *aligned_like)
 {
      v = vec_perm(v, v, vec_lvsr(0, aligned_like));
      vec_ste(v, 0, x);
      vec_ste(v, 4, x);
 }
 
-static inline void STL(R *x, V v, int ovs, const R *aligned_like)
+static inline void STL(R *x, V v, int ovs, R *aligned_like)
 {
      int fovs = 4 * ovs;
      v = vec_perm(v, v, vec_lvsr(fovs + 8, aligned_like));
@@ -95,12 +95,12 @@ static inline void STL(R *x, V v, int ovs, const R *aligned_like)
      vec_ste(v, 4 + fovs, x);
 }
 
-static inline void STA(R *x, V v, int ovs, const R *aligned_like) 
+static inline void STA(R *x, V v, int ovs, R *aligned_like) 
 {
      vec_st(v, 0, x);
 }
 
-static inline void ST(R *x, V v, int ovs, const R *aligned_like) 
+static inline void ST(R *x, V v, int ovs, R *aligned_like) 
 {
      STH(x, v, aligned_like);
      STL(x, v, ovs, aligned_like);
