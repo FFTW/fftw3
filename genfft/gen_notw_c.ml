@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_c.ml,v 1.12 2005-04-07 02:06:21 stevenj Exp $ *)
+(* $Id: gen_notw_c.ml,v 1.13 2005-09-26 02:25:35 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_c.ml,v 1.12 2005-04-07 02:06:21 stevenj Exp $"
+let cvsid = "$Id: gen_notw_c.ml,v 1.13 2005-09-26 02:25:35 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -51,9 +51,9 @@ let speclist = [
   " specialize for given output vector stride"
 ] 
 
-let nonstandard_optimizer list_of_pairable_stores dag =
+let nonstandard_optimizer list_of_buddy_stores dag =
   let sched = standard_scheduler dag in
-  let annot = Annotate.annotate list_of_pairable_stores sched in
+  let annot = Annotate.annotate list_of_buddy_stores sched in
   let _ = dump_asched annot in
   annot
 
@@ -95,16 +95,18 @@ let generate n =
       (C.array_subscript roarray vostride)
       (C.array_subscript "BUG" vostride)
       locations in
-  let list_of_pairable_stores =
-    if (!Simdmagic.store_pairs) then
-      if (n mod 2 == 0) then
-	List.map (fun i -> (fst (oloc (2 * i)), fst (oloc (2 * i + 1))))
-	  (iota (n / 2)) 
-      else failwith "n must be even for -store-pairs to work"
+  let list_of_buddy_stores =
+    let k = !Simdmagic.store_multiple in
+    if (k > 1) then
+      if (n mod k == 0) then
+	List.map 
+	  (fun i -> List.map (fun j -> (fst (oloc (k * i + j)))) (iota k))
+	  (iota (n / k)) 
+      else failwith "invalid n for -store-multiple"
     else []
   in
   let odag = store_array_r n oloc output in
-  let annot = nonstandard_optimizer list_of_pairable_stores odag in
+  let annot = nonstandard_optimizer list_of_buddy_stores odag in
 
   let body = Block (
     [Decl ("int", i);

@@ -97,6 +97,8 @@ static inline void STL(R *x, V v, int ovs, R *aligned_like)
 
 static inline void STA(R *x, V v, int ovs, R *aligned_like) 
 {
+     UNUSED(ovs);
+     UNUSED(aligned_like);
      vec_st(v, 0, x);
 }
 
@@ -106,9 +108,9 @@ static inline void ST(R *x, V v, int ovs, R *aligned_like)
      STL(x, v, ovs, aligned_like);
 }
 
-#define STPAIR1(x, v, ovs, aligned_like) /* no-op */
+#define STM2(x, v, ovs, aligned_like) /* no-op */
 
-static inline void STPAIR2(R *x, V v0, V v1, int ovs)
+static inline void STN2(R *x, V v0, V v1, int ovs)
 {
      const vector unsigned int even = 
 	  VLIT(0x00010203, 0x04050607, 0x10111213, 0x14151617);

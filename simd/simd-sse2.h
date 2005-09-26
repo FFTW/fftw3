@@ -79,8 +79,8 @@ static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
 #define LD LDA
 #define ST STA
 
-#define STPAIR1 STA
-#define STPAIR2(x, v0, v1, ovs) /* nop */
+#define STM2 STA
+#define STN2(x, v0, v1, ovs) /* nop */
 
 static __inline__ V FLIP_RI(V x)
 {

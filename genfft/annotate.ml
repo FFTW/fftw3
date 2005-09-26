@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.18 2005-02-26 05:31:52 athena Exp $ *)
+(* $Id: annotate.ml,v 1.19 2005-09-26 02:25:35 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.18 2005-02-26 05:31:52 athena Exp $ *)
+(* $Id: annotate.ml,v 1.19 2005-09-26 02:25:35 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -189,48 +189,36 @@ let rec anticipate_friends friendp sched =
   | (s, []) -> s (* assert that all insns have been used *)
   | _ -> failwith "anticipate_friends"
 
-let pair_stores buddy_list sched =
-  let rec find_buddy v = function
-    | [] -> None
-    | (even, odd) :: rest when v == even or v == odd -> Some (even, odd)
-    | _ :: rest -> find_buddy v rest
-  in
+let collect_buddy_stores buddy_list sched =
   let rec recur sched delayed_stores = match sched with
     | Done -> (sched, delayed_stores)
     | Instr (Assign (v, x)) ->
 	begin
-	  match find_buddy v buddy_list with
-	    | None -> (sched, delayed_stores)
-	    | Some (even, odd) -> 
-		try 
-		  let (vbuddy, xbuddy) = 
-		    List.find (fun (v, _) -> v == even or v == odd)
-		      delayed_stores
-		  in 
-		  let tmp = Variable.make_temporary () in
-		  let a = Instr (Assign (tmp, x)) in
-		  let pair1 = Instr (Assign (v, Times (NaN PAIR1, Load tmp)))
-		  and pair2 = 
-		    if (v == even) then
-		      Instr (Assign (v, 
-				     Times (NaN PAIR2,
-					    Plus [Load tmp; xbuddy])))
-		    else 
-		      Instr (Assign (vbuddy, 
-				     Times (NaN PAIR2,
-					    Plus [xbuddy; Load tmp])))
-		  in Seq (a, Seq(pair1, pair2)), delayed_stores
-		with Not_found ->
-		  let tmp = Variable.make_temporary () in
-		    (Seq ((Instr (Assign (tmp, x))),
-		          (Instr (Assign (v, Times (NaN PAIR1, Load tmp)))))),
-		    (v, Load tmp) :: delayed_stores
+	  try
+	    let buddies = List.find (List.mem v) buddy_list in 
+	    let tmp = Variable.make_temporary () in
+	    let i = Seq(Instr (Assign (tmp, x)),
+			Instr (Assign (v, Times (NaN MULTI_A, Load tmp))))
+	    and delayed_stores = (v, Load tmp) :: delayed_stores in
+	      try
+		(Seq (i,
+		      Instr (Assign 
+			       (List.hd buddies,
+				Times (NaN MULTI_B,
+				       Plus (List.map 
+					       (fun buddy ->
+						  List.assq buddy 
+						    delayed_stores)
+					       buddies))) )))
+		  , delayed_stores
+	      with Not_found -> (i, delayed_stores)
+	  with Not_found -> (sched, delayed_stores)
 	end
     | Seq (a, b) ->
 	let (newa, delayed_stores) = recur a delayed_stores in
 	let (newb, delayed_stores) = recur b delayed_stores in
 	  (Seq (newa, newb), delayed_stores)
-    | _ -> failwith "pair_stores"
+    | _ -> failwith "collect_buddy_stores"
   in let (sched, _) = recur sched [] in
     sched
   
@@ -258,7 +246,7 @@ let rec rewrite_declarations force_declarations
       in let (u, d) = declare_it (declared @ ua @ ub)
       in Annotate ([], u, d, 0, ASeq (ma, mb))
 
-let annotate list_of_pairable_stores schedule =
+let annotate list_of_buddy_stores schedule =
   let m = !Magic.number_of_variables in
 
   let rec analyze live_at_end = function
@@ -308,7 +296,7 @@ let annotate list_of_pairable_stores schedule =
       x
   in
 
-  let x = pair_stores list_of_pairable_stores x in
+  let x = collect_buddy_stores list_of_buddy_stores x in
   let x = analyze [] x in
   let res = rewrite_declarations true x in
   let () = Util.info "end annotate" in

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.ml,v 1.10 2005-02-11 02:47:38 athena Exp $ *)
+(* $Id: expr.ml,v 1.11 2005-09-26 02:25:35 athena Exp $ *)
 
 (* Here, we define the data type encapsulating a symbolic arithmetic
    expression, and provide some routines for manipulating it. *)
 
 (* I will regret this hack : *)
-type transcendent = I | CPLX | CPLXJ | PAIR1 | PAIR2
+type transcendent = I | CPLX | CPLXJ | MULTI_A | MULTI_B
 
 type expr =
   | Num of Number.number
@@ -48,8 +48,8 @@ let transcendent_to_float = function
   | I -> 2.718281828459045235360287471  (* any transcendent number will do *)
   | CPLX -> 3.141592653589793238462643383
   | CPLXJ -> 0.4210244382407083333356273777
-  | PAIR1 -> 0.6931471805599453094172321214
-  | PAIR2 -> -0.3665129205816643270124391582
+  | MULTI_A -> 0.6931471805599453094172321214
+  | MULTI_B -> -0.3665129205816643270124391582
 
 let rec hash = function
   | Num x -> hash_float (Number.to_float x)
@@ -93,8 +93,8 @@ let string_of_transcendent = function
   | I -> "I"
   | CPLX -> "CPLX"
   | CPLXJ -> "CPLXJ"
-  | PAIR1 -> "PAIR1"
-  | PAIR2 -> "PAIR2"
+  | MULTI_A -> "MULTI_A"
+  | MULTI_B -> "MULTI_B"
 
 let rec to_string = function
   | Load v -> Variable.unparse v

@@ -106,14 +106,14 @@ static inline void STA(R *x, V v, int ovs, const R *aligned_like)
 
 #if 0
 /* this should be faster but it isn't. */
-static inline void STPAIR2(R *x, V v0, V v1, int ovs)
+static inline void STN2(R *x, V v0, V v1, int ovs)
 {
      STA(x, SHUFPS(v0, v1, SHUFVAL(0, 1, 0, 1)), ovs, 0);
      STA(x + ovs, SHUFPS(v0, v1, SHUFVAL(2, 3, 2, 3)), ovs, 0);
 }
 #endif
-#define STPAIR1 ST
-#define STPAIR2(x, v0, v1, ovs) /* nop */
+#define STM2 ST
+#define STN2(x, v0, v1, ovs) /* nop */
 
 static inline V FLIP_RI(V x)
 {
