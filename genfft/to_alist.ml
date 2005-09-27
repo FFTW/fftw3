@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: to_alist.ml,v 1.8 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: to_alist.ml,v 1.9 2005-09-27 14:04:32 athena Exp $ *)
 
 (*************************************************************
  * Conversion of the dag to an assignment list
@@ -114,14 +114,14 @@ type fma =
   | FMS of expr * expr * expr   (* FMS (a, b, c) => -a + b * c *)
   | FNMS of expr * expr * expr  (* FNMS (a, b, c) => a - b * c *)
 
-let good_for_fma x = 
-  not !Simdmagic.simd_mode ||
-  match x with
-  | (Num _, _) -> true
-  | (_, Num _) -> true
-  | (NaN I, _) -> true
-  | (_, NaN I) -> true
-  | _ -> false
+let good_for_fma (a, b) = 
+  let good = function
+    | NaN I -> true
+    | NaN _ -> false
+    | Times(NaN _, _) -> false
+    | Times(_, NaN _) -> false
+    | _ -> true
+  in good a && good b
 
 let build_fma l = 
   if (not !Magic.enable_fma) then NO_FMA
