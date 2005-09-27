@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.19 2005-09-26 02:25:35 athena Exp $ *)
+(* $Id: annotate.ml,v 1.20 2005-09-27 00:52:36 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.19 2005-09-26 02:25:35 athena Exp $ *)
+(* $Id: annotate.ml,v 1.20 2005-09-27 00:52:36 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -195,7 +195,7 @@ let collect_buddy_stores buddy_list sched =
     | Instr (Assign (v, x)) ->
 	begin
 	  try
-	    let buddies = List.find (List.mem v) buddy_list in 
+	    let buddies = List.find (List.memq v) buddy_list in 
 	    let tmp = Variable.make_temporary () in
 	    let i = Seq(Instr (Assign (tmp, x)),
 			Instr (Assign (v, Times (NaN MULTI_A, Load tmp))))

@@ -46,11 +46,22 @@ typedef __m128d V;
 #define VSUB _mm_sub_pd
 #define VMUL _mm_mul_pd
 #define VXOR _mm_xor_pd
-#define DVK(var, val) const R var = K(val)
-#define LDK(x) _mm_set1_pd(x)
 #define SHUFPD _mm_shuffle_pd
 #define UNPCKL _mm_unpacklo_pd
 #define UNPCKH _mm_unpackhi_pd
+#define STOREH _mm_storeh_pd
+#define STOREL _mm_storel_pd
+
+#ifdef __GNUC__
+#define DVK(var, val) V var = __extension__ ({		\
+     static const union dvec _var = { {val, val} };	\
+     _var.v;						\
+})
+#define LDK(x) x
+#else
+#define DVK(var, val) const R var = K(val)
+#define LDK(x) _mm_set1_pd(x)
+#endif
 
 union dvec {
      double d[2];
@@ -81,6 +92,26 @@ static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
 
 #define STM2 STA
 #define STN2(x, v0, v1, ovs) /* nop */
+
+#define SSE2_USE_STM4
+static inline void STM4(R *x, V v, int ovs, const R *aligned_like)
+{
+     (void)aligned_like; /* UNUSED */
+#ifdef SSE2_USE_STM4
+     STOREL(x, v);
+     STOREH(x + ovs, v);
+#endif
+}
+
+static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
+{
+#ifndef SSE2_USE_STM4
+     STA(x, UNPCKL(v0, v1), 0, 0);
+     STA(x + ovs, UNPCKH(v0, v1), 0, 0);
+     STA(x + 2, UNPCKL(v2, v3), 0, 0);
+     STA(x + 2 + ovs, UNPCKH(v2, v3), 0, 0);
+#endif
+}
 
 static __inline__ V FLIP_RI(V x)
 {
@@ -151,6 +182,11 @@ static __inline__ V BYTWJ2(const R *t, V sr)
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
 #define VFMS(a, b, c) VSUB(VMUL(a, b), c)
+
+/* twiddle storage for split arrays */
+#define VTWS(x)								\
+  {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
+#define TWVLS (2 * VL)
 
 #define BEGIN_SIMD()
 #define END_SIMD()

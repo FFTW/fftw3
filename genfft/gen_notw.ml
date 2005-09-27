@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.24 2005-04-07 02:06:21 stevenj Exp $ *)
+(* $Id: gen_notw.ml,v 1.25 2005-09-27 00:52:36 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.24 2005-04-07 02:06:21 stevenj Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.25 2005-09-27 00:52:36 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -51,6 +51,12 @@ let speclist = [
   " specialize for given output vector stride"
 ] 
 
+let nonstandard_optimizer list_of_buddy_stores dag =
+  let sched = standard_scheduler dag in
+  let annot = Annotate.annotate list_of_buddy_stores sched in
+  let _ = dump_asched annot in
+  annot
+
 let generate n =
   let riarray = "ri"
   and iiarray = "ii"
@@ -64,10 +70,10 @@ let generate n =
 
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name
-  and byvl x = choose_simd x (ctimes (CVar "VL", x))  in
+  and byvl x = choose_simd x (ctimes (CVar "(2 * VL)", x))  in
   let ename = expand_name name in
 
-  let vl = choose_simd "1" "VL"
+  let vl = choose_simd "1" "(2 * VL)"
   in
 
   let vistride = either_stride (!uistride) (C.SVar istride)
@@ -89,8 +95,23 @@ let generate n =
       (C.array_subscript roarray vostride)
       (C.array_subscript ioarray vostride)
       locations in
+  let list_of_buddy_stores =
+    let k = !Simdmagic.store_multiple in
+    if (k > 1) then
+      if (n mod k == 0) then
+	List.append
+	  (List.map 
+	     (fun i -> List.map (fun j -> (fst (oloc (k * i + j)))) (iota k))
+	     (iota (n / k)))
+	  (List.map 
+	     (fun i -> List.map (fun j -> (snd (oloc (k * i + j)))) (iota k))
+	     (iota (n / k)))
+      else failwith "invalid n for -store-multiple"
+    else []
+  in
+
   let odag = store_array_c n oloc output in
-  let annot = standard_optimizer odag in
+  let annot = nonstandard_optimizer list_of_buddy_stores odag in
 
   let body = Block (
     [Decl ("int", i)],

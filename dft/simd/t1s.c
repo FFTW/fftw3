@@ -1,5 +1,4 @@
-(*
- * Copyright (c) 1997-1999 Massachusetts Institute of Technology
+/*
  * Copyright (c) 2003 Matteo Frigo
  * Copyright (c) 2003 Massachusetts Institute of Technology
  *
@@ -17,17 +16,33 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *)
-(* $Id: twiddle.mli,v 1.6 2005-09-27 00:52:36 athena Exp $ *)
+ */
 
-val speclist : (string * Arg.spec * string) list
+#include "codelet-dft.h"
 
-type twinstr
+#if HAVE_SIMD
+#include "t1s.h"
 
-val twiddle_policy :
-    unit ->
-    (int -> int -> (int -> Complex.expr) -> (int -> Complex.expr) ->
-      int -> Complex.expr) *(int -> int) * (int -> twinstr list)
+static int okp(const ct_desc *d,
+		      const R *rio, const R *iio, 
+		      int ios, int vs, int m, int dist, 
+		      const planner *plnr)
+{
+     UNUSED(rio);
+     UNUSED(iio);
+     return (RIGHT_CPU()
+	     && !NO_SIMDP(plnr)
+	     && ALIGNEDA(rio)
+	     && ALIGNEDA(iio)
+	     && SIMD_STRIDE_OKA(ios)
+	     && dist == 1
+             && (m % (2 * VL)) == 0
+	     && (!d->s1 || (d->s1 == ios))
+	     && (!d->s2 || (d->s2 == vs))
+	     && (!d->dist || (d->dist == dist))
+	  );
+}
 
-val twinstr_to_c_string : twinstr list -> string
-val twinstr_to_simd_string : string -> twinstr list -> string
+const ct_genus GENUS = { okp, 2 * VL };
+
+#endif

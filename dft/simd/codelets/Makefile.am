@@ -22,17 +22,20 @@ N1F = n1fv_2.c n1fv_3.c n1fv_4.c n1fv_5.c n1fv_6.c n1fv_7.c n1fv_8.c	\
 n1fv_9.c n1fv_10.c n1fv_11.c n1fv_12.c n1fv_13.c n1fv_14.c n1fv_15.c	\
 n1fv_16.c n1fv_32.c n1fv_64.c
 
+# as above, with restricted input vector stride
+N2F = n2fv_2.c n2fv_4.c n2fv_6.c n2fv_8.c n2fv_10.c n2fv_12.c	\
+n2fv_14.c n2fv_16.c n2fv_32.c n2fv_64.c
+
 # as above, but FFTW_BACKWARD
 N1B = n1bv_2.c n1bv_3.c n1bv_4.c n1bv_5.c n1bv_6.c n1bv_7.c n1bv_8.c	\
 n1bv_9.c n1bv_10.c n1bv_11.c n1bv_12.c n1bv_13.c n1bv_14.c n1bv_15.c	\
 n1bv_16.c n1bv_32.c n1bv_64.c
 
-# as above, with restricted input vector stride
-N2F = n2fv_2.c n2fv_4.c n2fv_6.c n2fv_8.c n2fv_10.c n2fv_12.c	\
-n2fv_14.c n2fv_16.c n2fv_32.c n2fv_64.c
-
 N2B = n2bv_2.c n2bv_4.c n2bv_6.c n2bv_8.c n2bv_10.c n2bv_12.c	\
 n2bv_14.c n2bv_16.c n2bv_32.c n2bv_64.c
+
+# split-complex codelets 
+N2S = n2sv_4.c n2sv_8.c n2sv_16.c n2sv_32.c n2sv_64.c
 
 ###########################################################################
 # t1fv_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT step
@@ -50,6 +53,9 @@ t1bv_9.c t1bv_10.c t1bv_12.c t1bv_15.c t1bv_16.c t1bv_32.c t1bv_64.c
 # same as t1bv_*, but with different twiddle storage scheme
 T2B = t2bv_2.c t2bv_4.c t2bv_8.c t2bv_16.c t2bv_32.c t2bv_64.c
 
+# split-complex codelets
+T1S = t1sv_2.c t1sv_4.c t1sv_8.c t1sv_16.c t1sv_32.c #t1sv_64.c
+
 ###########################################################################
 # q1fv_<r> is <r> twiddle FFTW_FORWARD FFTs of size <r> (DIF step),
 # where the output is transposed, using SIMD.  This is used for
@@ -62,8 +68,8 @@ Q1F = q1fv_2.c q1fv_4.c q1fv_8.c
 Q1B = q1bv_2.c q1bv_4.c q1bv_8.c
 
 ###########################################################################
-SIMD_CODELETS = $(N1F) $(N1B) $(N2F) $(N2B) $(T1F) $(T2F) $(T1B)	\
-$(T2B) $(Q1F) $(Q1B)
+SIMD_CODELETS = $(N1F) $(N1B) $(N2F) $(N2B) $(N2S) $(T1F) $(T2F)	\
+$(T1B) $(T1S) $(T2B) $(Q1F) $(Q1B)
 
 if HAVE_SIMD
 ALL_CODELETS = $(SIMD_CODELETS)
@@ -96,6 +102,9 @@ n1bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 n2bv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_NOTW_C) $(GFLAGS) -sign 1 -n $* -name n2bv_$* -with-ostride 2 -include "n2b.h"  -store-multiple 2) | $(ADD_DATE) | $(INDENT) >$@
 
+n2sv_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_NOTW) $(GFLAGS) -n $* -name n2sv_$* -with-ostride 1 -include "n2s.h" -store-multiple 4) | $(ADD_DATE) | $(INDENT) >$@
+
 t1fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1fv_$* -include "t1f.h") | $(ADD_DATE) | $(INDENT) >$@
 
@@ -107,6 +116,9 @@ t1bv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 
 t2bv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t2bv_$* -include "t2b.h" -sign 1) | $(ADD_DATE) | $(INDENT) >$@
+
+t1sv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE) $(GFLAGS) -n $* -name t1sv_$* -include "t1s.h") | $(ADD_DATE) | $(INDENT) >$@
 
 q1fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ_C)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDSQ_C) $(GFLAGS) -n $* -dif -name q1fv_$* -include "q1f.h") | $(ADD_DATE) | $(INDENT) >$@

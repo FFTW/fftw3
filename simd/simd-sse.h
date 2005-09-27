@@ -53,8 +53,17 @@ typedef __m128 V;
 #define STOREL(addr, val) _mm_storel_pi((__m64 *)(addr), val)
 #define UNPCKH _mm_unpackhi_ps
 #define UNPCKL _mm_unpacklo_ps
+
+#ifdef __GNUC__
+#define DVK(var, val) const V var = __extension__ ({		\
+     static const union fvec _var = { {val, val, val, val} };	\
+     _var.v;							\
+})
+#define LDK(x) x
+#else
 #define DVK(var, val) const R var = K(val)
 #define LDK(x) _mm_set_ps1(x)
+#endif
 
 union fvec {
      R f[4];
@@ -114,6 +123,24 @@ static inline void STN2(R *x, V v0, V v1, int ovs)
 #endif
 #define STM2 ST
 #define STN2(x, v0, v1, ovs) /* nop */
+
+#define STM4(x, v, ovs, aligned_like) /* no-op */
+
+static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
+{
+     V x0 = UNPCKL(v0, v2);
+     V x1 = UNPCKH(v0, v2);
+     V x2 = UNPCKL(v1, v3);
+     V x3 = UNPCKH(v1, v3);
+     V y0 = UNPCKL(x0, x2);
+     V y1 = UNPCKH(x0, x2);
+     V y2 = UNPCKL(x1, x3);
+     V y3 = UNPCKH(x1, x3);
+     STA(x, y0, 0, 0);
+     STA(x + ovs, y1, 0, 0);
+     STA(x + 2 * ovs, y2, 0, 0);
+     STA(x + 3 * ovs, y3, 0, 0);
+}
 
 static inline V FLIP_RI(V x)
 {
@@ -181,6 +208,12 @@ static inline V BYTWJ2(const R *t, V sr)
      V tr = twp[0], ti = twp[1];
      return VSUB(VMUL(tr, sr), VMUL(ti, si));
 }
+
+/* twiddle storage for split arrays */
+#define VTWS(x)								\
+  {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_COS, 2, x}, {TW_COS, 3, x},	\
+  {TW_SIN, 0, x}, {TW_SIN, 1, x}, {TW_SIN, 2, x}, {TW_SIN, 3, x}
+#define TWVLS (2 * VL)
 
 #define BEGIN_SIMD()
 #define END_SIMD()

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle.ml,v 1.17 2005-02-06 21:59:39 athena Exp $ *)
+(* $Id: gen_twiddle.ml,v 1.18 2005-09-27 00:52:36 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.17 2005-02-06 21:59:39 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.18 2005-09-27 00:52:36 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -62,7 +62,7 @@ let generate n =
 
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name 
-  and byvl x = choose_simd x (ctimes (CVar "VL", x)) in
+  and byvl x = choose_simd x (ctimes (CVar "(2 * VL)", x)) in
   let ename = expand_name name in
 
   let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
@@ -126,7 +126,7 @@ let generate n =
   in
   let twinstr = 
     Printf.sprintf "static const tw_instr twinstr[] = %s;\n\n" 
-      (twinstr_to_string (twdesc n))
+      (twinstr_to_string "(2 * VL)" (twdesc n))
   and desc = 
     Printf.sprintf
       "static const ct_desc desc = {%d, \"%s\", twinstr, %s, &GENUS, %s, %s, %s};\n\n"

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: genutil.ml,v 1.20 2005-03-15 13:44:41 athena Exp $ *)
+(* $Id: genutil.ml,v 1.21 2005-09-27 00:52:36 athena Exp $ *)
 
 (* utilities common to all generators *)
 open Util
@@ -322,9 +322,9 @@ let add_constants ast =
 	
   in mergedecls (C.Block (extract_constants ast, [ast]))
 
-let twinstr_to_string x =
+let twinstr_to_string vl x =
   if !Simdmagic.simd_mode then 
-    Twiddle.twinstr_to_simd_string x
+    Twiddle.twinstr_to_simd_string vl x
   else
     Twiddle.twinstr_to_c_string x
 

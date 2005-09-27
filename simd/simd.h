@@ -54,4 +54,6 @@
 #define SIMD_STRIDE_OKA(x) (!(((x) * sizeof(R)) % ALIGNMENTA))
 #define SIMD_VSTRIDE_OK SIMD_STRIDE_OK
 
+#define LDW(x) LDA(x, 0, 0) /* load twiddle factor */
+
 #define SIMD_ALIGNMENT ALIGNMENTA

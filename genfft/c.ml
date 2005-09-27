@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.26 2005-02-13 23:15:37 athena Exp $ *)
+(* $Id: c.ml,v 1.27 2005-09-27 00:52:36 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -346,6 +346,8 @@ let rec count_flops_expr_func (adds, mults, fmas) = function
 	in  (newadds, newmults, newfmas + 1))
   | Plus (a :: b) -> 
       count_flops_expr_func (adds, mults, fmas) (Plus [a; Plus b])
+  | Times (NaN MULTI_A,_)  -> (adds, mults, fmas)
+  | Times (NaN MULTI_B,_)  -> (adds, mults, fmas)
   | Times (NaN _,b) -> count_flops_expr_func (adds, mults, fmas) b
   | Times (Num _, b) -> 
       let (newadds, newmults, newfmas) = 

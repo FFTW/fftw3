@@ -28,7 +28,7 @@
 #define ALIGNMENT 8     /* alignment for LD/ST */
 #define ALIGNMENTA 16   /* alignment for LDA/STA */
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2)
-#define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
+#define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OKA
 
 #define RIGHT_CPU X(have_altivec)
 extern int RIGHT_CPU(void);
@@ -67,7 +67,7 @@ static inline V LDA(const R *x, int ivs, const R *aligned_like)
 static inline V LD(const R *x, int ivs, const R *aligned_like) 
 {
      /* common subexpressions */
-     int fivs = 4 * ivs;
+     const int fivs = sizeof(R) * ivs;
        /* you are not expected to understand this: */
      const vector unsigned int perm = VLIT(0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
      vector unsigned char ml = vec_lvsr(fivs + 8, aligned_like);
@@ -84,15 +84,15 @@ static inline void STH(R *x, V v, R *aligned_like)
 {
      v = vec_perm(v, v, vec_lvsr(0, aligned_like));
      vec_ste(v, 0, x);
-     vec_ste(v, 4, x);
+     vec_ste(v, sizeof(R), x);
 }
 
 static inline void STL(R *x, V v, int ovs, R *aligned_like)
 {
-     int fovs = 4 * ovs;
+     const int fovs = sizeof(R) * ovs;
      v = vec_perm(v, v, vec_lvsr(fovs + 8, aligned_like));
      vec_ste(v, fovs, x);
-     vec_ste(v, 4 + fovs, x);
+     vec_ste(v, sizeof(R) + fovs, x);
 }
 
 static inline void STA(R *x, V v, int ovs, R *aligned_like) 
@@ -112,12 +112,32 @@ static inline void ST(R *x, V v, int ovs, R *aligned_like)
 
 static inline void STN2(R *x, V v0, V v1, int ovs)
 {
+     const int fovs = sizeof(R) * ovs;
      const vector unsigned int even = 
 	  VLIT(0x00010203, 0x04050607, 0x10111213, 0x14151617);
      const vector unsigned int odd = 
 	  VLIT(0x08090a0b, 0x0c0d0e0f, 0x18191a1b, 0x1c1d1e1f);
-     STA(x, vec_perm(v0, v1, (vector unsigned char)even), ovs, 0);
-     STA(x + ovs, vec_perm(v0, v1, (vector unsigned char)odd), ovs, 0);
+     vec_st(vec_perm(v0, v1, (vector unsigned char)even), 0, x);
+     vec_st(vec_perm(v0, v1, (vector unsigned char)odd), fovs, x);
+}
+
+#define STM4(x, v, ovs, aligned_like) /* no-op */
+
+static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
+{
+     const int fovs = sizeof(R) * ovs;
+     V x0 = vec_mergeh(v0, v2);
+     V x1 = vec_mergel(v0, v2);
+     V x2 = vec_mergeh(v1, v3);
+     V x3 = vec_mergel(v1, v3);
+     V y0 = vec_mergeh(x0, x2);
+     V y1 = vec_mergel(x0, x2);
+     V y2 = vec_mergeh(x1, x3);
+     V y3 = vec_mergel(x1, x3);
+     vec_st(y0, 0, x);
+     vec_st(y1, fovs, x);
+     vec_st(y2, 2 * fovs, x);
+     vec_st(y3, 3 * fovs, x);
 }
 
 static inline V FLIP_RI(V x)
@@ -195,6 +215,12 @@ static __inline__ V BYTWJ2(const R *t, V sr)
      V tr = twp[0], ti = twp[1];
      return VFNMS(ti, si, VMUL(tr, sr));
 }
+
+/* twiddle storage for split arrays */
+#define VTWS(x)								\
+  {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_COS, 2, x}, {TW_COS, 3, x},	\
+  {TW_SIN, 0, x}, {TW_SIN, 1, x}, {TW_SIN, 2, x}, {TW_SIN, 3, x}
+#define TWVLS (2 * VL)
 
 #define BEGIN_SIMD()
 #define END_SIMD()

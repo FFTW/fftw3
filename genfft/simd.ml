@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.20 2005-09-26 02:25:35 athena Exp $ *)
+(* $Id: simd.ml,v 1.21 2005-09-27 00:52:36 athena Exp $ *)
 
 open Expr
 open List
@@ -72,16 +72,12 @@ and unparse_expr =
     | (Times (NaN I, b)) :: c :: d -> op2 "VFMAI" [b] (c :: d)
     | c :: (Times (NaN I, b)) :: d -> op2 "VFMAI" [b] (c :: d)
 
-    | (Uminus (Times (a, b))) :: c :: d when t a ->
-	op3 "VFNMS" a b (c :: d)
-    | c :: (Uminus (Times (a, b))) :: d when t a -> 
-	op3 "VFNMS" a b (c :: d)
-    | (Times (a, b)) :: (Uminus c) :: d when t a ->
-        op3 "VFMS" a b (c :: negate d)
-    | (Uminus c) :: (Times (a, b)) :: d when t a ->
-        op3 "VFMS" a b (c :: negate d)
-    | (Times (a, b)) :: c :: d when t a -> op3 "VFMA" a b (c :: d)
-    | c :: (Times (a, b)) :: d when t a -> op3 "VFMA" a b (c :: d)
+    | (Uminus (Times (a, b))) :: c :: d -> op3 "VFNMS" a b (c :: d)
+    | c :: (Uminus (Times (a, b))) :: d -> op3 "VFNMS" a b (c :: d)
+    | (Times (a, b)) :: (Uminus c) :: d -> op3 "VFMS" a b (c :: negate d)
+    | (Uminus c) :: (Times (a, b)) :: d -> op3 "VFMS" a b (c :: negate d)
+    | (Times (a, b)) :: c :: d          -> op3 "VFMA" a b (c :: d)
+    | c :: (Times (a, b)) :: d          -> op3 "VFMA" a b (c :: d)
 
     | (Uminus a :: b)                   -> op2 "VSUB" b [a]
     | (b :: Uminus a :: c)              -> op2 "VSUB" (b :: c) [a]
@@ -98,9 +94,6 @@ and unparse_expr =
     | [] -> []
     | (Uminus x) :: y -> x :: negate y
     | x :: y -> (Uminus x) :: negate y
-  and t = function 
-    | Num _ -> true 
-    | _ -> false
 
   in function
     | Times(Times(NaN CPLX, Load tw), src) when Variable.is_constant tw ->
@@ -110,6 +103,7 @@ and unparse_expr =
     | Load v when is_locative(v) ->
 	sprintf "LD(&(%s),%s,&(%s))" (Variable.unparse v) !ivs
 	  (Variable.unparse_for_alignment alignment_mod v)
+    | Load v when is_constant(v) -> sprintf "LDW(&(%s))" (Variable.unparse v)
     | Load v  -> Variable.unparse v
     | Num n -> sprintf "LDK(%s)" (Number.to_konst n)
     | NaN n -> failwith "NaN in unparse_expr"

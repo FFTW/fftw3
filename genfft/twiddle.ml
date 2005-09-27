@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.13 2003-03-15 20:29:42 stevenj Exp $ *)
+(* $Id: twiddle.ml,v 1.14 2005-09-27 00:52:36 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -57,9 +57,9 @@ let twinstr_to_c_string l =
     | a :: b ->  (if first then "\n" else ",\n") ^ (one a) ^ (loop false b)
   in "{" ^ (loop true l) ^ "}"
 
-let twinstr_to_simd_string l =
+let twinstr_to_simd_string vl l =
   let one sep = function
-    | (TW_NEXT, 1, 0) -> sep ^ "{TW_NEXT, VL, 0}"
+    | (TW_NEXT, 1, 0) -> sep ^ "{TW_NEXT, " ^ vl ^ ", 0}"
     | (TW_NEXT, _, _) -> failwith "twinstr_to_simd_string"
     | (TW_COS, 0, b) -> sep ^ (Printf.sprintf "VTW(%d)" b)
     | (TW_SIN, 0, b) -> ""
