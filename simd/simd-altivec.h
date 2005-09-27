@@ -200,7 +200,7 @@ static inline V BYTWJ1(const R *t, V sr)
   {TW_SIN, 0, -x}, {TW_SIN, 0, x}, {TW_SIN, 1, -x}, {TW_SIN, 1, x}
 #define TWVL2 (2 * VL)
 
-static __inline__ V BYTW2(const R *t, V sr)
+static inline V BYTW2(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V si = FLIP_RI(sr);
@@ -208,7 +208,7 @@ static __inline__ V BYTW2(const R *t, V sr)
      return VFMA(ti, si, VMUL(tr, sr));
 }
 
-static __inline__ V BYTWJ2(const R *t, V sr)
+static inline V BYTWJ2(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V si = FLIP_RI(sr);

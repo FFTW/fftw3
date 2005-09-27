@@ -73,14 +73,14 @@ union uvec {
      V v;
 };
 
-static __inline__ V LDA(const R *x, int ivs, const R *aligned_like)
+static inline V LDA(const R *x, int ivs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
      (void)ivs; /* UNUSED */
      return *(const V *)x;
 }
 
-static __inline__ void STA(R *x, V v, int ovs, const R *aligned_like)
+static inline void STA(R *x, V v, int ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
      (void)ovs; /* UNUSED */
@@ -119,18 +119,18 @@ static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
 #endif
 }
 
-static __inline__ V FLIP_RI(V x)
+static inline V FLIP_RI(V x)
 {
      return SHUFPD(x, x, 1);
 }
 
 extern const union uvec X(sse2_mp);
-static __inline__ V CHS_R(V x)
+static inline V CHS_R(V x)
 {
      return VXOR(X(sse2_mp).v, x);
 }
 
-static __inline__ V VBYI(V x)
+static inline V VBYI(V x)
 {
      x = FLIP_RI(x);
      x = CHS_R(x);
@@ -144,7 +144,7 @@ static __inline__ V VBYI(V x)
 #define VTW1(x) {TW_COS, 0, x}, {TW_SIN, 0, x}
 #define TWVL1 1
 
-static __inline__ V BYTW1(const R *t, V sr)
+static inline V BYTW1(const R *t, V sr)
 {
      V tx = LD(t, 1, t);
      V tr = UNPCKL(tx, tx);
@@ -154,7 +154,7 @@ static __inline__ V BYTW1(const R *t, V sr)
      return VADD(tr, VMUL(ti, sr));
 }
 
-static __inline__ V BYTWJ1(const R *t, V sr)
+static inline V BYTWJ1(const R *t, V sr)
 {
      V tx = LD(t, 1, t);
      V tr = UNPCKL(tx, tx);
@@ -169,7 +169,7 @@ static __inline__ V BYTWJ1(const R *t, V sr)
   {TW_COS, 0, x}, {TW_COS, 0, x}, {TW_SIN, 0, -x}, {TW_SIN, 0, x}
 #define TWVL2 2
 
-static __inline__ V BYTW2(const R *t, V sr)
+static inline V BYTW2(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V si = FLIP_RI(sr);
@@ -177,7 +177,7 @@ static __inline__ V BYTW2(const R *t, V sr)
      return VADD(VMUL(tr, sr), VMUL(ti, si));
 }
 
-static __inline__ V BYTWJ2(const R *t, V sr)
+static inline V BYTWJ2(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V si = FLIP_RI(sr);

@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.27 2005-09-27 00:52:36 athena Exp $ *)
+(* $Id: c.ml,v 1.28 2005-09-27 02:58:19 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -335,32 +335,26 @@ let build_fma = function
 
 let rec count_flops_expr_func (adds, mults, fmas) = function
   | Plus [] -> (adds, mults, fmas)
-  | Plus ([_; _] as a) -> (match build_fma a with
-    | None ->
-	let (newadds, newmults, newfmas) = 
-	  fold_left count_flops_expr_func (adds, mults, fmas) a
-	in (newadds + (length a) - 1, newmults, newfmas)
-    | Some (a, b, c) ->
-	let (newadds, newmults, newfmas) = 
-	  fold_left count_flops_expr_func (adds, mults, fmas) [a; b; c]
-	in  (newadds, newmults, newfmas + 1))
+  | Plus ([_; _] as a) -> 
+      begin
+	match build_fma a with
+	  | None ->
+	      fold_left count_flops_expr_func 
+		(adds + (length a) - 1, mults, fmas) a
+	  | Some (a, b, c) ->
+	      fold_left count_flops_expr_func (adds, mults, fmas+1) [a; b; c]
+      end
   | Plus (a :: b) -> 
       count_flops_expr_func (adds, mults, fmas) (Plus [a; Plus b])
   | Times (NaN MULTI_A,_)  -> (adds, mults, fmas)
   | Times (NaN MULTI_B,_)  -> (adds, mults, fmas)
-  | Times (NaN _,b) -> count_flops_expr_func (adds, mults, fmas) b
-  | Times (Num _, b) -> 
-      let (newadds, newmults, newfmas) = 
-	count_flops_expr_func (adds, mults, fmas) b
-      in (newadds, newmults + 1, newfmas)
-  | Times (a,b) ->
-      let (newadds, newmults, newfmas) = 
-	fold_left count_flops_expr_func (adds, mults, fmas) [a; b]
-      in if !Simdmagic.simd_mode then
-        (* complex multiplication *)
-	(newadds + 1, newmults + 2, newfmas)
-      else
-	(newadds, newmults + 1, newfmas)
+  | Times (NaN I,b) -> count_flops_expr_func (adds, mults, fmas) b
+  | Times (Times(NaN CPLX, Load _), b) ->
+      count_flops_expr_func (adds+1, mults+2, fmas) b
+  | Times (Times(NaN CPLXJ, Load _), b) ->
+      count_flops_expr_func (adds+1, mults+2, fmas) b
+  | Times (NaN _,_) -> failwith "bug in count_flops_expr_func"
+  | Times (a,b) -> fold_left count_flops_expr_func (adds, mults+1, fmas) [a; b]
   | Uminus a -> count_flops_expr_func (adds, mults, fmas) a
   | _ -> (adds, mults, fmas)
 
