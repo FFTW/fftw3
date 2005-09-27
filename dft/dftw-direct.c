@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.5 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: dftw-direct.c,v 1.6 2005-09-27 13:25:50 athena Exp $ */
 
 #include "ct.h"
 
@@ -246,7 +246,7 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->bufstride = X(mkstride)(r, 2 * compute_batchsize(r));
 
      X(ops_zero)(&pln->super.super.ops);
-     X(ops_madd2)(mcount * (vl/e->genus->vl), &e->ops, &pln->super.super.ops);
+     X(ops_madd2)(vl * (mcount/e->genus->vl), &e->ops, &pln->super.super.ops);
      
      if (ego->bufferedp) {
 	  /* 8 load/stores * N * VL */
