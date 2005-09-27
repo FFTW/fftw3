@@ -105,6 +105,12 @@ static inline void STM4(R *x, V v, int ovs, const R *aligned_like)
 
 static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
 {
+     (void)x;   /* UNUSED */
+     (void)v0;  /* UNUSED */
+     (void)v1;  /* UNUSED */
+     (void)v2;  /* UNUSED */
+     (void)v3;  /* UNUSED */
+     (void)ovs; /* UNUSED */
 #ifndef SSE2_USE_STM4
      STA(x, UNPCKL(v0, v1), 0, 0);
      STA(x + ovs, UNPCKH(v0, v1), 0, 0);
