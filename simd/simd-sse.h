@@ -128,18 +128,15 @@ static inline void STN2(R *x, V v0, V v1, int ovs)
 
 static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
 {
-     V x0 = UNPCKL(v0, v2);
-     V x1 = UNPCKH(v0, v2);
-     V x2 = UNPCKL(v1, v3);
-     V x3 = UNPCKH(v1, v3);
-     V y0 = UNPCKL(x0, x2);
-     V y1 = UNPCKH(x0, x2);
-     V y2 = UNPCKL(x1, x3);
-     V y3 = UNPCKH(x1, x3);
-     STA(x, y0, 0, 0);
-     STA(x + ovs, y1, 0, 0);
-     STA(x + 2 * ovs, y2, 0, 0);
-     STA(x + 3 * ovs, y3, 0, 0);
+     V x0, x1, x2, x3;
+     x0 = UNPCKL(v0, v2);
+     x1 = UNPCKH(v0, v2);
+     x2 = UNPCKL(v1, v3);
+     x3 = UNPCKH(v1, v3);
+     STA(x, UNPCKL(x0, x2), 0, 0);
+     STA(x + ovs, UNPCKH(x0, x2), 0, 0);
+     STA(x + 2 * ovs, UNPCKL(x1, x3), 0, 0);
+     STA(x + 3 * ovs, UNPCKH(x1, x3), 0, 0);
 }
 
 static inline V FLIP_RI(V x)
