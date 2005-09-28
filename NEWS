@@ -1,5 +1,9 @@
 Since FFTW 3.0.1:
 
+* Removed --enable-3dnow support.
+
+* SIMD support for split complex arrays.
+
 * New (faster) algorithm for REDFT00/RODFT00 (type-I DCT/DST) of odd size.
 
 * "4-step" algorithm for faster FFTs of very large sizes (> 2^18).
