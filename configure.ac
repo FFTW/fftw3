@@ -96,12 +96,6 @@ if test "$have_altivec" = "yes"; then
 	have_simd="yes"
 fi
 
-AC_ARG_ENABLE(3dnow, [AC_HELP_STRING([--enable-3dnow],[enable 3DNow! optimizations (fallback for non-k7-compatible)])], have_3dnow=$enableval, have_3dnow=no)
-if test "$have_3dnow" = "yes"; then
-	AC_DEFINE(HAVE_3DNOW,1,[Define to enable 3DNow! optimizations.])
-	have_simd="yes"
-fi
-
 if test "$PRECISION" != "$simd_precision" && test "$have_simd" = "yes"; then
 	AC_MSG_ERROR([requested SIMD type does not match selected precision])
 fi
@@ -214,9 +208,6 @@ if test "$GCC" = "yes"; then
     elif test "$have_sse2" = "yes"; then
 	AX_CHECK_COMPILER_FLAGS(-msse2, [SIMD_CFLAGS="-msse2"],
 	    [AC_MSG_ERROR([Need a version of gcc with -msse2])])
-    elif test "$have_3dnow" = "yes"; then
-	AX_CHECK_COMPILER_FLAGS(-m3dnow, [SIMD_CFLAGS="-m3dnow"],
-	    [AC_MSG_ERROR([Need a version of gcc with -m3dnow])])
     elif test "$have_altivec" = "yes"; then
 	# -DFAKE__VEC__ is a workaround because gcc-3.3 does not
 	# #define __VEC__ with -maltivec.

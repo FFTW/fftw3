@@ -30,10 +30,6 @@
 #include "simd-altivec.h"
 #endif
 
-#ifdef HAVE_3DNOW
-#include "simd-3dnow.h"
-#endif
-
 /* TAINT_BIT is set if pointers are not guaranteed to be multiples of
    ALIGNMENT */
 #define TAINT_BIT 1    

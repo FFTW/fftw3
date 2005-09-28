@@ -18,13 +18,11 @@
  *
  */
 
-/* $Id: align.c,v 1.26 2003-04-05 00:30:37 athena Exp $ */
+/* $Id: align.c,v 1.27 2005-09-28 02:28:40 athena Exp $ */
 
 #include "ifftw.h"
 
-#if HAVE_3DNOW
-#  define ALGN 8
-#elif HAVE_SIMD
+#if HAVE_SIMD
 #  define ALGN 16
 #elif HAVE_K7
 #  define ALGN 8

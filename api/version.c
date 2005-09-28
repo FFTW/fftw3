@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: version.c,v 1.9 2005-02-15 00:07:14 athena Exp $ */
+/* $Id: version.c,v 1.10 2005-09-28 02:28:40 athena Exp $ */
 
 #include "api.h"
 
@@ -41,10 +41,6 @@ const char X(version)[] = PACKAGE "-" PACKAGE_VERSION
 
 #if HAVE_ALTIVEC
    "-altivec"
-#endif
-
-#if HAVE_3DNOW
-   "-3dnow"
 #endif
 
 #if HAVE_K7

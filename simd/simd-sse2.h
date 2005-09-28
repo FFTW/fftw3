@@ -194,7 +194,4 @@ static inline V BYTWJ2(const R *t, V sr)
   {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
 #define TWVLS (2 * VL)
 
-#define BEGIN_SIMD()
-#define END_SIMD()
-
 #endif /* __SSE2__ */

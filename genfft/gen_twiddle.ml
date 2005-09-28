@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle.ml,v 1.19 2005-09-28 01:59:16 athena Exp $ *)
+(* $Id: gen_twiddle.ml,v 1.20 2005-09-28 02:28:40 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.19 2005-09-28 01:59:16 athena Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.20 2005-09-28 02:28:40 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -97,8 +97,7 @@ let generate n =
 
   let body = Block (
     [Decl ("int", i)],
-    [CVar(choose_simd "" "BEGIN_SIMD();"); (* hack *)
-     For (Expr_assign (CVar i, CVar m),
+    [For (Expr_assign (CVar i, CVar m),
 	  Binop (" > ", CVar i, Integer 0),
 	  list_to_comma 
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (byvl (Integer 1))]);
@@ -111,7 +110,6 @@ let generate n =
 	     make_volatile_stride (CVar iostride)
 	   ],
 	  Asch annot);
-     CVar(choose_simd "" "END_SIMD();"); (* hack *)
      Return (CVar twarray)
    ])
   in

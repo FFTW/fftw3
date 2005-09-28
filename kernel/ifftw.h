@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.253 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: ifftw.h,v 1.254 2005-09-28 02:28:40 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -70,7 +70,7 @@ typedef double R;
 #define HAVE_K7 0
 #endif
 
-#if defined(HAVE_SSE) || defined(HAVE_SSE2) || defined(HAVE_ALTIVEC) || defined(HAVE_3DNOW)
+#if defined(HAVE_SSE) || defined(HAVE_SSE2) || defined(HAVE_ALTIVEC)
 #define HAVE_SIMD 1
 #else
 #define HAVE_SIMD 0
