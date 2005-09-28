@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.25 2005-09-27 00:52:36 athena Exp $ *)
+(* $Id: gen_notw.ml,v 1.26 2005-09-28 01:59:16 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.25 2005-09-27 00:52:36 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.26 2005-09-28 01:59:16 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -115,7 +115,8 @@ let generate n =
 
   let body = Block (
     [Decl ("int", i)],
-    [For (Expr_assign (CVar i, CVar v),
+    [CVar(choose_simd "" "BEGIN_SIMD();"); (* hack *)
+     For (Expr_assign (CVar i, CVar v),
 	  Binop (" > ", CVar i, Integer 0),
 	  list_to_comma 
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (byvl (Integer 1))]);
@@ -130,7 +131,8 @@ let generate n =
 	     make_volatile_stride (CVar istride);
 	     make_volatile_stride (CVar ostride)
 	   ],
-	  Asch annot)
+	  Asch annot);
+     CVar(choose_simd "" "END_SIMD();") (* hack *)
    ])
   in
 
