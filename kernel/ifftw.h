@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.254 2005-09-28 02:28:40 athena Exp $ */
+/* $Id: ifftw.h,v 1.255 2005-10-02 15:49:13 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -543,6 +543,23 @@ enum {
 
 typedef enum { FORGET_ACCURSED, FORGET_EVERYTHING } amnesia;
 
+typedef enum { 
+     /* WISDOM_NORMAL: planner may or may not use wisdom */
+     WISDOM_NORMAL, 
+
+     /* WISDOM_ONLY: planner must use wisdom and must avoid searching */
+     WISDOM_ONLY, 
+
+     /* WISDOM_IS_BOGUS: planner must return 0 as quickly as possible */
+     WISDOM_IS_BOGUS,
+
+     /* WISDOM_IGNORE_INFEASIBLE: planner ignores infeasible wisdom */
+     WISDOM_IGNORE_INFEASIBLE,
+
+     /* WISDOM_IGNORE_ALL: planner ignores all */
+     WISDOM_IGNORE_ALL
+} wisdom_state_t;
+
 typedef struct {
      void (*register_solver)(planner *ego, solver *s);
      plan *(*mkplan)(planner *ego, problem *p);
@@ -573,6 +590,7 @@ struct planner_s {
      unsigned nslvdesc, slvdescsiz;
      const char *cur_reg_nam;
      int cur_reg_id;
+     wisdom_state_t wisdom_state;
 
      hashtab htab_blessed;
      hashtab htab_unblessed;

@@ -22,7 +22,8 @@
 
 double X(timelimit) = 1e30;
 
-static plan *mkplan(planner *plnr, unsigned flags, problem *prb, int bless)
+static plan *mkplan0(planner *plnr, unsigned flags, 
+		     problem *prb, int hash_info, wisdom_state_t wisdom_state)
 WITH_ALIGNED_STACK({
      plan *pln;
      double timelimit = plnr->timelimit;
@@ -33,10 +34,8 @@ WITH_ALIGNED_STACK({
      /* map API flags into FFTW flags */
      X(mapflags)(plnr, flags);
 
-     if (bless)
-	  plnr->flags.hash_info = BLESSING;
-     else
-	  plnr->flags.hash_info = 0;
+     plnr->flags.hash_info = hash_info;
+     plnr->wisdom_state = wisdom_state;
 
      /* create plan */
      pln = plnr->adt->mkplan(plnr, prb);
@@ -45,6 +44,38 @@ WITH_ALIGNED_STACK({
 
      return pln;
 })
+
+static plan *mkplan(planner *plnr, unsigned flags, problem *prb, int hash_info)
+{
+     plan *pln;
+
+     pln = mkplan0(plnr, flags, prb, hash_info, WISDOM_NORMAL);
+
+     if (plnr->wisdom_state == WISDOM_NORMAL && !pln) {
+	  /* maybe the planner failed because of inconsistent wisdom;
+	     plan again ignoring infeasible wisdom */
+	  pln = mkplan0(plnr, flags, prb, hash_info, WISDOM_IGNORE_INFEASIBLE);
+     }
+
+     if (plnr->wisdom_state == WISDOM_IS_BOGUS) {
+	  /* if the planner detected a wisdom inconsistency,
+	     forget all wisdom and plan again */
+	  plnr->adt->forget(plnr, FORGET_EVERYTHING);
+
+	  A(!pln);
+	  pln = mkplan0(plnr, flags, prb, hash_info, WISDOM_NORMAL);
+
+	  if (plnr->wisdom_state == WISDOM_IS_BOGUS) {
+	       /* if it still fails, plan without wisdom */
+	       plnr->adt->forget(plnr, FORGET_EVERYTHING);
+
+	       A(!pln);
+	       pln = mkplan0(plnr, flags, prb, hash_info, WISDOM_IGNORE_ALL);
+	  }
+     }
+
+     return pln;
+}
 
 apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 {
@@ -90,7 +121,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	  p->sign = sign; /* cache for execute_dft */
 	  
 	  /* re-create plan from wisdom, adding blessing */
-	  p->pln = mkplan(plnr, flags_used_for_planning, prb, 1);
+	  p->pln = mkplan(plnr, flags_used_for_planning, prb, BLESSING);
 	  AWAKE(p->pln, 1);
 	  
 	  /* we don't use pln for p->pln, above, since by re-creating the

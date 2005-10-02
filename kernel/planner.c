@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.164 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: planner.c,v 1.165 2005-10-02 15:49:13 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -320,7 +320,6 @@ static void htab_insert(hashtab *ht, const md5sig s, const flags_t *flagsp,
 		    } else {
 			 /* It is an error to insert an element that
 			    is subsumed by an existing entry. */
-			 /* CHECK THIS */
 			 A(!subsumes(&l->flags, SLVNDX(l), flagsp));
 		    }
 	       }
@@ -490,6 +489,10 @@ static plan *search(planner *ego, problem *p, int *slvndx,
      return pln;
 }
 
+#define CHECK_FOR_BOGOSITY			\
+     if (ego->wisdom_state == WISDOM_IS_BOGUS)	\
+	  goto wisdom_is_bogus
+
 static plan *mkplan(planner *ego, problem *p)
 {
      plan *pln;
@@ -506,20 +509,29 @@ static plan *mkplan(planner *ego, problem *p)
      check(&ego->htab_unblessed);
 #endif
 
+     pln = 0;
+
+     CHECK_FOR_BOGOSITY;
+
      ego->timed_out = 0;
 
      ++ego->nprob;
      md5hash(&m, p, ego);
 
-     pln = 0;
-
      flags_of_solution = ego->flags;
-     if ((sol = hlookup(ego, m.s, &flags_of_solution))) { 
+
+     if ((ego->wisdom_state != WISDOM_IGNORE_ALL) &&
+	 (sol = hlookup(ego, m.s, &flags_of_solution))) { 
 	  /* wisdom is acceptable */
+	  wisdom_state_t owisdom_state = ego->wisdom_state;
 	  slvndx = SLVNDX(sol);
 
-	  if (slvndx < 0) 
-	       return 0;   /* known to be infeasible */
+	  if (slvndx < 0) {
+	       if (ego->wisdom_state == WISDOM_IGNORE_INFEASIBLE)
+		    goto do_search;
+	       else
+		    return 0;   /* known to be infeasible */
+	  }
 
 	  flags_of_solution = sol->flags;
 
@@ -527,39 +539,56 @@ static plan *mkplan(planner *ego, problem *p)
 	     or from the planner */
 	  flags_of_solution.hash_info |= BLISS(ego->flags);
 
-	  /* use solver to obtain a plan */
+	  ego->wisdom_state = WISDOM_ONLY;
+
+	  /* use solver to obtain a plan in WISDOM_ONLY mode */
 	  pln = invoke_solver(ego, p, ego->slvdescs[slvndx].slv,
 			      &flags_of_solution);	  
 
-	  sol = 0; /* Paranoid: SOL may be dangling after
+	  CHECK_FOR_BOGOSITY; 	  /* catch error in child solvers */
+
+	  sol = 0; /* Paranoia: SOL may be dangling after
 		      invoke_solver(); make sure we don't accidentally
 		      reuse it. */
 
-	  /* if (!pln) then the entry is bogus, but
-	     we currently do nothing about it. */
+	  if (!pln)
+	       goto wisdom_is_bogus;
 
-	  /* CHECK THIS */
-	  A(pln);
+	  ego->wisdom_state = owisdom_state;
+
+	  goto skip_search;
      }
 
+ do_search:
+     /* cannot search in WISDOM_IS_ONLY mode */
+     if (ego->wisdom_state == WISDOM_ONLY)
+	  goto wisdom_is_bogus;
 
-     if (!pln) {
-	  flags_of_solution = ego->flags;
-	  pln = search(ego, p, &slvndx, &flags_of_solution);
-	  if (ego->timed_out) {
-	       A(!pln);
-	       return 0; /* no wisdom from timeout */
+     flags_of_solution = ego->flags;
+     pln = search(ego, p, &slvndx, &flags_of_solution);
+     CHECK_FOR_BOGOSITY; 	  /* catch error in child solvers */
+
+     if (ego->timed_out) {
+	  A(!pln);  /* CHECK THIS: why should this assertion hold ? */
+	  return 0; /* no wisdom from timeout */
+     }
+
+ skip_search:
+     if (ego->wisdom_state == WISDOM_NORMAL) {
+	  if (pln) {
+	       hinsert(ego, m.s, &flags_of_solution, slvndx);
+	       invoke_hook(ego, pln, p, 1);
+	  } else {
+	       hinsert(ego, m.s, &flags_of_solution, -1);
 	  }
      }
 
-     if (pln) {
-	  hinsert(ego, m.s, &flags_of_solution, slvndx);
-	  invoke_hook(ego, pln, p, 1);
-     } else {
-	  hinsert(ego, m.s, &flags_of_solution, -1);
-     }
-
      return pln;
+
+ wisdom_is_bogus:
+     X(plan_destroy_internal)(pln);
+     ego->wisdom_state = WISDOM_IS_BOGUS;
+     return 0;
 }
 
 static void htab_destroy(hashtab *ht)
@@ -693,6 +722,7 @@ planner *X(mkplanner)(void)
      p->pcost = p->epcost = 0.0;
      p->hook = 0;
      p->cur_reg_nam = 0;
+     p->wisdom_state = WISDOM_NORMAL;
 
      p->slvdescs = 0;
      p->nslvdesc = p->slvdescsiz = 0;
