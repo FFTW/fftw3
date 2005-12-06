@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.165 2005-10-02 15:49:13 athena Exp $ */
+/* $Id: planner.c,v 1.166 2005-12-06 02:25:57 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -574,7 +574,8 @@ static plan *mkplan(planner *ego, problem *p)
      }
 
  skip_search:
-     if (ego->wisdom_state == WISDOM_NORMAL) {
+     if (ego->wisdom_state == WISDOM_NORMAL ||
+	 ego->wisdom_state == WISDOM_ONLY) {
 	  if (pln) {
 	       hinsert(ego, m.s, &flags_of_solution, slvndx);
 	       invoke_hook(ego, pln, p, 1);
