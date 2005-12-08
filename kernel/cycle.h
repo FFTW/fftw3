@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.46 2005-01-21 19:42:04 stevenj Exp $ */
+/* $Id: cycle.h,v 1.47 2005-12-08 03:39:01 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -229,6 +229,17 @@ static __inline__ ticks getticks(void)
 
 INLINE_ELAPSED(__inline__)
 
+#define HAVE_TICK_COUNTER
+#endif
+
+/* PGI compiler, courtesy Cristiano Calonaci, Andrea Tarsi, & Roberto Gori */
+#if defined(__PGI) && defined(__x86_64__) && !defined(HAVE_TICK_COUNTER) 
+typedef unsigned long long ticks;
+static ticks getticks(void)
+{
+    asm(" rdtsc; shl    $0x20,%rdx; mov    %eax,%eax; or     %rdx,%rax;    ");
+}
+INLINE_ELAPSED(__inline__)
 #define HAVE_TICK_COUNTER
 #endif
 
