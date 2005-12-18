@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.49 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: problem.c,v 1.50 2005-12-18 23:15:04 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -99,7 +99,7 @@ static void print(problem *ego_, printer *p)
      int i;
      p->print(p, "(rdft %d %D %T %T", 
 	      X(alignment_of)(ego->I),
-	      ego->O - ego->I, 
+	      (INT)(ego->O - ego->I), 
 	      ego->sz,
 	      ego->vecsz);
      for (i = 0; i < ego->sz->rnk; ++i)

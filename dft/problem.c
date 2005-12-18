@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.36 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: problem.c,v 1.37 2005-12-18 23:15:04 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -52,8 +52,8 @@ static void print(problem *ego_, printer *p)
 	      ego->ri == ego->ro,
 	      X(alignment_of)(ego->ri),
 	      X(alignment_of)(ego->ro),
-	      ego->ii - ego->ri, 
-	      ego->io - ego->ro,
+	      (INT)(ego->ii - ego->ri), 
+	      (INT)(ego->io - ego->ro),
 	      ego->sz,
 	      ego->vecsz);
 }
