@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.257 2005-12-18 19:41:31 athena Exp $ */
+/* $Id: ifftw.h,v 1.258 2005-12-18 20:14:03 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -676,8 +676,8 @@ typedef INT stride;
 
 /* hackery to prevent the compiler from ``optimizing'' induction
    variables in codelet loops. */
-extern const int X(an_int_guaranteed_to_be_zero);
-#define MAKE_VOLATILE_STRIDE(x) (x) = (x) ^ X(an_int_guaranteed_to_be_zero)
+extern const stride X(a_stride_guaranteed_to_be_zero);
+#define MAKE_VOLATILE_STRIDE(x) (x) = (x) ^ X(a_stride_guaranteed_to_be_zero)
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
 

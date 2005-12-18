@@ -18,10 +18,10 @@
  *
  */
 
-/* $Id: stride.c,v 1.9 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: stride.c,v 1.10 2005-12-18 20:14:03 athena Exp $ */
 #include "ifftw.h"
 
-const int X(an_int_guaranteed_to_be_zero) = 0;
+const INT X(a_stride_guaranteed_to_be_zero) = 0;
 
 #ifdef PRECOMPUTE_ARRAY_INDICES
 stride X(mkstride)(INT n, INT s)
