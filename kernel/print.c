@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.26 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: print.c,v 1.27 2005-12-18 21:52:38 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -76,6 +76,11 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       case 'd': {
 			    int x = va_arg(ap, int);
 			    sprintf(buf, "%d", x);
+			    goto putbuf;
+		       }
+		       case 'D': {
+			    INT x = va_arg(ap, INT);
+			    sprintf(buf, BIGINT_FORMAT, x);
 			    goto putbuf;
 		       }
 		       case 'f': case 'e': case 'g': {
