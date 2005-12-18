@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse2.c,v 1.12 2005-09-05 19:23:27 athena Exp $ */
+/* $Id: sse2.c,v 1.13 2005-12-18 01:28:50 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -83,10 +83,11 @@ static int sse2_works(void)
      }
 }
 
+extern void X(check_alignment_of_sse2_mp)(void);
+
 int RIGHT_CPU(void)
 {
      static int init = 0, res;
-     extern void X(check_alignment_of_sse2_mp)(void);
 
      if (!init) {
 	  res = (cpuid_edx(1) & (1 << 26)) && sse2_works();

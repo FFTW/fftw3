@@ -18,14 +18,14 @@
  *
  */
 
-/* $Id: taint.c,v 1.3 2003-04-10 19:36:18 athena Exp $ */
+/* $Id: taint.c,v 1.4 2005-12-18 01:28:50 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
 
 #if HAVE_SIMD
 
-R *X(taint)(R *p, int s)
+R *X(taint)(R *p, INT s)
 {
      if (((unsigned)s * sizeof(R)) % ALIGNMENT)
 	  p = (R *) (PTRINT(p) | TAINT_BIT);

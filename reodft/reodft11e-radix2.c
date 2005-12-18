@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.10 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: reodft11e-radix2.c,v 1.11 2005-12-18 01:28:50 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:
@@ -50,20 +50,20 @@ typedef struct {
      plan_rdft super;
      plan *cld;
      twid *td, *td2;
-     int is, os;
-     int n;
-     int vl;
-     int ivs, ovs;
+     INT is, os;
+     INT n;
+     INT vl;
+     INT ivs, ovs;
      rdft_kind kind;
 } P;
 
 static void apply_re11(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is, os = ego->os;
-     int i, n = ego->n, n2 = n/2;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is, os = ego->os;
+     INT i, n = ego->n, n2 = n/2;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W;
      R *W2;
      R *buf;
@@ -74,7 +74,7 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 	  buf[0] = K(2.0) * I[0];
 	  buf[n2] = K(2.0) * I[is * (n - 1)];
 	  for (i = 1; i + i < n2; ++i) {
-	       int k = i + i;
+	       INT k = i + i;
 	       E a, b, a2, b2;
 	       {
 		    E u, v;
@@ -138,7 +138,7 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 	  }
 	  W2 += 2;
 	  for (i = 1; i + i < n2; ++i, W2 += 2) {
-	       int k;
+	       INT k;
 	       E u, v, u2, v2;
 	       u = buf[i];
 	       v = buf[n2 - i];
@@ -169,7 +169,7 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 	       }
 	  }
 	  if (i + i == n2) {
-	       int k = (i + i) - 1;
+	       INT k = (i + i) - 1;
 	       E wa, wb;
 	       E a, b;
 	       wa = W2[0]; /* cos */
@@ -194,10 +194,10 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 static void apply_re11(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is, os = ego->os;
-     int i, n = ego->n;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is, os = ego->os;
+     INT i, n = ego->n;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *W;
      R *buf;
 
@@ -207,7 +207,7 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 	  buf[0] = K(2.0) * I[0];
 	  buf[n/2] = K(2.0) * I[is * (n - 1)];
 	  for (i = 1; i + i < n; ++i) {
-	       int k = i + i;
+	       INT k = i + i;
 	       E a, b;
 	       a = I[is * (k - 1)];
 	       b = I[is * k];
@@ -268,10 +268,10 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 static void apply_ro11(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is, os = ego->os;
-     int i, n = ego->n, n2 = n/2;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is, os = ego->os;
+     INT i, n = ego->n, n2 = n/2;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W;
      R *W2;
      R *buf;
@@ -282,7 +282,7 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
 	  buf[0] = K(2.0) * I[is * (n - 1)];
 	  buf[n2] = K(2.0) * I[0];
 	  for (i = 1; i + i < n2; ++i) {
-	       int k = i + i;
+	       INT k = i + i;
 	       E a, b, a2, b2;
 	       {
 		    E u, v;
@@ -346,7 +346,7 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
 	  }
 	  W2 += 2;
 	  for (i = 1; i + i < n2; ++i, W2 += 2) {
-	       int k;
+	       INT k;
 	       E u, v, u2, v2;
 	       u = buf[i];
 	       v = buf[n2 - i];
@@ -377,7 +377,7 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
 	       }
 	  }
 	  if (i + i == n2) {
-	       int k = (i + i) - 1;
+	       INT k = (i + i) - 1;
 	       E wa, wb;
 	       E a, b;
 	       wa = W2[0]; /* cos */
@@ -452,7 +452,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      plan *cld;
      R *buf;
-     int n;
+     INT n;
      opcnt ops;
 
      static const plan_adt padt = {

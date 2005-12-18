@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.27 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: twiddle.c,v 1.28 2005-12-18 01:28:50 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -54,12 +54,12 @@ static int equal_instr(const tw_instr *p, const tw_instr *q)
      A(0 /* can't happen */);
 }
 
-static int ok_twid(const twid *t, const tw_instr *q, int n, int r, int m)
+static int ok_twid(const twid *t, const tw_instr *q, INT n, INT r, INT m)
 {
      return (n == t->n && r == t->r && m <= t->m && equal_instr(t->instr, q));
 }
 
-static twid *lookup(const tw_instr *q, int n, int r, int m)
+static twid *lookup(const tw_instr *q, INT n, INT r, INT m)
 {
      twid *p;
 
@@ -68,9 +68,9 @@ static twid *lookup(const tw_instr *q, int n, int r, int m)
      return p;
 }
 
-static int twlen0(int r, const tw_instr **pp)
+static INT twlen0(INT r, const tw_instr **pp)
 {
-     int ntwiddle = 0;
+     INT ntwiddle = 0;
      const tw_instr *p = *pp;
 
      /* compute length of bytecode program */
@@ -92,54 +92,54 @@ static int twlen0(int r, const tw_instr **pp)
      return ntwiddle;
 }
 
-int X(twiddle_length)(int r, const tw_instr *p)
+INT X(twiddle_length)(INT r, const tw_instr *p)
 {
      return twlen0(r, &p);
 }
 
-static R *compute(const tw_instr *instr, int n, int r, int m)
+static R *compute(const tw_instr *instr, INT n, INT r, INT m)
 {
-     int ntwiddle, j;
+     INT ntwiddle, j;
      R *W, *W0;
      const tw_instr *p;
 
-     static trigreal (*const f[])(int, int) = { 
-	  X(cos2pi), X(sin2pi), X(tan2pi) 
-     };
+     static trigreal (*const f[])(INT, INT) = { X(cos2pi), X(sin2pi) };
 
      p = instr;
      ntwiddle = twlen0(r, &p);
 
-     W0 = W = (R *)MALLOC(ntwiddle * (m / p->v) * sizeof(R), TWIDDLES);
+     W0 = W = (R *)MALLOC((ntwiddle * (m / (INT)p->v)) * sizeof(R), TWIDDLES);
 
-     for (j = 0; j < m; j += p->v) {
+     for (j = 0; j < m; j += (INT)p->v) {
           for (p = instr; p->op != TW_NEXT; ++p) {
 	       switch (p->op) {
 		   case TW_FULL:
 		   {
-			int i;
+			INT i;
 			A(m * r <= n);
 			for (i = 1; i < r; ++i) {
-			     *W++ = f[TW_COS]((j + p->v) * i, n);
-			     *W++ = f[TW_SIN]((j + p->v) * i, n);
+			     *W++ = f[TW_COS]((j + (INT)p->v) * i, n);
+			     *W++ = f[TW_SIN]((j + (INT)p->v) * i, n);
 			}
 			break;
 		   }
 
 		   case TW_HALF:
 		   {
-			int i;
+			INT i;
 			A((r % 2) == 1);
 			for (i = 1; i + i < r; ++i) {
-			     *W++ = f[TW_COS](MULMOD(i, (j + p->v), n), n);
-			     *W++ = f[TW_SIN](MULMOD(i, (j + p->v), n), n);
+			     *W++ = f[TW_COS](MULMOD(i, (j + (INT)p->v), n), 
+					      n);
+			     *W++ = f[TW_SIN](MULMOD(i, (j + (INT)p->v), n), 
+					      n);
 			}
 			break;
 		   }
 
 		   default:
 			A(m * r <= n);
-			*W++ = f[p->op](((signed int)(j + p->v)) * p->i, n);
+			*W++ = f[p->op]((j + (INT)p->v) * (INT)p->i, n);
 			break;
 	       }
 	  }
@@ -149,7 +149,7 @@ static R *compute(const tw_instr *instr, int n, int r, int m)
      return W0;
 }
 
-void X(mktwiddle)(twid **pp, const tw_instr *instr, int n, int r, int m)
+void X(mktwiddle)(twid **pp, const tw_instr *instr, INT n, INT r, INT m)
 {
      twid *p;
 
@@ -202,7 +202,7 @@ void X(twiddle_destroy)(twid **pp)
 
 
 void X(twiddle_awake)(int flg, twid **pp, 
-		      const tw_instr *instr, int n, int r, int m)
+		      const tw_instr *instr, INT n, INT r, INT m)
 {
      if (flg) 
 	  X(mktwiddle)(pp, instr, n, r, m);
@@ -211,7 +211,7 @@ void X(twiddle_awake)(int flg, twid **pp,
 }
 
 /* return a pointer to twiddles (0 if none) starting at mstart out of m */
-const R *X(twiddle_shift)(const twid *p, int mstart)
+const R *X(twiddle_shift)(const twid *p, INT mstart)
 {
      if (p)
 	  return (p->W + mstart * X(twiddle_length)(p->r, p->instr));

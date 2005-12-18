@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.33 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.34 2005-12-18 01:28:50 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -47,16 +47,16 @@ typedef struct {
      plan_rdft super;
 
      plan *cld;
-     int vl;
-     int ivs, ovs;
+     INT vl;
+     INT ivs, ovs;
      const S *solver;
 } P;
 
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int i, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT i, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      rdftapply cldapply = ((plan_rdft *) ego->cld)->apply;
 
      for (i = 0; i < vl; ++i) {

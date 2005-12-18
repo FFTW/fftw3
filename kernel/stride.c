@@ -18,16 +18,16 @@
  *
  */
 
-/* $Id: stride.c,v 1.8 2005-02-06 21:59:39 athena Exp $ */
+/* $Id: stride.c,v 1.9 2005-12-18 01:28:50 athena Exp $ */
 #include "ifftw.h"
 
 const int X(an_int_guaranteed_to_be_zero) = 0;
 
 #ifdef PRECOMPUTE_ARRAY_INDICES
-stride X(mkstride)(int n, int s)
+stride X(mkstride)(INT n, INT s)
 {
      int i;
-     int *p = (int *) MALLOC(n * sizeof(int), STRIDES);
+     INT *p = (INT *) MALLOC(n * sizeof(INT), STRIDES);
 
      for (i = 0; i < n; ++i)
           p[i] = s * i;

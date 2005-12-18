@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-directbuf.c,v 1.4 2005-02-19 14:31:14 athena Exp $ */
+/* $Id: hc2hc-directbuf.c,v 1.5 2005-12-18 01:28:50 athena Exp $ */
 
 #include "hc2hc.h"
 
@@ -32,9 +32,9 @@ typedef struct {
      plan_hc2hc super;
      khc2hc k;
      plan *cld0, *cldm; /* children for 0th and middle butterflies */
-     int twlen;
-     int r, m, vl, mstart1, mcount2;
-     int s, vs, ios;
+     INT twlen;
+     INT r, m, vl, mstart1, mcount2;
+     INT s, vs, ios;
      stride bufstride;
      const R *tdW;
      twid *td;
@@ -46,11 +46,11 @@ typedef struct {
    such that the (i0, i1) element has index (i0 * s0 + i1 * s1).
    The imaginary strides are of opposite signs to the real strides.
 */
-static void cpy(int n0, int n1,
-                const R *rA, const R *iA, int sa0, int sa1,
-                R *rB, R *iB, int sb0, int sb1)
+static void cpy(INT n0, INT n1,
+                const R *rA, const R *iA, INT sa0, INT sa1,
+                R *rB, R *iB, INT sb0, INT sb1)
 {
-     int i0, i1;
+     INT i0, i1;
 
      for (i0 = 0; i0 < n0; ++i0) {
           const R *pra, *pia;
@@ -70,8 +70,8 @@ static void cpy(int n0, int n1,
      }
 }
 
-static const R *doit(khc2hc k, R *rA, R *iA, const R *W, int ios, int dist,
-                     int r, int batchsz, R *buf, stride bufstride)
+static const R *doit(khc2hc k, R *rA, R *iA, const R *W, INT ios, INT dist,
+                     INT r, INT batchsz, R *buf, stride bufstride)
 {
      cpy(r, batchsz, rA, iA, ios, dist, buf, buf + 2*batchsz*r-1, 1, r);
      W = k(buf, buf + 2*batchsz*r-1, W, bufstride, 2*batchsz + 1, r);
@@ -86,10 +86,10 @@ static void apply(const plan *ego_, R *IO)
      const P *ego = (const P *) ego_;
      plan_rdft *cld0 = (plan_rdft *) ego->cld0;
      plan_rdft *cldm = (plan_rdft *) ego->cldm;
-     int i, j, m = ego->m, vl = ego->vl, r = ego->r;
-     int mstart1 = ego->mstart1, mcount2 = ego->mcount2;
-     int s = ego->s, vs = ego->vs, ios = ego->ios;
-     int batchsz = BATCHSZ(r);
+     INT i, j, m = ego->m, vl = ego->vl, r = ego->r;
+     INT mstart1 = ego->mstart1, mcount2 = ego->mcount2;
+     INT s = ego->s, vs = ego->vs, ios = ego->ios;
+     INT batchsz = BATCHSZ(r);
      R *buf;
 
      STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
@@ -142,7 +142,7 @@ static void print(const plan *ego_, printer *p)
      const P *ego = (const P *) ego_;
      const S *slv = ego->slv;
      const hc2hc_desc *e = slv->desc;
-     int batchsz = BATCHSZ(ego->r);
+     INT batchsz = BATCHSZ(ego->r);
 
      p->print(p, "(hc2hc-directbuf/%d-%d/%d%v \"%s\"%(%p%)%(%p%))",
 	      batchsz, ego->r, X(twiddle_length)(ego->r, e->tw), 
@@ -150,13 +150,13 @@ static void print(const plan *ego_, printer *p)
 }
 
 static int applicable0(const S *ego, 
-		       rdft_kind kind, int r, int m, int s, int vl, int vs, 
-		       int mstart1, int mcount2,
+		       rdft_kind kind, INT r, INT m, INT s, INT vl, INT vs, 
+		       INT mstart1, INT mcount2,
 		       R *IO)
 {
      const hc2hc_desc *e = ego->desc;
-     int batchsz;
-     int mc = (mcount2 - 1) / 2;
+     INT batchsz;
+     INT mc = (mcount2 - 1) / 2;
      UNUSED(vl); UNUSED(s); UNUSED(vs); UNUSED(IO); UNUSED(mstart1);
 
      return (
@@ -178,8 +178,8 @@ static int applicable0(const S *ego,
 }
 
 static int applicable(const S *ego, 
-		      rdft_kind kind, int r, int m, int s, int vl, int vs, 
-		      int mstart1, int mcount2,
+		      rdft_kind kind, INT r, INT m, INT s, INT vl, INT vs, 
+		      INT mstart1, INT mcount2,
 		      R *IO, const planner *plnr)
 {
      if (!applicable0(ego, kind, r, m, s, vl, vs, mstart1, mcount2, IO))
@@ -192,15 +192,15 @@ static int applicable(const S *ego,
 }
 
 static plan *mkcldw(const hc2hc_solver *ego_, 
-		    rdft_kind kind, int r, int m, int s, int vl, int vs, 
-		    int mstart, int mcount,
+		    rdft_kind kind, INT r, INT m, INT s, INT vl, INT vs, 
+		    INT mstart, INT mcount,
 		    R *IO, planner *plnr)
 {
      const S *ego = (const S *) ego_;
      P *pln;
      const hc2hc_desc *e = ego->desc;
      plan *cld0, *cldm;
-     int mstart1, mcount2;
+     INT mstart1, mcount2;
 
      static const plan_adt padt = {
 	  0, awake, print, destroy

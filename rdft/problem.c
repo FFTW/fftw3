@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.47 2003-04-10 19:36:17 athena Exp $ */
+/* $Id: problem.c,v 1.48 2005-12-18 01:28:50 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -59,8 +59,8 @@ static void recur(const iodim *dims, int rnk, R *I)
      else if (rnk == 0)
           I[0] = K(0.0);
      else if (rnk > 0) {
-          int i, n = dims[0].n;
-          int is = dims[0].is;
+          int i;
+	  INT n = dims[0].n, is = dims[0].is;
 
 	  if (rnk == 1) {
 	       /* this case is redundant but faster */

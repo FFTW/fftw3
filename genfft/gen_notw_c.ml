@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_c.ml,v 1.14 2005-09-28 02:28:40 athena Exp $ *)
+(* $Id: gen_notw_c.ml,v 1.15 2005-12-18 01:28:50 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_c.ml,v 1.14 2005-09-28 02:28:40 athena Exp $"
+let cvsid = "$Id: gen_notw_c.ml,v 1.15 2005-12-18 01:28:50 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -109,7 +109,7 @@ let generate n =
   let annot = nonstandard_optimizer list_of_buddy_stores odag in
 
   let body = Block (
-    [Decl ("int", i);
+    [Decl ("INT", i);
      Decl (C.constrealtypep, riarray);
      Decl (C.realtypep, roarray)],
     [Stmt_assign (CVar riarray, CVar (if (sign < 0) then "ri" else "ii"));
@@ -137,9 +137,9 @@ let generate n =
  	   Decl (C.realtypep, "io");
 	   Decl (C.stridetype, istride);
 	   Decl (C.stridetype, ostride);
-	   Decl ("int", v);
-	   Decl ("int", "ivs");
-	   Decl ("int", "ovs")]),
+	   Decl ("INT", v);
+	   Decl ("INT", "ivs");
+	   Decl ("INT", "ovs")]),
 	 add_constants body)
       
   in

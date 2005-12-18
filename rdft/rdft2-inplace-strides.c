@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-inplace-strides.c,v 1.5 2003-03-29 20:22:28 stevenj Exp $ */
+/* $Id: rdft2-inplace-strides.c,v 1.6 2005-12-18 01:28:50 athena Exp $ */
 
 #include "rdft.h"
 
@@ -30,8 +30,8 @@
    exhaustive; we only return 1 for the most common case.  */
 int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim)
 {
-     int N, Nc;
-     int is, os;
+     INT N, Nc;
+     INT is, os;
      int i;
      
      for (i = 0; i + 1 < p->sz->rnk; ++i)

@@ -28,15 +28,15 @@ typedef struct {
 typedef struct {
      plan_rdft super;
      twid *td;
-     int n, is, os;
+     INT n, is, os;
      rdft_kind kind;
 } P;
 
 /***************************************************************************/
 
-static void cdot_r2hc(int n, const E *x, const R *w, R *or0, R *oi1)
+static void cdot_r2hc(INT n, const E *x, const R *w, R *or0, R *oi1)
 {
-     int i;
+     INT i;
 
      E rr = x[0], ri = 0;
      x += 1;
@@ -49,9 +49,9 @@ static void cdot_r2hc(int n, const E *x, const R *w, R *or0, R *oi1)
      *oi1 = ri;
 }
 
-static void hartley_r2hc(int n, const R *xr, int xs, E *o, R *pr)
+static void hartley_r2hc(INT n, const R *xr, INT xs, E *o, R *pr)
 {
-     int i;
+     INT i;
      E sr;
      o[0] = sr = xr[0]; o += 1;
      for (i = 1; i + i < n; ++i) {
@@ -72,8 +72,8 @@ static void hartley_r2hc(int n, const R *xr, int xs, E *o, R *pr)
 static void apply_r2hc(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int i;
-     int n = ego->n, is = ego->is, os = ego->os;
+     INT i;
+     INT n = ego->n, is = ego->is, os = ego->os;
      const R *W = ego->td->W;
      E *buf;
 
@@ -89,9 +89,9 @@ static void apply_r2hc(const plan *ego_, R *I, R *O)
 }
 
 
-static void cdot_hc2r(int n, const E *x, const R *w, R *or0, R *or1)
+static void cdot_hc2r(INT n, const E *x, const R *w, R *or0, R *or1)
 {
-     int i;
+     INT i;
 
      E rr = x[0], ii = 0; 
      x += 1;
@@ -109,9 +109,9 @@ static void cdot_hc2r(int n, const E *x, const R *w, R *or0, R *or1)
 #endif
 }
 
-static void hartley_hc2r(int n, const R *x, int xs, E *o, R *pr)
+static void hartley_hc2r(INT n, const R *x, INT xs, E *o, R *pr)
 {
-     int i;
+     INT i;
      E sr;
 
      o[0] = sr = x[0]; o += 1;
@@ -126,8 +126,8 @@ static void hartley_hc2r(int n, const R *x, int xs, E *o, R *pr)
 static void apply_hc2r(const plan *ego_, R *I, R *O)		    
 {
      const P *ego = (const P *) ego_;
-     int i;
-     int n = ego->n, is = ego->is, os = ego->os;
+     INT i;
+     INT n = ego->n, is = ego->is, os = ego->os;
      const R *W = ego->td->W;
      E *buf;
 
@@ -200,7 +200,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *)ego_;
      const problem_rdft *p;
      P *pln;
-     int n;
+     INT n;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, X(plan_null_destroy)

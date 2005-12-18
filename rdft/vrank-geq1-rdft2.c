@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.36 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.37 2005-12-18 01:28:50 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -48,16 +48,16 @@ typedef struct {
      plan_rdft2 super;
 
      plan *cld;
-     int vl;
-     int ivs, ovs;
+     INT vl;
+     INT ivs, ovs;
      const S *solver;
 } P;
 
 static void apply(const plan *ego_, R *r, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     int i, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT i, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      rdft2apply cldapply = ((plan_rdft2 *) ego->cld)->apply;
 
      for (i = 0; i < vl; ++i) {
@@ -155,7 +155,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld;
      int vdim;
      iodim *d;
-     int ivs, ovs;
+     INT ivs, ovs;
 
      static const plan_adt padt = {
 	  X(rdft2_solve), awake, print, destroy

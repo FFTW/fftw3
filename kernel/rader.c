@@ -27,20 +27,20 @@
 
 /* shared twiddle and omega lists, keyed by two/three integers. */
 struct rader_tls {
-     int k1, k2, k3;
+     INT k1, k2, k3;
      R *W;
      int refcnt;
      rader_tl *cdr; 
 };
 
-void X(rader_tl_insert)(int k1, int k2, int k3, R *W, rader_tl **tl)
+void X(rader_tl_insert)(INT k1, INT k2, INT k3, R *W, rader_tl **tl)
 {
      rader_tl *t = (rader_tl *) MALLOC(sizeof(rader_tl), TWIDDLES);
      t->k1 = k1; t->k2 = k2; t->k3 = k3; t->W = W;
      t->refcnt = 1; t->cdr = *tl; *tl = t;
 }
 
-R *X(rader_tl_find)(int k1, int k2, int k3, rader_tl *t)
+R *X(rader_tl_find)(INT k1, INT k2, INT k3, rader_tl *t)
 {
      while (t && (t->k1 != k1 || t->k2 != k2 || t->k3 != k3))
 	  t = t->cdr;

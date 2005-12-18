@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.166 2005-12-06 02:25:57 athena Exp $ */
+/* $Id: planner.c,v 1.167 2005-12-18 01:28:50 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -251,7 +251,7 @@ static void rehash(hashtab *ht, unsigned nsiz)
      unsigned osiz = ht->hashsiz, h;
      solution *osol = ht->solutions, *nsol;
 
-     nsiz = (unsigned)X(next_prime)((int)nsiz);
+     nsiz = (unsigned)X(next_prime)((INT)nsiz);
      nsol = (solution *)MALLOC(nsiz * sizeof(solution), HASHT);
      ++ht->nrehash;
 

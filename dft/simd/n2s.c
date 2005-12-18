@@ -25,7 +25,7 @@
 
 static int okp(const kdft_desc *d,
                const R *ri, const R *ii, const R *ro, const R *io,
-               int is, int os, int vl, int ivs, int ovs, 
+               INT is, INT os, INT vl, INT ivs, INT ovs, 
 	       const planner *plnr)
 {
      return (RIGHT_CPU()

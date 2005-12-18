@@ -22,9 +22,9 @@
 
 #include "ifftw.h"
 
-int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz)
+INT X(compute_nbuf)(INT n, INT vl, INT nbuf, INT maxbufsz)
 {
-     int i; 
+     INT i; 
 
      if (nbuf * n > maxbufsz)
           nbuf = X(imax)((int)1, maxbufsz / n);

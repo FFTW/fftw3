@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: buffered.c,v 1.33 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: buffered.c,v 1.34 2005-12-18 01:28:50 athena Exp $ */
 
 #include "rdft.h"
 
 typedef struct {
-     int nbuf;
-     int maxbufsz;
-     int skew_alignment;
-     int skew;
+     INT nbuf;
+     INT maxbufsz;
+     INT skew_alignment;
+     INT skew;
      const char *nam;
 } bufadt;
 
@@ -39,8 +39,8 @@ typedef struct {
      plan_rdft super;
 
      plan *cld, *cldcpy, *cldrest;
-     int n, vl, nbuf, bufdist;
-     int ivs, ovs;
+     INT n, vl, nbuf, bufdist;
+     INT ivs, ovs;
 
      const S *slv;
 } P;
@@ -52,8 +52,8 @@ static void apply(const plan *ego_, R *I, R *O)
      plan_rdft *cld = (plan_rdft *) ego->cld;
      plan_rdft *cldcpy = (plan_rdft *) ego->cldcpy;
      plan_rdft *cldrest;
-     int i, vl = ego->vl, nbuf = ego->nbuf;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT i, vl = ego->vl, nbuf = ego->nbuf;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *bufs;
 
      bufs = (R *)MALLOC(sizeof(R) * nbuf * ego->bufdist, BUFFERS);
@@ -104,12 +104,12 @@ static void print(const plan *ego_, printer *p)
 }
 
 
-static int compute_nbuf(int n, int vl, const S *ego)
+static INT compute_nbuf(INT n, INT vl, const S *ego)
 {
      return X(compute_nbuf)(n, vl, ego->adt->nbuf, ego->adt->maxbufsz);
 }
 
-static int toobig(int n, const S *ego)
+static int toobig(INT n, const S *ego)
 {
      return (n > ego->adt->maxbufsz);
 }
@@ -180,8 +180,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cldrest = (plan *) 0;
      const problem_rdft *p = (const problem_rdft *) p_;
      R *bufs = (R *) 0;
-     int nbuf = 0, bufdist, n, vl;
-     int ivs, ovs;
+     INT nbuf = 0, bufdist, n, vl;
+     INT ivs, ovs;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -239,8 +239,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      /* plan the leftover transforms (cldrest): */
      {
-	  int id = ivs * (nbuf * (vl / nbuf));
-	  int od = ovs * (nbuf * (vl / nbuf));
+	  INT id = ivs * (nbuf * (vl / nbuf));
+	  INT od = ovs * (nbuf * (vl / nbuf));
 	  cldrest = X(mkplan_d)(plnr, 
 				X(mkproblem_rdft_d)(
 				     X(tensor_copy)(p->sz),

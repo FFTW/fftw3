@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-rdft2.c,v 1.6 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: rank0-rdft2.c,v 1.7 2005-12-18 01:28:50 athena Exp $ */
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
@@ -34,8 +34,8 @@ typedef struct {
 
 typedef struct {
      plan_rdft super;
-     int vl;
-     int ivs, ovs;
+     INT vl;
+     INT ivs, ovs;
      plan *cldcpy;
 } P;
 
@@ -57,8 +57,8 @@ static int applicable(const problem *p_)
 static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     int i, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT i, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
 
      for (i = 4; i <= vl; i += 4) {
           R r0, r1, r2, r3;
@@ -87,8 +87,8 @@ static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 static void apply_r2hc_inplace(const plan *ego_, R *r, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     int i, vl = ego->vl;
-     int ovs = ego->ovs;
+     INT i, vl = ego->vl;
+     INT ovs = ego->ovs;
 
      UNUSED(r);
      UNUSED(rio);

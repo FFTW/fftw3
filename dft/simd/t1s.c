@@ -25,7 +25,7 @@
 
 static int okp(const ct_desc *d,
 		      const R *rio, const R *iio, 
-		      int ios, int vs, int m, int dist, 
+		      INT ios, INT vs, INT m, INT dist, 
 		      const planner *plnr)
 {
      UNUSED(rio);

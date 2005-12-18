@@ -28,7 +28,7 @@ typedef hc2hc_solver S;
 typedef struct {
      plan_hc2hc super;
 
-     int r, m, s, vl, vs, mstart1, mcount1;
+     INT r, m, s, vl, vs, mstart1, mcount1;
      plan *cld0;
      plan *cld;
      twid *td;
@@ -47,11 +47,11 @@ static void mktwiddle(P *ego, int flg)
 
 static void bytwiddle(const P *ego, R *IO, R sign)
 {
-     int i, j, k;
-     int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
-     int ms = m * s;
-     int mstart1 = ego->mstart1, mcount1 = ego->mcount1;
-     int wrem = 2 * ((m-1)/2 - mcount1);
+     INT i, j, k;
+     INT r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
+     INT ms = m * s;
+     INT mstart1 = ego->mstart1, mcount1 = ego->mcount1;
+     INT wrem = 2 * ((m-1)/2 - mcount1);
 
      for (i = 0; i < vl; ++i, IO += vs) {
 	  const R *W = ego->td->W;
@@ -78,17 +78,17 @@ static void bytwiddle(const P *ego, R *IO, R sign)
      }
 }
 
-static void swapri(R *IO, int r, int m, int s, int jstart, int jend)
+static void swapri(R *IO, INT r, INT m, INT s, INT jstart, INT jend)
 {
-     int k;
-     int ms = m * s;
-     int js = jstart * s;
+     INT k;
+     INT ms = m * s;
+     INT js = jstart * s;
      for (k = 0; k + k < r; ++k) {
 	  /* pr := IO + (m - j) * s + k * ms */
 	  R *pr = IO + (k + 1) * ms - js;
 	  /* pi := IO + (m - j) * s + (r - 1 - k) * ms */
 	  R *pi = IO + (r - k) * ms - js;
-	  int j;
+	  INT j;
 	  for (j = jstart; j < jend; j += 1, pr -= s, pi -= s) {
 	       R t = *pr;
 	       *pr = *pi;
@@ -99,16 +99,16 @@ static void swapri(R *IO, int r, int m, int s, int jstart, int jend)
 
 static void reorder_dit(const P *ego, R *IO)
 {
-     int i, k;
-     int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
-     int ms = m * s;
-     int mstart1 = ego->mstart1, mend1 = mstart1 + ego->mcount1;
+     INT i, k;
+     INT r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
+     INT ms = m * s;
+     INT mstart1 = ego->mstart1, mend1 = mstart1 + ego->mcount1;
 
      for (i = 0; i < vl; ++i, IO += vs) {
 	  for (k = 1; k + k < r; ++k) {
 	       R *p0 = IO + k * ms;
 	       R *p1 = IO + (r - k) * ms;
-	       int j;
+	       INT j;
 
 	       for (j = mstart1; j < mend1; ++j) {
 		    E rp, ip, im, rm;
@@ -129,10 +129,10 @@ static void reorder_dit(const P *ego, R *IO)
 
 static void reorder_dif(const P *ego, R *IO)
 {
-     int i, k;
-     int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
-     int ms = m * s;
-     int mstart1 = ego->mstart1, mend1 = mstart1 + ego->mcount1;
+     INT i, k;
+     INT r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
+     INT ms = m * s;
+     INT mstart1 = ego->mstart1, mend1 = mstart1 + ego->mcount1;
 
      for (i = 0; i < vl; ++i, IO += vs) {
 	  swapri(IO, r, m, s, mstart1, mend1);
@@ -141,7 +141,7 @@ static void reorder_dif(const P *ego, R *IO)
 	       R *p0 = IO + k * ms;
 	       R *p1 = IO + (r - k) * ms;
 	       const R half = K(0.5);
-	       int j;
+	       INT j;
 
 	       for (j = mstart1; j < mend1; ++j) {
 		    E rp, ip, im, rm;
@@ -158,7 +158,7 @@ static void reorder_dif(const P *ego, R *IO)
      }
 }
 
-static int applicable(rdft_kind kind, int r, int m, const planner *plnr)
+static int applicable(rdft_kind kind, INT r, INT m, const planner *plnr)
 {
      return (1 
 	     && (R2HC_KINDP(kind) || HC2R_KINDP(kind))
@@ -173,7 +173,7 @@ static int applicable(rdft_kind kind, int r, int m, const planner *plnr)
 static void apply_dit(const plan *ego_, R *IO)
 {
      const P *ego = (const P *) ego_;
-     int start;
+     INT start;
      plan_rdft *cld, *cld0;
 
      bytwiddle(ego, IO, K(-1.0));
@@ -191,7 +191,7 @@ static void apply_dit(const plan *ego_, R *IO)
 static void apply_dif(const plan *ego_, R *IO)
 {
      const P *ego = (const P *) ego_;
-     int start;
+     INT start;
      plan_rdft *cld, *cld0;
 
      reorder_dif(ego, IO);
@@ -230,31 +230,14 @@ static void print(const plan *ego_, printer *p)
 	      ego->r, ego->m, ego->vl, ego->cld0, ego->cld);
 }
 
-static tensor *mktensor_3d(int n0, int is0, int os0,
-			  int n1, int is1, int os1,
-			  int n2, int is2, int os2)
-{
-     tensor *x = X(mktensor)(3);
-     x->dims[0].n = n0;
-     x->dims[0].is = is0;
-     x->dims[0].os = os0;
-     x->dims[1].n = n1;
-     x->dims[1].is = is1;
-     x->dims[1].os = os1;
-     x->dims[2].n = n2;
-     x->dims[2].is = is2;
-     x->dims[2].os = os2;
-     return x;
-}
-
 static plan *mkcldw(const hc2hc_solver *ego_, 
-		    rdft_kind kind, int r, int m, int s, int vl, int vs, 
-		    int mstart, int mcount,
+		    rdft_kind kind, INT r, INT m, INT s, INT vl, INT vs, 
+		    INT mstart, INT mcount,
 		    R *IO, planner *plnr)
 {
      P *pln;
      plan *cld0 = 0, *cld = 0;
-     int mstart1, mcount1, mstride;
+     INT mstart1, mcount1, mstride;
 
      static const plan_adt padt = {
 	  0, awake, print, destroy
@@ -288,9 +271,9 @@ static plan *mkcldw(const hc2hc_solver *ego_,
      cld = X(mkplan_d)(plnr, 
 			X(mkproblem_rdft_1_d)(
 			     X(mktensor_1d)(r, m * s, m * s),
-			     mktensor_3d(2, mstride * s, mstride * s,
-					 mcount1, s, s, 
-					 vl, vs, vs),
+			     X(mktensor_3d)(2, mstride * s, mstride * s,
+					    mcount1, s, s, 
+					    vl, vs, vs),
 			     IO + s * mstart1, IO + s * mstart1, kind)
 	                );
      if (!cld) goto nada;
@@ -323,7 +306,7 @@ static plan *mkcldw(const hc2hc_solver *ego_,
      return (plan *) 0;
 }
 
-static void regsolver(planner *plnr, int r)
+static void regsolver(planner *plnr, INT r)
 {
      S *slv = (S *)X(mksolver_hc2hc)(sizeof(S), r, mkcldw);
      REGISTER_SOLVER(plnr, &(slv->super));

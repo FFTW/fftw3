@@ -70,24 +70,24 @@ typedef struct {
      int (*okp)(
 	  const kr2hc_desc *desc,
 	  const R *I, const R *ro, const R *io,
-	  int is, int ios, int ros, int vl, int ivs, int ovs);
+	  INT is, INT ios, INT ros, INT vl, INT ivs, INT ovs);
      rdft_kind kind;
-     int vl;
+     INT vl;
 } kr2hc_genus;
 
 struct kr2hc_desc_s {
-     int sz;    /* size of transform computed */
+     INT sz;    /* size of transform computed */
      const char *nam;
      opcnt ops;
      const kr2hc_genus *genus;
-     int is;
-     int ros, ios;
-     int ivs;
-     int ovs;
+     INT is;
+     INT ros, ios;
+     INT ivs;
+     INT ovs;
 };
 
 typedef void (*kr2hc) (const R *I, R *ro, R *io, stride is,
-		       stride ros, stride ios, int vl, int ivs, int ovs);
+		       stride ros, stride ios, INT vl, INT ivs, INT ovs);
 void X(kr2hc_register)(planner *p, kr2hc codelet, const kr2hc_desc *desc);
 
 /* real-input DFT codelets, type II (middle case of hc2hc DIT) */
@@ -102,24 +102,24 @@ typedef struct hc2hc_desc_s hc2hc_desc;
 typedef struct {
      int (*okp)(
 	  const struct hc2hc_desc_s *desc,
-	  const R *rio, const R *iio, int ios, int vs, int m, int dist);
+	  const R *rio, const R *iio, INT ios, INT vs, INT m, INT dist);
      rdft_kind kind;
      int vl;
 } hc2hc_genus;
 
 struct hc2hc_desc_s {
-     int radix;
+     INT radix;
      const char *nam;
      const tw_instr *tw;
      opcnt ops;
      const hc2hc_genus *genus;
-     int s1;
-     int s2;
-     int dist;
+     INT s1;
+     INT s2;
+     INT dist;
 };
 
 typedef const R *(*khc2hc) (R *rioarray, R *iioarray, const R *W,
-                              stride ios, int m, int dist);
+			    stride ios, INT m, INT dist);
 void X(khc2hc_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc);
 
 extern const solvtab X(solvtab_rdft_r2hc);
@@ -131,24 +131,24 @@ typedef struct {
      int (*okp)(
 	  const khc2r_desc *desc,
 	  const R *ri, const R *ii, const R *O,
-	  int ris, int iis, int os, int vl, int ivs, int ovs);
+	  INT ris, INT iis, INT os, INT vl, INT ivs, INT ovs);
      rdft_kind kind;
-     int vl;
+     INT vl;
 } khc2r_genus;
 
 struct khc2r_desc_s {
-     int sz;    /* size of transform computed */
+     INT sz;    /* size of transform computed */
      const char *nam;
      opcnt ops;
      const khc2r_genus *genus;
-     int ris, iis;
-     int os;
-     int ivs;
-     int ovs;
+     INT ris, iis;
+     INT os;
+     INT ivs;
+     INT ovs;
 };
 
 typedef void (*khc2r) (const R *ri, const R *ii, R *O, stride ris,
-		       stride iis, stride os, int vl, int ivs, int ovs);
+		       stride iis, stride os, INT vl, INT ivs, INT ovs);
 void X(khc2r_register)(planner *p, khc2r codelet, const khc2r_desc *desc);
 
 /* real-output DFT codelets, type III (middle case of hc2hc DIF) */
@@ -166,23 +166,23 @@ typedef struct {
      int (*okp)(
 	  const kr2r_desc *desc,
 	  const R *I, const R *O,
-	  int is, int os, int vl, int ivs, int ovs);
-     int vl;
+	  INT is, INT os, INT vl, INT ivs, INT ovs);
+     INT vl;
 } kr2r_genus;
 
 struct kr2r_desc_s {
-     int sz;    /* size of transform computed */
+     INT sz;    /* size of transform computed */
      const char *nam;
      opcnt ops;
      const kr2r_genus *genus;
      rdft_kind kind;
-     int is, os;
-     int ivs;
-     int ovs;
+     INT is, os;
+     INT ivs;
+     INT ovs;
 };
 
 typedef void (*kr2r) (const R *I, R *O, stride is, stride os,
-		      int vl, int ivs, int ovs);
+		      INT vl, INT ivs, INT ovs);
 void X(kr2r_register)(planner *p, kr2r codelet, const kr2r_desc *desc);
 
 extern const solvtab X(solvtab_rdft_r2r);

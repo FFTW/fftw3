@@ -41,8 +41,8 @@ typedef struct {
 
      plan *cld1, *cld2;
      R *omega;
-     int n, npad, g, ginv;
-     int is, os;
+     INT n, npad, g, ginv;
+     INT is, os;
      plan *cld_omega;
 } P;
 
@@ -59,10 +59,10 @@ static rader_tl *omegas = 0;
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int n = ego->n; /* prime */
-     int npad = ego->npad; /* == n - 1 for unpadded Rader; always even */
-     int is = ego->is, os;
-     int k, gpower, g;
+     INT n = ego->n; /* prime */
+     INT npad = ego->npad; /* == n - 1 for unpadded Rader; always even */
+     INT is = ego->is, os;
+     INT k, gpower, g;
      R *buf, *omega;
      R r0;
 
@@ -154,11 +154,11 @@ static void apply(const plan *ego_, R *I, R *O)
      X(ifree)(buf);
 }
 
-static R *mkomega(plan *p_, int n, int npad, int ginv)
+static R *mkomega(plan *p_, INT n, INT npad, INT ginv)
 {
      plan_rdft *p = (plan_rdft *) p_;
      R *omega;
-     int i, gpower;
+     INT i, gpower;
      trigreal scale;
 
      if ((omega = X(rader_tl_find)(n, npad + 1, ginv, omegas))) 
@@ -255,9 +255,9 @@ static int applicable(const solver *ego, const problem *p, const planner *plnr)
      return (!NO_SLOWP(plnr) && applicable0(p));
 }
 
-static int choose_transform_size(int minsz)
+static INT choose_transform_size(INT minsz)
 {
-     static const int primes[] = { 2, 3, 5, 0 };
+     static const INT primes[] = { 2, 3, 5, 0 };
      while (!X(factors_into)(minsz, primes) || minsz % 2)
 	  ++minsz;
      return minsz;
@@ -268,8 +268,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      const problem_rdft *p = (const problem_rdft *) p_;
      P *pln;
-     int n, npad;
-     int is, os;
+     INT n, npad;
+     INT is, os;
      plan *cld1 = (plan *) 0;
      plan *cld2 = (plan *) 0;
      plan *cld_omega = (plan *) 0;

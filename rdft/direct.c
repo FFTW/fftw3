@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.19 2003-04-05 02:35:49 stevenj Exp $ */
+/* $Id: direct.c,v 1.20 2005-12-18 01:28:50 athena Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -38,7 +38,7 @@ typedef struct {
 	  const kr2r_desc *r2r;
      } desc;
      kodelet k;
-     int sz;
+     INT sz;
      rdft_kind kind;
      const char *nam;
 } S;
@@ -47,9 +47,9 @@ typedef struct {
      plan_rdft super;
 
      stride is, ros, ios;
-     int ioffset;
-     int vl;
-     int ivs, ovs;
+     INT ioffset;
+     INT vl;
+     INT ivs, ovs;
      kodelet k;
      const S *slv;
 } P;
@@ -95,7 +95,7 @@ static void print(const plan *ego_, printer *p)
 	      X(rdft_kind_str)(s->kind), s->sz, ego->vl, s->nam);
 }
 
-static int ioffset(rdft_kind kind, int sz, int s)
+static INT ioffset(rdft_kind kind, INT sz, INT s)
 {
      return(s * ((kind == R2HC || kind == HC2R) ? sz : (sz - 1)));
 }
@@ -105,8 +105,8 @@ static int applicable(const solver *ego_, const problem *p_)
      if (RDFTP(p_)) {
           const S *ego = (const S *) ego_;
           const problem_rdft *p = (const problem_rdft *) p_;
-	  int vl;
-	  int ivs, ovs;
+	  INT vl;
+	  INT ivs, ovs;
 
           return (
 	       1
@@ -122,12 +122,12 @@ static int applicable(const solver *ego_, const problem *p_)
 		   ego->desc.r2hc->genus->okp(ego->desc.r2hc, p->I, p->O, p->O
 					      + ioffset(ego->kind, ego->sz, p->sz->dims[0].os),
 					      p->sz->dims[0].is,
-					      p->sz->dims[0].os, -p->sz->dims[0].os,
+					      p->sz->dims[0].os, 0-p->sz->dims[0].os,
 					      vl, ivs, ovs))
 	       && (!HC2R_KINDP(ego->kind) ||
 		   ego->desc.hc2r->genus->okp(ego->desc.hc2r, p->I, p->I
 					      + ioffset(ego->kind, ego->sz, p->sz->dims[0].is), p->O,
-					      p->sz->dims[0].is, -p->sz->dims[0].is,
+					      p->sz->dims[0].is, 0-p->sz->dims[0].is,
 					      p->sz->dims[0].os, 
 					      vl, ivs, ovs))
 	       
@@ -193,7 +193,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  pln->ios = 0;
      }
      else {  
-	  int nr = (ego->kind == R2HC || ego->kind == HC2R) 
+	  INT nr = (ego->kind == R2HC || ego->kind == HC2R) 
 	       ?(d[0].n + 2) / 2 : /* R2HCII */ (d[0].n + 1) / 2;
 	  pln->ros = X(mkstride)(nr, hc2r_kindp ? d[0].is : d[0].os);
 	  pln->ios = X(mkstride)(ego->sz - nr + 1, 

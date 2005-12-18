@@ -18,17 +18,17 @@
  *
  */
 
-/* $Id: ct.c,v 1.46 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: ct.c,v 1.47 2005-12-18 01:28:50 athena Exp $ */
 
 #include "ct.h"
 
-ct_solver *(*X(mksolver_ct_hook))(size_t, int, int, ct_mkinferior) = 0;
+ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, ct_mkinferior) = 0;
 
 typedef struct {
      plan_dft super;
      plan *cld;
      plan *cldw;
-     int r;
+     INT r;
 } P;
 
 static void apply_dit(const plan *ego_, R *ri, R *ii, R *ro, R *io)
@@ -83,7 +83,7 @@ static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
 {
      if (DFTP(p_)) {
           const problem_dft *p = (const problem_dft *) p_;
-	  int r;
+	  INT r;
 
           return (1
                   && p->sz->rnk == 1
@@ -124,7 +124,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_dft *p;
      P *pln = 0;
      plan *cld = 0, *cldw = 0;
-     int n, r, m, vl, ivs, ovs;
+     INT n, r, m, vl, ivs, ovs;
      iodim *d;
      tensor *t1, *t2;
 
@@ -203,7 +203,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-ct_solver *X(mksolver_ct)(size_t size, int r, int dec, ct_mkinferior mkcldw)
+ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, ct_mkinferior mkcldw)
 {
      static const solver_adt sadt = { mkplan };
      ct_solver *slv = (ct_solver *)X(mksolver)(size, &sadt);

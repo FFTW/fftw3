@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: buffered.c,v 1.53 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: buffered.c,v 1.54 2005-12-18 01:28:50 athena Exp $ */
 
 #include "dft.h"
 
 typedef struct {
-     int nbuf;
-     int maxbufsz;
-     int skew_alignment;
-     int skew;
+     INT nbuf;
+     INT maxbufsz;
+     INT skew_alignment;
+     INT skew;
      const char *nam;
 } bufadt;
 
@@ -39,9 +39,9 @@ typedef struct {
      plan_dft super;
 
      plan *cld, *cldcpy, *cldrest;
-     int n, vl, nbuf, bufdist;
-     int ivs, ovs;
-     int roffset, ioffset;
+     INT n, vl, nbuf, bufdist;
+     INT ivs, ovs;
+     INT roffset, ioffset;
 
      const S *slv;
 } P;
@@ -50,15 +50,15 @@ typedef struct {
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
-     int nbuf = ego->nbuf;
+     INT nbuf = ego->nbuf;
      R *bufs = (R *)MALLOC(sizeof(R) * nbuf * ego->bufdist * 2, BUFFERS);
 
      plan_dft *cld = (plan_dft *) ego->cld;
      plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
      plan_dft *cldrest;
-     int i, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
-     int roffset = ego->roffset, ioffset = ego->ioffset;
+     INT i, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
+     INT roffset = ego->roffset, ioffset = ego->ioffset;
 
      for (i = nbuf; i <= vl; i += nbuf) {
           /* transform to bufs: */
@@ -105,12 +105,12 @@ static void print(const plan *ego_, printer *p)
               ego->cld, ego->cldcpy, ego->cldrest);
 }
 
-static int compute_nbuf(int n, int vl, const S *ego)
+static INT compute_nbuf(INT n, INT vl, const S *ego)
 {
      return X(compute_nbuf)(n, vl, ego->adt->nbuf, ego->adt->maxbufsz);
 }
 
-static int toobig(int n, const S *ego)
+static int toobig(INT n, const S *ego)
 {
      return (n > ego->adt->maxbufsz);
 }
@@ -178,8 +178,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cldrest = (plan *) 0;
      const problem_dft *p = (const problem_dft *) p_;
      R *bufs = (R *) 0;
-     int nbuf = 0, bufdist, n, vl;
-     int ivs, ovs, roffset, ioffset;
+     INT nbuf = 0, bufdist, n, vl;
+     INT ivs, ovs, roffset, ioffset;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -211,7 +211,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      /* attempt to keep real and imaginary part in the same order,
 	so as to allow optimizations in the the copy plan */
-     roffset = (p->ri - p->ii > 0) ? 1 : 0;
+     roffset = (p->ri - p->ii > 0) ? (INT)1 : (INT)0;
      ioffset = 1 - roffset;
 
      /* initial allocation for the purpose of planning */
@@ -249,8 +249,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      /* plan the leftover transforms (cldrest): */
      {
-	  int id = ivs * (nbuf * (vl / nbuf));
-	  int od = ovs * (nbuf * (vl / nbuf));
+	  INT id = ivs * (nbuf * (vl / nbuf));
+	  INT od = ovs * (nbuf * (vl / nbuf));
 	  cldrest = X(mkplan_d)(plnr, 
 				X(mkproblem_dft_d)(
 				     X(tensor_copy)(p->sz),
@@ -305,7 +305,7 @@ void X(dft_buffered_register)(planner *p)
      /* FIXME: what are good defaults? */
      static const bufadt adt = {
 	  /* nbuf */           8,
-	  /* maxbufsz */       (65536 / sizeof(R)),
+	  /* maxbufsz */       (INT)(65536 / sizeof(R)),
 	  /* skew_alignment */ 8,
 #if HAVE_SIMD  /* 5 is odd and screws up the alignment. */
 	  /* skew */           6,

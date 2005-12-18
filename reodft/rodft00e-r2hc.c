@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.27 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: rodft00e-r2hc.c,v 1.28 2005-12-18 01:28:50 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing.
 
@@ -50,19 +50,19 @@ typedef struct {
      plan_rdft super;
      plan *cld;
      twid *td;
-     int is, os;
-     int n;
-     int vl;
-     int ivs, ovs;
+     INT is, os;
+     INT n;
+     INT vl;
+     INT ivs, ovs;
 } P;
 
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is, os = ego->os;
-     int i, n = ego->n;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is, os = ego->os;
+     INT i, n = ego->n;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W;
      R *buf;
 
@@ -91,7 +91,7 @@ static void apply(const plan *ego_, R *I, R *O)
 	  /* FIXME: use recursive/cascade summation for better stability? */
 	  O[0] = buf[0] * 0.5;
 	  for (i = 1; i + i < n - 1; ++i) {
-	       int k = i + i;
+	       INT k = i + i;
 	       O[os * (k - 1)] = -buf[n - i];
 	       O[os * k] = O[os * (k - 2)] + buf[i];
 	  }
@@ -154,7 +154,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      plan *cld;
      R *buf;
-     int n;
+     INT n;
      opcnt ops;
 
      static const plan_adt padt = {

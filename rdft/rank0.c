@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.28 2005-03-15 18:25:53 athena Exp $ */
+/* $Id: rank0.c,v 1.29 2005-12-18 01:28:50 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -32,7 +32,7 @@
 
 typedef struct {
      plan_rdft super;
-     int vl;
+     INT vl;
      int rnk;
      iodim d[MAXRNK];
      const char *nam;
@@ -69,17 +69,17 @@ static int fill_iodim(P *pln, const problem_rdft *p)
 }
 
 /* generic higher-rank copy routine, calls cpy2d() to do the real work */
-static void copy(const iodim *d, int rnk, int vl,
+static void copy(const iodim *d, int rnk, INT vl,
 		 R *I, R *O,
 		 void (*cpy2d)(R *I, R *O,
-			       int n0, int is0, int os0,
-			       int n1, int is1, int os1, int vl))
+			       INT n0, INT is0, INT os0,
+			       INT n1, INT is1, INT os1, INT vl))
 {
      A(rnk >= 2);
      if (rnk == 2)
 	  cpy2d(I, O, d[0].n, d[0].is, d[0].os, d[1].n, d[1].is, d[1].os, vl);
      else {
-	  int i;
+	  INT i;
 	  for (i = 0; i < d[0].n; ++i, I += d[0].is, O += d[0].os)
 	       copy(d + 1, rnk - 1, vl, I, O, cpy2d);
      }
@@ -101,15 +101,15 @@ static int transposep(const P *pln)
 
 /* generic higher-rank transpose routine, calls transpose2d() to do
  * the real work */
-static void transpose(const iodim *d, int rnk, int vl,
+static void transpose(const iodim *d, int rnk, INT vl,
 		      R *I,
-		      void (*transpose2d)(R *I, int n, int s0, int s1, int vl))
+		      void (*transpose2d)(R *I, INT n, INT s0, INT s1, INT vl))
 {
      A(rnk >= 2);
      if (rnk == 2)
 	  transpose2d(I, d[0].n, d[0].is, d[0].os, vl);
      else {
-	  int i;
+	  INT i;
 	  for (i = 0; i < d[0].n; ++i, I += d[0].is)
 	       transpose(d + 1, rnk - 1, vl, I, transpose2d);
      }
@@ -179,7 +179,7 @@ static int applicable_tiled(const P *pln, const problem_rdft *p)
 	     && pln->rnk >= 2
 
 	     /* somewhat arbitrary */
-	     && pln->vl < (int)(CACHESIZE / (16 * sizeof(R)))
+	     && pln->vl < (INT)(CACHESIZE / (16 * sizeof(R)))
 	  );
 }
 
@@ -245,7 +245,7 @@ static int applicable_ip_sq_tiled(const P *pln, const problem_rdft *p)
 	     && applicable_ip_sq(pln, p)
 
 	     /* somewhat arbitrary */
-	     && pln->vl * 2 < (int)(CACHESIZE / (16 * sizeof(R)))
+	     && pln->vl * 2 < (INT)(CACHESIZE / (16 * sizeof(R)))
 	  );
 }
 

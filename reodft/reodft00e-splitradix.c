@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.8 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: reodft00e-splitradix.c,v 1.9 2005-12-18 01:28:50 athena Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.
@@ -42,20 +42,20 @@ typedef struct {
      plan_rdft super;
      plan *clde, *cldo;
      twid *td;
-     int is, os;
-     int n;
-     int vl;
-     int ivs, ovs;
+     INT is, os;
+     INT n;
+     INT vl;
+     INT ivs, ovs;
 } P;
 
 /* redft00 */
 static void apply_e(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is, os = ego->os;
-     int i, j, n = ego->n + 1, n2 = (n-1)/2;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is, os = ego->os;
+     INT i, j, n = ego->n + 1, n2 = (n-1)/2;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W - 2;
      R *buf;
 
@@ -129,10 +129,10 @@ static void apply_e(const plan *ego_, R *I, R *O)
 static void apply_o(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is, os = ego->os;
-     int i, j, n = ego->n - 1, n2 = (n+1)/2;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is, os = ego->os;
+     INT i, j, n = ego->n - 1, n2 = (n+1)/2;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *W = ego->td->W - 2;
      R *buf;
 
@@ -271,7 +271,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      plan *clde, *cldo;
      R *buf;
-     int n, n0;
+     INT n, n0;
      opcnt ops;
      int inplace_odd;
 
@@ -284,7 +284,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_rdft *) p_;
 
-     n = (n0 = p->sz->dims[0].n) + (p->kind[0] == REDFT00 ? -1 : 1);
+     n = (n0 = p->sz->dims[0].n) + (p->kind[0] == REDFT00 ? (INT)-1 : (INT)1);
      A(n > 0 && n % 2 == 0);
      buf = (R *) MALLOC(sizeof(R) * (n/2), BUFFERS);
 
@@ -327,7 +327,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      
      X(ops_zero)(&ops);
      ops.other = n/2;
-     ops.add = (p->kind[0]==REDFT00 ? 2:0) + (n/2-1)/2 * 6 + ((n/2)%2==0) * 2;
+     ops.add = (p->kind[0]==REDFT00 ? (INT)2 : (INT)0) +
+	  (n/2-1)/2 * 6 + ((n/2)%2==0) * 2;
      ops.mul = 1 + (n/2-1)/2 * 6 + ((n/2)%2==0) * 2;
 
      /* tweak ops.other so that r2hc-pad is used for small sizes, which

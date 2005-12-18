@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.30 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.31 2005-12-18 01:28:50 athena Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -31,7 +31,7 @@
 typedef struct {
      rdftapply apply;
      int (*applicable)(const problem_rdft *p, planner *plnr,
-		       int dim0, int dim1, int dim2, int *nbuf);
+		       int dim0, int dim1, int dim2, INT *nbuf);
      const char *nam;
 } transpose_adt;
 
@@ -42,12 +42,12 @@ typedef struct {
 
 typedef struct {
      plan_rdft super;
-     int n, vl;
-     int s0, s1, vs;
-     int m;
-     int nbuf; /* buffer size */
-     int nd, md, d; /* transpose_gcd params */
-     int fd;
+     INT n, vl;
+     INT s0, s1, vs;
+     INT m;
+     INT nbuf; /* buffer size */
+     INT nd, md, d; /* transpose_gcd params */
+     INT fd;
      const S *slv;
 } P;
 
@@ -55,9 +55,9 @@ typedef struct {
 /*************************************************************************/
 /* some utilities for the solvers */
 
-static int gcd(int a, int b)
+static INT gcd(INT a, INT b)
 {
-     int r;
+     INT r;
      do {
 	  r = a % b;
 	  a = b;
@@ -71,8 +71,8 @@ static int gcd(int a, int b)
 /********************* Generic Ntuple transposes *************************/
 /*************************************************************************/
 
-static void rec_transpose(R *A, R *B, int n0, int n1,
-			  int lda, int ldb, int vl)
+static void rec_transpose(R *A, R *B, INT n0, INT n1,
+			  INT lda, INT ldb, INT vl)
 {
      /* FIXME: inline and get rid of this routine */
      X(cpy2d)(A, B,
@@ -81,7 +81,7 @@ static void rec_transpose(R *A, R *B, int n0, int n1,
 	      vl);
 }
 
-static void rec_transpose_sq_ip(R *M, int n, int vl)
+static void rec_transpose_sq_ip(R *M, INT n, INT vl)
 {
      /* FIXME: inline and get rid of this routine */
      X(transpose)(M, n, n * vl, vl, vl);
@@ -93,16 +93,16 @@ static void rec_transpose_sq_ip(R *M, int n, int vl)
    "unpacked" (n x fda) formats.  The "padding" elements at the ends
    of the rows are not preserved. */
 
-static void pack(R *A, int n, int fda, int N)
+static void pack(R *A, INT n, INT fda, INT N)
 {
-     int i;
+     INT i;
      for (i = 0; i < n; ++i)
 	  memmove(A + (n*N) * i, A + (fda*N) * i, sizeof(R) * (n*N));
 }
 
-static void unpack(R *A, int n, int fda, int N)
+static void unpack(R *A, INT n, INT fda, INT N)
 {
-     int i;
+     INT i;
      for (i = n-1; i >= 0; --i)
 	  memmove(A + (fda*N) * i, A + (n*N) * i, sizeof(R) * (n*N));
 }
@@ -124,7 +124,7 @@ static void unpack(R *A, int n, int fda, int N)
    routine with d = gcd(p, q), n = p/d, and m = q/d. 
 
    See also transpose_cut, below, if |p-q| * gcd(p,q) < max(p,q). */
-static void transpose_gcd(R *A, int n, int m, int d, int N, R *buf)
+static void transpose_gcd(R *A, INT n, INT m, INT d, INT N, R *buf)
 {
      A(n > 0 && m > 0 && N > 0 && d > 0);
      if (d == 1) {
@@ -132,7 +132,7 @@ static void transpose_gcd(R *A, int n, int m, int d, int N, R *buf)
 	  memcpy(A, buf, m*n*N*sizeof(R));
      }
      else {
-	  int i, num_el = n*m*d*N;
+	  INT i, num_el = n*m*d*N;
 
 	  /* treat as (d x n) x (d' x m) matrix.  (d' = d) */
 
@@ -177,7 +177,7 @@ static void transpose_gcd(R *A, int n, int m, int d, int N, R *buf)
    of N-tuples and buf contains min(n,m) * |n-m| * N elements. 
 
    See also transpose_gcd, above, if |n-m| * gcd(n,m) > max(n,m). */
-static void transpose_cut(R *A, int n, int m, int N, R *buf)
+static void transpose_cut(R *A, INT n, INT m, INT N, R *buf)
 {
      A(n > 0 && m > 0 && N > 0);
      if (n > m) {
@@ -222,13 +222,13 @@ static void transpose_cut(R *A, int n, int m, int N, R *buf)
  * 
  */
 
-static void transpose_toms513(R *a, int nx, int ny, int N,
-                              char *move, int move_size, R *buf)
+static void transpose_toms513(R *a, INT nx, INT ny, INT N,
+                              char *move, INT move_size, R *buf)
 {
-     int i, im, mn;
+     INT i, im, mn;
      R *b, *c, *d;
-     int ncount;
-     int k;
+     INT ncount;
+     INT k;
      
      /* check arguments and initialize: */
      A(ny > 0 && nx > 0 && N > 0 && move_size > 0);
@@ -252,8 +252,8 @@ static void transpose_toms513(R *a, int nx, int ny, int N,
      im = ny;
      
      while (1) {
-	  int i1, i2, i1c, i2c;
-	  int kmi;
+	  INT i1, i2, i1c, i2c;
+	  INT kmi;
 	  
 	  /** Rearrange the elements of a loop
 	      and its companion loop: **/
@@ -333,7 +333,7 @@ static void transpose_toms513(R *a, int nx, int ny, int N,
 	  /** Search for loops to rearrange: **/
 	  
 	  while (1) {
-	       int max = k - i;
+	       INT max = k - i;
 	       ++i;
 	       A(i <= max);
 	       im += ny;
@@ -361,7 +361,7 @@ static void transpose_toms513(R *a, int nx, int ny, int N,
 
 /* whether we can transpose with one of our routines expecting
    contiguous Ntuples */
-static int Ntuple_transposable(const iodim *a, const iodim *b, int vl, int vs)
+static int Ntuple_transposable(const iodim *a, const iodim *b, INT vl, INT vs)
 {
      return (vs == 1 && b->is == vl && a->os == vl &&
 	     ((a->n == b->n && a->is == b->os
@@ -371,7 +371,7 @@ static int Ntuple_transposable(const iodim *a, const iodim *b, int vl, int vs)
 
 /* check whether a and b correspond to the first and second dimensions
    of a transpose of tuples with vector length = vl, stride = vs. */
-static int transposable(const iodim *a, const iodim *b, int vl, int vs)
+static int transposable(const iodim *a, const iodim *b, INT vl, INT vs)
 {
      return ((a->n == b->n && a->os == b->is && a->is == b->os)
              || Ntuple_transposable(a, b, vl, vs));
@@ -387,8 +387,8 @@ static int pickdim(const tensor *s, int *pdim0, int *pdim1, int *pdim2)
 	       if (dim0 == dim1) continue;
                if ((s->rnk == 2 || s->dims[dim2].is == s->dims[dim2].os)
 		   && transposable(s->dims + dim0, s->dims + dim1, 
-				   s->rnk == 2 ? 1 : s->dims[dim2].n,
-				   s->rnk == 2 ? 1 : s->dims[dim2].is)) {
+				   s->rnk == 2 ? (INT)1 : s->dims[dim2].n,
+				   s->rnk == 2 ? (INT)1 : s->dims[dim2].is)) {
                     *pdim0 = dim0;
                     *pdim1 = dim1;
 		    *pdim2 = dim2;
@@ -400,7 +400,7 @@ static int pickdim(const tensor *s, int *pdim0, int *pdim1, int *pdim2)
 
 /* generic applicability function */
 static int applicable(const solver *ego_, const problem *p_, planner *plnr,
-		      int *dim0, int *dim1, int *dim2, int *nbuf)
+		      int *dim0, int *dim1, int *dim2, INT *nbuf)
 {
      if (RDFTP(p_)) {
           const S *ego = (const S *) ego_;
@@ -435,7 +435,7 @@ static int applicable(const solver *ego_, const problem *p_, planner *plnr,
      return 0;
 }
 
-static void get_transpose_vec(const problem_rdft *p, int dim2, int *vl,int *vs)
+static void get_transpose_vec(const problem_rdft *p, int dim2, INT *vl,INT *vs)
 {
      if (p->vecsz->rnk == 2) {
 	  *vl = 1; *vs = 1;
@@ -453,8 +453,8 @@ static void get_transpose_vec(const problem_rdft *p, int dim2, int *vl,int *vs)
 static void apply_gcd(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int nd = ego->nd, md = ego->md, d = ego->d;
-     int vl = ego->vl;
+     INT nd = ego->nd, md = ego->md, d = ego->d;
+     INT vl = ego->vl;
      R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
      A(ego->vs == 1 && ego->s1 == vl && ego->s0 == ego->m * vl
        && ego->n == nd * d && ego->m == md * d);
@@ -464,11 +464,11 @@ static void apply_gcd(const plan *ego_, R *I, R *O)
 }
 
 static int applicable_gcd(const problem_rdft *p, planner *plnr,
-			  int dim0, int dim1, int dim2, int *nbuf)
+			  int dim0, int dim1, int dim2, INT *nbuf)
 {
-     int n = p->vecsz->dims[dim0].n;
-     int m = p->vecsz->dims[dim1].n;
-     int vl, vs;
+     INT n = p->vecsz->dims[dim0].n;
+     INT m = p->vecsz->dims[dim1].n;
+     INT vl, vs;
      get_transpose_vec(p, dim2, &vl, &vs);
      *nbuf = n * (m / gcd(n, m)) * vl;
      return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts */
@@ -490,8 +490,8 @@ static const transpose_adt adt_gcd =
 static void apply_cut(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int n = ego->n, m = ego->m;
-     int vl = ego->vl;
+     INT n = ego->n, m = ego->m;
+     INT vl = ego->vl;
      R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
      A(ego->vs == 1 && ego->s1 == vl && ego->s0 == m * vl);
      UNUSED(O);
@@ -500,11 +500,11 @@ static void apply_cut(const plan *ego_, R *I, R *O)
 }
 
 static int applicable_cut(const problem_rdft *p, planner *plnr,
-			  int dim0, int dim1, int dim2, int *nbuf)
+			  int dim0, int dim1, int dim2, INT *nbuf)
 {
-     int n = p->vecsz->dims[dim0].n;
-     int m = p->vecsz->dims[dim1].n;
-     int vl, vs;
+     INT n = p->vecsz->dims[dim0].n;
+     INT m = p->vecsz->dims[dim1].n;
+     INT vl, vs;
      get_transpose_vec(p, dim2, &vl, &vs);
      *nbuf = X(imin)(n, m) * X(iabs)(n - m) * vl;
      return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts? */
@@ -526,8 +526,8 @@ static const transpose_adt adt_cut =
 static void apply_toms513(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int n = ego->n, m = ego->m;
-     int vl = ego->vl;
+     INT n = ego->n, m = ego->m;
+     INT vl = ego->vl;
      R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
      A(ego->vs == 1 && ego->s1 == vl && ego->s0 == m * vl);
      UNUSED(O);
@@ -536,11 +536,11 @@ static void apply_toms513(const plan *ego_, R *I, R *O)
 }
 
 static int applicable_toms513(const problem_rdft *p, planner *plnr,
-			   int dim0, int dim1, int dim2, int *nbuf)
+			   int dim0, int dim1, int dim2, INT *nbuf)
 {
-     int n = p->vecsz->dims[dim0].n;
-     int m = p->vecsz->dims[dim1].n;
-     int vl, vs;
+     INT n = p->vecsz->dims[dim0].n;
+     INT m = p->vecsz->dims[dim1].n;
+     INT vl, vs;
      get_transpose_vec(p, dim2, &vl, &vs);
      *nbuf = 2*vl 
 	  + ((n + m) / 2 * sizeof(char) + sizeof(R) - 1) / sizeof(R);
@@ -572,7 +572,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const S *ego = (const S *) ego_;
      const problem_rdft *p;
-     int dim0, dim1, dim2, nbuf;
+     int dim0, dim1, dim2;
+     INT nbuf;
      P *pln;
 
      static const plan_adt padt = {

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.6 2005-09-27 13:25:50 athena Exp $ */
+/* $Id: dftw-direct.c,v 1.7 2005-12-18 01:28:50 athena Exp $ */
 
 #include "ct.h"
 
@@ -32,12 +32,12 @@ typedef struct {
 typedef struct {
      plan_dftw super;
      kdftw k;
-     int r, vl;
-     int s, vs;
-     int mcount;
+     INT r, vl;
+     INT s, vs;
+     INT mcount;
      stride bufstride, ios;
      const R *tdW;
-     int mstart, m;
+     INT mstart, m;
      twid *td;
      const S *slv;
 } P;
@@ -49,7 +49,7 @@ typedef struct {
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     int i, vl = ego->vl, s = ego->s, vs = ego->vs, mcount = ego->mcount;
+     INT i, vl = ego->vl, s = ego->s, vs = ego->vs, mcount = ego->mcount;
      const R *W = ego->tdW;
      ASSERT_ALIGNED_DOUBLE;
      for (i = 0; i < vl; ++i)
@@ -60,7 +60,7 @@ static void apply(const plan *ego_, R *rio, R *iio)
   Buffered code 
  *************************************************************/
 static const R *dobatch(kdftw k, R *rA, R *iA, const R *W, stride ios, 
-			int dist, int r, int batchsz, R *buf, stride bufstride)
+			INT dist, INT r, INT batchsz, R *buf, stride bufstride)
 {
      X(cpy2d_pair_ci)(rA, iA, buf, buf + 1, 
 		      r, WS(ios, 1), WS(bufstride, 1),
@@ -74,7 +74,7 @@ static const R *dobatch(kdftw k, R *rA, R *iA, const R *W, stride ios,
 
 /* must be even for SIMD alignment; should not be 2^k to avoid
    associativity conflicts */
-static int compute_batchsize(int radix)
+static INT compute_batchsize(INT radix)
 {
      /* round up to multiple of 4 */
      radix += 3;
@@ -86,8 +86,8 @@ static int compute_batchsize(int radix)
 static void apply_buf(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     int i, j, mcount = ego->mcount, vl = ego->vl, r = ego->r;
-     int batchsz = compute_batchsize(r);
+     INT i, j, mcount = ego->mcount, vl = ego->vl, r = ego->r;
+     INT batchsz = compute_batchsize(r);
      R *buf;
 
      STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
@@ -145,7 +145,7 @@ static void print(const plan *ego_, printer *p)
 }
 
 static int applicable0(const S *ego, 
-		       int dec, int r, int m, int s, int vl, int vs, 
+		       int dec, INT r, INT m, INT s, INT vl, INT vs, 
 		       R *rio, R *iio,
 		       const planner *plnr)
 {
@@ -165,12 +165,12 @@ static int applicable0(const S *ego,
 }
 
 static int applicable0_buf(const S *ego, 
-			   int dec, int r, int m, int s, int vl, int vs, 
+			   int dec, INT r, INT m, INT s, INT vl, INT vs, 
 			   R *rio, R *iio,
 			   const planner *plnr)
 {
      const ct_desc *e = ego->desc;
-     int batchsz;
+     INT batchsz;
      UNUSED(vl); UNUSED(s); UNUSED(vs); UNUSED(rio); UNUSED(iio);
 
      return (
@@ -189,7 +189,7 @@ static int applicable0_buf(const S *ego,
 }
 
 static int applicable(const S *ego, 
-		      int dec, int r, int m, int s, int vl, int vs, 
+		      int dec, INT r, INT m, INT s, INT vl, INT vs, 
 		      R *rio, R *iio,
 		      const planner *plnr)
 {
@@ -201,7 +201,7 @@ static int applicable(const S *ego,
 	       return 0;
      }
 
-     if (NO_UGLYP(plnr) && X(ct_uglyp)((ego->bufferedp? 512 : 16),
+     if (NO_UGLYP(plnr) && X(ct_uglyp)((ego->bufferedp? (INT)512 : (INT)16),
 				       m * r, r))
 	  return 0;
 
@@ -212,8 +212,8 @@ static int applicable(const S *ego,
 }
 
 static plan *mkcldw(const ct_solver *ego_, 
-		    int dec, int r, int m, int s, int vl, int vs, 
-		    int mstart, int mcount,
+		    int dec, INT r, INT m, INT s, INT vl, INT vs, 
+		    INT mstart, INT mcount,
 		    R *rio, R *iio,
 		    planner *plnr)
 {

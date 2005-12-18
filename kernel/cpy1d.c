@@ -21,9 +21,9 @@
 /* out of place 1D copy routine */
 #include "ifftw.h"
 
-void X(cpy1d)(R *I, R *O, int n0, int is0, int os0, int vl)
+void X(cpy1d)(R *I, R *O, INT n0, INT is0, INT os0, INT vl)
 {
-     int i0, v;
+     INT i0, v;
 
      A(I != O);
      switch (vl) {

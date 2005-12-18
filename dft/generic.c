@@ -27,14 +27,14 @@ typedef struct {
 typedef struct {
      plan_dft super;
      twid *td;
-     int n, is, os;
+     INT n, is, os;
 } P;
 
 
-static void cdot(int n, const E *x, const R *w, 
+static void cdot(INT n, const E *x, const R *w, 
 		 R *or0, R *oi0, R *or1, R *oi1)
 {
-     int i;
+     INT i;
 
      E rr = x[0], ri = 0, ir = x[1], ii = 0; 
      x += 2;
@@ -51,10 +51,10 @@ static void cdot(int n, const E *x, const R *w,
      *oi1 = ir + ri;
 }
 
-static void hartley(int n, const R *xr, const R *xi, int xs, E *o,
+static void hartley(INT n, const R *xr, const R *xi, INT xs, E *o,
 		    R *pr, R *pi)
 {
-     int i;
+     INT i;
      E sr, si;
      o[0] = sr = xr[0]; o[1] = si = xi[0]; o += 2;
      for (i = 1; i + i < n; ++i) {
@@ -71,8 +71,8 @@ static void hartley(int n, const R *xr, const R *xi, int xs, E *o,
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
-     int i;
-     int n = ego->n, is = ego->is, os = ego->os;
+     INT i;
+     INT n = ego->n, is = ego->is, os = ego->os;
      const R *W = ego->td->W;
      E *buf;
 
@@ -141,7 +141,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p;
      P *pln;
-     int n;
+     INT n;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, X(plan_null_destroy)

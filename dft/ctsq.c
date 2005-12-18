@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ctsq.c,v 1.5 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: ctsq.c,v 1.6 2005-12-18 01:28:50 athena Exp $ */
 
 /* special ``square transpose'' cooley-tukey solver for in-place problems */
 #include "ct.h"
@@ -36,7 +36,7 @@ typedef struct {
      twid *td;
      plan *cld;
      stride ios, vs;
-     int m, r, dist;
+     INT m, r, dist;
      const S *slv;
 } P;
 
@@ -80,7 +80,7 @@ static void print(const plan *ego_, printer *p)
 	      ego->r, e->nam, ego->cld);
 }
 
-#define divides(a, b) (((int)(b) % (int)(a)) == 0)
+#define divides(a, b) (((b) % (a)) == 0)
 static int applicable(const S *ego, const problem *p_, planner *plnr)
 {
      if (DFTP(p_)) {
@@ -99,12 +99,12 @@ static int applicable(const S *ego, const problem *p_, planner *plnr)
 		  /* conditions for transposition */
                   && vd[0].n == e->radix
                   && d[0].os == vd[0].is
-                  && d[0].is == (int)e->radix * vd[0].is
-                  && vd[0].os == (int)d[0].n * vd[0].is
+                  && d[0].is == e->radix * vd[0].is
+                  && vd[0].os == d[0].n * vd[0].is
 
 		  /* SIMD strides etc. */
 		  && (e->genus->okp(e, p->ri, p->ii, vd[0].os, vd[0].is, 
-				    d[0].n / e->radix, d[0].is, plnr))
+		       d[0].n / e->radix, d[0].is, plnr))
 	       );
      }
      return 0;

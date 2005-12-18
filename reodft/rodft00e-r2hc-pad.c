@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc-pad.c,v 1.2 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: rodft00e-r2hc-pad.c,v 1.3 2005-12-18 01:28:50 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, padded antisymmetrically to
    twice the size.  This is asymptotically a factor of ~2 worse than
@@ -35,19 +35,19 @@ typedef struct {
 typedef struct {
      plan_rdft super;
      plan *cld, *cldcpy;
-     int is;
-     int n;
-     int vl;
-     int ivs, ovs;
+     INT is;
+     INT n;
+     INT vl;
+     INT ivs, ovs;
 } P;
 
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is;
-     int i, n = ego->n;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is;
+     INT i, n = ego->n;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *buf;
 
      buf = (R *) MALLOC(sizeof(R) * (2*n), BUFFERS);
@@ -124,8 +124,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      plan *cld = (plan *) 0, *cldcpy;
      R *buf = (R *) 0;
-     int n;
-     int vl, ivs, ovs;
+     INT n;
+     INT vl, ivs, ovs;
      opcnt ops;
 
      static const plan_adt padt = {

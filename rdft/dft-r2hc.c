@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.30 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.31 2005-12-18 01:28:50 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -36,15 +36,15 @@ typedef struct {
 typedef struct {
      plan_dft super;
      plan *cld;
-     int ishift, oshift;
-     int os;
-     int n;
+     INT ishift, oshift;
+     INT os;
+     INT n;
 } P;
 
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
-     int n;
+     INT n;
 
      UNUSED(ii);
 
@@ -55,7 +55,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      n = ego->n;
      if (n > 1) {
-	  int i, os = ego->os;
+	  INT i, os = ego->os;
 	  for (i = 1; i < (n + 1)/2; ++i) {
 	       E rop, iop, iom, rom;
 	       rop = ro[os * i];
@@ -101,9 +101,9 @@ static int applicable0(const problem *p_)
      return 0;
 }
 
-static int split(R *r, R *i, int n, int s)
+static int splitp(R *r, R *i, INT n, INT s)
 {
-     return ((r > i ? r - i : i - r) >= ((int)n) * (s > 0 ? s : -s));
+     return ((r > i ? (r - i) : (i - r)) >= n * (s > 0 ? s : 0-s));
 }
 
 static int applicable(const problem *p_, const planner *plnr)
@@ -118,8 +118,8 @@ static int applicable(const problem *p_, const planner *plnr)
 
 	  /* this solver is ok for split arrays */
 	  if (p->sz->rnk == 1 &&
-	      split(p->ri, p->ii, p->sz->dims[0].n, p->sz->dims[0].is) &&
-	      split(p->ro, p->io, p->sz->dims[0].n, p->sz->dims[0].os))
+	      splitp(p->ri, p->ii, p->sz->dims[0].n, p->sz->dims[0].is) &&
+	      splitp(p->ro, p->io, p->sz->dims[0].n, p->sz->dims[0].os))
 	       return 1;
 
 	  return !(NO_DFT_R2HCP(plnr));
@@ -131,7 +131,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      const problem_dft *p;
      plan *cld;
-     int ishift = 0, oshift = 0;
+     INT ishift = 0, oshift = 0;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -149,7 +149,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  int i;
 	  for (i = 0; i < cld_vec->rnk; ++i) { /* make all istrides > 0 */
 	       if (cld_vec->dims[i].is < 0) {
-		    int nm1 = cld_vec->dims[i].n - 1;
+		    INT nm1 = cld_vec->dims[i].n - 1;
 		    ishift -= nm1 * (cld_vec->dims[i].is *= -1);
 		    oshift -= nm1 * (cld_vec->dims[i].os *= -1);
 	       }

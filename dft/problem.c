@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.34 2003-05-04 23:37:09 athena Exp $ */
+/* $Id: problem.c,v 1.35 2005-12-18 01:28:50 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -35,8 +35,8 @@ static void hash(const problem *p_, md5 *m)
      const problem_dft *p = (const problem_dft *) p_;
      X(md5puts)(m, "dft");
      X(md5int)(m, p->ri == p->ro);
-     X(md5ptrdiff)(m, p->ii - p->ri);
-     X(md5ptrdiff)(m, p->io - p->ro);
+     X(md5INT)(m, p->ii - p->ri);
+     X(md5INT)(m, p->io - p->ro);
      X(md5int)(m, X(alignment_of)(p->ri));
      X(md5int)(m, X(alignment_of)(p->ii));
      X(md5int)(m, X(alignment_of)(p->ro));

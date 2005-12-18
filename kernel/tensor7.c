@@ -18,31 +18,38 @@
  *
  */
 
-/* $Id: tensor7.c,v 1.8 2005-03-06 01:09:25 athena Exp $ */
+/* $Id: tensor7.c,v 1.9 2005-12-18 01:28:50 athena Exp $ */
 
 #include "ifftw.h"
+
+static int signof(INT x)
+{
+     if (x < 0) return -1;
+     if (x == 0) return 0;
+     /* if (x > 0) */ return 1;
+}
 
 /* total order among iodim's */
 int X(dimcmp)(const iodim *a, const iodim *b)
 {
-     int sai = X(iabs)(a->is), sbi = X(iabs)(b->is);
-     int sao = X(iabs)(a->os), sbo = X(iabs)(b->os);
-     int sam = X(imin)(sai, sao), sbm = X(imin)(sbi, sbo);
+     INT sai = X(iabs)(a->is), sbi = X(iabs)(b->is);
+     INT sao = X(iabs)(a->os), sbo = X(iabs)(b->os);
+     INT sam = X(imin)(sai, sao), sbm = X(imin)(sbi, sbo);
 
      /* in descending order of min{istride, ostride} */
      if (sam != sbm)
-	  return (sbm - sam);
+	  return signof(sbm - sam);
 
      /* in case of a tie, in descending order of istride */
      if (sbi != sai)
-          return (sbi - sai);
+          return signof(sbi - sai);
 
      /* in case of a tie, in descending order of ostride */
      if (sbo != sao)
-          return (sbo - sao);
+          return signof(sbo - sao);
 
      /* in case of a tie, in ascending order of n */
-     return (int)(a->n - b->n);
+     return signof(a->n - b->n);
 }
 
 
@@ -91,8 +98,7 @@ tensor *X(tensor_compress)(const tensor *sz)
    effective contiguous 1d array.  Assumes that a.is >= b.is. */
 static int strides_contig(iodim *a, iodim *b)
 {
-     return (a->is == b->is * (int)b->n &&
-             a->os == b->os * (int)b->n);
+     return (a->is == b->is * b->n && a->os == b->os * b->n);
 }
 
 /* Like tensor_compress, but also compress into one dimension any

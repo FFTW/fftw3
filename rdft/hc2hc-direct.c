@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-direct.c,v 1.4 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: hc2hc-direct.c,v 1.5 2005-12-18 01:28:50 athena Exp $ */
 
 #include "hc2hc.h"
 
@@ -32,8 +32,8 @@ typedef struct {
      plan_hc2hc super;
      khc2hc k;
      plan *cld0, *cldm; /* children for 0th and middle butterflies */
-     int r, m, vl, mstart1, mcount2;
-     int s, vs;
+     INT r, m, vl, mstart1, mcount2;
+     INT s, vs;
      stride ios;
      const R *tdW;
      twid *td;
@@ -45,9 +45,9 @@ static void apply(const plan *ego_, R *IO)
      const P *ego = (const P *) ego_;
      plan_rdft *cld0 = (plan_rdft *) ego->cld0;
      plan_rdft *cldm = (plan_rdft *) ego->cldm;
-     int i, r = ego->r, m = ego->m, vl = ego->vl;
-     int mstart1 = ego->mstart1, mcount2 = ego->mcount2;
-     int s = ego->s, vs = ego->vs;
+     INT i, r = ego->r, m = ego->m, vl = ego->vl;
+     INT mstart1 = ego->mstart1, mcount2 = ego->mcount2;
+     INT s = ego->s, vs = ego->vs;
 
      for (i = 0; i < vl; ++i, IO += vs) {
 	  cld0->apply((plan *) cld0, IO, IO);
@@ -88,8 +88,8 @@ static void print(const plan *ego_, printer *p)
 }
 
 static int applicable0(const S *ego, 
-		       rdft_kind kind, int r, int m, int s, int vl, int vs, 
-		       int mstart1, int mcount2,
+		       rdft_kind kind, INT r, INT m, INT s, INT vl, INT vs, 
+		       INT mstart1, INT mcount2,
 		       R *IO)
 {
      const hc2hc_desc *e = ego->desc;
@@ -112,8 +112,8 @@ static int applicable0(const S *ego,
 }
 
 static int applicable(const S *ego, 
-		      rdft_kind kind, int r, int m, int s, int vl, int vs, 
-		      int mstart1, int mcount2,
+		      rdft_kind kind, INT r, INT m, INT s, INT vl, INT vs, 
+		      INT mstart1, INT mcount2,
 		      R *IO, const planner *plnr)
 {
      if (!applicable0(ego, kind, r, m, s, vl, vs, mstart1, mcount2, IO))
@@ -126,15 +126,15 @@ static int applicable(const S *ego,
 }
 
 static plan *mkcldw(const hc2hc_solver *ego_, 
-		    rdft_kind kind, int r, int m, int s, int vl, int vs, 
-		    int mstart, int mcount,
+		    rdft_kind kind, INT r, INT m, INT s, INT vl, INT vs, 
+		    INT mstart, INT mcount,
 		    R *IO, planner *plnr)
 {
      const S *ego = (const S *) ego_;
      P *pln;
      const hc2hc_desc *e = ego->desc;
      plan *cld0, *cldm;
-     int mstart1, mcount2;
+     INT mstart1, mcount2;
 
      static const plan_adt padt = {
 	  0, awake, print, destroy

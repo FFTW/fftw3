@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.26 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.27 2005-12-18 01:28:50 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -44,20 +44,20 @@ typedef struct {
      plan_rdft super;
      plan *cld;
      twid *td, *td2;
-     int is, os;
-     int n;
-     int vl;
-     int ivs, ovs;
+     INT is, os;
+     INT n;
+     INT vl;
+     INT ivs, ovs;
      rdft_kind kind;
 } P;
 
 static void apply_re11(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is, os = ego->os;
-     int i, n = ego->n;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is, os = ego->os;
+     INT i, n = ego->n;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *W;
      R *buf;
      E cur;
@@ -99,7 +99,7 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 	  O[0] = W[0] * buf[0];
 	  for (i = 1; i < n - i; ++i) {
 	       E a, b;
-	       int k;
+	       INT k;
 	       a = buf[i];
 	       b = buf[n - i];
 	       k = i + i;
@@ -119,10 +119,10 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 static void apply_ro11(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is, os = ego->os;
-     int i, n = ego->n;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is, os = ego->os;
+     INT i, n = ego->n;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *W;
      R *buf;
      E cur;
@@ -164,7 +164,7 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
 	  O[0] = W[0] * buf[0];
 	  for (i = 1; i < n - i; ++i) {
 	       E a, b;
-	       int k;
+	       INT k;
 	       a = buf[i];
 	       b = buf[n - i];
 	       k = i + i;
@@ -237,7 +237,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      plan *cld;
      R *buf;
-     int n;
+     INT n;
      opcnt ops;
 
      static const plan_adt padt = {

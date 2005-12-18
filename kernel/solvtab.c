@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: solvtab.c,v 1.9 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: solvtab.c,v 1.10 2005-12-18 01:28:50 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -31,3 +31,4 @@ void X(solvtab_exec)(const solvtab tbl, planner *p)
      }
      p->cur_reg_nam = 0;
 }
+

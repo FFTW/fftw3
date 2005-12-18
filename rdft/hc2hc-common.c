@@ -49,14 +49,14 @@
 
 /* generic routine that produces cld0 and cldm, used by inferior
    solvers */
-int X(hc2hc_mkcldrn)(rdft_kind kind, int r, int m, int s,
-		       int mstart, int mcount,
+int X(hc2hc_mkcldrn)(rdft_kind kind, INT r, INT m, INT s,
+		       INT mstart, INT mcount,
 		       R *IO, planner *plnr,
 		       plan **cld0p, plan **cldmp)
 {
      tensor *radix = X(mktensor_1d)(r, m * s, m * s);
      tensor *null = X(mktensor_0d)();
-     int imid = s * (m/2);
+     INT imid = s * (m/2);
      plan *cld0 = 0, *cldm = 0;
 
      A(R2HC_KINDP(kind) || HC2R_KINDP(kind));

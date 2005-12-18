@@ -112,8 +112,8 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
 problem *X(mkproblem_rdft2_d)(tensor *sz, tensor *vecsz,
 			      R *r, R *rio, R *iio, rdft_kind kind);
 int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim);
-int X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k);
-void X(rdft2_strides)(rdft_kind kind, const iodim *d, int *is, int *os);
+INT X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k);
+void X(rdft2_strides)(rdft_kind kind, const iodim *d, INT *is, INT *os);
 
 /* verify.c: */
 void X(rdft2_verify)(plan *pln, const problem_rdft2 *p, int rounds);

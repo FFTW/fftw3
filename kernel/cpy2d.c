@@ -22,11 +22,11 @@
 #include "ifftw.h"
 
 void X(cpy2d)(R *I, R *O,
-	      int n0, int is0, int os0,
-	      int n1, int is1, int os1, 
-	      int vl)
+	      INT n0, INT is0, INT os0,
+	      INT n1, INT is1, INT os1, 
+	      INT vl)
 {
-     int i0, i1, v;
+     INT i0, i1, v;
 
      switch (vl) {
 	 case 1:
@@ -56,13 +56,11 @@ void X(cpy2d)(R *I, R *O,
      }
 }
 
-#define IABS(x) (((x) < 0) ? (-(x)) : (x))
-
 /* like cpy2d, but read input contiguously if possible */
 void X(cpy2d_ci)(R *I, R *O,
-		 int n0, int is0, int os0,
-		 int n1, int is1, int os1, 
-		 int vl)
+		 INT n0, INT is0, INT os0,
+		 INT n1, INT is1, INT os1, 
+		 INT vl)
 {
      if (IABS(is0) < IABS(is1))	/* inner loop is for n0 */
 	  X(cpy2d) (I, O, n0, is0, os0, n1, is1, os1, vl);
@@ -72,8 +70,9 @@ void X(cpy2d_ci)(R *I, R *O,
 
 /* like cpy2d, but write output contiguously if possible */
 void X(cpy2d_co)(R *I, R *O,
-		 int n0, int is0, int os0,
-		 int n1, int is1, int os1, int vl)
+		 INT n0, INT is0, INT os0,
+		 INT n1, INT is1, INT os1, 
+		 INT vl)
 {
      if (IABS(os0) < IABS(os1))	/* inner loop is for n0 */
 	  X(cpy2d) (I, O, n0, is0, os0, n1, is1, os1, vl);
@@ -85,11 +84,11 @@ void X(cpy2d_co)(R *I, R *O,
 /* tiled copy routines */
 struct cpy2d_closure {
      R *I, *O;
-     int is0, os0, is1, os1, vl;
+     INT is0, os0, is1, os1, vl;
      R *buf; 
 };
 
-static void dotile(int n0l, int n0u, int n1l, int n1u, void *args)
+static void dotile(INT n0l, INT n0u, INT n1l, INT n1u, void *args)
 {
      struct cpy2d_closure *k = (struct cpy2d_closure *)args;
      X(cpy2d)(k->I + n0l * k->is0 + n1l * k->is1,
@@ -99,7 +98,7 @@ static void dotile(int n0l, int n0u, int n1l, int n1u, void *args)
 	      k->vl);
 }
 
-static void dotile_buf(int n0l, int n0u, int n1l, int n1u, void *args)
+static void dotile_buf(INT n0l, INT n0u, INT n1l, INT n1u, void *args)
 {
      struct cpy2d_closure *k = (struct cpy2d_closure *)args;
 
@@ -120,10 +119,10 @@ static void dotile_buf(int n0l, int n0u, int n1l, int n1u, void *args)
 
 
 void X(cpy2d_tiled)(R *I, R *O,
-		    int n0, int is0, int os0,
-		    int n1, int is1, int os1, int vl) 
+		    INT n0, INT is0, INT os0,
+		    INT n1, INT is1, INT os1, INT vl) 
 {
-     int tilesz = X(compute_tilesz)(vl, 
+     INT tilesz = X(compute_tilesz)(vl, 
 				    1 /* input array */
 				    + 1 /* ouput array */);
      struct cpy2d_closure k;
@@ -139,13 +138,13 @@ void X(cpy2d_tiled)(R *I, R *O,
 }
 
 void X(cpy2d_tiledbuf)(R *I, R *O,
-		       int n0, int is0, int os0,
-		       int n1, int is1, int os1, int vl) 
+		       INT n0, INT is0, INT os0,
+		       INT n1, INT is1, INT os1, INT vl) 
 {
      R buf[CACHESIZE / (2 * sizeof(R))];
      /* input and buffer in cache, or
 	output and buffer in cache */
-     int tilesz = X(compute_tilesz)(vl, 2);
+     INT tilesz = X(compute_tilesz)(vl, 2);
      struct cpy2d_closure k;
      k.I = I;
      k.O = O;

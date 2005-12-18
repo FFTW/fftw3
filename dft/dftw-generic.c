@@ -27,7 +27,7 @@ struct P_s;
 typedef struct {
      void (*bytwiddle)(const struct P_s *ego, R *rio, R *iio);
      void (*mktwiddle)(struct P_s *ego, int flg);
-     int (*applicable)(int r, int m, const planner *plnr);
+     int (*applicable)(INT r, INT m, const planner *plnr);
      const char *nam;
 } wadt;
 
@@ -40,7 +40,7 @@ typedef struct P_s {
      plan_dftw super;
 
      const wadt *adt;
-     int r, m, s, vl, vs, mstart, mcount;
+     INT r, m, s, vl, vs, mstart, mcount;
      plan *cld;
 
      /* defined only for solver1: */
@@ -55,7 +55,7 @@ typedef struct P_s {
 } P;
 
 /* approximate log2(sqrt(n)) */
-static int choose_log2_twradix(int n)
+static int choose_log2_twradix(INT n)
 {
      int log2r = 0;
      while (n > 0) {
@@ -69,12 +69,12 @@ static int choose_log2_twradix(int n)
 static void mktwiddle2(P *ego, int flg)
 {
      if (flg) {
-	  int n = ego->r * ego->m;
+	  INT n = ego->r * ego->m;
 	  int log2_twradix = choose_log2_twradix(n);
-	  int twradix = 1 << log2_twradix;
-	  int n0 = twradix;
-	  int n1 = (n + twradix - 1) / twradix;
-	  int i;
+	  INT twradix = ((INT)1) << log2_twradix;
+	  INT n0 = twradix;
+	  INT n1 = (n + twradix - 1) / twradix;
+	  INT i;
 	  R *W0, *W1;
 
 	  ego->log2_twradix = log2_twradix;
@@ -97,20 +97,20 @@ static void mktwiddle2(P *ego, int flg)
 
 static void bytwiddle2(const P *ego, R *rio, R *iio)
 {
-     int i, j, k;
-     int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
+     INT i, j, k;
+     INT r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
      int twshft = ego->log2_twradix;
-     int twmsk = (1 << twshft) - 1;
-     int mstart = ego->mstart, mcount = ego->mcount;
-     int kstart = mstart == 0;
+     INT twmsk = (((INT)1) << twshft) - 1;
+     INT mstart = ego->mstart, mcount = ego->mcount;
+     INT kstart = mstart == 0;
 
      const R *W0 = ego->W0, *W1 = ego->W1;
      for (i = 0; i < vl; ++i) {
 	  for (j = 1; j < r; ++j) {
-	       unsigned jk = j * (kstart + mstart);
+	       INT jk = j * (kstart + mstart);
 	       for (k = kstart; k < mcount; ++k, jk += j) {
-		    unsigned jk0 = jk & twmsk;
-		    unsigned jk1 = jk >> twshft;
+		    INT jk0 = jk & twmsk;
+		    INT jk1 = jk >> twshft;
 		    E xr = rio[s * j * m + s * k];
 		    E xi = iio[s * j * m + s * k];
 		    E wr0 = W0[2 * jk0];
@@ -128,7 +128,7 @@ static void bytwiddle2(const P *ego, R *rio, R *iio)
      }
 }
 
-static int applicable2(int r, int m, const planner *plnr)
+static int applicable2(INT r, INT m, const planner *plnr)
 {
      return (1 
 	     && (!NO_UGLYP(plnr) || (m * r > 65536 && r > 64))
@@ -147,13 +147,13 @@ static void mktwiddle1(P *ego, int flg)
 
 static void bytwiddle1(const P *ego, R *rio, R *iio)
 {
-     int i, j, k;
-     int r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
-     int mcount = ego->mcount, mstart = ego->mstart;
-     int jstart = mstart == 0;
-     int jrem_W = 2 * ((m - 1) - (mcount - jstart));
-     int jrem_p = s * (m - mcount);
-     ptrdiff_t ip = iio - rio;
+     INT i, j, k;
+     INT r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
+     INT mcount = ego->mcount, mstart = ego->mstart;
+     INT jstart = mstart == 0;
+     INT jrem_W = 2 * ((m - 1) - (mcount - jstart));
+     INT jrem_p = s * (m - mcount);
+     INT ip = iio - rio;
      R *p;
 
      for (i = 0; i < vl; ++i) {
@@ -178,7 +178,7 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
      }
 }
 
-static int applicable1(int r, int m, const planner *plnr)
+static int applicable1(INT r, INT m, const planner *plnr)
 {
      UNUSED(r); UNUSED(m);
      return (1 
@@ -233,8 +233,8 @@ static void print(const plan *ego_, printer *p)
 }
 
 static plan *mkcldw(const ct_solver *ego_, 
-		    int dec, int r, int m, int s, int vl, int vs, 
-		    int mstart, int mcount,
+		    int dec, INT r, INT m, INT s, INT vl, INT vs, 
+		    INT mstart, INT mcount,
 		    R *rio, R *iio,
 		    planner *plnr)
 {
@@ -287,7 +287,7 @@ static plan *mkcldw(const ct_solver *ego_,
      return (plan *) 0;
 }
 
-static void regsolver(planner *plnr, const wadt *adt, int r, int dec)
+static void regsolver(planner *plnr, const wadt *adt, INT r, int dec)
 {
      S *slv = (S *)X(mksolver_ct)(sizeof(S), r, dec, mkcldw);
      slv->adt = adt;

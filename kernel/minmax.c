@@ -18,16 +18,16 @@
  *
  */
 
-/* $Id: minmax.c,v 1.6 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: minmax.c,v 1.7 2005-12-18 01:28:50 athena Exp $ */
 
 #include "ifftw.h"
 
-int X(imax)(int a, int b)
+INT X(imax)(INT a, INT b)
 {
      return (a > b) ? a : b;
 }
 
-int X(imin)(int a, int b)
+INT X(imin)(INT a, INT b)
 {
      return (a < b) ? a : b;
 }

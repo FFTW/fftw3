@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.21 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.22 2005-12-18 01:28:50 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -52,10 +52,10 @@ typedef struct {
 typedef struct {
      plan_rdft super;
      plan *cld;
-     int is, os;
-     int n;
-     int vl;
-     int ivs, ovs;
+     INT is, os;
+     INT n;
+     INT vl;
+     INT ivs, ovs;
      rdft_kind kind;
 } P;
 
@@ -66,17 +66,17 @@ static DK(SQRT2, +1.4142135623730950488016887242096980785696718753769);
 static void apply_re11(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is, os = ego->os;
-     int i, n = ego->n, n2 = n/2;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is, os = ego->os;
+     INT i, n = ego->n, n2 = n/2;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *buf;
 
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  {
-	       int m;
+	       INT m;
 	       for (i = 0, m = n2; m < n; ++i, m += 4)
 		    buf[i] = I[is * m];
 	       for (; m < 2 * n; ++i, m += 4)
@@ -97,7 +97,7 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 	  
 	  /* FIXME: strength-reduce loop by 4 to eliminate ugly sgn_set? */
 	  for (i = 0; i + i + 1 < n2; ++i) {
-	       int k = i + i + 1;
+	       INT k = i + i + 1;
 	       E c1, s1;
 	       E c2, s2;
 	       c1 = buf[k];
@@ -135,17 +135,17 @@ static void apply_re11(const plan *ego_, R *I, R *O)
 static void apply_ro11(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     int is = ego->is, os = ego->os;
-     int i, n = ego->n, n2 = n/2;
-     int iv, vl = ego->vl;
-     int ivs = ego->ivs, ovs = ego->ovs;
+     INT is = ego->is, os = ego->os;
+     INT i, n = ego->n, n2 = n/2;
+     INT iv, vl = ego->vl;
+     INT ivs = ego->ivs, ovs = ego->ovs;
      R *buf;
 
      buf = (R *) MALLOC(sizeof(R) * n, BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
 	  {
-	       int m;
+	       INT m;
 	       for (i = 0, m = n2; m < n; ++i, m += 4)
 		    buf[i] = I[is * (n - 1 - m)];
 	       for (; m < 2 * n; ++i, m += 4)
@@ -166,8 +166,8 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
 	  
 	  /* FIXME: strength-reduce loop by 4 to eliminate ugly sgn_set? */
 	  for (i = 0; i + i + 1 < n2; ++i) {
-	       int k = i + i + 1;
-	       int j;
+	       INT k = i + i + 1;
+	       INT j;
 	       E c1, s1;
 	       E c2, s2;
 	       c1 = buf[k];
@@ -247,7 +247,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      plan *cld;
      R *buf;
-     int n;
+     INT n;
      opcnt ops;
 
      static const plan_adt padt = {

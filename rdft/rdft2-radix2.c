@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.26 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.27 2005-12-18 01:28:50 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -52,8 +52,8 @@ typedef struct {
      plan_dft super;
      plan *cld;
      twid *td;
-     int is, os, ivs, ovs;
-     int n, vl;
+     INT is, os, ivs, ovs;
+     INT n, vl;
      const S *slv;
 } P;
 
@@ -118,11 +118,11 @@ static int applicable_b_dft(const problem *p_, const planner *plnr)
 /*
  * forward rdft2 via dft
  */
-static void k_f_dft(R *rio, R *iio, const R *W, int n, int dist)
+static void k_f_dft(R *rio, R *iio, const R *W, INT n, INT dist)
 {
-     int i;
+     INT i;
      R *pp = rio, *pm = rio + n * dist;
-     ptrdiff_t im = iio - rio;
+     INT im = iio - rio;
 
      /* i = 0 and i = n */
      {
@@ -166,8 +166,8 @@ static void apply_f_dft(const plan *ego_, R *r, R *rio, R *iio)
      }
 
      {
-          int i, vl = ego->vl, n2 = ego->n / 2;
-          int ovs = ego->ovs, os = ego->os;
+          INT i, vl = ego->vl, n2 = ego->n / 2;
+          INT ovs = ego->ovs, os = ego->os;
           const R *W = ego->td->W;
           for (i = 0; i < vl; ++i, rio += ovs, iio += ovs)
                k_f_dft(rio, iio, W, n2, os);
@@ -190,11 +190,11 @@ static const madt adt_f_dft = {
 /*
  * forward rdft2 via rdft
  */
-static void k_f_rdft(R *rio, R *iio, const R *W, int n, int dist)
+static void k_f_rdft(R *rio, R *iio, const R *W, INT n, INT dist)
 {
-     int i;
+     INT i;
      R *pp = rio, *pm = rio + n * dist;
-     ptrdiff_t im = iio - rio;
+     INT im = iio - rio;
 
      /* i = 0 and i = n */
      {
@@ -233,8 +233,8 @@ static void apply_f_rdft(const plan *ego_, R *r, R *rio, R *iio)
      }
 
      {
-          int i, vl = ego->vl, n2 = ego->n / 2;
-          int ovs = ego->ovs, os = ego->os;
+          INT i, vl = ego->vl, n2 = ego->n / 2;
+          INT ovs = ego->ovs, os = ego->os;
           const R *W = ego->td->W;
           for (i = 0; i < vl; ++i, rio += ovs, iio += ovs)
                k_f_rdft(rio, iio, W, n2, os);
@@ -262,11 +262,11 @@ static const madt adt_f_rdft = {
 /*
  * backward rdft2 via dft
  */
-static void k_b_dft(R *rio, R *iio, const R *W, int n, int dist)
+static void k_b_dft(R *rio, R *iio, const R *W, INT n, INT dist)
 {
-     int i;
+     INT i;
      R *pp = rio, *pm = rio + n * dist;
-     ptrdiff_t im = iio - rio;
+     INT im = iio - rio;
 
      /* i = 0 and i = n */
      {
@@ -298,8 +298,8 @@ static void apply_b_dft(const plan *ego_, R *r, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      {
-          int i, vl = ego->vl, n2 = ego->n / 2;
-          int ivs = ego->ivs, is = ego->is;
+          INT i, vl = ego->vl, n2 = ego->n / 2;
+          INT ivs = ego->ivs, is = ego->is;
           const R *W = ego->td->W;
 	  R *rio1 = rio, *iio1 = iio;
           for (i = 0; i < vl; ++i, rio1 += ivs, iio1 += ivs)
@@ -330,11 +330,11 @@ static const madt adt_b_dft = {
 /*
  * backward rdft2 via backward rdft
  */
-static void k_b_rdft(R *rio, R *iio, const R *W, int n, int dist)
+static void k_b_rdft(R *rio, R *iio, const R *W, INT n, INT dist)
 {
-     int i;
+     INT i;
      R *pp = rio, *pm = rio + n * dist;
-     ptrdiff_t im = iio - rio;
+     INT im = iio - rio;
 
      /* i = 0 and i = n */
      {
@@ -365,8 +365,8 @@ static void apply_b_rdft(const plan *ego_, R *r, R *rio, R *iio)
      const P *ego = (const P *) ego_;
 
      {
-          int i, vl = ego->vl, n2 = ego->n / 2;
-          int ivs = ego->ivs, is = ego->is;
+          INT i, vl = ego->vl, n2 = ego->n / 2;
+          INT ivs = ego->ivs, is = ego->is;
           const R *W = ego->td->W;
 	  R *rio1 = rio, *iio1 = iio;
           for (i = 0; i < vl; ++i, rio1 += ivs, iio1 += ivs)

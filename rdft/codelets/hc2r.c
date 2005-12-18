@@ -24,7 +24,7 @@
 static int okp(const khc2r_desc *d,
 	       const R *ri, const R *ii,
 	       const R *O,
-	       int ris, int iis, int os, int vl, int ivs, int ovs)
+	       INT ris, INT iis, INT os, INT vl, INT ivs, INT ovs)
 {
      UNUSED(ri); UNUSED(ii); UNUSED(O); UNUSED(vl);
      return (1

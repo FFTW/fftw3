@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.16 2005-03-09 01:44:25 athena Exp $ */
+/* $Id: primes.c,v 1.17 2005-12-18 01:28:50 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -33,12 +33,13 @@
 
 /* compute (x * y) mod p, but watch out for integer overflows; we must
    have x, y >= 0, p > 0.  This routine is slow. */
-int X(safe_mulmod)(int x, int y, int p)
+INT X(safe_mulmod)(INT x, INT y, INT p)
 {
-     if (y == 0 || x <= INT_MAX / y)
+     /* FIXME: INT_MAX is too conservative */
+     if (y == 0 || x <= ((INT)INT_MAX) / y)
 	  return((x * y) % p);
      else {
-	  int y2 = y/2;
+	  INT y2 = y/2;
 	  return((X(safe_mulmod)(x, y2, p) +
 		  X(safe_mulmod)(x, y - y2, p)) % p);
      }
@@ -49,13 +50,14 @@ int X(safe_mulmod)(int x, int y, int p)
 
 /* Compute n^m mod p, where m >= 0 and p > 0.  If we really cared, we
    could make this tail-recursive. */
-int X(power_mod)(int n, int m, int p)
+
+INT X(power_mod)(INT n, INT m, INT p)
 {
      A(p > 0);
      if (m == 0)
 	  return 1;
      else if (m % 2 == 0) {
-	  int x = X(power_mod)(n, m / 2, p);
+	  INT x = X(power_mod)(n, m / 2, p);
 	  return MULMOD(x, x, p);
      }
      else
@@ -63,13 +65,13 @@ int X(power_mod)(int n, int m, int p)
 }
 
 /* the following two routines were contributed by Greg Dionne. */
-static int get_prime_factors(int n, int *primef)
+static INT get_prime_factors(INT n, INT *primef)
 {
-     int i;
-     int size = 0;
+     INT i;
+     INT size = 0;
 
      A(n % 2 == 0); /* this routine is designed only for even n */
-     primef[size++] = 2;
+     primef[size++] = (INT)2;
      do
 	  n >>= 1;
      while ((n & 1) == 0);
@@ -90,11 +92,11 @@ static int get_prime_factors(int n, int *primef)
      return size;
 }
 
-int X(find_generator)(int p)
+INT X(find_generator)(INT p)
 {
-    int n, i, size;
-    int primef[16];     /* smallest number = 32589158477190044730 > 2^64 */
-    int pm1 = p - 1;
+    INT n, i, size;
+    INT primef[16];     /* smallest number = 32589158477190044730 > 2^64 */
+    INT pm1 = p - 1;
 
     if (p == 2)
 	 return 1;
@@ -111,9 +113,9 @@ int X(find_generator)(int p)
 
 /* Return first prime divisor of n  (It would be at best slightly faster to
    search a static table of primes; there are 6542 primes < 2^16.)  */
-int X(first_divisor)(int n)
+INT X(first_divisor)(INT n)
 {
-     int i;
+     INT i;
      if (n <= 1)
 	  return n;
      if (n % 2 == 0)
@@ -124,29 +126,29 @@ int X(first_divisor)(int n)
      return n;
 }
 
-int X(is_prime)(int n)
+int X(is_prime)(INT n)
 {
      return(n > 1 && X(first_divisor)(n) == n);
 }
 
-int X(next_prime)(int n)
+INT X(next_prime)(INT n)
 {
      while (!X(is_prime)(n)) ++n;
      return n;
 }
 
-int X(factors_into)(int n, const int *primes)
+int X(factors_into)(INT n, const INT *primes)
 {
-     for (; *primes; ++primes) 
+     for (; *primes != 0; ++primes) 
 	  while ((n % *primes) == 0) 
 	       n /= *primes;
      return (n == 1);
 }
 
 /* integer square root.  Return floor(sqrt(N)) */
-int X(isqrt)(int n)
+INT X(isqrt)(INT n)
 {
-     int guess, iguess;
+     INT guess, iguess;
 
      A(n >= 1);
      guess = n; iguess = 1;
@@ -159,14 +161,14 @@ int X(isqrt)(int n)
      return guess;
 }
 
-static int isqrt_maybe(int n)
+static INT isqrt_maybe(INT n)
 {
-     int guess = X(isqrt)(n);
+     INT guess = X(isqrt)(n);
      return guess * guess == n ? guess : 0;
 }
 
-#define divides(a, b) (((int)(b) % (int)(a)) == 0)
-int X(choose_radix)(int r, int n)
+#define divides(a, b) (((b) % (a)) == 0)
+INT X(choose_radix)(INT r, INT n)
 {
      if (r > 0) {
 	  if (divides(r, n)) return r;
@@ -175,7 +177,7 @@ int X(choose_radix)(int r, int n)
 	  return X(first_divisor)(n);
      } else {
 	  /* r is negative.  If n = (-r) * q^2, take q as the radix */
-	  r = -r;
+	  r = 0 - r;
 	  return (n > r && divides(r, n)) ? isqrt_maybe(n / r) : 0;
      }
 }

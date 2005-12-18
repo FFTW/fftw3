@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet-dft.h,v 1.6 2005-02-14 17:08:52 athena Exp $ */
+/* $Id: codelet-dft.h,v 1.7 2005-12-18 01:28:50 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -41,24 +41,24 @@ typedef struct {
      int (*okp)(
 	  const kdft_desc *desc,
 	  const R *ri, const R *ii, const R *ro, const R *io,
-	  int is, int os, int vl, int ivs, int ovs,
+	  INT is, INT os, INT vl, INT ivs, INT ovs,
 	  const planner *plnr);
-     int vl;
+     INT vl;
 } kdft_genus;
 
 struct kdft_desc_s {
-     int sz;    /* size of transform computed */
+     INT sz;    /* size of transform computed */
      const char *nam;
      opcnt ops;
      const kdft_genus *genus;
-     int is;
-     int os;
-     int ivs;
-     int ovs;
+     INT is;
+     INT os;
+     INT ivs;
+     INT ovs;
 };
 
 typedef void (*kdft) (const R *ri, const R *ii, R *ro, R *io,
-                      stride is, stride os, int vl, int ivs, int ovs);
+                      stride is, stride os, INT vl, INT ivs, INT ovs);
 void X(kdft_register)(planner *p, kdft codelet, const kdft_desc *desc);
 
 
@@ -67,31 +67,31 @@ typedef struct ct_desc_s ct_desc;
 typedef struct {
      int (*okp)(
 	  const struct ct_desc_s *desc,
-	  const R *rio, const R *iio, int ios, int vs, int m, int dist,
+	  const R *rio, const R *iio, INT ios, INT vs, INT m, INT dist,
 	  const planner *plnr);
-     int vl;
+     INT vl;
 } ct_genus;
 
 struct ct_desc_s {
-     int radix;
+     INT radix;
      const char *nam;
      const tw_instr *tw;
      opcnt ops;
      const ct_genus *genus;
-     int s1;
-     int s2;
-     int dist;
+     INT s1;
+     INT s2;
+     INT dist;
 };
 
 typedef const R *(*kdftw) (R *rioarray, R *iioarray, const R *W,
-			   stride ios, int m, int dist);
+			   stride ios, INT m, INT dist);
 void X(kdft_dit_register)(planner *p, kdftw codelet, const ct_desc *desc);
 void X(kdft_dif_register)(planner *p, kdftw codelet, const ct_desc *desc);
 
 
 typedef const R *(*kdftwsq) (R *rioarray, R *iioarray,
 			     const R *W, stride is, stride vs,
-			     int m, int dist);
+			     INT m, INT dist);
 void X(kdft_difsq_register)(planner *p, kdftwsq codelet, const ct_desc *desc);
 
 

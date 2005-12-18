@@ -23,7 +23,7 @@
 
 static int okp(const hc2hc_desc *d,
 	       const R *rio, const R *iio, 
-	       int ios, int vs, int m, int dist)
+	       INT ios, INT vs, INT m, INT dist)
 {
      UNUSED(rio); UNUSED(iio); UNUSED(m);
      return (1

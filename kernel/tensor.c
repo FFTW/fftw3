@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.39 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: tensor.c,v 1.40 2005-12-18 01:28:50 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -60,9 +60,10 @@ void X(tensor_destroy)(tensor *sz)
      X(ifree)(sz);
 }
 
-int X(tensor_sz)(const tensor *sz)
+INT X(tensor_sz)(const tensor *sz)
 {
-     int i, n = 1;
+     int i;
+     INT n = 1;
 
      if (!FINITE_RNK(sz->rnk))
           return 0;
@@ -79,16 +80,16 @@ void X(tensor_md5)(md5 *p, const tensor *t)
      if (FINITE_RNK(t->rnk)) {
 	  for (i = 0; i < t->rnk; ++i) {
 	       const iodim *q = t->dims + i;
-	       X(md5int)(p, q->n);
-	       X(md5int)(p, q->is);
-	       X(md5int)(p, q->os);
+	       X(md5INT)(p, q->n);
+	       X(md5INT)(p, q->is);
+	       X(md5INT)(p, q->os);
 	  }
      }
 }
 
 /* treat a (rank <= 1)-tensor as a rank-1 tensor, extracting
    appropriate n, is, and os components */
-int X(tensor_tornk1)(const tensor *t, int *n, int *is, int *os)
+int X(tensor_tornk1)(const tensor *t, INT *n, INT *is, INT *os)
 {
      A(t->rnk <= 1);
      if (t->rnk == 1) {

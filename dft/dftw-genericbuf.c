@@ -26,14 +26,14 @@
 
 typedef struct {
      ct_solver super;
-     int batchsz;
+     INT batchsz;
 } S;
 
 typedef struct {
      plan_dftw super;
 
-     int r, m, s, mb, me;
-     int batchsz;
+     INT r, m, s, mb, me;
+     INT batchsz;
      plan *cld;
 
      int log2_twradix;
@@ -43,7 +43,7 @@ typedef struct {
 } P;
 
 /* approximate log2(sqrt(n)) */
-static int choose_log2_twradix(int n)
+static int choose_log2_twradix(INT n)
 {
      int log2r = 0;
      while (n > 0) {
@@ -59,12 +59,12 @@ static int choose_log2_twradix(int n)
 static void mktwiddle(P *ego, int flg)
 {
      if (flg) {
-	  int n = ego->r * ego->m;
+	  INT n = ego->r * ego->m;
 	  int log2_twradix = choose_log2_twradix(n);
-	  int twradix = 1 << log2_twradix;
-	  int n0 = twradix;
-	  int n1 = (n + twradix - 1) / twradix;
-	  int i;
+	  INT twradix = ((INT)1) << log2_twradix;
+	  INT n0 = twradix;
+	  INT n1 = (n + twradix - 1) / twradix;
+	  INT i;
 	  R *W0, *W1;
 
 	  ego->log2_twradix = log2_twradix;
@@ -85,19 +85,19 @@ static void mktwiddle(P *ego, int flg)
      }
 }
 
-static void bytwiddle(const P *ego, int m0, int m1, R *buf, R *rio, R *iio)
+static void bytwiddle(const P *ego, INT m0, INT m1, R *buf, R *rio, R *iio)
 {
-     int j, k;
-     int r = ego->r, s = ego->s, m = ego->m;
+     INT j, k;
+     INT r = ego->r, s = ego->s, m = ego->m;
      int twshft = ego->log2_twradix;
-     int twmsk = (1 << twshft) - 1;
+     INT twmsk = (((INT)1) << twshft) - 1;
 
      const R *W0 = ego->W0, *W1 = ego->W1;
      for (j = 0; j < r; ++j) {
 	  for (k = m0; k < m1; ++k) {
-	       unsigned jk = j * k;
-	       int jk0 = jk & twmsk;
-	       int jk1 = jk >> twshft;
+	       INT jk = j * k;
+	       INT jk0 = jk & twmsk;
+	       INT jk1 = jk >> twshft;
 	       E xr = rio[s * (j * m + k)];
 	       E xi = iio[s * (j * m + k)];
 	       E wr0 = W0[2 * jk0];
@@ -114,7 +114,7 @@ static void bytwiddle(const P *ego, int m0, int m1, R *buf, R *rio, R *iio)
      }
 }
 
-static int applicable0(const S *ego, int r, int m, int vl, int dec,
+static int applicable0(const S *ego, INT r, INT m, INT vl, int dec,
 		       const planner *plnr)
 {
      return (1 
@@ -127,7 +127,7 @@ static int applicable0(const S *ego, int r, int m, int vl, int dec,
 	  );
 }
 
-static int applicable(const S *ego, int r, int m, int vl, int dec,
+static int applicable(const S *ego, INT r, INT m, INT vl, int dec,
 		      const planner *plnr)
 {
      if (!applicable0(ego, r, m, vl, dec, plnr))
@@ -138,7 +138,7 @@ static int applicable(const S *ego, int r, int m, int vl, int dec,
      return 1;
 }
 
-static void dobatch(const P *ego, int m0, int m1, R *buf, R *rio, R *iio)
+static void dobatch(const P *ego, INT m0, INT m1, R *buf, R *rio, R *iio)
 {
      plan_dft *cld;
 
@@ -156,7 +156,7 @@ static void apply(const plan *ego_, R *rio, R *iio)
      const P *ego = (const P *) ego_;
      R *buf = (R *) MALLOC(sizeof(R) * 2 * BATCHDIST(ego->r) * ego->batchsz,
 			   BUFFERS);
-     int m;
+     INT m;
 
      for (m = ego->mb; m < ego->me - ego->batchsz; m += ego->batchsz) 
 	  dobatch(ego, m, m + ego->batchsz, buf, rio, iio);
@@ -188,8 +188,8 @@ static void print(const plan *ego_, printer *p)
 }
 
 static plan *mkcldw(const ct_solver *ego_, 
-		    int dec, int r, int m, int s, int vl, int vs, 
-		    int mstart, int mcount,
+		    int dec, INT r, INT m, INT s, INT vl, INT vs, 
+		    INT mstart, INT mcount,
 		    R *rio, R *iio,
 		    planner *plnr)
 {
@@ -244,7 +244,7 @@ static plan *mkcldw(const ct_solver *ego_,
      return (plan *) 0;
 }
 
-static void regsolver(planner *plnr, int r, int batchsz)
+static void regsolver(planner *plnr, INT r, INT batchsz)
 {
      S *slv = (S *)X(mksolver_ct)(sizeof(S), r, DECDIT, mkcldw);
      slv->batchsz = batchsz;
@@ -253,8 +253,8 @@ static void regsolver(planner *plnr, int r, int batchsz)
 
 void X(ct_genericbuf_register)(planner *p)
 {
-     static const unsigned radices[] = { -1, -2, -4, -8, -16, -32, -64 };
-     static const unsigned batchsizes[] = { 4, 8, 16, 32, 64 };
+     static const INT radices[] = { -1, -2, -4, -8, -16, -32, -64 };
+     static const INT batchsizes[] = { 4, 8, 16, 32, 64 };
      unsigned i, j;
 
      for (i = 0; i < sizeof(radices) / sizeof(radices[0]); ++i) 

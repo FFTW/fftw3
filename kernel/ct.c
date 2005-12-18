@@ -25,7 +25,7 @@
 #define POW2P(n) (((n) > 0) && (((n) & ((n) - 1)) == 0))
 
 /* TRUE if radix-r is ugly for size n */
-int X(ct_uglyp)(int min_n, int n, int r)
+int X(ct_uglyp)(INT min_n, INT n, INT r)
 {
      return (n <= min_n) || (POW2P(n) && (n / r) <= 4);
 }

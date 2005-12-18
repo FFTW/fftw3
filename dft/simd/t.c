@@ -26,7 +26,7 @@
 
 static int okp_common(const ct_desc *d,
 		      const R *rio, const R *iio, 
-		      int ios, int vs, int m, int dist, 
+		      INT ios, INT vs, INT m, INT dist, 
 		      const planner *plnr)
 {
      UNUSED(rio);
@@ -44,7 +44,7 @@ static int okp_common(const ct_desc *d,
 
 static int okp_t1f(const ct_desc *d,
 		   const R *rio, const R *iio, 
-		   int ios, int vs, int m, int dist, 
+		   INT ios, INT vs, INT m, INT dist, 
 		   const planner *plnr)
 {
      return  okp_common(d, rio, iio, ios, vs, m, dist, plnr)
@@ -56,7 +56,7 @@ const ct_genus X(dft_t1fsimd_genus) = { okp_t1f, VL };
 
 static int okp_t1b(const ct_desc *d,
 		   const R *rio, const R *iio, 
-		   int ios, int vs, int m, int dist, 
+		   INT ios, INT vs, INT m, INT dist, 
 		   const planner *plnr)
 {
      return  okp_common(d, rio, iio, ios, vs, m, dist, plnr)
@@ -75,7 +75,7 @@ static int small_enough(const ct_desc *d, int m)
 
 static int okp_t2f(const ct_desc *d,
 		   const R *rio, const R *iio, 
-		   int ios, int vs, int m, int dist, 
+		   INT ios, INT vs, INT m, INT dist, 
 		   const planner *plnr)
 {
      return  okp_t1f(d, rio, iio, ios, vs, m, dist, plnr)
@@ -86,7 +86,7 @@ const ct_genus X(dft_t2fsimd_genus) = { okp_t2f, VL };
 
 static int okp_t2b(const ct_desc *d,
 		   const R *rio, const R *iio, 
-		   int ios, int vs, int m, int dist, 
+		   INT ios, INT vs, INT m, INT dist, 
 		   const planner *plnr)
 {
      return  okp_t1b(d, rio, iio, ios, vs, m, dist, plnr)

@@ -18,15 +18,15 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.37 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: buffered2.c,v 1.38 2005-12-18 01:28:50 athena Exp $ */
 
 #include "rdft.h"
 
 typedef struct {
-     int nbuf;
-     int maxbufsz;
-     int skew_alignment;
-     int skew;
+     INT nbuf;
+     INT maxbufsz;
+     INT skew_alignment;
+     INT skew;
      const char *nam;
 } bufadt;
 
@@ -39,8 +39,8 @@ typedef struct {
      plan_rdft2 super;
 
      plan *cld, *cldrest;
-     int n, vl, nbuf, bufdist;
-     int os, ivs, ovs;
+     INT n, vl, nbuf, bufdist;
+     INT os, ivs, ovs;
 
      const S *slv;
 } P;
@@ -51,10 +51,10 @@ typedef struct {
    the n loops? */
 
 /* copy halfcomplex array r (contiguous) to complex (strided) array rio/iio. */
-static void hc2c(int n, R *r, R *rio, R *iio, int os)
+static void hc2c(INT n, R *r, R *rio, R *iio, INT os)
 {
-     int n2 = (n + 1) / 2;
-     int i;
+     INT n2 = (n + 1) / 2;
+     INT i;
 
      rio[0] = r[0];
      iio[0] = 0;
@@ -89,10 +89,10 @@ static void hc2c(int n, R *r, R *rio, R *iio, int os)
 }
 
 /* reverse of hc2c */
-static void c2hc(int n, R *rio, R *iio, int is, R *r)
+static void c2hc(INT n, R *rio, R *iio, INT is, R *r)
 {
-     int n2 = (n + 1) / 2;
-     int i;
+     INT n2 = (n + 1) / 2;
+     INT i;
 
      r[0] = rio[0];
      for (i = 1; i < ((n2 - 1) & 3) + 1; ++i) {
@@ -129,9 +129,9 @@ static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_rdft *cld = (plan_rdft *) ego->cld;
-     int i, j, vl = ego->vl, nbuf = ego->nbuf, bufdist = ego->bufdist;
-     int n = ego->n;
-     int ivs = ego->ivs, ovs = ego->ovs, os = ego->os;
+     INT i, j, vl = ego->vl, nbuf = ego->nbuf, bufdist = ego->bufdist;
+     INT n = ego->n;
+     INT ivs = ego->ivs, ovs = ego->ovs, os = ego->os;
      R *bufs;
 
      bufs = (R *)MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
@@ -162,9 +162,9 @@ static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_rdft *cld = (plan_rdft *) ego->cld;
-     int i, j, vl = ego->vl, nbuf = ego->nbuf, bufdist = ego->bufdist;
-     int n = ego->n;
-     int ivs = ego->ivs, ovs = ego->ovs, is = ego->os;
+     INT i, j, vl = ego->vl, nbuf = ego->nbuf, bufdist = ego->bufdist;
+     INT n = ego->n;
+     INT ivs = ego->ivs, ovs = ego->ovs, is = ego->os;
      R *bufs;
 
      bufs = (R *)MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
@@ -218,9 +218,9 @@ static void print(const plan *ego_, printer *p)
               ego->cld, ego->cldrest);
 }
 
-static int min_nbuf(const problem_rdft2 *p, int n, int vl)
+static INT min_nbuf(const problem_rdft2 *p, INT n, INT vl)
 {
-     int is, os, ivs, ovs;
+     INT is, os, ivs, ovs;
 
      if (p->r != p->rio && p->r != p->iio)
 	  return 1;
@@ -235,23 +235,23 @@ static int min_nbuf(const problem_rdft2 *p, int n, int vl)
 	complex arrays, which overlap because of the differing sizes. */
      if (n * X(iabs)(is) <= X(iabs)(ivs)
 	 && (n/2 + 1) * X(iabs)(os) <= X(iabs)(ovs)
-	 && ( (p->rio - p->iio <= X(iabs)(os)) || 
-	      (p->iio - p->rio <= X(iabs)(os)) )
+	 && ( ((p->rio - p->iio) <= X(iabs)(os)) || 
+	      ((p->iio - p->rio) <= X(iabs)(os)) )
 	 && ivs > 0 && ovs > 0) {
-	  int vsmin = X(imin)(ivs, ovs);
-	  int vsmax = X(imax)(ivs, ovs);
+	  INT vsmin = X(imin)(ivs, ovs);
+	  INT vsmax = X(imax)(ivs, ovs);
 	  return(((vsmax - vsmin) * vl + vsmin - 1) / vsmin);
      }
 
      return vl; /* punt: just buffer the whole vector */
 }
 
-static int compute_nbuf(int n, int vl, const S *ego)
+static INT compute_nbuf(INT n, INT vl, const S *ego)
 {
      return X(compute_nbuf)(n, vl, ego->adt->nbuf, ego->adt->maxbufsz);
 }
 
-static int toobig(int n, const S *ego)
+static int toobig(INT n, const S *ego)
 {
      return (n > ego->adt->maxbufsz);
 }
@@ -293,8 +293,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      problem *cldp = 0;
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
      R *bufs = (R *) 0;
-     int nbuf = 0, bufdist, n, vl;
-     int ivs, ovs;
+     INT nbuf = 0, bufdist, n, vl;
+     INT ivs, ovs;
      unsigned u_reset = 0;
 
      static const plan_adt padt = {
@@ -414,7 +414,7 @@ void X(rdft2_buffered_register)(planner *p)
      /* FIXME: what are good defaults? */
      static const bufadt adt = {
 	  /* nbuf */           8,
-	  /* maxbufsz */       (65536 / sizeof(R)),
+	  /* maxbufsz */       (INT)(65536 / sizeof(R)),
 	  /* skew_alignment */ 8,
 	  /* skew */           5,
 	  /* nam */            "rdft2-buffered"

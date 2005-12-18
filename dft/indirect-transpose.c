@@ -33,7 +33,7 @@ typedef struct {
 
 typedef struct {
      plan_dft super;
-     int vl, ivs, ovs;
+     INT vl, ivs, ovs;
      plan *cldtrans, *cld, *cldrest;
 } P;
 
@@ -41,7 +41,7 @@ typedef struct {
 static void apply_ip(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
-     int vl = ego->vl, ivs = ego->ivs, ovs = ego->ovs, i;
+     INT vl = ego->vl, ivs = ego->ivs, ovs = ego->ovs, i;
 
      for (i = 0; i < vl; ++i) {
 	  {
@@ -65,7 +65,7 @@ static void apply_ip(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void apply_op(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
-     int vl = ego->vl, ivs = ego->ivs, ovs = ego->ovs, i;
+     INT vl = ego->vl, ivs = ego->ivs, ovs = ego->ovs, i;
 
      for (i = 0; i < vl; ++i) {
 	  {
@@ -166,7 +166,7 @@ static int applicable(const solver *ego_, const problem *p_,
      if (!applicable0(ego_, p_, plnr, pdim0, pdim1)) return 0;
      {
           const problem_dft *p = (const problem_dft *) p_;
-	  int u = p->ri == p->ii + 1 || p->ii == p->ri + 1 ? 2 : 1;
+	  INT u = p->ri == p->ii + 1 || p->ii == p->ri + 1 ? (INT)2 : (INT)1;
 
 	  /* UGLY if does not result in contiguous transforms or
 	     transforms of contiguous vectors (since the latter at
@@ -193,7 +193,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      int pdim0, pdim1;
      tensor *ts, *tv;
      int ip = ego->transpose_inplace;
-     int vl, ivs, ovs;
+     INT vl, ivs, ovs;
      R *rit, *iit, *rot, *iot;
 
      static const plan_adt padt = {

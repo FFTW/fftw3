@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2r.ml,v 1.6 2005-04-07 04:11:13 stevenj Exp $ *)
+(* $Id: gen_r2r.ml,v 1.7 2005-12-18 01:28:50 athena Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2r.ml,v 1.6 2005-04-07 04:11:13 stevenj Exp $"
+let cvsid = "$Id: gen_r2r.ml,v 1.7 2005-12-18 01:28:50 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -195,10 +195,10 @@ let generate n mode =
 	       else [Decl (C.stridetype, ostride)])
 	  @ (choose_simd []
 	       (if stride_fixed !uivstride then [] else 
-	       [Decl ("int", !Simd.ivs)]))
+	       [Decl ("INT", !Simd.ivs)]))
 	  @ (choose_simd []
 	       (if stride_fixed !uovstride then [] else 
-	       [Decl ("int", !Simd.ovs)]))
+	       [Decl ("INT", !Simd.ovs)]))
 	 ),
 	 add_constants (Asch annot))
 
@@ -208,9 +208,9 @@ let generate n mode =
     C.realtype ^ " *O, " ^
     C.stridetype ^ " is, " ^ 
     C.stridetype ^ " os, " ^ 
-      " int v, int ivs, int ovs)\n" ^
+      " INT v, INT ivs, INT ovs)\n" ^
     "{\n" ^
-    "int i;\n" ^
+    "INT i;\n" ^
     "for (i = v; i > 0; --i) {\n" ^
       name0 ^ "(I, O" ^
        (if stride_fixed !uistride then "" else ", is") ^ 

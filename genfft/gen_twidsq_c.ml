@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twidsq_c.ml,v 1.4 2005-09-28 02:28:40 athena Exp $ *)
+(* $Id: gen_twidsq_c.ml,v 1.5 2005-12-18 01:28:50 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twidsq_c.ml,v 1.4 2005-09-28 02:28:40 athena Exp $"
+let cvsid = "$Id: gen_twidsq_c.ml,v 1.5 2005-12-18 01:28:50 athena Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 
@@ -129,7 +129,7 @@ let generate n =
   let annot = standard_optimizer odag in
 
   let body = Block (
-    [Decl ("int", i);
+    [Decl ("INT", i);
      Decl (C.realtypep, rioarray)],
     [Stmt_assign (CVar rioarray,
 		  CVar (if (sign < 0) then "ri" else "ii"));
@@ -155,8 +155,8 @@ let generate n =
 	  Decl (C.constrealtypep, twarray);
 	  Decl (C.stridetype, istride);
 	  Decl (C.stridetype, vstride);
-	  Decl ("int", m);
-	  Decl ("int", dist)],
+	  Decl ("INT", m);
+	  Decl ("INT", dist)],
          add_constants body)
   in
   let twinstr = 

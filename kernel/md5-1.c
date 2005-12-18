@@ -21,9 +21,9 @@
 #include "ifftw.h"
 
 
-void X(md5putb)(md5 *p, const void *d_, int len)
+void X(md5putb)(md5 *p, const void *d_, size_t len)
 {
-     int i;
+     size_t i;
      const unsigned char *d = (const unsigned char *)d_;
      for (i = 0; i < len; ++i)
 	  X(md5putc)(p, d[i]);
@@ -42,13 +42,13 @@ void X(md5int)(md5 *p, int i)
      X(md5putb)(p, &i, sizeof(i));
 }
 
-void X(md5unsigned)(md5 *p, unsigned i)
+void X(md5INT)(md5 *p, INT i)
 {
      X(md5putb)(p, &i, sizeof(i));
 }
 
-void X(md5ptrdiff)(md5 *p, ptrdiff_t d)
+void X(md5unsigned)(md5 *p, unsigned i)
 {
-     X(md5putb)(p, &d, sizeof(d));
+     X(md5putb)(p, &i, sizeof(i));
 }
 

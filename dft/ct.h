@@ -23,8 +23,8 @@
 typedef void (*dftwapply) (const plan *ego, R *rio, R *iio);
 typedef struct ct_solver_s ct_solver;
 typedef plan *(*ct_mkinferior)(const ct_solver *ego,
-			    int dec, int r, int m, int s, int vl, int vs, 
-			    int mstart, int mcount,
+			    int dec, INT r, INT m, INT s, INT vl, INT vs, 
+			    INT mstart, INT mcount,
 			    R *rio, R *iio,
 			    planner *plnr);
 
@@ -40,7 +40,7 @@ extern plan *X(mkplan_dftw)(size_t size, const plan_adt *adt, dftwapply apply);
 
 struct ct_solver_s {
      solver super;
-     int r;
+     INT r;
      int dec;
 #    define DECDIF 0
 #    define DECDIT 1
@@ -49,8 +49,8 @@ struct ct_solver_s {
 };
 
 int X(ct_applicable)(const ct_solver *, const problem *, planner *);
-ct_solver *X(mksolver_ct)(size_t size, int r, int dec, ct_mkinferior mkcldw);
-extern ct_solver *(*X(mksolver_ct_hook))(size_t, int, int, ct_mkinferior);
+ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, ct_mkinferior mkcldw);
+extern ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, ct_mkinferior);
 
 void X(regsolver_ct_directw)(planner *plnr,
      kdftw codelet, const ct_desc *desc, int dec);

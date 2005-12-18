@@ -18,16 +18,16 @@
  *
  */
 
-/* $Id: rdft2-tensor-max-index.c,v 1.6 2003-03-29 20:22:28 stevenj Exp $ */
+/* $Id: rdft2-tensor-max-index.c,v 1.7 2005-12-18 01:28:50 athena Exp $ */
 
 #include "rdft.h"
 
 /* like X(tensor_max_index), but takes into account the special n/2+1
    final dimension for the complex output/input of an R2HC/HC2R transform. */
-int X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k)
+INT X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k)
 {
      int i;
-     int n = 0;
+     INT n = 0;
 
      A(FINITE_RNK(sz->rnk));
      for (i = 0; i + 1 < sz->rnk; ++i) {
@@ -36,7 +36,7 @@ int X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k)
      }
      if (i < sz->rnk) {
 	  const iodim *p = sz->dims + i;
-	  int is, os;
+	  INT is, os;
 	  X(rdft2_strides)(k, p, &is, &os);
 	  n += X(imax)((p->n - 1) * X(iabs)(is), (p->n/2) * X(iabs)(os));
      }

@@ -21,9 +21,9 @@
 #include "ifftw.h"
 
 /* in place square transposition, iterative */
-void X(transpose)(R *I, int n, int s0, int s1, int vl)
+void X(transpose)(R *I, INT n, INT s0, INT s1, INT vl)
 {
-     int i0, i1, v;
+     INT i0, i1, v;
 
      switch (vl) {
 	 case 1:
@@ -67,16 +67,16 @@ void X(transpose)(R *I, int n, int s0, int s1, int vl)
 
 struct transpose_closure {
      R *I;
-     int s0, s1, vl, tilesz;
+     INT s0, s1, vl, tilesz;
      R *buf0, *buf1; 
 };
 
-static void dotile(int n0l, int n0u, int n1l, int n1u, void *args)
+static void dotile(INT n0l, INT n0u, INT n1l, INT n1u, void *args)
 {
      struct transpose_closure *k = (struct transpose_closure *)args;
      R *I = k->I;
-     int s0 = k->s0, s1 = k->s1, vl = k->vl;
-     int i0, i1, v;
+     INT s0 = k->s0, s1 = k->s1, vl = k->vl;
+     INT i0, i1, v;
 
      switch (vl) {
 	 case 1:
@@ -117,7 +117,7 @@ static void dotile(int n0l, int n0u, int n1l, int n1u, void *args)
      }
 }
 
-static void dotile_buf(int n0l, int n0u, int n1l, int n1u, void *args)
+static void dotile_buf(INT n0l, INT n0u, INT n1l, INT n1u, void *args)
 {
      struct transpose_closure *k = (struct transpose_closure *)args;
      X(cpy2d_ci)(k->I + n0l * k->s0 + n1l * k->s1,
@@ -142,14 +142,14 @@ static void dotile_buf(int n0l, int n0u, int n1l, int n1u, void *args)
 		 k->vl);
 }
 
-static void transpose_rec(R *I, int n,
-			  void (*f)(int n0l, int n0u, int n1l, int n1u,
+static void transpose_rec(R *I, INT n,
+			  void (*f)(INT n0l, INT n0u, INT n1l, INT n1u,
 				    void *args),
 			  struct transpose_closure *k)
 {
    tail:
      if (n > 1) {
-	  int n2 = n / 2;
+	  INT n2 = n / 2;
 	  k->I = I;
 	  X(tile2d)(0, n2, n2, n, k->tilesz, f, k);
 	  transpose_rec(I, n2, f, k);
@@ -157,7 +157,7 @@ static void transpose_rec(R *I, int n,
      }
 }
 
-void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl) 
+void X(transpose_tiled)(R *I, INT n, INT s0, INT s1, INT vl) 
 {
      struct transpose_closure k;
      k.s0 = s0;
@@ -169,7 +169,7 @@ void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl)
      transpose_rec(I, n, dotile, &k);
 }
 
-void X(transpose_tiledbuf)(R *I, int n, int s0, int s1, int vl) 
+void X(transpose_tiledbuf)(R *I, INT n, INT s0, INT s1, INT vl) 
 {
      struct transpose_closure k;
      /* Assume that the the rows of I conflict into the same cache

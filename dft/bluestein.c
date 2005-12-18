@@ -26,17 +26,17 @@ typedef struct {
 
 typedef struct {
      plan_dft super;
-     int n;     /* problem size */
-     int nb;    /* size of convolution */
+     INT n;     /* problem size */
+     INT nb;    /* size of convolution */
      R *w;      /* lambda k . exp(2*pi*i*k^2/(2*n)) */
      R *W;      /* DFT(w) */
      plan *cldf;
-     int is, os;
+     INT is, os;
 } P;
 
-static void bluestein_sequence(int n, R *w)
+static void bluestein_sequence(INT n, R *w)
 {
-     int k, ksq, n2 = 2 * n;
+     INT k, ksq, n2 = 2 * n;
 
      ksq = 0;
      for (k = 0; k < n; ++k) {
@@ -49,17 +49,18 @@ static void bluestein_sequence(int n, R *w)
 
 static void mktwiddle(P *p)
 {
-     int i;
-     int n = p->n, nb = p->nb;
+     INT i;
+     INT n = p->n, nb = p->nb;
      R *w, *W;
-     E nbf = nb;
+     E nbf = (E)nb;
 
      p->w = w = (R *) MALLOC(2 * n * sizeof(R), TWIDDLES);
      p->W = W = (R *) MALLOC(2 * nb * sizeof(R), TWIDDLES);
+
      bluestein_sequence(n, w);
 
      for (i = 0; i < nb; ++i)
-          W[2*i] = W[2*i+1] = 0;
+          W[2*i] = W[2*i+1] = 0.0;
 
      W[0] = w[0] / nbf;
      W[1] = w[1] / nbf;
@@ -79,7 +80,7 @@ static void mktwiddle(P *p)
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
-     int i, n = ego->n, nb = ego->nb, is = ego->is, os = ego->os;
+     INT i, n = ego->n, nb = ego->nb, is = ego->is, os = ego->os;
      R *w = ego->w, *W = ego->W;
      R *b = (R *) MALLOC(2 * nb * sizeof(R), BUFFERS);
 
@@ -91,7 +92,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
           b[2*i+1] = xi * wr - xr * wi;
      }
 
-     for (; i < nb; ++i) b[2*i] = b[2*i+1] = 0;
+     for (; i < nb; ++i) b[2*i] = b[2*i+1] = 0.0;
 
      /* convolution: FFT */
      {
@@ -179,9 +180,9 @@ static void print(const plan *ego_, printer *p)
               ego->n, ego->nb, ego->cldf);
 }
 
-static int choose_transform_size(int minsz)
+static INT choose_transform_size(INT minsz)
 {
-     static const int primes[] = { 2, 3, 5, 0 };
+     static const INT primes[] = { 2, 3, 5, 0 };
      while (!X(factors_into)(minsz, primes))
 	  ++minsz;
      return minsz;
@@ -191,7 +192,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
      P *pln;
-     int n, nb;
+     INT n, nb;
      plan *cldf = 0;
      R *buf = (R *) 0;
 

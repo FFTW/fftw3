@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r.ml,v 1.16 2005-04-07 02:06:21 stevenj Exp $ *)
+(* $Id: gen_hc2r.ml,v 1.17 2005-12-18 01:28:50 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r.ml,v 1.16 2005-04-07 02:06:21 stevenj Exp $"
+let cvsid = "$Id: gen_hc2r.ml,v 1.17 2005-12-18 01:28:50 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -116,7 +116,7 @@ let generate n =
   let annot = standard_optimizer odag in
 
   let body = Block (
-    [Decl ("int", i)],
+    [Decl ("INT", i)],
     [For (Expr_assign (CVar i, CVar v),
 	  Binop (" > ", CVar i, Integer 0),
 	  list_to_comma 
@@ -140,9 +140,9 @@ let generate n =
 	   Decl (C.stridetype, ristride);
 	   Decl (C.stridetype, iistride);
 	   Decl (C.stridetype, ostride);
-	   Decl ("int", v);
-	   Decl ("int", "ivs");
-	   Decl ("int", "ovs")]),
+	   Decl ("INT", v);
+	   Decl ("INT", "ivs");
+	   Decl ("INT", "ovs")]),
 	 add_constants body)
 
   in let desc = 

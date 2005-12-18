@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor1.c,v 1.4 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: tensor1.c,v 1.5 2005-12-18 01:28:50 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -27,7 +27,7 @@ tensor *X(mktensor_0d)(void)
      return X(mktensor(0));
 }
 
-tensor *X(mktensor_1d)(int n, int is, int os)
+tensor *X(mktensor_1d)(INT n, INT is, INT os)
 {
      tensor *x = X(mktensor)(1);
      x->dims[0].n = n;

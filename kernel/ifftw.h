@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.255 2005-10-02 15:49:13 athena Exp $ */
+/* $Id: ifftw.h,v 1.256 2005-12-18 01:28:50 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -55,12 +55,17 @@ typedef double R;
 #define X(name) CONCAT(fftw_, name)
 #endif
 
+/*
+  integral type large enough to contain a stride (what ``int'' should
+  have been in the first place.
+*/
+typedef ptrdiff_t INT;
+
 /* dummy use of unused parameters to silence compiler warnings */
 #define UNUSED(x) (void)x
 
 #define FFT_SIGN (-1)  /* sign convention for forward transforms */
 
-/* get rid of that object-oriented stink: */
 #define REGISTER_SOLVER(p, s) X(solver_register)(p, s)
 
 #define STRINGIZEx(x) #x
@@ -251,27 +256,30 @@ typedef struct {
 } opcnt;
 
 void X(ops_zero)(opcnt *dst);
-void X(ops_other)(int o, opcnt *dst);
+void X(ops_other)(INT o, opcnt *dst);
 void X(ops_cpy)(const opcnt *src, opcnt *dst);
 
 void X(ops_add)(const opcnt *a, const opcnt *b, opcnt *dst);
 void X(ops_add2)(const opcnt *a, opcnt *dst);
 
 /* dst = m * a + b */
-void X(ops_madd)(int m, const opcnt *a, const opcnt *b, opcnt *dst);
+void X(ops_madd)(INT m, const opcnt *a, const opcnt *b, opcnt *dst);
 
 /* dst += m * a */
-void X(ops_madd2)(int m, const opcnt *a, opcnt *dst);
+void X(ops_madd2)(INT m, const opcnt *a, opcnt *dst);
 
 
 /*-----------------------------------------------------------------------*/
 /* minmax.c: */
-int X(imax)(int a, int b);
-int X(imin)(int a, int b);
+INT X(imax)(INT a, INT b);
+INT X(imin)(INT a, INT b);
 
 /*-----------------------------------------------------------------------*/
 /* iabs.c: */
-int X(iabs)(int a);
+INT X(iabs)(INT a);
+
+/* inline version */
+#define IABS(x) (((x) < 0) ? (0 - (x)) : (x))
 
 /*-----------------------------------------------------------------------*/
 /* md5.c */
@@ -294,12 +302,12 @@ typedef struct {
 } md5;
 
 void X(md5begin)(md5 *p);
-void X(md5putb)(md5 *p, const void *d_, int len);
+void X(md5putb)(md5 *p, const void *d_, size_t len);
 void X(md5puts)(md5 *p, const char *s);
 void X(md5putc)(md5 *p, unsigned char c);
 void X(md5int)(md5 *p, int i);
+void X(md5INT)(md5 *p, INT i);
 void X(md5unsigned)(md5 *p, unsigned i);
-void X(md5ptrdiff)(md5 *p, ptrdiff_t d);
 void X(md5end)(md5 *p);
 
 /*-----------------------------------------------------------------------*/
@@ -308,9 +316,9 @@ void X(md5end)(md5 *p);
 #undef STRUCT_HACK_C99
 
 typedef struct {
-     int n;
-     int is;			/* input stride */
-     int os;			/* output stride */
+     INT n;
+     INT is;			/* input stride */
+     INT os;			/* output stride */
 } iodim;
 
 typedef struct {
@@ -338,15 +346,18 @@ typedef enum { INPLACE_IS, INPLACE_OS } inplace_kind;
 
 tensor *X(mktensor)(int rnk);
 tensor *X(mktensor_0d)(void);
-tensor *X(mktensor_1d)(int n, int is, int os);
-tensor *X(mktensor_2d)(int n0, int is0, int os0,
-                      int n1, int is1, int os1);
-int X(tensor_sz)(const tensor *sz);
+tensor *X(mktensor_1d)(INT n, INT is, INT os);
+tensor *X(mktensor_2d)(INT n0, INT is0, INT os0,
+		       INT n1, INT is1, INT os1);
+tensor *X(mktensor_3d)(INT n0, INT is0, INT os0,
+		       INT n1, INT is1, INT os1,
+		       INT n2, INT is2, INT os2);
+INT X(tensor_sz)(const tensor *sz);
 void X(tensor_md5)(md5 *p, const tensor *t);
-int X(tensor_max_index)(const tensor *sz);
-int X(tensor_min_istride)(const tensor *sz);
-int X(tensor_min_ostride)(const tensor *sz);
-int X(tensor_min_stride)(const tensor *sz);
+INT X(tensor_max_index)(const tensor *sz);
+INT X(tensor_min_istride)(const tensor *sz);
+INT X(tensor_min_ostride)(const tensor *sz);
+INT X(tensor_min_stride)(const tensor *sz);
 int X(tensor_inplace_strides)(const tensor *sz);
 int X(tensor_inplace_strides2)(const tensor *a, const tensor *b);
 int X(tensor_strides_decrease)(const tensor *sz, const tensor *vecsz,
@@ -361,7 +372,7 @@ tensor *X(tensor_compress)(const tensor *sz);
 tensor *X(tensor_compress_contiguous)(const tensor *sz);
 tensor *X(tensor_append)(const tensor *a, const tensor *b);
 void X(tensor_split)(const tensor *sz, tensor **a, int a_rnk, tensor **b);
-int X(tensor_tornk1)(const tensor *t, int *n, int *is, int *os);
+int X(tensor_tornk1)(const tensor *t, INT *n, INT *is, INT *os);
 void X(tensor_destroy)(tensor *sz);
 void X(tensor_destroy2)(tensor *a, tensor *b);
 void X(tensor_destroy4)(tensor *a, tensor *b, tensor *c, tensor *d);
@@ -646,14 +657,14 @@ plan *X(mkplan_f_d)(planner *ego, problem *p,
 #endif
 
 #ifdef PRECOMPUTE_ARRAY_INDICES
-typedef int *stride;
+typedef INT *stride;
 #define WS(stride, i)  (stride[i])
-extern stride X(mkstride)(int n, int s);
+extern stride X(mkstride)(INT n, INT s);
 void X(stride_destroy)(stride p);
 #define MAKE_VOLATILE_STRIDE(x) (void)0 /* a no-op in expession context */
 #else
 
-typedef int stride;
+typedef INT stride;
 #define WS(stride, i)  (stride * i)
 #define fftwf_mkstride(n, stride) stride
 #define fftw_mkstride(n, stride) stride
@@ -686,29 +697,29 @@ int X(pickdim)(int which_dim, const int *buddies, int nbuddies,
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */
 /* little language to express twiddle factors computation */
-enum { TW_COS = 0, TW_SIN = 1, TW_TAN = 2, TW_NEXT = 3,
-       TW_FULL = 4, TW_HALF = 5 };
+enum { TW_COS = 0, TW_SIN = 1, TW_NEXT = 2, 
+       TW_FULL = 3, TW_HALF = 4 };
 
 typedef struct {
      unsigned char op;
-     unsigned char v;
+     signed char v;
      short i;
 } tw_instr;
 
 typedef struct twid_s {
      R *W;                     /* array of twiddle factors */
-     int n, r, m;                /* transform order, radix, # twiddle rows */
+     INT n, r, m;                /* transform order, radix, # twiddle rows */
      int refcnt;
      const tw_instr *instr;
      struct twid_s *cdr;
 } twid;
 
-void X(mktwiddle)(twid **pp, const tw_instr *instr, int n, int r, int m);
+void X(mktwiddle)(twid **pp, const tw_instr *instr, INT n, INT r, INT m);
 void X(twiddle_destroy)(twid **pp);
-int X(twiddle_length)(int r, const tw_instr *p);
+INT X(twiddle_length)(INT r, const tw_instr *p);
 void X(twiddle_awake)(int flg, twid **pp, 
-		      const tw_instr *instr, int n, int r, int m);
-const R *X(twiddle_shift)(const twid *p, int mstart);
+		      const tw_instr *instr, INT n, INT r, INT m);
+const R *X(twiddle_shift)(const twid *p, INT mstart);
 
 /*-----------------------------------------------------------------------*/
 /* trig.c */
@@ -718,38 +729,45 @@ typedef long double trigreal;
 typedef double trigreal;
 #endif
 
-extern trigreal X(cos2pi)(int, int);
-extern trigreal X(sin2pi)(int, int);
-extern trigreal X(tan2pi)(int, int);
+extern trigreal X(cos2pi)(INT, INT);
+extern trigreal X(sin2pi)(INT, INT);
 extern trigreal X(sincos)(trigreal m, trigreal n, int sinp);
 
 /*-----------------------------------------------------------------------*/
 /* primes.c: */
 
+/* FIXME: no longer valid */
+#if 0
 #if defined(FFTW_ENABLE_UNSAFE_MULMOD)
 #  define MULMOD(x,y,p) (((x) * (y)) % (p))
 #elif ((SIZEOF_INT != 0) && (SIZEOF_LONG >= 2 * SIZEOF_INT))
-#  define MULMOD(x,y,p) ((int) ((((long) (x)) * ((long) (y))) % ((long) (p))))
+#  define MULMOD(x,y,p) ((INT) ((((long) (x)) * ((long) (y))) % ((long) (p))))
 #elif ((SIZEOF_INT != 0) && (SIZEOF_LONG_LONG >= 2 * SIZEOF_INT))
-#  define MULMOD(x,y,p) ((int) ((((long long) (x)) * ((long long) (y))) \
+#  define MULMOD(x,y,p) ((INT) ((((long long) (x)) * ((long long) (y))) \
 				 % ((long long) (p))))
 #elif defined(_MSC_VER)
-#  define MULMOD(x,y,p) ((int) ((((__int64) (x)) * ((__int64) (y))) \
+#  define MULMOD(x,y,p) ((INT) ((((__int64) (x)) * ((__int64) (y))) \
                                  % ((__int64) (p))))
 #else /* 'long long' unavailable */
 #  define SAFE_MULMOD 1
-int X(safe_mulmod)(int x, int y, int p);
+INT X(safe_mulmod)(INT x, INT y, INT p);
 #  define MULMOD(x,y,p) X(safe_mulmod)(x,y,p)
 #endif
+#endif
 
-int X(power_mod)(int n, int m, int p);
-int X(find_generator)(int p);
-int X(first_divisor)(int n);
-int X(is_prime)(int n);
-int X(next_prime)(int n);
-int X(factors_into)(int n, const int *primes);
-int X(choose_radix)(int r, int n);
-int X(isqrt)(int n);
+#define SAFE_MULMOD 1
+INT X(safe_mulmod)(INT x, INT y, INT p);
+#define MULMOD(x,y,p) X(safe_mulmod)(x,y,p)
+
+
+INT X(power_mod)(INT n, INT m, INT p);
+INT X(find_generator)(INT p);
+INT X(first_divisor)(INT n);
+int X(is_prime)(INT n);
+INT X(next_prime)(INT n);
+int X(factors_into)(INT n, const INT *primes);
+INT X(choose_radix)(INT r, INT n);
+INT X(isqrt)(INT n);
 
 #define GENERIC_MIN_BAD 173 /* min prime for which generic becomes bad */
 
@@ -757,8 +775,8 @@ int X(isqrt)(int n);
 /* rader.c: */
 typedef struct rader_tls rader_tl;
 
-void X(rader_tl_insert)(int k1, int k2, int k3, R *W, rader_tl **tl);
-R *X(rader_tl_find)(int k1, int k2, int k3, rader_tl *t);
+void X(rader_tl_insert)(INT k1, INT k2, INT k3, R *W, rader_tl **tl);
+R *X(rader_tl_find)(INT k1, INT k2, INT k3, rader_tl *t);
 void X(rader_tl_delete)(R *W, rader_tl **tl);
 
 /*-----------------------------------------------------------------------*/
@@ -767,45 +785,45 @@ void X(rader_tl_delete)(R *W, rader_tl **tl);
 /* lower bound to the cache size, for tiled routines */
 #define CACHESIZE 8192
 
-int X(compute_tilesz)(int vl, int how_many_tiles_in_cache);
+INT X(compute_tilesz)(INT vl, int how_many_tiles_in_cache);
 
-void X(tile2d)(int n0l, int n0u, int n1l, int n1u, int tilesz,
-	       void (*f)(int n0l, int n0u, int n1l, int n1u, void *args),
+void X(tile2d)(INT n0l, INT n0u, INT n1l, INT n1u, INT tilesz,
+	       void (*f)(INT n0l, INT n0u, INT n1l, INT n1u, void *args),
 	       void *args);
-void X(cpy1d)(R *I, R *O, int n0, int is0, int os0, int vl);
+void X(cpy1d)(R *I, R *O, INT n0, INT is0, INT os0, INT vl);
 void X(cpy2d)(R *I, R *O,
-	      int n0, int is0, int os0,
-	      int n1, int is1, int os1,
-	      int vl);
+	      INT n0, INT is0, INT os0,
+	      INT n1, INT is1, INT os1,
+	      INT vl);
 void X(cpy2d_ci)(R *I, R *O,
-		 int n0, int is0, int os0,
-		 int n1, int is1, int os1,
-		 int vl);
+		 INT n0, INT is0, INT os0,
+		 INT n1, INT is1, INT os1,
+		 INT vl);
 void X(cpy2d_co)(R *I, R *O,
-		 int n0, int is0, int os0,
-		 int n1, int is1, int os1,
-		 int vl);
+		 INT n0, INT is0, INT os0,
+		 INT n1, INT is1, INT os1,
+		 INT vl);
 void X(cpy2d_tiled)(R *I, R *O,
-		    int n0, int is0, int os0,
-		    int n1, int is1, int os1, 
-		    int vl);
+		    INT n0, INT is0, INT os0,
+		    INT n1, INT is1, INT os1, 
+		    INT vl);
 void X(cpy2d_tiledbuf)(R *I, R *O,
-		       int n0, int is0, int os0,
-		       int n1, int is1, int os1, 
-		       int vl);
+		       INT n0, INT is0, INT os0,
+		       INT n1, INT is1, INT os1, 
+		       INT vl);
 void X(cpy2d_pair)(R *I0, R *I1, R *O0, R *O1,
-		   int n0, int is0, int os0,
-		   int n1, int is1, int os1);
+		   INT n0, INT is0, INT os0,
+		   INT n1, INT is1, INT os1);
 void X(cpy2d_pair_ci)(R *I0, R *I1, R *O0, R *O1,
-		      int n0, int is0, int os0,
-		      int n1, int is1, int os1);
+		      INT n0, INT is0, INT os0,
+		      INT n1, INT is1, INT os1);
 void X(cpy2d_pair_co)(R *I0, R *I1, R *O0, R *O1,
-		      int n0, int is0, int os0,
-		      int n1, int is1, int os1);
+		      INT n0, INT is0, INT os0,
+		      INT n1, INT is1, INT os1);
 
-void X(transpose)(R *I, int n, int s0, int s1, int vl);
-void X(transpose_tiled)(R *I, int n, int s0, int s1, int vl);
-void X(transpose_tiledbuf)(R *I, int n, int s0, int s1, int vl);
+void X(transpose)(R *I, INT n, INT s0, INT s1, INT vl);
+void X(transpose_tiled)(R *I, INT n, INT s0, INT s1, INT vl);
+void X(transpose_tiledbuf)(R *I, INT n, INT s0, INT s1, INT vl);
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
@@ -815,11 +833,11 @@ double X(measure_execution_time)(plan *pln, const problem *p);
 double X(seconds)(void);
 int X(alignment_of)(R *p);
 unsigned X(hash)(const char *s);
-int X(compute_nbuf)(int n, int vl, int nbuf, int maxbufsz);
-int X(ct_uglyp)(int min_n, int n, int r);
+INT X(compute_nbuf)(INT n, INT vl, INT nbuf, INT maxbufsz);
+int X(ct_uglyp)(INT min_n, INT n, INT r);
 
 #if HAVE_SIMD
-R *X(taint)(R *p, int s);
+R *X(taint)(R *p, INT s);
 R *X(join_taint)(R *p1, R *p2);
 #define TAINT(p, s) X(taint)(p, s)
 #define UNTAINT(p) ((R *) (((uintptr_t) (p)) & ~(uintptr_t)3))

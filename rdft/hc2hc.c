@@ -20,13 +20,13 @@
 
 #include "hc2hc.h"
 
-hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, int, hc2hc_mkinferior) = 0;
+hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, INT, hc2hc_mkinferior) = 0;
 
 typedef struct {
      plan_rdft super;
      plan *cld;
      plan *cldw;
-     int r;
+     INT r;
 } P;
 
 static void apply_dit(const plan *ego_, R *I, R *O)
@@ -81,7 +81,7 @@ static int applicable0(const hc2hc_solver *ego, const problem *p_, planner *plnr
 {
      if (RDFTP(p_)) {
           const problem_rdft *p = (const problem_rdft *) p_;
-	  int r;
+	  INT r;
 
           return (1
                   && p->sz->rnk == 1
@@ -123,7 +123,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      P *pln = 0;
      plan *cld = 0, *cldw = 0;
-     int n, r, m, vl, ivs, ovs;
+     INT n, r, m, vl, ivs, ovs;
      iodim *d;
      tensor *t1, *t2;
 
@@ -200,7 +200,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-hc2hc_solver *X(mksolver_hc2hc)(size_t size, int r, hc2hc_mkinferior mkcldw)
+hc2hc_solver *X(mksolver_hc2hc)(size_t size, INT r, hc2hc_mkinferior mkcldw)
 {
      static const solver_adt sadt = { mkplan };
      hc2hc_solver *slv = (hc2hc_solver *)X(mksolver)(size, &sadt);

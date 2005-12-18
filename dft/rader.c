@@ -35,18 +35,18 @@ typedef struct {
 
      plan *cld1, *cld2;
      R *omega;
-     int n, g, ginv;
-     int is, os;
+     INT n, g, ginv;
+     INT is, os;
      plan *cld_omega;
 } P;
 
 static rader_tl *omegas = 0;
 
-static R *mkomega(plan *p_, int n, int ginv)
+static R *mkomega(plan *p_, INT n, INT ginv)
 {
      plan_dft *p = (plan_dft *) p_;
      R *omega;
-     int i, gpower;
+     INT i, gpower;
      trigreal scale;
 
      if ((omega = X(rader_tl_find)(n, n, ginv, omegas)))
@@ -92,8 +92,8 @@ static void free_omega(R *omega)
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
-     int is, os;
-     int k, gpower, g, r;
+     INT is, os;
+     INT k, gpower, g, r;
      R *buf;
      R r0 = ri[0], i0 = ii[0];
 
@@ -148,7 +148,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      
      /* finally, do inverse permutation to unshuffle the output: */
      {
-	  int ginv = ego->ginv;
+	  INT ginv = ego->ginv;
 	  gpower = 1;
 	  for (k = 0; k < r - 1; ++k, gpower = MULMOD(gpower, ginv, r)) {
 	       ro[gpower * os] = buf[2*k];
@@ -221,7 +221,7 @@ static int applicable(const solver *ego_, const problem *p_,
      return (!NO_SLOWP(plnr) && applicable0(ego_, p_));
 }
 
-static int mkP(P *pln, int n, int is, int os, R *ro, R *io,
+static int mkP(P *pln, INT n, INT is, INT os, R *ro, R *io,
 	       planner *plnr)
 {
      plan *cld1 = (plan *) 0;
@@ -289,8 +289,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
      P *pln;
-     int n;
-     int is, os;
+     INT n;
+     INT is, os;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy

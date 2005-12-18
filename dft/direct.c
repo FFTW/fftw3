@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.43 2005-03-10 01:00:02 athena Exp $ */
+/* $Id: direct.c,v 1.44 2005-12-18 01:28:50 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -35,17 +35,15 @@ typedef struct {
      plan_dft super;
 
      stride is, os, bufstride;
-     int n, vl, ivs, ovs;
+     INT n, vl, ivs, ovs;
      kdft k;
      const S *slv;
 } P;
 
-#define IABS(x) (((x) < 0) ? (-(x)) : (x))
-
 static void dobatch(kdft k, 
 		    R *ri, R *ii, R *ro, R *io,
-		    int n, stride is, stride os,
-		    int vl, int ivs, int ovs, 
+		    INT n, stride is, stride os,
+		    INT vl, INT ivs, INT ovs, 
 		    R *buf, stride bufstride)
 {
      X(cpy2d_pair_ci)(ri, ii, buf, buf+1,
@@ -64,7 +62,7 @@ static void dobatch(kdft k,
      }
 }
 
-static int compute_batchsize(int n)
+static INT compute_batchsize(INT n)
 {
      /* round up to multiple of 4 */
      n += 3;
@@ -77,10 +75,10 @@ static void apply_buf(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
      R *buf;
-     int vl = ego->vl;
-     int n = ego->n;
-     int i;
-     int batchsz = compute_batchsize(n);
+     INT vl = ego->vl;
+     INT n = ego->n;
+     INT i;
+     INT batchsz = compute_batchsize(n);
 
      STACK_MALLOC(R *, buf, n * batchsz * 2 * sizeof(R));
 
@@ -137,9 +135,9 @@ static int applicable_buf(const solver *ego_, const problem *p_,
           const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
           const kdft_desc *d = ego->desc;
-	  int vl;
-	  int ivs, ovs;
-	  int batchsz;
+	  INT vl;
+	  INT ivs, ovs;
+	  INT batchsz;
 
           return (
 	       1
@@ -186,8 +184,8 @@ static int applicable(const solver *ego_, const problem *p_,
           const S *ego = (const S *) ego_;
           const problem_dft *p = (const problem_dft *) p_;
           const kdft_desc *d = ego->desc;
-	  int vl;
-	  int ivs, ovs;
+	  INT vl;
+	  INT ivs, ovs;
 
           return (
 	       1
