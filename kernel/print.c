@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.24 2005-02-22 04:29:52 athena Exp $ */
+/* $Id: print.c,v 1.25 2005-12-18 19:41:31 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -83,9 +83,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    A(*s == 'd');
 			    s += 1;
 			    x = va_arg(ap, ptrdiff_t);
-			    /* should use C99 %td here, but
-			       this is not yet widespread enough */
-			    sprintf(buf, "%ld", (long) x);
+			    sprintf(buf, BIGINT_FORMAT, x);
 			    goto putbuf;
 		       }
 		       case 'f': case 'e': case 'g': {
@@ -97,23 +95,23 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       }
 		       case 'v': {
 			    /* print optional vector length */
-			    int x = va_arg(ap, int);
+			    INT x = va_arg(ap, INT);
 			    if (x > 1) {
-				 sprintf(buf, "-x%d", x);
+				 sprintf(buf, "-x" BIGINT_FORMAT, x);
 				 goto putbuf;
 			    }
 			    break;
 		       }
 		       case 'o': {
 			    /* integer option.  Usage: %oNAME= */
-			    int x = va_arg(ap, int);
+			    INT x = va_arg(ap, INT);
 			    if (x)
 				 p->putchr(p, '/');
 			    while ((c = *s++) != '=')
 				 if (x)
 				      p->putchr(p, c);
 			    if (x) {
-				 sprintf(buf, "=%d", x);
+				 sprintf(buf, "=" BIGINT_FORMAT, x);
 				 goto putbuf;
 			    }
 			    break;
