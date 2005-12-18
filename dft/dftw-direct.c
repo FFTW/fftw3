@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.7 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: dftw-direct.c,v 1.8 2005-12-18 21:43:26 athena Exp $ */
 
 #include "ct.h"
 
@@ -136,11 +136,11 @@ static void print(const plan *ego_, printer *p)
      const ct_desc *e = slv->desc;
 
      if (slv->bufferedp) 
-	  p->print(p, "(dftw-directbuf/%d-%d/%d%v \"%s\")",
+	  p->print(p, "(dftw-directbuf/%D-%D/%D%v \"%s\")",
 		   compute_batchsize(ego->r), ego->r, 
 		   X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam);
      else
-	  p->print(p, "(dftw-direct-%d/%d%v \"%s\")",
+	  p->print(p, "(dftw-direct-%D/%D%v \"%s\")",
 		   ego->r, X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam);
 }
 

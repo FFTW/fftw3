@@ -176,7 +176,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *)ego_;
-     p->print(p, "(dft-bluestein-%d/%d%(%p%))",
+     p->print(p, "(dft-bluestein-%D/%D%(%p%))",
               ego->n, ego->nb, ego->cldf);
 }
 

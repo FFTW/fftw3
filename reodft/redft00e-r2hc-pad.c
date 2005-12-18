@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc-pad.c,v 1.3 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: redft00e-r2hc-pad.c,v 1.4 2005-12-18 21:43:26 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, padded symmetrically to
    twice the size.  This is asymptotically a factor of ~2 worse than
@@ -94,7 +94,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(redft00e-r2hc-pad-%d%v%(%p%)%(%p%))", 
+     p->print(p, "(redft00e-r2hc-pad-%D%v%(%p%)%(%p%))", 
 	      ego->n + 1, ego->vl, ego->cld, ego->cldcpy);
 }
 

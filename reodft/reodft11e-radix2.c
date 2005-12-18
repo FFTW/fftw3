@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.11 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: reodft11e-radix2.c,v 1.12 2005-12-18 21:43:26 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:
@@ -421,7 +421,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%se-radix2-r2hc-%d%v%(%p%))",
+     p->print(p, "(%se-radix2-r2hc-%D%v%(%p%))",
 	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }
 

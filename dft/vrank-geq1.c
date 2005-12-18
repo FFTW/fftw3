@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.45 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.46 2005-12-18 21:43:26 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -81,7 +81,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      const S *s = ego->solver;
-     p->print(p, "(dft-vrank>=1-x%d/%d%(%p%))",
+     p->print(p, "(dft-vrank>=1-x%D/%d%(%p%))",
  	      ego->vl, s->vecloop_dim, ego->cld);
 }
 

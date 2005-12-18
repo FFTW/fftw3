@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.29 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: rank0.c,v 1.30 2005-12-18 21:43:26 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -281,7 +281,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      int i;
-     p->print(p, "(%s/%d", ego->nam, ego->vl);
+     p->print(p, "(%s/%D", ego->nam, ego->vl);
      for (i = 0; i < ego->rnk; ++i)
 	  p->print(p, "%v", ego->d[i].n);
      p->print(p, ")");

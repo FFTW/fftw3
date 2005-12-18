@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.31 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.32 2005-12-18 21:43:26 athena Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -564,7 +564,7 @@ static const transpose_adt adt_toms513 =
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s-%dx%d%v)", ego->slv->adt->nam,
+     p->print(p, "(%s-%Dx%D%v)", ego->slv->adt->nam,
 	      ego->n, ego->m, ego->vl);
 }
 

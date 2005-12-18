@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.9 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: reodft00e-splitradix.c,v 1.10 2005-12-18 21:43:26 athena Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.
@@ -232,10 +232,10 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      if (ego->super.apply == apply_e)
-	  p->print(p, "(redft00e-splitradix-%d%v%(%p%)%(%p%))", 
+	  p->print(p, "(redft00e-splitradix-%D%v%(%p%)%(%p%))", 
 		   ego->n + 1, ego->vl, ego->clde, ego->cldo);
      else
-	  p->print(p, "(rodft00e-splitradix-%d%v%(%p%)%(%p%))", 
+	  p->print(p, "(rodft00e-splitradix-%D%v%(%p%)%(%p%))", 
 		   ego->n - 1, ego->vl, ego->clde, ego->cldo);
 }
 

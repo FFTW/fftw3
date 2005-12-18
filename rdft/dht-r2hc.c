@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dht-r2hc.c,v 1.21 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: dht-r2hc.c,v 1.22 2005-12-18 21:43:26 athena Exp $ */
 
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */
@@ -76,7 +76,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dht-r2hc-%d%(%p%))", ego->n, ego->cld);
+     p->print(p, "(dht-r2hc-%D%(%p%))", ego->n, ego->cld);
 }
 
 static int applicable0(const problem *p_, const planner *plnr)

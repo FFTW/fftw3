@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.20 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: rdft-dht.c,v 1.21 2005-12-18 21:43:26 athena Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime
@@ -134,7 +134,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s-dht-%d%(%p%))", 
+     p->print(p, "(%s-dht-%D%(%p%))", 
 	      ego->super.apply == apply_r2hc ? "r2hc" : "hc2r",
 	      ego->n, ego->cld);
 }

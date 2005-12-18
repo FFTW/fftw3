@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.54 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: buffered.c,v 1.55 2005-12-18 21:43:26 athena Exp $ */
 
 #include "dft.h"
 
@@ -98,7 +98,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s-%d%v/%d-%d%(%p%)%(%p%)%(%p%))",
+     p->print(p, "(%s-%D%v/%D-%D%(%p%)%(%p%)%(%p%))",
               ego->slv->adt->nam,
               ego->n, ego->nbuf,
               ego->vl, ego->bufdist % ego->n,

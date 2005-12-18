@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.20 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: direct2.c,v 1.21 2005-12-18 21:43:26 athena Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -83,7 +83,7 @@ static void print(const plan *ego_, printer *p)
      const P *ego = (const P *) ego_;
      const S *s = ego->slv;
 
-     p->print(p, "(rdft2-%s-direct-%d%v \"%s\")", 
+     p->print(p, "(rdft2-%s-direct-%D%v \"%s\")", 
 	      X(rdft_kind_str)(s->kind), s->sz, ego->vl, s->nam);
 }
 

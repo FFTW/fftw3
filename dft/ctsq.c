@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ctsq.c,v 1.6 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: ctsq.c,v 1.7 2005-12-18 21:43:26 athena Exp $ */
 
 /* special ``square transpose'' cooley-tukey solver for in-place problems */
 #include "ct.h"
@@ -75,7 +75,7 @@ static void print(const plan *ego_, printer *p)
      const S *slv = ego->slv;
      const ct_desc *e = slv->desc;
 
-     p->print(p, "(dft-ctsq-%s/%d \"%s\"%(%p%))",
+     p->print(p, "(dft-ctsq-%s/%D \"%s\"%(%p%))",
 	      slv->dec == DECDIT ? "dit" : "dif",
 	      ego->r, e->nam, ego->cld);
 }

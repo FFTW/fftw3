@@ -72,7 +72,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(rdft-ct-%s/%d%(%p%)%(%p%))",
+     p->print(p, "(rdft-ct-%s/%D%(%p%)%(%p%))",
 	      ego->super.apply == apply_dit ? "dit" : "dif",
 	      ego->r, ego->cldw, ego->cld);
 }

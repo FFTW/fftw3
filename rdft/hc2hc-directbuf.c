@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-directbuf.c,v 1.5 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: hc2hc-directbuf.c,v 1.6 2005-12-18 21:43:26 athena Exp $ */
 
 #include "hc2hc.h"
 
@@ -144,7 +144,7 @@ static void print(const plan *ego_, printer *p)
      const hc2hc_desc *e = slv->desc;
      INT batchsz = BATCHSZ(ego->r);
 
-     p->print(p, "(hc2hc-directbuf/%d-%d/%d%v \"%s\"%(%p%)%(%p%))",
+     p->print(p, "(hc2hc-directbuf/%D-%D/%D%v \"%s\"%(%p%)%(%p%))",
 	      batchsz, ego->r, X(twiddle_length)(ego->r, e->tw), 
 	      ego->vl, e->nam, ego->cld0, ego->cldm);
 }

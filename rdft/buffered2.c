@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.38 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: buffered2.c,v 1.39 2005-12-18 21:43:26 athena Exp $ */
 
 #include "rdft.h"
 
@@ -210,7 +210,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s-%s-%d%v/%d-%d%(%p%)%(%p%))",
+     p->print(p, "(%s-%s-%D%v/%D-%D%(%p%)%(%p%))",
               ego->slv->adt->nam,
 	      ego->super.apply == apply_r2hc ? "r2hc" : "hc2r",
               ego->n, ego->nbuf,

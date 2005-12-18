@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: tensor.c,v 1.40 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: tensor.c,v 1.41 2005-12-18 21:43:26 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -112,7 +112,7 @@ void X(tensor_print)(const tensor *x, printer *p)
 	  p->print(p, "(");
 	  for (i = 0; i < x->rnk; ++i) {
 	       const iodim *d = x->dims + i;
-	       p->print(p, "%s(%d %d %d)", 
+	       p->print(p, "%s(%D %D %D)", 
 			first ? "" : " ",
 			d->n, d->is, d->os);
 	       first = 0;

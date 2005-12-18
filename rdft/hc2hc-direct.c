@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-direct.c,v 1.5 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: hc2hc-direct.c,v 1.6 2005-12-18 21:43:26 athena Exp $ */
 
 #include "hc2hc.h"
 
@@ -82,7 +82,7 @@ static void print(const plan *ego_, printer *p)
      const S *slv = ego->slv;
      const hc2hc_desc *e = slv->desc;
 
-     p->print(p, "(hc2hc-direct-%d/%d%v \"%s\"%(%p%)%(%p%))",
+     p->print(p, "(hc2hc-direct-%D/%D%v \"%s\"%(%p%)%(%p%))",
               ego->r, X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam,
 	      ego->cld0, ego->cldm);
 }

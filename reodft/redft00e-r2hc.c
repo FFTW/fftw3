@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.27 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.28 2005-12-18 21:43:26 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing.
 
@@ -129,7 +129,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(redft00e-r2hc-%d%v%(%p%))", ego->n + 1, ego->vl, ego->cld);
+     p->print(p, "(redft00e-r2hc-%D%v%(%p%))", ego->n + 1, ego->vl, ego->cld);
 }
 
 static int applicable0(const solver *ego_, const problem *p_)

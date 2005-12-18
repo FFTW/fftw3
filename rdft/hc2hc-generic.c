@@ -225,7 +225,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(hc2hc-generic-%s-%d-%d%v%(%p%)%(%p%))", 
+     p->print(p, "(hc2hc-generic-%s-%D-%D%v%(%p%)%(%p%))", 
 	      ego->super.apply == apply_dit ? "dit" : "dif",
 	      ego->r, ego->m, ego->vl, ego->cld0, ego->cld);
 }

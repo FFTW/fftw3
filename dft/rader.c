@@ -191,7 +191,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *)ego_;
-     p->print(p, "(dft-rader-%d%ois=%oos=%(%p%)",
+     p->print(p, "(dft-rader-%D%ois=%oos=%(%p%)",
               ego->n, ego->is, ego->os, ego->cld1);
      if (ego->cld2 != ego->cld1)
           p->print(p, "%(%p%)", ego->cld2);

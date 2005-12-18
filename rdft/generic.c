@@ -161,7 +161,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
 
-     p->print(p, "(rdft-generic-%s-%d)", 
+     p->print(p, "(rdft-generic-%s-%D)", 
 	      ego->kind == R2HC ? "r2hc" : "hc2r", 
 	      ego->n);
 }

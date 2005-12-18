@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.47 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: ct.c,v 1.48 2005-12-18 21:43:26 athena Exp $ */
 
 #include "ct.h"
 
@@ -74,7 +74,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dft-ct-%s/%d%(%p%)%(%p%))",
+     p->print(p, "(dft-ct-%s/%D%(%p%)%(%p%))",
 	      ego->super.apply == apply_dit ? "dit" : "dif",
 	      ego->r, ego->cldw, ego->cld);
 }

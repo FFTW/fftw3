@@ -183,7 +183,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dftw-genericbuf/%d-%d-%d%(%p%))", 
+     p->print(p, "(dftw-genericbuf/%D-%D-%D%(%p%))", 
 	      ego->batchsz, ego->r, ego->m, ego->cld);
 }
 

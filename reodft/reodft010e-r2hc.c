@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.32 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: reodft010e-r2hc.c,v 1.33 2005-12-18 21:43:26 athena Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
@@ -311,7 +311,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%se-r2hc-%d%v%(%p%))",
+     p->print(p, "(%se-r2hc-%D%v%(%p%))",
 	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }
 

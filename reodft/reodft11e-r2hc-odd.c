@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.22 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.23 2005-12-18 21:43:26 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -216,7 +216,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%se-r2hc-odd-%d%v%(%p%))",
+     p->print(p, "(%se-r2hc-odd-%D%v%(%p%))",
 	      X(rdft_kind_str)(ego->kind), ego->n, ego->vl, ego->cld);
 }
 

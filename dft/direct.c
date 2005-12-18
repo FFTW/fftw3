@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.44 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: direct.c,v 1.45 2005-12-18 21:43:26 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -122,10 +122,10 @@ static void print(const plan *ego_, printer *p)
      const kdft_desc *d = s->desc;
 
      if (ego->slv->bufferedp)
-	  p->print(p, "(dft-directbuf/%d-%d%v \"%s\")", 
+	  p->print(p, "(dft-directbuf/%D-%D%v \"%s\")", 
 		   compute_batchsize(d->sz), d->sz, ego->vl, d->nam);
      else
-	  p->print(p, "(dft-direct-%d%v \"%s\")", d->sz, ego->vl, d->nam);
+	  p->print(p, "(dft-direct-%D%v \"%s\")", d->sz, ego->vl, d->nam);
 }
 
 static int applicable_buf(const solver *ego_, const problem *p_,

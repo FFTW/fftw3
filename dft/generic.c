@@ -105,7 +105,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
 
-     p->print(p, "(dft-generic-%d)", ego->n);
+     p->print(p, "(dft-generic-%D)", ego->n);
 }
 
 static int applicable0(const problem *p_)
