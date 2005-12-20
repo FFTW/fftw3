@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.28 2005-12-20 02:27:25 athena Exp $ */
+/* $Id: print.c,v 1.29 2005-12-20 03:04:00 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -43,7 +43,9 @@ static void newline(printer *p)
 	  p->putchr(p, ' ');
 }
 
-static void putint(printer *p, INT i, INT base)
+static const char *digits = "0123456789abcdef";
+
+static void putint(printer *p, INT i)
 {
      char buf[BSZ];
      char *f = buf;
@@ -54,8 +56,8 @@ static void putint(printer *p, INT i, INT base)
      }
      
      do {
-	  *f++ = "0123456789abcdef"[i % base];
-	  i /= base;
+	  *f++ = digits[i % 10];
+	  i /= 10;
      } while (i);
      
      do {
@@ -63,11 +65,31 @@ static void putint(printer *p, INT i, INT base)
      } while (f != buf);
 }
 
-static void vprint(printer *p, const char *format, va_list ap)
+static void putulong(printer *p, unsigned long i, int base, int width)
 {
      char buf[BSZ];
+     char *f = buf;
+
+     do {
+	  *f++ = digits[i % base];
+	  i /= base;
+     } while (i);
+
+     while (width > f - buf) {
+	  p->putchr(p, '0');
+	  --width;
+     }
+
+     do {
+	  p->putchr(p, *--f);
+     } while (f != buf);
+}
+
+static void vprint(printer *p, const char *format, va_list ap)
+{
      const char *s = format;
      char c;
+     INT ival;
 
      while ((c = *s++)) {
           switch (c) {
@@ -76,9 +98,9 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       case 'M': {
 			    /* md5 value */
 			    md5uint x = va_arg(ap, md5uint);
-			    x = 0xffffffffUL & x;
-			    sprintf(buf, "%8.8lx", (unsigned long)x);
-			    goto putbuf;
+			    putulong(p, (unsigned long)(0xffffffffUL & x),
+				     16, 8);
+			    break;
 		       }
 		       case 'c': {
 			    int x = va_arg(ap, int);
@@ -95,53 +117,45 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       }
 		       case 'd': {
 			    int x = va_arg(ap, int);
-			    sprintf(buf, "%d", x);
-			    goto putbuf;
+			    ival = (INT)x;
+			    goto putival;
 		       }
 		       case 'D': {
-			    INT x = va_arg(ap, INT);
-			    putint(p, x, 10);
-			    break;
-		       }
-		       case 'f': case 'e': case 'g': {
-			    char fmt[3] = "%x";
-			    double x = va_arg(ap, double);
-			    fmt[1] = c;
-			    sprintf(buf, fmt, x);
-			    goto putbuf;
+			    ival = va_arg(ap, INT);
+			    goto putival;
 		       }
 		       case 'v': {
 			    /* print optional vector length */
-			    INT x = va_arg(ap, INT);
-			    if (x > 1) {
+			    ival = va_arg(ap, INT);
+			    if (ival > 1) {
 				 myputs(p, "-x");
-				 putint(p, x, 10);
+				 goto putival;
 			    }
 			    break;
 		       }
 		       case 'o': {
 			    /* integer option.  Usage: %oNAME= */
-			    INT x = va_arg(ap, INT);
-			    if (x)
+			    ival = va_arg(ap, INT);
+			    if (ival)
 				 p->putchr(p, '/');
 			    while ((c = *s++) != '=')
-				 if (x)
+				 if (ival)
 				      p->putchr(p, c);
-			    if (x) {
+			    if (ival) {
 				 p->putchr(p, '=');
-				 putint(p, x, 10);
+				 goto putival;
 			    }
 			    break;
 		       }
 		       case 'u': {
 			    unsigned x = va_arg(ap, unsigned);
-			    sprintf(buf, "%u", x);
-			    goto putbuf;
+			    putulong(p, (unsigned long)x, 10, 0);
+			    break;
 		       }
 		       case 'x': {
 			    unsigned x = va_arg(ap, unsigned);
-			    sprintf(buf, "%x", x);
-			    goto putbuf;
+			    putulong(p, (unsigned long)x, 16, 0);
+			    break;
 		       }
 		       case '(': {
 			    /* newline, augment indent level */
@@ -185,11 +199,12 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    A(0 /* unknown format */);
 			    break;
 
-		   putbuf:
-			    myputs(p, buf);
-			    break;
 		   putnull:
 			    myputs(p, "(null)");
+			    break;
+
+		   putival:
+			    putint(p, ival);
 			    break;
 		   }
 		   break;
