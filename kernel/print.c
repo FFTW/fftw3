@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: print.c,v 1.27 2005-12-18 21:52:38 athena Exp $ */
+/* $Id: print.c,v 1.28 2005-12-20 02:27:25 athena Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>
@@ -41,6 +41,26 @@ static void newline(printer *p)
      p->putchr(p, '\n');
      for (i = 0; i < p->indent; ++i)
 	  p->putchr(p, ' ');
+}
+
+static void putint(printer *p, INT i, INT base)
+{
+     char buf[BSZ];
+     char *f = buf;
+
+     if (i < 0) {
+	  p->putchr(p, '-');
+	  i = -i;
+     }
+     
+     do {
+	  *f++ = "0123456789abcdef"[i % base];
+	  i /= base;
+     } while (i);
+     
+     do {
+	  p->putchr(p, *--f);
+     } while (f != buf);
 }
 
 static void vprint(printer *p, const char *format, va_list ap)
@@ -80,8 +100,8 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       }
 		       case 'D': {
 			    INT x = va_arg(ap, INT);
-			    sprintf(buf, BIGINT_FORMAT, x);
-			    goto putbuf;
+			    putint(p, x, 10);
+			    break;
 		       }
 		       case 'f': case 'e': case 'g': {
 			    char fmt[3] = "%x";
@@ -94,8 +114,8 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    /* print optional vector length */
 			    INT x = va_arg(ap, INT);
 			    if (x > 1) {
-				 sprintf(buf, "-x" BIGINT_FORMAT, x);
-				 goto putbuf;
+				 myputs(p, "-x");
+				 putint(p, x, 10);
 			    }
 			    break;
 		       }
@@ -108,8 +128,8 @@ static void vprint(printer *p, const char *format, va_list ap)
 				 if (x)
 				      p->putchr(p, c);
 			    if (x) {
-				 sprintf(buf, "=" BIGINT_FORMAT, x);
-				 goto putbuf;
+				 p->putchr(p, '=');
+				 putint(p, x, 10);
 			    }
 			    break;
 		       }

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.258 2005-12-18 20:14:03 athena Exp $ */
+/* $Id: ifftw.h,v 1.259 2005-12-20 02:27:25 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -60,7 +60,6 @@ typedef double R;
   have been in the first place.
 */
 typedef ptrdiff_t INT;
-#define BIGINT_FORMAT "%td" /* for sprintf() */
 
 /* dummy use of unused parameters to silence compiler warnings */
 #define UNUSED(x) (void)x
