@@ -88,8 +88,7 @@ static void doblock(md5sig state, const unsigned char *data)
      a = state[0]; b = state[1]; c = state[2]; d = state[3];
      for (i = 0; i < 64; ++i) {
 	  const struct roundtab *p = roundtab + i;
-	  int round = i / 16;
-	  switch (round) {
+	  switch (i >> 4) {
 	      case 0: a += (b & c) | (~b & d); break;
 	      case 1: a += (b & d) | (c & ~d); break;
 	      case 2: a += b ^ c ^ d; break;
