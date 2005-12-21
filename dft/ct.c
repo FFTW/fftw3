@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.48 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: ct.c,v 1.49 2005-12-21 03:29:19 athena Exp $ */
 
 #include "ct.h"
 
@@ -81,23 +81,20 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
 {
-     if (DFTP(p_)) {
-          const problem_dft *p = (const problem_dft *) p_;
-	  INT r;
+     const problem_dft *p = (const problem_dft *) p_;
+     INT r;
 
-          return (1
-                  && p->sz->rnk == 1
-                  && p->vecsz->rnk <= 1 
+     return (1
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk <= 1 
 
-                  /* DIF destroys the input and we don't like it */
-                  && (ego->dec == DECDIT || 
-		      p->ri == p->ro || 
-		      !NO_DESTROY_INPUTP(plnr))
+	     /* DIF destroys the input and we don't like it */
+	     && (ego->dec == DECDIT || 
+		 p->ri == p->ro || 
+		 !NO_DESTROY_INPUTP(plnr))
 		  
-		  && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 1)
-		  && p->sz->dims[0].n > r);
-     }
-     return 0;
+	     && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 1)
+	     && p->sz->dims[0].n > r);
 }
 
 
@@ -205,7 +202,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, ct_mkinferior mkcldw)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      ct_solver *slv = (ct_solver *)X(mksolver)(size, &sadt);
      slv->r = r;
      slv->dec = dec;

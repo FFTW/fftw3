@@ -38,9 +38,6 @@ typedef struct {
 #endif
 } problem_rdft;
 
-int X(problem_rdft_p)(const problem *p);
-#define RDFTP X(problem_rdft_p)  /* shorthand */
-
 void X(rdft_zerotens)(tensor *sz, R *I);
 problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 			   R *I, R *O, const rdft_kind *kind);
@@ -103,9 +100,6 @@ typedef struct {
      R *r, *rio, *iio;
      rdft_kind kind; /* R2HC or HC2R */
 } problem_rdft2;
-
-int X(problem_rdft2_p)(const problem *p);
-#define RDFT2P X(problem_rdft2_p)  /* shorthand */
 
 problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
 			    R *r, R *rio, R *iio, rdft_kind kind);

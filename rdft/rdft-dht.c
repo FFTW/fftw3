@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.21 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: rdft-dht.c,v 1.22 2005-12-21 03:29:19 athena Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime
@@ -141,21 +141,19 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable0(const solver *ego_, const problem *p_)
 {
+     const problem_rdft *p = (const problem_rdft *) p_;
      UNUSED(ego_);
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-          return (1
-		  && p->sz->rnk == 1
-		  && p->vecsz->rnk == 0
-		  && (p->kind[0] == R2HC || p->kind[0] == HC2R)
 
-		  /* hack: size-2 DHT etc. are defined as being equivalent
-		     to size-2 R2HC in problem.c, so we need this to prevent
-		     infinite loops for size 2 in EXHAUSTIVE mode: */
-		  && p->sz->dims[0].n > 2
-	       );
-     }
-     return 0;
+     return (1
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk == 0
+	     && (p->kind[0] == R2HC || p->kind[0] == HC2R)
+
+	     /* hack: size-2 DHT etc. are defined as being equivalent
+		to size-2 R2HC in problem.c, so we need this to prevent
+		infinite loops for size 2 in EXHAUSTIVE mode: */
+	     && p->sz->dims[0].n > 2
+	  );
 }
 
 static int applicable(const solver *ego, const problem *p_, 
@@ -212,7 +210,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

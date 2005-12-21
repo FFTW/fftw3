@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft.h,v 1.44 2005-03-20 21:12:44 athena Exp $ */
+/* $Id: dft.h,v 1.45 2005-12-21 03:29:19 athena Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__
@@ -32,9 +32,6 @@ typedef struct {
      tensor *sz, *vecsz;
      R *ri, *ii, *ro, *io;
 } problem_dft;
-
-int X(problem_dft_p)(const problem *p);
-#define DFTP X(problem_dft_p)  /* shorthand */
 
 void X(dft_zerotens)(tensor *sz, R *ri, R *ii);
 problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,

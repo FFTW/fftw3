@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.21 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: direct.c,v 1.22 2005-12-21 03:29:19 athena Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -102,58 +102,54 @@ static INT ioffset(rdft_kind kind, INT sz, INT s)
 
 static int applicable(const solver *ego_, const problem *p_)
 {
-     if (RDFTP(p_)) {
-          const S *ego = (const S *) ego_;
-          const problem_rdft *p = (const problem_rdft *) p_;
-	  INT vl;
-	  INT ivs, ovs;
+     const S *ego = (const S *) ego_;
+     const problem_rdft *p = (const problem_rdft *) p_;
+     INT vl;
+     INT ivs, ovs;
 
-          return (
-	       1
-	       && p->sz->rnk == 1
-	       && p->vecsz->rnk <= 1
-	       && p->sz->dims[0].n == ego->sz
-	       && p->kind[0] == ego->kind
+     return (
+	  1
+	  && p->sz->rnk == 1
+	  && p->vecsz->rnk <= 1
+	  && p->sz->dims[0].n == ego->sz
+	  && p->kind[0] == ego->kind
 
-	       /* check strides etc */
-	       && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
+	  /* check strides etc */
+	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
-	       && (!R2HC_KINDP(ego->kind) ||
-		   ego->desc.r2hc->genus->okp(ego->desc.r2hc, p->I, p->O, p->O
-					      + ioffset(ego->kind, ego->sz, p->sz->dims[0].os),
-					      p->sz->dims[0].is,
-					      p->sz->dims[0].os, 0-p->sz->dims[0].os,
-					      vl, ivs, ovs))
-	       && (!HC2R_KINDP(ego->kind) ||
-		   ego->desc.hc2r->genus->okp(ego->desc.hc2r, p->I, p->I
-					      + ioffset(ego->kind, ego->sz, p->sz->dims[0].is), p->O,
-					      p->sz->dims[0].is, 0-p->sz->dims[0].is,
-					      p->sz->dims[0].os, 
-					      vl, ivs, ovs))
+	  && (!R2HC_KINDP(ego->kind) ||
+	      ego->desc.r2hc->genus->okp(ego->desc.r2hc, p->I, p->O, p->O
+					 + ioffset(ego->kind, ego->sz, p->sz->dims[0].os),
+					 p->sz->dims[0].is,
+					 p->sz->dims[0].os, 0-p->sz->dims[0].os,
+					 vl, ivs, ovs))
+	  && (!HC2R_KINDP(ego->kind) ||
+	      ego->desc.hc2r->genus->okp(ego->desc.hc2r, p->I, p->I
+					 + ioffset(ego->kind, ego->sz, p->sz->dims[0].is), p->O,
+					 p->sz->dims[0].is, 0-p->sz->dims[0].is,
+					 p->sz->dims[0].os, 
+					 vl, ivs, ovs))
 	       
-	       && (!R2R_KINDP(ego->kind) ||
-		   ego->desc.r2r->genus->okp(ego->desc.r2r, p->I, p->O,
-					     p->sz->dims[0].is,
-					     p->sz->dims[0].os, 
-					     vl, ivs, ovs))
+	  && (!R2R_KINDP(ego->kind) ||
+	      ego->desc.r2r->genus->okp(ego->desc.r2r, p->I, p->O,
+					p->sz->dims[0].is,
+					p->sz->dims[0].os, 
+					vl, ivs, ovs))
 	       
-	       && (0
-		   /* can operate out-of-place */
-		   || p->I != p->O
+	  && (0
+	      /* can operate out-of-place */
+	      || p->I != p->O
 
-		   /*
-		    * can compute one transform in-place, no matter
-		    * what the strides are.
-		    */
-		   || p->vecsz->rnk == 0
+	      /*
+	       * can compute one transform in-place, no matter
+	       * what the strides are.
+	       */
+	      || p->vecsz->rnk == 0
 
-		   /* can operate in-place as long as strides are the same */
-		   || (X(tensor_inplace_strides2)(p->sz, p->vecsz))
-		    )
-	       );
-     }
-
-     return 0;
+	      /* can operate in-place as long as strides are the same */
+	      || (X(tensor_inplace_strides2)(p->sz, p->vecsz))
+	       )
+	  );
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -223,7 +219,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 solver *X(mksolver_rdft_r2hc_direct)(kr2hc k, const kr2hc_desc *desc)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k.r2hc = k;
      slv->desc.r2hc = desc;
@@ -235,7 +231,7 @@ solver *X(mksolver_rdft_r2hc_direct)(kr2hc k, const kr2hc_desc *desc)
 
 solver *X(mksolver_rdft_hc2r_direct)(khc2r k, const khc2r_desc *desc)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k.hc2r = k;
      slv->desc.hc2r = desc;
@@ -247,7 +243,7 @@ solver *X(mksolver_rdft_hc2r_direct)(khc2r k, const khc2r_desc *desc)
 
 solver *X(mksolver_rdft_r2r_direct)(kr2r k, const kr2r_desc *desc)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k.r2r = k;
      slv->desc.r2r = desc;

@@ -45,108 +45,114 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
 						    const problem *p_)
 {
      bench_problem *bp = 0;
-     if (DFTP(p_)) {
-	  const problem_dft *p = (const problem_dft *) p_;
+     switch (p_->adt->problem_kind) {
+	 case PROBLEM_DFT:
+	 {
+	      const problem_dft *p = (const problem_dft *) p_;
 	  
-	  if (!p->ri || !p->ii)
-	       abort();
+	      if (!p->ri || !p->ii)
+		   abort();
 
-	  bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
+	      bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
 
-	  bp->kind = PROBLEM_COMPLEX;
-	  bp->sign = FFT_SIGN;
-	  bp->split = 1; /* tensor strides are in R's, not C's */
-	  bp->in = UNTAINT(p->ri);
-	  bp->out = UNTAINT(p->ro);
-	  bp->ini = UNTAINT(p->ii);
-	  bp->outi = UNTAINT(p->io);
-	  bp->inphys = bp->outphys = 0;
-	  bp->iphyssz = bp->ophyssz = 0;
-	  bp->in_place = p->ri == p->ro;
-	  bp->sz = fftw_tensor_to_bench_tensor(p->sz);
-	  bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
-     }
-     else if (RDFTP(p_)) {
-	  const problem_rdft *p = (const problem_rdft *) p_;
-	  int i;
+	      bp->kind = PROBLEM_COMPLEX;
+	      bp->sign = FFT_SIGN;
+	      bp->split = 1; /* tensor strides are in R's, not C's */
+	      bp->in = UNTAINT(p->ri);
+	      bp->out = UNTAINT(p->ro);
+	      bp->ini = UNTAINT(p->ii);
+	      bp->outi = UNTAINT(p->io);
+	      bp->inphys = bp->outphys = 0;
+	      bp->iphyssz = bp->ophyssz = 0;
+	      bp->in_place = p->ri == p->ro;
+	      bp->sz = fftw_tensor_to_bench_tensor(p->sz);
+	      bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
+	      break;
+	 }
+	 case PROBLEM_RDFT:
+	 {
+	      const problem_rdft *p = (const problem_rdft *) p_;
+	      int i;
 
-	  if (!p->I || !p->O)
-	       abort();
+	      if (!p->I || !p->O)
+		   abort();
 
-	  for (i = 0; i < p->sz->rnk; ++i)
-	       switch (p->kind[i]) {
-		   case R2HC01:
-		   case R2HC10:
-		   case R2HC11:
-		   case HC2R01:
-		   case HC2R10:
-		   case HC2R11:
-			return bp;
-	       }
+	      for (i = 0; i < p->sz->rnk; ++i)
+		   switch (p->kind[i]) {
+		       case R2HC01:
+		       case R2HC10:
+		       case R2HC11:
+		       case HC2R01:
+		       case HC2R10:
+		       case HC2R11:
+			    return bp;
+		   }
 	  
-	  bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
+	      bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
 
-	  bp->kind = PROBLEM_R2R;
-	  bp->sign = FFT_SIGN;
-	  bp->split = 0;
-	  bp->in = UNTAINT(p->I);
-	  bp->out = UNTAINT(p->O);
-	  bp->ini = bp->outi = 0;
-	  bp->inphys = bp->outphys = 0;
-	  bp->iphyssz = bp->ophyssz = 0;
-	  bp->in_place = p->I == p->O;
-	  bp->sz = fftw_tensor_to_bench_tensor(p->sz);
-	  bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
-	  bp->k = (r2r_kind_t *) bench_malloc(sizeof(r2r_kind_t) * p->sz->rnk);
-	  for (i = 0; i < p->sz->rnk; ++i)
-	       switch (p->kind[i]) {
-		   case R2HC: bp->k[i] = R2R_R2HC; break;
-		   case HC2R: bp->k[i] = R2R_HC2R; break;
-		   case DHT: bp->k[i] = R2R_DHT; break;
-		   case REDFT00: bp->k[i] = R2R_REDFT00; break;
-		   case REDFT01: bp->k[i] = R2R_REDFT01; break;
-		   case REDFT10: bp->k[i] = R2R_REDFT10; break;
-		   case REDFT11: bp->k[i] = R2R_REDFT11; break;
-		   case RODFT00: bp->k[i] = R2R_RODFT00; break;
-		   case RODFT01: bp->k[i] = R2R_RODFT01; break;
-		   case RODFT10: bp->k[i] = R2R_RODFT10; break;
-		   case RODFT11: bp->k[i] = R2R_RODFT11; break;
-		   default: CK(0);
-	  }
-     }
-     else if (RDFT2P(p_)) {
-	  const problem_rdft2 *p = (const problem_rdft2 *) p_;
+	      bp->kind = PROBLEM_R2R;
+	      bp->sign = FFT_SIGN;
+	      bp->split = 0;
+	      bp->in = UNTAINT(p->I);
+	      bp->out = UNTAINT(p->O);
+	      bp->ini = bp->outi = 0;
+	      bp->inphys = bp->outphys = 0;
+	      bp->iphyssz = bp->ophyssz = 0;
+	      bp->in_place = p->I == p->O;
+	      bp->sz = fftw_tensor_to_bench_tensor(p->sz);
+	      bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
+	      bp->k = (r2r_kind_t *) bench_malloc(sizeof(r2r_kind_t) * p->sz->rnk);
+	      for (i = 0; i < p->sz->rnk; ++i)
+		   switch (p->kind[i]) {
+		       case R2HC: bp->k[i] = R2R_R2HC; break;
+		       case HC2R: bp->k[i] = R2R_HC2R; break;
+		       case DHT: bp->k[i] = R2R_DHT; break;
+		       case REDFT00: bp->k[i] = R2R_REDFT00; break;
+		       case REDFT01: bp->k[i] = R2R_REDFT01; break;
+		       case REDFT10: bp->k[i] = R2R_REDFT10; break;
+		       case REDFT11: bp->k[i] = R2R_REDFT11; break;
+		       case RODFT00: bp->k[i] = R2R_RODFT00; break;
+		       case RODFT01: bp->k[i] = R2R_RODFT01; break;
+		       case RODFT10: bp->k[i] = R2R_RODFT10; break;
+		       case RODFT11: bp->k[i] = R2R_RODFT11; break;
+		       default: CK(0);
+		   }
+	      break;
+	 }
+	 case PROBLEM_RDFT2:
+	 {
+	      const problem_rdft2 *p = (const problem_rdft2 *) p_;
 	  
-	  if (!p->r || !p->rio || !p->iio)
-	       abort();
+	      if (!p->r || !p->rio || !p->iio)
+		   abort();
 
-	  bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
+	      bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
 
-	  bp->kind = PROBLEM_REAL;
-	  bp->sign = p->kind == R2HC ? FFT_SIGN : -FFT_SIGN;
-	  bp->split = 1; /* tensor strides are in R's, not C's */
-	  if (p->kind == R2HC) {
-	       bp->sign = FFT_SIGN;
-	       bp->in = UNTAINT(p->r);
-	       bp->out = UNTAINT(p->rio);
-	       bp->ini = 0;
-	       bp->outi = UNTAINT(p->iio);
-	  }
-	  else {
-	       bp->sign = -FFT_SIGN;
-	       bp->out = UNTAINT(p->r);
-	       bp->in = UNTAINT(p->rio);
-	       bp->outi = 0;
-	       bp->ini = UNTAINT(p->iio);
-	  }
-	  bp->inphys = bp->outphys = 0;
-	  bp->iphyssz = bp->ophyssz = 0;
-	  bp->in_place = p->r == p->rio;
-	  bp->sz = fftw_tensor_to_bench_tensor(p->sz);
-	  bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
-     }
-     else {
-	  /* TODO */
+	      bp->kind = PROBLEM_REAL;
+	      bp->sign = p->kind == R2HC ? FFT_SIGN : -FFT_SIGN;
+	      bp->split = 1; /* tensor strides are in R's, not C's */
+	      if (p->kind == R2HC) {
+		   bp->sign = FFT_SIGN;
+		   bp->in = UNTAINT(p->r);
+		   bp->out = UNTAINT(p->rio);
+		   bp->ini = 0;
+		   bp->outi = UNTAINT(p->iio);
+	      }
+	      else {
+		   bp->sign = -FFT_SIGN;
+		   bp->out = UNTAINT(p->r);
+		   bp->in = UNTAINT(p->rio);
+		   bp->outi = 0;
+		   bp->ini = UNTAINT(p->iio);
+	      }
+	      bp->inphys = bp->outphys = 0;
+	      bp->iphyssz = bp->ophyssz = 0;
+	      bp->in_place = p->r == p->rio;
+	      bp->sz = fftw_tensor_to_bench_tensor(p->sz);
+	      bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
+	 }
+	 default: 
+	      abort();
      }
 
      bp->userinfo = 0;

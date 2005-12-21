@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.32 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.33 2005-12-21 03:29:19 athena Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -402,37 +402,34 @@ static int pickdim(const tensor *s, int *pdim0, int *pdim1, int *pdim2)
 static int applicable(const solver *ego_, const problem *p_, planner *plnr,
 		      int *dim0, int *dim1, int *dim2, INT *nbuf)
 {
-     if (RDFTP(p_)) {
-          const S *ego = (const S *) ego_;
-          const problem_rdft *p = (const problem_rdft *) p_;
+     const S *ego = (const S *) ego_;
+     const problem_rdft *p = (const problem_rdft *) p_;
 
-          return (1
-		  && p->I == p->O /* FIXME: out-of-place transposes too? */
-                  && p->sz->rnk == 0
-		  && (p->vecsz->rnk == 2 || p->vecsz->rnk == 3)
+     return (1
+	     && p->I == p->O /* FIXME: out-of-place transposes too? */
+	     && p->sz->rnk == 0
+	     && (p->vecsz->rnk == 2 || p->vecsz->rnk == 3)
 
-                  && pickdim(p->vecsz, dim0, dim1, dim2)
+	     && pickdim(p->vecsz, dim0, dim1, dim2)
 
-		  /* UGLY if vecloop in wrong order for locality */
-		  && (!NO_UGLYP(plnr) ||
-		      p->vecsz->rnk == 2 ||
-		      X(iabs)(p->vecsz->dims[*dim2].is)
-		      < X(imax)(X(iabs)(p->vecsz->dims[*dim0].is),
-				X(iabs)(p->vecsz->dims[*dim0].os)))
+	     /* UGLY if vecloop in wrong order for locality */
+	     && (!NO_UGLYP(plnr) ||
+		 p->vecsz->rnk == 2 ||
+		 X(iabs)(p->vecsz->dims[*dim2].is)
+		 < X(imax)(X(iabs)(p->vecsz->dims[*dim0].is),
+			   X(iabs)(p->vecsz->dims[*dim0].os)))
 
-		  /* SLOW if non-square */
-		  && (!NO_SLOWP(plnr)
-		      || p->vecsz->dims[*dim0].n == p->vecsz->dims[*dim1].n)
+	     /* SLOW if non-square */
+	     && (!NO_SLOWP(plnr)
+		 || p->vecsz->dims[*dim0].n == p->vecsz->dims[*dim1].n)
 		      
-                  && ego->adt->applicable(p, plnr, *dim0,*dim1,*dim2,nbuf)
+	     && ego->adt->applicable(p, plnr, *dim0,*dim1,*dim2,nbuf)
 
-		  /* buffers too big are UGLY */
-		  && ((!NO_UGLYP(plnr) && !CONSERVE_MEMORYP(plnr))
-		      || *nbuf <= 65536
-		      || *nbuf * 8 < X(tensor_sz)(p->vecsz))
-	       );
-     }
-     return 0;
+	     /* buffers too big are UGLY */
+	     && ((!NO_UGLYP(plnr) && !CONSERVE_MEMORYP(plnr))
+		 || *nbuf <= 65536
+		 || *nbuf * 8 < X(tensor_sz)(p->vecsz))
+	  );
 }
 
 static void get_transpose_vec(const problem_rdft *p, int dim2, INT *vl,INT *vs)
@@ -607,7 +604,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(const transpose_adt *adt)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->adt = adt;
      return &(slv->super);

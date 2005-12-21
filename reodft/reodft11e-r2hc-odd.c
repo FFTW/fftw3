@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.23 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.24 2005-12-21 03:29:19 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -222,18 +222,15 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable0(const solver *ego_, const problem *p_)
 {
+     const problem_rdft *p = (const problem_rdft *) p_;
      UNUSED(ego_);
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-          return (1
-		  && p->sz->rnk == 1
-		  && p->vecsz->rnk <= 1
-		  && p->sz->dims[0].n % 2 == 1
-		  && (p->kind[0] == REDFT11 || p->kind[0] == RODFT11)
-	       );
-     }
 
-     return 0;
+     return (1
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk <= 1
+	     && p->sz->dims[0].n % 2 == 1
+	     && (p->kind[0] == REDFT11 || p->kind[0] == RODFT11)
+	  );
 }
 
 static int applicable(const solver *ego, const problem *p, const planner *plnr)
@@ -293,7 +290,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

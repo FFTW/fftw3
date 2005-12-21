@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.37 2005-12-18 23:15:04 athena Exp $ */
+/* $Id: problem.c,v 1.38 2005-12-21 03:29:19 athena Exp $ */
 
 #include "dft.h"
 #include <stddef.h>
@@ -68,16 +68,12 @@ static void zero(const problem *ego_)
 
 static const problem_adt padt =
 {
+     PROBLEM_DFT,
      hash,
      zero,
      print,
      destroy
 };
-
-int X(problem_dft_p)(const problem *p)
-{
-     return (p->adt == &padt);
-}
 
 problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
                           R *ri, R *ii, R *ro, R *io)

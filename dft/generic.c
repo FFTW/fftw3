@@ -110,17 +110,13 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable0(const problem *p_)
 {
-     if (DFTP(p_)) {
-          const problem_dft *p = (const problem_dft *) p_;
-          return (1
-		  && p->sz->rnk == 1
-		  && p->vecsz->rnk == 0
-		  && (p->sz->dims[0].n % 2) == 1 
-		  && X(is_prime)(p->sz->dims[0].n)
-	       );
-     }
-
-     return 0;
+     const problem_dft *p = (const problem_dft *) p_;
+     return (1
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk == 0
+	     && (p->sz->dims[0].n % 2) == 1 
+	     && X(is_prime)(p->sz->dims[0].n)
+	  );
 }
 
 static int applicable(const solver *ego, const problem *p_, 
@@ -168,7 +164,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

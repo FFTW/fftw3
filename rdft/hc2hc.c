@@ -79,28 +79,24 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable0(const hc2hc_solver *ego, const problem *p_, planner *plnr)
 {
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-	  INT r;
+     const problem_rdft *p = (const problem_rdft *) p_;
+     INT r;
 
-          return (1
-                  && p->sz->rnk == 1
-                  && p->vecsz->rnk <= 1 
+     return (1
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk <= 1 
 
-		  && (/* either the problem is R2HC, which is solved by DIT */
-		       (p->kind[0] == R2HC)
-		      ||
-		       /* or the problem is HC2R, in which case it is solved
-			  by DIF, which destroys the input */
-		       (p->kind[0] == HC2R && 
-			(p->I == p->O || !NO_DESTROY_INPUTP(plnr))))
+	     && (/* either the problem is R2HC, which is solved by DIT */
+		  (p->kind[0] == R2HC)
+		  ||
+		  /* or the problem is HC2R, in which case it is solved
+		     by DIF, which destroys the input */
+		  (p->kind[0] == HC2R && 
+		   (p->I == p->O || !NO_DESTROY_INPUTP(plnr))))
 		  
-		  && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 0)
-		  && p->sz->dims[0].n > r);
-     }
-     return 0;
+	     && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 0)
+	     && p->sz->dims[0].n > r);
 }
-
 
 int X(hc2hc_applicable)(const hc2hc_solver *ego, const problem *p_, planner *plnr)
 {
@@ -202,7 +198,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 hc2hc_solver *X(mksolver_hc2hc)(size_t size, INT r, hc2hc_mkinferior mkcldw)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      hc2hc_solver *slv = (hc2hc_solver *)X(mksolver)(size, &sadt);
      slv->r = r;
      slv->mkcldw = mkcldw;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.32 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: dft-r2hc.c,v 1.33 2005-12-21 03:29:19 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -91,14 +91,10 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable0(const problem *p_)
 {
-     if (DFTP(p_)) {
-          const problem_dft *p = (const problem_dft *) p_;
-          return ((p->sz->rnk == 1 && p->vecsz->rnk == 0)
-		  || (p->sz->rnk == 0 && FINITE_RNK(p->vecsz->rnk))
-	       );
-     }
-
-     return 0;
+     const problem_dft *p = (const problem_dft *) p_;
+     return ((p->sz->rnk == 1 && p->vecsz->rnk == 0)
+	     || (p->sz->rnk == 0 && FINITE_RNK(p->vecsz->rnk))
+	  );
 }
 
 static int splitp(R *r, R *i, INT n, INT s)
@@ -187,7 +183,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

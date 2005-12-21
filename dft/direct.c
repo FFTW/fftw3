@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.45 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: direct.c,v 1.46 2005-12-21 03:29:19 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -131,93 +131,86 @@ static void print(const plan *ego_, printer *p)
 static int applicable_buf(const solver *ego_, const problem *p_,
 			  const planner *plnr)
 {
-     if (DFTP(p_)) {
-          const S *ego = (const S *) ego_;
-          const problem_dft *p = (const problem_dft *) p_;
-          const kdft_desc *d = ego->desc;
-	  INT vl;
-	  INT ivs, ovs;
-	  INT batchsz;
+     const S *ego = (const S *) ego_;
+     const problem_dft *p = (const problem_dft *) p_;
+     const kdft_desc *d = ego->desc;
+     INT vl;
+     INT ivs, ovs;
+     INT batchsz;
 
-          return (
-	       1
-	       && p->sz->rnk == 1
-	       && p->vecsz->rnk == 1
-	       && p->sz->dims[0].n == d->sz
+     return (
+	  1
+	  && p->sz->rnk == 1
+	  && p->vecsz->rnk == 1
+	  && p->sz->dims[0].n == d->sz
 
-	       /* check strides etc */
-	       && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
+	  /* check strides etc */
+	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
-	       /* UGLY if IS <= IVS */
-	       && !(NO_UGLYP(plnr) &&
-		    X(iabs)(p->sz->dims[0].is) <= X(iabs)(ivs))
+	  /* UGLY if IS <= IVS */
+	  && !(NO_UGLYP(plnr) &&
+	       X(iabs)(p->sz->dims[0].is) <= X(iabs)(ivs))
 
-	       && (batchsz = compute_batchsize(d->sz), 1)
-	       && (d->genus->okp(d, 0, ((const R *)0) + 1, p->ro, p->io,
-				 2 * batchsz, p->sz->dims[0].os,
-				 batchsz, 2, ovs, plnr))
-	       && (d->genus->okp(d, 0, ((const R *)0) + 1, p->ro, p->io,
-				 2 * batchsz, p->sz->dims[0].os,
-				 vl % batchsz, 2, ovs, plnr))
+	  && (batchsz = compute_batchsize(d->sz), 1)
+	  && (d->genus->okp(d, 0, ((const R *)0) + 1, p->ro, p->io,
+			    2 * batchsz, p->sz->dims[0].os,
+			    batchsz, 2, ovs, plnr))
+	  && (d->genus->okp(d, 0, ((const R *)0) + 1, p->ro, p->io,
+			    2 * batchsz, p->sz->dims[0].os,
+			    vl % batchsz, 2, ovs, plnr))
 
 
-	       && (0
-		   /* can operate out-of-place */
-		   || p->ri != p->ro
+	  && (0
+	      /* can operate out-of-place */
+	      || p->ri != p->ro
 
-		   /* any in-place problem that fits in the buffer is ok */
-		   || vl <= batchsz
+	      /* any in-place problem that fits in the buffer is ok */
+	      || vl <= batchsz
 
-		   /* can operate in-place as long as strides are the same */
-		   || (X(tensor_inplace_strides2)(p->sz, p->vecsz))
-		    )
-	       );
-     }
-
-     return 0;
+	      /* can operate in-place as long as strides are the same */
+	      || (X(tensor_inplace_strides2)(p->sz, p->vecsz))
+	       )
+	  );
 }
 
 static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
-     if (DFTP(p_)) {
-          const S *ego = (const S *) ego_;
-          const problem_dft *p = (const problem_dft *) p_;
-          const kdft_desc *d = ego->desc;
-	  INT vl;
-	  INT ivs, ovs;
+     const S *ego = (const S *) ego_;
+     const problem_dft *p = (const problem_dft *) p_;
+     const kdft_desc *d = ego->desc;
+     INT vl;
+     INT ivs, ovs;
 
-          return (
-	       1
-	       && p->sz->rnk == 1
-	       && p->vecsz->rnk <= 1
-	       && p->sz->dims[0].n == d->sz
+     return (
+	  1
+	  && p->sz->rnk == 1
+	  && p->vecsz->rnk <= 1
+	  && p->sz->dims[0].n == d->sz
 
-	       /* check strides etc */
-	       && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
+	  /* check strides etc */
+	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
-	       && (d->genus->okp(d, p->ri, p->ii, p->ro, p->io,
-				 p->sz->dims[0].is, p->sz->dims[0].os,
-				 vl, ivs, ovs, plnr))
+	  && (d->genus->okp(d, p->ri, p->ii, p->ro, p->io,
+			    p->sz->dims[0].is, p->sz->dims[0].os,
+			    vl, ivs, ovs, plnr))
 
-	       && (0
-		   /* can operate out-of-place */
-		   || p->ri != p->ro
+	  && (0
+	      /* can operate out-of-place */
+	      || p->ri != p->ro
 
-		   /*
-		    * can compute one transform in-place, no matter
-		    * what the strides are.
-		    */
-		   || p->vecsz->rnk == 0
+	      /*
+	       * can compute one transform in-place, no matter
+	       * what the strides are.
+	       */
+	      || p->vecsz->rnk == 0
 
-		   /* can operate in-place as long as strides are the same */
-		   || (X(tensor_inplace_strides2)(p->sz, p->vecsz))
-		    )
-	       );
-     }
-
-     return 0;
+	      /* can operate in-place as long as strides are the same */
+	      || (X(tensor_inplace_strides2)(p->sz, p->vecsz))
+	       )
+	  );
 }
+
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
@@ -267,7 +260,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(kdft k, const kdft_desc *desc, int bufferedp)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k = k;
      slv->desc = desc;

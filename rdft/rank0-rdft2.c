@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-rdft2.c,v 1.7 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: rank0-rdft2.c,v 1.8 2005-12-21 03:29:19 athena Exp $ */
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
@@ -41,17 +41,14 @@ typedef struct {
 
 static int applicable(const problem *p_)
 {
-     if (RDFT2P(p_)) {
-          const problem_rdft2 *p = (const problem_rdft2 *) p_;
-          return (1
-                  && p->sz->rnk == 0
-		  && (p->kind == HC2R
-		      || (((p->r != p->rio && p->r != p->iio)
-			   || X(rdft2_inplace_strides)(p, RNK_MINFTY))
-			  && p->vecsz->rnk <= 1))
-	       );
-     }
-     return 0;
+     const problem_rdft2 *p = (const problem_rdft2 *) p_;
+     return (1
+	     && p->sz->rnk == 0
+	     && (p->kind == HC2R
+		 || (((p->r != p->rio && p->r != p->iio)
+		      || X(rdft2_inplace_strides)(p, RNK_MINFTY))
+		     && p->vecsz->rnk <= 1))
+	  );
 }
 
 static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
@@ -184,7 +181,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

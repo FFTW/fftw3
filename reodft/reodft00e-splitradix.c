@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.10 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: reodft00e-splitradix.c,v 1.11 2005-12-21 03:29:19 athena Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.
@@ -241,23 +241,20 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable0(const solver *ego_, const problem *p_)
 {
+     const problem_rdft *p = (const problem_rdft *) p_;
      UNUSED(ego_);
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-          return (1
-		  && p->sz->rnk == 1
-		  && p->vecsz->rnk <= 1
-		  && (p->kind[0] == REDFT00 || p->kind[0] == RODFT00)
-		  && p->sz->dims[0].n > 1  /* don't create size-0 sub-plans */
-		  && p->sz->dims[0].n % 2  /* odd: 4 divides "logical" DFT */
-		  && (p->I != p->O || p->vecsz->rnk == 0
-		      || p->vecsz->dims[0].is == p->vecsz->dims[0].os)
-		  && (p->kind[0] != RODFT00 || p->I != p->O || 
-		      p->sz->dims[0].is >= p->sz->dims[0].os) /* laziness */
-	       );
-     }
 
-     return 0;
+     return (1
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk <= 1
+	     && (p->kind[0] == REDFT00 || p->kind[0] == RODFT00)
+	     && p->sz->dims[0].n > 1  /* don't create size-0 sub-plans */
+	     && p->sz->dims[0].n % 2  /* odd: 4 divides "logical" DFT */
+	     && (p->I != p->O || p->vecsz->rnk == 0
+		 || p->vecsz->dims[0].is == p->vecsz->dims[0].os)
+	     && (p->kind[0] != RODFT00 || p->I != p->O || 
+		 p->sz->dims[0].is >= p->sz->dims[0].os) /* laziness */
+	  );
 }
 
 static int applicable(const solver *ego, const problem *p, const planner *plnr)
@@ -346,7 +343,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

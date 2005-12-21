@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct2.c,v 1.21 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: direct2.c,v 1.22 2005-12-21 03:29:19 athena Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 
@@ -89,54 +89,50 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable(const solver *ego_, const problem *p_)
 {
-     if (RDFT2P(p_)) {
-          const S *ego = (const S *) ego_;
-          const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  INT vl;
-	  INT ivs, ovs;
+     const S *ego = (const S *) ego_;
+     const problem_rdft2 *p = (const problem_rdft2 *) p_;
+     INT vl;
+     INT ivs, ovs;
 
-          return (
-	       1
-	       && p->sz->rnk == 1
-	       && p->vecsz->rnk <= 1
-	       && p->sz->dims[0].n == ego->sz
-	       && p->kind == ego->kind
+     return (
+	  1
+	  && p->sz->rnk == 1
+	  && p->vecsz->rnk <= 1
+	  && p->sz->dims[0].n == ego->sz
+	  && p->kind == ego->kind
 
-	       /* check strides etc */
-	       && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
+	  /* check strides etc */
+	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
-	       && (ego->kind != R2HC ||
-		   ego->desc.r2hc->genus->okp(ego->desc.r2hc, 
-					      p->r, p->rio, p->rio,
-					      p->sz->dims[0].is,
-					      p->sz->dims[0].os,
-					      p->sz->dims[0].os,
-					      vl, ivs, ovs))
-	       && (ego->kind != HC2R ||
-		   ego->desc.hc2r->genus->okp(ego->desc.hc2r,
-					      p->rio, p->rio, p->r,
-					      p->sz->dims[0].is,
-					      p->sz->dims[0].is,
-					      p->sz->dims[0].os,
-					      vl, ivs, ovs))
+	  && (ego->kind != R2HC ||
+	      ego->desc.r2hc->genus->okp(ego->desc.r2hc, 
+					 p->r, p->rio, p->rio,
+					 p->sz->dims[0].is,
+					 p->sz->dims[0].os,
+					 p->sz->dims[0].os,
+					 vl, ivs, ovs))
+	  && (ego->kind != HC2R ||
+	      ego->desc.hc2r->genus->okp(ego->desc.hc2r,
+					 p->rio, p->rio, p->r,
+					 p->sz->dims[0].is,
+					 p->sz->dims[0].is,
+					 p->sz->dims[0].os,
+					 vl, ivs, ovs))
 	       
-	       && (0
-		   /* can operate out-of-place */
-		   || p->r != p->rio
+	  && (0
+	      /* can operate out-of-place */
+	      || p->r != p->rio
 
-		   /*
-		    * can compute one transform in-place, no matter
-		    * what the strides are.
-		    */
-		   || p->vecsz->rnk == 0
+	      /*
+	       * can compute one transform in-place, no matter
+	       * what the strides are.
+	       */
+	      || p->vecsz->rnk == 0
 
-		   /* can operate in-place as long as strides are the same */
-		   || X(rdft2_inplace_strides)(p, RNK_MINFTY)
-		    )
-	       );
-     }
-
-     return 0;
+	      /* can operate in-place as long as strides are the same */
+	      || X(rdft2_inplace_strides)(p, RNK_MINFTY)
+	       )
+	  );
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -193,7 +189,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 solver *X(mksolver_rdft2_r2hc_direct)(kr2hc k, const kr2hc_desc *desc)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k.r2hc = k;
      slv->desc.r2hc = desc;
@@ -205,7 +201,7 @@ solver *X(mksolver_rdft2_r2hc_direct)(kr2hc k, const kr2hc_desc *desc)
 
 solver *X(mksolver_rdft2_hc2r_direct)(khc2r k, const khc2r_desc *desc)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k.hc2r = k;
      slv->desc.hc2r = desc;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.22 2005-02-25 17:19:10 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.23 2005-12-21 03:29:19 athena Exp $ */
 
 /* plans for RDFT of rank >= 2 (multidimensional) */
 
@@ -99,17 +99,13 @@ static int picksplit(const S *ego, const tensor *sz, int *rp)
 
 static int applicable0(const solver *ego_, const problem *p_, int *rp)
 {
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-          const S *ego = (const S *)ego_;
-          return (1
-		  && FINITE_RNK(p->sz->rnk) && FINITE_RNK(p->vecsz->rnk)
-                  && p->sz->rnk >= 2
-                  && picksplit(ego, p->sz, rp)
-	       );
-     }
-
-     return 0;
+     const problem_rdft *p = (const problem_rdft *) p_;
+     const S *ego = (const S *)ego_;
+     return (1
+	     && FINITE_RNK(p->sz->rnk) && FINITE_RNK(p->vecsz->rnk)
+	     && p->sz->rnk >= 2
+	     && picksplit(ego, p->sz, rp)
+	  );
 }
 
 /* TODO: revise this. */
@@ -192,7 +188,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int spltrnk, const int *buddies, int nbuddies)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->spltrnk = spltrnk;
      slv->buddies = buddies;

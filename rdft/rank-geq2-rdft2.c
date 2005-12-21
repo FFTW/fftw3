@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.24 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.25 2005-12-21 03:29:19 athena Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -105,26 +105,22 @@ static int picksplit(const S *ego, const tensor *sz, int *rp)
 static int applicable0(const solver *ego_, const problem *p_, int *rp,
 		       const planner *plnr)
 {
-     if (RDFT2P(p_)) {
-          const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  const S *ego = (const S *)ego_;
-          return (1
-		  && FINITE_RNK(p->sz->rnk) && FINITE_RNK(p->vecsz->rnk)
-                  && p->sz->rnk >= 2
-		  && picksplit(ego, p->sz, rp)
-                  && (0
+     const problem_rdft2 *p = (const problem_rdft2 *) p_;
+     const S *ego = (const S *)ego_;
+     return (1
+	     && FINITE_RNK(p->sz->rnk) && FINITE_RNK(p->vecsz->rnk)
+	     && p->sz->rnk >= 2
+	     && picksplit(ego, p->sz, rp)
+	     && (0
 
-		      /* can work out-of-place, but HC2R destroys input */
-                      || (p->r != p->rio && p->r != p->iio && 
-			  (p->kind == R2HC || !NO_DESTROY_INPUTP(plnr)))
+		 /* can work out-of-place, but HC2R destroys input */
+		 || (p->r != p->rio && p->r != p->iio && 
+		     (p->kind == R2HC || !NO_DESTROY_INPUTP(plnr)))
 
-		      /* FIXME: what are sufficient conditions for inplace? */
-                      || (!(p->r != p->rio && p->r != p->iio))
-		       )
-	       );
-     }
-
-     return 0;
+		 /* FIXME: what are sufficient conditions for inplace? */
+		 || (!(p->r != p->rio && p->r != p->iio))
+		  )
+	  );
 }
 
 /* TODO: revise this. */
@@ -222,7 +218,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int spltrnk, const int *buddies, int nbuddies)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->spltrnk = spltrnk;
      slv->buddies = buddies;

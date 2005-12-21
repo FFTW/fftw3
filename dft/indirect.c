@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.38 2005-04-10 20:33:24 athena Exp $ */
+/* $Id: indirect.c,v 1.39 2005-12-21 03:29:19 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -133,46 +133,42 @@ static void print(const plan *ego_, printer *p)
 static int applicable0(const solver *ego_, const problem *p_,
 		       const planner *plnr)
 {
-     if (DFTP(p_)) {
-	  const S *ego = (const S *) ego_;
-          const problem_dft *p = (const problem_dft *) p_;
-          return (1
-                  && FINITE_RNK(p->vecsz->rnk)
+     const S *ego = (const S *) ego_;
+     const problem_dft *p = (const problem_dft *) p_;
+     return (1
+	     && FINITE_RNK(p->vecsz->rnk)
 
-                  /* problem must be a nontrivial transform, not just a copy */
-                  && p->sz->rnk > 0
+	     /* problem must be a nontrivial transform, not just a copy */
+	     && p->sz->rnk > 0
 
-                  && (0
+	     && (0
 
-		      /* problem must be in-place & require some
-		         rearrangement of the data; to prevent
-		         infinite loops with indirect-transpose, we
-		         further require that at least some transform
-		         strides must decrease */
-		      || (p->ri == p->ro
-			  && !X(tensor_inplace_strides2)(p->sz, p->vecsz)
-			  && X(tensor_strides_decrease)(
-				   p->sz, p->vecsz,
-				   ego->adt->apply == apply_after ? 
-				   INPLACE_IS : INPLACE_OS))
+		 /* problem must be in-place & require some
+		    rearrangement of the data; to prevent
+		    infinite loops with indirect-transpose, we
+		    further require that at least some transform
+		    strides must decrease */
+		 || (p->ri == p->ro
+		     && !X(tensor_inplace_strides2)(p->sz, p->vecsz)
+		     && X(tensor_strides_decrease)(
+			  p->sz, p->vecsz,
+			  ego->adt->apply == apply_after ? 
+			  INPLACE_IS : INPLACE_OS))
 
-		      /* or problem must be out of place, transforming
-			 from stride 1/2 to bigger stride, for apply_after */
-		      || (p->ri != p->ro && ego->adt->apply == apply_after
-			  && !NO_DESTROY_INPUTP(plnr)
-			  && X(tensor_min_istride)(p->sz) <= 2
-			  && X(tensor_min_ostride)(p->sz) > 2)
+		 /* or problem must be out of place, transforming
+		    from stride 1/2 to bigger stride, for apply_after */
+		 || (p->ri != p->ro && ego->adt->apply == apply_after
+		     && !NO_DESTROY_INPUTP(plnr)
+		     && X(tensor_min_istride)(p->sz) <= 2
+		     && X(tensor_min_ostride)(p->sz) > 2)
 			  
-		      /* or problem must be out of place, transforming
-			 to stride 1/2 from bigger stride, for apply_before */
-		      || (p->ri != p->ro && ego->adt->apply == apply_before
-			  && X(tensor_min_ostride)(p->sz) <= 2
-			  && X(tensor_min_istride)(p->sz) > 2)
-		       )
-	       );
-     }
-
-     return 0;
+		 /* or problem must be out of place, transforming
+		    to stride 1/2 from bigger stride, for apply_before */
+		 || (p->ri != p->ro && ego->adt->apply == apply_before
+		     && X(tensor_min_ostride)(p->sz) <= 2
+		     && X(tensor_min_istride)(p->sz) > 2)
+		  )
+	  );
 }
 
 static int applicable(const solver *ego_, const problem *p_,
@@ -227,7 +223,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(const ndrct_adt *adt)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->adt = adt;
      return &(slv->super);

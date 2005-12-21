@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem2.c,v 1.35 2005-12-18 23:15:04 athena Exp $ */
+/* $Id: problem2.c,v 1.36 2005-12-21 03:29:19 athena Exp $ */
 
 #include "dft.h"
 #include "rdft.h"
@@ -79,16 +79,12 @@ static void zero(const problem *ego_)
 
 static const problem_adt padt =
 {
+     PROBLEM_RDFT2,
      hash,
      zero,
      print,
      destroy
 };
-
-int X(problem_rdft2_p)(const problem *p)
-{
-     return (p->adt == &padt);
-}
 
 problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
 			    R *r, R *rio, R *iio, rdft_kind kind)

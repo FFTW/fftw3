@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.39 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: buffered2.c,v 1.40 2005-12-21 03:29:19 athena Exp $ */
 
 #include "rdft.h"
 
@@ -258,13 +258,10 @@ static int toobig(INT n, const S *ego)
 
 static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 {
+     const problem_rdft2 *p = (const problem_rdft2 *) p_;
      UNUSED(ego);
-     if (RDFT2P(p_)) {
-          const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  return(p->vecsz->rnk <= 1 && p->sz->rnk == 1
-		 && !(toobig(p->sz->dims[0].n, ego) && CONSERVE_MEMORYP(plnr)));
-     }
-     return 0;
+     return(p->vecsz->rnk <= 1 && p->sz->rnk == 1
+	    && !(toobig(p->sz->dims[0].n, ego) && CONSERVE_MEMORYP(plnr)));
 }
 
 static int applicable(const problem *p_, const S *ego, const planner *plnr)
@@ -403,7 +400,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(const bufadt *adt)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->adt = adt;
      return &(slv->super);

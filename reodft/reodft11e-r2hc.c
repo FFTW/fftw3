@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.28 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.29 2005-12-21 03:29:19 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -213,17 +213,15 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable0(const solver *ego_, const problem *p_)
 {
-     UNUSED(ego_);
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-          return (1
-		  && p->sz->rnk == 1
-		  && p->vecsz->rnk <= 1
-		  && (p->kind[0] == REDFT11 || p->kind[0] == RODFT11)
-	       );
-     }
+     const problem_rdft *p = (const problem_rdft *) p_;
 
-     return 0;
+     UNUSED(ego_);
+
+     return (1
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk <= 1
+	     && (p->kind[0] == REDFT11 || p->kind[0] == RODFT11)
+	  );
 }
 
 static int applicable(const solver *ego, const problem *p, const planner *plnr)
@@ -284,7 +282,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

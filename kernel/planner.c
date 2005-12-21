@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.168 2005-12-18 19:41:31 athena Exp $ */
+/* $Id: planner.c,v 1.169 2005-12-21 03:29:19 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -91,13 +91,15 @@ static void sgrow(planner *ego)
 static void register_solver(planner *ego, solver *s)
 {
      slvdesc *n;
+     int kind;
+
      if (s) { /* add s to solver list */
 	  X(solver_use)(s);
 
 	  if (ego->nslvdesc >= ego->slvdescsiz)
 	       sgrow(ego);
 
-	  n = ego->slvdescs + ego->nslvdesc++;
+	  n = ego->slvdescs + ego->nslvdesc;
 
 	  n->slv = s;
 	  n->reg_nam = ego->cur_reg_nam;
@@ -105,6 +107,12 @@ static void register_solver(planner *ego, solver *s)
 	  
 	  A(strlen(n->reg_nam) < MAXNAM);
 	  n->nam_hash = X(hash)(n->reg_nam);
+
+	  kind = s->adt->problem_kind;
+	  n->next_for_same_problem_kind = ego->slvdescs_for_problem_kind[kind];
+	  ego->slvdescs_for_problem_kind[kind] = ego->nslvdesc;
+
+	  ego->nslvdesc++;
      }
 }
 
@@ -401,10 +409,20 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
      int nthr = ego->nthr;
      plan *pln;
      ego->flags = *nflags;
+     A(p->adt->problem_kind == s->adt->problem_kind);
      pln = s->adt->mkplan(s, p, ego);
      ego->nthr = nthr;
      ego->flags = flags;
      return pln;
+}
+
+static plan *invoke_solver_if_correct_kind(
+     planner *ego, problem *p, solver *s, const flags_t *nflags)
+{
+     if (p->adt->problem_kind == s->adt->problem_kind)
+	  return invoke_solver(ego, p, s, nflags);
+     else
+	  return 0;
 }
 
 static plan *search0(planner *ego, problem *p, int *slvndx, 
@@ -418,7 +436,7 @@ static plan *search0(planner *ego, problem *p, int *slvndx,
 	  return 0;
      }
 
-     FORALL_SOLVERS(ego, s, sp, {
+     FORALL_SOLVERS_OF_KIND(p->adt->problem_kind, ego, s, sp, {
 	  plan *pln = invoke_solver(ego, p, s, flagsp);
 	  if (pln) {
 	       if (best) {
@@ -542,8 +560,9 @@ static plan *mkplan(planner *ego, problem *p)
 	  ego->wisdom_state = WISDOM_ONLY;
 
 	  /* use solver to obtain a plan in WISDOM_ONLY mode */
-	  pln = invoke_solver(ego, p, ego->slvdescs[slvndx].slv,
-			      &flags_of_solution);	  
+	  pln = invoke_solver_if_correct_kind(ego, p,
+					      ego->slvdescs[slvndx].slv,
+					      &flags_of_solution);	  
 
 	  CHECK_FOR_BOGOSITY; 	  /* catch error in child solvers */
 
@@ -712,6 +731,8 @@ static int imprt(planner *ego, scanner *sc)
  */
 planner *X(mkplanner)(void)
 {
+     int i;
+
      static const planner_adt padt = {
 	  register_solver, mkplan, forget, exprt, imprt
      };
@@ -735,6 +756,9 @@ planner *X(mkplanner)(void)
 
      mkhashtab(&p->htab_blessed);
      mkhashtab(&p->htab_unblessed);
+
+     for (i = 0; i < PROBLEM_LAST; ++i)
+	  p->slvdescs_for_problem_kind[i] = -1;
 
      return p;
 }

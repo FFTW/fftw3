@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.35 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: buffered.c,v 1.36 2005-12-21 03:29:19 athena Exp $ */
 
 #include "rdft.h"
 
@@ -116,41 +116,40 @@ static int toobig(INT n, const S *ego)
 
 static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 {
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-          iodim *d = p->sz->dims;
+     const problem_rdft *p = (const problem_rdft *) p_;
+     iodim *d = p->sz->dims;
 
-          if (1
-	      && p->vecsz->rnk <= 1
-	      && p->sz->rnk == 1
-	       ) {
+     if (1
+	 && p->vecsz->rnk <= 1
+	 && p->sz->rnk == 1
+	  ) {
 
-	       if (toobig(p->sz->dims[0].n, ego) && CONSERVE_MEMORYP(plnr))
-		    return 0;
+	  if (toobig(p->sz->dims[0].n, ego) && CONSERVE_MEMORYP(plnr))
+	       return 0;
 
-               /*
-		 In principle, the buffered transforms might be useful
-		 when working out of place.  However, in order to
-		 prevent infinite loops in the planner, we require
-		 that the output stride of the buffered transforms be
-		 greater than 1.
-               */
-               if (p->I != p->O)
-                    return (d[0].os > 1);
+	  /*
+	    In principle, the buffered transforms might be useful
+	    when working out of place.  However, in order to
+	    prevent infinite loops in the planner, we require
+	    that the output stride of the buffered transforms be
+	    greater than 1.
+	  */
+	  if (p->I != p->O)
+	       return (d[0].os > 1);
 
-               /* We can always do a single transform in-place */
-               if (p->vecsz->rnk == 0)
-                    return 1;
+	  /* We can always do a single transform in-place */
+	  if (p->vecsz->rnk == 0)
+	       return 1;
 
-               /*
-		* If the problem is in place, the input/output strides must
-		* be the same or the whole thing must fit in the buffer.
-		*/
-               return ((X(tensor_inplace_strides2)(p->sz, p->vecsz))
-                       || (compute_nbuf(d[0].n, p->vecsz->dims[0].n, ego)
-                           == p->vecsz->dims[0].n));
-          }
+	  /*
+	   * If the problem is in place, the input/output strides must
+	   * be the same or the whole thing must fit in the buffer.
+	   */
+	  return ((X(tensor_inplace_strides2)(p->sz, p->vecsz))
+		  || (compute_nbuf(d[0].n, p->vecsz->dims[0].n, ego)
+		      == p->vecsz->dims[0].n));
      }
+
      return 0;
 }
 
@@ -280,7 +279,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(const bufadt *adt)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->adt = adt;
      return &(slv->super);

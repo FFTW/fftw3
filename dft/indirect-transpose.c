@@ -130,33 +130,29 @@ static int applicable0(const solver *ego_, const problem *p_,
 		       const planner *plnr,
 		       int *pdim0, int *pdim1)
 {
-     if (DFTP(p_)) {
-	  const S *ego = (const S *) ego_;
-          const problem_dft *p = (const problem_dft *) p_;
-          return (1
-                  && FINITE_RNK(p->vecsz->rnk) && FINITE_RNK(p->sz->rnk)
+     const S *ego = (const S *) ego_;
+     const problem_dft *p = (const problem_dft *) p_;
+     return (1
+	     && FINITE_RNK(p->vecsz->rnk) && FINITE_RNK(p->sz->rnk)
 
-		  /* ego should be in-place if problem is in-place 
-		     (to prevent duplication) */
-		  && ((p->ri != p->ro) || ego->transpose_inplace)
+	     /* ego should be in-place if problem is in-place 
+		(to prevent duplication) */
+	     && ((p->ri != p->ro) || ego->transpose_inplace)
 
-		  /* transpose_inplace destroys input */
-		  && (!ego->transpose_inplace ||
-		      p->ri == p->ro || !NO_DESTROY_INPUTP(plnr))
+	     /* transpose_inplace destroys input */
+	     && (!ego->transpose_inplace ||
+		 p->ri == p->ro || !NO_DESTROY_INPUTP(plnr))
 
-		  /* FIXME: can/should we relax this constraint? */
-		  && (ego->transpose_inplace 
-		      || X(tensor_inplace_strides2)(p->vecsz, p->sz))
+	     /* FIXME: can/should we relax this constraint? */
+	     && (ego->transpose_inplace 
+		 || X(tensor_inplace_strides2)(p->vecsz, p->sz))
 
-                  && pickdim(p->vecsz, p->sz, pdim0, pdim1)
+	     && pickdim(p->vecsz, p->sz, pdim0, pdim1)
 
-		  /* output should not *already* include the transpose
-		     (in which case we duplicate the regular indirect.c) */
-		  && (p->sz->dims[*pdim1].os != p->vecsz->dims[*pdim0].is)
-	       );
-     }
-
-     return 0;
+	     /* output should not *already* include the transpose
+		(in which case we duplicate the regular indirect.c) */
+	     && (p->sz->dims[*pdim1].os != p->vecsz->dims[*pdim0].is)
+	  );
 }
 
 static int applicable(const solver *ego_, const problem *p_,
@@ -267,7 +263,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int transpose_inplace)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->transpose_inplace = transpose_inplace;
      return &(slv->super);

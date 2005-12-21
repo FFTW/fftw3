@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.50 2005-12-18 23:15:04 athena Exp $ */
+/* $Id: problem.c,v 1.51 2005-12-21 03:29:19 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -117,16 +117,12 @@ static void zero(const problem *ego_)
 
 static const problem_adt padt =
 {
+     PROBLEM_RDFT,
      hash,
      zero,
      print,
      destroy
 };
-
-int X(problem_rdft_p)(const problem *p)
-{
-     return (p->adt == &padt);
-}
 
 /* Dimensions of size 1 that are not REDFT/RODFT are no-ops and can be
    eliminated.  REDFT/RODFT unit dimensions often have factors of 2.0

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.30 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: rank0.c,v 1.31 2005-12-21 03:29:19 athena Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -263,19 +263,15 @@ static void apply_ip_sq_tiledbuf(const plan *ego_, R *I, R *O)
 /**************************************************************/
 static int applicable(const S *ego, const problem *p_)
 {
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-	  P pln;
-          return (1
-                  && p->sz->rnk == 0
-		  && FINITE_RNK(p->vecsz->rnk)
-		  && fill_iodim(&pln, p)
-		  && ego->applicable(&pln, p)
-	       );
-     }
-     return 0;
+     const problem_rdft *p = (const problem_rdft *) p_;
+     P pln;
+     return (1
+	     && p->sz->rnk == 0
+	     && FINITE_RNK(p->vecsz->rnk)
+	     && fill_iodim(&pln, p)
+	     && ego->applicable(&pln, p)
+	  );
 }
-
 
 static void print(const plan *ego_, printer *p)
 {
@@ -344,7 +340,7 @@ void X(rdft_rank0_register)(planner *p)
      };
 
      for (i = 0; i < sizeof(tab) / sizeof(tab[0]); ++i) {
-	  static const solver_adt sadt = { mkplan };
+	  static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
 	  S *slv = MKSOLVER(S, &sadt);
 	  slv->apply = tab[i].apply;
 	  slv->applicable = tab[i].applicable;

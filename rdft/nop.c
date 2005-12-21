@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop.c,v 1.9 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: nop.c,v 1.10 2005-12-21 03:29:19 athena Exp $ */
 
 /* plans for vrank -infty RDFTs (nothing to do) */
 
@@ -33,22 +33,19 @@ static void apply(const plan *ego_, R *I, R *O)
 
 static int applicable(const solver *ego_, const problem *p_)
 {
+     const problem_rdft *p = (const problem_rdft *) p_;
      UNUSED(ego_);
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-          return 0
-	       /* case 1 : -infty vector rank */
-	       || (p->vecsz->rnk == RNK_MINFTY)
+     return 0
+	  /* case 1 : -infty vector rank */
+	  || (p->vecsz->rnk == RNK_MINFTY)
 
-	       /* case 2 : rank-0 in-place rdft */
-	       || (1
-		   && p->sz->rnk == 0
-		   && FINITE_RNK(p->vecsz->rnk)
-		   && p->O == p->I
-		   && X(tensor_inplace_strides)(p->vecsz)
-                    );
-     }
-     return 0;
+	  /* case 2 : rank-0 in-place rdft */
+	  || (1
+	      && p->sz->rnk == 0
+	      && FINITE_RNK(p->vecsz->rnk)
+	      && p->O == p->I
+	      && X(tensor_inplace_strides)(p->vecsz)
+	       );
 }
 
 static void print(const plan *ego, printer *p)
@@ -76,7 +73,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      return MKSOLVER(solver, &sadt);
 }
 

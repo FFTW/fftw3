@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.28 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.29 2005-12-21 03:29:19 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -60,18 +60,14 @@ typedef struct {
 /* common applicability function of forward problems */
 static int applicable_f(const problem *p_, const planner *plnr)
 {
+     const problem_rdft2 *p = (const problem_rdft2 *) p_;
      UNUSED(plnr);
-     if (RDFT2P(p_)) {
-          const problem_rdft2 *p = (const problem_rdft2 *) p_;
-          return (1
-                  && p->kind == R2HC
-                  && p->vecsz->rnk <= 1
-                  && p->sz->rnk == 1
-		  && (p->sz->dims[0].n % 2) == 0
-	       );
-     }
-
-     return 0;
+     return (1
+	     && p->kind == R2HC
+	     && p->vecsz->rnk <= 1
+	     && p->sz->rnk == 1
+	     && (p->sz->dims[0].n % 2) == 0
+	  );
 }
 
 static int applicable_f_dft(const problem *p_, const planner *plnr)
@@ -89,18 +85,14 @@ static int applicable_f_dft(const problem *p_, const planner *plnr)
 /* common applicability function of backward problems */
 static int applicable_b(const problem *p_, const planner *plnr)
 {
-     if (RDFT2P(p_)) {
-          const problem_rdft2 *p = (const problem_rdft2 *) p_;
-          return (1
-                  && p->kind == HC2R
-		  && (p->r == p->rio || !NO_DESTROY_INPUTP(plnr))
-                  && p->vecsz->rnk <= 1
-                  && p->sz->rnk == 1
-		  && (p->sz->dims[0].n % 2) == 0
-	       );
-     }
-
-     return 0;
+     const problem_rdft2 *p = (const problem_rdft2 *) p_;
+     return (1
+	     && p->kind == HC2R
+	     && (p->r == p->rio || !NO_DESTROY_INPUTP(plnr))
+	     && p->vecsz->rnk <= 1
+	     && p->sz->rnk == 1
+	     && (p->sz->dims[0].n % 2) == 0
+	  );
 }
 
 static int applicable_b_dft(const problem *p_, const planner *plnr)
@@ -460,7 +452,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(const madt *adt)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->adt = adt;
      return &(slv->super);

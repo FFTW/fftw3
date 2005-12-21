@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dht-r2hc.c,v 1.22 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: dht-r2hc.c,v 1.23 2005-12-21 03:29:19 athena Exp $ */
 
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */
@@ -81,16 +81,13 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable0(const problem *p_, const planner *plnr)
 {
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-          return (1
-		  && !NO_DHT_R2HCP(plnr)
-		  && p->sz->rnk == 1
-		  && p->vecsz->rnk == 0
-		  && p->kind[0] == DHT
-	       );
-     }
-     return 0;
+     const problem_rdft *p = (const problem_rdft *) p_;
+     return (1
+	     && !NO_DHT_R2HCP(plnr)
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk == 0
+	     && p->kind[0] == DHT
+	  );
 }
 
 static int applicable(const solver *ego, const problem *p, const planner *plnr)
@@ -137,7 +134,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

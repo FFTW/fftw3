@@ -168,18 +168,14 @@ static void print(const plan *ego_, printer *p)
 
 static int applicable0(const S *ego, const problem *p_)
 {
-     if (RDFTP(p_)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-          return (1
-		  && p->sz->rnk == 1
-		  && p->vecsz->rnk == 0
-		  && (p->sz->dims[0].n % 2) == 1 
-		  && X(is_prime)(p->sz->dims[0].n)
-                  && p->kind[0] == ego->kind
-	       );
-     }
-
-     return 0;
+     const problem_rdft *p = (const problem_rdft *) p_;
+     return (1
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk == 0
+	     && (p->sz->dims[0].n % 2) == 1 
+	     && X(is_prime)(p->sz->dims[0].n)
+	     && p->kind[0] == ego->kind
+	  );
 }
 
 static int applicable(const S *ego, const problem *p_, 
@@ -229,7 +225,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(rdft_kind kind)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->kind = kind;
      return &(slv->super);

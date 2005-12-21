@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: nop2.c,v 1.10 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: nop2.c,v 1.11 2005-12-21 03:29:19 athena Exp $ */
 
 /* plans for vrank -infty RDFT2s (nothing to do), as well as in-place
    rank-0 HC2R.  Note that in-place rank-0 R2HC is *not* a no-op, because
@@ -36,23 +36,21 @@ static void apply(const plan *ego_, R *r, R *rio, R *iio)
 
 static int applicable(const solver *ego_, const problem *p_)
 {
+     const problem_rdft2 *p = (const problem_rdft2 *) p_;
      UNUSED(ego_);
-     if (RDFT2P(p_)) {
-          const problem_rdft2 *p = (const problem_rdft2 *) p_;
-          return(0
-		 /* case 1 : -infty vector rank */
-		 || (p->vecsz->rnk == RNK_MINFTY)
+
+     return(0
+	    /* case 1 : -infty vector rank */
+	    || (p->vecsz->rnk == RNK_MINFTY)
 		 
-		 /* case 2 : rank-0 in-place HC2R rdft */
-		 || (1
-		     && p->kind == HC2R
-		     && p->sz->rnk == 0
-		     && FINITE_RNK(p->vecsz->rnk)
-		     && (p->r == p->rio || p->r == p->iio)
-		     && X(rdft2_inplace_strides)(p, RNK_MINFTY)
-		      ));
-     }
-     return 0;
+	    /* case 2 : rank-0 in-place HC2R rdft */
+	    || (1
+		&& p->kind == HC2R
+		&& p->sz->rnk == 0
+		&& FINITE_RNK(p->vecsz->rnk)
+		&& (p->r == p->rio || p->r == p->iio)
+		&& X(rdft2_inplace_strides)(p, RNK_MINFTY)
+		 ));
 }
 
 static void print(const plan *ego, printer *p)
@@ -80,7 +78,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan };
      return MKSOLVER(solver, &sadt);
 }
 

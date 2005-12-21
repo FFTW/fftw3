@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.259 2005-12-20 02:27:25 athena Exp $ */
+/* $Id: ifftw.h,v 1.260 2005-12-21 03:29:19 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -381,7 +381,15 @@ int X(dimcmp)(const iodim *a, const iodim *b);
 
 /*-----------------------------------------------------------------------*/
 /* problem.c: */
+enum { 
+     PROBLEM_DFT, 
+     PROBLEM_RDFT,
+     PROBLEM_RDFT2,
+     PROBLEM_LAST 
+};
+
 typedef struct {
+     int problem_kind;
      void (*hash) (const problem *ego, md5 *p);
      void (*zero) (const problem *ego);
      void (*print) (problem *ego, printer *p);
@@ -448,6 +456,7 @@ void X(plan_null_destroy)(plan *ego);
 /*-----------------------------------------------------------------------*/
 /* solver.c: */
 typedef struct {
+     int problem_kind;
      plan *(*mkplan)(const solver *ego, const problem *p, planner *plnr);
 } solver_adt;
 
@@ -472,6 +481,7 @@ typedef struct slvdesc_s {
      const char *reg_nam;
      unsigned nam_hash;
      int reg_id;
+     int next_for_same_problem_kind;
 } slvdesc;
 
 typedef struct solution_s solution; /* opaque */
@@ -601,6 +611,8 @@ struct planner_s {
      unsigned nslvdesc, slvdescsiz;
      const char *cur_reg_nam;
      int cur_reg_id;
+     int slvdescs_for_problem_kind[PROBLEM_LAST];
+
      wisdom_state_t wisdom_state;
 
      hashtab htab_blessed;
@@ -642,6 +654,18 @@ void X(planner_destroy)(planner *ego);
 	  what;						\
      }							\
 }
+
+#define FORALL_SOLVERS_OF_KIND(kind, ego, s, p, what)		\
+{								\
+     int _cnt = ego->slvdescs_for_problem_kind[kind]; 		\
+     while (_cnt >= 0) {					\
+	  slvdesc *p = ego->slvdescs + _cnt;			\
+	  solver *s = p->slv;					\
+	  what;							\
+	  _cnt = p->next_for_same_problem_kind;			\
+     }								\
+}
+
 
 /* make plan, destroy problem */
 plan *X(mkplan_d)(planner *ego, problem *p);

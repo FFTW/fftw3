@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ctsq.c,v 1.7 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: ctsq.c,v 1.8 2005-12-21 03:29:19 athena Exp $ */
 
 /* special ``square transpose'' cooley-tukey solver for in-place problems */
 #include "ct.h"
@@ -83,31 +83,28 @@ static void print(const plan *ego_, printer *p)
 #define divides(a, b) (((b) % (a)) == 0)
 static int applicable(const S *ego, const problem *p_, planner *plnr)
 {
-     if (DFTP(p_)) {
-          const problem_dft *p = (const problem_dft *) p_;
-          const ct_desc *e = ego->desc;
-          iodim *d = p->sz->dims, *vd = p->vecsz->dims;
+     const problem_dft *p = (const problem_dft *) p_;
+     const ct_desc *e = ego->desc;
+     iodim *d = p->sz->dims, *vd = p->vecsz->dims;
 
-          return (1
-                  && p->ri == p->ro  /* inplace only */
-                  && p->sz->rnk == 1
-                  && p->vecsz->rnk == 1
+     return (1
+	     && p->ri == p->ro  /* inplace only */
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk == 1
 
-		  && d[0].n > e->radix
-                  && divides(e->radix, d[0].n)
+	     && d[0].n > e->radix
+	     && divides(e->radix, d[0].n)
 
-		  /* conditions for transposition */
-                  && vd[0].n == e->radix
-                  && d[0].os == vd[0].is
-                  && d[0].is == e->radix * vd[0].is
-                  && vd[0].os == d[0].n * vd[0].is
+	     /* conditions for transposition */
+	     && vd[0].n == e->radix
+	     && d[0].os == vd[0].is
+	     && d[0].is == e->radix * vd[0].is
+	     && vd[0].os == d[0].n * vd[0].is
 
-		  /* SIMD strides etc. */
-		  && (e->genus->okp(e, p->ri, p->ii, vd[0].os, vd[0].is, 
-		       d[0].n / e->radix, d[0].is, plnr))
-	       );
-     }
-     return 0;
+	     /* SIMD strides etc. */
+	     && (e->genus->okp(e, p->ri, p->ii, vd[0].os, vd[0].is, 
+			       d[0].n / e->radix, d[0].is, plnr))
+	  );
 }
 
 
@@ -177,7 +174,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 solver *X(mksolver_ctsq)(kdftwsq codelet, const ct_desc *desc, int dec)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k = codelet;
      slv->desc = desc;

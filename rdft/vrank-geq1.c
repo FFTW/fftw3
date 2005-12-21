@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.35 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: vrank-geq1.c,v 1.36 2005-12-21 03:29:19 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -92,22 +92,18 @@ static int pickdim(const S *ego, const tensor *vecsz, int oop, int *dp)
 
 static int applicable0(const solver *ego_, const problem *p_, int *dp)
 {
-     if (RDFTP(p_)) {
-          const S *ego = (const S *) ego_;
-          const problem_rdft *p = (const problem_rdft *) p_;
+     const S *ego = (const S *) ego_;
+     const problem_rdft *p = (const problem_rdft *) p_;
 
-          return (1
-                  && FINITE_RNK(p->vecsz->rnk)
-                  && p->vecsz->rnk > 0
+     return (1
+	     && FINITE_RNK(p->vecsz->rnk)
+	     && p->vecsz->rnk > 0
 
-		  /* the rank-0 solver deals with the general case */
-                  && p->sz->rnk > 0
+	     /* the rank-0 solver deals with the general case */
+	     && p->sz->rnk > 0
 
-                  && pickdim(ego, p->vecsz, p->I != p->O, dp)
-	       );
-     }
-
-     return 0;
+	     && pickdim(ego, p->vecsz, p->I != p->O, dp)
+	  );
 }
 
 static int applicable(const solver *ego_, const problem *p_, 
@@ -200,7 +196,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int vecloop_dim, const int *buddies, int nbuddies)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->vecloop_dim = vecloop_dim;
      slv->buddies = buddies;
