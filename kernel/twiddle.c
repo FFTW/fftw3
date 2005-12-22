@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.28 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: twiddle.c,v 1.29 2005-12-22 03:49:58 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -103,8 +103,6 @@ static R *compute(const tw_instr *instr, INT n, INT r, INT m)
      R *W, *W0;
      const tw_instr *p;
 
-     static trigreal (*const f[])(INT, INT) = { X(cos2pi), X(sin2pi) };
-
      p = instr;
      ntwiddle = twlen0(r, &p);
 
@@ -118,8 +116,8 @@ static R *compute(const tw_instr *instr, INT n, INT r, INT m)
 			INT i;
 			A(m * r <= n);
 			for (i = 1; i < r; ++i) {
-			     *W++ = f[TW_COS]((j + (INT)p->v) * i, n);
-			     *W++ = f[TW_SIN]((j + (INT)p->v) * i, n);
+			     X(sin_and_cos)((j + (INT)p->v) * i, n, W);
+			     W += 2;
 			}
 			break;
 		   }
@@ -129,17 +127,23 @@ static R *compute(const tw_instr *instr, INT n, INT r, INT m)
 			INT i;
 			A((r % 2) == 1);
 			for (i = 1; i + i < r; ++i) {
-			     *W++ = f[TW_COS](MULMOD(i, (j + (INT)p->v), n), 
-					      n);
-			     *W++ = f[TW_SIN](MULMOD(i, (j + (INT)p->v), n), 
-					      n);
+			     X(sin_and_cos)(MULMOD(i, (j + (INT)p->v), n), 
+					    n, W);
+			     W += 2;
 			}
 			break;
 		   }
 
-		   default:
+		   case TW_COS:
 			A(m * r <= n);
-			*W++ = f[p->op]((j + (INT)p->v) * (INT)p->i, n);
+			*W++ = X(sin_or_cos)((j + (INT)p->v) * (INT)p->i, n, 
+					     0);
+			break;
+
+		   case TW_SIN:
+			A(m * r <= n);
+			*W++ = X(sin_or_cos)((j + (INT)p->v) * (INT)p->i, n, 
+					     1);
 			break;
 	       }
 	  }

@@ -47,7 +47,7 @@ static R *mkomega(plan *p_, INT n, INT ginv)
      plan_dft *p = (plan_dft *) p_;
      R *omega;
      INT i, gpower;
-     trigreal scale;
+     R scale;
 
      if ((omega = X(rader_tl_find)(n, n, ginv, omegas)))
 	  return omega;
@@ -57,8 +57,9 @@ static R *mkomega(plan *p_, INT n, INT ginv)
      scale = n - 1.0; /* normalization for convolution */
 
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  omega[2*i] = X(cos2pi)(gpower, n) / scale;
-	  omega[2*i+1] = FFT_SIGN * X(sin2pi)(gpower, n) / scale;
+	  X(sin_and_cos)(gpower, n, omega+2*i);
+	  omega[2*i] /= scale;
+	  omega[2*i+1] /= FFT_SIGN * scale;
      }
      A(gpower == 1);
 

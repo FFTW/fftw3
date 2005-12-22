@@ -18,18 +18,80 @@
  *
  */
 
-/* $Id: trig.c,v 1.15 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: trig.c,v 1.16 2005-12-22 03:49:58 athena Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
 #include <math.h>
 
-trigreal X(cos2pi)(INT m, INT n)
+#ifdef FFTW_LDOUBLE
+#  define COS cosl
+#  define SIN sinl
+#  define TAN tanl
+#  define KTRIG(x) (x##L)
+#else
+#  define COS cos
+#  define SIN sin
+#  define TAN tan
+#  define KTRIG(x) (x)
+#endif
+
+static const trigreal K2PI =
+    KTRIG(6.2831853071795864769252867665590057683943388);
+#define by2pi(m, n) ((K2PI * (m)) / (n))
+
+/*
+ * Improve accuracy by reducing x to range [0..1/8]
+ * before multiplication by 2 * PI.
+ */
+
+R X(sin_or_cos)(INT im, INT in, int sinp)
 {
-     return X(sincos)((trigreal)m, (trigreal)n, 0);
+     trigreal m = im, n = in;
+
+     /* waiting for C to get tail recursion... */
+     trigreal half_n = n * KTRIG(0.5);
+     trigreal quarter_n = half_n * KTRIG(0.5);
+     trigreal eighth_n = quarter_n * KTRIG(0.5);
+     trigreal sgn = KTRIG(1.0);
+
+     if (sinp) goto sin;
+ cos:
+     if (m < 0) { m = -m; /* goto cos; */ }
+     if (m > half_n) { m = n - m; goto cos; }
+     if (m > eighth_n) { m = quarter_n - m; goto sin; }
+     return sgn * COS(by2pi(m, n));
+
+ msin:
+     sgn = -sgn;
+ sin:
+     if (m < 0) { m = -m; goto msin; }
+     if (m > half_n) { m = n - m; goto msin; }
+     if (m > eighth_n) { m = quarter_n - m; goto cos; }
+     return sgn * SIN(by2pi(m, n));
 }
 
-trigreal X(sin2pi)(INT m, INT n)
+void X(sin_and_cos)(INT im, INT in, R *p)
 {
-     return X(sincos)((trigreal)m, (trigreal)n, 1);
+     trigreal m = im, n = in;
+     trigreal half_n = n * KTRIG(0.5);
+     trigreal quarter_n = half_n * KTRIG(0.5);
+     trigreal eighth_n = quarter_n * KTRIG(0.5);
+     trigreal theta, c, s, t;
+     unsigned octant = 0;
+
+     if (m < 0) { m = -m; octant ^= 4; }
+     if (m > half_n) { m = n - m; octant ^= 4; }
+     if (m > quarter_n) { m = m - quarter_n; octant ^= 2; }
+     if (m > eighth_n) { m = quarter_n - m; octant ^= 1; }
+
+     theta = by2pi(m, n);
+     c = COS(theta); s = SIN(theta);
+
+     if (octant & 1) { t = c; c = s; s = t; }
+     if (octant & 2) { t = c; c = -s; s = t; }
+     if (octant & 4) { s = -s; }
+
+     p[0] = (R)c; 
+     p[1] = (R)s; 
 }

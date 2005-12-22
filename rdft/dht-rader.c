@@ -159,7 +159,7 @@ static R *mkomega(plan *p_, INT n, INT npad, INT ginv)
      plan_rdft *p = (plan_rdft *) p_;
      R *omega;
      INT i, gpower;
-     trigreal scale;
+     R scale;
 
      if ((omega = X(rader_tl_find)(n, npad + 1, ginv, omegas))) 
 	  return omega;
@@ -169,7 +169,9 @@ static R *mkomega(plan *p_, INT n, INT npad, INT ginv)
      scale = npad; /* normalization for convolution */
 
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  omega[i] = (X(cos2pi)(gpower, n) + X(sin2pi)(gpower, n)) / scale;
+	  R cs[2];
+	  X(sin_and_cos)(gpower, n, cs);
+	  omega[i] = (cs[0] + cs[1]) / scale;
      }
      A(gpower == 1);
 

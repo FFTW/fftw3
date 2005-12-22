@@ -71,14 +71,12 @@ static void mktwiddle(P *ego, int flg)
 	  ego->W0 = W0 = (R *)MALLOC(n0 * 2 * sizeof(R), TWIDDLES);
 	  ego->W1 = W1 = (R *)MALLOC(n1 * 2 * sizeof(R), TWIDDLES);
 
-	  for (i = 0; i < n0; ++i) {
-	       W0[2 * i] = X(cos2pi)(i, n);
-	       W0[2 * i + 1] = X(sin2pi)(i, n);
-	  }
-	  for (i = 0; i < n1; ++i) {
-	       W1[2 * i] = X(cos2pi)(i * twradix, n);
-	       W1[2 * i + 1] = X(sin2pi)(i * twradix, n);
-	  }
+	  for (i = 0; i < n0; ++i) 
+	       X(sin_and_cos)(i, n, W0+2*i);
+
+	  for (i = 0; i < n1; ++i) 
+	       X(sin_and_cos)(i * twradix, n, W1+2*i);
+
      } else {
 	  X(ifree0)(ego->W0); ego->W0 = 0;
 	  X(ifree0)(ego->W1); ego->W1 = 0;
