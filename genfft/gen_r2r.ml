@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2r.ml,v 1.7 2005-12-18 01:28:50 athena Exp $ *)
+(* $Id: gen_r2r.ml,v 1.8 2005-12-22 16:12:29 athena Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2r.ml,v 1.7 2005-12-18 01:28:50 athena Exp $"
+let cvsid = "$Id: gen_r2r.ml,v 1.8 2005-12-22 16:12:29 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -139,13 +139,15 @@ let rescale sc s1 s2 input i =
 let generate n mode =
   let iarray = "I"
   and oarray = "O"
-  and istride = "istride"
-  and ostride = "ostride" in
+  and istride = "is"
+  and ostride = "os" 
+  and i = "i" 
+  and v = "v" 
+  in
 
   let ns = string_of_int n
   and sign = !Genutil.sign 
   and name = !Magic.codelet_name in
-  let name0 = name ^ "_0" in
 
   let vistride = either_stride (!uistride) (C.SVar istride)
   and vostride = either_stride (!uostride) (C.SVar ostride)
@@ -185,48 +187,36 @@ let generate n mode =
   let odag = store_output n oloc output in
   let annot = standard_optimizer odag in
 
-  let tree0 =
-    Fcn ((if !Magic.standalone then "void" else "static void"), name0,
+  let body = Block (
+    [Decl ("INT", i)],
+    [For (Expr_assign (CVar i, CVar v),
+	  Binop (" > ", CVar i, Integer 0),
+	  list_to_comma 
+	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
+	     Expr_assign (CVar iarray, CPlus [CVar iarray; CVar !Simd.ivs]);
+	     Expr_assign (CVar oarray, CPlus [CVar oarray; CVar !Simd.ovs]);
+	     make_volatile_stride (CVar istride);
+	     make_volatile_stride (CVar ostride)
+	   ],
+	  Asch annot)
+   ])
+  in
+
+  let tree =
+    Fcn ((if !Magic.standalone then "void" else "static void"), name,
 	 ([Decl (C.constrealtypep, iarray);
-	   Decl (C.realtypep, oarray)]
-	  @ (if stride_fixed !uistride then [] 
-               else [Decl (C.stridetype, istride)])
-	  @ (if stride_fixed !uostride then [] 
-	       else [Decl (C.stridetype, ostride)])
-	  @ (choose_simd []
-	       (if stride_fixed !uivstride then [] else 
-	       [Decl ("INT", !Simd.ivs)]))
-	  @ (choose_simd []
-	       (if stride_fixed !uovstride then [] else 
-	       [Decl ("INT", !Simd.ovs)]))
-	 ),
-	 add_constants (Asch annot))
+	   Decl (C.realtypep, oarray);
+	   Decl (C.stridetype, istride);
+	   Decl (C.stridetype, ostride);
+	   Decl ("INT", v);
+	   Decl ("INT", "ivs");
+	   Decl ("INT", "ovs")]),
+	 add_constants body)
 
-  in let loop =
-    (if !Magic.standalone then "void" else "static void") ^ " " ^ name ^
-    "(const " ^ C.realtype ^ " *I, " ^ 
-    C.realtype ^ " *O, " ^
-    C.stridetype ^ " is, " ^ 
-    C.stridetype ^ " os, " ^ 
-      " INT v, INT ivs, INT ovs)\n" ^
-    "{\n" ^
-    "INT i;\n" ^
-    "for (i = v; i > 0; --i) {\n" ^
-      name0 ^ "(I, O" ^
-       (if stride_fixed !uistride then "" else ", is") ^ 
-       (if stride_fixed !uostride then "" else ", os") ^ 
-       (choose_simd ""
-	  (if stride_fixed !uivstride then "" else ", ivs")) ^ 
-       (choose_simd ""
-	  (if stride_fixed !uovstride then "" else ", ovs")) ^ 
-    ");\n" ^
-    "I += ivs; O += ovs;\n" ^
-    "}\n}\n\n"
-
-  and desc = 
+  in let desc = 
     Printf.sprintf 
       "static const kr2r_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n\n"
-      n name (flops_of tree0) 
+      n name (flops_of tree) 
       (match mode with
       | RDFT -> "RDFT00"
       | HDFT -> "HDFT00"
@@ -252,7 +242,7 @@ let generate n mode =
     "}\n"
 
   in
-  (unparse cvsid tree0) ^ "\n" ^ loop ^ (if !Magic.standalone then "" else desc ^ init)
+  (unparse cvsid tree) ^ "\n" ^ (if !Magic.standalone then "" else desc ^ init)
 
 
 let main () =
