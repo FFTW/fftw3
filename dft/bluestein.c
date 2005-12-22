@@ -40,7 +40,7 @@ static void bluestein_sequence(INT n, R *w)
 
      ksq = 0;
      for (k = 0; k < n; ++k) {
-	  X(sin_and_cos)(ksq, n2, w+2*k);
+	  X(cexp)(ksq, n2, w+2*k);
           /* careful with overflow */
           ksq += 2*k + 1; while (ksq > n2) ksq -= n2;
      }

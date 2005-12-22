@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.261 2005-12-22 03:49:58 athena Exp $ */
+/* $Id: ifftw.h,v 1.262 2005-12-22 15:25:15 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -754,7 +754,7 @@ typedef double trigreal;
 #endif
 
 R X(sin_or_cos)(INT im, INT in, int sinp);
-void X(sin_and_cos)(INT im, INT in, R *p);
+void X(cexp)(INT im, INT in, R *p);
 
 /*-----------------------------------------------------------------------*/
 /* primes.c: */

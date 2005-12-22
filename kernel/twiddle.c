@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.29 2005-12-22 03:49:58 athena Exp $ */
+/* $Id: twiddle.c,v 1.30 2005-12-22 15:25:15 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -116,7 +116,7 @@ static R *compute(const tw_instr *instr, INT n, INT r, INT m)
 			INT i;
 			A(m * r <= n);
 			for (i = 1; i < r; ++i) {
-			     X(sin_and_cos)((j + (INT)p->v) * i, n, W);
+			     X(cexp)((j + (INT)p->v) * i, n, W);
 			     W += 2;
 			}
 			break;
@@ -127,8 +127,7 @@ static R *compute(const tw_instr *instr, INT n, INT r, INT m)
 			INT i;
 			A((r % 2) == 1);
 			for (i = 1; i + i < r; ++i) {
-			     X(sin_and_cos)(MULMOD(i, (j + (INT)p->v), n), 
-					    n, W);
+			     X(cexp)(MULMOD(i, (j + (INT)p->v), n), n, W);
 			     W += 2;
 			}
 			break;

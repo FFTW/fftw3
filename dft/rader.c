@@ -57,7 +57,7 @@ static R *mkomega(plan *p_, INT n, INT ginv)
      scale = n - 1.0; /* normalization for convolution */
 
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  X(sin_and_cos)(gpower, n, omega+2*i);
+	  X(cexp)(gpower, n, omega+2*i);
 	  omega[2*i] /= scale;
 	  omega[2*i+1] /= FFT_SIGN * scale;
      }

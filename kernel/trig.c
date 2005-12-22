@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: trig.c,v 1.16 2005-12-22 03:49:58 athena Exp $ */
+/* $Id: trig.c,v 1.17 2005-12-22 15:25:15 athena Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
@@ -71,7 +71,7 @@ R X(sin_or_cos)(INT im, INT in, int sinp)
      return sgn * SIN(by2pi(m, n));
 }
 
-void X(sin_and_cos)(INT im, INT in, R *p)
+void X(cexp)(INT im, INT in, R *p)
 {
      trigreal m = im, n = in;
      trigreal half_n = n * KTRIG(0.5);

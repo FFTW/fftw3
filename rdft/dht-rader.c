@@ -170,7 +170,7 @@ static R *mkomega(plan *p_, INT n, INT npad, INT ginv)
 
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
 	  R cs[2];
-	  X(sin_and_cos)(gpower, n, cs);
+	  X(cexp)(gpower, n, cs);
 	  omega[i] = (cs[0] + cs[1]) / scale;
      }
      A(gpower == 1);
