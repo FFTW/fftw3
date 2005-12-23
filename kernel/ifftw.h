@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.263 2005-12-23 16:58:00 athena Exp $ */
+/* $Id: ifftw.h,v 1.264 2005-12-23 18:00:31 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -717,8 +717,8 @@ int X(pickdim)(int which_dim, const int *buddies, int nbuddies,
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */
 /* little language to express twiddle factors computation */
-enum { TW_COS = 0, TW_SIN = 1, TW_NEXT = 2, 
-       TW_FULL = 3, TW_HALF = 4 };
+enum { TW_COS = 0, TW_SIN = 1, TW_NEXT = 3, 
+       TW_FULL = 4, TW_HALF = 5 };
 
 typedef struct {
      unsigned char op;
