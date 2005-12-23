@@ -1,5 +1,7 @@
 Since FFTW 3.0.1:
 
+* 64-bit clean
+
 * Removed --enable-3dnow support.
 
 * SIMD support for split complex arrays.
