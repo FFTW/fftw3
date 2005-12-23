@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.264 2005-12-23 18:00:31 athena Exp $ */
+/* $Id: ifftw.h,v 1.265 2005-12-23 22:40:41 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -495,14 +495,15 @@ typedef struct solution_s solution; /* opaque */
 */
 
 typedef struct {
-     unsigned l:22;
-     unsigned hash_info:10;
-     unsigned u:22;
+     unsigned l:20;
+     unsigned hash_info:12;
+     unsigned u:20;
      
      /* abstraction break: we store the solver here to pad the
 	structure to 64 bits.  Otherwise, the struct is padded to 64
 	bits anyway, and another word is allocated for slvndx. */
-     int slvndx:10;
+     unsigned slvndx:12;
+     #define INFEASIBLE_SLVNDX ((1U<<12)-1)
 } flags_t;
 
 /* impatience flags  */

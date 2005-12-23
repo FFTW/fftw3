@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.169 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: planner.c,v 1.170 2005-12-23 22:40:41 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -50,9 +50,9 @@ static void check(hashtab *ht);
 #define LEQ(x, y) (((x) & (y)) == (x))
 
 /* A subsumes B */
-static int subsumes(const flags_t *a, int slvndx_a, const flags_t *b)
+static int subsumes(const flags_t *a, unsigned slvndx_a, const flags_t *b)
 {
-     if (slvndx_a >= 0)
+     if (slvndx_a != INFEASIBLE_SLVNDX)
 	  return LEQ(a->u, b->u) && LEQ(b->l, a->l);
      else
 	  return LEQ(a->l, b->l);
@@ -215,15 +215,21 @@ static solution *hlookup(planner *ego, const md5sig s,
 }
 
 static void fill_slot(hashtab *ht, const md5sig s, const flags_t *flagsp,
-		      int slvndx, solution *slot)
+		      unsigned slvndx, solution *slot)
 {
      ++ht->insert;
      ++ht->nelem;
      A(!LIVEP(slot));
      slot->flags.u = flagsp->u;
+     A(slot->flags.u == flagsp->u); /* bitfield could overflow */
      slot->flags.l = flagsp->l;
+     A(slot->flags.l == flagsp->l); /* bitfield could overflow */
      slot->flags.hash_info |= H_VALID | H_LIVE;
      SLVNDX(slot) = slvndx;
+
+     /* keep this check enabled in case we add so many solvers
+	that the bitfield overflows */
+     CK(SLVNDX(slot) == slvndx);     
      sigcpy(s, slot->s);
 }
 
@@ -236,7 +242,7 @@ static void kill_slot(hashtab *ht, solution *slot)
 }
 
 static void hinsert0(hashtab *ht, const md5sig s, const flags_t *flagsp, 
-		     int slvndx)
+		     unsigned slvndx)
 {
      solution *l;
      unsigned g, h = h1(ht, s), d = h2(ht, s); 
@@ -310,7 +316,7 @@ static void hshrink(hashtab *ht)
 #endif
 
 static void htab_insert(hashtab *ht, const md5sig s, const flags_t *flagsp,
-			int slvndx)
+			unsigned slvndx)
 {
      unsigned g, h = h1(ht, s), d = h2(ht, s);
      solution *first = 0;
@@ -346,7 +352,7 @@ static void htab_insert(hashtab *ht, const md5sig s, const flags_t *flagsp,
 }
 
 static void hinsert(planner *ego, const md5sig s, const flags_t *flagsp, 
-		    int slvndx)
+		    unsigned slvndx)
 {
      htab_insert(BLISS(*flagsp) ? &ego->htab_blessed : &ego->htab_unblessed,
 		 s, flagsp, slvndx );
@@ -425,7 +431,7 @@ static plan *invoke_solver_if_correct_kind(
 	  return 0;
 }
 
-static plan *search0(planner *ego, problem *p, int *slvndx, 
+static plan *search0(planner *ego, problem *p, unsigned *slvndx, 
 		     const flags_t *flagsp)
 {
      plan *best = 0;
@@ -462,7 +468,7 @@ static plan *search0(planner *ego, problem *p, int *slvndx,
      return best;
 }
 
-static plan *search(planner *ego, problem *p, int *slvndx, 
+static plan *search(planner *ego, problem *p, unsigned *slvndx, 
 		    flags_t *flagsp)
 {
      plan *pln = 0;
@@ -515,9 +521,10 @@ static plan *mkplan(planner *ego, problem *p)
 {
      plan *pln;
      md5 m;
-     int slvndx;
+     unsigned slvndx;
      flags_t flags_of_solution;
      solution *sol;
+     solver *s;
 
      ASSERT_ALIGNED_DOUBLE;
      A(LEQ(PLNR_L(ego), PLNR_U(ego)));
@@ -544,7 +551,7 @@ static plan *mkplan(planner *ego, problem *p)
 	  wisdom_state_t owisdom_state = ego->wisdom_state;
 	  slvndx = SLVNDX(sol);
 
-	  if (slvndx < 0) {
+	  if (slvndx == INFEASIBLE_SLVNDX) {
 	       if (ego->wisdom_state == WISDOM_IGNORE_INFEASIBLE)
 		    goto do_search;
 	       else
@@ -559,10 +566,11 @@ static plan *mkplan(planner *ego, problem *p)
 
 	  ego->wisdom_state = WISDOM_ONLY;
 
-	  /* use solver to obtain a plan in WISDOM_ONLY mode */
-	  pln = invoke_solver_if_correct_kind(ego, p,
-					      ego->slvdescs[slvndx].slv,
-					      &flags_of_solution);	  
+	  s = ego->slvdescs[slvndx].slv;
+	  if (p->adt->problem_kind != s->adt->problem_kind)
+	       goto wisdom_is_bogus;
+	  
+	  pln = invoke_solver(ego, p, s, &flags_of_solution);
 
 	  CHECK_FOR_BOGOSITY; 	  /* catch error in child solvers */
 
@@ -599,7 +607,7 @@ static plan *mkplan(planner *ego, problem *p)
 	       hinsert(ego, m.s, &flags_of_solution, slvndx);
 	       invoke_hook(ego, pln, p, 1);
 	  } else {
-	       hinsert(ego, m.s, &flags_of_solution, -1);
+	       hinsert(ego, m.s, &flags_of_solution, INFEASIBLE_SLVNDX);
 	  }
      }
 
@@ -659,7 +667,7 @@ static void exprt(planner *ego, printer *p)
      p->print(p, "(" WISDOM_PREAMBLE "\n");
      for (h = 0; h < ht->hashsiz; ++h) {
 	  solution *l = ht->solutions + h;
-	  if (LIVEP(l) && SLVNDX(l) >= 0) {
+	  if (LIVEP(l) && (SLVNDX(l) != INFEASIBLE_SLVNDX)) {
 	       slvdesc *sp = ego->slvdescs + SLVNDX(l);
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
@@ -681,7 +689,7 @@ static int imprt(planner *ego, scanner *sc)
      unsigned l, u;
      flags_t flags;
      int reg_id;
-     int slvndx;
+     unsigned slvndx;
      solution *sol;
      hashtab *ht = &ego->htab_blessed;
 
