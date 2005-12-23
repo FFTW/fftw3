@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.262 2005-12-22 15:25:15 athena Exp $ */
+/* $Id: ifftw.h,v 1.263 2005-12-23 16:58:00 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -284,11 +284,7 @@ INT X(iabs)(INT a);
 /*-----------------------------------------------------------------------*/
 /* md5.c */
 
-#if SIZEOF_UNSIGNED_INT >= 4
-typedef unsigned int md5uint;
-#else
 typedef unsigned long md5uint; /* at least 32 bits as per C standard */
-#endif
 
 typedef md5uint md5sig[4];
 
@@ -759,30 +755,10 @@ void X(cexp)(INT im, INT in, R *p);
 /*-----------------------------------------------------------------------*/
 /* primes.c: */
 
-/* FIXME: no longer valid */
-#if 0
-#if defined(FFTW_ENABLE_UNSAFE_MULMOD)
-#  define MULMOD(x,y,p) (((x) * (y)) % (p))
-#elif ((SIZEOF_INT != 0) && (SIZEOF_LONG >= 2 * SIZEOF_INT))
-#  define MULMOD(x,y,p) ((INT) ((((long) (x)) * ((long) (y))) % ((long) (p))))
-#elif ((SIZEOF_INT != 0) && (SIZEOF_LONG_LONG >= 2 * SIZEOF_INT))
-#  define MULMOD(x,y,p) ((INT) ((((long long) (x)) * ((long long) (y))) \
-				 % ((long long) (p))))
-#elif defined(_MSC_VER)
-#  define MULMOD(x,y,p) ((INT) ((((__int64) (x)) * ((__int64) (y))) \
-                                 % ((__int64) (p))))
-#else /* 'long long' unavailable */
-#  define SAFE_MULMOD 1
+#define MULMOD(x, y, p) \
+   (((x) <= 92681 - (y)) ? ((x) * (y)) % (p) : X(safe_mulmod)(x, y, p))
+
 INT X(safe_mulmod)(INT x, INT y, INT p);
-#  define MULMOD(x,y,p) X(safe_mulmod)(x,y,p)
-#endif
-#endif
-
-#define SAFE_MULMOD 1
-INT X(safe_mulmod)(INT x, INT y, INT p);
-#define MULMOD(x,y,p) X(safe_mulmod)(x,y,p)
-
-
 INT X(power_mod)(INT n, INT m, INT p);
 INT X(find_generator)(INT p);
 INT X(first_divisor)(INT n);

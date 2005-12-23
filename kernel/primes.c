@@ -18,25 +18,21 @@
  *
  */
 
-/* $Id: primes.c,v 1.17 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: primes.c,v 1.18 2005-12-23 16:58:00 athena Exp $ */
 
 #include "ifftw.h"
+#include <limits.h>
 
 /***************************************************************************/
 
 /* Rader's algorithm requires lots of modular arithmetic, and if we
    aren't careful we can have errors due to integer overflows. */
 
-#ifdef SAFE_MULMOD
-
-#  include <limits.h>
-
 /* compute (x * y) mod p, but watch out for integer overflows; we must
    have x, y >= 0, p > 0.  This routine is slow. */
 INT X(safe_mulmod)(INT x, INT y, INT p)
 {
-     /* FIXME: INT_MAX is too conservative */
-     if (y == 0 || x <= ((INT)INT_MAX) / y)
+     if (y == 0 || (x * y) / y == x)
 	  return((x * y) % p);
      else {
 	  INT y2 = y/2;
@@ -44,7 +40,6 @@ INT X(safe_mulmod)(INT x, INT y, INT p)
 		  X(safe_mulmod)(x, y - y2, p)) % p);
      }
 }
-#endif /* safe_mulmod ('long long' unavailable) */
 
 /***************************************************************************/
 
