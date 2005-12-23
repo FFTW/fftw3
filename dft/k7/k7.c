@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: k7.c,v 1.6 2003-04-05 00:16:32 stevenj Exp $ */
+/* $Id: k7.c,v 1.7 2005-12-23 22:50:25 athena Exp $ */
 
 #include "dft.h"
 
@@ -59,6 +59,13 @@ static int k7p(void)
      }
      return res;
 }
+
+/* cause a compile-time error if INT != int (in which case the
+   assembly code dies horribly). */
+static int nmokp(const kdft_desc *d,
+		 const R *ri, const R *ii, const R *ro, const R *io,
+		 INT is, INT os, INT vl, INT ivs, INT ovs,
+		 const planner *plnr);
 
 static int nmokp(const kdft_desc *d,
 		 const R *ri, const R *ii, const R *ro, const R *io,
