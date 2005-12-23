@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.18 2003-04-03 12:50:43 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.19 2005-12-23 20:34:32 athena Exp $ */
 
 
 #include "threads.h"
@@ -34,13 +34,13 @@ typedef struct {
      plan_rdft2 super;
 
      plan **cldrn;
-     int its, ots;
+     INT its, ots;
      int nthr;
      const S *solver;
 } P;
 
 typedef struct {
-     int its, ots;
+     INT its, ots;
      R *r, *rio, *iio;
      plan **cldrn;
 } PD;
@@ -48,8 +48,8 @@ typedef struct {
 static void *spawn_apply(spawn_data *d)
 WITH_ALIGNED_STACK({
      PD *ego = (PD *) d->data;
-     int its = ego->its;
-     int ots = ego->ots;
+     INT its = ego->its;
+     INT ots = ego->ots;
      int thr_num = d->thr_num;
      plan_rdft2 *cld = (plan_rdft2 *) ego->cldrn[d->thr_num];
 
@@ -111,18 +111,18 @@ static int pickdim(const S *ego, const tensor *vecsz, int oop, int *dp)
 static int applicable0(const solver *ego_, const problem *p_,
 		       const planner *plnr, int *dp)
 {
-     if (RDFT2P(p_) && plnr->nthr > 1) {
-          const S *ego = (const S *) ego_;
-          const problem_rdft2 *p = (const problem_rdft2 *) p_;
-	  if (FINITE_RNK(p->vecsz->rnk)
-	      && p->vecsz->rnk > 0
-	      && pickdim(ego, p->vecsz, 
-			 p->r != p->rio && p->r != p->iio, dp)) {
-	       if (p->r != p->rio && p->r != p->iio)
-		    return 1;  /* can always operate out-of-place */
+     const S *ego = (const S *) ego_;
+     const problem_rdft2 *p = (const problem_rdft2 *) p_;
 
-	       return(X(rdft2_inplace_strides)(p, *dp));
-	  }
+     if (FINITE_RNK(p->vecsz->rnk)
+	 && p->vecsz->rnk > 0
+	 && plnr->nthr > 1
+	 && pickdim(ego, p->vecsz, 
+		    p->r != p->rio && p->r != p->iio, dp)) {
+	  if (p->r != p->rio && p->r != p->iio)
+	       return 1;  /* can always operate out-of-place */
+
+	  return(X(rdft2_inplace_strides)(p, *dp));
      }
 
      return 0;
@@ -151,8 +151,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      int vdim;
      iodim *d;
      plan **cldrn = (plan **) 0;
-     int i, block_size, nthr;
-     int its, ots;
+     int i, nthr;
+     INT its, ots, block_size;
      tensor *vecsz;
 
      static const plan_adt padt = {
@@ -166,7 +166,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      d = p->vecsz->dims + vdim;
 
      block_size = (d->n + plnr->nthr - 1) / plnr->nthr;
-     nthr = (d->n + block_size - 1) / block_size;
+     nthr = (int)((d->n + block_size - 1) / block_size);
      plnr->nthr = (plnr->nthr + nthr - 1) / nthr;
      X(rdft2_strides)(p->kind, d, &its, &ots);
      its *= block_size; ots *= block_size;
@@ -215,7 +215,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int vecloop_dim, const int *buddies, int nbuddies)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->vecloop_dim = vecloop_dim;
      slv->buddies = buddies;

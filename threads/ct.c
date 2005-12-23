@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.1 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: ct.c,v 1.2 2005-12-23 20:34:32 athena Exp $ */
 
 #include "threads.h"
 
@@ -26,21 +26,21 @@ typedef struct {
      plan_dft super;
      plan *cld;
      plan **cldws;
-     int nthr, ts;
-     int r;
+     int nthr;
+     INT r, ts;
 } P;
 
 typedef struct {
      plan **cldws;
      R *r, *i;
-     int ts;
+     INT ts;
 } PD;
 
 static void *spawn_apply(spawn_data *d)
 WITH_ALIGNED_STACK({
      PD *ego = (PD *) d->data;
-     int thr_num = d->thr_num;
-     int offset = thr_num * ego->ts;
+     INT thr_num = d->thr_num;
+     INT offset = thr_num * ego->ts;
      
      plan_dftw *cldw = (plan_dftw *) (ego->cldws[thr_num]);
      cldw->apply((plan *) cldw, ego->r + offset, ego->i + offset);
@@ -110,7 +110,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      int i;
-     p->print(p, "(dft-thr-ct-%s-x%d/%d",
+     p->print(p, "(dft-thr-ct-%s-x%d/%D",
 	      ego->super.apply == apply_dit ? "dit" : "dif",
 	      ego->nthr, ego->r);
      for (i = 0; i < ego->nthr; ++i)
@@ -126,8 +126,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_dft *p;
      P *pln = 0;
      plan *cld = 0, **cldws = 0;
-     int n, r, m, vl, ivs, ovs;
-     int i, block_size, nthr, plnr_nthr_save, ts;
+     INT n, r, m, vl, ivs, ovs;
+     INT block_size, ts;
+     int i, nthr, plnr_nthr_save;
      iodim *d;
      tensor *t1, *t2;
 
@@ -147,7 +148,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
      block_size = (m + plnr->nthr - 1) / plnr->nthr;
-     nthr = (m + block_size - 1) / block_size;
+     nthr = (int)((m + block_size - 1) / block_size);
      plnr_nthr_save = plnr->nthr;
      plnr->nthr = (plnr->nthr + nthr - 1) / nthr;
 
@@ -241,10 +242,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-ct_solver *X(mksolver_ct_threads)(size_t size, int r, int dec,
+ct_solver *X(mksolver_ct_threads)(size_t size, INT r, int dec,
 				  ct_mkinferior mkcldw)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      ct_solver *slv = (ct_solver *) X(mksolver)(size, &sadt);
      slv->r = r;
      slv->dec = dec;

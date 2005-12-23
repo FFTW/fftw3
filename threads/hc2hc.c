@@ -25,7 +25,7 @@ typedef struct {
      plan *cld;
      plan **cldws;
      int nthr;
-     int r;
+     INT r;
 } P;
 
 typedef struct {
@@ -103,7 +103,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      int i;
-     p->print(p, "(rdft-thr-ct-%s-x%d/%d",
+     p->print(p, "(rdft-thr-ct-%s-x%d/%D",
 	      ego->super.apply == apply_dit ? "dit" : "dif",
 	      ego->nthr, ego->r);
      for (i = 0; i < ego->nthr; ++i)
@@ -119,8 +119,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      P *pln = 0;
      plan *cld = 0, **cldws = 0;
-     int n, r, m, vl, ivs, ovs, mcount;
-     int i, block_size, nthr, plnr_nthr_save;
+     INT n, r, m, vl, ivs, ovs, mcount;
+     int i, nthr, plnr_nthr_save;
+     INT block_size;
      iodim *d;
      tensor *t1, *t2;
 
@@ -141,7 +142,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
      block_size = (mcount + plnr->nthr - 1) / plnr->nthr;
-     nthr = (mcount + block_size - 1) / block_size;
+     nthr = (int)((mcount + block_size - 1) / block_size);
      plnr_nthr_save = plnr->nthr;
      plnr->nthr = (plnr->nthr + nthr - 1) / nthr;
 
@@ -228,9 +229,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-hc2hc_solver *X(mksolver_hc2hc_threads)(size_t size, int r, hc2hc_mkinferior mkcldw)
+hc2hc_solver *X(mksolver_hc2hc_threads)(size_t size, INT r, hc2hc_mkinferior mkcldw)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      hc2hc_solver *slv = (hc2hc_solver *)X(mksolver)(size, &sadt);
      slv->r = r;
      slv->mkcldw = mkcldw;

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-vrank-geq1.c,v 1.18 2004-10-24 05:18:14 stevenj Exp $ */
+/* $Id: dft-vrank-geq1.c,v 1.19 2005-12-23 20:34:32 athena Exp $ */
 
 #include "threads.h"
 
@@ -32,13 +32,13 @@ typedef struct {
 typedef struct {
      plan_dft super;
      plan **cldrn;
-     int its, ots;
+     INT its, ots;
      int nthr;
      const S *solver;
 } P;
 
 typedef struct {
-     int its, ots;
+     INT its, ots;
      R *ri, *ii, *ro, *io;
      plan **cldrn;
 } PD;
@@ -46,8 +46,8 @@ typedef struct {
 static void *spawn_apply(spawn_data *d)
 WITH_ALIGNED_STACK({
      PD *ego = (PD *) d->data;
-     int its = ego->its;
-     int ots = ego->ots;
+     INT its = ego->its;
+     INT ots = ego->ots;
      int thr_num = d->thr_num;
      plan_dft *cld = (plan_dft *) ego->cldrn[thr_num];
 
@@ -109,18 +109,15 @@ static int pickdim(const S *ego, const tensor *vecsz, int oop, int *dp)
 static int applicable0(const solver *ego_, const problem *p_,
 		       const planner *plnr, int *dp)
 {
-     if (DFTP(p_) && plnr->nthr > 1) {
-          const S *ego = (const S *) ego_;
-          const problem_dft *p = (const problem_dft *) p_;
+     const S *ego = (const S *) ego_;
+     const problem_dft *p = (const problem_dft *) p_;
 
-          return (1
-                  && FINITE_RNK(p->vecsz->rnk)
-                  && p->vecsz->rnk > 0
-                  && pickdim(ego, p->vecsz, p->ri != p->ro, dp)
-	       );
-     }
-
-     return 0;
+     return (1
+	     && plnr->nthr > 1
+	     && FINITE_RNK(p->vecsz->rnk)
+	     && p->vecsz->rnk > 0
+	     && pickdim(ego, p->vecsz, p->ri != p->ro, dp)
+	  );
 }
 
 static int applicable(const solver *ego_, const problem *p_,
@@ -146,8 +143,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      int vdim;
      iodim *d;
      plan **cldrn = (plan **) 0;
-     int i, block_size, nthr;
-     int its, ots;
+     int i, nthr;
+     INT its, ots, block_size;
      tensor *vecsz = 0;
 
      static const plan_adt padt = {
@@ -160,7 +157,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      d = p->vecsz->dims + vdim;
 
      block_size = (d->n + plnr->nthr - 1) / plnr->nthr;
-     nthr = (d->n + block_size - 1) / block_size;
+     nthr = (int)((d->n + block_size - 1) / block_size);
      plnr->nthr = (plnr->nthr + nthr - 1) / nthr;
      its = d->is * block_size;
      ots = d->os * block_size;
@@ -209,7 +206,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int vecloop_dim, const int *buddies, int nbuddies)
 {
-     static const solver_adt sadt = { mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->vecloop_dim = vecloop_dim;
      slv->buddies = buddies;

@@ -44,8 +44,8 @@ void X(dft_thr_vrank_geq1_register)(planner *p);
 void X(rdft_thr_vrank_geq1_register)(planner *p);
 void X(rdft2_thr_vrank_geq1_register)(planner *p);
 
-ct_solver *X(mksolver_ct_threads)(size_t size, int r, int dec, ct_mkinferior mkcldw);
-hc2hc_solver *X(mksolver_hc2hc_threads)(size_t size, int r, hc2hc_mkinferior mkcldw);
+ct_solver *X(mksolver_ct_threads)(size_t size, INT r, int dec, ct_mkinferior mkcldw);
+hc2hc_solver *X(mksolver_hc2hc_threads)(size_t size, INT r, hc2hc_mkinferior mkcldw);
 
 void X(threads_conf_standard)(planner *p);
 
