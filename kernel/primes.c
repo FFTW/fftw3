@@ -18,18 +18,23 @@
  *
  */
 
-/* $Id: primes.c,v 1.18 2005-12-23 16:58:00 athena Exp $ */
+/* $Id: primes.c,v 1.19 2005-12-24 01:46:24 stevenj Exp $ */
 
 #include "ifftw.h"
-#include <limits.h>
 
 /***************************************************************************/
 
 /* Rader's algorithm requires lots of modular arithmetic, and if we
    aren't careful we can have errors due to integer overflows. */
 
-/* compute (x * y) mod p, but watch out for integer overflows; we must
-   have x, y >= 0, p > 0.  This routine is slow. */
+/* Compute (x * y) mod p, but watch out for integer overflows; we must
+   have x, y >= 0, p > 0.   Also assumes that p < INT_MAX/2.
+
+   If overflow is common, this routine is much slower than e.g. using
+   'long long' arithmetic.  However, it has the advantage of working
+   when INT is 64 bits, and is also faster when overflow is rare.
+   FFTW calls this via the MULMOD macro, which further optimizes for
+   the case of small integers. */
 INT X(safe_mulmod)(INT x, INT y, INT p)
 {
      if (y == 0 || (x * y) / y == x)
