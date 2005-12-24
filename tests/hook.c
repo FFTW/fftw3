@@ -150,6 +150,7 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
 	      bp->in_place = p->r == p->rio;
 	      bp->sz = fftw_tensor_to_bench_tensor(p->sz);
 	      bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
+	      break;
 	 }
 	 default: 
 	      abort();
