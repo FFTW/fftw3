@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.170 2005-12-23 22:40:41 athena Exp $ */
+/* $Id: planner.c,v 1.171 2005-12-24 20:56:59 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -420,15 +420,6 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
      ego->nthr = nthr;
      ego->flags = flags;
      return pln;
-}
-
-static plan *invoke_solver_if_correct_kind(
-     planner *ego, problem *p, solver *s, const flags_t *nflags)
-{
-     if (p->adt->problem_kind == s->adt->problem_kind)
-	  return invoke_solver(ego, p, s, nflags);
-     else
-	  return 0;
 }
 
 static plan *search0(planner *ego, problem *p, unsigned *slvndx, 
