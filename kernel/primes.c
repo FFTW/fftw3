@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.19 2005-12-24 01:46:24 stevenj Exp $ */
+/* $Id: primes.c,v 1.20 2005-12-24 19:22:12 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -28,22 +28,31 @@
    aren't careful we can have errors due to integer overflows. */
 
 /* Compute (x * y) mod p, but watch out for integer overflows; we must
-   have x, y >= 0, p > 0.   Also assumes that p < INT_MAX/2.
+   have x, y >= 0, p > 0.
 
-   If overflow is common, this routine is much slower than e.g. using
-   'long long' arithmetic.  However, it has the advantage of working
-   when INT is 64 bits, and is also faster when overflow is rare.
-   FFTW calls this via the MULMOD macro, which further optimizes for
-   the case of small integers. */
+   If overflow is common, this routine is somewhat slower than
+   e.g. using 'long long' arithmetic.  However, it has the advantage
+   of working when INT is 64 bits, and is also faster when overflow is
+   rare.  FFTW calls this via the MULMOD macro, which further
+   optimizes for the case of small integers. 
+*/
+
+#define ADD_MOD(x, y, p) (x >= p - y) ? (x + (y - p)) : (x + y)
+
 INT X(safe_mulmod)(INT x, INT y, INT p)
 {
-     if (y == 0 || (x * y) / y == x)
-	  return((x * y) % p);
-     else {
-	  INT y2 = y/2;
-	  return((X(safe_mulmod)(x, y2, p) +
-		  X(safe_mulmod)(x, y - y2, p)) % p);
+     INT r;
+
+     if (y > x) 
+	  return X(safe_mulmod)(y, x, p);
+
+     r = 0;
+     while (y) {
+	  r = ADD_MOD(r, x*(y&1), p); y >>= 1;
+	  x = ADD_MOD(x, x, p);
      }
+
+     return r;
 }
 
 /***************************************************************************/
