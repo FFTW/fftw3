@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: codelet-dft.h,v 1.7 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: codelet-dft.h,v 1.8 2005-12-24 21:08:49 athena Exp $ */
 
 /*
  * This header file must include every file or define every
@@ -76,8 +76,8 @@ struct ct_desc_s {
      INT radix;
      const char *nam;
      const tw_instr *tw;
-     opcnt ops;
      const ct_genus *genus;
+     opcnt ops;
      INT s1;
      INT s2;
      INT dist;

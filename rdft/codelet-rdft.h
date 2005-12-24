@@ -111,8 +111,8 @@ struct hc2hc_desc_s {
      INT radix;
      const char *nam;
      const tw_instr *tw;
-     opcnt ops;
      const hc2hc_genus *genus;
+     opcnt ops;
      INT s1;
      INT s2;
      INT dist;

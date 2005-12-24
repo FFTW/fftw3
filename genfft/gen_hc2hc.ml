@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2hc.ml,v 1.13 2005-12-18 01:28:50 athena Exp $ *)
+(* $Id: gen_hc2hc.ml,v 1.14 2005-12-24 21:08:50 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2hc.ml,v 1.13 2005-12-18 01:28:50 athena Exp $"
+let cvsid = "$Id: gen_hc2hc.ml,v 1.14 2005-12-24 21:08:50 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -151,7 +151,7 @@ let generate n =
       (twinstr_to_string "VL" (twdesc n))
   and desc = 
     Printf.sprintf
-      "static const hc2hc_desc desc = {%d, \"%s\", twinstr, %s, &GENUS, %s, %s, %s};\n\n"
+      "static const hc2hc_desc desc = {%d, \"%s\", twinstr, &GENUS, %s, %s, %s, %s};\n\n"
       n name (flops_of tree)
       (stride_to_solverparm !uiostride) "0"
       (stride_to_solverparm !udist) 
