@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.171 2005-12-24 20:56:59 athena Exp $ */
+/* $Id: planner.c,v 1.172 2005-12-24 21:00:42 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -116,7 +116,7 @@ static void register_solver(planner *ego, solver *s)
      }
 }
 
-static int slookup(planner *ego, char *nam, int id)
+static unsigned slookup(planner *ego, char *nam, int id)
 {
      unsigned h = X(hash)(nam); /* used to avoid strcmp in the common case */
      FORALL_SOLVERS(ego, s, sp, {
@@ -125,7 +125,7 @@ static int slookup(planner *ego, char *nam, int id)
 	      && !strcmp(sp->reg_nam, nam))
 	       return sp - ego->slvdescs;
      });
-     return -1;
+     return INFEASIBLE_SLVNDX;
 }
 
 /*
@@ -705,7 +705,7 @@ static int imprt(planner *ego, scanner *sc)
 			sig + 0, sig + 1, sig + 2, sig + 3))
 	       goto bad;
 
-	  if ((slvndx = slookup(ego, buf, reg_id)) < 0)
+	  if ((slvndx = slookup(ego, buf, reg_id)) == INFEASIBLE_SLVNDX)
 	       goto bad;
 
 	  /* inter oves locum praesta */
