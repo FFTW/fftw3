@@ -218,7 +218,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->super.super.ops.add = (n-1) * 2.5;
      pln->super.super.ops.mul = 0;
      pln->super.super.ops.fma = 0.5 * (n-1) * (n-1) ;
+#if 0 /* these are nice pipelined sequential loads and should cost nothing */
      pln->super.super.ops.other = (n-1)*(2 + 1 + (n-1));  /* approximate */
+#endif
 
      return &(pln->super.super);
 }
