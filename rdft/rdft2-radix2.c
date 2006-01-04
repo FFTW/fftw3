@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.29 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.30 2006-01-04 00:34:04 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of
@@ -391,12 +391,13 @@ static const madt adt_b_rdft = {
 /*
  * common stuff
  */
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      static const tw_instr twinstr[] = { {TW_FULL, 0, 2}, {TW_NEXT, 1, 0} };
-     AWAKE(ego->cld, flg);
-     X(twiddle_awake)(flg, &ego->td, twinstr, ego->n, 2, (ego->n / 2 + 1) / 2);
+     AWAKE(ego->cld, wakefulness);
+     X(twiddle_awake)(wakefulness, &ego->td, twinstr, 
+		      ego->n, 2, (ego->n / 2 + 1) / 2);
 }
 
 static void destroy(plan *ego_)

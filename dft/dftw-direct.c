@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.8 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: dftw-direct.c,v 1.9 2006-01-04 00:34:03 athena Exp $ */
 
 #include "ct.h"
 
@@ -113,11 +113,11 @@ static void apply_buf(const plan *ego_, R *rio, R *iio)
 /*************************************************************
   common code
  *************************************************************/
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
 
-     X(twiddle_awake)(flg, &ego->td, ego->slv->desc->tw, 
+     X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw, 
 		      ego->r * ego->m, ego->r, ego->m);
      ego->tdW = X(twiddle_shift)(ego->td, ego->mstart);
 }
@@ -253,6 +253,7 @@ static plan *mkcldw(const ct_solver *ego_,
 	  pln->super.super.ops.other += 8 * r * mcount * vl;
      }
 
+     pln->super.super.could_prune_now_p = !ego->bufferedp && r >= 5 && r < 64;
      return &(pln->super.super);
 }
 

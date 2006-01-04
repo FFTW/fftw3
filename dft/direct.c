@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.46 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: direct.c,v 1.47 2006-01-04 00:34:03 athena Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 
@@ -255,6 +255,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (ego->bufferedp) 
 	  pln->super.super.ops.other += 4 * pln->n * pln->vl;
 
+     pln->super.super.could_prune_now_p = !ego->bufferedp;
      return &(pln->super.super);
 }
 

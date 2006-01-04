@@ -42,12 +42,13 @@ typedef struct {
 
 static rader_tl *omegas = 0;
 
-static R *mkomega(plan *p_, INT n, INT ginv)
+static R *mkomega(enum wakefulness wakefulness, plan *p_, INT n, INT ginv)
 {
      plan_dft *p = (plan_dft *) p_;
      R *omega;
      INT i, gpower;
-     R scale;
+     trigreal scale;
+     triggen *t;
 
      if ((omega = X(rader_tl_find)(n, n, ginv, omegas)))
 	  return omega;
@@ -56,16 +57,17 @@ static R *mkomega(plan *p_, INT n, INT ginv)
 
      scale = n - 1.0; /* normalization for convolution */
 
+     t = X(mktriggen)(wakefulness, n);
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  X(cexp)(gpower, n, omega+2*i);
-	  omega[2*i] /= scale;
-	  omega[2*i+1] /= FFT_SIGN * scale;
+	  trigreal w[2];
+	  t->cexpl(t, gpower, w);
+	  omega[2*i] = w[0] / scale;
+	  omega[2*i+1] = FFT_SIGN * w[1] / scale;
      }
+     X(triggen_destroy)(t);
      A(gpower == 1);
 
-     AWAKE(p_, 1);
      p->apply(p_, omega, omega + 1, omega, omega + 1);
-     AWAKE(p_, 0);
 
      X(rader_tl_insert)(n, n, ginv, omega, &omegas);
      return omega;
@@ -164,20 +166,23 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 /***************************************************************************/
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
 
-     AWAKE(ego->cld1, flg);
-     AWAKE(ego->cld2, flg);
+     AWAKE(ego->cld1, wakefulness);
+     AWAKE(ego->cld2, wakefulness);
+     AWAKE(ego->cld_omega, wakefulness);
 
-     if (flg) {
-	  if (!ego->omega) 
-	       ego->omega = 
-		    mkomega(ego->cld_omega, ego->n, ego->ginv);
-     } else {
-	  free_omega(ego->omega);
-	  ego->omega = 0;
+     switch (wakefulness) {
+	 case SLEEPY:
+	      free_omega(ego->omega);
+	      ego->omega = 0;
+	      break;
+	 default:
+	      ego->omega = mkomega(wakefulness,
+				   ego->cld_omega, ego->n, ego->ginv);
+	      break;
      }
 }
 

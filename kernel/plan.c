@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.20 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: plan.c,v 1.21 2006-01-04 00:34:04 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -31,10 +31,11 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
      plan *p = (plan *)MALLOC(size, PLANS);
 
      A(adt->destroy);
-     p->awake_refcnt = 0;
      p->adt = adt;
      X(ops_zero)(&p->ops);
      p->pcost = 0.0;
+     p->wakefulness = SLEEPY;
+     p->could_prune_now_p = 0;
      
      return p;
 }
@@ -45,8 +46,7 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
 void X(plan_destroy_internal)(plan *ego)
 {
      if (ego) {
-	  if (ego->awake_refcnt > 0)
-	       ego->adt->awake(ego, 0);
+	  CK(ego->wakefulness == SLEEPY);
           ego->adt->destroy(ego);
 	  X(ifree)(ego);
      }
@@ -59,16 +59,11 @@ void X(plan_null_destroy)(plan *ego)
      /* nothing */
 }
 
-void X(plan_awake)(plan *ego, int flag)
+void X(plan_awake)(plan *ego, enum wakefulness wakefulness)
 {
-     if (flag) {
-	  if (!ego->awake_refcnt)
-	       ego->adt->awake(ego, flag);
-	  ++ego->awake_refcnt;
-     } else {
-	  --ego->awake_refcnt;
-	  if (!ego->awake_refcnt)
-	       ego->adt->awake(ego, flag);
-     }
+     A(((wakefulness == SLEEPY) ^ (ego->wakefulness == SLEEPY)));
+	  
+     ego->adt->awake(ego, wakefulness);
+     ego->wakefulness = wakefulness;
 }
 

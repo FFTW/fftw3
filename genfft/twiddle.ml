@@ -18,25 +18,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.14 2005-09-27 00:52:36 athena Exp $ *)
+(* $Id: twiddle.ml,v 1.15 2006-01-04 00:34:03 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
 open Util
 
-type twop = TW_FULL | TW_COS | TW_SIN | TW_TAN | TW_NEXT
-
-let optoint = function
-  | TW_COS -> 0
-  | TW_SIN -> 1
-  | TW_TAN -> 2
-  | TW_NEXT -> 3
-  | TW_FULL -> 4
+type twop = TW_FULL | TW_COS | TW_SIN | TW_CEXP | TW_NEXT
 
 let optostring = function
   | TW_COS -> "TW_COS"
   | TW_SIN -> "TW_SIN"
-  | TW_TAN -> "TW_TAN"
+  | TW_CEXP -> "TW_CEXP"
   | TW_NEXT -> "TW_NEXT"
   | TW_FULL -> "TW_FULL"
 
@@ -241,8 +234,7 @@ let twiddle_policy_addition_chain t =
     fun i -> Complex.times (g i) (f i)    
   and twidlen n = 2 * List.length (load_set t n)
   and twdesc r = 
-    List.flatten (List.map (fun i -> [(TW_COS, 0, i); (TW_SIN, 0, i)])
-		    (load_set t r))
+    (List.map (fun i -> TW_CEXP, 0, i) (load_set t r))
     @ [(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
@@ -253,8 +245,7 @@ let twiddle_policy_addition_chain_log3 =
     fun i -> Complex.times (g i) (f i)    
   and twidlen n = 2 * List.length (load_set_log3 n)
   and twdesc r = 
-    List.flatten (List.map (fun i -> [(TW_COS, 0, i); (TW_SIN, 0, i)])
-		    (load_set_log3 r))
+    (List.map (fun i -> TW_CEXP, 0, i) (load_set_log3 r))
     @ [(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
@@ -279,7 +270,7 @@ let twiddle_policy_log2 =
        (List.map 
 	  (fun i -> 
 	    if i > 0 && is_pow 2 i then 
-	      [(TW_COS, 0, i); (TW_SIN, 0, i)] 
+	      [TW_CEXP, 0, i] 
 	    else 
 	      [])
 	  (iota n)))
@@ -308,12 +299,11 @@ let twiddle_policy_log3 =
     in fun i -> Complex.times (g i) (f i)
   and twidlen n = 2 * (terms_needed 0 1 0 n)
   and twdesc n =
-    (List.flatten 
-       (List.map 
-	  (fun i -> 
-	    let x = min (pow 3 i) (n - 1) in
-	    [(TW_COS, 0, x); (TW_SIN, 0, x)])
-	  (iota ((twidlen n) / 2))))
+    (List.map 
+       (fun i -> 
+	  let x = min (pow 3 i) (n - 1) in
+	    TW_CEXP, 0, x)
+       (iota ((twidlen n) / 2)))
     @ [(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
@@ -324,7 +314,7 @@ let policy_one mktw =
     let g = (mktw n (load_reim sign w)) in
     fun i -> Complex.times (g i) (f i)
   and twidlen n = 2
-  and twdesc n = [(TW_COS, 0, 1); (TW_SIN, 0, 1); (TW_NEXT, 1, 0)]
+  and twdesc n = [(TW_CEXP, 0, 1); (TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
     
 (* compute w^n = w w^{n-1} *)

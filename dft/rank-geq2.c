@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.39 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: rank-geq2.c,v 1.40 2006-01-04 00:34:03 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -53,11 +53,11 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 }
 
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld1, flg);
-     AWAKE(ego->cld2, flg);
+     AWAKE(ego->cld1, wakefulness);
+     AWAKE(ego->cld2, wakefulness);
 }
 
 static void destroy(plan *ego_)

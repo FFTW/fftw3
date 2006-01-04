@@ -18,21 +18,25 @@
  *
  */
 
-/* $Id: trig.c,v 1.17 2005-12-22 15:25:15 athena Exp $ */
+/* $Id: trig.c,v 1.18 2006-01-04 00:34:04 athena Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
 #include <math.h>
 
-#ifdef FFTW_LDOUBLE
+#ifdef TRIGREAL_IS_LONG_DOUBLE
 #  define COS cosl
 #  define SIN sinl
-#  define TAN tanl
 #  define KTRIG(x) (x##L)
+#  ifndef HAVE_DECL_SINL
+     extern long double sinl(long double x);
+#  endif
+#  ifndef HAVE_DECL_COSL
+     extern long double cosl(long double x);
+#  endif
 #else
 #  define COS cos
 #  define SIN sin
-#  define TAN tan
 #  define KTRIG(x) (x)
 #endif
 
@@ -45,45 +49,19 @@ static const trigreal K2PI =
  * before multiplication by 2 * PI.
  */
 
-R X(sin_or_cos)(INT im, INT in, int sinp)
+static void real_cexp(INT m, INT n, trigreal *out)
 {
-     trigreal m = im, n = in;
-
-     /* waiting for C to get tail recursion... */
-     trigreal half_n = n * KTRIG(0.5);
-     trigreal quarter_n = half_n * KTRIG(0.5);
-     trigreal eighth_n = quarter_n * KTRIG(0.5);
-     trigreal sgn = KTRIG(1.0);
-
-     if (sinp) goto sin;
- cos:
-     if (m < 0) { m = -m; /* goto cos; */ }
-     if (m > half_n) { m = n - m; goto cos; }
-     if (m > eighth_n) { m = quarter_n - m; goto sin; }
-     return sgn * COS(by2pi(m, n));
-
- msin:
-     sgn = -sgn;
- sin:
-     if (m < 0) { m = -m; goto msin; }
-     if (m > half_n) { m = n - m; goto msin; }
-     if (m > eighth_n) { m = quarter_n - m; goto cos; }
-     return sgn * SIN(by2pi(m, n));
-}
-
-void X(cexp)(INT im, INT in, R *p)
-{
-     trigreal m = im, n = in;
-     trigreal half_n = n * KTRIG(0.5);
-     trigreal quarter_n = half_n * KTRIG(0.5);
-     trigreal eighth_n = quarter_n * KTRIG(0.5);
      trigreal theta, c, s, t;
      unsigned octant = 0;
+     INT quarter_n = n;
 
-     if (m < 0) { m = -m; octant ^= 4; }
-     if (m > half_n) { m = n - m; octant ^= 4; }
-     if (m > quarter_n) { m = m - quarter_n; octant ^= 2; }
-     if (m > eighth_n) { m = quarter_n - m; octant ^= 1; }
+     n += n; n += n;
+     m += m; m += m;
+
+     if (m < 0) m += n;
+     if (m > n - m) { m = n - m; octant |= 4; }
+     if (m - quarter_n > 0) { m = m - quarter_n; octant |= 2; }
+     if (m > quarter_n - m) { m = quarter_n - m; octant |= 1; }
 
      theta = by2pi(m, n);
      c = COS(theta); s = SIN(theta);
@@ -92,6 +70,153 @@ void X(cexp)(INT im, INT in, R *p)
      if (octant & 2) { t = c; c = -s; s = t; }
      if (octant & 4) { s = -s; }
 
-     p[0] = (R)c; 
-     p[1] = (R)s; 
+     out[0] = c; 
+     out[1] = s; 
+}
+
+static INT choose_twshft(INT n)
+{
+     INT log2r = 0;
+     while (n > 0) {
+	  ++log2r;
+	  n /= 4;
+     }
+     return log2r;
+}
+
+static void cexpl_sqrtn_table(triggen *p, INT m, trigreal *res)
+{
+     m += p->n * (m < 0);
+
+     {
+	  INT m0 = m & p->twmsk;
+	  INT m1 = m >> p->twshft;
+	  trigreal wr0 = p->W0[2 * m0];
+	  trigreal wi0 = p->W0[2 * m0 + 1];
+	  trigreal wr1 = p->W1[2 * m1];
+	  trigreal wi1 = p->W1[2 * m1 + 1];
+
+	  res[0] = wr1 * wr0 - wi1 * wi0;
+	  res[1] = wi1 * wr0 + wr1 * wi0;
+     }
+}
+
+/* multiply (xr, xi) by exp(FFT_SIGN * 2*pi*i*m/n) */
+static void rotate_sqrtn_table(triggen *p, INT m, R xr, R xi, R *res)
+{
+     m += p->n * (m < 0);
+
+     {
+	  INT m0 = m & p->twmsk;
+	  INT m1 = m >> p->twshft;
+	  trigreal wr0 = p->W0[2 * m0];
+	  trigreal wi0 = p->W0[2 * m0 + 1];
+	  trigreal wr1 = p->W1[2 * m1];
+	  trigreal wi1 = p->W1[2 * m1 + 1];
+	  trigreal wr = wr1 * wr0 - wi1 * wi0;
+	  trigreal wi = wi1 * wr0 + wr1 * wi0;
+
+	  res[0] = xr * wr - xi * (FFT_SIGN * wi);
+	  res[1] = xi * wr + xr * (FFT_SIGN * wi);
+     }
+}
+
+static void cexpl_sincos(triggen *p, INT m, trigreal *res)
+{
+     real_cexp(m, p->n, res);
+}
+
+static void cexp_zero(triggen *p, INT m, R *res)
+{
+     res[0] = 0;
+     res[1] = 0;
+}
+
+static void cexpl_zero(triggen *p, INT m, trigreal *res)
+{
+     res[0] = 0;
+     res[1] = 0;
+}
+
+static void cexp_generic(triggen *p, INT m, R *res)
+{
+     trigreal resl[2];
+     p->cexpl(p, m, resl);
+     res[0] = (R)resl[0];
+     res[1] = (R)resl[1];
+}
+
+static void rotate_generic(triggen *p, INT m, R xr, R xi, R *res)
+{
+     trigreal w[2];
+     p->cexpl(p, m, w);
+     res[0] = xr * w[0] - xi * (FFT_SIGN * w[1]);
+     res[1] = xi * w[0] + xr * (FFT_SIGN * w[1]);
+}
+
+triggen *X(mktriggen)(enum wakefulness wakefulness, INT n)
+{
+     INT i, n0, n1;
+     triggen *p = (triggen *)MALLOC(sizeof(*p), TWIDDLES);
+
+     p->n = n;
+     p->W0 = p->W1 = 0;
+     p->cexp = 0;
+     p->rotate = 0;
+
+     switch (wakefulness) {
+	 case SLEEPY:
+	      A(0 /* can't happen */);
+	      break;
+
+	 case AWAKE_SQRTN_TABLE: {
+	      INT twshft = choose_twshft(n);
+
+	      p->twshft = twshft;
+	      p->twradix = ((INT)1) << twshft;
+	      p->twmsk = p->twradix - 1;
+
+	      n0 = p->twradix;
+	      n1 = (n + n0 - 1) / n0;
+
+	      p->W0 = (trigreal *)MALLOC(n0 * 2 * sizeof(trigreal), TWIDDLES);
+	      p->W1 = (trigreal *)MALLOC(n1 * 2 * sizeof(trigreal), TWIDDLES);
+
+	      for (i = 0; i < n0; ++i) 
+		   real_cexp(i, n, p->W0 + 2 * i);
+
+	      for (i = 0; i < n1; ++i) 
+		   real_cexp(i * p->twradix, n, p->W1 + 2 * i);
+
+	      p->cexpl = cexpl_sqrtn_table;
+	      p->rotate = rotate_sqrtn_table;
+	      break;
+	 }
+
+	 case AWAKE_SINCOS: 
+	      p->cexpl = cexpl_sincos;
+	      break;
+
+	 case AWAKE_ZERO: 
+	      p->cexp = cexp_zero;
+	      p->cexpl = cexpl_zero;
+	      break;
+     }
+
+     if (!p->cexp) {
+	  if (sizeof(trigreal) == sizeof(R))
+	       p->cexp = (void (*)(triggen *, INT, R *))p->cexpl;
+	  else
+	       p->cexp = cexp_generic;
+     }
+     if (!p->rotate)     
+	       p->rotate = rotate_generic;
+     return p;
+}
+
+void X(triggen_destroy)(triggen *p)
+{
+     X(ifree0)(p->W0);
+     X(ifree0)(p->W1);
+     X(ifree)(p);
 }

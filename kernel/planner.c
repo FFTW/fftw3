@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.172 2005-12-24 21:00:42 athena Exp $ */
+/* $Id: planner.c,v 1.173 2006-01-04 00:34:04 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -436,6 +436,10 @@ static plan *search0(planner *ego, problem *p, unsigned *slvndx,
      FORALL_SOLVERS_OF_KIND(p->adt->problem_kind, ego, s, sp, {
 	  plan *pln = invoke_solver(ego, p, s, flagsp);
 	  if (pln) {
+	       /* read COULD_PRUNE_NOW_P because PLN may be destroyed
+		  before we use COULD_PRUNE_NOW_P */
+	       int could_prune_now_p = pln->could_prune_now_p;
+
 	       if (best) {
 		    if (best_not_yet_timed) {
 			 evaluate_plan(ego, best, p);
@@ -453,6 +457,9 @@ static plan *search0(planner *ego, problem *p, unsigned *slvndx,
 		    best = pln;
 		    *slvndx = sp - ego->slvdescs;
 	       }
+
+	       if (ALLOW_PRUNINGP(ego) && could_prune_now_p) 
+		    break;
 	  }
      });
 

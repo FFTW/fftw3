@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.13 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: reodft11e-radix2.c,v 1.14 2006-01-04 00:34:04 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:
@@ -392,7 +392,7 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
      X(ifree)(buf);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      static const tw_instr reodft010e_tw[] = {
@@ -406,10 +406,12 @@ static void awake(plan *ego_, int flg)
           { TW_NEXT, 2, 0 }
      };
 
-     AWAKE(ego->cld, flg);
+     AWAKE(ego->cld, wakefulness);
 
-     X(twiddle_awake)(flg, &ego->td, reodft010e_tw, 2*ego->n, 1, ego->n/4+1);
-     X(twiddle_awake)(flg, &ego->td2, reodft11e_tw, 8*ego->n, 1, ego->n);
+     X(twiddle_awake)(wakefulness, &ego->td, reodft010e_tw, 
+		      2*ego->n, 1, ego->n/4+1);
+     X(twiddle_awake)(wakefulness, &ego->td2, reodft11e_tw, 
+		      8*ego->n, 1, ego->n);
 }
 
 static void destroy(plan *ego_)

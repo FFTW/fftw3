@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.36 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: buffered.c,v 1.37 2006-01-04 00:34:04 athena Exp $ */
 
 #include "rdft.h"
 
@@ -76,13 +76,13 @@ static void apply(const plan *ego_, R *I, R *O)
 }
 
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
 
-     AWAKE(ego->cld, flg);
-     AWAKE(ego->cldcpy, flg);
-     AWAKE(ego->cldrest, flg);
+     AWAKE(ego->cld, wakefulness);
+     AWAKE(ego->cldcpy, wakefulness);
+     AWAKE(ego->cldrest, wakefulness);
 }
 
 static void destroy(plan *ego_)

@@ -67,6 +67,7 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
 	      bp->in_place = p->ri == p->ro;
 	      bp->sz = fftw_tensor_to_bench_tensor(p->sz);
 	      bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
+	      bp->k = 0;
 	      break;
 	 }
 	 case PROBLEM_RDFT:
@@ -150,6 +151,7 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
 	      bp->in_place = p->r == p->rio;
 	      bp->sz = fftw_tensor_to_bench_tensor(p->sz);
 	      bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
+	      bp->k = 0;
 	      break;
 	 }
 	 default: 
@@ -157,6 +159,7 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
      }
 
      bp->userinfo = 0;
+     bp->pstring = 0;
      bp->destroy_input = !NO_DESTROY_INPUTP(plnr);
 
      return bp;
@@ -186,14 +189,14 @@ static void hook(planner *plnr, plan *pln, const problem *p_, int optimalp)
 	       the_plan->pln = pln;
 	       the_plan->prb = (problem *) p_;
 
-	       AWAKE(pln, 1);
+	       AWAKE(pln, AWAKE_SQRTN_TABLE);
 	       verify_problem(bp, rounds, tol);
-	       AWAKE(pln, 0);
+	       AWAKE(pln, SLEEPY);
 
 	       X(ifree)(the_plan);
 	       the_plan = the_plan_save;
 
-	       problem_free(bp);
+	       problem_destroy(bp);
 	  }
 
      }

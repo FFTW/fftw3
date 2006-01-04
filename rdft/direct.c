@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: direct.c,v 1.22 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: direct.c,v 1.23 2006-01-04 00:34:04 athena Exp $ */
 
 /* direct RDFT R2HC/HC2R solver, if we have a codelet */
 
@@ -212,6 +212,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(ops_madd2)(pln->vl / ego->desc.r2hc->genus->vl,
 		       &ego->desc.r2hc->ops,
 		       &pln->super.super.ops);
+
+     pln->super.super.could_prune_now_p = 1;
 
      return &(pln->super.super);
 }

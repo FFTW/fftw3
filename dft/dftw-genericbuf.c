@@ -36,99 +36,45 @@ typedef struct {
      INT batchsz;
      plan *cld;
 
-     int log2_twradix;
-     R *W0, *W1;
-
+     triggen *t;
      const S *slv;
 } P;
 
-/* approximate log2(sqrt(n)) */
-static int choose_log2_twradix(INT n)
-{
-     int log2r = 0;
-     while (n > 0) {
-	  ++log2r;
-	  n /= 4;
-     }
-     return log2r;
-}
 
 #define BATCHDIST(r) ((r) + 16)
 
 /**************************************************************/
-static void mktwiddle(P *ego, int flg)
-{
-     if (flg) {
-	  INT n = ego->r * ego->m;
-	  int log2_twradix = choose_log2_twradix(n);
-	  INT twradix = ((INT)1) << log2_twradix;
-	  INT n0 = twradix;
-	  INT n1 = (n + twradix - 1) / twradix;
-	  INT i;
-	  R *W0, *W1;
-
-	  ego->log2_twradix = log2_twradix;
-	  ego->W0 = W0 = (R *)MALLOC(n0 * 2 * sizeof(R), TWIDDLES);
-	  ego->W1 = W1 = (R *)MALLOC(n1 * 2 * sizeof(R), TWIDDLES);
-
-	  for (i = 0; i < n0; ++i) 
-	       X(cexp)(i, n, W0+2*i);
-
-	  for (i = 0; i < n1; ++i) 
-	       X(cexp)(i * twradix, n, W1+2*i);
-
-     } else {
-	  X(ifree0)(ego->W0); ego->W0 = 0;
-	  X(ifree0)(ego->W1); ego->W1 = 0;
-     }
-}
-
 static void bytwiddle(const P *ego, INT m0, INT m1, R *buf, R *rio, R *iio)
 {
      INT j, k;
-     INT r = ego->r, s = ego->s, m = ego->m;
-     int twshft = ego->log2_twradix;
-     INT twmsk = (((INT)1) << twshft) - 1;
-
-     const R *W0 = ego->W0, *W1 = ego->W1;
+     INT r = ego->r, s = ego->s, m = ego->m, mb = ego->mb;
+     triggen *t = ego->t;
      for (j = 0; j < r; ++j) {
-	  for (k = m0; k < m1; ++k) {
-	       INT jk = j * k;
-	       INT jk0 = jk & twmsk;
-	       INT jk1 = jk >> twshft;
-	       E xr = rio[s * (j * m + k)];
-	       E xi = iio[s * (j * m + k)];
-	       E wr0 = W0[2 * jk0];
-	       E wi0 = W0[2 * jk0 + 1];
-	       E wr1 = W1[2 * jk1];
-	       E wi1 = W1[2 * jk1 + 1];
-	       E wr = wr1 * wr0 - wi1 * wi0;
-	       E wi = wi1 * wr0 + wr1 * wi0;
-	       buf[j * 2 + 2 * BATCHDIST(r) * (k - m0) + 0] = 
-		    xr * wr + xi * wi;
-	       buf[j * 2 + 2 * BATCHDIST(r) * (k - m0) + 1] = 
-		    xi * wr - xr * wi;
-	  }
+	  for (k = m0; k < m1; ++k) 
+	       t->rotate(t, j * k,
+			 rio[s * (j * m + (k - mb))],
+			 iio[s * (j * m + (k - mb))],
+			 &buf[j * 2 + 2 * BATCHDIST(r) * (k - m0) + 0]);
      }
 }
 
-static int applicable0(const S *ego, INT r, INT m, INT vl, int dec,
+static int applicable0(const S *ego, INT r, INT m, INT vl, INT mcount, int dec,
 		       const planner *plnr)
 {
      return (1 
 	     && vl == 1
 	     && dec == DECDIT
-	     && m >= ego->batchsz
-	     && m % ego->batchsz == 0
+	     && mcount >= ego->batchsz
+	     && mcount % ego->batchsz == 0
 	     && r >= 64
 	     && m >= r
 	  );
 }
 
-static int applicable(const S *ego, INT r, INT m, INT vl, int dec,
+static int applicable(const S *ego, INT r, INT m, INT vl, INT mcount, int dec,
 		      const planner *plnr)
 {
-     if (!applicable0(ego, r, m, vl, dec, plnr))
+     if (!applicable0(ego, r, m, vl, mcount, dec, plnr))
 	  return 0;
      if (NO_UGLYP(plnr) && m * r < 65536)
 	  return 0;
@@ -139,12 +85,13 @@ static int applicable(const S *ego, INT r, INT m, INT vl, int dec,
 static void dobatch(const P *ego, INT m0, INT m1, R *buf, R *rio, R *iio)
 {
      plan_dft *cld;
+     INT mb = ego->mb;
 
      bytwiddle(ego, m0, m1, buf, rio, iio);
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, buf, buf + 1, buf, buf + 1);
-     X(cpy2d_pair_co)(buf,buf+1,rio + ego->s * m0, iio + ego->s * m0,
+     X(cpy2d_pair_co)(buf,buf+1,rio + ego->s * (m0-mb), iio + ego->s * (m0-mb),
 		      m1-m0, 2 * BATCHDIST(ego->r), ego->s,
 		      ego->r, 2, ego->m * ego->s);
 }
@@ -156,25 +103,32 @@ static void apply(const plan *ego_, R *rio, R *iio)
 			   BUFFERS);
      INT m;
 
-     for (m = ego->mb; m < ego->me - ego->batchsz; m += ego->batchsz) 
+     for (m = ego->mb; m < ego->me; m += ego->batchsz) 
 	  dobatch(ego, m, m + ego->batchsz, buf, rio, iio);
 
-     dobatch(ego, m, ego->me, buf, rio, iio);
+     A(m == ego->me);
      
      X(ifree)(buf);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, flg);
-     mktwiddle(ego, flg);
+     AWAKE(ego->cld, wakefulness);
+
+     switch (wakefulness) {
+	 case SLEEPY:
+	      X(triggen_destroy)(ego->t); ego->t = 0;
+	      break;
+	 default:
+	      ego->t = X(mktriggen)(AWAKE_SQRTN_TABLE, ego->r * ego->m);
+	      break;
+     }
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     A(!ego->W0 && !ego->W1);
      X(plan_destroy_internal)(ego->cld);
 }
 
@@ -201,7 +155,7 @@ static plan *mkcldw(const ct_solver *ego_,
      };
 
      A(mstart >= 0 && mstart + mcount <= m);
-     if (!applicable(ego, r, m, vl, dec, plnr))
+     if (!applicable(ego, r, m, vl, mcount, dec, plnr))
           return (plan *)0;
 
      buf = (R *) MALLOC(sizeof(R) * 2 * BATCHDIST(r) * ego->batchsz, BUFFERS);
@@ -226,7 +180,6 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->batchsz = ego->batchsz;
      pln->mb = mstart;
      pln->me = mstart + mcount;
-     pln->W0 = pln->W1 = 0;
 
      {
 	  double n0 = (r - 1) * (mcount - 1);
@@ -247,6 +200,13 @@ static void regsolver(planner *plnr, INT r, INT batchsz)
      S *slv = (S *)X(mksolver_ct)(sizeof(S), r, DECDIT, mkcldw);
      slv->batchsz = batchsz;
      REGISTER_SOLVER(plnr, &(slv->super.super));
+
+     if (X(mksolver_ct_hook)) {
+	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), r, DECDIT, mkcldw);
+	  slv->batchsz = batchsz;
+	  REGISTER_SOLVER(plnr, &(slv->super.super));
+     }
+
 }
 
 void X(ct_genericbuf_register)(planner *p)

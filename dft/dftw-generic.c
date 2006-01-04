@@ -23,126 +23,32 @@
 
 #include "ct.h"
 
-struct P_s;
-typedef struct {
-     void (*bytwiddle)(const struct P_s *ego, R *rio, R *iio);
-     void (*mktwiddle)(struct P_s *ego, int flg);
-     int (*applicable)(INT r, INT m, const planner *plnr);
-     const char *nam;
-} wadt;
+typedef ct_solver S;
 
 typedef struct {
-     ct_solver super;
-     const wadt *adt;
-} S;
-
-typedef struct P_s {
      plan_dftw super;
 
-     const wadt *adt;
      INT r, m, s, vl, vs, mstart, mcount;
      plan *cld;
 
      /* defined only for solver1: */
      twid *td;
 
-     /* defined only for solver2 */
-     int log2_twradix;
-     R *W0, *W1;
-
      const S *slv;
      int dec;
 } P;
 
-/* approximate log2(sqrt(n)) */
-static int choose_log2_twradix(INT n)
-{
-     int log2r = 0;
-     while (n > 0) {
-	  ++log2r;
-	  n /= 4;
-     }
-     return log2r;
-}
-
-/**************************************************************/
-static void mktwiddle2(P *ego, int flg)
-{
-     if (flg) {
-	  INT n = ego->r * ego->m;
-	  int log2_twradix = choose_log2_twradix(n);
-	  INT twradix = ((INT)1) << log2_twradix;
-	  INT n0 = twradix;
-	  INT n1 = (n + twradix - 1) / twradix;
-	  INT i;
-	  R *W0, *W1;
-
-	  ego->log2_twradix = log2_twradix;
-	  ego->W0 = W0 = (R *)MALLOC(n0 * 2 * sizeof(R), TWIDDLES);
-	  ego->W1 = W1 = (R *)MALLOC(n1 * 2 * sizeof(R), TWIDDLES);
-
-	  for (i = 0; i < n0; ++i) 
-	       X(cexp)(i, n, W0+2*i);
-
-	  for (i = 0; i < n1; ++i) 
-	       X(cexp)(i * twradix, n, W1+2*i);
-     } else {
-	  X(ifree0)(ego->W0); ego->W0 = 0;
-	  X(ifree0)(ego->W1); ego->W1 = 0;
-     }
-}
-
-static void bytwiddle2(const P *ego, R *rio, R *iio)
-{
-     INT i, j, k;
-     INT r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
-     int twshft = ego->log2_twradix;
-     INT twmsk = (((INT)1) << twshft) - 1;
-     INT mstart = ego->mstart, mcount = ego->mcount;
-     INT kstart = mstart == 0;
-
-     const R *W0 = ego->W0, *W1 = ego->W1;
-     for (i = 0; i < vl; ++i) {
-	  for (j = 1; j < r; ++j) {
-	       INT jk = j * (kstart + mstart);
-	       for (k = kstart; k < mcount; ++k, jk += j) {
-		    INT jk0 = jk & twmsk;
-		    INT jk1 = jk >> twshft;
-		    E xr = rio[s * j * m + s * k];
-		    E xi = iio[s * j * m + s * k];
-		    E wr0 = W0[2 * jk0];
-		    E wi0 = W0[2 * jk0 + 1];
-		    E wr1 = W1[2 * jk1];
-		    E wi1 = W1[2 * jk1 + 1];
-		    E wr = wr1 * wr0 - wi1 * wi0;
-		    E wi = wi1 * wr0 + wr1 * wi0;
-		    rio[s * j * m + s * k] = xr * wr + xi * wi;
-		    iio[s * j * m + s * k] = xi * wr - xr * wi;
-	       }
-	  }
-	  rio += vs;
-	  iio += vs;
-     }
-}
-
-static int applicable2(INT r, INT m, const planner *plnr)
-{
-     return (1 
-	     && (!NO_UGLYP(plnr) || (m * r > 65536 && r > 64))
-	  );
-}
-
-/**************************************************************/
-static void mktwiddle1(P *ego, int flg)
+static void mktwiddle(P *ego, enum wakefulness wakefulness)
 {
      static const tw_instr tw[] = { { TW_FULL, 0, 0 }, { TW_NEXT, 1, 0 } };
 
      /* note that R and M are swapped, to allow for sequential
 	access both to data and twiddles */
-     X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->m, ego->r);
+     X(twiddle_awake)(wakefulness, &ego->td, tw, 
+		      ego->r * ego->m, ego->m, ego->r);
 }
 
-static void bytwiddle1(const P *ego, R *rio, R *iio)
+static void bytwiddle(const P *ego, R *rio, R *iio)
 {
      INT i, j, k;
      INT r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
@@ -175,7 +81,7 @@ static void bytwiddle1(const P *ego, R *rio, R *iio)
      }
 }
 
-static int applicable1(INT r, INT m, const planner *plnr)
+static int applicable(INT r, INT m, const planner *plnr)
 {
      UNUSED(r); UNUSED(m);
      return (1 
@@ -183,14 +89,12 @@ static int applicable1(INT r, INT m, const planner *plnr)
 	  );
 }
 
-/**************************************************************/
-
 static void apply_dit(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
 
-     ego->adt->bytwiddle(ego, rio, iio);
+     bytwiddle(ego, rio, iio);
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
@@ -204,28 +108,27 @@ static void apply_dif(const plan *ego_, R *rio, R *iio)
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, rio, iio, rio, iio);
 
-     ego->adt->bytwiddle(ego, rio, iio);
+     bytwiddle(ego, rio, iio);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, flg);
-     ego->adt->mktwiddle(ego, flg);
+     AWAKE(ego->cld, wakefulness);
+     mktwiddle(ego, wakefulness);
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     A(!ego->W0 && !ego->W1);
      X(plan_destroy_internal)(ego->cld);
 }
 
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s-%s-%D-%D%v%(%p%))", 
-	      ego->adt->nam, ego->dec == DECDIT ? "dit" : "dif",
+     p->print(p, "(dftw-generic-%s-%D-%D%v%(%p%))", 
+	      ego->dec == DECDIT ? "dit" : "dif",
 	      ego->r, ego->m, ego->vl, ego->cld);
 }
 
@@ -244,7 +147,7 @@ static plan *mkcldw(const ct_solver *ego_,
      };
 
      A(mstart >= 0 && mstart + mcount <= m);
-     if (!ego->adt->applicable(r, m, plnr))
+     if (!applicable(r, m, plnr))
           return (plan *)0;
 
      cld = X(mkplan_d)(plnr, 
@@ -257,7 +160,6 @@ static plan *mkcldw(const ct_solver *ego_,
 
      pln = MKPLAN_DFTW(P, &padt, dec == DECDIT ? apply_dit : apply_dif);
      pln->slv = ego;
-     pln->adt = ego->adt;
      pln->cld = cld;
      pln->r = r;
      pln->m = m;
@@ -267,7 +169,6 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->mstart = mstart;
      pln->mcount = mcount;
      pln->dec = dec;
-     pln->W0 = pln->W1 = 0;
      pln->td = 0;
 
      {
@@ -284,31 +185,18 @@ static plan *mkcldw(const ct_solver *ego_,
      return (plan *) 0;
 }
 
-static void regsolver(planner *plnr, const wadt *adt, INT r, int dec)
+static void regsolver(planner *plnr, INT r, int dec)
 {
      S *slv = (S *)X(mksolver_ct)(sizeof(S), r, dec, mkcldw);
-     slv->adt = adt;
-     REGISTER_SOLVER(plnr, &(slv->super.super));
+     REGISTER_SOLVER(plnr, &(slv->super));
      if (X(mksolver_ct_hook)) {
 	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), r, dec, mkcldw);
-	  slv->adt = adt;
-	  REGISTER_SOLVER(plnr, &(slv->super.super));
+	  REGISTER_SOLVER(plnr, &(slv->super));
      }
 }
 
 void X(ct_generic_register)(planner *p)
 {
-     static const wadt a[] = {
-	  { bytwiddle1, mktwiddle1, applicable1, "dftw-generic1" },
-#if 0
-	  { bytwiddle2, mktwiddle2, applicable2, "dftw-generic2" }, 
-#endif
-     };
-     unsigned i;
-
-     for (i = 0; i < sizeof(a) / sizeof(a[0]); ++i) {
-	  regsolver(p, &a[i], 0, DECDIT);
-	  regsolver(p, &a[i], 0, DECDIF);
-     }
-/*   regsolver(p, &a[1], -1, DECDIT); 4-step? */
+     regsolver(p, 0, DECDIT);
+     regsolver(p, 0, DECDIF);
 }

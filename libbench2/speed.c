@@ -18,11 +18,11 @@
  *
  */
 
-/* $Id: speed.c,v 1.8 2003-03-30 14:41:27 athena Exp $ */
+/* $Id: speed.c,v 1.9 2006-01-04 00:34:04 athena Exp $ */
 
 #include "bench.h"
 
-void speed(const char *param)
+void speed(const char *param, int setup_only)
 {
      double *t;
      int iter, k;
@@ -30,6 +30,9 @@ void speed(const char *param)
      double tmin, y;
 
      t = (double *) bench_malloc(time_repeat * sizeof(double));
+
+     for (k = 0; k < time_repeat; ++k) 
+	  t[k] = 0;
 
      p = problem_parse(param);
      BENCH_ASSERT(can_do(p));
@@ -39,6 +42,9 @@ void speed(const char *param)
      timer_start();
      setup(p);
      p->setup_time = timer_stop();
+     
+     if (setup_only)
+	  goto done;
 
  start_over:
      for (iter = 1; iter < (1<<30); iter *= 2) {

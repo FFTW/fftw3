@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.27 2005-03-09 03:14:02 athena Exp $ */
+/* $Id: problem.c,v 1.28 2006-01-04 00:34:04 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"
@@ -317,9 +317,8 @@ void problem_destroy(bench_problem *p)
 {
      BENCH_ASSERT(p);
      problem_free(p);
-     if (p->k)
-	  bench_free(p->k);
-     bench_free(p->pstring);
+     bench_free0(p->k);
+     bench_free0(p->pstring);
      bench_free(p);
 }
 

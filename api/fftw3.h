@@ -47,7 +47,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.77 2005-05-24 03:12:22 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.78 2006-01-04 00:34:03 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -306,6 +306,7 @@ FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 #define FFTW_NO_SIMD (1U << 17)
 #define FFTW_NO_SLOW (1U << 18)
 #define FFTW_NO_FIXED_RADIX_LARGE_N (1U << 19)
+#define FFTW_ALLOW_PRUNING (1U << 20)
 
 #ifdef __cplusplus
 }  /* extern "C" */

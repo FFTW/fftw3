@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.265 2005-12-23 22:40:41 athena Exp $ */
+/* $Id: ifftw.h,v 1.266 2006-01-04 00:34:03 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -45,14 +45,15 @@
 /* determine precision and name-mangling scheme */
 #define CONCAT(prefix, name) prefix ## name
 #if defined(FFTW_SINGLE)
-typedef float R;
-#define X(name) CONCAT(fftwf_, name)
+  typedef float R;
+# define X(name) CONCAT(fftwf_, name)
 #elif defined(FFTW_LDOUBLE)
-typedef long double R;
-#define X(name) CONCAT(fftwl_, name)
+  typedef long double R;
+# define X(name) CONCAT(fftwl_, name)
+# define TRIGREAL_IS_LONG_DOUBLE
 #else
-typedef double R;
-#define X(name) CONCAT(fftw_, name)
+  typedef double R;
+# define X(name) CONCAT(fftw_, name)
 #endif
 
 /*
@@ -429,24 +430,33 @@ void X(scanner_destroy)(scanner *sc);
 
 /*-----------------------------------------------------------------------*/
 /* plan.c: */
+
+enum wakefulness {
+     SLEEPY,
+     AWAKE_ZERO,
+     AWAKE_SQRTN_TABLE,
+     AWAKE_SINCOS
+};
+
 typedef struct {
      void (*solve)(const plan *ego, const problem *p);
-     void (*awake)(plan *ego, int flag);
+     void (*awake)(plan *ego, enum wakefulness wakefulness);
      void (*print)(const plan *ego, printer *p);
      void (*destroy)(plan *ego);
 } plan_adt;
 
 struct plan_s {
      const plan_adt *adt;
-     int awake_refcnt;
      opcnt ops;
      double pcost;
+     enum wakefulness wakefulness; /* used for debugging only */
+     int could_prune_now_p;
 };
 
 plan *X(mkplan)(size_t size, const plan_adt *adt);
 void X(plan_destroy_internal)(plan *ego);
-void X(plan_awake)(plan *ego, int flag);
-#define AWAKE(plan, flag) X(plan_awake)(plan, flag)
+void X(plan_awake)(plan *ego, enum wakefulness wakefulness);
+#define AWAKE(plan, wakefulness) X(plan_awake)(plan, wakefulness)
 void X(plan_null_destroy)(plan *ego);
 
 /*-----------------------------------------------------------------------*/
@@ -524,7 +534,8 @@ enum {
      NO_SIMD = 0x2000,
      CONSERVE_MEMORY = 0x4000,
      NO_DHT_R2HC = 0x8000,
-     NO_UGLY = 0x10000
+     NO_UGLY = 0x10000,
+     ALLOW_PRUNING = 0x20000
 };
 
 /* hashtable information */
@@ -539,6 +550,7 @@ enum {
 
 #define ESTIMATEP(plnr) (PLNR_U(plnr) & ESTIMATE)
 #define BELIEVE_PCOSTP(plnr) (PLNR_U(plnr) & BELIEVE_PCOST)
+#define ALLOW_PRUNINGP(plnr) (PLNR_U(plnr) & ALLOW_PRUNING)
 
 #define NO_INDIRECT_OP_P(plnr) (PLNR_L(plnr) & NO_INDIRECT_OP)
 #define NO_LARGE_GENERICP(plnr) (PLNR_L(plnr) & NO_LARGE_GENERIC)
@@ -718,7 +730,7 @@ int X(pickdim)(int which_dim, const int *buddies, int nbuddies,
 /*-----------------------------------------------------------------------*/
 /* twiddle.c */
 /* little language to express twiddle factors computation */
-enum { TW_COS = 0, TW_SIN = 1, TW_NEXT = 3, 
+enum { TW_COS = 0, TW_SIN = 1, TW_CEXP = 2, TW_NEXT = 3, 
        TW_FULL = 4, TW_HALF = 5 };
 
 typedef struct {
@@ -733,25 +745,38 @@ typedef struct twid_s {
      int refcnt;
      const tw_instr *instr;
      struct twid_s *cdr;
+     enum wakefulness wakefulness;
 } twid;
 
-void X(mktwiddle)(twid **pp, const tw_instr *instr, INT n, INT r, INT m);
-void X(twiddle_destroy)(twid **pp);
 INT X(twiddle_length)(INT r, const tw_instr *p);
-void X(twiddle_awake)(int flg, twid **pp, 
-		      const tw_instr *instr, INT n, INT r, INT m);
+void X(twiddle_awake)(enum wakefulness wakefulness,
+		      twid **pp, const tw_instr *instr, INT n, INT r, INT m);
 const R *X(twiddle_shift)(const twid *p, INT mstart);
 
 /*-----------------------------------------------------------------------*/
 /* trig.c */
-#ifdef FFTW_LDOUBLE
-typedef long double trigreal;
+#ifdef TRIGREAL_IS_LONG_DOUBLE
+   typedef long double trigreal;
 #else
-typedef double trigreal;
+   typedef double trigreal;
 #endif
 
-R X(sin_or_cos)(INT im, INT in, int sinp);
-void X(cexp)(INT im, INT in, R *p);
+typedef struct triggen_s triggen;
+
+struct triggen_s {
+     void (*cexp)(triggen *t, INT m, R *result);
+     void (*cexpl)(triggen *t, INT m, trigreal *result);
+     void (*rotate)(triggen *p, INT m, R xr, R xi, R *res);
+
+     INT twshft;
+     INT twradix;
+     INT twmsk;
+     trigreal *W0, *W1;
+     INT n;
+};
+
+triggen *X(mktriggen)(enum wakefulness wakefulness, INT n);
+void X(triggen_destroy)(triggen *p);
 
 /*-----------------------------------------------------------------------*/
 /* primes.c: */
@@ -827,7 +852,7 @@ void X(transpose_tiledbuf)(R *I, INT n, INT s0, INT s1, INT vl);
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
-void X(null_awake)(plan *ego, int awake);
+void X(null_awake)(plan *ego, enum wakefulness wakefulness);
 double X(iestimate_cost)(const plan *pln);
 double X(measure_execution_time)(plan *pln, const problem *p);
 double X(seconds)(void);

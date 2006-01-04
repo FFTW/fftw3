@@ -18,15 +18,26 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.30 2005-12-22 15:25:15 athena Exp $ */
+/* $Id: twiddle.c,v 1.31 2006-01-04 00:34:04 athena Exp $ */
 
 /* Twiddle manipulation */
 
 #include "ifftw.h"
 #include <math.h>
 
-/* table of known twiddle factors */
-static twid *twlist = (twid *) 0;
+#define HASHSZ 109
+
+/* hash table of known twiddle factors */
+static twid *twlist[HASHSZ];
+
+static INT hash(INT n, INT r)
+{
+     INT h = n * 17 + r;
+
+     if (h < 0) h = -h;
+
+     return (h % HASHSZ);
+}
 
 static int equal_instr(const tw_instr *p, const tw_instr *q)
 {
@@ -54,16 +65,25 @@ static int equal_instr(const tw_instr *p, const tw_instr *q)
      A(0 /* can't happen */);
 }
 
-static int ok_twid(const twid *t, const tw_instr *q, INT n, INT r, INT m)
+static int ok_twid(const twid *t, 
+		   enum wakefulness wakefulness,
+		   const tw_instr *q, INT n, INT r, INT m)
 {
-     return (n == t->n && r == t->r && m <= t->m && equal_instr(t->instr, q));
+     return (wakefulness == t->wakefulness &&
+	     n == t->n &&
+	     r == t->r && 
+	     m <= t->m && 
+	     equal_instr(t->instr, q));
 }
 
-static twid *lookup(const tw_instr *q, INT n, INT r, INT m)
+static twid *lookup(enum wakefulness wakefulness,
+		    const tw_instr *q, INT n, INT r, INT m)
 {
      twid *p;
 
-     for (p = twlist; p && !ok_twid(p, q, n, r, m); p = p->cdr)
+     for (p = twlist[hash(n,r)]; 
+	  p && !ok_twid(p, wakefulness, q, n, r, m); 
+	  p = p->cdr)
           ;
      return p;
 }
@@ -83,8 +103,13 @@ static INT twlen0(INT r, const tw_instr **pp)
 	      case TW_HALF:
 		   ntwiddle += (r - 1);
 		   break;
-	      default:
-		   ++ntwiddle;
+	      case TW_CEXP:
+		   ntwiddle += 2;
+		   break;
+	      case TW_COS:
+	      case TW_SIN:
+		   ntwiddle += 1;
+		   break;
 	  }
      }
 
@@ -97,11 +122,13 @@ INT X(twiddle_length)(INT r, const tw_instr *p)
      return twlen0(r, &p);
 }
 
-static R *compute(const tw_instr *instr, INT n, INT r, INT m)
+static R *compute(enum wakefulness wakefulness,
+		  const tw_instr *instr, INT n, INT r, INT m)
 {
      INT ntwiddle, j;
      R *W, *W0;
      const tw_instr *p;
+     triggen *t = X(mktriggen)(wakefulness, n);
 
      p = instr;
      ntwiddle = twlen0(r, &p);
@@ -111,106 +138,118 @@ static R *compute(const tw_instr *instr, INT n, INT r, INT m)
      for (j = 0; j < m; j += (INT)p->v) {
           for (p = instr; p->op != TW_NEXT; ++p) {
 	       switch (p->op) {
-		   case TW_FULL:
-		   {
+		   case TW_FULL: {
 			INT i;
 			A(m * r <= n);
 			for (i = 1; i < r; ++i) {
-			     X(cexp)((j + (INT)p->v) * i, n, W);
+			     t->cexp(t, (j + (INT)p->v) * i, W);
 			     W += 2;
 			}
 			break;
 		   }
 
-		   case TW_HALF:
-		   {
+		   case TW_HALF: {
 			INT i;
 			A((r % 2) == 1);
 			for (i = 1; i + i < r; ++i) {
-			     X(cexp)(MULMOD(i, (j + (INT)p->v), n), n, W);
+			     t->cexp(t, MULMOD(i, (j + (INT)p->v), n), W);
 			     W += 2;
 			}
 			break;
 		   }
 
-		   case TW_COS:
+		   case TW_COS: {
+			R d[2];
+
 			A(m * r <= n);
-			*W++ = X(sin_or_cos)((j + (INT)p->v) * (INT)p->i, n, 
-					     0);
+			t->cexp(t, (j + (INT)p->v) * (INT)p->i, d);
+			*W++ = d[0];
 			break;
 
-		   case TW_SIN:
+		   }
+
+		   case TW_SIN: {
+			R d[2];
+
 			A(m * r <= n);
-			*W++ = X(sin_or_cos)((j + (INT)p->v) * (INT)p->i, n, 
-					     1);
+			t->cexp(t, (j + (INT)p->v) * (INT)p->i, d);
+			*W++ = d[1];
+			break;
+		   }
+
+		   case TW_CEXP:
+			A(m * r <= n);
+			t->cexp(t, (j + (INT)p->v) * (INT)p->i, W);
+			W += 2;
 			break;
 	       }
 	  }
           A(m % p->v == 0);
      }
 
+     X(triggen_destroy)(t);
      return W0;
 }
 
-void X(mktwiddle)(twid **pp, const tw_instr *instr, INT n, INT r, INT m)
+static void mktwiddle(enum wakefulness wakefulness,
+		      twid **pp, const tw_instr *instr, INT n, INT r, INT m)
 {
      twid *p;
+     INT h;
 
-     if (*pp) return;  /* already created */
-
-     if ((p = lookup(instr, n, r, m))) {
+     if ((p = lookup(wakefulness, instr, n, r, m))) {
           ++p->refcnt;
-	  goto done;
+     } else {
+	  p = (twid *) MALLOC(sizeof(twid), TWIDDLES);
+	  p->n = n;
+	  p->r = r;
+	  p->m = m;
+	  p->instr = instr;
+	  p->refcnt = 1;
+	  p->wakefulness = wakefulness;
+	  p->W = compute(wakefulness, instr, n, r, m);
+
+	  /* cons! onto twlist */
+	  h = hash(n, r);
+	  p->cdr = twlist[h];
+	  twlist[h] = p;
      }
 
-     p = (twid *) MALLOC(sizeof(twid), TWIDDLES);
-     p->n = n;
-     p->r = r;
-     p->m = m;
-     p->instr = instr;
-     p->refcnt = 1;
-     p->W = compute(instr, n, r, m);
-
-     /* cons! onto twlist */
-     p->cdr = twlist;
-     twlist = p;
-
- done:
      *pp = p;
-     return;
 }
 
-void X(twiddle_destroy)(twid **pp)
+static void twiddle_destroy(twid **pp)
 {
      twid *p = *pp;
-     if (p) {
-          twid **q;
-          if ((--p->refcnt) == 0) {
-               /* remove p from twiddle list */
-               for (q = &twlist; *q; q = &((*q)->cdr)) {
-                    if (*q == p) {
-                         *q = p->cdr;
-                         X(ifree)(p->W);
-                         X(ifree)(p);
-			 goto done;
-                    }
-               }
-               A(0 /* can't happen */ );
-          }
+     twid **q;
+
+     if ((--p->refcnt) == 0) {
+	  /* remove p from twiddle list */
+	  for (q = &twlist[hash(p->n, p->r)]; *q; q = &((*q)->cdr)) {
+	       if (*q == p) {
+		    *q = p->cdr;
+		    X(ifree)(p->W);
+		    X(ifree)(p);
+		    *pp = 0;
+		    return;
+	       }
+	  }
+	  A(0 /* can't happen */ );
      }
- done:
-     *pp = 0; /* destroy pointer */
-     return;
 }
 
 
-void X(twiddle_awake)(int flg, twid **pp, 
+void X(twiddle_awake)(enum wakefulness wakefulness, twid **pp, 
 		      const tw_instr *instr, INT n, INT r, INT m)
 {
-     if (flg) 
-	  X(mktwiddle)(pp, instr, n, r, m);
-     else 
-	  X(twiddle_destroy)(pp);
+     switch (wakefulness) {
+	 case SLEEPY: 
+	      twiddle_destroy(pp);
+	      break;
+	 default:
+	      mktwiddle(wakefulness, pp, instr, n, r, m);
+	      break;
+     }
 }
 
 /* return a pointer to twiddles (0 if none) starting at mstart out of m */

@@ -18,13 +18,13 @@
  *
  */
 
-/* $Id: awake.c,v 1.3 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: awake.c,v 1.4 2006-01-04 00:34:03 athena Exp $ */
 
 #include "ifftw.h"
 
-void X(null_awake)(plan *ego, int awake)
+void X(null_awake)(plan *ego, enum wakefulness wakefulness)
 {
      UNUSED(ego);
-     UNUSED(awake);
+     UNUSED(wakefulness);
      /* do nothing */
 }

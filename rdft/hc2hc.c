@@ -55,11 +55,11 @@ static void apply_dif(const plan *ego_, R *I, R *O)
      cld->apply((plan *) cld, I, O);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, flg);
-     AWAKE(ego->cldw, flg);
+     AWAKE(ego->cld, wakefulness);
+     AWAKE(ego->cldw, wakefulness);
 }
 
 static void destroy(plan *ego_)
@@ -188,6 +188,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cldw = cldw;
      pln->r = r;
      X(ops_add)(&cld->ops, &cldw->ops, &pln->super.super.ops);
+
+     /* inherit could_prune_now_p attribute from cldw */
+     pln->super.super.could_prune_now_p = cldw->could_prune_now_p;
+
      return &(pln->super.super);
 
  nada:

@@ -76,7 +76,9 @@ void X(mapflags)(planner *plnr, unsigned flags)
 
 	  IMPLIES(YES(FFTW_ESTIMATE), NO(FFTW_PATIENT)),
 	  IMPLIES(YES(FFTW_ESTIMATE),
-		  YES(FFTW_ESTIMATE_PATIENT | FFTW_NO_INDIRECT_OP)),
+		  YES(FFTW_ESTIMATE_PATIENT 
+		      | FFTW_NO_INDIRECT_OP
+		      | FFTW_ALLOW_PRUNING)),
 
 	  IMPLIES(NO(FFTW_EXHAUSTIVE), 
 		  YES(FFTW_NO_SLOW)),
@@ -108,6 +110,7 @@ void X(mapflags)(planner *plnr, unsigned flags)
 	  /* the following are undocumented, "beyond-guru" flags that
 	     require some understanding of FFTW internals */
 	  EQV(FFTW_ESTIMATE_PATIENT, ESTIMATE),
+	  EQV(FFTW_ALLOW_PRUNING, ALLOW_PRUNING),
 	  EQV(FFTW_BELIEVE_PCOST, BELIEVE_PCOST),
 	  EQV(FFTW_NO_DFT_R2HC, NO_DFT_R2HC),
 	  EQV(FFTW_NO_NONTHREADED, NO_NONTHREADED),

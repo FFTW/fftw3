@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-rdft2.c,v 1.8 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: rank0-rdft2.c,v 1.9 2006-01-04 00:34:04 athena Exp $ */
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
@@ -110,11 +110,11 @@ static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
      cldcpy->apply((plan *) cldcpy, rio, r);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      if (ego->cldcpy)
-	  AWAKE(ego->cldcpy, flg);
+	  AWAKE(ego->cldcpy, wakefulness);
 }
 
 static void destroy(plan *ego_)

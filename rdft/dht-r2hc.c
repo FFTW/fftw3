@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dht-r2hc.c,v 1.23 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: dht-r2hc.c,v 1.24 2006-01-04 00:34:04 athena Exp $ */
 
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */
@@ -61,10 +61,10 @@ static void apply(const plan *ego_, R *I, R *O)
      }
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, flg);
+     AWAKE(ego->cld, wakefulness);
 }
 
 static void destroy(plan *ego_)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.22 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: rdft-dht.c,v 1.23 2006-01-04 00:34:04 athena Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime
@@ -119,10 +119,10 @@ static void apply_hc2r_save(const plan *ego_, R *I, R *O)
      }
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, flg);
+     AWAKE(ego->cld, wakefulness);
 }
 
 static void destroy(plan *ego_)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.49 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: ct.c,v 1.50 2006-01-04 00:34:03 athena Exp $ */
 
 #include "ct.h"
 
@@ -57,11 +57,11 @@ static void apply_dif(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      cld->apply(ego->cld, ri, ii, ro, io);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, flg);
-     AWAKE(ego->cldw, flg);
+     AWAKE(ego->cld, wakefulness);
+     AWAKE(ego->cldw, wakefulness);
 }
 
 static void destroy(plan *ego_)
@@ -192,6 +192,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cldw = cldw;
      pln->r = r;
      X(ops_add)(&cld->ops, &cldw->ops, &pln->super.super.ops);
+
+     /* inherit could_prune_now_p attribute from cldw */
+     pln->super.super.could_prune_now_p = cldw->could_prune_now_p;
      return &(pln->super.super);
 
  nada:

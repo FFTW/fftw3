@@ -36,13 +36,14 @@ typedef struct {
 
 
 /**************************************************************/
-static void mktwiddle(P *ego, int flg)
+static void mktwiddle(P *ego, enum wakefulness wakefulness)
 {
      static const tw_instr tw[] = { { TW_HALF, 0, 0 }, { TW_NEXT, 1, 0 } };
 
      /* note that R and M are swapped, to allow for sequential
 	access both to data and twiddles */
-     X(twiddle_awake)(flg, &ego->td, tw, ego->r * ego->m, ego->m, ego->r);
+     X(twiddle_awake)(wakefulness, &ego->td, tw, 
+		      ego->r * ego->m, ego->m, ego->r);
 }
 
 static void bytwiddle(const P *ego, R *IO, R sign)
@@ -207,12 +208,12 @@ static void apply_dif(const plan *ego_, R *IO)
 }
 
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld0, flg);
-     AWAKE(ego->cld, flg);
-     mktwiddle(ego, flg);
+     AWAKE(ego->cld0, wakefulness);
+     AWAKE(ego->cld, wakefulness);
+     mktwiddle(ego, wakefulness);
 }
 
 static void destroy(plan *ego_)

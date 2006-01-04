@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.10 2003-05-04 23:37:09 athena Exp $ */
+/* $Id: bench.h,v 1.11 2006-01-04 00:34:04 athena Exp $ */
 
 /* benchmark program definitions */
 #include "bench-user.h"
@@ -43,7 +43,7 @@ void report_info_all(void);
 extern int aligned_main(int argc, char *argv[]);
 extern int bench_main(int argc, char *argv[]);
 
-extern void speed(const char *param);
+extern void speed(const char *param, int setup_only);
 extern void accuracy(const char *param, int rounds, int impulse_rounds);
 
 extern double mflops(const bench_problem *p, double t);

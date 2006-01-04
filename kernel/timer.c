@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.19 2005-02-16 04:53:53 stevenj Exp $ */
+/* $Id: timer.c,v 1.20 2006-01-04 00:34:04 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -140,7 +140,7 @@ typedef seconds ticks;
        int iter;
        int repeat;
 
-       AWAKE(pln, 1);
+       AWAKE(pln, AWAKE_ZERO);
        p->adt->zero(p);
 
   start_over:
@@ -172,7 +172,7 @@ typedef seconds ticks;
 	    if (tmin >= TIME_MIN) {
 		 tmin /= (double) iter;
 		 tmax /= (double) iter;
-		 AWAKE(pln, 0);
+		 AWAKE(pln, SLEEPY);
 		 return tmin;
 	    }
        }

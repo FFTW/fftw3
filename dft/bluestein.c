@@ -34,19 +34,22 @@ typedef struct {
      INT is, os;
 } P;
 
-static void bluestein_sequence(INT n, R *w)
+static void bluestein_sequence(enum wakefulness wakefulness, INT n, R *w)
 {
      INT k, ksq, n2 = 2 * n;
+     triggen *t = X(mktriggen)(wakefulness, n2);
 
      ksq = 0;
      for (k = 0; k < n; ++k) {
-	  X(cexp)(ksq, n2, w+2*k);
+	  t->cexp(t, ksq, w+2*k);
           /* careful with overflow */
           ksq += 2*k + 1; while (ksq > n2) ksq -= n2;
      }
+
+     X(triggen_destroy)(t);
 }
 
-static void mktwiddle(P *p)
+static void mktwiddle(enum wakefulness wakefulness, P *p)
 {
      INT i;
      INT n = p->n, nb = p->nb;
@@ -56,7 +59,7 @@ static void mktwiddle(P *p)
      p->w = w = (R *) MALLOC(2 * n * sizeof(R), TWIDDLES);
      p->W = W = (R *) MALLOC(2 * nb * sizeof(R), TWIDDLES);
 
-     bluestein_sequence(n, w);
+     bluestein_sequence(wakefulness, n, w);
 
      for (i = 0; i < nb; ++i)
           W[2*i] = W[2*i+1] = 0.0;
@@ -124,18 +127,21 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      X(ifree)(b);	  
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
 
-     AWAKE(ego->cldf, flg);
+     AWAKE(ego->cldf, wakefulness);
 
-     if (flg) {
-	  A(!ego->w);
-	  mktwiddle(ego);
-     } else {
-	  X(ifree0)(ego->w); ego->w = 0;
-	  X(ifree0)(ego->W); ego->W = 0;
+     switch (wakefulness) {
+	 case SLEEPY:
+	      X(ifree0)(ego->w); ego->w = 0;
+	      X(ifree0)(ego->W); ego->W = 0;
+	      break;
+	 default:
+	      A(!ego->w);
+	      mktwiddle(wakefulness, ego);
+	      break;
      }
 }
 

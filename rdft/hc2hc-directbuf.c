@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-directbuf.c,v 1.6 2005-12-18 21:43:26 athena Exp $ */
+/* $Id: hc2hc-directbuf.c,v 1.7 2006-01-04 00:34:04 athena Exp $ */
 
 #include "hc2hc.h"
 
@@ -118,13 +118,13 @@ static void apply(const plan *ego_, R *IO)
      STACK_FREE(buf);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
 
-     AWAKE(ego->cld0, flg);
-     AWAKE(ego->cldm, flg);
-     X(twiddle_awake)(flg, &ego->td, ego->slv->desc->tw, 
+     AWAKE(ego->cld0, wakefulness);
+     AWAKE(ego->cldm, wakefulness);
+     X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw, 
 		      ego->r * ego->m, ego->r, (ego->m + 1) / 2);
      ego->tdW = X(twiddle_shift)(ego->td, ego->mstart1);
 }

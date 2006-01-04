@@ -93,12 +93,12 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cldtrans);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cldtrans, flg);
-     AWAKE(ego->cld, flg);
-     AWAKE(ego->cldrest, flg);
+     AWAKE(ego->cldtrans, wakefulness);
+     AWAKE(ego->cld, wakefulness);
+     AWAKE(ego->cldrest, wakefulness);
 }
 
 static void print(const plan *ego_, printer *p)

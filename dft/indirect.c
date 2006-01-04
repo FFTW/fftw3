@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.39 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: indirect.c,v 1.40 2006-01-04 00:34:03 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -116,11 +116,11 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cldcpy);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cldcpy, flg);
-     AWAKE(ego->cld, flg);
+     AWAKE(ego->cldcpy, wakefulness);
+     AWAKE(ego->cld, wakefulness);
 }
 
 static void print(const plan *ego_, printer *p)

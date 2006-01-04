@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.39 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.40 2006-01-04 00:34:04 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -65,10 +65,10 @@ static void apply(const plan *ego_, R *r, R *rio, R *iio)
      }
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, flg);
+     AWAKE(ego->cld, wakefulness);
 }
 
 static void destroy(plan *ego_)

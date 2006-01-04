@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.25 2005-12-21 03:29:19 athena Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.26 2006-01-04 00:34:04 athena Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -69,11 +69,11 @@ static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
      
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cldr, flg);
-     AWAKE(ego->cldc, flg);
+     AWAKE(ego->cldr, wakefulness);
+     AWAKE(ego->cldc, wakefulness);
 }
 
 static void destroy(plan *ego_)

@@ -89,7 +89,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      STACK_FREE(buf);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      static const tw_instr half_tw[] = {
@@ -97,7 +97,7 @@ static void awake(plan *ego_, int flg)
 	  { TW_NEXT, 1, 0 }
      };
 
-     X(twiddle_awake)(flg, &ego->td, half_tw, ego->n, ego->n,
+     X(twiddle_awake)(wakefulness, &ego->td, half_tw, ego->n, ego->n,
 		      (ego->n - 1) / 2);
 }
 

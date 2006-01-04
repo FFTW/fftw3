@@ -233,6 +233,13 @@ AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
+AC_CHECK_TYPE([long double],
+              [AC_DEFINE(HAVE_LONG_DOUBLE, 1, [Define to 1 if the compiler supports `long double'])],
+[
+if test $PRECISION = l; then
+    AC_MSG_ERROR([long double is not a supported type with your compiler.])
+fi
+])
 AC_CHECK_TYPE([hrtime_t],[AC_DEFINE(HAVE_HRTIME_T, 1, [Define to 1 if hrtime_t is defined in <sys/time.h>])],,
 [
 #if HAVE_SYS_TIME_H
@@ -249,20 +256,14 @@ AC_CHECK_SIZEOF(void *)], [$ac_includes_default
 
 AC_CHECK_SIZEOF(float)
 AC_CHECK_SIZEOF(double)
-AC_CHECK_SIZEOF(long double)
-if test $PRECISION = l; then
-        if test $ac_cv_sizeof_long_double = 0; then
-                AC_MSG_ERROR([long double is not a supported type with your compiler.])
-	fi
-fi
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
-AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort])
-AC_CHECK_DECLS([drand48, memalign, posix_memalign])
+AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl])
+AC_CHECK_DECLS([drand48, memalign, posix_memalign, sinl, cosl])
 
 dnl Cray UNICOS _rtc() (real-time clock) intrinsic
 AC_MSG_CHECKING([for _rtc intrinsic])
