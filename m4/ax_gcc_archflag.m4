@@ -66,7 +66,7 @@ case $host_cpu in
 	    *6[[789b]]?:*:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
 	    *6??:*:*:*) ax_gcc_arch=pentiumpro ;;
             *f3[[347]]:*:*:*|*f4[1347]:*:*:*)
-		if test $ax_x86_64 = yes; then
+		if test $ax_x86_64 = no; then
                   ax_gcc_arch="prescott pentium4 pentiumpro";;
                 else
                   ax_gcc_arch="nocona pentium4 pentiumpro";;
