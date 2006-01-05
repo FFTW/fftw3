@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.176 2006-01-05 14:29:55 athena Exp $ */
+/* $Id: planner.c,v 1.177 2006-01-05 14:41:58 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -839,6 +839,8 @@ static void check(hashtab *ht)
 {
      unsigned live = 0;
      unsigned i;
+
+     A(ht->nelem < ht->hashsiz);
 
      for (i = 0; i < ht->hashsiz; ++i) {
 	  solution *l = ht->solutions + i; 
