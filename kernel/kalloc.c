@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2003 Matteo Frigo
- * Copyright (c) 2003 Massachusetts Institute of Technology
+ * Copyright (c) 2003, 2006 Matteo Frigo
+ * Copyright (c) 2003, 2006 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: kalloc.c,v 1.3 2005-03-15 02:43:53 stevenj Exp $ */
+/* $Id: kalloc.c,v 1.4 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "ifftw.h"
 

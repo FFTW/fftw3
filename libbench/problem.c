@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.6 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: problem.c,v 1.7 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"

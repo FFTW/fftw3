@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2003 Matteo Frigo
- * Copyright (c) 2003 Massachusetts Institute of Technology
+ * Copyright (c) 2003, 2006 Matteo Frigo
+ * Copyright (c) 2003, 2006 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: taint.c,v 1.4 2005-12-18 01:28:50 athena Exp $ */
+/* $Id: taint.c,v 1.5 2006-01-05 03:04:28 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: can-do.c,v 1.4 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: can-do.c,v 1.5 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "bench.h"
 #include <stdio.h>

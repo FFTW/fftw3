@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.12 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.13 2006-01-05 03:04:27 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 

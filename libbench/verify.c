@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify.c,v 1.17 2003-03-15 20:29:43 stevenj Exp $ */
+/* $Id: verify.c,v 1.18 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include <math.h>
 #include <stdio.h>

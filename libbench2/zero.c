@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: zero.c,v 1.8 2003-03-17 01:24:31 stevenj Exp $ */
+/* $Id: zero.c,v 1.9 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "bench.h"
 

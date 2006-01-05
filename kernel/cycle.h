@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2003 Matteo Frigo
- * Copyright (c) 2003 Massachusetts Institute of Technology
+ * Copyright (c) 2003, 2006 Matteo Frigo
+ * Copyright (c) 2003, 2006 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.47 2005-12-08 03:39:01 stevenj Exp $ */
+/* $Id: cycle.h,v 1.48 2006-01-05 03:04:27 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 

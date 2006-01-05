@@ -17,7 +17,7 @@
  *
  *)
 
-(* $Id: complex.mli,v 1.4 2002-06-16 12:05:17 athena Exp $ *)
+(* $Id: complex.mli,v 1.5 2006-01-05 03:04:27 stevenj Exp $ *)
 
 type expr
 val make : (Expr.expr * Expr.expr) -> expr

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2003 Matteo Frigo
- * Copyright (c) 2003 Massachusetts Institute of Technology
+ * Copyright (c) 2003, 2006 Matteo Frigo
+ * Copyright (c) 2003, 2006 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.6 2003-07-05 17:05:51 athena Exp $ */
+/* $Id: plan.c,v 1.7 2006-01-05 03:04:26 stevenj Exp $ */
 
 #include "dft.h"
 

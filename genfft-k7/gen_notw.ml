@@ -109,7 +109,7 @@ let no_twiddle_gen n sign =
   
   in ((initcode, body), k7vFlops body)
 
-let cvsid = "$Id: gen_notw.ml,v 1.11 2003-04-18 01:21:45 athena Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.12 2006-01-05 03:04:27 stevenj Exp $"
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
 let generate n =

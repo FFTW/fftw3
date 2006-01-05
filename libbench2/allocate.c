@@ -1,6 +1,6 @@
 /* not worth copyrighting */
 
-/* $Id: allocate.c,v 1.7 2003-03-17 01:24:31 stevenj Exp $ */
+/* $Id: allocate.c,v 1.8 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "bench.h"
 

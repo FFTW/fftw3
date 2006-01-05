@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2003 Matteo Frigo
- * Copyright (c) 2003 Massachusetts Institute of Technology
+ * Copyright (c) 2003, 2006 Matteo Frigo
+ * Copyright (c) 2003, 2006 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc-pad.c,v 1.6 2006-01-04 00:34:04 athena Exp $ */
+/* $Id: rodft00e-r2hc-pad.c,v 1.7 2006-01-05 03:04:27 stevenj Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, padded antisymmetrically to
    twice the size.  This is asymptotically a factor of ~2 worse than

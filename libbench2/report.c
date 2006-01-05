@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: report.c,v 1.9 2004-04-03 01:35:35 stevenj Exp $ */
+/* $Id: report.c,v 1.10 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "bench.h"
 #include <stdio.h>

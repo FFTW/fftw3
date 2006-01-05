@@ -1,7 +1,7 @@
 (*
  * Copyright (c) 1997-1999 Massachusetts Institute of Technology
- * Copyright (c) 2003 Matteo Frigo
- * Copyright (c) 2003 Massachusetts Institute of Technology
+ * Copyright (c) 2003, 2006 Matteo Frigo
+ * Copyright (c) 2003, 2006 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
  *
  *)
 
-(* $Id: algsimp.ml,v 1.3 2003-03-15 20:29:42 stevenj Exp $ *)
-let cvsid = "$Id: algsimp.ml,v 1.3 2003-03-15 20:29:42 stevenj Exp $"
+(* $Id: algsimp.ml,v 1.4 2006-01-05 03:04:27 stevenj Exp $ *)
+let cvsid = "$Id: algsimp.ml,v 1.4 2006-01-05 03:04:27 stevenj Exp $"
 
 open Util
 open Expr

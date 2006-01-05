@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.227 2005-05-23 01:40:59 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.228 2006-01-05 03:04:26 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi

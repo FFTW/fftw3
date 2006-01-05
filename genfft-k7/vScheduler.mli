@@ -17,7 +17,7 @@
  *
  *)
 
-(* $Id: vScheduler.mli,v 1.1 2002-06-14 10:56:15 athena Exp $ *)
+(* $Id: vScheduler.mli,v 1.2 2006-01-05 03:04:27 stevenj Exp $ *)
 
 open VSimdBasics
 

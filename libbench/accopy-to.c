@@ -1,5 +1,5 @@
 /* not worth copyrighting */
-/* $Id: accopy-to.c,v 1.1 2002-06-03 15:44:18 athena Exp $ */
+/* $Id: accopy-to.c,v 1.2 2006-01-05 03:04:27 stevenj Exp $ */
 #include "bench.h"
 
 /* default routine, can be overridden by user */

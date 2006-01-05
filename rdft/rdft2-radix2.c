@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2003 Matteo Frigo
- * Copyright (c) 2003 Massachusetts Institute of Technology
+ * Copyright (c) 2003, 2006 Matteo Frigo
+ * Copyright (c) 2003, 2006 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.30 2006-01-04 00:34:04 athena Exp $ */
+/* $Id: rdft2-radix2.c,v 1.31 2006-01-05 03:04:27 stevenj Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2003 Matteo Frigo
- * Copyright (c) 2003 Massachusetts Institute of Technology
+ * Copyright (c) 2003, 2006 Matteo Frigo
+ * Copyright (c) 2003, 2006 Massachusetts Institute of Technology
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.266 2006-01-04 00:34:03 athena Exp $ */
+/* $Id: ifftw.h,v 1.267 2006-01-05 03:04:27 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
