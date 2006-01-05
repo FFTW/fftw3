@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rdft-vrank-geq1.c,v 1.18 2006-01-05 03:04:28 stevenj Exp $ */
+/* $Id: rdft-vrank-geq1.c,v 1.19 2006-01-05 21:01:51 athena Exp $ */
 
 #include "threads.h"
 
@@ -67,12 +67,12 @@ static void apply(const plan *ego_, R *I, R *O)
      X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*) &d);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      int i;
      for (i = 0; i < ego->nthr; ++i)
-	  AWAKE(ego->cldrn[i], flg);
+	  AWAKE(ego->cldrn[i], wakefulness);
 }
 
 static void destroy(plan *ego_)

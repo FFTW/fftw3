@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.3 2006-01-05 03:04:28 stevenj Exp $ */
+/* $Id: ct.c,v 1.4 2006-01-05 21:01:51 athena Exp $ */
 
 #include "threads.h"
 
@@ -87,13 +87,13 @@ static void apply_dif(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      cld->apply(ego->cld, ri, ii, ro, io);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      int i;
-     AWAKE(ego->cld, flg);
+     AWAKE(ego->cld, wakefulness);
      for (i = 0; i < ego->nthr; ++i)
-	  AWAKE(ego->cldws[i], flg);
+	  AWAKE(ego->cldws[i], wakefulness);
 }
 
 static void destroy(plan *ego_)

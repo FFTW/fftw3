@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.31 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: rodft00e-r2hc.c,v 1.32 2006-01-05 21:01:51 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing.
 
@@ -103,7 +103,7 @@ static void apply(const plan *ego_, R *I, R *O)
      X(ifree)(buf);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      static const tw_instr rodft00e_tw[] = {
@@ -111,9 +111,10 @@ static void awake(plan *ego_, int flg)
           { TW_NEXT, 1, 0 }
      };
 
-     AWAKE(ego->cld, flg);
+     AWAKE(ego->cld, wakefulness);
 
-     X(twiddle_awake)(flg, &ego->td, rodft00e_tw, 2*ego->n, 1, (ego->n+1)/2);
+     X(twiddle_awake)(wakefulness,
+		      &ego->td, rodft00e_tw, 2*ego->n, 1, (ego->n+1)/2);
 }
 
 static void destroy(plan *ego_)

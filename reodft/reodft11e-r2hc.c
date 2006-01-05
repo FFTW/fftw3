@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.30 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: reodft11e-r2hc.c,v 1.31 2006-01-05 21:01:51 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 
@@ -179,7 +179,7 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
      X(ifree)(buf);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      static const tw_instr reodft010e_tw[] = {
@@ -192,10 +192,12 @@ static void awake(plan *ego_, int flg)
           { TW_NEXT, 2, 0 }
      };
 
-     AWAKE(ego->cld, flg);
+     AWAKE(ego->cld, wakefulness);
 
-     X(twiddle_awake)(flg, &ego->td, reodft010e_tw, 4*ego->n, 1, ego->n/2+1);
-     X(twiddle_awake)(flg, &ego->td2, reodft11e_tw, 8*ego->n, 1, ego->n * 2);
+     X(twiddle_awake)(wakefulness,
+		      &ego->td, reodft010e_tw, 4*ego->n, 1, ego->n/2+1);
+     X(twiddle_awake)(wakefulness,
+		      &ego->td2, reodft11e_tw, 8*ego->n, 1, ego->n * 2);
 }
 
 static void destroy(plan *ego_)

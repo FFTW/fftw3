@@ -80,13 +80,13 @@ static void apply_dif(const plan *ego_, R *I, R *O)
      cld->apply((plan *) cld, I, O);
 }
 
-static void awake(plan *ego_, int flg)
+static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      int i;
-     AWAKE(ego->cld, flg);
+     AWAKE(ego->cld, wakefulness);
      for (i = 0; i < ego->nthr; ++i)
-	  AWAKE(ego->cldws[i], flg);
+	  AWAKE(ego->cldws[i], wakefulness);
 }
 
 static void destroy(plan *ego_)
