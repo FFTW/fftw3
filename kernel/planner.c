@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.177 2006-01-05 14:41:58 athena Exp $ */
+/* $Id: planner.c,v 1.178 2006-01-05 16:20:59 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -354,15 +354,6 @@ static void htab_insert(hashtab *ht, const md5sig s, const flags_t *flagsp,
 
 	  g = addmod(g, d, ht->hashsiz);
      } while (g != h);
-
-     /* now find a free slot */
-     for (g = h; ; g = addmod(g, d, ht->hashsiz)) {
-	  solution *l = ht->solutions + g;
-	  ++ht->insert_iter;
-	  if (!LIVEP(l)) 
-	       break;
-	  A(addmod(g, d, ht->hashsiz) != h);
-     }
 
      if (first) {
 	  /* overwrite FIRST */
