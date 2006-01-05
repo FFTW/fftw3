@@ -53,8 +53,6 @@ case $host_cpu in
   i[[56]]86*|x86_64*) # use cpuid codes, in part from x86info-1.7 by Dave Jones
      AX_GCC_X86_CPUID(0)
      AX_GCC_X86_CPUID(1)
-     AC_EGREP_CPP(x86_64, [#ifdef __x86_64__\nx86_64\n#endif],
-                  [ax_x86_64=yes], [ax_x86_64=no]);
      case $ax_cv_gcc_x86_cpuid_0 in
        *:756e6547:*:*) # Intel
           case $ax_cv_gcc_x86_cpuid_1 in
@@ -66,11 +64,10 @@ case $host_cpu in
 	    *6[[789b]]?:*:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
 	    *6??:*:*:*) ax_gcc_arch=pentiumpro ;;
             *f3[[347]]:*:*:*|*f4[1347]:*:*:*)
-		if test $ax_x86_64 = no; then
-                  ax_gcc_arch="prescott pentium4 pentiumpro";;
-                else
-                  ax_gcc_arch="nocona pentium4 pentiumpro";;
-                fi
+		case $host_cpu in
+                  x86_64*) ax_gcc_arch="nocona pentium4 pentiumpro" ;;
+                  *) ax_gcc_arch="prescott pentium4 pentiumpro" ;;
+                esac ;;
             *f??:*:*:*) ax_gcc_arch="pentium4 pentiumpro";;
           esac ;;
        *:68747541:*:*) # AMD
