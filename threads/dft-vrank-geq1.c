@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-vrank-geq1.c,v 1.21 2006-01-05 21:01:51 athena Exp $ */
+/* $Id: dft-vrank-geq1.c,v 1.22 2006-01-05 23:23:15 athena Exp $ */
 
 #include "threads.h"
 
@@ -162,7 +162,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      its = d->is * block_size;
      ots = d->os * block_size;
 
-     cldrn = MALLOC(sizeof(plan *) * nthr, PLANS);
+     cldrn = (plan **)MALLOC(sizeof(plan *) * nthr, PLANS);
      for (i = 0; i < nthr; ++i) cldrn[i] = (plan *) 0;
      
      vecsz = X(tensor_copy)(p->vecsz);
