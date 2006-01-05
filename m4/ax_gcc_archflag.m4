@@ -135,9 +135,9 @@ case $host_cpu in
        *740[[0-9]]*) ax_gcc_arch="$cputype 7400 G4" ;;
        *74[[4-5]][[0-9]]*) ax_gcc_arch="$cputype 7450 G4" ;;
        *74[[0-9]][[0-9]]*) ax_gcc_arch="$cputype G4" ;;
-       *970*) ax_gcc_arch="970 G5";;
-       *POWER4*|*power4*|*gq*) ax_gcc_arch="power4";;
-       *POWER5*|*power5*|*gr*|*gs*) ax_gcc_arch="power5 power4";;
+       *970*) ax_gcc_arch="970 G5 power4";;
+       *POWER4*|*power4*|*gq*) ax_gcc_arch="power4 970";;
+       *POWER5*|*power5*|*gr*|*gs*) ax_gcc_arch="power5 power4 970";;
        603ev|8240) ax_gcc_arch="$cputype 603e 603";;
        *) ax_gcc_arch=$cputype ;;
      esac
