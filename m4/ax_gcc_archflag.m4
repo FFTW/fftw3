@@ -53,6 +53,8 @@ case $host_cpu in
   i[[56]]86*|x86_64*) # use cpuid codes, in part from x86info-1.7 by Dave Jones
      AX_GCC_X86_CPUID(0)
      AX_GCC_X86_CPUID(1)
+     AC_EGREP_CPP(x86_64, [#ifdef __x86_64__\nx86_64\n#endif],
+                  [ax_x86_64=yes], [ax_x86_64=no]);
      case $ax_cv_gcc_x86_cpuid_0 in
        *:756e6547:*:*) # Intel
           case $ax_cv_gcc_x86_cpuid_1 in
@@ -63,20 +65,24 @@ case $host_cpu in
 	    *6a?:*[[234]]:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
 	    *6[[789b]]?:*:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
 	    *6??:*:*:*) ax_gcc_arch=pentiumpro ;;
-            *f3[[37]]:*:*:*) ax_gcc_arch="prescott pentium4 pentiumpro";;
-            *f34:*:*:*) ax_gcc_arch="nocona prescott pentium4 pentiumpro";;
+            *f3[[347]]:*:*:*|*f4[1347]:*:*:*)
+		if test $ax_x86_64 = yes; then
+                  ax_gcc_arch="prescott pentium4 pentiumpro";;
+                else
+                  ax_gcc_arch="nocona pentium4 pentiumpro";;
+                fi
             *f??:*:*:*) ax_gcc_arch="pentium4 pentiumpro";;
           esac ;;
        *:68747541:*:*) # AMD
           case $ax_cv_gcc_x86_cpuid_1 in
 	    *5[[67]]?:*:*:*) ax_gcc_arch=k6 ;;
-	    *5[[8c]]?:*:*:*) ax_gcc_arch="k6-2 k6" ;;
-	    *5[[9d]]?:*:*:*) ax_gcc_arch="k6-3 k6" ;;
+	    *5[[8d]]?:*:*:*) ax_gcc_arch="k6-2 k6" ;;
+	    *5[[9]]?:*:*:*) ax_gcc_arch="k6-3 k6" ;;
 	    *60?:*:*:*) ax_gcc_arch=k7 ;;
 	    *6[[12]]?:*:*:*) ax_gcc_arch="athlon k7" ;;
 	    *6[[34]]?:*:*:*) ax_gcc_arch="athlon-tbird k7" ;;
 	    *67?:*:*:*) ax_gcc_arch="athlon-4 athlon k7" ;;
-	    *6[[68]]?:*:*:*) 
+	    *6[[68a]]?:*:*:*) 
 	       AX_GCC_X86_CPUID(0x80000006) # L2 cache size
 	       case $ax_cv_gcc_x86_cpuid_0x80000006 in
                  *:*:*[[1-9a-f]]??????:*) # (L2 = ecx >> 16) >= 256
@@ -85,6 +91,7 @@ case $host_cpu in
 	       esac ;;
 	    *f[[4cef8b]]?:*:*:*) ax_gcc_arch="athlon64 k8" ;;
 	    *f5?:*:*:*) ax_gcc_arch="opteron k8" ;;
+	    *f7?:*:*:*) ax_gcc_arch="athlon-fx opteron k8" ;;
 	    *f??:*:*:*) ax_gcc_arch="k8" ;;
           esac ;;
 	*:746e6543:*:*) # IDT
