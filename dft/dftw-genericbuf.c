@@ -61,6 +61,7 @@ static void bytwiddle(const P *ego, INT m0, INT m1, R *buf, R *rio, R *iio)
 static int applicable0(const S *ego, INT r, INT m, INT vl, INT mcount, int dec,
 		       const planner *plnr)
 {
+     UNUSED(plnr);
      return (1 
 	     && vl == 1
 	     && dec == DECDIT
@@ -153,6 +154,8 @@ static plan *mkcldw(const ct_solver *ego_,
      static const plan_adt padt = {
 	  0, awake, print, destroy
      };
+
+     UNUSED(vs); UNUSED(rio); UNUSED(iio);
 
      A(mstart >= 0 && mstart + mcount <= m);
      if (!applicable(ego, r, m, vl, mcount, dec, plnr))

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: trig.c,v 1.18 2006-01-04 00:34:04 athena Exp $ */
+/* $Id: trig.c,v 1.19 2006-01-05 00:54:40 stevenj Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"
@@ -128,12 +128,14 @@ static void cexpl_sincos(triggen *p, INT m, trigreal *res)
 
 static void cexp_zero(triggen *p, INT m, R *res)
 {
+     UNUSED(p); UNUSED(m);
      res[0] = 0;
      res[1] = 0;
 }
 
 static void cexpl_zero(triggen *p, INT m, trigreal *res)
 {
+     UNUSED(p); UNUSED(m);
      res[0] = 0;
      res[1] = 0;
 }

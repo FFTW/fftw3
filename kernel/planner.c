@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.173 2006-01-04 00:34:04 athena Exp $ */
+/* $Id: planner.c,v 1.174 2006-01-05 00:54:40 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -96,6 +96,7 @@ static void register_solver(planner *ego, solver *s)
      if (s) { /* add s to solver list */
 	  X(solver_use)(s);
 
+	  A(ego->nslvdesc < INFEASIBLE_SLVNDX);
 	  if (ego->nslvdesc >= ego->slvdescsiz)
 	       sgrow(ego);
 
