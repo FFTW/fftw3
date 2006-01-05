@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.175 2006-01-05 14:12:00 athena Exp $ */
+/* $Id: planner.c,v 1.176 2006-01-05 14:29:55 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -188,6 +188,10 @@ static solution *htab_lookup(hashtab *ht, const md5sig s,
 
      /* search all entries that match; select the one with
 	the lowest flags.u */
+     /* This loop may potentially traverse the whole table, since at
+	least one element is guaranteed to be !LIVEP, but all elements
+	may be VALIDP.  Hence, we stop after at the first invalid
+	element or after traversing the whole table. */
      g = h;
      do {
 	  solution *l = ht->solutions + g;
@@ -325,12 +329,11 @@ static void htab_insert(hashtab *ht, const md5sig s, const flags_t *flagsp,
      unsigned g, h = h1(ht, s), d = h2(ht, s);
      solution *first = 0;
 
-     /* Remove all entries that are subsumed by the new one.  This
-	loop may potentially traverse the whole table, since at
-	least one element is guaranteed to be !LIVEP, but all
-	elements may be VALIDP.  Hence, we stop after at the first
-	invalid element or after traversin the whole table.
-     */
+     /* Remove all entries that are subsumed by the new one.  */
+     /* This loop may potentially traverse the whole table, since at
+	least one element is guaranteed to be !LIVEP, but all elements
+	may be VALIDP.  Hence, we stop after at the first invalid
+	element or after traversing the whole table. */
      g = h;
      do {
 	  solution *l = ht->solutions + g;
@@ -851,9 +854,9 @@ static void check(hashtab *ht)
 	  if (LIVEP(l1)) {
 	       unsigned g, h = h1(ht, l1->s), d = h2(ht, l1->s);
 
-	       for (g = h; ; g = addmod(g, d, ht->hashsiz)) {
+	       g = h;
+	       do {
 		    solution *l = ht->solutions + g;
-		    ++ht->lookup_iter;
 		    if (VALIDP(l)) {
 			 if (l1 == l)
 			      foundit = 1;
@@ -863,7 +866,8 @@ static void check(hashtab *ht)
 			 }
 		    } else 
 			 break;
-	       }
+		    g = addmod(g, d, ht->hashsiz);
+	       } while (g != h);
 
 	       A(foundit);
 	  }
