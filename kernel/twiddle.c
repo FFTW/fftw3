@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.32 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: twiddle.c,v 1.33 2006-01-05 22:39:02 athena Exp $ */
 
 /* Twiddle manipulation */
 
@@ -88,10 +88,9 @@ static twid *lookup(enum wakefulness wakefulness,
      return p;
 }
 
-static INT twlen0(INT r, const tw_instr **pp)
+static INT twlen0(INT r, const tw_instr *p, INT *vl)
 {
      INT ntwiddle = 0;
-     const tw_instr *p = *pp;
 
      /* compute length of bytecode program */
      A(r > 0);
@@ -113,29 +112,32 @@ static INT twlen0(INT r, const tw_instr **pp)
 	  }
      }
 
-     *pp = p;
+     *vl = (INT)p->v;
      return ntwiddle;
 }
 
 INT X(twiddle_length)(INT r, const tw_instr *p)
 {
-     return twlen0(r, &p);
+     INT vl;
+     return twlen0(r, p, &vl);
 }
 
 static R *compute(enum wakefulness wakefulness,
 		  const tw_instr *instr, INT n, INT r, INT m)
 {
-     INT ntwiddle, j;
+     INT ntwiddle, j, vl;
      R *W, *W0;
      const tw_instr *p;
      triggen *t = X(mktriggen)(wakefulness, n);
 
      p = instr;
-     ntwiddle = twlen0(r, &p);
+     ntwiddle = twlen0(r, p, &vl);
 
-     W0 = W = (R *)MALLOC((ntwiddle * (m / (INT)p->v)) * sizeof(R), TWIDDLES);
+     A(m % vl == 0);
 
-     for (j = 0; j < m; j += (INT)p->v) {
+     W0 = W = (R *)MALLOC((ntwiddle * (m / vl)) * sizeof(R), TWIDDLES);
+
+     for (j = 0; j < m; j += vl) {
           for (p = instr; p->op != TW_NEXT; ++p) {
 	       switch (p->op) {
 		   case TW_FULL: {
@@ -184,7 +186,6 @@ static R *compute(enum wakefulness wakefulness,
 			break;
 	       }
 	  }
-          A(m % p->v == 0);
      }
 
      X(triggen_destroy)(t);
@@ -255,8 +256,13 @@ void X(twiddle_awake)(enum wakefulness wakefulness, twid **pp,
 /* return a pointer to twiddles (0 if none) starting at mstart out of m */
 const R *X(twiddle_shift)(const twid *p, INT mstart)
 {
-     if (p)
-	  return (p->W + mstart * X(twiddle_length)(p->r, p->instr));
-     else
+     if (p) {
+	  INT ntwiddle, vl;
+
+	  ntwiddle = twlen0(p->r, p->instr, &vl);
+	  A((mstart % vl) == 0);
+	  return (p->W + (mstart / vl) * ntwiddle);
+     } else {
 	  return 0;
+     }
 }
