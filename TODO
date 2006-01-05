@@ -37,15 +37,9 @@ TODO before FFTW-$2\pi$:
 * Try FFTPACK-style back-and-forth (Stockham) FFT.  (We tried this a
   few years ago and it was slower, but perhaps matters have changed.)
 
-* Modify generator to produce integer FFTs (etc.) of small sizes.
-
 * dif, difsq simd codelets
 
 * Generate assembly directly for more processors, or maybe fork gcc.  =)
 
 * export NO_SEARCH flag to the user (i.e. document FFTW_WISDOM_ONLY) (?)
   (This is currently obsolete)
-
-* Add a FAQ entry about the crash because of gcc-3.4.[1-3] bugs.
-  I am waiting until gcc-3.4.4 is released.
- 
