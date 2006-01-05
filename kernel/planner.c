@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.174 2006-01-05 00:54:40 stevenj Exp $ */
+/* $Id: planner.c,v 1.175 2006-01-05 14:12:00 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -188,7 +188,8 @@ static solution *htab_lookup(hashtab *ht, const md5sig s,
 
      /* search all entries that match; select the one with
 	the lowest flags.u */
-     for (g = h; ; g = addmod(g, d, ht->hashsiz)) {
+     g = h;
+     do {
 	  solution *l = ht->solutions + g;
 	  ++ht->lookup_iter;
 	  if (VALIDP(l)) {
@@ -198,13 +199,15 @@ static solution *htab_lookup(hashtab *ht, const md5sig s,
 		    if (!best || LEQ(l->flags.u, best->flags.u))
 			 best = l;
 	       }
-	  } else {
-	       if (best) 
-		    ++ht->succ_lookup;
-	       return best;
-	  }
-	  A((g + d) % ht->hashsiz != h);
-     }
+	  } else 
+	       break;
+
+	  g = addmod(g, d, ht->hashsiz);
+     } while (g != h);
+
+     if (best) 
+	  ++ht->succ_lookup;
+     return best;
 }
 
 static solution *hlookup(planner *ego, const md5sig s, 
@@ -322,9 +325,14 @@ static void htab_insert(hashtab *ht, const md5sig s, const flags_t *flagsp,
      unsigned g, h = h1(ht, s), d = h2(ht, s);
      solution *first = 0;
 
-     /* Remove all entries that are subsumed by the new one.
-	Overwrite the first found, if any exists. */
-     for (g = h; ; g = addmod(g, d, ht->hashsiz)) {
+     /* Remove all entries that are subsumed by the new one.  This
+	loop may potentially traverse the whole table, since at
+	least one element is guaranteed to be !LIVEP, but all
+	elements may be VALIDP.  Hence, we stop after at the first
+	invalid element or after traversin the whole table.
+     */
+     g = h;
+     do {
 	  solution *l = ht->solutions + g;
 	  ++ht->insert_iter;
 	  if (VALIDP(l)) {
@@ -340,6 +348,17 @@ static void htab_insert(hashtab *ht, const md5sig s, const flags_t *flagsp,
 	       }
 	  } else 
 	       break;
+
+	  g = addmod(g, d, ht->hashsiz);
+     } while (g != h);
+
+     /* now find a free slot */
+     for (g = h; ; g = addmod(g, d, ht->hashsiz)) {
+	  solution *l = ht->solutions + g;
+	  ++ht->insert_iter;
+	  if (!LIVEP(l)) 
+	       break;
+	  A(addmod(g, d, ht->hashsiz) != h);
      }
 
      if (first) {
