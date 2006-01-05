@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.11 2006-01-04 00:34:04 athena Exp $ */
+/* $Id: bench.h,v 1.12 2006-01-05 01:43:41 athena Exp $ */
 
 /* benchmark program definitions */
 #include "bench-user.h"
@@ -56,7 +56,6 @@ extern char *make_short_options(const struct option *opt);
 extern void usage(const char *progname, const struct option *opt);
 
 extern bench_problem *problem_parse(const char *desc);
-extern void problem_destroy(bench_problem *p);
 
 extern void ovtpvt(const char *format, ...);
 

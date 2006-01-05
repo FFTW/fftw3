@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.18 2003-11-15 01:05:54 stevenj Exp $ */
+/* $Id: bench-user.h,v 1.19 2006-01-05 01:43:41 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -139,6 +139,7 @@ extern void verify_problem(bench_problem *p, int rounds, double tol);
 extern void problem_alloc(bench_problem *p);
 extern void problem_free(bench_problem *p);
 extern void problem_zero(bench_problem *p);
+extern void problem_destroy(bench_problem *p);
 
 extern int power_of_two(int n);
 extern int log_2(int n);
