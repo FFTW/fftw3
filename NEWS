@@ -1,10 +1,6 @@
 Since FFTW 3.0.1:
 
-* 64-bit clean
-
-* Removed --enable-3dnow support.
-
-* SIMD support for split complex arrays.
+* Faster FFTW_ESTIMATE planner.
 
 * New (faster) algorithm for REDFT00/RODFT00 (type-I DCT/DST) of odd size.
 
@@ -19,8 +15,12 @@ Since FFTW 3.0.1:
 * Faster prime-size DFTs: implemented Bluestein's algorithm, as well
   as a zero-padded Rader variant to limit recursive use of Rader's algorithm.
 
+* SIMD support for split complex arrays.
+
 * New FFTW_TIMELIMIT option to specify a (rough) upper bound to the planning
   time (does not affect ESTIMATE mode).
+
+* Removed --enable-3dnow support; use --enable-k7 instead.
 
 * FMA (fused multiply-add) version is now included in "standard" FFTW,
   and is enabled with --enable-fma (the default on PowerPC and Itanium).
@@ -36,6 +36,9 @@ Since FFTW 3.0.1:
   Solaris/Intel.
 
 * Various documentation clarifications.
+
+* 64-bit clean.  (Fixes a bug affecting the split guru planner on 
+  64-bit machines, reported by David Necas.)
 
 * Fixed Debian bug #259612: inadvertent use of SSE instructions on
   non-SSE machines (causing a crash) for --enable-sse binaries.
@@ -70,7 +73,8 @@ Since FFTW 3.0.1:
 
 * Cycle-counter compilation fixes for Itanium, Alpha, x86-64, Sparc,
   MacOS (thanks to Matt Boman, John Bowman, and James A. Treacy for
-  reports/fixes).
+  reports/fixes).  Added x86-64 cycle counter for PGI compilers,
+  courtesy Cristiano Calonaci.
 
 * Fix compilation problem in test program due to C99 conflict.
 
