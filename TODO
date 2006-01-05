@@ -11,6 +11,8 @@ TODO before FFTW-$2\pi$:
 
 * merge genfft-k7 generator with the main genfft branch.
   genfft-k7 was written by Stefan Kral based on the fftw-2.1 genfft.
+  (The k7 stuff is becoming obsolete because it is not 64-bit clean.
+  We should phase it out in the next release.)
 
 * implement rdft/problem2 for even radices other than 2.
 
@@ -18,9 +20,6 @@ TODO before FFTW-$2\pi$:
 
 * Explore the idea of having n < 0 in tensors, possibly to mean
   inverse DFT.
-
-* implement NO_RADER flag, have rader.c set NO_RADER, to avoid
-  recursive applications of the algorithm. (?)
 
 * better estimator: possibly, let "other" cost be coef * n, where
   coef is a per-solver constant determined via some big numerical
@@ -40,6 +39,3 @@ TODO before FFTW-$2\pi$:
 * dif, difsq simd codelets
 
 * Generate assembly directly for more processors, or maybe fork gcc.  =)
-
-* export NO_SEARCH flag to the user (i.e. document FFTW_WISDOM_ONLY) (?)
-  (This is currently obsolete)
