@@ -39,3 +39,6 @@ TODO before FFTW-$2\pi$:
 * dif, difsq simd codelets
 
 * Generate assembly directly for more processors, or maybe fork gcc.  =)
+
+* ensure that threaded solvers generate (block_size % 4 == 0)
+  to allow SIMD to be used.
