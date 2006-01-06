@@ -18,7 +18,7 @@ rm -f config.cache
 # --enable-maintainer-mode enables build of genfft and automatic
 # rebuild of codelets whenever genfft changes
 (
-    ./configure --disable-shared --enable-maintainer-mode $*
+    ./configure --disable-shared --enable-maintainer-mode --enable-threads $*
     (cd genfft; make depend)
     (cd genfft-k7; make depend)
 )
