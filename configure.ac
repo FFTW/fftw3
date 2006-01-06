@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(fftw, 3.1-pre1, fftw@fftw.org)
+AC_INIT(fftw, 3.1-beta1, fftw@fftw.org)
 AC_CONFIG_SRCDIR(kernel/ifftw.h)
 SHARED_VERSION_INFO="4:0:1" # CURRENT:REVISION:AGE
 
