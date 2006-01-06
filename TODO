@@ -52,5 +52,4 @@ TODO before FFTW-$2\pi$:
   and we have to adjust W with the X(twiddle_shift)() hack.  Codelets
   should obey the uniform protocol as well.
 
-
-
+* memoize triggen.
