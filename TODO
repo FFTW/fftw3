@@ -42,3 +42,15 @@ TODO before FFTW-$2\pi$:
 
 * ensure that threaded solvers generate (block_size % 4 == 0)
   to allow SIMD to be used.
+
+* consider whether it would be simpler to have a uniform description
+  (IO, m0, m1, W) for twiddle problems, where IO always points
+  to the beginning of the array, W always points to the beginning
+  of the twiddle table, and the problem is solved in the
+  range m \in [m0, m1).  Currently we have a messy situation in which
+  we sometimes use [m0, m1), sometimes we use [mstart, mstart+mcount),
+  and we have to adjust W with the X(twiddle_shift)() hack.  Codelets
+  should obey the uniform protocol as well.
+
+
+
