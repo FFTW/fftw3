@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.267 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.268 2006-01-06 14:26:29 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -943,7 +943,19 @@ static __inline__ E FNMS(E a, E b, E c)
 #endif
 
 /* stack-alignment hackery */
-#if defined(__GNUC__) && defined(__i386__)
+#ifdef __ICC /* Intel's compiler for ia32 */
+#define WITH_ALIGNED_STACK(what)				\
+{								\
+     /*								\
+      * Simply calling alloca seems to do the right thing.	\
+      * The size of the allocated block seems to be irrelevant.	\
+      */							\
+     _alloca(16);						\
+     what							\
+}
+#endif
+
+#if defined(__GNUC__) && defined(__i386__) && !defined(WITH_ALIGNED_STACK)
 /*
  * horrible hack to align the stack to a 16-byte boundary.
  *
@@ -972,18 +984,6 @@ static __inline__ E FNMS(E a, E b, E c)
       */							\
      __asm__ __volatile__ ("andl $-16, %esp");			\
 								\
-     what							\
-}
-#endif
-
-#ifdef __ICC /* Intel's compiler for ia32 */
-#define WITH_ALIGNED_STACK(what)				\
-{								\
-     /*								\
-      * Simply calling alloca seems to do the right thing.	\
-      * The size of the allocated block seems to be irrelevant.	\
-      */							\
-     _alloca(16);						\
      what							\
 }
 #endif
