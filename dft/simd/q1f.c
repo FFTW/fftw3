@@ -24,7 +24,7 @@
 #if HAVE_SIMD
 static int okp(const ct_desc *d,
 	       const R *rio, const R *iio, 
-	       INT ios, INT vs, INT m, INT dist,
+	       INT ios, INT vs, INT m, INT mb, INT me, INT dist,
 	       const planner *plnr)
 {
      return (RIGHT_CPU()
@@ -35,6 +35,8 @@ static int okp(const ct_desc *d,
 	     && SIMD_VSTRIDE_OK(dist)
 	     && iio == rio + 1
              && (m % VL) == 0
+             && (mb % VL) == 0
+             && (me % VL) == 0
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))
 	     && (!d->dist || (d->dist == dist))

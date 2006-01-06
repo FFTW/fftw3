@@ -51,7 +51,6 @@ static void apply_dit(const plan *ego_, R *I, R *O)
      cld->apply((plan *) cld, I, O);
 
      {
-	  const P *ego_thr = (const P *) ego_;
 	  PD d;
 	  
 	  d.IO = O;
@@ -67,7 +66,6 @@ static void apply_dif(const plan *ego_, R *I, R *O)
      plan_rdft *cld;
 
      {
-	  const P *ego_thr = (const P *) ego_;
 	  PD d;
 	  
 	  d.IO = I;

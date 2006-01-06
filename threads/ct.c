@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.4 2006-01-05 21:01:51 athena Exp $ */
+/* $Id: ct.c,v 1.5 2006-01-06 03:19:09 athena Exp $ */
 
 #include "threads.h"
 
@@ -56,7 +56,6 @@ static void apply_dit(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      cld->apply(ego->cld, ri, ii, ro, io);
 
      {
-	  const P *ego_thr = (const P *) ego_;
 	  PD d;
 	  
 	  d.r = ro; d.i = io;
@@ -73,7 +72,6 @@ static void apply_dif(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      plan_dft *cld;
 
      {
-	  const P *ego_thr = (const P *) ego_;
 	  PD d;
 	  
 	  d.r = ri; d.i = ii;

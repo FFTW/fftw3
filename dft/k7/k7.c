@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: k7.c,v 1.8 2006-01-05 03:04:26 stevenj Exp $ */
+/* $Id: k7.c,v 1.9 2006-01-06 03:19:09 athena Exp $ */
 
 #include "dft.h"
 
@@ -101,7 +101,7 @@ const kdft_genus X(kdft_k7_pgenus) = { npokp, 1 };
 
 static int cmokp(const ct_desc *d,
 		 const R *rio, const R *iio, 
-		 int ios, int vs, int m, int dist,
+		 int ios, int vs, int m, int mb, int me, int dist,
 		 const planner *plnr)
 {
      return (k7p()
@@ -116,7 +116,7 @@ const ct_genus X(kdft_ct_k7_mgenus) = { cmokp, 1 };
 
 static int cpokp(const ct_desc *d,
 		 const R *rio, const R *iio, 
-		 int ios, int vs, int m, int dist,
+		 int ios, int vs, int m, int mb, int me, int dist,
 		 const planner *plnr)
 {
      return (k7p()

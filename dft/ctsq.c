@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ctsq.c,v 1.10 2006-01-05 03:04:26 stevenj Exp $ */
+/* $Id: ctsq.c,v 1.11 2006-01-06 03:19:09 athena Exp $ */
 
 /* special ``square transpose'' cooley-tukey solver for in-place problems */
 #include "ct.h"
@@ -103,7 +103,8 @@ static int applicable(const S *ego, const problem *p_, planner *plnr)
 
 	     /* SIMD strides etc. */
 	     && (e->genus->okp(e, p->ri, p->ii, vd[0].os, vd[0].is, 
-			       d[0].n / e->radix, d[0].is, plnr))
+			       d[0].n / e->radix, 0, d[0].n / e->radix,
+			       d[0].is, plnr))
 	  );
 }
 

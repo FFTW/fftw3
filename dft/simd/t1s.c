@@ -24,9 +24,9 @@
 #include "t1s.h"
 
 static int okp(const ct_desc *d,
-		      const R *rio, const R *iio, 
-		      INT ios, INT vs, INT m, INT dist, 
-		      const planner *plnr)
+	       const R *rio, const R *iio, 
+	       INT ios, INT vs, INT m, INT mb, INT me, INT dist,
+	       const planner *plnr)
 {
      UNUSED(rio);
      UNUSED(iio);
@@ -37,6 +37,8 @@ static int okp(const ct_desc *d,
 	     && SIMD_STRIDE_OKA(ios)
 	     && dist == 1
              && (m % (2 * VL)) == 0
+             && (mb % (2 * VL)) == 0
+             && (me % (2 * VL)) == 0
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))
 	     && (!d->dist || (d->dist == dist))

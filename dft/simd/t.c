@@ -26,7 +26,7 @@
 
 static int okp_common(const ct_desc *d,
 		      const R *rio, const R *iio, 
-		      INT ios, INT vs, INT m, INT dist, 
+		      INT ios, INT vs, INT m, INT mb, INT me, INT dist,
 		      const planner *plnr)
 {
      UNUSED(rio);
@@ -36,6 +36,8 @@ static int okp_common(const ct_desc *d,
 	     && SIMD_STRIDE_OKA(ios)
 	     && SIMD_VSTRIDE_OKA(dist)
              && (m % VL) == 0
+             && (mb % VL) == 0
+             && (me % VL) == 0
 	     && (!d->s1 || (d->s1 == ios))
 	     && (!d->s2 || (d->s2 == vs))
 	     && (!d->dist || (d->dist == dist))
@@ -44,10 +46,10 @@ static int okp_common(const ct_desc *d,
 
 static int okp_t1f(const ct_desc *d,
 		   const R *rio, const R *iio, 
-		   INT ios, INT vs, INT m, INT dist, 
+		   INT ios, INT vs, INT m, INT mb, INT me, INT dist,
 		   const planner *plnr)
 {
-     return  okp_common(d, rio, iio, ios, vs, m, dist, plnr)
+     return  okp_common(d, rio, iio, ios, vs, m, mb, me, dist, plnr)
 	  && iio == rio + 1
 	  && ALIGNEDA(rio);
 }
@@ -56,10 +58,10 @@ const ct_genus X(dft_t1fsimd_genus) = { okp_t1f, VL };
 
 static int okp_t1b(const ct_desc *d,
 		   const R *rio, const R *iio, 
-		   INT ios, INT vs, INT m, INT dist, 
+		   INT ios, INT vs, INT m, INT mb, INT me, INT dist,
 		   const planner *plnr)
 {
-     return  okp_common(d, rio, iio, ios, vs, m, dist, plnr)
+     return  okp_common(d, rio, iio, ios, vs, m, mb, me, dist, plnr)
 	  && rio == iio + 1
 	  && ALIGNEDA(iio);
 }
@@ -75,10 +77,10 @@ static int small_enough(const ct_desc *d, int m)
 
 static int okp_t2f(const ct_desc *d,
 		   const R *rio, const R *iio, 
-		   INT ios, INT vs, INT m, INT dist, 
+		   INT ios, INT vs, INT m, INT mb, INT me, INT dist,
 		   const planner *plnr)
 {
-     return  okp_t1f(d, rio, iio, ios, vs, m, dist, plnr)
+     return  okp_t1f(d, rio, iio, ios, vs, m, mb, me, dist, plnr)
 	  && small_enough(d, m);
 }
 
@@ -86,10 +88,10 @@ const ct_genus X(dft_t2fsimd_genus) = { okp_t2f, VL };
 
 static int okp_t2b(const ct_desc *d,
 		   const R *rio, const R *iio, 
-		   INT ios, INT vs, INT m, INT dist, 
+		   INT ios, INT vs, INT m, INT mb, INT me, INT dist,
 		   const planner *plnr)
 {
-     return  okp_t1b(d, rio, iio, ios, vs, m, dist, plnr)
+     return  okp_t1b(d, rio, iio, ios, vs, m, mb, me, dist, plnr)
 	  && small_enough(d, m);
 }
 

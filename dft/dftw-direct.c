@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.10 2006-01-05 03:04:26 stevenj Exp $ */
+/* $Id: dftw-direct.c,v 1.11 2006-01-06 03:19:09 athena Exp $ */
 
 #include "ct.h"
 
@@ -145,7 +145,8 @@ static void print(const plan *ego_, printer *p)
 }
 
 static int applicable0(const S *ego, 
-		       int dec, INT r, INT m, INT s, INT vl, INT vs, 
+		       int dec, INT r, INT m, INT mb, INT me,
+		       INT s, INT vl, INT vs, 
 		       R *rio, R *iio,
 		       const planner *plnr)
 {
@@ -158,14 +159,16 @@ static int applicable0(const S *ego,
 	  && r == e->radix
 
 	  /* check for alignment/vector length restrictions */
-	  && (e->genus->okp(e, rio, iio, m * s, 0, m, s, plnr))
-	  && (e->genus->okp(e, rio + vs, iio + vs, m * s, 0, m, s, plnr))
+	  && (e->genus->okp(e, rio, iio, m * s, 0, m, mb, me, s, plnr))
+	  && (e->genus->okp(e, rio + vs, iio + vs, m * s, 0, m, mb, me, 
+			    s, plnr))
 				 
 	  );
 }
 
 static int applicable0_buf(const S *ego, 
-			   int dec, INT r, INT m, INT s, INT vl, INT vs, 
+			   int dec, INT r, INT m, INT mb, INT me,
+			   INT s, INT vl, INT vs, 
 			   R *rio, R *iio,
 			   const planner *plnr)
 {
@@ -182,22 +185,24 @@ static int applicable0_buf(const S *ego,
 	     batchsize and for the remainder */
 	  && (batchsz = compute_batchsize(r), 1)
 	  && (e->genus->okp(e, 0, ((const R *)0) + 1, 2 * batchsz, 0,
-			    batchsz, 2, plnr))
+			    m, mb, mb + batchsz, 2, plnr))
 	  && (e->genus->okp(e, 0, ((const R *)0) + 1, 2 * batchsz, 0, 
-			    m % batchsz, 2, plnr))
+			    m, mb, me, 2, plnr))
 	  );
 }
 
 static int applicable(const S *ego, 
-		      int dec, INT r, INT m, INT s, INT vl, INT vs, 
+		      int dec, INT r, INT m, INT mb, INT me,
+		      INT s, INT vl, INT vs, 
 		      R *rio, R *iio,
 		      const planner *plnr)
 {
      if (ego->bufferedp) {
-	  if (!applicable0_buf(ego, dec, r, m, s, vl, vs, rio, iio, plnr))
+	  if (!applicable0_buf(ego, dec, r, m, mb, me, s, vl, vs,
+			       rio, iio, plnr))
 	       return 0;
      } else {
-	  if (!applicable0(ego, dec, r, m, s, vl, vs, rio, iio, plnr))
+	  if (!applicable0(ego, dec, r, m, mb, me, s, vl, vs, rio, iio, plnr))
 	       return 0;
      }
 
@@ -226,7 +231,8 @@ static plan *mkcldw(const ct_solver *ego_,
      };
 
      A(mstart >= 0 && mstart + mcount <= m);
-     if (!applicable(ego, dec, r, m, s, vl, vs, rio, iio, plnr))
+     if (!applicable(ego, dec, r, m, mstart, mstart + mcount, 
+		     s, vl, vs, rio, iio, plnr))
           return (plan *)0;
 
      pln = MKPLAN_DFTW(P, &padt, ego->bufferedp ? apply_buf : apply);
