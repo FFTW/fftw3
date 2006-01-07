@@ -54,6 +54,7 @@ static int okp_t1f(const ct_desc *d,
 	  && ALIGNEDA(rio);
 }
 
+extern const ct_genus X(dft_t1fsimd_genus);
 const ct_genus X(dft_t1fsimd_genus) = { okp_t1f, VL };
 
 static int okp_t1b(const ct_desc *d,
@@ -66,6 +67,7 @@ static int okp_t1b(const ct_desc *d,
 	  && ALIGNEDA(iio);
 }
 
+extern const ct_genus X(dft_t1bsimd_genus);
 const ct_genus X(dft_t1bsimd_genus) = { okp_t1b, VL };
 
 /* use t2* codelets only when n = m*radix is small, because
@@ -84,6 +86,7 @@ static int okp_t2f(const ct_desc *d,
 	  && small_enough(d, m);
 }
 
+extern const ct_genus X(dft_t2fsimd_genus);
 const ct_genus X(dft_t2fsimd_genus) = { okp_t2f, VL };
 
 static int okp_t2b(const ct_desc *d,
@@ -95,6 +98,7 @@ static int okp_t2b(const ct_desc *d,
 	  && small_enough(d, m);
 }
 
+extern const ct_genus X(dft_t2bsimd_genus);
 const ct_genus X(dft_t2bsimd_genus) = { okp_t2b, VL };
 
 #endif /* HAVE_SIMD */
