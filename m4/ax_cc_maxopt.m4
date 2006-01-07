@@ -83,7 +83,7 @@ if test "$ac_test_CFLAGS" != "set"; then
                 *:756e6547:*:*) # Intel
                   case $ax_cv_gcc_x86_cpuid_1 in
                     *6a?:*[[234]]:*:*|*6[[789b]]?:*:*:*) icc_flags="-xK";;
-                    *f3[[37]]:*:*:*|*f34:*:*:*) icc_flags="-xP -xN -xW -xK";;
+                    *f3[[347]]:*:*:*|*f4[1347]:*:*:*) icc_flags="-xP -xN -xW -xK";;
                     *f??:*:*:*) icc_flags="-xN -xW -xK";;
                   esac ;;
               esac ;;
