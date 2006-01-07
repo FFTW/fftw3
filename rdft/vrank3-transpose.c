@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.34 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.35 2006-01-07 21:39:20 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -164,9 +164,9 @@ static void transpose_gcd(R *A, INT n, INT m, INT d, INT N, R *buf)
 }
 
 /*************************************************************************/
-/* Cache-oblivious in-place transpose of non-square matrices, based 
-   a square sub-matrix first and then transposing the remainder
-   with the help of a buffer.
+/* Cache-oblivious in-place transpose of non-square matrices, based on
+   transposing a square sub-matrix first and then transposing the
+   remainder with the help of a buffer.
 
    This algorithm is related to algorithm V3 from Murray Dow,
    "Transposing a matrix on a vector computer," Parallel Computing 21
