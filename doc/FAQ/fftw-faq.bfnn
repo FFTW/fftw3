@@ -230,10 +230,18 @@ As of fftw-3.1, --enable-3dnow is no longer supported.
 \question 18apr:fma What's the difference between the fma and the non-fma versions?
 
 The fma version tries to exploit the fused multiply-add instructions
-implemented in many processors such as PowerPC, ia-64, and MIPS.
-The two FFTW packages are otherwise identical.
+implemented in many processors such as PowerPC, ia-64, and MIPS.  The
+two FFTW packages are otherwise identical.  In FFTW 3.1, the fma and
+non-fma versions were merged together into a single package, and the
+\courier{configure\} script attempts to automatically guess which
+version to use.  
 
-Definitely use the fma version if you have a PowerPC-based system with
+The FFTW 3.1 \courier{configure\} script enables fma by default on
+PowerPC, Itanium, and PA-RISC, and disables it otherwise.  You can
+force one or the other by using the \courier{--enable-fma\} or
+\courier{--disable-fma\} flag for \courier{configure\}.
+
+Definitely use fma if you have a PowerPC-based system with
 \courier{gcc\} (or IBM \courier{xlc\}).  This includes all GNU/Linux
 systems for PowerPC and all MacOS X systems.  Also use it on PA-RISC
 and Itanium with the HP/UX compiler.

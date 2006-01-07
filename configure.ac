@@ -14,6 +14,7 @@ dnl configure options
 case "${host_cpu}" in
   powerpc*) have_fma=yes;;
   ia64*) have_fma=yes;;
+  hppa*) have_fma=yes;;
   *) have_fma=no;;
 esac
 
