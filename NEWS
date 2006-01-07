@@ -17,7 +17,7 @@ Since FFTW 3.0.1:
 
 * SIMD support for split complex arrays.
 
-* Faster Altivec support.
+* Faster Altivec/VMX support.
 
 * New FFTW_TIMELIMIT option to specify a (rough) upper bound to the planning
   time (does not affect ESTIMATE mode).
