@@ -137,14 +137,15 @@ one.)
 This bug is reportedly fixed in later versions of \courier{gcc\}.
 
 Versions 8.0 and 8.1 of Intel's \courier{icc\} falsely claim to be
-\courier{gcc\}, so you should specify \courier{CC="icc -no-gcc"\}.
-\courier{icc-8.0.066\} reportely produces incorrect code for FFTW
-2.1.5, but is fixed in version 8.1.  \courier{icc-7.1\} compiler build
-20030402Z appears to produce incorrect dependencies, causing the
-compilation to fail.  \courier{icc-7.1\} build 20030307Z appears to
-work fine.  (Use \courier{icc -V\} to check which build you have.)  As
-of 2003/04/18, build 20030402Z appears not to be available any longer
-on Intel's website, whereas the older build 20030307Z is available.
+\courier{gcc\}, so you should specify \courier{CC="icc -no-gcc"\};
+this is automatic in FFTW 3.1.  \courier{icc-8.0.066\} reportely
+produces incorrect code for FFTW 2.1.5, but is fixed in version 8.1.
+\courier{icc-7.1\} compiler build 20030402Z appears to produce
+incorrect dependencies, causing the compilation to fail.
+\courier{icc-7.1\} build 20030307Z appears to work fine.  (Use
+\courier{icc -V\} to check which build you have.)  As of 2003/04/18,
+build 20030402Z appears not to be available any longer on Intel's
+website, whereas the older build 20030307Z is available.
 
 \courier{ranlib\} of GNU \courier{binutils\} 2.9.1 on Irix has been
 observed to corrupt the FFTW libraries, causing a link failure when
