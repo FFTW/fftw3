@@ -6,7 +6,7 @@ Since FFTW 3.0.1:
 
 * "4-step" algorithm for faster FFTs of very large sizes (> 2^18).
 
-* Faster in-place real-data DFTs.
+* Faster in-place real-data DFTs (for R2HC and HC2R r2r formats).
 
 * Faster in-place non-square transpositions (FFTW uses these internally
   for in-place FFTs, and you can also perform them explicitly using
