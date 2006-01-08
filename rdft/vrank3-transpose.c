@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.38 2006-01-08 05:19:19 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.39 2006-01-08 08:13:53 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -279,6 +279,9 @@ static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
 				       R2HC));
 	  if (!ego->cld1)
 	       return 0;
+	  X(ops_madd)(d, &ego->cld1->ops, &ego->super.super.ops,
+		      &ego->super.super.ops);
+	  ego->super.super.ops.other += num_el * d * 2;
      }
 
      ego->cld2 = X(mkplan_d)(plnr,
@@ -291,6 +294,7 @@ static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
 				  R2HC));
      if (!ego->cld2)
 	  return 0;
+     X(ops_add)(&ego->super.super.ops, &ego->cld2->ops, &ego->super.super.ops);
 
      if (m > 1) {
 	  ego->cld3 = X(mkplan_d)(plnr,
@@ -303,6 +307,9 @@ static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
 				       R2HC));
 	  if (!ego->cld3)
 	       return 0;
+	  X(ops_madd)(d, &ego->cld3->ops, &ego->super.super.ops,
+		      &ego->super.super.ops);
+	  ego->super.super.ops.other += num_el * d * 2;
      }
 
      return 1;
@@ -423,6 +430,15 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 	  if (!ego->cld2)
 	       return 0;
      }
+
+     X(ops_add)(&ego->super.super.ops, &ego->cld1->ops, &ego->super.super.ops);
+     X(ops_add)(&ego->super.super.ops, &ego->cld2->ops, &ego->super.super.ops);
+     ego->super.super.ops.other += 
+	  vl * X(imin)(n,m) * (X(iabs)(n-m) + X(imin)(n,m)) * 2;
+
+     /* heuristic penalty so that estimator prefers transpose-gcd when
+	gcd is large and |n-m| are large, and vice-versa when |n-m| small): */
+     ego->super.super.ops.other += vl*(X(iabs)(n-m)*ego->d - X(imax)(n,m))*4;
 
      return 1;
 }
@@ -622,7 +638,9 @@ static int applicable_toms513(const problem_rdft *p, planner *plnr,
 
 static int mkcldrn_toms513(const problem_rdft *p, planner *plnr, P *ego)
 {
-     UNUSED(p); UNUSED(plnr); UNUSED(ego);
+     UNUSED(p); UNUSED(plnr);
+     /* heuristic so that TOMS algorithm is last resort */
+     ego->super.super.ops.other += ego->n * ego->m * ego->vl * 2 * 20;
      return 1;
 }
 
@@ -693,15 +711,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->fd = pln->s0 / pln->vl;
      pln->slv = ego;
 
+     X(ops_zero)(&pln->super.super.ops); /* mkcldrn is responsible for ops */
+
      pln->cld1 = pln->cld2 = pln->cld3 = 0;
      if (!ego->adt->mkcldrn(p, plnr, pln)) {
 	  X(plan_destroy_internal)(&(pln->super.super));
 	  return 0;
      }
-
-     /* pln->vl * (2 loads + 2 stores) * (pln->n \choose 2) 
-        (FIXME? underestimate for non-square) */
-     X(ops_other)(2 * pln->vl * pln->n * (pln->m - 1), &pln->super.super.ops);
 
      return &(pln->super.super);
 }
