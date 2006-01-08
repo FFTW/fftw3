@@ -85,7 +85,8 @@ Since FFTW 3.0.1:
 
 * Fixed compilation failure on MacOS 10.3 due to getopt conflict.
 
-* Workaround Visual C++ bug in SSE compilation, reported by Eddie Yee.
+* Work around Visual C++ (version 6/7) bug in SSE compilation;
+  thanks to Eddie Yee for his detailed report.
 
 FFTW 3.0.1
 
