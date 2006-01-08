@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.21 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: primes.c,v 1.22 2006-01-08 01:57:16 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -159,7 +159,9 @@ INT X(isqrt)(INT n)
 {
      INT guess, iguess;
 
-     A(n >= 1);
+     A(n >= 0);
+     if (n == 0) return 0;
+
      guess = n; iguess = 1;
 
      do {
