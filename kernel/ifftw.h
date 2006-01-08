@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.268 2006-01-06 14:26:29 athena Exp $ */
+/* $Id: ifftw.h,v 1.269 2006-01-08 02:57:34 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -849,6 +849,12 @@ void X(cpy2d_pair_co)(R *I0, R *I1, R *O0, R *O1,
 void X(transpose)(R *I, INT n, INT s0, INT s1, INT vl);
 void X(transpose_tiled)(R *I, INT n, INT s0, INT s1, INT vl);
 void X(transpose_tiledbuf)(R *I, INT n, INT s0, INT s1, INT vl);
+
+typedef void (*transpose_func)(R *I, INT n, INT s0, INT s1, INT vl);
+typedef void (*cpy2d_func)(R *I, R *O,
+			   INT n0, INT is0, INT os0,
+			   INT n1, INT is1, INT os1,
+			   INT vl);
 
 /*-----------------------------------------------------------------------*/
 /* misc stuff */

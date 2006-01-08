@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.35 2006-01-07 21:39:20 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.36 2006-01-08 02:57:34 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -33,6 +33,8 @@ typedef struct {
      int (*applicable)(const problem_rdft *p, planner *plnr,
 		       int dim0, int dim1, int dim2, INT *nbuf);
      const char *nam;
+     transpose_func transpose;
+     cpy2d_func cpy2d;
 } transpose_adt;
 
 typedef struct {
@@ -67,24 +69,88 @@ static INT gcd(INT a, INT b)
      return a;
 }
 
-/*************************************************************************/
-/********************* Generic Ntuple transposes *************************/
-/*************************************************************************/
-
-static void rec_transpose(R *A, R *B, INT n0, INT n1,
-			  INT lda, INT ldb, INT vl)
+/* whether we can transpose with one of our routines expecting
+   contiguous Ntuples */
+static int Ntuple_transposable(const iodim *a, const iodim *b, INT vl, INT vs)
 {
-     /* FIXME: inline and get rid of this routine */
-     X(cpy2d)(A, B,
-	      n0, lda * vl, vl, 
-	      n1, vl, ldb * vl,
-	      vl);
+     return (vs == 1 && b->is == vl && a->os == vl &&
+	     ((a->n == b->n && a->is == b->os
+	       && a->is >= b->n && a->is % vl == 0)
+	      || (a->is == b->n * vl && b->os == a->n * vl)));
 }
 
-static void rec_transpose_sq_ip(R *M, INT n, INT vl)
+/* check whether a and b correspond to the first and second dimensions
+   of a transpose of tuples with vector length = vl, stride = vs. */
+static int transposable(const iodim *a, const iodim *b, INT vl, INT vs)
 {
-     /* FIXME: inline and get rid of this routine */
-     X(transpose)(M, n, n * vl, vl, vl);
+     return ((a->n == b->n && a->os == b->is && a->is == b->os)
+             || Ntuple_transposable(a, b, vl, vs));
+}
+
+static int pickdim(const tensor *s, int *pdim0, int *pdim1, int *pdim2)
+{
+     int dim0, dim1;
+
+     for (dim0 = 0; dim0 < s->rnk; ++dim0)
+          for (dim1 = 0; dim1 < s->rnk; ++dim1) {
+	       int dim2 = 3 - dim0 - dim1;
+	       if (dim0 == dim1) continue;
+               if ((s->rnk == 2 || s->dims[dim2].is == s->dims[dim2].os)
+		   && transposable(s->dims + dim0, s->dims + dim1, 
+				   s->rnk == 2 ? (INT)1 : s->dims[dim2].n,
+				   s->rnk == 2 ? (INT)1 : s->dims[dim2].is)) {
+                    *pdim0 = dim0;
+                    *pdim1 = dim1;
+		    *pdim2 = dim2;
+                    return 1;
+               }
+	  }
+     return 0;
+}
+
+/* generic applicability function */
+static int applicable(const solver *ego_, const problem *p_, planner *plnr,
+		      int *dim0, int *dim1, int *dim2, INT *nbuf)
+{
+     const S *ego = (const S *) ego_;
+     const problem_rdft *p = (const problem_rdft *) p_;
+
+     return (1
+	     && p->I == p->O /* FIXME: out-of-place transposes too? */
+	     && p->sz->rnk == 0
+	     && (p->vecsz->rnk == 2 || p->vecsz->rnk == 3)
+
+	     && pickdim(p->vecsz, dim0, dim1, dim2)
+
+	     /* UGLY if vecloop in wrong order for locality */
+	     && (!NO_UGLYP(plnr) ||
+		 p->vecsz->rnk == 2 ||
+		 X(iabs)(p->vecsz->dims[*dim2].is)
+		 < X(imax)(X(iabs)(p->vecsz->dims[*dim0].is),
+			   X(iabs)(p->vecsz->dims[*dim0].os)))
+
+	     /* SLOW if non-square */
+	     && (!NO_SLOWP(plnr)
+		 || p->vecsz->dims[*dim0].n == p->vecsz->dims[*dim1].n)
+		      
+	     && ego->adt->applicable(p, plnr, *dim0,*dim1,*dim2,nbuf)
+
+	     /* buffers too big are UGLY */
+	     && ((!NO_UGLYP(plnr) && !CONSERVE_MEMORYP(plnr))
+		 || *nbuf <= 65536
+		 || *nbuf * 8 < X(tensor_sz)(p->vecsz))
+	  );
+}
+
+static void get_transpose_vec(const problem_rdft *p, int dim2, INT *vl,INT *vs)
+{
+     if (p->vecsz->rnk == 2) {
+	  *vl = 1; *vs = 1;
+     }
+     else {
+	  *vl = p->vecsz->dims[dim2].n;
+	  *vs = p->vecsz->dims[dim2].is; /* == os */
+     }  
 }
 
 /*************************************************************************/
@@ -115,53 +181,111 @@ static void unpack(R *A, INT n, INT fda, INT N)
    "Transposing a matrix on a vector computer," Parallel Computing 21
    (12), 1997-2005 (1995), with the modification that we use
    cache-oblivious recursive transpose subroutines (and we derived
-   it independently). */
+   it independently).
+   
+   For a p x q matrix, this requires scratch space equal to the size
+   of the matrix divided by gcd(p,q).  Alternatively, see also the
+   "cut" algorithm below, if |p-q| * gcd(p,q) < max(p,q). */
 
-/* Transpose the matrix A in-place, where A is an (n*d) x (m*d) matrix
-   of N-tuples and buf contains n*m*d*N elements.  
-
-   In general, to transpose a p x q matrix, you should call this
-   routine with d = gcd(p, q), n = p/d, and m = q/d. 
-
-   See also transpose_cut, below, if |p-q| * gcd(p,q) < max(p,q). */
-static void transpose_gcd(R *A, INT n, INT m, INT d, INT N, R *buf)
+static void apply_gcd(const plan *ego_, R *I, R *O)
 {
-     A(n > 0 && m > 0 && N > 0 && d > 0);
+     const P *ego = (const P *) ego_;
+     INT n = ego->nd, m = ego->md, d = ego->d;
+     INT vl = ego->vl;
+     R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
+     const transpose_adt *adt = ego->slv->adt;
+     cpy2d_func cpy2d = adt->cpy2d;
+
+     A(ego->vs == 1 && ego->s1 == vl && ego->s0 == ego->m * vl
+       && ego->n == n * d && ego->m == m * d);
+     UNUSED(O);
+
+     /* Transpose the matrix I in-place, where I is an (n*d) x (m*d) matrix
+	of vl-tuples and buf contains n*m*d*vl elements.  
+	
+	In general, to transpose a p x q matrix, you should call this
+	routine with d = gcd(p, q), n = p/d, and m = q/d.  */
+
+     A(n > 0 && m > 0 && vl > 0 && d > 0);
      if (d == 1) {
-	  rec_transpose(A, buf, n, m, m, n, N);
-	  memcpy(A, buf, m*n*N*sizeof(R));
+	  cpy2d(I, buf, n, m*vl, vl, m, vl, n*vl, vl);
+	  memcpy(I, buf, m*n*vl*sizeof(R));
      }
      else {
-	  INT i, num_el = n*m*d*N;
-
+	  INT i, num_el = n*m*d*vl;
+	  
 	  /* treat as (d x n) x (d' x m) matrix.  (d' = d) */
-
+	  
 	  /* First, transpose d x (n x d') x m to d x (d' x n) x m,
 	     using the buf matrix.  This consists of d transposes
 	     of contiguous n x d' matrices of m-tuples. */
 	  if (n > 1) {
 	       for (i = 0; i < d; ++i) {
-		    rec_transpose(A + i*num_el, buf,
-				  n, d, d, n, m*N);
-		    memcpy(A + i*num_el, buf, num_el*sizeof(R));
+		    cpy2d(I + i*num_el, buf, 
+			  n, d*(m*vl), (m*vl),
+			  d, (m*vl), n*(m*vl), (m*vl));
+		    memcpy(I + i*num_el, buf, num_el*sizeof(R));
 	       }
 	  }
 	  
 	  /* Now, transpose (d x d') x (n x m) to (d' x d) x (n x m), which
 	     is a square in-place transpose of n*m-tuples: */
-	  rec_transpose_sq_ip(A, d, n*m*N);
-
+	  adt->transpose(I, d, d * (n*m*vl), (n*m*vl), (n*m*vl));
+	  
 	  /* Finally, transpose d' x ((d x n) x m) to d' x (m x (d x n)),
 	     using the buf matrix.  This consists of d' transposes
 	     of contiguous d*n x m matrices. */
 	  if (m > 1) {
 	       for (i = 0; i < d; ++i) {
-		    rec_transpose(A + i*num_el, buf, d*n, m, m, d*n, N);
-		    memcpy(A + i*num_el, buf, num_el*sizeof(R));
+		    cpy2d(I + i*num_el, buf,
+			  (d*n), m*vl, vl,
+			  m, vl, (d*n)*vl, vl);
+		    memcpy(I + i*num_el, buf, num_el*sizeof(R));
 	       }
 	  }
      }
+
+     X(ifree)(buf);
 }
+
+static int applicable_gcd(const problem_rdft *p, planner *plnr,
+			  int dim0, int dim1, int dim2, INT *nbuf)
+{
+     INT n = p->vecsz->dims[dim0].n;
+     INT m = p->vecsz->dims[dim1].n;
+     INT vl, vs;
+     get_transpose_vec(p, dim2, &vl, &vs);
+     *nbuf = n * (m / gcd(n, m)) * vl;
+     return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts */
+	     && n != m
+	     && Ntuple_transposable(p->vecsz->dims + dim0,
+				    p->vecsz->dims + dim1,
+				    vl, vs));
+}
+
+static const transpose_adt adt_gcd =
+{
+     apply_gcd, applicable_gcd,
+     "rdft-transpose-gcd",
+     X(transpose), X(cpy2d)
+};
+
+
+static const transpose_adt adt_gcd_tiled =
+{
+     apply_gcd, applicable_gcd,
+     "rdft-transpose-gcd-tiled",
+     X(transpose_tiled), X(cpy2d_tiled)
+};
+
+
+static const transpose_adt adt_gcd_tiledbuf =
+{
+     apply_gcd, applicable_gcd,
+     "rdft-transpose-gcd-tiledbuf",
+     X(transpose_tiledbuf), X(cpy2d_tiledbuf)
+};
+
 
 /*************************************************************************/
 /* Cache-oblivious in-place transpose of non-square matrices, based on
@@ -171,30 +295,82 @@ static void transpose_gcd(R *A, INT n, INT m, INT d, INT N, R *buf)
    This algorithm is related to algorithm V3 from Murray Dow,
    "Transposing a matrix on a vector computer," Parallel Computing 21
    (12), 1997-2005 (1995), with the modification that we use
-   cache-oblivious recursive transpose subroutines */
+   cache-oblivious recursive transpose subroutines.
 
-/* Transpose the matrix A in-place, where A is an n x m matrix
-   of N-tuples and buf contains min(n,m) * |n-m| * N elements. 
+   For transposing an n x m matrix, requires scratch space equal to
+   the size of the matrix times |n-m| / max(n,m).  See also
+   transpose-gcd, above, if |n-m| * gcd(n,m) > max(n,m). */
 
-   See also transpose_gcd, above, if |n-m| * gcd(n,m) > max(n,m). */
-static void transpose_cut(R *A, INT n, INT m, INT N, R *buf)
+static void apply_cut(const plan *ego_, R *I, R *O)
 {
-     A(n > 0 && m > 0 && N > 0);
+     const P *ego = (const P *) ego_;
+     INT n = ego->n, m = ego->m;
+     INT vl = ego->vl;
+     R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
+     const transpose_adt *adt = ego->slv->adt;
+     A(ego->vs == 1 && ego->s1 == vl && ego->s0 == m * vl);
+     UNUSED(O);
+
+     /* Transpose the matrix I in-place, where I is an n x m matrix
+	of vl-tuples and buf contains min(n,m) * |n-m| * N elements. */
+     A(n > 0 && m > 0 && vl > 0);
      if (n > m) {
-	  memcpy(buf, A + m*(m*N), (n-m)*(m*N)*sizeof(R));
-	  rec_transpose_sq_ip(A, m, N);
-	  unpack(A, m, n, N);
-	  rec_transpose(buf, A + m*N, n-m, m, m, n, N);
+	  memcpy(buf, I + m*(m*vl), (n-m)*(m*vl)*sizeof(R));
+	  adt->transpose(I, m, m * vl, vl, vl);
+	  unpack(I, m, n, vl);
+	  adt->cpy2d(buf, I + m*vl,
+		     n-m, m*vl, vl,
+		     m, vl, n*vl, vl);
      }
      else if (m > n) {
-	  rec_transpose(A + n*N, buf, n, m-n, m, n, N);
-	  pack(A, n, m, N);
-	  rec_transpose_sq_ip(A, n, N);
-	  memcpy(A + n*(n*N), buf, (m-n)*(n*N)*sizeof(R));
+	  adt->cpy2d(I + n*vl, buf,
+		     n, m*vl, vl,
+		     m-n, vl, n*vl, vl);
+	  pack(I, n, m, vl);
+	  adt->transpose(I, n, n*vl, vl, vl);
+	  memcpy(I + n*(n*vl), buf, (m-n)*(n*vl)*sizeof(R));
      }
      else /* n == m */
-	  rec_transpose_sq_ip(A, n, N);
+	  adt->transpose(I, n, n*vl, vl, vl);
+
+     X(ifree)(buf);
 }
+
+static int applicable_cut(const problem_rdft *p, planner *plnr,
+			  int dim0, int dim1, int dim2, INT *nbuf)
+{
+     INT n = p->vecsz->dims[dim0].n;
+     INT m = p->vecsz->dims[dim1].n;
+     INT vl, vs;
+     get_transpose_vec(p, dim2, &vl, &vs);
+     *nbuf = X(imin)(n, m) * X(iabs)(n - m) * vl;
+     return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts? */
+	     && n != m
+	     && Ntuple_transposable(p->vecsz->dims + dim0,
+				    p->vecsz->dims + dim1,
+				    vl, vs));
+}
+
+static const transpose_adt adt_cut =
+{
+     apply_cut, applicable_cut,
+     "rdft-transpose-cut",
+     X(transpose), X(cpy2d)
+};
+
+static const transpose_adt adt_cut_tiled =
+{
+     apply_cut, applicable_cut,
+     "rdft-transpose-cut-tiled",
+     X(transpose_tiled), X(cpy2d_tiled)
+};
+
+static const transpose_adt adt_cut_tiledbuf =
+{
+     apply_cut, applicable_cut,
+     "rdft-transpose-cut-tiledbuf",
+     X(transpose_tiledbuf), X(cpy2d_tiledbuf)
+};
 
 /*************************************************************************/
 /* In-place transpose routine from TOMS.  This routine is much slower
@@ -355,171 +531,6 @@ static void transpose_toms513(R *a, INT nx, INT ny, INT N,
      }
 }
 
-/*************************************************************************/
-/****************************** Solvers **********************************/
-/*************************************************************************/
-
-/* whether we can transpose with one of our routines expecting
-   contiguous Ntuples */
-static int Ntuple_transposable(const iodim *a, const iodim *b, INT vl, INT vs)
-{
-     return (vs == 1 && b->is == vl && a->os == vl &&
-	     ((a->n == b->n && a->is == b->os
-	       && a->is >= b->n && a->is % vl == 0)
-	      || (a->is == b->n * vl && b->os == a->n * vl)));
-}
-
-/* check whether a and b correspond to the first and second dimensions
-   of a transpose of tuples with vector length = vl, stride = vs. */
-static int transposable(const iodim *a, const iodim *b, INT vl, INT vs)
-{
-     return ((a->n == b->n && a->os == b->is && a->is == b->os)
-             || Ntuple_transposable(a, b, vl, vs));
-}
-
-static int pickdim(const tensor *s, int *pdim0, int *pdim1, int *pdim2)
-{
-     int dim0, dim1;
-
-     for (dim0 = 0; dim0 < s->rnk; ++dim0)
-          for (dim1 = 0; dim1 < s->rnk; ++dim1) {
-	       int dim2 = 3 - dim0 - dim1;
-	       if (dim0 == dim1) continue;
-               if ((s->rnk == 2 || s->dims[dim2].is == s->dims[dim2].os)
-		   && transposable(s->dims + dim0, s->dims + dim1, 
-				   s->rnk == 2 ? (INT)1 : s->dims[dim2].n,
-				   s->rnk == 2 ? (INT)1 : s->dims[dim2].is)) {
-                    *pdim0 = dim0;
-                    *pdim1 = dim1;
-		    *pdim2 = dim2;
-                    return 1;
-               }
-	  }
-     return 0;
-}
-
-/* generic applicability function */
-static int applicable(const solver *ego_, const problem *p_, planner *plnr,
-		      int *dim0, int *dim1, int *dim2, INT *nbuf)
-{
-     const S *ego = (const S *) ego_;
-     const problem_rdft *p = (const problem_rdft *) p_;
-
-     return (1
-	     && p->I == p->O /* FIXME: out-of-place transposes too? */
-	     && p->sz->rnk == 0
-	     && (p->vecsz->rnk == 2 || p->vecsz->rnk == 3)
-
-	     && pickdim(p->vecsz, dim0, dim1, dim2)
-
-	     /* UGLY if vecloop in wrong order for locality */
-	     && (!NO_UGLYP(plnr) ||
-		 p->vecsz->rnk == 2 ||
-		 X(iabs)(p->vecsz->dims[*dim2].is)
-		 < X(imax)(X(iabs)(p->vecsz->dims[*dim0].is),
-			   X(iabs)(p->vecsz->dims[*dim0].os)))
-
-	     /* SLOW if non-square */
-	     && (!NO_SLOWP(plnr)
-		 || p->vecsz->dims[*dim0].n == p->vecsz->dims[*dim1].n)
-		      
-	     && ego->adt->applicable(p, plnr, *dim0,*dim1,*dim2,nbuf)
-
-	     /* buffers too big are UGLY */
-	     && ((!NO_UGLYP(plnr) && !CONSERVE_MEMORYP(plnr))
-		 || *nbuf <= 65536
-		 || *nbuf * 8 < X(tensor_sz)(p->vecsz))
-	  );
-}
-
-static void get_transpose_vec(const problem_rdft *p, int dim2, INT *vl,INT *vs)
-{
-     if (p->vecsz->rnk == 2) {
-	  *vl = 1; *vs = 1;
-     }
-     else {
-	  *vl = p->vecsz->dims[dim2].n;
-	  *vs = p->vecsz->dims[dim2].is; /* == os */
-     }  
-}
-
-
-/*-----------------------------------------------------------------------*/
-/* cache-oblivious gcd-based non-square transpose, vector-stride 1 only */
-
-static void apply_gcd(const plan *ego_, R *I, R *O)
-{
-     const P *ego = (const P *) ego_;
-     INT nd = ego->nd, md = ego->md, d = ego->d;
-     INT vl = ego->vl;
-     R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
-     A(ego->vs == 1 && ego->s1 == vl && ego->s0 == ego->m * vl
-       && ego->n == nd * d && ego->m == md * d);
-     UNUSED(O);
-     transpose_gcd(I, nd, md, d, vl, buf);
-     X(ifree)(buf);
-}
-
-static int applicable_gcd(const problem_rdft *p, planner *plnr,
-			  int dim0, int dim1, int dim2, INT *nbuf)
-{
-     INT n = p->vecsz->dims[dim0].n;
-     INT m = p->vecsz->dims[dim1].n;
-     INT vl, vs;
-     get_transpose_vec(p, dim2, &vl, &vs);
-     *nbuf = n * (m / gcd(n, m)) * vl;
-     return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts */
-	     && n != m
-	     && Ntuple_transposable(p->vecsz->dims + dim0,
-				    p->vecsz->dims + dim1,
-				    vl, vs));
-}
-
-static const transpose_adt adt_gcd =
-{
-     apply_gcd, applicable_gcd,
-     "rdft-transpose-gcd"
-};
-
-/*-----------------------------------------------------------------------*/
-/* cache-oblivious cut-based non-square transpose, vector-stride 1 only */
-
-static void apply_cut(const plan *ego_, R *I, R *O)
-{
-     const P *ego = (const P *) ego_;
-     INT n = ego->n, m = ego->m;
-     INT vl = ego->vl;
-     R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
-     A(ego->vs == 1 && ego->s1 == vl && ego->s0 == m * vl);
-     UNUSED(O);
-     transpose_cut(I, n, m, vl, buf);
-     X(ifree)(buf);
-}
-
-static int applicable_cut(const problem_rdft *p, planner *plnr,
-			  int dim0, int dim1, int dim2, INT *nbuf)
-{
-     INT n = p->vecsz->dims[dim0].n;
-     INT m = p->vecsz->dims[dim1].n;
-     INT vl, vs;
-     get_transpose_vec(p, dim2, &vl, &vs);
-     *nbuf = X(imin)(n, m) * X(iabs)(n - m) * vl;
-     return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts? */
-	     && n != m
-	     && Ntuple_transposable(p->vecsz->dims + dim0,
-				    p->vecsz->dims + dim1,
-				    vl, vs));
-}
-
-static const transpose_adt adt_cut =
-{
-     apply_cut, applicable_cut,
-     "rdft-transpose-cut"
-};
-
-/*-----------------------------------------------------------------------*/
-/* non-square transpose from TOMS 513, vector-stride 1 only */
-
 static void apply_toms513(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
@@ -551,7 +562,8 @@ static int applicable_toms513(const problem_rdft *p, planner *plnr,
 static const transpose_adt adt_toms513 =
 {
      apply_toms513, applicable_toms513,
-     "rdft-transpose-toms513"
+     "rdft-transpose-toms513",
+     0, 0
 };
 
 /*-----------------------------------------------------------------------*/
@@ -614,7 +626,9 @@ void X(rdft_vrank3_transpose_register)(planner *p)
 {
      unsigned i;
      static const transpose_adt *const adts[] = {
-	  &adt_gcd, &adt_cut, &adt_toms513
+	  &adt_gcd, &adt_gcd_tiled, &adt_gcd_tiledbuf,
+	  &adt_cut, &adt_cut_tiled, &adt_cut_tiledbuf,
+	  &adt_toms513
      };
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
           REGISTER_SOLVER(p, mksolver(adts[i]));

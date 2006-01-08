@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0.c,v 1.32 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: rank0.c,v 1.33 2006-01-08 02:57:34 stevenj Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 
@@ -71,9 +71,7 @@ static int fill_iodim(P *pln, const problem_rdft *p)
 /* generic higher-rank copy routine, calls cpy2d() to do the real work */
 static void copy(const iodim *d, int rnk, INT vl,
 		 R *I, R *O,
-		 void (*cpy2d)(R *I, R *O,
-			       INT n0, INT is0, INT os0,
-			       INT n1, INT is1, INT os1, INT vl))
+		 cpy2d_func cpy2d)
 {
      A(rnk >= 2);
      if (rnk == 2)
@@ -103,7 +101,7 @@ static int transposep(const P *pln)
  * the real work */
 static void transpose(const iodim *d, int rnk, INT vl,
 		      R *I,
-		      void (*transpose2d)(R *I, INT n, INT s0, INT s1, INT vl))
+		      transpose_func transpose2d)
 {
      A(rnk >= 2);
      if (rnk == 2)
@@ -179,7 +177,7 @@ static int applicable_tiled(const P *pln, const problem_rdft *p)
 	     && pln->rnk >= 2
 
 	     /* somewhat arbitrary */
-	     && pln->vl < (INT)(CACHESIZE / (16 * sizeof(R)))
+	     && X(compute_tilesz)(pln->vl, 1) > 4
 	  );
 }
 
@@ -245,7 +243,7 @@ static int applicable_ip_sq_tiled(const P *pln, const problem_rdft *p)
 	     && applicable_ip_sq(pln, p)
 
 	     /* somewhat arbitrary */
-	     && pln->vl * 2 < (INT)(CACHESIZE / (16 * sizeof(R)))
+	     && X(compute_tilesz)(pln->vl, 2) > 4
 	  );
 }
 
