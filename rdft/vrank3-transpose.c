@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.39 2006-01-08 08:13:53 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.40 2006-01-08 20:39:28 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -278,7 +278,7 @@ static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
 				       TAINT(p->I, num_el), buf,
 				       R2HC));
 	  if (!ego->cld1)
-	       return 0;
+	       goto nada;
 	  X(ops_madd)(d, &ego->cld1->ops, &ego->super.super.ops,
 		      &ego->super.super.ops);
 	  ego->super.super.ops.other += num_el * d * 2;
@@ -293,7 +293,7 @@ static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
 				  p->I, p->I,
 				  R2HC));
      if (!ego->cld2)
-	  return 0;
+	  goto nada;
      X(ops_add)(&ego->super.super.ops, &ego->cld2->ops, &ego->super.super.ops);
 
      if (m > 1) {
@@ -306,13 +306,18 @@ static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
 				       TAINT(p->I, num_el), buf,
 				       R2HC));
 	  if (!ego->cld3)
-	       return 0;
+	       goto nada;
 	  X(ops_madd)(d, &ego->cld3->ops, &ego->super.super.ops,
 		      &ego->super.super.ops);
 	  ego->super.super.ops.other += num_el * d * 2;
      }
 
+     X(ifree)(buf);
      return 1;
+
+ nada:
+     X(ifree)(buf);
+     return 0;
 }
 
 static const transpose_adt adt_gcd =
@@ -394,7 +399,7 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 				       p->I, p->I,
 				       R2HC));
 	  if (!ego->cld1)
-	       return 0;
+	       goto nada;
 
 	  ego->cld2 = X(mkplan_d)(plnr,
 				  X(mkproblem_rdft_d)(
@@ -405,7 +410,7 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 				       buf, p->I + m*vl,
 				       R2HC));
 	  if (!ego->cld2)
-	       return 0;
+	       goto nada;
      }
      else /* if (m > n) */ {
 	  ego->cld1 = X(mkplan_d)(plnr,
@@ -417,7 +422,7 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 				       p->I + n*vl, buf,
 				       R2HC));
 	  if (!ego->cld1)
-	       return 0;
+	       goto nada;
 
 	  ego->cld2 = X(mkplan_d)(plnr,
 				  X(mkproblem_rdft_d)(
@@ -428,7 +433,7 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 				       p->I, p->I,
 				       R2HC));
 	  if (!ego->cld2)
-	       return 0;
+	       goto nada;
      }
 
      X(ops_add)(&ego->super.super.ops, &ego->cld1->ops, &ego->super.super.ops);
@@ -440,7 +445,12 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 	gcd is large and |n-m| are large, and vice-versa when |n-m| small): */
      ego->super.super.ops.other += vl*(X(iabs)(n-m)*ego->d - X(imax)(n,m))*4;
 
+     X(ifree)(buf);
      return 1;
+
+ nada:
+     X(ifree)(buf);
+     return 0;
 }
 
 static const transpose_adt adt_cut =
