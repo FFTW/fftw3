@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.36 2006-01-08 02:57:34 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.37 2006-01-08 05:16:20 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -28,13 +28,14 @@
 #include <string.h>		/* for memcpy() */
 #endif
 
+struct P_s;
+
 typedef struct {
      rdftapply apply;
      int (*applicable)(const problem_rdft *p, planner *plnr,
 		       int dim0, int dim1, int dim2, INT *nbuf);
+     int (*mkcldrn)(const problem_rdft *p, planner *plnr, struct P_s *ego);
      const char *nam;
-     transpose_func transpose;
-     cpy2d_func cpy2d;
 } transpose_adt;
 
 typedef struct {
@@ -42,7 +43,7 @@ typedef struct {
      const transpose_adt *adt;
 } S;
 
-typedef struct {
+typedef struct P_s {
      plan_rdft super;
      INT n, vl;
      INT s0, s1, vs;
@@ -50,6 +51,7 @@ typedef struct {
      INT nbuf; /* buffer size */
      INT nd, md, d; /* transpose_gcd params */
      INT fd;
+     plan *cld1, *cld2, *cld3; /* children, null if unused */
      const S *slv;
 } P;
 
@@ -193,8 +195,7 @@ static void apply_gcd(const plan *ego_, R *I, R *O)
      INT n = ego->nd, m = ego->md, d = ego->d;
      INT vl = ego->vl;
      R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
-     const transpose_adt *adt = ego->slv->adt;
-     cpy2d_func cpy2d = adt->cpy2d;
+     INT i, num_el = n*m*d*vl;
 
      A(ego->vs == 1 && ego->s1 == vl && ego->s0 == ego->m * vl
        && ego->n == n * d && ego->m == m * d);
@@ -206,42 +207,37 @@ static void apply_gcd(const plan *ego_, R *I, R *O)
 	In general, to transpose a p x q matrix, you should call this
 	routine with d = gcd(p, q), n = p/d, and m = q/d.  */
 
-     A(n > 0 && m > 0 && vl > 0 && d > 0);
-     if (d == 1) {
-	  cpy2d(I, buf, n, m*vl, vl, m, vl, n*vl, vl);
-	  memcpy(I, buf, m*n*vl*sizeof(R));
-     }
-     else {
-	  INT i, num_el = n*m*d*vl;
-	  
-	  /* treat as (d x n) x (d' x m) matrix.  (d' = d) */
-	  
-	  /* First, transpose d x (n x d') x m to d x (d' x n) x m,
-	     using the buf matrix.  This consists of d transposes
-	     of contiguous n x d' matrices of m-tuples. */
-	  if (n > 1) {
-	       for (i = 0; i < d; ++i) {
-		    cpy2d(I + i*num_el, buf, 
-			  n, d*(m*vl), (m*vl),
-			  d, (m*vl), n*(m*vl), (m*vl));
-		    memcpy(I + i*num_el, buf, num_el*sizeof(R));
-	       }
+     A(n > 0 && m > 0 && vl > 0);
+     A(d > 1);
+
+     /* treat as (d x n) x (d' x m) matrix.  (d' = d) */
+     
+     /* First, transpose d x (n x d') x m to d x (d' x n) x m,
+	using the buf matrix.  This consists of d transposes
+	of contiguous n x d' matrices of m-tuples. */
+     if (n > 1) {
+	  rdftapply cldapply = ((plan_rdft *) ego->cld1)->apply;
+	  for (i = 0; i < d; ++i) {
+	       cldapply(ego->cld1, I + i*num_el, buf);
+	       memcpy(I + i*num_el, buf, num_el*sizeof(R));
 	  }
-	  
-	  /* Now, transpose (d x d') x (n x m) to (d' x d) x (n x m), which
-	     is a square in-place transpose of n*m-tuples: */
-	  adt->transpose(I, d, d * (n*m*vl), (n*m*vl), (n*m*vl));
-	  
-	  /* Finally, transpose d' x ((d x n) x m) to d' x (m x (d x n)),
-	     using the buf matrix.  This consists of d' transposes
-	     of contiguous d*n x m matrices. */
-	  if (m > 1) {
-	       for (i = 0; i < d; ++i) {
-		    cpy2d(I + i*num_el, buf,
-			  (d*n), m*vl, vl,
-			  m, vl, (d*n)*vl, vl);
-		    memcpy(I + i*num_el, buf, num_el*sizeof(R));
-	       }
+     }
+     
+     /* Now, transpose (d x d') x (n x m) to (d' x d) x (n x m), which
+	is a square in-place transpose of n*m-tuples: */
+     {
+	  rdftapply cldapply = ((plan_rdft *) ego->cld2)->apply;
+	  cldapply(ego->cld2, I, I);
+     }
+     
+     /* Finally, transpose d' x ((d x n) x m) to d' x (m x (d x n)),
+	using the buf matrix.  This consists of d' transposes
+	of contiguous d*n x m matrices. */
+     if (m > 1) {
+	  rdftapply cldapply = ((plan_rdft *) ego->cld3)->apply;
+	  for (i = 0; i < d; ++i) {
+	       cldapply(ego->cld3, I + i*num_el, buf);
+	       memcpy(I + i*num_el, buf, num_el*sizeof(R));
 	  }
      }
 
@@ -253,39 +249,70 @@ static int applicable_gcd(const problem_rdft *p, planner *plnr,
 {
      INT n = p->vecsz->dims[dim0].n;
      INT m = p->vecsz->dims[dim1].n;
-     INT vl, vs;
+     INT d, vl, vs;
      get_transpose_vec(p, dim2, &vl, &vs);
-     *nbuf = n * (m / gcd(n, m)) * vl;
+     d = gcd(n, m);
+     *nbuf = n * (m / d) * vl;
      return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts */
 	     && n != m
+	     && d > 1
 	     && Ntuple_transposable(p->vecsz->dims + dim0,
 				    p->vecsz->dims + dim1,
 				    vl, vs));
 }
 
+static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
+{
+     INT n = ego->nd, m = ego->md, d = ego->d;
+     INT vl = ego->vl;
+     R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
+     INT num_el = n*m*d*vl;
+
+     if (n > 1) {
+	  ego->cld1 = X(mkplan_d)(plnr,
+				  X(mkproblem_rdft_d)(
+				       X(mktensor_0d)(),
+				       X(mktensor_3d)(n, d*m*vl, m*vl,
+						      d, m*vl, n*m*vl,
+						      m*vl, 1, 1),
+				       TAINT(p->I, num_el), buf,
+				       R2HC));
+	  if (!ego->cld1)
+	       return 0;
+     }
+
+     ego->cld2 = X(mkplan_d)(plnr,
+			     X(mkproblem_rdft_d)(
+				  X(mktensor_0d)(),
+				  X(mktensor_3d)(d, d*n*m*vl, n*m*vl,
+						 d, n*m*vl, d*n*m*vl,
+						 n*m*vl, 1, 1),
+				  p->I, p->I,
+				  R2HC));
+     if (!ego->cld2)
+	  return 0;
+
+     if (m > 1) {
+	  ego->cld3 = X(mkplan_d)(plnr,
+				  X(mkproblem_rdft_d)(
+				       X(mktensor_0d)(),
+				       X(mktensor_3d)(d*n, m*vl, vl,
+						      m, vl, d*n*vl,
+						      vl, 1, 1),
+				       TAINT(p->I, num_el), buf,
+				       R2HC));
+	  if (!ego->cld3)
+	       return 0;
+     }
+
+     return 1;
+}
+
 static const transpose_adt adt_gcd =
 {
-     apply_gcd, applicable_gcd,
-     "rdft-transpose-gcd",
-     X(transpose), X(cpy2d)
+     apply_gcd, applicable_gcd, mkcldrn_gcd,
+     "rdft-transpose-gcd"
 };
-
-
-static const transpose_adt adt_gcd_tiled =
-{
-     apply_gcd, applicable_gcd,
-     "rdft-transpose-gcd-tiled",
-     X(transpose_tiled), X(cpy2d_tiled)
-};
-
-
-static const transpose_adt adt_gcd_tiledbuf =
-{
-     apply_gcd, applicable_gcd,
-     "rdft-transpose-gcd-tiledbuf",
-     X(transpose_tiledbuf), X(cpy2d_tiledbuf)
-};
-
 
 /*************************************************************************/
 /* Cache-oblivious in-place transpose of non-square matrices, based on
@@ -307,31 +334,24 @@ static void apply_cut(const plan *ego_, R *I, R *O)
      INT n = ego->n, m = ego->m;
      INT vl = ego->vl;
      R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
-     const transpose_adt *adt = ego->slv->adt;
      A(ego->vs == 1 && ego->s1 == vl && ego->s0 == m * vl);
      UNUSED(O);
 
      /* Transpose the matrix I in-place, where I is an n x m matrix
 	of vl-tuples and buf contains min(n,m) * |n-m| * N elements. */
-     A(n > 0 && m > 0 && vl > 0);
+     A(n > 0 && m > 0 && vl > 0 && n != m);
      if (n > m) {
 	  memcpy(buf, I + m*(m*vl), (n-m)*(m*vl)*sizeof(R));
-	  adt->transpose(I, m, m * vl, vl, vl);
+	  ((plan_rdft *) ego->cld1)->apply(ego->cld1, I, I);
 	  unpack(I, m, n, vl);
-	  adt->cpy2d(buf, I + m*vl,
-		     n-m, m*vl, vl,
-		     m, vl, n*vl, vl);
+	  ((plan_rdft *) ego->cld2)->apply(ego->cld2, buf, I + m*vl);
      }
-     else if (m > n) {
-	  adt->cpy2d(I + n*vl, buf,
-		     n, m*vl, vl,
-		     m-n, vl, n*vl, vl);
+     else /* if (m > n) */ {
+	  ((plan_rdft *) ego->cld1)->apply(ego->cld1, I + n*vl, buf);
 	  pack(I, n, m, vl);
-	  adt->transpose(I, n, n*vl, vl, vl);
+	  ((plan_rdft *) ego->cld2)->apply(ego->cld2, I, I);
 	  memcpy(I + n*(n*vl), buf, (m-n)*(n*vl)*sizeof(R));
      }
-     else /* n == m */
-	  adt->transpose(I, n, n*vl, vl, vl);
 
      X(ifree)(buf);
 }
@@ -351,25 +371,66 @@ static int applicable_cut(const problem_rdft *p, planner *plnr,
 				    vl, vs));
 }
 
+static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
+{
+     INT n = ego->n, m = ego->m;
+     INT vl = ego->vl;
+     R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
+
+     if (n > m) {
+	  ego->cld1 = X(mkplan_d)(plnr,
+				  X(mkproblem_rdft_d)(
+				       X(mktensor_0d)(),
+				       X(mktensor_3d)(m, m*vl, vl,
+						      m, vl, m*vl,
+						      vl, 1, 1),
+				       p->I, p->I,
+				       R2HC));
+	  if (!ego->cld1)
+	       return 0;
+
+	  ego->cld2 = X(mkplan_d)(plnr,
+				  X(mkproblem_rdft_d)(
+				       X(mktensor_0d)(),
+				       X(mktensor_3d)(n-m, m*vl, vl,
+						      m, vl, n*vl,
+						      vl, 1, 1),
+				       buf, p->I + m*vl,
+				       R2HC));
+	  if (!ego->cld2)
+	       return 0;
+     }
+     else /* if (m > n) */ {
+	  ego->cld1 = X(mkplan_d)(plnr,
+				  X(mkproblem_rdft_d)(
+				       X(mktensor_0d)(),
+				       X(mktensor_3d)(n, m*vl, vl,
+						      m-n, vl, n*vl,
+						      vl, 1, 1),
+				       p->I + n*vl, buf,
+				       R2HC));
+	  if (!ego->cld1)
+	       return 0;
+
+	  ego->cld2 = X(mkplan_d)(plnr,
+				  X(mkproblem_rdft_d)(
+				       X(mktensor_0d)(),
+				       X(mktensor_3d)(n, n*vl, vl,
+						      n, vl, n*vl,
+						      vl, 1, 1),
+				       p->I, p->I,
+				       R2HC));
+	  if (!ego->cld2)
+	       return 0;
+     }
+
+     return 1;
+}
+
 static const transpose_adt adt_cut =
 {
-     apply_cut, applicable_cut,
-     "rdft-transpose-cut",
-     X(transpose), X(cpy2d)
-};
-
-static const transpose_adt adt_cut_tiled =
-{
-     apply_cut, applicable_cut,
-     "rdft-transpose-cut-tiled",
-     X(transpose_tiled), X(cpy2d_tiled)
-};
-
-static const transpose_adt adt_cut_tiledbuf =
-{
-     apply_cut, applicable_cut,
-     "rdft-transpose-cut-tiledbuf",
-     X(transpose_tiledbuf), X(cpy2d_tiledbuf)
+     apply_cut, applicable_cut, mkcldrn_cut,
+     "rdft-transpose-cut"
 };
 
 /*************************************************************************/
@@ -559,22 +620,47 @@ static int applicable_toms513(const problem_rdft *p, planner *plnr,
 				    vl, vs));
 }
 
+static int mkcldrn_toms513(const problem_rdft *p, planner *plnr, P *ego)
+{
+     UNUSED(p), UNUSED(plnr); UNUSED(ego);
+     return 1;
+}
+
 static const transpose_adt adt_toms513 =
 {
-     apply_toms513, applicable_toms513,
-     "rdft-transpose-toms513",
-     0, 0
+     apply_toms513, applicable_toms513, mkcldrn_toms513,
+     "rdft-transpose-toms513"
 };
 
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
 /* generic stuff: */
 
+static void awake(plan *ego_, enum wakefulness wakefulness)
+{
+     P *ego = (P *) ego_;
+     if (ego->cld1) AWAKE(ego->cld1, wakefulness);
+     if (ego->cld2) AWAKE(ego->cld2, wakefulness);
+     if (ego->cld3) AWAKE(ego->cld3, wakefulness);
+}
+
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s-%Dx%D%v)", ego->slv->adt->nam,
+     p->print(p, "(%s-%Dx%D%v", ego->slv->adt->nam,
 	      ego->n, ego->m, ego->vl);
+     if (ego->cld1) p->print(p, "%(%p%)", ego->cld1);
+     if (ego->cld2) p->print(p, "%(%p%)", ego->cld2);
+     if (ego->cld3) p->print(p, "%(%p%)", ego->cld3);
+     p->print(p, ")");
+}
+
+static void destroy(plan *ego_)
+{
+     P *ego = (P *) ego_;
+     X(plan_destroy_internal)(ego->cld3);
+     X(plan_destroy_internal)(ego->cld2);
+     X(plan_destroy_internal)(ego->cld1);
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -586,7 +672,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
 
      static const plan_adt padt = {
-	  X(rdft_solve), X(null_awake), print, X(plan_null_destroy)
+	  X(rdft_solve), awake, print, destroy
      };
 
      if (!applicable(ego_, p_, plnr, &dim0, &dim1, &dim2, &nbuf))
@@ -607,6 +693,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->fd = pln->s0 / pln->vl;
      pln->slv = ego;
 
+     pln->cld1 = pln->cld2 = pln->cld3 = 0;
+     if (!ego->adt->mkcldrn(p, plnr, pln)) {
+	  X(plan_destroy_internal)(&(pln->super.super));
+	  return 0;
+     }
+
      /* pln->vl * (2 loads + 2 stores) * (pln->n \choose 2) 
         (FIXME? underestimate for non-square) */
      X(ops_other)(2 * pln->vl * pln->n * (pln->m - 1), &pln->super.super.ops);
@@ -626,9 +718,7 @@ void X(rdft_vrank3_transpose_register)(planner *p)
 {
      unsigned i;
      static const transpose_adt *const adts[] = {
-	  &adt_gcd, &adt_gcd_tiled, &adt_gcd_tiledbuf,
-	  &adt_cut, &adt_cut_tiled, &adt_cut_tiledbuf,
-	  &adt_toms513
+	  &adt_gcd, &adt_cut, &adt_toms513
      };
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
           REGISTER_SOLVER(p, mksolver(adts[i]));
