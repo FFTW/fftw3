@@ -26,6 +26,8 @@ void X(tile2d)(INT n0l, INT n0u, INT n1l, INT n1u, INT tilesz,
 	       void *args)
 {
      INT d0, d1;
+
+     A(tilesz > 0); /* infinite loops otherwise */
      
  tail:
      d0 = n0u - n0l;
