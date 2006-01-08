@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.37 2006-01-08 05:16:20 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.38 2006-01-08 05:19:19 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -622,7 +622,7 @@ static int applicable_toms513(const problem_rdft *p, planner *plnr,
 
 static int mkcldrn_toms513(const problem_rdft *p, planner *plnr, P *ego)
 {
-     UNUSED(p), UNUSED(plnr); UNUSED(ego);
+     UNUSED(p); UNUSED(plnr); UNUSED(ego);
      return 1;
 }
 
