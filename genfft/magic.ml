@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.19 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: magic.ml,v 1.20 2006-01-08 16:44:52 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -52,13 +52,14 @@ let lisp_syntax = ref false
 let network_transposition = ref true
 let inklude = ref ""
 let generic_arith = ref false
-let list_schedule_threshold = ref 0
 let reorder_insns = ref false
 let reorder_loads = ref false
 let reorder_stores = ref false
 let precompute_twiddles = ref false
 let newsplit = ref false
 let standalone = ref false
+let pipeline_latency = ref 0
+let schedule_for_pipeline = ref false
 
 (* command-line parser for magic parameters *)
 let undocumented = " Undocumented voodoo parameter"
@@ -95,7 +96,8 @@ let speclist = [
   "-alternate-convolution", set_int alternate_convolution, undocumented;
   "-deep-collect-depth", set_int deep_collect_depth, undocumented;
   "-schedule-type", set_int schedule_type, undocumented;
-  "-list-schedule-threshold", set_int list_schedule_threshold, undocumented;
+  "-pipeline-latency", set_int pipeline_latency, undocumented;
+  "-schedule-for-pipeline", set_bool schedule_for_pipeline, undocumented;
 
   "-dif-split-radix", set_bool dif_split_radix, undocumented;
   "-dit-split-radix", unset_bool dif_split_radix, undocumented;

@@ -68,8 +68,8 @@ PRELUDE_COMMANDS_RDFT=cat $(COPYRIGHT) $(PRELUDE_RDFT)
 ASMPRELUDE_COMMANDS=cat $(COPYRIGHT) $(ASMPRELUDE)
 
 FLAGS_COMMON = -compact -variables 4
-DFT_FLAGS_COMMON = $(FLAGS_COMMON) 
-RDFT_FLAGS_COMMON = $(FLAGS_COMMON)
+DFT_FLAGS_COMMON = $(FLAGS_COMMON) -pipeline-latency 4
+RDFT_FLAGS_COMMON = $(FLAGS_COMMON) -pipeline-latency 4
 
 # cancel the hideous builtin rules that cause an infinite loop
 %: %.o

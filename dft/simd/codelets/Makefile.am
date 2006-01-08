@@ -88,7 +88,7 @@ SOLVTAB_NAME = X(solvtab_dft_simd)
 include $(top_srcdir)/support/Makefile.codelets
 
 if MAINTAINER_MODE
-GFLAGS = -simd $(FLAGS_COMMON)
+GFLAGS = -simd $(FLAGS_COMMON) -pipeline-latency 8
 
 n1fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_NOTW_C) $(GFLAGS) -n $* -name n1fv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@

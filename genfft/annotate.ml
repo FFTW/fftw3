@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.21 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: annotate.ml,v 1.22 2006-01-08 16:44:52 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.21 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: annotate.ml,v 1.22 2006-01-08 16:44:52 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -221,7 +221,54 @@ let collect_buddy_stores buddy_list sched =
     | _ -> failwith "collect_buddy_stores"
   in let (sched, _) = recur sched [] in
     sched
-  
+
+let schedule_for_pipeline sched =
+  let update_readytimes t (Assign (v, _)) ready_times = 
+    (v, (t + !Magic.pipeline_latency)) :: ready_times
+  and readyp t ready_times ((Assign (_, x)) as insn) =
+    List.for_all 
+      (fun var -> 
+	 try 
+	   (List.assq var ready_times) <= t
+	 with Not_found -> false)
+      (List.filter Variable.is_temporary (Expr.find_vars x))
+  in
+  let rec recur sched t ready_times delayed_instructions =
+    let (ready, not_ready) = 
+      List.partition (readyp t ready_times) delayed_instructions 
+    in match ready with
+      | a :: b -> 
+	  let (sched, t, ready_times, delayed_instructions) =
+	    recur sched (t+1) (update_readytimes t a ready_times)
+	      (b @ not_ready)
+	  in
+	    (Seq (Instr a, sched)), t, ready_times, delayed_instructions
+      | _ -> (match sched with
+		| Done -> (sched, t, ready_times, delayed_instructions)
+		| Instr a ->
+		    if (readyp t ready_times a) then
+		      (sched, (t+1), (update_readytimes t a ready_times),
+		       delayed_instructions)
+		    else
+		      (Done, t, ready_times, (a :: delayed_instructions))
+		| Seq (a, b) ->
+		    let (a, t, ready_times, delayed_instructions) =
+		      recur a t ready_times delayed_instructions 
+		    in
+		    let (b, t, ready_times, delayed_instructions) =
+		      recur b t ready_times delayed_instructions 
+		    in (Seq (a, b)), t, ready_times, delayed_instructions
+	        | _ -> failwith "schedule_for_pipeline")
+  in let rec recur_until_done sched t ready_times delayed_instructions =
+      let (sched, t, ready_times, delayed_instructions) = 
+	recur sched t ready_times delayed_instructions
+      in match delayed_instructions with
+	| [] -> sched
+	| _ -> 
+	    (Seq (sched,
+		  (recur_until_done Done (t+1) ready_times 
+		     delayed_instructions)))
+  in recur_until_done sched 0 [] []
   
 let rec rewrite_declarations force_declarations 
     (Annotate (_, _, declared, _, what)) =
@@ -273,6 +320,14 @@ let annotate list_of_buddy_stores schedule =
   in 
   let () = Util.info "begin annotate" in
   let x = linearize schedule in
+
+  let x =
+    if (!Magic.schedule_for_pipeline && !Magic.pipeline_latency > 0) then
+      schedule_for_pipeline x 
+    else
+      x
+  in
+
   let x = 
     if !Magic.reorder_insns then 
       linearize(anticipate_friends use_same_vars x) 
