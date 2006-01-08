@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.40 2006-01-08 20:39:28 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.41 2006-01-08 20:58:40 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -339,6 +339,12 @@ static const transpose_adt adt_gcd =
    For transposing an n x m matrix, requires scratch space equal to
    the size of the matrix times |n-m| / max(n,m).  See also
    transpose-gcd, above, if |n-m| * gcd(n,m) > max(n,m). */
+
+/* TODO: as a generalization, we could use the "cut" method to cut a non-
+   square matrix into another non-square matrix with a large gcd.  e.g.
+   2048x4097 could be cut into 2048x4096, which could then use transpose-gcd.
+   This may completely eliminate the cases in which the TOMS algorithm
+   is useful. */
 
 static void apply_cut(const plan *ego_, R *I, R *O)
 {
