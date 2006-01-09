@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.42 2006-01-09 04:58:23 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.43 2006-01-09 05:07:40 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -320,12 +320,12 @@ static const transpose_adt adt_gcd =
 
    The best case, and the one described by Dow, is for |n-m| small, in
    which case we transpose a square sub-matrix of size min(n,m),
-   followed by the remainder via a buffer.  This requires scratch
-   space equal to the size of the matrix times |n-m| / max(n,m).
+   handling the remainder via a buffer.  This requires scratch space
+   equal to the size of the matrix times |n-m| / max(n,m).
 
    As a generalization when |n-m| is not small, we also support cutting
    *both* dimensions to an nc x mc matrix which is *not* necessarily
-   square, but has a large gcd (which can therefore use transpose-gcd).
+   square, but has a large gcd (and can therefore use transpose-gcd).
 */
 
 static void apply_cut(const plan *ego_, R *I, R *O)
@@ -491,7 +491,7 @@ static const transpose_adt adt_cut =
 
 /*************************************************************************/
 /* In-place transpose routine from TOMS.  This routine is much slower
-   than the cache-obliviouss algorithm above, but is has the advantage
+   than e.g. the transpose-gcd algorithm above, but is has the advantage
    of requiring less buffer space for the case of gcd(nx,ny) small. 
 
    However, it has been superseded by the combination of the generalized
