@@ -556,20 +556,22 @@ int X(ithreads_init)(void)
 	  attr_changed = 1;
      }
 
-     /* Make sure threads parallelize (they don't by default on Solaris) */
+     /* Make sure threads parallelize (they don't by default on Solaris).
+	
+        Note, however that the POSIX standard does not *require*
+	implementations to support PTHREAD_SCOPE_SYSTEM.  They may
+        only support PTHREAD_SCOPE_PROCESS (e.g. IRIX, Cygwin).  In
+        this case, how the threads interact with other resources on
+        the system is undefined by the standard, and we have to
+        hope for the best. */
      err = pthread_attr_getscope(&fftw_pthread_attributes, &attr);
      if (err) return err;
      if (attr != PTHREAD_SCOPE_SYSTEM) {
 	  err = pthread_attr_setscope(&fftw_pthread_attributes,
 				      PTHREAD_SCOPE_SYSTEM);
-          /* IRIX lossage: PTHREAD_SCOPE_SYSTEM requires special
-             permissions, giving err == 1, but the default
-             (PTHREAD_SCOPE_PROCESS) already parallelizes over
-             multiple CPUs(?).  So, we ignore err == 1. */
 	  if (err == 0)
 	       attr_changed = 1;
-          else if (err != 1)
-               return err;
+          /* ignore other errors */
      }
 
      if (attr_changed)  /* we aren't using the defaults */
