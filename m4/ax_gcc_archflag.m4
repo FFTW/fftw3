@@ -43,10 +43,11 @@ AC_CACHE_VAL(ax_cv_gcc_archflag,
 [
 ax_cv_gcc_archflag="unknown"
 
-if test "$GCC" = yes -a "$cross_compiling" = no; then
+if test "$GCC" = yes; then
 
 if test "x$ax_gcc_arch" = xyes; then
 ax_gcc_arch=""
+if test "$cross_compiling" = no; then
 case $host_cpu in
   i386*) ax_gcc_arch=i386 ;;
   i486*) ax_gcc_arch=i486 ;;
@@ -148,10 +149,10 @@ case $host_cpu in
      ax_gcc_arch="$ax_gcc_arch powerpc"
      ;;
 esac
+fi # not cross-compiling
 fi # guess arch
 
 if test "x$ax_gcc_arch" != x -a "x$ax_gcc_arch" != xno; then
-
 for arch in $ax_gcc_arch; do
   if test "x[]m4_default([$1],yes)" = xyes; then # if we require portable code
     flags="-mtune=$arch"
@@ -168,7 +169,7 @@ for arch in $ax_gcc_arch; do
 done
 fi
 
-fi
+fi # $GCC=yes
 ])
 AC_MSG_CHECKING([for gcc architecture flag])
 AC_MSG_RESULT($ax_cv_gcc_archflag)
