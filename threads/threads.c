@@ -569,9 +569,8 @@ int X(ithreads_init)(void)
      if (attr != PTHREAD_SCOPE_SYSTEM) {
 	  err = pthread_attr_setscope(&fftw_pthread_attributes,
 				      PTHREAD_SCOPE_SYSTEM);
-	  if (err == 0)
-	       attr_changed = 1;
-          /* ignore other errors */
+	  if (err == 0) attr_changed = 1;
+          /* ignore errors */
      }
 
      if (attr_changed)  /* we aren't using the defaults */
