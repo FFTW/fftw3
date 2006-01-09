@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.269 2006-01-08 02:57:34 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.270 2006-01-09 17:04:04 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -632,6 +632,7 @@ struct planner_s {
 
      double timelimit; /* X(seconds)() at which to bail out */
      int timed_out; /* whether most recent search timed out */
+     int need_timeout_check;
 
      /* various statistics */
      int nplan;    /* number of plans evaluated */

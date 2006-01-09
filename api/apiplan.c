@@ -25,12 +25,6 @@ double X(timelimit) = 1e30;
 static plan *mkplan0(planner *plnr, unsigned flags, 
 		     problem *prb, int hash_info, wisdom_state_t wisdom_state)
 WITH_ALIGNED_STACK({
-     plan *pln;
-     double timelimit = plnr->timelimit;
-     
-     /* never time out of estimator, since it is required as a fallback */
-     if (flags & FFTW_ESTIMATE) plnr->timelimit = X(seconds)() + 1e30;
-     
      /* map API flags into FFTW flags */
      X(mapflags)(plnr, flags);
 
@@ -38,11 +32,7 @@ WITH_ALIGNED_STACK({
      plnr->wisdom_state = wisdom_state;
 
      /* create plan */
-     pln = plnr->adt->mkplan(plnr, prb);
-
-     plnr->timelimit = timelimit;
-
-     return pln;
+     return plnr->adt->mkplan(plnr, prb);
 })
 
 static plan *mkplan(planner *plnr, unsigned flags, problem *prb, int hash_info)

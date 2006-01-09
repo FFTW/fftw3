@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.178 2006-01-05 16:20:59 athena Exp $ */
+/* $Id: planner.c,v 1.179 2006-01-09 17:04:04 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -415,6 +415,7 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 
 	       pln->pcost = t;
 	       ego->pcost += t;
+	       ego->need_timeout_check = 1;
 	  }
      }
      
@@ -436,19 +437,48 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
      return pln;
 }
 
+static int timeout_p(planner *ego)
+{
+     /* do not timeout when estimating.  First, the estimator is the
+	planner of last resort.  Second, calling X(seconds)() is
+	slower than estimating */
+     if (!ESTIMATEP(ego)) {
+	  ego->need_timeout_check = 0;
+
+	  /* do not assume that X(seconds)() is monotonic */
+	  if (ego->timed_out)
+	       return 1;
+
+	  if (X(seconds)() >= ego->timelimit) {
+	       ego->timed_out = 1;
+	       return 1;
+	  }
+     }
+     return 0;
+}
+
 static plan *search0(planner *ego, problem *p, unsigned *slvndx, 
 		     const flags_t *flagsp)
 {
      plan *best = 0;
      int best_not_yet_timed = 1;
 
-     if (X(seconds)() > ego->timelimit) {
-	  ego->timed_out = 1;
+     /* Do not start a search if the planner timed out. This check is
+	necessary, lest the relaxation mechanism kick in */
+     if (timeout_p(ego))
 	  return 0;
-     }
 
      FORALL_SOLVERS_OF_KIND(p->adt->problem_kind, ego, s, sp, {
-	  plan *pln = invoke_solver(ego, p, s, flagsp);
+	  plan *pln;
+
+	  if (ego->need_timeout_check) 
+	       if (timeout_p(ego)) {
+		    X(plan_destroy_internal)(best);
+		    return 0;
+	       }
+
+	  pln = invoke_solver(ego, p, s, flagsp);
+
 	  if (pln) {
 	       /* read COULD_PRUNE_NOW_P because PLN may be destroyed
 		  before we use COULD_PRUNE_NOW_P */
@@ -773,6 +803,7 @@ planner *X(mkplanner)(void)
      p->flags.u = 0;
      p->flags.hash_info = 0;
      p->nthr = 1;
+     p->need_timeout_check = 0; /* not really needed */
 
      mkhashtab(&p->htab_blessed);
      mkhashtab(&p->htab_unblessed);
