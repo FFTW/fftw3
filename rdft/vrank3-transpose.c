@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.41 2006-01-08 20:58:40 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.42 2006-01-09 04:58:23 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -45,12 +45,10 @@ typedef struct {
 
 typedef struct P_s {
      plan_rdft super;
-     INT n, vl;
-     INT s0, s1, vs;
-     INT m;
+     INT n, m, vl; /* transpose n x m matrix of vl-tuples */
      INT nbuf; /* buffer size */
-     INT nd, md, d; /* transpose_gcd params */
-     INT fd;
+     INT nd, md, d; /* transpose-gcd params */
+     INT nc, mc; /* transpose-cut params */
      plan *cld1, *cld2, *cld3; /* children, null if unused */
      const S *slv;
 } P;
@@ -110,6 +108,9 @@ static int pickdim(const tensor *s, int *pdim0, int *pdim1, int *pdim2)
      return 0;
 }
 
+#define MINBUFDIV 9 /* min factor by which buffer is smaller than data */
+#define MAXBUF 65536 /* maximum non-ugly buffer */
+
 /* generic applicability function */
 static int applicable(const solver *ego_, const problem *p_, planner *plnr,
 		      int *dim0, int *dim1, int *dim2, INT *nbuf)
@@ -139,8 +140,8 @@ static int applicable(const solver *ego_, const problem *p_, planner *plnr,
 
 	     /* buffers too big are UGLY */
 	     && ((!NO_UGLYP(plnr) && !CONSERVE_MEMORYP(plnr))
-		 || *nbuf <= 65536
-		 || *nbuf * 8 < X(tensor_sz)(p->vecsz))
+		 || *nbuf <= MAXBUF
+		 || *nbuf * MINBUFDIV <= X(tensor_sz)(p->vecsz))
 	  );
 }
 
@@ -153,26 +154,6 @@ static void get_transpose_vec(const problem_rdft *p, int dim2, INT *vl,INT *vs)
 	  *vl = p->vecsz->dims[dim2].n;
 	  *vs = p->vecsz->dims[dim2].is; /* == os */
      }  
-}
-
-/*************************************************************************/
-
-/* Convert an n x n square matrix A between "packed" (n x n) and
-   "unpacked" (n x fda) formats.  The "padding" elements at the ends
-   of the rows are not preserved. */
-
-static void pack(R *A, INT n, INT fda, INT N)
-{
-     INT i;
-     for (i = 0; i < n; ++i)
-	  memmove(A + (n*N) * i, A + (fda*N) * i, sizeof(R) * (n*N));
-}
-
-static void unpack(R *A, INT n, INT fda, INT N)
-{
-     INT i;
-     for (i = n-1; i >= 0; --i)
-	  memmove(A + (fda*N) * i, A + (n*N) * i, sizeof(R) * (n*N));
 }
 
 /*************************************************************************/
@@ -197,8 +178,7 @@ static void apply_gcd(const plan *ego_, R *I, R *O)
      R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
      INT i, num_el = n*m*d*vl;
 
-     A(ego->vs == 1 && ego->s1 == vl && ego->s0 == ego->m * vl
-       && ego->n == n * d && ego->m == m * d);
+     A(ego->n == n * d && ego->m == m * d);
      UNUSED(O);
 
      /* Transpose the matrix I in-place, where I is an (n*d) x (m*d) matrix
@@ -327,51 +307,68 @@ static const transpose_adt adt_gcd =
 };
 
 /*************************************************************************/
-/* Cache-oblivious in-place transpose of non-square matrices, based on
-   transposing a square sub-matrix first and then transposing the
-   remainder with the help of a buffer.
+/* Cache-oblivious in-place transpose of non-square n x m matrices,
+   based on transposing a sub-matrix first and then transposing the
+   remainder(s) with the help of a buffer.  See also transpose-gcd,
+   above, if gcd(n,m) is large.
 
    This algorithm is related to algorithm V3 from Murray Dow,
    "Transposing a matrix on a vector computer," Parallel Computing 21
-   (12), 1997-2005 (1995), with the modification that we use
-   cache-oblivious recursive transpose subroutines.
+   (12), 1997-2005 (1995), with the modifications that we use
+   cache-oblivious recursive transpose subroutines and we have the
+   generalization for large |n-m| below.
 
-   For transposing an n x m matrix, requires scratch space equal to
-   the size of the matrix times |n-m| / max(n,m).  See also
-   transpose-gcd, above, if |n-m| * gcd(n,m) > max(n,m). */
+   The best case, and the one described by Dow, is for |n-m| small, in
+   which case we transpose a square sub-matrix of size min(n,m),
+   followed by the remainder via a buffer.  This requires scratch
+   space equal to the size of the matrix times |n-m| / max(n,m).
 
-/* TODO: as a generalization, we could use the "cut" method to cut a non-
-   square matrix into another non-square matrix with a large gcd.  e.g.
-   2048x4097 could be cut into 2048x4096, which could then use transpose-gcd.
-   This may completely eliminate the cases in which the TOMS algorithm
-   is useful. */
+   As a generalization when |n-m| is not small, we also support cutting
+   *both* dimensions to an nc x mc matrix which is *not* necessarily
+   square, but has a large gcd (which can therefore use transpose-gcd).
+*/
 
 static void apply_cut(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     INT n = ego->n, m = ego->m;
-     INT vl = ego->vl;
-     R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
-     A(ego->vs == 1 && ego->s1 == vl && ego->s0 == m * vl);
+     INT n = ego->n, m = ego->m, nc = ego->nc, mc = ego->mc, vl = ego->vl;
+     INT i;
+     R *buf1 = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
      UNUSED(O);
 
-     /* Transpose the matrix I in-place, where I is an n x m matrix
-	of vl-tuples and buf contains min(n,m) * |n-m| * N elements. */
-     A(n > 0 && m > 0 && vl > 0 && n != m);
-     if (n > m) {
-	  memcpy(buf, I + m*(m*vl), (n-m)*(m*vl)*sizeof(R));
-	  ((plan_rdft *) ego->cld1)->apply(ego->cld1, I, I);
-	  unpack(I, m, n, vl);
-	  ((plan_rdft *) ego->cld2)->apply(ego->cld2, buf, I + m*vl);
-     }
-     else /* if (m > n) */ {
-	  ((plan_rdft *) ego->cld1)->apply(ego->cld1, I + n*vl, buf);
-	  pack(I, n, m, vl);
-	  ((plan_rdft *) ego->cld2)->apply(ego->cld2, I, I);
-	  memcpy(I + n*(n*vl), buf, (m-n)*(n*vl)*sizeof(R));
+     if (m > mc) {
+	  ((plan_rdft *) ego->cld1)->apply(ego->cld1, I + mc*vl, buf1);
+	  for (i = 0; i < nc; ++i)
+	       memmove(I + (mc*vl) * i, I + (m*vl) * i, sizeof(R) * (mc*vl));
      }
 
-     X(ifree)(buf);
+     ((plan_rdft *) ego->cld2)->apply(ego->cld2, I, I); /* nc x mc transpose */
+     
+     if (n > nc) {
+	  R *buf2 = buf1 + (m-mc)*(nc*vl); /* FIXME: force better alignment? */
+	  memcpy(buf2, I + nc*(m*vl), (n-nc)*(m*vl)*sizeof(R));
+	  for (i = mc-1; i >= 0; --i)
+	       memmove(I + (n*vl) * i, I + (nc*vl) * i, sizeof(R) * (n*vl));
+	  ((plan_rdft *) ego->cld3)->apply(ego->cld3, buf2, I + nc*vl);
+     }
+
+     if (m > mc) {
+	  if (n > nc)
+	       for (i = mc; i < m; ++i)
+		    memcpy(I + i*(n*vl), buf1 + (i-mc)*(nc*vl),
+			   (nc*vl)*sizeof(R));
+	  else
+	       memcpy(I + mc*(n*vl), buf1, (m-mc)*(n*vl)*sizeof(R));
+     }
+
+     X(ifree)(buf1);
+}
+
+/* only cut one dimension if the resulting buffer is small enough */
+static int cut1(INT n, INT m, INT vl)
+{
+     return (X(imax)(n,m) >= X(iabs)(n-m) * MINBUFDIV
+	     || X(imin)(n,m) * X(iabs)(n-m) * vl <= MAXBUF);
 }
 
 static int applicable_cut(const problem_rdft *p, planner *plnr,
@@ -381,9 +378,13 @@ static int applicable_cut(const problem_rdft *p, planner *plnr,
      INT m = p->vecsz->dims[dim1].n;
      INT vl, vs;
      get_transpose_vec(p, dim2, &vl, &vs);
-     *nbuf = X(imin)(n, m) * X(iabs)(n - m) * vl;
+     *nbuf = 0; /* always small enough to be non-UGLY (?) */
      return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts? */
 	     && n != m
+	     
+	     /* don't call transpose-cut recursively (avoid inf. loops) */
+	     && (cut1(n, m, vl) || gcd(n, m) < MINBUFDIV)
+
 	     && Ntuple_transposable(p->vecsz->dims + dim0,
 				    p->vecsz->dims + dim1,
 				    vl, vs));
@@ -391,65 +392,84 @@ static int applicable_cut(const problem_rdft *p, planner *plnr,
 
 static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 {
-     INT n = ego->n, m = ego->m;
+     INT n = ego->n, m = ego->m, nc, mc;
      INT vl = ego->vl;
-     R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
+     R *buf;
 
-     if (n > m) {
+     /* pick the "best" cut */
+     if (cut1(n, m, vl)) {
+	  nc = mc = X(imin)(n,m);
+     }
+     else {
+	  INT dc, ns, ms;
+	  dc = gcd(m, n); nc = n; mc = m;
+	  /* search for cut with largest gcd
+	     (FIXME: different optimality criteria? larger search range?) */
+	  for (ms = m; ms > 0 && ms > m - 32; --ms) {
+	       for (ns = n; ns > 0 && ns > n - 32; --ns) {
+		    INT ds = gcd(ms, ns);
+		    if (ds > dc) {
+			 dc = ds; nc = ns; mc = ms;
+			 if (dc == X(imin)(ns, ms))
+			      break; /* cannot get larger than this */
+		    }
+	       }
+	       if (dc == X(imin)(n, ms))
+		    break; /* cannot get larger than this */
+	  }
+     }
+     ego->nc = nc;
+     ego->mc = mc;
+     ego->nbuf = (m-mc)*(nc*vl) + (n-nc)*(m*vl);
+
+     buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
+
+     if (m > mc) {
 	  ego->cld1 = X(mkplan_d)(plnr,
 				  X(mkproblem_rdft_d)(
 				       X(mktensor_0d)(),
-				       X(mktensor_3d)(m, m*vl, vl,
-						      m, vl, m*vl,
+				       X(mktensor_3d)(nc, m*vl, vl,
+						      m-mc, vl, nc*vl,
 						      vl, 1, 1),
-				       p->I, p->I,
+				       p->I + mc*vl, buf,
 				       R2HC));
 	  if (!ego->cld1)
 	       goto nada;
+	  X(ops_add)(&ego->super.super.ops, &ego->cld1->ops, 
+		     &ego->super.super.ops);
 
-	  ego->cld2 = X(mkplan_d)(plnr,
+     }
+
+     ego->cld2 = X(mkplan_d)(plnr,
+			     X(mkproblem_rdft_d)(
+				  X(mktensor_0d)(),
+				  X(mktensor_3d)(nc, mc*vl, vl,
+						 mc, vl, nc*vl,
+						 vl, 1, 1),
+				  p->I, p->I,
+				  R2HC));
+     if (!ego->cld2)
+	  goto nada;
+     X(ops_add)(&ego->super.super.ops, &ego->cld2->ops, &ego->super.super.ops);
+
+     if (n > nc) {
+	  ego->cld3 = X(mkplan_d)(plnr,
 				  X(mkproblem_rdft_d)(
 				       X(mktensor_0d)(),
-				       X(mktensor_3d)(n-m, m*vl, vl,
+				       X(mktensor_3d)(n-nc, m*vl, vl,
 						      m, vl, n*vl,
 						      vl, 1, 1),
-				       buf, p->I + m*vl,
+				       buf + (m-mc)*(nc*vl), p->I + nc*vl,
 				       R2HC));
-	  if (!ego->cld2)
+	  if (!ego->cld3)
 	       goto nada;
-     }
-     else /* if (m > n) */ {
-	  ego->cld1 = X(mkplan_d)(plnr,
-				  X(mkproblem_rdft_d)(
-				       X(mktensor_0d)(),
-				       X(mktensor_3d)(n, m*vl, vl,
-						      m-n, vl, n*vl,
-						      vl, 1, 1),
-				       p->I + n*vl, buf,
-				       R2HC));
-	  if (!ego->cld1)
-	       goto nada;
-
-	  ego->cld2 = X(mkplan_d)(plnr,
-				  X(mkproblem_rdft_d)(
-				       X(mktensor_0d)(),
-				       X(mktensor_3d)(n, n*vl, vl,
-						      n, vl, n*vl,
-						      vl, 1, 1),
-				       p->I, p->I,
-				       R2HC));
-	  if (!ego->cld2)
-	       goto nada;
+	  X(ops_add)(&ego->super.super.ops, &ego->cld3->ops, 
+		     &ego->super.super.ops);
      }
 
-     X(ops_add)(&ego->super.super.ops, &ego->cld1->ops, &ego->super.super.ops);
-     X(ops_add)(&ego->super.super.ops, &ego->cld2->ops, &ego->super.super.ops);
-     ego->super.super.ops.other += 
-	  vl * X(imin)(n,m) * (X(iabs)(n-m) + X(imin)(n,m)) * 2;
-
-     /* heuristic penalty so that estimator prefers transpose-gcd when
-	gcd is large and |n-m| are large, and vice-versa when |n-m| small): */
-     ego->super.super.ops.other += vl*(X(iabs)(n-m)*ego->d - X(imax)(n,m))*4;
+     /* memcpy/memmove operations */
+     ego->super.super.ops.other += 2 * vl * (nc*mc * ((m > mc) + (n > nc))
+					     + (n-nc)*m + (m-mc)*nc);
 
      X(ifree)(buf);
      return 1;
@@ -465,10 +485,19 @@ static const transpose_adt adt_cut =
      "rdft-transpose-cut"
 };
 
+#define USE_TOMS513 0 /* define to include obsoleted(?) TOMS algorithm */
+
+#if USE_TOMS513
+
 /*************************************************************************/
 /* In-place transpose routine from TOMS.  This routine is much slower
-   than the cache-oblivious algorithm above, but is has the advantage
-   of requiring less buffer space for the case of gcd(nx,ny) small. */
+   than the cache-obliviouss algorithm above, but is has the advantage
+   of requiring less buffer space for the case of gcd(nx,ny) small. 
+
+   However, it has been superseded by the combination of the generalized
+   transpose-cut method with the transpose-gcd method, which can always
+   transpose with buffers a small fraction of the array size regardless
+   of gcd(nx,ny). */
 
 /*
  * TOMS Transpose.  Algorithm 513 (Revised version of algorithm 380).
@@ -630,7 +659,6 @@ static void apply_toms513(const plan *ego_, R *I, R *O)
      INT n = ego->n, m = ego->m;
      INT vl = ego->vl;
      R *buf = (R *)MALLOC(sizeof(R) * ego->nbuf, BUFFERS);
-     A(ego->vs == 1 && ego->s1 == vl && ego->s0 == m * vl);
      UNUSED(O);
      transpose_toms513(I, n, m, vl, (char *) (buf + 2*vl), (n+m)/2, buf);
      X(ifree)(buf);
@@ -646,6 +674,7 @@ static int applicable_toms513(const problem_rdft *p, planner *plnr,
      *nbuf = 2*vl 
 	  + ((n + m) / 2 * sizeof(char) + sizeof(R) - 1) / sizeof(R);
      return (!NO_SLOWP(plnr)
+	     && !NO_UGLYP(plnr) /* UGLY compared to cut+gcd method(?) */
 	     && n != m
 	     && Ntuple_transposable(p->vecsz->dims + dim0,
 				    p->vecsz->dims + dim1,
@@ -665,6 +694,8 @@ static const transpose_adt adt_toms513 =
      apply_toms513, applicable_toms513, mkcldrn_toms513,
      "rdft-transpose-toms513"
 };
+
+#endif /* USE_TOMS513 */
 
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
@@ -702,7 +733,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      const problem_rdft *p;
      int dim0, dim1, dim2;
-     INT nbuf;
+     INT nbuf, vs;
      P *pln;
 
      static const plan_adt padt = {
@@ -717,14 +748,11 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln->n = p->vecsz->dims[dim0].n;
      pln->m = p->vecsz->dims[dim1].n;
-     pln->s0 = p->vecsz->dims[dim0].is;
-     pln->s1 = p->vecsz->dims[dim1].is;
-     get_transpose_vec(p, dim2, &pln->vl, &pln->vs);
+     get_transpose_vec(p, dim2, &pln->vl, &vs);
      pln->nbuf = nbuf;
      pln->d = gcd(pln->n, pln->m);
      pln->nd = pln->n / pln->d;
      pln->md = pln->m / pln->d;
-     pln->fd = pln->s0 / pln->vl;
      pln->slv = ego;
 
      X(ops_zero)(&pln->super.super.ops); /* mkcldrn is responsible for ops */
@@ -750,7 +778,10 @@ void X(rdft_vrank3_transpose_register)(planner *p)
 {
      unsigned i;
      static const transpose_adt *const adts[] = {
-	  &adt_gcd, &adt_cut, &adt_toms513
+	  &adt_gcd, &adt_cut,
+#if USE_TOMS513
+	  &adt_toms513
+#endif
      };
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
           REGISTER_SOLVER(p, mksolver(adts[i]));
