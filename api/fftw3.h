@@ -47,7 +47,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.80 2006-01-10 01:00:47 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.81 2006-01-10 01:05:11 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -115,7 +115,7 @@ struct fftw_iodim_do_not_use_me {
 FFTW_DEFINE_COMPLEX(R, C);						   \
 									   \
 typedef struct X(plan_s) *X(plan);					   \
-FFTW_EXTERN X(timelimit);						   \
+FFTW_EXTERN double X(timelimit);					   \
 									   \
 typedef struct fftw_iodim_do_not_use_me X(iodim);			   \
 									   \
