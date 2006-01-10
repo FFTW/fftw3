@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.23 2006-01-10 04:21:06 stevenj Exp $ */
+/* $Id: timer.c,v 1.24 2006-01-10 04:21:21 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -86,7 +86,7 @@ double X(seconds)(void)
    on the clock() function is Windows, for which CLOCKS_PER_SEC is 1000
    for which the clock wraps once every 50 days.  Hopefully this is
    infrequent enough not to be a problem.  (On the occasions where it
-   wraps the fftw_timelimit will be ignored.) */
+   wraps the fftw_timelimit could be ignored.) */
 typedef clock_t seconds;
 
 static seconds getseconds(void) { return clock(); }
