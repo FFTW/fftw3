@@ -7,7 +7,7 @@ AM_INIT_AUTOMAKE(1.7)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AC_SUBST(SHARED_VERSION_INFO)
-AM_ENABLE_SHARED(no) dnl to hell with shared libraries
+AC_DISABLE_SHARED dnl to hell with shared libraries
 AC_CANONICAL_HOST
 
 dnl configure options
