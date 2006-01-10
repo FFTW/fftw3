@@ -24,6 +24,16 @@
 
 #define COMPILING_FFTW /* used for DLL symbol exporting in fftw3.h */
 
+/* when compiling with GNU libtool, DLL_EXPORT is #defined for compiling
+   the shared-library code.  In this case, we'll define FFTW_DLL to
+   add export attributes to the specified functions in fftw3.h
+   (these aren't actually needed by default, since libtool just exports
+   everything, but it doesn't hurt to do this in case we change
+   it at some point to export less) */
+#if defined(DLL_EXPORT)
+#  define FFTW_DLL
+#endif
+
 /* just in case: force <fftw3.h> not to use C99 complex numbers
    (#undef _Complex_I fails in xlc because _Complex_I is treated
    specially, and is defined even if <complex.h> is not included) */
