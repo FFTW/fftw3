@@ -24,13 +24,13 @@
 
 #define COMPILING_FFTW /* used for DLL symbol exporting in fftw3.h */
 
-/* when compiling with GNU libtool, DLL_EXPORT is #defined for compiling
-   the shared-library code.  In this case, we'll define FFTW_DLL to
-   add export attributes to the specified functions in fftw3.h
-   (these aren't actually needed by default, since libtool just exports
-   everything, but it doesn't hurt to do this in case we change
-   it at some point to export less) */
-#if defined(DLL_EXPORT)
+/* when compiling with GNU libtool on Windows, DLL_EXPORT is #defined
+   for compiling the shared-library code.  In this case, we'll #define
+   FFTW_DLL to add dllexport attributes to the specified functions in
+   fftw3.h (these aren't actually needed by default, since libtool
+   just exports everything, but it doesn't hurt to do this in case we
+   change it at some point to export less) */
+#ifdef DLL_EXPORT
 #  define FFTW_DLL
 #endif
 
