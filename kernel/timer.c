@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.22 2006-01-10 04:12:27 stevenj Exp $ */
+/* $Id: timer.c,v 1.23 2006-01-10 04:21:06 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -84,9 +84,9 @@ double X(seconds)(void)
 
 /* Note that the only system where we are likely to need to fall back
    on the clock() function is Windows, for which CLOCKS_PER_SEC is 1000
-   and we don't have to worry about the clock wrapping until 50 days
-   have elapsed, which should be far longer than the time to create any
-   single plan. */
+   for which the clock wraps once every 50 days.  Hopefully this is
+   infrequent enough not to be a problem.  (On the occasions where it
+   wraps the fftw_timelimit will be ignored.) */
 typedef clock_t seconds;
 
 static seconds getseconds(void) { return clock(); }
