@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.179 2006-01-09 17:04:04 athena Exp $ */
+/* $Id: planner.c,v 1.180 2006-01-10 03:27:37 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -136,13 +136,17 @@ static unsigned slookup(planner *ego, char *nam, int id)
 /* first hash function */
 static unsigned h1(const hashtab *ht, const md5sig s)
 {
-     return s[0] % ht->hashsiz;
+     unsigned h = s[0] % ht->hashsiz;
+     A(h == (s[0] % ht->hashsiz));
+     return h;
 }
 
 /* second hash function (for double hashing) */
 static unsigned h2(const hashtab *ht, const md5sig s)
 {
-     return 1U + s[1] % (ht->hashsiz - 1);
+     unsigned h = 1U + s[1] % (ht->hashsiz - 1);
+     A(h == (1U + s[1] % (ht->hashsiz - 1)));
+     return h;
 }
 
 static void md5hash(md5 *m, const problem *p, const planner *plnr)
