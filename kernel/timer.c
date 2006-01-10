@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.24 2006-01-10 04:21:21 stevenj Exp $ */
+/* $Id: timer.c,v 1.25 2006-01-10 05:03:32 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -28,88 +28,56 @@
 
 #ifndef WITH_SLOW_TIMER
 #  include "cycle.h"
-#else
-#  if TIME_WITH_SYS_TIME
-#   include <sys/time.h>
-#   include <time.h>
-#  else
-#   if HAVE_SYS_TIME_H
-#    include <sys/time.h>
-#   else
-#    include <time.h>
-#   endif
-#  endif
 #endif
 
 #ifndef FFTW_TIME_LIMIT
 #define FFTW_TIME_LIMIT 2.0  /* don't run for more than two seconds */
 #endif
 
-#ifdef HAVE_BSDGETTIMEOFDAY
-#ifndef HAVE_GETTIMEOFDAY
-#define gettimeofday BSDgettimeofday
-#define HAVE_GETTIMEOFDAY 1
-#endif
-#endif
-
-#if defined(HAVE_GETTIMEOFDAY) && !defined(HAVE_SECONDS_TIMER)
-typedef struct timeval seconds;
-
-static seconds getseconds(void)
+#if defined(HAVE_GETTIMEOFDAY)
+crude_time X(get_crude_time)(void)
 {
-     struct timeval tv;
+     crude_time tv;
      gettimeofday(&tv, 0);
      return tv;
 }
 
-static double elapsed_sec(seconds t1, seconds t0)
-{
-     return (double)(t1.tv_sec - t0.tv_sec) +
-	  (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6;
-}
+#define elapsed_sec(t1,t0) ((double)(t1.tv_sec - t0.tv_sec) +		\
+			    (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6)
 
-double X(seconds)(void)
+double X(elapsed_since)(crude_time t0)
 {
-     struct timeval tv;
-     gettimeofday(&tv, 0);
-     return (double)(tv.tv_sec) + (double)(tv.tv_usec) * 1.0e-6;
+     crude_time t1;
+     gettimeofday(&t1, 0);
+     return elapsed_sec(t1, t0);
 }
 
 #  define TIME_MIN_SEC 1.0e-2 /* from fftw2 */
-#  define HAVE_SECONDS_TIMER
-#endif
 
-#ifndef HAVE_SECONDS_TIMER
-#  include <time.h>
+#else /* !HAVE_GETTIMEOFDAY */
 
 /* Note that the only system where we are likely to need to fall back
    on the clock() function is Windows, for which CLOCKS_PER_SEC is 1000
-   for which the clock wraps once every 50 days.  Hopefully this is
-   infrequent enough not to be a problem.  (On the occasions where it
-   wraps the fftw_timelimit could be ignored.) */
-typedef clock_t seconds;
+   and thus the clock wraps once every 50 days.  This should hopefully
+   be longer than the time required to create any single plan! */
+crude_time X(get_crude_time)(void) { return clock(); }
 
-static seconds getseconds(void) { return clock(); }
+#define elapsed_sec(t1,t0) ((double) ((t1) - (t0)) / CLOCKS_PER_SEC)
 
-static double elapsed_sec(seconds t1, seconds t0)
+double X(elapsed_since)(crude_time t0)
 {
-     return ((double) (t1 - t0)) / CLOCKS_PER_SEC;
-}
-
-double X(seconds)(void)
-{
-     return ((double) (clock())) / CLOCKS_PER_SEC;
+     return elapsed_sec(clock(), t0);
 }
 
 #  define TIME_MIN_SEC 2.0e-1 /* from fftw2 */
-#  define HAVE_SECONDS_TIMER
-#endif
+
+#endif /* !HAVE_GETTIMEOFDAY */
 
 #ifdef WITH_SLOW_TIMER
 /* excruciatingly slow; only use this if there is no choice! */
-typedef seconds ticks;
-#  define getticks getseconds
-#  define elapsed elapsed_sec
+typedef crude_time ticks;
+#  define getticks X(get_crude_time)
+#  define elapsed(t1,t0) elapsed_sec(t1,t0)
 #  define TIME_MIN TIME_MIN_SEC
 #  define TIME_REPEAT 4 /* from fftw2 */
 #  define HAVE_TICK_COUNTER
@@ -140,7 +108,7 @@ typedef seconds ticks;
 
   double X(measure_execution_time)(plan *pln, const problem *p)
   {
-       seconds begin, now;
+       crude_time begin;
        double t, tmax, tmin;
        int iter;
        int repeat;
@@ -153,7 +121,7 @@ typedef seconds ticks;
 	    tmin = 1.0E10;
 	    tmax = -1.0E10;
 
-	    begin = getseconds();
+	    begin = X(get_crude_time)();
 	    /* repeat the measurement TIME_REPEAT times */
 	    for (repeat = 0; repeat < TIME_REPEAT; ++repeat) {
 		 t = measure(pln, p, iter);
@@ -167,8 +135,7 @@ typedef seconds ticks;
 		      tmax = t;
 
 		 /* do not run for too long */
-		 now = getseconds();
-		 t = elapsed_sec(now, begin);
+		 t = X(elapsed_since)(begin);
 
 		 if (t > FFTW_TIME_LIMIT)
 		      break;

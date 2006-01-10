@@ -84,8 +84,8 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 
      flags &= ~(FFTW_ESTIMATE | FFTW_MEASURE | FFTW_PATIENT | FFTW_EXHAUSTIVE);
 
-     plnr->timelimit = X(seconds)() + ((flags & FFTW_TIMELIMIT)
-				       ? X(timelimit) : 1e30);
+     plnr->start_time = X(get_crude_time)();
+     plnr->timelimit = (flags & FFTW_TIMELIMIT) ? X(timelimit) : 1e30;
 	  
      /* plan at incrementally increasing patience until we run out of time */
      for (pln = 0, flags_used_for_planning = 0; pat <= pat_max; ++pat) {

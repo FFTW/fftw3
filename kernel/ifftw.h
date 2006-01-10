@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.273 2006-01-10 04:20:26 athena Exp $ */
+/* $Id: ifftw.h,v 1.274 2006-01-10 05:03:32 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -254,6 +254,36 @@ extern int X(in_thread);
 #  define THREAD_ON 
 #  define THREAD_OFF 
 #endif
+
+/*-----------------------------------------------------------------------*/
+/* low-resolution clock */
+
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
+#ifdef HAVE_BSDGETTIMEOFDAY
+#ifndef HAVE_GETTIMEOFDAY
+#define gettimeofday BSDgettimeofday
+#define HAVE_GETTIMEOFDAY 1
+#endif
+#endif
+
+#if defined(HAVE_GETTIMEOFDAY)
+typedef struct timeval crude_time;
+#else
+typedef clock_t crude_time;
+#endif
+
+crude_time X(get_crude_time)(void);
+double X(elapsed_since)(crude_time t0); /* time in seconds since t0 */
 
 /*-----------------------------------------------------------------------*/
 /* ops.c: */
@@ -647,7 +677,8 @@ struct planner_s {
      int nthr;
      flags_t flags;
 
-     double timelimit; /* X(seconds)() at which to bail out */
+     crude_time start_time;
+     double timelimit; /* elapsed_since(start_time) at which to bail out */
      int timed_out; /* whether most recent search timed out */
      int need_timeout_check;
 
@@ -879,7 +910,6 @@ typedef void (*cpy2d_func)(R *I, R *O,
 void X(null_awake)(plan *ego, enum wakefulness wakefulness);
 double X(iestimate_cost)(const plan *pln);
 double X(measure_execution_time)(plan *pln, const problem *p);
-double X(seconds)(void);
 int X(alignment_of)(R *p);
 unsigned X(hash)(const char *s);
 INT X(compute_nbuf)(INT n, INT vl, INT nbuf, INT maxbufsz);

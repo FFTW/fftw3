@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.181 2006-01-10 03:57:16 stevenj Exp $ */
+/* $Id: planner.c,v 1.182 2006-01-10 05:03:32 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -444,16 +444,16 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
 static int timeout_p(planner *ego)
 {
      /* do not timeout when estimating.  First, the estimator is the
-	planner of last resort.  Second, calling X(seconds)() is
+	planner of last resort.  Second, calling X(elapsed_since)() is
 	slower than estimating */
      if (!ESTIMATEP(ego)) {
 	  ego->need_timeout_check = 0;
 
-	  /* do not assume that X(seconds)() is monotonic */
+	  /* do not assume that X(elapsed_since)() is monotonic */
 	  if (ego->timed_out)
 	       return 1;
 
-	  if (X(seconds)() >= ego->timelimit) {
+	  if (X(elapsed_since)(ego->start_time) >= ego->timelimit) {
 	       ego->timed_out = 1;
 	       return 1;
 	  }
