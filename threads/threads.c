@@ -96,9 +96,25 @@
 
 */
 
+/************************** MP directive Threads ****************************/
+
+#if defined(USING_OPENMP_THREADS) || defined(USING_SGIMP_THREADS)
+
+/* Use MP compiler directives to induce parallelism, in which case
+   we don't need any of the thread spawning/waiting macros: */
+
+typedef void * (*fftw_thr_function) (void *);
+
+typedef char fftw_thr_id;  /* dummy */
+
+#define fftw_thr_spawn(tid_ptr, proc, data) ((proc)(data))
+#define fftw_thr_wait(tid) (0) /* do nothing */
+
+#define USING_COMPILER_THREADS 1
+
 /************************** Solaris Threads ****************************/
       
-#if defined(USING_SOLARIS_THREADS)
+#elif defined(USING_SOLARIS_THREADS)
 
 /* Solaris threads glue.  Tested. */
 
@@ -252,22 +268,6 @@ typedef cthread_t fftw_thr_id;
      *(tid_ptr) = cthread_fork(proc, (any_t) (data))
 
 #define fftw_thr_wait(tid) cthread_join(tid)
-
-/************************** MP directive Threads ****************************/
-
-#elif defined(USING_OPENMP_THREADS) || defined(USING_SGIMP_THREADS)
-
-/* Use MP compiler directives to induce parallelism, in which case
-   we don't need any of the thread spawning/waiting macros: */
-
-typedef void * (*fftw_thr_function) (void *);
-
-typedef char fftw_thr_id;  /* dummy */
-
-#define fftw_thr_spawn(tid_ptr, proc, data) ((proc)(data))
-#define fftw_thr_wait(tid) (0) /* do nothing */
-
-#define USING_COMPILER_THREADS 1
 
 /************************** POSIX Threads ****************************/
 
