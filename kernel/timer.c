@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.25 2006-01-10 05:03:32 stevenj Exp $ */
+/* $Id: timer.c,v 1.26 2006-01-10 05:14:00 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -108,8 +108,6 @@ typedef crude_time ticks;
 
   double X(measure_execution_time)(plan *pln, const problem *p)
   {
-       crude_time begin;
-       double t, tmax, tmin;
        int iter;
        int repeat;
 
@@ -118,13 +116,12 @@ typedef crude_time ticks;
 
   start_over:
        for (iter = 1; iter; iter *= 2) {
-	    tmin = 1.0E10;
-	    tmax = -1.0E10;
+	    double tmin = 1.0E10, tmax = -1.0E10;
+	    crude_time begin = X(get_crude_time)();
 
-	    begin = X(get_crude_time)();
 	    /* repeat the measurement TIME_REPEAT times */
 	    for (repeat = 0; repeat < TIME_REPEAT; ++repeat) {
-		 t = measure(pln, p, iter);
+		 double t = measure(pln, p, iter);
 
 		 if (t < 0)
 		      goto start_over;
@@ -135,9 +132,7 @@ typedef crude_time ticks;
 		      tmax = t;
 
 		 /* do not run for too long */
-		 t = X(elapsed_since)(begin);
-
-		 if (t > FFTW_TIME_LIMIT)
+		 if (X(elapsed_since)(begin) > FFTW_TIME_LIMIT)
 		      break;
 	    }
 
