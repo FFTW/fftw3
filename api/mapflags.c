@@ -131,4 +131,8 @@ void X(mapflags)(planner *plnr, unsigned flags)
      /* enforce l <= u  */
      PLNR_L(plnr) = l;
      PLNR_U(plnr) = u | l;
+
+     /* assert that the conversion didn't lose bits */
+     A(PLNR_L(plnr) == l);
+     A(PLNR_U(plnr) == (u | l));
 }
