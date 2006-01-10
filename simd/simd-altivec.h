@@ -57,17 +57,17 @@ static inline V VMUL(V a, V b)
 
 static inline V VFMS(V a, V b, V c) { return VSUB(VMUL(a, b), c); }
 
-static inline V LDA(const R *x, int ivs, const R *aligned_like) 
+static inline V LDA(const R *x, INT ivs, const R *aligned_like) 
 {
      UNUSED(ivs);
      UNUSED(aligned_like);
      return vec_ld(0, x);
 }
 
-static inline V LD(const R *x, int ivs, const R *aligned_like) 
+static inline V LD(const R *x, INT ivs, const R *aligned_like) 
 {
      /* common subexpressions */
-     const int fivs = sizeof(R) * ivs;
+     const INT fivs = sizeof(R) * ivs;
        /* you are not expected to understand this: */
      const vector unsigned int perm = VLIT(0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
      vector unsigned char ml = vec_lvsr(fivs + 8, aligned_like);
@@ -87,22 +87,22 @@ static inline void STH(R *x, V v, R *aligned_like)
      vec_ste(v, sizeof(R), x);
 }
 
-static inline void STL(R *x, V v, int ovs, R *aligned_like)
+static inline void STL(R *x, V v, INT ovs, R *aligned_like)
 {
-     const int fovs = sizeof(R) * ovs;
+     const INT fovs = sizeof(R) * ovs;
      v = vec_perm(v, v, vec_lvsr(fovs + 8, aligned_like));
      vec_ste(v, fovs, x);
      vec_ste(v, sizeof(R) + fovs, x);
 }
 
-static inline void STA(R *x, V v, int ovs, R *aligned_like) 
+static inline void STA(R *x, V v, INT ovs, R *aligned_like) 
 {
      UNUSED(ovs);
      UNUSED(aligned_like);
      vec_st(v, 0, x);
 }
 
-static inline void ST(R *x, V v, int ovs, R *aligned_like) 
+static inline void ST(R *x, V v, INT ovs, R *aligned_like) 
 {
      STH(x, v, aligned_like);
      STL(x, v, ovs, aligned_like);
@@ -110,9 +110,9 @@ static inline void ST(R *x, V v, int ovs, R *aligned_like)
 
 #define STM2(x, v, ovs, aligned_like) /* no-op */
 
-static inline void STN2(R *x, V v0, V v1, int ovs)
+static inline void STN2(R *x, V v0, V v1, INT ovs)
 {
-     const int fovs = sizeof(R) * ovs;
+     const INT fovs = sizeof(R) * ovs;
      const vector unsigned int even = 
 	  VLIT(0x00010203, 0x04050607, 0x10111213, 0x14151617);
      const vector unsigned int odd = 
@@ -123,9 +123,9 @@ static inline void STN2(R *x, V v0, V v1, int ovs)
 
 #define STM4(x, v, ovs, aligned_like) /* no-op */
 
-static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
+static inline void STN4(R *x, V v0, V v1, V v2, V v3, INT ovs)
 {
-     const int fovs = sizeof(R) * ovs;
+     const INT fovs = sizeof(R) * ovs;
      V x0 = vec_mergeh(v0, v2);
      V x1 = vec_mergel(v0, v2);
      V x2 = vec_mergeh(v1, v3);

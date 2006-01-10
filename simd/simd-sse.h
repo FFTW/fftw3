@@ -83,7 +83,7 @@ union uvec {
    (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
 
-static inline V LD(const R *x, int ivs, const R *aligned_like)
+static inline V LD(const R *x, INT ivs, const R *aligned_like)
 {
      V var;
      (void)aligned_like; /* UNUSED */
@@ -92,21 +92,21 @@ static inline V LD(const R *x, int ivs, const R *aligned_like)
      return var;
 }
 
-static inline V LDA(const R *x, int ivs, const R *aligned_like)
+static inline V LDA(const R *x, INT ivs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
      (void)ivs; /* UNUSED */
      return *(const V *)x;
 }
 
-static inline void ST(R *x, V v, int ovs, const R *aligned_like)
+static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
      STOREL(x, v);
      STOREH(x + ovs, v);
 }
 
-static inline void STA(R *x, V v, int ovs, const R *aligned_like)
+static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
      (void)ovs; /* UNUSED */
@@ -115,7 +115,7 @@ static inline void STA(R *x, V v, int ovs, const R *aligned_like)
 
 #if 0
 /* this should be faster but it isn't. */
-static inline void STN2(R *x, V v0, V v1, int ovs)
+static inline void STN2(R *x, V v0, V v1, INT ovs)
 {
      STA(x, SHUFPS(v0, v1, SHUFVAL(0, 1, 0, 1)), ovs, 0);
      STA(x + ovs, SHUFPS(v0, v1, SHUFVAL(2, 3, 2, 3)), ovs, 0);
@@ -126,7 +126,7 @@ static inline void STN2(R *x, V v0, V v1, int ovs)
 
 #define STM4(x, v, ovs, aligned_like) /* no-op */
 
-static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
+static inline void STN4(R *x, V v0, V v1, V v2, V v3, INT ovs)
 {
      V x0, x1, x2, x3;
      x0 = UNPCKL(v0, v2);

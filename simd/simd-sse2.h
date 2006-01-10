@@ -73,14 +73,14 @@ union uvec {
      V v;
 };
 
-static inline V LDA(const R *x, int ivs, const R *aligned_like)
+static inline V LDA(const R *x, INT ivs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
      (void)ivs; /* UNUSED */
      return *(const V *)x;
 }
 
-static inline void STA(R *x, V v, int ovs, const R *aligned_like)
+static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
      (void)ovs; /* UNUSED */
@@ -94,7 +94,7 @@ static inline void STA(R *x, V v, int ovs, const R *aligned_like)
 #define STN2(x, v0, v1, ovs) /* nop */
 
 #define SSE2_USE_STM4
-static inline void STM4(R *x, V v, int ovs, const R *aligned_like)
+static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
 #ifdef SSE2_USE_STM4
@@ -103,7 +103,7 @@ static inline void STM4(R *x, V v, int ovs, const R *aligned_like)
 #endif
 }
 
-static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
+static inline void STN4(R *x, V v0, V v1, V v2, V v3, INT ovs)
 {
      (void)x;   /* UNUSED */
      (void)v0;  /* UNUSED */
