@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.184 2006-01-10 13:59:22 athena Exp $ */
+/* $Id: planner.c,v 1.185 2006-01-10 14:13:20 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -639,7 +639,7 @@ static plan *mkplan(planner *ego, problem *p)
      }
 
  do_search:
-     /* cannot search in WISDOM_IS_ONLY mode */
+     /* cannot search in WISDOM_ONLY mode */
      if (ego->wisdom_state == WISDOM_ONLY)
 	  goto wisdom_is_bogus;
 
