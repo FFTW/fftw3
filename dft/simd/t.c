@@ -72,7 +72,7 @@ const ct_genus X(dft_t1bsimd_genus) = { okp_t1b, VL };
 
 /* use t2* codelets only when n = m*radix is small, because
    t2* codelets use ~2n twiddle factors (instead of ~n) */
-static int small_enough(const ct_desc *d, int m)
+static int small_enough(const ct_desc *d, INT m)
 {
      return m * d->radix <= 16384;
 }
