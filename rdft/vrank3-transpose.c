@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.43 2006-01-09 05:07:40 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.44 2006-01-10 23:44:28 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, square and non-square in-place transposition  */
 
@@ -371,6 +371,8 @@ static int cut1(INT n, INT m, INT vl)
 	     || X(imin)(n,m) * X(iabs)(n-m) * vl <= MAXBUF);
 }
 
+#define CUT_NSRCH 32 /* range of sizes to search for possible cuts */
+
 static int applicable_cut(const problem_rdft *p, planner *plnr,
 			  int dim0, int dim1, int dim2, INT *nbuf)
 {
@@ -379,11 +381,16 @@ static int applicable_cut(const problem_rdft *p, planner *plnr,
      INT vl, vs;
      get_transpose_vec(p, dim2, &vl, &vs);
      *nbuf = 0; /* always small enough to be non-UGLY (?) */
+     A(MINBUFDIV <= CUT_NSRCH); /* assumed to avoid inf. loops below */
      return (!NO_SLOWP(plnr) /* FIXME: not really SLOW for large 1d ffts? */
 	     && n != m
 	     
-	     /* don't call transpose-cut recursively (avoid inf. loops) */
-	     && (cut1(n, m, vl) || gcd(n, m) < MINBUFDIV)
+	     /* Don't call transpose-cut recursively (avoid inf. loops):
+	        the non-square sub-transpose produced when !cut1
+	        should always have gcd(n,m) >= min(CUT_NSRCH,n,m),
+	        for which transpose-gcd is applicable */
+	     && (cut1(n, m, vl)
+		 || gcd(n, m) < X(imin)(MINBUFDIV, X(imin)(n,m)))
 
 	     && Ntuple_transposable(p->vecsz->dims + dim0,
 				    p->vecsz->dims + dim1,
@@ -404,9 +411,9 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 	  INT dc, ns, ms;
 	  dc = gcd(m, n); nc = n; mc = m;
 	  /* search for cut with largest gcd
-	     (FIXME: different optimality criteria? larger search range?) */
-	  for (ms = m; ms > 0 && ms > m - 32; --ms) {
-	       for (ns = n; ns > 0 && ns > n - 32; --ns) {
+	     (FIXME: different optimality criteria? different search range?) */
+	  for (ms = m; ms > 0 && ms > m - CUT_NSRCH; --ms) {
+	       for (ns = n; ns > 0 && ns > n - CUT_NSRCH; --ns) {
 		    INT ds = gcd(ms, ns);
 		    if (ds > dc) {
 			 dc = ds; nc = ns; mc = ms;
@@ -417,6 +424,7 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 	       if (dc == X(imin)(n, ms))
 		    break; /* cannot get larger than this */
 	  }
+	  A(dc >= X(imin)(CUT_NSRCH, X(imin)(n, m)));
      }
      ego->nc = nc;
      ego->mc = mc;
