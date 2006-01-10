@@ -36,6 +36,7 @@ $(CODLIST): Makefile
 	) >$@
 
 # only delete codlist.c in maintainer-mode, since it is included in the dist
+# FIXME: is there a way to delete in 'make clean' only when builddir != srcdir?
 maintainer-clean-local:
 	rm -f $(CODLIST)
 
