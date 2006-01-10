@@ -35,8 +35,9 @@ $(CODLIST): Makefile
 	echo "};";							\
 	) >$@
 
-clean-local:
-	rm -f codlist.c
+# only delete codlist.c in maintainer-mode, since it is included in the dist
+maintainer-clean-local:
+	rm -f $(CODLIST)
 
 if MAINTAINER_MODE
 
