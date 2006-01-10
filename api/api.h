@@ -71,10 +71,11 @@ int X(many_kosherp)(int rnk, const int *n, int howmany);
 int X(guru_kosherp)(int rank, const X(iodim) *dims,
 		    int howmany_rank, const X(iodim) *howmany_dims);
 
+/* Note: FFTW_EXTERN is used for "internal" functions used in tests/hook.c */
 
-printer *X(mkprinter_file)(FILE *f);
+FFTW_EXTERN printer *X(mkprinter_file)(FILE *f);
 
-planner *X(the_planner)(void);
+FFTW_EXTERN planner *X(the_planner)(void);
 void X(configure_planner)(planner *plnr);
 
 void X(mapflags)(planner *, unsigned);

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.270 2006-01-09 17:04:04 athena Exp $ */
+/* $Id: ifftw.h,v 1.271 2006-01-10 02:18:25 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -40,6 +40,16 @@
 
 #if HAVE_INTTYPES_H
 # include <inttypes.h>           /* uintptr_t, maybe */
+#endif
+
+/* Windows annoyances -- since tests/hook.c uses some internal
+   FFTW functions, we need to given them the dllexport attribute
+   under Windows when compiling as a DLL (see api/fftw3.h). */
+#if (defined(FFTW_DLL) || defined(DLL_EXPORT)) \
+ && (defined(_WIN32) || defined(__WIN32__))
+#  define IFFTW_EXTERN extern __declspec(dllexport)
+#else
+#  define IFFTW_EXTERN
 #endif
 
 /* determine precision and name-mangling scheme */
@@ -170,7 +180,8 @@ void *alloca(size_t);
 
 /*-----------------------------------------------------------------------*/
 /* assert.c: */
-extern void X(assertion_failed)(const char *s, int line, const char *file);
+IFFTW_EXTERN void X(assertion_failed)(const char *s, 
+				      int line, const char *file);
 
 /* always check */
 #define CK(ex)						 \
@@ -212,7 +223,7 @@ enum malloc_tag {
      MALLOC_WHAT_LAST		/* must be last */
 };
 
-extern void X(ifree)(void *ptr);
+IFFTW_EXTERN void X(ifree)(void *ptr);
 extern void X(ifree0)(void *ptr);
 
 #ifdef FFTW_DEBUG_MALLOC
@@ -225,7 +236,7 @@ void X(malloc_print_minfo)(int vrbose);
 
 #else /* ! FFTW_DEBUG_MALLOC */
 
-extern void *X(malloc_plain)(size_t sz);
+IFFTW_EXTERN void *X(malloc_plain)(size_t sz);
 #define MALLOC(n, what)  X(malloc_plain)(n)
 #define NATIVE_MALLOC(n, what) malloc(n)
 
@@ -414,7 +425,7 @@ struct printer_s {
 printer *X(mkprinter)(size_t size, 
 		      void (*putchr)(printer *p, char c),
 		      void (*cleanup)(printer *p));
-void X(printer_destroy)(printer *p);
+IFFTW_EXTERN void X(printer_destroy)(printer *p);
 
 /*-----------------------------------------------------------------------*/
 /* scan.c */
@@ -455,7 +466,7 @@ struct plan_s {
 
 plan *X(mkplan)(size_t size, const plan_adt *adt);
 void X(plan_destroy_internal)(plan *ego);
-void X(plan_awake)(plan *ego, enum wakefulness wakefulness);
+IFFTW_EXTERN void X(plan_awake)(plan *ego, enum wakefulness wakefulness);
 #define AWAKE(plan, wakefulness) X(plan_awake)(plan, wakefulness)
 void X(plan_null_destroy)(plan *ego);
 
