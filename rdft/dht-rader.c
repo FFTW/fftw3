@@ -279,7 +279,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld2 = (plan *) 0;
      plan *cld_omega = (plan *) 0;
      R *buf = (R *) 0;
-     R *O;
      problem *cldp;
 
      static const plan_adt padt = {
@@ -292,7 +291,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      n = p->sz->dims[0].n;
      is = p->sz->dims[0].is;
      os = p->sz->dims[0].os;
-     O = p->O;
 
      if (ego->pad)
 	  npad = choose_transform_size(2 * (n - 1) - 1);
