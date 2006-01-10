@@ -32,6 +32,7 @@ static bench_tensor *fftw_tensor_to_bench_tensor(tensor *t)
      if (FINITE_RNK(t->rnk)) {
 	  int i;
 	  for (i = 0; i < t->rnk; ++i) {
+	       /* FIXME: 64-bit unclean because of INT -> int conversion */
 	       bt->dims[i].n = t->dims[i].n;
 	       bt->dims[i].is = t->dims[i].is;
 	       bt->dims[i].os = t->dims[i].os;
