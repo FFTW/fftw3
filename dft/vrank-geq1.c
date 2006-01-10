@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.49 2006-01-05 03:04:26 stevenj Exp $ */
+/* $Id: vrank-geq1.c,v 1.50 2006-01-10 13:24:41 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the
@@ -206,7 +206,7 @@ void X(dft_vrank_geq1_register)(planner *p)
      /* FIXME: Should we try other vecloop_dim values? */
      static const int buddies[] = { 1, -1 };
 
-     const int nbuddies = sizeof(buddies) / sizeof(buddies[0]);
+     const int nbuddies = (int)(sizeof(buddies) / sizeof(buddies[0]));
 
      for (i = 0; i < nbuddies; ++i)
           REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));

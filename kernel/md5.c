@@ -76,7 +76,7 @@ static const struct roundtab {
 static void doblock(md5sig state, const unsigned char *data)
 {
      md5uint a, b, c, d, t, x[16];
-     const md5uint msk = 0xffffffffUL;
+     const md5uint msk = (md5uint)0xffffffffUL;
      int i;
 
      /* encode input bytes into md5uint */

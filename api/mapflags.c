@@ -50,7 +50,7 @@ static void map_flags(unsigned *iflags, unsigned *oflags,
                *oflags = OP(*oflags, flagmap[i].op);
 }
 
-#define NELEM(array)(sizeof(array) / sizeof((array)[0]))
+#define NELEM(array) ((int) (sizeof(array) / sizeof((array)[0])))
 
 void X(mapflags)(planner *plnr, unsigned flags)
 {

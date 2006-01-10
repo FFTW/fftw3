@@ -27,7 +27,7 @@ INT X(compute_nbuf)(INT n, INT vl, INT nbuf, INT maxbufsz)
      INT i; 
 
      if (nbuf * n > maxbufsz)
-          nbuf = X(imax)((int)1, maxbufsz / n);
+          nbuf = X(imax)((INT)1, maxbufsz / n);
 
      /*
       * Look for a buffer number (not too big) that divides the

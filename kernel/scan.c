@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: scan.c,v 1.18 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: scan.c,v 1.19 2006-01-10 13:24:41 athena Exp $ */
 
 #include "ifftw.h"
 #include <string.h>
@@ -152,7 +152,8 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 		       }
 		       case 'M': {
 			    md5uint *x = va_arg(ap, md5uint *);
-			    *x = 0xffffffffUL & getlong(sc, 16, &ch);
+			    *x = (md5uint)
+				    (0xffffffffUL & getlong(sc, 16, &ch));
 			    if (!ch) return 0;
 			    break;
 		       }

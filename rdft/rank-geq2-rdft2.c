@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.27 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: rank-geq2-rdft2.c,v 1.28 2006-01-10 13:24:41 athena Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 
@@ -231,7 +231,7 @@ void X(rdft2_rank_geq2_register)(planner *p)
      int i;
      static const int buddies[] = { 0, 1, -2 };
 
-     const int nbuddies = sizeof(buddies) / sizeof(buddies[0]);
+     const int nbuddies = (int)(sizeof(buddies) / sizeof(buddies[0]));
 
      for (i = 0; i < nbuddies; ++i)
           REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));

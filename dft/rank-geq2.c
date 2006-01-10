@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank-geq2.c,v 1.41 2006-01-05 03:04:26 stevenj Exp $ */
+/* $Id: rank-geq2.c,v 1.42 2006-01-10 13:24:41 athena Exp $ */
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
@@ -187,7 +187,7 @@ void X(dft_rank_geq2_register)(planner *p)
      int i;
      static const int buddies[] = { 1, 0, -2 };
 
-     const int nbuddies = sizeof(buddies) / sizeof(buddies[0]);
+     const int nbuddies = (int)(sizeof(buddies) / sizeof(buddies[0]));
 
      for (i = 0; i < nbuddies; ++i)
           REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));
