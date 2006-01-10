@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: plan.c,v 1.22 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: plan.c,v 1.23 2006-01-10 13:56:55 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -46,7 +46,7 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
 void X(plan_destroy_internal)(plan *ego)
 {
      if (ego) {
-	  CK(ego->wakefulness == SLEEPY);
+	  A(ego->wakefulness == SLEEPY);
           ego->adt->destroy(ego);
 	  X(ifree)(ego);
      }
