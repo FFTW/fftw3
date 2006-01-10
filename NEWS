@@ -1,4 +1,4 @@
-Since FFTW 3.0.1:
+FFTW 3.1:
 
 * Faster FFTW_ESTIMATE planner.
 
@@ -87,6 +87,16 @@ Since FFTW 3.0.1:
 
 * Work around Visual C++ (version 6/7) bug in SSE compilation;
   thanks to Eddie Yee for his detailed report.
+
+Changes from FFTW 3.1 beta:
+
+* Fixes for creating DLLs under Windows; thanks to John Pavel for his feedback.
+
+* Fixed more 64-bit problems, thanks to John Pavel for the bug report.
+
+* Further speed improvements for Altivec/VMX.
+
+* Further speed improvements for non-square transpositions.
 
 FFTW 3.0.1
 
