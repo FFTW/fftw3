@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.182 2006-01-10 05:03:32 stevenj Exp $ */
+/* $Id: planner.c,v 1.183 2006-01-10 13:36:13 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -441,23 +441,28 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
      return pln;
 }
 
+/* maintain the invariant TIMED_OUT ==> NEED_TIMEOUT_CHECK */
 static int timeout_p(planner *ego)
 {
      /* do not timeout when estimating.  First, the estimator is the
 	planner of last resort.  Second, calling X(elapsed_since)() is
 	slower than estimating */
      if (!ESTIMATEP(ego)) {
-	  ego->need_timeout_check = 0;
-
 	  /* do not assume that X(elapsed_since)() is monotonic */
-	  if (ego->timed_out)
+	  if (ego->timed_out) {
+	       A(ego->need_timeout_check);
 	       return 1;
+	  }
 
 	  if (X(elapsed_since)(ego->start_time) >= ego->timelimit) {
 	       ego->timed_out = 1;
+	       ego->need_timeout_check = 1;
 	       return 1;
 	  }
      }
+
+     A(!ego->timed_out);
+     ego->need_timeout_check = 0;
      return 0;
 }
 
@@ -813,7 +818,7 @@ planner *X(mkplanner)(void)
      p->flags.u = 0;
      p->flags.hash_info = 0;
      p->nthr = 1;
-     p->need_timeout_check = 0; /* not really needed */
+     p->need_timeout_check = 1;
 
      mkhashtab(&p->htab_blessed);
      mkhashtab(&p->htab_unblessed);
