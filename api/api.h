@@ -22,14 +22,24 @@
 #ifndef __API_H__
 #define __API_H__
 
-#define COMPILING_FFTW /* used for DLL symbol exporting in fftw3.h */
+#ifndef CALLING_FFTW /* defined in hook.c, when calling internal functions */
+#  define COMPILING_FFTW /* used for DLL symbol exporting in fftw3.h */
+#endif
 
-/* when compiling with GNU libtool on Windows, DLL_EXPORT is #defined
+/* When compiling with GNU libtool on Windows, DLL_EXPORT is #defined
    for compiling the shared-library code.  In this case, we'll #define
    FFTW_DLL to add dllexport attributes to the specified functions in
-   fftw3.h (these aren't actually needed by default, since libtool
-   just exports everything, but it doesn't hurt to do this in case we
-   change it at some point to export less) */
+   fftw3.h.
+
+   If we don't specify dllexport explicitly, then libtool
+   automatically exports all symbols.  However, if we specify
+   dllexport explicitly for any functions, then libtool apparently
+   doesn't do any automatic exporting.  (Not documented, grrr, but
+   this is the observed behavior with libtool 1.5.8.)  Thus, using
+   this forces us to correctly dllexport every exported symbol, or
+   linking bench.exe will fail.  This has the advantage of forcing
+   us to mark things correctly, which is necessary for other compilers
+   (such as MS VC++). */
 #ifdef DLL_EXPORT
 #  define FFTW_DLL
 #endif

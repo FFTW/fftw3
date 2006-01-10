@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.271 2006-01-10 02:18:25 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.272 2006-01-10 02:54:07 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -45,11 +45,13 @@
 /* Windows annoyances -- since tests/hook.c uses some internal
    FFTW functions, we need to given them the dllexport attribute
    under Windows when compiling as a DLL (see api/fftw3.h). */
-#if (defined(FFTW_DLL) || defined(DLL_EXPORT)) \
+#if defined(FFTW_EXTERN)
+#  define IFFTW_EXTERN FFTW_EXTERN
+#elif (defined(FFTW_DLL) || defined(DLL_EXPORT)) \
  && (defined(_WIN32) || defined(__WIN32__))
 #  define IFFTW_EXTERN extern __declspec(dllexport)
 #else
-#  define IFFTW_EXTERN
+#  define IFFTW_EXTERN extern
 #endif
 
 /* determine precision and name-mangling scheme */

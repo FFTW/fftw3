@@ -13,6 +13,8 @@
 
 #include <stdio.h>
 #include "bench-user.h"
+
+#define CALLING_FFTW /* hack for Windows DLL nonsense */
 #include "api.h"
 #include "dft.h"
 #include "rdft.h"
