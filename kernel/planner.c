@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.180 2006-01-10 03:27:37 athena Exp $ */
+/* $Id: planner.c,v 1.181 2006-01-10 03:57:16 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -511,6 +511,12 @@ static plan *search0(planner *ego, problem *p, unsigned *slvndx,
 	  }
      });
 
+     /* this check is necessary in case the last invoke_solver timed out */
+     if (ego->timed_out) {
+	  X(plan_destroy_internal)(best);
+	  return 0;
+     }
+
      return best;
 }
 
@@ -642,7 +648,7 @@ static plan *mkplan(planner *ego, problem *p)
      CHECK_FOR_BOGOSITY; 	  /* catch error in child solvers */
 
      if (ego->timed_out) {
-	  A(!pln);  /* CHECK THIS: why should this assertion hold ? */
+	  A(!pln);
 	  return 0; /* no wisdom from timeout */
      }
 
