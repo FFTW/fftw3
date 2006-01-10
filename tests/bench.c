@@ -728,7 +728,7 @@ void cleanup(void)
 #    ifdef FFTW_DEBUG_MALLOC
      {
 	  /* undocumented memory checker */
-	  extern void FFTW(malloc_print_minfo)(int v);
+	  FFTW_EXTERN void FFTW(malloc_print_minfo)(int v);
 	  if (verbose > 2)
 	       FFTW(malloc_print_minfo)(verbose);
      }
