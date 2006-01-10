@@ -47,7 +47,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.84 2006-01-10 01:20:28 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.85 2006-01-10 01:30:19 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -75,9 +75,11 @@ extern "C"
 /* annoying Windows syntax for shared-library declarations */
 /* IMPORTANT: for Windows compilers, you should add a line
         #define FFTW_DLL
-   here if you are compiling/using FFTW as a DLL, in order to
-   do the proper importing/exporting.  This is not necessary under
-   MinGW/Cygwin, where libtool does the imports/exports automatically. */
+   here if you are compiling/using FFTW as a DLL, in order to do the
+   proper importing/exporting, or alternatively compile with
+   -DFFTW_DLL or the equivalent command-line flag.  This is not
+   necessary under MinGW/Cygwin, where libtool does the
+   imports/exports automatically. */
 #if defined(FFTW_DLL) && (defined(_WIN32) || defined(__WIN32__))
 #  if defined(COMPILING_FFTW) /* defined in api.h when compiling FFTW */
 #    define FFTW_EXTERN extern __declspec(dllexport) 
