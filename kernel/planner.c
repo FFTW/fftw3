@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.183 2006-01-10 13:36:13 athena Exp $ */
+/* $Id: planner.c,v 1.184 2006-01-10 13:59:22 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -480,13 +480,14 @@ static plan *search0(planner *ego, problem *p, unsigned *slvndx,
      FORALL_SOLVERS_OF_KIND(p->adt->problem_kind, ego, s, sp, {
 	  plan *pln;
 
+	  pln = invoke_solver(ego, p, s, flagsp);
+
 	  if (ego->need_timeout_check) 
 	       if (timeout_p(ego)) {
 		    X(plan_destroy_internal)(best);
+		    X(plan_destroy_internal)(pln);
 		    return 0;
 	       }
-
-	  pln = invoke_solver(ego, p, s, flagsp);
 
 	  if (pln) {
 	       /* read COULD_PRUNE_NOW_P because PLN may be destroyed
@@ -515,12 +516,6 @@ static plan *search0(planner *ego, problem *p, unsigned *slvndx,
 		    break;
 	  }
      });
-
-     /* this check is necessary in case the last invoke_solver timed out */
-     if (ego->timed_out) {
-	  X(plan_destroy_internal)(best);
-	  return 0;
-     }
 
      return best;
 }
