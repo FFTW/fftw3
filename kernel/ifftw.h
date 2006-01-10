@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.272 2006-01-10 02:54:07 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.273 2006-01-10 04:20:26 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -298,7 +298,11 @@ INT X(iabs)(INT a);
 /*-----------------------------------------------------------------------*/
 /* md5.c */
 
+#if SIZEOF_UNSIGNED_INT >= 4
+typedef unsigned int md5uint;
+#else
 typedef unsigned long md5uint; /* at least 32 bits as per C standard */
+#endif
 
 typedef md5uint md5sig[4];
 
