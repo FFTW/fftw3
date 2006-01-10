@@ -36,6 +36,9 @@ static bench_tensor *fftw_tensor_to_bench_tensor(tensor *t)
 	       bt->dims[i].n = t->dims[i].n;
 	       bt->dims[i].is = t->dims[i].is;
 	       bt->dims[i].os = t->dims[i].os;
+	       BENCH_ASSERT(bt->dims[i].n == t->dims[i].n);
+	       BENCH_ASSERT(bt->dims[i].is == t->dims[i].is);
+	       BENCH_ASSERT(bt->dims[i].os == t->dims[i].os);
 	  }
      }
      return bt;
