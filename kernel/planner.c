@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.185 2006-01-10 14:13:20 athena Exp $ */
+/* $Id: planner.c,v 1.186 2006-01-10 17:21:56 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -484,8 +484,8 @@ static plan *search0(planner *ego, problem *p, unsigned *slvndx,
 
 	  if (ego->need_timeout_check) 
 	       if (timeout_p(ego)) {
-		    X(plan_destroy_internal)(best);
 		    X(plan_destroy_internal)(pln);
+		    X(plan_destroy_internal)(best);
 		    return 0;
 	       }
 
