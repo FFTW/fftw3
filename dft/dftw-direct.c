@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.11 2006-01-06 03:19:09 athena Exp $ */
+/* $Id: dftw-direct.c,v 1.12 2006-01-10 22:50:12 athena Exp $ */
 
 #include "ct.h"
 
@@ -210,7 +210,7 @@ static int applicable(const S *ego,
 				       m * r, r))
 	  return 0;
 
-     if (m * r > 65536 && NO_FIXED_RADIX_LARGE_NP(plnr))
+     if (m * r > 262144 && NO_FIXED_RADIX_LARGE_NP(plnr))
 	  return 0;
 
      return 1;
