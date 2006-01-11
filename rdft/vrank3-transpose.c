@@ -18,9 +18,10 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.44 2006-01-10 23:44:28 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.45 2006-01-11 18:32:26 stevenj Exp $ */
 
-/* rank-0, vector-rank-3, square and non-square in-place transposition  */
+/* rank-0, vector-rank-3, non-square in-place transposition
+   (see rank0.c for square transposition)  */
 
 #include "rdft.h"
 
