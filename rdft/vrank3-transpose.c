@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.45 2006-01-11 18:32:26 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.46 2006-01-11 18:38:46 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, non-square in-place transposition
    (see rank0.c for square transposition)  */
@@ -412,7 +412,7 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 	  INT dc, ns, ms;
 	  dc = gcd(m, n); nc = n; mc = m;
 	  /* search for cut with largest gcd
-	     (FIXME: different optimality criteria? different search range?) */
+	     (TODO: different optimality criteria? different search range?) */
 	  for (ms = m; ms > 0 && ms > m - CUT_NSRCH; --ms) {
 	       for (ns = n; ns > 0 && ns > n - CUT_NSRCH; --ns) {
 		    INT ds = gcd(ms, ns);
