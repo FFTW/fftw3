@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rodft00e-r2hc-pad.c,v 1.7 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: rodft00e-r2hc-pad.c,v 1.8 2006-01-11 17:27:05 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, padded antisymmetrically to
    twice the size.  This is asymptotically a factor of ~2 worse than
@@ -53,13 +53,13 @@ static void apply(const plan *ego_, R *I, R *O)
      buf = (R *) MALLOC(sizeof(R) * (2*n), BUFFERS);
 
      for (iv = 0; iv < vl; ++iv, I += ivs, O += ovs) {
-	  buf[0] = 0.0;
+	  buf[0] = K(0.0);
 	  for (i = 1; i < n; ++i) {
 	       R a = I[(i-1) * is];
 	       buf[i] = -a;
 	       buf[2*n - i] = a;
 	  }
-	  buf[i] = 0.0; /* i == n, Nyquist */
+	  buf[i] = K(0.0); /* i == n, Nyquist */
 	  
 	  /* r2hc transform of size 2*n */
 	  {

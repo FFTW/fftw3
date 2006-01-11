@@ -182,7 +182,7 @@ static R *mkomega(enum wakefulness wakefulness,
      A(npad == n - 1 || npad >= 2*(n - 1) - 1);
 
      for (; i < npad; ++i)
-	  omega[i] = 0.0;
+	  omega[i] = K(0.0);
      if (npad > n - 1)
 	  for (i = 1; i < n-1; ++i)
 	       omega[npad - i] = omega[n - 1 - i];

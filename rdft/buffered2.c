@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.42 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: buffered2.c,v 1.43 2006-01-11 17:27:05 athena Exp $ */
 
 #include "rdft.h"
 
@@ -84,7 +84,7 @@ static void hc2c(INT n, R *r, R *rio, R *iio, INT os)
      }
      if ((n & 1) == 0) {	/* store the Nyquist frequency */
 	  rio[n2 * os] = r[n2];
-	  iio[n2 * os] = 0.0;
+	  iio[n2 * os] = K(0.0);
      }
 }
 

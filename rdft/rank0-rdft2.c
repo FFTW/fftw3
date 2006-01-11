@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-rdft2.c,v 1.10 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: rank0-rdft2.c,v 1.11 2006-01-11 17:27:05 athena Exp $ */
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
@@ -64,19 +64,19 @@ static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
           r2 = *r; r += ivs;
           r3 = *r; r += ivs;
           *rio = r0; rio += ovs;
-	  *iio = 0.0; iio += ovs;
+	  *iio = K(0.0); iio += ovs;
           *rio = r1; rio += ovs;
-	  *iio = 0.0; iio += ovs;
+	  *iio = K(0.0); iio += ovs;
           *rio = r2; rio += ovs;
-	  *iio = 0.0; iio += ovs;
+	  *iio = K(0.0); iio += ovs;
 	  *rio = r3; rio += ovs;
-	  *iio = 0.0; iio += ovs;
+	  *iio = K(0.0); iio += ovs;
      }
      for (; i < vl + 4; ++i) {
           R r0;
           r0 = *r; r += ivs;
           *rio = r0; rio += ovs;
-	  *iio = 0.0; iio += ovs;
+	  *iio = K(0.0); iio += ovs;
      }
 }
 
@@ -90,13 +90,13 @@ static void apply_r2hc_inplace(const plan *ego_, R *r, R *rio, R *iio)
      UNUSED(r);
      UNUSED(rio);
      for (i = 4; i <= vl; i += 4) {
-	  *iio = 0.0; iio += ovs;
-	  *iio = 0.0; iio += ovs;
-	  *iio = 0.0; iio += ovs;
-	  *iio = 0.0; iio += ovs;
+	  *iio = K(0.0); iio += ovs;
+	  *iio = K(0.0); iio += ovs;
+	  *iio = K(0.0); iio += ovs;
+	  *iio = K(0.0); iio += ovs;
      }
      for (; i < vl + 4; ++i) {
-	  *iio = 0.0; iio += ovs;
+	  *iio = K(0.0); iio += ovs;
      }
 }
 

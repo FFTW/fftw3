@@ -62,7 +62,7 @@ static void mktwiddle(enum wakefulness wakefulness, P *p)
      bluestein_sequence(wakefulness, n, w);
 
      for (i = 0; i < nb; ++i)
-          W[2*i] = W[2*i+1] = 0.0;
+          W[2*i] = W[2*i+1] = K(0.0);
 
      W[0] = w[0] / nbf;
      W[1] = w[1] / nbf;
@@ -94,7 +94,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
           b[2*i+1] = xi * wr - xr * wi;
      }
 
-     for (; i < nb; ++i) b[2*i] = b[2*i+1] = 0.0;
+     for (; i < nb; ++i) b[2*i] = b[2*i+1] = K(0.0);
 
      /* convolution: FFT */
      {
