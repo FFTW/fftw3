@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.46 2006-01-11 18:38:46 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.47 2006-01-11 18:47:49 stevenj Exp $ */
 
 /* rank-0, vector-rank-3, non-square in-place transposition
    (see rank0.c for square transposition)  */
@@ -120,7 +120,7 @@ static int applicable(const solver *ego_, const problem *p_, planner *plnr,
      const problem_rdft *p = (const problem_rdft *) p_;
 
      return (1
-	     && p->I == p->O /* FIXME: out-of-place transposes too? */
+	     && p->I == p->O
 	     && p->sz->rnk == 0
 	     && (p->vecsz->rnk == 2 || p->vecsz->rnk == 3)
 
