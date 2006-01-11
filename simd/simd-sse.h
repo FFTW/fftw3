@@ -48,7 +48,6 @@ typedef __m128 V;
 #define VXOR _mm_xor_ps
 #define SHUFPS _mm_shuffle_ps
 #define LOADH(addr, val) _mm_loadh_pi(val, (const __m64 *)(addr))
-#define LOADL0(addr, val) _mm_loadl_pi(val, (const __m64 *)(addr))
 #define STOREH(addr, val) _mm_storeh_pi((__m64 *)(addr), val)
 #define STOREL(addr, val) _mm_storel_pi((__m64 *)(addr), val)
 #define UNPCKH _mm_unpackhi_ps
@@ -60,9 +59,24 @@ typedef __m128 V;
      _var.v;							\
 })
 #define LDK(x) x
+
+/* we use inline asm because gcc generates slow code for
+   _mm_loadh_pi().  gcc insists upon having an existing variable for
+   VAL, which is however never used.  Thus, it generates code to move
+   values in and out the variable.  Worse still, gcc-4.0 stores VAL on
+   the stack, causing valgrind to complain about uninitialized reads.
+*/   
+
+static inline V LOADL0(const R *addr, V val)
+{
+     __asm__("movlps %1, %0" : "=x"(val) : "m"(*addr));
+     return val;
+}
+
 #else
 #define DVK(var, val) const R var = K(val)
 #define LDK(x) _mm_set_ps1(x)
+#define LOADL0(addr, val) _mm_loadl_pi(val, (const __m64 *)(addr))
 #endif
 
 union fvec {
