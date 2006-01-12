@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.275 2006-01-10 22:45:11 stevenj Exp $ */
+/* $Id: ifftw.h,v 1.276 2006-01-12 20:55:52 stevenj Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -1009,7 +1009,8 @@ static __inline__ E FNMS(E a, E b, E c)
 }
 #endif
 
-#if defined(__GNUC__) && defined(__i386__) && !defined(WITH_ALIGNED_STACK)
+#if defined(__GNUC__) && defined(__i386__) && !defined(WITH_ALIGNED_STACK) \
+    && !(defined(__MACOSX__) || defined(__APPLE__)) /* OSX ABI is aligned */
 /*
  * horrible hack to align the stack to a 16-byte boundary.
  *
