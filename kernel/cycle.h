@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.48 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: cycle.h,v 1.49 2006-01-12 17:46:49 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -194,14 +194,14 @@ typedef LARGE_INTEGER ticks;
 
 static __inline ticks getticks(void)
 {
-     ticks ret;
+     ticks retval;
 
      __asm {
 	  RDTSC
-	  mov ret.HighPart, edx
-	  mov ret.LowPart, eax
+	  mov retval.HighPart, edx
+	  mov retval.LowPart, eax
      }
-     return ret;
+     return retval;
 }
 
 static __inline double elapsed(ticks t1, ticks t0)
