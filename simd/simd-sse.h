@@ -140,6 +140,7 @@ static inline void STN2(R *x, V v0, V v1, INT ovs)
 
 #define STM4(x, v, ovs, aligned_like) /* no-op */
 
+#ifdef VISUAL_CXX_DOES_NOT_SUCK
 static inline void STN4(R *x, V v0, V v1, V v2, V v3, INT ovs)
 {
      V x0, x1, x2, x3;
@@ -152,6 +153,43 @@ static inline void STN4(R *x, V v0, V v1, V v2, V v3, INT ovs)
      STA(x + 2 * ovs, UNPCKL(x1, x3), 0, 0);
      STA(x + 3 * ovs, UNPCKH(x1, x3), 0, 0);
 }
+#else /* Visual C++ sucks */
+
+/*
+  Straight from the mouth of the horse:
+
+     We "reserved" the possibility of aligning arguments with 
+     __declspec(align(X)) passed by value by issuing this error. 
+
+     The first 3 parameters of type __m64 (or other MMX types) are
+     passed in registers.  The rest would be passed on the stack.  We
+     decided aligning the stack was wasteful, especially for __m128
+     parameters.  Also, we thought it would be infrequent that people
+     would want to pass more than 3 by value.
+
+     If we didn't issue an error, we would have to binary compatibility
+     in the future if we decided to align the arguments.
+
+
+     Hope that explains it. 
+     -- 
+     Jason Shirk, Visual C++ Compiler Team 
+     This posting is provided AS IS with no warranties, and confers no rights
+*/
+
+#define STN4(x, v0, v1, v2, v3, ovs)			\
+{							\
+     V xxx0, xxx1, xxx2, xxx3;				\
+     xxx0 = UNPCKL(v0, v2);				\
+     xxx1 = UNPCKH(v0, v2);				\
+     xxx2 = UNPCKL(v1, v3);				\
+     xxx3 = UNPCKH(v1, v3);				\
+     STA(x, UNPCKL(xxx0, xxx2), 0, 0);			\
+     STA(x + ovs, UNPCKH(xxx0, xxx2), 0, 0);		\
+     STA(x + 2 * ovs, UNPCKL(xxx1, xxx3), 0, 0);	\
+     STA(x + 3 * ovs, UNPCKH(xxx1, xxx3), 0, 0);	\
+}
+#endif
 
 static inline V FLIP_RI(V x)
 {
