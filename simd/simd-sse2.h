@@ -93,16 +93,16 @@ static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
 #define STM2 STA
 #define STN2(x, v0, v1, ovs) /* nop */
 
-#define SSE2_USE_STM4
 static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
-#ifdef SSE2_USE_STM4
      STOREL(x, v);
      STOREH(x + ovs, v);
-#endif
 }
 
+#define STN4(x, v0, v1, v2, v3, ovs) /* nothing */
+
+#if 0 /* not used, using STM4 */
 static inline void STN4(R *x, V v0, V v1, V v2, V v3, INT ovs)
 {
      (void)x;   /* UNUSED */
@@ -111,13 +111,12 @@ static inline void STN4(R *x, V v0, V v1, V v2, V v3, INT ovs)
      (void)v2;  /* UNUSED */
      (void)v3;  /* UNUSED */
      (void)ovs; /* UNUSED */
-#ifndef SSE2_USE_STM4
      STA(x, UNPCKL(v0, v1), 0, 0);
      STA(x + ovs, UNPCKH(v0, v1), 0, 0);
      STA(x + 2, UNPCKL(v2, v3), 0, 0);
      STA(x + 2 + ovs, UNPCKH(v2, v3), 0, 0);
-#endif
 }
+#endif
 
 static inline V FLIP_RI(V x)
 {
