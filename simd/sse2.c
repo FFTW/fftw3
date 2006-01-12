@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sse2.c,v 1.14 2006-01-05 03:04:28 stevenj Exp $ */
+/* $Id: sse2.c,v 1.15 2006-01-12 13:31:43 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
@@ -31,15 +31,15 @@
 static inline int cpuid_edx(int op)
 {
 #ifdef _MSC_VER
-     int ret;
+     int result;
      _asm {
 	  push ebx
 	  mov eax,op
           cpuid
-	  mov ret,edx
+	  mov result,edx
           pop ebx
      }
-     return ret;
+     return result;
 #else
      int eax, ecx, edx;
 
