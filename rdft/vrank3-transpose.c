@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.47 2006-01-11 18:47:49 stevenj Exp $ */
+/* $Id: vrank3-transpose.c,v 1.48 2006-01-13 03:21:57 athena Exp $ */
 
 /* rank-0, vector-rank-3, non-square in-place transposition
    (see rank0.c for square transposition)  */
@@ -251,13 +251,11 @@ static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
 
      if (n > 1) {
 	  ego->cld1 = X(mkplan_d)(plnr,
-				  X(mkproblem_rdft_d)(
-				       X(mktensor_0d)(),
+				  X(mkproblem_rdft_0_d)(
 				       X(mktensor_3d)(n, d*m*vl, m*vl,
 						      d, m*vl, n*m*vl,
 						      m*vl, 1, 1),
-				       TAINT(p->I, num_el), buf,
-				       R2HC));
+				       TAINT(p->I, num_el), buf));
 	  if (!ego->cld1)
 	       goto nada;
 	  X(ops_madd)(d, &ego->cld1->ops, &ego->super.super.ops,
@@ -266,26 +264,22 @@ static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
      }
 
      ego->cld2 = X(mkplan_d)(plnr,
-			     X(mkproblem_rdft_d)(
-				  X(mktensor_0d)(),
+			     X(mkproblem_rdft_0_d)(
 				  X(mktensor_3d)(d, d*n*m*vl, n*m*vl,
 						 d, n*m*vl, d*n*m*vl,
 						 n*m*vl, 1, 1),
-				  p->I, p->I,
-				  R2HC));
+				  p->I, p->I));
      if (!ego->cld2)
 	  goto nada;
      X(ops_add)(&ego->super.super.ops, &ego->cld2->ops, &ego->super.super.ops);
 
      if (m > 1) {
 	  ego->cld3 = X(mkplan_d)(plnr,
-				  X(mkproblem_rdft_d)(
-				       X(mktensor_0d)(),
+				  X(mkproblem_rdft_0_d)(
 				       X(mktensor_3d)(d*n, m*vl, vl,
 						      m, vl, d*n*vl,
 						      vl, 1, 1),
-				       TAINT(p->I, num_el), buf,
-				       R2HC));
+				       TAINT(p->I, num_el), buf));
 	  if (!ego->cld3)
 	       goto nada;
 	  X(ops_madd)(d, &ego->cld3->ops, &ego->super.super.ops,
@@ -435,13 +429,11 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 
      if (m > mc) {
 	  ego->cld1 = X(mkplan_d)(plnr,
-				  X(mkproblem_rdft_d)(
-				       X(mktensor_0d)(),
+				  X(mkproblem_rdft_0_d)(
 				       X(mktensor_3d)(nc, m*vl, vl,
 						      m-mc, vl, nc*vl,
 						      vl, 1, 1),
-				       p->I + mc*vl, buf,
-				       R2HC));
+				       p->I + mc*vl, buf));
 	  if (!ego->cld1)
 	       goto nada;
 	  X(ops_add)(&ego->super.super.ops, &ego->cld1->ops, 
@@ -450,26 +442,22 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
      }
 
      ego->cld2 = X(mkplan_d)(plnr,
-			     X(mkproblem_rdft_d)(
-				  X(mktensor_0d)(),
+			     X(mkproblem_rdft_0_d)(
 				  X(mktensor_3d)(nc, mc*vl, vl,
 						 mc, vl, nc*vl,
 						 vl, 1, 1),
-				  p->I, p->I,
-				  R2HC));
+				  p->I, p->I));
      if (!ego->cld2)
 	  goto nada;
      X(ops_add)(&ego->super.super.ops, &ego->cld2->ops, &ego->super.super.ops);
 
      if (n > nc) {
 	  ego->cld3 = X(mkplan_d)(plnr,
-				  X(mkproblem_rdft_d)(
-				       X(mktensor_0d)(),
+				  X(mkproblem_rdft_0_d)(
 				       X(mktensor_3d)(n-nc, m*vl, vl,
 						      m, vl, n*vl,
 						      vl, 1, 1),
-				       buf + (m-mc)*(nc*vl), p->I + nc*vl,
-				       R2HC));
+				       buf + (m-mc)*(nc*vl), p->I + nc*vl));
 	  if (!ego->cld3)
 	       goto nada;
 	  X(ops_add)(&ego->super.super.ops, &ego->cld3->ops, 

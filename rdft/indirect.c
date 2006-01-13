@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.32 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: indirect.c,v 1.33 2006-01-13 03:21:57 athena Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done
@@ -193,10 +193,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
           return (plan *) 0;
 
      cldcpy = X(mkplan_d)(plnr,
-			  X(mkproblem_rdft_d)(
-			       X(mktensor_0d)(),
+			  X(mkproblem_rdft_0_d)(
 			       X(tensor_append)(p->vecsz, p->sz),
-			       p->I, p->O, (rdft_kind *) 0));
+			       p->I, p->O));
      if (!cldcpy) goto nada;
 
      cld = X(mkplan_f_d)(plnr, ego->adt->mkcld(p), NO_BUFFERING, 0, 0);

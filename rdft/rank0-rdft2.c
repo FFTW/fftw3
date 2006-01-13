@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-rdft2.c,v 1.11 2006-01-11 17:27:05 athena Exp $ */
+/* $Id: rank0-rdft2.c,v 1.12 2006-01-13 03:21:57 athena Exp $ */
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
@@ -152,10 +152,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      if (p->kind == HC2R) {
 	  cldcpy = X(mkplan_d)(plnr,
-			       X(mkproblem_rdft_d)(
-				    X(mktensor_0d)(),
+			       X(mkproblem_rdft_0_d)(
 				    X(tensor_copy)(p->vecsz),
-				    p->rio, p->r, (rdft_kind *) 0));
+				    p->rio, p->r));
 	  if (!cldcpy) return (plan *) 0;
      }
 

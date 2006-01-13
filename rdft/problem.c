@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: problem.c,v 1.52 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: problem.c,v 1.53 2006-01-13 03:21:57 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>
@@ -228,4 +228,11 @@ problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
 {
      A(sz->rnk <= 1);
      return X(mkproblem_rdft_d)(sz, vecsz, I, O, &kind);
+}
+
+/* create a zero-dimensional problem */
+problem *X(mkproblem_rdft_0_d)(tensor *vecsz, R *I, R *O)
+{
+     return X(mkproblem_rdft_d)(X(mktensor_0d)(), vecsz, I, O, 
+				(const rdft_kind *)0);
 }

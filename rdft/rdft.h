@@ -43,6 +43,7 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 			   R *I, R *O, const rdft_kind *kind);
 problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
 			     R *I, R *O, const rdft_kind *kind);
+problem *X(mkproblem_rdft_0_d)(tensor *vecsz, R *I, R *O);
 problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
 			     R *I, R *O, rdft_kind kind);
 problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
