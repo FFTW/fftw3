@@ -118,10 +118,6 @@ if test "$with_windows_f77_mangling" = "yes"; then
 	AC_DEFINE(WINDOWS_F77_MANGLING,1,[Use common Windows Fortran mangling styles for the Fortran interfaces.])
 fi
 
-AC_ARG_ENABLE(unsafe-mulmod, [AC_HELP_STRING([--enable-unsafe-mulmod],[risk overflow for large prime sizes])], enable_unsafe_mulmod=$enableval, enable_unsafe_mulmod=no)
-if test "$enable_unsafe_mulmod" = "yes"; then
-        AC_DEFINE([FFTW_ENABLE_UNSAFE_MULMOD],1,[enable fast, unsafe modular multiplications, risking overflow for large prime sizes])
-fi
 OCAML_INIT_PATHS
 
 dnl compute library suffix
