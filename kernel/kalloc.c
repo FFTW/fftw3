@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: kalloc.c,v 1.4 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: kalloc.c,v 1.5 2006-01-13 00:17:35 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -79,8 +79,12 @@ void *X(kernel_malloc)(size_t n)
 #    undef real_free
 #    define real_free our_free16
 
-#  elif defined(__FreeBSD__)
+#  elif defined(__FreeBSD__) && (MIN_ALIGNMENT <= 16)
      /* FreeBSD does not have memalign, but its malloc is 16-byte aligned. */
+     p = malloc(n);
+
+#  elif (defined(__MACOSX__) || defined(__APPLE__)) && (MIN_ALIGNMENT <= 16)
+     /* MacOS X malloc is already 16-byte aligned */
      p = malloc(n);
 
 #  elif defined(HAVE_MEMALIGN)
@@ -105,10 +109,6 @@ void *X(kernel_malloc)(size_t n)
      p = (void *) _aligned_malloc(n, MIN_ALIGNMENT);
 #    undef real_free
 #    define real_free _aligned_free
-
-#  elif (defined(__MACOSX__) || defined(__APPLE__)) && (MIN_ALIGNMENT <= 16)
-     /* MacOS X malloc is already 16-byte aligned */
-     p = malloc(n);
 
 #  elif defined(macintosh) /* MacOS 9 */
      p = (void *) MPAllocateAligned(n,
