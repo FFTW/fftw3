@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.43 2006-01-11 17:27:05 athena Exp $ */
+/* $Id: buffered2.c,v 1.44 2006-01-13 00:17:57 athena Exp $ */
 
 #include "rdft.h"
 
@@ -53,74 +53,36 @@ typedef struct {
 /* copy halfcomplex array r (contiguous) to complex (strided) array rio/iio. */
 static void hc2c(INT n, R *r, R *rio, R *iio, INT os)
 {
-     INT n2 = (n + 1) / 2;
      INT i;
 
      rio[0] = r[0];
      iio[0] = 0;
-     for (i = 1; i < ((n2 - 1) & 3) + 1; ++i) {
+
+     for (i = 1; i + i < n; ++i) {
 	  rio[i * os] = r[i];
 	  iio[i * os] = r[n - i];
      }
-     for (; i < n2; i += 4) {
-	  R r0, r1, r2, r3;
-	  R i0, i1, i2, i3;
-	  r0 = r[i];
-	  r1 = r[i + 1];
-	  r2 = r[i + 2];
-	  r3 = r[i + 3];
-	  i3 = r[n - (i + 3)];
-	  i2 = r[n - (i + 2)];
-	  i1 = r[n - (i + 1)];
-	  i0 = r[n - i];
-	  rio[i * os] = r0;
-	  iio[i * os] = i0;
-	  rio[(i + 1) * os] = r1;
-	  iio[(i + 1) * os] = i1;
-	  rio[(i + 2) * os] = r2;
-	  iio[(i + 2) * os] = i2;
-	  rio[(i + 3) * os] = r3;
-	  iio[(i + 3) * os] = i3;
-     }
-     if ((n & 1) == 0) {	/* store the Nyquist frequency */
-	  rio[n2 * os] = r[n2];
-	  iio[n2 * os] = K(0.0);
+
+     if (i + i == n) {	/* store the Nyquist frequency */
+	  rio[i * os] = r[i];
+	  iio[i * os] = K(0.0);
      }
 }
 
 /* reverse of hc2c */
 static void c2hc(INT n, R *rio, R *iio, INT is, R *r)
 {
-     INT n2 = (n + 1) / 2;
      INT i;
 
      r[0] = rio[0];
-     for (i = 1; i < ((n2 - 1) & 3) + 1; ++i) {
+
+     for (i = 1; i + i < n; ++i) {
 	  r[i] = rio[i * is];
 	  r[n - i] = iio[i * is];
      }
-     for (; i < n2; i += 4) {
-	  R r0, r1, r2, r3;
-	  R i0, i1, i2, i3;
-	  r0 = rio[i * is];
-	  i0 = iio[i * is];
-	  r1 = rio[(i + 1) * is];
-	  i1 = iio[(i + 1) * is];
-	  r2 = rio[(i + 2) * is];
-	  i2 = iio[(i + 2) * is];
-	  r3 = rio[(i + 3) * is];
-	  i3 = iio[(i + 3) * is];
-	  r[i] = r0;
-	  r[i + 1] = r1;
-	  r[i + 2] = r2;
-	  r[i + 3] = r3;
-	  r[n - (i + 3)] = i3;
-	  r[n - (i + 2)] = i2;
-	  r[n - (i + 1)] = i1;
-	  r[n - i] = i0;
-     }
-     if ((n & 1) == 0)		/* store the Nyquist frequency */
-	  r[n2] = rio[n2 * is];
+
+     if (i + i == n)		/* store the Nyquist frequency */
+	  r[i] = rio[i * is];
 }
 
 /***************************************************************************/
