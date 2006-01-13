@@ -53,3 +53,6 @@ TODO before FFTW-$2\pi$:
   should obey the uniform protocol as well.
 
 * memoize triggen.
+
+* orb problems with FFTW_PRESERVE_INPUT ought to use SIMD somehow.
+  (Currently they reduce to an r2r problem that does not use SIMD.)
