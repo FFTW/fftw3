@@ -69,8 +69,9 @@ typedef __m128 V;
 
 static inline V LOADL0(const R *addr, V val)
 {
-     __asm__("movlps %1, %0" : "=x"(val) : "m"(*addr));
-     return val;
+     V retval;
+     __asm__("movlps %1, %0" : "=x"(retval) : "m"(*addr), "x"(val));
+     return retval;
 }
 
 #else
