@@ -70,6 +70,11 @@ typedef __m128 V;
 static inline V LOADL0(const R *addr, V val)
 {
      V retval;
+     /* gcc-3.3 -O3 produces wrong code with the ``obvious'' coding
+
+          __asm__("movlps %1, %0" : "=x"(retval) : "m"(*addr));
+ 
+     */
      __asm__("movlps %1, %0" : "=x"(retval) : "m"(*addr), "x"(val));
      return retval;
 }
