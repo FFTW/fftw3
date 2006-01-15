@@ -20,17 +20,14 @@
 
 #include "bench.h"
 
-#define	ENOUGH_DURATION_TEN(one)	one one one one one one one one one one
+#define	TEN(one)	one; one; one; one; one; one; one; one; one; one;
 
 /* the Intel compiler optimizes away this routine if we put it in
    timer.c.  */
 char ***bench_do_useless_work(int n, char ***p)
 {
      while (n-- > 0) {
-	  int k;
-	  for (k = 0; k < 10; ++k) {
-	       ENOUGH_DURATION_TEN(p = (char ***) *p;);
-	  }
+	  TEN(TEN(p = (char ***) *p));
      }
      return (p);
 }
