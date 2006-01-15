@@ -18,14 +18,14 @@
  *
  */
 
-/* $Id: speed.c,v 1.10 2006-01-15 01:40:12 athena Exp $ */
+/* $Id: speed.c,v 1.11 2006-01-15 21:09:53 athena Exp $ */
 
 #include "bench.h"
 
 void speed(const char *param, int setup_only)
 {
      double *t;
-     int iter, k;
+     int iter = 0, k;
      bench_problem *p;
      double tmin, y;
 
@@ -69,9 +69,12 @@ void speed(const char *param, int setup_only)
  done:
      done(p);
 
-     for (k = 0; k < time_repeat; ++k) {
-	  t[k] /= iter;
-     }
+     if (iter) 
+	  for (k = 0; k < time_repeat; ++k) 
+	       t[k] /= iter;
+     else
+	  for (k = 0; k < time_repeat; ++k) 
+	       t[k] = 0;
 
      report(p, t, time_repeat);
 
