@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.8 2006-01-15 01:40:12 athena Exp $ */
+/* $Id: timer.c,v 1.9 2006-01-15 03:16:09 athena Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -44,26 +44,7 @@
 double time_min;
 int time_repeat;
 
-#if defined(HAVE_GETTIMEOFDAY) && !defined(HAVE_TIMER)
-typedef struct timeval mytime;
-
-static mytime get_time(void)
-{
-     struct timeval tv;
-     gettimeofday(&tv, 0);
-     return tv;
-}
-
-static double elapsed(mytime t1, mytime t0)
-{
-     return (double)(t1.tv_sec - t0.tv_sec) +
-	  (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6;
-}
-
-#define HAVE_TIMER
-#endif
-
-#if !defined(HAVE_TIMER) && (defined(__WIN32__) || defined(_WIN32) || defined(_WINDOWS))
+#if !defined(HAVE_TIMER) && (defined(__WIN32__) || defined(_WIN32) || defined(_WINDOWS) || defined(__CYGWIN__))
 #include <windows.h>
 typedef LARGE_INTEGER mytime;
 
@@ -80,6 +61,26 @@ static double elapsed(mytime t1, mytime t0)
      QueryPerformanceFrequency(&freq);
      return ((double) (t1.QuadPart - t0.QuadPart)) /
 	  ((double) freq.QuadPart);
+}
+
+#define HAVE_TIMER
+#endif
+
+
+#if defined(HAVE_GETTIMEOFDAY) && !defined(HAVE_TIMER)
+typedef struct timeval mytime;
+
+static mytime get_time(void)
+{
+     struct timeval tv;
+     gettimeofday(&tv, 0);
+     return tv;
+}
+
+static double elapsed(mytime t1, mytime t0)
+{
+     return (double)(t1.tv_sec - t0.tv_sec) +
+	  (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6;
 }
 
 #define HAVE_TIMER
