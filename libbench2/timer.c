@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.11 2006-01-15 21:09:53 athena Exp $ */
+/* $Id: timer.c,v 1.12 2006-01-15 21:32:54 athena Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -126,21 +126,21 @@ static double time_n(int n)
 static int good_enough_p(int n, double *tp)
 {
      int i;
-     double t;
-
-     t = time_n(n * nmin);
-
-     if (t >= tmax_try) {
-	  *tp = t;
-	  return 1;
-     }
-
-     if (t <= 0)
-	  return 0; /* not enough resolution */
+     double t = 0.0;
 
      /* vary nmin and see if time scales proportionally */
-     for (i = nmin + 1; i < nmax; ++i) {
+     for (i = nmin; i < nmax; ++i) {
 	  double t1 = time_n(n * i);
+
+	  if (t1 <= 0)
+	       return 0; /* not enough resolution */
+
+	  if (t1 >= tmax_try) {
+	       t = t1;
+	       break;
+	  }
+
+	  t = (i == nmin) ? t1 : t;
 
 	  if (t1 >= (t * (i + 0.5) / nmin))
 	       return 0;
