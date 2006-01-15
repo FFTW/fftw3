@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.28 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: align.c,v 1.29 2006-01-15 20:12:08 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -27,11 +27,16 @@
 #elif HAVE_K7
 #  define ALGN 8
 #else
-#  define ALGN (sizeof(R))
+   /* disable the alignment machinery, because it will break,
+      e.g., if sizeof(R) == 12 (as in long-double/x86) */
+#  define ALGN 0
 #endif
 
 /* NONPORTABLE */
 int X(alignment_of)(R *p)
 {
-     return (int)(((uintptr_t) p) % ALGN);
+     if (ALGN > 0)
+	  return (int)(((uintptr_t) p) % ALGN);
+     else
+	  return 0;
 }
