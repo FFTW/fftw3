@@ -84,7 +84,7 @@ void rdwisdom(void)
 
      if (!usewisdom) return;
 
-     timer_start();
+     timer_start(USER_TIMER);
      if ((f = fopen(wisdat, "r"))) {
 	  if (!FFTW(import_wisdom_from_file)(f))
 	       fprintf(stderr, "bench: ERROR reading wisdom\n");
@@ -92,7 +92,7 @@ void rdwisdom(void)
 	       success = 1;
 	  fclose(f);
      }
-     tim = timer_stop();
+     tim = timer_stop(USER_TIMER);
 
      if (success) {
 	  if (verbose > 1) printf("READ WISDOM (%g seconds): ", tim);
@@ -111,12 +111,12 @@ void wrwisdom(void)
      double tim;
      if (!havewisdom) return;
 
-     timer_start();
+     timer_start(USER_TIMER);
      if ((f = fopen(wisdat, "w"))) {
 	  FFTW(export_wisdom_to_file)(f);
 	  fclose(f);
      }
-     tim = timer_stop();
+     tim = timer_stop(USER_TIMER);
      if (verbose > 1) printf("write wisdom took %g seconds\n", tim);
 }
 
@@ -650,9 +650,9 @@ int can_do(bench_problem *p)
 	  printf("Planning %s...\n", p->pstring);
      rdwisdom();
 
-     timer_start();
+     timer_start(USER_TIMER);
      the_plan = mkplan(p, preserve_input_flags(p) | the_flags | FFTW_ESTIMATE);
-     tim = timer_stop();
+     tim = timer_stop(USER_TIMER);
      if (verbose > 2) printf("estimate-planner time: %g s\n", tim);
 
      if (the_plan) {
@@ -680,9 +680,9 @@ void setup(bench_problem *p)
      if (verbose > 1 && nthreads > 1) printf("NTHREADS = %d\n", nthreads);
 #endif
 
-     timer_start();
+     timer_start(USER_TIMER);
      the_plan = mkplan(p, preserve_input_flags(p) | the_flags);
-     tim = timer_stop();
+     tim = timer_stop(USER_TIMER);
      if (verbose > 1) printf("planner time: %g s\n", tim);
 
      BENCH_ASSERT(the_plan);

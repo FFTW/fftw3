@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: speed.c,v 1.9 2006-01-04 00:34:04 athena Exp $ */
+/* $Id: speed.c,v 1.10 2006-01-15 01:40:12 athena Exp $ */
 
 #include "bench.h"
 
@@ -39,9 +39,9 @@ void speed(const char *param, int setup_only)
      problem_alloc(p);
      problem_zero(p);
 
-     timer_start();
+     timer_start(LIBBENCH_TIMER);
      setup(p);
-     p->setup_time = timer_stop();
+     p->setup_time = timer_stop(LIBBENCH_TIMER);
      
      if (setup_only)
 	  goto done;
@@ -50,9 +50,9 @@ void speed(const char *param, int setup_only)
      for (iter = 1; iter < (1<<30); iter *= 2) {
 	  tmin = 1.0e20;
 	  for (k = 0; k < time_repeat; ++k) {
-	       timer_start();
+	       timer_start(LIBBENCH_TIMER);
 	       doit(iter, p);
-	       y = timer_stop();
+	       y = timer_stop(LIBBENCH_TIMER);
 	       if (y < 0) /* yes, it happens */
 		    goto start_over;
 	       t[k] = y;
