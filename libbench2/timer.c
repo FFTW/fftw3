@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.9 2006-01-15 03:16:09 athena Exp $ */
+/* $Id: timer.c,v 1.10 2006-01-15 15:12:55 athena Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -112,31 +112,41 @@ if you find them useful.
 */
 
 
-typedef char *TYPE;
 static const double tmin_try = 1.0e-6; /* seconds */
 static const double tmax_try = 1.0;    /* seconds */
 static const double tolerance = 0.01;
 
-static TYPE **work(int n, TYPE **p)
-{
-#define	ENOUGH_DURATION_TEN(one)	one one one one one one one one one one
-     while (n-- > 0) {
-	  ENOUGH_DURATION_TEN(p = (TYPE **) *p;);
-     }
-     return (p);
-}
-
 /* do N units of work */
 static double duration(int n)
 {
-     TYPE   *x = (TYPE *)&x;
-     TYPE  **p = (TYPE **)&x;
+     char **x = (char **)&x;
+     char ***p = (char ***)&x;
      mytime t0, t1;
 
      t0 = get_time();
-     p = work(n, p);
+     p = bench_do_useless_work(n, p);
      t1 = get_time();
      return (elapsed(t1, t0));
+}
+
+static double timer_resolution(void)
+{
+     int i;
+     double  tmin = 1.0e10;
+
+     for (i = 0; i < time_repeat; ++i) {
+	  mytime t0, t1;
+	  double t;
+
+	  t0 = get_time();
+	  do {
+	       t1 = get_time();
+	       t = elapsed(t1, t0);
+	  } while (t == 0);
+	  if (t < tmin)
+	       tmin = t;
+     }
+     return tmin;
 }
 
 static double time_n(int n)
@@ -184,16 +194,16 @@ static int acceptable(double tmin)
 {
      int n;
      unsigned i;
-     static const double test_points[] = { 1.015, 1.02, 1.035 };
+     static const double test_points[] = { 1.015, 1.02, 1.035, 1.04};
      double baseline;
-     
+
      n = find_n(tmin);
      if (n <= 0)
 	  return 0;
 
      baseline = time_n(n);
 
-     for (i = 0; i < sizeof(test_points) / sizeof(double); ++i) {
+     for (i = 0; i < sizeof(test_points) / sizeof(test_points[0]); ++i) {
 	  double usecs = time_n((int)((double) n * test_points[i]));
 	  double expected = baseline * test_points[i];
 	  double diff = expected > usecs ? expected - usecs : usecs - expected;
@@ -206,8 +216,12 @@ static int acceptable(double tmin)
 static double calibrate(void)
 {
      double tmin;
+     double resolution = timer_resolution();
 
-     for (tmin = tmin_try; tmin < tmax_try && !acceptable(tmin); tmin *= 2.0)
+     for (tmin = tmin_try; 
+	  tmin < tmax_try && (tmin * tolerance < resolution ||
+			      !acceptable(tmin));
+	  tmin *= 2.0)
 	  ;
      return tmin;
 }

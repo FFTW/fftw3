@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.12 2006-01-05 01:43:41 athena Exp $ */
+/* $Id: bench.h,v 1.13 2006-01-15 15:12:55 athena Exp $ */
 
 /* benchmark program definitions */
 #include "bench-user.h"
@@ -27,6 +27,7 @@ extern double time_min;
 extern int time_repeat;
 
 extern void timer_init(double tmin, int repeat);
+extern char ***bench_do_useless_work(int n, char ***p);
 
 /* report functions */
 extern void (*report)(const bench_problem *p, double *t, int st);
