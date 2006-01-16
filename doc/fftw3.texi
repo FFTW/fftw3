@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.229 2006-01-07 22:49:37 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.230 2006-01-16 00:32:27 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2107,19 +2107,22 @@ then finally (time permitting) in @code{FFTW_PATIENT}.  If
 @code{FFTW_TIMELIMIT | FFTW_EXHAUSTIVE} is specified instead, the
 planner will further progress to @code{FFTW_EXHAUSTIVE} mode.
 
-@end itemize
+The maximum allowed planning time is specified by the global
+variable @code{fftw_timelimit}:
 
 @example
 extern double fftw_timelimit;
 @end example
 @vindex fftw_timelimit
 
-This is a global variable that specifies the maximum planning time in
-seconds, for use with the @code{FFTW_TIMELIMIT} flag, above; the
-default value is a very large number (i.e. no limit).  Note that this
-is only a rough limit; in practice, the planner may use somewhat more
-time if the time limit is reached when the planner is in the middle of
-an operation that cannot be interrupted.
+This variable specifies the maximum planning time in seconds, for use
+with the @code{FFTW_TIMELIMIT} flag.  The default value is a very large
+number (i.e. no limit).  Note that this is only a rough limit; in
+practice, the planner may use somewhat more time if the time limit is
+reached when the planner is in the middle of an operation that cannot be
+interrupted.
+
+@end itemize
 
 @subsubheading Algorithm-restriction flags
 @itemize @bullet
