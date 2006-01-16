@@ -20,7 +20,9 @@
 
 #include "api.h"
 
-double X(timelimit) = 1e30;
+static double timelimit = 1e30;
+
+void X(set_timelimit)(double tlim) { timelimit = tlim; }
 
 static plan *mkplan0(planner *plnr, unsigned flags, 
 		     problem *prb, int hash_info, wisdom_state_t wisdom_state)
@@ -85,7 +87,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
      flags &= ~(FFTW_ESTIMATE | FFTW_MEASURE | FFTW_PATIENT | FFTW_EXHAUSTIVE);
 
      plnr->start_time = X(get_crude_time)();
-     plnr->timelimit = (flags & FFTW_TIMELIMIT) ? X(timelimit) : 1e30;
+     plnr->timelimit = (flags & FFTW_TIMELIMIT) ? timelimit : 1e30;
 	  
      /* plan at incrementally increasing patience until we run out of time */
      for (pln = 0, flags_used_for_planning = 0; pat <= pat_max; ++pat) {

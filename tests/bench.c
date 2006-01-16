@@ -63,7 +63,7 @@ void useropt(const char *arg)
      else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
      else if (sscanf(arg, "timelimit=%lg", &y) == 1) {
 	  the_flags |= FFTW_TIMELIMIT;
-	  FFTW(timelimit) = y;
+	  FFTW(set_timelimit)(y);
      }
 
      else fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);

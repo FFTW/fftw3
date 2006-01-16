@@ -47,7 +47,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.87 2006-01-10 23:12:14 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.88 2006-01-16 00:59:38 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -116,7 +116,6 @@ struct fftw_iodim_do_not_use_me {
 FFTW_DEFINE_COMPLEX(R, C);						   \
 									   \
 typedef struct X(plan_s) *X(plan);					   \
-FFTW_EXTERN double X(timelimit);					   \
 									   \
 typedef struct fftw_iodim_do_not_use_me X(iodim);			   \
 									   \
@@ -257,6 +256,8 @@ FFTW_EXTERN void X(execute_r2r)(const X(plan) p, R *in, R *out);	   \
 FFTW_EXTERN void X(destroy_plan)(X(plan) p);				   \
 FFTW_EXTERN void X(forget_wisdom)(void);				   \
 FFTW_EXTERN void X(cleanup)(void);					   \
+									   \
+FFTW_EXTERN void X(set_timelimit)(double);				   \
 									   \
 FFTW_EXTERN void X(plan_with_nthreads)(int nthreads);			   \
 FFTW_EXTERN int X(init_threads)(void);					   \
