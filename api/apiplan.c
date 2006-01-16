@@ -37,6 +37,12 @@ WITH_ALIGNED_STACK({
      return plnr->adt->mkplan(plnr, prb);
 })
 
+static unsigned force_estimator(unsigned flags)
+{
+     flags &= ~(FFTW_MEASURE | FFTW_PATIENT | FFTW_EXHAUSTIVE);
+     return (flags | FFTW_ESTIMATE);
+}
+
 static plan *mkplan(planner *plnr, unsigned flags, problem *prb, int hash_info)
 {
      plan *pln;
@@ -46,7 +52,8 @@ static plan *mkplan(planner *plnr, unsigned flags, problem *prb, int hash_info)
      if (plnr->wisdom_state == WISDOM_NORMAL && !pln) {
 	  /* maybe the planner failed because of inconsistent wisdom;
 	     plan again ignoring infeasible wisdom */
-	  pln = mkplan0(plnr, flags, prb, hash_info, WISDOM_IGNORE_INFEASIBLE);
+	  pln = mkplan0(plnr, force_estimator(flags), prb, 
+			hash_info, WISDOM_IGNORE_INFEASIBLE);
      }
 
      if (plnr->wisdom_state == WISDOM_IS_BOGUS) {
@@ -62,7 +69,8 @@ static plan *mkplan(planner *plnr, unsigned flags, problem *prb, int hash_info)
 	       plnr->adt->forget(plnr, FORGET_EVERYTHING);
 
 	       A(!pln);
-	       pln = mkplan0(plnr, flags, prb, hash_info, WISDOM_IGNORE_ALL);
+	       pln = mkplan0(plnr, force_estimator(flags), 
+			     prb, hash_info, WISDOM_IGNORE_ALL);
 	  }
      }
 
