@@ -212,11 +212,12 @@ static void paranoid_checks(void)
 {
      /* FIXME: assumes char = 8 bits, which is false on at least one
 	DSP I know of. */
-
+#if 0
      /* if flags_t is not 64 bits i want to know it. */
      CK(sizeof(flags_t) == 8);
 
      CK(sizeof(md5uint) >= 4);
+#endif
 
      CK(sizeof(uintptr_t) >= sizeof(R *));
 
