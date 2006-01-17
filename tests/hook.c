@@ -208,10 +208,26 @@ static void hook(planner *plnr, plan *pln, const problem *p_, int optimalp)
      }
 }
 
+static void paranoid_checks(void)
+{
+     /* FIXME: assumes char = 8 bits, which is false on at least one
+	DSP I know of. */
+
+     /* if flags_t is not 64 bits i want to know it. */
+     CK(sizeof(flags_t) == 8);
+
+     CK(sizeof(md5uint) >= 4);
+
+     CK(sizeof(uintptr_t) >= sizeof(R *));
+
+     CK(sizeof(INT) >= sizeof(R *));
+}
+
 void install_hook(void)
 {
      planner *plnr = X(the_planner)();
      plnr->hook = hook;
+     paranoid_checks();
 }
 
 void uninstall_hook(void)
