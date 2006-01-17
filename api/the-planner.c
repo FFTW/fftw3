@@ -40,3 +40,10 @@ void X(cleanup)(void)
           plnr = 0;
      }
 }
+
+void X(set_timelimit)(double tlim) 
+{
+     /* PLNR is not necessarily initialized when this function is
+	called, so use X(the_planner)() */
+     X(the_planner)()->timelimit = tlim; 
+}

@@ -47,7 +47,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.88 2006-01-16 00:59:38 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.89 2006-01-17 02:52:01 athena Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -305,7 +305,6 @@ FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 #define FFTW_PRESERVE_INPUT (1U << 4) /* cancels FFTW_DESTROY_INPUT */
 #define FFTW_PATIENT (1U << 5) /* IMPATIENT is default */
 #define FFTW_ESTIMATE (1U << 6)
-#define FFTW_TIMELIMIT (1U << 30)
 
 /* undocumented beyond-guru flags */
 #define FFTW_ESTIMATE_PATIENT (1U << 7)

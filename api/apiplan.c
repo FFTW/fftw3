@@ -20,10 +20,6 @@
 
 #include "api.h"
 
-static double timelimit = 1e30;
-
-void X(set_timelimit)(double tlim) { timelimit = tlim; }
-
 static plan *mkplan0(planner *plnr, unsigned flags, 
 		     problem *prb, int hash_info, wisdom_state_t wisdom_state)
 WITH_ALIGNED_STACK({
@@ -90,12 +86,11 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
      pat_max = flags & FFTW_ESTIMATE ? 0 :
 	  (flags & FFTW_EXHAUSTIVE ? 3 :
 	   (flags & FFTW_PATIENT ? 2 : 1));
-     pat = flags & FFTW_TIMELIMIT ? 0 : pat_max;
+     pat = plnr->timelimit > 0 ? 0 : pat_max;
 
      flags &= ~(FFTW_ESTIMATE | FFTW_MEASURE | FFTW_PATIENT | FFTW_EXHAUSTIVE);
 
      plnr->start_time = X(get_crude_time)();
-     plnr->timelimit = (flags & FFTW_TIMELIMIT) ? timelimit : 1e30;
 	  
      /* plan at incrementally increasing patience until we run out of time */
      for (pln = 0, flags_used_for_planning = 0; pat <= pat_max; ++pat) {

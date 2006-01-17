@@ -62,7 +62,6 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "amnesia")) amnesia = 1;
      else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
      else if (sscanf(arg, "timelimit=%lg", &y) == 1) {
-	  the_flags |= FFTW_TIMELIMIT;
 	  FFTW(set_timelimit)(y);
      }
 

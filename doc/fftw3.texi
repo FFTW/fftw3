@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.231 2006-01-16 00:59:38 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.232 2006-01-17 02:52:01 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2093,35 +2093,6 @@ even wider range of algorithms, including many that we think are
 unlikely to be fast, to produce the most optimal plan but with a
 substantially increased planning time.
 
-@item
-@ctindex FFTW_TIMELIMIT
-@code{FFTW_TIMELIMIT}, in addition to one of the flags above, tells
-FFTW to plan with a progressively wider range of algorithms until the
-a given time limit (specified by @code{fftw_set_timelimit}, below) is
-reached or the given range of algorithms is explored, returning the
-best available plan.
-
-For example, specifying @code{FFTW_TIMELIMIT | FFTW_PATIENT} first
-plans in @code{FFTW_ESTIMATE} mode, then in @code{FFTW_MEASURE} mode,
-then finally (time permitting) in @code{FFTW_PATIENT}.  If
-@code{FFTW_TIMELIMIT | FFTW_EXHAUSTIVE} is specified instead, the
-planner will further progress to @code{FFTW_EXHAUSTIVE} mode.
-
-The maximum allowed planning time is specified by calling
-@code{fftw_set_timelimit}:
-
-@example
-extern void fftw_set_timelimit(double new_timelimit);
-@end example
-@findex fftw_set_timelimit
-
-The argument to this function specifies the maximum planning time in
-seconds, for use with the @code{FFTW_TIMELIMIT} flag.  The default
-value is to have no limit.  Note that this is only a rough limit; in
-practice, the planner may use somewhat more time if the time limit is
-reached when the planner is in the middle of an operation that cannot
-be interrupted.
-
 @end itemize
 
 @subsubheading Algorithm-restriction flags
@@ -2161,6 +2132,32 @@ original.  (Using @code{fftw_malloc} makes this flag unnecessary even
 then.)
 
 @end itemize
+
+@subsubheading Limiting planning time
+
+@example
+extern void fftw_set_timelimit(double seconds);
+@end example
+@findex fftw_set_timelimit
+
+This function instructs FFTW to spend at most @code{seconds} seconds
+(approximately) in the planner.  If @code{seconds == 0} (the default
+value), then planning time is unbounded.  Otherwise, FFTW plans with a
+progressively wider range of algorithms until the the given time limit
+is reached or the given range of algorithms is explored, returning the
+best available plan.
+
+For example, specifying @code{FFTW_PATIENT} first plans in
+@code{FFTW_ESTIMATE} mode, then in @code{FFTW_MEASURE} mode, then
+finally (time permitting) in @code{FFTW_PATIENT}.  If
+@code{FFTW_EXHAUSTIVE} is specified instead, the planner will further
+progress to @code{FFTW_EXHAUSTIVE} mode.
+
+Note that the @code{seconds} argument specifies only a rough limit; in
+practice, the planner may use somewhat more time if the time limit is
+reached when the planner is in the middle of an operation that cannot be
+interrupted.
+
 
 @c =========>
 @node Real-data DFTs, Real-data DFT Array Format, Planner Flags, Basic Interface
