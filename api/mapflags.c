@@ -60,19 +60,14 @@ static unsigned timelimit_to_flags(double timelimit)
      const double tmax = 365 * 24 * 3600;
      const double tstep = 1.05;
      const int nsteps = (1 << BITS_FOR_TIMELIMIT);
-     double tmin = tmax / pow(tstep, (double)nsteps);
      int x;
-
-     /* < 0 means infinite time limit */
-     if (!(timelimit >= 0))
-	  return 0;
-
+     
      if (timelimit >= tmax)
 	  return 0;
-     if (timelimit <= tmin)
+     if (timelimit <= 1.0e-10)
 	  return nsteps - 1;
      
-     x = (int) rint(log(tmax / timelimit) / log(tstep));
+     x = (int) (0.5 + (log(tmax / timelimit) / log(tstep)));
 
      if (x < 0) x = 0;
      if (x >= nsteps) x = nsteps - 1;
