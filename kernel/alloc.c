@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: alloc.c,v 1.46 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: alloc.c,v 1.47 2006-01-17 13:28:18 athena Exp $ */
 #include "ifftw.h"
 
 /**********************************************************
@@ -217,8 +217,9 @@ void X(malloc_print_minfo)(int verbose)
      struct minfo *info;
      int what;
      unsigned int h;
+     int leak = 0;
 
-     if (verbose) {
+     if (verbose > 2) {
 	  static const char *names[MALLOC_WHAT_LAST] = {
 	       "EVERYTHING",
 	       "PLANS", "SOLVERS", "PROBLEMS", "BUFFERS",
@@ -245,9 +246,13 @@ void X(malloc_print_minfo)(int verbose)
 
      for (h = 0; h < HASHSZ; ++h) 
 	  for (info = minfo[h]; info; info = info->next) {
+	       leak = 1;
 	       printf("%s:%d:  %zd bytes at %p\n",
 		      info->file, info->line, info->n, info->p);
 	  }
+
+     if (leak)
+	  abort();
 }
 
 #else

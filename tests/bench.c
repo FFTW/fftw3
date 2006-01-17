@@ -728,8 +728,7 @@ void cleanup(void)
      {
 	  /* undocumented memory checker */
 	  FFTW_EXTERN void FFTW(malloc_print_minfo)(int v);
-	  if (verbose > 2)
-	       FFTW(malloc_print_minfo)(verbose);
+	  FFTW(malloc_print_minfo)(verbose);
      }
 #    endif
 }
