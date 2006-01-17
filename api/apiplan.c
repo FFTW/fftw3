@@ -86,7 +86,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
      pat_max = flags & FFTW_ESTIMATE ? 0 :
 	  (flags & FFTW_EXHAUSTIVE ? 3 :
 	   (flags & FFTW_PATIENT ? 2 : 1));
-     pat = plnr->timelimit > 0 ? 0 : pat_max;
+     pat = plnr->timelimit >= 0 ? 0 : pat_max;
 
      flags &= ~(FFTW_ESTIMATE | FFTW_MEASURE | FFTW_PATIENT | FFTW_EXHAUSTIVE);
 

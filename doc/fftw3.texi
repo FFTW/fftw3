@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.232 2006-01-17 02:52:01 athena Exp $
+@comment $Id: fftw3.texi,v 1.233 2006-01-17 04:03:33 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2141,11 +2141,13 @@ extern void fftw_set_timelimit(double seconds);
 @findex fftw_set_timelimit
 
 This function instructs FFTW to spend at most @code{seconds} seconds
-(approximately) in the planner.  If @code{seconds == 0} (the default
-value), then planning time is unbounded.  Otherwise, FFTW plans with a
+(approximately) in the planner.  If @code{seconds ==
+FFTW_NO_TIMELIMIT} (the default value, which is negative), then
+planning time is unbounded.  Otherwise, FFTW plans with a
 progressively wider range of algorithms until the the given time limit
 is reached or the given range of algorithms is explored, returning the
 best available plan.
+@ctindex FFTW_NO_TIMELIMIT
 
 For example, specifying @code{FFTW_PATIENT} first plans in
 @code{FFTW_ESTIMATE} mode, then in @code{FFTW_MEASURE} mode, then
@@ -2155,8 +2157,10 @@ progress to @code{FFTW_EXHAUSTIVE} mode.
 
 Note that the @code{seconds} argument specifies only a rough limit; in
 practice, the planner may use somewhat more time if the time limit is
-reached when the planner is in the middle of an operation that cannot be
-interrupted.
+reached when the planner is in the middle of an operation that cannot
+be interrupted.  At the very least, the planner will complete planning
+in @code{FFTW_ESTIMATE} mode (which is thus equivalent to a time limit
+of 0).
 
 
 @c =========>

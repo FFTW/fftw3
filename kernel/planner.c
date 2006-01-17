@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.187 2006-01-17 02:52:01 athena Exp $ */
+/* $Id: planner.c,v 1.188 2006-01-17 04:03:34 stevenj Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -454,7 +454,7 @@ static int timeout_p(planner *ego)
 	       return 1;
 	  }
 
-	  if (ego->timelimit > 0 &&
+	  if (ego->timelimit >= 0 &&
 	      X(elapsed_since)(ego->start_time) >= ego->timelimit) {
 	       ego->timed_out = 1;
 	       ego->need_timeout_check = 1;
@@ -815,7 +815,7 @@ planner *X(mkplanner)(void)
      p->flags.hash_info = 0;
      p->nthr = 1;
      p->need_timeout_check = 1;
-     p->timelimit = 0;
+     p->timelimit = -1;
 
      mkhashtab(&p->htab_blessed);
      mkhashtab(&p->htab_unblessed);

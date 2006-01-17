@@ -47,7 +47,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.89 2006-01-17 02:52:01 athena Exp $ */
+/* $Id: fftw3.h,v 1.90 2006-01-17 04:03:33 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -295,6 +295,8 @@ FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 
 #define FFTW_FORWARD (-1)
 #define FFTW_BACKWARD (+1)
+
+#define FFTW_NO_TIMELIMIT (-1.0)
 
 /* documented flags */
 #define FFTW_MEASURE (0U)
