@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: planner.c,v 1.188 2006-01-17 04:03:34 stevenj Exp $ */
+/* $Id: planner.c,v 1.189 2006-01-17 05:17:27 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 
@@ -35,6 +35,7 @@
 #define LIVEP(solution) ((solution)->flags.hash_info & H_LIVE)
 #define SLVNDX(solution) ((solution)->flags.slvndx)
 #define BLISS(flags) (((flags).hash_info) & BLESSING)
+#define INFEASIBLE_SLVNDX ((1U<<BITS_FOR_SLVNDX)-1)
 
 
 #define MAXNAM 64  /* maximum length of registrar's name.
@@ -52,10 +53,13 @@ static void check(hashtab *ht);
 /* A subsumes B */
 static int subsumes(const flags_t *a, unsigned slvndx_a, const flags_t *b)
 {
-     if (slvndx_a != INFEASIBLE_SLVNDX)
-	  return LEQ(a->u, b->u) && LEQ(b->l, a->l);
-     else
-	  return LEQ(a->l, b->l);
+     if (slvndx_a != INFEASIBLE_SLVNDX) {
+	  A(a->timelimit_impatience == 0);
+	  return (LEQ(a->u, b->u) && LEQ(b->l, a->l));
+     } else {
+	  return (LEQ(a->l, b->l) 
+		  && a->timelimit_impatience <= b->timelimit_impatience);
+     }
 }
 
 static unsigned addmod(unsigned a, unsigned b, unsigned p)
@@ -233,9 +237,8 @@ static void fill_slot(hashtab *ht, const md5sig s, const flags_t *flagsp,
      ++ht->nelem;
      A(!LIVEP(slot));
      slot->flags.u = flagsp->u;
-     A(slot->flags.u == flagsp->u); /* bitfield could overflow */
      slot->flags.l = flagsp->l;
-     A(slot->flags.l == flagsp->l); /* bitfield could overflow */
+     slot->flags.timelimit_impatience = flagsp->timelimit_impatience;
      slot->flags.hash_info |= H_VALID | H_LIVE;
      SLVNDX(slot) = slvndx;
 
@@ -434,6 +437,7 @@ static plan *invoke_solver(planner *ego, problem *p, solver *s,
      int nthr = ego->nthr;
      plan *pln;
      ego->flags = *nflags;
+     PLNR_TIMELIMIT_IMPATIENCE(ego) = 0;
      A(p->adt->problem_kind == s->adt->problem_kind);
      pln = s->adt->mkplan(s, p, ego);
      ego->nthr = nthr;
@@ -582,6 +586,10 @@ static plan *mkplan(planner *ego, problem *p)
      ASSERT_ALIGNED_DOUBLE;
      A(LEQ(PLNR_L(ego), PLNR_U(ego)));
 
+     if (ESTIMATEP(ego))
+	  PLNR_TIMELIMIT_IMPATIENCE(ego) = 0; /* canonical form */
+
+
 #ifdef FFTW_DEBUG
      check(&ego->htab_blessed);
      check(&ego->htab_unblessed);
@@ -650,7 +658,18 @@ static plan *mkplan(planner *ego, problem *p)
 
      if (ego->timed_out) {
 	  A(!pln);
-	  return 0; /* no wisdom from timeout */
+	  if (PLNR_TIMELIMIT_IMPATIENCE(ego) != 0) {
+	       /* record (below) that this plan has failed because of
+		  timeout */
+	       flags_of_solution.hash_info |= BLESSING;
+	  } else {
+	       /* this is not the top-level problem or timeout is not
+		  active: record no wisdom. */
+	       return 0;
+	  }
+     } else {
+	  /* canonicalize to infinite timeout */
+	  flags_of_solution.timelimit_impatience = 0;
      }
 
  skip_search:
@@ -710,6 +729,7 @@ static void forget(planner *ego, amnesia a)
 
 /* FIXME: what sort of version information should we write? */
 #define WISDOM_PREAMBLE PACKAGE "-" VERSION " " STRINGIZE(X(wisdom))
+static const char stimeout[] = "TIMEOUT";
 
 /* tantus labor non sit cassus */
 static void exprt(planner *ego, printer *p)
@@ -720,13 +740,24 @@ static void exprt(planner *ego, printer *p)
      p->print(p, "(" WISDOM_PREAMBLE "\n");
      for (h = 0; h < ht->hashsiz; ++h) {
 	  solution *l = ht->solutions + h;
-	  if (LIVEP(l) && (SLVNDX(l) != INFEASIBLE_SLVNDX)) {
-	       slvdesc *sp = ego->slvdescs + SLVNDX(l);
+	  if (LIVEP(l)) {
+	       const char *reg_nam;
+	       int reg_id;
+
+	       if (SLVNDX(l) == INFEASIBLE_SLVNDX) {
+		    reg_nam = stimeout;
+		    reg_id = 0;
+	       } else {
+		    slvdesc *sp = ego->slvdescs + SLVNDX(l);
+		    reg_nam = sp->reg_nam;
+		    reg_id = sp->reg_id;
+	       }
+
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
-	       p->print(p, "  (%s %d #x%x #x%x #x%M #x%M #x%M #x%M)\n",
-			sp->reg_nam, sp->reg_id, 
-			l->flags.l, l->flags.u, 
+	       p->print(p, "  (%s %d #x%x #x%x #x%x #x%M #x%M #x%M #x%M)\n",
+			reg_nam, reg_id, 
+			l->flags.l, l->flags.u, l->flags.timelimit_impatience, 
 			l->s[0], l->s[1], l->s[2], l->s[3]);
 	  }
      }
@@ -739,12 +770,12 @@ static int imprt(planner *ego, scanner *sc)
 {
      char buf[MAXNAM + 1];
      md5uint sig[4];
-     unsigned l, u;
+     unsigned l, u, timelimit_impatience;
      flags_t flags;
      int reg_id;
      unsigned slvndx;
-     solution *sol;
      hashtab *ht = &ego->htab_blessed;
+     hashtab old;
 
      if (!sc->scan(sc, "(" WISDOM_PREAMBLE))
 	  return 0; /* don't need to restore hashtable */
@@ -752,9 +783,10 @@ static int imprt(planner *ego, scanner *sc)
      /* make a backup copy of the hash table (cache the hash) */
      {
 	  unsigned h, hsiz = ht->hashsiz;
-	  sol = (solution *)MALLOC(hsiz * sizeof(solution), HASHT);
+	  old = *ht;
+	  old.solutions = (solution *)MALLOC(hsiz * sizeof(solution), HASHT);
 	  for (h = 0; h < hsiz; ++h)
-	       sol[h] = ht->solutions[h];
+	       old.solutions[h] = ht->solutions[h];
      }
 
      while (1) {
@@ -762,28 +794,42 @@ static int imprt(planner *ego, scanner *sc)
 	       break;
 
 	  /* qua resurget ex favilla */
-	  if (!sc->scan(sc, "(%*s %d #x%x #x%x #x%M #x%M #x%M #x%M)",
-			MAXNAM, buf, &reg_id, &l, &u,
+	  if (!sc->scan(sc, "(%*s %d #x%x #x%x #x%x #x%M #x%M #x%M #x%M)",
+			MAXNAM, buf, &reg_id, &l, &u, &timelimit_impatience,
 			sig + 0, sig + 1, sig + 2, sig + 3))
 	       goto bad;
 
-	  if ((slvndx = slookup(ego, buf, reg_id)) == INFEASIBLE_SLVNDX)
-	       goto bad;
+	  if (!strcmp(buf, stimeout) && reg_id == 0) {
+	       slvndx = INFEASIBLE_SLVNDX;
+	  } else {
+	       if (timelimit_impatience != 0)
+		    goto bad;
+
+	       slvndx = slookup(ego, buf, reg_id);
+	       if (slvndx == INFEASIBLE_SLVNDX)
+		    goto bad;
+	  }
 
 	  /* inter oves locum praesta */
 	  flags.l = l;
 	  flags.u = u;
+	  flags.timelimit_impatience = timelimit_impatience;
 	  flags.hash_info = BLESSING;
+
+	  CK(flags.l == l);
+	  CK(flags.u == u);
+	  CK(flags.timelimit_impatience == timelimit_impatience);
+
 	  hinsert(ego, sig, &flags, slvndx);
      }
 
-     X(ifree0)(sol);
+     X(ifree0)(old.solutions);
      return 1;
 
  bad:
      /* ``The wisdom of FFTW must be above suspicion.'' */
      X(ifree0)(ht->solutions);
-     ht->solutions = sol;
+     *ht = old;
      return 0;
 }
 
@@ -812,6 +858,7 @@ planner *X(mkplanner)(void)
 
      p->flags.l = 0;
      p->flags.u = 0;
+     p->flags.timelimit_impatience = 0;
      p->flags.hash_info = 0;
      p->nthr = 1;
      p->need_timeout_check = 1;

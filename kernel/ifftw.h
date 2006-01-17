@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.277 2006-01-16 02:30:31 athena Exp $ */
+/* $Id: ifftw.h,v 1.278 2006-01-17 05:17:27 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__
@@ -553,14 +553,16 @@ typedef struct solution_s solution; /* opaque */
 
 typedef struct {
      unsigned l:20;
-     unsigned hash_info:12;
+     unsigned hash_info:3;
+     #define BITS_FOR_TIMELIMIT 9
+     unsigned timelimit_impatience:BITS_FOR_TIMELIMIT;
      unsigned u:20;
      
      /* abstraction break: we store the solver here to pad the
 	structure to 64 bits.  Otherwise, the struct is padded to 64
 	bits anyway, and another word is allocated for slvndx. */
-     unsigned slvndx:12;
-     #define INFEASIBLE_SLVNDX ((1U<<12)-1)
+     #define BITS_FOR_SLVNDX 12
+     unsigned slvndx:BITS_FOR_SLVNDX;
 } flags_t;
 
 /* impatience flags  */
@@ -594,6 +596,7 @@ enum {
 
 #define PLNR_L(plnr) ((plnr)->flags.l)
 #define PLNR_U(plnr) ((plnr)->flags.u)
+#define PLNR_TIMELIMIT_IMPATIENCE(plnr) ((plnr)->flags.timelimit_impatience)
 
 #define ESTIMATEP(plnr) (PLNR_U(plnr) & ESTIMATE)
 #define BELIEVE_PCOSTP(plnr) (PLNR_U(plnr) & BELIEVE_PCOST)

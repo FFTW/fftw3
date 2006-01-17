@@ -19,6 +19,7 @@
  */
 
 #include "api.h"
+#include <math.h>
 
 /* a flag operation: x is either a flag, in which case xm == 0, or
    a mask, in which case xm == x; using this we can compactly code
@@ -50,11 +51,39 @@ static void map_flags(unsigned *iflags, unsigned *oflags,
                *oflags = OP(*oflags, flagmap[i].op);
 }
 
+/* encoding of the planner timelimit into a BITS_FOR_TIMELIMIT-bits
+   nonnegative integer, such that we can still view the integer as
+   ``impatience'': higher means *lower* time limit, and 0 is the
+   highest possible value (about 1 year of calendar time) */
+static unsigned timelimit_to_flags(double timelimit)
+{
+     const double tmax = 365 * 24 * 3600;
+     const double tstep = 1.05;
+     const int nsteps = (1 << BITS_FOR_TIMELIMIT);
+     double tmin = tmax / pow(tstep, (double)nsteps);
+     int x;
+
+     /* < 0 means infinite time limit */
+     if (!(timelimit >= 0))
+	  return 0;
+
+     if (timelimit >= tmax)
+	  return 0;
+     if (timelimit <= tmin)
+	  return nsteps - 1;
+     
+     x = (int) rint(log(tmax / timelimit) / log(tstep));
+
+     if (x < 0) x = 0;
+     if (x >= nsteps) x = nsteps - 1;
+     return x;
+}
+
 #define NELEM(array) ((int) (sizeof(array) / sizeof((array)[0])))
 
 void X(mapflags)(planner *plnr, unsigned flags)
 {
-     unsigned l, u;
+     unsigned l, u, t;
 
      /* map of api flags -> api flags, to implement consistency rules
         and combination flags */
@@ -135,4 +164,10 @@ void X(mapflags)(planner *plnr, unsigned flags)
      /* assert that the conversion didn't lose bits */
      A(PLNR_L(plnr) == l);
      A(PLNR_U(plnr) == (u | l));
+
+     /* compute flags representation of the timelimit */
+     t = timelimit_to_flags(plnr->timelimit);
+
+     PLNR_TIMELIMIT_IMPATIENCE(plnr) = t;
+     A(PLNR_TIMELIMIT_IMPATIENCE(plnr) == t);
 }
