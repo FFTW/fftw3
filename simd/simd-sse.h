@@ -73,7 +73,8 @@ static inline V LOADL0(const R *addr, V val)
      /* gcc-3.3 -O3 produces wrong code with the ``obvious'' coding
 
           __asm__("movlps %1, %0" : "=x"(retval) : "m"(*addr));
- 
+
+        So we are back to the uninitialized variable nonsense.  Grrr... 
      */
      __asm__("movlps %1, %0" : "=x"(retval) : "m"(*addr), "x"(val));
      return retval;
