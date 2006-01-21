@@ -69,6 +69,9 @@ AC_ARG_ENABLE(k7, [AC_HELP_STRING([--enable-k7],[enable AMD K7 optimizations, in
 if test "$PRECISION" != "s"; then have_k7=no; fi
 if test "$have_k7" = "yes"; then
 	AC_DEFINE(HAVE_K7,1,[Define to enable AMD K7 optimizations.])
+	if test "$enable_shared" = "yes"; then
+		AC_MSG_ERROR([--enable-k7 is incompatible with --enable-shared.])
+	fi
 fi
 AM_CONDITIONAL(HAVE_K7, test "$have_k7" = "yes")
 
