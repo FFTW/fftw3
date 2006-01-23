@@ -194,6 +194,11 @@ if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
             AX_CHECK_COMPILER_FLAGS([-Wp,-H128000],
             		            [CFLAGS="$CFLAGS -Wp,-H128000"])
             ;;
+
+	portland) # -Masmkeyword required for asm("") cycle counter
+	    AX_CHECK_COMPILER_FLAGS([-Masmkeyword],
+                                    [CFLAGS="$CFLAGS -Masmkeyword"])
+            ;;
       esac
     fi
 fi
