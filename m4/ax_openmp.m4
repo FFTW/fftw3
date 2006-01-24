@@ -38,7 +38,7 @@ AC_PREREQ(2.59) dnl for _AC_LANG_PREFIX
 
 AC_CACHE_CHECK([for OpenMP flag of _AC_LANG compiler], ax_cv_[]_AC_LANG_ABBREV[]_openmp, [save[]_AC_LANG_PREFIX[]FLAGS=$[]_AC_LANG_PREFIX[]FLAGS
 ax_cv_[]_AC_LANG_ABBREV[]_openmp=unknown
-# Flags to try:  -openmp (icc), -mp (SGI), -xopenmp (Sun), -omp (Tru64),
+# Flags to try:  -openmp (icc), -mp (SGI & PGI), -xopenmp (Sun), -omp (Tru64),
 #                -qsmp=omp (AIX), none
 ax_openmp_flags="-openmp -mp -xopenmp -omp -qsmp=omp none"
 if test "x$OPENMP_[]_AC_LANG_PREFIX[]FLAGS" != x; then
