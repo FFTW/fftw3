@@ -29,7 +29,7 @@ dnl flag is found, and ACTION-IF-NOT-FOUND is a list of commands
 dnl to run it if it is not found.  If ACTION-IF-FOUND is not specified,
 dnl the default action will define HAVE_OPENMP.
 dnl
-dnl @version 2005-05-30
+dnl @version 2006-01-24
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
@@ -38,9 +38,9 @@ AC_PREREQ(2.59) dnl for _AC_LANG_PREFIX
 
 AC_CACHE_CHECK([for OpenMP flag of _AC_LANG compiler], ax_cv_[]_AC_LANG_ABBREV[]_openmp, [save[]_AC_LANG_PREFIX[]FLAGS=$[]_AC_LANG_PREFIX[]FLAGS
 ax_cv_[]_AC_LANG_ABBREV[]_openmp=unknown
-# Flags to try:  -openmp (icc), -mp (SGI & PGI), -xopenmp (Sun), -omp (Tru64),
-#                -qsmp=omp (AIX), none
-ax_openmp_flags="-openmp -mp -xopenmp -omp -qsmp=omp none"
+# Flags to try:  -fopenmp (gcc), -openmp (icc), -mp (SGI & PGI),
+#                -xopenmp (Sun), -omp (Tru64), -qsmp=omp (AIX), none
+ax_openmp_flags="-fopenmp -openmp -mp -xopenmp -omp -qsmp=omp none"
 if test "x$OPENMP_[]_AC_LANG_PREFIX[]FLAGS" != x; then
   ax_openmp_flags="$OPENMP_[]_AC_LANG_PREFIX[]FLAGS $ax_openmp_flags"
 fi
