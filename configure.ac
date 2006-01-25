@@ -186,8 +186,6 @@ if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
 		    [CODELET_OPTIM="$CODELET_OPTIM --param large-function-growth=1000"])
             ;;
 
-	intel) AX_CHECK_COMPILER_FLAGS([-no-gcc], [CFLAGS="$CFLAGS -no-gcc"]);;
-
         ibm) CODELET_OPTIM=-O;;
 
       esac
@@ -197,6 +195,10 @@ fi
 AC_SUBST(CODELET_OPTIM)
 
 case "${ax_cv_c_compiler_vendor}" in
+   intel) # Stop icc from defining __GNUC__
+        AX_CHECK_COMPILER_FLAGS([-no-gcc], [CC="$CC -no-gcc"])
+        ;;
+
    hp) # must (sometimes) manually increase cpp limits to handle fftw3.h
         AX_CHECK_COMPILER_FLAGS([-Wp,-H128000],
         		        [CC="$CC -Wp,-H128000"])
