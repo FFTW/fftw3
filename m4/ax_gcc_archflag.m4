@@ -49,9 +49,7 @@ if test "x$ax_gcc_arch" = xyes; then
 ax_gcc_arch=""
 if test "$cross_compiling" = no; then
 case $host_cpu in
-  i386*) ax_gcc_arch=i386 ;;
-  i486*) ax_gcc_arch=i486 ;;
-  i[[56]]86*|x86_64*) # use cpuid codes, in part from x86info-1.7 by Dave Jones
+  i[[3456]]86*|x86_64*) # use cpuid codes, in part from x86info-1.7 by D. Jones
      AX_GCC_X86_CPUID(0)
      AX_GCC_X86_CPUID(1)
      case $ax_cv_gcc_x86_cpuid_0 in
