@@ -190,20 +190,23 @@ if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
 
         ibm) CODELET_OPTIM=-O;;
 
-        hp) # must (sometimes) manually increase cpp limits to handle fftw3.h
-            AX_CHECK_COMPILER_FLAGS([-Wp,-H128000],
-            		            [CFLAGS="$CFLAGS -Wp,-H128000"])
-            ;;
-
-	portland) # -Masmkeyword required for asm("") cycle counter
-	    AX_CHECK_COMPILER_FLAGS([-Masmkeyword],
-                                    [CFLAGS="$CFLAGS -Masmkeyword"])
-            ;;
       esac
     fi
 fi
 
 AC_SUBST(CODELET_OPTIM)
+
+case "${ax_cv_c_compiler_vendor}" in
+   hp) # must (sometimes) manually increase cpp limits to handle fftw3.h
+        AX_CHECK_COMPILER_FLAGS([-Wp,-H128000],
+        		        [CC="$CC -Wp,-H128000"])
+        ;;
+
+   portland) # -Masmkeyword required for asm("") cycle counters
+	AX_CHECK_COMPILER_FLAGS([-Masmkeyword],
+                                [CC="$CC -Masmkeyword"])
+        ;;
+esac
 
 if test "x$SIMD_CFLAGS" = x; then
 if test "$GCC" = "yes"; then
