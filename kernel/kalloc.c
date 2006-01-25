@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: kalloc.c,v 1.5 2006-01-13 00:17:35 stevenj Exp $ */
+/* $Id: kalloc.c,v 1.6 2006-01-25 23:00:04 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -128,7 +128,7 @@ void *X(kernel_malloc)(size_t n)
 #  else
      /* Add your machine here and send a patch to fftw@fftw.org 
         or (e.g. for Windows) configure --with-our-malloc16 */
-#    error "Don't know how to malloc() aligned memory."
+#    error "Don't know how to malloc() aligned memory ... try configuring --with-our-malloc16"
 #  endif
 
 #else /* !defined(MIN_ALIGNMENT) */
