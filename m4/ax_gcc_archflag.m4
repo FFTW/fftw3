@@ -60,7 +60,8 @@ case $host_cpu in
 	    *6[[3456]]?:*:*:*) ax_gcc_arch="pentium2 pentiumpro" ;;
 	    *6a?:*[[01]]:*:*) ax_gcc_arch="pentium2 pentiumpro" ;;
 	    *6a?:*[[234]]:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
-	    *6[[789b]]?:*:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
+	    *6[[9d]]?:*:*:*) ax_gcc_arch="pentium-m pentium3 pentiumpro" ;;
+	    *6[[78b]]?:*:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
 	    *6??:*:*:*) ax_gcc_arch=pentiumpro ;;
             *f3[[347]]:*:*:*|*f4[1347]:*:*:*)
 		case $host_cpu in
