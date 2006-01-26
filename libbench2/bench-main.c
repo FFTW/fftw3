@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.15 2006-01-04 00:34:04 athena Exp $ */
+/* $Id: bench-main.c,v 1.16 2006-01-26 04:02:19 athena Exp $ */
 
 #include "getopt.h"
 #include "bench.h"
@@ -59,7 +59,9 @@ static struct option long_options[] =
 static void check_alignment(double *x)
 {
      UNUSED(x);
-#ifdef FFTW_DEBUG_ALIGNMENT
+     /* #ifndef FFTW_DEBUG_ALIGNMENT here is correct.  I do not mean
+	#ifdef FFTW_DEBUG_ALIGNMENT.  Think about it. */
+#ifndef FFTW_DEBUG_ALIGNMENT
      BENCH_ASSERT((((long)x) & 0x7) == 0);
 #endif
 }
