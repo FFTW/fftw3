@@ -195,9 +195,9 @@ static void hook(planner *plnr, plan *pln, const problem *p_, int optimalp)
 	       the_plan->pln = pln;
 	       the_plan->prb = (problem *) p_;
 
-	       AWAKE(pln, AWAKE_SQRTN_TABLE);
+	       X(plan_awake)(pln, AWAKE_SQRTN_TABLE);
 	       verify_problem(bp, rounds, tol);
-	       AWAKE(pln, SLEEPY);
+	       X(plan_awake)(pln, SLEEPY);
 
 	       X(ifree)(the_plan);
 	       the_plan = the_plan_save;

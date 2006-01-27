@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.5 2006-01-06 03:19:09 athena Exp $ */
+/* $Id: ct.c,v 1.6 2006-01-27 02:10:50 athena Exp $ */
 
 #include "threads.h"
 
@@ -89,9 +89,9 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      int i;
-     AWAKE(ego->cld, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
      for (i = 0; i < ego->nthr; ++i)
-	  AWAKE(ego->cldws[i], wakefulness);
+	  X(plan_awake)(ego->cldws[i], wakefulness);
 }
 
 static void destroy(plan *ego_)

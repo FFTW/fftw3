@@ -96,9 +96,9 @@ static void destroy(plan *ego_)
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cldtrans, wakefulness);
-     AWAKE(ego->cld, wakefulness);
-     AWAKE(ego->cldrest, wakefulness);
+     X(plan_awake)(ego->cldtrans, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
+     X(plan_awake)(ego->cldrest, wakefulness);
 }
 
 static void print(const plan *ego_, printer *p)

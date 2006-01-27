@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: rank0-rdft2.c,v 1.12 2006-01-13 03:21:57 athena Exp $ */
+/* $Id: rank0-rdft2.c,v 1.13 2006-01-27 02:10:50 athena Exp $ */
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
@@ -114,7 +114,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      if (ego->cldcpy)
-	  AWAKE(ego->cldcpy, wakefulness);
+	  X(plan_awake)(ego->cldcpy, wakefulness);
 }
 
 static void destroy(plan *ego_)

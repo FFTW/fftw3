@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.48 2006-01-13 03:21:57 athena Exp $ */
+/* $Id: vrank3-transpose.c,v 1.49 2006-01-27 02:10:50 athena Exp $ */
 
 /* rank-0, vector-rank-3, non-square in-place transposition
    (see rank0.c for square transposition)  */
@@ -701,9 +701,9 @@ static const transpose_adt adt_toms513 =
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     if (ego->cld1) AWAKE(ego->cld1, wakefulness);
-     if (ego->cld2) AWAKE(ego->cld2, wakefulness);
-     if (ego->cld3) AWAKE(ego->cld3, wakefulness);
+     if (ego->cld1) X(plan_awake)(ego->cld1, wakefulness);
+     if (ego->cld2) X(plan_awake)(ego->cld2, wakefulness);
+     if (ego->cld3) X(plan_awake)(ego->cld3, wakefulness);
 }
 
 static void print(const plan *ego_, printer *p)

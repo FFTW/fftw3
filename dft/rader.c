@@ -170,9 +170,9 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
 
-     AWAKE(ego->cld1, wakefulness);
-     AWAKE(ego->cld2, wakefulness);
-     AWAKE(ego->cld_omega, wakefulness);
+     X(plan_awake)(ego->cld1, wakefulness);
+     X(plan_awake)(ego->cld2, wakefulness);
+     X(plan_awake)(ego->cld_omega, wakefulness);
 
      switch (wakefulness) {
 	 case SLEEPY:

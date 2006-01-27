@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-direct.c,v 1.8 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: hc2hc-direct.c,v 1.9 2006-01-27 02:10:50 athena Exp $ */
 
 #include "hc2hc.h"
 
@@ -61,8 +61,8 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
 
-     AWAKE(ego->cld0, wakefulness);
-     AWAKE(ego->cldm, wakefulness);
+     X(plan_awake)(ego->cld0, wakefulness);
+     X(plan_awake)(ego->cldm, wakefulness);
      X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw, 
 		      ego->r * ego->m, ego->r, (ego->m + 1) / 2);
      ego->tdW = X(twiddle_shift)(ego->td, ego->mstart1);

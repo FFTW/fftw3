@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.36 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: dft-r2hc.c,v 1.37 2006-01-27 02:10:50 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting
@@ -73,7 +73,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
 }
 
 static void destroy(plan *ego_)

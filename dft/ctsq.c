@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ctsq.c,v 1.11 2006-01-06 03:19:09 athena Exp $ */
+/* $Id: ctsq.c,v 1.12 2006-01-27 02:10:50 athena Exp $ */
 
 /* special ``square transpose'' cooley-tukey solver for in-place problems */
 #include "ct.h"
@@ -56,7 +56,7 @@ static void apply_dif(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
      X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw, 
 		      ego->r * ego->m, ego->r, ego->m);
 }

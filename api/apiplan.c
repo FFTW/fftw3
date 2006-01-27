@@ -33,6 +33,11 @@ WITH_ALIGNED_STACK({
      return plnr->adt->mkplan(plnr, prb);
 })
 
+static void aligned_awake(plan *ego, enum wakefulness wakefulness)
+WITH_ALIGNED_STACK({
+     X(plan_awake)(ego, wakefulness);
+})
+
 static unsigned force_estimator(unsigned flags)
 {
      flags &= ~(FFTW_MEASURE | FFTW_PATIENT | FFTW_EXHAUSTIVE);
@@ -121,10 +126,10 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	  if (sizeof(trigreal) > sizeof(R)) {
 	       /* this is probably faster, and we have enough trigreal
 		  bits to maintain accuracy */
-	       AWAKE(p->pln, AWAKE_SQRTN_TABLE);
+	       aligned_awake(p->pln, AWAKE_SQRTN_TABLE);
 	  } else {
 	       /* more accurate */
-	       AWAKE(p->pln, AWAKE_SINCOS);
+	       aligned_awake(p->pln, AWAKE_SINCOS);
 	  }
 	  
 	  /* we don't use pln for p->pln, above, since by re-creating the
@@ -142,7 +147,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 void X(destroy_plan)(X(plan) p)
 {
      if (p) {
-          AWAKE(p->pln, SLEEPY);
+          X(plan_awake)(p->pln, SLEEPY);
           X(plan_destroy_internal)(p->pln);
           X(problem_destroy)(p->prb);
           X(ifree)(p);

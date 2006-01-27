@@ -114,7 +114,7 @@ static void apply_dif(const plan *ego_, R *rio, R *iio)
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
      mktwiddle(ego, wakefulness);
 }
 

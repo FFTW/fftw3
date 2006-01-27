@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.31 2006-01-05 21:01:51 athena Exp $ */
+/* $Id: redft00e-r2hc.c,v 1.32 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing.
 
@@ -116,7 +116,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
           { TW_NEXT, 1, 0 }
      };
 
-     AWAKE(ego->cld, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
      X(twiddle_awake)(wakefulness,
 		      &ego->td, redft00e_tw, 2*ego->n, 1, (ego->n+1)/2);
 }

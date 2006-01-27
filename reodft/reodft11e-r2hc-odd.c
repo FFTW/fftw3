@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.26 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: reodft11e-r2hc-odd.c,v 1.27 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:
@@ -204,7 +204,7 @@ static void apply_ro11(const plan *ego_, R *I, R *O)
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
 }
 
 static void destroy(plan *ego_)

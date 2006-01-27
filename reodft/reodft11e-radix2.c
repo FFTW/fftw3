@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.15 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: reodft11e-radix2.c,v 1.16 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:
@@ -406,7 +406,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
           { TW_NEXT, 2, 0 }
      };
 
-     AWAKE(ego->cld, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
 
      X(twiddle_awake)(wakefulness, &ego->td, reodft010e_tw, 
 		      2*ego->n, 1, ego->n/4+1);

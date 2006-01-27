@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: ct.c,v 1.51 2006-01-05 03:04:26 stevenj Exp $ */
+/* $Id: ct.c,v 1.52 2006-01-27 02:10:50 athena Exp $ */
 
 #include "ct.h"
 
@@ -60,8 +60,8 @@ static void apply_dif(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, wakefulness);
-     AWAKE(ego->cldw, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
+     X(plan_awake)(ego->cldw, wakefulness);
 }
 
 static void destroy(plan *ego_)

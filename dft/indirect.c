@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: indirect.c,v 1.41 2006-01-05 03:04:26 stevenj Exp $ */
+/* $Id: indirect.c,v 1.42 2006-01-27 02:10:50 athena Exp $ */
 
 
 /* solvers/plans for vectors of small DFT's that cannot be done
@@ -119,8 +119,8 @@ static void destroy(plan *ego_)
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cldcpy, wakefulness);
-     AWAKE(ego->cld, wakefulness);
+     X(plan_awake)(ego->cldcpy, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
 }
 
 static void print(const plan *ego_, printer *p)

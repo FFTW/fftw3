@@ -58,8 +58,8 @@ static void apply_dif(const plan *ego_, R *I, R *O)
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, wakefulness);
-     AWAKE(ego->cldw, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
+     X(plan_awake)(ego->cldw, wakefulness);
 }
 
 static void destroy(plan *ego_)

@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: redft00e-r2hc-pad.c,v 1.7 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: redft00e-r2hc-pad.c,v 1.8 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, padded symmetrically to
    twice the size.  This is asymptotically a factor of ~2 worse than
@@ -80,8 +80,8 @@ static void apply(const plan *ego_, R *I, R *O)
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     AWAKE(ego->cld, wakefulness);
-     AWAKE(ego->cldcpy, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
+     X(plan_awake)(ego->cldcpy, wakefulness);
 }
 
 static void destroy(plan *ego_)

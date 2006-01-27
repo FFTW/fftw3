@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: vrank-geq1-rdft2.c,v 1.23 2006-01-10 13:24:41 athena Exp $ */
+/* $Id: vrank-geq1-rdft2.c,v 1.24 2006-01-27 02:10:50 athena Exp $ */
 
 
 #include "threads.h"
@@ -77,7 +77,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      P *ego = (P *) ego_;
      int i;
      for (i = 0; i < ego->nthr; ++i)
-	  AWAKE(ego->cldrn[i], wakefulness);
+	  X(plan_awake)(ego->cldrn[i], wakefulness);
 }
 
 static void destroy(plan *ego_)

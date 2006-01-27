@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.26 2006-01-10 05:14:00 stevenj Exp $ */
+/* $Id: timer.c,v 1.27 2006-01-27 02:10:50 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -111,7 +111,7 @@ typedef crude_time ticks;
        int iter;
        int repeat;
 
-       AWAKE(pln, AWAKE_ZERO);
+       X(plan_awake)(pln, AWAKE_ZERO);
        p->adt->zero(p);
 
   start_over:
@@ -139,7 +139,7 @@ typedef crude_time ticks;
 	    if (tmin >= TIME_MIN) {
 		 tmin /= (double) iter;
 		 tmax /= (double) iter;
-		 AWAKE(pln, SLEEPY);
+		 X(plan_awake)(pln, SLEEPY);
 		 return tmin;
 	    }
        }

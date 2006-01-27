@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.12 2006-01-04 00:34:04 athena Exp $ */
+/* $Id: reodft00e-splitradix.c,v 1.13 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.
@@ -216,8 +216,8 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
           { TW_NEXT, 1, 0 }
      };
 
-     AWAKE(ego->clde, wakefulness);
-     AWAKE(ego->cldo, wakefulness);
+     X(plan_awake)(ego->clde, wakefulness);
+     X(plan_awake)(ego->cldo, wakefulness);
      X(twiddle_awake)(wakefulness, &ego->td, reodft00e_tw, 
 		      2*ego->n, 1, ego->n/4);
 }

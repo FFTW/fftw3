@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: buffered.c,v 1.58 2006-01-05 03:04:26 stevenj Exp $ */
+/* $Id: buffered.c,v 1.59 2006-01-27 02:10:50 athena Exp $ */
 
 #include "dft.h"
 
@@ -82,9 +82,9 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
 
-     AWAKE(ego->cld, wakefulness);
-     AWAKE(ego->cldcpy, wakefulness);
-     AWAKE(ego->cldrest, wakefulness);
+     X(plan_awake)(ego->cld, wakefulness);
+     X(plan_awake)(ego->cldcpy, wakefulness);
+     X(plan_awake)(ego->cldrest, wakefulness);
 }
 
 static void destroy(plan *ego_)
