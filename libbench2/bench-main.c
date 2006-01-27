@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.16 2006-01-26 04:02:19 athena Exp $ */
+/* $Id: bench-main.c,v 1.17 2006-01-27 00:15:12 athena Exp $ */
 
 #include "getopt.h"
 #include "bench.h"
@@ -56,16 +56,6 @@ static struct option long_options[] =
   {0, no_argument, 0, 0}
 };
 
-static void check_alignment(double *x)
-{
-     UNUSED(x);
-     /* #ifndef FFTW_DEBUG_ALIGNMENT here is correct.  I do not mean
-	#ifdef FFTW_DEBUG_ALIGNMENT.  Think about it. */
-#ifndef FFTW_DEBUG_ALIGNMENT
-     BENCH_ASSERT((((long)x) & 0x7) == 0);
-#endif
-}
-
 int bench_main(int argc, char *argv[])
 {
      double tmin = 0.0;
@@ -77,8 +67,6 @@ int bench_main(int argc, char *argv[])
      int c;
      int ndx;
      char *short_options = make_short_options(long_options);
-
-     check_alignment(&tol);
 
      report = report_verbose; /* default */
      verbose = 0;
