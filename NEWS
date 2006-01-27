@@ -1,4 +1,4 @@
-FFTW 3.1 beta 2:
+FFTW 3.1:
 
 * Faster FFTW_ESTIMATE planner.
 
