@@ -1,4 +1,4 @@
-FFTW 3.1:
+FFTW 3.1
 
 * Faster FFTW_ESTIMATE planner.
 
@@ -19,8 +19,8 @@ FFTW 3.1:
 
 * Much faster Altivec/VMX performance.
 
-* New FFTW_TIMELIMIT option to specify a (rough) upper bound to the planning
-  time (does not affect ESTIMATE mode).
+* New fftw_set_timelimit function to specify a (rough) upper bound to the
+  planning time (does not affect ESTIMATE mode).
 
 * Removed --enable-3dnow support; use --enable-k7 instead.
 
@@ -87,6 +87,13 @@ FFTW 3.1:
 
 * Work around Visual C++ (version 6/7) bug in SSE compilation;
   thanks to Eddie Yee for his detailed report.
+
+Changes from FFTW 3.1 beta 2:
+
+* Several minor compilation fixes.
+
+* Eliminate FFTW_TIMELIMIT flag and replace fftw_timelimit global with
+  fftw_set_timelimit function.  Make wisdom work with time-limited plans.
 
 Changes from FFTW 3.1 beta 1:
 
