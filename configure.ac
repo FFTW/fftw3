@@ -142,7 +142,6 @@ AC_PROG_MAKE_SET
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
-
 AC_CHECK_PROG(OCAMLC, ocamlc, ocamlc)
 AC_CHECK_PROG(OCAMLOPT, ocamlopt, ocamlopt)
 AC_CHECK_PROG(OCAMLDEP, ocamldep, ocamldep)
@@ -346,6 +345,8 @@ AC_ARG_WITH(openmp, [AC_HELP_STRING([--with-openmp],[use OpenMP directives inste
 
 AC_ARG_ENABLE(threads, [AC_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=$with_openmp)
 
+AC_ARG_WITH(combined-threads, [AC_HELP_STRING([--with-combined-threads],[combine threads into main libfftw3])], with_combined_threads=$withval, with_combined_threads=no)
+
 dnl Check for threads library...
 THREADLIBS=""
 if test "$enable_threads" = "yes"; then
@@ -379,6 +380,7 @@ if test "$enable_threads" = "yes"; then
 fi
 AC_SUBST(THREADLIBS)
 AM_CONDITIONAL(THREADS, test x"$THREADLIBS" != x)
+AM_CONDITIONAL(COMBINED_THREADS, test x"$with_combined_threads" = xyes)
 
 dnl -----------------------------------------------------------------------
 

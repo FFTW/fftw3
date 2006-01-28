@@ -6,7 +6,9 @@ noinst_PROGRAMS = bench
 EXTRA_DIST = check.pl README
 
 if THREADS
+if !COMBINED_THREADS
 LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_threads.la
+endif
 else
 LIBFFTWTHREADS = 
 endif

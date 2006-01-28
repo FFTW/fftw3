@@ -32,6 +32,12 @@ else
 K7_LIBS=
 endif
 
+if THREADS
+if COMBINED_THREADS
+COMBINED_THREADLIBS=threads/libfftw3@PREC_SUFFIX@_threads.la
+endif
+endif
+
 libfftw3@PREC_SUFFIX@_la_SOURCES = 
 
 libfftw3@PREC_SUFFIX@_la_LIBADD =			\
@@ -46,7 +52,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	rdft/codelets/r2r/librdft_codelets_r2r.la	\
 	reodft/libreodft.la				\
 	api/libapi.la					\
-        $(SIMD_LIBS) $(K7_LIBS)
+        $(SIMD_LIBS) $(K7_LIBS) $(COMBINED_THREADLIBS)
 
 libfftw3@PREC_SUFFIX@_la_LDFLAGS = -no-undefined -version-info @SHARED_VERSION_INFO@
 
