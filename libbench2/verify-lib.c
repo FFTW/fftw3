@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.19 2006-01-05 03:04:27 stevenj Exp $ */
+/* $Id: verify-lib.c,v 1.20 2006-01-30 01:42:51 athena Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -294,7 +294,7 @@ double impulse(dofft_closure *k,
 
      /* check impulsive input */
      for (i = 0; i < vecn; ++i) {
-	  R x = (i+1) / (double)(vecn+1);
+	  R x = (sqrt(n)*(i+1)) / (double)(vecn+1);
 	  for (j = 0; j < n; ++j) {
 	       c_re(inA[j + i * n]) = 0;
 	       c_im(inA[j + i * n]) = 0;
@@ -310,7 +310,7 @@ double impulse(dofft_closure *k,
 
      /* check constant input */
      for (i = 0; i < vecn; ++i) {
-	  R x = (i+1) / (double)(vecn+1);
+	  R x = (i+1) / ((double)(vecn+1) * sqrt(n));
 	  for (j = 0; j < n; ++j) {
 	       c_re(inA[j + i * n]) = x;
 	       c_im(inA[j + i * n]) = 0;
