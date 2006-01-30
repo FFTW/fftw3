@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: timer.c,v 1.12 2006-01-15 21:32:54 athena Exp $ */
+/* $Id: timer.c,v 1.13 2006-01-30 16:09:32 athena Exp $ */
 
 #include "bench.h"
 #include <stdio.h>
@@ -184,18 +184,18 @@ void timer_init(double tmin, int repeat)
 	  time_min = calibrate();
 }
 
-static mytime t0[NTIMERS];
+static mytime t0[BENCH_NTIMERS];
 
 void timer_start(int n)
 {
-     BENCH_ASSERT(n >= 0 && n < NTIMERS);
+     BENCH_ASSERT(n >= 0 && n < BENCH_NTIMERS);
      t0[n] = get_time();
 }
 
 double timer_stop(int n)
 {
      mytime t1;
-     BENCH_ASSERT(n >= 0 && n < NTIMERS);
+     BENCH_ASSERT(n >= 0 && n < BENCH_NTIMERS);
      t1 = get_time();
      return elapsed(t1, t0[n]);
 }

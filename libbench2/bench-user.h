@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.20 2006-01-15 01:40:12 athena Exp $ */
+/* $Id: bench-user.h,v 1.21 2006-01-30 16:09:32 athena Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 
@@ -126,7 +126,7 @@ extern int verbose;
 
 #define LIBBENCH_TIMER 0
 #define USER_TIMER 1
-#define NTIMERS 2
+#define BENCH_NTIMERS 2
 extern void timer_start(int which_timer);
 extern double timer_stop(int which_timer);
 
