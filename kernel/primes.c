@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.23 2006-01-30 20:26:22 stevenj Exp $ */
+/* $Id: primes.c,v 1.24 2006-01-30 20:27:53 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -46,7 +46,7 @@ INT X(safe_mulmod)(INT x, INT y, INT p)
      if (y > x) 
 	  return X(safe_mulmod)(y, x, p);
 
-     A(0 <= x && y < p);
+     A(0 <= y && x < p);
 
      r = 0;
      while (y) {
