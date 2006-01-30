@@ -172,8 +172,8 @@ static R *mkomega(enum wakefulness wakefulness,
 
      t = X(mktriggen)(wakefulness, n);
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
-	  R w[2];
-	  t->cexp(t, gpower, w);
+	  trigreal w[2];
+	  t->cexpl(t, gpower, w);
 	  omega[i] = (w[0] + w[1]) / scale;
      }
      X(triggen_destroy)(t);
