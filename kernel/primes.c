@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.22 2006-01-08 01:57:16 stevenj Exp $ */
+/* $Id: primes.c,v 1.23 2006-01-30 20:26:22 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -28,7 +28,7 @@
    aren't careful we can have errors due to integer overflows. */
 
 /* Compute (x * y) mod p, but watch out for integer overflows; we must
-   have x, y >= 0, p > 0.
+   have 0 <= {x, y} < p.
 
    If overflow is common, this routine is somewhat slower than
    e.g. using 'long long' arithmetic.  However, it has the advantage
@@ -45,6 +45,8 @@ INT X(safe_mulmod)(INT x, INT y, INT p)
 
      if (y > x) 
 	  return X(safe_mulmod)(y, x, p);
+
+     A(0 <= x && y < p);
 
      r = 0;
      while (y) {
