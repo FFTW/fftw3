@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: primes.c,v 1.24 2006-01-30 20:27:53 stevenj Exp $ */
+/* $Id: primes.c,v 1.25 2006-02-05 23:19:55 athena Exp $ */
 
 #include "ifftw.h"
 
@@ -37,7 +37,7 @@
    optimizes for the case of small integers. 
 */
 
-#define ADD_MOD(x, y, p) (x >= p - y) ? (x + (y - p)) : (x + y)
+#define ADD_MOD(x, y, p) ((x) >= (p) - (y)) ? ((x) + ((y) - (p))) : ((x) + (y))
 
 INT X(safe_mulmod)(INT x, INT y, INT p)
 {
