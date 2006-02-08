@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.51 2006-01-23 20:31:24 athena Exp $ */
+/* $Id: cycle.h,v 1.52 2006-02-08 02:36:47 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -217,7 +217,7 @@ static __inline double elapsed(ticks t1, ticks t0)
 /*
  * X86-64 cycle counter
  */
-#if defined(__GNUC__) && defined(__x86_64__)  && !defined(HAVE_TICK_COUNTER)
+#if (defined(__GNUC__) || defined(__ICC)) && defined(__x86_64__)  && !defined(HAVE_TICK_COUNTER)
 typedef unsigned long long ticks;
 
 static __inline__ ticks getticks(void)
