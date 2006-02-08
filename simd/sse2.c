@@ -18,15 +18,12 @@
  *
  */
 
-/* $Id: sse2.c,v 1.16 2006-01-23 20:31:24 athena Exp $ */
+/* $Id: sse2.c,v 1.17 2006-02-08 03:01:36 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"
 
 #if HAVE_SSE2
-
-#include <signal.h>
-#include <setjmp.h>
 
 # if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
 
@@ -37,27 +34,9 @@
 
 # else /* !x86_64 */
 
-  static inline int cpuid_edx(int op)
-  {
-#   ifdef _MSC_VER
-       int result;
-       _asm {
-	    push ebx
-	    mov eax,op
-	    cpuid
-	    mov result,edx
-	    pop ebx
-       }
-       return result;
-#   else
-       int eax, ecx, edx;
-
-       __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
-	       : "=a" (eax), "=c" (ecx), "=d" (edx)
-	       : "a" (op));
-       return edx;
-#   endif
-  }
+# include <signal.h>
+# include <setjmp.h>
+# include "x86-cpuid.h"
 
   static jmp_buf jb;
 
@@ -93,7 +72,10 @@
        static int init = 0, res;
 
        if (!init) {
-	    res = (cpuid_edx(1) & (1 << 26)) && sse2_works();
+	    res =   !is_386() 
+		 && has_cpuid()
+		 && (cpuid_edx(1) & (1 << 26))
+		 && sse2_works();
 	    init = 1;
 	    X(check_alignment_of_sse2_mp)();
        }
