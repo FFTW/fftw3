@@ -26,6 +26,13 @@
    for the Fortran linker, and we must omit the f77 API. */
 #if defined(F77_FUNC) || defined(WINDOWS_F77_MANGLING)
 
+/* annoying Windows syntax for shared-library declarations */
+#if defined(FFTW_DLL) && (defined(_WIN32) || defined(__WIN32__))
+#  define FFTW_VOIDFUNC __declspec(dllexport) void
+#else
+#  define FFTW_VOIDFUNC void
+#endif
+
 /*-----------------------------------------------------------------------*/
 /* some internal functions used by the f77 api */
 
