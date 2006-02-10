@@ -3,8 +3,8 @@ dnl @summary determine how to compile programs using OpenMP
 dnl @category InstalledPackages
 dnl
 dnl This macro tries to find out how to compile programs that
-dnl use OpenMP a standard API and set of compiler directives for
-dnl parallel programming (see http://www-unix.mcs/)
+dnl use OpenMP, a standard API and set of compiler directives for
+dnl parallel programming (see http://www-unix.mcs/).
 dnl
 dnl On success, it sets the OPENMP_CFLAGS/OPENMP_CXXFLAGS/OPENMP_F77FLAGS
 dnl output variable to the flag (e.g. -omp) used both to compile *and* link
