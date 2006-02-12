@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle_c.ml,v 1.13 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: gen_twiddle_c.ml,v 1.14 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle_c.ml,v 1.13 2006-01-05 03:04:27 stevenj Exp $"
+let cvsid = "$Id: gen_twiddle_c.ml,v 1.14 2006-02-12 23:34:12 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -65,16 +65,10 @@ let generate n =
   and bytwvl x = choose_simd x (ctimes (CVar "TWVL", x)) in
   let ename = expand_name name in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy true in
   let nt = num_twiddles n in
 
-  let tf = if sign > 0 then
-    fun x -> Complex.times (Complex.nan Expr.CPLX) (Complex.real x)
-  else
-    fun x -> Complex.times (Complex.nan Expr.CPLXJ) (Complex.real x)
-  in
-
-  let byw = bytwiddle n sign (tf @@ (twiddle_array nt twarray)) in
+  let byw = bytwiddle n sign (twiddle_array nt twarray) in
 
   let viostride = either_stride (!uiostride) (C.SVar iostride) in
   let _ = Simd.ovs := stride_to_string "dist" !udist in

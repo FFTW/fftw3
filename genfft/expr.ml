@@ -18,19 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.ml,v 1.12 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: expr.ml,v 1.13 2006-02-12 23:34:12 athena Exp $ *)
 
 (* Here, we define the data type encapsulating a symbolic arithmetic
    expression, and provide some routines for manipulating it. *)
 
 (* I will regret this hack : *)
-type transcendent = I | CPLX | CPLXJ | MULTI_A | MULTI_B
+(* NEWS: I did *)
+type transcendent = I | MULTI_A | MULTI_B
 
 type expr =
   | Num of Number.number
   | NaN of transcendent
   | Plus of expr list
   | Times of expr * expr
+  | CTimes of expr * expr
+  | CTimesJ of expr * expr  (* CTimesJ (a, b) = conj(a) * b *)
   | Uminus of expr
   | Load of Variable.variable
   | Store of Variable.variable * expr
@@ -46,8 +49,6 @@ let sum_list l = List.fold_right (+) l 0
 
 let transcendent_to_float = function
   | I -> 2.718281828459045235360287471  (* any transcendent number will do *)
-  | CPLX -> 3.141592653589793238462643383
-  | CPLXJ -> 0.4210244382407083333356273777
   | MULTI_A -> 0.6931471805599453094172321214
   | MULTI_B -> -0.3665129205816643270124391582
 
@@ -58,6 +59,8 @@ let rec hash = function
   | Store (v, x) -> 2 * Variable.hash v - 2345 * hash x
   | Plus l -> 5 + 23451 * sum_list (List.map Hashtbl.hash l)
   | Times (a, b) -> 41 + 31415 * (Hashtbl.hash a +  Hashtbl.hash b)
+  | CTimes (a, b) -> 49 + 3245 * (Hashtbl.hash a +  Hashtbl.hash b)
+  | CTimesJ (a, b) -> 31 + 3471 * (Hashtbl.hash a +  Hashtbl.hash b)
   | Uminus x -> 42 + 12345 * (hash x)
 
 (* find all variables *)
@@ -66,6 +69,8 @@ let rec find_vars x =
   | Load y -> [y]
   | Plus l -> List.flatten (List.map find_vars l)
   | Times (a, b) -> (find_vars a) @ (find_vars b)
+  | CTimes (a, b) -> (find_vars a) @ (find_vars b)
+  | CTimesJ (a, b) -> (find_vars a) @ (find_vars b)
   | Uminus a -> find_vars a
   | _ -> []
 
@@ -91,8 +96,6 @@ let rec foldr_string_concat l =
 
 let string_of_transcendent = function
   | I -> "I"
-  | CPLX -> "CPLX"
-  | CPLXJ -> "CPLXJ"
   | MULTI_A -> "MULTI_A"
   | MULTI_B -> "MULTI_B"
 
@@ -102,6 +105,8 @@ let rec to_string = function
   | NaN n -> string_of_transcendent n
   | Plus x -> "(+ " ^ (foldr_string_concat (List.map to_string x)) ^ ")"
   | Times (a, b) -> "(* " ^ (to_string a) ^ " " ^ (to_string b) ^ ")"
+  | CTimes (a, b) -> "(c* " ^ (to_string a) ^ " " ^ (to_string b) ^ ")"
+  | CTimesJ (a, b) -> "(cj* " ^ (to_string a) ^ " " ^ (to_string b) ^ ")"
   | Uminus a -> "(- " ^ (to_string a) ^ ")"
   | Store (v, a) -> "(:= " ^ (Variable.unparse v) ^ " " ^
       (to_string a) ^ ")"
@@ -113,6 +118,8 @@ let rec to_string_a d x =
   | NaN n -> string_of_transcendent n
   | Plus x -> "(+ " ^ (foldr_string_concat (List.map (to_string_a (d - 1)) x)) ^ ")"
   | Times (a, b) -> "(* " ^ (to_string_a (d - 1) a) ^ " " ^ (to_string_a (d - 1) b) ^ ")"
+  | CTimes (a, b) -> "(c* " ^ (to_string_a (d - 1) a) ^ " " ^ (to_string_a (d - 1) b) ^ ")"
+  | CTimesJ (a, b) -> "(cj* " ^ (to_string_a (d - 1) a) ^ " " ^ (to_string_a (d - 1) b) ^ ")"
   | Uminus a -> "(- " ^ (to_string_a (d-1) a) ^ ")"
   | Store (v, a) -> "(:= " ^ (Variable.unparse v) ^ " " ^
       (to_string_a (d-1) a) ^ ")"
@@ -129,6 +136,8 @@ let rec expr_to_constants = function
   | Num n -> [n]
   | Plus a -> List.flatten (List.map expr_to_constants a)
   | Times (a, b) -> (expr_to_constants a) @ (expr_to_constants b)
+  | CTimes (a, b) -> (expr_to_constants a) @ (expr_to_constants b)
+  | CTimesJ (a, b) -> (expr_to_constants a) @ (expr_to_constants b)
   | Uminus a -> expr_to_constants a
   | _ -> []
 

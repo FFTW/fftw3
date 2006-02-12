@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twidsq.ml,v 1.18 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: gen_twidsq.ml,v 1.19 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twidsq.ml,v 1.18 2006-01-05 03:04:27 stevenj Exp $"
+let cvsid = "$Id: gen_twidsq.ml,v 1.19 2006-02-12 23:34:12 athena Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 
@@ -75,7 +75,7 @@ let generate n =
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy false in
   let nt = num_twiddles n in
 
   let svstride = either_stride (!uvstride) (C.SVar vstride)
@@ -101,10 +101,6 @@ let generate n =
       (C.varray_subscript rioarray svstride sistride) 
       (C.varray_subscript iioarray svstride sistride) 
       locations 
-  in
-
-  let icache = temporary_v_array_c n n
-  and ocache = temporary_v_array_c n n
   in
 
   let lioi = load_v_array_c n n ioi in

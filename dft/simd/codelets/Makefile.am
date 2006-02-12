@@ -45,6 +45,7 @@ t1fv_9.c t1fv_10.c t1fv_12.c t1fv_15.c t1fv_16.c t1fv_32.c t1fv_64.c
 
 # same as t1fv_*, but with different twiddle storage scheme
 T2F = t2fv_2.c t2fv_4.c t2fv_8.c t2fv_16.c t2fv_32.c t2fv_64.c
+T3F = t3fv_4.c t3fv_8.c t3fv_16.c t3fv_32.c
 
 # as above, but FFTW_BACKWARD
 T1B = t1bv_2.c t1bv_3.c t1bv_4.c t1bv_5.c t1bv_6.c t1bv_7.c t1bv_8.c	\
@@ -52,10 +53,11 @@ t1bv_9.c t1bv_10.c t1bv_12.c t1bv_15.c t1bv_16.c t1bv_32.c t1bv_64.c
 
 # same as t1bv_*, but with different twiddle storage scheme
 T2B = t2bv_2.c t2bv_4.c t2bv_8.c t2bv_16.c t2bv_32.c t2bv_64.c
+T3B = t3bv_4.c t3bv_8.c t3bv_16.c t3bv_32.c
 
 # split-complex codelets
 T1S = t1sv_2.c t1sv_4.c t1sv_8.c t1sv_16.c t1sv_32.c #t1sv_64.c
-T2S = t2sv_2.c t2sv_4.c t2sv_8.c t2sv_16.c t2sv_32.c #t2sv_64.c
+T2S = t2sv_4.c t2sv_8.c t2sv_16.c t2sv_32.c #t2sv_64.c
 
 ###########################################################################
 # q1fv_<r> is <r> twiddle FFTW_FORWARD FFTs of size <r> (DIF step),
@@ -70,7 +72,7 @@ Q1B = q1bv_2.c q1bv_4.c q1bv_8.c
 
 ###########################################################################
 SIMD_CODELETS = $(N1F) $(N1B) $(N2F) $(N2B) $(N2S) $(T1F) $(T2F)	\
-$(T1B) $(T2B) $(T1S) $(T2S) $(Q1F) $(Q1B)
+$(T3F) $(T1B) $(T2B) $(T3B) $(T1S) $(T2S) $(Q1F) $(Q1B)
 
 if HAVE_SIMD
 ALL_CODELETS = $(SIMD_CODELETS)
@@ -91,6 +93,7 @@ include $(top_srcdir)/support/Makefile.codelets
 if MAINTAINER_MODE
 GFLAGS = -simd $(FLAGS_COMMON) -pipeline-latency 8
 FLAGS_T2S=-twiddle-log3 -precompute-twiddles
+FLAGS_T3=-twiddle-log3 -precompute-twiddles -no-generate-bytw
 
 n1fv_%.c:  $(CODELET_DEPS) $(GEN_NOTW_C)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_NOTW_C) $(GFLAGS) -n $* -name n1fv_$* -include "n1f.h") | $(ADD_DATE) | $(INDENT) >$@
@@ -113,11 +116,17 @@ t1fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 t2fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t2fv_$* -include "t2f.h") | $(ADD_DATE) | $(INDENT) >$@
 
+t3fv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE_C) $(GFLAGS) $(FLAGS_T3) -n $* -name t3fv_$* -include "t3f.h") | $(ADD_DATE) | $(INDENT) >$@
+
 t1bv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t1bv_$* -include "t1b.h" -sign 1) | $(ADD_DATE) | $(INDENT) >$@
 
 t2bv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE_C) $(GFLAGS) -n $* -name t2bv_$* -include "t2b.h" -sign 1) | $(ADD_DATE) | $(INDENT) >$@
+
+t3bv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE_C)
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE_C) $(GFLAGS) $(FLAGS_T3) -n $* -name t3bv_$* -include "t3b.h" -sign 1) | $(ADD_DATE) | $(INDENT) >$@
 
 t1sv_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
 	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE) $(GFLAGS) -n $* -name t1sv_$* -include "ts.h") | $(ADD_DATE) | $(INDENT) >$@

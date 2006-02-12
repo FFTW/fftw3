@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_mdct.ml,v 1.5 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: gen_mdct.ml,v 1.6 2006-02-12 23:34:12 athena Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_mdct.ml,v 1.5 2006-01-05 03:04:27 stevenj Exp $"
+let cvsid = "$Id: gen_mdct.ml,v 1.6 2006-02-12 23:34:12 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -177,12 +177,8 @@ let generate n mode =
   and oarray = "O"
   and istride = "istride"
   and ostride = "ostride" 
-  and window = "W" in
-
-  let ns = string_of_int n
-  and sign = !Genutil.sign 
+  and window = "W" 
   and name = !Magic.codelet_name in
-  let name0 = name ^ "_0" in
 
   let vistride = either_stride (!uistride) (C.SVar istride)
   and vostride = either_stride (!uostride) (C.SVar ostride)

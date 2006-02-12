@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2hc.ml,v 1.15 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: gen_hc2hc.ml,v 1.16 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2hc.ml,v 1.15 2006-01-05 03:04:27 stevenj Exp $"
+let cvsid = "$Id: gen_hc2hc.ml,v 1.16 2006-02-12 23:34:12 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -91,7 +91,7 @@ let generate n =
   and name = !Magic.codelet_name 
   and byvl x = choose_simd x (ctimes (CVar "VL", x)) in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy false in
   let nt = num_twiddles n in
 
   let byw = bytwiddle n sign (twiddle_array nt twarray) in
@@ -115,7 +115,6 @@ let generate n =
   let vdist = CVar !Simd.ivs 
   and vrioarray = CVar rioarray
   and viioarray = CVar iioarray
-  and iostridev = CVar iostride
   and vi = CVar i  and vm = CVar m 
   in
   let body = Block (

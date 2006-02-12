@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: magic.ml,v 1.20 2006-01-08 16:44:52 athena Exp $ *)
+(* $Id: magic.ml,v 1.21 2006-02-12 23:34:12 athena Exp $ *)
 
 (* magic parameters *)
 let verbose = ref false
@@ -35,7 +35,6 @@ let inline_loads_constants = ref false
 let inline_constants = ref true
 let trivial_stores = ref false
 let locations_are_special = ref false
-let wsquare = ref false
 let strength_reduce_mul = ref false
 let number_of_variables = ref 4
 let codelet_name = ref "unnamed"
@@ -60,6 +59,7 @@ let newsplit = ref false
 let standalone = ref false
 let pipeline_latency = ref 0
 let schedule_for_pipeline = ref false
+let generate_bytw = ref true
 
 (* command-line parser for magic parameters *)
 let undocumented = " Undocumented voodoo parameter"
@@ -151,8 +151,8 @@ let speclist = [
   "-strength-reduce-mul", set_bool strength_reduce_mul, undocumented;
   "-no-strength-reduce-mul", unset_bool strength_reduce_mul, undocumented;
 
-  "-wsquare", set_bool wsquare, undocumented;
-  "-no-wsquare", unset_bool wsquare, undocumented;
+  "-generate-bytw", set_bool generate_bytw, undocumented;
+  "-no-generate-bytw", unset_bool generate_bytw, undocumented;
 ] 
    
 

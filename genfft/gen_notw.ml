@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw.ml,v 1.29 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: gen_notw.ml,v 1.30 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw.ml,v 1.29 2006-01-05 03:04:27 stevenj Exp $"
+let cvsid = "$Id: gen_notw.ml,v 1.30 2006-02-12 23:34:12 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -72,9 +72,6 @@ let generate n =
   and name = !Magic.codelet_name
   and byvl x = choose_simd x (ctimes (CVar "(2 * VL)", x))  in
   let ename = expand_name name in
-
-  let vl = choose_simd "1" "(2 * VL)"
-  in
 
   let vistride = either_stride (!uistride) (C.SVar istride)
   and vostride = either_stride (!uostride) (C.SVar ostride)

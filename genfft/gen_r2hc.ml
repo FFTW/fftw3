@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2hc.ml,v 1.17 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: gen_r2hc.ml,v 1.18 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2hc.ml,v 1.17 2006-01-05 03:04:27 stevenj Exp $"
+let cvsid = "$Id: gen_r2hc.ml,v 1.18 2006-02-12 23:34:12 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -83,8 +83,7 @@ let generate n =
     if !dftII_flag then(rdftII, "r2hcII") else (Trig.rdft, "r2hc")
   in
 
-  let ns = string_of_int n
-  and sign = !Genutil.sign 
+  let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
 
   let vistride = either_stride (!uistride) (C.SVar istride)

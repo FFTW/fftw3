@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.29 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: c.ml,v 1.30 2006-02-12 23:34:12 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract
@@ -59,7 +59,7 @@ and c_ast =
   | CVar of string
   | CCall of string * c_ast
   | CPlus of c_ast list
-  | CTimes of c_ast * c_ast
+  | ITimes of c_ast * c_ast
   | CUminus of c_ast
 and c_fcn = Fcn of string * string * (c_decl list) * c_ast
 
@@ -67,7 +67,7 @@ and c_fcn = Fcn of string * string * (c_decl list) * c_ast
 let ctimes = function
   | (Integer 1), a -> a
   | a, (Integer 1) -> a
-  | a, b -> CTimes (a, b)
+  | a, b -> ITimes (a, b)
 
 (*
  * C AST unparser 
@@ -229,7 +229,7 @@ and unparse_ast =
     | CPlus [] -> "0 /* bug */"
     | CPlus [a] -> " /* bug */ " ^ (unparse_ast a)
     | CPlus (a::b) -> (parenthesize a) ^ (unparse_plus b)
-    | CTimes (a, b) -> (parenthesize a) ^ " * " ^ (parenthesize b)
+    | ITimes (a, b) -> (parenthesize a) ^ " * " ^ (parenthesize b)
     | CUminus a -> "- " ^ (parenthesize a)
 
 and unparse_function = function
@@ -349,12 +349,11 @@ let rec count_flops_expr_func (adds, mults, fmas) = function
   | Times (NaN MULTI_A,_)  -> (adds, mults, fmas)
   | Times (NaN MULTI_B,_)  -> (adds, mults, fmas)
   | Times (NaN I,b) -> count_flops_expr_func (adds, mults, fmas) b
-  | Times (Times(NaN CPLX, Load _), b) ->
-      count_flops_expr_func (adds+1, mults+2, fmas) b
-  | Times (Times(NaN CPLXJ, Load _), b) ->
-      count_flops_expr_func (adds+1, mults+2, fmas) b
-  | Times (NaN _,_) -> failwith "bug in count_flops_expr_func"
   | Times (a,b) -> fold_left count_flops_expr_func (adds, mults+1, fmas) [a; b]
+  | CTimes (a,b) -> 
+      fold_left count_flops_expr_func (adds+1, mults+2, fmas) [a; b]
+  | CTimesJ (a,b) -> 
+      fold_left count_flops_expr_func (adds+1, mults+2, fmas) [a; b]
   | Uminus a -> count_flops_expr_func (adds, mults, fmas) a
   | _ -> (adds, mults, fmas)
 
@@ -369,7 +368,7 @@ let arith_complexity f =
 
 (* print the operation costs *)
 let print_cost f =
-  let Fcn (_, name, _, _) = f 
+  let Fcn (_, _, _, _) = f 
   and (a, m, fmas, v, mem) = arith_complexity f
   in
   "/*\n"^

@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twidsq_c.ml,v 1.7 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: gen_twidsq_c.ml,v 1.8 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twidsq_c.ml,v 1.7 2006-01-05 03:04:27 stevenj Exp $"
+let cvsid = "$Id: gen_twidsq_c.ml,v 1.8 2006-02-12 23:34:12 athena Exp $"
 type ditdif = DIT | DIF
 let ditdif = ref DIT
 
@@ -77,14 +77,8 @@ let generate n =
   and bytwvl x = choose_simd x (ctimes (CVar "TWVL", x)) in
   let ename = expand_name name in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy true in
   let nt = num_twiddles n in
-
-  let tf = if sign > 0 then
-    fun x -> Complex.times (Complex.nan Expr.CPLX) (Complex.real x)
-  else
-    fun x -> Complex.times (Complex.nan Expr.CPLXJ) (Complex.real x)
-  in
 
   let svstride = either_stride (!uvstride) (C.SVar vstride)
   and sistride = either_stride (!uistride) (C.SVar istride) in
@@ -93,9 +87,9 @@ let generate n =
 
   let byw =
     if !reload_twiddle then
-      array n (fun v -> bytwiddle n sign (tf @@ (twiddle_array nt twarray)))
+      array n (fun v -> bytwiddle n sign (twiddle_array nt twarray))
     else
-      let a = bytwiddle n sign (tf @@ (twiddle_array nt twarray))
+      let a = bytwiddle n sign (twiddle_array nt twarray)
       in fun v -> a
   in
 
@@ -111,10 +105,6 @@ let generate n =
       (C.varray_subscript rioarray svstride sistride) 
       (C.varray_subscript "BUG" svstride sistride) 
       locations 
-  in
-
-  let icache = temporary_v_array_c n n
-  and ocache = temporary_v_array_c n n
   in
 
   let lioi = load_v_array_c n n ioi in

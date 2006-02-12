@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: schedule.ml,v 1.7 2006-01-08 16:44:52 athena Exp $ *)
+(* $Id: schedule.ml,v 1.8 2006-02-12 23:34:12 athena Exp $ *)
 
 (* This file contains the instruction scheduler, which finds an
    efficient ordering for a given list of instructions.
@@ -197,8 +197,8 @@ let schedule =
    1) the set of loads from locatives and their successors,
    2) all other nodes
 
-   This step separates the ``body'' of the dag, which computes
-   the actual fft, from the ``precomputations'', which computes e.g.
+   This step separates the ``body'' of the dag, which computes the
+   actual fft, from the ``precomputations'' part, which computes e.g.
    twiddle factors.
 *)
 let partition_precomputations alist =

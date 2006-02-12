@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: to_alist.ml,v 1.10 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: to_alist.ml,v 1.11 2006-02-12 23:34:12 athena Exp $ *)
 
 (*************************************************************
  * Conversion of the dag to an assignment list
@@ -155,6 +155,8 @@ let rec visitM x =
 	  visitM b >> visitM b >>
 	  visitM c >> visitM c)
     | Times (a, b) -> visitM a >> visitM b
+    | CTimes (a, b) -> visitM a >> visitM b
+    | CTimesJ (a, b) -> visitM a >> visitM b
     | Uminus a -> visitM a)
     x
 
@@ -208,10 +210,20 @@ let rec expr_of_nodeM x =
               mapM expr_of_nodeM a >>= fun a' ->
 		with_temp_maybeM x (Plus a')
 	end
-    | Times (Times ((NaN _ as n), (Load _ as a)), b) ->
-	(* funny special case for SIMD twiddle factors *)
+    | CTimes (Load _ as a, b) when !Magic.generate_bytw ->
         expr_of_nodeM b >>= fun b' ->
-	  with_tempM (Times (Times (n, a), b'))
+          with_tempM (CTimes (a, b'))
+    | CTimes (a, b) ->
+        expr_of_nodeM a >>= fun a' ->
+          expr_of_nodeM b >>= fun b' ->
+            with_tempM (CTimes (a', b'))
+    | CTimesJ (Load _ as a, b) when !Magic.generate_bytw ->
+        expr_of_nodeM b >>= fun b' ->
+          with_tempM (CTimesJ (a, b'))
+    | CTimesJ (a, b) ->
+        expr_of_nodeM a >>= fun a' ->
+          expr_of_nodeM b >>= fun b' ->
+            with_tempM (CTimesJ (a', b'))
     | Times (a, b) ->
         expr_of_nodeM a >>= fun a' ->
           expr_of_nodeM b >>= fun b' ->

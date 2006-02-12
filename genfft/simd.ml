@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.ml,v 1.22 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: simd.ml,v 1.23 2006-02-12 23:34:12 athena Exp $ *)
 
 open Expr
 open List
@@ -96,12 +96,14 @@ and unparse_expr =
     | x :: y -> (Uminus x) :: negate y
 
   in function
-    | Times(Times(NaN CPLX, Load tw), src) when Variable.is_constant tw ->
+    | CTimes(Load tw, src) 
+	when Variable.is_constant tw && !Magic.generate_bytw ->
 	unparse_by_twiddle "BYTW" tw src
-    | Times(Times(NaN CPLXJ, Load tw), src) when Variable.is_constant tw ->
+    | CTimesJ(Load tw, src) 
+	when Variable.is_constant tw && !Magic.generate_bytw ->
 	unparse_by_twiddle "BYTWJ" tw src
     | Load v when is_locative(v) ->
-	sprintf "LD(&(%s),%s,&(%s))" (Variable.unparse v) !ivs
+	sprintf "LD(&(%s), %s, &(%s))" (Variable.unparse v) !ivs
 	  (Variable.unparse_for_alignment alignment_mod v)
     | Load v when is_constant(v) -> sprintf "LDW(&(%s))" (Variable.unparse v)
     | Load v  -> Variable.unparse v
@@ -112,7 +114,11 @@ and unparse_expr =
     | Plus a -> unparse_plus a
     | Times(NaN I,b) -> op1 "VBYI" b
     | Times(a,b) ->
-	sprintf "VMUL(%s,%s)" (unparse_expr a) (unparse_expr b)
+	sprintf "VMUL(%s, %s)" (unparse_expr a) (unparse_expr b)
+    | CTimes(a,b) ->
+	sprintf "VZMUL(%s, %s)" (unparse_expr a) (unparse_expr b)
+    | CTimesJ(a,b) ->
+	sprintf "VZMULJ(%s, %s)" (unparse_expr a) (unparse_expr b)
     | Uminus a when !Magic.vneg -> op1 "VNEG" a
     | Uminus a -> failwith "SIMD Uminus"
     | _ -> failwith "unparse_expr"

@@ -19,8 +19,8 @@
  *
  *)
 
-(* $Id: algsimp.ml,v 1.8 2006-01-05 03:04:27 stevenj Exp $ *)
-let cvsid = "$Id: algsimp.ml,v 1.8 2006-01-05 03:04:27 stevenj Exp $"
+(* $Id: algsimp.ml,v 1.9 2006-02-12 23:34:12 athena Exp $ *)
+let cvsid = "$Id: algsimp.ml,v 1.9 2006-02-12 23:34:12 athena Exp $"
 
 open Util
 open Expr
@@ -61,6 +61,10 @@ end = struct
     | (Times (a, a'), Times (b, b')) ->
  	((a == b) && (a' == b')) or
  	((a == b') && (a' == b))
+    | (CTimes (a, a'), CTimes (b, b')) ->
+ 	((a == b) && (a' == b')) or
+ 	((a == b') && (a' == b))
+    | (CTimesJ (a, a'), CTimesJ (b, b')) -> ((a == b) && (a' == b'))
     | (Plus a, Plus b) -> subset a b && subset b a
     | (Uminus a, Uminus b) -> (a == b)
     | _ -> false
@@ -351,9 +355,17 @@ end = struct
  	| Plus a -> 
  	    mapM algsimpM a >>= splusM
  	| Times (a, b) -> 
- 	    algsimpM a >>= fun a' ->
+ 	    (algsimpM a >>= fun a' ->
  	      algsimpM b >>= fun b' ->
- 		stimesM (a', b')
+ 		stimesM (a', b'))
+ 	| CTimes (a, b) -> 
+ 	    (algsimpM a >>= fun a' ->
+ 	      algsimpM b >>= fun b' ->
+ 		makeNode (CTimes (a', b')))
+ 	| CTimesJ (a, b) -> 
+ 	    (algsimpM a >>= fun a' ->
+ 	      algsimpM b >>= fun b' ->
+ 		makeNode (CTimesJ (a', b')))
  	| Uminus a -> 
  	    algsimpM a >>= suminusM 
  	| Store (v, a) ->
@@ -396,6 +408,8 @@ module Transpose = struct
 	    | Store (v, n) -> [n]
 	    | Plus l -> l
 	    | Times (a, b) -> [a; b]
+	    | CTimes (a, b) -> [a; b]
+	    | CTimesJ (a, b) -> [a; b]
 	    | Uminus x -> [x]
 	    | _ -> []
 	    in let rec loop t = function
@@ -421,6 +435,12 @@ module Transpose = struct
       | Times (a, b) when b == node -> 
 	  dualM candidate_parent >>= fun x' -> 
 	    returnM [makeTimes (a, x')]
+      | CTimes (a, b) when b == node -> 
+	  dualM candidate_parent >>= fun x' -> 
+	    returnM [CTimes (a, x')]
+      | CTimesJ (a, b) when b == node -> 
+	  dualM candidate_parent >>= fun x' -> 
+	    returnM [CTimesJ (a, x')]
       | Uminus n when n == node -> 
 	  dualM candidate_parent >>= fun x' -> 
 	    returnM [makeUminus x']
@@ -505,6 +525,8 @@ end = struct
 	    | Times _ -> (load, store, plus, times + 1, uminus, num)
 	    | Uminus _ -> (load, store, plus, times, uminus + 1, num)
 	    | Num _ -> (load, store, plus, times, uminus, num + 1)
+	    | CTimes _ -> (load, store, plus, times, uminus, num)
+	    | CTimesJ _ -> (load, store, plus, times, uminus, num)
 	    | NaN _ -> (load, store, plus, times, uminus, num))
 	    rest
     in let (l, s, p, t, u, n) = 

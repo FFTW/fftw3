@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2r.ml,v 1.9 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: gen_r2r.ml,v 1.10 2006-02-12 23:34:12 athena Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +26,7 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2r.ml,v 1.9 2006-01-05 03:04:27 stevenj Exp $"
+let cvsid = "$Id: gen_r2r.ml,v 1.10 2006-02-12 23:34:12 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -145,8 +145,7 @@ let generate n mode =
   and v = "v" 
   in
 
-  let ns = string_of_int n
-  and sign = !Genutil.sign 
+  let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
 
   let vistride = either_stride (!uistride) (C.SVar istride)

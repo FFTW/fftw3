@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle.ml,v 1.23 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: gen_twiddle.ml,v 1.24 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.23 2006-01-05 03:04:27 stevenj Exp $"
+let cvsid = "$Id: gen_twiddle.ml,v 1.24 2006-02-12 23:34:12 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -65,7 +65,7 @@ let generate n =
   and byvl x = choose_simd x (ctimes (CVar "(2 * VL)", x)) in
   let ename = expand_name name in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy () in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy false in
   let nt = num_twiddles n in
 
   let byw = bytwiddle n sign (twiddle_array nt twarray) in

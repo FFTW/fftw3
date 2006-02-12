@@ -18,15 +18,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: expr.mli,v 1.12 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: expr.mli,v 1.13 2006-02-12 23:34:12 athena Exp $ *)
 
-type transcendent = I | CPLX | CPLXJ | MULTI_A | MULTI_B
+type transcendent = I | MULTI_A | MULTI_B
 
 type expr =
   | Num of Number.number
   | NaN of transcendent
   | Plus of expr list
   | Times of expr * expr
+  | CTimes of expr * expr
+  | CTimesJ of expr * expr
   | Uminus of expr
   | Load of Variable.variable
   | Store of Variable.variable * expr

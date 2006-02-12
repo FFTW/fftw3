@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: annotate.ml,v 1.22 2006-01-08 16:44:52 athena Exp $ *)
+(* $Id: annotate.ml,v 1.23 2006-02-12 23:34:12 athena Exp $ *)
 
 (* Here, we take a schedule (produced by schedule.ml) ordering a
    sequence of instructions, and produce an annotated schedule.  The
@@ -30,7 +30,7 @@
    nested blocks that help communicate variable lifetimes to the
    compiler. *)
 
-(* $Id: annotate.ml,v 1.22 2006-01-08 16:44:52 athena Exp $ *)
+(* $Id: annotate.ml,v 1.23 2006-02-12 23:34:12 athena Exp $ *)
 open Schedule
 open Expr
 open Variable
@@ -225,7 +225,7 @@ let collect_buddy_stores buddy_list sched =
 let schedule_for_pipeline sched =
   let update_readytimes t (Assign (v, _)) ready_times = 
     (v, (t + !Magic.pipeline_latency)) :: ready_times
-  and readyp t ready_times ((Assign (_, x)) as insn) =
+  and readyp t ready_times (Assign (_, x)) =
     List.for_all 
       (fun var -> 
 	 try 
@@ -294,8 +294,6 @@ let rec rewrite_declarations force_declarations
       in Annotate ([], u, d, 0, ASeq (ma, mb))
 
 let annotate list_of_buddy_stores schedule =
-  let m = !Magic.number_of_variables in
-
   let rec analyze live_at_end = function
       Done -> Annotate (live_at_end, [], [], 0, ADone)
     | Instr i -> (match i with

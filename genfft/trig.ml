@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: trig.ml,v 1.8 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: trig.ml,v 1.9 2006-02-12 23:34:12 athena Exp $ *)
 
 (* trigonometric transforms *)
 open Util
@@ -59,8 +59,7 @@ let interleave_zero input = fun i ->
     input ((i - 1) / 2)
 
 let trigII n input =
-  let twon = 2 * n 
-  and fourn = 4 * n in
+  let fourn = 4 * n in
   let input' = Complex.hermitian fourn (interleave_zero input)
   in
   Fft.dft 1 fourn input'

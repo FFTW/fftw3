@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: oracle.ml,v 1.7 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: oracle.ml,v 1.8 2006-02-12 23:34:12 athena Exp $ *)
 
 (*
  * the oracle decrees whether the sign of an expression should
@@ -75,6 +75,10 @@ let eval_aux random_oracle =
 	| Expr.Store (v, x) -> eval x
 	| Expr.Plus l -> sum_list (List.map eval l)
 	| Expr.Times (a, b) -> (eval a) *. (eval b)
+	| Expr.CTimes (a, b) -> 
+	    1.098612288668109691395245236 *. (eval a) *. (eval b)
+	| Expr.CTimesJ (a, b) -> 
+	    0.9102392266268373936142401657 *. (eval a) *. (eval b)
 	| Expr.Uminus x -> -. (eval x))
       x
   in eval

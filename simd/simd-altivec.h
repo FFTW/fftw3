@@ -170,6 +170,30 @@ static inline V VFNMSI(V b, V c)
      return VFNMS(FLIP_RI(b), pmpm, c);
 }
 
+static inline V VZMUL(V tx, V sr)
+{
+     const vector unsigned int real = 
+	  VLIT(0x00010203, 0x00010203, 0x08090a0b, 0x08090a0b);
+     const vector unsigned int imag = 
+	  VLIT(0x04050607, 0x04050607, 0x0c0d0e0f, 0x0c0d0e0f);
+     V si = VBYI(sr);
+     V tr = vec_perm(tx, tx, (vector unsigned char)real);
+     V ti = vec_perm(tx, tx, (vector unsigned char)imag);
+     return VFMA(ti, si, VMUL(tr, sr));
+}
+
+static inline V VZMULJ(V tx, V sr)
+{
+     const vector unsigned int real = 
+	  VLIT(0x00010203, 0x00010203, 0x08090a0b, 0x08090a0b);
+     const vector unsigned int imag = 
+	  VLIT(0x04050607, 0x04050607, 0x0c0d0e0f, 0x0c0d0e0f);
+     V si = VBYI(sr);
+     V tr = vec_perm(tx, tx, (vector unsigned char)real);
+     V ti = vec_perm(tx, tx, (vector unsigned char)imag);
+     return VFNMS(ti, si, VMUL(tr, sr));
+}
+
 /* twiddle storage #1: compact, slower */
 #define VTW1(x) {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
 #define TWVL1 (VL)
@@ -215,6 +239,10 @@ static inline V BYTWJ2(const R *t, V sr)
      V tr = twp[0], ti = twp[1];
      return VFNMS(ti, si, VMUL(tr, sr));
 }
+
+/* twiddle storage #3 */
+#define VTW3(x) {TW_COS, 0, x}, {TW_SIN, 0, x}, {TW_COS, 1, x}, {TW_SIN, 1, x}
+#define TWVL3 (VL)
 
 /* twiddle storage for split arrays */
 #define VTWS(x)								\
