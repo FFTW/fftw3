@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: twiddle.ml,v 1.16 2006-01-05 03:04:27 stevenj Exp $ *)
+(* $Id: twiddle.ml,v 1.17 2006-02-12 20:30:27 athena Exp $ *)
 
 (* policies for loading/computing twiddle factors *)
 open Complex
@@ -38,8 +38,7 @@ type twinstr = (twop * int * int)
 let rec unroll_twfull l = match l with
 | [] -> []
 | (TW_FULL, 0, n) :: b ->
-    (List.flatten
-       (forall [] cons 1 n (fun i -> [(TW_COS, 0, i); (TW_SIN, 0, i)])))
+    (forall [] cons 1 n (fun i -> (TW_CEXP, 0, i)))
     @ unroll_twfull b
 | a :: b -> a :: unroll_twfull b
 
@@ -54,8 +53,7 @@ let twinstr_to_simd_string vl l =
   let one sep = function
     | (TW_NEXT, 1, 0) -> sep ^ "{TW_NEXT, " ^ vl ^ ", 0}"
     | (TW_NEXT, _, _) -> failwith "twinstr_to_simd_string"
-    | (TW_COS, 0, b) -> sep ^ (Printf.sprintf "VTW(%d)" b)
-    | (TW_SIN, 0, b) -> ""
+    | (TW_CEXP, 0, b) -> sep ^ (Printf.sprintf "VTW(%d)" b)
     | _ -> failwith "twinstr_to_simd_string"
   in let rec loop first = function
     | [] -> ""

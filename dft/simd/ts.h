@@ -18,33 +18,16 @@
  *
  */
 
-#include "codelet-dft.h"
+#include "simd.h"
 
-#if HAVE_SIMD
-#include "t1s.h"
+#undef LD
+#define LD LDA
+#undef ST
+#define ST STA
 
-static int okp(const ct_desc *d,
-	       const R *rio, const R *iio, 
-	       INT ios, INT vs, INT m, INT mb, INT me, INT dist,
-	       const planner *plnr)
-{
-     UNUSED(rio);
-     UNUSED(iio);
-     return (RIGHT_CPU()
-	     && !NO_SIMDP(plnr)
-	     && ALIGNEDA(rio)
-	     && ALIGNEDA(iio)
-	     && SIMD_STRIDE_OKA(ios)
-	     && dist == 1
-             && (m % (2 * VL)) == 0
-             && (mb % (2 * VL)) == 0
-             && (me % (2 * VL)) == 0
-	     && (!d->s1 || (d->s1 == ios))
-	     && (!d->s2 || (d->s2 == vs))
-	     && (!d->dist || (d->dist == dist))
-	  );
-}
+#define VTW VTWS
+#define TWVL TWVLS
 
-const ct_genus GENUS = { okp, 2 * VL };
+#define GENUS X(dft_tssimd_genus)
+extern const ct_genus GENUS;
 
-#endif
