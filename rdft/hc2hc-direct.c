@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: hc2hc-direct.c,v 1.9 2006-01-27 02:10:50 athena Exp $ */
+/* $Id: hc2hc-direct.c,v 1.10 2006-02-13 12:59:06 athena Exp $ */
 
 #include "hc2hc.h"
 
@@ -174,7 +174,7 @@ static plan *mkcldw(const hc2hc_solver *ego_,
      X(ops_madd2)(vl, &cld0->ops, &pln->super.super.ops);
      X(ops_madd2)(vl, &cldm->ops, &pln->super.super.ops);
 
-     pln->super.super.could_prune_now_p = r >= 5 && r < 64;
+     pln->super.super.could_prune_now_p = (r >= 5 && r < 64 && m >= r);
 
      return &(pln->super.super);
 }

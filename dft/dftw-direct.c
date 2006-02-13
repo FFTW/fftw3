@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.12 2006-01-10 22:50:12 athena Exp $ */
+/* $Id: dftw-direct.c,v 1.13 2006-02-13 12:59:06 athena Exp $ */
 
 #include "ct.h"
 
@@ -259,7 +259,8 @@ static plan *mkcldw(const ct_solver *ego_,
 	  pln->super.super.ops.other += 8 * r * mcount * vl;
      }
 
-     pln->super.super.could_prune_now_p = !ego->bufferedp && r >= 5 && r < 64;
+     pln->super.super.could_prune_now_p =
+	  (!ego->bufferedp && r >= 5 && r < 64 && m >= r);
      return &(pln->super.super);
 }
 
