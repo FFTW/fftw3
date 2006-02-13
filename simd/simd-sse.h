@@ -214,6 +214,24 @@ static inline V VBYI(V x)
      return CHS_R(FLIP_RI(x));
 }
 
+static inline V VZMUL(V tx, V sr)
+{
+     V tr = SHUFPS(tx, tx, SHUFVAL(0, 0, 2, 2));
+     V ti = SHUFPS(tx, tx, SHUFVAL(1, 1, 3, 3));
+     tr = VMUL(tr, sr);
+     sr = VBYI(sr);
+     return VADD(tr, VMUL(ti, sr));
+}
+
+static inline V VZMULJ(V tx, V sr)
+{
+     V tr = SHUFPS(tx, tx, SHUFVAL(0, 0, 2, 2));
+     V ti = SHUFPS(tx, tx, SHUFVAL(1, 1, 3, 3));
+     tr = VMUL(tr, sr);
+     sr = VBYI(sr);
+     return VSUB(tr, VMUL(ti, sr));
+}
+
 #define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 
@@ -264,6 +282,10 @@ static inline V BYTWJ2(const R *t, V sr)
      V tr = twp[0], ti = twp[1];
      return VSUB(VMUL(tr, sr), VMUL(ti, si));
 }
+
+/* twiddle storage #3 */
+#define VTW3(x) {TW_CEXP, 0, x}, {TW_CEXP, 1, x}
+#define TWVL3 (VL)
 
 /* twiddle storage for split arrays */
 #define VTWS(x)								\

@@ -139,13 +139,8 @@ static inline V VBYI(V x)
 #define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 
-/* twiddle storage #1: compact, slower */
-#define VTW1(x) {TW_COS, 0, x}, {TW_SIN, 0, x}
-#define TWVL1 1
-
-static inline V BYTW1(const R *t, V sr)
+static inline V VZMUL(V tx, V sr)
 {
-     V tx = LD(t, 1, t);
      V tr = UNPCKL(tx, tx);
      V ti = UNPCKH(tx, tx);
      tr = VMUL(sr, tr);
@@ -153,14 +148,31 @@ static inline V BYTW1(const R *t, V sr)
      return VADD(tr, VMUL(ti, sr));
 }
 
-static inline V BYTWJ1(const R *t, V sr)
+static inline V VZMULJ(V tx, V sr)
 {
-     V tx = LD(t, 1, t);
      V tr = UNPCKL(tx, tx);
      V ti = UNPCKH(tx, tx);
      tr = VMUL(sr, tr);
      sr = VBYI(sr);
      return VSUB(tr, VMUL(ti, sr));
+}
+
+/* twiddle storage #1: compact, slower */
+#define VTW1(x) {TW_CEXP, 0, x}
+#define TWVL1 1
+#define VTW3(x) VTW1(x)
+#define TWVL3 TWVL1
+
+static inline V BYTW1(const R *t, V sr)
+{
+     V tx = LD(t, 1, t);
+     return VZMUL(tx, sr);
+}
+
+static inline V BYTWJ1(const R *t, V sr)
+{
+     V tx = LD(t, 1, t);
+     return VZMULJ(tx, sr);
 }
 
 /* twiddle storage #2: twice the space, faster (when in cache) */
