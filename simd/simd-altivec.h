@@ -241,7 +241,7 @@ static inline V BYTWJ2(const R *t, V sr)
 }
 
 /* twiddle storage #3 */
-#define VTW3(x) {TW_COS, 0, x}, {TW_SIN, 0, x}, {TW_COS, 1, x}, {TW_SIN, 1, x}
+#define VTW3(x) {TW_CEXP, 0, x}, {TW_CEXP, 1, x}
 #define TWVL3 (VL)
 
 /* twiddle storage for split arrays */
