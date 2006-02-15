@@ -23,7 +23,7 @@
  *
  */
 
-/* $Id: cycle.h,v 1.53 2006-02-15 13:18:41 athena Exp $ */
+/* $Id: cycle.h,v 1.54 2006-02-15 13:43:05 athena Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 
@@ -245,7 +245,7 @@ INLINE_ELAPSED(__inline__)
 #define HAVE_TICK_COUNTER
 #endif
 
-/* Visual C++ x86-64, courtesy of Dirk Michaelis */
+/* Visual C++, courtesy of Dirk Michaelis */
 #if _MSC_VER >= 1400 && (defined(_M_AMD64) || defined(_M_X64)) && !defined(HAVE_TICK_COUNTER)
 
 #include <intrin.h>
