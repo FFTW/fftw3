@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.233 2006-01-17 04:03:33 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.234 2006-02-15 00:03:27 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4666,7 +4666,7 @@ Note especially @code{--help} to list all flags and
 
 @item
 @cindex portability
-@code{--with-portable-binary}: Disable compiler optimizations that
+@code{--enable-portable-binary}: Disable compiler optimizations that
 would produce unportable binaries. @b{Important:} Use this if you are
 distributing compiled binaries to people who many not use exactly the
 same processor as you.
@@ -4680,7 +4680,7 @@ architecture to tune for; this option overrides that guess
 deduced architecture was wrong or because you want to tune for a
 different CPU than the one you are compiling with.  You can use
 @code{--without-gcc-arch} to disable architecture-specific tuning
-entirely.  Note that if @code{--with-portable-binary} is enabled
+entirely.  Note that if @code{--enable-portable-binary} is enabled
 (above), then we use @code{-mtune} but not @code{-march}, so the
 resulting binary will run on any architecture even though it is
 optimized for a particular one.
