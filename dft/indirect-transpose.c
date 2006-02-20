@@ -26,40 +26,13 @@
 
 #include "dft.h"
 
-typedef struct {
-     solver super;
-     int transpose_inplace;
-} S;
+typedef solver S;
 
 typedef struct {
      plan_dft super;
      INT vl, ivs, ovs;
      plan *cldtrans, *cld, *cldrest;
 } P;
-
-/* initial transpose is in-place on input */
-static void apply_ip(const plan *ego_, R *ri, R *ii, R *ro, R *io)
-{
-     const P *ego = (const P *) ego_;
-     INT vl = ego->vl, ivs = ego->ivs, ovs = ego->ovs, i;
-
-     for (i = 0; i < vl; ++i) {
-	  {
-	       plan_dft *cldtrans = (plan_dft *) ego->cldtrans;
-	       cldtrans->apply(ego->cldtrans, ri, ii, ri, ii);
-	  }
-	  {
-	       plan_dft *cld = (plan_dft *) ego->cld;
-	       cld->apply(ego->cld, ri, ii, ro, io);
-	  }
-	  ri += ivs; ii += ivs;
-	  ro += ovs; io += ovs;
-     }
-     {
-	  plan_dft *cldrest = (plan_dft *) ego->cldrest;
-	  cldrest->apply(ego->cldrest, ri, ii, ro, io);
-     }
-}
 
 /* initial transpose is out-of-place from input to output */
 static void apply_op(const plan *ego_, R *ri, R *ii, R *ro, R *io)
@@ -104,9 +77,8 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(indirect-transpose%s%v%(%p%)%(%p%)%(%p%))", 
-	      ego->super.apply == apply_ip ? "-inplace" : "", ego->vl,
-	      ego->cldtrans, ego->cld, ego->cldrest);
+     p->print(p, "(indirect-transpose%v%(%p%)%(%p%)%(%p%))", 
+	      ego->vl, ego->cldtrans, ego->cld, ego->cldrest);
 }
 
 static int pickdim(const tensor *vs, const tensor *s, int *pdim0, int *pdim1)
@@ -130,22 +102,13 @@ static int applicable0(const solver *ego_, const problem *p_,
 		       const planner *plnr,
 		       int *pdim0, int *pdim1)
 {
-     const S *ego = (const S *) ego_;
      const problem_dft *p = (const problem_dft *) p_;
+     UNUSED(ego_);
      return (1
 	     && FINITE_RNK(p->vecsz->rnk) && FINITE_RNK(p->sz->rnk)
 
-	     /* ego should be in-place if problem is in-place 
-		(to prevent duplication) */
-	     && ((p->ri != p->ro) || ego->transpose_inplace)
-
-	     /* transpose_inplace destroys input */
-	     && (!ego->transpose_inplace ||
-		 p->ri == p->ro || !NO_DESTROY_INPUTP(plnr))
-
 	     /* FIXME: can/should we relax this constraint? */
-	     && (ego->transpose_inplace 
-		 || X(tensor_inplace_strides2)(p->vecsz, p->sz))
+	     && X(tensor_inplace_strides2)(p->vecsz, p->sz)
 
 	     && pickdim(p->vecsz, p->sz, pdim0, pdim1)
 
@@ -188,7 +151,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld = 0, *cldtrans = 0, *cldrest = 0;
      int pdim0, pdim1;
      tensor *ts, *tv;
-     int ip = ego->transpose_inplace;
      INT vl, ivs, ovs;
      R *rit, *iit, *rot, *iot;
 
@@ -217,8 +179,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 			    X(mkproblem_dft_d)(X(mktensor_0d)(),
 					       X(tensor_append)(tv, ts),
 					       rit, iit, 
-					       ip ? rit : rot,
-					       ip ? iit : iot));
+					       rot, iot));
      X(tensor_destroy2)(ts, tv);
      if (!cldtrans) goto nada;
 
@@ -228,8 +189,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      tv->dims[pdim0].is = p->sz->dims[pdim1].is;
      tv->dims[pdim0].n = p->sz->dims[pdim1].n;
      cld = X(mkplan_d)(plnr, X(mkproblem_dft_d)(ts, tv,
-						ip ? rit : rot,
-						ip ? iit : iot,
+						rot, iot,
 						rot, iot));
      if (!cld) goto nada;
 
@@ -242,7 +202,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 						    p->io + ovs * vl));
      if (!cldrest) goto nada;
 
-     pln = MKPLAN_DFT(P, &padt, ip ? apply_ip : apply_op);
+     pln = MKPLAN_DFT(P, &padt, apply_op);
      pln->cldtrans = cldtrans;
      pln->cld = cld;
      pln->cldrest = cldrest;
@@ -261,17 +221,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *)0;
 }
 
-static solver *mksolver(int transpose_inplace)
+static solver *mksolver(void)
 {
      static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
-     slv->transpose_inplace = transpose_inplace;
-     return &(slv->super);
+     return slv;
 }
 
 void X(dft_indirect_transpose_register)(planner *p)
 {
-     int ip;
-     for (ip = 0; ip <= 1; ++ip)
-	  REGISTER_SOLVER(p, mksolver(ip));
+     REGISTER_SOLVER(p, mksolver());
 }
