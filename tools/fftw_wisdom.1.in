@@ -149,11 +149,11 @@ Send wisdom output to
 .I file
 rather than to standard output (the default).
 .TP
-\fB\-i\fR, \fB\--impatient\fR; \fB\-e\fR, \fB\--estimate\fR; \fB\-x\fR, \fB\--exhaustive\fR
+\fB\-m\fR, \fB\--measure\fR; \fB\-e\fR, \fB\--estimate\fR; \fB\-x\fR, \fB\--exhaustive\fR
 Normally, 
 .I fftw@PREC_SUFFIX@-wisdom
 creates plans in FFTW_PATIENT mode, but with these options you can instead
-use FFTW_IMPATIENT, FFTW_ESTIMATE, or FFTW_EXHAUSTIVE modes, respectively,
+use FFTW_MEASURE, FFTW_ESTIMATE, or FFTW_EXHAUSTIVE modes, respectively,
 as described in more detail by the FFTW manual.
 
 Note that wisdom is tagged with the planning patience level, and a
