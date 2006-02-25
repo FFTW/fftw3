@@ -118,7 +118,8 @@ int my_getopt(int argc, char *argv[], const struct my_option *optarray)
      } else {
 	  /* short option */
 	  for (l = optarray; l->short_name; ++l) {
-	       if (l->short_name < 128 && *p == l->short_name) {
+	       if (l->short_name == (char)l->short_name &&
+		   *p == l->short_name) {
 		    ++p;
 		    switch (l->argtype) {
 			case NOARG: 
