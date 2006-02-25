@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.18 2006-02-25 02:25:48 athena Exp $ */
+/* $Id: bench-main.c,v 1.19 2006-02-25 04:13:49 stevenj Exp $ */
 
 #include "bench.h"
 #include "my-getopt.h"
@@ -169,7 +169,8 @@ int bench_main(int argc, char *argv[])
 		   
 	      case '?':
 		   /* my_getopt() already printed an error message. */
-		   break;
+		   cleanup();
+		   return 1;
 
 	      default:
 		   abort ();

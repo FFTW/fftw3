@@ -70,7 +70,7 @@ static int prob_size_cmp(const void *p1_, const void *p2_)
 static struct my_option options[] =
 {
   {"help", NOARG, 'h'},
-  {"version", OPTARG, 'V'},
+  {"version", NOARG, 'V'},
   {"verbose", OPTARG, 'v'},
 
   {"canonical", NOARG, 'c'},
@@ -271,8 +271,9 @@ int bench_main(int argc, char *argv[])
 #endif
 
 	      case '?':
-		   /* `getopt_long' already printed an error message. */
-		   break;
+		   /* `my_getopt' already printed an error message. */
+		   cleanup();
+		   return EXIT_FAILURE;
 
 	      default:
 		   abort ();

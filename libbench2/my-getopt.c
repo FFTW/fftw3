@@ -124,6 +124,11 @@ int my_getopt(int argc, char *argv[], const struct my_option *optarray)
 		    ++p;
 		    switch (l->argtype) {
 			case NOARG: 
+			     if (*p) {
+				  fprintf(stderr, "option -%c does not "
+					  "take an argument\n", l->short_name);
+				  return '?';
+			     }
 		    ok1:
 			     return l->short_name;
 			case OPTARG: 
