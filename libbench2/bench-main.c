@@ -18,42 +18,41 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.17 2006-01-27 00:15:12 athena Exp $ */
+/* $Id: bench-main.c,v 1.18 2006-02-25 02:25:48 athena Exp $ */
 
-#include "getopt.h"
 #include "bench.h"
+#include "my-getopt.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 
 int verbose;
 
-static struct option long_options[] =
+static const struct my_option options[] =
 {
-  {"accuracy", required_argument, 0, 'a'},
-  {"accuracy-rounds", required_argument, 0, 405},
-  {"impulse-accuracy-rounds", required_argument, 0, 406},
-  {"can-do", required_argument, 0, 'd'},
-  {"help", no_argument, 0, 'h'},
-  {"info", required_argument, 0, 'i'},
-  {"info-all", no_argument, 0, 'I'},
-  {"print-precision", no_argument, 0, 402},
-  {"print-time-min", no_argument, 0, 400},
-  {"random-seed", required_argument, 0, 404},
-  {"report-benchmark", no_argument, 0, 320},
-  {"report-mflops", no_argument, 0, 300},
-  {"report-time", no_argument, 0, 310},
-  {"report-verbose", no_argument, 0, 330},
-  {"speed", required_argument, 0, 's'},
-  {"setup-speed", required_argument, 0, 'S'},
-  {"time-min", required_argument, 0, 't'},
-  {"time-repeat", required_argument, 0, 'r'},
-  {"user-option", required_argument, 0, 'o'},
-  {"verbose", optional_argument, 0, 'v'},
-  {"verify", required_argument, 0, 'y'},
-  {"verify-rounds", required_argument, 0, 401},
-  {"verify-tolerance", required_argument, 0, 403},
-  {0, no_argument, 0, 0}
+  {"accuracy", REQARG, 'a'},
+  {"accuracy-rounds", REQARG, 405},
+  {"impulse-accuracy-rounds", REQARG, 406},
+  {"can-do", REQARG, 'd'},
+  {"help", NOARG, 'h'},
+  {"info", REQARG, 'i'},
+  {"info-all", NOARG, 'I'},
+  {"print-precision", NOARG, 402},
+  {"print-time-min", NOARG, 400},
+  {"random-seed", REQARG, 404},
+  {"report-benchmark", NOARG, 320},
+  {"report-mflops", NOARG, 300},
+  {"report-time", NOARG, 310},
+  {"report-verbose", NOARG, 330},
+  {"speed", REQARG, 's'},
+  {"setup-speed", REQARG, 'S'},
+  {"time-min", REQARG, 't'},
+  {"time-repeat", REQARG, 'r'},
+  {"user-option", REQARG, 'o'},
+  {"verbose", OPTARG, 'v'},
+  {"verify", REQARG, 'y'},
+  {"verify-rounds", REQARG, 401},
+  {"verify-tolerance", REQARG, 403},
+  {0, NOARG, 0}
 };
 
 int bench_main(int argc, char *argv[])
@@ -65,8 +64,6 @@ int bench_main(int argc, char *argv[])
      int iarounds = 0;
      int arounds = 1; /* this is too low for precise results */
      int c;
-     int ndx;
-     char *short_options = make_short_options(long_options);
 
      report = report_verbose; /* default */
      verbose = 0;
@@ -74,49 +71,48 @@ int bench_main(int argc, char *argv[])
      tol = SINGLE_PRECISION ? 1.0e-3 : 1.0e-10;
      bench_srand(1);
 
-     while ((c = getopt_long (argc, argv, short_options,
-			      long_options, &ndx)) != -1) {
+     while ((c = my_getopt (argc, argv, options)) != -1) {
 	  switch (c) {
 	      case 't' :
-		   tmin = strtod(optarg, 0);
+		   tmin = strtod(my_optarg, 0);
 		   break;
 	      case 'r':
-		   repeat = atoi(optarg);
+		   repeat = atoi(my_optarg);
 		   break;
 	      case 's':
 		   timer_init(tmin, repeat);
-		   speed(optarg, 0);
+		   speed(my_optarg, 0);
 		   break;
 	      case 'S':
 		   timer_init(tmin, repeat);
-		   speed(optarg, 1);
+		   speed(my_optarg, 1);
 		   break;
 	      case 'd':
-		   report_can_do(optarg);
+		   report_can_do(my_optarg);
 		   break;
 	      case 'o':
-		   useropt(optarg);
+		   useropt(my_optarg);
 		   break;
 	      case 'v':
-		   if (optarg)
-			verbose = atoi(optarg);
+		   if (my_optarg)
+			verbose = atoi(my_optarg);
 		   else
 			++verbose;
 		   break;
 	      case 'y':
-		   verify(optarg, rounds, tol);
+		   verify(my_optarg, rounds, tol);
 		   break;
 	      case 'a':
-		   accuracy(optarg, arounds, iarounds);
+		   accuracy(my_optarg, arounds, iarounds);
 		   break;
 	      case 'i':
-		   report_info(optarg);
+		   report_info(my_optarg);
 		   break;
 	      case 'I':
 		   report_info_all();
 		   break;
 	      case 'h':
-		   usage(argv[0], long_options);
+		   my_usage(argv[0], options);
 		   break;
 
 	      case 300: /* --report-mflops */
@@ -141,7 +137,7 @@ int bench_main(int argc, char *argv[])
 		   break;
 
 	      case 401: /* --verify-rounds */
-		   rounds = atoi(optarg);
+		   rounds = atoi(my_optarg);
 		   break;
 
 	      case 402: /* --print-precision */
@@ -156,23 +152,23 @@ int bench_main(int argc, char *argv[])
 		   break;
 
 	      case 403: /* --verify-tolerance */
-		   tol = strtod(optarg, 0);
+		   tol = strtod(my_optarg, 0);
 		   break;
 
 	      case 404: /* --random-seed */
-		   bench_srand(atoi(optarg));
+		   bench_srand(atoi(my_optarg));
 		   break;
 
 	      case 405: /* --accuracy-rounds */
-		   arounds = atoi(optarg);
+		   arounds = atoi(my_optarg);
 		   break;
 		   
 	      case 406: /* --impulse-accuracy-rounds */
-		   iarounds = atoi(optarg);
+		   iarounds = atoi(my_optarg);
 		   break;
 		   
 	      case '?':
-		   /* `getopt_long' already printed an error message. */
+		   /* my_getopt() already printed an error message. */
 		   break;
 
 	      default:
@@ -182,12 +178,11 @@ int bench_main(int argc, char *argv[])
 
      /* assume that any remaining arguments are problems to be
         benchmarked */
-     while (optind < argc) {
+     while (my_optind < argc) {
 	  timer_init(tmin, repeat);
-	  speed(argv[optind++], 0);
+	  speed(argv[my_optind++], 0);
      }
 
      cleanup();
-     bench_free(short_options);
      return 0;
 }

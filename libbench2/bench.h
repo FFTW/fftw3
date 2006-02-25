@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: bench.h,v 1.14 2006-01-15 21:09:53 athena Exp $ */
+/* $Id: bench.h,v 1.15 2006-02-25 02:25:48 athena Exp $ */
 
 /* benchmark program definitions */
 #include "bench-user.h"
@@ -52,10 +52,6 @@ extern double mflops(const bench_problem *p, double t);
 
 extern double bench_drand(void);
 extern void bench_srand(int seed);
-
-struct option; /* opaque */
-extern char *make_short_options(const struct option *opt);
-extern void usage(const char *progname, const struct option *opt);
 
 extern bench_problem *problem_parse(const char *desc);
 
