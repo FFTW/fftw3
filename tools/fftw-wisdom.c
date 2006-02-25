@@ -32,7 +32,7 @@ int verbose;
 
 static void do_problem(bench_problem *p)
 {
-     if (verbose > 0)
+     if (verbose)
 	  printf("PLANNING PROBLEM: %s\n", p->pstring);
      /* BENCH_ASSERT(can_do(p)); */
      problem_alloc(p);
@@ -71,7 +71,7 @@ static struct my_option options[] =
 {
   {"help", NOARG, 'h'},
   {"version", NOARG, 'V'},
-  {"verbose", OPTARG, 'v'},
+  {"verbose", NOARG, 'v'},
 
   {"canonical", NOARG, 'c'},
   {"time-limit", REQARG, 't'},
@@ -198,10 +198,7 @@ int bench_main(int argc, char *argv[])
 		   break;
 		   
 	      case 'v':
-		   if (my_optarg)
-			verbose = atoi(my_optarg);
-		   else
-			++verbose;
+		   verbose = 1;
 		   break;
 		   
 	      case 'c':
