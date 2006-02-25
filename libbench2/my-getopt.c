@@ -25,6 +25,7 @@
 
 int my_optind = 1;
 const char *my_optarg = 0;
+static const char *scan_pointer = 0;
 
 void my_usage(const char *progname, const struct my_option *opt)
 {
@@ -70,19 +71,28 @@ int my_getopt(int argc, char *argv[], const struct my_option *optarray)
      const char *p;
      const struct my_option *l;
 
-     if (my_optind >= argc)
-	  return -1; /* no more options */
+     if (scan_pointer && *scan_pointer) {
+	  /* continue a previously scanned argv[] element */
+	  p = scan_pointer;
+	  goto short_option;
+     } else {
+	  /* new argv[] element */
+	  if (my_optind >= argc)
+	       return -1; /* no more options */
 
-     p = argv[my_optind];
-
-     if (*p++ != '-')  
-	  return (-1); /* not an option */
-
-     ++my_optind;
-     my_optarg = 0;
+	  p = argv[my_optind];
+     
+	  if (*p++ != '-')  
+	       return (-1); /* not an option */
+     
+	  ++my_optind;
+     }
 
      if (*p == '-') {
 	  /* long option */
+	  scan_pointer = 0;
+	  my_optarg = 0;
+
 	  ++p;
 	  
 	  for (l = optarray; l->short_name; ++l) {
@@ -117,18 +127,17 @@ int my_getopt(int argc, char *argv[], const struct my_option *optarray)
 
 	  goto bad;
      } else {
-	  /* short option */
+     short_option:
+	  scan_pointer = 0;
+	  my_optarg = 0;
+
 	  for (l = optarray; l->short_name; ++l) {
 	       if (l->short_name == (char)l->short_name &&
 		   *p == l->short_name) {
 		    ++p;
 		    switch (l->argtype) {
 			case NOARG: 
-			     if (*p) {
-				  fprintf(stderr, "option -%c does not "
-					  "take an argument\n", l->short_name);
-				  return '?';
-			     }
+			     scan_pointer = p;
 		    ok1:
 			     return l->short_name;
 			case OPTARG: 
