@@ -1,6 +1,6 @@
 /* Re-use libbench2 and the test program, but override bench_main so that
    we can have different command-line syntax. */
-#include "getopt.h"
+#include "my-getopt.h"
 #include "bench.h"
 
 #include <stdio.h>
@@ -67,31 +67,31 @@ static int prob_size_cmp(const void *p1_, const void *p2_)
    break the wisdom for any non-threads program trying to use it. */
 #define USE_THREADS 0
 
-static struct option long_options[] =
+static struct my_option options[] =
 {
-  {"help", no_argument, 0, 'h'},
-  {"version", optional_argument, 0, 'V'},
-  {"verbose", optional_argument, 0, 'v'},
+  {"help", NOARG, 'h'},
+  {"version", OPTARG, 'V'},
+  {"verbose", OPTARG, 'v'},
 
-  {"canonical", no_argument, 0, 'c'},
-  {"time-limit", required_argument, 0, 't'},
+  {"canonical", NOARG, 'c'},
+  {"time-limit", REQARG, 't'},
 
-  {"output-file", required_argument, 0, 'o'},
+  {"output-file", REQARG, 'o'},
 
-  {"impatient", no_argument, 0, 'i'},
-  {"estimate", no_argument, 0, 'e'},
-  {"exhaustive", no_argument, 0, 'x'},
+  {"impatient", NOARG, 'i'},
+  {"estimate", NOARG, 'e'},
+  {"exhaustive", NOARG, 'x'},
 
-  {"no-system-wisdom", no_argument, 0, 'n'},
-  {"wisdom-file", required_argument, 0, 'w'},
+  {"no-system-wisdom", NOARG, 'n'},
+  {"wisdom-file", REQARG, 'w'},
 
 #if USE_THREADS && defined(HAVE_THREADS)
-  {"threads", required_argument, 0, 'T'},
+  {"threads", REQARG, 'T'},
 #endif
 
   /* options to restrict configuration to rdft-only, etcetera? */
   
-  {0, no_argument, 0, 0}
+  {0, NOARG, 0}
 };
 
 static void help(FILE *f, const char *program_name)
@@ -147,9 +147,7 @@ static char canonical_sizes[][32] = {
 int bench_main(int argc, char *argv[])
 {
      int c;
-     int ind;
      unsigned i;
-     char *short_options = make_short_options(long_options);
      int impatient = 0;
      int system_wisdom = 1;
      int canonical = 0;
@@ -168,8 +166,7 @@ int bench_main(int argc, char *argv[])
      BENCH_ASSERT(FFTW(init_threads)());
 #endif
 
-     while ((c = getopt_long (argc, argv, short_options,
-			      long_options, &ind)) != -1) {
+     while ((c = my_getopt(argc, argv, options)) != -1) {
 	  switch (c) {
 	      case 'h':
 		   help(stdout, argv[0]);
@@ -201,8 +198,8 @@ int bench_main(int argc, char *argv[])
 		   break;
 		   
 	      case 'v':
-		   if (optarg)
-			verbose = atoi(optarg);
+		   if (my_optarg)
+			verbose = atoi(my_optarg);
 		   else
 			++verbose;
 		   break;
@@ -212,19 +209,19 @@ int bench_main(int argc, char *argv[])
 		   break;
 
 	      case 't':
-		   hours = atof(optarg);
+		   hours = atof(my_optarg);
 		   break;
 
 	      case 'o':
 		   if (output_fname)
 			bench_free(output_fname);
 		   
-		   if (!strcmp(optarg, "-"))
+		   if (!strcmp(my_optarg, "-"))
 			output_fname = 0;
 		   else {
 			output_fname = (char *) bench_malloc(sizeof(char) *
-						    (strlen(optarg) + 1));
-			strcpy(output_fname, optarg);
+						    (strlen(my_optarg) + 1));
+			strcpy(output_fname, my_optarg);
 		   }
 		   break;
 
@@ -246,15 +243,15 @@ int bench_main(int argc, char *argv[])
 
 	      case 'w': {
 		   FILE *w = stdin;
-		   if (strcmp(optarg, "-") && !(w = fopen(optarg, "r"))) {
+		   if (strcmp(my_optarg, "-") && !(w = fopen(my_optarg, "r"))) {
 			fprintf(stderr,
-				"fftw-wisdom: error opening \"%s\"", optarg);
+				"fftw-wisdom: error opening \"%s\"", my_optarg);
 			perror("");
 			exit(EXIT_FAILURE);
 		   }
 		   if (!FFTW(import_wisdom_from_file)(w)) {
 			fprintf(stderr, "fftw_wisdom: error reading wisdom"
-				"from \"%s\"\n", optarg);
+				"from \"%s\"\n", my_optarg);
 			exit(EXIT_FAILURE);
 		   }
 		   if (w != stdin)
@@ -264,7 +261,7 @@ int bench_main(int argc, char *argv[])
 
 #if USE_THREADS && defined(HAVE_THREADS)
 	      case 'T':
-		   nthreads = atoi(optarg);
+		   nthreads = atoi(my_optarg);
 		   if (nthreads > 1) {
 			fprintf(stderr, "fftw-wisdom: "
 				"not compiled with thread support\n");
@@ -307,15 +304,15 @@ int bench_main(int argc, char *argv[])
 	  }
      }
 
-     while (optind < argc) {
-	  if (!strcmp(argv[optind], "-")) {
+     while (my_optind < argc) {
+	  if (!strcmp(argv[my_optind], "-")) {
 	       char s[1025];
 	       while (1 == fscanf(stdin, "%1024s", s))
 		    add_problem(s, &problems, &iproblem, &nproblems);
 	  }
 	  else
-	       add_problem(argv[optind], &problems, &iproblem, &nproblems);
-	  ++optind;
+	       add_problem(argv[my_optind], &problems, &iproblem, &nproblems);
+	  ++my_optind;
      }
 
      nproblems = iproblem;
@@ -352,7 +349,6 @@ int bench_main(int argc, char *argv[])
 	  bench_free(output_fname);
 
      cleanup();
-     bench_free(short_options);
 
      return EXIT_SUCCESS;
 }
