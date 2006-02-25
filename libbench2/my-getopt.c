@@ -87,7 +87,8 @@ int my_getopt(int argc, char *argv[], const struct my_option *optarray)
 	  
 	  for (l = optarray; l->short_name; ++l) {
 	       int len = strlen(l->long_name);
-	       if (!strncmp(l->long_name, p, len)) {
+	       if (!strncmp(l->long_name, p, len) && 
+		   (!p[len] || p[len] == '=')) {
 		    switch (l->argtype) {
 			case NOARG: 
 		    ok:
