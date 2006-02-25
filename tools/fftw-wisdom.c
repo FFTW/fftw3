@@ -108,7 +108,7 @@ static void help(FILE *f, const char *program_name)
  "              -c, --canonical: plan/optimize canonical set of sizes\n"
  "     -t <h>, --time-limit=<h>: time limit in hours (default: 0, no limit)\n"
  "  -o FILE, --output-file=FILE: output to FILE instead of stdout\n"
- "              -i, --impatient: plan in IMPATIENT mode (PATIENT is default)\n"
+ "              -i, --impatient: plan in MEASURE mode (PATIENT is default)\n"
  "               -e, --estimate: plan in ESTIMATE mode (not recommended)\n"
  "             -x, --exhaustive: plan in EXHAUSTIVE mode (may be slow)\n"
  "       -n, --no-system-wisdom: don't read /etc/fftw/ system wisdom file\n"
