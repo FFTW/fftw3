@@ -1,3 +1,20 @@
+FFTW 3.1.1
+
+* Performance improvements for Intel EMT64.
+
+* Performance improvements for large-size transforms with SIMD.
+
+* Cycle counter support for Intel icc and Visual C++ on x86-64.
+
+* In fftw-wisdom tool, replaced obsolete --impatient with --measure.
+
+* Fixed compilation failure with AIX/xlc; thanks to Joseph Thomas.
+
+* Windows DLL support for Fortran API (added missing __declspec(dllexport)).
+
+* SSE/SSE2 code works properly (i.e. disables itself) on older 386 and 486
+  CPUs lacking a CPUID instruction; thanks to Eric Korpela.
+
 FFTW 3.1
 
 * Faster FFTW_ESTIMATE planner.
