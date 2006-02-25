@@ -101,8 +101,7 @@ int my_getopt(int argc, char *argv[], const struct my_option *optarray)
 		   (!p[len] || p[len] == '=')) {
 		    switch (l->argtype) {
 			case NOARG: 
-		    ok:
-			     return l->short_name;
+			     goto ok;
 			case OPTARG: 
 			     if (p[len] == '=')
 				  my_optarg = p + len + 1;
@@ -124,8 +123,6 @@ int my_getopt(int argc, char *argv[], const struct my_option *optarray)
 		    }
 	       }
 	  }
-
-	  goto bad;
      } else {
      short_option:
 	  scan_pointer = 0;
@@ -138,32 +135,34 @@ int my_getopt(int argc, char *argv[], const struct my_option *optarray)
 		    switch (l->argtype) {
 			case NOARG: 
 			     scan_pointer = p;
-		    ok1:
-			     return l->short_name;
+			     goto ok;
 			case OPTARG: 
 			     if (*p)
 				  my_optarg = p;
-			     goto ok1;
+			     goto ok;
 			case REQARG: 
 			     if (*p) {
 				  my_optarg = p;
-				  goto ok1;
-			     }
-			     if (my_optind >= argc) {
-				  fprintf(stderr, 
+			     } else {
+				  if (my_optind >= argc) {
+				       fprintf(stderr, 
 					  "option -%c requires an argument\n",
 					  l->short_name);
-				  return '?';
+				       return '?';
+				  }
+				  my_optarg = argv[my_optind];
+				  ++my_optind;
 			     }
-			     my_optarg = argv[my_optind];
-			     ++my_optind;
-			     goto ok1;
+			     goto ok;
 		    }
 	       }
 	  }
-     bad:
-	  fprintf(stderr, "unrecognized option %s\n", argv[my_optind - 1]);
-	  return '?';
      }
+
+     fprintf(stderr, "unrecognized option %s\n", argv[my_optind - 1]);
+     return '?';
+
+ ok:
+     return l->short_name;
 }
 
