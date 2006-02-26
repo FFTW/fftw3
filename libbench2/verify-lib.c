@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.20 2006-01-30 01:42:51 athena Exp $ */
+/* $Id: verify-lib.c,v 1.21 2006-02-26 01:27:01 stevenj Exp $ */
 
 #include "verify.h"
 #include <math.h>
@@ -288,7 +288,6 @@ double impulse(dofft_closure *k,
 	       C *outA, C *outB, C *outC,
 	       C *tmp, int rounds, double tol)
 {
-     int N = n * vecn;
      int i, j;
      double e = 0.0;
 
