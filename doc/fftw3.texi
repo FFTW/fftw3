@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.235 2006-03-04 21:08:16 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.236 2006-03-04 21:13:08 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1355,13 +1355,15 @@ by default, it is a good idea to make sure.
 Unfortunately, @code{gcc} only @emph{preserves} the stack
 alignment---as a result, if the stack starts off misaligned, it will
 always be misaligned, with a disastrous effect on performance (in
-double precision).  Fortunately, recent versions of glibc (on
-GNU/Linux) provide a properly-aligned starting stack, but this was not
-the case with a number of older versions, and we are not certain of
-the situation on other operating systems.  Hopefully, as time goes by
-this will become less of a concern, but if you want to be paranoid you
-can copy the code from FFTW's @code{libbench2/aligned-main.c} to
-guarantee alignment of your @code{main} function (with @code{gcc}).
+double precision).  To prevent this, FFTW includes hacks to align its
+own stack if necessary, so it should perform well even if you call it
+from a program with a misaligned stack.  Currently, our hacks support
+@code{gcc} and the Intel C compiler; if you use another compiler you
+are on your own.  Fortunately, recent versions of glibc (on GNU/Linux)
+provide a properly-aligned starting stack, but this was not the case
+with a number of older versions, and we are not certain of the
+situation on other operating systems.  Hopefully, as time goes by this
+will become less of a concern.
 
 @c ------------------------------------------------------------
 @node Multi-dimensional Array Format, Words of Wisdom-Saving Plans, Data Alignment, Other Important Topics
