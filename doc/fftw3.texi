@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.236 2006-03-04 21:13:08 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.237 2006-03-04 21:17:56 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -1486,7 +1486,7 @@ on the stack (``automatic'' storage), which has a very limited size on
 most operating systems (declaring an array with more than a few
 thousand elements will often cause a crash).  (You can get around this
 limitation on many systems by declaring the array as
-<code>static</code> and/or global, but that has its own drawbacks.)
+@code{static} and/or global, but that has its own drawbacks.)
 Second, it may not optimally align the array for use with a SIMD
 FFTW (@pxref{SIMD alignment and fftw_malloc}).  Instead, we recommend
 using @code{fftw_malloc}, as described below.
