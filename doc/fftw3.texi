@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.237 2006-03-04 21:17:56 stevenj Exp $
+@comment $Id: fftw3.texi,v 1.238 2006-03-17 14:20:10 athena Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -4809,18 +4809,19 @@ that you want to share.
 
 To create the FFTW library, you will then need to compile all of the
 @samp{.c} files in the @code{kernel}, @code{dft}, @code{dft/codelets},
-@code{dft/codelets/standard}, @code{dft/codelets/inplace}, @code{rdft},
-@code{rdft/codelets}, @code{rdft/codelets/r2hc},
-@code{rdft/codelets/hc2r}, @code{rdft/codelets/r2r}, @code{reodft}, and
-@code{api} directories.  If you are compiling with SIMD support
-(e.g. you defined @code{HAVE_SSE2} in @code{config.h}), then you also
-need to compile the @code{.c} files in the @code{simd}, @code{dft/simd},
-and @code{dft/simd/codelets} directories.  If you are compiling with AMD
-K7 optimizations (i.e. you defined @code{HAVE_K7}), then you also need
-to include the @code{dft/k7} and @code{dft/k7/codelets} directories.
-(See the previous section for more information on configuration options
-like SIMD and K7 optimization; each Unix configuration option has a
-corresponding @code{#define} in @code{config.h}.)
+@code{dft/codelets/standard}, @code{rdft}, @code{rdft/codelets},
+@code{rdft/codelets/r2hc}, @code{rdft/codelets/hc2r},
+@code{rdft/codelets/r2r}, @code{reodft}, and @code{api} directories.
+If you are compiling with SIMD support (e.g. you defined
+@code{HAVE_SSE2} in @code{config.h}), then you also need to compile
+the @code{.c} files in the @code{simd}, @code{simd/nonportable},
+@code{dft/simd}, and @code{dft/simd/codelets} directories.  If you are
+compiling with AMD K7 optimizations (i.e. you defined @code{HAVE_K7}),
+then you also need to include the @code{dft/k7} and
+@code{dft/k7/codelets} directories.  (See the previous section for
+more information on configuration options like SIMD and K7
+optimization; each Unix configuration option has a corresponding
+@code{#define} in @code{config.h}.)
 
 Once these files are all compiled, link them into a library, or a shared
 library, or directly into your program.
