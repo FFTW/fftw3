@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: align.c,v 1.29 2006-01-15 20:12:08 athena Exp $ */
+/* $Id: align.c,v 1.30 2006-03-28 04:30:22 stevenj Exp $ */
 
 #include "ifftw.h"
 
@@ -35,8 +35,9 @@
 /* NONPORTABLE */
 int X(alignment_of)(R *p)
 {
-     if (ALGN > 0)
-	  return (int)(((uintptr_t) p) % ALGN);
-     else
-	  return 0;
+#if ALGN == 0
+     return 0;
+#else
+     return (int)(((uintptr_t) p) % ALGN);
+#endif
 }
