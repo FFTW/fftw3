@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@comment $Id: fftw3.texi,v 1.238 2006-03-17 14:20:10 athena Exp $
+@comment $Id: fftw3.texi,v 1.239 2006-04-03 19:52:44 stevenj Exp $
 @comment %**start of header
 @setfilename fftw3.info
 @include version.texi
@@ -2064,6 +2064,11 @@ argument, which is a bitwise OR (@samp{|}) of zero or more of the flag
 constants defined below.  These flags control the rigor (and time) of
 the planning process, and can also impose (or lift) restrictions on the
 type of transform algorithm that is employed.
+
+@emph{Important:} the planner overwrites the input array during
+planning, so you should initialize your input data after creating the
+plan.  The only exception to this is the @code{FFTW_ESTIMATE} flag, as
+mentioned below.
 
 @subsubheading Planning-rigor flags
 @itemize @bullet
