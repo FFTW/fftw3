@@ -18,7 +18,7 @@ dnl to the string "unknown".
 dnl
 dnl This macro mainly exists to be used in AX_GCC_ARCHFLAG.
 dnl
-dnl @version 2005-05-30
+dnl @version 2006-04-20
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_X86_CPUID],
@@ -28,9 +28,17 @@ AC_CACHE_CHECK(for x86 cpuid $1 output, ax_cv_gcc_x86_cpuid_$1,
  [AC_RUN_IFELSE([AC_LANG_PROGRAM([#include <stdio.h>], [
      int op = $1, eax, ebx, ecx, edx;
      FILE *f;
-      __asm__("cpuid"
-        : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-        : "a" (op));
+     __asm__("push %%ebx\n\t"
+             "cpuid\n\t"
+             "pop %%ebx"
+             : "=a" (eax), "=c" (ecx), "=d" (edx)
+             : "a" (op));
+     __asm__("push %%ebx\n\t"
+             "cpuid\n\t"
+             "mov %%ebx, %%eax\n\t"
+             "pop %%ebx"
+             : "=a" (ebx), "=c" (ecx), "=d" (edx)
+             : "a" (op));
      f = fopen("conftest_cpuid", "w"); if (!f) return 1;
      fprintf(f, "%x:%x:%x:%x\n", eax, ebx, ecx, edx);
      fclose(f);
