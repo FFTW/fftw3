@@ -186,7 +186,10 @@ that file.
 
 \courier{gcc\} 2.95 on MacOS X miscompiles AltiVec code (fixed in
 later versions).  \courier{gcc\} 3.2.x miscompiles AltiVec
-permutations, but FFTW has a workaround.  
+permutations, but FFTW has a workaround.  \courier{gcc\} 4.0.1 on
+MacOS for Intel crashes when compiling FFTW; a workaround is to
+compile one file without optimization: \courier{cd kernel; make
+CFLAGS=" " trig.lo\}.
 
 \question 26aug:solarisSucks FFTW does not compile on Solaris, complaining about \courier{const\}.
 
