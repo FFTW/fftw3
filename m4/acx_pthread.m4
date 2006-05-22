@@ -41,7 +41,7 @@ dnl macros posted by Alejandro Forero Cuervo to the autoconf macro
 dnl repository.  We are also grateful for the helpful feedback of
 dnl numerous users.
 dnl
-dnl @version 2005-06-15
+dnl @version 2006-05-22
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
@@ -215,8 +215,8 @@ if test "x$acx_pthread_ok" = xyes; then
         LIBS="$save_LIBS"
         CFLAGS="$save_CFLAGS"
 
-        # More AIX lossage: must compile with cc_r
-        AC_CHECK_PROG(PTHREAD_CC, cc_r, cc_r, ${CC})
+        # More AIX lossage: must compile with xlc_r or cc_r
+        AC_CHECK_PROGS(PTHREAD_CC, xlc_r cc_r, ${CC})
 else
         PTHREAD_CC="$CC"
 fi
