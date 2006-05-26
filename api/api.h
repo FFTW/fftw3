@@ -74,12 +74,15 @@ tensor *X(mktensor_rowmajor)(int rnk, const int *n,
 			     int is, int os);
 
 tensor *X(mktensor_iodims)(int rank, const X(iodim) *dims, int is, int os);
+tensor *X(mktensor_iodims64)(int rank, const X(iodim64) *dims, int is, int os);
 const int *X(rdft2_pad)(int rnk, const int *n, const int *nembed,
 			int inplace, int cmplx, int **nfree);
 
 int X(many_kosherp)(int rnk, const int *n, int howmany);
 int X(guru_kosherp)(int rank, const X(iodim) *dims,
 		    int howmany_rank, const X(iodim) *howmany_dims);
+int X(guru64_kosherp)(int rank, const X(iodim64) *dims,
+		    int howmany_rank, const X(iodim64) *howmany_dims);
 
 /* Note: FFTW_EXTERN is used for "internal" functions used in tests/hook.c */
 

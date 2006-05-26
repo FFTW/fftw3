@@ -1,2 +1,2 @@
-#include "guru.h"
+#include "guru64.h"
 #include "mktensor-iodims.h"

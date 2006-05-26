@@ -19,7 +19,13 @@ plan-guru-r2r.c plan-guru-split-dft-c2r.c plan-guru-split-dft-r2c.c	\
 plan-guru-split-dft.c plan-many-dft-c2r.c plan-many-dft-r2c.c		\
 plan-many-dft.c plan-many-r2r.c plan-r2r-1d.c plan-r2r-2d.c		\
 plan-r2r-3d.c plan-r2r.c print-plan.c rdft2-pad.c the-planner.c		\
-version.c api.h f77funcs.h fftw3.h x77.h
+version.c api.h f77funcs.h fftw3.h x77.h guru.h guru64.h		\
+mktensor-iodims.h plan-guru-dft-c2r.h plan-guru-dft-r2c.h		\
+plan-guru-dft.h plan-guru-r2r.h plan-guru-split-dft-c2r.h		\
+plan-guru-split-dft-r2c.h plan-guru-split-dft.h plan-guru64-dft-c2r.c	\
+plan-guru64-dft-r2c.c plan-guru64-dft.c plan-guru64-r2r.c		\
+plan-guru64-split-dft-c2r.c plan-guru64-split-dft-r2c.c			\
+plan-guru64-split-dft.c mktensor-iodims64.c
 
 BUILT_SOURCES = fftw3.f
 

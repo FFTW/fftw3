@@ -47,7 +47,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.90 2006-01-17 04:03:33 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.91 2006-05-26 02:04:18 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -102,6 +102,13 @@ struct fftw_iodim_do_not_use_me {
      int os;			/* output stride */
 };
 
+typedef long long fftw_int64; /* FIXME: what type to use? */
+struct fftw_iodim64_do_not_use_me {
+     fftw_int64 n;                     /* dimension size */
+     fftw_int64 is;			/* input stride */
+     fftw_int64 os;			/* output stride */
+};
+
 /*
   huge second-order macro that defines prototypes for all API
   functions.  We expand this macro for each supported precision
@@ -118,6 +125,7 @@ FFTW_DEFINE_COMPLEX(R, C);						   \
 typedef struct X(plan_s) *X(plan);					   \
 									   \
 typedef struct fftw_iodim_do_not_use_me X(iodim);			   \
+typedef struct fftw_iodim64_do_not_use_me X(iodim64);			   \
 									   \
 typedef enum fftw_r2r_kind_do_not_use_me X(r2r_kind);			   \
 									   \
@@ -149,6 +157,19 @@ FFTW_EXTERN X(plan) X(plan_guru_dft)(int rank, const X(iodim) *dims,	   \
 FFTW_EXTERN X(plan) X(plan_guru_split_dft)(int rank, const X(iodim) *dims, \
 			 int howmany_rank,				   \
 			 const X(iodim) *howmany_dims,			   \
+			 R *ri, R *ii, R *ro, R *io,			   \
+			 unsigned flags);				   \
+									   \
+FFTW_EXTERN X(plan) X(plan_guru64_dft)(int rank,			   \
+                         const X(iodim64) *dims,			   \
+			 int howmany_rank,				   \
+			 const X(iodim64) *howmany_dims,		   \
+			 C *in, C *out,					   \
+			 int sign, unsigned flags);			   \
+FFTW_EXTERN X(plan) X(plan_guru64_split_dft)(int rank,			   \
+                         const X(iodim64) *dims,			   \
+			 int howmany_rank,				   \
+			 const X(iodim64) *howmany_dims,		   \
 			 R *ri, R *ii, R *ro, R *io,			   \
 			 unsigned flags);				   \
 									   \
@@ -217,12 +238,38 @@ FFTW_EXTERN X(plan) X(plan_guru_split_dft_c2r)(				   \
 			     R *ri, R *ii, R *out,			   \
 			     unsigned flags);				   \
 									   \
+FFTW_EXTERN X(plan) X(plan_guru64_dft_r2c)(int rank,			   \
+                             const X(iodim64) *dims,			   \
+			     int howmany_rank,				   \
+			     const X(iodim64) *howmany_dims,		   \
+			     R *in, C *out,				   \
+			     unsigned flags);				   \
+FFTW_EXTERN X(plan) X(plan_guru64_dft_c2r)(int rank,			   \
+                             const X(iodim64) *dims,			   \
+			     int howmany_rank,				   \
+			     const X(iodim64) *howmany_dims,		   \
+			     C *in, R *out,				   \
+			     unsigned flags);				   \
+									   \
+FFTW_EXTERN X(plan) X(plan_guru64_split_dft_r2c)(			   \
+                             int rank, const X(iodim64) *dims,		   \
+			     int howmany_rank,				   \
+			     const X(iodim64) *howmany_dims,		   \
+			     R *in, R *ro, R *io,			   \
+			     unsigned flags);				   \
+FFTW_EXTERN X(plan) X(plan_guru64_split_dft_c2r)(			   \
+                             int rank, const X(iodim64) *dims,		   \
+			     int howmany_rank,				   \
+			     const X(iodim64) *howmany_dims,		   \
+			     R *ri, R *ii, R *out,			   \
+			     unsigned flags);				   \
+									   \
 FFTW_EXTERN void X(execute_dft_r2c)(const X(plan) p, R *in, C *out);	   \
 FFTW_EXTERN void X(execute_dft_c2r)(const X(plan) p, C *in, R *out);	   \
 									   \
 FFTW_EXTERN void X(execute_split_dft_r2c)(const X(plan) p,		   \
                                           R *in, R *ro, R *io);		   \
-FFTW_EXTERN void X(execute_split_dft_c2r)(const X(plan) p, 		   \
+FFTW_EXTERN void X(execute_split_dft_c2r)(const X(plan) p,		   \
                                           R *ri, R *ii, R *out);	   \
 									   \
 FFTW_EXTERN X(plan) X(plan_many_r2r)(int rank, const int *n,		   \
@@ -251,6 +298,13 @@ FFTW_EXTERN X(plan) X(plan_guru_r2r)(int rank, const X(iodim) *dims,	   \
                          const X(iodim) *howmany_dims,			   \
                          R *in, R *out,					   \
                          const X(r2r_kind) *kind, unsigned flags);	   \
+									   \
+FFTW_EXTERN X(plan) X(plan_guru64_r2r)(int rank, const X(iodim64) *dims,   \
+                         int howmany_rank,				   \
+                         const X(iodim64) *howmany_dims,		   \
+                         R *in, R *out,					   \
+                         const X(r2r_kind) *kind, unsigned flags);	   \
+									   \
 FFTW_EXTERN void X(execute_r2r)(const X(plan) p, R *in, R *out);	   \
 									   \
 FFTW_EXTERN void X(destroy_plan)(X(plan) p);				   \
