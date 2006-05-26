@@ -1,3 +1,10 @@
+* New 64-bit API: for every "plan_guru" function there is a new "plan_guru64"
+  function with the same semantics, but which takes fftw_iodim64 instead of
+  fftw_iodim.  fftw_iodim64 is the same as fftw_iodim, except that it takes
+  64-bit integer types as parameters.  This is only useful for specifying
+  very large transforms on 64-bit machines.  (Internally, FFTW uses
+  32-bit sizes on 32-bit machiens and 64-bit sizes on 64-bit machines.)
+
 FFTW 3.1.1
 
 * Performance improvements for Intel EMT64.
