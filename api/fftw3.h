@@ -47,7 +47,7 @@
 /* header file for fftw3 */
 /* (The following is the CVS ID for this file, *not* the version
    number of FFTW:) */
-/* $Id: fftw3.h,v 1.93 2006-05-26 16:53:09 stevenj Exp $ */
+/* $Id: fftw3.h,v 1.94 2006-05-26 19:00:38 stevenj Exp $ */
 
 #ifndef FFTW3_H
 #define FFTW3_H
@@ -102,16 +102,11 @@ struct fftw_iodim_do_not_use_me {
      int os;			/* output stride */
 };
 
-#if defined(_MSC_VER) || defined(__BORLANDC__)
-typedef __int64 fftw_int64; /* MS, of course, has its own 64-bit type,
-                               although newer versions support long long */
-#else
-typedef long long fftw_int64; /* C99, and de facto standard for C++ */
-#endif
+#include <stddef.h> /* for ptrdiff_t */
 struct fftw_iodim64_do_not_use_me {
-     fftw_int64 n;                     /* dimension size */
-     fftw_int64 is;			/* input stride */
-     fftw_int64 os;			/* output stride */
+     ptrdiff_t n;                     /* dimension size */
+     ptrdiff_t is;			/* input stride */
+     ptrdiff_t os;			/* output stride */
 };
 
 /*
