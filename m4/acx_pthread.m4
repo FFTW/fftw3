@@ -41,7 +41,7 @@ dnl macros posted by Alejandro Forero Cuervo to the autoconf macro
 dnl repository.  We are also grateful for the helpful feedback of
 dnl numerous users.
 dnl
-dnl @version 2006-05-22
+dnl @version 2006-05-28
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
