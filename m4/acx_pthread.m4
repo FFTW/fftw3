@@ -216,8 +216,9 @@ if test "x$acx_pthread_ok" = xyes; then
         CFLAGS="$save_CFLAGS"
 
         # More AIX lossage: must compile with xlc_r or cc_r
-	# (FIXME: what to do if user employs a non-IBM compiler? e.g. gcc?)
-        AC_CHECK_PROGS(PTHREAD_CC, xlc_r cc_r, ${CC})
+	if test x"$GCC" != xyes; then
+          AC_CHECK_PROGS(PTHREAD_CC, xlc_r cc_r, ${CC})
+	fi
 else
         PTHREAD_CC="$CC"
 fi
