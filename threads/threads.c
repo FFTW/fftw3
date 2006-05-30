@@ -484,6 +484,7 @@ void X(spawn_loop)(int loopmax, int nthr,
 	  for (w = workers, i = 0; i < nthr; ++i) {
 	       A(w);
 	       fftw_sem_wait(&w->sid_done);
+	       w = w->next;
 	  }
 
 #else /* explicit thread spawning: */
