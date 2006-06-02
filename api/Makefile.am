@@ -4,6 +4,9 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft		\
 include_HEADERS = fftw3.h fftw3.f
 noinst_LTLIBRARIES = libapi.la
 
+pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@
+pkginclude_HEADERS = api.h
+
 libapi_la_SOURCES = apiplan.c configure.c execute-dft-c2r.c		\
 execute-dft-r2c.c execute-dft.c execute-r2r.c execute-split-dft-c2r.c	\
 execute-split-dft-r2c.c execute-split-dft.c execute.c			\
