@@ -298,7 +298,7 @@ int bench_main(int argc, char *argv[])
 		    if (!strchr(canonical_sizes[i],'x')
 			|| !strchr(types[j],'o')) {
 #ifdef HAVE_SNPRINTF
-			 snprintf(ps,64, "%s%s", types[j], canonical_sizes[i]);
+			 snprintf(ps, sizeof(ps), "%s%s", types[j], canonical_sizes[i]);
 #else
 			 sprintf(ps, "%s%s", types[j], canonical_sizes[i]);
 #endif
