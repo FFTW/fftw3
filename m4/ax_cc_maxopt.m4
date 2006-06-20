@@ -19,7 +19,7 @@ dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_COMPILER_VENDOR,
 dnl                  AX_GCC_ARCHFLAG, AX_GCC_X86_CPUID
 dnl
-dnl @version 2005-05-30
+dnl @version 2006-06-20
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
