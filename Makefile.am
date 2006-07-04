@@ -1,8 +1,8 @@
 OPTIONS_AUTOMAKE=gnu
 lib_LTLIBRARIES = libfftw3@PREC_SUFFIX@.la
 
-pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@
-nodist_pkginclude_HEADERS = config.h
+# pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@
+# nodist_pkginclude_HEADERS = config.h
 
 # recompile genfft if maintainer mode is true
 if MAINTAINER_MODE

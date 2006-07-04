@@ -3,8 +3,8 @@ SUBDIRS =
 
 noinst_LTLIBRARIES = libreodft.la
 
-pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@
-pkginclude_HEADERS = reodft.h
+# pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@
+# pkginclude_HEADERS = reodft.h
 
 # no longer used due to numerical problems
 EXTRA_DIST = reodft11e-r2hc.c redft00e-r2hc.c rodft00e-r2hc.c

@@ -1,8 +1,8 @@
 AM_CPPFLAGS = -I$(top_srcdir)/simd
 noinst_LTLIBRARIES = libkernel.la
 
-pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@
-pkginclude_HEADERS = ifftw.h cycle.h
+# pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@
+# pkginclude_HEADERS = ifftw.h cycle.h
 
 libkernel_la_SOURCES = align.c alloc.c assert.c awake.c buffered.c	\
 cpy1d.c cpy2d-pair.c cpy2d.c ct.c debug.c hash.c iabs.c kalloc.c	\
