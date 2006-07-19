@@ -84,7 +84,10 @@ int my_getopt(int argc, char *argv[], const struct my_option *optarray)
      
 	  if (*p++ != '-')  
 	       return (-1); /* not an option */
-     
+
+	  if (!*p) 
+	       return (-1); /* string is exactly '-' */
+	       
 	  ++my_optind;
      }
 
