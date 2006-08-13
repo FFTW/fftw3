@@ -1,12 +1,9 @@
-# build normal and fma distributions
-
 NJOBS=2
 
-cvs update -d
+darcs pull fftw@fftw.org:darcs/fftw3
 
 # hackery to build ChangeLog
-echo >ChangeLog
-rcs2log -l 72 >ChangeLog
+darcs changes >ChangeLog
 emacs -batch -q -no-site-file --eval \
    '(progn (find-file "ChangeLog") (fill-region 1 1000000) (save-buffer))'
 
