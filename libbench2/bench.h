@@ -27,8 +27,6 @@ extern double time_min;
 extern int time_repeat;
 
 extern void timer_init(double tmin, int repeat);
-extern void bench_fft8(const float *ri, const float *ii, float *ro, float *io,
-		       int is, int os);
 
 /* report functions */
 extern void (*report)(const bench_problem *p, double *t, int st);
