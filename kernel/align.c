@@ -24,8 +24,6 @@
 
 #if HAVE_SIMD
 #  define ALGN 16
-#elif HAVE_K7
-#  define ALGN 8
 #else
    /* disable the alignment machinery, because it will break,
       e.g., if sizeof(R) == 12 (as in long-double/x86) */

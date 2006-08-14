@@ -43,7 +43,4 @@ const char X(version)[] = PACKAGE "-" PACKAGE_VERSION
    "-altivec"
 #endif
 
-#if HAVE_K7
-   "-k7"
-#endif
 ;

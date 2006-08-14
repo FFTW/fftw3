@@ -65,16 +65,6 @@ fi
 AM_CONDITIONAL(LDOUBLE, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 
-AC_ARG_ENABLE(k7, [AC_HELP_STRING([--enable-k7],[enable AMD K7 optimizations, including 3dNow!])], have_k7=$enableval, have_k7=no)
-if test "$PRECISION" != "s"; then have_k7=no; fi
-if test "$have_k7" = "yes"; then
-	AC_DEFINE(HAVE_K7,1,[Define to enable AMD K7 optimizations.])
-	if test "$enable_shared" = "yes"; then
-		AC_MSG_ERROR([--enable-k7 is incompatible with --enable-shared.])
-	fi
-fi
-AM_CONDITIONAL(HAVE_K7, test "$have_k7" = "yes")
-
 have_simd="no"
 simd_precision="s"
 
@@ -420,7 +410,6 @@ AC_CONFIG_FILES([
    Makefile
    support/Makefile
    genfft/Makefile
-   genfft-k7/Makefile
    kernel/Makefile
    simd/Makefile
    simd/nonportable/Makefile
@@ -430,8 +419,6 @@ AC_CONFIG_FILES([
    dft/codelets/standard/Makefile
    dft/simd/Makefile
    dft/simd/codelets/Makefile
-   dft/k7/Makefile
-   dft/k7/codelets/Makefile
 
    rdft/Makefile
    rdft/codelets/Makefile

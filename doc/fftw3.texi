@@ -269,7 +269,7 @@ transform (DFT) and various special cases thereof.
 
 @item  FFTW supports arbitrary multi-dimensional data.
 
-@item  FFTW supports the SSE, SSE2, 3DNow!, and Altivec instruction
+@item  FFTW supports the SSE, SSE2, and Altivec instruction
        sets.
 
 @item  FFTW @value{VERSION} includes parallel (multi-threaded) transforms
@@ -1296,14 +1296,12 @@ SIMD, which stands for ``Single Instruction Multiple Data,'' is a set
 of special operations supported by some processors to perform a single
 operation on several numbers (usually 2 or 4) simultaneously.  SIMD
 floating-point instructions are available on several popular CPUs:
-SSE/SSE2 (single/double precision) on Pentium III/IV and higher,
-3DNow! (single precision) on the AMD K7 and higher, and AltiVec
-(single precision) on the PowerPC G4 and higher.  FFTW can be compiled
-to support the SIMD instructions on any of these systems.
+SSE/SSE2 (single/double precision) on Pentium III/IV and higher, and
+AltiVec (single precision) on the PowerPC G4 and higher.  FFTW can be
+compiled to support the SIMD instructions on any of these systems.
 @cindex SIMD
 @cindex SSE
 @cindex SSE2
-@cindex 3DNow!
 @cindex AltiVec
 @cindex precision
 
@@ -4749,20 +4747,18 @@ have a cycle counter but still really want an optimized plan regardless
 of the time).  @xref{Cycle Counters}.
 
 @item
-@code{--enable-sse}, @code{--enable-sse2}, @code{--enable-k7},
-@code{--enable-altivec}: Enable the compilation of SIMD code for SSE
-(Pentium III+), SSE2 (Pentium IV+), 3dNow! (AMD K7 and others), or
-AltiVec (PowerPC G4+).  SSE, 3dNow!, and AltiVec only work with
-@code{--enable-float} (above), while SSE2 only works in double precision
-(the default).  The resulting code will @emph{still work} on earlier
-CPUs lacking the SIMD extensions (SIMD is automatically disabled,
-although the FFTW library is still larger).
+@code{--enable-sse}, @code{--enable-sse2}, @code{--enable-altivec}:
+Enable the compilation of SIMD code for SSE (Pentium III+), SSE2
+(Pentium IV+), or AltiVec (PowerPC G4+).  SSE and AltiVec only work
+with @code{--enable-float} (above), while SSE2 only works in double
+precision (the default).  The resulting code will @emph{still work} on
+earlier CPUs lacking the SIMD extensions (SIMD is automatically
+disabled, although the FFTW library is still larger).
 @itemize @minus
 @item
-These options, with the exception of @code{--enable-k7} (which uses
-assembly), require a compiler supporting SIMD extensions, and compiler
-support is still a bit flaky: see the FFTW FAQ for a list of compiler
-versions that have problems compiling FFTW.
+These options require a compiler supporting SIMD extensions, and
+compiler support is still a bit flaky: see the FFTW FAQ for a list of
+compiler versions that have problems compiling FFTW.
 @item
 With the Linux kernel, you may have to recompile the kernel with the
 option to support SSE/SSE2/AltiVec (see the ``Processor type and
@@ -4820,13 +4816,7 @@ To create the FFTW library, you will then need to compile all of the
 If you are compiling with SIMD support (e.g. you defined
 @code{HAVE_SSE2} in @code{config.h}), then you also need to compile
 the @code{.c} files in the @code{simd}, @code{simd/nonportable},
-@code{dft/simd}, and @code{dft/simd/codelets} directories.  If you are
-compiling with AMD K7 optimizations (i.e. you defined @code{HAVE_K7}),
-then you also need to include the @code{dft/k7} and
-@code{dft/k7/codelets} directories.  (See the previous section for
-more information on configuration options like SIMD and K7
-optimization; each Unix configuration option has a corresponding
-@code{#define} in @code{config.h}.)
+@code{dft/simd}, and @code{dft/simd/codelets} directories. 
 
 Once these files are all compiled, link them into a library, or a shared
 library, or directly into your program.
@@ -4890,12 +4880,12 @@ written in Objective Caml, a dialect of ML, which is available at
 @uref{http://pauillac.inria.fr/ocaml/}.
 @cindex Caml
 
-If you have Objective Caml installed (along with recent versions of GNU
-@code{autoconf}, @code{automake}, and @code{libtool}), then you can
-change the set of codelets that are generated or play with the
+If you have Objective Caml installed (along with recent versions of
+GNU @code{autoconf}, @code{automake}, and @code{libtool}), then you
+can change the set of codelets that are generated or play with the
 generation options.  The set of generated codelets is specified by the
-@code{dft/codelets/*/Makefile.am}, @code{dft/simd/codelets/Makefile.am},
-@code{dft/k7/codelets/Makefile.am}, and
+@code{dft/codelets/*/Makefile.am},
+@code{dft/simd/codelets/Makefile.am}, and
 @code{rdft/codelets/*/Makefile.am} files.  For example, you can add
 efficient REDFT codelets of small sizes by modifying
 @code{rdft/codelets/r2r/Makefile.am}.
@@ -4978,7 +4968,8 @@ Steven's physics degree would not exist without him.
 Franz Franchetti wrote SIMD extensions to FFTW 2, which eventually
 led to the SIMD support in FFTW 3.
 
-Stefan Kral wrote most of the K7 code generator distributed with FFTW 3.
+Stefan Kral wrote most of the K7 code generator distributed with FFTW
+3.0.x and 3.1.x.
 
 Andrew Sterian contributed the Windows timing code in FFTW 2.  
 

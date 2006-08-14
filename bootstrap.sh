@@ -12,7 +12,6 @@
 
 touch ChangeLog
 touch genfft/.depend
-touch genfft-k7/.depend
 
 echo "PLEASE IGNORE WARNINGS AND ERRORS"
 
@@ -29,5 +28,4 @@ rm -f config.cache
 (
     ./configure --disable-shared --enable-maintainer-mode --enable-threads $*
     (cd genfft; make depend)
-    (cd genfft-k7; make depend)
 )

@@ -84,10 +84,6 @@ typedef ptrdiff_t INT;
 #define STRINGIZEx(x) #x
 #define STRINGIZE(x) STRINGIZEx(x)
 
-#ifndef HAVE_K7
-#define HAVE_K7 0
-#endif
-
 #if defined(HAVE_SSE) || defined(HAVE_SSE2) || defined(HAVE_ALTIVEC)
 #define HAVE_SIMD 1
 #else
@@ -736,7 +732,7 @@ plan *X(mkplan_f_d)(planner *ego, problem *p,
 /* stride.c: */
 
 /* If PRECOMPUTE_ARRAY_INDICES is defined, precompute all strides. */
-#if (defined(__i386__) || defined(__x86_64__) || _M_IX86 >= 500) && !HAVE_K7 && !defined(FFTW_LDOUBLE)
+#if (defined(__i386__) || defined(__x86_64__) || _M_IX86 >= 500) && !defined(FFTW_LDOUBLE)
 #define PRECOMPUTE_ARRAY_INDICES
 #endif
 

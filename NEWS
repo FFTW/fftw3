@@ -6,6 +6,9 @@
   on 64-bit machines.  (Internally, FFTW uses ptrdiff_t everywhere
   regardless of what API you choose.)
 
+* Removed k7 support, which only worked in 32-bits mode and is
+  becoming obsolete.  Use --enable-sse instead.
+
 FFTW 3.1.1
 
 * Performance improvements for Intel EMT64.

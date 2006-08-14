@@ -6,7 +6,7 @@ lib_LTLIBRARIES = libfftw3@PREC_SUFFIX@.la
 
 # recompile genfft if maintainer mode is true
 if MAINTAINER_MODE
-GENFFT = genfft genfft-k7
+GENFFT = genfft
 else
 GENFFT =
 endif
@@ -25,14 +25,6 @@ SIMD_LIBS=						\
 	dft/simd/codelets/libdft_codelets_simd.la	
 else
 SIMD_LIBS=
-endif
-
-if HAVE_K7
-K7_LIBS=							\
-        dft/k7/libdft_k7.la					\
-	dft/k7/codelets/libdft_codelets_k7.la		
-else
-K7_LIBS=
 endif
 
 if THREADS
@@ -55,7 +47,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	rdft/codelets/r2r/librdft_codelets_r2r.la	\
 	reodft/libreodft.la				\
 	api/libapi.la					\
-        $(SIMD_LIBS) $(K7_LIBS) $(COMBINED_THREADLIBS)
+        $(SIMD_LIBS) $(COMBINED_THREADLIBS)
 
 libfftw3@PREC_SUFFIX@_la_LDFLAGS = -no-undefined -version-info @SHARED_VERSION_INFO@
 

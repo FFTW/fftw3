@@ -98,10 +98,6 @@ void X(kdft_difsq_register)(planner *p, kdftwsq codelet, const ct_desc *desc);
 
 extern const solvtab X(solvtab_dft_standard);
 
-#if HAVE_K7
-extern const solvtab X(solvtab_dft_k7);
-#endif
-
 #if HAVE_SIMD
 extern const solvtab X(solvtab_dft_simd);
 #endif

@@ -42,9 +42,6 @@ void X(dft_conf_standard)(planner *p)
 {
      X(solvtab_exec)(s, p);
      X(solvtab_exec)(X(solvtab_dft_standard), p);
-#if HAVE_K7
-     X(solvtab_exec)(X(solvtab_dft_k7), p);
-#endif
 #if HAVE_SIMD
      X(solvtab_exec)(X(solvtab_dft_simd), p);
 #endif

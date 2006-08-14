@@ -10,7 +10,7 @@ emacs -batch -q -no-site-file --eval \
 sh bootstrap.sh
 
 make maintainer-clean
-./configure --enable-maintainer-mode --enable-single --enable-sse --enable-k7 --enable-threads
+./configure --enable-maintainer-mode --enable-single --enable-sse --enable-threads
 make -j $NJOBS
 make -j $NJOBS dist
 

@@ -9,11 +9,6 @@ TODO before FFTW-$2\pi$:
 * I can't believe that there isn't a closed form for the omega
   array in Rader.
 
-* merge genfft-k7 generator with the main genfft branch.
-  genfft-k7 was written by Stefan Kral based on the fftw-2.1 genfft.
-  (The k7 stuff is becoming obsolete because it is not 64-bit clean.
-  We should phase it out in the next release.)
-
 * implement rdft/problem2 for even radices other than 2.
 
 * convolution problem type(s)

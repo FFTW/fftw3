@@ -26,14 +26,7 @@ for name in $d/tools/fftw-wisdom.c; do
 done
 
 for name in $d/configure.ac; do
-    sed -e 's+genfft-k7/Makefile++' $name | sed -e 's+AC_INIT(fftw,+AC_INIT(commercial-fftw,+' > ${name}.tmp
-    chmod --reference=$name ${name}.tmp
-    touch --reference=$name ${name}.tmp
-    mv ${name}.tmp $name
-done
-
-for name in $d/Makefile.am; do
-    sed -e 's+genfft-k7++' $name > ${name}.tmp
+    cat $name | sed -e 's+AC_INIT(fftw,+AC_INIT(commercial-fftw,+' > ${name}.tmp
     chmod --reference=$name ${name}.tmp
     touch --reference=$name ${name}.tmp
     mv ${name}.tmp $name
