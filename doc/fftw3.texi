@@ -372,14 +372,11 @@ $513 = 19 \cdot 3^3$,
 @end html
 you can customize FFTW to support the factor @math{19} efficiently.
 
-For more information regarding FFTW, see the paper, ``FFTW: An
-adaptive software architecture for the FFT,'' by M. Frigo and
-S. G. Johnson, which appeared in the 23rd International Conference on
-Acoustics, Speech, and Signal Processing (@cite{Proc. ICASSP 1998}
-@b{3}, p. 1381).  See also, ``The Fastest Fourier Transform in the
-West,'' by M. Frigo and S. G. Johnson, which is the technical report
-MIT-LCS-TR-728 (Sep. '97).  The code generator is described in the
-paper ``A fast Fourier transform compiler'',
+For more information regarding FFTW, see the paper, ``The Design and
+Implementation of FFTW3,'' by M. Frigo and S. G. Johnson, which was an
+invited paper in @cite{Proc. IEEE} @b{93} (2), p. 216 (2005).  The
+code generator is described in the paper ``A fast Fourier transform
+compiler'',
 @cindex compiler
 by M. Frigo, in the @cite{Proceedings of the 1999 ACM SIGPLAN Conference
 on Programming Language Design and Implementation (PLDI), Atlanta,
