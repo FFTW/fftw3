@@ -117,7 +117,8 @@ let generate n =
   in
 
   let tree = 
-    Fcn (("static " ^ C.constrealtypep), ename,
+    Fcn (((if !Magic.standalone then "" else "static ")
+	  ^ C.constrealtypep), ename,
 	 [Decl (C.realtypep, "ri");
 	  Decl (C.realtypep, "ii");
 	  Decl (C.constrealtypep, twarray);
@@ -149,7 +150,7 @@ let generate n =
     (Printf.sprintf "{\n%s(p, %s, &desc);\n}" register ename)
   in
 
-  (unparse cvsid tree) ^ "\n" ^ init
+  (unparse cvsid tree) ^ "\n" ^ (if !Magic.standalone then "" else init)
 
 
 let main () =

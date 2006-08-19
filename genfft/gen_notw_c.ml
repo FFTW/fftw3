@@ -155,8 +155,7 @@ let generate n =
     "}\n"
 
   in ((unparse cvsid tree) ^ "\n" ^ 
-      desc ^
-      init)
+	(if !Magic.standalone then "" else desc ^ init))
 
 let main () =
   begin
