@@ -420,6 +420,19 @@ different FFT algorithms will give slightly different results (on the
 order of the numerical accuracy; typically a fractional difference of
 1e-15 or so in double precision).
 
+\question 31aug:nondeterministic FFTW gives different results between runs
+
+If you use \courier{FFTW_MEASURE\} or \courier{FFTW_PATIENT\} mode,
+then the algorithm FFTW employs is not deterministic: it depends on
+runtime performance measurements.  This will cause the results to vary
+slightly from run to run.  However, the differences should be slight,
+on the order of the floating-point precision, and therefore should
+have no practical impact on most applications.
+
+If you use saved plans (wisdom) or \courier{FFTW_ESTIMATE\} mode,
+however, then the algorithm is deterministic and the results should be
+identical between runs.
+
 \question 26aug:savePlans Can I save FFTW's plans?
 
 Yes. Starting with version 1.2, FFTW provides the \courier{wisdom\}
