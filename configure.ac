@@ -385,6 +385,15 @@ AM_CONDITIONAL(COMBINED_THREADS, test x"$with_combined_threads" = xyes)
 
 dnl -----------------------------------------------------------------------
 
+AC_ARG_ENABLE(mpi, [AC_HELP_STRING([--enable-mpi],[compile FFTW MPI library])], enable_mpi=$enableval, enable_mpi=no)
+
+if test "$enable_mpi" = "yes"; then
+   ACX_MPI([],[AC_MSG_ERROR([could not find mpi library for --enable-mpi])])
+fi
+AM_CONDITIONAL(MPI, test "$enable_mpi" = "yes")
+
+dnl -----------------------------------------------------------------------
+
 AC_MSG_CHECKING([whether a cycle counter is available])
 save_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="$CPPFLAGS -I$srcdir/kernel"
@@ -429,6 +438,8 @@ AC_CONFIG_FILES([
    reodft/Makefile
 
    threads/Makefile
+
+   mpi/Makefile
 
    api/Makefile
 
