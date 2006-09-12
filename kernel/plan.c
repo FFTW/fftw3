@@ -61,9 +61,11 @@ void X(plan_null_destroy)(plan *ego)
 
 void X(plan_awake)(plan *ego, enum wakefulness wakefulness)
 {
-     A(((wakefulness == SLEEPY) ^ (ego->wakefulness == SLEEPY)));
+     if (ego) {
+	  A(((wakefulness == SLEEPY) ^ (ego->wakefulness == SLEEPY)));
 	  
-     ego->adt->awake(ego, wakefulness);
-     ego->wakefulness = wakefulness;
+	  ego->adt->awake(ego, wakefulness);
+	  ego->wakefulness = wakefulness;
+     }
 }
 

@@ -701,9 +701,9 @@ static const transpose_adt adt_toms513 =
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
-     if (ego->cld1) X(plan_awake)(ego->cld1, wakefulness);
-     if (ego->cld2) X(plan_awake)(ego->cld2, wakefulness);
-     if (ego->cld3) X(plan_awake)(ego->cld3, wakefulness);
+     X(plan_awake)(ego->cld1, wakefulness);
+     X(plan_awake)(ego->cld2, wakefulness);
+     X(plan_awake)(ego->cld3, wakefulness);
 }
 
 static void print(const plan *ego_, printer *p)
