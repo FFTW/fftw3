@@ -22,5 +22,6 @@ endif
 
 fftw@PREC_SUFFIX@_wisdom_SOURCES = fftw-wisdom.c
 fftw@PREC_SUFFIX@_wisdom_LDADD = $(top_builddir)/tests/bench.o	\
-$(LIBFFTWTHREADS) $(top_builddir)/libfftw3@PREC_SUFFIX@.la	\
+$(top_builddir)/tests/fftw_bench_common.o $(LIBFFTWTHREADS)	\
+$(top_builddir)/libfftw3@PREC_SUFFIX@.la			\
 $(top_builddir)/libbench2/libbench2.a $(THREADLIBS)
