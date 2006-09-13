@@ -425,6 +425,13 @@ enum {
      PROBLEM_DFT, 
      PROBLEM_RDFT,
      PROBLEM_RDFT2,
+
+     /* for mpi/ subdirectory */
+     PROBLEM_MPI_DFT,
+     PROBLEM_MPI_RDFT,
+     PROBLEM_MPI_RDFT2,
+     PROBLEM_MPI_TRANSPOSE,
+
      PROBLEM_LAST 
 };
 

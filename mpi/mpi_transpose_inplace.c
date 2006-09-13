@@ -60,7 +60,7 @@ static void apply(const plan *ego_, R *I, R *O)
 	  INT *rbs = ego->recv_block_sizes;
 	  INT *rbo = ego->recv_block_offsets;
 	  MPI_Comm comm = ego->comm;
-	  MPI_status status;
+	  MPI_Status status;
 	  R *buf = (R*) MALLOC(sizeof(R) * sbs[0], BUFFERS);
 
 	  for (i = 0; i < n_pes; ++i) {
@@ -231,12 +231,12 @@ static tensor *mktensor_4d(INT n0, INT is0, INT os0,
      return x;
 }
 
-static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
+static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_mpi_transpose *p;
      P *pln;
      plan *cld1 = 0, *cld2 = 0, *cld3 = 0, *cld4 = 0;
-     INT b, bt, nxb;
+     INT b, bt, nxb, vn;
      INT *sbs, *sbo, *rbs, *rbo;
      int pe, my_pe, n_pes, sort_pe = -1, ascending = 1;
      static const plan_adt padt = {
@@ -249,14 +249,16 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
           return (plan *) 0;
 
      p = (const problem_mpi_transpose *) p_;
+     vn = p->vn;
+
      b = X(current_block)(p->nx, p->block, p->comm);
 
      if (!(p->flags & SCRAMBLED_IN)) {
 	  cld1 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
-						   (b, p->ny * p->vn, p->vn,
-						    p->ny, p->vn, b * p->vn,
-						    p->vn, 1, 1),
+						   (b, p->ny * vn, vn,
+						    p->ny, vn, b * vn,
+						    vn, 1, 1),
 						   p->I, p->O));
 	  if (!cld1) goto nada;
      }
@@ -266,7 +268,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
      nxb = p->nx / p->block;
      if (p->nx == nxb * p->block) { /* divisible => ordinary transpose */
 	  if (!(p->flags & SCRAMBLED_OUT)) {
-	       b *= p->vn;
+	       b *= vn;
 	       cld2 = X(mkplan_d)(plnr, 
 				  X(mkproblem_rdft_0_d)(X(mktensor_3d)
 							(nxb, bt * b, b,
@@ -296,7 +298,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 				   vn, 1, 1),
 				  p->O, p->O));
 	  if (!cld2) goto nada;
-	  nxb = p->nx - nxb * p->block
+	  nxb = p->nx - nxb * p->block;
 	  cld3 = X(mkplan_d)(plnr,
 			     X(mkproblem_rdft_0_d)(
 				  X(mktensor_3d)
@@ -330,7 +332,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
      MPI_Comm_size(p->comm, &n_pes);
 
      /* Compute sizes/offsets of blocks to exchange between processors */
-     sbs = (INT *) MALLOC(4 * n_pes * sizeof(INT));
+     sbs = (INT *) MALLOC(4 * n_pes * sizeof(INT), PLANS);
      sbo = sbs + n_pes;
      rbs = sbo + n_pes;
      rbo = rbs + n_pes;
@@ -365,15 +367,16 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 	  pln->sched = 0; /* this process is not doing anything */
      }
      else {
-	  pln->sched = (INT *) MALLOC(n_pes * sizeof(INT));
+	  pln->sched = (INT *) MALLOC(n_pes * sizeof(INT), PLANS);
 	  fill1_comm_sched(pln->sched, my_pe, n_pes);
 	  if (sort_pe >= 0)
 	       sort1_comm_sched(pln->sched, n_pes, sort_pe, ascending);
      }
 
      /* FIXME: OPS */
+     X(ops_zero)(&pln->super.super.ops);
 
-     return &(pln->super);
+     return &(pln->super.super);
 
  nada:
      X(plan_destroy_internal)(cld4);

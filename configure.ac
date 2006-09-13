@@ -141,6 +141,17 @@ AC_SUBST(OCAMLOPTCFLAGS)
 AC_SUBST(OCAMLDEFS)
 AC_SUBST(OCAMLLDFLAGS)
 
+dnl -----------------------------------------------------------------------
+
+AC_ARG_ENABLE(mpi, [AC_HELP_STRING([--enable-mpi],[compile FFTW MPI library])], enable_mpi=$enableval, enable_mpi=no)
+
+if test "$enable_mpi" = "yes"; then
+   ACX_MPI([],[AC_MSG_ERROR([could not find mpi library for --enable-mpi])])
+fi
+AM_CONDITIONAL(MPI, test "$enable_mpi" = "yes")
+
+dnl -----------------------------------------------------------------------
+
 dnl determine CFLAGS first
 AX_CC_MAXOPT
 
@@ -382,15 +393,6 @@ fi
 AC_SUBST(THREADLIBS)
 AM_CONDITIONAL(THREADS, test x"$THREADLIBS" != x)
 AM_CONDITIONAL(COMBINED_THREADS, test x"$with_combined_threads" = xyes)
-
-dnl -----------------------------------------------------------------------
-
-AC_ARG_ENABLE(mpi, [AC_HELP_STRING([--enable-mpi],[compile FFTW MPI library])], enable_mpi=$enableval, enable_mpi=no)
-
-if test "$enable_mpi" = "yes"; then
-   ACX_MPI([],[AC_MSG_ERROR([could not find mpi library for --enable-mpi])])
-fi
-AM_CONDITIONAL(MPI, test "$enable_mpi" = "yes")
 
 dnl -----------------------------------------------------------------------
 

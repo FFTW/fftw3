@@ -55,8 +55,8 @@ static void print(problem *ego_, printer *p)
 	      ego->vn,
 	      ego->nx, ego->ny,
 	      ego->block, ego->tblock);
-     MPI_Comm_rank(p->comm, &i); p->print(p, " %d", i);
-     MPI_Comm_size(p->comm, &i); p->print(p, " %d)", i);
+     MPI_Comm_rank(ego->comm, &i); p->print(p, " %d", i);
+     MPI_Comm_size(ego->comm, &i); p->print(p, " %d)", i);
 }
 
 static void zero(const problem *ego_)
@@ -65,8 +65,7 @@ static void zero(const problem *ego_)
      R *I = (ego->flags & SCRAMBLED_IN) ? ego->O : ego->I;
      INT i, b, s, N = ego->vn * ego->ny;
 
-     X(current_block)(ego->n[0], ego->block, ego->comm, &b, &s);
-     N *= b;
+     N *= X(current_block)(ego->nx, ego->block, ego->comm);
 
      for (i = 0; i < N; ++i) I[i] = K(0.0);
 }

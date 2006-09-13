@@ -114,12 +114,12 @@ static void print(const plan *ego_, printer *p)
      p->print(p, ")");
 }
 
-static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
+static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_mpi_transpose *p;
      P *pln;
      plan *cld1 = 0, *cld2 = 0;
-     INT b, bt, nxb;
+     INT b, bt, nxb, vn;
      int *sbs, *sbo, *rbs, *rbo;
      int pe, my_pe, n_pes;
      static const plan_adt padt = {
@@ -128,23 +128,25 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 
      UNUSED(ego);
 
-     if (!applicable(ego, p, plnr))
+     if (!applicable(ego, p_, plnr))
           return (plan *) 0;
 
      p = (const problem_mpi_transpose *) p_;
+     vn = p->vn;
+
      b = X(current_block)(p->nx, p->block, p->comm);
 
      if (!(p->flags & SCRAMBLED_IN)) {
 	  cld1 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
-						   (b, p->ny * p->vn, p->vn,
-						    p->ny, p->vn, b * p->vn,
-						    p->vn, 1, 1),
+						   (b, p->ny * vn, vn,
+						    p->ny, vn, b * vn,
+						    vn, 1, 1),
 						   p->I, p->O));
 	  if (!cld1) goto nada;
      }
 
-     b = p->block * p->vn;
+     b = p->block * vn;
      bt = X(current_block)(p->ny, p->tblock, p->comm);
      nxb = p->nx / p->block;
      if (p->nx == nxb * p->block) { /* divisible => ordinary transpose */
@@ -174,7 +176,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
         whether/why this would be any faster, though. */
      MPI_Comm_rank(p->comm, &my_pe);
      MPI_Comm_size(p->comm, &n_pes);
-     sbs = (int *) MALLOC(4 * n_pes * sizeof(int));
+     sbs = (int *) MALLOC(4 * n_pes * sizeof(int), PLANS);
      sbo = sbs + n_pes;
      rbs = sbo + n_pes;
      rbo = rbs + n_pes;
@@ -200,7 +202,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
      if (cld1 && cld2)
 	  X(ops_add)(&cld1->ops, &cld2->ops, &pln->super.super.ops);
      else if (cld2)
-	  pln->super.super.ops = cld2;
+	  pln->super.super.ops = cld2->ops;
      else {
 	  if (cld1)
 	       pln->super.super.ops = cld1->ops;
@@ -210,7 +212,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
      }
      /* FIXME: should MPI operations be counted in "other" somehow? */
 
-     return &(pln->super);
+     return &(pln->super.super);
 
  nada:
      X(plan_destroy_internal)(cld2);

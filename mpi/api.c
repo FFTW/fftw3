@@ -30,8 +30,7 @@ static int mpi_inited = 0;
 static void init(void)
 {
      if (!mpi_inited) {
-	  plnr = X(the_planner)();
-          X(mpi_conf_standard)(plnr);
+          X(mpi_conf_standard)(X(the_planner)());
 	  mpi_inited = 1;
      }
 }
@@ -65,11 +64,13 @@ ptrdiff_t X(mpi_local_size_2d)(ptrdiff_t nx, ptrdiff_t ny,
 			       MPI_Comm comm,
 			       ptrdiff_t *local_nx, ptrdiff_t *local_x_start)
 {
+     ptrdiff_t local_ny, local_y_start;
      return X(mpi_local_size_2d_transposed)(nx, ny,
 					    FFTW_MPI_DEFAULT_BLOCK,
 					    FFTW_MPI_DEFAULT_BLOCK,
 					    comm,
-					    local_nx, local_x_start);
+					    local_nx, local_x_start,
+					    &local_ny, &local_y_start);
 }
 
 X(plan) X(mpi_plan_transpose)(ptrdiff_t nx, ptrdiff_t ny, R *in, R *out, 

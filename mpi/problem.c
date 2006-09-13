@@ -58,8 +58,8 @@ static void print(problem *ego_, printer *p)
 	      ego->rnk);
      for (i = 0; i < ego->rnk; ++i) p->print(p, " %D", ego->n[i]);
      p->print(p, " %d %D %D", ego->flags, ego->block, ego->tblock);
-     MPI_Comm_rank(p->comm, &i); p->print(p, " %d", i);
-     MPI_Comm_size(p->comm, &i); p->print(p, " %d)", i);
+     MPI_Comm_rank(ego->comm, &i); p->print(p, " %d", i);
+     MPI_Comm_size(ego->comm, &i); p->print(p, " %d)", i);
 }
 
 static void zero(const problem *ego_)
@@ -69,8 +69,7 @@ static void zero(const problem *ego_)
      INT i, b, s, N = ego->vn * 2;
      int irnk;
 
-     X(current_block)(ego->n[0], ego->block, ego->comm, &b, &s);
-     N *= b;
+     N *= X(current_block)(ego->n[0], ego->block, ego->comm);
      for (irnk = 1; irnk < ego->rnk; ++irnk) N *= ego->n[irnk];
 
      for (i = 0; i < N; ++i) I[i] = K(0.0);
@@ -89,7 +88,7 @@ problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
                               R *I, R *O,
                               INT block, INT tblock,
                               MPI_Comm comm,
-                              int flags);
+                              int flags)
 {
      problem_mpi_dft *ego =
           (problem_mpi_dft *)X(mkproblem)(sizeof(problem_mpi_dft), &padt);
