@@ -54,6 +54,7 @@ extern void bench_srand(int seed);
 extern bench_problem *problem_parse(const char *desc);
 
 extern void ovtpvt(const char *format, ...);
+extern void ovtpvt_err(const char *format, ...);
 
 extern void fftaccuracy(int n, bench_complex *a, bench_complex *ffta,
 			int sign, double err[6]);

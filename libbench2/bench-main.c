@@ -112,7 +112,7 @@ int bench_main(int argc, char *argv[])
 		   report_info_all();
 		   break;
 	      case 'h':
-		   my_usage(argv[0], options);
+		   if (verbose >= 0) my_usage(argv[0], options);
 		   break;
 
 	      case 300: /* --report-mflops */

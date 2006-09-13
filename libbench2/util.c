@@ -38,8 +38,7 @@ extern int posix_memalign(void **, size_t, size_t);
 
 void bench_assertion_failed(const char *s, int line, const char *file)
 {
-     fflush(stdout);
-     fprintf(stderr, "bench: %s:%d: assertion failed: %s\n", file, line, s);
+     ovtpvt_err("bench: %s:%d: assertion failed: %s\n", file, line, s);
      exit(EXIT_FAILURE);
 }
 

@@ -26,5 +26,5 @@
 
 void useropt(const char *arg)
 {
-     fprintf(stderr, "unknown user option: %s.  Ignoring.\n", arg);
+     ovtpvt_err("unknown user option: %s.  Ignoring.\n", arg);
 }
