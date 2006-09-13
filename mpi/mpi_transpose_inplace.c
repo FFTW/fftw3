@@ -245,7 +245,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      UNUSED(ego);
 
-     if (!applicable(ego, p, plnr))
+     if (!applicable(ego, p_, plnr))
           return (plan *) 0;
 
      p = (const problem_mpi_transpose *) p_;
@@ -392,7 +392,7 @@ static solver *mksolver(void)
      return MKSOLVER(solver, &sadt);
 }
 
-void X(mpi_transpose_alltoall_register)(planner *p)
+void X(mpi_transpose_inplace_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }
