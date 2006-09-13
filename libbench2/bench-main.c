@@ -69,6 +69,9 @@ int bench_main(int argc, char *argv[])
      verbose = 0;
 
      tol = SINGLE_PRECISION ? 1.0e-3 : 1.0e-10;
+
+     main_init(&argc, &argv);
+
      bench_srand(1);
 
      while ((c = my_getopt (argc, argv, options)) != -1) {

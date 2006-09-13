@@ -528,3 +528,12 @@ FFTW(plan) mkplan(bench_problem *p, int flags)
      }
 }
 
+void main_init(int *argc, char ***argv)
+{
+     UNUSED(argc);
+     UNUSED(argv);
+}
+
+void final_cleanup(void)
+{
+}

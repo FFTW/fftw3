@@ -202,4 +202,6 @@ void cleanup(void)
 	  FFTW(malloc_print_minfo)(verbose);
      }
 #    endif
+
+     final_cleanup();
 }

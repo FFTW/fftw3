@@ -234,7 +234,7 @@ double acmp(C *a, C *b, int n, const char *test, double tol)
 	  {
 	       int i;
 	       for (i = 0; i < n; ++i) 
-		    ovtput_err("%8d %16.12f %16.12f   %16.12f %16.12f\n", i, 
+		    ovtpvt_err("%8d %16.12f %16.12f   %16.12f %16.12f\n", i, 
 			       (double) c_re(a[i]), (double) c_im(a[i]),
 			       (double) c_re(b[i]), (double) c_im(b[i]));
 	  }

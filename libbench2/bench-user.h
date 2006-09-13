@@ -134,6 +134,7 @@ extern int can_do(bench_problem *p);
 extern void setup(bench_problem *p);
 extern void doit(int iter, bench_problem *p);
 extern void done(bench_problem *p);
+extern void main_init(int *argc, char ***argv);
 extern void cleanup(void);
 extern void verify(const char *param, int rounds, double tol);
 extern void useropt(const char *arg);
