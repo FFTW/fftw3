@@ -1,6 +1,9 @@
 /* See bench.c.  We keep a few common subroutines in this file so
    that they can be re-used in the MPI test program. */
 
+#include <math.h>
+#include <stdio.h>
+#include <string.h>
 #include "fftw_bench.h"
 
 FFTW(plan) the_plan = 0;
