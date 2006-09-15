@@ -99,8 +99,7 @@ static int applicable0(const solver *ego_, const problem *p_, int *dp)
 	     && FINITE_RNK(p->vecsz->rnk)
 	     && p->vecsz->rnk > 0
 
-	     /* the rank-0 solver deals with the general case */
-	     && p->sz->rnk > 0
+	     && p->sz->rnk >= 0
 
 	     && pickdim(ego, p->vecsz, p->I != p->O, dp)
 	  );
@@ -120,6 +119,11 @@ static int applicable(const solver *ego_, const problem *p_,
 
      if (NO_UGLYP(plnr)) {
 	  p = (const problem_rdft *) p_;
+
+	  /* the rank-0 solver deals with the general case most of the
+	     time (an exception is loops of non-square transposes) */
+	  if (NO_SLOWP(plnr) && p->sz->rnk == 0)
+	       return 0;
 
 	  /* Heuristic: if the transform is multi-dimensional, and the
 	     vector stride is less than the transform size, then we
