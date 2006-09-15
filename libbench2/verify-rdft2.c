@@ -188,7 +188,9 @@ static void rdft2_apply(dofft_closure *k_,
      if (p->sign < 0) { /* R2HC */
 	  int N, vN, i;
 	  cpyr(&c_re(in[0]), pckdsz, ri, totalsz);
+	  after_problem_rcopy_from(p, ri);
 	  doit(1, p);
+	  after_problem_hccopy_to(p, ro, io);
 	  if (k->k.recopy_input)
 	       cpyr(ri, totalsz_swap, &c_re(in[0]), pckdsz_swap);
 	  cpyhc2(ro, io, probsz2, totalsz2, totalscale,
@@ -201,7 +203,9 @@ static void rdft2_apply(dofft_closure *k_,
      else { /* HC2R */
 	  icpyhc2(ri, ii, probsz2, totalsz2, totalscale,
 		  &c_re(in[0]), &c_im(in[0]), pckdsz2);
+	  after_problem_hccopy_from(p, ri, ii);
 	  doit(1, p);
+	  after_problem_rcopy_to(p, ro);
 	  if (k->k.recopy_input)
 	       cpyhc2(ri, ii, probsz2_swap, totalsz2_swap, totalscale,
 		      &c_re(in[0]), &c_im(in[0]), pckdsz2_swap);

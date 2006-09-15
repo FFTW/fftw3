@@ -87,7 +87,9 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 
      cpy(&c_re(in[0]), &c_im(in[0]), pckdsz, 1,
 	    ri, ii, totalsz, totalscale);
+     after_problem_ccopy_from(p, ri, ii);
      doit(1, p);
+     after_problem_ccopy_to(p, ro, io);
      if (k->k.recopy_input)
 	  cpy(ri, ii, totalsz_swap, totalscale,
 	      &c_re(in[0]), &c_im(in[0]), pckdsz_swap, 1);

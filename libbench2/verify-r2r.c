@@ -369,7 +369,9 @@ static void cpyr(R *ra, bench_tensor *sza, R *rb, bench_tensor *szb)
 static void dofft(info *nfo, R *in, R *out)
 {
      cpyr(in, nfo->pckdsz, (R *) nfo->p->in, nfo->totalsz);
+     after_problem_rcopy_from(nfo->p, nfo->p->in);
      doit(1, nfo->p);
+     after_problem_rcopy_to(nfo->p, nfo->p->out);
      cpyr((R *) nfo->p->out, nfo->totalsz, out, nfo->pckdsz);
 }
 
@@ -845,7 +847,9 @@ static void r2r_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 	      BENCH_ASSERT(0); /* not yet implemented */
      }
 
+     after_problem_rcopy_from(p, ri);
      doit(1, p);
+     after_problem_rcopy_to(p, ro);
 
      switch (p->k[0]) {
 	 case R2R_R2HC:

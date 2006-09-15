@@ -77,7 +77,6 @@ X(plan) X(mpi_plan_transpose)(ptrdiff_t nx, ptrdiff_t ny, R *in, R *out,
 			      MPI_Comm comm, unsigned flags)
 			      
 {
-     init();
      return X(mpi_plan_many_transpose)(nx, ny, 1,
 				       FFTW_MPI_DEFAULT_BLOCK,
 				       FFTW_MPI_DEFAULT_BLOCK,
@@ -90,9 +89,14 @@ X(plan) X(mpi_plan_many_transpose)(ptrdiff_t nx, ptrdiff_t ny,
 				   R *in, R *out, 
 				   MPI_Comm comm, unsigned flags)
 {
+     init();
+
      if (howmany < 0 || xblock < 0 || yblock < 0 ||
 	 nx <= 0 || ny <= 0) return 0;
-     
+
+     if (!xblock) xblock = X(default_block)(nx, comm);
+     if (!yblock) yblock = X(default_block)(ny, comm);
+
      return 
 	  X(mkapiplan)(FFTW_FORWARD, flags,
 		       X(mkproblem_mpi_transpose)(howmany, nx, ny,

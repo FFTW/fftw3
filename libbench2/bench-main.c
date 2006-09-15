@@ -97,10 +97,12 @@ int bench_main(int argc, char *argv[])
 		   useropt(my_optarg);
 		   break;
 	      case 'v':
-		   if (my_optarg)
-			verbose = atoi(my_optarg);
-		   else
-			++verbose;
+		   if (verbose >= 0) { /* verbose < 0 disables output */
+			if (my_optarg)
+			     verbose = atoi(my_optarg);
+			else
+			     ++verbose;
+		   }
 		   break;
 	      case 'y':
 		   verify(my_optarg, rounds, tol);
