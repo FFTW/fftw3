@@ -31,7 +31,8 @@
 typedef struct {
      plan_mpi_transpose super;
 
-     plan *cld1, *cld2, *cld3, *cld4;
+     plan *cld1, *cld2, *cld2rest, *cld3;
+     ptrdiff_t rest_offset;
      
      int n_pes, my_pe, *sched;
      INT *send_block_sizes, *send_block_offsets;
@@ -42,7 +43,7 @@ typedef struct {
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     plan_rdft *cld1, *cld2, *cld3, *cld4;
+     plan_rdft *cld1, *cld2, *cld2rest, *cld3;
      int *sched;
 
      /* transpose locally to get contiguous chunks */
@@ -89,12 +90,13 @@ static void apply(const plan *ego_, R *I, R *O)
         (3 subplans, two of which operate on disjoint data) */
      cld2 = (plan_rdft *) ego->cld2;
      cld2->apply(ego->cld2, O, O);
-     cld3 = (plan_rdft *) ego->cld3;
-     if (cld3) {
-          cld3->apply(ego->cld3, O, O); /* leftover from cld2 */
-	  cld4 = (plan_rdft *) ego->cld4;
-	  if (cld4)
-	       cld4->apply(ego->cld4, O, O);
+     cld2rest = (plan_rdft *) ego->cld2rest;
+     if (cld2rest) {
+	  R *Orest = O + ego->rest_offset;
+          cld2rest->apply(ego->cld2rest, Orest, Orest);
+	  cld3 = (plan_rdft *) ego->cld3;
+	  if (cld3)
+	       cld3->apply(ego->cld3, O, O);
 	  /* else SCRAMBLED_OUT is true and user wants O transposed */
      }
 }
@@ -114,8 +116,8 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      P *ego = (P *) ego_;
      X(plan_awake)(ego->cld1, wakefulness);
      X(plan_awake)(ego->cld2, wakefulness);
+     X(plan_awake)(ego->cld2rest, wakefulness);
      X(plan_awake)(ego->cld3, wakefulness);
-     X(plan_awake)(ego->cld4, wakefulness);
 }
 
 static void destroy(plan *ego_)
@@ -124,8 +126,8 @@ static void destroy(plan *ego_)
      X(ifree0)(ego->sched);
      X(ifree0)(ego->send_block_sizes);
      MPI_Comm_free(&ego->comm);
-     X(plan_destroy_internal)(ego->cld4);
      X(plan_destroy_internal)(ego->cld3);
+     X(plan_destroy_internal)(ego->cld2rest);
      X(plan_destroy_internal)(ego->cld2);
      X(plan_destroy_internal)(ego->cld1);
 }
@@ -136,8 +138,8 @@ static void print(const plan *ego_, printer *p)
      p->print(p, "(mpi_transpose-inplace");
      if (ego->cld1) p->print(p, "%(%p%)", ego->cld1);
      if (ego->cld2) p->print(p, "%(%p%)", ego->cld2);
+     if (ego->cld2rest) p->print(p, "%(%p%)", ego->cld2rest);
      if (ego->cld3) p->print(p, "%(%p%)", ego->cld3);
-     if (ego->cld4) p->print(p, "%(%p%)", ego->cld4);
      p->print(p, ")");
 }
 
@@ -235,8 +237,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_mpi_transpose *p;
      P *pln;
-     plan *cld1 = 0, *cld2 = 0, *cld3 = 0, *cld4 = 0;
-     INT b, bt, nxb, vn;
+     plan *cld1 = 0, *cld2 = 0, *cld2rest = 0, *cld3 = 0;
+     INT b, bt, nxb, vn, rest_offset;
      INT *sbs, *sbo, *rbs, *rbo;
      int pe, my_pe, n_pes, sort_pe = -1, ascending = 1;
      static const plan_adt padt = {
@@ -265,7 +267,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      b = p->block;
      bt = X(current_block)(p->ny, p->tblock, p->comm);
-     nxb = p->nx / p->block;
+     nxb = p->nx / b;
      if (p->nx == nxb * p->block) { /* divisible => ordinary transpose */
 	  if (!(p->flags & SCRAMBLED_OUT)) {
 	       b *= vn;
@@ -289,6 +291,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  if (!cld2) goto nada;
      }
      else {
+	  ptrdiff_t nxr = p->nx - nxb * b;
 	  cld2 = X(mkplan_d)(plnr,
 			     X(mkproblem_rdft_0_d)(
 				  mktensor_4d
@@ -298,24 +301,24 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				   vn, 1, 1),
 				  p->O, p->O));
 	  if (!cld2) goto nada;
-	  nxb = p->nx - nxb * p->block;
-	  cld3 = X(mkplan_d)(plnr,
+	  rest_offset = nxb * b * bt * vn;
+	  cld2rest = X(mkplan_d)(plnr,
 			     X(mkproblem_rdft_0_d)(
 				  X(mktensor_3d)
-				  (bt, nxb * vn, vn,
-				   nxb, vn, bt * vn,
+				  (bt, nxr * vn, vn,
+				   nxr, vn, bt * vn,
 				   vn, 1, 1),
-				  p->O, p->O));
-	  if (!cld3) goto nada;
+				  p->O + rest_offset, p->O + rest_offset));
+	  if (!cld2rest) goto nada;
 	  if (!(p->flags & SCRAMBLED_OUT)) {
-	       cld4 = X(mkplan_d)(plnr,
+	       cld3 = X(mkplan_d)(plnr,
 				  X(mkproblem_rdft_0_d)(
 				       X(mktensor_3d)
 				       (p->nx, bt * vn, vn,
 					bt, vn, p->nx * vn,
 					vn, 1, 1),
 				       p->O, p->O));
-	       if (!cld4) goto nada;
+	       if (!cld3) goto nada;
 	  }
      }
 
@@ -323,8 +326,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      pln->cld1 = cld1;
      pln->cld2 = cld2;
+     pln->cld2rest = cld2rest;
+     pln->rest_offset = rest_offset;
      pln->cld3 = cld3;
-     pln->cld4 = cld4;
 
      MPI_Comm_dup(p->comm, &pln->comm);
 
@@ -380,8 +384,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      return &(pln->super.super);
 
  nada:
-     X(plan_destroy_internal)(cld4);
      X(plan_destroy_internal)(cld3);
+     X(plan_destroy_internal)(cld2rest);
      X(plan_destroy_internal)(cld2);
      X(plan_destroy_internal)(cld1);
      return (plan *) 0;
