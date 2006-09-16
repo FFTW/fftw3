@@ -387,7 +387,7 @@ static double racmp(R *a, R *b, int n, const char *test, double tol)
 			       (double) a[i],
 			       (double) b[i]);
 	  }
-	  exit(EXIT_FAILURE);
+	  bench_exit(EXIT_FAILURE);
      }
      return d;
 }

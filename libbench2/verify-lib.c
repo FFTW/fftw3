@@ -239,7 +239,7 @@ double acmp(C *a, C *b, int n, const char *test, double tol)
 			       (double) c_re(b[i]), (double) c_im(b[i]));
 	  }
 
-	  exit(EXIT_FAILURE);
+	  bench_exit(EXIT_FAILURE);
      }
      return d;
 }

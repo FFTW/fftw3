@@ -173,6 +173,7 @@ extern void after_problem_hccopy_from(bench_problem *p, bench_real *ri, bench_re
 extern void after_problem_hccopy_to(bench_problem *p, bench_real *ro, bench_real *io);
 extern void after_problem_rcopy_from(bench_problem *p, bench_real *ri);
 extern void after_problem_rcopy_to(bench_problem *p, bench_real *ro);
+extern void bench_exit(int status);
 
 /**************************************************************
  * malloc
