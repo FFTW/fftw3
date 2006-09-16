@@ -41,7 +41,7 @@ dnl macros posted by Alejandro Forero Cuervo to the autoconf macro
 dnl repository.  We are also grateful for the helpful feedback of
 dnl numerous users.
 dnl
-dnl @version 2006-05-29
+dnl @version 2006-09-15
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
@@ -84,7 +84,7 @@ fi
 # which indicates that we try without any flags at all, and "pthread-config"
 # which is a program returning the flags for the Pth emulation library.
 
-acx_pthread_flags="pthreads none -Kthread -kthread lthread -pthread -pthreads -mthreads pthread --thread-safe -mt pthread-config"
+acx_pthread_flags="pthreads none -Kthread -kthread lthread -pthread -pthreads -mt -mthreads pthread --thread-safe pthread-config"
 
 # The ordering *is* (sometimes) important.  Some notes on the
 # individual items follow:
@@ -102,6 +102,7 @@ acx_pthread_flags="pthreads none -Kthread -kthread lthread -pthread -pthreads -m
 #      doesn't hurt to check since this sometimes defines pthreads too;
 #      also defines -D_REENTRANT)
 #      ... -mt is also the pthreads flag for HP/aCC
+#           (where it should come before -mthreads to avoid spurious warnings)
 # pthread: Linux, etcetera
 # --thread-safe: KAI C++
 # pthread-config: use pthread-config program (for GNU Pth library)
