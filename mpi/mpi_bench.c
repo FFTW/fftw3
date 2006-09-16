@@ -42,7 +42,7 @@ BENCH_DOCF("codelet-optim", mkcodelet_optim)
 BENCH_DOCF("nproc", mknproc)
 END_BENCH_DOC 
 
-static ptrdiff_t local_nx, local_x_start, ny, local_ny, local_y_start, nx, xblock, yblock;
+static ptrdiff_t local_nx, local_x_start, ny, local_ny, local_y_start, nx, vn, xblock, yblock;
 bench_real *local_in = 0, *local_out = 0;
 
 int n_pes = 1, my_pe = 0;
@@ -65,11 +65,11 @@ static void alloc_local(ptrdiff_t nreal, int inplace)
 
 void after_problem_rcopy_from(bench_problem *p, bench_real *ri)
 {
-     ptrdiff_t i, j;
+     ptrdiff_t i, j, nyv = ny * vn;
      UNUSED(p);
      for (i = 0; i < local_nx; ++i)
-	  for (j = 0; j < ny; ++j)
-	       local_in[i*ny + j] = ri[(i+local_x_start)*ny + j];
+	  for (j = 0; j < nyv; ++j)
+	       local_in[i*nyv + j] = ri[(i+local_x_start)*nyv + j];
 }
 
 static void collect_data(ptrdiff_t block, ptrdiff_t n, ptrdiff_t vn,
@@ -95,7 +95,7 @@ static void collect_data(ptrdiff_t block, ptrdiff_t n, ptrdiff_t vn,
 void after_problem_rcopy_to(bench_problem *p, bench_real *ro)
 {
      UNUSED(p);
-     collect_data(yblock, ny, nx, ro);
+     collect_data(yblock, ny, nx * vn, ro);
 }
 
 static FFTW(plan) mkplan_complex(bench_problem *p, int flags)
@@ -111,8 +111,9 @@ static FFTW(plan) mkplan_real(bench_problem *p, int flags)
 static FFTW(plan) mkplan_transpose(bench_problem *p, int flags)
 {
      ptrdiff_t ntot;
-     int vn, ix, iy, i;
+     int ix, iy, i;
      const bench_iodim *d = p->vecsz->dims;
+     FFTW(plan) pln;
 
      if (p->vecsz->rnk == 3) {
 	  for (i = 0; i < 3; ++i)
@@ -153,14 +154,34 @@ static FFTW(plan) mkplan_transpose(bench_problem *p, int flags)
      yblock = (ny + n_pes - 1) / n_pes;
      alloc_local(ntot, p->in == p->out);
 
-     return FFTW(mpi_plan_many_transpose)(nx, ny, vn,
-					  FFTW_MPI_DEFAULT_BLOCK,
-					  FFTW_MPI_DEFAULT_BLOCK,
-					  local_in, local_out,
-					  MPI_COMM_WORLD, flags);
+     pln = FFTW(mpi_plan_many_transpose)(nx, ny, vn,
+					 FFTW_MPI_DEFAULT_BLOCK,
+					 FFTW_MPI_DEFAULT_BLOCK,
+					 local_in, local_out,
+					 MPI_COMM_WORLD, flags);
+     
+#if 0
+     if (pln && vn == 1) {
+	  int i, j;
+	  bench_real *ri = (bench_real *) p->in;
+	  bench_real *ro = (bench_real *) p->out;
+	  if (!ri || !ro) return pln;
+	  for (i = 0; i < nx * ny; ++i)
+	       ri[i] = i;
+	  after_problem_rcopy_from(p, ri);
+	  FFTW(execute)(pln);
+	  after_problem_rcopy_to(p, ro);
+	  if (my_pe == 0) {
+	       for (i = 0; i < nx; ++i) {
+		    for (j = 0; j < ny; ++j)
+			 printf("  %3g", ro[j * nx + i]);
+		    printf("\n");
+	       }
+	  }
+     }
+#endif
 
-     nx *= vn;
-     ny *= vn;
+     return pln;
 }
 
 static FFTW(plan) mkplan_r2r(bench_problem *p, int flags)
