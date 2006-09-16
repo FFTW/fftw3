@@ -331,6 +331,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      MPI_Comm_rank(p->comm, &my_pe);
      MPI_Comm_size(p->comm, &n_pes);
 
+     n_pes = (int) X(imax)((p->nx + p->block - 1) / p->block, 
+			   (p->ny + p->tblock - 1) / p->tblock);
+
      /* Compute sizes/offsets of blocks to exchange between processors */
      sbs = (INT *) MALLOC(4 * n_pes * sizeof(INT), PLANS);
      sbo = sbs + n_pes;
@@ -348,9 +351,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  rbs[pe] = db * bt * vn;
 	  rbo[pe] = pe * (p->block * bt) * vn;
 
-	  if (sbs[pe] == 0 && rbs[pe] == 0)
-	       n_pes = pe; /* no need to deal with this or later pe's */
-	  else if (db * dbt > 0 && db * p->tblock != p->block * dbt) {
+	  if (db * dbt > 0 && db * p->tblock != p->block * dbt) {
 	       A(sort_pe == -1); /* only one process should need sorting */
 	       sort_pe = pe;
 	       ascending = db * p->tblock > p->block * dbt;
