@@ -32,6 +32,7 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "nosimd")) the_flags |= FFTW_NO_SIMD;
      else if (!strcmp(arg, "noindirectop")) the_flags |= FFTW_NO_INDIRECT_OP;
      else if (sscanf(arg, "flag=%d", &x) == 1) the_flags |= x;
+     else if (sscanf(arg, "bflag=%d", &x) == 1) the_flags |= 1U << x;
      else if (!strcmp(arg, "paranoid")) paranoid = 1;
      else if (!strcmp(arg, "wisdom")) usewisdom = 1;
      else if (!strcmp(arg, "amnesia")) amnesia = 1;
