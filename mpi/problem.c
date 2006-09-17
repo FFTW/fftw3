@@ -109,8 +109,9 @@ problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
      if (UNTAINT(I) == UNTAINT(O))
 	  I = O = JOIN_TAINT(I, O);
 
-     /* note that we *don't* compress the rank by removing n=1 dimensions,
-	because the output format depends on the dimensionality */
+     /* Note that we *don't* compress the rank by removing n=1 dimensions,
+	because the output format depends on the dimensionality.  Rank
+        compression will occur where it matters, in the serial FFTW. */
 
      ego->rnk = rnk;
      ego->n = (INT *) MALLOC(rnk * sizeof(INT), TENSORS);

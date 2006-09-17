@@ -392,6 +392,10 @@ tensor *X(mktensor_2d)(INT n0, INT is0, INT os0,
 tensor *X(mktensor_3d)(INT n0, INT is0, INT os0,
 		       INT n1, INT is1, INT os1,
 		       INT n2, INT is2, INT os2);
+tensor *X(mktensor_4d)(INT n0, INT is0, INT os0,
+		       INT n1, INT is1, INT os1,
+		       INT n2, INT is2, INT os2,
+		       INT n3, INT is3, INT os3);
 INT X(tensor_sz)(const tensor *sz);
 void X(tensor_md5)(md5 *p, const tensor *t);
 INT X(tensor_max_index)(const tensor *sz);

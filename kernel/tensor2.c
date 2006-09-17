@@ -53,3 +53,23 @@ tensor *X(mktensor_3d)(INT n0, INT is0, INT os0,
      return x;
 }
 
+tensor *X(mktensor_4d)(INT n0, INT is0, INT os0,
+		       INT n1, INT is1, INT os1,
+		       INT n2, INT is2, INT os2,
+		       INT n3, INT is3, INT os3)
+{
+     tensor *x = X(mktensor)(4);
+     x->dims[0].n = n0;
+     x->dims[0].is = is0;
+     x->dims[0].os = os0;
+     x->dims[1].n = n1;
+     x->dims[1].is = is1;
+     x->dims[1].os = os1;
+     x->dims[2].n = n2;
+     x->dims[2].is = is2;
+     x->dims[2].os = os2;
+     x->dims[3].n = n3;
+     x->dims[3].is = is3;
+     x->dims[3].os = os3;
+     return x;
+}

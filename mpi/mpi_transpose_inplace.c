@@ -215,27 +215,6 @@ static void sort1_comm_sched(int *sched, int npes, int sortpe, int ascending)
      X(ifree)(sortsched);
 }
 
-static tensor *mktensor_4d(INT n0, INT is0, INT os0,
-			   INT n1, INT is1, INT os1,
-			   INT n2, INT is2, INT os2,
-			   INT n3, INT is3, INT os3)
-{
-     tensor *x = X(mktensor)(4);
-     x->dims[0].n = n0;
-     x->dims[0].is = is0;
-     x->dims[0].os = os0;
-     x->dims[1].n = n1;
-     x->dims[1].is = is1;
-     x->dims[1].os = os1;
-     x->dims[2].n = n2;
-     x->dims[2].is = is2;
-     x->dims[2].os = os2;
-     x->dims[3].n = n3;
-     x->dims[3].is = is3;
-     x->dims[3].os = os3;
-     return x;
-}
-
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
      const problem_mpi_transpose *p;
@@ -284,7 +263,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  else {
 	       cld2 = X(mkplan_d)(plnr, 
 				  X(mkproblem_rdft_0_d)(
-				       mktensor_4d
+				       X(mktensor_4d)
 				       (nxb, bt * b * vn, bt * b * vn,
 					bt, b * vn, vn,
 					b, vn, bt * vn,
@@ -297,7 +276,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  INT nxr = p->nx - nxb * b;
 	  cld2 = X(mkplan_d)(plnr,
 			     X(mkproblem_rdft_0_d)(
-				  mktensor_4d
+				  X(mktensor_4d)
 				  (nxb, bt * b * vn, bt * b * vn,
 				   bt, b * vn, vn,
 				   b, vn, bt * vn,

@@ -45,7 +45,7 @@ problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
 void X(mpi_dft_solve)(const plan *ego_, const problem *p_);
 
 /* plans have same operands as rdft plans, so just re-use */
-typedef plan_rdft plan_mpi_transpose;
+typedef plan_rdft plan_mpi_dft;
 #define MKPLAN_MPI_DFT(type, adt, apply) \
   (type *)X(mkplan_rdft)(sizeof(type), adt, apply)
 

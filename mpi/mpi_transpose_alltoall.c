@@ -71,7 +71,6 @@ static int applicable(const solver *ego_, const problem *p_,
      UNUSED(ego_);
      return (1
 	     && p->I != p->O
-	     && !(p->flags & SCRAMBLED_OUT) /* not useful to support here? */
 	     && !NO_DESTROY_INPUTP(plnr)
 	     && !X(is_block_cyclic)(p->nx, p->block, p->comm)
 	     && !X(is_block_cyclic)(p->ny, p->tblock, p->comm)
@@ -111,7 +110,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      const problem_mpi_transpose *p;
      P *pln;
      plan *cld1 = 0, *cld2 = 0, *cld2rest = 0;
-     INT b, bt, nx, nxb, vn, Ioff = 0, Ooff = 0;
+     INT b, bt, nxb, vn, Ioff = 0, Ooff = 0;
      int *sbs, *sbo, *rbs, *rbo;
      int pe, my_pe, n_pes;
      static const plan_adt padt = {
@@ -138,31 +137,57 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  if (!cld1) goto nada;
      }
 
-     b = p->block * vn;
-     nx = p->nx * vn;
      bt = X(current_block)(p->ny, p->tblock, p->comm);
      nxb = (p->nx + p->block - 1) / p->block;
      if (p->nx != nxb * p->block)
 	  nxb -= 1; /* number of equal-sized blocks */
-     cld2 = X(mkplan_d)(plnr, 
-			X(mkproblem_rdft_0_d)(X(mktensor_3d)
-					      (nxb, bt * b, b,
-					       bt, b, nx,
-					       b, 1, 1),
-					      p->I, p->O));
-     if (!cld2) goto nada;
-
-     if (p->nx != nxb * p->block) { /* some leftover blocks to transpose */
-	  Ioff = bt * b * nxb;
-	  Ooff = b * nxb;
-	  b = nx - nxb * b;
-	  cld2rest = X(mkplan_d)(plnr,
-				 X(mkproblem_rdft_0_d)(X(mktensor_2d)
-						       (bt, b, nx,
-							b, 1, 1),
-						       p->I + Ioff,
-						       p->O + Ooff));
-	  if (!cld2rest) goto nada;
+     if (!(p->flags & SCRAMBLED_OUT)) {
+	  INT nx = p->nx * vn;
+	  b = p->block * vn;
+	  cld2 = X(mkplan_d)(plnr, 
+			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
+						   (nxb, bt * b, b,
+						    bt, b, nx,
+						    b, 1, 1),
+						   p->I, p->O));
+	  if (!cld2) goto nada;
+	  
+	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
+	       Ioff = bt * b * nxb;
+	       Ooff = b * nxb;
+	       b = nx - nxb * b;
+	       cld2rest = X(mkplan_d)(plnr,
+				      X(mkproblem_rdft_0_d)(X(mktensor_2d)
+							    (bt, b, nx,
+							     b, 1, 1),
+							    p->I + Ioff,
+							    p->O + Ooff));
+	       if (!cld2rest) goto nada;
+	  }
+     }
+     else { /* SCRAMBLED_OUT */
+	  b = p->block;
+	  cld2 = X(mkplan_d)(plnr, 
+			     X(mkproblem_rdft_0_d)(X(mktensor_4d)
+						   (nxb, bt * b*vn, bt * b*vn,
+						    bt, b*vn, vn,
+						    b, vn, bt*vn,
+						    vn, 1, 1),
+						   p->I, p->O));
+	  if (!cld2) goto nada;
+	  
+	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
+	       Ioff = Ooff = bt * b * nxb * vn;
+	       b = p->nx - nxb * b;
+	       cld2rest = X(mkplan_d)(plnr,
+				      X(mkproblem_rdft_0_d)(X(mktensor_3d)
+							    (bt, b*vn, vn,
+							     b, vn, bt*vn,
+							     vn, 1, 1),
+							    p->I + Ioff,
+							    p->O + Ooff));
+	       if (!cld2rest) goto nada;
+	  }
      }
 
      pln = MKPLAN_MPI_TRANSPOSE(P, &padt, apply);

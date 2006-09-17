@@ -27,10 +27,25 @@
 
 #include <mpi.h>
 
-/* mpi problem flags */
+/* mpi problem flags:
+
+   meaning for rnk > 1:
+      TRANSPOSED: output is globally transposed 
+      SCRAMBLED_IN: input is *locally* transposed and stored in
+                    the *output* array (somewhat ugly, but this allows
+                    us to use the input array as scratch space if
+                    DESTROY_INPUT; otherwise we have no way to denote this)
+      SCRAMBLED_OUT: output is *locally* transposed.
+
+   meaning for rnk == 1:
+      TRANSPOSED: not applicable
+      SCRAMBLED_IN/SCRAMBLED_OUT: to be determined (some mixture of
+                                  global and local transpositions)
+*/
 #define TRANSPOSED (1 << 0) /* only for rank >= 2 */
 #define SCRAMBLED_IN (1 << 1) /* only for rank 1 */
 #define SCRAMBLED_OUT (1 << 2) /* only for rank 1 */
+
 
 #if defined(FFTW_SINGLE)
 #  define FFTW_MPI_TYPE MPI_FLOAT
