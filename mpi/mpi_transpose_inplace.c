@@ -32,7 +32,7 @@ typedef struct {
      plan_mpi_transpose super;
 
      plan *cld1, *cld2, *cld2rest, *cld3;
-     ptrdiff_t rest_offset;
+     INT rest_offset;
      
      int n_pes, my_pe, *sched;
      INT *send_block_sizes, *send_block_offsets;
@@ -291,7 +291,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  if (!cld2) goto nada;
      }
      else {
-	  ptrdiff_t nxr = p->nx - nxb * b;
+	  INT nxr = p->nx - nxb * b;
 	  cld2 = X(mkplan_d)(plnr,
 			     X(mkproblem_rdft_0_d)(
 				  mktensor_4d

@@ -148,7 +148,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      b = p->block * vn;
      bt = X(current_block)(p->ny, p->tblock, p->comm);
-     nxb = p->nx / p->block;
+     nxb = (p->nx + p->block - 1) / p->block;
      if (p->nx == nxb * p->block) { /* divisible => ordinary transpose */
 	  cld2 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
@@ -163,7 +163,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      pln->cld1 = cld1;
      pln->cld2 = cld2;
-     pln->nx = p->nx;
+     pln->nx = p->nx * vn;
      pln->nxb1 = nxb - 1;
      pln->b = b;
      pln->bt = bt;
