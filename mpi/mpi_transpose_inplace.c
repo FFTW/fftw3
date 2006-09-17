@@ -378,8 +378,17 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	       sort1_comm_sched(pln->sched, n_pes, sort_pe, ascending);
      }
 
-     /* FIXME: OPS */
      X(ops_zero)(&pln->super.super.ops);
+     X(ops_zero)(&pln->super.super.ops);
+     if (cld1)
+	  X(ops_add)(&pln->super.super.ops, &cld1->ops, &pln->super.super.ops);
+     if (cld2)
+	  X(ops_add)(&pln->super.super.ops, &cld2->ops, &pln->super.super.ops);
+     if (cld2rest)
+	  X(ops_add)(&pln->super.super.ops, &cld2rest->ops, &pln->super.super.ops);
+     if (cld3)
+	  X(ops_add)(&pln->super.super.ops, &cld3->ops, &pln->super.super.ops);
+     /* FIXME: should MPI operations be counted in "other" somehow? */
 
      return &(pln->super.super);
 
