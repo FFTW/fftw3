@@ -101,7 +101,6 @@ problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
      A(vn > 0);
      A(block > 0 && block <= n[0]);
      A(!(TRANSPOSED & flags) || rnk >= 2);
-     A(!(flags & (SCRAMBLED_IN | SCRAMBLED_OUT)) || rnk == 1);
      use_tblock = (TRANSPOSED & flags) && rnk >= 2;
      A((use_tblock && tblock > 0 && tblock <= n[1]) 
        || (!use_tblock && block == tblock));

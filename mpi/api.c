@@ -92,7 +92,7 @@ X(plan) X(mpi_plan_many_transpose)(ptrdiff_t nx, ptrdiff_t ny,
      init();
 
      if (howmany < 0 || xblock < 0 || yblock < 0 ||
-	 nx <= 0 || ny <= 0) return 0;
+	 nx <= 0 || ny <= 0 || flags & FFTW_MPI_TRANSPOSED) return 0;
 
      if (!xblock) xblock = X(default_block)(nx, comm);
      if (!yblock) yblock = X(default_block)(ny, comm);

@@ -44,21 +44,22 @@ END_BENCH_DOC
 
 static ptrdiff_t local_nx, local_x_start, ny, local_ny, local_y_start, nx, vn, xblock, yblock;
 bench_real *local_in = 0, *local_out = 0;
+FFTW(plan) plan_scramble_in = 0, plan_scramble_out = 0;
 
 int n_pes = 1, my_pe = 0;
 int *recv_cnt = 0, *recv_off; /* for MPI_Gatherv */
 
 static void alloc_local(ptrdiff_t nreal, int inplace)
 {
-     fftw_free(local_in);
-     if (local_out != local_in) fftw_free(local_out);
+     FFTW(free)(local_in);
+     if (local_out != local_in) FFTW(free)(local_out);
      if (nreal > 0) {
 	  ptrdiff_t i;
-	  local_in = (bench_real*) fftw_malloc(nreal * sizeof(bench_real));
+	  local_in = (bench_real*) FFTW(malloc)(nreal * sizeof(bench_real));
 	  if (inplace)
 	       local_out = local_in;
 	  else
-	       local_out = (bench_real*) fftw_malloc(nreal * sizeof(bench_real));
+	       local_out = (bench_real*) FFTW(malloc)(nreal * sizeof(bench_real));
 	  for (i = 0; i < nreal; ++i) local_in[i] = 0.0;
      }
 }
@@ -70,6 +71,7 @@ void after_problem_rcopy_from(bench_problem *p, bench_real *ri)
      for (i = 0; i < local_nx; ++i)
 	  for (j = 0; j < nyv; ++j)
 	       local_in[i*nyv + j] = ri[(i+local_x_start)*nyv + j];
+     if (plan_scramble_in) FFTW(execute)(plan_scramble_in);
 }
 
 static void collect_data(ptrdiff_t block, ptrdiff_t n, ptrdiff_t vn,
@@ -95,7 +97,30 @@ static void collect_data(ptrdiff_t block, ptrdiff_t n, ptrdiff_t vn,
 void after_problem_rcopy_to(bench_problem *p, bench_real *ro)
 {
      UNUSED(p);
+     if (plan_scramble_out) FFTW(execute)(plan_scramble_out);
      collect_data(yblock, ny, nx * vn, ro);
+}
+
+static FFTW(plan) mkplan_transpose_local(int nx, int ny, int vn, 
+					 bench_real *in, bench_real *out)
+{
+     FFTW(iodim) hdims[3];
+     FFTW(r2r_kind) k[3];
+     FFTW(plan) pln;
+
+     hdims[0].n = nx;
+     hdims[0].is = ny * vn;
+     hdims[0].os = vn;
+     hdims[1].n = ny;
+     hdims[1].is = vn;
+     hdims[1].os = nx * vn;
+     hdims[2].n = vn;
+     hdims[2].is = 1;
+     hdims[2].os = 1;
+     k[0] = k[1] = k[2] = FFTW_R2HC;
+     pln = FFTW(plan_guru_r2r)(0, 0, 3, hdims, in, out, k, FFTW_ESTIMATE);
+     BENCH_ASSERT(pln != 0);
+     return pln;
 }
 
 static FFTW(plan) mkplan_complex(bench_problem *p, int flags)
@@ -189,18 +214,37 @@ static FFTW(plan) mkplan_r2r(bench_problem *p, int flags)
      if ((p->sz->rnk == 0 || (p->sz->rnk == 1 && p->sz->dims[0].n == 1))
 	 && p->vecsz->rnk >= 2 && p->vecsz->rnk <= 3)
 	  return mkplan_transpose(p, flags);
-     
+
      return 0;
 }
 
 FFTW(plan) mkplan(bench_problem *p, int flags)
 {
+     FFTW(plan) pln = 0;
+
+     FFTW(destroy_plan)(plan_scramble_in); plan_scramble_in = 0;
+     FFTW(destroy_plan)(plan_scramble_out); plan_scramble_out = 0;
      switch (p->kind) {
-         case PROBLEM_COMPLEX:    return mkplan_complex(p, flags);
-         case PROBLEM_REAL:       return mkplan_real(p, flags);
-         case PROBLEM_R2R:        return mkplan_r2r(p, flags);
-         default: BENCH_ASSERT(0); return 0;
+         case PROBLEM_COMPLEX:
+	      pln = mkplan_complex(p, flags);
+	      break;
+         case PROBLEM_REAL:
+	      pln = mkplan_real(p, flags);
+	      break;
+         case PROBLEM_R2R:
+	      pln = mkplan_r2r(p, flags);
+	      break;
+         default: BENCH_ASSERT(0);
      }
+
+     if (pln && (flags & FFTW_MPI_SCRAMBLED_IN))
+	  plan_scramble_in = mkplan_transpose_local(local_nx, ny, vn,
+						    local_in, local_out);
+     if (pln && (flags & FFTW_MPI_SCRAMBLED_OUT))
+	  plan_scramble_out = mkplan_transpose_local(nx, local_ny, vn,
+						     local_out, local_out);
+     
+     return pln;
 }
 
 void main_init(int *argc, char ***argv)
@@ -209,15 +253,17 @@ void main_init(int *argc, char ***argv)
      MPI_Comm_rank(MPI_COMM_WORLD, &my_pe);
      MPI_Comm_size(MPI_COMM_WORLD, &n_pes);
      if (my_pe != 0) verbose = -999;
-     recv_cnt = (int *) fftw_malloc(sizeof(int) * n_pes);
-     recv_off = (int *) fftw_malloc(sizeof(int) * n_pes);
+     recv_cnt = (int *) FFTW(malloc)(sizeof(int) * n_pes);
+     recv_off = (int *) FFTW(malloc)(sizeof(int) * n_pes);
 }
 
 void final_cleanup(void)
 {
      alloc_local(0, 0);
-     fftw_free(recv_off);
-     fftw_free(recv_cnt);
+     FFTW(free)(recv_off); recv_off = 0;
+     FFTW(free)(recv_cnt); recv_cnt = 0;
+     FFTW(destroy_plan)(plan_scramble_in); plan_scramble_in = 0;
+     FFTW(destroy_plan)(plan_scramble_out); plan_scramble_out = 0;
      MPI_Finalize();
 }
 
