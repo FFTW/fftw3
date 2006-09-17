@@ -118,7 +118,7 @@ static FFTW(plan) mkplan_transpose(bench_problem *p, int flags)
      if (p->vecsz->rnk == 3) {
 	  for (i = 0; i < 3; ++i)
 	       if (d[i].is == 1 && d[i].is == 1) {
-		    vn = d[0].n;
+		    vn = d[i].n;
 		    ix = (i + 1) % 3;
 		    iy = (i + 2) % 3;
 		    break;
