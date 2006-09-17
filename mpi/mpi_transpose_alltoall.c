@@ -73,6 +73,8 @@ static int applicable(const solver *ego_, const problem *p_,
 	     && p->I != p->O
 	     && !(p->flags & SCRAMBLED_OUT) /* not useful to support here? */
 	     && !NO_DESTROY_INPUTP(plnr)
+	     && !X(is_block_cyclic)(p->nx, p->block, p->comm)
+	     && !X(is_block_cyclic)(p->ny, p->tblock, p->comm)
 	  );
 }
 

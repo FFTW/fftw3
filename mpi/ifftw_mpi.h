@@ -41,6 +41,7 @@
 #endif
 
 /* block.c: */
+int X(is_block_cyclic)(INT n, INT block, MPI_Comm comm);
 INT X(default_block)(INT n, MPI_Comm comm);
 INT X(current_block)(INT n, INT block, MPI_Comm comm);
 INT X(some_block)(INT n, INT block, int which_pe, int n_pes);

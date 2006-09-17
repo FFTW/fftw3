@@ -106,9 +106,12 @@ static int applicable(const solver *ego_, const problem *p_,
 {
      const problem_mpi_transpose *p = (const problem_mpi_transpose *) p_;
      UNUSED(ego_);
-     UNUSED(p_);
      UNUSED(plnr);
-     return (1); /* FIXME: ugly if out-of-place and destroy_input? */
+     /* FIXME: ugly if out-of-place and destroy_input? */
+     return (1
+	     && !X(is_block_cyclic)(p->nx, p->block, p->comm)
+	     && !X(is_block_cyclic)(p->ny, p->tblock, p->comm)
+	  );
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)
