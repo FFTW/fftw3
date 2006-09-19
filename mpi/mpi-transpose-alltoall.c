@@ -21,7 +21,7 @@
 /* plans for distributed out-of-place transpose using MPI_Alltoall,
    and which destroy the input array */
 
-#include "mpi_transpose.h"
+#include "mpi-transpose.h"
 #include <string.h>
 
 typedef struct {

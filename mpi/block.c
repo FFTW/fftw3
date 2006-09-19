@@ -18,7 +18,7 @@
  *
  */
 
-#include "ifftw_mpi.h"
+#include "ifftw-mpi.h"
 
 /* If the block size is small enough that n/block > n_pes, then
    we will interpret it as a block-cyclic distribution.  However,

@@ -21,7 +21,7 @@
 /* "MPI" DFTs where all of the data is on one processor...just
    call through to serial API. */
 
-#include "mpi_dft.h"
+#include "mpi-dft.h"
 #include "dft.h"
 
 /* from api/extract-reim.c */

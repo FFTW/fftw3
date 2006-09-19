@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "fftw_bench.h"
+#include "fftw-bench.h"
 
 FFTW(plan) the_plan = 0;
 

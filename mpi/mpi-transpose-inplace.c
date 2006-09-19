@@ -25,7 +25,7 @@
    processors (i.e. to total array size divided by the number of
    processors squared). */
 
-#include "mpi_transpose.h"
+#include "mpi-transpose.h"
 #include <string.h>
 
 typedef struct {

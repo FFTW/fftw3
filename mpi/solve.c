@@ -18,7 +18,7 @@
  *
  */
 
-#include "mpi_dft.h"
+#include "mpi-dft.h"
 
 /* use the apply() operation for MPI_DFT problems */
 void X(mpi_dft_solve)(const plan *ego_, const problem *p_)

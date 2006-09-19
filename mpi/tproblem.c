@@ -18,7 +18,7 @@
  *
  */
 
-#include "mpi_transpose.h"
+#include "mpi-transpose.h"
 
 static void destroy(problem *ego_)
 {

@@ -18,7 +18,7 @@
  *
  */
 
-#include "mpi_dft.h"
+#include "mpi-dft.h"
 
 static void destroy(problem *ego_)
 {

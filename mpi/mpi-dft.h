@@ -18,37 +18,37 @@
  *
  */
 
-#include "ifftw_mpi.h"
+#include "ifftw-mpi.h"
 
-/* tproblem.c: */
+/* problem.c: */
 typedef struct {
      problem super;
      INT vn; /* vector length (vector stride 1) */
-     INT nx, ny; /* nx x ny transposed to ny x nx */
-     R *I, *O; /* contiguous real arrays (both same size!) */
+     int rnk; INT *n; /* only contiguous row-major, rnk>0 is supported */
+     R *I, *O; /* contiguous interleaved arrays */
 
-     int flags;
+     int sign, flags;
 
      INT block, tblock; /* block size, slab decomposition;
-			   tblock is for transposed blocks on output */
+			   tblock is for any transposed blocks on output */
 
      MPI_Comm comm;
-} problem_mpi_transpose;
+} problem_mpi_dft;
 
-problem *X(mkproblem_mpi_transpose)(INT vn, INT nx, INT ny,
-				    R *I, R *O,
-				    INT block, INT tblock,
-				    MPI_Comm comm,
-				    int flags);
+problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
+			      R *I, R *O,
+			      INT block, INT tblock,
+			      MPI_Comm comm,
+			      int sign, int flags);
 
-/* tsolve.c: */
-void X(mpi_transpose_solve)(const plan *ego_, const problem *p_);
+/* solve.c: */
+void X(mpi_dft_solve)(const plan *ego_, const problem *p_);
 
 /* plans have same operands as rdft plans, so just re-use */
-typedef plan_rdft plan_mpi_transpose;
-#define MKPLAN_MPI_TRANSPOSE(type, adt, apply) \
+typedef plan_rdft plan_mpi_dft;
+#define MKPLAN_MPI_DFT(type, adt, apply) \
   (type *)X(mkplan_rdft)(sizeof(type), adt, apply)
 
 /* various solvers */
-void X(mpi_transpose_inplace_register)(planner *p);
-void X(mpi_transpose_alltoall_register)(planner *p);
+void X(mpi_dft_rank_geq2_register)(planner *p);
+void X(mpi_dft_serial_register)(planner *p);

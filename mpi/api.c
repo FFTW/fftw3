@@ -19,10 +19,10 @@
  */
 
 #include "api.h"
-#include "fftw3_mpi.h"
-#include "ifftw_mpi.h"
-#include "mpi_transpose.h"
-#include "mpi_dft.h"
+#include "fftw3-mpi.h"
+#include "ifftw-mpi.h"
+#include "mpi-transpose.h"
+#include "mpi-dft.h"
 
 #define MPI_FLAGS(f) ((f) >> 27)
 

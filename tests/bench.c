@@ -4,14 +4,14 @@
    lot of added complexity in order to exercise and test the full API,
    etcetera.  We suggest reading the manual. 
 
-   (Some of the self-test code is split off into fftw_bench_common.c and
+   (Some of the self-test code is split off into fftw-bench.c and
    hook.c.) */
 /**************************************************************************/
 
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "fftw_bench.h"
+#include "fftw-bench.h"
 
 static const char *mkversion(void) { return FFTW(version); }
 static const char *mkcc(void) { return FFTW(cc); }

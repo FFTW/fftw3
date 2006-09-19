@@ -20,8 +20,8 @@
 
 /* Complex DFTs of rank >= 2 */
 
-#include "mpi_dft.h"
-#include "mpi_transpose.h"
+#include "mpi-dft.h"
+#include "mpi-transpose.h"
 #include "dft.h"
 
 /* from api/extract-reim.c */

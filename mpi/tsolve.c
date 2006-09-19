@@ -18,7 +18,7 @@
  *
  */
 
-#include "mpi_transpose.h"
+#include "mpi-transpose.h"
 
 /* use the apply() operation for MPI_TRANSPOSE problems */
 void X(mpi_transpose_solve)(const plan *ego_, const problem *p_)

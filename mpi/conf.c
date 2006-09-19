@@ -20,8 +20,8 @@
 
 /* $Id: conf.c,v 1.3 2006-01-05 03:04:28 stevenj Exp $ */
 
-#include "mpi_transpose.h"
-#include "mpi_dft.h"
+#include "mpi-transpose.h"
+#include "mpi-dft.h"
 
 static const solvtab s =
 {
