@@ -146,7 +146,6 @@ static int applicable(const solver *ego_, const problem *p_,
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
-     const S *ego = (const S *) ego_;
      P *pln;
      plan *cld = 0, *cldtrans = 0, *cldrest = 0;
      int pdim0, pdim1;

@@ -71,8 +71,6 @@ static bench_tensor *dwim(bench_tensor *t, bench_iodim **last_iodim,
 
 static void transpose_tensor(bench_tensor *t)
 {
-     int i;
-
      if (!FINITE_RNK(t->rnk) || t->rnk < 2)
           return;
 
