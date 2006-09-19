@@ -5,15 +5,15 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 if MPI
 lib_LTLIBRARIES = libfftw3@PREC_SUFFIX@_mpi.la
 include_HEADERS = fftw3-mpi.h
-noinst_PROGRAMS = mpi_bench
+noinst_PROGRAMS = mpi-bench
 endif
 
 CC=@MPICC@
 
 EXTRADIST = testsched.c
 
-TRANSPOSE_SRC = mpi-transpose-alltoall.c mpi-transpose-inplace.c tproblem.c tsolve.c mpi-transpose.h
-DFT_SRC = mpi-dft-serial.c mpi-dft-rank-geq2.c problem.c solve.c mpi-dft.h
+TRANSPOSE_SRC = transpose-alltoall.c transpose-inplace.c transpose-problem.c transpose-solve.c mpi-transpose.h
+DFT_SRC = dft-serial.c dft-rank-geq2.c dft-problem.c dft-solve.c mpi-dft.h
 
 libfftw3@PREC_SUFFIX@_mpi_la_SOURCES = api.c block.c conf.c fftw3-mpi.h ifftw-mpi.h $(TRANSPOSE_SRC) $(DFT_SRC)
 
