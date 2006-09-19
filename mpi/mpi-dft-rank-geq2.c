@@ -109,7 +109,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      const problem_mpi_dft *p;
      P *pln;
      plan *cld1 = 0, *cld2 = 0, *cldt1 = 0, *cldt2 = 0;
-     R *ri, *ii, *ro, *io;
+     R *ri, *ii, *ro, *io, *I, *O;
      tensor *sz;
      int i;
      INT b, nl;
@@ -125,8 +125,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      p = (const problem_mpi_dft *) p_;
 
-     X(extract_reim)(p->sign, p->I, &ri, &ii);
-     X(extract_reim)(p->sign, p->O, &ro, &io);
+     X(extract_reim)(p->sign, I = p->I, &ri, &ii);
+     X(extract_reim)(p->sign, O = p->O, &ro, &io);
 
      sz = X(mktensor)(p->rnk - 1); /* tensor of last rnk-1 dimensions */
      i = p->rnk - 2; A(i >= 0);
@@ -160,14 +160,14 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      }
      if (!cld1) goto nada;
 
-     if (NO_DESTROY_INPUTP(plnr)) { ri = ro; ii = io; }
+     if (NO_DESTROY_INPUTP(plnr)) { ri = ro; ii = io; I = O; }
 
      tflags = (p->flags & ~TRANSPOSED) | SCRAMBLED_IN;
      if (!(p->flags & TRANSPOSED))
 	  tflags = tflags | SCRAMBLED_OUT;
      cldt1 = X(mkplan_d)(plnr,
 			 X(mkproblem_mpi_transpose)(nl*2, p->n[0],p->n[1],
-						    ro, ri,
+						    O, I,
 						    p->block, p->tblock,
 						    p->comm,
 						    tflags));
@@ -184,7 +184,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						X(mktensor_1d)(b * nl, 2, 2),
 						ri, ii, sro, sio));
      }
-     else { /* !TRANSPOSED and !SCRAMBLED_OUT */
+     else { /* !SCRAMBLED_OUT (implies TRANSPOSED) */
 	  INT s = p->n[0] * nl * 2; /* we have b x n[0] x nl complex array */
 	  cld2 = X(mkplan_d)(plnr,
 			     X(mkproblem_dft_d)(X(mktensor_1d)(p->n[0], 
@@ -199,7 +199,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  tflags = p->flags | SCRAMBLED_IN;
 	  cldt2 = X(mkplan_d)(plnr,
 			      X(mkproblem_mpi_transpose)(nl*2, p->n[1],p->n[0],
-							 ri, ro,
+							 I, O,
 							 p->tblock, p->block,
 							 p->comm,
 							 tflags));
