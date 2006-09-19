@@ -34,6 +34,8 @@ typedef struct {
      int *recv_block_sizes, *recv_block_offsets;
 
      INT rest_Ioff, rest_Ooff;
+
+     int equal_blocks;
 } P;
 
 static void apply(const plan *ego_, R *I, R *O)
@@ -46,12 +48,17 @@ static void apply(const plan *ego_, R *I, R *O)
      cld1->apply(ego->cld1, I, O);
 
      /* transpose chunks globally */
-     MPI_Alltoallv(O, ego->send_block_sizes, ego->send_block_offsets,
-		   FFTW_MPI_TYPE,
-		   I, ego->recv_block_sizes, ego->recv_block_offsets,
-		   FFTW_MPI_TYPE,
-		   ego->comm);
-
+     if (ego->equal_blocks)
+	  MPI_Alltoall(O, ego->send_block_sizes[0], FFTW_MPI_TYPE,
+		       I, ego->recv_block_sizes[0], FFTW_MPI_TYPE,
+		       ego->comm);
+     else
+	  MPI_Alltoallv(O, ego->send_block_sizes, ego->send_block_offsets,
+			FFTW_MPI_TYPE,
+			I, ego->recv_block_sizes, ego->recv_block_offsets,
+			FFTW_MPI_TYPE,
+			ego->comm);
+     
      /* transpose locally, again, to get ordinary row-major */
      cld2 = (plan_rdft *) ego->cld2;
      if (cld2) {
@@ -98,6 +105,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      p->print(p, "(mpi-transpose-alltoall");
+     if (ego->equal_blocks) p->print(p, "/e");
      if (ego->cld1) p->print(p, "%(%p%)", ego->cld1);
      if (ego->cld2) p->print(p, "%(%p%)", ego->cld2);
      if (ego->cld2rest) p->print(p, "%(%p%)", ego->cld2rest);
@@ -112,6 +120,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      INT b, bt, nxb, vn, Ioff = 0, Ooff = 0;
      int *sbs, *sbo, *rbs, *rbo;
      int pe, my_pe, n_pes;
+     int equal_blocks = 1;
      static const plan_adt padt = {
           X(mpi_transpose_solve), awake, print, destroy
      };
@@ -226,11 +235,15 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	  sbo[pe] = (int) (pe * (b * p->tblock) * vn);
 	  rbs[pe] = (int) (db * bt * vn);
 	  rbo[pe] = (int) (pe * (p->block * bt) * vn);
+	  if (sbs[pe] != (b * p->tblock) * vn
+	      || rbs[pe] != (p->block * bt) * vn)
+	       equal_blocks = 0;
      }
      pln->send_block_sizes = sbs;
      pln->send_block_offsets = sbo;
      pln->recv_block_sizes = rbs;
      pln->recv_block_offsets = rbo;
+     pln->equal_blocks = equal_blocks;
 
      X(ops_zero)(&pln->super.super.ops);
      if (cld1)
