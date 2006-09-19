@@ -97,7 +97,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi_transpose-alltoall");
+     p->print(p, "(mpi-transpose-alltoall");
      if (ego->cld1) p->print(p, "%(%p%)", ego->cld1);
      if (ego->cld2) p->print(p, "%(%p%)", ego->cld2);
      if (ego->cld2rest) p->print(p, "%(%p%)", ego->cld2rest);

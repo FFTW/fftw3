@@ -51,3 +51,4 @@ typedef plan_rdft plan_mpi_dft;
 
 /* various solvers */
 void X(mpi_dft_rank_geq2_register)(planner *p);
+void X(mpi_dft_serial_register)(planner *p);

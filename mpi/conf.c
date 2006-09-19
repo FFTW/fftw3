@@ -28,6 +28,7 @@ static const solvtab s =
      SOLVTAB(X(mpi_transpose_inplace_register)),
      SOLVTAB(X(mpi_transpose_alltoall_register)),
      SOLVTAB(X(mpi_dft_rank_geq2_register)),
+     SOLVTAB(X(mpi_dft_serial_register)),
      SOLVTAB_END
 };
 

@@ -31,7 +31,7 @@ typedef struct {
      plan_mpi_dft super;
 
      plan *cld1, *cldt1, *cld2, *cldt2;
-     ptrdiff_t roff, ioff;
+     INT roff, ioff;
      int preserve_input;
 } P;
 
@@ -40,7 +40,7 @@ static void apply(const plan *ego_, R *I, R *O)
      const P *ego = (const P *) ego_;
      plan_dft *cld1, *cld2;
      plan_rdft *cldt1, *cldt2;
-     ptrdiff_t roff = ego->roff, ioff = ego->ioff;
+     INT roff = ego->roff, ioff = ego->ioff;
      
      /* DFT local dimensions */
      cld1 = (plan_dft *) ego->cld1;
@@ -68,10 +68,16 @@ static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
      const problem_mpi_dft *p = (const problem_mpi_dft *) p_;
+     int n_pes;
      UNUSED(ego_);
      UNUSED(plnr);
+     MPI_Comm_size(p->comm, &n_pes);
      return (1
 	     && p->rnk > 1
+	     && (!NO_UGLYP(plnr) /* UGLY if non-parallel */
+		 || X(some_block)(p->n[0], p->block, 0, n_pes) < p->n[0]
+		 || (p->rnk > 1
+		     && X(some_block)(p->n[1], p->tblock, 0, n_pes) < p->n[1]))
 	  );
 }
 
@@ -96,7 +102,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi_dft-rank-geq2");
+     p->print(p, "(mpi-dft-rank-geq2");
      if (ego->cld1) p->print(p, "%(%p%)", ego->cld1);
      if (ego->cldt1) p->print(p, "%(%p%)", ego->cldt1);
      if (ego->cld2) p->print(p, "%(%p%)", ego->cld2);
