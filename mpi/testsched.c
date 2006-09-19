@@ -19,9 +19,9 @@
  */
 
 /**********************************************************************/
-/* This is a modified and combined version of the sched.c and test_sched.c
-   files shipeped with FFTW 2, written to implement and test various
-   all-to-all communications scheduling patterns.
+/* This is a modified and combined version of the sched.c and
+   test_sched.c files shipped with FFTW 2, written to implement and
+   test various all-to-all communications scheduling patterns.
 
    It is not used in FFTW 3, but I keep it around if we ever want to
    play with this again or to change algorithms.  In particular,
