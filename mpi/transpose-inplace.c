@@ -247,7 +247,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    p->ny, vn, b * vn,
 						    vn, 1, 1),
 						   p->I, p->O));
-     if (!cld1) goto nada;
+     if (X(any_true)(!cld1, p->comm)) goto nada;
 
      b = p->block;
      bt = X(current_block)(p->ny, p->tblock, p->comm);
@@ -272,7 +272,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 					vn, 1, 1),
 				       p->O, p->O));
 	  }
-	  if (!cld2) goto nada;
+	  if (X(any_true)(!cld2, p->comm)) goto nada;
      }
      else {
 	  INT nxr = p->nx - nxb * b;
@@ -284,7 +284,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				   b, vn, bt * vn,
 				   vn, 1, 1),
 				  p->O, p->O));
-	  if (!cld2) goto nada;
+	  if (X(any_true)(!cld2, p->comm)) goto nada;
 	  rest_offset = nxb * b * bt * vn;
 	  cld2rest = X(mkplan_d)(plnr,
 			     X(mkproblem_rdft_0_d)(
@@ -293,7 +293,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				   nxr, vn, bt * vn,
 				   vn, 1, 1),
 				  p->O + rest_offset, p->O + rest_offset));
-	  if (!cld2rest) goto nada;
+	  if (X(any_true)(!cld2rest, p->comm)) goto nada;
 	  if (!(p->flags & SCRAMBLED_OUT)) {
 	       cld3 = X(mkplan_d)(plnr,
 				  X(mkproblem_rdft_0_d)(
@@ -302,7 +302,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 					bt, vn, p->nx * vn,
 					vn, 1, 1),
 				       p->O, p->O));
-	       if (!cld3) goto nada;
+	       if (X(any_true)(!cld3, p->comm)) goto nada;
 	  }
      }
 

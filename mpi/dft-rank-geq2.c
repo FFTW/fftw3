@@ -164,7 +164,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 							       p->vn, 2, 2),
 						ri, ii, ro, io));
      }
-     if (!cld1) goto nada;
+     if (X(any_true)(!cld1, p->comm)) goto nada;
 
      if (NO_DESTROY_INPUTP(plnr)) { ri = ro; ii = io; I = O; }
 
@@ -177,7 +177,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    p->block, p->tblock,
 						    p->comm,
 						    tflags));
-     if (!cldt1) goto nada;
+     if (X(any_true)(!cldt1, p->comm)) goto nada;
 
      b = X(current_block)(p->n[1], p->tblock, p->comm);     
      if (tflags & SCRAMBLED_OUT) { /* last dimension transposed after cldt1 */
@@ -199,7 +199,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 							       nl, 2, 2),
 						ri, ii, ro, io));
      }
-     if (!cld2) goto nada;
+     if (X(any_true)(!cld2, p->comm)) goto nada;
 
      if (!(p->flags & TRANSPOSED)) {
 	  tflags = p->flags | SCRAMBLED_IN;
@@ -209,7 +209,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 							 p->tblock, p->block,
 							 p->comm,
 							 tflags));
-	  if (!cldt2) goto nada;
+	  if (X(any_true)(!cldt2, p->comm)) goto nada;
      }
 
      pln = MKPLAN_MPI_DFT(P, &padt, apply);

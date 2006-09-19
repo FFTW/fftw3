@@ -58,6 +58,9 @@ INT X(default_block)(INT n, MPI_Comm comm);
 INT X(current_block)(INT n, INT block, MPI_Comm comm);
 INT X(some_block)(INT n, INT block, int which_pe, int n_pes);
 
+/* any_true.c */
+int X(any_true)(int condition, MPI_Comm comm);
+
 /* conf.c */
 void X(mpi_conf_standard)(planner *p);
 

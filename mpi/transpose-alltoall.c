@@ -147,7 +147,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    p->ny, vn, b * vn,
 						    vn, 1, 1),
 						   p->I, p->O));
-     if (!cld1) goto nada;
+     if (X(any_true)(!cld1, p->comm)) goto nada;
 	  
      bt = X(current_block)(p->ny, p->tblock, p->comm);
      nxb = (p->nx + p->block - 1) / p->block;
@@ -162,7 +162,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    bt, b, nx,
 						    b, 1, 1),
 						   p->I, p->O));
-	  if (!cld2) goto nada;
+	  if (X(any_true)(!cld2, p->comm)) goto nada;
 	  
 	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
 	       Ioff = bt * b * nxb;
@@ -174,7 +174,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 							     b, 1, 1),
 							    p->I + Ioff,
 							    p->O + Ooff));
-	       if (!cld2rest) goto nada;
+	       if (X(any_true)(!cld2rest, p->comm)) goto nada;
 	  }
      }
      else { /* SCRAMBLED_OUT */
@@ -186,7 +186,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    b, vn, bt*vn,
 						    vn, 1, 1),
 						   p->I, p->O));
-	  if (!cld2) goto nada;
+	  if (X(any_true)(!cld2, p->comm)) goto nada;
 	  
 	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
 	       Ioff = Ooff = bt * b * nxb * vn;
@@ -198,7 +198,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 							     vn, 1, 1),
 							    p->I + Ioff,
 							    p->O + Ooff));
-	       if (!cld2rest) goto nada;
+	       if (X(any_true)(!cld2rest, p->comm)) goto nada;
 	  }
      }
 

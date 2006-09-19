@@ -117,7 +117,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 					       X(mktensor_1d)(0,0,0),
 					       ri, ii, ro, io));
      }
-     if (!cld) return (plan *) 0;
+     if (X(any_true)(!cld, p->comm)) return (plan *) 0;
 
      pln = MKPLAN_MPI_DFT(P, &padt, apply);
      pln->cld = cld;
