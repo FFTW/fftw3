@@ -48,9 +48,7 @@ static void apply(const plan *ego_, R *I, R *O)
 
      /* transpose locally to get contiguous chunks */
      cld1 = (plan_rdft *) ego->cld1;
-     if (cld1)
-	  cld1->apply(ego->cld1, I, O);
-     /* else !cld1, then SCRAMBLED_IN is true and transpose is already in O */
+     cld1->apply(ego->cld1, I, O);
 
      /* transpose chunks globally */
      sched = ego->sched;
@@ -237,15 +235,19 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      b = X(current_block)(p->nx, p->block, p->comm);
 
-     if (!(p->flags & SCRAMBLED_IN)) {
+     if (p->flags & SCRAMBLED_IN) /* I is already transposed */
+	  cld1 = X(mkplan_d)(plnr, 
+			     X(mkproblem_rdft_0_d)(X(mktensor_1d)
+						   (b * p->ny * vn, 1, 1),
+						   p->I, p->O));
+     else /* transpose b x ny x vn -> ny x b x vn */
 	  cld1 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
 						   (b, p->ny * vn, vn,
 						    p->ny, vn, b * vn,
 						    vn, 1, 1),
 						   p->I, p->O));
-	  if (!cld1) goto nada;
-     }
+     if (!cld1) goto nada;
 
      b = p->block;
      bt = X(current_block)(p->ny, p->tblock, p->comm);
@@ -360,7 +362,6 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	       sort1_comm_sched(pln->sched, n_pes, sort_pe, ascending);
      }
 
-     X(ops_zero)(&pln->super.super.ops);
      X(ops_zero)(&pln->super.super.ops);
      if (cld1)
 	  X(ops_add)(&pln->super.super.ops, &cld1->ops, &pln->super.super.ops);

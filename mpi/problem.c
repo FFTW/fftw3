@@ -39,6 +39,7 @@ static void hash(const problem *p_, md5 *m)
      X(md5INT)(m, p->vn);
      X(md5int)(m, p->rnk);
      for (i = 0; i < p->rnk; ++i) X(md5INT)(m, p->n[i]);
+     X(md5int)(m, p->sign);
      X(md5int)(m, p->flags);
      X(md5INT)(m, p->block);
      X(md5INT)(m, p->tblock);
@@ -57,7 +58,8 @@ static void print(problem *ego_, printer *p)
 	      ego->vn,
 	      ego->rnk);
      for (i = 0; i < ego->rnk; ++i) p->print(p, " %D", ego->n[i]);
-     p->print(p, " %d %D %D", ego->flags, ego->block, ego->tblock);
+     p->print(p, " %d %d %D %D",
+	      ego->sign, ego->flags, ego->block, ego->tblock);
      MPI_Comm_rank(ego->comm, &i); p->print(p, " %d", i);
      MPI_Comm_size(ego->comm, &i); p->print(p, " %d)", i);
 }
@@ -66,7 +68,7 @@ static void zero(const problem *ego_)
 {
      const problem_mpi_dft *ego = (const problem_mpi_dft *) ego_;
      R *I = ego->I;
-     INT i, b, s, N = ego->vn * 2;
+     INT i, N = ego->vn * 2;
      int irnk;
 
      N *= X(current_block)(ego->n[0], ego->block, ego->comm);
@@ -88,6 +90,7 @@ problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
                               R *I, R *O,
                               INT block, INT tblock,
                               MPI_Comm comm,
+			      int sign,
                               int flags)
 {
      problem_mpi_dft *ego =
@@ -100,6 +103,7 @@ problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
      for (i = 0; i < rnk; ++i) A(n[i] > 0);
      A(vn > 0);
      A(block > 0 && block <= n[0]);
+     A(sign == -1 || sign == 1);
      A(!(TRANSPOSED & flags) || rnk >= 2);
      use_tblock = (TRANSPOSED & flags) && rnk >= 2;
      A((use_tblock && tblock > 0 && tblock <= n[1]) 
@@ -120,6 +124,7 @@ problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
      ego->vn = vn;
      ego->I = I;
      ego->O = O;
+     ego->sign = sign;
      ego->flags = flags;
      ego->block = block;
      ego->tblock = tblock;

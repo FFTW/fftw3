@@ -68,24 +68,64 @@ extern "C"
 								\
 FFTW_EXTERN void X(mpi_cleanup)(void);				\
 								\
-FFTW_EXTERN ptrdiff_t X(mpi_local_size_2d)			\
-     (ptrdiff_t nx, ptrdiff_t ny, MPI_Comm comm,		\
-      ptrdiff_t *local_nx, ptrdiff_t *local_x_start);		\
-FFTW_EXTERN ptrdiff_t X(mpi_local_size_2d_transposed)		\
-     (ptrdiff_t nx, ptrdiff_t ny,				\
-      ptrdiff_t xblock, ptrdiff_t yblock,			\
-      MPI_Comm comm,						\
+FFTW_EXTERN ptrdiff_t X(mpi_local_size_many_transposed)		\
+     (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,		\
+      ptrdiff_t xblock, ptrdiff_t yblock, MPI_Comm comm,	\
       ptrdiff_t *local_nx, ptrdiff_t *local_x_start,		\
       ptrdiff_t *local_ny, ptrdiff_t *local_y_start);		\
+FFTW_EXTERN ptrdiff_t X(mpi_local_size_many)			\
+     (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,		\
+      ptrdiff_t xblock, ptrdiff_t yblock, MPI_Comm comm,	\
+      ptrdiff_t *local_nx, ptrdiff_t *local_x_start);		\
+FFTW_EXTERN ptrdiff_t X(mpi_local_size_transposed)		\
+     (int rnk, const ptrdiff_t *n, MPI_Comm comm,		\
+      ptrdiff_t *local_nx, ptrdiff_t *local_x_start,		\
+      ptrdiff_t *local_ny, ptrdiff_t *local_y_start);		\
+FFTW_EXTERN ptrdiff_t X(mpi_local_size)				\
+     (int rnk, const ptrdiff_t *n, MPI_Comm comm,		\
+      ptrdiff_t *local_nx, ptrdiff_t *local_x_start);		\
+FFTW_EXTERN ptrdiff_t X(mpi_local_size_1d)(			\
+     ptrdiff_t nx, MPI_Comm comm,				\
+     ptrdiff_t *local_nx, ptrdiff_t *local_x_start);		\
+FFTW_EXTERN ptrdiff_t X(mpi_local_size_2d)(			\
+     ptrdiff_t nx, ptrdiff_t ny, MPI_Comm comm,			\
+     ptrdiff_t *local_nx, ptrdiff_t *local_x_start);		\
+FFTW_EXTERN ptrdiff_t X(mpi_local_size_2d_transposed)(		\
+     ptrdiff_t nx, ptrdiff_t ny, MPI_Comm comm,			\
+     ptrdiff_t *local_nx, ptrdiff_t *local_x_start,		\
+     ptrdiff_t *local_ny, ptrdiff_t *local_y_start);		\
+FFTW_EXTERN ptrdiff_t X(mpi_local_size_3d)(			\
+     ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz, MPI_Comm comm,	\
+     ptrdiff_t *local_nx, ptrdiff_t *local_x_start);		\
+FFTW_EXTERN ptrdiff_t X(mpi_local_size_3d_transposed)(		\
+     ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz, MPI_Comm comm,	\
+     ptrdiff_t *local_nx, ptrdiff_t *local_x_start,		\
+     ptrdiff_t *local_ny, ptrdiff_t *local_y_start);		\
 								\
-								\
-FFTW_EXTERN X(plan) X(mpi_plan_transpose)			\
-     (ptrdiff_t nx, ptrdiff_t ny,				\
-      R *in, R *out, MPI_Comm comm, unsigned flags);		\
 FFTW_EXTERN X(plan) X(mpi_plan_many_transpose)			\
      (ptrdiff_t nx, ptrdiff_t ny,				\
       ptrdiff_t howmany, ptrdiff_t xblock, ptrdiff_t yblock,	\
-      R *in, R *out, MPI_Comm comm, unsigned flags);
+      R *in, R *out, MPI_Comm comm, unsigned flags);		\
+FFTW_EXTERN X(plan) X(mpi_plan_transpose)			\
+     (ptrdiff_t nx, ptrdiff_t ny,				\
+      R *in, R *out, MPI_Comm comm, unsigned flags);		\
+								\
+FFTW_EXTERN X(plan) X(mpi_plan_many_dft)			\
+     (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,		\
+      ptrdiff_t block, ptrdiff_t tblock, C *in, C *out,		\
+      MPI_Comm comm, int sign, unsigned flags);			\
+FFTW_EXTERN X(plan) X(mpi_plan_dft)				\
+     (int rnk, const ptrdiff_t *n, C *in, C *out,		\
+      MPI_Comm comm, int sign, unsigned flags);			\
+FFTW_EXTERN X(plan) X(mpi_plan_dft_1d)				\
+     (ptrdiff_t nx, C *in, C *out,				\
+      MPI_Comm comm, int sign, unsigned flags);			\
+FFTW_EXTERN X(plan) X(mpi_plan_dft_2d)				\
+     (ptrdiff_t nx, ptrdiff_t ny, C *in, C *out,		\
+      MPI_Comm comm, int sign, unsigned flags);			\
+FFTW_EXTERN X(plan) X(mpi_plan_dft_3d)				\
+     (ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz, C *in, C *out,	\
+      MPI_Comm comm, int sign, unsigned flags);
 
 /* end of FFTW_MPI_DEFINE_API macro */
 

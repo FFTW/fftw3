@@ -27,12 +27,7 @@ typedef struct {
      INT nx, ny; /* nx x ny transposed to ny x nx */
      R *I, *O; /* contiguous real arrays (both same size!) */
 
-     int flags; /* problem flags: 
-
-		     SCRAMBLED_IN = the input slab is already transposed 
-                                    locally, and is stored in O, not I. 
-		     SCRAMBLED_OUT = output slab is transposed locally
-                     TRANSPOSED = not allowed */
+     int flags;
 
      INT block, tblock; /* block size, slab decomposition;
 			   tblock is for transposed blocks on output */

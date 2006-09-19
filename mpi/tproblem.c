@@ -62,8 +62,8 @@ static void print(problem *ego_, printer *p)
 static void zero(const problem *ego_)
 {
      const problem_mpi_transpose *ego = (const problem_mpi_transpose *) ego_;
-     R *I = (ego->flags & SCRAMBLED_IN) ? ego->O : ego->I;
-     INT i, b, s, N = ego->vn * ego->ny;
+     R *I = ego->I;
+     INT i, N = ego->vn * ego->ny;
 
      N *= X(current_block)(ego->nx, ego->block, ego->comm);
 

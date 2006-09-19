@@ -12,7 +12,10 @@ CC=@MPICC@
 
 EXTRADIST = testsched.c
 
-libfftw3@PREC_SUFFIX@_mpi_la_SOURCES = api.c block.c conf.c mpi_transpose_alltoall.c mpi_transpose_inplace.c problem.c tproblem.c tsolve.c fftw3_mpi.h ifftw_mpi.h mpi_dft.h mpi_transpose.h
+TRANSPOSE_SRC = mpi_transpose_alltoall.c mpi_transpose_inplace.c tproblem.c tsolve.c mpi_transpose.h
+DFT_SRC = mpi-dft-rank-geq2.c problem.c solve.c mpi_dft.h
+
+libfftw3@PREC_SUFFIX@_mpi_la_SOURCES = api.c block.c conf.c fftw3_mpi.h ifftw_mpi.h $(TRANSPOSE_SRC) $(DFT_SRC)
 
 libfftw3@PREC_SUFFIX@_mpi_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
 

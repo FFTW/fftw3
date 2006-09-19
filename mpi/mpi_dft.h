@@ -27,7 +27,7 @@ typedef struct {
      int rnk; INT *n; /* only contiguous row-major, rnk>0 is supported */
      R *I, *O; /* contiguous interleaved arrays */
 
-     int flags;
+     int sign, flags;
 
      INT block, tblock; /* block size, slab decomposition;
 			   tblock is for any transposed blocks on output */
@@ -39,7 +39,7 @@ problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
 			      R *I, R *O,
 			      INT block, INT tblock,
 			      MPI_Comm comm,
-			      int flags);
+			      int sign, int flags);
 
 /* solve.c: */
 void X(mpi_dft_solve)(const plan *ego_, const problem *p_);

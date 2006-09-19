@@ -164,7 +164,7 @@ void verify_dft(bench_problem *p, int rounds, double tol, errors *e);
 void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e);
 void verify_r2r(bench_problem *p, int rounds, double tol, errors *e);
 
-/**************************************************************
+/**************************************************************/
 /* routines to override */
 
 extern void after_problem_ccopy_from(bench_problem *p, bench_real *ri, bench_real *ii);

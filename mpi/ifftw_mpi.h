@@ -31,10 +31,7 @@
 
    meaning for rnk > 1:
       TRANSPOSED: output is globally transposed 
-      SCRAMBLED_IN: input is *locally* transposed and stored in
-                    the *output* array (somewhat ugly, but this allows
-                    us to use the input array as scratch space if
-                    DESTROY_INPUT; otherwise we have no way to denote this)
+      SCRAMBLED_IN: input is *locally* transposed
       SCRAMBLED_OUT: output is *locally* transposed.
 
    meaning for rnk == 1:

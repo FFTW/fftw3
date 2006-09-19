@@ -18,20 +18,12 @@
  *
  */
 
-/* $Id: conf.c,v 1.3 2006-01-05 03:04:28 stevenj Exp $ */
-
-#include "mpi_transpose.h"
 #include "mpi_dft.h"
 
-static const solvtab s =
+/* use the apply() operation for MPI_DFT problems */
+void X(mpi_dft_solve)(const plan *ego_, const problem *p_)
 {
-     SOLVTAB(X(mpi_transpose_inplace_register)),
-     SOLVTAB(X(mpi_transpose_alltoall_register)),
-     SOLVTAB(X(mpi_dft_rank_geq2_register)),
-     SOLVTAB_END
-};
-
-void X(mpi_conf_standard)(planner *p)
-{
-     X(solvtab_exec)(s, p);
+     const plan_mpi_dft *ego = (const plan_mpi_dft *) ego_;
+     const problem_mpi_dft *p = (const problem_mpi_dft *) p_;
+     ego->apply(ego_, UNTAINT(p->I), UNTAINT(p->O));
 }
