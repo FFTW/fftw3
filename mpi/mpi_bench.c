@@ -163,18 +163,29 @@ static void make_scramblers(int rnk, ptrdiff_t nx, ptrdiff_t ny,
 
 static int tensor_rowmajor_transposedp(bench_tensor *t)
 {
+     bench_iodim *d;
      int i;
 
      BENCH_ASSERT(FINITE_RNK(t->rnk));
+     if (t->rnk < 2)
+	  return 0;
 
-     i = t->rnk - 1;
-     while (--i >= 0) {
-          bench_iodim *d = t->dims + i;
-          if (d[0].is != d[1].is * d[1].n)
-               return 0;
-          if (d[1].os != d[0].os * d[0].n)
+     d = t->dims;
+     if (d[0].is != d[1].is * d[1].n
+	 || d[0].os != d[1].is
+	 || d[1].os != d[0].os * d[0].n)
+	  return 0;
+     if (t->rnk > 2 && d[1].is != d[2].is * d[2].n)
+	  return 0;
+     for (i = 2; i + 1 < t->rnk; ++i) {
+          d = t->dims + i;
+          if (d[0].is != d[1].is * d[1].n
+	      || d[0].os != d[1].os * d[1].n)
                return 0;
      }
+
+     if (t->rnk > 2 && t->dims[t->rnk-1].is != t->dims[t->rnk-1].os)
+	  return 0;
      return 1;
 }
 
@@ -183,8 +194,7 @@ static int tensor_contiguousp(bench_tensor *t, int s)
      return (t->dims[t->rnk-1].is == s
 	     && ((tensor_rowmajorp(t) && 
 		  t->dims[t->rnk-1].is == t->dims[t->rnk-1].os)
-		 || (tensor_rowmajor_transposedp(t) && 
-		     t->dims[t->rnk-1].is == t->dims[0].os)));
+		 || tensor_rowmajor_transposedp(t)));
 }
 
 static FFTW(plan) mkplan_complex(bench_problem *p, int flags)

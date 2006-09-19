@@ -73,12 +73,11 @@ static void transpose_tensor(bench_tensor *t)
 {
      int i;
 
-     if (!FINITE_RNK(t->rnk) || t->rnk < 1)
+     if (!FINITE_RNK(t->rnk) || t->rnk < 2)
           return;
 
-     t->dims[0].os = t->dims[t->rnk - 1].os;
-     for (i = 1; i < t->rnk; ++i)
-	  t->dims[i].os = t->dims[i-1].os * t->dims[i-1].n;
+     t->dims[0].os = t->dims[1].os;
+     t->dims[1].os = t->dims[0].os * t->dims[0].n;
 }
 
 static const char *parseint(const char *s, int *n)
