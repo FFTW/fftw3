@@ -12,7 +12,7 @@ CC=@MPICC@
 
 EXTRADIST = testsched.c
 
-TRANSPOSE_SRC = transpose-alltoall.c transpose-inplace.c transpose-problem.c transpose-solve.c mpi-transpose.h
+TRANSPOSE_SRC = transpose-alltoall.c transpose-inplace.c transpose-radix2.c transpose-problem.c transpose-solve.c mpi-transpose.h
 DFT_SRC = dft-serial.c dft-rank-geq2.c dft-problem.c dft-solve.c mpi-dft.h
 
 libfftw3@PREC_SUFFIX@_mpi_la_SOURCES = api.c any-true.c block.c conf.c fftw3-mpi.h ifftw-mpi.h $(TRANSPOSE_SRC) $(DFT_SRC)
