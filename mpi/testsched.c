@@ -23,18 +23,20 @@
    test_sched.c files shipped with FFTW 2, written to implement and
    test various all-to-all communications scheduling patterns.
 
-   It is not used in FFTW 3, but I keep it around if we ever want to
-   play with this again or to change algorithms.  In particular,
-   I used it to implement and test the fill1_comm_sched routine,
-   which allows us to create a schedule for 1 process at a time.
+   It is not used in FFTW 3, but I keep it around in case we ever want
+   to play with this again or to change algorithms.  In particular, I
+   used it to implement and test the fill1_comm_sched routine in
+   transpose-inplace.c, which allows us to create a schedule for one
+   process at a time and is much more compact than the FFTW 2 code.
 
    Note that the scheduling algorithm is somewhat modified from that
    of FFTW 2.  Originally, I thought that one "stall" in the schedule
    was unavoidable for odd numbers of processes, since this is the
-   case for the soccer-timetabling problem.  However, because of
-   the self-communication step, we can use the self-communication
-   to fill in the stalls.  This greatly simplifies the process
-   re-sorting algorithm. */
+   case for the soccer-timetabling problem.  However, because of the
+   self-communication step, we can use the self-communication to fill
+   in the stalls.  (I vaguely recall a user pointing out this error to
+   me a long time ago, but I can't find the email.)  This greatly
+   simplifies the process re-sorting algorithm. */
 
 /**********************************************************************/
 
