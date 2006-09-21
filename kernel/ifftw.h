@@ -670,6 +670,8 @@ struct planner_s {
      const planner_adt *adt;
      void (*hook)(struct planner_s *plnr, plan *pln, 
 		  const problem *p, int optimalp);
+     double (*measure_hook)(struct planner_s *plnr, plan *pln,
+			    const problem *p, double t);
 
      /* solver descriptors */
      slvdesc *slvdescs;

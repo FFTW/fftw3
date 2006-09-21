@@ -414,6 +414,10 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 	       ego->epcost += pln->pcost;
 	  } else {
 	       double t = X(measure_execution_time)(pln, p);
+	       
+	       /* for MPI, need to synchronize timing measurements */
+	       if (ego->measure_hook)
+		    t = ego->measure_hook(ego, pln, p, t);
 
 	       if (t < 0) {  /* unavailable cycle counter */
 		    /* Real programmers can write FORTRAN in any language */
@@ -850,6 +854,7 @@ planner *X(mkplanner)(void)
      p->nplan = p->nprob = 0;
      p->pcost = p->epcost = 0.0;
      p->hook = 0;
+     p->measure_hook = 0;
      p->cur_reg_nam = 0;
      p->wisdom_state = WISDOM_NORMAL;
 

@@ -26,13 +26,37 @@
 
 #define MPI_FLAGS(f) ((f) >> 27)
 
+/*************************************************************************/
+
 static int mpi_inited = 0;
+
+static double measure_hook(planner *plnr, plan *pln,
+			   const problem *p, double t)
+{
+     MPI_Comm comm;
+     double tmax;
+     UNUSED(plnr); UNUSED(pln);
+     switch (p->adt->problem_kind) {
+	 case PROBLEM_MPI_DFT:
+	      comm = ((const problem_mpi_dft *) p)->comm;
+	      break;
+	 case PROBLEM_MPI_TRANSPOSE:
+	      comm = ((const problem_mpi_transpose *) p)->comm;
+	      break;
+	 default:
+	      return t;
+     }
+     MPI_Allreduce(&t, &tmax, 1, MPI_DOUBLE, MPI_MAX, comm);
+     return tmax;
+}
 
 static void init(void)
 {
      if (!mpi_inited) {
-          X(mpi_conf_standard)(X(the_planner)());
-	  mpi_inited = 1;
+	  planner *plnr = X(the_planner)();
+	  plnr->measure_hook = measure_hook;
+          X(mpi_conf_standard)(plnr);
+	  mpi_inited = 1;	  
      }
 }
 
