@@ -319,9 +319,11 @@ fi
 
 dnl add gcc warnings, in debug/maintainer mode only
 if test "$enable_debug" = yes || test "$USE_MAINTAINER_MODE" = yes; then
+if test "$ac_test_CFLAGS" != "set"; then
 	if test $ac_cv_prog_gcc = yes; then
 		CFLAGS="$CFLAGS -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align -pedantic -Wno-long-long -Wshadow -Wbad-function-cast -Wwrite-strings -Wstrict-prototypes -Wredundant-decls -Wnested-externs" # -Wundef -Wconversion -Wmissing-prototypes -Wmissing-declarations 
 	fi
+fi
 fi
 
 dnl -----------------------------------------------------------------------
