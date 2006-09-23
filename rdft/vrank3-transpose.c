@@ -482,19 +482,20 @@ static const transpose_adt adt_cut =
      "rdft-transpose-cut"
 };
 
-#define USE_TOMS513 0 /* define to include obsoleted(?) TOMS algorithm */
-
-#if USE_TOMS513
-
 /*************************************************************************/
-/* In-place transpose routine from TOMS.  This routine is much slower
-   than e.g. the transpose-gcd algorithm above, but is has the advantage
-   of requiring less buffer space for the case of gcd(nx,ny) small. 
+/* In-place transpose routine from TOMS, which follows the cycles of
+   the permutation so that it writes to each location only once.
+   Because of cache-line and other issues, however, this routine is
+   typically much slower than transpose-gcd or transpose-cut, even
+   though the latter do some extra writes.  On the other hand, if the
+   vector length is large then the TOMS routine is best.
 
-   However, it has been superseded by the combination of the generalized
-   transpose-cut method with the transpose-gcd method, which can always
-   transpose with buffers a small fraction of the array size regardless
-   of gcd(nx,ny). */
+   The TOMS routine also has the advantage of requiring less buffer
+   space for the case of gcd(nx,ny) small.  However, in this case it
+   has been superseded by the combination of the generalized
+   transpose-cut method with the transpose-gcd method, which can
+   always transpose with buffers a small fraction of the array size
+   regardless of gcd(nx,ny). */
 
 /*
  * TOMS Transpose.  Algorithm 513 (Revised version of algorithm 380).
@@ -671,7 +672,7 @@ static int applicable_toms513(const problem_rdft *p, planner *plnr,
      *nbuf = 2*vl 
 	  + ((n + m) / 2 * sizeof(char) + sizeof(R) - 1) / sizeof(R);
      return (!NO_SLOWP(plnr)
-	     && !NO_UGLYP(plnr) /* UGLY compared to cut+gcd method(?) */
+	     && (vl > 8 || !NO_UGLYP(plnr)) /* UGLY for small vl */
 	     && n != m
 	     && Ntuple_transposable(p->vecsz->dims + dim0,
 				    p->vecsz->dims + dim1,
@@ -681,8 +682,8 @@ static int applicable_toms513(const problem_rdft *p, planner *plnr,
 static int mkcldrn_toms513(const problem_rdft *p, planner *plnr, P *ego)
 {
      UNUSED(p); UNUSED(plnr);
-     /* heuristic so that TOMS algorithm is last resort */
-     ego->super.super.ops.other += ego->n * ego->m * ego->vl * 2 * 20;
+     /* heuristic so that TOMS algorithm is last resort for small vl */
+     ego->super.super.ops.other += ego->n * ego->m * 2 * (ego->vl + 30);
      return 1;
 }
 
@@ -691,8 +692,6 @@ static const transpose_adt adt_toms513 =
      apply_toms513, applicable_toms513, mkcldrn_toms513,
      "rdft-transpose-toms513"
 };
-
-#endif /* USE_TOMS513 */
 
 /*-----------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------*/
@@ -776,9 +775,7 @@ void X(rdft_vrank3_transpose_register)(planner *p)
      unsigned i;
      static const transpose_adt *const adts[] = {
 	  &adt_gcd, &adt_cut,
-#if USE_TOMS513
 	  &adt_toms513
-#endif
      };
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
           REGISTER_SOLVER(p, mksolver(adts[i]));
