@@ -749,12 +749,16 @@ plan *X(mkplan_f_d)(planner *ego, problem *p,
 #define PRECOMPUTE_ARRAY_INDICES
 #endif
 
+extern const INT X(an_INT_guaranteed_to_be_zero);
+
 #ifdef PRECOMPUTE_ARRAY_INDICES
 typedef INT *stride;
 #define WS(stride, i)  (stride[i])
 extern stride X(mkstride)(INT n, INT s);
 void X(stride_destroy)(stride p);
-#define MAKE_VOLATILE_STRIDE(x) (void)0 /* a no-op in expession context */
+/* hackery to prevent the compiler from copying the strides array
+   onto the stack */
+#define MAKE_VOLATILE_STRIDE(x) (x) = (x) + X(an_INT_guaranteed_to_be_zero)
 #else
 
 typedef INT stride;
@@ -768,8 +772,7 @@ typedef INT stride;
 
 /* hackery to prevent the compiler from ``optimizing'' induction
    variables in codelet loops. */
-extern const stride X(a_stride_guaranteed_to_be_zero);
-#define MAKE_VOLATILE_STRIDE(x) (x) = (x) ^ X(a_stride_guaranteed_to_be_zero)
+#define MAKE_VOLATILE_STRIDE(x) (x) = (x) ^ X(an_INT_guaranteed_to_be_zero)
 
 #endif /* PRECOMPUTE_ARRAY_INDICES */
 
