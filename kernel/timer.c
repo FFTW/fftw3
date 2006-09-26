@@ -116,7 +116,8 @@ typedef crude_time ticks;
 
   start_over:
        for (iter = 1; iter; iter *= 2) {
-	    double tmin = 1.0E10, tmax = -1.0E10;
+	    double tmin = 0;
+	    int first = 1;
 	    crude_time begin = X(get_crude_time)();
 
 	    /* repeat the measurement TIME_REPEAT times */
@@ -126,10 +127,9 @@ typedef crude_time ticks;
 		 if (t < 0)
 		      goto start_over;
 
-		 if (t < tmin)
+		 if (first || t < tmin)
 		      tmin = t;
-		 if (t > tmax)
-		      tmax = t;
+		 first = 0;
 
 		 /* do not run for too long */
 		 if (X(elapsed_since)(begin) > FFTW_TIME_LIMIT)
@@ -138,7 +138,6 @@ typedef crude_time ticks;
 
 	    if (tmin >= TIME_MIN) {
 		 tmin /= (double) iter;
-		 tmax /= (double) iter;
 		 X(plan_awake)(pln, SLEEPY);
 		 return tmin;
 	    }
