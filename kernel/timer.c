@@ -137,9 +137,8 @@ typedef crude_time ticks;
 	    }
 
 	    if (tmin >= TIME_MIN) {
-		 tmin /= (double) iter;
 		 X(plan_awake)(pln, SLEEPY);
-		 return tmin;
+		 return tmin / (double) iter;
 	    }
        }
        goto start_over; /* may happen if timer is screwed up */
