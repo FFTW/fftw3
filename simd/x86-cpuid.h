@@ -31,7 +31,7 @@
 static inline int is_386() 
 {
 #ifdef _MSC_VER
-    unsigned int result,test;
+    unsigned int result,tst;
     _asm {
         pushfd
         pop eax
@@ -43,11 +43,11 @@ static inline int is_386()
         pop eax
         push edx
         popfd
-        mov test,edx
+        mov tst,edx
         mov result,eax
     }
 #else
-    register unsigned int result,test;
+    register unsigned int result,tst;
     __asm__ (
         "pushfl\n\t"
         "popl %0\n\t"
@@ -59,17 +59,17 @@ static inline int is_386()
         "popl %0\n\t"
         "pushl %1\n\t"
         "popfl"
-    : "=r" (result), "=r" (test) /* output */
+    : "=r" (result), "=r" (tst) /* output */
     :  /* no inputs */
     );
 #endif
-    return (result == test);
+    return (result == tst);
 }
 
 static inline int has_cpuid() 
 {
 #ifdef _MSC_VER
-    unsigned int result,test;
+    unsigned int result,tst;
     _asm {
         pushfd
         pop eax
@@ -81,11 +81,11 @@ static inline int has_cpuid()
         pop eax
         push edx
         popfd
-        mov test,edx
+        mov tst,edx
         mov result,eax
     }
 #else
-    register unsigned int result,test;
+    register unsigned int result,tst;
     __asm__ (
         "pushfl\n\t"
         "pop %0\n\t"
@@ -97,11 +97,11 @@ static inline int has_cpuid()
         "popl %0\n\t"
         "pushl %1\n\t"
         "popfl"
-    : "=r" (result), "=r" (test) /* output */
+    : "=r" (result), "=r" (tst) /* output */
     : /* no inputs */
     );
 #endif
-    return (result != test);
+    return (result != tst);
 }
 
 static inline int cpuid_edx(int op)
