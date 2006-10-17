@@ -191,6 +191,10 @@ MacOS for Intel crashes when compiling FFTW; a workaround is to
 compile one file without optimization: \courier{cd kernel; make
 CFLAGS=" " trig.lo\}.
 
+\courier{gcc\} 4.1.1 reportedly crashes when compiling FFTW for MIPS;
+the workaround is to compile the file it crashes on
+(\courier{t2_64.c\}) with a lower optimization level.
+
 \question 26aug:solarisSucks FFTW does not compile on Solaris, complaining about \courier{const\}.
 
 We know that at least on Solaris 2.5.x with Sun's compilers 4.2 you
