@@ -111,7 +111,7 @@ FFTW manual.
 For example, \'cif12x13x14\' is a three-dimensional 12 by 13 x 14
 complex DFT operating in-place.  \'rob65536\' is a one-dimensional
 size-65536 out-of-place complex-to-real (backwards) transform
-operating on Hermitian-symmety input.  \'ki10hx20e01\' is a
+operating on Hermitian-symmetry input.  \'ki10hx20e01\' is a
 two-dimensional 10 by 20 r2r transform where the first dimension is a
 DHT and the second dimension is an REDFT01 (DCT-III).
 
