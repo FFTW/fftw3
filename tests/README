@@ -16,8 +16,8 @@ where each command is as follows:
 
     The syntax for problems is [i|o][r|c][f|b]<size>, where
 
-      i/o means in-place or out-of-place.  In-place is the default
-      r/c means real or complex transform.  Complex is the default
+      i/o means in-place or out-of-place.  Out of place is the default.
+      r/c means real or complex transform.  Complex is the default.
       f/b means forward or backward transform.  Forward is the default.
       <size> is an arbitrary multidimensional sequence of integers
         separated by the character 'x'.
