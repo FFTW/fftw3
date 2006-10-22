@@ -61,6 +61,7 @@ static void create_worker(void *(*worker)(void *arg),
      pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
      pthread_create(&tid, &attr, worker, (void *)arg);
+     pthread_attr_destroy(&attr);
 }
 /* end PTHREADS GLUE: */
 
