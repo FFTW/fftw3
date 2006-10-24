@@ -80,41 +80,12 @@ struct work {
 };
 
 static bsem_t queue_lock;
-static bsem_t all_done;
 static struct worker *worker_queue;
-static int nworkers;
-static int terminating;
-
-static struct work *get_work(struct worker *r)
-{
-     down(&queue_lock);
-
-     if (terminating)
-	  goto terminate;
-
-     r->cdr = worker_queue;
-     worker_queue = r;
-     up(&queue_lock);
-
-     /* wait until work becomes available */
-     down(&r->ready);
-
-     /* work is in r->w */
-     if (r->w) 
-	  return r->w;
-
-     /* no work.  Terminate */
-     down(&queue_lock);
-
- terminate:
-     --nworkers;
-     /* the last worker wakes up the main thread */
-     if (nworkers == 0)
-	  up(&all_done);
-
-     up(&queue_lock);
-
-     return 0;
+#define WITH_QUEUE_LOCK(what)			\
+{						\
+     down(&queue_lock);				\
+     what;					\
+     up(&queue_lock);				\
 }
 
 static void *worker(void *arg)
@@ -124,66 +95,72 @@ static void *worker(void *arg)
      bsem_init(&ego.ready);
 
      do {
-	  A(w);
+	  A(w->proc);
+
+	  /* do the work */
           w->proc(&w->d);
+
+	  /* First enqueue the worker, then signal that work is
+	     completed.  The opposite order would allow the parent to
+	     continue, and possibly create another worker before we
+	     get a chance to add ourselves to the work queue. */
+
+	  /* enqueue worker into worker queue: */
+	  WITH_QUEUE_LOCK({
+	       ego.cdr = worker_queue;
+	       worker_queue = &ego;
+	  });
+
+	  /* signal that work is done */
 	  up(&w->done);
-	  w = get_work(&ego);
-     } while (w);
+
+	  /* wait until work becomes available */
+	  down(&ego.ready);
+	  
+	  w = ego.w;
+     } while (w->proc);
+
+     /* termination protocol */
+     up(&w->done);
 
      bsem_destroy(&ego.ready);
 
      return (void *)0;
 }
 
-static void post_work(void *arg)
-{
-     struct work *w = (struct work *)arg;
-     down(&queue_lock);
-     if (worker_queue) {
-	  /* a worker is available.  Remove it from the worker queue
-	     and wake it up */
-	  struct worker *r = worker_queue;
-	  worker_queue = r->cdr;
-	  r->w = w;
-	  up(&r->ready);
-     } else {
-	  /* no worker is available.  Create one */
-	  create_worker(worker, w);
-	  ++nworkers;
-     }
-     up(&queue_lock);
-}
-
 static void kill_workforce(void)
 {
-     down(&queue_lock);
-     terminating = 1;
+     struct work w;
 
-     if (nworkers == 0)
-	  up(&all_done);
+     w.proc = 0;
+     bsem_init(&w.done);
 
-     /* tell all queued workers that they must terminate */
-     while (worker_queue) {
-	  struct worker *r = worker_queue;
-	  worker_queue = r->cdr;
-	  r->w = 0;
-	  up(&r->ready);
-     }
+     WITH_QUEUE_LOCK({
+	  /* tell all workers that they must terminate.  
 
-     up(&queue_lock);
+	  Because workers enqueue themselves before signaling the
+	  completion of the work, all workers belong to the worker queue
+	  if we get here.  Also, all workers are waiting at
+	  down(&ego.ready), so we can hold the queue lock without
+	  deadlocking */
+	  while (worker_queue) {
+	       struct worker *r = worker_queue;
+	       worker_queue = r->cdr;
+	       r->w = &w;
+	       up(&r->ready);
+	       down(&w.done);
+	  }
+     });
 
-     down(&all_done);
+     bsem_destroy(&w.done);
 }
 
 int X(ithreads_init)(void)
 {
      bsem_init(&queue_lock);
-     bsem_init(&all_done);
      up(&queue_lock);
 
      worker_queue = 0;
-     nworkers = 0;
-     terminating = 0;
 
      X(mksolver_ct_hook) = X(mksolver_ct_threads);
      X(mksolver_hc2hc_hook) = X(mksolver_hc2hc_threads);
@@ -227,27 +204,42 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      STACK_MALLOC(struct work *, r, sizeof(struct work) * nthr);
 	  
      for (i = 0; i < nthr; ++i) {
-	  spawn_data *d = &r[i].d;
+	  struct work *w = &r[i];
+	  spawn_data *d = &w->d;
 	  d->max = (d->min = i * block_size) + block_size;
 	  if (d->max > loopmax)
 	       d->max = loopmax;
 	  d->thr_num = i;
 	  d->data = data;
-	  r[i].proc = proc;
+	  w->proc = proc;
 	   
-
 	  if (i == nthr - 1) {
 	       /* we do it ourselves */
 	       proc(d);
 	  } else {
-	       bsem_init(&r[i].done);
-	       post_work(&r[i]);
+	       /* dispatch work W to some worker */
+	       bsem_init(&w->done);
+
+	       WITH_QUEUE_LOCK({
+		    if (worker_queue) {
+			 /* a worker is available.  Remove it from the
+			    worker queue and wake it up */
+			 struct worker *r = worker_queue;
+			 worker_queue = r->cdr;
+			 r->w = w;
+			 up(&r->ready);
+		    } else {
+			 /* no worker is available.  Create one */
+			 create_worker(worker, w);
+		    }
+	       });
 	  }
      }
 
      for (i = 0; i < nthr - 1; ++i) { 
-	  down(&r[i].done);
-	  bsem_destroy(&r[i].done);
+	  struct work *w = &r[i];
+	  down(&w->done);
+	  bsem_destroy(&w->done);
      }
 
      STACK_FREE(r);
@@ -258,7 +250,6 @@ void X(threads_cleanup)(void)
 {
      kill_workforce();
      bsem_destroy(&queue_lock);
-     bsem_destroy(&all_done);
      X(mksolver_ct_hook) = 0;
      X(mksolver_hc2hc_hook) = 0;
 }
