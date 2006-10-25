@@ -131,9 +131,6 @@ static int applicable(const solver *ego_, const problem *p_,
 
      if (!applicable0(ego_, p_, rp, plnr)) return 0;
 
-     /* fixed spltrnk (unlike fftw2's spltrnk=1, default buddies[0] is
-        spltrnk=0, which is an asymptotic "theoretical optimum" for
-        an ideal cache; it's equivalent to spltrnk=1 for rnk < 4). */
      if (NO_RANK_SPLITSP(plnr) && (ego->spltrnk != ego->buddies[0]))
           return 0;
 
@@ -229,7 +226,7 @@ static solver *mksolver(int spltrnk, const int *buddies, int nbuddies)
 void X(rdft2_rank_geq2_register)(planner *p)
 {
      int i;
-     static const int buddies[] = { 0, 1, -2 };
+     static const int buddies[] = { 1, 0, -2 };
 
      const int nbuddies = (int)(sizeof(buddies) / sizeof(buddies[0]));
 
