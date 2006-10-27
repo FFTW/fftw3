@@ -36,7 +36,6 @@ void X(spawn_loop)(int loopmax, int nthreads,
 		   spawn_function proc, void *data);
 int X(ithreads_init)(void);
 void X(threads_cleanup)(void);
-void X(threads_setmax)(int nthreads_max);
 
 /* configurations */
 
@@ -48,5 +47,6 @@ ct_solver *X(mksolver_ct_threads)(size_t size, INT r, int dec, ct_mkinferior mkc
 hc2hc_solver *X(mksolver_hc2hc_threads)(size_t size, INT r, hc2hc_mkinferior mkcldw);
 
 void X(threads_conf_standard)(planner *p);
-
+void X(threads_register_hooks)(void);
+void X(threads_unregister_hooks)(void);
 #endif /* __THREADS_H__ */

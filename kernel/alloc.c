@@ -76,7 +76,7 @@ struct minfo {
 
 static struct minfo *minfo[HASHSZ] = {0};
 
-#ifdef HAVE_THREADS
+#if defined(HAVE_THREADS) || defined(HAVE_OPENMP)
 int X(in_thread) = 0;
 #endif
 

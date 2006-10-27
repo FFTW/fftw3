@@ -23,6 +23,18 @@
 
 static int threads_inited = 0;
 
+static void threads_register_hooks(void)
+{
+     X(mksolver_ct_hook) = X(mksolver_ct_threads);
+     X(mksolver_hc2hc_hook) = X(mksolver_hc2hc_threads);
+}
+
+static void threads_unregister_hooks(void)
+{
+     X(mksolver_ct_hook) = 0;
+     X(mksolver_hc2hc_hook) = 0;
+}
+
 /* should be called before all other FFTW functions! */
 int X(init_threads)(void)
 {
@@ -31,6 +43,8 @@ int X(init_threads)(void)
 
           if (X(ithreads_init)())
                return 0;
+
+	  threads_register_hooks();
 
 	  /* this should be the first time the_planner is called,
 	     and hence the time it is configured */
@@ -42,11 +56,13 @@ int X(init_threads)(void)
      return 1;
 }
 
+
 void X(cleanup_threads)(void)
 {
      X(cleanup)();
      if (threads_inited) {
 	  X(threads_cleanup)();
+	  threads_unregister_hooks();
 	  threads_inited = 0;
      }
 }
@@ -62,5 +78,4 @@ void X(plan_with_nthreads)(int nthreads)
      A(threads_inited);
      plnr = X(the_planner)();
      plnr->nthr = X(imax)(1, nthreads);
-     X(threads_setmax)(plnr->nthr);
 }

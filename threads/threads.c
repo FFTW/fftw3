@@ -23,11 +23,14 @@
    spawn and join threads on various systems. */
 
 #include "threads.h"
+
+#ifdef HAVE_THREADS
+#if defined(USING_POSIX_THREADS)
+
 #include <pthread.h>
 #include <semaphore.h>
 
-/* PTHREADS GLUE: */
-/* binary semaphore, implemented with general semaphores: */
+/* Abstraction of a binary semaphore, implemented with general semaphores: */
 typedef sem_t bsem_t; 
 
 static void bsem_init(bsem_t *s)
@@ -63,9 +66,18 @@ static void create_worker(void *(*worker)(void *arg),
      pthread_create(&tid, &attr, worker, (void *)arg);
      pthread_attr_destroy(&attr);
 }
-/* end PTHREADS GLUE: */
+
+static void destroy_worker(void)
+{
+     pthread_exit((void *)0);
+}
+
+#else
+#error "No threading layer defined"
+#endif
 
 /************************************************************************/
+/* Main code: */
 struct worker {
      bsem_t ready;
      struct work *w;
@@ -125,6 +137,8 @@ static void *worker(void *arg)
 
      bsem_destroy(&ego.ready);
 
+     destroy_worker();
+     /* UNREACHABLE */
      return (void *)0;
 }
 
@@ -162,15 +176,7 @@ int X(ithreads_init)(void)
 
      worker_queue = 0;
 
-     X(mksolver_ct_hook) = X(mksolver_ct_threads);
-     X(mksolver_hc2hc_hook) = X(mksolver_hc2hc_threads);
-
      return 0; /* no error */
-}
-
-void X(threads_setmax)(int n)
-{
-     UNUSED(n);
 }
 
 /* Distribute a loop from 0 to loopmax-1 over nthreads threads.
@@ -250,6 +256,6 @@ void X(threads_cleanup)(void)
 {
      kill_workforce();
      bsem_destroy(&queue_lock);
-     X(mksolver_ct_hook) = 0;
-     X(mksolver_hc2hc_hook) = 0;
 }
+
+#endif /* HAVE_THREADS */

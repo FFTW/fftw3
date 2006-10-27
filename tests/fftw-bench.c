@@ -6,6 +6,10 @@
 #include <string.h>
 #include "fftw-bench.h"
 
+#if defined(HAVE_THREADS) || defined(HAVE_OPENMP)
+#define HAVE_SMP
+#endif
+
 FFTW(plan) the_plan = 0;
 
 static const char *wisdat = "wis.dat";
@@ -52,7 +56,7 @@ void rdwisdom(void)
 
      if (havewisdom) return;
 
-#ifdef HAVE_THREADS
+#ifdef HAVE_SMP
      BENCH_ASSERT(FFTW(init_threads)());
      FFTW(plan_with_nthreads)(nthreads);
 #endif
@@ -147,7 +151,7 @@ void setup(bench_problem *p)
      rdwisdom();
      install_hook();
 
-#ifdef HAVE_THREADS
+#ifdef HAVE_SMP
      if (verbose > 1 && nthreads > 1) printf("NTHREADS = %d\n", nthreads);
 #endif
 
@@ -190,7 +194,7 @@ void done(bench_problem *p)
 void cleanup(void)
 {
      wrwisdom();
-#ifdef HAVE_THREADS
+#ifdef HAVE_SMP
      FFTW(cleanup_threads)();
 #else
      FFTW(cleanup)();

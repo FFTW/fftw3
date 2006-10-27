@@ -27,7 +27,7 @@ else
 SIMD_LIBS=
 endif
 
-if THREADS
+if SMP
 if COMBINED_THREADS
 COMBINED_THREADLIBS=threads/libfftw3@PREC_SUFFIX@_threads.la
 endif

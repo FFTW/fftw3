@@ -19,7 +19,7 @@ libfftw3@PREC_SUFFIX@_mpi_la_SOURCES = api.c any-true.c block.c conf.c fftw3-mpi
 
 libfftw3@PREC_SUFFIX@_mpi_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
 
-if THREADS
+if SMP
 if !COMBINED_THREADS
 LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_threads.la
 endif

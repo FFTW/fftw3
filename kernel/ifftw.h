@@ -240,7 +240,7 @@ IFFTW_EXTERN void *X(malloc_plain)(size_t sz);
 
 #endif
 
-#if defined(FFTW_DEBUG) && defined(FFTW_DEBUG_MALLOC) && defined(HAVE_THREADS)
+#if defined(FFTW_DEBUG) && defined(FFTW_DEBUG_MALLOC) && (defined(HAVE_THREADS) || defined(HAVE_OPENMP))
 extern int X(in_thread);
 #  define IN_THREAD X(in_thread)
 #  define THREAD_ON { int in_thread_save = X(in_thread); X(in_thread) = 1

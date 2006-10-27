@@ -5,7 +5,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/libbench2	\
 noinst_PROGRAMS = bench
 EXTRA_DIST = check.pl README
 
-if THREADS
+if SMP
 if !COMBINED_THREADS
 LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_threads.la
 endif
@@ -23,7 +23,7 @@ check-local: bench$(EXEEXT)
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW transforms passed basic tests!"
 	@echo "--------------------------------------------------------------"
-if THREADS
+if SMP
 	perl -w $(srcdir)/check.pl -r -c=30 -v --nthreads=2 `pwd`/bench
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW threaded transforms passed basic tests!"
@@ -35,7 +35,7 @@ bigcheck: bench$(EXEEXT)
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW transforms passed big tests!"
 	@echo "--------------------------------------------------------------"
-if THREADS
+if SMP
 	perl -w $(srcdir)/check.pl -a -v --nthreads=2 `pwd`/bench
 	perl -w $(srcdir)/check.pl -a -v --nthreads=3 `pwd`/bench
 	perl -w $(srcdir)/check.pl -a -v --nthreads=10 `pwd`/bench
@@ -50,7 +50,7 @@ smallcheck: bench$(EXEEXT)
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW transforms passed a few tests!"
 	@echo "--------------------------------------------------------------"
-if THREADS
+if SMP
 	perl -w $(srcdir)/check.pl -r --estimate -c=2 -v --nthreads=2 `pwd`/bench
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW threaded transforms passed a few tests!"
@@ -58,7 +58,7 @@ if THREADS
 endif
 
 paranoid-check: bench$(EXEEXT)
-if THREADS
+if SMP
 	perl -w $(srcdir)/check.pl -a -o=exhaustive --nthreads=10 --paranoid `pwd`/bench
 	perl -w $(srcdir)/check.pl -a -o=exhaustive --nthreads=7 --paranoid `pwd`/bench
 	perl -w $(srcdir)/check.pl -a -o=exhaustive --nthreads=3 --paranoid `pwd`/bench

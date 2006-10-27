@@ -10,6 +10,10 @@
 #include <string.h>
 #include <time.h>
 
+#if defined(HAVE_THREADS) || defined(HAVE_OPENMP)
+#define HAVE_SMP
+#endif
+
 #define CONCAT(prefix, name) prefix ## name
 #if defined(BENCHFFT_SINGLE)
 #define FFTW(x) CONCAT(fftwf_, x)
@@ -65,7 +69,7 @@ static int prob_size_cmp(const void *p1_, const void *p2_)
 /* By default, don't allow fftw-wisdom tool to use threads; we don't
    want users to put threads wisdom in the system wisdom, which would
    break the wisdom for any non-threads program trying to use it. */
-#define USE_THREADS 0
+#define USE_SMP 0
 
 static struct my_option options[] =
 {
@@ -86,7 +90,7 @@ static struct my_option options[] =
   {"no-system-wisdom", NOARG, 'n'},
   {"wisdom-file", REQARG, 'w'},
 
-#if USE_THREADS && defined(HAVE_THREADS)
+#if USE_SMP && defined(HAVE_SMP)
   {"threads", REQARG, 'T'},
 #endif
 
@@ -114,7 +118,7 @@ static void help(FILE *f, const char *program_name)
  "             -x, --exhaustive: plan in EXHAUSTIVE mode (may be slow)\n"
  "       -n, --no-system-wisdom: don't read /etc/fftw/ system wisdom file\n"
  "  -w FILE, --wisdom-file=FILE: read wisdom from FILE (stdin if -)\n"
-#if USE_THREADS && defined(HAVE_THREADS)
+#if USE_SMP && defined(HAVE_SMP)
  "            -T N, --threads=N: plan with N threads\n"
 #endif
 	  "\nSize syntax: <type><inplace><direction><geometry>\n"
@@ -163,7 +167,7 @@ int bench_main(int argc, char *argv[])
      usewisdom = 0;
 
      bench_srand(1);
-#if USE_THREADS && defined(HAVE_THREADS)
+#if USE_SMP && defined(HAVE_SMP)
      BENCH_ASSERT(FFTW(init_threads)());
 #endif
 
@@ -258,7 +262,7 @@ int bench_main(int argc, char *argv[])
 		   break;
 	      }
 
-#if USE_THREADS && defined(HAVE_THREADS)
+#if USE_SMP && defined(HAVE_SMP)
 	      case 'T':
 		   nthreads = atoi(my_optarg);
 		   if (nthreads > 1) {

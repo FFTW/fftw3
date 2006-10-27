@@ -12,7 +12,7 @@ fftw@PREC_SUFFIX@-wisdom.1: fftw_wisdom.1
 	rm -f $@
 	cp fftw_wisdom.1 $@
 
-if THREADS
+if SMP
 if !COMBINED_THREADS
 LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_threads.la
 endif
