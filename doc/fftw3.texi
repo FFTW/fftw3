@@ -3958,18 +3958,16 @@ script (@pxref{Installation on Unix}).
 @fpindex configure
 
 @cindex portability
-The threads routines require your operating system to have some sort of
-shared-memory threads support.  Specifically, the FFTW threads package
-works with POSIX threads (available on most Unix variants, from
-GNU/Linux to MacOS X) and Win32 threads.  We also support using
-@uref{http://www.openmp.org,OpenMP} or SGI MP compiler directives to
-launch threads, enabled by using @code{--with-openmp} or
-@code{--with-sgimp} in addition to @code{--enable-threads}.  (This may
-be useful if you are employing that sort of directive in your own code,
-in order to minimize conflicts.)  If you have a shared-memory machine
-that uses a different threads API, it should be a simple matter of
-programming to include support for it; see the file
-@code{fftw_threads-int.h} for more detail.
+The threads routines require your operating system to have some sort
+of shared-memory threads support.  Specifically, the FFTW threads
+package works with POSIX threads (available on most Unix variants,
+from GNU/Linux to MacOS X) and Win32 threads.  We also support using
+@uref{http://www.openmp.org,OpenMP}, enabled by using
+@code{--enable-openmp}.  (This may be useful if you are employing that
+sort of directive in your own code, in order to minimize conflicts.)
+If you have a shared-memory machine that uses a different threads API,
+it should be a simple matter of programming to include support for it;
+see the file @code{threads/threads.c} for more detail.
 
 Ideally, of course, you should also have multiple processors in order to
 get any benefit from the threaded transforms.
@@ -4706,16 +4704,15 @@ machine/compiler.  @xref{Precision}.
 @cindex threads
 @code{--enable-threads}: Enables compilation and installation of the
 FFTW threads library (@pxref{Multi-threaded FFTW}), which provides a
-simple interface to parallel transforms for SMP systems.  (By default,
-the threads routines are not compiled.)
+simple interface to parallel transforms for SMP systems.  By default,
+the threads routines are not compiled.
 
 @item
-@code{--with-openmp}, @code{--with-sgimp}: In conjunction with
-@code{--enable-threads}, causes the multi-threaded FFTW library to use
-OpenMP or SGI MP compiler directives in order to induce parallelism,
-rather than spawning its own threads directly.  (Useful especially for
-programs already employing such directives, in order to minimize
-conflicts between different parallelization mechanisms.)
+@code{--enable-openmp}: Like @code{--enable-threads}, but using OpenMP
+compiler directives in order to induce parallelism rather than
+spawning its own threads directly.  Useful especially for programs
+already employing such directives, in order to minimize conflicts
+between different parallelization mechanisms.
 
 @ignore
 @item
