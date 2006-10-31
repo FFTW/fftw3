@@ -30,31 +30,30 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-/* Abstraction of a binary semaphore, implemented with general semaphores: */
-typedef sem_t bsem_t; 
+typedef sem_t os_sem_t; 
 
-static void bsem_init(bsem_t *s)
+static void os_sem_init(os_sem_t *s)
 {
      sem_init(s, 0, 0);
 }
 
-static void up(bsem_t *s)
-{
-     sem_post(s);
-}
-
-static void down(bsem_t *s)
-{
-     sem_wait(s);
-}
-
-static void bsem_destroy(bsem_t *s)
+static void os_sem_destroy(os_sem_t *s)
 {
      sem_destroy(s);
 }
 
-static void create_worker(void *(*worker)(void *arg), 
-			  void *arg)
+static void os_sem_down(os_sem_t *s)
+{
+     sem_wait(s);
+}
+
+static void os_sem_up(os_sem_t *s)
+{
+     sem_post(s);
+}
+
+static void os_create_worker(void *(*worker)(void *arg), 
+			     void *arg)
 {
      pthread_attr_t attr;
      pthread_t tid;
@@ -67,7 +66,7 @@ static void create_worker(void *(*worker)(void *arg),
      pthread_attr_destroy(&attr);
 }
 
-static void destroy_worker(void)
+static void os_destroy_worker(void)
 {
      pthread_exit((void *)0);
 }
@@ -77,9 +76,86 @@ static void destroy_worker(void)
 #endif
 
 /************************************************************************/
+int X(spinlock_mode_i_know_what_i_am_doing) = 0;
+#define SPINLOCK_MODE X(spinlock_mode_i_know_what_i_am_doing)
+
+/* two implementations of semaphores:
+
+    If (!SPINLOCK_MODE), then X is unused and we use OS semaphores
+    as is.
+
+    If (SPINLOCK_MODE), then the OS semaphore S is used to implement
+    an atomic swap on X, which we use to spin.  See comments in down()
+    for why you must know what you are doing if you want spinlock mode.
+*/
+typedef struct {
+     volatile int x;
+     os_sem_t s;
+} fftw_sem_t;
+
+/* atomic exchange of S->X and X */
+static int xchg(fftw_sem_t *s, int x)
+{
+     int r;
+     os_sem_down(&s->s);
+     r = s->x;
+     s->x = x;
+     os_sem_up(&s->s);
+     return r;
+}
+
+static void fftw_sem_init(fftw_sem_t *s)
+{
+     os_sem_init(&s->s);
+
+     if (SPINLOCK_MODE) {
+	  s->x = 0;
+	  os_sem_up(&s->s);
+     }
+}
+
+static void fftw_sem_destroy(fftw_sem_t *s)
+{
+     os_sem_destroy(&s->s);
+}
+
+static void down(fftw_sem_t *s)
+{
+     if (SPINLOCK_MODE) {
+	  if (xchg(s, 0) != 0) 
+	       return; /* fast case */
+
+	  do {
+	       /* Spin on s->x, without yielding to the OS and without
+		  clogging the bus with atomic operations. 
+
+		  This implementation guarantees mutual exclusion, but
+		  it may livelock because there is no guarantee that
+		  the update xchg(s, 1) in up() becomes ever visible
+		  to the current thread.  This property depends upon
+		  the memory model, and can be portably guaranteed
+		  only if we call os_sem_down(), which is precisely
+		  what we are trying to avoid.
+	       */
+	       while (s->x == 0) ;
+	  } while (xchg(s, 0) == 0);
+     } else {
+	  os_sem_down(&s->s);
+     }
+}
+
+static void up(fftw_sem_t *s)
+{
+     if (SPINLOCK_MODE) {
+	  xchg(s, 1);
+     } else {
+	  os_sem_up(&s->s);
+     }
+}
+
 /* Main code: */
 struct worker {
-     bsem_t ready;
+     fftw_sem_t ready;
      struct work *w;
      struct worker *cdr;
 };
@@ -87,11 +163,11 @@ struct worker {
 struct work {
      spawn_function proc;
      spawn_data d;
-     bsem_t done;
+     fftw_sem_t done;
      struct work *cdr;
 };
 
-static bsem_t queue_lock;
+static fftw_sem_t queue_lock;
 static struct worker *worker_queue;
 #define WITH_QUEUE_LOCK(what)			\
 {						\
@@ -104,7 +180,7 @@ static void *worker(void *arg)
 {
      struct worker ego;
      struct work *w = (struct work *)arg;
-     bsem_init(&ego.ready);
+     fftw_sem_init(&ego.ready);
 
      do {
 	  A(w->proc);
@@ -135,9 +211,9 @@ static void *worker(void *arg)
      /* termination protocol */
      up(&w->done);
 
-     bsem_destroy(&ego.ready);
+     fftw_sem_destroy(&ego.ready);
 
-     destroy_worker();
+     os_destroy_worker();
      /* UNREACHABLE */
      return (void *)0;
 }
@@ -147,7 +223,7 @@ static void kill_workforce(void)
      struct work w;
 
      w.proc = 0;
-     bsem_init(&w.done);
+     fftw_sem_init(&w.done);
 
      WITH_QUEUE_LOCK({
 	  /* tell all workers that they must terminate.  
@@ -166,12 +242,12 @@ static void kill_workforce(void)
 	  }
      });
 
-     bsem_destroy(&w.done);
+     fftw_sem_destroy(&w.done);
 }
 
 int X(ithreads_init)(void)
 {
-     bsem_init(&queue_lock);
+     fftw_sem_init(&queue_lock);
      up(&queue_lock);
 
      worker_queue = 0;
@@ -224,19 +300,19 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
 	       proc(d);
 	  } else {
 	       /* dispatch work W to some worker */
-	       bsem_init(&w->done);
+	       fftw_sem_init(&w->done);
 
 	       WITH_QUEUE_LOCK({
 		    if (worker_queue) {
 			 /* a worker is available.  Remove it from the
 			    worker queue and wake it up */
-			 struct worker *r = worker_queue;
-			 worker_queue = r->cdr;
-			 r->w = w;
-			 up(&r->ready);
+			 struct worker *q = worker_queue;
+			 worker_queue = q->cdr;
+			 q->w = w;
+			 up(&q->ready);
 		    } else {
 			 /* no worker is available.  Create one */
-			 create_worker(worker, w);
+			 os_create_worker(worker, w);
 		    }
 	       });
 	  }
@@ -245,7 +321,7 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      for (i = 0; i < nthr - 1; ++i) { 
 	  struct work *w = &r[i];
 	  down(&w->done);
-	  bsem_destroy(&w->done);
+	  fftw_sem_destroy(&w->done);
      }
 
      STACK_FREE(r);
@@ -255,7 +331,7 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
 void X(threads_cleanup)(void)
 {
      kill_workforce();
-     bsem_destroy(&queue_lock);
+     fftw_sem_destroy(&queue_lock);
 }
 
 #endif /* HAVE_THREADS */
