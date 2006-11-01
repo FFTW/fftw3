@@ -54,7 +54,7 @@ void my_usage(const char *progname, const struct my_option *opt)
 		 col += 5;
 		 break;
 	    case OPTARG:
-		 fputs(" [arg(s)]]", stdout);
+		 fputs(" [arg]]", stdout);
 		 col += 10;
 		 break;
 	    default:
