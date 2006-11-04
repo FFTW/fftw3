@@ -28,28 +28,41 @@
 #if defined(USING_POSIX_THREADS)
 
 #include <pthread.h>
-#include <semaphore.h>
 
-typedef sem_t os_sem_t; 
+typedef struct {
+     pthread_mutex_t m;
+     pthread_cond_t c;
+     int x;
+} os_sem_t; 
 
 static void os_sem_init(os_sem_t *s)
 {
-     sem_init(s, 0, 0);
+     pthread_mutex_init(&s->m, (pthread_mutexattr_t *)0);
+     pthread_cond_init(&s->c, (pthread_condattr_t *)0);
+     s->x = 0;
 }
 
 static void os_sem_destroy(os_sem_t *s)
 {
-     sem_destroy(s);
+     pthread_mutex_destroy(&s->m);
+     pthread_cond_destroy(&s->c);
 }
 
 static void os_sem_down(os_sem_t *s)
 {
-     sem_wait(s);
+     pthread_mutex_lock(&s->m);
+     while (s->x <= 0) 
+	  pthread_cond_wait(&s->c, &s->m);
+     --s->x;
+     pthread_mutex_unlock(&s->m);
 }
 
 static void os_sem_up(os_sem_t *s)
 {
-     sem_post(s);
+     pthread_mutex_lock(&s->m);
+     ++s->x;
+     pthread_cond_signal(&s->c);
+     pthread_mutex_unlock(&s->m);
 }
 
 static void os_create_worker(void *(*worker)(void *arg), 
