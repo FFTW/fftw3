@@ -177,7 +177,6 @@ struct work {
      spawn_function proc;
      spawn_data d;
      fftw_sem_t done;
-     struct work *cdr;
 };
 
 static fftw_sem_t queue_lock;
