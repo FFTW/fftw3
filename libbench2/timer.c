@@ -59,7 +59,7 @@ static double elapsed(mytime t1, mytime t0)
 {
      LARGE_INTEGER freq;
      QueryPerformanceFrequency(&freq);
-     return ((double) (t1.QuadPart - t0.QuadPart)) /
+     return (((double) t1.QuadPart - (double) t0.QuadPart)) /
 	  ((double) freq.QuadPart);
 }
 
@@ -79,8 +79,8 @@ static mytime get_time(void)
 
 static double elapsed(mytime t1, mytime t0)
 {
-     return (double)(t1.tv_sec - t0.tv_sec) +
-	  (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6;
+     return ((double) t1.tv_sec - (double) t0.tv_sec) +
+	  ((double) t1.tv_usec - (double) t0.tv_usec) * 1.0E-6;
 }
 
 #define HAVE_TIMER
