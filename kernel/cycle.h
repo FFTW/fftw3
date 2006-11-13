@@ -92,7 +92,7 @@
 
 #define INLINE_ELAPSED(INL) static INL double elapsed(ticks t1, ticks t0) \
 {									  \
-     return (double)(t1 - t0);						  \
+     return (double)t1 - (double)t0;					  \
 }
 
 /*----------------------------------------------------------------*/
@@ -123,7 +123,8 @@ static inline double elapsed(ticks t1, ticks t0) /* time in nanoseconds */
 {
      time_base_to_time(&t1, TIMEBASE_SZ);
      time_base_to_time(&t0, TIMEBASE_SZ);
-     return ((t1.tb_high - t0.tb_high) * 1e9 + (t1.tb_low - t0.tb_low));
+     return (((double)t1.tb_high - (double)t0.tb_high) * 1.0e9 + 
+	     ((double)t1.tb_low - (double)t0.tb_low));
 }
 
 #define HAVE_TICK_COUNTER
@@ -206,7 +207,7 @@ static __inline ticks getticks(void)
 
 static __inline double elapsed(ticks t1, ticks t0)
 {  
-     return (double)(t1.QuadPart - t0.QuadPart);
+     return (double)t1.QuadPart - (double)t0.QuadPart;
 }  
 
 #define HAVE_TICK_COUNTER
@@ -329,6 +330,8 @@ static __inline ticks getticks(void)
      return temp;
 }
 
+INLINE_ELAPSED(inline)
+
 #define HAVE_TICK_COUNTER
 #endif
 
@@ -445,8 +448,8 @@ static inline ticks getticks(void)
 
 static inline double elapsed(ticks t1, ticks t0)
 {
-     return (double)(t1.tv_sec - t0.tv_sec) * 1.0E9 +
-	  (double)(t1.tv_nsec - t0.tv_nsec);
+     return ((double)t1.tv_sec - (double)t0.tv_sec) * 1.0E9 +
+	  ((double)t1.tv_nsec - (double)t0.tv_nsec);
 }
 #define HAVE_TICK_COUNTER
 #endif
