@@ -255,29 +255,33 @@ extern int X(in_thread);
 /*-----------------------------------------------------------------------*/
 /* low-resolution clock */
 
-#if TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
+#ifdef FAKE_CRUDE_TIME
+ typedef int crude_time;
 #else
-# if HAVE_SYS_TIME_H
+# if TIME_WITH_SYS_TIME
 #  include <sys/time.h>
-# else
 #  include <time.h>
+# else
+#  if HAVE_SYS_TIME_H
+#   include <sys/time.h>
+#  else
+#   include <time.h>
+#  endif
 # endif
-#endif
 
-#ifdef HAVE_BSDGETTIMEOFDAY
-#ifndef HAVE_GETTIMEOFDAY
-#define gettimeofday BSDgettimeofday
-#define HAVE_GETTIMEOFDAY 1
-#endif
-#endif
+# ifdef HAVE_BSDGETTIMEOFDAY
+# ifndef HAVE_GETTIMEOFDAY
+# define gettimeofday BSDgettimeofday
+# define HAVE_GETTIMEOFDAY 1
+# endif
+# endif
 
-#if defined(HAVE_GETTIMEOFDAY)
-typedef struct timeval crude_time;
-#else
-typedef clock_t crude_time;
-#endif
+# if defined(HAVE_GETTIMEOFDAY)
+   typedef struct timeval crude_time;
+# else
+   typedef clock_t crude_time;
+# endif
+#endif /* else FAKE_CRUDE_TIME */
 
 crude_time X(get_crude_time)(void);
 double X(elapsed_since)(const planner *plnr, const problem *p,

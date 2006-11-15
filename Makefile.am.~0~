@@ -14,7 +14,7 @@ endif
 ACLOCAL_AMFLAGS=-I ./m4
 
 SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft api threads \
-cell libbench2 . tests mpi doc tools
+libbench2 . tests mpi doc tools
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in m4
 
 if HAVE_SIMD
@@ -41,13 +41,13 @@ libfftw3@PREC_SUFFIX@_la_SOURCES =
 libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	kernel/libkernel.la				\
 	dft/libdft.la					\
-	dft/codelets/libdft_codelets.la			\
-	dft/codelets/standard/libdft_standard.la	\
+	dft/scalar/libdft_scalar.la			\
+	dft/scalar/codelets/libdft_scalar_codelets.la	\
 	rdft/librdft.la					\
-	rdft/codelets/librdft_codelets.la		\
-	rdft/codelets/r2cf/librdft_codelets_r2cf.la	\
-	rdft/codelets/r2cb/librdft_codelets_r2cb.la	\
-	rdft/codelets/r2r/librdft_codelets_r2r.la	\
+	rdft/scalar/librdft_scalar.la			\
+	rdft/scalar/r2cf/librdft_scalar_r2cf.la		\
+	rdft/scalar/r2cb/librdft_scalar_r2cb.la		\
+	rdft/scalar/r2r/librdft_scalar_r2r.la		\
 	reodft/libreodft.la				\
 	api/libapi.la					\
         $(SIMD_LIBS) $(COMBINED_THREADLIBS)

@@ -171,7 +171,7 @@ void bench_free(void *p)
  **********************************************************/
 /* production version, no hacks */
 
-#define MIN_ALIGNMENT 16    /* must be power of two */
+#define MIN_ALIGNMENT 128    /* must be power of two */
 
 #define real_free free /* memalign and malloc use ordinary free */
 

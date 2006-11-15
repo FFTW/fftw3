@@ -28,4 +28,5 @@ void X(configure_planner)(planner *plnr)
      X(dft_conf_standard)(plnr);
      X(rdft_conf_standard)(plnr);
      X(reodft_conf_standard)(plnr);
+     X(dft_conf_cell)(plnr);
 }

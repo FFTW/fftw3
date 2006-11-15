@@ -500,6 +500,8 @@ AC_CONFIG_FILES([
    reodft/Makefile
 
    threads/Makefile
+   cell/Makefile
+   cell/spu/Makefile
 
    mpi/Makefile
 

@@ -1,0 +1,35 @@
+CBE_SYSROOT=/opt/IBM/cell-sdk-1.1/sysroot
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+
+SPU_CC=spu-gcc
+
+SPU_CFLAGS= -O3 -W -Wall -Winline -Wno-main -I${top_srcdir}	\
+-I${top_srcdir}/kernel -I $(CBE_SYSROOT)/usr/spu/include
+
+EMBEDSPU = embedspu
+EMBEDSPU_FLAGS = -m32
+
+OBJ=spu_n2fv_10.o spu_n2fv_8.o spu_t1fv_4.o spu_n2fv_12.o		\
+spu_t1fv_10.o spu_t1fv_5.o spu_n2fv_14.o spu_t1fv_12.o spu_t1fv_6.o	\
+spu_n2fv_16.o spu_t1fv_15.o spu_t1fv_7.o spu_n2fv_2.o spu_t1fv_16.o	\
+spu_t1fv_8.o spu_n2fv_32.o spu_t1fv_2.o spu_t1fv_9.o spu_n2fv_4.o	\
+spu_t1fv_32.o spu_n2fv_6.o spu_t1fv_3.o execute.o
+
+all:  spu_fftw-embed.o planner 
+
+spu_fftw-embed.o: spu_fftw
+	$(EMBEDSPU) $(EMBEDSPU_FLAGS) spu_fftw $< $@
+
+spu_fftw: main.o alloc.o $(OBJ)
+	$(SPU_CC) -o $@ $^
+
+planner: planner.o $(OBJ)
+	$(SPU_CC) -o $@ $^ -lm
+
+.c.o:
+	$(SPU_CC) $(SPU_CFLAGS) -c -o $@ $<
+
+
+clean:
+	rm -f *.o planner

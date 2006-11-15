@@ -1,0 +1,68 @@
+#include "fftw-spu.h"
+
+const n_codelet X(n2fvtab)[33] = {
+     [2] = X(spu_n2fv_2),
+     [4] = X(spu_n2fv_4),
+     [6] = X(spu_n2fv_6),
+     [8] = X(spu_n2fv_8),
+     [10] = X(spu_n2fv_10),
+     [12] = X(spu_n2fv_12),
+     [14] = X(spu_n2fv_14),
+     [16] = X(spu_n2fv_16),
+     [32] = X(spu_n2fv_32),
+};
+
+const t_codelet X(t1fvtab)[33] = {
+     [2] = X(spu_t1fv_2),
+     [3] = X(spu_t1fv_3),
+     [4] = X(spu_t1fv_4),
+     [5] = X(spu_t1fv_5),
+     [6] = X(spu_t1fv_6),
+     [7] = X(spu_t1fv_7),
+     [8] = X(spu_t1fv_8),
+     [9] = X(spu_t1fv_9),
+     [10] = X(spu_t1fv_10),
+     [12] = X(spu_t1fv_12),
+     [15] = X(spu_t1fv_15),
+     [16] = X(spu_t1fv_16),
+     [32] = X(spu_t1fv_32),
+};
+
+static void recur(struct spu_plan *p, const R *in, R *out,
+		  stride is, /* stride os, assert(os == 2) */
+		  int v, /* stride ivs, assert(ivs == 2) */
+		  stride ovs)
+{
+     /* assert(v > 0); */
+     /* assert((v % VL) == 0); */
+
+     int r = p->r, m = p->m;
+
+     if (r < 0) {
+	  X(n2fvtab)[-r](in, in+1, out, out+1, is, 2, v, 2, ovs);
+     } else {
+	  int i;
+
+	  for (i = 0; i < r; ++i) 
+	       recur(p+1, in + i * is, out + i * m * 2,
+		     r * is, v, ovs);
+
+	  for (i = 0; i < v; ++i) 
+	       X(t1fvtab)[r](out + i*ovs, (out+1) + i*ovs, p->W, 2*m, m, 2);
+     }
+}
+
+void X(spu_execute_plan)(struct spu_plan *p, const R *in, R *out)
+{
+     if (sizeof(R) == sizeof(float)) {
+	  int r = p->r, m = p->m;
+
+	  /* assert(r > 0); */
+	  /* assert((r % 2) == 0); */
+	  recur(p+1, in, out, /* is: */ 2*r, /* v: */ r, /* ovs: */ 2*m);
+	  X(t1fvtab)[r](out, out+1, p->W, 2*m, m, 2);
+     } else {
+	  recur(p, in, out, /* is: */ 2, /* v: */ 1, /* ovs: */ 0);
+     }
+}
+
