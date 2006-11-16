@@ -20,7 +20,7 @@
 
 #include "ifftw.h"
 
-#ifdef HAVE_CELL
+#if HAVE_CELL
 
 #include "fftw-cell.h"
 #include <libspe.h>

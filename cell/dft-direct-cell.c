@@ -22,7 +22,7 @@
 
 #include "dft.h"
 
-#ifdef HAVE_CELL
+#if HAVE_CELL
 
 #include "simd.h"
 #include "fftw-cell.h"
