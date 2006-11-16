@@ -6,6 +6,7 @@
 #include "../fftw-cell.h"
 
 #define MAX_DMA_SIZE 16384
+#define MAX_LIST_SZ 64
 
 #if FFTW_SINGLE
 typedef unsigned long long complex_hack_t;
@@ -71,16 +72,20 @@ static void dma1d(void *spu_addr_, unsigned long long ppu_addr, size_t sz,
      }
 }
 
+
 /* 2D dma transfer routine, works for 
    ppu_stride_bytes == 2 * sizeof(R) or ppu_vstride_bytes == 2 * sizeof(R) */
 static void dma2d(R *A, unsigned long long ppu_addr, 
-		  size_t n, /* int spu_stride = 2 , */ int ppu_stride_bytes,
-		  size_t v, /* int spu_vstride = 2 * n, */
+		  int n, /* int spu_stride = 2 , */ int ppu_stride_bytes,
+		  int v, /* int spu_vstride = 2 * n, */
 		  int ppu_vstride_bytes,
 		  unsigned int cmd,
-		  R *buf)
+		  R *buf, int nbuf)
 {
      int vv, i;
+     
+     static mfc_list_element_t list[MAX_LIST_SZ] 
+	  __attribute__ ((aligned (ALIGNMENT)));
 
      if (ppu_stride_bytes == 2 * sizeof(R)) { 
 	  /* contiguous array on the PPU side */
@@ -96,8 +101,8 @@ static void dma2d(R *A, unsigned long long ppu_addr,
 	       A += 2 * n;
 	       ppu_addr += ppu_vstride_bytes;
 	  }
-     } else {
-	  /* ppu_vstride_bytes == 2 * sizeof(R) */
+     } else if (2 * sizeof(R) * v > 16384) {
+	  /* vector transfer of long vectors */
 	  for (i = 0; i < n; ++i) {
 	       R *bufalign = align_like(buf, ppu_addr);
 	       if (cmd == MFC_PUT_CMD)
@@ -108,9 +113,49 @@ static void dma2d(R *A, unsigned long long ppu_addr,
 	       A += 2;
 	       ppu_addr += ppu_stride_bytes;
 	  }
+     } else {
+	  /* vector transfer of short vectors, use dma lists */
+
+	  /* ppu_vstride_bytes == 2 * sizeof(R) */
+	  int ii;
+	  unsigned int cmdl = 
+	       (cmd == MFC_PUT_CMD) ? MFC_PUTL_CMD : MFC_GETL_CMD;
+	  unsigned int tag_id = 0;
+
+	  for (i = 0; i < n; i += nbuf) {
+	       /* FIXME: I don't think that this alignment makes any
+		  difference */
+	       R *bufalign = align_like(buf, ppu_addr);
+
+	       if (nbuf > n - i)
+		    nbuf = n - i;
+
+	       for (ii = 0; ii < nbuf; ++ii) {
+		    list[ii].notify = 0;
+		    list[ii].size = 2 * sizeof(R) * v;
+		    list[ii].eal = ppu_addr;
+		    ppu_addr += ppu_stride_bytes;
+	       }
+
+	       if (cmd == MFC_PUT_CMD) 
+		    for (ii = 0; ii < nbuf; ++ii) {
+			 complex_memcpy(bufalign + ii * 2 * v, 2, A, 2 * n, v);
+			 A += 2;
+		    }
+
+	       spu_mfcdma32(bufalign, (unsigned)list, nbuf * sizeof(list[0]),
+			    tag_id, cmdl);
+	       spu_mfcstat(2);
+
+	       if (cmd == MFC_GET_CMD) 
+		    for (ii = 0; ii < nbuf; ++ii) {
+			 complex_memcpy(A, 2 * n, bufalign + ii * 2 * v, 2, v);
+			 A += 2;
+		    }
+	  }
      }
 }
-		     
+
 static void build_plan(struct spu_plan *p,
 		       int n, R *W, const struct spu_radices *pp)
 {
@@ -182,7 +227,7 @@ static void flip_ri(R *A, int ncomplex)
 static void do_dft(struct dft_context *dft)
 {
      int v, vv;
-     int chunk;
+     int chunk, nbuf;
      struct spu_plan plan[MAX_PLAN_LEN];
      R *W, *A, *Aalign, *Balign, *buf;
      int n = dft->n;
@@ -199,25 +244,45 @@ static void do_dft(struct dft_context *dft)
      /* build plan */
      build_plan(plan, dft->n, W, &dft->r);
 
+     /* Proof that you can write FORTRAN in any language: */
+
+     /* ugly computation of nbuf */
+     if (VL > 1 && 
+	 (dft->is_bytes != 2 * sizeof(R) || dft->os_bytes != 2 * sizeof(R))) {
+
+	  /* either the input or the output operates in vector
+	     mode.  Allocate about n/16 buffers (arbitrary) */
+	  nbuf = 1 + n/16;
+     } else {
+	  /* we don't need any dma buffer in this case */
+	  nbuf = 0;
+     }
+
+     if (nbuf > MAX_LIST_SZ) 
+	  nbuf = MAX_LIST_SZ;
+
      /* allocation:
 	A: (chunk + 1) * nbytes + 2 * ALIGNMENT
-	buf: 2 * sizeof(R) * chunk + ALIGNMENT.
+	buf: 2 * sizeof(R) * nbuf * chunk + ALIGNMENT.
 
 	Solving for chunk yields: 
      */
-     if (VL > 1 &&
-	 (dft->is_bytes != 2 * sizeof(R) || dft->os_bytes != 2 * sizeof(R))) {
-	  /* either the input or the output operates in vector mode.  
-	     Must guarantee chunk % VL == 0 */
-	  chunk = VL * ((X(spu_alloc_avail)() - 3 * ALIGNMENT - nbytes) / 
-			(VL * (nbytes + 2 * sizeof(R))));
-     } else {
-	  chunk = (X(spu_alloc_avail)() - 3 * ALIGNMENT - nbytes) / 
-	       (nbytes + 2 * sizeof(R));
+     {
+	  int avail = X(spu_alloc_avail)() - 3 * ALIGNMENT - nbytes;
+	  int per_chunk = nbytes + 2 * sizeof(R) * nbuf;
+	  if (VL > 1 &&
+	      (dft->is_bytes != 2 * sizeof(R) || 
+	       dft->os_bytes != 2 * sizeof(R))) {
+	       /* either the input or the output operates in vector
+		  mode.  Must guarantee chunk % VL == 0 */
+	       chunk = VL * (avail / (VL * per_chunk));
+	  } else {
+	       chunk = avail / per_chunk;
+	  }
      }
 
-     buf = X(spu_alloc)(2 * sizeof(R) * chunk + ALIGNMENT);
-     A = X(spu_alloc)((chunk + 1) * nbytes + 2 * ALIGNMENT);
+     buf = X(spu_alloc)(2 * sizeof(R) * nbuf * chunk + ALIGNMENT);
+     A = X(spu_alloc)((chunk + 1) * nbytes + 2 * ALIGNMENT);     /* QED */
 
      /* for all vector elements we are responsible for: */
      for (v = dft->v0; v < dft->v1; v += chunk) {
@@ -232,7 +297,7 @@ static void do_dft(struct dft_context *dft)
 	  dma2d(Aalign, dft->xi + v * dft->ivs_bytes,
 		n, /* 2, */ dft->is_bytes,
 		chunk, /* twon, */ dft->ivs_bytes,
-		MFC_GET_CMD, buf);
+		MFC_GET_CMD, buf, nbuf);
 
 	  if (dft->sign == 1)
 	       flip_ri(Aalign, n * chunk);
@@ -250,7 +315,7 @@ static void do_dft(struct dft_context *dft)
 	  dma2d(Balign, dft->xo + v * dft->ovs_bytes,
 		n, /* 2, */ dft->os_bytes,
 		chunk, /* twon, */ dft->ovs_bytes,
-		MFC_PUT_CMD, buf);
+		MFC_PUT_CMD, buf, nbuf);
      }
 }
 
