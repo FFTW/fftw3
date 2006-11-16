@@ -1,5 +1,6 @@
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft
 noinst_LTLIBRARIES = libcell.la
+SUBDIRS=spu
 
 if SINGLE
 PLANS=plans-single.c
