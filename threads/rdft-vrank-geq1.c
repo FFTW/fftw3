@@ -202,7 +202,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int vecloop_dim, const int *buddies, int nbuddies)
 {
-     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);
      slv->vecloop_dim = vecloop_dim;
      slv->buddies = buddies;

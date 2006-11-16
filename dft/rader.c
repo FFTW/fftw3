@@ -315,7 +315,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);
      return &(slv->super);
 }

@@ -55,7 +55,9 @@ void X(dft_direct_cell_register)(planner *p);
 void X(dft_conf_cell)(planner *p);
 
 void *X(cell_aligned_malloc)(size_t n);
-int X(init_cell)(void);
+void X(cell_activate_spes)(void);
+void X(cell_deactivate_spes)(void);
+
 int X(cell_nspe)(void);
 struct spu_context *X(cell_get_ctx)(int spe);
 void X(cell_spe_awake_all)(void);

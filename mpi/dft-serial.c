@@ -120,7 +120,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { PROBLEM_MPI_DFT, mkplan };
+     static const solver_adt sadt = { PROBLEM_MPI_DFT, mkplan, 0 };
      return MKSOLVER(solver, &sadt);
 }
 

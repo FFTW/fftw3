@@ -72,7 +72,7 @@ static plan *mkplan(const solver *ego, const problem *p, planner *plnr)
 
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan, 0 };
      return MKSOLVER(solver, &sadt);
 }
 

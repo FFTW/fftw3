@@ -534,6 +534,7 @@ void X(plan_null_destroy)(plan *ego);
 typedef struct {
      int problem_kind;
      plan *(*mkplan)(const solver *ego, const problem *p, planner *plnr);
+     void (*destroy)(solver *ego);
 } solver_adt;
 
 struct solver_s {

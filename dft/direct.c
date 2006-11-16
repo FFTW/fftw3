@@ -273,7 +273,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(kdft k, const kdft_desc *desc, int bufferedp)
 {
-     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);
      slv->k = k;
      slv->desc = desc;

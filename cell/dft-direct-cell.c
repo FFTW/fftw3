@@ -292,10 +292,17 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 }
 
+static void solver_destroy(solver *ego)
+{
+     UNUSED(ego);
+     X(cell_deactivate_spes)();
+}
+
 static solver *mksolver(void)
 {
-     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan, solver_destroy };
      S *slv = MKSOLVER(S, &sadt);
+     X(cell_activate_spes)();
      return &(slv->super);
 }
 

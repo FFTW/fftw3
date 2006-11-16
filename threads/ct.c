@@ -259,7 +259,7 @@ ct_solver *X(mksolver_ct_threads)(size_t size, INT r, int dec,
 				  ct_mkinferior mkcldw,
 				  ct_force_vrecursion force_vrecursionp)
 {
-     static const solver_adt sadt = { PROBLEM_DFT, mkplan };
+     static const solver_adt sadt = { PROBLEM_DFT, mkplan, 0 };
      ct_solver *slv = (ct_solver *) X(mksolver)(size, &sadt);
      slv->r = r;
      slv->dec = dec;

@@ -297,7 +297,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(int copy_transposed_in)
 {
-     static const solver_adt sadt = { PROBLEM_MPI_TRANSPOSE, mkplan };
+     static const solver_adt sadt = { PROBLEM_MPI_TRANSPOSE, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);
      slv->copy_transposed_in = copy_transposed_in;
      return &(slv->super);

@@ -196,7 +196,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 hc2hc_solver *X(mksolver_hc2hc)(size_t size, INT r, hc2hc_mkinferior mkcldw)
 {
-     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT, mkplan, 0 };
      hc2hc_solver *slv = (hc2hc_solver *)X(mksolver)(size, &sadt);
      slv->r = r;
      slv->mkcldw = mkcldw;

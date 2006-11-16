@@ -370,7 +370,7 @@ void X(rdft_rank0_register)(planner *p)
      };
 
      for (i = 0; i < sizeof(tab) / sizeof(tab[0]); ++i) {
-	  static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
+	  static const solver_adt sadt = { PROBLEM_RDFT, mkplan, 0 };
 	  S *slv = MKSOLVER(S, &sadt);
 	  slv->apply = tab[i].apply;
 	  slv->applicable = tab[i].applicable;

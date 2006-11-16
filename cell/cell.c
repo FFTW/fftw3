@@ -37,11 +37,12 @@ void *X(cell_aligned_malloc)(size_t n)
 
 static struct spu_context *ctx[SPU_NUM_THREADS];
 static speid_t spe_id[SPU_NUM_THREADS];
-static int inited = 0;
+static int refcnt = 0;
 static int nspe;
-int X(init_cell)(void)
+
+void X(cell_activate_spes)(void)
 {
-     if (!inited) {
+     if (refcnt++ == 0) {
 	  int i;
 
 	  nspe = SPU_NUM_THREADS;
@@ -51,8 +52,25 @@ int X(init_cell)(void)
 	       spe_id[i] = spe_create_thread(0, &spu_fftw, ctx[i],
 					     NULL, -1, 0);
 	  }
+     }
+}
 
-	  inited = 1;
+void X(cell_deactivate_spes)(void)
+{
+     if (--refcnt == 0) {
+	  int i;
+	  int status = 0;
+
+	  for (i = 0; i < nspe; ++i)
+	       ctx[i]->op = SPE_EXIT;
+
+	  X(cell_spe_awake_all)();
+
+	  for (i = 0; i < nspe; ++i) {
+	       spe_wait(spe_id[i], &status, 0);
+	       free(ctx[i]);
+	       ctx[i] = 0;
+	  }
      }
 }
 

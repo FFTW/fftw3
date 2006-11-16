@@ -163,7 +163,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 /* constructor */
 solver *X(mksolver_rdft2_direct)(kr2c k, const kr2c_desc *desc)
 {
-     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);
      slv->k = k;
      slv->desc = desc;

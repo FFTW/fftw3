@@ -61,7 +61,6 @@ void rdwisdom(void)
      BENCH_ASSERT(FFTW(init_threads)());
      FFTW(plan_with_nthreads)(nthreads);
 #endif
-     FFTW(init_cell)();
 
      if (!usewisdom) return;
 

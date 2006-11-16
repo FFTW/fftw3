@@ -23,12 +23,8 @@ SIMD_LIBS=						\
 	simd/nonportable/libsimd_nonportable.la		\
 	dft/simd/libdft_simd.la				\
 	dft/simd/codelets/libdft_codelets_simd.la
-SIMD_OR_CELL_LIBS=simd/libsimd.la
-endif
-
-if HAVE_CELL
-CELL_LIBS=cell/libcell.la
-SIMD_OR_CELL_LIBS=simd/libsimd.la
+else
+SIMD_LIBS=
 endif
 
 

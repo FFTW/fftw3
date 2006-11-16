@@ -37,8 +37,11 @@ void X(solver_use)(solver *ego)
 
 void X(solver_destroy)(solver *ego)
 {
-     if ((--ego->refcnt) == 0)
+     if ((--ego->refcnt) == 0) {
+	  if (ego->adt->destroy)
+	       ego->adt->destroy(ego);
           X(ifree)(ego);
+     }
 }
 
 void X(solver_register)(planner *plnr, solver *s)
