@@ -101,7 +101,7 @@ typedef struct scanner_s scanner;
 
 /*-----------------------------------------------------------------------*/
 /* alloca: */
-#if HAVE_SIMD
+#if HAVE_SIMD || HAVE_CELL
 #define MIN_ALIGNMENT 16
 #endif
 
@@ -951,7 +951,7 @@ INT X(bufdist)(INT n, INT vl);
 int X(toobig)(INT n);
 int X(ct_uglyp)(INT min_n, INT n, INT r);
 
-#if HAVE_SIMD
+#if HAVE_SIMD || HAVE_CELL
 R *X(taint)(R *p, INT s);
 R *X(join_taint)(R *p1, R *p2);
 #define TAINT(p, s) X(taint)(p, s)

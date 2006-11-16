@@ -22,7 +22,7 @@
 #include "ifftw.h"
 #include "simd.h"
 
-#if HAVE_SIMD
+#if HAVE_SIMD || HAVE_CELL
 
 R *X(taint)(R *p, INT s)
 {

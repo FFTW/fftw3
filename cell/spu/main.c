@@ -247,8 +247,7 @@ static void do_dft(struct dft_context *dft)
      /* Proof that you can write FORTRAN in any language: */
 
      /* ugly computation of nbuf */
-     if (VL > 1 && 
-	 (dft->is_bytes != 2 * sizeof(R) || dft->os_bytes != 2 * sizeof(R))) {
+     if ((dft->is_bytes != 2 * sizeof(R) || dft->os_bytes != 2 * sizeof(R))) {
 
 	  /* either the input or the output operates in vector
 	     mode.  Allocate about n/16 buffers (arbitrary) */

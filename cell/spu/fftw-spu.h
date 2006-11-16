@@ -39,24 +39,38 @@ size_t X(spu_alloc_avail)(void);
 #define ALIGNMENT 128
 
 /* list of codelets: */
-void X(spu_n2fv_10) (const R *ri, const R *ii, R *ro, R *io, stride is,
-		     stride os, INT v, INT ivs, INT ovs);
-void X(spu_n2fv_12) (const R *ri, const R *ii, R *ro, R *io, stride is,
-		     stride os, INT v, INT ivs, INT ovs);
-void X(spu_n2fv_14) (const R *ri, const R *ii, R *ro, R *io, stride is,
-		     stride os, INT v, INT ivs, INT ovs);
-void X(spu_n2fv_16) (const R *ri, const R *ii, R *ro, R *io, stride is,
-		     stride os, INT v, INT ivs, INT ovs);
 void X(spu_n2fv_2) (const R *ri, const R *ii, R *ro, R *io, stride is,
 		    stride os, INT v, INT ivs, INT ovs);
-void X(spu_n2fv_32) (const R *ri, const R *ii, R *ro, R *io, stride is,
-		     stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_3) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		    stride os, INT v, INT ivs, INT ovs);
 void X(spu_n2fv_4) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		    stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_5) (const R *ri, const R *ii, R *ro, R *io, stride is,
 		    stride os, INT v, INT ivs, INT ovs);
 void X(spu_n2fv_6) (const R *ri, const R *ii, R *ro, R *io, stride is,
 		    stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_7) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		    stride os, INT v, INT ivs, INT ovs);
 void X(spu_n2fv_8) (const R *ri, const R *ii, R *ro, R *io, stride is,
 		    stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_9) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		    stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_10) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		     stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_11) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		    stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_12) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		     stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_13) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		    stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_14) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		     stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_15) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		    stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_16) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		     stride os, INT v, INT ivs, INT ovs);
+void X(spu_n2fv_32) (const R *ri, const R *ii, R *ro, R *io, stride is,
+		     stride os, INT v, INT ivs, INT ovs);
 
 const R *X(spu_t1fv_10) (R *ri, R *ii, const R *W, stride ios, INT m,
 			 INT dist);

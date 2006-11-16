@@ -18,11 +18,13 @@
  *
  */
 
-/* $Id: direct.c,v 1.48 2006-01-05 03:04:26 stevenj Exp $ */
-
 /* direct DFT solver via cell library */
 
 #include "dft.h"
+
+#ifdef HAVE_CELL
+
+#include "simd.h"
 #include "fftw-cell.h"
 
 typedef struct {
@@ -190,29 +192,29 @@ const struct spu_radices *find_radices(R *ri, R *ii, R *ro, R *io,
      } else
 	  return 0; /* can't do it */
      
-     if (!X(cell_aligned_p)(xi) || !X(cell_aligned_p)(xo))
+     if (!ALIGNEDA(xi) || !ALIGNEDA(xo))
 	  return 0;
 
      /* either is or ivs must be 2 */
      if (is == 2) {
 	  /* DFT of contiguous input.  Vector strides must be
 	     aligned */
-	  if (!X(cell_aligned_stride)(ivs))
+	  if (!SIMD_STRIDE_OKA(ivs))
 	       return 0;
      } else if (ivs == 2) {
 	  /* Vector DFT.  Strides must be aligned */
-	  if (!X(cell_aligned_stride)(is) || ((v % VL) != 0))
+	  if (!SIMD_STRIDE_OKA(is) || ((v % VL) != 0))
 	       return 0;
      } else
 	  return 0; /* can't do it */
 
      /* same for output strides */
      if (os == 2) {
-	  if (!X(cell_aligned_stride)(ovs))
+	  if (!SIMD_STRIDE_OKA(ovs))
 	       return 0;
      } else if (ovs == 2) {
 	  /* Vector DFT.  Strides must be aligned */
-	  if (!X(cell_aligned_stride)(os) || ((v % VL) != 0))
+	  if (!SIMD_STRIDE_OKA(os) || ((v % VL) != 0))
 	       return 0;
      } else
 	  return 0; /* can't do it */
@@ -220,12 +222,13 @@ const struct spu_radices *find_radices(R *ri, R *ii, R *ro, R *io,
      return p;
 }
 
-static int applicable(const problem_dft *p)
+static int applicable(const planner *plnr, const problem_dft *p)
 {
      return (
 	  1
 	  && p->sz->rnk == 1
 	  && p->vecsz->rnk <= 1
+	  && !NO_SIMDP(plnr)
 
 	  && (0
 	      /* can operate out-of-place */
@@ -259,7 +262,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      UNUSED(plnr);
 
-     if (!applicable(p))
+     if (!applicable(plnr, p))
 	  return (plan *)0;
 
      d = p->sz->dims;
@@ -300,3 +303,5 @@ void X(dft_direct_cell_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }
+
+#endif /* HAVE_CELL */

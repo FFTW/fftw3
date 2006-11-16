@@ -18,9 +18,13 @@
  *
  */
 
+#include "ifftw.h"
+
+#ifdef HAVE_CELL
+
+#include "fftw-cell.h"
 #include <libspe.h>
 #include <stdlib.h> /* posix_memalign */
-#include "fftw-cell.h"
 
 extern spe_program_handle_t spu_fftw;
 
@@ -29,16 +33,6 @@ void *X(cell_aligned_malloc)(size_t n)
      void *p;
      posix_memalign(&p, 128, n);
      return p;
-}
-
-int X(cell_aligned_p)(R *x)
-{
-     return (((INT)x) & 15) == 0;
-}
-
-int X(cell_aligned_stride)(INT x)
-{
-     return ((x * sizeof(R)) & 15) == 0;
 }
 
 static struct spu_context *ctx[SPU_NUM_THREADS];
@@ -88,3 +82,5 @@ void X(cell_spe_wait_all)(void)
 	  (void) spe_read_out_mbox(spe_id[i]);
      }
 }
+
+#endif /* HAVE_CELL */

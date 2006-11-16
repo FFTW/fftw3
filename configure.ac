@@ -101,6 +101,12 @@ if test "$PRECISION" != "$simd_precision" && test "$have_simd" = "yes"; then
 	AC_MSG_ERROR([requested SIMD type does not match selected precision])
 fi
 
+AC_ARG_ENABLE(cell, [AC_HELP_STRING([--enable-cell],[enable optimizations for the Cell Broadband Engine])], have_cell=$enableval, have_cell=no)
+if test "$have_cell" = "yes"; then
+	AC_DEFINE(HAVE_CELL,1,[Define to enable optimizations for the Cell Broadband Engine])
+fi
+
+AM_CONDITIONAL(HAVE_CELL, test "$have_cell" = "yes")
 AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
 
 AC_ARG_WITH(slow-timer, [AC_HELP_STRING([--with-slow-timer],[use low-precision timers (SLOW)])], with_slow_timer=$withval, with_slow_timer=no)

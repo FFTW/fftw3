@@ -18,11 +18,13 @@ cell libbench2 . tests mpi doc tools
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in m4
 
 if HAVE_SIMD
-SIMD_LIBS=						\
-	simd/libsimd.la					\
-	simd/nonportable/libsimd_nonportable.la		\
-	dft/simd/libdft_simd.la				\
-	dft/simd/codelets/libdft_codelets_simd.la
+SIMD_LIBS=							\
+	simd/libsimd.la						\
+	simd/nonportable/libsimd_nonportable.la			\
+	dft/simd/libdft_simd.la					\
+	dft/simd/codelets/libdft_simd_codelets.la		\
+	rdft/simd/librdft_simd.la				\
+	rdft/simd/codelets/librdft_simd_codelets.la	
 else
 SIMD_LIBS=
 endif

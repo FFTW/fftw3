@@ -1,6 +1,11 @@
-AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft
+AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
+-I$(top_srcdir)/simd
 noinst_LTLIBRARIES = libcell.la
+
+if HAVE_CELL
 SUBDIRS=spu
+SPU_STUB=spu_fftw-embed.lo
+endif
 
 if SINGLE
 PLANS=plans-single.c
@@ -10,7 +15,7 @@ endif
 
 libcell_la_SOURCES = cell.c conf.c dft-direct-cell.c $(PLANS)	\
 fftw-cell.h
-libcell_la_LIBADD = spu_fftw-embed.lo
+libcell_la_LIBADD = $(SPU_STUB)
 
 # HACK ALERT:
 spu_fftw-embed.lo: conf.lo FORCE 

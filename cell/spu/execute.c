@@ -10,6 +10,16 @@ const n_codelet X(n2fvtab)[33] = {
      [14] = X(spu_n2fv_14),
      [16] = X(spu_n2fv_16),
      [32] = X(spu_n2fv_32),
+
+#ifndef FFTW_SINGLE
+     [3] = X(spu_n2fv_3),
+     [5] = X(spu_n2fv_5),
+     [7] = X(spu_n2fv_7),
+     [9] = X(spu_n2fv_9),
+     [11] = X(spu_n2fv_11),
+     [13] = X(spu_n2fv_13),
+     [15] = X(spu_n2fv_15),
+#endif
 };
 
 const t_codelet X(t1fvtab)[33] = {
