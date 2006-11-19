@@ -36,7 +36,34 @@ void X(spu_alloc_reset)(void);
 void *X(spu_alloc)(size_t sz);
 size_t X(spu_alloc_avail)(void);
 
+void X(spu_complex_memcpy)(R *dst, int dstride,
+			   const R *src, int sstride,
+			   int n);
+
+void X(spu_complex_transpose)(R *A_, int n);
+void X(spu_complex_transpose_and_swap)(R *A_, R *B_, int ni, int nj);
+
+void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
+		  unsigned int cmdl);
+
+void X(spu_dma2d)(R *A, long long ppu_addr, 
+		  int n, /* int spu_stride = 2 , */ int ppu_stride_bytes,
+		  int v, /* int spu_vstride = 2 * n, */
+		  int ppu_vstride_bytes,
+		  unsigned int cmdl,
+		  R *buf, int nbuf);
+
+/* max # of DMA lists */
+#define MAX_LIST_SZ 64
+
+/* DMA preferred alignment */
 #define ALIGNMENT 128
+
+/* add k to spu_addr, 0 < k <= ALIGNMENT, so that 
+   (spu_addr + k) % ALIGNMENT == ppu_addr % ALIGNMENT */
+#define ALIGN_LIKE(spu_addr, ppu_addr)						\
+  (void *)(((char *)(spu_addr)) +						\
+     ((((unsigned)(ppu_addr)) - ((unsigned)(spu_addr))) & (ALIGNMENT - 1)))
 
 /* list of codelets: */
 void X(spu_n2fv_2) (const R *ri, const R *ii, R *ro, R *io, stride is,

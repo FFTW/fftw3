@@ -1,160 +1,8 @@
 #include <stdlib.h>
 #include <spu_intrinsics.h>
-#include <cbe_mfc.h>
 #include <spu_mfcio.h>
 #include "fftw-spu.h"
 #include "../fftw-cell.h"
-
-#define MAX_DMA_SIZE 16384
-#define MAX_LIST_SZ 64
-
-#if FFTW_SINGLE
-typedef unsigned long long complex_hack_t;
-#else
-typedef vector float complex_hack_t;
-#endif
-
-static void complex_memcpy(R *dst, int dstride,
-			   const R *src, int sstride,
-			   int n)
-{
-     int i;
-
-     for (i = 0; i < n - 3; i += 4, src += 4 * sstride, dst += 4 * dstride) {
-	  complex_hack_t x0 = *((complex_hack_t *)(src + 0 * sstride));
-	  complex_hack_t x1 = *((complex_hack_t *)(src + 1 * sstride));
-	  complex_hack_t x2 = *((complex_hack_t *)(src + 2 * sstride));
-	  complex_hack_t x3 = *((complex_hack_t *)(src + 3 * sstride));
-	  *((complex_hack_t *)(dst + 0 * dstride)) = x0;
-	  *((complex_hack_t *)(dst + 1 * dstride)) = x1;
-	  *((complex_hack_t *)(dst + 2 * dstride)) = x2;
-	  *((complex_hack_t *)(dst + 3 * dstride)) = x3;
-     }
-     for (; i < n; ++i, src += sstride, dst += dstride) {
-	  complex_hack_t x0 = *((complex_hack_t *)(src + 0 * sstride));
-	  *((complex_hack_t *)(dst + 0 * dstride)) = x0;
-     }
-}
-
-/* add k to spu_addr, 0 < k <= ALIGNMENT, so that 
-   (spu_addr + k) % ALIGNMENT == ppu_addr % ALIGNMENT */
-static void *align_like(void *spu_addr_, unsigned long long ppu_addr)
-{
-     char *spu_addr = spu_addr_;
-     return spu_addr + ((((unsigned)ppu_addr) - ((unsigned)spu_addr))
-			& (ALIGNMENT - 1));
-}
-
-
-/* universal DMA transfer routine */
-static void dma1d(void *spu_addr_, unsigned long long ppu_addr, size_t sz,
-		  unsigned int cmd)
-		     
-{
-     unsigned int tag_id = 0;
-     char *spu_addr = spu_addr_;
-
-     while (sz > 0) {
-	  /* select chunk to align ppu_addr */
-	  size_t chunk = ALIGNMENT - (ppu_addr & (ALIGNMENT - 1));
-
-	  /* if already aligned, transfer the whole thing */
-	  if (chunk == ALIGNMENT || chunk > sz) 
-	       chunk = sz;
-	  
-	  /* ...up to MAX_DMA_SIZE */
-	  if (chunk > MAX_DMA_SIZE) 
-	       chunk = MAX_DMA_SIZE;
-
-	  spu_mfcdma32(spu_addr, ppu_addr, chunk, tag_id, cmd);
-	  sz -= chunk; spu_addr += chunk; ppu_addr += chunk;
-	  spu_mfcstat(2);
-     }
-}
-
-
-/* 2D dma transfer routine, works for 
-   ppu_stride_bytes == 2 * sizeof(R) or ppu_vstride_bytes == 2 * sizeof(R) */
-static void dma2d(R *A, unsigned long long ppu_addr, 
-		  int n, /* int spu_stride = 2 , */ int ppu_stride_bytes,
-		  int v, /* int spu_vstride = 2 * n, */
-		  int ppu_vstride_bytes,
-		  unsigned int cmd,
-		  R *buf, int nbuf)
-{
-     int vv, i;
-     
-     static mfc_list_element_t list[MAX_LIST_SZ] 
-	  __attribute__ ((aligned (ALIGNMENT)));
-
-     if (ppu_stride_bytes == 2 * sizeof(R)) { 
-	  /* contiguous array on the PPU side */
-	  
-	  /* if the input is a 1D contiguous array, collapse n into v */
-	  if (ppu_vstride_bytes == ppu_stride_bytes * n) {
-	       n *= v;
-	       v = 1;
-	  }
-	  
-	  for (vv = 0; vv < v; ++vv) {
-	       dma1d(A, ppu_addr, n * 2 * sizeof(R), cmd);
-	       A += 2 * n;
-	       ppu_addr += ppu_vstride_bytes;
-	  }
-     } else if (2 * sizeof(R) * v > 16384) {
-	  /* vector transfer of long vectors */
-	  for (i = 0; i < n; ++i) {
-	       R *bufalign = align_like(buf, ppu_addr);
-	       if (cmd == MFC_PUT_CMD)
-		    complex_memcpy(bufalign, 2, A, 2 * n, v);
-	       dma1d(bufalign, ppu_addr, v * 2 * sizeof(R), cmd);
-	       if (cmd == MFC_GET_CMD)
-		    complex_memcpy(A, 2 * n, bufalign, 2, v);
-	       A += 2;
-	       ppu_addr += ppu_stride_bytes;
-	  }
-     } else {
-	  /* vector transfer of short vectors, use dma lists */
-
-	  /* ppu_vstride_bytes == 2 * sizeof(R) */
-	  int ii;
-	  unsigned int cmdl = 
-	       (cmd == MFC_PUT_CMD) ? MFC_PUTL_CMD : MFC_GETL_CMD;
-	  unsigned int tag_id = 0;
-
-	  for (i = 0; i < n; i += nbuf) {
-	       /* FIXME: I don't think that this alignment makes any
-		  difference */
-	       R *bufalign = align_like(buf, ppu_addr);
-
-	       if (nbuf > n - i)
-		    nbuf = n - i;
-
-	       for (ii = 0; ii < nbuf; ++ii) {
-		    list[ii].notify = 0;
-		    list[ii].size = 2 * sizeof(R) * v;
-		    list[ii].eal = ppu_addr;
-		    ppu_addr += ppu_stride_bytes;
-	       }
-
-	       if (cmd == MFC_PUT_CMD) 
-		    for (ii = 0; ii < nbuf; ++ii) {
-			 complex_memcpy(bufalign + ii * 2 * v, 2, A, 2 * n, v);
-			 A += 2;
-		    }
-
-	       spu_mfcdma32(bufalign, (unsigned)list, nbuf * sizeof(list[0]),
-			    tag_id, cmdl);
-	       spu_mfcstat(2);
-
-	       if (cmd == MFC_GET_CMD) 
-		    for (ii = 0; ii < nbuf; ++ii) {
-			 complex_memcpy(A, 2 * n, bufalign + ii * 2 * v, 2, v);
-			 A += 2;
-		    }
-	  }
-     }
-}
 
 static void build_plan(struct spu_plan *p,
 		       int n, R *W, const struct spu_radices *pp)
@@ -224,7 +72,7 @@ static void flip_ri(R *A, int ncomplex)
 
 
 /* compute DFT of contiguous arrays (is = os = 2) */
-static void do_dft(struct dft_context *dft)
+static void do_dft(const struct dft_context *dft)
 {
      int v, vv;
      int chunk, nbuf;
@@ -238,19 +86,20 @@ static void do_dft(struct dft_context *dft)
 
      /* obtain twiddle factors */
      W = X(spu_alloc)(dft->Wsz_bytes + ALIGNMENT);
-     W = align_like(W, dft->W);
-     dma1d(W, dft->W, dft->Wsz_bytes, MFC_GET_CMD);
+     W = ALIGN_LIKE(W, dft->W);
+     X(spu_dma1d)(W, dft->W, dft->Wsz_bytes, MFC_GETL_CMD);
      
      /* build plan */
      build_plan(plan, dft->n, W, &dft->r);
 
-     /* Proof that you can write FORTRAN in any language: */
+     /* Proof that one can write FORTRAN in any language: */
 
      /* ugly computation of nbuf */
      if ((dft->is_bytes != 2 * sizeof(R) || dft->os_bytes != 2 * sizeof(R))) {
 
 	  /* either the input or the output operates in vector
 	     mode.  Allocate about n/16 buffers (arbitrary) */
+	  /* FIXME */
 	  nbuf = 1 + n/16;
      } else {
 	  /* we don't need any dma buffer in this case */
@@ -267,8 +116,8 @@ static void do_dft(struct dft_context *dft)
 	Solving for chunk yields: 
      */
      {
-	  int avail = X(spu_alloc_avail)() - 3 * ALIGNMENT - nbytes;
-	  int per_chunk = nbytes + 2 * sizeof(R) * nbuf;
+	  size_t avail = X(spu_alloc_avail)() - 3 * ALIGNMENT - nbytes;
+	  size_t per_chunk = nbytes + 2 * sizeof(R) * nbuf;
 	  if (VL > 1 &&
 	      (dft->is_bytes != 2 * sizeof(R) || 
 	       dft->os_bytes != 2 * sizeof(R))) {
@@ -288,15 +137,15 @@ static void do_dft(struct dft_context *dft)
 	  if (chunk > dft->v1 - v)
 	       chunk = dft->v1 - v;
 
-	  Aalign = align_like(A + ALIGNMENT + twon, 
+	  Aalign = ALIGN_LIKE(A + ALIGNMENT + twon, 
 			      dft->xi + v * dft->ivs_bytes);
-	  Balign = align_like(A, dft->xo + v * dft->ovs_bytes);
+	  Balign = ALIGN_LIKE(A, dft->xo + v * dft->ovs_bytes);
 
 	  /* obtain data */
-	  dma2d(Aalign, dft->xi + v * dft->ivs_bytes,
-		n, /* 2, */ dft->is_bytes,
-		chunk, /* twon, */ dft->ivs_bytes,
-		MFC_GET_CMD, buf, nbuf);
+	  X(spu_dma2d)(Aalign, dft->xi + v * dft->ivs_bytes,
+		       n, /* 2, */ dft->is_bytes,
+		       chunk, /* twon, */ dft->ivs_bytes,
+		       MFC_GETL_CMD, buf, nbuf);
 
 	  if (dft->sign == 1)
 	       flip_ri(Aalign, n * chunk);
@@ -311,13 +160,74 @@ static void do_dft(struct dft_context *dft)
 	       flip_ri(Balign, n * chunk);
 
 	  /* write data back */
-	  dma2d(Balign, dft->xo + v * dft->ovs_bytes,
-		n, /* 2, */ dft->os_bytes,
-		chunk, /* twon, */ dft->ovs_bytes,
-		MFC_PUT_CMD, buf, nbuf);
+	  X(spu_dma2d)(Balign, dft->xo + v * dft->ovs_bytes,
+		       n, /* 2, */ dft->os_bytes,
+		       chunk, /* twon, */ dft->ovs_bytes,
+		       MFC_PUTL_CMD, buf, nbuf);
      }
 }
 
+
+
+static void do_transpose(const struct transpose_context *t)
+{
+     int i, j, ni, nj;
+     int n = t->n, nspe = t->nspe, my_id = t->my_id;
+     int s1_bytes = t->s1_bytes;
+     int s0_bytes = t->s0_bytes;
+     int nblock, blocksz;
+     size_t avail;
+     R *A, *B, *Aalign, *Balign;
+
+     X(spu_alloc_reset)();
+
+     /* poor man's square root */
+     avail = X(spu_alloc_avail)();
+     blocksz = 32;
+     while (2 * ((blocksz + 16) * (blocksz + 16) * 2 * sizeof(R) + ALIGNMENT) < 
+	    avail)
+	  blocksz += 16;
+
+     A = X(spu_alloc)(blocksz * blocksz * 2 * sizeof(R) + ALIGNMENT);
+     B = X(spu_alloc)(blocksz * blocksz * 2 * sizeof(R) + ALIGNMENT);
+
+     nblock = 0;
+     ni = blocksz;
+     for (i = 0; i < n; i += ni) {
+	  nj = blocksz;
+	  for (j = 0; j < n; j += nj) {
+	       if ((nblock++ % nspe) != my_id)
+		    continue; /* block is not ours */
+
+	       if (ni > n - i) ni = n - i;
+	       if (nj > n - j) nj = n - j;
+
+	       if (i == j) {
+		    /* diagonal block */
+		    Aalign = ALIGN_LIKE(A, t->A + (i * s1_bytes + j * s0_bytes));
+		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
+				 nj, s0_bytes, ni, s1_bytes, MFC_GETL_CMD, 0, 0);
+		    X(spu_complex_transpose)(Aalign, ni /* == nj */);
+		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
+				 nj, s0_bytes, ni, s1_bytes, MFC_PUTL_CMD, 0, 0);
+	       } else if (i > j) {
+		    Aalign = ALIGN_LIKE(A, t->A + (i * s1_bytes + j * s0_bytes));
+		    Balign = ALIGN_LIKE(B, t->A + (j * s1_bytes + i * s0_bytes));
+		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
+				 nj, s0_bytes, ni, s1_bytes, MFC_GETL_CMD, 0, 0);
+		    X(spu_dma2d)(Balign, t->A + (j * s1_bytes + i * s0_bytes),
+				 ni, s0_bytes, nj, s1_bytes, MFC_GETL_CMD, 0, 0);
+		    X(spu_complex_transpose_and_swap)(Aalign, Balign, ni, nj);
+		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
+				 nj, s0_bytes, ni, s1_bytes, MFC_PUTL_CMD, 0, 0);
+		    X(spu_dma2d)(Balign, t->A + (j * s1_bytes + i * s0_bytes),
+				 ni, s0_bytes, nj, s1_bytes, MFC_PUTL_CMD, 0, 0);
+	       } else {
+		    /* nothing */
+	       }
+	  }
+     }
+}
 
 int main(unsigned long long spu_id, unsigned long long parm)
 {  
@@ -329,11 +239,15 @@ int main(unsigned long long spu_id, unsigned long long parm)
 	  wait();
 
 	  /* obtain context */
-	  dma1d(&ctx, parm, sizeof(ctx), MFC_GET_CMD);
+	  X(spu_dma1d)(&ctx, parm, sizeof(ctx), MFC_GETL_CMD);
 
 	  switch (ctx.op) {
 	      case SPE_DFT:
 		   do_dft(&ctx.u.dft);
+		   break;
+
+	      case SPE_TRANSPOSE:
+		   do_transpose(&ctx.u.transpose);
 		   break;
 
 	      case SPE_EXIT:

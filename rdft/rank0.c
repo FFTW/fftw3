@@ -289,6 +289,27 @@ static void apply_ip_sq_tiledbuf(const plan *ego_, R *I, R *O)
 #define applicable_ip_sq_tiledbuf applicable_ip_sq_tiled
 
 /**************************************************************/
+#if HAVE_CELL
+/* rank 2, in place, square transpose, using Cell SPEs */
+static void apply_ip_cell(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     UNUSED(O);
+     transpose(ego->d, ego->rnk, ego->vl, I, X(cell_transpose));
+}
+
+
+static int applicable_ip_cell(const P *pln, const problem_rdft *p)
+{
+     return (1
+	     && p->I == p->O
+	     && pln->rnk >= 2
+	     && transposep(pln)
+	     && X(cell_transpose_applicable)(p->I, pln->d + (pln->rnk - 2), pln->vl)
+	  );
+}
+#endif
+/**************************************************************/
 static int applicable(const S *ego, const problem *p_)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
@@ -357,6 +378,9 @@ void X(rdft_rank0_register)(planner *p)
 	  { apply_tiled,    applicable_tiled,    "rdft-rank0-tiled" },
 	  { apply_tiledbuf, applicable_tiledbuf, "rdft-rank0-tiledbuf" },
 	  { apply_ip_sq,    applicable_ip_sq,    "rdft-rank0-ip-sq" },
+#if HAVE_CELL
+	  { apply_ip_cell,  applicable_ip_cell,  "rdft-rank0-ip-cell" },
+#endif
 	  { 
 	       apply_ip_sq_tiled,
 	       applicable_ip_sq_tiled,

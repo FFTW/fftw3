@@ -25,20 +25,31 @@ struct dft_context {
      int sign;
      int Wsz_bytes;
      /* pointers, converted to ulonglong */
-     unsigned long long xi, xo;
-     unsigned long long W;
+     long long xi, xo;
+     long long W;
+};
+
+struct transpose_context {
+     long long A;
+     int n;
+     int s0_bytes;
+     int s1_bytes;
+     int nspe;
+     int my_id;
 };
 
 /* operations that the SPE's can execute */
 
 enum spu_op {
      SPE_DFT,
+     SPE_TRANSPOSE,
      SPE_EXIT
 };
 
 struct spu_context {
      union spu_context_u {
 	  struct dft_context dft;
+	  struct transpose_context transpose;
 	  /* possibly others */
      } u;
 
@@ -52,7 +63,6 @@ extern const struct spu_radices
    X(spu_radices)[(MAX_N/REQUIRE_N_MULTIPLE_OF) + 1];
 
 void X(dft_direct_cell_register)(planner *p);
-void X(dft_conf_cell)(planner *p);
 
 void *X(cell_aligned_malloc)(size_t n);
 void X(cell_activate_spes)(void);

@@ -18,7 +18,7 @@
  *
  */
 
-#include "ifftw.h"
+#include "dft.h"
 
 #if HAVE_CELL
 

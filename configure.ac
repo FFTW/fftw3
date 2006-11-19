@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(fftw, 3.2alpha1, fftw@fftw.org)
+AC_INIT(fftw, 3.2cell, fftw@fftw.org)
 AC_CONFIG_SRCDIR(kernel/ifftw.h)
 SHARED_VERSION_INFO="5:0:2" # CURRENT:REVISION:AGE
 
@@ -319,7 +319,10 @@ AC_FUNC_ALLOCA
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
-AC_CHECK_LIB(spe, spe_wait)
+if test "$have_cell" = "yes"; then
+   AC_CHECK_LIB(spe, spe_wait)
+fi
+
 AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl snprintf])
 AC_CHECK_DECLS([drand48, memalign, posix_memalign, sinl, cosl])
 

@@ -57,13 +57,14 @@ static int compute_twiddle_size(const struct spu_radices *p, int n)
      return sz;
 }
 
-static void fill_twiddles(R *W, const signed char *q, int n)
+static void fill_twiddles(enum wakefulness wakefulness,
+			  R *W, const signed char *q, int n)
 {
      int r;
      R d[2];
 
      if ((r = *q) > 0) {
-	  triggen *t = X(mktriggen)(AWAKE_SINCOS, n);
+	  triggen *t = X(mktriggen)(wakefulness, n);
 	  int i, j, v, m = n / r;
 
 	  for (j = 0; j < m; j += VL) {
@@ -79,15 +80,16 @@ static void fill_twiddles(R *W, const signed char *q, int n)
 	       }
 	  }
 	  X(triggen_destroy)(t);
-	  fill_twiddles(W, q + 1, m);
+	  fill_twiddles(wakefulness, W, q + 1, m);
      }
 }
 
-static R *make_twiddles(const struct spu_radices *p, int n, int *Wsz)
+static R *make_twiddles(enum wakefulness wakefulness,
+			const struct spu_radices *p, int n, int *Wsz)
 {
      *Wsz = compute_twiddle_size(p, n);
      R *W = X(cell_aligned_malloc)(*Wsz * sizeof(R));
-     fill_twiddles(W, p->r, n);
+     fill_twiddles(wakefulness, W, p->r, n);
      return W;
 }
 
@@ -123,9 +125,9 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  dft->ovs_bytes = ego->ovs * sizeof(R);
 	  dft->sign = ego->sign;
 	  dft->Wsz_bytes = ego->Wsz * sizeof(R);
-	  dft->W = (unsigned long long)ego->W;
-	  dft->xi = (unsigned long long)xi;
-	  dft->xo = (unsigned long long)xo;
+	  dft->W = (INT)ego->W;
+	  dft->xi = (INT)xi;
+	  dft->xo = (INT)xo;
 
 	  /* partition v into pieces of equal size, subject to alignment
 	     constraints */
@@ -151,16 +153,29 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      X(cell_spe_wait_all)();
 }
 
-static void destroy(plan *ego_)
+static void destroy(plan *ego)
 {
-     P *ego = (P *) ego_;
-     X(ifree0)(ego->W);
+     UNUSED(ego);
 }
 
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      p->print(p, "(dft-direct-cell-%D%v)", ego->n, ego->v);
+}
+
+static void awake(plan *ego_, enum wakefulness wakefulness)
+{
+     P *ego = (P *) ego_;
+     switch (wakefulness) {
+	 case SLEEPY:
+	      X(ifree0)(ego->W);
+	      ego->W = 0;
+	      break;
+	 default:
+	      ego->W = make_twiddles(wakefulness, &ego->radices, ego->n, &ego->Wsz);
+	      break;
+     }
 }
 
 static 
@@ -226,6 +241,7 @@ static int applicable(const planner *plnr, const problem_dft *p)
 {
      return (
 	  1
+	  && X(cell_nspe)() > 0
 	  && p->sz->rnk == 1
 	  && p->vecsz->rnk <= 1
 	  && !NO_SIMDP(plnr)
@@ -257,7 +273,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const struct spu_radices *radices;
 
      static const plan_adt padt = {
-	  X(dft_solve), X(null_awake), print, destroy
+	  X(dft_solve), awake, print, destroy
      };
 
      UNUSED(plnr);
@@ -285,7 +301,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->ivs = ivs;
      pln->ovs = ovs;
      pln->sign = sign;
-     pln->W = make_twiddles(radices, pln->n, &pln->Wsz);
+     pln->W = 0;
 
      X(ops_zero)(&pln->super.super.ops);
      pln->super.super.could_prune_now_p = 1;

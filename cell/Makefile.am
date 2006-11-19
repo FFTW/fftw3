@@ -13,8 +13,8 @@ else
 PLANS=plans-double.c
 endif
 
-libcell_la_SOURCES = cell.c conf.c dft-direct-cell.c $(PLANS)	\
-fftw-cell.h
+libcell_la_SOURCES = cell.c conf.c dft-direct-cell.c transpose.c	\
+$(PLANS) fftw-cell.h
 libcell_la_LIBADD = $(SPU_STUB)
 
 # HACK ALERT:

@@ -38,14 +38,13 @@ void *X(cell_aligned_malloc)(size_t n)
 static struct spu_context *ctx[SPU_NUM_THREADS];
 static speid_t spe_id[SPU_NUM_THREADS];
 static int refcnt = 0;
-static int nspe;
+static int nspe = SPU_NUM_THREADS;
 
 void X(cell_activate_spes)(void)
 {
      if (refcnt++ == 0) {
 	  int i;
 
-	  nspe = SPU_NUM_THREADS;
 	  for(i = 0; i < nspe; ++i) {
 	       ctx[i] = X(cell_aligned_malloc)(sizeof(*ctx[i]));
 
@@ -77,6 +76,15 @@ void X(cell_deactivate_spes)(void)
 int X(cell_nspe)(void)
 {
      return nspe;
+}
+
+void X(cell_set_nspe)(int n)
+{
+     if (n > SPU_NUM_THREADS)
+	  n = SPU_NUM_THREADS;
+     if (n < 0)
+	  n = 0;
+     nspe = n;
 }
 
 struct spu_context *X(cell_get_ctx)(int spe)

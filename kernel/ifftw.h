@@ -938,6 +938,11 @@ typedef void (*cpy2d_func)(R *I, R *O,
 			   INT n1, INT is1, INT os1,
 			   INT vl);
 
+#if HAVE_CELL
+int X(cell_transpose_applicable)(R *I, iodim *d, INT vl);
+void X(cell_transpose)(R *I, INT n, INT s0, INT s1, INT vl);
+#endif
+
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
 void X(null_awake)(plan *ego, enum wakefulness wakefulness);
