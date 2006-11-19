@@ -50,7 +50,7 @@ static int equal_instr(const tw_instr *p, const tw_instr *q)
 
 	  switch (p->op) {
 	      case TW_NEXT:
-		   return 1;
+		   return (p->v == q->v); /* p->i is ignored */
 
 	      case TW_FULL:
 	      case TW_HALF:
@@ -167,7 +167,6 @@ static R *compute(enum wakefulness wakefulness,
 			t->cexp(t, (j + (INT)p->v) * (INT)p->i, d);
 			*W++ = d[0];
 			break;
-
 		   }
 
 		   case TW_SIN: {
