@@ -92,45 +92,49 @@ static void do_dft(const struct dft_context *dft)
      /* build plan */
      build_plan(plan, dft->n, W, &dft->r);
 
-     /* Proof that one can write FORTRAN in any language: */
-
-     /* ugly computation of nbuf */
-     if ((dft->is_bytes != 2 * sizeof(R) || dft->os_bytes != 2 * sizeof(R))) {
-
-	  /* either the input or the output operates in vector
-	     mode.  Allocate about n/16 buffers (arbitrary) */
-	  /* FIXME */
-	  nbuf = 1 + n/16;
-     } else {
-	  /* we don't need any dma buffer in this case */
-	  nbuf = 0;
-     }
-
-     if (nbuf > MAX_LIST_SZ) 
-	  nbuf = MAX_LIST_SZ;
-
-     /* allocation:
-	A: (chunk + 1) * nbytes + 2 * ALIGNMENT
-	buf: 2 * sizeof(R) * nbuf * chunk + ALIGNMENT.
-
-	Solving for chunk yields: 
-     */
+     /* Compute values of chunk and nbuf, and allocate proper buffers.
+	This code is the proof that one can write FORTRAN in any
+	language. */
      {
 	  size_t avail = X(spu_alloc_avail)() - 3 * ALIGNMENT - nbytes;
-	  size_t per_chunk = nbytes + 2 * sizeof(R) * nbuf;
-	  if (VL > 1 &&
-	      (dft->is_bytes != 2 * sizeof(R) || 
-	       dft->os_bytes != 2 * sizeof(R))) {
-	       /* either the input or the output operates in vector
-		  mode.  Must guarantee chunk % VL == 0 */
-	       chunk = VL * (avail / (VL * per_chunk));
-	  } else {
-	       chunk = avail / per_chunk;
-	  }
-     }
+	  if (dft->is_bytes != 2 * sizeof(R) || 
+	      dft->os_bytes != 2 * sizeof(R)) {
+	       /* We use dma2d in vector mode, and threfore chunk must
+		  be a multiple of VL.  Compute chunk/VL first, and 
+		  multiply by VL at the end */
+		  
+	       const int chunkalign = (128 / (2 * sizeof(R))) / VL;
+	       const int maxchunk = (dft->v1 - dft->v0) / VL;
+	       avail /= VL;
 
-     buf = X(spu_alloc)(2 * sizeof(R) * nbuf * chunk + ALIGNMENT);
-     A = X(spu_alloc)((chunk + 1) * nbytes + 2 * ALIGNMENT);     /* QED */
+	       /* initial value of nbuf (approx. 1/8 of memory for buffers) */
+	       nbuf = 1 + n/8; 
+	       if (nbuf > MAX_LIST_SZ) nbuf = MAX_LIST_SZ;
+
+	       /* for given value of nbuf, try to increase chunk, subject
+		  to available memory, maxchunk, and alignment constraints */
+	       chunk = avail / (nbytes + 2 * sizeof(R) * nbuf);
+	       if (chunk > maxchunk) chunk = maxchunk;
+	       if (chunk > chunkalign) chunk &= ~(chunkalign-1);
+
+	       /* for given value of chunk, make nbuf as large as possible */
+	       if (chunk > 0)
+		    nbuf = (avail - chunk * nbytes) / (2 * sizeof(R) * chunk);
+	       if (nbuf > MAX_LIST_SZ) nbuf = MAX_LIST_SZ;
+
+	       /* finally, compute the true value of chunk */
+	       chunk *= VL;
+	  } else {
+	       /* easy case, we need no buffers */
+	       const int chunkalign = (128 / (2 * sizeof(R)));
+	       nbuf = 0;
+	       chunk = avail / nbytes;
+	       if (chunk > chunkalign) chunk &= ~(chunkalign-1);
+	  }
+
+	  buf = X(spu_alloc)(2 * sizeof(R) * nbuf * chunk + ALIGNMENT);
+	  A = X(spu_alloc)((chunk + 1) * nbytes + 2 * ALIGNMENT);
+     } /* QED */
 
      /* for all vector elements we are responsible for: */
      for (v = dft->v0; v < dft->v1; v += chunk) {
