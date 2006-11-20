@@ -1,0 +1,70 @@
+/* -*- C -*- */
+#include "fftw-spu.h"
+#include "../fftw-cell.h"
+
+void X(spu_do_transpose)(const struct transpose_context *t)
+{
+     int i, j, ni, nj;
+     int n = t->n, nspe = t->nspe, my_id = t->my_id;
+     int s1_bytes = t->s1_bytes;
+     int s0_bytes = t->s0_bytes;
+     int nblock, blocksz;
+     size_t avail;
+     R *A, *B, *Aalign, *Balign;
+
+     X(spu_alloc_reset)();
+
+     /* poor man's square root */
+     avail = X(spu_alloc_avail)();
+     blocksz = 32;
+     while (2 * ((blocksz + 16) * (blocksz + 16) * 2 * sizeof(R) 
+		 + ALIGNMENT) < avail)
+	  blocksz += 16;
+
+     A = X(spu_alloc)(blocksz * blocksz * 2 * sizeof(R) + ALIGNMENT);
+     B = X(spu_alloc)(blocksz * blocksz * 2 * sizeof(R) + ALIGNMENT);
+
+     nblock = 0;
+     ni = blocksz;
+     for (i = 0; i < n; i += ni) {
+	  if (ni > n - i) ni = n - i;
+	  nj = blocksz;
+	  for (j = i; j < n; j += nj) {
+	       if (nj > n - j) nj = n - j;
+
+	       if ((nblock++ % nspe) != my_id)
+		    continue; /* block is not ours */
+
+	       if (i == j) {
+		    /* diagonal block */
+		    Aalign = 
+			 ALIGN_LIKE(A, t->A + (i * s1_bytes + j * s0_bytes));
+		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
+				 nj, s0_bytes, ni, s1_bytes, 
+				 MFC_GETL_CMD, 0, 0);
+		    X(spu_complex_transpose)(Aalign, ni /* == nj */);
+		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
+				 nj, s0_bytes, ni, s1_bytes, 
+				 MFC_PUTL_CMD, 0, 0);
+	       } else /* if (j > i) */ {
+		    Aalign = 
+			 ALIGN_LIKE(A, t->A + (i * s1_bytes + j * s0_bytes));
+		    Balign = 
+			 ALIGN_LIKE(B, t->A + (j * s1_bytes + i * s0_bytes));
+		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
+				 nj, s0_bytes, ni, s1_bytes,
+				 MFC_GETL_CMD, 0, 0);
+		    X(spu_dma2d)(Balign, t->A + (j * s1_bytes + i * s0_bytes),
+				 ni, s0_bytes, nj, s1_bytes,
+				 MFC_GETL_CMD, 0, 0);
+		    X(spu_complex_transpose_and_swap)(Aalign, Balign, ni, nj);
+		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
+				 nj, s0_bytes, ni, s1_bytes,
+				 MFC_PUTL_CMD, 0, 0);
+		    X(spu_dma2d)(Balign, t->A + (j * s1_bytes + i * s0_bytes),
+				 ni, s0_bytes, nj, s1_bytes,
+				 MFC_PUTL_CMD, 0, 0);
+	       }
+	  }
+     }
+}

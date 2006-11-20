@@ -37,7 +37,7 @@ HFILES=fftw-spu.h spu-double.h spu-single.h
 LIBS=-lm
 
 spufftw_SOURCES=main.spuc alloc.spuc copy.spuc dma.spuc execute.spuc	\
-$(ALL_CODELETS) $(HFILES)
+transpose.spuc dft.spuc $(ALL_CODELETS) $(HFILES)
 spufftw_LINK=$(SPUCC) -o $@
 
 planner_SOURCES=planner.spuc execute.spuc $(ALL_CODELETS) $(HFILES)
