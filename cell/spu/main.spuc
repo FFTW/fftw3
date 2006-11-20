@@ -1,3 +1,4 @@
+/* -*- C -*- */
 #include <stdlib.h>
 #include <spu_intrinsics.h>
 #include <spu_mfcio.h>
@@ -96,14 +97,18 @@ static void do_dft(const struct dft_context *dft)
 	This code is the proof that one can write FORTRAN in any
 	language. */
      {
-	  size_t avail = X(spu_alloc_avail)() - 3 * ALIGNMENT - nbytes;
+	  size_t avail = X(spu_alloc_avail)() - nbytes -
+	       ALIGNMENT * (1 /* buf */
+			    + 2 /* A */
+			    + 1 /* implicit between buf and A */
+		    );
 	  if (dft->is_bytes != 2 * sizeof(R) || 
 	      dft->os_bytes != 2 * sizeof(R)) {
 	       /* We use dma2d in vector mode, and threfore chunk must
 		  be a multiple of VL.  Compute chunk/VL first, and 
 		  multiply by VL at the end */
 		  
-	       const int chunkalign = (128 / (2 * sizeof(R))) / VL;
+	       const int chunkalign = (ALIGNMENT / (2 * sizeof(R))) / VL;
 	       const int maxchunk = (dft->v1 - dft->v0) / VL;
 	       avail /= VL;
 
@@ -126,7 +131,7 @@ static void do_dft(const struct dft_context *dft)
 	       chunk *= VL;
 	  } else {
 	       /* easy case, we need no buffers */
-	       const int chunkalign = (128 / (2 * sizeof(R)));
+	       const int chunkalign = (ALIGNMENT / (2 * sizeof(R)));
 	       nbuf = 0;
 	       chunk = avail / nbytes;
 	       if (chunk > chunkalign) chunk &= ~(chunkalign-1);
@@ -141,7 +146,7 @@ static void do_dft(const struct dft_context *dft)
 	  if (chunk > dft->v1 - v)
 	       chunk = dft->v1 - v;
 
-	  Aalign = ALIGN_LIKE(A + ALIGNMENT + twon, 
+	  Aalign = ALIGN_LIKE(A + ALIGNMENT/sizeof(R) + twon, 
 			      dft->xi + v * dft->ivs_bytes);
 	  Balign = ALIGN_LIKE(A, dft->xo + v * dft->ovs_bytes);
 

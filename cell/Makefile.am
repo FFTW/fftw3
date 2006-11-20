@@ -4,7 +4,7 @@ noinst_LTLIBRARIES = libcell.la
 
 if HAVE_CELL
 SUBDIRS=spu
-SPU_STUB=spu_fftw-embed.lo
+SPU_STUB=spufftw-embed.lo
 endif
 
 if SINGLE
@@ -18,11 +18,6 @@ $(PLANS) fftw-cell.h
 libcell_la_LIBADD = $(SPU_STUB)
 
 # HACK ALERT:
-spu_fftw-embed.lo: conf.lo FORCE 
-	(cd spu && make spu_fftw-embed.o)
-	sed -e s+conf+spu/spu_fftw-embed+g <$< >$@
-
-FORCE:
-
-
-
+spufftw-embed.lo: conf.lo spu/spufftw
+	embedspu -m32 spu_fftw spu/spufftw spufftw-embed.o
+	sed -e s+conf+spufftw-embed+g <$< >$@
