@@ -35,7 +35,9 @@ typedef struct {
      plan_dft super;
      struct spu_radices radices;
      /* strides expressed in reals */
-     INT n, is, os, v, ivs, ovs;
+     INT n, is, os;
+     struct cell_iotensor v;
+     int cutdim;
      int sign;
      int Wsz;
      R *W;
@@ -100,6 +102,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      R *xi, *xo;
      int i, v;
      int nspe = X(cell_nspe)();
+     int cutdim = ego->cutdim;
 
      /* find pointer to beginning of data, depending on sign */
      if (ego->sign == -1) {
@@ -109,7 +112,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      }
 
      /* fill contexts */
-     v = ego->v;
+     v = ego->v.dims[cutdim].n1;
      for (i = 0; i < nspe; ++i) {
 	  int chunk;
 	  struct spu_context *ctx = X(cell_get_ctx)(i);
@@ -121,8 +124,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  dft->n = ego->n;
 	  dft->is_bytes = ego->is * sizeof(R);
 	  dft->os_bytes = ego->os * sizeof(R);
-	  dft->ivs_bytes = ego->ivs * sizeof(R);
-	  dft->ovs_bytes = ego->ovs * sizeof(R);
+	  dft->v = ego->v;
 	  dft->sign = ego->sign;
 	  dft->Wsz_bytes = ego->Wsz * sizeof(R);
 	  dft->W = (INT)ego->W;
@@ -139,9 +141,9 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	       chunk = v / (nspe - i);
 	  }
 
-	  dft->v1 = v;
+	  dft->v.dims[cutdim].n1 = v;
 	  v -= chunk;
-	  dft->v0 = v;
+	  dft->v.dims[cutdim].n0 = v;
      }
 
      A(v == 0);
@@ -161,7 +163,11 @@ static void destroy(plan *ego)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dft-direct-cell-%D%v)", ego->n, ego->v);
+     int i;
+     p->print(p, "(dft-direct-cell-%D/%d", ego->n, ego->cutdim);
+     for (i = 0; i < CELL_DFT_MAXVRANK; ++i)
+	  p->print(p, "%v", (INT)ego->v.dims[i].n1);
+     p->print(p, ")");
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)
@@ -173,15 +179,106 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 	      ego->W = 0;
 	      break;
 	 default:
-	      ego->W = make_twiddles(wakefulness, &ego->radices, ego->n, &ego->Wsz);
+	      ego->W = make_twiddles(wakefulness, &ego->radices, 
+				     ego->n, &ego->Wsz);
 	      break;
      }
+}
+
+static int build_vtensor(const iodim *d, const tensor *vecsz,
+			 struct cell_iotensor *tens)
+{
+     int i;
+     int contigdim = -1;
+     iodim *t;
+     struct cell_iodim *v = tens->dims;
+
+     /* allow vecrnk=0 if the strides are ok */
+     if (vecsz->rnk == 0 && d->is == 2 && d->os == 2)
+	  goto skip_contigdim;
+
+     for (i = 0; i < vecsz->rnk; ++i) {
+	  t = vecsz->dims + i;
+	  if (( 
+		   /* contiguous input across D */
+		   (d->is == 2 && (d->n % VL) == 0 && SIMD_STRIDE_OKA(t->is))
+		   ||
+		   /* contiguous input across T */
+		   (t->is == 2 && (t->n % VL) == 0 && SIMD_STRIDE_OKA(d->is))
+		   )
+	      && (
+		   /* contiguous output across D */
+		   (d->os == 2 && (d->n % VL) == 0 && SIMD_STRIDE_OKA(t->os))
+		   ||
+		   /* contiguous output across T */
+		   (t->os == 2 && (t->n % VL) == 0 && SIMD_STRIDE_OKA(d->os))
+		   )) {
+	       /* choose I as the contiguous dimension */
+	       contigdim = i;
+	  } else {
+	       /* vector strides must be aligned */
+	       if (!SIMD_STRIDE_OKA(t->is) || !SIMD_STRIDE_OKA(t->os))
+		    return 0;
+	  }
+     }
+
+     /* no contiguous dimension found, can't do it */
+     if (contigdim < 0)
+	  return 0;
+
+     /* build cell_iotensor: */
+     
+     /* contigdim goes first */
+     t = vecsz->dims + contigdim;
+     v->n0 = 0; v->n1 = t->n; 
+     v->is_bytes = t->is * sizeof(R); v->os_bytes = t->os * sizeof(R);
+     ++v;
+
+ skip_contigdim:
+     /* other dimensions next */
+     for (i = 0; i < vecsz->rnk; ++i) 
+	  if (i != contigdim) {
+	       t = vecsz->dims + i;
+	       v->n0 = 0; 
+	       v->n1 = t->n; 
+	       v->is_bytes = t->is * sizeof(R); 
+	       v->os_bytes = t->os * sizeof(R);
+	       ++v;
+	  }
+     
+     /* complete cell tensor */
+     for (; i < CELL_DFT_MAXVRANK; ++i) {
+	  v->n0 = 0; v->n1 = 1; v->is_bytes = 0; v->os_bytes = 0; ++v;
+     }
+
+     return 1; 
+}
+
+/* choose a dimension that should be cut when parallelizing */
+static int choose_cutdim(const struct cell_iotensor *tens)
+{
+     int cutdim = 0;
+     int i;
+
+     for (i = 1; i < CELL_DFT_MAXVRANK; ++i) {
+	  const struct cell_iodim *cut = &tens->dims[cutdim];
+	  const struct cell_iodim *t = &tens->dims[i];
+	  if ((cut->is_bytes == 2 * sizeof(R) || 
+	       cut->os_bytes == 2 * sizeof(R))
+	      && t->n1 > 1) {
+	       /* since cutdim is contiguous, prefer to cut I */
+	       cutdim = i;
+	  } else if (t->n1 > cut->n1) {
+	       /* prefer to cut the longer dimension */
+	       cutdim = i;
+	  }
+     }
+     return cutdim;
 }
 
 static 
 const struct spu_radices *find_radices(R *ri, R *ii, R *ro, R *io,
 				       int n, int is, int os,
-				       int v, int ivs, int ovs,
 				       int *sign)
 {
      const struct spu_radices *p;
@@ -210,30 +307,6 @@ const struct spu_radices *find_radices(R *ri, R *ii, R *ro, R *io,
      if (!ALIGNEDA(xi) || !ALIGNEDA(xo))
 	  return 0;
 
-     /* either is or ivs must be 2 */
-     if (is == 2) {
-	  /* DFT of contiguous input.  Vector strides must be
-	     aligned */
-	  if (!SIMD_STRIDE_OKA(ivs))
-	       return 0;
-     } else if (ivs == 2) {
-	  /* Vector DFT.  Strides must be aligned */
-	  if (!SIMD_STRIDE_OKA(is) || ((v % VL) != 0))
-	       return 0;
-     } else
-	  return 0; /* can't do it */
-
-     /* same for output strides */
-     if (os == 2) {
-	  if (!SIMD_STRIDE_OKA(ovs))
-	       return 0;
-     } else if (ovs == 2) {
-	  /* Vector DFT.  Strides must be aligned */
-	  if (!SIMD_STRIDE_OKA(os) || ((v % VL) != 0))
-	       return 0;
-     } else
-	  return 0; /* can't do it */
-
      return p;
 }
 
@@ -243,7 +316,7 @@ static int applicable(const planner *plnr, const problem_dft *p)
 	  1
 	  && X(cell_nspe)() > 0
 	  && p->sz->rnk == 1
-	  && p->vecsz->rnk <= 1
+	  && p->vecsz->rnk <= CELL_DFT_MAXVRANK
 	  && !NO_SIMDP(plnr)
 
 	  && (0
@@ -268,9 +341,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      const problem_dft *p = (const problem_dft *) p_;
      iodim *d;
-     INT v, ivs, ovs;
      int sign;
      const struct spu_radices *radices;
+     struct cell_iotensor v;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -282,14 +355,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  return (plan *)0;
 
      d = p->sz->dims;
-     X(tensor_tornk1)(p->vecsz, &v, &ivs, &ovs);
 
      radices = find_radices(p->ri, p->ii, p->ro, p->io,
 			    d[0].n, d[0].is, d[0].os,
-			    v, ivs, ovs,
 			    &sign);
      if (!radices)
 	  return (plan *)0;
+
+     if (!build_vtensor(d, p->vecsz, &v))
+	  return 0;
 	 
      pln = MKPLAN_DFT(P, &padt, apply);
 
@@ -297,13 +371,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->n = d[0].n;
      pln->is = d[0].is;
      pln->os = d[0].os;
-     pln->v = v;
-     pln->ivs = ivs;
-     pln->ovs = ovs;
      pln->sign = sign;
+     pln->v = v;
+     pln->cutdim = choose_cutdim(&v);
      pln->W = 0;
 
      X(ops_zero)(&pln->super.super.ops);
+     pln->super.super.ops.other += 100; /* FIXME */
      pln->super.super.could_prune_now_p = 1;
      return &(pln->super.super);
 }

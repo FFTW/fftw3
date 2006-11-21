@@ -12,16 +12,30 @@
 
 #define MAX_PLAN_LEN 4
 #define SPU_NUM_THREADS 8
+#define CELL_DFT_MAXVRANK 2
 
 struct spu_radices {
      signed char r[MAX_PLAN_LEN];
 };
 
+struct cell_iodim {
+     int n0;  /* lower bound, n0 <= n */
+     int n1;  /* upper bound, n < n1 */
+
+     /* strides expressed in bytes  */
+     int is_bytes;
+     int os_bytes;
+};
+
+struct cell_iotensor {
+     struct cell_iodim dims[CELL_DFT_MAXVRANK];
+};
 
 struct dft_context {
      struct spu_radices r;
      /* strides expressed in bytes  */
-     int n, is_bytes, os_bytes, v0, v1, ivs_bytes, ovs_bytes;
+     int n, is_bytes, os_bytes;
+     struct cell_iotensor v;
      int sign;
      int Wsz_bytes;
      /* pointers, converted to ulonglong */

@@ -59,16 +59,22 @@ static void flip_ri(R *A, int ncomplex)
 }
 
 
+#if CELL_DFT_MAXVRANK != 2
+#error "This routine only works for CELL_DFT_MAXVRANK == 2"
+#endif
+
 /* compute DFT of contiguous arrays (is = os = 2) */
 void X(spu_do_dft)(const struct dft_context *dft)
 {
-     int v, vv;
+     int v0, v1, vv;
      int chunk, nbuf;
      struct spu_plan plan[MAX_PLAN_LEN];
      R *W, *A, *Aalign, *Balign, *buf;
      int n = dft->n;
      int twon = 2 * n;
      int nbytes = twon * sizeof(R);
+     const struct cell_iodim *vd = dft->v.dims;
+     long long xi, xo;
 
      X(spu_alloc_reset)();
 
@@ -96,7 +102,7 @@ void X(spu_do_dft)(const struct dft_context *dft)
 		  multiply by VL at the end */
 		  
 	       const int chunkalign = (ALIGNMENT / (2 * sizeof(R))) / VL;
-	       const int maxchunk = (dft->v1 - dft->v0) / VL;
+	       const int maxchunk = (vd[0].n1 - vd[0].n0) / VL;
 	       avail /= VL;
 
 	       /* initial value of nbuf (approx. 1/8 of memory for buffers) */
@@ -129,37 +135,41 @@ void X(spu_do_dft)(const struct dft_context *dft)
      } /* QED */
 
      /* for all vector elements we are responsible for: */
-     for (v = dft->v0; v < dft->v1; v += chunk) {
-	  if (chunk > dft->v1 - v)
-	       chunk = dft->v1 - v;
+     for (v1 = vd[1].n0; v1 < vd[1].n1; v1++) {
+	  xi = dft->xi + v1 * vd[1].is_bytes;
+	  xo = dft->xo + v1 * vd[1].os_bytes;
+	  for (v0 = vd[0].n0; v0 < vd[0].n1; v0 += chunk) {
+	       if (chunk > vd[0].n1 - v0)
+		    chunk = vd[0].n1 - v0;
 
-	  Aalign = ALIGN_LIKE(A + ALIGNMENT/sizeof(R) + twon, 
-			      dft->xi + v * dft->ivs_bytes);
-	  Balign = ALIGN_LIKE(A, dft->xo + v * dft->ovs_bytes);
+	       Aalign = ALIGN_LIKE(A + ALIGNMENT/sizeof(R) + twon, 
+				   xi + v0 * vd[0].is_bytes);
+	       Balign = ALIGN_LIKE(A, xo + v0 * vd[0].os_bytes);
 
-	  /* obtain data */
-	  X(spu_dma2d)(Aalign, dft->xi + v * dft->ivs_bytes,
-		       n, /* 2, */ dft->is_bytes,
-		       chunk, /* twon, */ dft->ivs_bytes,
-		       MFC_GETL_CMD, buf, nbuf);
+	       /* obtain data */
+	       X(spu_dma2d)(Aalign, xi + v0 * vd[0].is_bytes,
+			    n, /* 2, */ dft->is_bytes,
+			    chunk, /* twon, */ vd[0].is_bytes,
+			    MFC_GETL_CMD, buf, nbuf);
 
-	  if (dft->sign == 1)
-	       flip_ri(Aalign, n * chunk);
+	       if (dft->sign == 1)
+		    flip_ri(Aalign, n * chunk);
 
-	  /* compute FFTs */
-	  for (vv = 0; vv < chunk; ++vv) 
-	       X(spu_execute_plan)(plan,
-				   Aalign + vv * twon, 
-				   Balign + vv * twon);
+	       /* compute FFTs */
+	       for (vv = 0; vv < chunk; ++vv) 
+		    X(spu_execute_plan)(plan,
+					Aalign + vv * twon, 
+					Balign + vv * twon);
 
-	  if (dft->sign == 1)
-	       flip_ri(Balign, n * chunk);
+	       if (dft->sign == 1)
+		    flip_ri(Balign, n * chunk);
 
-	  /* write data back */
-	  X(spu_dma2d)(Balign, dft->xo + v * dft->ovs_bytes,
-		       n, /* 2, */ dft->os_bytes,
-		       chunk, /* twon, */ dft->ovs_bytes,
-		       MFC_PUTL_CMD, buf, nbuf);
+	       /* write data back */
+	       X(spu_dma2d)(Balign, xo + v0 * vd[0].os_bytes,
+			    n, /* 2, */ dft->os_bytes,
+			    chunk, /* twon, */ vd[0].os_bytes,
+			    MFC_PUTL_CMD, buf, nbuf);
+	  }
      }
 }
 
