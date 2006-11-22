@@ -7,7 +7,6 @@
 
 static void wait(void)
 {
-     while (spu_stat_in_mbox () < 1);
      (void) spu_read_in_mbox();
 }
 
