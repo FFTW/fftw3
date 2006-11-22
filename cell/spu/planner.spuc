@@ -26,7 +26,7 @@ R *fill_twiddle(R *W, int r, int m)
 
 R A[2*MAX_N] __attribute__ ((aligned (16)));
 R B[2*MAX_N] __attribute__ ((aligned (16)));
-R W[5*MAX_N] __attribute__ ((aligned (16)));
+R W[2*MAX_N] __attribute__ ((aligned (16)));
 
 void fill_plan(struct spu_plan *p)
 {

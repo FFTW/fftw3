@@ -2,7 +2,7 @@
 
 /* simple-minded memory allocator */
 
-static char mem[160*1024] __attribute__ ((aligned (ALIGNMENT)));
+static char mem[200*1024] __attribute__ ((aligned (ALIGNMENT)));
 static char *allocptr;
 
 void X(spu_alloc_reset)(void)

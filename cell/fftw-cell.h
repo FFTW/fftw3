@@ -1,11 +1,11 @@
 #include <ifftw.h>
 
 #ifdef FFTW_SINGLE 
-#define MAX_N 4096
+#define MAX_N 6144
 #define REQUIRE_N_MULTIPLE_OF 4
 #define VL 2
 #else
-#define MAX_N 2048
+#define MAX_N 3072
 #define REQUIRE_N_MULTIPLE_OF 1
 #define VL 1
 #endif
