@@ -31,7 +31,6 @@ typedef struct {
      INT r, m, s, vl, vs, mstart, mcount;
      plan *cld;
 
-     /* defined only for solver1: */
      twid *td;
 
      const S *slv;
