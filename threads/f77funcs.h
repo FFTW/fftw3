@@ -23,17 +23,17 @@
    f77api.c, possibly multiple times in order to support multiple
    compiler manglings (via redefinition of F77). */
 
-void F77(plan_with_nthreads, PLAN_WITH_NTHREADS)(int *nthreads)
+FFTW_VOIDFUNC F77(plan_with_nthreads, PLAN_WITH_NTHREADS)(int *nthreads)
 {
      X(plan_with_nthreads)(*nthreads);
 }
 
-void F77(init_threads, INIT_THREADS)(int *okay)
+FFTW_VOIDFUNC F77(init_threads, INIT_THREADS)(int *okay)
 {
      *okay = X(init_threads)();
 }
 
-void F77(cleanup_threads, CLEANUP_THREADS)(void)
+FFTW_VOIDFUNC F77(cleanup_threads, CLEANUP_THREADS)(void)
 {
      X(cleanup_threads)();
 }

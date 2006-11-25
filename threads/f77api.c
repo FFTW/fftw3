@@ -43,10 +43,23 @@
 
 #else /* WINDOWS_F77_MANGLING */
 
+/* Various mangling conventions common (?) under Windows. */
+
+/* g77 */
 #  define WINDOWS_F77_FUNC(a, A) a ## __
 #  define F77x(a, A) WINDOWS_F77_FUNC(a, A)
 #  include "f77funcs.h"
 
+/* Intel, etc. */
+#  undef WINDOWS_F77_FUNC
+#  define WINDOWS_F77_FUNC(a, A) a ## _
+#  include "f77funcs.h"
+
+/* Digital/Compaq/HP Visual Fortran, Intel Fortran.  stdcall attribute
+   is apparently required to adjust for calling conventions (callee
+   pops stack in stdcall).  See also:
+       http://msdn.microsoft.com/library/en-us/vccore98/html/_core_mixed.2d.language_programming.3a_.overview.asp
+*/
 #  undef WINDOWS_F77_FUNC
 #  if defined(__GNUC__)
 #    define WINDOWS_F77_FUNC(a, A) __attribute__((stdcall)) A
