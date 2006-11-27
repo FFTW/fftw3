@@ -39,6 +39,7 @@ LIBS=-lm
 spufftw_SOURCES=main.spuc alloc.spuc copy.spuc dma.spuc execute.spuc	\
 transpose.spuc dft.spuc $(ALL_CODELETS) $(HFILES)
 spufftw_LINK=$(SPUCC) -o $@
+spufftw_OBJECTS: $(HFILES)
 
 planner_SOURCES=planner.spuc execute.spuc $(ALL_CODELETS) $(HFILES)
 planner_LINK=$(SPUCC) -o $@

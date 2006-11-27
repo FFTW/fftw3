@@ -95,18 +95,28 @@ struct spu_context *X(cell_get_ctx)(int spe)
 void X(cell_spe_awake_all)(void)
 {
      int i;
-     for (i = 0; i < nspe; ++i)
+
+     for (i = 0; i < nspe; ++i) {
+	  ctx[i]->done = 0;
+     }
+     /* FIXME: do we need this? */
+     asm volatile ("sync");
+
+     for (i = 0; i < nspe; ++i) {
 	  spe_write_in_mbox(spe_id[i], 0);
+     }
 }
 
 void X(cell_spe_wait_all)(void)
 {
      int i;
      for (i = 0; i < nspe; ++i) {
-	  while (spe_stat_out_mbox(spe_id[i]) <= 0)
-	       ; 
-	  (void) spe_read_out_mbox(spe_id[i]);
+	  while (!ctx[i]->done)
+	       ;
      }
+     
+     /* BE Programming Handbook, 19.6.4 */
+     asm volatile ("lwsync");
 }
 
 #endif /* HAVE_CELL */

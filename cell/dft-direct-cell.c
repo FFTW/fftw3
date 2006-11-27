@@ -21,6 +21,7 @@
 /* direct DFT solver via cell library */
 
 #include "dft.h"
+#include "ct.h"
 
 #if HAVE_CELL
 
@@ -41,6 +42,10 @@ typedef struct {
      int sign;
      int Wsz;
      R *W;
+
+     /* optional twiddle factors for dftw: */
+     INT rw, mw;  /* rw == 0 indicates no twiddle factors */
+     R *Ww;
 } P;
 
 
@@ -136,28 +141,27 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  if (VL > 1 && (ego->is != 2 || ego->os != 2)) {
 	       /* either the input or the output operates in vector mode */
 	       A(v % VL == 0); /* enforced in find_radices() */
-	       chunk = VL * (v / (VL * (nspe - i)));
+	       chunk = VL * ((v - ego->v.dims[cutdim].n0) / (VL * (nspe - i)));
 	  } else {
-	       chunk = v / (nspe - i);
+	       chunk = (v - ego->v.dims[cutdim].n0) / (nspe - i);
 	  }
 
 	  dft->v.dims[cutdim].n1 = v;
 	  v -= chunk;
 	  dft->v.dims[cutdim].n0 = v;
+
+	  /* optional dftw twiddles */
+	  if ((dft->rw = ego->rw)) 
+	       dft->Ww = (INT)ego->Ww;
      }
 
-     A(v == 0);
+     A(v == ego->v.dims[cutdim].n0);
 
      /* activate spe's */
      X(cell_spe_awake_all)();
 
      /* wait for completion */
      X(cell_spe_wait_all)();
-}
-
-static void destroy(plan *ego)
-{
-     UNUSED(ego);
 }
 
 static void print(const plan *ego_, printer *p)
@@ -170,9 +174,49 @@ static void print(const plan *ego_, printer *p)
      p->print(p, ")");
 }
 
+static R *make_twiddlesw(enum wakefulness wakefulness, int r, int m)
+
+{
+     R *W0= X(cell_aligned_malloc)(r * m * 2 * sizeof(R));
+     R *W = W0;
+     R d[2];
+     triggen *t = X(mktriggen)(wakefulness, r * m);
+     int i, j, v;
+     for (j = 0; j < m; j++) {
+	  for (i = 0; i < r; i += VL) {
+	       for (v = 0; v < VL; ++v) {
+		    t->cexp(t, (i+v) * j, d);
+		    *W++ = d[0];
+	       }
+	       for (v = 0; v < VL; ++v) {
+		    t->cexp(t, (i+v) * j, d);
+		    *W++ = d[1];
+	       }
+	  }
+     }
+     X(triggen_destroy)(t);
+
+     return W0;
+}
+
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
+
+     /* awake the optional dftw twiddles */
+     if (ego->rw) {
+	  switch (wakefulness) {
+	      case SLEEPY:
+		   X(ifree0)(ego->Ww);
+		   ego->Ww = 0;
+		   break;
+	      default:
+		   ego->Ww = make_twiddlesw(wakefulness, ego->rw, ego->mw);
+		   break;
+	  }
+     }
+
+     /* awake the twiddles for the dft part */
      switch (wakefulness) {
 	 case SLEEPY:
 	      X(ifree0)(ego->W);
@@ -335,9 +379,12 @@ static int applicable(const planner *plnr, const problem_dft *p)
 	  );
 }
 
-static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
+static const plan_adt padt = {
+     X(dft_solve), awake, print, X(plan_null_destroy)
+};
+
+static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
-     const S *ego = (const S *) ego_;
      P *pln;
      const problem_dft *p = (const problem_dft *) p_;
      iodim *d;
@@ -345,11 +392,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const struct spu_radices *radices;
      struct cell_iotensor v;
 
-     static const plan_adt padt = {
-	  X(dft_solve), awake, print, destroy
-     };
-
-     UNUSED(plnr);
+     UNUSED(plnr); UNUSED(ego);
 
      if (!applicable(plnr, p))
 	  return (plan *)0;
@@ -376,6 +419,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cutdim = choose_cutdim(&v);
      pln->W = 0;
 
+     pln->rw = 0;
+
      X(ops_zero)(&pln->super.super.ops);
      pln->super.super.ops.other += 100; /* FIXME */
      pln->super.super.could_prune_now_p = 1;
@@ -401,4 +446,140 @@ void X(dft_direct_cell_register)(planner *p)
      REGISTER_SOLVER(p, mksolver());
 }
 
+/**************************************************************/
+/* solvers with twiddle factors: */
+
+typedef struct {
+     plan_dftw super;
+     plan *cld;
+} Pw;
+
+static void destroyw(plan *ego_)
+{
+     Pw *ego = (Pw *) ego_;
+     X(plan_destroy_internal)(ego->cld);
+}
+
+static void printw(const plan *ego_, printer *p)
+{
+     const Pw *ego = (const Pw *) ego_;
+     const P *cld = (const P *) ego->cld;
+     int i;
+     p->print(p, "(dftw-direct-cell-%D-%D%v%(%p%))", 
+	      cld->rw, cld->mw, cld->v.dims[1].n1,
+	      ego->cld);
+}
+
+static void awakew(plan *ego_, enum wakefulness wakefulness)
+{
+     Pw *ego = (Pw *) ego_;
+     X(plan_awake)(ego->cld, wakefulness);
+}
+
+static void applyw(const plan *ego_, R *rio, R *iio)
+{
+     const Pw *ego = (const Pw *) ego_;
+     dftapply cldapply = ((plan_dft *) ego->cld)->apply;
+     cldapply(ego->cld, rio, iio, rio, iio);
+}
+
+static plan *mkcldw(const ct_solver *ego, 
+		    int dec, INT r, INT m, INT s, INT vl, INT vs, 
+		    INT mstart, INT mcount,
+		    R *rio, R *iio,
+		    planner *plnr)
+{
+     const struct spu_radices *radices;
+     int sign;
+     Pw *pln;
+     P *cld;
+     struct cell_iodim *v;
+
+     static const plan_adt padtw = {
+	  0, awakew, printw, destroyw
+     };
+
+     UNUSED(ego);
+
+     /* use only if cell is enabled */
+     if (NO_SIMDP(plnr) || X(cell_nspe)() <= 0)
+	  return 0;
+
+     /* don't bother for small N */
+     if (r * m <= MAX_N)
+	  return 0;
+
+     /* only handle input contiguous in the M dimension */
+     if (s != 2)
+	  return 0;
+
+     /* M dimension must be kosher */
+     if ((m % VL) || (mstart % VL) || (mcount % VL))
+	  return 0;
+
+     /* vector dimension, if any, must be kosher */
+     if (!SIMD_STRIDE_OKA(vs))
+	  return 0;
+
+     radices = find_radices(rio, iio, rio, iio,
+			    r, m * s, m * s,
+			    &sign);
+
+     if (!radices)
+	  return 0;
+
+     cld = MKPLAN_DFT(P, &padt, apply);
+
+     cld->radices = *radices;
+     cld->n = r;
+     cld->is = m * s;
+     cld->os = m * s;
+     cld->sign = sign;
+     cld->W = 0;
+
+     cld->rw = r; cld->mw = m; cld->Ww = 0;
+     
+     /* build vtensor by hand */
+     v = cld->v.dims;
+     v[0].n0 = mstart; v[0].n1 = mstart + mcount;
+     v[0].is_bytes = v[0].os_bytes = s * sizeof(R);
+     v[1].n0 = 0; v[1].n1 = vl; v[1].is_bytes = v[1].os_bytes = vs * sizeof(R);
+     cld->cutdim = 0;
+
+     pln = MKPLAN_DFTW(Pw, &padtw, applyw);
+     pln->cld = &cld->super.super;
+     X(ops_zero)(&pln->super.super.ops);
+     pln->super.super.ops.other += 100; /* FIXME */
+     return &(pln->super.super);
+}
+
+static void regsolverw(planner *plnr, INT r, int dec)
+{
+     ct_solver *slv = X(mksolver_ct)(sizeof(ct_solver), r, dec, mkcldw);
+     REGISTER_SOLVER(plnr, &(slv->super));
+}
+
+void X(ct_cell_direct_register)(planner *p)
+{
+#if 0
+     regsolverw(p, -1, DECDIT);
+     regsolverw(p, 16, DECDIT);
+     regsolverw(p, 64, DECDIT);
+     regsolverw(p, 128, DECDIT);
+     regsolverw(p, 256, DECDIT);
+#endif
+     int n;
+
+     for (n = 32; n <= MAX_N; n += REQUIRE_N_MULTIPLE_OF) {
+	  const struct spu_radices *r = 
+	       X(spu_radices) + n / REQUIRE_N_MULTIPLE_OF;
+	  if (r->r[0])
+	       regsolverw(p, n, DECDIT);
+     }
+
+}
+
+
 #endif /* HAVE_CELL */
+
+

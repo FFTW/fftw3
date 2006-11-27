@@ -40,8 +40,12 @@ void X(spu_complex_memcpy)(R *dst, int dstride,
 			   const R *src, int sstride,
 			   int n);
 
-void X(spu_complex_transpose)(R *A_, int n);
-void X(spu_complex_transpose_and_swap)(R *A_, R *B_, int ni, int nj);
+void X(spu_complex_transpose_op)(R *I, R *O,
+				 int n0, /* int is0 = 2, */ int os0,
+				 int n1, int is1 /*, int os1 = 2 */);
+
+void X(spu_complex_transpose)(R *A, int n);
+void X(spu_complex_transpose_and_swap)(R *A, R *B, int ni, int nj);
 
 void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
 		  unsigned int cmdl);
@@ -66,9 +70,9 @@ void X(spu_do_dft)(const struct dft_context *dft);
 
 /* add k to spu_addr, 0 < k <= ALIGNMENT, so that 
    (spu_addr + k) % ALIGNMENT == ppu_addr % ALIGNMENT */
-#define ALIGN_LIKE(spu_addr, ppu_addr)						\
-  (void *)(((char *)(spu_addr)) +						\
-     ((((unsigned)(ppu_addr)) - ((unsigned)(spu_addr))) & (ALIGNMENT - 1)))
+#define ALIGN_LIKE(spu_addr, ppu_addr)					 \
+(void *)(((char *)(spu_addr)) +						 \
+  ((((unsigned)(ppu_addr)) - ((unsigned)(spu_addr))) & (ALIGNMENT - 1)))
 
 /* list of codelets: */
 void X(spu_n2fv_2) (const R *ri, const R *ii, R *ro, R *io, stride is,

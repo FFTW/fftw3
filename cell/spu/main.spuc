@@ -10,11 +10,6 @@ static void wait(void)
      (void) spu_read_in_mbox();
 }
 
-static void ack(void)
-{
-     spu_write_out_mbox(0);
-}
-
 int main(unsigned long long spu_id, unsigned long long parm)
 {  
      static struct spu_context ctx __attribute__ ((aligned (ALIGNMENT)));
@@ -40,6 +35,8 @@ int main(unsigned long long spu_id, unsigned long long parm)
 		   return 0;
 	  }
 
-	  ack();
+	  /* signal completion: */
+	  ctx.done = 1;
+	  X(spu_dma1d)(&ctx, parm, sizeof(ctx), MFC_PUTLF_CMD);
      }
 }

@@ -52,7 +52,7 @@ void X(spu_dma2d)(R *A, long long ppu_addr,
 {
      int vv, i, ii;
      unsigned int tag_id = 0;
-     
+
      if (ppu_stride_bytes == 2 * sizeof(R)) { 
 	  /* contiguous array on the PPU side */
 
@@ -120,22 +120,18 @@ void X(spu_dma2d)(R *A, long long ppu_addr,
 		    }
 
 		    if (cmdl == MFC_PUTL_CMD) 
-			 for (ii = 0; ii < nbuf; ++ii) {
-			      X(spu_complex_memcpy)(bufalign + ii * 2 * v, 2, 
-						    A, 2 * n, v);
-			      A += 2;
-			 }
+			 X(spu_complex_transpose_op)(A, bufalign,
+						     nbuf, 2 * v, v, 2 * n);
 
-		    spu_mfcdma32(bufalign, (unsigned)list, nbuf * sizeof(list[0]),
-				 tag_id, cmdl);
+		    spu_mfcdma32(bufalign, (unsigned)list, 
+				 nbuf * sizeof(list[0]), tag_id, cmdl);
 		    spu_mfcstat(2);
 
 		    if (cmdl == MFC_GETL_CMD) 
-			 for (ii = 0; ii < nbuf; ++ii) {
-			      X(spu_complex_memcpy)(A, 2 * n,
-						    bufalign + ii * 2 * v, 2, v);
-			      A += 2;
-			 }
+			 X(spu_complex_transpose_op)(bufalign, A,
+						     v, 2 * n, nbuf, 2 * v);
+
+		    A += 2 * nbuf;
 	       }
 	  }
      }

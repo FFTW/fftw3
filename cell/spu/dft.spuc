@@ -58,6 +58,36 @@ static void flip_ri(R *A, int ncomplex)
      }
 }
 
+static void bytwiddle(R *A, int r, int chunk, R *buf,
+		      int m, long long Wppu0)
+{
+     int v, i;
+
+     for (v = 0; v < chunk; ++v, ++m, A += 2 * r) {
+	  long long Wppu = Wppu0 + m * r * 2 * sizeof(R);
+	  R *W = ALIGN_LIKE(buf, Wppu);
+	  X(spu_dma1d)(W, Wppu, r * 2 * sizeof(R), MFC_GETL_CMD);
+	  for (i = 0; i < r - 3 * VL; i += 4 * VL) {
+	       V a0 = LD(A + 2 * (i + 0 * VL), 0, 0);
+	       V a1 = LD(A + 2 * (i + 1 * VL), 0, 0);
+	       V a2 = LD(A + 2 * (i + 2 * VL), 0, 0);
+	       V a3 = LD(A + 2 * (i + 3 * VL), 0, 0);
+	       V b0 = BYTWJ(W + 2 * (i + 0 * VL), a0);
+	       V b1 = BYTWJ(W + 2 * (i + 1 * VL), a1);
+	       V b2 = BYTWJ(W + 2 * (i + 2 * VL), a2);
+	       V b3 = BYTWJ(W + 2 * (i + 3 * VL), a3);
+	       ST(A + 2 * (i + 0 * VL), b0, 0, 0);
+	       ST(A + 2 * (i + 1 * VL), b1, 0, 0);
+	       ST(A + 2 * (i + 2 * VL), b2, 0, 0);
+	       ST(A + 2 * (i + 3 * VL), b3, 0, 0);
+	  }
+	  for (; i < r; i += VL) {
+	       V a0 = LD(A + 2 * i, 0, 0);
+	       V b0 = BYTWJ(W + 2 * i, a0);
+	       ST(A + 2 * i, b0, 0, 0);
+	  }
+     }
+}
 
 #if CELL_DFT_MAXVRANK != 2
 #error "This routine only works for CELL_DFT_MAXVRANK == 2"
@@ -105,8 +135,9 @@ void X(spu_do_dft)(const struct dft_context *dft)
 	       const int maxchunk = (vd[0].n1 - vd[0].n0) / VL;
 	       avail /= VL;
 
-	       /* initial value of nbuf (approx. 1/8 of memory for buffers) */
-	       nbuf = 1 + n/8; 
+	       /* initial value of nbuf (approx. 1/4 of memory for buffers) */
+	       nbuf = 2 + n/4; 
+	       if (VL > 1) nbuf = VL * (nbuf / VL);
 	       if (nbuf > MAX_LIST_SZ) nbuf = MAX_LIST_SZ;
 
 	       /* for given value of nbuf, try to increase chunk, subject
@@ -118,6 +149,7 @@ void X(spu_do_dft)(const struct dft_context *dft)
 	       /* for given value of chunk, make nbuf as large as possible */
 	       if (chunk > 0)
 		    nbuf = (avail - chunk * nbytes) / (2 * sizeof(R) * chunk);
+	       if (VL > 1) nbuf = VL * (nbuf / VL);
 	       if (nbuf > MAX_LIST_SZ) nbuf = MAX_LIST_SZ;
 
 	       /* finally, compute the true value of chunk */
@@ -154,6 +186,9 @@ void X(spu_do_dft)(const struct dft_context *dft)
 
 	       if (dft->sign == 1)
 		    flip_ri(Aalign, n * chunk);
+
+	       if (dft->rw)
+		    bytwiddle(Aalign, n, chunk, A, v0, dft->Ww);
 
 	       /* compute FFTs */
 	       for (vv = 0; vv < chunk; ++vv) 

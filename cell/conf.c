@@ -27,6 +27,7 @@
 static const solvtab s =
 {
      SOLVTAB(X(dft_direct_cell_register)),
+     SOLVTAB(X(ct_cell_direct_register)),
      SOLVTAB_END
 };
 

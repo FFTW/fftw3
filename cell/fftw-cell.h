@@ -38,9 +38,16 @@ struct dft_context {
      struct cell_iotensor v;
      int sign;
      int Wsz_bytes;
-     /* pointers, converted to ulonglong */
+
+     /* optional parameters for dftw */
+     int rw;
+
+     /* pointers, converted to long long */
      long long xi, xo;
      long long W;
+
+     /* optional twiddles for dftw */
+     long long Ww;
 };
 
 struct transpose_context {
@@ -68,8 +75,11 @@ struct spu_context {
      } u;
 
      char pad[15 -
-	      (((sizeof(union spu_context_u) + sizeof(enum spu_op)) - 1) 
+	      (((sizeof(union spu_context_u) + 
+		 sizeof(enum spu_op)
+		 + sizeof(int)) - 1) 
 	       & 15)];
+     volatile int done;
      enum spu_op op;
 };
 
@@ -77,6 +87,7 @@ extern const struct spu_radices
    X(spu_radices)[(MAX_N/REQUIRE_N_MULTIPLE_OF) + 1];
 
 void X(dft_direct_cell_register)(planner *p);
+void X(ct_cell_direct_register)(planner *p);
 
 void *X(cell_aligned_malloc)(size_t n);
 void X(cell_activate_spes)(void);
