@@ -32,6 +32,8 @@ endif
 
 BUILT_SOURCES= $(SINGLE_CODELETS) $(DOUBLE_CODELETS)
 HFILES=fftw-spu.h spu-double.h spu-single.h
+OTHERDEPS=${top_srcdir}/kernel/ifftw.h ${top_srcdir}/cell/fftw-cell.h	\
+${top_builddir}/config.h
 
 # override the value set by configure
 LIBS=-lm
@@ -39,7 +41,7 @@ LIBS=-lm
 spufftw_SOURCES=main.spuc alloc.spuc copy.spuc dma.spuc execute.spuc	\
 transpose.spuc dft.spuc $(ALL_CODELETS) $(HFILES)
 spufftw_LINK=$(SPUCC) -o $@
-spufftw_OBJECTS: $(HFILES)
+$(spufftw_OBJECTS): $(HFILES) $(OTHERDEPS)
 
 planner_SOURCES=planner.spuc execute.spuc $(ALL_CODELETS) $(HFILES)
 planner_LINK=$(SPUCC) -o $@
