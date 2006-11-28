@@ -118,6 +118,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      /* fill contexts */
      v = ego->v.dims[cutdim].n1;
+
      for (i = 0; i < nspe; ++i) {
 	  int chunk;
 	  struct spu_context *ctx = X(cell_get_ctx)(i);
@@ -138,13 +139,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 	  /* partition v into pieces of equal size, subject to alignment
 	     constraints */
-	  if (VL > 1 && (ego->is != 2 || ego->os != 2)) {
-	       /* either the input or the output operates in vector mode */
-	       A(v % VL == 0); /* enforced in find_radices() */
-	       chunk = VL * ((v - ego->v.dims[cutdim].n0) / (VL * (nspe - i)));
-	  } else {
-	       chunk = (v - ego->v.dims[cutdim].n0) / (nspe - i);
-	  }
+	  chunk = VL * ((v - ego->v.dims[cutdim].n0) / (VL * (nspe - i)));
 
 	  dft->v.dims[cutdim].n1 = v;
 	  v -= chunk;
@@ -243,19 +238,22 @@ static int build_vtensor(const iodim *d, const tensor *vecsz,
 
      for (i = 0; i < vecsz->rnk; ++i) {
 	  t = vecsz->dims + i;
+	  if (t->n % VL) /* FIXME: too conservative, but hard to get it
+			    right */
+	       return 0; 
 	  if (( 
 		   /* contiguous input across D */
-		   (d->is == 2 && (d->n % VL) == 0 && SIMD_STRIDE_OKA(t->is))
+		   (d->is == 2 && SIMD_STRIDE_OKA(t->is))
 		   ||
 		   /* contiguous input across T */
-		   (t->is == 2 && (t->n % VL) == 0 && SIMD_STRIDE_OKA(d->is))
+		   (t->is == 2 && SIMD_STRIDE_OKA(d->is))
 		   )
 	      && (
 		   /* contiguous output across D */
-		   (d->os == 2 && (d->n % VL) == 0 && SIMD_STRIDE_OKA(t->os))
+		   (d->os == 2 && SIMD_STRIDE_OKA(t->os))
 		   ||
 		   /* contiguous output across T */
-		   (t->os == 2 && (t->n % VL) == 0 && SIMD_STRIDE_OKA(d->os))
+		   (t->os == 2 && SIMD_STRIDE_OKA(d->os))
 		   )) {
 	       /* choose I as the contiguous dimension */
 	       contigdim = i;
@@ -307,6 +305,7 @@ static int choose_cutdim(const struct cell_iotensor *tens)
      for (i = 1; i < CELL_DFT_MAXVRANK; ++i) {
 	  const struct cell_iodim *cut = &tens->dims[cutdim];
 	  const struct cell_iodim *t = &tens->dims[i];
+
 	  if ((cut->is_bytes == 2 * sizeof(R) || 
 	       cut->os_bytes == 2 * sizeof(R))
 	      && t->n1 > 1) {

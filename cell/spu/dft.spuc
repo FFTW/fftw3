@@ -117,7 +117,8 @@ void X(spu_do_dft)(const struct dft_context *dft)
      /* build plan */
      build_plan(plan, dft->n, W, &dft->r);
 
-     chunk = (X(spu_alloc_avail)() - nbytes - 2 * ALIGNMENT) / nbytes;
+     chunk = VL * 
+	  ((X(spu_alloc_avail)() - nbytes - 2 * ALIGNMENT) / (VL * nbytes));
      if (chunk > chunkalign) chunk &= ~(chunkalign-1);
 
      A = X(spu_alloc)((chunk + 1) * nbytes + 2 * ALIGNMENT);
