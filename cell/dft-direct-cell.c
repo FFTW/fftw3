@@ -110,7 +110,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      int cutdim = ego->cutdim;
 
      /* find pointer to beginning of data, depending on sign */
-     if (ego->sign == -1) {
+     if (ego->sign == FFT_SIGN) {
 	  xi = ri; xo = ro;
      } else {
 	  xi = ii; xo = io;
@@ -340,10 +340,10 @@ const struct spu_radices *find_radices(R *ri, R *ii, R *ro, R *io,
 
      /* check whether the data format is supported */
      if (ii == ri + 1 && io == ro + 1) { /* R I R I ... format */
-	  *sign = -1;
+	  *sign = FFT_SIGN;
 	  xi = ri; xo = ro;
      } else if (ri == ii + 1 && ro == io + 1) { /* I R I R ... format */
-	  *sign = 1;
+	  *sign = -FFT_SIGN;
 	  xi = ii; xo = io;
      } else
 	  return 0; /* can't do it */

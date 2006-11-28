@@ -140,7 +140,7 @@ void X(spu_do_dft)(const struct dft_context *dft)
 			    chunk, /* twon, */ vd[0].is_bytes,
 			    MFC_GETL_CMD);
 
-	       if (dft->sign == 1)
+	       if (dft->sign != FFT_SIGN)
 		    flip_ri(Aalign, n * chunk);
 
 	       if (dft->rw)
@@ -152,7 +152,7 @@ void X(spu_do_dft)(const struct dft_context *dft)
 					Aalign + vv * twon, 
 					Balign + vv * twon);
 
-	       if (dft->sign == 1)
+	       if (dft->sign != FFT_SIGN)
 		    flip_ri(Balign, n * chunk);
 
 	       /* write data back */
