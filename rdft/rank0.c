@@ -301,11 +301,20 @@ static void apply_ip_cell(const plan *ego_, R *I, R *O)
 
 static int applicable_ip_cell(const P *pln, const problem_rdft *p)
 {
+     R *I = p->I;
+     int i;
+     iodim *d;
+
+     for (i = 0, d = pln->d; i < pln->rnk - 2; ++i, ++d) {
+	  I = TAINT(I, d->is);
+	  I = TAINT(I, d->os);
+     }
+
      return (1
 	     && p->I == p->O
 	     && pln->rnk >= 2
 	     && transposep(pln)
-	     && X(cell_transpose_applicable)(p->I, pln->d + (pln->rnk - 2), pln->vl)
+	     && X(cell_transpose_applicable)(I, d, pln->vl)
 	  );
 }
 #endif
