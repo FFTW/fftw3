@@ -7,10 +7,17 @@
 #include "../fftw-cell.h"
 
 #define MAX_DMA_SIZE 16384
-static mfc_list_element_t list[MAX_LIST_SZ] __attribute__ ((aligned (ALIGNMENT)));
+static mfc_list_element_t list[MAX_LIST_SZ] 
+    __attribute__ ((aligned (ALIGNMENT)));
+
+#define MKLISTENTRY(p, sz, ppu_addr)		\
+{						\
+     (p)->notify = 0;				\
+     (p)->size = (sz);				\
+     (p)->eal = (ppu_addr);			\
+}
 
 /* universal DMA transfer routine */
-
 void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
 		  unsigned int cmdl)
 {
@@ -29,9 +36,7 @@ void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
 	  if (chunk > MAX_DMA_SIZE) 
 	       chunk = MAX_DMA_SIZE;
 
-	  list[nlist].notify = 0;
-	  list[nlist].size = chunk;
-	  list[nlist].eal = ppu_addr;
+	  MKLISTENTRY(list + nlist, chunk, ppu_addr);
 	  ++nlist;
 	  sz -= chunk; ppu_addr += chunk;
      }
@@ -41,17 +46,93 @@ void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
      spu_mfcstat(2);
 }
 
+static void shuffle(R *A, int lda, int r, int c)
+{
+     int r0 = 0, r1 = r;
+     int c0 = 0, c1 = c;
+     int dr, dc;
+     
+ tail:
+     dr = r1 - r0;
+     dc = c1 - c0;
+
+     if (dc > 0) {
+	  if (dr > dc) {
+	       X(spu_complex_transpose)(A + r0 * lda + 2 * c0, lda, dc);
+	       r0 += dc;
+	       goto tail;
+	  } else if (dr > 0) {
+	       X(spu_complex_transpose)(A + r0 * lda + 2 * c0, lda, dr);
+	       c0 += dr;
+	       goto tail;
+	  }
+     }
+}
+
+static void transfer(R *A, long long ppu_addr, int ppu_stride_bytes,
+		     int r, int c,
+		     unsigned int cmdl)
+{
+     int rx;
+     int nlist = 0;
+     unsigned int tag_id = 0;
+     R *spu_addr = A;
+
+     for (rx = 0; rx < r; ++rx) {
+	  int r0 = 0, r1 = r;
+	  int c0 = 0, c1 = c;
+	  int dr, dc;
+     
+     tail:
+	  dr = r1 - r0;
+	  dc = c1 - c0;
+
+	  if (dc > 0) {
+	       if (dr > dc) {
+		    if (rx < r0 + dc)
+			 r1 = r0 + dc;
+		    else
+			 r0 = r0 + dc;
+		    goto tail;
+	       } else if (dr > 0) {
+		    int cx = c0 + (rx - r0);
+
+		    if (nlist == MAX_LIST_SZ) {
+			 spu_mfcdma32(spu_addr, (unsigned)list, 
+				      nlist * sizeof(list[0]),
+				      tag_id, cmdl);
+			 spu_mfcstat(2);
+			 spu_addr = A;
+			 nlist = 0;
+		    }
+		    MKLISTENTRY(list + nlist, 
+				2 * sizeof(R) * dr,
+				ppu_addr + cx * ppu_stride_bytes 
+				+ r0 * 2 * sizeof(R));
+		    ++nlist;
+		    A += 2 * dr;
+		    c0 += dr;
+		    goto tail;
+	       } 
+	  }
+     }
+
+     if (nlist > 0) {
+	  spu_mfcdma32(spu_addr, (unsigned)list, nlist * sizeof(list[0]),
+		       tag_id, cmdl);
+	  spu_mfcstat(2);
+     }
+}
+
 /* 2D dma transfer routine, works for 
    ppu_stride_bytes == 2 * sizeof(R) or ppu_vstride_bytes == 2 * sizeof(R) */
 void X(spu_dma2d)(R *A, long long ppu_addr, 
 		  int n, /* int spu_stride = 2 , */ int ppu_stride_bytes,
 		  int v, /* int spu_vstride = 2 * n, */
 		  int ppu_vstride_bytes,
-		  unsigned int cmdl,
-		  R *buf, int nbuf)
+		  unsigned int cmdl)
 {
-     int vv, i, ii;
-     unsigned int tag_id = 0;
+     int vv, ii;
 
      if (ppu_stride_bytes == 2 * sizeof(R)) { 
 	  /* contiguous array on the PPU side */
@@ -70,14 +151,13 @@ void X(spu_dma2d)(R *A, long long ppu_addr,
 	       }
 	  } else {
 	       int chunk = MAX_LIST_SZ;
+	       unsigned int tag_id = 0;
 	       for (vv = 0; vv < v; vv += chunk) {
 		    if (chunk > v - vv)
 			 chunk = v - vv;
 
 		    for (ii = 0; ii < chunk; ++ii) {
-			 list[ii].notify = 0;
-			 list[ii].size = 2 * sizeof(R) * n;
-			 list[ii].eal = ppu_addr;
+			 MKLISTENTRY(list + ii, 2 * sizeof(R) * n, ppu_addr);
 			 ppu_addr += ppu_vstride_bytes;
 		    }
 
@@ -90,49 +170,12 @@ void X(spu_dma2d)(R *A, long long ppu_addr,
 	  }
      } else { 
 	  /* ppu_vstride_bytes == 2 * sizeof(R) */
-	  if (n == 1 || 2 * sizeof(R) * v > MAX_DMA_SIZE) {
-	       /* vector transfer of long vectors */
-	       for (i = 0; i < n; ++i) {
-		    R *bufalign = ALIGN_LIKE(buf, ppu_addr);
-		    if (cmdl == MFC_PUTL_CMD)
-			 X(spu_complex_memcpy)(bufalign, 2, A, 2 * n, v);
-		    X(spu_dma1d)(bufalign, ppu_addr, v * 2 * sizeof(R), cmdl);
-		    if (cmdl == MFC_GETL_CMD)
-			 X(spu_complex_memcpy)(A, 2 * n, bufalign, 2, v);
-		    A += 2;
-		    ppu_addr += ppu_stride_bytes;
-	       }
-	  } else {
-	       /* vector transfer of short vectors, use dma lists */
-	       for (i = 0; i < n; i += nbuf) {
-		    /* FIXME: I don't think that this alignment makes any
-		       difference */
-		    R *bufalign = ALIGN_LIKE(buf, ppu_addr);
+	  if (cmdl == MFC_PUTL_CMD) 
+	       shuffle(A, 2 * n, v, n);
 
-		    if (nbuf > n - i)
-			 nbuf = n - i;
+	  transfer(A, ppu_addr, ppu_stride_bytes, v, n, cmdl);
 
-		    for (ii = 0; ii < nbuf; ++ii) {
-			 list[ii].notify = 0;
-			 list[ii].size = 2 * sizeof(R) * v;
-			 list[ii].eal = ppu_addr;
-			 ppu_addr += ppu_stride_bytes;
-		    }
-
-		    if (cmdl == MFC_PUTL_CMD) 
-			 X(spu_complex_transpose_op)(A, bufalign,
-						     nbuf, 2 * v, v, 2 * n);
-
-		    spu_mfcdma32(bufalign, (unsigned)list, 
-				 nbuf * sizeof(list[0]), tag_id, cmdl);
-		    spu_mfcstat(2);
-
-		    if (cmdl == MFC_GETL_CMD) 
-			 X(spu_complex_transpose_op)(bufalign, A,
-						     v, 2 * n, nbuf, 2 * v);
-
-		    A += 2 * nbuf;
-	       }
-	  }
+	  if (cmdl == MFC_GETL_CMD) 
+	       shuffle(A, 2 * n, v, n);
      }
 }

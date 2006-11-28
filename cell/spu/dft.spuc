@@ -97,9 +97,10 @@ static void bytwiddle(R *A, int r, int chunk, R *buf,
 void X(spu_do_dft)(const struct dft_context *dft)
 {
      int v0, v1, vv;
-     int chunk, nbuf;
+     int chunk;
+     const int chunkalign = (ALIGNMENT / (2 * sizeof(R)));
      struct spu_plan plan[MAX_PLAN_LEN];
-     R *W, *A, *Aalign, *Balign, *buf;
+     R *W, *A, *Aalign, *Balign;
      int n = dft->n;
      int twon = 2 * n;
      int nbytes = twon * sizeof(R);
@@ -116,55 +117,10 @@ void X(spu_do_dft)(const struct dft_context *dft)
      /* build plan */
      build_plan(plan, dft->n, W, &dft->r);
 
-     /* Compute values of chunk and nbuf, and allocate proper buffers.
-	This code is the proof that one can write FORTRAN in any
-	language. */
-     {
-	  size_t avail = X(spu_alloc_avail)() - nbytes -
-	       ALIGNMENT * (1 /* buf */
-			    + 2 /* A */
-			    + 1 /* implicit between buf and A */
-		    );
-	  if (dft->is_bytes != 2 * sizeof(R) || 
-	      dft->os_bytes != 2 * sizeof(R)) {
-	       /* We use dma2d in vector mode, and threfore chunk must
-		  be a multiple of VL.  Compute chunk/VL first, and 
-		  multiply by VL at the end */
-		  
-	       const int chunkalign = (ALIGNMENT / (2 * sizeof(R))) / VL;
-	       const int maxchunk = (vd[0].n1 - vd[0].n0) / VL;
-	       avail /= VL;
+     chunk = (X(spu_alloc_avail)() - nbytes - 2 * ALIGNMENT) / nbytes;
+     if (chunk > chunkalign) chunk &= ~(chunkalign-1);
 
-	       /* initial value of nbuf (approx. 1/4 of memory for buffers) */
-	       nbuf = 2 + n/4; 
-	       if (VL > 1) nbuf = VL * (nbuf / VL);
-	       if (nbuf > MAX_LIST_SZ) nbuf = MAX_LIST_SZ;
-
-	       /* for given value of nbuf, try to increase chunk, subject
-		  to available memory, maxchunk, and alignment constraints */
-	       chunk = avail / (nbytes + 2 * sizeof(R) * nbuf);
-	       if (chunk > maxchunk) chunk = maxchunk;
-	       if (chunk > chunkalign) chunk &= ~(chunkalign-1);
-
-	       /* for given value of chunk, make nbuf as large as possible */
-	       if (chunk > 0)
-		    nbuf = (avail - chunk * nbytes) / (2 * sizeof(R) * chunk);
-	       if (VL > 1) nbuf = VL * (nbuf / VL);
-	       if (nbuf > MAX_LIST_SZ) nbuf = MAX_LIST_SZ;
-
-	       /* finally, compute the true value of chunk */
-	       chunk *= VL;
-	  } else {
-	       /* easy case, we need no buffers */
-	       const int chunkalign = (ALIGNMENT / (2 * sizeof(R)));
-	       nbuf = 0;
-	       chunk = avail / nbytes;
-	       if (chunk > chunkalign) chunk &= ~(chunkalign-1);
-	  }
-
-	  buf = X(spu_alloc)(2 * sizeof(R) * nbuf * chunk + ALIGNMENT);
-	  A = X(spu_alloc)((chunk + 1) * nbytes + 2 * ALIGNMENT);
-     } /* QED */
+     A = X(spu_alloc)((chunk + 1) * nbytes + 2 * ALIGNMENT);
 
      /* for all vector elements we are responsible for: */
      for (v1 = vd[1].n0; v1 < vd[1].n1; v1++) {
@@ -182,7 +138,7 @@ void X(spu_do_dft)(const struct dft_context *dft)
 	       X(spu_dma2d)(Aalign, xi + v0 * vd[0].is_bytes,
 			    n, /* 2, */ dft->is_bytes,
 			    chunk, /* twon, */ vd[0].is_bytes,
-			    MFC_GETL_CMD, buf, nbuf);
+			    MFC_GETL_CMD);
 
 	       if (dft->sign == 1)
 		    flip_ri(Aalign, n * chunk);
@@ -203,7 +159,7 @@ void X(spu_do_dft)(const struct dft_context *dft)
 	       X(spu_dma2d)(Balign, xo + v0 * vd[0].os_bytes,
 			    n, /* 2, */ dft->os_bytes,
 			    chunk, /* twon, */ vd[0].os_bytes,
-			    MFC_PUTL_CMD, buf, nbuf);
+			    MFC_PUTL_CMD);
 	  }
      }
 }

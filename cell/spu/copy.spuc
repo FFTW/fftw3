@@ -2,197 +2,78 @@
 #include "fftw-spu.h"
 #include "../fftw-cell.h"
 
-#if FFTW_SINGLE
-typedef unsigned long long complex_hack_t;
-#else
-typedef vector float complex_hack_t;
-#endif
-
-void X(spu_complex_memcpy)(R *dst, int dstride,
-			   const R *src, int sstride,
-			   int n)
-{
-     int i;
-
-     for (i = 0; i < n - 3; i += 4, src += 4 * sstride, dst += 4 * dstride) {
-	  complex_hack_t x0 = *((complex_hack_t *)(src + 0 * sstride));
-	  complex_hack_t x1 = *((complex_hack_t *)(src + 1 * sstride));
-	  complex_hack_t x2 = *((complex_hack_t *)(src + 2 * sstride));
-	  complex_hack_t x3 = *((complex_hack_t *)(src + 3 * sstride));
-	  *((complex_hack_t *)(dst + 0 * dstride)) = x0;
-	  *((complex_hack_t *)(dst + 1 * dstride)) = x1;
-	  *((complex_hack_t *)(dst + 2 * dstride)) = x2;
-	  *((complex_hack_t *)(dst + 3 * dstride)) = x3;
-     }
-     for (; i < n; ++i, src += sstride, dst += dstride) {
-	  complex_hack_t x0 = *((complex_hack_t *)(src + 0 * sstride));
-	  *((complex_hack_t *)(dst + 0 * dstride)) = x0;
-     }
-}
-
-/* out of place transpose */
-void X(spu_complex_transpose_op)(R *I, R *O,
-				 int n0, /* int is0 = 2, */ int os0,
-				 int n1, int is1 /*, int os1 = 2 */)
-{
-     int i0, i1;
-
-     if (VL == 2) { /* single precision */
-	  for (i1 = 0; i1 < n1; i1 += 2) {
-	       for (i0 = 0; i0 < n0 - 6; i0 += 8) {
-		    R *Ip = I + (is1 * i1 + 2 * i0);
-		    R *Op = O + (os0 * i0 + 2 * i1);
-
-		    V a00 = LD(Ip + (0 * is1 + 0), 0, 0);
-		    V a10 = LD(Ip + (1 * is1 + 0), 0, 0);
-		    V a01 = LD(Ip + (0 * is1 + 4), 0, 0);
-		    V a11 = LD(Ip + (1 * is1 + 4), 0, 0);
-		    V a02 = LD(Ip + (0 * is1 + 8), 0, 0);
-		    V a12 = LD(Ip + (1 * is1 + 8), 0, 0);
-		    V a03 = LD(Ip + (0 * is1 + 12), 0, 0);
-		    V a13 = LD(Ip + (1 * is1 + 12), 0, 0);
-
-		    STN2(Op + (0 * os0), a00, a10, os0);
-		    STN2(Op + (2 * os0), a01, a11, os0);
-		    STN2(Op + (4 * os0), a02, a12, os0);
-		    STN2(Op + (6 * os0), a03, a13, os0);
-	       }
-	       for (; i0 < n0; i0 += 2) {
-		    R *Ip = I + (is1 * i1 + 2 * i0);
-		    R *Op = O + (os0 * i0 + 2 * i1);
-
-		    V a00 = LD(Ip + (0 * is1 + 0), 0, 0);
-		    V a10 = LD(Ip + (1 * is1 + 0), 0, 0);
-		    STN2(Op + (0 * os0), a00, a10, os0);
-	       }
-	  }
-     } else { /* double precision */
-	  for (i1 = 0; i1 < n1; i1 += 1) {
-	       for (i0 = 0; i0 < n0 - 4; i0 += 4) {
-		    R *Ip = I + (is1 * i1 + 2 * i0);
-		    R *Op = O + (os0 * i0 + 2 * i1);
-
-		    V a00 = LD(Ip + (0 * is1 + 0), 0, 0);
-		    V a01 = LD(Ip + (0 * is1 + 2), 0, 0);
-		    V a02 = LD(Ip + (0 * is1 + 4), 0, 0);
-		    V a03 = LD(Ip + (0 * is1 + 6), 0, 0);
-		    ST(Op + (0 * os0), a00, 0, 0);
-		    ST(Op + (1 * os0), a01, 0, 0);
-		    ST(Op + (2 * os0), a02, 0, 0);
-		    ST(Op + (3 * os0), a03, 0, 0);
-	       }
-	       for (; i0 < n0; i0 += 1) {
-		    R *Ip = I + (is1 * i1 + 2 * i0);
-		    R *Op = O + (os0 * i0 + 2 * i1);
-
-		    V a00 = LD(Ip + (0 * is1 + 0), 0, 0);
-		    ST(Op + (0 * os0), a00, 0, 0);
-	       }
-	  }
-     }
-}
-
 /* in-place transpose, n x n square complex matrix */
-void X(spu_complex_transpose)(R *A, int n)
+void X(spu_complex_transpose)(R *A, int lda, int n)
 {
      int i, j;
 
      if (VL == 2) { /* single precision */
 	  for (i = 0; i < n; i += 2) {
-	       for (j = i; j < n; j += 2) {
-		    R *Aij = A + 2 * (i * n + j);
-		    R *Aji = A + 2 * (j * n + i);
-		    V ai0j0 = LD(Aij + 2 * (0 * n + 0), 0, 0);
-		    V ai1j0 = LD(Aij + 2 * (1 * n + 0), 0, 0);
-		    V aj0i0 = LD(Aji + 2 * (0 * n), 0, 0);
-		    V aj1i0 = LD(Aji + 2 * (1 * n), 0, 0);
-		    STN2(Aij + 2 * (0 * n + 0), aj0i0, aj1i0, 2 * n);
-		    STN2(Aji + 2 * (0 * n), ai0j0, ai1j0, 2 * n);
+	       R *Ai = A + i * lda;
+	       for (j = i; j < n - 2; j += 4) {
+		    R *Aj = A + j * lda;
+		    R *Aij = Ai + 2 * j;
+		    R *Aji = Aj + 2 * i;
+		    V aj0i0 = LD(Aji + 0 * lda, 0, 0);
+		    V aj1i0 = LD(Aji + 1 * lda, 0, 0);
+		    V aj2i0 = LD(Aji + 2 * lda, 0, 0);
+		    V aj3i0 = LD(Aji + 3 * lda, 0, 0);
+		    V ai0j0 = LD(Aij + 0 * lda + 0, 0, 0);
+		    V ai1j0 = LD(Aij + 1 * lda + 0, 0, 0);
+		    V ai0j2 = LD(Aij + 0 * lda + 4, 0, 0);
+		    V ai1j2 = LD(Aij + 1 * lda + 4, 0, 0);
+		    STN2(Aij + 0 * lda + 0, aj0i0, aj1i0, lda);
+		    STN2(Aij + 0 * lda + 4, aj2i0, aj3i0, lda);
+		    STN2(Aji + 0 * lda, ai0j0, ai1j0, lda);
+		    STN2(Aji + 2 * lda, ai0j2, ai1j2, lda);
+	       }
+	       for (; j < n; j += 2) {
+		    R *Aj = A + j * lda;
+		    R *Aij = Ai + 2 * j;
+		    R *Aji = Aj + 2 * i;
+		    V aj0i0 = LD(Aji + 0 * lda, 0, 0);
+		    V aj1i0 = LD(Aji + 1 * lda, 0, 0);
+		    V ai0j0 = LD(Aij + 0 * lda, 0, 0);
+		    V ai1j0 = LD(Aij + 1 * lda, 0, 0);
+		    STN2(Aij + 0 * lda, aj0i0, aj1i0, lda);
+		    STN2(Aji + 0 * lda, ai0j0, ai1j0, lda);
 	       }
 	  }
+
      } else { /* double precision */
 	  for (i = 0; i < n; ++i) {
-	       for (j = i; j < n; ++j) {
-		    R *Aij = A + 2 * (i * n + j);
-		    R *Aji = A + 2 * (j * n + i);
-		    V ai0j0 = LD(Aij + 2 * (0 * n + 0), 0, 0);
-		    V aj0i0 = LD(Aji + 2 * (0 * n), 0, 0);
-		    ST(Aij + 2 * (0 * n + 0), aj0i0, 0, 0);
-		    ST(Aji + 2 * (0 * n), ai0j0, 0, 0);
+	       R *Ai = A + i * lda;
+	       for (j = i; j < n - 3; j += 4) {
+		    R *Aj = A + j * lda;
+		    R *Aij = Ai + 2 * j;
+		    R *Aji = Aj + 2 * i;
+		    V ai0j0 = LD(Aij + (0 * lda), 0, 0);
+		    V ai0j1 = LD(Aij + (0 * lda + 2), 0, 0);
+		    V ai0j2 = LD(Aij + (0 * lda + 4), 0, 0);
+		    V ai0j3 = LD(Aij + (0 * lda + 6), 0, 0);
+		    V aj0i0 = LD(Aji + (0 * lda), 0, 0);
+		    V aj1i0 = LD(Aji + (1 * lda), 0, 0);
+		    V aj2i0 = LD(Aji + (2 * lda), 0, 0);
+		    V aj3i0 = LD(Aji + (3 * lda), 0, 0);
+		    ST(Aji + (0 * lda), ai0j0, 0, 0);
+		    ST(Aji + (1 * lda), ai0j1, 0, 0);
+		    ST(Aji + (2 * lda), ai0j2, 0, 0);
+		    ST(Aji + (3 * lda), ai0j3, 0, 0);
+		    ST(Aij + (0 * lda), aj0i0, 0, 0);
+		    ST(Aij + (0 * lda + 2), aj1i0, 0, 0);
+		    ST(Aij + (0 * lda + 4), aj2i0, 0, 0);
+		    ST(Aij + (0 * lda + 6), aj3i0, 0, 0);
+	       }
+	       for (; j < n; ++j) {
+		    R *Aj = A + j * lda;
+		    R *Aij = Ai + 2 * j;
+		    R *Aji = Aj + 2 * i;
+		    V ai0j0 = LD(Aij + (0 * lda), 0, 0);
+		    V aj0i0 = LD(Aji + (0 * lda), 0, 0);
+		    ST(Aji + (0 * lda), ai0j0, 0, 0);
+		    ST(Aij + (0 * lda), aj0i0, 0, 0);
 	       }
 	  }
      }
 }
 
-/* A is ni rows x nj columns, row-major.
-   B is nj rows x ni columns, row-major. */
-void X(spu_complex_transpose_and_swap)(R *A, R *B, int ni, int nj)
-{
-     int i, j;
-     /* assert ((ni % VL) == 0); */
-     /* assert ((nj % VL) == 0); */
-
-     if (VL == 2) { /* single precision */
-	  for (i = 0; i < ni; i += 2) {
-	       for (j = 0; j < nj - 2; j += 4) {
-		    R *Aij = A + 2 * (i * nj + j);
-		    R *Bji = B + 2 * (j * ni + i);
-
-		    V ai0j0 = LD(Aij + 2 * (0 * nj + 0), 0, 0);
-		    V ai1j0 = LD(Aij + 2 * (1 * nj + 0), 0, 0);
-		    V ai0j2 = LD(Aij + 2 * (0 * nj + 2), 0, 0);
-		    V ai1j2 = LD(Aij + 2 * (1 * nj + 2), 0, 0);
-		    V bj0i0 = LD(Bji + 2 * (0 * ni), 0, 0);
-		    V bj1i0 = LD(Bji + 2 * (1 * ni), 0, 0);
-		    V bj2i0 = LD(Bji + 2 * (2 * ni), 0, 0);
-		    V bj3i0 = LD(Bji + 2 * (3 * ni), 0, 0);
-
-		    STN2(Aij + 2 * (0 * nj + 0), bj0i0, bj1i0, 2 * nj);
-		    STN2(Aij + 2 * (0 * nj + 2), bj2i0, bj3i0, 2 * nj);
-		    STN2(Bji + 2 * (0 * ni), ai0j0, ai1j0, 2 * ni);
-		    STN2(Bji + 2 * (2 * ni), ai0j2, ai1j2, 2 * ni);
-	       }
-	       for (; j < nj; j += 2) {
-		    R *Aij = A + 2 * (i * nj + j);
-		    R *Bji = B + 2 * (j * ni + i);
-		    V ai0j0 = LD(Aij + 2 * (0 * nj + 0), 0, 0);
-		    V ai1j0 = LD(Aij + 2 * (1 * nj + 0), 0, 0);
-		    V bj0i0 = LD(Bji + 2 * (0 * ni), 0, 0);
-		    V bj1i0 = LD(Bji + 2 * (1 * ni), 0, 0);
-		    STN2(Aij + 2 * (0 * nj + 0), bj0i0, bj1i0, 2 * nj);
-		    STN2(Bji + 2 * (0 * ni), ai0j0, ai1j0, 2 * ni);
-	       }
-	  }
-     } else { /* double precision */
-	  for (i = 0; i < ni; ++i) {
-	       for (j = 0; j < nj - 3; j += 4) {
-		    R *Aij = A + 2 * (i * nj + j);
-		    R *Bji = B + 2 * (j * ni + i);
-		    V ai0j0 = LD(Aij + 2 * (0 * nj + 0), 0, 0);
-		    V ai0j1 = LD(Aij + 2 * (0 * nj + 1), 0, 0);
-		    V ai0j2 = LD(Aij + 2 * (0 * nj + 2), 0, 0);
-		    V ai0j3 = LD(Aij + 2 * (0 * nj + 3), 0, 0);
-		    V bj0i0 = LD(Bji + 2 * (0 * ni), 0, 0);
-		    V bj1i0 = LD(Bji + 2 * (1 * ni), 0, 0);
-		    V bj2i0 = LD(Bji + 2 * (2 * ni), 0, 0);
-		    V bj3i0 = LD(Bji + 2 * (3 * ni), 0, 0);
-		    ST(Aij + 2 * (0 * nj + 0), bj0i0, 0, 0);
-		    ST(Aij + 2 * (0 * nj + 1), bj1i0, 0, 0);
-		    ST(Aij + 2 * (0 * nj + 2), bj2i0, 0, 0);
-		    ST(Aij + 2 * (0 * nj + 3), bj3i0, 0, 0);
-		    ST(Bji + 2 * (0 * ni), ai0j0, 0, 0);
-		    ST(Bji + 2 * (1 * ni), ai0j1, 0, 0);
-		    ST(Bji + 2 * (2 * ni), ai0j2, 0, 0);
-		    ST(Bji + 2 * (3 * ni), ai0j3, 0, 0);
-	       }
-	       for (; j < nj; ++j) {
-		    R *Aij = A + 2 * (i * nj + j);
-		    R *Bji = B + 2 * (j * ni + i);
-		    V ai0j0 = LD(Aij + 2 * (0 * nj + 0), 0, 0);
-		    V bj0i0 = LD(Bji + 2 * (0 * ni), 0, 0);
-		    ST(Aij + 2 * (0 * nj + 0), bj0i0, 0, 0);
-		    ST(Bji + 2 * (0 * ni), ai0j0, 0, 0);
-	       }
-	  }
-     }
-}
