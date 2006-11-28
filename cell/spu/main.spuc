@@ -20,7 +20,7 @@ int main(unsigned long long spu_id, unsigned long long parm)
 	  wait();
 
 	  /* obtain context */
-	  X(spu_dma1d)(&ctx, parm, sizeof(ctx), MFC_GETL_CMD);
+	  X(spu_dma1d)(&ctx, parm, sizeof(ctx), MFC_GET_CMD);
 
 	  switch (ctx.op) {
 	      case SPE_DFT:
@@ -37,6 +37,6 @@ int main(unsigned long long spu_id, unsigned long long parm)
 
 	  /* signal completion: */
 	  ctx.done = 1;
-	  X(spu_dma1d)(&ctx, parm, sizeof(ctx), MFC_PUTLF_CMD);
+	  X(spu_dma1d)(&ctx, parm, sizeof(ctx), MFC_PUTF_CMD);
      }
 }

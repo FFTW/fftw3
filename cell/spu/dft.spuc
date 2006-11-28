@@ -66,7 +66,7 @@ static void bytwiddle(R *A, int r, int chunk, R *buf,
      for (v = 0; v < chunk; ++v, ++m, A += 2 * r) {
 	  long long Wppu = Wppu0 + m * r * 2 * sizeof(R);
 	  R *W = ALIGN_LIKE(buf, Wppu);
-	  X(spu_dma1d)(W, Wppu, r * 2 * sizeof(R), MFC_GETL_CMD);
+	  X(spu_dma1d)(W, Wppu, r * 2 * sizeof(R), MFC_GET_CMD);
 	  for (i = 0; i < r - 3 * VL; i += 4 * VL) {
 	       V a0 = LD(A + 2 * (i + 0 * VL), 0, 0);
 	       V a1 = LD(A + 2 * (i + 1 * VL), 0, 0);
@@ -112,7 +112,7 @@ void X(spu_do_dft)(const struct dft_context *dft)
      /* obtain twiddle factors */
      W = X(spu_alloc)(dft->Wsz_bytes + ALIGNMENT);
      W = ALIGN_LIKE(W, dft->W);
-     X(spu_dma1d)(W, dft->W, dft->Wsz_bytes, MFC_GETL_CMD);
+     X(spu_dma1d)(W, dft->W, dft->Wsz_bytes, MFC_GET_CMD);
      
      /* build plan */
      build_plan(plan, dft->n, W, &dft->r);
@@ -139,7 +139,7 @@ void X(spu_do_dft)(const struct dft_context *dft)
 	       X(spu_dma2d)(Aalign, xi + v0 * vd[0].is_bytes,
 			    n, /* 2, */ dft->is_bytes,
 			    chunk, /* twon, */ vd[0].is_bytes,
-			    MFC_GETL_CMD);
+			    MFC_GET_CMD);
 
 	       if (dft->sign != FFT_SIGN)
 		    flip_ri(Aalign, n * chunk);
@@ -160,7 +160,7 @@ void X(spu_do_dft)(const struct dft_context *dft)
 	       X(spu_dma2d)(Balign, xo + v0 * vd[0].os_bytes,
 			    n, /* 2, */ dft->os_bytes,
 			    chunk, /* twon, */ vd[0].os_bytes,
-			    MFC_PUTL_CMD);
+			    MFC_PUT_CMD);
 	  }
      }
 }

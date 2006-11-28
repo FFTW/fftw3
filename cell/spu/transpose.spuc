@@ -41,10 +41,10 @@ void X(spu_do_transpose)(const struct transpose_context *t)
 			 ALIGN_LIKE(A, t->A + (i * s1_bytes + j * s0_bytes));
 		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
 				 nj, s0_bytes, ni, s1_bytes, 
-				 MFC_GETL_CMD);
+				 MFC_GET_CMD);
 		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
 				 ni, s1_bytes, nj, s0_bytes, 
-				 MFC_PUTL_CMD);
+				 MFC_PUT_CMD);
 	       } else /* if (j > i) */ {
 		    Aalign = 
 			 ALIGN_LIKE(A, t->A + (i * s1_bytes + j * s0_bytes));
@@ -52,16 +52,16 @@ void X(spu_do_transpose)(const struct transpose_context *t)
 			 ALIGN_LIKE(B, t->A + (j * s1_bytes + i * s0_bytes));
 		    X(spu_dma2d)(Aalign, t->A + (i * s1_bytes + j * s0_bytes),
 				 nj, s0_bytes, ni, s1_bytes,
-				 MFC_GETL_CMD);
+				 MFC_GET_CMD);
 		    X(spu_dma2d)(Balign, t->A + (j * s1_bytes + i * s0_bytes),
 				 ni, s0_bytes, nj, s1_bytes,
-				 MFC_GETL_CMD);
+				 MFC_GET_CMD);
 		    X(spu_dma2d)(Aalign, t->A + (j * s1_bytes + i * s0_bytes),
 				 nj, s1_bytes, ni, s0_bytes, 
-				 MFC_PUTL_CMD);
+				 MFC_PUT_CMD);
 		    X(spu_dma2d)(Balign, t->A + (i * s1_bytes + j * s0_bytes),
 				 ni, s1_bytes, nj, s0_bytes, 
-				 MFC_PUTL_CMD);
+				 MFC_PUT_CMD);
 	       }
 	  }
      }

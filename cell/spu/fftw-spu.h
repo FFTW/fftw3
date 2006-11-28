@@ -52,9 +52,6 @@ struct dft_context;
 void X(spu_do_transpose)(const struct transpose_context *t);
 void X(spu_do_dft)(const struct dft_context *dft);
 
-/* max # of DMA lists */
-#define MAX_LIST_SZ 128
-
 /* DMA preferred alignment */
 #define ALIGNMENT 128
 

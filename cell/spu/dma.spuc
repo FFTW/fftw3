@@ -7,22 +7,12 @@
 #include "../fftw-cell.h"
 
 #define MAX_DMA_SIZE 16384
-static mfc_list_element_t list[MAX_LIST_SZ] 
-    __attribute__ ((aligned (ALIGNMENT)));
+#define DMA_WAIT() spu_mfcstat(2)
 
-#define MKLISTENTRY(p, sz, ppu_addr)		\
-{						\
-     (p)->notify = 0;				\
-     (p)->size = (sz);				\
-     (p)->eal = (ppu_addr);			\
-}
-
-/* universal DMA transfer routine */
-void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
-		  unsigned int cmdl)
+static void spu_dma1d_nowait(void *spu_addr, long long ppu_addr, size_t sz,
+			     unsigned int cmd)
 {
      unsigned int tag_id = 0;
-     int nlist = 0;
 
      while (sz > 0) {
 	  /* select chunk to align ppu_addr */
@@ -36,91 +26,64 @@ void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
 	  if (chunk > MAX_DMA_SIZE) 
 	       chunk = MAX_DMA_SIZE;
 
-	  MKLISTENTRY(list + nlist, chunk, ppu_addr);
-	  ++nlist;
-	  sz -= chunk; ppu_addr += chunk;
+	  spu_mfcdma32(spu_addr, ppu_addr, chunk, tag_id, cmd);
+	  sz -= chunk; ppu_addr += chunk; spu_addr += chunk;
      }
-
-     spu_mfcdma32(spu_addr, (unsigned)list, nlist * sizeof(list[0]),
-		  tag_id, cmdl);
-     spu_mfcstat(2);
 }
 
-static void shuffle(R *A, int lda, int r, int c)
+static void dma2d_contig_nowait(R *A, long long ppu_addr,
+				int n, 
+				int v, int spu_vstride, int ppu_vstride_bytes,
+				unsigned int cmd)
 {
-     int r0 = 0, r1 = r;
-     int c0 = 0, c1 = c;
-     int dr, dc;
-     
+     int vv;
+     for (vv = 0; vv < v; ++vv) {
+	  spu_dma1d_nowait(A, ppu_addr, 2 * sizeof(R) * n, cmd);
+	  A += spu_vstride;
+	  ppu_addr += ppu_vstride_bytes;
+     }
+}
+
+void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
+		  unsigned int cmd)
+{
+     spu_dma1d_nowait(spu_addr, ppu_addr, sz, cmd);
+     DMA_WAIT();
+}
+
+enum operation { DO_DMA, DO_TRANSPOSE };
+
+static void dma2d_transposed(R *A, int lda, 
+			     long long ppu_addr, int ppu_stride_bytes,
+			     int r, int c,
+			     unsigned int cmd, 
+			     enum operation op)
+{
  tail:
-     dr = r1 - r0;
-     dc = c1 - c0;
+     if (c > 0) {
+	  if (r > c) {
+	       if (op == DO_DMA)
+		    dma2d_contig_nowait(A, ppu_addr,
+					c, c, lda, ppu_stride_bytes, cmd);
+	       else
+		    X(spu_complex_transpose)(A, lda, c);
 
-     if (dc > 0) {
-	  if (dr > dc) {
-	       X(spu_complex_transpose)(A + r0 * lda + 2 * c0, lda, dc);
-	       r0 += dc;
+	       r -= c;
+	       A += lda * c;
+	       ppu_addr += 2 * sizeof(R) * c;
 	       goto tail;
-	  } else if (dr > 0) {
-	       X(spu_complex_transpose)(A + r0 * lda + 2 * c0, lda, dr);
-	       c0 += dr;
+	  } else if (r > 0) {
+	       if (op == DO_DMA)
+		    dma2d_contig_nowait(A, ppu_addr, 
+					r, r, lda, ppu_stride_bytes, cmd);
+	       else
+		    X(spu_complex_transpose)(A, lda, r);
+
+	       c -= r;
+	       A += 2 * r;
+	       ppu_addr += ppu_stride_bytes * r;
 	       goto tail;
 	  }
-     }
-}
-
-static void transfer(R *A, long long ppu_addr, int ppu_stride_bytes,
-		     int r, int c,
-		     unsigned int cmdl)
-{
-     int rx;
-     int nlist = 0;
-     unsigned int tag_id = 0;
-     R *spu_addr = A;
-
-     for (rx = 0; rx < r; ++rx) {
-	  int r0 = 0, r1 = r;
-	  int c0 = 0, c1 = c;
-	  int dr, dc;
-     
-     tail:
-	  dr = r1 - r0;
-	  dc = c1 - c0;
-
-	  if (dc > 0) {
-	       if (dr > dc) {
-		    if (rx < r0 + dc)
-			 r1 = r0 + dc;
-		    else
-			 r0 = r0 + dc;
-		    goto tail;
-	       } else if (dr > 0) {
-		    int cx = c0 + (rx - r0);
-
-		    if (nlist == MAX_LIST_SZ) {
-			 spu_mfcdma32(spu_addr, (unsigned)list, 
-				      nlist * sizeof(list[0]),
-				      tag_id, cmdl);
-			 spu_mfcstat(2);
-			 spu_addr = A;
-			 nlist = 0;
-		    }
-		    MKLISTENTRY(list + nlist, 
-				2 * sizeof(R) * dr,
-				ppu_addr + cx * ppu_stride_bytes 
-				+ r0 * 2 * sizeof(R));
-		    ++nlist;
-		    A += 2 * dr;
-		    c0 += dr;
-		    goto tail;
-	       } 
-	  }
-     }
-
-     if (nlist > 0) {
-	  spu_mfcdma32(spu_addr, (unsigned)list, nlist * sizeof(list[0]),
-		       tag_id, cmdl);
-	  spu_mfcstat(2);
      }
 }
 
@@ -130,10 +93,8 @@ void X(spu_dma2d)(R *A, long long ppu_addr,
 		  int n, /* int spu_stride = 2 , */ int ppu_stride_bytes,
 		  int v, /* int spu_vstride = 2 * n, */
 		  int ppu_vstride_bytes,
-		  unsigned int cmdl)
+		  unsigned int cmd)
 {
-     int vv, ii;
-
      if (ppu_stride_bytes == 2 * sizeof(R)) { 
 	  /* contiguous array on the PPU side */
 
@@ -142,40 +103,22 @@ void X(spu_dma2d)(R *A, long long ppu_addr,
 	       n *= v;
 	       v = 1;
 	  }
-	  
-	  if (v == 1 || 2 * sizeof(R) * n > MAX_DMA_SIZE) {
-	       for (vv = 0; vv < v; ++vv) {
-		    X(spu_dma1d)(A, ppu_addr, 2 * sizeof(R) * n, cmdl);
-		    A += 2 * n;
-		    ppu_addr += ppu_vstride_bytes;
-	       }
-	  } else {
-	       int chunk = MAX_LIST_SZ;
-	       unsigned int tag_id = 0;
-	       for (vv = 0; vv < v; vv += chunk) {
-		    if (chunk > v - vv)
-			 chunk = v - vv;
 
-		    for (ii = 0; ii < chunk; ++ii) {
-			 MKLISTENTRY(list + ii, 2 * sizeof(R) * n, ppu_addr);
-			 ppu_addr += ppu_vstride_bytes;
-		    }
-
-		    spu_mfcdma32(A, (unsigned)list, chunk * sizeof(list[0]),
-				 tag_id, cmdl);
-		    spu_mfcstat(2);
-
-		    A += 2 * n * chunk;
-	       }
-	  }
+	  dma2d_contig_nowait(A, ppu_addr, n, v, 
+			      2 * n, ppu_vstride_bytes, cmd);
+	  DMA_WAIT();
      } else { 
 	  /* ppu_vstride_bytes == 2 * sizeof(R) */
-	  if (cmdl == MFC_PUTL_CMD) 
-	       shuffle(A, 2 * n, v, n);
+	  if (cmd == MFC_PUT_CMD) 
+	       dma2d_transposed(A, 2 * n, ppu_addr, ppu_stride_bytes,
+				v, n, cmd, DO_TRANSPOSE);
 
-	  transfer(A, ppu_addr, ppu_stride_bytes, v, n, cmdl);
+	  dma2d_transposed(A, 2 * n, ppu_addr, ppu_stride_bytes, 
+			   v, n, cmd, DO_DMA);
+	  DMA_WAIT();
 
-	  if (cmdl == MFC_GETL_CMD) 
-	       shuffle(A, 2 * n, v, n);
+	  if (cmd == MFC_GET_CMD) 
+	       dma2d_transposed(A, 2 * n, ppu_addr, ppu_stride_bytes,
+				v, n, cmd, DO_TRANSPOSE);
      }
 }
