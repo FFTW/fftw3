@@ -36,8 +36,6 @@ void X(spu_alloc_reset)(void);
 void *X(spu_alloc)(size_t sz);
 size_t X(spu_alloc_avail)(void);
 
-void X(spu_complex_transpose)(R *A, int lda, int n);
-
 void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
 		  unsigned int cmdl);
 
@@ -47,10 +45,14 @@ void X(spu_dma2d)(R *A, long long ppu_addr,
 		  int ppu_vstride_bytes,
 		  unsigned int cmdl);
 
-struct transpose_context;
 struct dft_context;
-void X(spu_do_transpose)(const struct transpose_context *t);
 void X(spu_do_dft)(const struct dft_context *dft);
+
+struct transpose_context;
+void X(spu_do_transpose)(const struct transpose_context *t);
+
+struct copy_context;
+void X(spu_do_copy)(const struct copy_context *c);
 
 /* DMA preferred alignment */
 #define ALIGNMENT 128

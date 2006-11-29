@@ -2,33 +2,25 @@
 #include "fftw-spu.h"
 #include "../fftw-cell.h"
 
+#define BLOCKSZ 64
 void X(spu_do_transpose)(const struct transpose_context *t)
 {
      int i, j, ni, nj;
      int n = t->n, nspe = t->nspe, my_id = t->my_id;
      int s1_bytes = t->s1_bytes;
      int s0_bytes = t->s0_bytes;
-     int nblock, blocksz;
-     size_t avail;
+     int nblock;
      R *A, *B, *Aalign, *Balign;
 
      X(spu_alloc_reset)();
-
-     /* poor man's square root */
-     avail = X(spu_alloc_avail)();
-     blocksz = 32;
-     while (2 * ((blocksz + 16) * (blocksz + 16) * 2 * sizeof(R) 
-		 + ALIGNMENT) < avail)
-	  blocksz += 16;
-
-     A = X(spu_alloc)(blocksz * blocksz * 2 * sizeof(R) + ALIGNMENT);
-     B = X(spu_alloc)(blocksz * blocksz * 2 * sizeof(R) + ALIGNMENT);
+     A = X(spu_alloc)(BLOCKSZ * BLOCKSZ * 2 * sizeof(R) + ALIGNMENT);
+     B = X(spu_alloc)(BLOCKSZ * BLOCKSZ * 2 * sizeof(R) + ALIGNMENT);
 
      nblock = 0;
-     ni = blocksz;
+     ni = BLOCKSZ;
      for (i = 0; i < n; i += ni) {
 	  if (ni > n - i) ni = n - i;
-	  nj = blocksz;
+	  nj = BLOCKSZ;
 	  for (j = i; j < n; j += nj) {
 	       if (nj > n - j) nj = n - j;
 

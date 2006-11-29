@@ -31,6 +31,10 @@ int main(unsigned long long spu_id, unsigned long long parm)
 		   X(spu_do_transpose)(&ctx.u.transpose);
 		   break;
 
+	      case SPE_COPY:
+		   X(spu_do_copy)(&ctx.u.copy);
+		   break;
+
 	      case SPE_EXIT:
 		   return 0;
 	  }

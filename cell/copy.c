@@ -25,43 +25,50 @@
 #include "simd.h"
 #include "fftw-cell.h"
 
-int X(cell_transpose_applicable)(R *I, const iodim *d, INT vl)
+int X(cell_copy_applicable)(R *I, R *O, const iodim *n, const iodim *v)
 {
      return (1
 	     && X(cell_nspe)() > 0
+	     && UNTAINT(I) != UNTAINT(O)
 	     && ALIGNEDA(I)
-	     && (d->n % VL) == 0
-	     && FITS_IN_INT(d->n)
-	     && FITS_IN_INT(d->is * sizeof(R))
-	     && FITS_IN_INT(d->os * sizeof(R))
-	     && vl == 2
-	     && ((d->is == vl && SIMD_STRIDE_OKA(d->os))
+	     && ALIGNEDA(O)
+	     && (n % VL) == 0
+	     && ((v % VL) == 0 || (is == 2 && os == 2))
+	     && ((n->is == 2 && SIMD_STRIDE_OKA(v->is)) 
 		 ||
-		 (d->os == vl && SIMD_STRIDE_OKA(d->is)))
+		 (v->is == 2 && SIMD_STRIDE_OKA(n->is)))
+	     && ((n->os == 2 && SIMD_STRIDE_OKA(v->os))
+		 ||
+		 (v->os == 2 && SIMD_STRIDE_OKA(n->os)))
+	     && FITS_IN_INT(n)
+	     && FITS_IN_INT(n->is * sizeof(R))
+	     && FITS_IN_INT(n->os * sizeof(R))
+	     && FITS_IN_INT(v)
+	     && FITS_IN_INT(v->is * sizeof(R))
+	     && FITS_IN_INT(v->os * sizeof(R))
 	  );
 }
 
-void X(cell_transpose)(R *I, INT n, INT s0, INT s1, INT vl)
+void X(cell_copy)(R *I, R *O, const iodim *n, const iodim *v)
 {
      int i, nspe = X(cell_nspe)();
 
      for (i = 0; i < nspe; ++i) {
 	  struct spu_context *ctx = X(cell_get_ctx)(i);
-	  struct transpose_context *t = &ctx->u.transpose;
+	  struct copy_context *c = &ctx->u.copy;
 
-	  ctx->op = SPE_TRANSPOSE;
+	  ctx->op = SPE_COPY;
 
-	  if (s0 == vl) {
-	       t->s0_bytes = s0 * sizeof(R);
-	       t->s1_bytes = s1 * sizeof(R);
-	  } else {
-	       t->s0_bytes = s1 * sizeof(R);
-	       t->s1_bytes = s0 * sizeof(R);
-	  }
-	  t->n = n;
-	  t->A = (INT)I;
-	  t->nspe = nspe;
-	  t->my_id = i;
+	  c->I = (INT)I;
+	  c->O = (INT)O;
+	  c->n = n;
+	  c->v = v;
+	  c->is_bytes = n->is * sizeof(R);
+	  c->os_bytes = n->os * sizeof(R);
+	  c->ivs_bytes = v->is * sizeof(R);
+	  c->ovs_bytes = v->os * sizeof(R);
+	  c->nspe = nspe;
+	  c->my_id = i;
      }
 
      /* activate spe's */

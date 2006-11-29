@@ -317,6 +317,57 @@ static int applicable_ip_cell(const P *pln, const problem_rdft *p)
 	     && X(cell_transpose_applicable)(I, d, pln->vl)
 	  );
 }
+
+/* out of place copies using Cell SPEs */
+static void apply_cell(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+
+     if (ego->vl == 2) {
+	  X(cell_copy)(I, O, ego->d + 0, ego->d + 1);
+     } else {
+	  const iodim vone = {1, 0, 0};
+	  const iodim *v;
+	  iodim n;
+	  n.n = ego->vl / 2; n.is = 2; n.os = 2;
+
+	  /* canonicalize to rank 1 plus vl */
+	  switch (ego->rnk) {
+	      case 0: v = &vone; break;
+	      case 1: v = ego->d; break;
+	  }
+
+	  X(cell_copy)(I, O, &n, v);
+     }
+}
+
+static int applicable_cell(const P *pln, const problem_rdft *p)
+{
+     iodim *d = pln->d;
+
+     if (pln->vl == 2) {
+	  return (1
+		  && pln->rnk == 2
+		  && X(cell_copy_applicable)(p->I, p->O,
+					     pln->d + 0, pln->d + 1)
+	       );
+     } else if ((pln->vl % 2) == 0) { /* SPE handles pairs only */
+	  const iodim vone = {1, 0, 0};
+	  const iodim *v;
+	  iodim n;
+	  n.n = pln->vl / 2; n.is = 2; n.os = 2;
+
+	  /* canonicalize to rank 1 plus vl */
+	  switch (pln->rnk) {
+	      case 0: v = &vone; break;
+	      case 1: v = pln->d; break;
+	      default: return 0;
+	  }
+
+	  return X(cell_copy_applicable)(p->I, p->O, &n, v);
+     } else 
+	  return 0;
+}
 #endif
 /**************************************************************/
 static int applicable(const S *ego, const problem *p_)
@@ -388,6 +439,7 @@ void X(rdft_rank0_register)(planner *p)
 	  { apply_tiledbuf, applicable_tiledbuf, "rdft-rank0-tiledbuf" },
 	  { apply_ip_sq,    applicable_ip_sq,    "rdft-rank0-ip-sq" },
 #if HAVE_CELL
+	  { apply_cell,     applicable_cell,     "rdft-rank0-cell" },
 	  { apply_ip_cell,  applicable_ip_cell,  "rdft-rank0-ip-cell" },
 #endif
 	  { 

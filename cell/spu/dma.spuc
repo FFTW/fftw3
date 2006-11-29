@@ -9,6 +9,82 @@
 #define MAX_DMA_SIZE 16384
 #define DMA_WAIT() spu_mfcstat(2)
 
+/* in-place transpose, n x n square complex matrix */
+static void complex_transpose(R *A, int lda, int n)
+{
+     int i, j;
+
+     if (VL == 2) { /* single precision */
+	  for (i = 0; i < n; i += 2) {
+	       R *Ai = A + i * lda;
+	       for (j = i; j < n - 2; j += 4) {
+		    R *Aj = A + j * lda;
+		    R *Aij = Ai + 2 * j;
+		    R *Aji = Aj + 2 * i;
+		    V aj0i0 = LD(Aji + 0 * lda, 0, 0);
+		    V aj1i0 = LD(Aji + 1 * lda, 0, 0);
+		    V aj2i0 = LD(Aji + 2 * lda, 0, 0);
+		    V aj3i0 = LD(Aji + 3 * lda, 0, 0);
+		    V ai0j0 = LD(Aij + 0 * lda + 0, 0, 0);
+		    V ai1j0 = LD(Aij + 1 * lda + 0, 0, 0);
+		    V ai0j2 = LD(Aij + 0 * lda + 4, 0, 0);
+		    V ai1j2 = LD(Aij + 1 * lda + 4, 0, 0);
+		    STN2(Aij + 0 * lda + 0, aj0i0, aj1i0, lda);
+		    STN2(Aij + 0 * lda + 4, aj2i0, aj3i0, lda);
+		    STN2(Aji + 0 * lda, ai0j0, ai1j0, lda);
+		    STN2(Aji + 2 * lda, ai0j2, ai1j2, lda);
+	       }
+	       for (; j < n; j += 2) {
+		    R *Aj = A + j * lda;
+		    R *Aij = Ai + 2 * j;
+		    R *Aji = Aj + 2 * i;
+		    V aj0i0 = LD(Aji + 0 * lda, 0, 0);
+		    V aj1i0 = LD(Aji + 1 * lda, 0, 0);
+		    V ai0j0 = LD(Aij + 0 * lda, 0, 0);
+		    V ai1j0 = LD(Aij + 1 * lda, 0, 0);
+		    STN2(Aij + 0 * lda, aj0i0, aj1i0, lda);
+		    STN2(Aji + 0 * lda, ai0j0, ai1j0, lda);
+	       }
+	  }
+
+     } else { /* double precision */
+	  for (i = 0; i < n; ++i) {
+	       R *Ai = A + i * lda;
+	       for (j = i; j < n - 3; j += 4) {
+		    R *Aj = A + j * lda;
+		    R *Aij = Ai + 2 * j;
+		    R *Aji = Aj + 2 * i;
+		    V ai0j0 = LD(Aij + (0 * lda), 0, 0);
+		    V ai0j1 = LD(Aij + (0 * lda + 2), 0, 0);
+		    V ai0j2 = LD(Aij + (0 * lda + 4), 0, 0);
+		    V ai0j3 = LD(Aij + (0 * lda + 6), 0, 0);
+		    V aj0i0 = LD(Aji + (0 * lda), 0, 0);
+		    V aj1i0 = LD(Aji + (1 * lda), 0, 0);
+		    V aj2i0 = LD(Aji + (2 * lda), 0, 0);
+		    V aj3i0 = LD(Aji + (3 * lda), 0, 0);
+		    ST(Aji + (0 * lda), ai0j0, 0, 0);
+		    ST(Aji + (1 * lda), ai0j1, 0, 0);
+		    ST(Aji + (2 * lda), ai0j2, 0, 0);
+		    ST(Aji + (3 * lda), ai0j3, 0, 0);
+		    ST(Aij + (0 * lda), aj0i0, 0, 0);
+		    ST(Aij + (0 * lda + 2), aj1i0, 0, 0);
+		    ST(Aij + (0 * lda + 4), aj2i0, 0, 0);
+		    ST(Aij + (0 * lda + 6), aj3i0, 0, 0);
+	       }
+	       for (; j < n; ++j) {
+		    R *Aj = A + j * lda;
+		    R *Aij = Ai + 2 * j;
+		    R *Aji = Aj + 2 * i;
+		    V ai0j0 = LD(Aij + (0 * lda), 0, 0);
+		    V aj0i0 = LD(Aji + (0 * lda), 0, 0);
+		    ST(Aji + (0 * lda), ai0j0, 0, 0);
+		    ST(Aij + (0 * lda), aj0i0, 0, 0);
+	       }
+	  }
+     }
+}
+
+
 static void spu_dma1d_nowait(void *spu_addr, long long ppu_addr, size_t sz,
 			     unsigned int cmd)
 {
@@ -66,7 +142,7 @@ static void dma2d_transposed(R *A, int lda,
 		    dma2d_contig_nowait(A, ppu_addr, c, c,
 					lda, ppu_stride_bytes, cmd);
 	       else
-		    X(spu_complex_transpose)(A, lda, c);
+		    complex_transpose(A, lda, c);
 
 	       r -= c;
 	       A += lda * c;
@@ -77,7 +153,7 @@ static void dma2d_transposed(R *A, int lda,
 		    dma2d_contig_nowait(A, ppu_addr, r, r, 
 					lda, ppu_stride_bytes, cmd);
 	       else
-		    X(spu_complex_transpose)(A, lda, r);
+		    complex_transpose(A, lda, r);
 
 	       c -= r;
 	       A += 2 * r;

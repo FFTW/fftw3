@@ -59,11 +59,22 @@ struct transpose_context {
      int my_id;
 };
 
+struct copy_context {
+     long long I;
+     long long O;
+     int n, v;
+     int is_bytes, os_bytes;
+     int ivs_bytes, ovs_bytes;
+     int nspe;
+     int my_id;
+};
+
 /* operations that the SPE's can execute */
 
 enum spu_op {
      SPE_DFT,
      SPE_TRANSPOSE,
+     SPE_COPY,
      SPE_EXIT
 };
 
@@ -71,6 +82,7 @@ struct spu_context {
      union spu_context_u {
 	  struct dft_context dft;
 	  struct transpose_context transpose;
+	  struct copy_context copy;
 	  /* possibly others */
      } u;
 
@@ -97,3 +109,5 @@ int X(cell_nspe)(void);
 struct spu_context *X(cell_get_ctx)(int spe);
 void X(cell_spe_awake_all)(void);
 void X(cell_spe_wait_all)(void);
+
+#define FITS_IN_INT(x) ((x) == (int)(x))

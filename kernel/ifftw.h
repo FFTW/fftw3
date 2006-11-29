@@ -939,8 +939,10 @@ typedef void (*cpy2d_func)(R *I, R *O,
 			   INT vl);
 
 #if HAVE_CELL
-int X(cell_transpose_applicable)(R *I, iodim *d, INT vl);
+int X(cell_transpose_applicable)(R *I, const iodim *d, INT vl);
 void X(cell_transpose)(R *I, INT n, INT s0, INT s1, INT vl);
+int X(cell_copy_applicable)(R *I, R *O, const iodim *n, const iodim *v);
+void X(cell_copy)(R *I, R *O, const iodim *n, const iodim *v);
 #endif
 
 /*-----------------------------------------------------------------------*/
