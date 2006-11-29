@@ -139,7 +139,13 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 	  /* partition v into pieces of equal size, subject to alignment
 	     constraints */
-	  chunk = VL * ((v - ego->v.dims[cutdim].n0) / (VL * (nspe - i)));
+	  if (ego->is == 2 && ego->os == 2) {
+	       /* SPE can handle an arbitrary number of contiguous
+		  transforms */
+	       chunk = (v - ego->v.dims[cutdim].n0) / (nspe - i);
+	  } else {
+	       chunk = VL * ((v - ego->v.dims[cutdim].n0) / (VL * (nspe - i)));
+	  }
 
 	  dft->v.dims[cutdim].n1 = v;
 	  v -= chunk;
@@ -238,8 +244,7 @@ static int build_vtensor(const iodim *d, const tensor *vecsz,
 
      for (i = 0; i < vecsz->rnk; ++i) {
 	  t = vecsz->dims + i;
-	  if (t->n % VL) /* FIXME: too conservative, but hard to get it
-			    right */
+	  if (t->n % VL) /* FIXME: too conservative, but hard to get right */
 	       return 0; 
 	  if (( 
 		   /* contiguous input across D */
@@ -560,13 +565,6 @@ static void regsolverw(planner *plnr, INT r, int dec)
 
 void X(ct_cell_direct_register)(planner *p)
 {
-#if 0
-     regsolverw(p, -1, DECDIT);
-     regsolverw(p, 16, DECDIT);
-     regsolverw(p, 64, DECDIT);
-     regsolverw(p, 128, DECDIT);
-     regsolverw(p, 256, DECDIT);
-#endif
      int n;
 
      for (n = 32; n <= MAX_N; n += REQUIRE_N_MULTIPLE_OF) {

@@ -63,8 +63,8 @@ static void dma2d_transposed(R *A, int lda,
      if (c > 0) {
 	  if (r > c) {
 	       if (op == DO_DMA)
-		    dma2d_contig_nowait(A, ppu_addr,
-					c, c, lda, ppu_stride_bytes, cmd);
+		    dma2d_contig_nowait(A, ppu_addr, c, c,
+					lda, ppu_stride_bytes, cmd);
 	       else
 		    X(spu_complex_transpose)(A, lda, c);
 
@@ -74,8 +74,8 @@ static void dma2d_transposed(R *A, int lda,
 	       goto tail;
 	  } else if (r > 0) {
 	       if (op == DO_DMA)
-		    dma2d_contig_nowait(A, ppu_addr, 
-					r, r, lda, ppu_stride_bytes, cmd);
+		    dma2d_contig_nowait(A, ppu_addr, r, r, 
+					lda, ppu_stride_bytes, cmd);
 	       else
 		    X(spu_complex_transpose)(A, lda, r);
 
