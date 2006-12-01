@@ -295,11 +295,9 @@ static int choose_cutdim(const struct cell_iotensor *tens)
 
 static 
 const struct spu_radices *find_radices(R *ri, R *ii, R *ro, R *io,
-				       int n, int is, int os,
-				       int *sign)
+				       int n, int *sign)
 {
      const struct spu_radices *p;
-     struct cell_dft_plan *pln;
      R *xi, *xo;
 
      /* valid n? */
@@ -373,8 +371,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      d = p->sz->dims;
 
      radices = find_radices(p->ri, p->ii, p->ro, p->io,
-			    d[0].n, d[0].is, d[0].os,
-			    &sign);
+			    d[0].n, &sign);
      if (!radices)
 	  return (plan *)0;
 
@@ -437,7 +434,6 @@ static void printw(const plan *ego_, printer *p)
 {
      const Pw *ego = (const Pw *) ego_;
      const P *cld = (const P *) ego->cld;
-     int i;
      p->print(p, "(dftw-direct-cell-%D-%D%v%(%p%))", 
 	      cld->rw, cld->mw, cld->v.dims[1].n1,
 	      ego->cld);
@@ -472,7 +468,7 @@ static plan *mkcldw(const ct_solver *ego,
 	  0, awakew, printw, destroyw
      };
 
-     UNUSED(ego);
+     UNUSED(ego); UNUSED(dec);
 
      /* use only if cell is enabled */
      if (NO_SIMDP(plnr) || X(cell_nspe)() <= 0)
@@ -495,8 +491,7 @@ static plan *mkcldw(const ct_solver *ego,
 	  return 0;
 
      radices = find_radices(rio, iio, rio, iio,
-			    r, m * s, m * s,
-			    &sign);
+			    r, &sign);
 
      if (!radices)
 	  return 0;
