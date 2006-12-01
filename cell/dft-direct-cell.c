@@ -28,6 +28,10 @@
 #include "simd.h"
 #include "fftw-cell.h"
 
+#if CELL_DFT_MAXVRANK != 2
+#error "This code only works for CELL_DFT_MAXVRANK == 2"
+#endif
+
 typedef struct {
      solver super;
 } S;
@@ -374,31 +378,6 @@ const struct spu_radices *find_radices(R *ri, R *ii, R *ro, R *io,
      return p;
 }
 
-static int applicable(const planner *plnr, const problem_dft *p)
-{
-     return (
-	  1
-	  && X(cell_nspe)() > 0
-	  && p->sz->rnk == 1
-	  && p->vecsz->rnk <= CELL_DFT_MAXVRANK
-	  && !NO_SIMDP(plnr)
-
-	  && (0
-	      /* can operate out-of-place */
-	      || p->ri != p->ro
-
-	      /*
-	       * can compute one transform in-place, no matter
-	       * what the strides are.
-	       */
-	      || p->vecsz->rnk == 0
-
-	      /* can operate in-place as long as strides are the same */
-	      || (X(tensor_inplace_strides2)(p->sz, p->vecsz))
-	       )
-	  );
-}
-
 static const plan_adt padt = {
      X(dft_solve), awake, print, X(plan_null_destroy)
 };
@@ -411,12 +390,21 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      int sign;
      const struct spu_radices *radices;
      struct cell_iotensor v;
+     struct cell_iodim *const vd = v.dims;
+     int cutdim;
 
-     UNUSED(plnr); UNUSED(ego);
+     UNUSED(ego);
 
-     if (!applicable(plnr, p))
-	  return (plan *)0;
+     /* basic conditions */
+     if (!(1
+	   && X(cell_nspe)() > 0
+	   && p->sz->rnk == 1
+	   && p->vecsz->rnk <= CELL_DFT_MAXVRANK
+	   && !NO_SIMDP(plnr)
+	      ))
+	  return 0;
 
+     /* see if SPE supports N */
      d = p->sz->dims;
 
      radices = find_radices(p->ri, p->ii, p->ro, p->io,
@@ -424,7 +412,30 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      if (!radices)
 	  return (plan *)0;
 
+     /* see if the SPE dma supports the strides that we have */
      if (!build_vtensor(d, p->vecsz, &v))
+	  return 0;
+
+     cutdim = choose_cutdim(&v);
+
+     /* see if we can do it without overwriting the input with
+	itself */
+     if (!(0
+	   /* can operate out-of-place */
+	   || p->ri != p->ro
+
+	   /* all strides are in-place */
+	   || (1
+	       && d[0].is == d[0].os
+	       && vd[0].is_bytes == vd[0].os_bytes
+	       && vd[1].is_bytes == vd[1].os_bytes)
+
+	   /* cutdim is in place and the rest fits into SPU memory */
+	   || (1
+	       && vd[cutdim].is_bytes == vd[cutdim].os_bytes
+	       /* FIXME: the SPE should be able to handle 2*MAX_N */
+	       && d[0].n * vd[1-cutdim].n1 <= MAX_N)
+	      ))
 	  return 0;
 	 
      pln = MKPLAN_DFT(P, &padt, apply);
@@ -435,13 +446,13 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->os = d[0].os;
      pln->sign = sign;
      pln->v = v;
-     pln->cutdim = choose_cutdim(&v);
+     pln->cutdim = cutdim;
      pln->W = 0;
 
      pln->rw = 0;
 
-     compute_opcnt(radices, pln->n, v.dims[0].n1 * v.dims[1].n1,
-		   &pln->super.super.ops);
+     compute_opcnt(radices, pln->n, 
+		   vd[0].n1 * vd[1].n1, &pln->super.super.ops);
      pln->super.super.could_prune_now_p = 1;
      return &(pln->super.super);
 }
