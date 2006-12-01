@@ -1,3 +1,4 @@
+/* -*- C -*- */
 #include "fftw-spu.h"
 
 const n_codelet X(n2fvtab)[33] = {

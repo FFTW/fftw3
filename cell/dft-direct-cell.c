@@ -49,6 +49,55 @@ typedef struct {
 } P;
 
 
+/* op counts of SPE codelets */
+static const opcnt n_ops[33] = {
+     [2] = {2, 0, 0, 0},
+     [3] = {3, 1, 3, 0},
+     [4] = {6, 0, 2, 0}, 
+     [5] = {7, 2, 9, 0}, 
+     [6] = {12, 2, 6, 0},
+     [7] = {9, 3, 21, 0},
+     [8] = {16, 0, 10, 0}, 
+     [9] = {12, 4, 34, 0}, 
+     [10] = {24, 4, 18, 0},
+     [11] = {15, 5, 55, 0},
+     [12] = {30, 2, 18, 0},
+     [13] = {31, 6, 57, 0},
+     [14] = {32, 6, 42, 0},
+     [15] = {36, 7, 42, 0},
+     [16] = {38, 0, 34, 0},
+     [32] = {88, 0, 98, 0},
+};
+
+static const opcnt t_ops[33] = {
+     [2] = {3, 2, 0, 0},
+     [3] = {5, 5, 3, 0},
+     [4] = {9, 6, 2, 0},
+     [5] = {11, 10, 9, 0},
+     [6] = {17, 12, 6, 0},
+     [7] = {15, 15, 21, 0},
+     [8] = {23, 14, 10, 0},
+     [9] = {20, 20, 34, 0},
+     [10] =  {33, 22, 18, 0},
+     [12] = {41, 24, 18, 0},
+     [15] = {50, 35, 42, 0},
+     [16] = {53, 30, 34, 0},
+     [32] = {119, 62, 98, 0},
+};
+
+static void compute_opcnt(const struct spu_radices *p, 
+			  int n, int v, opcnt *ops)
+{
+     int r;
+     signed char *q;
+
+     X(ops_zero)(ops);
+     for (q = p->r; (r = *q) > 0; ++q, v *= r) 
+	  X(ops_madd2)((v * (n / r)) / VL, &t_ops[r], ops);
+
+     X(ops_madd2)(v / VL, &n_ops[-r], ops);
+}
+
 /* expressed in real numbers */
 static int compute_twiddle_size(const struct spu_radices *p, int n)
 {
@@ -391,8 +440,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      pln->rw = 0;
 
-     X(ops_zero)(&pln->super.super.ops);
-     pln->super.super.ops.other += 100; /* FIXME */
+     compute_opcnt(radices, pln->n, v.dims[0].n1 * v.dims[1].n1,
+		   &pln->super.super.ops);
      pln->super.super.could_prune_now_p = 1;
      return &(pln->super.super);
 }
@@ -516,8 +565,10 @@ static plan *mkcldw(const ct_solver *ego,
 
      pln = MKPLAN_DFTW(Pw, &padtw, applyw);
      pln->cld = &cld->super.super;
-     X(ops_zero)(&pln->super.super.ops);
-     pln->super.super.ops.other += 100; /* FIXME */
+     compute_opcnt(radices, cld->n, mcount * vl, &pln->super.super.ops);
+     /* for twiddle factors: one mul and one fma per complex point */
+     pln->super.super.ops.fma += (cld->n * mcount * vl) / VL;
+     pln->super.super.ops.mul += (cld->n * mcount * vl) / VL;
      return &(pln->super.super);
 }
 
