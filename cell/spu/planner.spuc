@@ -1,3 +1,4 @@
+/* -*- C -*- */
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,10 +16,10 @@ R *fill_twiddle(R *W, int r, int m)
 
      for (j = 0; j < m; j += VL) {
 	  for (i = 1; i < r; ++i) {
-	       for (v = 0; v < VL; ++v) 
+	       for (v = 0; v < VL; ++v) {
 		    *W++ = cos(twopi * i * (j+v) / n);
-	       for (v = 0; v < VL; ++v) 
 		    *W++ = sin(twopi * i * (j+v) / n);
+	       }
 	  }
      }
      return W;

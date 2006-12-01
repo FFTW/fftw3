@@ -32,18 +32,18 @@ int X(cell_copy_applicable)(R *I, R *O, const iodim *n, const iodim *v)
 	     && UNTAINT(I) != UNTAINT(O)
 	     && ALIGNEDA(I)
 	     && ALIGNEDA(O)
-	     && (n % VL) == 0
-	     && ((v % VL) == 0 || (is == 2 && os == 2))
+	     && (n->n % VL) == 0
+	     && ((v->n % VL) == 0 || (n->is == 2 && n->os == 2))
 	     && ((n->is == 2 && SIMD_STRIDE_OKA(v->is)) 
 		 ||
 		 (v->is == 2 && SIMD_STRIDE_OKA(n->is)))
 	     && ((n->os == 2 && SIMD_STRIDE_OKA(v->os))
 		 ||
 		 (v->os == 2 && SIMD_STRIDE_OKA(n->os)))
-	     && FITS_IN_INT(n)
+	     && FITS_IN_INT(n->n)
 	     && FITS_IN_INT(n->is * sizeof(R))
 	     && FITS_IN_INT(n->os * sizeof(R))
-	     && FITS_IN_INT(v)
+	     && FITS_IN_INT(v->n)
 	     && FITS_IN_INT(v->is * sizeof(R))
 	     && FITS_IN_INT(v->os * sizeof(R))
 	  );
@@ -61,8 +61,8 @@ void X(cell_copy)(R *I, R *O, const iodim *n, const iodim *v)
 
 	  c->I = (INT)I;
 	  c->O = (INT)O;
-	  c->n = n;
-	  c->v = v;
+	  c->n = n->n;
+	  c->v = v->n;
 	  c->is_bytes = n->is * sizeof(R);
 	  c->os_bytes = n->os * sizeof(R);
 	  c->ivs_bytes = v->is * sizeof(R);

@@ -45,7 +45,7 @@ typedef struct {
 
      /* optional twiddle factors for dftw: */
      INT rw, mw;  /* rw == 0 indicates no twiddle factors */
-     R *Ww;
+     twid *td;
 } P;
 
 
@@ -64,30 +64,26 @@ static int compute_twiddle_size(const struct spu_radices *p, int n)
      return sz;
 }
 
+/* FIXME: find a way to use the normal FFTW twiddle mechanisms for this */
 static void fill_twiddles(enum wakefulness wakefulness,
 			  R *W, const signed char *q, int n)
 {
      int r;
-     R d[2];
 
-     if ((r = *q) > 0) {
+     for ( ; (r = *q) > 0; ++q) {
 	  triggen *t = X(mktriggen)(wakefulness, n);
 	  int i, j, v, m = n / r;
 
 	  for (j = 0; j < m; j += VL) {
 	       for (i = 1; i < r; ++i) {
 		    for (v = 0; v < VL; ++v) {
-			 t->cexp(t, i * (j + v), d);
-			 *W++ = d[0];
-		    }
-		    for (v = 0; v < VL; ++v) {
-			 t->cexp(t, i * (j + v), d);
-			 *W++ = d[1];
+			 t->cexp(t, i * (j + v), W);
+			 W += 2;
 		    }
 	       }
 	  }
 	  X(triggen_destroy)(t);
-	  fill_twiddles(wakefulness, W, q + 1, m);
+	  n = m;
      }
 }
 
@@ -153,7 +149,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 	  /* optional dftw twiddles */
 	  if ((dft->rw = ego->rw)) 
-	       dft->Ww = (INT)ego->Ww;
+	       dft->Ww = (INT)ego->td->W;
      }
 
      A(v == ego->v.dims[cutdim].n0);
@@ -175,46 +171,19 @@ static void print(const plan *ego_, printer *p)
      p->print(p, ")");
 }
 
-static R *make_twiddlesw(enum wakefulness wakefulness, int r, int m)
-
-{
-     R *W0= X(cell_aligned_malloc)(r * m * 2 * sizeof(R));
-     R *W = W0;
-     R d[2];
-     triggen *t = X(mktriggen)(wakefulness, r * m);
-     int i, j, v;
-     for (j = 0; j < m; j++) {
-	  for (i = 0; i < r; i += VL) {
-	       for (v = 0; v < VL; ++v) {
-		    t->cexp(t, (i+v) * j, d);
-		    *W++ = d[0];
-	       }
-	       for (v = 0; v < VL; ++v) {
-		    t->cexp(t, (i+v) * j, d);
-		    *W++ = d[1];
-	       }
-	  }
-     }
-     X(triggen_destroy)(t);
-
-     return W0;
-}
-
 static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
 
      /* awake the optional dftw twiddles */
      if (ego->rw) {
-	  switch (wakefulness) {
-	      case SLEEPY:
-		   X(ifree0)(ego->Ww);
-		   ego->Ww = 0;
-		   break;
-	      default:
-		   ego->Ww = make_twiddlesw(wakefulness, ego->rw, ego->mw);
-		   break;
-	  }
+	  static const tw_instr tw[] = {
+	       { TW_CEXP, 0, 0 },
+	       { TW_FULL, 0, 0 }, 
+	       { TW_NEXT, 1, 0 } 
+	  };
+	  X(twiddle_awake)(wakefulness, &ego->td, tw, 
+			   ego->rw * ego->mw, ego->rw, ego->mw);
      }
 
      /* awake the twiddles for the dft part */
@@ -541,7 +510,7 @@ static plan *mkcldw(const ct_solver *ego,
      cld->sign = sign;
      cld->W = 0;
 
-     cld->rw = r; cld->mw = m; cld->Ww = 0;
+     cld->rw = r; cld->mw = m; cld->td = 0;
      
      /* build vtensor by hand */
      v = cld->v.dims;
