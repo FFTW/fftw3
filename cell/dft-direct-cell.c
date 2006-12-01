@@ -524,7 +524,7 @@ static plan *mkcldw(const ct_solver *ego,
 	  return 0;
 
      /* don't bother for small N */
-     if (r * m <= MAX_N)
+     if (r * m * vl <= MAX_N / 8 /* ARBITRARY */)
 	  return 0;
 
      /* only handle input contiguous in the M dimension */
@@ -582,13 +582,12 @@ void X(ct_cell_direct_register)(planner *p)
 {
      int n;
 
-     for (n = 32; n <= MAX_N; n += REQUIRE_N_MULTIPLE_OF) {
+     for (n = 0; n <= MAX_N; n += REQUIRE_N_MULTIPLE_OF) {
 	  const struct spu_radices *r = 
 	       X(spu_radices) + n / REQUIRE_N_MULTIPLE_OF;
 	  if (r->r[0])
 	       regsolverw(p, n, DECDIT);
      }
-
 }
 
 
