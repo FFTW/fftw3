@@ -28,7 +28,8 @@ typedef ct_solver S;
 typedef struct {
      plan_dftw super;
 
-     INT r, m, s, vl, vs, mstart, mcount;
+     INT r, rs, m, ms, v, vs, mstart, mcount;
+
      plan *cld;
 
      twid *td;
@@ -43,29 +44,31 @@ static void mktwiddle(P *ego, enum wakefulness wakefulness)
 
      /* note that R and M are swapped, to allow for sequential
 	access both to data and twiddles */
-     X(twiddle_awake)(wakefulness, &ego->td, tw, 
+     X(twiddle_awake)(wakefulness, &ego->td, tw,
 		      ego->r * ego->m, ego->m, ego->r);
 }
 
 static void bytwiddle(const P *ego, R *rio, R *iio)
 {
      INT i, j, k;
-     INT r = ego->r, m = ego->m, s = ego->s, vl = ego->vl, vs = ego->vs;
+     INT r = ego->r, rs = ego->rs;
+     INT m = ego->m, ms = ego->ms;
+     INT v = ego->v, vs = ego->vs;
      INT mcount = ego->mcount, mstart = ego->mstart;
      INT jstart = mstart == 0;
      INT jrem_W = 2 * ((m - 1) - (mcount - jstart));
-     INT jrem_p = s * (m - mcount);
+     INT jrem_p = ms * (m - mcount);
      INT ip = iio - rio;
      R *p;
 
-     for (i = 0; i < vl; ++i) {
+     for (i = 0; i < v; ++i) {
 	  const R *W = ego->td->W + 2 * (mstart - 1 + jstart);
 
 	  /* loop invariant: p = rio + s * (k * m + j) + i * vs. */
 	  p = rio + i * vs;
 
-	  for (k = 1, p += s * m, W += 2 * (m - 1); k < r; ++k) {
-	       for (j = jstart, p += jstart*s; j < mcount; ++j, p += s) {
+	  for (k = 1, p += rs, W += 2 * (m - 1); k < r; ++k) {
+	       for (j = jstart, p += jstart*ms; j < mcount; ++j, p += ms) {
 		    E xr = p[0];
 		    E xi = p[ip];
 		    E wr = W[0];
@@ -80,10 +83,12 @@ static void bytwiddle(const P *ego, R *rio, R *iio)
      }
 }
 
-static int applicable(INT r, INT m, const planner *plnr)
+static int applicable(INT irs, INT ors, INT ivs, INT ovs,
+		      const planner *plnr)
 {
-     UNUSED(r); UNUSED(m);
-     return (1 
+     return (1
+	     && irs == ors
+	     && ivs == ovs
 	     && !NO_SLOWP(plnr)
 	  );
 }
@@ -126,13 +131,15 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dftw-generic-%s-%D-%D%v%(%p%))", 
+     p->print(p, "(dftw-generic-%s-%D-%D%v%(%p%))",
 	      ego->dec == DECDIT ? "dit" : "dif",
-	      ego->r, ego->m, ego->vl, ego->cld);
+	      ego->r, ego->m, ego->v, ego->cld);
 }
 
-static plan *mkcldw(const ct_solver *ego_, 
-		    int dec, INT r, INT m, INT s, INT vl, INT vs, 
+static plan *mkcldw(const ct_solver *ego_,
+		    INT r, INT irs, INT ors,
+		    INT m, INT ms,
+		    INT v, INT ivs, INT ovs,
 		    INT mstart, INT mcount,
 		    R *rio, R *iio,
 		    planner *plnr)
@@ -146,32 +153,33 @@ static plan *mkcldw(const ct_solver *ego_,
      };
 
      A(mstart >= 0 && mstart + mcount <= m);
-     if (!applicable(r, m, plnr))
+     if (!applicable(irs, ors, ivs, ovs, plnr))
           return (plan *)0;
 
-     cld = X(mkplan_d)(plnr, 
+     cld = X(mkplan_d)(plnr,
 			X(mkproblem_dft_d)(
-			     X(mktensor_1d)(r, m * s, m * s),
-			     X(mktensor_2d)(mcount, s, s, vl, vs, vs),
+			     X(mktensor_1d)(r, irs, irs),
+			     X(mktensor_2d)(mcount, ms, ms, v, ivs, ivs),
 			     rio, iio, rio, iio)
 			);
      if (!cld) goto nada;
 
-     pln = MKPLAN_DFTW(P, &padt, dec == DECDIT ? apply_dit : apply_dif);
+     pln = MKPLAN_DFTW(P, &padt, ego->dec == DECDIT ? apply_dit : apply_dif);
      pln->slv = ego;
      pln->cld = cld;
      pln->r = r;
+     pln->rs = irs;
      pln->m = m;
-     pln->s = s;
-     pln->vl = vl;
-     pln->vs = vs;
+     pln->ms = ms;
+     pln->v = v;
+     pln->vs = ivs;
      pln->mstart = mstart;
      pln->mcount = mcount;
-     pln->dec = dec;
+     pln->dec = ego->dec;
      pln->td = 0;
 
      {
-	  double n0 = (r - 1) * (mcount - 1) * vl;
+	  double n0 = (r - 1) * (mcount - 1) * v;
 	  pln->super.super.ops = cld->ops;
 	  pln->super.super.ops.mul += 8 * n0;
 	  pln->super.super.ops.add += 4 * n0;

@@ -32,37 +32,36 @@ typedef struct {
 typedef struct {
      plan_dftw super;
      kdftw k;
-     INT r, vl;
-     INT s, vs;
-     INT mcount;
-     stride bufstride, ios;
+     INT r;
+     stride rs;
+     INT m, ms, v, vs, mstart, mcount;
+     stride bufstride;
      const R *tdW;
-     INT mstart, m;
      twid *td;
      const S *slv;
 } P;
 
 
 /*************************************************************
-  Nonbuffered code 
+  Nonbuffered code
  *************************************************************/
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     INT i, vl = ego->vl, s = ego->s, vs = ego->vs, mcount = ego->mcount;
+     INT i, v = ego->v, ms = ego->ms, vs = ego->vs, mcount = ego->mcount;
      const R *W = ego->tdW;
      ASSERT_ALIGNED_DOUBLE;
-     for (i = 0; i < vl; ++i)
-	  ego->k(rio + i * vs, iio + i * vs, W, ego->ios, mcount, s);
+     for (i = 0; i < v; ++i)
+	  ego->k(rio + i * vs, iio + i * vs, W, ego->rs, mcount, ms);
 }
 
 /*************************************************************
-  Buffered code 
+  Buffered code
  *************************************************************/
-static const R *dobatch(kdftw k, R *rA, R *iA, const R *W, stride ios, 
+static const R *dobatch(kdftw k, R *rA, R *iA, const R *W, stride ios,
 			INT dist, INT r, INT batchsz, R *buf, stride bufstride)
 {
-     X(cpy2d_pair_ci)(rA, iA, buf, buf + 1, 
+     X(cpy2d_pair_ci)(rA, iA, buf, buf + 1,
 		      r, WS(ios, 1), WS(bufstride, 1),
 		      batchsz, dist, 2);
      W = k(buf, buf + 1, W, bufstride, batchsz, 2);
@@ -86,24 +85,24 @@ static INT compute_batchsize(INT radix)
 static void apply_buf(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     INT i, j, mcount = ego->mcount, vl = ego->vl, r = ego->r;
+     INT i, j, mcount = ego->mcount, v = ego->v, r = ego->r;
      INT batchsz = compute_batchsize(r);
      R *buf;
 
      STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
 
-     for (i = 0; i < vl; ++i) {
+     for (i = 0; i < v; ++i) {
 	  R *rA = rio + i * ego->vs, *iA = iio + i * ego->vs;
 	  const R *W = ego->tdW;
 
 	  for (j = 0; j < mcount - batchsz; j += batchsz) {
-	       W = dobatch(ego->k, rA, iA, W, ego->ios, ego->s, ego->r, 
+	       W = dobatch(ego->k, rA, iA, W, ego->rs, ego->ms, ego->r,
 			   batchsz, buf, ego->bufstride);
-	       rA += ego->s * batchsz;
-	       iA += ego->s * batchsz;
+	       rA += ego->ms * batchsz;
+	       iA += ego->ms * batchsz;
 	  }
 
-	  dobatch(ego->k, rA, iA, W, ego->ios, ego->s, ego->r, mcount - j,
+	  dobatch(ego->k, rA, iA, W, ego->rs, ego->ms, ego->r, mcount - j,
 		  buf, ego->bufstride);
      }
 
@@ -117,7 +116,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
 
-     X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw, 
+     X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw,
 		      ego->r * ego->m, ego->r, ego->m);
      ego->tdW = X(twiddle_shift)(ego->td, ego->mstart);
 }
@@ -126,7 +125,7 @@ static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      X(stride_destroy)(ego->bufstride);
-     X(stride_destroy)(ego->ios);
+     X(stride_destroy)(ego->rs);
 }
 
 static void print(const plan *ego_, printer *p)
@@ -135,74 +134,85 @@ static void print(const plan *ego_, printer *p)
      const S *slv = ego->slv;
      const ct_desc *e = slv->desc;
 
-     if (slv->bufferedp) 
+     if (slv->bufferedp)
 	  p->print(p, "(dftw-directbuf/%D-%D/%D%v \"%s\")",
-		   compute_batchsize(ego->r), ego->r, 
-		   X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam);
+		   compute_batchsize(ego->r), ego->r,
+		   X(twiddle_length)(ego->r, e->tw), ego->v, e->nam);
      else
 	  p->print(p, "(dftw-direct-%D/%D%v \"%s\")",
-		   ego->r, X(twiddle_length)(ego->r, e->tw), ego->vl, e->nam);
+		   ego->r, X(twiddle_length)(ego->r, e->tw), ego->v, e->nam);
 }
 
-static int applicable0(const S *ego, 
-		       int dec, INT r, INT m, INT mb, INT me,
-		       INT s, INT vl, INT vs, 
+static int applicable0(const S *ego,
+		       INT r, INT irs, INT ors,
+		       INT m, INT ms,
+		       INT v, INT ivs, INT ovs,
+		       INT mb, INT me,
 		       R *rio, R *iio,
 		       const planner *plnr)
 {
      const ct_desc *e = ego->desc;
-     UNUSED(vl);
+     UNUSED(v);
 
      return (
 	  1
-	  && dec == ego->super.dec
 	  && r == e->radix
+	  && irs == ors /* in-place along R */
+	  && ivs == ovs /* in-place along V */
 
 	  /* check for alignment/vector length restrictions */
-	  && (e->genus->okp(e, rio, iio, m * s, 0, m, mb, me, s, plnr))
-	  && (e->genus->okp(e, rio + vs, iio + vs, m * s, 0, m, mb, me, 
-			    s, plnr))
-				 
+	  && (e->genus->okp(e, rio, iio, ivs, 0, m, mb, me, ms, plnr))
+	  && (e->genus->okp(e, rio + ivs, iio + ivs, ivs, 0, m, mb, me,
+			    ms, plnr))
+
 	  );
 }
 
-static int applicable0_buf(const S *ego, 
-			   int dec, INT r, INT m, INT mb, INT me,
-			   INT s, INT vl, INT vs, 
+static int applicable0_buf(const S *ego,
+			   INT r, INT irs, INT ors,
+			   INT m, INT ms,
+			   INT v, INT ivs, INT ovs,
+			   INT mb, INT me,
 			   R *rio, R *iio,
 			   const planner *plnr)
 {
      const ct_desc *e = ego->desc;
      INT batchsz;
-     UNUSED(vl); UNUSED(s); UNUSED(vs); UNUSED(rio); UNUSED(iio);
+     UNUSED(v); UNUSED(ms); UNUSED(rio); UNUSED(iio);
 
      return (
 	  1
-	  && dec == ego->super.dec
 	  && r == e->radix
+	  && irs == ors /* in-place along R */
+	  && ivs == ovs /* in-place along V */
 
 	  /* check for alignment/vector length restrictions, both for
 	     batchsize and for the remainder */
 	  && (batchsz = compute_batchsize(r), 1)
 	  && (e->genus->okp(e, 0, ((const R *)0) + 1, 2 * batchsz, 0,
 			    m, mb, mb + batchsz, 2, plnr))
-	  && (e->genus->okp(e, 0, ((const R *)0) + 1, 2 * batchsz, 0, 
+	  && (e->genus->okp(e, 0, ((const R *)0) + 1, 2 * batchsz, 0,
 			    m, mb, me, 2, plnr))
 	  );
 }
 
-static int applicable(const S *ego, 
-		      int dec, INT r, INT m, INT mb, INT me,
-		      INT s, INT vl, INT vs, 
+static int applicable(const S *ego,
+		      INT r, INT irs, INT ors,
+		      INT m, INT ms,
+		      INT v, INT ivs, INT ovs,
+		      INT mb, INT me,
 		      R *rio, R *iio,
 		      const planner *plnr)
 {
      if (ego->bufferedp) {
-	  if (!applicable0_buf(ego, dec, r, m, mb, me, s, vl, vs,
+	  if (!applicable0_buf(ego,
+			       r, irs, ors, m, ms, v, ivs, ovs, mb, me,
 			       rio, iio, plnr))
 	       return 0;
      } else {
-	  if (!applicable0(ego, dec, r, m, mb, me, s, vl, vs, rio, iio, plnr))
+	  if (!applicable0(ego,
+			   r, irs, ors, m, ms, v, ivs, ovs, mb, me,
+			   rio, iio, plnr))
 	       return 0;
      }
 
@@ -216,8 +226,10 @@ static int applicable(const S *ego,
      return 1;
 }
 
-static plan *mkcldw(const ct_solver *ego_, 
-		    int dec, INT r, INT m, INT s, INT vl, INT vs, 
+static plan *mkcldw(const ct_solver *ego_,
+		    INT r, INT irs, INT ors,
+		    INT m, INT ms,
+		    INT v, INT ivs, INT ovs,
 		    INT mstart, INT mcount,
 		    R *rio, R *iio,
 		    planner *plnr)
@@ -231,32 +243,33 @@ static plan *mkcldw(const ct_solver *ego_,
      };
 
      A(mstart >= 0 && mstart + mcount <= m);
-     if (!applicable(ego, dec, r, m, mstart, mstart + mcount, 
-		     s, vl, vs, rio, iio, plnr))
+     if (!applicable(ego,
+		     r, irs, ors, m, ms, v, ivs, ovs, mstart, mstart + mcount,
+		     rio, iio, plnr))
           return (plan *)0;
 
      pln = MKPLAN_DFTW(P, &padt, ego->bufferedp ? apply_buf : apply);
 
      pln->k = ego->k;
-     pln->ios = X(mkstride)(r, m * s);
+     pln->rs = X(mkstride)(r, irs);
      pln->td = 0;
      pln->tdW = 0;
      pln->r = r;
      pln->m = m;
-     pln->s = s;
-     pln->vl = vl;
-     pln->vs = vs;
+     pln->ms = ms;
+     pln->v = v;
+     pln->vs = ivs;
      pln->mstart = mstart;
      pln->mcount = mcount;
      pln->slv = ego;
      pln->bufstride = X(mkstride)(r, 2 * compute_batchsize(r));
 
      X(ops_zero)(&pln->super.super.ops);
-     X(ops_madd2)(vl * (mcount/e->genus->vl), &e->ops, &pln->super.super.ops);
-     
+     X(ops_madd2)(v * (mcount/e->genus->vl), &e->ops, &pln->super.super.ops);
+
      if (ego->bufferedp) {
-	  /* 8 load/stores * N * VL */
-	  pln->super.super.ops.other += 8 * r * mcount * vl;
+	  /* 8 load/stores * N * V */
+	  pln->super.super.ops.other += 8 * r * mcount * v;
      }
 
      pln->super.super.could_prune_now_p =
@@ -264,7 +277,7 @@ static plan *mkcldw(const ct_solver *ego_,
      return &(pln->super.super);
 }
 
-static void regone(planner *plnr, kdftw codelet, 
+static void regone(planner *plnr, kdftw codelet,
 		   const ct_desc *desc, int dec, int bufferedp)
 {
      S *slv = (S *)X(mksolver_ct)(sizeof(S), desc->radix, dec, mkcldw);
@@ -274,7 +287,7 @@ static void regone(planner *plnr, kdftw codelet,
      REGISTER_SOLVER(plnr, &(slv->super.super));
      if (X(mksolver_ct_hook)) {
 	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), desc->radix,
-					     dec, mkcldw);
+					 dec, mkcldw);
 	  slv->k = codelet;
 	  slv->desc = desc;
 	  slv->bufferedp = bufferedp;
@@ -282,7 +295,7 @@ static void regone(planner *plnr, kdftw codelet,
      }
 }
 
-void X(regsolver_ct_directw)(planner *plnr, kdftw codelet, 
+void X(regsolver_ct_directw)(planner *plnr, kdftw codelet,
 			     const ct_desc *desc, int dec)
 {
      regone(plnr, codelet, desc, dec, /* bufferedp */ 0);

@@ -86,13 +86,13 @@ static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
 
      return (1
 	     && p->sz->rnk == 1
-	     && p->vecsz->rnk <= 1 
+	     && p->vecsz->rnk <= 1
 
 	     /* DIF destroys the input and we don't like it */
-	     && (ego->dec == DECDIT || 
-		 p->ri == p->ro || 
+	     && (ego->dec == DECDIT ||
+		 p->ri == p->ro ||
 		 !NO_DESTROY_INPUTP(plnr))
-		  
+
 	     && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 1)
 	     && p->sz->dims[0].n > r);
 }
@@ -108,7 +108,10 @@ int X(ct_applicable)(const ct_solver *ego, const problem *p_, planner *plnr)
      p = (const problem_dft *) p_;
 
      /* emulate fftw2 behavior */
-     if (NO_VRECURSEP(plnr) && (p->vecsz->rnk > 0))
+     if (1
+	 && NO_VRECURSEP(plnr)
+	 && (p->vecsz->rnk > 0)
+	 && ego->dec != DECDIF+TRANSPOSE)
 	  return 0;
 
      return 1;
@@ -121,9 +124,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_dft *p;
      P *pln = 0;
      plan *cld = 0, *cldw = 0;
-     INT n, r, m, vl, ivs, ovs;
+     INT n, r, m, v, ivs, ovs;
      iodim *d;
-     tensor *t1, *t2;
 
      static const plan_adt padt = {
 	  X(dft_solve), awake, print, destroy
@@ -138,24 +140,25 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      r = X(choose_radix)(ego->r, n);
      m = n / r;
 
-     X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
+     X(tensor_tornk1)(p->vecsz, &v, &ivs, &ovs);
 
      switch (ego->dec) {
 	 case DECDIT:
 	 {
-	      cldw = ego->mkcldw(ego, 
-				 DECDIT, r, m, d[0].os, vl, ovs, 0, m,
+	      cldw = ego->mkcldw(ego,
+				 r, m * d[0].os, m * d[0].os,
+				 m, d[0].os,
+				 v, ovs, ovs,
+				 0, m,
 				 p->ro, p->io, plnr);
 	      if (!cldw) goto nada;
 
-	      t1 = X(mktensor_1d)(r, d[0].is, m * d[0].os);
-	      t2 = X(tensor_append)(t1, p->vecsz);
-	      X(tensor_destroy)(t1);
-
-	      cld = X(mkplan_d)(plnr, 
+	      cld = X(mkplan_d)(plnr,
 				X(mkproblem_dft_d)(
 				     X(mktensor_1d)(m, r * d[0].is, d[0].os),
-				     t2, p->ri, p->ii, p->ro, p->io)
+				     X(mktensor_2d)(r, d[0].is, m * d[0].os,
+						    v, ivs, ovs),
+				     p->ri, p->ii, p->ro, p->io)
 		   );
 	      if (!cld) goto nada;
 
@@ -163,29 +166,56 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	      break;
 	 }
 	 case DECDIF:
+	 case DECDIF+TRANSPOSE:
 	 {
+	      INT cors, covs; /* cldw ors, ovs */
+	      if (ego->dec == DECDIF+TRANSPOSE) {
+		   cors = ivs;
+		   covs = m * d[0].is;
+		   /* ensure that we generate well-formed dftw subproblems */
+		   /* FIXME: too conservative */
+		   if (!(1
+			 && r == v
+			 && d[0].is == r * cors))
+			goto nada;
+
+		   /* FIXME: allow in-place only for now, like in
+		      fftw-3.[01] */
+		   if (!(1
+			 && p->ri == p->ro
+			 && d[0].is == r * d[0].os
+			 && cors == d[0].os
+			 && covs == ovs
+			    ))
+			goto nada;
+	      } else {
+		   cors = m * d[0].is;
+		   covs = ivs;
+	      }
+
 	      cldw = ego->mkcldw(ego,
-				 DECDIF, r, m, d[0].is, vl, ivs, 0, m,
+				 r, m * d[0].is, cors,
+				 m, d[0].is,
+				 v, ivs, covs,
+				 0, m,
 				 p->ri, p->ii, plnr);
 	      if (!cldw) goto nada;
 
-	      t1 = X(mktensor_1d)(r, m * d[0].is, d[0].os);
-	      t2 = X(tensor_append)(t1, p->vecsz);
-	      X(tensor_destroy)(t1);
-
-	      cld = X(mkplan_d)(plnr, 
+	      cld = X(mkplan_d)(plnr,
 				X(mkproblem_dft_d)(
 				     X(mktensor_1d)(m, d[0].is, r * d[0].os),
-				     t2, p->ri, p->ii, p->ro, p->io)
+				     X(mktensor_2d)(r, cors, d[0].os,
+						    v, covs, ovs),
+				     p->ri, p->ii, p->ro, p->io)
 		   );
 	      if (!cld) goto nada;
-	      
+
 	      pln = MKPLAN_DFT(P, &padt, apply_dif);
 	      break;
 	 }
 
 	 default: A(0);
-	      
+
      }
 
      pln->cld = cld;

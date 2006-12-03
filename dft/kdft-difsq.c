@@ -24,5 +24,5 @@
 
 void X(kdft_difsq_register)(planner *p, kdftwsq k, const ct_desc *desc)
 {
-     REGISTER_SOLVER(p, X(mksolver_ctsq)(k, desc, DECDIF));
+     X(regsolver_ct_directwsq)(p, k, desc, DECDIF);
 }

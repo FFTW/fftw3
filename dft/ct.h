@@ -20,13 +20,14 @@
 
 #include "dft.h"
 
-typedef void (*dftwapply) (const plan *ego, R *rio, R *iio);
+typedef void (*dftwapply)(const plan *ego, R *rio, R *iio);
 typedef struct ct_solver_s ct_solver;
 typedef plan *(*ct_mkinferior)(const ct_solver *ego,
-			    int dec, INT r, INT m, INT s, INT vl, INT vs, 
-			    INT mstart, INT mcount,
-			    R *rio, R *iio,
-			    planner *plnr);
+			       INT r, INT irs, INT ors,
+			       INT m, INT ms,
+			       INT v, INT ivs, INT ovs,
+			       INT mstart, INT mcount,
+			       R *rio, R *iio, planner *plnr);
 
 typedef struct {
      plan super;
@@ -44,7 +45,7 @@ struct ct_solver_s {
      int dec;
 #    define DECDIF 0
 #    define DECDIT 1
-
+#    define TRANSPOSE 2
      ct_mkinferior mkcldw;
 };
 
@@ -57,3 +58,5 @@ void X(regsolver_ct_directw)(planner *plnr,
 void X(regsolver_ct_directwbuf)(planner *plnr,
      kdftw codelet, const ct_desc *desc, int dec);
 solver *X(mksolver_ctsq)(kdftwsq codelet, const ct_desc *desc, int dec);
+void X(regsolver_ct_directwsq)(planner *plnr, kdftwsq codelet, 
+			       const ct_desc *desc, int dec);

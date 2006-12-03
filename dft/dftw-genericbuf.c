@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2003, 2006 Matteo Frigo
  * Copyright (c) 2003, 2006 Massachusetts Institute of Technology
@@ -32,7 +31,7 @@ typedef struct {
 typedef struct {
      plan_dftw super;
 
-     INT r, m, s, mb, me;
+     INT r, rs, m, ms, v, vs, mb, me;
      INT batchsz;
      plan *cld;
 
@@ -47,24 +46,25 @@ typedef struct {
 static void bytwiddle(const P *ego, INT m0, INT m1, R *buf, R *rio, R *iio)
 {
      INT j, k;
-     INT r = ego->r, s = ego->s, m = ego->m, mb = ego->mb;
+     INT r = ego->r, rs = ego->rs, ms = ego->ms, mb = ego->mb;
      triggen *t = ego->t;
      for (j = 0; j < r; ++j) {
-	  for (k = m0; k < m1; ++k) 
+	  for (k = m0; k < m1; ++k)
 	       t->rotate(t, j * k,
-			 rio[s * (j * m + (k - mb))],
-			 iio[s * (j * m + (k - mb))],
+			 rio[j * rs + (k - mb) * ms],
+			 iio[j * rs + (k - mb) * ms],
 			 &buf[j * 2 + 2 * BATCHDIST(r) * (k - m0) + 0]);
      }
 }
 
-static int applicable0(const S *ego, INT r, INT m, INT vl, INT mcount, int dec,
-		       const planner *plnr)
+static int applicable0(const S *ego,
+		       INT r, INT irs, INT ors,
+		       INT m, INT v,
+		       INT mcount)
 {
-     UNUSED(plnr);
-     return (1 
-	     && vl == 1
-	     && dec == DECDIT
+     return (1
+	     && v == 1
+	     && irs == ors
 	     && mcount >= ego->batchsz
 	     && mcount % ego->batchsz == 0
 	     && r >= 64
@@ -72,10 +72,13 @@ static int applicable0(const S *ego, INT r, INT m, INT vl, INT mcount, int dec,
 	  );
 }
 
-static int applicable(const S *ego, INT r, INT m, INT vl, INT mcount, int dec,
+static int applicable(const S *ego,
+		      INT r, INT irs, INT ors,
+		      INT m, INT v,
+		      INT mcount,
 		      const planner *plnr)
 {
-     if (!applicable0(ego, r, m, vl, mcount, dec, plnr))
+     if (!applicable0(ego, r, irs, ors, m, v, mcount))
 	  return 0;
      if (NO_UGLYP(plnr) && m * r < 65536)
 	  return 0;
@@ -92,9 +95,10 @@ static void dobatch(const P *ego, INT m0, INT m1, R *buf, R *rio, R *iio)
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, buf, buf + 1, buf, buf + 1);
-     X(cpy2d_pair_co)(buf,buf+1,rio + ego->s * (m0-mb), iio + ego->s * (m0-mb),
-		      m1-m0, 2 * BATCHDIST(ego->r), ego->s,
-		      ego->r, 2, ego->m * ego->s);
+     X(cpy2d_pair_co)(buf, buf + 1,
+		      rio + ego->ms * (m0-mb), iio + ego->ms * (m0-mb),
+		      m1-m0, 2 * BATCHDIST(ego->r), ego->ms,
+		      ego->r, 2, ego->rs);
 }
 
 static void apply(const plan *ego_, R *rio, R *iio)
@@ -104,11 +108,11 @@ static void apply(const plan *ego_, R *rio, R *iio)
 			   BUFFERS);
      INT m;
 
-     for (m = ego->mb; m < ego->me; m += ego->batchsz) 
+     for (m = ego->mb; m < ego->me; m += ego->batchsz)
 	  dobatch(ego, m, m + ego->batchsz, buf, rio, iio);
 
      A(m == ego->me);
-     
+
      X(ifree)(buf);
 }
 
@@ -136,12 +140,14 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(dftw-genericbuf/%D-%D-%D%(%p%))", 
+     p->print(p, "(dftw-genericbuf/%D-%D-%D%(%p%))",
 	      ego->batchsz, ego->r, ego->m, ego->cld);
 }
 
-static plan *mkcldw(const ct_solver *ego_, 
-		    int dec, INT r, INT m, INT s, INT vl, INT vs, 
+static plan *mkcldw(const ct_solver *ego_,
+		    INT r, INT irs, INT ors,
+		    INT m, INT ms,
+		    INT v, INT ivs, INT ovs,
 		    INT mstart, INT mcount,
 		    R *rio, R *iio,
 		    planner *plnr)
@@ -154,19 +160,19 @@ static plan *mkcldw(const ct_solver *ego_,
      static const plan_adt padt = {
 	  0, awake, print, destroy
      };
-
-     UNUSED(vs); UNUSED(rio); UNUSED(iio);
+     
+     UNUSED(ivs); UNUSED(ovs); UNUSED(rio); UNUSED(iio);
 
      A(mstart >= 0 && mstart + mcount <= m);
-     if (!applicable(ego, r, m, vl, mcount, dec, plnr))
+     if (!applicable(ego, r, irs, ors, m, v, mcount, plnr))
           return (plan *)0;
 
      buf = (R *) MALLOC(sizeof(R) * 2 * BATCHDIST(r) * ego->batchsz, BUFFERS);
-     cld = X(mkplan_d)(plnr, 
+     cld = X(mkplan_d)(plnr,
 			X(mkproblem_dft_d)(
 			     X(mktensor_1d)(r, 2, 2),
 			     X(mktensor_1d)(ego->batchsz,
-					    2 * BATCHDIST(r), 
+					    2 * BATCHDIST(r),
 					    2 * BATCHDIST(r)),
 			     buf, buf + 1, buf, buf + 1
 			     )
@@ -179,7 +185,8 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->cld = cld;
      pln->r = r;
      pln->m = m;
-     pln->s = s;
+     pln->ms = ms;
+     pln->rs = irs;
      pln->batchsz = ego->batchsz;
      pln->mb = mstart;
      pln->me = mstart + mcount;
@@ -218,7 +225,7 @@ void X(ct_genericbuf_register)(planner *p)
      static const INT batchsizes[] = { 4, 8, 16, 32, 64 };
      unsigned i, j;
 
-     for (i = 0; i < sizeof(radices) / sizeof(radices[0]); ++i) 
-	  for (j = 0; j < sizeof(batchsizes) / sizeof(batchsizes[0]); ++j) 
+     for (i = 0; i < sizeof(radices) / sizeof(radices[0]); ++i)
+	  for (j = 0; j < sizeof(batchsizes) / sizeof(batchsizes[0]); ++j)
 	       regsolver(p, radices[i], batchsizes[j]);
 }
