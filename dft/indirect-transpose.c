@@ -103,7 +103,8 @@ static int applicable0(const solver *ego_, const problem *p_,
 		       int *pdim0, int *pdim1)
 {
      const problem_dft *p = (const problem_dft *) p_;
-     UNUSED(ego_);
+     UNUSED(ego_); UNUSED(plnr);
+
      return (1
 	     && FINITE_RNK(p->vecsz->rnk) && FINITE_RNK(p->sz->rnk)
 

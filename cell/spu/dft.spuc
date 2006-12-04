@@ -59,14 +59,20 @@ static void flip_ri(R *A, int ncomplex)
 }
 
 static void bytwiddle(R *A, int r, int chunk, R *buf,
-		      int m, long long Wppu0)
+		      int m, int dm, long long Wppu0)
 {
      int v, i;
+     int mold = -1;  /* assert (mold != m) */
+     R *W = 0;
 
-     for (v = 0; v < chunk; ++v, ++m, A += 2 * r) {
-	  long long Wppu = Wppu0 + m * r * 2 * sizeof(R);
-	  R *W = ALIGN_LIKE(buf, Wppu);
-	  X(spu_dma1d)(W, Wppu, r * 2 * sizeof(R), MFC_GET_CMD);
+     for (v = 0; v < chunk; ++v, m += dm, A += 2 * r) {
+	  /* load twiddles if we don't have them already */
+	  if (mold != m) {
+	       long long Wppu = Wppu0 + m * r * 2 * sizeof(R);
+	       W = ALIGN_LIKE(buf, Wppu);
+	       X(spu_dma1d)(W, Wppu, r * 2 * sizeof(R), MFC_GET_CMD);
+	       mold = m;
+	  }
 	  for (i = 0; i < r - 3 * VL; i += 4 * VL) {
 	       V a0 = LD(A + 2 * (i + 0 * VL), 0, 0);
 	       V a1 = LD(A + 2 * (i + 1 * VL), 0, 0);
@@ -89,10 +95,6 @@ static void bytwiddle(R *A, int r, int chunk, R *buf,
      }
 }
 
-#if CELL_DFT_MAXVRANK != 2
-#error "This routine only works for CELL_DFT_MAXVRANK == 2"
-#endif
-
 /* compute DFT of contiguous arrays (is = os = 2) */
 void X(spu_do_dft)(const struct dft_context *dft)
 {
@@ -104,8 +106,9 @@ void X(spu_do_dft)(const struct dft_context *dft)
      int n = dft->n;
      int twon = 2 * n;
      int nbytes = twon * sizeof(R);
-     const struct cell_iodim *vd = dft->v.dims;
+     const struct cell_iodim *vd = dft->v;
      long long xi, xo;
+     int dm0 = vd[0].dm, dm1 = vd[1].dm;
 
      X(spu_alloc_reset)();
 
@@ -128,6 +131,8 @@ void X(spu_do_dft)(const struct dft_context *dft)
 	  xi = dft->xi + v1 * vd[1].is_bytes;
 	  xo = dft->xo + v1 * vd[1].os_bytes;
 	  for (v0 = vd[0].n0; v0 < vd[0].n1; v0 += chunk) {
+	       int m = v0 * dm0 + v1 * dm1;
+
 	       if (chunk > vd[0].n1 - v0)
 		    chunk = vd[0].n1 - v0;
 
@@ -144,14 +149,18 @@ void X(spu_do_dft)(const struct dft_context *dft)
 	       if (dft->sign != FFT_SIGN)
 		    flip_ri(Aalign, n * chunk);
 
-	       if (dft->rw)
-		    bytwiddle(Aalign, n, chunk, A, v0, dft->Ww);
+	       if (m > 0 || dm0 > 0)
+		    bytwiddle(Aalign, n, chunk, A, m, dm0, dft->Ww);
 
 	       /* compute FFTs */
 	       for (vv = 0; vv < chunk; ++vv) 
 		    X(spu_execute_plan)(plan,
 					Aalign + vv * twon, 
 					Balign + vv * twon);
+
+	       if (m < 0 || dm0 < 0) 
+		    bytwiddle(Balign, n, chunk, Balign + twon * chunk,
+			      -m, -dm0, dft->Ww);
 
 	       if (dft->sign != FFT_SIGN)
 		    flip_ri(Balign, n * chunk);
