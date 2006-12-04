@@ -148,8 +148,8 @@ static R *make_twiddles(enum wakefulness wakefulness,
 
 static int fits_in_local_store(INT n, INT v)
 {
-     /* the SPU has space for 4 * MAX_N arrays of complex numbers.
-	We need n*(v+1) for data plus n for twiddle factors. */
+     /* the SPU has space for 4 * MAX_N complex numbers.  We need
+	n*(v+1) for data plus n for twiddle factors. */
      return n * (v+2) <= 4 * MAX_N;
 }
 
