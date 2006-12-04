@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: oracle.mli,v 1.3 2006-01-05 03:04:27 stevenj Exp $ *)
 
 val should_flip_sign : Expr.expr -> bool
 val likely_equal : Expr.expr -> Expr.expr -> bool

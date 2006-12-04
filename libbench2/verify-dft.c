@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: verify-dft.c,v 1.16 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "verify.h"
 

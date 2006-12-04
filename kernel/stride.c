@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: stride.c,v 1.11 2006-01-05 03:04:27 stevenj Exp $ */
 #include "ifftw.h"
 
 const INT X(an_INT_guaranteed_to_be_zero) = 0;

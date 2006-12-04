@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: speed.c,v 1.11 2006-01-15 21:09:53 athena Exp $ */
 
 #include "bench.h"
 

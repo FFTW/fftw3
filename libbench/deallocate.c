@@ -1,6 +1,5 @@
 /* not worth copyrighting */
 
-/* $Id: deallocate.c,v 1.2 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"

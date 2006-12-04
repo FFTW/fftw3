@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: kdft-dif.c,v 1.11 2006-01-05 03:04:26 stevenj Exp $ */
 
 #include "ct.h"
 

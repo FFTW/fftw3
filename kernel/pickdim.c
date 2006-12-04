@@ -20,7 +20,6 @@
 
 #include "ifftw.h"
 
-/* $Id: pickdim.c,v 1.6 2006-01-05 03:04:27 stevenj Exp $ */
 
 /* Given a solver which_dim, a vector sz, and whether or not the
    transform is out-of-place, return the actual dimension index that

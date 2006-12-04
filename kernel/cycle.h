@@ -23,7 +23,6 @@
  *
  */
 
-/* $Id: cycle.h,v 1.55 2006-06-23 06:33:45 stevenj Exp $ */
 
 /* machine-dependent cycle counters code. Needs to be inlined. */
 

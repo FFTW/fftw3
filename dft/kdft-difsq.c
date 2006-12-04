@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: kdft-difsq.c,v 1.10 2006-01-05 03:04:26 stevenj Exp $ */
 
 #include "ct.h"
 

@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: dftw-direct.c,v 1.13 2006-02-13 12:59:06 athena Exp $ */
 
 #include "ct.h"
 

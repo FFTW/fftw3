@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: c.ml,v 1.30 2006-02-12 23:34:12 athena Exp $ *)
 
 (*
  * This module contains the definition of a C-like abstract

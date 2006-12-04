@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: bench-main.c,v 1.19 2006-02-25 04:13:49 stevenj Exp $ */
 
 #include "bench.h"
 #include "my-getopt.h"

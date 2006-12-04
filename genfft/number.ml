@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: number.ml,v 1.6 2006-01-05 03:04:27 stevenj Exp $ *)
 
 (* The generator keeps track of numeric constants in symbolic
    expressions using the abstract number type, defined in this file.

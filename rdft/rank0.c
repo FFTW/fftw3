@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: rank0.c,v 1.33 2006-01-08 02:57:34 stevenj Exp $ */
 
 /* plans for rank-0 RDFTs (copy operations) */
 

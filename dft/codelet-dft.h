@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: codelet-dft.h,v 1.10 2006-01-06 03:19:09 athena Exp $ */
 
 /*
  * This header file must include every file or define every

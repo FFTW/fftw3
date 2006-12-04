@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: buffered2.c,v 1.45 2006-01-27 02:10:50 athena Exp $ */
 
 #include "rdft.h"
 

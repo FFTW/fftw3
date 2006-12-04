@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: reodft11e-r2hc.c,v 1.32 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK.  Use a trick from: 

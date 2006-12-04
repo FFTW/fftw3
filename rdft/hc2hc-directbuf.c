@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: hc2hc-directbuf.c,v 1.9 2006-01-27 02:10:50 athena Exp $ */
 
 #include "hc2hc.h"
 

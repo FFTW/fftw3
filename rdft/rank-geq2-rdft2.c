@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: rank-geq2-rdft2.c,v 1.29 2006-01-27 02:10:50 athena Exp $ */
 
 /* plans for RDFT2 of rank >= 2 (multidimensional) */
 

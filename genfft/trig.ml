@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: trig.ml,v 1.9 2006-02-12 23:34:12 athena Exp $ *)
 
 (* trigonometric transforms *)
 open Util

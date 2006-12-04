@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: dht-r2hc.c,v 1.26 2006-01-27 02:10:50 athena Exp $ */
 
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */

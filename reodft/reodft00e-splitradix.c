@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: reodft00e-splitradix.c,v 1.13 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do an R{E,O}DFT00 problem (of an odd length n) recursively via an
    R{E,O}DFT00 problem and an RDFT problem of half the length.

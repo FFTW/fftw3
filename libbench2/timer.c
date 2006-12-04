@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: timer.c,v 1.13 2006-01-30 16:09:32 athena Exp $ */
 
 #include "bench.h"
 #include <stdio.h>

@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: schedule.ml,v 1.8 2006-02-12 23:34:12 athena Exp $ *)
 
 (* This file contains the instruction scheduler, which finds an
    efficient ordering for a given list of instructions.

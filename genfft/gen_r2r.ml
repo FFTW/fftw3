@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_r2r.ml,v 1.10 2006-02-12 23:34:12 athena Exp $ *)
 
 (* generation of trigonometric transforms *)
 
@@ -26,7 +25,6 @@ open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_r2r.ml,v 1.10 2006-02-12 23:34:12 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -241,7 +239,7 @@ let generate n mode =
     "}\n"
 
   in
-  (unparse cvsid tree) ^ "\n" ^ (if !Magic.standalone then "" else desc ^ init)
+  (unparse tree) ^ "\n" ^ (if !Magic.standalone then "" else desc ^ init)
 
 
 let main () =

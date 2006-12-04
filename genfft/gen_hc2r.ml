@@ -18,13 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_hc2r.ml,v 1.19 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_hc2r.ml,v 1.19 2006-02-12 23:34:12 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -158,7 +156,7 @@ let generate n =
     "}\n"
 
   in
-  (unparse cvsid tree) ^ "\n" ^ (if !Magic.standalone then "" else desc ^ init)
+  (unparse tree) ^ "\n" ^ (if !Magic.standalone then "" else desc ^ init)
 
 
 let main () =

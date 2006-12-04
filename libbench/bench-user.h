@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: bench-user.h,v 1.13 2006-01-05 03:04:27 stevenj Exp $ */
 #ifndef __BENCH_USER_H__
 #define __BENCH_USER_H__
 

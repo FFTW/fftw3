@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: simd.mli,v 1.8 2006-01-05 03:04:27 stevenj Exp $ *)
 
 val unparse_function : C.c_fcn -> string
 val extract_constants : C.c_ast -> C.c_decl list

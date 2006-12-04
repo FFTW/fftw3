@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: conf.c,v 1.31 2006-01-05 03:04:26 stevenj Exp $ */
 
 #include "dft.h"
 

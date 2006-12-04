@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: ifftw.h,v 1.281 2006-02-10 14:18:39 athena Exp $ */
 
 /* FFTW internal header file */
 #ifndef __IFFTW_H__

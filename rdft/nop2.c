@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: nop2.c,v 1.12 2006-01-05 03:04:27 stevenj Exp $ */
 
 /* plans for vrank -infty RDFT2s (nothing to do), as well as in-place
    rank-0 HC2R.  Note that in-place rank-0 R2HC is *not* a no-op, because

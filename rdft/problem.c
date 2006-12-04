@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: problem.c,v 1.53 2006-01-13 03:21:57 athena Exp $ */
 
 #include "rdft.h"
 #include <stddef.h>

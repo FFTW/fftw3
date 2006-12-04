@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: conf.c,v 1.28 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "rdft.h"
 

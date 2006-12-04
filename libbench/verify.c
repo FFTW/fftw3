@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: verify.c,v 1.18 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include <math.h>
 #include <stdio.h>

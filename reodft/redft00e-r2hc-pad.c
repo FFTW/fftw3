@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: redft00e-r2hc-pad.c,v 1.8 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, padded symmetrically to
    twice the size.  This is asymptotically a factor of ~2 worse than

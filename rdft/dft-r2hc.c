@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: dft-r2hc.c,v 1.37 2006-01-27 02:10:50 athena Exp $ */
 
 /* Compute the complex DFT by combining R2HC RDFTs on the real
    and imaginary parts.   This could be useful for people just wanting

@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: timer.c,v 1.7 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "config.h"
 #include "bench.h"

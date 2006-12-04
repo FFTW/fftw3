@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: rdft-dht.c,v 1.25 2006-01-27 02:10:50 athena Exp $ */
 
 /* Solve an R2HC/HC2R problem via post/pre processing of a DHT.  This
    is mainly useful because we can use Rader to compute DHTs of prime

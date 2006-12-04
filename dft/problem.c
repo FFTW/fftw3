@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: problem.c,v 1.39 2006-01-05 03:04:26 stevenj Exp $ */
 
 #include "dft.h"
 #include <stddef.h>

@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: reodft11e-r2hc-odd.c,v 1.27 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem via an R2HC problem of the same *odd* size,
    with some permutations and post-processing, as described in:

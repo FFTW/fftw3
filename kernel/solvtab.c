@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: solvtab.c,v 1.11 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "ifftw.h"
 

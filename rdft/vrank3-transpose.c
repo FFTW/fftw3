@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: vrank3-transpose.c,v 1.49 2006-01-27 02:10:50 athena Exp $ */
 
 /* rank-0, vector-rank-3, non-square in-place transposition
    (see rank0.c for square transposition)  */

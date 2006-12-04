@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: problem.c,v 1.28 2006-01-04 00:34:04 athena Exp $ */
 
 #include "config.h"
 #include "bench.h"

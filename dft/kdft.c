@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: kdft.c,v 1.6 2006-01-05 03:04:26 stevenj Exp $ */
 
 #include "dft.h"
 

@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: rodft00e-r2hc-pad.c,v 1.9 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, padded antisymmetrically to
    twice the size.  This is asymptotically a factor of ~2 worse than

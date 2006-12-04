@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: indirect.c,v 1.34 2006-01-27 02:10:50 athena Exp $ */
 
 
 /* solvers/plans for vectors of small RDFT's that cannot be done

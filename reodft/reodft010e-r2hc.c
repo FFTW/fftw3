@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: reodft010e-r2hc.c,v 1.37 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */

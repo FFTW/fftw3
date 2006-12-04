@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: oracle.ml,v 1.9 2006-02-13 01:12:10 athena Exp $ *)
 
 (*
  * the oracle decrees whether the sign of an expression should

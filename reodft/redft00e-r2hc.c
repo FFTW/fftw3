@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: redft00e-r2hc.c,v 1.32 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do a REDFT00 problem via an R2HC problem, with some pre/post-processing.
 

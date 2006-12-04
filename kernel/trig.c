@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: trig.c,v 1.20 2006-01-05 03:04:27 stevenj Exp $ */
 
 /* trigonometric functions */
 #include "ifftw.h"

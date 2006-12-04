@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: plan.c,v 1.23 2006-01-10 13:56:55 athena Exp $ */
 
 #include "ifftw.h"
 

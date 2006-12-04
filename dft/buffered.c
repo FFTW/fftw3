@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: buffered.c,v 1.59 2006-01-27 02:10:50 athena Exp $ */
 
 #include "dft.h"
 

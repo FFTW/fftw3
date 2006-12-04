@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: bench.h,v 1.15 2006-02-25 02:25:48 athena Exp $ */
 
 /* benchmark program definitions */
 #include "bench-user.h"

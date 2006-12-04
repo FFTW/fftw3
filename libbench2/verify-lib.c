@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: verify-lib.c,v 1.21 2006-02-26 01:27:01 stevenj Exp $ */
 
 #include "verify.h"
 #include <math.h>

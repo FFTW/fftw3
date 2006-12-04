@@ -18,13 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_twiddle.ml,v 1.24 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_twiddle.ml,v 1.24 2006-02-12 23:34:12 athena Exp $"
 
 type ditdif = DIT | DIF
 let ditdif = ref DIT
@@ -148,7 +146,7 @@ let generate n =
     (Printf.sprintf "{\n%s(p, %s, &desc);\n}" register ename)
   in
 
-  (unparse cvsid tree) ^ "\n" ^
+  (unparse tree) ^ "\n" ^
     (if !Magic.standalone then "" else init)
 
 

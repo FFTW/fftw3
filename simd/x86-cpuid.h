@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: x86-cpuid.h,v 1.1 2006-02-08 03:01:36 athena Exp $ */
 
 /* this code was kindly donated by Eric J. Korpela */
 

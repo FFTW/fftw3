@@ -18,13 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_notw_c.ml,v 1.17 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_notw_c.ml,v 1.17 2006-02-12 23:34:12 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -154,7 +152,7 @@ let generate n =
     "  X(kdft_register)(p, " ^ ename ^ ", &desc);\n" ^
     "}\n"
 
-  in ((unparse cvsid tree) ^ "\n" ^ 
+  in ((unparse tree) ^ "\n" ^ 
 	(if !Magic.standalone then "" else desc ^ init))
 
 let main () =

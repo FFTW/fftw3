@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: complex.ml,v 1.9 2006-02-12 23:34:12 athena Exp $ *)
 
 (* abstraction layer for complex operations *)
 open Littlesimp

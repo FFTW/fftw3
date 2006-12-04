@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: util.mli,v 1.3 2006-01-05 03:04:27 stevenj Exp $ *)
 
 val invmod : int -> int -> int
 val gcd : int -> int -> int

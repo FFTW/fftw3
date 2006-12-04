@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: scan.c,v 1.19 2006-01-10 13:24:41 athena Exp $ */
 
 #include "ifftw.h"
 #include <string.h>

@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: twiddle.c,v 1.33 2006-01-05 22:39:02 athena Exp $ */
 
 /* Twiddle manipulation */
 

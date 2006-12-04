@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: conf.c,v 1.3 2006-01-05 03:04:28 stevenj Exp $ */
 
 #include "threads.h"
 

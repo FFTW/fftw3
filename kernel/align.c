@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: align.c,v 1.30 2006-03-28 04:30:22 stevenj Exp $ */
 
 #include "ifftw.h"
 

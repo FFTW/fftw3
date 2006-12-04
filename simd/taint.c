@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: taint.c,v 1.5 2006-01-05 03:04:28 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"

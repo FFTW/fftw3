@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: problem2.c,v 1.37 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "dft.h"
 #include "rdft.h"

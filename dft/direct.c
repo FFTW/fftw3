@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: direct.c,v 1.48 2006-01-05 03:04:26 stevenj Exp $ */
 
 /* direct DFT solver, if we have a codelet */
 

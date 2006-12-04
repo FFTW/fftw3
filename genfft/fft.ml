@@ -18,9 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: fft.ml,v 1.4 2006-01-05 03:04:27 stevenj Exp $ *)
 
-let cvsid = "$Id: fft.ml,v 1.4 2006-01-05 03:04:27 stevenj Exp $"
 
 (* This is the part of the generator that actually computes the FFT
    in symbolic form *)

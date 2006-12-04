@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: sse2.c,v 1.17 2006-02-08 03:01:36 athena Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"

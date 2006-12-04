@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: rdft2-radix2.c,v 1.32 2006-01-27 02:10:50 athena Exp $ */
 
 /*
   Compute RDFT2 of even size via either a DFT or a vector RDFT of

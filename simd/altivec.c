@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: altivec.c,v 1.14 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "ifftw.h"
 #include "simd.h"

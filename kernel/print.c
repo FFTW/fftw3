@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: print.c,v 1.30 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "ifftw.h"
 #include <stddef.h>

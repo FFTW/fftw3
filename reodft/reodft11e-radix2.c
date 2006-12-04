@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: reodft11e-radix2.c,v 1.16 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do an R{E,O}DFT11 problem of *even* size by a pair of R2HC problems
    of half the size, plus some pre/post-processing.  Use a trick from:

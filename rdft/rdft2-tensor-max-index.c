@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: rdft2-tensor-max-index.c,v 1.8 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "rdft.h"
 

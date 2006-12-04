@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: ct.c,v 1.52 2006-01-27 02:10:50 athena Exp $ */
 
 #include "ct.h"
 

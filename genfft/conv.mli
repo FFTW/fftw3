@@ -18,6 +18,5 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: conv.mli,v 1.3 2006-01-05 03:04:27 stevenj Exp $ *)
 
 val conv : int -> Complex.signal -> int -> Complex.signal -> Complex.signal

@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: rodft00e-r2hc.c,v 1.33 2006-01-27 02:10:50 athena Exp $ */
 
 /* Do a RODFT00 problem via an R2HC problem, with some pre/post-processing.
 

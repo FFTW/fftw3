@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: kalloc.c,v 1.6 2006-01-25 23:00:04 stevenj Exp $ */
 
 #include "ifftw.h"
 

@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: nop.c,v 1.17 2006-01-05 03:04:26 stevenj Exp $ */
 
 /* plans for vrank -infty DFTs (nothing to do) */
 

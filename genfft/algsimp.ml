@@ -19,8 +19,6 @@
  *
  *)
 
-(* $Id: algsimp.ml,v 1.9 2006-02-12 23:34:12 athena Exp $ *)
-let cvsid = "$Id: algsimp.ml,v 1.9 2006-02-12 23:34:12 athena Exp $"
 
 open Util
 open Expr

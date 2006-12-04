@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: primes.c,v 1.25 2006-02-05 23:19:55 athena Exp $ */
 
 #include "ifftw.h"
 

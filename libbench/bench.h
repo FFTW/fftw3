@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: bench.h,v 1.8 2006-01-05 03:04:27 stevenj Exp $ */
 
 /* benchmark program definitions */
 #include "config.h"

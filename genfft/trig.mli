@@ -18,7 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: trig.mli,v 1.4 2006-01-05 03:04:27 stevenj Exp $ *)
 
 val rdft : int -> int -> Complex.signal -> Complex.signal
 val hdft : int -> int -> Complex.signal -> Complex.signal

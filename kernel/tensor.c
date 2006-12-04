@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: tensor.c,v 1.42 2006-01-05 03:04:27 stevenj Exp $ */
 
 #include "ifftw.h"
 

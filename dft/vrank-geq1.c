@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: vrank-geq1.c,v 1.51 2006-01-27 02:10:50 athena Exp $ */
 
 
 /* Plans for handling vector transform loops.  These are *just* the

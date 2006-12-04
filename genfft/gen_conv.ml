@@ -18,13 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *)
-(* $Id: gen_conv.ml,v 1.8 2006-02-12 23:34:12 athena Exp $ *)
 
 open Util
 open Genutil
 open C
 
-let cvsid = "$Id: gen_conv.ml,v 1.8 2006-02-12 23:34:12 athena Exp $"
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
@@ -71,7 +69,7 @@ let generate n =
 	 Asch annot)
 
   in
-  (unparse cvsid tree)
+  (unparse tree)
 
 
 let main () =

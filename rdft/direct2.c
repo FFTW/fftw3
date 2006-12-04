@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: direct2.c,v 1.24 2006-01-05 03:04:27 stevenj Exp $ */
 
 /* direct RDFT2 R2HC/HC2R solver, if we have a codelet */
 

@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: planner.c,v 1.189 2006-01-17 05:17:27 athena Exp $ */
 #include "ifftw.h"
 #include <string.h>
 

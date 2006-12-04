@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: dft-vrank-geq1.c,v 1.24 2006-01-27 02:10:50 athena Exp $ */
 
 #include "threads.h"
 

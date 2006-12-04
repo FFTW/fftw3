@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: timer.c,v 1.27 2006-01-27 02:10:50 athena Exp $ */
 
 #include "ifftw.h"
 

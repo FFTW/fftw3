@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: dft.h,v 1.46 2006-01-05 03:04:26 stevenj Exp $ */
 
 #ifndef __DFT_H__
 #define __DFT_H__

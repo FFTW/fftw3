@@ -18,7 +18,6 @@
  *
  */
 
-/* $Id: rank0-rdft2.c,v 1.13 2006-01-27 02:10:50 athena Exp $ */
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
