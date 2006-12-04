@@ -146,6 +146,12 @@ static R *make_twiddles(enum wakefulness wakefulness,
      return W;
 }
 
+static int fits_in_local_store(INT n, INT v)
+{
+     /* the SPU has space for 4 * MAX_N arrays of complex numbers.
+	We need n*(v+1) for data plus n for twiddle factors. */
+     return n * (v+2) <= 4 * MAX_N;
+}
 
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
@@ -412,11 +418,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	       && vd[0].is_bytes == vd[0].os_bytes
 	       && vd[1].is_bytes == vd[1].os_bytes)
 
-	   /* cutdim is in place and the rest fits into SPU memory */
+	   /* we cut across in-place dimension 1 and dimension 0 fits
+	      into local store */
 	   || (1
-	       && vd[cutdim].is_bytes == vd[cutdim].os_bytes
-	       /* FIXME: the SPE should be able to handle 2*MAX_N */
-	       && d[0].n * vd[1-cutdim].n1 <= MAX_N)
+	       && cutdim == 1
+	       && vd[1].is_bytes == vd[1].os_bytes
+	       && fits_in_local_store(d[0].n, vd[0].n1 - vd[0].n0))
 	      ))
 	  return 0;
 
@@ -576,7 +583,7 @@ static plan *mkcldw(const ct_solver *ego,
 	     local store */
 	  if (!(0
 		|| ((irs == ors) && (ivs == ovs))
-		|| v * r <= MAX_N))
+		|| fits_in_local_store(r, v) ))
 	       return 0;
 
 	  /* check alignment */
