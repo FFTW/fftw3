@@ -121,6 +121,13 @@ static int applicable(const solver *ego_, const problem *p_,
 
      p = (const problem_dft *) p_;
 
+     if (PRESERVE_UNITSTRIDEP(plnr)) {
+	  /* do not iterate over unit-stride dimensions */
+	  iodim *d = p->vecsz->dims + *dp;
+	  if (d->is == 2 || d->os == 2)
+	       return 0;
+     }
+
      if (NO_UGLYP(plnr)) {
 	  /* Heuristic: if the transform is multi-dimensional, and the
 	     vector stride is less than the transform size, then we

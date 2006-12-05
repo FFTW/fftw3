@@ -109,7 +109,7 @@ void X(mapflags)(planner *plnr, unsigned flags)
 
 	  /* a canonical set of fftw2-like impatience flags */
 	  IMPLIES(NO(FFTW_PATIENT),
-		  YES(FFTW_NO_VRECURSE
+		  YES(FFTW_PRESERVE_UNITSTRIDE
 		      | FFTW_NO_RANK_SPLITS
 		      | FFTW_NO_VRANK_SPLITS
 		      | FFTW_NO_NONTHREADED
@@ -141,7 +141,7 @@ void X(mapflags)(planner *plnr, unsigned flags)
 	  EQV(FFTW_NO_INDIRECT_OP, NO_INDIRECT_OP),
 	  EQV(FFTW_NO_RANK_SPLITS, NO_RANK_SPLITS),
 	  EQV(FFTW_NO_VRANK_SPLITS, NO_VRANK_SPLITS),
-	  EQV(FFTW_NO_VRECURSE, NO_VRECURSE),
+	  EQV(FFTW_PRESERVE_UNITSTRIDE, PRESERVE_UNITSTRIDE),
 	  EQV(FFTW_NO_SLOW, NO_SLOW),
 	  EQV(FFTW_NO_FIXED_RADIX_LARGE_N, NO_FIXED_RADIX_LARGE_N)
      };

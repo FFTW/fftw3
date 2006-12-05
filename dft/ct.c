@@ -106,11 +106,13 @@ int X(ct_applicable)(const ct_solver *ego, const problem *p_, planner *plnr)
 
      p = (const problem_dft *) p_;
 
-     /* emulate fftw2 behavior */
+     /* PRESERVE_UNITSTRIDE is satisfied if either ivs or ovs is unit */
      if (1
-	 && NO_VRECURSEP(plnr)
-	 && (p->vecsz->rnk > 0)
-	 && ego->dec != DECDIF+TRANSPOSE)
+	 && PRESERVE_UNITSTRIDEP(plnr)
+	 && ego->dec != DECDIF+TRANSPOSE
+	 && p->vecsz->rnk > 0
+	 && p->vecsz->dims[0].is != 2
+	 && p->vecsz->dims[0].os != 2)
 	  return 0;
 
      return 1;

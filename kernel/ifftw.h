@@ -589,7 +589,7 @@ enum {
      ESTIMATE = 0x0002,
      NO_DFT_R2HC = 0x0004,
      NO_SLOW = 0x0008,
-     NO_VRECURSE = 0x0010,
+     PRESERVE_UNITSTRIDE = 0x0010,
      NO_INDIRECT_OP = 0x0020,
      NO_LARGE_GENERIC = 0x0040,
      NO_RANK_SPLITS = 0x0080,
@@ -624,7 +624,7 @@ enum {
 #define NO_LARGE_GENERICP(plnr) (PLNR_L(plnr) & NO_LARGE_GENERIC)
 #define NO_RANK_SPLITSP(plnr) (PLNR_L(plnr) & NO_RANK_SPLITS)
 #define NO_VRANK_SPLITSP(plnr) (PLNR_L(plnr) & NO_VRANK_SPLITS)
-#define NO_VRECURSEP(plnr) (PLNR_L(plnr) & NO_VRECURSE)
+#define PRESERVE_UNITSTRIDEP(plnr) (PLNR_L(plnr) & PRESERVE_UNITSTRIDE)
 #define NO_DFT_R2HCP(plnr) (PLNR_L(plnr) & NO_DFT_R2HC)
 #define NO_SLOWP(plnr) (PLNR_L(plnr) & NO_SLOW)
 #define NO_UGLYP(plnr) (PLNR_L(plnr) & NO_UGLY)
