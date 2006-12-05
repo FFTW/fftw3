@@ -33,6 +33,7 @@
 int X(alignment_of)(R *p)
 {
 #if ALGN == 0
+     UNUSED(p);
      return 0;
 #else
      return (int)(((uintptr_t) p) % ALGN);
