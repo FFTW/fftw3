@@ -443,7 +443,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      compute_opcnt(radices, pln->n, 
 		   vd[0].n1 * vd[1].n1, &pln->super.super.ops);
-     pln->super.super.could_prune_now_p = 1;
+
+     /* penalize cuts across short dimensions */
+     if (vd[cutdim].n1 < vd[1-cutdim].n1)
+	  pln->super.super.ops.other += 3.14159;
+
+//     pln->super.super.could_prune_now_p = 1;
      return &(pln->super.super);
 }
 

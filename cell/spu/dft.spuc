@@ -122,7 +122,13 @@ void X(spu_do_dft)(const struct dft_context *dft)
 
      chunk = VL * 
 	  ((X(spu_alloc_avail)() - nbytes - 2 * ALIGNMENT) / (VL * nbytes));
-     if (chunk > chunkalign) chunk &= ~(chunkalign-1);
+
+     /* align CHUNK, but only if CHUNK is less than the whole dimension	0,
+	since the invoking code may be relying upon the whole chunk to
+	fit into local store.  Besides, there is no point to align
+	CHUNK in this case anyway. */
+     if (vd[0].n1 > vd[0].n0 + chunk && chunk > chunkalign)
+	  chunk &= ~(chunkalign-1);
 
      A = X(spu_alloc)((chunk + 1) * nbytes + 2 * ALIGNMENT);
 
