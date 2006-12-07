@@ -129,6 +129,17 @@ void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
 
 enum operation { DO_DMA, DO_TRANSPOSE };
 
+/* algorithm for transposing rectangular matrices from ppu memory to
+   SPU local store and vice versa.
+
+   The algorithm cut a maximal square region of the matrix, copies the
+   square into local store using contiguous DMA, transposese the
+   square piece in-place, and tail-recurs on the rest of the matrix.
+
+   For reasons not well understood, performance seems better if we
+   execute all the DMAs first and then all the transpositions.  This
+   needs further investigation.
+*/
 static void dma2d_transposed(R *A, int lda, 
 			     long long ppu_addr, int ppu_stride_bytes,
 			     int r, int c,
@@ -138,6 +149,7 @@ static void dma2d_transposed(R *A, int lda,
  tail:
      if (c > 0) {
 	  if (r > c) {
+	       /* cut a CxC chunk */
 	       if (op == DO_DMA)
 		    dma2d_contig_nowait(A, ppu_addr, c, c,
 					lda, ppu_stride_bytes, cmd);
@@ -149,6 +161,7 @@ static void dma2d_transposed(R *A, int lda,
 	       ppu_addr += 2 * sizeof(R) * c;
 	       goto tail;
 	  } else if (r > 0) {
+	       /* cut a RxR chunk */
 	       if (op == DO_DMA)
 		    dma2d_contig_nowait(A, ppu_addr, r, r, 
 					lda, ppu_stride_bytes, cmd);
@@ -184,7 +197,7 @@ void X(spu_dma2d)(R *A, long long ppu_addr,
 			      2 * n, ppu_vstride_bytes, cmd);
 	  DMA_WAIT();
      } else { 
-	  /* ppu_vstride_bytes == 2 * sizeof(R) */
+	  /* ppu_vstride_bytes == 2 * sizeof(R), use transposed DMA */
 	  if (cmd == MFC_PUT_CMD) 
 	       dma2d_transposed(A, 2 * n, ppu_addr, ppu_stride_bytes,
 				v, n, cmd, DO_TRANSPOSE);
