@@ -147,3 +147,44 @@ void X(tensor_split)(const tensor *sz, tensor **a, int arnk, tensor **b)
      *a = X(tensor_copy_sub)(sz, 0, arnk);
      *b = X(tensor_copy_sub)(sz, arnk, sz->rnk - arnk);
 }
+
+/* TRUE if the two tensors are equal */
+int X(tensor_equal)(const tensor *a, const tensor *b)
+{
+     if (a->rnk != b->rnk)
+	  return 0;
+
+     if (FINITE_RNK(a->rnk)) {
+	  int i;
+	  for (i = 0; i < a->rnk; ++i) 
+	       if (0
+		   || a->dims[i].n != b->dims[i].n
+		   || a->dims[i].is != b->dims[i].is
+		   || a->dims[i].os != b->dims[i].os
+		    )
+		    return 0;
+     }
+
+     return 1;
+}
+
+/* TRUE if the sets of input and output locations described by
+   (append sz vecsz) are the same */
+int X(tensor_inplace_locations)(const tensor *sz, const tensor *vecsz)
+{
+     tensor *t = X(tensor_append)(sz, vecsz);
+     tensor *ti = X(tensor_copy_inplace)(t, INPLACE_IS);
+     tensor *to = X(tensor_copy_inplace)(t, INPLACE_OS);
+     tensor *tic = X(tensor_compress_contiguous)(ti);
+     tensor *toc = X(tensor_compress_contiguous)(to);
+
+     int retval = X(tensor_equal)(tic, toc);
+
+     X(tensor_destroy)(t);
+     X(tensor_destroy)(ti);
+     X(tensor_destroy)(to);
+     X(tensor_destroy)(tic);
+     X(tensor_destroy)(toc);
+
+     return retval;
+}

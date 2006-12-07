@@ -421,6 +421,8 @@ void X(tensor_destroy2)(tensor *a, tensor *b);
 void X(tensor_destroy4)(tensor *a, tensor *b, tensor *c, tensor *d);
 void X(tensor_print)(const tensor *sz, printer *p);
 int X(dimcmp)(const iodim *a, const iodim *b);
+int X(tensor_equal)(const tensor *a, const tensor *b);
+int X(tensor_inplace_locations)(const tensor *sz, const tensor *vecsz);
 
 /*-----------------------------------------------------------------------*/
 /* problem.c: */

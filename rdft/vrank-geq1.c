@@ -101,6 +101,8 @@ static int applicable0(const solver *ego_, const problem *p_, int *dp)
 	     && p->sz->rnk >= 0
 
 	     && pickdim(ego, p->vecsz, p->I != p->O, dp)
+
+	     && (p->I != p->O || X(tensor_inplace_locations)(p->sz, p->vecsz))
 	  );
 }
 

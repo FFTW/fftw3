@@ -136,17 +136,22 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 	  if (p->I != p->O)
 	       return (d[0].os > 1);
 
-	  /* We can always do a single transform in-place */
-	  if (p->vecsz->rnk == 0)
-	       return 1;
-
 	  /*
 	   * If the problem is in place, the input/output strides must
 	   * be the same or the whole thing must fit in the buffer.
 	   */
-	  return ((X(tensor_inplace_strides2)(p->sz, p->vecsz))
-		  || (compute_nbuf(d[0].n, p->vecsz->dims[0].n, ego)
-		      == p->vecsz->dims[0].n));
+	  if (X(tensor_inplace_strides2)(p->sz, p->vecsz))
+	       return 1;
+
+	  if (/* fits into buffer: */
+	       ((p->vecsz->rnk == 0)
+		||
+		(compute_nbuf(d[0].n, p->vecsz->dims[0].n, ego)
+		 == p->vecsz->dims[0].n))
+	       &&
+	       /* I/O locations are in place */
+	       X(tensor_inplace_locations)(p->sz, p->vecsz))
+	       return 1;
      }
 
      return 0;
