@@ -93,10 +93,30 @@ static void compute_opcnt(const struct spu_radices *p,
      signed char *q;
 
      X(ops_zero)(ops);
-     for (q = p->r; (r = *q) > 0; ++q, v *= r) 
-	  X(ops_madd2)((v * (n / r)) / VL, &t_ops[r], ops);
 
-     X(ops_madd2)(v / VL, &n_ops[-r], ops);
+     for (q = p->r; (r = *q) > 0; ++q) 
+	  X(ops_madd2)(v * (n / r) / VL, &t_ops[r], ops);
+
+     X(ops_madd2)(v * (n / (-r)) / VL, &n_ops[-r], ops);
+}
+
+static int extent(struct cell_iodim *d)
+{
+     return d->n1 - d->n0;
+}
+
+/* FIXME: this is totally broken */
+static void cost_model(const P *pln, opcnt *ops)
+{
+     int r = pln->n;
+     int v0 = extent(pln->v + 0);
+     int v1 = extent(pln->v + 1);
+
+     compute_opcnt(&pln->radices, r, v0 * v1, ops);
+
+     /* penalize cuts across short dimensions */
+     if (extent(pln->v + pln->cutdim) < extent(pln->v + 1 - pln->cutdim))
+	  ops->other += 3.14159;
 }
 
 /* expressed in real numbers */
@@ -256,75 +276,90 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      }
 }
 
-static int build_vdim(const iodim *d, const tensor *vecsz,
-		      struct cell_iodim *v)
+static int contiguous_or_aligned_p(int s_bytes)
 {
-     int i;
-     int contigdim = -1;
-     iodim *t;
+     return (s_bytes == 2 * sizeof(R)) || ((s_bytes % ALIGNMENTA) == 0);
+}
 
-     /* allow vecrnk=0 if the strides are ok */
-     if (vecsz->rnk == 0 && d->is == 2 && d->os == 2)
-	  goto skip_contigdim;
+static int build_vdim(int inplacep,
+		      int r, int irs, int ors,
+		      int m, int ims, int oms, int dm,
+		      int v, int ivs, int ovs,
+		      struct cell_iodim vd[2], int cutdim)
+{
+     int vm, vv;
 
-     for (i = 0; i < vecsz->rnk; ++i) {
-	  t = vecsz->dims + i;
-	  if (t->n % VL) /* FIXME: too conservative, but hard to get right */
-	       return 0; 
-	  if (( 
-		   /* contiguous input across D */
-		   (d->is == 2 && SIMD_STRIDE_OKA(t->is))
-		   ||
-		   /* contiguous input across T */
-		   (t->is == 2 && SIMD_STRIDE_OKA(d->is))
-		   )
-	      && (
-		   /* contiguous output across D */
-		   (d->os == 2 && SIMD_STRIDE_OKA(t->os))
-		   ||
-		   /* contiguous output across T */
-		   (t->os == 2 && SIMD_STRIDE_OKA(d->os))
-		   )) {
-	       /* choose I as the contiguous dimension */
-	       contigdim = i;
-	  } else {
-	       /* vector strides must be aligned */
-	       if (!SIMD_STRIDE_OKA(t->is) || !SIMD_STRIDE_OKA(t->os))
-		    return 0;
-	  }
+     /* R dimension must be aligned in all cases */
+     if (!(1
+	   && r % VL == 0 /* REDUNDANT */
+	   && contiguous_or_aligned_p(irs * sizeof(R))
+	   && contiguous_or_aligned_p(ors * sizeof(R))))
+	  return 0;
+	   
+     if ((irs == 2 || ims == 2) && (ors == 2 || oms == 2)) {
+	  /* Case 1: in SPU, let N=R, V0=M, V1=V */
+	  vm = 0; 
+	  vv = 1;
+     } else if ((irs == 2 || ivs == 2) && (ors == 2 || ovs == 2)) {
+	  /* Case 2: in SPU, let N=R, V0=V, V1=M */
+	  vm = 1; 
+	  vv = 0;
+     } else { 
+	  /* can't do it */
+	  return 0;
      }
 
-     /* no contiguous dimension found, can't do it */
-     if (contigdim < 0)
+     vd[vm].n0 = 0; vd[vm].n1 = m;
+     vd[vm].is_bytes = ims * sizeof(R); vd[vm].os_bytes = oms * sizeof(R);
+     vd[vm].dm = dm;
+
+     vd[vv].n0 = 0; vd[vv].n1 = v; 
+     vd[vv].is_bytes = ivs * sizeof(R); vd[vv].os_bytes = ovs * sizeof(R);
+     vd[vv].dm = 0;
+
+     /* SPE DMA restrictions: */
+     if (!(1
+	   /* dimension 0 must be aligned, dimension 1 is arbitrary */
+	   && (vd[0].n1 % VL == 0)
+
+	   /* dimension-0 strides must be either contiguous or aligned */
+	   && contiguous_or_aligned_p(vd[0].is_bytes)
+	   && contiguous_or_aligned_p(vd[0].os_bytes)
+
+	   /* dimension-1 strides must be aligned */
+	   && ((vd[1].is_bytes % ALIGNMENTA) == 0)
+	   && ((vd[1].os_bytes % ALIGNMENTA) == 0)
+	      ))
 	  return 0;
 
-     /* contigdim goes first */
-     t = vecsz->dims + contigdim;
-     v->n0 = 0; v->n1 = t->n; 
-     v->is_bytes = t->is * sizeof(R); v->os_bytes = t->os * sizeof(R);
-     v->dm = 0;
-     ++v;
+     /* Restrictions due to the computation of CHUNK in apply(): */
+     if (!(0
+	   || (irs == 2 && ors == 2)
+	   || cutdim > 0
+	   || (extent(vd + cutdim) % VL) == 0 ))
+	  return 0;
 
- skip_contigdim:
-     /* other dimensions next */
-     for (i = 0; i < vecsz->rnk; ++i) 
-	  if (i != contigdim) {
-	       t = vecsz->dims + i;
-	       v->n0 = 0; 
-	       v->n1 = t->n; 
-	       v->is_bytes = t->is * sizeof(R); 
-	       v->os_bytes = t->os * sizeof(R);
-	       v->dm = 0;
-	       ++v;
-	  }
-     
-     /* complete tensor */
-     for (; i < 2; ++i) {
-	  v->n0 = 0; v->n1 = 1; v->is_bytes = 0; v->os_bytes = 0;
-	  v->dm = 0; ++v;
-     }
+     /* see if we can do it without overwriting the input with itself */
+     if (!(0
+	   /* can operate out-of-place */
+	   || !inplacep
 
-     return 1; 
+	   /* all strides are in-place */
+	   || (1
+	       && irs == ors
+	       && ims == oms
+	       && ivs == ovs)
+
+	   /* we cut across in-place dimension 1, and dimension 0 fits
+	      into local store */
+	   || (1
+	       && cutdim == 1
+	       && vd[cutdim].is_bytes == vd[cutdim].os_bytes
+	       && fits_in_local_store(r, extent(vd + 0)))
+	      ))
+	  return 0;
+
+     return 1;
 }
 
 static 
@@ -368,11 +403,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      const S *ego = (const S *)ego_;
      const problem_dft *p = (const problem_dft *) p_;
-     iodim *d;
      int sign;
      const struct spu_radices *radices;
      struct cell_iodim vd[2];
-     int cutdim;
+     int m, ims, oms, v, ivs, ovs;
 
      /* basic conditions */
      if (!(1
@@ -384,71 +418,58 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  return 0;
 
      /* see if SPE supports N */
-     d = p->sz->dims;
-     radices = find_radices(p->ri, p->ii, p->ro, p->io, d[0].n, &sign);
-     if (!radices)
-	  return 0;
+     {
+	  iodim *d = p->sz->dims;
+	  radices = find_radices(p->ri, p->ii, p->ro, p->io, d[0].n, &sign);
+	  if (!radices)
+	       return 0;
+     }
 
-     /* see if the SPE dma supports the strides that we have */
-     if (!build_vdim(d, p->vecsz, vd))
-	  return 0;
+     /* canonicalize to vrank 2 */
+     if (p->vecsz->rnk >= 1) {
+	  iodim *d = p->vecsz->dims + 0;
+	  m = d->n; ims = d->is; oms = d->os;
+     } else {
+	  m = 1; ims = oms = 0;
+     }
 
-     cutdim = ego->cutdim;
+     if (p->vecsz->rnk >= 2) {
+	  iodim *d = p->vecsz->dims + 1;
+	  v = d->n; ivs = d->is; ovs = d->os;
+     } else {
+	  v = 1; ivs = ovs = 0;
+     }
 
-     if (!(0
-	   /* either N is contiguous... */ 
-	   || (d[0].is == 2 && d[0].os == 2)
-
-	   /* ... or vd[cutdim] must be a multiple of VL if cutdim==0
-	      (see computation of CHUNK in apply()) */
-	   || cutdim > 0
-	   || (vd[cutdim].n1 % VL) == 0
-	      ))
-	  return 0;
-
-     /* see if we can do it without overwriting the input with
-	itself */
-     if (!(0
-	   /* can operate out-of-place */
-	   || p->ri != p->ro
-
-	   /* all strides are in-place */
-	   || (1
-	       && d[0].is == d[0].os
-	       && vd[0].is_bytes == vd[0].os_bytes
-	       && vd[1].is_bytes == vd[1].os_bytes)
-
-	   /* we cut across in-place dimension 1 and dimension 0 fits
-	      into local store */
-	   || (1
-	       && cutdim == 1
-	       && vd[1].is_bytes == vd[1].os_bytes
-	       && fits_in_local_store(d[0].n, vd[0].n1 - vd[0].n0))
-	      ))
-	  return 0;
+     /* see if strides are supported by the SPE DMA routine  */
+     {
+	  iodim *d = p->sz->dims + 0;
+	  if (!build_vdim(p->ri == p->ro,
+			  d->n, d->is, d->os,
+			  m, ims, oms, 0,
+			  v, ivs, ovs,
+			  vd, ego->cutdim))
+	       return 0;
+     }
 
      pln = MKPLAN_DFT(P, &padt, apply);
 
      pln->radices = *radices;
-     pln->n = d[0].n;
-     pln->is = d[0].is;
-     pln->os = d[0].os;
+     {
+	  iodim *d = p->sz->dims + 0;
+	  pln->n = d[0].n;
+	  pln->is = d[0].is;
+	  pln->os = d[0].os;
+     }
      pln->sign = sign;
      pln->v[0] = vd[0];
      pln->v[1] = vd[1];
-     pln->cutdim = cutdim;
+     pln->cutdim = ego->cutdim;
      pln->W = 0;
 
      pln->rw = 0;
 
-     compute_opcnt(radices, pln->n, 
-		   vd[0].n1 * vd[1].n1, &pln->super.super.ops);
+     cost_model(pln, &pln->super.super.ops);
 
-     /* penalize cuts across short dimensions */
-     if (vd[cutdim].n1 < vd[1-cutdim].n1)
-	  pln->super.super.ops.other += 3.14159;
-
-//     pln->super.super.could_prune_now_p = 1;
      return &(pln->super.super);
 }
 
@@ -481,6 +502,11 @@ typedef struct {
      plan *cld;
 } Pw;
 
+typedef struct {
+     ct_solver super;
+     int cutdim;
+} Sw;
+
 static void destroyw(plan *ego_)
 {
      Pw *ego = (Pw *) ego_;
@@ -509,7 +535,7 @@ static void applyw(const plan *ego_, R *rio, R *iio)
      cldapply(ego->cld, rio, iio, rio, iio);
 }
 
-static plan *mkcldw(const ct_solver *ego, 
+static plan *mkcldw(const ct_solver *ego_, 
 		    INT r, INT irs, INT ors,
 		    INT m, INT ms,
 		    INT v, INT ivs, INT ovs,
@@ -517,12 +543,13 @@ static plan *mkcldw(const ct_solver *ego,
 		    R *rio, R *iio,
 		    planner *plnr)
 {
+     const Sw *ego = (const Sw *)ego_;
      const struct spu_radices *radices;
      int sign;
      Pw *pln;
      P *cld;
-     struct cell_iodim d[2];
-     int cutdim, dm = 0;
+     struct cell_iodim vd[2];
+     int dm = 0;
 
      static const plan_adt padtw = {
 	  0, awakew, printw, destroyw
@@ -532,8 +559,12 @@ static plan *mkcldw(const ct_solver *ego,
      if (NO_SIMDP(plnr) || X(cell_nspe)() <= 0)
 	  return 0;
 
+     /* no way in hell this SPU stuff is going to work with pthreads */
+     if (mstart != 0 || mcount != m)
+	  return 0;
+
      /* don't bother for small N */
-     if (r * m * v <= MAX_N / 8 /* ARBITRARY */)
+     if (r * m * v <= MAX_N / 12 /* ARBITRARY */)
 	  return 0;
 
      /* check whether the R dimension is supported */
@@ -542,12 +573,8 @@ static plan *mkcldw(const ct_solver *ego,
      if (!radices)
 	  return 0;
 
-     /* check the M dimension */
-     if ((m % VL) || (mstart % VL) || (mcount % VL))
-	  return 0;
-
      /* encode decimation in DM */
-     switch (ego->dec) {
+     switch (ego->super.dec) {
 	 case DECDIT: 
 	 case DECDIT+TRANSPOSE: 
 	      dm = 1; 
@@ -558,63 +585,12 @@ static plan *mkcldw(const ct_solver *ego,
 	      break;
      }
 
-     if (ms == 2) {
-	  /* Case 1: contiguous I/O across M.  In SPU, let N=R, V0=M,
-	     V1=V. Cut M */
-
-	  /* other strides must be in-place and aligned */
-	  if (!(1
-		&& irs == ors 
-		&& ivs == ovs 
-		&& SIMD_STRIDE_OKA(ivs) 
-		&& SIMD_STRIDE_OKA(irs)
-		   ))
-	       return 0;
-
-	  d[0].n0 = mstart; d[0].n1 = mstart + mcount;
-	  d[0].is_bytes = d[0].os_bytes = ms * sizeof(R);
-	  d[0].dm = dm;
-
-	  d[1].n0 = 0; d[1].n1 = v; 
-	  d[1].is_bytes = ivs * sizeof(R); d[1].os_bytes = ovs * sizeof(R);
-	  d[1].dm = 0;
-
-	  cutdim = 0;
-     } else if ((irs == 2 || ivs == 2) && (ors == 2 || ovs == 2)) {
-	  /* Case 2: contiguous I/O across either V or R.  In
-	     SPU, let N=R, V0=V, V1=M.  Cut M */
-	  
-	  /* either the strides are in-place or V*R fits into the SPU
-	     local store */
-	  if (!(0
-		|| ((irs == ors) && (ivs == ovs))
-		|| fits_in_local_store(r, v) ))
-	       return 0;
-
-	  /* check alignment */
-	  if (!(1
-		/* M stride must be aligned */
-		&& SIMD_STRIDE_OKA(ms)
-
-		/* other strides are either contiguous or aligned */
-		&& (irs == 2 || SIMD_STRIDE_OKA(irs))
-		&& (ors == 2 || SIMD_STRIDE_OKA(ors))
-		&& (ivs == 2 || SIMD_STRIDE_OKA(ivs))
-		&& (ovs == 2 || SIMD_STRIDE_OKA(ovs))
-		   ))
-	       return 0;
-	  
-	  d[0].n0 = 0; d[0].n1 = v; 
-	  d[0].is_bytes = ivs * sizeof(R); d[0].os_bytes = ovs * sizeof(R);
-	  d[0].dm = 0;
-
-	  d[1].n0 = mstart; d[1].n1 = mstart + mcount;
-	  d[1].is_bytes = d[1].os_bytes = ms * sizeof(R);
-	  d[1].dm = dm;
-
-	  cutdim = 1;
-     } else
-	  return 0; /* can't do it */
+     if (!build_vdim(1,
+		     r, irs, ors,
+		     m, ms, ms, dm,
+		     v, ivs, ovs,
+		     vd, ego->cutdim))
+	  return 0;
 
      cld = MKPLAN_DFT(P, &padt, apply);
 
@@ -627,25 +603,32 @@ static plan *mkcldw(const ct_solver *ego,
 
      cld->rw = r; cld->mw = m; cld->td = 0;
      
-     /* build vdim by hand */
-     cld->v[0] = d[0];
-     cld->v[1] = d[1];
-     cld->cutdim = cutdim;
+     cld->v[0] = vd[0];
+     cld->v[1] = vd[1];
+     cld->cutdim = ego->cutdim;
 
      pln = MKPLAN_DFTW(Pw, &padtw, applyw);
      pln->cld = &cld->super.super;
-     compute_opcnt(radices, cld->n, mcount * v, &pln->super.super.ops);
+
+     cost_model(cld, &pln->super.super.ops);
+
      /* for twiddle factors: one mul and one fma per complex point */
-     pln->super.super.ops.fma += (cld->n * mcount * v) / VL;
-     pln->super.super.ops.mul += (cld->n * mcount * v) / VL;
+     pln->super.super.ops.fma += (r * m * v) / VL;
+     pln->super.super.ops.mul += (r * m * v) / VL;
+
+     /* FIXME: heuristics */
+     /* pay penalty for large radices: */
+     if (r > MAX_N / 12)
+	  pln->super.super.ops.other += ((r - (MAX_N / 12)) * m * v);
 
      return &(pln->super.super);
 }
 
-static void regsolverw(planner *plnr, INT r, int dec)
+static void regsolverw(planner *plnr, INT r, int dec, int cutdim)
 {
-     ct_solver *slv = X(mksolver_ct)(sizeof(ct_solver), r, dec, mkcldw);
-     REGISTER_SOLVER(plnr, &(slv->super));
+     Sw *slv = (Sw *)X(mksolver_ct)(sizeof(Sw), r, dec, mkcldw);
+     slv->cutdim = cutdim;
+     REGISTER_SOLVER(plnr, &(slv->super.super));
 }
 
 void X(ct_cell_direct_register)(planner *p)
@@ -656,8 +639,10 @@ void X(ct_cell_direct_register)(planner *p)
 	  const struct spu_radices *r = 
 	       X(spu_radices) + n / REQUIRE_N_MULTIPLE_OF;
 	  if (r->r[0]) {
-	       regsolverw(p, n, DECDIT);
-	       regsolverw(p, n, DECDIF+TRANSPOSE);
+	       regsolverw(p, n, DECDIT, 0);
+	       regsolverw(p, n, DECDIT, 1);
+	       regsolverw(p, n, DECDIF+TRANSPOSE, 0);
+	       regsolverw(p, n, DECDIF+TRANSPOSE, 1);
 	  }
      }
 }
