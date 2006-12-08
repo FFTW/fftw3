@@ -84,8 +84,7 @@ tensor *X(tensor_compress)(const tensor *sz)
                x->dims[rnk++] = sz->dims[i];
      }
 
-     if (rnk) {
-	  /* God knows how qsort() behaves if n==0 */
+     if (rnk > 1) {
 	  qsort(x->dims, (size_t)x->rnk, sizeof(iodim),
 		(int (*)(const void *, const void *))X(dimcmp));
      }
@@ -181,10 +180,7 @@ int X(tensor_inplace_locations)(const tensor *sz, const tensor *vecsz)
      int retval = X(tensor_equal)(tic, toc);
 
      X(tensor_destroy)(t);
-     X(tensor_destroy)(ti);
-     X(tensor_destroy)(to);
-     X(tensor_destroy)(tic);
-     X(tensor_destroy)(toc);
+     X(tensor_destroy4)(ti, to, tic, toc);
 
      return retval;
 }
