@@ -327,7 +327,7 @@ static void apply_cell(const plan *ego_, R *I, R *O)
 	  X(cell_copy)(I, O, ego->d + 0, ego->d + 1);
      } else {
 	  const iodim vone = {1, 0, 0};
-	  const iodim *v;
+	  const iodim *v = 0;
 	  iodim n;
 	  n.n = ego->vl / 2; n.is = 2; n.os = 2;
 
