@@ -23,11 +23,11 @@
 #include "rdft.h"
 #include <stddef.h>
 
-static void destroy(problem *ego_)
+static void destroy(const problem *ego_)
 {
-     problem_rdft2 *ego = (problem_rdft2 *) ego_;
+     const problem_rdft2 *ego = (const problem_rdft2 *) ego_;
      X(tensor_destroy2)(ego->vecsz, ego->sz);
-     X(ifree)(ego_);
+     X(ifree)((problem *)ego_);
 }
 
 static void hash(const problem *p_, md5 *m)
@@ -45,9 +45,9 @@ static void hash(const problem *p_, md5 *m)
      X(tensor_md5)(m, p->vecsz);
 }
 
-static void print(problem *ego_, printer *p)
+static void print(const problem *ego_, printer *p)
 {
-     problem_rdft2 *ego = (problem_rdft2 *) ego_;
+     const problem_rdft2 *ego = (const problem_rdft2 *) ego_;
      p->print(p, "(rdft2 %d %D %D %d %T %T)", 
 	      X(alignment_of)(ego->r),
 	      (INT)(ego->rio - ego->r), 
@@ -85,8 +85,8 @@ static const problem_adt padt =
      destroy
 };
 
-problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
-			    R *r, R *rio, R *iio, rdft_kind kind)
+const problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
+				  R *r, R *rio, R *iio, rdft_kind kind)
 {
      problem_rdft2 *ego =
           (problem_rdft2 *)X(mkproblem)(sizeof(problem_rdft2), &padt);
@@ -127,10 +127,10 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
 }
 
 /* Same as X(mkproblem_rdft2), but also destroy input tensors. */
-problem *X(mkproblem_rdft2_d)(tensor *sz, tensor *vecsz,
-			      R *r, R *rio, R *iio, rdft_kind kind)
+const problem *X(mkproblem_rdft2_d)(tensor *sz, tensor *vecsz,
+				    R *r, R *rio, R *iio, rdft_kind kind)
 {
-     problem *p;
+     const problem *p;
      p = X(mkproblem_rdft2)(sz, vecsz, r, rio, iio, kind);
      X(tensor_destroy2)(vecsz, sz);
      return p;

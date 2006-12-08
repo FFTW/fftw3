@@ -31,11 +31,11 @@
 
 #include "dft.h"
 
-typedef problem *(*mkcld_t) (const problem_dft *p);
+typedef const problem *(*mkcld_t) (const problem_dft *p);
 
 typedef struct {
      dftapply apply;
-     problem *(*mkcld)(const problem_dft *p);
+     const problem *(*mkcld)(const problem_dft *p);
      const char *nam;
 } ndrct_adt;
 
@@ -66,7 +66,7 @@ static void apply_before(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      }
 }
 
-static problem *mkcld_before(const problem_dft *p)
+static const problem *mkcld_before(const problem_dft *p)
 {
      return X(mkproblem_dft_d)(X(tensor_copy_inplace)(p->sz, INPLACE_OS),
 			       X(tensor_copy_inplace)(p->vecsz, INPLACE_OS),
@@ -95,7 +95,7 @@ static void apply_after(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      }
 }
 
-static problem *mkcld_after(const problem_dft *p)
+static const problem *mkcld_after(const problem_dft *p)
 {
      return X(mkproblem_dft_d)(X(tensor_copy_inplace)(p->sz, INPLACE_IS),
 			       X(tensor_copy_inplace)(p->vecsz, INPLACE_IS),

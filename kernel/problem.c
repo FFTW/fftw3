@@ -31,9 +31,48 @@ problem *X(mkproblem)(size_t sz, const problem_adt *adt)
 }
 
 /* destructor */
-void X(problem_destroy)(problem *ego)
+void X(problem_destroy)(const problem *ego)
 {
      if (ego)
 	  ego->adt->destroy(ego);
 }
 
+/* management of unsolvable problems */
+static void unsolvable_destroy(const problem *ego)
+{
+     UNUSED(ego);
+}
+
+static void unsolvable_hash(const problem *p, md5 *m)
+{
+     UNUSED(p);
+     X(md5puts)(m, "unsolvable");
+}
+
+static void unsolvable_print(const problem *ego, printer *p)
+{
+     UNUSED(ego);
+     p->print(p, "(unsolvable)");
+}
+
+static void unsolvable_zero(const problem *ego)
+{
+     UNUSED(ego);
+}
+
+static const problem_adt padt =
+{
+     PROBLEM_UNSOLVABLE,
+     unsolvable_hash,
+     unsolvable_zero,
+     unsolvable_print,
+     unsolvable_destroy
+};
+
+/* there is no point in malloc'ing this one */
+static const problem the_unsolvable_problem = { &padt };
+
+const problem *X(mkproblem_unsolvable)(void)
+{
+     return &the_unsolvable_problem;
+}

@@ -55,7 +55,7 @@
 /* the API ``plan'' contains both the kernel plan and problem */
 struct X(plan_s) {
      plan *pln;
-     problem *prb;
+     const problem *prb;
      int sign;
 };
 
@@ -93,6 +93,6 @@ void X(configure_planner)(planner *plnr);
 
 void X(mapflags)(planner *, unsigned);
 
-apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb);
+apiplan *X(mkapiplan)(int sign, unsigned flags, const problem *prb);
 
 #endif				/* __API_H__ */

@@ -427,6 +427,9 @@ int X(tensor_inplace_locations)(const tensor *sz, const tensor *vecsz);
 /*-----------------------------------------------------------------------*/
 /* problem.c: */
 enum { 
+     /* a problem that cannot be solved */
+     PROBLEM_UNSOLVABLE,
+
      PROBLEM_DFT, 
      PROBLEM_RDFT,
      PROBLEM_RDFT2,
@@ -444,8 +447,8 @@ typedef struct {
      int problem_kind;
      void (*hash) (const problem *ego, md5 *p);
      void (*zero) (const problem *ego);
-     void (*print) (problem *ego, printer *p);
-     void (*destroy) (problem *ego);
+     void (*print) (const problem *ego, printer *p);
+     void (*destroy) (const problem *ego);
 } problem_adt;
 
 struct problem_s {
@@ -453,7 +456,8 @@ struct problem_s {
 };
 
 problem *X(mkproblem)(size_t sz, const problem_adt *adt);
-void X(problem_destroy)(problem *ego);
+void X(problem_destroy)(const problem *ego);
+const problem *X(mkproblem_unsolvable)(void);
 
 /*-----------------------------------------------------------------------*/
 /* print.c */
@@ -649,7 +653,7 @@ typedef enum {
 
 typedef struct {
      void (*register_solver)(planner *ego, solver *s);
-     plan *(*mkplan)(planner *ego, problem *p);
+     plan *(*mkplan)(planner *ego, const problem *p);
      void (*forget)(planner *ego, amnesia a);
      void (*exprt)(planner *ego, printer *p); /* ``export'' is a reserved
 						 word in C++. */
@@ -738,8 +742,8 @@ void X(planner_destroy)(planner *ego);
 
 
 /* make plan, destroy problem */
-plan *X(mkplan_d)(planner *ego, problem *p);
-plan *X(mkplan_f_d)(planner *ego, problem *p, 
+plan *X(mkplan_d)(planner *ego, const problem *p);
+plan *X(mkplan_f_d)(planner *ego, const problem *p, 
 		    unsigned l_set, unsigned u_set, unsigned u_reset);
 
 /*-----------------------------------------------------------------------*/

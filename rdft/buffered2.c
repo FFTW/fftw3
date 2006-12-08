@@ -248,7 +248,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln;
      plan *cld = (plan *) 0;
      plan *cldrest = (plan *) 0;
-     problem *cldp = 0;
+     const problem *cldp = 0;
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
      R *bufs = (R *) 0;
      INT nbuf = 0, bufdist, n, vl;

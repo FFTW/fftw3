@@ -33,10 +33,10 @@ typedef struct {
 } problem_dft;
 
 void X(dft_zerotens)(tensor *sz, R *ri, R *ii);
-problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
-                          R *ri, R *ii, R *ro, R *io);
-problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
-                            R *ri, R *ii, R *ro, R *io);
+const problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
+				R *ri, R *ii, R *ro, R *io);
+const problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
+				  R *ri, R *ii, R *ro, R *io);
 
 /* solve.c: */
 void X(dft_solve)(const plan *ego_, const problem *p_);

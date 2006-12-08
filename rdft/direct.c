@@ -139,12 +139,11 @@ static int applicable(const solver *ego_, const problem *p_)
 	      /* can operate out-of-place */
 	      || p->I != p->O
 
+	      /* computing one transform */
+	      || vl == 1
+
 	      /* can operate in-place as long as strides are the same */
 	      || X(tensor_inplace_strides2)(p->sz, p->vecsz)
-
-	      /* computing one transform, and the tensors describe
-		 an in-place set of locations */
-	      || (vl == 1 && X(tensor_inplace_locations)(p->sz, p->vecsz))
 	       )
 	  );
 }

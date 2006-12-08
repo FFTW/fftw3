@@ -147,10 +147,7 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 	       ((p->vecsz->rnk == 0)
 		||
 		(compute_nbuf(d[0].n, p->vecsz->dims[0].n, ego)
-		 == p->vecsz->dims[0].n))
-	       &&
-	       /* I/O locations are in place */
-	       X(tensor_inplace_locations)(p->sz, p->vecsz))
+		 == p->vecsz->dims[0].n)))
 	       return 1;
      }
 

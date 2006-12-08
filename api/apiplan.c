@@ -21,7 +21,8 @@
 #include "api.h"
 
 static plan *mkplan0(planner *plnr, unsigned flags, 
-		     problem *prb, int hash_info, wisdom_state_t wisdom_state)
+		     const problem *prb, int hash_info, 
+		     wisdom_state_t wisdom_state)
 WITH_ALIGNED_STACK({
      /* map API flags into FFTW flags */
      X(mapflags)(plnr, flags);
@@ -44,7 +45,8 @@ static unsigned force_estimator(unsigned flags)
      return (flags | FFTW_ESTIMATE);
 }
 
-static plan *mkplan(planner *plnr, unsigned flags, problem *prb, int hash_info)
+static plan *mkplan(planner *plnr, unsigned flags, 
+		    const problem *prb, int hash_info)
 {
      plan *pln;
 
@@ -78,7 +80,7 @@ static plan *mkplan(planner *plnr, unsigned flags, problem *prb, int hash_info)
      return pln;
 }
 
-apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
+apiplan *X(mkapiplan)(int sign, unsigned flags, const problem *prb)
 {
      apiplan *p = 0;
      plan *pln;

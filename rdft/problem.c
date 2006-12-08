@@ -22,14 +22,14 @@
 #include "rdft.h"
 #include <stddef.h>
 
-static void destroy(problem *ego_)
+static void destroy(const problem *ego_)
 {
-     problem_rdft *ego = (problem_rdft *) ego_;
+     const problem_rdft *ego = (const problem_rdft *) ego_;
 #if !defined(STRUCT_HACK_C99) && !defined(STRUCT_HACK_KR)
      X(ifree0)(ego->kind);
 #endif
      X(tensor_destroy2)(ego->vecsz, ego->sz);
-     X(ifree)(ego_);
+     X(ifree)((problem *)ego_);
 }
 
 static void kind_hash(md5 *m, const rdft_kind *kind, int rnk)
@@ -92,7 +92,7 @@ const char *X(rdft_kind_str)(rdft_kind kind)
      return kstr[kind];
 }
 
-static void print(problem *ego_, printer *p)
+static void print(const problem *ego_, printer *p)
 {
      const problem_rdft *ego = (const problem_rdft *) ego_;
      int i;
@@ -133,8 +133,8 @@ static int nontrivial(const iodim *d, rdft_kind kind)
 	     || (REODFT_KINDP(kind) && kind != REDFT01 && kind != RODFT01));
 }
 
-problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
-			   R *I, R *O, const rdft_kind *kind)
+const problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
+				 R *I, R *O, const rdft_kind *kind)
 {
      problem_rdft *ego;
      int rnk = sz->rnk;
@@ -146,6 +146,9 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 
      if (UNTAINT(I) == UNTAINT(O))
 	  I = O = JOIN_TAINT(I, O);
+
+     if (I == O && !X(tensor_inplace_locations)(sz, vecsz))
+	  return X(mkproblem_unsolvable)();
 
      for (i = rnk = 0; i < sz->rnk; ++i) {
           A(sz->dims[i].n > 0);
@@ -205,32 +208,32 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 }
 
 /* Same as X(mkproblem_rdft), but also destroy input tensors. */
-problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
-			     R *I, R *O, const rdft_kind *kind)
+const problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
+				   R *I, R *O, const rdft_kind *kind)
 {
-     problem *p;
+     const problem *p;
      p = X(mkproblem_rdft)(sz, vecsz, I, O, kind);
      X(tensor_destroy2)(vecsz, sz);
      return p;
 }
 
 /* As above, but for rnk <= 1 only and takes a scalar kind parameter */
-problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
-			     R *I, R *O, rdft_kind kind)
+const problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
+				   R *I, R *O, rdft_kind kind)
 {
      A(sz->rnk <= 1);
      return X(mkproblem_rdft)(sz, vecsz, I, O, &kind);
 }
 
-problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
-			       R *I, R *O, rdft_kind kind)
+const problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
+				     R *I, R *O, rdft_kind kind)
 {
      A(sz->rnk <= 1);
      return X(mkproblem_rdft_d)(sz, vecsz, I, O, &kind);
 }
 
 /* create a zero-dimensional problem */
-problem *X(mkproblem_rdft_0_d)(tensor *vecsz, R *I, R *O)
+const problem *X(mkproblem_rdft_0_d)(tensor *vecsz, R *I, R *O)
 {
      return X(mkproblem_rdft_d)(X(mktensor_0d)(), vecsz, I, O, 
 				(const rdft_kind *)0);

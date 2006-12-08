@@ -433,7 +433,7 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 }
 
 /* maintain dynamic scoping of flags, nthr: */
-static plan *invoke_solver(planner *ego, problem *p, solver *s, 
+static plan *invoke_solver(planner *ego, const problem *p, solver *s, 
 			   const flags_t *nflags)
 {
      flags_t flags = ego->flags;
@@ -474,7 +474,7 @@ static int timeout_p(planner *ego)
      return 0;
 }
 
-static plan *search0(planner *ego, problem *p, unsigned *slvndx, 
+static plan *search0(planner *ego, const problem *p, unsigned *slvndx, 
 		     const flags_t *flagsp)
 {
      plan *best = 0;
@@ -528,7 +528,7 @@ static plan *search0(planner *ego, problem *p, unsigned *slvndx,
      return best;
 }
 
-static plan *search(planner *ego, problem *p, unsigned *slvndx, 
+static plan *search(planner *ego, const problem *p, unsigned *slvndx, 
 		    flags_t *flagsp)
 {
      plan *pln = 0;
@@ -577,7 +577,7 @@ static plan *search(planner *ego, problem *p, unsigned *slvndx,
      if (ego->wisdom_state == WISDOM_IS_BOGUS)	\
 	  goto wisdom_is_bogus
 
-static plan *mkplan(planner *ego, problem *p)
+static plan *mkplan(planner *ego, const problem *p)
 {
      plan *pln;
      md5 m;
@@ -893,7 +893,7 @@ void X(planner_destroy)(planner *ego)
      X(ifree)(ego); /* dona eis requiem */
 }
 
-plan *X(mkplan_d)(planner *ego, problem *p)
+plan *X(mkplan_d)(planner *ego, const problem *p)
 {
      plan *pln = ego->adt->mkplan(ego, p);
      X(problem_destroy)(p);
@@ -901,7 +901,7 @@ plan *X(mkplan_d)(planner *ego, problem *p)
 }
 
 /* like X(mkplan_d), but sets/resets flags as well */
-plan *X(mkplan_f_d)(planner *ego, problem *p, 
+plan *X(mkplan_f_d)(planner *ego, const problem *p, 
 		    unsigned l_set, unsigned u_set, unsigned u_reset)
 {
      flags_t oflags = ego->flags;

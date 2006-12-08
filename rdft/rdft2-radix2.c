@@ -37,7 +37,7 @@
 typedef struct {
      int (*applicable) (const problem *p_, const planner *plnr);
      void (*apply) (const plan *ego_, R *r, R *rio, R *iio);
-     problem *(*mkcld) (const problem_rdft2 *p);
+     const problem *(*mkcld) (const problem_rdft2 *p);
      opcnt ops;
      const char *nam;
 } madt;
@@ -165,7 +165,7 @@ static void apply_f_dft(const plan *ego_, R *r, R *rio, R *iio)
      }
 }
 
-static problem *mkcld_f_dft(const problem_rdft2 *p)
+static const problem *mkcld_f_dft(const problem_rdft2 *p)
 {
      const iodim *d = p->sz->dims;
      return X(mkproblem_dft_d) (
@@ -232,7 +232,7 @@ static void apply_f_rdft(const plan *ego_, R *r, R *rio, R *iio)
      }
 }
 
-static problem *mkcld_f_rdft(const problem_rdft2 *p)
+static const problem *mkcld_f_rdft(const problem_rdft2 *p)
 {
      const iodim *d = p->sz->dims;
 
@@ -304,7 +304,7 @@ static void apply_b_dft(const plan *ego_, R *r, R *rio, R *iio)
      }
 }
 
-static problem *mkcld_b_dft(const problem_rdft2 *p)
+static const problem *mkcld_b_dft(const problem_rdft2 *p)
 {
      const iodim *d = p->sz->dims;
 
@@ -370,7 +370,7 @@ static void apply_b_rdft(const plan *ego_, R *r, R *rio, R *iio)
      }
 }
 
-static problem *mkcld_b_rdft(const problem_rdft2 *p)
+static const problem *mkcld_b_rdft(const problem_rdft2 *p)
 {
      const iodim *d = p->sz->dims;
 

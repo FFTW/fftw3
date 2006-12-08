@@ -22,11 +22,11 @@
 #include "dft.h"
 #include <stddef.h>
 
-static void destroy(problem *ego_)
+static void destroy(const problem *ego_)
 {
-     problem_dft *ego = (problem_dft *) ego_;
+     const problem_dft *ego = (const problem_dft *) ego_;
      X(tensor_destroy2)(ego->vecsz, ego->sz);
-     X(ifree)(ego_);
+     X(ifree)((problem *)ego_);
 }
 
 static void hash(const problem *p_, md5 *m)
@@ -44,7 +44,7 @@ static void hash(const problem *p_, md5 *m)
      X(tensor_md5)(m, p->vecsz);
 }
 
-static void print(problem *ego_, printer *p)
+static void print(const problem *ego_, printer *p)
 {
      const problem_dft *ego = (const problem_dft *) ego_;
      p->print(p, "(dft %d %d %d %D %D %T %T)", 
@@ -74,11 +74,15 @@ static const problem_adt padt =
      destroy
 };
 
-problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
-                          R *ri, R *ii, R *ro, R *io)
+const problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
+				R *ri, R *ii, R *ro, R *io)
 {
-     problem_dft *ego =
-          (problem_dft *)X(mkproblem)(sizeof(problem_dft), &padt);
+     problem_dft *ego;
+
+     if (ri == ro && !X(tensor_inplace_locations)(sz, vecsz))
+	  return X(mkproblem_unsolvable)();
+
+     ego = (problem_dft *)X(mkproblem)(sizeof(problem_dft), &padt);
 
      A((ri == ro) == (ii == io)); /* both in place or both out of place */
      A(X(tensor_kosherp)(sz));
@@ -106,10 +110,10 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
 }
 
 /* Same as X(mkproblem_dft), but also destroy input tensors. */
-problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
-                            R *ri, R *ii, R *ro, R *io)
+const problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
+				  R *ri, R *ii, R *ro, R *io)
 {
-     problem *p;
+     const problem *p;
      p = X(mkproblem_dft)(sz, vecsz, ri, ii, ro, io);
      X(tensor_destroy2)(vecsz, sz);
      return p;
