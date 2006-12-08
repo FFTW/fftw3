@@ -343,8 +343,6 @@ static void apply_cell(const plan *ego_, R *I, R *O)
 
 static int applicable_cell(const P *pln, const problem_rdft *p)
 {
-     iodim *d = pln->d;
-
      if (pln->vl == 2) {
 	  return (1
 		  && pln->rnk == 2
