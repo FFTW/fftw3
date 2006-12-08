@@ -79,15 +79,6 @@ const problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
 {
      problem_dft *ego;
 
-     if (ri == ro && !X(tensor_inplace_locations)(sz, vecsz))
-	  return X(mkproblem_unsolvable)();
-
-     ego = (problem_dft *)X(mkproblem)(sizeof(problem_dft), &padt);
-
-     A((ri == ro) == (ii == io)); /* both in place or both out of place */
-     A(X(tensor_kosherp)(sz));
-     A(X(tensor_kosherp)(vecsz));
-
      /* enforce pointer equality if untainted pointers are equal */
      if (UNTAINT(ri) == UNTAINT(ro))
 	  ri = ro = JOIN_TAINT(ri, ro);
@@ -97,6 +88,15 @@ const problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
      /* more correctness conditions: */
      A(TAINTOF(ri) == TAINTOF(ii));
      A(TAINTOF(ro) == TAINTOF(io));
+
+     A((ri == ro) == (ii == io)); /* both in place or both out of place */
+     A(X(tensor_kosherp)(sz));
+     A(X(tensor_kosherp)(vecsz));
+
+     if (ri == ro && !X(tensor_inplace_locations)(sz, vecsz))
+	  return X(mkproblem_unsolvable)();
+
+     ego = (problem_dft *)X(mkproblem)(sizeof(problem_dft), &padt);
 
      ego->sz = X(tensor_compress)(sz);
      ego->vecsz = X(tensor_compress_contiguous)(vecsz);
