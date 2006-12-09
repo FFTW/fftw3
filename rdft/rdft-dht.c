@@ -165,7 +165,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      P *pln;
      const problem_rdft *p;
-     const problem *cldp;
+     problem *cldp;
      plan *cld;
 
      static const plan_adt padt = {

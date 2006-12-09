@@ -31,14 +31,14 @@ problem *X(mkproblem)(size_t sz, const problem_adt *adt)
 }
 
 /* destructor */
-void X(problem_destroy)(const problem *ego)
+void X(problem_destroy)(problem *ego)
 {
      if (ego)
 	  ego->adt->destroy(ego);
 }
 
 /* management of unsolvable problems */
-static void unsolvable_destroy(const problem *ego)
+static void unsolvable_destroy(problem *ego)
 {
      UNUSED(ego);
 }
@@ -70,9 +70,9 @@ static const problem_adt padt =
 };
 
 /* there is no point in malloc'ing this one */
-static const problem the_unsolvable_problem = { &padt };
+static problem the_unsolvable_problem = { &padt };
 
-const problem *X(mkproblem_unsolvable)(void)
+problem *X(mkproblem_unsolvable)(void)
 {
      return &the_unsolvable_problem;
 }

@@ -80,7 +80,7 @@ static plan *mkplan(planner *plnr, unsigned flags,
      return pln;
 }
 
-apiplan *X(mkapiplan)(int sign, unsigned flags, const problem *prb)
+apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 {
      apiplan *p = 0;
      plan *pln;

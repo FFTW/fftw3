@@ -157,7 +157,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      tensor *sz1, *sz2, *vecszi, *sz2i;
      int spltrnk;
      inplace_kind k;
-     const problem *cldp;
+     problem *cldp;
 
      static const plan_adt padt = {
 	  X(rdft2_solve), awake, print, destroy

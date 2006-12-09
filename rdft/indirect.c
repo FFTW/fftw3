@@ -31,11 +31,11 @@
 
 #include "rdft.h"
 
-typedef const problem *(*mkcld_t) (const problem_rdft *p);
+typedef problem *(*mkcld_t) (const problem_rdft *p);
 
 typedef struct {
      rdftapply apply;
-     const problem *(*mkcld)(const problem_rdft *p);
+     problem *(*mkcld)(const problem_rdft *p);
      const char *nam;
 } ndrct_adt;
 
@@ -66,7 +66,7 @@ static void apply_before(const plan *ego_, R *I, R *O)
      }
 }
 
-static const problem *mkcld_before(const problem_rdft *p)
+static problem *mkcld_before(const problem_rdft *p)
 {
      return X(mkproblem_rdft_d)(X(tensor_copy_inplace)(p->sz, INPLACE_OS),
 				X(tensor_copy_inplace)(p->vecsz, INPLACE_OS),
@@ -95,7 +95,7 @@ static void apply_after(const plan *ego_, R *I, R *O)
      }
 }
 
-static const problem *mkcld_after(const problem_rdft *p)
+static problem *mkcld_after(const problem_rdft *p)
 {
      return X(mkproblem_rdft_d)(X(tensor_copy_inplace)(p->sz, INPLACE_IS),
 				X(tensor_copy_inplace)(p->vecsz, INPLACE_IS),

@@ -22,11 +22,11 @@
 #include "dft.h"
 #include <stddef.h>
 
-static void destroy(const problem *ego_)
+static void destroy(problem *ego_)
 {
-     const problem_dft *ego = (const problem_dft *) ego_;
+     problem_dft *ego = (problem_dft *) ego_;
      X(tensor_destroy2)(ego->vecsz, ego->sz);
-     X(ifree)((problem *)ego_);
+     X(ifree)(ego_);
 }
 
 static void hash(const problem *p_, md5 *m)
@@ -74,8 +74,8 @@ static const problem_adt padt =
      destroy
 };
 
-const problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
-				R *ri, R *ii, R *ro, R *io)
+problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
+			  R *ri, R *ii, R *ro, R *io)
 {
      problem_dft *ego;
 
@@ -110,11 +110,10 @@ const problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
 }
 
 /* Same as X(mkproblem_dft), but also destroy input tensors. */
-const problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
-				  R *ri, R *ii, R *ro, R *io)
+problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
+			    R *ri, R *ii, R *ro, R *io)
 {
-     const problem *p;
-     p = X(mkproblem_dft)(sz, vecsz, ri, ii, ro, io);
+     problem *p = X(mkproblem_dft)(sz, vecsz, ri, ii, ro, io);
      X(tensor_destroy2)(vecsz, sz);
      return p;
 }

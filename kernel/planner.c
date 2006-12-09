@@ -893,7 +893,7 @@ void X(planner_destroy)(planner *ego)
      X(ifree)(ego); /* dona eis requiem */
 }
 
-plan *X(mkplan_d)(planner *ego, const problem *p)
+plan *X(mkplan_d)(planner *ego, problem *p)
 {
      plan *pln = ego->adt->mkplan(ego, p);
      X(problem_destroy)(p);
@@ -901,7 +901,7 @@ plan *X(mkplan_d)(planner *ego, const problem *p)
 }
 
 /* like X(mkplan_d), but sets/resets flags as well */
-plan *X(mkplan_f_d)(planner *ego, const problem *p, 
+plan *X(mkplan_f_d)(planner *ego, problem *p, 
 		    unsigned l_set, unsigned u_set, unsigned u_reset)
 {
      flags_t oflags = ego->flags;

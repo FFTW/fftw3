@@ -39,15 +39,15 @@ typedef struct {
 } problem_rdft;
 
 void X(rdft_zerotens)(tensor *sz, R *I);
-const problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
-				 R *I, R *O, const rdft_kind *kind);
-const problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
-				   R *I, R *O, const rdft_kind *kind);
-const problem *X(mkproblem_rdft_0_d)(tensor *vecsz, R *I, R *O);
-const problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
-				   R *I, R *O, rdft_kind kind);
-const problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
-				     R *I, R *O, rdft_kind kind);
+problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
+			   R *I, R *O, const rdft_kind *kind);
+problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
+			     R *I, R *O, const rdft_kind *kind);
+problem *X(mkproblem_rdft_0_d)(tensor *vecsz, R *I, R *O);
+problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
+			     R *I, R *O, rdft_kind kind);
+problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
+			       R *I, R *O, rdft_kind kind);
 
 const char *X(rdft_kind_str)(rdft_kind kind);
 
@@ -102,10 +102,10 @@ typedef struct {
      rdft_kind kind; /* R2HC or HC2R */
 } problem_rdft2;
 
-const problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
-				  R *r, R *rio, R *iio, rdft_kind kind);
-const problem *X(mkproblem_rdft2_d)(tensor *sz, tensor *vecsz,
-				    R *r, R *rio, R *iio, rdft_kind kind);
+problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
+			    R *r, R *rio, R *iio, rdft_kind kind);
+problem *X(mkproblem_rdft2_d)(tensor *sz, tensor *vecsz,
+			      R *r, R *rio, R *iio, rdft_kind kind);
 int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim);
 INT X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k);
 void X(rdft2_strides)(rdft_kind kind, const iodim *d, INT *is, INT *os);

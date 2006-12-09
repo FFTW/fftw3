@@ -279,7 +279,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld2 = (plan *) 0;
      plan *cld_omega = (plan *) 0;
      R *buf = (R *) 0;
-     const problem *cldp;
+     problem *cldp;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy

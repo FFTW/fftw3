@@ -448,7 +448,7 @@ typedef struct {
      void (*hash) (const problem *ego, md5 *p);
      void (*zero) (const problem *ego);
      void (*print) (const problem *ego, printer *p);
-     void (*destroy) (const problem *ego);
+     void (*destroy) (problem *ego);
 } problem_adt;
 
 struct problem_s {
@@ -456,8 +456,8 @@ struct problem_s {
 };
 
 problem *X(mkproblem)(size_t sz, const problem_adt *adt);
-void X(problem_destroy)(const problem *ego);
-const problem *X(mkproblem_unsolvable)(void);
+void X(problem_destroy)(problem *ego);
+problem *X(mkproblem_unsolvable)(void);
 
 /*-----------------------------------------------------------------------*/
 /* print.c */
@@ -742,8 +742,8 @@ void X(planner_destroy)(planner *ego);
 
 
 /* make plan, destroy problem */
-plan *X(mkplan_d)(planner *ego, const problem *p);
-plan *X(mkplan_f_d)(planner *ego, const problem *p, 
+plan *X(mkplan_d)(planner *ego, problem *p);
+plan *X(mkplan_f_d)(planner *ego, problem *p, 
 		    unsigned l_set, unsigned u_set, unsigned u_reset);
 
 /*-----------------------------------------------------------------------*/
