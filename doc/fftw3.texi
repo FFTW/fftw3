@@ -2997,7 +2997,8 @@ and c2r transforms, respectively.  For split arrays, @code{ri} and
 transform, and @code{ro} and @code{io} point to the real and imaginary
 output arrays for an r2c transform.  @code{in} and @code{ro} or
 @code{ri} and @code{out} may be the same, indicating an in-place
-transform.  
+transform.   (In-place transforms where @code{in} and @code{io} or
+@code{ii} and @code{out} are the same are not currently supported.)
 
 @cindex flags
 @code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,

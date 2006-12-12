@@ -104,36 +104,8 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
      /* correctness condition: */
      A(TAINTOF(rio) == TAINTOF(iio));
 
-     if (r == rio || r == iio) {
-	  /* require even/odd real data, including "padding" at the end
-	     of each row, to coincide with complex data */
-	  if (sz->rnk == 0) {
-	       if (r != rio || !X(tensor_inplace_locations)(sz, vecsz))
-		    return X(mkproblem_unsolvable)();
-	  }
-	  else {
-	       int inplace;
-	       INT ridiff = X(iabs)(iio - rio);
-	       tensor *sz2;
-	       iodim lastdim = sz->dims[sz->rnk - 1];
-
-	       lastdim.n = lastdim.n/2 + 1;
-	       if (kind == R2HC) {
-		    if (ridiff == lastdim.is)
-			 lastdim.is *= 2; /* interleaved */
-	       }
-	       else { /* kind == HC2R */
-		    if (ridiff == lastdim.os)
-			 lastdim.os *= 2; /* interleaved */
-	       }
-	       sz2 = X(tensor_copy)(sz);
-	       sz2->dims[sz->rnk - 1] = lastdim;
-	       inplace = X(tensor_inplace_locations)(sz2, vecsz);
-	       X(tensor_destroy)(sz2);
-	       if (!inplace)
-		    return X(mkproblem_unsolvable)();
-	  }
-     }
+     if (r == iio) /* require in-place problems to use r == rio */
+	  return X(mkproblem_unsolvable)();
 
      if (sz->rnk > 1) { /* have to compress rnk-1 dims separately, ugh */
 	  tensor *szc = X(tensor_copy_except)(sz, sz->rnk - 1);
