@@ -260,9 +260,9 @@ static void kill_workforce(void)
 int X(ithreads_init)(void)
 {
      fftw_sem_init(&queue_lock);
-     up(&queue_lock);
-
      worker_queue = 0;
+
+     up(&queue_lock);
 
      return 0; /* no error */
 }
