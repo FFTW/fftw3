@@ -42,9 +42,8 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "wisdom")) usewisdom = 1;
      else if (!strcmp(arg, "amnesia")) amnesia = 1;
      else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
-#ifdef HAVE_THREADS
-     else if (!strcmp(arg, "spinlocks")) 
-	  FFTW(spinlock_mode_i_know_what_i_am_doing) = 1;
+#if HAVE_CELL
+     else if (sscanf(arg, "nspe=%d", &x) == 1) FFTW(cell_set_nspe)(x);
 #endif
      else if (sscanf(arg, "timelimit=%lg", &y) == 1) {
 	  FFTW(set_timelimit)(y);
