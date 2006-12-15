@@ -29,41 +29,71 @@
 
 #include <pthread.h>
 
-typedef struct {
-     pthread_mutex_t m;
-     pthread_cond_t c;
-     int x;
-} os_sem_t; 
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
-static void os_sem_init(os_sem_t *s)
-{
-     pthread_mutex_init(&s->m, (pthread_mutexattr_t *)0);
-     pthread_cond_init(&s->c, (pthread_condattr_t *)0);
-     s->x = 0;
-}
+#if (defined(_POSIX_SEMAPHORES) && (_POSIX_SEMAPHORES >= 200112L))
+   /* 
+      use POSIX semaphores 
+   */
 
-static void os_sem_destroy(os_sem_t *s)
-{
-     pthread_mutex_destroy(&s->m);
-     pthread_cond_destroy(&s->c);
-}
+#  include <semaphore.h>
 
-static void os_sem_down(os_sem_t *s)
-{
-     pthread_mutex_lock(&s->m);
-     while (s->x <= 0) 
-	  pthread_cond_wait(&s->c, &s->m);
-     --s->x;
-     pthread_mutex_unlock(&s->m);
-}
+   typedef sem_t os_sem_t;
 
-static void os_sem_up(os_sem_t *s)
-{
-     pthread_mutex_lock(&s->m);
-     ++s->x;
-     pthread_cond_signal(&s->c);
-     pthread_mutex_unlock(&s->m);
-}
+   static void os_sem_init(os_sem_t *s) { sem_init(s, 0, 0); }
+   static void os_sem_destroy(os_sem_t *s) { sem_destroy(s); }
+   static void os_sem_down(os_sem_t *s) { sem_wait(s); }
+   static void os_sem_up(os_sem_t *s) { sem_post(s); }
+
+#else
+   /* 
+      simulate semaphores with condition variables
+   */
+
+   typedef struct {
+	pthread_mutex_t m;
+	pthread_cond_t c;
+	volatile int x;
+   } os_sem_t; 
+
+   static void os_sem_init(os_sem_t *s)
+   {
+	pthread_mutex_init(&s->m, (pthread_mutexattr_t *)0);
+	pthread_cond_init(&s->c, (pthread_condattr_t *)0);
+
+	/* wrap initialization in lock to exploit the release
+	   semantics of pthread_mutex_unlock() */
+	pthread_mutex_lock(&s->m);
+	s->x = 0;
+	pthread_mutex_unlock(&s->m);
+   }
+
+   static void os_sem_destroy(os_sem_t *s)
+   {
+	pthread_mutex_destroy(&s->m);
+	pthread_cond_destroy(&s->c);
+   }
+
+   static void os_sem_down(os_sem_t *s)
+   {
+	pthread_mutex_lock(&s->m);
+	while (s->x <= 0) 
+	     pthread_cond_wait(&s->c, &s->m);
+	--s->x;
+	pthread_mutex_unlock(&s->m);
+   }
+
+   static void os_sem_up(os_sem_t *s)
+   {
+	pthread_mutex_lock(&s->m);
+	++s->x;
+	pthread_cond_signal(&s->c);
+	pthread_mutex_unlock(&s->m);
+   }
+
+#endif
 
 static void os_create_worker(void *(*worker)(void *arg), 
 			     void *arg)
@@ -169,8 +199,8 @@ static void up(fftw_sem_t *s)
 /* Main code: */
 struct worker {
      fftw_sem_t ready;
-     struct work *w;
-     struct worker *cdr;
+     struct work *volatile w;
+     struct worker *volatile cdr;
 };
 
 struct work {
@@ -180,7 +210,7 @@ struct work {
 };
 
 static fftw_sem_t queue_lock;
-static struct worker *worker_queue;
+static struct worker *volatile worker_queue;
 #define WITH_QUEUE_LOCK(what)			\
 {						\
      down(&queue_lock);				\
@@ -260,9 +290,11 @@ static void kill_workforce(void)
 int X(ithreads_init)(void)
 {
      fftw_sem_init(&queue_lock);
-     worker_queue = 0;
-
      up(&queue_lock);
+
+     WITH_QUEUE_LOCK({
+	  worker_queue = 0;
+     })
 
      return 0; /* no error */
 }
