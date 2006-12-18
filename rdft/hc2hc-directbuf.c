@@ -33,7 +33,7 @@ typedef struct {
      plan *cld0, *cldm; /* children for 0th and middle butterflies */
      INT twlen;
      INT r, m, vl, mstart1, mcount2;
-     INT s, vs, ios;
+     INT s, vs, rs;
      stride bufstride;
      const R *tdW;
      twid *td;
@@ -69,12 +69,12 @@ static void cpy(INT n0, INT n1,
      }
 }
 
-static const R *doit(khc2hc k, R *rA, R *iA, const R *W, INT ios, INT dist,
+static const R *doit(khc2hc k, R *rA, R *iA, const R *W, INT rs, INT dist,
                      INT r, INT batchsz, R *buf, stride bufstride)
 {
-     cpy(r, batchsz, rA, iA, ios, dist, buf, buf + 2*batchsz*r-1, 1, r);
+     cpy(r, batchsz, rA, iA, rs, dist, buf, buf + 2*batchsz*r-1, 1, r);
      W = k(buf, buf + 2*batchsz*r-1, W, bufstride, 2*batchsz + 1, r);
-     cpy(r, batchsz, buf, buf + 2*batchsz*r-1, 1, r, rA, iA, ios, dist);
+     cpy(r, batchsz, buf, buf + 2*batchsz*r-1, 1, r, rA, iA, rs, dist);
      return W;
 }
 
@@ -87,7 +87,7 @@ static void apply(const plan *ego_, R *IO)
      plan_rdft *cldm = (plan_rdft *) ego->cldm;
      INT i, j, m = ego->m, vl = ego->vl, r = ego->r;
      INT mstart1 = ego->mstart1, mcount2 = ego->mcount2;
-     INT s = ego->s, vs = ego->vs, ios = ego->ios;
+     INT s = ego->s, vs = ego->vs, rs = ego->rs;
      INT batchsz = BATCHSZ(r);
      R *buf;
 
@@ -102,14 +102,14 @@ static void apply(const plan *ego_, R *IO)
 	  rA = IO + s*mstart1; iA = IO + (r * m - mstart1) * s;
 	  W = ego->tdW;
 	  for (j = (mcount2-1)/2; j >= batchsz; j -= batchsz) {
-	       W = doit(ego->k, rA, iA, W, ios, s, r, batchsz,
+	       W = doit(ego->k, rA, iA, W, rs, s, r, batchsz,
 			buf, ego->bufstride);
 	       rA += s * batchsz;
 	       iA -= s * batchsz;
 	  }
 	  /* do remaining j calls, if any */
 	  if (j > 0)
-	       doit(ego->k, rA, iA, W, ios, s, r, j, buf, ego->bufstride);
+	       doit(ego->k, rA, iA, W, rs, s, r, j, buf, ego->bufstride);
 
 	  cldm->apply((plan *) cldm, IO + s*(m/2), IO + s*(m/2));
      }
@@ -219,7 +219,7 @@ static plan *mkcldw(const hc2hc_solver *ego_,
      pln = MKPLAN_HC2HC(P, &padt, apply);
 
      pln->k = ego->k;
-     pln->ios = m * s;
+     pln->rs = m * s;
      pln->td = 0;
      pln->tdW = 0;
      pln->r = r;

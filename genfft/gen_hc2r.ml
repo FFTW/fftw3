@@ -73,9 +73,10 @@ let hcdftIII sign n input =
   in Fft.dft sign (2 * n) input'
 
 let generate n =
-  let riarray = "ri"
-  and iiarray = "ii"
-  and oarray = "O"
+  let riarray = "Ir"
+  and iiarray = "Ii"
+  and oarraye = "O0"
+  and oarrayo = "O1"
   and ristride = "ris"
   and iistride = "iis"
   and ostride = "os" 
@@ -103,11 +104,17 @@ let generate n =
       (C.array_subscript iiarray viistride)
       locations in
   let output = transform sign n (load_array_hc n input) in
-  let oloc = 
+  let oloce = 
     locative_array_c n 
-      (C.array_subscript oarray vostride)
+      (C.array_subscript oarraye vostride)
+      (C.array_subscript "BUG" vostride)
+      locations 
+  and oloco = 
+    locative_array_c n 
+      (C.array_subscript oarrayo vostride)
       (C.array_subscript "BUG" vostride)
       locations in
+  let oloc i = if i mod 2 == 0 then oloce (i/2) else oloco ((i-1)/2) in
   let odag = store_array_r n oloc output in
   let annot = standard_optimizer odag in
 
@@ -119,7 +126,8 @@ let generate n =
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
 	     Expr_assign (CVar riarray, CPlus [CVar riarray; CVar !Simd.ivs]);
 	     Expr_assign (CVar iiarray, CPlus [CVar iiarray; CVar !Simd.ivs]);
-	     Expr_assign (CVar oarray, CPlus [CVar oarray; CVar !Simd.ovs]);
+	     Expr_assign (CVar oarraye, CPlus [CVar oarraye; CVar !Simd.ovs]);
+	     Expr_assign (CVar oarrayo, CPlus [CVar oarrayo; CVar !Simd.ovs]);
 	     make_volatile_stride (CVar ristride);
 	     make_volatile_stride (CVar iistride);
 	     make_volatile_stride (CVar ostride)
@@ -132,7 +140,8 @@ let generate n =
     Fcn ((if !Magic.standalone then "void" else "static void"), name,
 	 ([Decl (C.constrealtypep, riarray);
 	   Decl (C.constrealtypep, iiarray);
-	   Decl (C.realtypep, oarray);
+	   Decl (C.realtypep, oarraye);
+	   Decl (C.realtypep, oarrayo);
 	   Decl (C.stridetype, ristride);
 	   Decl (C.stridetype, iistride);
 	   Decl (C.stridetype, ostride);

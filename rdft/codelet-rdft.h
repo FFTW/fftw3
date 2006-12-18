@@ -69,7 +69,7 @@ typedef struct kr2hc_desc_s kr2hc_desc;
 typedef struct {
      int (*okp)(
 	  const kr2hc_desc *desc,
-	  const R *I, const R *ro, const R *io,
+	  const R *I0, const R *I1, const R *Or, const R *Oi,
 	  INT is, INT ios, INT ros, INT vl, INT ivs, INT ovs);
      rdft_kind kind;
      INT vl;
@@ -86,8 +86,9 @@ struct kr2hc_desc_s {
      INT ovs;
 };
 
-typedef void (*kr2hc) (const R *I, R *ro, R *io, stride is,
-		       stride ros, stride ios, INT vl, INT ivs, INT ovs);
+typedef void (*kr2hc) (const R *I0, const R *I1, R *Or, R *Oi,
+		       stride is, stride ros, stride ios,
+		       INT vl, INT ivs, INT ovs);
 void X(kr2hc_register)(planner *p, kr2hc codelet, const kr2hc_desc *desc);
 
 /* real-input DFT codelets, type II (middle case of hc2hc DIT) */
@@ -102,7 +103,7 @@ typedef struct hc2hc_desc_s hc2hc_desc;
 typedef struct {
      int (*okp)(
 	  const struct hc2hc_desc_s *desc,
-	  const R *rio, const R *iio, INT ios, INT vs, INT m, INT dist);
+	  const R *rio, const R *iio, INT rs, INT vs, INT m, INT ms);
      rdft_kind kind;
      int vl;
 } hc2hc_genus;
@@ -113,14 +114,42 @@ struct hc2hc_desc_s {
      const tw_instr *tw;
      const hc2hc_genus *genus;
      opcnt ops;
-     INT s1;
-     INT s2;
-     INT dist;
+     INT rs;
+     INT vs;
+     INT ms;
 };
 
 typedef const R *(*khc2hc) (R *rioarray, R *iioarray, const R *W,
-			    stride ios, INT m, INT dist);
+			    stride rs, INT m, INT ms);
 void X(khc2hc_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc);
+
+/* half-complex to rdft2-complex DIT/DIF codelets: */
+typedef struct hc2c_desc_s hc2c_desc;
+
+typedef struct {
+     int (*okp)(
+	  const struct hc2c_desc_s *desc,
+	  const R *Rp, const R *Ip, const R *Rm, const R *Im, 
+	  INT rs, INT vs, INT m, INT ms);
+     rdft_kind kind;
+     int vl;
+} hc2c_genus;
+
+struct hc2c_desc_s {
+     INT radix;
+     const char *nam;
+     const tw_instr *tw;
+     const hc2c_genus *genus;
+     opcnt ops;
+     INT rs;
+     INT vs;
+     INT ms;
+};
+
+typedef const R *(*khc2c) (R *Rp, R *Ip, R *Rm, R *Im, const R *W,
+			   stride rs, INT m, INT ms);
+void X(khc2c_register)(planner *p, khc2c codelet, const hc2c_desc *desc);
+
 
 extern const solvtab X(solvtab_rdft_r2hc);
 
@@ -130,7 +159,7 @@ typedef struct khc2r_desc_s khc2r_desc;
 typedef struct {
      int (*okp)(
 	  const khc2r_desc *desc,
-	  const R *ri, const R *ii, const R *O,
+	  const R *Ir, const R *Ii, const R *O0, const R *O1,
 	  INT ris, INT iis, INT os, INT vl, INT ivs, INT ovs);
      rdft_kind kind;
      INT vl;
@@ -147,8 +176,9 @@ struct khc2r_desc_s {
      INT ovs;
 };
 
-typedef void (*khc2r) (const R *ri, const R *ii, R *O, stride ris,
-		       stride iis, stride os, INT vl, INT ivs, INT ovs);
+typedef void (*khc2r) (const R *Ir, const R *Ii, R *O0, R *O1,
+		       stride ris, stride iis, stride os,
+		       INT vl, INT ivs, INT ovs);
 void X(khc2r_register)(planner *p, khc2r codelet, const khc2r_desc *desc);
 
 /* real-output DFT codelets, type III (middle case of hc2hc DIF) */

@@ -25,12 +25,13 @@
 
 #include "rdft.h"
 
-static void apply(const plan *ego_, R *r, R *rio, R *iio)
+static void apply(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {
      UNUSED(ego_);
-     UNUSED(r);
-     UNUSED(rio);
-     UNUSED(iio);
+     UNUSED(r0);
+     UNUSED(r1);
+     UNUSED(cr);
+     UNUSED(ci);
 }
 
 static int applicable(const solver *ego_, const problem *p_)
@@ -42,12 +43,14 @@ static int applicable(const solver *ego_, const problem *p_)
 	    /* case 1 : -infty vector rank */
 	    || (p->vecsz->rnk == RNK_MINFTY)
 		 
-	    /* case 2 : rank-0 in-place HC2R rdft */
+	    /* case 2 : rank-0 in-place rdft, except that
+	       R2HC is not a no-op because it sets the imaginary
+	       part to 0 */
 	    || (1
-		&& p->kind == HC2R
+		&& p->kind != R2HC
 		&& p->sz->rnk == 0
 		&& FINITE_RNK(p->vecsz->rnk)
-		&& (p->r == p->rio || p->r == p->iio)
+		&& (p->r0 == p->cr)
 		&& X(rdft2_inplace_strides)(p, RNK_MINFTY)
 		 ));
 }

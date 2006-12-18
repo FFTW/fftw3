@@ -25,5 +25,6 @@
 void X(execute_split_dft_c2r)(const X(plan) p, R *ri, R *ii, R *out)
 WITH_ALIGNED_STACK({
      plan_rdft2 *pln = (plan_rdft2 *) p->pln;
-     pln->apply((plan *) pln, out, ri, ii);
+     problem_rdft2 *prb = (problem_rdft2 *) p->prb;
+     pln->apply((plan *) pln, out, out + (prb->r1 - prb->r0), ri, ii);
 })

@@ -45,10 +45,10 @@ typedef struct {
 typedef struct {
      plan_rdft super;
 
-     stride is, ros, ios;
      INT ioffset;
      INT vl;
-     INT ivs, ovs;
+     INT is, ivs, ovs;
+     stride isx, ros, ios;
      kodelet k;
      const S *slv;
 } P;
@@ -57,7 +57,8 @@ static void apply_r2hc(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      ASSERT_ALIGNED_DOUBLE;
-     ego->k.r2hc(I, O, O + ego->ioffset, ego->is, ego->ros, ego->ios,
+     ego->k.r2hc(I, I + ego->is, O, O + ego->ioffset, 
+		 ego->isx, ego->ros, ego->ios,
 		 ego->vl, ego->ivs, ego->ovs);
 }
 
@@ -65,7 +66,8 @@ static void apply_hc2r(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      ASSERT_ALIGNED_DOUBLE;
-     ego->k.hc2r(I, I + ego->ioffset, O, ego->ros, ego->ios, ego->is,
+     ego->k.hc2r(I, I + ego->ioffset, O, O + ego->is,
+		 ego->ros, ego->ios, ego->isx,
 		 ego->vl, ego->ivs, ego->ovs);
 }
 
@@ -73,13 +75,13 @@ static void apply_r2r(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      ASSERT_ALIGNED_DOUBLE;
-     ego->k.r2r(I, O, ego->is, ego->ros, ego->vl, ego->ivs, ego->ovs);
+     ego->k.r2r(I, O, ego->isx, ego->ros, ego->vl, ego->ivs, ego->ovs);
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(stride_destroy)(ego->is);
+     X(stride_destroy)(ego->isx);
      X(stride_destroy)(ego->ros);
      if (!R2R_KINDP(ego->slv->kind))
 	  X(stride_destroy)(ego->ios);
@@ -117,14 +119,18 @@ static int applicable(const solver *ego_, const problem *p_)
 	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
 	  && (!R2HC_KINDP(ego->kind) ||
-	      ego->desc.r2hc->genus->okp(ego->desc.r2hc, p->I, p->O, p->O
-					 + ioffset(ego->kind, ego->sz, p->sz->dims[0].os),
+	      ego->desc.r2hc->genus->okp(ego->desc.r2hc, 
+					 p->I,  p->I + p->sz->dims[0].is,
+					 p->O, 
+					 p->O + ioffset(ego->kind, ego->sz, p->sz->dims[0].os),
 					 p->sz->dims[0].is,
 					 p->sz->dims[0].os, 0-p->sz->dims[0].os,
 					 vl, ivs, ovs))
 	  && (!HC2R_KINDP(ego->kind) ||
-	      ego->desc.hc2r->genus->okp(ego->desc.hc2r, p->I, p->I
-					 + ioffset(ego->kind, ego->sz, p->sz->dims[0].is), p->O,
+	      ego->desc.hc2r->genus->okp(ego->desc.hc2r, 
+					 p->I, 
+					 p->I + ioffset(ego->kind, ego->sz, p->sz->dims[0].is), 
+					 p->O, p->O + p->sz->dims[0].os, 
 					 p->sz->dims[0].is, 0-p->sz->dims[0].is,
 					 p->sz->dims[0].os, 
 					 vl, ivs, ovs))
@@ -179,17 +185,16 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->k = ego->k;
      pln->ioffset = ioffset(ego->kind, d[0].n, hc2r_kindp ? d[0].is : d[0].os);
 
-     pln->is = X(mkstride)(ego->sz, hc2r_kindp ? d[0].os : d[0].is);
+     pln->is = hc2r_kindp ? d[0].os : d[0].is;
      if (r2r_kindp) {
+	  pln->isx = X(mkstride)(ego->sz, pln->is);
 	  pln->ros = X(mkstride)(ego->sz, d[0].os);
 	  pln->ios = 0;
      }
      else {  
-	  INT nr = (ego->kind == R2HC || ego->kind == HC2R) 
-	       ?(d[0].n + 2) / 2 : /* R2HCII */ (d[0].n + 1) / 2;
-	  pln->ros = X(mkstride)(nr, hc2r_kindp ? d[0].is : d[0].os);
-	  pln->ios = X(mkstride)(ego->sz - nr + 1, 
-				 hc2r_kindp ? -d[0].is : -d[0].os);
+	  pln->isx = X(mkstride)(ego->sz, 2 * pln->is);
+	  pln->ros = X(mkstride)(ego->sz, hc2r_kindp ? d[0].is : d[0].os);
+	  pln->ios = X(mkstride)(ego->sz, hc2r_kindp ? -d[0].is : -d[0].os);
      }
 
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);

@@ -59,7 +59,7 @@ int X(hc2hc_mkcldrn)(rdft_kind kind, INT r, INT m, INT s,
      INT imid = s * (m/2);
      plan *cld0 = 0, *cldm = 0;
 
-     A(R2HC_KINDP(kind) || HC2R_KINDP(kind));
+     A(kind == R2HC || kind == HC2R);
      A(mstart >= 0 && mcount > 0 && mstart + mcount <= (m + 2) / 2);
 
      cld0 = X(mkplan_d)(plnr, 
@@ -71,7 +71,7 @@ int X(hc2hc_mkcldrn)(rdft_kind kind, INT r, INT m, INT s,
 			X(mkproblem_rdft_1)(
 			     (m%2 || mstart+mcount < (m+2)/2) ? null : radix, 
 			     null, IO + imid, IO + imid, 
-			     R2HC_KINDP(kind) ? R2HCII : HC2RIII));
+			     kind == R2HC ? R2HCII : HC2RIII));
      if (!cldm) goto nada;
 
      X(tensor_destroy2)(null, radix);

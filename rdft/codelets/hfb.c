@@ -23,13 +23,13 @@
 
 static int okp(const hc2hc_desc *d,
 	       const R *rio, const R *iio, 
-	       INT ios, INT vs, INT m, INT dist)
+	       INT rs, INT vs, INT m, INT ms)
 {
      UNUSED(rio); UNUSED(iio); UNUSED(m);
      return (1
-	     && (!d->s1 || (d->s1 == ios))
-	     && (!d->s2 || (d->s2 == vs))
-	     && (!d->dist || (d->dist == dist))
+	     && (!d->rs || (d->rs == rs))
+	     && (!d->vs || (d->vs == vs))
+	     && (!d->ms || (d->ms == ms))
 	  );
 }
 

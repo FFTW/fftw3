@@ -58,8 +58,7 @@ static void recur(const iodim *dims, int rnk, R *I)
      else if (rnk == 0)
           I[0] = K(0.0);
      else if (rnk > 0) {
-          int i;
-	  INT n = dims[0].n, is = dims[0].is;
+          INT i, n = dims[0].n, is = dims[0].is;
 
 	  if (rnk == 1) {
 	       /* this case is redundant but faster */

@@ -18,23 +18,36 @@
  *
  */
 
-#include "api.h"
 #include "rdft.h"
 
-X(plan) XGURU(split_dft_c2r)(int rank, const IODIM *dims,
-			     int howmany_rank, const IODIM *howmany_dims,
-			     R *ri, R *ii, R *out, unsigned flags)
-{
-     if (!GURU_KOSHERP(rank, dims, howmany_rank, howmany_dims)) return 0;
+typedef void (*hc2capply) (const plan *ego, R *cr, R *ci);
+typedef struct hc2c_solver_s hc2c_solver;
+typedef plan *(*hc2c_mkinferior)(const hc2c_solver *ego, rdft_kind kind,
+				 INT r, INT rs,
+				 INT m, INT ms, 
+				 INT v, INT vs,
+				 R *cr, R *ci,
+				 planner *plnr);
 
-     if (out != ri)
-	  flags |= FFTW_DESTROY_INPUT;
-     return X(mkapiplan)(
-	  0, flags, 
-	  X(mkproblem_rdft2_d_3pointers)(
-	       MKTENSOR_IODIMS(rank, dims, 1, 1),
-	       MKTENSOR_IODIMS(howmany_rank, howmany_dims, 1, 1),
-	       TAINT_UNALIGNED(out, flags),
-	       TAINT_UNALIGNED(ri, flags),
-	       TAINT_UNALIGNED(ii, flags), HC2R));
-}
+typedef struct {
+     plan super;
+     hc2capply apply;
+} plan_hc2c;
+
+extern plan *X(mkplan_hc2c)(size_t size, const plan_adt *adt, 
+			    hc2capply apply);
+
+#define MKPLAN_HC2C(type, adt, apply) \
+  (type *)X(mkplan_hc2c)(sizeof(type), adt, apply)
+
+struct hc2c_solver_s {
+     solver super;
+     INT r;
+
+     hc2c_mkinferior mkcldw;
+};
+
+hc2c_solver *X(mksolver_hc2c)(size_t size, INT r, hc2c_mkinferior mkcldw);
+
+void X(regsolver_hc2c_direct)(planner *plnr, khc2c codelet, 
+			      const hc2c_desc *desc);

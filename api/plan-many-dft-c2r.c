@@ -42,11 +42,11 @@ X(plan) X(plan_many_dft_c2r)(int rank, const int *n,
 	  flags |= FFTW_DESTROY_INPUT;
      p = X(mkapiplan)(
 	  0, flags,
-	  X(mkproblem_rdft2_d)(
+	  X(mkproblem_rdft2_d_3pointers)(
 	       X(mktensor_rowmajor)(
 		    rank, n, 
-		    X (rdft2_pad)(rank, n, inembed, inplace, 1, &nfi),
-		    X (rdft2_pad)(rank, n, onembed, inplace, 0, &nfo),
+		    X(rdft2_pad)(rank, n, inembed, inplace, 1, &nfi),
+		    X(rdft2_pad)(rank, n, onembed, inplace, 0, &nfo),
 		    2 * istride, ostride),
 	       X(mktensor_1d)(howmany, 2 * idist, odist),
 	       TAINT_UNALIGNED(out, flags),

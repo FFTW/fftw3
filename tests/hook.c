@@ -93,6 +93,8 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
 		       case HC2R10:
 		       case HC2R11:
 			    return bp;
+		       default:
+			    ;
 		   }
 	  
 	      bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
@@ -129,9 +131,22 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
 	 case PROBLEM_RDFT2:
 	 {
 	      const problem_rdft2 *p = (const problem_rdft2 *) p_;
+	      int rnk = p->sz->rnk;
 	  
-	      if (!p->r || !p->rio || !p->iio)
+	      if (!p->r0 || !p->r1 || !p->cr || !p->ci)
 		   abort();
+	      
+	      /* give up verifying rdft2 R2HCII */
+	      if (p->kind != R2HC && p->kind != HC2R)
+		   return bp;
+
+	      if (rnk > 0) {
+		   /* can't verify separate even/odd arrays for now */
+		   if (p->r1 != p->r0 +
+		       ((p->kind == R2HC) ? 
+			p->sz->dims[rnk-1].is : p->sz->dims[rnk-1].os))
+			return bp;
+	      }
 
 	      bp = (bench_problem *) bench_malloc(sizeof(bench_problem));
 
@@ -140,21 +155,21 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
 	      bp->split = 1; /* tensor strides are in R's, not C's */
 	      if (p->kind == R2HC) {
 		   bp->sign = FFT_SIGN;
-		   bp->in = UNTAINT(p->r);
-		   bp->out = UNTAINT(p->rio);
+		   bp->in = UNTAINT(p->r0);
+		   bp->out = UNTAINT(p->cr);
 		   bp->ini = 0;
-		   bp->outi = UNTAINT(p->iio);
+		   bp->outi = UNTAINT(p->ci);
 	      }
 	      else {
 		   bp->sign = -FFT_SIGN;
-		   bp->out = UNTAINT(p->r);
-		   bp->in = UNTAINT(p->rio);
+		   bp->out = UNTAINT(p->r0);
+		   bp->in = UNTAINT(p->cr);
 		   bp->outi = 0;
-		   bp->ini = UNTAINT(p->iio);
+		   bp->ini = UNTAINT(p->ci);
 	      }
 	      bp->inphys = bp->outphys = 0;
 	      bp->iphyssz = bp->ophyssz = 0;
-	      bp->in_place = p->r == p->rio;
+	      bp->in_place = p->r0 == p->cr;
 	      bp->sz = fftw_tensor_to_bench_tensor(p->sz);
 	      bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
 	      bp->k = 0;

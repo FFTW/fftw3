@@ -18,23 +18,20 @@
  *
  */
 
-#include "api.h"
-#include "rdft.h"
+#include "codelet-rdft.h"
+#include "hc2c.h"
 
-X(plan) XGURU(split_dft_c2r)(int rank, const IODIM *dims,
-			     int howmany_rank, const IODIM *howmany_dims,
-			     R *ri, R *ii, R *out, unsigned flags)
+static int okp(const hc2c_desc *d,
+	       const R *Rp, const R *Ip, const R *Rm, const R *Im, 
+	       INT rs, INT vs, INT m, INT ms)
 {
-     if (!GURU_KOSHERP(rank, dims, howmany_rank, howmany_dims)) return 0;
-
-     if (out != ri)
-	  flags |= FFTW_DESTROY_INPUT;
-     return X(mkapiplan)(
-	  0, flags, 
-	  X(mkproblem_rdft2_d_3pointers)(
-	       MKTENSOR_IODIMS(rank, dims, 1, 1),
-	       MKTENSOR_IODIMS(howmany_rank, howmany_dims, 1, 1),
-	       TAINT_UNALIGNED(out, flags),
-	       TAINT_UNALIGNED(ri, flags),
-	       TAINT_UNALIGNED(ii, flags), HC2R));
+     UNUSED(Rp); UNUSED(Ip); UNUSED(Rm); UNUSED(Im); UNUSED(m);
+     return (1
+	     && (!d->rs || (d->rs == rs))
+	     && (!d->vs || (d->vs == vs))
+	     && (!d->ms || (d->ms == ms))
+	  );
 }
+
+const hc2c_genus GENUS = { okp, R2HC, 1 };
+

@@ -51,22 +51,34 @@ typedef struct {
      INT ilast;
 } P;
 
-static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hcii(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {
      const P *ego = (const P *) ego_;
      INT i, vl = ego->vl, ovs = ego->ovs;
      ASSERT_ALIGNED_DOUBLE;
-     ego->k.r2hc(r, rio, iio, ego->is, ego->os, ego->os,
+     ego->k.r2hc(r0, r1, cr, ci,
+		 ego->is, ego->os, ego->os,
 		 vl, ego->ivs, ovs);
-     for (i = 0; i < vl; ++i, iio += ovs)
-	  iio[0] = iio[ego->ilast] = 0;
 }
 
-static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hc(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
+{
+     const P *ego = (const P *) ego_;
+     INT i, vl = ego->vl, ovs = ego->ovs;
+     ASSERT_ALIGNED_DOUBLE;
+     ego->k.r2hc(r0, r1, cr, ci,
+		 ego->is, ego->os, ego->os,
+		 vl, ego->ivs, ovs);
+     for (i = 0; i < vl; ++i, ci += ovs)
+	  ci[0] = ci[ego->ilast] = 0;
+}
+
+static void apply_hc2r(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {
      const P *ego = (const P *) ego_;
      ASSERT_ALIGNED_DOUBLE;
-     ego->k.hc2r(rio, iio, r, ego->os, ego->os, ego->is,
+     ego->k.hc2r(cr, ci, r0, r1,
+		 ego->os, ego->os, ego->is,
 		 ego->vl, ego->ivs, ego->ovs);
 }
 
@@ -103,16 +115,18 @@ static int applicable(const solver *ego_, const problem *p_)
 	  /* check strides etc */
 	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
-	  && (ego->kind != R2HC ||
+	  && (!R2HC_KINDP(ego->kind) ||
 	      ego->desc.r2hc->genus->okp(ego->desc.r2hc, 
-					 p->r, p->rio, p->rio,
+					 p->r0, p->r1,
+					 p->cr, p->ci,
 					 p->sz->dims[0].is,
 					 p->sz->dims[0].os,
 					 p->sz->dims[0].os,
 					 vl, ivs, ovs))
-	  && (ego->kind != HC2R ||
+	  && (!HC2R_KINDP(ego->kind) ||
 	      ego->desc.hc2r->genus->okp(ego->desc.hc2r,
-					 p->rio, p->rio, p->r,
+					 p->cr, p->ci,
+					 p->r0, p->r1,
 					 p->sz->dims[0].is,
 					 p->sz->dims[0].is,
 					 p->sz->dims[0].os,
@@ -120,7 +134,7 @@ static int applicable(const solver *ego_, const problem *p_)
 	       
 	  && (0
 	      /* can operate out-of-place */
-	      || p->r != p->rio
+	      || p->r0 != p->cr
 
 	      /*
 	       * can compute one transform in-place, no matter
@@ -153,17 +167,20 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      p = (const problem_rdft2 *) p_;
 
-     r2hc_kindp = p->kind == R2HC;
-     A(r2hc_kindp || p->kind == HC2R);
+     r2hc_kindp = R2HC_KINDP(p->kind);
+     A(r2hc_kindp || HC2R_KINDP(p->kind));
 
-     pln = MKPLAN_RDFT2(P, &padt, r2hc_kindp ? apply_r2hc : apply_hc2r);
+     pln = MKPLAN_RDFT2(P, &padt, 
+			(r2hc_kindp ? 
+			 (p->kind == R2HCII ? apply_r2hcii : apply_r2hc )
+			 : apply_hc2r));
 
      d = p->sz->dims[0];
 
      pln->k = ego->k;
 
      pln->is = X(mkstride)(ego->sz, r2hc_kindp ? d.is : d.os);
-     pln->os = X(mkstride)(d.n/2 + 1, r2hc_kindp ? d.os : d.is);
+     pln->os = X(mkstride)(ego->sz, r2hc_kindp ? d.os : d.is);
 
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
 

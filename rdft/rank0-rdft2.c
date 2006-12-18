@@ -44,69 +44,78 @@ static int applicable(const problem *p_)
      return (1
 	     && p->sz->rnk == 0
 	     && (p->kind == HC2R
-		 || (((p->r != p->rio && p->r != p->iio)
-		      || X(rdft2_inplace_strides)(p, RNK_MINFTY))
-		     && p->vecsz->rnk <= 1))
+		 ||
+		 (1
+		  && p->kind == R2HC
+		
+		  && p->vecsz->rnk <= 1
+  
+		  && ((p->r0 != p->cr) 
+		      || 
+		      X(rdft2_inplace_strides)(p, RNK_MINFTY)) ))
 	  );
 }
 
-static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hc(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {
      const P *ego = (const P *) ego_;
      INT i, vl = ego->vl;
      INT ivs = ego->ivs, ovs = ego->ovs;
 
+     UNUSED(r1); /* rank-0 has no real odd-index elements */
+
      for (i = 4; i <= vl; i += 4) {
-          R r0, r1, r2, r3;
-          r0 = *r; r += ivs;
-          r1 = *r; r += ivs;
-          r2 = *r; r += ivs;
-          r3 = *r; r += ivs;
-          *rio = r0; rio += ovs;
-	  *iio = K(0.0); iio += ovs;
-          *rio = r1; rio += ovs;
-	  *iio = K(0.0); iio += ovs;
-          *rio = r2; rio += ovs;
-	  *iio = K(0.0); iio += ovs;
-	  *rio = r3; rio += ovs;
-	  *iio = K(0.0); iio += ovs;
+          R x0, x1, x2, x3;
+          x0 = *r0; r0 += ivs;
+          x1 = *r0; r0 += ivs;
+          x2 = *r0; r0 += ivs;
+          x3 = *r0; r0 += ivs;
+          *cr = x0; cr += ovs;
+	  *ci = K(0.0); ci += ovs;
+          *cr = x1; cr += ovs;
+	  *ci = K(0.0); ci += ovs;
+          *cr = x2; cr += ovs;
+	  *ci = K(0.0); ci += ovs;
+	  *cr = x3; cr += ovs;
+	  *ci = K(0.0); ci += ovs;
      }
      for (; i < vl + 4; ++i) {
-          R r0;
-          r0 = *r; r += ivs;
-          *rio = r0; rio += ovs;
-	  *iio = K(0.0); iio += ovs;
+          R x0;
+          x0 = *r0; r0 += ivs;
+          *cr = x0; cr += ovs;
+	  *ci = K(0.0); ci += ovs;
      }
 }
 
 /* in-place r2hc rank-0: set imaginary parts of output to 0 */
-static void apply_r2hc_inplace(const plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hc_inplace(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {
      const P *ego = (const P *) ego_;
      INT i, vl = ego->vl;
      INT ovs = ego->ovs;
 
-     UNUSED(r);
-     UNUSED(rio);
+     UNUSED(r0); UNUSED(r1); UNUSED(cr);
+
      for (i = 4; i <= vl; i += 4) {
-	  *iio = K(0.0); iio += ovs;
-	  *iio = K(0.0); iio += ovs;
-	  *iio = K(0.0); iio += ovs;
-	  *iio = K(0.0); iio += ovs;
+	  *ci = K(0.0); ci += ovs;
+	  *ci = K(0.0); ci += ovs;
+	  *ci = K(0.0); ci += ovs;
+	  *ci = K(0.0); ci += ovs;
      }
      for (; i < vl + 4; ++i) {
-	  *iio = K(0.0); iio += ovs;
+	  *ci = K(0.0); ci += ovs;
      }
 }
 
-/* a rank-0 HC2R rdft2 problem is just a copy from rio to r,
+/* a rank-0 HC2R rdft2 problem is just a copy from cr to r0,
    so we can use a rank-0 rdft plan */
-static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
+static void apply_hc2r(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {
      const P *ego = (const P *) ego_;
      plan_rdft *cldcpy = (plan_rdft *) ego->cldcpy;
-     UNUSED(iio);
-     cldcpy->apply((plan *) cldcpy, rio, r);
+     UNUSED(ci);
+     UNUSED(r1);
+     cldcpy->apply((plan *) cldcpy, cr, r0);
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)
@@ -153,13 +162,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  cldcpy = X(mkplan_d)(plnr,
 			       X(mkproblem_rdft_0_d)(
 				    X(tensor_copy)(p->vecsz),
-				    p->rio, p->r));
+				    p->cr, p->r0));
 	  if (!cldcpy) return (plan *) 0;
      }
 
      pln = MKPLAN_RDFT2(P, &padt, 
 			p->kind == R2HC ? 
-			(p->r == p->rio ? apply_r2hc_inplace : apply_r2hc) 
+			(p->r0 == p->cr ? apply_r2hc_inplace : apply_r2hc) 
 			: apply_hc2r);
      
      if (p->kind == R2HC)

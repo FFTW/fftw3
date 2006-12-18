@@ -52,7 +52,7 @@ typedef struct {
      const S *solver;
 } P;
 
-static void apply(const plan *ego_, R *r, R *rio, R *iio)
+static void apply(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {
      const P *ego = (const P *) ego_;
      INT i, vl = ego->vl;
@@ -60,7 +60,8 @@ static void apply(const plan *ego_, R *r, R *rio, R *iio)
      rdft2apply cldapply = ((plan_rdft2 *) ego->cld)->apply;
 
      for (i = 0; i < vl; ++i) {
-          cldapply(ego->cld, r + i * ivs, rio + i * ovs, iio + i * ovs);
+          cldapply(ego->cld, r0 + i * ivs, r1 + i * ivs,
+		   cr + i * ovs, ci + i * ovs);
      }
 }
 
@@ -96,9 +97,8 @@ static int applicable0(const solver *ego_, const problem *p_, int *dp)
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
      if (FINITE_RNK(p->vecsz->rnk)
 	 && p->vecsz->rnk > 0
-	 && pickdim(ego, p->vecsz, 
-		    p->r != p->rio && p->r != p->iio, dp)) {
-	  if (p->r != p->rio && p->r != p->iio)
+	 && pickdim(ego, p->vecsz, p->r0 != p->cr, dp)) {
+	  if (p->r0 != p->cr)
 	       return 1;  /* can always operate out-of-place */
 
 	  return(X(rdft2_inplace_strides)(p, *dp));
@@ -173,8 +173,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 		       X(mkproblem_rdft2_d)(
 			    X(tensor_copy)(p->sz),
 			    X(tensor_copy_except)(p->vecsz, vdim),
-			    TAINT(p->r, ivs), 
-			    TAINT(p->rio, ovs), TAINT(p->iio, ovs),
+			    TAINT(p->r0, ivs), TAINT(p->r1, ivs), 
+			    TAINT(p->cr, ovs), TAINT(p->ci, ovs),
 			    p->kind));
      if (!cld) return (plan *) 0;
 

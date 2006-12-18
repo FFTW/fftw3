@@ -22,9 +22,9 @@
 #include "rdft.h"
 
 X(plan) XGURU(dft_r2c)(int rank, const IODIM *dims,
-			     int howmany_rank,
-			     const IODIM *howmany_dims,
-			     R *in, C *out, unsigned flags)
+		       int howmany_rank,
+		       const IODIM *howmany_dims,
+		       R *in, C *out, unsigned flags)
 {
      R *ro, *io;
 
@@ -34,10 +34,10 @@ X(plan) XGURU(dft_r2c)(int rank, const IODIM *dims,
 
      return X(mkapiplan)(
 	  0, flags,
-	  X(mkproblem_rdft2_d)(MKTENSOR_IODIMS(rank, dims, 1, 2),
-			       MKTENSOR_IODIMS(howmany_rank, howmany_dims,
-						  1, 2),
-			       TAINT_UNALIGNED(in, flags),
-			       TAINT_UNALIGNED(ro, flags),
-			       TAINT_UNALIGNED(io, flags), R2HC));
+	  X(mkproblem_rdft2_d_3pointers)(
+	       MKTENSOR_IODIMS(rank, dims, 1, 2),
+	       MKTENSOR_IODIMS(howmany_rank, howmany_dims, 1, 2),
+	       TAINT_UNALIGNED(in, flags),
+	       TAINT_UNALIGNED(ro, flags),
+	       TAINT_UNALIGNED(io, flags), R2HC));
 }

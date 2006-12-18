@@ -22,11 +22,12 @@
 #include "hc2r.h"
 
 static int okp(const khc2r_desc *d,
-	       const R *ri, const R *ii,
-	       const R *O,
-	       INT ris, INT iis, INT os, INT vl, INT ivs, INT ovs)
+	       const R *Ir, const R *Ii,
+	       const R *O0, const R *O1,
+	       INT ris, INT iis, INT os,
+	       INT vl, INT ivs, INT ovs)
 {
-     UNUSED(ri); UNUSED(ii); UNUSED(O); UNUSED(vl);
+     UNUSED(Ir); UNUSED(Ii); UNUSED(O0); UNUSED(O1); UNUSED(vl);
      return (1
 	     && (!d->ris || (d->ris == ris))
 	     && (!d->iis || (d->iis == iis))

@@ -86,7 +86,7 @@ static void c2hc(INT n, R *rio, R *iio, INT is, R *r)
 
 /***************************************************************************/
 
-static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
+static void apply_r2hc(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {
      const P *ego = (const P *) ego_;
      plan_rdft *cld = (plan_rdft *) ego->cld;
@@ -94,32 +94,33 @@ static void apply_r2hc(const plan *ego_, R *r, R *rio, R *iio)
      INT n = ego->n;
      INT ivs = ego->ivs, ovs = ego->ovs, os = ego->os;
      R *bufs;
+     UNUSED(r1);
 
      bufs = (R *)MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
      for (i = nbuf; i <= vl; i += nbuf) {
           /* transform to bufs: */
-          cld->apply((plan *) cld, r, bufs);
-	  r += ivs;
+          cld->apply((plan *) cld, r0, bufs);
+	  r0 += ivs;
 
           /* copy back */
-	  for (j = 0; j < nbuf; ++j, rio += ovs, iio += ovs)
-	       hc2c(n, bufs + j*bufdist, rio, iio, os);
+	  for (j = 0; j < nbuf; ++j, cr += ovs, ci += ovs)
+	       hc2c(n, bufs + j*bufdist, cr, ci, os);
      }
 
      /* Do the remaining transforms, if any: */
      {
 	  plan_rdft *cldrest = (plan_rdft *) ego->cldrest;
 	  R *b = bufs;
-	  cldrest->apply((plan *) cldrest, r, bufs);
-	  for (i -= nbuf; i < vl; ++i, rio += ovs, iio += ovs, b += bufdist)
-	       hc2c(n, b, rio, iio, os);
+	  cldrest->apply((plan *) cldrest, r0, bufs);
+	  for (i -= nbuf; i < vl; ++i, cr += ovs, ci += ovs, b += bufdist)
+	       hc2c(n, b, cr, ci, os);
      }
 
      X(ifree)(bufs);
 }
 
-static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
+static void apply_hc2r(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {
      const P *ego = (const P *) ego_;
      plan_rdft *cld = (plan_rdft *) ego->cld;
@@ -127,27 +128,28 @@ static void apply_hc2r(const plan *ego_, R *r, R *rio, R *iio)
      INT n = ego->n;
      INT ivs = ego->ivs, ovs = ego->ovs, is = ego->os;
      R *bufs;
+     UNUSED(r1);
 
      bufs = (R *)MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
      for (i = nbuf; i <= vl; i += nbuf) {
           /* copy to bufs */
-	  for (j = 0; j < nbuf; ++j, rio += ivs, iio += ivs)
-	       c2hc(n, rio, iio, is, bufs + j*bufdist);
+	  for (j = 0; j < nbuf; ++j, cr += ivs, ci += ivs)
+	       c2hc(n, cr, ci, is, bufs + j*bufdist);
 
           /* transform back: */
-          cld->apply((plan *) cld, bufs, r);
-	  r += ovs;
+          cld->apply((plan *) cld, bufs, r0);
+	  r0 += ovs;
      }
 
      /* Do the remaining transforms, if any: */
      {
 	  plan_rdft *cldrest;
 	  R *b = bufs;
-	  for (i -= nbuf; i < vl; ++i, rio += ivs, iio += ivs, b += bufdist)
-	       c2hc(n, rio, iio, is, b);
+	  for (i -= nbuf; i < vl; ++i, cr += ivs, ci += ivs, b += bufdist)
+	       c2hc(n, cr, ci, is, b);
 	  cldrest = (plan_rdft *) ego->cldrest;
-	  cldrest->apply((plan *) cldrest, bufs, r);
+	  cldrest->apply((plan *) cldrest, bufs, r0);
      }
 
      X(ifree)(bufs);
@@ -183,7 +185,7 @@ static INT min_nbuf(const problem_rdft2 *p, INT n, INT vl)
 {
      INT is, os, ivs, ovs;
 
-     if (p->r != p->rio && p->r != p->iio)
+     if (p->r0 != p->cr)
 	  return 1;
      if (X(rdft2_inplace_strides(p, RNK_MINFTY)))
 	  return 1;
@@ -196,8 +198,8 @@ static INT min_nbuf(const problem_rdft2 *p, INT n, INT vl)
 	complex arrays, which overlap because of the differing sizes. */
      if (n * X(iabs)(is) <= X(iabs)(ivs)
 	 && (n/2 + 1) * X(iabs)(os) <= X(iabs)(ovs)
-	 && ( ((p->rio - p->iio) <= X(iabs)(os)) || 
-	      ((p->iio - p->rio) <= X(iabs)(os)) )
+	 && ( ((p->cr - p->ci) <= X(iabs)(os)) || 
+	      ((p->ci - p->cr) <= X(iabs)(os)) )
 	 && ivs > 0 && ovs > 0) {
 	  INT vsmin = X(imin)(ivs, ovs);
 	  INT vsmax = X(imax)(ivs, ovs);
@@ -221,8 +223,20 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 {
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
      UNUSED(ego);
-     return(p->vecsz->rnk <= 1 && p->sz->rnk == 1
-	    && !(toobig(p->sz->dims[0].n, ego) && CONSERVE_MEMORYP(plnr)));
+     return(1
+	    && p->vecsz->rnk <= 1
+	    && p->sz->rnk == 1
+
+	    /* FIXME: does it make sense to do R2HCII ? */
+	    && (p->kind == R2HC || p->kind == HC2R)
+
+	    /* FIXME: real strides must allow for reduction to rdft */
+	    /* FIXME: reduce to rdft2 as well? */
+	    && (2 * (p->r1 - p->r0) ==
+		(((p->kind == R2HC) ? p->sz->dims[0].is : p->sz->dims[0].os)))
+
+	    && !(toobig(p->sz->dims[0].n, ego) && CONSERVE_MEMORYP(plnr))
+	  );
 }
 
 static int applicable(const problem *p_, const S *ego, const planner *plnr)
@@ -235,7 +249,7 @@ static int applicable(const problem *p_, const S *ego, const planner *plnr)
 
      p = (const problem_rdft2 *) p_;
      if (NO_UGLYP(plnr)) {
-	  if (p->r != p->rio && p->r != p->iio) return 0;
+	  if (p->r0 != p->cr) return 0;
 	  if (toobig(p->sz->dims[0].n, ego)) return 0;
      }
      return 1;
@@ -286,23 +300,23 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
-     if (p->r == p->rio || p->r == p->iio)
+     if (p->r0 == p->cr)
 	  u_reset = NO_DESTROY_INPUT; /* ok to destroy input */
 
      if (p->kind == R2HC)
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
+		    X(mktensor_1d)(n, p->sz->dims[0].is/2, 1),
 		    X(mktensor_1d)(nbuf, ivs, bufdist),
-		    TAINT(p->r, ivs * nbuf), bufs, &p->kind);
+		    TAINT(p->r0, ivs * nbuf), bufs, &p->kind);
      else {
 	  A(p->kind == HC2R);
 	  u_reset = NO_DESTROY_INPUT; /* always ok to destroy buf */
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, 1, p->sz->dims[0].os),
+		    X(mktensor_1d)(n, 1, p->sz->dims[0].os/2),
 		    X(mktensor_1d)(nbuf, bufdist, ovs),
-		    bufs, TAINT(p->r, ovs * nbuf), &p->kind);
+		    bufs, TAINT(p->r0, ovs * nbuf), &p->kind);
      }
      if (!(cld = X(mkplan_f_d)(plnr, cldp, 0, 0, u_reset))) goto nada;
 
@@ -310,15 +324,15 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (p->kind == R2HC)
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, p->sz->dims[0].is, 1),
+		    X(mktensor_1d)(n, p->sz->dims[0].is/2, 1),
 		    X(mktensor_1d)(vl % nbuf, ivs, bufdist),
-		    p->r + ivs * (nbuf * (vl / nbuf)), bufs, &p->kind);
+		    p->r0 + ivs * (nbuf * (vl / nbuf)), bufs, &p->kind);
      else /* HC2R */
 	  cldp =
 	       X(mkproblem_rdft_d)(
-		    X(mktensor_1d)(n, 1, p->sz->dims[0].os),
+		    X(mktensor_1d)(n, 1, p->sz->dims[0].os/2),
 		    X(mktensor_1d)(vl % nbuf, bufdist, ovs),
-			 bufs, p->r + ovs * (nbuf * (vl / nbuf)), &p->kind);
+			 bufs, p->r0 + ovs * (nbuf * (vl / nbuf)), &p->kind);
      if (!(cldrest = X(mkplan_d)(plnr, cldp))) goto nada;
 
      /* deallocate buffers, let apply() allocate them for real */

@@ -254,14 +254,16 @@ FFTW_VOIDFUNC F77(plan_guru_split_dft_r2c, PLAN_GURU_SPLIT_DFT_R2C)(
 FFTW_VOIDFUNC F77(execute_dft_r2c, EXECUTE_DFT_R2C)(X(plan) * const p, R *in, C *out)
 WITH_ALIGNED_STACK({
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
-     pln->apply((plan *) pln, in, out[0], out[0]+1);
+     problem_rdft2 *prb = (problem_rdft2 *) (*p)->prb;
+     pln->apply((plan *) pln, in, in + (prb->r1 - prb->r0), out[0], out[0]+1);
 })
 
 FFTW_VOIDFUNC F77(execute_split_dft_r2c, EXECUTE_SPLIT_DFT_R2C)(X(plan) * const p,
 						       R *in, R *ro, R *io)
 WITH_ALIGNED_STACK({
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
-     pln->apply((plan *) pln, in, ro, io);
+     problem_rdft2 *prb = (problem_rdft2 *) (*p)->prb;
+     pln->apply((plan *) pln, in, in + (prb->r1 - prb->r0), ro, io);
 })
 
 /****************************** DFT c2r *********************************/
@@ -346,14 +348,16 @@ FFTW_VOIDFUNC F77(plan_guru_split_dft_c2r, PLAN_GURU_SPLIT_DFT_C2R)(
 FFTW_VOIDFUNC F77(execute_dft_c2r, EXECUTE_DFT_C2R)(X(plan) * const p, C *in, R *out)
 WITH_ALIGNED_STACK({
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
-     pln->apply((plan *) pln, out, in[0], in[0]+1);
+     problem_rdft2 *prb = (problem_rdft2 *) (*p)->prb;
+     pln->apply((plan *) pln, out, out + (prb->r1 - prb->r0), in[0], in[0]+1);
 })
 
 FFTW_VOIDFUNC F77(execute_split_dft_c2r, EXECUTE_SPLIT_DFT_C2R)(X(plan) * const p,
 					   R *ri, R *ii, R *out)
 WITH_ALIGNED_STACK({
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
-     pln->apply((plan *) pln, out, ri, ii);
+     problem_rdft2 *prb = (problem_rdft2 *) (*p)->prb;
+     pln->apply((plan *) pln, out, out + (prb->r1 - prb->r0), ri, ii);
 })
 
 /****************************** r2r *********************************/

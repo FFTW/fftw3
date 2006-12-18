@@ -54,7 +54,11 @@ int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim)
      Nc = (N / p->sz->dims[p->sz->rnk-1].n) *
 	  (p->sz->dims[p->sz->rnk-1].n/2 + 1);
      X(rdft2_strides)(p->kind, p->sz->dims + p->sz->rnk - 1, &is, &os);
+
+     /* the factor of 2 comes from the fact that IS is the stride
+	of p->r0 and p->r1, which is twice as large as the strides
+	in the r2r case */
      return(p->vecsz->dims[vdim].is == p->vecsz->dims[vdim].os
-	    && X(iabs)(p->vecsz->dims[vdim].os)
-	    >= X(imax)(Nc * X(iabs)(os), N * X(iabs)(is)));
+	    && X(iabs)(2 * p->vecsz->dims[vdim].os)
+	    >= X(imax)(2 * Nc * X(iabs)(os), N * X(iabs)(is)));
 }

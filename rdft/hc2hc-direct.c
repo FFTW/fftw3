@@ -33,7 +33,7 @@ typedef struct {
      plan *cld0, *cldm; /* children for 0th and middle butterflies */
      INT r, m, vl, mstart1, mcount2;
      INT s, vs;
-     stride ios;
+     stride rs;
      const R *tdW;
      twid *td;
      const S *slv;
@@ -51,7 +51,7 @@ static void apply(const plan *ego_, R *IO)
      for (i = 0; i < vl; ++i, IO += vs) {
 	  cld0->apply((plan *) cld0, IO, IO);
 	  ego->k(IO + s * mstart1, IO + (r * m - mstart1) * s, 
-		 ego->tdW, ego->ios, mcount2, s);
+		 ego->tdW, ego->rs, mcount2, s);
 	  cldm->apply((plan *) cldm, IO + s*(m/2), IO + s*(m/2));
      }
 }
@@ -72,7 +72,7 @@ static void destroy(plan *ego_)
      P *ego = (P *) ego_;
      X(plan_destroy_internal)(ego->cld0);
      X(plan_destroy_internal)(ego->cldm);
-     X(stride_destroy)(ego->ios);
+     X(stride_destroy)(ego->rs);
 }
 
 static void print(const plan *ego_, printer *p)
@@ -153,7 +153,7 @@ static plan *mkcldw(const hc2hc_solver *ego_,
      pln = MKPLAN_HC2HC(P, &padt, apply);
 
      pln->k = ego->k;
-     pln->ios = X(mkstride)(r, m * s);
+     pln->rs = X(mkstride)(r, m * s);
      pln->td = 0;
      pln->tdW = 0;
      pln->r = r;

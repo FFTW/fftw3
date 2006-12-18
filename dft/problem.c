@@ -89,12 +89,14 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
      A(TAINTOF(ri) == TAINTOF(ii));
      A(TAINTOF(ro) == TAINTOF(io));
 
-     A((ri == ro) == (ii == io)); /* both in place or both out of place */
      A(X(tensor_kosherp)(sz));
      A(X(tensor_kosherp)(vecsz));
 
-     if (ri == ro && !X(tensor_inplace_locations)(sz, vecsz))
-	  return X(mkproblem_unsolvable)();
+     if (ri == ro || ii == io) {
+	  /* If either real or imag pointers are in place, both must be. */
+	  if (ri != ro || ii != io || !X(tensor_inplace_locations)(sz, vecsz))
+	       return X(mkproblem_unsolvable)();
+     }
 
      ego = (problem_dft *)X(mkproblem)(sizeof(problem_dft), &padt);
 

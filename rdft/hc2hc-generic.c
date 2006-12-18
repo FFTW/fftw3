@@ -162,7 +162,7 @@ static void reorder_dif(const P *ego, R *IO)
 static int applicable(rdft_kind kind, INT r, INT m, const planner *plnr)
 {
      return (1 
-	     && (R2HC_KINDP(kind) || HC2R_KINDP(kind))
+	     && (kind == R2HC || kind == HC2R)
 	     && (m % 2)
 	     && (r % 2)
 	     && !NO_SLOWP(plnr)
@@ -279,8 +279,7 @@ static plan *mkcldw(const hc2hc_solver *ego_,
 	                );
      if (!cld) goto nada;
      
-     pln = MKPLAN_HC2HC(P, &padt, 
-			R2HC_KINDP(kind) ? apply_dit : apply_dif);
+     pln = MKPLAN_HC2HC(P, &padt, (kind == R2HC) ? apply_dit : apply_dif);
      pln->cld = cld;
      pln->cld0 = cld0;
      pln->r = r;
@@ -295,7 +294,7 @@ static plan *mkcldw(const hc2hc_solver *ego_,
      {
 	  double n0 = 0.5 * (r - 1) * (2 * mcount1) * vl;
 	  pln->super.super.ops = cld->ops;
-	  pln->super.super.ops.mul += (R2HC_KINDP(kind) ? 5.0 : 7.0) * n0;
+	  pln->super.super.ops.mul += (kind == R2HC ? 5.0 : 7.0) * n0;
 	  pln->super.super.ops.add += 4.0 * n0;
 	  pln->super.super.ops.other += 11.0 * n0;
      }

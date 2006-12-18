@@ -69,9 +69,10 @@ let rdftII sign n input =
     else Complex.zero
 
 let generate n =
-  let iarray = "I"
-  and roarray = "ro"
-  and ioarray = "io"
+  let iarraye = "I0"
+  and iarrayo = "I1"
+  and roarray = "Or"
+  and ioarray = "Oi"
   and istride = "is"
   and rostride = "ros" 
   and iostride = "ios" 
@@ -93,11 +94,18 @@ let generate n =
   let _ = Simd.ivs := stride_to_string "ivs" !uivstride in
 
   let locations = unique_array_c n in
-  let input = 
+  let inpute = 
     locative_array_c n 
-      (C.array_subscript iarray vistride)
+      (C.array_subscript iarraye vistride)
       (C.array_subscript "BUG" vistride)
-      locations in
+      locations 
+  and inputo =
+    locative_array_c n 
+      (C.array_subscript iarrayo vistride)
+      (C.array_subscript "BUG" vistride)
+      locations 
+  in
+  let input i = if i mod 2 == 0 then inpute (i/2) else inputo ((i-1)/2) in
   let output = transform sign n (load_array_r n input) in
   let oloc = 
     locative_array_c n 
@@ -113,7 +121,8 @@ let generate n =
 	  Binop (" > ", CVar i, Integer 0),
 	  list_to_comma 
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
-	     Expr_assign (CVar iarray, CPlus [CVar iarray; CVar !Simd.ivs]);
+	     Expr_assign (CVar iarraye, CPlus [CVar iarraye; CVar !Simd.ivs]);
+	     Expr_assign (CVar iarrayo, CPlus [CVar iarrayo; CVar !Simd.ivs]);
 	     Expr_assign (CVar roarray, CPlus [CVar roarray; CVar !Simd.ovs]);
 	     Expr_assign (CVar ioarray, CPlus [CVar ioarray; CVar !Simd.ovs]);
 	     make_volatile_stride (CVar istride);
@@ -126,7 +135,8 @@ let generate n =
 
   let tree =
     Fcn ((if !Magic.standalone then "void" else "static void"), name,
-	 ([Decl (C.constrealtypep, iarray);
+	 ([Decl (C.constrealtypep, iarraye);
+	   Decl (C.constrealtypep, iarrayo);
 	   Decl (C.realtypep, roarray);
 	   Decl (C.realtypep, ioarray);
 	   Decl (C.stridetype, istride);

@@ -22,11 +22,12 @@
 #include "r2hc.h"
 
 static int okp(const kr2hc_desc *d,
-	       const R *I,
-	       const R *ro, const R *io,
-	       INT is, INT ros, INT ios, INT vl, INT ivs, INT ovs)
+	       const R *I0, const R *I1,
+	       const R *Or, const R *Oi,
+	       INT is, INT ros, INT ios, 
+	       INT vl, INT ivs, INT ovs)
 {
-     UNUSED(I); UNUSED(ro); UNUSED(io); UNUSED(vl);
+     UNUSED(I0); UNUSED(I1); UNUSED(Or); UNUSED(Oi); UNUSED(vl);
      return (1
 	     && (!d->is || (d->is == is))
 	     && (!d->ros || (d->ros == ros))
