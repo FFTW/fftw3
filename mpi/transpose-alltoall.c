@@ -78,6 +78,7 @@ static int applicable(const solver *ego_, const problem *p_,
      return (1
 	     && p->I != p->O
 	     && !NO_DESTROY_INPUTP(plnr)
+	     && !SCRAMBLEDP(p->flags)
 	  );
 }
 
@@ -136,7 +137,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      b = XM(block)(p->nx, p->block, my_pe);
 
-     if (p->flags & SCRAMBLED_IN) /* I is already transposed */
+     if (p->flags & TRANSPOSED_IN) /* I is already transposed */
 	  cld1 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_1d)
 						   (b * p->ny * vn, 1, 1),
@@ -154,7 +155,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      nxb = (p->nx + p->block - 1) / p->block;
      if (p->nx != nxb * p->block)
 	  nxb -= 1; /* number of equal-sized blocks */
-     if (!(p->flags & SCRAMBLED_OUT)) {
+     if (!(p->flags & TRANSPOSED_OUT)) {
 	  INT nx = p->nx * vn;
 	  b = p->block * vn;
 	  cld2 = X(mkplan_d)(plnr, 
@@ -178,7 +179,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	       if (XM(any_true)(!cld2rest, p->comm)) goto nada;
 	  }
      }
-     else { /* SCRAMBLED_OUT */
+     else { /* TRANSPOSED_OUT */
 	  b = p->block;
 	  cld2 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_4d)

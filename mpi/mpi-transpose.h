@@ -27,8 +27,8 @@ typedef struct {
      INT nx, ny; /* nx x ny transposed to ny x nx */
      R *I, *O; /* contiguous real arrays (both same size!) */
 
-     int flags; /* SCRAMBLED_IN: input is *locally* transposed
-		   SCRAMBLED_OUT: output is *locally* transposed */
+     int flags; /* TRANSPOSED_IN: input is *locally* transposed
+		   TRANSPOSED_OUT: output is *locally* transposed */
 
      INT block, tblock; /* block size, slab decomposition;
 			   tblock is for transposed blocks on output */

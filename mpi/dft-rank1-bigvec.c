@@ -23,7 +23,7 @@
    instead transpose the DFT dimension with the vector dimension to 
    make the DFT local.
 
-   In this case, SCRAMBLED_IN/OUT mean that the DFT dimension is pre/post
+   In this case, TRANSPOSED_IN/OUT mean that the DFT dimension is pre/post
    transposed with the vector dimension, respectively. */
 
 #include "mpi-dft.h"
@@ -48,7 +48,7 @@ static void apply(const plan *ego_, R *I, R *O)
      plan_rdft *cldt_before, *cldt_after;
      INT roff = ego->roff, ioff = ego->ioff;
      
-     /* global transpose, if not SCRAMBLED_IN */
+     /* global transpose, if not TRANSPOSED_IN */
      cldt_before = (plan_rdft *) ego->cldt_before;
      if (cldt_before) {
 	  cldt_before->apply(ego->cldt_before, I, O);
@@ -59,7 +59,7 @@ static void apply(const plan *ego_, R *I, R *O)
 	  cld = (plan_dft *) ego->cld;
 	  cld->apply(ego->cld, O+roff, O+ioff, I+roff, I+ioff);
 	  
-	  /* global transpose, if not SCRAMBLED_OUT */
+	  /* global transpose, if not TRANSPOSED_OUT */
 	  cldt_after = (plan_rdft *) ego->cldt_after;
 	  if (cldt_after)
 	       cldt_after->apply(ego->cldt_after, I, O);
@@ -69,7 +69,7 @@ static void apply(const plan *ego_, R *I, R *O)
 	  cld = (plan_dft *) ego->cld;
 	  cld->apply(ego->cld, I+roff, I+ioff, O+roff, O+ioff);
 	  
-	  /* global transpose, if not SCRAMBLED_OUT */
+	  /* global transpose, if not TRANSPOSED_OUT */
 	  cldt_after = (plan_rdft *) ego->cldt_after;
 	  if (cldt_after)
 	       cldt_after->apply(ego->cldt_after, O, O);
@@ -89,6 +89,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	     && p->vn >= n_pes /* TODO: relax this, using more memory? */
 	     && (!NO_UGLYP(plnr) /* ugly if dft-serial is applicable */
                  || !XM(dft_serial_applicable)(p))
+	     && !SCRAMBLEDP(p->flags)
 	  );
 }
 
@@ -143,14 +144,14 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      vblock = XM(default_block)(p->vn, n_pes);
      vb = XM(block)(p->vn, vblock, my_pe);
 
-     if (!(p->flags & SCRAMBLED_IN)) { /* transpose dims[0].n with vn */
+     if (!(p->flags & TRANSPOSED_IN)) { /* transpose dims[0].n with vn */
 	  cldt_before = X(mkplan_d)(plnr,
 				    XM(mkproblem_transpose)(
 					 p->sz->dims[0].n, p->vn, 2,
 					 I = p->I, O = p->O,
 					 p->sz->dims[0].b[IB], vblock,
 					 p->comm,
-					 SCRAMBLED_OUT));
+					 TRANSPOSED_OUT));
 	  if (XM(any_true)(!cldt_before, p->comm)) goto nada;	  
 	  if (NO_DESTROY_INPUTP(plnr)) { I = O; }
      }
@@ -168,14 +169,14 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 					  ro, io, ri, ii));
      if (XM(any_true)(!cld, p->comm)) goto nada;	  
 
-     if (!(p->flags & SCRAMBLED_OUT)) {
+     if (!(p->flags & TRANSPOSED_OUT)) {
 	  cldt_after = X(mkplan_d)(plnr,
 				    XM(mkproblem_transpose)(
 					 p->vn, p->sz->dims[0].n, 2,
 					 I, cldt_before ? O : I,
 					 vblock, p->sz->dims[0].b[OB], 
 					 p->comm,
-					 SCRAMBLED_IN));
+					 TRANSPOSED_IN));
 	  if (XM(any_true)(!cldt_after, p->comm)) goto nada;	  
      }
 

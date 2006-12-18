@@ -95,18 +95,19 @@ static void apply(const plan *ego_, R *I, R *O)
 	  cld3 = (plan_rdft *) ego->cld3;
 	  if (cld3)
 	       cld3->apply(ego->cld3, O, O);
-	  /* else SCRAMBLED_OUT is true and user wants O transposed */
+	  /* else TRANSPOSED_OUT is true and user wants O transposed */
      }
 }
 
 static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
+     const problem_mpi_transpose *p = (const problem_mpi_transpose *) p_;
      UNUSED(ego_);
      UNUSED(plnr);
-     UNUSED(p_);
      /* FIXME: ugly if out-of-place and destroy_input? */
-     return (1);
+     return (1
+	     && !SCRAMBLEDP(p->flags));
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)
@@ -235,7 +236,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      b = XM(block)(p->nx, p->block, my_pe);
 
-     if (p->flags & SCRAMBLED_IN) /* I is already transposed */
+     if (p->flags & TRANSPOSED_IN) /* I is already transposed */
 	  cld1 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_1d)
 						   (b * p->ny * vn, 1, 1),
@@ -253,7 +254,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      bt = XM(block)(p->ny, p->tblock, my_pe);
      nxb = p->nx / b;
      if (p->nx == nxb * p->block) { /* divisible => ordinary transpose */
-	  if (!(p->flags & SCRAMBLED_OUT)) {
+	  if (!(p->flags & TRANSPOSED_OUT)) {
 	       b *= vn;
 	       cld2 = X(mkplan_d)(plnr, 
 				  X(mkproblem_rdft_0_d)(X(mktensor_3d)
@@ -294,7 +295,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				   vn, 1, 1),
 				  p->O + rest_offset, p->O + rest_offset));
 	  if (XM(any_true)(!cld2rest, p->comm)) goto nada;
-	  if (!(p->flags & SCRAMBLED_OUT)) {
+	  if (!(p->flags & TRANSPOSED_OUT)) {
 	       cld3 = X(mkplan_d)(plnr,
 				  X(mkproblem_rdft_0_d)(
 				       X(mktensor_3d)

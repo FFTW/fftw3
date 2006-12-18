@@ -72,7 +72,7 @@ static int applicable(const solver *ego_, const problem *p_,
      UNUSED(plnr);
      return (1
 	     && p->sz->rnk > 1
-	     && p->flags == 0 /* SCRAMBLED_IN/OUT not supported */
+	     && p->flags == 0 /* TRANSPOSED/SCRAMBLED_IN/OUT not supported */
 	     && XM(is_block1d)(p->sz, IB) && XM(is_block1d)(p->sz, OB)
 	     && (!NO_UGLYP(plnr) /* ugly if dft-serial is applicable */
 		 || !XM(dft_serial_applicable)(p))
@@ -178,9 +178,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      if (NO_DESTROY_INPUTP(plnr)) { ri = ro; ii = io; I = O; }
 
-     tflags = SCRAMBLED_IN;
+     tflags = TRANSPOSED_IN;
      if (!transposed_in || tblock == ny)
-	  tflags = tflags | SCRAMBLED_OUT;
+	  tflags = tflags | TRANSPOSED_OUT;
      if (!(transposed_out = tblock < ny))
 	  tblock = XM(default_block)(ny, n_pes);
 
@@ -192,7 +192,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      if (XM(any_true)(!cldt1, p->comm)) goto nada;
 
      b = XM(block)(ny, tblock, my_pe);
-     if (tflags & SCRAMBLED_OUT) { /* last dimension transposed after cldt1 */
+     if (tflags & TRANSPOSED_OUT) { /* last dimension transposed after cldt1 */
           INT s = b * nl * 2;  /* we have nx x b x nl complex array */
           R *sro, *sio;
           if (transposed_out) { sro = ro; sio = io; }
@@ -202,7 +202,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
                                                 X(mktensor_1d)(b * nl, 2, 2),
                                                 ri, ii, sro, sio));
      }
-     else { /* !SCRAMBLED_OUT (=> TRANSPOSED_IN && TRANSPOSED_OUT) */
+     else { /* !TRANSPOSED_OUT (=> TRANSPOSED_IN && TRANSPOSED_OUT) */
 	  INT s = nx * nl * 2; /* we have b x nx x nl complex array */
 	  cld2 = X(mkplan_d)(plnr,
 			     X(mkproblem_dft_d)(X(mktensor_1d)(nx, nl*2, nl*2),
@@ -213,9 +213,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      if (XM(any_true)(!cld2, p->comm)) goto nada;
 
      if (!transposed_out) {
-	  tflags = SCRAMBLED_IN;
+	  tflags = TRANSPOSED_IN;
 	  if (transposed_in)
-	       tflags = tflags | SCRAMBLED_OUT;
+	       tflags = tflags | TRANSPOSED_OUT;
 	  cldt2 = X(mkplan_d)(plnr,
 			      XM(mkproblem_transpose)(ny, nx, nl*2,
 						      I, O,

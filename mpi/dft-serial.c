@@ -63,7 +63,7 @@ static void print(const plan *ego_, printer *p)
 int XM(dft_serial_applicable)(const problem_mpi_dft *p)
 {
      return (1
-	     && p->flags == 0 /* SCRAMBLED_IN/OUT not supported */
+	     && p->flags == 0 /* TRANSPOSED/SCRAMBLED_IN/OUT not supported */
 	     && ((XM(is_local)(p->sz, IB) && XM(is_local)(p->sz, OB))
 		 || p->vn == 0));
 }

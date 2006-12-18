@@ -28,7 +28,8 @@ typedef struct {
      R *I, *O; /* contiguous interleaved arrays */
 
      int sign; /* FFTW_FORWARD / FFTW_BACKWARD */
-     int flags; /* SCRAMBLED_IN/OUT meaningful for 1d transforms only */
+     int flags; /* TRANSPOSED_IN/OUT meaningful for 1d-bigvec transforms only
+		   SCRAMBLED_IN/OUT meaningful for 1d transforms only */
 
      MPI_Comm comm;
 } problem_mpi_dft;

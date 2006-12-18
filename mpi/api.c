@@ -24,14 +24,8 @@
 #include "mpi-transpose.h"
 #include "mpi-dft.h"
 
-/* Convert API flags to internal MPI flags.  Note that internally,
-   we use the same flags to indicate scrambling and transposing,
-   because we always have one or the other and never both.  However,
-   in the API we use different flags to make it more flexible and
-   to allow better error-checking. */
-#define MPI_FLAGS(f)							 \
-  ((((f) & (FFTW_MPI_SCRAMBLED_IN | FFTW_MPI_SCRAMBLED_OUT)) >> 28)	 \
-   | (((f) & (FFTW_MPI_TRANSPOSED_IN | FFTW_MPI_TRANSPOSED_OUT)) >> 30))
+/* Convert API flags to internal MPI flags. */
+#define MPI_FLAGS(f) ((f) >> 28)
 
 /*************************************************************************/
 
@@ -377,10 +371,6 @@ X(plan) XM(plan_many_transpose)(ptrdiff_t nx, ptrdiff_t ny,
      if (howmany < 0 || xblock < 0 || yblock < 0 ||
 	 nx <= 0 || ny <= 0) return 0;
 
-     if (flags & (FFTW_MPI_SCRAMBLED_IN | FFTW_MPI_SCRAMBLED_OUT))
-	  return 0; /* scrambled in/out not meaningful in transpose plans,
-		       and must not be confused with transposed in/out */
-
      MPI_Comm_size(comm, &n_pes);
      if (!xblock) xblock = XM(default_block)(nx, n_pes);
      if (!yblock) yblock = XM(default_block)(ny, n_pes);
@@ -417,10 +407,6 @@ X(plan) XM(plan_guru_dft)(int rnk, const XM(ddim) *dims0,
      dtensor *sz;
      
      init();
-
-     if (flags & (FFTW_MPI_TRANSPOSED_IN | FFTW_MPI_TRANSPOSED_OUT))
-	  return 0; /* transposed in/out not meaningful in guru API,
-		       and must not be confused with scrambled in/out */
 
      if (howmany < 0 || rnk < 1) return 0;
      for (i = 0; i < rnk; ++i)

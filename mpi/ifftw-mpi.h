@@ -27,9 +27,16 @@
 
 #include <mpi.h>
 
-/* mpi problem flags: problem-dependent meaning */
+/* mpi problem flags: problem-dependent meaning, but in general
+   SCRAMBLED means some reordering *within* the dimensions, while
+   TRANSPOSED means some reordering *of* the dimensions */
 #define SCRAMBLED_IN (1 << 0)
 #define SCRAMBLED_OUT (1 << 1)
+#define TRANSPOSED_IN (1 << 2)
+#define TRANSPOSED_OUT (1 << 3)
+
+#define SCRAMBLEDP(flags) ((flags) & (SCRAMBLED_IN | SCRAMBLED_OUT))
+#define TRANSPOSEDP(flags) ((flags) & (TRANSPOSED_IN | TRANSPOSED_OUT))
 
 #if defined(FFTW_SINGLE)
 #  define FFTW_MPI_TYPE MPI_FLOAT

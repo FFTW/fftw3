@@ -117,6 +117,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	     && n_pes > 2 /* no point for 2 processes */
 	     && p->nx % p->block == 0 && p->nx / p->block == n_pes
 	     && p->ny % p->tblock == 0 && p->ny / p->tblock == n_pes
+	     && !SCRAMBLEDP(p->flags)
 	  );
 }
 
@@ -182,7 +183,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      bt = XM(block)(p->ny, p->tblock, me);
      A(b == p->nx / np && bt == p->ny / np);
 
-     if (p->flags & SCRAMBLED_IN) /* I is already transposed */
+     if (p->flags & TRANSPOSED_IN) /* I is already transposed */
 	  cld1 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_1d)
 						   (b * p->ny * vn, 1, 1),
@@ -212,7 +213,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      cldt = X(mkplan_d)(plnr, XM(mkproblem_transpose)
 			(np/2, np/2, 2 * bt * b * vn, 
 			 I, O, 1, 1, comm2,
-			 p->flags | SCRAMBLED_IN | SCRAMBLED_OUT));
+			 p->flags | TRANSPOSED_IN | TRANSPOSED_OUT));
      MPI_Comm_free(&comm2);
      if (XM(any_true)(!cldt, p->comm)) goto nada;
 
@@ -226,9 +227,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      if (XM(any_true)(!cld3, p->comm)) goto nada;
 
      /* Finally, transpose 2 x np/2 x bt x b x vn = np x bt x b x vn 
-            -> np x b x bt x vn (SCRAMBLED_OUT)
-        or  -> bt x np x b x vn (!SCRAMBLED_OUT) */
-     if (p->flags & SCRAMBLED_OUT)
+            -> np x b x bt x vn (TRANSPOSED_OUT)
+        or  -> bt x np x b x vn (!TRANSPOSED_OUT) */
+     if (p->flags & TRANSPOSED_OUT)
 	  cld4 = X(mkplan_d)(plnr,
 			     X(mkproblem_rdft_0_d)(
 				  X(mktensor_4d)
