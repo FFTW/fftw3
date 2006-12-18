@@ -29,8 +29,8 @@ X(plan) XGURU(dft)(int rank, const IODIM *dims,
 
      if (!GURU_KOSHERP(rank, dims, howmany_rank, howmany_dims)) return 0;
 
-     X(extract_reim)(sign, in, &ri, &ii);
-     X(extract_reim)(sign, out, &ro, &io);
+     EXTRACT_REIM(sign, in, &ri, &ii);
+     EXTRACT_REIM(sign, out, &ro, &io);
 
      return X(mkapiplan)(
 	  sign, flags,

@@ -30,7 +30,7 @@ X(plan) XGURU(dft_r2c)(int rank, const IODIM *dims,
 
      if (!GURU_KOSHERP(rank, dims, howmany_rank, howmany_dims)) return 0;
 
-     X(extract_reim)(FFT_SIGN, out, &ro, &io);
+     EXTRACT_REIM(FFT_SIGN, out, &ro, &io);
 
      return X(mkapiplan)(
 	  0, flags,

@@ -29,7 +29,7 @@ X(plan) XGURU(dft_c2r)(int rank, const IODIM *dims,
 
      if (!GURU_KOSHERP(rank, dims, howmany_rank, howmany_dims)) return 0;
 
-     X(extract_reim)(FFT_SIGN, in, &ri, &ii);
+     EXTRACT_REIM(FFT_SIGN, in, &ri, &ii);
 
      if (out != ri)
 	  flags |= FFTW_DESTROY_INPUT;

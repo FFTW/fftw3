@@ -47,8 +47,12 @@ r2cbIII_15.c r2cbIII_16.c r2cbIII_32.c r2cbIII_64.c
 HC2CB = hc2cb_2.c hc2cb_4.c hc2cb_6.c hc2cb_8.c hc2cb_10.c hc2cb_12.c	\
 hc2cb_16.c hc2cb_32.c
 
+# like hc2cb, but generates part of its trig table on the fly (good
+# for large n)
+HC2CB2 = hc2cb2_4.c hc2cb2_8.c hc2cb2_16.c hc2cb2_32.c
+
 ###########################################################################
-ALL_CODELETS = $(R2CB) $(HB) $(R2CBIII) $(HC2CB)
+ALL_CODELETS = $(R2CB) $(HB) $(R2CBIII) $(HC2CB) $(HC2CB2)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
@@ -64,6 +68,7 @@ FLAGS_R2CB=$(RDFT_FLAGS_COMMON) -sign 1
 FLAGS_HB=$(RDFT_FLAGS_COMMON) -sign 1
 FLAGS_HB2=$(RDFT_FLAGS_COMMON) -sign 1 -twiddle-log3 -precompute-twiddles
 FLAGS_HC2CB=$(RDFT_FLAGS_COMMON) -sign 1
+FLAGS_HC2CB2=$(RDFT_FLAGS_COMMON) -sign 1 -twiddle-log3 -precompute-twiddles
 FLAGS_R2CBIII=$(RDFT_FLAGS_COMMON) -sign 1
 
 r2cb_%.c:  $(CODELET_DEPS) $(GEN_R2CB)
@@ -80,5 +85,8 @@ r2cbIII_%.c:  $(CODELET_DEPS) $(GEN_R2CB)
 
 hc2cb_%.c:  $(CODELET_DEPS) $(GEN_HC2C)
 	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2C) $(FLAGS_HC2CB) -n $* -dif -name hc2cb_$* -include "hc2cb.h") | $(ADD_DATE) | $(INDENT) >$@
+
+hc2cb2_%.c:  $(CODELET_DEPS) $(GEN_HC2C)
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2C) $(FLAGS_HC2CB2) -n $* -dif -name hc2cb2_$* -include "hc2cb.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE
