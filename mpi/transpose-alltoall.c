@@ -25,6 +25,14 @@
 #include <string.h>
 
 typedef struct {
+     solver super;
+     int copy_transposed_in; /* whether to copy the input for TRANSPOSED_IN,
+				which makes the final transpose out-of-place
+				but costs an extra copy and requires us
+				to destroy the input */
+} S;
+
+typedef struct {
      plan_mpi_transpose super;
 
      plan *cld1, *cld2, *cld2rest;
@@ -86,14 +94,15 @@ static void apply(const plan *ego_, R *I, R *O)
      }
 }
 
-static int applicable(const solver *ego_, const problem *p_,
+static int applicable(const S *ego, const problem *p_,
 		      const planner *plnr)
 {
      const problem_mpi_transpose *p = (const problem_mpi_transpose *) p_;
-     UNUSED(ego_);
      return (1
 	     && p->I != p->O
-	     && (!NO_DESTROY_INPUTP(plnr) || (p->flags & TRANSPOSED_IN))
+	     && (!NO_DESTROY_INPUTP(plnr) || 
+		 ((p->flags & TRANSPOSED_IN) && !ego->copy_transposed_in))
+	     && ((p->flags & TRANSPOSED_IN) || !ego->copy_transposed_in)
 	     && !SCRAMBLEDP(p->flags)
 	  );
 }
@@ -127,8 +136,9 @@ static void print(const plan *ego_, printer *p)
      p->print(p, ")");
 }
 
-static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
+static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
+     const S *ego = (const S *) ego_;
      const problem_mpi_transpose *p;
      P *pln;
      plan *cld1 = 0, *cld2 = 0, *cld2rest = 0;
@@ -141,8 +151,6 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
           XM(transpose_solve), awake, print, destroy
      };
 
-     UNUSED(ego);
-
      if (!applicable(ego, p_, plnr))
           return (plan *) 0;
 
@@ -154,8 +162,17 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      b = XM(block)(p->nx, p->block, my_pe);
 
-     if (p->flags & TRANSPOSED_IN) /* I is already transposed */
-	  I = p->O; /* final transpose is in-place */
+     if (p->flags & TRANSPOSED_IN) { /* I is already transposed */
+	  if (ego->copy_transposed_in) {
+	       cld1 = X(mkplan_d)(plnr,
+				  X(mkproblem_rdft_0_d)(X(mktensor_1d)
+							(b * p->ny * vn, 1, 1),
+							I = p->I, p->O));
+	       if (XM(any_true)(!cld1, p->comm)) goto nada;
+	  }
+	  else
+	       I = p->O; /* final transpose is in-place */
+     }
      else { /* transpose b x ny x vn -> ny x b x vn */
 	  cld1 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
@@ -275,13 +292,16 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(void)
+static solver *mksolver(int copy_transposed_in)
 {
      static const solver_adt sadt = { PROBLEM_MPI_TRANSPOSE, mkplan };
-     return MKSOLVER(solver, &sadt);
+     S *slv = MKSOLVER(S, &sadt);
+     slv->copy_transposed_in = copy_transposed_in;
+     return &(slv->super);
 }
 
 void XM(transpose_alltoall_register)(planner *p)
 {
-     REGISTER_SOLVER(p, mksolver());
+     REGISTER_SOLVER(p, mksolver(0));
+     REGISTER_SOLVER(p, mksolver(1));
 }
