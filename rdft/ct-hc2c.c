@@ -32,6 +32,7 @@ static void apply_dit(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
      const P *ego = (const P *) ego_;
      plan_rdft *cld;
      plan_hc2c *cldw;
+     UNUSED(r1);
 
      cld = (plan_rdft *) ego->cld;
      cld->apply(ego->cld, r0, cr);
@@ -45,6 +46,7 @@ static void apply_dif(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
      const P *ego = (const P *) ego_;
      plan_rdft *cld;
      plan_hc2c *cldw;
+     UNUSED(r1);
 
      cldw = (plan_hc2c *) ego->cldw;
      cldw->apply(ego->cldw, cr, ci);
@@ -89,8 +91,7 @@ static int applicable0(const hc2c_solver *ego, const problem *p_, planner *plnr)
 		  ||
 		  /* or the problem is HC2R, in which case it is solved
 		     by DIF, which destroys the input */
-		  (0 && /* FIXME */
-		   p->kind == HC2R && 
+		  (p->kind == HC2R && 
 		   (p->r0 == p->cr || !NO_DESTROY_INPUTP(plnr))))
 		  
 	     && ((r = X(choose_radix)(ego->r, p->sz->dims[0].n)) > 0)
@@ -161,7 +162,28 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	      pln = MKPLAN_RDFT2(P, &padt, apply_dit);
 	      break;
 
-	      /* FIXME: HC2R */
+	 case HC2R:
+	      cldw = ego->mkcldw(ego, HC2R, 
+				 r, m * d[0].is, 
+				 m, d[0].is,
+				 v, ovs,
+				 p->cr, p->ci, plnr);
+	      if (!cldw) goto nada;
+
+	      cld = X(mkplan_d)(plnr, 
+				X(mkproblem_rdft_1_d)(
+				     X(mktensor_1d)(m, d[0].is, (r/2)*d[0].os),
+				     X(mktensor_3d)(
+					  2, p->r1 - p->r0, p->ci - p->cr,
+					  r / 2, m * d[0].is, d[0].os,
+					  v, ivs, ovs),
+				     p->r0, p->cr, HC2R) 
+		   );
+	      if (!cld) goto nada;
+
+	      pln = MKPLAN_RDFT2(P, &padt, apply_dif);
+	      break;
+
 
 	 default: 
 	      A(0);

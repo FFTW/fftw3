@@ -40,13 +40,13 @@ r2hcII_7.c r2hcII_8.c r2hcII_9.c r2hcII_10.c r2hcII_12.c r2hcII_15.c	\
 r2hcII_16.c r2hcII_32.c r2hcII_64.c
 
 ###########################################################################
-# hc2c_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT
+# hc2cf_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT
 # step for a real-input FFT with rdft2-style output.  <r> must be even.
-HC2C = hc2c_2.c hc2c_4.c hc2c_6.c hc2c_8.c hc2c_10.c hc2c_12.c	\
-hc2c_16.c hc2c_32.c
+HC2CF = hc2cf_2.c hc2cf_4.c hc2cf_6.c hc2cf_8.c hc2cf_10.c hc2cf_12.c	\
+hc2cf_16.c hc2cf_32.c
 
 ###########################################################################
-ALL_CODELETS = $(R2HC) $(HF) $(HF2) $(R2HCII) $(HC2C)
+ALL_CODELETS = $(R2HC) $(HF) $(HF2) $(R2HCII) $(HC2CF)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
@@ -61,7 +61,7 @@ if MAINTAINER_MODE
 FLAGS_R2HC=$(RDFT_FLAGS_COMMON)
 FLAGS_HF=$(RDFT_FLAGS_COMMON)
 FLAGS_HF2=$(RDFT_FLAGS_COMMON) -twiddle-log3 -precompute-twiddles
-FLAGS_HC2C=$(RDFT_FLAGS_COMMON)
+FLAGS_HC2CF=$(RDFT_FLAGS_COMMON)
 FLAGS_R2HCII=$(RDFT_FLAGS_COMMON)
 
 r2hc_%.c:  $(CODELET_DEPS) $(GEN_R2HC)
@@ -76,7 +76,7 @@ hf2_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
 r2hcII_%.c:  $(CODELET_DEPS) $(GEN_R2HC)
 	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2HC) $(FLAGS_R2HC) -n $* -name r2hcII_$* -dft-II -include "r2hcII.h") | $(ADD_DATE) | $(INDENT) >$@
 
-hc2c_%.c:  $(CODELET_DEPS) $(GEN_HC2C)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2C) $(FLAGS_HC2C) -n $* -dit -name hc2c_$* -include "hc2c.h") | $(ADD_DATE) | $(INDENT) >$@
+hc2cf_%.c:  $(CODELET_DEPS) $(GEN_HC2C)
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2C) $(FLAGS_HC2CF) -n $* -dit -name hc2cf_$* -include "hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE

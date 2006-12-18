@@ -224,76 +224,6 @@ static const madt adt_b_dft = {
 };
 
 /*
- * backward rdft2 via backward rdft
- */
-static void k_b_rdft(R *cr, R *ci, const R *W, INT n, INT dist)
-{
-     INT i;
-     R *pp = cr, *pm = cr + n * dist;
-     INT im = ci - cr;
-
-     /* i = 0 and i = n */
-     {
-          E rop = pp[0], iop = pm[0];
-          pp[0] = rop + iop;
-          pp[im] = rop - iop;
-	  pp += dist; pm -= dist;
-     }
-
-     /* middle elements */
-     for (W += 2, i = 2; i < n; i += 2, W += 2) {
-          E a = pp[0], b = pp[im], c = pm[0], d = pm[im];
-          E wr = W[0], wi = W[1];
-	  E r0 = a + c, r1 = a - c, i0 = b - d, i1 = b + d;
-	  pp[0] = r0;
-	  pm[0] = i0;
-	  pp[im] = r1 * wr - i1 * wi;
-	  pm[im] = i1 * wr + r1 * wi;
-	  pp += dist; pm -= dist;
-     }
-
-     /* i = n/2 when n is even */
-     if (!(n & 1)) { pp[0] *= K(2.0); pp[im] *= -K(2.0); }
-}
-
-static void apply_b_rdft(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
-{
-     const P *ego = (const P *) ego_;
-     UNUSED(r1);
-
-     {
-          INT i, vl = ego->vl, n2 = ego->n / 2;
-          INT ivs = ego->ivs, is = ego->is;
-          const R *W = ego->td->W;
-	  R *cr1 = cr, *ci1 = ci;
-          for (i = 0; i < vl; ++i, cr1 += ivs, ci1 += ivs)
-               k_b_rdft(cr1, ci1, W, n2, is);
-     }
-
-     {
-          plan_rdft *cld = (plan_rdft *) ego->cld;
-          cld->apply((plan *) cld, cr, r0);
-     }
-}
-
-static problem *mkcld_b_rdft(const problem_rdft2 *p)
-{
-     const iodim *d = p->sz->dims;
-
-     tensor *radix = X(mktensor_1d)(2, p->ci - p->cr, p->r1 - p->r0);
-     tensor *cld_vec = X(tensor_append)(radix, p->vecsz);
-     X(tensor_destroy)(radix);
-
-     return X(mkproblem_rdft_1_d) (
-	  X(mktensor_1d)(d[0].n / 2, d[0].is, d[0].os),
-	  cld_vec, p->cr, p->r0, HC2R);
-}
-
-static const madt adt_b_rdft = {
-     applicable_b, apply_b_rdft, mkcld_b_rdft, {6, 4, 0, 0}, "hc2r2-rdft"
-};
-
-/*
  * common stuff
  */
 static void awake(plan *ego_, enum wakefulness wakefulness)
@@ -368,8 +298,7 @@ void X(rdft2_radix2_register)(planner *p)
 {
      unsigned i;
      static const madt *const adts[] = {
-	  &adt_f_dft,
-	  &adt_b_dft, &adt_b_rdft
+	  &adt_f_dft, &adt_b_dft,
      };
 
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)

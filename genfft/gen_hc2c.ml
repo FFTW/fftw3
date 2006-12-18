@@ -54,6 +54,8 @@ let byui = Complex.times (Complex.uminus Complex.i)
 
 let sym n f i = if (i < n - i) then f i else Complex.conj (f i)
 
+let shuffle_eo fe fo i = if i mod 2 == 0 then fe (i/2) else fo ((i-1)/2)
+
 let generate n =
   let rs = "rs"
   and twarray = "W"
@@ -87,35 +89,37 @@ let generate n =
   let the_location = (Unique.make (), Unique.make ()) in
   let locations _ = the_location in
 
+  let locr = (locative_array_c n 
+		(C.array_subscript arp vrs)
+		(C.array_subscript arm vrs)
+		locations )
+  and loci = (locative_array_c n 
+		(C.array_subscript aip vrs)
+		(C.array_subscript aim vrs)
+		locations)
+  and locp = (locative_array_c n 
+		(C.array_subscript arp vrs)
+		(C.array_subscript aip vrs)
+		locations)
+  and locm = (locative_array_c n 
+		(C.array_subscript arm vrs)
+		(C.array_subscript aim vrs)
+		locations)
+  in
+  let locri i = if i mod 2 == 0 then locr (i/2) else loci ((i-1)/2)
+  and locpm i = if i < n - i then locp i else locm (n-1-i)
+  in
+
   let asch = 
     match !ditdif with
     | DIT -> 
-	let inpute = 
-	  locative_array_c n 
-	    (C.array_subscript arp vrs)
-	    (C.array_subscript arm vrs)
-	    locations 
-	and inputo = 
-	  locative_array_c n 
-	    (C.array_subscript aip vrs)
-	    (C.array_subscript aim vrs)
-	    locations 
-	in
-	let input i = 
-	  if i mod 2 == 0 then inpute (i/2) else inputo ((i-1)/2) in
-	let output = Fft.dft sign n (byw (load_array_c n input)) in
-	let olocp = 
-	  locative_array_c n 
-	    (C.array_subscript arp vrs)
-	    (C.array_subscript aip vrs)
-	    locations 
-	and olocm = 
-	  locative_array_c n 
-	    (C.array_subscript arm vrs)
-	    (C.array_subscript aim vrs)
-	    locations in
-	let oloc i = if i < n - i then olocp i else olocm (n-1-i) in
-	let odag = store_array_c n oloc (sym n output) in
+	let output = Fft.dft sign n (byw (load_array_c n locri)) in
+	let odag = store_array_c n locpm (sym n output) in
+	  standard_optimizer odag 
+
+    | DIF -> 
+	let output = byw (Fft.dft sign n (sym n (load_array_c n locpm))) in
+	let odag = store_array_c n locri output in
 	  standard_optimizer odag 
   in
 
