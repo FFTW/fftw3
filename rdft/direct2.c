@@ -35,7 +35,7 @@ typedef struct {
 typedef struct {
      plan_rdft2 super;
 
-     stride is, os;
+     stride rs, cs;
      INT vl;
      INT ivs, ovs;
      kr2c k;
@@ -48,7 +48,7 @@ static void apply(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
      const P *ego = (const P *) ego_;
      ASSERT_ALIGNED_DOUBLE;
      ego->k(r0, r1, cr, ci,
-	    ego->is, ego->os, ego->os,
+	    ego->rs, ego->cs, ego->cs,
 	    ego->vl, ego->ivs, ego->ovs);
 }
 
@@ -58,7 +58,7 @@ static void apply_r2hc(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
      INT i, vl = ego->vl, ovs = ego->ovs;
      ASSERT_ALIGNED_DOUBLE;
      ego->k(r0, r1, cr, ci,
-	    ego->is, ego->os, ego->os,
+	    ego->rs, ego->cs, ego->cs,
 	    vl, ego->ivs, ovs);
      for (i = 0; i < vl; ++i, ci += ovs)
 	  ci[0] = ci[ego->ilast] = 0;
@@ -67,8 +67,8 @@ static void apply_r2hc(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(stride_destroy)(ego->is);
-     X(stride_destroy)(ego->os);
+     X(stride_destroy)(ego->rs);
+     X(stride_destroy)(ego->cs);
 }
 
 static void print(const plan *ego_, printer *p)
@@ -147,8 +147,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln->k = ego->k;
 
-     pln->is = X(mkstride)(ego->sz, r2hc_kindp ? d.is : d.os);
-     pln->os = X(mkstride)(ego->sz, r2hc_kindp ? d.os : d.is);
+     pln->rs = X(mkstride)(ego->sz, r2hc_kindp ? d.is : d.os);
+     pln->cs = X(mkstride)(ego->sz, r2hc_kindp ? d.os : d.is);
 
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
 

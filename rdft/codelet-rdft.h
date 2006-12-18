@@ -85,7 +85,7 @@ struct kr2c_desc_s {
 };
 
 typedef void (*kr2c) (R *R0, R *R1, R *Cr, R *Ci,
-		      stride ris, stride csr, stride csi,
+		      stride rs, stride csr, stride csi,
 		      INT vl, INT ivs, INT ovs);
 void X(kr2c_register)(planner *p, kr2c codelet, const kr2c_desc *desc);
 
