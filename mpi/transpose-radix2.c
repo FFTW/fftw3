@@ -262,16 +262,11 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      MPI_Comm_dup(p->comm, &pln->comm);
 
      X(ops_zero)(&pln->super.super.ops);
-     if (cld1)
-	  X(ops_add)(&pln->super.super.ops, &cld1->ops, &pln->super.super.ops);
-     if (cld2)
-	  X(ops_add)(&pln->super.super.ops, &cld2->ops, &pln->super.super.ops);
-     if (cldt)
-	  X(ops_add)(&pln->super.super.ops, &cldt->ops, &pln->super.super.ops);
-     if (cld3)
-	  X(ops_add)(&pln->super.super.ops, &cld3->ops, &pln->super.super.ops);
-     if (cld4)
-	  X(ops_add)(&pln->super.super.ops, &cld4->ops, &pln->super.super.ops);
+     if (cld1) X(ops_add2)(&cld1->ops, &pln->super.super.ops);
+     if (cld2) X(ops_add2)(&cld2->ops, &pln->super.super.ops);
+     if (cldt) X(ops_add2)(&cldt->ops, &pln->super.super.ops);
+     if (cld3) X(ops_add2)(&cld3->ops, &pln->super.super.ops);
+     if (cld4) X(ops_add2)(&cld4->ops, &pln->super.super.ops);
      /* FIXME: should MPI operations be counted in "other" somehow? */
 
      return &(pln->super.super);

@@ -235,14 +235,10 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->ioff = io - p->O;
 
      X(ops_zero)(&pln->super.super.ops);
-     if (cld1)
-	  X(ops_add)(&pln->super.super.ops, &cld1->ops, &pln->super.super.ops);
-     if (cld2)
-	  X(ops_add)(&pln->super.super.ops, &cld2->ops, &pln->super.super.ops);
-     if (cldt1)
-	  X(ops_add)(&pln->super.super.ops, &cldt1->ops, &pln->super.super.ops);
-     if (cldt2)
-	  X(ops_add)(&pln->super.super.ops, &cldt2->ops, &pln->super.super.ops);
+     if (cld1) X(ops_add2)(&cld1->ops, &pln->super.super.ops);
+     if (cld2) X(ops_add2)(&cld2->ops, &pln->super.super.ops);
+     if (cldt1) X(ops_add2)(&cldt1->ops, &pln->super.super.ops);
+     if (cldt2) X(ops_add2)(&cldt2->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 

@@ -270,7 +270,7 @@ static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
 				  p->I, p->I));
      if (!ego->cld2)
 	  goto nada;
-     X(ops_add)(&ego->super.super.ops, &ego->cld2->ops, &ego->super.super.ops);
+     X(ops_add2)(&ego->cld2->ops, &ego->super.super.ops);
 
      if (m > 1) {
 	  ego->cld3 = X(mkplan_d)(plnr,
@@ -281,8 +281,7 @@ static int mkcldrn_gcd(const problem_rdft *p, planner *plnr, P *ego)
 				       TAINT(p->I, num_el), buf));
 	  if (!ego->cld3)
 	       goto nada;
-	  X(ops_madd)(d, &ego->cld3->ops, &ego->super.super.ops,
-		      &ego->super.super.ops);
+	  X(ops_madd2)(d, &ego->cld3->ops, &ego->super.super.ops);
 	  ego->super.super.ops.other += num_el * d * 2;
      }
 
@@ -435,9 +434,7 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 				       p->I + mc*vl, buf));
 	  if (!ego->cld1)
 	       goto nada;
-	  X(ops_add)(&ego->super.super.ops, &ego->cld1->ops, 
-		     &ego->super.super.ops);
-
+	  X(ops_add2)(&ego->cld1->ops, &ego->super.super.ops);
      }
 
      ego->cld2 = X(mkplan_d)(plnr,
@@ -448,7 +445,7 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 				  p->I, p->I));
      if (!ego->cld2)
 	  goto nada;
-     X(ops_add)(&ego->super.super.ops, &ego->cld2->ops, &ego->super.super.ops);
+     X(ops_add2)(&ego->cld2->ops, &ego->super.super.ops);
 
      if (n > nc) {
 	  ego->cld3 = X(mkplan_d)(plnr,
@@ -459,8 +456,7 @@ static int mkcldrn_cut(const problem_rdft *p, planner *plnr, P *ego)
 				       buf + (m-mc)*(nc*vl), p->I + nc*vl));
 	  if (!ego->cld3)
 	       goto nada;
-	  X(ops_add)(&ego->super.super.ops, &ego->cld3->ops, 
-		     &ego->super.super.ops);
+	  X(ops_add2)(&ego->cld3->ops, &ego->super.super.ops);
      }
 
      /* memcpy/memmove operations */

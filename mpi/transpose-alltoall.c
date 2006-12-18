@@ -245,12 +245,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->equal_blocks = equal_blocks;
 
      X(ops_zero)(&pln->super.super.ops);
-     if (cld1)
-	  X(ops_add)(&pln->super.super.ops, &cld1->ops, &pln->super.super.ops);
-     if (cld2)
-	  X(ops_add)(&pln->super.super.ops, &cld2->ops, &pln->super.super.ops);
-     if (cld2rest)
-	  X(ops_add)(&pln->super.super.ops, &cld2rest->ops, &pln->super.super.ops);
+     if (cld1) X(ops_add2)(&cld1->ops, &pln->super.super.ops);
+     if (cld2) X(ops_add2)(&cld2->ops, &pln->super.super.ops);
+     if (cld2rest) X(ops_add2)(&cld2rest->ops, &pln->super.super.ops);
      /* FIXME: should MPI operations be counted in "other" somehow? */
 
      return &(pln->super.super);
