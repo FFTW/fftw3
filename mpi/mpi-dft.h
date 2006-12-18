@@ -53,3 +53,4 @@ int XM(dft_serial_applicable)(const problem_mpi_dft *p);
 /* various solvers */
 void XM(dft_rank_geq2_register)(planner *p);
 void XM(dft_serial_register)(planner *p);
+void XM(dft_rank1_bigvec_register)(planner *p);

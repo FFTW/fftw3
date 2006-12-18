@@ -189,13 +189,25 @@ ptrdiff_t XM(local_size_guru)(int rnk, const XM(ddim) *dims0,
 		    sz->dims[i].b[IB]
 			 = XM(default_block)(sz->dims[i].n, n_pes);
 		    sz->dims[1-i].b[IB] = sz->dims[1-i].n;
-		    local_size(my_pe, sz, IB, 
-			       local_n_in, local_start_in);
+		    local_size(my_pe, sz, IB, local_n_in, local_start_in);
 		    N = X(imax)(N, prod(rnk, local_n_in));
 		    sz->dims[i] = odims[i];
 		    sz->dims[1-i] = odims[1-i];
 		    break;
 	       }
+     }
+     else if (rnk == 1) {
+	  if (howmany >= n_pes) { /* dft-rank1-bigvec */
+	       ptrdiff_t n[2], start[2];
+	       dtensor *sz2 = XM(mkdtensor)(2);
+	       sz2->dims[0] = sz->dims[0];
+	       sz2->dims[0].b[IB] = sz->dims[0].n;
+	       sz2->dims[1].n = sz2->dims[1].b[OB] = howmany;
+	       sz2->dims[1].b[IB] = XM(default_block)(howmany, n_pes);
+	       local_size(my_pe, sz2, IB, n, start);
+	       XM(dtensor_destroy)(sz2);
+	       N = X(imax)(N, (prod(2, n) + howmany - 1) / howmany);
+	  }
      }
      /* TODO: rnk==1 also may need extra space */
 
