@@ -78,8 +78,6 @@ static int applicable(const solver *ego_, const problem *p_,
      return (1
 	     && p->I != p->O
 	     && !NO_DESTROY_INPUTP(plnr)
-	     && !X(is_block_cyclic)(p->nx, p->block, p->comm)
-	     && !X(is_block_cyclic)(p->ny, p->tblock, p->comm)
 	  );
 }
 
@@ -122,7 +120,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      int pe, my_pe, n_pes;
      int equal_blocks = 1;
      static const plan_adt padt = {
-          X(mpi_transpose_solve), awake, print, destroy
+          XM(transpose_solve), awake, print, destroy
      };
 
      UNUSED(ego);
@@ -133,7 +131,10 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      p = (const problem_mpi_transpose *) p_;
      vn = p->vn;
 
-     b = X(current_block)(p->nx, p->block, p->comm);
+     MPI_Comm_rank(p->comm, &my_pe);
+     MPI_Comm_size(p->comm, &n_pes);
+
+     b = XM(block)(p->nx, p->block, my_pe);
 
      if (p->flags & SCRAMBLED_IN) /* I is already transposed */
 	  cld1 = X(mkplan_d)(plnr, 
@@ -147,9 +148,9 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    p->ny, vn, b * vn,
 						    vn, 1, 1),
 						   p->I, p->O));
-     if (X(any_true)(!cld1, p->comm)) goto nada;
+     if (XM(any_true)(!cld1, p->comm)) goto nada;
 	  
-     bt = X(current_block)(p->ny, p->tblock, p->comm);
+     bt = XM(block)(p->ny, p->tblock, my_pe);
      nxb = (p->nx + p->block - 1) / p->block;
      if (p->nx != nxb * p->block)
 	  nxb -= 1; /* number of equal-sized blocks */
@@ -162,7 +163,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    bt, b, nx,
 						    b, 1, 1),
 						   p->I, p->O));
-	  if (X(any_true)(!cld2, p->comm)) goto nada;
+	  if (XM(any_true)(!cld2, p->comm)) goto nada;
 	  
 	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
 	       Ioff = bt * b * nxb;
@@ -174,7 +175,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 							     b, 1, 1),
 							    p->I + Ioff,
 							    p->O + Ooff));
-	       if (X(any_true)(!cld2rest, p->comm)) goto nada;
+	       if (XM(any_true)(!cld2rest, p->comm)) goto nada;
 	  }
      }
      else { /* SCRAMBLED_OUT */
@@ -186,7 +187,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    b, vn, bt*vn,
 						    vn, 1, 1),
 						   p->I, p->O));
-	  if (X(any_true)(!cld2, p->comm)) goto nada;
+	  if (XM(any_true)(!cld2, p->comm)) goto nada;
 	  
 	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
 	       Ioff = Ooff = bt * b * nxb * vn;
@@ -198,7 +199,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 							     vn, 1, 1),
 							    p->I + Ioff,
 							    p->O + Ooff));
-	       if (X(any_true)(!cld2rest, p->comm)) goto nada;
+	       if (XM(any_true)(!cld2rest, p->comm)) goto nada;
 	  }
      }
 
@@ -216,18 +217,16 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
         command.  TODO: In the special case where all block sizes are
         equal, we could use the MPI_Alltoall command.  It's not clear
         whether/why this would be any faster, though. */
-     MPI_Comm_rank(p->comm, &my_pe);
-     MPI_Comm_size(p->comm, &n_pes);
      sbs = (int *) MALLOC(4 * n_pes * sizeof(int), PLANS);
      sbo = sbs + n_pes;
      rbs = sbo + n_pes;
      rbo = rbs + n_pes;
-     b = X(some_block)(p->nx, p->block, my_pe, n_pes);
-     bt = X(some_block)(p->ny, p->tblock, my_pe, n_pes);
+     b = XM(block)(p->nx, p->block, my_pe);
+     bt = XM(block)(p->ny, p->tblock, my_pe);
      for (pe = 0; pe < n_pes; ++pe) {
 	  INT db, dbt; /* destination block sizes */
-	  db = X(some_block)(p->nx, p->block, pe, n_pes);
-	  dbt = X(some_block)(p->ny, p->tblock, pe, n_pes);
+	  db = XM(block)(p->nx, p->block, pe);
+	  dbt = XM(block)(p->ny, p->tblock, pe);
 
 	  /* MPI requires type "int" here; apparently it
 	     has no 64-bit API?  Grrr. */
@@ -269,7 +268,7 @@ static solver *mksolver(void)
      return MKSOLVER(solver, &sadt);
 }
 
-void X(mpi_transpose_alltoall_register)(planner *p)
+void XM(transpose_alltoall_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }

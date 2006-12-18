@@ -193,6 +193,8 @@ void done(bench_problem *p)
 
 void cleanup(void)
 {
+     initial_cleanup();
+
      wrwisdom();
 #ifdef HAVE_SMP
      FFTW(cleanup_threads)();

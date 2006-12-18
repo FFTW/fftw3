@@ -14,4 +14,5 @@
 #endif
 
 extern FFTW(plan) mkplan(bench_problem *p, int flags);
+extern void initial_cleanup(void);
 extern void final_cleanup(void);

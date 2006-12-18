@@ -24,15 +24,15 @@
 
 static const solvtab s =
 {
-     SOLVTAB(X(mpi_transpose_inplace_register)),
-     SOLVTAB(X(mpi_transpose_alltoall_register)),
-     SOLVTAB(X(mpi_transpose_radix2_register)),
-     SOLVTAB(X(mpi_dft_rank_geq2_register)),
-     SOLVTAB(X(mpi_dft_serial_register)),
+     SOLVTAB(XM(transpose_inplace_register)),
+     SOLVTAB(XM(transpose_alltoall_register)),
+     SOLVTAB(XM(transpose_radix2_register)),
+     SOLVTAB(XM(dft_rank_geq2_register)),
+     SOLVTAB(XM(dft_serial_register)),
      SOLVTAB_END
 };
 
-void X(mpi_conf_standard)(planner *p)
+void XM(conf_standard)(planner *p)
 {
      X(solvtab_exec)(s, p);
 }

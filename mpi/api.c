@@ -24,7 +24,14 @@
 #include "mpi-transpose.h"
 #include "mpi-dft.h"
 
-#define MPI_FLAGS(f) ((f) >> 27)
+/* Convert API flags to internal MPI flags.  Note that internally,
+   we use the same flags to indicate scrambling and transposing,
+   because we always have one or the other and never both.  However,
+   in the API we use different flags to make it more flexible and
+   to allow better error-checking. */
+#define MPI_FLAGS(f)							 \
+  ((((f) & (FFTW_MPI_SCRAMBLED_IN | FFTW_MPI_SCRAMBLED_OUT)) >> 28)	 \
+   | (((f) & (FFTW_MPI_TRANSPOSED_IN | FFTW_MPI_TRANSPOSED_OUT)) >> 30))
 
 /*************************************************************************/
 
@@ -55,12 +62,12 @@ static void init(void)
      if (!mpi_inited) {
 	  planner *plnr = X(the_planner)();
 	  plnr->measure_hook = measure_hook;
-          X(mpi_conf_standard)(plnr);
+          XM(conf_standard)(plnr);
 	  mpi_inited = 1;	  
      }
 }
 
-void X(mpi_cleanup)(void)
+void XM(cleanup)(void)
 {
      X(cleanup)();
      mpi_inited = 0;
@@ -68,216 +75,415 @@ void X(mpi_cleanup)(void)
 
 /*************************************************************************/
 
-ptrdiff_t X(mpi_local_size_many_transposed)(int rnk, const ptrdiff_t *n,
-					    ptrdiff_t howmany,
-					    ptrdiff_t xblock, ptrdiff_t yblock,
-					    MPI_Comm comm,
-					    ptrdiff_t *local_nx,
-					    ptrdiff_t *local_x_start,
-					    ptrdiff_t *local_ny, 
-					    ptrdiff_t *local_y_start)
+static dtensor *mkdtensor_api(int rnk, const XM(ddim) *dims0)
 {
-     int my_pe;
+     dtensor *x = XM(mkdtensor)(rnk);
+     int i;
+     for (i = 0; i < rnk; ++i) {
+	  x->dims[i].n = dims0[i].n;
+	  x->dims[i].b[IB] = dims0[i].ib;
+	  x->dims[i].b[OB] = dims0[i].ob;
+     }
+     return x;
+}
+
+static dtensor *default_sz(int rnk, const XM(ddim) *dims0, int n_pes)
+{
+     dtensor *sz = XM(mkdtensor)(rnk);
+     dtensor *sz0 = mkdtensor_api(rnk, dims0);
+     block_kind k;
+     int i;
+
+     for (i = 0; i < rnk; ++i) {
+	  sz->dims[i].n = dims0[i].n;
+	  sz->dims[i].b[IB] = dims0[i].ib ? dims0[i].ib : sz->dims[i].n;
+	  sz->dims[i].b[OB] = dims0[i].ob ? dims0[i].ob : sz->dims[i].n;
+     }
+
+     /* If we haven't used all of the processes yet, and some of the
+	block sizes weren't specified (i.e. 0), then set the
+	unspecified blocks so as to use as many processes as
+	possible with as few distributed dimensions as possible. */
+     for (k = IB; k <= OB; ++k) {
+	  INT nb = XM(num_blocks_total)(sz, k);
+	  INT np = n_pes / nb;
+	  for (i = 0; i < rnk && np > 1; ++i)
+	       if (!sz0->dims[i].b[k]) {
+		    sz->dims[i].b[k] = XM(default_block)(sz->dims[i].n, np);
+		    nb *= XM(num_blocks)(sz->dims[i].n, sz->dims[i].b[k]);
+		    np = n_pes / nb;
+	       }
+     }
+
+     XM(dtensor_destroy)(sz0);
+     return sz;
+}
+
+/* allocate simple local (serial) dims array corresponding to n[rnk] */
+static XM(ddim) *simple_dims(int rnk, const int *n)
+{
+     XM(ddim) *dims = (XM(ddim) *) MALLOC(sizeof(XM(ddim)) * rnk,
+						TENSORS);
+     int i;
+     for (i = 0; i < rnk; ++i)
+	  dims[i].n = dims[i].ib = dims[i].ob = n[i];
+     return dims;
+}
+
+/*************************************************************************/
+
+static void local_size(int my_pe, const dtensor *sz, block_kind k,
+		       ptrdiff_t *local_n, ptrdiff_t *local_start)
+{
+     int i;
+     if (my_pe >= XM(num_blocks_total)(sz, k))
+	  for (i = 0; i < sz->rnk; ++i)
+	       local_n[i] = local_start[i] = 0;
+     else {
+	  XM(block_coords)(sz, k, my_pe, local_start);
+	  for (i = 0; i < sz->rnk; ++i) {
+	       local_n[i] = XM(block)(sz->dims[i].n, sz->dims[i].b[k],
+				      local_start[i]);
+	       local_start[i] *= sz->dims[i].b[k];
+	  }
+     }
+}
+
+static INT prod(int rnk, const int *local_n) 
+{
+     int i;
+     INT N = 1;
+     for (i = 0; i < rnk; ++i) N *= local_n[i];
+     return N;
+}
+
+ptrdiff_t XM(local_size_guru)(int rnk, const XM(ddim) *dims0,
+			      ptrdiff_t howmany, MPI_Comm comm,
+			      ptrdiff_t *local_n_in,
+			      ptrdiff_t *local_start_in,
+			      ptrdiff_t *local_n_out, 
+			      ptrdiff_t *local_start_out)
+{
+     INT N;
+     int my_pe, n_pes, i;
+     dtensor *sz;
+
+     if (rnk == 0)
+	  return howmany;
+
      MPI_Comm_rank(comm, &my_pe);
+     MPI_Comm_size(comm, &n_pes);
+     sz = default_sz(rnk, dims0, n_pes);
+
+     /* Now, we must figure out how much local space the user should
+	allocate.  This depends strongly on the exact algorithms we
+	employ...ugh!  FIXME: get this info from the solvers somehow? */
+     N = 1;
+     if (rnk > 1 && XM(is_block1d)(sz, IB) && XM(is_block1d)(sz, OB)) {
+	  ddim odims[2];
+	  odims[0] = sz->dims[0]; odims[1] = sz->dims[1]; /* save */
+	  /* we may need extra space for transposed intermediate data */
+	  for (i = 0; i < 2; ++i)
+	       if (XM(num_blocks)(sz->dims[i].n, sz->dims[i].b[IB]) == 1 &&
+		   XM(num_blocks)(sz->dims[i].n, sz->dims[i].b[OB]) == 1) {
+		    sz->dims[i].b[IB]
+			 = XM(default_block)(sz->dims[i].n, n_pes);
+		    sz->dims[1-i].b[IB] = sz->dims[1-i].n;
+		    local_size(my_pe, sz, IB, 
+			       local_n_in, local_start_in);
+		    N = X(imax)(N, prod(rnk, local_n_in));
+		    sz->dims[i] = odims[i];
+		    sz->dims[1-i] = odims[1-i];
+		    break;
+	       }
+     }
+     /* TODO: rnk==1 also may need extra space */
+
+     local_size(my_pe, sz, IB, local_n_in, local_start_in);
+     local_size(my_pe, sz, OB, local_n_out, local_start_out);
+
+     /* at least, make sure we have enough space to store input & output */
+     N = X(imax)(N, X(imax)(prod(rnk, local_n_in), prod(rnk, local_n_out)));
+
+     XM(dtensor_destroy)(sz);
+     return N * howmany;
+}
+
+ptrdiff_t XM(local_size_many_transposed)(int rnk, const ptrdiff_t *n,
+					 ptrdiff_t howmany,
+					 ptrdiff_t xblock, ptrdiff_t yblock,
+					 MPI_Comm comm,
+					 ptrdiff_t *local_nx,
+					 ptrdiff_t *local_x_start,
+					 ptrdiff_t *local_ny,
+					 ptrdiff_t *local_y_start)
+{
+     ptrdiff_t N;
+     XM(ddim) *dims; 
+     ptrdiff_t *local;
+
+     if (rnk == 0) {
+	  *local_nx = *local_ny = 1;
+	  *local_x_start = *local_y_start = 0;
+	  return howmany;
+     }
+
+     dims = simple_dims(rnk, n);
+     local = (ptrdiff_t *) MALLOC(sizeof(ptrdiff_t) * rnk * 4, TENSORS);
+
+     /* default 1d block distribution, with transposed output */
+     dims[0].ib = xblock;
+     if (rnk > 1)
+	  dims[1].ob = yblock;
+     else
+	  dims[0].ob = xblock;
+     
+     N = XM(local_size_guru)(rnk, dims, howmany, comm, 
+			     local, local + rnk,
+			     local + 2*rnk, local + 3*rnk);
+     *local_nx = local[0];
+     *local_x_start = local[rnk];
      if (rnk > 1) {
-	  INT nx = n[0], ny = n[1];
-	  int i;
-	  for (i = 2; i < rnk; ++i) howmany *= n[i];
-	  if (!xblock) xblock = X(default_block)(nx, comm);
-	  if (!yblock) yblock = X(default_block)(ny, comm);
-	  *local_nx = X(current_block)(nx, xblock, comm);
-	  *local_ny = X(current_block)(ny, yblock, comm);
-	  *local_x_start = *local_nx == 0 ? 0 : xblock * my_pe;
-	  *local_y_start = *local_ny == 0 ? 0 : yblock * my_pe;
-	  return X(imax)(*local_nx * ny, *local_ny * nx) * howmany;
+	  *local_ny = local[2*rnk + 1];
+	  *local_y_start = local[3*rnk + 1];
      }
      else {
-	  A(0); /* unimplemented */
-	  return 0;
+	  *local_ny = *local_nx;
+	  *local_y_start = *local_x_start;
      }
+     X(ifree)(local);
+     X(ifree)(dims);
+     return N;
 }
 
-ptrdiff_t X(mpi_local_size_many)(int rnk, const ptrdiff_t *n,
-				 ptrdiff_t howmany,
-				 ptrdiff_t xblock, ptrdiff_t yblock,
-				 MPI_Comm comm,
-				 ptrdiff_t *local_nx,
-				 ptrdiff_t *local_x_start)
+ptrdiff_t XM(local_size_many)(int rnk, const ptrdiff_t *n,
+			      ptrdiff_t howmany, 
+			      ptrdiff_t xblock,
+			      MPI_Comm comm,
+			      ptrdiff_t *local_nx,
+			      ptrdiff_t *local_x_start)
 {
      ptrdiff_t local_ny, local_y_start;
-     return X(mpi_local_size_many_transposed)(rnk, n, howmany,
-					      xblock, yblock, comm,
-					      local_nx, local_x_start,
-					      &local_ny, &local_y_start);
+     return XM(local_size_many_transposed)(rnk, n, howmany,
+					   xblock, FFTW_MPI_DEFAULT_BLOCK,
+					   comm,
+					   local_nx, local_x_start,
+					   &local_ny, &local_y_start);
 }
 
-ptrdiff_t X(mpi_local_size_transposed)(int rnk, const ptrdiff_t *n,
+
+ptrdiff_t XM(local_size_transposed)(int rnk, const ptrdiff_t *n,
+				    MPI_Comm comm,
+				    ptrdiff_t *local_nx,
+				    ptrdiff_t *local_x_start,
+				    ptrdiff_t *local_ny,
+				    ptrdiff_t *local_y_start)
+{
+     return XM(local_size_many_transposed)(rnk, n, 1,
+					   FFTW_MPI_DEFAULT_BLOCK,
+					   FFTW_MPI_DEFAULT_BLOCK,
+					   comm,
+					   local_nx, local_x_start,
+					   local_ny, local_y_start);
+}
+
+ptrdiff_t XM(local_size)(int rnk, const ptrdiff_t *n,
+			 MPI_Comm comm,
+			 ptrdiff_t *local_nx,
+			 ptrdiff_t *local_x_start)
+{
+     ptrdiff_t local_ny, local_y_start;
+     return XM(local_size_transposed)(rnk, n, comm,
+				      local_nx, local_x_start,
+				      &local_ny, &local_y_start);
+}
+
+ptrdiff_t XM(local_size_1d)(ptrdiff_t nx, MPI_Comm comm,
+			    ptrdiff_t *local_nx, ptrdiff_t *local_x_start)
+{
+     return XM(local_size)(1, &nx, comm, local_nx, local_x_start);
+}
+
+ptrdiff_t XM(local_size_2d_transposed)(ptrdiff_t nx, ptrdiff_t ny,
 				       MPI_Comm comm,
 				       ptrdiff_t *local_nx,
 				       ptrdiff_t *local_x_start,
-				       ptrdiff_t *local_ny,
+				       ptrdiff_t *local_ny, 
 				       ptrdiff_t *local_y_start)
 {
-     return X(mpi_local_size_many_transposed)(rnk, n, 1,
-					      FFTW_MPI_DEFAULT_BLOCK,
-					      FFTW_MPI_DEFAULT_BLOCK,
-					      comm, local_nx, local_x_start,
-					      local_ny, local_y_start);
+     ptrdiff_t n[2];
+     n[0] = nx; n[1] = ny;
+     return XM(local_size_transposed)(2, n, comm,
+				      local_nx, local_x_start,
+				      local_ny, local_y_start);
 }
 
-ptrdiff_t X(mpi_local_size)(int rnk, const ptrdiff_t *n,
+ptrdiff_t XM(local_size_2d)(ptrdiff_t nx, ptrdiff_t ny, MPI_Comm comm,
+			       ptrdiff_t *local_nx, ptrdiff_t *local_x_start)
+{
+     ptrdiff_t n[2];
+     n[0] = nx; n[1] = ny;
+     return XM(local_size)(2, n, comm, local_nx, local_x_start);
+}
+
+ptrdiff_t XM(local_size_3d_transposed)(ptrdiff_t nx, ptrdiff_t ny,
+				       ptrdiff_t nz,
+				       MPI_Comm comm,
+				       ptrdiff_t *local_nx,
+				       ptrdiff_t *local_x_start,
+				       ptrdiff_t *local_ny, 
+				       ptrdiff_t *local_y_start)
+{
+     ptrdiff_t n[3];
+     n[0] = nx; n[1] = ny; n[2] = nz;
+     return XM(local_size_transposed)(3, n, comm,
+				      local_nx, local_x_start,
+				      local_ny, local_y_start);
+}
+
+ptrdiff_t XM(local_size_3d)(ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz,
 			    MPI_Comm comm,
-			    ptrdiff_t *local_nx,
-			    ptrdiff_t *local_x_start)
-{
-     ptrdiff_t local_ny, local_y_start;
-     return X(mpi_local_size_transposed)(rnk, n, comm,
-					 local_nx, local_x_start,
-					 &local_ny, &local_y_start);
-}
-
-ptrdiff_t X(mpi_local_size_1d)(ptrdiff_t nx, MPI_Comm comm,
-			       ptrdiff_t *local_nx, ptrdiff_t *local_x_start)
-{
-     return X(mpi_local_size)(1, &nx, comm, local_nx, local_x_start);
-}
-
-ptrdiff_t X(mpi_local_size_2d_transposed)(ptrdiff_t nx, ptrdiff_t ny,
-					  MPI_Comm comm,
-					  ptrdiff_t *local_nx,
-					  ptrdiff_t *local_x_start,
-					  ptrdiff_t *local_ny, 
-					  ptrdiff_t *local_y_start)
-{
-     ptrdiff_t n[2];
-     n[0] = nx; n[1] = ny;
-     return X(mpi_local_size_transposed)(2, n, comm,
-					 local_nx, local_x_start,
-					 local_ny, local_y_start);
-}
-
-ptrdiff_t X(mpi_local_size_2d)(ptrdiff_t nx, ptrdiff_t ny, MPI_Comm comm,
-			       ptrdiff_t *local_nx, ptrdiff_t *local_x_start)
-{
-     ptrdiff_t n[2];
-     n[0] = nx; n[1] = ny;
-     return X(mpi_local_size)(2, n, comm, local_nx, local_x_start);
-}
-
-ptrdiff_t X(mpi_local_size_3d_transposed)(ptrdiff_t nx, ptrdiff_t ny,
-					  ptrdiff_t nz,
-					  MPI_Comm comm,
-					  ptrdiff_t *local_nx,
-					  ptrdiff_t *local_x_start,
-					  ptrdiff_t *local_ny, 
-					  ptrdiff_t *local_y_start)
+			    ptrdiff_t *local_nx, ptrdiff_t *local_x_start)
 {
      ptrdiff_t n[3];
      n[0] = nx; n[1] = ny; n[2] = nz;
-     return X(mpi_local_size_transposed)(3, n, comm,
-					 local_nx, local_x_start,
-					 local_ny, local_y_start);
-}
-
-ptrdiff_t X(mpi_local_size_3d)(ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz,
-			       MPI_Comm comm,
-			       ptrdiff_t *local_nx, ptrdiff_t *local_x_start)
-{
-     ptrdiff_t n[3];
-     n[0] = nx; n[1] = ny; n[2] = nz;
-     return X(mpi_local_size)(3, n, comm, local_nx, local_x_start);
+     return XM(local_size)(3, n, comm, local_nx, local_x_start);
 }
 
 /*************************************************************************/
 /* Transpose API */
 
-X(plan) X(mpi_plan_many_transpose)(ptrdiff_t nx, ptrdiff_t ny, 
-				   ptrdiff_t howmany,
-				   ptrdiff_t xblock, ptrdiff_t yblock,
-				   R *in, R *out, 
-				   MPI_Comm comm, unsigned flags)
+X(plan) XM(plan_many_transpose)(ptrdiff_t nx, ptrdiff_t ny, 
+				ptrdiff_t howmany,
+				ptrdiff_t xblock, ptrdiff_t yblock,
+				R *in, R *out, 
+				MPI_Comm comm, unsigned flags)
 {
+     int n_pes;
      init();
 
      if (howmany < 0 || xblock < 0 || yblock < 0 ||
-	 nx <= 0 || ny <= 0 || flags & FFTW_MPI_TRANSPOSED) return 0;
+	 nx <= 0 || ny <= 0) return 0;
 
-     if (!xblock) xblock = X(default_block)(nx, comm);
-     if (!yblock) yblock = X(default_block)(ny, comm);
+     if (flags & (FFTW_MPI_SCRAMBLED_IN | FFTW_MPI_SCRAMBLED_OUT))
+	  return 0; /* scrambled in/out not meaningful in transpose plans,
+		       and must not be confused with transposed in/out */
+
+     MPI_Comm_size(comm, &n_pes);
+     if (!xblock) xblock = XM(default_block)(nx, n_pes);
+     if (!yblock) yblock = XM(default_block)(ny, n_pes);
+     if (n_pes < XM(num_blocks)(nx, xblock)
+	 || n_pes < XM(num_blocks)(ny, yblock))
+	  return 0;
 
      return 
 	  X(mkapiplan)(FFTW_FORWARD, flags,
-		       X(mkproblem_mpi_transpose)(howmany, nx, ny,
-						  in, out, xblock, yblock,
-						  comm, MPI_FLAGS(flags)));
+		       XM(mkproblem_transpose)(nx, ny, howmany,
+					       in, out, xblock, yblock,
+					       comm, MPI_FLAGS(flags)));
 }
 
-X(plan) X(mpi_plan_transpose)(ptrdiff_t nx, ptrdiff_t ny, R *in, R *out, 
-			      MPI_Comm comm, unsigned flags)
+X(plan) XM(plan_transpose)(ptrdiff_t nx, ptrdiff_t ny, R *in, R *out, 
+			   MPI_Comm comm, unsigned flags)
 			      
 {
-     return X(mpi_plan_many_transpose)(nx, ny, 1,
-				       FFTW_MPI_DEFAULT_BLOCK,
-				       FFTW_MPI_DEFAULT_BLOCK,
-				       in, out, comm, flags);
+     return XM(plan_many_transpose)(nx, ny, 1,
+				    FFTW_MPI_DEFAULT_BLOCK,
+				    FFTW_MPI_DEFAULT_BLOCK,
+				    in, out, comm, flags);
 }
 
 /*************************************************************************/
 /* Complex DFT API */
 
-X(plan) X(mpi_plan_many_dft)(int rnk, const ptrdiff_t *n,
-			     ptrdiff_t howmany,
-			     ptrdiff_t xblock, ptrdiff_t yblock,
-			     C *in, C *out,
-			     MPI_Comm comm, int sign, unsigned flags)
+X(plan) XM(plan_guru_dft)(int rnk, const XM(ddim) *dims0,
+			  ptrdiff_t howmany,
+			  C *in, C *out,
+			  MPI_Comm comm, int sign, unsigned flags)
 {
-     int i;
-
+     int n_pes, i;
+     dtensor *sz;
+     
      init();
 
-     if (howmany < 0 || xblock < 0 || yblock < 0 || rnk < 1) return 0;
-     for (i = 0; i < rnk; ++i) if (n[i] < 1) return 0;
-     if (rnk == 1 && (flags & FFTW_MPI_TRANSPOSED)) return 0;
+     if (flags & (FFTW_MPI_TRANSPOSED_IN | FFTW_MPI_TRANSPOSED_OUT))
+	  return 0; /* transposed in/out not meaningful in guru API,
+		       and must not be confused with scrambled in/out */
 
-     if (!xblock) xblock = X(default_block)(n[0], comm);
-     if (!yblock && rnk > 1) yblock = X(default_block)(n[1], comm);
+     if (howmany < 0 || rnk < 1) return 0;
+     for (i = 0; i < rnk; ++i)
+	  if (dims0[i].n < 1 || dims0[i].ib < 0 || dims0[i].ob < 0)
+	       return 0;
+
+     MPI_Comm_size(comm, &n_pes);
+     sz = default_sz(rnk, dims0, n_pes);
+
+     if (XM(num_blocks_total)(sz, IB) > n_pes
+	 || XM(num_blocks_total)(sz, OB) > n_pes) {
+	  XM(dtensor_destroy)(sz);
+	  return 0;
+     }
 
      return
           X(mkapiplan)(sign, flags,
-                       X(mkproblem_mpi_dft)(howmany, rnk, n,
-					    (R *) in, (R *) out,
-					    xblock, yblock,
-					    comm, sign, MPI_FLAGS(flags)));
+                       XM(mkproblem_dft_d)(sz, howmany,
+					   (R *) in, (R *) out,
+					   comm, sign, 
+					   MPI_FLAGS(flags)));
 }
 
-X(plan) X(mpi_plan_dft)(int rnk, const ptrdiff_t *n, C *in, C *out,
+X(plan) XM(plan_many_dft)(int rnk, const ptrdiff_t *n,
+			  ptrdiff_t howmany,
+			  ptrdiff_t iblock, ptrdiff_t oblock,
+			  C *in, C *out,
+			  MPI_Comm comm, int sign, unsigned flags)
+{
+     XM(ddim) *dims = simple_dims(rnk, n);
+     X(plan) pln;
+
+     if (rnk == 1) {
+	  dims[0].ib = iblock;
+	  dims[0].ob = oblock;
+     }
+     else if (rnk > 1) {
+	  dims[0 != (flags & FFTW_MPI_TRANSPOSED_IN)].ib = iblock;
+	  dims[0 != (flags & FFTW_MPI_TRANSPOSED_OUT)].ob = oblock;
+	  flags &= ~(FFTW_MPI_TRANSPOSED_IN | FFTW_MPI_TRANSPOSED_OUT);
+     }
+
+     pln = XM(plan_guru_dft)(rnk,dims,howmany, in,out, comm, sign, flags);
+     X(ifree)(dims);
+     return pln;
+}
+
+X(plan) XM(plan_dft)(int rnk, const ptrdiff_t *n, C *in, C *out,
+		     MPI_Comm comm, int sign, unsigned flags)
+{
+     return XM(plan_many_dft)(rnk, n, 1,
+			      FFTW_MPI_DEFAULT_BLOCK,
+			      FFTW_MPI_DEFAULT_BLOCK,
+			      in, out, comm, sign, flags);
+}
+
+X(plan) XM(plan_dft_1d)(ptrdiff_t nx, C *in, C *out,
 			MPI_Comm comm, int sign, unsigned flags)
 {
-     return X(mpi_plan_many_dft)(rnk, n, 1,
-				 FFTW_MPI_DEFAULT_BLOCK,
-				 FFTW_MPI_DEFAULT_BLOCK,
-				 in, out, comm, sign, flags);
+     return XM(plan_dft)(1, &nx, in, out, comm, sign, flags);
 }
 
-X(plan) X(mpi_plan_dft_1d)(ptrdiff_t nx, C *in, C *out,
-			   MPI_Comm comm, int sign, unsigned flags)
-{
-     return X(mpi_plan_dft)(1, &nx, in, out, comm, sign, flags);
-}
-
-X(plan) X(mpi_plan_dft_2d)(ptrdiff_t nx, ptrdiff_t ny, C *in, C *out,
-			   MPI_Comm comm, int sign, unsigned flags)
+X(plan) XM(plan_dft_2d)(ptrdiff_t nx, ptrdiff_t ny, C *in, C *out,
+			MPI_Comm comm, int sign, unsigned flags)
 {
      ptrdiff_t n[2];
      n[0] = nx; n[1] = ny;
-     return X(mpi_plan_dft)(2, n, in, out, comm, sign, flags);
+     return XM(plan_dft)(2, n, in, out, comm, sign, flags);
 }
 
-X(plan) X(mpi_plan_dft_3d)(ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz,
-			   C *in, C *out,
-			   MPI_Comm comm, int sign, unsigned flags)
+X(plan) XM(plan_dft_3d)(ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz,
+			C *in, C *out,
+			MPI_Comm comm, int sign, unsigned flags)
 {
      ptrdiff_t n[3];
      n[0] = nx; n[1] = ny; n[2] = nz;
-     return X(mpi_plan_dft)(3, n, in, out, comm, sign, flags);
+     return XM(plan_dft)(3, n, in, out, comm, sign, flags);
 }

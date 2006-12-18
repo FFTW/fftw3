@@ -115,8 +115,6 @@ static int applicable(const solver *ego_, const problem *p_,
      return (1
 	     && n_pes % 2 == 0
 	     && n_pes > 2 /* no point for 2 processes */
-	     && !X(is_block_cyclic)(p->nx, p->block, p->comm)
-	     && !X(is_block_cyclic)(p->ny, p->tblock, p->comm)
 	     && p->nx % p->block == 0 && p->nx / p->block == n_pes
 	     && p->ny % p->tblock == 0 && p->ny / p->tblock == n_pes
 	  );
@@ -165,7 +163,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      MPI_Comm comm2;
      R *I, *O;
      static const plan_adt padt = {
-          X(mpi_transpose_solve), awake, print, destroy
+          XM(transpose_solve), awake, print, destroy
      };
 
      UNUSED(ego);
@@ -180,8 +178,8 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      MPI_Comm_size(p->comm, &np);
      MPI_Comm_rank(p->comm, &me);
-     b = X(current_block)(p->nx, p->block, p->comm);
-     bt = X(current_block)(p->ny, p->tblock, p->comm);
+     b = XM(block)(p->nx, p->block, me);
+     bt = XM(block)(p->ny, p->tblock, me);
      A(b == p->nx / np && bt == p->ny / np);
 
      if (p->flags & SCRAMBLED_IN) /* I is already transposed */
@@ -196,7 +194,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    p->ny, vn, b * vn,
 						    vn, 1, 1),
 						   I, O));
-     if (X(any_true)(!cld1, p->comm)) goto nada;
+     if (XM(any_true)(!cld1, p->comm)) goto nada;
 
      if (NO_DESTROY_INPUTP(plnr)) I = O;
 
@@ -208,15 +206,15 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 			  np/2, bt * b * vn, 2 * bt * b * vn,
 			  bt * b * vn, 1, 1),
 			 O, I));
-     if (X(any_true)(!cld2, p->comm)) goto nada;
+     if (XM(any_true)(!cld2, p->comm)) goto nada;
 
      MPI_Comm_split(p->comm, me < np/2, me, &comm2);
-     cldt = X(mkplan_d)(plnr, X(mkproblem_mpi_transpose)
-			(2 * bt * b * vn, np/2, np/2,
+     cldt = X(mkplan_d)(plnr, XM(mkproblem_transpose)
+			(np/2, np/2, 2 * bt * b * vn, 
 			 I, O, 1, 1, comm2,
 			 p->flags | SCRAMBLED_IN | SCRAMBLED_OUT));
      MPI_Comm_free(&comm2);
-     if (X(any_true)(!cldt, p->comm)) goto nada;
+     if (XM(any_true)(!cldt, p->comm)) goto nada;
 
      /* transpose np/2 x 2 x bt x b x vn -> 2 x np/2 x bt x b x vn */
      cld3 = X(mkplan_d)(plnr,X(mkproblem_rdft_0_d)
@@ -225,7 +223,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 			  2, bt * b * vn, np/2 * bt * b * vn,
 			  bt * b * vn, 1, 1),
 			 O, I));
-     if (X(any_true)(!cld3, p->comm)) goto nada;
+     if (XM(any_true)(!cld3, p->comm)) goto nada;
 
      /* Finally, transpose 2 x np/2 x bt x b x vn = np x bt x b x vn 
             -> np x b x bt x vn (SCRAMBLED_OUT)
@@ -246,7 +244,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    bt, b * vn, np * b * vn,
 						    b * vn, 1, 1),
 						   I, O));
-     if (X(any_true)(!cld4, p->comm)) goto nada;
+     if (XM(any_true)(!cld4, p->comm)) goto nada;
 
      pln = MKPLAN_MPI_TRANSPOSE(P, &padt, apply);
 
@@ -293,7 +291,7 @@ static solver *mksolver(void)
      return MKSOLVER(solver, &sadt);
 }
 
-void X(mpi_transpose_radix2_register)(planner *p)
+void XM(transpose_radix2_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }

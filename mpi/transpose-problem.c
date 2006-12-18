@@ -40,23 +40,22 @@ static void hash(const problem *p_, md5 *m)
      X(md5INT)(m, p->ny);
      X(md5INT)(m, p->block);
      X(md5INT)(m, p->tblock);
-     MPI_Comm_rank(p->comm, &i); X(md5int)(m, i);
      MPI_Comm_size(p->comm, &i); X(md5int)(m, i);
 }
 
-static void print(problem *ego_, printer *p)
+static void print(const problem *ego_, printer *p)
 {
      const problem_mpi_transpose *ego = (const problem_mpi_transpose *) ego_;
      int i;
-     p->print(p, "(mpi-transpose %d %d %d %D %D %D %D %D", 
+     MPI_Comm_size(ego->comm, &i);
+     p->print(p, "(mpi-transpose %d %d %d %D %D %D %D %D %d)", 
 	      ego->I == ego->O,
 	      X(alignment_of)(ego->I),
 	      X(alignment_of)(ego->O),
 	      ego->vn,
 	      ego->nx, ego->ny,
-	      ego->block, ego->tblock);
-     MPI_Comm_rank(ego->comm, &i); p->print(p, " %d", i);
-     MPI_Comm_size(ego->comm, &i); p->print(p, " %d)", i);
+	      ego->block, ego->tblock,
+	      i);
 }
 
 static void zero(const problem *ego_)
@@ -64,8 +63,10 @@ static void zero(const problem *ego_)
      const problem_mpi_transpose *ego = (const problem_mpi_transpose *) ego_;
      R *I = ego->I;
      INT i, N = ego->vn * ego->ny;
+     int my_pe;
 
-     N *= X(current_block)(ego->nx, ego->block, ego->comm);
+     MPI_Comm_rank(ego->comm, &my_pe);
+     N *= XM(block)(ego->nx, ego->block, my_pe);
 
      for (i = 0; i < N; ++i) I[i] = K(0.0);
 }
@@ -79,20 +80,18 @@ static const problem_adt padt =
      destroy
 };
 
-problem *X(mkproblem_mpi_transpose)(INT vn, INT nx, INT ny,
-				    R *I, R *O,
-				    INT block, INT tblock,
-				    MPI_Comm comm,
-				    int flags)
+problem *XM(mkproblem_transpose)(INT nx, INT ny, INT vn,
+				 R *I, R *O,
+				 INT block, INT tblock,
+				 MPI_Comm comm,
+				 int flags)
 {
      problem_mpi_transpose *ego =
           (problem_mpi_transpose *)X(mkproblem)(sizeof(problem_mpi_transpose), &padt);
 
-     A(rnk > 0);
-     A(nx > 0 && ny > 0);
-     A(vn > 0);
-     A(block > 0 && block <= nx && tblock > 0 && tblock <= ny);
-     A(!(flags & TRANSPOSED)); /* flag not permitted */
+     A(nx > 0 && ny > 0 && vn > 0);
+     A(block > 0 && XM(num_blocks_ok)(block, nx, comm)
+       && tblock > 0 && XM(num_blocks_ok)(tblock, ny, comm));
 
      /* enforce pointer equality if untainted pointers are equal */
      if (UNTAINT(I) == UNTAINT(O))
@@ -104,8 +103,8 @@ problem *X(mkproblem_mpi_transpose)(INT vn, INT nx, INT ny,
      ego->I = I;
      ego->O = O;
      ego->flags = flags;
-     ego->block = block;
-     ego->tblock = tblock;
+     ego->block = block > nx ? nx : block;
+     ego->tblock = tblock > ny ? ny : tblock;
 
      MPI_Comm_dup(comm, &ego->comm);
 

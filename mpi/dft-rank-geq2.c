@@ -60,7 +60,7 @@ static void apply(const plan *ego_, R *I, R *O)
 	  cld2->apply(ego->cld2, I+roff, I+ioff, I+roff, I+ioff);
 	  cldt2->apply(ego->cldt2, I, O);
      }
-     else /* TRANSPOSED format */
+     else /* TRANSPOSED_OUT format */
 	  cld2->apply(ego->cld2, I+roff, I+ioff, O+roff, O+ioff);
 }
 
@@ -68,16 +68,14 @@ static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
      const problem_mpi_dft *p = (const problem_mpi_dft *) p_;
-     int n_pes;
      UNUSED(ego_);
      UNUSED(plnr);
-     MPI_Comm_size(p->comm, &n_pes);
      return (1
-	     && p->rnk > 1
-	     && (!NO_UGLYP(plnr) /* UGLY if non-parallel */
-		 || X(some_block)(p->n[0], p->block, 0, n_pes) < p->n[0]
-		 || (p->rnk > 1
-		     && X(some_block)(p->n[1], p->tblock, 0, n_pes) < p->n[1]))
+	     && p->sz->rnk > 1
+	     && p->flags == 0 /* SCRAMBLED_IN/OUT not supported */
+	     && XM(is_block1d)(p->sz, IB) && XM(is_block1d)(p->sz, OB)
+	     && (!NO_UGLYP(plnr) /* ugly if dft-serial is applicable */
+		 || !XM(dft_serial_applicable)(p))
 	  );
 }
 
@@ -117,11 +115,11 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      plan *cld1 = 0, *cld2 = 0, *cldt1 = 0, *cldt2 = 0;
      R *ri, *ii, *ro, *io, *I, *O;
      tensor *sz;
-     int i;
-     INT b, nl;
-     int tflags;
+     int i, my_pe, n_pes, tflags;
+     INT b, block, tblock, fblock, nx, ny, nl;
+     int transposed_in, transposed_out;
      static const plan_adt padt = {
-          X(mpi_dft_solve), awake, print, destroy
+          XM(dft_solve), awake, print, destroy
      };
 
      UNUSED(ego);
@@ -133,83 +131,97 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      X(extract_reim)(p->sign, I = p->I, &ri, &ii);
      X(extract_reim)(p->sign, O = p->O, &ro, &io);
+     MPI_Comm_rank(p->comm, &my_pe);
+     MPI_Comm_size(p->comm, &n_pes);
 
-     sz = X(mktensor)(p->rnk - 1); /* tensor of last rnk-1 dimensions */
-     i = p->rnk - 2; A(i >= 0);
-     sz->dims[i].n = p->n[i + 1];
+     sz = X(mktensor)(p->sz->rnk - 1); /* tensor of last rnk-1 dimensions */
+     i = p->sz->rnk - 2; A(i >= 0);
+     sz->dims[i].n = p->sz->dims[i+1].n;
      sz->dims[i].is = sz->dims[i].os = 2 * p->vn;
      for (--i; i >= 0; --i) {
-	  sz->dims[i].n = p->n[i + 1];
-	  sz->dims[i].is = sz->dims[i].os = 
-	       sz->dims[i + 1].n * sz->dims[i + 1].is;
+	  sz->dims[i].n = p->sz->dims[i+1].n;
+	  sz->dims[i].is = sz->dims[i].os = sz->dims[i+1].n * sz->dims[i+1].is;
      }
      nl = sz->dims[0].is / 2; /* product of dimensions after 2nd */
-     b = X(current_block)(p->n[0], p->block, p->comm);     
-     if (p->flags & SCRAMBLED_IN) { /* first dimension already transposed */
+     if ((transposed_in =
+	  (XM(num_blocks)(p->sz->dims[0].n, p->sz->dims[0].b[IB]) == 1))) {
+	  /* TRANSPOSED_IN: 0th dim is local, 1st is distributed */
 	  INT s = sz->dims[0].is;
+	  b = XM(block)(nx = p->sz->dims[1].n, 
+			block = p->sz->dims[1].b[IB], my_pe);
+	  sz->dims[0].n = ny = p->sz->dims[0].n;
 	  sz->dims[0].is = sz->dims[0].os = s * b;
 	  cld1 = X(mkplan_d)(plnr,
 			     X(mkproblem_dft_d)(sz,
 						X(mktensor_2d)(b, s, s,
 							       p->vn, 2, 2),
 						ri, ii, ro, io));
+	  tblock = p->sz->dims[0].b[OB];
+	  fblock = p->sz->dims[1].b[OB];
      }
      else {
-	  INT os = sz->dims[0].is;
-	  INT is = sz->dims[0].n * os;
-	  sz->dims[0].os = os * b; /* transpose first dimension with b */
-	  cld1 = X(mkplan_d)(plnr,
-			     X(mkproblem_dft_d)(sz,
-						X(mktensor_2d)(b, is, os,
-							       p->vn, 2, 2),
-						ri, ii, ro, io));
+          INT os = sz->dims[0].is;
+          INT is = sz->dims[0].n * os;
+	  b = XM(block)(nx = p->sz->dims[0].n, 
+			block = p->sz->dims[0].b[IB], my_pe);
+	  ny = p->sz->dims[1].n;
+          sz->dims[0].os = os * b; /* transpose first dimension with b */
+          cld1 = X(mkplan_d)(plnr,
+                             X(mkproblem_dft_d)(sz,
+                                                X(mktensor_2d)(b, is, os,
+                                                               p->vn, 2, 2),
+                                                ri, ii, ro, io));
+	  tblock = p->sz->dims[1].b[OB];
+	  fblock = p->sz->dims[0].b[OB];
      }
-     if (X(any_true)(!cld1, p->comm)) goto nada;
+     if (XM(any_true)(!cld1, p->comm)) goto nada;
 
      if (NO_DESTROY_INPUTP(plnr)) { ri = ro; ii = io; I = O; }
 
-     tflags = (p->flags & ~TRANSPOSED) | SCRAMBLED_IN;
-     if (!(p->flags & TRANSPOSED))
+     tflags = SCRAMBLED_IN;
+     if (!transposed_in || tblock == ny)
 	  tflags = tflags | SCRAMBLED_OUT;
-     cldt1 = X(mkplan_d)(plnr,
-			 X(mkproblem_mpi_transpose)(nl*2, p->n[0],p->n[1],
-						    O, I,
-						    p->block, p->tblock,
-						    p->comm,
-						    tflags));
-     if (X(any_true)(!cldt1, p->comm)) goto nada;
+     if (!(transposed_out = tblock < ny))
+	  tblock = XM(default_block)(ny, n_pes);
 
-     b = X(current_block)(p->n[1], p->tblock, p->comm);     
+     cldt1 = X(mkplan_d)(plnr,
+			 XM(mkproblem_transpose)(nx, ny, nl*2,
+						 O, I,
+						 block, tblock,
+						 p->comm, tflags));
+     if (XM(any_true)(!cldt1, p->comm)) goto nada;
+
+     b = XM(block)(ny, tblock, my_pe);
      if (tflags & SCRAMBLED_OUT) { /* last dimension transposed after cldt1 */
-	  INT s = b * nl * 2;  /* we have n[0] x b x nl complex array */
-	  R *sro, *sio;
-	  if (p->flags & TRANSPOSED) { sro = ro; sio = io; }
-	  else { sro = ri; sio = ii; }
-	  cld2 = X(mkplan_d)(plnr,
-			     X(mkproblem_dft_d)(X(mktensor_1d)(p->n[0], s, s),
-						X(mktensor_1d)(b * nl, 2, 2),
-						ri, ii, sro, sio));
+          INT s = b * nl * 2;  /* we have nx x b x nl complex array */
+          R *sro, *sio;
+          if (transposed_out) { sro = ro; sio = io; }
+          else { sro = ri; sio = ii; }
+          cld2 = X(mkplan_d)(plnr,
+                             X(mkproblem_dft_d)(X(mktensor_1d)(nx, s, s),
+                                                X(mktensor_1d)(b * nl, 2, 2),
+                                                ri, ii, sro, sio));
      }
-     else { /* !SCRAMBLED_OUT (implies TRANSPOSED) */
-	  INT s = p->n[0] * nl * 2; /* we have b x n[0] x nl complex array */
+     else { /* !SCRAMBLED_OUT (=> TRANSPOSED_IN && TRANSPOSED_OUT) */
+	  INT s = nx * nl * 2; /* we have b x nx x nl complex array */
 	  cld2 = X(mkplan_d)(plnr,
-			     X(mkproblem_dft_d)(X(mktensor_1d)(p->n[0], 
-							       nl*2, nl*2),
+			     X(mkproblem_dft_d)(X(mktensor_1d)(nx, nl*2, nl*2),
 						X(mktensor_2d)(b, s, s,
 							       nl, 2, 2),
 						ri, ii, ro, io));
      }
-     if (X(any_true)(!cld2, p->comm)) goto nada;
+     if (XM(any_true)(!cld2, p->comm)) goto nada;
 
-     if (!(p->flags & TRANSPOSED)) {
-	  tflags = p->flags | SCRAMBLED_IN;
+     if (!transposed_out) {
+	  tflags = SCRAMBLED_IN;
+	  if (transposed_in)
+	       tflags = tflags | SCRAMBLED_OUT;
 	  cldt2 = X(mkplan_d)(plnr,
-			      X(mkproblem_mpi_transpose)(nl*2, p->n[1],p->n[0],
-							 I, O,
-							 p->tblock, p->block,
-							 p->comm,
-							 tflags));
-	  if (X(any_true)(!cldt2, p->comm)) goto nada;
+			      XM(mkproblem_transpose)(ny, nx, nl*2,
+						      I, O,
+						      tblock, fblock,
+						      p->comm, tflags));
+	  if (XM(any_true)(!cldt2, p->comm)) goto nada;
      }
 
      pln = MKPLAN_MPI_DFT(P, &padt, apply);
@@ -248,7 +260,7 @@ static solver *mksolver(void)
      return MKSOLVER(solver, &sadt);
 }
 
-void X(mpi_dft_rank_geq2_register)(planner *p)
+void XM(dft_rank_geq2_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }

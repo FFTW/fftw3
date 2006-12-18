@@ -23,7 +23,7 @@
 static void destroy(problem *ego_)
 {
      problem_mpi_dft *ego = (problem_mpi_dft *) ego_;
-     X(ifree0)(ego->n);
+     XM(dtensor_destroy)(ego->sz);
      MPI_Comm_free(&ego->comm);
      X(ifree)(ego_);
 }
@@ -36,31 +36,23 @@ static void hash(const problem *p_, md5 *m)
      X(md5int)(m, p->I == p->O);
      X(md5int)(m, X(alignment_of)(p->I));
      X(md5int)(m, X(alignment_of)(p->O));
+     XM(dtensor_md5)(m, p->sz);
      X(md5INT)(m, p->vn);
-     X(md5int)(m, p->rnk);
-     for (i = 0; i < p->rnk; ++i) X(md5INT)(m, p->n[i]);
      X(md5int)(m, p->sign);
      X(md5int)(m, p->flags);
-     X(md5INT)(m, p->block);
-     X(md5INT)(m, p->tblock);
-     MPI_Comm_rank(p->comm, &i); X(md5int)(m, i);
      MPI_Comm_size(p->comm, &i); X(md5int)(m, i);
 }
 
-static void print(problem *ego_, printer *p)
+static void print(const problem *ego_, printer *p)
 {
      const problem_mpi_dft *ego = (const problem_mpi_dft *) ego_;
      int i;
-     p->print(p, "(mpi-dft %d %d %d %D %d", 
+     p->print(p, "(mpi-dft %d %d %d %D ", 
 	      ego->I == ego->O,
 	      X(alignment_of)(ego->I),
-	      X(alignment_of)(ego->O),
-	      ego->vn,
-	      ego->rnk);
-     for (i = 0; i < ego->rnk; ++i) p->print(p, " %D", ego->n[i]);
-     p->print(p, " %d %d %D %D",
-	      ego->sign, ego->flags, ego->block, ego->tblock);
-     MPI_Comm_rank(ego->comm, &i); p->print(p, " %d", i);
+	      X(alignment_of)(ego->O));
+     XM(dtensor_print)(ego->sz, p);
+     p->print(p, " %d %d %d", ego->vn, ego->sign, ego->flags);
      MPI_Comm_size(ego->comm, &i); p->print(p, " %d)", i);
 }
 
@@ -69,11 +61,10 @@ static void zero(const problem *ego_)
      const problem_mpi_dft *ego = (const problem_mpi_dft *) ego_;
      R *I = ego->I;
      INT i, N = ego->vn * 2;
-     int irnk;
+     int my_pe;
 
-     N *= X(current_block)(ego->n[0], ego->block, ego->comm);
-     for (irnk = 1; irnk < ego->rnk; ++irnk) N *= ego->n[irnk];
-
+     MPI_Comm_rank(ego->comm, &my_pe);
+     N = 2 * ego->vn * XM(total_block)(ego->sz, IB, my_pe);
      for (i = 0; i < N; ++i) I[i] = K(0.0);
 }
 
@@ -86,50 +77,46 @@ static const problem_adt padt =
      destroy
 };
 
-problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
-                              R *I, R *O,
-                              INT block, INT tblock,
-                              MPI_Comm comm,
-			      int sign,
-                              int flags)
+problem *XM(mkproblem_dft)(const dtensor *sz, INT vn,
+			   R *I, R *O,
+			   MPI_Comm comm,
+			   int sign,
+			   int flags)
 {
      problem_mpi_dft *ego =
           (problem_mpi_dft *)X(mkproblem)(sizeof(problem_mpi_dft), &padt);
-     int i;
-     int use_tblock;
+     int n_pes;
 
-     A(rnk > 0);
-     A(n);
-     for (i = 0; i < rnk; ++i) A(n[i] > 0);
-     A(vn > 0);
-     A(block > 0 && block <= n[0]);
+     A(XM(dtensor_validp)(sz) && FINITE_RNK(sz->rnk));
+     MPI_Comm_size(comm, &n_pes);
+     A(n_pes >= XM(num_blocks_total)(sz, IB)
+       && n_pes >= XM(num_blocks_total)(sz, OB));
+     A(vn >= 0);
      A(sign == -1 || sign == 1);
-     A(!(TRANSPOSED & flags) || rnk >= 2);
-     use_tblock = (TRANSPOSED & flags) && rnk >= 2;
-     A((use_tblock && tblock > 0 && tblock <= n[1]) 
-       || (!use_tblock && block == tblock));
 
      /* enforce pointer equality if untainted pointers are equal */
      if (UNTAINT(I) == UNTAINT(O))
 	  I = O = JOIN_TAINT(I, O);
 
-     /* Note that we *don't* compress the rank by removing n=1 dimensions,
-	because the output format depends on the dimensionality.  Rank
-        compression will occur where it matters, in the serial FFTW. */
-
-     ego->rnk = rnk;
-     ego->n = (INT *) MALLOC(rnk * sizeof(INT), TENSORS);
-     for (i = 0; i < rnk; ++i) ego->n[i] = n[i];
-
+     ego->sz = XM(dtensor_canonical)(sz);
      ego->vn = vn;
      ego->I = I;
      ego->O = O;
      ego->sign = sign;
      ego->flags = flags;
-     ego->block = block;
-     ego->tblock = tblock;
 
      MPI_Comm_dup(comm, &ego->comm);
 
      return &(ego->super);
+}
+
+problem *XM(mkproblem_dft_d)(dtensor *sz, INT vn,
+			     R *I, R *O,
+			     MPI_Comm comm,
+			     int sign,
+			     int flags)
+{
+     problem *p = XM(mkproblem_dft)(sz, vn, I, O, comm, sign, flags);
+     XM(dtensor_destroy)(sz);
+     return p;
 }

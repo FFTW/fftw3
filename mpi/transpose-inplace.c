@@ -102,14 +102,11 @@ static void apply(const plan *ego_, R *I, R *O)
 static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr)
 {
-     const problem_mpi_transpose *p = (const problem_mpi_transpose *) p_;
      UNUSED(ego_);
      UNUSED(plnr);
+     UNUSED(p_);
      /* FIXME: ugly if out-of-place and destroy_input? */
-     return (1
-	     && !X(is_block_cyclic)(p->nx, p->block, p->comm)
-	     && !X(is_block_cyclic)(p->ny, p->tblock, p->comm)
-	  );
+     return (1);
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)
@@ -218,11 +215,11 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      const problem_mpi_transpose *p;
      P *pln;
      plan *cld1 = 0, *cld2 = 0, *cld2rest = 0, *cld3 = 0;
-     INT b, bt, nxb, vn, rest_offset;
+     INT b, bt, nxb, vn, rest_offset = 0;
      INT *sbs, *sbo, *rbs, *rbo;
      int pe, my_pe, n_pes, sort_pe = -1, ascending = 1;
      static const plan_adt padt = {
-          X(mpi_transpose_solve), awake, print, destroy
+          XM(transpose_solve), awake, print, destroy
      };
 
      UNUSED(ego);
@@ -233,7 +230,10 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      p = (const problem_mpi_transpose *) p_;
      vn = p->vn;
 
-     b = X(current_block)(p->nx, p->block, p->comm);
+     MPI_Comm_rank(p->comm, &my_pe);
+     MPI_Comm_size(p->comm, &n_pes);
+
+     b = XM(block)(p->nx, p->block, my_pe);
 
      if (p->flags & SCRAMBLED_IN) /* I is already transposed */
 	  cld1 = X(mkplan_d)(plnr, 
@@ -247,10 +247,10 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    p->ny, vn, b * vn,
 						    vn, 1, 1),
 						   p->I, p->O));
-     if (X(any_true)(!cld1, p->comm)) goto nada;
+     if (XM(any_true)(!cld1, p->comm)) goto nada;
 
      b = p->block;
-     bt = X(current_block)(p->ny, p->tblock, p->comm);
+     bt = XM(block)(p->ny, p->tblock, my_pe);
      nxb = p->nx / b;
      if (p->nx == nxb * p->block) { /* divisible => ordinary transpose */
 	  if (!(p->flags & SCRAMBLED_OUT)) {
@@ -272,7 +272,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 					vn, 1, 1),
 				       p->O, p->O));
 	  }
-	  if (X(any_true)(!cld2, p->comm)) goto nada;
+	  if (XM(any_true)(!cld2, p->comm)) goto nada;
      }
      else {
 	  INT nxr = p->nx - nxb * b;
@@ -284,7 +284,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				   b, vn, bt * vn,
 				   vn, 1, 1),
 				  p->O, p->O));
-	  if (X(any_true)(!cld2, p->comm)) goto nada;
+	  if (XM(any_true)(!cld2, p->comm)) goto nada;
 	  rest_offset = nxb * b * bt * vn;
 	  cld2rest = X(mkplan_d)(plnr,
 			     X(mkproblem_rdft_0_d)(
@@ -293,7 +293,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				   nxr, vn, bt * vn,
 				   vn, 1, 1),
 				  p->O + rest_offset, p->O + rest_offset));
-	  if (X(any_true)(!cld2rest, p->comm)) goto nada;
+	  if (XM(any_true)(!cld2rest, p->comm)) goto nada;
 	  if (!(p->flags & SCRAMBLED_OUT)) {
 	       cld3 = X(mkplan_d)(plnr,
 				  X(mkproblem_rdft_0_d)(
@@ -302,7 +302,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 					bt, vn, p->nx * vn,
 					vn, 1, 1),
 				       p->O, p->O));
-	       if (X(any_true)(!cld3, p->comm)) goto nada;
+	       if (XM(any_true)(!cld3, p->comm)) goto nada;
 	  }
      }
 
@@ -316,23 +316,20 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      MPI_Comm_dup(p->comm, &pln->comm);
 
-     MPI_Comm_rank(p->comm, &my_pe);
-     MPI_Comm_size(p->comm, &n_pes);
-
-     n_pes = (int) X(imax)((p->nx + p->block - 1) / p->block, 
-			   (p->ny + p->tblock - 1) / p->tblock);
+     n_pes = (int) X(imax)(XM(num_blocks)(p->nx, p->block),
+			   XM(num_blocks)(p->ny, p->tblock));
 
      /* Compute sizes/offsets of blocks to exchange between processors */
      sbs = (INT *) MALLOC(4 * n_pes * sizeof(INT), PLANS);
      sbo = sbs + n_pes;
      rbs = sbo + n_pes;
      rbo = rbs + n_pes;
-     b = X(some_block)(p->nx, p->block, my_pe, n_pes);
-     bt = X(some_block)(p->ny, p->tblock, my_pe, n_pes);
+     b = XM(block)(p->nx, p->block, my_pe);
+     bt = XM(block)(p->ny, p->tblock, my_pe);
      for (pe = 0; pe < n_pes; ++pe) {
 	  INT db, dbt; /* destination block sizes */
-	  db = X(some_block)(p->nx, p->block, pe, n_pes);
-	  dbt = X(some_block)(p->ny, p->tblock, pe, n_pes);
+	  db = XM(block)(p->nx, p->block, pe);
+	  dbt = XM(block)(p->ny, p->tblock, pe);
 
 	  sbs[pe] = b * dbt * vn;
 	  sbo[pe] = pe * (b * p->tblock) * vn;
@@ -389,7 +386,7 @@ static solver *mksolver(void)
      return MKSOLVER(solver, &sadt);
 }
 
-void X(mpi_transpose_inplace_register)(planner *p)
+void XM(transpose_inplace_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }

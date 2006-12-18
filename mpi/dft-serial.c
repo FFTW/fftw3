@@ -60,50 +60,44 @@ static void print(const plan *ego_, printer *p)
      p->print(p, "(mpi-dft-serial %(%p%))", ego->cld);
 }
 
+int XM(dft_serial_applicable)(const problem_mpi_dft *p)
+{
+     return (1
+	     && p->flags == 0 /* SCRAMBLED_IN/OUT not supported */
+	     && ((XM(is_local)(p->sz, IB) && XM(is_local)(p->sz, OB))
+		 || p->vn == 0));
+}
+
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 {
-     const problem_mpi_dft *p = (problem_mpi_dft *) p_;
+     const problem_mpi_dft *p = (const problem_mpi_dft *) p_;
      P *pln;
      plan *cld;
-     int my_pe, n_pes;
+     int my_pe;
      R *ri, *ii, *ro, *io;
      static const plan_adt padt = {
-          X(mpi_dft_solve), awake, print, destroy
+          XM(dft_solve), awake, print, destroy
      };
 
      UNUSED(ego);
 
      /* check whether applicable: */
-     MPI_Comm_size(p->comm, &n_pes);
-     if (X(some_block)(p->n[0], p->block, 0, n_pes) < p->n[0]
-	 || (p->rnk > 1
-	     && X(some_block)(p->n[1], p->tblock, 0, n_pes) < p->n[1])
-	 || (p->rnk == 1 && (p->flags & (SCRAMBLED_IN | SCRAMBLED_OUT))))
+     if (!XM(dft_serial_applicable)(p))
           return (plan *) 0;
 
      X(extract_reim)(p->sign, p->I, &ri, &ii);
      X(extract_reim)(p->sign, p->O, &ro, &io);
 
      MPI_Comm_rank(p->comm, &my_pe);
-     if (my_pe == 0) {
-	  int i, rnk = p->rnk;
-	  tensor *sz = X(mktensor)(p->rnk);
+     if (my_pe == 0 && p->vn > 0) {
+	  int i, rnk = p->sz->rnk;
+	  tensor *sz = X(mktensor)(p->sz->rnk);
 	  sz->dims[rnk - 1].is = sz->dims[rnk - 1].os = 2 * p->vn;
-	  sz->dims[rnk - 1].n = p->n[rnk - 1];
+	  sz->dims[rnk - 1].n = p->sz->dims[rnk - 1].n;
 	  for (i = rnk - 1; i > 0; --i) {
 	       sz->dims[i - 1].is = sz->dims[i - 1].os = 
-		    sz->dims[i].is * p->n[i];
-	       sz->dims[i - 1].n = p->n[i - 1];
-	  }
-	  
-	  if (p->flags & SCRAMBLED_IN) { /* transposed input, rnk>1 */
-	       sz->dims[0].is = sz->dims[1].is;
-	       sz->dims[1].is = sz->dims[0].is * sz->dims[0].n;
-	  }
-	  if (((p->flags & SCRAMBLED_OUT) != 0) ^
-	      ((p->flags & TRANSPOSED) != 0)) { /* transposed output, rnk>1 */
-	       sz->dims[0].os = sz->dims[1].os;
-	       sz->dims[1].os = sz->dims[0].os * sz->dims[0].n;
+		    sz->dims[i].is * sz->dims[i].n;
+	       sz->dims[i - 1].n = p->sz->dims[i - 1].n;
 	  }
 	  
 	  cld = X(mkplan_d)(plnr,
@@ -117,7 +111,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 					       X(mktensor_1d)(0,0,0),
 					       ri, ii, ro, io));
      }
-     if (X(any_true)(!cld, p->comm)) return (plan *) 0;
+     if (XM(any_true)(!cld, p->comm)) return (plan *) 0;
 
      pln = MKPLAN_MPI_DFT(P, &padt, apply);
      pln->cld = cld;
@@ -133,7 +127,7 @@ static solver *mksolver(void)
      return MKSOLVER(solver, &sadt);
 }
 
-void X(mpi_dft_serial_register)(planner *p)
+void XM(dft_serial_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }

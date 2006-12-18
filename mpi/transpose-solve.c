@@ -21,7 +21,7 @@
 #include "mpi-transpose.h"
 
 /* use the apply() operation for MPI_TRANSPOSE problems */
-void X(mpi_transpose_solve)(const plan *ego_, const problem *p_)
+void XM(transpose_solve)(const plan *ego_, const problem *p_)
 {
      const plan_mpi_transpose *ego = (const plan_mpi_transpose *) ego_;
      const problem_mpi_transpose *p = (const problem_mpi_transpose *) p_;

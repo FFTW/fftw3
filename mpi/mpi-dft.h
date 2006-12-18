@@ -23,32 +23,33 @@
 /* problem.c: */
 typedef struct {
      problem super;
+     dtensor *sz;
      INT vn; /* vector length (vector stride 1) */
-     int rnk; INT *n; /* only contiguous row-major, rnk>0 is supported */
      R *I, *O; /* contiguous interleaved arrays */
 
-     int sign, flags;
-
-     INT block, tblock; /* block size, slab decomposition;
-			   tblock is for any transposed blocks on output */
+     int sign; /* FFTW_FORWARD / FFTW_BACKWARD */
+     int flags; /* SCRAMBLED_IN/OUT meaningful for 1d transforms only */
 
      MPI_Comm comm;
 } problem_mpi_dft;
 
-problem *X(mkproblem_mpi_dft)(INT vn, int rnk, const INT *n,
-			      R *I, R *O,
-			      INT block, INT tblock,
-			      MPI_Comm comm,
+problem *XM(mkproblem_dft)(const dtensor *sz, INT vn,
+			      R *I, R *O, MPI_Comm comm,
 			      int sign, int flags);
+problem *XM(mkproblem_dft_d)(dtensor *sz, INT vn,
+			     R *I, R *O, MPI_Comm comm,
+			     int sign, int flags);
 
 /* solve.c: */
-void X(mpi_dft_solve)(const plan *ego_, const problem *p_);
+void XM(dft_solve)(const plan *ego_, const problem *p_);
 
 /* plans have same operands as rdft plans, so just re-use */
 typedef plan_rdft plan_mpi_dft;
 #define MKPLAN_MPI_DFT(type, adt, apply) \
   (type *)X(mkplan_rdft)(sizeof(type), adt, apply)
 
+int XM(dft_serial_applicable)(const problem_mpi_dft *p);
+
 /* various solvers */
-void X(mpi_dft_rank_geq2_register)(planner *p);
-void X(mpi_dft_serial_register)(planner *p);
+void XM(dft_rank_geq2_register)(planner *p);
+void XM(dft_serial_register)(planner *p);

@@ -20,53 +20,116 @@
 
 #include "ifftw-mpi.h"
 
-/* If the block size is small enough that n/block > n_pes, then
-   we will interpret it as a block-cyclic distribution.  However,
-   we don't have transpose solvers for block-cyclic yet. */
-int X(is_block_cyclic)(INT n, INT block, MPI_Comm comm)
+INT XM(num_blocks)(INT n, INT block)
+{
+     return (n + block - 1) / block;
+}
+
+int XM(num_blocks_ok)(INT n, INT block, MPI_Comm comm)
 {
      int n_pes;
      MPI_Comm_size(comm, &n_pes);
-     return ((n + block - 1) / block > n_pes);
+     return n_pes >= XM(num_blocks)(n, block);
 }
 
 /* Pick a default block size for dividing a problem of size n among
-   the processors of the given communicator.   Divide as equally
-   as possible, while minimizing the maximum block size among the
-   processes as well as the number of processes with nonzero blocks. */
-INT X(default_block)(INT n, MPI_Comm comm)
+   n_pes processes.  Divide as equally as possible, while minimizing
+   the maximum block size among the processes as well as the number of
+   processes with nonzero blocks. */
+INT XM(default_block)(INT n, INT n_pes)
 {
-     int n_pes;
-     MPI_Comm_size(comm, &n_pes);
      return ((n + n_pes - 1) / n_pes);
 }
 
 /* For a given block size and dimension n, compute the block size b
-   and the starting offset s on the given process.   For block-cyclic
-   format, this is the *total* size of the cyclic blocks on which_pe. */
-INT X(some_block)(INT n, INT block, int which_pe, int n_pes)
+   and the starting offset s on the given process. */
+INT XM(block)(INT n, INT block, INT which_block)
 {
-     int n_blocks = (n + block - 1) / block;
-     if (n_blocks > n_pes) { /* block-cyclic */
-	  return (block * ((n_pes / n_blocks)
-			   + (n_pes % n_blocks >= which_pe + 1))
-		  + (((n_pes % n_blocks + n_pes - 1) % n_pes == which_pe)
-		     * (n % block - block)));
+     INT n_blocks = XM(num_blocks)(n, block);
+     if (which_block >= n_blocks)
+	  return 0;
+     else
+	  return ((which_block == n_blocks - 1)
+		  ? (n - which_block * block) : block);
+}
+
+static INT num_blocks_kind(const ddim *dim, block_kind k)
+{
+     return XM(num_blocks)(dim->n, dim->b[k]);
+}
+
+INT XM(num_blocks_total)(const dtensor *sz, block_kind k)
+{
+     if (FINITE_RNK(sz->rnk)) {
+	  int i;
+	  INT ntot = 1;
+	  for (i = 0; i < sz->rnk; ++i)
+	       ntot *= num_blocks_kind(sz->dims + i, k);
+	  return ntot;
      }
-     else { /* ordinary block distribution */
-	  n_pes = n_blocks;
-	  if (which_pe >= n_pes)
-	       return 0;
-	  else
-	       return ((which_pe == n_pes - 1)
-		       ? (n - which_pe * block) : block);
+     else
+	  return 0;
+}
+
+int XM(idle_process)(const dtensor *sz, block_kind k, int which_pe)
+{
+     return (which_pe >= XM(num_blocks_total)(sz, k));
+}
+
+/* Given a non-idle process which_pe, computes the coordinate
+   vector coords[rnk] giving the coordinates of a block in the
+   matrix of blocks.  k specifies whether we are talking about
+   the input or output data distribution. */
+void XM(block_coords)(const dtensor *sz, block_kind k, int which_pe, 
+		     INT *coords)
+{
+     int i;
+     A(!XM(idle_process)(sz, k, which_pe) && FINITE_RNK(sz->dims));
+     for (i = sz->rnk - 1; i >= 0; --i) {
+	  INT nb = num_blocks_kind(sz->dims + i, k);
+	  coords[i] = which_pe % nb;
+	  which_pe /= nb;
      }
 }
 
-INT X(current_block)(INT n, INT block, MPI_Comm comm)
+INT XM(total_block)(const dtensor *sz, block_kind k, INT which_pe)
 {
-     int my_pe, n_pes;
-     MPI_Comm_rank(comm, &my_pe);
-     MPI_Comm_size(comm, &n_pes);
-     return X(some_block)(n, block, my_pe, n_pes);
+     if (XM(idle_process)(sz, k, which_pe))
+	  return 0;
+     else {
+	  int i;
+	  INT N = 1, *coords;
+	  STACK_MALLOC(INT*, coords, sizeof(INT) * sz->rnk);
+	  XM(block_coords)(sz, k, which_pe, coords);
+	  for (i = 0; i < sz->rnk; ++i)
+	       N *= XM(block)(sz->dims[i].n, sz->dims[i].b[k], coords[i]);
+	  STACK_FREE(coords);
+	  return N;
+     }
+}
+
+/* returns whether sz is local for dims >= dim */
+int XM(is_local_after)(int dim, const dtensor *sz, block_kind k)
+{
+     if (FINITE_RNK(sz->rnk))
+	  for (; dim < sz->rnk; ++dim)
+	       if (XM(num_blocks)(sz->dims[dim].n, sz->dims[dim].b[k]) > 1)
+		    return 0;
+     return 1;
+}
+
+int XM(is_local)(const dtensor *sz, block_kind k)
+{
+     return XM(is_local_after)(0, sz, k);
+}
+
+/* Return whether sz is distributed for k according to a simple
+   1d block distribution in the first or second dimensions */
+int XM(is_block1d)(const dtensor *sz, block_kind k)
+{
+     int i;
+     if (!FINITE_RNK(sz->rnk)) return 0;
+     for (i = 0; i < sz->rnk && num_blocks_kind(sz->dims + i, k) == 1; ++i) ;
+     return(i < sz->rnk && i < 2 && XM(is_local_after)(i + 1, sz, k));
+
 }

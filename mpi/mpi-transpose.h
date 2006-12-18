@@ -27,7 +27,8 @@ typedef struct {
      INT nx, ny; /* nx x ny transposed to ny x nx */
      R *I, *O; /* contiguous real arrays (both same size!) */
 
-     int flags;
+     int flags; /* SCRAMBLED_IN: input is *locally* transposed
+		   SCRAMBLED_OUT: output is *locally* transposed */
 
      INT block, tblock; /* block size, slab decomposition;
 			   tblock is for transposed blocks on output */
@@ -35,14 +36,14 @@ typedef struct {
      MPI_Comm comm;
 } problem_mpi_transpose;
 
-problem *X(mkproblem_mpi_transpose)(INT vn, INT nx, INT ny,
-				    R *I, R *O,
-				    INT block, INT tblock,
-				    MPI_Comm comm,
-				    int flags);
+problem *XM(mkproblem_transpose)(INT nx, INT ny, INT vn,
+				 R *I, R *O,
+				 INT block, INT tblock,
+				 MPI_Comm comm,
+				 int flags);
 
 /* tsolve.c: */
-void X(mpi_transpose_solve)(const plan *ego_, const problem *p_);
+void XM(transpose_solve)(const plan *ego_, const problem *p_);
 
 /* plans have same operands as rdft plans, so just re-use */
 typedef plan_rdft plan_mpi_transpose;
@@ -50,6 +51,6 @@ typedef plan_rdft plan_mpi_transpose;
   (type *)X(mkplan_rdft)(sizeof(type), adt, apply)
 
 /* various solvers */
-void X(mpi_transpose_inplace_register)(planner *p);
-void X(mpi_transpose_alltoall_register)(planner *p);
-void X(mpi_transpose_radix2_register)(planner *p);
+void XM(transpose_inplace_register)(planner *p);
+void XM(transpose_alltoall_register)(planner *p);
+void XM(transpose_radix2_register)(planner *p);

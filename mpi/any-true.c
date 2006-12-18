@@ -30,7 +30,7 @@
         if (any_true(failure, comm)) goto nada;
 */
 
-int X(any_true)(int condition, MPI_Comm comm)
+int XM(any_true)(int condition, MPI_Comm comm)
 {
      int result;
      MPI_Allreduce(&condition, &result, 1, MPI_INT, MPI_LOR, comm);

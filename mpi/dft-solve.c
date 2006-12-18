@@ -21,7 +21,7 @@
 #include "mpi-dft.h"
 
 /* use the apply() operation for MPI_DFT problems */
-void X(mpi_dft_solve)(const plan *ego_, const problem *p_)
+void XM(dft_solve)(const plan *ego_, const problem *p_)
 {
      const plan_mpi_dft *ego = (const plan_mpi_dft *) ego_;
      const problem_mpi_dft *p = (const problem_mpi_dft *) p_;

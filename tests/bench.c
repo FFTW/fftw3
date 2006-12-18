@@ -534,6 +534,10 @@ void main_init(int *argc, char ***argv)
      UNUSED(argv);
 }
 
+void initial_cleanup(void)
+{
+}
+
 void final_cleanup(void)
 {
 }
