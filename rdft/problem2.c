@@ -155,7 +155,11 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
      A(FINITE_RNK(sz->rnk));
 
      /* require in-place problems to use r0 == cr */
-     if (UNTAINT(r0) == UNTAINT(ci) || UNTAINT(r1) == UNTAINT(cr))
+     if (UNTAINT(r0) == UNTAINT(ci))
+	  return X(mkproblem_unsolvable)();
+
+     /* if odd elements exist, check R1 */
+     if (sz->rnk > 0 && UNTAINT(r1) == UNTAINT(cr))
 	  return X(mkproblem_unsolvable)();
 
      if (UNTAINT(r0) == UNTAINT(cr)) 
