@@ -19,7 +19,7 @@
  */
 
 /* plans for distributed out-of-place transpose using MPI_Alltoall,
-   and which destroy the input array */
+   and which destroy the input array (unless TRANSPOSED_IN is used) */
 
 #include "mpi-transpose.h"
 #include <string.h>
@@ -45,19 +45,35 @@ static void apply(const plan *ego_, R *I, R *O)
 
      /* transpose locally to get contiguous chunks */
      cld1 = (plan_rdft *) ego->cld1;
-     cld1->apply(ego->cld1, I, O);
-
-     /* transpose chunks globally */
-     if (ego->equal_blocks)
-	  MPI_Alltoall(O, ego->send_block_sizes[0], FFTW_MPI_TYPE,
-		       I, ego->recv_block_sizes[0], FFTW_MPI_TYPE,
-		       ego->comm);
-     else
-	  MPI_Alltoallv(O, ego->send_block_sizes, ego->send_block_offsets,
-			FFTW_MPI_TYPE,
-			I, ego->recv_block_sizes, ego->recv_block_offsets,
-			FFTW_MPI_TYPE,
-			ego->comm);
+     if (cld1) {
+	  cld1->apply(ego->cld1, I, O);
+	  
+	  /* transpose chunks globally */
+	  if (ego->equal_blocks)
+	       MPI_Alltoall(O, ego->send_block_sizes[0], FFTW_MPI_TYPE,
+			    I, ego->recv_block_sizes[0], FFTW_MPI_TYPE,
+			    ego->comm);
+	  else
+	       MPI_Alltoallv(O, ego->send_block_sizes, ego->send_block_offsets,
+			     FFTW_MPI_TYPE,
+			     I, ego->recv_block_sizes, ego->recv_block_offsets,
+			     FFTW_MPI_TYPE,
+			     ego->comm);
+     }
+     else { /* TRANSPOSED_IN, no need to destroy input */
+	  /* transpose chunks globally */
+	  if (ego->equal_blocks)
+	       MPI_Alltoall(I, ego->send_block_sizes[0], FFTW_MPI_TYPE,
+			    O, ego->recv_block_sizes[0], FFTW_MPI_TYPE,
+			    ego->comm);
+	  else
+	       MPI_Alltoallv(I, ego->send_block_sizes, ego->send_block_offsets,
+			     FFTW_MPI_TYPE,
+			     O, ego->recv_block_sizes, ego->recv_block_offsets,
+			     FFTW_MPI_TYPE,
+			     ego->comm);
+	  I = O; /* final transpose (if any) is in-place */
+     }
      
      /* transpose locally, again, to get ordinary row-major */
      cld2 = (plan_rdft *) ego->cld2;
@@ -77,7 +93,7 @@ static int applicable(const solver *ego_, const problem *p_,
      UNUSED(ego_);
      return (1
 	     && p->I != p->O
-	     && !NO_DESTROY_INPUTP(plnr)
+	     && (!NO_DESTROY_INPUTP(plnr) || (p->flags & TRANSPOSED_IN))
 	     && !SCRAMBLEDP(p->flags)
 	  );
 }
@@ -117,6 +133,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      P *pln;
      plan *cld1 = 0, *cld2 = 0, *cld2rest = 0;
      INT b, bt, nxb, vn, Ioff = 0, Ooff = 0;
+     R *I;
      int *sbs, *sbo, *rbs, *rbo;
      int pe, my_pe, n_pes;
      int equal_blocks = 1;
@@ -138,18 +155,16 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      b = XM(block)(p->nx, p->block, my_pe);
 
      if (p->flags & TRANSPOSED_IN) /* I is already transposed */
-	  cld1 = X(mkplan_d)(plnr, 
-			     X(mkproblem_rdft_0_d)(X(mktensor_1d)
-						   (b * p->ny * vn, 1, 1),
-						   p->I, p->O));
-     else /* transpose b x ny x vn -> ny x b x vn */
+	  I = p->O; /* final transpose is in-place */
+     else { /* transpose b x ny x vn -> ny x b x vn */
 	  cld1 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
 						   (b, p->ny * vn, vn,
 						    p->ny, vn, b * vn,
 						    vn, 1, 1),
-						   p->I, p->O));
-     if (XM(any_true)(!cld1, p->comm)) goto nada;
+						   I = p->I, p->O));
+	  if (XM(any_true)(!cld1, p->comm)) goto nada;
+     }
 	  
      bt = XM(block)(p->ny, p->tblock, my_pe);
      nxb = (p->nx + p->block - 1) / p->block;
@@ -163,7 +178,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						   (nxb, bt * b, b,
 						    bt, b, nx,
 						    b, 1, 1),
-						   p->I, p->O));
+						   I, p->O));
 	  if (XM(any_true)(!cld2, p->comm)) goto nada;
 	  
 	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
@@ -174,7 +189,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				      X(mkproblem_rdft_0_d)(X(mktensor_2d)
 							    (bt, b, nx,
 							     b, 1, 1),
-							    p->I + Ioff,
+							    I + Ioff,
 							    p->O + Ooff));
 	       if (XM(any_true)(!cld2rest, p->comm)) goto nada;
 	  }
@@ -187,7 +202,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 						    bt, b*vn, vn,
 						    b, vn, bt*vn,
 						    vn, 1, 1),
-						   p->I, p->O));
+						   I, p->O));
 	  if (XM(any_true)(!cld2, p->comm)) goto nada;
 	  
 	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
@@ -198,7 +213,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 							    (bt, b*vn, vn,
 							     b, vn, bt*vn,
 							     vn, 1, 1),
-							    p->I + Ioff,
+							    I + Ioff,
 							    p->O + Ooff));
 	       if (XM(any_true)(!cld2rest, p->comm)) goto nada;
 	  }
