@@ -24,16 +24,14 @@
 #include "rdft.h"
 
 typedef union {
-     kr2hc r2hc;
-     khc2r hc2r;
+     kr2c r2c;
      kr2r r2r;
 } kodelet;
 
 typedef struct {
      solver super;
      union {
-	  const kr2hc_desc *r2hc;
-	  const khc2r_desc *hc2r;
+	  const kr2c_desc *r2c;
 	  const kr2r_desc *r2r;
      } desc;
      kodelet k;
@@ -57,18 +55,18 @@ static void apply_r2hc(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      ASSERT_ALIGNED_DOUBLE;
-     ego->k.r2hc(I, I + ego->is, O, O + ego->ioffset, 
-		 ego->isx, ego->ros, ego->ios,
-		 ego->vl, ego->ivs, ego->ovs);
+     ego->k.r2c(I, I + ego->is, O, O + ego->ioffset, 
+		ego->isx, ego->ros, ego->ios,
+		ego->vl, ego->ivs, ego->ovs);
 }
 
 static void apply_hc2r(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      ASSERT_ALIGNED_DOUBLE;
-     ego->k.hc2r(I, I + ego->ioffset, O, O + ego->is,
-		 ego->ros, ego->ios, ego->isx,
-		 ego->vl, ego->ivs, ego->ovs);
+     ego->k.r2c(O, O + ego->is, I, I + ego->ioffset, 
+		ego->isx, ego->ros, ego->ios,
+		ego->vl, ego->ivs, ego->ovs);
 }
 
 static void apply_r2r(const plan *ego_, R *I, R *O)
@@ -119,21 +117,21 @@ static int applicable(const solver *ego_, const problem *p_)
 	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
 	  && (!R2HC_KINDP(ego->kind) ||
-	      ego->desc.r2hc->genus->okp(ego->desc.r2hc, 
-					 p->I,  p->I + p->sz->dims[0].is,
-					 p->O, 
-					 p->O + ioffset(ego->kind, ego->sz, p->sz->dims[0].os),
-					 p->sz->dims[0].is,
-					 p->sz->dims[0].os, 0-p->sz->dims[0].os,
-					 vl, ivs, ovs))
+	      ego->desc.r2c->genus->okp(ego->desc.r2c, 
+					p->I,  p->I + p->sz->dims[0].is,
+					p->O, 
+					p->O + ioffset(ego->kind, ego->sz, p->sz->dims[0].os),
+					p->sz->dims[0].is,
+					p->sz->dims[0].os, 0-p->sz->dims[0].os,
+					vl, ivs, ovs))
 	  && (!HC2R_KINDP(ego->kind) ||
-	      ego->desc.hc2r->genus->okp(ego->desc.hc2r, 
-					 p->I, 
-					 p->I + ioffset(ego->kind, ego->sz, p->sz->dims[0].is), 
-					 p->O, p->O + p->sz->dims[0].os, 
-					 p->sz->dims[0].is, 0-p->sz->dims[0].is,
-					 p->sz->dims[0].os, 
-					 vl, ivs, ovs))
+	      ego->desc.r2c->genus->okp(ego->desc.r2c, 
+					p->O, p->O + p->sz->dims[0].os, 
+					p->I, 
+					p->I + ioffset(ego->kind, ego->sz, p->sz->dims[0].is), 
+					p->sz->dims[0].os, 
+					p->sz->dims[0].is, 0-p->sz->dims[0].is,
+					vl, ivs, ovs))
 	       
 	  && (!R2R_KINDP(ego->kind) ||
 	      ego->desc.r2r->genus->okp(ego->desc.r2r, p->I, p->O,
@@ -205,13 +203,9 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(ops_madd2)(pln->vl / ego->desc.r2r->genus->vl,
 		       &ego->desc.r2r->ops,
 		       &pln->super.super.ops);
-     else if (hc2r_kindp)
-	  X(ops_madd2)(pln->vl / ego->desc.hc2r->genus->vl,
-		       &ego->desc.hc2r->ops,
-		       &pln->super.super.ops);
-     else
-	  X(ops_madd2)(pln->vl / ego->desc.r2hc->genus->vl,
-		       &ego->desc.r2hc->ops,
+     else 
+	  X(ops_madd2)(pln->vl / ego->desc.r2c->genus->vl,
+		       &ego->desc.r2c->ops,
 		       &pln->super.super.ops);
 
      pln->super.super.could_prune_now_p = 1;
@@ -220,24 +214,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 }
 
 /* constructor */
-solver *X(mksolver_rdft_r2hc_direct)(kr2hc k, const kr2hc_desc *desc)
+solver *X(mksolver_rdft_r2c_direct)(kr2c k, const kr2c_desc *desc)
 {
      static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
-     slv->k.r2hc = k;
-     slv->desc.r2hc = desc;
-     slv->sz = desc->sz;
-     slv->nam = desc->nam;
-     slv->kind = desc->genus->kind;
-     return &(slv->super);
-}
-
-solver *X(mksolver_rdft_hc2r_direct)(khc2r k, const khc2r_desc *desc)
-{
-     static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
-     S *slv = MKSOLVER(S, &sadt);
-     slv->k.hc2r = k;
-     slv->desc.hc2r = desc;
+     slv->k.r2c = k;
+     slv->desc.r2c = desc;
      slv->sz = desc->sz;
      slv->nam = desc->nam;
      slv->kind = desc->genus->kind;

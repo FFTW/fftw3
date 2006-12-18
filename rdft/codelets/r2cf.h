@@ -19,10 +19,5 @@
  */
 
 
-#include "rdft.h"
-
-void X(khc2r_register)(planner *p, khc2r codelet, const khc2r_desc *desc)
-{
-     REGISTER_SOLVER(p, X(mksolver_rdft_hc2r_direct)(codelet, desc));
-     REGISTER_SOLVER(p, X(mksolver_rdft2_hc2r_direct)(codelet, desc));
-}
+#define GENUS X(rdft_r2cf_genus)
+extern const kr2c_genus GENUS;

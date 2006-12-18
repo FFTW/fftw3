@@ -19,5 +19,5 @@
  */
 
 
-#define GENUS X(rdft_hc2r_genus)
-extern const khc2r_genus GENUS;
+#define GENUS X(rdft_r2cb_genus)
+extern const kr2c_genus GENUS;

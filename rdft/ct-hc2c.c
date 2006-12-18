@@ -174,10 +174,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 				X(mkproblem_rdft_1_d)(
 				     X(mktensor_1d)(m, d[0].is, (r/2)*d[0].os),
 				     X(mktensor_3d)(
-					  2, p->r1 - p->r0, p->ci - p->cr,
+					  2, p->ci - p->cr, p->r1 - p->r0, 
 					  r / 2, m * d[0].is, d[0].os,
 					  v, ivs, ovs),
-				     p->r0, p->cr, HC2R) 
+				     p->cr, p->r0, HC2R) 
 		   );
 	      if (!cld) goto nada;
 

@@ -69,8 +69,7 @@ plan *X(mkplan_rdft)(size_t size, const plan_adt *adt, rdftapply apply);
 
 /* various solvers */
 
-solver *X(mksolver_rdft_r2hc_direct)(kr2hc k, const kr2hc_desc *desc);
-solver *X(mksolver_rdft_hc2r_direct)(khc2r k, const khc2r_desc *desc);
+solver *X(mksolver_rdft_r2c_direct)(kr2c k, const kr2c_desc *desc);
 solver *X(mksolver_rdft_r2r_direct)(kr2r k, const kr2r_desc *desc);
 
 void X(rdft_rank0_register)(planner *p);
@@ -150,8 +149,7 @@ plan *X(mkplan_rdft2)(size_t size, const plan_adt *adt, rdft2apply apply);
 
 /* various solvers */
 
-solver *X(mksolver_rdft2_r2hc_direct)(kr2hc k, const kr2hc_desc *desc);
-solver *X(mksolver_rdft2_hc2r_direct)(khc2r k, const khc2r_desc *desc);
+solver *X(mksolver_rdft2_direct)(kr2c k, const kr2c_desc *desc);
 
 void X(rdft2_vrank_geq1_register)(planner *p);
 void X(rdft2_buffered_register)(planner *p);

@@ -26,32 +26,32 @@ open C
 
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number>"
 
-let uistride = ref Stride_variable
-let urostride = ref Stride_variable
-let uiostride = ref Stride_variable
-let uivstride = ref Stride_variable
-let uovstride = ref Stride_variable
+let urs = ref Stride_variable
+let ucsr = ref Stride_variable
+let ucsi = ref Stride_variable
+let uivs = ref Stride_variable
+let uovs = ref Stride_variable
 let dftII_flag = ref false
 
 let speclist = [
-  "-with-istride",
-  Arg.String(fun x -> uistride := arg_to_stride x),
-  " specialize for given input stride";
+  "-with-rs",
+  Arg.String(fun x -> urs := arg_to_stride x),
+  " specialize for given real-array stride";
 
-  "-with-rostride",
-  Arg.String(fun x -> urostride := arg_to_stride x),
-  " specialize for given real output stride";
+  "-with-csr",
+  Arg.String(fun x -> ucsr := arg_to_stride x),
+  " specialize for given complex-array real stride";
 
-  "-with-iostride",
-  Arg.String(fun x -> uiostride := arg_to_stride x),
-  " specialize for given imaginary output stride";
+  "-with-csi",
+  Arg.String(fun x -> ucsi := arg_to_stride x),
+  " specialize for given complex-array imaginary stride";
 
-  "-with-ivstride",
-  Arg.String(fun x -> uivstride := arg_to_stride x),
+  "-with-ivs",
+  Arg.String(fun x -> uivs := arg_to_stride x),
   " specialize for given input vector stride";
 
-  "-with-ovstride",
-  Arg.String(fun x -> uovstride := arg_to_stride x),
+  "-with-ovs",
+  Arg.String(fun x -> uovs := arg_to_stride x),
   " specialize for given output vector stride";
 
   "-dft-II",
@@ -69,48 +69,41 @@ let rdftII sign n input =
     else Complex.zero
 
 let generate n =
-  let iarraye = "I0"
-  and iarrayo = "I1"
-  and roarray = "Or"
-  and ioarray = "Oi"
-  and istride = "is"
-  and rostride = "ros" 
-  and iostride = "ios" 
-  and i = "i" 
-  and v = "v"
-  and (transform, kind) =
-    if !dftII_flag then(rdftII, "r2hcII") else (Trig.rdft, "r2hc")
+  let ar0 = "R0" and ar1 = "R1" and acr = "Cr" and aci = "Ci"
+  and rs = "rs" and csr = "csr" and csi = "csi" 
+  and i = "i" and v = "v"
+  and transform = if !dftII_flag then rdftII else Trig.rdft
   in
 
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
 
-  let vistride = either_stride (!uistride) (C.SVar istride)
-  and vrostride = either_stride (!urostride) (C.SVar rostride)
-  and viostride = either_stride (!uiostride) (C.SVar iostride)
+  let vrs = either_stride (!urs) (C.SVar rs)
+  and vcsr = either_stride (!ucsr) (C.SVar csr)
+  and vcsi = either_stride (!ucsi) (C.SVar csi)
   in
 
-  let _ = Simd.ovs := stride_to_string "ovs" !uovstride in
-  let _ = Simd.ivs := stride_to_string "ivs" !uivstride in
+  let _ = Simd.ovs := stride_to_string "ovs" !uovs in
+  let _ = Simd.ivs := stride_to_string "ivs" !uivs in
 
   let locations = unique_array_c n in
   let inpute = 
     locative_array_c n 
-      (C.array_subscript iarraye vistride)
-      (C.array_subscript "BUG" vistride)
+      (C.array_subscript ar0 vrs)
+      (C.array_subscript "BUG" vrs)
       locations 
   and inputo =
     locative_array_c n 
-      (C.array_subscript iarrayo vistride)
-      (C.array_subscript "BUG" vistride)
+      (C.array_subscript ar1 vrs)
+      (C.array_subscript "BUG" vrs)
       locations 
   in
   let input i = if i mod 2 == 0 then inpute (i/2) else inputo ((i-1)/2) in
   let output = transform sign n (load_array_r n input) in
   let oloc = 
     locative_array_c n 
-      (C.array_subscript roarray vrostride)
-      (C.array_subscript ioarray viostride)
+      (C.array_subscript acr vcsr)
+      (C.array_subscript aci vcsi)
       locations in
   let odag = store_array_hc n oloc output in
   let annot = standard_optimizer odag in
@@ -121,13 +114,13 @@ let generate n =
 	  Binop (" > ", CVar i, Integer 0),
 	  list_to_comma 
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
-	     Expr_assign (CVar iarraye, CPlus [CVar iarraye; CVar !Simd.ivs]);
-	     Expr_assign (CVar iarrayo, CPlus [CVar iarrayo; CVar !Simd.ivs]);
-	     Expr_assign (CVar roarray, CPlus [CVar roarray; CVar !Simd.ovs]);
-	     Expr_assign (CVar ioarray, CPlus [CVar ioarray; CVar !Simd.ovs]);
-	     make_volatile_stride (CVar istride);
-	     make_volatile_stride (CVar rostride);
-	     make_volatile_stride (CVar iostride)
+	     Expr_assign (CVar ar0, CPlus [CVar ar0; CVar !Simd.ivs]);
+	     Expr_assign (CVar ar1, CPlus [CVar ar1; CVar !Simd.ivs]);
+	     Expr_assign (CVar acr, CPlus [CVar acr; CVar !Simd.ovs]);
+	     Expr_assign (CVar aci, CPlus [CVar aci; CVar !Simd.ovs]);
+	     make_volatile_stride (CVar rs);
+	     make_volatile_stride (CVar csr);
+	     make_volatile_stride (CVar csi)
 	   ],
 	  Asch annot)
    ])
@@ -135,13 +128,13 @@ let generate n =
 
   let tree =
     Fcn ((if !Magic.standalone then "void" else "static void"), name,
-	 ([Decl (C.constrealtypep, iarraye);
-	   Decl (C.constrealtypep, iarrayo);
-	   Decl (C.realtypep, roarray);
-	   Decl (C.realtypep, ioarray);
-	   Decl (C.stridetype, istride);
-	   Decl (C.stridetype, rostride);
-	   Decl (C.stridetype, iostride);
+	 ([Decl (C.realtypep, ar0);
+	   Decl (C.realtypep, ar1);
+	   Decl (C.realtypep, acr);
+	   Decl (C.realtypep, aci);
+	   Decl (C.stridetype, rs);
+	   Decl (C.stridetype, csr);
+	   Decl (C.stridetype, csi);
 	   Decl ("INT", v);
 	   Decl ("INT", "ivs");
 	   Decl ("INT", "ovs")]),
@@ -149,16 +142,16 @@ let generate n =
 
   in let desc = 
     Printf.sprintf 
-      "static const kr2hc_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n\n"
+      "static const kr2c_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n\n"
       n name (flops_of tree) 
-      (stride_to_solverparm !uistride) 
-      (stride_to_solverparm !urostride) (stride_to_solverparm !uiostride)
+      (stride_to_solverparm !urs) 
+      (stride_to_solverparm !ucsr) (stride_to_solverparm !ucsi)
       "0" "0"
 
   and init =
     (declare_register_fcn name) ^
     "{" ^
-    "  X(k" ^ kind ^ "_register)(p, " ^ name ^ ", &desc);\n" ^
+    "  X(kr2c_register)(p, " ^ name ^ ", &desc);\n" ^
     "}\n"
 
   in

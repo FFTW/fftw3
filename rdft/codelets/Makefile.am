@@ -1,7 +1,7 @@
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/rdft
-SUBDIRS = r2hc hc2r r2r
+SUBDIRS = r2cf r2cb r2r
 noinst_LTLIBRARIES = librdft_codelets.la
 
-librdft_codelets_la_SOURCES = hb.h hc2r.c hc2r.h hc2rIII.h hf.h hfb.c	\
-r2hc.c r2hc.h r2hcII.h r2r.c r2r.h hc2c.c hc2cf.h hc2cb.h
+librdft_codelets_la_SOURCES = hb.h r2cb.h r2cbIII.h hf.h hfb.c r2c.c	\
+r2cf.h r2cfII.h r2r.c r2r.h hc2c.c hc2cf.h hc2cb.h
 

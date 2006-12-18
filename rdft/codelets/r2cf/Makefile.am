@@ -13,31 +13,31 @@
 ###########################################################################
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/rdft	\
 -I$(top_srcdir)/rdft/codelets
-noinst_LTLIBRARIES = librdft_codelets_r2hc.la
+noinst_LTLIBRARIES = librdft_codelets_r2cf.la
 
 ###########################################################################
-# r2hc_<n> is a hard-coded real-to-complex FFT of size <n> (base cases
+# r2cf_<n> is a hard-coded real-to-complex FFT of size <n> (base cases
 # of real-input FFT recursion)
-R2HC = r2hc_2.c r2hc_3.c r2hc_4.c r2hc_5.c r2hc_6.c r2hc_7.c r2hc_8.c	\
-r2hc_9.c r2hc_10.c r2hc_11.c r2hc_12.c r2hc_13.c r2hc_14.c r2hc_15.c	\
-r2hc_16.c r2hc_32.c r2hc_64.c r2hc_128.c 
+R2CF = r2cf_2.c r2cf_3.c r2cf_4.c r2cf_5.c r2cf_6.c r2cf_7.c r2cf_8.c	\
+r2cf_9.c r2cf_10.c r2cf_11.c r2cf_12.c r2cf_13.c r2cf_14.c r2cf_15.c	\
+r2cf_16.c r2cf_32.c r2cf_64.c r2cf_128.c 
 
 ###########################################################################
 # hf_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT
 # step for a real-input FFT.  Every hf codelet must have a
-# corresponding r2hcII codelet (see below)!
+# corresponding r2cfII codelet (see below)!
 HF = hf_2.c hf_3.c hf_4.c hf_5.c hf_6.c hf_7.c hf_8.c hf_9.c	\
 hf_10.c hf_12.c hf_15.c hf_16.c hf_32.c hf_64.c
 
 # like hf, but generates part of its trig table on the fly (good for large n)
 HF2 = hf2_4.c hf2_8.c hf2_16.c hf2_32.c hf2_64.c
 
-# an r2hc transform where the input is shifted by half a sample (output
+# an r2cf transform where the input is shifted by half a sample (output
 # is multiplied by a phase).  This is needed as part of the DIT recursion;
-# every hf_<r> or hf2_<r> codelet should have a corresponding r2hcII_<r>
-R2HCII = r2hcII_2.c r2hcII_3.c r2hcII_4.c r2hcII_5.c r2hcII_6.c		\
-r2hcII_7.c r2hcII_8.c r2hcII_9.c r2hcII_10.c r2hcII_12.c r2hcII_15.c	\
-r2hcII_16.c r2hcII_32.c r2hcII_64.c
+# every hf_<r> or hf2_<r> codelet should have a corresponding r2cfII_<r>
+R2CFII = r2cfII_2.c r2cfII_3.c r2cfII_4.c r2cfII_5.c r2cfII_6.c		\
+r2cfII_7.c r2cfII_8.c r2cfII_9.c r2cfII_10.c r2cfII_12.c r2cfII_15.c	\
+r2cfII_16.c r2cfII_32.c r2cfII_64.c
 
 ###########################################################################
 # hc2cf_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIT
@@ -46,26 +46,26 @@ HC2CF = hc2cf_2.c hc2cf_4.c hc2cf_6.c hc2cf_8.c hc2cf_10.c hc2cf_12.c	\
 hc2cf_16.c hc2cf_32.c
 
 ###########################################################################
-ALL_CODELETS = $(R2HC) $(HF) $(HF2) $(R2HCII) $(HC2CF)
+ALL_CODELETS = $(R2CF) $(HF) $(HF2) $(R2CFII) $(HC2CF)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
-librdft_codelets_r2hc_la_SOURCES = $(BUILT_SOURCES)
+librdft_codelets_r2cf_la_SOURCES = $(BUILT_SOURCES)
 
-SOLVTAB_NAME = X(solvtab_rdft_r2hc)
+SOLVTAB_NAME = X(solvtab_rdft_r2cf)
 
 # special rules for regenerating codelets.
 include $(top_srcdir)/support/Makefile.codelets
 
 if MAINTAINER_MODE
-FLAGS_R2HC=$(RDFT_FLAGS_COMMON)
+FLAGS_R2CF=$(RDFT_FLAGS_COMMON)
 FLAGS_HF=$(RDFT_FLAGS_COMMON)
 FLAGS_HF2=$(RDFT_FLAGS_COMMON) -twiddle-log3 -precompute-twiddles
 FLAGS_HC2CF=$(RDFT_FLAGS_COMMON)
-FLAGS_R2HCII=$(RDFT_FLAGS_COMMON)
+FLAGS_R2CFII=$(RDFT_FLAGS_COMMON)
 
-r2hc_%.c:  $(CODELET_DEPS) $(GEN_R2HC)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2HC) $(FLAGS_R2HC) -n $* -name r2hc_$* -include "r2hc.h") | $(ADD_DATE) | $(INDENT) >$@
+r2cf_%.c:  $(CODELET_DEPS) $(GEN_R2CF)
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2CF) $(FLAGS_R2CF) -n $* -name r2cf_$* -include "r2cf.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hf_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
 	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2HC) $(FLAGS_HF) -n $* -dit -name hf_$* -include "hf.h") | $(ADD_DATE) | $(INDENT) >$@
@@ -73,8 +73,8 @@ hf_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
 hf2_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
 	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2HC) $(FLAGS_HF2) -n $* -dit -name hf2_$* -include "hf.h") | $(ADD_DATE) | $(INDENT) >$@
 
-r2hcII_%.c:  $(CODELET_DEPS) $(GEN_R2HC)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2HC) $(FLAGS_R2HC) -n $* -name r2hcII_$* -dft-II -include "r2hcII.h") | $(ADD_DATE) | $(INDENT) >$@
+r2cfII_%.c:  $(CODELET_DEPS) $(GEN_R2CF)
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2CF) $(FLAGS_R2CF) -n $* -name r2cfII_$* -dft-II -include "r2cfII.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hc2cf_%.c:  $(CODELET_DEPS) $(GEN_HC2C)
 	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2C) $(FLAGS_HC2CF) -n $* -dit -name hc2cf_$* -include "hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@

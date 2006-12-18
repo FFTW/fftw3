@@ -54,7 +54,7 @@ static const solvtab s =
 void X(rdft_conf_standard)(planner *p)
 {
      X(solvtab_exec)(s, p);
-     X(solvtab_exec)(X(solvtab_rdft_r2hc), p);
-     X(solvtab_exec)(X(solvtab_rdft_hc2r), p);
+     X(solvtab_exec)(X(solvtab_rdft_r2cf), p);
+     X(solvtab_exec)(X(solvtab_rdft_r2cb), p);
      X(solvtab_exec)(X(solvtab_rdft_r2r), p);
 }

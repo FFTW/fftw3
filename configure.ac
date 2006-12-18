@@ -452,8 +452,8 @@ AC_CONFIG_FILES([
 
    rdft/Makefile
    rdft/codelets/Makefile
-   rdft/codelets/r2hc/Makefile
-   rdft/codelets/hc2r/Makefile
+   rdft/codelets/r2cf/Makefile
+   rdft/codelets/r2cb/Makefile
    rdft/codelets/r2r/Makefile
 
    reodft/Makefile

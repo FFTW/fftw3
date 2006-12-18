@@ -4805,7 +4805,7 @@ that you want to share.
 To create the FFTW library, you will then need to compile all of the
 @samp{.c} files in the @code{kernel}, @code{dft}, @code{dft/codelets},
 @code{dft/codelets/standard}, @code{rdft}, @code{rdft/codelets},
-@code{rdft/codelets/r2hc}, @code{rdft/codelets/hc2r},
+@code{rdft/codelets/r2cf}, @code{rdft/codelets/r2cb},
 @code{rdft/codelets/r2r}, @code{reodft}, and @code{api} directories.
 If you are compiling with SIMD support (e.g. you defined
 @code{HAVE_SSE2} in @code{config.h}), then you also need to compile
