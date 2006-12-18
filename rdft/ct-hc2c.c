@@ -166,7 +166,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	      cldw = ego->mkcldw(ego, HC2R, 
 				 r, m * d[0].is, 
 				 m, d[0].is,
-				 v, ovs,
+				 v, ivs,
 				 p->cr, p->ci, plnr);
 	      if (!cldw) goto nada;
 
