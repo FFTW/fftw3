@@ -34,8 +34,8 @@ X(plan) X(plan_many_dft)(int rank, const int *n,
 
      if (!X(many_kosherp)(rank, n, howmany)) return 0;
 
-     X(extract_reim)(sign, in, &ri, &ii);
-     X(extract_reim)(sign, out, &ro, &io);
+     EXTRACT_REIM(sign, in, &ri, &ii);
+     EXTRACT_REIM(sign, out, &ro, &io);
 
      return 
 	  X(mkapiplan)(sign, flags,

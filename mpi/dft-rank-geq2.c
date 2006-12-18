@@ -24,9 +24,6 @@
 #include "mpi-transpose.h"
 #include "dft.h"
 
-/* from api/extract-reim.c */
-extern void X(extract_reim)(int sign, R *c, R **r, R **i);
-
 typedef struct {
      plan_mpi_dft super;
 

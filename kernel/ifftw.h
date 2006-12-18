@@ -77,6 +77,7 @@ typedef ptrdiff_t INT;
 #define UNUSED(x) (void)x
 
 #define FFT_SIGN (-1)  /* sign convention for forward transforms */
+extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 
 #define REGISTER_SOLVER(p, s) X(solver_register)(p, s)
 

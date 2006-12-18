@@ -35,7 +35,7 @@ X(plan) X(plan_many_dft_r2c)(int rank, const int *n,
 
      if (!X(many_kosherp)(rank, n, howmany)) return 0;
 
-     X(extract_reim)(FFT_SIGN, out, &ro, &io);
+     EXTRACT_REIM(FFT_SIGN, out, &ro, &io);
      inplace = in == ro;
 
      p = X(mkapiplan)(

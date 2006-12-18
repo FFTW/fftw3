@@ -35,7 +35,7 @@ X(plan) X(plan_many_dft_c2r)(int rank, const int *n,
 
      if (!X(many_kosherp)(rank, n, howmany)) return 0;
 
-     X(extract_reim)(FFT_SIGN, in, &ri, &ii);
+     EXTRACT_REIM(FFT_SIGN, in, &ri, &ii);
      inplace = out == ri;
 
      if (!inplace)

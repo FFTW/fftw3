@@ -11,7 +11,7 @@ libapi_la_SOURCES = apiplan.c configure.c execute-dft-c2r.c		\
 execute-dft-r2c.c execute-dft.c execute-r2r.c execute-split-dft-c2r.c	\
 execute-split-dft-r2c.c execute-split-dft.c execute.c			\
 export-wisdom-to-file.c export-wisdom-to-string.c export-wisdom.c	\
-extract-reim.c f77api.c flops.c forget-wisdom.c import-system-wisdom.c	\
+f77api.c flops.c forget-wisdom.c import-system-wisdom.c			\
 import-wisdom-from-file.c import-wisdom-from-string.c import-wisdom.c	\
 malloc.c map-r2r-kind.c mapflags.c mkprinter-file.c mktensor-iodims.c	\
 mktensor-rowmajor.c plan-dft-1d.c plan-dft-2d.c plan-dft-3d.c		\

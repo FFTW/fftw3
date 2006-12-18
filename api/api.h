@@ -65,7 +65,7 @@ typedef struct X(plan_s) apiplan;
 /* complex type for internal use */
 typedef R C[2];
 
-void X(extract_reim)(int sign, C *c, R **r, R **i);
+#define EXTRACT_REIM(sign, c, r, i) X(extract_reim)(sign, (c)[0], r, i)
 
 #define TAINT_UNALIGNED(p, flg) TAINT(p, ((flg) & FFTW_UNALIGNED) != 0)
 
