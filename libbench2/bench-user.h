@@ -123,6 +123,8 @@ typedef struct {
 
 extern int verbose;
 
+extern int no_speed_allocation;
+
 #define LIBBENCH_TIMER 0
 #define USER_TIMER 1
 #define BENCH_NTIMERS 2

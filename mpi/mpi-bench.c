@@ -59,6 +59,7 @@ static int *orecv_cnt = 0, *orecv_off = 0; /* for MPI_Gatherv */
 
 static bench_real *local_in = 0, *local_out = 0;
 static bench_real *all_local_in = 0, *all_local_out = 0;
+static int all_local_in_alloc = 0, all_local_out_alloc = 0;
 static FFTW(plan) plan_scramble_in = 0, plan_unscramble_out = 0;
 
 static void alloc_rnk(int rnk_) {
@@ -116,8 +117,7 @@ static void setup_gather_scatter(void)
 	  off += N;
      }
      iNtot = off;
-     bench_free(all_local_in);
-     all_local_in = (bench_real*) bench_malloc(iNtot * sizeof(bench_real));
+     all_local_in_alloc = 1;
 
      istrides[rnk - 1] = vn;
      for (j = rnk - 2; j >= 0; --j)
@@ -133,8 +133,7 @@ static void setup_gather_scatter(void)
 	  off += N;
      }
      oNtot = off;
-     bench_free(all_local_out);
-     all_local_out = (bench_real*) bench_malloc(oNtot * sizeof(bench_real));
+     all_local_out_alloc = 1;
 
      ostrides[rnk - 1] = vn;
      for (j = rnk - 2; j >= 0; --j)
@@ -203,6 +202,11 @@ static void do_scatter_in(bench_real *in)
 {
      bench_real *ali;
      int i;
+     if (all_local_in_alloc) {
+          bench_free(all_local_in);
+	  all_local_in = (bench_real*) bench_malloc(iNtot*sizeof(bench_real));
+	  all_local_in_alloc = 0;
+     }
      ali = all_local_in;
      for (i = 0; i < n_pes; ++i) {
 	  copy_block_in(ali,
@@ -222,6 +226,11 @@ static void do_gather_out(bench_real *out)
      bench_real *alo;
      int i;
 
+     if (all_local_out_alloc) {
+          bench_free(all_local_out);
+	  all_local_out = (bench_real*) bench_malloc(oNtot*sizeof(bench_real));
+	  all_local_out_alloc = 0;
+     }
      MPI_Gatherv(local_out, orecv_cnt[my_pe], BENCH_MPI_TYPE,
 		 all_local_out, orecv_cnt, orecv_off, BENCH_MPI_TYPE,
 		 0, MPI_COMM_WORLD);
@@ -249,7 +258,7 @@ static void alloc_local(ptrdiff_t nreal, int inplace)
 	       local_out = local_in;
 	  else
 	       local_out = (bench_real*) bench_malloc(nreal * sizeof(bench_real));
-	  for (i = 0; i < nreal; ++i) local_in[i] = 0.0;
+	  for (i = 0; i < nreal; ++i) local_in[i] = local_out[i] = 0.0;
      }
 }
 
@@ -530,6 +539,7 @@ void main_init(int *argc, char ***argv)
      MPI_Comm_rank(MPI_COMM_WORLD, &my_pe);
      MPI_Comm_size(MPI_COMM_WORLD, &n_pes);
      if (my_pe != 0) verbose = -999;
+     no_speed_allocation = 1; /* so we can benchmark transforms > memory */
      if (sizeof(ptrdiff_t) == sizeof(int))
 	  ptrdiff_t_type = MPI_INT;
      else if (sizeof(ptrdiff_t) == sizeof(long long))

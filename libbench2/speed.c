@@ -21,6 +21,8 @@
 
 #include "bench.h"
 
+int no_speed_allocation = 0; /* 1 to not allocate array data in speed() */
+
 void speed(const char *param, int setup_only)
 {
      double *t;
@@ -35,8 +37,10 @@ void speed(const char *param, int setup_only)
 
      p = problem_parse(param);
      BENCH_ASSERT(can_do(p));
-     problem_alloc(p);
-     problem_zero(p);
+     if (!no_speed_allocation) {
+	  problem_alloc(p);
+	  problem_zero(p);
+     }
 
      timer_start(LIBBENCH_TIMER);
      setup(p);
@@ -77,7 +81,8 @@ void speed(const char *param, int setup_only)
 
      report(p, t, time_repeat);
 
-     problem_destroy(p);
+     if (!no_speed_allocation)
+	  problem_destroy(p);
      bench_free(t);
      return;
 }
