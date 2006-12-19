@@ -161,14 +161,18 @@ void setup(bench_problem *p)
      if (verbose > 1) printf("planner time: %g s\n", tim);
 
      BENCH_ASSERT(the_plan);
-
-     if (verbose > 1) {
-	  double add, mul, nfma;
-	  FFTW(print_plan)(the_plan);
-	  printf("\n");
+     
+     {
+	  double add, mul, nfma, cost;
 	  FFTW(flops)(the_plan, &add, &mul, &nfma);
-	  printf("flops: %0.0f add, %0.0f mul, %0.0f fma\n", add, mul, nfma);
-	  printf("estimated cost: %f\n", FFTW(estimate_cost)(the_plan));
+	  cost = FFTW(estimate_cost)(the_plan);
+	  if (verbose > 1) {
+	       FFTW(print_plan)(the_plan);
+	       printf("\n");
+	       printf("flops: %0.0f add, %0.0f mul, %0.0f fma\n",
+		      add, mul, nfma);
+	       printf("estimated cost: %f\n", cost);
+	  }
      }
 }
 
