@@ -84,7 +84,7 @@ void XM(block_coords)(const dtensor *sz, block_kind k, int which_pe,
 		     INT *coords)
 {
      int i;
-     A(!XM(idle_process)(sz, k, which_pe) && FINITE_RNK(sz->dims));
+     A(!XM(idle_process)(sz, k, which_pe) && FINITE_RNK(sz->rnk));
      for (i = sz->rnk - 1; i >= 0; --i) {
 	  INT nb = num_blocks_kind(sz->dims + i, k);
 	  coords[i] = which_pe % nb;
