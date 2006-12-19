@@ -38,60 +38,105 @@ typedef struct {
      INT *send_block_sizes, *send_block_offsets;
      INT *recv_block_sizes, *recv_block_offsets;
      MPI_Comm comm;
+     int preserve_input;
 } P;
+
+static void transpose_chunks(int *sched, int n_pes, int my_pe,
+			     INT *sbs, INT *sbo, INT *rbs, INT *rbo,
+			     MPI_Comm comm,
+			     R *I, R *O)
+{
+     if (sched) {
+	  int i;
+	  MPI_Status status;
+
+	  /* TODO: explore non-synchronous send/recv? */
+
+	  if (I == O) {
+	       R *buf = (R*) MALLOC(sizeof(R) * sbs[0], BUFFERS);
+	       
+	       for (i = 0; i < n_pes; ++i) {
+		    int pe = sched[i];
+		    if (my_pe == pe) {
+			 if (rbo[pe] != sbo[pe])
+			      memmove(O + rbo[pe], O + sbo[pe],
+				      sbs[pe] * sizeof(R));
+		    }
+		    else {
+			 memcpy(buf, O + sbo[pe], sbs[pe] * sizeof(R));
+			 MPI_Sendrecv(buf, (int) (sbs[pe]), FFTW_MPI_TYPE,
+				      pe, my_pe * n_pes + pe,
+				      O + rbo[pe], (int) (rbs[pe]),
+				      FFTW_MPI_TYPE,
+				      pe, pe * n_pes + my_pe,
+				      comm, &status);
+		    }
+	       }
+
+	       X(ifree)(buf);
+	  }
+	  else { /* I != O */
+	       for (i = 0; i < n_pes; ++i) {
+		    int pe = sched[i];
+		    if (my_pe == pe)
+			 memcpy(O + rbo[pe], I + sbo[pe], sbs[pe] * sizeof(R));
+		    else
+			 MPI_Sendrecv(I + sbo[pe], (int) (sbs[pe]),
+				      FFTW_MPI_TYPE,
+				      pe, my_pe * n_pes + pe,
+				      O + rbo[pe], (int) (rbs[pe]),
+				      FFTW_MPI_TYPE,
+				      pe, pe * n_pes + my_pe,
+				      comm, &status);
+	       }
+	  }
+     }
+}
 
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      plan_rdft *cld1, *cld2, *cld2rest, *cld3;
-     int *sched;
 
      /* transpose locally to get contiguous chunks */
      cld1 = (plan_rdft *) ego->cld1;
-     cld1->apply(ego->cld1, I, O);
-
-     /* transpose chunks globally */
-     sched = ego->sched;
-     if (sched) {
-	  int n_pes = ego->n_pes, my_pe = ego->my_pe, i;
-	  INT *sbs = ego->send_block_sizes;
-	  INT *sbo = ego->send_block_offsets;
-	  INT *rbs = ego->recv_block_sizes;
-	  INT *rbo = ego->recv_block_offsets;
-	  MPI_Comm comm = ego->comm;
-	  MPI_Status status;
-	  R *buf = (R*) MALLOC(sizeof(R) * sbs[0], BUFFERS);
-
-	  for (i = 0; i < n_pes; ++i) {
-	       int pe = sched[i];
-	       if (my_pe == pe) {
-		    if (rbo[pe] != sbo[pe])
-			 memmove(O + rbo[pe], O + sbo[pe],
-				 sbs[pe] * sizeof(R));
-	       }
-	       else {
-		    memcpy(buf, O + sbo[pe], sbs[pe] * sizeof(R));
-		    MPI_Sendrecv(buf, (int) (sbs[pe]), FFTW_MPI_TYPE,
-				 pe, my_pe * n_pes + pe,
-				 O + rbo[pe], (int) (rbs[pe]), FFTW_MPI_TYPE,
-				 pe, pe * n_pes + my_pe,
-				 comm, &status);
-		    /* TODO: explore non-synchronous send/recv? */
-	       }
-	  }
+     if (cld1) {
+	  cld1->apply(ego->cld1, I, O);
 	  
-	  X(ifree)(buf);
+	  if (ego->preserve_input) I = O;
+
+	  /* transpose chunks globally */
+	  transpose_chunks(ego->sched, ego->n_pes, ego->my_pe,
+			   ego->send_block_sizes, ego->send_block_offsets,
+			   ego->recv_block_sizes, ego->recv_block_offsets,
+			   ego->comm, O, I);
+     }
+     else if (ego->preserve_input) {
+	  /* transpose chunks globally */
+	  transpose_chunks(ego->sched, ego->n_pes, ego->my_pe,
+			   ego->send_block_sizes, ego->send_block_offsets,
+			   ego->recv_block_sizes, ego->recv_block_offsets,
+			   ego->comm, I, O);
+
+	  I = O;
+     }
+     else {
+	  /* transpose chunks globally */
+	  transpose_chunks(ego->sched, ego->n_pes, ego->my_pe,
+			   ego->send_block_sizes, ego->send_block_offsets,
+			   ego->recv_block_sizes, ego->recv_block_offsets,
+			   ego->comm, I, I);
      }
 
      /* transpose locally, again, to get ordinary row-major;
-        this may take two transposes if the block sizes are unequal
-        (3 subplans, two of which operate on disjoint data) */
+	this may take two transposes if the block sizes are unequal
+	(3 subplans, two of which operate on disjoint data) */
      cld2 = (plan_rdft *) ego->cld2;
-     cld2->apply(ego->cld2, O, O);
+     cld2->apply(ego->cld2, I, O);
      cld2rest = (plan_rdft *) ego->cld2rest;
      if (cld2rest) {
-	  R *Orest = O + ego->rest_offset;
-          cld2rest->apply(ego->cld2rest, Orest, Orest);
+	  ptrdiff_t rest_offset = ego->rest_offset;
+	  cld2rest->apply(ego->cld2rest, I + rest_offset, O + rest_offset);
 	  cld3 = (plan_rdft *) ego->cld3;
 	  if (cld3)
 	       cld3->apply(ego->cld3, O, O);
@@ -105,7 +150,9 @@ static int applicable(const solver *ego_, const problem *p_,
      const problem_mpi_transpose *p = (const problem_mpi_transpose *) p_;
      UNUSED(ego_);
      UNUSED(plnr);
-     /* FIXME: ugly if out-of-place and destroy_input? */
+     /* Note: this is *not* UGLY for out-of-place, destroy-input plans;
+	the planner often prefers transpose-inplace to transpose-alltoall,
+	at least with LAM MPI on my machine. */
      return (1
 	     && !SCRAMBLEDP(p->flags));
 }
@@ -219,6 +266,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      INT b, bt, nxb, vn, rest_offset = 0;
      INT *sbs, *sbo, *rbs, *rbo;
      int pe, my_pe, n_pes, sort_pe = -1, ascending = 1;
+     R *I, *O;
      static const plan_adt padt = {
           XM(transpose_solve), awake, print, destroy
      };
@@ -230,25 +278,23 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      p = (const problem_mpi_transpose *) p_;
      vn = p->vn;
+     I = p->I; O = p->O;
 
      MPI_Comm_rank(p->comm, &my_pe);
      MPI_Comm_size(p->comm, &n_pes);
 
      b = XM(block)(p->nx, p->block, my_pe);
-
-     if (p->flags & TRANSPOSED_IN) /* I is already transposed */
-	  cld1 = X(mkplan_d)(plnr, 
-			     X(mkproblem_rdft_0_d)(X(mktensor_1d)
-						   (b * p->ny * vn, 1, 1),
-						   p->I, p->O));
-     else /* transpose b x ny x vn -> ny x b x vn */
+     
+     if (!(p->flags & TRANSPOSED_IN)) { /* b x ny x vn -> ny x b x vn */
 	  cld1 = X(mkplan_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
 						   (b, p->ny * vn, vn,
 						    p->ny, vn, b * vn,
 						    vn, 1, 1),
-						   p->I, p->O));
-     if (XM(any_true)(!cld1, p->comm)) goto nada;
+						   I, O));
+	  if (XM(any_true)(!cld1, p->comm)) goto nada;
+     }
+     if (NO_DESTROY_INPUTP(plnr)) I = O;
 
      b = p->block;
      bt = XM(block)(p->ny, p->tblock, my_pe);
@@ -261,7 +307,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 							(nxb, bt * b, b,
 							 bt, b, nxb * b,
 							 b, 1, 1),
-							p->O, p->O));
+							I, O));
 	  }
 	  else {
 	       cld2 = X(mkplan_d)(plnr, 
@@ -271,7 +317,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 					bt, b * vn, vn,
 					b, vn, bt * vn,
 					vn, 1, 1),
-				       p->O, p->O));
+				       I, O));
 	  }
 	  if (XM(any_true)(!cld2, p->comm)) goto nada;
      }
@@ -284,7 +330,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				   bt, b * vn, vn,
 				   b, vn, bt * vn,
 				   vn, 1, 1),
-				  p->O, p->O));
+				  I, O));
 	  if (XM(any_true)(!cld2, p->comm)) goto nada;
 	  rest_offset = nxb * b * bt * vn;
 	  cld2rest = X(mkplan_d)(plnr,
@@ -293,7 +339,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				  (bt, nxr * vn, vn,
 				   nxr, vn, bt * vn,
 				   vn, 1, 1),
-				  p->O + rest_offset, p->O + rest_offset));
+				  I + rest_offset, O + rest_offset));
 	  if (XM(any_true)(!cld2rest, p->comm)) goto nada;
 	  if (!(p->flags & TRANSPOSED_OUT)) {
 	       cld3 = X(mkplan_d)(plnr,
@@ -302,7 +348,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 				       (p->nx, bt * vn, vn,
 					bt, vn, p->nx * vn,
 					vn, 1, 1),
-				       p->O, p->O));
+				       O, O));
 	       if (XM(any_true)(!cld3, p->comm)) goto nada;
 	  }
      }
@@ -314,6 +360,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->cld2rest = cld2rest;
      pln->rest_offset = rest_offset;
      pln->cld3 = cld3;
+     pln->preserve_input = NO_DESTROY_INPUTP(plnr);
 
      MPI_Comm_dup(p->comm, &pln->comm);
 
