@@ -81,7 +81,7 @@ problem *XM(mkproblem_dft)(const dtensor *sz, INT vn,
 			   R *I, R *O,
 			   MPI_Comm comm,
 			   int sign,
-			   int flags)
+			   unsigned flags)
 {
      problem_mpi_dft *ego =
           (problem_mpi_dft *)X(mkproblem)(sizeof(problem_mpi_dft), &padt);
@@ -114,7 +114,7 @@ problem *XM(mkproblem_dft_d)(dtensor *sz, INT vn,
 			     R *I, R *O,
 			     MPI_Comm comm,
 			     int sign,
-			     int flags)
+			     unsigned flags)
 {
      problem *p = XM(mkproblem_dft)(sz, vn, I, O, comm, sign, flags);
      XM(dtensor_destroy)(sz);

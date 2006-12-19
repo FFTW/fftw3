@@ -28,18 +28,18 @@ typedef struct {
      R *I, *O; /* contiguous interleaved arrays */
 
      int sign; /* FFTW_FORWARD / FFTW_BACKWARD */
-     int flags; /* TRANSPOSED_IN/OUT meaningful for 1d-bigvec transforms only
-		   SCRAMBLED_IN/OUT meaningful for 1d transforms only */
+     unsigned flags; /* TRANSPOSED_IN/OUT meaningful for 1d-bigvec only
+			SCRAMBLED_IN/OUT meaningful for 1d transforms only */
 
      MPI_Comm comm;
 } problem_mpi_dft;
 
 problem *XM(mkproblem_dft)(const dtensor *sz, INT vn,
 			      R *I, R *O, MPI_Comm comm,
-			      int sign, int flags);
+			      int sign, unsigned flags);
 problem *XM(mkproblem_dft_d)(dtensor *sz, INT vn,
 			     R *I, R *O, MPI_Comm comm,
-			     int sign, int flags);
+			     int sign, unsigned flags);
 
 /* solve.c: */
 void XM(dft_solve)(const plan *ego_, const problem *p_);
@@ -55,3 +55,4 @@ int XM(dft_serial_applicable)(const problem_mpi_dft *p);
 void XM(dft_rank_geq2_register)(planner *p);
 void XM(dft_serial_register)(planner *p);
 void XM(dft_rank1_bigvec_register)(planner *p);
+void XM(dft_rank1_register)(planner *p);

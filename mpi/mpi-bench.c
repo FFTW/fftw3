@@ -336,7 +336,7 @@ static int tensor_contiguousp(bench_tensor *t, int s)
 		 || tensor_rowmajor_transposedp(t)));
 }
 
-static FFTW(plan) mkplan_complex(bench_problem *p, int flags)
+static FFTW(plan) mkplan_complex(bench_problem *p, unsigned flags)
 {
      FFTW(plan) pln = 0;
      int i; 
@@ -359,35 +359,34 @@ static FFTW(plan) mkplan_complex(bench_problem *p, int flags)
 	  local_ni[i] = local_no[i] = total_ni[i];
 	  local_starti[i] = local_starto[i] = 0;
      }
-     {
+     if (rnk > 1) {
 	  ptrdiff_t n, start, nT, startT;
 	  ntot = FFTW(mpi_local_size_many_transposed)
 	       (p->sz->rnk, total_ni, vn,
 		FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK,
 		MPI_COMM_WORLD,
 		&n, &start, &nT, &startT);
-	  if (rnk > 1) {
-	       if  (flags & FFTW_MPI_TRANSPOSED_IN) {
-		    local_ni[1] = nT;
-		    local_starti[1] = startT;
-	       }
-	       else {
-		    local_ni[0] = n;
-		    local_starti[0] = start;
-	       }
-	       if  (flags & FFTW_MPI_TRANSPOSED_OUT) {
-		    local_no[1] = nT;
-		    local_starto[1] = startT;
-	       }
-	       else {
-		    local_no[0] = n;
-		    local_starto[0] = start;
-	       }
+	  if  (flags & FFTW_MPI_TRANSPOSED_IN) {
+	       local_ni[1] = nT;
+	       local_starti[1] = startT;
 	  }
 	  else {
-	       local_no[0] = local_ni[0] = n;
-	       local_starto[0] = local_starti[0] = start;
+	       local_ni[0] = n;
+	       local_starti[0] = start;
 	  }
+	  if  (flags & FFTW_MPI_TRANSPOSED_OUT) {
+	       local_no[1] = nT;
+	       local_starto[1] = startT;
+	  }
+	  else {
+	       local_no[0] = n;
+	       local_starto[0] = start;
+	  }
+     }
+     else if (rnk == 1) {
+	  ntot = FFTW(mpi_local_size_many_1d)
+	       (total_ni[0], vn, MPI_COMM_WORLD, p->sign, flags,
+		local_ni, local_starti, local_no, local_starto);
      }
      alloc_local(ntot * 2, p->in == p->out);
 
@@ -403,12 +402,12 @@ static FFTW(plan) mkplan_complex(bench_problem *p, int flags)
      return pln;
 }
 
-static FFTW(plan) mkplan_real(bench_problem *p, int flags)
+static FFTW(plan) mkplan_real(bench_problem *p, unsigned flags)
 {
      return 0;
 }
 
-static FFTW(plan) mkplan_transpose(bench_problem *p, int flags)
+static FFTW(plan) mkplan_transpose(bench_problem *p, unsigned flags)
 {
      ptrdiff_t ntot, nx, ny;
      int ix=0, iy=1, i;
@@ -495,7 +494,7 @@ static FFTW(plan) mkplan_transpose(bench_problem *p, int flags)
      return pln;
 }
 
-static FFTW(plan) mkplan_r2r(bench_problem *p, int flags)
+static FFTW(plan) mkplan_r2r(bench_problem *p, unsigned flags)
 {
      if ((p->sz->rnk == 0 || (p->sz->rnk == 1 && p->sz->dims[0].n == 1))
 	 && p->vecsz->rnk >= 2 && p->vecsz->rnk <= 3)
@@ -504,7 +503,7 @@ static FFTW(plan) mkplan_r2r(bench_problem *p, int flags)
      return 0;
 }
 
-FFTW(plan) mkplan(bench_problem *p, int flags)
+FFTW(plan) mkplan(bench_problem *p, unsigned flags)
 {
      FFTW(plan) pln = 0;
      FFTW(destroy_plan)(plan_scramble_in); plan_scramble_in = 0;

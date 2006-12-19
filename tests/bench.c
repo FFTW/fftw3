@@ -115,7 +115,7 @@ static int halfish_sizeof_problem(bench_problem *p)
      return n2;
 }
 
-static FFTW(plan) mkplan_real_split(bench_problem *p, int flags)
+static FFTW(plan) mkplan_real_split(bench_problem *p, unsigned flags)
 {
      FFTW(plan) pln;
      bench_tensor *sz = p->sz, *vecsz = p->vecsz;
@@ -145,7 +145,7 @@ static FFTW(plan) mkplan_real_split(bench_problem *p, int flags)
      return pln;
 }
 
-static FFTW(plan) mkplan_real_interleaved(bench_problem *p, int flags)
+static FFTW(plan) mkplan_real_interleaved(bench_problem *p, unsigned flags)
 {
      FFTW(plan) pln;
      bench_tensor *sz = p->sz, *vecsz = p->vecsz;
@@ -290,7 +290,7 @@ static FFTW(plan) mkplan_real_interleaved(bench_problem *p, int flags)
      }
 }
 
-static FFTW(plan) mkplan_real(bench_problem *p, int flags)
+static FFTW(plan) mkplan_real(bench_problem *p, unsigned flags)
 {
      if (p->split)
 	  return mkplan_real_split(p, flags);
@@ -298,7 +298,7 @@ static FFTW(plan) mkplan_real(bench_problem *p, int flags)
 	  return mkplan_real_interleaved(p, flags);
 }
 
-static FFTW(plan) mkplan_complex_split(bench_problem *p, int flags)
+static FFTW(plan) mkplan_complex_split(bench_problem *p, unsigned flags)
 {
      FFTW(plan) pln;
      bench_tensor *sz = p->sz, *vecsz = p->vecsz;
@@ -320,7 +320,7 @@ static FFTW(plan) mkplan_complex_split(bench_problem *p, int flags)
      return pln;
 }
 
-static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
+static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, unsigned flags)
 {
      FFTW(plan) pln;
      bench_tensor *sz = p->sz, *vecsz = p->vecsz;
@@ -403,7 +403,7 @@ static FFTW(plan) mkplan_complex_interleaved(bench_problem *p, int flags)
      }
 }
 
-static FFTW(plan) mkplan_complex(bench_problem *p, int flags)
+static FFTW(plan) mkplan_complex(bench_problem *p, unsigned flags)
 {
      if (p->split)
 	  return mkplan_complex_split(p, flags);
@@ -411,7 +411,7 @@ static FFTW(plan) mkplan_complex(bench_problem *p, int flags)
 	  return mkplan_complex_interleaved(p, flags);
 }
 
-static FFTW(plan) mkplan_r2r(bench_problem *p, int flags)
+static FFTW(plan) mkplan_r2r(bench_problem *p, unsigned flags)
 {
      FFTW(plan) pln;
      bench_tensor *sz = p->sz, *vecsz = p->vecsz;
@@ -518,7 +518,7 @@ static FFTW(plan) mkplan_r2r(bench_problem *p, int flags)
      return pln;
 }
 
-FFTW(plan) mkplan(bench_problem *p, int flags)
+FFTW(plan) mkplan(bench_problem *p, unsigned flags)
 {
      switch (p->kind) {
 	 case PROBLEM_COMPLEX:	  return mkplan_complex(p, flags);

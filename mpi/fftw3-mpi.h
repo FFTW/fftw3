@@ -93,9 +93,15 @@ FFTW_EXTERN ptrdiff_t XM(local_size_transposed)			\
 FFTW_EXTERN ptrdiff_t XM(local_size)				\
      (int rnk, const ptrdiff_t *n, MPI_Comm comm,		\
       ptrdiff_t *local_nx, ptrdiff_t *local_x_start);		\
+FFTW_EXTERN ptrdiff_t XM(local_size_many_1d)(			\
+     ptrdiff_t nx, ptrdiff_t howmany,				\
+     MPI_Comm comm, int sign, unsigned flags,			\
+     ptrdiff_t *local_nx, ptrdiff_t *local_x_start,		\
+     ptrdiff_t *local_ny, ptrdiff_t *local_y_start);		\
 FFTW_EXTERN ptrdiff_t XM(local_size_1d)(			\
-     ptrdiff_t nx, MPI_Comm comm,				\
-     ptrdiff_t *local_nx, ptrdiff_t *local_x_start);		\
+     ptrdiff_t nx, MPI_Comm comm, int sign, unsigned flags,	\
+     ptrdiff_t *local_nx, ptrdiff_t *local_x_start,		\
+     ptrdiff_t *local_ny, ptrdiff_t *local_y_start);		\
 FFTW_EXTERN ptrdiff_t XM(local_size_2d)(			\
      ptrdiff_t nx, ptrdiff_t ny, MPI_Comm comm,			\
      ptrdiff_t *local_nx, ptrdiff_t *local_x_start);		\

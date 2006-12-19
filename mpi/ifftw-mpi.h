@@ -102,6 +102,10 @@ int XM(is_local_after)(int dim, const dtensor *sz, block_kind k);
 int XM(is_local)(const dtensor *sz, block_kind k);
 int XM(is_block1d)(const dtensor *sz, block_kind k);
 
+/* choose-radix.c */
+INT XM(choose_radix)(ddim d, int n_pes, unsigned flags, int sign,
+                     INT rblock[2], INT mblock[2]);
+
 /***********************************************************************/
 /* any_true.c */
 int XM(any_true)(int condition, MPI_Comm comm);

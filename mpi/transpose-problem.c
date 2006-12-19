@@ -84,7 +84,7 @@ problem *XM(mkproblem_transpose)(INT nx, INT ny, INT vn,
 				 R *I, R *O,
 				 INT block, INT tblock,
 				 MPI_Comm comm,
-				 int flags)
+				 unsigned flags)
 {
      problem_mpi_transpose *ego =
           (problem_mpi_transpose *)X(mkproblem)(sizeof(problem_mpi_transpose), &padt);

@@ -30,6 +30,7 @@ static const solvtab s =
      SOLVTAB(XM(dft_rank_geq2_register)),
      SOLVTAB(XM(dft_serial_register)),
      SOLVTAB(XM(dft_rank1_bigvec_register)),
+     SOLVTAB(XM(dft_rank1_register)),
      SOLVTAB_END
 };
 

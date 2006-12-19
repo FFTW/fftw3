@@ -111,7 +111,9 @@ static dtensor *default_sz(int rnk, const XM(ddim) *dims0, int n_pes)
      }
 
      XM(dtensor_destroy)(sz0);
-     return sz;
+     sz0 = XM(dtensor_canonical)(sz);
+     XM(dtensor_destroy)(sz);
+     return sz0;
 }
 
 /* allocate simple local (serial) dims array corresponding to n[rnk] */
@@ -157,7 +159,8 @@ ptrdiff_t XM(local_size_guru)(int rnk, const XM(ddim) *dims0,
 			      ptrdiff_t *local_n_in,
 			      ptrdiff_t *local_start_in,
 			      ptrdiff_t *local_n_out, 
-			      ptrdiff_t *local_start_out)
+			      ptrdiff_t *local_start_out,
+			      int sign, unsigned flags)
 {
      INT N;
      int my_pe, n_pes, i;
@@ -192,7 +195,8 @@ ptrdiff_t XM(local_size_guru)(int rnk, const XM(ddim) *dims0,
 	       }
      }
      else if (rnk == 1) {
-	  if (howmany >= n_pes) { /* dft-rank1-bigvec */
+	  if (howmany >= n_pes /* dft-rank1-bigvec */
+	      && !(flags & (FFTW_MPI_SCRAMBLED_IN | FFTW_MPI_SCRAMBLED_OUT))) {
 	       ptrdiff_t n[2], start[2];
 	       dtensor *sz2 = XM(mkdtensor)(2);
 	       sz2->dims[0] = sz->dims[0];
@@ -203,8 +207,31 @@ ptrdiff_t XM(local_size_guru)(int rnk, const XM(ddim) *dims0,
 	       XM(dtensor_destroy)(sz2);
 	       N = X(imax)(N, (prod(2, n) + howmany - 1) / howmany);
 	  }
+	  else { /* dft-rank1 */
+	       INT r, m, rblock[2], mblock[2];
+
+	       /* Since the 1d transforms are so different, we require
+		  the user to call local_size_1d for this case.  Ugh. */
+	       CK(sign == FFTW_FORWARD || sign == FFTW_BACKWARD);
+
+	       if ((r = XM(choose_radix)(sz->dims[0], n_pes, flags, sign,
+					 rblock, mblock))) {
+		    m = sz->dims[0].n / r;
+		    if (flags & FFTW_MPI_SCRAMBLED_IN)
+			 sz->dims[0].b[IB] = rblock[IB] * m;
+		    else { /* !SCRAMBLED_IN */
+			 sz->dims[0].b[IB] = r * mblock[IB];
+			 N = X(imax)(N, rblock[IB] * m);
+		    }
+		    if (flags & FFTW_MPI_SCRAMBLED_OUT)
+			 sz->dims[0].b[IB] = r * mblock[OB];
+		    else { /* !SCRAMBLED_OUT */
+			 N = X(imax)(N, r * mblock[OB]);
+			 sz->dims[0].b[OB] = rblock[OB] * m;
+		    }
+	       }
+	  }
      }
-     /* TODO: rnk==1 also may need extra space */
 
      local_size(my_pe, sz, IB, local_n_in, local_start_in);
      local_size(my_pe, sz, OB, local_n_out, local_start_out);
@@ -243,11 +270,13 @@ ptrdiff_t XM(local_size_many_transposed)(int rnk, const ptrdiff_t *n,
      if (rnk > 1)
 	  dims[1].ob = yblock;
      else
-	  dims[0].ob = xblock;
+	  dims[0].ob = xblock; /* FIXME: 1d not really supported here 
+				         since we don't have flags/sign */
      
      N = XM(local_size_guru)(rnk, dims, howmany, comm, 
 			     local, local + rnk,
-			     local + 2*rnk, local + 3*rnk);
+			     local + 2*rnk, local + 3*rnk,
+			     0, 0);
      *local_nx = local[0];
      *local_x_start = local[rnk];
      if (rnk > 1) {
@@ -305,10 +334,26 @@ ptrdiff_t XM(local_size)(int rnk, const ptrdiff_t *n,
 				      &local_ny, &local_y_start);
 }
 
-ptrdiff_t XM(local_size_1d)(ptrdiff_t nx, MPI_Comm comm,
-			    ptrdiff_t *local_nx, ptrdiff_t *local_x_start)
+ptrdiff_t XM(local_size_many_1d)(ptrdiff_t nx, ptrdiff_t howmany, 
+				 MPI_Comm comm, int sign, unsigned flags,
+				 ptrdiff_t *local_nx, ptrdiff_t *local_x_start,
+				 ptrdiff_t *local_ny, ptrdiff_t *local_y_start)
 {
-     return XM(local_size)(1, &nx, comm, local_nx, local_x_start);
+     XM(ddim) d;
+     d.n = nx;
+     d.ib = d.ob = FFTW_MPI_DEFAULT_BLOCK;
+     return XM(local_size_guru)(1, &d, howmany, comm,
+				local_nx, local_x_start,
+				local_ny, local_y_start, sign, flags);
+}
+
+ptrdiff_t XM(local_size_1d)(ptrdiff_t nx,
+			    MPI_Comm comm, int sign, unsigned flags,
+			    ptrdiff_t *local_nx, ptrdiff_t *local_x_start,
+			    ptrdiff_t *local_ny, ptrdiff_t *local_y_start)
+{
+     return XM(local_size_1d)(nx, comm, sign, flags, local_nx, local_x_start,
+			      local_ny, local_y_start);
 }
 
 ptrdiff_t XM(local_size_2d_transposed)(ptrdiff_t nx, ptrdiff_t ny,

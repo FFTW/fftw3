@@ -27,8 +27,8 @@ typedef struct {
      INT nx, ny; /* nx x ny transposed to ny x nx */
      R *I, *O; /* contiguous real arrays (both same size!) */
 
-     int flags; /* TRANSPOSED_IN: input is *locally* transposed
-		   TRANSPOSED_OUT: output is *locally* transposed */
+     unsigned flags; /* TRANSPOSED_IN: input is *locally* transposed
+			TRANSPOSED_OUT: output is *locally* transposed */
 
      INT block, tblock; /* block size, slab decomposition;
 			   tblock is for transposed blocks on output */
@@ -40,7 +40,7 @@ problem *XM(mkproblem_transpose)(INT nx, INT ny, INT vn,
 				 R *I, R *O,
 				 INT block, INT tblock,
 				 MPI_Comm comm,
-				 int flags);
+				 unsigned flags);
 
 /* tsolve.c: */
 void XM(transpose_solve)(const plan *ego_, const problem *p_);
