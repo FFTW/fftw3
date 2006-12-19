@@ -210,6 +210,37 @@ static int applicable_memcpy(const P *pln, const problem_rdft *p)
 }
 
 /**************************************************************/
+/* rank > 0 vecloop, out of place, using memcpy (e.g. out-of-place
+   transposes of vl-tuples ... for large vl it should be more
+   efficient to use memcpy than the tiled stuff). */
+
+static void memcpy_loop(INT cpysz, int rnk, const iodim *d, R *I, R *O)
+{
+     INT i, n = d->n, is = d->is, os = d->os;
+     if (rnk == 1)
+	  for (i = 0; i < n; ++i, I += is, O += os)
+	       memcpy(O, I, cpysz);
+     else {
+	  --rnk; ++d;
+	  for (i = 0; i < n; ++i, I += is, O += os)
+	       memcpy_loop(cpysz, rnk, d, I, O);
+     }
+}
+
+static void apply_memcpy_loop(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     memcpy_loop(ego->vl * sizeof(R), ego->rnk, ego->d, I, O);
+}
+
+static int applicable_memcpy_loop(const P *pln, const problem_rdft *p)
+{
+     return (p->I != p->O
+	     && pln->rnk > 0
+             && pln->vl > 2 /* do not bother memcpy-ing complex numbers */);
+}
+
+/**************************************************************/
 /* rank 2, in place, square transpose, iterative */
 static void apply_ip_sq(const plan *ego_, R *I, R *O)
 {
@@ -319,6 +350,8 @@ void X(rdft_rank0_register)(planner *p)
 	  const char *nam;
      } tab[] = {
 	  { apply_memcpy,   applicable_memcpy,   "rdft-rank0-memcpy" },
+	  { apply_memcpy_loop,   applicable_memcpy_loop,  
+	    "rdft-rank0-memcpy-loop" },
 	  { apply_iter,     applicable_iter,     "rdft-rank0-iter-ci" },
 	  { apply_cpy2dco,  applicable_cpy2dco,  "rdft-rank0-iter-co" },
 	  { apply_tiled,    applicable_tiled,    "rdft-rank0-tiled" },
