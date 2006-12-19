@@ -115,8 +115,13 @@ static void rotate_sqrtn_table(triggen *p, INT m, R xr, R xi, R *res)
 	  trigreal wr = wr1 * wr0 - wi1 * wi0;
 	  trigreal wi = wi1 * wr0 + wr1 * wi0;
 
-	  res[0] = xr * wr - xi * (FFT_SIGN * wi);
-	  res[1] = xi * wr + xr * (FFT_SIGN * wi);
+#if FFT_SIGN == -1
+	  res[0] = xr * wr + xi * wi;
+	  res[1] = xi * wr - xr * wi;
+#else
+	  res[0] = xr * wr - xi * wi;
+	  res[1] = xi * wr + xr * wi;
+#endif
      }
 }
 
