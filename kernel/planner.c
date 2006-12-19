@@ -386,19 +386,23 @@ static void invoke_hook(planner *ego, plan *pln, const problem *p,
 	  ego->hook(ego, pln, p, optimalp);
 }
 
-double X(iestimate_cost)(const plan *pln)
+double X(iestimate_cost)(const planner *ego, const plan *pln, const problem *p,
+			 cost_kind k)
 {
-     return 0.0
+     double cost =
 	  + pln->ops.add
 	  + pln->ops.mul
-
+	  
 #if HAVE_FMA
 	  + pln->ops.fma
 #else
 	  + 2 * pln->ops.fma
 #endif
-
+	  
 	  + pln->ops.other;
+     if (ego->cost_hook)
+	  cost = ego->cost_hook(ego, pln, p, cost, k);
+     return cost;
 }
 
 static void evaluate_plan(planner *ego, plan *pln, const problem *p)
@@ -409,14 +413,14 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 	  if (ESTIMATEP(ego)) {
 	  estimate:
 	       /* heuristic */
-	       pln->pcost = X(iestimate_cost)(pln);
+	       pln->pcost = X(iestimate_cost)(ego, pln, p, COST_MAX);
 	       ego->epcost += pln->pcost;
 	  } else {
 	       double t = X(measure_execution_time)(pln, p);
 	       
 	       /* for MPI, need to synchronize timing measurements */
-	       if (ego->measure_hook)
-		    t = ego->measure_hook(ego, pln, p, t);
+	       if (ego->cost_hook)
+		    t = ego->cost_hook(ego, pln, p, t, COST_MAX);
 
 	       if (t < 0) {  /* unavailable cycle counter */
 		    /* Real programmers can write FORTRAN in any language */
@@ -853,7 +857,7 @@ planner *X(mkplanner)(void)
      p->nplan = p->nprob = 0;
      p->pcost = p->epcost = 0.0;
      p->hook = 0;
-     p->measure_hook = 0;
+     p->cost_hook = 0;
      p->cur_reg_nam = 0;
      p->wisdom_state = WISDOM_NORMAL;
 

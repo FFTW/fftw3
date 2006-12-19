@@ -672,12 +672,14 @@ typedef struct {
      int nrehash;
 } hashtab;
 
+typedef enum { COST_SUM, COST_MAX } cost_kind;
+
 struct planner_s {
      const planner_adt *adt;
      void (*hook)(struct planner_s *plnr, plan *pln, 
 		  const problem *p, int optimalp);
-     double (*measure_hook)(struct planner_s *plnr, plan *pln,
-			    const problem *p, double t);
+     double (*cost_hook)(const struct planner_s *plnr, const plan *pln,
+			 const problem *p, double t, cost_kind k);
 
      /* solver descriptors */
      slvdesc *slvdescs;
@@ -928,7 +930,8 @@ typedef void (*cpy2d_func)(R *I, R *O,
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
 void X(null_awake)(plan *ego, enum wakefulness wakefulness);
-double X(iestimate_cost)(const plan *pln);
+double X(iestimate_cost)(const planner *ego, const plan *pln, const problem *p,
+			 cost_kind k);
 double X(measure_execution_time)(plan *pln, const problem *p);
 int X(alignment_of)(R *p);
 unsigned X(hash)(const char *s);

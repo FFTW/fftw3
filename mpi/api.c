@@ -31,11 +31,11 @@
 
 static int mpi_inited = 0;
 
-static double measure_hook(planner *plnr, plan *pln,
-			   const problem *p, double t)
+static double cost_hook(const planner *plnr, const plan *pln,
+			const problem *p, double t, cost_kind k)
 {
      MPI_Comm comm;
-     double tmax;
+     double tsum;
      UNUSED(plnr); UNUSED(pln);
      switch (p->adt->problem_kind) {
 	 case PROBLEM_MPI_DFT:
@@ -47,15 +47,16 @@ static double measure_hook(planner *plnr, plan *pln,
 	 default:
 	      return t;
      }
-     MPI_Allreduce(&t, &tmax, 1, MPI_DOUBLE, MPI_MAX, comm);
-     return tmax;
+     MPI_Allreduce(&t, &tsum, 1, MPI_DOUBLE, 
+		   k == COST_SUM ? MPI_SUM : MPI_MAX, comm);
+     return tsum;
 }
 
 static void init(void)
 {
      if (!mpi_inited) {
 	  planner *plnr = X(the_planner)();
-	  plnr->measure_hook = measure_hook;
+	  plnr->cost_hook = cost_hook;
           XM(conf_standard)(plnr);
 	  mpi_inited = 1;	  
      }

@@ -28,5 +28,5 @@ void X(flops)(const X(plan) p, double *add, double *mul, double *fma)
 
 double X(estimate_cost)(const X(plan) p)
 {
-     return X(iestimate_cost)(p->pln);
+     return X(iestimate_cost)(X(the_planner)(), p->pln, p->prb, COST_SUM);
 }
