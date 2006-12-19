@@ -277,7 +277,7 @@ hc2c_solver *X(mksolver_hc2c)(size_t size, INT r,
 			      hc2c_kind hc2ckind,
 			      hc2c_mkinferior mkcldw)
 {
-     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan };
+     static const solver_adt sadt = { PROBLEM_RDFT2, mkplan, 0 };
      hc2c_solver *slv = (hc2c_solver *)X(mksolver)(size, &sadt);
      slv->r = r;
      slv->hc2ckind = hc2ckind;
