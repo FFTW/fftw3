@@ -930,8 +930,8 @@ typedef void (*cpy2d_func)(R *I, R *O,
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
 void X(null_awake)(plan *ego, enum wakefulness wakefulness);
-double X(iestimate_cost)(const planner *ego, const plan *pln, const problem *p,
-			 cost_kind k);
+double X(iestimate_cost)(const planner *, const plan *, const problem *);
+
 double X(measure_execution_time)(plan *pln, const problem *p);
 int X(alignment_of)(R *p);
 unsigned X(hash)(const char *s);

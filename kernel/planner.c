@@ -386,8 +386,7 @@ static void invoke_hook(planner *ego, plan *pln, const problem *p,
 	  ego->hook(ego, pln, p, optimalp);
 }
 
-double X(iestimate_cost)(const planner *ego, const plan *pln, const problem *p,
-			 cost_kind k)
+double X(iestimate_cost)(const planner *ego, const plan *pln, const problem *p)
 {
      double cost =
 	  + pln->ops.add
@@ -401,7 +400,7 @@ double X(iestimate_cost)(const planner *ego, const plan *pln, const problem *p,
 	  
 	  + pln->ops.other;
      if (ego->cost_hook)
-	  cost = ego->cost_hook(ego, pln, p, cost, k);
+	  cost = ego->cost_hook(ego, pln, p, cost, COST_MAX);
      return cost;
 }
 
@@ -413,7 +412,7 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 	  if (ESTIMATEP(ego)) {
 	  estimate:
 	       /* heuristic */
-	       pln->pcost = X(iestimate_cost)(ego, pln, p, COST_MAX);
+	       pln->pcost = X(iestimate_cost)(ego, pln, p);
 	       ego->epcost += pln->pcost;
 	  } else {
 	       double t = X(measure_execution_time)(pln, p);
