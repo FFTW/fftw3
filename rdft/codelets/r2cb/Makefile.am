@@ -32,7 +32,7 @@ HB = hb_2.c hb_3.c hb_4.c hb_5.c hb_6.c hb_7.c hb_8.c hb_9.c	\
 hb_10.c hb_12.c hb_15.c hb_16.c hb_32.c hb_64.c
 
 # like hb, but generates part of its trig table on the fly (good for large n)
-HB2 = hb2_4.c hb2_8.c hb2_16.c hb2_32.c hb2_64.c
+HB2 = hb2_4.c hb2_8.c hb2_16.c hb2_32.c
 
 # an r2cb transform where the output is shifted by half a sample (input
 # is multiplied by a phase).  This is needed as part of the DIF recursion;
@@ -52,7 +52,7 @@ hc2cb_16.c hc2cb_32.c
 HC2CB2 = hc2cb2_4.c hc2cb2_8.c hc2cb2_16.c hc2cb2_32.c
 
 ###########################################################################
-ALL_CODELETS = $(R2CB) $(HB) $(R2CBIII) $(HC2CB) $(HC2CB2)
+ALL_CODELETS = $(R2CB) $(HB) $(HB2) $(R2CBIII) $(HC2CB) $(HC2CB2)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 

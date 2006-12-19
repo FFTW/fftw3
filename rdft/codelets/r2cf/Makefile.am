@@ -30,7 +30,7 @@ HF = hf_2.c hf_3.c hf_4.c hf_5.c hf_6.c hf_7.c hf_8.c hf_9.c	\
 hf_10.c hf_12.c hf_15.c hf_16.c hf_32.c hf_64.c
 
 # like hf, but generates part of its trig table on the fly (good for large n)
-HF2 = hf2_4.c hf2_8.c hf2_16.c hf2_32.c hf2_64.c
+HF2 = hf2_4.c hf2_8.c hf2_16.c hf2_32.c
 
 # an r2cf transform where the input is shifted by half a sample (output
 # is multiplied by a phase).  This is needed as part of the DIT recursion;
