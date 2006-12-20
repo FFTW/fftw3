@@ -56,6 +56,7 @@ GEN_R2CF = ${GENFFTDIR}/gen_r2cf
 GEN_R2CB = ${GENFFTDIR}/gen_r2cb
 GEN_HC2HC = ${GENFFTDIR}/gen_hc2hc
 GEN_HC2C = ${GENFFTDIR}/gen_hc2c
+GEN_HC2CDFT = ${GENFFTDIR}/gen_hc2cdft
 GEN_R2R = ${GENFFTDIR}/gen_r2r
 PRELUDE_DFT = ${top_srcdir}/support/codelet_prelude.dft
 PRELUDE_RDFT = ${top_srcdir}/support/codelet_prelude.rdft

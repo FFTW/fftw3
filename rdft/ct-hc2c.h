@@ -45,9 +45,13 @@ struct hc2c_solver_s {
      INT r;
 
      hc2c_mkinferior mkcldw;
+     hc2c_kind hc2ckind;
 };
 
-hc2c_solver *X(mksolver_hc2c)(size_t size, INT r, hc2c_mkinferior mkcldw);
+hc2c_solver *X(mksolver_hc2c)(size_t size, INT r,
+			      hc2c_kind hc2ckind,
+			      hc2c_mkinferior mkcldw);
 
 void X(regsolver_hc2c_direct)(planner *plnr, khc2c codelet, 
-			      const hc2c_desc *desc);
+			      const hc2c_desc *desc,
+			      hc2c_kind hc2ckind);

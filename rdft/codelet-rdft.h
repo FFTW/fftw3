@@ -106,6 +106,11 @@ void X(khc2hc_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc);
 /* half-complex to rdft2-complex DIT/DIF codelets: */
 typedef struct hc2c_desc_s hc2c_desc;
 
+typedef enum {
+     HC2C_VIA_RDFT,
+     HC2C_VIA_DFT
+} hc2c_kind;
+
 typedef struct {
      rdft_kind kind;
      INT vl;
@@ -121,8 +126,8 @@ struct hc2c_desc_s {
 
 typedef const R *(*khc2c) (R *Rp, R *Ip, R *Rm, R *Im, const R *W,
 			   stride rs, INT m, INT ms);
-void X(khc2c_register)(planner *p, khc2c codelet, const hc2c_desc *desc);
-
+void X(khc2c_register)(planner *p, khc2c codelet, const hc2c_desc *desc,
+		       hc2c_kind hc2ckind);
 
 extern const solvtab X(solvtab_rdft_r2cf);
 extern const solvtab X(solvtab_rdft_r2cb);

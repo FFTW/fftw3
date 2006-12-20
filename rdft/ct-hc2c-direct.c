@@ -276,9 +276,11 @@ static plan *mkcldw(const hc2c_solver *ego_, rdft_kind kind,
 }
 
 static void regone(planner *plnr, khc2c codelet,
-		   const hc2c_desc *desc, int bufferedp)
+		   const hc2c_desc *desc, 
+		   hc2c_kind hc2ckind, 
+		   int bufferedp)
 {
-     S *slv = (S *)X(mksolver_hc2c)(sizeof(S), desc->radix, mkcldw);
+     S *slv = (S *)X(mksolver_hc2c)(sizeof(S), desc->radix, hc2ckind, mkcldw);
      slv->k = codelet;
      slv->desc = desc;
      slv->bufferedp = bufferedp;
@@ -286,8 +288,9 @@ static void regone(planner *plnr, khc2c codelet,
 }
 
 void X(regsolver_hc2c_direct)(planner *plnr, khc2c codelet,
-			      const hc2c_desc *desc)
+			      const hc2c_desc *desc,
+			      hc2c_kind hc2ckind)
 {
-     regone(plnr, codelet, desc, /* bufferedp */0);
-     regone(plnr, codelet, desc, /* bufferedp */1);
+     regone(plnr, codelet, desc, hc2ckind, /* bufferedp */0);
+     regone(plnr, codelet, desc, hc2ckind, /* bufferedp */1);
 }

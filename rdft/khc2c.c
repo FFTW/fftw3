@@ -21,7 +21,8 @@
 
 #include "ct-hc2c.h"
 
-void X(khc2c_register)(planner *p, khc2c codelet, const hc2c_desc *desc)
+void X(khc2c_register)(planner *p, khc2c codelet, const hc2c_desc *desc,
+		       hc2c_kind hc2ckind)
 {
-     X(regsolver_hc2c_direct)(p, codelet, desc);
+     X(regsolver_hc2c_direct)(p, codelet, desc, hc2ckind);
 }

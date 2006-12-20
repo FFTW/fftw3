@@ -45,12 +45,17 @@ r2cfII_16.c r2cfII_32.c r2cfII_64.c
 HC2CF = hc2cf_2.c hc2cf_4.c hc2cf_6.c hc2cf_8.c hc2cf_10.c hc2cf_12.c	\
 hc2cf_16.c hc2cf_32.c
 
+HC2CFDFT = hc2cfdft_2.c hc2cfdft_4.c hc2cfdft_6.c hc2cfdft_8.c	\
+hc2cfdft_10.c hc2cfdft_12.c hc2cfdft_16.c hc2cfdft_32.c
+
 # like hc2cf, but generates part of its trig table on the fly (good
 # for large n)
 HC2CF2 = hc2cf2_4.c hc2cf2_8.c hc2cf2_16.c hc2cf2_32.c
+HC2CFDFT2 = hc2cfdft2_4.c hc2cfdft2_8.c hc2cfdft2_16.c hc2cfdft2_32.c
 
 ###########################################################################
-ALL_CODELETS = $(R2CF) $(HF) $(HF2) $(R2CFII) $(HC2CF) $(HC2CF2)
+ALL_CODELETS = $(R2CF) $(HF) $(HF2) $(R2CFII) $(HC2CF) $(HC2CF2)	\
+$(HC2CFDFT) $(HC2CFDFT2)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
@@ -86,5 +91,11 @@ hc2cf_%.c:  $(CODELET_DEPS) $(GEN_HC2C)
 
 hc2cf2_%.c:  $(CODELET_DEPS) $(GEN_HC2C)
 	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2C) $(FLAGS_HC2CF2) -n $* -dit -name hc2cf2_$* -include "hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
+
+hc2cfdft_%.c:  $(CODELET_DEPS) $(GEN_HC2CDFT)
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT) $(FLAGS_HC2CF) -n $* -dit -name hc2cfdft_$* -include "hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
+
+hc2cfdft2_%.c:  $(CODELET_DEPS) $(GEN_HC2CDFT)
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT) $(FLAGS_HC2CF2) -n $* -dit -name hc2cfdft2_$* -include "hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE

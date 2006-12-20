@@ -52,8 +52,6 @@ let speclist = [
 let byi = Complex.times Complex.i
 let byui = Complex.times (Complex.uminus Complex.i)
 
-let sym n f i = if (i < n - i) then f i else Complex.conj (f i)
-
 let shuffle_eo fe fo i = if i mod 2 == 0 then fe (i/2) else fo ((i-1)/2)
 
 let generate n =
@@ -89,37 +87,55 @@ let generate n =
   let the_location = (Unique.make (), Unique.make ()) in
   let locations _ = the_location in
 
-  let locr = (locative_array_c n 
-		(C.array_subscript arp vrs)
-		(C.array_subscript arm vrs)
-		locations )
-  and loci = (locative_array_c n 
-		(C.array_subscript aip vrs)
-		(C.array_subscript aim vrs)
-		locations)
-  and locp = (locative_array_c n 
-		(C.array_subscript arp vrs)
-		(C.array_subscript aip vrs)
-		locations)
-  and locm = (locative_array_c n 
-		(C.array_subscript arm vrs)
-		(C.array_subscript aim vrs)
-		locations)
+  let rlocp = (locative_array_c n 
+		 (C.array_subscript arp vrs)
+		 (C.array_subscript aip vrs)
+		 locations )
+  and rlocm = (locative_array_c n 
+		 (C.array_subscript arm vrs)
+		 (C.array_subscript aim vrs)
+		 locations)
+  and clocp = (locative_array_c n 
+		 (C.array_subscript arp vrs)
+		 (C.array_subscript aip vrs)
+		 locations)
+  and clocm = (locative_array_c n 
+		 (C.array_subscript arm vrs)
+		 (C.array_subscript aim vrs)
+		 locations)
   in
-  let locri i = if i mod 2 == 0 then locr (i/2) else loci ((i-1)/2)
-  and locpm i = if i < n - i then locp i else locm (n-1-i)
+  let rloc i = if i mod 2 == 0 then rlocp (i/2) else rlocm ((i-1)/2)
+  and cloc i = if i < n - i then clocp i else clocm (n-1-i)
+  and sym n f i = if (i < n - i) then f i else Complex.conj (f i)
+  and sym1 f i = 
+    if i mod 2 == 0 then
+      Complex.plus [f i; Complex.conj (f (i+1))]
+    else
+      Complex.times (Complex.uminus Complex.i)
+	(Complex.plus [f (i-1); Complex.uminus (Complex.conj (f i))])
+  and sym1i f i = 
+    if i mod 2 == 0 then
+      Complex.plus [f i; Complex.times Complex.i (f (i+1))]
+    else
+      Complex.conj
+	(Complex.plus [f (i-1); 
+		       Complex.times (Complex.uminus Complex.i) (f i)])
   in
 
   let asch = 
     match !ditdif with
     | DIT -> 
-	let output = Fft.dft sign n (byw (load_array_c n locri)) in
-	let odag = store_array_c n locpm (sym n output) in
+	let output = 
+	  (Complex.times Complex.half) @@
+	    (Fft.dft sign n (byw (sym1 (load_array_c n rloc)))) in
+	let odag = store_array_c n cloc (sym n output) in
 	  standard_optimizer odag 
 
     | DIF -> 
-	let output = byw (Fft.dft sign n (sym n (load_array_c n locpm))) in
-	let odag = store_array_c n locri output in
+	let output = 
+	  byw (Fft.dft sign n (sym n (load_array_c n cloc)))
+	in
+	let odag = store_array_c n rloc (sym1i output) in
 	  standard_optimizer odag 
   in
 
@@ -176,7 +192,7 @@ let generate n =
     twinstr ^ 
     desc ^
     (declare_register_fcn name) ^
-    (Printf.sprintf "{\n%s(p, %s, &desc, HC2C_VIA_RDFT);\n}" register name)
+    (Printf.sprintf "{\n%s(p, %s, &desc, HC2C_VIA_DFT);\n}" register name)
   in
 
   (unparse tree) ^ "\n" ^ init
