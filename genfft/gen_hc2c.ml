@@ -132,10 +132,10 @@ let generate n =
   in
   let body = Block (
     [Decl ("INT", i)],
-    [For (Expr_assign (vi, (CPlus [vm; CUminus (Integer 2)])),
+    [For (Expr_assign (vi, vm),
 	  Binop (" > ", vi, Integer 0),
 	  list_to_comma 
-	    [Expr_assign (vi, CPlus [vi; CUminus (byvl (Integer 2))]);
+	    [Expr_assign (vi, CPlus [vi; CUminus (byvl (Integer 1))]);
 	     Expr_assign (varp, CPlus [varp; byvl vms]);
 	     Expr_assign (vaip, CPlus [vaip; byvl vms]);
 	     Expr_assign (varm, CPlus [varm; CUminus (byvl vms)]);
@@ -166,10 +166,8 @@ let generate n =
       (twinstr_to_string "VL" (twdesc n))
   and desc = 
     Printf.sprintf
-      "static const hc2c_desc desc = {%d, \"%s\", twinstr, &GENUS, %s, %s, %s, %s};\n\n"
+      "static const hc2c_desc desc = {%d, \"%s\", twinstr, &GENUS, %s};\n\n"
       n name (flops_of tree)
-      (stride_to_solverparm !urs) "0"
-      (stride_to_solverparm !ums) 
   and register = "X(khc2c_register)"
 
   in

@@ -57,13 +57,13 @@ let genone sign n transform load store vrs =
   let input = 
     locative_array_c n 
       (C.array_subscript rioarray vrs)
-      (C.array_subscript iioarray (SNeg vrs))
+      (C.array_subscript iioarray vrs)
       locations in
   let output = transform sign n (load n input) in
   let ioloc = 
     locative_array_c n 
       (C.array_subscript rioarray vrs)
-      (C.array_subscript iioarray (SNeg vrs))
+      (C.array_subscript iioarray vrs)
       locations in
   let odag = store n ioloc output in
   let annot = standard_optimizer odag 
@@ -102,11 +102,13 @@ let generate n =
     match !ditdif with
     | DIT -> 
 	genone sign n 
-	  (fun sign n input -> sym2 n (Fft.dft sign n (byw (sym1 n input))))
+	  (fun sign n input -> 
+	     ((sym1 n) @@ (sym2 n)) (Fft.dft sign n (byw input)))
 	  load_array_c store_array_c vrs
     | DIF -> 
 	genone sign n 
-	  (fun sign n input -> sym1 n (byw (Fft.dft sign n (sym2i n input))))
+	  (fun sign n input -> 
+	     byw (Fft.dft sign n (((sym2i n) @@ (sym1 n)) input)))
 	  load_array_c store_array_c vrs
   in
 
@@ -117,10 +119,10 @@ let generate n =
   in
   let body = Block (
     [Decl ("INT", i)],
-    [For (Expr_assign (vi, (CPlus [vm; CUminus (Integer 2)])),
+    [For (Expr_assign (vi, vm),
 	  Binop (" > ", vi, Integer 0),
 	  list_to_comma 
-	    [Expr_assign (vi, CPlus [vi; CUminus (byvl (Integer 2))]);
+	    [Expr_assign (vi, CPlus [vi; CUminus (byvl (Integer 1))]);
 	     Expr_assign (vrioarray, CPlus [vrioarray; byvl vms]);
 	     Expr_assign (viioarray, 
 			  CPlus [viioarray; CUminus (byvl vms)]);
@@ -148,10 +150,8 @@ let generate n =
       (twinstr_to_string "VL" (twdesc n))
   and desc = 
     Printf.sprintf
-      "static const hc2hc_desc desc = {%d, \"%s\", twinstr, &GENUS, %s, %s, %s, %s};\n\n"
+      "static const hc2hc_desc desc = {%d, \"%s\", twinstr, &GENUS, %s};\n\n"
       n name (flops_of tree)
-      (stride_to_solverparm !urs) "0"
-      (stride_to_solverparm !ums) 
   and register = "X(khc2hc_register)"
 
   in

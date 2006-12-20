@@ -145,11 +145,8 @@ let generate n =
 
   in let desc = 
     Printf.sprintf 
-      "static const kr2c_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n\n"
+      "static const kr2c_desc desc = { %d, \"%s\", %s, &GENUS };\n\n"
       n name (flops_of tree) 
-      (stride_to_solverparm !ucsr) (stride_to_solverparm !ucsi)
-      (stride_to_solverparm !urs)
-      "0" "0"
 
   and init =
     (declare_register_fcn name) ^

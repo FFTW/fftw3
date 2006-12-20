@@ -212,7 +212,7 @@ let generate n mode =
 
   in let desc = 
     Printf.sprintf 
-      "static const kr2r_desc desc = { %d, \"%s\", %s, &GENUS, %s, %s, %s, %s, %s };\n\n"
+      "static const kr2r_desc desc = { %d, \"%s\", %s, &GENUS, %s };\n\n"
       n name (flops_of tree) 
       (match mode with
       | RDFT -> "RDFT00"
@@ -227,10 +227,6 @@ let generate n mode =
       | RODFT01 -> "RODFT01"
       | RODFT11 -> "RODFT11"
       | _ -> failwith "must specify a transform kind")
-      (stride_to_solverparm !uistride) 
-      (stride_to_solverparm !uostride)
-      (choose_simd "0" (stride_to_solverparm !uivstride))
-      (choose_simd "0" (stride_to_solverparm !uovstride))
 
   and init =
     (declare_register_fcn name) ^

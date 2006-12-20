@@ -27,9 +27,6 @@ typedef struct {
      solver super;
      const kr2c_desc *desc;
      kr2c k;
-     INT sz;
-     rdft_kind kind;
-     const char *nam;
 } S;
 
 typedef struct {
@@ -77,12 +74,14 @@ static void print(const plan *ego_, printer *p)
      const S *s = ego->slv;
 
      p->print(p, "(rdft2-%s-direct-%D%v \"%s\")", 
-	      X(rdft_kind_str)(s->kind), s->sz, ego->vl, s->nam);
+	      X(rdft_kind_str)(s->desc->genus->kind), s->desc->n, 
+	      ego->vl, s->desc->nam);
 }
 
 static int applicable(const solver *ego_, const problem *p_)
 {
      const S *ego = (const S *) ego_;
+     const kr2c_desc *desc = ego->desc;
      const problem_rdft2 *p = (const problem_rdft2 *) p_;
      INT vl;
      INT ivs, ovs;
@@ -91,18 +90,12 @@ static int applicable(const solver *ego_, const problem *p_)
 	  1
 	  && p->sz->rnk == 1
 	  && p->vecsz->rnk <= 1
-	  && p->sz->dims[0].n == ego->sz
-	  && p->kind == ego->kind
+	  && p->sz->dims[0].n == desc->n
+	  && p->kind == desc->genus->kind
 
 	  /* check strides etc */
 	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
-	  && ego->desc->genus->okp(ego->desc, 
-				   p->r0, p->r1, p->cr, p->ci,
-				   p->sz->dims[0].is, 
-				   p->sz->dims[0].os, p->sz->dims[0].os,
-				   vl, ivs, ovs)
-	       
 	  && (0
 	      /* can operate out-of-place */
 	      || p->r0 != p->cr
@@ -124,7 +117,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      P *pln;
      const problem_rdft2 *p;
-     iodim d;
+     iodim *d;
      int r2hc_kindp;
 
      static const plan_adt padt = {
@@ -143,16 +136,17 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln = MKPLAN_RDFT2(P, &padt, p->kind == R2HC ? apply_r2hc : apply);
 
-     d = p->sz->dims[0];
+     d = p->sz->dims;
 
      pln->k = ego->k;
 
-     pln->rs = X(mkstride)(ego->sz, r2hc_kindp ? d.is : d.os);
-     pln->cs = X(mkstride)(ego->sz, r2hc_kindp ? d.os : d.is);
+     pln->rs = X(mkstride)(d->n, r2hc_kindp ? d->is : d->os);
+     pln->cs = X(mkstride)(d->n, r2hc_kindp ? d->os : d->is);
 
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
 
-     pln->ilast = (d.n % 2) ? 0 : (d.n/2) * d.os; /* Nyquist freq., if any */
+     /* Nyquist freq., if any */
+     pln->ilast = (d->n % 2) ? 0 : (d->n/2) * d->os;
 
      pln->slv = ego;
      X(ops_zero)(&pln->super.super.ops);
@@ -173,8 +167,5 @@ solver *X(mksolver_rdft2_direct)(kr2c k, const kr2c_desc *desc)
      S *slv = MKSOLVER(S, &sadt);
      slv->k = k;
      slv->desc = desc;
-     slv->sz = desc->sz;
-     slv->nam = desc->nam;
-     slv->kind = desc->genus->kind;
      return &(slv->super);
 }

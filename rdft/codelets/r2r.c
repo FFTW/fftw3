@@ -21,18 +21,4 @@
 #include "codelet-rdft.h"
 #include "r2r.h"
 
-static int okp(const kr2r_desc *d,
-	       const R *I,
-	       const R *O,
-	       INT is, INT os, INT vl, INT ivs, INT ovs)
-{
-     UNUSED(I); UNUSED(O); UNUSED(vl);
-     return (1
-	     && (!d->is || (d->is == is))
-	     && (!d->os || (d->os == os))
-	     && (!d->ivs || (d->ivs == ivs))
-	     && (!d->ovs || (d->ovs == ovs))
-	  );
-}
-
-const kr2r_genus GENUS = { okp, 1 };
+const kr2r_genus GENUS = { 1 };

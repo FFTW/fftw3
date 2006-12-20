@@ -44,13 +44,13 @@ static void apply(const plan *ego_, R *IO)
      const P *ego = (const P *) ego_;
      plan_rdft *cld0 = (plan_rdft *) ego->cld0;
      plan_rdft *cldm = (plan_rdft *) ego->cldm;
-     INT i, r = ego->r, m = ego->m, vl = ego->vl;
+     INT i, m = ego->m, vl = ego->vl;
      INT mstart1 = ego->mstart1, mcount2 = ego->mcount2;
      INT s = ego->s, vs = ego->vs;
 
      for (i = 0; i < vl; ++i, IO += vs) {
 	  cld0->apply((plan *) cld0, IO, IO);
-	  ego->k(IO + s * mstart1, IO + (r * m - mstart1) * s, 
+	  ego->k(IO + s * mstart1, IO + (m - mstart1) * s, 
 		 ego->tdW, ego->rs, mcount2, s);
 	  cldm->apply((plan *) cldm, IO + s*(m/2), IO + s*(m/2));
      }
@@ -86,13 +86,9 @@ static void print(const plan *ego_, printer *p)
 	      ego->cld0, ego->cldm);
 }
 
-static int applicable0(const S *ego, 
-		       rdft_kind kind, INT r, INT m, INT s, INT vl, INT vs, 
-		       INT mstart1, INT mcount2,
-		       R *IO)
+static int applicable0(const S *ego, rdft_kind kind, INT r)
 {
      const hc2hc_desc *e = ego->desc;
-     UNUSED(vl);
 
      return (
 	  1
@@ -100,22 +96,13 @@ static int applicable0(const S *ego,
 	  && r == e->radix
 	  && kind == e->genus->kind
 
-	  /* check for alignment/vector length restrictions */
-	  && (e->genus->okp(e, IO + s * mstart1, IO + s * (r * m - mstart1),
-			    m * s, 0, mcount2, s))
-	  && (e->genus->okp(e, IO + s * mstart1 + vs, 
-			    IO + s * (r * m - mstart1) + vs,
-			    m * s, 0, mcount2, s))
-				 
 	  );
 }
 
-static int applicable(const S *ego, 
-		      rdft_kind kind, INT r, INT m, INT s, INT vl, INT vs, 
-		      INT mstart1, INT mcount2,
-		      R *IO, const planner *plnr)
+static int applicable(const S *ego, rdft_kind kind, INT r, INT m,
+		      const planner *plnr)
 {
-     if (!applicable0(ego, kind, r, m, s, vl, vs, mstart1, mcount2, IO))
+     if (!applicable0(ego, kind, r))
           return 0;
 
      if (NO_UGLYP(plnr) && X(ct_uglyp)(16, m * r, r))
@@ -140,10 +127,9 @@ static plan *mkcldw(const hc2hc_solver *ego_,
      };
 
      mstart1 = mstart + (mstart == 0);
-     mcount2 = 1 + 2 * (mcount - (mstart==0)
-			- (m%2 == 0 && mstart+mcount == (m+2)/2));
+     mcount2 = mcount - (mstart==0) - (m%2 == 0 && mstart+mcount == (m+2)/2);
 
-     if (!applicable(ego, kind, r, m, s, vl, vs, mstart1, mcount2, IO, plnr))
+     if (!applicable(ego, kind, r, m, plnr))
           return (plan *)0;
 
      if (!X(hc2hc_mkcldrn)(kind, r, m, s, mstart, mcount,
@@ -168,7 +154,7 @@ static plan *mkcldw(const hc2hc_solver *ego_,
      pln->mcount2 = mcount2;
 
      X(ops_zero)(&pln->super.super.ops);
-     X(ops_madd2)(vl * (((mcount2 - 1) / 2) / e->genus->vl),
+     X(ops_madd2)(vl * (mcount2 / e->genus->vl), 
 		  &e->ops, &pln->super.super.ops);
      X(ops_madd2)(vl, &cld0->ops, &pln->super.super.ops);
      X(ops_madd2)(vl, &cldm->ops, &pln->super.super.ops);

@@ -27,9 +27,6 @@ typedef struct {
      solver super;
      const kr2r_desc *desc;
      kr2r k;
-     INT sz;
-     rdft_kind kind;
-     const char *nam;
 } S;
 
 typedef struct {
@@ -61,7 +58,8 @@ static void print(const plan *ego_, printer *p)
      const S *s = ego->slv;
 
      p->print(p, "(rdft-%s-direct-r2r-%D%v \"%s\")", 
-	      X(rdft_kind_str)(s->kind), s->sz, ego->vl, s->nam);
+	      X(rdft_kind_str)(s->desc->kind), s->desc->n,
+	      ego->vl, s->desc->nam);
 }
 
 static int applicable(const solver *ego_, const problem *p_)
@@ -75,16 +73,12 @@ static int applicable(const solver *ego_, const problem *p_)
 	  1
 	  && p->sz->rnk == 1
 	  && p->vecsz->rnk <= 1
-	  && p->sz->dims[0].n == ego->sz
-	  && p->kind[0] == ego->kind
+	  && p->sz->dims[0].n == ego->desc->n
+	  && p->kind[0] == ego->desc->kind
 
 	  /* check strides etc */
 	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
-	  && ego->desc->genus->okp(ego->desc, p->I, p->O,
-				   p->sz->dims[0].is, p->sz->dims[0].os, 
-				   vl, ivs, ovs)
-	       
 	  && (0
 	      /* can operate out-of-place */
 	      || p->I != p->O
@@ -123,8 +117,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln->k = ego->k;
 
-     pln->is = X(mkstride)(ego->sz, d[0].is);
-     pln->os = X(mkstride)(ego->sz, d[0].os);
+     pln->is = X(mkstride)(d->n, d->is);
+     pln->os = X(mkstride)(d->n, d->os);
 
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
 
@@ -146,9 +140,6 @@ solver *X(mksolver_rdft_r2r_direct)(kr2r k, const kr2r_desc *desc)
      S *slv = MKSOLVER(S, &sadt);
      slv->k = k;
      slv->desc = desc;
-     slv->sz = desc->sz;
-     slv->nam = desc->nam;
-     slv->kind = desc->kind;
      return &(slv->super);
 }
 

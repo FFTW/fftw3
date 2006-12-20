@@ -70,6 +70,7 @@ plan *X(mkplan_rdft)(size_t size, const plan_adt *adt, rdftapply apply);
 /* various solvers */
 
 solver *X(mksolver_rdft_r2c_direct)(kr2c k, const kr2c_desc *desc);
+solver *X(mksolver_rdft_r2c_directbuf)(kr2c k, const kr2c_desc *desc);
 solver *X(mksolver_rdft_r2r_direct)(kr2r k, const kr2r_desc *desc);
 
 void X(rdft_rank0_register)(planner *p);

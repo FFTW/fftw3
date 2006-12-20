@@ -27,21 +27,22 @@ typedef struct {
      solver super;
      const kr2c_desc *desc;
      kr2c k;
-     INT sz;
-     rdft_kind kind;
-     const char *nam;
+     int bufferedp;
 } S;
 
 typedef struct {
      plan_rdft super;
 
-     INT ioffset;
-     INT vl, rs0, ivs, ovs;
      stride rs, csr, csi;
+     stride brs, bcsr, bcsi;
+     INT n, vl, rs0, ivs, ovs, ioffset, bioffset;
      kr2c k;
      const S *slv;
 } P;
 
+/*************************************************************
+  Nonbuffered code
+ *************************************************************/
 static void apply_r2hc(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
@@ -60,12 +61,107 @@ static void apply_hc2r(const plan *ego_, R *I, R *O)
 	    ego->vl, ego->ivs, ego->ovs);
 }
 
+/*************************************************************
+  Buffered code
+ *************************************************************/
+/* should not be 2^k to avoid associativity conflicts */
+static INT compute_batchsize(INT radix)
+{
+     /* round up to multiple of 4 */
+     radix += 3;
+     radix &= -4;
+
+     return (radix + 2);
+}
+
+void dobatch_r2hc(const P *ego, R *I, R *O, R *buf, INT batchsz)
+{
+     X(cpy2d_ci)(I, buf,
+		 ego->n, ego->rs0, WS(ego->bcsr /* hack */, 1),
+		 batchsz, ego->ivs, 1, 1);
+
+     if (IABS(WS(ego->csr, 1)) < IABS(ego->ovs)) {
+	  /* transform directly to output */
+	  ego->k(buf, buf + WS(ego->bcsr /* hack */, 1), 
+		 O, O + ego->ioffset, 
+		 ego->brs, ego->csr, ego->csi,
+		 batchsz, 1, ego->ovs);
+     } else {
+	  /* transform to buffer and copy back */
+	  ego->k(buf, buf + WS(ego->bcsr /* hack */, 1), 
+		 buf, buf + ego->bioffset, 
+		 ego->brs, ego->bcsr, ego->bcsi,
+		 batchsz, 1, 1);
+	  X(cpy2d_co)(buf, O,
+		      ego->n, WS(ego->bcsr, 1), WS(ego->csr, 1),  
+		      batchsz, 1, ego->ovs, 1);
+     }
+}
+
+void dobatch_hc2r(const P *ego, R *I, R *O, R *buf, INT batchsz)
+{
+     if (IABS(WS(ego->csr, 1)) < IABS(ego->ivs)) {
+	  /* transform directly from input */
+	  ego->k(buf, buf + WS(ego->bcsr /* hack */, 1),
+		 I, I + ego->ioffset, 
+		 ego->brs, ego->csr, ego->csi,
+		 batchsz, ego->ivs, 1);
+     } else {
+	  /* copy into buffer and transform in place */
+	  X(cpy2d_ci)(I, buf,
+		      ego->n, WS(ego->csr, 1), WS(ego->bcsr, 1),
+		      batchsz, ego->ivs, 1, 1);
+	  ego->k(buf, buf + WS(ego->bcsr /* hack */, 1),
+		 buf, buf + ego->bioffset, 
+		 ego->brs, ego->bcsr, ego->bcsi,
+		 batchsz, 1, 1);
+     }
+     X(cpy2d_co)(buf, O,
+		 ego->n, WS(ego->bcsr /* hack */, 1), ego->rs0,
+		 batchsz, 1, ego->ovs, 1);
+}
+
+static void iterate(const P *ego, R *I, R *O,
+		    void (*dobatch)(const P *ego, R *I, R *O, 
+				    R *buf, INT batchsz))
+{
+     R *buf;
+     INT vl = ego->vl;
+     INT n = ego->n;
+     INT i;
+     INT batchsz = compute_batchsize(n);
+
+     STACK_MALLOC(R *, buf, n * batchsz * sizeof(R));
+
+     for (i = 0; i < vl - batchsz; i += batchsz) {
+	  dobatch(ego, I, O, buf, batchsz);
+	  I += batchsz * ego->ivs;
+	  O += batchsz * ego->ovs;
+     }
+     dobatch(ego, I, O, buf, vl - i);
+
+     STACK_FREE(buf);
+}
+
+static void apply_buf_r2hc(const plan *ego_, R *I, R *O)
+{
+     iterate((const P *) ego_, I, O, dobatch_r2hc);
+}
+
+static void apply_buf_hc2r(const plan *ego_, R *I, R *O)
+{
+     iterate((const P *) ego_, I, O, dobatch_hc2r);
+}
+
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      X(stride_destroy)(ego->rs);
      X(stride_destroy)(ego->csr);
      X(stride_destroy)(ego->csi);
+     X(stride_destroy)(ego->brs);
+     X(stride_destroy)(ego->bcsr);
+     X(stride_destroy)(ego->bcsi);
 }
 
 static void print(const plan *ego_, printer *p)
@@ -73,8 +169,16 @@ static void print(const plan *ego_, printer *p)
      const P *ego = (const P *) ego_;
      const S *s = ego->slv;
 
-     p->print(p, "(rdft-%s-direct-r2c-%D%v \"%s\")", 
-	      X(rdft_kind_str)(s->kind), s->sz, ego->vl, s->nam);
+     if (ego->slv->bufferedp)
+	  p->print(p, "(rdft-%s-directbuf/%D-r2c-%D%v \"%s\")", 
+		   X(rdft_kind_str)(s->desc->genus->kind), 
+		   /* hack */ WS(ego->bcsr, 1), ego->n, 
+		   ego->vl, s->desc->nam);
+
+     else 
+	  p->print(p, "(rdft-%s-direct-r2c-%D%v \"%s\")", 
+		   X(rdft_kind_str)(s->desc->genus->kind), ego->n, 
+		   ego->vl, s->desc->nam);
 }
 
 static INT ioffset(rdft_kind kind, INT sz, INT s)
@@ -85,34 +189,20 @@ static INT ioffset(rdft_kind kind, INT sz, INT s)
 static int applicable(const solver *ego_, const problem *p_)
 {
      const S *ego = (const S *) ego_;
+     const kr2c_desc *desc = ego->desc;
      const problem_rdft *p = (const problem_rdft *) p_;
-     INT vl, ivs, ovs, rs, cs;
-     R *R0, *C0;
+     INT vl, ivs, ovs;
 
      return (
 	  1
 	  && p->sz->rnk == 1
 	  && p->vecsz->rnk <= 1
-	  && p->sz->dims[0].n == ego->sz
-	  && p->kind[0] == ego->kind
+	  && p->sz->dims[0].n == desc->n
+	  && p->kind[0] == desc->genus->kind
 
 	  /* check strides etc */
 	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
-	  && ((R2HC_KINDP(ego->kind) ?
-	       (R0 = p->I, C0 = p->O, 
-		rs = p->sz->dims[0].is, cs = p->sz->dims[0].os)
-	       :
-	       (R0 = p->O, C0 = p->I,
-		rs = p->sz->dims[0].os, cs = p->sz->dims[0].is)),
-	      1)
-
-	  && ego->desc->genus->okp(ego->desc, 
-				   R0, R0 + rs,
-				   C0, C0 + ioffset(ego->kind, ego->sz, cs),
-				   rs, cs, -cs,
-				   vl, ivs, ovs)
-	       
 	  && (0
 	      /* can operate out-of-place */
 	      || p->I != p->O
@@ -126,13 +216,46 @@ static int applicable(const solver *ego_, const problem *p_)
 	  );
 }
 
+static int applicable_buf(const solver *ego_, const problem *p_)
+{
+     const S *ego = (const S *) ego_;
+     const kr2c_desc *desc = ego->desc;
+     const problem_rdft *p = (const problem_rdft *) p_;
+     INT vl, ivs, ovs, batchsz;
+
+     return (
+	  1
+	  && p->sz->rnk == 1
+	  && p->vecsz->rnk <= 1
+	  && p->sz->dims[0].n == desc->n
+	  && p->kind[0] == desc->genus->kind
+
+	  /* check strides etc */
+	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
+
+	  && (batchsz = compute_batchsize(desc->n), 1)
+
+	  && (0
+	      /* can operate out-of-place */
+	      || p->I != p->O
+
+	      /* can operate in-place as long as strides are the same */
+	      || X(tensor_inplace_strides2)(p->sz, p->vecsz)
+
+	      /* can do it if the problem fits in the buffer, no matter
+		 what the strides are */
+	      || vl <= batchsz
+	       )
+	  );
+}
+
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const S *ego = (const S *) ego_;
      P *pln;
      const problem_rdft *p;
      iodim *d;
-     INT rs, cs;
+     INT rs, cs, b, n;
      R *R0, *C0;
 
      static const plan_adt padt = {
@@ -141,31 +264,45 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      UNUSED(plnr);
 
-     if (!applicable(ego_, p_))
-          return (plan *)0;
+     if (ego->bufferedp) {
+	  if (!applicable_buf(ego_, p_))
+	       return (plan *)0;
+     } else {
+	  if (!applicable(ego_, p_))
+	       return (plan *)0;
+     }
 
      p = (const problem_rdft *) p_;
 
-     if (R2HC_KINDP(ego->kind)) {
+     if (R2HC_KINDP(p->kind[0])) {
 	  R0 = p->I; C0 = p->O;
 	  rs = p->sz->dims[0].is; cs = p->sz->dims[0].os;
+	  pln = MKPLAN_RDFT(P, &padt, 
+			    ego->bufferedp ? apply_buf_r2hc : apply_r2hc);
      } else {
 	  R0 = p->O; C0 = p->I;
 	  rs = p->sz->dims[0].os; cs = p->sz->dims[0].is;
+	  pln = MKPLAN_RDFT(P, &padt, 
+			    ego->bufferedp ? apply_buf_hc2r : apply_hc2r);
      }
 
-     pln = MKPLAN_RDFT(P, &padt, 
-		       R2HC_KINDP(ego->kind) ? apply_r2hc : apply_hc2r);
-
      d = p->sz->dims;
+     n = d[0].n;
 
      pln->k = ego->k;
-     pln->ioffset = ioffset(ego->kind, d[0].n, cs);
+     pln->n = n;
 
      pln->rs0 = rs;
-     pln->rs = X(mkstride)(ego->sz, 2 * rs);
-     pln->csr = X(mkstride)(ego->sz, cs);
-     pln->csi = X(mkstride)(ego->sz, -cs);
+     pln->rs = X(mkstride)(n, 2 * rs);
+     pln->csr = X(mkstride)(n, cs);
+     pln->csi = X(mkstride)(n, -cs);
+     pln->ioffset = ioffset(p->kind[0], n, cs);
+
+     b = compute_batchsize(n);
+     pln->brs = X(mkstride)(n, 2 * b);
+     pln->bcsr = X(mkstride)(n, b);
+     pln->bcsi = X(mkstride)(n, -b);
+     pln->bioffset = ioffset(p->kind[0], n, b);
 
      X(tensor_tornk1)(p->vecsz, &pln->vl, &pln->ivs, &pln->ovs);
 
@@ -176,20 +313,31 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 		  &ego->desc->ops,
 		  &pln->super.super.ops);
 
-     pln->super.super.could_prune_now_p = 1;
+     if (ego->bufferedp) 
+	  pln->super.super.ops.other += 2 * n * pln->vl;
+
+     pln->super.super.could_prune_now_p = !ego->bufferedp;
 
      return &(pln->super.super);
 }
 
 /* constructor */
-solver *X(mksolver_rdft_r2c_direct)(kr2c k, const kr2c_desc *desc)
+static solver *mksolver(kr2c k, const kr2c_desc *desc, int bufferedp)
 {
      static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
      slv->k = k;
      slv->desc = desc;
-     slv->sz = desc->sz;
-     slv->nam = desc->nam;
-     slv->kind = desc->genus->kind;
+     slv->bufferedp = bufferedp;
      return &(slv->super);
+}
+
+solver *X(mksolver_rdft_r2c_direct)(kr2c k, const kr2c_desc *desc)
+{
+     return mksolver(k, desc, 0);
+}
+
+solver *X(mksolver_rdft_r2c_directbuf)(kr2c k, const kr2c_desc *desc)
+{
+     return mksolver(k, desc, 1);
 }

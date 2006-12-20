@@ -67,21 +67,15 @@ typedef enum {
 typedef struct kr2c_desc_s kr2c_desc;
 
 typedef struct {
-     int (*okp)(
-	  const kr2c_desc *desc,
-	  const R *R0, const R *R1, const R *Cr, const R *Ci,
-	  INT rs, INT csr, INT csi, INT vl, INT ivs, INT ovs);
      rdft_kind kind;
      INT vl;
 } kr2c_genus;
 
 struct kr2c_desc_s {
-     INT sz;    /* size of transform computed */
+     INT n;    /* size of transform computed */
      const char *nam;
      opcnt ops;
      const kr2c_genus *genus;
-     INT rs, csr, csi;
-     INT ivs, ovs;
 };
 
 typedef void (*kr2c) (R *R0, R *R1, R *Cr, R *Ci,
@@ -93,11 +87,8 @@ void X(kr2c_register)(planner *p, kr2c codelet, const kr2c_desc *desc);
 typedef struct hc2hc_desc_s hc2hc_desc;
 
 typedef struct {
-     int (*okp)(
-	  const struct hc2hc_desc_s *desc,
-	  const R *rio, const R *iio, INT rs, INT vs, INT m, INT ms);
      rdft_kind kind;
-     int vl;
+     INT vl;
 } hc2hc_genus;
 
 struct hc2hc_desc_s {
@@ -106,9 +97,6 @@ struct hc2hc_desc_s {
      const tw_instr *tw;
      const hc2hc_genus *genus;
      opcnt ops;
-     INT rs;
-     INT vs;
-     INT ms;
 };
 
 typedef const R *(*khc2hc) (R *rioarray, R *iioarray, const R *W,
@@ -119,12 +107,8 @@ void X(khc2hc_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc);
 typedef struct hc2c_desc_s hc2c_desc;
 
 typedef struct {
-     int (*okp)(
-	  const struct hc2c_desc_s *desc,
-	  const R *Rp, const R *Ip, const R *Rm, const R *Im, 
-	  INT rs, INT vs, INT m, INT ms);
      rdft_kind kind;
-     int vl;
+     INT vl;
 } hc2c_genus;
 
 struct hc2c_desc_s {
@@ -133,9 +117,6 @@ struct hc2c_desc_s {
      const tw_instr *tw;
      const hc2c_genus *genus;
      opcnt ops;
-     INT rs;
-     INT vs;
-     INT ms;
 };
 
 typedef const R *(*khc2c) (R *Rp, R *Ip, R *Rm, R *Im, const R *W,
@@ -150,22 +131,15 @@ extern const solvtab X(solvtab_rdft_r2cb);
 typedef struct kr2r_desc_s kr2r_desc;
 
 typedef struct {
-     int (*okp)(
-	  const kr2r_desc *desc,
-	  const R *I, const R *O,
-	  INT is, INT os, INT vl, INT ivs, INT ovs);
      INT vl;
 } kr2r_genus;
 
 struct kr2r_desc_s {
-     INT sz;    /* size of transform computed */
+     INT n;    /* size of transform computed */
      const char *nam;
      opcnt ops;
      const kr2r_genus *genus;
      rdft_kind kind;
-     INT is, os;
-     INT ivs;
-     INT ovs;
 };
 
 typedef void (*kr2r) (const R *I, R *O, stride is, stride os,

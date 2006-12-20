@@ -21,21 +21,9 @@
 #include "codelet-rdft.h"
 #include "hf.h"
 
-static int okp(const hc2hc_desc *d,
-	       const R *rio, const R *iio, 
-	       INT rs, INT vs, INT m, INT ms)
-{
-     UNUSED(rio); UNUSED(iio); UNUSED(m);
-     return (1
-	     && (!d->rs || (d->rs == rs))
-	     && (!d->vs || (d->vs == vs))
-	     && (!d->ms || (d->ms == ms))
-	  );
-}
-
-const hc2hc_genus GENUS = { okp, R2HC, 1 };
+const hc2hc_genus GENUS = { R2HC, 1 };
 
 #undef GENUS
 #include "hb.h"
 
-const hc2hc_genus GENUS = { okp, HC2R, 1 };
+const hc2hc_genus GENUS = { HC2R, 1 };

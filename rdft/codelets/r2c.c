@@ -20,32 +20,18 @@
 
 #include "codelet-rdft.h"
 
-static int okp(const kr2c_desc *d,
-	       const R *R0, const R *R1, const R *Cr, const R *Ci,
-	       INT rs, INT csr, INT csi, INT vl, INT ivs, INT ovs)
-{
-     UNUSED(R0); UNUSED(R1); UNUSED(Cr); UNUSED(Ci); UNUSED(vl);
-     return (1
-	     && (!d->rs || (d->rs == rs))
-	     && (!d->csr || (d->csr == csr))
-	     && (!d->csi || (d->csi == csi))
-	     && (!d->ivs || (d->ivs == ivs))
-	     && (!d->ovs || (d->ovs == ovs))
-	  );
-}
-
 #include "r2cf.h"
-const kr2c_genus GENUS = { okp, R2HC, 1 };
+const kr2c_genus GENUS = { R2HC, 1 };
 #undef GENUS
 
 #include "r2cfII.h"
-const kr2c_genus GENUS = { okp, R2HCII, 1 };
+const kr2c_genus GENUS = { R2HCII, 1 };
 #undef GENUS
 
 #include "r2cb.h"
-const kr2c_genus GENUS = { okp, HC2R, 1 };
+const kr2c_genus GENUS = { HC2R, 1 };
 #undef GENUS
 
 #include "r2cbIII.h"
-const kr2c_genus GENUS = { okp, HC2RIII, 1 };
+const kr2c_genus GENUS = { HC2RIII, 1 };
 #undef GENUS
