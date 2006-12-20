@@ -44,7 +44,6 @@ static const solvtab s =
      SOLVTAB(X(rdft2_rank0_register)),
      SOLVTAB(X(rdft2_buffered_register)),
      SOLVTAB(X(rdft2_rank_geq2_register)),
-     SOLVTAB(X(rdft2_radix2_register)),
 
      SOLVTAB(X(hc2hc_generic_register)),
 

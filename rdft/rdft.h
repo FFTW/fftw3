@@ -157,7 +157,6 @@ void X(rdft2_buffered_register)(planner *p);
 void X(rdft2_nop_register)(planner *p);
 void X(rdft2_rank0_register)(planner *p);
 void X(rdft2_rank_geq2_register)(planner *p);
-void X(rdft2_radix2_register)(planner *p);
 
 /****************************************************************************/
 
