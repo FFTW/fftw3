@@ -34,7 +34,7 @@ typedef struct {
      plan *cld0, *cldm; /* children for 0th and middle butterflies */
      INT r, m, v;
      INT ms, vs;
-     stride rs, bufstride;
+     stride rs, brs;
      const R *tdW;
      twid *td;
      const S *slv;
@@ -79,9 +79,9 @@ static INT compute_batchsize(INT radix)
 static const R *dobatch(khc2c k, R *Rp, R *Ip, R *Rm, R *Im, const R *W, 
 			INT r, INT rs,
 			INT batchsz, INT ms, 
-			R *bufp, stride bufstride)
+			R *bufp, stride brs)
 {
-     INT b = WS(bufstride, 1);
+     INT b = WS(brs, 1);
      R *bufm = bufp + b - 2;
 
      X(cpy2d_pair_ci)(Rp, Ip, bufp, bufp + 1,
@@ -90,7 +90,7 @@ static const R *dobatch(khc2c k, R *Rp, R *Ip, R *Rm, R *Im, const R *W,
      X(cpy2d_pair_ci)(Rm, Im, bufm, bufm + 1,
 		      r, rs, b,
 		      batchsz, -ms, -2);
-     W = k(bufp, bufp + 1, bufm, bufm + 1, W, bufstride, batchsz, 1);
+     W = k(bufp, bufp + 1, bufm, bufm + 1, W, brs, batchsz, 1);
      X(cpy2d_pair_co)(bufp, bufp + 1, Rp, Ip, 
 		      r, b, rs,
 		      batchsz, 2, ms);
@@ -126,14 +126,14 @@ static void apply_buf(const plan *ego_, R *cr, R *ci)
 	  for (j = 0; j < m1 - batchsz; j += batchsz) {
 	       W = dobatch(ego->k, Rp, Ip, Rm, Im, W, 
 			   ego->r, WS(ego->rs, 1), batchsz, ego->ms, 
-			   buf, ego->bufstride);
+			   buf, ego->brs);
 	       Rp += ego->ms * batchsz; Ip += ego->ms * batchsz;
 	       Rm -= ego->ms * batchsz; Im -= ego->ms * batchsz;
 	  }
 
 	  b = m1 - j;
 	  dobatch(ego->k, Rp, Ip, Rm, Im, W, 
-		  ego->r, WS(ego->rs, 1), b, ego->ms, buf, ego->bufstride);
+		  ego->r, WS(ego->rs, 1), b, ego->ms, buf, ego->brs);
 	  Rp += ego->ms * b; Ip += ego->ms * b;
 	  Rm -= ego->ms * b; Im -= ego->ms * b;
 
@@ -163,7 +163,7 @@ static void destroy(plan *ego_)
      X(plan_destroy_internal)(ego->cld0);
      X(plan_destroy_internal)(ego->cldm);
      X(stride_destroy)(ego->rs);
-     X(stride_destroy)(ego->bufstride);
+     X(stride_destroy)(ego->brs);
 }
 
 static void print(const plan *ego_, printer *p)
@@ -252,7 +252,7 @@ static plan *mkcldw(const hc2c_solver *ego_, rdft_kind kind,
      pln->m = m; pln->ms = ms;
      pln->v = v; pln->vs = vs;
      pln->slv = ego;
-     pln->bufstride = X(mkstride)(r, 4 * compute_batchsize(r));
+     pln->brs = X(mkstride)(r, 4 * compute_batchsize(r));
      pln->cld0 = cld0;
      pln->cldm = cldm;
 

@@ -54,7 +54,3 @@ void X(regsolver_hc2hc_directbuf)(planner *plnr, khc2hc codelet,
 				  const hc2hc_desc *desc);
 
 int X(hc2hc_applicable)(const hc2hc_solver *, const problem *, planner *);
-int X(hc2hc_mkcldrn)(rdft_kind kind, INT r, INT m, INT s, 
-		       INT mstart, INT mcount,
-		       R *IO, planner *plnr,
-		       plan **cld0p, plan **cldmp);
