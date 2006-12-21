@@ -61,7 +61,6 @@ static void apply_dit_dft(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
      const P *ego = (const P *) ego_;
      plan_dft *cld;
      plan_hc2c *cldw;
-     UNUSED(r1);
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, r0, r1, cr, ci);
@@ -75,7 +74,6 @@ static void apply_dif_dft(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
      const P *ego = (const P *) ego_;
      plan_dft *cld;
      plan_hc2c *cldw;
-     UNUSED(r1);
 
      cldw = (plan_hc2c *) ego->cldw;
      cldw->apply(ego->cldw, cr, ci);

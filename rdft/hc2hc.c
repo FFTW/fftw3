@@ -119,9 +119,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      P *pln = 0;
      plan *cld = 0, *cldw = 0;
-     INT n, r, m, vl, ivs, ovs;
+     INT n, r, m, v, ivs, ovs;
      iodim *d;
-     tensor *t1, *t2;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -136,23 +135,21 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      r = X(choose_radix)(ego->r, n);
      m = n / r;
 
-     X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
+     X(tensor_tornk1)(p->vecsz, &v, &ivs, &ovs);
 
      switch (p->kind[0]) {
 	 case R2HC:
 	      cldw = ego->mkcldw(ego, 
-				 R2HC, r, m, d[0].os, vl, ovs, 0, (m+2)/2, 
+				 R2HC, r, m, d[0].os, v, ovs, 0, (m+2)/2, 
 				 p->O, plnr);
 	      if (!cldw) goto nada;
-
-	      t1 = X(mktensor_1d)(r, d[0].is, m * d[0].os);
-	      t2 = X(tensor_append)(t1, p->vecsz);
-	      X(tensor_destroy)(t1);
 
 	      cld = X(mkplan_d)(plnr, 
 				X(mkproblem_rdft_d)(
 				     X(mktensor_1d)(m, r * d[0].is, d[0].os),
-				     t2, p->I, p->O, p->kind)
+				     X(mktensor_2d)(r, d[0].is, m * d[0].os,
+						    v, ivs, ovs),
+				     p->I, p->O, p->kind)
 		   );
 	      if (!cld) goto nada;
 
@@ -161,18 +158,16 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 	 case HC2R:
 	      cldw = ego->mkcldw(ego,
-				 HC2R, r, m, d[0].is, vl, ivs, 0, (m+2)/2, 
+				 HC2R, r, m, d[0].is, v, ivs, 0, (m+2)/2, 
 				 p->I, plnr);
 	      if (!cldw) goto nada;
-
-	      t1 = X(mktensor_1d)(r, m * d[0].is, d[0].os);
-	      t2 = X(tensor_append)(t1, p->vecsz);
-	      X(tensor_destroy)(t1);
 
 	      cld = X(mkplan_d)(plnr, 
 				X(mkproblem_rdft_d)(
 				     X(mktensor_1d)(m, d[0].is, r * d[0].os),
-				     t2, p->I, p->O, p->kind)
+				     X(mktensor_2d)(r, m * d[0].is, d[0].os,
+						    v, ivs, ovs),
+				     p->I, p->O, p->kind)
 		   );
 	      if (!cld) goto nada;
 	      
@@ -181,7 +176,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 	 default: 
 	      A(0);
-	      
      }
 
      pln->cld = cld;

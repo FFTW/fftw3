@@ -117,11 +117,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      P *pln = 0;
      plan *cld = 0, **cldws = 0;
-     INT n, r, m, vl, ivs, ovs, mcount;
+     INT n, r, m, v, ivs, ovs, mcount;
      int i, nthr, plnr_nthr_save;
      INT block_size;
      iodim *d;
-     tensor *t1, *t2;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -137,7 +136,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      m = n / r;
      mcount = (m + 2) / 2;
 
-     X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
+     X(tensor_tornk1)(p->vecsz, &v, &ivs, &ovs);
 
      block_size = (mcount + plnr->nthr - 1) / plnr->nthr;
      nthr = (int)((mcount + block_size - 1) / block_size);
@@ -151,7 +150,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	 case R2HC:
 	      for (i = 0; i < nthr; ++i) {
 		   cldws[i] = ego->mkcldw(ego, 
-					  R2HC, r, m, d[0].os, vl, ovs, 
+					  R2HC, r, m, d[0].os, v, ovs, 
 					  i*block_size, 
 					  (i == nthr - 1) ? 
 					  (mcount - i*block_size) : block_size,
@@ -159,16 +158,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 		   if (!cldws[i]) goto nada;
 	      }
 
-	      t1 = X(mktensor_1d)(r, d[0].is, m * d[0].os);
-	      t2 = X(tensor_append)(t1, p->vecsz);
-	      X(tensor_destroy)(t1);
-
 	      plnr->nthr = plnr_nthr_save;
 
 	      cld = X(mkplan_d)(plnr, 
 				X(mkproblem_rdft_d)(
 				     X(mktensor_1d)(m, r * d[0].is, d[0].os),
-				     t2, p->I, p->O, p->kind)
+				     X(mktensor_2d)(r, d[0].is, m * d[0].os,
+						    v, ivs, ovs),
+				     p->I, p->O, p->kind)
 		   );
 	      if (!cld) goto nada;
 
@@ -178,7 +175,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	 case HC2R:
 	      for (i = 0; i < nthr; ++i) {
 		   cldws[i] = ego->mkcldw(ego, 
-					  HC2R, r, m, d[0].is, vl, ivs, 
+					  HC2R, r, m, d[0].is, v, ivs, 
 					  i*block_size, 
 					  (i == nthr - 1) ? 
 					  (mcount - i*block_size) : block_size,
@@ -186,16 +183,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 		   if (!cldws[i]) goto nada;
 	      }
 
-	      t1 = X(mktensor_1d)(r, m * d[0].is, d[0].os);
-	      t2 = X(tensor_append)(t1, p->vecsz);
-	      X(tensor_destroy)(t1);
-
 	      plnr->nthr = plnr_nthr_save;
 
 	      cld = X(mkplan_d)(plnr, 
 				X(mkproblem_rdft_d)(
 				     X(mktensor_1d)(m, d[0].is, r * d[0].os),
-				     t2, p->I, p->O, p->kind)
+				     X(mktensor_2d)(r, m * d[0].is, d[0].os,
+						    v, ivs, ovs),
+				     p->I, p->O, p->kind)
 		   );
 	      if (!cld) goto nada;
 	      
@@ -204,7 +199,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 	 default: 
 	      A(0);
-	      
      }
 
      pln->cld = cld;
@@ -227,7 +221,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-hc2hc_solver *X(mksolver_hc2hc_threads)(size_t size, INT r, hc2hc_mkinferior mkcldw)
+hc2hc_solver *X(mksolver_hc2hc_threads)(size_t size, INT r, 
+					hc2hc_mkinferior mkcldw)
 {
      static const solver_adt sadt = { PROBLEM_RDFT, mkplan };
      hc2hc_solver *slv = (hc2hc_solver *)X(mksolver)(size, &sadt);
