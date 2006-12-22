@@ -19,7 +19,7 @@
  *
  *)
 
-type transcendent = I | MULTI_A | MULTI_B
+type transcendent = I | MULTI_A | MULTI_B | CONJ
 
 type expr =
   | Num of Number.number

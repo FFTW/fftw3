@@ -50,7 +50,5 @@ extern hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, INT, hc2hc_mkinferior);
 
 void X(regsolver_hc2hc_direct)(planner *plnr, khc2hc codelet, 
 			       const hc2hc_desc *desc);
-void X(regsolver_hc2hc_directbuf)(planner *plnr, khc2hc codelet, 
-				  const hc2hc_desc *desc);
 
 int X(hc2hc_applicable)(const hc2hc_solver *, const problem *, planner *);

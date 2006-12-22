@@ -24,19 +24,14 @@
 
 #if HAVE_SSE2
 
-#if 0
-/* apparently, MSVC converts -0.0 to 0.0 */
-const union dvec X(sse2_mp) = { {-0.0, 0.0} };
-#endif
-
-const union uvec X(sse2_mp) = {
-     { 0x00000000, 0x80000000, 0x00000000, 0x00000000 }
+const union uvec X(sse2_pm) = {
+     { 0x00000000, 0x00000000, 0x00000000, 0x80000000 }
 };
 
 /* paranoia because of past compiler bugs */
-void X(check_alignment_of_sse2_mp)(void)
+void X(check_alignment_of_sse2_pm)(void)
 {
-     CK(ALIGNED(&X(sse2_mp)));
+     CK(ALIGNED(&X(sse2_pm)));
 }
 #endif
 

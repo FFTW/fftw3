@@ -18,7 +18,6 @@
  *
  */
 
-#include "codelet-dft.h"
 #include "simd.h"
 
 #undef LD

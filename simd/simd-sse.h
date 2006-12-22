@@ -203,15 +203,15 @@ static inline V FLIP_RI(V x)
      return SHUFPS(x, x, SHUFVAL(1, 0, 3, 2));
 }
 
-extern const union uvec X(sse_mpmp);
-static inline V CHS_R(V x)
+extern const union uvec X(sse_pmpm);
+static inline V VCONJ(V x)
 {
-     return VXOR(X(sse_mpmp).v, x);
+     return VXOR(X(sse_pmpm).v, x);
 }
 
 static inline V VBYI(V x)
 {
-     return CHS_R(FLIP_RI(x));
+     return FLIP_RI(VCONJ(x));
 }
 
 static inline V VZMUL(V tx, V sr)

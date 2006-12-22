@@ -18,7 +18,6 @@
  *
  */
 
-#include "codelet-dft.h"
 #include "simd.h"
 
 #define GENUS X(dft_n1bsimd_genus)

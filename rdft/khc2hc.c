@@ -24,5 +24,4 @@
 void X(khc2hc_register)(planner *p, khc2hc codelet, const hc2hc_desc *desc)
 {
      X(regsolver_hc2hc_direct)(p, codelet, desc);
-     X(regsolver_hc2hc_directbuf)(p, codelet, desc);
 }

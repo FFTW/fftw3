@@ -90,6 +90,12 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 #define HAVE_SIMD 0
 #endif
 
+#if defined(HAVE_SSE2)
+#define HAVE_SIMD_2WAY 1
+#else
+#define HAVE_SIMD_2WAY 0
+#endif
+
 /* forward declarations */
 typedef struct problem_s problem;
 typedef struct plan_s plan;

@@ -112,6 +112,10 @@ typedef enum {
 } hc2c_kind;
 
 typedef struct {
+     int (*okp)(
+	  const R *Rp, const R *Ip, const R *Rm, const R *Im, 
+	  INT rs, INT m, INT ms, 
+	  const planner *plnr);
      rdft_kind kind;
      INT vl;
 } hc2c_genus;
@@ -131,6 +135,7 @@ void X(khc2c_register)(planner *p, khc2c codelet, const hc2c_desc *desc,
 
 extern const solvtab X(solvtab_rdft_r2cf);
 extern const solvtab X(solvtab_rdft_r2cb);
+extern const solvtab X(solvtab_rdft_simd);
 
 /* real-input & output DFT-like codelets (DHT, etc.) */
 typedef struct kr2r_desc_s kr2r_desc;

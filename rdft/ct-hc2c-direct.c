@@ -183,22 +183,77 @@ static void print(const plan *ego_, printer *p)
 		   ego->cld0, ego->cldm);
 }
 
-static int applicable0(const S *ego, rdft_kind kind, INT r)
+static int applicable0(const S *ego, rdft_kind kind,
+		       INT r, INT rs,
+		       INT m, INT ms, 
+		       INT v, INT vs,
+		       const R *cr, const R *ci,
+		       const planner *plnr)
 {
      const hc2c_desc *e = ego->desc;
+     UNUSED(v);
 
      return (
 	  1
 	  && r == e->radix
 	  && kind == e->genus->kind
+
+	  /* first v-loop iteration */
+	  && e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+			   rs, (m-1)/2, ms, plnr)
+	  
+	  /* subsequent v-loop iterations */
+	  && (cr += vs, ci += vs, 1)
+
+	  && e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+			   rs, (m-1)/2, ms, plnr)
 	  );
 }
 
-static int applicable(const S *ego, rdft_kind kind, INT r, INT m,
+static int applicable0_buf(const S *ego, rdft_kind kind,
+			   INT r, INT rs,
+			   INT m, INT ms, 
+			   INT v, INT vs,
+			   const R *cr, const R *ci,
+			   const planner *plnr)
+{
+     const hc2c_desc *e = ego->desc;
+     INT batchsz, brs;
+     UNUSED(v); UNUSED(rs); UNUSED(ms); UNUSED(vs);
+
+     return (
+	  1
+	  && r == e->radix
+	  && kind == e->genus->kind
+
+	  /* ignore cr, ci, use buffer */
+	  && (cr = (const R *)0, ci = cr + 1, 
+	      batchsz = compute_batchsize(r), 
+	      brs = 4 * batchsz, 1)
+
+	  && e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
+			   brs, batchsz, 2, plnr)
+
+	  && e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
+			   brs, ((m-1)/2) % batchsz, 2, plnr)
+
+	  );
+}
+
+static int applicable(const S *ego, rdft_kind kind,
+		      INT r, INT rs,
+		      INT m, INT ms, 
+		      INT v, INT vs,
+		      R *cr, R *ci,
 		      const planner *plnr)
 {
-     if (!applicable0(ego, kind, r))
-          return 0;
+     if (ego->bufferedp) {
+	  if (!applicable0_buf(ego, kind, r, rs, m, ms, v, vs, cr, ci, plnr))
+	       return 0;
+     } else {
+	  if (!applicable0(ego, kind, r, rs, m, ms, v, vs, cr, ci, plnr))
+	       return 0;
+     }
 
      if (NO_UGLYP(plnr) && X(ct_uglyp)((ego->bufferedp? (INT)512 : (INT)16),
 				       m * r, r))
@@ -224,7 +279,7 @@ static plan *mkcldw(const hc2c_solver *ego_, rdft_kind kind,
 	  0, awake, print, destroy
      };
 
-     if (!applicable(ego, kind, r, m, plnr))
+     if (!applicable(ego, kind, r, rs, m, ms, v, vs, cr, ci, plnr))
           return (plan *)0;
 
      cld0 = X(mkplan_d)(

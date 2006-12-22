@@ -348,6 +348,7 @@ let rec count_flops_expr_func (adds, mults, fmas) = function
   | Times (NaN MULTI_A,_)  -> (adds, mults, fmas)
   | Times (NaN MULTI_B,_)  -> (adds, mults, fmas)
   | Times (NaN I,b) -> count_flops_expr_func (adds, mults, fmas) b
+  | Times (NaN CONJ,b) -> count_flops_expr_func (adds, mults, fmas) b
   | Times (a,b) -> fold_left count_flops_expr_func (adds, mults+1, fmas) [a; b]
   | CTimes (a,b) -> 
       fold_left count_flops_expr_func (adds+1, mults+2, fmas) [a; b]

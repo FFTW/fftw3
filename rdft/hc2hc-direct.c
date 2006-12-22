@@ -281,10 +281,5 @@ void X(regsolver_hc2hc_direct)(planner *plnr, khc2hc codelet,
 			       const hc2hc_desc *desc)
 {
      regone(plnr, codelet, desc, /* bufferedp */0);
-}
-
-void X(regsolver_hc2hc_directbuf)(planner *plnr, khc2hc codelet,
-				  const hc2hc_desc *desc)
-{
      regone(plnr, codelet, desc, /* bufferedp */1);
 }

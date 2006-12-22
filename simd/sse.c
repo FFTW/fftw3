@@ -67,7 +67,7 @@
   int RIGHT_CPU(void)
   {
        static int init = 0, res;
-       extern void X(check_alignment_of_sse_mpmp)(void);
+       extern void X(check_alignment_of_sse_pmpm)(void);
 
        if (!init) {
 	    res =   !is_386() 
@@ -75,7 +75,7 @@
 		 && (cpuid_edx(1) & (1 << 25)) 
 		 && sse_works();
 	    init = 1;
-	    X(check_alignment_of_sse_mpmp)();
+	    X(check_alignment_of_sse_pmpm)();
        }
        return res;
   }

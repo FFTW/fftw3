@@ -123,21 +123,24 @@ static inline V FLIP_RI(V x)
      return SHUFPD(x, x, 1);
 }
 
-extern const union uvec X(sse2_mp);
-static inline V CHS_R(V x)
+extern const union uvec X(sse2_pm);
+static inline V VCONJ(V x)
 {
-     return VXOR(X(sse2_mp).v, x);
+     return VXOR(X(sse2_pm).v, x);
 }
 
 static inline V VBYI(V x)
 {
+     x = VCONJ(x);
      x = FLIP_RI(x);
-     x = CHS_R(x);
      return x;
 }
 
 #define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
+#define VFMACONJ(b, c) VADD(c, VCONJ(b))
+#define VFNMSCONJ(b, c) VSUB(c, VCONJ(b))
+#define VFMSCONJ(b, c) VSUB(VCONJ(b), c)
 
 static inline V VZMUL(V tx, V sr)
 {

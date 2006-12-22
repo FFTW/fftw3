@@ -64,7 +64,7 @@
        }
   }
 
-  extern void X(check_alignment_of_sse2_mp)(void);
+  extern void X(check_alignment_of_sse2_pm)(void);
 
   int RIGHT_CPU(void)
   {
@@ -76,7 +76,7 @@
 		 && (cpuid_edx(1) & (1 << 26))
 		 && sse2_works();
 	    init = 1;
-	    X(check_alignment_of_sse2_mp)();
+	    X(check_alignment_of_sse2_pm)();
        }
        return res;
   }

@@ -116,6 +116,7 @@ type fma =
 let good_for_fma (a, b) = 
   let good = function
     | NaN I -> true
+    | NaN CONJ -> true
     | NaN _ -> false
     | Times(NaN _, _) -> false
     | Times(_, NaN _) -> false

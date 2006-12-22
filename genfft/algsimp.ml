@@ -125,6 +125,16 @@ end = struct
 	stimesM (b, a)
     | (a, b) -> makeNode (Times (a, b))
 
+  and sctimesM = function 
+    | (Uminus a, b) -> sctimesM (a, b) >>= suminusM
+    | (a, Uminus b) -> sctimesM (a, b) >>= suminusM
+    | (a, b) -> makeNode (CTimes (a, b))
+
+  and sctimesjM = function 
+    | (Uminus a, b) -> sctimesjM (a, b) >>= suminusM
+    | (a, Uminus b) -> sctimesjM (a, b) >>= suminusM
+    | (a, b) -> makeNode (CTimesJ (a, b))
+
   and reduce_sumM x = match x with
     [] -> returnM []
   | [Num a] -> 
@@ -359,11 +369,11 @@ end = struct
  	| CTimes (a, b) -> 
  	    (algsimpM a >>= fun a' ->
  	      algsimpM b >>= fun b' ->
- 		makeNode (CTimes (a', b')))
+		sctimesM (a', b'))
  	| CTimesJ (a, b) -> 
  	    (algsimpM a >>= fun a' ->
  	      algsimpM b >>= fun b' ->
- 		makeNode (CTimesJ (a', b')))
+		sctimesjM (a', b'))
  	| Uminus a -> 
  	    algsimpM a >>= suminusM 
  	| Store (v, a) ->

@@ -21,9 +21,19 @@
 #include "codelet-rdft.h"
 #include "hc2cf.h"
 
-const hc2c_genus GENUS = { R2HC, 1 };
+static int okp(const R *Rp, const R *Ip, const R *Rm, const R *Im, 
+	       INT rs, INT m, INT ms, 
+	       const planner *plnr)
+{
+     UNUSED(Rp); UNUSED(Ip); UNUSED(Rm); UNUSED(Im);
+     UNUSED(rs); UNUSED(m); UNUSED(ms); UNUSED(plnr);
+
+     return 1;
+}
+
+const hc2c_genus GENUS = { okp, R2HC, 1 };
 
 #undef GENUS
 #include "hc2cb.h"
 
-const hc2c_genus GENUS = { HC2R, 1 };
+const hc2c_genus GENUS = { okp, HC2R, 1 };

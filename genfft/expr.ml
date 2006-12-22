@@ -24,7 +24,7 @@
 
 (* I will regret this hack : *)
 (* NEWS: I did *)
-type transcendent = I | MULTI_A | MULTI_B
+type transcendent = I | MULTI_A | MULTI_B | CONJ
 
 type expr =
   | Num of Number.number
@@ -50,6 +50,7 @@ let transcendent_to_float = function
   | I -> 2.718281828459045235360287471  (* any transcendent number will do *)
   | MULTI_A -> 0.6931471805599453094172321214
   | MULTI_B -> -0.3665129205816643270124391582
+  | CONJ -> 0.6019072301972345747375400015
 
 let rec hash = function
   | Num x -> hash_float (Number.to_float x)
@@ -97,6 +98,7 @@ let string_of_transcendent = function
   | I -> "I"
   | MULTI_A -> "MULTI_A"
   | MULTI_B -> "MULTI_B"
+  | CONJ -> "CONJ"
 
 let rec to_string = function
   | Load v -> Variable.unparse v

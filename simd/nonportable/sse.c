@@ -24,19 +24,14 @@
 
 #if HAVE_SSE
 
-#if 0
-/* apparently, MSVC converts -0.0 to 0.0 */
-const union fvec X(sse_mpmp) = {{-0.0, 0.0, -0.0, 0.0}};
-#endif
-
-const union uvec X(sse_mpmp) = {
-     { 0x80000000, 0x00000000, 0x80000000, 0x00000000 }
+const union uvec X(sse_pmpm) = {
+     { 0x00000000, 0x80000000, 0x00000000, 0x80000000 }
 };
 
 /* paranoia because of past compiler bugs */
-void X(check_alignment_of_sse_mpmp)(void)
+void X(check_alignment_of_sse_pmpm)(void)
 {
-     CK(ALIGNED(&X(sse_mpmp)));
+     CK(ALIGNED(&X(sse_pmpm)));
 }
 
 #endif

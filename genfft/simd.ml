@@ -66,10 +66,16 @@ and unparse_expr =
 
     | (Uminus (Times (NaN I, b))) :: c :: d -> op2 "VFNMSI" [b] (c :: d)
     | c :: (Uminus (Times (NaN I, b))) :: d -> op2 "VFNMSI" [b] (c :: d)
-    | (Times (NaN I, b)) :: (Uminus c) :: d -> failwith "VFMSI"
-    | (Uminus c) :: (Times (NaN I, b)) :: d -> failwith "VFMSI"
+    | (Uminus (Times (NaN CONJ, b))) :: c :: d -> op2 "VFNMSCONJ" [b] (c :: d)
+    | c :: (Uminus (Times (NaN CONJ, b))) :: d -> op2 "VFNMSCONJ" [b] (c :: d)
     | (Times (NaN I, b)) :: c :: d -> op2 "VFMAI" [b] (c :: d)
     | c :: (Times (NaN I, b)) :: d -> op2 "VFMAI" [b] (c :: d)
+    | (Times (NaN CONJ, b)) :: (Uminus c) :: d -> op2 "VFMSCONJ" [b] (c :: d)
+    | (Uminus c) :: (Times (NaN CONJ, b)) :: d -> op2 "VFMSCONJ" [b] (c :: d)
+    | (Times (NaN CONJ, b)) :: c :: d -> op2 "VFMACONJ" [b] (c :: d)
+    | c :: (Times (NaN CONJ, b)) :: d -> op2 "VFMACONJ" [b] (c :: d)
+    | (Times (NaN _, b)) :: (Uminus c) :: d -> failwith "VFMS NaN"
+    | (Uminus c) :: (Times (NaN _, b)) :: d -> failwith "VFMS NaN"
 
     | (Uminus (Times (a, b))) :: c :: d -> op3 "VFNMS" a b (c :: d)
     | c :: (Uminus (Times (a, b))) :: d -> op3 "VFNMS" a b (c :: d)
@@ -112,6 +118,7 @@ and unparse_expr =
     | Plus [a] -> " /* bug */ " ^ (unparse_expr a)
     | Plus a -> unparse_plus a
     | Times(NaN I,b) -> op1 "VBYI" b
+    | Times(NaN CONJ,b) -> op1 "VCONJ" b
     | Times(a,b) ->
 	sprintf "VMUL(%s, %s)" (unparse_expr a) (unparse_expr b)
     | CTimes(a,b) ->
