@@ -90,7 +90,7 @@ static const R *dobatch(khc2c k, R *Rp, R *Ip, R *Rm, R *Im, const R *W,
      X(cpy2d_pair_ci)(Rm, Im, bufm, bufm + 1,
 		      r, rs, b,
 		      batchsz, -ms, -2);
-     W = k(bufp, bufp + 1, bufm, bufm + 1, W, brs, batchsz, 1);
+     W = k(bufp, bufp + 1, bufm, bufm + 1, W, brs, batchsz, 2);
      X(cpy2d_pair_co)(bufp, bufp + 1, Rp, Ip, 
 		      r, b, rs,
 		      batchsz, 2, ms);
