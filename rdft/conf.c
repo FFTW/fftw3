@@ -57,7 +57,7 @@ void X(rdft_conf_standard)(planner *p)
      X(solvtab_exec)(X(solvtab_rdft_r2cb), p);
      X(solvtab_exec)(X(solvtab_rdft_r2r), p);
 
-#if HAVE_SIMD_2WAY
+#if HAVE_SIMD
      X(solvtab_exec)(X(solvtab_rdft_simd), p);
 #endif
 }

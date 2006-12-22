@@ -31,8 +31,6 @@ let realtype = "V"
 let realtypep = realtype ^ " *"
 let constrealtype = "const " ^ realtype
 let constrealtypep = constrealtype ^ " *"
-let ivs = ref "ivs"
-let ovs = ref "ovs"
 let alignment_mod = 2
 
 (*
@@ -47,17 +45,19 @@ and unparse_store dst = function
   | Times (NaN MULTI_A, x) ->
       sprintf "STM%d(&(%s),%s,%s,&(%s));\n" 
 	!Simdmagic.store_multiple
-	(Variable.unparse dst) (unparse_expr x) !ovs
+	(Variable.unparse dst) (unparse_expr x)
+	(Variable.vstride_of_locative dst)
 	(Variable.unparse_for_alignment alignment_mod dst)
   | Times (NaN MULTI_B, Plus stuff) ->
       sprintf "STN%d(&(%s)%s,%s);\n" 
 	!Simdmagic.store_multiple
 	(Variable.unparse dst) 
 	(List.fold_right (fun x a -> "," ^ (unparse_expr x) ^ a) stuff "")
-	!ovs
+	(Variable.vstride_of_locative dst)
   | src_expr -> 
       sprintf "ST(&(%s),%s,%s,&(%s));\n" 
-	(Variable.unparse dst) (unparse_expr src_expr) !ovs
+	(Variable.unparse dst) (unparse_expr src_expr) 
+	(Variable.vstride_of_locative dst)
 	(Variable.unparse_for_alignment alignment_mod dst)
 
 and unparse_expr =
@@ -108,7 +108,8 @@ and unparse_expr =
 	when Variable.is_constant tw && !Magic.generate_bytw ->
 	unparse_by_twiddle "BYTWJ" tw src
     | Load v when is_locative(v) ->
-	sprintf "LD(&(%s), %s, &(%s))" (Variable.unparse v) !ivs
+	sprintf "LD(&(%s), %s, &(%s))" (Variable.unparse v) 
+	  (Variable.vstride_of_locative v)
 	  (Variable.unparse_for_alignment alignment_mod v)
     | Load v when is_constant(v) -> sprintf "LDW(&(%s))" (Variable.unparse v)
     | Load v  -> Variable.unparse v

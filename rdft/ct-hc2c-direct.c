@@ -35,7 +35,6 @@ typedef struct {
      INT r, m, v;
      INT ms, vs;
      stride rs, brs;
-     const R *tdW;
      twid *td;
      const S *slv;
 } P;
@@ -54,7 +53,7 @@ static void apply(const plan *ego_, R *cr, R *ci)
      for (i = 0; i < v; ++i, cr += vs, ci += vs) {
 	  cld0->apply((plan *) cld0, cr, ci, cr, ci);
 	  ego->k(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
-		 ego->tdW, ego->rs, (m-1)/2, ms);
+		 ego->td->W, ego->rs, 1, (m+1)/2, ms);
 	  cldm->apply((plan *) cldm, cr + (m/2)*ms, ci + (m/2)*ms, 
 		      cr + (m/2)*ms, ci + (m/2)*ms);
      }
@@ -76,28 +75,27 @@ static INT compute_batchsize(INT radix)
      return (radix + 2);
 }
 
-static const R *dobatch(khc2c k, R *Rp, R *Ip, R *Rm, R *Im, const R *W, 
-			INT r, INT rs,
-			INT batchsz, INT ms, 
-			R *bufp, stride brs)
+static void dobatch(khc2c k, R *Rp, R *Ip, R *Rm, R *Im, const R *W, 
+		    INT r, INT rs,
+		    INT mb, INT me, INT ms, 
+		    R *bufp, stride brs)
 {
      INT b = WS(brs, 1);
      R *bufm = bufp + b - 2;
 
-     X(cpy2d_pair_ci)(Rp, Ip, bufp, bufp + 1,
+     X(cpy2d_pair_ci)(Rp + mb * ms, Ip + mb * ms, bufp, bufp + 1,
 		      r, rs, b,
-		      batchsz, ms, 2);
-     X(cpy2d_pair_ci)(Rm, Im, bufm, bufm + 1,
+		      me - mb, ms, 2);
+     X(cpy2d_pair_ci)(Rm - mb * ms, Im - mb * ms, bufm, bufm + 1,
 		      r, rs, b,
-		      batchsz, -ms, -2);
-     W = k(bufp, bufp + 1, bufm, bufm + 1, W, brs, batchsz, 2);
-     X(cpy2d_pair_co)(bufp, bufp + 1, Rp, Ip, 
+		      me - mb, -ms, -2);
+     k(bufp, bufp + 1, bufm, bufm + 1, W, brs, mb, me, 2);
+     X(cpy2d_pair_co)(bufp, bufp + 1, Rp + mb * ms, Ip + mb * ms, 
 		      r, b, rs,
-		      batchsz, 2, ms);
-     X(cpy2d_pair_co)(bufm, bufm + 1, Rm, Im,
+		      me - mb, 2, ms);
+     X(cpy2d_pair_co)(bufm, bufm + 1, Rm - mb * ms, Im - mb * ms,
 		      r, b, rs,
-		      batchsz, -2, -ms);
-     return W;
+		      me - mb, -2, -ms);
 }
 
 static void apply_buf(const plan *ego_, R *cr, R *ci)
@@ -105,39 +103,32 @@ static void apply_buf(const plan *ego_, R *cr, R *ci)
      const P *ego = (const P *) ego_;
      plan_rdft2 *cld0 = (plan_rdft2 *) ego->cld0;
      plan_rdft2 *cldm = (plan_rdft2 *) ego->cldm;
-     INT i, j, m = ego->m, v = ego->v;
+     INT i, j, ms = ego->ms, v = ego->v;
      INT batchsz = compute_batchsize(ego->r);
-     INT b;
      R *buf;
-     INT m1 = (m-1)/2;
+     INT mb = 1, me = (ego->m+1) / 2;
 
      STACK_MALLOC(R *, buf, ego->r * batchsz * 4 * sizeof(R));
 
-     for (i = 0; i < v; ++i) {
-	  R *Rp = cr + i * ego->vs;
-	  R *Ip = ci + i * ego->vs;
-	  R *Rm = Rp + m * ego->ms;
-	  R *Im = Ip + m * ego->ms;
-	  const R *W = ego->tdW;
+     for (i = 0; i < v; ++i, cr += ego->vs, ci += ego->vs) {
+	  R *Rp = cr;
+	  R *Ip = ci;
+	  R *Rm = cr + ego->m * ms;
+	  R *Im = ci + ego->m * ms;
 
 	  cld0->apply((plan *) cld0, Rp, Ip, Rp, Ip);
-	  Rp += ego->ms; Ip += ego->ms; Rm -= ego->ms; Im -= ego->ms; 
 
-	  for (j = 0; j < m1 - batchsz; j += batchsz) {
-	       W = dobatch(ego->k, Rp, Ip, Rm, Im, W, 
-			   ego->r, WS(ego->rs, 1), batchsz, ego->ms, 
-			   buf, ego->brs);
-	       Rp += ego->ms * batchsz; Ip += ego->ms * batchsz;
-	       Rm -= ego->ms * batchsz; Im -= ego->ms * batchsz;
-	  }
+	  for (j = mb; j < me - batchsz; j += batchsz) 
+	       dobatch(ego->k, Rp, Ip, Rm, Im, ego->td->W, 
+		       ego->r, WS(ego->rs, 1), j, j + batchsz, ms, 
+		       buf, ego->brs);
 
-	  b = m1 - j;
-	  dobatch(ego->k, Rp, Ip, Rm, Im, W, 
-		  ego->r, WS(ego->rs, 1), b, ego->ms, buf, ego->brs);
-	  Rp += ego->ms * b; Ip += ego->ms * b;
-	  Rm -= ego->ms * b; Im -= ego->ms * b;
+	  dobatch(ego->k, Rp, Ip, Rm, Im, ego->td->W, 
+		  ego->r, WS(ego->rs, 1), j, me, ms, buf, ego->brs);
 
-	  cldm->apply((plan *) cldm, Rp, Ip, Rp, Ip);
+	  cldm->apply((plan *) cldm, 
+		      Rp + me * ms, Ip + me * ms,
+		      Rp + me * ms, Ip + me * ms);
      }
 
      STACK_FREE(buf);
@@ -152,9 +143,9 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 
      X(plan_awake)(ego->cld0, wakefulness);
      X(plan_awake)(ego->cldm, wakefulness);
+     /* m+3 instead of m+1 is a hack to cover 4-way SIMD */
      X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw, 
-		      ego->r * ego->m, ego->r, (ego->m + 1) / 2);
-     ego->tdW = X(twiddle_shift)(ego->td, 1);
+		      ego->r * ego->m, ego->r, (ego->m + 3) / 2);
 }
 
 static void destroy(plan *ego_)
@@ -200,13 +191,13 @@ static int applicable0(const S *ego, rdft_kind kind,
 
 	  /* first v-loop iteration */
 	  && e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
-			   rs, (m-1)/2, ms, plnr)
+			   rs, 1, (m+1)/2, ms, plnr)
 	  
 	  /* subsequent v-loop iterations */
 	  && (cr += vs, ci += vs, 1)
 
 	  && e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
-			   rs, (m-1)/2, ms, plnr)
+			   rs, 1, (m+1)/2, ms, plnr)
 	  );
 }
 
@@ -232,11 +223,10 @@ static int applicable0_buf(const S *ego, rdft_kind kind,
 	      brs = 4 * batchsz, 1)
 
 	  && e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
-			   brs, batchsz, 2, plnr)
+			   brs, 1, 1+batchsz, 2, plnr)
 
 	  && e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
-			   brs, ((m-1)/2) % batchsz, 2, plnr)
-
+			   brs, 1, 1 + (((m-1)/2) % batchsz), 2, plnr)
 	  );
 }
 
@@ -302,7 +292,6 @@ static plan *mkcldw(const hc2c_solver *ego_, rdft_kind kind,
 
      pln->k = ego->k;
      pln->td = 0;
-     pln->tdW = 0;
      pln->r = r; pln->rs = X(mkstride)(r, rs);
      pln->m = m; pln->ms = ms;
      pln->v = v; pln->vs = vs;

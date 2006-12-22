@@ -25,7 +25,7 @@
 
 static int okp(const ct_desc *d,
 	       const R *rio, const R *iio, 
-	       INT ios, INT vs, INT m, INT mb, INT me, INT dist,
+	       INT rs, INT vs, INT m, INT mb, INT me, INT ms,
 	       const planner *plnr)
 {
      UNUSED(rio);
@@ -34,14 +34,14 @@ static int okp(const ct_desc *d,
 	     && !NO_SIMDP(plnr)
 	     && ALIGNEDA(rio)
 	     && ALIGNEDA(iio)
-	     && SIMD_STRIDE_OKA(ios)
-	     && dist == 1
+	     && SIMD_STRIDE_OKA(rs)
+	     && ms == 1
              && (m % (2 * VL)) == 0
              && (mb % (2 * VL)) == 0
              && (me % (2 * VL)) == 0
-	     && (!d->s1 || (d->s1 == ios))
-	     && (!d->s2 || (d->s2 == vs))
-	     && (!d->dist || (d->dist == dist))
+	     && (!d->rs || (d->rs == rs))
+	     && (!d->vs || (d->vs == vs))
+	     && (!d->ms || (d->ms == ms))
 	  );
 }
 

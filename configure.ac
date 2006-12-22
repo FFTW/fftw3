@@ -66,7 +66,6 @@ AM_CONDITIONAL(LDOUBLE, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 
 have_simd="no"
-have_simd_2way="no"
 simd_precision="s"
 
 AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
@@ -79,7 +78,6 @@ AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE2 optimizations])
 if test "$have_sse2" = "yes"; then
 	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
 	have_simd="yes"
-	have_simd_2way="yes"
 	simd_precision="d"
 	if test "$have_sse" = "yes"; then
 		AC_MSG_ERROR([you cannot use SSE and SSE2 at the same time])
@@ -97,7 +95,6 @@ if test "$PRECISION" != "$simd_precision" && test "$have_simd" = "yes"; then
 fi
 
 AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
-AM_CONDITIONAL(HAVE_SIMD_2WAY, test "$have_simd_2way" = "yes")
 
 AC_ARG_WITH(slow-timer, [AC_HELP_STRING([--with-slow-timer],[use low-precision timers (SLOW)])], with_slow_timer=$withval, with_slow_timer=no)
 if test "$with_slow_timer" = "yes"; then

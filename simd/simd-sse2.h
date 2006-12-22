@@ -138,9 +138,6 @@ static inline V VBYI(V x)
 
 #define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
-#define VFMACONJ(b, c) VADD(c, VCONJ(b))
-#define VFNMSCONJ(b, c) VSUB(c, VCONJ(b))
-#define VFMSCONJ(b, c) VSUB(VCONJ(b), c)
 
 static inline V VZMUL(V tx, V sr)
 {
@@ -207,5 +204,10 @@ static inline V BYTWJ2(const R *t, V sr)
 #define VTWS(x)								\
   {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
 #define TWVLS (2 * VL)
+
+
+/* twiddle storage for hc2cdftv codelets */
+#define VTWHC2CDFTV(x) {TW_CEXP, 1, x}
+#define TWVLHC2CDFTV (VL)
 
 #endif /* __SSE2__ */

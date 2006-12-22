@@ -29,7 +29,6 @@ let ditdif = ref DIT
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number> [ -dit | -dif ]"
 
 let urs = ref Stride_variable
-let ums = ref Stride_variable
 
 let speclist = [
   "-dit",
@@ -43,10 +42,6 @@ let speclist = [
   "-with-rs",
   Arg.String(fun x -> urs := arg_to_stride x),
   " specialize for given R-stride";
-
-  "-with-ms",
-  Arg.String(fun x -> ums := arg_to_stride x),
-  " specialize for given ms"
 ]
 
 let rioarray = "cr" 
@@ -58,13 +53,13 @@ let genone sign n transform load store vrs =
     locative_array_c n 
       (C.array_subscript rioarray vrs)
       (C.array_subscript iioarray vrs)
-      locations in
+      locations "BUG" in
   let output = transform sign n (load n input) in
   let ioloc = 
     locative_array_c n 
       (C.array_subscript rioarray vrs)
       (C.array_subscript iioarray vrs)
-      locations in
+      locations "BUG" in
   let odag = store n ioloc output in
   let annot = standard_optimizer odag 
   in annot
@@ -81,9 +76,7 @@ let sym2i n f i = if (i < n - i) then f i else byui (f i)
 let generate n =
   let rs = "rs"
   and twarray = "W"
-  and i = "i" 
-  and m = "m"
-  and ms = "ms" in
+  and m = "m" and mb = "mb" and me = "me" and ms = "ms" in
 
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name 
@@ -95,8 +88,6 @@ let generate n =
   let byw = bytwiddle n sign (twiddle_array nt twarray) in
 
   let vrs = either_stride (!urs) (C.SVar rs) in
-  let _ = Simd.ovs := stride_to_string "ms" !ums in
-  let _ = Simd.ivs := stride_to_string "ms" !ums in
 
   let asch = 
     match !ditdif with
@@ -112,17 +103,21 @@ let generate n =
 	  load_array_c store_array_c vrs
   in
 
-  let vms = CVar !Simd.ivs 
+  let vms = CVar "ms" 
   and vrioarray = CVar rioarray
   and viioarray = CVar iioarray
-  and vi = CVar i  and vm = CVar m 
+  and vm = CVar m and vmb = CVar mb and vme = CVar me 
   in
   let body = Block (
-    [Decl ("INT", i)],
-    [For (Expr_assign (vi, vm),
-	  Binop (" > ", vi, Integer 0),
+    [Decl ("INT", m)],
+    [For (list_to_comma
+	    [Expr_assign (vm, vmb);
+	     Expr_assign (CVar twarray, 
+			  CPlus [CVar twarray; 
+				 ctimes (vmb, Integer nt)])],
+	  Binop (" < ", vm, vme),
 	  list_to_comma 
-	    [Expr_assign (vi, CPlus [vi; CUminus (byvl (Integer 1))]);
+	    [Expr_assign (vm, CPlus [vm; byvl (Integer 1)]);
 	     Expr_assign (vrioarray, CPlus [vrioarray; byvl vms]);
 	     Expr_assign (viioarray, 
 			  CPlus [viioarray; CUminus (byvl vms)]);
@@ -130,18 +125,17 @@ let generate n =
 					       byvl (Integer nt)]);
 	     make_volatile_stride (CVar rs)
 	   ],
-	  Asch asch);
-     Return (CVar twarray)]
-    )
+	  Asch asch)])
   in
 
   let tree = 
-    Fcn ("static const R *", name,
+    Fcn ("static void", name,
 	 [Decl (C.realtypep, rioarray);
 	  Decl (C.realtypep, iioarray);
 	  Decl (C.constrealtypep, twarray);
 	  Decl (C.stridetype, rs);
-	  Decl ("INT", m);
+	  Decl ("INT", mb);
+	  Decl ("INT", me);
 	  Decl ("INT", ms)],
          add_constants body)
   in

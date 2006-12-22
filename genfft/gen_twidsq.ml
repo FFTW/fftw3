@@ -30,9 +30,9 @@ let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number> [ -dit | -dif ]"
 
 let reload_twiddle = ref false
 
-let uistride = ref Stride_variable
-let uvstride = ref Stride_variable
-let udist = ref Stride_variable
+let urs = ref Stride_variable
+let uvs = ref Stride_variable
+let ums = ref Stride_variable
 
 let speclist = [
   "-dit",
@@ -47,28 +47,25 @@ let speclist = [
   Arg.Unit(fun () -> reload_twiddle := true),
   " do not collect common twiddle factors";
 
-  "-with-istride",
-  Arg.String(fun x -> uistride := arg_to_stride x),
+  "-with-rs",
+  Arg.String(fun x -> urs := arg_to_stride x),
   " specialize for given input stride";
 
-  "-with-vstride",
-  Arg.String(fun x -> uvstride := arg_to_stride x),
+  "-with-vs",
+  Arg.String(fun x -> uvs := arg_to_stride x),
   " specialize for given vector stride";
 
-  "-with-dist",
-  Arg.String(fun x -> udist := arg_to_stride x),
-  " specialize for given dist"
+  "-with-ms",
+  Arg.String(fun x -> ums := arg_to_stride x),
+  " specialize for given ms"
 ]
 
 let generate n =
   let rioarray = "rio"
   and iioarray = "iio"
-  and istride = "is"
-  and vstride = "vs"
-  and twarray = "W" 
-  and i = "i" 
-  and m = "m"
-  and dist = "dist" in
+  and rs = "rs" and vs = "vs"
+  and twarray = "W"
+  and m = "m" and mb = "mb" and me = "me" and ms = "ms" in
 
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
@@ -76,8 +73,8 @@ let generate n =
   let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy false in
   let nt = num_twiddles n in
 
-  let svstride = either_stride (!uvstride) (C.SVar vstride)
-  and sistride = either_stride (!uistride) (C.SVar istride) in
+  let svs = either_stride (!uvs) (C.SVar vs)
+  and srs = either_stride (!urs) (C.SVar rs) in
 
   let byw =
     if !reload_twiddle then
@@ -91,14 +88,14 @@ let generate n =
 
   let ioi = 
     locative_v_array_c n n 
-      (C.varray_subscript rioarray svstride sistride) 
-      (C.varray_subscript iioarray svstride sistride) 
-      locations 
+      (C.varray_subscript rioarray svs srs) 
+      (C.varray_subscript iioarray svs srs) 
+      locations "BUG"
   and ioo = 
     locative_v_array_c n n 
-      (C.varray_subscript rioarray svstride sistride) 
-      (C.varray_subscript iioarray svstride sistride) 
-      locations 
+      (C.varray_subscript rioarray svs srs) 
+      (C.varray_subscript iioarray svs srs) 
+      locations "BUG"
   in
 
   let lioi = load_v_array_c n n ioi in
@@ -111,31 +108,36 @@ let generate n =
   let odag = store_v_array_c n n ioo (transpose output) in
   let annot = standard_optimizer odag in
 
+  let vm = CVar m and vmb = CVar mb and vme = CVar me in
+
   let body = Block (
-    [Decl ("INT", i)],
-    [For (Expr_assign (CVar i, CVar m),
-	  Binop (" > ", CVar i, Integer 0),
+    [Decl ("INT", m)],
+    [For (list_to_comma
+	    [Expr_assign (vm, vmb);
+	     Expr_assign (CVar twarray, 
+			  CPlus [CVar twarray; 
+				 ctimes (vmb, Integer nt)])],
+	  Binop (" < ", vm, vme),
 	  list_to_comma 
-	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
-	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; CVar dist]);
-	     Expr_assign (CVar iioarray, CPlus [CVar iioarray; CVar dist]);
+	    [Expr_assign (vm, CPlus [vm; Integer 1]);
+	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; CVar ms]);
+	     Expr_assign (CVar iioarray, CPlus [CVar iioarray; CVar ms]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; Integer nt]);
-	     make_volatile_stride (CVar istride);
-	     make_volatile_stride (CVar vstride)
+	     make_volatile_stride (CVar rs);
+	     make_volatile_stride (CVar vs)
 	   ],
-	  Asch annot);
-     Return (CVar twarray)
-   ]) in
+	  Asch annot)]) in
 
   let tree = 
-    Fcn (("static " ^ C.constrealtypep), name,
+    Fcn (("static void"), name,
 	 [Decl (C.realtypep, rioarray);
 	  Decl (C.realtypep, iioarray);
 	  Decl (C.constrealtypep, twarray);
-	  Decl (C.stridetype, istride);
-	  Decl (C.stridetype, vstride);
-	  Decl ("INT", m);
-	  Decl ("INT", dist)],
+	  Decl (C.stridetype, rs);
+	  Decl (C.stridetype, vs);
+	  Decl ("INT", mb);
+	  Decl ("INT", me);
+	  Decl ("INT", ms)],
          add_constants body)
   in
   let twinstr = 
@@ -146,8 +148,8 @@ let generate n =
     Printf.sprintf
       "static const ct_desc desc = {%d, \"%s\", twinstr, &GENUS, %s, %s, %s, %s};\n\n"
       n name (flops_of tree) 
-      (stride_to_solverparm !uistride) (stride_to_solverparm !uvstride)
-      (stride_to_solverparm !udist) 
+      (stride_to_solverparm !urs) (stride_to_solverparm !uvs)
+      (stride_to_solverparm !ums) 
 
   and register = 
     match !ditdif with

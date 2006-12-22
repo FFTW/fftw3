@@ -59,6 +59,15 @@ endif
 
 paranoid-check: bench$(EXEEXT)
 if SMP
+	perl -w $(srcdir)/check.pl -a --nthreads=10 --paranoid `pwd`/bench
+	perl -w $(srcdir)/check.pl -a --nthreads=7 --paranoid `pwd`/bench
+	perl -w $(srcdir)/check.pl -a --nthreads=3 --paranoid `pwd`/bench
+	perl -w $(srcdir)/check.pl -a --nthreads=2 --paranoid `pwd`/bench
+endif
+	perl -w $(srcdir)/check.pl -a --paranoid `pwd`/bench
+
+exhaustive-check: bench$(EXEEXT)
+if SMP
 	perl -w $(srcdir)/check.pl -a --exhaustive --nthreads=10 --paranoid `pwd`/bench
 	perl -w $(srcdir)/check.pl -a --exhaustive --nthreads=7 --paranoid `pwd`/bench
 	perl -w $(srcdir)/check.pl -a --exhaustive --nthreads=3 --paranoid `pwd`/bench

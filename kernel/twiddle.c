@@ -250,17 +250,3 @@ void X(twiddle_awake)(enum wakefulness wakefulness, twid **pp,
 	      break;
      }
 }
-
-/* return a pointer to twiddles (0 if none) starting at mstart out of m */
-const R *X(twiddle_shift)(const twid *p, INT mstart)
-{
-     if (p) {
-	  INT ntwiddle, vl;
-
-	  ntwiddle = twlen0(p->r, p->instr, &vl);
-	  A((mstart % vl) == 0);
-	  return (p->W + (mstart / vl) * ntwiddle);
-     } else {
-	  return 0;
-     }
-}

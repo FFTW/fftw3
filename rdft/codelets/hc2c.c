@@ -22,11 +22,11 @@
 #include "hc2cf.h"
 
 static int okp(const R *Rp, const R *Ip, const R *Rm, const R *Im, 
-	       INT rs, INT m, INT ms, 
+	       INT rs, INT mb, INT me, INT ms, 
 	       const planner *plnr)
 {
      UNUSED(Rp); UNUSED(Ip); UNUSED(Rm); UNUSED(Im);
-     UNUSED(rs); UNUSED(m); UNUSED(ms); UNUSED(plnr);
+     UNUSED(rs); UNUSED(mb); UNUSED(me); UNUSED(ms); UNUSED(plnr);
 
      return 1;
 }

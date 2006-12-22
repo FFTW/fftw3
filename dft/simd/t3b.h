@@ -27,6 +27,7 @@
 
 #define VTW VTW3
 #define TWVL TWVL3
+#define LDW(x) LDA(x, 0, 0) /* load twiddle factor */
 
 /* same as t1b otherwise */
 #define GENUS X(dft_t1bsimd_genus)

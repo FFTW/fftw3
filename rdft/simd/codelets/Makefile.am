@@ -24,7 +24,7 @@ hc2cbdftv_10.c hc2cbdftv_12.c hc2cbdftv_16.c hc2cbdftv_32.c
 
 ###########################################################################
 SIMD_CODELETS = $(HC2CFDFTV) $(HC2CBDFTV)
-if HAVE_SIMD_2WAY
+if HAVE_SIMD
 ALL_CODELETS = $(SIMD_CODELETS)
 else
 ALL_CODELETS = 
@@ -40,7 +40,7 @@ SOLVTAB_NAME = X(solvtab_rdft_simd)
 include $(top_srcdir)/support/Makefile.codelets
 
 if MAINTAINER_MODE
-FLAGS_HC2C=-simd $(FLAGS_COMMON) -pipeline-latency 8 -trivial-stores -variables 32 
+FLAGS_HC2C=-simd $(FLAGS_COMMON) -pipeline-latency 8 -trivial-stores -variables 32 -no-generate-bytw
 
 hc2cfdftv_%.c:  $(CODELET_DEPS) $(GEN_HC2CDFT_C)
 	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT_C) $(FLAGS_HC2C) -n $* -dit -name hc2cfdftv_$* -include "hc2cfv.h") | $(ADD_DATE) | $(INDENT) >$@

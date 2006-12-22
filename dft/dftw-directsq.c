@@ -32,8 +32,7 @@ typedef struct {
      kdftwsq k;
      INT r;
      stride rs, vs;
-     INT m, ms, v, mstart, mcount;
-     const R *tdW;
+     INT m, ms, v, mb, me;
      twid *td;
      const S *slv;
 } P;
@@ -42,7 +41,7 @@ typedef struct {
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     ego->k(rio, iio, ego->tdW, ego->rs, ego->vs, ego->mcount, ego->ms);
+     ego->k(rio, iio, ego->td->W, ego->rs, ego->vs, ego->mb, ego->me, ego->ms);
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)
@@ -51,7 +50,6 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 
      X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw,
 		      ego->r * ego->m, ego->r, ego->m);
-     ego->tdW = X(twiddle_shift)(ego->td, ego->mstart);
 }
 
 static void destroy(plan *ego_)
@@ -125,13 +123,12 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->rs = X(mkstride)(r, irs);
      pln->vs = X(mkstride)(v, ivs);
      pln->td = 0;
-     pln->tdW = 0;
      pln->r = r;
      pln->m = m;
      pln->ms = ms;
      pln->v = v;
-     pln->mstart = mstart;
-     pln->mcount = mcount;
+     pln->mb = mstart;
+     pln->me = mstart + mcount;
      pln->slv = ego;
 
      X(ops_zero)(&pln->super.super.ops);

@@ -18,22 +18,17 @@ libbench2 . tests mpi doc tools
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in m4
 
 if HAVE_SIMD
-SIMD_LIBS=						\
-	simd/libsimd.la					\
-	simd/nonportable/libsimd_nonportable.la		\
-	dft/simd/libdft_simd.la				\
-	dft/simd/codelets/libdft_codelets_simd.la
+SIMD_LIBS=							\
+	simd/libsimd.la						\
+	simd/nonportable/libsimd_nonportable.la			\
+	dft/simd/libdft_simd.la					\
+	dft/simd/codelets/libdft_codelets_simd.la		\
+	rdft/simd/librdft_simd.la				\
+	rdft/simd/codelets/librdft_simd_codelets.la	
 else
 SIMD_LIBS=
 endif
 
-if HAVE_SIMD_2WAY
-SIMD_2WAY_LIBS=						\
-	rdft/simd/librdft_simd.la			\
-	rdft/simd/codelets/librdft_simd_codelets.la	
-else
-SIMD_2WAY_LIBS=
-endif
 
 if SMP
 if COMBINED_THREADS
@@ -55,7 +50,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =				\
 	rdft/codelets/r2r/librdft_codelets_r2r.la		\
 	reodft/libreodft.la					\
 	api/libapi.la						\
-        $(SIMD_LIBS) $(SIMD_2WAY_LIBS) $(COMBINED_THREADLIBS)
+        $(SIMD_LIBS) $(COMBINED_THREADLIBS)
 
 libfftw3@PREC_SUFFIX@_la_LDFLAGS = -no-undefined -version-info @SHARED_VERSION_INFO@
 

@@ -25,5 +25,4 @@ val realtype : string
 val realtypep : string
 val constrealtype : string
 val constrealtypep : string
-val ivs : string ref
-val ovs : string ref
+

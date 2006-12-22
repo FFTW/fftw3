@@ -293,4 +293,8 @@ static inline V BYTWJ2(const R *t, V sr)
   {TW_SIN, 0, x}, {TW_SIN, 1, x}, {TW_SIN, 2, x}, {TW_SIN, 3, x}
 #define TWVLS (2 * VL)
 
+/* twiddle storage for hc2cdftv codelets */
+#define VTWHC2CDFTV(x) {TW_CEXP, 1, x}, {TW_CEXP, 2, x}
+#define TWVLHC2CDFTV (VL)
+
 #endif /* __SSE__ */

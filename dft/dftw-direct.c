@@ -33,9 +33,8 @@ typedef struct {
      kdftw k;
      INT r;
      stride rs;
-     INT m, ms, v, vs, mstart, mcount;
-     stride bufstride;
-     const R *tdW;
+     INT m, ms, v, vs, mb, me;
+     stride brs;
      twid *td;
      const S *slv;
 } P;
@@ -47,27 +46,28 @@ typedef struct {
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     INT i, v = ego->v, ms = ego->ms, vs = ego->vs, mcount = ego->mcount;
-     const R *W = ego->tdW;
+     INT i, v = ego->v, vs = ego->vs;
      ASSERT_ALIGNED_DOUBLE;
      for (i = 0; i < v; ++i)
-	  ego->k(rio + i * vs, iio + i * vs, W, ego->rs, mcount, ms);
+	  ego->k(rio + i * vs, iio + i * vs, ego->td->W, ego->rs, 
+		 ego->mb, ego->me, ego->ms);
 }
 
 /*************************************************************
   Buffered code
  *************************************************************/
-static const R *dobatch(kdftw k, R *rA, R *iA, const R *W, stride ios,
-			INT dist, INT r, INT batchsz, R *buf, stride bufstride)
+static void dobatch(kdftw k, R *rA, R *iA, const R *W, 
+		    INT r, INT rs,
+		    INT mb, INT me, INT ms,
+		    R *buf, stride brs)
 {
-     X(cpy2d_pair_ci)(rA, iA, buf, buf + 1,
-		      r, WS(ios, 1), WS(bufstride, 1),
-		      batchsz, dist, 2);
-     W = k(buf, buf + 1, W, bufstride, batchsz, 2);
-     X(cpy2d_pair_co)(buf, buf + 1, rA, iA,
-		      r, WS(bufstride, 1), WS(ios, 1),
-		      batchsz, 2, dist);
-     return W;
+     X(cpy2d_pair_ci)(rA + mb * ms, iA + mb * ms, buf, buf + 1,
+		      r, rs, WS(brs, 1),
+		      me - mb, ms, 2);
+     k(buf, buf + 1, W, brs, mb, me, 2);
+     X(cpy2d_pair_co)(buf, buf + 1, rA + mb * ms, iA + mb * ms,
+		      r, WS(brs, 1), rs,
+		      me - mb, 2, ms);
 }
 
 /* must be even for SIMD alignment; should not be 2^k to avoid
@@ -84,25 +84,22 @@ static INT compute_batchsize(INT radix)
 static void apply_buf(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     INT i, j, mcount = ego->mcount, v = ego->v, r = ego->r;
+     INT i, j, v = ego->v, r = ego->r;
      INT batchsz = compute_batchsize(r);
      R *buf;
+     INT mb = ego->mb, me = ego->me;
 
      STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
 
-     for (i = 0; i < v; ++i) {
-	  R *rA = rio + i * ego->vs, *iA = iio + i * ego->vs;
-	  const R *W = ego->tdW;
+     for (i = 0; i < v; ++i, rio += ego->vs, iio += ego->vs) {
+	  for (j = mb; j < me - batchsz; j += batchsz) 
+	       dobatch(ego->k, rio, iio, ego->td->W,
+		       ego->r, WS(ego->rs, 1), j, j + batchsz, ego->ms,
+		       buf, ego->brs);
 
-	  for (j = 0; j < mcount - batchsz; j += batchsz) {
-	       W = dobatch(ego->k, rA, iA, W, ego->rs, ego->ms, ego->r,
-			   batchsz, buf, ego->bufstride);
-	       rA += ego->ms * batchsz;
-	       iA += ego->ms * batchsz;
-	  }
-
-	  dobatch(ego->k, rA, iA, W, ego->rs, ego->ms, ego->r, mcount - j,
-		  buf, ego->bufstride);
+	  dobatch(ego->k, rio, iio, ego->td->W,
+		  ego->r, WS(ego->rs, 1), j, me, ego->ms,
+		  buf, ego->brs);
      }
 
      STACK_FREE(buf);
@@ -117,13 +114,12 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 
      X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw,
 		      ego->r * ego->m, ego->r, ego->m);
-     ego->tdW = X(twiddle_shift)(ego->td, ego->mstart);
 }
 
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
-     X(stride_destroy)(ego->bufstride);
+     X(stride_destroy)(ego->brs);
      X(stride_destroy)(ego->rs);
 }
 
@@ -252,16 +248,15 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->k = ego->k;
      pln->rs = X(mkstride)(r, irs);
      pln->td = 0;
-     pln->tdW = 0;
      pln->r = r;
      pln->m = m;
      pln->ms = ms;
      pln->v = v;
      pln->vs = ivs;
-     pln->mstart = mstart;
-     pln->mcount = mcount;
+     pln->mb = mstart;
+     pln->me = mstart + mcount;
      pln->slv = ego;
-     pln->bufstride = X(mkstride)(r, 2 * compute_batchsize(r));
+     pln->brs = X(mkstride)(r, 2 * compute_batchsize(r));
 
      X(ops_zero)(&pln->super.super.ops);
      X(ops_madd2)(v * (mcount/e->genus->vl), &e->ops, &pln->super.super.ops);

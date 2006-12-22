@@ -28,8 +28,8 @@ type ditdif = DIT | DIF
 let ditdif = ref DIT
 let usage = "Usage: " ^ Sys.argv.(0) ^ " -n <number> [ -dit | -dif ]"
 
-let uiostride = ref Stride_variable
-let udist = ref Stride_variable
+let urs = ref Stride_variable
+let ums = ref Stride_variable
 
 let speclist = [
   "-dit",
@@ -40,23 +40,21 @@ let speclist = [
   Arg.Unit(fun () -> ditdif := DIF),
   " generate a DIF codelet";
 
-  "-with-iostride",
-  Arg.String(fun x -> uiostride := arg_to_stride x),
+  "-with-rs",
+  Arg.String(fun x -> urs := arg_to_stride x),
   " specialize for given i/o stride";
 
-  "-with-dist",
-  Arg.String(fun x -> udist := arg_to_stride x),
-  " specialize for given dist"
+  "-with-ms",
+  Arg.String(fun x -> ums := arg_to_stride x),
+  " specialize for given ms"
 ]
 
 let generate n =
   let rioarray = "ri"
   and iioarray = "ii"
-  and iostride = "ios"
+  and rs = "rs"
   and twarray = "W"
-  and i = "i" 
-  and m = "m"
-  and dist = "dist" in
+  and m = "m" and mb = "mb" and me = "me" and ms = "ms" in
 
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name 
@@ -68,21 +66,20 @@ let generate n =
 
   let byw = bytwiddle n sign (twiddle_array nt twarray) in
 
-  let viostride = either_stride (!uiostride) (C.SVar iostride) in
-  let _ = Simd.ovs := stride_to_string "dist" !udist in
-  let _ = Simd.ivs := stride_to_string "dist" !udist in
+  let vrs = either_stride (!urs) (C.SVar rs) in
+  let sms = stride_to_string "ms" !ums in
 
   let locations = unique_array_c n in
   let iloc = 
     locative_array_c n 
-      (C.array_subscript rioarray viostride)
-      (C.array_subscript iioarray viostride)
-      locations
+      (C.array_subscript rioarray vrs)
+      (C.array_subscript iioarray vrs)
+      locations sms
   and oloc = 
     locative_array_c n 
-      (C.array_subscript rioarray viostride)
-      (C.array_subscript iioarray viostride)
-      locations 
+      (C.array_subscript rioarray vrs)
+      (C.array_subscript iioarray vrs)
+      locations sms
   in
   let liloc = load_array_c n iloc in
   let output =
@@ -93,34 +90,39 @@ let generate n =
   let odag = store_array_c n oloc output in
   let annot = standard_optimizer odag in
 
+  let vm = CVar m and vmb = CVar mb and vme = CVar me in
+
   let body = Block (
-    [Decl ("INT", i)],
-    [For (Expr_assign (CVar i, CVar m),
-	  Binop (" > ", CVar i, Integer 0),
+    [Decl ("INT", m)],
+    [For (list_to_comma
+	    [Expr_assign (vm, vmb);
+	     Expr_assign (CVar twarray, 
+			  CPlus [CVar twarray; 
+				 ctimes (vmb, Integer nt)])],
+	  Binop (" < ", vm, vme),
 	  list_to_comma 
-	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (byvl (Integer 1))]);
+	    [Expr_assign (vm, CPlus [vm; byvl (Integer 1)]);
 	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; 
-						byvl (CVar !Simd.ivs)]);
+						byvl (CVar sms)]);
 	     Expr_assign (CVar iioarray, CPlus [CVar iioarray; 
-						byvl (CVar !Simd.ivs)]);
+						byvl (CVar sms)]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
 					       byvl (Integer nt)]);
-	     make_volatile_stride (CVar iostride)
-	   ],
-	  Asch annot);
-     Return (CVar twarray)
-   ])
+	     make_volatile_stride (CVar rs)
+	    ],
+	  Asch annot)])
   in
 
   let tree = 
-    Fcn (((if !Magic.standalone then "" else "static ") ^ C.constrealtypep),
+    Fcn (((if !Magic.standalone then "" else "static ") ^ "void"),
 	 ename,
 	 [Decl (C.realtypep, rioarray);
 	  Decl (C.realtypep, iioarray);
 	  Decl (C.constrealtypep, twarray);
-	  Decl (C.stridetype, iostride);
-	  Decl ("INT", m);
-	  Decl ("INT", dist)],
+	  Decl (C.stridetype, rs);
+	  Decl ("INT", mb);
+	  Decl ("INT", me);
+	  Decl ("INT", ms)],
          add_constants body)
   in
   let twinstr = 
@@ -130,8 +132,8 @@ let generate n =
     Printf.sprintf
       "static const ct_desc desc = {%d, \"%s\", twinstr, &GENUS, %s, %s, %s, %s};\n\n"
       n name (flops_of tree) 
-      (stride_to_solverparm !uiostride) "0"
-      (stride_to_solverparm !udist) 
+      (stride_to_solverparm !urs) "0"
+      (stride_to_solverparm !ums) 
   and register = 
     match !ditdif with
     | DIT -> "X(kdft_dit_register)"

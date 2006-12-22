@@ -150,8 +150,8 @@ let generate n mode =
   and vostride = either_stride (!uostride) (C.SVar ostride)
   in
 
-  let _ = Simd.ovs := stride_to_string "ovs" !uovstride in
-  let _ = Simd.ivs := stride_to_string "ivs" !uivstride in
+  let sovs = stride_to_string "ovs" !uovstride in
+  let sivs = stride_to_string "ivs" !uivstride in
 
   let (transform, load_input, store_output, si1,si2,so1,so2) = match mode with
   | RDFT -> Trig.rdft sign, load_array_r, store_array_hc, -1,-1,-1,-1
@@ -172,7 +172,7 @@ let generate n mode =
   let input = locative_array_c n 
       (C.array_subscript iarray vistride)
       (C.array_subscript "BUG" vistride)
-      locations in
+      locations sivs in
   let output = rescale sqrt_half so1 so2
       ((Complex.times (Complex.inverse_int_sqrt !normsqr))
        @@ (transform n (rescale sqrt_two si1 si2 (load_array_c n input)))) in
@@ -180,7 +180,7 @@ let generate n mode =
     locative_array_c n 
       (C.array_subscript oarray vostride)
       (C.array_subscript "BUG" vostride)
-      locations in
+      locations sovs in
   let odag = store_output n oloc output in
   let annot = standard_optimizer odag in
 
@@ -190,8 +190,8 @@ let generate n mode =
 	  Binop (" > ", CVar i, Integer 0),
 	  list_to_comma 
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
-	     Expr_assign (CVar iarray, CPlus [CVar iarray; CVar !Simd.ivs]);
-	     Expr_assign (CVar oarray, CPlus [CVar oarray; CVar !Simd.ovs]);
+	     Expr_assign (CVar iarray, CPlus [CVar iarray; CVar sivs]);
+	     Expr_assign (CVar oarray, CPlus [CVar oarray; CVar sovs]);
 	     make_volatile_stride (CVar istride);
 	     make_volatile_stride (CVar ostride)
 	   ],

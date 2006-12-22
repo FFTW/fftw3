@@ -21,18 +21,19 @@
 #include "codelet-rdft.h"
 #include "hc2cfv.h"
 
-#if HAVE_SIMD_2WAY
+#if HAVE_SIMD
 static int okp(const R *Rp, const R *Ip, const R *Rm, const R *Im, 
-	       INT rs, INT m, INT ms, 
+	       INT rs, INT mb, INT me, INT ms, 
 	       const planner *plnr)
 {
      return (RIGHT_CPU()
 	     && !NO_SIMDP(plnr)
-	     && SIMD_STRIDE_OKA(rs)
-	     && SIMD_VSTRIDE_OKA(ms)
-             && (m % VL) == 0
-	     && ALIGNEDA(Rp)
-	     && ALIGNEDA(Rm)
+	     && SIMD_STRIDE_OK(rs)
+	     && SIMD_VSTRIDE_OK(ms)
+             && ((me - mb) % VL) == 0
+             && ((mb - 1) % VL) == 0 /* twiddle factors alignment */
+	     && ALIGNED(Rp)
+	     && ALIGNED(Rm)
 	     && Ip == Rp + 1
 	     && Im == Rm + 1);
 }

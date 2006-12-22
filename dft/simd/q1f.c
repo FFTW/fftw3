@@ -24,22 +24,22 @@
 #if HAVE_SIMD
 static int okp(const ct_desc *d,
 	       const R *rio, const R *iio, 
-	       INT ios, INT vs, INT m, INT mb, INT me, INT dist,
+	       INT rs, INT vs, INT m, INT mb, INT me, INT ms,
 	       const planner *plnr)
 {
      return (RIGHT_CPU()
              && ALIGNED(rio)
 	     && !NO_SIMDP(plnr)
-	     && SIMD_STRIDE_OK(ios)
+	     && SIMD_STRIDE_OK(rs)
 	     && SIMD_STRIDE_OK(vs)
-	     && SIMD_VSTRIDE_OK(dist)
+	     && SIMD_VSTRIDE_OK(ms)
 	     && iio == rio + 1
              && (m % VL) == 0
              && (mb % VL) == 0
              && (me % VL) == 0
-	     && (!d->s1 || (d->s1 == ios))
-	     && (!d->s2 || (d->s2 == vs))
-	     && (!d->dist || (d->dist == dist))
+	     && (!d->rs || (d->rs == rs))
+	     && (!d->vs || (d->vs == vs))
+	     && (!d->ms || (d->ms == ms))
 	  );
 }
 const ct_genus GENUS = { okp, VL };

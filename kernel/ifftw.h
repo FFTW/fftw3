@@ -90,12 +90,6 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 #define HAVE_SIMD 0
 #endif
 
-#if defined(HAVE_SSE2)
-#define HAVE_SIMD_2WAY 1
-#else
-#define HAVE_SIMD_2WAY 0
-#endif
-
 /* forward declarations */
 typedef struct problem_s problem;
 typedef struct plan_s plan;
@@ -828,7 +822,6 @@ typedef struct twid_s {
 INT X(twiddle_length)(INT r, const tw_instr *p);
 void X(twiddle_awake)(enum wakefulness wakefulness,
 		      twid **pp, const tw_instr *instr, INT n, INT r, INT m);
-const R *X(twiddle_shift)(const twid *p, INT mstart);
 
 /*-----------------------------------------------------------------------*/
 /* trig.c */

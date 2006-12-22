@@ -33,20 +33,20 @@ let unique_v_array_c veclen n =
   array veclen (fun _ ->
     unique_array_c n)
 
-let locative_array_c n rarr iarr loc = 
+let locative_array_c n rarr iarr loc vs = 
   array n (fun i -> 
     let klass = Unique.make () in
     let (rloc, iloc) = loc i in
-    (Variable.make_locative rloc klass rarr i,
-     Variable.make_locative iloc klass iarr i))
+    (Variable.make_locative rloc klass rarr i vs,
+     Variable.make_locative iloc klass iarr i vs))
 
-let locative_v_array_c veclen n rarr iarr loc = 
+let locative_v_array_c veclen n rarr iarr loc vs = 
   array veclen (fun v ->
     array n (fun i -> 
       let klass = Unique.make () in
       let (rloc, iloc) = loc v i in
-      (Variable.make_locative rloc klass (rarr v) i,
-       Variable.make_locative iloc klass (iarr v) i)))
+      (Variable.make_locative rloc klass (rarr v) i vs,
+       Variable.make_locative iloc klass (iarr v) i vs)))
 
 let temporary_array n = 
   array n (fun i -> Variable.make_temporary ())

@@ -57,9 +57,7 @@ let shuffle_eo fe fo i = if i mod 2 == 0 then fe (i/2) else fo ((i-1)/2)
 let generate n =
   let rs = "rs"
   and twarray = "W"
-  and i = "i" 
-  and m = "m" 
-  and ms = "ms"
+  and m = "m" and mb = "mb" and me = "me" and ms = "ms"
 
   (* the array names are from the point of view of the complex array
      (output in R2C, input in C2R) *)
@@ -73,7 +71,8 @@ let generate n =
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name 
   and byvl x = choose_simd x (ctimes (CVar "VL", x)) 
-  and bytwvl x = choose_simd x (ctimes (CVar "TWVL", x)) in
+  and bytwvl x = choose_simd x (ctimes (CVar "TWVL", x)) 
+  and bytwvl_vl x = choose_simd x (ctimes (CVar "(TWVL/VL)", x)) in
 
   let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy true in
   let nt = num_twiddles n in
@@ -81,8 +80,8 @@ let generate n =
   let byw = bytwiddle n sign (twiddle_array nt twarray) in
 
   let vrs = either_stride (!urs) (C.SVar rs) in
-  let _ = Simd.ovs := stride_to_string "ms" !ums in
-  let _ = Simd.ivs := stride_to_string "ms" !ums in
+  let sms = stride_to_string "ms" !ums in
+  let msms = "-" ^ sms in
 
   (* assume a single location.  No point in doing alias analysis *)
   let the_location = (Unique.make (), Unique.make ()) in
@@ -91,19 +90,19 @@ let generate n =
   let rlocp = (locative_array_c n 
 		 (C.array_subscript arp vrs)
 		 (C.array_subscript aip vrs)
-		 locations )
+		 locations sms)
   and rlocm = (locative_array_c n 
 		 (C.array_subscript arm vrs)
 		 (C.array_subscript aim vrs)
-		 locations)
+		 locations msms)
   and clocp = (locative_array_c n 
 		 (C.array_subscript arp vrs)
 		 (C.array_subscript aip vrs)
-		 locations)
+		 locations sms)
   and clocm = (locative_array_c n 
 		 (C.array_subscript arm vrs)
 		 (C.array_subscript aim vrs)
-		 locations)
+		 locations msms)
   in
   let rloc i = if i mod 2 == 0 then rlocp (i/2) else rlocm ((i-1)/2)
   and cloc i = if i < n - i then clocp i else clocm (n-1-i)
@@ -148,19 +147,24 @@ let generate n =
 	  standard_optimizer odag 
   in
 
-  let vms = CVar !Simd.ivs 
+  let vms = CVar sms 
   and varp = CVar arp
   and vaip = CVar aip
   and varm = CVar arm
   and vaim = CVar aim
-  and vi = CVar i  and vm = CVar m 
+  and vm = CVar m and vmb = CVar mb and vme = CVar me 
   in
   let body = Block (
-    [Decl ("INT", i)],
-    [For (Expr_assign (vi, vm),
-	  Binop (" > ", vi, Integer 0),
+    [Decl ("INT", m)],
+    [For (list_to_comma
+	    [Expr_assign (vm, vmb);
+	     Expr_assign (CVar twarray, 
+			  CPlus [CVar twarray; 
+				 ctimes (vmb, 
+					 bytwvl_vl (Integer nt))])],
+	  Binop (" < ", vm, vme),
 	  list_to_comma 
-	    [Expr_assign (vi, CPlus [vi; CUminus (byvl (Integer 1))]);
+	    [Expr_assign (vm, CPlus [vm; byvl (Integer 1)]);
 	     Expr_assign (varp, CPlus [varp; byvl vms]);
 	     Expr_assign (vaip, CPlus [vaip; byvl vms]);
 	     Expr_assign (varm, CPlus [varm; CUminus (byvl vms)]);
@@ -169,20 +173,20 @@ let generate n =
 					       bytwvl (Integer nt)]);
 	     make_volatile_stride (CVar rs)
 	   ],
-	  Asch asch);
-     Return (CVar twarray)]
+	  Asch asch)]
     )
   in
 
   let tree = 
-    Fcn ("static const R *", name,
+    Fcn ("static void", name,
 	 [Decl (C.realtypep, arp);
 	  Decl (C.realtypep, aip);
 	  Decl (C.realtypep, arm);
 	  Decl (C.realtypep, aim);
 	  Decl (C.constrealtypep, twarray);
 	  Decl (C.stridetype, rs);
-	  Decl ("INT", m);
+	  Decl ("INT", mb);
+	  Decl ("INT", me);
 	  Decl ("INT", ms)],
          add_constants body)
   in

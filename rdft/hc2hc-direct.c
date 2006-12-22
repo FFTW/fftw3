@@ -33,10 +33,8 @@ typedef struct {
      khc2hc k;
      plan *cld0, *cldm; /* children for 0th and middle butterflies */
      INT r, m, v;
-     INT ms, vs;
-     INT mstart1, mcount2;
+     INT ms, vs, mb, me;
      stride rs, brs;
-     const R *tdW;
      twid *td;
      const S *slv;
 } P;
@@ -50,14 +48,14 @@ static void apply(const plan *ego_, R *IO)
      plan_rdft *cld0 = (plan_rdft *) ego->cld0;
      plan_rdft *cldm = (plan_rdft *) ego->cldm;
      INT i, m = ego->m, v = ego->v;
-     INT mstart1 = ego->mstart1, mcount2 = ego->mcount2;
+     INT mb = ego->mb, me = ego->me;
      INT ms = ego->ms, vs = ego->vs;
 
      for (i = 0; i < v; ++i, IO += vs) {
 	  cld0->apply((plan *) cld0, IO, IO);
-	  ego->k(IO + ms * mstart1, IO + (m - mstart1) * ms, 
-		 ego->tdW, ego->rs, mcount2, ms);
-	  cldm->apply((plan *) cldm, IO + ms*(m/2), IO + ms*(m/2));
+	  ego->k(IO + ms * mb, IO + (m - mb) * ms, 
+		 ego->td->W, ego->rs, mb, me, ms);
+	  cldm->apply((plan *) cldm, IO + (m/2) * ms, IO + (m/2) * ms);
      }
 }
 
@@ -75,21 +73,21 @@ static INT compute_batchsize(INT radix)
      return (radix + 2);
 }
 
-static const R *doit(khc2hc k, R *Ap, R *Am, const R *W, INT rs, INT ms,
-                     INT r, INT batchsz, R *bufp, stride brs)
+static void dobatch(khc2hc k, R *IOp, R *IOm, const R *W, 
+		    INT r, INT rs,
+		    INT mb, INT me, INT ms,
+		    R *bufp, stride brs)
 {
      INT b = WS(brs, 1);
      R *bufm = bufp + b - 1;
 
-     X(cpy2d_ci)(Ap, bufp, r, rs, b, batchsz,  ms,  1, 1);
-     X(cpy2d_ci)(Am, bufm, r, rs, b, batchsz, -ms, -1, 1);
+     X(cpy2d_ci)(IOp + mb * ms, bufp, r, rs, b, me - mb,  ms,  1, 1);
+     X(cpy2d_ci)(IOm - mb * ms, bufm, r, rs, b, me - mb, -ms, -1, 1);
 
-     W = k(bufp, bufm, W, brs, batchsz, 1);
+     k(bufp, bufm, W, brs, mb, me, 1);
 
-     X(cpy2d_co)(bufp, Ap, r, b, rs, batchsz,  1,  ms, 1);
-     X(cpy2d_co)(bufm, Am, r, b, rs, batchsz, -1, -ms, 1);
-
-     return W;
+     X(cpy2d_co)(bufp, IOp + mb * ms, r, b, rs, me - mb,  1,  ms, 1);
+     X(cpy2d_co)(bufm, IOm - mb * ms, r, b, rs, me - mb, -1, -ms, 1);
 }
 
 static void apply_buf(const plan *ego_, R *IO)
@@ -98,30 +96,26 @@ static void apply_buf(const plan *ego_, R *IO)
      plan_rdft *cld0 = (plan_rdft *) ego->cld0;
      plan_rdft *cldm = (plan_rdft *) ego->cldm;
      INT i, j, m = ego->m, v = ego->v, r = ego->r;
-     INT mstart1 = ego->mstart1, mcount2 = ego->mcount2;
-     INT ms = ego->ms, vs = ego->vs, rs = WS(ego->rs, 1);
+     INT mb = ego->mb, me = ego->me, ms = ego->ms;
      INT batchsz = compute_batchsize(r);
      R *buf;
 
      STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
 
-     for (i = 0; i < v; ++i, IO += vs) {
-	  R *rA, *iA;
-	  const R *W;
+     for (i = 0; i < v; ++i, IO += ego->vs) {
+	  R *IOp = IO;
+	  R *IOm = IO + m * ms;
 
 	  cld0->apply((plan *) cld0, IO, IO);
-	       
-	  rA = IO + ms * mstart1; iA = IO + (m - mstart1) * ms;
-	  W = ego->tdW;
-	  for (j = mcount2; j >= batchsz; j -= batchsz) {
-	       W = doit(ego->k, rA, iA, W, rs, ms, r, batchsz, 
-			buf, ego->brs);
-	       rA += ms * batchsz;
-	       iA -= ms * batchsz;
-	  }
-	  /* do remaining j calls, if any */
-	  if (j > 0)
-	       doit(ego->k, rA, iA, W, rs, ms, r, j, buf, ego->brs);
+
+	  for (j = mb; j < me - batchsz; j += batchsz) 	       
+	       dobatch(ego->k, IOp, IOm, ego->td->W, 
+		       r,  WS(ego->rs, 1), j, j + batchsz, ms,
+		       buf, ego->brs);
+
+	  dobatch(ego->k, IOp, IOm, ego->td->W, 
+		  r, WS(ego->rs, 1), j, me, ms,
+		  buf, ego->brs);
 
 	  cldm->apply((plan *) cldm, IO + ms * (m/2), IO + ms * (m/2));
      }
@@ -137,7 +131,6 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      X(plan_awake)(ego->cldm, wakefulness);
      X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw, 
 		      ego->r * ego->m, ego->r, (ego->m + 1) / 2);
-     ego->tdW = X(twiddle_shift)(ego->td, ego->mstart1);
 }
 
 static void destroy(plan *ego_)
@@ -232,7 +225,6 @@ static plan *mkcldw(const hc2hc_solver *ego_,
 
      pln->k = ego->k;
      pln->td = 0;
-     pln->tdW = 0;
      pln->r = r; pln->rs = X(mkstride)(r, rs);
      pln->m = m; pln->ms = ms;
      pln->v = v; pln->vs = vs;
@@ -240,17 +232,17 @@ static plan *mkcldw(const hc2hc_solver *ego_,
      pln->brs = X(mkstride)(r, 2 * compute_batchsize(r));
      pln->cld0 = cld0;
      pln->cldm = cldm;
-     pln->mstart1 = mstart + CLD0P(mstart);
-     pln->mcount2 = mcount - CLD0P(mstart) - CLDMP(m, mstart, mcount);
+     pln->mb = mstart + CLD0P(mstart);
+     pln->me = mstart + mcount - CLDMP(m, mstart, mcount);
 
      X(ops_zero)(&pln->super.super.ops);
-     X(ops_madd2)(v * (pln->mcount2 / e->genus->vl),
+     X(ops_madd2)(v * ((pln->me - pln->mb) / e->genus->vl),
 		  &e->ops, &pln->super.super.ops);
      X(ops_madd2)(v, &cld0->ops, &pln->super.super.ops);
      X(ops_madd2)(v, &cldm->ops, &pln->super.super.ops);
 
      if (ego->bufferedp) 
-	  pln->super.super.ops.other += 4 * r * pln->mcount2 * v;
+	  pln->super.super.ops.other += 4 * r * (pln->me - pln->mb) * v;
 
      return &(pln->super.super);
 

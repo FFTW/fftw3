@@ -87,26 +87,26 @@ let generate n =
   and vcsi = either_stride (!ucsi) (C.SVar csi)
   in
 
-  let _ = Simd.ovs := stride_to_string "ovs" !uovs in
-  let _ = Simd.ivs := stride_to_string "ivs" !uivs in
+  let sovs = stride_to_string "ovs" !uovs in
+  let sivs = stride_to_string "ivs" !uivs in
 
   let locations = unique_array_c n in
   let input = 
     locative_array_c n 
       (C.array_subscript acr vcsr)
       (C.array_subscript aci vcsi)
-      locations in
+      locations sivs in
   let output = transform sign n (load_array_hc n input) in
   let oloce = 
     locative_array_c n 
       (C.array_subscript ar0 vrs)
       (C.array_subscript "BUG" vrs)
-      locations 
+      locations sovs
   and oloco = 
     locative_array_c n 
       (C.array_subscript ar1 vrs)
       (C.array_subscript "BUG" vrs)
-      locations in
+      locations sovs in
   let oloc i = if i mod 2 == 0 then oloce (i/2) else oloco ((i-1)/2) in
   let odag = store_array_r n oloc output in
   let annot = standard_optimizer odag in
@@ -117,10 +117,10 @@ let generate n =
 	  Binop (" > ", CVar i, Integer 0),
 	  list_to_comma 
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
-	     Expr_assign (CVar ar0, CPlus [CVar ar0; CVar !Simd.ovs]);
-	     Expr_assign (CVar ar1, CPlus [CVar ar1; CVar !Simd.ovs]);
-	     Expr_assign (CVar acr, CPlus [CVar acr; CVar !Simd.ivs]);
-	     Expr_assign (CVar aci, CPlus [CVar aci; CVar !Simd.ivs]);
+	     Expr_assign (CVar ar0, CPlus [CVar ar0; CVar sovs]);
+	     Expr_assign (CVar ar1, CPlus [CVar ar1; CVar sovs]);
+	     Expr_assign (CVar acr, CPlus [CVar acr; CVar sivs]);
+	     Expr_assign (CVar aci, CPlus [CVar aci; CVar sivs]);
 	     make_volatile_stride (CVar rs);
 	     make_volatile_stride (CVar csr);
 	     make_volatile_stride (CVar csi)

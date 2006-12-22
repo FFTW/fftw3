@@ -27,6 +27,7 @@
 
 #define VTW VTWS
 #define TWVL TWVLS
+#define LDW(x) LDA(x, 0, 0) /* load twiddle factor */
 
 #define GENUS X(dft_tssimd_genus)
 extern const ct_genus GENUS;

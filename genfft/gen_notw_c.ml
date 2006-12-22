@@ -73,8 +73,8 @@ let generate n =
   and vostride = either_stride (!uostride) (C.SVar ostride)
   in
 
-  let _ = Simd.ovs := stride_to_string "ovs" !uovstride in
-  let _ = Simd.ivs := stride_to_string "ivs" !uivstride in
+  let sivs = stride_to_string "ivs" !uivstride in
+  let sovs = stride_to_string "ovs" !uovstride in
 
   let fft = Trig.dft_via_rdft in
 
@@ -83,13 +83,13 @@ let generate n =
     locative_array_c n 
       (C.array_subscript riarray vistride)
       (C.array_subscript "BUG" vistride)
-      locations in
+      locations sivs in
   let output = fft sign n (load_array_r n input) in
   let oloc = 
     locative_array_c n 
       (C.array_subscript roarray vostride)
       (C.array_subscript "BUG" vostride)
-      locations in
+      locations sovs in
   let list_of_buddy_stores =
     let k = !Simdmagic.store_multiple in
     if (k > 1) then
@@ -114,9 +114,9 @@ let generate n =
 	  list_to_comma 
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (byvl (Integer 1))]);
 	     Expr_assign (CVar riarray, CPlus [CVar riarray; 
-					       byvl (CVar !Simd.ivs)]);
+					       byvl (CVar sivs)]);
 	     Expr_assign (CVar roarray, CPlus [CVar roarray; 
-					       byvl (CVar !Simd.ovs)]);
+					       byvl (CVar sovs)]);
 	     make_volatile_stride (CVar istride);
 	     make_volatile_stride (CVar ostride)
 	   ],
