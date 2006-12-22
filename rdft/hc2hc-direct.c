@@ -145,6 +145,7 @@ static void destroy(plan *ego_)
      P *ego = (P *) ego_;
      X(plan_destroy_internal)(ego->cld0);
      X(plan_destroy_internal)(ego->cldm);
+     X(stride_destroy)(ego->rs);
      X(stride_destroy)(ego->brs);
 }
 
