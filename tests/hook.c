@@ -142,7 +142,7 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
 
 	      if (rnk > 0) {
 		   /* can't verify separate even/odd arrays for now */
-		   if (p->r1 != p->r0 +
+		   if (2 * (p->r1 - p->r0) !=
 		       ((p->kind == R2HC) ? 
 			p->sz->dims[rnk-1].is : p->sz->dims[rnk-1].os))
 			return bp;
@@ -171,6 +171,10 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
 	      bp->iphyssz = bp->ophyssz = 0;
 	      bp->in_place = p->r0 == p->cr;
 	      bp->sz = fftw_tensor_to_bench_tensor(p->sz);
+	      if (p->kind == R2HC)
+		   bp->sz->dims[rnk-1].is /= 2;
+	      else 
+		   bp->sz->dims[rnk-1].os /= 2;
 	      bp->vecsz = fftw_tensor_to_bench_tensor(p->vecsz);
 	      bp->k = 0;
 	      break;
