@@ -160,7 +160,7 @@ let generate n =
 	    [Expr_assign (vm, vmb);
 	     Expr_assign (CVar twarray, 
 			  CPlus [CVar twarray; 
-				 ctimes (vmb, 
+				 ctimes (CPlus [vmb; CUminus (Integer 1)],
 					 bytwvl_vl (Integer nt))])],
 	  Binop (" < ", vm, vme),
 	  list_to_comma 
