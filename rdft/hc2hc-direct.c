@@ -73,18 +73,19 @@ static INT compute_batchsize(INT radix)
      return (radix + 2);
 }
 
-static void dobatch(khc2hc k, R *IOp, R *IOm, const R *W, 
-		    INT r, INT rs,
-		    INT mb, INT me, INT ms,
-		    R *bufp, stride brs)
+static void dobatch(const P *ego, R *IOp, R *IOm,
+		    INT mb, INT me, R *bufp)
 {
-     INT b = WS(brs, 1);
+     INT b = WS(ego->brs, 1);
+     INT rs = WS(ego->rs, 1);
+     INT r = ego->r;
+     INT ms = ego->ms;
      R *bufm = bufp + b - 1;
 
      X(cpy2d_ci)(IOp + mb * ms, bufp, r, rs, b, me - mb,  ms,  1, 1);
      X(cpy2d_ci)(IOm - mb * ms, bufm, r, rs, b, me - mb, -ms, -1, 1);
 
-     k(bufp, bufm, W, brs, mb, me, 1);
+     ego->k(bufp, bufm, ego->td->W, ego->brs, mb, me, 1);
 
      X(cpy2d_co)(bufp, IOp + mb * ms, r, b, rs, me - mb,  1,  ms, 1);
      X(cpy2d_co)(bufm, IOm - mb * ms, r, b, rs, me - mb, -1, -ms, 1);
@@ -108,14 +109,10 @@ static void apply_buf(const plan *ego_, R *IO)
 
 	  cld0->apply((plan *) cld0, IO, IO);
 
-	  for (j = mb; j < me - batchsz; j += batchsz) 	       
-	       dobatch(ego->k, IOp, IOm, ego->td->W, 
-		       r,  WS(ego->rs, 1), j, j + batchsz, ms,
-		       buf, ego->brs);
+	  for (j = mb; j + batchsz < me; j += batchsz) 	       
+	       dobatch(ego, IOp, IOm, j, j + batchsz, buf);
 
-	  dobatch(ego->k, IOp, IOm, ego->td->W, 
-		  r, WS(ego->rs, 1), j, me, ms,
-		  buf, ego->brs);
+	  dobatch(ego, IOp, IOm, j, me, buf);
 
 	  cldm->apply((plan *) cldm, IO + ms * (m/2), IO + ms * (m/2));
      }
@@ -130,7 +127,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      X(plan_awake)(ego->cld0, wakefulness);
      X(plan_awake)(ego->cldm, wakefulness);
      X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw, 
-		      ego->r * ego->m, ego->r, (ego->m + 1) / 2);
+		      ego->r * ego->m, ego->r, (ego->m - 1) / 2);
 }
 
 static void destroy(plan *ego_)
