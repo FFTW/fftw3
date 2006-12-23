@@ -32,7 +32,7 @@ typedef struct {
      plan_hc2c super;
      khc2c k;
      plan *cld0, *cldm; /* children for 0th and middle butterflies */
-     INT r, m, v;
+     INT r, m, v, extra_iter;
      INT ms, vs;
      stride rs, brs;
      twid *td;
@@ -59,6 +59,34 @@ static void apply(const plan *ego_, R *cr, R *ci)
      }
 }
 
+static void apply_extra_iter(const plan *ego_, R *cr, R *ci)
+{
+     const P *ego = (const P *) ego_;
+     plan_rdft2 *cld0 = (plan_rdft2 *) ego->cld0;
+     plan_rdft2 *cldm = (plan_rdft2 *) ego->cldm;
+     INT i, m = ego->m, v = ego->v;
+     INT ms = ego->ms, vs = ego->vs;
+     INT mm = (m-1)/2;
+
+     for (i = 0; i < v; ++i, cr += vs, ci += vs) {
+	  cld0->apply((plan *) cld0, cr, ci, cr, ci);
+
+	  /* for 4-way SIMD when (m+1)/2-1 is odd: iterate over an
+	     even vector length MM-1, and then execute the last
+	     iteration as a 2-vector with vector stride 0.  The
+	     twiddle factors of the second half of the last iteration
+	     are bogus, but we only store the results of the first
+	     half. */
+	  ego->k(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+		 ego->td->W, ego->rs, 1, mm, ms);
+	  ego->k(cr + mm*ms, ci + mm*ms, cr + (m-mm)*ms, ci + (m-mm)*ms,
+		 ego->td->W, ego->rs, mm, mm+1, 0);
+	  cldm->apply((plan *) cldm, cr + (m/2)*ms, ci + (m/2)*ms, 
+		      cr + (m/2)*ms, ci + (m/2)*ms);
+     }
+
+}
+
 /*************************************************************
   Buffered code
  *************************************************************/
@@ -66,8 +94,6 @@ static void apply(const plan *ego_, R *cr, R *ci)
 /* should not be 2^k to avoid associativity conflicts */
 static INT compute_batchsize(INT radix)
 {
-     radix /= 2;
-
      /* round up to multiple of 4 */
      radix += 3;
      radix &= -4;
@@ -75,26 +101,27 @@ static INT compute_batchsize(INT radix)
      return (radix + 2);
 }
 
-static void dobatch(khc2c k, R *Rp, R *Ip, R *Rm, R *Im, const R *W, 
-		    INT r, INT rs,
-		    INT mb, INT me, INT ms, 
-		    R *bufp, stride brs)
+static void dobatch(const P *ego, R *Rp, R *Ip, R *Rm, R *Im,
+		    INT mb, INT me, INT extra_iter, R *bufp)
 {
-     INT b = WS(brs, 1);
+     INT b = WS(ego->brs, 1);
+     INT rs = WS(ego->rs, 1);
+     INT ms = ego->ms;
      R *bufm = bufp + b - 2;
 
      X(cpy2d_pair_ci)(Rp + mb * ms, Ip + mb * ms, bufp, bufp + 1,
-		      r, rs, b,
+		      ego->r / 2, rs, b,
 		      me - mb, ms, 2);
      X(cpy2d_pair_ci)(Rm - mb * ms, Im - mb * ms, bufm, bufm + 1,
-		      r, rs, b,
+		      ego->r / 2, rs, b,
 		      me - mb, -ms, -2);
-     k(bufp, bufp + 1, bufm, bufm + 1, W, brs, mb, me, 2);
+     ego->k(bufp, bufp + 1, bufm, bufm + 1, ego->td->W, 
+	    ego->brs, mb, me + extra_iter, 2);
      X(cpy2d_pair_co)(bufp, bufp + 1, Rp + mb * ms, Ip + mb * ms, 
-		      r, b, rs,
+		      ego->r / 2, b, rs,
 		      me - mb, 2, ms);
      X(cpy2d_pair_co)(bufm, bufm + 1, Rm - mb * ms, Im - mb * ms,
-		      r, b, rs,
+		      ego->r / 2, b, rs,
 		      me - mb, -2, -ms);
 }
 
@@ -108,7 +135,7 @@ static void apply_buf(const plan *ego_, R *cr, R *ci)
      R *buf;
      INT mb = 1, me = (ego->m+1) / 2;
 
-     STACK_MALLOC(R *, buf, ego->r * batchsz * 4 * sizeof(R));
+     STACK_MALLOC(R *, buf, ego->r * batchsz * 2 * sizeof(R));
 
      for (i = 0; i < v; ++i, cr += ego->vs, ci += ego->vs) {
 	  R *Rp = cr;
@@ -118,17 +145,15 @@ static void apply_buf(const plan *ego_, R *cr, R *ci)
 
 	  cld0->apply((plan *) cld0, Rp, Ip, Rp, Ip);
 
-	  for (j = mb; j < me - batchsz; j += batchsz) 
-	       dobatch(ego->k, Rp, Ip, Rm, Im, ego->td->W, 
-		       ego->r, WS(ego->rs, 1), j, j + batchsz, ms, 
-		       buf, ego->brs);
+	  for (j = mb; j + batchsz < me; j += batchsz) 
+	       dobatch(ego, Rp, Ip, Rm, Im, j, j + batchsz, 0, buf);
 
-	  dobatch(ego->k, Rp, Ip, Rm, Im, ego->td->W, 
-		  ego->r, WS(ego->rs, 1), j, me, ms, buf, ego->brs);
+	  dobatch(ego, Rp, Ip, Rm, Im, j, me, ego->extra_iter, buf);
 
 	  cldm->apply((plan *) cldm, 
 		      Rp + me * ms, Ip + me * ms,
 		      Rp + me * ms, Ip + me * ms);
+
      }
 
      STACK_FREE(buf);
@@ -143,9 +168,9 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 
      X(plan_awake)(ego->cld0, wakefulness);
      X(plan_awake)(ego->cldm, wakefulness);
-     /* m+3 instead of m+1 is a hack to cover 4-way SIMD */
      X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw, 
-		      ego->r * ego->m, ego->r, (ego->m + 3) / 2);
+		      ego->r * ego->m, ego->r, 
+		      (ego->m + 1) / 2 + ego->extra_iter + 1);
 }
 
 static void destroy(plan *ego_)
@@ -164,13 +189,15 @@ static void print(const plan *ego_, printer *p)
      const hc2c_desc *e = slv->desc;
 
      if (slv->bufferedp)
-	  p->print(p, "(hc2c-directbuf/%D-%D/%D%v \"%s\"%(%p%)%(%p%))",
-		   compute_batchsize(ego->r), ego->r,
-		   X(twiddle_length)(ego->r, e->tw), ego->v, e->nam,
+	  p->print(p, "(hc2c-directbuf/%D-%D/%D/%D%v \"%s\"%(%p%)%(%p%))",
+		   compute_batchsize(ego->r),
+		   ego->r, X(twiddle_length)(ego->r, e->tw),
+		   ego->extra_iter, ego->v, e->nam, 
 		   ego->cld0, ego->cldm);
      else
-	  p->print(p, "(hc2c-direct-%D/%D%v \"%s\"%(%p%)%(%p%))",
-		   ego->r, X(twiddle_length)(ego->r, e->tw), ego->v, e->nam,
+	  p->print(p, "(hc2c-direct-%D/%D/%D%v \"%s\"%(%p%)%(%p%))",
+		   ego->r, X(twiddle_length)(ego->r, e->tw), 
+		   ego->extra_iter, ego->v, e->nam, 
 		   ego->cld0, ego->cldm);
 }
 
@@ -179,7 +206,8 @@ static int applicable0(const S *ego, rdft_kind kind,
 		       INT m, INT ms, 
 		       INT v, INT vs,
 		       const R *cr, const R *ci,
-		       const planner *plnr)
+		       const planner *plnr,
+		       INT *extra_iter)
 {
      const hc2c_desc *e = ego->desc;
      UNUSED(v);
@@ -190,14 +218,19 @@ static int applicable0(const S *ego, rdft_kind kind,
 	  && kind == e->genus->kind
 
 	  /* first v-loop iteration */
-	  && e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
-			   rs, 1, (m+1)/2, ms, plnr)
+	  && ((*extra_iter = 0,
+	       e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+			     rs, 1, (m+1)/2, ms, plnr))
+	      ||
+	      (*extra_iter = 1,
+	       (e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+			      rs, 1, (m+1)/2-1, ms, plnr))))
 	  
 	  /* subsequent v-loop iterations */
 	  && (cr += vs, ci += vs, 1)
 
 	  && e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
-			   rs, 1, (m+1)/2, ms, plnr)
+			   rs, 1, (m+1)/2 - *extra_iter, ms, plnr)
 	  );
 }
 
@@ -206,7 +239,7 @@ static int applicable0_buf(const S *ego, rdft_kind kind,
 			   INT m, INT ms, 
 			   INT v, INT vs,
 			   const R *cr, const R *ci,
-			   const planner *plnr)
+			   const planner *plnr, INT *extra_iter)
 {
      const hc2c_desc *e = ego->desc;
      INT batchsz, brs;
@@ -225,8 +258,14 @@ static int applicable0_buf(const S *ego, rdft_kind kind,
 	  && e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
 			   brs, 1, 1+batchsz, 2, plnr)
 
-	  && e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
-			   brs, 1, 1 + (((m-1)/2) % batchsz), 2, plnr)
+	  && ((*extra_iter = 0,
+	       e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
+			     brs, 1, 1 + (((m-1)/2) % batchsz), 2, plnr))
+	      ||
+	      (*extra_iter = 1,
+	       e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
+			     brs, 1, 1 + 1 + (((m-1)/2) % batchsz), 2, plnr)))
+	      
 	  );
 }
 
@@ -235,13 +274,15 @@ static int applicable(const S *ego, rdft_kind kind,
 		      INT m, INT ms, 
 		      INT v, INT vs,
 		      R *cr, R *ci,
-		      const planner *plnr)
+		      const planner *plnr, INT *extra_iter)
 {
      if (ego->bufferedp) {
-	  if (!applicable0_buf(ego, kind, r, rs, m, ms, v, vs, cr, ci, plnr))
+	  if (!applicable0_buf(ego, kind, r, rs, m, ms, v, vs, cr, ci, plnr,
+			       extra_iter))
 	       return 0;
      } else {
-	  if (!applicable0(ego, kind, r, rs, m, ms, v, vs, cr, ci, plnr))
+	  if (!applicable0(ego, kind, r, rs, m, ms, v, vs, cr, ci, plnr,
+			   extra_iter))
 	       return 0;
      }
 
@@ -264,12 +305,14 @@ static plan *mkcldw(const hc2c_solver *ego_, rdft_kind kind,
      const hc2c_desc *e = ego->desc;
      plan *cld0 = 0, *cldm = 0;
      INT imid = (m / 2) * ms;
+     INT extra_iter;
 
      static const plan_adt padt = {
 	  0, awake, print, destroy
      };
 
-     if (!applicable(ego, kind, r, rs, m, ms, v, vs, cr, ci, plnr))
+     if (!applicable(ego, kind, r, rs, m, ms, v, vs, cr, ci, plnr, 
+		     &extra_iter))
           return (plan *)0;
 
      cld0 = X(mkplan_d)(
@@ -288,7 +331,10 @@ static plan *mkcldw(const hc2c_solver *ego_, rdft_kind kind,
 			       kind == R2HC ? R2HCII : HC2RIII));
      if (!cldm) goto nada;
 
-     pln = MKPLAN_HC2C(P, &padt, ego->bufferedp ? apply_buf : apply);
+     if (ego->bufferedp)
+	  pln = MKPLAN_HC2C(P, &padt, apply_buf);
+     else
+	  pln = MKPLAN_HC2C(P, &padt, extra_iter ? apply_extra_iter : apply);
 
      pln->k = ego->k;
      pln->td = 0;
@@ -299,6 +345,7 @@ static plan *mkcldw(const hc2c_solver *ego_, rdft_kind kind,
      pln->brs = X(mkstride)(r, 4 * compute_batchsize(r));
      pln->cld0 = cld0;
      pln->cldm = cldm;
+     pln->extra_iter = extra_iter;
 
      X(ops_zero)(&pln->super.super.ops);
      X(ops_madd2)(v * (((m - 1) / 2) / e->genus->vl),
@@ -306,10 +353,8 @@ static plan *mkcldw(const hc2c_solver *ego_, rdft_kind kind,
      X(ops_madd2)(v, &cld0->ops, &pln->super.super.ops);
      X(ops_madd2)(v, &cldm->ops, &pln->super.super.ops);
 
-     if (ego->bufferedp) {
-	  /* 8 load/stores * N * V */
-	  pln->super.super.ops.other += 8 * r * m * v;
-     }
+     if (ego->bufferedp) 
+	  pln->super.super.ops.other += 4 * r * m * v;
 
      return &(pln->super.super);
 

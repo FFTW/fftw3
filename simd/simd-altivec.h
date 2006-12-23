@@ -104,8 +104,10 @@ static inline void STA(R *x, V v, INT ovs, R *aligned_like)
 
 static inline void ST(R *x, V v, INT ovs, R *aligned_like) 
 {
-     STH(x, v, aligned_like);
+     /* WARNING: the extra_iter hack depends upon STH occurring after
+	STL */
      STL(x, v, ovs, aligned_like);
+     STH(x, v, aligned_like);
 }
 
 #define STM2(x, v, ovs, aligned_like) /* no-op */

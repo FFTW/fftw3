@@ -106,6 +106,22 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      ego->k(ri, ii, ro, io, ego->is, ego->os, ego->vl, ego->ivs, ego->ovs);
 }
 
+static void apply_extra_iter(const plan *ego_, R *ri, R *ii, R *ro, R *io)
+{
+     const P *ego = (const P *) ego_;
+     ASSERT_ALIGNED_DOUBLE;
+     INT vl = ego->vl;
+
+     /* for 4-way SIMD when VL is odd: iterate over an
+	even vector length VL, and then execute the last
+	iteration as a 2-vector with vector stride 0. */
+     ego->k(ri, ii, ro, io, ego->is, ego->os, vl - 1, ego->ivs, ego->ovs);
+
+     ego->k(ri + (vl - 1) * ego->ivs, ii + (vl - 1) * ego->ivs,
+	    ro + (vl - 1) * ego->ovs, io + (vl - 1) * ego->ovs,
+	    ego->is, ego->os, 1, 0, 0);
+}
+
 static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
@@ -174,7 +190,7 @@ static int applicable_buf(const solver *ego_, const problem *p_,
 }
 
 static int applicable(const solver *ego_, const problem *p_,
-		      const planner *plnr)
+		      const planner *plnr, int *extra_iterp)
 {
      const S *ego = (const S *) ego_;
      const problem_dft *p = (const problem_dft *) p_;
@@ -191,9 +207,19 @@ static int applicable(const solver *ego_, const problem *p_,
 	  /* check strides etc */
 	  && X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs)
 
-	  && (d->genus->okp(d, p->ri, p->ii, p->ro, p->io,
-			    p->sz->dims[0].is, p->sz->dims[0].os,
-			    vl, ivs, ovs, plnr))
+	  && ((*extra_iterp = 0,
+	       (d->genus->okp(d, p->ri, p->ii, p->ro, p->io,
+			      p->sz->dims[0].is, p->sz->dims[0].os,
+			      vl, ivs, ovs, plnr)))
+	      ||
+	      (*extra_iterp = 1,
+	       ((d->genus->okp(d, p->ri, p->ii, p->ro, p->io,
+			       p->sz->dims[0].is, p->sz->dims[0].os,
+			       vl - 1, ivs, ovs, plnr))
+		&&
+		(d->genus->okp(d, p->ri, p->ii, p->ro, p->io,
+			       p->sz->dims[0].is, p->sz->dims[0].os,
+			       2, 0, 0, plnr)))))
 
 	  && (0
 	      /* can operate out-of-place */
@@ -226,17 +252,16 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (ego->bufferedp) {
 	  if (!applicable_buf(ego_, p_, plnr))
 	       return (plan *)0;
+	  pln = MKPLAN_DFT(P, &padt, apply_buf);
      } else {
-	  if (!applicable(ego_, p_, plnr))
+	  int extra_iterp = 0;
+	  if (!applicable(ego_, p_, plnr, &extra_iterp))
 	       return (plan *)0;
+	  pln = MKPLAN_DFT(P, &padt, extra_iterp ? apply_extra_iter : apply);
      }
 
      p = (const problem_dft *) p_;
-
-     pln = MKPLAN_DFT(P, &padt, ego->bufferedp ? apply_buf : apply);
-
      d = p->sz->dims;
-
      pln->k = ego->k;
      pln->n = d[0].n;
      pln->is = X(mkstride)(pln->n, d[0].is);

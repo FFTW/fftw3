@@ -123,8 +123,10 @@ static inline V LDA(const R *x, INT ivs, const R *aligned_like)
 static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
-     STOREL(x, v);
+     /* WARNING: the extra_iter hack depends upon STOREL occurring
+	after STOREH */
      STOREH(x + ovs, v);
+     STOREL(x, v);
 }
 
 static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
