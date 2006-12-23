@@ -147,27 +147,44 @@ static inline V FLIP_RI(V x)
      return vec_perm(x, x, (vector unsigned char)perm);
 }
 
-static inline V CHS_R(V x)
+static inline V VCONJ(V x)
 {
-     const V pmpm = VLIT(-0.0, 0.0, -0.0, 0.0);
+     const V pmpm = VLIT(0.0, -0.0, 0.0, -0.0);
      return vec_xor(x, pmpm);
 }
 
 static inline V VBYI(V x)
 {
-     return CHS_R(FLIP_RI(x));
+     return FLIP_RI(VCONJ(x));
 }
 
 static inline V VFMAI(V b, V c)
 {
-     const V pmpm = VLIT(-1.0, 1.0, -1.0, 1.0);
-     return VFMA(FLIP_RI(b), pmpm, c);
+     const V mpmp = VLIT(-1.0, 1.0, -1.0, 1.0);
+     return VFMA(FLIP_RI(b), mpmp, c);
 }
 
 static inline V VFNMSI(V b, V c)
 {
-     const V pmpm = VLIT(-1.0, 1.0, -1.0, 1.0);
-     return VFNMS(FLIP_RI(b), pmpm, c);
+     const V mpmp = VLIT(-1.0, 1.0, -1.0, 1.0);
+     return VFNMS(FLIP_RI(b), mpmp, c);
+}
+
+static inline V VFMACONJ(V b, V c)
+{
+     const V pmpm = VLIT(1.0, -1.0, 1.0, -1.0);
+     return VFMA(b, pmpm, c);
+}
+
+static inline V VFNMSCONJ(V b, V c)
+{
+     const V pmpm = VLIT(1.0, -1.0, 1.0, -1.0);
+     return VFNMS(b, pmpm, c);
+}
+
+static inline V VFMSCONJ(V b, V c)
+{
+     return VSUB(VCONJ(b), c);
 }
 
 static inline V VZMUL(V tx, V sr)
@@ -249,5 +266,9 @@ static inline V BYTWJ2(const R *t, V sr)
   {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_COS, 2, x}, {TW_COS, 3, x},	\
   {TW_SIN, 0, x}, {TW_SIN, 1, x}, {TW_SIN, 2, x}, {TW_SIN, 3, x}
 #define TWVLS (2 * VL)
+
+/* twiddle storage for hc2cdftv codelets */
+#define VTWHC2CDFTV(x) {TW_CEXP, 1, x}, {TW_CEXP, 2, x}
+#define TWVLHC2CDFTV (VL)
 
 #endif /* #ifdef __VEC__ */
