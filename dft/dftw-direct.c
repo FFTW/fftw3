@@ -46,20 +46,22 @@ typedef struct {
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     INT i, v = ego->v, vs = ego->vs;
+     INT i, v = ego->v, vs = ego->vs, mb = ego->mb, ms = ego->ms;
      ASSERT_ALIGNED_DOUBLE;
-     for (i = 0; i < v; ++i)
-	  ego->k(rio + i * vs, iio + i * vs, ego->td->W, ego->rs, 
-		 ego->mb, ego->me, ego->ms);
+     for (i = 0; i < v; ++i, rio += vs, iio += vs)
+	  ego->k(rio + mb*ms, iio + mb*ms, ego->td->W, 
+		 ego->rs, mb, ego->me, ms);
 }
 
 static void apply_extra_iter(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     INT i, v = ego->v, vs = ego->vs, mm = ego->me - 1, ms = ego->ms;
+     INT i, v = ego->v, vs = ego->vs;
+     INT mb = ego->mb, me = ego->me, mm = me - 1, ms = ego->ms;
      ASSERT_ALIGNED_DOUBLE;
      for (i = 0; i < v; ++i, rio += vs, iio += vs) {
-	  ego->k(rio, iio, ego->td->W, ego->rs, ego->mb, mm, ms);
+	  ego->k(rio + mb*ms, iio + mb*ms, ego->td->W, 
+		 ego->rs, mb, mm, ms);
 	  ego->k(rio + mm*ms, iio + mm*ms, ego->td->W, 
 		 ego->rs, mm, mm+2, 0);
      }
@@ -68,17 +70,18 @@ static void apply_extra_iter(const plan *ego_, R *rio, R *iio)
 /*************************************************************
   Buffered code
  *************************************************************/
-static void dobatch(kdftw k, R *rA, R *iA, const R *W, 
-		    INT r, INT rs,
-		    INT mb, INT me, INT ms,
-		    R *buf, stride brs)
+static void dobatch(const P *ego, R *rA, R *iA, INT mb, INT me, R *buf)
 {
-     X(cpy2d_pair_ci)(rA + mb * ms, iA + mb * ms, buf, buf + 1,
-		      r, rs, WS(brs, 1),
+     INT brs = WS(ego->brs, 1);
+     INT rs = WS(ego->rs, 1);
+     INT ms = ego->ms;
+
+     X(cpy2d_pair_ci)(rA + mb*ms, iA + mb*ms, buf, buf + 1,
+		      ego->r, rs, brs,
 		      me - mb, ms, 2);
-     k(buf, buf + 1, W, brs, mb, me, 2);
-     X(cpy2d_pair_co)(buf, buf + 1, rA + mb * ms, iA + mb * ms,
-		      r, WS(brs, 1), rs,
+     ego->k(buf, buf + 1, ego->td->W, ego->brs, mb, me, 2);
+     X(cpy2d_pair_co)(buf, buf + 1, rA + mb*ms, iA + mb*ms,
+		      ego->r, brs, rs,
 		      me - mb, 2, ms);
 }
 
@@ -104,14 +107,10 @@ static void apply_buf(const plan *ego_, R *rio, R *iio)
      STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
 
      for (i = 0; i < v; ++i, rio += ego->vs, iio += ego->vs) {
-	  for (j = mb; j < me - batchsz; j += batchsz) 
-	       dobatch(ego->k, rio, iio, ego->td->W,
-		       ego->r, WS(ego->rs, 1), j, j + batchsz, ego->ms,
-		       buf, ego->brs);
+	  for (j = mb; j + batchsz < me; j += batchsz) 
+	       dobatch(ego, rio, iio, j, j + batchsz, buf);
 
-	  dobatch(ego->k, rio, iio, ego->td->W,
-		  ego->r, WS(ego->rs, 1), j, me, ego->ms,
-		  buf, ego->brs);
+	  dobatch(ego, rio, iio, j, me, buf);
      }
 
      STACK_FREE(buf);
@@ -172,11 +171,16 @@ static int applicable0(const S *ego,
 	       e->genus->okp(e, rio, iio, ivs, 0, m, mb, me, ms, plnr))
 	      ||
 	      (*extra_iter = 1,
-	       (e->genus->okp(e, rio, iio, ivs, 0, m, 
-			      mb, me - 1, ms, plnr)
-		&&
-		e->genus->okp(e, rio, iio, ivs, 0, m, 
-			      me - 1, me + 1, ms, plnr))))
+	       (1
+		/* FIXME: require full array, otherwise some threads
+		   may be extra_iter and other threads won't be.
+		   Generating the proper twiddle factors is a pain in
+		   this case */
+		&& mb == 0 && me == m
+		&& e->genus->okp(e, rio, iio, ivs, 0, m, 
+				 mb, me - 1, ms, plnr)
+		&& e->genus->okp(e, rio, iio, ivs, 0, m, 
+				 me - 1, me + 1, ms, plnr))))
 
 	  && (e->genus->okp(e, rio + ivs, iio + ivs, ivs, 0, m, 
 			    mb, me - *extra_iter, ms, plnr))

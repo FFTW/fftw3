@@ -41,7 +41,9 @@ typedef struct {
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     ego->k(rio, iio, ego->td->W, ego->rs, ego->vs, ego->mb, ego->me, ego->ms);
+     INT mb = ego->mb, ms = ego->ms;
+     ego->k(rio + mb*ms, iio + mb*ms, ego->td->W, ego->rs, ego->vs,
+	    mb, ego->me, ms);
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)

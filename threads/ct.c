@@ -26,23 +26,21 @@ typedef struct {
      plan *cld;
      plan **cldws;
      int nthr;
-     INT r, ts;
+     INT r;
 } P;
 
 typedef struct {
      plan **cldws;
      R *r, *i;
-     INT ts;
 } PD;
 
 static void *spawn_apply(spawn_data *d)
 WITH_ALIGNED_STACK({
      PD *ego = (PD *) d->data;
      INT thr_num = d->thr_num;
-     INT offset = thr_num * ego->ts;
 
      plan_dftw *cldw = (plan_dftw *) (ego->cldws[thr_num]);
-     cldw->apply((plan *) cldw, ego->r + offset, ego->i + offset);
+     cldw->apply((plan *) cldw, ego->r, ego->i);
      return 0;
 })
 
@@ -59,7 +57,6 @@ static void apply_dit(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 	  d.r = ro; d.i = io;
 	  d.cldws = ego->cldws;
-	  d.ts = ego->ts;
 
 	  X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*)&d);
      }
@@ -75,7 +72,6 @@ static void apply_dif(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 	  d.r = ri; d.i = ii;
 	  d.cldws = ego->cldws;
-	  d.ts = ego->ts;
 
 	  X(spawn_loop)(ego->nthr, ego->nthr, spawn_apply, (void*)&d);
      }
@@ -246,7 +242,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cld = cld;
      pln->cldws = cldws;
      pln->nthr = nthr;
-     pln->ts = ts;
      pln->r = r;
      X(ops_zero)(&pln->super.super.ops);
      for (i = 0; i < nthr; ++i)
