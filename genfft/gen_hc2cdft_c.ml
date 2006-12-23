@@ -74,7 +74,7 @@ let generate n =
   and bytwvl x = choose_simd x (ctimes (CVar "TWVL", x)) 
   and bytwvl_vl x = choose_simd x (ctimes (CVar "(TWVL/VL)", x)) in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy true in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy 1 true in
   let nt = num_twiddles n in
 
   let byw = bytwiddle n sign (twiddle_array nt twarray) in

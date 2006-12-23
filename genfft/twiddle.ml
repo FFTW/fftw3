@@ -23,11 +23,9 @@
 open Complex
 open Util
 
-type twop = TW_FULL | TW_COS | TW_SIN | TW_CEXP | TW_NEXT
+type twop = TW_FULL | TW_CEXP | TW_NEXT
 
 let optostring = function
-  | TW_COS -> "TW_COS"
-  | TW_SIN -> "TW_SIN"
   | TW_CEXP -> "TW_CEXP"
   | TW_NEXT -> "TW_NEXT"
   | TW_FULL -> "TW_FULL"
@@ -36,8 +34,8 @@ type twinstr = (twop * int * int)
 
 let rec unroll_twfull l = match l with
 | [] -> []
-| (TW_FULL, 0, n) :: b ->
-    (forall [] cons 1 n (fun i -> (TW_CEXP, 0, i)))
+| (TW_FULL, v, n) :: b ->
+    (forall [] cons 1 n (fun i -> (TW_CEXP, v, i)))
     @ unroll_twfull b
 | a :: b -> a :: unroll_twfull b
 
@@ -52,7 +50,7 @@ let twinstr_to_simd_string vl l =
   let one sep = function
     | (TW_NEXT, 1, 0) -> sep ^ "{TW_NEXT, " ^ vl ^ ", 0}"
     | (TW_NEXT, _, _) -> failwith "twinstr_to_simd_string"
-    | (TW_CEXP, 0, b) -> sep ^ (Printf.sprintf "VTW(%d)" b)
+    | (TW_CEXP, v, b) -> sep ^ (Printf.sprintf "VTW(%d,%d)" v b)
     | _ -> failwith "twinstr_to_simd_string"
   in let rec loop first = function
     | [] -> ""
@@ -108,11 +106,11 @@ let make_bytwiddle sign use_complex_arith g f i =
 
 (* various policies for computing/loading twiddle factors *)
 
-let twiddle_policy_load_all use_complex_arith =
+let twiddle_policy_load_all v use_complex_arith =
   let bytwiddle n sign w f =
     make_bytwiddle sign use_complex_arith (fun i -> w (i - 1)) f
   and twidlen n = 2 * (n - 1)
-  and twdesc r = [(TW_FULL, 0, r);(TW_NEXT, 1, 0)]
+  and twdesc r = [(TW_FULL, v, r);(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
 (*
@@ -121,7 +119,7 @@ let twiddle_policy_load_all use_complex_arith =
  *      let y = i - x in
  *      compute w^{x+y} = w^x * w^y
  *)
-let twiddle_policy_log2 use_complex_arith =
+let twiddle_policy_log2 v use_complex_arith =
   let bytwiddle n sign w f =
     let g = rec_array n (fun self i ->
       if i = 0 then Complex.one
@@ -136,14 +134,14 @@ let twiddle_policy_log2 use_complex_arith =
        (List.map 
 	  (fun i -> 
 	    if i > 0 && is_pow 2 i then 
-	      [TW_CEXP, 0, i] 
+	      [TW_CEXP, v, i] 
 	    else 
 	      [])
 	  (iota n)))
     @ [(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc
 
-let twiddle_policy_log3 use_complex_arith =
+let twiddle_policy_log3 v use_complex_arith =
   let rec terms_needed i pi s n =
     if (s >= n - 1) then i
     else terms_needed (i + 1) (3 * pi) (s + pi) n
@@ -168,7 +166,7 @@ let twiddle_policy_log3 use_complex_arith =
     (List.map 
        (fun i -> 
 	  let x = min (pow 3 i) (n - 1) in
-	    TW_CEXP, 0, x)
+	    TW_CEXP, v, x)
        (iota ((twidlen n) / 2)))
     @ [(TW_NEXT, 1, 0)]
   in bytwiddle, twidlen, twdesc

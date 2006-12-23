@@ -69,7 +69,7 @@ let generate n =
   and name = !Magic.codelet_name 
   and byvl x = choose_simd x (ctimes (CVar "VL", x)) in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy false in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy 1 false in
   let nt = num_twiddles n in
 
   let byw = bytwiddle n sign (twiddle_array nt twarray) in
@@ -127,7 +127,8 @@ let generate n =
 	    [Expr_assign (vm, vmb);
 	     Expr_assign (CVar twarray, 
 			  CPlus [CVar twarray; 
-				 ctimes (vmb, Integer nt)])],
+				 ctimes (CPlus [vmb; CUminus (Integer 1)],
+					 Integer nt)])],
 	  Binop (" < ", vm, vme),
 	  list_to_comma 
 	    [Expr_assign (vm, CPlus [vm; byvl (Integer 1)]);

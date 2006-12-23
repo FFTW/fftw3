@@ -61,7 +61,7 @@ let generate n =
   and byvl x = choose_simd x (ctimes (CVar "(2 * VL)", x)) in
   let ename = expand_name name in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy false in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy 0 false in
   let nt = num_twiddles n in
 
   let byw = bytwiddle n sign (twiddle_array nt twarray) in

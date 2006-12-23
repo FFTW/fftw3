@@ -33,7 +33,7 @@ typedef struct {
      kdftw k;
      INT r;
      stride rs;
-     INT m, ms, v, vs, mb, me;
+     INT m, ms, v, vs, mb, me, extra_iter;
      stride brs;
      twid *td;
      const S *slv;
@@ -51,6 +51,18 @@ static void apply(const plan *ego_, R *rio, R *iio)
      for (i = 0; i < v; ++i)
 	  ego->k(rio + i * vs, iio + i * vs, ego->td->W, ego->rs, 
 		 ego->mb, ego->me, ego->ms);
+}
+
+static void apply_extra_iter(const plan *ego_, R *rio, R *iio)
+{
+     const P *ego = (const P *) ego_;
+     INT i, v = ego->v, vs = ego->vs, mm = ego->me - 1, ms = ego->ms;
+     ASSERT_ALIGNED_DOUBLE;
+     for (i = 0; i < v; ++i, rio += vs, iio += vs) {
+	  ego->k(rio, iio, ego->td->W, ego->rs, ego->mb, mm, ms);
+	  ego->k(rio + mm*ms, iio + mm*ms, ego->td->W, 
+		 ego->rs, mm, mm+2, 0);
+     }
 }
 
 /*************************************************************
@@ -113,7 +125,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      P *ego = (P *) ego_;
 
      X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw,
-		      ego->r * ego->m, ego->r, ego->m);
+		      ego->r * ego->m, ego->r, ego->m + ego->extra_iter);
 }
 
 static void destroy(plan *ego_)
@@ -144,7 +156,7 @@ static int applicable0(const S *ego,
 		       INT v, INT ivs, INT ovs,
 		       INT mb, INT me,
 		       R *rio, R *iio,
-		       const planner *plnr)
+		       const planner *plnr, INT *extra_iter)
 {
      const ct_desc *e = ego->desc;
      UNUSED(v);
@@ -156,9 +168,18 @@ static int applicable0(const S *ego,
 	  && ivs == ovs /* in-place along V */
 
 	  /* check for alignment/vector length restrictions */
-	  && (e->genus->okp(e, rio, iio, ivs, 0, m, mb, me, ms, plnr))
-	  && (e->genus->okp(e, rio + ivs, iio + ivs, ivs, 0, m, mb, me,
-			    ms, plnr))
+	  && ((*extra_iter = 0,
+	       e->genus->okp(e, rio, iio, ivs, 0, m, mb, me, ms, plnr))
+	      ||
+	      (*extra_iter = 1,
+	       (e->genus->okp(e, rio, iio, ivs, 0, m, 
+			      mb, me - 1, ms, plnr)
+		&&
+		e->genus->okp(e, rio, iio, ivs, 0, m, 
+			      me - 1, me + 1, ms, plnr))))
+
+	  && (e->genus->okp(e, rio + ivs, iio + ivs, ivs, 0, m, 
+			    mb, me - *extra_iter, ms, plnr))
 
 	  );
 }
@@ -197,9 +218,10 @@ static int applicable(const S *ego,
 		      INT v, INT ivs, INT ovs,
 		      INT mb, INT me,
 		      R *rio, R *iio,
-		      const planner *plnr)
+		      const planner *plnr, INT *extra_iter)
 {
      if (ego->bufferedp) {
+	  *extra_iter = 0;
 	  if (!applicable0_buf(ego,
 			       r, irs, ors, m, ms, v, ivs, ovs, mb, me,
 			       rio, iio, plnr))
@@ -207,7 +229,7 @@ static int applicable(const S *ego,
      } else {
 	  if (!applicable0(ego,
 			   r, irs, ors, m, ms, v, ivs, ovs, mb, me,
-			   rio, iio, plnr))
+			   rio, iio, plnr, extra_iter))
 	       return 0;
      }
 
@@ -232,6 +254,7 @@ static plan *mkcldw(const ct_solver *ego_,
      const S *ego = (const S *) ego_;
      P *pln;
      const ct_desc *e = ego->desc;
+     INT extra_iter;
 
      static const plan_adt padt = {
 	  0, awake, print, destroy
@@ -240,10 +263,14 @@ static plan *mkcldw(const ct_solver *ego_,
      A(mstart >= 0 && mstart + mcount <= m);
      if (!applicable(ego,
 		     r, irs, ors, m, ms, v, ivs, ovs, mstart, mstart + mcount,
-		     rio, iio, plnr))
+		     rio, iio, plnr, &extra_iter))
           return (plan *)0;
 
-     pln = MKPLAN_DFTW(P, &padt, ego->bufferedp ? apply_buf : apply);
+     if (ego->bufferedp) {
+	  pln = MKPLAN_DFTW(P, &padt, apply_buf);
+     } else {
+	  pln = MKPLAN_DFTW(P, &padt, extra_iter ? apply_extra_iter : apply);
+     }
 
      pln->k = ego->k;
      pln->rs = X(mkstride)(r, irs);
@@ -257,6 +284,7 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->me = mstart + mcount;
      pln->slv = ego;
      pln->brs = X(mkstride)(r, 2 * compute_batchsize(r));
+     pln->extra_iter = extra_iter;
 
      X(ops_zero)(&pln->super.super.ops);
      X(ops_madd2)(v * (mcount/e->genus->vl), &e->ops, &pln->super.super.ops);

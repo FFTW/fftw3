@@ -82,7 +82,7 @@ let generate n =
   and name = !Magic.codelet_name 
   and byvl x = choose_simd x (ctimes (CVar "VL", x)) in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy false in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy 0 false in
   let nt = num_twiddles n in
 
   let byw = bytwiddle n sign (twiddle_array nt twarray) in

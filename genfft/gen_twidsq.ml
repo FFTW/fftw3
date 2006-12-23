@@ -70,7 +70,7 @@ let generate n =
   let sign = !Genutil.sign 
   and name = !Magic.codelet_name in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy false in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy 0 false in
   let nt = num_twiddles n in
 
   let svs = either_stride (!uvs) (C.SVar vs)

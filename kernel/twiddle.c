@@ -141,8 +141,9 @@ static R *compute(enum wakefulness wakefulness,
 	       switch (p->op) {
 		   case TW_FULL: {
 			INT i;
-			A(m * r <= n);
 			for (i = 1; i < r; ++i) {
+			     A((j + (INT)p->v) * i < n);
+			     A((j + (INT)p->v) * i > -n);
 			     t->cexp(t, (j + (INT)p->v) * i, W);
 			     W += 2;
 			}
@@ -162,7 +163,8 @@ static R *compute(enum wakefulness wakefulness,
 		   case TW_COS: {
 			R d[2];
 
-			A(m * r <= n);
+			A((j + (INT)p->v) * p->i < n);
+			A((j + (INT)p->v) * p->i > -n);
 			t->cexp(t, (j + (INT)p->v) * (INT)p->i, d);
 			*W++ = d[0];
 			break;
@@ -171,14 +173,16 @@ static R *compute(enum wakefulness wakefulness,
 		   case TW_SIN: {
 			R d[2];
 
-			A(m * r <= n);
+			A((j + (INT)p->v) * p->i < n);
+			A((j + (INT)p->v) * p->i > -n);
 			t->cexp(t, (j + (INT)p->v) * (INT)p->i, d);
 			*W++ = d[1];
 			break;
 		   }
 
 		   case TW_CEXP:
-			A(m * r <= n);
+			A((j + (INT)p->v) * p->i < n);
+			A((j + (INT)p->v) * p->i > -n);
 			t->cexp(t, (j + (INT)p->v) * (INT)p->i, W);
 			W += 2;
 			break;

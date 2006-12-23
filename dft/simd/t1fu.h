@@ -20,9 +20,11 @@
 
 #include "simd.h"
 
-#define VTW VTW3
-#define TWVL TWVL3
-#define LDW(x) LDA(x, 0, 0)
+#define VTW VTW1
+#define TWVL TWVL1
+#define BYTW BYTW1
+#define BYTWJ BYTWJ1
 
-#define GENUS X(rdft_hc2cbv_genus)
-extern const hc2c_genus GENUS;
+#define GENUS X(dft_t1fusimd_genus)
+extern const ct_genus GENUS;
+

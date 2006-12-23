@@ -158,9 +158,9 @@ static inline V VZMULJ(V tx, V sr)
 }
 
 /* twiddle storage #1: compact, slower */
-#define VTW1(x) {TW_CEXP, 0, x}
+#define VTW1(v,x) {TW_CEXP, v, x}
 #define TWVL1 1
-#define VTW3(x) VTW1(x)
+#define VTW3(v,x) VTW1(v,x)
 #define TWVL3 TWVL1
 
 static inline V BYTW1(const R *t, V sr)
@@ -176,8 +176,8 @@ static inline V BYTWJ1(const R *t, V sr)
 }
 
 /* twiddle storage #2: twice the space, faster (when in cache) */
-#define VTW2(x)								\
-  {TW_COS, 0, x}, {TW_COS, 0, x}, {TW_SIN, 0, -x}, {TW_SIN, 0, x}
+#define VTW2(v,x)							\
+  {TW_COS, v, x}, {TW_COS, v, x}, {TW_SIN, v, -x}, {TW_SIN, v, x}
 #define TWVL2 2
 
 static inline V BYTW2(const R *t, V sr)
@@ -201,13 +201,8 @@ static inline V BYTWJ2(const R *t, V sr)
 #define VFMS(a, b, c) VSUB(VMUL(a, b), c)
 
 /* twiddle storage for split arrays */
-#define VTWS(x)								\
-  {TW_COS, 0, x}, {TW_COS, 1, x}, {TW_SIN, 0, x}, {TW_SIN, 1, x}
+#define VTWS(v,x)							\
+  {TW_COS, v, x}, {TW_COS, v+1, x}, {TW_SIN, v, x}, {TW_SIN, v+1, x}
 #define TWVLS (2 * VL)
-
-
-/* twiddle storage for hc2cdftv codelets */
-#define VTWHC2CDFTV(x) {TW_CEXP, 1, x}
-#define TWVLHC2CDFTV (VL)
 
 #endif /* __SSE2__ */

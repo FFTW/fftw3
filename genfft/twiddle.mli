@@ -24,7 +24,7 @@ val speclist : (string * Arg.spec * string) list
 type twinstr
 
 val twiddle_policy :
-  bool ->
+  int -> bool ->
   (int -> int -> (int -> Complex.expr) -> (int -> Complex.expr) ->
      int -> Complex.expr) *(int -> int) * (int -> twinstr list)
 

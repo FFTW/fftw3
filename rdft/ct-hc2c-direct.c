@@ -80,7 +80,7 @@ static void apply_extra_iter(const plan *ego_, R *cr, R *ci)
 	  ego->k(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
 		 ego->td->W, ego->rs, 1, mm, ms);
 	  ego->k(cr + mm*ms, ci + mm*ms, cr + (m-mm)*ms, ci + (m-mm)*ms,
-		 ego->td->W, ego->rs, mm, mm+1, 0);
+		 ego->td->W, ego->rs, mm, mm+2, 0);
 	  cldm->apply((plan *) cldm, cr + (m/2)*ms, ci + (m/2)*ms, 
 		      cr + (m/2)*ms, ci + (m/2)*ms);
      }
@@ -170,7 +170,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      X(plan_awake)(ego->cldm, wakefulness);
      X(twiddle_awake)(wakefulness, &ego->td, ego->slv->desc->tw, 
 		      ego->r * ego->m, ego->r, 
-		      (ego->m + 1) / 2 + ego->extra_iter + 1);
+		      (ego->m - 1) / 2 + ego->extra_iter);
 }
 
 static void destroy(plan *ego_)
@@ -223,8 +223,11 @@ static int applicable0(const S *ego, rdft_kind kind,
 			     rs, 1, (m+1)/2, ms, plnr))
 	      ||
 	      (*extra_iter = 1,
-	       (e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
-			      rs, 1, (m+1)/2-1, ms, plnr))))
+	       ((e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+			       rs, 1, (m-1)/2, ms, plnr))
+		&&
+		(e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+			       rs, (m-1)/2, (m-1)/2 + 2, 0, plnr)))))
 	  
 	  /* subsequent v-loop iterations */
 	  && (cr += vs, ci += vs, 1)

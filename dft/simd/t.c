@@ -29,13 +29,30 @@ static int okp_common(const ct_desc *d,
 		      INT rs, INT vs, INT m, INT mb, INT me, INT ms,
 		      const planner *plnr)
 {
-     UNUSED(rio);
-     UNUSED(iio);
+     UNUSED(rio); UNUSED(iio);
      return (RIGHT_CPU()
 	     && !NO_SIMDP(plnr)
 	     && SIMD_STRIDE_OKA(rs)
 	     && SIMD_VSTRIDE_OKA(ms)
              && (m % VL) == 0
+             && (mb % VL) == 0
+             && (me % VL) == 0
+	     && (!d->rs || (d->rs == rs))
+	     && (!d->vs || (d->vs == vs))
+	     && (!d->ms || (d->ms == ms))
+	  );
+}
+
+static int okp_commonu(const ct_desc *d,
+		      const R *rio, const R *iio, 
+		      INT rs, INT vs, INT m, INT mb, INT me, INT ms,
+		      const planner *plnr)
+{
+     UNUSED(rio); UNUSED(iio); UNUSED(m);
+     return (RIGHT_CPU()
+	     && !NO_SIMDP(plnr)
+	     && SIMD_STRIDE_OK(rs)
+	     && SIMD_VSTRIDE_OK(ms)
              && (mb % VL) == 0
              && (me % VL) == 0
 	     && (!d->rs || (d->rs == rs))
@@ -57,6 +74,19 @@ static int okp_t1f(const ct_desc *d,
 extern const ct_genus X(dft_t1fsimd_genus);
 const ct_genus X(dft_t1fsimd_genus) = { okp_t1f, VL };
 
+static int okp_t1fu(const ct_desc *d,
+		    const R *rio, const R *iio, 
+		    INT rs, INT vs, INT m, INT mb, INT me, INT ms,
+		    const planner *plnr)
+{
+     return  okp_commonu(d, rio, iio, rs, vs, m, mb, me, ms, plnr)
+	  && iio == rio + 1
+	  && ALIGNED(rio);
+}
+
+extern const ct_genus X(dft_t1fusimd_genus);
+const ct_genus X(dft_t1fusimd_genus) = { okp_t1fu, VL };
+
 static int okp_t1b(const ct_desc *d,
 		   const R *rio, const R *iio, 
 		   INT rs, INT vs, INT m, INT mb, INT me, INT ms,
@@ -69,6 +99,19 @@ static int okp_t1b(const ct_desc *d,
 
 extern const ct_genus X(dft_t1bsimd_genus);
 const ct_genus X(dft_t1bsimd_genus) = { okp_t1b, VL };
+
+static int okp_t1bu(const ct_desc *d,					\
+		   const R *rio, const R *iio, 				\
+		   INT rs, INT vs, INT m, INT mb, INT me, INT ms,	\
+		   const planner *plnr)					\
+{									\
+     return  okp_commonu(d, rio, iio, rs, vs, m, mb, me, ms, plnr)	\
+	  && rio == iio + 1						\
+	  && ALIGNED(iio);						\
+}
+
+extern const ct_genus X(dft_t1busimd_genus);
+const ct_genus X(dft_t1busimd_genus) = { okp_t1bu, VL };
 
 /* use t2* codelets only when n = m*radix is small, because
    t2* codelets use ~2n twiddle factors (instead of ~n) */

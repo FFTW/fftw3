@@ -20,8 +20,8 @@
 
 #include "simd.h"
 
-#define VTW VTWHC2CDFTV
-#define TWVL TWVLHC2CDFTV
+#define VTW VTW3
+#define TWVL TWVL3
 #define LDW(x) LDA(x, 0, 0)
 
 #define GENUS X(rdft_hc2cfv_genus)

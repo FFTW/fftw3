@@ -73,7 +73,7 @@ let generate n =
   and bytwvl_vl x = choose_simd x (ctimes (CVar "(TWVL/VL)", x)) in
   let ename = expand_name name in
 
-  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy true in
+  let (bytwiddle, num_twiddles, twdesc) = Twiddle.twiddle_policy 0 true in
   let nt = num_twiddles n in
 
   let svs = either_stride (!uvs) (C.SVar vs)
