@@ -171,7 +171,7 @@ static bench_problem *fftw_problem_to_bench_problem(planner *plnr,
 	      bp->iphyssz = bp->ophyssz = 0;
 	      bp->in_place = p->r0 == p->cr;
 	      bp->sz = fftw_tensor_to_bench_tensor(p->sz);
-	      if (rnk > 1) {
+	      if (rnk > 0) {
 		   if (p->kind == R2HC)
 			bp->sz->dims[rnk-1].is /= 2;
 		   else 
