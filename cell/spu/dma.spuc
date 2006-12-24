@@ -1,7 +1,6 @@
 /* -*- C -*- */
 #include <stdlib.h>
 #include <spu_intrinsics.h>
-#include <cbe_mfc.h>
 #include <spu_mfcio.h>
 #include "fftw-spu.h"
 #include "../fftw-cell.h"

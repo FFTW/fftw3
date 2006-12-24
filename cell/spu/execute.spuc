@@ -59,7 +59,7 @@ static void recur(struct spu_plan *p, const R *in, R *out,
 		     r * is, v, ovs);
 
 	  for (i = 0; i < v; ++i) 
-	       X(t1fvtab)[r](out + i*ovs, (out+1) + i*ovs, p->W, 2*m, m, 2);
+	       X(t1fvtab)[r](out + i*ovs, (out+1) + i*ovs, p->W, 2*m, 0, m, 2);
      }
 }
 
@@ -71,7 +71,7 @@ void X(spu_execute_plan)(struct spu_plan *p, const R *in, R *out)
 	  /* assert(r > 0); */
 	  /* assert((r % 2) == 0); */
 	  recur(p+1, in, out, /* is: */ 2*r, /* v: */ r, /* ovs: */ 2*m);
-	  X(t1fvtab)[r](out, out+1, p->W, 2*m, m, 2);
+	  X(t1fvtab)[r](out, out+1, p->W, 2*m, 0, m, 2);
      } else {
 	  recur(p, in, out, /* is: */ 2, /* v: */ 1, /* ovs: */ 0);
      }

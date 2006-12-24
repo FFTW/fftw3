@@ -1,11 +1,9 @@
 noinst_PROGRAMS=spufftw planner
 
-# FIXME: autodetect SPUCC, CBE_SYSROOT
-CBE_SYSROOT=/opt/IBM/cell-sdk-1.1/sysroot
+# FIXME: autodetect SPUCC
 SPUCC=spu-gcc
 SPUCFLAGS= -O3 -W -Wall -Winline -Wno-main -I. -I$(srcdir)	\
--I$(top_builddir) -I${top_srcdir}/kernel			\
--I $(CBE_SYSROOT)/usr/spu/include
+-I$(top_builddir) -I${top_srcdir}/kernel
 
 # use the silly suffix .spuc so that automake does not get 
 # confused

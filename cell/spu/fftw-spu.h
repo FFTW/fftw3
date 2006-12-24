@@ -1,5 +1,5 @@
 #include <spu_intrinsics.h>
-#include <cbe_mfc.h>
+#include <spu_mfcio.h>
 
 #define FAKE_CRUDE_TIME		/* the spu does not have proper time headers */
 #include <ifftw.h>
@@ -24,8 +24,8 @@ struct spu_plan {
 typedef void (*n_codelet) (const R *ri, const R *ii, R *ro, R *io,
 			   stride is, stride os, INT v, INT ivs, INT ovs);
 
-typedef const R *(*t_codelet) (R *ri, R *ii, const R *W,
-			       stride ios, INT m, INT dist);
+typedef void (*t_codelet) (R *ri, R *ii, const R *W, 
+			   stride rs, INT mb, INT me, INT ms);
 
 extern const n_codelet X(n2fvtab)[33];
 extern const t_codelet X(t1fvtab)[33];
@@ -97,29 +97,29 @@ void X(spu_n2fv_16) (const R *ri, const R *ii, R *ro, R *io, stride is,
 void X(spu_n2fv_32) (const R *ri, const R *ii, R *ro, R *io, stride is,
 		     stride os, INT v, INT ivs, INT ovs);
 
-const R *X(spu_t1fv_10) (R *ri, R *ii, const R *W, stride ios, INT m,
-			 INT dist);
-const R *X(spu_t1fv_12) (R *ri, R *ii, const R *W, stride ios, INT m,
-			 INT dist);
-const R *X(spu_t1fv_15) (R *ri, R *ii, const R *W, stride ios, INT m,
-			 INT dist);
-const R *X(spu_t1fv_16) (R *ri, R *ii, const R *W, stride ios, INT m,
-			 INT dist);
-const R *X(spu_t1fv_2) (R *ri, R *ii, const R *W, stride ios, INT m,
-			INT dist);
-const R *X(spu_t1fv_32) (R *ri, R *ii, const R *W, stride ios, INT m,
-			 INT dist);
-const R *X(spu_t1fv_3) (R *ri, R *ii, const R *W, stride ios, INT m,
-			INT dist);
-const R *X(spu_t1fv_4) (R *ri, R *ii, const R *W, stride ios, INT m,
-			INT dist);
-const R *X(spu_t1fv_5) (R *ri, R *ii, const R *W, stride ios, INT m,
-			INT dist);
-const R *X(spu_t1fv_6) (R *ri, R *ii, const R *W, stride ios, INT m,
-			INT dist);
-const R *X(spu_t1fv_7) (R *ri, R *ii, const R *W, stride ios, INT m,
-			INT dist);
-const R *X(spu_t1fv_8) (R *ri, R *ii, const R *W, stride ios, INT m,
-			INT dist);
-const R *X(spu_t1fv_9) (R *ri, R *ii, const R *W, stride ios, INT m,
-			INT dist);
+void X(spu_t1fv_10) (R *ri, R *ii, const R *W, stride rs, 
+		     INT mb, INT me, INT ms);
+void X(spu_t1fv_12) (R *ri, R *ii, const R *W, stride rs,
+		     INT mb, INT me, INT ms);
+void X(spu_t1fv_15) (R *ri, R *ii, const R *W, stride rs,
+		     INT mb, INT me, INT ms);
+void X(spu_t1fv_16) (R *ri, R *ii, const R *W, stride rs,
+		     INT mb, INT me, INT ms);
+void X(spu_t1fv_2) (R *ri, R *ii, const R *W, stride rs,
+		    INT mb, INT me, INT ms);
+void X(spu_t1fv_32) (R *ri, R *ii, const R *W, stride rs,
+		     INT mb, INT me, INT ms);
+void X(spu_t1fv_3) (R *ri, R *ii, const R *W, stride rs,
+		    INT mb, INT me, INT ms);
+void X(spu_t1fv_4) (R *ri, R *ii, const R *W, stride rs,
+		    INT mb, INT me, INT ms);
+void X(spu_t1fv_5) (R *ri, R *ii, const R *W, stride rs,
+		    INT mb, INT me, INT ms);
+void X(spu_t1fv_6) (R *ri, R *ii, const R *W, stride rs,
+		    INT mb, INT me, INT ms);
+void X(spu_t1fv_7) (R *ri, R *ii, const R *W, stride rs,
+		    INT mb, INT me, INT ms);
+void X(spu_t1fv_8) (R *ri, R *ii, const R *W, stride rs,
+		    INT mb, INT me, INT ms);
+void X(spu_t1fv_9) (R *ri, R *ii, const R *W, stride rs,
+		    INT mb, INT me, INT ms);
