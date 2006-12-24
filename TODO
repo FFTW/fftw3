@@ -9,8 +9,6 @@ TODO before FFTW-$2\pi$:
 * I can't believe that there isn't a closed form for the omega
   array in Rader.
 
-* implement rdft/problem2 for even radices other than 2.
-
 * convolution problem type(s)
 
 * Explore the idea of having n < 0 in tensors, possibly to mean
@@ -31,21 +29,10 @@ TODO before FFTW-$2\pi$:
 * Try FFTPACK-style back-and-forth (Stockham) FFT.  (We tried this a
   few years ago and it was slower, but perhaps matters have changed.)
 
-* dif, difsq simd codelets
-
 * Generate assembly directly for more processors, or maybe fork gcc.  =)
 
 * ensure that threaded solvers generate (block_size % 4 == 0)
   to allow SIMD to be used.
-
-* consider whether it would be simpler to have a uniform description
-  (IO, m0, m1, W) for twiddle problems, where IO always points
-  to the beginning of the array, W always points to the beginning
-  of the twiddle table, and the problem is solved in the
-  range m \in [m0, m1).  Currently we have a messy situation in which
-  we sometimes use [m0, m1), sometimes we use [mstart, mstart+mcount),
-  and we have to adjust W with the X(twiddle_shift)() hack.  Codelets
-  should obey the uniform protocol as well.
 
 * memoize triggen.
 
