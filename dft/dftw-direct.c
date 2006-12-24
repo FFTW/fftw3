@@ -46,11 +46,13 @@ typedef struct {
 static void apply(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
-     INT i, v = ego->v, vs = ego->vs, mb = ego->mb, ms = ego->ms;
+     INT i;
      ASSERT_ALIGNED_DOUBLE;
-     for (i = 0; i < v; ++i, rio += vs, iio += vs)
+     for (i = 0; i < ego->v; ++i, rio += ego->vs, iio += ego->vs) {
+	  INT  mb = ego->mb, ms = ego->ms;
 	  ego->k(rio + mb*ms, iio + mb*ms, ego->td->W, 
 		 ego->rs, mb, ego->me, ms);
+     }
 }
 
 static void apply_extra_iter(const plan *ego_, R *rio, R *iio)
