@@ -43,17 +43,17 @@ typedef struct {
 #define BATCHDIST(r) ((r) + 16)
 
 /**************************************************************/
-static void bytwiddle(const P *ego, INT m0, INT m1, R *buf, R *rio, R *iio)
+static void bytwiddle(const P *ego, INT mb, INT me, R *buf, R *rio, R *iio)
 {
      INT j, k;
-     INT r = ego->r, rs = ego->rs, ms = ego->ms, mb = ego->mb;
+     INT r = ego->r, rs = ego->rs, ms = ego->ms;
      triggen *t = ego->t;
      for (j = 0; j < r; ++j) {
-	  for (k = m0; k < m1; ++k)
+	  for (k = mb; k < me; ++k)
 	       t->rotate(t, j * k,
-			 rio[j * rs + (k - mb) * ms],
-			 iio[j * rs + (k - mb) * ms],
-			 &buf[j * 2 + 2 * BATCHDIST(r) * (k - m0) + 0]);
+			 rio[j * rs + k * ms],
+			 iio[j * rs + k * ms],
+			 &buf[j * 2 + 2 * BATCHDIST(r) * (k - mb) + 0]);
      }
 }
 
@@ -67,8 +67,8 @@ static int applicable0(const S *ego,
 	     && irs == ors
 	     && mcount >= ego->batchsz
 	     && mcount % ego->batchsz == 0
-	     && r >= 64
-	     && m >= r
+/*	     && r >= 64 
+	     && m >= r */
 	  );
 }
 
@@ -86,18 +86,18 @@ static int applicable(const S *ego,
      return 1;
 }
 
-static void dobatch(const P *ego, INT m0, INT m1, R *buf, R *rio, R *iio)
+static void dobatch(const P *ego, INT mb, INT me, R *buf, R *rio, R *iio)
 {
      plan_dft *cld;
-     INT mb = ego->mb;
+     INT ms = ego->ms;
 
-     bytwiddle(ego, m0, m1, buf, rio, iio);
+     bytwiddle(ego, mb, me, buf, rio, iio);
 
      cld = (plan_dft *) ego->cld;
      cld->apply(ego->cld, buf, buf + 1, buf, buf + 1);
      X(cpy2d_pair_co)(buf, buf + 1,
-		      rio + ego->ms * (m0-mb), iio + ego->ms * (m0-mb),
-		      m1-m0, 2 * BATCHDIST(ego->r), ego->ms,
+		      rio + ms * mb, iio + ms * mb,
+		      me-mb, 2 * BATCHDIST(ego->r), ms,
 		      ego->r, 2, ego->rs);
 }
 

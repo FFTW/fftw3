@@ -28,7 +28,7 @@ typedef ct_solver S;
 typedef struct {
      plan_dftw super;
 
-     INT r, rs, m, ms, v, vs, mstart, mcount;
+     INT r, rs, m, mb, me, ms, v, vs;
 
      plan *cld;
 
@@ -50,36 +50,28 @@ static void mktwiddle(P *ego, enum wakefulness wakefulness)
 
 static void bytwiddle(const P *ego, R *rio, R *iio)
 {
-     INT i, j, k;
+     INT iv, ir, im;
      INT r = ego->r, rs = ego->rs;
-     INT m = ego->m, ms = ego->ms;
+     INT m = ego->m, mb = ego->mb, me = ego->me, ms = ego->ms;
      INT v = ego->v, vs = ego->vs;
-     INT mcount = ego->mcount, mstart = ego->mstart;
-     INT jstart = mstart == 0;
-     INT jrem_W = 2 * ((m - 1) - (mcount - jstart));
-     INT jrem_p = ms * (m - mcount);
-     INT ip = iio - rio;
-     R *p;
+     const R *W = ego->td->W;
 
-     for (i = 0; i < v; ++i) {
-	  const R *W = ego->td->W + 2 * (mstart - 1 + jstart);
-
-	  /* loop invariant: p = rio + s * (k * m + j) + i * vs. */
-	  p = rio + i * vs;
-
-	  for (k = 1, p += rs, W += 2 * (m - 1); k < r; ++k) {
-	       for (j = jstart, p += jstart*ms; j < mcount; ++j, p += ms) {
-		    E xr = p[0];
-		    E xi = p[ip];
-		    E wr = W[0];
-		    E wi = W[1];
-		    p[0] = xr * wr + xi * wi;
-		    p[ip] = xi * wr - xr * wi;
-		    W += 2;
+     mb += (mb == 0); /* skip m=0 iteration */
+     for (iv = 0; iv < v; ++iv) {
+	  for (ir = 1; ir < r; ++ir) {
+	       for (im = mb; im < me; ++im) {
+		    R *pr = rio + ms * im + rs * ir;
+		    R *pi = iio + ms * im + rs * ir;
+		    E xr = *pr;
+		    E xi = *pi;
+		    E wr = W[2 * im + (2 * (m-1)) * ir - 2];
+		    E wi = W[2 * im + (2 * (m-1)) * ir - 1];
+		    *pr = xr * wr + xi * wi;
+		    *pi = xi * wr - xr * wi;
 	       }
-	       W += jrem_W;
-	       p += jrem_p;
 	  }
+	  rio += vs;
+	  iio += vs;
      }
 }
 
@@ -97,20 +89,22 @@ static void apply_dit(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
+     INT dm = ego->ms * ego->mb;
 
      bytwiddle(ego, rio, iio);
 
      cld = (plan_dft *) ego->cld;
-     cld->apply(ego->cld, rio, iio, rio, iio);
+     cld->apply(ego->cld, rio + dm, iio + dm, rio + dm, iio + dm);
 }
 
 static void apply_dif(const plan *ego_, R *rio, R *iio)
 {
      const P *ego = (const P *) ego_;
      plan_dft *cld;
+     INT dm = ego->ms * ego->mb;
 
      cld = (plan_dft *) ego->cld;
-     cld->apply(ego->cld, rio, iio, rio, iio);
+     cld->apply(ego->cld, rio + dm, iio + dm, rio + dm, iio + dm);
 
      bytwiddle(ego, rio, iio);
 }
@@ -173,8 +167,8 @@ static plan *mkcldw(const ct_solver *ego_,
      pln->ms = ms;
      pln->v = v;
      pln->vs = ivs;
-     pln->mstart = mstart;
-     pln->mcount = mcount;
+     pln->mb = mstart;
+     pln->me = mstart + mcount;
      pln->dec = ego->dec;
      pln->td = 0;
 
