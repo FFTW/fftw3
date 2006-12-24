@@ -67,8 +67,8 @@ static int applicable0(const S *ego,
 	     && irs == ors
 	     && mcount >= ego->batchsz
 	     && mcount % ego->batchsz == 0
-/*	     && r >= 64 
-	     && m >= r */
+	     && r >= 64 
+	     && m >= r
 	  );
 }
 
