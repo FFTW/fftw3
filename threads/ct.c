@@ -120,7 +120,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      P *pln = 0;
      plan *cld = 0, **cldws = 0;
      INT n, r, m, v, ivs, ovs;
-     INT block_size, ts;
+     INT block_size;
      int i, nthr, plnr_nthr_save;
      iodim *d;
 
@@ -150,8 +150,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      switch (ego->dec) {
 	 case DECDIT:
 	 {
-	      ts = d[0].os * block_size;
-
 	      for (i = 0; i < nthr; ++i) {
 		   cldws[i] = ego->mkcldw(ego,
 					  r, m * d[0].os, m * d[0].os,
@@ -160,7 +158,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 					  i*block_size,
 					  (i == nthr - 1) ?
 					  (m - i*block_size) : block_size,
-					  p->ro + ts*i, p->io + ts*i, plnr);
+					  p->ro, p->io, plnr);
 		   if (!cldws[i]) goto nada;
 	      }
 
@@ -206,8 +204,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 		   covs = ivs;
 	      }
 
-	      ts = d[0].is * block_size;
-
 	      for (i = 0; i < nthr; ++i) {
 		   cldws[i] = ego->mkcldw(ego,
 					  r, m * d[0].is, cors,
@@ -216,7 +212,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 					  i*block_size,
 					  (i == nthr - 1) ?
 					  (m - i*block_size) : block_size,
-					  p->ri + ts*i, p->ii + ts*i, plnr);
+					  p->ri, p->ii, plnr);
 		   if (!cldws[i]) goto nada;
 	      }
 
