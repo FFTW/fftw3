@@ -12,8 +12,8 @@
 
 ###########################################################################
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/rdft	\
--I$(top_srcdir)/rdft/codelets
-noinst_LTLIBRARIES = librdft_codelets_r2r.la
+-I$(top_srcdir)/rdft/scalar
+noinst_LTLIBRARIES = librdft_scalar_r2r.la
 
 ###########################################################################
 # The following lines specify the REDFT/RODFT/DHT sizes for which to generate
@@ -39,7 +39,7 @@ ALL_CODELETS = $(E00) $(E01) $(E10) $(E11) $(O00) $(O01) $(O10) $(O11) $(DHT)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
-librdft_codelets_r2r_la_SOURCES = $(BUILT_SOURCES)
+librdft_scalar_r2r_la_SOURCES = $(BUILT_SOURCES)
 
 SOLVTAB_NAME = X(solvtab_rdft_r2r)
 

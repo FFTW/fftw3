@@ -12,8 +12,8 @@
 
 ###########################################################################
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
--I$(top_srcdir)/dft/codelets
-noinst_LTLIBRARIES = libdft_standard.la
+-I$(top_srcdir)/dft/scalar
+noinst_LTLIBRARIES = libdft_scalar_codelets.la
 
 ###########################################################################
 # n1_<n> is a hard-coded FFT of size <n> (base cases of FFT recursion)
@@ -54,7 +54,7 @@ ALL_CODELETS = $(N1) $(T1) $(T2) $(F1) $(F2) $(Q1)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
-libdft_standard_la_SOURCES = $(BUILT_SOURCES)
+libdft_scalar_codelets_la_SOURCES = $(BUILT_SOURCES)
 
 SOLVTAB_NAME = X(solvtab_dft_standard)
 

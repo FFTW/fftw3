@@ -12,8 +12,8 @@
 
 ###########################################################################
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/rdft	\
--I$(top_srcdir)/rdft/codelets
-noinst_LTLIBRARIES = librdft_codelets_r2cb.la
+-I$(top_srcdir)/rdft/scalar
+noinst_LTLIBRARIES = librdft_scalar_r2cb.la
 
 ###########################################################################
 # r2cb_<n> is a hard-coded complex-to-real FFT of size <n> (base cases
@@ -61,7 +61,7 @@ $(HC2CBDFT) $(HC2CBDFT2)
 
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
-librdft_codelets_r2cb_la_SOURCES = $(BUILT_SOURCES)
+librdft_scalar_r2cb_la_SOURCES = $(BUILT_SOURCES)
 
 SOLVTAB_NAME = X(solvtab_rdft_r2cb)
 

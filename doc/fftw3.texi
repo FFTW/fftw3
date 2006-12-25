@@ -4803,10 +4803,10 @@ have to hand-create a configuration file (and/or a pre-compiled binary)
 that you want to share.
 
 To create the FFTW library, you will then need to compile all of the
-@samp{.c} files in the @code{kernel}, @code{dft}, @code{dft/codelets},
-@code{dft/codelets/standard}, @code{rdft}, @code{rdft/codelets},
-@code{rdft/codelets/r2cf}, @code{rdft/codelets/r2cb},
-@code{rdft/codelets/r2r}, @code{reodft}, and @code{api} directories.
+@samp{.c} files in the @code{kernel}, @code{dft}, @code{dft/scalar},
+@code{dft/scalar/codelets}, @code{rdft}, @code{rdft/scalar},
+@code{rdft/scalar/r2cf}, @code{rdft/scalar/r2cb},
+@code{rdft/scalar/r2r}, @code{reodft}, and @code{api} directories.
 If you are compiling with SIMD support (e.g. you defined
 @code{HAVE_SSE2} in @code{config.h}), then you also need to compile
 the @code{.c} files in the @code{simd}, @code{simd/nonportable},

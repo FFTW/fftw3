@@ -22,7 +22,7 @@ SIMD_LIBS=							\
 	simd/libsimd.la						\
 	simd/nonportable/libsimd_nonportable.la			\
 	dft/simd/libdft_simd.la					\
-	dft/simd/codelets/libdft_codelets_simd.la		\
+	dft/simd/codelets/libdft_simd_codelets.la		\
 	rdft/simd/librdft_simd.la				\
 	rdft/simd/codelets/librdft_simd_codelets.la	
 else
@@ -38,21 +38,22 @@ endif
 
 libfftw3@PREC_SUFFIX@_la_SOURCES = 
 
-libfftw3@PREC_SUFFIX@_la_LIBADD =				\
-	kernel/libkernel.la					\
-	dft/libdft.la						\
-	dft/codelets/libdft_codelets.la				\
-	dft/codelets/standard/libdft_standard.la		\
-	rdft/librdft.la						\
-	rdft/codelets/librdft_codelets.la			\
-	rdft/codelets/r2cf/librdft_codelets_r2cf.la		\
-	rdft/codelets/r2cb/librdft_codelets_r2cb.la		\
-	rdft/codelets/r2r/librdft_codelets_r2r.la		\
-	reodft/libreodft.la					\
-	api/libapi.la						\
+libfftw3@PREC_SUFFIX@_la_LIBADD =			\
+	kernel/libkernel.la				\
+	dft/libdft.la					\
+	dft/scalar/libdft_scalar.la			\
+	dft/scalar/codelets/libdft_scalar_codelets.la	\
+	rdft/librdft.la					\
+	rdft/scalar/librdft_scalar.la			\
+	rdft/scalar/r2cf/librdft_scalar_r2cf.la		\
+	rdft/scalar/r2cb/librdft_scalar_r2cb.la		\
+	rdft/scalar/r2r/librdft_scalar_r2r.la		\
+	reodft/libreodft.la				\
+	api/libapi.la					\
         $(SIMD_LIBS) $(COMBINED_THREADLIBS)
 
-libfftw3@PREC_SUFFIX@_la_LDFLAGS = -no-undefined -version-info @SHARED_VERSION_INFO@
+libfftw3@PREC_SUFFIX@_la_LDFLAGS = -no-undefined -version-info	\
+@SHARED_VERSION_INFO@
 
 fftw3@PREC_SUFFIX@.pc: fftw.pc
 	cp -f fftw.pc fftw3@PREC_SUFFIX@.pc

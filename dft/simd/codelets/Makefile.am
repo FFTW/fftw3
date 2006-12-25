@@ -14,7 +14,7 @@
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 -I$(top_srcdir)/dft/simd -I$(top_srcdir)/simd
 AM_CFLAGS = $(SIMD_CFLAGS)
-noinst_LTLIBRARIES = libdft_codelets_simd.la
+noinst_LTLIBRARIES = libdft_simd_codelets.la
 
 ###########################################################################
 # n1fv_<n> is a hard-coded FFTW_FORWARD FFT of size <n>, using SIMD
@@ -88,7 +88,7 @@ endif
 EXTRA_DIST = $(SIMD_CODELETS)
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
-libdft_codelets_simd_la_SOURCES = $(BUILT_SOURCES)
+libdft_simd_codelets_la_SOURCES = $(BUILT_SOURCES)
 
 SOLVTAB_NAME = X(solvtab_dft_simd)
 

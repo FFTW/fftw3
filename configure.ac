@@ -445,16 +445,16 @@ AC_CONFIG_FILES([
    simd/nonportable/Makefile
 
    dft/Makefile
-   dft/codelets/Makefile
-   dft/codelets/standard/Makefile
+   dft/scalar/Makefile
+   dft/scalar/codelets/Makefile
    dft/simd/Makefile
    dft/simd/codelets/Makefile
 
    rdft/Makefile
-   rdft/codelets/Makefile
-   rdft/codelets/r2cf/Makefile
-   rdft/codelets/r2cb/Makefile
-   rdft/codelets/r2r/Makefile
+   rdft/scalar/Makefile
+   rdft/scalar/r2cf/Makefile
+   rdft/scalar/r2cb/Makefile
+   rdft/scalar/r2r/Makefile
    rdft/simd/Makefile
    rdft/simd/codelets/Makefile
 
