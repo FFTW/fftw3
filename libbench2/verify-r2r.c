@@ -369,9 +369,9 @@ static void cpyr(R *ra, bench_tensor *sza, R *rb, bench_tensor *szb)
 static void dofft(info *nfo, R *in, R *out)
 {
      cpyr(in, nfo->pckdsz, (R *) nfo->p->in, nfo->totalsz);
-     after_problem_rcopy_from(nfo->p, nfo->p->in);
+     after_problem_rcopy_from(nfo->p, (bench_real *)nfo->p->in);
      doit(1, nfo->p);
-     after_problem_rcopy_to(nfo->p, nfo->p->out);
+     after_problem_rcopy_to(nfo->p, (bench_real *)nfo->p->out);
      cpyr((R *) nfo->p->out, nfo->totalsz, out, nfo->pckdsz);
 }
 
