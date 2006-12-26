@@ -193,3 +193,14 @@ INT X(choose_radix)(INT r, INT n)
 	  return (n > r && divides(r, n)) ? isqrt_maybe(n / r) : 0;
      }
 }
+
+/* return A mod N, works for all A including A < 0 */
+INT X(modulo)(INT a, INT n)
+{
+     A(n > 0);
+     if (a >= 0)
+	  return a % n;
+     else
+	  return (n - 1) - ((-(a + (INT)1)) % n);
+}
+

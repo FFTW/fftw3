@@ -863,6 +863,7 @@ INT X(next_prime)(INT n);
 int X(factors_into)(INT n, const INT *primes);
 INT X(choose_radix)(INT r, INT n);
 INT X(isqrt)(INT n);
+INT X(modulo)(INT a, INT n);
 
 #define GENERIC_MIN_BAD 173 /* min prime for which generic becomes bad */
 
@@ -934,7 +935,9 @@ double X(iestimate_cost)(const planner *, const plan *, const problem *);
 double X(measure_execution_time)(plan *pln, const problem *p);
 int X(alignment_of)(R *p);
 unsigned X(hash)(const char *s);
-INT X(compute_nbuf)(INT n, INT vl, INT nbuf, INT maxbufsz);
+INT X(nbuf)(INT n, INT vl);
+INT X(bufdist)(INT n, INT vl);
+int X(toobig)(INT n);
 int X(ct_uglyp)(INT min_n, INT n, INT r);
 
 #if HAVE_SIMD

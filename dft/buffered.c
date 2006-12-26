@@ -22,16 +22,7 @@
 #include "dft.h"
 
 typedef struct {
-     INT nbuf;
-     INT maxbufsz;
-     INT skew_alignment;
-     INT skew;
-     const char *nam;
-} bufadt;
-
-typedef struct {
      solver super;
-     const bufadt *adt;
 } S;
 
 typedef struct {
@@ -41,8 +32,6 @@ typedef struct {
      INT n, vl, nbuf, bufdist;
      INT ivs, ovs;
      INT roffset, ioffset;
-
-     const S *slv;
 } P;
 
 /* transform a vector input with the help of bufs */
@@ -97,24 +86,13 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s-%D%v/%D-%D%(%p%)%(%p%)%(%p%))",
-              ego->slv->adt->nam,
+     p->print(p, "(dft-buffered-%D%v/%D-%D%(%p%)%(%p%)%(%p%))",
               ego->n, ego->nbuf,
               ego->vl, ego->bufdist % ego->n,
               ego->cld, ego->cldcpy, ego->cldrest);
 }
 
-static INT compute_nbuf(INT n, INT vl, const S *ego)
-{
-     return X(compute_nbuf)(n, vl, ego->adt->nbuf, ego->adt->maxbufsz);
-}
-
-static int toobig(INT n, const S *ego)
-{
-     return (n > ego->adt->maxbufsz);
-}
-
-static int applicable0(const problem *p_, const S *ego, const planner *plnr)
+static int applicable0(const problem *p_, const planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
      const iodim *d = p->sz->dims;
@@ -124,7 +102,7 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 	 && p->sz->rnk == 1
 	  ) {
 
-	  if (toobig(p->sz->dims[0].n, ego) && CONSERVE_MEMORYP(plnr))
+	  if (X(toobig)(p->sz->dims[0].n) && CONSERVE_MEMORYP(plnr))
 	       return 0;
 
 	  /*
@@ -147,31 +125,28 @@ static int applicable0(const problem *p_, const S *ego, const planner *plnr)
 	  if (/* fits into buffer: */
 	       ((p->vecsz->rnk == 0)
 		||
-		(compute_nbuf(d[0].n, p->vecsz->dims[0].n, ego)
-		 == p->vecsz->dims[0].n)))
+		(X(nbuf)(d[0].n, p->vecsz->dims[0].n) == p->vecsz->dims[0].n)))
 	       return 1;
      }
 
      return 0;
 }
 
-static int applicable(const problem *p_, const S *ego, const planner *plnr)
+static int applicable(const problem *p_, const planner *plnr)
 {
      if (NO_BUFFERINGP(plnr)) return 0;
-     if (!applicable0(p_, ego, plnr)) return 0;
+     if (!applicable0(p_, plnr)) return 0;
 
      if (NO_UGLYP(plnr)) {
 	  const problem_dft *p = (const problem_dft *) p_;
 	  if (p->ri != p->ro) return 0;
-	  if (toobig(p->sz->dims[0].n, ego)) return 0;
+	  if (X(toobig)(p->sz->dims[0].n)) return 0;
      }
      return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
-     const S *ego = (const S *) ego_;
-     const bufadt *adt = ego->adt;
      P *pln;
      plan *cld = (plan *) 0;
      plan *cldcpy = (plan *) 0;
@@ -185,29 +160,18 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(dft_solve), awake, print, destroy
      };
 
-     if (!applicable(p_, ego, plnr))
+     UNUSED(ego_);
+
+     if (!applicable(p_, plnr))
           goto nada;
 
      n = X(tensor_sz)(p->sz);
 
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
-     nbuf = compute_nbuf(n, vl, ego);
+     nbuf = X(nbuf)(n, vl);
+     bufdist = X(bufdist)(n, vl);
      A(nbuf > 0);
-
-     /*
-      * Determine BUFDIST, the offset between successive array bufs.
-      * bufdist = n + skew, where skew is chosen such that bufdist %
-      * skew_alignment = skew.
-      */
-     if (vl == 1) {
-          bufdist = n;
-     } else {
-          bufdist =
-               n + ((adt->skew_alignment + adt->skew - n % adt->skew_alignment)
-                    % adt->skew_alignment);
-          A(p->vecsz->rnk == 1);
-     }
 
      /* attempt to keep real and imaginary part in the same order,
 	so as to allow optimizations in the the copy plan */
@@ -264,7 +228,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cld = cld;
      pln->cldcpy = cldcpy;
      pln->cldrest = cldrest;
-     pln->slv = ego;
      pln->n = n;
      pln->vl = vl;
      pln->ivs = ivs * nbuf;
@@ -291,29 +254,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(const bufadt *adt)
+static solver *mksolver(void)
 {
      static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      S *slv = MKSOLVER(S, &sadt);
-     slv->adt = adt;
      return &(slv->super);
 }
 
-
 void X(dft_buffered_register)(planner *p)
 {
-     /* FIXME: what are good defaults? */
-     static const bufadt adt = {
-	  /* nbuf */           8,
-	  /* maxbufsz */       (INT)(65536 / sizeof(R)),
-	  /* skew_alignment */ 8,
-#if HAVE_SIMD  /* 5 is odd and screws up the alignment. */
-	  /* skew */           6,
-#else
-	  /* skew */           5,
-#endif
-	  /* nam */            "dft-buffered"
-     };
-
-     REGISTER_SOLVER(p, mksolver(&adt));
+     REGISTER_SOLVER(p, mksolver());
 }

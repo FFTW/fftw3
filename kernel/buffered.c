@@ -22,12 +22,17 @@
 
 #include "ifftw.h"
 
-INT X(compute_nbuf)(INT n, INT vl, INT nbuf, INT maxbufsz)
-{
-     INT i; 
+#define NBUF ((INT)8)
+#define MAXBUFSZ (65536 / (INT)(sizeof(R)))
 
-     if (nbuf * n > maxbufsz)
-          nbuf = X(imax)((INT)1, maxbufsz / n);
+INT X(nbuf)(INT n, INT vl)
+{
+     INT i, nbuf; 
+
+     nbuf = NBUF;
+
+     if (nbuf * n > MAXBUFSZ)
+          nbuf = X(imax)((INT)1, MAXBUFSZ / n);
 
      /*
       * Look for a buffer number (not too big) that divides the
@@ -42,3 +47,19 @@ INT X(compute_nbuf)(INT n, INT vl, INT nbuf, INT maxbufsz)
      return nbuf;
 }
 
+#define SKEW 6 /* need to be even for SIMD */
+#define SKEWMOD 8 
+
+INT X(bufdist)(INT n, INT vl)
+{
+     if (vl == 1)
+	  return n;
+     else 
+	  /* return smallest X such that X >= N and X == SKEW (mod SKEWMOD) */
+	  return n + X(modulo)(SKEW - n, SKEWMOD);
+}
+
+int X(toobig)(INT n)
+{
+     return n > MAXBUFSZ;
+}
