@@ -319,7 +319,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  pln->os = p->sz->dims[0].is; /* stride of rio/iio  */
      }
 
-
      pln->nbuf = nbuf;
      pln->bufdist = bufdist;
 

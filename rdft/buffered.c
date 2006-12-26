@@ -30,7 +30,7 @@ typedef struct {
 
      plan *cld, *cldcpy, *cldrest;
      INT n, vl, nbuf, bufdist;
-     INT ivs, ovs;
+     INT ivs_by_nbuf, ovs_by_nbuf;
 } P;
 
 /* transform a vector input with the help of bufs */
@@ -41,7 +41,7 @@ static void apply(const plan *ego_, R *I, R *O)
      plan_rdft *cldcpy = (plan_rdft *) ego->cldcpy;
      plan_rdft *cldrest;
      INT i, vl = ego->vl, nbuf = ego->nbuf;
-     INT ivs = ego->ivs, ovs = ego->ovs;
+     INT ivs_by_nbuf = ego->ivs_by_nbuf, ovs_by_nbuf = ego->ovs_by_nbuf;
      R *bufs;
 
      bufs = (R *)MALLOC(sizeof(R) * nbuf * ego->bufdist, BUFFERS);
@@ -49,11 +49,43 @@ static void apply(const plan *ego_, R *I, R *O)
      for (i = nbuf; i <= vl; i += nbuf) {
           /* transform to bufs: */
           cld->apply((plan *) cld, I, bufs);
-	  I += ivs;
+	  I += ivs_by_nbuf;
 
           /* copy back */
           cldcpy->apply((plan *) cldcpy, bufs, O);
-	  O += ovs;
+	  O += ovs_by_nbuf;
+     }
+
+     /* Do the remaining transforms, if any: */
+     cldrest = (plan_rdft *) ego->cldrest;
+     cldrest->apply((plan *) cldrest, I, O);
+
+     X(ifree)(bufs);
+}
+
+/* for hc2r problems, copy the input into buffer, and then
+   transform buffer->output, which allows for destruction of the
+   buffer */
+static void apply_hc2r(const plan *ego_, R *I, R *O)
+{
+     const P *ego = (const P *) ego_;
+     plan_rdft *cld = (plan_rdft *) ego->cld;
+     plan_rdft *cldcpy = (plan_rdft *) ego->cldcpy;
+     plan_rdft *cldrest;
+     INT i, vl = ego->vl, nbuf = ego->nbuf;
+     INT ivs_by_nbuf = ego->ivs_by_nbuf, ovs_by_nbuf = ego->ovs_by_nbuf;
+     R *bufs;
+
+     bufs = (R *)MALLOC(sizeof(R) * nbuf * ego->bufdist, BUFFERS);
+
+     for (i = nbuf; i <= vl; i += nbuf) {
+          /* copy input into bufs: */
+          cldcpy->apply((plan *) cldcpy, I, bufs);
+	  I += ivs_by_nbuf;
+
+          /* transform to output */
+          cld->apply((plan *) cld, bufs, O);
+	  O += ovs_by_nbuf;
      }
 
      /* Do the remaining transforms, if any: */
@@ -103,15 +135,23 @@ static int applicable0(const problem *p_, const planner *plnr)
 	  if (X(toobig)(p->sz->dims[0].n) && CONSERVE_MEMORYP(plnr))
 	       return 0;
 
-	  /*
-	    In principle, the buffered transforms might be useful
-	    when working out of place.  However, in order to
-	    prevent infinite loops in the planner, we require
-	    that the output stride of the buffered transforms be
-	    greater than 1.
-	  */
-	  if (p->I != p->O)
-	       return (d[0].os > 1);
+	  if (p->I != p->O) {
+	       if (p->kind[0] == HC2R) {
+		    /* Allow HC2R problems only if the input is to be
+		       preserved.  This solver sets NO_DESTROY_INPUT,
+		       which prevents infinite loops */
+		    return (NO_DESTROY_INPUTP(plnr));
+	       } else {
+		    /*
+		      In principle, the buffered transforms might be useful
+		      when working out of place.  However, in order to
+		      prevent infinite loops in the planner, we require
+		      that the output stride of the buffered transforms be
+		      greater than 1.
+		    */
+		    return (d[0].os > 1);
+	       }
+	  }
 
 	  /*
 	   * If the problem is in place, the input/output strides must
@@ -139,9 +179,18 @@ static int applicable(const problem *p_, const planner *plnr)
      if (!applicable0(p_, plnr)) return 0;
 
      p = (const problem_rdft *) p_;
-     if (NO_UGLYP(plnr)) {
-	  if (p->I != p->O) return 0;
-	  if (X(toobig)(p->sz->dims[0].n)) return 0;
+     if (p->kind[0] == HC2R) {
+	  if (NO_UGLYP(plnr)) {
+	       /* UGLY if in-place and too big, since the problem
+		  could be solved via transpositions */
+	       if (p->I == p->O && X(toobig)(p->sz->dims[0].n)) 
+		    return 0;
+	  }
+     } else {
+	  if (NO_UGLYP(plnr)) {
+	       if (p->I != p->O) return 0;
+	       if (X(toobig)(p->sz->dims[0].n)) return 0;
+	  }
      }
      return 1;
 }
@@ -156,6 +205,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      R *bufs = (R *) 0;
      INT nbuf = 0, bufdist, n, vl;
      INT ivs, ovs;
+     int hc2rp;
 
      static const plan_adt padt = {
 	  X(rdft_solve), awake, print, destroy
@@ -168,6 +218,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      n = X(tensor_sz)(p->sz);
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
+     hc2rp = p->kind[0] == HC2R;
 
      nbuf = X(nbuf)(n, vl);
      bufdist = X(bufdist)(n, vl);
@@ -176,22 +227,41 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      /* initial allocation for the purpose of planning */
      bufs = (R *) MALLOC(sizeof(R) * nbuf * bufdist, BUFFERS);
 
-     /* allow destruction of input if problem is in place */
-     cld = X(mkplan_f_d)(plnr, 
-			 X(mkproblem_rdft_d)(
-			      X(mktensor_1d)(n, p->sz->dims[0].is, 1),
-			      X(mktensor_1d)(nbuf, ivs, bufdist),
-			      TAINT(p->I, ivs * nbuf), bufs, p->kind),
-			 0, 0, (p->I == p->O) ? NO_DESTROY_INPUT : 0);
-     if (!cld) goto nada;
+     if (hc2rp) {
+	  /* allow destruction of buffer */
+	  cld = X(mkplan_f_d)(plnr, 
+			      X(mkproblem_rdft_d)(
+				   X(mktensor_1d)(n, 1, p->sz->dims[0].os),
+				   X(mktensor_1d)(nbuf, bufdist, ovs),
+				   bufs, TAINT(p->O, ovs * nbuf), p->kind),
+			      0, 0, NO_DESTROY_INPUT);
+	  if (!cld) goto nada;
 
-     /* copying back from the buffer is a rank-0 transform: */
-     cldcpy = X(mkplan_d)(plnr, 
-			  X(mkproblem_rdft_0_d)(
-			       X(mktensor_2d)(nbuf, bufdist, ovs,
-					      n, 1, p->sz->dims[0].os),
-			       bufs, TAINT(p->O, ovs * nbuf)));
-     if (!cldcpy) goto nada;
+	  /* copying input into buffer buffer is a rank-0 transform: */
+	  cldcpy = X(mkplan_d)(plnr, 
+			       X(mkproblem_rdft_0_d)(
+				    X(mktensor_2d)(nbuf, ivs, bufdist,
+						   n, p->sz->dims[0].is, 1),
+				    TAINT(p->I, ivs * nbuf), bufs));
+	  if (!cldcpy) goto nada;
+     } else {
+	  /* allow destruction of input if problem is in place */
+	  cld = X(mkplan_f_d)(plnr, 
+			      X(mkproblem_rdft_d)(
+				   X(mktensor_1d)(n, p->sz->dims[0].is, 1),
+				   X(mktensor_1d)(nbuf, ivs, bufdist),
+				   TAINT(p->I, ivs * nbuf), bufs, p->kind),
+			      0, 0, (p->I == p->O) ? NO_DESTROY_INPUT : 0);
+	  if (!cld) goto nada;
+
+	  /* copying back from the buffer is a rank-0 transform: */
+	  cldcpy = X(mkplan_d)(plnr, 
+			       X(mkproblem_rdft_0_d)(
+				    X(mktensor_2d)(nbuf, bufdist, ovs,
+						   n, 1, p->sz->dims[0].os),
+				    bufs, TAINT(p->O, ovs * nbuf)));
+	  if (!cldcpy) goto nada;
+     }
 
      /* deallocate buffers, let apply() allocate them for real */
      X(ifree)(bufs);
@@ -209,14 +279,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
      if (!cldrest) goto nada;
 
-     pln = MKPLAN_RDFT(P, &padt, apply);
+     pln = MKPLAN_RDFT(P, &padt, hc2rp ? apply_hc2r : apply);
      pln->cld = cld;
      pln->cldcpy = cldcpy;
      pln->cldrest = cldrest;
      pln->n = n;
      pln->vl = vl;
-     pln->ivs = ivs * nbuf;
-     pln->ovs = ovs * nbuf;
+     pln->ivs_by_nbuf = ivs * nbuf;
+     pln->ovs_by_nbuf = ovs * nbuf;
 
      pln->nbuf = nbuf;
      pln->bufdist = bufdist;
