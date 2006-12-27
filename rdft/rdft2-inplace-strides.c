@@ -30,7 +30,7 @@
 int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim)
 {
      INT N, Nc;
-     INT is, os;
+     INT rs, cs;
      int i;
      
      for (i = 0; i + 1 < p->sz->rnk; ++i)
@@ -53,12 +53,12 @@ int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim)
      N = X(tensor_sz)(p->sz);
      Nc = (N / p->sz->dims[p->sz->rnk-1].n) *
 	  (p->sz->dims[p->sz->rnk-1].n/2 + 1);
-     X(rdft2_strides)(p->kind, p->sz->dims + p->sz->rnk - 1, &is, &os);
+     X(rdft2_strides)(p->kind, p->sz->dims + p->sz->rnk - 1, &rs, &cs);
 
-     /* the factor of 2 comes from the fact that IS is the stride
+     /* the factor of 2 comes from the fact that RS is the stride
 	of p->r0 and p->r1, which is twice as large as the strides
 	in the r2r case */
      return(p->vecsz->dims[vdim].is == p->vecsz->dims[vdim].os
-	    && X(iabs)(2 * p->vecsz->dims[vdim].os)
-	    >= X(imax)(2 * Nc * X(iabs)(os), N * X(iabs)(is)));
+	    && (X(iabs)(2 * p->vecsz->dims[vdim].os)
+		>= X(imax)(2 * Nc * X(iabs)(cs), N * X(iabs)(rs))));
 }

@@ -218,7 +218,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      n = X(tensor_sz)(p->sz);
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
-     hc2rp = p->kind[0] == HC2R;
+     hc2rp = (p->kind[0] == HC2R);
 
      nbuf = X(nbuf)(n, vl);
      bufdist = X(bufdist)(n, vl);

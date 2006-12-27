@@ -7,7 +7,7 @@ noinst_LTLIBRARIES = librdft.la
 # pkginclude_HEADERS = codelet-rdft.h rdft.h
 
 RDFT2 = buffered2.c direct2.c nop2.c rank0-rdft2.c rank-geq2-rdft2.c	\
-plan2.c problem2.c solve2.c vrank-geq1-rdft2.c				\
+plan2.c problem2.c solve2.c vrank-geq1-rdft2.c rdft2-rdft.c		\
 rdft2-tensor-max-index.c rdft2-inplace-strides.c rdft2-strides.c	\
 khc2c.c ct-hc2c.h ct-hc2c.c ct-hc2c-direct.c
 

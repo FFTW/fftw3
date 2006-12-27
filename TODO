@@ -36,7 +36,4 @@ TODO before FFTW-$2\pi$:
 
 * memoize triggen.
 
-* orb problems with FFTW_PRESERVE_INPUT ought to use SIMD somehow.
-  (Currently they reduce to an r2r problem that does not use SIMD.)
-
 * eliminate alignment hacks, which ought to be obsolete by now.

@@ -146,8 +146,7 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
 			    R *r0, R *r1, R *cr, R *ci,
 			    rdft_kind kind)
 {
-     problem_rdft2 *ego =
-          (problem_rdft2 *)X(mkproblem)(sizeof(problem_rdft2), &padt);
+     problem_rdft2 *ego;
 
      A(kind == R2HC || kind == R2HCII || kind == HC2R || kind == HC2RIII);
      A(X(tensor_kosherp)(sz));
@@ -158,12 +157,14 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
      if (UNTAINT(r0) == UNTAINT(ci))
 	  return X(mkproblem_unsolvable)();
 
-     /* if odd elements exist, check R1 */
-     if (sz->rnk > 0 && UNTAINT(r1) == UNTAINT(cr))
-	  return X(mkproblem_unsolvable)();
+     /* FIXME: should check UNTAINT(r1) == UNTAINT(cr) but
+	only if odd elements exist, which requires compressing the 
+	tensors first */
 
      if (UNTAINT(r0) == UNTAINT(cr)) 
 	  r0 = cr = JOIN_TAINT(r0, cr);
+
+     ego = (problem_rdft2 *)X(mkproblem)(sizeof(problem_rdft2), &padt);
 
      if (sz->rnk > 1) { /* have to compress rnk-1 dims separately, ugh */
 	  tensor *szc = X(tensor_copy_except)(sz, sz->rnk - 1);

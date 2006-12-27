@@ -48,7 +48,7 @@ typedef struct {
 
      plan *cld;
      INT vl;
-     INT ivs, ovs;
+     INT rvs, cvs;
      const S *solver;
 } P;
 
@@ -56,12 +56,12 @@ static void apply(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {
      const P *ego = (const P *) ego_;
      INT i, vl = ego->vl;
-     INT ivs = ego->ivs, ovs = ego->ovs;
+     INT rvs = ego->rvs, cvs = ego->cvs;
      rdft2apply cldapply = ((plan_rdft2 *) ego->cld)->apply;
 
      for (i = 0; i < vl; ++i) {
-          cldapply(ego->cld, r0 + i * ivs, r1 + i * ivs,
-		   cr + i * ovs, ci + i * ovs);
+          cldapply(ego->cld, r0 + i * rvs, r1 + i * rvs,
+		   cr + i * cvs, ci + i * cvs);
      }
 }
 
@@ -112,7 +112,6 @@ static int applicable(const solver *ego_, const problem *p_,
 		      const planner *plnr, int *dp)
 {
      const S *ego = (const S *)ego_;
-
      if (!applicable0(ego_, p_, dp)) return 0;
 
      /* fftw2 behavior */
@@ -153,7 +152,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld;
      int vdim;
      iodim *d;
-     INT ivs, ovs;
+     INT rvs, cvs;
 
      static const plan_adt padt = {
 	  X(rdft2_solve), awake, print, destroy
@@ -167,14 +166,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      A(d->n > 1);  /* or else, p->ri + d->is etc. are invalid */
 
-     X(rdft2_strides)(p->kind, d, &ivs, &ovs);
+     X(rdft2_strides)(p->kind, d, &rvs, &cvs);
 
      cld = X(mkplan_d)(plnr, 
 		       X(mkproblem_rdft2_d)(
 			    X(tensor_copy)(p->sz),
 			    X(tensor_copy_except)(p->vecsz, vdim),
-			    TAINT(p->r0, ivs), TAINT(p->r1, ivs), 
-			    TAINT(p->cr, ovs), TAINT(p->ci, ovs),
+			    TAINT(p->r0, rvs), TAINT(p->r1, rvs), 
+			    TAINT(p->cr, cvs), TAINT(p->ci, cvs),
 			    p->kind));
      if (!cld) return (plan *) 0;
 
@@ -182,8 +181,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      pln->cld = cld;
      pln->vl = d->n;
-     pln->ivs = ivs;
-     pln->ovs = ovs;
+     pln->rvs = rvs;
+     pln->cvs = cvs;
 
      pln->solver = ego;
      X(ops_zero)(&pln->super.super.ops);

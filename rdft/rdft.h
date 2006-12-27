@@ -126,7 +126,7 @@ problem *X(mkproblem_rdft2_d_3pointers)(tensor *sz, tensor *vecsz,
 					R *r, R *cr, R *ci, rdft_kind kind);
 int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim);
 INT X(rdft2_tensor_max_index)(const tensor *sz, rdft_kind k);
-void X(rdft2_strides)(rdft_kind kind, const iodim *d, INT *is, INT *os);
+void X(rdft2_strides)(rdft_kind kind, const iodim *d, INT *rs, INT *cs);
 INT X(rdft2_complex_n)(INT real_n, rdft_kind kind);
 
 /* verify.c: */
@@ -154,6 +154,7 @@ solver *X(mksolver_rdft2_direct)(kr2c k, const kr2c_desc *desc);
 
 void X(rdft2_vrank_geq1_register)(planner *p);
 void X(rdft2_buffered_register)(planner *p);
+void X(rdft2_rdft_register)(planner *p);
 void X(rdft2_nop_register)(planner *p);
 void X(rdft2_rank0_register)(planner *p);
 void X(rdft2_rank_geq2_register)(planner *p);
