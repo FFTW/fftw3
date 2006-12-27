@@ -68,7 +68,7 @@ static void recur(const iodim *dims, int rnk, R *I0, R *I1)
 	  if (rnk == 1) {
 	       for (i = 0; i < n - 1; i += 2) {
 		    *I0 = *I1 = K(0.0);
-		    ++I0; ++I1;
+		    I0 += is; I1 += is;
 	       }
 	       if (i < n) 
 		    *I0 = K(0.0);
