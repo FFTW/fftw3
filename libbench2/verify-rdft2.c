@@ -154,7 +154,7 @@ static void rdft2_apply(dofft_closure *k_,
      ri = (bench_real *) p->in;
      ro = (bench_real *) p->out;
 
-     if (p->sz->rnk > 0) {
+     if (FINITE_RNK(p->sz->rnk) && p->sz->rnk > 0 && n2 > 0) {
 	  probsz2 = tensor_copy_sub(p->sz, p->sz->rnk - 1, 1);
 	  totalsz2 = tensor_copy_sub(totalsz, 0, totalsz->rnk - 1);
 	  pckdsz2 = tensor_copy_sub(pckdsz, 0, pckdsz->rnk - 1);
