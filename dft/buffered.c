@@ -263,18 +263,5 @@ static solver *mksolver(void)
 
 void X(dft_buffered_register)(planner *p)
 {
-     /* FIXME: what are good defaults? */
-     static const bufadt adt = {
-	  /* nbuf */           8,
-	  /* maxbufsz */       (INT)(65536 / sizeof(R)),
-	  /* skew_alignment */ 8,
-#if HAVE_SIMD  /* 5 is odd and screws up the alignment. */
-	  /* skew */           6,
-#else
-	  /* skew */           5,
-#endif
-	  /* nam */            "dft-buffered"
-     };
-
-     REGISTER_SOLVER(p, mksolver(&adt));
+     REGISTER_SOLVER(p, mksolver());
 }
