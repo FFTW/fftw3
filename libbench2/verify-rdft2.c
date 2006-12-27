@@ -232,6 +232,9 @@ void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e)
 
      BENCH_ASSERT(p->kind == PROBLEM_REAL);
 
+     if (!FINITE_RNK(p->sz) || !FINITE_RNK(p->vecsz))
+	  return;      /* give up */
+
      k.k.apply = rdft2_apply;
      k.k.recopy_input = 0;
      k.p = p;
