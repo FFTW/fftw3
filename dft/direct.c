@@ -109,8 +109,9 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 static void apply_extra_iter(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
-     ASSERT_ALIGNED_DOUBLE;
      INT vl = ego->vl;
+
+     ASSERT_ALIGNED_DOUBLE;
 
      /* for 4-way SIMD when VL is odd: iterate over an
 	even vector length VL, and then execute the last
