@@ -252,7 +252,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	       X(mkproblem_rdft2_d)(
 		    X(mktensor_1d)(n, p->sz->dims[0].is, 2),
 		    X(mktensor_1d)(nbuf, ivs, bufdist),
-		    TAINT(p->r0, ovs * nbuf), TAINT(p->r1, ovs * nbuf),
+		    TAINT(p->r0, ivs * nbuf), TAINT(p->r1, ivs * nbuf),
 		    bufs + roffset, bufs + ioffset, p->kind),
 	       0, 0, (p->r0 == p->cr) ? NO_DESTROY_INPUT : 0);
 	  if (!cld) goto nada;
