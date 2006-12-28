@@ -45,6 +45,12 @@ void speed(const char *param, int setup_only)
      timer_start(LIBBENCH_TIMER);
      setup(p);
      p->setup_time = timer_stop(LIBBENCH_TIMER);
+
+     /* reset the input to zero again, because the planner in paranoid
+	mode sets it to random values, thus making the benchmark
+	diverge. */
+     if (!no_speed_allocation) 
+	  problem_zero(p);
      
      if (setup_only)
 	  goto done;
