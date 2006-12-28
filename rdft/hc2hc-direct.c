@@ -206,7 +206,8 @@ static plan *mkcldw(const hc2hc_solver *ego_,
 	  X(mkproblem_rdft_1_d)((CLD0P(mstart) ?
 				 X(mktensor_1d)(r, rs, rs) : X(mktensor_0d)()),
 				X(mktensor_0d)(),
-				IO, IO, kind));
+				TAINT(IO, vs), TAINT(IO, vs), 
+				kind));
      if (!cld0) goto nada;
 
      cldm = X(mkplan_d)(
@@ -214,7 +215,7 @@ static plan *mkcldw(const hc2hc_solver *ego_,
 	  X(mkproblem_rdft_1_d)((CLDMP(m, mstart, mcount) ?
 				 X(mktensor_1d)(r, rs, rs) : X(mktensor_0d)()),
 				X(mktensor_0d)(),
-				IO + imid, IO + imid, 
+				TAINT(IO + imid, vs), TAINT(IO + imid, vs),
 				kind == R2HC ? R2HCII : HC2RIII));
      if (!cldm) goto nada;
 	  

@@ -322,7 +322,9 @@ static plan *mkcldw(const hc2c_solver *ego_, rdft_kind kind,
 	  plnr, 
 	  X(mkproblem_rdft2_d)(X(mktensor_1d)(r, rs, rs),
 			       X(mktensor_0d)(),
-			       cr, ci, cr, ci, kind));
+			       TAINT(cr, vs), TAINT(ci, vs),
+			       TAINT(cr, vs), TAINT(ci, vs),
+			       kind));
      if (!cld0) goto nada;
 
      cldm = X(mkplan_d)(
@@ -330,7 +332,8 @@ static plan *mkcldw(const hc2c_solver *ego_, rdft_kind kind,
 	  X(mkproblem_rdft2_d)(((m % 2) ?
 				X(mktensor_0d)() : X(mktensor_1d)(r, rs, rs) ),
 			       X(mktensor_0d)(),
-			       cr + imid, ci + imid, cr + imid, ci + imid,
+			       TAINT(cr + imid, vs), TAINT(ci + imid, vs),
+			       TAINT(cr + imid, vs), TAINT(ci + imid, vs),
 			       kind == R2HC ? R2HCII : HC2RIII));
      if (!cldm) goto nada;
 
