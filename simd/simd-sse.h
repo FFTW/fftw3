@@ -47,7 +47,6 @@ typedef __m128 V;
 #define VMUL _mm_mul_ps
 #define VXOR _mm_xor_ps
 #define SHUFPS _mm_shuffle_ps
-#define LOADH(addr, val) _mm_loadh_pi(val, (const __m64 *)(addr))
 #define STOREH(addr, val) _mm_storeh_pi((__m64 *)(addr), val)
 #define STOREL(addr, val) _mm_storel_pi((__m64 *)(addr), val)
 #define UNPCKH _mm_unpackhi_ps
@@ -67,6 +66,15 @@ typedef __m128 V;
    the stack, causing valgrind to complain about uninitialized reads.
 */   
 
+  static inline V LD(const R *x, INT ivs, const R *aligned_like)
+  {
+       V var;
+       (void)aligned_like; /* UNUSED */
+       __asm__("movlps %1, %0\n\tmovhps %2, %0"
+	       : "=x"(var) : "m"(x[0]), "m"(x[ivs]));
+       return var;
+  }
+
 static inline V LOADL0(const R *addr, V val)
 {
      V retval;
@@ -81,9 +89,21 @@ static inline V LOADL0(const R *addr, V val)
 }
 
 #else
-#define DVK(var, val) const R var = K(val)
-#define LDK(x) _mm_set_ps1(x)
-#define LOADL0(addr, val) _mm_loadl_pi(val, (const __m64 *)(addr))
+
+# define DVK(var, val) const R var = K(val)
+# define LDK(x) _mm_set_ps1(x)
+# define LOADH(addr, val) _mm_loadh_pi(val, (const __m64 *)(addr))
+# define LOADL0(addr, val) _mm_loadl_pi(val, (const __m64 *)(addr))
+
+  static inline V LD(const R *x, INT ivs, const R *aligned_like)
+  {
+       V var;
+       (void)aligned_like; /* UNUSED */
+       var = LOADL0(x, var);
+       var = LOADH(x + ivs, var);
+       return var;
+  }
+
 #endif
 
 union fvec {
@@ -103,15 +123,6 @@ union uvec {
 #define SHUFVAL(fp0,fp1,fp2,fp3) \
    (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
-
-static inline V LD(const R *x, INT ivs, const R *aligned_like)
-{
-     V var;
-     (void)aligned_like; /* UNUSED */
-     var = LOADL0(x, var);
-     var = LOADH(x + ivs, var);
-     return var;
-}
 
 static inline V LDA(const R *x, INT ivs, const R *aligned_like)
 {
