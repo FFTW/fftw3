@@ -53,18 +53,18 @@ typedef __m128 V;
 #define UNPCKL _mm_unpacklo_ps
 
 #ifdef __GNUC__
-#define DVK(var, val) const V var = __extension__ ({		\
+#  define DVK(var, val) const V var = __extension__ ({		\
      static const union fvec _var = { {val, val, val, val} };	\
      _var.v;							\
-})
-#define LDK(x) x
+   })
+#  define LDK(x) x
 
-/* we use inline asm because gcc generates slow code for
-   _mm_loadh_pi().  gcc insists upon having an existing variable for
-   VAL, which is however never used.  Thus, it generates code to move
-   values in and out the variable.  Worse still, gcc-4.0 stores VAL on
-   the stack, causing valgrind to complain about uninitialized reads.
-*/   
+  /* we use inline asm because gcc generates slow code for
+     _mm_loadh_pi().  gcc insists upon having an existing variable for
+     VAL, which is however never used.  Thus, it generates code to move
+     values in and out the variable.  Worse still, gcc-4.0 stores VAL on
+     the stack, causing valgrind to complain about uninitialized reads.
+  */   
 
   static inline V LD(const R *x, INT ivs, const R *aligned_like)
   {
@@ -74,19 +74,6 @@ typedef __m128 V;
 	       : "=x"(var) : "m"(x[0]), "m"(x[ivs]));
        return var;
   }
-
-static inline V LOADL0(const R *addr, V val)
-{
-     V retval;
-     /* gcc-3.3 -O3 produces wrong code with the ``obvious'' coding
-
-          __asm__("movlps %1, %0" : "=x"(retval) : "m"(*addr));
-
-        So we are back to the uninitialized variable nonsense.  Grrr... 
-     */
-     __asm__("movlps %1, %0" : "=x"(retval) : "m"(*addr), "x"(val));
-     return retval;
-}
 
 #else
 
