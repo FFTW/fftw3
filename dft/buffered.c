@@ -58,11 +58,11 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  ro += ovs; io += ovs;
      }
 
+     X(ifree)(bufs);
+
      /* Do the remaining transforms, if any: */
      cldrest = (plan_dft *) ego->cldrest;
      cldrest->apply((plan *) cldrest, ri, ii, ro, io);
-
-     X(ifree)(bufs);
 }
 
 

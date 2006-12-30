@@ -56,11 +56,11 @@ static void apply(const plan *ego_, R *I, R *O)
 	  O += ovs_by_nbuf;
      }
 
+     X(ifree)(bufs);
+
      /* Do the remaining transforms, if any: */
      cldrest = (plan_rdft *) ego->cldrest;
      cldrest->apply((plan *) cldrest, I, O);
-
-     X(ifree)(bufs);
 }
 
 /* for hc2r problems, copy the input into buffer, and then
@@ -88,11 +88,11 @@ static void apply_hc2r(const plan *ego_, R *I, R *O)
 	  O += ovs_by_nbuf;
      }
 
+     X(ifree)(bufs);
+
      /* Do the remaining transforms, if any: */
      cldrest = (plan_rdft *) ego->cldrest;
      cldrest->apply((plan *) cldrest, I, O);
-
-     X(ifree)(bufs);
 }
 
 
