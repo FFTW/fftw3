@@ -489,7 +489,7 @@ library and link it into your program, not just \courier{#include
 
 \question 22oct:nostack My program crashes, complaining about stack space.
 
-You cannot declare large arrays statically (e.g. via
+You cannot declare large arrays with automatic storage (e.g. via
 \courier{fftw_complex array[N]\}); you should use
 \courier{fftw_malloc\} (or equivalent) to allocate the arrays you want
 to transform if they are larger than a few hundred elements.
