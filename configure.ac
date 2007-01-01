@@ -350,7 +350,18 @@ if test "x$enable_fortran" = xyes; then
 	f77_foo2=`echo $f77foo | sed 's/77/77_/'`
 	if test "$f77_foo" = "$f77_foo2"; then
 		AC_DEFINE(F77_FUNC_EQUIV, 1, [Define if F77_FUNC and F77_FUNC_ are equivalent.])
+
+		# Include g77 wrappers by default for GNU systems or gfortran
+		with_g77_wrappers=$ac_cv_f77_compiler_gnu
+		case $host_os in *gnu*) with_g77_wrappers=yes ;; esac
 	fi
+else
+	with_g77_wrappers=no
+fi
+
+AC_ARG_WITH(g77-wrappers, [AC_HELP_STRING([--with-g77-wrappers],[force inclusion of g77-compatible wrappers in addition to any other Fortran compiler that is detected])], with_g77_wrappers=$withval)
+if test "x$with_g77_wrappers" = "xyes"; then
+	AC_DEFINE(WITH_G77_WRAPPERS,1,[Include g77-compatible wrappers in addition to any other Fortran wrappers.])
 fi
 
 dnl -----------------------------------------------------------------------

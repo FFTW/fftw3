@@ -52,6 +52,12 @@
 #  define F77_FUNC_(a, A) a ## __
 #endif
 
+#if defined(WITH_G77_WRAPPERS) && !defined(DISABLE_FORTRAN)
+#  undef F77_FUNC_
+#  define F77_FUNC_(a, A) a ## __
+#  undef F77_FUNC_EQUIV
+#endif
+
 /* annoying Windows syntax for shared-library declarations */
 #if defined(FFTW_DLL) && (defined(_WIN32) || defined(__WIN32__))
 #  define FFTW_VOIDFUNC __declspec(dllexport) void
