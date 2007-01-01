@@ -328,7 +328,7 @@ fi
 
 dnl -----------------------------------------------------------------------
 
-AC_ARG_ENABLE(fortran, [  --disable-fortran       don't include fortran-callable wrappers], enable_fortran=$enableval, enable_fortran=yes)
+AC_ARG_ENABLE(fortran, [AC_HELP_STRING([--disable-fortran],[don't include Fortran-callable wrappers])], enable_fortran=$enableval, enable_fortran=yes)
 
 if test "$enable_fortran" = "yes"; then
         AC_PROG_F77
