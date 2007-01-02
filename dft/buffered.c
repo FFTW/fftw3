@@ -30,7 +30,7 @@ typedef struct {
 
      plan *cld, *cldcpy, *cldrest;
      INT n, vl, nbuf, bufdist;
-     INT ivs, ovs;
+     INT ivs_by_nbuf, ovs_by_nbuf;
      INT roffset, ioffset;
 } P;
 
@@ -45,17 +45,17 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
      plan_dft *cldrest;
      INT i, vl = ego->vl;
-     INT ivs = ego->ivs, ovs = ego->ovs;
+     INT ivs_by_nbuf = ego->ivs_by_nbuf, ovs_by_nbuf = ego->ovs_by_nbuf;
      INT roffset = ego->roffset, ioffset = ego->ioffset;
 
      for (i = nbuf; i <= vl; i += nbuf) {
           /* transform to bufs: */
           cld->apply((plan *) cld, ri, ii, bufs + roffset, bufs + ioffset);
-	  ri += ivs; ii += ivs;
+	  ri += ivs_by_nbuf; ii += ivs_by_nbuf;
 
           /* copy back */
           cldcpy->apply((plan *) cldcpy, bufs+roffset, bufs+ioffset, ro, io);
-	  ro += ovs; io += ovs;
+	  ro += ovs_by_nbuf; io += ovs_by_nbuf;
      }
 
      X(ifree)(bufs);
@@ -230,8 +230,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->cldrest = cldrest;
      pln->n = n;
      pln->vl = vl;
-     pln->ivs = ivs * nbuf;
-     pln->ovs = ovs * nbuf;
+     pln->ivs_by_nbuf = ivs * nbuf;
+     pln->ovs_by_nbuf = ovs * nbuf;
      pln->roffset = roffset;
      pln->ioffset = ioffset;
 
