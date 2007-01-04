@@ -167,7 +167,7 @@ for flag in $acx_pthread_flags; do
                      pthread_attr_init((pthread_attr_t*) 0);
                      pthread_cleanup_push((void(*)(void *)) 0, (void*) 0);
                      pthread_create((pthread_t*) 0, (pthread_attr_t*) 0,
-                                    (void(*)(void *)) 0, (void*) 0);
+                                    (void*(*)(void *)) 0, (void*) 0);
                      pthread_cleanup_pop(0); ],
                     [acx_pthread_ok=yes])
 
