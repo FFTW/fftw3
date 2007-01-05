@@ -44,7 +44,7 @@ void speed(const char *param, int setup_only)
 
      timer_start(LIBBENCH_TIMER);
      setup(p);
-     p->setup_time = timer_stop(LIBBENCH_TIMER);
+     p->setup_time = bench_cost_postprocess(timer_stop(LIBBENCH_TIMER));
 
      /* reset the input to zero again, because the planner in paranoid
 	mode sets it to random values, thus making the benchmark
@@ -61,7 +61,7 @@ void speed(const char *param, int setup_only)
 	  for (k = 0; k < time_repeat; ++k) {
 	       timer_start(LIBBENCH_TIMER);
 	       doit(iter, p);
-	       y = timer_stop(LIBBENCH_TIMER);
+	       y = bench_cost_postprocess(timer_stop(LIBBENCH_TIMER));
 	       if (y < 0) /* yes, it happens */
 		    goto start_over;
 	       t[k] = y;

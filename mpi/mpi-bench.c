@@ -575,3 +575,10 @@ void bench_exit(int status)
 {
      MPI_Abort(MPI_COMM_WORLD, status);
 }
+
+double bench_cost_postprocess(double cost)
+{
+     double cost_max;
+     MPI_Allreduce(&cost, &cost_max, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+     return cost_max;
+}

@@ -175,6 +175,7 @@ extern void after_problem_hccopy_to(bench_problem *p, bench_real *ro, bench_real
 extern void after_problem_rcopy_from(bench_problem *p, bench_real *ri);
 extern void after_problem_rcopy_to(bench_problem *p, bench_real *ro);
 extern void bench_exit(int status);
+extern double bench_cost_postprocess(double cost);
 
 /**************************************************************
  * malloc
