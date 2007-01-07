@@ -21,14 +21,31 @@
 /* Complex DFTs of rank == 1 when the vector length vn is >= # processes.
    In this case, we don't need to use a six-step type algorithm, and can
    instead transpose the DFT dimension with the vector dimension to 
-   make the DFT local.
-
-   In this case, TRANSPOSED_IN/OUT mean that the DFT dimension is pre/post
-   transposed with the vector dimension, respectively. */
+   make the DFT local. */
 
 #include "mpi-dft.h"
 #include "mpi-transpose.h"
 #include "dft.h"
+
+/* Different ways to rearrange the vector dimension vn during transposition,
+   reflecting different tradeoffs between ease of transposition and
+   contiguity during the subsequent DFTs.
+
+   TODO: can we pare this down to CONTIG and DISCONTIG, at least
+   in MEASURE mode? */
+typedef enum {
+     CONTIG = 0, /* vn x 1: make subsequent DFTs contiguous */
+     DISCONTIG, /* P x (vn/P) for P processes */
+     SQUARE_BEFORE, /* try to get square transpose at beginning */
+     SQUARE_MIDDLE, /* try to get square transpose in the middle */
+     SQUARE_AFTER /* try to get square transpose at end */
+} rearrangement;
+
+typedef struct {
+     solver super;
+     int preserve_input; /* preserve input even if DESTROY_INPUT was passed */
+     rearrangement rearrange;
+} S;
 
 typedef struct {
      plan_mpi_dft super;
@@ -36,6 +53,7 @@ typedef struct {
      plan *cldt_before, *cld, *cldt_after;
      INT roff, ioff;
      int preserve_input;
+     rearrangement rearrange;
 } P;
 
 static void apply(const plan *ego_, R *I, R *O)
@@ -45,48 +63,57 @@ static void apply(const plan *ego_, R *I, R *O)
      plan_rdft *cldt_before, *cldt_after;
      INT roff = ego->roff, ioff = ego->ioff;
      
-     /* global transpose, if not TRANSPOSED_IN */
+     /* global transpose */
      cldt_before = (plan_rdft *) ego->cldt_before;
-     if (cldt_before) {
-	  cldt_before->apply(ego->cldt_before, I, O);
+     cldt_before->apply(ego->cldt_before, I, O);
+     
+     if (ego->preserve_input) I = O;
 	  
-	  if (ego->preserve_input) I = O;
-	  
-	  /* 1d DFT(s) */
-	  cld = (plan_dft *) ego->cld;
-	  cld->apply(ego->cld, O+roff, O+ioff, I+roff, I+ioff);
-	  
-	  /* global transpose, if not TRANSPOSED_OUT */
-	  cldt_after = (plan_rdft *) ego->cldt_after;
-	  if (cldt_after)
-	       cldt_after->apply(ego->cldt_after, I, O);
-     }
-     else {
-	  /* 1d DFT(s) */
-	  cld = (plan_dft *) ego->cld;
-	  cld->apply(ego->cld, I+roff, I+ioff, O+roff, O+ioff);
-	  
-	  /* global transpose, if not TRANSPOSED_OUT */
-	  cldt_after = (plan_rdft *) ego->cldt_after;
-	  if (cldt_after)
-	       cldt_after->apply(ego->cldt_after, O, O);
-     }
+     /* 1d DFT(s) */
+     cld = (plan_dft *) ego->cld;
+     cld->apply(ego->cld, O+roff, O+ioff, I+roff, I+ioff);
+     
+     /* global transpose */
+     cldt_after = (plan_rdft *) ego->cldt_after;
+     cldt_after->apply(ego->cldt_after, I, O);
 }
 
-static int applicable(const solver *ego_, const problem *p_,
+static int div_mult(INT b, INT a) { 
+     return (a > b && a % b == 0);
+}
+static int div_mult2(INT b, INT a, INT n) { 
+     return (div_mult(b, a) && div_mult(n, b));
+}
+
+static int applicable(const S *ego, const problem *p_,
 		      const planner *plnr)
 {
      const problem_mpi_dft *p = (const problem_mpi_dft *) p_;
      int n_pes;
-     UNUSED(ego_);
-     UNUSED(plnr);
      MPI_Comm_size(p->comm, &n_pes);
      return (1
 	     && p->sz->rnk == 1
-	     && p->vn >= n_pes /* TODO: relax this, using more memory? */
+	     && !(p->flags & ~RANK1_BIGVEC_ONLY)
+	     && (!ego->preserve_input || (!NO_DESTROY_INPUTP(plnr)
+					  && p->I != p->O))
+	     && (p->vn >= n_pes /* TODO: relax this, using more memory? */
+		 || (p->flags & RANK1_BIGVEC_ONLY))
+
+	     /* note: it is important that cases other than CONTIG be
+		applicable only when the resulting transpose dimension
+		is divisible by n_pes; otherwise, the allocation size
+		returned by the API will be incorrect */
+	     && (ego->rearrange != DISCONTIG || div_mult(n_pes, p->vn))
+	     && (ego->rearrange != SQUARE_BEFORE 
+		 || div_mult2(p->sz->dims[0].b[IB], p->vn, n_pes))
+	     && (ego->rearrange != SQUARE_AFTER
+		 || (p->sz->dims[0].b[IB] != p->sz->dims[0].b[OB]
+		     && div_mult2(p->sz->dims[0].b[OB], p->vn, n_pes)))
+	     && (ego->rearrange != SQUARE_MIDDLE
+		 || div_mult(p->sz->dims[0].n * n_pes, p->vn))
+
 	     && (!NO_UGLYP(plnr) /* ugly if dft-serial is applicable */
                  || !XM(dft_serial_applicable)(p))
-	     && !SCRAMBLEDP(p->flags)
 	  );
 }
 
@@ -109,20 +136,21 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi-dft-rank1-bigvec");
-     if (ego->cldt_before) p->print(p, "%(%p%)", ego->cldt_before);
-     if (ego->cld) p->print(p, "%(%p%)", ego->cld);
-     if (ego->cldt_after) p->print(p, "%(%p%)", ego->cldt_after);
-     p->print(p, ")");
+     const char descrip[][16] = { "contig", "discontig", "square-after",
+				  "square-middle", "square-before" };
+     p->print(p, "(mpi-dft-rank1-bigvec/%s%s %(%p%) %(%p%) %(%p%))",
+	      descrip[ego->rearrange], ego->preserve_input==2 ?"/p":"",
+	      ego->cldt_before, ego->cld, ego->cldt_after);
 }
 
-static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
+static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
+     const S *ego = (const S *) ego_;
      const problem_mpi_dft *p;
      P *pln;
      plan *cld = 0, *cldt_before = 0, *cldt_after = 0;
      R *ri, *ii, *ro, *io, *I, *O;
-     INT vblock, vb;
+     INT yblock, yb, nx, ny, vn;
      int my_pe, n_pes;
      static const plan_adt padt = {
           XM(dft_solve), awake, print, destroy
@@ -138,57 +166,68 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      MPI_Comm_rank(p->comm, &my_pe);
      MPI_Comm_size(p->comm, &n_pes);
      
-     vblock = XM(default_block)(p->vn, n_pes);
-     vb = XM(block)(p->vn, vblock, my_pe);
-
-     if (!(p->flags & TRANSPOSED_IN)) { /* transpose dims[0].n with vn */
-	  cldt_before = X(mkplan_d)(plnr,
-				    XM(mkproblem_transpose)(
-					 p->sz->dims[0].n, p->vn, 2,
-					 I = p->I, O = p->O,
-					 p->sz->dims[0].b[IB], vblock,
-					 p->comm,
-					 TRANSPOSED_OUT));
-	  if (XM(any_true)(!cldt_before, p->comm)) goto nada;	  
-	  if (NO_DESTROY_INPUTP(plnr)) { I = O; }
+     nx = p->sz->dims[0].n;
+     switch (ego->rearrange) {
+	 case CONTIG:
+	      ny = p->vn;
+	      break;
+	 case DISCONTIG:
+	      ny = n_pes;
+	      break;
+	 case SQUARE_BEFORE:
+	      ny = p->sz->dims[0].b[IB];
+	      break;
+	 case SQUARE_AFTER:
+	      ny = p->sz->dims[0].b[OB];
+	      break;
+	 case SQUARE_MIDDLE:
+	      ny = p->sz->dims[0].n * n_pes;
+	      break;
      }
-     else {
-	  I = p->O; O = p->I; /* swap for 1d DFT to avoid a copy from I->O */
-     }
+     vn = p->vn / ny;
+     A(ny * vn == p->vn);
 
+     yblock = XM(default_block)(ny, n_pes);
+     cldt_before = X(mkplan_d)(plnr,
+			       XM(mkproblem_transpose)(
+				    nx, ny, vn*2,
+				    I = p->I, O = p->O,
+				    p->sz->dims[0].b[IB], yblock,
+				    p->comm, 0));
+     if (XM(any_true)(!cldt_before, p->comm)) goto nada;	  
+     if (ego->preserve_input || NO_DESTROY_INPUTP(plnr)) { I = O; }
+     
      X(extract_reim)(p->sign, I, &ri, &ii);
      X(extract_reim)(p->sign, O, &ro, &io);
 
+     yb = XM(block)(ny, yblock, my_pe);
      cld = X(mkplan_d)(plnr,
-		       X(mkproblem_dft_d)(X(mktensor_1d)(p->sz->dims[0].n,
-							 vb*2, vb*2),
-					  X(mktensor_1d)(vb, 2, 2),
+		       X(mkproblem_dft_d)(X(mktensor_1d)(nx, vn*2, vn*2),
+					  X(mktensor_2d)(yb, vn*2*nx, vn*2*nx,
+							 vn, 2, 2),
 					  ro, io, ri, ii));
      if (XM(any_true)(!cld, p->comm)) goto nada;	  
-
-     if (!(p->flags & TRANSPOSED_OUT)) {
-	  cldt_after = X(mkplan_d)(plnr,
-				    XM(mkproblem_transpose)(
-					 p->vn, p->sz->dims[0].n, 2,
-					 I, cldt_before ? O : I,
-					 vblock, p->sz->dims[0].b[OB], 
-					 p->comm,
-					 TRANSPOSED_IN));
-	  if (XM(any_true)(!cldt_after, p->comm)) goto nada;	  
-     }
+     
+     cldt_after = X(mkplan_d)(plnr,
+			      XM(mkproblem_transpose)(
+				   ny, nx, vn*2,
+				   I, O,
+				   yblock, p->sz->dims[0].b[OB], 
+				   p->comm, 0));
+     if (XM(any_true)(!cldt_after, p->comm)) goto nada;	  
 
      pln = MKPLAN_MPI_DFT(P, &padt, apply);
 
      pln->cldt_before = cldt_before;
      pln->cld = cld;
      pln->cldt_after = cldt_after;
-     pln->preserve_input = NO_DESTROY_INPUTP(plnr);
+     pln->preserve_input = ego->preserve_input ? 2 : NO_DESTROY_INPUTP(plnr);
      pln->roff = ro - p->O;
      pln->ioff = io - p->O;
+     pln->rearrange = ego->rearrange;
 
-     pln->super.super.ops = cld->ops;
-     if (cldt_before) X(ops_add2)(&cldt_before->ops, &pln->super.super.ops);
-     if (cldt_after) X(ops_add2)(&cldt_after->ops, &pln->super.super.ops);
+     X(ops_add)(&cldt_before->ops, &cld->ops, &pln->super.super.ops);
+     X(ops_add2)(&cldt_after->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 
@@ -199,13 +238,20 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(void)
+static solver *mksolver(rearrangement rearrange, int preserve_input)
 {
      static const solver_adt sadt = { PROBLEM_MPI_DFT, mkplan };
-     return MKSOLVER(solver, &sadt);
+     S *slv = MKSOLVER(S, &sadt);
+     slv->rearrange = rearrange;
+     slv->preserve_input = preserve_input;
+     return &(slv->super);
 }
 
 void XM(dft_rank1_bigvec_register)(planner *p)
 {
-     REGISTER_SOLVER(p, mksolver());
+     rearrangement rearrange;
+     int preserve_input;
+     for (rearrange = CONTIG; rearrange <= SQUARE_MIDDLE; ++rearrange)
+	  for (preserve_input = 0; preserve_input <= 1; ++preserve_input)
+	       REGISTER_SOLVER(p, mksolver(rearrange, preserve_input));
 }

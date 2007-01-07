@@ -103,7 +103,7 @@ static int applicable(const S *ego, const problem *p_,
 	     && (!NO_DESTROY_INPUTP(plnr) || 
 		 ((p->flags & TRANSPOSED_IN) && !ego->copy_transposed_in))
 	     && ((p->flags & TRANSPOSED_IN) || !ego->copy_transposed_in)
-	     && !SCRAMBLEDP(p->flags)
+	     && ONLY_TRANSPOSEDP(p->flags)
 	  );
 }
 
@@ -164,22 +164,24 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      if (p->flags & TRANSPOSED_IN) { /* I is already transposed */
 	  if (ego->copy_transposed_in) {
-	       cld1 = X(mkplan_d)(plnr,
+	       cld1 = X(mkplan_f_d)(plnr,
 				  X(mkproblem_rdft_0_d)(X(mktensor_1d)
 							(b * p->ny * vn, 1, 1),
-							I = p->I, p->O));
+							I = p->I, p->O),
+				    0, 0, NO_SLOW);
 	       if (XM(any_true)(!cld1, p->comm)) goto nada;
 	  }
 	  else
 	       I = p->O; /* final transpose is in-place */
      }
      else { /* transpose b x ny x vn -> ny x b x vn */
-	  cld1 = X(mkplan_d)(plnr, 
-			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
-						   (b, p->ny * vn, vn,
-						    p->ny, vn, b * vn,
-						    vn, 1, 1),
-						   I = p->I, p->O));
+	  cld1 = X(mkplan_f_d)(plnr, 
+			       X(mkproblem_rdft_0_d)(X(mktensor_3d)
+						     (b, p->ny * vn, vn,
+						      p->ny, vn, b * vn,
+						      vn, 1, 1),
+						     I = p->I, p->O),
+			       0, 0, NO_SLOW);
 	  if (XM(any_true)(!cld1, p->comm)) goto nada;
      }
 	  
@@ -190,48 +192,52 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (!(p->flags & TRANSPOSED_OUT)) {
 	  INT nx = p->nx * vn;
 	  b = p->block * vn;
-	  cld2 = X(mkplan_d)(plnr, 
-			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
-						   (nxb, bt * b, b,
-						    bt, b, nx,
-						    b, 1, 1),
-						   I, p->O));
+	  cld2 = X(mkplan_f_d)(plnr, 
+			       X(mkproblem_rdft_0_d)(X(mktensor_3d)
+						     (nxb, bt * b, b,
+						      bt, b, nx,
+						      b, 1, 1),
+						     I, p->O),
+			       0, 0, NO_SLOW);
 	  if (XM(any_true)(!cld2, p->comm)) goto nada;
 	  
 	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
 	       Ioff = bt * b * nxb;
 	       Ooff = b * nxb;
 	       b = nx - nxb * b;
-	       cld2rest = X(mkplan_d)(plnr,
-				      X(mkproblem_rdft_0_d)(X(mktensor_2d)
-							    (bt, b, nx,
-							     b, 1, 1),
-							    I + Ioff,
-							    p->O + Ooff));
+	       cld2rest = X(mkplan_f_d)(plnr,
+					X(mkproblem_rdft_0_d)(X(mktensor_2d)
+							      (bt, b, nx,
+							       b, 1, 1),
+							      I + Ioff,
+							      p->O + Ooff),
+					0, 0, NO_SLOW);
 	       if (XM(any_true)(!cld2rest, p->comm)) goto nada;
 	  }
      }
      else { /* TRANSPOSED_OUT */
 	  b = p->block;
-	  cld2 = X(mkplan_d)(plnr, 
+	  cld2 = X(mkplan_f_d)(plnr, 
 			     X(mkproblem_rdft_0_d)(X(mktensor_4d)
 						   (nxb, bt * b*vn, bt * b*vn,
 						    bt, b*vn, vn,
 						    b, vn, bt*vn,
 						    vn, 1, 1),
-						   I, p->O));
+						   I, p->O),
+			       0, 0, NO_SLOW);
 	  if (XM(any_true)(!cld2, p->comm)) goto nada;
 	  
 	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
 	       Ioff = Ooff = bt * b * nxb * vn;
 	       b = p->nx - nxb * b;
-	       cld2rest = X(mkplan_d)(plnr,
-				      X(mkproblem_rdft_0_d)(X(mktensor_3d)
-							    (bt, b*vn, vn,
-							     b, vn, bt*vn,
-							     vn, 1, 1),
-							    I + Ioff,
-							    p->O + Ooff));
+	       cld2rest = X(mkplan_f_d)(plnr,
+					X(mkproblem_rdft_0_d)(X(mktensor_3d)
+							      (bt, b*vn, vn,
+							       b, vn, bt*vn,
+							       vn, 1, 1),
+							      I + Ioff,
+							      p->O + Ooff),
+					0, 0, NO_SLOW);
 	       if (XM(any_true)(!cld2rest, p->comm)) goto nada;
 	  }
      }
@@ -302,6 +308,7 @@ static solver *mksolver(int copy_transposed_in)
 
 void XM(transpose_alltoall_register)(planner *p)
 {
-     REGISTER_SOLVER(p, mksolver(0));
-     REGISTER_SOLVER(p, mksolver(1));
+     int cti;
+     for (cti = 0; cti <= 1; ++cti)
+	  REGISTER_SOLVER(p, mksolver(cti));
 }

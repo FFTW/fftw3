@@ -28,7 +28,7 @@ typedef struct {
      R *I, *O; /* contiguous interleaved arrays */
 
      int sign; /* FFTW_FORWARD / FFTW_BACKWARD */
-     unsigned flags; /* TRANSPOSED_IN/OUT meaningful for 1d-bigvec only
+     unsigned flags; /* TRANSPOSED_IN/OUT meaningful for rnk>1 only
 			SCRAMBLED_IN/OUT meaningful for 1d transforms only */
 
      MPI_Comm comm;
@@ -53,6 +53,7 @@ int XM(dft_serial_applicable)(const problem_mpi_dft *p);
 
 /* various solvers */
 void XM(dft_rank_geq2_register)(planner *p);
+void XM(dft_rank_geq2_transposed_register)(planner *p);
 void XM(dft_serial_register)(planner *p);
 void XM(dft_rank1_bigvec_register)(planner *p);
 void XM(dft_rank1_register)(planner *p);

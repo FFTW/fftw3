@@ -144,14 +144,14 @@ static int applicable(const solver *ego_, const problem *p_,
      return (1
 	     && p->sz->rnk == 1
 
-	     && !TRANSPOSEDP(p->flags)
+	     && ONLY_SCRAMBLEDP(p->flags)
 
 	     && (!NO_UGLYP(plnr) /* ugly if dft-serial is applicable */
                  || !XM(dft_serial_applicable)(p))
 
 	     /* disallow if dft-rank1-bigvec is applicable since the
 		data distribution may be slightly different (ugh!) */
-	     && (p->vn < n_pes || SCRAMBLEDP(p->flags))
+	     && (p->vn < n_pes || p->flags)
 
 	     && (*r = XM(choose_radix)(p->sz->dims[0], n_pes,
 				       p->flags, p->sign,

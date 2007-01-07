@@ -47,12 +47,12 @@ static void print(const problem *ego_, printer *p)
 {
      const problem_mpi_dft *ego = (const problem_mpi_dft *) ego_;
      int i;
-     p->print(p, "(mpi-dft %d %d %d %D ", 
+     p->print(p, "(mpi-dft %d %d %d ", 
 	      ego->I == ego->O,
 	      X(alignment_of)(ego->I),
 	      X(alignment_of)(ego->O));
      XM(dtensor_print)(ego->sz, p);
-     p->print(p, " %d %d %d", ego->vn, ego->sign, ego->flags);
+     p->print(p, " %D %d %d", ego->vn, ego->sign, ego->flags);
      MPI_Comm_size(ego->comm, &i); p->print(p, " %d)", i);
 }
 
@@ -103,6 +103,16 @@ problem *XM(mkproblem_dft)(const dtensor *sz, INT vn,
      ego->I = I;
      ego->O = O;
      ego->sign = sign;
+
+     /* canonicalize: replace TRANSPOSED_IN with TRANSPOSED_OUT by
+        swapping the first two dimensions (for rnk > 1) */
+     if ((flags & TRANSPOSED_IN) && ego->sz->rnk > 1) {
+	  ddim dim0 = ego->sz->dims[0];
+	  ego->sz->dims[0] = ego->sz->dims[1];
+	  ego->sz->dims[1] = dim0;
+	  flags &= ~TRANSPOSED_IN;
+	  flags ^= TRANSPOSED_OUT;
+     }
      ego->flags = flags;
 
      MPI_Comm_dup(comm, &ego->comm);

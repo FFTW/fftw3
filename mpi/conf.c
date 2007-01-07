@@ -28,6 +28,7 @@ static const solvtab s =
      SOLVTAB(XM(transpose_alltoall_register)),
      SOLVTAB(XM(transpose_radix2_register)),
      SOLVTAB(XM(dft_rank_geq2_register)),
+     SOLVTAB(XM(dft_rank_geq2_transposed_register)),
      SOLVTAB(XM(dft_serial_register)),
      SOLVTAB(XM(dft_rank1_bigvec_register)),
      SOLVTAB(XM(dft_rank1_register)),

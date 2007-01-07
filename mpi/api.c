@@ -174,11 +174,15 @@ ptrdiff_t XM(local_size_guru)(int rnk, const XM(ddim) *dims0,
      sz = default_sz(rnk, dims0, n_pes);
 
      /* Now, we must figure out how much local space the user should
-	allocate.  This depends strongly on the exact algorithms we
-	employ...ugh!  FIXME: get this info from the solvers somehow? */
-     N = 1;
+	allocate (or at least an upper bound).  This depends strongly
+	on the exact algorithms we employ...ugh!  FIXME: get this info
+	from the solvers somehow? */
+     N = 1; /* never return zero allocation size */
      if (rnk > 1 && XM(is_block1d)(sz, IB) && XM(is_block1d)(sz, OB)) {
+	  INT Nafter;
 	  ddim odims[2];
+
+	  /* dft-rank-geq2-transposed */
 	  odims[0] = sz->dims[0]; odims[1] = sz->dims[1]; /* save */
 	  /* we may need extra space for transposed intermediate data */
 	  for (i = 0; i < 2; ++i)
@@ -193,10 +197,23 @@ ptrdiff_t XM(local_size_guru)(int rnk, const XM(ddim) *dims0,
 		    sz->dims[1-i] = odims[1-i];
 		    break;
 	       }
+
+	  /* dft-rank-geq2 */
+	  Nafter = howmany;
+	  for (i = 1; i < sz->rnk; ++i) Nafter *= sz->dims[i].n;
+	  N = X(imax)(N, (sz->dims[0].n
+			  * XM(block)(Nafter, XM(default_block)(Nafter, n_pes),
+				      my_pe) + howmany - 1) / howmany);
+
+	  /* dft-rank-geq2 with dimensions swapped */
+	  Nafter = howmany * sz->dims[0].n;
+          for (i = 2; i < sz->rnk; ++i) Nafter *= sz->dims[i].n;
+          N = X(imax)(N, (sz->dims[1].n
+                          * XM(block)(Nafter, XM(default_block)(Nafter, n_pes),
+                                      my_pe) + howmany - 1) / howmany);
      }
      else if (rnk == 1) {
-	  if (howmany >= n_pes /* dft-rank1-bigvec */
-	      && !(flags & (FFTW_MPI_SCRAMBLED_IN | FFTW_MPI_SCRAMBLED_OUT))) {
+	  if (howmany >= n_pes && !flags) { /* dft-rank1-bigvec */
 	       ptrdiff_t n[2], start[2];
 	       dtensor *sz2 = XM(mkdtensor)(2);
 	       sz2->dims[0] = sz->dims[0];
@@ -265,10 +282,15 @@ ptrdiff_t XM(local_size_many_transposed)(int rnk, const ptrdiff_t *n,
      dims = simple_dims(rnk, n);
      local = (ptrdiff_t *) MALLOC(sizeof(ptrdiff_t) * rnk * 4, TENSORS);
 
-     /* default 1d block distribution, with transposed output */
+     /* default 1d block distribution, with transposed output
+        if yblock < n[1] */
      dims[0].ib = xblock;
-     if (rnk > 1)
-	  dims[1].ob = yblock;
+     if (rnk > 1) {
+	  if (yblock < n[1])
+	       dims[1].ob = yblock;
+	  else
+	       dims[0].ob = xblock;
+     }
      else
 	  dims[0].ob = xblock; /* FIXME: 1d not really supported here 
 				         since we don't have flags/sign */
@@ -301,7 +323,8 @@ ptrdiff_t XM(local_size_many)(int rnk, const ptrdiff_t *n,
 {
      ptrdiff_t local_ny, local_y_start;
      return XM(local_size_many_transposed)(rnk, n, howmany,
-					   xblock, FFTW_MPI_DEFAULT_BLOCK,
+					   xblock, rnk > 1 
+					   ? n[1] : FFTW_MPI_DEFAULT_BLOCK,
 					   comm,
 					   local_nx, local_x_start,
 					   &local_ny, &local_y_start);
@@ -328,10 +351,8 @@ ptrdiff_t XM(local_size)(int rnk, const ptrdiff_t *n,
 			 ptrdiff_t *local_nx,
 			 ptrdiff_t *local_x_start)
 {
-     ptrdiff_t local_ny, local_y_start;
-     return XM(local_size_transposed)(rnk, n, comm,
-				      local_nx, local_x_start,
-				      &local_ny, &local_y_start);
+     return XM(local_size_many)(rnk, n, 1, FFTW_MPI_DEFAULT_BLOCK, comm,
+				local_nx, local_x_start);
 }
 
 ptrdiff_t XM(local_size_many_1d)(ptrdiff_t nx, ptrdiff_t howmany, 
@@ -492,7 +513,6 @@ X(plan) XM(plan_many_dft)(int rnk, const ptrdiff_t *n,
      else if (rnk > 1) {
 	  dims[0 != (flags & FFTW_MPI_TRANSPOSED_IN)].ib = iblock;
 	  dims[0 != (flags & FFTW_MPI_TRANSPOSED_OUT)].ob = oblock;
-	  flags &= ~(FFTW_MPI_TRANSPOSED_IN | FFTW_MPI_TRANSPOSED_OUT);
      }
 
      pln = XM(plan_guru_dft)(rnk,dims,howmany, in,out, comm, sign, flags);

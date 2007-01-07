@@ -19,9 +19,16 @@
  */
 
 /* Complex DFTs of rank >= 2, for the case where we are distributed
-   across the first dimension only, and the output is not transposed. */
+   across the first dimension only, and the output is transposed both
+   in data distribution and in ordering (for the first 2 dimensions).
+
+   (Note that we don't have to handle the case where the input is
+   transposed, since this is equivalent to transposed output with the
+   first two dimensions swapped, and is automatically canonicalized as
+   such by dft-problem.c. */
 
 #include "mpi-dft.h"
+#include "mpi-transpose.h"
 #include "dft.h"
 
 typedef struct {
@@ -32,7 +39,7 @@ typedef struct {
 typedef struct {
      plan_mpi_dft super;
 
-     plan *cld1, *cld2;
+     plan *cld1, *cldt, *cld2;
      INT roff, ioff;
      int preserve_input;
 } P;
@@ -40,8 +47,8 @@ typedef struct {
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     plan_dft *cld1;
-     plan_rdft *cld2;
+     plan_dft *cld1, *cld2;
+     plan_rdft *cldt;
      INT roff = ego->roff, ioff = ego->ioff;
      
      /* DFT local dimensions */
@@ -53,9 +60,13 @@ static void apply(const plan *ego_, R *I, R *O)
      else
 	  cld1->apply(ego->cld1, I+roff, I+ioff, I+roff, I+ioff);
 
-     /* DFT non-local dimension (via dft-rank1-bigvec, usually): */
-     cld2 = (plan_rdft *) ego->cld2;
-     cld2->apply(ego->cld2, I, O);
+     /* global transpose */
+     cldt = (plan_rdft *) ego->cldt;
+     cldt->apply(ego->cldt, I, O);
+
+     /* DFT final local dimension */
+     cld2 = (plan_dft *) ego->cld2;
+     cld2->apply(ego->cld2, O+roff, O+ioff, O+roff, O+ioff);
 }
 
 static int applicable(const S *ego, const problem *p_,
@@ -64,11 +75,12 @@ static int applicable(const S *ego, const problem *p_,
      const problem_mpi_dft *p = (const problem_mpi_dft *) p_;
      return (1
 	     && p->sz->rnk > 1
-	     && p->flags == 0 /* TRANSPOSED/SCRAMBLED_IN/OUT not supported */
+	     && p->flags == TRANSPOSED_OUT
 	     && (!ego->preserve_input || (!NO_DESTROY_INPUTP(plnr)
 					  && p->I != p->O))
 	     && XM(is_local_after)(1, p->sz, IB)
-	     && XM(is_local_after)(1, p->sz, OB)
+	     && XM(is_local_after)(2, p->sz, OB)
+	     && XM(num_blocks)(p->sz->dims[0].n, p->sz->dims[0].b[OB]) == 1
 	     && (!NO_UGLYP(plnr) /* ugly if dft-serial is applicable */
 		 || !XM(dft_serial_applicable)(p))
 	  );
@@ -78,6 +90,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 {
      P *ego = (P *) ego_;
      X(plan_awake)(ego->cld1, wakefulness);
+     X(plan_awake)(ego->cldt, wakefulness);
      X(plan_awake)(ego->cld2, wakefulness);
 }
 
@@ -85,14 +98,16 @@ static void destroy(plan *ego_)
 {
      P *ego = (P *) ego_;
      X(plan_destroy_internal)(ego->cld2);
+     X(plan_destroy_internal)(ego->cldt);
      X(plan_destroy_internal)(ego->cld1);
 }
 
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi-dft-rank-geq2%s%(%p%)%(%p%))", 
-	      ego->preserve_input==2 ?"/p":"", ego->cld1, ego->cld2);
+     p->print(p, "(mpi-dft-rank-geq2%s%(%p%)%(%p%)%(%p%))", 
+	      ego->preserve_input==2 ?"/p":"",
+	      ego->cld1, ego->cldt, ego->cld2);
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -100,7 +115,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      const problem_mpi_dft *p;
      P *pln;
-     plan *cld1 = 0, *cld2 = 0;
+     plan *cld1 = 0, *cldt = 0, *cld2 = 0;
      R *ri, *ii, *ro, *io, *I, *O;
      tensor *sz;
      dtensor *sz2;
@@ -136,7 +151,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  sz->dims[i].n = p->sz->dims[i+1].n;
 	  sz->dims[i].is = sz->dims[i].os = sz->dims[i+1].n * sz->dims[i+1].is;
      }
-     nrest = X(tensor_sz)(sz);
+     nrest = 1; for (i = 1; i < sz->rnk; ++i) nrest *= sz->dims[i].n;
      {
           INT is = sz->dims[0].n * sz->dims[0].is;
           INT b = XM(block)(p->sz->dims[0].n, p->sz->dims[0].b[IB], my_pe);
@@ -148,26 +163,45 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  if (XM(any_true)(!cld1, p->comm)) goto nada;
      }
 
-     sz2 = XM(mkdtensor)(1); /* tensor for first (distributed) dimension */
-     sz2->dims[0] = p->sz->dims[0];
-     cld2 = X(mkplan_d)(plnr, XM(mkproblem_dft_d)(sz2, nrest * p->vn,
-						  I, O, p->comm, p->sign, 
-						  RANK1_BIGVEC_ONLY));
-     if (XM(any_true)(!cld2, p->comm)) goto nada;
+     nrest *= p->vn;
+     cldt = X(mkplan_d)(plnr,
+			XM(mkproblem_transpose)(
+			     p->sz->dims[0].n, p->sz->dims[1].n, nrest * 2,
+			     I, O,
+			     p->sz->dims[0].b[IB], p->sz->dims[1].b[OB], 
+			     p->comm, 0));
+     if (XM(any_true)(!cldt, p->comm)) goto nada;
+
+     X(extract_reim)(p->sign, O, &ro, &io);
+     {
+	  INT is = p->sz->dims[0].n * nrest * 2;
+	  INT b = XM(block)(p->sz->dims[1].n, p->sz->dims[1].b[OB], my_pe);
+	  cld2 = X(mkplan_d)(plnr,
+			     X(mkproblem_dft_d)(X(mktensor_1d)(
+						     p->sz->dims[0].n,
+						     nrest * 2, nrest * 2),
+						X(mktensor_2d)(b, is, is,
+							       nrest, 2, 2),
+						ro, io, ro, io));
+	  if (XM(any_true)(!cld2, p->comm)) goto nada;
+     }
 
      pln = MKPLAN_MPI_DFT(P, &padt, apply);
      pln->cld1 = cld1;
+     pln->cldt = cldt;
      pln->cld2 = cld2;
      pln->preserve_input = ego->preserve_input ? 2 : NO_DESTROY_INPUTP(plnr);
      pln->roff = ri - p->I;
      pln->ioff = ii - p->I;
 
      X(ops_add)(&cld1->ops, &cld2->ops, &pln->super.super.ops);
+     X(ops_add2)(&cldt->ops, &pln->super.super.ops);
 
      return &(pln->super.super);
 
  nada:
      X(plan_destroy_internal)(cld2);
+     X(plan_destroy_internal)(cldt);
      X(plan_destroy_internal)(cld1);
      return (plan *) 0;
 }
@@ -180,7 +214,7 @@ static solver *mksolver(int preserve_input)
      return &(slv->super);
 }
 
-void XM(dft_rank_geq2_register)(planner *p)
+void XM(dft_rank_geq2_transposed_register)(planner *p)
 {
      int preserve_input;
      for (preserve_input = 0; preserve_input <= 1; ++preserve_input)

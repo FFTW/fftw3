@@ -408,6 +408,19 @@ static FFTW(plan) mkplan_complex(bench_problem *p, unsigned flags)
 
      vn *= 2;
 
+     if (rnk > 1) {
+	  ptrdiff_t nrest = 1;
+	  for (i = 2; i < rnk; ++i) nrest *= p->sz->dims[i].n;
+	  if (flags & FFTW_MPI_TRANSPOSED_IN)
+	       plan_scramble_in = mkplan_transpose_local(
+		    p->sz->dims[0].n, local_ni[1], vn * nrest,
+		    local_in, local_in);
+	  if (flags & FFTW_MPI_TRANSPOSED_OUT)
+	       plan_unscramble_out = mkplan_transpose_local(
+		    local_no[1], p->sz->dims[0].n, vn * nrest,
+		    local_out, local_out);
+     }
+     
      return pln;
 }
 

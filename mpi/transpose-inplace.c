@@ -29,6 +29,11 @@
 #include <string.h>
 
 typedef struct {
+     solver super;
+     int preserve_input; /* preserve input even if DESTROY_INPUT was passed */
+} S;
+
+typedef struct {
      plan_mpi_transpose super;
 
      plan *cld1, *cld2, *cld2rest, *cld3;
@@ -144,17 +149,17 @@ static void apply(const plan *ego_, R *I, R *O)
      }
 }
 
-static int applicable(const solver *ego_, const problem *p_,
+static int applicable(const S *ego, const problem *p_,
 		      const planner *plnr)
 {
      const problem_mpi_transpose *p = (const problem_mpi_transpose *) p_;
-     UNUSED(ego_);
-     UNUSED(plnr);
      /* Note: this is *not* UGLY for out-of-place, destroy-input plans;
 	the planner often prefers transpose-inplace to transpose-alltoall,
 	at least with LAM MPI on my machine. */
      return (1
-	     && !SCRAMBLEDP(p->flags));
+	     && (!ego->preserve_input || (!NO_DESTROY_INPUTP(plnr)
+					  && p->I != p->O))
+	     && ONLY_TRANSPOSEDP(p->flags));
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)
@@ -181,7 +186,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi-transpose-inplace");
+     p->print(p, "(mpi-transpose-inplace%s", ego->preserve_input==2 ?"/p":"");
      if (ego->cld1) p->print(p, "%(%p%)", ego->cld1);
      if (ego->cld2) p->print(p, "%(%p%)", ego->cld2);
      if (ego->cld2rest) p->print(p, "%(%p%)", ego->cld2rest);
@@ -258,8 +263,9 @@ static void sort1_comm_sched(int *sched, int npes, int sortpe, int ascending)
      X(ifree)(sortsched);
 }
 
-static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
+static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
+     const S *ego = (const S *) ego_;
      const problem_mpi_transpose *p;
      P *pln;
      plan *cld1 = 0, *cld2 = 0, *cld2rest = 0, *cld3 = 0;
@@ -286,15 +292,16 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      b = XM(block)(p->nx, p->block, my_pe);
      
      if (!(p->flags & TRANSPOSED_IN)) { /* b x ny x vn -> ny x b x vn */
-	  cld1 = X(mkplan_d)(plnr, 
-			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
-						   (b, p->ny * vn, vn,
-						    p->ny, vn, b * vn,
-						    vn, 1, 1),
-						   I, O));
+	  cld1 = X(mkplan_f_d)(plnr, 
+			       X(mkproblem_rdft_0_d)(X(mktensor_3d)
+						     (b, p->ny * vn, vn,
+						      p->ny, vn, b * vn,
+						      vn, 1, 1),
+						     I, O),
+			       0, 0, NO_SLOW);
 	  if (XM(any_true)(!cld1, p->comm)) goto nada;
      }
-     if (NO_DESTROY_INPUTP(plnr)) I = O;
+     if (ego->preserve_input || NO_DESTROY_INPUTP(plnr)) I = O;
 
      b = p->block;
      bt = XM(block)(p->ny, p->tblock, my_pe);
@@ -302,53 +309,58 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      if (p->nx == nxb * p->block) { /* divisible => ordinary transpose */
 	  if (!(p->flags & TRANSPOSED_OUT)) {
 	       b *= vn;
-	       cld2 = X(mkplan_d)(plnr, 
-				  X(mkproblem_rdft_0_d)(X(mktensor_3d)
-							(nxb, bt * b, b,
-							 bt, b, nxb * b,
-							 b, 1, 1),
-							I, O));
+	       cld2 = X(mkplan_f_d)(plnr, 
+				    X(mkproblem_rdft_0_d)(X(mktensor_3d)
+							  (nxb, bt * b, b,
+							   bt, b, nxb * b,
+							   b, 1, 1),
+							  I, O),
+				    0, 0, NO_SLOW);
 	  }
 	  else {
-	       cld2 = X(mkplan_d)(plnr, 
-				  X(mkproblem_rdft_0_d)(
-				       X(mktensor_4d)
-				       (nxb, bt * b * vn, bt * b * vn,
-					bt, b * vn, vn,
-					b, vn, bt * vn,
-					vn, 1, 1),
-				       I, O));
+	       cld2 = X(mkplan_f_d)(plnr, 
+				    X(mkproblem_rdft_0_d)(
+					 X(mktensor_4d)
+					 (nxb, bt * b * vn, bt * b * vn,
+					  bt, b * vn, vn,
+					  b, vn, bt * vn,
+					  vn, 1, 1),
+					 I, O),
+				    0, 0, NO_SLOW);
 	  }
 	  if (XM(any_true)(!cld2, p->comm)) goto nada;
      }
      else {
 	  INT nxr = p->nx - nxb * b;
-	  cld2 = X(mkplan_d)(plnr,
-			     X(mkproblem_rdft_0_d)(
-				  X(mktensor_4d)
-				  (nxb, bt * b * vn, bt * b * vn,
-				   bt, b * vn, vn,
-				   b, vn, bt * vn,
-				   vn, 1, 1),
-				  I, O));
+	  cld2 = X(mkplan_f_d)(plnr,
+			       X(mkproblem_rdft_0_d)(
+				    X(mktensor_4d)
+				    (nxb, bt * b * vn, bt * b * vn,
+				     bt, b * vn, vn,
+				     b, vn, bt * vn,
+				     vn, 1, 1),
+				    I, O),
+			       0, 0, NO_SLOW);
 	  if (XM(any_true)(!cld2, p->comm)) goto nada;
 	  rest_offset = nxb * b * bt * vn;
-	  cld2rest = X(mkplan_d)(plnr,
-			     X(mkproblem_rdft_0_d)(
-				  X(mktensor_3d)
-				  (bt, nxr * vn, vn,
-				   nxr, vn, bt * vn,
-				   vn, 1, 1),
-				  I + rest_offset, O + rest_offset));
+	  cld2rest = X(mkplan_f_d)(plnr,
+				   X(mkproblem_rdft_0_d)(
+					X(mktensor_3d)
+					(bt, nxr * vn, vn,
+					 nxr, vn, bt * vn,
+					 vn, 1, 1),
+					I + rest_offset, O + rest_offset),
+				   0, 0, NO_SLOW);
 	  if (XM(any_true)(!cld2rest, p->comm)) goto nada;
 	  if (!(p->flags & TRANSPOSED_OUT)) {
-	       cld3 = X(mkplan_d)(plnr,
-				  X(mkproblem_rdft_0_d)(
-				       X(mktensor_3d)
-				       (p->nx, bt * vn, vn,
-					bt, vn, p->nx * vn,
-					vn, 1, 1),
-				       O, O));
+	       cld3 = X(mkplan_f_d)(plnr,
+				    X(mkproblem_rdft_0_d)(
+					 X(mktensor_3d)
+					 (p->nx, bt * vn, vn,
+					  bt, vn, p->nx * vn,
+					  vn, 1, 1),
+					 O, O),
+				    0, 0, NO_SLOW);
 	       if (XM(any_true)(!cld3, p->comm)) goto nada;
 	  }
      }
@@ -360,7 +372,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      pln->cld2rest = cld2rest;
      pln->rest_offset = rest_offset;
      pln->cld3 = cld3;
-     pln->preserve_input = NO_DESTROY_INPUTP(plnr);
+     pln->preserve_input = ego->preserve_input ? 2 : NO_DESTROY_INPUTP(plnr);
 
      MPI_Comm_dup(p->comm, &pln->comm);
 
@@ -424,13 +436,17 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(void)
+static solver *mksolver(int preserve_input)
 {
      static const solver_adt sadt = { PROBLEM_MPI_TRANSPOSE, mkplan };
-     return MKSOLVER(solver, &sadt);
+     S *slv = MKSOLVER(S, &sadt);
+     slv->preserve_input = preserve_input;
+     return &(slv->super);
 }
 
 void XM(transpose_inplace_register)(planner *p)
 {
-     REGISTER_SOLVER(p, mksolver());
+     int preserve_input;
+     for (preserve_input = 0; preserve_input <= 1; ++preserve_input)
+	  REGISTER_SOLVER(p, mksolver(preserve_input));
 }

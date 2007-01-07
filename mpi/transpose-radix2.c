@@ -117,7 +117,7 @@ static int applicable(const solver *ego_, const problem *p_,
 	     && n_pes > 2 /* no point for 2 processes */
 	     && p->nx % p->block == 0 && p->nx / p->block == n_pes
 	     && p->ny % p->tblock == 0 && p->ny / p->tblock == n_pes
-	     && !SCRAMBLEDP(p->flags)
+	     && ONLY_TRANSPOSEDP(p->flags)
 	  );
 }
 
@@ -184,29 +184,32 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      A(b == p->nx / np && bt == p->ny / np);
 
      if (p->flags & TRANSPOSED_IN) /* I is already transposed */
-	  cld1 = X(mkplan_d)(plnr, 
-			     X(mkproblem_rdft_0_d)(X(mktensor_1d)
-						   (b * p->ny * vn, 1, 1),
-						   I, O));
+	  cld1 = X(mkplan_f_d)(plnr, 
+			       X(mkproblem_rdft_0_d)(X(mktensor_1d)
+						     (b * p->ny * vn, 1, 1),
+						     I, O),
+			       0, 0, NO_SLOW);
      else /* transpose b x ny x vn -> ny x b x vn */
-	  cld1 = X(mkplan_d)(plnr, 
-			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
-						   (b, p->ny * vn, vn,
-						    p->ny, vn, b * vn,
-						    vn, 1, 1),
-						   I, O));
+	  cld1 = X(mkplan_f_d)(plnr, 
+			       X(mkproblem_rdft_0_d)(X(mktensor_3d)
+						     (b, p->ny * vn, vn,
+						      p->ny, vn, b * vn,
+						      vn, 1, 1),
+						     I, O),
+			       0, 0, NO_SLOW);
      if (XM(any_true)(!cld1, p->comm)) goto nada;
 
      if (NO_DESTROY_INPUTP(plnr)) I = O;
 
      /* transpose ny x b x vn = 2 x np/2 x bt x b x vn
             -> np/2 x 2 x bt x b x vn */
-     cld2 = X(mkplan_d)(plnr,X(mkproblem_rdft_0_d)
-			(X(mktensor_3d)
-			 (2, np/2 * bt * b * vn, bt * b * vn,
-			  np/2, bt * b * vn, 2 * bt * b * vn,
-			  bt * b * vn, 1, 1),
-			 O, I));
+     cld2 = X(mkplan_f_d)(plnr,X(mkproblem_rdft_0_d)
+			  (X(mktensor_3d)
+			   (2, np/2 * bt * b * vn, bt * b * vn,
+			    np/2, bt * b * vn, 2 * bt * b * vn,
+			    bt * b * vn, 1, 1),
+			   O, I),
+			  0, 0, NO_SLOW);
      if (XM(any_true)(!cld2, p->comm)) goto nada;
 
      MPI_Comm_split(p->comm, me < np/2, me, &comm2);
@@ -218,33 +221,36 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
      if (XM(any_true)(!cldt, p->comm)) goto nada;
 
      /* transpose np/2 x 2 x bt x b x vn -> 2 x np/2 x bt x b x vn */
-     cld3 = X(mkplan_d)(plnr,X(mkproblem_rdft_0_d)
-			(X(mktensor_3d)
-			 (np/2, 2 * bt * b * vn, bt * b * vn,
-			  2, bt * b * vn, np/2 * bt * b * vn,
-			  bt * b * vn, 1, 1),
-			 O, I));
+     cld3 = X(mkplan_f_d)(plnr,X(mkproblem_rdft_0_d)
+			  (X(mktensor_3d)
+			   (np/2, 2 * bt * b * vn, bt * b * vn,
+			    2, bt * b * vn, np/2 * bt * b * vn,
+			    bt * b * vn, 1, 1),
+			   O, I),
+			  0, 0, NO_SLOW);
      if (XM(any_true)(!cld3, p->comm)) goto nada;
 
      /* Finally, transpose 2 x np/2 x bt x b x vn = np x bt x b x vn 
             -> np x b x bt x vn (TRANSPOSED_OUT)
         or  -> bt x np x b x vn (!TRANSPOSED_OUT) */
      if (p->flags & TRANSPOSED_OUT)
-	  cld4 = X(mkplan_d)(plnr,
-			     X(mkproblem_rdft_0_d)(
-				  X(mktensor_4d)
-				  (np, bt * b * vn, bt * b * vn,
-				   bt, b * vn, vn,
-				   b, vn, bt * vn,
-				   vn, 1, 1),
-				  I, O));
+	  cld4 = X(mkplan_f_d)(plnr,
+			       X(mkproblem_rdft_0_d)(
+				    X(mktensor_4d)
+				    (np, bt * b * vn, bt * b * vn,
+				     bt, b * vn, vn,
+				     b, vn, bt * vn,
+				     vn, 1, 1),
+				    I, O),
+			       0, 0, NO_SLOW);
      else
-	  cld4 = X(mkplan_d)(plnr,
-			     X(mkproblem_rdft_0_d)(X(mktensor_3d)
-						   (np, bt * b * vn, b * vn,
-						    bt, b * vn, np * b * vn,
-						    b * vn, 1, 1),
-						   I, O));
+	  cld4 = X(mkplan_f_d)(plnr,
+			       X(mkproblem_rdft_0_d)(X(mktensor_3d)
+						     (np, bt * b * vn, b * vn,
+						      bt, b * vn, np * b * vn,
+						      b * vn, 1, 1),
+						     I, O),
+			       0, 0, NO_SLOW);
      if (XM(any_true)(!cld4, p->comm)) goto nada;
 
      pln = MKPLAN_MPI_TRANSPOSE(P, &padt, apply);

@@ -34,9 +34,10 @@
 #define SCRAMBLED_OUT (1 << 1)
 #define TRANSPOSED_IN (1 << 2)
 #define TRANSPOSED_OUT (1 << 3)
+#define RANK1_BIGVEC_ONLY (1 << 4) /* for rank=1, allow only bigvec solver */
 
-#define SCRAMBLEDP(flags) ((flags) & (SCRAMBLED_IN | SCRAMBLED_OUT))
-#define TRANSPOSEDP(flags) ((flags) & (TRANSPOSED_IN | TRANSPOSED_OUT))
+#define ONLY_SCRAMBLEDP(flags) (!((flags) & ~(SCRAMBLED_IN|SCRAMBLED_OUT)))
+#define ONLY_TRANSPOSEDP(flags) (!((flags) & ~(TRANSPOSED_IN|TRANSPOSED_OUT)))
 
 #if defined(FFTW_SINGLE)
 #  define FFTW_MPI_TYPE MPI_FLOAT
