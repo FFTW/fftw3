@@ -69,7 +69,7 @@ static int applicable(const S *ego, const problem *p_,
 					  && p->I != p->O))
 	     && XM(is_local_after)(1, p->sz, IB)
 	     && XM(is_local_after)(1, p->sz, OB)
-	     && (!NO_UGLYP(plnr) /* ugly if dft-serial is applicable */
+	     && (!NO_SLOWP(plnr) /* slow if dft-serial is applicable */
 		 || !XM(dft_serial_applicable)(p))
 	  );
 }

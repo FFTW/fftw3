@@ -186,12 +186,9 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi-transpose-inplace%s", ego->preserve_input==2 ?"/p":"");
-     if (ego->cld1) p->print(p, "%(%p%)", ego->cld1);
-     if (ego->cld2) p->print(p, "%(%p%)", ego->cld2);
-     if (ego->cld2rest) p->print(p, "%(%p%)", ego->cld2rest);
-     if (ego->cld3) p->print(p, "%(%p%)", ego->cld3);
-     p->print(p, ")");
+     p->print(p, "(mpi-transpose-inplace%s%(%p%)%(%p%)%(%p%)%(%p%))", 
+	      ego->preserve_input==2 ?"/p":"",
+	      ego->cld1, ego->cld2, ego->cld2rest, ego->cld3);
 }
 
 /* Given a process which_pe and a number of processes npes, fills

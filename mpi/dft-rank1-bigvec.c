@@ -32,7 +32,7 @@
    contiguity during the subsequent DFTs.
 
    TODO: can we pare this down to CONTIG and DISCONTIG, at least
-   in MEASURE mode? */
+   in MEASURE mode?  SQUARE_MIDDLE is also used for 1d destroy-input DFTs. */
 typedef enum {
      CONTIG = 0, /* vn x 1: make subsequent DFTs contiguous */
      DISCONTIG, /* P x (vn/P) for P processes */
@@ -112,7 +112,7 @@ static int applicable(const S *ego, const problem *p_,
 	     && (ego->rearrange != SQUARE_MIDDLE
 		 || div_mult(p->sz->dims[0].n * n_pes, p->vn))
 
-	     && (!NO_UGLYP(plnr) /* ugly if dft-serial is applicable */
+	     && (!NO_SLOWP(plnr) /* slow if dft-serial is applicable */
                  || !XM(dft_serial_applicable)(p))
 	  );
 }
@@ -183,6 +183,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	 case SQUARE_MIDDLE:
 	      ny = p->sz->dims[0].n * n_pes;
 	      break;
+	 default:
+	      return (plan *) 0;
      }
      vn = p->vn / ny;
      A(ny * vn == p->vn);

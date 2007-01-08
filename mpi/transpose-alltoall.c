@@ -128,12 +128,9 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi-transpose-alltoall");
-     if (ego->equal_blocks) p->print(p, "/e");
-     if (ego->cld1) p->print(p, "%(%p%)", ego->cld1);
-     if (ego->cld2) p->print(p, "%(%p%)", ego->cld2);
-     if (ego->cld2rest) p->print(p, "%(%p%)", ego->cld2rest);
-     p->print(p, ")");
+     p->print(p, "(mpi-transpose-alltoall%s%(%p%)%(%p%)%(%p%))",
+	      ego->equal_blocks ? "/e" : "",
+	      ego->cld1, ego->cld2, ego->cld2rest);
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

@@ -81,7 +81,7 @@ static int applicable(const S *ego, const problem *p_,
 	     && XM(is_local_after)(1, p->sz, IB)
 	     && XM(is_local_after)(2, p->sz, OB)
 	     && XM(num_blocks)(p->sz->dims[0].n, p->sz->dims[0].b[OB]) == 1
-	     && (!NO_UGLYP(plnr) /* ugly if dft-serial is applicable */
+	     && (!NO_SLOWP(plnr) /* slow if dft-serial is applicable */
 		 || !XM(dft_serial_applicable)(p))
 	  );
 }

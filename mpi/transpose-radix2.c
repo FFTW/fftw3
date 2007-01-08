@@ -145,13 +145,8 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi-transpose-radix2");
-     if (ego->cld1) p->print(p, "%(%p%)", ego->cld1);
-     if (ego->cld2) p->print(p, "%(%p%)", ego->cld2);
-     if (ego->cldt) p->print(p, "%(%p%)", ego->cldt);
-     if (ego->cld3) p->print(p, "%(%p%)", ego->cld3);
-     if (ego->cld4) p->print(p, "%(%p%)", ego->cld4);
-     p->print(p, ")");
+     p->print(p, "(mpi-transpose-radix2%(%p%)%(%p%)%(%p%)%(%p%)%(%p%))",
+	      ego->cld1, ego->cld2, ego->cldt, ego->cld3, ego->cld4);
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
