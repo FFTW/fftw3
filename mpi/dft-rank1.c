@@ -37,24 +37,22 @@ typedef struct {
      plan *cldt, *cld_ddft, *cld_dft;
      INT roff, ioff;
      int preserve_input;
-     INT vn, xmin, xmax, m, r;
+     INT vn, xmin, xmax, xs, m, r;
 } P;
 
-static void do_twiddle(triggen *t, INT rmin, INT rmax, INT m,
-		       INT vn, R *xr, R *xi)
+static void do_twiddle(triggen *t, INT ir, INT m, INT vn, R *xr, R *xi)
 {
      void (*rotate)(triggen *, INT, R, R, R *) = t->rotate;
-     INT ir, im, iv;
-     for (ir = rmin; ir <= rmax; ++ir)
-	  for (im = 0; im < m; ++im)
-	       for (iv = 0; iv < vn; ++iv) {
-		    /* TODO: modify/inline rotate function
-		       so that it can do whole vn vector at once? */
-		    R c[2];
-		    rotate(t, ir * im, *xr, *xi, c);
-		    *xr = c[0]; *xi = c[1];
-		    xr += 2; xi += 2;
-	       }
+     INT im, iv;
+     for (im = 0; im < m; ++im)
+	  for (iv = 0; iv < vn; ++iv) {
+	       /* TODO: modify/inline rotate function
+		  so that it can do whole vn vector at once? */
+	       R c[2];
+	       rotate(t, ir * im, *xr, *xi, c);
+	       *xr = c[0]; *xi = c[1];
+	       xr += 2; xi += 2;
+	  }
 }
 
 /* radix-r DFT of size r*m.  This is equivalent to an m x r 2d DFT,
@@ -85,24 +83,28 @@ static void apply_ddft_first(const plan *ego_, R *I, R *O)
      const P *ego = (const P *) ego_;
      plan_dft *cld_dft;
      plan_rdft *cldt, *cld_ddft;
-     INT roff, ioff; 
+     INT roff, ioff, im, mmax, ms, r, vn;
+     triggen *t;
+     R *dI, *dO;
 
      /* distributed size-m DFTs, with output in m x r format */
      cld_ddft = (plan_rdft *) ego->cld_ddft;
      cld_ddft->apply(ego->cld_ddft, I, O);
 
-     roff = ego->roff; ioff = ego->ioff;
-
-     /* multiply twiddles.  TODO: perform in batches along with size-r
-	DFTs, similar to dftw-genericbuf? */
-     do_twiddle(ego->t, ego->xmin, ego->xmax, ego->r, ego->vn, O+roff, O+ioff);
-
      cldt = (plan_rdft *) ego->cldt;
      if (ego->preserve_input || !cldt) I = O;
 
-     /* 1d DFTs of size r */
+     /* twiddle multiplications, followed by 1d DFTs of size-r */
      cld_dft = (plan_dft *) ego->cld_dft;
-     cld_dft->apply(ego->cld_dft, O+roff, O+ioff, I+roff, I+ioff);
+     roff = ego->roff; ioff = ego->ioff;
+     mmax = ego->xmax; ms = ego->xs;
+     t = ego->t; r = ego->r; vn = ego->vn;
+     dI = O; dO = I;
+     for (im = ego->xmin; im <= mmax; ++im) {
+	  do_twiddle(t, im, r, vn, dI+roff, dI+ioff);
+	  cld_dft->apply((plan *) cld_dft, dI+roff, dI+ioff, dO+roff, dO+ioff);
+	  dI += ms; dO += ms;
+     }
 
      /* final global transpose (m x r -> r x m), if not SCRAMBLED_OUT */
      if (cldt) 
@@ -114,8 +116,9 @@ static void apply_ddft_last(const plan *ego_, R *I, R *O)
      const P *ego = (const P *) ego_;
      plan_dft *cld_dft;
      plan_rdft *cldt, *cld_ddft;
-     INT roff, ioff;
-     R *dI, *dO;
+     INT roff, ioff, ir, rmax, rs, m, vn;
+     triggen *t;
+     R *dI, *dO0, *dO;
 
      /* initial global transpose (m x r -> r x m), if not SCRAMBLED_IN */
      cldt = (plan_rdft *) ego->cldt;
@@ -126,20 +129,22 @@ static void apply_ddft_last(const plan *ego_, R *I, R *O)
      else 
 	  dI = I;
      if (ego->preserve_input) dO = O; else dO = I;
+     dO0 = dO;
 
-     roff = ego->roff; ioff = ego->ioff;
-
-     /* 1d DFTs of size m */
+     /* 1d DFTs of size m, followed by twiddle multiplications */
      cld_dft = (plan_dft *) ego->cld_dft;
-     cld_dft->apply(ego->cld_dft, dI+roff, dI+ioff, dO+roff, dO+ioff);
-
-     /* multiply twiddles.  TODO: perform in batches along with size-m
-	DFTs, similar to dftw-genericbuf? */
-     do_twiddle(ego->t, ego->xmin,ego->xmax,ego->m, ego->vn, dO+roff, dO+ioff);
+     roff = ego->roff; ioff = ego->ioff;
+     rmax = ego->xmax; rs = ego->xs;
+     t = ego->t; m = ego->m; vn = ego->vn;
+     for (ir = ego->xmin; ir <= rmax; ++ir) {
+	  cld_dft->apply((plan *) cld_dft, dI+roff, dI+ioff, dO+roff, dO+ioff);
+	  do_twiddle(t, ir, m, vn, dO+roff, dO+ioff);
+	  dI += rs; dO += rs;
+     }
 
      /* distributed size-r DFTs, with output in r x m format */
      cld_ddft = (plan_rdft *) ego->cld_ddft;
-     cld_ddft->apply(ego->cld_ddft, dO, O);
+     cld_ddft->apply(ego->cld_ddft, dO0, O);
 }
 
 static int applicable(const S *ego, const problem *p_,
@@ -268,17 +273,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 						      RANK1_BIGVEC_ONLY));
      if (XM(any_true)(!cld_ddft, p->comm)) goto nada;
 
-     I = (ddft_first || !p->flags) ? p->O : p->I;
-     O = (preserve_input || (ddft_first && p->flags))
-	  ? p->O : p->I;
+     I = TAINT((ddft_first || !p->flags) ? p->O : p->I, rp * p->vn * 2);
+     O = TAINT((preserve_input || (ddft_first && p->flags)) ? p->O : p->I, 
+	       rp * p->vn * 2);
      X(extract_reim)(p->sign, I, &ri, &ii);
      X(extract_reim)(p->sign, O, &ro, &io);
      cld_dft = X(mkplan_d)(plnr,
 			X(mkproblem_dft_d)(X(mktensor_1d)(rp, p->vn*2,p->vn*2),
-					   X(mktensor_2d)(mpb,
-							  rp*p->vn*2, 
-							  rp*p->vn*2,
-							  p->vn, 2, 2),
+					   X(mktensor_1d)(p->vn, 2, 2),
 					   ri, ii, ro, io));
      if (XM(any_true)(!cld_dft, p->comm)) goto nada;
      
@@ -309,6 +311,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->r = r;
      pln->xmin = (ddft_first ? mblock[OB] : rblock[IB]) * my_pe;
      pln->xmax = pln->xmin + mpb - 1;
+     pln->xs = rp * p->vn * 2;
      pln->t = 0;
 
      X(ops_add)(&cld_ddft->ops, &cld_dft->ops, &pln->super.super.ops);
