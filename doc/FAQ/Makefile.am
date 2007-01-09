@@ -3,14 +3,17 @@ BFNNCONV_SRC = bfnnconv.pl m-ascii.pl m-html.pl m-info.pl m-lout.pl m-post.pl
 FAQ = fftw-faq.ascii fftw-faq.html
 EXTRA_DIST = fftw-faq.bfnn $(FAQ) $(BFNNCONV_SRC) html.refs
 
-$(FAQ): $(BFNNCONV_SRC) fftw-faq.bfnn
+html.refs2: html.refs
+	cp -f ${srcdir}/html.refs html.refs2
+
+$(FAQ): $(BFNNCONV_SRC) fftw-faq.bfnn html.refs2
 	@echo converting...
-	perl bfnnconv.pl fftw-faq.bfnn
+	perl -I${srcdir} ${srcdir}/bfnnconv.pl ${srcdir}/fftw-faq.bfnn
 	@echo converting again...
-	perl bfnnconv.pl fftw-faq.bfnn
+	perl -I${srcdir} ${srcdir}/bfnnconv.pl ${srcdir}/fftw-faq.bfnn
 
 faq: $(FAQ)
 
 clean-local:
 	rm -f *~ core a.out *.lout *.ps *.info *.ascii *.xrefdb *.post
-	rm -rf *.html
+	rm -rf *.html html.refs2

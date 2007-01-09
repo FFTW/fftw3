@@ -9,7 +9,7 @@
 \set authormail fftw@fftw.org
 \set title      FFTW Frequently Asked Questions with Answers
 \set copyholder Matteo Frigo and Massachusetts Institute of Technology
-\call-html startup html.refs
+\call-html startup html.refs2
 \copyto ASCII
             FFTW FREQUENTLY ASKED QUESTIONS WITH ANSWERS
                             `date '+%d %h %Y'`
