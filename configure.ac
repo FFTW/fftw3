@@ -421,6 +421,9 @@ if test "$enable_threads" = "yes"; then
    if test "$enable_openmp" = "yes"; then
       AC_MSG_ERROR([--enable-threads/--enable-openmp are mutually exclusive])
    fi
+   if test "$have_cell" = "yes"; then
+      AC_MSG_ERROR([--enable-threads/--enable-cell are mutually exclusive])
+   fi
    have_smp="yes"
 fi
 
