@@ -26,7 +26,7 @@
 #include <libspe.h>
 #include <stdlib.h> /* posix_memalign */
 
-extern spe_program_handle_t spu_fftw;
+extern spe_program_handle_t X(spu_fftw);
 
 void *X(cell_aligned_malloc)(size_t n)
 {
@@ -35,20 +35,34 @@ void *X(cell_aligned_malloc)(size_t n)
      return p;
 }
 
-static struct spu_context *ctx[SPU_NUM_THREADS];
-static speid_t spe_id[SPU_NUM_THREADS];
+static struct spu_context *ctx[MAX_NSPE];
+static speid_t spe_id[MAX_NSPE];
 static int refcnt = 0;
-static int nspe = SPU_NUM_THREADS;
+static int nspe = -1;
+
+static void set_default_nspe(void)
+{
+     if (nspe < 0) {
+	  /* set NSPE to the maximum of 8 and the number of physical
+	     SPEs.  A two-processor Cell blade reports 16 SPEs, but we
+	     only want to use one processor by default. */
+	  int phys = spe_count_physical_spes();
+	  if (phys > 8)
+	       phys = 8;
+	  X(cell_set_nspe)(phys);
+     }
+}
 
 void X(cell_activate_spes)(void)
 {
      if (refcnt++ == 0) {
 	  int i;
 
+	  set_default_nspe();
 	  for(i = 0; i < nspe; ++i) {
 	       ctx[i] = X(cell_aligned_malloc)(sizeof(*ctx[i]));
 
-	       spe_id[i] = spe_create_thread(0, &spu_fftw, ctx[i],
+	       spe_id[i] = spe_create_thread(0, &X(spu_fftw), ctx[i],
 					     NULL, -1, 0);
 	  }
      }
@@ -80,8 +94,8 @@ int X(cell_nspe)(void)
 
 void X(cell_set_nspe)(int n)
 {
-     if (n > SPU_NUM_THREADS)
-	  n = SPU_NUM_THREADS;
+     if (n > MAX_NSPE)
+	  n = MAX_NSPE;
      if (n < 0)
 	  n = 0;
      nspe = n;

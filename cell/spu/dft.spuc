@@ -59,7 +59,7 @@ static void flip_ri(R *A, int ncomplex)
 }
 
 static void bytwiddle(R *A, int r, int chunk, R *buf,
-		      int m, int dm, long long Wppu0)
+		      int m, int dm, unsigned long long Wppu0)
 {
      int v, i;
      int mold = -1;  /* assert (mold != m) */
@@ -68,7 +68,7 @@ static void bytwiddle(R *A, int r, int chunk, R *buf,
      for (v = 0; v < chunk; ++v, m += dm, A += 2 * r) {
 	  /* load twiddles if we don't have them already */
 	  if (mold != m) {
-	       long long Wppu = Wppu0 + m * r * 2 * sizeof(R);
+	       unsigned long long Wppu = Wppu0 + m * r * 2 * sizeof(R);
 	       W = ALIGN_LIKE(buf, Wppu);
 	       X(spu_dma1d)(W, Wppu, r * 2 * sizeof(R), MFC_GET_CMD);
 	       mold = m;
@@ -107,7 +107,7 @@ void X(spu_do_dft)(const struct dft_context *dft)
      int twon = 2 * n;
      int nbytes = twon * sizeof(R);
      const struct cell_iodim *vd = dft->v;
-     long long xi, xo;
+     unsigned long long xi, xo;
      int dm0 = vd[0].dm, dm1 = vd[1].dm;
 
      X(spu_alloc_reset)();

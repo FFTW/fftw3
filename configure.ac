@@ -104,6 +104,9 @@ fi
 AC_ARG_ENABLE(cell, [AC_HELP_STRING([--enable-cell],[enable optimizations for the Cell Broadband Engine])], have_cell=$enableval, have_cell=no)
 if test "$have_cell" = "yes"; then
 	AC_DEFINE(HAVE_CELL,1,[Define to enable optimizations for the Cell Broadband Engine])
+	if test "$PRECISION" = "l"; then
+	   AC_MSG_ERROR([Cell does not support long double])
+        fi
 fi
 
 AM_CONDITIONAL(HAVE_CELL, test "$have_cell" = "yes")

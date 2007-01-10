@@ -59,7 +59,7 @@ void X(cell_transpose)(R *I, INT n, INT s0, INT s1, INT vl)
 	       t->s1_bytes = s0 * sizeof(R);
 	  }
 	  t->n = n;
-	  t->A = (INT)I;
+	  t->A = (uintptr_t)I;
 	  t->nspe = nspe;
 	  t->my_id = i;
      }

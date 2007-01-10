@@ -37,7 +37,7 @@ typedef struct {
      plan_dft super;
      struct spu_radices radices;
      /* strides expressed in reals */
-     INT n, is, os;
+     int n, is, os;
      struct cell_iodim v[2];
      int cutdim;
      int sign;
@@ -45,7 +45,7 @@ typedef struct {
      R *W;
 
      /* optional twiddle factors for dftw: */
-     INT rw, mw;  /* rw == 0 indicates no twiddle factors */
+     int rw, mw;  /* rw == 0 indicates no twiddle factors */
      twid *td;
 } P;
 
@@ -206,9 +206,9 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  dft->v[1] = ego->v[1];
 	  dft->sign = ego->sign;
 	  dft->Wsz_bytes = ego->Wsz * sizeof(R);
-	  dft->W = (INT)ego->W;
-	  dft->xi = (INT)xi;
-	  dft->xo = (INT)xo;
+	  dft->W = (uintptr_t)ego->W;
+	  dft->xi = (uintptr_t)xi;
+	  dft->xo = (uintptr_t)xo;
 
 	  /* partition v into pieces of equal size, subject to alignment
 	     constraints */
@@ -226,7 +226,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 	  /* optional dftw twiddles */
 	  if (ego->rw) 
-	       dft->Ww = (INT)ego->td->W;
+	       dft->Ww = (uintptr_t)ego->td->W;
      }
 
      A(v == ego->v[cutdim].n0);
@@ -282,12 +282,25 @@ static int contiguous_or_aligned_p(int s_bytes)
 }
 
 static int build_vdim(int inplacep,
-		      int r, int irs, int ors,
-		      int m, int ims, int oms, int dm,
-		      int v, int ivs, int ovs,
+		      INT r, INT irs, INT ors,
+		      INT m, INT ims, INT oms, int dm,
+		      INT v, INT ivs, INT ovs,
 		      struct cell_iodim vd[2], int cutdim)
 {
      int vm, vv;
+
+     /* 32-bit overflow? */
+     if (!(1
+	   && FITS_IN_INT(r)
+	   && FITS_IN_INT(irs * sizeof(R))
+	   && FITS_IN_INT(ors * sizeof(R))
+	   && FITS_IN_INT(m)
+	   && FITS_IN_INT(ims * sizeof(R))
+	   && FITS_IN_INT(oms * sizeof(R))
+	   && FITS_IN_INT(v)
+	   && FITS_IN_INT(ivs * sizeof(R))
+	   && FITS_IN_INT(ovs * sizeof(R))))
+	  return 0;
 
      /* R dimension must be aligned in all cases */
      if (!(1
@@ -364,10 +377,14 @@ static int build_vdim(int inplacep,
 
 static 
 const struct spu_radices *find_radices(R *ri, R *ii, R *ro, R *io,
-				       int n, int *sign)
+				       INT n, int *sign)
 {
      const struct spu_radices *p;
      R *xi, *xo;
+
+     /* 32-bit overflow? */
+     if (!FITS_IN_INT(n))
+	  return 0;
 
      /* valid n? */
      if (n <= 0 || n > MAX_N || ((n % REQUIRE_N_MULTIPLE_OF) != 0))
@@ -406,7 +423,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      int sign;
      const struct spu_radices *radices;
      struct cell_iodim vd[2];
-     int m, ims, oms, v, ivs, ovs;
+     INT m, ims, oms, v, ivs, ovs;
 
      /* basic conditions */
      if (!(1

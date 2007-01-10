@@ -36,10 +36,10 @@ void X(spu_alloc_reset)(void);
 void *X(spu_alloc)(size_t sz);
 size_t X(spu_alloc_avail)(void);
 
-void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
+void X(spu_dma1d)(void *spu_addr, unsigned long long ppu_addr, size_t sz,
 		  unsigned int cmdl);
 
-void X(spu_dma2d)(R *A, long long ppu_addr, 
+void X(spu_dma2d)(R *A, unsigned long long ppu_addr, 
 		  int n, /* int spu_stride = 2 , */ int ppu_stride_bytes,
 		  int v, /* int spu_vstride = 2 * n, */
 		  int ppu_vstride_bytes,

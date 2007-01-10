@@ -84,8 +84,9 @@ static void complex_transpose(R *A, int lda, int n)
 }
 
 
-static void spu_dma1d_nowait(void *spu_addr, long long ppu_addr, size_t sz,
-			     unsigned int cmd)
+static void spu_dma1d_nowait(void *spu_addr, 
+			     unsigned long long ppu_addr, 
+			     size_t sz, unsigned int cmd)
 {
      unsigned int tag_id = 0;
 
@@ -101,12 +102,13 @@ static void spu_dma1d_nowait(void *spu_addr, long long ppu_addr, size_t sz,
 	  if (chunk > MAX_DMA_SIZE) 
 	       chunk = MAX_DMA_SIZE;
 
-	  spu_mfcdma32(spu_addr, ppu_addr, chunk, tag_id, cmd);
+	  spu_mfcdma64(spu_addr, mfc_ea2h(ppu_addr), mfc_ea2l(ppu_addr),
+		       chunk, tag_id, cmd);
 	  sz -= chunk; ppu_addr += chunk; spu_addr += chunk;
      }
 }
 
-static void dma2d_contig_nowait(R *A, long long ppu_addr,
+static void dma2d_contig_nowait(R *A, unsigned long long ppu_addr,
 				int n, 
 				int v, int spu_vstride, int ppu_vstride_bytes,
 				unsigned int cmd)
@@ -119,7 +121,7 @@ static void dma2d_contig_nowait(R *A, long long ppu_addr,
      }
 }
 
-void X(spu_dma1d)(void *spu_addr, long long ppu_addr, size_t sz,
+void X(spu_dma1d)(void *spu_addr, unsigned long long ppu_addr, size_t sz,
 		  unsigned int cmd)
 {
      spu_dma1d_nowait(spu_addr, ppu_addr, sz, cmd);
@@ -140,7 +142,7 @@ enum operation { DO_DMA, DO_TRANSPOSE };
    needs further investigation.
 */
 static void dma2d_transposed(R *A, int lda, 
-			     long long ppu_addr, int ppu_stride_bytes,
+			     unsigned long long ppu_addr, int ppu_stride_bytes,
 			     int r, int c,
 			     unsigned int cmd, 
 			     enum operation op)
@@ -177,7 +179,7 @@ static void dma2d_transposed(R *A, int lda,
 
 /* 2D dma transfer routine, works for 
    ppu_stride_bytes == 2 * sizeof(R) or ppu_vstride_bytes == 2 * sizeof(R) */
-void X(spu_dma2d)(R *A, long long ppu_addr, 
+void X(spu_dma2d)(R *A, unsigned long long ppu_addr, 
 		  int n, /* int spu_stride = 2 , */ int ppu_stride_bytes,
 		  int v, /* int spu_vstride = 2 * n, */
 		  int ppu_vstride_bytes,

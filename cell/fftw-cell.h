@@ -11,7 +11,7 @@
 #endif
 
 #define MAX_PLAN_LEN 4
-#define SPU_NUM_THREADS 8
+#define MAX_NSPE 16
 
 struct spu_radices {
      signed char r[MAX_PLAN_LEN];
@@ -37,16 +37,16 @@ struct dft_context {
      int sign;
      int Wsz_bytes;
 
-     /* pointers, converted to long long */
-     long long xi, xo;
-     long long W;
+     /* pointers, converted to ulonglong */
+     unsigned long long xi, xo;
+     unsigned long long W;
 
      /* optional twiddles for dftw */
-     long long Ww;
+     unsigned long long Ww;
 };
 
 struct transpose_context {
-     long long A;
+     unsigned long long A;
      int n;
      int s0_bytes;
      int s1_bytes;
@@ -55,8 +55,8 @@ struct transpose_context {
 };
 
 struct copy_context {
-     long long I;
-     long long O;
+     unsigned long long I;
+     unsigned long long O;
      int n, v;
      int is_bytes, os_bytes;
      int ivs_bytes, ovs_bytes;
@@ -101,6 +101,8 @@ void X(cell_activate_spes)(void);
 void X(cell_deactivate_spes)(void);
 
 int X(cell_nspe)(void);
+void X(cell_set_nspe)(int n);
+
 struct spu_context *X(cell_get_ctx)(int spe);
 void X(cell_spe_awake_all)(void);
 void X(cell_spe_wait_all)(void);

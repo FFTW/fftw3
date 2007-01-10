@@ -59,8 +59,8 @@ void X(cell_copy)(R *I, R *O, const iodim *n, const iodim *v)
 
 	  ctx->op = SPE_COPY;
 
-	  c->I = (INT)I;
-	  c->O = (INT)O;
+	  c->I = (uintptr_t)I;
+	  c->O = (uintptr_t)O;
 	  c->n = n->n;
 	  c->v = v->n;
 	  c->is_bytes = n->is * sizeof(R);
