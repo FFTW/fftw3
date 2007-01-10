@@ -74,7 +74,7 @@ static INT compute_batchsize(INT radix)
      return (radix + 2);
 }
 
-void dobatch_r2hc(const P *ego, R *I, R *O, R *buf, INT batchsz)
+static void dobatch_r2hc(const P *ego, R *I, R *O, R *buf, INT batchsz)
 {
      X(cpy2d_ci)(I, buf,
 		 ego->n, ego->rs0, WS(ego->bcsr /* hack */, 1),
@@ -98,7 +98,7 @@ void dobatch_r2hc(const P *ego, R *I, R *O, R *buf, INT batchsz)
      }
 }
 
-void dobatch_hc2r(const P *ego, R *I, R *O, R *buf, INT batchsz)
+static void dobatch_hc2r(const P *ego, R *I, R *O, R *buf, INT batchsz)
 {
      if (IABS(WS(ego->csr, 1)) < IABS(ego->ivs)) {
 	  /* transform directly from input */
