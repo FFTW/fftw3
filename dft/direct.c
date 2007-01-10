@@ -39,25 +39,24 @@ typedef struct {
      const S *slv;
 } P;
 
-static void dobatch(kdft k, 
-		    R *ri, R *ii, R *ro, R *io,
-		    INT n, stride is, stride os,
-		    INT vl, INT ivs, INT ovs, 
-		    R *buf, stride bufstride)
+static void dobatch(const P *ego, R *ri, R *ii, R *ro, R *io, 
+		    R *buf, INT batchsz)
 {
      X(cpy2d_pair_ci)(ri, ii, buf, buf+1,
-		      n, WS(is, 1), WS(bufstride, 1),
-		      vl, ivs, 2);
+		      ego->n, WS(ego->is, 1), WS(ego->bufstride, 1),
+		      batchsz, ego->ivs, 2);
      
-     if (IABS(WS(os, 1)) < IABS(ovs)) {
+     if (IABS(WS(ego->os, 1)) < IABS(ego->ovs)) {
 	  /* transform directly to output */
-	  k(buf, buf+1, ro, io, bufstride, os, vl, 2, ovs);
+	  ego->k(buf, buf+1, ro, io, 
+		 ego->bufstride, ego->os, batchsz, 2, ego->ovs);
      } else {
 	  /* transform to buffer and copy back */
-	  k(buf, buf+1, buf, buf+1, bufstride, bufstride, vl, 2, 2);
+	  ego->k(buf, buf+1, buf, buf+1, 
+		 ego->bufstride, ego->bufstride, batchsz, 2, 2);
 	  X(cpy2d_pair_co)(buf, buf+1, ro, io,
-			   n, WS(bufstride, 1), WS(os, 1), 
-			   vl, 2, ovs);
+			   ego->n, WS(ego->bufstride, 1), WS(ego->os, 1), 
+			   batchsz, 2, ego->ovs);
      }
 }
 
@@ -74,27 +73,17 @@ static void apply_buf(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {
      const P *ego = (const P *) ego_;
      R *buf;
-     INT vl = ego->vl;
-     INT n = ego->n;
+     INT vl = ego->vl, n = ego->n, batchsz = compute_batchsize(n);
      INT i;
-     INT batchsz = compute_batchsize(n);
 
      STACK_MALLOC(R *, buf, n * batchsz * 2 * sizeof(R));
 
      for (i = 0; i < vl - batchsz; i += batchsz) {
-	  dobatch(ego->k, ri, ii, ro, io,
-		  n, ego->is, ego->os,
-		  batchsz, ego->ivs, ego->ovs,
-		  buf, ego->bufstride);
-	  ri += batchsz * ego->ivs;
-	  ii += batchsz * ego->ivs;
-	  ro += batchsz * ego->ovs;
-	  io += batchsz * ego->ovs;
+	  dobatch(ego, ri, ii, ro, io, buf, batchsz);
+	  ri += batchsz * ego->ivs; ii += batchsz * ego->ivs;
+	  ro += batchsz * ego->ovs; io += batchsz * ego->ovs;
      }
-     dobatch(ego->k, ri, ii, ro, io,
-	     n, ego->is, ego->os,
-	     vl - i, ego->ivs, ego->ovs,
-	     buf, ego->bufstride);
+     dobatch(ego, ri, ii, ro, io, buf, vl - i);
 
      STACK_FREE(buf);
 }
