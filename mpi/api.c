@@ -117,7 +117,7 @@ static dtensor *default_sz(int rnk, const XM(ddim) *dims0, int n_pes)
 }
 
 /* allocate simple local (serial) dims array corresponding to n[rnk] */
-static XM(ddim) *simple_dims(int rnk, const int *n)
+static XM(ddim) *simple_dims(int rnk, const ptrdiff_t *n)
 {
      XM(ddim) *dims = (XM(ddim) *) MALLOC(sizeof(XM(ddim)) * rnk,
 						TENSORS);
@@ -146,7 +146,7 @@ static void local_size(int my_pe, const dtensor *sz, block_kind k,
      }
 }
 
-static INT prod(int rnk, const int *local_n) 
+static INT prod(int rnk, const ptrdiff_t *local_n) 
 {
      int i;
      INT N = 1;

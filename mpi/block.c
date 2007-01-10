@@ -36,14 +36,14 @@ int XM(num_blocks_ok)(INT n, INT block, MPI_Comm comm)
    n_pes processes.  Divide as equally as possible, while minimizing
    the maximum block size among the processes as well as the number of
    processes with nonzero blocks. */
-INT XM(default_block)(INT n, INT n_pes)
+INT XM(default_block)(INT n, int n_pes)
 {
      return ((n + n_pes - 1) / n_pes);
 }
 
 /* For a given block size and dimension n, compute the block size b
    and the starting offset s on the given process. */
-INT XM(block)(INT n, INT block, INT which_block)
+INT XM(block)(INT n, INT block, int which_block)
 {
      INT n_blocks = XM(num_blocks)(n, block);
      if (which_block >= n_blocks)
@@ -92,7 +92,7 @@ void XM(block_coords)(const dtensor *sz, block_kind k, int which_pe,
      }
 }
 
-INT XM(total_block)(const dtensor *sz, block_kind k, INT which_pe)
+INT XM(total_block)(const dtensor *sz, block_kind k, int which_pe)
 {
      if (XM(idle_process)(sz, k, which_pe))
 	  return 0;

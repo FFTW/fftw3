@@ -90,15 +90,15 @@ void XM(dtensor_print)(const dtensor *t, printer *p);
 /* for a single distributed dimension: */
 INT XM(num_blocks)(INT n, INT block);
 int XM(num_blocks_ok)(INT n, INT block, MPI_Comm comm);
-INT XM(default_block)(INT n, INT n_pes);
-INT XM(block)(INT n, INT block, INT which_block);
+INT XM(default_block)(INT n, int n_pes);
+INT XM(block)(INT n, INT block, int which_block);
 
 /* for multiple distributed dimensions: */
 INT XM(num_blocks_total)(const dtensor *sz, block_kind k);
-int XM(idle_process)(const dtensor *sz, block_kind k, INT which_pe);
-void XM(block_coords)(const dtensor *sz, block_kind k, INT which_pe, 
+int XM(idle_process)(const dtensor *sz, block_kind k, int which_pe);
+void XM(block_coords)(const dtensor *sz, block_kind k, int which_pe, 
 		     INT *coords);
-INT XM(total_block)(const dtensor *sz, block_kind k, INT which_pe);
+INT XM(total_block)(const dtensor *sz, block_kind k, int which_pe);
 int XM(is_local_after)(int dim, const dtensor *sz, block_kind k);
 int XM(is_local)(const dtensor *sz, block_kind k);
 int XM(is_block1d)(const dtensor *sz, block_kind k);
