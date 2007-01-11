@@ -51,6 +51,6 @@ typedef plan_rdft plan_mpi_transpose;
   (type *)X(mkplan_rdft)(sizeof(type), adt, apply)
 
 /* various solvers */
-void XM(transpose_inplace_register)(planner *p);
+void XM(transpose_pairwise_register)(planner *p);
 void XM(transpose_alltoall_register)(planner *p);
 void XM(transpose_radix2_register)(planner *p);

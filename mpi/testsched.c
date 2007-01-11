@@ -26,7 +26,7 @@
    It is not used in FFTW 3, but I keep it around in case we ever want
    to play with this again or to change algorithms.  In particular, I
    used it to implement and test the fill1_comm_sched routine in
-   transpose-inplace.c, which allows us to create a schedule for one
+   transpose-pairwise.c, which allows us to create a schedule for one
    process at a time and is much more compact than the FFTW 2 code.
 
    Note that the scheduling algorithm is somewhat modified from that

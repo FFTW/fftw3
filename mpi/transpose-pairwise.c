@@ -18,12 +18,12 @@
  *
  */
 
-/* Plans for distributed in-place transposes (or out-of-place, while
-   preserving the input).  These require a slightly tricky sequence of
-   exchanges between processors.  The amount of buffer space required
-   is proportional to the local size divided by the number of
-   processors (i.e. to total array size divided by the number of
-   processors squared). */
+/* Distributed transposes using a sequence of carefully scheduled
+   pairwise exchanges.  This has the advantage that it can be done
+   in-place, or out-of-place while preserving the input, using buffer
+   space proportional to the local size divided by the number of
+   processes (i.e. to the total array size divided by the number of
+   processes squared). */
 
 #include "mpi-transpose.h"
 #include <string.h>
@@ -154,7 +154,7 @@ static int applicable(const S *ego, const problem *p_,
 {
      const problem_mpi_transpose *p = (const problem_mpi_transpose *) p_;
      /* Note: this is *not* UGLY for out-of-place, destroy-input plans;
-	the planner often prefers transpose-inplace to transpose-alltoall,
+	the planner often prefers transpose-pairwise to transpose-alltoall,
 	at least with LAM MPI on my machine. */
      return (1
 	     && (!ego->preserve_input || (!NO_DESTROY_INPUTP(plnr)
@@ -186,7 +186,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi-transpose-inplace%s%(%p%)%(%p%)%(%p%)%(%p%))", 
+     p->print(p, "(mpi-transpose-pairwise%s%(%p%)%(%p%)%(%p%)%(%p%))", 
 	      ego->preserve_input==2 ?"/p":"",
 	      ego->cld1, ego->cld2, ego->cld2rest, ego->cld3);
 }
@@ -441,7 +441,7 @@ static solver *mksolver(int preserve_input)
      return &(slv->super);
 }
 
-void XM(transpose_inplace_register)(planner *p)
+void XM(transpose_pairwise_register)(planner *p)
 {
      int preserve_input;
      for (preserve_input = 0; preserve_input <= 1; ++preserve_input)
