@@ -37,7 +37,7 @@ typedef struct {
      plan_dft super;
      struct spu_radices radices;
      /* strides expressed in reals */
-     int n, is, os;
+     INT n, is, os;
      struct cell_iodim v[2];
      int cutdim;
      int sign;
@@ -45,7 +45,7 @@ typedef struct {
      R *W;
 
      /* optional twiddle factors for dftw: */
-     int rw, mw;  /* rw == 0 indicates no twiddle factors */
+     INT rw, mw;  /* rw == 0 indicates no twiddle factors */
      twid *td;
 } P;
 
@@ -87,9 +87,9 @@ static const opcnt t_ops[33] = {
 };
 
 static void compute_opcnt(const struct spu_radices *p, 
-			  int n, int v, opcnt *ops)
+			  INT n, INT v, opcnt *ops)
 {
-     int r;
+     INT r;
      signed char *q;
 
      X(ops_zero)(ops);
@@ -100,7 +100,7 @@ static void compute_opcnt(const struct spu_radices *p,
      X(ops_madd2)(v * (n / (-r)) / VL, &n_ops[-r], ops);
 }
 
-static int extent(struct cell_iodim *d)
+static INT extent(struct cell_iodim *d)
 {
      return d->n1 - d->n0;
 }
@@ -108,9 +108,9 @@ static int extent(struct cell_iodim *d)
 /* FIXME: this is totally broken */
 static void cost_model(const P *pln, opcnt *ops)
 {
-     int r = pln->n;
-     int v0 = extent(pln->v + 0);
-     int v1 = extent(pln->v + 1);
+     INT r = pln->n;
+     INT v0 = extent(pln->v + 0);
+     INT v1 = extent(pln->v + 1);
 
      compute_opcnt(&pln->radices, r, v0 * v1, ops);
 
@@ -120,10 +120,10 @@ static void cost_model(const P *pln, opcnt *ops)
 }
 
 /* expressed in real numbers */
-static int compute_twiddle_size(const struct spu_radices *p, int n)
+static INT compute_twiddle_size(const struct spu_radices *p, INT n)
 {
-     int sz = 0;
-     int r;
+     INT sz = 0;
+     INT r;
      signed char *q;
 
      for (q = p->r; (r = *q) > 0; ++q) {
@@ -136,13 +136,13 @@ static int compute_twiddle_size(const struct spu_radices *p, int n)
 
 /* FIXME: find a way to use the normal FFTW twiddle mechanisms for this */
 static void fill_twiddles(enum wakefulness wakefulness,
-			  R *W, const signed char *q, int n)
+			  R *W, const signed char *q, INT n)
 {
-     int r;
+     INT r;
 
      for ( ; (r = *q) > 0; ++q) {
 	  triggen *t = X(mktriggen)(wakefulness, n);
-	  int i, j, v, m = n / r;
+	  INT i, j, v, m = n / r;
 
 	  for (j = 0; j < m; j += VL) {
 	       for (i = 1; i < r; ++i) {
@@ -158,10 +158,12 @@ static void fill_twiddles(enum wakefulness wakefulness,
 }
 
 static R *make_twiddles(enum wakefulness wakefulness,
-			const struct spu_radices *p, int n, int *Wsz)
+			const struct spu_radices *p, INT n, int *Wsz)
 {
-     *Wsz = compute_twiddle_size(p, n);
-     R *W = X(cell_aligned_malloc)(*Wsz * sizeof(R));
+     INT sz = compute_twiddle_size(p, n);
+     R *W = X(cell_aligned_malloc)(sz * sizeof(R));
+     A(FITS_IN_INT(sz));
+     *Wsz = sz;
      fill_twiddles(wakefulness, W, p->r, n);
      return W;
 }
@@ -205,6 +207,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  dft->v[0] = ego->v[0];
 	  dft->v[1] = ego->v[1];
 	  dft->sign = ego->sign;
+	  A(FITS_IN_INT(ego->Wsz * sizeof(R)));
 	  dft->Wsz_bytes = ego->Wsz * sizeof(R);
 	  dft->W = (uintptr_t)ego->W;
 	  dft->xi = (uintptr_t)xi;
@@ -276,7 +279,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      }
 }
 
-static int contiguous_or_aligned_p(int s_bytes)
+static int contiguous_or_aligned_p(INT s_bytes)
 {
      return (s_bytes == 2 * sizeof(R)) || ((s_bytes % ALIGNMENTA) == 0);
 }
@@ -336,8 +339,8 @@ static int build_vdim(int inplacep,
 	   && (vd[0].n1 % VL == 0)
 
 	   /* dimension-0 strides must be either contiguous or aligned */
-	   && contiguous_or_aligned_p(vd[0].is_bytes)
-	   && contiguous_or_aligned_p(vd[0].os_bytes)
+	   && contiguous_or_aligned_p((INT)vd[0].is_bytes)
+	   && contiguous_or_aligned_p((INT)vd[0].os_bytes)
 
 	   /* dimension-1 strides must be aligned */
 	   && ((vd[1].is_bytes % ALIGNMENTA) == 0)
@@ -650,7 +653,7 @@ static void regsolverw(planner *plnr, INT r, int dec, int cutdim)
 
 void X(ct_cell_direct_register)(planner *p)
 {
-     int n;
+     INT n;
 
      for (n = 0; n <= MAX_N; n += REQUIRE_N_MULTIPLE_OF) {
 	  const struct spu_radices *r = 
