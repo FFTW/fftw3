@@ -102,9 +102,16 @@ problem *XM(mkproblem_transpose)(INT nx, INT ny, INT vn,
      ego->vn = vn;
      ego->I = I;
      ego->O = O;
-     ego->flags = flags;
      ego->block = block > nx ? nx : block;
      ego->tblock = tblock > ny ? ny : tblock;
+
+     /* canonicalize flags: we can freely assume that the data is
+	"transposed" if one of the dimensions is 1. */
+     if (ego->block == 1)
+	  flags |= TRANSPOSED_IN;
+     if (ego->tblock == 1)
+	  flags |= TRANSPOSED_OUT;
+     ego->flags = flags;
 
      MPI_Comm_dup(comm, &ego->comm);
 
