@@ -118,7 +118,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      plan *cld1 = 0, *cldt = 0, *cld2 = 0;
      R *ri, *ii, *ro, *io, *I, *O;
      tensor *sz;
-     dtensor *sz2;
      int i, my_pe, n_pes;
      INT nrest;
      static const plan_adt padt = {

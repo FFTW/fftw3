@@ -53,4 +53,4 @@ typedef plan_rdft plan_mpi_transpose;
 /* various solvers */
 void XM(transpose_pairwise_register)(planner *p);
 void XM(transpose_alltoall_register)(planner *p);
-void XM(transpose_radix2_register)(planner *p);
+void XM(transpose_recurse_register)(planner *p);

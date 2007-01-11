@@ -498,6 +498,7 @@ static FFTW(plan) mkplan_transpose(bench_problem *p, unsigned flags)
 	  bench_real *ri = (bench_real *) p->in;
 	  bench_real *ro = (bench_real *) p->out;
 	  if (!ri || !ro) return pln;
+	  setup_gather_scatter();
 	  for (i = 0; i < nx * ny; ++i)
 	       ri[i] = i;
 	  after_problem_rcopy_from(p, ri);
