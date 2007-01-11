@@ -156,37 +156,37 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      b = XM(block)(p->nx, p->block, me);
      A(p->tblock * np == p->ny); /* this is currently required for cld1 */
      if (p->flags & TRANSPOSED_IN) { 
-          /* r x m x (bt x b x vn) -> m x r x (bt x b x vn) */
+          /* m x r x (bt x b x vn) -> r x m x (bt x b x vn) */
 	  INT vn = p->vn * b * p->tblock;
 	  cld1 = X(mkplan_f_d)(plnr,
                                X(mkproblem_rdft_0_d)(X(mktensor_3d)
-						     (r, m*vn, vn,
-						      m, vn, r*vn,
+						     (m, r*vn, vn,
+						      r, vn, m*vn,
 						      vn, 1, 1),
                                                      I, O),
                                0, 0, NO_SLOW);
      }
      else if (I != O) { /* combine cld1 with TRANSPOSED_IN permutation */
-          /* b x r x m x bt x vn -> m x r x bt x b x vn */
+          /* b x m x r x bt x vn -> r x m x bt x b x vn */
 	  INT vn = p->vn;
 	  INT bt = p->tblock;
 	  cld1 = X(mkplan_f_d)(plnr,
                                X(mkproblem_rdft_0_d)(X(mktensor_5d)
-						     (b, r*m*bt*vn, vn,
-						      r, m*bt*vn, bt*b*vn,
-						      m, bt*vn, r*bt*b*vn,
+						     (b, m*r*bt*vn, vn,
+						      m, r*bt*vn, bt*b*vn,
+						      r, bt*vn, m*bt*b*vn,
 						      bt, vn, b*vn,
 						      vn, 1, 1),
                                                      I, O),
                                0, 0, NO_SLOW);
      }
      else { /* TRANSPOSED_IN permutation must be separate for in-place */
-	  /* b x (r x m) x bt x vn -> b x (m x r) x bt x vn */
+	  /* b x (m x r) x bt x vn -> b x (r x m) x bt x vn */
 	  INT vn = p->vn * p->tblock;
 	  cld1 = X(mkplan_f_d)(plnr,
                                X(mkproblem_rdft_0_d)(X(mktensor_4d)
-						     (r, m*vn, vn,
-						      m, vn, r*vn,
+						     (m, r*vn, vn,
+						      r, vn, m*vn,
 						      vn, 1, 1,
 						      b, np*vn, np*vn),
                                                      I, O),
