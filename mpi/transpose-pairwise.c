@@ -410,7 +410,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  pln->sched = 0; /* this process is not doing anything */
      }
      else {
-	  pln->sched = (INT *) MALLOC(n_pes * sizeof(INT), PLANS);
+	  pln->sched = (int *) MALLOC(n_pes * sizeof(int), PLANS);
 	  fill1_comm_sched(pln->sched, my_pe, n_pes);
 	  if (sort_pe >= 0)
 	       sort1_comm_sched(pln->sched, n_pes, sort_pe, ascending);
