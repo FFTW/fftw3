@@ -6,7 +6,7 @@
 #include "../fftw-cell.h"
 
 #define MAX_DMA_SIZE 16384
-#define DMA_WAIT() spu_mfcstat(2)
+#define DMA_WAIT mfc_read_tag_status_all
 
 /* in-place transpose, n x n square complex matrix */
 static void complex_transpose(R *A, int lda, int n)
