@@ -242,7 +242,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
 static solver *mksolver(rearrangement rearrange, int preserve_input)
 {
-     static const solver_adt sadt = { PROBLEM_MPI_DFT, mkplan };
+     static const solver_adt sadt = { PROBLEM_MPI_DFT, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);
      slv->rearrange = rearrange;
      slv->preserve_input = preserve_input;

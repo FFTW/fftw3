@@ -256,7 +256,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 static solver *mksolver(int preserve_input,
 			int (*radix)(int np), const char *nam)
 {
-     static const solver_adt sadt = { PROBLEM_MPI_TRANSPOSE, mkplan };
+     static const solver_adt sadt = { PROBLEM_MPI_TRANSPOSE, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);
      slv->preserve_input = preserve_input;
      slv->radix = radix;
