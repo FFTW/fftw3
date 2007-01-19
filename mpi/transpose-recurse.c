@@ -29,7 +29,9 @@
    where N is the total data size.  Also, the amount of local data
    rearrangement is increased.  So, it's not clear, a priori, what the
    best algorithm will be, and we'll leave it to the planner.  (In
-   theory, it looks like this should become advantageous for large p.)
+   theory and practice, it looks like this becomes advantageous for
+   large p, in the limit where the message sizes are small and
+   latency-dominated.)
 */
 
 #include "mpi-transpose.h"
@@ -83,6 +85,15 @@ static int radix_first(int np)
      return (r >= (int) (X(isqrt)(np)) ? 0 : r);
 }
 
+/* In theory, transpose-recurse becomes advantageous for message sizes
+   below some minimum, assuming that the time is dominated by
+   communications.  In practice, we want to constrain the minimum
+   message size for transpose-recurse to keep the planning time down.
+   I've set this conservatively according to some simple experiments
+   on a Cray XT3 where the crossover message size was 128, although on
+   a larger-latency machine the crossover will be larger. */
+#define SMALL_MESSAGE 2048
+
 static int applicable(const S *ego, const problem *p_,
 		      const planner *plnr, int *r)
 {
@@ -95,8 +106,9 @@ static int applicable(const S *ego, const problem *p_,
                                           && p->I != p->O))
 	     && (*r = ego->radix(n_pes)) && *r < n_pes && *r > 1
 	     && (!CONSERVE_MEMORYP(plnr) || *r > 8
-		 || !X(toobig)(p->nx * p->ny * p->vn / n_pes / *r))
-	     && (!NO_UGLYP(plnr) || n_pes > 2) /* TODO: cutoff > 2? */
+		 || !X(toobig)((p->nx * (p->ny / n_pes) * p->vn) / *r))
+	     && (!NO_SLOWP(plnr) || 
+		 (p->nx * (p->ny / n_pes) * p->vn) / n_pes <= SMALL_MESSAGE)
 	     && ONLY_TRANSPOSEDP(p->flags)
 	  );
 }
