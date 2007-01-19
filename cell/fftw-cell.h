@@ -20,16 +20,16 @@
 #include <ifftw.h>
 
 #ifdef FFTW_SINGLE 
-#define MAX_N 6144
+#define MAX_N 8192
 #define REQUIRE_N_MULTIPLE_OF 4
 #define VL 2
 #else
-#define MAX_N 3072
+#define MAX_N 4096
 #define REQUIRE_N_MULTIPLE_OF 1
 #define VL 1
 #endif
 
-#define MAX_PLAN_LEN 4
+#define MAX_PLAN_LEN 5
 #define MAX_NSPE 16
 
 struct spu_radices {

@@ -49,7 +49,7 @@ typedef struct {
 } P;
 
 
-/* op counts of SPE codelets */
+/* op counts of SPU codelets */
 static const opcnt n_ops[33] = {
      [2] = {2, 0, 0, 0},
      [3] = {3, 1, 3, 0},
@@ -169,9 +169,9 @@ static R *make_twiddles(enum wakefulness wakefulness,
 
 static int fits_in_local_store(INT n, INT v)
 {
-     /* the SPU has space for 4 * MAX_N complex numbers.  We need
+     /* the SPU has space for 3 * MAX_N complex numbers.  We need
 	n*(v+1) for data plus n for twiddle factors. */
-     return n * (v+2) <= 4 * MAX_N;
+     return n * (v+2) <= 3 * MAX_N;
 }
 
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
@@ -181,6 +181,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      int i, v;
      int nspe = X(cell_nspe)();
      int cutdim = ego->cutdim;
+     int contiguous_r = ((ego->is == 2) && (ego->os == 2));
 
      /* find pointer to beginning of data, depending on sign */
      if (ego->sign == FFT_SIGN) {
@@ -214,12 +215,13 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
 	  /* partition v into pieces of equal size, subject to alignment
 	     constraints */
-	  if ((ego->is == 2 && ego->os == 2) || cutdim > 0) {
-	       chunk = (v - ego->v[cutdim].n0) / (nspe - i);
-	  } else {
-	       /* Either CUTDIM==0 or the input is not contiguous.
-		  The SPE needs multiples of VL in this case */
+	  if (cutdim == 0 && !contiguous_r) {
+	       /* CUTDIM = 0 and the SPU uses transposed DMA.
+		  We must preserve the alignment of the dimension 0 in the
+		  cut */
 	       chunk = VL * ((v - ego->v[cutdim].n0) / (VL * (nspe - i)));
+	  } else {
+	       chunk = (v - ego->v[cutdim].n0) / (nspe - i);
 	  }
 
 	  dft->v[cutdim].n1 = v;
@@ -290,6 +292,7 @@ static int build_vdim(int inplacep,
 		      struct cell_iodim vd[2], int cutdim)
 {
      int vm, vv;
+     int contiguous_r = ((irs == 2) && (ors == 2));
 
      /* 32-bit overflow? */
      if (!(1
@@ -332,10 +335,26 @@ static int build_vdim(int inplacep,
      vd[vv].is_bytes = ivs * sizeof(R); vd[vv].os_bytes = ovs * sizeof(R);
      vd[vv].dm = 0;
 
-     /* SPE DMA restrictions: */
+     /* Restrictions on the size of the SPU local store: */
+     if (!(0
+	   /* for contiguous I/O, one array of size R must fit into
+	      local store.  (The fits_in_local_store() check is
+	      redundant because R <= MAX_N holds, but we check anyway
+	      for clarity */
+	   || (contiguous_r && fits_in_local_store(r, 1))
+
+	   /* for noncontiguous I/O, VL arrays of size R must fit into
+	      local store because of transposed DMA */
+	   || fits_in_local_store(r, VL)))
+	  return 0;
+
+     /* SPU DMA restrictions: */
      if (!(1
-	   /* dimension 0 must be aligned, dimension 1 is arbitrary */
-	   && (vd[0].n1 % VL == 0)
+	   /* If R is noncontiguous, then the SPU uses transposed DMA
+	      and therefore dimension 0 must be aligned */ 
+	   && (contiguous_r || vd[0].n1 % VL == 0)
+
+	   /* dimension 1 is arbitrary */
 
 	   /* dimension-0 strides must be either contiguous or aligned */
 	   && contiguous_or_aligned_p((INT)vd[0].is_bytes)
@@ -345,13 +364,6 @@ static int build_vdim(int inplacep,
 	   && ((vd[1].is_bytes % ALIGNMENTA) == 0)
 	   && ((vd[1].os_bytes % ALIGNMENTA) == 0)
 	      ))
-	  return 0;
-
-     /* Restrictions due to the computation of CHUNK in apply(): */
-     if (!(0
-	   || (irs == 2 && ors == 2)
-	   || cutdim > 0
-	   || (extent(vd + cutdim) % VL) == 0 ))
 	  return 0;
 
      /* see if we can do it without overwriting the input with itself */
@@ -436,7 +448,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	      ))
 	  return 0;
 
-     /* see if SPE supports N */
+     /* see if SPU supports N */
      {
 	  iodim *d = p->sz->dims;
 	  radices = find_radices(p->ri, p->ii, p->ro, p->io, d[0].n, &sign);
@@ -459,7 +471,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  v = 1; ivs = ovs = 0;
      }
 
-     /* see if strides are supported by the SPE DMA routine  */
+     /* see if strides are supported by the SPU DMA routine  */
      {
 	  iodim *d = p->sz->dims + 0;
 	  if (!build_vdim(p->ri == p->ro,
@@ -583,7 +595,7 @@ static plan *mkcldw(const ct_solver *ego_,
 	  return 0;
 
      /* don't bother for small N */
-     if (r * m * v <= MAX_N / 12 /* ARBITRARY */)
+     if (r * m * v <= MAX_N / 16 /* ARBITRARY */)
 	  return 0;
 
      /* check whether the R dimension is supported */
@@ -637,8 +649,8 @@ static plan *mkcldw(const ct_solver *ego_,
 
      /* FIXME: heuristics */
      /* pay penalty for large radices: */
-     if (r > MAX_N / 12)
-	  pln->super.super.ops.other += ((r - (MAX_N / 12)) * m * v);
+     if (r > MAX_N / 16)
+	  pln->super.super.ops.other += ((r - (MAX_N / 16)) * m * v);
 
      return &(pln->super.super);
 }

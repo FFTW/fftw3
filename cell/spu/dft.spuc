@@ -138,8 +138,14 @@ void X(spu_do_dft)(const struct dft_context *dft)
      /* build plan */
      build_plan(plan, dft->n, W, &dft->r);
 
-     chunk = VL * 
-	  ((X(spu_alloc_avail)() - nbytes - 2 * ALIGNMENT) / (VL * nbytes));
+     if (dft->is_bytes == 2 * sizeof(R) && dft->os_bytes == 2 * sizeof(R)) {
+	  chunk = (X(spu_alloc_avail)() - nbytes - 2 * ALIGNMENT) / nbytes;
+     } else {
+	  /* CHUNK must be a multiple of VL for transposed DMA */
+	  chunk = VL * 
+	       ((X(spu_alloc_avail)() - nbytes - 2 * ALIGNMENT) /
+		(VL * nbytes));
+     }
 
      /* align CHUNK, but only if CHUNK is less than the whole dimension	0,
 	since the invoking code may be relying upon the whole chunk to
