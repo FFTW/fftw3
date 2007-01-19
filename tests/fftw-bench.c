@@ -141,8 +141,10 @@ void setup(bench_problem *p)
 {
      double tim;
 
-     if (amnesia)
+     if (amnesia) {
 	  FFTW(forget_wisdom)();
+	  havewisdom = 0;
+     }
 
      /* Regression test: check that fftw_malloc exists and links
       * properly */
