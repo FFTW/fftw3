@@ -796,6 +796,8 @@ static int imprt(planner *ego, scanner *sc)
      }
 
      while (1) {
+	  solution *sol;
+
 	  if (sc->scan(sc, ")"))
 	       break;
 
@@ -826,7 +828,9 @@ static int imprt(planner *ego, scanner *sc)
 	  CK(flags.u == u);
 	  CK(flags.timelimit_impatience == timelimit_impatience);
 
-	  hinsert(ego, sig, &flags, slvndx);
+	  if (!(sol = hlookup(ego, sig, &flags))
+	      || !subsumes(&sol->flags, SLVNDX(sol), &flags))
+	       hinsert(ego, sig, &flags, slvndx);
      }
 
      X(ifree0)(old.solutions);
