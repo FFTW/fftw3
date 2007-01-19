@@ -31,12 +31,10 @@
 
 static int mpi_inited = 0;
 
-static double cost_hook(const planner *plnr, const plan *pln,
-			const problem *p, double t, cost_kind k)
+static double cost_hook(const problem *p, double t, cost_kind k)
 {
      MPI_Comm comm;
      double tsum;
-     UNUSED(plnr); UNUSED(pln);
      switch (p->adt->problem_kind) {
 	 case PROBLEM_MPI_DFT:
 	      comm = ((const problem_mpi_dft *) p)->comm;

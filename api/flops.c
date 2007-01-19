@@ -26,9 +26,9 @@ void X(flops)(const X(plan) p, double *add, double *mul, double *fma)
      opcnt *o = &p->pln->ops;
      *add = o->add; *mul = o->mul; *fma = o->fma;
      if (plnr->cost_hook) {
-	  *add = plnr->cost_hook(plnr, p->pln, p->prb, *add, COST_SUM);
-	  *mul = plnr->cost_hook(plnr, p->pln, p->prb, *mul, COST_SUM);
-	  *fma = plnr->cost_hook(plnr, p->pln, p->prb, *fma, COST_SUM);
+	  *add = plnr->cost_hook(p->prb, *add, COST_SUM);
+	  *mul = plnr->cost_hook(p->prb, *mul, COST_SUM);
+	  *fma = plnr->cost_hook(p->prb, *fma, COST_SUM);
      }
 }
 

@@ -279,7 +279,8 @@ typedef clock_t crude_time;
 #endif
 
 crude_time X(get_crude_time)(void);
-double X(elapsed_since)(crude_time t0); /* time in seconds since t0 */
+double X(elapsed_since)(const planner *plnr, const problem *p,
+			crude_time t0); /* time in seconds since t0 */
 
 /*-----------------------------------------------------------------------*/
 /* ops.c: */
@@ -683,8 +684,7 @@ struct planner_s {
      const planner_adt *adt;
      void (*hook)(struct planner_s *plnr, plan *pln, 
 		  const problem *p, int optimalp);
-     double (*cost_hook)(const struct planner_s *plnr, const plan *pln,
-			 const problem *p, double t, cost_kind k);
+     double (*cost_hook)(const problem *p, double t, cost_kind k);
 
      /* solver descriptors */
      slvdesc *slvdescs;
@@ -937,7 +937,8 @@ typedef void (*cpy2d_func)(R *I, R *O,
 void X(null_awake)(plan *ego, enum wakefulness wakefulness);
 double X(iestimate_cost)(const planner *, const plan *, const problem *);
 
-double X(measure_execution_time)(plan *pln, const problem *p);
+double X(measure_execution_time)(const planner *plnr, 
+				 plan *pln, const problem *p);
 int X(alignment_of)(R *p);
 unsigned X(hash)(const char *s);
 INT X(nbuf)(INT n, INT vl);

@@ -44,7 +44,7 @@ crude_time X(get_crude_time)(void)
 #define elapsed_sec(t1,t0) ((double)(t1.tv_sec - t0.tv_sec) +		\
 			    (double)(t1.tv_usec - t0.tv_usec) * 1.0E-6)
 
-double X(elapsed_since)(crude_time t0)
+static double elapsed_since(crude_time t0)
 {
      crude_time t1;
      gettimeofday(&t1, 0);
@@ -63,7 +63,7 @@ crude_time X(get_crude_time)(void) { return clock(); }
 
 #define elapsed_sec(t1,t0) ((double) ((t1) - (t0)) / CLOCKS_PER_SEC)
 
-double X(elapsed_since)(crude_time t0)
+static double elapsed_since(crude_time t0)
 {
      return elapsed_sec(clock(), t0);
 }
@@ -71,6 +71,14 @@ double X(elapsed_since)(crude_time t0)
 #  define TIME_MIN_SEC 2.0e-1 /* from fftw2 */
 
 #endif /* !HAVE_GETTIMEOFDAY */
+
+double X(elapsed_since)(const planner *plnr, const problem *p, crude_time t0)
+{
+     double t = elapsed_since(t0);
+     if (plnr->cost_hook)
+	  t = plnr->cost_hook(p, t, COST_MAX);
+     return t;
+}
 
 #ifdef WITH_SLOW_TIMER
 /* excruciatingly slow; only use this if there is no choice! */
@@ -105,7 +113,8 @@ typedef crude_time ticks;
   }
 
 
-  double X(measure_execution_time)(plan *pln, const problem *p)
+  double X(measure_execution_time)(const planner *plnr, 
+				   plan *pln, const problem *p)
   {
        int iter;
        int repeat;
@@ -131,10 +140,12 @@ typedef crude_time ticks;
 		 first = 0;
 
 		 /* do not run for too long */
-		 if (X(elapsed_since)(begin) > FFTW_TIME_LIMIT)
+		 if (X(elapsed_since)(plnr, p, begin) > FFTW_TIME_LIMIT)
 		      break;
 	    }
 
+	    if (plnr->cost_hook)
+		 tmin = plnr->cost_hook(p, tmin, COST_MAX);
 	    if (tmin >= TIME_MIN) {
 		 X(plan_awake)(pln, SLEEPY);
 		 return tmin / (double) iter;

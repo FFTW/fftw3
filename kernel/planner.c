@@ -400,7 +400,7 @@ double X(iestimate_cost)(const planner *ego, const plan *pln, const problem *p)
 	  
 	  + pln->ops.other;
      if (ego->cost_hook)
-	  cost = ego->cost_hook(ego, pln, p, cost, COST_MAX);
+	  cost = ego->cost_hook(p, cost, COST_MAX);
      return cost;
 }
 
@@ -415,12 +415,8 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 	       pln->pcost = X(iestimate_cost)(ego, pln, p);
 	       ego->epcost += pln->pcost;
 	  } else {
-	       double t = X(measure_execution_time)(pln, p);
+	       double t = X(measure_execution_time)(ego, pln, p);
 	       
-	       /* for MPI, need to synchronize timing measurements */
-	       if (ego->cost_hook)
-		    t = ego->cost_hook(ego, pln, p, t, COST_MAX);
-
 	       if (t < 0) {  /* unavailable cycle counter */
 		    /* Real programmers can write FORTRAN in any language */
 		    goto estimate;
@@ -452,7 +448,7 @@ static plan *invoke_solver(planner *ego, const problem *p, solver *s,
 }
 
 /* maintain the invariant TIMED_OUT ==> NEED_TIMEOUT_CHECK */
-static int timeout_p(planner *ego)
+static int timeout_p(planner *ego, const problem *p)
 {
      /* do not timeout when estimating.  First, the estimator is the
 	planner of last resort.  Second, calling X(elapsed_since)() is
@@ -465,7 +461,7 @@ static int timeout_p(planner *ego)
 	  }
 
 	  if (ego->timelimit >= 0 &&
-	      X(elapsed_since)(ego->start_time) >= ego->timelimit) {
+	      X(elapsed_since)(ego, p, ego->start_time) >= ego->timelimit) {
 	       ego->timed_out = 1;
 	       ego->need_timeout_check = 1;
 	       return 1;
@@ -485,7 +481,7 @@ static plan *search0(planner *ego, const problem *p, unsigned *slvndx,
 
      /* Do not start a search if the planner timed out. This check is
 	necessary, lest the relaxation mechanism kick in */
-     if (timeout_p(ego))
+     if (timeout_p(ego, p))
 	  return 0;
 
      FORALL_SOLVERS_OF_KIND(p->adt->problem_kind, ego, s, sp, {
@@ -494,7 +490,7 @@ static plan *search0(planner *ego, const problem *p, unsigned *slvndx,
 	  pln = invoke_solver(ego, p, s, flagsp);
 
 	  if (ego->need_timeout_check) 
-	       if (timeout_p(ego)) {
+	       if (timeout_p(ego, p)) {
 		    X(plan_destroy_internal)(pln);
 		    X(plan_destroy_internal)(best);
 		    return 0;
