@@ -268,11 +268,16 @@ AC_CHECK_TYPE([hrtime_t],[AC_DEFINE(HAVE_HRTIME_T, 1, [Define to 1 if hrtime_t i
 #endif
 ])
 
+AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(unsigned int)
-
-AC_CHECK_TYPES(uintptr_t, [], [AC_CHECK_SIZEOF(unsigned long)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(unsigned long)
+AC_CHECK_SIZEOF(long long)
 AC_CHECK_SIZEOF(unsigned long long)
-AC_CHECK_SIZEOF(void *)], [$ac_includes_default
+AC_CHECK_SIZEOF(size_t)
+AC_CHECK_SIZEOF(ptrdiff_t)
+
+AC_CHECK_TYPES(uintptr_t, [], [AC_CHECK_SIZEOF(void *)], [$ac_includes_default
 #ifdef HAVE_STDINT_H
 #  include <stdint.h>
 #endif])

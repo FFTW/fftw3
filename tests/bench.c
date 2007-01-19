@@ -541,3 +541,13 @@ void initial_cleanup(void)
 void final_cleanup(void)
 {
 }
+
+int import_wisdom(FILE *f)
+{
+     return FFTW(import_wisdom_from_file)(f);
+}
+
+void export_wisdom(FILE *f)
+{
+     FFTW(export_wisdom_to_file)(f);
+}

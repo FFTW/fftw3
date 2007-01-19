@@ -19,6 +19,17 @@
 #  define BENCH_MPI_TYPE MPI_DOUBLE
 #endif
 
+#if SIZEOF_PTRDIFF_T == SIZEOF_INT
+#  define FFTW_MPI_PTRDIFF_T MPI_INT
+#elif SIZEOF_PTRDIFF_T == SIZEOF_LONG
+#  define FFTW_MPI_PTRDIFF_T MPI_LONG
+#elif SIZEOF_PTRDIFF_T == SIZEOF_LONG_LONG
+#  define FFTW_MPI_PTRDIFF_T MPI_LONG_LONG
+#else
+#  error MPI type for ptrdiff_t is unknown
+#  define FFTW_MPI_PTRDIFF_T MPI_LONG
+#endif
+
 static const char *mkversion(void) { return FFTW(version); }
 static const char *mkcc(void) { return FFTW(cc); }
 static const char *mkcodelet_optim(void) { return FFTW(codelet_optim); }
@@ -43,7 +54,6 @@ BENCH_DOCF("nproc", mknproc)
 END_BENCH_DOC 
 
 static int n_pes = 1, my_pe = 0;
-MPI_Datatype ptrdiff_t_type = MPI_INT;
 
 /* global variables describing the shape of the data and its distribution */
 static int rnk;
@@ -89,23 +99,23 @@ static void setup_gather_scatter(void)
      int i, j;
      ptrdiff_t off;
 
-     MPI_Gather(local_ni, rnk, ptrdiff_t_type,
-		all_local_ni, rnk, ptrdiff_t_type,
+     MPI_Gather(local_ni, rnk, FFTW_MPI_PTRDIFF_T,
+		all_local_ni, rnk, FFTW_MPI_PTRDIFF_T,
 		0, MPI_COMM_WORLD);
-     MPI_Bcast(all_local_ni, rnk*n_pes, ptrdiff_t_type, 0, MPI_COMM_WORLD);
-     MPI_Gather(local_starti, rnk, ptrdiff_t_type,
-		all_local_starti, rnk, ptrdiff_t_type,
+     MPI_Bcast(all_local_ni, rnk*n_pes, FFTW_MPI_PTRDIFF_T, 0, MPI_COMM_WORLD);
+     MPI_Gather(local_starti, rnk, FFTW_MPI_PTRDIFF_T,
+		all_local_starti, rnk, FFTW_MPI_PTRDIFF_T,
 		0, MPI_COMM_WORLD);
-     MPI_Bcast(all_local_starti, rnk*n_pes, ptrdiff_t_type, 0, MPI_COMM_WORLD);
+     MPI_Bcast(all_local_starti, rnk*n_pes, FFTW_MPI_PTRDIFF_T, 0, MPI_COMM_WORLD);
 
-     MPI_Gather(local_no, rnk, ptrdiff_t_type,
-		all_local_no, rnk, ptrdiff_t_type,
+     MPI_Gather(local_no, rnk, FFTW_MPI_PTRDIFF_T,
+		all_local_no, rnk, FFTW_MPI_PTRDIFF_T,
 		0, MPI_COMM_WORLD);
-     MPI_Bcast(all_local_no, rnk*n_pes, ptrdiff_t_type, 0, MPI_COMM_WORLD);
-     MPI_Gather(local_starto, rnk, ptrdiff_t_type,
-		all_local_starto, rnk, ptrdiff_t_type,
+     MPI_Bcast(all_local_no, rnk*n_pes, FFTW_MPI_PTRDIFF_T, 0, MPI_COMM_WORLD);
+     MPI_Gather(local_starto, rnk, FFTW_MPI_PTRDIFF_T,
+		all_local_starto, rnk, FFTW_MPI_PTRDIFF_T,
 		0, MPI_COMM_WORLD);
-     MPI_Bcast(all_local_starto, rnk*n_pes, ptrdiff_t_type, 0, MPI_COMM_WORLD);
+     MPI_Bcast(all_local_starto, rnk*n_pes, FFTW_MPI_PTRDIFF_T, 0, MPI_COMM_WORLD);
 
      off = 0;
      for (i = 0; i < n_pes; ++i) {
@@ -554,16 +564,11 @@ void main_init(int *argc, char ***argv)
      MPI_Comm_size(MPI_COMM_WORLD, &n_pes);
      if (my_pe != 0) verbose = -999;
      no_speed_allocation = 1; /* so we can benchmark transforms > memory */
-     if (sizeof(ptrdiff_t) == sizeof(int))
-	  ptrdiff_t_type = MPI_INT;
-     else if (sizeof(ptrdiff_t) == sizeof(long long))
-	  ptrdiff_t_type = MPI_LONG_LONG_INT;
-     else
-	  BENCH_ASSERT(0);
      isend_cnt = (int *) bench_malloc(sizeof(int) * n_pes);
      isend_off = (int *) bench_malloc(sizeof(int) * n_pes);
      orecv_cnt = (int *) bench_malloc(sizeof(int) * n_pes);
      orecv_off = (int *) bench_malloc(sizeof(int) * n_pes);
+     FFTW(mpi_init)();
 }
 
 void initial_cleanup(void)
@@ -595,4 +600,20 @@ double bench_cost_postprocess(double cost)
      double cost_max;
      MPI_Allreduce(&cost, &cost_max, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
      return cost_max;
+}
+
+
+int import_wisdom(FILE *f)
+{
+     int success = 1, sall;
+     if (my_pe == 0) success = FFTW(import_wisdom_from_file)(f);
+     FFTW(mpi_broadcast_wisdom)(MPI_COMM_WORLD);
+     MPI_Allreduce(&success, &sall, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+     return sall;
+}
+
+void export_wisdom(FILE *f)
+{
+     FFTW(mpi_gather_wisdom)(MPI_COMM_WORLD);
+     if (my_pe == 0) FFTW(export_wisdom_to_file)(f);
 }

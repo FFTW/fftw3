@@ -52,7 +52,7 @@ static double cost_hook(const planner *plnr, const plan *pln,
      return tsum;
 }
 
-static void init(void)
+void XM(init)(void)
 {
      if (!mpi_inited) {
 	  planner *plnr = X(the_planner)();
@@ -433,7 +433,7 @@ X(plan) XM(plan_many_transpose)(ptrdiff_t nx, ptrdiff_t ny,
 				MPI_Comm comm, unsigned flags)
 {
      int n_pes;
-     init();
+     XM(init)();
 
      if (howmany < 0 || xblock < 0 || yblock < 0 ||
 	 nx <= 0 || ny <= 0) return 0;
@@ -473,7 +473,7 @@ X(plan) XM(plan_guru_dft)(int rnk, const XM(ddim) *dims0,
      int n_pes, i;
      dtensor *sz;
      
-     init();
+     XM(init)();
 
      if (howmany < 0 || rnk < 1) return 0;
      for (i = 0; i < rnk; ++i)

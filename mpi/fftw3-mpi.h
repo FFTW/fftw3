@@ -75,6 +75,7 @@ struct fftw_mpi_ddim_do_not_use_me {
 								\
 typedef struct fftw_mpi_ddim_do_not_use_me XM(ddim);		\
 								\
+FFTW_EXTERN void XM(init)(void);				\
 FFTW_EXTERN void XM(cleanup)(void);				\
 								\
 FFTW_EXTERN ptrdiff_t XM(local_size_many_transposed)		\
@@ -140,7 +141,10 @@ FFTW_EXTERN X(plan) XM(plan_dft_2d)				\
       MPI_Comm comm, int sign, unsigned flags);			\
 FFTW_EXTERN X(plan) XM(plan_dft_3d)				\
      (ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz, C *in, C *out,	\
-      MPI_Comm comm, int sign, unsigned flags);
+      MPI_Comm comm, int sign, unsigned flags);			\
+								\
+FFTW_EXTERN void XM(gather_wisdom)(MPI_Comm comm_);	        \
+FFTW_EXTERN void XM(broadcast_wisdom)(MPI_Comm comm_);
 
 /* end of FFTW_MPI_DEFINE_API macro */
 

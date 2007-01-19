@@ -65,7 +65,7 @@ void rdwisdom(void)
 
      timer_start(USER_TIMER);
      if ((f = fopen(wisdat, "r"))) {
-	  if (!FFTW(import_wisdom_from_file)(f))
+	  if (!import_wisdom(f))
 	       fprintf(stderr, "bench: ERROR reading wisdom\n");
 	  else
 	       success = 1;
@@ -77,7 +77,7 @@ void rdwisdom(void)
 	  if (verbose > 1) printf("READ WISDOM (%g seconds): ", tim);
 	  
 	  if (verbose > 3)
-	       FFTW(export_wisdom_to_file)(stdout);
+	       export_wisdom(stdout);
 	  if (verbose > 1)
 	       printf("\n");
      }
@@ -92,7 +92,7 @@ void wrwisdom(void)
 
      timer_start(USER_TIMER);
      if ((f = fopen(wisdat, "w"))) {
-	  FFTW(export_wisdom_to_file)(f);
+	  export_wisdom(f);
 	  fclose(f);
      }
      tim = timer_stop(USER_TIMER);

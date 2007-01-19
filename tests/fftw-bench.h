@@ -16,3 +16,5 @@
 extern FFTW(plan) mkplan(bench_problem *p, unsigned flags);
 extern void initial_cleanup(void);
 extern void final_cleanup(void);
+extern int import_wisdom(FILE *f);
+extern void export_wisdom(FILE *f);
