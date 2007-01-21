@@ -22,14 +22,16 @@
 
 #include "ifftw.h"
 
-#define NBUF ((INT)8)
-#define MAXBUFSZ (65536 / (INT)(sizeof(R)))
+#define MAXNBUF ((INT)256)
+
+/* approx. 512KB of buffers for complex data */
+#define MAXBUFSZ (256 * 1024 / (INT)(sizeof(R)))
 
 INT X(nbuf)(INT n, INT vl)
 {
      INT i, nbuf; 
 
-     nbuf = NBUF;
+     nbuf = MAXNBUF;
 
      if (nbuf * n > MAXBUFSZ)
           nbuf = X(imax)((INT)1, MAXBUFSZ / n);
