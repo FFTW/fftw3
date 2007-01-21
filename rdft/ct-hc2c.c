@@ -137,15 +137,10 @@ int X(hc2c_applicable)(const hc2c_solver *ego, const problem *p_,
 
      p = (const problem_rdft2 *) p_;
 
-     /* PRESERVE_UNITSTRIDE is satisfied if either ivs or ovs is unit */
-     if (1
-	 && PRESERVE_UNITSTRIDEP(plnr)
-	 && p->vecsz->rnk > 0
-	 && p->vecsz->dims[0].is != 1
-	 && p->vecsz->dims[0].os != 1)
-	  return 0;
-
-     return 1;
+     return (0
+	     || p->vecsz->rnk == 0
+	     || !NO_VRECURSEP(plnr)
+	  );
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

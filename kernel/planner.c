@@ -536,7 +536,7 @@ static plan *search(planner *ego, const problem *p, unsigned *slvndx,
      /* relax impatience in this order: */
      static const unsigned relax_tab[] = {
 	  0, /* relax nothing */
-	  PRESERVE_UNITSTRIDE,
+	  NO_VRECURSE,
 	  NO_FIXED_RADIX_LARGE_N,
 	  NO_SLOW,
 	  NO_UGLY

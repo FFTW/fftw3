@@ -118,13 +118,6 @@ static int applicable(const solver *ego_, const problem *p_,
 
      p = (const problem_rdft *) p_;
 
-     if (PRESERVE_UNITSTRIDEP(plnr)) {
-	  /* do not iterate over unit-stride dimensions */
-	  iodim *d = p->vecsz->dims + *dp;
-	  if (d->is == 1 || d->os == 1)
-	       return 0;
-     }
-
      if (NO_UGLYP(plnr)) {
 	  /* the rank-0 solver deals with the general case most of the
 	     time (an exception is loops of non-square transposes) */

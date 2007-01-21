@@ -76,4 +76,8 @@ void X(ct_genericbuf_register)(planner *p);
 /* configurations */
 void X(dft_conf_standard)(planner *p);
 
+/* exception to NO_VRECURSE: allow Cooley-Tukey to vector-recurse if
+   the vector is ``sufficiently long'' */
+#define VRECURSE_ANYWAYP(d) ((d).is == 2 && (d).os != 2 && (d).n >= 64)
+
 #endif /* __DFT_H__ */
