@@ -29,23 +29,21 @@
 
 INT X(nbuf)(INT n, INT vl)
 {
-     INT i, nbuf; 
+     INT i, nbuf, lb; 
 
-     nbuf = MAXNBUF;
-
-     if (nbuf * n > MAXBUFSZ)
-          nbuf = X(imax)((INT)1, MAXBUFSZ / n);
+     nbuf = X(imin)(MAXNBUF,
+		    X(imin)(vl, X(imax)((INT)1, MAXBUFSZ / n)));
 
      /*
-      * Look for a buffer number (not too big) that divides the
+      * Look for a buffer number (not too small) that divides the
       * vector length, in order that we only need one child plan:
       */
-     for (i = nbuf; i < vl && i < 2 * nbuf; ++i)
+     lb = X(imax)(1, nbuf / 4);
+     for (i = nbuf; i >= lb; --i)
           if (vl % i == 0)
                return i;
 
      /* whatever... */
-     nbuf = X(imin)(nbuf, vl);
      return nbuf;
 }
 
