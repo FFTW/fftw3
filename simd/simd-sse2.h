@@ -157,6 +157,24 @@ static inline V VZMULJ(V tx, V sr)
      return VSUB(tr, VMUL(ti, sr));
 }
 
+static inline V VZMULI(V tx, V sr)
+{
+     V tr = UNPCKL(tx, tx);
+     V ti = UNPCKH(tx, tx);
+     ti = VMUL(ti, sr);
+     sr = VBYI(sr);
+     return VSUB(VMUL(tr, sr), ti);
+}
+
+static inline V VZMULIJ(V tx, V sr)
+{
+     V tr = UNPCKL(tx, tx);
+     V ti = UNPCKH(tx, tx);
+     ti = VMUL(ti, sr);
+     sr = VBYI(sr);
+     return VADD(VMUL(tr, sr), ti);
+}
+
 /* twiddle storage #1: compact, slower */
 #define VTW1(v,x) {TW_CEXP, v, x}
 #define TWVL1 1

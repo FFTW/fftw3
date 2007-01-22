@@ -232,6 +232,24 @@ static inline V VZMULJ(V tx, V sr)
      return VSUB(tr, VMUL(ti, sr));
 }
 
+static inline V VZMULI(V tx, V sr)
+{
+     V tr = SHUFPS(tx, tx, SHUFVAL(0, 0, 2, 2));
+     V ti = SHUFPS(tx, tx, SHUFVAL(1, 1, 3, 3));
+     ti = VMUL(ti, sr);
+     sr = VBYI(sr);
+     return VSUB(VMUL(tr, sr), ti);
+}
+
+static inline V VZMULIJ(V tx, V sr)
+{
+     V tr = SHUFPS(tx, tx, SHUFVAL(0, 0, 2, 2));
+     V ti = SHUFPS(tx, tx, SHUFVAL(1, 1, 3, 3));
+     ti = VMUL(ti, sr);
+     sr = VBYI(sr);
+     return VADD(VMUL(tr, sr), ti);
+}
+
 #define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 

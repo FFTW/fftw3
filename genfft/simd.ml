@@ -122,8 +122,12 @@ and unparse_expr =
     | Times(NaN CONJ,b) -> op1 "VCONJ" b
     | Times(a,b) ->
 	sprintf "VMUL(%s, %s)" (unparse_expr a) (unparse_expr b)
+    | CTimes(a,Times(NaN I, b)) ->
+	sprintf "VZMULI(%s, %s)" (unparse_expr a) (unparse_expr b)
     | CTimes(a,b) ->
 	sprintf "VZMUL(%s, %s)" (unparse_expr a) (unparse_expr b)
+    | CTimesJ(a,Times(NaN I, b)) ->
+	sprintf "VZMULIJ(%s, %s)" (unparse_expr a) (unparse_expr b)
     | CTimesJ(a,b) ->
 	sprintf "VZMULJ(%s, %s)" (unparse_expr a) (unparse_expr b)
     | Uminus a when !Magic.vneg -> op1 "VNEG" a

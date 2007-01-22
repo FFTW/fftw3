@@ -213,6 +213,30 @@ static inline V VZMULJ(V tx, V sr)
      return VFNMS(ti, si, VMUL(tr, sr));
 }
 
+static inline V VZMULI(V tx, V si)
+{
+     const vector unsigned int real = 
+	  VLIT(0x00010203, 0x00010203, 0x08090a0b, 0x08090a0b);
+     const vector unsigned int imag = 
+	  VLIT(0x04050607, 0x04050607, 0x0c0d0e0f, 0x0c0d0e0f);
+     V sr = VBYI(si);
+     V tr = vec_perm(tx, tx, (vector unsigned char)real);
+     V ti = vec_perm(tx, tx, (vector unsigned char)imag);
+     return VFNMS(ti, si, VMUL(tr, sr));
+}
+
+static inline V VZMULIJ(V tx, V si)
+{
+     const vector unsigned int real = 
+	  VLIT(0x00010203, 0x00010203, 0x08090a0b, 0x08090a0b);
+     const vector unsigned int imag = 
+	  VLIT(0x04050607, 0x04050607, 0x0c0d0e0f, 0x0c0d0e0f);
+     V sr = VBYI(si);
+     V tr = vec_perm(tx, tx, (vector unsigned char)real);
+     V ti = vec_perm(tx, tx, (vector unsigned char)imag);
+     return VFMA(ti, si, VMUL(tr, sr));
+}
+
 /* twiddle storage #1: compact, slower */
 #define VTW1(v,x) \
  {TW_COS, v, x}, {TW_COS, v+1, x}, {TW_SIN, v, x}, {TW_SIN, v+1, x}

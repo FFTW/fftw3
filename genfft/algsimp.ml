@@ -115,6 +115,10 @@ end = struct
   and stimesM = function 
     | (Uminus a, b) -> stimesM (a, b) >>= suminusM
     | (a, Uminus b) -> stimesM (a, b) >>= suminusM
+    | (NaN I, CTimes (a, b)) -> stimesM (NaN I, b) >>= 
+	fun ib -> sctimesM (a, ib)
+    | (NaN I, CTimesJ (a, b)) -> stimesM (NaN I, b) >>= 
+	fun ib -> sctimesjM (a, ib)
     | (Num a, Num b) -> snumM (Number.mul a b)
     | (Num a, Times (Num b, c)) -> 
 	snumM (Number.mul a b) >>= fun x -> stimesM (x, c)
