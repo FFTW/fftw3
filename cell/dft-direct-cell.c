@@ -655,9 +655,36 @@ static plan *mkcldw(const ct_solver *ego_,
      return &(pln->super.super);
 }
 
+/* heuristic to enable vector recursion */
+static int force_vrecur(const ct_solver *ego, const problem_dft *p)
+{
+     iodim *d;
+     INT n, r, m;
+     INT cutoff = 128;
+
+     A(p->vecsz->rnk == 1);
+     A(p->sz->rnk == 1);
+
+     n = p->sz->dims[0].n;
+     r = X(choose_radix)(ego->r, n);
+     m = n / r;
+
+     d = p->vecsz->dims + 0;
+     return (1
+	     /* some vector dimension is contiguous */
+	     && (d->is == 2 || d->os == 2)
+	     
+	     /* vector is sufficiently long */
+	     && d->n >= cutoff
+
+	     /* transform is sufficiently long */
+	     && m >= cutoff
+	     && r >= cutoff);
+}
+
 static void regsolverw(planner *plnr, INT r, int dec, int cutdim)
 {
-     Sw *slv = (Sw *)X(mksolver_ct)(sizeof(Sw), r, dec, mkcldw);
+     Sw *slv = (Sw *)X(mksolver_ct)(sizeof(Sw), r, dec, mkcldw, force_vrecur);
      slv->cutdim = cutdim;
      REGISTER_SOLVER(plnr, &(slv->super.super));
 }

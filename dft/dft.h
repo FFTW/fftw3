@@ -76,4 +76,8 @@ void X(ct_genericbuf_register)(planner *p);
 /* configurations */
 void X(dft_conf_standard)(planner *p);
 
+#if HAVE_CELL
+  void X(dft_conf_cell)(planner *p);
+#endif
+
 #endif /* __DFT_H__ */
