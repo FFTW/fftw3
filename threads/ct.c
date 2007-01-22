@@ -256,12 +256,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 }
 
 ct_solver *X(mksolver_ct_threads)(size_t size, INT r, int dec,
-				  ct_mkinferior mkcldw)
+				  ct_mkinferior mkcldw,
+				  ct_force_vrecursion force_vrecursionp)
 {
      static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      ct_solver *slv = (ct_solver *) X(mksolver)(size, &sadt);
      slv->r = r;
      slv->dec = dec;
      slv->mkcldw = mkcldw;
+     slv->force_vrecursionp = force_vrecursionp;
      return slv;
 }

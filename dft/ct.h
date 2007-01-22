@@ -28,6 +28,8 @@ typedef plan *(*ct_mkinferior)(const ct_solver *ego,
 			       INT v, INT ivs, INT ovs,
 			       INT mstart, INT mcount,
 			       R *rio, R *iio, planner *plnr);
+typedef int (*ct_force_vrecursion)(const ct_solver *ego, 
+				   const problem_dft *p);
 
 typedef struct {
      plan super;
@@ -47,11 +49,15 @@ struct ct_solver_s {
 #    define DECDIT 1
 #    define TRANSPOSE 2
      ct_mkinferior mkcldw;
+     ct_force_vrecursion force_vrecursionp;
 };
 
 int X(ct_applicable)(const ct_solver *, const problem *, planner *);
-ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, ct_mkinferior mkcldw);
-extern ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, ct_mkinferior);
+ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, 
+			  ct_mkinferior mkcldw, 
+			  ct_force_vrecursion force_vrecursionp);
+extern ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
+					 ct_mkinferior, ct_force_vrecursion);
 
 void X(regsolver_ct_directw)(planner *plnr,
      kdftw codelet, const ct_desc *desc, int dec);

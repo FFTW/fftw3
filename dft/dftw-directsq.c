@@ -142,12 +142,13 @@ static plan *mkcldw(const ct_solver *ego_,
 static void regone(planner *plnr, kdftwsq codelet,
 		   const ct_desc *desc, int dec)
 {
-     S *slv = (S *)X(mksolver_ct)(sizeof(S), desc->radix, dec, mkcldw);
+     S *slv = (S *)X(mksolver_ct)(sizeof(S), desc->radix, dec, mkcldw, 0);
      slv->k = codelet;
      slv->desc = desc;
      REGISTER_SOLVER(plnr, &(slv->super.super));
      if (X(mksolver_ct_hook)) {
-	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), desc->radix, dec, mkcldw);
+	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), desc->radix, dec,
+					 mkcldw, 0);
 	  slv->k = codelet;
 	  slv->desc = desc;
 	  REGISTER_SOLVER(plnr, &(slv->super.super));

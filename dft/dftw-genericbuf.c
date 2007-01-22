@@ -207,12 +207,12 @@ static plan *mkcldw(const ct_solver *ego_,
 
 static void regsolver(planner *plnr, INT r, INT batchsz)
 {
-     S *slv = (S *)X(mksolver_ct)(sizeof(S), r, DECDIT, mkcldw);
+     S *slv = (S *)X(mksolver_ct)(sizeof(S), r, DECDIT, mkcldw, 0);
      slv->batchsz = batchsz;
      REGISTER_SOLVER(plnr, &(slv->super.super));
 
      if (X(mksolver_ct_hook)) {
-	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), r, DECDIT, mkcldw);
+	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), r, DECDIT, mkcldw, 0);
 	  slv->batchsz = batchsz;
 	  REGISTER_SOLVER(plnr, &(slv->super.super));
      }

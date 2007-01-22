@@ -121,10 +121,6 @@ static int applicable(const solver *ego_, const problem *p_,
 
      p = (const problem_dft *) p_;
 
-     /* Do not break a dimension that is handled by vector recursion */
-     if (NO_VRECURSEP(plnr) && VRECURSE_ANYWAYP(p->vecsz->dims[*dp]))
-	  return 0;
-
      if (NO_UGLYP(plnr)) {
 	  /* Heuristic: if the transform is multi-dimensional, and the
 	     vector stride is less than the transform size, then we

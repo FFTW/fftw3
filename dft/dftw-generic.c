@@ -188,10 +188,10 @@ static plan *mkcldw(const ct_solver *ego_,
 
 static void regsolver(planner *plnr, INT r, int dec)
 {
-     S *slv = (S *)X(mksolver_ct)(sizeof(S), r, dec, mkcldw);
+     S *slv = (S *)X(mksolver_ct)(sizeof(S), r, dec, mkcldw, 0);
      REGISTER_SOLVER(plnr, &(slv->super));
      if (X(mksolver_ct_hook)) {
-	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), r, dec, mkcldw);
+	  slv = (S *)X(mksolver_ct_hook)(sizeof(S), r, dec, mkcldw, 0);
 	  REGISTER_SOLVER(plnr, &(slv->super));
      }
 }

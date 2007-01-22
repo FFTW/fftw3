@@ -21,7 +21,8 @@
 
 #include "ct.h"
 
-ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, ct_mkinferior) = 0;
+ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
+				  ct_mkinferior, ct_force_vrecursion) = 0;
 
 typedef struct {
      plan_dft super;
@@ -110,7 +111,7 @@ int X(ct_applicable)(const ct_solver *ego, const problem *p_, planner *plnr)
 	     || ego->dec == DECDIF+TRANSPOSE
 	     || p->vecsz->rnk == 0
 	     || !NO_VRECURSEP(plnr)
-	     || VRECURSE_ANYWAYP(p->vecsz->dims[0])
+	     || (ego->force_vrecursionp && ego->force_vrecursionp(ego, p))
 	  );
 }
 
@@ -230,13 +231,16 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, ct_mkinferior mkcldw)
+ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, 
+			  ct_mkinferior mkcldw,
+			  ct_force_vrecursion force_vrecursionp)
 {
      static const solver_adt sadt = { PROBLEM_DFT, mkplan };
      ct_solver *slv = (ct_solver *)X(mksolver)(size, &sadt);
      slv->r = r;
      slv->dec = dec;
      slv->mkcldw = mkcldw;
+     slv->force_vrecursionp = force_vrecursionp;
      return slv;
 }
 

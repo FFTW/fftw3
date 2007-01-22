@@ -76,19 +76,4 @@ void X(ct_genericbuf_register)(planner *p);
 /* configurations */
 void X(dft_conf_standard)(planner *p);
 
-#if 1
-/* I cannot find a predicate that is sufficiently useful and that does
-   not impact planning time too much, so this mechanism is disabled
-   for now. */
-#define VRECURSE_ANYWAYP(d) (0)
-#else
-/* experimental exception to NO_VRECURSE: allow Cooley-Tukey to
-   vector-recurse if the vector is ``sufficiently long''.
-
-   This particular predicate would allow vector recursion for 1D
-   transforms where the top-level radix is >= 64.  
-*/
-#define VRECURSE_ANYWAYP(d) ((d).is == 2 && (d).os != 2 && (d).n >= 64)
-#endif
-
 #endif /* __DFT_H__ */
