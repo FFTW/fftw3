@@ -136,6 +136,75 @@ static void os_destroy_worker(void)
      pthread_exit((void *)0);
 }
 
+#elif defined(__WIN32__) || defined(_WIN32) || defined(_WINDOWS)
+#include <windows.h>
+#include <process.h>
+
+typedef HANDLE os_mutex_t;
+
+static void os_mutex_init(os_mutex_t *s) 
+{ 
+     *s = CreateMutex(NULL, FALSE, NULL);
+}
+
+static void os_mutex_destroy(os_mutex_t *s) 
+{ 
+     CloseHandle(*s);
+}
+
+static void os_mutex_lock(os_mutex_t *s)
+{ 
+     WaitForSingleObject(*s, INFINITE);
+}
+
+static void os_mutex_unlock(os_mutex_t *s) 
+{ 
+     ReleaseMutex(*s);
+}
+
+typedef HANDLE os_sem_t;
+
+static void os_sem_init(os_sem_t *s) 
+{
+     s = CreateSemaphore(NULL, 0, 0x7FFFFFFFL, NULL);
+}
+
+static void os_sem_destroy(os_sem_t *s) 
+{ 
+     CloseHandle(*s);
+}
+
+static void os_sem_down(os_sem_t *s) 
+{ 
+     WaitForSingleObject(*s, INFINITE);
+}
+
+static void os_sem_up(os_sem_t *s) 
+{
+     ReleaseSemaphore(*s, 1, NULL);
+}
+
+typedef unsigned (__stdcall *winthread_start) (void *);
+
+static void os_create_worker(void *(*worker)(void *arg), 
+			     void *arg)
+{
+     DWORD tid;
+
+     _beginthreadex((void *)NULL,               /* security attrib */
+		    0,				/* stack size */
+		    (winthread_start)worker,    /* start address */
+		    arg,			/* parameters */
+		    0,				/* creation flags */
+		    (unsigned *)&tid);		/* tid */
+}
+
+static void os_destroy_worker(void)
+{
+     /* FIXME: how do you terminate a thread on Windows? */
+}
+
+
 #else
 #error "No threading layer defined"
 #endif
