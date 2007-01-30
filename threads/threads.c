@@ -117,7 +117,9 @@ static void os_mutex_unlock(os_mutex_t *s) { pthread_mutex_unlock(s); }
 
 #endif
 
-static void os_create_worker(void *(*worker)(void *arg), 
+#define FFTW_WORKER void *
+
+static void os_create_worker(FFTW_WORKER (*worker)(void *arg), 
 			     void *arg)
 {
      pthread_attr_t attr;
@@ -184,24 +186,23 @@ static void os_sem_up(os_sem_t *s)
      ReleaseSemaphore(*s, 1, NULL);
 }
 
+#define FFTW_WORKER unsigned __stdcall
 typedef unsigned (__stdcall *winthread_start) (void *);
 
-static void os_create_worker(void *(*worker)(void *arg), 
+static void os_create_worker(winthread_start worker,
 			     void *arg)
 {
-     DWORD tid;
-
      _beginthreadex((void *)NULL,               /* security attrib */
 		    0,				/* stack size */
-		    (winthread_start)worker,    /* start address */
+		    worker,                     /* start address */
 		    arg,			/* parameters */
 		    0,				/* creation flags */
-		    (unsigned *)&tid);		/* tid */
+		    (unsigned *)NULL);		/* tid */
 }
 
 static void os_destroy_worker(void)
 {
-     /* FIXME: how do you terminate a thread on Windows? */
+     _endthreadex(0);
 }
 
 
@@ -233,7 +234,7 @@ static struct worker *volatile worker_queue;
      os_mutex_unlock(&queue_lock);		\
 }
 
-static void *worker(void *arg)
+static FFTW_WORKER worker(void *arg)
 {
      struct worker ego;
      struct work *w = (struct work *)arg;
@@ -272,7 +273,7 @@ static void *worker(void *arg)
 
      os_destroy_worker();
      /* UNREACHABLE */
-     return (void *)0;
+     return 0;
 }
 
 static void kill_workforce(void)
