@@ -1,0 +1,103 @@
+This version of FFTW contains specific support for the Cell Broadband
+Engine (``Cell'') processor.
+
+ACKNOWLEDGMENTS
+---------------
+
+The code in the cell/ directory was written and graciously donated to
+the FFTW project by the IBM Austin Research Laboratory.  We are
+grateful to Pat Bohrer and Lorraine Herger of IBM for this generous
+contribution.
+
+
+SCOPE
+-----
+
+Cell consists of one PowerPC core (``PPE'') and of a number of
+Synergistic Processing Elements (``SPE'') to which the PPE can
+delegate computation.  The IBM QS20 Cell blade offers 8 SPEs per Cell
+chip.  The Sony Playstation 3 contains 6 useable SPEs.
+
+This version of FFTW fully utilizes the SPEs for one- and
+multi-dimensional complex FFTs of sizes that can be factored into
+small primes, both in single and double precision.  Transforms of real
+data use SPEs only partially at this time.  If FFTW cannot use the
+SPEs, it falls back to a slower computation on the PPE.
+
+This library is meant to use the SPEs transparently without user
+intervention.  However, certain caveats apply, which are discussed
+later in this document.
+
+
+INSTALLATION
+------------
+
+To enable support for Cell in double precision:
+
+   configure --enable-cell
+   make
+   make install
+
+In single precision:
+
+   configure --enable-cell --enable-single
+   make
+   make install
+
+In addition, the PPE supports the Altivec (or VMX) instruction set in
+single precision.  (Altivec is Apple/Freescale terminology, VMX is IBM
+terminology for the same thing.)  You can enable support for Altivec
+with the ``--enable-altivec'' flag (single precision only).
+
+The software compiles with the Cell SDK 2.0, and probably with earlier
+ones as well.
+
+CAVEATS
+-------
+
+* The benchmark program allocates memory using malloc() or equivalent
+  library calls, reflecting the common usage of the FFTW library.
+  However, you can sometimes improve performance significantly by
+  allocating memory in system-specific large TLB pages.  E.g.,
+  we have seen 39 GFLOPS/s for a 256x256x256 problem using large
+  pages, whereas the speed is about 25 GFLOPS/s with normal pages.
+  YMMV.
+
+* FFTW hoards all available SPEs for itself.  You can optionally
+  choose a different number of SPEs by calling the undocumented
+  function fftw_cell_set_nspe(n), where ``n'' is the number of desired
+  SPEs.  Expect this interface to go away once we figure out how to
+  make FFTW play nicely with other Cell software.
+
+  In particular, if you try to link both the single and double precision
+  of FFTW in the same program (which you can do), they will both try
+  to grab all SPEs and the second one will hang.
+
+* The SPEs demand that data be stored in contiguous arrays aligned at
+  16-byte boundaries.  If you instruct FFTW to operate on
+  noncontiguous or nonaligned data, the SPEs will not be used,
+  resulting in slow execution.
+
+* The FFTW_ESTIMATE mode may produce seriously suboptimal plans, and
+  it becomes particularly confused if you enable both the SPEs and
+  Altivec.  If you care about performance, please use FFTW_MEASURE
+  until we figure out a more reliable performance model.
+
+ACCURACY
+--------
+
+The SPEs are fully IEEE-754 compliant in double precision.  In single
+precision, they only implement round-towards-zero as opposed to the
+standard round-to-even mode.  (The PPE is fully IEEE-754 compliant
+like all other PowerPC implementations.)  Because of the rounding
+mode, FFTW is less accurate when running on the SPEs than on the PPE.
+The accuracy loss is hard to quantify in general, but as a rough
+guideline, the L2 norm of the relative roundoff error for random
+inputs is 4-8 times larger than the corresponding calculation in
+round-to-even arithmetic.  In other words, expect to lose 2 to 3 bits
+of accuracy.
+
+FFTW currently does not use any algorithm that degrades accuracy to
+gain performance on the SPE.  One implication of this choice is that
+large 1D transforms run slower than they would if we were willing to
+sacrifice another bit or so of accuracy.
