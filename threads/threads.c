@@ -168,7 +168,7 @@ typedef HANDLE os_sem_t;
 
 static void os_sem_init(os_sem_t *s) 
 {
-     s = CreateSemaphore(NULL, 0, 0x7FFFFFFFL, NULL);
+     *s = CreateSemaphore(NULL, 0, 0x7FFFFFFFL, NULL);
 }
 
 static void os_sem_destroy(os_sem_t *s) 
