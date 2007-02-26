@@ -135,9 +135,9 @@ FFTW_EXTERN X(plan) X(plan_dft)(int rank, const int *n,			   \
 									   \
 FFTW_EXTERN X(plan) X(plan_dft_1d)(int n, C *in, C *out, int sign,	   \
 		       unsigned flags);					   \
-FFTW_EXTERN X(plan) X(plan_dft_2d)(int nx, int ny,			   \
+FFTW_EXTERN X(plan) X(plan_dft_2d)(int n0, int n1,			   \
 		       C *in, C *out, int sign, unsigned flags);	   \
-FFTW_EXTERN X(plan) X(plan_dft_3d)(int nx, int ny, int nz,		   \
+FFTW_EXTERN X(plan) X(plan_dft_3d)(int n0, int n1, int n2,		   \
 		       C *in, C *out, int sign, unsigned flags);	   \
 									   \
 FFTW_EXTERN X(plan) X(plan_many_dft)(int rank, const int *n,		   \
@@ -188,10 +188,10 @@ FFTW_EXTERN X(plan) X(plan_dft_r2c)(int rank, const int *n,		   \
                         R *in, C *out, unsigned flags);			   \
 									   \
 FFTW_EXTERN X(plan) X(plan_dft_r2c_1d)(int n,R *in,C *out,unsigned flags); \
-FFTW_EXTERN X(plan) X(plan_dft_r2c_2d)(int nx, int ny,			   \
+FFTW_EXTERN X(plan) X(plan_dft_r2c_2d)(int n0, int n1,			   \
 			   R *in, C *out, unsigned flags);		   \
-FFTW_EXTERN X(plan) X(plan_dft_r2c_3d)(int nx, int ny,			   \
-			   int nz,					   \
+FFTW_EXTERN X(plan) X(plan_dft_r2c_3d)(int n0, int n1,			   \
+			   int n2,					   \
 			   R *in, C *out, unsigned flags);		   \
 									   \
 									   \
@@ -207,10 +207,10 @@ FFTW_EXTERN X(plan) X(plan_dft_c2r)(int rank, const int *n,		   \
                         C *in, R *out, unsigned flags);			   \
 									   \
 FFTW_EXTERN X(plan) X(plan_dft_c2r_1d)(int n,C *in,R *out,unsigned flags); \
-FFTW_EXTERN X(plan) X(plan_dft_c2r_2d)(int nx, int ny,			   \
+FFTW_EXTERN X(plan) X(plan_dft_c2r_2d)(int n0, int n1,			   \
 			   C *in, R *out, unsigned flags);		   \
-FFTW_EXTERN X(plan) X(plan_dft_c2r_3d)(int nx, int ny,			   \
-			   int nz,					   \
+FFTW_EXTERN X(plan) X(plan_dft_c2r_3d)(int n0, int n1,			   \
+			   int n2,					   \
 			   C *in, R *out, unsigned flags);		   \
 									   \
 FFTW_EXTERN X(plan) X(plan_guru_dft_r2c)(int rank, const X(iodim) *dims,   \
@@ -284,10 +284,10 @@ FFTW_EXTERN X(plan) X(plan_r2r)(int rank, const int *n, R *in, R *out,	   \
 									   \
 FFTW_EXTERN X(plan) X(plan_r2r_1d)(int n, R *in, R *out,		   \
                        X(r2r_kind) kind, unsigned flags);		   \
-FFTW_EXTERN X(plan) X(plan_r2r_2d)(int nx, int ny, R *in, R *out,	   \
+FFTW_EXTERN X(plan) X(plan_r2r_2d)(int n0, int n1, R *in, R *out,	   \
                        X(r2r_kind) kindx, X(r2r_kind) kindy,		   \
                        unsigned flags);					   \
-FFTW_EXTERN X(plan) X(plan_r2r_3d)(int nx, int ny, int nz,		   \
+FFTW_EXTERN X(plan) X(plan_r2r_3d)(int n0, int n1, int n2,		   \
                        R *in, R *out, X(r2r_kind) kindx,		   \
                        X(r2r_kind) kindy, X(r2r_kind) kindz,		   \
                        unsigned flags);					   \

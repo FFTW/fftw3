@@ -40,25 +40,49 @@ $O(n \\log n)$
 
 @macro ndims
 @ifinfo
-n1 x n2 x n3 x ... x nd
+n[0] x n[1] x n[2] x ... x n[d-1]
 @end ifinfo
 @html
-n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x n<sub>d</sub>
+n<sub>0</sub> x n<sub>1</sub> x n<sub>2</sub> x ... x n<sub>d-1</sub>
 @end html
 @tex
-$n_1 \\times n_2 \\times n_3 \\times \\cdots \\times n_d$
+$n_0 \\times n_1 \\times n_2 \\times \\cdots \\times n_{d-1}$
 @end tex
 @end macro
 
 @macro ndimshalf
 @ifinfo
-n1 x n2 x n3 x ... x (nd/2 + 1)
+n[0] x n[1] x n[2] x ... x (n[d-1]/2 + 1)
 @end ifinfo
 @html
-n<sub>1</sub> x n<sub>2</sub> x n<sub>3</sub> x ... x (n<sub>d</sub>/2 + 1)
+n<sub>0</sub> x n<sub>1</sub> x n<sub>2</sub> x ... x (n<sub>d-1</sub>/2 + 1)
 @end html
 @tex
-$n_1 \\times n_2 \\times n_3 \\times \\cdots \\times (n_d/2 + 1)$
+$n_0 \\times n_1 \\times n_2 \\times \\cdots \\times (n_{d-1}/2 + 1)$
+@end tex
+@end macro
+
+@macro twodims{d1, d2}
+@ifinfo
+\d1\ x \d2\
+@end ifinfo
+@html
+\d1\&nbsp;&times;&nbsp;\d2\
+@end html
+@tex
+$\d1\ \\times \d2\$
+@end tex
+@end macro
+
+@macro threedims{d1, d2, d3}
+@ifinfo
+\d1\ x \d2\ x \d3\
+@end ifinfo
+@html
+\d1\&nbsp;&times;&nbsp;\d2\&times;&nbsp;\d3\
+@end html
+@tex
+$\d1\ \\times \d2\ \\times \d3\$
 @end tex
 @end macro
 
@@ -117,7 +141,7 @@ This manual documents FFTW version @value{VERSION}.
 * Tutorial::                    
 * Other Important Topics::      
 * FFTW Reference::              
-* Parallel FFTW::               
+* Parallel FFTW: Shared-Memory Threads::  
 * Calling FFTW from Fortran::   
 * Upgrading from FFTW version 2::  
 * Installation and Customization::  
@@ -219,16 +243,12 @@ What FFTW Really Computes
 * 1d Discrete Hartley Transforms (DHTs)::  
 * Multi-dimensional Transforms::  
 
-Parallel FFTW
-
-* Multi-threaded FFTW::         
-* Thread safety::               
-
-Multi-threaded FFTW
+Parallel FFTW: Shared-Memory Threads
 
 * Installation and Supported Hardware/Software::  
 * Usage of Multi-threaded FFTW::  
 * How Many Threads to Use?::    
+* Thread safety::               
 
 Calling FFTW from Fortran
 
@@ -616,10 +636,10 @@ with @code{fftw_destroy_plan(plan)} (and @code{fftw_free}).  The only
 difference is the routine you use to create the plan:
 
 @example
-fftw_plan fftw_plan_dft_2d(int nx, int ny,
+fftw_plan fftw_plan_dft_2d(int n0, int n1,
                            fftw_complex *in, fftw_complex *out,
                            int sign, unsigned flags);
-fftw_plan fftw_plan_dft_3d(int nx, int ny, int nz,
+fftw_plan fftw_plan_dft_3d(int n0, int n1, int n2,
                            fftw_complex *in, fftw_complex *out,
                            int sign, unsigned flags);
 fftw_plan fftw_plan_dft(int rank, const int *n,
@@ -630,8 +650,8 @@ fftw_plan fftw_plan_dft(int rank, const int *n,
 @findex fftw_plan_dft_3d
 @findex fftw_plan_dft
 
-These routines create plans for @code{nx} by @code{ny} two-dimensional
-(2d) transforms, @code{nx} by @code{ny} by @code{nz} 3d transforms,
+These routines create plans for @code{n0} by @code{n1} two-dimensional
+(2d) transforms, @code{n0} by @code{n1} by @code{n2} 3d transforms,
 and arbitrary @code{rank}-dimensional transforms, respectively.  In the
 @cindex rank
 third case, @code{n} is a pointer to an array @code{n[rank]} denoting
@@ -644,8 +664,8 @@ further in @ref{Multi-dimensional Array Format}.
 You may have noticed that all the planner routines described so far
 have overlapping functionality.  For example, you can plan a 1d or 2d
 transform by using @code{fftw_plan_dft} with a @code{rank} of @code{1}
-or @code{2}, or even by calling @code{fftw_plan_dft_3d} with @code{nx}
-and/or @code{ny} equal to @code{1} (with no loss in efficiency).  This
+or @code{2}, or even by calling @code{fftw_plan_dft_3d} with @code{n0}
+and/or @code{n1} equal to @code{1} (with no loss in efficiency).  This
 pattern continues, and FFTW's planning routines in general form a
 ``partial order,'' sequences of
 @cindex partial order
@@ -764,10 +784,10 @@ transforms, may sometimes yield better performance.
 Multi-dimensional DFTs of real data use the following planner routines:
 
 @example
-fftw_plan fftw_plan_dft_r2c_2d(int nx, int ny,
+fftw_plan fftw_plan_dft_r2c_2d(int n0, int n1,
                                double *in, fftw_complex *out,
                                unsigned flags);
-fftw_plan fftw_plan_dft_r2c_3d(int nx, int ny, int nz,
+fftw_plan fftw_plan_dft_r2c_3d(int n0, int n1, int n2,
                                double *in, fftw_complex *out,
                                unsigned flags);
 fftw_plan fftw_plan_dft_r2c(int rank, const int *n,
@@ -803,47 +823,47 @@ dimension is even and one if it is odd.
 @cindex padding
 That is, the last dimension of the real data must physically contain
 @tex
-$2 (n_d/2+1)$
+$2 (n_{d-1}/2+1)$
 @end tex
 @ifinfo
-2 * (nd/2+1)
+2 * (n[d-1]/2+1)
 @end ifinfo
 @html
-2 * (n<sub>d</sub>/2+1)
+2 * (n<sub>d-1</sub>/2+1)
 @end html
 @code{double} values (exactly enough to hold the complex data).
 This physical array size does not, however, change the @emph{logical}
 array size---only
 @tex
-$n_d$
+$n_{d-1}$
 @end tex
 @ifinfo
-nd
+n[d-1]
 @end ifinfo
 @html
-n<sub>d</sub>
+n<sub>d-1</sub>
 @end html
 values are actually stored in the last dimension, and
 @tex
-$n_d$
+$n_{d-1}$
 @end tex
 @ifinfo
-nd
+n[d-1]
 @end ifinfo
 @html
-n<sub>d</sub>
+n<sub>d-1</sub>
 @end html
 is the last dimension passed to the plan-creation routine.
 
 For example, consider the transform of a two-dimensional real array of
-size @code{nx} by @code{ny}.  The output of the r2c transform is a
-two-dimensional complex array of size @code{nx} by @code{ny/2+1}, where
+size @code{n0} by @code{n1}.  The output of the r2c transform is a
+two-dimensional complex array of size @code{n0} by @code{n1/2+1}, where
 the @code{y} dimension has been cut nearly in half because of
 redundancies in the output.  Because @code{fftw_complex} is twice the
 size of @code{double}, the output array is slightly bigger than the
 input array.  Thus, if we want to compute the transform in place, we
-must @emph{pad} the input array so that it is of size @code{nx} by
-@code{2*(ny/2+1)}.  If @code{ny} is even, then there are two padding
+must @emph{pad} the input array so that it is of size @code{n0} by
+@code{2*(n1/2+1)}.  If @code{n1} is even, then there are two padding
 elements at the end of each row (which need not be initialized, as they
 are only used for output).
 
@@ -895,10 +915,10 @@ r2r transforms share the same planner interface:
 @example
 fftw_plan fftw_plan_r2r_1d(int n, double *in, double *out,
                            fftw_r2r_kind kind, unsigned flags);
-fftw_plan fftw_plan_r2r_2d(int nx, int ny, double *in, double *out,
+fftw_plan fftw_plan_r2r_2d(int n0, int n1, double *in, double *out,
                            fftw_r2r_kind kindx, fftw_r2r_kind kindy,
                            unsigned flags);
-fftw_plan fftw_plan_r2r_3d(int nx, int ny, int nz,
+fftw_plan fftw_plan_r2r_3d(int n0, int n1, int n2,
                            double *in, double *out,
                            fftw_r2r_kind kindx,
                            fftw_r2r_kind kindy,
@@ -1021,11 +1041,11 @@ like the c2r transform, an out-of-place hc2r transform will
 Although these halfcomplex transforms can be used with the
 multi-dimensional r2r interface, the interpretation of such a separable
 product of transforms along each dimension is problematic.  For example,
-consider a two-dimensional @code{nx} by @code{ny}, r2hc by r2hc
-transform planned by @code{fftw_plan_r2r_2d(nx, ny, in, out, FFTW_R2HC,
+consider a two-dimensional @code{n0} by @code{n1}, r2hc by r2hc
+transform planned by @code{fftw_plan_r2r_2d(n0, n1, in, out, FFTW_R2HC,
 FFTW_R2HC, FFTW_MEASURE)}.  Conceptually, FFTW first transforms the rows
-(of size @code{ny}) to produce halfcomplex rows, and then transforms the
-columns (of size @code{nx}).  Half of these column transforms, however,
+(of size @code{n1}) to produce halfcomplex rows, and then transforms the
+columns (of size @code{n0}).  Half of these column transforms, however,
 are of imaginary parts, and should therefore be multiplied by @math{i}
 and combined with the r2hc transforms of the real columns to produce the
 2d DFT amplitudes; FFTW's r2r transform does @emph{not} perform this
@@ -1392,26 +1412,26 @@ varies most quickly.
 
 To be more explicit, let us consider an array of rank @math{d} whose
 dimensions are @ndims{}. Now, we specify a location in the array by a
-sequence of (zero-based) indices, one for each dimension:
+sequence of @math{d} (zero-based) indices, one for each dimension:
 @tex
-$(i_1, i_2, i_3, \ldots, i_d)$.
+$(i_0, i_1, i_2, \ldots, i_{d-1})$.
 @end tex
 @ifinfo
-(i1, i2, ..., id).
+(i[0], i[1], ..., i[d-1]).
 @end ifinfo
 @html
-(i<sub>1</sub>, i<sub>2</sub>, i<sub>3</sub>,..., i<sub>d</sub>).
+(i<sub>0</sub>, i<sub>1</sub>, i<sub>2</sub>,..., i<sub>d-1</sub>).
 @end html
 If the array is stored in row-major
 order, then this element is located at the position
 @tex
-$i_d + n_d (i_{d-1} + n_{d-1} (\ldots + n_2 i_1))$.
+$i_{d-1} + n_{d-1} (i_{d-2} + n_{d-2} (\ldots + n_1 i_0))$.
 @end tex
 @ifinfo
-id + nd * (id-1 + nd-1 * (... + n2 * i1)).
+i[d-1] + n[d-1] * (i[d-2] + n[d-2] * (... + n[1] * i[0])).
 @end ifinfo
 @html
-i<sub>d</sub> + n<sub>d</sub> * (i<sub>d-1</sub> + n<sub>d-1</sub> * (... + n<sub>2</sub> * i<sub>1</sub>)).
+i<sub>d-1</sub> + n<sub>d-1</sub> * (i<sub>d-2</sub> + n<sub>d-2</sub> * (... + n<sub>1</sub> * i<sub>0</sub>)).
 @end html
 
 Note that, for the ordinary complex DFT, each element of the array
@@ -1463,16 +1483,16 @@ special to transform it.  For example:
 
 @example
 @{
-     fftw_complex data[NX][NY][NZ];
+     fftw_complex data[N0][N1][N2];
      fftw_plan plan;
      ...
-     plan = fftw_plan_dft_3d(NX, NY, NZ, &data[0][0][0], &data[0][0][0],
+     plan = fftw_plan_dft_3d(N0, N1, N2, &data[0][0][0], &data[0][0][0],
                              FFTW_FORWARD, FFTW_ESTIMATE);
      ...
 @}
 @end example
 
-This will plan a 3d in-place transform of size @code{NX x NY x NZ}.
+This will plan a 3d in-place transform of size @code{N0 x N1 x N2}.
 Notice how we took the address of the zero-th element to pass to the
 planner (we could also have used a typecast).
 
@@ -1481,7 +1501,7 @@ arrays in this way, for two reasons.  First, this allocates the array
 on the stack (``automatic'' storage), which has a very limited size on
 most operating systems (declaring an array with more than a few
 thousand elements will often cause a crash).  (You can get around this
-limitation on many systems by declaring the array as
+limitation on man1 systems by declaring the array as
 @code{static} and/or global, but that has its own drawbacks.)
 Second, it may not optimally align the array for use with a SIMD
 FFTW (@pxref{SIMD alignment and fftw_malloc}).  Instead, we recommend
@@ -1500,8 +1520,8 @@ Creating the array is simple: using a dynamic-allocation routine like
 @code{fftw_malloc}, allocate an array big enough to store N
 @code{fftw_complex} values (for a complex DFT), where N is the product
 of the sizes of the array dimensions (i.e. the total number of complex
-values in the array).  For example, here is code to allocate a 5x12x27
-rank 3 array:
+values in the array).  For example, here is code to allocate a
+@threedims{5}{12}{27} rank-3 array:
 @findex fftw_malloc
 
 @example
@@ -1690,7 +1710,7 @@ e.g. for a canonical set of sizes to store in the system wisdom file.
 @cindex fftw-wisdom utility
 
 @c ************************************************************
-@node FFTW Reference, Parallel FFTW, Other Important Topics, Top
+@node FFTW Reference, Parallel FFTW: Shared-Memory Threads, Other Important Topics, Top
 @chapter FFTW Reference
 
 This chapter provides a complete reference for all sequential (i.e.,
@@ -1950,10 +1970,10 @@ with any of FFTW's supported transform types.
 fftw_plan fftw_plan_dft_1d(int n,
                            fftw_complex *in, fftw_complex *out,
                            int sign, unsigned flags);
-fftw_plan fftw_plan_dft_2d(int nx, int ny,
+fftw_plan fftw_plan_dft_2d(int n0, int n1,
                            fftw_complex *in, fftw_complex *out,
                            int sign, unsigned flags);
-fftw_plan fftw_plan_dft_3d(int nx, int ny, int nz,
+fftw_plan fftw_plan_dft_3d(int n0, int n1, int n2,
                            fftw_complex *in, fftw_complex *out,
                            int sign, unsigned flags);
 fftw_plan fftw_plan_dft(int rank, const int *n,
@@ -1990,7 +2010,7 @@ size of the array @code{*n}), and can be any non-negative integer.  The
 of one number from input to output.
 
 @item
-@code{n}, or @code{nx}/@code{ny}/@code{nz}, or @code{n[rank]},
+@code{n}, or @code{n0}/@code{n1}/@code{n2}, or @code{n[rank]},
 respectively, gives the size of the transform dimensions.  They can be
 any positive integer.
  
@@ -1998,7 +2018,7 @@ any positive integer.
 @item
 @cindex row-major
 Multi-dimensional arrays are stored in row-major order with dimensions:
-@code{nx} x @code{ny}; or @code{nx} x @code{ny} x @code{nz}; or
+@code{n0} x @code{n1}; or @code{n0} x @code{n1} x @code{n2}; or
 @code{n[0]} x @code{n[1]} x ... x @code{n[rank-1]}.
 @xref{Multi-dimensional Array Format}.
 @item
@@ -2175,10 +2195,10 @@ of 0).
 fftw_plan fftw_plan_dft_r2c_1d(int n,
                                double *in, fftw_complex *out,
                                unsigned flags);
-fftw_plan fftw_plan_dft_r2c_2d(int nx, int ny,
+fftw_plan fftw_plan_dft_r2c_2d(int n0, int n1,
                                double *in, fftw_complex *out,
                                unsigned flags);
-fftw_plan fftw_plan_dft_r2c_3d(int nx, int ny, int nz,
+fftw_plan fftw_plan_dft_r2c_3d(int n0, int n1, int n2,
                                double *in, fftw_complex *out,
                                unsigned flags);
 fftw_plan fftw_plan_dft_r2c(int rank, const int *n,
@@ -2218,7 +2238,7 @@ size of the array @code{*n}), and can be any non-negative integer.  The
 of one number (with zero imaginary part) from input to output.
 
 @item
-@code{n}, or @code{nx}/@code{ny}/@code{nz}, or @code{n[rank]},
+@code{n}, or @code{n0}/@code{n1}/@code{n2}, or @code{n[rank]},
 respectively, gives the size of the @emph{logical} transform dimensions.
 They can be any positive integer.  This is different in general from the
 @emph{physical} array dimensions, which are described in @ref{Real-data
@@ -2272,10 +2292,10 @@ half of a logically Hermitian array) to real output, are given by:
 fftw_plan fftw_plan_dft_c2r_1d(int n,
                                fftw_complex *in, double *out,
                                unsigned flags);
-fftw_plan fftw_plan_dft_c2r_2d(int nx, int ny,
+fftw_plan fftw_plan_dft_c2r_2d(int n0, int n1,
                                fftw_complex *in, double *out,
                                unsigned flags);
-fftw_plan fftw_plan_dft_c2r_3d(int nx, int ny, int nz,
+fftw_plan fftw_plan_dft_c2r_3d(int n0, int n1, int n2,
                                fftw_complex *in, double *out,
                                unsigned flags);
 fftw_plan fftw_plan_dft_c2r(int rank, const int *n,
@@ -2340,35 +2360,35 @@ accommodate the size of the complex data---two extra if the last
 dimension is even and one if it is odd.  That is, the last dimension of
 the real data must physically contain
 @tex
-$2 (n_d/2+1)$
+$2 (n_{d-1}/2+1)$
 @end tex
 @ifinfo
-2 * (nd/2+1)
+2 * (n[d-1]/2+1)
 @end ifinfo
 @html
-2 * (n<sub>d</sub>/2+1)
+2 * (n<sub>d-1</sub>/2+1)
 @end html
 @code{double} values (exactly enough to hold the complex data).  This
 physical array size does not, however, change the @emph{logical} array
 size---only
 @tex
-$n_d$
+$n_{d-1}$
 @end tex
 @ifinfo
-nd
+n[d-1]
 @end ifinfo
 @html
-n<sub>d</sub>
+n<sub>d-1</sub>
 @end html
 values are actually stored in the last dimension, and
 @tex
-$n_d$
+$n_{d-1}$
 @end tex
 @ifinfo
-nd
+n[d-1]
 @end ifinfo
 @html
-n<sub>d</sub>
+n<sub>d-1</sub>
 @end html
 is the last dimension passed to the planner.
 
@@ -2380,10 +2400,10 @@ is the last dimension passed to the planner.
 @example
 fftw_plan fftw_plan_r2r_1d(int n, double *in, double *out,
                            fftw_r2r_kind kind, unsigned flags);
-fftw_plan fftw_plan_r2r_2d(int nx, int ny, double *in, double *out,
+fftw_plan fftw_plan_r2r_2d(int n0, int n1, double *in, double *out,
                            fftw_r2r_kind kindx, fftw_r2r_kind kindy,
                            unsigned flags);
-fftw_plan fftw_plan_r2r_3d(int nx, int ny, int nz,
+fftw_plan fftw_plan_r2r_3d(int n0, int n1, int n2,
                            double *in, double *out,
                            fftw_r2r_kind kindx,
                            fftw_r2r_kind kindy,
@@ -2424,7 +2444,7 @@ planners correspond to a @code{rank} of @code{1}, @code{2}, and
 of one number from input to output.
 
 @item
-@code{n}, or @code{nx}/@code{ny}/@code{nz}, or @code{n[rank]},
+@code{n}, or @code{n0}/@code{n1}/@code{n2}, or @code{n[rank]},
 respectively, gives the (physical) size of the transform dimensions.
 They can be any positive integer.
  
@@ -2432,7 +2452,7 @@ They can be any positive integer.
 @item
 @cindex row-major
 Multi-dimensional arrays are stored in row-major order with dimensions:
-@code{nx} x @code{ny}; or @code{nx} x @code{ny} x @code{nz}; or
+@code{n0} x @code{n1}; or @code{n0} x @code{n1} x @code{n2}; or
 @code{n[0]} x @code{n[1]} x ... x @code{n[rank-1]}.
 @xref{Multi-dimensional Array Format}.
 @item
@@ -3843,40 +3863,40 @@ multi-dimensional DFT of the input data; since the input data are purely
 real, the output data have the Hermitian symmetry and therefore only one
 non-redundant half need be stored.  More specifically, for an @ndims multi-dimensional real-input DFT, the full (logical) complex output array
 @tex
-$Y[k_1, k_2, \ldots, k_d]$
+$Y[k_0, k_1, \ldots, k_{d-1}]$
 @end tex
 @html
-<i>Y</i>[<i>k</i><sub>1</sub>, <i>k</i><sub>2</sub>, ...,
-<i>k</i><sub><i>d</i></sub>]
+<i>Y</i>[<i>k</i><sub>0</sub>, <i>k</i><sub>1</sub>, ...,
+<i>k</i><sub><i>d-1</i></sub>]
 @end html
 @ifinfo
-Y[k1, k2, ..., kd]
+Y[k[0], k[1], ..., k[d-1]]
 @end ifinfo
 has the symmetry:
 @tex
 $$
-Y[k_1, k_2, \ldots, k_d] = Y[n_1 - k_1, n_2 - k_2, \ldots, n_d - k_d]^*
+Y[k_0, k_1, \ldots, k_{d-1}] = Y[n_0 - k_0, n_1 - k_1, \ldots, n_{d-1} - k_{d-1}]^*
 $$
 @end tex
 @html
-<i>Y</i>[<i>k</i><sub>1</sub>, <i>k</i><sub>2</sub>, ...,
-<i>k</i><sub><i>d</i></sub>] = <i>Y</i>[<i>n</i><sub>1</sub> -
-<i>k</i><sub>1</sub>, <i>n</i><sub>2</sub> - <i>k</i><sub>2</sub>, ...,
-<i>n</i><sub><i>d</i></sub> - <i>k</i><sub><i>d</i></sub>]<sup>*</sup>
+<i>Y</i>[<i>k</i><sub>0</sub>, <i>k</i><sub>1</sub>, ...,
+<i>k</i><sub><i>d-1</i></sub>] = <i>Y</i>[<i>n</i><sub>0</sub> -
+<i>k</i><sub>0</sub>, <i>n</i><sub>1</sub> - <i>k</i><sub>1</sub>, ...,
+<i>n</i><sub><i>d-1</i></sub> - <i>k</i><sub><i>d-1</i></sub>]<sup>*</sup>
 @end html
 @ifinfo
-Y[k1, k2, ..., kd] = Y[n1 - k1, n2 - k2, ..., nd - kd]*
+Y[k[0], k[1], ..., k[d-1]] = Y[n[0] - k[0], n[1] - k[1], ..., n[d-1] - k[d-1]]*
 @end ifinfo
 (where each dimension is periodic).  Because of this symmetry, we only
 store the
 @tex
-$k_d = 0 \cdots n_d/2$
+$k_{d-1} = 0 \cdots n_{d-1}/2$
 @end tex
 @html
-<i>k</i><sub><i>d</i></sub> = 0...<i>n</i><sub><i>d</i></sub>/2+1
+<i>k</i><sub><i>d-1</i></sub> = 0...<i>n</i><sub><i>d-1</i></sub>/2+1
 @end html
 @ifinfo
-kd = 0...nd/2
+k[d-1] = 0...n[d-1]/2
 @end ifinfo
 elements of the @emph{last} dimension (division by @math{2} is rounded
 down).  (We could instead have cut any other dimension in half, but the
@@ -3902,54 +3922,41 @@ multi-dimensional discrete Hartley transform defined in the literature,
 as discussed in @ref{The Discrete Hartley Transform}.
 
 @c ************************************************************
-@node Parallel FFTW, Calling FFTW from Fortran, FFTW Reference, Top
-@chapter Parallel FFTW
+@node Parallel FFTW: Shared-Memory Threads, Calling FFTW from Fortran, FFTW Reference, Top
+@chapter Parallel FFTW: Shared-Memory Threads
 
 @cindex parallel transform
-In this chapter we discuss the use of FFTW in a parallel environment.
+In this chapter we document the parallel FFTW routines for
+shared-memory parallel hardware.  These routines, which support
+parallel one- and multi-dimensional transforms of both real and
+complex data, are the easiest way to take advantage of multiple
+processors with FFTW.  They work just like the corresponding
+uniprocessor transform routines, except that you have an extra
+initialization routine to call, and there is a routine to set the
+number of threads to employ.  Any program that uses the uniprocessor
+FFTW can therefore be trivially modified to use the multi-threaded
+FFTW.
 
-Currently, FFTW 3 includes parallel transforms for shared-memory
-machines with some flavor of threads (e.g. POSIX threads); any program
-using FFTW can be trivially modified to use these transforms, which are
-documented in @ref{Multi-threaded FFTW}.
-
-Users calling FFTW from a multi-threaded program should also consult
-@ref{Thread safety}.  This section tells you which routines of FFTW it
-is safe to call in parallel from different shared-memory threads.
-
-FFTW 2 also contains distributed-memory parallel transforms using the
-MPI message-passing standard.  MPI transforms are not yet available in
-FFTW 3, so users requiring that capability must use FFTW 2 for now.
-
-@menu
-* Multi-threaded FFTW::         
-* Thread safety::               
-@end menu
-
-@c ------------------------------------------------------------
-@node Multi-threaded FFTW, Thread safety, Parallel FFTW, Parallel FFTW
-@section Multi-threaded FFTW
-
-@cindex threads
-In this section we document the parallel FFTW routines for shared-memory
-threads on SMP hardware.  These routines, which support parallel one-
-and multi-dimensional transforms of both real and complex data, are the
-easiest way to take advantage of multiple processors with FFTW.  They
-work just like the corresponding uniprocessor transform routines, except
-that you have an extra initialization routine to call, and there is a
-routine to set the number of threads to employ.  Any program that uses
-the uniprocessor FFTW can therefore be trivially modified to use the
-multi-threaded FFTW.
+A shared-memory machine is one in which all CPUs can directly access
+the same main memory, and such machines are now common due to the
+ubiquity of multi-core CPUs.  FFTW's multi-threading support allows
+you to utilize these additional CPUs transparently from a single
+program.  However, this does not necessarily translate into
+performance gains---when multiple threads/CPUs are employed, there is
+an overhead required for synchronization that may outweigh the
+computatational parallelism.  Therefore, you can only benefit from
+threads if your problem is sufficiently large.
 
 @menu
 * Installation and Supported Hardware/Software::  
 * Usage of Multi-threaded FFTW::  
 * How Many Threads to Use?::    
+* Thread safety::               
 @end menu
 
-@c =========>
-@node Installation and Supported Hardware/Software, Usage of Multi-threaded FFTW, Multi-threaded FFTW, Multi-threaded FFTW
-@subsection Installation and Supported Hardware/Software
+@c ------------------------------------------------------------
+@node Installation and Supported Hardware/Software, Usage of Multi-threaded FFTW, Parallel FFTW: Shared-Memory Threads, Parallel FFTW: Shared-Memory Threads
+@section Installation and Supported Hardware/Software
 
 All of the FFTW threads code is located in the @code{threads}
 subdirectory of the FFTW package.  On Unix systems, the FFTW threads
@@ -3974,9 +3981,9 @@ see the file @code{threads/threads.c} for more detail.
 Ideally, of course, you should also have multiple processors in order to
 get any benefit from the threaded transforms.
 
-@c =========>
-@node Usage of Multi-threaded FFTW, How Many Threads to Use?, Installation and Supported Hardware/Software, Multi-threaded FFTW
-@subsection Usage of Multi-threaded FFTW
+@c ------------------------------------------------------------
+@node Usage of Multi-threaded FFTW, How Many Threads to Use?, Installation and Supported Hardware/Software, Parallel FFTW: Shared-Memory Threads
+@section Usage of Multi-threaded FFTW
 
 Here, it is assumed that the reader is already familiar with the usage
 of the uniprocessor FFTW routines, described elsewhere in this manual.
@@ -4042,14 +4049,14 @@ program using the multi-threaded FFTW, that wisdom @emph{cannot be used}
 by a program using only the single-threaded FFTW (i.e. not calling
 @code{fftw_init_threads}).  @xref{Words of Wisdom-Saving Plans}.
 
-@c =========>
-@node How Many Threads to Use?,  , Usage of Multi-threaded FFTW, Multi-threaded FFTW
-@subsection How Many Threads to Use?
+@c ------------------------------------------------------------
+@node How Many Threads to Use?, Thread safety, Usage of Multi-threaded FFTW, Parallel FFTW: Shared-Memory Threads
+@section How Many Threads to Use?
 
 @cindex number of threads
-There is a fair amount of overhead involved in spawning and synchronizing
-threads, so the optimal number of threads to use depends upon the size
-of the transform as well as on the number of processors you have.
+There is a fair amount of overhead involved in synchronizing threads,
+so the optimal number of threads to use depends upon the size of the
+transform as well as on the number of processors you have.
 
 As a general rule, you don't want to use more threads than you have
 processors.  (Using more threads will work, but there will be extra
@@ -4065,7 +4072,7 @@ parallelization.
 @ctindex FFTW_PATIENT
 
 @c ------------------------------------------------------------
-@node Thread safety,  , Multi-threaded FFTW, Parallel FFTW
+@node Thread safety,  , How Many Threads to Use?, Parallel FFTW: Shared-Memory Threads
 @section Thread safety
 
 @cindex threads
@@ -4099,7 +4106,236 @@ involves a separate address-space and global variables for each process,
 and is not susceptible to problems of this sort.)
 
 @c ************************************************************
-@node Calling FFTW from Fortran, Upgrading from FFTW version 2, Parallel FFTW, Top
+@node Parallel FFTW: MPI
+@chapter Parallel FFTW: MPI
+
+@cindex parallel transform
+In this chapter we document the parallel FFTW routines for parallel
+hardware supporting the MPI message-passing interface.  Unlike the
+shared-memory threads described in the previous chapter, MPI allows
+you to use @emph{distributed-memory} parallelism, where each CPU has
+its own separate memory, and which can scale up to clusters of many
+thousands of processors.  This capability comes at a price however:
+each process only stores a @emph{portion} of the data to be
+transformed, which means that the data structures and
+programming-interface are quite different from the serial or threads
+versions of FFTW.
+
+Distributed-memory parallelism is especially useful when you are
+transforming arrays so large that they do not fit into the memory of a
+single processor.  The storage per-process required by FFTW's MPI
+routines is proportional to the total array size divided by the number
+of processes.  Conversely, distributed-memory parallelism can easily
+pose an unacceptably high communications overhead for small problems;
+the threshold problem size for which parallelism becomes important
+will depend on the precise problem you are interested in, your
+hardware, and your MPI implementation.
+
+A note on terminology: in MPI, you divide the data among a set of
+``processes'' which each run in their own memory address space.
+Generally, each process runs on a different physical processor, but
+this is not required.  A group of processes in MPI is described by an
+opaque data structure called a ``communicator,'' the most common of
+which is the predefined communicator @code{MPI_COMM_WORLD} which
+refers to @emph{all} processes.  For more information on these and
+other concepts common to all MPI programs, we refer the reader to the
+documentation at @uref{http://www-unix.mcs.anl.gov/mpi/, the MPI home
+page}.
+
+We assume in this chapter that the reader is familiar with the usage
+of the serial (uniprocessor) FFTW, and focus only on the concepts new
+to the MPI interface.
+
+@menu
+* Installation and Supported Hardware/Software::  
+* Usage of Multi-threaded FFTW::  
+* How Many Threads to Use?::    
+* Thread safety::               
+@end menu
+
+@c ------------------------------------------------------------
+@node Installation and Supported Hardware/Software
+@section Installation and Supported Hardware/Software
+
+All of the FFTW MPI code is located in the @code{mpi} subdirectory of
+the FFTW package.  On Unix systems, the FFTW MPI libraries and header
+files are automatically configured, compiled, and installed along with
+the uniprocessor FFTW libraries simply by including
+@code{--enable-mpi} in the flags to the @code{configure} script
+(@pxref{Installation on Unix}).
+@fpindex configure
+
+Any implementation of the MPI standard, version 1 or later, should
+work with FFTW.  The @code{configure} script will attempt to
+automatically detect how to compile and link code using your MPI
+implementation.  In some cases, especially if you have multiple
+different MPI implementations installed or have an unusual MPI
+software package, you may need to provide this information explicitly.
+
+Most commonly, one compiles MPI code by invoking a special compiler
+command, typically @code{mpicc} for C code.  The @code{configure}
+script knows the most common names for this command, but you can
+specify the MPI compilation command explicitly by setting the
+@code{MPICC} variable, as in @samp{./configure MPICC=mpicc ...}.
+
+If, instead of a special compiler command, you need to link a certain
+library, you can specify the link command via the @code{MPILIBS}
+variable, as in @samp{./configure MPILIBS=-lmpi ...}.  Note that if
+your MPI library is installed in a non-standard location (one the
+compiler does not know about by default), you may also have to specify
+the location of the library and header files via @code{LDFLAGS} and
+@code{CPPFLAGS} variables, respectively, as in @samp{./configure
+LDFLAGS=-L/path/to/mpi/libs CPPFLAGS=-I/path/to/mpi/include ...}.
+
+@c ------------------------------------------------------------
+@node Simple MPI example
+@section Simple MPI example
+
+Before we document the FFTW MPI interface in detail, we begin with a
+simple example outlining how one would perform a two-dimensional
+@code{N0} by @code{N1} complex DFT. 
+
+@example
+#include <fftw3-mpi.h>
+
+int main(int argc, char **argv)
+@{
+    const ptrdiff_t N0 = ..., N1 = ...;
+    fftw_plan plan;
+    fftw_complex *data;
+    ptrdiff_t alloc_local, local_n0, local_x_start, i, j;
+
+    MPI_Init(&argc, &argv);
+    fftw_mpi_init();
+
+    /* get local data size and allocate */
+    alloc_local = fftw3_mpi_local_size_2d(N0, N1, MPI_COMM_WORLD,
+                                         &local_n0, &local_x_start);
+    data = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * alloc_local);
+
+    /* create plan for forward DFT */
+    plan = fftw_mpi_plan_dft_2d(N0, N1, data, data, MPI_COMM_WORLD,
+                                FFTW_FORWARD, FFTW_ESTIMATE);    
+
+    /* initialize data */
+    for (i = 0; i < local_n0; ++i) for (j = 0; j < N1; ++j) {
+       /* initialize data to some function my_function(x,y) */
+       data[i*N1 + j] = my_function(local_x_start + i, j);
+    }
+
+    /* compute transforms, in-place, as many times as desired */
+    fftw_execute(plan);
+
+    fftw_destroy_plan(plan);
+
+    MPI_Finalize();
+@}
+@end example
+
+As can be seen above, the MPI interface follows the same basic style
+of allocate/plan/execute/destroy as the serial FFTW routines.  All of
+the MPI-specific routines are prefixed with @samp{fftw_mpi_} instead
+of @samp{fftw_}.  There are a few important differences, however:
+
+First, we must call @code{fftw_mpi_init()} after calling
+@code{MPI_Init} (required in all MPI programs) and before calling any
+other @samp{fftw_mpi_} routine.
+
+Second, when we create the plan with @code{fftw_mpi_plan_dft_2d},
+analogous to @code{fftw_plan_dft_2d}, we pass an additional argument:
+the communicator, indicating which processes will participate in the
+transform (here @code{MPI_COMM_WORLD}, indicating all processes).
+Whenever you create, execute, or destroy a plan for an MPI transform,
+you must call the corresponding FFTW routine on @emph{all} processes
+in the communicator for that transform.  (That is, these are
+@emph{collective} calls.)  Note that the plan for the MPI transform
+uses the standard @code{fftw_execute} and @code{fftw_destroy}
+routines (the guru execute routines also work).
+
+Third, all of the FFTW MPI routines take @code{ptrdiff_t} arguments
+instead of @code{int} as for the serial FFTW.  @code{ptrdiff_t} is a
+standard C integer type which is (at least) 32 bits wide on a 32-bit
+machine and 64 bits wide on a 64-bit machine.  This is to make it easy
+to specify very large parallel transforms on a 64-bit machine.  (You
+can specify 64-bit transform sizes in the serial FFTW, too, but
+only by using the @samp{guru64} planner interface.)
+
+Fourth, and most importantly, you don't allocate the entire
+two-dimensional array on each process.  Instead, you call
+@code{fftw_mpi_local_size_2d} to find out what @code{portion} of the
+array resides on each processor, and how much space to allocate.
+Here, the portion of the array on each process is a @code{local_n0} by
+@code{N1} slice of the total array, starting at index
+@code{local_x_start}.  The total number of @code{fftw_complex} numbers
+to allocate is given by the @code{alloc_local} return value, which
+@emph{may} be greater than @code{local_n0 * N1} (in case some
+intermediate calculations require additional storage).  The data
+distribution in FFTW's MPI interface is described in more detail by
+the next section.
+
+Given the portion of the array that resides on the local process, it
+is straightforward to initialize the data (here to a function
+@code{myfunction}) and otherwise manipulate it.  Of course, at the end
+of the program you may want to output the data somehow, but
+synchronizing this output is up to you and is beyond the scope of this
+manual.  (One good way to output a large multi-dimensional distributed
+array in MPI to a portable binary file is to use the free HDF5
+library; see the @uref{http://www.hdfgroup.org/, HDF home page}.)
+
+@c ------------------------------------------------------------
+@node MPI data distribution
+@section MPI data distribution
+
+The most important concept to understand in using FFTW's MPI interface
+is the data distribution.  With a serial or multithreaded FFT, all of
+the input and outputs are stored as a single contiguous chunk of
+memory.  With a distributed-memory FFT, the inputs and outputs are
+broken into disjoint blocks, one per process.
+
+In particular, FFTW uses a @emph{1d block distribution} of the data,
+distributed along the @emph{first dimension}.  For example, if you
+want to perform a @twodims{100,200} complex DFT, distributed over 4
+processes, each process will get a @twodims{25,200} slice of the data.
+That is, process 0 will get rows 0 through 24, process 1 will get rows
+25 through 49, process 2 will get rows 50 through 74, and process 3
+will get rows 75 through 99.  If you take the same array but
+distribute it over 3 processes, then it is not evenly divisible so the
+different processes will have unequal chunks.  FFTW's default choice
+in this case is to assign 34 rows to processes 0 and 1, and 32 rows to
+process 2.
+
+FFTW provides several @samp{fftw_mpi_local_size} routines that you can
+call to find out what portion of an array is stored on the current
+process.  In most cases, you should use the default block sizes picked
+by FFTW, but it is also possible to specify your own block size.  For
+example, with a @twodims{100,200} array on three processes, you can
+tell FFTW to use a block size of 40, which would assign 40 rows to
+processes 0 and 1, and 20 rows to process 2.  FFTW's default is to
+divide the data equally among the processes if possible, and as best
+it can otherwise.  The rows are always assigned in ``rank order,''
+i.e. process 0 gets the first block of rows, then process 1, and so
+on.  (You can change this by using @code{MPI_Comm_split} to create a
+new communicator with re-ordered processes.)  However, you should
+always call the @samp{fftw_mpi_local_size} routines, if possible,
+rather than trying to predict FFTW's distribution choices.
+
+As with the planner interface, the @samp{fftw_mpi_local_size}
+distribution interface is broken into basic and advanced interfaces,
+where the latter allows you to specify the block size manually and
+also to request block sizes when computing multiple transforms
+simultaneously.
+
+@node Basic distribution interface
+@subsection Basic distribution
+
+@node Transposed distribution interface
+@subsection Transposed distribution
+
+@node Advanced distribution interface
+@subsection Advanced distribution
+
+@c ************************************************************
+@node Calling FFTW from Fortran, Upgrading from FFTW version 2, Parallel FFTW: Shared-Memory Threads, Top
 @chapter Calling FFTW from Fortran
 @cindex Fortran interface
 
