@@ -3113,6 +3113,7 @@ be equally aligned.
 
 @end itemize
 
+@cindex alignment
 The alignment issue is especially critical, because if you don't use
 @code{fftw_malloc} then you may have little control over the alignment
 of arrays in memory.  For example, neither the C++ @code{new} function
