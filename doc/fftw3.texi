@@ -141,7 +141,8 @@ This manual documents FFTW version @value{VERSION}.
 * Tutorial::                    
 * Other Important Topics::      
 * FFTW Reference::              
-* Parallel FFTW: Shared-Memory Threads::  
+* Multi-threaded FFTW::         
+* Distributed-memory FFTW with MPI::  
 * Calling FFTW from Fortran::   
 * Upgrading from FFTW version 2::  
 * Installation and Customization::  
@@ -194,6 +195,7 @@ FFTW Reference
 * Basic Interface::             
 * Advanced Interface::          
 * Guru Interface::              
+* New-data Execute Functions::  
 * Wisdom::                      
 * What FFTW Really Computes::   
 
@@ -225,7 +227,6 @@ Guru Interface
 * Guru Complex DFTs::           
 * Guru Real-data DFTs::         
 * Guru Real-to-real Transforms::  
-* Guru Execution of Plans::     
 
 Wisdom
 
@@ -243,12 +244,24 @@ What FFTW Really Computes
 * 1d Discrete Hartley Transforms (DHTs)::  
 * Multi-dimensional Transforms::  
 
-Parallel FFTW: Shared-Memory Threads
+Multi-threaded FFTW
 
 * Installation and Supported Hardware/Software::  
 * Usage of Multi-threaded FFTW::  
 * How Many Threads to Use?::    
 * Thread safety::               
+
+Distributed-memory FFTW with MPI
+
+* FFTW MPI Installation::       
+* Simple MPI example::          
+* MPI data distribution::       
+
+MPI data distribution
+
+* Basic distribution interface::  
+* Transposed distribution interface::  
+* Advanced distribution interface::  
 
 Calling FFTW from Fortran
 
@@ -422,12 +435,13 @@ Alignment}, the storage scheme of multi-dimensional arrays
 storing plans on disk (@pxref{Words of Wisdom-Saving Plans}).  Next,
 @ref{FFTW Reference} provides comprehensive documentation of all
 FFTW's features.  Parallel transforms are discussed in their own
-chapter @ref{Parallel FFTW}.  Fortran programmers can also use FFTW,
-as described in @ref{Calling FFTW from Fortran}.  @ref{Installation
-and Customization} explains how to install FFTW in your computer
-system and how to adapt FFTW to your needs.  License and copyright
-information is given in @ref{License and Copyright}.  Finally, we
-thank all the people who helped us in @ref{Acknowledgments}.
+chapters: @ref{Multi-threaded FFTW} and @ref{Distributed-memory FFTW
+with MPI}.  Fortran programmers can also use FFTW, as described in
+@ref{Calling FFTW from Fortran}.  @ref{Installation and Customization}
+explains how to install FFTW in your computer system and how to adapt
+FFTW to your needs.  License and copyright information is given in
+@ref{License and Copyright}.  Finally, we thank all the people who
+helped us in @ref{Acknowledgments}.
 
 @c ************************************************************
 @node  Tutorial, Other Important Topics, Introduction, Top
@@ -1521,7 +1535,7 @@ Creating the array is simple: using a dynamic-allocation routine like
 @code{fftw_complex} values (for a complex DFT), where N is the product
 of the sizes of the array dimensions (i.e. the total number of complex
 values in the array).  For example, here is code to allocate a
-@threedims{5}{12}{27} rank-3 array:
+@threedims{5,12,27} rank-3 array:
 @findex fftw_malloc
 
 @example
@@ -1710,12 +1724,12 @@ e.g. for a canonical set of sizes to store in the system wisdom file.
 @cindex fftw-wisdom utility
 
 @c ************************************************************
-@node FFTW Reference, Parallel FFTW: Shared-Memory Threads, Other Important Topics, Top
+@node FFTW Reference, Multi-threaded FFTW, Other Important Topics, Top
 @chapter FFTW Reference
 
 This chapter provides a complete reference for all sequential (i.e.,
-one-processor) FFTW functions.  For parallel transforms, @xref{Parallel
-FFTW}.
+one-processor) FFTW functions.  Parallel transforms are described in
+later chapters.
 
 @menu
 * Data Types and Files::        
@@ -1723,6 +1737,7 @@ FFTW}.
 * Basic Interface::             
 * Advanced Interface::          
 * Guru Interface::              
+* New-data Execute Functions::  
 * Wisdom::                      
 * What FFTW Really Computes::   
 @end menu
@@ -2760,7 +2775,7 @@ Arrays @code{n}, @code{inembed}, @code{onembed}, and @code{kind} are not
 used after this function returns.  You can safely free or reuse them.
 
 @c ------------------------------------------------------------
-@node Guru Interface, Wisdom, Advanced Interface, FFTW Reference
+@node Guru Interface, New-data Execute Functions, Advanced Interface, FFTW Reference
 @section Guru Interface
 @cindex guru interface
 
@@ -2773,14 +2788,6 @@ size and stride.
 One can also use more general complex-number formats, e.g. separate real
 and imaginary arrays.
 
-In addition to the more flexible planner interface, there are also
-guru generalizations of @code{fftw_execute} that allow a given plan to
-be executed on a different array (sufficiently similar to the
-original).  Note that in order to use the guru execute functions, you
-do not need to use the guru planner interface: you can create plans
-with the basic or advanced interface and execute them with the guru
-interface.
-
 For those users who require the flexibility of the guru interface, it is
 important that they pay special attention to the documentation lest they
 shoot themselves in the foot.
@@ -2791,7 +2798,6 @@ shoot themselves in the foot.
 * Guru Complex DFTs::           
 * Guru Real-data DFTs::         
 * Guru Real-to-real Transforms::  
-* Guru Execution of Plans::     
 @end menu
 
 @c =========>
@@ -3031,7 +3037,7 @@ supported for interleaved arrays.  For split arrays, the planner will
 return @code{NULL}.
 
 @c =========>
-@node Guru Real-to-real Transforms, Guru Execution of Plans, Guru Real-data DFTs, Guru Interface
+@node Guru Real-to-real Transforms,  , Guru Real-data DFTs, Guru Interface
 @subsection Guru Real-to-real Transforms
 
 @example
@@ -3063,18 +3069,19 @@ may be the same, indicating an in-place transform.
 @code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
 as defined in @ref{Planner Flags}.
 
-@c =========>
-@node Guru Execution of Plans,  , Guru Real-to-real Transforms, Guru Interface
-@subsection Guru Execution of Plans
+@c -----------------------------------------------------------
+@node New-data Execute Functions, Wisdom, Guru Interface, FFTW Reference
+@section New-data Execute Functions
 @cindex execute
+@cindex new-data execution
 
 Normally, one executes a plan for the arrays with which the plan was
 created, by calling @code{fftw_execute(plan)} as described in @ref{Using
 Plans}.
 @findex fftw_execute
-However, it is possible to apply a given plan to a @emph{different}
-array using the guru functions detailed below, provided that the
-following conditions are met:
+However, it is possible for sophisticated users to apply a given plan
+to a @emph{different} array using the ``new-data execute'' functions
+detailed below, provided that the following conditions are met:
 
 @itemize @bullet
 
@@ -3106,11 +3113,23 @@ be equally aligned.
 
 @end itemize
 
-If you are tempted to use this guru interface because you want to
-transform a known bunch of arrays of the same size, @strong{stop here}
-and go use the advanced interface instead (@pxref{Advanced Interface})).
+The alignment issue is especially critical, because if you don't use
+@code{fftw_malloc} then you may have little control over the alignment
+of arrays in memory.  For example, neither the C++ @code{new} function
+nor the Fortran @code{allocate} statement provide strong enough
+guarantees about data alignment.  If you don't use @code{fftw_malloc},
+therefore, you probably have to use @code{FFTW_UNALIGNED} (which
+disables most SIMD support).  If possible, it is probably better for
+you to simply create multiple plans (creating a new plan is quick once
+one exists for a given size), or better yet re-use the same array for
+your transforms.
 
-The guru execute functions are:
+If you are tempted to use the new-data execute interface because you
+want to transform a known bunch of arrays of the same size, you should
+probably go use the advanced interface instead (@pxref{Advanced
+Interface})).
+
+The new-data execute functions are:
 
 @example
 void fftw_execute_dft(
@@ -3163,7 +3182,7 @@ transform type, from the basic to the guru interface, could have been
 used to create the plan, however.
 
 @c ------------------------------------------------------------
-@node Wisdom, What FFTW Really Computes, Guru Interface, FFTW Reference
+@node Wisdom, What FFTW Really Computes, New-data Execute Functions, FFTW Reference
 @section Wisdom
 @cindex wisdom
 @cindex saving plans to disk
@@ -3922,8 +3941,8 @@ multi-dimensional discrete Hartley transform defined in the literature,
 as discussed in @ref{The Discrete Hartley Transform}.
 
 @c ************************************************************
-@node Parallel FFTW: Shared-Memory Threads, Calling FFTW from Fortran, FFTW Reference, Top
-@chapter Parallel FFTW: Shared-Memory Threads
+@node Multi-threaded FFTW, Distributed-memory FFTW with MPI, FFTW Reference, Top
+@chapter Multi-threaded FFTW
 
 @cindex parallel transform
 In this chapter we document the parallel FFTW routines for
@@ -3955,7 +3974,7 @@ threads if your problem is sufficiently large.
 @end menu
 
 @c ------------------------------------------------------------
-@node Installation and Supported Hardware/Software, Usage of Multi-threaded FFTW, Parallel FFTW: Shared-Memory Threads, Parallel FFTW: Shared-Memory Threads
+@node Installation and Supported Hardware/Software, Usage of Multi-threaded FFTW, Multi-threaded FFTW, Multi-threaded FFTW
 @section Installation and Supported Hardware/Software
 
 All of the FFTW threads code is located in the @code{threads}
@@ -3982,7 +4001,7 @@ Ideally, of course, you should also have multiple processors in order to
 get any benefit from the threaded transforms.
 
 @c ------------------------------------------------------------
-@node Usage of Multi-threaded FFTW, How Many Threads to Use?, Installation and Supported Hardware/Software, Parallel FFTW: Shared-Memory Threads
+@node Usage of Multi-threaded FFTW, How Many Threads to Use?, Installation and Supported Hardware/Software, Multi-threaded FFTW
 @section Usage of Multi-threaded FFTW
 
 Here, it is assumed that the reader is already familiar with the usage
@@ -4050,7 +4069,7 @@ by a program using only the single-threaded FFTW (i.e. not calling
 @code{fftw_init_threads}).  @xref{Words of Wisdom-Saving Plans}.
 
 @c ------------------------------------------------------------
-@node How Many Threads to Use?, Thread safety, Usage of Multi-threaded FFTW, Parallel FFTW: Shared-Memory Threads
+@node How Many Threads to Use?, Thread safety, Usage of Multi-threaded FFTW, Multi-threaded FFTW
 @section How Many Threads to Use?
 
 @cindex number of threads
@@ -4072,7 +4091,7 @@ parallelization.
 @ctindex FFTW_PATIENT
 
 @c ------------------------------------------------------------
-@node Thread safety,  , How Many Threads to Use?, Parallel FFTW: Shared-Memory Threads
+@node Thread safety,  , How Many Threads to Use?, Multi-threaded FFTW
 @section Thread safety
 
 @cindex threads
@@ -4097,8 +4116,7 @@ shared data between plans are great.
 Note also that, since the plan is not modified by @code{fftw_execute},
 it is safe to execute the @emph{same plan} in parallel by multiple
 threads.  However, since a given plan operates by default on a fixed
-array, you need to use one of the guru variants (@pxref{Guru Execution
-of Plans}) so that different threads compute the transform of different data.
+array, you need to use one of the new-data execute functions (@pxref{New-data Execute Functions}) so that different threads compute the transform of different data.
 
 (Users should note that these comments only apply to programs using
 shared-memory threads.  Parallelism using MPI or forked processes
@@ -4106,8 +4124,8 @@ involves a separate address-space and global variables for each process,
 and is not susceptible to problems of this sort.)
 
 @c ************************************************************
-@node Parallel FFTW: MPI
-@chapter Parallel FFTW: MPI
+@node Distributed-memory FFTW with MPI, Calling FFTW from Fortran, Multi-threaded FFTW, Top
+@chapter Distributed-memory FFTW with MPI
 
 @cindex parallel transform
 In this chapter we document the parallel FFTW routines for parallel
@@ -4147,15 +4165,14 @@ of the serial (uniprocessor) FFTW, and focus only on the concepts new
 to the MPI interface.
 
 @menu
-* Installation and Supported Hardware/Software::  
-* Usage of Multi-threaded FFTW::  
-* How Many Threads to Use?::    
-* Thread safety::               
+* FFTW MPI Installation::       
+* Simple MPI example::          
+* MPI data distribution::       
 @end menu
 
 @c ------------------------------------------------------------
-@node Installation and Supported Hardware/Software
-@section Installation and Supported Hardware/Software
+@node FFTW MPI Installation, Simple MPI example, Distributed-memory FFTW with MPI, Distributed-memory FFTW with MPI
+@section FFTW MPI Installation
 
 All of the FFTW MPI code is located in the @code{mpi} subdirectory of
 the FFTW package.  On Unix systems, the FFTW MPI libraries and header
@@ -4188,7 +4205,7 @@ the location of the library and header files via @code{LDFLAGS} and
 LDFLAGS=-L/path/to/mpi/libs CPPFLAGS=-I/path/to/mpi/include ...}.
 
 @c ------------------------------------------------------------
-@node Simple MPI example
+@node Simple MPI example, MPI data distribution, FFTW MPI Installation, Distributed-memory FFTW with MPI
 @section Simple MPI example
 
 Before we document the FFTW MPI interface in detail, we begin with a
@@ -4218,10 +4235,10 @@ int main(int argc, char **argv)
                                 FFTW_FORWARD, FFTW_ESTIMATE);    
 
     /* initialize data */
-    for (i = 0; i < local_n0; ++i) for (j = 0; j < N1; ++j) {
+    for (i = 0; i < local_n0; ++i) for (j = 0; j < N1; ++j) @{
        /* initialize data to some function my_function(x,y) */
        data[i*N1 + j] = my_function(local_x_start + i, j);
-    }
+    @}
 
     /* compute transforms, in-place, as many times as desired */
     fftw_execute(plan);
@@ -4250,7 +4267,7 @@ you must call the corresponding FFTW routine on @emph{all} processes
 in the communicator for that transform.  (That is, these are
 @emph{collective} calls.)  Note that the plan for the MPI transform
 uses the standard @code{fftw_execute} and @code{fftw_destroy}
-routines (the guru execute routines also work).
+routines (the new-data execute routines also work).
 
 Third, all of the FFTW MPI routines take @code{ptrdiff_t} arguments
 instead of @code{int} as for the serial FFTW.  @code{ptrdiff_t} is a
@@ -4283,7 +4300,7 @@ array in MPI to a portable binary file is to use the free HDF5
 library; see the @uref{http://www.hdfgroup.org/, HDF home page}.)
 
 @c ------------------------------------------------------------
-@node MPI data distribution
+@node MPI data distribution,  , Simple MPI example, Distributed-memory FFTW with MPI
 @section MPI data distribution
 
 The most important concept to understand in using FFTW's MPI interface
@@ -4325,17 +4342,23 @@ where the latter allows you to specify the block size manually and
 also to request block sizes when computing multiple transforms
 simultaneously.
 
-@node Basic distribution interface
+@menu
+* Basic distribution interface::  
+* Transposed distribution interface::  
+* Advanced distribution interface::  
+@end menu
+
+@node Basic distribution interface, Transposed distribution interface, MPI data distribution, MPI data distribution
 @subsection Basic distribution
 
-@node Transposed distribution interface
+@node Transposed distribution interface, Advanced distribution interface, Basic distribution interface, MPI data distribution
 @subsection Transposed distribution
 
-@node Advanced distribution interface
+@node Advanced distribution interface,  , Transposed distribution interface, MPI data distribution
 @subsection Advanced distribution
 
 @c ************************************************************
-@node Calling FFTW from Fortran, Upgrading from FFTW version 2, Parallel FFTW: Shared-Memory Threads, Top
+@node Calling FFTW from Fortran, Upgrading from FFTW version 2, Distributed-memory FFTW with MPI, Top
 @chapter Calling FFTW from Fortran
 @cindex Fortran interface
 
