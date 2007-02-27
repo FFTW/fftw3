@@ -358,7 +358,8 @@ interface.
 \call item
 If the abovementioned array characteristics are the same, you are
 willing to pay close attention to the documentation, and you really
-need to, we provide a "new-data" interface to apply a plan to a new array.
+need to, we provide a "new-array execution" interface to apply a plan
+to a new array.
 \call endlist
 
 \question 25may:slow FFTW seems really slow.

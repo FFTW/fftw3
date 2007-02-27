@@ -195,7 +195,7 @@ FFTW Reference
 * Basic Interface::             
 * Advanced Interface::          
 * Guru Interface::              
-* New-data Execute Functions::  
+* New-array Execute Functions::  
 * Wisdom::                      
 * What FFTW Really Computes::   
 
@@ -1737,7 +1737,7 @@ later chapters.
 * Basic Interface::             
 * Advanced Interface::          
 * Guru Interface::              
-* New-data Execute Functions::  
+* New-array Execute Functions::  
 * Wisdom::                      
 * What FFTW Really Computes::   
 @end menu
@@ -2775,7 +2775,7 @@ Arrays @code{n}, @code{inembed}, @code{onembed}, and @code{kind} are not
 used after this function returns.  You can safely free or reuse them.
 
 @c ------------------------------------------------------------
-@node Guru Interface, New-data Execute Functions, Advanced Interface, FFTW Reference
+@node Guru Interface, New-array Execute Functions, Advanced Interface, FFTW Reference
 @section Guru Interface
 @cindex guru interface
 
@@ -3070,17 +3070,17 @@ may be the same, indicating an in-place transform.
 as defined in @ref{Planner Flags}.
 
 @c -----------------------------------------------------------
-@node New-data Execute Functions, Wisdom, Guru Interface, FFTW Reference
-@section New-data Execute Functions
+@node New-array Execute Functions, Wisdom, Guru Interface, FFTW Reference
+@section New-array Execute Functions
 @cindex execute
-@cindex new-data execution
+@cindex new-array execution
 
 Normally, one executes a plan for the arrays with which the plan was
 created, by calling @code{fftw_execute(plan)} as described in @ref{Using
 Plans}.
 @findex fftw_execute
 However, it is possible for sophisticated users to apply a given plan
-to a @emph{different} array using the ``new-data execute'' functions
+to a @emph{different} array using the ``new-array execute'' functions
 detailed below, provided that the following conditions are met:
 
 @itemize @bullet
@@ -3124,12 +3124,12 @@ you to simply create multiple plans (creating a new plan is quick once
 one exists for a given size), or better yet re-use the same array for
 your transforms.
 
-If you are tempted to use the new-data execute interface because you
+If you are tempted to use the new-array execute interface because you
 want to transform a known bunch of arrays of the same size, you should
 probably go use the advanced interface instead (@pxref{Advanced
 Interface})).
 
-The new-data execute functions are:
+The new-array execute functions are:
 
 @example
 void fftw_execute_dft(
@@ -3182,7 +3182,7 @@ transform type, from the basic to the guru interface, could have been
 used to create the plan, however.
 
 @c ------------------------------------------------------------
-@node Wisdom, What FFTW Really Computes, New-data Execute Functions, FFTW Reference
+@node Wisdom, What FFTW Really Computes, New-array Execute Functions, FFTW Reference
 @section Wisdom
 @cindex wisdom
 @cindex saving plans to disk
@@ -4116,7 +4116,7 @@ shared data between plans are great.
 Note also that, since the plan is not modified by @code{fftw_execute},
 it is safe to execute the @emph{same plan} in parallel by multiple
 threads.  However, since a given plan operates by default on a fixed
-array, you need to use one of the new-data execute functions (@pxref{New-data Execute Functions}) so that different threads compute the transform of different data.
+array, you need to use one of the new-array execute functions (@pxref{New-array Execute Functions}) so that different threads compute the transform of different data.
 
 (Users should note that these comments only apply to programs using
 shared-memory threads.  Parallelism using MPI or forked processes
@@ -4267,7 +4267,7 @@ you must call the corresponding FFTW routine on @emph{all} processes
 in the communicator for that transform.  (That is, these are
 @emph{collective} calls.)  Note that the plan for the MPI transform
 uses the standard @code{fftw_execute} and @code{fftw_destroy}
-routines (the new-data execute routines also work).
+routines (the new-array execute routines also work).
 
 Third, all of the FFTW MPI routines take @code{ptrdiff_t} arguments
 instead of @code{int} as for the serial FFTW.  @code{ptrdiff_t} is a
