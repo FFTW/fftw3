@@ -510,5 +510,5 @@ INLINE_ELAPSED(inline)
 
 #define HAVE_TICK_COUNTER
 #endif
-#endif // HAVE_MIPS_ZBUS_TIMER
+#endif /* HAVE_MIPS_ZBUS_TIMER */
 
