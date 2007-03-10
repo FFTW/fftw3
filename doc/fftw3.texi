@@ -268,7 +268,7 @@ transform (DFT) and various special cases thereof.
 
 @item  FFTW supports arbitrary multi-dimensional data.
 
-@item  FFTW supports the SSE, SSE2, and Altivec instruction
+@item  FFTW supports the SSE, SSE2, Altivec, and MIPS PS instruction
        sets.
 
 @item  FFTW @value{VERSION} includes parallel (multi-threaded) transforms
@@ -1288,17 +1288,19 @@ SIMD acceleration), and alignment of the stack.
 @node SIMD alignment and fftw_malloc, Stack alignment on x86, Data Alignment, Data Alignment
 @subsection SIMD alignment and fftw_malloc
 
-SIMD, which stands for ``Single Instruction Multiple Data,'' is a set
-of special operations supported by some processors to perform a single
+SIMD, which stands for ``Single Instruction Multiple Data,'' is a set of
+special operations supported by some processors to perform a single
 operation on several numbers (usually 2 or 4) simultaneously.  SIMD
 floating-point instructions are available on several popular CPUs:
-SSE/SSE2 (single/double precision) on Pentium III/IV and higher, and
-AltiVec (single precision) on the PowerPC G4 and higher.  FFTW can be
-compiled to support the SIMD instructions on any of these systems.
+SSE/SSE2 (single/double precision) on Pentium III and higher and on
+AMD64, AltiVec (single precision) on some PowerPCs (Apple G4 and
+higher), and MIPS Paired Single.  FFTW can be compiled to support the
+SIMD instructions on any of these systems.
 @cindex SIMD
 @cindex SSE
 @cindex SSE2
 @cindex AltiVec
+@cindex MIPS PS
 @cindex precision
 
 A program linking to an FFTW library compiled with SIMD support can
@@ -4741,10 +4743,11 @@ have a cycle counter but still really want an optimized plan regardless
 of the time).  @xref{Cycle Counters}.
 
 @item
-@code{--enable-sse}, @code{--enable-sse2}, @code{--enable-altivec}:
+@code{--enable-sse}, @code{--enable-sse2}, @code{--enable-altivec},
+@code{--enable-mips_ps}:
 Enable the compilation of SIMD code for SSE (Pentium III+), SSE2
-(Pentium IV+), or AltiVec (PowerPC G4+).  SSE and AltiVec only work
-with @code{--enable-float} (above), while SSE2 only works in double
+(Pentium IV+), AltiVec (PowerPC G4+), or MIPS PS.  SSE, AltiVec and MIPS PS
+only work with @code{--enable-float} (above), while SSE2 only works in double
 precision (the default).  The resulting code will @emph{still work} on
 earlier CPUs lacking the SIMD extensions (SIMD is automatically
 disabled, although the FFTW library is still larger).
