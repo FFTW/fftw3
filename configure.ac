@@ -15,6 +15,7 @@ case "${host_cpu}" in
   powerpc*) have_fma=yes;;
   ia64*) have_fma=yes;;
   hppa*) have_fma=yes;;
+  mips64*) have_fma=yes;;
   *) have_fma=no;;
 esac
 
@@ -90,6 +91,12 @@ if test "$have_altivec" = "yes"; then
 	have_simd="yes"
 fi
 
+AC_ARG_ENABLE(mips_ps, [AC_HELP_STRING([--enable-mips_ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
+if test "$have_mips_ps" = "yes"; then
+	AC_DEFINE(HAVE_MIPS_PS,1,[Define to enable MIPS paired-single optimizations.])
+	have_simd="yes"
+fi
+
 if test "$PRECISION" != "$simd_precision" && test "$have_simd" = "yes"; then
 	AC_MSG_ERROR([requested SIMD type does not match selected precision])
 fi
@@ -99,6 +106,11 @@ AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
 AC_ARG_WITH(slow-timer, [AC_HELP_STRING([--with-slow-timer],[use low-precision timers (SLOW)])], with_slow_timer=$withval, with_slow_timer=no)
 if test "$with_slow_timer" = "yes"; then
 	AC_DEFINE(WITH_SLOW_TIMER,1,[Use low-precision timers, making planner very slow])
+fi
+
+AC_ARG_ENABLE(mips_zbus_timer, [AC_HELP_STRING([--enable-mips-zbus-timer],[use MIPS ZBus cycle-counter])], have_mips_zbus_timer=$enableval, have_mips_zbus_timer=no)
+if test "$have_mips_zbus_timer" = "yes"; then
+	AC_DEFINE(HAVE_MIPS_ZBUS_TIMER,1,[Define to enable use of MIPS ZBus cycle-counter.])
 fi
 
 AC_ARG_WITH(our-malloc16, [AC_HELP_STRING([--with-our-malloc16],[use our 16-byte aligned malloc (helpful for Win32)])], with_our_malloc16=$withval, with_our_malloc16=no)
@@ -226,6 +238,17 @@ if test "$GCC" = "yes"; then
 		[SIMD_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
 	        [AX_CHECK_COMPILER_FLAGS(-fvec, [SIMD_CFLAGS="-fvec"],
 		    [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
+    elif test "$have_mips_ps" = "yes"; then
+        # Just punt here and use only new 4.2 compiler :(
+	# Should add section for older compilers...
+	AX_CHECK_COMPILER_FLAGS(-mpaired-single,
+	    [SIMD_CFLAGS="-mpaired-single"],
+	    #[AC_MSG_ERROR([Need a version of gcc with -mpaired-single])])
+	    [AX_CHECK_COMPILER_FLAGS(-march=mips64,
+	      [SIMD_CFLAGS="-march=mips64"],
+	        [AC_MSG_ERROR(
+		 [Need a version of gcc with -mpaired-single or -march=mips64])
+		])])
     fi
 fi
 fi

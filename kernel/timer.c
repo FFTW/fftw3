@@ -156,8 +156,10 @@ typedef crude_time ticks;
 
 #else /* no cycle counter */
 
-  double X(measure_execution_time)(plan *pln, const problem *p)
+  double X(measure_execution_time)(const planner *plnr, 
+				   plan *pln, const problem *p)
   {
+       UNUSED(plnr);
        UNUSED(p);
        UNUSED(pln);
        return -1.0;

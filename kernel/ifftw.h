@@ -84,7 +84,8 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 #define STRINGIZEx(x) #x
 #define STRINGIZE(x) STRINGIZEx(x)
 
-#if defined(HAVE_SSE) || defined(HAVE_SSE2) || defined(HAVE_ALTIVEC)
+#if defined(HAVE_SSE) || defined(HAVE_SSE2) || defined(HAVE_ALTIVEC) || \
+    defined(HAVE_MIPS_PS)
 #define HAVE_SIMD 1
 #else
 #define HAVE_SIMD 0

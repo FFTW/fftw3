@@ -30,6 +30,10 @@
 #include "simd-altivec.h"
 #endif
 
+#ifdef HAVE_MIPS_PS
+#include "simd-mips_ps.h"
+#endif
+
 /* TAINT_BIT is set if pointers are not guaranteed to be multiples of
    ALIGNMENT */
 #define TAINT_BIT 1    

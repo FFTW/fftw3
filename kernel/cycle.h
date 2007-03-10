@@ -469,3 +469,46 @@ INLINE_ELAPSED(inline)
 #define HAVE_TICK_COUNTER
 #endif
 
+/*----------------------------------------------------------------*/
+/* MIPS ZBus */
+#if HAVE_MIPS_ZBUS_TIMER
+#if defined(__mips__) && !defined(HAVE_TICK_COUNTER)
+#include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+typedef uint64_t ticks;
+
+static inline ticks getticks(void)
+{
+  static uint64_t* addr = 0;
+
+  if (addr == 0)
+  {
+    uint32_t rq_addr = 0x10030000;
+    int fd;
+    int pgsize;
+
+    pgsize = getpagesize();
+    fd = open ("/dev/mem", O_RDONLY | O_SYNC, 0);
+    if (fd < 0) {
+      perror("open");
+      return NULL;
+    }
+    addr = mmap(0, pgsize, PROT_READ, MAP_SHARED, fd, rq_addr);
+    close(fd);
+    if (addr == (uint64_t *)-1) {
+      perror("mmap");
+      return NULL;
+    }
+  }
+
+  return *addr;
+}
+
+INLINE_ELAPSED(inline)
+
+#define HAVE_TICK_COUNTER
+#endif
+#endif // HAVE_MIPS_ZBUS_TIMER
+
