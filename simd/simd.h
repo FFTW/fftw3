@@ -30,6 +30,16 @@
 #include "simd-altivec.h"
 #endif
 
+#if defined(HAVE_CELL) && !defined(ALIGNMENT)
+/* align Cell data in the same way as Altivec */
+#define ALIGNMENT 8 
+#define ALIGNMENTA 16
+#endif
+
+#ifdef HAVE_MIPS_PS
+#include "simd-mips_ps.h"
+#endif
+
 /* TAINT_BIT is set if pointers are not guaranteed to be multiples of
    ALIGNMENT */
 #define TAINT_BIT 1    
