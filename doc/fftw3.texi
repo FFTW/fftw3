@@ -43,7 +43,7 @@ $O(n \\log n)$
 n[0] x n[1] x n[2] x ... x n[d-1]
 @end ifinfo
 @html
-n<sub>0</sub> x n<sub>1</sub> x n<sub>2</sub> x ... x n<sub>d-1</sub>
+n<sub>0</sub>&nbsp;&times;&nbsp;n<sub>1</sub>&nbsp;&times;&nbsp;n<sub>2</sub>&nbsp;&times;&nbsp;&hellip;&nbsp;&times;&nbsp;n<sub>d-1</sub>
 @end html
 @tex
 $n_0 \\times n_1 \\times n_2 \\times \\cdots \\times n_{d-1}$
@@ -55,7 +55,7 @@ $n_0 \\times n_1 \\times n_2 \\times \\cdots \\times n_{d-1}$
 n[0] x n[1] x n[2] x ... x (n[d-1]/2 + 1)
 @end ifinfo
 @html
-n<sub>0</sub> x n<sub>1</sub> x n<sub>2</sub> x ... x (n<sub>d-1</sub>/2 + 1)
+n<sub>0</sub>&nbsp;&times;&nbsp;n<sub>1</sub>&nbsp;&times;&nbsp;n<sub>2</sub>&nbsp;&times;&nbsp;&hellip;&nbsp;&times;&nbsp;(n<sub>d-1</sub>/2 + 1)
 @end html
 @tex
 $n_0 \\times n_1 \\times n_2 \\times \\cdots \\times (n_{d-1}/2 + 1)$
@@ -83,6 +83,31 @@ $\d1\ \\times \d2\$
 @end html
 @tex
 $\d1\ \\times \d2\ \\times \d3\$
+@end tex
+@end macro
+
+@macro dimk{k}
+@ifinfo
+n[\k\]
+@end ifinfo
+@html
+n<sub>\k\</sub>
+@end html
+@tex
+$n_\k\$
+@end tex
+@end macro
+
+
+@macro ndimstrans
+@ifinfo
+n[1] x n[0] x n[2] x ... x n[d-1]
+@end ifinfo
+@html
+n<sub>1</sub>&nbsp;&times;&nbsp;n<sub>0</sub>&nbsp;&times;&nbsp;n<sub>2</sub>&nbsp;&times;&nbsp;&hellip;&nbsp;&times;&nbsp;n<sub>d-1</sub>
+@end html
+@tex
+$n_1 \\times n_0 \\times n_2 \\times \\cdots \\times n_{d-1}$
 @end tex
 @end macro
 
@@ -256,12 +281,19 @@ Distributed-memory FFTW with MPI
 * FFTW MPI Installation::       
 * Simple MPI example::          
 * MPI data distribution::       
+* FFTW MPI Transposes::         
+* FFTW MPI Reference::          
 
 MPI data distribution
 
-* Basic distribution interface::  
-* Transposed distribution interface::  
-* Advanced distribution interface::  
+* Basic and advanced distribution interfaces::  
+* Load balancing::              
+* Transposed distributions::    
+* One-dimensional distributions::  
+
+FFTW MPI Transposes
+
+* An improved replacement for MPI_Alltoall::  
 
 Calling FFTW from Fortran
 
@@ -4169,6 +4201,8 @@ to the MPI interface.
 * FFTW MPI Installation::       
 * Simple MPI example::          
 * MPI data distribution::       
+* FFTW MPI Transposes::         
+* FFTW MPI Reference::          
 @end menu
 
 @c ------------------------------------------------------------
@@ -4221,27 +4255,25 @@ int main(int argc, char **argv)
     const ptrdiff_t N0 = ..., N1 = ...;
     fftw_plan plan;
     fftw_complex *data;
-    ptrdiff_t alloc_local, local_n0, local_x_start, i, j;
+    ptrdiff_t alloc_local, local_n0, local_0_start, i, j;
 
     MPI_Init(&argc, &argv);
     fftw_mpi_init();
 
-    /* get local data size and allocate */
+    /* @r{get local data size and allocate} */
     alloc_local = fftw3_mpi_local_size_2d(N0, N1, MPI_COMM_WORLD,
-                                         &local_n0, &local_x_start);
+                                         &local_n0, &local_0_start);
     data = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * alloc_local);
 
-    /* create plan for forward DFT */
+    /* @r{create plan for forward DFT} */
     plan = fftw_mpi_plan_dft_2d(N0, N1, data, data, MPI_COMM_WORLD,
                                 FFTW_FORWARD, FFTW_ESTIMATE);    
 
-    /* initialize data */
-    for (i = 0; i < local_n0; ++i) for (j = 0; j < N1; ++j) @{
-       /* initialize data to some function my_function(x,y) */
-       data[i*N1 + j] = my_function(local_x_start + i, j);
-    @}
+    /* @r{initialize data to some function} my_function(x,y) */
+    for (i = 0; i < local_n0; ++i) for (j = 0; j < N1; ++j)
+       data[i*N1 + j] = my_function(local_0_start + i, j);
 
-    /* compute transforms, in-place, as many times as desired */
+    /* @r{compute transforms, in-place, as many times as desired} */
     fftw_execute(plan);
 
     fftw_destroy_plan(plan);
@@ -4284,7 +4316,7 @@ two-dimensional array on each process.  Instead, you call
 array resides on each processor, and how much space to allocate.
 Here, the portion of the array on each process is a @code{local_n0} by
 @code{N1} slice of the total array, starting at index
-@code{local_x_start}.  The total number of @code{fftw_complex} numbers
+@code{local_0_start}.  The total number of @code{fftw_complex} numbers
 to allocate is given by the @code{alloc_local} return value, which
 @emph{may} be greater than @code{local_n0 * N1} (in case some
 intermediate calculations require additional storage).  The data
@@ -4301,7 +4333,7 @@ array in MPI to a portable binary file is to use the free HDF5
 library; see the @uref{http://www.hdfgroup.org/, HDF home page}.)
 
 @c ------------------------------------------------------------
-@node MPI data distribution,  , Simple MPI example, Distributed-memory FFTW with MPI
+@node MPI data distribution, FFTW MPI Transposes, Simple MPI example, Distributed-memory FFTW with MPI
 @section MPI data distribution
 
 The most important concept to understand in using FFTW's MPI interface
@@ -4337,26 +4369,272 @@ new communicator with re-ordered processes.)  However, you should
 always call the @samp{fftw_mpi_local_size} routines, if possible,
 rather than trying to predict FFTW's distribution choices.
 
-As with the planner interface, the @samp{fftw_mpi_local_size}
-distribution interface is broken into basic and advanced interfaces,
-where the latter allows you to specify the block size manually and
-also to request block sizes when computing multiple transforms
-simultaneously.
-
 @menu
-* Basic distribution interface::  
-* Transposed distribution interface::  
-* Advanced distribution interface::  
+* Basic and advanced distribution interfaces::  
+* Load balancing::              
+* Transposed distributions::    
+* One-dimensional distributions::  
 @end menu
 
-@node Basic distribution interface, Transposed distribution interface, MPI data distribution, MPI data distribution
-@subsection Basic distribution
+@node Basic and advanced distribution interfaces, Load balancing, MPI data distribution, MPI data distribution
+@subsection Basic and advanced distribution interfaces
 
-@node Transposed distribution interface, Advanced distribution interface, Basic distribution interface, MPI data distribution
-@subsection Transposed distribution
+As with the planner interface, the @samp{fftw_mpi_local_size}
+distribution interface is broken into basic and advanced
+(@samp{_many}) interfaces, where the latter allows you to specify the
+block size manually and also to request block sizes when computing
+multiple transforms simultaneously.  These functions are documented
+more exhaustively by the FFTW MPI Reference, but we summarize the
+basic ideas here using a couple of two-dimensional examples.
 
-@node Advanced distribution interface,  , Transposed distribution interface, MPI data distribution
-@subsection Advanced distribution
+For the @twodims{100,200} complex-DFT example, above, we would find
+the distribution by calling the following function in the basic
+interface:
+
+@example
+ptrdiff_t fftw_mpi_local_size_2d(ptrdiff_t n0, ptrdiff_t n1, MPI_Comm comm,
+                    ptrdiff_t *local_n0, ptrdiff_t *local_0_start);
+@end example
+@findex fftw_mpi_local_size_2d
+
+Given the total size of the data to be transformed (here, @code{n0 =
+100} and @code{n1 = 200}) and an MPI communicator (@code{comm}), this
+function provides three numbers.
+
+First, it describes the shape of the local data: the current process
+should store a @code{local_n0} by @code{n1} slice of the overall
+dataset, in row-major order (@code{n1} dimension contiguous), starting
+at index @code{local_0_start}.  That is, if the total dataset is
+viewed as a @code{n0} by @code{n1} matrix, the current process should
+store the rows @code{local_0_start} to
+@code{local_0_start+local_n0-1}.  Obviously, if you are running with
+only a single MPI process, that process will store the entire array:
+@code{local_0_start} will be zero and @code{local_n0} will be
+@code{n0}.
+
+Second, the return value is the total number of data elements (e.g.,
+complex numbers for a complex DFT) that should be allocated for the
+input and output arrays on the current process (ideally with
+@code{fftw_malloc}, to ensure optimal alignment).  It might seem that
+this should always be equal to @code{local_n0 * n1}, but this is
+@emph{not} the case.  FFTW's distributed FFT algorithms require data
+redistributions at intermediate stages of the transform, and in some
+circumstances this may require slightly larger local storage.  This is
+discussed in more detail below, under @ref{Load balancing}.
+
+The advanced-interface @samp{local_size} function for multidimensional
+transforms returns the same three things (@code{local_n0},
+@code{local_0_start}, and the total number of elements to allocate),
+but takes more inputs:
+
+@example
+ptrdiff_t fftw_mpi_local_size_many(int rnk, const ptrdiff_t *n,
+                                   ptrdiff_t howmany,
+                                   ptrdiff_t block0,
+                                   MPI_Comm comm,
+                                   ptrdiff_t *local_n0,
+                                   ptrdiff_t *local_0_start);
+@end example
+@findex fftw_mpi_local_size_many
+
+The two-dimensional case above corresponds to @code{rnk = 2} and an
+array @code{n} of length 2 with @code{n[0] = n0} and @code{n[1] = n1}.
+This routine is for any @code{rnk > 1}; one-dimensional transforms
+have their own interface because they work slightly differently, as
+discussed below.
+
+First, the advanced interface allows you to perform multiple
+transforms at once, of interleaved data, as specified by the
+@code{howmany} parameter.  (@code{hoamany} is 1 for a single
+transform.)
+
+Second, here you can specify your desired block size in the @code{n0}
+dimension, @code{block0}.  To use FFTW's default block size, pass
+@code{FFTW_MPI_DEFAULT_BLOCK} (0) for @code{block0}.  Otherwise, on
+@code{P} processes, FFTW will return @code{local_n0} equal to
+@code{block0} on the first @code{P / block0} processes (rounded down),
+return @code{local_n0} equal to @code{n0 - block0 * (P / block0)} on
+the next process, and @code{local_n0} equal to zero on any remaining
+processes.  In general, we recommend using the default block size
+(which corresponds to @code{n0 / P}, rounded up).
+
+For example, suppose you have @code{P = 4} processes and @code{n0 =
+21}.  The default will be a block size of @code{6}, which will give
+@code{local_n0 = 6} on the first three processes and @code{local_n0 =
+3} on the last process.  Instead, however, you could specify
+@code{block0 = 5} if you wanted, which would give @code{local_n0 = 5}
+on processes 0 to 2, @code{local_n0 = 6} on process 3.  (This choice,
+while it may look superficially more ``balanced,'' has the same
+critical path as FFTW's default but requires more communications.)
+
+@node Load balancing, Transposed distributions, Basic and advanced distribution interfaces, MPI data distribution
+@subsection Load balancing
+@cindex load balancing
+
+Ideally, when you parallelize a transform over some @math{P}
+processes, each process should end up with work that takes equal time.
+Otherwise, all of the processes end up waiting on whichever process is
+slowest.  This goal is known as ``load balancing.''  In this section,
+we describe the circumstances under which FFTW is able to load-balance
+well, and in particular how you should choose your transform size in
+order to load balance.
+
+Load balancing is especially difficult when you are parallelizing over
+heterogeneous machines; for example, if one of your processors is a
+old 486 and another is a Pentium IV, obviously you should give the
+Pentium more work to do than the 486 since the latter is much slower.
+FFTW does not deal with this problem, however---it assumes that your
+processes run on hardware of comparable speed, and that the goal is
+therefore to divide the problem as equally as possible.
+
+For a multi-dimensional complex DFT, FFTW can divide the problem
+equally among the processes if: (i) the @emph{first} dimension
+@code{n0} is divisible by @math{P}; and (ii), the @emph{product} of
+the subsequent dimensions is divisible by @math{P}.  (For the advanced
+interface, where you can specify multiple simultaneous transforms via
+some ``vector'' length @code{howmany}, a factor of @code{howmany} is
+included in the product of the subsequent dimensions.)
+
+For a one-dimensional complex DFT, the length @code{N} of the data
+should be divisible by @math{P} @emph{squared} to be able to divide
+the problem equally among the processes.
+
+@node Transposed distributions, One-dimensional distributions, Load balancing, MPI data distribution
+@subsection Transposed distributions
+
+Internally, FFTW's MPI transform algorithms work by first computing
+transforms of the data local to each process, then by globally
+@emph{transposing} the data in some fashion to redistribute the data
+among the processes, transforming the new data local to each process,
+and transposing back.  For example, a two-dimensional @code{n0} by
+@code{n1} array, distributed across the @code{n0} dimension, is
+transformd by: (i) transforming the @code{n1} dimension, which are
+local to each process; (ii) transposing to a @code{n1} by @code{n0}
+array, distributed across the @code{n1} dimension; (iii) transforming
+the @code{n0} dimension, which is now local to each process; (iv)
+transposing back.
+
+However, in many applications it is acceptable to compute a
+multidimensional DFT whose results are produced in transposed order
+(e.g., @code{n1} by @code{n0} in two dimensions).  This provides a
+significant performance advantage, because it means that the final
+transposition step can be omitted.  FFTW supports this optimization,
+which you specify by passing the flag @code{FFTW_MPI_TRANSPOSED_OUT}
+to the planner routines.  To compute the inverse transform of
+transposed output, you specify @code{FFTW_MPI_TRANSPOSED_IN} to tell
+it that the input is transposed.  In this section, we explain how to
+interpret the output format of such a transform.
+
+Suppose you have are transforming multi-dimensional data with (at
+least two) dimensions @ndims{}.  As always, it is distributed along
+the first dimension @dimk{0}.  Now, if we compute its DFT with the
+@code{FFTW_MPI_TRANSPOSED_OUT}, the resulting output data are stored
+with the first @emph{two} dimensions transosed: @ndimstrans{},
+distributed along the @dimk{0} dimension.  Conversely, if we take the
+@ndimstrans{} data and transform it with the
+@code{FFTW_MPI_TRANSPOSED_IN} flag, then the format goes back to the
+original @ndims{}.
+
+There are two ways to find the portion of the transposed array that
+resides on the current process.  First, you can simply call the
+appropriate @samp{local_size} function, passing @ndimstrans{} (the
+transposed dimensions).  This would mean calling the @samp{local_size}
+function twice, once for the transposed and once for the
+non-transposed dimensions.  Alternatively, you can call one of the
+@samp{local_size_transposed} functions, which returns both the
+non-transposed and transposed data distribution from a single call.
+For example, for a 3d transform with transposed output (or input), you
+might call:
+
+@example
+ptrdiff_t fftw_mpi_local_size_3d_transposed(
+                ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2, MPI_Comm comm,
+                ptrdiff_t *local_n0, ptrdiff_t *local_0_start,
+                ptrdiff_t *local_n1, ptrdiff_t *local_1_start);
+@end example
+@findex fftw_mpi_local_size_3d_transposed
+
+Here, @code{local_n0} and @code{local_0_start} give the size and
+starting index of the @code{n0} dimension, for the
+@emph{non}-transposed data, as in the previous sections.  For
+@emph{transposed} data (e.g. the output for
+@code{FFTW_MPI_TRANSPOSED_OUT}), @code{local_n1} and
+@code{local_1_start} give the size and starting index of the @code{n1}
+dimension, which is the first dimension of the transposed data
+(@code{n1} by @code{n0} by @code{n2}).
+
+(Note that @code{FFTW_MPI_TRANSPOSED_IN} is completely equivalent to
+performing @code{FFTW_MPI_TRANSPOSED_OUT} and passing the first two
+dimensions to the planner in reverse order, or vice versa.  If you
+pass @emph{both} the @code{FFTW_MPI_TRANSPOSED_IN} and
+@code{FFTW_MPI_TRANSPOSED_OUT} flags, it is equivalent to swapping the
+first two dimensions passed to the planner and passing @emph{neither}
+flag.)
+
+@node One-dimensional distributions,  , Transposed distributions, MPI data distribution
+@subsection One-dimensional distributions
+
+For one-dimensional distributed DFTs using FFTW, matters are slightly
+more complicated because the data distribution is more closely tied to
+how the algorithm works.  In particular, you can no longer pass an
+arbitrary block size, and must accept FFTW's default, and the block
+sizes may be different for input and output.  Also, the data
+distribution depends on the flags and transform direction, in order
+for forward and backward transforms to work correctly.
+
+@example
+ptrdiff_t fftw_mpi_local_size_1d(ptrdiff_t n0, MPI_Comm comm,
+                int sign, unsigned flags,
+                ptrdiff_t *local_ni, ptrdiff_t *local_i_start,
+                ptrdiff_t *local_no, ptrdiff_t *local_o_start);
+@end example
+@findex fftw_mpi_local_size_1d
+
+This function computes the data distribution for a 1d transform of
+size @code{n0} with the given transform @code{sign} and @code{flags}.
+Both input and output data use block distributions.  The input on the
+current process will consist of @code{local_ni} numbers starting at
+index @code{local_i_start}; e.g. if only a single process is used,
+then @code{local_ni} will be @code{n0} and @code{local_i_start} will
+be @code{0}.  Similarly for the output, with @code{local_no} numbers
+starting at index @code{local_o_start}.  The return value of
+@code{fftw_mpi_local_size_1d} will be the total number of elements to
+allocate on the current process (which might be slightly larger than
+the local size due to intermediate steps in the algorithm).
+
+As mentioned above (@pxref{Load balancing}), the data will be divided
+equally among the processes if @code{n0} is divisible by the
+@emph{square} of the number of processes.  In this case,
+@code{local_ni} will equal @code{local_no}.  Otherwise, they may be
+different.
+
+For some applications, such as convolutions, the order of the output
+data is irrelevant.  In this case, performance can be improved by
+specifying that the output data be stored in an FFTW-defined
+``scrambled'' format.  (In particular, this is the analogue of
+transposed output in the multidimensional case: scrambled output saves
+a communications step.)  If you pass @code{FFTW_MPI_SCRAMBLED_OUT} in
+the flags, then the output is stored in this (undocumented) scrambled
+order.  Conversely, to perform the inverse transform of data in
+scrambled order, pass the @code{FFTW_MPI_SCRAMBLED_IN} flag.
+
+In MPI FFTW, only composite sizes @code{n0} can be parallelized; we
+have not yet implemented a parallel algorithm for large prime sizes.
+
+@c ------------------------------------------------------------
+@node FFTW MPI Transposes, FFTW MPI Reference, MPI data distribution, Distributed-memory FFTW with MPI
+@section FFTW MPI Transposes
+
+@menu
+* An improved replacement for MPI_Alltoall::  
+@end menu
+
+@node An improved replacement for MPI_Alltoall,  , FFTW MPI Transposes, FFTW MPI Transposes
+@subsection An improved replacement for MPI_Alltoall
+
+@c ------------------------------------------------------------
+@node FFTW MPI Reference,  , FFTW MPI Transposes, Distributed-memory FFTW with MPI
+@section FFTW MPI Reference
 
 @c ************************************************************
 @node Calling FFTW from Fortran, Upgrading from FFTW version 2, Distributed-memory FFTW with MPI, Top

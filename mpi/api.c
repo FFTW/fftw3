@@ -239,7 +239,7 @@ ptrdiff_t XM(local_size_guru)(int rnk, const XM(ddim) *dims0,
 			 N = X(imax)(N, rblock[IB] * m);
 		    }
 		    if (flags & FFTW_MPI_SCRAMBLED_OUT)
-			 sz->dims[0].b[IB] = r * mblock[OB];
+			 sz->dims[0].b[OB] = r * mblock[OB];
 		    else { /* !SCRAMBLED_OUT */
 			 N = X(imax)(N, r * mblock[OB]);
 			 sz->dims[0].b[OB] = rblock[OB] * m;
@@ -371,8 +371,9 @@ ptrdiff_t XM(local_size_1d)(ptrdiff_t nx,
 			    ptrdiff_t *local_nx, ptrdiff_t *local_x_start,
 			    ptrdiff_t *local_ny, ptrdiff_t *local_y_start)
 {
-     return XM(local_size_1d)(nx, comm, sign, flags, local_nx, local_x_start,
-			      local_ny, local_y_start);
+     return XM(local_size_many_1d)(nx, 1, comm, sign, flags,
+				   local_nx, local_x_start,
+				   local_ny, local_y_start);
 }
 
 ptrdiff_t XM(local_size_2d_transposed)(ptrdiff_t nx, ptrdiff_t ny,
