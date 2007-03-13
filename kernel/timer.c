@@ -131,7 +131,9 @@ typedef crude_time ticks;
 	    /* repeat the measurement TIME_REPEAT times */
 	    for (repeat = 0; repeat < TIME_REPEAT; ++repeat) {
 		 double t = measure(pln, p, iter);
-
+		 
+		 if (plnr->cost_hook)
+		      t = plnr->cost_hook(p, t, COST_MAX);
 		 if (t < 0)
 		      goto start_over;
 
@@ -144,8 +146,6 @@ typedef crude_time ticks;
 		      break;
 	    }
 
-	    if (plnr->cost_hook)
-		 tmin = plnr->cost_hook(p, tmin, COST_MAX);
 	    if (tmin >= TIME_MIN) {
 		 X(plan_awake)(pln, SLEEPY);
 		 return tmin / (double) iter;
