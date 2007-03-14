@@ -90,30 +90,40 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 			    FFTW_PATIENT, FFTW_EXHAUSTIVE};
      int pat, pat_max;
 
-     pat_max = flags & FFTW_ESTIMATE ? 0 :
-	  (flags & FFTW_EXHAUSTIVE ? 3 :
-	   (flags & FFTW_PATIENT ? 2 : 1));
-     pat = plnr->timelimit >= 0 ? 0 : pat_max;
+     if (flags & FFTW_WISDOM_ONLY) {
+	  /* special mode that returns a plan only if wisdom is present,
+	     and returns 0 otherwise.  Phil Dumont requested this
+	     feature, do not remove. */
+	  flags_used_for_planning = flags;
+	  pln = mkplan0(plnr, flags, prb, 0, WISDOM_ONLY);
+     } else {
+	  pat_max = flags & FFTW_ESTIMATE ? 0 :
+	       (flags & FFTW_EXHAUSTIVE ? 3 :
+		(flags & FFTW_PATIENT ? 2 : 1));
+	  pat = plnr->timelimit >= 0 ? 0 : pat_max;
 
-     flags &= ~(FFTW_ESTIMATE | FFTW_MEASURE | FFTW_PATIENT | FFTW_EXHAUSTIVE);
+	  flags &= ~(FFTW_ESTIMATE | FFTW_MEASURE | 
+		     FFTW_PATIENT | FFTW_EXHAUSTIVE);
 
-     plnr->start_time = X(get_crude_time)();
+	  plnr->start_time = X(get_crude_time)();
 	  
-     /* plan at incrementally increasing patience until we run out of time */
-     for (pln = 0, flags_used_for_planning = 0; pat <= pat_max; ++pat) {
-	  plan *pln1;
-	  unsigned tmpflags = flags | pats[pat];
-	  pln1 = mkplan(plnr, tmpflags, prb, 0);
+	  /* plan at incrementally increasing patience until we run
+	     out of time */
+	  for (pln = 0, flags_used_for_planning = 0; pat <= pat_max; ++pat) {
+	       plan *pln1;
+	       unsigned tmpflags = flags | pats[pat];
+	       pln1 = mkplan(plnr, tmpflags, prb, 0);
 
-	  if (!pln1) {
-	       /* don't bother continuing if planner failed or timed out */
-	       A(!pln || plnr->timed_out);
-	       break;
+	       if (!pln1) {
+		    /* don't bother continuing if planner failed or timed out */
+		    A(!pln || plnr->timed_out);
+		    break;
+	       }
+
+	       X(plan_destroy_internal)(pln);
+	       pln = pln1;
+	       flags_used_for_planning = tmpflags;
 	  }
-
-	  X(plan_destroy_internal)(pln);
-	  pln = pln1;
-	  flags_used_for_planning = tmpflags;
      }
 
      if (pln) {

@@ -376,6 +376,7 @@ FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 #define FFTW_NO_SLOW (1U << 18)
 #define FFTW_NO_FIXED_RADIX_LARGE_N (1U << 19)
 #define FFTW_ALLOW_PRUNING (1U << 20)
+#define FFTW_WISDOM_ONLY (1U << 21)
 
 #ifdef __cplusplus
 }  /* extern "C" */
