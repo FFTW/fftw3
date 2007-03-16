@@ -6,5 +6,7 @@ Stevenj G. Johnson <stevenj@alum.mit.edu>
 Stefan Kral <skral@fftw.org> wrote genfft-k7/*.ml*, which was
 added in fftw-3.0 and removed in fftw-3.2.
 
+Support for the Cell Broadband Engine was graciously donated
+by the IBM Austin Research Lab.
 
 
