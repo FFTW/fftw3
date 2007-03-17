@@ -105,7 +105,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi-dft-rank-geq2%s%(%p%)%(%p%)%(%p%))", 
+     p->print(p, "(mpi-dft-rank-geq2-transposed%s%(%p%)%(%p%)%(%p%))", 
 	      ego->preserve_input==2 ?"/p":"",
 	      ego->cld1, ego->cldt, ego->cld2);
 }
