@@ -282,6 +282,9 @@ Distributed-memory FFTW with MPI
 * Simple MPI example::          
 * MPI data distribution::       
 * FFTW MPI Transposes::         
+* FFTW MPI Wisdom::             
+* Avoiding MPI Deadlocks::      
+* FFTW MPI Performance Tips::   
 * FFTW MPI Reference::          
 
 MPI data distribution
@@ -4204,6 +4207,9 @@ to the MPI interface.
 * Simple MPI example::          
 * MPI data distribution::       
 * FFTW MPI Transposes::         
+* FFTW MPI Wisdom::             
+* Avoiding MPI Deadlocks::      
+* FFTW MPI Performance Tips::   
 * FFTW MPI Reference::          
 @end menu
 
@@ -4624,7 +4630,7 @@ In MPI FFTW, only composite sizes @code{n0} can be parallelized; we
 have not yet implemented a parallel algorithm for large prime sizes.
 
 @c ------------------------------------------------------------
-@node FFTW MPI Transposes, FFTW MPI Reference, MPI data distribution, Distributed-memory FFTW with MPI
+@node FFTW MPI Transposes, FFTW MPI Wisdom, MPI data distribution, Distributed-memory FFTW with MPI
 @section FFTW MPI Transposes
 
 The FFTW's MPI Fourier transforms rely on one or more @emph{global
@@ -4762,7 +4768,111 @@ possible algorithms that, depending on your MPI implementation and
 your hardware, may be faster.
 
 @c ------------------------------------------------------------
-@node FFTW MPI Reference,  , FFTW MPI Transposes, Distributed-memory FFTW with MPI
+@node FFTW MPI Wisdom, Avoiding MPI Deadlocks, FFTW MPI Transposes, Distributed-memory FFTW with MPI
+@section FFTW MPI Wisdom
+
+FFTW's ``wisdom'' facility (@pxref{Words of Wisdom-Saving Plans}) can
+be used to save MPI plans as well as to save uniprocessor plans.
+However, for MPI there are several unavoidable complications.
+
+First, the MPI standard does not guarantee that every process can
+perform file I/O (at least, not using C stdio routines)---only the
+process of rank @code{MPI_IO} can in general (unless @code{MPI_IO ==
+MPI_ANY_SOURCE}).  (In practice, @code{MPI_IO} is commonly assumed to
+be zero, i.e. at least process 0 can perform I/O, since otherwise a
+single-process run could not perform I/O.)  So, if we want to export
+the wisdom from a single process to a file, we must first export the
+wisdom to a string, then send it to process 0, then write it to a
+file.
+
+Second, in principle we may want to have separate wisdom for every
+process, since in general the processes may run on different hardware
+even for a single MPI program.  However, in practice FFTW's MPI code
+is designed for the case of homogeneous hardware (@pxref{Load
+balancing}), and in this case it is convenient to use the same wisdom
+for every process.  Thus, we need a mechanism to synchronize the wisdom.
+
+To address both of these problems, FFTW provides the following two
+functions:
+
+@example
+void fftw_mpi_broadcast_wisdom(MPI_Comm comm);
+void fftw_mpi_gather_wisdom(MPI_Comm comm);
+@end example
+@findex fftw_mpi_gather_wisdom
+@findex fftw_mpi_broadcast_wisdom
+
+Given a communicator @code{comm}, @code{fftw_mpi_broadcast_wisdom}
+will broadcast the wisdom from process 0 to all other processes.
+Conversely, @code{fftw_mpi_gather_wisdom} will collect wisdom from all
+processes onto process 0.  (If the plans created for the same problem
+by different processes are not the same, @code{fftw_mpi_gather_wisdom}
+will arbitrarily choose one of the plans.)  Both of these functions
+may result in suboptimal plans for different processes if the
+processes are running on non-identical hardware.  Both of these
+functions are @emph{collective} calls, which means that they must be
+executed by all processes in the communicator.
+
+So, for example, a typical code snippet to import wisdom from a file
+and use it on all processes would be:
+
+@example
+@{
+    int rank;
+    FILE *f;
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if (rank == 0 && (f = fopen("mywisdom", "r"))) @{
+        fftw_import_wisdom_from_file(f);
+        fclose(f);
+    @}
+    fftw_mpi_broadcast_wisdom(MPI_COMM_WORLD);
+@}
+@end example
+
+Similarly, a typical code snippet to export wisdom from all processes
+to a file is:
+
+@example
+@{
+    int rank;
+    FILE *f;
+
+    fftw_mpi_gather_wisdom(MPI_COMM_WORLD);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if (rank == 0 && (f = fopen("mywisdom", "w"))) @{
+        fftw_export_wisdom_to_file(f);
+        fclose(f);
+    @}
+@}
+@end example
+
+@c ------------------------------------------------------------
+@node Avoiding MPI Deadlocks, FFTW MPI Performance Tips, FFTW MPI Wisdom, Distributed-memory FFTW with MPI
+@section Avoiding MPI Deadlocks
+
+An MPI program can @emph{deadlock} if one process is waiting for a
+message from another process that never gets sent.  To avoid deadlocks
+when using FFTW's MPI routines, it is important to know which
+functions are @emph{collective}: that is, which functions must
+@emph{always} be called in the @emph{same order} from @emph{every}
+process in a given communicator.  (For example, @code{MPI_Barrier} is
+the canonical example of a collective function in the MPI standard.)
+
+The functions in FFTW that are @emph{always} collective are: every
+function beginning with @samp{fftw_mpi_plan}, as well as
+@code{fftw_mpi_broadcast_wisdom} and @code{fftw_mpi_gather_wisdom}.
+Also, the following functions from the ordinary FFTW interface are
+collective when they are applied to a plan created by an
+@samp{fftw_mpi_plan} function: @code{fftw_execute},
+@code{fftw_destroy_plan}, and @code{fftw_flops}.
+
+@c ------------------------------------------------------------
+@node FFTW MPI Performance Tips, FFTW MPI Reference, Avoiding MPI Deadlocks, Distributed-memory FFTW with MPI
+@section FFTW MPI Performance Tips
+
+@c ------------------------------------------------------------
+@node FFTW MPI Reference,  , FFTW MPI Performance Tips, Distributed-memory FFTW with MPI
 @section FFTW MPI Reference
 
 @c ************************************************************
