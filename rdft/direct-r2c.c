@@ -256,7 +256,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const problem_rdft *p;
      iodim *d;
      INT rs, cs, b, n;
-     R *R0, *C0;
 
      static const plan_adt padt = {
 	  X(rdft_solve), X(null_awake), print, destroy
@@ -275,12 +274,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      p = (const problem_rdft *) p_;
 
      if (R2HC_KINDP(p->kind[0])) {
-	  R0 = p->I; C0 = p->O;
 	  rs = p->sz->dims[0].is; cs = p->sz->dims[0].os;
 	  pln = MKPLAN_RDFT(P, &padt, 
 			    ego->bufferedp ? apply_buf_r2hc : apply_r2hc);
      } else {
-	  R0 = p->O; C0 = p->I;
 	  rs = p->sz->dims[0].os; cs = p->sz->dims[0].is;
 	  pln = MKPLAN_RDFT(P, &padt, 
 			    ego->bufferedp ? apply_buf_hc2r : apply_hc2r);
