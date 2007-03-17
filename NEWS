@@ -1,3 +1,7 @@
+FFTW 3.2alpha1
+
+* Support for the Cell processor, donated by IBM Research; see README.Cell.
+
 * New 64-bit API: for every "plan_guru" function there is a new "plan_guru64"
   function with the same semantics, but which takes fftw_iodim64 instead of
   fftw_iodim.  fftw_iodim64 is the same as fftw_iodim, except that it takes
@@ -6,8 +10,40 @@
   on 64-bit machines.  (Internally, FFTW uses ptrdiff_t everywhere
   regardless of what API you choose.)
 
-* Removed k7 support, which only worked in 32-bits mode and is
+* Experimental MPI support.  (Currently, only complex one- and multi-
+  dimensional FFTs with 1d block distributions, as well as distributed
+  transposes.)
+
+* Significantly faster r2c transforms, especially on machines with SIMD.
+
+* Rewritten multi-threaded support for better performance by
+  re-using a fixed pool of threads rather than continually
+  respawning and joining (which nowadays is much slower).
+
+* Support for MIPS paired-single SIMD instructions, donated by
+  Codesourcery.
+
+* FFTW_WISDOM_ONLY planner flag, to create plan only if wisdom is
+  available and return NULL otherwise.
+
+* Removed k7 support, which only worked in 32-bit mode and is
   becoming obsolete.  Use --enable-sse instead.
+
+* Added --with-g77-wrappers configure option to force inclusion
+  of g77 wrappers, in addition to whatever is needed for the
+  detected Fortran compilers.  This is many intended for GNU/Linux
+  distros switching to gfortran, but wishing to include both
+  gfortran and g77 support in FFTW.
+
+* In manual, renamed "guru execute" functions to "new-data execute"
+  functions, to reduce confusion with the guru planner interface.
+  (The programming interface is unchanged.)
+
+* Add missing __declspec attribute to threads API functions when compiling
+  for Windows (thanks to Robert O. Morris for the bug report)
+
+* Fixed missing return value from dfftw_init_threads in Fortran;
+  thanks to Markus Wetzstein for the bug report.
 
 FFTW 3.1.1
 
