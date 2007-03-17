@@ -109,7 +109,7 @@ static dtensor *default_sz(int rnk, const XM(ddim) *dims0, int n_pes)
      }
 
      XM(dtensor_destroy)(sz0);
-     sz0 = XM(dtensor_canonical)(sz);
+     sz0 = XM(dtensor_canonical)(sz, 0);
      XM(dtensor_destroy)(sz);
      return sz0;
 }

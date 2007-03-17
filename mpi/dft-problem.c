@@ -60,7 +60,7 @@ static void zero(const problem *ego_)
 {
      const problem_mpi_dft *ego = (const problem_mpi_dft *) ego_;
      R *I = ego->I;
-     INT i, N = ego->vn * 2;
+     INT i, N;
      int my_pe;
 
      MPI_Comm_rank(ego->comm, &my_pe);
@@ -98,7 +98,7 @@ problem *XM(mkproblem_dft)(const dtensor *sz, INT vn,
      if (UNTAINT(I) == UNTAINT(O))
 	  I = O = JOIN_TAINT(I, O);
 
-     ego->sz = XM(dtensor_canonical)(sz);
+     ego->sz = XM(dtensor_canonical)(sz, 1);
      ego->vn = vn;
      ego->I = I;
      ego->O = O;

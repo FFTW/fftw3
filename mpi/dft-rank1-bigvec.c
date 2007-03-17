@@ -27,20 +27,6 @@
 #include "mpi-transpose.h"
 #include "dft.h"
 
-/* Different ways to rearrange the vector dimension vn during transposition,
-   reflecting different tradeoffs between ease of transposition and
-   contiguity during the subsequent DFTs.
-
-   TODO: can we pare this down to CONTIG and DISCONTIG, at least
-   in MEASURE mode?  SQUARE_MIDDLE is also used for 1d destroy-input DFTs. */
-typedef enum {
-     CONTIG = 0, /* vn x 1: make subsequent DFTs contiguous */
-     DISCONTIG, /* P x (vn/P) for P processes */
-     SQUARE_BEFORE, /* try to get square transpose at beginning */
-     SQUARE_MIDDLE, /* try to get square transpose in the middle */
-     SQUARE_AFTER /* try to get square transpose at end */
-} rearrangement;
-
 typedef struct {
      solver super;
      int preserve_input; /* preserve input even if DESTROY_INPUT was passed */
@@ -78,13 +64,6 @@ static void apply(const plan *ego_, R *I, R *O)
      cldt_after->apply(ego->cldt_after, I, O);
 }
 
-static int div_mult(INT b, INT a) { 
-     return (a > b && a % b == 0);
-}
-static int div_mult2(INT b, INT a, INT n) { 
-     return (div_mult(b, a) && div_mult(n, b));
-}
-
 static int applicable(const S *ego, const problem *p_,
 		      const planner *plnr)
 {
@@ -99,18 +78,8 @@ static int applicable(const S *ego, const problem *p_,
 	     && (p->vn >= n_pes /* TODO: relax this, using more memory? */
 		 || (p->flags & RANK1_BIGVEC_ONLY))
 
-	     /* note: it is important that cases other than CONTIG be
-		applicable only when the resulting transpose dimension
-		is divisible by n_pes; otherwise, the allocation size
-		returned by the API will be incorrect */
-	     && (ego->rearrange != DISCONTIG || div_mult(n_pes, p->vn))
-	     && (ego->rearrange != SQUARE_BEFORE 
-		 || div_mult2(p->sz->dims[0].b[IB], p->vn, n_pes))
-	     && (ego->rearrange != SQUARE_AFTER
-		 || (p->sz->dims[0].b[IB] != p->sz->dims[0].b[OB]
-		     && div_mult2(p->sz->dims[0].b[OB], p->vn, n_pes)))
-	     && (ego->rearrange != SQUARE_MIDDLE
-		 || div_mult(p->sz->dims[0].n * n_pes, p->vn))
+	     && XM(rearrange_applicable)(ego->rearrange,
+					 p->sz->dims[0], p->vn, n_pes)
 
 	     && (!NO_SLOWP(plnr) /* slow if dft-serial is applicable */
                  || !XM(dft_serial_applicable)(p))
@@ -167,25 +136,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      MPI_Comm_size(p->comm, &n_pes);
      
      nx = p->sz->dims[0].n;
-     switch (ego->rearrange) {
-	 case CONTIG:
-	      ny = p->vn;
-	      break;
-	 case DISCONTIG:
-	      ny = n_pes;
-	      break;
-	 case SQUARE_BEFORE:
-	      ny = p->sz->dims[0].b[IB];
-	      break;
-	 case SQUARE_AFTER:
-	      ny = p->sz->dims[0].b[OB];
-	      break;
-	 case SQUARE_MIDDLE:
-	      ny = p->sz->dims[0].n * n_pes;
-	      break;
-	 default:
-	      return (plan *) 0;
-     }
+     if (!(ny = XM(rearrange_ny)(ego->rearrange, p->sz->dims[0], vn, n_pes)))
+	  return (plan *) 0;
      vn = p->vn / ny;
      A(ny * vn == p->vn);
 
@@ -253,7 +205,7 @@ void XM(dft_rank1_bigvec_register)(planner *p)
 {
      rearrangement rearrange;
      int preserve_input;
-     for (rearrange = CONTIG; rearrange <= SQUARE_MIDDLE; ++rearrange)
+     FORALL_REARRANGE(rearrange)
 	  for (preserve_input = 0; preserve_input <= 1; ++preserve_input)
 	       REGISTER_SOLVER(p, mksolver(rearrange, preserve_input));
 }

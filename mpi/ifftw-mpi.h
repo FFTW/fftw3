@@ -80,7 +80,7 @@ typedef struct {
 dtensor *XM(mkdtensor)(int rnk);
 void XM(dtensor_destroy)(dtensor *sz);
 dtensor *XM(dtensor_copy)(const dtensor *sz);
-dtensor *XM(dtensor_canonical)(const dtensor *sz);
+dtensor *XM(dtensor_canonical)(const dtensor *sz, int compress);
 int XM(dtensor_validp)(const dtensor *sz);
 void XM(dtensor_md5)(md5 *p, const dtensor *t);
 void XM(dtensor_print)(const dtensor *t, printer *p);
@@ -114,4 +114,32 @@ int XM(any_true)(int condition, MPI_Comm comm);
 /* conf.c */
 void XM(conf_standard)(planner *p);
 
+/***********************************************************************/
+/* rearrange.c */
+
+/* Different ways to rearrange the vector dimension vn during transposition,
+   reflecting different tradeoffs between ease of transposition and
+   contiguity during the subsequent DFTs.
+
+   TODO: can we pare this down to CONTIG and DISCONTIG, at least
+   in MEASURE mode?  SQUARE_MIDDLE is also used for 1d destroy-input DFTs. */
+typedef enum {
+     CONTIG = 0, /* vn x 1: make subsequent DFTs contiguous */
+     DISCONTIG, /* P x (vn/P) for P processes */
+     SQUARE_BEFORE, /* try to get square transpose at beginning */
+     SQUARE_MIDDLE, /* try to get square transpose in the middle */
+     SQUARE_AFTER /* try to get square transpose at end */
+} rearrangement;
+
+/* skipping SQUARE_AFTER since it doesn't seem to offer any advantage
+   over SQUARE_BEFORE */
+#define FORALL_REARRANGE(rearrange) for (rearrange = CONTIG; rearrange <= SQUARE_MIDDLE; ++rearrange)
+
+int XM(rearrange_applicable)(rearrangement rearrange, 
+			     ddim dim0, INT vn, int n_pes);
+INT XM(rearrange_ny)(rearrangement rearrange, ddim dim0, INT vn, int n_pes);
+
+/***********************************************************************/
+
 #endif /* __IFFTW_MPI_H__ */
+

@@ -82,7 +82,7 @@ dtensor *XM(dtensor_copy)(const dtensor *sz)
      return x;
 }
 
-dtensor *XM(dtensor_canonical)(const dtensor *sz)
+dtensor *XM(dtensor_canonical)(const dtensor *sz, int compress)
 {
      int i, rnk;
      dtensor *x;
@@ -93,12 +93,12 @@ dtensor *XM(dtensor_canonical)(const dtensor *sz)
      for (i = rnk = 0; i < sz->rnk; ++i) {
 	  if (sz->dims[i].n <= 0)
 	       return XM(mkdtensor)(RNK_MINFTY);
-	  else if (sz->dims[i].n > 1)
+	  else if (!compress || sz->dims[i].n > 1)
 	       ++rnk;
      }
      x = XM(mkdtensor)(rnk);
      for (i = rnk = 0; i < sz->rnk; ++i) {
-	  if (sz->dims[i].n > 1) {
+	  if (!compress || sz->dims[i].n > 1) {
                x->dims[rnk].n = sz->dims[i].n;
 	       for (k = IB; k <= OB; ++k) {
 		    if (XM(num_blocks)(sz->dims[i].n, sz->dims[i].b[k]) == 1)
