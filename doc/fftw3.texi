@@ -967,13 +967,13 @@ r2r transforms share the same planner interface:
 fftw_plan fftw_plan_r2r_1d(int n, double *in, double *out,
                            fftw_r2r_kind kind, unsigned flags);
 fftw_plan fftw_plan_r2r_2d(int n0, int n1, double *in, double *out,
-                           fftw_r2r_kind kindx, fftw_r2r_kind kindy,
+                           fftw_r2r_kind kind0, fftw_r2r_kind kind1,
                            unsigned flags);
 fftw_plan fftw_plan_r2r_3d(int n0, int n1, int n2,
                            double *in, double *out,
-                           fftw_r2r_kind kindx,
-                           fftw_r2r_kind kindy,
-                           fftw_r2r_kind kindz,
+                           fftw_r2r_kind kind0,
+                           fftw_r2r_kind kind1,
+                           fftw_r2r_kind kind2,
                            unsigned flags);
 fftw_plan fftw_plan_r2r(int rank, const int *n, double *in, double *out,
                         const fftw_r2r_kind *kind, unsigned flags);
@@ -2453,13 +2453,13 @@ is the last dimension passed to the planner.
 fftw_plan fftw_plan_r2r_1d(int n, double *in, double *out,
                            fftw_r2r_kind kind, unsigned flags);
 fftw_plan fftw_plan_r2r_2d(int n0, int n1, double *in, double *out,
-                           fftw_r2r_kind kindx, fftw_r2r_kind kindy,
+                           fftw_r2r_kind kind0, fftw_r2r_kind kind1,
                            unsigned flags);
 fftw_plan fftw_plan_r2r_3d(int n0, int n1, int n2,
                            double *in, double *out,
-                           fftw_r2r_kind kindx,
-                           fftw_r2r_kind kindy,
-                           fftw_r2r_kind kindz,
+                           fftw_r2r_kind kind0,
+                           fftw_r2r_kind kind1,
+                           fftw_r2r_kind kind2,
                            unsigned flags);
 fftw_plan fftw_plan_r2r(int rank, const int *n, double *in, double *out,
                         const fftw_r2r_kind *kind, unsigned flags);
@@ -2540,7 +2540,7 @@ These arrays are overwritten during planning, unless
 initialized, but they must be allocated.)
 
 @item
-@code{kind}, or @code{kindx}/@code{kindy}/@code{kindz}, or
+@code{kind}, or @code{kind0}/@code{kind1}/@code{kind2}, or
 @code{kind[rank]}, is the kind of r2r transform used for the
 corresponding dimension.  The valid kind constants are described in
 @ref{Real-to-Real Transform Kinds}.  In a multi-dimensional transform,

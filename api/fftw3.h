@@ -285,11 +285,11 @@ FFTW_EXTERN X(plan) X(plan_r2r)(int rank, const int *n, R *in, R *out,	   \
 FFTW_EXTERN X(plan) X(plan_r2r_1d)(int n, R *in, R *out,		   \
                        X(r2r_kind) kind, unsigned flags);		   \
 FFTW_EXTERN X(plan) X(plan_r2r_2d)(int n0, int n1, R *in, R *out,	   \
-                       X(r2r_kind) kindx, X(r2r_kind) kindy,		   \
+                       X(r2r_kind) kind0, X(r2r_kind) kind1,		   \
                        unsigned flags);					   \
 FFTW_EXTERN X(plan) X(plan_r2r_3d)(int n0, int n1, int n2,		   \
-                       R *in, R *out, X(r2r_kind) kindx,		   \
-                       X(r2r_kind) kindy, X(r2r_kind) kindz,		   \
+                       R *in, R *out, X(r2r_kind) kind0,		   \
+                       X(r2r_kind) kind1, X(r2r_kind) kind2,		   \
                        unsigned flags);					   \
 									   \
 FFTW_EXTERN X(plan) X(plan_guru_r2r)(int rank, const X(iodim) *dims,	   \
