@@ -285,6 +285,7 @@ Distributed-memory FFTW with MPI
 * FFTW MPI Wisdom::             
 * Avoiding MPI Deadlocks::      
 * FFTW MPI Performance Tips::   
+* Combining MPI and Threads::   
 * FFTW MPI Reference::          
 
 MPI data distribution
@@ -4210,6 +4211,7 @@ to the MPI interface.
 * FFTW MPI Wisdom::             
 * Avoiding MPI Deadlocks::      
 * FFTW MPI Performance Tips::   
+* Combining MPI and Threads::   
 * FFTW MPI Reference::          
 @end menu
 
@@ -4870,11 +4872,68 @@ collective when they are applied to a plan created by an
 @code{fftw_destroy_plan}, and @code{fftw_flops}.
 
 @c ------------------------------------------------------------
-@node FFTW MPI Performance Tips, FFTW MPI Reference, Avoiding MPI Deadlocks, Distributed-memory FFTW with MPI
+@node FFTW MPI Performance Tips, Combining MPI and Threads, Avoiding MPI Deadlocks, Distributed-memory FFTW with MPI
 @section FFTW MPI Performance Tips
 
+In this section, we collect a few tips on getting the best performance
+out of FFTW's MPI transforms.
+
+First, because of the 1d block distribution, FFTW's parallelization is
+currently limited by the size of the first dimension.
+(Multidimensional block distributions may be supported by a future
+version.) More generally, you should ideally arrange the dimensions so
+that FFTW can divide them equally among the processes. @xref{Load
+balancing}.
+
+Second, if it is not too inconvenient, you should consider working
+with transposed output for multidimensional plans, as this saves a
+considerable amount of communications.  @xref{Transposed distributions}.
+
+Third, the fastest choices are generally either an in-place transform
+or an out-of-place transform with the @code{FFTW_DESTROY_INPUT} flag
+(which allows the input array to be used as scratch space).  In-place
+is especially beneficial if the amount of data per process is large.
+
 @c ------------------------------------------------------------
-@node FFTW MPI Reference,  , FFTW MPI Performance Tips, Distributed-memory FFTW with MPI
+@node Combining MPI and Threads, FFTW MPI Reference, FFTW MPI Performance Tips, Distributed-memory FFTW with MPI
+@section Combining MPI and Threads
+
+In certain cases, it may be advantageous to combine MPI
+(distributed-memory) and threads (shared-memory) parallelization.
+FFTW supports this, with certain caveats.  For example, if you have a
+cluster of 4-processor shared-memory nodes, you may want to use
+threads within the nodes and MPI between the nodes, instead of MPI for
+all parallelization.  FFTW's MPI code can also transparently use
+FFTW's Cell processor support (e.g. for clusters of Cell processors).
+
+In particular, it is possible to seamlessly combine the MPI FFTW
+routines with the multi-threaded FFTW routines (@pxref{Multi-threaded
+FFTW}).  In this case, you will begin your program by calling both
+@code{fftw_mpi_init()} and @code{fftw_init_threads()}.  Then, if you
+call @code{fftw_plan_with_nthreads(N)}, then @emph{every} MPI process
+will launch @code{N} threads to parallelize its transforms.
+
+For example, in the hypothetical cluster of 4-processor nodes, you
+might wish to launch only a single MPI process per node, and then call
+@code{fftw_plan_with_nthreads(4)} on each process to use all
+processors in the nodes.
+
+This may or may not be faster than simply using as many MPI processes
+as you have processors, however.  On one hand, using threads within a
+node eliminates the need for explicit message passing within the node.
+On the other hand, FFTW's transpose routines are not multi-threaded,
+and this means that the communications that do take place will not
+benefit from parallelization within the node.  Moreover, many MPI
+implementations already have optimizations to exploit shared memory
+when it is available.
+
+(Note that this is quite independent of whether MPI itself is
+re-entrant or multi-threaded: regardless of how many threads you
+specify with @code{fftw_plan_with_nthreads}, FFTW will perform all of
+its MPI communication only from the parent process.)
+
+@c ------------------------------------------------------------
+@node FFTW MPI Reference,  , Combining MPI and Threads, Distributed-memory FFTW with MPI
 @section FFTW MPI Reference
 
 @c ************************************************************
