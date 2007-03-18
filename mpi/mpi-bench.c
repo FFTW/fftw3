@@ -288,11 +288,13 @@ void after_problem_rcopy_to(bench_problem *p, bench_real *ro)
 
 void after_problem_ccopy_from(bench_problem *p, bench_real *ri, bench_real *ii)
 {
+     UNUSED(ii);
      after_problem_rcopy_from(p, ri);
 }
 
 void after_problem_ccopy_to(bench_problem *p, bench_real *ro, bench_real *io)
 {
+     UNUSED(io);
      after_problem_rcopy_to(p, ro);
 }
 
@@ -436,6 +438,7 @@ static FFTW(plan) mkplan_complex(bench_problem *p, unsigned flags)
 
 static FFTW(plan) mkplan_real(bench_problem *p, unsigned flags)
 {
+     UNUSED(p); UNUSED(flags);
      return 0;
 }
 
@@ -529,11 +532,101 @@ static FFTW(plan) mkplan_transpose(bench_problem *p, unsigned flags)
 
 static FFTW(plan) mkplan_r2r(bench_problem *p, unsigned flags)
 {
+     FFTW(plan) pln = 0;
+     int i; 
+     ptrdiff_t ntot;
+     FFTW(r2r_kind) *k;
+
      if ((p->sz->rnk == 0 || (p->sz->rnk == 1 && p->sz->dims[0].n == 1))
 	 && p->vecsz->rnk >= 2 && p->vecsz->rnk <= 3)
 	  return mkplan_transpose(p, flags);
 
-     return 0;
+     vn = p->vecsz->rnk == 1 ? p->vecsz->dims[0].n : 1;
+
+     if (p->sz->rnk < 1
+	 || p->split
+	 || !tensor_contiguousp(p->sz, vn)
+	 || tensor_rowmajor_transposedp(p->sz)
+	 || p->vecsz->rnk > 1
+	 || (p->vecsz->rnk == 1 && (p->vecsz->dims[0].is != 1
+				    || p->vecsz->dims[0].os != 1)))
+	  return 0;
+
+     alloc_rnk(p->sz->rnk);
+     for (i = 0; i < rnk; ++i) {
+	  total_ni[i] = total_no[i] = p->sz->dims[i].n;
+	  local_ni[i] = local_no[i] = total_ni[i];
+	  local_starti[i] = local_starto[i] = 0;
+     }
+     if (rnk > 1) {
+	  ptrdiff_t n, start, nT, startT;
+	  ntot = FFTW(mpi_local_size_many_transposed)
+	       (p->sz->rnk, total_ni, vn,
+		FFTW_MPI_DEFAULT_BLOCK, FFTW_MPI_DEFAULT_BLOCK,
+		MPI_COMM_WORLD,
+		&n, &start, &nT, &startT);
+	  if  (flags & FFTW_MPI_TRANSPOSED_IN) {
+	       local_ni[1] = nT;
+	       local_starti[1] = startT;
+	  }
+	  else {
+	       local_ni[0] = n;
+	       local_starti[0] = start;
+	  }
+	  if  (flags & FFTW_MPI_TRANSPOSED_OUT) {
+	       local_no[1] = nT;
+	       local_starto[1] = startT;
+	  }
+	  else {
+	       local_no[0] = n;
+	       local_starto[0] = start;
+	  }
+     }
+     else if (rnk == 1) {
+	  ntot = FFTW(mpi_local_size_many_1d)
+	       (total_ni[0], vn, MPI_COMM_WORLD, p->sign, flags,
+		local_ni, local_starti, local_no, local_starto);
+     }
+     alloc_local(ntot, p->in == p->out);
+
+     k = (FFTW(r2r_kind) *) bench_malloc(sizeof(FFTW(r2r_kind)) * p->sz->rnk);
+     for (i = 0; i < p->sz->rnk; ++i)
+	  switch (p->k[i]) {
+	      case R2R_R2HC: k[i] = FFTW_R2HC; break;
+	      case R2R_HC2R: k[i] = FFTW_HC2R; break;
+	      case R2R_DHT: k[i] = FFTW_DHT; break;
+	      case R2R_REDFT00: k[i] = FFTW_REDFT00; break;
+	      case R2R_REDFT01: k[i] = FFTW_REDFT01; break;
+	      case R2R_REDFT10: k[i] = FFTW_REDFT10; break;
+	      case R2R_REDFT11: k[i] = FFTW_REDFT11; break;
+	      case R2R_RODFT00: k[i] = FFTW_RODFT00; break;
+	      case R2R_RODFT01: k[i] = FFTW_RODFT01; break;
+	      case R2R_RODFT10: k[i] = FFTW_RODFT10; break;
+	      case R2R_RODFT11: k[i] = FFTW_RODFT11; break;
+	      default: BENCH_ASSERT(0);
+	  }
+
+     pln = FFTW(mpi_plan_many_r2r)(p->sz->rnk, total_ni, vn, 
+				   FFTW_MPI_DEFAULT_BLOCK,
+				   FFTW_MPI_DEFAULT_BLOCK,
+				   local_in, local_out,
+				   MPI_COMM_WORLD, k, flags);
+     bench_free(k);
+
+     if (rnk > 1) {
+	  ptrdiff_t nrest = 1;
+	  for (i = 2; i < rnk; ++i) nrest *= p->sz->dims[i].n;
+	  if (flags & FFTW_MPI_TRANSPOSED_IN)
+	       plan_scramble_in = mkplan_transpose_local(
+		    p->sz->dims[0].n, local_ni[1], vn * nrest,
+		    local_in, local_in);
+	  if (flags & FFTW_MPI_TRANSPOSED_OUT)
+	       plan_unscramble_out = mkplan_transpose_local(
+		    local_no[1], p->sz->dims[0].n, vn * nrest,
+		    local_out, local_out);
+     }
+     
+     return pln;
 }
 
 FFTW(plan) mkplan(bench_problem *p, unsigned flags)

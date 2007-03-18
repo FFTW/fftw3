@@ -18,29 +18,12 @@
  *
  */
 
-
-#include "mpi-transpose.h"
-#include "mpi-dft.h"
 #include "mpi-rdft.h"
 
-static const solvtab s =
+/* use the apply() operation for MPI_RDFT problems */
+void XM(rdft_solve)(const plan *ego_, const problem *p_)
 {
-     SOLVTAB(XM(transpose_pairwise_register)),
-     SOLVTAB(XM(transpose_alltoall_register)),
-     SOLVTAB(XM(transpose_recurse_register)),
-     SOLVTAB(XM(dft_rank_geq2_register)),
-     SOLVTAB(XM(dft_rank_geq2_transposed_register)),
-     SOLVTAB(XM(dft_serial_register)),
-     SOLVTAB(XM(dft_rank1_bigvec_register)),
-     SOLVTAB(XM(dft_rank1_register)),
-     SOLVTAB(XM(rdft_rank_geq2_register)),
-     SOLVTAB(XM(rdft_rank_geq2_transposed_register)),
-     SOLVTAB(XM(rdft_serial_register)),
-     SOLVTAB(XM(rdft_rank1_bigvec_register)),
-     SOLVTAB_END
-};
-
-void XM(conf_standard)(planner *p)
-{
-     X(solvtab_exec)(s, p);
+     const plan_mpi_rdft *ego = (const plan_mpi_rdft *) ego_;
+     const problem_mpi_rdft *p = (const problem_mpi_rdft *) p_;
+     ego->apply(ego_, UNTAINT(p->I), UNTAINT(p->O));
 }

@@ -23,6 +23,7 @@
 #include "ifftw-mpi.h"
 #include "mpi-transpose.h"
 #include "mpi-dft.h"
+#include "mpi-rdft.h"
 
 /* Convert API flags to internal MPI flags. */
 #define MPI_FLAGS(f) ((f) >> 28)
@@ -549,4 +550,107 @@ X(plan) XM(plan_dft_3d)(ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz,
      ptrdiff_t n[3];
      n[0] = nx; n[1] = ny; n[2] = nz;
      return XM(plan_dft)(3, n, in, out, comm, sign, flags);
+}
+
+/*************************************************************************/
+/* R2R API */
+
+extern rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind);
+
+X(plan) XM(plan_guru_r2r)(int rnk, const XM(ddim) *dims0,
+			  ptrdiff_t howmany,
+			  R *in, R *out,
+			  MPI_Comm comm, const X(r2r_kind) *kind,
+			  unsigned flags)
+{
+     int n_pes, i;
+     dtensor *sz;
+     rdft_kind *k;
+     X(plan) pln;
+     
+     XM(init)();
+
+     if (howmany < 0 || rnk < 1) return 0;
+     for (i = 0; i < rnk; ++i)
+	  if (dims0[i].n < 1 || dims0[i].ib < 0 || dims0[i].ob < 0)
+	       return 0;
+
+     k = X(map_r2r_kind)(rnk, kind);
+
+     MPI_Comm_size(comm, &n_pes);
+     sz = default_sz(rnk, dims0, n_pes);
+
+     if (XM(num_blocks_total)(sz, IB) > n_pes
+	 || XM(num_blocks_total)(sz, OB) > n_pes) {
+	  XM(dtensor_destroy)(sz);
+	  return 0;
+     }
+
+     pln = X(mkapiplan)(0, flags,
+			XM(mkproblem_rdft_d)(sz, howmany,
+					     in, out,
+					     comm, k, MPI_FLAGS(flags)));
+     X(ifree0)(k);
+     return pln;
+}
+
+X(plan) XM(plan_many_r2r)(int rnk, const ptrdiff_t *n,
+			  ptrdiff_t howmany,
+			  ptrdiff_t iblock, ptrdiff_t oblock,
+			  R *in, R *out,
+			  MPI_Comm comm, const X(r2r_kind) *kind,
+			  unsigned flags)
+{
+     XM(ddim) *dims = simple_dims(rnk, n);
+     X(plan) pln;
+
+     if (rnk == 1) {
+	  dims[0].ib = iblock;
+	  dims[0].ob = oblock;
+     }
+     else if (rnk > 1) {
+	  dims[0 != (flags & FFTW_MPI_TRANSPOSED_IN)].ib = iblock;
+	  dims[0 != (flags & FFTW_MPI_TRANSPOSED_OUT)].ob = oblock;
+     }
+
+     pln = XM(plan_guru_r2r)(rnk,dims,howmany, in,out, comm, kind, flags);
+     X(ifree)(dims);
+     return pln;
+}
+
+X(plan) XM(plan_r2r)(int rnk, const ptrdiff_t *n, R *in, R *out,
+		     MPI_Comm comm, 
+		     const X(r2r_kind) *kind,
+		     unsigned flags)
+{
+     return XM(plan_many_r2r)(rnk, n, 1,
+			      FFTW_MPI_DEFAULT_BLOCK,
+			      FFTW_MPI_DEFAULT_BLOCK,
+			      in, out, comm, kind, flags);
+}
+
+X(plan) XM(plan_r2r_2d)(ptrdiff_t nx, ptrdiff_t ny, R *in, R *out,
+			MPI_Comm comm,
+			X(r2r_kind) kindx, X(r2r_kind) kindy,
+			unsigned flags)
+{
+     ptrdiff_t n[2];
+     X(r2r_kind) kind[2];
+     n[0] = nx; n[1] = ny;
+     kind[0] = kindx; kind[1] = kindy;
+     return XM(plan_r2r)(2, n, in, out, comm, kind, flags);
+}
+
+X(plan) XM(plan_r2r_3d)(ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz,
+			R *in, R *out,
+			MPI_Comm comm, 
+			X(r2r_kind) kindx, X(r2r_kind) kindy,
+			X(r2r_kind) kindz,
+			unsigned flags)
+{
+     ptrdiff_t n[3];
+     X(r2r_kind) kind[3];
+     n[0] = nx; n[1] = ny; n[2] = nz;
+     kind[0] = kindx; kind[1] = kindy; kind[2] = kindz;
+     return XM(plan_r2r)(3, n, in, out, comm, kind, flags);
 }
