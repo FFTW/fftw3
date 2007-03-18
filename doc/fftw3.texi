@@ -168,6 +168,7 @@ This manual documents FFTW version @value{VERSION}.
 * FFTW Reference::              
 * Multi-threaded FFTW::         
 * Distributed-memory FFTW with MPI::  
+* FFTW on the Cell Processor::  
 * Calling FFTW from Fortran::   
 * Upgrading from FFTW version 2::  
 * Installation and Customization::  
@@ -301,6 +302,12 @@ FFTW MPI Transposes
 * Basic distributed-transpose interface::  
 * Advanced distributed-transpose interface::  
 * An improved replacement for MPI_Alltoall::  
+
+FFTW on the Cell Processor
+
+* Cell Installation::           
+* Cell Caveats::                
+* FFTW Accuracy on Cell::       
 
 Calling FFTW from Fortran
 
@@ -2921,6 +2928,7 @@ dims[i+1].is} (similarly for @code{os}).  The stride of the last
 e.g. to be equivalent to the advanced complex-DFT interface, you would
 have @code{dims[rank-1].is} = @code{istride} and
 @code{dims[rank-1].os} = @code{ostride}.
+@cindex row-major
 
 In general, we only guarantee FFTW to return a non-@code{NULL} plan if
 the vector and transform dimensions correspond to a set of distinct
@@ -3075,6 +3083,7 @@ as defined in @ref{Planner Flags}.
 In-place transforms of rank greater than 1 are currently only
 supported for interleaved arrays.  For split arrays, the planner will
 return @code{NULL}.
+@cindex in-place
 
 @c =========>
 @node Guru Real-to-real Transforms, 64-bit Guru Interface, Guru Real-data DFTs, Guru Interface
@@ -3112,6 +3121,7 @@ as defined in @ref{Planner Flags}.
 @c =========>
 @node 64-bit Guru Interface,  , Guru Real-to-real Transforms, Guru Interface
 @subsection 64-bit Guru Interface
+@cindex 64-bit architecture
 
 When compiled in 64-bit mode on a 64-bit architecture (where addresses
 are 64 bits wide), FFTW uses 64-bit quantities internally for all
@@ -3142,6 +3152,7 @@ machine.)  We stress that there is @emph{no performance advantage} to
 using this interface---the same internal FFTW code is employed
 regardless---and it is only necessary if you want to specify very
 large transform sizes.
+@tindex ptrdiff_t
 
 In particular, the 64-bit guru interface is a set of planner routines
 that are exactly the same as the guru planner routines, except that
@@ -4074,6 +4085,8 @@ performance gains---when multiple threads/CPUs are employed, there is
 an overhead required for synchronization that may outweigh the
 computatational parallelism.  Therefore, you can only benefit from
 threads if your problem is sufficiently large.
+@cindex shared-memory
+@cindex threads
 
 @menu
 * Installation and Supported Hardware/Software::  
@@ -4233,8 +4246,9 @@ involves a separate address-space and global variables for each process,
 and is not susceptible to problems of this sort.)
 
 @c ************************************************************
-@node Distributed-memory FFTW with MPI, Calling FFTW from Fortran, Multi-threaded FFTW, Top
+@node Distributed-memory FFTW with MPI, FFTW on the Cell Processor, Multi-threaded FFTW, Top
 @chapter Distributed-memory FFTW with MPI
+@cindex MPI
 
 @cindex parallel transform
 In this chapter we document the parallel FFTW routines for parallel
@@ -4247,6 +4261,7 @@ each process only stores a @emph{portion} of the data to be
 transformed, which means that the data structures and
 programming-interface are quite different from the serial or threads
 versions of FFTW.
+@cindex data distribution
 
 Distributed-memory parallelism is especially useful when you are
 transforming arrays so large that they do not fit into the memory of a
@@ -4268,6 +4283,8 @@ refers to @emph{all} processes.  For more information on these and
 other concepts common to all MPI programs, we refer the reader to the
 documentation at @uref{http://www-unix.mcs.anl.gov/mpi/, the MPI home
 page}.
+@cindex MPI communicator
+@ctindex MPI_COMM_WORLD
 
 We assume in this chapter that the reader is familiar with the usage
 of the serial (uniprocessor) FFTW, and focus only on the concepts new
@@ -4309,6 +4326,7 @@ command, typically @code{mpicc} for C code.  The @code{configure}
 script knows the most common names for this command, but you can
 specify the MPI compilation command explicitly by setting the
 @code{MPICC} variable, as in @samp{./configure MPICC=mpicc ...}.
+@fpindex MPICC
 
 If, instead of a special compiler command, you need to link a certain
 library, you can specify the link command via the @code{MPILIBS}
@@ -4370,6 +4388,8 @@ of @samp{fftw_}.  There are a few important differences, however:
 First, we must call @code{fftw_mpi_init()} after calling
 @code{MPI_Init} (required in all MPI programs) and before calling any
 other @samp{fftw_mpi_} routine.
+@findex MPI_Init
+@findex fftw_mpi_init
 
 Second, when we create the plan with @code{fftw_mpi_plan_dft_2d},
 analogous to @code{fftw_plan_dft_2d}, we pass an additional argument:
@@ -4381,14 +4401,20 @@ in the communicator for that transform.  (That is, these are
 @emph{collective} calls.)  Note that the plan for the MPI transform
 uses the standard @code{fftw_execute} and @code{fftw_destroy}
 routines (the new-array execute routines also work).
+@cindex collective function
+@findex fftw_mpi_plan_dft_2d
+@ctindex MPI_COMM_WORLD
 
 Third, all of the FFTW MPI routines take @code{ptrdiff_t} arguments
 instead of @code{int} as for the serial FFTW.  @code{ptrdiff_t} is a
 standard C integer type which is (at least) 32 bits wide on a 32-bit
 machine and 64 bits wide on a 64-bit machine.  This is to make it easy
 to specify very large parallel transforms on a 64-bit machine.  (You
-can specify 64-bit transform sizes in the serial FFTW, too, but
-only by using the @samp{guru64} planner interface.)
+can specify 64-bit transform sizes in the serial FFTW, too, but only
+by using the @samp{guru64} planner interface.  @xref{64-bit Guru
+Interface}.)
+@tindex ptrdiff_t
+@cindex 64-bit architecture
 
 Fourth, and most importantly, you don't allocate the entire
 two-dimensional array on each process.  Instead, you call
@@ -4402,6 +4428,8 @@ to allocate is given by the @code{alloc_local} return value, which
 intermediate calculations require additional storage).  The data
 distribution in FFTW's MPI interface is described in more detail by
 the next section.
+@findex fftw_mpi_local_size_2d
+@cindex data distribution
 
 Given the portion of the array that resides on the local process, it
 is straightforward to initialize the data (here to a function
@@ -4411,10 +4439,12 @@ synchronizing this output is up to you and is beyond the scope of this
 manual.  (One good way to output a large multi-dimensional distributed
 array in MPI to a portable binary file is to use the free HDF5
 library; see the @uref{http://www.hdfgroup.org/, HDF home page}.)
+@cindex HDF5
 
 @c ------------------------------------------------------------
 @node MPI data distribution, FFTW MPI Transposes, Simple MPI example, Distributed-memory FFTW with MPI
 @section MPI data distribution
+@cindex data distribution
 
 The most important concept to understand in using FFTW's MPI interface
 is the data distribution.  With a serial or multithreaded FFT, all of
@@ -4433,6 +4463,7 @@ distribute it over 3 processes, then it is not evenly divisible so the
 different processes will have unequal chunks.  FFTW's default choice
 in this case is to assign 34 rows to processes 0 and 1, and 32 rows to
 process 2.
+@cindex block distribution
 
 FFTW provides several @samp{fftw_mpi_local_size} routines that you can
 call to find out what portion of an array is stored on the current
@@ -4490,7 +4521,8 @@ store the rows @code{local_0_start} to
 @code{local_0_start+local_n0-1}.  Obviously, if you are running with
 only a single MPI process, that process will store the entire array:
 @code{local_0_start} will be zero and @code{local_n0} will be
-@code{n0}.
+@code{n0}.  @xref{Row-major Format}.
+@cindex row-major
 
 Second, the return value is the total number of data elements (e.g.,
 complex numbers for a complex DFT) that should be allocated for the
@@ -4501,6 +4533,7 @@ this should always be equal to @code{local_n0 * n1}, but this is
 redistributions at intermediate stages of the transform, and in some
 circumstances this may require slightly larger local storage.  This is
 discussed in more detail below, under @ref{Load balancing}.
+@findex fftw_malloc
 
 The advanced-interface @samp{local_size} function for multidimensional
 transforms returns the same three things (@code{local_n0},
@@ -4537,6 +4570,8 @@ return @code{local_n0} equal to @code{n0 - block0 * (P / block0)} on
 the next process, and @code{local_n0} equal to zero on any remaining
 processes.  In general, we recommend using the default block size
 (which corresponds to @code{n0 / P}, rounded up).
+@ctindex FFTW_MPI_DEFAULT_BLOCK
+@cindex block distribution
 
 For example, suppose you have @code{P = 4} processes and @code{n0 =
 21}.  The default will be a block size of @code{6}, which will give
@@ -4593,6 +4628,7 @@ local to each process; (ii) transposing to a @code{n1} by @code{n0}
 array, distributed across the @code{n1} dimension; (iii) transforming
 the @code{n0} dimension, which is now local to each process; (iv)
 transposing back.
+@cindex transpose
 
 However, in many applications it is acceptable to compute a
 multidimensional DFT whose results are produced in transposed order
@@ -4604,6 +4640,8 @@ to the planner routines.  To compute the inverse transform of
 transposed output, you specify @code{FFTW_MPI_TRANSPOSED_IN} to tell
 it that the input is transposed.  In this section, we explain how to
 interpret the output format of such a transform.
+@ctindex FFTW_MPI_TRANSPOSED_OUT
+@ctindex FFTW_MPI_TRANSPOSED_IN
 
 Suppose you have are transforming multi-dimensional data with (at
 least two) dimensions @ndims{}.  As always, it is distributed along
@@ -4697,6 +4735,8 @@ a communications step.)  If you pass @code{FFTW_MPI_SCRAMBLED_OUT} in
 the flags, then the output is stored in this (undocumented) scrambled
 order.  Conversely, to perform the inverse transform of data in
 scrambled order, pass the @code{FFTW_MPI_SCRAMBLED_IN} flag.
+@ctindex FFTW_MPI_SCRAMBLED_OUT
+@ctindex FFTW_MPI_SCRAMBLED_IN
 
 In MPI FFTW, only composite sizes @code{n0} can be parallelized; we
 have not yet implemented a parallel algorithm for large prime sizes.
@@ -4704,6 +4744,7 @@ have not yet implemented a parallel algorithm for large prime sizes.
 @c ------------------------------------------------------------
 @node FFTW MPI Transposes, FFTW MPI Wisdom, MPI data distribution, Distributed-memory FFTW with MPI
 @section FFTW MPI Transposes
+@cindex transpose
 
 The FFTW's MPI Fourier transforms rely on one or more @emph{global
 transposition} step for their communications.  For example, the
@@ -4739,6 +4780,7 @@ fftw_plan fftw_mpi_plan_transpose(ptrdiff_t n0, ptrdiff_t n1,
 The input and output arrays (@code{in} and @code{out}) can be the
 same.  The transpose is actually executed by calling
 @code{fftw_execute} on the plan, as usual.
+@findex fftw_execute
 
 The @code{flags} are the usual FFTW planner flags, but support
 two additional flags: @code{FFTW_MPI_TRANSPOSED_OUT} and/or
@@ -4750,11 +4792,14 @@ order, but for an @code{FFTW_MPI_TRANSPOSED_IN} plan the input data is
 stored as @code{n1} by @code{local_n0} in row-major order.  Similarly,
 @code{FFTW_MPI_TRANSPOSED_OUT} means that the output is @code{n0} by
 @code{local_n1} instead of @code{local_n1} by @code{n0}.
+@ctindex FFTW_MPI_TRANSPOSED_OUT
+@ctindex FFTW_MPI_TRANSPOSED_IN
 
 To determine the local size of the array on each process before and
 after the transpose, as well as the amount of storage that must be
 allocated, one should call @code{fftw_mpi_local_size_2d_transposed},
 just as for a 2d DFT as described in the previous section:
+@cindex data distribution
 
 @example
 ptrdiff_t fftw_mpi_local_size_2d_transposed
@@ -4787,7 +4832,9 @@ The input is distributed along the @code{n0} dimension with block size
 along the @code{n1} dimension with block size @code{block1}.  If
 @code{FFTW_MPI_DEFAULT_BLOCK} (0) is passed for a block size then FFTW
 uses its default block size.  To get the local size of the data on
-each process, you should then call @code{fftw_mpi_local_size_many}.
+each process, you should then call @code{fftw_mpi_local_size_many_transposed}.
+@ctindex FFTW_MPI_DEFAULT_BLOCK
+@findex fftw_mpi_local_size_many_transposed
 
 @node An improved replacement for MPI_Alltoall,  , Advanced distributed-transpose interface, FFTW MPI Transposes
 @subsection An improved replacement for MPI_Alltoall
@@ -4796,6 +4843,7 @@ We close this section by noting that FFTW's MPI transpose routines can
 be thought of as a generalization for the @code{MPI_Alltoall} function
 (albeit only for floating-point types), and in some circumstances can
 function as an improved replacement.
+@findex MPI_Alltoall
 
 @code{MPI_Alltoall} is defined by the MPI standard as:
 
@@ -4828,6 +4876,7 @@ However, using the FFTW routine instead of @code{MPI_Alltoall} may
 have certain advantages.  First of all, FFTW's routine can operate
 in-place @code{in == out}) whereas @code{MPI_Alltoall} can only
 operate out-of-place.
+@cindex in-place
 
 Second, even for out-of-place plans, FFTW's routine may be faster,
 especially if you need to perform the all-to-all communication many
@@ -4838,10 +4887,14 @@ FFTW uses for an out-of-place transpose @emph{is} simply to call
 @code{MPI_Alltoall}.  However, FFTW also considers several other
 possible algorithms that, depending on your MPI implementation and
 your hardware, may be faster.
+@ctindex FFTW_MEASURE
+@ctindex FFTW_PATIENT
 
 @c ------------------------------------------------------------
 @node FFTW MPI Wisdom, Avoiding MPI Deadlocks, FFTW MPI Transposes, Distributed-memory FFTW with MPI
 @section FFTW MPI Wisdom
+@cindex wisdom
+@cindex saving plans to disk
 
 FFTW's ``wisdom'' facility (@pxref{Words of Wisdom-Saving Plans}) can
 be used to save MPI plans as well as to save uniprocessor plans.
@@ -4856,6 +4909,8 @@ single-process run could not perform I/O.)  So, if we want to export
 the wisdom from a single process to a file, we must first export the
 wisdom to a string, then send it to process 0, then write it to a
 file.
+@ctindex MPI_IO
+@ctindex MPI_ANY_SOURCE
 
 Second, in principle we may want to have separate wisdom for every
 process, since in general the processes may run on different hardware
@@ -4884,6 +4939,7 @@ may result in suboptimal plans for different processes if the
 processes are running on non-identical hardware.  Both of these
 functions are @emph{collective} calls, which means that they must be
 executed by all processes in the communicator.
+@cindex collective function
 
 So, for example, a typical code snippet to import wisdom from a file
 and use it on all processes would be:
@@ -4906,6 +4962,7 @@ and use it on all processes would be:
 (Note that we must call @code{fftw_mpi_init} before importing any
 wisdom that might contain MPI plans.)  Similarly, a typical code
 snippet to export wisdom from all processes to a file is:
+@findex fftw_mpi_init
 
 @example
 @{
@@ -4924,6 +4981,7 @@ snippet to export wisdom from all processes to a file is:
 @c ------------------------------------------------------------
 @node Avoiding MPI Deadlocks, FFTW MPI Performance Tips, FFTW MPI Wisdom, Distributed-memory FFTW with MPI
 @section Avoiding MPI Deadlocks
+@cindex deadlock
 
 An MPI program can @emph{deadlock} if one process is waiting for a
 message from another process that never gets sent.  To avoid deadlocks
@@ -4932,6 +4990,8 @@ functions are @emph{collective}: that is, which functions must
 @emph{always} be called in the @emph{same order} from @emph{every}
 process in a given communicator.  (For example, @code{MPI_Barrier} is
 the canonical example of a collective function in the MPI standard.)
+@cindex collective function
+@findex MPI_Barrier
 
 The functions in FFTW that are @emph{always} collective are: every
 function beginning with @samp{fftw_mpi_plan}, as well as
@@ -4940,6 +5000,9 @@ Also, the following functions from the ordinary FFTW interface are
 collective when they are applied to a plan created by an
 @samp{fftw_mpi_plan} function: @code{fftw_execute},
 @code{fftw_destroy_plan}, and @code{fftw_flops}.
+@findex fftw_execute
+@findex fftw_destroy_plan
+@findex fftw_flops
 
 @c ------------------------------------------------------------
 @node FFTW MPI Performance Tips, Combining MPI and Threads, Avoiding MPI Deadlocks, Distributed-memory FFTW with MPI
@@ -4954,19 +5017,30 @@ currently limited by the size of the first dimension.
 version.) More generally, you should ideally arrange the dimensions so
 that FFTW can divide them equally among the processes. @xref{Load
 balancing}.
+@cindex block distribution
+@cindex load balancing
 
 Second, if it is not too inconvenient, you should consider working
 with transposed output for multidimensional plans, as this saves a
 considerable amount of communications.  @xref{Transposed distributions}.
+@cindex transpose
 
 Third, the fastest choices are generally either an in-place transform
 or an out-of-place transform with the @code{FFTW_DESTROY_INPUT} flag
 (which allows the input array to be used as scratch space).  In-place
 is especially beneficial if the amount of data per process is large.
+@ctindex FFTW_DESTROY_INPUT
+
+Fourth, if you have multiple arrays to transform at once, rather than
+calling FFTW's MPI transforms several times it usually seems to be
+faster to interleave the data and use the advanced interface.  (This
+groups the communications together instead of requiring separate
+messages for each transform.)
 
 @c ------------------------------------------------------------
 @node Combining MPI and Threads, FFTW MPI Reference, FFTW MPI Performance Tips, Distributed-memory FFTW with MPI
 @section Combining MPI and Threads
+@cindex threads
 
 In certain cases, it may be advantageous to combine MPI
 (distributed-memory) and threads (shared-memory) parallelization.
@@ -4975,6 +5049,7 @@ cluster of 4-processor shared-memory nodes, you may want to use
 threads within the nodes and MPI between the nodes, instead of MPI for
 all parallelization.  FFTW's MPI code can also transparently use
 FFTW's Cell processor support (e.g. for clusters of Cell processors).
+@cindex Cell processor
 
 In particular, it is possible to seamlessly combine the MPI FFTW
 routines with the multi-threaded FFTW routines (@pxref{Multi-threaded
@@ -4982,6 +5057,9 @@ FFTW}).  In this case, you will begin your program by calling both
 @code{fftw_mpi_init()} and @code{fftw_init_threads()}.  Then, if you
 call @code{fftw_plan_with_nthreads(N)}, then @emph{every} MPI process
 will launch @code{N} threads to parallelize its transforms.
+@findex fftw_mpi_init
+@findex fftw_init_threads
+@findex fftw_plan_with_nthreads
 
 For example, in the hypothetical cluster of 4-processor nodes, you
 might wish to launch only a single MPI process per node, and then call
@@ -4996,18 +5074,132 @@ and this means that the communications that do take place will not
 benefit from parallelization within the node.  Moreover, many MPI
 implementations already have optimizations to exploit shared memory
 when it is available.
+@cindex transpose
 
 (Note that this is quite independent of whether MPI itself is
-re-entrant or multi-threaded: regardless of how many threads you
+thread-safe or multi-threaded: regardless of how many threads you
 specify with @code{fftw_plan_with_nthreads}, FFTW will perform all of
 its MPI communication only from the parent process.)
+@cindex thread safety
 
 @c ------------------------------------------------------------
 @node FFTW MPI Reference,  , Combining MPI and Threads, Distributed-memory FFTW with MPI
 @section FFTW MPI Reference
 
 @c ************************************************************
-@node Calling FFTW from Fortran, Upgrading from FFTW version 2, Distributed-memory FFTW with MPI, Top
+@node FFTW on the Cell Processor, Calling FFTW from Fortran, Distributed-memory FFTW with MPI, Top
+@chapter FFTW on the Cell Processor
+@cindex Cell processor
+
+Starting with version 3.2, FFTW contains specific support for the Cell
+Broadband Engine (``Cell'') processor, graciously donated by the IBM
+Austin Research Laboratory.
+
+Cell consists of one PowerPC core (``PPE'') and of a number of
+Synergistic Processing Elements (``SPE'') to which the PPE can
+delegate computation.  The IBM QS20 Cell blade offers 8 SPEs per Cell
+chip.  The Sony Playstation 3 contains 6 useable SPEs.
+
+Currently, FFTW fully utilizes the SPEs for one- and multi-dimensional
+complex FFTs of sizes that can be factored into small primes, both in
+single and double precision.  Transforms of real data use SPEs only
+partially at this time.  If FFTW cannot use the SPEs, it falls back to
+a slower computation on the PPE.
+
+FFTW is meant to use the SPEs transparently without user intervention.
+However, certain caveats apply, which are discussed later in this
+document.
+
+@menu
+* Cell Installation::           
+* Cell Caveats::                
+* FFTW Accuracy on Cell::       
+@end menu
+
+@c ------------------------------------------------------------
+@node Cell Installation, Cell Caveats, FFTW on the Cell Processor, FFTW on the Cell Processor
+@section Cell Installation
+
+All of the FFTW Cell code is located in the @code{cell} subdirectory
+of the FFTW package.  On Unix systems, the FFTW Cell support is
+automatically configured, compiled, and included in the uniprocessor
+FFTW libraries simply by including @code{--enable-cell} in the flags
+to the @code{configure} script (@pxref{Installation on Unix}).
+@fpindex configure
+
+Both double precision (the default) and single precision are supported
+on the Cell; for the latter, configure with @code{--enable-cell
+--enable-single}.
+
+In addition, the PPE supports the Altivec (or VMX) instruction set in
+single precision.  (Altivec is Apple/Freescale terminology, VMX is IBM
+terminology for the same thing.)  You can enable support for Altivec
+with the @code{--enable-altivec} flag (single precision only).
+
+The software compiles with the Cell SDK 2.0, and probably with earlier
+ones as well.
+
+@c ------------------------------------------------------------
+@node Cell Caveats, FFTW Accuracy on Cell, Cell Installation, FFTW on the Cell Processor
+@section Cell Caveats
+
+@itemize @bullet
+@item
+The FFTW benchmark program allocates memory using malloc() or
+equivalent library calls, reflecting the common usage of the FFTW
+library.  However, you can sometimes improve performance significantly
+by allocating memory in system-specific large TLB pages.  E.g., we
+have seen 39 GFLOPS/s for a @threedims{256,256,256} problem using
+large pages, whereas the speed is about 25 GFLOPS/s with normal pages.
+YMMV.
+
+@item
+FFTW hoards all available SPEs for itself.  You can optionally
+choose a different number of SPEs by calling the undocumented
+function @code{fftw_cell_set_nspe(n)}, where @code{n} is the number of desired
+SPEs.  Expect this interface to go away once we figure out how to
+make FFTW play nicely with other Cell software.
+
+In particular, if you try to link both the single and double precision
+of FFTW in the same program (which you can do), they will both try
+to grab all SPEs and the second one will hang.
+
+@item
+The SPEs demand that data be stored in contiguous arrays aligned at
+16-byte boundaries.  If you instruct FFTW to operate on
+noncontiguous or nonaligned data, the SPEs will not be used,
+resulting in slow execution.  @xref{Data Alignment}.
+
+@item
+The @code{FFTW_ESTIMATE} mode may produce seriously suboptimal plans, and
+it becomes particularly confused if you enable both the SPEs and
+Altivec.  If you care about performance, please use @code{FFTW_MEASURE}
+or @code{FFTW_PATIENT} until we figure out a more reliable performance model.
+
+@end itemize
+
+@c ------------------------------------------------------------
+@node FFTW Accuracy on Cell,  , Cell Caveats, FFTW on the Cell Processor
+@section FFTW Accuracy on Cell
+
+The SPEs are fully IEEE-754 compliant in double precision.  In single
+precision, they only implement round-towards-zero as opposed to the
+standard round-to-even mode.  (The PPE is fully IEEE-754 compliant
+like all other PowerPC implementations.)  Because of the rounding
+mode, FFTW is less accurate when running on the SPEs than on the PPE.
+The accuracy loss is hard to quantify in general, but as a rough
+guideline, the L2 norm of the relative roundoff error for random
+inputs is 4 to 8 times larger than the corresponding calculation in
+round-to-even arithmetic.  In other words, expect to lose 2 to 3 bits
+of accuracy.
+
+FFTW currently does not use any algorithm that degrades accuracy to
+gain performance on the SPE.  One implication of this choice is that
+large 1D transforms run slower than they would if we were willing to
+sacrifice another bit or so of accuracy.
+
+@c ************************************************************
+@node Calling FFTW from Fortran, Upgrading from FFTW version 2, FFTW on the Cell Processor, Top
 @chapter Calling FFTW from Fortran
 @cindex Fortran interface
 
@@ -5624,14 +5816,30 @@ spawning its own threads directly.  Useful especially for programs
 already employing such directives, in order to minimize conflicts
 between different parallelization mechanisms.
 
-@ignore
+@item
+@code{--with-combined-threads}: By default, if @code{--enable-threads}
+or @code{--enable-openmp} are used, the threads support is compiled
+into a separate library that must be linked in addition to the main
+FFTW library.  This is so that users of the serial library do not need
+to link the system threads libraries.  If
+@code{--with-combined-threads} is specified, however, then no separate
+threads library is created, and threads are included in the main FFTW
+library.  This is mainly useful under Windows, where no system threads
+library is required and inter-library dependencies are problematic.
+
 @item
 @cindex MPI
-@code{--enable-mpi}: Enables compilation and installation of the FFTW MPI
-library (@pxref{MPI FFTW}), which provides parallel transforms for
-distributed-memory systems with MPI.  (By default, the MPI routines are
-not compiled.)
-@end ignore
+@code{--enable-mpi}: Enables compilation and installation of the FFTW
+MPI library (@pxref{Distributed-memory FFTW with MPI}), which provides
+parallel transforms for distributed-memory systems with MPI.  (By
+default, the MPI routines are not compiled.)  @xref{FFTW MPI
+Installation}.
+
+@item
+@cindex Cell processor
+@code{--enable-cell}: Enables code to exploit the Cell processor
+(@pxref{FFTW on the Cell Processor}), assuming you have the Cell SDK.
+By default, code for the Cell processor is not compiled.
 
 @item
 @cindex Fortran-callable wrappers
@@ -5644,6 +5852,23 @@ the @code{configure} script finds a Fortran compiler on your system.
 @code{F77=}@i{foo} to @code{configure}.)
 
 @item
+@code{--with-g77-wrappers}: By default, when Fortran wrappers are
+included, the wrappers employ the linking conventions of the Fortran
+compiler detected by the @code{configure} script.  If this compiler is
+GNU @code{g77}, however, then @emph{two} versions of the wrappers are
+included: one with @code{g77}'s idiosyncratic convention of appending
+two underscores to identifiers, and one with the more common
+convention of appending only a single underscore.  This way, the same
+FFTW library will work with both @code{g77} and other Fortran
+compilers, such as GNU @code{gfortran}.  However, the converse is not
+true: if you configure with a different compiler, then the
+@code{g77}-compatible wrappers are not included.  By specifying
+@code{--with-g77-wrappers}, the @code{g77}-compatible wrappers are
+included in addition to wrappers for whatever Fortran compiler
+@code{configure} finds.
+@fpindex g77
+
+@item
 @code{--with-slow-timer}: Disables the use of hardware cycle counters,
 and falls back on @code{gettimeofday} or @code{clock}.  This greatly
 worsens performance, and should generally not be used (unless you don't
@@ -5652,9 +5877,9 @@ of the time).  @xref{Cycle Counters}.
 
 @item
 @code{--enable-sse}, @code{--enable-sse2}, @code{--enable-altivec},
-@code{--enable-mips_ps}:
+@code{--enable-mips-ps}:
 Enable the compilation of SIMD code for SSE (Pentium III+), SSE2
-(Pentium IV+), AltiVec (PowerPC G4+), or MIPS PS.  SSE, AltiVec and MIPS PS
+(Pentium IV+), AltiVec (PowerPC G4+), or MIPS PS.  SSE, AltiVec, and MIPS PS
 only work with @code{--enable-float} (above), while SSE2 only works in double
 precision (the default).  The resulting code will @emph{still work} on
 earlier CPUs lacking the SIMD extensions (SIMD is automatically
@@ -5833,6 +6058,9 @@ Foundation under award DMR-9400334.
 
 Code for the Cell Broadband Engine was graciously donated to the FFTW
 project by the IBM Austin Research Lab.
+
+Code for the MIPS paired-single SIMD support was graciously donated to
+the FFTW project by CodeSourcery, Inc.
 
 We are grateful to Sun Microsystems Inc.@ for its donation of a
 cluster of 9 8-processor Ultra HPC 5000 SMPs (24 Gflops peak). These

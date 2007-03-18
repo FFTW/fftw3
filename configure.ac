@@ -91,7 +91,7 @@ if test "$have_altivec" = "yes"; then
 	have_simd="yes"
 fi
 
-AC_ARG_ENABLE(mips_ps, [AC_HELP_STRING([--enable-mips_ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
+AC_ARG_ENABLE(mips-ps, [AC_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
 if test "$have_mips_ps" = "yes"; then
 	AC_DEFINE(HAVE_MIPS_PS,1,[Define to enable MIPS paired-single optimizations.])
 	have_simd="yes"
