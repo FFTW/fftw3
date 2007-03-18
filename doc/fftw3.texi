@@ -4919,7 +4919,7 @@ might wish to launch only a single MPI process per node, and then call
 processors in the nodes.
 
 This may or may not be faster than simply using as many MPI processes
-as you have processors, however.  On one hand, using threads within a
+as you have processors, however.  On the one hand, using threads within a
 node eliminates the need for explicit message passing within the node.
 On the other hand, FFTW's transpose routines are not multi-threaded,
 and this means that the communications that do take place will not
