@@ -40,6 +40,9 @@ static double cost_hook(const problem *p, double t, cost_kind k)
 	 case PROBLEM_MPI_DFT:
 	      comm = ((const problem_mpi_dft *) p)->comm;
 	      break;
+	 case PROBLEM_MPI_RDFT:
+	      comm = ((const problem_mpi_rdft *) p)->comm;
+	      break;
 	 case PROBLEM_MPI_TRANSPOSE:
 	      comm = ((const problem_mpi_transpose *) p)->comm;
 	      break;
