@@ -4821,6 +4821,7 @@ and use it on all processes would be:
     int rank;
     FILE *f;
 
+    fftw_mpi_init();
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     if (rank == 0 && (f = fopen("mywisdom", "r"))) @{
         fftw_import_wisdom_from_file(f);
@@ -4830,8 +4831,9 @@ and use it on all processes would be:
 @}
 @end example
 
-Similarly, a typical code snippet to export wisdom from all processes
-to a file is:
+(Note that we must call @code{fftw_mpi_init} before importing any
+wisdom that might contain MPI plans.)  Similarly, a typical code
+snippet to export wisdom from all processes to a file is:
 
 @example
 @{
