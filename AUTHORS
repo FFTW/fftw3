@@ -9,4 +9,5 @@ added in fftw-3.0 and removed in fftw-3.2.
 Support for the Cell Broadband Engine was graciously donated
 by the IBM Austin Research Lab.
 
-
+Support for MIPS64 paired-single SIMD instructions was graciously
+donated by CodeSourcery, Inc.
