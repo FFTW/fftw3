@@ -136,7 +136,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      MPI_Comm_size(p->comm, &n_pes);
      
      nx = p->sz->dims[0].n;
-     if (!(ny = XM(rearrange_ny)(ego->rearrange, p->sz->dims[0], vn, n_pes)))
+     if (!(ny = XM(rearrange_ny)(ego->rearrange, p->sz->dims[0],p->vn,n_pes)))
 	  return (plan *) 0;
      vn = p->vn / ny;
      A(ny * vn == p->vn);
