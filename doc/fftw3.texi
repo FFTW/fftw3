@@ -252,6 +252,7 @@ Guru Interface
 * Guru Complex DFTs::           
 * Guru Real-data DFTs::         
 * Guru Real-to-real Transforms::  
+* 64-bit Guru Interface::       
 
 Wisdom
 
@@ -1935,8 +1936,8 @@ the arrays for which it was planned (which must still exist).  The plan
 is not modified, and @code{fftw_execute} can be called as many times as
 desired.
 
-To apply a given plan to a different array, you can use the guru
-interface.  @xref{Guru Interface}.
+To apply a given plan to a different array, you can use the new-array execute
+interface.  @xref{New-array Execute Functions}.
 
 @code{fftw_execute} (and equivalents) is the only function in FFTW
 guaranteed to be thread-safe; see @ref{Thread safety}.
@@ -2199,14 +2200,14 @@ input-preserving algorithms are implemented and the planner will return
 @item
 @ctindex FFTW_UNALIGNED
 @cindex alignment
-@code{FFTW_UNALIGNED} specifies that the algorithm may not
-impose any unusual alignment requirements on the input/output arrays
-(i.e. no SIMD may be used).  This flag is normally @emph{not necessary},
-since the planner automatically detects misaligned arrays.  The only use
-for this flag is if you want to use the guru interface to execute a
-given plan on a different array that may not be aligned like the
-original.  (Using @code{fftw_malloc} makes this flag unnecessary even
-then.)
+@code{FFTW_UNALIGNED} specifies that the algorithm may not impose any
+unusual alignment requirements on the input/output arrays (i.e. no
+SIMD may be used).  This flag is normally @emph{not necessary}, since
+the planner automatically detects misaligned arrays.  The only use for
+this flag is if you want to use the new-array execute interface to
+execute a given plan on a different array that may not be aligned like
+the original.  (Using @code{fftw_malloc} makes this flag unnecessary
+even then.)
 
 @end itemize
 
@@ -2836,6 +2837,7 @@ shoot themselves in the foot.
 * Guru Complex DFTs::           
 * Guru Real-data DFTs::         
 * Guru Real-to-real Transforms::  
+* 64-bit Guru Interface::       
 @end menu
 
 @c =========>
@@ -3075,7 +3077,7 @@ supported for interleaved arrays.  For split arrays, the planner will
 return @code{NULL}.
 
 @c =========>
-@node Guru Real-to-real Transforms,  , Guru Real-data DFTs, Guru Interface
+@node Guru Real-to-real Transforms, 64-bit Guru Interface, Guru Real-data DFTs, Guru Interface
 @subsection Guru Real-to-real Transforms
 
 @example
@@ -3106,6 +3108,74 @@ may be the same, indicating an in-place transform.
 @cindex flags
 @code{flags} is a bitwise OR (@samp{|}) of zero or more planner flags,
 as defined in @ref{Planner Flags}.
+
+@c =========>
+@node 64-bit Guru Interface,  , Guru Real-to-real Transforms, Guru Interface
+@subsection 64-bit Guru Interface
+
+When compiled in 64-bit mode on a 64-bit architecture (where addresses
+are 64 bits wide), FFTW uses 64-bit quantities internally for all
+transform sizes, strides, and so on---you don't have to do anything
+special to exploit this.  However, in the ordinary FFTW interfaces,
+you specify the transform size by an @code{int} quantity, which is
+normally only 32 bits wide.  This means that, even though FFTW is
+using 64-bit sizes internally, you cannot specify a single transform
+dimension larger than
+@ifinfo
+2^31-1
+@end ifinfo
+@html
+2<sup><small>31</small></sup>&minus;1
+@end html
+@tex
+$2^31-1$
+@end tex
+numbers.
+
+We expect that few users will require transforms larger than this, but,
+for those who do, we provide a 64-bit version of the guru interface in
+which all sizes are specified as integers of type @code{ptrdiff_t}
+instead of @code{int}.  (@code{ptrdiff_t} is a signed integer type
+defined by the C standard to be wide enough to represent address
+differences, and thus must be at least 64 bits wide on a 64-bit
+machine.)  We stress that there is @emph{no performance advantage} to
+using this interface---the same internal FFTW code is employed
+regardless---and it is only necessary if you want to specify very
+large transform sizes.
+
+In particular, the 64-bit guru interface is a set of planner routines
+that are exactly the same as the guru planner routines, except that
+they are named with @samp{guru64} instead of @samp{guru} and they take
+arguments of type @code{fftw_iodim64} instead of @code{fftw_iodim}.
+For example, instead of @code{fftw_plan_guru_dft}, we have
+@code{fftw_plan_guru64_dft}.
+
+@example
+fftw_plan fftw_plan_guru64_dft(
+     int rank, const fftw_iodim64 *dims,
+     int howmany_rank, const fftw_iodim64 *howmany_dims,
+     fftw_complex *in, fftw_complex *out,
+     int sign, unsigned flags);
+@end example
+@findex fftw_plan_guru64_dft
+
+The @code{fftw_iodim64} type is similar to @code{fftw_iodim}, with the
+same interpretation, except that it uses type @code{ptrdiff_t} instead
+of type @code{int}.
+
+@example
+typedef struct @{
+     ptrdiff_t n;
+     ptrdiff_t is;
+     ptrdiff_t os;
+@} fftw_iodim64;
+@end example
+@tindex fftw_iodim64
+
+Every other @samp{fftw_plan_guru} function also has a
+@samp{fftw_plan_guru64} equivalent, but we do not repeat their
+documentation here since they are identical to the 32-bit versions
+except as noted above.
 
 @c -----------------------------------------------------------
 @node New-array Execute Functions, Wisdom, Guru Interface, FFTW Reference

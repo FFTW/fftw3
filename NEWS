@@ -35,7 +35,7 @@ FFTW 3.2alpha1
   distros switching to gfortran, but wishing to include both
   gfortran and g77 support in FFTW.
 
-* In manual, renamed "guru execute" functions to "new-data execute"
+* In manual, renamed "guru execute" functions to "new-array execute"
   functions, to reduce confusion with the guru planner interface.
   (The programming interface is unchanged.)
 
