@@ -125,6 +125,8 @@ extern int verbose;
 
 extern int no_speed_allocation;
 
+extern int always_pad_real;
+
 #define LIBBENCH_TIMER 0
 #define USER_TIMER 1
 #define BENCH_NTIMERS 2

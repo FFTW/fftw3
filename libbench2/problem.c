@@ -26,6 +26,8 @@
 #include <string.h>
 #include <ctype.h>
 
+int always_pad_real = 0; /* by default, only pad in-place case */
+
 typedef enum {
      SAME, PADDED, HALFISH
 } n_transform;
@@ -270,12 +272,12 @@ bench_problem *problem_parse(const char *s)
 
      if (p->kind == PROBLEM_REAL) {
 	  if (p->sign < 0) {
-	       nti = p->in_place ? PADDED : SAME;
+	       nti = p->in_place || always_pad_real ? PADDED : SAME;
 	       nto = HALFISH;
 	  }
 	  else {
 	       nti = HALFISH;
-	       nto = p->in_place ? PADDED : SAME;
+	       nto = p->in_place || always_pad_real ? PADDED : SAME;
 	  }
      }
 

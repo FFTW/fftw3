@@ -1,6 +1,7 @@
 FFTW 3.2alpha1
 
-* Support for the Cell processor, donated by IBM Research; see README.Cell.
+* Support for the Cell processor, donated by IBM Research; see README.Cell
+  and the Cell section of the manual.
 
 * New 64-bit API: for every "plan_guru" function there is a new "plan_guru64"
   function with the same semantics, but which takes fftw_iodim64 instead of
@@ -10,9 +11,13 @@ FFTW 3.2alpha1
   on 64-bit machines.  (Internally, FFTW uses ptrdiff_t everywhere
   regardless of what API you choose.)
 
-* Experimental MPI support.  (Currently, only complex one- and multi-
-  dimensional FFTs with 1d block distributions, as well as distributed
-  transposes.)
+* Experimental MPI support.  Complex one- and multi-dimensional FFTs,
+  multi-dimensional r2r, multi-dimensional r2c/c2r transforms, and
+  distributed transpose operations, with 1d block distributions.
+  (This is an alpha preview: routines have not been exhaustively
+  tested, documentation is incomplete, and some functionality is
+  missing, e.g. Fortran support.)  See mpi/README and also the MPI
+  section of the manual.
 
 * Significantly faster r2c transforms, especially on machines with SIMD.
 

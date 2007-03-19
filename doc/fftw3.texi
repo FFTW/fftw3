@@ -281,8 +281,11 @@ Multi-threaded FFTW
 Distributed-memory FFTW with MPI
 
 * FFTW MPI Installation::       
+* Linking and Initializing MPI FFTW::  
 * Simple MPI example::          
 * MPI data distribution::       
+* Multi-dimensional MPI DFT of Real Data::  
+* Other Multi-dimensional Real-data MPI Transforms::  
 * FFTW MPI Transposes::         
 * FFTW MPI Wisdom::             
 * Avoiding MPI Deadlocks::      
@@ -4256,7 +4259,7 @@ hardware supporting the MPI message-passing interface.  Unlike the
 shared-memory threads described in the previous chapter, MPI allows
 you to use @emph{distributed-memory} parallelism, where each CPU has
 its own separate memory, and which can scale up to clusters of many
-thousands of processors.  This capability comes at a price however:
+thousands of processors.  This capability comes at a price, however:
 each process only stores a @emph{portion} of the data to be
 transformed, which means that the data structures and
 programming-interface are quite different from the serial or threads
@@ -4292,8 +4295,11 @@ to the MPI interface.
 
 @menu
 * FFTW MPI Installation::       
+* Linking and Initializing MPI FFTW::  
 * Simple MPI example::          
 * MPI data distribution::       
+* Multi-dimensional MPI DFT of Real Data::  
+* Other Multi-dimensional Real-data MPI Transforms::  
 * FFTW MPI Transposes::         
 * FFTW MPI Wisdom::             
 * Avoiding MPI Deadlocks::      
@@ -4303,7 +4309,7 @@ to the MPI interface.
 @end menu
 
 @c ------------------------------------------------------------
-@node FFTW MPI Installation, Simple MPI example, Distributed-memory FFTW with MPI, Distributed-memory FFTW with MPI
+@node FFTW MPI Installation, Linking and Initializing MPI FFTW, Distributed-memory FFTW with MPI, Distributed-memory FFTW with MPI
 @section FFTW MPI Installation
 
 All of the FFTW MPI code is located in the @code{mpi} subdirectory of
@@ -4326,7 +4332,7 @@ command, typically @code{mpicc} for C code.  The @code{configure}
 script knows the most common names for this command, but you can
 specify the MPI compilation command explicitly by setting the
 @code{MPICC} variable, as in @samp{./configure MPICC=mpicc ...}.
-@fpindex MPICC
+@fpindex mpicc
 
 If, instead of a special compiler command, you need to link a certain
 library, you can specify the link command via the @code{MPILIBS}
@@ -4338,7 +4344,40 @@ the location of the library and header files via @code{LDFLAGS} and
 LDFLAGS=-L/path/to/mpi/libs CPPFLAGS=-I/path/to/mpi/include ...}.
 
 @c ------------------------------------------------------------
-@node Simple MPI example, MPI data distribution, FFTW MPI Installation, Distributed-memory FFTW with MPI
+@node Linking and Initializing MPI FFTW, Simple MPI example, FFTW MPI Installation, Distributed-memory FFTW with MPI
+@section Linking and Initializing MPI FFTW
+
+Programs using the MPI FFTW routines should be linked with
+@code{-lfftw3_mpi -lfftw3 -lm} on Unix. You will also need to link
+with whatever library is responsible for MPI on your system; in most
+MPI implementations, there is a special compiler alias named
+@code{mpicc} to compile and link MPI code.
+@fpindex mpicc
+@cindex linking on Unix
+
+Before calling any FFTW routines, but after calling @code{MPI_Init},
+you should call the function:
+
+@example
+void fftw_mpi_init(void);
+@end example
+@findex fftw_mpi_init
+
+If, at the end of your program, you want to get rid of all memory and
+other resources allocated internally by FFTW, for both the serial and
+MPI routines, you can call:
+
+@example
+void fftw_mpi_cleanup(void);
+@end example
+@findex fftw_mpi_cleanup
+
+which is much like the @code{fftw_cleanup()} function except that it
+also gets rid of FFTW's MPI-related data.  You must @emph{not} execute
+any previously created plans after calling this function.
+
+@c ------------------------------------------------------------
+@node Simple MPI example, MPI data distribution, Linking and Initializing MPI FFTW, Distributed-memory FFTW with MPI
 @section Simple MPI example
 
 Before we document the FFTW MPI interface in detail, we begin with a
@@ -4442,7 +4481,7 @@ library; see the @uref{http://www.hdfgroup.org/, HDF home page}.)
 @cindex HDF5
 
 @c ------------------------------------------------------------
-@node MPI data distribution, FFTW MPI Transposes, Simple MPI example, Distributed-memory FFTW with MPI
+@node MPI data distribution, Multi-dimensional MPI DFT of Real Data, Simple MPI example, Distributed-memory FFTW with MPI
 @section MPI data distribution
 @cindex data distribution
 
@@ -4742,7 +4781,33 @@ In MPI FFTW, only composite sizes @code{n0} can be parallelized; we
 have not yet implemented a parallel algorithm for large prime sizes.
 
 @c ------------------------------------------------------------
-@node FFTW MPI Transposes, FFTW MPI Wisdom, MPI data distribution, Distributed-memory FFTW with MPI
+@node Multi-dimensional MPI DFT of Real Data, Other Multi-dimensional Real-data MPI Transforms, MPI data distribution, Distributed-memory FFTW with MPI
+@section Multi-dimensional MPI DFT of Real Data
+
+FFTW's MPI interface also supports multi-dimensional DFTs of real
+data, similar to the serial r2c and c2r interfaces.
+
+Documentation pending.
+
+Limitations: Currently, @code{FFTW_MPI_TRANSPOSED_IN} and
+@code{FFTW_MPI_TRANSPOSED_OUT} are not yet supproted for the MPI r2c
+and c2r transforms.  Parallel one-dimensional real-data DFTs are also
+not supported.
+
+@c ------------------------------------------------------------
+@node Other Multi-dimensional Real-data MPI Transforms, FFTW MPI Transposes, Multi-dimensional MPI DFT of Real Data, Distributed-memory FFTW with MPI
+@section Other multi-dimensional Real-Data MPI Transforms
+
+FFTW's MPI interface also supports multi-dimensional @samp{r2r}
+transforms of all kinds supported by the serial interface
+(e.g. discrete cosine and sine transforms, discrete Hartley
+transforms, etc.).  Only multi-dimensional @samp{r2r} transforms, not
+one-dimensional transforms, are currently parallelized.
+
+Documentation pending.
+
+@c ------------------------------------------------------------
+@node FFTW MPI Transposes, FFTW MPI Wisdom, Other Multi-dimensional Real-data MPI Transforms, Distributed-memory FFTW with MPI
 @section FFTW MPI Transposes
 @cindex transpose
 
@@ -5085,6 +5150,8 @@ its MPI communication only from the parent process.)
 @c ------------------------------------------------------------
 @node FFTW MPI Reference,  , Combining MPI and Threads, Distributed-memory FFTW with MPI
 @section FFTW MPI Reference
+
+Detailed documentation of all FFTW MPI routines pending.
 
 @c ************************************************************
 @node FFTW on the Cell Processor, Calling FFTW from Fortran, Distributed-memory FFTW with MPI, Top
