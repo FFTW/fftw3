@@ -1,4 +1,4 @@
-FFTW 3.2alpha1
+FFTW 3.2alpha2
 
 * Support for the Cell processor, donated by IBM Research; see README.Cell
   and the Cell section of the manual.
