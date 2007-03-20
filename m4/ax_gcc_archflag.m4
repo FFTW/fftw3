@@ -27,7 +27,7 @@ dnl
 dnl (The main emphasis here is on recent CPUs, on the principle that
 dnl  doing high-performance computing on old hardware is uncommon.)
 dnl
-dnl @version 2006-04-20
+dnl @version 2007-03-20
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_ARCHFLAG],
@@ -64,7 +64,7 @@ case $host_cpu in
 	    *6[[9d]]?:*:*:*) ax_gcc_arch="pentium-m pentium3 pentiumpro" ;;
 	    *6[[e]]?:*:*:*) ax_gcc_arch="pentium-m pentium3 pentiumpro" ;; # Core Duo
 	    *6??:*:*:*) ax_gcc_arch=pentiumpro ;;
-            *f3[[347]]:*:*:*|*f4[1347]:*:*:*)
+            *f3[[347]]:*:*:*|*f4[[1347]]:*:*:*)
 		case $host_cpu in
                   x86_64*) ax_gcc_arch="nocona pentium4 pentiumpro" ;;
                   *) ax_gcc_arch="prescott pentium4 pentiumpro" ;;
