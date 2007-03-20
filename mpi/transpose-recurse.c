@@ -216,7 +216,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 			       O, I, p->block, m * p->tblock, comm2, 
 			       p->I != p->O
 			       ? TRANSPOSED_IN : (p->flags & TRANSPOSED_IN)));
-	  if (XM(any_true)(!cldtr, p->comm)) goto nada;
+	  if (XM(any_true)(!cldtr, comm2)) goto nada;
      }
      MPI_Comm_free(&comm2);
      
@@ -227,7 +227,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 			      (p->nx, b, p->vn,
 			       I, O, r * p->block, p->tblock, comm2, 
 			       TRANSPOSED_IN | (p->flags & TRANSPOSED_OUT)));
-	  if (XM(any_true)(!cldtm, p->comm)) goto nada;
+	  if (XM(any_true)(!cldtm, comm2)) goto nada;
      }
      MPI_Comm_free(&comm2);
 
