@@ -79,7 +79,7 @@ $\d1\ \\times \d2\$
 \d1\ x \d2\ x \d3\
 @end ifinfo
 @html
-\d1\&nbsp;&times;&nbsp;\d2\&times;&nbsp;\d3\
+\d1\&nbsp;&times;&nbsp;\d2\&nbsp;&times;&nbsp;\d3\
 @end html
 @tex
 $\d1\ \\times \d2\ \\times \d3\$
@@ -104,7 +104,7 @@ $n_\k\$
 n[1] x n[0] x n[2] x ... x n[d-1]
 @end ifinfo
 @html
-n<sub>1</sub>&nbsp;&times;&nbsp;n<sub>0</sub>&nbsp;&times;&nbsp;n<sub>2</sub>&nbsp;&times;&nbsp;&hellip;&nbsp;&times;&nbsp;n<sub>d-1</sub>
+n<sub>1</sub>&nbsp;&times;&nbsp;n<sub>0</sub>&nbsp;&times;&nbsp;n<sub>2</sub>&nbsp;&times;&hellip;&times;&nbsp;n<sub>d-1</sub>
 @end html
 @tex
 $n_1 \\times n_0 \\times n_2 \\times \\cdots \\times n_{d-1}$
