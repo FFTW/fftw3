@@ -242,8 +242,14 @@ static void fill1_comm_sched(int *sched, int which_pe, int npes)
      A(s == npes);
 }
 
-/* sort the communication schedule sched for npes so that the schedule
-   on process sortpe is ascending or descending (!ascending). */
+/* Sort the communication schedule sched for npes so that the schedule
+   on process sortpe is ascending or descending (!ascending).  This is
+   necessary to allow in-place transposes when the problem does not
+   divide equally among the processes.  In this case there is one
+   process where the incoming blocks are bigger/smaller than the
+   outgoing blocks and thus have to be received in
+   descending/ascending order, respectively, to avoid overwriting data
+   before it is sent. */
 static void sort1_comm_sched(int *sched, int npes, int sortpe, int ascending)
 {
      int *sortsched, i;
