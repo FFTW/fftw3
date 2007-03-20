@@ -88,12 +88,10 @@ problem *XM(mkproblem_rdft2)(const dtensor *sz, INT vn,
 {
      problem_mpi_rdft2 *ego =
           (problem_mpi_rdft2 *)X(mkproblem)(sizeof(problem_mpi_rdft2), &padt);
-     int n_pes, lastdim;
+     int n_pes;
 
      A(XM(dtensor_validp)(sz) && FINITE_RNK(sz->rnk) && sz->rnk > 1);
      MPI_Comm_size(comm, &n_pes);
-     A(n_pes >= XM(num_blocks_total)(sz, IB)
-       && n_pes >= XM(num_blocks_total)(sz, OB));
      A(vn >= 0);
      A(kind == R2HC || kind == HC2R);
 
@@ -102,27 +100,20 @@ problem *XM(mkproblem_rdft2)(const dtensor *sz, INT vn,
 	  I = O = JOIN_TAINT(I, O);
 
      ego->sz = XM(dtensor_canonical)(sz, 0);
-     lastdim = ego->sz->rnk - 1;
-     A(ego->sz->dims[lastdim].n == ego->sz->dims[lastdim].b[IB]
-       && ego->sz->dims[lastdim].n == ego->sz->dims[lastdim].b[OB]);
+#ifdef FFTW_DEBUG
+     ego->sz->dims[sz->rnk - 1].n = sz->dims[sz->rnk - 1].n / 2 + 1;
+     A(n_pes >= XM(num_blocks_total)(ego->sz, IB)
+       && n_pes >= XM(num_blocks_total)(ego->sz, OB));
+     ego->sz->dims[sz->rnk - 1].n = sz->dims[sz->rnk - 1].n;
+#endif
 
      ego->vn = vn;
      ego->I = I;
      ego->O = O;
      ego->kind = kind;
 
-     /* canonicalize: replace TRANSPOSED_IN with TRANSPOSED_OUT by
-        swapping the first two dimensions (for rnk > 2)
-        (for rnk == 2, we can't do this, grr...) */
-     if ((flags & TRANSPOSED_IN) && ego->sz->rnk > 2) {
-	  ddim dim0 = ego->sz->dims[0];
-	  ego->sz->dims[0] = ego->sz->dims[1];
-	  ego->sz->dims[1] = dim0;
-	  flags &= ~TRANSPOSED_IN;
-	  flags ^= TRANSPOSED_OUT;
-     }
-     /* We may end up only supporting TRANSPOSED_OUT for r2c
-	and TRANSPOSED_IN for c2r transforms. */
+     /* We only support TRANSPOSED_OUT for r2c and TRANSPOSED_IN for
+	c2r transforms. */
 
      ego->flags = flags;
 

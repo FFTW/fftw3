@@ -39,7 +39,7 @@ static const solvtab s =
      SOLVTAB(XM(rdft_serial_register)),
      SOLVTAB(XM(rdft_rank1_bigvec_register)),
      SOLVTAB(XM(rdft2_rank_geq2_register)),
-     /* SOLVTAB(XM(rdft2_rank_geq2_transposed_register)), */
+     SOLVTAB(XM(rdft2_rank_geq2_transposed_register)),
      SOLVTAB(XM(rdft2_serial_register)),
      SOLVTAB_END
 };

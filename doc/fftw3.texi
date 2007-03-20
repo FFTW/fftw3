@@ -4789,10 +4789,7 @@ data, similar to the serial r2c and c2r interfaces.
 
 Documentation pending.
 
-Limitations: Currently, @code{FFTW_MPI_TRANSPOSED_IN} and
-@code{FFTW_MPI_TRANSPOSED_OUT} are not yet supproted for the MPI r2c
-and c2r transforms.  Parallel one-dimensional real-data DFTs are also
-not supported.
+Parallel one-dimensional real-data DFTs are not supported.
 
 @c ------------------------------------------------------------
 @node Other Multi-dimensional Real-data MPI Transforms, FFTW MPI Transposes, Multi-dimensional MPI DFT of Real Data, Distributed-memory FFTW with MPI

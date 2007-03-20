@@ -88,15 +88,20 @@ static dtensor *mkdtensor_api(int rnk, const XM(ddim) *dims0)
      return x;
 }
 
-static dtensor *default_sz(int rnk, const XM(ddim) *dims0, int n_pes)
+static dtensor *default_sz(int rnk, const XM(ddim) *dims0, int n_pes,
+			   int rdft2)
 {
      dtensor *sz = XM(mkdtensor)(rnk);
      dtensor *sz0 = mkdtensor_api(rnk, dims0);
      block_kind k;
      int i;
 
-     for (i = 0; i < rnk; ++i) {
+     for (i = 0; i < rnk; ++i)
 	  sz->dims[i].n = dims0[i].n;
+
+     if (rdft2) sz->dims[rnk-1].n = dims0[rnk-1].n / 2 + 1;
+
+     for (i = 0; i < rnk; ++i) {
 	  sz->dims[i].b[IB] = dims0[i].ib ? dims0[i].ib : sz->dims[i].n;
 	  sz->dims[i].b[OB] = dims0[i].ob ? dims0[i].ob : sz->dims[i].n;
      }
@@ -115,6 +120,8 @@ static dtensor *default_sz(int rnk, const XM(ddim) *dims0, int n_pes)
 		    np = n_pes / nb;
 	       }
      }
+
+     if (rdft2) sz->dims[rnk-1].n = dims0[rnk-1].n;
 
      XM(dtensor_destroy)(sz0);
      sz0 = XM(dtensor_canonical)(sz, 0);
@@ -177,7 +184,7 @@ ptrdiff_t XM(local_size_guru)(int rnk, const XM(ddim) *dims0,
 
      MPI_Comm_rank(comm, &my_pe);
      MPI_Comm_size(comm, &n_pes);
-     sz = default_sz(rnk, dims0, n_pes);
+     sz = default_sz(rnk, dims0, n_pes, 0);
 
      /* Now, we must figure out how much local space the user should
 	allocate (or at least an upper bound).  This depends strongly
@@ -488,7 +495,7 @@ X(plan) XM(plan_guru_dft)(int rnk, const XM(ddim) *dims0,
 	       return 0;
 
      MPI_Comm_size(comm, &n_pes);
-     sz = default_sz(rnk, dims0, n_pes);
+     sz = default_sz(rnk, dims0, n_pes, 0);
 
      if (XM(num_blocks_total)(sz, IB) > n_pes
 	 || XM(num_blocks_total)(sz, OB) > n_pes) {
@@ -585,7 +592,7 @@ X(plan) XM(plan_guru_r2r)(int rnk, const XM(ddim) *dims0,
      k = X(map_r2r_kind)(rnk, kind);
 
      MPI_Comm_size(comm, &n_pes);
-     sz = default_sz(rnk, dims0, n_pes);
+     sz = default_sz(rnk, dims0, n_pes, 0);
 
      if (XM(num_blocks_total)(sz, IB) > n_pes
 	 || XM(num_blocks_total)(sz, OB) > n_pes) {
@@ -682,13 +689,15 @@ static X(plan) plan_guru_rdft2(int rnk, const XM(ddim) *dims0,
 	       return 0;
 
      MPI_Comm_size(comm, &n_pes);
-     sz = default_sz(rnk, dims0, n_pes);
+     sz = default_sz(rnk, dims0, n_pes, 1);
 
+     sz->dims[rnk-1].n = dims0[rnk-1].n / 2 + 1;
      if (XM(num_blocks_total)(sz, IB) > n_pes
 	 || XM(num_blocks_total)(sz, OB) > n_pes) {
 	  XM(dtensor_destroy)(sz);
 	  return 0;
      }
+     sz->dims[rnk-1].n = dims0[rnk-1].n;
 
      if (kind == R2HC)
 	  return X(mkapiplan)(0, flags,

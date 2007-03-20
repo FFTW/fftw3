@@ -7,9 +7,6 @@ things:
 
  * There is no Fortran-callable interface yet.
 
- * The TRANSPOSED_IN/TRANSPOSED_OUT flags are not yet supported
-   for r2c/c2r transforms.
-
  * There is no support for 1d r2c/c2r transforms (real-data DFTs).
    (Most likely, this feature will *not* be present in FFTW 3.2;
    currently, we only plan to support 1d complex DFTs in MPI.)
