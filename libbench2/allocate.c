@@ -62,7 +62,8 @@ void problem_alloc(bench_problem *p)
 	  bench_real *in;
 	  bench_complex *out;
 
-	  p->iphyssz = p->in_place ? (isz > osz*2 ? isz : osz*2) : isz;
+	  isz = isz > osz*2 ? isz : osz*2;
+	  p->iphyssz = isz;
 	  p->inphys = in = (bench_real *) bench_malloc(p->iphyssz * sizeof(bench_real));
 	  p->in = in - ilb;
 	  
@@ -79,7 +80,8 @@ void problem_alloc(bench_problem *p)
 	  bench_real *out;
 	  bench_complex *in;
 
-	  p->ophyssz = p->in_place ? (osz > isz*2 ? osz : isz*2) : osz;
+	  osz = osz > isz*2 ? osz : isz*2;
+	  p->ophyssz = osz;
 	  p->outphys = out = (bench_real *) bench_malloc(p->ophyssz * sizeof(bench_real));
 	  p->out = out - olb;
 	  
