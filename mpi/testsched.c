@@ -34,9 +34,8 @@
    was unavoidable for odd numbers of processes, since this is the
    case for the soccer-timetabling problem.  However, because of the
    self-communication step, we can use the self-communication to fill
-   in the stalls.  (I vaguely recall a user pointing out this error to
-   me a long time ago, but I can't find the email.)  This greatly
-   simplifies the process re-sorting algorithm. */
+   in the stalls.  (Thanks to Ralf Wildenhues for pointing this out.)
+   This greatly simplifies the process re-sorting algorithm. */
 
 /**********************************************************************/
 
