@@ -113,6 +113,7 @@ typedef struct {
      int iphyssz, ophyssz;
      char *pstring;
      void *userinfo; /* user can store whatever */
+     int scrambled_in, scrambled_out; /* hack for MPI */
 
      /* internal hack so that we can use verifier in FFTW test program */
      void *ini, *outi; /* if nonzero, point to imag. parts for dft */

@@ -246,6 +246,7 @@ bench_problem *problem_parse(const char *s)
      p->destroy_input = 0;
      p->split = 0;
      p->userinfo = 0;
+     p->scrambled_in = p->scrambled_out = 0;
      p->sz = p->vecsz = 0;
      p->ini = p->outi = 0;
      p->pstring = (char *) bench_malloc(sizeof(char) * (strlen(s) + 1));
@@ -265,6 +266,11 @@ bench_problem *problem_parse(const char *s)
 	 case 'c': p->kind = PROBLEM_COMPLEX; ++s; goto L1;
 	 case 'k': p->kind = PROBLEM_R2R; ++s; goto L1;
 	 case 't': transpose = 1; ++s; goto L1;
+	      
+	 /* hack for MPI: */
+	 case '[': p->scrambled_in = 1; ++s; goto L1;
+	 case ']': p->scrambled_out = 1; ++s; goto L1;
+
 	 default : ;
      }
 

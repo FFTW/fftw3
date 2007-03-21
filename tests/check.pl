@@ -96,11 +96,11 @@ sub do_problem {
 	if ($problem =~ /r/ && $problem !~ /x/) { return; } # no 1d r2c
 	if ($problem =~ /k/ && $problem !~ /x/) { return; } # no 1d r2r
 	if ($problem =~ /r/ && $problem =~ /v/) { return; } # TODO
-	if ($mpi_transposed_in) {
+	if ($mpi_transposed_in || $problem =~ /\[/) {
 	    if ($problem !~ /x/) { return; } # no 1d transposed_in
 	    if ($problem =~ /r/ && $problem !~ /b/) { return; } # only c2r
 	}
-	if ($mpi_transposed_out) {
+	if ($mpi_transposed_out || $problem =~ /\]/) {
 	    if ($problem !~ /x/) { return; } # no 1d transposed_out
 	    if ($problem =~ /r/ && $problem =~ /b/) { return; } # only r2c
 	}
@@ -226,6 +226,11 @@ sub one_random_test {
 	my $v = int(1 + rand($g));
 	$sz = "${sz}*${v}" if ($vtype == 1);
 	$sz = "${sz}v${v}" if ($vtype == 2);
+    }
+    if ($mpi) {
+	my $stype = int(rand(3));
+	$sz = "]${sz}" if ($stype == 1);
+	$sz = "[${sz}" if ($stype == 2);
     }
     if ($is_r2r) {
 	do_problem("ik$sz", 1);
