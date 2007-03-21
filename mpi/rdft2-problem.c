@@ -60,14 +60,15 @@ static void zero(const problem *ego_)
 {
      const problem_mpi_rdft2 *ego = (const problem_mpi_rdft2 *) ego_;
      R *I = ego->I;
-     INT i, N, nlast;
+     dtensor *sz;
+     INT i, N;
      int my_pe;
 
+     sz = XM(dtensor_copy)(ego->sz);
+     sz->dims[sz->rnk - 1].n = sz->dims[sz->rnk - 1].n / 2 + 1;
      MPI_Comm_rank(ego->comm, &my_pe);
-     N = 2 * ego->vn * XM(total_block)(ego->sz, IB, my_pe);
-     nlast = ego->sz->dims[ego->sz->rnk - 1].n;
-     A(ego->sz->dims[ego->sz->rnk - 1].b[IB] = nlast);
-     N = (N / nlast) * (nlast/2 + 1);
+     N = 2 * ego->vn * XM(total_block)(sz, IB, my_pe);
+     XM(dtensor_destroy)(sz);
      for (i = 0; i < N; ++i) I[i] = K(0.0);
 }
 
