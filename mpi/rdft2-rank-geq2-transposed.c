@@ -77,14 +77,14 @@ static void apply_c2r(const plan *ego_, R *I, R *O)
      plan_dft *cld2;
      plan_rdft *cldt;
      
-     /* DFT local dimensions */
+     /* IDFT local dimensions */
      cld2 = (plan_dft *) ego->cld2;
      if (ego->preserve_input) {
-	  cld2->apply(ego->cld2, I, I+1, O, O+1);
+	  cld2->apply(ego->cld2, I+1, I, O+1, O);
 	  I = O;
      }
      else
-	  cld2->apply(ego->cld2, I, I+1, I, I+1);
+	  cld2->apply(ego->cld2, I+1, I, I+1, I);
 
      /* global transpose */
      cldt = (plan_rdft *) ego->cldt;
@@ -152,7 +152,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      R *r0, *r1, *cr, *ci, *ri, *ii, *ro, *io, *I, *O;
      tensor *sz;
      int i, my_pe, n_pes;
-     INT nrest, n1;
+     INT nrest, n1, b1;
      static const plan_adt padt = {
           XM(rdft2_solve), awake, print, destroy
      };
@@ -182,12 +182,12 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  r1 = (r0 = O) + p->vn;
 	  ci = (cr = O) + 1;
 	  if (ego->preserve_input || NO_DESTROY_INPUTP(plnr)) {
-	       ii = (ri = I) + 1;
-	       io = (ro = O) + 1;
+	       ri = (ii = I) + 1;
+	       ro = (io = O) + 1;
 	       I = O;
 	  }
 	  else
-	       io = ii = (ro = ri = I) + 1;
+	       ro = ri = (io = ii = I) + 1;
      }
 
      MPI_Comm_rank(p->comm, &my_pe);
@@ -215,26 +215,32 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
 
      nrest *= p->vn;
-     n1 = p->sz->rnk == 2 ? p->sz->dims[1].n/2+1 : p->sz->dims[1].n;
+     n1 = p->sz->dims[1].n;
+     b1 = p->sz->dims[1].b[k2];
+     if (p->sz->rnk == 2) { /* n1 dimension is cut in ~half */
+	  n1 = n1 / 2 + 1;
+	  b1 = b1 == p->sz->dims[1].n ? n1 : b1;
+     }
+
      if (p->kind == R2HC)
 	  cldt = X(mkplan_d)(plnr,
 			     XM(mkproblem_transpose)(
 				  p->sz->dims[0].n, n1, nrest * 2,
 				  I, O,
-				  p->sz->dims[0].b[IB], p->sz->dims[1].b[OB], 
+				  p->sz->dims[0].b[IB], b1,
 				  p->comm, 0));
      else
 	  cldt = X(mkplan_d)(plnr,
 			     XM(mkproblem_transpose)(
 				  n1, p->sz->dims[0].n, nrest * 2,
 				  I, O,
-				  p->sz->dims[1].b[IB], p->sz->dims[0].b[OB], 
+				  b1, p->sz->dims[0].b[OB], 
 				  p->comm, 0));
      if (XM(any_true)(!cldt, p->comm)) goto nada;
 
      {
 	  INT is = p->sz->dims[0].n * nrest * 2;
-	  INT b = XM(block)(n1, p->sz->dims[1].b[k2], my_pe);
+	  INT b = XM(block)(n1, b1, my_pe);
 	  cld2 = X(mkplan_d)(plnr,
 			     X(mkproblem_dft_d)(X(mktensor_1d)(
 						     p->sz->dims[0].n,
