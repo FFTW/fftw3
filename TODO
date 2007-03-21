@@ -1,7 +1,5 @@
 TODO before FFTW-$2\pi$:
 
-* MPI version
-
 * DCT/DST codelets?  which kinds?
 
 * investigate the addition-chain trig computation
