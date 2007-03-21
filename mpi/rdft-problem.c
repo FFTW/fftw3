@@ -124,9 +124,12 @@ problem *XM(mkproblem_rdft)(const dtensor *sz, INT vn,
      /* canonicalize: replace TRANSPOSED_IN with TRANSPOSED_OUT by
         swapping the first two dimensions (for rnk > 1) */
      if ((flags & TRANSPOSED_IN) && ego->sz->rnk > 1) {
+	  rdft_kind k = ego->kind[0];
 	  ddim dim0 = ego->sz->dims[0];
 	  ego->sz->dims[0] = ego->sz->dims[1];
 	  ego->sz->dims[1] = dim0;
+	  ego->kind[0] = ego->kind[1];
+	  ego->kind[1] = k;
 	  flags &= ~TRANSPOSED_IN;
 	  flags ^= TRANSPOSED_OUT;
      }
