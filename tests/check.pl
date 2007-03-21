@@ -19,6 +19,10 @@ $do_random = 0;
 $keepgoing = 0;
 $flushcount = 42;
 
+$mpi = 0;
+$mpi_transposed_in = 0;
+$mpi_transposed_out = 0;
+
 sub make_options {
     my $options = $default_options;
     $options = "--verify-rounds=$rounds $options" if $rounds;
@@ -29,6 +33,8 @@ sub make_options {
     $options = "-o estimate $options" if $estimate;
     $options = "-o wisdom $options" if $wisdom;
     $options = "-o nthreads=$nthreads $options" if ($nthreads > 1);
+    $options = "-obflag=30 $options" if $mpi_transposed_in;
+    $options = "-obflag=31 $options" if $mpi_transposed_out;
     return $options;
 }
 
@@ -81,6 +87,23 @@ sub do_problem {
 	&& ($problem =~ /i.*x/
 	    || $problem =~ /v/ || $problem =~ /\*/)) {
 	return; # cannot do real split inplace-multidimensional or vector
+    }
+
+    # in --mpi mode, restrict to problems supported by MPI code
+    if ($mpi) {
+	if ($problem =~ /\//) { return; } # no split
+	if ($problem =~ /\*/) { return; } # no non-contiguous vectors
+	if ($problem =~ /r/ && $problem !~ /x/) { return; } # no 1d r2c
+	if ($problem =~ /k/ && $problem !~ /x/) { return; } # no 1d r2r
+	if ($problem =~ /r/ && $problem =~ /v/) { return; } # TODO
+	if ($mpi_transposed_in) {
+	    if ($problem !~ /x/) { return; } # no 1d transposed_in
+	    if ($problem =~ /r/ && $problem !~ /b/) { return; } # only c2r
+	}
+	if ($mpi_transposed_out) {
+	    if ($problem !~ /x/) { return; } # no 1d transposed_out
+	    if ($problem =~ /r/ && $problem =~ /b/) { return; } # only r2c
+	}
     }
 
     # size-1 redft00 is not defined/doable
@@ -241,6 +264,14 @@ sub parse_arguments (@)
 	elsif ($arglist[0] =~ /^--verify-rounds=(.+)$/) { $rounds = $1; }
 	elsif ($arglist[0] =~ /^--count=(.+)$/) { $maxcount = $1; }
 	elsif ($arglist[0] =~ /^-c=(.+)$/) { $maxcount = $1; }
+	elsif ($arglist[0] =~ /^--flushcount=(.+)$/) { $flushcount = $1; }
+	elsif ($arglist[0] =~ /^--maxsize=(.+)$/) { $maxsize = $1; }
+
+	elsif ($arglist[0] eq '--mpi') { ++$mpi; }
+	elsif ($arglist[0] eq '--mpi-transposed-in') {
+	    ++$mpi; ++$mpi_transposed_in; }
+	elsif ($arglist[0] eq '--mpi-transposed-out') {
+	    ++$mpi; ++$mpi_transposed_out; }
 	
 	elsif ($arglist[0] eq '-0d') { ++$do_0d; }
 	elsif ($arglist[0] eq '-1d') { ++$do_1d; }
