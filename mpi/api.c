@@ -226,7 +226,7 @@ ptrdiff_t XM(local_size_guru)(int rnk, const XM(ddim) *dims0,
                                       my_pe) + howmany - 1) / howmany);
      }
      else if (rnk == 1) {
-	  if (howmany >= n_pes && !flags) { /* dft-rank1-bigvec */
+	  if (howmany >= n_pes && !MPI_FLAGS(flags)) { /* dft-rank1-bigvec */
 	       ptrdiff_t n[2], start[2];
 	       dtensor *sz2 = XM(mkdtensor)(2);
 	       sz2->dims[0] = sz->dims[0];
