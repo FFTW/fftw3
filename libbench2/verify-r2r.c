@@ -381,8 +381,9 @@ static double racmp(R *a, R *b, int n, const char *test, double tol)
      if (d > tol) {
 	  ovtpvt_err("Found relative error %e (%s)\n", d, test);
 	  {
-	       int i;
-	       for (i = 0; i < n; ++i)
+	       int i, N;
+	       N = n > 300 && verbose <= 2 ? 300 : n;
+	       for (i = 0; i < N; ++i)
 		    ovtpvt_err("%8d %16.12f   %16.12f\n", i, 
 			       (double) a[i],
 			       (double) b[i]);
