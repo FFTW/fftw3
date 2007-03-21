@@ -19,7 +19,7 @@ FFTW 3.2alpha2
   missing, e.g. Fortran support.)  See mpi/README and also the MPI
   section of the manual.
 
-* Significantly faster r2c transforms, especially on machines with SIMD.
+* Significantly faster r2c/c2r transforms, especially on machines with SIMD.
 
 * Rewritten multi-threaded support for better performance by
   re-using a fixed pool of threads rather than continually
@@ -36,8 +36,8 @@ FFTW 3.2alpha2
 
 * Added --with-g77-wrappers configure option to force inclusion
   of g77 wrappers, in addition to whatever is needed for the
-  detected Fortran compilers.  This is many intended for GNU/Linux
-  distros switching to gfortran, but wishing to include both
+  detected Fortran compilers.  This is mainly intended for GNU/Linux
+  distros switching to gfortran that wish to include both
   gfortran and g77 support in FFTW.
 
 * In manual, renamed "guru execute" functions to "new-array execute"
@@ -45,7 +45,7 @@ FFTW 3.2alpha2
   (The programming interface is unchanged.)
 
 * Add missing __declspec attribute to threads API functions when compiling
-  for Windows (thanks to Robert O. Morris for the bug report)
+  for Windows; thanks to Robert O. Morris for the bug report.
 
 * Fixed missing return value from dfftw_init_threads in Fortran;
   thanks to Markus Wetzstein for the bug report.
