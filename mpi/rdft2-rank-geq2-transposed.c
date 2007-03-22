@@ -203,13 +203,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
      nrest = 1; for (i = 1; i < sz->rnk; ++i) nrest *= sz->dims[i].n;
      {
+	  INT ivs = 1 + (p->kind == HC2R), ovs = 1 + (p->kind == R2HC);
           INT is = sz->dims[0].n * sz->dims[0].is;
           INT b = XM(block)(p->sz->dims[0].n, p->sz->dims[0].b[k1], my_pe);
 	  sz->dims[p->sz->rnk - 2].n = p->sz->dims[p->sz->rnk - 1].n;
 	  cld1 = X(mkplan_d)(plnr,
                              X(mkproblem_rdft2_d)(sz,
 						  X(mktensor_2d)(b, is, is,
-								 p->vn, 2, 2),
+								p->vn,ivs,ovs),
 						  r0, r1, cr, ci, p->kind));
 	  if (XM(any_true)(!cld1, p->comm)) goto nada;
      }

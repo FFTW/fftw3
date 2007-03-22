@@ -95,7 +95,6 @@ sub do_problem {
 	if ($problem =~ /\*/) { return; } # no non-contiguous vectors
 	if ($problem =~ /r/ && $problem !~ /x/) { return; } # no 1d r2c
 	if ($problem =~ /k/ && $problem !~ /x/) { return; } # no 1d r2r
-	if ($problem =~ /r/ && $problem =~ /v/) { return; } # TODO
 	if ($mpi_transposed_in || $problem =~ /\[/) {
 	    if ($problem !~ /x/) { return; } # no 1d transposed_in
 	    if ($problem =~ /r/ && $problem !~ /b/) { return; } # only c2r

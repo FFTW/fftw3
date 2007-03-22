@@ -100,6 +100,7 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 
      MPI_Comm_rank(p->comm, &my_pe);
      if (my_pe == 0 && p->vn > 0) {
+	  INT ivs = 1 + (p->kind == HC2R), ovs = 1 + (p->kind == R2HC);
 	  int i, rnk = p->sz->rnk;
 	  tensor *sz = X(mktensor)(p->sz->rnk);
 	  sz->dims[rnk - 1].is = sz->dims[rnk - 1].os = 2 * p->vn;
@@ -110,10 +111,10 @@ static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)
 	       sz->dims[i - 1].n = p->sz->dims[i - 1].n;
 	  }
 	  sz->dims[rnk - 1].n = p->sz->dims[rnk - 1].n;
-	  
+
 	  cld = X(mkplan_d)(plnr,
 			    X(mkproblem_rdft2_d)(sz,
-						 X(mktensor_1d)(p->vn, 2, 2),
+						 X(mktensor_1d)(p->vn,ivs,ovs),
 						 r0, r1, cr, ci, p->kind));
      }
      else { /* idle process: make nop plan */
