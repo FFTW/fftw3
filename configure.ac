@@ -357,7 +357,6 @@ AX_GCC_ALIGNS_STACK()
 dnl override CFLAGS selection when debugging
 if test "${enable_debug}" = "yes"; then
 	CFLAGS="-g"
-	LDFLAGS="-static"
 fi
 
 dnl add gcc warnings, in debug/maintainer mode only
