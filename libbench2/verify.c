@@ -35,7 +35,7 @@ void verify_problem(bench_problem *p, int rounds, double tol)
      }
 
      if (verbose)
-	  ovtpvt("%g %g %g\n", e.l, e.i, e.s);
+	  ovtpvt("%s %g %g %g\n", p->pstring, e.l, e.i, e.s);
 }
 
 void verify(const char *param, int rounds, double tol)
@@ -43,7 +43,10 @@ void verify(const char *param, int rounds, double tol)
      bench_problem *p;
 
      p = problem_parse(param);
-     BENCH_ASSERT(can_do(p));
+     if (!can_do(p)) {
+	  ovtpvt_err("No can_do for %s\n", p->pstring);
+	  BENCH_ASSERT(0);
+     }
      problem_alloc(p);
      problem_zero(p);
      setup(p);
