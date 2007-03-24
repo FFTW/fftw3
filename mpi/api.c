@@ -123,6 +123,10 @@ static dtensor *default_sz(int rnk, const XM(ddim) *dims0, int n_pes,
 
      if (rdft2) sz->dims[rnk-1].n = dims0[rnk-1].n;
 
+     /* punt for 1d prime */
+     if (rnk == 1 && X(is_prime)(sz->dims[0].n))
+	  sz->dims[0].b[IB] = sz->dims[0].b[OB] = sz->dims[0].n;
+
      XM(dtensor_destroy)(sz0);
      sz0 = XM(dtensor_canonical)(sz, 0);
      XM(dtensor_destroy)(sz);
