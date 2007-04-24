@@ -17,10 +17,12 @@ AM_CFLAGS = $(SIMD_CFLAGS)
 noinst_LTLIBRARIES = librdft_simd_codelets.la
 
 HC2CFDFTV = hc2cfdftv_2.c hc2cfdftv_4.c hc2cfdftv_6.c hc2cfdftv_8.c	\
-hc2cfdftv_10.c hc2cfdftv_12.c hc2cfdftv_16.c hc2cfdftv_32.c
+hc2cfdftv_10.c hc2cfdftv_12.c hc2cfdftv_16.c hc2cfdftv_32.c \
+hc2cfdftv_20.c # hc2cfdftv_30.c
 
 HC2CBDFTV = hc2cbdftv_2.c hc2cbdftv_4.c hc2cbdftv_6.c hc2cbdftv_8.c	\
-hc2cbdftv_10.c hc2cbdftv_12.c hc2cbdftv_16.c hc2cbdftv_32.c
+hc2cbdftv_10.c hc2cbdftv_12.c hc2cbdftv_16.c hc2cbdftv_32.c \
+hc2cbdftv_20.c # hc2cbdftv_30.c
 
 ###########################################################################
 SIMD_CODELETS = $(HC2CFDFTV) $(HC2CBDFTV)
