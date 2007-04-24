@@ -26,7 +26,7 @@ n1fv_20.c n1fv_25.c # n1fv_30.c n1fv_40.c n1fv_50.c
 # as above, with restricted input vector stride
 N2F = n2fv_2.c n2fv_4.c n2fv_6.c n2fv_8.c n2fv_10.c n2fv_12.c	\
 n2fv_14.c n2fv_16.c n2fv_32.c n2fv_64.c \
-n2fv_10.c n2fv_20.c # n2fv_30.c n2fv_40.c n2fv_50.c
+n2fv_20.c # n2fv_30.c n2fv_40.c n2fv_50.c
 
 # as above, but FFTW_BACKWARD
 N1B = n1bv_2.c n1bv_3.c n1bv_4.c n1bv_5.c n1bv_6.c n1bv_7.c n1bv_8.c	\
@@ -36,7 +36,7 @@ n1bv_20.c n1bv_25.c # n1bv_30.c n1bv_40.c n1bv_50.c
 
 N2B = n2bv_2.c n2bv_4.c n2bv_6.c n2bv_8.c n2bv_10.c n2bv_12.c	\
 n2bv_14.c n2bv_16.c n2bv_32.c n2bv_64.c \
-n2bv_10.c n2bv_20.c # n2bv_30.c n2bv_40.c n2bv_50.c
+n2bv_20.c # n2bv_30.c n2bv_40.c n2bv_50.c
 
 # split-complex codelets 
 N2S = n2sv_4.c n2sv_8.c n2sv_16.c n2sv_32.c n2sv_64.c
@@ -55,7 +55,7 @@ T3F = t3fv_4.c t3fv_8.c t3fv_16.c t3fv_32.c \
 t3fv_5.c t3fv_10.c t3fv_20.c t3fv_25.c
 T1FU = t1fuv_2.c t1fuv_3.c t1fuv_4.c t1fuv_5.c t1fuv_6.c t1fuv_7.c	\
 t1fuv_8.c t1fuv_9.c t1fuv_10.c \
-t1fuv_5.c t1fuv_10.c t1fuv_20.c t1fuv_25.c
+t1fuv_20.c t1fuv_25.c
 
 # as above, but FFTW_BACKWARD
 T1B = t1bv_2.c t1bv_3.c t1bv_4.c t1bv_5.c t1bv_6.c t1bv_7.c t1bv_8.c	\
@@ -69,7 +69,7 @@ T3B = t3bv_4.c t3bv_8.c t3bv_16.c t3bv_32.c \
 t3bv_5.c t3bv_10.c t3bv_20.c t3bv_25.c
 T1BU = t1buv_2.c t1buv_3.c t1buv_4.c t1buv_5.c t1buv_6.c t1buv_7.c	\
 t1buv_8.c t1buv_9.c t1buv_10.c \
-t1buv_5.c t1buv_10.c t1buv_20.c t1buv_25.c
+t1buv_20.c t1buv_25.c
 
 # split-complex codelets
 T1S = t1sv_2.c t1sv_4.c t1sv_8.c t1sv_16.c t1sv_32.c #t1sv_64.c
