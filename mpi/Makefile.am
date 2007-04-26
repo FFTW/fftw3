@@ -35,31 +35,35 @@ mpi_bench_LDADD = libfftw3@PREC_SUFFIX@_mpi.la $(LIBFFTWTHREADS) $(top_builddir)
 
 CHECK = $(top_srcdir)/tests/check.pl
 NUMCHECK=10
-CHECKOPTS = --verbose --random --maxsize=10000 -c=$(NUMCHECK)
+CHECKSIZE=10000
+CHECKOPTS = --verbose --random --maxsize=$(CHECKSIZE) -c=$(NUMCHECK)
 
 check-local: mpi-bench$(EXEEXT)
 	perl -w $(CHECK) $(CHECKOPTS) --mpi `pwd`/mpi-bench
 	@echo "--------------------------------------------------------------"
-	@echo "         MPI FFTW transforms passed basic tests, 1 CPU"
+	@echo "     MPI FFTW transforms passed "$(NUMCHECK)" tests, 1 CPU"
 	@echo "--------------------------------------------------------------"
 	perl -w $(CHECK) $(CHECKOPTS) --mpi "$(MPIRUN) -np 2 `pwd`/mpi-bench"
 	@echo "--------------------------------------------------------------"
-	@echo "         MPI FFTW transforms passed basic tests, 2 CPUs"
+	@echo "      MPI FFTW transforms passed "$(NUMCHECK)" tests, 2 CPUs"
 	@echo "--------------------------------------------------------------"
 	perl -w $(CHECK) $(CHECKOPTS) --mpi "$(MPIRUN) -np 3 `pwd`/mpi-bench"
 	@echo "--------------------------------------------------------------"
-	@echo "         MPI FFTW transforms passed basic tests, 3 CPUs"
+	@echo "      MPI FFTW transforms passed "$(NUMCHECK)" tests, 3 CPUs"
 	@echo "--------------------------------------------------------------"
 	perl -w $(CHECK) $(CHECKOPTS) --mpi "$(MPIRUN) -np 4 `pwd`/mpi-bench"
 	@echo "--------------------------------------------------------------"
-	@echo "         MPI FFTW transforms passed basic tests, 4 CPUs"
+	@echo "      MPI FFTW transforms passed "$(NUMCHECK)" tests, 4 CPUs"
 	@echo "--------------------------------------------------------------"
 if SMP
 	perl -w $(CHECK) $(CHECKOPTS) --nthreads=2 "$(MPIRUN) -np 3 `pwd`/mpi-bench"
 	@echo "--------------------------------------------------------------"
-	@echo "         MPI FFTW threaded transforms passed basic tests!"
+	@echo "      MPI FFTW threaded transforms passed "$(NUMCHECK)" tests!"
 	@echo "--------------------------------------------------------------"
 endif
 
 bigcheck: mpi-bench$(EXEEXT)
-	$(MAKE) $(AM_MAKEFLAGS) NUMCHECK=100 check-local
+	$(MAKE) $(AM_MAKEFLAGS) NUMCHECK=100 CHECKSIZE=60000 check-local
+
+smallcheck: mpi-bench$(EXEEXT)
+	$(MAKE) $(AM_MAKEFLAGS) NUMCHECK=2 check-local
