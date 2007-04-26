@@ -109,7 +109,7 @@ static int applicable(const solver *ego_, const problem *p_,
 
      /* FIXME: this heuristic is broken on Cell, where vrank-geq1
 	is slow */
-#if 0
+#ifndef HAVE_CELL
      /* Heuristic: if the vector stride is greater than the transform
         sz, don't use (prefer to do the vector loop first with a
         vrank-geq1 plan). */
@@ -117,6 +117,8 @@ static int applicable(const solver *ego_, const problem *p_,
 	  if (p->vecsz->rnk > 0 &&
 	      X(tensor_min_stride)(p->vecsz) > X(tensor_max_index)(p->sz))
 	       return 0;
+#else
+     UNUSED(p);
 #endif
 
      return 1;
