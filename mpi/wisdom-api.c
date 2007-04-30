@@ -60,17 +60,17 @@ void XM(gather_wisdom)(MPI_Comm comm_)
      }
      if (n_pes > 1 && my_pe < 2) { /* import process 1 -> 0 */
 	  if (my_pe == 1) {
-	       wis = fftw_export_wisdom_to_string();
+	       wis = X(export_wisdom_to_string)();
 	       wislen = strlen(wis) + 1;
 	       MPI_Send(&wislen, 1, FFTW_MPI_SIZE_T, 0, 111, comm);
 	       MPI_Send(wis, wislen, MPI_CHAR, 0, 222, comm);
-	       fftw_free(wis);
+	       X(free)(wis);
 	  }
 	  else /* my_pe == 0 */ {
 	       MPI_Recv(&wislen, 1, FFTW_MPI_SIZE_T, 1, 111, comm, &status);
 	       wis = (char *) MALLOC(wislen * sizeof(char), OTHER);
 	       MPI_Recv(wis, wislen, MPI_CHAR, 1, 222, comm, &status);
-	       if (!fftw_import_wisdom_from_string(wis))
+	       if (!X(import_wisdom_from_string)(wis))
 		    MPI_Abort(comm, 1);
 	       X(ifree)(wis);
 	  }
@@ -97,16 +97,16 @@ void XM(broadcast_wisdom)(MPI_Comm comm_)
 	  MPI_Bcast(&wislen, 1, FFTW_MPI_SIZE_T, 0, comm);
 	  wis = (char *) MALLOC(wislen * sizeof(char), OTHER);
 	  MPI_Bcast(wis, wislen, MPI_CHAR, 0, comm);
-	  if (!fftw_import_wisdom_from_string(wis))
+	  if (!X(import_wisdom_from_string)(wis))
 	       MPI_Abort(comm, 1);
 	  X(ifree)(wis);
      }
      else /* my_pe == 0 */ {
-	  wis = fftw_export_wisdom_to_string();
+	  wis = X(export_wisdom_to_string)();
 	  wislen = strlen(wis) + 1;
 	  MPI_Bcast(&wislen, 1, FFTW_MPI_SIZE_T, 0, comm);
 	  MPI_Bcast(wis, wislen, MPI_CHAR, 0, comm);
-	  fftw_free(wis);
+	  X(free)(wis);
      }
      MPI_Comm_free(&comm);
 }
