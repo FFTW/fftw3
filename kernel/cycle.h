@@ -111,14 +111,14 @@ INLINE_ELAPSED(inline)
 #if defined(HAVE_READ_REAL_TIME) && defined(HAVE_TIME_BASE_TO_TIME) && !defined(HAVE_TICK_COUNTER)
 typedef timebasestruct_t ticks;
 
-static inline ticks getticks(void)
+static __inline ticks getticks(void)
 {
      ticks t;
      read_real_time(&t, TIMEBASE_SZ);
      return t;
 }
 
-static inline double elapsed(ticks t1, ticks t0) /* time in nanoseconds */
+static __inline double elapsed(ticks t1, ticks t0) /* time in nanoseconds */
 {
      time_base_to_time(&t1, TIMEBASE_SZ);
      time_base_to_time(&t0, TIMEBASE_SZ);
