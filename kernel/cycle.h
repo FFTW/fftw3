@@ -217,7 +217,7 @@ static __inline double elapsed(ticks t1, ticks t0)
 /*
  * X86-64 cycle counter
  */
-#if (defined(__GNUC__) || defined(__ICC)) && defined(__x86_64__)  && !defined(HAVE_TICK_COUNTER)
+#if (defined(__GNUC__) || defined(__ICC) || defined(__SUNPRO_C)) && defined(__x86_64__)  && !defined(HAVE_TICK_COUNTER)
 typedef unsigned long long ticks;
 
 static __inline__ ticks getticks(void)
