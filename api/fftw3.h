@@ -44,10 +44,6 @@
  *
  ****************************************************************************/
 
-/* header file for fftw3 */
-/* (The following is the CVS ID for this file, *not* the version
-   number of FFTW:) */
-
 #ifndef FFTW3_H
 #define FFTW3_H
 
