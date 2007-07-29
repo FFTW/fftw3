@@ -270,7 +270,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      /* awake the twiddles for the dft part */
      switch (wakefulness) {
 	 case SLEEPY:
-	      X(ifree0)(ego->W);
+	      free(ego->W);
 	      ego->W = 0;
 	      break;
 	 default:
