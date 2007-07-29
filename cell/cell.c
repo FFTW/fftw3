@@ -96,8 +96,13 @@ void X(cell_activate_spes)(void)
 #ifdef HAVE_LIBSPE2
 #  if USE_PS_AREA
 	       spe_id[i] = spe_context_create(SPE_MAP_PS, NULL);
-	       ps_area[i] = (spe_spu_control_area_t *)
-		    spe_ps_area_get(spe_id[i], SPE_CONTROL_AREA);
+	       if (spe_id[i])
+		    ps_area[i] = (spe_spu_control_area_t *)
+			 spe_ps_area_get(spe_id[i], SPE_CONTROL_AREA);
+	       else { /* OS doesn't support SPE_MAP_PS */
+		    spe_id[i] = spe_context_create(0, NULL);
+		    ps_area[i] = NULL;
+	       }
 #  else
 	       spe_id[i] = spe_context_create(0, NULL);
 #  endif
@@ -171,9 +176,9 @@ void X(cell_spe_awake_all)(void)
      for (i = 0; i < nspe; ++i) {
 #ifdef HAVE_LIBSPE2
 #  if USE_PS_AREA
-	  if (ps_area[i]) /* NULL if not supported by OS */
+	  if (ps_area[i])
 	       ps_area[i]->SPU_In_Mbox = 0;
-	  else
+	  else /* NULL if not supported by OS */
 #  endif
 	  spe_in_mbox_write(spe_id[i], &zero, 1, SPE_MBOX_ANY_NONBLOCKING);
 #else
