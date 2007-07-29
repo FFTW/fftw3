@@ -38,6 +38,8 @@ NUMCHECK=10
 CHECKSIZE=10000
 CHECKOPTS = --verbose --random --maxsize=$(CHECKSIZE) -c=$(NUMCHECK)
 
+if MPI
+
 check-local: mpi-bench$(EXEEXT)
 	perl -w $(CHECK) $(CHECKOPTS) --mpi `pwd`/mpi-bench
 	@echo "--------------------------------------------------------------"
@@ -67,3 +69,5 @@ bigcheck: mpi-bench$(EXEEXT)
 
 smallcheck: mpi-bench$(EXEEXT)
 	$(MAKE) $(AM_MAKEFLAGS) NUMCHECK=2 check-local
+
+endif
