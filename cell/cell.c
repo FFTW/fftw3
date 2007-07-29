@@ -21,6 +21,8 @@
 
 #if HAVE_CELL
 
+#define USE_PS_AREA 1
+
 #ifdef HAVE_LIBSPE2
 #  include <pthread.h>
 #  include <libspe2.h>
@@ -44,6 +46,9 @@ static struct spu_context *ctx[MAX_NSPE];
 #ifdef HAVE_LIBSPE2
 static pthread_t spe_pthread[MAX_NSPE];
 static spe_context_ptr_t spe_id[MAX_NSPE];
+#  if USE_PS_AREA
+static spe_spu_control_area_t *ps_area[MAX_NSPE];
+#  endif
 #else
 static speid_t spe_id[MAX_NSPE];
 #endif
@@ -89,7 +94,13 @@ void X(cell_activate_spes)(void)
 	       ctx[i] = X(cell_aligned_malloc)(sizeof(*ctx[i]));
 
 #ifdef HAVE_LIBSPE2
+#  if USE_PS_AREA
+	       spe_id[i] = spe_context_create(SPE_MAP_PS, NULL);
+	       ps_area[i] = (spe_spu_control_area_t *)
+		    spe_ps_area_get(spe_id[i], SPE_CONTROL_AREA);
+#  else
 	       spe_id[i] = spe_context_create(0, NULL);
+#  endif
 	       spe_program_load(spe_id[i], &X(spu_fftw));
 	       pthread_create(&spe_pthread[i], NULL, ppu_thread, 
 			      (void *) ((uintptr_t) i));
@@ -159,6 +170,11 @@ void X(cell_spe_awake_all)(void)
 
      for (i = 0; i < nspe; ++i) {
 #ifdef HAVE_LIBSPE2
+#  if USE_PS_AREA
+	  if (ps_area[i]) /* NULL if not supported by OS */
+	       ps_area[i]->SPU_In_Mbox = 0;
+	  else
+#  endif
 	  spe_in_mbox_write(spe_id[i], &zero, 1, SPE_MBOX_ANY_NONBLOCKING);
 #else
 	  spe_write_in_mbox(spe_id[i], 0);
