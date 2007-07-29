@@ -56,7 +56,7 @@ void X(cell_copy)(R *I, R *O, const iodim *n, const iodim *v)
 	  struct spu_context *ctx = X(cell_get_ctx)(i);
 	  struct copy_context *c = &ctx->u.copy;
 
-	  ctx->op = SPE_COPY;
+	  ctx->op = FFTW_SPE_COPY;
 
 	  c->I = (uintptr_t)I;
 	  c->O = (uintptr_t)O;

@@ -86,10 +86,10 @@ struct copy_context {
 /* operations that the SPE's can execute */
 
 enum spu_op {
-     SPE_DFT,
-     SPE_TRANSPOSE,
-     SPE_COPY,
-     SPE_EXIT
+     FFTW_SPE_DFT,
+     FFTW_SPE_TRANSPOSE,
+     FFTW_SPE_COPY,
+     FFTW_SPE_EXIT
 };
 
 struct spu_context {
@@ -116,6 +116,7 @@ void X(dft_direct_cell_register)(planner *p);
 void X(ct_cell_direct_register)(planner *p);
 
 void *X(cell_aligned_malloc)(size_t n);
+
 void X(cell_activate_spes)(void);
 void X(cell_deactivate_spes)(void);
 

@@ -21,8 +21,14 @@
 
 #if HAVE_CELL
 
+#ifdef HAVE_LIBSPE2
+#  include <pthread.h>
+#  include <libspe2.h>
+#else /* !HAVE_LIBSPE2 */
+#  include <libspe.h>
+#endif /* !HAVE_LIBSPE2 */
+
 #include "fftw-cell.h"
-#include <libspe.h>
 #include <stdlib.h> /* posix_memalign */
 
 extern spe_program_handle_t X(spu_fftw);
@@ -35,7 +41,12 @@ void *X(cell_aligned_malloc)(size_t n)
 }
 
 static struct spu_context *ctx[MAX_NSPE];
+#ifdef HAVE_LIBSPE2
+static pthread_t spe_pthread[MAX_NSPE];
+static spe_context_ptr_t spe_id[MAX_NSPE];
+#else
 static speid_t spe_id[MAX_NSPE];
+#endif
 static int refcnt = 0;
 static int nspe = -1;
 
@@ -45,12 +56,28 @@ static void set_default_nspe(void)
 	  /* set NSPE to the maximum of 8 and the number of physical
 	     SPEs.  A two-processor Cell blade reports 16 SPEs, but we
 	     only want to use one processor by default. */
+#ifdef HAVE_LIBSPE2
+	  int phys = spe_cpu_info_get(SPE_COUNT_PHYSICAL_SPES, -1);
+#else
 	  int phys = spe_count_physical_spes();
+#endif
 	  if (phys > 8)
 	       phys = 8;
 	  X(cell_set_nspe)(phys);
      }
 }
+
+#ifdef HAVE_LIBSPE2
+static void *ppu_thread(void *arg)
+{
+     int rc, i = (int) ((uintptr_t) arg);
+     do {
+	  unsigned int entry = SPE_DEFAULT_ENTRY;
+	  rc = spe_context_run(spe_id[i], &entry, 0, ctx[i], NULL, NULL);
+     } while (rc > 0);
+     pthread_exit(NULL);
+}
+#endif
 
 void X(cell_activate_spes)(void)
 {
@@ -61,8 +88,15 @@ void X(cell_activate_spes)(void)
 	  for(i = 0; i < nspe; ++i) {
 	       ctx[i] = X(cell_aligned_malloc)(sizeof(*ctx[i]));
 
+#ifdef HAVE_LIBSPE2
+	       spe_id[i] = spe_context_create(0, NULL);
+	       spe_program_load(spe_id[i], &X(spu_fftw));
+	       pthread_create(&spe_pthread[i], NULL, ppu_thread, 
+			      (void *) ((uintptr_t) i));
+#else
 	       spe_id[i] = spe_create_thread(0, &X(spu_fftw), ctx[i],
 					     NULL, -1, 0);
+#endif
 	  }
      }
 }
@@ -71,15 +105,20 @@ void X(cell_deactivate_spes)(void)
 {
      if (--refcnt == 0) {
 	  int i;
-	  int status = 0;
 
 	  for (i = 0; i < nspe; ++i)
-	       ctx[i]->op = SPE_EXIT;
+	       ctx[i]->op = FFTW_SPE_EXIT;
 
 	  X(cell_spe_awake_all)();
 
 	  for (i = 0; i < nspe; ++i) {
+#ifdef HAVE_LIBSPE2
+	       pthread_join(spe_pthread[i], NULL);
+	       spe_context_destroy(spe_id[i]);
+#else
+	       int status = 0;
 	       spe_wait(spe_id[i], &status, 0);
+#endif
 	       free(ctx[i]);
 	       ctx[i] = 0;
 	  }
@@ -108,6 +147,9 @@ struct spu_context *X(cell_get_ctx)(int spe)
 void X(cell_spe_awake_all)(void)
 {
      int i;
+#ifdef HAVE_LIBSPE2
+     unsigned int zero = 0;
+#endif
 
      for (i = 0; i < nspe; ++i) {
 	  ctx[i]->done = 0;
@@ -116,7 +158,11 @@ void X(cell_spe_awake_all)(void)
      asm volatile ("sync");
 
      for (i = 0; i < nspe; ++i) {
+#ifdef HAVE_LIBSPE2
+	  spe_in_mbox_write(spe_id[i], &zero, 1, SPE_MBOX_ANY_NONBLOCKING);
+#else
 	  spe_write_in_mbox(spe_id[i], 0);
+#endif
      }
 }
 

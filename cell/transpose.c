@@ -48,7 +48,7 @@ void X(cell_transpose)(R *I, INT n, INT s0, INT s1, INT vl)
 	  struct spu_context *ctx = X(cell_get_ctx)(i);
 	  struct transpose_context *t = &ctx->u.transpose;
 
-	  ctx->op = SPE_TRANSPOSE;
+	  ctx->op = FFTW_SPE_TRANSPOSE;
 
 	  if (s0 == vl) {
 	       t->s0_bytes = s0 * sizeof(R);

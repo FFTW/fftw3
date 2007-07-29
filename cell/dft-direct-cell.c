@@ -198,7 +198,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  struct spu_context *ctx = X(cell_get_ctx)(i);
 	  struct dft_context *dft = &ctx->u.dft;
 
-	  ctx->op = SPE_DFT;
+	  ctx->op = FFTW_SPE_DFT;
 
 	  dft->r = ego->radices;
 	  dft->n = ego->n;

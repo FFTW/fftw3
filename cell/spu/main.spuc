@@ -42,19 +42,19 @@ int main(unsigned long long spu_id, unsigned long long parm)
 	  X(spu_dma1d)(&ctx, parm, sizeof(ctx), MFC_GET_CMD);
 
 	  switch (ctx.op) {
-	      case SPE_DFT:
+	      case FFTW_SPE_DFT:
 		   X(spu_do_dft)(&ctx.u.dft);
 		   break;
 
-	      case SPE_TRANSPOSE:
+	      case FFTW_SPE_TRANSPOSE:
 		   X(spu_do_transpose)(&ctx.u.transpose);
 		   break;
 
-	      case SPE_COPY:
+	      case FFTW_SPE_COPY:
 		   X(spu_do_copy)(&ctx.u.copy);
 		   break;
 
-	      case SPE_EXIT:
+	      case FFTW_SPE_EXIT:
 		   return 0;
 	  }
 
