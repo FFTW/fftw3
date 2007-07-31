@@ -550,7 +550,7 @@ static FFTW(plan) mkplan_transpose(bench_problem *p, unsigned flags)
 
      if (p->vecsz->rnk == 3) {
 	  for (i = 0; i < 3; ++i)
-	       if (d[i].is == 1 && d[i].is == 1) {
+	       if (d[i].is == 1 && d[i].os == 1) {
 		    vn = d[i].n;
 		    ix = (i + 1) % 3;
 		    iy = (i + 2) % 3;
