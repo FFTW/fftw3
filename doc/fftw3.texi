@@ -2146,9 +2146,17 @@ the planning process, and can also impose (or lift) restrictions on the
 type of transform algorithm that is employed.
 
 @emph{Important:} the planner overwrites the input array during
-planning, so you should initialize your input data after creating the
-plan.  The only exception to this is the @code{FFTW_ESTIMATE} flag, as
-mentioned below.
+planning unless a saved plan (@pxref{Wisdom}) is available for that
+problem, so you should initialize your input data after creating the
+plan.  The only exceptions to this are the @code{FFTW_ESTIMATE} and
+@code{FFTW_WISDOM_ONLY} flags, as mentioned below.
+
+In all cases, if wisdom is available for the given problem that was
+created with equal-or-greater planning rigor, then it is used instead.
+For example, in @code{FFTW_ESTIMATE} mode any available wisdom is
+used, whereas in @code{FFTW_PATIENT} mode only wisdom created in
+patient or exhaustive mode can be used.  @xref{Words of Wisdom-Saving
+Plans}.
 
 @subsubheading Planning-rigor flags
 @itemize @bullet
@@ -2180,6 +2188,19 @@ longer planning time (especially for large transforms).
 even wider range of algorithms, including many that we think are
 unlikely to be fast, to produce the most optimal plan but with a
 substantially increased planning time.
+
+@item
+@ctindex FFTW_WISDOM_ONLY
+@code{FFTW_WISDOM_ONLY} is a special planning mode in which the plan
+is only created if wisdom is available for the given problem, and
+otherwise a @code{NULL} plan is returned.  This can be combined with
+other flags, e.g. @samp{FFTW_WISDOM_ONLY | FFTW_PATIENT} creates a
+plan only if wisdom is available that was created in
+@code{FFTW_PATIENT} or @code{FFTW_EXHAUSTIVE} mode.  The
+@code{FFTW_WISDOM_ONLY} flag is intended for users who need to detect
+whether wisdom is available; for example, if wisdom is not available
+one may wish to allocate new arrays for planning so that user data is
+not overwritten.
 
 @end itemize
 

@@ -91,9 +91,9 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
      int pat, pat_max;
 
      if (flags & FFTW_WISDOM_ONLY) {
-	  /* special mode that returns a plan only if wisdom is present,
-	     and returns 0 otherwise.  Phil Dumont requested this
-	     feature, do not remove. */
+	  /* Special mode that returns a plan only if wisdom is present,
+	     and returns 0 otherwise.  This is now documented in the manual,
+	     as a way to detect whether wisdom is available for a problem. */
 	  flags_used_for_planning = flags;
 	  pln = mkplan0(plnr, flags, prb, 0, WISDOM_ONLY);
      } else {
