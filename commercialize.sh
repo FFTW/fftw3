@@ -61,7 +61,7 @@ EOF
 EOF
  done
 
- ./configure
+ ./configure --enable-sse2
  make dist
  mv $newtarball ..
 )
