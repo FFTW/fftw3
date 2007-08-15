@@ -4250,7 +4250,7 @@ planner routines share data (e.g. wisdom and trigonometric tables)
 between calls and plans.
 
 The upshot is that the only thread-safe (re-entrant) routine in FFTW is
-@code{fftw_execute} (and the guru variants thereof).  All other routines
+@code{fftw_execute} (and the new-array variants thereof).  All other routines
 (e.g. the planner) should only be called from one thread at a time.  So,
 for example, you can wrap a semaphore lock around any calls to the
 planner; even more simply, you can just create all of your plans from
