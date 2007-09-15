@@ -139,8 +139,13 @@ static void os_destroy_worker(void)
 }
 
 #elif defined(__WIN32__) || defined(_WIN32) || defined(_WINDOWS)
+/* hack: windef.h defines INT for its own purposes and this causes
+   a conflict with our own INT in ifftw.h.  Divert the windows
+   definition into another name unlikely to cause a conflict */
+#define INT magnus_ab_INTegro_seclorum_nascitur_ordo
 #include <windows.h>
 #include <process.h>
+#undef INT
 
 typedef HANDLE os_mutex_t;
 
