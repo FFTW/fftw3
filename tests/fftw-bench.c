@@ -23,6 +23,10 @@ int amnesia = 0;
 extern void install_hook(void);  /* in hook.c */
 extern void uninstall_hook(void);  /* in hook.c */
 
+#if HAVE_CELL
+extern void FFTW(cell_set_nspe)(int); /* in fftw-cell.h */
+#endif
+
 void useropt(const char *arg)
 {
      int x;
