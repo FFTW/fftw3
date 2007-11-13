@@ -1,3 +1,26 @@
+FFTW 3.2alpha3
+
+* Performance improvements for sizes with factors of 5 and 10.
+
+* Documented FFTW_WISDOM_ONLY flag, at the suggestion of Mario
+  Emmenlauer and Phil Dumont.
+
+* Port Cell code to SDK2.1 (libspe2), as opposed to the old libspe1 code.
+
+* Performance improvements in Cell code for N < 32k, thanks to Jan Wagner
+  for the suggestions.
+
+* Cycle counter for Sun x86_64 compiler, and compilation fix in cycle
+  counter for AIX/xlc (thanks to Jeff Haferman for the bug report).
+
+* Fixed incorrect type prefix in MPI code that prevented wisdom routines
+  from working in single precision (thanks to Eric A. Borisch for the report).
+
+* Added 'make check' for MPI code (which still fails in a couple corner
+  cases, but should be much better than in alpha2).
+
+* Many other small fixes.
+
 FFTW 3.2alpha2
 
 * Support for the Cell processor, donated by IBM Research; see README.Cell
