@@ -158,8 +158,10 @@ problems may appear:
 
 \courier{gcc\} 3.4.[0123] for x86 produces incorrect SSE2 code for
 FFTW when \courier{-O2\} (the best choice for FFTW) is used, causing
-FFTW to crash (\courier{make check\} crashes).  This bug is fixed
-in \courier{gcc\} 3.4.4.
+FFTW to crash (\courier{make check\} crashes).  This bug is fixed in
+\courier{gcc\} 3.4.4.  On x86_64 (amd64/em64t), \courier{gcc\} 3.4.4
+reportedly still has a similar problem, but this is fixed as of
+\courier{gcc\} 3.4.6.
 
 \courier{gcc-3.2\} for x86 produces incorrect SIMD code if
 \courier{-O3\} is used.  The same compiler produces incorrect SIMD
