@@ -5856,7 +5856,7 @@ Note especially @code{--help} to list all flags and
 @cindex portability
 @code{--enable-portable-binary}: Disable compiler optimizations that
 would produce unportable binaries. @b{Important:} Use this if you are
-distributing compiled binaries to people who many not use exactly the
+distributing compiled binaries to people who may not use exactly the
 same processor as you.
 
 @item
