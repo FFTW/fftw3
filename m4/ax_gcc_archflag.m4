@@ -49,7 +49,7 @@ if test "x$ax_gcc_arch" = xyes; then
 ax_gcc_arch=""
 if test "$cross_compiling" = no; then
 case $host_cpu in
-  i[[3456]]86*|x86_64*) # use cpuid codes, in part from x86info-1.7 by D. Jones
+  i[[3456]]86*|x86_64*|amd64*) # use cpuid codes, in part from x86info-1.7 by D. Jones
      AX_GCC_X86_CPUID(0)
      AX_GCC_X86_CPUID(1)
      case $ax_cv_gcc_x86_cpuid_0 in
@@ -66,7 +66,7 @@ case $host_cpu in
 	    *6??:*:*:*) ax_gcc_arch=pentiumpro ;;
             *f3[[347]]:*:*:*|*f4[[1347]]:*:*:*)
 		case $host_cpu in
-                  x86_64*) ax_gcc_arch="nocona pentium4 pentiumpro" ;;
+                  x86_64*|amd64*) ax_gcc_arch="nocona pentium4 pentiumpro" ;;
                   *) ax_gcc_arch="prescott pentium4 pentiumpro" ;;
                 esac ;;
             *f??:*:*:*) ax_gcc_arch="pentium4 pentiumpro";;
@@ -159,7 +159,7 @@ for arch in $ax_gcc_arch; do
     flags="-mtune=$arch"
     # -mcpu=$arch and m$arch generate nonportable code on every arch except
     # x86.  And some other arches (e.g. Alpha) don't accept -mtune.  Grrr.
-    case $host_cpu in i*86|x86_64*) flags="$flags -mcpu=$arch -m$arch";; esac
+    case $host_cpu in i*86|x86_64*|amd64*) flags="$flags -mcpu=$arch -m$arch";; esac
   else
     flags="-march=$arch -mcpu=$arch -m$arch"
   fi
