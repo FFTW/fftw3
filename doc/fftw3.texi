@@ -3375,7 +3375,7 @@ end of the wisdom data.
 @code{fftw_export_wisdom_to_string} returns a pointer to a
 @code{NULL}-terminated string holding the wisdom data. This string is
 dynamically allocated, and it is the responsibility of the caller to
-deallocate it with @code{fftw_free} when it is no longer needed.
+deallocate it with @code{free} when it is no longer needed.
 
 All of these routines export the wisdom in the same format, which we
 will not document here except to say that it is LISP-like ASCII text
