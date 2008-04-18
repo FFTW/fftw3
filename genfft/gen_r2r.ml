@@ -50,6 +50,7 @@ type mode =
 let mode = ref NONE
 let normsqr = ref 1
 let unitary = ref false
+let noloop = ref false
 
 let speclist = [
   "-with-istride",
@@ -123,6 +124,10 @@ let speclist = [
   "-unitary",
   Arg.Unit(fun () -> unitary := true),
   " unitary normalization (up overall scale factor)";
+
+  "-noloop",
+  Arg.Unit(fun () -> noloop := true),
+  " no vector loop";
 ]
 
 let sqrt_half = Complex.inverse_int_sqrt 2
@@ -184,7 +189,7 @@ let generate n mode =
   let odag = store_output n oloc output in
   let annot = standard_optimizer odag in
 
-  let body = Block (
+  let body = if !noloop then Block([], [Asch annot]) else Block (
     [Decl ("INT", i)],
     [For (Expr_assign (CVar i, CVar v),
 	  Binop (" > ", CVar i, Integer 0),
@@ -202,12 +207,17 @@ let generate n mode =
   let tree =
     Fcn ((if !Magic.standalone then "void" else "static void"), name,
 	 ([Decl (C.constrealtypep, iarray);
-	   Decl (C.realtypep, oarray);
-	   Decl (C.stridetype, istride);
-	   Decl (C.stridetype, ostride);
-	   Decl ("INT", v);
-	   Decl ("INT", "ivs");
-	   Decl ("INT", "ovs")]),
+	   Decl (C.realtypep, oarray)]
+	  @ (if stride_fixed !uistride then [] 
+               else [Decl (C.stridetype, istride)])
+	  @ (if stride_fixed !uostride then [] 
+	       else [Decl (C.stridetype, ostride)])
+	  @ (if !noloop then [] else
+               [Decl ("INT", v)]
+	       @ (if stride_fixed !uivstride then [] 
+                    else [Decl ("INT", "ivs")])
+	       @ (if stride_fixed !uovstride then [] 
+                    else [Decl ("INT", "ovs")]))),
 	 add_constants body)
 
   in let desc = 
