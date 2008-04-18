@@ -48,9 +48,20 @@ let nan x = CE (NaN x, makeNum Number.zero)
 
 let half = inverse_int 2
 
+let times3x3 (CE (a, b)) (CE (c, d)) = 
+  CE (makePlus [makeTimes (c, makePlus [a; makeUminus (b)]);
+	        makeTimes (b, makePlus [c; makeUminus (d)])],
+      makePlus [makeTimes (a, makePlus [c; d]);
+	        makeUminus(makeTimes (c, makePlus [a; makeUminus (b)]))])
+
 let times (CE (a, b)) (CE (c, d)) = 
-  CE (makePlus [makeTimes (a, c); makeUminus (makeTimes (b, d))],
-      makePlus [makeTimes (a, d); makeTimes (b, c)])
+  if not !Magic.threemult then
+    CE (makePlus [makeTimes (a, c); makeUminus (makeTimes (b, d))],
+        makePlus [makeTimes (a, d); makeTimes (b, c)])
+  else if is_constant c && is_constant d then
+    times3x3 (CE (a, b)) (CE (c, d))
+  else (* hope a and b are constant expressions *)
+    times3x3 (CE (c, d)) (CE (a, b))
 
 let ctimes (CE (a, _)) (CE (c, _)) = 
   CE (CTimes (a, c), makeNum Number.zero)

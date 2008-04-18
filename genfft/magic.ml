@@ -28,6 +28,7 @@ let circular_min = ref 64
 let rader_min = ref 13
 let rader_list = ref [5]
 let alternate_convolution = ref 17
+let threemult = ref false
 let inline_single = ref true
 let inline_loads = ref false
 let inline_loads_constants = ref false
@@ -77,6 +78,9 @@ let speclist = [
 
   "-rader-min", set_int rader_min,
   "<n> : Use Rader's algorithm for prime sizes >= <n>";
+
+  "-threemult", set_bool threemult, 
+  " Use 3-multiply complex multiplications";
 
   "-karatsuba-min", set_int karatsuba_min, undocumented;
   "-karatsuba-variant", set_int karatsuba_variant, undocumented;
