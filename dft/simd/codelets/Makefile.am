@@ -54,8 +54,7 @@ t2fv_5.c t2fv_10.c t2fv_20.c t2fv_25.c
 T3F = t3fv_4.c t3fv_8.c t3fv_16.c t3fv_32.c \
 t3fv_5.c t3fv_10.c t3fv_20.c t3fv_25.c
 T1FU = t1fuv_2.c t1fuv_3.c t1fuv_4.c t1fuv_5.c t1fuv_6.c t1fuv_7.c	\
-t1fuv_8.c t1fuv_9.c t1fuv_10.c \
-t1fuv_20.c t1fuv_25.c
+t1fuv_8.c t1fuv_9.c t1fuv_10.c
 
 # as above, but FFTW_BACKWARD
 T1B = t1bv_2.c t1bv_3.c t1bv_4.c t1bv_5.c t1bv_6.c t1bv_7.c t1bv_8.c	\
@@ -68,8 +67,7 @@ t2bv_5.c t2bv_10.c t2bv_20.c t2bv_25.c
 T3B = t3bv_4.c t3bv_8.c t3bv_16.c t3bv_32.c \
 t3bv_5.c t3bv_10.c t3bv_20.c t3bv_25.c
 T1BU = t1buv_2.c t1buv_3.c t1buv_4.c t1buv_5.c t1buv_6.c t1buv_7.c	\
-t1buv_8.c t1buv_9.c t1buv_10.c \
-t1buv_20.c t1buv_25.c
+t1buv_8.c t1buv_9.c t1buv_10.c
 
 # split-complex codelets
 T1S = t1sv_2.c t1sv_4.c t1sv_8.c t1sv_16.c t1sv_32.c #t1sv_64.c
