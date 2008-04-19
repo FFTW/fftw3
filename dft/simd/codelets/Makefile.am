@@ -85,9 +85,8 @@ Q1F = q1fv_2.c q1fv_4.c q1fv_5.c q1fv_8.c
 Q1B = q1bv_2.c q1bv_4.c q1bv_5.c q1bv_8.c
 
 ###########################################################################
-SIMD_CODELETS = $(N1F) $(N1B) $(N2F) $(N2B) $(N2S) $(T1F) $(T2F)	\
-$(T3F) $(T1FU) $(T1B) $(T2B) $(T3B) $(T1BU) $(T1S) $(T2S) $(Q1F)	\
-$(Q1B)
+SIMD_CODELETS = $(N1F) $(N1B) $(N2F) $(N2B) $(N2S) $(T1FU) $(T1F)	\
+$(T2F) $(T3F) $(T1BU) $(T1B) $(T2B) $(T3B) $(T1S) $(T2S) $(Q1F) $(Q1B)
 
 if HAVE_SIMD
 ALL_CODELETS = $(SIMD_CODELETS)
