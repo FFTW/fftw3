@@ -360,16 +360,20 @@ let rec count_flops_expr_func (adds, mults, fmas) = function
 let count_flops f = 
     fold_left count_flops_expr_func (0, 0, 0) (fcn_to_expr_list f)
 
+let count_constants f = 
+    length (unique_constants (flatten (map expr_to_constants (fcn_to_expr_list f))))
+
 let arith_complexity f =
   let (a, m, fmas) = count_flops f
   and v = count_stack_vars f
+  and c = count_constants f
   and mem = count_memory_acc f
-  in (a, m, fmas, v, mem)
+  in (a, m, fmas, v, c, mem)
 
 (* print the operation costs *)
 let print_cost f =
   let Fcn (_, _, _, _) = f 
-  and (a, m, fmas, v, mem) = arith_complexity f
+  and (a, m, fmas, v, c, mem) = arith_complexity f
   in
   "/*\n"^
   " * This function contains " ^
@@ -379,7 +383,8 @@ let print_cost f =
   (string_of_int a) ^ " additions, "  ^
   (string_of_int m) ^ " multiplications, " ^
   (string_of_int fmas) ^ " fused multiply/add),\n" ^
-  " * " ^ (string_of_int v) ^ " stack variables, and " ^
+  " * " ^ (string_of_int v) ^ " stack variables, " ^
+  (string_of_int c) ^ " constants, and " ^
   (string_of_int mem) ^ " memory accesses\n" ^
   " */\n"
 
