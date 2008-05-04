@@ -197,6 +197,12 @@ CFLAGS=" " trig.lo\}.
 the workaround is to compile the file it crashes on
 (\courier{t2_64.c\}) with a lower optimization level.
 
+\courier{gcc\} versions 4.1.2 to 4.2.0 for x86 reportedly miscompile
+FFTW 3.1's test program, causing \courier{make check\} to crash
+(\courier{gcc\} bug #26528).  The bug was reportedly fixed in
+\courier{gcc\} version 4.2.1 and later.  A workaround is to compile
+\courier{libbench2/verify-lib.c\} without optimization.
+
 \question 26aug:solarisSucks FFTW does not compile on Solaris, complaining about \courier{const\}.
 
 We know that at least on Solaris 2.5.x with Sun's compilers 4.2 you
