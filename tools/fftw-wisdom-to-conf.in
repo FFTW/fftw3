@@ -64,7 +64,7 @@ void ${prefix}configure_planner(void *plnr)
 EOF
 
 sed 's/ *(//' | cut -d" " -f1 | grep -v -- - | egrep -v '^ *\)*$' | sort | uniq | while read reg_nam; do
-    echo "    X($reg_nam)\\"
+    printf '    X(%s)\\\n' "$reg_nam"
 done
 
 cat <<EOF
