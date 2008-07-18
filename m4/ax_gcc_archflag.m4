@@ -69,7 +69,7 @@ case $host_cpu in
                   x86_64*|amd64*) ax_gcc_arch="nocona pentium4 pentiumpro" ;;
                   *) ax_gcc_arch="prescott pentium4 pentiumpro" ;;
                 esac ;;
-            *f??:*:*:*) ax_gcc_arch="pentium4 pentiumpro";;
+            *f??:*:*:*) ax_gcc_arch="native pentium4 pentiumpro";;
           esac ;;
        *:68747541:*:*) # AMD
           case $ax_cv_gcc_x86_cpuid_1 in
@@ -90,7 +90,7 @@ case $host_cpu in
 	    *f[[4cef8b]]?:*:*:*) ax_gcc_arch="athlon64 k8" ;;
 	    *f5?:*:*:*) ax_gcc_arch="opteron k8" ;;
 	    *f7?:*:*:*) ax_gcc_arch="athlon-fx opteron k8" ;;
-	    *f??:*:*:*) ax_gcc_arch="k8" ;;
+	    *f??:*:*:*) ax_gcc_arch="native k8" ;;
           esac ;;
 	*:746e6543:*:*) # IDT
 	   case $ax_cv_gcc_x86_cpuid_1 in
@@ -102,8 +102,8 @@ case $host_cpu in
      esac
      if test x"$ax_gcc_arch" = x; then # fallback
 	case $host_cpu in
-	  i586*) ax_gcc_arch=pentium ;;
-	  i686*) ax_gcc_arch=pentiumpro ;;
+	  i586*) ax_gcc_arch="native pentium" ;;
+	  i686*) ax_gcc_arch="native pentiumpro" ;;
         esac
      fi 
      ;;
@@ -145,7 +145,7 @@ case $host_cpu in
        *POWER5*|*power5*|*gr*|*gs*) ax_gcc_arch="power5 power4 970";;
        603ev|8240) ax_gcc_arch="$cputype 603e 603";;
        *Cell*) ax_gcc_arch="cellppu cell";;
-       *) ax_gcc_arch=$cputype ;;
+       *) ax_gcc_arch="$cputype native" ;;
      esac
      ax_gcc_arch="$ax_gcc_arch powerpc"
      ;;
