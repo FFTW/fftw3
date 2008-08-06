@@ -1,4 +1,4 @@
-NJOBS=2
+NJOBS=4
 
 darcs pull fftw@fftw.org:darcs/fftw3
 
