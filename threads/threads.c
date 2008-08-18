@@ -363,22 +363,28 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
 	       /* we do it ourselves */
 	       proc(d);
 	  } else {
+	       struct worker *q = 0;
+
 	       /* dispatch work W to some worker */
 	       os_sem_init(&w->done);
 
 	       WITH_QUEUE_LOCK({
 		    if (worker_queue) {
 			 /* a worker is available.  Remove it from the
-			    worker queue and wake it up */
-			 struct worker *q = worker_queue;
+			    worker queue */
+			 q = worker_queue;
 			 worker_queue = q->cdr;
-			 q->w = w;
-			 os_sem_up(&q->ready);
-		    } else {
-			 /* no worker is available.  Create one */
-			 os_create_worker(worker, w);
 		    }
 	       });
+
+	       if (q) {
+		    /* a worker is available, wake it up */
+		    q->w = w;
+		    os_sem_up(&q->ready);
+	       } else {
+		    /* no worker is available.  Create one */
+		    os_create_worker(worker, w);
+	       }
 	  }
      }
 
