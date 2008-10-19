@@ -141,6 +141,7 @@ static plan *mkcldw(const ct_solver *ego_,
      const S *ego = (const S *)ego_;
      P *pln;
      plan *cld = 0;
+     INT dm = ms * mstart;
 
      static const plan_adt padt = {
 	  0, awake, print, destroy
@@ -154,7 +155,7 @@ static plan *mkcldw(const ct_solver *ego_,
 			X(mkproblem_dft_d)(
 			     X(mktensor_1d)(r, irs, irs),
 			     X(mktensor_2d)(mcount, ms, ms, v, ivs, ivs),
-			     rio, iio, rio, iio)
+			     rio + dm, iio + dm, rio + dm, iio + dm)
 			);
      if (!cld) goto nada;
 
