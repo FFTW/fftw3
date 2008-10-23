@@ -27,6 +27,7 @@
 void verify_problem(bench_problem *p, int rounds, double tol)
 {
      errors e;
+     const char *pstring = p->pstring ? p->pstring : "<unknown problem>";
 
      switch (p->kind) {
 	 case PROBLEM_COMPLEX: verify_dft(p, rounds, tol, &e); break;
@@ -35,7 +36,7 @@ void verify_problem(bench_problem *p, int rounds, double tol)
      }
 
      if (verbose)
-	  ovtpvt("%s %g %g %g\n", p->pstring, e.l, e.i, e.s);
+	  ovtpvt("%s %g %g %g\n", pstring, e.l, e.i, e.s);
 }
 
 void verify(const char *param, int rounds, double tol)
