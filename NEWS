@@ -1,6 +1,9 @@
 * Fixed segfault due to unaligned access in certain obscure problems
   that use SSE and multiple threads.
 
+* MPI transforms not included, as they are still in alpha; the alpha
+  versions of the MPI transforms are in FFTW 3.3alpha1.
+
 FFTW 3.2alpha3
 
 * Performance improvements for sizes with factors of 5 and 10.

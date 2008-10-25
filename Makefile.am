@@ -14,7 +14,7 @@ endif
 ACLOCAL_AMFLAGS=-I ./m4
 
 SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft api threads \
-cell libbench2 . tests mpi doc tools
+cell libbench2 . tests doc tools
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in m4	\
 README.Cell
 
