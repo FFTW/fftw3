@@ -33,36 +33,21 @@
 #  include <unistd.h>
 #endif
 
-/* MUTEXES: Mutual exclusion devices that are only released by the thread
-   that acquired the lock.   Expected to be faster than the more general
-   semaphores below. */
-typedef pthread_mutex_t os_mutex_t;
-
-static void os_mutex_init(os_mutex_t *s) 
-{ 
-     pthread_mutex_init(s, (pthread_mutexattr_t *)0);
-}
-
-static void os_mutex_destroy(os_mutex_t *s) { pthread_mutex_destroy(s); }
-static void os_mutex_lock(os_mutex_t *s) { pthread_mutex_lock(s); }
-static void os_mutex_unlock(os_mutex_t *s) { pthread_mutex_unlock(s); }
-
-
-/* SEMAPHORES: Dijkstra-style semaphores where arbitrary threads can
-   execute up() and down().  We only need binary semaphores. */
+/* imlementation of semaphores and mutexes: */
 #if (defined(_POSIX_SEMAPHORES) && (_POSIX_SEMAPHORES >= 200112L))
 
-   /* use optional POSIX semaphores. */
+   /* If optional POSIX semaphores are supported, use them to
+      implement both semaphores and mutexes. */
 #  include <semaphore.h>
 #  include <errno.h>
 
    typedef sem_t os_sem_t;
 
-   static void os_sem_init(os_sem_t *s) { sem_init(s, 0, 0); }
+   static void os_sem_init(os_sem_t *s) { sem_init(s, 1, 0); }
    static void os_sem_destroy(os_sem_t *s) { sem_destroy(s); }
 
-   static void os_sem_down(os_sem_t *s) 
-   { 
+   static void os_sem_down(os_sem_t *s)
+   {
 	int err;
 	do {
 	     err = sem_wait(s);
@@ -72,7 +57,34 @@ static void os_mutex_unlock(os_mutex_t *s) { pthread_mutex_unlock(s); }
 
    static void os_sem_up(os_sem_t *s) { sem_post(s); }
 
-#else /* simulate semaphores with condition variables */
+   /*
+      The reason why we use sem_t to implement mutexes is that I have
+      seen mysterious hangs with glibc-2.7 and linux-2.6.22 when using
+      pthread_mutex_t, but no hangs with sem_t or with linux >=
+      2.6.24.  For lack of better information, sem_t looks like the
+      safest choice.
+   */
+   typedef sem_t os_mutex_t;
+   static void os_mutex_init(os_mutex_t *s) { sem_init(s, 1, 1); }
+   #define os_mutex_destroy os_sem_destroy
+   #define os_mutex_lock os_sem_down
+   #define os_mutex_unlock os_sem_up
+
+#else
+
+   /* If optional POSIX semaphores are not defined, use pthread
+      mutexes for mutexes, and simulate semaphores with condition
+      variables */
+   typedef pthread_mutex_t os_mutex_t;
+
+   static void os_mutex_init(os_mutex_t *s) 
+   { 
+	pthread_mutex_init(s, (pthread_mutexattr_t *)0);
+   }
+
+   static void os_mutex_destroy(os_mutex_t *s) { pthread_mutex_destroy(s); }
+   static void os_mutex_lock(os_mutex_t *s) { pthread_mutex_lock(s); }
+   static void os_mutex_unlock(os_mutex_t *s) { pthread_mutex_unlock(s); }
 
    typedef struct {
 	pthread_mutex_t m;
