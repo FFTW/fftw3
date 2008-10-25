@@ -41,7 +41,7 @@ CHECKOPTS = --verbose --random --maxsize=$(CHECKSIZE) -c=$(NUMCHECK)
 if MPI
 
 check-local: mpi-bench$(EXEEXT)
-	perl -w $(CHECK) $(CHECKOPTS) --mpi `pwd`/mpi-bench
+	perl -w $(CHECK) $(CHECKOPTS) --mpi "$(MPIRUN) -np 1 `pwd`/mpi-bench"
 	@echo "--------------------------------------------------------------"
 	@echo "     MPI FFTW transforms passed "$(NUMCHECK)" tests, 1 CPU"
 	@echo "--------------------------------------------------------------"
