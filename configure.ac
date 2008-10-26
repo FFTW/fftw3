@@ -520,8 +520,6 @@ AC_CONFIG_FILES([
    cell/Makefile
    cell/spu/Makefile
 
-   mpi/Makefile
-
    api/Makefile
 
    libbench2/Makefile
