@@ -528,6 +528,8 @@ AC_CONFIG_FILES([
 
    api/Makefile
 
+   mpi/Makefile
+
    libbench2/Makefile
    tests/Makefile
    doc/Makefile
