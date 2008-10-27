@@ -11,7 +11,7 @@ else
 GENFFT =
 endif
 
-ACLOCAL_AMFLAGS=-I ./m4
+ACLOCAL_AMFLAGS=-I m4
 
 SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft api threads \
 cell libbench2 . tests doc tools
