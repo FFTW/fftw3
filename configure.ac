@@ -147,7 +147,6 @@ dnl Checks for programs.
 AC_PROG_CC
 AX_COMPILER_VENDOR
 AC_PROG_CC_STDC
-AMX_PROG_AS     dnl AM_PROG_AS breaks at least one version of libtool
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
