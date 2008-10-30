@@ -287,6 +287,12 @@ static struct worker *dequeue(void)
 	       worker_queue = q->cdr;
      });
 
+     if (!q) {
+	  /* no worker is available.  Create one */
+	  q = make_worker();
+	  os_create_thread(worker, q);
+     }
+
      return q;
 }
 
@@ -309,10 +315,6 @@ static FFTW_WORKER worker(void *arg)
 
 	  /* signal that work is done */
 	  os_sem_up(&ego->done);
-
-	  os_sem_down(&ego->ready);
-
-	  enqueue(ego);
      }
 
      /* termination protocol */
@@ -405,13 +407,6 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
 	       proc(d);
 	  } else {
 	       struct worker *q = dequeue();
-
-	       if (!q) {
-		    /* no worker is available.  Create one */
-		    q = make_worker();
-		    os_create_thread(worker, q);
-	       }
-
 	       q->w = w;
 	       w->q = q;
 	       os_sem_up(&q->ready);
@@ -421,7 +416,7 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      for (i = 0; i < nthr - 1; ++i) { 
 	  struct work *w = &r[i];
 	  os_sem_down(&w->q->done);
-	  os_sem_up(&w->q->ready);
+	  enqueue(w->q);
      }
 
      STACK_FREE(r);
