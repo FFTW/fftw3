@@ -269,33 +269,6 @@ static struct worker *volatile worker_queue;
      os_mutex_unlock(&queue_lock);		\
 }
 
-static void enqueue(struct worker *q)
-{
-     WITH_QUEUE_LOCK({
-	  q->cdr = worker_queue;
-	  worker_queue = q;
-     });
-}
-
-static struct worker *dequeue(void)
-{
-     struct worker *q;
-
-     WITH_QUEUE_LOCK({
-	  q = worker_queue;
-	  if (q) 
-	       worker_queue = q->cdr;
-     });
-
-     if (!q) {
-	  /* no worker is available.  Create one */
-	  q = make_worker();
-	  os_create_thread(worker, q);
-     }
-
-     return q;
-}
-
 static FFTW_WORKER worker(void *arg)
 {
      struct worker *ego = (struct worker *)arg;
@@ -324,6 +297,34 @@ static FFTW_WORKER worker(void *arg)
      /* UNREACHABLE */
      return 0;
 }
+
+static void enqueue(struct worker *q)
+{
+     WITH_QUEUE_LOCK({
+	  q->cdr = worker_queue;
+	  worker_queue = q;
+     });
+}
+
+static struct worker *dequeue(void)
+{
+     struct worker *q;
+
+     WITH_QUEUE_LOCK({
+	  q = worker_queue;
+	  if (q) 
+	       worker_queue = q->cdr;
+     });
+
+     if (!q) {
+	  /* no worker is available.  Create one */
+	  q = make_worker();
+	  os_create_thread(worker, q);
+     }
+
+     return q;
+}
+
 
 static void kill_workforce(void)
 {
