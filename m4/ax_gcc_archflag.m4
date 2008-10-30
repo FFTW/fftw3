@@ -49,7 +49,7 @@ if test "x$ax_gcc_arch" = xyes; then
 ax_gcc_arch=""
 if test "$cross_compiling" = no; then
 case $host_cpu in
-  i[[3456]]86*|x86_64*|amd64*) # use cpuid codes, in part from x86info-1.7 by D. Jones
+  i[[3456]]86*|x86_64*|amd64*) # use cpuid codes, in part from x86info-1.21 by D. Jones
      AX_GCC_X86_CPUID(0)
      AX_GCC_X86_CPUID(1)
      case $ax_cv_gcc_x86_cpuid_0 in
@@ -62,8 +62,9 @@ case $host_cpu in
 	    *6a?:*[[234]]:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
 	    *6[[78b]]?:*:*:*) ax_gcc_arch="pentium3 pentiumpro" ;;
 	    *6[[9d]]?:*:*:*) ax_gcc_arch="pentium-m pentium3 pentiumpro" ;;
-	    *6[[e]]?:*:*:*) ax_gcc_arch="pentium-m pentium3 pentiumpro" ;; # Core Duo
-	    *6??:*:*:*) ax_gcc_arch=pentiumpro ;;
+	    *6[[e]]?:*:*:*) ax_gcc_arch="native pentium-m pentium3 pentiumpro" ;; # Core Duo
+	    *6f?:*:*:*) ax_gcc_arch="core2 native pentium-m pentium3 pentiumpro" ;;
+	    *6??:*:*:*) ax_gcc_arch="native pentiumpro" ;;
             *f3[[347]]:*:*:*|*f4[[1347]]:*:*:*)
 		case $host_cpu in
                   x86_64*|amd64*) ax_gcc_arch="nocona pentium4 pentiumpro" ;;
@@ -74,8 +75,8 @@ case $host_cpu in
        *:68747541:*:*) # AMD
           case $ax_cv_gcc_x86_cpuid_1 in
 	    *5[[67]]?:*:*:*) ax_gcc_arch=k6 ;;
-	    *5[[8d]]?:*:*:*) ax_gcc_arch="k6-2 k6" ;;
-	    *5[[9]]?:*:*:*) ax_gcc_arch="k6-3 k6" ;;
+	    *5[[8c]]?:*:*:*) ax_gcc_arch="k6-2 k6" ;;
+	    *5[[9d]]?:*:*:*) ax_gcc_arch="k6-3 k6" ;;
 	    *60?:*:*:*) ax_gcc_arch=k7 ;;
 	    *6[[12]]?:*:*:*) ax_gcc_arch="athlon k7" ;;
 	    *6[[34]]?:*:*:*) ax_gcc_arch="athlon-tbird k7" ;;
@@ -104,6 +105,7 @@ case $host_cpu in
 	case $host_cpu in
 	  i586*) ax_gcc_arch="native pentium" ;;
 	  i686*) ax_gcc_arch="native pentiumpro" ;;
+          x86_64*|amd64*) ax_gcc_arch="native" ;;
         esac
      fi 
      ;;
