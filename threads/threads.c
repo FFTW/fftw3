@@ -245,7 +245,7 @@ static struct worker *make_worker(void)
      return q;
 }
 
-static void *unmake_worker(struct worker *q)
+static void unmake_worker(struct worker *q)
 {
      os_sem_destroy(&q->done);
      os_sem_destroy(&q->ready);
