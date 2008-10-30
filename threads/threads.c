@@ -233,8 +233,8 @@ static void os_destroy_thread(void)
 struct worker {
      os_sem_t ready;
      os_sem_t done;
-     struct work *volatile w;
-     struct worker *volatile cdr;
+     struct work *w;
+     struct worker *cdr;
 };
 
 static struct worker *make_worker(void)
@@ -261,7 +261,7 @@ struct work {
 static os_mutex_t queue_lock;
 static os_sem_t termination_semaphore;
 
-static struct worker *volatile worker_queue;
+static struct worker *worker_queue;
 #define WITH_QUEUE_LOCK(what)			\
 {						\
      os_mutex_lock(&queue_lock);		\
@@ -335,11 +335,11 @@ static void kill_workforce(void)
      WITH_QUEUE_LOCK({
 	  /* tell all workers that they must terminate.  
 
-	  Because workers enqueue themselves before signaling the
-	  completion of the work, all workers belong to the worker queue
-	  if we get here.  Also, all workers are waiting at
-	  os_sem_down(ready), so we can hold the queue lock without
-	  deadlocking */
+	     Because workers enqueue themselves before signaling the
+	     completion of the work, all workers belong to the worker queue
+	     if we get here.  Also, all workers are waiting at
+	     os_sem_down(ready), so we can hold the queue lock without
+	     deadlocking */
 	  while (worker_queue) {
 	       struct worker *q = worker_queue;
 	       worker_queue = q->cdr;
@@ -393,9 +393,11 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      THREAD_ON; /* prevent debugging mode from failing under threads */
      STACK_MALLOC(struct work *, r, sizeof(struct work) * nthr);
 	  
+     /* distribute work: */
      for (i = 0; i < nthr; ++i) {
 	  struct work *w = &r[i];
 	  spawn_data *d = &w->d;
+
 	  d->max = (d->min = i * block_size) + block_size;
 	  if (d->max > loopmax)
 	       d->max = loopmax;
@@ -404,13 +406,15 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
 	  w->proc = proc;
 	   
 	  if (i == nthr - 1) {
-	       /* we do it ourselves */
+	       /* do the work ourselves */
 	       proc(d);
 	  } else {
-	       struct worker *q = dequeue();
-	       q->w = w;
-	       w->q = q;
-	       os_sem_up(&q->ready);
+	       /* assign a worker to W */
+	       w->q = dequeue();
+
+	       /* tell worker w->q to do it */
+	       w->q->w = w; /* Dirac could have written this */
+	       os_sem_up(&w->q->ready);
 	  }
      }
 
