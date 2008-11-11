@@ -1,8 +1,13 @@
+FFTW 3.2
+
+* Worked around apparent glibc bug that leads to rare hangs when freeing
+  semaphores.
+
 * Fixed segfault due to unaligned access in certain obscure problems
   that use SSE and multiple threads.
 
 * MPI transforms not included, as they are still in alpha; the alpha
-  versions of the MPI transforms are in FFTW 3.3alpha1.
+  versions of the MPI transforms have been moved to FFTW 3.3alpha1.
 
 FFTW 3.2alpha3
 

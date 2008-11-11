@@ -1,6 +1,6 @@
 .\" 
-.\" Copyright (c) 2003, 2007 Matteo Frigo
-.\" Copyright (c) 2003, 2007 Massachusetts Institute of Technology
+.\" Copyright (c) 2003, 2007-8 Matteo Frigo
+.\" Copyright (c) 2003, 2007-8 Massachusetts Institute of Technology
 .\" 
 .\" This program is free software; you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -183,8 +183,8 @@ Send bug reports to fftw@fftw.org.
 .SH AUTHORS
 Written by Steven G. Johnson and Matteo Frigo.
 
-Copyright (c) 2003, 2007 Matteo Frigo
+Copyright (c) 2003, 2007-8 Matteo Frigo
 .br
-Copyright (c) 2003, 2007 Massachusetts Institute of Technology
+Copyright (c) 2003, 2007-8 Massachusetts Institute of Technology
 .SH "SEE ALSO"
 fftw-wisdom-to-conf(1)
