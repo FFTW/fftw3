@@ -4436,6 +4436,16 @@ integer array arguments (@code{n}, @code{is}, and @code{os}) in the
 Fortran guru interface, all of whose lengths should be equal to the
 corresponding @code{rank} argument.
 
+@item
+The guru planner interface in Fortran does @emph{not} do any automatic
+translation between column-major and row-major; you are responsible
+for setting the strides etcetera to correspond to your Fortran arrays.
+However, as a slight bug that we are preserving for backwards
+compatibility, the @samp{plan_guru_r2r} in Fortran @emph{does} reverse the
+order of its @code{kind} array parameter, so the @code{kind} array
+of that routine should be in the reverse of the order of the iodim
+arrays (see above).
+
 @end itemize
 
 In general, you should take care to use Fortran data types that
