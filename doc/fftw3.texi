@@ -4108,11 +4108,12 @@ of shared-memory threads support.  Specifically, the FFTW threads
 package works with POSIX threads (available on most Unix variants,
 from GNU/Linux to MacOS X) and Win32 threads.  We also support using
 @uref{http://www.openmp.org,OpenMP}, enabled by using
-@code{--enable-openmp}.  (This may be useful if you are employing that
-sort of directive in your own code, in order to minimize conflicts.)
-If you have a shared-memory machine that uses a different threads API,
-it should be a simple matter of programming to include support for it;
-see the file @code{threads/threads.c} for more detail.
+@code{--enable-openmp} (@emph{instead} of @code{--enable-threads}).
+(This may be useful if you are employing that sort of directive in
+your own code, in order to minimize conflicts.)  If you have a
+shared-memory machine that uses a different threads API, it should be
+a simple matter of programming to include support for it; see the file
+@code{threads/threads.c} for more detail.
 
 Ideally, of course, you should also have multiple processors in order to
 get any benefit from the threaded transforms.
@@ -4978,7 +4979,10 @@ the threads routines are not compiled.
 compiler directives in order to induce parallelism rather than
 spawning its own threads directly.  Useful especially for programs
 already employing such directives, in order to minimize conflicts
-between different parallelization mechanisms.
+between different parallelization mechanisms.  Use either
+@code{--enable-openmp} or @code{--enable-threads}, not both; in either
+case the multi-threaded FFTW interface/library (@pxref{Multi-threaded
+FFTW}) is compiled (with different back ends).
 
 @item
 @code{--with-combined-threads}: By default, if @code{--enable-threads}
