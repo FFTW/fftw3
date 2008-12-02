@@ -218,8 +218,13 @@ fi
 AC_SUBST(CODELET_OPTIM)
 
 case "${ax_cv_c_compiler_vendor}" in
-   intel) # Stop icc from defining __GNUC__
-        AX_CHECK_COMPILER_FLAGS([-no-gcc], [CC="$CC -no-gcc"])
+   intel) # Stop icc from defining __GNUC__, except on MacOS where this fails
+        case "${host_os}" in
+            *darwin*) ;; # icc -no-gcc fails to compile some system headers
+            *) 
+	       AX_CHECK_COMPILER_FLAGS([-no-gcc], [CC="$CC -no-gcc"])
+               ;;
+        esac
         ;;
 
    hp) # must (sometimes) manually increase cpp limits to handle fftw3.h
