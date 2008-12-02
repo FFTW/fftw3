@@ -239,7 +239,7 @@ case "${ax_cv_c_compiler_vendor}" in
 esac
 
 if test "x$SIMD_CFLAGS" = x; then
-if test "$GCC" = "yes"; then
+if test "${ax_cv_c_compiler_vendor}" = "gnu"; then
     if test "$have_sse" = "yes"; then
 	AX_CHECK_COMPILER_FLAGS(-msse, [SIMD_CFLAGS="-msse"],
 	    [AC_MSG_ERROR([Need a version of gcc with -msse])])
