@@ -19,7 +19,7 @@ dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_COMPILER_VENDOR,
 dnl                  AX_GCC_ARCHFLAG, AX_GCC_X86_CPUID
 dnl
-dnl @version 2006-06-20
+dnl @version 2008-12-02
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
@@ -70,10 +70,20 @@ if test "$ac_test_CFLAGS" != "set"; then
                 echo "******************************************************"])
          ;;
 
-    intel) CFLAGS="-O3 -ansi_alias"
+    intel) CFLAGS="-O3"
+        # Intel seems to have changed the spelling of this flag recently
+        icc_ansi_alias="unknown"
+	for flag in -ansi-alias -ansi_alias; do
+	  AX_CHECK_COMPILER_FLAGS($flag, [icc_ansi_alias=$flag; break])
+	done
+ 	if test "x$icc_ansi_alias" != xunknown; then
+            CFLAGS="$CFLAGS $icc_ansi_alias"
+        fi
+	AX_CHECK_COMPILER_FLAGS(-malign-double, CFLAGS="$CFLAGS -malign-double")
 	if test "x$acx_maxopt_portable" = xno; then
 	  icc_archflag=unknown
 	  icc_flags=""
+	  # -xN etcetera are for older versions of icc:
 	  case $host_cpu in
 	    i686*|x86_64*)
               # icc accepts gcc assembly syntax, so these should work:
@@ -88,6 +98,8 @@ if test "$ac_test_CFLAGS" != "set"; then
                   esac ;;
               esac ;;
           esac
+          # newer icc versions should support -xHost
+	  icc_flags="-xHost $icc_flags"
           if test "x$icc_flags" != x; then
             for flag in $icc_flags; do
               AX_CHECK_COMPILER_FLAGS($flag, [icc_archflag=$flag; break])
