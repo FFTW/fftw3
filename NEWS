@@ -1,3 +1,17 @@
+FFTW 3.2.1
+
+* Compile with icc on MacOS X, use better icc compiler flags.
+
+* Some documentation clarifications, e.g. of fact that --enable-openmp
+  and --enable-threads are mutually exclusive (thanks to Long To),
+  and document slightly odd behavior of plan_guru_r2r in Fortran
+  (thanks to Alexander Pozdneev).
+
+* FAQ was accidentally omitted from 3.2 tarball.
+
+* Remove some extraneous (harmless) files accidentally included in 
+  a subdirectory of the 3.2 tarball.
+
 FFTW 3.2
 
 * Worked around apparent glibc bug that leads to rare hangs when freeing
