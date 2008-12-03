@@ -60,11 +60,10 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
      bench_tensor *totalsz, *pckdsz;
      bench_tensor *totalsz_swap, *pckdsz_swap;
      bench_real *ri, *ii, *ro, *io;
-     int n, totalscale;
+     int totalscale;
 
      totalsz = tensor_append(p->vecsz, p->sz);
      pckdsz = verify_pack(totalsz, 2);
-     n = tensor_sz(totalsz);
      ri = (bench_real *) p->in;
      ro = (bench_real *) p->out;
 
@@ -75,8 +74,8 @@ static void dft_apply(dofft_closure *k_, bench_complex *in, bench_complex *out)
 	when using interleaved format, but it is the distance between
 	real elements when using split format */
      if (p->split) {
-	  ii = p->ini ? (bench_real *) p->ini : ri + n;
-	  io = p->outi ? (bench_real *) p->outi : ro + n;
+	  ii = p->ini ? (bench_real *) p->ini : ri + p->iphyssz;
+	  io = p->outi ? (bench_real *) p->outi : ro + p->ophyssz;
 	  totalscale = 1;
      } else {
 	  ii = p->ini ? (bench_real *) p->ini : ri + 1;

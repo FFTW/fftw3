@@ -304,10 +304,9 @@ static FFTW(plan) mkplan_complex_split(bench_problem *p, unsigned flags)
      bench_tensor *sz = p->sz, *vecsz = p->vecsz;
      FFTW(iodim) *dims, *howmany_dims;
      bench_real *ri, *ii, *ro, *io;
-     int n = sizeof_problem(p);
 
-     extract_reim_split(p->sign, n, (bench_real *) p->in, &ri, &ii);
-     extract_reim_split(p->sign, n, (bench_real *) p->out, &ro, &io);
+     extract_reim_split(p->sign, p->iphyssz, (bench_real *) p->in, &ri, &ii);
+     extract_reim_split(p->sign, p->ophyssz, (bench_real *) p->out, &ro, &io);
 
      dims = bench_tensor_to_fftw_iodim(sz);
      howmany_dims = bench_tensor_to_fftw_iodim(vecsz);

@@ -44,11 +44,13 @@ void verify(const char *param, int rounds, double tol)
      bench_problem *p;
 
      p = problem_parse(param);
+     problem_alloc(p);
+
      if (!can_do(p)) {
 	  ovtpvt_err("No can_do for %s\n", p->pstring);
 	  BENCH_ASSERT(0);
      }
-     problem_alloc(p);
+
      problem_zero(p);
      setup(p);
 
