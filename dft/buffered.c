@@ -23,7 +23,10 @@
 
 typedef struct {
      solver super;
+     int maxnbuf_ndx;
 } S;
+
+static const INT maxnbufs[] = { 8, 256 };
 
 typedef struct {
      plan_dft super;
@@ -92,7 +95,7 @@ static void print(const plan *ego_, printer *p)
               ego->cld, ego->cldcpy, ego->cldrest);
 }
 
-static int applicable0(const problem *p_, const planner *plnr)
+static int applicable0(const S *ego, const problem *p_, const planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
      const iodim *d = p->sz->dims;
@@ -103,6 +106,14 @@ static int applicable0(const problem *p_, const planner *plnr)
 	  ) {
 
 	  if (X(toobig)(p->sz->dims[0].n) && CONSERVE_MEMORYP(plnr))
+	       return 0;
+
+	  /* if this solver is redundant, in the sense that a solver
+	     of lower index generates the same plan, then prune this
+	     solver */
+	  if (X(nbuf_redundant)(d[0].n, p->vecsz->dims[0].n,
+				ego->maxnbuf_ndx,
+				maxnbufs, NELEM(maxnbufs)))
 	       return 0;
 
 	  /*
@@ -125,17 +136,19 @@ static int applicable0(const problem *p_, const planner *plnr)
 	  if (/* fits into buffer: */
 	       ((p->vecsz->rnk == 0)
 		||
-		(X(nbuf)(d[0].n, p->vecsz->dims[0].n) == p->vecsz->dims[0].n)))
+		(X(nbuf)(d[0].n, p->vecsz->dims[0].n, 
+			 maxnbufs[ego->maxnbuf_ndx]) 
+		 == p->vecsz->dims[0].n)))
 	       return 1;
      }
 
      return 0;
 }
 
-static int applicable(const problem *p_, const planner *plnr)
+static int applicable(const S *ego, const problem *p_, const planner *plnr)
 {
      if (NO_BUFFERINGP(plnr)) return 0;
-     if (!applicable0(p_, plnr)) return 0;
+     if (!applicable0(ego, p_, plnr)) return 0;
 
      if (NO_UGLYP(plnr)) {
 	  const problem_dft *p = (const problem_dft *) p_;
@@ -148,6 +161,7 @@ static int applicable(const problem *p_, const planner *plnr)
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      P *pln;
+     const S *ego = (const S *)ego_;
      plan *cld = (plan *) 0;
      plan *cldcpy = (plan *) 0;
      plan *cldrest = (plan *) 0;
@@ -160,16 +174,14 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(dft_solve), awake, print, destroy
      };
 
-     UNUSED(ego_);
-
-     if (!applicable(p_, plnr))
+     if (!applicable(ego, p_, plnr))
           goto nada;
 
      n = X(tensor_sz)(p->sz);
 
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
-     nbuf = X(nbuf)(n, vl);
+     nbuf = X(nbuf)(n, vl, maxnbufs[ego->maxnbuf_ndx]);
      bufdist = X(bufdist)(n, vl);
      A(nbuf > 0);
 
@@ -254,14 +266,17 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(void)
+static solver *mksolver(int maxnbuf_ndx)
 {
      static const solver_adt sadt = { PROBLEM_DFT, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);
+     slv->maxnbuf_ndx = maxnbuf_ndx;
      return &(slv->super);
 }
 
 void X(dft_buffered_register)(planner *p)
 {
-     REGISTER_SOLVER(p, mksolver());
+     size_t i;
+     for (i = 0; i < NELEM(maxnbufs); ++i)
+	  REGISTER_SOLVER(p, mksolver(i));
 }

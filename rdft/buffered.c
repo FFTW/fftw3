@@ -163,7 +163,8 @@ static int applicable0(const problem *p_, const planner *plnr)
 	  if (/* fits into buffer: */
 	       ((p->vecsz->rnk == 0)
 		||
-		(X(nbuf)(d[0].n, p->vecsz->dims[0].n) == p->vecsz->dims[0].n)))
+		(X(nbuf)(d[0].n, p->vecsz->dims[0].n, 0) 
+		 == p->vecsz->dims[0].n)))
 	       return 1;
      }
 
@@ -220,7 +221,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
      hc2rp = (p->kind[0] == HC2R);
 
-     nbuf = X(nbuf)(n, vl);
+     nbuf = X(nbuf)(n, vl, 0);
      bufdist = X(bufdist)(n, vl);
      A(nbuf > 0);
 

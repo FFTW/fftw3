@@ -76,6 +76,8 @@ typedef ptrdiff_t INT;
 /* dummy use of unused parameters to silence compiler warnings */
 #define UNUSED(x) (void)x
 
+#define NELEM(array) ((int) (sizeof(array) / sizeof((array)[0])))
+
 #define FFT_SIGN (-1)  /* sign convention for forward transforms */
 extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 
@@ -954,7 +956,9 @@ double X(measure_execution_time)(const planner *plnr,
 				 plan *pln, const problem *p);
 int X(alignment_of)(R *p);
 unsigned X(hash)(const char *s);
-INT X(nbuf)(INT n, INT vl);
+INT X(nbuf)(INT n, INT vl, INT maxnbuf);
+int X(nbuf_redundant)(INT n, INT vl, int which, 
+		      const INT *maxnbuf, int nmaxnbuf);
 INT X(bufdist)(INT n, INT vl);
 int X(toobig)(INT n);
 int X(ct_uglyp)(INT min_n, INT n, INT r);

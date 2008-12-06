@@ -74,8 +74,6 @@ static unsigned timelimit_to_flags(double timelimit)
      return x;
 }
 
-#define NELEM(array) ((int) (sizeof(array) / sizeof((array)[0])))
-
 void X(mapflags)(planner *plnr, unsigned flags)
 {
      unsigned l, u, t;

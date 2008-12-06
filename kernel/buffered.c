@@ -22,16 +22,19 @@
 
 #include "ifftw.h"
 
-#define MAXNBUF ((INT)256)
+#define DEFAULT_MAXNBUF ((INT)256)
 
 /* approx. 512KB of buffers for complex data */
 #define MAXBUFSZ (256 * 1024 / (INT)(sizeof(R)))
 
-INT X(nbuf)(INT n, INT vl)
+INT X(nbuf)(INT n, INT vl, INT maxnbuf)
 {
      INT i, nbuf, lb; 
 
-     nbuf = X(imin)(MAXNBUF,
+     if (!maxnbuf) 
+	  maxnbuf = DEFAULT_MAXNBUF;
+
+     nbuf = X(imin)(maxnbuf,
 		    X(imin)(vl, X(imax)((INT)1, MAXBUFSZ / n)));
 
      /*
@@ -62,4 +65,17 @@ INT X(bufdist)(INT n, INT vl)
 int X(toobig)(INT n)
 {
      return n > MAXBUFSZ;
+}
+
+/* TRUE if there exists i < which such that maxnbuf[i] and
+   maxnbuf[which] yield the same value, in which case we canonicalize
+   on the minimum value */
+int X(nbuf_redundant)(INT n, INT vl, int which, 
+		      const INT *maxnbuf, int nmaxnbuf)
+{
+     int i;
+     for (i = 0; i < which; ++i)
+	  if (X(nbuf)(n, vl, maxnbuf[i]) == X(nbuf)(n, vl, maxnbuf[which]))
+	       return 1;
+     return 0;
 }

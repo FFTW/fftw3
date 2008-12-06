@@ -238,7 +238,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      n = p->sz->dims[0].n;
      X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
-     nbuf = X(imax)(X(nbuf)(n, vl), min_nbuf(p, n, vl));
+     nbuf = X(imax)(X(nbuf)(n, vl, 0), min_nbuf(p, n, vl));
      bufdist = X(bufdist)(n, vl);
      A(nbuf > 0);
 
