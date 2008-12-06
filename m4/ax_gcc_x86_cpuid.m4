@@ -18,7 +18,7 @@ dnl to the string "unknown".
 dnl
 dnl This macro mainly exists to be used in AX_GCC_ARCHFLAG.
 dnl
-dnl @version 2006-04-20
+dnl @version 2008-12-06
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_GCC_X86_CPUID],
@@ -28,6 +28,19 @@ AC_CACHE_CHECK(for x86 cpuid $1 output, ax_cv_gcc_x86_cpuid_$1,
  [AC_RUN_IFELSE([AC_LANG_PROGRAM([#include <stdio.h>], [
      int op = $1, eax, ebx, ecx, edx;
      FILE *f;
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64)
+     __asm__("push %%rbx\n\t"
+             "cpuid\n\t"
+             "pop %%rbx"
+             : "=a" (eax), "=c" (ecx), "=d" (edx)
+             : "a" (op));
+     __asm__("push %%rbx\n\t"
+             "cpuid\n\t"
+             "mov %%rbx, %%rax\n\t"
+             "pop %%rbx"
+             : "=a" (ebx), "=c" (ecx), "=d" (edx)
+             : "a" (op));
+#else
      __asm__("push %%ebx\n\t"
              "cpuid\n\t"
              "pop %%ebx"
@@ -39,6 +52,7 @@ AC_CACHE_CHECK(for x86 cpuid $1 output, ax_cv_gcc_x86_cpuid_$1,
              "pop %%ebx"
              : "=a" (ebx), "=c" (ecx), "=d" (edx)
              : "a" (op));
+#endif
      f = fopen("conftest_cpuid", "w"); if (!f) return 1;
      fprintf(f, "%x:%x:%x:%x\n", eax, ebx, ecx, edx);
      fclose(f);
