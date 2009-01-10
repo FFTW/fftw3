@@ -134,6 +134,8 @@ static int applicable0(const S *ego, const problem *p_, const planner *plnr)
 	 && p->vecsz->rnk <= 1
 	 && p->sz->rnk == 1
 	  ) {
+	  INT vl, ivs, ovs;
+	  X(tensor_tornk1)(p->vecsz, &vl, &ivs, &ovs);
 
 	  if (X(toobig)(d[0].n) && CONSERVE_MEMORYP(plnr))
 	       return 0;
@@ -141,7 +143,7 @@ static int applicable0(const S *ego, const problem *p_, const planner *plnr)
 	  /* if this solver is redundant, in the sense that a solver
 	     of lower index generates the same plan, then prune this
 	     solver */
-	  if (X(nbuf_redundant)(d[0].n, p->vecsz->dims[0].n,
+	  if (X(nbuf_redundant)(d[0].n, vl,
 				ego->maxnbuf_ndx,
 				maxnbufs, NELEM(maxnbufs)))
 	       return 0;
