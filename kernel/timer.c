@@ -33,7 +33,26 @@
 #define FFTW_TIME_LIMIT 2.0  /* don't run for more than two seconds */
 #endif
 
-#if defined(HAVE_GETTIMEOFDAY)
+#if defined(__WIN32__) || defined(_WIN32) || defined(_WIN64)
+crude_time X(get_crude_time)(void)
+{
+     crude_time tv;
+     QueryPerformanceCounter(&tv);
+     return tv;
+}
+
+static double elapsed_since(crude_time t0)
+{
+     crude_time t1, freq;
+     QueryPerformanceCounter(&t1);
+     QueryPerformanceFrequency(&freq);
+     return (((double) (t1.QuadPart - t0.QuadPart))) /
+	  ((double) freq.QuadPart);
+}
+
+#  define TIME_MIN_SEC 1.0e-2
+
+#elif defined(HAVE_GETTIMEOFDAY)
 crude_time X(get_crude_time)(void)
 {
      crude_time tv;
