@@ -18,12 +18,10 @@ noinst_LTLIBRARIES = librdft_scalar_r2cb.la
 ###########################################################################
 # r2cb_<n> is a hard-coded complex-to-real FFT of size <n> (base cases
 # of real-output FFT recursion)
-R2CB = r2cb_3.c r2cb_4.c r2cb_5.c r2cb_6.c r2cb_7.c r2cb_8.c r2cb_9.c	\
-r2cb_10.c r2cb_11.c r2cb_12.c r2cb_13.c r2cb_14.c r2cb_15.c r2cb_16.c	\
-r2cb_32.c r2cb_64.c r2cb_128.c \
-r2cb_20.c r2cb_25.c # r2cb_30.c r2cb_40.c r2cb_50.c
-
-# (r2cb_2.c is equivalent to r2cf_2.c)
+R2CB = r2cb_2.c r2cb_3.c r2cb_4.c r2cb_5.c r2cb_6.c r2cb_7.c r2cb_8.c	\
+r2cb_9.c r2cb_10.c r2cb_11.c r2cb_12.c r2cb_13.c r2cb_14.c r2cb_15.c	\
+r2cb_16.c r2cb_32.c r2cb_64.c r2cb_128.c r2cb_20.c r2cb_25.c \
+# r2cb_30.c r2cb_40.c r2cb_50.c
 
 ###########################################################################
 # hb_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIF
