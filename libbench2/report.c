@@ -93,20 +93,19 @@ void report_benchmark(const bench_problem *p, double *t, int st)
 static void sprintf_time(double x, char *buf, int buflen)
 {
 #ifdef HAVE_SNPRINTF
-#  define BENCH_BUFARG buf, buflen
+#  define MY_SPRINTF(a, b) snprintf(buf, buflen, a, b)
 #else
-#  define snprintf sprintf
-#  define BENCH_BUFARG buf
+#  define MY_SPRINTF(a, b) sprintf(buf, a, b)
 #endif
      if (x < 1.0E-6)
-	  snprintf(BENCH_BUFARG, "%.2f ns", x * 1.0E9);
+	  MY_SPRINTF("%.2f ns", x * 1.0E9);
      else if (x < 1.0E-3)
-	  snprintf(BENCH_BUFARG, "%.2f us", x * 1.0E6);
+	  MY_SPRINTF("%.2f us", x * 1.0E6);
      else if (x < 1.0)
-	  snprintf(BENCH_BUFARG, "%.2f ms", x * 1.0E3);
+	  MY_SPRINTF("%.2f ms", x * 1.0E3);
      else
-	  snprintf(BENCH_BUFARG, "%.2f s", x);
-#undef BENCH_BUFARG
+	  MY_SPRINTF("%.2f s", x);
+#undef MY_SPRINTF
 }
 
 void report_verbose(const bench_problem *p, double *t, int st)
