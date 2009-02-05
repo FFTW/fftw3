@@ -1,6 +1,16 @@
 FFTW 3.2.1
 
+* Performance improvements for some multidimensional r2c/c2r transforms;
+  thanks to Eugene Miloslavsky for his benchmark reports.
+
 * Compile with icc on MacOS X, use better icc compiler flags.
+
+* Compilation fixes for systems where snprintf is defined as a macro;
+  thanks to Marcus Mae for the bug report.
+
+* Fortran documentation now recommends not using dfftw_execute,
+  because of reports of problems with various Fortran compilers;
+  it is better to use dfftw_execute_dft etcetera.
 
 * Some documentation clarifications, e.g. of fact that --enable-openmp
   and --enable-threads are mutually exclusive (thanks to Long To),
