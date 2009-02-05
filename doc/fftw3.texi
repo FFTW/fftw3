@@ -287,6 +287,7 @@ Calling FFTW from Fortran
 
 * Fortran-interface routines::  
 * FFTW Constants in Fortran::   
+* FFTW Execution in Fortran::   
 * Fortran Examples::            
 * Wisdom of Fortran?::          
 
@@ -3223,7 +3224,7 @@ Here, the alignment is a platform-dependent quantity (for example, it is
 the address modulo 16 if SSE SIMD instructions are used, but the address
 modulo 4 for non-SIMD single-precision FFTW on the same machine).  In
 general, only arrays allocated with @code{fftw_malloc} are guaranteed to
-be equally aligned.
+be equally aligned (@pxref{SIMD alignment and fftw_malloc}).
 
 @end itemize
 
@@ -4370,6 +4371,7 @@ manual.
 @menu
 * Fortran-interface routines::  
 * FFTW Constants in Fortran::   
+* FFTW Execution in Fortran::   
 * Fortran Examples::            
 * Wisdom of Fortran?::          
 @end menu
@@ -4460,7 +4462,7 @@ Such simple correspondences are assumed in the examples below.
 @cindex portability
 
 @c -------------------------------------------------------
-@node  FFTW Constants in Fortran, Fortran Examples, Fortran-interface routines, Calling FFTW from Fortran
+@node  FFTW Constants in Fortran, FFTW Execution in Fortran, Fortran-interface routines, Calling FFTW from Fortran
 @section FFTW Constants in Fortran
 
 When creating plans in FFTW, a number of constants are used to specify
@@ -4483,7 +4485,72 @@ should just use @samp{@code{+}}.  (Take care not to add in the same flag
 more than once, though.)
 
 @c -------------------------------------------------------
-@node Fortran Examples, Wisdom of Fortran?, FFTW Constants in Fortran, Calling FFTW from Fortran
+@node  FFTW Execution in Fortran, Fortran Examples, FFTW Constants in Fortran, Calling FFTW from Fortran
+@section FFTW Execution in Fortran
+
+In C, in order to use a plan, one normally calls @code{fftw_execute},
+which executes the plan to perform the transform on the input/output
+arrays passed when the plan was created (@pxref{Using Plans}).  The
+corresponding subroutine call in Fortran is:
+@example
+        call dfftw_execute(plan)
+@end example
+@findex dfftw_execute
+
+However, we have had reports that this causes problems with some
+recent optimizing Fortran compilers.  The problem is, because the
+input/output arrays are not passed as explicit arguments to
+@code{dfftw_execute}, the semantics of Fortran (unlike C) allow the
+compiler to assume that the input/output arrays are not changed by
+@code{dfftw_execute}.  As a consequence, certain compilers end up
+optimizing out or repositioning the call to @code{dfftw_execute},
+assuming incorrectly that it does nothing.
+
+There are various workarounds to this, but the safest and simplest
+thing is to not use @code{dfftw_execute} in Fortran.  Instead, use the
+functions described in @ref{New-array Execute Functions}, which take
+the input/output arrays as explicit arguments.  For example, if the
+plan is for a complex-data DFT and was created for the arrays
+@code{in} and @code{out}, you would do:
+@example
+        call dfftw_execute_dft(plan, in, out)
+@end example
+@findex dfftw_execute_dft
+
+There are a few things to be careful of, however:
+
+@itemize @bullet
+
+@item
+You must use the correct type of execute function, matching the way
+the plan was created.  Complex DFT plans should use
+@code{dfftw_execute_dft}, Real-input (r2c) DFT plans should use use
+@code{dfftw_execute_dft_r2c}, and real-output (c2r) DFT plans should
+use @code{dfftw_execute_dft_c2r}.  The various r2r plans should use
+@code{dfftw_execute_r2r}.
+
+@item
+You should normally pass the same input/output arrays that were used when
+creating the plan.  This is always safe.
+
+@item
+@emph{If} you pass @emph{different} input/output arrays compared to
+those used when creating the plan, you must abide by all the
+restrictions of the new-array execute functions (@pxref{New-array
+Execute Functions}).  The most difficult of these, in Fortran, is the
+requirement that the new arrays have the same alignment as the
+original arrays, because there seems to be no way in Fortran to obtain
+guaranteed-aligned arrays (analogous to @code{fftw_malloc} in C).  You
+can, of course, use the @code{FFTW_UNALIGNED} flag when creating the
+plan, in which case the plan does not depend on the alignment, but
+this may sacrifice substantial performance on architectures (like x86)
+with SIMD instructions (@pxref{SIMD alignment and fftw_malloc}).
+@ctindex FFTW_UNALIGNED
+
+@end itemize
+
+@c -------------------------------------------------------
+@node Fortran Examples, Wisdom of Fortran?, FFTW Execution in Fortran, Calling FFTW from Fortran
 @section Fortran Examples
 
 In C, you might have something like the following to transform a
@@ -4506,15 +4573,17 @@ In Fortran, you would use the following to accomplish the same thing:
         integer*8 plan
 
         call dfftw_plan_dft_1d(plan,N,in,out,FFTW_FORWARD,FFTW_ESTIMATE)
-        call dfftw_execute(plan)
+        call dfftw_execute_dft(plan, in, out)
         call dfftw_destroy_plan(plan)
 @end example
 @findex dfftw_plan_dft_1d
-@findex dfftw_execute
+@findex dfftw_execute_dft
 @findex dfftw_destroy_plan
 
-Notice how all routines are called as Fortran subroutines, and the plan
-is returned via the first argument to @code{dfftw_plan_dft_1d}.  To do
+Notice how all routines are called as Fortran subroutines, and the
+plan is returned via the first argument to @code{dfftw_plan_dft_1d}.
+Notice also that we changed @code{fftw_execute} to
+@code{dfftw_execute_dft} (@pxref{FFTW Execution in Fortran}).  To do
 the same thing, but using 8 threads in parallel (@pxref{Multi-threaded
 FFTW}), you would simply prefix these calls with:
 
@@ -4546,7 +4615,7 @@ In Fortran, you would use this instead:
 
         call dfftw_plan_dft_3d(plan, L,M,N, arr,arr,
        &                       FFTW_FORWARD, FFTW_ESTIMATE)
-        call dfftw_execute(plan)
+        call dfftw_execute_dft(plan, arr, arr)
         call dfftw_destroy_plan(plan)
 @end example
 @findex dfftw_plan_dft_3d
@@ -4564,10 +4633,11 @@ To transform a one-dimensional real array in Fortran, you might do:
         integer*8 plan
 
         call dfftw_plan_dft_r2c_1d(plan,N,in,out,FFTW_ESTIMATE)
-        call dfftw_execute(plan)
+        call dfftw_execute_dft_r2c(plan, in, out)
         call dfftw_destroy_plan(plan)
 @end example
 @findex dfftw_plan_dft_r2c_1d
+@findex dfftw_execute_dft_r2c
 
 To transform a two-dimensional real array, out of place, you might use
 the following:
@@ -4580,7 +4650,7 @@ the following:
         integer*8 plan
 
         call dfftw_plan_dft_r2c_2d(plan,M,N,in,out,FFTW_ESTIMATE)
-        call dfftw_execute(plan)
+        call dfftw_execute_dft_r2c(plan, in, out)
         call dfftw_destroy_plan(plan)
 @end example
 @findex dfftw_plan_dft_r2c_2d
