@@ -278,10 +278,7 @@ extern int X(in_thread);
 # endif
 # endif
 
-# if defined(__WIN32__) || defined(_WIN32) || defined(_WIN64)
-#  include <windows.h>
-   typedef LARGE_INTEGER crude_time;
-# elif defined(HAVE_GETTIMEOFDAY)
+# if defined(HAVE_GETTIMEOFDAY)
    typedef struct timeval crude_time;
 # else
    typedef clock_t crude_time;

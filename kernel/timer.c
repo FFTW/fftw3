@@ -33,7 +33,14 @@
 #define FFTW_TIME_LIMIT 2.0  /* don't run for more than two seconds */
 #endif
 
-#if defined(__WIN32__) || defined(_WIN32) || defined(_WIN64)
+/* the following code is disabled for now, because it seems to
+   require that we #include <windows.h> in ifftw.h to 
+   typedef LARGE_INTEGER crude_time, and this pulls in the whole
+   Windows universe and leads to namespace conflicts (unless
+   we did some hack like assuming sizeof(LARGE_INTEGER) == sizeof(long long).
+   gettimeofday is provided by MinGW, which we use to cross-compile
+   FFTW for Windows, and this seems to work well enough */
+#if 0 && (defined(__WIN32__) || defined(_WIN32) || defined(_WIN64))
 crude_time X(get_crude_time)(void)
 {
      crude_time tv;
