@@ -46,7 +46,7 @@ sub flush_problems {
 
     if ($#list_of_problems >= 0) {
 	for (@list_of_problems) {
-	    $problist = "$problist --verify $_";
+	    $problist = "$problist --verify '$_'";
 	}
 	print "Executing \"$program $options $problist\"\n" 
 	    if $verbose;
