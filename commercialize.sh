@@ -49,7 +49,7 @@ you have negotiated.
 Please note that this package is provided WITHOUT ANY WARRANTY.
 See your license agreement for complete details.
 
-Contact Ms. Magdalen Christian (mchristi@mit.edu) for more information
+Contact Mr. Thomas O'Keefe (tokeefe@MIT.EDU) for more information
 regarding licensing.
 EOF
 
