@@ -290,7 +290,7 @@ static int applicable(const S *ego, rdft_kind kind,
      }
 
      if (NO_UGLYP(plnr) && X(ct_uglyp)((ego->bufferedp? (INT)512 : (INT)16),
-				       m * r, r))
+				       v, m * r, r))
 	  return 0;
 
      return 1;
