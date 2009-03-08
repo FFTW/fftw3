@@ -27,6 +27,5 @@
 /* TRUE if radix-r is ugly for size n */
 int X(ct_uglyp)(INT min_n, INT v, INT n, INT r)
 {
-     return 0;
      return (n <= min_n) || (POW2P(n) && (v * (n / r)) <= 4);
 }
