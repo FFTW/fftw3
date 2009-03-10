@@ -23,10 +23,11 @@
 
 void X(cpy2d)(R *I, R *O,
 	      INT n0, INT is0, INT os0,
-	      INT n1, INT is1, INT os1, 
+	      INT n1, INT is1, INT os1,
 	      INT vl)
 {
      INT i0, i1, v;
+     typedef struct { double d; } wide_type;
 
      switch (vl) {
 	 case 1:
@@ -37,13 +38,31 @@ void X(cpy2d)(R *I, R *O,
 		   }
 	      break;
 	 case 2:
-	      for (i1 = 0; i1 < n1; ++i1)
-		   for (i0 = 0; i0 < n0; ++i0) {
-			R x0 = I[i0 * is0 + i1 * is1];
-			R x1 = I[i0 * is0 + i1 * is1 + 1];
-			O[i0 * os0 + i1 * os1] = x0;
-			O[i0 * os0 + i1 * os1 + 1] = x1;
-		   }
+	      /* try to copy R[2] as WIDE_TYPE if WIDE_TYPE is large enough
+		 to hold R[2], and if the input is properly aligned.
+		 This is a win when R==float and WIDE_TYPE is 64 bits. */
+	      if (1
+		  && (2 * sizeof(R) == sizeof(wide_type))
+		  && (((size_t)I) % sizeof(wide_type) == 0)
+		  && (((size_t)O) % sizeof(wide_type) == 0)
+		  && ((is0 & 1) == 0)
+		  && ((is1 & 1) == 0)
+		  && ((os0 & 1) == 0)
+		  && ((os1 & 1) == 0)) {
+		   for (i1 = 0; i1 < n1; ++i1)
+			for (i0 = 0; i0 < n0; ++i0) {
+			     *(wide_type *)&O[i0 * os0 + i1 * os1] =
+				  *(wide_type *)&I[i0 * is0 + i1 * is1];
+			}
+	      } else {
+		   for (i1 = 0; i1 < n1; ++i1)
+			for (i0 = 0; i0 < n0; ++i0) {
+			     R x0 = I[i0 * is0 + i1 * is1];
+			     R x1 = I[i0 * is0 + i1 * is1 + 1];
+			     O[i0 * os0 + i1 * os1] = x0;
+ 			     O[i0 * os0 + i1 * os1 + 1] = x1;
+			}
+	      }
 	      break;
 	 default:
 	      for (i1 = 0; i1 < n1; ++i1)
@@ -59,7 +78,7 @@ void X(cpy2d)(R *I, R *O,
 /* like cpy2d, but read input contiguously if possible */
 void X(cpy2d_ci)(R *I, R *O,
 		 INT n0, INT is0, INT os0,
-		 INT n1, INT is1, INT os1, 
+		 INT n1, INT is1, INT os1,
 		 INT vl)
 {
      if (IABS(is0) < IABS(is1))	/* inner loop is for n0 */
@@ -71,7 +90,7 @@ void X(cpy2d_ci)(R *I, R *O,
 /* like cpy2d, but write output contiguously if possible */
 void X(cpy2d_co)(R *I, R *O,
 		 INT n0, INT is0, INT os0,
-		 INT n1, INT is1, INT os1, 
+		 INT n1, INT is1, INT os1,
 		 INT vl)
 {
      if (IABS(os0) < IABS(os1))	/* inner loop is for n0 */
@@ -85,7 +104,7 @@ void X(cpy2d_co)(R *I, R *O,
 struct cpy2d_closure {
      R *I, *O;
      INT is0, os0, is1, os1, vl;
-     R *buf; 
+     R *buf;
 };
 
 static void dotile(INT n0l, INT n0u, INT n1l, INT n1u, void *args)
@@ -111,7 +130,7 @@ static void dotile_buf(INT n0l, INT n0u, INT n1l, INT n1u, void *args)
 
      /* copy from buf to O */
      X(cpy2d_co)(k->buf,
-		 k->O + n0l * k->os0 + n1l * k->os1,		 
+		 k->O + n0l * k->os0 + n1l * k->os1,
 		 n0u - n0l, k->vl, k->os0,
 		 n1u - n1l, k->vl * (n0u - n0l), k->os1,
 		 k->vl);
@@ -120,9 +139,9 @@ static void dotile_buf(INT n0l, INT n0u, INT n1l, INT n1u, void *args)
 
 void X(cpy2d_tiled)(R *I, R *O,
 		    INT n0, INT is0, INT os0,
-		    INT n1, INT is1, INT os1, INT vl) 
+		    INT n1, INT is1, INT os1, INT vl)
 {
-     INT tilesz = X(compute_tilesz)(vl, 
+     INT tilesz = X(compute_tilesz)(vl,
 				    1 /* input array */
 				    + 1 /* ouput array */);
      struct cpy2d_closure k;
@@ -139,7 +158,7 @@ void X(cpy2d_tiled)(R *I, R *O,
 
 void X(cpy2d_tiledbuf)(R *I, R *O,
 		       INT n0, INT is0, INT os0,
-		       INT n1, INT is1, INT os1, INT vl) 
+		       INT n1, INT is1, INT os1, INT vl)
 {
      R buf[CACHESIZE / (2 * sizeof(R))];
      /* input and buffer in cache, or
@@ -157,4 +176,3 @@ void X(cpy2d_tiledbuf)(R *I, R *O,
      A(tilesz * tilesz * vl * sizeof(R) <= sizeof(buf));
      X(tile2d)(0, n0, 0, n1, tilesz, dotile_buf, &k);
 }
-
