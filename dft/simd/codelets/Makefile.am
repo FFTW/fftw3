@@ -20,7 +20,7 @@ noinst_LTLIBRARIES = libdft_simd_codelets.la
 # n1fv_<n> is a hard-coded FFTW_FORWARD FFT of size <n>, using SIMD
 N1F = n1fv_2.c n1fv_3.c n1fv_4.c n1fv_5.c n1fv_6.c n1fv_7.c n1fv_8.c	\
 n1fv_9.c n1fv_10.c n1fv_11.c n1fv_12.c n1fv_13.c n1fv_14.c n1fv_15.c	\
-n1fv_16.c n1fv_32.c n1fv_64.c \
+n1fv_16.c n1fv_32.c n1fv_64.c n1fv_128.c \
 n1fv_20.c n1fv_25.c # n1fv_30.c n1fv_40.c n1fv_50.c
 
 # as above, with restricted input vector stride
@@ -31,7 +31,7 @@ n2fv_20.c # n2fv_30.c n2fv_40.c n2fv_50.c
 # as above, but FFTW_BACKWARD
 N1B = n1bv_2.c n1bv_3.c n1bv_4.c n1bv_5.c n1bv_6.c n1bv_7.c n1bv_8.c	\
 n1bv_9.c n1bv_10.c n1bv_11.c n1bv_12.c n1bv_13.c n1bv_14.c n1bv_15.c	\
-n1bv_16.c n1bv_32.c n1bv_64.c \
+n1bv_16.c n1bv_32.c n1bv_64.c n1bv_128.c \
 n1bv_20.c n1bv_25.c # n1bv_30.c n1bv_40.c n1bv_50.c
 
 N2B = n2bv_2.c n2bv_4.c n2bv_6.c n2bv_8.c n2bv_10.c n2bv_12.c	\
