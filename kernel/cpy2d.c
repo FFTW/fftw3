@@ -21,13 +21,24 @@
 /* out of place 2D copy routines */
 #include "ifftw.h"
 
+#if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
+#  ifdef HAVE_XMMINTRIN_H
+#    include <xmmintrin.h>
+#    define WIDE_TYPE __m128
+#  endif
+#endif
+
+#ifndef WIDE_TYPE
+/* fall back to double, which means that WIDE_TYPE will be unused */
+#  define WIDE_TYPE double
+#endif
+
 void X(cpy2d)(R *I, R *O,
 	      INT n0, INT is0, INT os0,
 	      INT n1, INT is1, INT os1,
 	      INT vl)
 {
      INT i0, i1, v;
-     typedef struct { double d; } wide_type;
 
      switch (vl) {
 	 case 1:
@@ -38,21 +49,39 @@ void X(cpy2d)(R *I, R *O,
 		   }
 	      break;
 	 case 2:
-	      /* try to copy R[2] as WIDE_TYPE if WIDE_TYPE is large enough
-		 to hold R[2], and if the input is properly aligned.
-		 This is a win when R==float and WIDE_TYPE is 64 bits. */
 	      if (1
-		  && (2 * sizeof(R) == sizeof(wide_type))
-		  && (((size_t)I) % sizeof(wide_type) == 0)
-		  && (((size_t)O) % sizeof(wide_type) == 0)
+		  && (2 * sizeof(R) == sizeof(WIDE_TYPE))
+		  && (sizeof(WIDE_TYPE) > sizeof(double))
+		  && (((size_t)I) % sizeof(WIDE_TYPE) == 0)
+		  && (((size_t)O) % sizeof(WIDE_TYPE) == 0)
 		  && ((is0 & 1) == 0)
 		  && ((is1 & 1) == 0)
 		  && ((os0 & 1) == 0)
 		  && ((os1 & 1) == 0)) {
+		   /* copy R[2] as WIDE_TYPE if WIDE_TYPE is large
+		      enough to hold R[2], and if the input is
+		      properly aligned.  This is a win when R==double
+		      and WIDE_TYPE is 128 bits. */
 		   for (i1 = 0; i1 < n1; ++i1)
 			for (i0 = 0; i0 < n0; ++i0) {
-			     *(wide_type *)&O[i0 * os0 + i1 * os1] =
-				  *(wide_type *)&I[i0 * is0 + i1 * is1];
+			     *(WIDE_TYPE *)&O[i0 * os0 + i1 * os1] =
+				  *(WIDE_TYPE *)&I[i0 * is0 + i1 * is1];
+			}
+	      } else if (1
+		  && (2 * sizeof(R) == sizeof(double))
+		  && (((size_t)I) % sizeof(double) == 0)
+		  && (((size_t)O) % sizeof(double) == 0)
+		  && ((is0 & 1) == 0)
+		  && ((is1 & 1) == 0)
+		  && ((os0 & 1) == 0)
+		  && ((os1 & 1) == 0)) {
+		   /* copy R[2] as double if double is large enough to
+		      hold R[2], and if the input is properly aligned.
+		      This case applies when R==float */
+		   for (i1 = 0; i1 < n1; ++i1)
+			for (i0 = 0; i0 < n0; ++i0) {
+			     *(double *)&O[i0 * os0 + i1 * os1] =
+				  *(double *)&I[i0 * is0 + i1 * is1];
 			}
 	      } else {
 		   for (i1 = 0; i1 < n1; ++i1)
