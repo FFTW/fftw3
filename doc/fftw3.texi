@@ -1947,8 +1947,9 @@ and you should not attempt to execute them nor to destroy them.  You can
 however create and execute/destroy new plans, in which case FFTW starts
 accumulating wisdom information again.
 
-@code{fftw_cleanup} does not deallocate your plans; you should still
-call @code{fftw_destroy_plan} for this purpose. 
+@code{fftw_cleanup} does not deallocate your plans, however.  To prevent
+memory leaks, you must still call @code{fftw_destroy_plan} before
+executing @code{fftw_cleanup}.
 
 The following two routines are provided purely for academic purposes
 (that is, for entertainment).
