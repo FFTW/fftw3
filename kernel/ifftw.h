@@ -107,7 +107,7 @@ typedef struct scanner_s scanner;
 #define MIN_ALIGNMENT 16
 #endif
 
-#ifdef HAVE_ALLOCA
+#if defined(HAVE_ALLOCA) && defined(FFTW_ENABLE_ALLOCA)
    /* use alloca if available */
 
 #ifndef alloca

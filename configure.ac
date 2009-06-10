@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(fftw, 3.2.1, fftw@fftw.org)
+AC_INIT(fftw, 3.2.2alpha, fftw@fftw.org)
 AC_CONFIG_SRCDIR(kernel/ifftw.h)
 SHARED_VERSION_INFO="5:3:2" # CURRENT:REVISION:AGE
 
@@ -42,6 +42,11 @@ fi
 AC_ARG_ENABLE(debug-alignment, [AC_HELP_STRING([--enable-debug-alignment],[enable alignment debugging hacks])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_DEBUG_ALIGNMENT,1,[Define to enable alignment debugging hacks.])
+fi
+
+AC_ARG_ENABLE(alloca, [AC_HELP_STRING([--enable-alloca],[enable use of the alloca() function (may be broken on mingw64)])], ok=$enableval, ok=yes)
+if test "$ok" = "yes"; then
+	AC_DEFINE(FFTW_ENABLE_ALLOCA,1,[Define to enable the use of alloca().])
 fi
 
 AC_ARG_ENABLE(single, [AC_HELP_STRING([--enable-single],[compile fftw in single precision])], ok=$enableval, ok=no)
