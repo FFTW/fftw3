@@ -1,3 +1,10 @@
+FFTW 3.2.2
+
+* Improve performance of some copy operations of complex arrays on
+  x86 machines.
+
+* Add configure flag to disable alloca(), which is broken in mingw64.
+
 FFTW 3.2.1
 
 * Performance improvements for some multidimensional r2c/c2r transforms;
