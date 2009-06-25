@@ -43,7 +43,7 @@
 
    typedef sem_t os_sem_t;
 
-   static void os_sem_init(os_sem_t *s) { sem_init(s, 1, 0); }
+   static void os_sem_init(os_sem_t *s) { sem_init(s, 0, 0); }
    static void os_sem_destroy(os_sem_t *s) { sem_destroy(s); }
 
    static void os_sem_down(os_sem_t *s)
@@ -65,7 +65,7 @@
       safest choice.
    */
    typedef sem_t os_mutex_t;
-   static void os_mutex_init(os_mutex_t *s) { sem_init(s, 1, 1); }
+   static void os_mutex_init(os_mutex_t *s) { sem_init(s, 0, 1); }
    #define os_mutex_destroy os_sem_destroy
    #define os_mutex_lock os_sem_down
    #define os_mutex_unlock os_sem_up
