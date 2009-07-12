@@ -242,6 +242,9 @@ static plan *mkcldw(const hc2hc_solver *ego_,
      if (ego->bufferedp) 
 	  pln->super.super.ops.other += 4 * r * (pln->me - pln->mb) * v;
 
+     pln->super.super.could_prune_now_p =
+	  (!ego->bufferedp && r >= 5 && r < 64 && m >= r);
+
      return &(pln->super.super);
 
  nada:
