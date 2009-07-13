@@ -1,26 +1,34 @@
+set -e
+
+confflags="--prefix=`pwd`/mingw64 --host=x86_64-w64-mingw32 --with-gcc-arch=nocona --enable-portable-binary --disable-alloca --with-our-malloc16 --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads"
+
 rm -rf mingw64
 
-rm -rf double-mingw64
-mkdir double-mingw64
-cd double-mingw64
-../configure --prefix=`pwd`/../mingw64 --host=x86_64-w64-mingw32 --with-gcc-arch=nocona --enable-portable-binary --disable-alloca --with-our-malloc16 --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads --enable-sse2 && make -j4 && make install
-cp -f tests/.libs/bench.exe `pwd`/../mingw64/bin/bench.exe
-cd ..
+(
+    rm -rf double-mingw64
+    mkdir double-mingw64
+    cd double-mingw64
+    ../configure ${confflags} --enable-sse2 && make -j4 && make install
+    cp -f tests/.libs/bench.exe `pwd`/../mingw64/bin/bench.exe
+)
 
-rm -rf single-mingw64
-mkdir single-mingw64
-cd single-mingw64
-../configure --prefix=`pwd`/../mingw64 --host=x86_64-w64-mingw32 --with-gcc-arch=nocona --enable-portable-binary --disable-alloca --with-our-malloc16 --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads --enable-sse --enable-float && make -j4 && make install
-cp -f tests/.libs/bench.exe `pwd`/../mingw64/bin/benchf.exe
-cd ..
+(
+    rm -rf single-mingw64
+    mkdir single-mingw64
+    cd single-mingw64
+    ../configure ${confflags} --enable-sse --enable-float && make -j4 && make install
+    cp -f tests/.libs/bench.exe `pwd`/../mingw64/bin/benchf.exe
+)
 
-rm -rf ldouble-mingw
-mkdir ldouble-mingw
-cd ldouble-mingw
-../configure --prefix=`pwd`/../mingw64 --host=x86_64-w64-mingw32 --with-gcc-arch=nocona --enable-portable-binary --disable-alloca --with-our-malloc16 --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads --enable-long-double && make -j4 && make install
-cp -f tests/.libs/bench.exe `pwd`/../mingw64/bin/benchl.exe
-cd ..
+(
+    rm -rf ldouble-mingw64
+    mkdir ldouble-mingw64
+    cd ldouble-mingw64
+    ../configure ${confflags} --enable-long-double && make -j4 && make install
+    cp -f tests/.libs/bench.exe `pwd`/../mingw64/bin/benchl.exe
+)
 
+(
 cd mingw64/bin
 for dll in *.dll; do
     def=`basename $dll .dll`.def
@@ -28,7 +36,7 @@ for dll in *.dll; do
     echo EXPORTS >> $def
     x86_64-w64-mingw32-nm $dll | grep ' T _' | sed 's/.* T _//' | grep fftw >> $def
 done
-cd ../..
+)
 
 perl -pi -e 's,^ * #define FFTW_DLL,*/\n#define FFTW_DLL\n/*,' mingw64/include/fftw3.h
 
