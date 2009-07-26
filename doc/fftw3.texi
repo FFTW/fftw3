@@ -1536,7 +1536,7 @@ arrays in this way, for two reasons.  First, this allocates the array
 on the stack (``automatic'' storage), which has a very limited size on
 most operating systems (declaring an array with more than a few
 thousand elements will often cause a crash).  (You can get around this
-limitation on man1 systems by declaring the array as
+limitation on many systems by declaring the array as
 @code{static} and/or global, but that has its own drawbacks.)
 Second, it may not optimally align the array for use with a SIMD
 FFTW (@pxref{SIMD alignment and fftw_malloc}).  Instead, we recommend
