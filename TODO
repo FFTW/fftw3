@@ -1,3 +1,7 @@
+BUGS:
+
+* inconsistent nthreads in fftw-wisdom
+
 TODO before FFTW-$2\pi$:
 
 * DCT/DST codelets?  which kinds?
