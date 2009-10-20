@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(fftw, 3.2.2, fftw@fftw.org)
+AC_INIT(fftw, 3.2.3-alpha, fftw@fftw.org)
 AC_CONFIG_SRCDIR(kernel/ifftw.h)
 SHARED_VERSION_INFO="5:4:2" # CURRENT:REVISION:AGE
 
@@ -277,7 +277,7 @@ AC_SUBST(SIMD_CFLAGS)
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h limits.h c_asm.h intrinsics.h stdint.h mach/mach_time.h sys/sysctl.h xmmintrin.h])
+AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h limits.h c_asm.h intrinsics.h stdint.h mach/mach_time.h sys/sysctl.h])
 dnl c_asm.h: Header file for enabling asm() on Digital Unix  
 dnl intrinsics.h: cray unicos
 dnl sys/sysctl.h: MacOS X altivec detection
@@ -287,7 +287,7 @@ save_CFLAGS="$CFLAGS"
 save_CPPFLAGS="$CPPFLAGS"
 CFLAGS="$CFLAGS $SIMD_CFLAGS"
 CPPFLAGS="$CPPFLAGS $SIMD_CFLAGS"
-AC_CHECK_HEADERS([altivec.h])
+AC_CHECK_HEADERS([altivec.h xmmintrin.h])
 CFLAGS="$save_CFLAGS"
 CPPFLAGS="$save_CPPFLAGS"
 
