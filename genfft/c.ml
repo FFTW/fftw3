@@ -132,6 +132,8 @@ and unparse_expr_generic =
     | [Times (c, d); (Times (a, b))] -> quaternary "FMMA" a b c d
     | [(Uminus (Times (a, b))); c] -> ternary "FNMS" a b c
     | [c; (Uminus (Times (a, b)))] -> ternary "FNMS" a b c
+    | [(Uminus c); (Times (a, b))] -> ternary "FMS" a b c
+    | [(Times (a, b)); (Uminus c)] -> ternary "FMS" a b c
     | [c; (Times (a, b))] -> ternary "FMA" a b c
     | [(Times (a, b)); c] -> ternary "FMA" a b c
     | [a; Uminus b] -> binary "SUB" a b
