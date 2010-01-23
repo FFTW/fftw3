@@ -547,6 +547,39 @@ factors.  For more details, see \docref{pruned FFTs with FFTW\}.
 There are also some algorithms that compute pruned transforms
 \italic{approximately\}, but they are beyond the scope of this FAQ.
 
+\question 21jan:transpose  Can I use FFTW's routines for in-place and out-of-place matrix transposition?
+
+You can use the FFTW guru interface to create a rank-0 transform of
+vector rank 2 where the vector strides are transposed.  (A rank-0
+transform is equivalent to a 1D transform of size 1, which.  just
+copies the input into the output.)  Specifying the same location for
+the input and output makes the transpose in-place.
+
+For double-valued data stored in row-major format, plan creation looks like
+this:
+
+\verbatim
+fftw_plan plan_transpose(int rows, int cols, double *in, double *out)
+{
+    const unsigned flags = FFTW_ESTIMATE; /* other flags are possible */
+    fftw_iodim howmany_dims[2];
+
+    howmany_dims[0].n  = rows;
+    howmany_dims[0].is = cols;
+    howmany_dims[0].os = 1;
+
+    howmany_dims[1].n  = cols;
+    howmany_dims[1].is = 1;
+    howmany_dims[1].os = rows;
+
+    return fftw_plan_guru_r2r(/*rank=*/ 0, /*dims=*/ NULL,
+                              /*howmany_rank=*/ 2, howmany_dims,
+                              in, out, /*kind=*/ NULL, flags);
+}
+\endverbatim
+
+(This entry was written by Rhys Ulerich.)
+
 \comment ######################################################################
 
 \section  Internals of FFTW
