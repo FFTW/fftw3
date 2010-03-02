@@ -4243,6 +4243,14 @@ shared-memory threads.  Parallelism using MPI or forked processes
 involves a separate address-space and global variables for each process,
 and is not susceptible to problems of this sort.)
 
+If you are configured FFTW with the @code{--enable-debug} or
+@code{--enable-debug-malloc} flags (@pxref{Installation on Unix}),
+then @code{fftw_execute} is not thread-safe.  This flags are not
+documented because they are intended only for developing
+and debugging FFTW, but if you must use @code{--enable-debug} then you
+should also specifically pass @code{--disable-debug-malloc} for
+@code{fftw_execute} to be thread-safe.
+
 @c ************************************************************
 @node FFTW on the Cell Processor, Calling FFTW from Fortran, Multi-threaded FFTW, Top
 @chapter FFTW on the Cell Processor
