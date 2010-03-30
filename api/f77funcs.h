@@ -79,6 +79,16 @@ FFTW_VOIDFUNC F77(flops,FLOPS)(X(plan) *p, double *add, double *mul, double *fma
      X(flops)(*p, add, mul, fma);
 }
 
+FFTW_VOIDFUNC F77(estimate_cost,ESTIMATE_COST)(double *cost, X(plan) * const p)
+{
+     *cost = X(estimate_cost)(*p);
+}
+
+FFTW_VOIDFUNC F77(cost,COST)(double *cost, X(plan) * const p)
+{
+     *cost = X(cost)(*p);
+}
+
 /******************************** DFT ***********************************/
 
 FFTW_VOIDFUNC F77(plan_dft, PLAN_DFT)(X(plan) *p, int *rank, const int *n,

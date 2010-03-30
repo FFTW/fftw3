@@ -1951,6 +1951,23 @@ accumulating wisdom information again.
 memory leaks, you must still call @code{fftw_destroy_plan} before
 executing @code{fftw_cleanup}.
 
+Occasionally, it may useful to know FFTW's internal ``cost'' metric
+that it uses to compare plans to one another; this cost is
+proportional to an execution time of the plan, in undocumented units,
+if the plan was created with the @code{FFTW_MEASURE} or other
+timing-based options, or alternatively is a heuristic cost function
+for @code{FFTW_EXECUTE} plans.  (The cost values of measured and
+estimated plans are not comparable, being in different units.  Also,
+costs from different FFTW versions or the same version compiled
+differently may not be in the same units.  Plans created from wisdom
+have a cost of 0 since no timing measurement is performed for them.)
+The cost metric for a given plan is returned by:
+
+@example
+double fftw_cost(const fftw_plan plan);
+@end example
+@findex fftw_cost
+
 The following two routines are provided purely for academic purposes
 (that is, for entertainment).
 

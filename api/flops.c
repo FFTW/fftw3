@@ -36,3 +36,8 @@ double X(estimate_cost)(const X(plan) p)
 {
      return X(iestimate_cost)(X(the_planner)(), p->pln, p->prb);
 }
+
+double X(cost)(const X(plan) p)
+{
+     return p->pln->pcost;
+}
