@@ -11,8 +11,8 @@ fftw3.pdf: rfftwnd.pdf
 rfftwnd.eps: rfftwnd.fig
 	fig2dev -L eps -m .7 ${srcdir}/rfftwnd.fig rfftwnd.eps
 
-rfftwnd.png: rfftwnd.fig
-	fig2dev -L png -m 1 ${srcdir}/rfftwnd.fig rfftwnd.png
+rfftwnd-for-html.png: rfftwnd.fig
+	fig2dev -L png -m 1 ${srcdir}/rfftwnd.fig rfftwnd-for-html.png
 
 rfftwnd.pdf: rfftwnd.fig
 	fig2dev -L pdf -m .7 ${srcdir}/rfftwnd.fig rfftwnd.pdf
@@ -25,11 +25,11 @@ equation-rodft10.png equation-rodft11.png
 
 EXTRA_DIST = f77_wisdom.f fftw3.pdf html rfftwnd.fig rfftwnd.eps $(EQN_IMAGES)
 
-html: $(fftw3_TEXINFOS) $(EQN_IMAGES) rfftwnd.png
+html: $(fftw3_TEXINFOS) $(EQN_IMAGES) rfftwnd-for-html.png
 	$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
 		--html --number-sections -o html fftw3.texi
 	for i in $(EQN_IMAGES); do cp -f ${srcdir}/$$i html; done
-	cp -f rfftwnd.png html
+	cp -f rfftwnd-for-html.png html
 
 clean-local:
 	rm -f *.html

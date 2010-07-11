@@ -907,7 +907,12 @@ The following illustration depicts the input and output arrays just
 described, for both the out-of-place and in-place transforms (with the
 arrows indicating consecutive memory locations):
 
+@ifhtml
+@image{rfftwnd-for-html}
+@end ifhtml
+@ifnothtml
 @image{rfftwnd}
+@end ifnothtml
 @end ifnotinfo
 
 These transforms are unnormalized, so an r2c followed by a c2r
