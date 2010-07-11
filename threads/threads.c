@@ -239,7 +239,7 @@ struct worker {
 
 static struct worker *make_worker(void)
 {
-     struct worker *q = MALLOC(sizeof(*q), OTHER);
+     struct worker *q = (struct worker *)MALLOC(sizeof(*q), OTHER);
      os_sem_init(&q->ready);
      os_sem_init(&q->done);
      return q;
