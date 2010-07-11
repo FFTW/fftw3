@@ -667,9 +667,11 @@ Multi-dimensional transforms work much the same way as one-dimensional
 transforms: you allocate arrays of @code{fftw_complex} (preferably
 using @code{fftw_malloc}), create an @code{fftw_plan}, execute it as
 many times as you want with @code{fftw_execute(plan)}, and clean up
-with @code{fftw_destroy_plan(plan)} (and @code{fftw_free}).  The only
-difference is the routine you use to create the plan:
+with @code{fftw_destroy_plan(plan)} (and @code{fftw_free}).  
 
+FFTW provides two routines for creating plans for 2d and 3d transforms,
+and one routine for creating plans of arbitrary dimensionality.
+The 2d and 3d routines have the following signature:
 @example
 fftw_plan fftw_plan_dft_2d(int n0, int n1,
                            fftw_complex *in, fftw_complex *out,
@@ -677,24 +679,50 @@ fftw_plan fftw_plan_dft_2d(int n0, int n1,
 fftw_plan fftw_plan_dft_3d(int n0, int n1, int n2,
                            fftw_complex *in, fftw_complex *out,
                            int sign, unsigned flags);
+@end example
+@findex fftw_plan_dft_2d
+@findex fftw_plan_dft_3d
+
+These routines create plans for @code{n0} by @code{n1} two-dimensional
+(2d) transforms and @code{n0} by @code{n1} by @code{n2} 3d transforms,
+respectively.  All of these transforms operate on contiguous arrays in
+the C-standard @dfn{row-major} order, so that the last dimension has the
+fastest-varying index in the array.  This layout is described further in
+@ref{Multi-dimensional Array Format}.
+
+FFTW can also compute transforms of higher dimensionality.  In order to
+avoid confusion between the various meanings of the the word
+``dimension'', we use the term @emph{rank}
+@cindex rank
+to denote the number of independent indices in an array.@footnote{The
+term ``rank'' is commonly used in the APL, FORTRAN, and Common Lisp
+traditions, although it is not so common in the C@tie{}world.}  For
+example, we say that a 2d transform has rank@tie{}2, a 3d transform has
+rank@tie{}3, and so on.  You can plan transforms of arbitrary rank by
+means of the following function:
+
+@example
 fftw_plan fftw_plan_dft(int rank, const int *n,
                         fftw_complex *in, fftw_complex *out,
                         int sign, unsigned flags);
 @end example
-@findex fftw_plan_dft_2d
-@findex fftw_plan_dft_3d
 @findex fftw_plan_dft
 
-These routines create plans for @code{n0} by @code{n1} two-dimensional
-(2d) transforms, @code{n0} by @code{n1} by @code{n2} 3d transforms,
-and arbitrary @code{rank}-dimensional transforms, respectively.  In the
-@cindex rank
-third case, @code{n} is a pointer to an array @code{n[rank]} denoting
-an @code{n[0]} by @code{n[1]} by @dots{} by @code{n[rank-1]}
-transform.  All of these transforms operate on contiguous arrays in
-the C-standard @dfn{row-major} order, so that the last dimension has
-the fastest-varying index in the array.  This layout is described
-further in @ref{Multi-dimensional Array Format}.
+Here, @code{n} is a pointer to an array @code{n[rank]} denoting an
+@code{n[0]} by @code{n[1]} by @dots{} by @code{n[rank-1]} transform.
+Thus, for example, the call
+@example
+fftw_plan_dft_2d(n0, n1, in, out, sign, flags);
+@end example
+is equivalent to the following code fragment:
+@example
+int n[2];
+n[0] = n0;
+n[1] = n1;
+fftw_plan_dft(2, n, in, out, sign, flags);
+@end example
+@code{fftw_plan_dft} is not restricted to 2d and 3d transforms,
+however, but it can plan transforms of arbitrary rank.
 
 You may have noticed that all the planner routines described so far
 have overlapping functionality.  For example, you can plan a 1d or 2d
@@ -902,16 +930,22 @@ must @emph{pad} the input array so that it is of size @code{n0} by
 elements at the end of each row (which need not be initialized, as they
 are only used for output).
 
-@ifnotinfo
+@ifhtml
 The following illustration depicts the input and output arrays just
 described, for both the out-of-place and in-place transforms (with the
 arrows indicating consecutive memory locations):
-
-@ifhtml
 @image{rfftwnd-for-html}
 @end ifhtml
+@ifnotinfo
 @ifnothtml
-@image{rfftwnd}
+@float Figure,fig:rfftwnd
+@center @image{rfftwnd}
+@caption{Illustration of the data layout for a 2d @code{nx} by @code{ny}
+real-to-complex transform.}
+@end float
+@ref{fig:rfftwnd} depicts the input and output arrays just
+described, for both the out-of-place and in-place transforms (with the
+arrows indicating consecutive memory locations):
 @end ifnothtml
 @end ifnotinfo
 
@@ -1247,7 +1281,7 @@ set of codelets for efficiency and generality, or sacrificing a factor of
 $\sim 2$
 @end tex
 @ifnottex
-~2
+2
 @end ifnottex
 in speed to use a real DFT of twice the size.  We currently
 employ the latter technique for general @math{n}, as well as a limited
@@ -2008,9 +2042,13 @@ the given file or to @code{stdout}, respectively.
 @section Basic Interface
 @cindex basic interface
 
-The basic interface, which we expect to satisfy the needs of most users,
-provides planner routines for transforms of a single contiguous array
-with any of FFTW's supported transform types.
+Recall that the FFTW API is divided into three parts@footnote{Gallia est
+omnis divisa in partes tres (Julius Caesar).}: the @dfn{basic interface}
+computes a single transform of contiguous data, the @dfn{advanced
+interface} computes transforms of multiple or strided arrays, and the
+@dfn{guru interface} supports the most general data layouts,
+multiplicities, and strides.  This section describes the the basic
+interface, which we expect to satisfy the needs of most users.
 
 @menu
 * Complex DFTs::                
@@ -2026,7 +2064,7 @@ with any of FFTW's supported transform types.
 @subsection Complex DFTs
 
 @example
-fftw_plan fftw_plan_dft_1d(int n,
+fftw_plan fftw_plan_dft_1d(int n0,
                            fftw_complex *in, fftw_complex *out,
                            int sign, unsigned flags);
 fftw_plan fftw_plan_dft_2d(int n0, int n1,
@@ -2052,26 +2090,28 @@ parameters, then creating another plan of the same type and parameters,
 but for different arrays, is fast and shares constant data with the
 first plan (if it still exists).
 
-The planner returns @code{NULL} if the plan cannot be created.  A
-non-@code{NULL} plan is always returned by the basic interface unless
-you are using a customized FFTW configuration supporting a restricted
-set of transforms.
+The planner returns @code{NULL} if the plan cannot be created.  In the
+standard FFTW distribution, the basic interface is guaranteed to return
+a non-@code{NULL} plan.  A plan may be @code{NULL}, however, if you are
+using a customized FFTW configuration supporting a restricted set of
+transforms.
 
 @subsubheading Arguments
 @itemize @bullet
 
 @item
-@code{rank} is the dimensionality of the transform (it should be the
-size of the array @code{*n}), and can be any non-negative integer.  The
+@code{rank} is the rank of the transform (it should be the size of the
+array @code{*n}), and can be any non-negative integer.  (@xref{Complex
+Multi-Dimensional DFTs}, for the definition of ``rank''.)  The
 @samp{_1d}, @samp{_2d}, and @samp{_3d} planners correspond to a
-@code{rank} of @code{1}, @code{2}, and @code{3}, respectively.  A
-@code{rank} of zero is equivalent to a transform of size 1, i.e. a copy
-of one number from input to output.
+@code{rank} of @code{1}, @code{2}, and @code{3}, respectively.  The rank
+may be zero, which is equivalent to a rank-1 transform of size 1, i.e. a
+copy of one number from input to output.
 
 @item
-@code{n}, or @code{n0}/@code{n1}/@code{n2}, or @code{n[rank]},
-respectively, gives the size of the transform dimensions.  They can be
-any positive integer.
+@code{n0}, @code{n1}, @code{n2}, or @code{n[0..rank-1]} (as appropriate
+for each routine) specify the size of the transform dimensions.  They
+can be any positive integer.
  
 @itemize @minus
 @item
@@ -2272,7 +2312,7 @@ of 0).
 @subsection Real-data DFTs
 
 @example
-fftw_plan fftw_plan_dft_r2c_1d(int n,
+fftw_plan fftw_plan_dft_r2c_1d(int n0,
                                double *in, fftw_complex *out,
                                unsigned flags);
 fftw_plan fftw_plan_dft_r2c_2d(int n0, int n1,
@@ -2310,17 +2350,18 @@ with a multi-dimensional out-of-place c2r transform (see below).
 @itemize @bullet
 
 @item
-@code{rank} is the dimensionality of the transform (it should be the
-size of the array @code{*n}), and can be any non-negative integer.  The
+@code{rank} is the rank of the transform (it should be the size of the
+array @code{*n}), and can be any non-negative integer.  (@xref{Complex
+Multi-Dimensional DFTs}, for the definition of ``rank''.)  The
 @samp{_1d}, @samp{_2d}, and @samp{_3d} planners correspond to a
-@code{rank} of @code{1}, @code{2}, and @code{3}, respectively.  A
-@code{rank} of zero is equivalent to a transform of size 1, i.e. a copy
-of one number (with zero imaginary part) from input to output.
+@code{rank} of @code{1}, @code{2}, and @code{3}, respectively.  The rank
+may be zero, which is equivalent to a rank-1 transform of size 1, i.e. a
+copy of one real number (with zero imaginary part) from input to output.
 
 @item
-@code{n}, or @code{n0}/@code{n1}/@code{n2}, or @code{n[rank]},
-respectively, gives the size of the @emph{logical} transform dimensions.
-They can be any positive integer.  This is different in general from the
+@code{n0}, @code{n1}, @code{n2}, or @code{n[0..rank-1]}, (as appropriate
+for each routine) specify the size of the transform dimensions.  They
+can be any positive integer.  This is different in general from the
 @emph{physical} array dimensions, which are described in @ref{Real-data
 DFT Array Format}.
  
@@ -2369,7 +2410,7 @@ The inverse transforms, taking complex input (storing the non-redundant
 half of a logically Hermitian array) to real output, are given by:
 
 @example
-fftw_plan fftw_plan_dft_c2r_1d(int n,
+fftw_plan fftw_plan_dft_c2r_1d(int n0,
                                fftw_complex *in, double *out,
                                unsigned flags);
 fftw_plan fftw_plan_dft_c2r_2d(int n0, int n1,
@@ -2716,30 +2757,40 @@ fftw_plan fftw_plan_many_dft(int rank, const int *n, int howmany,
 @end example
 @findex fftw_plan_many_dft
 
-This plans multidimensional complex DFTs, and is exactly the same as
-@code{fftw_plan_dft} except for the new parameters @code{howmany},
-@{@code{i},@code{o}@}@code{nembed}, @{@code{i},@code{o}@}@code{stride},
-and @{@code{i},@code{o}@}@code{dist}.
+This routine plans multiple multidimensional complex DFTs, and it
+extends the @code{fftw_plan_dft} routine (@pxref{Complex DFTs}) to
+compute @code{howmany} transforms, each having rank @code{rank} and size
+@code{n}.  In addition, the transform data need not be contiguous, but
+it may be laid out in memory with an arbitrary stride.  To account for
+these possibilities, @code{fftw_plan_many_dft} adds the new parameters
+@code{howmany}, @{@code{i},@code{o}@}@code{nembed},
+@{@code{i},@code{o}@}@code{stride}, and
+@{@code{i},@code{o}@}@code{dist}.  The FFTW basic interface
+(@pxref{Complex DFTs}) provides routines specialized for ranks 1, 2,
+and@tie{}3, but the advanced interface handles only the general-rank
+case.
 
-@code{howmany} is the number of transforms to compute, where the
-@code{k}-th transform is of the arrays starting at @code{in+k*idist} and
-@code{out+k*odist}.  The resulting plans can often be faster than
-calling FFTW multiple times for the individual transforms.  The basic
-@code{fftw_plan_dft} interface corresponds to @code{howmany=1} (in which
-case the @code{dist} parameters are ignored).
+@code{howmany} is the number of transforms to compute.  The resulting
+plan computes @code{howmany} transforms, where the input of the
+@code{k}-th transform is at location @code{in+k*idist} (in C pointer
+arithmetic), and its output is at location @code{out+k*odist}.  Plans
+obtained in this way can often be faster than calling FFTW multiple
+times for the individual transforms.  The basic @code{fftw_plan_dft}
+interface corresponds to @code{howmany=1} (in which case the @code{dist}
+parameters are ignored).
 @cindex howmany parameter
 @cindex dist
 
-The two @code{nembed} parameters (which should be arrays of length
-@code{rank}) indicate the sizes of the input and output array
-dimensions, respectively, where the transform is of a subarray of size
-@code{n}.  (Each dimension of @code{n} should be @code{<=} the
-corresponding dimension of the @code{nembed} arrays.)  That is, the
-input and output arrays are stored in row-major order with size given by
-@code{nembed} (not counting the strides and howmany multiplicities).
-Passing @code{NULL} for an @code{nembed} parameter is equivalent to
-passing @code{n} (i.e. same physical and logical dimensions, as in the
-basic interface.)
+Each of the @code{howmany} transforms has rank @code{rank} and size
+@code{n}, as in the basic interface.  In addition, the advanced
+interface allows the input and output arrays of each transform to be
+row-major subarrays of larger rank-@code{rank} arrays, described by
+@code{inembed} and @code{onembed} parameters, respectively.
+@{@code{i},@code{o}@}@code{nembed} must be arrays of length @code{rank},
+and @code{n} should be elementwise less than or equal to
+@{@code{i},@code{o}@}@code{nembed}.  Passing @code{NULL} for an
+@code{nembed} parameter is equivalent to passing @code{n} (i.e. same
+physical and logical dimensions, as in the basic interface.)
 
 The @code{stride} parameters indicate that the @code{j}-th element of
 the input or output arrays is located at @code{j*istride} or
@@ -2757,13 +2808,41 @@ return @code{NULL}.
 Arrays @code{n}, @code{inembed}, and @code{onembed} are not used after
 this function returns.  You can safely free or reuse them.
 
-So, for example, to transform a sequence of contiguous arrays, stored
-one after another, one would use a @code{stride} of 1 and a @code{dist}
-of @math{N}, where @math{N} is the product of the dimensions.  In
-another example, to transform an array of contiguous ``vectors'' of
-length @math{M}, one would use a @code{howmany} of @math{M}, a
-@code{stride} of @math{M}, and a @code{dist} of 1.
-@cindex vector
+@strong{Examples}:
+One transform of one 5 by 6 array contiguous in memory:
+@example
+   int rank = 2;
+   int n[] = @{5, 6@};
+   int howmany = 1;
+   int idist = odist = 0; /* unused because howmany = 1 */
+   int istride = ostride = 1; /* array is contiguous in memory */
+   int *inembed = n, *onembed = n;
+@end example
+
+Transform of three 5 by 6 arrays, each contiguous in memory,
+stored in memory one after another:
+@example
+   int rank = 2;
+   int n[] = @{5, 6@};
+   int howmany = 3;
+   int idist = odist = n[0]*n[1]; /* = 30, the distance in memory
+                                     between the first element
+                                     of the first array and the
+                                     first element of the second array */
+   int istride = ostride = 1; /* array is contiguous in memory */
+   int *inembed = n, *onembed = n;
+@end example
+
+Transform each column of a 2d array with 10 rows and 3 columns:
+@example
+   int rank = 1; /* not 2: we are computing 1d transforms */
+   int n[] = @{10@}; /* 1d transforms of length 10 */
+   int howmany = 3;
+   int idist = odist = 1;
+   int istride = ostride = 3; /* distance between two elements in 
+                                 the same column */
+   int *inembed = n, *onembed = n;
+@end example
 
 @c =========>
 @node Advanced Real-data DFTs, Advanced Real-to-real Transforms, Advanced Complex DFTs, Advanced Interface
