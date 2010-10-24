@@ -223,4 +223,9 @@ static inline V BYTWJ2(const R *t, V sr)
   {TW_COS, v, x}, {TW_COS, v+1, x}, {TW_SIN, v, x}, {TW_SIN, v+1, x}
 #define TWVLS (2 * VL)
 
+#define VFMACONJ(b,c)  VADD(VCONJ(b),c)
+#define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
+#define VFNMSCONJ(b,c) VSUB(c, VCONJ(b))
+
+
 #endif /* __SSE2__ */
