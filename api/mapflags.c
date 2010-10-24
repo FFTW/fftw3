@@ -62,7 +62,7 @@ static unsigned timelimit_to_flags(double timelimit)
      const int nsteps = (1 << BITS_FOR_TIMELIMIT);
      int x;
      
-     if (timelimit >= tmax)
+     if (timelimit < 0 || timelimit >= tmax)
 	  return 0;
      if (timelimit <= 1.0e-10)
 	  return nsteps - 1;
