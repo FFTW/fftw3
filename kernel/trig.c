@@ -23,7 +23,7 @@
 #include "ifftw.h"
 #include <math.h>
 
-#ifdef TRIGREAL_IS_LONG_DOUBLE
+#if defined(TRIGREAL_IS_LONG_DOUBLE)
 #  define COS cosl
 #  define SIN sinl
 #  define KTRIG(x) (x##L)
@@ -32,6 +32,21 @@
 #  endif
 #  ifndef HAVE_DECL_COSL
      extern long double cosl(long double x);
+#  endif
+#elif defined(TRIGREAL_IS_QUAD)
+#  if defined(HAVE_COSQ) && defined(HAVE_SINQ)
+#    define COS cosq
+#    define SIN sinq
+#  else
+#    define COS cosl
+#    define SIN sinl
+#  endif
+#  define KTRIG(x) (x##Q)
+#  ifndef HAVE_DECL_SINQ
+     extern __float128 sinq(__float128 x);
+#  endif
+#  ifndef HAVE_DECL_COSQ
+     extern __float128 cosq(__float128 x);
 #  endif
 #else
 #  define COS cos

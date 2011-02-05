@@ -70,6 +70,18 @@ if test "$ok" = "yes"; then
 	PRECISION=l
 fi
 AM_CONDITIONAL(LDOUBLE, test "$ok" = "yes")
+
+AC_ARG_ENABLE(quad-precision, [AC_HELP_STRING([--enable-quad-precision],[compile fftw in quadruple precision if available (EXPERIMENTAL)])], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+	if test "$PRECISION" != "d"; then
+		AC_MSG_ERROR([conflicting precisions specified])
+	fi
+	AC_DEFINE(FFTW_QUAD,1,[Define to compile in quad precision.])
+	AC_DEFINE(BENCHFFT_QUAD,1,[Define to compile in quad precision.])
+	PRECISION=q
+fi
+AM_CONDITIONAL(QUAD, test "$ok" = "yes")
+
 AC_SUBST(PRECISION)
 
 have_simd="no"
@@ -338,8 +350,8 @@ if test "$have_cell" = "yes"; then
    AC_CHECK_LIB(spe2, spe_context_run, [], [AC_CHECK_LIB(spe, spe_wait)])
 fi
 
-AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl snprintf])
-AC_CHECK_DECLS([drand48, memalign, posix_memalign, sinl, cosl])
+AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl sinq cosq snprintf])
+AC_CHECK_DECLS([drand48, memalign, posix_memalign, sinl, cosl, sinq, cosq])
 
 dnl Cray UNICOS _rtc() (real-time clock) intrinsic
 AC_MSG_CHECKING([for _rtc intrinsic])

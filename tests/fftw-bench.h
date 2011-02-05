@@ -9,6 +9,8 @@
 #define FFTW(x) CONCAT(fftwf_, x)
 #elif defined(BENCHFFT_LDOUBLE)
 #define FFTW(x) CONCAT(fftwl_, x)
+#elif defined(BENCHFFT_QUAD)
+#define FFTW(x) CONCAT(fftwq_, x)
 #else
 #define FFTW(x) CONCAT(fftw_, x)
 #endif

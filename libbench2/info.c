@@ -52,6 +52,7 @@ void report_info_all(void)
      }
      ovtpvt("(benchmark-precision \"%s\")\n", 
 	    SINGLE_PRECISION ? "single" : 
-	    (LDOUBLE_PRECISION ? "long-double" : "double"));
+	    (LDOUBLE_PRECISION ? "long-double" : 
+	     (QUAD_PRECISION ? "quad" : "double")));
 }
 

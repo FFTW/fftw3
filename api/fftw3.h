@@ -66,6 +66,7 @@ extern "C"
 #define FFTW_MANGLE_DOUBLE(name) FFTW_CONCAT(fftw_, name)
 #define FFTW_MANGLE_FLOAT(name) FFTW_CONCAT(fftwf_, name)
 #define FFTW_MANGLE_LONG_DOUBLE(name) FFTW_CONCAT(fftwl_, name)
+#define FFTW_MANGLE_QUAD(name) FFTW_CONCAT(fftwq_, name)
 
 /* IMPORTANT: for Windows compilers, you should add a line
         #define FFTW_DLL
@@ -342,6 +343,8 @@ FFTW_EXTERN const char X(codelet_optim)[];
 FFTW_DEFINE_API(FFTW_MANGLE_DOUBLE, double, fftw_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_FLOAT, float, fftwf_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
+
+/* gcc only: FFTW_DEFINE_API(FFTW_MANGLE_QUAD, __float128, fftwq_complex) */
 
 #define FFTW_FORWARD (-1)
 #define FFTW_BACKWARD (+1)

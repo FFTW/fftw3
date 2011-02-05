@@ -62,6 +62,10 @@
   typedef long double R;
 # define X(name) CONCAT(fftwl_, name)
 # define TRIGREAL_IS_LONG_DOUBLE
+#elif defined(FFTW_QUAD)
+  typedef __float128 R;
+# define X(name) CONCAT(fftwq_, name)
+# define TRIGREAL_IS_QUAD
 #else
   typedef double R;
 # define X(name) CONCAT(fftw_, name)
@@ -838,8 +842,10 @@ void X(twiddle_awake)(enum wakefulness wakefulness,
 
 /*-----------------------------------------------------------------------*/
 /* trig.c */
-#ifdef TRIGREAL_IS_LONG_DOUBLE
+#if defined(TRIGREAL_IS_LONG_DOUBLE)
    typedef long double trigreal;
+#elif defined(TRIGREAL_IS_QUAD)
+   typedef __float128 trigreal;
 #else
    typedef double trigreal;
 #endif
@@ -993,8 +999,10 @@ R *X(join_taint)(R *p1, R *p2);
 
 typedef R E;  /* internal precision of codelets. */
 
-#ifdef FFTW_LDOUBLE
+#if defined(FFTW_LDOUBLE)
 #  define K(x) ((E) x##L)
+#elif defined(FFTW_QUAD)
+#  define K(x) ((E) x##Q)
 #else
 #  define K(x) ((E) x)
 #endif

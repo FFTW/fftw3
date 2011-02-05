@@ -18,7 +18,7 @@
  *
  */
 
-#if defined(FFTW_SINGLE) || defined(FFTW_LDOUBLE)
+#if defined(FFTW_SINGLE) || defined(FFTW_LDOUBLE) || defined(FFTW_QUAD)
 #error "SSE2 only works in double precision"
 #endif
 

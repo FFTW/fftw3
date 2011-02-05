@@ -86,6 +86,12 @@ void accuracy_r2r(bench_problem *p, int rounds, int impulse_rounds,
 #  define SIN sinl
 #  define TAN tanl
 #  define KTRIG(x) (x##L)
+#elif defined(BENCHFFT_QUAD) && HAVE_COSQ
+   typedef __float128 trigreal;
+#  define COS cosq
+#  define SIN sinq
+#  define TAN tanq
+#  define KTRIG(x) (x##Q)
 #else
    typedef double trigreal;
 #  define COS cos

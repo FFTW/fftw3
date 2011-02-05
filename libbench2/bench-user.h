@@ -40,6 +40,8 @@ extern "C" {
 typedef float bench_real;
 #elif defined(BENCHFFT_LDOUBLE)
 typedef long double bench_real;
+#elif defined(BENCHFFT_QUAD)
+typedef __float128 bench_real;
 #else
 typedef double bench_real;
 #endif
@@ -55,6 +57,8 @@ typedef bench_real bench_complex[2];
 #define SINGLE_PRECISION (!DOUBLE_PRECISION && sizeof(bench_real) == sizeof(float))
 #undef LDOUBLE_PRECISION
 #define LDOUBLE_PRECISION (!DOUBLE_PRECISION && sizeof(bench_real) == sizeof(long double))
+#undef QUAD_PRECISION
+#define QUAD_PRECISION (!LDOUBLE_PRECISION && sizeof(bench_real) == sizeof(__float128))
 
 typedef enum { PROBLEM_COMPLEX, PROBLEM_REAL, PROBLEM_R2R } problem_kind_t;
 

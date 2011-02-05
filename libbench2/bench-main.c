@@ -147,6 +147,8 @@ int bench_main(int argc, char *argv[])
 	      case 402: /* --print-precision */
 		   if (SINGLE_PRECISION)
 			ovtpvt("single\n");
+		   else if (QUAD_PRECISION)
+			ovtpvt("quad\n");
 		   else if (LDOUBLE_PRECISION)
 			ovtpvt("long-double\n");
 		   else if (DOUBLE_PRECISION)
