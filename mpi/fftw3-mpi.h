@@ -187,7 +187,12 @@ FFTW_EXTERN X(plan) XM(plan_dft_c2r_3d)				\
       MPI_Comm comm, unsigned flags);				\
 								\
 FFTW_EXTERN void XM(gather_wisdom)(MPI_Comm comm_);		\
-FFTW_EXTERN void XM(broadcast_wisdom)(MPI_Comm comm_);
+FFTW_EXTERN void XM(broadcast_wisdom)(MPI_Comm comm_);          \
+								\
+FFTW_EXTERN void XM(execute_dft)(X(plan), C *in, C *out);	\
+FFTW_EXTERN void XM(execute_dft_r2c)(X(plan), R *in, C *out);	\
+FFTW_EXTERN void XM(execute_dft_c2r)(X(plan), C *in, R *out);	\
+FFTW_EXTERN void XM(execute_r2r)(X(plan), R *in, R *out); 
 
 
 

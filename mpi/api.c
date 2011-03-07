@@ -810,3 +810,26 @@ X(plan) XM(plan_dft_c2r_3d)(ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz,
      n[0] = nx; n[1] = ny; n[2] = nz;
      return XM(plan_dft_c2r)(3, n, in, out, comm, flags);
 }
+
+/*************************************************************************/
+/* New-array execute functions */
+
+void XM(execute_dft)(const X(plan) p, C *in, C *out) {
+     /* internally, MPI plans are just rdft plans */
+     X(execute_r2r)(p, (R*) in, (R*) out);
+}
+
+void XM(execute_dft_r2c)(const X(plan) p, R *in, C *out) {
+     /* internally, MPI plans are just rdft plans */
+     X(execute_r2r)(p, in, (R*) out);
+}
+
+void XM(execute_dft_c2r)(const X(plan) p, C *in, R *out) {
+     /* internally, MPI plans are just rdft plans */
+     X(execute_r2r)(p, (R*) in, out);
+}
+
+void XM(execute_r2r)(const X(plan) p, R *in, R *out) {
+     /* internally, MPI plans are just rdft plans */
+     X(execute_r2r)(p, in, out);
+}
