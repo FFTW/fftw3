@@ -50,6 +50,9 @@ double bench_drand(void)
 {
      return drand48() - 0.5;
 }
+#  if defined(HAVE_DECL_SRAND48) && !HAVE_DECL_SRAND48
+extern void srand48(long);
+#  endif
 void bench_srand(int seed)
 {
      srand48(seed);
