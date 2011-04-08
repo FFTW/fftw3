@@ -403,7 +403,7 @@ static double random_estimate(const planner *ego, const plan *pln,
      X(md5putb)(&m, &pln->ops, sizeof(pln->ops));
      X(md5putb)(&m, &pln->adt, sizeof(pln->adt));
      X(md5end)(&m);
-     return m.s[0];
+     return ego->cost_hook ? ego->cost_hook(p, m.s[0], COST_MAX) : m.s[0];
 }
 
 #endif
