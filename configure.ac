@@ -49,7 +49,7 @@ if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_RANDOM_ESTIMATOR,1,[Define to enable pseudorandom estimate planning for debugging.])
 fi
 
-AC_ARG_ENABLE(alloca, [AC_HELP_STRING([--enable-alloca],[enable use of the alloca() function (may be broken on mingw64)])], ok=$enableval, ok=yes)
+AC_ARG_ENABLE(alloca, [AC_HELP_STRING([--disable-alloca],[disable use of the alloca() function (may be broken on mingw64)])], ok=$enableval, ok=yes)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_ENABLE_ALLOCA,1,[Define to enable the use of alloca().])
 fi
