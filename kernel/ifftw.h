@@ -958,6 +958,10 @@ void X(cell_copy)(R *I, R *O, const iodim *n, const iodim *v);
 void X(null_awake)(plan *ego, enum wakefulness wakefulness);
 double X(iestimate_cost)(const planner *, const plan *, const problem *);
 
+#ifdef FFTW_RANDOM_ESTIMATOR
+extern unsigned X(random_estimate_seed);
+#endif
+
 double X(measure_execution_time)(const planner *plnr, 
 				 plan *pln, const problem *p);
 int X(alignment_of)(R *p);

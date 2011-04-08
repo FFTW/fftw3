@@ -27,6 +27,10 @@ extern void uninstall_hook(void);  /* in hook.c */
 extern void FFTW(cell_set_nspe)(int); /* in fftw-cell.h */
 #endif
 
+#ifdef FFTW_RANDOM_ESTIMATOR
+extern unsigned FFTW(random_estimate_seed);
+#endif
+
 void useropt(const char *arg)
 {
      int x;
@@ -48,6 +52,9 @@ void useropt(const char *arg)
      else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
 #if HAVE_CELL
      else if (sscanf(arg, "nspe=%d", &x) == 1) FFTW(cell_set_nspe)(x);
+#endif
+#ifdef FFTW_RANDOM_ESTIMATOR
+     else if (sscanf(arg, "eseed=%d", &x) == 1) FFTW(random_estimate_seed) = x;
 #endif
      else if (sscanf(arg, "timelimit=%lg", &y) == 1) {
 	  FFTW(set_timelimit)(y);

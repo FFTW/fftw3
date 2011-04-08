@@ -152,6 +152,10 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
      
      /* discard all information not necessary to reconstruct the plan */
      plnr->adt->forget(plnr, FORGET_ACCURSED);
+
+#ifdef FFTW_RANDOM_ESTIMATOR
+     X(random_estimate_seed)++; /* subsequent "random" plans are distinct */
+#endif
      
      return p;
 }

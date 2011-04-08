@@ -386,6 +386,28 @@ static void invoke_hook(planner *ego, plan *pln, const problem *p,
 	  ego->hook(ego, pln, p, optimalp);
 }
 
+#ifdef FFTW_RANDOM_ESTIMATOR
+/* a "random" estimate, used for debugging to generate "random"
+   plans, albeit from a deterministic seed. */
+
+unsigned X(random_estimate_seed) = 0;
+
+static double random_estimate(const planner *ego, const plan *pln, 
+			      const problem *p)
+{
+     md5 m;
+     X(md5begin)(&m);
+     X(md5unsigned)(&m, X(random_estimate_seed));
+     X(md5int)(&m, ego->nthr);
+     p->adt->hash(p, &m);
+     X(md5putb)(&m, &pln->ops, sizeof(pln->ops));
+     X(md5putb)(&m, &pln->adt, sizeof(pln->adt));
+     X(md5end)(&m);
+     return m.s[0];
+}
+
+#endif
+
 double X(iestimate_cost)(const planner *ego, const plan *pln, const problem *p)
 {
      double cost =
@@ -412,8 +434,13 @@ static void evaluate_plan(planner *ego, plan *pln, const problem *p)
 	  if (ESTIMATEP(ego)) {
 	  estimate:
 	       /* heuristic */
+#ifdef FFTW_RANDOM_ESTIMATOR
+	       pln->pcost = random_estimate(ego, pln, p);
+	       ego->epcost += X(iestimate_cost)(ego, pln, p);
+#else
 	       pln->pcost = X(iestimate_cost)(ego, pln, p);
 	       ego->epcost += pln->pcost;
+#endif
 	  } else {
 	       double t = X(measure_execution_time)(ego, pln, p);
 	       
