@@ -110,6 +110,7 @@ INT XM(choose_radix)(ddim d, int n_pes, unsigned flags, int sign,
 /***********************************************************************/
 /* any_true.c */
 int XM(any_true)(int condition, MPI_Comm comm);
+int XM(md5_equal)(md5 m, MPI_Comm comm);
 
 /* conf.c */
 void XM(conf_standard)(planner *p);

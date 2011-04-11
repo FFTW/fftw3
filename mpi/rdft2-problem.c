@@ -34,13 +34,17 @@ static void hash(const problem *p_, md5 *m)
      int i;
      X(md5puts)(m, "mpi-rdft2");
      X(md5int)(m, p->I == p->O);
-     X(md5int)(m, X(alignment_of)(p->I));
-     X(md5int)(m, X(alignment_of)(p->O));
+     /* don't include alignment -- may differ between processes
+	X(md5int)(m, X(alignment_of)(p->I));
+	X(md5int)(m, X(alignment_of)(p->O));
+	... note that applicability of MPI plans does not depend
+	    on alignment (although optimality may, in principle). */
      XM(dtensor_md5)(m, p->sz);
      X(md5INT)(m, p->vn);
      X(md5int)(m, p->kind);
      X(md5int)(m, p->flags);
      MPI_Comm_size(p->comm, &i); X(md5int)(m, i);
+     A(XM(md5_equal)(*m, p->comm));
 }
 
 static void print(const problem *ego_, printer *p)
