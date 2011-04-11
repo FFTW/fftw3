@@ -639,6 +639,12 @@ static plan *mkplan(planner *ego, const problem *p)
 	 (sol = hlookup(ego, m.s, &flags_of_solution))) { 
 	  /* wisdom is acceptable */
 	  wisdom_state_t owisdom_state = ego->wisdom_state;
+
+	  /* this hook is mainly for MPI, to make sure that
+	     wisdom is in sync across all processes for MPI problems */
+	  if (ego->wisdom_ok_hook && !ego->wisdom_ok_hook(p, sol->flags))
+	       goto do_search; /* ignore not-ok wisdom */
+
 	  slvndx = SLVNDX(sol);
 
 	  if (slvndx == INFEASIBLE_SLVNDX) {
@@ -881,6 +887,7 @@ planner *X(mkplanner)(void)
      p->pcost = p->epcost = 0.0;
      p->hook = 0;
      p->cost_hook = 0;
+     p->wisdom_ok_hook = 0;
      p->cur_reg_nam = 0;
      p->wisdom_state = WISDOM_NORMAL;
 

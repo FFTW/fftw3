@@ -33,29 +33,76 @@
 
 static int mpi_inited = 0;
 
-static double cost_hook(const problem *p, double t, cost_kind k)
-{
-     MPI_Comm comm;
-     double tsum;
+static MPI_Comm problem_comm(const problem *p) {
      switch (p->adt->problem_kind) {
 	 case PROBLEM_MPI_DFT:
-	      comm = ((const problem_mpi_dft *) p)->comm;
-	      break;
+	      return ((const problem_mpi_dft *) p)->comm;
 	 case PROBLEM_MPI_RDFT:
-	      comm = ((const problem_mpi_rdft *) p)->comm;
-	      break;
+	      return ((const problem_mpi_rdft *) p)->comm;
 	 case PROBLEM_MPI_RDFT2:
-	      comm = ((const problem_mpi_rdft2 *) p)->comm;
-	      break;
+	      return ((const problem_mpi_rdft2 *) p)->comm;
 	 case PROBLEM_MPI_TRANSPOSE:
-	      comm = ((const problem_mpi_transpose *) p)->comm;
-	      break;
+	      return ((const problem_mpi_transpose *) p)->comm;
 	 default:
-	      return t;
+	      return MPI_COMM_NULL;
      }
+}
+
+/* used to synchronize cost measurements (timing or estimation)
+   across all processes for an MPI problem, which is critical to
+   ensure that all processes decide to use the same MPI plans
+   (whereas serial plans need not be syncronized). */
+static double cost_hook(const problem *p, double t, cost_kind k)
+{
+     MPI_Comm comm = problem_comm(p);
+     double tsum;
+     if (comm == MPI_COMM_NULL) return t;
      MPI_Allreduce(&t, &tsum, 1, MPI_DOUBLE, 
 		   k == COST_SUM ? MPI_SUM : MPI_MAX, comm);
      return tsum;
+}
+
+/* Used to reject wisdom that is not in sync across all processes
+   for an MPI problem, which is critical to ensure that all processes
+   decide to use the same MPI plans.  (Even though costs are synchronized,
+   above, out-of-sync wisdom may result from plans being produced
+   by communicators that do not span all processes, either from a
+   user-specified communicator or e.g. from transpose-recurse. */
+static int wisdom_ok_hook(const problem *p, flags_t flags)
+{
+     MPI_Comm comm = problem_comm(p);
+     int eq_me, eq_all;
+     /* unpack flags bitfield, since MPI communications may involve
+	byte-order changes and MPI cannot do this for bit fields */
+#if SIZEOF_UNSIGNED_INT >= 4 /* must be big enough to hold 20-bit fields */
+     unsigned int f[5];
+#else
+     unsigned long f[5]; /* at least 32 bits as per C standard */
+#endif
+
+     if (comm == MPI_COMM_NULL) return 1; /* non-MPI wisdom is always ok */
+
+     /* otherwise, check that the flags and solver index are identical
+	on all processes in this problem's communicator.
+
+	TO DO: possibly we can relax strict equality, but it is
+	critical to ensure that any flags which affect what plan is
+	created (and whether the solver is applicable) are the same,
+	e.g. DESTROY_INPUT, NO_UGLY, etcetera.  (If the MPI algorithm
+	differs between processes, deadlocks/crashes generally result.) */
+     f[0] = flags.l;
+     f[1] = flags.hash_info;
+     f[2] = flags.timelimit_impatience;
+     f[3] = flags.u;
+     f[4] = flags.slvndx;
+     MPI_Bcast(f, 5, 
+	       SIZEOF_UNSIGNED_INT >= 4 ? MPI_UNSIGNED : MPI_UNSIGNED_LONG,
+	       0, comm);
+     eq_me = f[0] == flags.l && f[1] == flags.hash_info
+	  && f[2] == flags.timelimit_impatience
+	  && f[3] == flags.u && f[4] == flags.slvndx;
+     MPI_Allreduce(&eq_me, &eq_all, 1, MPI_INT, MPI_LAND, comm);
+     return eq_all;
 }
 
 void XM(init)(void)
@@ -63,6 +110,7 @@ void XM(init)(void)
      if (!mpi_inited) {
 	  planner *plnr = X(the_planner)();
 	  plnr->cost_hook = cost_hook;
+	  plnr->wisdom_ok_hook = wisdom_ok_hook;
           XM(conf_standard)(plnr);
 	  mpi_inited = 1;	  
      }
