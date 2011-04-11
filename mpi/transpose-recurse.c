@@ -210,26 +210,24 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 
      b = XM(block)(p->nx, r * p->block, me / r);
      MPI_Comm_split(p->comm, me / r, me, &comm2);
-     if (b) {
+     if (b)
 	  cldtr = X(mkplan_d)(plnr, XM(mkproblem_transpose)
 			      (b, p->ny, p->vn,
 			       O, I, p->block, m * p->tblock, comm2, 
 			       p->I != p->O
 			       ? TRANSPOSED_IN : (p->flags & TRANSPOSED_IN)));
-	  if (XM(any_true)(!cldtr, comm2)) goto nada;
-     }
      MPI_Comm_free(&comm2);
+     if (XM(any_true)(b && !cldtr, p->comm)) goto nada;
      
      b = XM(block)(p->ny, m * p->tblock, me % r);
      MPI_Comm_split(p->comm, me % r, me, &comm2);
-     if (b) {
+     if (b)
 	  cldtm = X(mkplan_d)(plnr, XM(mkproblem_transpose)
 			      (p->nx, b, p->vn,
 			       I, O, r * p->block, p->tblock, comm2, 
 			       TRANSPOSED_IN | (p->flags & TRANSPOSED_OUT)));
-	  if (XM(any_true)(!cldtm, comm2)) goto nada;
-     }
      MPI_Comm_free(&comm2);
+     if (XM(any_true)(b && !cldtm, p->comm)) goto nada;
 
      pln = MKPLAN_MPI_TRANSPOSE(P, &padt, apply);
 
