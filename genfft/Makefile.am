@@ -1,7 +1,7 @@
 # this makefile requires GNU make.
 
-EXTRA_DIST = .depend algsimp.ml annotate.ml assoctable.ml c.ml		\
-complex.ml conv.ml dag.ml expr.ml fft.ml gen_hc2c.ml gen_hc2cdft.ml	\
+EXTRA_DIST = algsimp.ml annotate.ml assoctable.ml c.ml complex.ml	\
+conv.ml dag.ml expr.ml fft.ml gen_hc2c.ml gen_hc2cdft.ml		\
 gen_hc2cdft_c.ml gen_hc2hc.ml gen_r2cb.ml gen_mdct.ml gen_notw.ml	\
 gen_notw_c.ml gen_r2cf.ml gen_r2r.ml gen_twiddle.ml gen_twiddle_c.ml	\
 gen_twidsq.ml gen_twidsq_c.ml genutil.ml littlesimp.ml magic.ml		\
