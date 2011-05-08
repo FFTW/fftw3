@@ -57,8 +57,13 @@ typedef bench_real bench_complex[2];
 #define SINGLE_PRECISION (!DOUBLE_PRECISION && sizeof(bench_real) == sizeof(float))
 #undef LDOUBLE_PRECISION
 #define LDOUBLE_PRECISION (!DOUBLE_PRECISION && sizeof(bench_real) == sizeof(long double))
+
 #undef QUAD_PRECISION
+#ifdef BENCHFFT_QUAD
 #define QUAD_PRECISION (!LDOUBLE_PRECISION && sizeof(bench_real) == sizeof(__float128))
+#else
+#define QUAD_PRECISION 0
+#endif
 
 typedef enum { PROBLEM_COMPLEX, PROBLEM_REAL, PROBLEM_R2R } problem_kind_t;
 
