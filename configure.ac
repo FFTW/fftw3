@@ -155,8 +155,6 @@ if test "$with_windows_f77_mangling" = "yes"; then
 	AC_DEFINE(WINDOWS_F77_MANGLING,1,[Use common Windows Fortran mangling styles for the Fortran interfaces.])
 fi
 
-OCAML_INIT_PATHS
-
 dnl compute library suffix
 case "$PRECISION" in
      s) PREC_SUFFIX=f;;
@@ -175,14 +173,7 @@ AC_PROG_MAKE_SET
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 
-AC_CHECK_PROG(OCAMLC, ocamlc, ocamlc)
-AC_CHECK_PROG(OCAMLOPT, ocamlopt, ocamlopt)
-AC_CHECK_PROG(OCAMLDEP, ocamldep, ocamldep)
-
-AC_SUBST(OCAMLCFLAGS)
-AC_SUBST(OCAMLOPTCFLAGS)
-AC_SUBST(OCAMLDEFS)
-AC_SUBST(OCAMLLDFLAGS)
+AC_CHECK_PROG(OCAMLBUILD, ocamlbuild, ocamlbuild)
 
 dnl -----------------------------------------------------------------------
 

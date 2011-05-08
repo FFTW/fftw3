@@ -11,7 +11,6 @@
 ############################################################################
 
 touch ChangeLog
-touch genfft/.depend
 
 echo "PLEASE IGNORE WARNINGS AND ERRORS"
 
@@ -27,5 +26,4 @@ rm -f config.cache
 # rebuild of codelets whenever genfft changes
 (
     ./configure --disable-shared --enable-maintainer-mode --enable-threads $*
-    (cd genfft; make depend)
 )
