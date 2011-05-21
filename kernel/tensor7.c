@@ -121,7 +121,7 @@ tensor *X(tensor_compress_contiguous)(const tensor *sz)
      if (X(tensor_sz)(sz) == 0) 
 	  return X(mktensor)(RNK_MINFTY);
 
-     sz2 = X(tensor_compress)(sz);
+     sz2 = really_compress(sz);
      A(FINITE_RNK(sz2->rnk));
 
      if (sz2->rnk < 2)		/* nothing to compress */
