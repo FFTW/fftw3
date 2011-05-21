@@ -124,8 +124,16 @@ tensor *X(tensor_compress_contiguous)(const tensor *sz)
      sz2 = really_compress(sz);
      A(FINITE_RNK(sz2->rnk));
 
-     if (sz2->rnk < 2)		/* nothing to compress */
+     if (sz2->rnk <= 1) { /* nothing to compress. */ 
+	  if (0) {
+	       /* this call is redundant, because "sz->rnk <= 1" implies
+		  that the tensor is already canonical, but I am writing
+		  it explicitly because "logically" we need to canonicalize
+		  the tensor before returning. */
+	       canonicalize(sz2);
+	  }
           return sz2;
+     }
 
      /* sort in descending order of |istride|, so that compressible
 	dimensions appear contigously */
