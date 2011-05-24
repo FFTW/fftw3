@@ -4692,7 +4692,7 @@ In Fortran, you would use the following to accomplish the same thing:
 
 Notice how all routines are called as Fortran subroutines, and the
 plan is returned via the first argument to @code{dfftw_plan_dft_1d}.
-Notice also that we changed @code{fftw_execute_dft} to
+Notice also that we changed @code{fftw_execute} to
 @code{dfftw_execute_dft} (@pxref{FFTW Execution in Fortran}).  To do
 the same thing, but using 8 threads in parallel (@pxref{Multi-threaded
 FFTW}), you would simply prefix these calls with:
