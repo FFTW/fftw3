@@ -89,6 +89,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
      unsigned int pats[] = {FFTW_ESTIMATE, FFTW_MEASURE,
 			    FFTW_PATIENT, FFTW_EXHAUSTIVE};
      int pat, pat_max;
+     double pcost = 0;
 
      if (flags & FFTW_WISDOM_ONLY) {
 	  /* Special mode that returns a plan only if wisdom is present,
@@ -123,6 +124,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	       X(plan_destroy_internal)(pln);
 	       pln = pln1;
 	       flags_used_for_planning = tmpflags;
+	       pcost = pln->pcost;
 	  }
      }
 
@@ -134,6 +136,9 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	  
 	  /* re-create plan from wisdom, adding blessing */
 	  p->pln = mkplan(plnr, flags_used_for_planning, prb, BLESSING);
+
+	  /* record pcost from most recent measurement for use in X(cost) */
+	  p->pln->pcost = pcost;
 
 	  if (sizeof(trigreal) > sizeof(R)) {
 	       /* this is probably faster, and we have enough trigreal

@@ -180,15 +180,16 @@ void setup(bench_problem *p)
      BENCH_ASSERT(the_plan);
      
      {
-	  double add, mul, nfma, cost;
+	  double add, mul, nfma, cost, pcost;
 	  FFTW(flops)(the_plan, &add, &mul, &nfma);
 	  cost = FFTW(estimate_cost)(the_plan);
+	  pcost = FFTW(cost)(the_plan);
 	  if (verbose > 1) {
 	       FFTW(print_plan)(the_plan);
 	       printf("\n");
 	       printf("flops: %0.0f add, %0.0f mul, %0.0f fma\n",
 		      add, mul, nfma);
-	       printf("estimated cost: %f\n", cost);
+	       printf("estimated cost: %f, pcost = %f\n", cost, pcost);
 	  }
      }
 }
