@@ -6,8 +6,9 @@ Stevenj G. Johnson <stevenj@alum.mit.edu>
 Stefan Kral <skral@fftw.org> wrote genfft-k7/*.ml*, which was
 added in fftw-3.0 and removed in fftw-3.2.
 
-Support for the Cell Broadband Engine was graciously donated
-by the IBM Austin Research Lab.
+Support for the Cell Broadband Engine was graciously donated by the
+IBM Austin Research Lab, which was added in fftw-3.2 and removed in
+fftw-3.3.
 
 Support for MIPS64 paired-single SIMD instructions was graciously
 donated by CodeSourcery, Inc.

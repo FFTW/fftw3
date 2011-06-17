@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(fftw, 3.2.3-alpha, fftw@fftw.org)
+AC_INIT(fftw, 3.3-alpha, fftw@fftw.org)
 AC_CONFIG_SRCDIR(kernel/ifftw.h)
 SHARED_VERSION_INFO="5:4:2" # CURRENT:REVISION:AGE
 
@@ -124,15 +124,6 @@ if test "$PRECISION" != "$simd_precision" && test "$have_simd" = "yes"; then
 	AC_MSG_ERROR([requested SIMD type does not match selected precision])
 fi
 
-AC_ARG_ENABLE(cell, [AC_HELP_STRING([--enable-cell],[enable optimizations for the Cell Broadband Engine])], have_cell=$enableval, have_cell=no)
-if test "$have_cell" = "yes"; then
-	AC_DEFINE(HAVE_CELL,1,[Define to enable optimizations for the Cell Broadband Engine])
-	if test "$PRECISION" = "l"; then
-	   AC_MSG_ERROR([Cell does not support long double])
-        fi
-fi
-
-AM_CONDITIONAL(HAVE_CELL, test "$have_cell" = "yes")
 AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
 
 AC_ARG_WITH(slow-timer, [AC_HELP_STRING([--with-slow-timer],[use low-precision timers (SLOW)])], with_slow_timer=$withval, with_slow_timer=no)
@@ -342,9 +333,6 @@ AC_FUNC_ALLOCA
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
-if test "$have_cell" = "yes"; then
-   AC_CHECK_LIB(spe2, spe_context_run, [], [AC_CHECK_LIB(spe, spe_wait)])
-fi
 
 AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl sinq cosq snprintf])
 AC_CHECK_DECLS([drand48, srand48, memalign, posix_memalign, sinl, cosl, sinq, cosq])
@@ -440,9 +428,6 @@ if test "$enable_threads" = "yes"; then
    if test "$enable_openmp" = "yes"; then
       AC_MSG_ERROR([--enable-threads/--enable-openmp are mutually exclusive])
    fi
-   if test "$have_cell" = "yes"; then
-      AC_MSG_ERROR([--enable-threads/--enable-cell are mutually exclusive])
-   fi
    have_smp="yes"
 fi
 
@@ -535,8 +520,6 @@ AC_CONFIG_FILES([
    reodft/Makefile
 
    threads/Makefile
-   cell/Makefile
-   cell/spu/Makefile
 
    api/Makefile
 

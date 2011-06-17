@@ -167,7 +167,6 @@ This manual documents FFTW version @value{VERSION}.
 * Other Important Topics::      
 * FFTW Reference::              
 * Multi-threaded FFTW::         
-* FFTW on the Cell Processor::  
 * Calling FFTW from Fortran::   
 * Upgrading from FFTW version 2::  
 * Installation and Customization::  
@@ -276,12 +275,6 @@ Multi-threaded FFTW
 * Usage of Multi-threaded FFTW::  
 * How Many Threads to Use?::    
 * Thread safety::               
-
-FFTW on the Cell Processor
-
-* Cell Installation::           
-* Cell Caveats::                
-* FFTW Accuracy on Cell::       
 
 Calling FFTW from Fortran
 
@@ -4159,7 +4152,7 @@ multi-dimensional discrete Hartley transform defined in the literature,
 as discussed in @ref{The Discrete Hartley Transform}.
 
 @c ************************************************************
-@node Multi-threaded FFTW, FFTW on the Cell Processor, FFTW Reference, Top
+@node Multi-threaded FFTW, Calling FFTW from Fortran, FFTW Reference, Top
 @chapter Multi-threaded FFTW
 
 @cindex parallel transform
@@ -4353,119 +4346,7 @@ should also specifically pass @code{--disable-debug-malloc} for
 @code{fftw_execute} to be thread-safe.
 
 @c ************************************************************
-@node FFTW on the Cell Processor, Calling FFTW from Fortran, Multi-threaded FFTW, Top
-@chapter FFTW on the Cell Processor
-@cindex Cell processor
-
-Starting with version 3.2, FFTW contains specific support for the Cell
-Broadband Engine (``Cell'') processor, graciously donated by the IBM
-Austin Research Laboratory.
-
-Cell consists of one PowerPC core (``PPE'') and of a number of
-Synergistic Processing Elements (``SPE'') to which the PPE can
-delegate computation.  The IBM QS20 Cell blade offers 8 SPEs per Cell
-chip.  The Sony Playstation 3 contains 6 useable SPEs.
-
-Currently, FFTW fully utilizes the SPEs for one- and multi-dimensional
-complex FFTs of sizes that can be factored into small primes, both in
-single and double precision.  Transforms of real data use SPEs only
-partially at this time.  If FFTW cannot use the SPEs, it falls back to
-a slower computation on the PPE.
-
-FFTW is meant to use the SPEs transparently without user intervention.
-However, certain caveats apply, which are discussed later in this
-document.
-
-@menu
-* Cell Installation::           
-* Cell Caveats::                
-* FFTW Accuracy on Cell::       
-@end menu
-
-@c ------------------------------------------------------------
-@node Cell Installation, Cell Caveats, FFTW on the Cell Processor, FFTW on the Cell Processor
-@section Cell Installation
-
-All of the FFTW Cell code is located in the @code{cell} subdirectory
-of the FFTW package.  On Unix systems, the FFTW Cell support is
-automatically configured, compiled, and included in the uniprocessor
-FFTW libraries simply by including @code{--enable-cell} in the flags
-to the @code{configure} script (@pxref{Installation on Unix}).
-@fpindex configure
-
-Both double precision (the default) and single precision are supported
-on the Cell; for the latter, configure with @code{--enable-cell
---enable-single}.
-
-In addition, the PPE supports the Altivec (or VMX) instruction set in
-single precision.  (Altivec is Apple/Freescale terminology, VMX is IBM
-terminology for the same thing.)  You can enable support for Altivec
-with the @code{--enable-altivec} flag (single precision only).
-
-The software compiles with the Cell SDK 2.0, and probably with earlier
-ones as well.
-
-@c ------------------------------------------------------------
-@node Cell Caveats, FFTW Accuracy on Cell, Cell Installation, FFTW on the Cell Processor
-@section Cell Caveats
-
-@itemize @bullet
-@item
-The FFTW benchmark program allocates memory using malloc() or
-equivalent library calls, reflecting the common usage of the FFTW
-library.  However, you can sometimes improve performance significantly
-by allocating memory in system-specific large TLB pages.  E.g., we
-have seen 39 GFLOPS/s for a @threedims{256,256,256} problem using
-large pages, whereas the speed is about 25 GFLOPS/s with normal pages.
-YMMV.
-
-@item
-FFTW hoards all available SPEs for itself.  You can optionally
-choose a different number of SPEs by calling the undocumented
-function @code{fftw_cell_set_nspe(n)}, where @code{n} is the number of desired
-SPEs.  Expect this interface to go away once we figure out how to
-make FFTW play nicely with other Cell software.
-
-In particular, if you try to link both the single and double precision
-of FFTW in the same program (which you can do), they will both try
-to grab all SPEs and the second one will hang.
-
-@item
-The SPEs demand that data be stored in contiguous arrays aligned at
-16-byte boundaries.  If you instruct FFTW to operate on
-noncontiguous or nonaligned data, the SPEs will not be used,
-resulting in slow execution.  @xref{Data Alignment}.
-
-@item
-The @code{FFTW_ESTIMATE} mode may produce seriously suboptimal plans, and
-it becomes particularly confused if you enable both the SPEs and
-Altivec.  If you care about performance, please use @code{FFTW_MEASURE}
-or @code{FFTW_PATIENT} until we figure out a more reliable performance model.
-
-@end itemize
-
-@c ------------------------------------------------------------
-@node FFTW Accuracy on Cell,  , Cell Caveats, FFTW on the Cell Processor
-@section FFTW Accuracy on Cell
-
-The SPEs are fully IEEE-754 compliant in double precision.  In single
-precision, they only implement round-towards-zero as opposed to the
-standard round-to-even mode.  (The PPE is fully IEEE-754 compliant
-like all other PowerPC implementations.)  Because of the rounding
-mode, FFTW is less accurate when running on the SPEs than on the PPE.
-The accuracy loss is hard to quantify in general, but as a rough
-guideline, the L2 norm of the relative roundoff error for random
-inputs is 4 to 8 times larger than the corresponding calculation in
-round-to-even arithmetic.  In other words, expect to lose 2 to 3 bits
-of accuracy.
-
-FFTW currently does not use any algorithm that degrades accuracy to
-gain performance on the SPE.  One implication of this choice is that
-large 1D transforms run slower than they would if we were willing to
-sacrifice another bit or so of accuracy.
-
-@c ************************************************************
-@node Calling FFTW from Fortran, Upgrading from FFTW version 2, FFTW on the Cell Processor, Top
+@node Calling FFTW from Fortran, Upgrading from FFTW version 2, Multi-threaded FFTW, Top
 @chapter Calling FFTW from Fortran
 @cindex Fortran interface
 
@@ -5180,12 +5061,6 @@ library.  This is mainly useful under Windows, where no system threads
 library is required and inter-library dependencies are problematic.
 
 @item
-@cindex Cell processor
-@code{--enable-cell}: Enables code to exploit the Cell processor
-(@pxref{FFTW on the Cell Processor}), assuming you have the Cell SDK.
-By default, code for the Cell processor is not compiled.
-
-@item
 @cindex Fortran-callable wrappers
 @code{--disable-fortran}: Disables inclusion of Fortran-callable
 wrapper routines (@pxref{Calling FFTW from Fortran}) in the standard
@@ -5401,7 +5276,8 @@ Research Science and Engineering Center program of the National Science
 Foundation under award DMR-9400334.
 
 Code for the Cell Broadband Engine was graciously donated to the FFTW
-project by the IBM Austin Research Lab.
+project by the IBM Austin Research Lab and included in fftw-3.2.  (This
+code was removed in fftw-3.3.)
 
 Code for the MIPS paired-single SIMD support was graciously donated to
 the FFTW project by CodeSourcery, Inc.
