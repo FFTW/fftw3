@@ -757,7 +757,7 @@ FFTW(plan) mkplan(bench_problem *p, unsigned flags)
 	      break;
          default: BENCH_ASSERT(0);
      }
-     setup_gather_scatter();
+     if (pln) setup_gather_scatter();
      return pln;
 }
 
