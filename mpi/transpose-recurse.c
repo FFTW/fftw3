@@ -85,6 +85,33 @@ static int radix_first(int np)
      return (r >= (int) (X(isqrt)(np)) ? 0 : r);
 }
 
+/* the local allocated space on process pe required for the given transpose
+   dimensions and block sizes */
+static INT transpose_space(INT nx, INT ny, INT block, INT tblock, int pe)
+{
+     return X(imax)(XM(block)(nx, block, pe) * ny,
+		    nx * XM(block)(ny, tblock, pe));
+}
+
+/* check whether the recursive transposes fit within the space
+   that must have been allocated on each process for this transpose;
+   this must be modified if the subdivision in mkplan is changed! */
+static int enough_space(INT nx, INT ny, INT block, INT tblock,
+			int r, int n_pes)
+{
+     int pe;
+     int m = n_pes / r;
+     for (pe = 0; pe < n_pes; ++pe) {
+	  INT space = transpose_space(nx, ny, block, tblock, pe);
+	  INT b1 = XM(block)(nx, r * block, pe / r);
+	  INT b2 = XM(block)(ny, m * tblock, pe % r);
+	  if (transpose_space(b1, ny, block, m*tblock, pe % r) > space
+	      || transpose_space(nx, b2, r*block, tblock, pe / r) > space)
+	       return 0;
+     }
+     return 1;
+}
+
 /* In theory, transpose-recurse becomes advantageous for message sizes
    below some minimum, assuming that the time is dominated by
    communications.  In practice, we want to constrain the minimum
@@ -105,6 +132,7 @@ static int applicable(const S *ego, const problem *p_,
 	     && (!ego->preserve_input || (!NO_DESTROY_INPUTP(plnr)
                                           && p->I != p->O))
 	     && (*r = ego->radix(n_pes)) && *r < n_pes && *r > 1
+	     && enough_space(p->nx, p->ny, p->block, p->tblock, *r, n_pes)
 	     && (!CONSERVE_MEMORYP(plnr) || *r > 8
 		 || !X(toobig)((p->nx * (p->ny / n_pes) * p->vn) / *r))
 	     && (!NO_SLOWP(plnr) || 
