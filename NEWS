@@ -1,3 +1,43 @@
+* Removed support for the Cell Broadband Engine.
+
+* New function fftw_cost to return FFTW's internal cost metric for 
+  a given plan; thanks to Rhys Ulerich and Nathanael Schaeffer for the
+  suggestion.
+
+FFTW 3.2.2
+
+* Improve performance of some copy operations of complex arrays on
+  x86 machines.
+
+* Add configure flag to disable alloca(), which is broken in mingw64.
+
+* Planning in FFTW_ESTIMATE mode for r2r transforms became slower
+  between fftw-3.1.3 and 3.2.  This regression has now been fixed.
+
+FFTW 3.2.1
+
+* Performance improvements for some multidimensional r2c/c2r transforms;
+  thanks to Eugene Miloslavsky for his benchmark reports.
+
+* Compile with icc on MacOS X, use better icc compiler flags.
+
+* Compilation fixes for systems where snprintf is defined as a macro;
+  thanks to Marcus Mae for the bug report.
+
+* Fortran documentation now recommends not using dfftw_execute,
+  because of reports of problems with various Fortran compilers;
+  it is better to use dfftw_execute_dft etcetera.
+
+* Some documentation clarifications, e.g. of fact that --enable-openmp
+  and --enable-threads are mutually exclusive (thanks to Long To),
+  and document slightly odd behavior of plan_guru_r2r in Fortran
+  (thanks to Alexander Pozdneev).
+
+* FAQ was accidentally omitted from 3.2 tarball.
+
+* Remove some extraneous (harmless) files accidentally included in 
+  a subdirectory of the 3.2 tarball.
+
 FFTW 3.2
 
 * Worked around apparent glibc bug that leads to rare hangs when freeing
