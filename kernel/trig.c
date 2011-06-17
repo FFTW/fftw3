@@ -34,20 +34,11 @@
      extern long double cosl(long double x);
 #  endif
 #elif defined(TRIGREAL_IS_QUAD)
-#  if defined(HAVE_COSQ) && defined(HAVE_SINQ)
-#    define COS cosq
-#    define SIN sinq
-#  else
-#    define COS cosl
-#    define SIN sinl
-#  endif
+#  define COS cosq
+#  define SIN sinq
 #  define KTRIG(x) (x##Q)
-#  ifndef HAVE_DECL_SINQ
-     extern __float128 sinq(__float128 x);
-#  endif
-#  ifndef HAVE_DECL_COSQ
-     extern __float128 cosq(__float128 x);
-#  endif
+   extern __float128 sinq(__float128 x);
+   extern __float128 cosq(__float128 x);
 #else
 #  define COS cos
 #  define SIN sin

@@ -50,8 +50,13 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
         $(SIMD_LIBS)					\
 	$(COMBINED_THREADLIBS)
 
+if QUAD
+# cannot use -no-undefined since dependent on libquadmath
+libfftw3@PREC_SUFFIX@_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
+else
 libfftw3@PREC_SUFFIX@_la_LDFLAGS = -no-undefined -version-info	\
 @SHARED_VERSION_INFO@
+endif
 
 fftw3@PREC_SUFFIX@.pc: fftw.pc
 	cp -f fftw.pc fftw3@PREC_SUFFIX@.pc

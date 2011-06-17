@@ -334,7 +334,11 @@ AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
 
-AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl sinq cosq snprintf])
+if test $PRECISION = q; then
+   AC_CHECK_LIB(quadmath, sinq, [], [AC_MSG_ERROR([quad precision requires libquadmath for quad-precision trigonometric routines])])
+fi
+
+AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl snprintf])
 AC_CHECK_DECLS([drand48, srand48, memalign, posix_memalign, sinl, cosl, sinq, cosq])
 
 dnl Cray UNICOS _rtc() (real-time clock) intrinsic
