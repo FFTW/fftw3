@@ -67,7 +67,7 @@ int bench_main(int argc, char *argv[])
      report = report_verbose; /* default */
      verbose = 0;
 
-     tol = SINGLE_PRECISION ? 1.0e-3 : 1.0e-10;
+     tol = SINGLE_PRECISION ? 1.0e-3 : (QUAD_PRECISION ? 1e-29 : 1.0e-10);
 
      main_init(&argc, &argv);
 
