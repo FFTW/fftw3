@@ -26,6 +26,9 @@
 /* FIXME: what is best?  BLAS uses D..._X, apparently.  Ugh. */
 #  define x77(name) CONCAT(lfftw_, name)
 #  define X77(NAME) CONCAT(LFFTW_, NAME)
+#elif defined(FFTW_QUAD)
+#  define x77(name) CONCAT(qfftw_, name)
+#  define X77(NAME) CONCAT(QFFTW_, NAME)
 #else
 #  define x77(name) CONCAT(dfftw_, name)
 #  define X77(NAME) CONCAT(DFFTW_, NAME)
