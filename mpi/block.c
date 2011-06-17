@@ -41,8 +41,8 @@ INT XM(default_block)(INT n, int n_pes)
      return ((n + n_pes - 1) / n_pes);
 }
 
-/* For a given block size and dimension n, compute the block size b
-   and the starting offset s on the given process. */
+/* For a given block size and dimension n, compute the block size 
+   on the given process. */
 INT XM(block)(INT n, INT block, int which_block)
 {
      INT n_blocks = XM(num_blocks)(n, block);
