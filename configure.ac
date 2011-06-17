@@ -76,11 +76,12 @@ if test "$ok" = "yes"; then
 fi
 AM_CONDITIONAL(LDOUBLE, test "$ok" = "yes")
 
-AC_ARG_ENABLE(quad-precision, [AC_HELP_STRING([--enable-quad-precision],[compile fftw in quadruple precision if available (EXPERIMENTAL)])], ok=$enableval, ok=no)
+AC_ARG_ENABLE(quad-precision, [AC_HELP_STRING([--enable-quad-precision],[compile fftw in quadruple precision if available])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	if test "$PRECISION" != "d"; then
 		AC_MSG_ERROR([conflicting precisions specified])
 	fi
+	AX_GCC_VERSION(4,6,0,[],[AC_MSG_ERROR([gcc 4.6 or later required for quad precision support])])
 	AC_DEFINE(FFTW_QUAD,1,[Define to compile in quad precision.])
 	AC_DEFINE(BENCHFFT_QUAD,1,[Define to compile in quad precision.])
 	PRECISION=q
