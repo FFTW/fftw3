@@ -94,8 +94,8 @@ problem *XM(mkproblem_transpose)(INT nx, INT ny, INT vn,
           (problem_mpi_transpose *)X(mkproblem)(sizeof(problem_mpi_transpose), &padt);
 
      A(nx > 0 && ny > 0 && vn > 0);
-     A(block > 0 && XM(num_blocks_ok)(block, nx, comm)
-       && tblock > 0 && XM(num_blocks_ok)(tblock, ny, comm));
+     A(block > 0 && XM(num_blocks_ok)(nx, block, comm)
+       && tblock > 0 && XM(num_blocks_ok)(ny, tblock, comm));
 
      /* enforce pointer equality if untainted pointers are equal */
      if (UNTAINT(I) == UNTAINT(O))
