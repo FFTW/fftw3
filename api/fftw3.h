@@ -346,7 +346,7 @@ FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 
 /* __float128 (quad precision) is a gcc extension on i386, x86_64, and ia64
    for gcc >= 4.6 (compiled in FFTW with --enable-quad-precision) */
-#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)) \	
+#if (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)) \
  && (defined(__i386__) || defined(__x86_64__) || defined(__ia64__))
 FFTW_DEFINE_API(FFTW_MANGLE_QUAD, __float128, fftwq_complex)
 #endif
