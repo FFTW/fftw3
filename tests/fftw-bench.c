@@ -23,10 +23,6 @@ int amnesia = 0;
 extern void install_hook(void);  /* in hook.c */
 extern void uninstall_hook(void);  /* in hook.c */
 
-#if HAVE_CELL
-extern void FFTW(cell_set_nspe)(int); /* in fftw-cell.h */
-#endif
-
 #ifdef FFTW_RANDOM_ESTIMATOR
 extern unsigned FFTW(random_estimate_seed);
 #endif
@@ -50,9 +46,6 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "wisdom")) usewisdom = 1;
      else if (!strcmp(arg, "amnesia")) amnesia = 1;
      else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
-#if HAVE_CELL
-     else if (sscanf(arg, "nspe=%d", &x) == 1) FFTW(cell_set_nspe)(x);
-#endif
 #ifdef FFTW_RANDOM_ESTIMATOR
      else if (sscanf(arg, "eseed=%d", &x) == 1) FFTW(random_estimate_seed) = x;
 #endif

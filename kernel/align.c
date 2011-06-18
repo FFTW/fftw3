@@ -21,7 +21,7 @@
 
 #include "ifftw.h"
 
-#if HAVE_SIMD || HAVE_CELL
+#if HAVE_SIMD
 #  define ALGN 16
 #else
    /* disable the alignment machinery, because it will break,

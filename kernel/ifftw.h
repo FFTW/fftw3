@@ -107,7 +107,7 @@ typedef struct scanner_s scanner;
 
 /*-----------------------------------------------------------------------*/
 /* alloca: */
-#if HAVE_SIMD || HAVE_CELL
+#if HAVE_SIMD
 #define MIN_ALIGNMENT 16
 #endif
 
@@ -946,13 +946,6 @@ typedef void (*cpy2d_func)(R *I, R *O,
 			   INT n1, INT is1, INT os1,
 			   INT vl);
 
-#if HAVE_CELL
-int X(cell_transpose_applicable)(R *I, const iodim *d, INT vl);
-void X(cell_transpose)(R *I, INT n, INT s0, INT s1, INT vl);
-int X(cell_copy_applicable)(R *I, R *O, const iodim *n, const iodim *v);
-void X(cell_copy)(R *I, R *O, const iodim *n, const iodim *v);
-#endif
-
 /*-----------------------------------------------------------------------*/
 /* misc stuff */
 void X(null_awake)(plan *ego, enum wakefulness wakefulness);
@@ -973,7 +966,7 @@ INT X(bufdist)(INT n, INT vl);
 int X(toobig)(INT n);
 int X(ct_uglyp)(INT min_n, INT v, INT n, INT r);
 
-#if HAVE_SIMD || HAVE_CELL
+#if HAVE_SIMD
 R *X(taint)(R *p, INT s);
 R *X(join_taint)(R *p1, R *p2);
 #define TAINT(p, s) X(taint)(p, s)
