@@ -20,3 +20,8 @@ extern void initial_cleanup(void);
 extern void final_cleanup(void);
 extern int import_wisdom(FILE *f);
 extern void export_wisdom(FILE *f);
+
+#if defined(HAVE_THREADS) || defined(HAVE_OPENMP)
+#  define HAVE_SMP
+   extern int threads_ok;
+#endif

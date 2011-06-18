@@ -858,19 +858,63 @@ In certain cases, it may be advantageous to combine MPI
 FFTW supports this, with certain caveats.  For example, if you have a
 cluster of 4-processor shared-memory nodes, you may want to use
 threads within the nodes and MPI between the nodes, instead of MPI for
-all parallelization.  FFTW's MPI code can also transparently use
-FFTW's Cell processor support (e.g. for clusters of Cell processors).
-@cindex Cell processor
+all parallelization.
 
 In particular, it is possible to seamlessly combine the MPI FFTW
 routines with the multi-threaded FFTW routines (@pxref{Multi-threaded
-FFTW}).  In this case, you will begin your program by calling both
-@code{fftw_mpi_init()} and @code{fftw_init_threads()}.  Then, if you
-call @code{fftw_plan_with_nthreads(N)}, then @emph{every} MPI process
-will launch @code{N} threads to parallelize its transforms.
+FFTW}). However, some care must be taken in the initialization code,
+which should look something like this:
+
+@example
+int threads_ok;
+
+int main(int argc, char **argv)
+@{
+    int provided;
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &provided);
+    threads_ok = provided >= MPI_THREAD_FUNNELED;
+
+    if (threads_ok) threads_ok = fftw_init_threads();
+    fftw_mpi_init();
+
+    ...
+    if (threads_ok) fftw_plan_with_nthreads(...);
+    ...
+    
+    MPI_Finalize();
+@}
+@end example
 @findex fftw_mpi_init
 @findex fftw_init_threads
 @findex fftw_plan_with_nthreads
+
+First, note that instead of calling @code{MPI_Init}, you should call
+@code{MPI_Init_threads}, which is the initialization routine defined
+by the MPI-2 standard to indicate to MPI that your program will be
+multithreaded.  We pass @code{MPI_THREAD_FUNNELED}, which indicates
+that we will only call MPI routines from the main thread.  (FFTW will
+launch additional threads internally, but the extra threads will not
+call MPI code.)  (You may also pass @code{MPI_THREAD_SERIALIZED} or
+@code{MPI_THREAD_MULTIPLE}, which requests additional multithreading
+support from the MPI implementation, but this is not required by
+FFTW.)  The @code{provided} parameter returns what level of threads
+support is actually supported by your MPI implementation: this
+@emph{must} be at least @code{MPI_THREAD_FUNNELED} if you want to call
+the FFTW threads routines, so we define a global variable
+@code{threads_ok} to record this.  You should only call
+@code{fftw_init_threads} or @code{fftw_plan_with_nthreads} if
+@code{threads_ok} is true.  For more information on thread safety in
+MPI, see the
+@uref{http://www.mpi-forum.org/docs/mpi-20-html/node162.htm, MPI and
+Threads} section of the MPI-2 standard.
+@cindex thread safety
+
+Second, we must call @code{fftw_init_threads} @emph{before}
+@code{fftw_mpi_init}.  This is critical for technical reasons having
+to do with how FFTW initializes its list of algorithms.
+
+Then, if you call @code{fftw_plan_with_nthreads(N)}, @emph{every} MPI
+process will launch (up to) @code{N} threads to parallelize its transforms.
 
 For example, in the hypothetical cluster of 4-processor nodes, you
 might wish to launch only a single MPI process per node, and then call
@@ -878,20 +922,15 @@ might wish to launch only a single MPI process per node, and then call
 processors in the nodes.
 
 This may or may not be faster than simply using as many MPI processes
-as you have processors, however.  On the one hand, using threads within a
-node eliminates the need for explicit message passing within the node.
-On the other hand, FFTW's transpose routines are not multi-threaded,
-and this means that the communications that do take place will not
-benefit from parallelization within the node.  Moreover, many MPI
-implementations already have optimizations to exploit shared memory
-when it is available.
+as you have processors, however.  On the one hand, using threads
+within a node eliminates the need for explicit message passing within
+the node.  On the other hand, FFTW's transpose routines are not
+multi-threaded, and this means that the communications that do take
+place will not benefit from parallelization within the node.
+Moreover, many MPI implementations already have optimizations to
+exploit shared memory when it is available, so adding the
+multithreaded FFTW on top of this may be superfluous.
 @cindex transpose
-
-(Note that this is quite independent of whether MPI itself is
-thread-safe or multi-threaded: regardless of how many threads you
-specify with @code{fftw_plan_with_nthreads}, FFTW will perform all of
-its MPI communication only from the parent process.)
-@cindex thread safety
 
 @c ------------------------------------------------------------
 @node FFTW MPI Reference,  , Combining MPI and Threads, Distributed-memory FFTW with MPI

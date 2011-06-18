@@ -763,7 +763,13 @@ FFTW(plan) mkplan(bench_problem *p, unsigned flags)
 
 void main_init(int *argc, char ***argv)
 {
+#ifdef HAVE_SMP
+     int provided;
+     MPI_Init_thread(argc, argv, MPI_THREAD_FUNNELED, &provided);
+     threads_ok = provided >= MPI_THREAD_FUNNELED;
+#else
      MPI_Init(argc, argv);
+#endif
      MPI_Comm_rank(MPI_COMM_WORLD, &my_pe);
      MPI_Comm_size(MPI_COMM_WORLD, &n_pes);
      if (my_pe != 0) verbose = -999;
@@ -773,6 +779,13 @@ void main_init(int *argc, char ***argv)
      isend_off = (int *) bench_malloc(sizeof(int) * n_pes);
      orecv_cnt = (int *) bench_malloc(sizeof(int) * n_pes);
      orecv_off = (int *) bench_malloc(sizeof(int) * n_pes);
+
+     /* init_threads must be called before any other FFTW function,
+	including mpi_init, because it has to register the threads hooks
+	before the planner is initalized */
+#ifdef HAVE_SMP
+     if (threads_ok) { BENCH_ASSERT(FFTW(init_threads)()); }
+#endif
      FFTW(mpi_init)();
 }
 

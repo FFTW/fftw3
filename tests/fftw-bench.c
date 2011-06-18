@@ -6,8 +6,8 @@
 #include <string.h>
 #include "fftw-bench.h"
 
-#if defined(HAVE_THREADS) || defined(HAVE_OPENMP)
-#define HAVE_SMP
+#ifdef HAVE_SMP
+int threads_ok = 1;
 #endif
 
 FFTW(plan) the_plan = 0;
@@ -65,8 +65,14 @@ void rdwisdom(void)
      if (havewisdom) return;
 
 #ifdef HAVE_SMP
-     BENCH_ASSERT(FFTW(init_threads)());
-     FFTW(plan_with_nthreads)(nthreads);
+     if (threads_ok) {
+	  BENCH_ASSERT(FFTW(init_threads)());
+	  FFTW(plan_with_nthreads)(nthreads);
+     }
+     else if (nthreads > 1 && verbose > 1) {
+	  fprintf(stderr, "bench: WARNING - nthreads = %d, but threads not supported\n", nthreads);
+	  nthreads = 1;
+     }
 #endif
 
      if (!usewisdom) return;
