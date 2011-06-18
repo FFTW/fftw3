@@ -58,7 +58,7 @@ check-local: mpi-bench$(EXEEXT)
 	@echo "      MPI FFTW transforms passed "$(NUMCHECK)" tests, 4 CPUs"
 	@echo "--------------------------------------------------------------"
 if SMP
-	perl -w $(CHECK) $(CHECKOPTS) --nthreads=2 "$(MPIRUN) -np 3 `pwd`/mpi-bench"
+	perl -w $(CHECK) $(CHECKOPTS) --mpi --nthreads=2 "$(MPIRUN) -np 3 `pwd`/mpi-bench"
 	@echo "--------------------------------------------------------------"
 	@echo "      MPI FFTW threaded transforms passed "$(NUMCHECK)" tests!"
 	@echo "--------------------------------------------------------------"
