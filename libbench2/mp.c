@@ -48,7 +48,7 @@ static void fromreal(REAL x, N a)
      cpy(zero, a);
      if (x == 0.0) return;
      
-     if (x > 0) { SGNA = 1; }
+     if (x >= 0) { SGNA = 1; }
      else       { SGNA = -1; x = -x; }
 
      e = 0;
@@ -60,7 +60,7 @@ static void fromreal(REAL x, N a)
 	  REAL y;
 
 	  x *= RADIX;
-	  y = floor(x);
+	  y = (REAL) ((int) x);
 	  AD[i] = (DG)y;
 	  x -= y;
      }
