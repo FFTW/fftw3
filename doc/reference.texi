@@ -213,8 +213,11 @@ for @code{FFTW_ESTIMATE} plans.  (The cost values of measured and
 estimated plans are not comparable, being in different units.  Also,
 costs from different FFTW versions or the same version compiled
 differently may not be in the same units.  Plans created from wisdom
-have a cost of 0 since no timing measurement is performed for them.)
-The cost metric for a given plan is returned by:
+have a cost of 0 since no timing measurement is performed for them.
+Finally, certain problems for which only one top-level algorithm was
+possible may have required no measurements of the cost of the whole
+plan, in which case @code{fftw}cost} will also return 0.)  The cost
+metric for a given plan is returned by:
 
 @example
 double fftw_cost(const fftw_plan plan);
