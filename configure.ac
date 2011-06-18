@@ -81,7 +81,6 @@ if test "$ok" = "yes"; then
 	if test "$PRECISION" != "d"; then
 		AC_MSG_ERROR([conflicting precisions specified])
 	fi
-	AX_GCC_VERSION(4,6,0,[],[AC_MSG_ERROR([gcc 4.6 or later required for quad precision support])])
 	AC_DEFINE(FFTW_QUAD,1,[Define to compile in quad precision.])
 	AC_DEFINE(BENCHFFT_QUAD,1,[Define to compile in quad precision.])
 	PRECISION=q
@@ -336,6 +335,7 @@ AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
 
 if test $PRECISION = q; then
+   AX_GCC_VERSION(4,6,0,[],[AC_MSG_ERROR([gcc 4.6 or later required for quad precision support])])
    AC_CHECK_LIB(quadmath, sinq, [], [AC_MSG_ERROR([quad precision requires libquadmath for quad-precision trigonometric routines])])
 fi
 
