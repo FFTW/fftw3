@@ -1,7 +1,7 @@
 SUBDIRS = FAQ
 
 info_TEXINFOS = fftw3.texi
-fftw3_TEXINFOS = fftw3.texi version.texi
+fftw3_TEXINFOS = acknowledgements.texi cindex.texi fftw3.texi findex.texi fortran.texi install.texi intro.texi license.texi mpi.texi other.texi reference.texi threads.texi tutorial.texi upgrading.texi version.texi
 
 DVIPS = dvips -Pwww
 
@@ -16,7 +16,6 @@ rfftwnd-for-html.png: rfftwnd.fig
 
 rfftwnd.pdf: rfftwnd.fig
 	fig2dev -L pdf -m .7 ${srcdir}/rfftwnd.fig rfftwnd.pdf
-
 
 EQN_IMAGES = equation-dft.png equation-dht.png equation-idft.png	\
 equation-redft00.png equation-redft01.png equation-redft10.png		\
