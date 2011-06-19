@@ -68,7 +68,7 @@ committee has recently agreed to mandate that the storage format used
 for this type be binary-compatible with the C99 type, i.e. an array
 @code{T[2]} with consecutive real @code{[0]} and imaginary @code{[1]}
 parts.  (See report
-@uref{http://anubis.dkuug.dk/JTC1/SC22/WG21/docs/papers/2002/1388.pdf,
+@uref{http://www.open-std.org/jtc1/sc22/WG21/docs/papers/2002/n1388.pdf
 WG21/N1388}.)  Although not part of the official standard as of this
 writing, the proposal stated that: ``This solution has been tested with
 all current major implementations of the standard library and shown to

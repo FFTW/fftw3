@@ -4,7 +4,7 @@
 
 @cindex parallel transform
 In this chapter we document the parallel FFTW routines for parallel
-hardware supporting the MPI message-passing interface.  Unlike the
+systems supporting the MPI message-passing interface.  Unlike the
 shared-memory threads described in the previous chapter, MPI allows
 you to use @emph{distributed-memory} parallelism, where each CPU has
 its own separate memory, and which can scale up to clusters of many
@@ -21,14 +21,14 @@ single processor.  The storage per-process required by FFTW's MPI
 routines is proportional to the total array size divided by the number
 of processes.  Conversely, distributed-memory parallelism can easily
 pose an unacceptably high communications overhead for small problems;
-the threshold problem size for which parallelism becomes important
+the threshold problem size for which parallelism becomes advantageous
 will depend on the precise problem you are interested in, your
 hardware, and your MPI implementation.
 
 A note on terminology: in MPI, you divide the data among a set of
 ``processes'' which each run in their own memory address space.
 Generally, each process runs on a different physical processor, but
-this is not required.  A group of processes in MPI is described by an
+this is not required.  A set of processes in MPI is described by an
 opaque data structure called a ``communicator,'' the most common of
 which is the predefined communicator @code{MPI_COMM_WORLD} which
 refers to @emph{all} processes.  For more information on these and
@@ -97,12 +97,15 @@ LDFLAGS=-L/path/to/mpi/libs CPPFLAGS=-I/path/to/mpi/include ...}.
 @section Linking and Initializing MPI FFTW
 
 Programs using the MPI FFTW routines should be linked with
-@code{-lfftw3_mpi -lfftw3 -lm} on Unix. You will also need to link
-with whatever library is responsible for MPI on your system; in most
-MPI implementations, there is a special compiler alias named
-@code{mpicc} to compile and link MPI code.
+@code{-lfftw3_mpi -lfftw3 -lm} on Unix in double precision,
+@code{-lfftw3f_mpi -lfftw3f -lm} in single precision, and so on
+(@pxref{Precision}). You will also need to link with whatever library
+is responsible for MPI on your system; in most MPI implementations,
+there is a special compiler alias named @code{mpicc} to compile and
+link MPI code.
 @fpindex mpicc
 @cindex linking on Unix
+@cindex precision
 
 Before calling any FFTW routines, but after calling @code{MPI_Init},
 you should call the function:
@@ -148,10 +151,10 @@ int main(int argc, char **argv)
 
     /* @r{get local data size and allocate} */
     alloc_local = fftw3_mpi_local_size_2d(N0, N1, MPI_COMM_WORLD,
-                                         &local_n0, &local_0_start);
+                                          &local_n0, &local_0_start);
     data = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * alloc_local);
 
-    /* @r{create plan for forward DFT} */
+    /* @r{create plan for in-place forward DFT} */
     plan = fftw_mpi_plan_dft_2d(N0, N1, data, data, MPI_COMM_WORLD,
                                 FFTW_FORWARD, FFTW_ESTIMATE);    
 
@@ -236,7 +239,7 @@ library; see the @uref{http://www.hdfgroup.org/, HDF home page}.)
 
 The most important concept to understand in using FFTW's MPI interface
 is the data distribution.  With a serial or multithreaded FFT, all of
-the input and outputs are stored as a single contiguous chunk of
+the inputs and outputs are stored as a single contiguous chunk of
 memory.  With a distributed-memory FFT, the inputs and outputs are
 broken into disjoint blocks, one per process.
 
@@ -268,6 +271,17 @@ new communicator with re-ordered processes.)  However, you should
 always call the @samp{fftw_mpi_local_size} routines, if possible,
 rather than trying to predict FFTW's distribution choices.
 
+In particular, it is critical that you allocate the storage size that
+is returned by @samp{fftw_mpi_local_size}, which is @emph{not}
+necessarily the size of the local slice of the array.  The reason is
+that intermediate steps of FFTW's algorithms involve transposing the
+array and redistributing the data, so at these intermediate steps FFTW
+may require more local storage space (albeit always proportional to
+the total size divided by the number of processes).  The
+@samp{fftw_mpi_local_size} functions know how much storage is required
+for these intermediate steps and tell you the correct amount to
+allocate.
+
 @menu
 * Basic and advanced distribution interfaces::  
 * Load balancing::              
@@ -292,7 +306,7 @@ interface:
 
 @example
 ptrdiff_t fftw_mpi_local_size_2d(ptrdiff_t n0, ptrdiff_t n1, MPI_Comm comm,
-                    ptrdiff_t *local_n0, ptrdiff_t *local_0_start);
+                                 ptrdiff_t *local_n0, ptrdiff_t *local_0_start);
 @end example
 @findex fftw_mpi_local_size_2d
 
@@ -412,11 +426,12 @@ among the processes, transforming the new data local to each process,
 and transposing back.  For example, a two-dimensional @code{n0} by
 @code{n1} array, distributed across the @code{n0} dimension, is
 transformd by: (i) transforming the @code{n1} dimension, which are
-local to each process; (ii) transposing to a @code{n1} by @code{n0}
+local to each process; (ii) transposing to an @code{n1} by @code{n0}
 array, distributed across the @code{n1} dimension; (iii) transforming
 the @code{n0} dimension, which is now local to each process; (iv)
 transposing back.
 @cindex transpose
+
 
 However, in many applications it is acceptable to compute a
 multidimensional DFT whose results are produced in transposed order
@@ -431,15 +446,16 @@ interpret the output format of such a transform.
 @ctindex FFTW_MPI_TRANSPOSED_OUT
 @ctindex FFTW_MPI_TRANSPOSED_IN
 
+
 Suppose you have are transforming multi-dimensional data with (at
 least two) dimensions @ndims{}.  As always, it is distributed along
 the first dimension @dimk{0}.  Now, if we compute its DFT with the
-@code{FFTW_MPI_TRANSPOSED_OUT}, the resulting output data are stored
+@code{FFTW_MPI_TRANSPOSED_OUT} flag, the resulting output data are stored
 with the first @emph{two} dimensions transosed: @ndimstrans{},
-distributed along the @dimk{0} dimension.  Conversely, if we take the
+distributed along the @dimk{1} dimension.  Conversely, if we take the
 @ndimstrans{} data and transform it with the
 @code{FFTW_MPI_TRANSPOSED_IN} flag, then the format goes back to the
-original @ndims{}.
+original @ndims{} array.
 
 There are two ways to find the portion of the transposed array that
 resides on the current process.  First, you can simply call the
@@ -461,7 +477,7 @@ ptrdiff_t fftw_mpi_local_size_3d_transposed(
 @findex fftw_mpi_local_size_3d_transposed
 
 Here, @code{local_n0} and @code{local_0_start} give the size and
-starting index of the @code{n0} dimension, for the
+starting index of the @code{n0} dimension for the
 @emph{non}-transposed data, as in the previous sections.  For
 @emph{transposed} data (e.g. the output for
 @code{FFTW_MPI_TRANSPOSED_OUT}), @code{local_n1} and
@@ -483,7 +499,7 @@ flag.)
 For one-dimensional distributed DFTs using FFTW, matters are slightly
 more complicated because the data distribution is more closely tied to
 how the algorithm works.  In particular, you can no longer pass an
-arbitrary block size, and must accept FFTW's default, and the block
+arbitrary block size and must accept FFTW's default; also, the block
 sizes may be different for input and output.  Also, the data
 distribution depends on the flags and transform direction, in order
 for forward and backward transforms to work correctly.
@@ -620,6 +636,10 @@ ptrdiff_t fftw_mpi_local_size_2d_transposed
 @end example
 @findex fftw_mpi_local_size_2d_transposed
 
+Again, the return value is the local storage to allocate, which in
+this case is the number of @emph{real} (@code{double}) values rather
+than complex numbers as in the previous examples.
+
 @node Advanced distributed-transpose interface, An improved replacement for MPI_Alltoall, Basic distributed-transpose interface, FFTW MPI Transposes
 @subsection Advanced distributed-transpose interface
 
@@ -685,7 +705,7 @@ with a block size of 1, is just a standard all-to-all communication.
 
 However, using the FFTW routine instead of @code{MPI_Alltoall} may
 have certain advantages.  First of all, FFTW's routine can operate
-in-place @code{in == out}) whereas @code{MPI_Alltoall} can only
+in-place (@code{in == out}) whereas @code{MPI_Alltoall} can only
 operate out-of-place.
 @cindex in-place
 
@@ -804,6 +824,7 @@ the canonical example of a collective function in the MPI standard.)
 @cindex collective function
 @findex MPI_Barrier
 
+
 The functions in FFTW that are @emph{always} collective are: every
 function beginning with @samp{fftw_mpi_plan}, as well as
 @code{fftw_mpi_broadcast_wisdom} and @code{fftw_mpi_gather_wisdom}.
@@ -831,16 +852,19 @@ balancing}.
 @cindex block distribution
 @cindex load balancing
 
+
 Second, if it is not too inconvenient, you should consider working
 with transposed output for multidimensional plans, as this saves a
 considerable amount of communications.  @xref{Transposed distributions}.
 @cindex transpose
+
 
 Third, the fastest choices are generally either an in-place transform
 or an out-of-place transform with the @code{FFTW_DESTROY_INPUT} flag
 (which allows the input array to be used as scratch space).  In-place
 is especially beneficial if the amount of data per process is large.
 @ctindex FFTW_DESTROY_INPUT
+
 
 Fourth, if you have multiple arrays to transform at once, rather than
 calling FFTW's MPI transforms several times it usually seems to be
@@ -898,7 +922,7 @@ call MPI code.)  (You may also pass @code{MPI_THREAD_SERIALIZED} or
 @code{MPI_THREAD_MULTIPLE}, which requests additional multithreading
 support from the MPI implementation, but this is not required by
 FFTW.)  The @code{provided} parameter returns what level of threads
-support is actually supported by your MPI implementation: this
+support is actually supported by your MPI implementation; this
 @emph{must} be at least @code{MPI_THREAD_FUNNELED} if you want to call
 the FFTW threads routines, so we define a global variable
 @code{threads_ok} to record this.  You should only call
@@ -908,6 +932,7 @@ MPI, see the
 @uref{http://www.mpi-forum.org/docs/mpi-20-html/node162.htm, MPI and
 Threads} section of the MPI-2 standard.
 @cindex thread safety
+
 
 Second, we must call @code{fftw_init_threads} @emph{before}
 @code{fftw_mpi_init}.  This is critical for technical reasons having
