@@ -62,6 +62,7 @@ complex type and you can manipulate it with ordinary arithmetic
 imaginary unit);
 @cindex C99
 
+
 C++ has its own @code{complex<T>} template class, defined in the
 standard @code{<complex>} header file.  Reportedly, the C++ standards
 committee has recently agreed to mandate that the storage format used
@@ -119,6 +120,7 @@ be any more precise than @code{double} (or may not be supported at all,
 although it is standard in C99).
 @cindex C99
 
+
 We also support using the nonstandard @code{__float128}
 quadruple-precision type provided by recent versions of @code{gcc} on
 32- and 64-bit x86 hardware (@pxref{Installation and Customization}).
@@ -143,6 +145,7 @@ These are functions that behave identically to @code{malloc} and
 any special alignment restrictions imposed by any algorithm in FFTW
 (e.g. for SIMD acceleration).  @xref{Data Alignment}.
 @cindex alignment
+
 
 Data allocated by @code{fftw_malloc} @emph{must} be deallocated by
 @code{fftw_free} and not by the ordinary @code{free}.
@@ -517,6 +520,7 @@ progressively wider range of algorithms until the the given time limit
 is reached or the given range of algorithms is explored, returning the
 best available plan.
 @ctindex FFTW_NO_TIMELIMIT
+
 
 For example, specifying @code{FFTW_PATIENT} first plans in
 @code{FFTW_ESTIMATE} mode, then in @code{FFTW_MEASURE} mode, then
@@ -1006,6 +1010,7 @@ parameters are ignored).
 @cindex howmany parameter
 @cindex dist
 
+
 Each of the @code{howmany} transforms has rank @code{rank} and size
 @code{n}, as in the basic interface.  In addition, the advanced
 interface allows the input and output arrays of each transform to be
@@ -1025,6 +1030,7 @@ the input or output arrays is located at @code{j*istride} or
 that the (@code{j},@code{k})-th element is at @code{j*stride+k*dist}.
 (The basic @code{fftw_plan_dft} interface corresponds to a stride of 1.)
 @cindex stride
+
 
 For in-place transforms, the input and output @code{stride} and
 @code{dist} parameters should be the same; otherwise, the planner may
@@ -1184,9 +1190,11 @@ complex number, and the imaginary part understood to be stored in the
 next memory location.
 @cindex interleaved format
 
+
 The @dfn{split} format allows separate pointers to the real and
 imaginary parts of a complex array.
 @cindex split format
+
 
 Technically, the interleaved format is redundant, because you can
 always express an interleaved array in terms of a split array with
@@ -1228,6 +1236,7 @@ which case pointer arithmetic operates in units of
 @code{sizeof(double)}.
 @cindex stride
 
+
 The guru planner interfaces all take a (@code{rank}, @code{dims[rank]})
 pair describing the transform size, and a (@code{howmany_rank},
 @code{howmany_dims[howmany_rank]}) pair describing the ``vector'' size (a
@@ -1252,6 +1261,7 @@ e.g. to be equivalent to the advanced complex-DFT interface, you would
 have @code{dims[rank-1].is} = @code{istride} and
 @code{dims[rank-1].os} = @code{ostride}.
 @cindex row-major
+
 
 In general, we only guarantee FFTW to return a non-@code{NULL} plan if
 the vector and transform dimensions correspond to a set of distinct
@@ -1390,6 +1400,7 @@ for an in-place transform, each individual dimension should be able to
 operate in place.)
 @cindex in-place
 
+
 @code{in} and @code{out} point to the input and output arrays for r2c
 and c2r transforms, respectively.  For split arrays, @code{ri} and
 @code{ii} point to the real and imaginary input arrays for a c2r
@@ -1476,6 +1487,7 @@ using this interface---the same internal FFTW code is employed
 regardless---and it is only necessary if you want to specify very
 large transform sizes.
 @tindex ptrdiff_t
+
 
 In particular, the 64-bit guru interface is a set of planner routines
 that are exactly the same as the guru planner routines, except that
@@ -1722,6 +1734,7 @@ implementation-defined standard file (@code{/etc/fftw/wisdom} on Unix
 and GNU systems).
 @cindex wisdom, system-wide
 
+
 The return value of these import routines is @code{1} if the wisdom was
 read successfully and @code{0} otherwise. Note that, in all of these
 functions, any data in the input stream past the end of the wisdom data
@@ -1755,6 +1768,7 @@ FFTW.  It is preferable to create wisdom directly from your executable
 (@pxref{Caveats in Using Wisdom}), but this program is useful for
 creating global wisdom files for @code{fftw_import_system_wisdom}.
 @cindex fftw-wisdom utility
+
 
 The second program is @code{fftw-wisdom-to-conf}, which takes a wisdom
 file as input and produces a @dfn{configuration routine} as output.  The
@@ -1914,6 +1928,7 @@ elements are not stored in the halfcomplex output format.
 @ctindex R2HC
 @cindex halfcomplex format
 
+
 The c2r and @code{H2RC} r2r transforms compute the backward DFT of the
 @emph{complex} array @math{X} with Hermitian symmetry, stored in the
 r2c/@code{R2HC} output formats, respectively, where the backward
@@ -1948,6 +1963,7 @@ forward (and backward) DFTs as defined above, where the input array
 this case, the output array is likewise real and even symmetry.
 @cindex real-even DFT
 @cindex REDFT
+
 
 @ctindex REDFT00
 For the case of @code{REDFT00}, this even symmetry means that
@@ -1984,6 +2000,7 @@ such a transform a @dfn{discrete cosine transform} (DCT), although it is
 really just a special case of the DFT.
 @cindex discrete cosine transform
 @cindex DCT
+
 
 In each of the definitions below, we transform a real array @math{X} of
 length @math{n} to a real array @math{Y} of length @math{n}:
@@ -2075,6 +2092,7 @@ in the original array multiplied by @math{N}, where @math{N} is the
 @math{n=1} is not defined); otherwise, @math{N=2n}.
 @cindex normalization
 
+
 In defining the discrete cosine transform, some authors also include
 additional factors of
 @ifinfo
@@ -2100,6 +2118,7 @@ forward (and backward) DFTs as defined above, where the input array
 this case, the output is odd symmetry and purely imaginary.
 @cindex real-odd DFT
 @cindex RODFT
+
 
 @ctindex RODFT00
 For the case of @code{RODFT00}, this odd symmetry means that
@@ -2137,6 +2156,7 @@ such a transform a @dfn{discrete sine transform} (DST), although it is
 really just a special case of the DFT.
 @cindex discrete sine transform
 @cindex DST
+
 
 In each of the definitions below, we transform a real array @math{X} of
 length @math{n} to a real array @math{Y} of length @math{n}:
@@ -2222,6 +2242,7 @@ in the original array multiplied by @math{N}, where @math{N} is the
 @emph{logical} DFT size.  For @code{RODFT00}, @math{N=2(n+1)};
 otherwise, @math{N=2n}.
 @cindex normalization
+
 
 In defining the discrete sine transform, some authors also include
 additional factors of

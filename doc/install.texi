@@ -17,6 +17,7 @@ of the @code{configure} output if no cycle counter is found.)
 @cindex compiler
 @cindex portability
 
+
 Installation of FFTW is simplest if you have a Unix or a GNU system,
 such as GNU/Linux, and we describe this case in the first section below,
 including the use of special configuration options to e.g. install
@@ -343,6 +344,7 @@ algorithms and performs algebraic simplifications on them.  It was
 written in Objective Caml, a dialect of ML, which is available at
 @uref{http://pauillac.inria.fr/ocaml/}.
 @cindex Caml
+
 
 If you have Objective Caml installed (along with recent versions of
 GNU @code{autoconf}, @code{automake}, and @code{libtool}), then you

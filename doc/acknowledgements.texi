@@ -46,6 +46,7 @@ Scheme, but Caml is definitely better for this kind of application.
 @cindex Caml
 @cindex LISP
 
+
 FFTW uses many tools from the GNU project, including @code{automake},
 @code{texinfo}, and @code{libtool}.
 
@@ -53,6 +54,7 @@ Prof.@ Charles E.@ Leiserson of MIT provided continuous support and
 encouragement.  This program would not exist without him.  Charles also
 proposed the name ``codelets'' for the basic FFT blocks.
 @cindex codelet
+
 
 Prof.@ John D.@ Joannopoulos of MIT demonstrated continuing tolerance of
 Steven's ``extra-curricular'' computer-science activities, as well as

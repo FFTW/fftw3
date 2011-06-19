@@ -15,6 +15,7 @@ programming-interface are quite different from the serial or threads
 versions of FFTW.
 @cindex data distribution
 
+
 Distributed-memory parallelism is especially useful when you are
 transforming arrays so large that they do not fit into the memory of a
 single processor.  The storage per-process required by FFTW's MPI
@@ -37,6 +38,7 @@ documentation at @uref{http://www-unix.mcs.anl.gov/mpi/, the MPI home
 page}.
 @cindex MPI communicator
 @ctindex MPI_COMM_WORLD
+
 
 We assume in this chapter that the reader is familiar with the usage
 of the serial (uniprocessor) FFTW, and focus only on the concepts new
@@ -69,6 +71,7 @@ the uniprocessor FFTW libraries simply by including
 (@pxref{Installation on Unix}).
 @fpindex configure
 
+
 Any implementation of the MPI standard, version 1 or later, should
 work with FFTW.  The @code{configure} script will attempt to
 automatically detect how to compile and link code using your MPI
@@ -82,6 +85,7 @@ script knows the most common names for this command, but you can
 specify the MPI compilation command explicitly by setting the
 @code{MPICC} variable, as in @samp{./configure MPICC=mpicc ...}.
 @fpindex mpicc
+
 
 If, instead of a special compiler command, you need to link a certain
 library, you can specify the link command via the @code{MPILIBS}
@@ -106,6 +110,7 @@ link MPI code.
 @fpindex mpicc
 @cindex linking on Unix
 @cindex precision
+
 
 Before calling any FFTW routines, but after calling @code{MPI_Init},
 you should call the function:
@@ -182,6 +187,7 @@ other @samp{fftw_mpi_} routine.
 @findex MPI_Init
 @findex fftw_mpi_init
 
+
 Second, when we create the plan with @code{fftw_mpi_plan_dft_2d},
 analogous to @code{fftw_plan_dft_2d}, we pass an additional argument:
 the communicator, indicating which processes will participate in the
@@ -197,6 +203,7 @@ documented below).
 @findex fftw_mpi_plan_dft_2d
 @ctindex MPI_COMM_WORLD
 
+
 Third, all of the FFTW MPI routines take @code{ptrdiff_t} arguments
 instead of @code{int} as for the serial FFTW.  @code{ptrdiff_t} is a
 standard C integer type which is (at least) 32 bits wide on a 32-bit
@@ -207,6 +214,7 @@ by using the @samp{guru64} planner interface.  @xref{64-bit Guru
 Interface}.)
 @tindex ptrdiff_t
 @cindex 64-bit architecture
+
 
 Fourth, and most importantly, you don't allocate the entire
 two-dimensional array on each process.  Instead, you call
@@ -222,6 +230,7 @@ distribution in FFTW's MPI interface is described in more detail by
 the next section.
 @findex fftw_mpi_local_size_2d
 @cindex data distribution
+
 
 Given the portion of the array that resides on the local process, it
 is straightforward to initialize the data (here to a function
@@ -256,6 +265,7 @@ different processes will have unequal chunks.  FFTW's default choice
 in this case is to assign 34 rows to processes 0 and 1, and 32 rows to
 process 2.
 @cindex block distribution
+
 
 FFTW provides several @samp{fftw_mpi_local_size} routines that you can
 call to find out what portion of an array is stored on the current
@@ -327,6 +337,7 @@ only a single MPI process, that process will store the entire array:
 @code{n0}.  @xref{Row-major Format}.
 @cindex row-major
 
+
 Second, the return value is the total number of data elements (e.g.,
 complex numbers for a complex DFT) that should be allocated for the
 input and output arrays on the current process (ideally with
@@ -337,6 +348,7 @@ redistributions at intermediate stages of the transform, and in some
 circumstances this may require slightly larger local storage.  This is
 discussed in more detail below, under @ref{Load balancing}.
 @findex fftw_malloc
+
 
 The advanced-interface @samp{local_size} function for multidimensional
 transforms returns the same three things (@code{local_n0},
@@ -375,6 +387,7 @@ processes.  In general, we recommend using the default block size
 (which corresponds to @code{n0 / P}, rounded up).
 @ctindex FFTW_MPI_DEFAULT_BLOCK
 @cindex block distribution
+
 
 For example, suppose you have @code{P = 4} processes and @code{n0 =
 21}.  The default will be a block size of @code{6}, which will give
@@ -543,6 +556,7 @@ scrambled order, pass the @code{FFTW_MPI_SCRAMBLED_IN} flag.
 @ctindex FFTW_MPI_SCRAMBLED_OUT
 @ctindex FFTW_MPI_SCRAMBLED_IN
 
+
 In MPI FFTW, only composite sizes @code{n0} can be parallelized; we
 have not yet implemented a parallel algorithm for large prime sizes.
 
@@ -610,6 +624,7 @@ same.  The transpose is actually executed by calling
 @code{fftw_execute} on the plan, as usual.
 @findex fftw_execute
 
+
 The @code{flags} are the usual FFTW planner flags, but support
 two additional flags: @code{FFTW_MPI_TRANSPOSED_OUT} and/or
 @code{FFTW_MPI_TRANSPOSED_IN}.  What these flags indicate, for
@@ -622,6 +637,7 @@ stored as @code{n1} by @code{local_n0} in row-major order.  Similarly,
 @code{local_n1} instead of @code{local_n1} by @code{n0}.
 @ctindex FFTW_MPI_TRANSPOSED_OUT
 @ctindex FFTW_MPI_TRANSPOSED_IN
+
 
 To determine the local size of the array on each process before and
 after the transpose, as well as the amount of storage that must be
@@ -677,6 +693,7 @@ be thought of as a generalization for the @code{MPI_Alltoall} function
 function as an improved replacement.
 @findex MPI_Alltoall
 
+
 @code{MPI_Alltoall} is defined by the MPI standard as:
 
 @example
@@ -709,6 +726,7 @@ have certain advantages.  First of all, FFTW's routine can operate
 in-place (@code{in == out}) whereas @code{MPI_Alltoall} can only
 operate out-of-place.
 @cindex in-place
+
 
 Second, even for out-of-place plans, FFTW's routine may be faster,
 especially if you need to perform the all-to-all communication many
@@ -744,6 +762,7 @@ file.
 @ctindex MPI_IO
 @ctindex MPI_ANY_SOURCE
 
+
 Second, in principle we may want to have separate wisdom for every
 process, since in general the processes may run on different hardware
 even for a single MPI program.  However, in practice FFTW's MPI code
@@ -772,6 +791,7 @@ processes are running on non-identical hardware.  Both of these
 functions are @emph{collective} calls, which means that they must be
 executed by all processes in the communicator.
 @cindex collective function
+
 
 So, for example, a typical code snippet to import wisdom from a file
 and use it on all processes would be:

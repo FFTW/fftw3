@@ -75,6 +75,7 @@ instructions (such as SSE and Altivec) are available (@pxref{SIMD
 alignment and fftw_malloc}).
 @cindex SIMD
 
+
 The data is an array of type @code{fftw_complex}, which is by default a
 @code{double[2]} composed of the real (@code{in[i][0]}) and imaginary
 (@code{in[i][1]}) parts of a complex number.
@@ -101,6 +102,7 @@ The next two arguments are pointers to the input and output arrays of
 the transform.  These pointers can be equal, indicating an
 @dfn{in-place} transform.
 @cindex in-place
+
 
 The fourth argument, @code{sign}, can be either @code{FFTW_FORWARD}
 (@code{-1}) or @code{FFTW_BACKWARD} (@code{+1}),
@@ -154,6 +156,7 @@ Arrays allocated with @code{fftw_malloc} should be deallocated by
 forbid, @code{delete}).
 @findex fftw_free
 
+
 The DFT results are stored in-order in the array @code{out}, with the
 zero-frequency (DC) component in @code{out[0]}.
 @cindex frequency
@@ -168,6 +171,7 @@ definition of the DFT, see @ref{What FFTW Really Computes}.
 @cindex DFT
 @cindex normalization
 
+
 If you have a C compiler, such as @code{gcc}, that supports the
 recent C99 standard, and you @code{#include <complex.h>} @emph{before}
 @code{<fftw3.h>}, then @code{fftw_complex} is the native
@@ -178,11 +182,13 @@ bit-compatible with the C99 complex type. @xref{Complex numbers}.
 typecast.)
 @cindex C++
 
+
 Single and long-double precision versions of FFTW may be installed; to
 use them, replace the @code{fftw_} prefix by @code{fftwf_} or
 @code{fftwl_} and link with @code{-lfftw3f} or @code{-lfftw3l}, but
 use the @emph{same} @code{<fftw3.h>} header file.
 @cindex precision
+
 
 Many more flags exist besides @code{FFTW_MEASURE} and
 @code{FFTW_ESTIMATE}.  For example, use @code{FFTW_PATIENT} if you're
@@ -331,6 +337,7 @@ always @code{FFTW_BACKWARD}.
 @code{fftwf} and @code{fftwl}, @code{double} should be replaced by
 @code{float} and @code{long double}, respectively.)
 @cindex precision
+
 
 Here, @code{n} is the ``logical'' size of the DFT, not necessarily the
 physical size of the array.  In particular, the real (@code{double})
@@ -488,6 +495,7 @@ the number of real data elements---that is, the product of the
 (logical) dimensions of the real data.
 @cindex normalization
 
+
 (Because the last dimension is treated specially, if it is equal to
 @code{1} the transform is @emph{not} equivalent to a lower-dimensional
 r2c/c2r transform.  In that case, the last complex dimension also has
@@ -636,6 +644,7 @@ Thus, the r2hc transform of @code{n} real values is a halfcomplex array of
 length @code{n}, and vice versa for hc2r.
 @cindex normalization
 
+
 Aside from the differing format, the output of
 @code{FFTW_R2HC}/@code{FFTW_HC2R} is otherwise exactly the same as for
 the corresponding 1d r2c/c2r transform
@@ -683,6 +692,7 @@ known as the discrete cosine and sine transforms (@dfn{DCT} and
 @cindex DCT
 @cindex discrete sine transform
 @cindex DST
+
 
 (In this section, we describe the 1d transforms; multi-dimensional
 transforms are just a separable product of these transforms operating
@@ -761,6 +771,7 @@ where @math{N} is the @emph{logical} DFT size.  For REDFT00,
 @math{N=2(n-1)}; for RODFT00, @math{N=2(n+1)}; otherwise, @math{N=2n}.
 @cindex normalization
 @cindex IDCT
+
 
 Note that the boundary conditions of the transform output array are
 given by the input boundary conditions of the inverse transform.
@@ -851,6 +862,7 @@ positive @code{n}) can be specified by an r2r kind of @code{FFTW_DHT}.
 @cindex discrete Hartley transform
 @cindex DHT
 
+
 If you are planning to use the DHT because you've heard that it is
 ``faster'' than the DFT (FFT), @strong{stop here}.  That story is an old
 but enduring misconception that was debunked in 1987: a properly
@@ -862,6 +874,7 @@ Like the DFT, in FFTW the DHT is unnormalized, so computing a DHT of
 size @code{n} followed by another DHT of the same size will result in
 the original array multiplied by @code{n}.
 @cindex normalization
+
 
 The DHT was originally proposed as a more efficient alternative to the
 DFT for real data, but it was subsequently shown that a specialized DFT

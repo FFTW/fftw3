@@ -95,6 +95,7 @@ documentation to avoid problems.
 @cindex advanced interface
 @cindex guru interface 
 
+
 Besides the automatic performance adaptation performed by the planner,
 it is also possible for advanced users to customize FFTW manually.  For
 example, if code space is a concern, we provide a tool that links only

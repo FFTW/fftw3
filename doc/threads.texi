@@ -44,6 +44,7 @@ including @code{--enable-threads} in the flags to the @code{configure}
 script (@pxref{Installation on Unix}).
 @fpindex configure
 
+
 @cindex portability
 The threads routines require your operating system to have some sort
 of shared-memory threads support.  Specifically, the FFTW threads
@@ -74,6 +75,7 @@ First, programs using the parallel complex transforms should be linked with
 with whatever library is responsible for threads on your system
 (e.g. @code{-lpthread} on GNU/Linux).
 @cindex linking on Unix
+
 
 Second, before calling @emph{any} FFTW routines, you should call the
 function:

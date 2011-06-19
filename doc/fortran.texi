@@ -335,6 +335,7 @@ that do not take file/string arguments, however:
 @findex dfftw_export_wisdom
 @findex dfftw_forget_wisdom
 
+
 So, for example, to import the system-wide wisdom, you would do:
 
 @example

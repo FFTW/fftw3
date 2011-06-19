@@ -41,6 +41,7 @@ SIMD instructions on any of these systems.
 @cindex MIPS PS
 @cindex precision
 
+
 A program linking to an FFTW library compiled with SIMD support can
 obtain a nonnegligible speedup for most complex and r2c/c2r
 transforms.  In order to obtain this speedup, however, the arrays of
@@ -330,6 +331,7 @@ one.
 @ctindex FFTW_PATIENT
 @ctindex FFTW_EXHAUSTIVE
 @ctindex FFTW_ESTIMATE
+
 
 Whenever you create a plan, the FFTW planner accumulates wisdom, which
 is information sufficient to reconstruct the plan.  After planning,
