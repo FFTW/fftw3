@@ -126,8 +126,18 @@ optimized for a particular one.
 @code{--enable-long-double}: Produces a long-double precision version of
 FFTW (@code{long double}) instead of the default double-precision
 (@code{double}).  The @code{configure} script will halt with an error
-message is @code{long double} is the same size as @code{double} on your
+message if @code{long double} is the same size as @code{double} on your
 machine/compiler.  @xref{Precision}.
+
+@item
+@cindex precision
+@code{--enable-quad-precision}: Produces a quadruple-precision version
+of FFTW using the nonstandard @code{__float128} type provided by
+@code{gcc} 4.6 or later on x86, x86-64, and Itanium architectures,
+instead of the default double-precision (@code{double}).  The
+@code{configure} script will halt with an error message if the
+compiler is not @code{gcc} version 4.6 or later or if @code{gcc}'s
+@code{libquadmath} library is not installed.  @xref{Precision}.
 
 @item
 @cindex threads

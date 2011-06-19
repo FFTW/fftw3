@@ -119,6 +119,14 @@ be any more precise than @code{double} (or may not be supported at all,
 although it is standard in C99).
 @cindex C99
 
+We also support using the nonstandard @code{__float128}
+quadruple-precision type provided by recent versions of @code{gcc} on
+32- and 64-bit x86 hardware (@pxref{Installation and Customization}).
+To use this type, link with @code{-lfftw3q -lquadmath -lm} (the
+@code{libquadmath} library provided by @code{gcc} is needed for
+quadruple-precision trigonometric functions) and use @samp{fftwq_}
+identifiers.
+
 @c =========>
 @node Memory Allocation,  , Precision, Data Types and Files
 @subsection Memory Allocation
