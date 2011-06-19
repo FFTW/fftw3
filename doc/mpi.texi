@@ -190,8 +190,9 @@ Whenever you create, execute, or destroy a plan for an MPI transform,
 you must call the corresponding FFTW routine on @emph{all} processes
 in the communicator for that transform.  (That is, these are
 @emph{collective} calls.)  Note that the plan for the MPI transform
-uses the standard @code{fftw_execute} and @code{fftw_destroy}
-routines (the new-array execute routines also work).
+uses the standard @code{fftw_execute} and @code{fftw_destroy} routines
+(on the other hand, there are MPI-specific new-array execute functions
+documented below).
 @cindex collective function
 @findex fftw_mpi_plan_dft_2d
 @ctindex MPI_COMM_WORLD
