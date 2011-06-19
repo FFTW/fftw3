@@ -270,8 +270,8 @@ the given file or to @code{stdout}, respectively.
 @section Basic Interface
 @cindex basic interface
 
-Recall that the FFTW API is divided into three parts@footnote{Gallia est
-omnis divisa in partes tres (Julius Caesar).}: the @dfn{basic interface}
+Recall that the FFTW API is divided into three parts@footnote{@i{Gallia est
+omnis divisa in partes tres} (Julius Caesar).}: the @dfn{basic interface}
 computes a single transform of contiguous data, the @dfn{advanced
 interface} computes transforms of multiple or strided arrays, and the
 @dfn{guru interface} supports the most general data layouts,
