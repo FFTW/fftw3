@@ -153,6 +153,7 @@ case "$PRECISION" in
      s) PREC_SUFFIX=f;;
      d) PREC_SUFFIX=;;
      l) PREC_SUFFIX=l;;
+     q) PREC_SUFFIX=q;;
 esac
 AC_SUBST(PREC_SUFFIX)
 
