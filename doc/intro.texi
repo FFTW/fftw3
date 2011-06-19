@@ -136,9 +136,10 @@ FFTW, the FAQ, benchmarks, and other links, are available at
 The current version of FFTW incorporates many good ideas from the past
 thirty years of FFT literature.  In one way or another, FFTW uses the
 Cooley-Tukey algorithm, the prime factor algorithm, Rader's algorithm
-for prime sizes, and a split-radix algorithm (with a variation due to
-Dan Bernstein).  FFTW's code generator also produces new algorithms
-that we do not completely understand.
+for prime sizes, and a split-radix algorithm (with a
+``conjugate-pair'' variation pointed out to us by Dan Bernstein).
+FFTW's code generator also produces new algorithms that we do not
+completely understand.
 @cindex algorithm
 The reader is referred to the cited papers for the appropriate
 references.
