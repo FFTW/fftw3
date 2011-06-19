@@ -332,6 +332,9 @@ static void kill_workforce(void)
 
      w.proc = 0;
 
+     THREAD_ON; /* needed for debugging mode: since make_worker
+		   is called from dequeue which is only called in
+		   thread_on mode, we need to unmake_worker in thread_on. */
      WITH_QUEUE_LOCK({
 	  /* tell all workers that they must terminate.  
 
@@ -349,6 +352,7 @@ static void kill_workforce(void)
 	       unmake_worker(q);
 	  }
      });
+     THREAD_OFF;
 }
 
 int X(ithreads_init)(void)
