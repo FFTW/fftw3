@@ -23,15 +23,18 @@ manual.
 @node Fortran-interface routines, FFTW Constants in Fortran, Calling FFTW from Fortran, Calling FFTW from Fortran
 @section Fortran-interface routines
 
-Nearly all of the FFTW functions have Fortran-callable equivalents.  The
-name of the Fortran routine is the same as that of the corresponding C
-routine, but with the @samp{fftw_} prefix replaced by @samp{dfftw_}.
-(The single and long-double precision versions use @samp{sfftw_} and
-@samp{lfftw_}, respectively, instead of @samp{fftwf_} and
-@samp{fftwl_}.)@footnote{Technically, Fortran 77 identifiers are
-not allowed to have more than 6 characters, nor may they contain
-underscores.  Any compiler that enforces this limitation doesn't deserve
-to link to FFTW.}
+Nearly all of the FFTW functions have Fortran-callable equivalents.
+The name of the Fortran routine is the same as that of the
+corresponding C routine, but with the @samp{fftw_} prefix replaced by
+@samp{dfftw_}.@footnote{Technically, Fortran 77 identifiers are not
+allowed to have more than 6 characters, nor may they contain
+underscores.  Any compiler that enforces this limitation doesn't
+deserve to link to FFTW.}  The single and long-double precision
+versions use @samp{sfftw_} and @samp{lfftw_}, respectively, instead of
+@samp{fftwf_} and @samp{fftwl_}; quadruple precision (@code{real*16})
+is available on some systems as @samp{fftwq_} (@pxref{Precision}).
+(Note that @code{long double} on x86 hardware is usually at most
+80-bit extended precision, @emph{not} quadruple precision.)
 
 For the most part, all of the arguments to the functions are the same,
 with the following exceptions:
