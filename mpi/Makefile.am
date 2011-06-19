@@ -36,7 +36,7 @@ mpi_bench_LDADD = libfftw3@PREC_SUFFIX@_mpi.la $(LIBFFTWTHREADS) $(top_builddir)
 CHECK = $(top_srcdir)/tests/check.pl
 NUMCHECK=10
 CHECKSIZE=10000
-CHECKOPTS = --verbose --random --maxsize=$(CHECKSIZE) -c=$(NUMCHECK)
+CHECKOPTS = --verbose --random --maxsize=$(CHECKSIZE) -c=$(NUMCHECK) $(CHECK_PL_OPTS)
 
 if MPI
 

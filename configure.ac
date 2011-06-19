@@ -47,6 +47,7 @@ fi
 AC_ARG_ENABLE(random-estimator, [AC_HELP_STRING([--enable-random-estimator],[enable pseudorandom estimator (debugging hack)])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_RANDOM_ESTIMATOR,1,[Define to enable pseudorandom estimate planning for debugging.])
+	CHECK_PL_OPTS="--estimate"
 fi
 
 AC_ARG_ENABLE(alloca, [AC_HELP_STRING([--disable-alloca],[disable use of the alloca() function (may be broken on mingw64)])], ok=$enableval, ok=yes)
@@ -88,6 +89,7 @@ fi
 AM_CONDITIONAL(QUAD, test "$ok" = "yes")
 
 AC_SUBST(PRECISION)
+AC_SUBST(CHECK_PL_OPTS)
 
 have_simd="no"
 simd_precision="s"
