@@ -766,9 +766,14 @@ FFTW(plan) mkplan(bench_problem *p, unsigned flags)
 void main_init(int *argc, char ***argv)
 {
 #ifdef HAVE_SMP
+# if MPI_VERSION >= 2 /* for MPI_Init_thread */
      int provided;
      MPI_Init_thread(argc, argv, MPI_THREAD_FUNNELED, &provided);
      threads_ok = provided >= MPI_THREAD_FUNNELED;
+# else
+     MPI_Init(argc, argv);
+     threads_ok = 0;
+# endif
 #else
      MPI_Init(argc, argv);
 #endif
