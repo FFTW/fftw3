@@ -174,6 +174,9 @@ dnl -----------------------------------------------------------------------
 AC_ARG_ENABLE(mpi, [AC_HELP_STRING([--enable-mpi],[compile FFTW MPI library])], enable_mpi=$enableval, enable_mpi=no)
 
 if test "$enable_mpi" = "yes"; then
+   if test $PRECISION = q; then
+      AC_MSG_ERROR([quad precision is not supported in MPI])
+   fi
    ACX_MPI([],[AC_MSG_ERROR([could not find mpi library for --enable-mpi])])
    AC_CHECK_PROG(MPIRUN, mpirun, mpirun)
    AC_SUBST(MPIRUN)

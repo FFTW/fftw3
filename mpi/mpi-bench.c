@@ -15,6 +15,8 @@
 #  define BENCH_MPI_TYPE MPI_FLOAT
 #elif defined(BENCHFFT_LDOUBLE)
 #  define BENCH_MPI_TYPE MPI_LONG_DOUBLE
+#elif defined(BENCHFFT_QUAD)
+#  error MPI quad-precision type is unknown
 #else
 #  define BENCH_MPI_TYPE MPI_DOUBLE
 #endif

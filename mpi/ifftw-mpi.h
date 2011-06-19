@@ -43,6 +43,8 @@
 #  define FFTW_MPI_TYPE MPI_FLOAT
 #elif defined(FFTW_LDOUBLE)
 #  define FFTW_MPI_TYPE MPI_LONG_DOUBLE
+#elif defined(FFTW_QUAD)
+#  error MPI quad-precision type is unknown
 #else
 #  define FFTW_MPI_TYPE MPI_DOUBLE
 #endif
