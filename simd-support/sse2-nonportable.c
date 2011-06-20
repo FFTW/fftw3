@@ -21,12 +21,16 @@
 #include "ifftw.h"
 
 #if HAVE_SSE2
-/* this file must be compiled with -msse2 or equivalent, and it will
-   fail at runtime on a machine that does not support sse2 */
+/* this file must be compiled with -msse/-msse2 or equivalent, and it will
+   fail at runtime on a machine that does not support sse/sse2 */
 #include "simd-sse2.h"
 
 const union uvec X(sse2_pm) = {
+#ifdef FFTW_SINGLE
+     { 0x00000000, 0x80000000, 0x00000000, 0x80000000 }
+#else
      { 0x00000000, 0x00000000, 0x00000000, 0x80000000 }
+#endif
 };
 
 /* paranoia because of past compiler bugs */

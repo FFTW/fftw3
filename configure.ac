@@ -96,15 +96,14 @@ if test "$have_sse" = "yes"; then
 	if test "$PRECISION" != "s"; then
 		AC_MSG_ERROR([SSE requires single precision])
 	fi
-	AC_DEFINE(HAVE_SSE,1,[Define to enable SSE optimizations.])
 fi
-AM_CONDITIONAL(HAVE_SSE, test "$have_sse" = "yes")
 
-AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
+AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE/SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
+if test "$have_sse" = "yes"; then have_sse2=yes; fi
 if test "$have_sse2" = "yes"; then
-	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
-	if test "$PRECISION" != "d"; then
-		AC_MSG_ERROR([SSE2 requires double precision])
+	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE/SSE2 optimizations.])
+	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+		AC_MSG_ERROR([SSE2 requires single or double precision])
 	fi
 fi
 AM_CONDITIONAL(HAVE_SSE2, test "$have_sse2" = "yes")
@@ -263,16 +262,11 @@ esac
 
 dnl Determine SIMD CFLAGS at least for gcc
 if test "${ax_cv_c_compiler_vendor}" = "gnu"; then
-    # SSE
-    if test "$have_sse" = "yes" -a "x$SSE_CFLAGS" = x; then
-	AX_CHECK_COMPILER_FLAGS(-msse, [SSE_CFLAGS="-msse"],
-	    [AC_MSG_ERROR([Need a version of gcc with -msse])])
-    fi
-
-    # SSE2
+    # SSE/SSE2
     if test "$have_sse2" = "yes" -a "x$SSE2_CFLAGS" = x; then
-	AX_CHECK_COMPILER_FLAGS(-msse2, [SSE2_CFLAGS="-msse2"],
-	    [AC_MSG_ERROR([Need a version of gcc with -msse2])])
+        if test $PRECISION=d; then flag=msse2; else flag=msse; fi
+	AX_CHECK_COMPILER_FLAGS(-$flag, [SSE2_CFLAGS="-$flag"],
+	    [AC_MSG_ERROR([Need a version of gcc with -$flag])])
     fi
 
     # AVX
@@ -304,7 +298,6 @@ if test "${ax_cv_c_compiler_vendor}" = "gnu"; then
     dnl fi
 fi
 
-AC_SUBST(SSE_CFLAGS)
 AC_SUBST(SSE2_CFLAGS)
 AC_SUBST(AVX_CFLAGS)
 

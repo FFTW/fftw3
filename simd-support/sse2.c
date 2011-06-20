@@ -21,6 +21,12 @@
 
 #include "ifftw.h"
 
+#ifdef FFTW_SINGLE
+#  define DS(d,s) s /* single-precision option */
+#else
+#  define DS(d,s) d /* double-precision option */
+#endif
+
 #if HAVE_SSE2
 
 # if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
@@ -53,10 +59,11 @@
 	    return 0;
        } else {
 #         ifdef _MSC_VER
-	    _asm { xorpd xmm0,xmm0 }
+	    _asm { DS(xorpd,xorps) xmm0,xmm0 }
 #         else
-	    /* asm volatile ("xorpd %xmm0, %xmm0"); */
-	    asm volatile (".byte 0x66; .byte 0x0f; .byte 0x57; .byte 0xc0");
+	    /* asm volatile ("xorpd/s %xmm0, %xmm0"); */
+	    asm volatile(DS(".byte 0x66; .byte 0x0f; .byte 0x57; .byte 0xc0",
+			                ".byte 0x0f; .byte 0x57; .byte 0xc0"));
 #         endif
 	    signal(SIGILL, oldsig);
 	    return 1;
@@ -72,7 +79,7 @@
        if (!init) {
 	    res =   !is_386() 
 		 && has_cpuid()
-		 && (cpuid_edx(1) & (1 << 26))
+		 && (cpuid_edx(1) & (1 << DS(26,25)))
 		 && sse2_works();
 	    init = 1;
 	    X(check_alignment_of_sse2_pm)();
