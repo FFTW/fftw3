@@ -242,7 +242,7 @@ let generate n mode =
 	  @ (if (not (window_param mode)) then [] 
 	       else [Decl (C.constrealtypep, window)])
 	 ),
-	 add_constants (Asch annot))
+	 finalize_fcn (Asch annot))
 
   in
   (unparse tree) ^ "\n"

@@ -223,4 +223,9 @@ static inline V BYTWJ2(const R *t, V sr)
 #define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
 #define VFNMSCONJ(b,c) VSUB(c, VCONJ(b))
 
+/* User VZEROUPPER to avoid the penalty of switching from AVX to
+   SSE.   See Intel Optimization Manual (April 2011, version 248966),
+   Section 11.3 */
+#define VLEAVE _mm256_zeroupper
+
 #include "simd-common.h"

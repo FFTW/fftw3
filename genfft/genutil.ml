@@ -306,7 +306,7 @@ let unparse tree =
   else
     C.unparse_function tree)
 
-let add_constants ast = 
+let finalize_fcn ast = 
   let mergedecls = function
       C.Block (d1, [C.Block (d2, s)]) -> C.Block (d1 @ d2, s)
     | x -> x
@@ -316,7 +316,7 @@ let add_constants ast =
     else
       C.extract_constants
 	
-  in mergedecls (C.Block (extract_constants ast, [ast]))
+  in mergedecls (C.Block (extract_constants ast, [ast; C.Simd_leavefun]))
 
 let twinstr_to_string vl x =
   if !Simdmagic.simd_mode then 

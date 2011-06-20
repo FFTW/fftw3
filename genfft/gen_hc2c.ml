@@ -154,7 +154,7 @@ let generate n =
 	  Decl ("INT", mb);
 	  Decl ("INT", me);
 	  Decl ("INT", ms)],
-         add_constants body)
+         finalize_fcn body)
   in
   let twinstr = 
     Printf.sprintf "static const tw_instr twinstr[] = %s;\n\n" 

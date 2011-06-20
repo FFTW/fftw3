@@ -208,4 +208,6 @@ static inline V BYTWJ2(const R *t, V sr)
 #define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
 #define VFNMSCONJ(b,c) VSUB(c, VCONJ(b))
 
+#define VLEAVE() /* nothing */
+
 #include "simd-common.h"

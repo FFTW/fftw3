@@ -218,7 +218,7 @@ let generate n mode =
                     else [Decl ("INT", "ivs")])
 	       @ (if stride_fixed !uovstride then [] 
                     else [Decl ("INT", "ovs")]))),
-	 add_constants body)
+	 finalize_fcn body)
 
   in let desc = 
     Printf.sprintf 

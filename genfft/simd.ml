@@ -186,6 +186,7 @@ and unparse_ast ast =
   in match ast with 
   | Asch a -> (unparse_annotated true a)
   | Return x -> "return " ^ unparse_ast x ^ ";"
+  | Simd_leavefun -> "VLEAVE();"
   | For (a, b, c, d) ->
       "for (" ^
       unparse_ast a ^ "; " ^ unparse_ast b ^ "; " ^ unparse_ast c

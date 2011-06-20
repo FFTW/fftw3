@@ -42,6 +42,7 @@ type c_decl =
 
 and c_ast =
   | Asch of Annotate.annotated_schedule
+  | Simd_leavefun
   | Return of c_ast
   | For of c_ast * c_ast * c_ast * c_ast
   | If of c_ast * c_ast

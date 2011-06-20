@@ -46,6 +46,7 @@ type c_decl =
 
 and c_ast =
   | Asch of annotated_schedule
+  | Simd_leavefun
   | Return of c_ast
   | For of c_ast * c_ast * c_ast * c_ast
   | If of c_ast * c_ast
@@ -204,6 +205,7 @@ and unparse_ast =
   in
   function
     | Asch a -> (unparse_annotated true a)
+    | Simd_leavefun -> "" (* used only in SIMD code *)
     | Return x -> "return " ^ unparse_ast x ^ ";"
     | For (a, b, c, d) ->
 	"for (" ^

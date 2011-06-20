@@ -135,7 +135,7 @@ let generate n =
 	   Decl ("INT", v);
 	   Decl ("INT", "ivs");
 	   Decl ("INT", "ovs")]),
-	 add_constants body)
+	 finalize_fcn body)
       
   in
   let desc = 
