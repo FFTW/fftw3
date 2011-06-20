@@ -77,10 +77,10 @@ typedef DS(__m128d,__m128) V;
 #    define DVK(var, val) V var = __extension__ ({ \
          static const union rvec _var = { {val,val} }; _var.v; })
 #  endif
-#define LDK(x) x
+#  define LDK(x) x
 #else
-#define DVK(var, val) const R var = K(val)
-#define LDK(x) DS(_mm_set1_pd,_mm_set_ps1)(x)
+#  define DVK(var, val) const R var = K(val)
+#  define LDK(x) DS(_mm_set1_pd,_mm_set_ps1)(x)
 #endif
 
 union rvec {
