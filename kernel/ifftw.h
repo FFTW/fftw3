@@ -91,11 +91,14 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 #define STRINGIZE(x) STRINGIZEx(x)
 
 #if defined(HAVE_SSE) || defined(HAVE_SSE2) || defined(HAVE_ALTIVEC) || \
-    defined(HAVE_MIPS_PS)
+     defined(HAVE_MIPS_PS) || defined(HAVE_AVX256D)
 #define HAVE_SIMD 1
 #else
 #define HAVE_SIMD 0
 #endif
+
+extern int X(have_simd_sse2)(void);
+extern int X(have_simd_avx256d)(void);
 
 /* forward declarations */
 typedef struct problem_s problem;
@@ -108,7 +111,8 @@ typedef struct scanner_s scanner;
 /*-----------------------------------------------------------------------*/
 /* alloca: */
 #if HAVE_SIMD
-#define MIN_ALIGNMENT 16
+#define MIN_ALIGNMENT 32  /* best alignment for AVX, conservative for
+			   * everything else */
 #endif
 
 #if defined(HAVE_ALLOCA) && defined(FFTW_ENABLE_ALLOCA)

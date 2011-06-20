@@ -18,7 +18,7 @@
  *
  */
 
-#include "simd.h"
+#include SIMD_HEADER
 
 #undef LD
 #define LD LDA
@@ -30,6 +30,6 @@
 #define BYTW BYTW1
 #define BYTWJ BYTWJ1
 
-#define GENUS X(dft_t1fsimd_genus)
+#define GENUS XSIMD(dft_t1fsimd_genus)
 extern const ct_genus GENUS;
 

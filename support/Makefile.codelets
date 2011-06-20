@@ -13,27 +13,28 @@ CODELET_NAME=codelet_
 
 # rule to build codlist
 $(CODLIST): Makefile
-	(								\
-	echo "#include \"ifftw.h\"";					\
-	echo;								\
-	for i in $(ALL_CODELETS) NIL; do				\
-	   if test "$$i" != NIL; then					\
-	     j=`basename $$i | sed -e 's/[.][cS]$$//g'`;		\
-             echo "extern void X($(CODELET_NAME)$$j)(planner *);";	\
-           fi								\
-	done;								\
-	echo;								\
-	echo;								\
-	echo "extern const solvtab $(SOLVTAB_NAME);";		        \
-	echo "const solvtab $(SOLVTAB_NAME) = {";		        \
-	for i in $(ALL_CODELETS) NIL; do				\
-	   if test "$$i" != NIL; then					\
-	     j=`basename $$i | sed -e 's/[.][cS]$$//g'`;		\
-	     echo "   SOLVTAB(X($(CODELET_NAME)$$j)),";			\
-	   fi								\
-	done;								\
-	echo "   SOLVTAB_END";						\
-	echo "};";							\
+	(									\
+	echo "#include \"ifftw.h\"";						\
+	echo $(INCLUDE_SIMD_HEADER);						\
+	echo;									\
+	for i in $(ALL_CODELETS) NIL; do					\
+	   if test "$$i" != NIL; then						\
+	     j=`basename $$i | sed -e 's/[.][cS]$$//g'`;			\
+             echo "extern void $(XRENAME)($(CODELET_NAME)$$j)(planner *);";	\
+           fi									\
+	done;									\
+	echo;									\
+	echo;									\
+	echo "extern const solvtab $(SOLVTAB_NAME);";				\
+	echo "const solvtab $(SOLVTAB_NAME) = {";				\
+	for i in $(ALL_CODELETS) NIL; do					\
+	   if test "$$i" != NIL; then						\
+	     j=`basename $$i | sed -e 's/[.][cS]$$//g'`;			\
+	     echo "   SOLVTAB($(XRENAME)($(CODELET_NAME)$$j)),";		\
+	   fi									\
+	done;									\
+	echo "   SOLVTAB_END";							\
+	echo "};";								\
 	) >$@
 
 # only delete codlist.c in maintainer-mode, since it is included in the dist

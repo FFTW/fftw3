@@ -237,10 +237,13 @@ let declare_register_fcn name =
   if name = "" then
     "void NAME(planner *p)\n"
   else 
-    "void X(codelet_" ^ name ^ ")(planner *p)\n"
+    "void " ^ (choose_simd "X" "XSIMD") ^
+      "(codelet_" ^ name ^ ")(planner *p)\n"
 
 let stringify name = 
-  if name = "" then "STRINGIZE(NAME)" else "\"" ^ name ^ "\""
+  if name = "" then "STRINGIZE(NAME)" else 
+    choose_simd ("\"" ^ name ^ "\"")
+      ("XSIMD_STRING(\"" ^ name ^ "\")")
 
 let parse user_speclist usage =
   Arg.parse

@@ -18,7 +18,7 @@
  *
  */
 
-#include "simd.h"
+#include SIMD_HEADER
 
 #undef LD
 #define LD LDA
@@ -29,6 +29,6 @@
 #define TWVL TWVLS
 #define LDW(x) LDA(x, 0, 0) /* load twiddle factor */
 
-#define GENUS X(dft_tssimd_genus)
+#define GENUS XSIMD(dft_tssimd_genus)
 extern const ct_genus GENUS;
 

@@ -18,10 +18,10 @@
  *
  */
 
-#include "simd.h"
+#include SIMD_HEADER
 
 #undef LD
 #define LD LDA
 
-#define GENUS X(dft_n2bsimd_genus)
+#define GENUS XSIMD(dft_n2bsimd_genus)
 extern const kdft_genus GENUS;

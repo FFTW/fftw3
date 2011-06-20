@@ -18,32 +18,20 @@
  *
  */
 
-#include "codelet-dft.h"
-#include "n2b.h"
+#include "ifftw.h"
 
-#if HAVE_SIMD
-static int okp(const kdft_desc *d,
-               const R *ri, const R *ii, const R *ro, const R *io,
-               INT is, INT os, INT vl, INT ivs, INT ovs, 
-	       const planner *plnr)
+#if HAVE_SSE2
+/* this file must be compiled with -msse2 or equivalent, and it will
+   fail at runtime on a machine that does not support sse2 */
+#include "simd-sse2.h"
+
+const union uvec X(sse2_pm) = {
+     { 0x00000000, 0x00000000, 0x00000000, 0x80000000 }
+};
+
+/* paranoia because of past compiler bugs */
+void X(check_alignment_of_sse2_pm)(void)
 {
-     return (RIGHT_CPU()
-             && ALIGNEDA(ii)
-             && ALIGNEDA(io)
-	     && !NO_SIMDP(plnr)
-	     && SIMD_STRIDE_OKA(is)
-	     && SIMD_VSTRIDE_OKA(ivs)
-	     && SIMD_VSTRIDE_OKA(os) /* os == 2 enforced by codelet */
-	     && SIMD_STRIDE_OKPAIR(ovs)
-             && ri == ii + 1
-             && ro == io + 1
-             && (vl % VL) == 0
-             && (!d->is || (d->is == is))
-             && (!d->os || (d->os == os))
-             && (!d->ivs || (d->ivs == ivs))
-             && (!d->ovs || (d->ovs == ovs))
-          );
+     CK(ALIGNED(&X(sse2_pm)));
 }
-
-const kdft_genus GENUS = { okp, VL };
 #endif

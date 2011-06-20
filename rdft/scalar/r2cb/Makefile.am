@@ -70,6 +70,7 @@ BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 librdft_scalar_r2cb_la_SOURCES = $(BUILT_SOURCES)
 
 SOLVTAB_NAME = X(solvtab_rdft_r2cb)
+XRENAME=X
 
 # special rules for regenerating codelets.
 include $(top_srcdir)/support/Makefile.codelets

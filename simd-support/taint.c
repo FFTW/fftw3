@@ -18,33 +18,26 @@
  *
  */
 
-#include "codelet-dft.h"
+
+#include "ifftw.h"
+#include "simd-common.h"
 
 #if HAVE_SIMD
-#include "ts.h"
 
-static int okp(const ct_desc *d,
-	       const R *rio, const R *iio, 
-	       INT rs, INT vs, INT m, INT mb, INT me, INT ms,
-	       const planner *plnr)
+R *X(taint)(R *p, INT s)
 {
-     UNUSED(rio);
-     UNUSED(iio);
-     return (RIGHT_CPU()
-	     && !NO_SIMDP(plnr)
-	     && ALIGNEDA(rio)
-	     && ALIGNEDA(iio)
-	     && SIMD_STRIDE_OKA(rs)
-	     && ms == 1
-             && (m % (2 * VL)) == 0
-             && (mb % (2 * VL)) == 0
-             && (me % (2 * VL)) == 0
-	     && (!d->rs || (d->rs == rs))
-	     && (!d->vs || (d->vs == vs))
-	     && (!d->ms || (d->ms == ms))
-	  );
+     if (((unsigned)s * sizeof(R)) % ALIGNMENT)
+	  p = (R *) (PTRINT(p) | TAINT_BIT);
+     if (((unsigned)s * sizeof(R)) % ALIGNMENTA)
+	  p = (R *) (PTRINT(p) | TAINT_BITA);
+     return p;
 }
 
-const ct_genus GENUS = { okp, 2 * VL };
-
+/* join the taint of two pointers that are supposed to be
+   the same modulo the taint */
+R *X(join_taint)(R *p1, R *p2)
+{
+     A(UNTAINT(p1) == UNTAINT(p2));
+     return (R *)(PTRINT(p1) | PTRINT(p2));
+}
 #endif

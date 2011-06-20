@@ -54,12 +54,12 @@ Q1 = q1_2.c q1_4.c q1_8.c  q1_3.c q1_5.c q1_6.c
 
 ###########################################################################
 ALL_CODELETS = $(N1) $(T1) $(T2) $(F1) $(F2) $(Q1)
-
 BUILT_SOURCES= $(ALL_CODELETS) $(CODLIST)
 
 libdft_scalar_codelets_la_SOURCES = $(BUILT_SOURCES)
 
 SOLVTAB_NAME = X(solvtab_dft_standard)
+XRENAME=X
 
 # special rules for regenerating codelets.
 include $(top_srcdir)/support/Makefile.codelets

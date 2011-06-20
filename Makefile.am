@@ -13,18 +13,20 @@ endif
 
 ACLOCAL_AMFLAGS=-I m4
 
-SUBDIRS=support $(GENFFT) kernel simd dft rdft reodft api threads \
-libbench2 . tests mpi doc tools m4
+SUBDIRS=support $(GENFFT) kernel simd-support dft rdft reodft api	\
+threads libbench2 . tests mpi doc tools m4
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in
 
-if HAVE_SIMD
-SIMD_LIBS=							\
-	simd/nonportable/libsimd_nonportable.la			\
-	dft/simd/libdft_simd.la					\
-	dft/simd/codelets/libdft_simd_codelets.la		\
-	rdft/simd/librdft_simd.la				\
-	rdft/simd/codelets/librdft_simd_codelets.la		\
-	simd/libsimd.la
+SIMD_LIBS =						\
+	simd-support/libsimd_support.la			\
+	simd-support/libsimd_sse2_nonportable.la
+
+if HAVE_SSE2
+SSE2_LIBS = dft/simd/sse2/libdft_sse2_codelets.la
+endif
+
+if HAVE_AVX256D
+AVX256D_LIBS = dft/simd/avx256d/libdft_avx256d_codelets.la
 endif
 
 if SMP
@@ -47,7 +49,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	rdft/scalar/r2r/librdft_scalar_r2r.la		\
 	reodft/libreodft.la				\
 	api/libapi.la					\
-        $(SIMD_LIBS)					\
+        $(SIMD_LIBS) $(SSE2_LIBS) $(AVX256D_LIBS)	\
 	$(COMBINED_THREADLIBS)
 
 if QUAD

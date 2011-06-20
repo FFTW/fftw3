@@ -91,42 +91,55 @@ AM_CONDITIONAL(QUAD, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 AC_SUBST(CHECK_PL_OPTS)
 
-have_simd="no"
-simd_precision="s"
-
 AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
 if test "$have_sse" = "yes"; then
+	if test "$PRECISION" != "s"; then
+		AC_MSG_ERROR([SSE requires single precision])
+	fi
 	AC_DEFINE(HAVE_SSE,1,[Define to enable SSE optimizations.])
-	have_simd="yes"
 fi
+AM_CONDITIONAL(HAVE_SSE, test "$have_sse" = "yes")
 
 AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
 if test "$have_sse2" = "yes"; then
 	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE2 optimizations.])
-	have_simd="yes"
-	simd_precision="d"
-	if test "$have_sse" = "yes"; then
-		AC_MSG_ERROR([you cannot use SSE and SSE2 at the same time])
+	if test "$PRECISION" != "d"; then
+		AC_MSG_ERROR([SSE2 requires double precision])
 	fi
 fi
+AM_CONDITIONAL(HAVE_SSE2, test "$have_sse2" = "yes")
+
+AC_ARG_ENABLE(avx, [AC_HELP_STRING([--enable-avx],[enable AVX optimizations])], have_avx=$enableval, have_avx=no)
+if test "$have_avx" = "yes"; then
+	if test "$PRECISION" == "d"; then
+		AC_DEFINE(HAVE_AVX256D,1,[Define to enable double-precision AVX256.])
+		have_avx256d="yes"
+	elif test "$PRECISION" == "s"; then
+		AC_DEFINE(HAVE_AVX256S,1,[Define to enable single-precision AVX256.])
+		have_avx256s="yes"
+	else
+		AC_MSG_ERROR([Wrong AVX precision])
+	fi
+fi
+AM_CONDITIONAL(HAVE_AVX256D, test "$have_avx256d" = "yes")
 
 AC_ARG_ENABLE(altivec, [AC_HELP_STRING([--enable-altivec],[enable Altivec optimizations])], have_altivec=$enableval, have_altivec=no)
 if test "$have_altivec" = "yes"; then
 	AC_DEFINE(HAVE_ALTIVEC,1,[Define to enable Altivec optimizations.])
-	have_simd="yes"
+	if test "$PRECISION" != "s"; then
+		AC_MSG_ERROR([Altivec requires single precision])
+	fi
 fi
+AM_CONDITIONAL(HAVE_ALTIVEC, test "$have_altivec" = "yes")
 
 AC_ARG_ENABLE(mips-ps, [AC_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
 if test "$have_mips_ps" = "yes"; then
 	AC_DEFINE(HAVE_MIPS_PS,1,[Define to enable MIPS paired-single optimizations.])
-	have_simd="yes"
+	if test "$PRECISION" != "s"; then
+		AC_MSG_ERROR([MIPS paired-single requires single precision])
+	fi
 fi
-
-if test "$PRECISION" != "$simd_precision" && test "$have_simd" = "yes"; then
-	AC_MSG_ERROR([requested SIMD type does not match selected precision])
-fi
-
-AM_CONDITIONAL(HAVE_SIMD, test "$have_simd" = "yes")
+AM_CONDITIONAL(HAVE_MIPS_PS, test "$have_mips_ps" = "yes")
 
 AC_ARG_WITH(slow-timer, [AC_HELP_STRING([--with-slow-timer],[use low-precision timers (SLOW)])], with_slow_timer=$withval, with_slow_timer=no)
 if test "$with_slow_timer" = "yes"; then
@@ -248,37 +261,52 @@ case "${ax_cv_c_compiler_vendor}" in
         ;;
 esac
 
-if test "x$SIMD_CFLAGS" = x; then
+dnl Determine SIMD CFLAGS at least for gcc
 if test "${ax_cv_c_compiler_vendor}" = "gnu"; then
-    if test "$have_sse" = "yes"; then
-	AX_CHECK_COMPILER_FLAGS(-msse, [SIMD_CFLAGS="-msse"],
+    # SSE
+    if test "$have_sse" = "yes" -a "x$SSE_CFLAGS" = x; then
+	AX_CHECK_COMPILER_FLAGS(-msse, [SSE_CFLAGS="-msse"],
 	    [AC_MSG_ERROR([Need a version of gcc with -msse])])
-    elif test "$have_sse2" = "yes"; then
-	AX_CHECK_COMPILER_FLAGS(-msse2, [SIMD_CFLAGS="-msse2"],
-	    [AC_MSG_ERROR([Need a version of gcc with -msse2])])
-    elif test "$have_altivec" = "yes"; then
-	# -DFAKE__VEC__ is a workaround because gcc-3.3 does not
-	# #define __VEC__ with -maltivec.
-	AX_CHECK_COMPILER_FLAGS(-faltivec, [SIMD_CFLAGS="-faltivec"],
-	    [AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
-		[SIMD_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
-	        [AX_CHECK_COMPILER_FLAGS(-fvec, [SIMD_CFLAGS="-fvec"],
-		    [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
-    elif test "$have_mips_ps" = "yes"; then
-        # Just punt here and use only new 4.2 compiler :(
-	# Should add section for older compilers...
-	AX_CHECK_COMPILER_FLAGS(-mpaired-single,
-	    [SIMD_CFLAGS="-mpaired-single"],
-	    #[AC_MSG_ERROR([Need a version of gcc with -mpaired-single])])
-	    [AX_CHECK_COMPILER_FLAGS(-march=mips64,
-	      [SIMD_CFLAGS="-march=mips64"],
-	        [AC_MSG_ERROR(
-		 [Need a version of gcc with -mpaired-single or -march=mips64])
-		])])
     fi
+
+    # SSE2
+    if test "$have_sse2" = "yes" -a "x$SSE2_CFLAGS" = x; then
+	AX_CHECK_COMPILER_FLAGS(-msse2, [SSE2_CFLAGS="-msse2"],
+	    [AC_MSG_ERROR([Need a version of gcc with -msse2])])
+    fi
+
+    # AVX
+    if test "$have_avx" = "yes" -a "x$AVX_CFLAGS" = x; then
+	AX_CHECK_COMPILER_FLAGS(-mavx, [AVX_CFLAGS="-mavx"],
+	    [AC_MSG_ERROR([Need a version of gcc with -mavx])])
+    fi
+
+    dnl FIXME:
+    dnl elif test "$have_altivec" = "yes"; then
+    dnl 	# -DFAKE__VEC__ is a workaround because gcc-3.3 does not
+    dnl 	# #define __VEC__ with -maltivec.
+    dnl 	AX_CHECK_COMPILER_FLAGS(-faltivec, [SIMD_CFLAGS="-faltivec"],
+    dnl 	    [AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
+    dnl 		[SIMD_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
+    dnl 	        [AX_CHECK_COMPILER_FLAGS(-fvec, [SIMD_CFLAGS="-fvec"],
+    dnl 		    [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
+    dnl elif test "$have_mips_ps" = "yes"; then
+    dnl     # Just punt here and use only new 4.2 compiler :(
+    dnl 	# Should add section for older compilers...
+    dnl 	AX_CHECK_COMPILER_FLAGS(-mpaired-single,
+    dnl 	    [SIMD_CFLAGS="-mpaired-single"],
+    dnl 	    #[AC_MSG_ERROR([Need a version of gcc with -mpaired-single])])
+    dnl 	    [AX_CHECK_COMPILER_FLAGS(-march=mips64,
+    dnl 	      [SIMD_CFLAGS="-march=mips64"],
+    dnl 	        [AC_MSG_ERROR(
+    dnl 		 [Need a version of gcc with -mpaired-single or -march=mips64])
+    dnl 		])])
+    dnl fi
 fi
-fi
-AC_SUBST(SIMD_CFLAGS)
+
+AC_SUBST(SSE_CFLAGS)
+AC_SUBST(SSE2_CFLAGS)
+AC_SUBST(AVX_CFLAGS)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -513,22 +541,21 @@ AC_CONFIG_FILES([
    support/Makefile
    genfft/Makefile
    kernel/Makefile
-   simd/Makefile
-   simd/nonportable/Makefile
+   simd-support/Makefile
 
    dft/Makefile
    dft/scalar/Makefile
    dft/scalar/codelets/Makefile
    dft/simd/Makefile
-   dft/simd/codelets/Makefile
+   dft/simd/common/Makefile
+   dft/simd/sse2/Makefile
+   dft/simd/avx256d/Makefile
 
    rdft/Makefile
    rdft/scalar/Makefile
    rdft/scalar/r2cf/Makefile
    rdft/scalar/r2cb/Makefile
    rdft/scalar/r2r/Makefile
-   rdft/simd/Makefile
-   rdft/simd/codelets/Makefile
 
    reodft/Makefile
 

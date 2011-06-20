@@ -18,7 +18,7 @@
  *
  */
 
-#include "simd.h"
+#include SIMD_HEADER
 
-#define GENUS X(dft_n1bsimd_genus)
+#define GENUS XSIMD(dft_n1bsimd_genus)
 extern const kdft_genus GENUS;

@@ -130,8 +130,8 @@ let generate n =
       (twinstr_to_string "(2 * VL)" (twdesc n))
   and desc = 
     Printf.sprintf
-      "static const ct_desc desc = {%d, \"%s\", twinstr, &GENUS, %s, %s, %s, %s};\n\n"
-      n name (flops_of tree) 
+      "static const ct_desc desc = {%d, %s, twinstr, &GENUS, %s, %s, %s, %s};\n\n"
+      n (stringify name) (flops_of tree) 
       (stride_to_solverparm !urs) "0"
       (stride_to_solverparm !ums) 
   and register = 
