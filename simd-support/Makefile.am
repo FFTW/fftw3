@@ -2,7 +2,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel
 noinst_LTLIBRARIES = libsimd_support.la libsimd_sse2_nonportable.la
 
 libsimd_support_la_SOURCES = taint.c simd-common.h simd-sse2.h sse2.c	\
-x86-cpuid.h avx256d.c simd-avx256d.h
+x86-cpuid.h amd64-cpuid.h avx256d.c simd-avx256d.h
 
 # sse2-nonportable.c needs SSE2_CFLAGS, but Automake does not support
 # per-object CFLAGS.  Thus we build a separate library.

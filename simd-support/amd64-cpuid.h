@@ -19,44 +19,33 @@
  */
 
 
-#include "ifftw.h"
-
-#if HAVE_AVX256D
-
-#if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
-
-#include "amd64-cpuid.h"
-
-int X(have_simd_avx256d)(void)
-{
-       static int init = 0, res;
-
-       if (!init) {
-	    res = 1 
-		 && ((cpuid_ecx(1) & 0x18000000) == 0x18000000)
-		 && ((xgetbv_eax(0) & 0x6) == 0x6);
-	    init = 1;
-       }
-       return res;
-}
-
-#else /* 32-bit code */
-
-#include "x86-cpuid.h"
-
-int X(have_simd_avx256d)(void)
-{
-       static int init = 0, res;
-
-       if (!init) {
-	    res =   !is_386() 
-		 && has_cpuid()
-		 && ((cpuid_ecx(1) & 0x18000000) == 0x18000000)
-		 && ((xgetbv_eax(0) & 0x6) == 0x6);
-	    init = 1;
-       }
-       return res;
-}
+#ifdef _MSC_VER
+#ifndef inline
+#define inline __inline
+#endif
 #endif
 
+static inline int cpuid_ecx(int op)
+{
+#    ifdef _MSC_VER
+#error FIXME
+#    else
+     int eax, ecx, edx;
+
+     __asm__("pushq %%rbx\n\tcpuid\n\tpopq %%rbx"
+	     : "=a" (eax), "=c" (ecx), "=d" (edx)
+	     : "a" (op));
+     return ecx;
+#    endif
+}
+
+static inline int xgetbv_eax(int op)
+{
+#    ifdef _MSC_VER
+#error "FIXME"
+#    else
+     int eax, edx;
+     __asm__ (".byte 0x0f, 0x01, 0xd0" : "=a"(eax), "=d"(edx) : "c" (op));
+     return eax;
 #endif
+}

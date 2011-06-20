@@ -124,3 +124,36 @@ static inline int cpuid_edx(int op)
      return edx;
 #    endif
 }
+
+static inline int cpuid_ecx(int op)
+{
+#    ifdef _MSC_VER
+     int result;
+     _asm {
+	  push ebx
+          mov eax,op
+          cpuid
+          mov result,ecx
+          pop ebx
+     }
+     return result;
+#    else
+     int eax, ecx, edx;
+
+     __asm__("push %%ebx\n\tcpuid\n\tpop %%ebx"
+	     : "=a" (eax), "=c" (ecx), "=d" (edx)
+	     : "a" (op));
+     return ecx;
+#    endif
+}
+
+static inline int xgetbv_eax(int op)
+{
+#    ifdef _MSC_VER
+#error "FIXME"
+#    else
+     int eax, edx;
+     __asm__ (".byte 0x0f, 0x01, 0xd0" : "=a"(eax), "=d"(edx) : "c" (op));
+     return eax;
+#endif
+}
