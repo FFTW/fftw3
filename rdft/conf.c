@@ -58,7 +58,12 @@ void X(rdft_conf_standard)(planner *p)
      X(solvtab_exec)(X(solvtab_rdft_r2cb), p);
      X(solvtab_exec)(X(solvtab_rdft_r2r), p);
 
-#if HAVE_SIMD
-/*     X(solvtab_exec)(X(solvtab_rdft_simd), p); */
+#if HAVE_SSE2
+     if (X(have_simd_sse2)())
+	  X(solvtab_exec)(X(solvtab_rdft_sse2), p);
+#endif
+#if HAVE_AVX256D
+     if (X(have_simd_avx256d)())
+	  X(solvtab_exec)(X(solvtab_rdft_avx256d), p);
 #endif
 }

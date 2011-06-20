@@ -22,11 +22,13 @@ SIMD_LIBS =						\
 	simd-support/libsimd_sse2_nonportable.la
 
 if HAVE_SSE2
-SSE2_LIBS = dft/simd/sse2/libdft_sse2_codelets.la
+SSE2_LIBS = dft/simd/sse2/libdft_sse2_codelets.la	\
+rdft/simd/sse2/librdft_sse2_codelets.la
 endif
 
 if HAVE_AVX256D
-AVX256D_LIBS = dft/simd/avx256d/libdft_avx256d_codelets.la
+AVX256D_LIBS = dft/simd/avx256d/libdft_avx256d_codelets.la	\
+rdft/simd/avx256d/librdft_avx256d_codelets.la
 endif
 
 if SMP

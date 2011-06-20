@@ -195,8 +195,8 @@ let generate n =
       (twinstr_to_string "VL" (twdesc n))
   and desc = 
     Printf.sprintf
-      "static const hc2c_desc desc = {%d, \"%s\", twinstr, &GENUS, %s};\n\n"
-      n name (flops_of tree)
+      "static const hc2c_desc desc = {%d, %s, twinstr, &GENUS, %s};\n\n"
+      n (stringify name) (flops_of tree)
   and register = "X(khc2c_register)"
 
   in

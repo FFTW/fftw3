@@ -19,14 +19,15 @@
  */
 
 #include "codelet-rdft.h"
-#include "hc2cfv.h"
+#include SIMD_HEADER
 
-#if HAVE_SIMD
-static int okp(const R *Rp, const R *Ip, const R *Rm, const R *Im, 
-	       INT rs, INT mb, INT me, INT ms, 
-	       const planner *plnr)
+#define EXTERN_CONST(t, x) extern const t x; const t x
+
+static int hc2cbv_okp(const R *Rp, const R *Ip, const R *Rm, const R *Im, 
+		      INT rs, INT mb, INT me, INT ms, 
+		      const planner *plnr)
 {
-     return (RIGHT_CPU()
+     return (1
 	     && !NO_SIMDP(plnr)
 	     && SIMD_STRIDE_OK(rs)
 	     && SIMD_VSTRIDE_OK(ms)
@@ -38,5 +39,22 @@ static int okp(const R *Rp, const R *Ip, const R *Rm, const R *Im,
 	     && Im == Rm + 1);
 }
 
-const hc2c_genus GENUS = { okp, R2HC, VL };
-#endif
+EXTERN_CONST(hc2c_genus, XSIMD(rdft_hc2cbv_genus)) = { hc2cbv_okp, HC2R, VL };
+
+static int hc2cfv_okp(const R *Rp, const R *Ip, const R *Rm, const R *Im, 
+		      INT rs, INT mb, INT me, INT ms, 
+		      const planner *plnr)
+{
+     return (1
+	     && !NO_SIMDP(plnr)
+	     && SIMD_STRIDE_OK(rs)
+	     && SIMD_VSTRIDE_OK(ms)
+             && ((me - mb) % VL) == 0
+             && ((mb - 1) % VL) == 0 /* twiddle factors alignment */
+	     && ALIGNED(Rp)
+	     && ALIGNED(Rm)
+	     && Ip == Rp + 1
+	     && Im == Rm + 1);
+}
+
+EXTERN_CONST(hc2c_genus, XSIMD(rdft_hc2cfv_genus)) = { hc2cfv_okp, R2HC, VL };

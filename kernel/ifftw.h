@@ -90,6 +90,7 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 #define STRINGIZEx(x) #x
 #define STRINGIZE(x) STRINGIZEx(x)
 
+/* define HAVE_SIMD if any simd extensions are supported */
 #if defined(HAVE_SSE) || defined(HAVE_SSE2) || defined(HAVE_ALTIVEC) || \
      defined(HAVE_MIPS_PS) || defined(HAVE_AVX256D)
 #define HAVE_SIMD 1

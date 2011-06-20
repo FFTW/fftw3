@@ -18,11 +18,11 @@
  *
  */
 
-#include "simd.h"
+#include SIMD_HEADER
 
 #define VTW VTW3
 #define TWVL TWVL3
 #define LDW(x) LDA(x, 0, 0)
 
-#define GENUS X(rdft_hc2cbv_genus)
+#define GENUS XSIMD(rdft_hc2cbv_genus)
 extern const hc2c_genus GENUS;

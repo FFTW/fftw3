@@ -556,6 +556,10 @@ AC_CONFIG_FILES([
    rdft/scalar/r2cf/Makefile
    rdft/scalar/r2cb/Makefile
    rdft/scalar/r2r/Makefile
+   rdft/simd/Makefile
+   rdft/simd/common/Makefile
+   rdft/simd/sse2/Makefile
+   rdft/simd/avx256d/Makefile
 
    reodft/Makefile
 
