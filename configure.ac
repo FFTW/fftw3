@@ -200,45 +200,6 @@ dnl -----------------------------------------------------------------------
 dnl determine CFLAGS first
 AX_CC_MAXOPT
 
-# some additional FFTW-specific tweaks to the flags
-if test "$ac_test_CFLAGS" != "set"; then # if user didn't override CFLAGS
-    if test "x$CODELET_OPTIM" = x; then
-
-      case "${ax_cv_c_compiler_vendor}" in
-        gnu)
-            case "${host_cpu}" in
-	       # gcc's ``optimizations'' slow down everything on IA32.
-	       # (not to mention compiler bugs)
-               i?86*) CODELET_OPTIM=-O ;;
-            esac
-
-	    # disable certain other gcc ``optimizations'' that produce worse 
-	    # codelets
-	    AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns,
-		    [CODELET_OPTIM="$CODELET_OPTIM -fno-schedule-insns"])
-	    AX_CHECK_COMPILER_FLAGS(-fno-web,
-		    [CODELET_OPTIM="$CODELET_OPTIM -fno-web"])
-	    AX_CHECK_COMPILER_FLAGS(-fno-loop-optimize,
-		    [CODELET_OPTIM="$CODELET_OPTIM -fno-loop-optimize"])
-
-	    # The gcc-3.4 inliner is totally broken; it does not inline
-	    # small functions like VFMAI.
-	    AX_CHECK_COMPILER_FLAGS(
-		    [--param inline-unit-growth=1000],
-		    [CODELET_OPTIM="$CODELET_OPTIM --param inline-unit-growth=1000"])
-	    AX_CHECK_COMPILER_FLAGS(
-		    [--param large-function-growth=1000],
-		    [CODELET_OPTIM="$CODELET_OPTIM --param large-function-growth=1000"])
-            ;;
-
-        ibm) CODELET_OPTIM=-O;;
-
-      esac
-    fi
-fi
-
-AC_SUBST(CODELET_OPTIM)
-
 case "${ax_cv_c_compiler_vendor}" in
    intel) # Stop icc from defining __GNUC__, except on MacOS where this fails
         case "${host_os}" in
@@ -527,7 +488,6 @@ fi
 dnl -----------------------------------------------------------------------
 
 AC_DEFINE_UNQUOTED(FFTW_CC, "$CC $CFLAGS", [C compiler name and flags])
-AC_DEFINE_UNQUOTED(CODELET_OPTIM, "$CODELET_OPTIM", [extra CFLAGS for codelets])
 
 AC_CONFIG_FILES([
    Makefile
