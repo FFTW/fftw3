@@ -88,7 +88,7 @@ future releases.
 
 @code{configure} supports all the standard flags defined by the GNU
 Coding Standards; see the @code{INSTALL} file in FFTW or
-@uref{http://www.gnu.org/prep/standards_toc.html, the GNU web page}.
+@uref{http://www.gnu.org/prep/standards/html_node/index.html, the GNU web page}.
 Note especially @code{--help} to list all flags and
 @code{--enable-shared} to create shared, rather than static, libraries.
 @code{configure} also accepts a few FFTW-specific flags, particularly:
@@ -342,7 +342,7 @@ We do not expect casual users to employ the generator, which is a rather
 sophisticated program that generates directed acyclic graphs of FFT
 algorithms and performs algebraic simplifications on them.  It was
 written in Objective Caml, a dialect of ML, which is available at
-@uref{http://pauillac.inria.fr/ocaml/}.
+@uref{http://caml.inria.fr/ocaml/index.en.html}.
 @cindex Caml
 
 

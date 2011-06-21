@@ -34,7 +34,7 @@ opaque data structure called a ``communicator,'' the most common of
 which is the predefined communicator @code{MPI_COMM_WORLD} which
 refers to @emph{all} processes.  For more information on these and
 other concepts common to all MPI programs, we refer the reader to the
-documentation at @uref{http://www-unix.mcs.anl.gov/mpi/, the MPI home
+documentation at @uref{http://www.mcs.anl.gov/research/projects/mpi/, the MPI home
 page}.
 @cindex MPI communicator
 @ctindex MPI_COMM_WORLD

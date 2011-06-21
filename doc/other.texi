@@ -301,7 +301,7 @@ declare an array of arrays of pointers that point to appropriate places
 in the block.  That sort of trick is beyond the scope of this
 documentation; for more information on multi-dimensional arrays in C,
 see the @code{comp.lang.c}
-@uref{http://www.eskimo.com/~scs/C-faq/s6.html, FAQ}.
+@uref{http://c-faq.com/aryptr/dynmuldimary.html, FAQ}.
 
 @c ------------------------------------------------------------
 @node Words of Wisdom-Saving Plans, Caveats in Using Wisdom, Multi-dimensional Array Format, Other Important Topics

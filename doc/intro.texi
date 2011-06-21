@@ -50,7 +50,7 @@ information online.
 @c for more than one machine.  An extensive comparison of FFTW's
 @c performance with that of other Fourier transform codes has been made,
 @c and the results are available on the Web at
-@c @uref{http://fftw.org/~benchfft, the benchFFT home page}.
+@c @uref{http://fftw.org/benchfft, the benchFFT home page}.
 @c @cindex benchmark
 @c @fpindex benchfft
 
