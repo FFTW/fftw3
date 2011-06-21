@@ -1,14 +1,15 @@
 AM_CFLAGS = $(AVX_CFLAGS)
-noinst_LTLIBRARIES = librdft_avx_codelets.la
 SIMD_HEADER=simd-avx.h
 
 include $(top_srcdir)/rdft/simd/codlist.mk
 include $(top_srcdir)/rdft/simd/simd.mk
 
 if HAVE_AVX
-BUILT_SOURCES = $(EXTRA_DIST)
-endif
 
+noinst_LTLIBRARIES = librdft_avx_codelets.la
+BUILT_SOURCES = $(EXTRA_DIST)
 librdft_avx_codelets_la_SOURCES = $(BUILT_SOURCES)
+
+endif
 
 
