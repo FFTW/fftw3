@@ -264,7 +264,7 @@ dnl Determine SIMD CFLAGS at least for gcc
 if test "${ax_cv_c_compiler_vendor}" = "gnu"; then
     # SSE/SSE2
     if test "$have_sse2" = "yes" -a "x$SSE2_CFLAGS" = x; then
-        if test $PRECISION=d; then flag=msse2; else flag=msse; fi
+        if test "$PRECISION" = d; then flag=msse2; else flag=msse; fi
 	AX_CHECK_COMPILER_FLAGS(-$flag, [SSE2_CFLAGS="-$flag"],
 	    [AC_MSG_ERROR([Need a version of gcc with -$flag])])
     fi
