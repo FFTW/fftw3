@@ -110,17 +110,12 @@ AM_CONDITIONAL(HAVE_SSE2, test "$have_sse2" = "yes")
 
 AC_ARG_ENABLE(avx, [AC_HELP_STRING([--enable-avx],[enable AVX optimizations])], have_avx=$enableval, have_avx=no)
 if test "$have_avx" = "yes"; then
-	if test "$PRECISION" == "d"; then
-		AC_DEFINE(HAVE_AVX256D,1,[Define to enable double-precision AVX256.])
-		have_avx256d="yes"
-	elif test "$PRECISION" == "s"; then
-		AC_DEFINE(HAVE_AVX256S,1,[Define to enable single-precision AVX256.])
-		have_avx256s="yes"
-	else
-		AC_MSG_ERROR([Wrong AVX precision])
+        AC_DEFINE(HAVE_AVX,1,[Define to enable AVX optimizations.])
+	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+		AC_MSG_ERROR([AVX requires single or double precision])
 	fi
 fi
-AM_CONDITIONAL(HAVE_AVX256D, test "$have_avx256d" = "yes")
+AM_CONDITIONAL(HAVE_AVX, test "$have_avx" = "yes")
 
 AC_ARG_ENABLE(altivec, [AC_HELP_STRING([--enable-altivec],[enable Altivec optimizations])], have_altivec=$enableval, have_altivec=no)
 if test "$have_altivec" = "yes"; then
@@ -502,7 +497,7 @@ AC_CONFIG_FILES([
    dft/simd/Makefile
    dft/simd/common/Makefile
    dft/simd/sse2/Makefile
-   dft/simd/avx256d/Makefile
+   dft/simd/avx/Makefile
 
    rdft/Makefile
    rdft/scalar/Makefile
@@ -512,7 +507,7 @@ AC_CONFIG_FILES([
    rdft/simd/Makefile
    rdft/simd/common/Makefile
    rdft/simd/sse2/Makefile
-   rdft/simd/avx256d/Makefile
+   rdft/simd/avx/Makefile
 
    reodft/Makefile
 

@@ -45,8 +45,8 @@ void X(dft_conf_standard)(planner *p)
      if (X(have_simd_sse2)())
 	  X(solvtab_exec)(X(solvtab_dft_sse2), p);
 #endif
-#if HAVE_AVX256D
-     if (X(have_simd_avx256d)())
-	  X(solvtab_exec)(X(solvtab_dft_avx256d), p);
+#if HAVE_AVX
+     if (X(have_simd_avx)())
+	  X(solvtab_exec)(X(solvtab_dft_avx), p);
 #endif
 }

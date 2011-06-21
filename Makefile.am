@@ -26,9 +26,9 @@ SSE2_LIBS = dft/simd/sse2/libdft_sse2_codelets.la	\
 rdft/simd/sse2/librdft_sse2_codelets.la
 endif
 
-if HAVE_AVX256D
-AVX256D_LIBS = dft/simd/avx256d/libdft_avx256d_codelets.la	\
-rdft/simd/avx256d/librdft_avx256d_codelets.la
+if HAVE_AVX
+AVX_LIBS = dft/simd/avx/libdft_avx_codelets.la	\
+rdft/simd/avx/librdft_avx_codelets.la
 endif
 
 if SMP
@@ -51,7 +51,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	rdft/scalar/r2r/librdft_scalar_r2r.la		\
 	reodft/libreodft.la				\
 	api/libapi.la					\
-        $(SIMD_LIBS) $(SSE2_LIBS) $(AVX256D_LIBS)	\
+        $(SIMD_LIBS) $(SSE2_LIBS) $(AVX_LIBS)     	\
 	$(COMBINED_THREADLIBS)
 
 if QUAD

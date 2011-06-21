@@ -136,7 +136,7 @@ void X(khc2c_register)(planner *p, khc2c codelet, const hc2c_desc *desc,
 extern const solvtab X(solvtab_rdft_r2cf);
 extern const solvtab X(solvtab_rdft_r2cb);
 extern const solvtab X(solvtab_rdft_sse2);
-extern const solvtab X(solvtab_rdft_avx256d);
+extern const solvtab X(solvtab_rdft_avx);
 
 /* real-input & output DFT-like codelets (DHT, etc.) */
 typedef struct kr2r_desc_s kr2r_desc;

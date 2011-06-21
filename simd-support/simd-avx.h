@@ -19,10 +19,10 @@
  */
 
 #if defined(FFTW_SINGLE) || defined(FFTW_LDOUBLE) || defined(FFTW_QUAD)
-#error "AVX256D only works in double precision"
+#error "AVX only works in double precision"
 #endif
 
-#define SIMD_SUFFIX  _avx256d  /* for renaming */
+#define SIMD_SUFFIX  _avx  /* for renaming */
 #define VL 2            /* SIMD complex vector length */
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2)
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK

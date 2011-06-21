@@ -21,13 +21,13 @@
 
 #include "ifftw.h"
 
-#if HAVE_AVX256D
+#if HAVE_AVX
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
 
 #include "amd64-cpuid.h"
 
-int X(have_simd_avx256d)(void)
+int X(have_simd_avx)(void)
 {
        static int init = 0, res;
 
@@ -44,7 +44,7 @@ int X(have_simd_avx256d)(void)
 
 #include "x86-cpuid.h"
 
-int X(have_simd_avx256d)(void)
+int X(have_simd_avx)(void)
 {
        static int init = 0, res;
 
