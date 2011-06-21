@@ -70,6 +70,20 @@ typedef DS(__m128d,__m128) V;
 #endif
 
 #ifdef __GNUC__
+  /*
+   * gcc-3.3 generates slow code for mm_set_ps (write all elements to
+   * the stack and load __m128 from the stack).
+   *
+   * gcc-3.[34] generates slow code for mm_set_ps1 (load into low element
+   * and shuffle).
+   *
+   * This hack forces gcc to generate a constant __m128 at compile time.
+   */
+  union rvec {
+       R r[DS(2,4)];
+       V v;
+  };
+
 #  ifdef FFTW_SINGLE
 #    define DVK(var, val) V var = __extension__ ({ \
          static const union rvec _var = { {val,val,val,val} }; _var.v; })
@@ -82,11 +96,6 @@ typedef DS(__m128d,__m128) V;
 #  define DVK(var, val) const R var = K(val)
 #  define LDK(x) DS(_mm_set1_pd,_mm_set_ps1)(x)
 #endif
-
-union rvec {
-     R r[DS(2,4)];
-     V v;
-};
 
 union uvec {
      unsigned u[4];
@@ -117,8 +126,8 @@ static inline V LD(const R *x, INT ivs, const R *aligned_like)
      V var;
      (void)aligned_like; /* UNUSED */
 #  ifdef __GNUC__
-     /* We use inline asm because gcc generates slow code for
-	_mm_loadh_pi().  gcc insists upon having an existing variable for
+     /* We use inline asm because gcc-3.x generates slow code for
+	_mm_loadh_pi().  gcc-3.x insists upon having an existing variable for
 	VAL, which is however never used.  Thus, it generates code to move
 	values in and out the variable.  Worse still, gcc-4.0 stores VAL on
 	the stack, causing valgrind to complain about uninitialized reads. */  
