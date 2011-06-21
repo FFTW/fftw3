@@ -231,15 +231,17 @@ if test "${ax_cv_c_compiler_vendor}" = "gnu"; then
 	    [AC_MSG_ERROR([Need a version of gcc with -mavx])])
     fi
 
+    if test "$have_altivec" = "yes" -a "x$ALTIVEC_CFLAGS" = x; then
+     	# -DFAKE__VEC__ is a workaround because gcc-3.3 does not
+     	# #define __VEC__ with -maltivec.
+     	AX_CHECK_COMPILER_FLAGS(-faltivec, [ALTIVEC_CFLAGS="-faltivec"],
+     	    [AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
+     		[ALTIVEC_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
+     	        [AX_CHECK_COMPILER_FLAGS(-fvec, [ALTIVEC_CFLAGS="-fvec"],
+     		    [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
+    fi
+
     dnl FIXME:
-    dnl elif test "$have_altivec" = "yes"; then
-    dnl 	# -DFAKE__VEC__ is a workaround because gcc-3.3 does not
-    dnl 	# #define __VEC__ with -maltivec.
-    dnl 	AX_CHECK_COMPILER_FLAGS(-faltivec, [SIMD_CFLAGS="-faltivec"],
-    dnl 	    [AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
-    dnl 		[SIMD_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
-    dnl 	        [AX_CHECK_COMPILER_FLAGS(-fvec, [SIMD_CFLAGS="-fvec"],
-    dnl 		    [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
     dnl elif test "$have_mips_ps" = "yes"; then
     dnl     # Just punt here and use only new 4.2 compiler :(
     dnl 	# Should add section for older compilers...
@@ -256,6 +258,7 @@ fi
 
 AC_SUBST(SSE2_CFLAGS)
 AC_SUBST(AVX_CFLAGS)
+AC_SUBST(ALTIVEC_CFLAGS)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -498,6 +501,7 @@ AC_CONFIG_FILES([
    dft/simd/common/Makefile
    dft/simd/sse2/Makefile
    dft/simd/avx/Makefile
+   dft/simd/altivec/Makefile
 
    rdft/Makefile
    rdft/scalar/Makefile
@@ -508,6 +512,7 @@ AC_CONFIG_FILES([
    rdft/simd/common/Makefile
    rdft/simd/sse2/Makefile
    rdft/simd/avx/Makefile
+   rdft/simd/altivec/Makefile
 
    reodft/Makefile
 

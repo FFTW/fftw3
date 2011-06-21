@@ -112,8 +112,15 @@ typedef struct scanner_s scanner;
 /*-----------------------------------------------------------------------*/
 /* alloca: */
 #if HAVE_SIMD
-#define MIN_ALIGNMENT 32  /* best alignment for AVX, conservative for
-			   * everything else */
+#  ifdef HAVE_AVX
+#    define MIN_ALIGNMENT 32  /* best alignment for AVX, conservative for
+			       * everything else */
+#  else
+     /* Note that we cannot use 32-byte alignment for all SIMD.  For
+	example, MacOS X malloc is 16-byte aligned, but there was no
+	posix_memalign in MacOS X until version 10.6. */
+#    define MIN_ALIGNMENT 16
+#  endif
 #endif
 
 #if defined(HAVE_ALLOCA) && defined(FFTW_ENABLE_ALLOCA)
