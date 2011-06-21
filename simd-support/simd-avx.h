@@ -80,35 +80,42 @@ union rvec {
      V v;
 };
 
+#define LOADH(addr, val) _mm_loadh_pi(val, (const __m64 *)(addr))
+#define LOADL(addr, val) _mm_loadl_pi(val, (const __m64 *)(addr))
+#define STOREH(addr, val) _mm_storeh_pi((__m64 *)(addr), val)
+#define STOREL(addr, val) _mm_storel_pi((__m64 *)(addr), val)
+
+/* it seems like the only AVX way to store 4 complex floats is to
+   extract two pairs of complex floats into two __m128 registers, and
+   then use SSE-like half-stores.  Similarly, to load 4 complex
+   floats, we load two pairs of complex floats into two __m128
+   registers, and then pack the two __m128 registers into one __m256
+   value. */
 static inline V LD(const R *x, INT ivs, const R *aligned_like)
 {
-     /* FIXME: slow */
-     union rvec r;
+     __m128 l, h;
+     V v;
      (void)aligned_like; /* UNUSED */
-     r.r[0] = x[0];
-     r.r[1] = x[1];
-     r.r[2] = x[ivs];
-     r.r[3] = x[ivs+1];
-     r.r[4] = x[2*ivs];
-     r.r[5] = x[2*ivs+1];
-     r.r[6] = x[3*ivs];
-     r.r[7] = x[3*ivs+1];
-     return r.v;
+     l = LOADL(x, l);
+     l = LOADH(x + ivs, l);
+     h = LOADL(x + 2*ivs, h);
+     h = LOADH(x + 3*ivs, h);
+     v = _mm256_castps128_ps256(l);
+     v = _mm256_insertf128_ps(v, h, 1);
+     return v;
 }
 
 static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 {
-     union rvec r;
+     __m128 h = _mm256_extractf128_ps(v, 1);
+     __m128 l = _mm256_castps256_ps128(v);
      (void)aligned_like; /* UNUSED */
-     r.v = v;
-     x[0] = r.r[0];
-     x[1] = r.r[1];
-     x[ovs] = r.r[2];
-     x[ovs+1] = r.r[3];
-     x[2*ovs] = r.r[4];
-     x[2*ovs+1] = r.r[5];
-     x[3*ovs] = r.r[6];
-     x[3*ovs+1] = r.r[7];
+     /* WARNING: the extra_iter hack depends upon STOREL occurring
+	after STOREH */
+     STOREH(x + 3*ovs, h);
+     STOREL(x + 2*ovs, h);
+     STOREH(x + ovs, l);
+     STOREL(x, l);
 }
 
 #define STM2 ST
