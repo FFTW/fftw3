@@ -98,5 +98,6 @@ void X(kdft_difsq_register)(planner *p, kdftwsq codelet, const ct_desc *desc);
 extern const solvtab X(solvtab_dft_standard);
 extern const solvtab X(solvtab_dft_sse2);
 extern const solvtab X(solvtab_dft_avx);
+extern const solvtab X(solvtab_dft_altivec);
 
 #endif				/* __DFT_CODELET_H__ */
