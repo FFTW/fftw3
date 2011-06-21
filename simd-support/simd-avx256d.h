@@ -45,24 +45,52 @@ typedef __m256d V;
 #define VLIT(x0, x1, x2, x3) _mm256_set_pd(x0, x1, x2, x3)
 #define DVK(var, val) V var = VLIT(val, val, val, val)
 #define LDK(x) x
+#define SHUFVAL(fp0,fp1,fp2,fp3) \
+   (((fp3) << 3) | ((fp2) << 2) | ((fp1) << 1) | ((fp0)))
+
+static inline __m128d LOAD128(const R *x)
+{
+     /* gcc-4.6 miscompiles the combination _mm256_castpd128_pd256(LOAD128(x))
+	into a 256-bit vmovapd, which requires 32-byte aligment instead of
+	16-byte alignment.
+
+	icc-12.0.0 generates movaps, which is an SSE instruction and subject
+	to the AVX<->SSE transition penalty.  (What were they thinking?).
+
+	Force the use of vmovapd via asm until compilers stabilize.
+     */
+#if defined(__GNUC__) || (defined(__ICC) && defined(unix))
+     __m128d var;
+     __asm__("vmovapd %1, %0\n" : "=x"(var) : "m"(x[0]));
+     return var;
+#else
+     return *(const __m128d *)x;
+#endif
+}
+
+static inline void STORE128(R *x, __m128d var)
+{
+     /* icc-12.0.0 generates movaps, which is an SSE instruction and subject
+	to the AVX<->SSE transition penalty.
+
+	Force the use of vmovapd via asm.  Note that this instruction
+	ought to be combined with extractf128, but it isn't in the
+	current formulation. */
+#if (defined(__ICC) && defined(unix))
+     __asm__("vmovapd %0, %1\n" :: "x"(var), "m"(x[0]));
+#else
+     *(__m128d *)x = var;
+#endif
+}
 
 static inline V LD(const R *x, INT ivs, const R *aligned_like)
 {
      V var;
      (void)aligned_like; /* UNUSED */
-     /*     var = _mm256_castpd128_pd256(*(const __m128d *)x); */
-     var = _mm256_insertf128_pd(var, *(const __m128d *)(x), 0);
+     var = _mm256_castpd128_pd256(LOAD128(x));
      var = _mm256_insertf128_pd(var, *(const __m128d *)(x+ivs), 1);
      return var;
 }
-
-
-#define VFMA(a, b, c) VADD(c, VMUL(a, b))
-#define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
-#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
-
-#define SHUFVAL(fp0,fp1,fp2,fp3) \
-   (((fp3) << 3) | ((fp2) << 2) | ((fp1) << 1) | ((fp0)))
 
 static inline V LDA(const R *x, INT ivs, const R *aligned_like)
 {
@@ -77,7 +105,7 @@ static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
      /* WARNING: the extra_iter hack depends upon the store of the low
 	part occurring after the store of the high part */
      *(__m128d *)(x + ovs) = _mm256_extractf128_pd(v, 1);
-     *(__m128d *)(x) = _mm256_extractf128_pd(v, 0);
+     STORE128(x, _mm256_extractf128_pd(v, 0));
 }
 
 static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
@@ -156,9 +184,6 @@ static inline V VZMULIJ(V tx, V sr)
      return VADD(VMUL(tr, sr), ti);
 }
 
-#define VFMAI(b, c) VADD(c, VBYI(b))
-#define VFNMSI(b, c) VSUB(c, VBYI(b))
-
 /* twiddle storage #1: compact, slower */
 #define VTW1(v,x)  \
   {TW_COS, v, x}, {TW_SIN, v, x}, {TW_COS, v+1, x}, {TW_SIN, v+1, x}
@@ -219,6 +244,12 @@ static inline V BYTWJ2(const R *t, V sr)
 #define TWVLS (2 * VL)
 
 
+/* FMA macros */
+#define VFMA(a, b, c) VADD(c, VMUL(a, b))
+#define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
+#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
+#define VFMAI(b, c) VADD(c, VBYI(b))
+#define VFNMSI(b, c) VSUB(c, VBYI(b))
 #define VFMACONJ(b,c)  VADD(VCONJ(b),c)
 #define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
 #define VFNMSCONJ(b,c) VSUB(c, VCONJ(b))
