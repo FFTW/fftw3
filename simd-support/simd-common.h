@@ -23,9 +23,12 @@
    set of alignment contraints.  So this alignment stuff cannot be
    defined in the SIMD header files.  Rather than defining a separate
    set of "machine" header files, we just do this ugly ifdef here. */
-#if defined(HAVE_SSE2) || defined(HAVE_AVX256D)
-#define ALIGNMENT 16    /* Alignment for the LD/ST macros */
-#define ALIGNMENTA 16   /* Alignment for the LDA/STA macros */
+#if (defined(HAVE_SSE2) && !defined(FFTW_SINGLE)) || defined(HAVE_AVX256D)
+#  define ALIGNMENT 16    /* Alignment for the LD/ST macros */
+#  define ALIGNMENTA 16   /* Alignment for the LDA/STA macros */
+#elif defined(HAVE_SSE2) && defined(FFTW_SINGLE)
+#  define ALIGNMENT 8    /* Alignment for the LD/ST macros */
+#  define ALIGNMENTA 16   /* Alignment for the LDA/STA macros */
 #endif
 
 #if HAVE_SIMD
