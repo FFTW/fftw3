@@ -1,3 +1,5 @@
+* Add support for the AVX extensions to the x86 ISA.
+
 * Removed support for the Cell Broadband Engine.
 
 * New function fftw_cost to return FFTW's internal cost metric for 
