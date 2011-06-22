@@ -216,45 +216,47 @@ case "${ax_cv_c_compiler_vendor}" in
         ;;
 esac
 
-dnl Determine SIMD CFLAGS at least for gcc
-if test "${ax_cv_c_compiler_vendor}" = "gnu"; then
-    # SSE/SSE2
-    if test "$have_sse2" = "yes" -a "x$SSE2_CFLAGS" = x; then
-        if test "$PRECISION" = d; then flag=msse2; else flag=msse; fi
-	AX_CHECK_COMPILER_FLAGS(-$flag, [SSE2_CFLAGS="-$flag"],
-	    [AC_MSG_ERROR([Need a version of gcc with -$flag])])
-    fi
+dnl Determine SIMD CFLAGS at least for gcc and icc
+case "${ax_cv_c_compiler_vendor}" in
+    gnu|intel)
+	# SSE/SSE2
+	if test "$have_sse2" = "yes" -a "x$SSE2_CFLAGS" = x; then
+	    if test "$PRECISION" = d; then flag=msse2; else flag=msse; fi
+	    AX_CHECK_COMPILER_FLAGS(-$flag, [SSE2_CFLAGS="-$flag"],
+		[AC_MSG_ERROR([Need a version of gcc with -$flag])])
+	fi
 
-    # AVX
-    if test "$have_avx" = "yes" -a "x$AVX_CFLAGS" = x; then
-	AX_CHECK_COMPILER_FLAGS(-mavx, [AVX_CFLAGS="-mavx"],
-	    [AC_MSG_ERROR([Need a version of gcc with -mavx])])
-    fi
+	# AVX
+	if test "$have_avx" = "yes" -a "x$AVX_CFLAGS" = x; then
+	    AX_CHECK_COMPILER_FLAGS(-mavx, [AVX_CFLAGS="-mavx"],
+		[AC_MSG_ERROR([Need a version of gcc with -mavx])])
+	fi
 
-    if test "$have_altivec" = "yes" -a "x$ALTIVEC_CFLAGS" = x; then
-     	# -DFAKE__VEC__ is a workaround because gcc-3.3 does not
-     	# #define __VEC__ with -maltivec.
-     	AX_CHECK_COMPILER_FLAGS(-faltivec, [ALTIVEC_CFLAGS="-faltivec"],
-     	    [AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
-     		[ALTIVEC_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
-     	        [AX_CHECK_COMPILER_FLAGS(-fvec, [ALTIVEC_CFLAGS="-fvec"],
-     		    [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
-    fi
+	if test "$have_altivec" = "yes" -a "x$ALTIVEC_CFLAGS" = x; then
+	    # -DFAKE__VEC__ is a workaround because gcc-3.3 does not
+	    # #define __VEC__ with -maltivec.
+	    AX_CHECK_COMPILER_FLAGS(-faltivec, [ALTIVEC_CFLAGS="-faltivec"],
+		[AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
+		    [ALTIVEC_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
+		    [AX_CHECK_COMPILER_FLAGS(-fvec, [ALTIVEC_CFLAGS="-fvec"],
+			[AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
+	fi
 
-    dnl FIXME:
-    dnl elif test "$have_mips_ps" = "yes"; then
-    dnl     # Just punt here and use only new 4.2 compiler :(
-    dnl 	# Should add section for older compilers...
-    dnl 	AX_CHECK_COMPILER_FLAGS(-mpaired-single,
-    dnl 	    [SIMD_CFLAGS="-mpaired-single"],
-    dnl 	    #[AC_MSG_ERROR([Need a version of gcc with -mpaired-single])])
-    dnl 	    [AX_CHECK_COMPILER_FLAGS(-march=mips64,
-    dnl 	      [SIMD_CFLAGS="-march=mips64"],
-    dnl 	        [AC_MSG_ERROR(
-    dnl 		 [Need a version of gcc with -mpaired-single or -march=mips64])
-    dnl 		])])
-    dnl fi
-fi
+	dnl FIXME:
+	dnl elif test "$have_mips_ps" = "yes"; then
+	dnl     # Just punt here and use only new 4.2 compiler :(
+	dnl 	# Should add section for older compilers...
+	dnl 	AX_CHECK_COMPILER_FLAGS(-mpaired-single,
+	dnl 	    [SIMD_CFLAGS="-mpaired-single"],
+	dnl 	    #[AC_MSG_ERROR([Need a version of gcc with -mpaired-single])])
+	dnl 	    [AX_CHECK_COMPILER_FLAGS(-march=mips64,
+	dnl 	      [SIMD_CFLAGS="-march=mips64"],
+	dnl 	        [AC_MSG_ERROR(
+	dnl 		 [Need a version of gcc with -mpaired-single or -march=mips64])
+	dnl 		])])
+	dnl fi
+	;;
+esac
 
 AC_SUBST(SSE2_CFLAGS)
 AC_SUBST(AVX_CFLAGS)

@@ -75,10 +75,6 @@ static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
 }
 
 #if FFTW_SINGLE
-union rvec {
-     R r[8];
-     V v;
-};
 
 #define LOADH(addr, val) _mm_loadh_pi(val, (const __m64 *)(addr))
 #define LOADL(addr, val) _mm_loadl_pi(val, (const __m64 *)(addr))
@@ -121,35 +117,39 @@ static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 #define STM2 ST
 #define STN2(x, v0, v1, ovs) /* nop */
 
-static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
-{
-     union rvec r;
-     (void)aligned_like; /* UNUSED */
-     r.v = v;
-     x[0*ovs] = r.r[0];
-     x[1*ovs] = r.r[1];
-     x[2*ovs] = r.r[2];
-     x[3*ovs] = r.r[3];
-     x[4*ovs] = r.r[4];
-     x[5*ovs] = r.r[5];
-     x[6*ovs] = r.r[6];
-     x[7*ovs] = r.r[7];
+#define STM4(x, v, ovs, aligned_like) /* no-op */
+#define STN4(x, v0, v1, v2, v3, ovs)				\
+{								\
+     V xxx0, xxx1, xxx2, xxx3;					\
+     V yyy0, yyy1, yyy2, yyy3;					\
+     xxx0 = _mm256_unpacklo_ps(v0, v2);				\
+     xxx1 = _mm256_unpackhi_ps(v0, v2);				\
+     xxx2 = _mm256_unpacklo_ps(v1, v3);				\
+     xxx3 = _mm256_unpackhi_ps(v1, v3);				\
+     yyy0 = _mm256_unpacklo_ps(xxx0, xxx2);			\
+     yyy1 = _mm256_unpackhi_ps(xxx0, xxx2);			\
+     yyy2 = _mm256_unpacklo_ps(xxx1, xxx3);			\
+     yyy3 = _mm256_unpackhi_ps(xxx1, xxx3);			\
+     *(__m128 *)(x + 0 * ovs) = _mm256_castps256_ps128(yyy0);	\
+     *(__m128 *)(x + 4 * ovs) = _mm256_extractf128_ps(yyy0, 1);	\
+     *(__m128 *)(x + 1 * ovs) = _mm256_castps256_ps128(yyy1);	\
+     *(__m128 *)(x + 5 * ovs) = _mm256_extractf128_ps(yyy1, 1);	\
+     *(__m128 *)(x + 2 * ovs) = _mm256_castps256_ps128(yyy2);	\
+     *(__m128 *)(x + 6 * ovs) = _mm256_extractf128_ps(yyy2, 1);	\
+     *(__m128 *)(x + 3 * ovs) = _mm256_castps256_ps128(yyy3);	\
+     *(__m128 *)(x + 7 * ovs) = _mm256_extractf128_ps(yyy3, 1);	\
 }
-#define STN4(x, v0, v1, v2, v3, ovs)  /* nop */
 
 #else
-static inline __m128d LOAD128(const R *x)
+static inline __m128d VMOVAPD_LD(const R *x)
 {
-     /* gcc-4.6 miscompiles the combination _mm256_castpd128_pd256(LOAD128(x))
+     /* gcc-4.6 miscompiles the combination _mm256_castpd128_pd256(VMOVAPD_LD(x))
 	into a 256-bit vmovapd, which requires 32-byte aligment instead of
 	16-byte alignment.
 
-	icc-12.0.0 generates movaps, which is an SSE instruction and subject
-	to the AVX<->SSE transition penalty.  (What were they thinking?).
-
 	Force the use of vmovapd via asm until compilers stabilize.
      */
-#if defined(__GNUC__) || (defined(__ICC) && defined(unix))
+#if defined(__GNUC__)
      __m128d var;
      __asm__("vmovapd %1, %0\n" : "=x"(var) : "m"(x[0]));
      return var;
@@ -158,26 +158,11 @@ static inline __m128d LOAD128(const R *x)
 #endif
 }
 
-static inline void STORE128(R *x, __m128d var)
-{
-     /* icc-12.0.0 generates movaps, which is an SSE instruction and subject
-	to the AVX<->SSE transition penalty.
-
-	Force the use of vmovapd via asm.  Note that this instruction
-	ought to be combined with extractf128, but it isn't in the
-	current formulation. */
-#if (defined(__ICC) && defined(unix))
-     __asm__("vmovapd %0, %1\n" :: "x"(var), "m"(x[0]));
-#else
-     *(__m128d *)x = var;
-#endif
-}
-
 static inline V LD(const R *x, INT ivs, const R *aligned_like)
 {
      V var;
      (void)aligned_like; /* UNUSED */
-     var = _mm256_castpd128_pd256(LOAD128(x));
+     var = _mm256_castpd128_pd256(VMOVAPD_LD(x));
      var = _mm256_insertf128_pd(var, *(const __m128d *)(x+ivs), 1);
      return var;
 }
@@ -188,7 +173,7 @@ static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
      /* WARNING: the extra_iter hack depends upon the store of the low
 	part occurring after the store of the high part */
      *(__m128d *)(x + ovs) = _mm256_extractf128_pd(v, 1);
-     STORE128(x, _mm256_extractf128_pd(v, 0));
+     *(__m128d *)x = _mm256_castpd256_pd128(v);
 }
 
 
