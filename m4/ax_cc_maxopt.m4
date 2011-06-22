@@ -80,37 +80,11 @@ if test "$ac_test_CFLAGS" != "set"; then
             CFLAGS="$CFLAGS $icc_ansi_alias"
         fi
 	AX_CHECK_COMPILER_FLAGS(-malign-double, CFLAGS="$CFLAGS -malign-double")
-	if test "x$acx_maxopt_portable" = xno; then
-	  icc_archflag=unknown
-	  icc_flags=""
-	  # -xN etcetera are for older versions of icc:
-	  case $host_cpu in
-	    i686*|x86_64*)
-              # icc accepts gcc assembly syntax, so these should work:
-	      AX_GCC_X86_CPUID(0)
-              AX_GCC_X86_CPUID(1)
-	      case $ax_cv_gcc_x86_cpuid_0 in # see AX_GCC_ARCHFLAG
-                *:756e6547:*:*) # Intel
-                  case $ax_cv_gcc_x86_cpuid_1 in
-                    *6a?:*[[234]]:*:*|*6[[789b]]?:*:*:*) icc_flags="-xK";;
-                    *f3[[347]]:*:*:*|*f4[1347]:*:*:*) icc_flags="-xP -xN -xW -xK";;
-                    *f??:*:*:*) icc_flags="-xN -xW -xK";;
-                  esac ;;
-              esac ;;
-          esac
-          # newer icc versions should support -xHost
-	  icc_flags="-xHost $icc_flags"
-          if test "x$icc_flags" != x; then
-            for flag in $icc_flags; do
-              AX_CHECK_COMPILER_FLAGS($flag, [icc_archflag=$flag; break])
-            done
-          fi
-          AC_MSG_CHECKING([for icc architecture flag])
-	  AC_MSG_RESULT($icc_archflag)
-          if test "x$icc_archflag" != xunknown; then
-            CFLAGS="$CFLAGS $icc_archflag"
-          fi
-        fi
+	# We used to check for architecture flags here, e.g. -xHost etc.,
+	# but these flags are problematic.  On icc-12.0.0, "-mavx -xHost"
+	# overrides -mavx with -xHost, generating SSE2 code instead of AVX
+	# code.  ICC does not seem to support -mtune=host or equivalent
+	# non-ABI changing flag.
 	;;
     
     gnu) 
