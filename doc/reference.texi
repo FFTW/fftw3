@@ -161,6 +161,25 @@ the output of @code{fftw_malloc} to whatever pointer type you are
 allocating.
 @cindex C++
 
+
+We also provide the following two convenience functions to allocate
+real and complex arrays with @code{n} elements, which are equivalent
+to @code{(double *) fftw_malloc(sizeof(double) * n)} and
+@code{(fftw_complex *) fftw_malloc(sizeof(fftw_complex) * n)},
+respectively:
+
+@example
+double *fftw_alloc_real(size_t n);
+fftw_complex *fftw_alloc_complex(size_t n);
+@end example
+@findex fftw_alloc_real
+@findex fftw_alloc_complex
+
+The equivalent functions in other precisions allocate arrays of @code{n}
+elements in that precision.  e.g. @code{fftwf_alloc_real(n)} is
+equivalent to @code{(float *) fftwf_malloc(sizeof(float) * n)}.
+@cindex precision
+
 @c ------------------------------------------------------------
 @node Using Plans, Basic Interface, Data Types and Files, FFTW Reference
 @section Using Plans
