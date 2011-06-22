@@ -61,13 +61,13 @@ typedef DS(__m128d,__m128) V;
 #define UNPCKL SUFF(_mm_unpacklo_p)
 #define UNPCKH SUFF(_mm_unpackhi_p)
 
-#ifdef FFTW_SINGLE
-#  define STOREH(addr, val) _mm_storeh_pi((__m64 *)(addr), val)
-#  define STOREL(addr, val) _mm_storel_pi((__m64 *)(addr), val)
-#else
-#  define STOREH _mm_storeh_pd
-#  define STOREL _mm_storel_pd
-#endif
+#define SHUFVALS(fp0,fp1,fp2,fp3) \
+   (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
+
+#define VDUPL(x) DS(UNPCKL(x, x), SHUF(x, x, SHUFVALS(0, 0, 2, 2)))
+#define VDUPH(x) DS(UNPCKH(x, x), SHUF(x, x, SHUFVALS(1, 1, 3, 3)))
+#define STOREH(a, v) DS(_mm_storeh_pd(a, v), _mm_storeh_pi((__m64 *)(a), v))
+#define STOREL(a, v) DS(_mm_storel_pd(a, v), _mm_storel_pi((__m64 *)(a), v))
 
 #ifdef __GNUC__
   /*
@@ -101,9 +101,6 @@ union uvec {
      unsigned u[4];
      V v;
 };
-
-#define SHUFVAL(fp0,fp1,fp2,fp3) \
-   (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
 static inline V LDA(const R *x, INT ivs, const R *aligned_like)
 {
@@ -190,7 +187,7 @@ static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 
 static inline V FLIP_RI(V x)
 {
-     return SHUF(x, x, DS(1, SHUFVAL(1, 0, 3, 2)));
+     return SHUF(x, x, DS(1, SHUFVALS(1, 0, 3, 2)));
 }
 
 extern const union uvec X(sse2_pm);
@@ -206,18 +203,10 @@ static inline V VBYI(V x)
      return x;
 }
 
-#ifdef FFTW_SINGLE
-#  define UNPCKR(x) SHUF(x, x, SHUFVAL(0, 0, 2, 2))
-#  define UNPCKI(x) SHUF(x, x, SHUFVAL(1, 1, 3, 3))
-#else
-#  define UNPCKR(x) UNPCKL(x, x)
-#  define UNPCKI(x) UNPCKH(x, x)
-#endif
-
 static inline V VZMUL(V tx, V sr)
 {
-     V tr = UNPCKR(tx);
-     V ti = UNPCKI(tx);
+     V tr = VDUPL(tx);
+     V ti = VDUPH(tx);
      tr = VMUL(sr, tr);
      sr = VBYI(sr);
      return VADD(tr, VMUL(ti, sr));
@@ -225,8 +214,8 @@ static inline V VZMUL(V tx, V sr)
 
 static inline V VZMULJ(V tx, V sr)
 {
-     V tr = UNPCKR(tx);
-     V ti = UNPCKI(tx);
+     V tr = VDUPL(tx);
+     V ti = VDUPH(tx);
      tr = VMUL(sr, tr);
      sr = VBYI(sr);
      return VSUB(tr, VMUL(ti, sr));
@@ -234,8 +223,8 @@ static inline V VZMULJ(V tx, V sr)
 
 static inline V VZMULI(V tx, V sr)
 {
-     V tr = UNPCKR(tx);
-     V ti = UNPCKI(tx);
+     V tr = VDUPL(tx);
+     V ti = VDUPH(tx);
      ti = VMUL(ti, sr);
      sr = VBYI(sr);
      return VSUB(VMUL(tr, sr), ti);
@@ -243,8 +232,8 @@ static inline V VZMULI(V tx, V sr)
 
 static inline V VZMULIJ(V tx, V sr)
 {
-     V tr = UNPCKR(tx);
-     V ti = UNPCKI(tx);
+     V tr = VDUPL(tx);
+     V ti = VDUPH(tx);
      ti = VMUL(ti, sr);
      sr = VBYI(sr);
      return VADD(VMUL(tr, sr), ti);
