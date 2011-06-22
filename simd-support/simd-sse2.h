@@ -69,6 +69,7 @@ typedef DS(__m128d,__m128) V;
 #define STOREH(a, v) DS(_mm_storeh_pd(a, v), _mm_storeh_pi((__m64 *)(a), v))
 #define STOREL(a, v) DS(_mm_storel_pd(a, v), _mm_storel_pi((__m64 *)(a), v))
 
+
 #ifdef __GNUC__
   /*
    * gcc-3.3 generates slow code for mm_set_ps (write all elements to
@@ -184,7 +185,6 @@ static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 #  define STN4(x, v0, v1, v2, v3, ovs) /* nothing */
 #endif
 
-
 static inline V FLIP_RI(V x)
 {
      return SHUF(x, x, DS(1, SHUFVALS(1, 0, 3, 2)));
@@ -203,13 +203,23 @@ static inline V VBYI(V x)
      return x;
 }
 
+/* FMA support */
+#define VFMA(a, b, c) VADD(c, VMUL(a, b))
+#define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
+#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
+#define VFMAI(b, c) VADD(c, VBYI(b))
+#define VFNMSI(b, c) VSUB(c, VBYI(b))
+#define VFMACONJ(b,c)  VADD(VCONJ(b),c)
+#define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
+#define VFNMSCONJ(b,c) VSUB(c, VCONJ(b))
+
 static inline V VZMUL(V tx, V sr)
 {
      V tr = VDUPL(tx);
      V ti = VDUPH(tx);
      tr = VMUL(sr, tr);
      sr = VBYI(sr);
-     return VADD(tr, VMUL(ti, sr));
+     return VFMA(ti, sr, tr);
 }
 
 static inline V VZMULJ(V tx, V sr)
@@ -218,7 +228,7 @@ static inline V VZMULJ(V tx, V sr)
      V ti = VDUPH(tx);
      tr = VMUL(sr, tr);
      sr = VBYI(sr);
-     return VSUB(tr, VMUL(ti, sr));
+     return VFNMS(ti, sr, tr);
 }
 
 static inline V VZMULI(V tx, V sr)
@@ -227,7 +237,7 @@ static inline V VZMULI(V tx, V sr)
      V ti = VDUPH(tx);
      ti = VMUL(ti, sr);
      sr = VBYI(sr);
-     return VSUB(VMUL(tr, sr), ti);
+     return VFMS(tr, sr, ti);
 }
 
 static inline V VZMULIJ(V tx, V sr)
@@ -236,7 +246,7 @@ static inline V VZMULIJ(V tx, V sr)
      V ti = VDUPH(tx);
      ti = VMUL(ti, sr);
      sr = VBYI(sr);
-     return VADD(VMUL(tr, sr), ti);
+     return VFMA(tr, sr, ti);
 }
 
 /* twiddle storage #1: compact, slower */
@@ -251,7 +261,7 @@ static inline V BYTW1(const R *t, V sr)
      V ti = UNPCKH(tx, tx);
      tr = VMUL(tr, sr);
      sr = VBYI(sr);
-     return VADD(tr, VMUL(ti, sr));
+     return VFMA(ti, sr, tr);
 }
 static inline V BYTWJ1(const R *t, V sr)
 {
@@ -261,7 +271,7 @@ static inline V BYTWJ1(const R *t, V sr)
      V ti = UNPCKH(tx, tx);
      tr = VMUL(tr, sr);
      sr = VBYI(sr);
-     return VSUB(tr, VMUL(ti, sr));
+     return VFNMS(ti, sr, tr);
 }
 #else /* !FFTW_SINGLE */
 #  define VTW1(v,x) {TW_CEXP, v, x}
@@ -293,14 +303,14 @@ static inline V BYTW2(const R *t, V sr)
      const V *twp = (const V *)t;
      V si = FLIP_RI(sr);
      V tr = twp[0], ti = twp[1];
-     return VADD(VMUL(tr, sr), VMUL(ti, si));
+     return VFMA(tr, sr, VMUL(ti, si));
 }
 static inline V BYTWJ2(const R *t, V sr)
 {
      const V *twp = (const V *)t;
      V si = FLIP_RI(sr);
      V tr = twp[0], ti = twp[1];
-     return VSUB(VMUL(tr, sr), VMUL(ti, si));
+     return VFNMS(ti, si, VMUL(tr, sr));
 }
 
 /* twiddle storage #3 */
@@ -322,16 +332,6 @@ static inline V BYTWJ2(const R *t, V sr)
     {TW_COS, v, x}, {TW_COS, v+1, x}, {TW_SIN, v, x}, {TW_SIN, v+1, x}
 #endif
 #define TWVLS (2 * VL)
-
-/* FMA macros */
-#define VFMA(a, b, c) VADD(c, VMUL(a, b))
-#define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
-#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
-#define VFMAI(b, c) VADD(c, VBYI(b))
-#define VFNMSI(b, c) VSUB(c, VBYI(b))
-#define VFMACONJ(b,c)  VADD(VCONJ(b),c)
-#define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
-#define VFNMSCONJ(b,c) VSUB(c, VCONJ(b))
 
 #define VLEAVE() /* nothing */
 

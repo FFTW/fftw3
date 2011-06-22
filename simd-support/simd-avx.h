@@ -213,22 +213,32 @@ static inline V VBYI(V x)
      return FLIP_RI(VCONJ(x));
 }
 
+/* FMA support */
+#define VFMA(a, b, c) VADD(c, VMUL(a, b))
+#define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
+#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
+#define VFMAI(b, c) VADD(c, VBYI(b))
+#define VFNMSI(b, c) VSUB(c, VBYI(b))
+#define VFMACONJ(b,c)  VADD(VCONJ(b),c)
+#define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
+#define VFNMSCONJ(b,c) VSUB(c, VCONJ(b))
+
 static inline V VZMUL(V tx, V sr)
 {
      V tr = VDUPL(tx);
      V ti = VDUPH(tx);
-     tr = VMUL(tr, sr);
+     tr = VMUL(sr, tr);
      sr = VBYI(sr);
-     return VADD(tr, VMUL(ti, sr));
+     return VFMA(ti, sr, tr);
 }
 
 static inline V VZMULJ(V tx, V sr)
 {
      V tr = VDUPL(tx);
      V ti = VDUPH(tx);
-     tr = VMUL(tr, sr);
+     tr = VMUL(sr, tr);
      sr = VBYI(sr);
-     return VSUB(tr, VMUL(ti, sr));
+     return VFNMS(ti, sr, tr);
 }
 
 static inline V VZMULI(V tx, V sr)
@@ -237,7 +247,7 @@ static inline V VZMULI(V tx, V sr)
      V ti = VDUPH(tx);
      ti = VMUL(ti, sr);
      sr = VBYI(sr);
-     return VSUB(VMUL(tr, sr), ti);
+     return VFMS(tr, sr, ti);
 }
 
 static inline V VZMULIJ(V tx, V sr)
@@ -246,7 +256,7 @@ static inline V VZMULIJ(V tx, V sr)
      V ti = VDUPH(tx);
      ti = VMUL(ti, sr);
      sr = VBYI(sr);
-     return VADD(VMUL(tr, sr), ti);
+     return VFMA(tr, sr, ti);
 }
 
 /* twiddle storage #1: compact, slower */
@@ -286,7 +296,7 @@ static inline V BYTW2(const R *t, V sr)
      const V *twp = (const V *)t;
      V si = FLIP_RI(sr);
      V tr = twp[0], ti = twp[1];
-     return VADD(VMUL(tr, sr), VMUL(ti, si));
+     return VFMA(tr, sr, VMUL(ti, si));
 }
 
 static inline V BYTWJ2(const R *t, V sr)
@@ -294,7 +304,7 @@ static inline V BYTWJ2(const R *t, V sr)
      const V *twp = (const V *)t;
      V si = FLIP_RI(sr);
      V tr = twp[0], ti = twp[1];
-     return VSUB(VMUL(tr, sr), VMUL(ti, si));
+     return VFNMS(ti, si, VMUL(tr, sr));
 }
 
 /* twiddle storage #3 */
@@ -316,19 +326,9 @@ static inline V BYTWJ2(const R *t, V sr)
 #define TWVLS (2 * VL)
 
 
-/* FMA macros */
-#define VFMA(a, b, c) VADD(c, VMUL(a, b))
-#define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
-#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
-#define VFMAI(b, c) VADD(c, VBYI(b))
-#define VFNMSI(b, c) VSUB(c, VBYI(b))
-#define VFMACONJ(b,c)  VADD(VCONJ(b),c)
-#define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
-#define VFNMSCONJ(b,c) VSUB(c, VCONJ(b))
-
-/* User VZEROUPPER to avoid the penalty of switching from AVX to
-   SSE.   See Intel Optimization Manual (April 2011, version 248966),
-   Section 11.3 */
+/* Use VZEROUPPER to avoid the penalty of switching from AVX to SSE.
+   See Intel Optimization Manual (April 2011, version 248966), Section
+   11.3 */
 #define VLEAVE _mm256_zeroupper
 
 #include "simd-common.h"
