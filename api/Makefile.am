@@ -1,7 +1,9 @@
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft		\
 -I$(top_srcdir)/rdft -I$(top_srcdir)/reodft
 
-include_HEADERS = fftw3.h fftw3.f
+EXTRA_DIST = f03api.sh genf03.pl
+
+include_HEADERS = fftw3.h fftw3.f fftw3.f03
 noinst_LTLIBRARIES = libapi.la
 
 # pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@
@@ -30,15 +32,22 @@ plan-guru64-dft-r2c.c plan-guru64-dft.c plan-guru64-r2r.c		\
 plan-guru64-split-dft-c2r.c plan-guru64-split-dft-r2c.c			\
 plan-guru64-split-dft.c mktensor-iodims64.c
 
-BUILT_SOURCES = fftw3.f
+BUILT_SOURCES = fftw3.f fftw3.f03.in fftw3.f03
+
+fftw3.f03: fftw3.f03.in
+	(echo "  integer, parameter :: C_FFTW_R2R_KIND = @C_FFTW_R2R_KIND@"; \
+         cat $(srcdir)/fftw3.f03.in) > $@
 
 if MAINTAINER_MODE
 
 # convert constants to F77 PARAMETER statements
 fftw3.f: fftw3.h
 	rm -f $@
-	perl -pe 's/([A-Z0-9_]+)=([0-9]+)/\n      INTEGER \1\n      PARAMETER (\1=\2)\n/g' $< |egrep 'PARAMETER|INTEGER' > $@
+	perl -pe 's/([A-Z0-9_]+)=([+-]?[0-9]+)/\n      INTEGER \1\n      PARAMETER (\1=\2)\n/g' $< |egrep 'PARAMETER|INTEGER' > $@
 	perl -pe 's/#define +([A-Z0-9_]+) +\(([+-]?[0-9]+)U?\)/\n      INTEGER \1\n      PARAMETER (\1=\2)\n/g' $< |egrep 'PARAMETER|INTEGER' >> $@
 	perl -pe 'if (/#define +([A-Z0-9_]+) +\(([0-9]+)U? *<< *([0-9]+)\)/) { print "\n      INTEGER $$1\n      PARAMETER ($$1=",$$2 << $$3,")\n"; }' $< |egrep 'PARAMETER|INTEGER' >> $@
+
+fftw3.f03.in: fftw3.h f03api.sh genf03.pl
+	$(srcdir)/f03api.sh > $@
 
 endif # MAINTAINER_MODE

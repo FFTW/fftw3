@@ -187,8 +187,10 @@ plan, simply pass the dimensions of the array to the planner in
 @code{N x M x L} matrix in column-major order, you should pass the
 dimensions of the array as if it were an @code{L x M x N} matrix
 (which it is, from the perspective of FFTW).  This is done for you
-@emph{automatically} by the FFTW Fortran interface
-(@pxref{Calling FFTW from Fortran}).
+@emph{automatically} by the FFTW legacy-Fortran interface
+(@pxref{Calling FFTW from Legacy Fortran}), but you must do it
+manually with the modern Fortran interface (@pxref{Reversing array
+dimensions}).
 @cindex Fortran interface
 
 @c =========>

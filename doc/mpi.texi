@@ -1,4 +1,4 @@
-@node Distributed-memory FFTW with MPI, Calling FFTW from Fortran, Multi-threaded FFTW, Top
+@node Distributed-memory FFTW with MPI, Calling FFTW from Modern Fortran, Multi-threaded FFTW, Top
 @chapter Distributed-memory FFTW with MPI
 @cindex MPI
 

@@ -178,8 +178,8 @@ Installation}.
 
 @item
 @cindex Fortran-callable wrappers
-@code{--disable-fortran}: Disables inclusion of Fortran-callable
-wrapper routines (@pxref{Calling FFTW from Fortran}) in the standard
+@code{--disable-fortran}: Disables inclusion of legacy-Fortran
+wrapper routines (@pxref{Calling FFTW from Legacy Fortran}) in the standard
 FFTW libraries.  These wrapper routines increase the library size by
 only a negligible amount, so they are included by default as long as
 the @code{configure} script finds a Fortran compiler on your system.

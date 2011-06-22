@@ -1,0 +1,222 @@
+@node Calling FFTW from Modern Fortran, Calling FFTW from Legacy Fortran, Distributed-memory FFTW with MPI, Top
+@chapter Calling FFTW from Modern Fortran
+@cindex Fortran interface
+
+Fortran 2003 standardized ways for Fortran code to call C libraries,
+and this allows us to support a direct translation of the FFTW C API
+into Fortran.  Compared to the legacy Fortran 77 interface
+(@pxref{Calling FFTW from Legacy Fortran}), this direct interface
+offers many advantages, especially compile-time type-checking and
+aligned memory allocation.  As of this writing, support for these C
+interoperability features seems widespread, having been implemented in
+nearly all major Fortran compilers (e.g. GNU, Intel, IBM,
+Oracle/Solaris, Portland Group, NAG).
+@cindex portability
+
+This chapter documents that interface.  For the most part, since this
+interface allows Fortran to call the C interface directly, the usage
+is identical to C translated to Fortran syntax.  However, there are a
+few subtle points such as memory allocation, wisdom, and data types
+that deserve closer attention.
+
+@menu
+* Overview of Fortran interface::
+* Reversing array dimensions::
+* FFTW Fortran type reference::
+* Plan execution in Fortran::
+* Allocating aligned memory in Fortran::
+* Accessing the wisdom API from Fortran::
+* FFTW Fortran examples::
+* Defining an FFTW module::
+@end menu
+
+@c -------------------------------------------------------
+@node Overview of Fortran interface, Reversing array dimensions, Calling FFTW from Modern Fortran, Calling FFTW from Modern Fortran
+@section Overview of Fortran interface
+
+FFTW provides a file @code{fftw3.f03} that defines Fortran 2003
+interfaces for all of its C routines, except for the MPI routines
+described elsewhere, which can be found in the same directory as
+@code{fftw3.h} (the C header file).  In any Fortran subroutine where
+you want to use FFTW functions, you should begin with:
+
+@example
+  use, intrinsic :: iso_c_binding 
+  include 'fftw3.f03'
+@end example
+
+This includes the interface definitions and the standard
+@code{iso_c_binding} module (which defines the equivalents of C
+types).  You can also put the FFTW functions into a module if you
+prefer (@pxref{Defining an FFTW module}).
+
+At this point, you can now call anything in the FFTW C interface
+directly, almost exactly as in C other than minor changes in syntax.
+For example:
+
+@example
+  type(C_PTR) :: plan
+  complex(C_DOUBLE_COMPLEX), dimension(1024,1000) :: in, out
+  plan = fftw_plan_dft_2d(1000,1024, in,out, FFTW_FORWARD,FFTW_ESTIMATE)
+  ...
+  call fftw_execute_dft(plan, in, out)
+  ...
+  call fftw_destroy_plan(plan)
+@end example
+
+A few important things to keep in mind are:
+
+@itemize @bullet
+
+@item
+FFTW plans are @code{type(C_PTR)}.  Other C types are mapped in the
+obvious way via the @code{iso_c_binding} standard: @code{int} turns
+into @code{integer(C_INT)}, @code{fftw_complex} turns into
+@code{complex(C_DOUBLE_COMPLEX)}, @code{double} turns into
+@code{real(C_DOUBLE)}, and so on. @xref{FFTW Fortran type reference}.
+
+@item
+Functions in C become functions in Fortran if they have a return value,
+and subroutines in Fortran otherwise.
+
+@item
+The ordering of the Fortran array dimensions must be @emph{reversed}
+when they are passed to the FFTW plan creation, thanks to differences
+in array indexing conventions (@pxref{Multi-dimensional Array
+Format}).  This is @emph{unlike} the legacy Fortran interface
+(@pxref{Fortran-interface routines}), which reversed the dimensions
+for you.  @xref{Reversing array dimensions}.
+
+@item
+Using ordinary Fortran array declarations like this works, but may
+yield suboptimal performance because the data may not be not aligned
+to exploit SIMD instructions on modern proessors (@pxref{SIMD
+alignment and fftw_malloc}). Better performance will often be obtained
+by allocating with @samp{fftw_alloc}. @xref{Allocating aligned memory
+in Fortran}.
+@cindex alignment
+
+@item
+Similar to the legacy Fortran interface (@pxref{FFTW Execution in
+Fortran}), we currently recommend @emph{not} using @code{fftw_execute}
+but rather using the more specialized functions like
+@code{fftw_execute_dft} (@pxref{New-array Execute Functions}).
+However, you should execute the plan on the @code{same arrays} as the
+ones for which you created the plan, unless you are especially
+careful.  @xref{Plan execution in Fortran}.
+
+@end itemize
+
+@c -------------------------------------------------------
+@node Reversing array dimensions, FFTW Fortran type reference, Overview of Fortran interface, Calling FFTW from Modern Fortran
+@section Reversing array dimensions
+
+@cindex row-major
+@cindex column-major
+A minor annoyance in calling FFTW from Fortran is that FFTW's array
+dimensions are defined in the C convention (row-major order), while
+Fortran's array dimensions are the opposite convention (column-major
+order). @xref{Multi-dimensional Array Format}.  This is just a
+bookkeeping difference, with no effect on performance.  The only
+consequence of this is that, whenever you create an FFTW plan for a
+multi-dimensional transform, you must always @emph{reverse the
+ordering of the dimensions}.
+
+For example, consider the three-dimensional (@threedims{L,M,N}) arrays:
+
+@example
+  complex(C_DOUBLE_COMPLEX), dimension(L,M,N) :: in, out
+@end example
+
+To plan a DFT for these arrays using @code{fftw_plan_dft_3d}, you could do:
+
+@example
+  plan = fftw_plan_dft_3d(N,M,L, in,out, FFTW_FORWARD,FFTW_ESTIMATE)
+@end example
+
+That is, from FFTW's perspective this is a @threedims{N,M,L} array.
+@emph{No data transposition need occur}, as this is @emph{only
+notation}.  Similarly, to use the more generic routine
+@code{fftw_plan_dft} with the same arrays, you could do:
+
+@example
+  integer(C_INT), dimension(3) :: n = [N,M,L]
+  plan = fftw_plan_dft_3d(3, n, in,out, FFTW_FORWARD,FFTW_ESTIMATE)
+@end example
+
+Note, by the way, that this is different from the legacy Fortran
+interface (@pxref{Fortran-interface routines}), which automatically
+reverses the order of the array dimension for you.  Here, you are
+calling the C interface directly, so there is no ``translation'' layer.
+
+@cindex r2c/c2r multi-dimensional array format
+An important thing to keep in mind is the implication of this for
+multidimensional real-to-complex transforms (@pxref{Multi-Dimensional
+DFTs of Real Data}).  In C, a multidimensional real-to-complex DFT
+chops the last dimension roughly in half (@threedims{N,M,L} real input
+goes to @threedims{N,M,L/2+1} complex output).  In Fortran, because
+the array dimension notation is reversed, the @code{last} dimension of
+the complex data is chopped roughly in half.  For example consider the
+@samp{r2c} transform of @threedims{L,M,N} real input in Fortran:
+
+@example
+  type(C_PTR) :: plan
+  real(C_DOUBLE), dimension(L,M,N) :: in
+  complex(C_DOUBLE_COMPLEX), dimension(L/2+1,M,N) :: out
+  plan = fftw_plan_dft_r2c_3d(N,M,L, in,out, FFTW_ESTIMATE)
+  ...
+  call fftw_execute_dft_r2c(in, out)
+@end example
+
+@cindex in-place
+@cindex padding
+Alternatively, for an in-place r2c transform, as described in the C
+documentation we must @emph{pad} the @emph{first} dimension of the
+real input with an extra two entries (which are ignored by FFTW) so as
+to leave enough space for the complex output. The input is
+@emph{allocated} as a @threedims{2[L/2+1],M,N} array, even though only
+@threedims{L,M,N} of it is actually used.  In this example, we will
+allocate the array as a pointer type, using @samp{fftw_alloc} to
+ensure aligned memory for maximum performance (@pxref{Allocating
+aligned memory in Fortran}); this also makes it easy to reference the
+same memory as both a real array and a complex array.
+
+@example
+  real(C_DOUBLE), pointer :: in(:,:,:)
+  complex(C_DOUBLE_COMPLEX), pointer :: out(:,:,:)
+  type(c_ptr) :: plan, data
+  data = fftw_alloc_complex((L/2+1) * M * N)
+  call c_f_pointer(data, in, [2*(L/2+1),M,N])
+  call c_f_pointer(data, out, [L/2+1,M,N])
+  plan = fftw_plan_dft_r2c_3d(N,M,L, in,out, FFTW_ESTIMATE)
+  ...
+  call fftw_execute_dft_r2c(plan, in, out)
+  ...
+  call fftw_destroy_plan(plan)
+  call fftw_free(data)
+@end example
+
+@c -------------------------------------------------------
+@node FFTW Fortran type reference, Plan execution in Fortran, Reversing array dimensions, Calling FFTW from Modern Fortran
+@section FFTW Fortran type reference
+
+@c -------------------------------------------------------
+@node Plan execution in Fortran, Allocating aligned memory in Fortran, FFTW Fortran type reference, Calling FFTW from Modern Fortran
+@section Plan execution in Fortran
+
+@c -------------------------------------------------------
+@node Allocating aligned memory in Fortran, Accessing the wisdom API from Fortran, Plan execution in Fortran, Calling FFTW from Modern Fortran
+@section Allocating aligned memory in Fortran
+
+@c -------------------------------------------------------
+@node Accessing the wisdom API from Fortran, FFTW Fortran examples, Allocating aligned memory in Fortran, Calling FFTW from Modern Fortran
+@section Accessing the wisdom API from Fortran
+
+@c -------------------------------------------------------
+@node FFTW Fortran examples, Defining an FFTW module, Accessing the wisdom API from Fortran, Calling FFTW from Modern Fortran
+@section FFTW Fortran examples
+
+@c -------------------------------------------------------
+@node Defining an FFTW module,  , FFTW Fortran examples, Calling FFTW from Modern Fortran
+@section Defining an FFTW module
+

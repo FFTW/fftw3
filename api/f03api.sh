@@ -1,0 +1,38 @@
+#! /bin/sh
+
+# Script to generate Fortran 2003 interface declarations for FFTW from
+# the fftw3.h header file.
+
+# This is designed so that the Fortran caller can do:
+#   use, intrinsic :: iso_c_binding
+#   implicit none
+#   include 'fftw3.f03'
+# and then call the C FFTW functions directly, with type checking.
+
+# C_FFTW_R2R_KIND is determined by configure and inserted by the Makefile
+# echo "  integer, parameter :: C_FFTW_R2R_KIND = @C_FFTW_R2R_KIND@"
+echo
+
+# Extract constants
+perl -pe 's/([A-Z0-9_]+)=([+-]?[0-9]+)/\n  integer\(C_INT\), parameter :: \1 = \2\n/g' < fftw3.h | grep 'integer(C_INT)'
+perl -pe 's/#define +([A-Z0-9_]+) +\(([+-]?[0-9]+)U?\)/\n  integer\(C_INT\), parameter :: \1 = \2\n/g' < fftw3.h | grep 'integer(C_INT)'
+perl -pe 'if (/#define +([A-Z0-9_]+) +\(([0-9]+)U? *<< *([0-9]+)\)/) { print "\n  integer\(C_INT\), parameter :: $1 = ",$2 << $3,"\n"; }' < fftw3.h | grep 'integer(C_INT)'
+
+# Extract function declarations
+for p in "" "f" "l"; do
+    echo
+    cat <<EOF
+  type, bind(C) :: fftw${p}_iodim
+     integer(c_int) n, is, os
+  end type fftw${p}_iodim
+  type, bind(C) :: fftw${p}_iodim64
+     integer(c_intptr_t) n, is, os
+  end type fftw${p}_iodim64
+EOF
+
+    echo
+    echo "  interface"
+    gcc -E fftw3.h |grep "fftw${p}_plan_dft" |tr ';' '\n' | perl genf03.pl
+    echo "  end interface"
+
+done

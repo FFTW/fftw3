@@ -1,4 +1,4 @@
-@node Upgrading from FFTW version 2, Installation and Customization, Calling FFTW from Fortran, Top
+@node Upgrading from FFTW version 2, Installation and Customization, Calling FFTW from Legacy Fortran, Top
 @chapter Upgrading from FFTW version 2
 
 In this chapter, we outline the process for updating codes designed for

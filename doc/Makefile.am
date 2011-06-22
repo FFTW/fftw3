@@ -1,7 +1,7 @@
 SUBDIRS = FAQ
 
 info_TEXINFOS = fftw3.texi
-fftw3_TEXINFOS = acknowledgements.texi cindex.texi fftw3.texi findex.texi fortran.texi install.texi intro.texi license.texi mpi.texi other.texi reference.texi threads.texi tutorial.texi upgrading.texi version.texi
+fftw3_TEXINFOS = acknowledgements.texi cindex.texi fftw3.texi findex.texi install.texi intro.texi legacy-fortran.texi license.texi modern-fortran.texi mpi.texi other.texi reference.texi threads.texi tutorial.texi upgrading.texi version.texi
 
 DVIPS = dvips -Pwww
 

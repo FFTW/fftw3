@@ -105,6 +105,9 @@ struct fftw_iodim64_do_not_use_me {
      ptrdiff_t os;			/* output stride */
 };
 
+typedef void (*fftw_write_char_func_do_not_use_me)(char c, void *);
+typedef int (*fftw_read_char_func_do_not_use_me)(void *);
+
 /*
   huge second-order macro that defines prototypes for all API
   functions.  We expand this macro for each supported precision
@@ -124,6 +127,9 @@ typedef struct fftw_iodim_do_not_use_me X(iodim);			   \
 typedef struct fftw_iodim64_do_not_use_me X(iodim64);			   \
 									   \
 typedef enum fftw_r2r_kind_do_not_use_me X(r2r_kind);			   \
+									   \
+typedef fftw_write_char_func_do_not_use_me X(write_char_func);		   \
+typedef fftw_read_char_func_do_not_use_me X(read_char_func);		   \
 									   \
 FFTW_EXTERN void X(execute)(const X(plan) p);				   \
 									   \
@@ -307,7 +313,7 @@ FFTW_EXTERN void X(destroy_plan)(X(plan) p);				   \
 FFTW_EXTERN void X(forget_wisdom)(void);				   \
 FFTW_EXTERN void X(cleanup)(void);					   \
 									   \
-FFTW_EXTERN void X(set_timelimit)(double);				   \
+FFTW_EXTERN void X(set_timelimit)(double t);				   \
 									   \
 FFTW_EXTERN void X(plan_with_nthreads)(int nthreads);			   \
 FFTW_EXTERN int X(init_threads)(void);					   \
@@ -315,17 +321,19 @@ FFTW_EXTERN void X(cleanup_threads)(void);				   \
 									   \
 FFTW_EXTERN void X(export_wisdom_to_file)(FILE *output_file);		   \
 FFTW_EXTERN char *X(export_wisdom_to_string)(void);			   \
-FFTW_EXTERN void X(export_wisdom)(void (*write_char)(char c, void *),	   \
+FFTW_EXTERN void X(export_wisdom)(X(write_char_func) write_char,   	   \
                                   void *data);				   \
 FFTW_EXTERN int X(import_system_wisdom)(void);				   \
 FFTW_EXTERN int X(import_wisdom_from_file)(FILE *input_file);		   \
 FFTW_EXTERN int X(import_wisdom_from_string)(const char *input_string);	   \
-FFTW_EXTERN int X(import_wisdom)(int (*read_char)(void *), void *data);	   \
+FFTW_EXTERN int X(import_wisdom)(X(read_char_func) read_char, void *data); \
 									   \
 FFTW_EXTERN void X(fprint_plan)(const X(plan) p, FILE *output_file);	   \
 FFTW_EXTERN void X(print_plan)(const X(plan) p);			   \
 									   \
 FFTW_EXTERN void *X(malloc)(size_t n);					   \
+FFTW_EXTERN R *X(alloc_real)(size_t n);					   \
+FFTW_EXTERN C *X(alloc_complex)(size_t n);				   \
 FFTW_EXTERN void X(free)(void *p);					   \
 									   \
 FFTW_EXTERN void X(flops)(const X(plan) p,				   \

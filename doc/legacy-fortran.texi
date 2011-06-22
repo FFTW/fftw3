@@ -1,15 +1,29 @@
-@node Calling FFTW from Fortran, Upgrading from FFTW version 2, Distributed-memory FFTW with MPI, Top
-@chapter Calling FFTW from Fortran
+@node Calling FFTW from Legacy Fortran, Upgrading from FFTW version 2, Calling FFTW from Modern Fortran, Top
+@chapter Calling FFTW from Legacy Fortran
 @cindex Fortran interface
 
-This chapter describes the Fortran-callable interface to FFTW, which
-differs from the C interface only in the prefix (@samp{dfftw_} instead
-of @samp{fftw_}), and a few other minor details.  The Fortran interface
-is included in the FFTW libraries by default, unless a Fortran compiler
-isn't found on your system or @code{--disable-fortran} is included in
-the @code{configure} flags.  We assume here that the reader is already
+This chapter describes the interface to FFTW callable by Fortran code
+in older compilers not supporting the Fortran 2003 C interoperability
+features (@pxref{Calling FFTW from Modern Fortran}).  This interface
+has the major disadvantage that it is not type-checked, so if you
+mistake the argument types or ordering then your program will not have
+any compiler errors, and will likely crash at runtime.  So, greater
+care is needed.  Also, technically interfacing older Fortran versions
+to C is nonstandard, but in practice we have found that the techniques
+used in this chapter have worked with all known Fortran compilers for
+many years.
+
+The legacy Fortran interface differs from the C interface only in the
+prefix (@samp{dfftw_} instead of @samp{fftw_} in double precision) and
+a few other minor details.  This Fortran interface is included in the
+FFTW libraries by default, unless a Fortran compiler isn't found on
+your system or @code{--disable-fortran} is included in the
+@code{configure} flags.  We assume here that the reader is already
 familiar with the usage of FFTW in C, as described elsewhere in this
 manual.
+
+The MPI parallel interface to FFTW is @emph{not} currently available
+to legacy Fortran.
 
 @menu
 * Fortran-interface routines::  
@@ -20,11 +34,11 @@ manual.
 @end menu
 
 @c -------------------------------------------------------
-@node Fortran-interface routines, FFTW Constants in Fortran, Calling FFTW from Fortran, Calling FFTW from Fortran
+@node Fortran-interface routines, FFTW Constants in Fortran, Calling FFTW from Legacy Fortran, Calling FFTW from Legacy Fortran
 @section Fortran-interface routines
 
 Nearly all of the FFTW functions have Fortran-callable equivalents.
-The name of the Fortran routine is the same as that of the
+The name of the legacy Fortran routine is the same as that of the
 corresponding C routine, but with the @samp{fftw_} prefix replaced by
 @samp{dfftw_}.@footnote{Technically, Fortran 77 identifiers are not
 allowed to have more than 6 characters, nor may they contain
@@ -44,7 +58,8 @@ with the following exceptions:
 @item
 @code{plan} variables (what would be of type @code{fftw_plan} in C),
 must be declared as a type that is at least as big as a pointer
-(address) on your machine.  We recommend using @code{integer*8}.
+(address) on your machine.  We recommend using @code{integer*8} everywhere,
+since this should always be big enough.
 @cindex portability
 
 @item
@@ -69,7 +84,7 @@ easily pass files or strings between C and Fortran; see @ref{Wisdom of
 Fortran?}.
 
 @item
-Fortran cannot use the @code{fftw_malloc} dynamic-allocation routine.
+Legacy Fortran cannot use the @code{fftw_malloc} dynamic-allocation routine.
 If you want to exploit the SIMD FFTW (@pxref{Data Alignment}), you'll
 need to figure out some other way to ensure that your arrays are at
 least 16-byte aligned.
@@ -98,17 +113,17 @@ arrays (see above).
 @end itemize
 
 In general, you should take care to use Fortran data types that
-correspond to (i.e. are the same size as) the C types used by FFTW.  If
-your C and Fortran compilers are made by the same vendor, the
-correspondence is usually straightforward (i.e. @code{integer}
-corresponds to @code{int}, @code{real} corresponds to @code{float},
-etcetera).  The native Fortran double/single-precision complex type
-should be compatible with @code{fftw_complex}/@code{fftwf_complex}.
-Such simple correspondences are assumed in the examples below.
+correspond to (i.e. are the same size as) the C types used by FFTW.
+In practice, this correspondence is usually straightforward
+(i.e. @code{integer} corresponds to @code{int}, @code{real}
+corresponds to @code{float}, etcetera).  The native Fortran
+double/single-precision complex type should be compatible with
+@code{fftw_complex}/@code{fftwf_complex}.  Such simple correspondences
+are assumed in the examples below.
 @cindex portability
 
 @c -------------------------------------------------------
-@node  FFTW Constants in Fortran, FFTW Execution in Fortran, Fortran-interface routines, Calling FFTW from Fortran
+@node  FFTW Constants in Fortran, FFTW Execution in Fortran, Fortran-interface routines, Calling FFTW from Legacy Fortran
 @section FFTW Constants in Fortran
 
 When creating plans in FFTW, a number of constants are used to specify
@@ -131,7 +146,7 @@ should just use @samp{@code{+}}.  (Take care not to add in the same flag
 more than once, though.)
 
 @c -------------------------------------------------------
-@node  FFTW Execution in Fortran, Fortran Examples, FFTW Constants in Fortran, Calling FFTW from Fortran
+@node  FFTW Execution in Fortran, Fortran Examples, FFTW Constants in Fortran, Calling FFTW from Legacy Fortran
 @section FFTW Execution in Fortran
 
 In C, in order to use a plan, one normally calls @code{fftw_execute},
@@ -196,7 +211,7 @@ with SIMD instructions (@pxref{SIMD alignment and fftw_malloc}).
 @end itemize
 
 @c -------------------------------------------------------
-@node Fortran Examples, Wisdom of Fortran?, FFTW Execution in Fortran, Calling FFTW from Fortran
+@node Fortran Examples, Wisdom of Fortran?, FFTW Execution in Fortran, Calling FFTW from Legacy Fortran
 @section Fortran Examples
 
 In C, you might have something like the following to transform a
@@ -314,7 +329,7 @@ Fortran program can use its ordinary column-major order.
 @cindex r2c/c2r multi-dimensional array format
 
 @c -------------------------------------------------------
-@node Wisdom of Fortran?,  , Fortran Examples, Calling FFTW from Fortran
+@node Wisdom of Fortran?,  , Fortran Examples, Calling FFTW from Legacy Fortran
 @section Wisdom of Fortran?
 
 In this section, we discuss how one can import/export FFTW wisdom

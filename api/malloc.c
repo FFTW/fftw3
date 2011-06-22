@@ -30,3 +30,21 @@ void X(free)(void *p)
 {
      X(kernel_free)(p);
 }
+
+/* The following two routines are mainly for the convenience of
+   the Fortran 2003 API, although C users may find them convienent
+   as well.  The problem is that, although Fortran 2003 has a
+   c_sizeof intrinsic that is equivalent to sizeof, it is broken
+   in some gfortran versions, and in any case is a bit unnatural
+   in a Fortran context.  So we provide routines to allocate real
+   and complex arrays, which are all that are really needed by FFTW. */
+
+R *X(alloc_real)(size_t n)
+{
+     return (R *) X(malloc)(sizeof(R) * n);
+}
+
+C *X(alloc_complex)(size_t n)
+{
+     return (C *) X(malloc)(sizeof(C) * n);
+}

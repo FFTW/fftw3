@@ -316,6 +316,18 @@ AC_CHECK_TYPES(uintptr_t, [], [AC_CHECK_SIZEOF(void *)], [$ac_includes_default
 AC_CHECK_SIZEOF(float)
 AC_CHECK_SIZEOF(double)
 
+dnl Check sizeof fftw_r2r_kind for Fortran interface [it has == sizeof(int)
+dnl for years, but being paranoid].  Note: the definition here must match
+dnl the one in api/fftw3.h!
+AC_CHECK_SIZEOF(fftw_r2r_kind, [], [typedef enum {
+     FFTW_R2HC=0, FFTW_HC2R=1, FFTW_DHT=2,
+     FFTW_REDFT00=3, FFTW_REDFT01=4, FFTW_REDFT10=5, FFTW_REDFT11=6,
+     FFTW_RODFT00=7, FFTW_RODFT01=8, FFTW_RODFT10=9, FFTW_RODFT11=10
+} fftw_r2r_kind;])
+if test 0 = $ac_cv_sizeof_fftw_r2r_kind; then AC_MSG_ERROR([sizeof(fftw_r2r_kind) test failed]); fi
+C_FFTW_R2R_KIND=C_INT`expr $ac_cv_sizeof_fftw_r2r_kind \* 8`_T
+AC_SUBST(C_FFTW_R2R_KIND)
+
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
 AC_FUNC_STRTOD

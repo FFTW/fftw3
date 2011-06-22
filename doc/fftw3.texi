@@ -168,7 +168,8 @@ This manual documents FFTW version @value{VERSION}.
 * FFTW Reference::              
 * Multi-threaded FFTW::         
 * Distributed-memory FFTW with MPI::  
-* Calling FFTW from Fortran::   
+* Calling FFTW from Modern Fortran::  
+* Calling FFTW from Legacy Fortran::  
 * Upgrading from FFTW version 2::  
 * Installation and Customization::  
 * Acknowledgments::             
@@ -184,7 +185,8 @@ This manual documents FFTW version @value{VERSION}.
 @include reference.texi
 @include threads.texi
 @include mpi.texi
-@include fortran.texi
+@include modern-fortran.texi
+@include legacy-fortran.texi
 @include upgrading.texi
 @include install.texi
 @include acknowledgements.texi

@@ -156,9 +156,10 @@ storing plans on disk (@pxref{Words of Wisdom-Saving Plans}).  Next,
 FFTW's features.  Parallel transforms are discussed in their own
 chapters: @ref{Multi-threaded FFTW} and @ref{Distributed-memory FFTW
 with MPI}.  Fortran programmers can also use FFTW, as described in
-@ref{Calling FFTW from Fortran}.  @ref{Installation and Customization}
-explains how to install FFTW in your computer system and how to adapt
-FFTW to your needs.  License and copyright information is given in
-@ref{License and Copyright}.  Finally, we thank all the people who
-helped us in @ref{Acknowledgments}.
+@ref{Calling FFTW from Legacy Fortran} and @ref{Calling FFTW from
+Modern Fortran}.  @ref{Installation and Customization} explains how to
+install FFTW in your computer system and how to adapt FFTW to your
+needs.  License and copyright information is given in @ref{License and
+Copyright}.  Finally, we thank all the people who helped us in
+@ref{Acknowledgments}.
 
