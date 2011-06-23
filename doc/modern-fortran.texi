@@ -74,6 +74,10 @@ A few important things to keep in mind are:
 
 @item
 @tindex fftw_complex
+@ctindex C_PTR
+@ctindex C_INT
+@ctindex C_DOUBLE
+@ctindex C_DOUBLE_COMPLEX
 FFTW plans are @code{type(C_PTR)}.  Other C types are mapped in the
 obvious way via the @code{iso_c_binding} standard: @code{int} turns
 into @code{integer(C_INT)}, @code{fftw_complex} turns into
@@ -231,6 +235,12 @@ opaque pointer).
 @item
 @tindex fftw_complex
 @cindex precision
+@ctindex C_DOUBLE
+@ctindex C_FLOAT
+@ctindex C_LONG_DOUBLE
+@ctindex C_DOUBLE_COMPLEX
+@ctindex C_FLOAT_COMPLEX
+@ctindex C_LONG_DOUBLE_COMPLEX
 The C floating-point types @code{double}, @code{float}, and @code{long
 double} correspond to @code{real(C_DOUBLE)}, @code{real(C_FLOAT)}, and
 @code{real(C_LONG_DOUBLE)}, respectively.  The C complex types
@@ -243,11 +253,16 @@ correspond in Fortran to @code{complex(C_DOUBLE_COMPLEX)},
 
 @item
 @tindex ptrdiff_t
+@ctindex C_INT
+@ctindex C_INTPTR_T
+@ctindex C_SIZE_T
+@findex fftw_malloc
 The C integer types @code{int} and @code{unsigned} (used for planner
-flags) become @code{integer(C_INT)}.  The C integer type @code{ptrdiff_t} (e.g. in the @ref{64-bit Guru Interface}) becomes @code{integer(C_INTPTR_T)}, and @code{size_t} becomes @code{integer(C_SIZE_T)}.
+flags) become @code{integer(C_INT)}.  The C integer type @code{ptrdiff_t} (e.g. in the @ref{64-bit Guru Interface}) becomes @code{integer(C_INTPTR_T)}, and @code{size_t} (in @code{fftw_malloc} etc.) becomes @code{integer(C_SIZE_T)}.
 
 @item
 @tindex fftw_r2r_kind
+@ctindex C_FFTW_R2R_KIND
 The @code{fftw_r2r_kind} type (@pxref{Real-to-Real Transform Kinds})
 becomes @code{integer(C_FFTW_R2R_KIND)}.  The various constant values
 of the C enumerated type (@code{FFTW_R2HC} etc.) become simply integer
@@ -279,6 +294,7 @@ three @code{integer(C_INT)} components: @code{n}, @code{is}, and
 @code{os}, with the same meanings as in C.  The @code{fftw_iodim64} type in the 64-bit guru interface (@pxref{64-bit Guru Interface}) is the same, except that its components are of type @code{integer(C_INTPTR_T)}.
 
 @item
+@ctindex C_FUNPTR
 Using the wisdom import/export functions from Fortran is a bit tricky,
 and is discussed in @ref{Accessing the wisdom API from Fortran}.  In
 brief, the @code{FILE *} arguments map to @code{type(C_PTR)}, @code{const char *} to @code{character(C_CHAR), dimension(*), intent(in)} (null-terminated!), and the generic read-char/write-char functions map to @code{type(C_FUNPTR)}.
@@ -286,23 +302,164 @@ brief, the @code{FILE *} arguments map to @code{type(C_PTR)}, @code{const char *
 @end itemize
 
 @cindex portability
-You may be wondering if you need to search-and-replace @code{real*8}
-(or whatever your favorite Fortran spelling of ``double precision''
-is) with @code{real(C_DOUBLE)} everywhere in your program, and
-similarly for @code{complex} and @code{integer} types.  The answer is
-no; you can still use your existing types.  As long as the sizes of
-these types match their C counterparts, things should work without a
-hitch.  The worst that can happen, e.g. in the (unlikely) event of a
-system where @code{real*8} is different from @code{real(C_DOUBLE)}, is
-that the compiler will give you a type-mismatch error.
+You may be wondering if you need to search-and-replace
+@code{real(kind(0.0d0))} (or whatever your favorite Fortran spelling
+of ``double precision'' is) with @code{real(C_DOUBLE)} everywhere in
+your program, and similarly for @code{complex} and @code{integer}
+types.  The answer is no; you can still use your existing types.  As
+long as these types match their C counterparts, things should work
+without a hitch.  The worst that can happen, e.g. in the (unlikely)
+event of a system where @code{real(kind(0.0d0))} is different from
+@code{real(C_DOUBLE)}, is that the compiler will give you a
+type-mismatch error.  That is, if you don't use the
+@code{iso_c_binding} kinds you need to accept at least the theoretical
+possibility of having to change your code in response to compiler
+errors on some future machine, but you don't need to worry about
+silently compiling incorrect code that yields runtime errors.
 
 @c -------------------------------------------------------
 @node Plan execution in Fortran, Allocating aligned memory in Fortran, FFTW Fortran type reference, Calling FFTW from Modern Fortran
 @section Plan execution in Fortran
 
+In C, in order to use a plan, one normally calls @code{fftw_execute},
+which executes the plan to perform the transform on the input/output
+arrays passed when the plan was created (@pxref{Using Plans}).  The
+corresponding subroutine call in modern Fortran is:
+@example
+ call fftw_execute(plan)
+@end example
+@findex fftw_execute
+
+However, we have had reports that this causes problems with some
+recent optimizing Fortran compilers.  The problem is, because the
+input/output arrays are not passed as explicit arguments to
+@code{fftw_execute}, the semantics of Fortran (unlike C) allow the
+compiler to assume that the input/output arrays are not changed by
+@code{fftw_execute}.  As a consequence, certain compilers end up
+repositioning the call to @code{fftw_execute}, assuming incorrectly
+that it does nothing to the arrays.
+
+There are various workarounds to this, but the safest and simplest
+thing is to not use @code{fftw_execute} in Fortran.  Instead, use the
+functions described in @ref{New-array Execute Functions}, which take
+the input/output arrays as explicit arguments.  For example, if the
+plan is for a complex-data DFT and was created for the arrays
+@code{in} and @code{out}, you would do:
+@example
+ call fftw_execute_dft(plan, in, out)
+@end example
+@findex fftw_execute_dft
+
+There are a few things to be careful of, however:
+
+@itemize @bullet
+
+@item
+@findex fftw_execute_dft_r2c
+@findex fftw_execute_dft_c2r
+@findex fftw_execute_r2r
+You must use the correct type of execute function, matching the way
+the plan was created.  Complex DFT plans should use
+@code{fftw_execute_dft}, Real-input (r2c) DFT plans should use use
+@code{fftw_execute_dft_r2c}, and real-output (c2r) DFT plans should
+use @code{fftw_execute_dft_c2r}.  The various r2r plans should use
+@code{fftw_execute_r2r}.  Fortunately, if you use the wrong one you
+will get a compile-time type-mismatch error (unlike legacy Fortran).
+
+@item
+You should normally pass the same input/output arrays that were used when
+creating the plan.  This is always safe.
+
+@item
+@emph{If} you pass @emph{different} input/output arrays compared to
+those used when creating the plan, you must abide by all the
+restrictions of the new-array execute functions (@pxref{New-array
+Execute Functions}).  The most tricky of these is the
+requirement that the new arrays have the same alignment as the
+original arrays; the best (and possibly only) way to guarantee this
+is to use the @samp{fftw_alloc} functions to allocate your arrays (@pxref{Allocating aligned memory in Fortran}). Alternatively, you can
+use the @code{FFTW_UNALIGNED} flag when creating the
+plan, in which case the plan does not depend on the alignment, but
+this may sacrifice substantial performance on architectures (like x86)
+with SIMD instructions (@pxref{SIMD alignment and fftw_malloc}).
+@ctindex FFTW_UNALIGNED
+
+@end itemize
+
 @c -------------------------------------------------------
 @node Allocating aligned memory in Fortran, Accessing the wisdom API from Fortran, Plan execution in Fortran, Calling FFTW from Modern Fortran
 @section Allocating aligned memory in Fortran
+
+@cindex alignment
+@findex fftw_alloc_real
+@findex fftw_alloc_complex
+In order to obtain maximum performance in FFTW, you should store your
+data in arrays that have been specially aligned in memory (@pxref{SIMD
+alignment and fftw_malloc}).  Enforcing alignment also permits you to
+safely use the new-array execute functions (@pxref{New-array Execute
+Functions}) to apply a given plan to more than one pair of in/out
+arrays.  Unfortunately, standard Fortran arrays do @emph{not} provide
+any alignment guarantees.  The @emph{only} way to allocate aligned
+memory in standard Fortran is to allocate it with an external C
+function, like the @code{fftw_alloc_real} and
+@code{fftw_alloc_complex} functions.  Fortunately, Fortran 2003 provides
+a simple way to associate such allocated memory with a standard Fortran
+array pointer that you can then use normally.
+
+We therefore recommend allocating all your input/output arrays using
+the following technique:
+
+@enumerate
+
+@item
+Declare a @code{pointer}, @code{arr}, to your array of the desired type
+and dimensions.  For example, @code{real(C_DOUBLE), pointer :: a(:,:)}
+for a 2d real array, or @code{complex(C_DOUBLE_COMPLEX), pointer ::
+a(:,:,:)} for a 3d complex array.
+
+@item
+Declare an @code{integer(C_SIZE_T) :: sz} to hold the number of
+elements to allocate.  Set @code{sz} to the total number of elements
+in your array.   e.g. @code{sz = L * M * N} for an @threedims{L,M,N} array.
+
+@item
+Declare a @code{type(C_PTR) :: p} to hold the return value from
+FFTW's allocation routine.  Set @code{p = fftw_alloc_real(sz)} for a real array, or @code{p = fftw_alloc_complex(sz)} for a complex array.
+
+@item
+@findex c_f_pointer
+Associate your pointer @code{arr} with the allocated memory @code{p}
+using the standard @code{c_f_pointer} subroutine: @code{call
+c_f_pointer(p, arr, [...dimensions...])}, where
+@code{[...dimensions...])} are an array of the dimensions of the array
+(in the usual Fortran order). e.g. @code{call c_f_pointer(p, arr,
+[L,M,N])} for an @threedims{L,M,N} array.  (Alternatively, you can
+omit the dimensions argument if you specified the shape explicitly
+when declaring @code{arr}.)  You can now use @code{arr} as a usual
+multidimensional array.
+
+@item
+When you are done using the array, deallocate the memory by @code{call
+fftw_free(p)} on @code{p}.
+
+@end enumerate
+
+For example, here is how we would allocate an @twodims{L,M} 2d real array:
+
+@example
+  real(C_DOUBLE), pointer :: arr(:,:)
+  integer(C_SIZE_T) ::  sz
+  type(C_PTR) :: p
+  sz = L * M
+  p = fftw_alloc_real(sz)
+  call c_f_pointer(p, arr, [L,M])
+  @emph{...use arr(i,j) as usual...}
+  call fftw_free(p)
+@end example
+
+See @ref{Reversing array dimensions} for an example allocating a
+single array and associating both real and complex array pointers with
+it, for in-place real-to-complex transforms.
 
 @c -------------------------------------------------------
 @node Accessing the wisdom API from Fortran, FFTW Fortran examples, Allocating aligned memory in Fortran, Calling FFTW from Modern Fortran

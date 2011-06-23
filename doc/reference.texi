@@ -400,6 +400,8 @@ array is overwritten. If @code{in != out}, the two arrays must
 not overlap (but FFTW does not check for this condition).
 
 @item
+@ctindex FFTW_FORWARD
+@ctindex FFTW_BACKWARD
 @code{sign} is the sign of the exponent in the formula that defines the
 Fourier transform.  It can be @math{-1} (= @code{FFTW_FORWARD}) or
 @math{+1} (= @code{FFTW_BACKWARD}).

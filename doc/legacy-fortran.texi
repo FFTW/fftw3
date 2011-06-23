@@ -141,9 +141,10 @@ your code.
 
 @cindex flags
 In C, you combine different flags (like @code{FFTW_PRESERVE_INPUT} and
-@code{FFTW_MEASURE}) using the @samp{@code{|}} operator; in Fortran you
-should just use @samp{@code{+}}.  (Take care not to add in the same flag
-more than once, though.)
+@code{FFTW_MEASURE}) using the @samp{@code{|}} operator; in Fortran
+you should just use @samp{@code{+}}.  (Take care not to add in the
+same flag more than once, though.  Alternatively, you can use the
+@code{ior} intrinsic function standardized in Fortran 95.)
 
 @c -------------------------------------------------------
 @node  FFTW Execution in Fortran, Fortran Examples, FFTW Constants in Fortran, Calling FFTW from Legacy Fortran
@@ -152,7 +153,7 @@ more than once, though.)
 In C, in order to use a plan, one normally calls @code{fftw_execute},
 which executes the plan to perform the transform on the input/output
 arrays passed when the plan was created (@pxref{Using Plans}).  The
-corresponding subroutine call in Fortran is:
+corresponding subroutine call in legacy Fortran is:
 @example
         call dfftw_execute(plan)
 @end example
@@ -200,7 +201,7 @@ those used when creating the plan, you must abide by all the
 restrictions of the new-array execute functions (@pxref{New-array
 Execute Functions}).  The most difficult of these, in Fortran, is the
 requirement that the new arrays have the same alignment as the
-original arrays, because there seems to be no way in Fortran to obtain
+original arrays, because there seems to be no way in legacy Fortran to obtain
 guaranteed-aligned arrays (analogous to @code{fftw_malloc} in C).  You
 can, of course, use the @code{FFTW_UNALIGNED} flag when creating the
 plan, in which case the plan does not depend on the alignment, but
