@@ -137,18 +137,41 @@ while (<>) {
 	    next;
 	}
 
-	print "    ";
+	# Fortran has a 132-character line-length limit by default (grr)
+	$len = 0;
+
+	print "    "; $len = $len + length("    ");
 	if ($ret eq "void") {
 	    $kind = "subroutine"
 	}
 	else {
 	    print "$return_types{$ret} ";
+	    $len = $len + length("$return_types{$ret} ");
 	    $kind = "function"
 	}
-
+	print "$kind $name("; $len = $len + length("$kind $name(");
+	$len0 = $len;
+	
 	$argnames = $args;
 	$argnames =~ s/([a-zA-Z_0-9 ]+[ \*]) *([a-zA-Z_0-9]+) */$2/g;
-	print "$kind $name($argnames) bind(C, name='$name')\n";
+	$comma = "";
+	foreach $argname (split(/ *, */, $argnames)) {
+	    if ($len + length("$comma$argname") + 3 > 132) {
+		printf ", &\n%*s", $len0, "";
+		$len = $len0;
+		$comma = "";
+	    }
+	    print "$comma$argname";
+	    $len = $len + length("$comma$argname");
+	    $comma = ",";
+	}
+	print ") "; $len = $len + 2;
+
+	if ($len + length("bind(C, name='$name')") > 132) {
+	    printf "&\n%*s", $len0 - length("$name("), "";
+	}
+	print "bind(C, name='$name')\n";
+
 	print "      import\n";
 	foreach $arg (split(/ *, */, $args)) {
 	    $arg =~ /^([a-zA-Z_0-9 ]+[ \*]) *([a-zA-Z_0-9]+) *$/;
