@@ -48,6 +48,6 @@ fftw3.f: fftw3.h
 	perl -pe 'if (/#define +([A-Z0-9_]+) +\(([0-9]+)U? *<< *([0-9]+)\)/) { print "\n      INTEGER $$1\n      PARAMETER ($$1=",$$2 << $$3,")\n"; }' $< |egrep 'PARAMETER|INTEGER' >> $@
 
 fftw3.f03.in: fftw3.h f03api.sh genf03.pl
-	$(srcdir)/f03api.sh > $@
+	sh $(srcdir)/f03api.sh > $@
 
 endif # MAINTAINER_MODE
