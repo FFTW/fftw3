@@ -200,8 +200,10 @@ same memory as both a real array and a complex array.
 @example
   real(C_DOUBLE), pointer :: in(:,:,:)
   complex(C_DOUBLE_COMPLEX), pointer :: out(:,:,:)
-  type(c_ptr) :: plan, data
-  data = fftw_alloc_complex((L/2+1) * M * N)
+  type(C_PTR) :: plan, data
+  integer(C_SIZE_T) sz
+  sz = (L/2+1) * M * N
+  data = fftw_alloc_complex(sz)
   call c_f_pointer(data, in, [2*(L/2+1),M,N])
   call c_f_pointer(data, out, [L/2+1,M,N])
   plan = fftw_plan_dft_r2c_3d(N,M,L, in,out, FFTW_ESTIMATE)
