@@ -4,7 +4,8 @@
 #     extern <type> <name>(...args...)
 #     extern <type> <name>(...args...)
 #     ...
-# with no line breaks except after semicolons.
+# with no line breaks within a given function.  (It's too much work to
+# write a general parser, since we just have to handle FFTW's header files.)
 
 sub canonicalize_type {
     my($type);
