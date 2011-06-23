@@ -40,6 +40,7 @@ described elsewhere, which can be found in the same directory as
 @code{fftw3.h} (the C header file).  In any Fortran subroutine where
 you want to use FFTW functions, you should begin with:
 
+@cindex iso_c_binding
 @example
   use, intrinsic :: iso_c_binding 
   include 'fftw3.f03'
@@ -54,6 +55,9 @@ At this point, you can now call anything in the FFTW C interface
 directly, almost exactly as in C other than minor changes in syntax.
 For example:
 
+@findex fftw_plan_dft_2d
+@findex fftw_execute_dft
+@findex fftw_destroy_plan
 @example
   type(C_PTR) :: plan
   complex(C_DOUBLE_COMPLEX), dimension(1024,1000) :: in, out
@@ -69,6 +73,7 @@ A few important things to keep in mind are:
 @itemize @bullet
 
 @item
+@tindex fftw_complex
 FFTW plans are @code{type(C_PTR)}.  Other C types are mapped in the
 obvious way via the @code{iso_c_binding} standard: @code{int} turns
 into @code{integer(C_INT)}, @code{fftw_complex} turns into
@@ -88,15 +93,17 @@ Format}).  This is @emph{unlike} the legacy Fortran interface
 for you.  @xref{Reversing array dimensions}.
 
 @item
+@cindex alignment
+@cindex SIMD
 Using ordinary Fortran array declarations like this works, but may
 yield suboptimal performance because the data may not be not aligned
 to exploit SIMD instructions on modern proessors (@pxref{SIMD
 alignment and fftw_malloc}). Better performance will often be obtained
 by allocating with @samp{fftw_alloc}. @xref{Allocating aligned memory
 in Fortran}.
-@cindex alignment
 
 @item
+@findex fftw_execute
 Similar to the legacy Fortran interface (@pxref{FFTW Execution in
 Fortran}), we currently recommend @emph{not} using @code{fftw_execute}
 but rather using the more specialized functions like
@@ -104,6 +111,10 @@ but rather using the more specialized functions like
 However, you should execute the plan on the @code{same arrays} as the
 ones for which you created the plan, unless you are especially
 careful.  @xref{Plan execution in Fortran}.
+
+@item
+@cindex flags
+Multiple planner flags are combined with @code{ior} (equivalent to @samp{|} in C).  e.g. @code{FFTW_MEASURE | FFTW_DESTROY_INPUT} becomes @code{ior(FFTW_MEASURE, FFTW_DESTROY_INPUT)}.  (You can also use @samp{+} as long as you don't try to include a given flag more than once.)
 
 @end itemize
 
@@ -130,6 +141,7 @@ For example, consider the three-dimensional (@threedims{L,M,N}) arrays:
 
 To plan a DFT for these arrays using @code{fftw_plan_dft_3d}, you could do:
 
+@findex fftw_plan_dft_3d
 @example
   plan = fftw_plan_dft_3d(N,M,L, in,out, FFTW_FORWARD,FFTW_ESTIMATE)
 @end example
@@ -159,6 +171,8 @@ the array dimension notation is reversed, the @code{last} dimension of
 the complex data is chopped roughly in half.  For example consider the
 @samp{r2c} transform of @threedims{L,M,N} real input in Fortran:
 
+@findex fftw_plan_dft_r2c_3d
+@findex fftw_execute_dft_r2c
 @example
   type(C_PTR) :: plan
   real(C_DOUBLE), dimension(L,M,N) :: in
@@ -181,6 +195,8 @@ ensure aligned memory for maximum performance (@pxref{Allocating
 aligned memory in Fortran}); this also makes it easy to reference the
 same memory as both a real array and a complex array.
 
+@findex fftw_alloc_complex
+@findex c_f_pointer
 @example
   real(C_DOUBLE), pointer :: in(:,:,:)
   complex(C_DOUBLE_COMPLEX), pointer :: out(:,:,:)
@@ -199,6 +215,84 @@ same memory as both a real array and a complex array.
 @c -------------------------------------------------------
 @node FFTW Fortran type reference, Plan execution in Fortran, Reversing array dimensions, Calling FFTW from Modern Fortran
 @section FFTW Fortran type reference
+
+The following are the most important type correspondences between the
+C interface and Fortran:
+
+@itemize @bullet
+
+@item
+@tindex fftw_plan
+Plans (@code{fftw_plan} and variants) are @code{type(C_PTR)} (i.e. an
+opaque pointer).
+
+@item
+@tindex fftw_complex
+@cindex precision
+The C floating-point types @code{double}, @code{float}, and @code{long
+double} correspond to @code{real(C_DOUBLE)}, @code{real(C_FLOAT)}, and
+@code{real(C_LONG_DOUBLE)}, respectively.  The C complex types
+@code{fftw_complex}, @code{fftwf_complex}, and @code{fftwl_complex}
+correspond in Fortran to @code{complex(C_DOUBLE_COMPLEX)},
+@code{complex(C_FLOAT_COMPLEX)}, and
+@code{complex(C_LONG_DOUBLE_COMPLEX)}, respectively.  Just as in C
+(@pxref{Precision}), the FFTW subroutines and types are prefixed with
+@samp{fftw_}, @code{fftwf_}, and @code{fftwl_} for the different precisions, and link to different libraries (@code{-lfftw3}, @code{-lfftw3f}, and @code{-lfftw3l} on Unix), but use the @emph{same} include file @code{fftw3.f03} and the @emph{same} constants (all of which begin with @samp{FFTW_}).
+
+@item
+@tindex ptrdiff_t
+The C integer types @code{int} and @code{unsigned} (used for planner
+flags) become @code{integer(C_INT)}.  The C integer type @code{ptrdiff_t} (e.g. in the @ref{64-bit Guru Interface}) becomes @code{integer(C_INTPTR_T)}, and @code{size_t} becomes @code{integer(C_SIZE_T)}.
+
+@item
+@tindex fftw_r2r_kind
+The @code{fftw_r2r_kind} type (@pxref{Real-to-Real Transform Kinds})
+becomes @code{integer(C_FFTW_R2R_KIND)}.  The various constant values
+of the C enumerated type (@code{FFTW_R2HC} etc.) become simply integer
+constants of the same names in Fortran.
+
+@item
+Most pointer @emph{arguments} to functions (e.g. @code{double *}) become
+@code{dimension(*), intent(inout)} arrays of the same type, or
+@code{intent(in)} if they are pointers to constant data
+(e.g. @code{const double *}).
+
+@item
+@findex fftw_alloc_real
+@findex c_f_pointer
+Pointer @emph{return} values (e.g @code{double *}) become
+@code{type(C_PTR)}.  (If they are pointers to arrays, as for
+@code{fftw_alloc_real}, you can convert them back to Fortran array
+pointers with the standard intrinsic function @code{c_f_pointer}.)
+
+@item
+@cindex guru interface
+@tindex fftw_iodim
+@tindex fftw_iodim64
+@cindex 64-bit architecture
+The @code{fftw_iodim} type in the guru interface (@pxref{Guru vector
+and transform sizes}) becomes @code{type(fftw_iodim)} in Fortran, a
+derived data type (the Fortran analogue of C's @code{struct}) with
+three @code{integer(C_INT)} components: @code{n}, @code{is}, and
+@code{os}, with the same meanings as in C.  The @code{fftw_iodim64} type in the 64-bit guru interface (@pxref{64-bit Guru Interface}) is the same, except that its components are of type @code{integer(C_INTPTR_T)}.
+
+@item
+Using the wisdom import/export functions from Fortran is a bit tricky,
+and is discussed in @ref{Accessing the wisdom API from Fortran}.  In
+brief, the @code{FILE *} arguments map to @code{type(C_PTR)}, @code{const char *} to @code{character(C_CHAR), dimension(*), intent(in)} (null-terminated!), and the generic read-char/write-char functions map to @code{type(C_FUNPTR)}.
+
+@end itemize
+
+@cindex portability
+You may be wondering if you need to search-and-replace @code{real*8}
+(or whatever your favorite Fortran spelling of ``double precision''
+is) with @code{real(C_DOUBLE)} everywhere in your program, and
+similarly for @code{complex} and @code{integer} types.  The answer is
+no; you can still use your existing types.  As long as the sizes of
+these types match their C counterparts, things should work without a
+hitch.  The worst that can happen, e.g. in the (unlikely) event of a
+system where @code{real*8} is different from @code{real(C_DOUBLE)}, is
+that the compiler will give you a type-mismatch error.
 
 @c -------------------------------------------------------
 @node Plan execution in Fortran, Allocating aligned memory in Fortran, FFTW Fortran type reference, Calling FFTW from Modern Fortran
