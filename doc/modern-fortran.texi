@@ -509,7 +509,9 @@ You can call them like this:
 @example
   integer(C_INT) :: ret
   ret = fftw_export_wisdom_to_filename(C_CHAR_'my_wisdom.dat' // C_NULL_CHAR)
+  if (ret .eq. 0) stop 'error exporting wisdom to file'
   ret = fftw_import_wisdom_from_filename(C_CHAR_'my_wisdom.dat' // C_NULL_CHAR)
+  if (ret .eq. 0) stop 'error importing wisdom from file'
 @end example
 
 Note that prepending @samp{C_CHAR_} is needed to specify that the
