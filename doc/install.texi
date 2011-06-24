@@ -96,27 +96,6 @@ Note especially @code{--help} to list all flags and
 @itemize @bullet
 
 @item
-@cindex portability
-@code{--enable-portable-binary}: Disable compiler optimizations that
-would produce unportable binaries. @b{Important:} Use this if you are
-distributing compiled binaries to people who may not use exactly the
-same processor as you.
-
-@item
-@code{--with-gcc-arch=}@i{arch}: When compiling with @code{gcc}, FFTW
-tries to deduce the current CPU in order to tell @code{gcc} what
-architecture to tune for; this option overrides that guess
-(i.e. @i{arch} should be a valid argument for @code{gcc}'s
-@code{-march} or @code{-mtune} flags).  You might do this because the
-deduced architecture was wrong or because you want to tune for a
-different CPU than the one you are compiling with.  You can use
-@code{--without-gcc-arch} to disable architecture-specific tuning
-entirely.  Note that if @code{--enable-portable-binary} is enabled
-(above), then we use @code{-mtune} but not @code{-march}, so the
-resulting binary will run on any architecture even though it is
-optimized for a particular one.
-
-@item
 @cindex precision
 @code{--enable-float}: Produces a single-precision version of FFTW
 (@code{float}) instead of the default double-precision (@code{double}).
@@ -276,8 +255,8 @@ To create the FFTW library, you will then need to compile all of the
 @code{rdft/scalar/r2r}, @code{reodft}, and @code{api} directories.
 If you are compiling with SIMD support (e.g. you defined
 @code{HAVE_SSE2} in @code{config.h}), then you also need to compile
-the @code{.c} files in the @code{simd}, @code{simd/nonportable},
-@code{dft/simd}, and @code{dft/simd/codelets} directories. 
+the @code{.c} files in the @code{simd-support},
+@code{@{dft,rdft@}/simd}, @code{@{dft,rdft@}/simd/*} directories.
 
 Once these files are all compiled, link them into a library, or a shared
 library, or directly into your program.

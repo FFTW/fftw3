@@ -11,6 +11,9 @@
   a given plan; thanks to Rhys Ulerich and Nathanael Schaeffer for the
   suggestion.
 
+* Remove the automatic detection of native architecture flag for gcc
+  which was introduced in fftw-3.1, since new gcc supports -mtune=native.
+
 FFTW 3.2.2
 
 * Improve performance of some copy operations of complex arrays on
