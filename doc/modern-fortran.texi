@@ -573,8 +573,8 @@ character array:
 
 Note that @code{slen} is the length of the C string, but the length of
 the array is @code{slen+1} because it includes the terminating null
-character.  (You can omit the @samp{+1} if you don't want @code{s} to
-include the null character.) The standard @code{c_associated} function
+character.  (You can omit the @samp{+1} if you don't want Fortran to
+know about the null character.) The standard @code{c_associated} function
 checks whether @code{p} is a null pointer, which is returned by
 @code{fftw_export_wisdom_to_string} if there was an error.
 
