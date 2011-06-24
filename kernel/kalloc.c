@@ -41,8 +41,9 @@ extern int posix_memalign(void **, size_t, size_t);
 
 #define real_free free /* memalign and malloc use ordinary free */
 
-#if defined(WITH_OUR_MALLOC16) && (MIN_ALIGNMENT == 16)
-/* Our own 16-byte aligned malloc/free.  Assumes sizeof(void*) is a
+#define IS_POWER_OF_TWO(n) (((n) > 0) && (((n) & ((n) - 1)) == 0))
+#if defined(WITH_OUR_MALLOC) && (MIN_ALIGNMENT >= 8) && IS_POWER_OF_TWO(MIN_ALIGNMENT)
+/* Our own MIN_ALIGNMENT-aligned malloc/free.  Assumes sizeof(void*) is a
    power of two <= 8 and that malloc is at least sizeof(void*)-aligned.
 
    The main reason for this routine is that, as of this writing,
@@ -53,15 +54,15 @@ extern int posix_memalign(void **, size_t, size_t);
    (e.g. gcc/MinGW should be fine).  Our code should be at least as good
    as the MS _aligned_malloc, in any case, according to second-hand
    reports of the algorithm it employs (also based on plain malloc). */
-static void *our_malloc16(size_t n)
+static void *our_malloc(size_t n)
 {
      void *p0, *p;
-     if (!(p0 = malloc(n + 16))) return (void *) 0;
-     p = (void *) (((uintptr_t) p0 + 16) & (~((uintptr_t) 15)));
+     if (!(p0 = malloc(n + MIN_ALIGNMENT))) return (void *) 0;
+     p = (void *) (((uintptr_t) p0 + MIN_ALIGNMENT) & (~((uintptr_t) (MIN_ALIGNMENT - 1))));
      *((void **) p - 1) = p0;
      return p;
 }
-static void our_free16(void *p)
+static void our_free(void *p)
 {
      if (p) free(*((void **) p - 1));
 }
@@ -73,10 +74,10 @@ void *X(kernel_malloc)(size_t n)
 
 #if defined(MIN_ALIGNMENT)
 
-#  if defined(WITH_OUR_MALLOC16) && (MIN_ALIGNMENT == 16)
-     p = our_malloc16(n);
+#  if defined(WITH_OUR_MALLOC)
+     p = our_malloc(n);
 #    undef real_free
-#    define real_free our_free16
+#    define real_free our_free
 
 #  elif defined(__FreeBSD__) && (MIN_ALIGNMENT <= 16)
      /* FreeBSD does not have memalign, but its malloc is 16-byte aligned. */
