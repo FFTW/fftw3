@@ -69,3 +69,13 @@ int X(import_wisdom_from_file)(FILE *input_file)
      X(scanner_destroy)(s);
      return ret;
 }
+
+int X(import_wisdom_from_filename)(const char *filename)
+{
+     FILE *f = fopen(filename, "r");
+     int ret;
+     if (!f) return 0; /* error opening file */
+     ret = X(import_wisdom_from_file)(f);
+     if (fclose(f)) ret = 0; /* error closing file */
+     return ret;
+}

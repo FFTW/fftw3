@@ -20,14 +20,14 @@ few subtle points such as memory allocation, wisdom, and data types
 that deserve closer attention.
 
 @menu
-* Overview of Fortran interface::
-* Reversing array dimensions::
-* FFTW Fortran type reference::
-* Plan execution in Fortran::
-* Allocating aligned memory in Fortran::
-* Accessing the wisdom API from Fortran::
-* FFTW Fortran examples::
-* Defining an FFTW module::
+* Overview of Fortran interface::  
+* Reversing array dimensions::  
+* FFTW Fortran type reference::  
+* Plan execution in Fortran::   
+* Allocating aligned memory in Fortran::  
+* Accessing the wisdom API from Fortran::  
+* FFTW Fortran examples::       
+* Defining an FFTW module::     
 @end menu
 
 @c -------------------------------------------------------
@@ -453,7 +453,20 @@ For example, here is how we would allocate an @twodims{L,M} 2d real array:
   sz = L * M
   p = fftw_alloc_real(sz)
   call c_f_pointer(p, arr, [L,M])
-  @emph{...use arr(i,j) as usual...}
+  @emph{...use arr and arr(i,j) as usual...}
+  call fftw_free(p)
+@end example
+
+and here is an @threedims{L,M,N} 3d complex array:
+
+@example
+  complex(C_DOUBLE_COMPLEX), pointer :: arr(:,:,:)
+  integer(C_SIZE_T) ::  sz
+  type(C_PTR) :: p
+  sz = L * M * N
+  p = fftw_alloc_complex(sz)
+  call c_f_pointer(p, arr, [L,M,N])
+  @emph{...use arr and arr(i,j,k) as usual...}
   call fftw_free(p)
 @end example
 
@@ -464,6 +477,63 @@ it, for in-place real-to-complex transforms.
 @c -------------------------------------------------------
 @node Accessing the wisdom API from Fortran, FFTW Fortran examples, Allocating aligned memory in Fortran, Calling FFTW from Modern Fortran
 @section Accessing the wisdom API from Fortran
+@cindex wisdom
+@cindex saving plans to disk
+
+As explained in @ref{Words of Wisdom-Saving Plans}, FFTW provides a
+``wisdom'' API for saving plans to disk so that they can be recreated
+quickly.  The C API for exporting (@pxref{Wisdom Export}) and
+importing (@pxref{Wisdom Import}) wisdom is somewhat tricky to use
+from Fortran, however, because of differences in file I/O and string
+types between C and Fortran.
+
+@menu
+* Wisdom File Export/Import from Fortran::  
+* Wisdom String Export/Import from Fortran::  
+* Wisdom Generic Export/Import from Fortran::  
+@end menu
+
+@c =========>
+@node Wisdom File Export/Import from Fortran, Wisdom String Export/Import from Fortran, Accessing the wisdom API from Fortran, Accessing the wisdom API from Fortran
+@subsection Wisdom File Export/Import from Fortran
+
+@findex fftw_import wisdom_from_filename
+@findex fftw_export_wisdom_to_filename
+The easiest way to export and import wisdom is to do so using
+@code{fftw_export_wisdom_to_filename} and
+@code{fftw_wisdom_from_filename}.  The only trick is that these
+require you to pass a C string, which is an array of type
+@code{CHARACTER(C_CHAR)} that is terminated by @code{C_NULL_CHAR}.
+You can call them like this:
+
+@example
+  integer(C_INT) ret
+  ret = fftw_export_wisdom_to_filename(C_CHAR_'my_wisdom.dat' // C_NULL_CHAR)
+  ret = fftw_import_wisdom_from_filename(C_CHAR_'my_wisdom.dat' // C_NULL_CHAR)
+@end example
+
+Note that prepending @samp{C_CHAR_} is needed to specify that the
+literal string is of kind @code{C_CHAR}, and we null-terminate the
+string by appending @samp{// C_NULL_CHAR}.  These functions return an
+@code{integer(C_INT)} (@code{ret}) which is @code{0} if an error
+occurred during export/import and nonzero otherwise.
+
+It is also possible to use the lower-level routines
+@code{fftw_export_wisdom_to_file} and
+@code{fftw_import_wisdom_from_file}, which accept parameters of the C
+type @code{FILE*}, expressed in Fortran as @code{type(C_PTR)}.
+However, you are then responsible for creating the @code{FILE*}
+yourself.  You can do this by using @code{iso_c_binding} to define
+Fortran intefaces for the C library functions @code{fopen} and
+@code{fclose}, which is a bit strange in Fortran but workable.
+
+@c =========>
+@node Wisdom String Export/Import from Fortran, Wisdom Generic Export/Import from Fortran, Wisdom File Export/Import from Fortran, Accessing the wisdom API from Fortran
+@subsection Wisdom String Export/Import from Fortran
+
+@c =========>
+@node Wisdom Generic Export/Import from Fortran,  , Wisdom String Export/Import from Fortran, Accessing the wisdom API from Fortran
+@subsection Wisdom Generic Export/Import from Fortran
 
 @c -------------------------------------------------------
 @node FFTW Fortran examples, Defining an FFTW module, Accessing the wisdom API from Fortran, Calling FFTW from Modern Fortran

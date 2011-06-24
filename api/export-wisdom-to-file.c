@@ -27,3 +27,14 @@ void X(export_wisdom_to_file)(FILE *output_file)
      plnr->adt->exprt(plnr, p);
      X(printer_destroy)(p);
 }
+
+int X(export_wisdom_to_filename)(const char *filename)
+{
+     FILE *f = fopen(filename, "w");
+     int ret;
+     if (!f) return 0; /* error opening file */
+     X(export_wisdom_to_file)(f);
+     ret = !ferror(f);
+     if (fclose(f)) ret = 0; /* error closing file */
+     return ret;
+}

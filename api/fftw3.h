@@ -319,11 +319,13 @@ FFTW_EXTERN void X(plan_with_nthreads)(int nthreads);			   \
 FFTW_EXTERN int X(init_threads)(void);					   \
 FFTW_EXTERN void X(cleanup_threads)(void);				   \
 									   \
+FFTW_EXTERN int X(export_wisdom_to_filename)(const char *filename);	   \
 FFTW_EXTERN void X(export_wisdom_to_file)(FILE *output_file);		   \
 FFTW_EXTERN char *X(export_wisdom_to_string)(void);			   \
 FFTW_EXTERN void X(export_wisdom)(X(write_char_func) write_char,   	   \
                                   void *data);				   \
 FFTW_EXTERN int X(import_system_wisdom)(void);				   \
+FFTW_EXTERN int X(import_wisdom_from_filename)(const char *filename);	   \
 FFTW_EXTERN int X(import_wisdom_from_file)(FILE *input_file);		   \
 FFTW_EXTERN int X(import_wisdom_from_string)(const char *input_string);	   \
 FFTW_EXTERN int X(import_wisdom)(X(read_char_func) read_char, void *data); \

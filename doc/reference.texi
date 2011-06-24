@@ -1678,11 +1678,13 @@ plans from disk.  This mechanism is called @dfn{wisdom}.
 @subsection Wisdom Export
 
 @example
+int fftw_export_wisdom_to_filename(const char *filename);
 void fftw_export_wisdom_to_file(FILE *output_file);
 char *fftw_export_wisdom_to_string(void);
 void fftw_export_wisdom(void (*write_char)(char c, void *), void *data);
 @end example
 @findex fftw_export_wisdom
+@findex fftw_export_wisdom_to_filename
 @findex fftw_export_wisdom_to_file
 @findex fftw_export_wisdom_to_string
 
@@ -1697,12 +1699,17 @@ medium, as specified by the callback function
 @code{write_char}. @code{write_char} is a @code{putc}-like function that
 writes the character @code{c} to some output; its second parameter is
 the @code{data} pointer passed to @code{fftw_export_wisdom}.  For
-convenience, the following two ``wrapper'' routines are provided:
+convenience, the following three ``wrapper'' routines are provided:
 
-@code{fftw_export_wisdom_to_file} writes the wisdom to the
-current position in @code{output_file}, which should be open with write
-permission.  Upon exit, the file remains open and is positioned at the
-end of the wisdom data.
+@code{fftw_export_wisdom_to_filename} writes wisdom to a file named
+@code{filename} (which is created or overwritten), returning @code{1}
+on success and @code{0} on failure.  A lower-level function, which
+requires you to open and close the file yourself (e.g. if you want to
+write wisdom to a portion of a larger file) is
+@code{fftw_export_wisdom_to_file}.  This writes the wisdom to the
+current position in @code{output_file}, which should be open with
+write permission; upon exit, the file remains open and is positioned
+at the end of the wisdom data.
 
 @code{fftw_export_wisdom_to_string} returns a pointer to a
 @code{NULL}-terminated string holding the wisdom data. This string is
@@ -1719,12 +1726,13 @@ that is insensitive to white space.
 
 @example
 int fftw_import_system_wisdom(void);
-int fftw_import_wisdom_from_file(FILE *input_file);
+int fftw_import_wisdom_from_filename(const char *filename);
 int fftw_import_wisdom_from_string(const char *input_string);
 int fftw_import_wisdom(int (*read_char)(void *), void *data);
 @end example
 @findex fftw_import_wisdom
 @findex fftw_import_system_wisdom
+@findex fftw_import_wisdom_from_filename
 @findex fftw_import_wisdom_from_file
 @findex fftw_import_wisdom_from_string
 
@@ -1740,12 +1748,15 @@ input; its parameter is the @code{data} pointer passed to
 @code{fftw_import_wisdom}. If the end of the input data is reached
 (which should never happen for valid data), @code{read_char} should
 return @code{EOF} (as defined in @code{<stdio.h>}).  For convenience,
-the following two ``wrapper'' routines are provided:
+the following three ``wrapper'' routines are provided:
 
-@code{fftw_import_wisdom_from_file} reads wisdom from the current
-position in @code{input_file}, which should be open with read
-permission.  Upon exit, the file remains open, but the position of the
-read pointer is unspecified.
+@code{fftw_import_wisdom_from_filename} reads wisdom from a file named
+@code{filename}.  A lower-level function, which requires you to open
+and close the file yourself (e.g. if you want to read wisdom from a
+portion of a larger file) is @code{fftw_import_wisdom_from_file}. This
+reads wisdom from the current position in @code{input_file} (which
+should be open with read permission); upon exit, the file remains
+open, but the position of the read pointer is unspecified.
 
 @code{fftw_import_wisdom_from_string} reads wisdom from the
 @code{NULL}-terminated string @code{input_string}.

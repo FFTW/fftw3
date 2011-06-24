@@ -339,17 +339,18 @@ Whenever you create a plan, the FFTW planner accumulates wisdom, which
 is information sufficient to reconstruct the plan.  After planning,
 you can save this information to disk by means of the function:
 @example
-void fftw_export_wisdom_to_file(FILE *output_file);
+int fftw_export_wisdom_to_filename(const char *filename);
 @end example
-@findex fftw_export_wisdom_to_file
+@findex fftw_export_wisdom_to_filename
+(This function returns non-zero on success.)
 
 The next time you run the program, you can restore the wisdom with
-@code{fftw_import_wisdom_from_file} (which returns non-zero on success),
+@code{fftw_import_wisdom_from_filename} (which also returns non-zero on success),
 and then recreate the plan using the same flags as before.
 @example
-int fftw_import_wisdom_from_file(FILE *input_file);
+int fftw_import_wisdom_from_filename(const char *filename);
 @end example
-@findex fftw_import_wisdom_from_file
+@findex fftw_import_wisdom_from_filename
 
 Wisdom is automatically used for any size to which it is applicable, as
 long as the planner flags are not more ``patient'' than those with which
