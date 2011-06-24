@@ -10,8 +10,8 @@ endif
 
 CC=@MPICC@
 
-EXTRADIST = testsched.c f03api.sh f03-wrap.sh genf03-wrap.sh
-BUILT_SOURCES = fftw3-mpi.f03 f03-wrap.c
+EXTRADIST = testsched.c f03api.sh f03-wrap.sh genf03-wrap.sh fftw3-mpi.f03.in
+BUILT_SOURCES = fftw3-mpi.f03.in fftw3-mpi.f03 f03-wrap.c
 
 TRANSPOSE_SRC = transpose-alltoall.c transpose-pairwise.c transpose-recurse.c transpose-problem.c transpose-solve.c mpi-transpose.h
 DFT_SRC = dft-serial.c dft-rank-geq2.c dft-rank-geq2-transposed.c dft-rank1.c dft-rank1-bigvec.c dft-problem.c dft-solve.c mpi-dft.h
@@ -73,9 +73,12 @@ smallcheck: mpi-bench$(EXEEXT)
 
 endif
 
+fftw3-mpi.f03: fftw3-mpi.f03.in
+	sed 's/C_MPI_FINT/@C_MPI_FINT@/' $(srcdir)/fftw3-mpi.f03.in > $@
+
 if MAINTAINER_MODE
 
-fftw3-mpi.f03: fftw3-mpi.h f03api.sh $(top_srcdir)/api/genf03.pl
+fftw3-mpi.f03.in: fftw3-mpi.h f03api.sh $(top_srcdir)/api/genf03.pl
 	sh $(srcdir)/f03api.sh > $@
 
 f03-wrap.c: fftw3-mpi.h f03-wrap.sh genf03-wrap.pl

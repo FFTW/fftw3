@@ -118,7 +118,12 @@ sub canonicalize_type {
     "fftwl_read_char_func" => "type(C_FUNPTR), value",
     "fftwq_read_char_func" => "type(C_FUNPTR), value",
 
-    "MPI_Comm" => "integer, value"
+    # Although the MPI standard defines this type as simply "integer",
+    # if we use integer without a 'C_' kind in a bind(C) interface then
+    # gfortran complains.  Instead, since MPI also requires the C type
+    # MPI_Fint to match Fortran integers, we use the size of this type
+    # (extracted by configure and substituted by the Makefile).
+    "MPI_Comm" => "integer(C_MPI_FINT), value"
     );
 
 while (<>) {
