@@ -531,7 +531,56 @@ Fortran intefaces for the C library functions @code{fopen} and
 @node Wisdom String Export/Import from Fortran, Wisdom Generic Export/Import from Fortran, Wisdom File Export/Import from Fortran, Accessing the wisdom API from Fortran
 @subsection Wisdom String Export/Import from Fortran
 
+@findex fftw_export_wisdom_to_string
+Dealing with FFTW's C string export/import is a bit more painful.  In
+particular, the @code{fftw_export_wisdom_to_string} function requires
+you to deal with a dynamically allocated C string.  To get its length,
+you must define an interface to the C @code{strlen} function, and to
+deallocate it you must define an interface to C @code{free}:
 
+@example
+  use, intrinsic :: iso_c_binding
+  interface
+    integer(C_INT) function strlen(s) bind(C, name='strlen')
+      import
+      type(C_PTR), value :: s
+    end function strlen
+    subroutine free(p) bind(C, name='free')
+      import
+      type(C_PTR), value :: p
+    end subroutine free
+  end interface
+@end example
+
+Given these definitions, you can then export wisdom to a Fortran
+character array:
+
+@example
+  character(C_CHAR), pointer :: s(:)
+  integer(C_SIZE_T) :: slen
+  type(C_PTR) :: p
+  p = fftw_export_wisdom_to_string()
+  if (.not. c_associated(p)) stop 'error exporting wisdom'
+  slen = strlen(p)
+  call c_f_pointer(p, s, [slen+1])
+  ...
+  call free(p)
+@end example
+@findex c_associated
+@findex c_f_pointer
+
+Note that @code{slen} is the length of the C string, but the length of
+the array is @code{slen+1} because it includes the terminating null
+character.  (You can omit the @samp{+1} if you don't want @code{s} to
+include the null character.) The standard @code{c_associated} function
+checks whether @code{p} is a null pointer, which is returned by
+@code{fftw_export_wisdom_to_string} if there was an error.
+
+@findex fftw_import_wisdom_from_string
+To import wisdom from a string, use
+@code{fftw_import_wisdom_from_string} as usual; note that the argument
+of this function must be a @code{character(C_CHAR)} that is terminated
+by the @code{C_NULL_CHAR} character, like the @code{s} array above.
 
 @c =========>
 @node Wisdom Generic Export/Import from Fortran,  , Wisdom String Export/Import from Fortran, Accessing the wisdom API from Fortran
