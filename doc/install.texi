@@ -346,7 +346,7 @@ If you have Objective Caml installed (along with recent versions of
 GNU @code{autoconf}, @code{automake}, and @code{libtool}), then you
 can change the set of codelets that are generated or play with the
 generation options.  The set of generated codelets is specified by the
-@code{{dft,rdft}/{codelets,simd}/*/Makefile.am} files.  For example, you can add
+@code{@{dft,rdft@}/@{codelets,simd@}/*/Makefile.am} files.  For example, you can add
 efficient REDFT codelets of small sizes by modifying
 @code{rdft/codelets/r2r/Makefile.am}.
 @cindex REDFT
