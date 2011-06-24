@@ -28,9 +28,9 @@ perl -pe 'if (/#define +([A-Z0-9_]+) +\(([0-9]+)U? *<< *([0-9]+)\)/) { print "\n
 for p in "" "f" "l"; do
     echo
     cat <<EOF
-  type, bind(C) :: fftw${p}_ddim
+  type, bind(C) :: fftw${p}_mpi_ddim
      integer(C_INTPTR_T) n, ib, ob
-  end type fftw${p}_ddim
+  end type fftw${p}_mpi_ddim
 EOF
 
     echo

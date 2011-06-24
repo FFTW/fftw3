@@ -27,7 +27,7 @@
 #include "mpi-rdft2.h"
 
 /* Convert API flags to internal MPI flags. */
-#define MPI_FLAGS(f) ((f) >> 28)
+#define MPI_FLAGS(f) ((f) >> 27)
 
 /*************************************************************************/
 

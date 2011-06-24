@@ -209,10 +209,10 @@ FFTW_MPI_DEFINE_API(FFTW_MPI_MANGLE_LONG_DOUBLE, FFTW_MANGLE_LONG_DOUBLE, long d
 #define FFTW_MPI_DEFAULT_BLOCK (0)
 
 /* MPI-specific flags */
-#define FFTW_MPI_SCRAMBLED_IN (1U << 28)
-#define FFTW_MPI_SCRAMBLED_OUT (1U << 29)
-#define FFTW_MPI_TRANSPOSED_IN (1U << 30)
-#define FFTW_MPI_TRANSPOSED_OUT (1U << 31)
+#define FFTW_MPI_SCRAMBLED_IN (1U << 27)
+#define FFTW_MPI_SCRAMBLED_OUT (1U << 28)
+#define FFTW_MPI_TRANSPOSED_IN (1U << 29)
+#define FFTW_MPI_TRANSPOSED_OUT (1U << 30)
 
 #ifdef __cplusplus
 }  /* extern "C" */
