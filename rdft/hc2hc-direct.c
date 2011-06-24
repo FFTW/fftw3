@@ -100,8 +100,9 @@ static void apply_buf(const plan *ego_, R *IO)
      INT mb = ego->mb, me = ego->me, ms = ego->ms;
      INT batchsz = compute_batchsize(r);
      R *buf;
+     size_t bufsz = r * batchsz * 2 * sizeof(R);
 
-     STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
+     BUF_ALLOC(R *, buf, bufsz);
 
      for (i = 0; i < v; ++i, IO += ego->vs) {
 	  R *IOp = IO;
@@ -117,7 +118,7 @@ static void apply_buf(const plan *ego_, R *IO)
 	  cldm->apply((plan *) cldm, IO + ms * (m/2), IO + ms * (m/2));
      }
 
-     STACK_FREE(buf);
+     BUF_FREE(buf, bufsz);
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)

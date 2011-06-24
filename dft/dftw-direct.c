@@ -105,8 +105,9 @@ static void apply_buf(const plan *ego_, R *rio, R *iio)
      INT batchsz = compute_batchsize(r);
      R *buf;
      INT mb = ego->mb, me = ego->me;
+     size_t bufsz = r * batchsz * 2 * sizeof(R);
 
-     STACK_MALLOC(R *, buf, r * batchsz * 2 * sizeof(R));
+     BUF_ALLOC(R *, buf, bufsz);
 
      for (i = 0; i < v; ++i, rio += ego->vs, iio += ego->vs) {
 	  for (j = mb; j + batchsz < me; j += batchsz) 
@@ -115,7 +116,7 @@ static void apply_buf(const plan *ego_, R *rio, R *iio)
 	  dobatch(ego, rio, iio, j, me, buf);
      }
 
-     STACK_FREE(buf);
+     BUF_FREE(buf, bufsz);
 }
 
 /*************************************************************

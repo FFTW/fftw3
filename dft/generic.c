@@ -75,8 +75,9 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      INT n = ego->n, is = ego->is, os = ego->os;
      const R *W = ego->td->W;
      E *buf;
+     size_t bufsz = n * 2 * sizeof(E);
 
-     STACK_MALLOC(E *, buf, n * 2 * sizeof(E));
+     BUF_ALLOC(E *, buf, bufsz);
      hartley(n, ri, ii, is, buf, ro, io);
 
      for (i = 1; i + i < n; ++i) {
@@ -86,7 +87,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 	  W += n - 1;
      }
 
-     STACK_FREE(buf);
+     BUF_FREE(buf, bufsz);
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)

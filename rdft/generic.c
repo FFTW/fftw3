@@ -76,8 +76,9 @@ static void apply_r2hc(const plan *ego_, R *I, R *O)
      INT n = ego->n, is = ego->is, os = ego->os;
      const R *W = ego->td->W;
      E *buf;
+     size_t bufsz = n * sizeof(E);
 
-     STACK_MALLOC(E *, buf, n * sizeof(E));
+     BUF_ALLOC(E *, buf, bufsz);
      hartley_r2hc(n, I, is, buf, O);
 
      for (i = 1; i + i < n; ++i) {
@@ -85,7 +86,7 @@ static void apply_r2hc(const plan *ego_, R *I, R *O)
 	  W += n - 1;
      }
 
-     STACK_FREE(buf);
+     BUF_FREE(buf, bufsz);
 }
 
 
@@ -130,8 +131,9 @@ static void apply_hc2r(const plan *ego_, R *I, R *O)
      INT n = ego->n, is = ego->is, os = ego->os;
      const R *W = ego->td->W;
      E *buf;
+     size_t bufsz = n * sizeof(E);
 
-     STACK_MALLOC(E *, buf, n * sizeof(E));
+     BUF_ALLOC(E *, buf, bufsz);
      hartley_hc2r(n, I, is, buf, O);
 
      for (i = 1; i + i < n; ++i) {
@@ -139,7 +141,7 @@ static void apply_hc2r(const plan *ego_, R *I, R *O)
 	  W += n - 1;
      }
 
-     STACK_FREE(buf);
+     BUF_FREE(buf, bufsz);
 }
 
 

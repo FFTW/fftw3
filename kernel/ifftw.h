@@ -150,23 +150,47 @@ void *alloca(size_t);
 #endif
 
 #  ifdef MIN_ALIGNMENT
-#    define STACK_MALLOC(T, p, x)				\
+#    define STACK_MALLOC(T, p, n)				\
      {								\
-         p = (T)alloca((x) + MIN_ALIGNMENT);			\
+         p = (T)alloca((n) + MIN_ALIGNMENT);			\
          p = (T)(((uintptr_t)p + (MIN_ALIGNMENT - 1)) &	\
                (~(uintptr_t)(MIN_ALIGNMENT - 1)));		\
      }
-#    define STACK_FREE(x) 
+#    define STACK_FREE(n) 
 #  else /* HAVE_ALLOCA && !defined(MIN_ALIGNMENT) */
-#    define STACK_MALLOC(T, p, x) p = (T)alloca(x) 
-#    define STACK_FREE(x) 
+#    define STACK_MALLOC(T, p, n) p = (T)alloca(n) 
+#    define STACK_FREE(n) 
 #  endif
 
 #else /* ! HAVE_ALLOCA */
    /* use malloc instead of alloca */
-#  define STACK_MALLOC(T, p, x) p = (T)MALLOC(x, OTHER)
-#  define STACK_FREE(x) X(ifree)(x)
+#  define STACK_MALLOC(T, p, n) p = (T)MALLOC(n, OTHER)
+#  define STACK_FREE(n) X(ifree)(n)
 #endif /* ! HAVE_ALLOCA */
+
+/* allocation of buffers.  If these grow too large use malloc(), else
+   use STACK_MALLOC (hopefully reducing to alloca()). */
+
+/* 64KiB ought to be enough for anybody */
+#define MAX_STACK_ALLOC ((size_t)64 * 1024)
+
+#define BUF_ALLOC(T, p, n)			\
+{						\
+     if (n < MAX_STACK_ALLOC) {			\
+	  STACK_MALLOC(T, p, n);		\
+     } else {					\
+	  p = (T)MALLOC(n, BUFFERS);		\
+     }						\
+}
+
+#define BUF_FREE(p, n)				\
+{						\
+     if (n < MAX_STACK_ALLOC) {			\
+	  STACK_FREE(p);			\
+     } else {					\
+	  X(ifree)(p);				\
+     }						\
+}
 
 /*-----------------------------------------------------------------------*/
 /* define uintptr_t if it is not already defined */
