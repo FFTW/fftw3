@@ -851,6 +851,11 @@ most useful.
 @node The Discrete Hartley Transform,  , Real even/odd DFTs (cosine/sine transforms), More DFTs of Real Data
 @subsection The Discrete Hartley Transform
 
+If you are planning to use the DHT because you've heard that it is
+``faster'' than the DFT (FFT), @strong{stop here}.  The DHT is not
+faster than the DFT.  That story is an old but enduring misconception
+that was debunked in 1987.
+
 The discrete Hartley transform (DHT) is an invertible linear transform
 closely related to the DFT.  In the DFT, one multiplies each input by
 @math{cos - i * sin} (a complex exponential), whereas in the DHT each
@@ -862,19 +867,10 @@ positive @code{n}) can be specified by an r2r kind of @code{FFTW_DHT}.
 @cindex discrete Hartley transform
 @cindex DHT
 
-
-If you are planning to use the DHT because you've heard that it is
-``faster'' than the DFT (FFT), @strong{stop here}.  That story is an old
-but enduring misconception that was debunked in 1987: a properly
-designed real-input FFT (such as FFTW's) has no more operations in
-general than an FHT.  Moreover, in FFTW, the DHT is ordinarily
-@emph{slower} than the DFT for composite sizes (see below).
-
 Like the DFT, in FFTW the DHT is unnormalized, so computing a DHT of
 size @code{n} followed by another DHT of the same size will result in
 the original array multiplied by @code{n}.
 @cindex normalization
-
 
 The DHT was originally proposed as a more efficient alternative to the
 DFT for real data, but it was subsequently shown that a specialized DFT

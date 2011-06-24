@@ -37,5 +37,3 @@ TODO before FFTW-$2\pi$:
   to allow SIMD to be used.
 
 * memoize triggen.
-
-* eliminate alignment hacks, which ought to be obsolete by now.

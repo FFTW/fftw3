@@ -43,7 +43,7 @@ typedef struct {
 } PD;
 
 static void *spawn_apply(spawn_data *d)
-WITH_ALIGNED_STACK({
+{
      PD *ego = (PD *) d->data;
      INT its = ego->its;
      INT ots = ego->ots;
@@ -54,7 +54,7 @@ WITH_ALIGNED_STACK({
 		ego->ri + thr_num * its, ego->ii + thr_num * its,
 		ego->ro + thr_num * ots, ego->io + thr_num * ots);
      return 0;
-})
+}
 
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {

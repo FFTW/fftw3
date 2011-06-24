@@ -23,7 +23,7 @@
 static plan *mkplan0(planner *plnr, unsigned flags, 
 		     const problem *prb, int hash_info, 
 		     wisdom_state_t wisdom_state)
-WITH_ALIGNED_STACK({
+{
      /* map API flags into FFTW flags */
      X(mapflags)(plnr, flags);
 
@@ -32,12 +32,7 @@ WITH_ALIGNED_STACK({
 
      /* create plan */
      return plnr->adt->mkplan(plnr, prb);
-})
-
-static void aligned_awake(plan *ego, enum wakefulness wakefulness)
-WITH_ALIGNED_STACK({
-     X(plan_awake)(ego, wakefulness);
-})
+}
 
 static unsigned force_estimator(unsigned flags)
 {
@@ -143,10 +138,10 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	  if (sizeof(trigreal) > sizeof(R)) {
 	       /* this is probably faster, and we have enough trigreal
 		  bits to maintain accuracy */
-	       aligned_awake(p->pln, AWAKE_SQRTN_TABLE);
+	       X(plan_awake)(p->pln, AWAKE_SQRTN_TABLE);
 	  } else {
 	       /* more accurate */
-	       aligned_awake(p->pln, AWAKE_SINCOS);
+	       X(plan_awake)(p->pln, AWAKE_SINCOS);
 	  }
 	  
 	  /* we don't use pln for p->pln, above, since by re-creating the

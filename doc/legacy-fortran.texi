@@ -85,7 +85,7 @@ Fortran?}.
 
 @item
 Legacy Fortran cannot use the @code{fftw_malloc} dynamic-allocation routine.
-If you want to exploit the SIMD FFTW (@pxref{Data Alignment}), you'll
+If you want to exploit the SIMD FFTW (@pxref{SIMD alignment and fftw_malloc}), you'll
 need to figure out some other way to ensure that your arrays are at
 least 16-byte aligned.
 

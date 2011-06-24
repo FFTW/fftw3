@@ -5,8 +5,8 @@ fftw3_TEXINFOS = acknowledgements.texi cindex.texi fftw3.texi findex.texi instal
 
 DVIPS = dvips -Pwww
 
-fftw3.dvi: rfftwnd.eps
-fftw3.pdf: rfftwnd.pdf
+fftw3.dvi:: rfftwnd.eps
+fftw3.pdf:: rfftwnd.pdf
 
 rfftwnd.eps: rfftwnd.fig
 	fig2dev -L eps -m .7 ${srcdir}/rfftwnd.fig rfftwnd.eps

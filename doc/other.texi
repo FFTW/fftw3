@@ -1,30 +1,15 @@
 @node Other Important Topics, FFTW Reference, Tutorial, Top
 @chapter Other Important Topics
 @menu
-* Data Alignment::              
+* SIMD alignment and fftw_malloc::  
 * Multi-dimensional Array Format::  
 * Words of Wisdom-Saving Plans::  
 * Caveats in Using Wisdom::     
 @end menu
 
 @c ------------------------------------------------------------
-@node Data Alignment, Multi-dimensional Array Format, Other Important Topics, Other Important Topics
-@section Data Alignment
-@cindex alignment
-
-@menu
-* SIMD alignment and fftw_malloc::  
-* Stack alignment on x86::      
-@end menu
-
-In order to get the best performance from FFTW, one needs to be
-somewhat aware of two problems related to data alignment on x86
-(Pentia) architectures: alignment of allocated arrays (for use with
-SIMD acceleration), and alignment of the stack.
-
-@c =========>
-@node SIMD alignment and fftw_malloc, Stack alignment on x86, Data Alignment, Data Alignment
-@subsection SIMD alignment and fftw_malloc
+@node SIMD alignment and fftw_malloc, Multi-dimensional Array Format, Other Important Topics, Other Important Topics
+@section SIMD alignment and fftw_malloc
 
 SIMD, which stands for ``Single Instruction Multiple Data,'' is a set of
 special operations supported by some processors to perform a single
@@ -40,7 +25,6 @@ SIMD instructions on any of these systems.
 @cindex AltiVec
 @cindex MIPS PS
 @cindex precision
-
 
 A program linking to an FFTW library compiled with SIMD support can
 obtain a nonnegligible speedup for most complex and r2c/c2r
@@ -69,39 +53,8 @@ happens not to be properly aligned, FFTW will not use the SIMD
 extensions.
 @cindex C++
 
-@c =========>
-@node Stack alignment on x86,  , SIMD alignment and fftw_malloc, Data Alignment
-@subsection Stack alignment on x86
-
-On the Pentium and subsequent x86 processors, there is a substantial
-performance penalty if double-precision variables are not stored
-8-byte aligned; a factor of two or more is not unusual.
-Unfortunately, the stack (the place that local variables and
-subroutine arguments live) is not guaranteed by the Intel ABI to be
-8-byte aligned.
-
-Recent versions of @code{gcc} (as well as most other compilers, we are
-told, such as Intel's, Metrowerks', and Microsoft's) are able to keep
-the stack 8-byte aligned; @code{gcc} does this by default (see
-@code{-mpreferred-stack-boundary} in the @code{gcc} documentation).
-If you are not certain whether your compiler maintains stack alignment
-by default, it is a good idea to make sure.
-
-Unfortunately, @code{gcc} only @emph{preserves} the stack
-alignment---as a result, if the stack starts off misaligned, it will
-always be misaligned, with a disastrous effect on performance (in
-double precision).  To prevent this, FFTW includes hacks to align its
-own stack if necessary, so it should perform well even if you call it
-from a program with a misaligned stack.  Currently, our hacks support
-@code{gcc} and the Intel C compiler; if you use another compiler you
-are on your own.  Fortunately, recent versions of glibc (on GNU/Linux)
-provide a properly-aligned starting stack, but this was not the case
-with a number of older versions, and we are not certain of the
-situation on other operating systems.  Hopefully, as time goes by this
-will become less of a concern.
-
 @c ------------------------------------------------------------
-@node Multi-dimensional Array Format, Words of Wisdom-Saving Plans, Data Alignment, Other Important Topics
+@node Multi-dimensional Array Format, Words of Wisdom-Saving Plans, SIMD alignment and fftw_malloc, Other Important Topics
 @section Multi-dimensional Array Format
 
 This section describes the format in which multi-dimensional arrays

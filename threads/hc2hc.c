@@ -34,13 +34,13 @@ typedef struct {
 } PD;
 
 static void *spawn_apply(spawn_data *d)
-WITH_ALIGNED_STACK({
+{
      PD *ego = (PD *) d->data;
      
      plan_hc2hc *cldw = (plan_hc2hc *) (ego->cldws[d->thr_num]);
      cldw->apply((plan *) cldw, ego->IO);
      return 0;
-})
+}
 
 static void apply_dit(const plan *ego_, R *I, R *O)
 {

@@ -147,9 +147,10 @@ references.
 
 The rest of this manual is organized as follows.  We first discuss the
 sequential (single-processor) implementation.  We start by describing
-the basic interface/features of FFTW in @ref{Tutorial}.  The following
-chapter discusses @ref{Other Important Topics}, including @ref{Data
-Alignment}, the storage scheme of multi-dimensional arrays
+the basic interface/features of FFTW in @ref{Tutorial}.  
+Next, @ref{Other Important Topics} discusses data alignment
+(@pxref{SIMD alignment and fftw_malloc}),
+the storage scheme of multi-dimensional arrays
 (@pxref{Multi-dimensional Array Format}), and FFTW's mechanism for
 storing plans on disk (@pxref{Words of Wisdom-Saving Plans}).  Next,
 @ref{FFTW Reference} provides comprehensive documentation of all

@@ -143,7 +143,7 @@ void fftw_free(void *p);
 These are functions that behave identically to @code{malloc} and
 @code{free}, except that they guarantee that the returned pointer obeys
 any special alignment restrictions imposed by any algorithm in FFTW
-(e.g. for SIMD acceleration).  @xref{Data Alignment}.
+(e.g. for SIMD acceleration).  @xref{SIMD alignment and fftw_malloc}.
 @cindex alignment
 
 

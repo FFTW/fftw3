@@ -1,5 +1,5 @@
 \input texinfo    @c -*-texinfo-*-
-@c Update by C-x C-e on: (texinfo-multiple-files-update "fftw3.texi")
+@c Update by C-x C-e on: (texinfo-multiple-files-update "fftw3.texi" nil t)
 @setfilename fftw3.info
 @include version.texi
 @settitle FFTW @value{VERSION}
