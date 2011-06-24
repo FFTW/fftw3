@@ -435,11 +435,11 @@ problem, so you should initialize your input data after creating the
 plan.  The only exceptions to this are the @code{FFTW_ESTIMATE} and
 @code{FFTW_WISDOM_ONLY} flags, as mentioned below.
 
-In all cases, if wisdom is available for the given problem that was
-created with equal-or-greater planning rigor, then it is used instead.
-For example, in @code{FFTW_ESTIMATE} mode any available wisdom is
-used, whereas in @code{FFTW_PATIENT} mode only wisdom created in
-patient or exhaustive mode can be used.  @xref{Words of Wisdom-Saving
+In all  cases, if  wisdom is  available for the  given problem  that was
+created  with equal-or-greater  planning rigor,  then the  more rigorous
+wisdom is used.  For example, in @code{FFTW_ESTIMATE} mode any available
+wisdom is used, whereas  in @code{FFTW_PATIENT} mode only wisdom created
+in patient or exhaustive mode can be used.  @xref{Words of Wisdom-Saving
 Plans}.
 
 @subsubheading Planning-rigor flags

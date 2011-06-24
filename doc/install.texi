@@ -211,23 +211,19 @@ have a cycle counter but still really want an optimized plan regardless
 of the time).  @xref{Cycle Counters}.
 
 @item
-@code{--enable-sse}, @code{--enable-sse2}, @code{--enable-altivec},
-@code{--enable-mips-ps}:
-Enable the compilation of SIMD code for SSE (Pentium III+), SSE2
-(Pentium IV+), AltiVec (PowerPC G4+), or MIPS PS.  SSE, AltiVec, and MIPS PS
-only work with @code{--enable-float} (above), while SSE2 only works in double
-precision (the default).  The resulting code will @emph{still work} on
-earlier CPUs lacking the SIMD extensions (SIMD is automatically
-disabled, although the FFTW library is still larger).
+@code{--enable-sse}, @code{--enable-sse2}, @code{--enable-avx},
+@code{--enable-altivec}, @code{--enable-mips-ps}: Enable the compilation
+of SIMD code for SSE (Pentium III+), SSE2 (Pentium IV+), AVX (Sandy
+Bridge, Interlagos), AltiVec (PowerPC G4+), or MIPS PS.  SSE, AltiVec,
+and MIPS PS only work with @code{--enable-float} (above).
+SSE2 works in both single and double precision.  The resulting code will
+@emph{still work} on earlier CPUs lacking the SIMD extensions (SIMD is
+automatically disabled, although the FFTW library is still larger).
 @itemize @minus
 @item
 These options require a compiler supporting SIMD extensions, and
-compiler support is still a bit flaky: see the FFTW FAQ for a list of
+compiler support is always a bit flaky: see the FFTW FAQ for a list of
 compiler versions that have problems compiling FFTW.
-@item
-With the Linux kernel, you may have to recompile the kernel with the
-option to support SSE/SSE2/AltiVec (see the ``Processor type and
-features'' settings).
 @item
 With AltiVec and @code{gcc}, you may have to use the
 @code{-mabi=altivec} option when compiling any code that links to FFTW,
@@ -350,9 +346,7 @@ If you have Objective Caml installed (along with recent versions of
 GNU @code{autoconf}, @code{automake}, and @code{libtool}), then you
 can change the set of codelets that are generated or play with the
 generation options.  The set of generated codelets is specified by the
-@code{dft/codelets/*/Makefile.am},
-@code{dft/simd/codelets/Makefile.am}, and
-@code{rdft/codelets/*/Makefile.am} files.  For example, you can add
+@code{{dft,rdft}/{codelets,simd}/*/Makefile.am} files.  For example, you can add
 efficient REDFT codelets of small sizes by modifying
 @code{rdft/codelets/r2r/Makefile.am}.
 @cindex REDFT

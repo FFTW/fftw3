@@ -15,7 +15,7 @@ SIMD, which stands for ``Single Instruction Multiple Data,'' is a set of
 special operations supported by some processors to perform a single
 operation on several numbers (usually 2 or 4) simultaneously.  SIMD
 floating-point instructions are available on several popular CPUs:
-SSE/SSE2 (single/double precision) on Pentium III and higher and on
+SSE/SSE2/AVX on Pentium III and higher and on
 AMD64, AltiVec (single precision) on some PowerPCs (Apple G4 and
 higher), and MIPS Paired Single.  FFTW can be compiled to support the
 SIMD instructions on any of these systems.
@@ -60,7 +60,7 @@ extensions.
 This section describes the format in which multi-dimensional arrays
 are stored in FFTW.  We felt that a detailed discussion of this topic
 was necessary.  Since several different formats are common, this topic
-is often a source of confusion among users.
+is often a source of confusion.
 
 @menu
 * Row-major Format::            

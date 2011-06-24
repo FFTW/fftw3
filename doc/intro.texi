@@ -18,7 +18,7 @@ transform (DFT) and various special cases thereof.
 
 @item  FFTW supports arbitrary multi-dimensional data.
 
-@item  FFTW supports the SSE, SSE2, Altivec, and MIPS PS instruction
+@item  FFTW supports the SSE, SSE2, AVX, Altivec, and MIPS PS instruction
        sets.
 
 @item  FFTW @value{VERSION} includes parallel (multi-threaded) transforms

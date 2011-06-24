@@ -1,12 +1,9 @@
 SUBDIRS = FAQ
 
 info_TEXINFOS = fftw3.texi
-fftw3_TEXINFOS = acknowledgements.texi cindex.texi fftw3.texi findex.texi install.texi intro.texi legacy-fortran.texi license.texi modern-fortran.texi mpi.texi other.texi reference.texi threads.texi tutorial.texi upgrading.texi version.texi
+fftw3_TEXINFOS = acknowledgements.texi cindex.texi fftw3.texi findex.texi install.texi intro.texi legacy-fortran.texi license.texi modern-fortran.texi mpi.texi other.texi reference.texi threads.texi tutorial.texi upgrading.texi version.texi rfftwnd.pdf rfftwnd.eps
 
 DVIPS = dvips -Pwww
-
-fftw3.dvi:: rfftwnd.eps
-fftw3.pdf:: rfftwnd.pdf
 
 rfftwnd.eps: rfftwnd.fig
 	fig2dev -L eps -m .7 ${srcdir}/rfftwnd.fig rfftwnd.eps
@@ -22,7 +19,7 @@ equation-redft00.png equation-redft01.png equation-redft10.png		\
 equation-redft11.png equation-rodft00.png equation-rodft01.png		\
 equation-rodft10.png equation-rodft11.png
 
-EXTRA_DIST = f77_wisdom.f fftw3.pdf html rfftwnd.fig rfftwnd.eps $(EQN_IMAGES)
+EXTRA_DIST = f77_wisdom.f fftw3.pdf html rfftwnd.fig rfftwnd.eps rfftwnd.pdf $(EQN_IMAGES)
 
 html: $(fftw3_TEXINFOS) $(EQN_IMAGES) rfftwnd-for-html.png
 	$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \

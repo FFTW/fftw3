@@ -63,12 +63,12 @@ The basic usage of FFTW to compute a one-dimensional DFT of size
 @}
 @end example
 
-(When you compile, you must also link with the @code{fftw3} library,
-e.g. @code{-lfftw3 -lm} on Unix systems.)
+You must link this code with the @code{fftw3} library.  On Unix systems,
+link with @code{-lfftw3 -lm}.
 
-First you allocate the input and output arrays.  You can allocate them
-in any way that you like, but we recommend using @code{fftw_malloc},
-which behaves like
+The example code first allocates the input and output arrays.  You can
+allocate them in any way that you like, but we recommend using
+@code{fftw_malloc}, which behaves like
 @findex fftw_malloc
 @code{malloc} except that it properly aligns the array when SIMD
 instructions (such as SSE and Altivec) are available (@pxref{SIMD
@@ -124,10 +124,12 @@ does not run any computation and just builds a
 reasonable plan that is probably sub-optimal.  In short, if your
 program performs many transforms of the same size and initialization
 time is not important, use @code{FFTW_MEASURE}; otherwise use the
-estimate.  The data in the @code{in}/@code{out} arrays is
-@emph{overwritten} during @code{FFTW_MEASURE} planning, so such
-planning should be done @emph{before} the input is initialized by the
-user.  
+estimate.  
+
+@emph{You must create the plan before initializing the input}, because
+@code{FFTW_MEASURE} overwrites the @code{in}/@code{out} arrays.
+(Technically, @code{FFTW_ESTIMATE} does not touch your arrays, but you
+should always create plans first just to be sure.)
 
 Once the plan has been created, you can use it as many times as you
 like for transforms on the specified @code{in}/@code{out} arrays,
@@ -137,26 +139,6 @@ void fftw_execute(const fftw_plan plan);
 @end example
 @findex fftw_execute
 
-@cindex execute
-If you want to transform a @emph{different} array of the same size, you
-can create a new plan with @code{fftw_plan_dft_1d} and FFTW
-automatically reuses the information from the previous plan, if
-possible.  (Alternatively, with the ``guru'' interface you can apply a
-given plan to a different array, if you are careful.
-@xref{FFTW Reference}.)
-
-When you are done with the plan, you deallocate it by calling
-@code{fftw_destroy_plan(plan)}:
-@example
-void fftw_destroy_plan(fftw_plan plan);
-@end example
-@findex fftw_destroy_plan
-Arrays allocated with @code{fftw_malloc} should be deallocated by
-@code{fftw_free} rather than the ordinary @code{free} (or, heaven
-forbid, @code{delete}).
-@findex fftw_free
-
-
 The DFT results are stored in-order in the array @code{out}, with the
 zero-frequency (DC) component in @code{out[0]}.
 @cindex frequency
@@ -164,16 +146,35 @@ If @code{in != out}, the transform is @dfn{out-of-place} and the input
 array @code{in} is not modified.  Otherwise, the input array is
 overwritten with the transform.
 
-Users should note that FFTW computes an @emph{unnormalized} DFT.
-Thus, computing a forward followed by a backward transform (or vice
-versa) results in the original array scaled by @code{n}.  For the
-definition of the DFT, see @ref{What FFTW Really Computes}.
+@cindex execute
+If you want to transform a @emph{different} array of the same size, you
+can create a new plan with @code{fftw_plan_dft_1d} and FFTW
+automatically reuses the information from the previous plan, if
+possible.  Alternatively, with the ``guru'' interface you can apply a
+given plan to a different array, if you are careful.
+@xref{FFTW Reference}.
+
+When you are done with the plan, you deallocate it by calling
+@code{fftw_destroy_plan(plan)}:
+@example
+void fftw_destroy_plan(fftw_plan plan);
+@end example
+@findex fftw_destroy_plan
+If you allocate an array with @code{fftw_malloc()} you must deallocate
+it with @code{fftw_free()}.  Do not use @code{free()} or, heaven
+forbid, @code{delete}.
+@findex fftw_free
+
+FFTW computes an @emph{unnormalized} DFT.  Thus, computing a forward
+followed by a backward transform (or vice versa) results in the original
+array scaled by @code{n}.  For the definition of the DFT, see @ref{What
+FFTW Really Computes}.
 @cindex DFT
 @cindex normalization
 
 
 If you have a C compiler, such as @code{gcc}, that supports the
-recent C99 standard, and you @code{#include <complex.h>} @emph{before}
+C99 standard, and you @code{#include <complex.h>} @emph{before}
 @code{<fftw3.h>}, then @code{fftw_complex} is the native
 double-precision complex type and you can manipulate it with ordinary
 arithmetic.  Otherwise, FFTW defines its own complex type, which is
@@ -182,11 +183,10 @@ bit-compatible with the C99 complex type. @xref{Complex numbers}.
 typecast.)
 @cindex C++
 
-
-Single and long-double precision versions of FFTW may be installed; to
-use them, replace the @code{fftw_} prefix by @code{fftwf_} or
-@code{fftwl_} and link with @code{-lfftw3f} or @code{-lfftw3l}, but
-use the @emph{same} @code{<fftw3.h>} header file.
+To use single or long-double precision versions of FFTW, replace the
+@code{fftw_} prefix by @code{fftwf_} or @code{fftwl_} and link with
+@code{-lfftw3f} or @code{-lfftw3l}, but use the @emph{same}
+@code{<fftw3.h>} header file.
 @cindex precision
 
 

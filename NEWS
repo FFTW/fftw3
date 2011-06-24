@@ -1,4 +1,9 @@
-* Add support for the AVX extensions to the x86 ISA.
+* Add support for the AVX extensions to the x86 ISA.  The AVX code
+  works with 16-byte alignment (as opposed to 32-byte alignment),
+  so there is no ABI change w.r.t. FFTW-3.2.2.
+
+* Add support for quad-precision __float128 where available.
+  The new routines use the fftwq_ prefix.
 
 * Removed support for the Cell Broadband Engine.
 
