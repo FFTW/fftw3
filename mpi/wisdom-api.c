@@ -64,7 +64,7 @@ void XM(gather_wisdom)(MPI_Comm comm_)
 	       wislen = strlen(wis) + 1;
 	       MPI_Send(&wislen, 1, FFTW_MPI_SIZE_T, 0, 111, comm);
 	       MPI_Send(wis, wislen, MPI_CHAR, 0, 222, comm);
-	       X(free)(wis);
+	       free(wis);
 	  }
 	  else /* my_pe == 0 */ {
 	       MPI_Recv(&wislen, 1, FFTW_MPI_SIZE_T, 1, 111, comm, &status);

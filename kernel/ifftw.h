@@ -248,7 +248,7 @@ extern void X(ifree0)(void *ptr);
 IFFTW_EXTERN void *X(malloc_debug)(size_t n, enum malloc_tag what,
 			     const char *file, int line);
 #define MALLOC(n, what) X(malloc_debug)(n, what, __FILE__, __LINE__)
-#define NATIVE_MALLOC(n, what) MALLOC(n, what)
+#define NATIVE_MALLOC(n, what) malloc(n)
 IFFTW_EXTERN void X(malloc_print_minfo)(int vrbose);
 
 #else /* ! FFTW_DEBUG_MALLOC */
