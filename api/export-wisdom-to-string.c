@@ -71,7 +71,7 @@ char *X(export_wisdom_to_string)(void)
      plnr->adt->exprt(plnr, p);
      X(printer_destroy)(p);
 
-     s = (char *) NATIVE_MALLOC(sizeof(char) * (cnt + 1), OTHER);
+     s = (char *) malloc(sizeof(char) * (cnt + 1));
      if (s) {
           p = mkprinter_str(s);
           plnr->adt->exprt(plnr, p);
