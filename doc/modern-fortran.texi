@@ -205,7 +205,7 @@ same memory as both a real array and a complex array.
   real(C_DOUBLE), pointer :: in(:,:,:)
   complex(C_DOUBLE_COMPLEX), pointer :: out(:,:,:)
   type(C_PTR) :: plan, data
-  integer(C_SIZE_T) sz
+  integer(C_SIZE_T) :: sz
   sz = (L/2+1) * M * N
   data = fftw_alloc_complex(sz)
   call c_f_pointer(data, in, [2*(L/2+1),M,N])
@@ -507,7 +507,7 @@ require you to pass a C string, which is an array of type
 You can call them like this:
 
 @example
-  integer(C_INT) ret
+  integer(C_INT) :: ret
   ret = fftw_export_wisdom_to_filename(C_CHAR_'my_wisdom.dat' // C_NULL_CHAR)
   ret = fftw_import_wisdom_from_filename(C_CHAR_'my_wisdom.dat' // C_NULL_CHAR)
 @end example
@@ -530,6 +530,8 @@ Fortran intefaces for the C library functions @code{fopen} and
 @c =========>
 @node Wisdom String Export/Import from Fortran, Wisdom Generic Export/Import from Fortran, Wisdom File Export/Import from Fortran, Accessing the wisdom API from Fortran
 @subsection Wisdom String Export/Import from Fortran
+
+
 
 @c =========>
 @node Wisdom Generic Export/Import from Fortran,  , Wisdom String Export/Import from Fortran, Accessing the wisdom API from Fortran
