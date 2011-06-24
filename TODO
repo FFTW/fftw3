@@ -1,13 +1,8 @@
-BUGS:
-
-* inconsistent nthreads in fftw-wisdom
+TODO before FFTW-$2\pi$:
 
 * Wisdom: make it clear that it is specific to the exact fftw version
   and configuration.  Report error codes when reading wisdom.  Maybe
-  have multiple system wisdom files, one per version?  Maybe add
-  checksum of the fftw configuration to the wisdom file?
-
-TODO before FFTW-$2\pi$:
+  have multiple system wisdom files, one per version?
 
 * DCT/DST codelets?  which kinds?
 

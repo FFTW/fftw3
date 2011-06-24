@@ -11,7 +11,8 @@
 #include <time.h>
 
 #if defined(HAVE_THREADS) || defined(HAVE_OPENMP)
-#define HAVE_SMP
+#  define HAVE_SMP
+   extern int threads_ok;
 #endif
 
 #define CONCAT(prefix, name) prefix ## name
@@ -68,11 +69,6 @@ static int prob_size_cmp(const void *p1_, const void *p2_)
      return (sz(*p1) - sz(*p2));
 }
 
-/* By default, don't allow fftw-wisdom tool to use threads; we don't
-   want users to put threads wisdom in the system wisdom, which would
-   break the wisdom for any non-threads program trying to use it. */
-#define USE_SMP 0
-
 static struct my_option options[] =
 {
   {"help", NOARG, 'h'},
@@ -92,7 +88,7 @@ static struct my_option options[] =
   {"no-system-wisdom", NOARG, 'n'},
   {"wisdom-file", REQARG, 'w'},
 
-#if USE_SMP && defined(HAVE_SMP)
+#ifdef HAVE_SMP
   {"threads", REQARG, 'T'},
 #endif
 
@@ -120,7 +116,7 @@ static void help(FILE *f, const char *program_name)
  "             -x, --exhaustive: plan in EXHAUSTIVE mode (may be slow)\n"
  "       -n, --no-system-wisdom: don't read /etc/fftw/ system wisdom file\n"
  "  -w FILE, --wisdom-file=FILE: read wisdom from FILE (stdin if -)\n"
-#if USE_SMP && defined(HAVE_SMP)
+#ifdef HAVE_SMP
  "            -T N, --threads=N: plan with N threads\n"
 #endif
 	  "\nSize syntax: <type><inplace><direction><geometry>\n"
@@ -169,8 +165,10 @@ int bench_main(int argc, char *argv[])
      usewisdom = 0;
 
      bench_srand(1);
-#if USE_SMP && defined(HAVE_SMP)
-     BENCH_ASSERT(FFTW(init_threads)());
+#ifdef HAVE_SMP
+     /* do not configure FFTW with threads, unless the
+	user requests -T */
+     threads_ok = 0;
 #endif
 
      while ((c = my_getopt(argc, argv, options)) != -1) {
@@ -250,12 +248,12 @@ int bench_main(int argc, char *argv[])
 		   FILE *w = stdin;
 		   if (strcmp(my_optarg, "-") && !(w = fopen(my_optarg, "r"))) {
 			fprintf(stderr,
-				"fftw-wisdom: error opening \"%s\"", my_optarg);
+				"fftw-wisdom: error opening \"%s\": ", my_optarg);
 			perror("");
 			exit(EXIT_FAILURE);
 		   }
 		   if (!FFTW(import_wisdom_from_file)(w)) {
-			fprintf(stderr, "fftw_wisdom: error reading wisdom"
+			fprintf(stderr, "fftw_wisdom: error reading wisdom "
 				"from \"%s\"\n", my_optarg);
 			exit(EXIT_FAILURE);
 		   }
@@ -264,14 +262,12 @@ int bench_main(int argc, char *argv[])
 		   break;
 	      }
 
-#if USE_SMP && defined(HAVE_SMP)
+#ifdef HAVE_SMP
 	      case 'T':
 		   nthreads = atoi(my_optarg);
-		   if (nthreads > 1) {
-			fprintf(stderr, "fftw-wisdom: "
-				"not compiled with thread support\n");
-			exit(EXIT_FAILURE);
-		   }
+		   if (nthreads < 1) nthreads = 1;
+		   threads_ok = 1;
+		   BENCH_ASSERT(FFTW(init_threads)());
 		   break;
 #endif
 
