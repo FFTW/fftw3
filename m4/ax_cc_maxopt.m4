@@ -8,18 +8,15 @@ dnl good for FFTW and hopefully for other scientific codes.  Modify
 dnl as needed.)
 dnl
 dnl The user can override the flags by setting the CFLAGS environment
-dnl variable.  The user can also specify --enable-portable-binary in
-dnl order to disable any optimization flags that might result in
-dnl a binary that only runs on the host architecture.
+dnl variable.  
 dnl
 dnl Note also that the flags assume that ANSI C aliasing rules are
 dnl followed by the code (e.g. for gcc's -fstrict-aliasing), and that
 dnl floating-point computations can be re-ordered as needed.
 dnl
 dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_COMPILER_VENDOR,
-dnl                  AX_GCC_ARCHFLAG, AX_GCC_X86_CPUID
 dnl
-dnl @version 2008-12-02
+dnl @version 2011-06-22
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
@@ -28,33 +25,20 @@ AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([AX_COMPILER_VENDOR])
 AC_REQUIRE([AC_CANONICAL_HOST])
 
-AC_ARG_ENABLE(portable-binary, [AC_HELP_STRING([--enable-portable-binary], [disable compiler optimizations that would produce unportable binaries])], 
-	acx_maxopt_portable=$enableval, acx_maxopt_portable=no)
-
 # Try to determine "good" native compiler flags if none specified via CFLAGS
 if test "$ac_test_CFLAGS" != "set"; then
   CFLAGS=""
   case $ax_cv_c_compiler_vendor in
     dec) CFLAGS="-newc -w0 -O5 -ansi_alias -ansi_args -fp_reorder -tune host"
-	 if test "x$acx_maxopt_portable" = xno; then
-           CFLAGS="$CFLAGS -arch host"
-         fi;;
+    	 ;;
 
     sun) CFLAGS="-native -fast -xO5 -dalign"
-	 if test "x$acx_maxopt_portable" = xyes; then
-	   CFLAGS="$CFLAGS -xarch=generic"
-         fi;;
+    	 ;;
 
     hp)  CFLAGS="+Oall +Optrs_ansi +DSnative"
-	 if test "x$acx_maxopt_portable" = xyes; then
-	   CFLAGS="$CFLAGS +DAportable"
-	 fi;;
+    	 ;;
 
-    ibm) if test "x$acx_maxopt_portable" = xno; then
-           xlc_opt="-qarch=auto -qtune=auto"
-	 else
-           xlc_opt="-qtune=auto"
-	 fi
+    ibm) xlc_opt="-qtune=auto"
          AX_CHECK_COMPILER_FLAGS($xlc_opt,
          	CFLAGS="-O3 -qansialias -w $xlc_opt",
                [CFLAGS="-O3 -qansialias -w"
@@ -89,7 +73,10 @@ if test "$ac_test_CFLAGS" != "set"; then
     
     gnu) 
      # default optimization flags for gcc on all systems
-     CFLAGS="-O3 -fomit-frame-pointer"
+     CFLAGS="-O3"
+
+     # tune for the host by default
+     AX_CHECK_COMPILER_FLAGS(-mtune=native, CFLAGS="$CFLAGS -mtune=native")
 
      # -malign-double for x86 systems
      AX_CHECK_COMPILER_FLAGS(-malign-double, CFLAGS="$CFLAGS -malign-double")
@@ -101,7 +88,6 @@ if test "$ac_test_CFLAGS" != "set"; then
      # note that we enable "unsafe" fp optimization with other compilers, too
      AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
 
-     AX_GCC_ARCHFLAG($acx_maxopt_portable)
      ;;
   esac
 
