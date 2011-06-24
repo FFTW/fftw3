@@ -38,6 +38,10 @@ const char X(version)[] = PACKAGE "-" PACKAGE_VERSION
    "-sse2"
 #endif
 
+#if HAVE_AVX
+   "-avx"
+#endif
+
 #if HAVE_ALTIVEC
    "-altivec"
 #endif
