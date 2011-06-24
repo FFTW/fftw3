@@ -20,6 +20,8 @@ sub canonicalize_type {
 # C->Fortran map of supported return types
 %return_types = (
     "int" => "integer(C_INT)",
+    "ptrdiff_t" => "integer(C_INTPTR_T)",
+    "size_t" => "integer(C_SIZE_T)",
     "double" => "real(C_DOUBLE)",
     "float" => "real(C_FLOAT)",
     "long double" => "real(C_LONG_DOUBLE)",
@@ -115,6 +117,8 @@ sub canonicalize_type {
     "fftwf_read_char_func" => "type(C_FUNPTR), value",
     "fftwl_read_char_func" => "type(C_FUNPTR), value",
     "fftwq_read_char_func" => "type(C_FUNPTR), value",
+
+    "MPI_Comm" => "integer, value"
     );
 
 while (<>) {
@@ -135,6 +139,14 @@ while (<>) {
 	if ($bad) {
 	    print "! Unable to generate Fortran interface for $name\n";
 	    next;
+	}
+
+	# any function taking an MPI_Comm arg needs a C wrapper (grr).
+	if ($args =~ /MPI_Comm/) {
+	    $cname = $name . "_f03";
+	}
+	else {
+	    $cname = $name;
 	}
 
 	# Fortran has a 132-character line-length limit by default (grr)
@@ -167,10 +179,10 @@ while (<>) {
 	}
 	print ") "; $len = $len + 2;
 
-	if ($len + length("bind(C, name='$name')") > 132) {
+	if ($len + length("bind(C, name='$cname')") > 132) {
 	    printf "&\n%*s", $len0 - length("$name("), "";
 	}
-	print "bind(C, name='$name')\n";
+	print "bind(C, name='$cname')\n";
 
 	print "      import\n";
 	foreach $arg (split(/ *, */, $args)) {

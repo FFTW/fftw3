@@ -4,19 +4,20 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 
 if MPI
 lib_LTLIBRARIES = libfftw3@PREC_SUFFIX@_mpi.la
-include_HEADERS = fftw3-mpi.h
+include_HEADERS = fftw3-mpi.h fftw3-mpi.f03
 noinst_PROGRAMS = mpi-bench
 endif
 
 CC=@MPICC@
 
-EXTRADIST = testsched.c README
+EXTRADIST = testsched.c f03api.sh f03-wrap.sh genf03-wrap.sh
+BUILT_SOURCES = fftw3-mpi.f03 f03-wrap.c
 
 TRANSPOSE_SRC = transpose-alltoall.c transpose-pairwise.c transpose-recurse.c transpose-problem.c transpose-solve.c mpi-transpose.h
 DFT_SRC = dft-serial.c dft-rank-geq2.c dft-rank-geq2-transposed.c dft-rank1.c dft-rank1-bigvec.c dft-problem.c dft-solve.c mpi-dft.h
 RDFT_SRC = rdft-serial.c rdft-rank-geq2.c rdft-rank-geq2-transposed.c rdft-rank1-bigvec.c rdft-problem.c rdft-solve.c mpi-rdft.h
 RDFT2_SRC = rdft2-serial.c rdft2-rank-geq2.c rdft2-rank-geq2-transposed.c rdft2-problem.c rdft2-solve.c mpi-rdft2.h
-SRC = any-true.c api.c block.c choose-radix.c conf.c dtensor.c fftw3-mpi.h ifftw-mpi.h rearrange.c wisdom-api.c
+SRC = any-true.c api.c block.c choose-radix.c conf.c dtensor.c fftw3-mpi.h ifftw-mpi.h rearrange.c wisdom-api.c f03-wrap.c
 
 libfftw3@PREC_SUFFIX@_mpi_la_SOURCES = $(SRC) $(TRANSPOSE_SRC) $(DFT_SRC) $(RDFT_SRC) $(RDFT2_SRC)
 
@@ -69,5 +70,15 @@ bigcheck: mpi-bench$(EXEEXT)
 
 smallcheck: mpi-bench$(EXEEXT)
 	$(MAKE) $(AM_MAKEFLAGS) NUMCHECK=2 check-local
+
+endif
+
+if MAINTAINER_MODE
+
+fftw3-mpi.f03: fftw3-mpi.h f03api.sh $(top_srcdir)/api/genf03.pl
+	sh $(srcdir)/f03api.sh > $@
+
+f03-wrap.c: fftw3-mpi.h f03-wrap.sh genf03-wrap.pl
+	sh $(srcdir)/f03-wrap.sh > $@
 
 endif

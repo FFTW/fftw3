@@ -35,8 +35,9 @@ plan-guru64-split-dft.c mktensor-iodims64.c
 BUILT_SOURCES = fftw3.f fftw3.f03.in fftw3.f03
 
 fftw3.f03: fftw3.f03.in
-	(echo "  integer, parameter :: C_FFTW_R2R_KIND = @C_FFTW_R2R_KIND@"; \
-         cat $(srcdir)/fftw3.f03.in) > $@
+	(echo "! Generated automatically.  DO NOT EDIT!"; echo; \
+         echo "  integer, parameter :: C_FFTW_R2R_KIND = @C_FFTW_R2R_KIND@"; \
+         grep -v "Generated automatically" $(srcdir)/fftw3.f03.in) > $@
 
 if MAINTAINER_MODE
 

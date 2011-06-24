@@ -9,9 +9,11 @@
 #   include 'fftw3.f03'
 # and then call the C FFTW functions directly, with type checking.
 
+echo "! Generated automatically.  DO NOT EDIT!"
+echo
+
 # C_FFTW_R2R_KIND is determined by configure and inserted by the Makefile
 # echo "  integer, parameter :: C_FFTW_R2R_KIND = @C_FFTW_R2R_KIND@"
-echo
 
 # Extract constants
 perl -pe 's/([A-Z0-9_]+)=([+-]?[0-9]+)/\n  integer\(C_INT\), parameter :: \1 = \2\n/g' < fftw3.h | grep 'integer(C_INT)'
@@ -23,10 +25,10 @@ for p in "" "f" "l"; do
     echo
     cat <<EOF
   type, bind(C) :: fftw${p}_iodim
-     integer(c_int) n, is, os
+     integer(C_INT) n, is, os
   end type fftw${p}_iodim
   type, bind(C) :: fftw${p}_iodim64
-     integer(c_intptr_t) n, is, os
+     integer(C_INTPTR_T) n, is, os
   end type fftw${p}_iodim64
 EOF
 
