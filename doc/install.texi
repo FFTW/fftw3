@@ -191,10 +191,9 @@ of the time).  @xref{Cycle Counters}.
 
 @item
 @code{--enable-sse}, @code{--enable-sse2}, @code{--enable-avx},
-@code{--enable-altivec}, @code{--enable-mips-ps}: Enable the compilation
+@code{--enable-altivec}: Enable the compilation
 of SIMD code for SSE (Pentium III+), SSE2 (Pentium IV+), AVX (Sandy
-Bridge, Interlagos), AltiVec (PowerPC G4+), or MIPS PS.  SSE, AltiVec,
-and MIPS PS only work with @code{--enable-float} (above).
+Bridge, Interlagos), AltiVec (PowerPC G4+).  SSE and AltiVec only work with @code{--enable-float} (above).
 SSE2 works in both single and double precision.  The resulting code will
 @emph{still work} on earlier CPUs lacking the SIMD extensions (SIMD is
 automatically disabled, although the FFTW library is still larger).
