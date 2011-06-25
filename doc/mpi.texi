@@ -244,6 +244,7 @@ manual.  (One good way to output a large multi-dimensional distributed
 array in MPI to a portable binary file is to use the free HDF5
 library; see the @uref{http://www.hdfgroup.org/, HDF home page}.)
 @cindex HDF5
+@cindex MPI I/O
 
 @c ------------------------------------------------------------
 @node MPI data distribution, Multi-dimensional MPI DFT of Real Data, 2d MPI example, Distributed-memory FFTW with MPI
@@ -882,18 +883,27 @@ FFTW's ``wisdom'' facility (@pxref{Words of Wisdom-Saving Plans}) can
 be used to save MPI plans as well as to save uniprocessor plans.
 However, for MPI there are several unavoidable complications.
 
+@cindex MPI I/O
 First, the MPI standard does not guarantee that every process can
-perform file I/O (at least, not using C stdio routines)---only the
-process of rank @code{MPI_IO} can in general (unless @code{MPI_IO ==
-MPI_ANY_SOURCE}).  (In practice, @code{MPI_IO} is commonly assumed to
-be zero, i.e. at least process 0 can perform I/O, since otherwise a
-single-process run could not perform I/O.)  So, if we want to export
-the wisdom from a single process to a file, we must first export the
-wisdom to a string, then send it to process 0, then write it to a
-file.
-@ctindex MPI_IO
-@ctindex MPI_ANY_SOURCE
-
+perform file I/O (at least, not using C stdio routines)---in general,
+we may only assume that process 0 is capable of I/O.@footnote{In fact,
+even this assumption is not technically guaranteed by the standard,
+although it seems to be universal in actual MPI implementations and is
+widely assumed by MPI-using software.  Technically, you need to query
+the @code{MPI_IO} attribute of @code{MPI_COMM_WORLD} with
+@code{MPI_Attr_get}.  If this attribute is @code{MPI_PROC_NULL}, no
+I/O is possible.  If it is @code{MPI_ANY_SOURCE}, any process can
+perform I/O.  Otherwise, it is the rank of a process that can perform
+I/O ... but since it is not guaranteed to yield the @emph{same} rank
+on all processes, you have to do an @code{MPI_Allreduce} of some kind
+if you want all processes to agree about which is going to do I/O.
+And even then, the standard only guarantees that this process can
+perform output, but not input. See e.g. @cite{Parallel Programming
+with MPI} by P. S. Pacheco, section 8.1.3.  Needless to say, in our
+experience virtually no MPI programmers worry about this.} So, if we
+want to export the wisdom from a single process to a file, we must
+first export the wisdom to a string, then send it to process 0, then
+write it to a file.
 
 Second, in principle we may want to have separate wisdom for every
 process, since in general the processes may run on different hardware
