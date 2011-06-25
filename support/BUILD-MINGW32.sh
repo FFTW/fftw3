@@ -1,6 +1,6 @@
 set -e
 
-confflags="--prefix=`pwd`/mingw32 --host=i586-mingw32msvc --with-gcc-arch=prescott --enable-portable-binary --with-our-malloc16 --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads"
+confflags="--prefix=`pwd`/mingw32 --host=i586-mingw32msvc --with-our-malloc --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads"
 
 rm -rf mingw32
 
@@ -8,7 +8,7 @@ rm -rf mingw32
     rm -rf double-mingw32
     mkdir double-mingw32
     cd double-mingw32
-    ../configure ${confflags} --enable-sse2 && make -j4 && make install
+    ../configure ${confflags} --enable-sse2 --enable-avx && make -j4 && make install
     cp -f tests/.libs/bench.exe `pwd`/../mingw32/bin/bench.exe
 )
 
@@ -16,7 +16,7 @@ rm -rf mingw32
     rm -rf single-mingw32
     mkdir single-mingw32
     cd single-mingw32
-    ../configure ${confflags} --enable-sse --enable-float && make -j4 && make install
+    ../configure ${confflags} --enable-sse --enable-avx --enable-float && make -j4 && make install
     cp -f tests/.libs/bench.exe `pwd`/../mingw32/bin/benchf.exe
 )
 

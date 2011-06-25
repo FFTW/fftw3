@@ -1,6 +1,6 @@
 set -e
 
-confflags="--prefix=`pwd`/mingw64 --host=x86_64-w64-mingw32 --with-gcc-arch=nocona --enable-portable-binary --disable-alloca --with-our-malloc16 --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads"
+confflags="--prefix=`pwd`/mingw64 --host=amd64-mingw32msvc --disable-alloca --with-our-malloc --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads"
 
 rm -rf mingw64
 
@@ -8,7 +8,7 @@ rm -rf mingw64
     rm -rf double-mingw64
     mkdir double-mingw64
     cd double-mingw64
-    ../configure ${confflags} --enable-sse2 && make -j4 && make install
+    ../configure ${confflags} --enable-sse2 --enable-avx && make -j4 && make install
     cp -f tests/.libs/bench.exe `pwd`/../mingw64/bin/bench.exe
 )
 
@@ -16,7 +16,7 @@ rm -rf mingw64
     rm -rf single-mingw64
     mkdir single-mingw64
     cd single-mingw64
-    ../configure ${confflags} --enable-sse --enable-float && make -j4 && make install
+    ../configure ${confflags} --enable-sse2 --enable-avx --enable-float && make -j4 && make install
     cp -f tests/.libs/bench.exe `pwd`/../mingw64/bin/benchf.exe
 )
 
@@ -34,7 +34,7 @@ for dll in *.dll; do
     def=`basename $dll .dll`.def
     echo "LIBRARY $dll" > $def
     echo EXPORTS >> $def
-    x86_64-w64-mingw32-nm $dll | grep ' T _' | sed 's/.* T _//' | grep fftw >> $def
+    amd64-mingw32msvc-nm $dll | grep ' T _' | sed 's/.* T _//' | grep fftw >> $def
 done
 )
 

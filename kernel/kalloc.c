@@ -127,8 +127,8 @@ void *X(kernel_malloc)(size_t n)
 
 #  else
      /* Add your machine here and send a patch to fftw@fftw.org 
-        or (e.g. for Windows) configure --with-our-malloc16 */
-#    error "Don't know how to malloc() aligned memory ... try configuring --with-our-malloc16"
+        or (e.g. for Windows) configure --with-our-malloc */
+#    error "Don't know how to malloc() aligned memory ... try configuring --with-our-malloc"
 #  endif
 
 #else /* !defined(MIN_ALIGNMENT) */
