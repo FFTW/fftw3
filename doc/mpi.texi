@@ -1121,4 +1121,142 @@ Detailed documentation of all FFTW MPI routines pending.
 @c ------------------------------------------------------------
 @node FFTW MPI Fortran Interface,  , FFTW MPI Reference, Distributed-memory FFTW with MPI
 @section FFTW MPI Fortran Interface
+@cindex Fortran interface
 
+@cindex iso_c_binding
+The FFTW MPI interface is callable from modern Fortran compilers
+supporting the Fortran 2003 @code{iso_c_binding} standard for calling
+C functions.  As described in @ref{Calling FFTW from Modern Fortran},
+this means that you can directly call FFTW's C interface from Fortran
+with only minor changes in syntax.  There are, however, a few things
+specific to the MPI interface to keep in mind:
+
+@itemize @bullet
+
+@item
+Instead of including @code{fftw3.f03} as in @ref{Overview of Fortran
+interface }, you should @code{include 'fftw3-mpi.f03'} (after
+@code{use, intrinsic :: iso_c_binding} as before).  The
+@code{fftw3-mpi.f03} file includes @code{fftw3.f03}, so you should
+@emph{not} @code{include} them both yourself.
+
+@item
+Because of the different storage conventions between C and Fortran,
+you reverse the order of your array dimensions when passing them to
+FFTW (@pxref{Reversing array dimensions}).  This is merely a
+difference in notation and incurs no performance overhead.  However,
+it means that, whereas in C the @emph{first} dimension is distributed,
+in Fortran the @emph{last} dimension of your array is distributed.
+
+@item
+@cindex MPI communicator
+In Fortran, communicators are stored as @code{integer} types; there is
+no @code{MPI_Comm} type, nor is there any way to access a C
+@code{MPI_Comm}.  Fortunately, this is taken care of for you by the
+FFTW Fortran interface: whenever the C interface expects an
+@code{MPI_Comm} type, you should pass the Fortran communicator as an
+@code{integer}.@footnote{Technically, this is because you aren't
+actually calling the C functions directly. You are calling wrapper
+functions that translate the communicator with @code{MPI_Comm_f2c}
+before calling the ordinary C interface.  This is all done
+transparently, however, since the @code{fftw3-mpi.f03} interface file
+renames the wrappers so that they are called in Fortran with the same
+names as the C interface functions.}
+
+@item
+Because you need to call the @samp{local_size} function to find out
+how much space to allocate, and this may be @emph{larger} than the
+local portion of the array (@pxref{MPI data distribution}), you should
+@emph{always} allocate your arrays dynamically using FFTW's allocation
+routines as described in @ref{Allocating aligned memory in Fortran}.
+(Coincidentally, this also provides the best performance by
+guaranteeding proper data alignment.)
+
+@item
+Because all sizes in the MPI FFTW interface are declared as
+@code{ptrdiff_t} in C, you should use @code{integer(C_INTPTR_T)} in
+Fortran (@pxref{FFTW Fortran type reference}).
+
+@item
+@findex fftw_execute_dft
+@findex fftw_mpi_execute_dft
+In Fortran, because of the language semantics, we generally recommend
+using the new-array execute functions for all plans, even in the
+common case where you are executing the plan on the same arrays for
+which the plan was created (@pxref{Plan execution in Fortran}).
+However, note that in the MPI interface these functions are changed:
+@code{fftw_execute_dft} becomes @code{fftw_mpi_execute_dft}, etcetera.
+
+@end itemize
+
+For example, here is a Fortran code snippet to perform a distributed
+@twodims{L,M} complex DFT in-place.  (This assumes you have already
+initialized MPI with @code{MPI_init} and have also performed
+@code{call fftw_mpi_init}.)
+
+@example
+  use, intrinsic :: iso_c_binding
+  include 'fftw3.f03'
+  integer(C_INTPTR_T), parameter :: L = ...
+  integer(C_INTPTR_T), parameter :: M = ...
+  type(C_PTR) :: plan, cdata
+  complex(C_DOUBLE_COMPLEX), pointer :: data(:,:)
+  integer(C_INTPTR_T) :: i, j, alloc_local, local_M, local_j_offset
+
+!   @r{get local data size and allocate (note dimension reversal)}
+  alloc_local = fftw3_mpi_local_size_2d(M, L, MPI_COMM_WORLD, &
+                                        local_M, local_j_offset)
+  cdata = fftw_alloc_complex(alloc_local)
+  call c_f_pointer(cdata, data, [L,local_M])
+
+!   @r{create MPI plan for in-place forward DFT (note dimension reversal)}
+  plan = fftw_mpi_plan_dft_2d(M, L, data, data, MPI_COMM_WORLD, &
+                              FFTW_FORWARD, FFTW_MEASURE)
+
+! @r{initialize data to some function} my_function(i,j)
+  do j = 1, local_M
+    do i = 1, L
+      data(i, j) = my_function(i, j + local_j_offset)
+    end do
+  end do
+
+! @r{compute transform (as many times as desired)}
+  call fftw_mpi_execute_dft(plan)
+
+  call fftw_destroy_plan(plan)
+  call fftw_free(cdata)
+@end example
+
+Note that when we called @code{fftw3_mpi_local_size_2d} and
+@code{fftw_mpi_plan_dft_2d} with the dimensions in reversed order,
+since a @twodims{L,M} Fortran array is viewed by FFTW in C as a
+@twodims{M, L} array.  This means that the array was distributed over
+the @code{M} dimension, the local portion of which is a
+@twodims{L,local_M} array in Fortran.  (You must @emph{not} use an
+@code{allocate} statement to allocate an @twodims{L,local_M} array,
+however; you must allocate @code{alloc_local} complex numbers, which
+may be greater than @code{L * local_M}, in order to reserve space for
+intermediate steps of the transform.)  Finally, we mention that
+because C's array indices are zero-based, the @code{local_j_offset}
+argument can conveniently be interpreted as an offset in the 1-based
+@code{j} index (rather than as a starting index as in C).
+
+If instead you had used the @code{ior(FFTW_MEASURE,
+FFTW_MPI_TRANSPOSED_OUT)} flag, the output of the transform would be a
+transposed @twodims{M,local_L} array, associated with the @emph{same}
+@code{cdata} allocation (since the transform is in-place), and which
+you could declare with:
+
+@example
+  complex(C_DOUBLE_COMPLEX), pointer :: tdata(:,:)
+  ...
+  call c_f_pointer(cdata, tdata, [M,local_L])
+@end example
+
+where @code{local_L} would have been obtained by changing the
+@code{fftw3_mpi_local_size_2d} call to:
+
+@example
+  alloc_local = fftw3_mpi_local_size_2d_transposed(M, L, MPI_COMM_WORLD, &
+                           local_M, local_j_offset, local_L, local_i_offset)
+@end example
