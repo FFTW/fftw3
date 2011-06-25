@@ -47,7 +47,7 @@ to the MPI interface.
 @menu
 * FFTW MPI Installation::       
 * Linking and Initializing MPI FFTW::  
-* Simple MPI example::          
+* 2d MPI example::              
 * MPI data distribution::       
 * Multi-dimensional MPI DFT of Real Data::  
 * Other Multi-dimensional Real-data MPI Transforms::  
@@ -57,6 +57,7 @@ to the MPI interface.
 * FFTW MPI Performance Tips::   
 * Combining MPI and Threads::   
 * FFTW MPI Reference::          
+* FFTW MPI Fortran Interface::  
 @end menu
 
 @c ------------------------------------------------------------
@@ -97,7 +98,7 @@ the location of the library and header files via @code{LDFLAGS} and
 LDFLAGS=-L/path/to/mpi/libs CPPFLAGS=-I/path/to/mpi/include ...}.
 
 @c ------------------------------------------------------------
-@node Linking and Initializing MPI FFTW, Simple MPI example, FFTW MPI Installation, Distributed-memory FFTW with MPI
+@node Linking and Initializing MPI FFTW, 2d MPI example, FFTW MPI Installation, Distributed-memory FFTW with MPI
 @section Linking and Initializing MPI FFTW
 
 Programs using the MPI FFTW routines should be linked with
@@ -112,8 +113,10 @@ link MPI code.
 @cindex precision
 
 
-Before calling any FFTW routines, but after calling @code{MPI_Init},
-you should call the function:
+@findex fftw_init_threads
+Before calling any FFTW routines except possibly
+@code{fftw_init_threads} (@pxref{Combining MPI and Threads}), but after calling
+@code{MPI_Init}, you should call the function:
 
 @example
 void fftw_mpi_init(void);
@@ -134,8 +137,8 @@ also gets rid of FFTW's MPI-related data.  You must @emph{not} execute
 any previously created plans after calling this function.
 
 @c ------------------------------------------------------------
-@node Simple MPI example, MPI data distribution, Linking and Initializing MPI FFTW, Distributed-memory FFTW with MPI
-@section Simple MPI example
+@node 2d MPI example, MPI data distribution, Linking and Initializing MPI FFTW, Distributed-memory FFTW with MPI
+@section 2d MPI example
 
 Before we document the FFTW MPI interface in detail, we begin with a
 simple example outlining how one would perform a two-dimensional
@@ -157,7 +160,7 @@ int main(int argc, char **argv)
     /* @r{get local data size and allocate} */
     alloc_local = fftw3_mpi_local_size_2d(N0, N1, MPI_COMM_WORLD,
                                           &local_n0, &local_0_start);
-    data = (fftw_complex *) fftw_malloc(sizeof(fftw_complex) * alloc_local);
+    data = fftw_alloc_complex(alloc_local);
 
     /* @r{create plan for in-place forward DFT} */
     plan = fftw_mpi_plan_dft_2d(N0, N1, data, data, MPI_COMM_WORLD,
@@ -218,7 +221,7 @@ Interface}.)
 
 Fourth, and most importantly, you don't allocate the entire
 two-dimensional array on each process.  Instead, you call
-@code{fftw_mpi_local_size_2d} to find out what @code{portion} of the
+@code{fftw_mpi_local_size_2d} to find out what @emph{portion} of the
 array resides on each processor, and how much space to allocate.
 Here, the portion of the array on each process is a @code{local_n0} by
 @code{N1} slice of the total array, starting at index
@@ -243,7 +246,7 @@ library; see the @uref{http://www.hdfgroup.org/, HDF home page}.)
 @cindex HDF5
 
 @c ------------------------------------------------------------
-@node MPI data distribution, Multi-dimensional MPI DFT of Real Data, Simple MPI example, Distributed-memory FFTW with MPI
+@node MPI data distribution, Multi-dimensional MPI DFT of Real Data, 2d MPI example, Distributed-memory FFTW with MPI
 @section MPI data distribution
 @cindex data distribution
 
@@ -341,13 +344,15 @@ only a single MPI process, that process will store the entire array:
 Second, the return value is the total number of data elements (e.g.,
 complex numbers for a complex DFT) that should be allocated for the
 input and output arrays on the current process (ideally with
-@code{fftw_malloc}, to ensure optimal alignment).  It might seem that
-this should always be equal to @code{local_n0 * n1}, but this is
-@emph{not} the case.  FFTW's distributed FFT algorithms require data
-redistributions at intermediate stages of the transform, and in some
-circumstances this may require slightly larger local storage.  This is
-discussed in more detail below, under @ref{Load balancing}.
+@code{fftw_malloc} or an @samp{fftw_alloc} function, to ensure optimal
+alignment).  It might seem that this should always be equal to
+@code{local_n0 * n1}, but this is @emph{not} the case.  FFTW's
+distributed FFT algorithms require data redistributions at
+intermediate stages of the transform, and in some circumstances this
+may require slightly larger local storage.  This is discussed in more
+detail below, under @ref{Load balancing}.
 @findex fftw_malloc
+@findex fftw_alloc_complex
 
 
 The advanced-interface @samp{local_size} function for multidimensional
@@ -565,23 +570,150 @@ have not yet implemented a parallel algorithm for large prime sizes.
 @section Multi-dimensional MPI DFT of Real Data
 
 FFTW's MPI interface also supports multi-dimensional DFTs of real
-data, similar to the serial r2c and c2r interfaces.
+data, similar to the serial r2c and c2r interfaces.  (Parallel
+one-dimensional real-data DFTs are not currently supported; you must
+use a complex transform and set the imaginary parts of the inputs to
+zero.)
 
-Documentation pending.
+The key points to understand for r2c and c2r MPI transforms (compared
+to the MPI complex DFTs or the serial r2c/c2r transforms), are:
 
-Parallel one-dimensional real-data DFTs are not supported.
+@itemize @bullet
+
+@item
+Just as for serial transforms, r2c/c2r DFTs transform @ndims{} real
+data to/from @ndimshalf{} complex data: the last dimension of the
+complex data is cut in half (rounded down), plus one.  As for the
+serial transforms, the sizes you pass to the @samp{plan_dft_r2c} and
+@samp{plan_dft_c2r} are the @ndims{} dimensions of the real data.
+
+@item
+@cindex padding
+Although the real data is @emph{conceptually} @ndims{}, it is
+@emph{physically} stored as an @ndimspad{} array, where the last
+dimension has been @emph{padded} to make it the same size as the
+complex output.  This is much like the in-place serial r2c/c2r
+interface (@pxref{Multi-Dimensional DFTs of Real Data}), except that
+in MPI the padding is required even for out-of-place data.  The extra
+padding numbers are ignored by FFTW (they are @emph{not} like
+zero-padding the transform to a larger size); they are only used to
+determine the data layout.
+
+@item
+@cindex data distribution
+The data distribution in MPI for @emph{both} the real and complex data
+is determined by the shape of the @emph{complex} data.  That is, you
+call the appropriate @samp{local size} function for the @ndimshalf{}
+complex data, and then use the @emph{same} distribution for the real
+data except that the last complex dimension is replaced by a (padded)
+real dimension of twice the length.
+
+@end itemize
+
+For example suppose we are performing an out-of-place r2c transform of
+@threedims{L,M,N} real data [padded to @threedims{L,M,2(N/2+1)}],
+resulting in @threedims{L,M,N/2+1} complex data.  Similar to the
+example in @ref{2d MPI example}, we might do something like:
+
+@example
+#include <fftw3-mpi.h>
+
+int main(int argc, char **argv)
+@{
+    const ptrdiff_t L = ..., M = ..., N = ...;
+    fftw_plan plan;
+    double *rin;
+    fftw_complex *cout;
+    ptrdiff_t alloc_local, local_n0, local_0_start, i, j, k;
+
+    MPI_Init(&argc, &argv);
+    fftw_mpi_init();
+
+    /* @r{get local data size and allocate} */
+    alloc_local = fftw3_mpi_local_size_3d(L, M, N/2+1, MPI_COMM_WORLD,
+                                          &local_n0, &local_0_start);
+    rin = fftw_alloc_real(2 * alloc_local);
+    cout = fftw_alloc_complex(alloc_local);
+
+    /* @r{create plan for in-place r2c DFT} */
+    plan = fftw_mpi_plan_dft_r2c_3d(L, M, N, rin, cout, MPI_COMM_WORLD,
+                                    FFTW_MEASURE);
+
+    /* @r{initialize rin to some function} my_func(x,y,z) */
+    for (i = 0; i < local_n0; ++i)
+       for (j = 0; j < M; ++j)
+         for (k = 0; k < N; ++k)
+       rin[(i*M + j) * (2*(N/2+1)) + k] = my_func(local_0_start+i, j, k);
+
+    /* @r{compute transforms as many times as desired} */
+    fftw_execute(plan);
+
+    fftw_destroy_plan(plan);
+
+    MPI_Finalize();
+@}
+@end example
+
+@findex fftw_alloc_real
+@cindex row-major
+Note that we allocated @code{rin} using @code{fftw_alloc_real} with an
+argument of @code{2 * alloc_local}: since @code{alloc_local} is the
+number of @emph{complex} values to allocate, the number of @emph{real}
+values is twice as many.  The @code{rin} array is then
+@threedims{local_n0,M,2(N/2+1)} in row-major order, so its
+@code{(i,j,k)} element is at the index @code{(i*M + j) * (2*(N/2+1)) +
+k} (@pxref{Multi-dimensional Array Format }).
 
 @c ------------------------------------------------------------
 @node Other Multi-dimensional Real-data MPI Transforms, FFTW MPI Transposes, Multi-dimensional MPI DFT of Real Data, Distributed-memory FFTW with MPI
 @section Other multi-dimensional Real-Data MPI Transforms
 
+@cindex r2r
 FFTW's MPI interface also supports multi-dimensional @samp{r2r}
 transforms of all kinds supported by the serial interface
 (e.g. discrete cosine and sine transforms, discrete Hartley
 transforms, etc.).  Only multi-dimensional @samp{r2r} transforms, not
 one-dimensional transforms, are currently parallelized.
 
-Documentation pending.
+@tindex fftw_r2r_kind
+These are used much like the multidimensional complex DFTs discussed
+above, except that the data is real rather than complex, and one needs
+to pass an r2r transform kind (@code{fftw_r2r_kind}) for each
+dimension as in the serial FFTW (@pxref{More DFTs of Real Data}).
+
+For example, one might perform a two-dimensional @twodims{L,M} that is
+an REDFT10 (DCT-II) in the first dimension and an RODFT10 (DST-II) in
+the second dimension with code like:
+
+@example
+    const ptrdiff_t L = ..., M = ...;
+    fftw_plan plan;
+    double *data;
+    ptrdiff_t alloc_local, local_n0, local_0_start, i, j;
+
+    /* @r{get local data size and allocate} */
+    alloc_local = fftw3_mpi_local_size_2d(L, M, MPI_COMM_WORLD,
+                                          &local_n0, &local_0_start);
+    data = fftw_alloc_real(alloc_local);
+
+    /* @r{create plan for in-place REDFT10 x RODFT10} */
+    plan = fftw_mpi_plan_r2r_2d(L, M, data, data, MPI_COMM_WORLD,
+                                FFTW_REDFT10, FFTW_RODFT10, FFTW_MEASURE);
+
+    /* @r{initialize data to some function} my_function(x,y) */
+    for (i = 0; i < local_n0; ++i) for (j = 0; j < M; ++j)
+       data[i*M + j] = my_function(local_0_start + i, j);
+
+    /* @r{compute transforms, in-place, as many times as desired} */
+    fftw_execute(plan);
+
+    fftw_destroy_plan(plan);
+@end example
+
+@findex fftw_alloc_real
+Notice that we use the same @samp{local_size} functions as we did for
+complex data, only now we interpret the sizes in terms of real rather
+than complex values, and correspondingly use @code{fftw_alloc_real}.
 
 @c ------------------------------------------------------------
 @node FFTW MPI Transposes, FFTW MPI Wisdom, Other Multi-dimensional Real-data MPI Transforms, Distributed-memory FFTW with MPI
@@ -799,14 +931,10 @@ and use it on all processes would be:
 @example
 @{
     int rank;
-    FILE *f;
 
     fftw_mpi_init();
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    if (rank == 0 && (f = fopen("mywisdom", "r"))) @{
-        fftw_import_wisdom_from_file(f);
-        fclose(f);
-    @}
+    if (rank == 0) fftw_import_wisdom_from_filename("mywisdom");
     fftw_mpi_broadcast_wisdom(MPI_COMM_WORLD);
 @}
 @end example
@@ -819,14 +947,10 @@ snippet to export wisdom from all processes to a file is:
 @example
 @{
     int rank;
-    FILE *f;
 
     fftw_mpi_gather_wisdom(MPI_COMM_WORLD);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    if (rank == 0 && (f = fopen("mywisdom", "w"))) @{
-        fftw_export_wisdom_to_file(f);
-        fclose(f);
-    @}
+    if (rank == 0) fftw_export_wisdom_to_filename("mywisdom");
 @}
 @end example
 
@@ -979,8 +1103,12 @@ multithreaded FFTW on top of this may be superfluous.
 @cindex transpose
 
 @c ------------------------------------------------------------
-@node FFTW MPI Reference,  , Combining MPI and Threads, Distributed-memory FFTW with MPI
+@node FFTW MPI Reference, FFTW MPI Fortran Interface, Combining MPI and Threads, Distributed-memory FFTW with MPI
 @section FFTW MPI Reference
 
 Detailed documentation of all FFTW MPI routines pending.
+
+@c ------------------------------------------------------------
+@node FFTW MPI Fortran Interface,  , FFTW MPI Reference, Distributed-memory FFTW with MPI
+@section FFTW MPI Fortran Interface
 

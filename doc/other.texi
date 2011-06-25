@@ -54,6 +54,15 @@ happens not to be properly aligned, FFTW will not use the SIMD
 extensions.
 @cindex C++
 
+@findex fftw_alloc_real
+@findex fftw_alloc_complex
+Since @code{fftw_malloc} only ever needs to be used for real and
+complex arrays, we provide two convenient wrapper routines
+@code{fftw_alloc_real(N)} and @code{fftw_alloc_complex(N)} that are
+equivalent to @code{(double*)fftw_malloc(sizeof(double) * N)} and
+@code{(fftw_complex*)fftw_malloc(sizeof(fftw_complex) * N)},
+respectively (or their equivalents in other precisions).
+
 @c ------------------------------------------------------------
 @node Multi-dimensional Array Format, Words of Wisdom-Saving Plans, SIMD alignment and fftw_malloc, Other Important Topics
 @section Multi-dimensional Array Format

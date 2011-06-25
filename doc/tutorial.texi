@@ -72,7 +72,8 @@ allocate them in any way that you like, but we recommend using
 @findex fftw_malloc
 @code{malloc} except that it properly aligns the array when SIMD
 instructions (such as SSE and Altivec) are available (@pxref{SIMD
-alignment and fftw_malloc}).
+alignment and fftw_malloc}). [Alternatively, we provide a convenient wrapper function @code{fftw_alloc_complex(N)} which has the same effect.]
+@findex fftw_alloc_complex
 @cindex SIMD
 
 
@@ -308,10 +309,10 @@ users, but it is important to be aware of them.
 
 The routines to perform real-data transforms are almost the same as
 those for complex transforms: you allocate arrays of @code{double}
-and/or @code{fftw_complex} (preferably using @code{fftw_malloc}),
-create an @code{fftw_plan}, execute it as many times as you want with
-@code{fftw_execute(plan)}, and clean up with
-@code{fftw_destroy_plan(plan)} (and @code{fftw_free}).  The only
+and/or @code{fftw_complex} (preferably using @code{fftw_malloc} or
+@code{fftw_alloc_complex}), create an @code{fftw_plan}, execute it as
+many times as you want with @code{fftw_execute(plan)}, and clean up
+with @code{fftw_destroy_plan(plan)} (and @code{fftw_free}).  The only
 differences are that the input (or output) is of type @code{double}
 and there are new routines to create the plan.  In one dimension:
 
@@ -347,12 +348,14 @@ For an in-place transform,
 @cindex in-place
 @code{in} and @code{out} are aliased to the same array, which must be
 big enough to hold both; so, the real array would actually have
-@code{2*(n/2+1)} elements, where the elements beyond the first @code{n}
-are unused padding.  The @math{k}th element of the complex array is
-exactly the same as the @math{k}th element of the corresponding complex
-DFT.  All positive @code{n} are supported; products of small factors are
-most efficient, but an @Onlogn algorithm is used even for prime
-sizes.
+@code{2*(n/2+1)} elements, where the elements beyond the first
+@code{n} are unused padding.  (Note that this is very different from
+the concept of ``zero-padding'' a transform to a larger length, which
+changes the logical size of the DFT by actually adding new input
+data.)  The @math{k}th element of the complex array is exactly the
+same as the @math{k}th element of the corresponding complex DFT.  All
+positive @code{n} are supported; products of small factors are most
+efficient, but an @Onlogn algorithm is used even for prime sizes.
 
 As noted above, the c2r transform destroys its input array even for
 out-of-place transforms.  This can be prevented, if necessary, by

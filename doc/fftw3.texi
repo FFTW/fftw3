@@ -62,6 +62,18 @@ $n_0 \\times n_1 \\times n_2 \\times \\cdots \\times (n_{d-1}/2 + 1)$
 @end tex
 @end macro
 
+@macro ndimspad
+@ifinfo
+n[0] x n[1] x n[2] x ... x [2 (n[d-1]/2 + 1)]
+@end ifinfo
+@html
+n<sub>0</sub>&nbsp;&times;&nbsp;n<sub>1</sub>&nbsp;&times;&nbsp;n<sub>2</sub>&nbsp;&times;&nbsp;&hellip;&nbsp;&times;&nbsp;[2&nbsp;(n<sub>d-1</sub>/2 + 1)]
+@end html
+@tex
+$n_0 \\times n_1 \\times n_2 \\times \\cdots \\times [2(n_{d-1}/2 + 1)]$
+@end tex
+@end macro
+
 @macro twodims{d1, d2}
 @ifinfo
 \d1\ x \d2\
