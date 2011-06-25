@@ -26,7 +26,6 @@ that deserve closer attention.
 * Plan execution in Fortran::   
 * Allocating aligned memory in Fortran::  
 * Accessing the wisdom API from Fortran::  
-* FFTW Fortran examples::       
 * Defining an FFTW module::     
 @end menu
 
@@ -475,7 +474,7 @@ single array and associating both real and complex array pointers with
 it, for in-place real-to-complex transforms.
 
 @c -------------------------------------------------------
-@node Accessing the wisdom API from Fortran, FFTW Fortran examples, Allocating aligned memory in Fortran, Calling FFTW from Modern Fortran
+@node Accessing the wisdom API from Fortran, Defining an FFTW module, Allocating aligned memory in Fortran, Calling FFTW from Modern Fortran
 @section Accessing the wisdom API from Fortran
 @cindex wisdom
 @cindex saving plans to disk
@@ -588,11 +587,94 @@ by the @code{C_NULL_CHAR} character, like the @code{s} array above.
 @node Wisdom Generic Export/Import from Fortran,  , Wisdom String Export/Import from Fortran, Accessing the wisdom API from Fortran
 @subsection Wisdom Generic Export/Import from Fortran
 
-@c -------------------------------------------------------
-@node FFTW Fortran examples, Defining an FFTW module, Accessing the wisdom API from Fortran, Calling FFTW from Modern Fortran
-@section FFTW Fortran examples
+The most generic wisdom export/import functions allow you to provide
+an arbitrary callback function to read/write one character at a time
+in any way you want.  However, your callback function must be written
+in a special way, using the @code{bind(C)} attribute to be passed to a
+C interface.
+
+@findex fftw_export_wisdom
+In particular, to call the generic wisdom export function
+@code{fftw_export_wisdom}, you would write a callback subroutine of the form:
+
+@example
+  subroutine my_write_char(c, p) bind(C)
+    use, intrinsic :: iso_c_binding
+    character(C_CHAR), value :: c
+    type(C_PTR), value :: p
+    @emph{...write c...}
+  end subroutine my_write_char
+@end example
+
+Given such a subroutine (along with the corresponding interface definition), you could then export wisdom using:
+
+@findex c_funloc
+@example
+  call fftw_export_wisdom(c_funloc(my_write_char), p)
+@end example
+
+@findex c_loc
+@findex c_f_pointer
+The standard @code{c_funloc} intrinsic converts a Fortran
+@code{bind(C)} subroutine into a C function pointer.  The parameter
+@code{p} is a @code{type(C_PTR)} to any arbitrary data that you want
+to pass to @code{my_write_char} (or @code{C_NULL_PTR} if none).  (Note
+that you can get a C pointer to Fortran data using the intrinsic
+@code{c_loc}, and convert it back to a Fortran pointer in
+@code{my_write_char} using @code{c_f_pointer}.)
+
+Similarly, to use the generic @code{fftw_import_wisdom}, you would
+define a callback function of the form:
+
+@findex fftw_import_wisdom
+@example
+  integer(C_INT) function my_read_char(p) bind(C)
+    use, intrinsic :: iso_c_binding
+    type(C_PTR), value :: p
+    character :: c
+    @emph{...read a character c...}
+    my_read_char = ichar(c, C_INT)
+  end function my_read_char
+
+  ....
+
+  integer(C_INT) :: ret
+  ret = fftw_import_wisdom(c_funloc(my_read_char), p)
+  if (ret .eq. 0) stop 'error importing wisdom'
+@end example
+
+Your function can return @code{-1} if the end of the input is reached.
+Again, @code{p} is an arbitrary @code{type(C_PTR} that is passed
+through to your function.  @code{fftw_import_wisdom} returns @code{0}
+if an error occurred and nonzero otherwise.
 
 @c -------------------------------------------------------
-@node Defining an FFTW module,  , FFTW Fortran examples, Calling FFTW from Modern Fortran
+@node Defining an FFTW module,  , Accessing the wisdom API from Fortran, Calling FFTW from Modern Fortran
 @section Defining an FFTW module
 
+Rather than using the @code{include} statement to include the
+@code{fftw3.f03} interface file in any subroutine where you want to
+use FFTW, you might prefer to define an FFTW Fortran module.  FFTW
+does not install itself as a module, primarily because
+@code{fftw3.f03} can be shared between different Fortran compilers but
+modules (in general) cannot.  However, it is trivial to define your
+own FFTW module if you want.  Just create a file containing:
+
+@example
+  module FFTW3
+    use, intrinsic :: iso_c_binding
+    include 'fftw3.f03'
+  end module
+@end example
+
+Compile this file into a module as usual for your compiler (e.g. with
+@code{gfortran -c} you will get a file @code{fftw3.mod}).  Now,
+instead of @code{include 'fftw3.f03'}, whenever you want to use FFTW
+routines you can just do:
+
+@example
+  use FFTW3
+@end example
+
+as usual for FFTW modules.  (You still need to link to the FFTW
+library, of course.)
