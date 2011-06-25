@@ -10,7 +10,7 @@ endif
 
 CC=@MPICC@
 
-EXTRADIST = testsched.c f03api.sh f03-wrap.sh genf03-wrap.sh fftw3-mpi.f03.in
+EXTRA_DIST = testsched.c f03api.sh f03-wrap.sh genf03-wrap.pl fftw3-mpi.f03.in
 BUILT_SOURCES = fftw3-mpi.f03.in fftw3-mpi.f03 f03-wrap.c
 
 TRANSPOSE_SRC = transpose-alltoall.c transpose-pairwise.c transpose-recurse.c transpose-problem.c transpose-solve.c mpi-transpose.h
