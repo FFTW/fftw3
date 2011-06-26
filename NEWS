@@ -22,11 +22,13 @@ FFTW 3.3-beta1
 * Add support for quad-precision __float128 where available (gcc 4.6 or later).
   The new routines use the fftwq_ prefix.
 
+* Temporarily removed MIPS paired-single support due to lack of
+  available hardware for testing.  We hope to add it back before the
+  final FFTW 3.3 release; meanwhile, users who want this functionality
+  should continue using FFTW 3.2.x.
+
 * Removed support for the Cell Broadband Engine.  Cell users should
   use FFTW 3.2.x.
-
-* Removed MIPS paired-single support; users who want this functionality
-  should use FFTW 3.2.x.
 
 * New convenience functions fftw_alloc_real and fftw_alloc_complex
   to use fftw_malloc for real and complex arrays without typecasts
