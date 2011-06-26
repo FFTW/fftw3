@@ -1,18 +1,67 @@
-* Add support for the AVX extensions to the x86 ISA.  The AVX code
-  works with 16-byte alignment (as opposed to 32-byte alignment),
-  so there is no ABI change w.r.t. FFTW-3.2.2.
+FFTW 3.3-beta1
 
-* Add support for quad-precision __float128 where available.
+* Add support for the AVX extensions to x86 and x86-64.  The AVX code
+  works with 16-byte alignment (as opposed to 32-byte alignment),
+  so there is no ABI change compared to FFTW 3.2.2.
+
+* Added Fortran 2003 interface, which should be usable on most modern
+  Fortran compilers (e.g. gfortran) and provides type-checked access
+  to the the C FFTW interface.  (The legacy Fortran-77 interface is
+  still included also.)
+
+* Added MPI distributed-memory transforms.  Compared to 3.3alpha,
+  the major changes in the MPI transforms are:
+    - Fixed some deadlock and crashing bugs.
+    - Added Fortran 2003 interface.
+    - Added new-array execute functions for MPI plans.
+    - Eliminated use of large MPI tags, since Cray MPI requires tags < 2^24;
+      thanks to Jonathan Bentz for the bug report.
+    - Expanded documentation.
+    - Some ABI changes - not binary-compatible with 3.3alpha MPI.
+
+* Add support for quad-precision __float128 where available (gcc 4.6 or later).
   The new routines use the fftwq_ prefix.
 
-* Removed support for the Cell Broadband Engine.
+* Removed support for the Cell Broadband Engine.  Cell users should
+  use FFTW 3.2.x.
+
+* Removed MIPS paired-single support; users who want this functionality
+  should use FFTW 3.2.x.
+
+* New convenience functions fftw_alloc_real and fftw_alloc_complex
+  to use fftw_malloc for real and complex arrays without typecasts
+  or sizeof.
+
+* New convenience functions fftw_export_wisdom_to_filename and
+  fftw_import_wisdom_from_filename that export/import wisdom
+  to a file, which don't require you to open/close the file yourself.
 
 * New function fftw_cost to return FFTW's internal cost metric for 
   a given plan; thanks to Rhys Ulerich and Nathanael Schaeffer for the
   suggestion.
 
+* The --enable-sse2 configure flag now works in both double and single
+  precision (and is equivalent to --enable-sse in the latter case).
+
+* Remove --enable-portable-binary flag: we new produce portable binaries
+  by default.
+
 * Remove the automatic detection of native architecture flag for gcc
   which was introduced in fftw-3.1, since new gcc supports -mtune=native.
+  Remove the --with-gcc-arch flag; if you want to specify a particlar
+  arch to configure, use ./configure CC="gcc -mtune=...".
+
+* --with-our-malloc16 configure flag is now renamed --with-our-malloc.
+
+* Fixed build problem failure when srand48 declaration is missing;
+  thanks to Ralf Wildenhues for the bug report.
+
+* Fixed bug in fftw_set_timelimit: ensure that a negative timelimit
+  is equivalent to no timelimit in all cases.  Thanks to William Andrew
+  Burnson for the bug report.
+
+* Fixed stack-overflow problem on OpenBSD caused by using alloca with
+  too large a buffer.
 
 FFTW 3.2.2
 
