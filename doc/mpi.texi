@@ -48,7 +48,7 @@ to the MPI interface.
 * FFTW MPI Installation::       
 * Linking and Initializing MPI FFTW::  
 * 2d MPI example::              
-* MPI data distribution::       
+* MPI Data Distribution::       
 * Multi-dimensional MPI DFT of Real Data::  
 * Other Multi-dimensional Real-data MPI Transforms::  
 * FFTW MPI Transposes::         
@@ -137,7 +137,7 @@ also gets rid of FFTW's MPI-related data.  You must @emph{not} execute
 any previously created plans after calling this function.
 
 @c ------------------------------------------------------------
-@node 2d MPI example, MPI data distribution, Linking and Initializing MPI FFTW, Distributed-memory FFTW with MPI
+@node 2d MPI example, MPI Data Distribution, Linking and Initializing MPI FFTW, Distributed-memory FFTW with MPI
 @section 2d MPI example
 
 Before we document the FFTW MPI interface in detail, we begin with a
@@ -247,8 +247,8 @@ library; see the @uref{http://www.hdfgroup.org/, HDF home page}.)
 @cindex MPI I/O
 
 @c ------------------------------------------------------------
-@node MPI data distribution, Multi-dimensional MPI DFT of Real Data, 2d MPI example, Distributed-memory FFTW with MPI
-@section MPI data distribution
+@node MPI Data Distribution, Multi-dimensional MPI DFT of Real Data, 2d MPI example, Distributed-memory FFTW with MPI
+@section MPI Data Distribution
 @cindex data distribution
 
 The most important concept to understand in using FFTW's MPI interface
@@ -304,7 +304,7 @@ allocate.
 * One-dimensional distributions::  
 @end menu
 
-@node Basic and advanced distribution interfaces, Load balancing, MPI data distribution, MPI data distribution
+@node Basic and advanced distribution interfaces, Load balancing, MPI Data Distribution, MPI Data Distribution
 @subsection Basic and advanced distribution interfaces
 
 As with the planner interface, the @samp{fftw_mpi_local_size}
@@ -404,7 +404,7 @@ on processes 0 to 2, @code{local_n0 = 6} on process 3.  (This choice,
 while it may look superficially more ``balanced,'' has the same
 critical path as FFTW's default but requires more communications.)
 
-@node Load balancing, Transposed distributions, Basic and advanced distribution interfaces, MPI data distribution
+@node Load balancing, Transposed distributions, Basic and advanced distribution interfaces, MPI Data Distribution
 @subsection Load balancing
 @cindex load balancing
 
@@ -436,7 +436,7 @@ For a one-dimensional complex DFT, the length @code{N} of the data
 should be divisible by @math{P} @emph{squared} to be able to divide
 the problem equally among the processes.
 
-@node Transposed distributions, One-dimensional distributions, Load balancing, MPI data distribution
+@node Transposed distributions, One-dimensional distributions, Load balancing, MPI Data Distribution
 @subsection Transposed distributions
 
 Internally, FFTW's MPI transform algorithms work by first computing
@@ -513,7 +513,7 @@ pass @emph{both} the @code{FFTW_MPI_TRANSPOSED_IN} and
 first two dimensions passed to the planner and passing @emph{neither}
 flag.)
 
-@node One-dimensional distributions,  , Transposed distributions, MPI data distribution
+@node One-dimensional distributions,  , Transposed distributions, MPI Data Distribution
 @subsection One-dimensional distributions
 
 For one-dimensional distributed DFTs using FFTW, matters are slightly
@@ -567,7 +567,7 @@ In MPI FFTW, only composite sizes @code{n0} can be parallelized; we
 have not yet implemented a parallel algorithm for large prime sizes.
 
 @c ------------------------------------------------------------
-@node Multi-dimensional MPI DFT of Real Data, Other Multi-dimensional Real-data MPI Transforms, MPI data distribution, Distributed-memory FFTW with MPI
+@node Multi-dimensional MPI DFT of Real Data, Other Multi-dimensional Real-data MPI Transforms, MPI Data Distribution, Distributed-memory FFTW with MPI
 @section Multi-dimensional MPI DFT of Real Data
 
 FFTW's MPI interface also supports multi-dimensional DFTs of real
@@ -1116,7 +1116,257 @@ multithreaded FFTW on top of this may be superfluous.
 @node FFTW MPI Reference, FFTW MPI Fortran Interface, Combining MPI and Threads, Distributed-memory FFTW with MPI
 @section FFTW MPI Reference
 
-Detailed documentation of all FFTW MPI routines pending.
+This chapter provides a complete reference to all FFTW MPI functions,
+datatypes, and constants.  See also @ref{FFTW Reference} for information
+on functions and types in common with the serial interface.
+
+@menu
+* MPI Files and Data Types::    
+* MPI Initialization::          
+* Using MPI Plans::             
+* MPI Data Distribution Functions::  
+* MPI Plan Creation::           
+* MPI Wisdom Communication::    
+@end menu
+
+@node MPI Files and Data Types, MPI Initialization, FFTW MPI Reference, FFTW MPI Reference
+@subsection MPI Files and Data Types
+
+All programs using FFTW's MPI support should include its header file:
+
+@example
+#include <fftw3-mpi.h>
+@end example
+
+Note that this header file includes the serial-FFTW @code{fftw3.h}
+header file, and also the @code{mpi.h} header file for MPI, so you
+need not include those files separately.
+
+You must also link to @emph{both} the FFTW MPI library and to the
+serial FFTW library.  On Unix, this means adding @code{-lfftw3_mpi
+-lfftw3 -lm} at the end of the link command.
+
+@cindex precision
+Different precisions are handled as in the serial interface:
+@xref{Precision}.  That is, @samp{fftw_} functions become
+@code{fftwf_} (in single precision) etcetera, and the libraries become
+@code{-lfftw3f_mpi -lfftw3f -lm} etcetera on Unix.  Long-double
+precision is supported in MPI, but quad precision (@samp{fftwq_}) is
+not due to the lack of MPI support for this type.
+
+@node MPI Initialization, Using MPI Plans, MPI Files and Data Types, FFTW MPI Reference
+@subsection MPI Initialization
+
+Before calling any other FFTW MPI (@samp{fftw_mpi_}) function, and
+before importing any wisdom for MPI problems, you must call:
+
+@findex fftw_mpi_init
+@example
+void fftw_mpi_init(void);
+@end example
+
+@findex fftw_init_threads
+If FFTW threads support is used, however, @code{fftw_mpi_init} should
+be called @emph{after} @code{fftw_init_threads} (@pxref{Combining MPI
+and Threads}).  Calling @code{fftw_mpi_init} additional times (before
+@code{fftw_mpi_cleanup}) has no effect.
+
+
+If you want to deallocate all persistent data and reset FFTW to the
+pristine state it was in when you started your program, you can call:
+
+@findex fftw_mpi_cleanup
+@example
+void fftw_mpi_cleanup(void);
+@end example
+
+@findex fftw_cleanup
+(This calls @code{fftw_cleanup}, so you need not call the serial
+cleanup routine too, although it is safe to do so.)  After calling
+@code{fftw_mpi_cleanup}, all existing plans become undefined, and you
+should not attempt to execute or destroy them.  You must call
+@code{fftw_mpi_init} again after @code{fftw_mpi_cleanup} if you want
+to resume using the MPI FFTW routines.
+
+@node Using MPI Plans, MPI Data Distribution Functions, MPI Initialization, FFTW MPI Reference
+@subsection Using MPI Plans
+
+Once an MPI plan is created, you can execute and destroy it using
+@code{fftw_execute}, @code{fftw_destroy_plan}, and the other functions
+in the serial interface that operate on generic plans (@pxref{Using
+Plans}).  
+
+@cindex collective function
+@cindex MPI communicator
+The @code{fftw_execute} and @code{fftw_destroy_plan} functions, applied to
+MPI plans, are @emph{collective} calls: they must be called for all processes
+in the communicator that was used to create the plan.
+
+@cindex new-array execution
+You must @emph{not} use the serial new-array plan-execution functions
+@code{fftw_execute_dft} and so on (@pxref{New-array Execute
+Functions}) with MPI plans.  Such functions are specialized to the
+problem type, and there are specific new-array execute functions for MPI plans:
+
+@findex fftw_mpi_execute_dft
+@findex fftw_mpi_execute_dft_r2c
+@findex fftw_mpi_execute_dft_c2r
+@findex fftw_mpi_execute_r2r
+@example
+void fftw_mpi_execute_dft(fftw_plan p, fftw_complex *in, fftw_complex *out);
+void fftw_mpi_execute_dft_r2c(fftw_plan p, double *in, fftw_complex *out);
+void fftw_mpi_execute_dft_c2r(fftw_plan p, fftw_complex *in, double *out);
+void fftw_mpi_execute_r2r(fftw_plan p, double *in, double *out);
+@end example
+
+@cindex alignment
+@findex fftw_malloc
+These functions have the same restrictions as those of the serial
+new-array execute functions.  They are @emph{always} safe to apply to
+the @emph{same} @code{in} and @code{out} arrays that were used to
+create the plan.  They can only be applied to new arrarys if those
+arrays have the same types, dimensions, in-placeness, and alignment as
+the original arrays, where the best way to ensure the same alignment
+is to use FFTW's @code{fftw_malloc} and related allocation functions
+for all arrays (@pxref{Memory Allocation}).
+
+@node MPI Data Distribution Functions, MPI Plan Creation, Using MPI Plans, FFTW MPI Reference
+@subsection MPI Data Distribution Functions
+
+@cindex data distribution
+As described above (@pxref{MPI Data Distribution}), in order to
+allocate your arrays, @emph{before} creating a plan, you must first
+call one of the following routines to determine the required
+allocation size and the portion of the array locally stored on a given
+process.  The @code{MPI_Comm} communicator passed here must be
+equivalent to the communicator used below for plan creation.
+
+The basic interface for multidimensional transforms consists of the
+functions:
+
+@findex fftw_mpi_local_size_2d
+@findex fftw_mpi_local_size_3d
+@findex fftw_mpi_local_size
+@findex fftw_mpi_local_size_2d_transposed
+@findex fftw_mpi_local_size_3d_transposed
+@findex fftw_mpi_local_size_transposed
+@example
+ptrdiff_t fftw_mpi_local_size_2d(ptrdiff_t n0, ptrdiff_t n1, MPI_Comm comm,
+                                 ptrdiff_t *local_n0, ptrdiff_t *local_0_start);
+ptrdiff_t fftw_mpi_local_size_3d(ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2,
+                                 MPI_Comm comm,
+                                 ptrdiff_t *local_n0, ptrdiff_t *local_0_start);
+ptrdiff_t fftw_mpi_local_size(int rnk, const ptrdiff_t *n, MPI_Comm comm,
+                              ptrdiff_t *local_n0, ptrdiff_t *local_0_start);
+
+ptrdiff_t fftw_mpi_local_size_2d_transposed(ptrdiff_t n0, ptrdiff_t n1, MPI_Comm comm,
+                                            ptrdiff_t *local_n0, ptrdiff_t *local_0_start,
+                                            ptrdiff_t *local_n1, ptrdiff_t *local_1_start);
+ptrdiff_t fftw_mpi_local_size_3d_transposed(ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2,
+                                            MPI_Comm comm,
+                                            ptrdiff_t *local_n0, ptrdiff_t *local_0_start,
+                                            ptrdiff_t *local_n1, ptrdiff_t *local_1_start);
+ptrdiff_t fftw_mpi_local_size_transposed(int rnk, const ptrdiff_t *n, MPI_Comm comm,
+                                         ptrdiff_t *local_n0, ptrdiff_t *local_0_start,
+                                         ptrdiff_t *local_n1, ptrdiff_t *local_1_start);
+@end example
+
+These functions return the number of elements to allocate (complex
+numbers for DFT/r2c/c2r plans, real numbers for r2r plans), whereas
+the @code{local_n0} and @code{local_0_start} return the portion
+(@code{local_0_start} to @code{local_0_start + local_n0 - 1}) of the
+first dimension of an @ndims{} array that is stored on the local
+process.  @xref{Basic and advanced distribution interfaces}.  For
+@code{FFTW_MPI_TRANSPOSED_OUT} plans, the @samp{_transposed} variants
+are useful in order to also return the local portion of the first
+dimension in the @ndimstrans{} transposed output.  @xref{Transposed
+distributions}.  The advanced interface for multidimensional
+transforms is:
+
+@findex fftw_mpi_local_size_many
+@findex fftw_mpi_local_size_many_transposed
+@example
+ptrdiff_t fftw_mpi_local_size_many(int rnk, const ptrdiff_t *n, ptrdiff_t howmany,
+                                   ptrdiff_t block0, MPI_Comm comm,
+                                   ptrdiff_t *local_n0, ptrdiff_t *local_0_start);
+ptrdiff_t fftw_mpi_local_size_many_transposed(int rnk, const ptrdiff_t *n, ptrdiff_t howmany,
+                                              ptrdiff_t block0, ptrdiff_t block1, MPI_Comm comm,
+                                              ptrdiff_t *local_n0, ptrdiff_t *local_0_start,
+                                              ptrdiff_t *local_n1, ptrdiff_t *local_1_start);
+@end example
+
+These differ from the basic interface in only two ways.  First, they
+allow you to specify block sizes @code{block0} and @code{block1} (the
+latter for the transposed output); you can pass
+@code{FFTW_MPI_DEFAULT_BLOCK} to use FFTW's default block size as in
+the basic interface.  Second, you can pass a @code{howmany} parameter,
+corresponding to the advanced planning interface below: this is for
+transforms of contiguous @code{howmany}-tuples of numbers
+(@code{howmany = 1} in the basic interface).
+
+The corresponding basic and advanced routines for one-dimensional
+transforms (currently only complex DFTs) are:
+
+@findex fftw_mpi_local_size_1d
+@findex fftw_mpi_local_size_many_1d
+@example
+ptrdiff_t fftw_mpi_local_size_1d(
+             ptrdiff_t n0, MPI_Comm comm, int sign, unsigned flags,
+             ptrdiff_t *local_ni, ptrdiff_t *local_i_start,
+             ptrdiff_t *local_no, ptrdiff_t *local_o_start);
+ptrdiff_t fftw_mpi_local_size_many_1d(
+             ptrdiff_t n0, ptrdiff_t howmany,
+             MPI_Comm comm, int sign, unsigned flags,
+             ptrdiff_t *local_ni, ptrdiff_t *local_i_start,
+             ptrdiff_t *local_no, ptrdiff_t *local_o_start);
+@end example
+
+@ctindex FFTW_MPI_SCRAMBLED_OUT
+@ctindex FFTW_MPI_SCRAMBLED_IN
+As above, the return value is the number of elements to allocate
+(complex numbers, for complex DFTs).  The @code{local_ni} and
+@code{local_i_start} arguments return the portion
+(@code{local_i_start} to @code{local_i_start + local_ni - 1}) of the
+1d array that is stored on this process for the transform
+@emph{input}, and @code{local_no} and @code{local_o_start} are the
+corresponding quantities for the input.  The @code{sign}
+(@code{FFTW_FORWARD} or @code{FFTW_BACKWARD}) and @code{flags} must
+match the arguments passed when creating a plan.  Although the inputs
+and outputs have different data distributions in general, it is
+guaranteed that the @emph{output} data distribution of an
+@code{FFTW_FORWARD} plan will match the @emph{input} data distribution
+of an @code{FFTW_BACKWARD} plan and vice versa; similarly for the
+@code{FFTW_MPI_SCRAMBLED_OUT} and @code{FFTW_MPI_SCRAMBLED_IN} flags.
+@xref{One-dimensional distributions}.
+
+@node MPI Plan Creation, MPI Wisdom Communication, MPI Data Distribution Functions, FFTW MPI Reference
+@subsection MPI Plan Creation
+
+@node MPI Wisdom Communication,  , MPI Plan Creation, FFTW MPI Reference
+@subsection MPI Wisdom Communication
+
+To facilitate synchronizing wisdom among the different MPI processes,
+we provide two functions:
+
+@findex fftw_mpi_gather_wisdom
+@findex fftw_mpi_broadcast_wisdom
+@example
+void fftw_mpi_gather_wisdom(MPI_Comm comm);
+void fftw_mpi_broadcast_wisdom(MPI_Comm comm);
+@end example
+
+The @code{fftw_mpi_gather_wisdom} function gathers all wisdom in the
+given communicator @code{comm} to the process of rank 0 in the
+communicator: that process obtains the union of all wisdom on all the
+processes.  As a side effect, some other processes will gain
+additional wisdom from other processes, but only process 0 will gain
+the complete union.
+
+The @code{fftw_mpi_broadcast_wisdom} does the reverse: it exports
+wisdom from process 0 in @code{comm} to all other processes in the
+communicator, replacing any wisdom they currently have.
+
+@xref{FFTW MPI Wisdom}.
 
 @c ------------------------------------------------------------
 @node FFTW MPI Fortran Interface,  , FFTW MPI Reference, Distributed-memory FFTW with MPI
@@ -1169,7 +1419,7 @@ names as the C interface functions.}
 @item
 Because you need to call the @samp{local_size} function to find out
 how much space to allocate, and this may be @emph{larger} than the
-local portion of the array (@pxref{MPI data distribution}), you should
+local portion of the array (@pxref{MPI Data Distribution}), you should
 @emph{always} allocate your arrays dynamically using FFTW's allocation
 routines as described in @ref{Allocating aligned memory in Fortran}.
 (Coincidentally, this also provides the best performance by
@@ -1183,12 +1433,14 @@ Fortran (@pxref{FFTW Fortran type reference}).
 @item
 @findex fftw_execute_dft
 @findex fftw_mpi_execute_dft
+@cindex new-array execution
 In Fortran, because of the language semantics, we generally recommend
 using the new-array execute functions for all plans, even in the
 common case where you are executing the plan on the same arrays for
 which the plan was created (@pxref{Plan execution in Fortran}).
 However, note that in the MPI interface these functions are changed:
-@code{fftw_execute_dft} becomes @code{fftw_mpi_execute_dft}, etcetera.
+@code{fftw_execute_dft} becomes @code{fftw_mpi_execute_dft},
+etcetera. @xref{Using MPI Plans}.
 
 @end itemize
 
