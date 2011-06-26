@@ -72,8 +72,9 @@ if test "$ac_test_CFLAGS" != "set"; then
 	;;
     
     gnu) 
-     # default optimization flags for gcc on all systems
-     CFLAGS="-O3"
+     # Default optimization flags for gcc on all systems.
+     # Somehow -O3 does not imply -fomit-frame-pointer on ia32
+     CFLAGS="-O3 -fomit-frame-pointer"
 
      # tune for the host by default
      AX_CHECK_COMPILER_FLAGS(-mtune=native, CFLAGS="$CFLAGS -mtune=native")
