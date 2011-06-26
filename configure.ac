@@ -159,6 +159,8 @@ if test "$with_windows_f77_mangling" = "yes"; then
 	AC_DEFINE(WINDOWS_F77_MANGLING,1,[Use common Windows Fortran mangling styles for the Fortran interfaces.])
 fi
 
+AC_ARG_WITH(incoming-stack-boundary, [AC_HELP_STRING([--with-incoming-stack-boundary=X],[Assume that stack is aligned to (1<<X) bytes])], with_incoming_stack_boundary=$withval, with_incoming_stack_boundary=no)
+
 dnl compute library suffix
 case "$PRECISION" in
      s) PREC_SUFFIX=f;;
@@ -279,6 +281,18 @@ esac
 AC_SUBST(SSE2_CFLAGS)
 AC_SUBST(AVX_CFLAGS)
 AC_SUBST(ALTIVEC_CFLAGS)
+
+dnl add stack alignment CFLAGS if so requested
+if test "$with_incoming_stack_boundary"x != "no"x; then
+   case "${ax_cv_c_compiler_vendor}" in
+      gnu)
+        tentative_flags="-mincoming-stack-boundary=$with_incoming_stack_boundary";
+        AX_CHECK_COMPILER_FLAGS($tentative_flags, 
+	          [STACK_ALIGN_CFLAGS=$tentative_flags])
+      ;;
+   esac
+fi
+AC_SUBST(STACK_ALIGN_CFLAGS)
 
 dnl Checks for header files.
 AC_HEADER_STDC

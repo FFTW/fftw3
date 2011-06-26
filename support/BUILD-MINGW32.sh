@@ -1,6 +1,6 @@
 set -e
 
-confflags="--prefix=`pwd`/mingw32 --host=i586-mingw32msvc --with-our-malloc --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads"
+confflags="--prefix=`pwd`/mingw32 --host=i586-mingw32msvc --with-our-malloc --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads --with-incoming-stack-boundary=2"
 
 rm -rf mingw32
 

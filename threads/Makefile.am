@@ -1,5 +1,6 @@
 AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
 -I$(top_srcdir)/rdft -I$(top_srcdir)/api
+AM_CFLAGS = $(STACK_ALIGN_CFLAGS)
 
 if SMP
 if COMBINED_THREADS
