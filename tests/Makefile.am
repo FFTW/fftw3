@@ -24,7 +24,7 @@ check-local: bench$(EXEEXT)
 	@echo "         FFTW transforms passed basic tests!"
 	@echo "--------------------------------------------------------------"
 if SMP
-	perl -w $(srcdir)/check.pl -r -c=30 -v --nthreads=2 `pwd`/bench
+	perl -w $(srcdir)/check.pl $(CHECK_PL_OPTS) -r -c=30 -v --nthreads=2 `pwd`/bench
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW threaded transforms passed basic tests!"
 	@echo "--------------------------------------------------------------"
