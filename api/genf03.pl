@@ -73,9 +73,8 @@ sub canonicalize_type {
     "const fftwl_plan" => "type(C_PTR), value",
     "const fftwq_plan" => "type(C_PTR), value",
 
-    "int *" => "integer(C_INT), dimension(*), intent(inout)",
     "const int *" => "integer(C_INT), dimension(*), intent(in)",
-    "ptrdiff_t *" => "integer(C_INTPTR_T), dimension(*), intent(inout)",
+    "ptrdiff_t *" => "integer(C_INTPTR_T), intent(out)",
     "const ptrdiff_t *" => "integer(C_INTPTR_T), dimension(*), intent(in)",
 
     "const fftw_r2r_kind *" => "integer(C_FFTW_R2R_KIND), dimension(*), intent(in)",
@@ -83,15 +82,15 @@ sub canonicalize_type {
     "const fftwl_r2r_kind *" => "integer(C_FFTW_R2R_KIND), dimension(*), intent(in)",
     "const fftwq_r2r_kind *" => "integer(C_FFTW_R2R_KIND), dimension(*), intent(in)",
 
-    "double *" => "real(C_DOUBLE), dimension(*), intent(inout)",
-    "float *" => "real(C_FLOAT), dimension(*), intent(inout)",
-    "long double *" => "real(C_LONG_DOUBLE), dimension(*), intent(inout)",
-    "__float128 *" => "real*16, dimension(*), intent(inout)",
+    "double *" => "real(C_DOUBLE), dimension(*), intent(out)",
+    "float *" => "real(C_FLOAT), dimension(*), intent(out)",
+    "long double *" => "real(C_LONG_DOUBLE), dimension(*), intent(out)",
+    "__float128 *" => "real*16, dimension(*), intent(out)",
 
-    "fftw_complex *" => "complex(C_DOUBLE_COMPLEX), dimension(*), intent(inout)",
-    "fftwf_complex *" => "complex(C_FLOAT_COMPLEX), dimension(*), intent(inout)",
-    "fftwl_complex *" => "complex(C_LONG_DOUBLE_COMPLEX), dimension(*), intent(inout)",
-    "fftwq_complex *" => "complex*32, dimension(*), intent(inout)",
+    "fftw_complex *" => "complex(C_DOUBLE_COMPLEX), dimension(*), intent(out)",
+    "fftwf_complex *" => "complex(C_FLOAT_COMPLEX), dimension(*), intent(out)",
+    "fftwl_complex *" => "complex(C_LONG_DOUBLE_COMPLEX), dimension(*), intent(out)",
+    "fftwq_complex *" => "complex*32, dimension(*), intent(out)",
 
     "const fftw_iodim *" => "type(fftw_iodim), dimension(*), intent(in)",
     "const fftwf_iodim *" => "type(fftwf_iodim), dimension(*), intent(in)",
@@ -106,7 +105,6 @@ sub canonicalize_type {
     "void *" => "type(C_PTR), value",
     "FILE *" => "type(C_PTR), value",
 
-    "char *" => "character(C_CHAR), dimension(*), intent(inout)",
     "const char *" => "character(C_CHAR), dimension(*), intent(in)",
 
     "fftw_write_char_func" => "type(C_FUNPTR), value",
@@ -194,7 +192,19 @@ while (<>) {
 	    $arg =~ /^([a-zA-Z_0-9 ]+[ \*]) *([a-zA-Z_0-9]+) *$/;
 	    $argtype = &canonicalize_type($1);
 	    $argname = $2;
-	    print "      $arg_types{$argtype} :: $argname\n"
+	    $ftype = $arg_types{$argtype};
+
+	    # Various special cases for argument types:
+	    if ($name =~ /_flops$/ && $argtype eq "double *") {
+		$ftype = "real(C_DOUBLE), intent(out)" 
+	    }
+	    if ($name =~ /_execute/ && ($argname eq "ri" ||
+					$argname eq "ii" || 
+					$argname eq "in")) {
+		$ftype =~ s/intent\(out\)/intent(inout)/;
+	    }
+
+	    print "      $ftype :: $argname\n"
 	}
 
 	print "    end $kind $name\n";

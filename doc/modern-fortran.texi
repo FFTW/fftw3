@@ -182,7 +182,7 @@ the complex data is chopped roughly in half.  For example consider the
   complex(C_DOUBLE_COMPLEX), dimension(L/2+1,M,N) :: out
   plan = fftw_plan_dft_r2c_3d(N,M,L, in,out, FFTW_ESTIMATE)
   ...
-  call fftw_execute_dft_r2c(in, out)
+  call fftw_execute_dft_r2c(plan, in, out)
 @end example
 
 @cindex in-place
@@ -268,10 +268,19 @@ of the C enumerated type (@code{FFTW_R2HC} etc.) become simply integer
 constants of the same names in Fortran.
 
 @item
-Most pointer @emph{arguments} to functions (e.g. @code{double *}) become
-@code{dimension(*), intent(inout)} arrays of the same type, or
-@code{intent(in)} if they are pointers to constant data
-(e.g. @code{const double *}).
+@ctindex FFTW_DESTROY_INPUT
+@cindex in-place
+@findex fftw_flops
+Numeric array pointer arguments (e.g. @code{double *})
+become @code{dimension(*), intent(out)} arrays of the same type, or
+@code{dimension(*), intent(in)} if they are pointers to constant data
+(e.g. @code{const int *}).  There are a few exceptions where numeric
+pointers refer to scalar outputs (e.g. for @code{fftw_flops}), in which
+case they are @code{intent(out)} scalar arguments in Fortran too.
+For the new-array execute functions (@pxref{New-array Execute Functions}),
+the input arrays are declared @code{dimension(*), intent(inout)}, since
+they can be modified in the case of in-place or @code{FFTW_DESTROY_INPUT}
+transforms.
 
 @item
 @findex fftw_alloc_real

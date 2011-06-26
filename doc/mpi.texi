@@ -158,8 +158,8 @@ int main(int argc, char **argv)
     fftw_mpi_init();
 
     /* @r{get local data size and allocate} */
-    alloc_local = fftw3_mpi_local_size_2d(N0, N1, MPI_COMM_WORLD,
-                                          &local_n0, &local_0_start);
+    alloc_local = fftw_mpi_local_size_2d(N0, N1, MPI_COMM_WORLD,
+                                         &local_n0, &local_0_start);
     data = fftw_alloc_complex(alloc_local);
 
     /* @r{create plan for in-place forward DFT} */
@@ -631,8 +631,8 @@ int main(int argc, char **argv)
     fftw_mpi_init();
 
     /* @r{get local data size and allocate} */
-    alloc_local = fftw3_mpi_local_size_3d(L, M, N/2+1, MPI_COMM_WORLD,
-                                          &local_n0, &local_0_start);
+    alloc_local = fftw_mpi_local_size_3d(L, M, N/2+1, MPI_COMM_WORLD,
+                                         &local_n0, &local_0_start);
     rin = fftw_alloc_real(2 * alloc_local);
     cout = fftw_alloc_complex(alloc_local);
 
@@ -693,8 +693,8 @@ the second dimension with code like:
     ptrdiff_t alloc_local, local_n0, local_0_start, i, j;
 
     /* @r{get local data size and allocate} */
-    alloc_local = fftw3_mpi_local_size_2d(L, M, MPI_COMM_WORLD,
-                                          &local_n0, &local_0_start);
+    alloc_local = fftw_mpi_local_size_2d(L, M, MPI_COMM_WORLD,
+                                         &local_n0, &local_0_start);
     data = fftw_alloc_real(alloc_local);
 
     /* @r{create plan for in-place REDFT10 x RODFT10} */
@@ -1138,7 +1138,10 @@ Instead of including @code{fftw3.f03} as in @ref{Overview of Fortran
 interface }, you should @code{include 'fftw3-mpi.f03'} (after
 @code{use, intrinsic :: iso_c_binding} as before).  The
 @code{fftw3-mpi.f03} file includes @code{fftw3.f03}, so you should
-@emph{not} @code{include} them both yourself.
+@emph{not} @code{include} them both yourself.  (You will also want to
+include the MPI header file, usually via @code{include 'mpif.h'} or
+similar, although though this is not needed by @code{fftw3-mpi.f03}
+@i{per se}.)
 
 @item
 Because of the different storage conventions between C and Fortran,
@@ -1204,8 +1207,8 @@ initialized MPI with @code{MPI_init} and have also performed
   integer(C_INTPTR_T) :: i, j, alloc_local, local_M, local_j_offset
 
 !   @r{get local data size and allocate (note dimension reversal)}
-  alloc_local = fftw3_mpi_local_size_2d(M, L, MPI_COMM_WORLD, &
-                                        local_M, local_j_offset)
+  alloc_local = fftw_mpi_local_size_2d(M, L, MPI_COMM_WORLD, &
+                                       local_M, local_j_offset)
   cdata = fftw_alloc_complex(alloc_local)
   call c_f_pointer(cdata, data, [L,local_M])
 
@@ -1221,13 +1224,13 @@ initialized MPI with @code{MPI_init} and have also performed
   end do
 
 ! @r{compute transform (as many times as desired)}
-  call fftw_mpi_execute_dft(plan)
+  call fftw_mpi_execute_dft(plan, data, data)
 
   call fftw_destroy_plan(plan)
   call fftw_free(cdata)
 @end example
 
-Note that when we called @code{fftw3_mpi_local_size_2d} and
+Note that when we called @code{fftw_mpi_local_size_2d} and
 @code{fftw_mpi_plan_dft_2d} with the dimensions in reversed order,
 since a @twodims{L,M} Fortran array is viewed by FFTW in C as a
 @twodims{M, L} array.  This means that the array was distributed over
@@ -1254,9 +1257,9 @@ you could declare with:
 @end example
 
 where @code{local_L} would have been obtained by changing the
-@code{fftw3_mpi_local_size_2d} call to:
+@code{fftw_mpi_local_size_2d} call to:
 
 @example
-  alloc_local = fftw3_mpi_local_size_2d_transposed(M, L, MPI_COMM_WORLD, &
+  alloc_local = fftw_mpi_local_size_2d_transposed(M, L, MPI_COMM_WORLD, &
                            local_M, local_j_offset, local_L, local_i_offset)
 @end example
