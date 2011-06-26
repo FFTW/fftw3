@@ -114,7 +114,8 @@ sub do_problem {
     } else {
 	print "Executing \"$program $options --can-do $problem\"\n" 
 	    if $verbose;
-	if (`$program $options --can-do $problem` ne "#f\n") {
+	$result=`$program $options --can-do $problem`;
+	if ($result ne "#f\n" && $result ne "#f\r\n") {
 	    print "FAILED $program: $problem is not undoable\n";
 	    exit 1 unless $keepgoing;
 	}
