@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2003, 2007-8 Matteo Frigo
- * Copyright (c) 2003, 2007-8 Massachusetts Institute of Technology
+ * Copyright (c) 2003, 2007-11 Matteo Frigo
+ * Copyright (c) 2003, 2007-11 Massachusetts Institute of Technology
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
