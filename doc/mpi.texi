@@ -1229,7 +1229,10 @@ create the plan.  They can only be applied to new arrarys if those
 arrays have the same types, dimensions, in-placeness, and alignment as
 the original arrays, where the best way to ensure the same alignment
 is to use FFTW's @code{fftw_malloc} and related allocation functions
-for all arrays (@pxref{Memory Allocation}).
+for all arrays (@pxref{Memory Allocation}).  Note that distributed
+transposes (@pxref{FFTW MPI Transposes}) use
+@code{fftw_mpi_execute_r2r}, since they count as rank-zero r2r plans
+from FFTW's perspective.
 
 @node MPI Data Distribution Functions, MPI Plan Creation, Using MPI Plans, FFTW MPI Reference
 @subsection MPI Data Distribution Functions
@@ -1344,6 +1347,8 @@ of an @code{FFTW_BACKWARD} plan and vice versa; similarly for the
 @node MPI Plan Creation, MPI Wisdom Communication, MPI Data Distribution Functions, FFTW MPI Reference
 @subsection MPI Plan Creation
 
+@subsubheading Complex-data MPI DFTs
+
 Plans for complex-data DFTs (@pxref{2d MPI example}) are created by:
 
 @findex fftw_mpi_plan_dft_1d
@@ -1379,8 +1384,14 @@ collective function that must be called for all processes in the
 communicator.  The @code{in} and @code{out} pointers refer only to a
 portion of the overall transform data (@pxref{MPI Data Distribution})
 as specified by the @samp{local_size} functions in the previous
-section.  Unless @code{flags} contains @code{FFTW_ESTIMATE}, these arrays
-are overwritten during plan creation as for the serial interface.
+section.  Unless @code{flags} contains @code{FFTW_ESTIMATE}, these
+arrays are overwritten during plan creation as for the serial
+interface.  For multi-dimensional transforms, any dimensions @code{>
+1} are supported; for one-dimensional transforms, only composite
+(non-prime) @code{n0} are currently supported (unlike the serial
+FFTW).  Requesting an unsupported transform size will yield a
+@code{NULL} plan.  (As in the serial interface, highly composite sizes
+generally yield the best performance.)
 
 @cindex advanced interface
 @ctindex FFTW_MPI_DEFAULT_BLOCK
@@ -1399,6 +1410,8 @@ to use FFTW's default block size as in the basic interface.  Also, the
 corresponds to the same parameter in the serial advanced interface
 (@pxref{Advanced Complex DFTs}) with @code{stride = howmany} and
 @code{dist = 1}.
+
+@subsubheading MPI flags
 
 The @code{flags} can be any of those for the serial FFTW
 (@pxref{Planner Flags}), and in addition may include one or more of
@@ -1426,6 +1439,8 @@ specify that the output or input of an @ndims{} transform is
 transposed to @ndimstrans{}.  @xref{Transposed distributions}.
 
 @end itemize
+
+@subsubheading Real-data MPI DFTs
 
 @cindex r2c
 Plans for real-input/output (r2c/c2r) DFTs (@pxref{Multi-dimensional
@@ -1473,7 +1488,8 @@ output of a real-input DFT (@pxref{Multi-dimensional Transforms}).
 However, the real array must be stored within a padded @ndimspad{}
 array (much like the in-place serial r2c transforms, but here for
 out-of-place transforms as well). Currently, only multi-dimensional
-(@code{rnk > 1}) r2c/c2r transforms are supported.  As explained above
+(@code{rnk > 1}) r2c/c2r transforms are supported (requesting a plan
+for @code{rnk = 1} will yield @code{NULL}).  As explained above
 (@pxref{Multi-dimensional MPI DFTs of Real Data}), the data
 distribution of both the real and complex arrays is given by the
 @samp{local_size} function called for the dimensions of the
@@ -1500,10 +1516,13 @@ fftw_plan fftw_mpi_plan_many_dft_c2r
                MPI_Comm comm, unsigned flags);               
 @end example
 
+@subsubheading MPI r2r transforms
+
 @cindex r2r
-Finally, there are corresponding plan-creation routines for r2r
+There are corresponding plan-creation routines for r2r
 transforms (@pxref{More DFTs of Real Data}), currently supporting
-multidimensional (@code{rnk > 1}) transforms only:
+multidimensional (@code{rnk > 1}) transforms only (@code{rnk = 1} will
+yield a @code{NULL} plan):
 
 @example
 fftw_plan fftw_mpi_plan_r2r_2d(ptrdiff_t n0, ptrdiff_t n1,
@@ -1532,7 +1551,34 @@ that the arrays are of real numbers (and hence the outputs of the
 @samp{local_size} data-distribution functions should be interpreted as
 counts of real rather than complex numbers).  Also, the @code{kind}
 parameters specify the r2r kinds along each dimension as for the
-serial interface (@pxref{Real-to-Real Transform Kinds}).
+serial interface (@pxref{Real-to-Real Transform Kinds}).  @xref{Other
+Multi-dimensional Real-data MPI Transforms}.
+
+@subsubheading MPI transposition
+@cindex transpose
+
+FFTW also provides routines to plan a transpose of a distributed
+@code{n0} by @code{n1} array of real numbers, or an array of
+@code{howmany}-tuples of real numbers with specified block sizes
+(@pxref{FFTW MPI Transposes}):
+
+@findex fftw_mpi_plan_transpose
+@findex fftw_mpi_plan_many_transpose
+@example
+fftw_plan fftw_mpi_plan_transpose(ptrdiff_t n0, ptrdiff_t n1,
+                                  double *in, double *out,
+                                  MPI_Comm comm, unsigned flags);
+fftw_plan fftw_mpi_plan_many_transpose
+                (ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t howmany,
+                 ptrdiff_t block0, ptrdiff_t block1,
+                 double *in, double *out, MPI_Comm comm, unsigned flags);
+@end example
+
+@cindex new-array execution
+@findex fftw_mpi_execute_r2r
+These plans are used with the @code{fftw_mpi_execute_r2r} new-array
+execute function (@pxref{Using MPI Plans }), since they count as (rank
+zero) r2r plans from FFTW's perspective.
 
 @node MPI Wisdom Communication,  , MPI Plan Creation, FFTW MPI Reference
 @subsection MPI Wisdom Communication
