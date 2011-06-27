@@ -4,7 +4,8 @@ AM_CFLAGS = $(STACK_ALIGN_CFLAGS)
 
 EXTRA_DIST = f03api.sh genf03.pl fftw3.f03.in
 
-include_HEADERS = fftw3.h fftw3.f fftw3.f03
+include_HEADERS = fftw3.h fftw3.f
+nodist_include_HEADERS = fftw3.f03
 noinst_LTLIBRARIES = libapi.la
 
 # pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@
