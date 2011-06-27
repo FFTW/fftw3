@@ -82,6 +82,8 @@ static int wisdom_ok_hook(const problem *p, flags_t flags)
 
      if (comm == MPI_COMM_NULL) return 1; /* non-MPI wisdom is always ok */
 
+     if (XM(any_true)(0, comm)) return 0; /* some process had nowisdom_hook */
+
      /* otherwise, check that the flags and solver index are identical
 	on all processes in this problem's communicator.
 
@@ -105,12 +107,24 @@ static int wisdom_ok_hook(const problem *p, flags_t flags)
      return eq_all;
 }
 
+/* This hook is called when wisdom is not found.  The any_true here
+   matches up with the any_true in wisdom_ok_hook, in order to handle
+   the case where some processes had wisdom (and called wisdom_ok_hook)
+   and some processes didn't have wisdom (and called nowisdom_hook). */
+static void nowisdom_hook(const problem *p)
+{
+     MPI_Comm comm = problem_comm(p);
+     if (comm == MPI_COMM_NULL) return; /* nothing to do for non-MPI p */
+     XM(any_true)(1, comm); /* signal nowisdom to any wisdom_ok_hook */
+}
+
 void XM(init)(void)
 {
      if (!mpi_inited) {
 	  planner *plnr = X(the_planner)();
 	  plnr->cost_hook = cost_hook;
 	  plnr->wisdom_ok_hook = wisdom_ok_hook;
+	  plnr->nowisdom_hook = nowisdom_hook;
           XM(conf_standard)(plnr);
 	  mpi_inited = 1;	  
      }

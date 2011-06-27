@@ -650,51 +650,54 @@ static plan *mkplan(planner *ego, const problem *p)
 
      flags_of_solution = ego->flags;
 
-     if ((ego->wisdom_state != WISDOM_IGNORE_ALL) &&
-	 (sol = hlookup(ego, m.s, &flags_of_solution))) { 
-	  /* wisdom is acceptable */
-	  wisdom_state_t owisdom_state = ego->wisdom_state;
-
-	  /* this hook is mainly for MPI, to make sure that
-	     wisdom is in sync across all processes for MPI problems */
-	  if (ego->wisdom_ok_hook && !ego->wisdom_ok_hook(p, sol->flags))
-	       goto do_search; /* ignore not-ok wisdom */
-
-	  slvndx = SLVNDX(sol);
-
-	  if (slvndx == INFEASIBLE_SLVNDX) {
-	       if (ego->wisdom_state == WISDOM_IGNORE_INFEASIBLE)
-		    goto do_search;
-	       else
-		    return 0;   /* known to be infeasible */
+     if (ego->wisdom_state != WISDOM_IGNORE_ALL) {
+	  if ((sol = hlookup(ego, m.s, &flags_of_solution))) { 
+	       /* wisdom is acceptable */
+	       wisdom_state_t owisdom_state = ego->wisdom_state;
+	       
+	       /* this hook is mainly for MPI, to make sure that
+		  wisdom is in sync across all processes for MPI problems */
+	       if (ego->wisdom_ok_hook && !ego->wisdom_ok_hook(p, sol->flags))
+		    goto do_search; /* ignore not-ok wisdom */
+	       
+	       slvndx = SLVNDX(sol);
+	       
+	       if (slvndx == INFEASIBLE_SLVNDX) {
+		    if (ego->wisdom_state == WISDOM_IGNORE_INFEASIBLE)
+			 goto do_search;
+		    else
+			 return 0;   /* known to be infeasible */
+	       }
+	       
+	       flags_of_solution = sol->flags;
+	       
+	       /* inherit blessing either from wisdom
+		  or from the planner */
+	       flags_of_solution.hash_info |= BLISS(ego->flags);
+	       
+	       ego->wisdom_state = WISDOM_ONLY;
+	       
+	       s = ego->slvdescs[slvndx].slv;
+	       if (p->adt->problem_kind != s->adt->problem_kind)
+		    goto wisdom_is_bogus;
+	       
+	       pln = invoke_solver(ego, p, s, &flags_of_solution);
+	       
+	       CHECK_FOR_BOGOSITY; 	  /* catch error in child solvers */
+	       
+	       sol = 0; /* Paranoia: SOL may be dangling after
+			   invoke_solver(); make sure we don't accidentally
+			   reuse it. */
+	       
+	       if (!pln)
+		    goto wisdom_is_bogus;
+	       
+	       ego->wisdom_state = owisdom_state;
+	       
+	       goto skip_search;
 	  }
-
-	  flags_of_solution = sol->flags;
-
-	  /* inherit blessing either from wisdom
-	     or from the planner */
-	  flags_of_solution.hash_info |= BLISS(ego->flags);
-
-	  ego->wisdom_state = WISDOM_ONLY;
-
-	  s = ego->slvdescs[slvndx].slv;
-	  if (p->adt->problem_kind != s->adt->problem_kind)
-	       goto wisdom_is_bogus;
-	  
-	  pln = invoke_solver(ego, p, s, &flags_of_solution);
-
-	  CHECK_FOR_BOGOSITY; 	  /* catch error in child solvers */
-
-	  sol = 0; /* Paranoia: SOL may be dangling after
-		      invoke_solver(); make sure we don't accidentally
-		      reuse it. */
-
-	  if (!pln)
-	       goto wisdom_is_bogus;
-
-	  ego->wisdom_state = owisdom_state;
-
-	  goto skip_search;
+	  else if (ego->nowisdom_hook) /* for MPI, make sure lack of wisdom */
+	       ego->nowisdom_hook(p);  /*   is in sync across all processes */
      }
 
  do_search:
@@ -919,6 +922,7 @@ planner *X(mkplanner)(void)
      p->hook = 0;
      p->cost_hook = 0;
      p->wisdom_ok_hook = 0;
+     p->nowisdom_hook = 0;
      p->cur_reg_nam = 0;
      p->wisdom_state = WISDOM_NORMAL;
 

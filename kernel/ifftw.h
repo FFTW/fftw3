@@ -732,6 +732,7 @@ struct planner_s {
 		  const problem *p, int optimalp);
      double (*cost_hook)(const problem *p, double t, cost_kind k);
      int (*wisdom_ok_hook)(const problem *p, flags_t flags);
+     void (*nowisdom_hook)(const problem *p);
 
      /* solver descriptors */
      slvdesc *slvdescs;
