@@ -19,8 +19,8 @@ html: $(fftw3_TEXINFOS) $(EQN_IMAGES) rfftwnd-for-html.png
 	for i in $(EQN_IMAGES); do cp -f ${srcdir}/$$i html; done
 	cp -f rfftwnd-for-html.png html
 
-clean-local:
-	rm -f *.html
+maintainer-clean-local:
+	rm -rf html
 
 if MAINTAINER_MODE
 # generate the figure for the manual and distribute the binaries, so that
