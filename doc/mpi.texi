@@ -49,7 +49,7 @@ to the MPI interface.
 * Linking and Initializing MPI FFTW::  
 * 2d MPI example::              
 * MPI Data Distribution::       
-* Multi-dimensional MPI DFT of Real Data::  
+* Multi-dimensional MPI DFTs of Real Data::  
 * Other Multi-dimensional Real-data MPI Transforms::  
 * FFTW MPI Transposes::         
 * FFTW MPI Wisdom::             
@@ -247,7 +247,7 @@ library; see the @uref{http://www.hdfgroup.org/, HDF home page}.)
 @cindex MPI I/O
 
 @c ------------------------------------------------------------
-@node MPI Data Distribution, Multi-dimensional MPI DFT of Real Data, 2d MPI example, Distributed-memory FFTW with MPI
+@node MPI Data Distribution, Multi-dimensional MPI DFTs of Real Data, 2d MPI example, Distributed-memory FFTW with MPI
 @section MPI Data Distribution
 @cindex data distribution
 
@@ -356,6 +356,7 @@ detail below, under @ref{Load balancing}.
 @findex fftw_alloc_complex
 
 
+@cindex advanced interface
 The advanced-interface @samp{local_size} function for multidimensional
 transforms returns the same three things (@code{local_n0},
 @code{local_0_start}, and the total number of elements to allocate),
@@ -567,8 +568,8 @@ In MPI FFTW, only composite sizes @code{n0} can be parallelized; we
 have not yet implemented a parallel algorithm for large prime sizes.
 
 @c ------------------------------------------------------------
-@node Multi-dimensional MPI DFT of Real Data, Other Multi-dimensional Real-data MPI Transforms, MPI Data Distribution, Distributed-memory FFTW with MPI
-@section Multi-dimensional MPI DFT of Real Data
+@node Multi-dimensional MPI DFTs of Real Data, Other Multi-dimensional Real-data MPI Transforms, MPI Data Distribution, Distributed-memory FFTW with MPI
+@section Multi-dimensional MPI DFTs of Real Data
 
 FFTW's MPI interface also supports multi-dimensional DFTs of real
 data, similar to the serial r2c and c2r interfaces.  (Parallel
@@ -666,7 +667,7 @@ values is twice as many.  The @code{rin} array is then
 k} (@pxref{Multi-dimensional Array Format }).
 
 @c ------------------------------------------------------------
-@node Other Multi-dimensional Real-data MPI Transforms, FFTW MPI Transposes, Multi-dimensional MPI DFT of Real Data, Distributed-memory FFTW with MPI
+@node Other Multi-dimensional Real-data MPI Transforms, FFTW MPI Transposes, Multi-dimensional MPI DFTs of Real Data, Distributed-memory FFTW with MPI
 @section Other multi-dimensional Real-Data MPI Transforms
 
 @cindex r2r
@@ -1283,6 +1284,7 @@ dimension in the @ndimstrans{} transposed output.  @xref{Transposed
 distributions}.  The advanced interface for multidimensional
 transforms is:
 
+@cindex advanced interface
 @findex fftw_mpi_local_size_many
 @findex fftw_mpi_local_size_many_transposed
 @example
@@ -1341,6 +1343,196 @@ of an @code{FFTW_BACKWARD} plan and vice versa; similarly for the
 
 @node MPI Plan Creation, MPI Wisdom Communication, MPI Data Distribution Functions, FFTW MPI Reference
 @subsection MPI Plan Creation
+
+Plans for complex-data DFTs (@pxref{2d MPI example}) are created by:
+
+@findex fftw_mpi_plan_dft_1d
+@findex fftw_mpi_plan_dft_2d
+@findex fftw_mpi_plan_dft_3d
+@findex fftw_mpi_plan_dft
+@findex fftw_mpi_plan_many_dft
+@example
+fftw_plan fftw_mpi_plan_dft_1d(ptrdiff_t n0, fftw_complex *in, fftw_complex *out,
+                               MPI_Comm comm, int sign, unsigned flags);
+fftw_plan fftw_mpi_plan_dft_2d(ptrdiff_t n0, ptrdiff_t n1,
+                               fftw_complex *in, fftw_complex *out,
+                               MPI_Comm comm, int sign, unsigned flags);
+fftw_plan fftw_mpi_plan_dft_3d(ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2,
+                               fftw_complex *in, fftw_complex *out,
+                               MPI_Comm comm, int sign, unsigned flags);
+fftw_plan fftw_mpi_plan_dft(int rnk, const ptrdiff_t *n, 
+                            fftw_complex *in, fftw_complex *out,
+                            MPI_Comm comm, int sign, unsigned flags);
+fftw_plan fftw_mpi_plan_many_dft(int rnk, const ptrdiff_t *n,
+                                 ptrdiff_t howmany, ptrdiff_t block, ptrdiff_t tblock,
+                                 fftw_complex *in, fftw_complex *out,
+                                 MPI_Comm comm, int sign, unsigned flags);
+@end example
+
+@cindex MPI communicator
+@cindex collective function
+These are similar to their serial counterparts (@pxref{Complex DFTs})
+in specifying the dimensions, sign, and flags of the transform.  The
+@code{comm} argument gives an MPI communicator that specifies the set
+of processes to participate in the transform; plan creation is a
+collective function that must be called for all processes in the
+communicator.  The @code{in} and @code{out} pointers refer only to a
+portion of the overall transform data (@pxref{MPI Data Distribution})
+as specified by the @samp{local_size} functions in the previous
+section.  Unless @code{flags} contains @code{FFTW_ESTIMATE}, these arrays
+are overwritten during plan creation as for the serial interface.
+
+@cindex advanced interface
+@ctindex FFTW_MPI_DEFAULT_BLOCK
+@cindex stride
+The advanced-interface @code{fftw_mpi_plan_many_dft} additionally
+allows you to specify the block sizes for the first dimension
+(@code{block}) of the @ndims{} input data and the first dimension
+(@code{tblock}) of the @ndimstrans{} transposed data (at intermediate
+steps of the transform, and for the output if
+@code{FFTW_TRANSPOSED_OUT} is specified in @code{flags}).  These must
+be the same block sizes as were passed to the corresponding
+@samp{local_size} function; you can pass @code{FFTW_MPI_DEFAULT_BLOCK}
+to use FFTW's default block size as in the basic interface.  Also, the
+@code{howmany} parameter specifies that the transform is of contiguous
+@code{howmany}-tuples rather than individual complex numbers; this
+corresponds to the same parameter in the serial advanced interface
+(@pxref{Advanced Complex DFTs}) with @code{stride = howmany} and
+@code{dist = 1}.
+
+The @code{flags} can be any of those for the serial FFTW
+(@pxref{Planner Flags}), and in addition may include one or more of
+the following MPI-specific flags, which improve performance at the
+cost of changing the output or input data formats.
+
+@itemize @bullet
+
+@item
+@ctindex FFTW_MPI_SCRAMBLED_OUT
+@ctindex FFTW_MPI_SCRAMBLED_IN
+@code{FFTW_MPI_SCRAMBLED_OUT}, @code{FFTW_MPI_SCRAMBLED_IN}: valid for
+1d transforms only, these flags indicate that the output/input of the
+transform are in an undocumented ``scrambled'' order.  A forward
+@code{FFTW_MPI_SCRAMBLED_OUT} transform can be inverted by a backward
+@code{FFTW_MPI_SCRAMBLED_IN} (times the usual 1/@i{N} normalization).
+@xref{One-dimensional distributions}.
+
+@item
+@ctindex FFTW_MPI_TRANSPOSED_OUT
+@ctindex FFTW_MPI_TRANSPOSED_IN
+@code{FFTW_MPI_TRANSPOSED_OUT}, @code{FFTW_MPI_TRANSPOSED_IN}: valid
+for multidimensional (@code{rnk > 1}) transforms only, these flags
+specify that the output or input of an @ndims{} transform is
+transposed to @ndimstrans{}.  @xref{Transposed distributions}.
+
+@end itemize
+
+@cindex r2c
+Plans for real-input/output (r2c/c2r) DFTs (@pxref{Multi-dimensional
+MPI DFTs of Real Data}) are created by:
+
+@findex fftw_mpi_plan_dft_r2c_2d
+@findex fftw_mpi_plan_dft_r2c_2d
+@findex fftw_mpi_plan_dft_r2c_3d
+@findex fftw_mpi_plan_dft_r2c
+@findex fftw_mpi_plan_dft_c2r_2d
+@findex fftw_mpi_plan_dft_c2r_2d
+@findex fftw_mpi_plan_dft_c2r_3d
+@findex fftw_mpi_plan_dft_c2r
+@example
+fftw_plan fftw_mpi_plan_dft_r2c_2d(ptrdiff_t n0, ptrdiff_t n1, 
+                                   double *in, fftw_complex *out,
+                                   MPI_Comm comm, unsigned flags);
+fftw_plan fftw_mpi_plan_dft_r2c_2d(ptrdiff_t n0, ptrdiff_t n1, 
+                                   double *in, fftw_complex *out,
+                                   MPI_Comm comm, unsigned flags);
+fftw_plan fftw_mpi_plan_dft_r2c_3d(ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2,
+                                   double *in, fftw_complex *out,
+                                   MPI_Comm comm, unsigned flags);
+fftw_plan fftw_mpi_plan_dft_r2c(int rnk, const ptrdiff_t *n,
+                                double *in, fftw_complex *out,
+                                MPI_Comm comm, unsigned flags);
+fftw_plan fftw_mpi_plan_dft_c2r_2d(ptrdiff_t n0, ptrdiff_t n1, 
+                                   fftw_complex *in, double *out,
+                                   MPI_Comm comm, unsigned flags);
+fftw_plan fftw_mpi_plan_dft_c2r_2d(ptrdiff_t n0, ptrdiff_t n1, 
+                                   fftw_complex *in, double *out,
+                                   MPI_Comm comm, unsigned flags);
+fftw_plan fftw_mpi_plan_dft_c2r_3d(ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2,
+                                   fftw_complex *in, double *out,
+                                   MPI_Comm comm, unsigned flags);
+fftw_plan fftw_mpi_plan_dft_c2r(int rnk, const ptrdiff_t *n,
+                                fftw_complex *in, double *out,
+                                MPI_Comm comm, unsigned flags);
+@end example
+
+Similar to the serial interface (@pxref{Real-data DFTs}), these
+transform logically @ndims{} real data to/from @ndimshalf{} complex
+data, representing the non-redundant half of the conjugate-symmetry
+output of a real-input DFT (@pxref{Multi-dimensional Transforms}).
+However, the real array must be stored within a padded @ndimspad{}
+array (much like the in-place serial r2c transforms, but here for
+out-of-place transforms as well). Currently, only multi-dimensional
+(@code{rnk > 1}) r2c/c2r transforms are supported.  As explained above
+(@pxref{Multi-dimensional MPI DFTs of Real Data}), the data
+distribution of both the real and complex arrays is given by the
+@samp{local_size} function called for the dimensions of the
+@emph{complex} array.  Similar to the other planning functions, the
+input and output arrays are overwritten when the plan is created
+except in @code{FFTW_ESTIMATE} mode.
+
+As for the complex DFTs above, there is an advance interface that
+allows you to manually specify block sizes and to transform contiguous
+@code{howmany}-tuples of real/complex numbers:
+
+@findex fftw_mpi_plan_many_dft_r2c
+@findex fftw_mpi_plan_many_dft_c2r
+@example
+fftw_plan fftw_mpi_plan_many_dft_r2c
+              (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,
+               ptrdiff_t iblock, ptrdiff_t oblock,
+               double *in, fftw_complex *out,
+               MPI_Comm comm, unsigned flags);
+fftw_plan fftw_mpi_plan_many_dft_c2r
+              (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,
+               ptrdiff_t iblock, ptrdiff_t oblock,
+               fftw_complex *in, double *out,
+               MPI_Comm comm, unsigned flags);               
+@end example
+
+@cindex r2r
+Finally, there are corresponding plan-creation routines for r2r
+transforms (@pxref{More DFTs of Real Data}), currently supporting
+multidimensional (@code{rnk > 1}) transforms only:
+
+@example
+fftw_plan fftw_mpi_plan_r2r_2d(ptrdiff_t n0, ptrdiff_t n1,
+                               double *in, double *out,
+                               MPI_Comm comm,
+                               fftw_r2r_kind kind0, fftw_r2r_kind kind1,
+                               unsigned flags);
+fftw_plan fftw_mpi_plan_r2r_3d(ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2,
+                               double *in, double *out,
+                               MPI_Comm comm,
+                               fftw_r2r_kind kind0, fftw_r2r_kind kind1, fftw_r2r_kind kind2,
+                               unsigned flags);
+fftw_plan fftw_mpi_plan_r2r(int rnk, const ptrdiff_t *n,
+                            double *in, double *out,
+                            MPI_Comm comm, const fftw_r2r_kind *kind, 
+                            unsigned flags);
+fftw_plan fftw_mpi_plan_many_r2r(int rnk, const ptrdiff_t *n,
+                                 ptrdiff_t iblock, ptrdiff_t oblock,
+                                 double *in, double *out,
+                                 MPI_Comm comm, const fftw_r2r_kind *kind, 
+                                 unsigned flags);
+@end example
+
+The parameters are much the same as for the complex DFTs above, except
+that the arrays are of real numbers (and hence the outputs of the
+@samp{local_size} data-distribution functions should be interpreted as
+counts of real rather than complex numbers).  Also, the @code{kind}
+parameters specify the r2r kinds along each dimension as for the
+serial interface (@pxref{Real-to-Real Transform Kinds}).
 
 @node MPI Wisdom Communication,  , MPI Plan Creation, FFTW MPI Reference
 @subsection MPI Wisdom Communication
