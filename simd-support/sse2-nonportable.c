@@ -25,6 +25,9 @@
    fail at runtime on a machine that does not support sse/sse2 */
 #include "simd-sse2.h"
 
+/* This will produce -0.0f (or -0.0d) even on broken
+   compilers that do not distinguish +0.0 from -0.0.
+   I bet some are still around. */
 const union uvec X(sse2_pm) = {
 #ifdef FFTW_SINGLE
      { 0x00000000, 0x80000000, 0x00000000, 0x80000000 }
