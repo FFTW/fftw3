@@ -381,8 +381,7 @@ $2^a 3^b 5^c 7^d 11^e 13^f$,
 @end html
 where @math{e+f} is either @math{0} or @math{1}, and the other exponents
 are arbitrary.  Other sizes are computed by means of a slow,
-general-purpose algorithm (which nevertheless retains @Onlogn
-performance even for prime sizes).  It is possible to customize FFTW
+general-purpose algorithm (which nevertheless retains @Onlogn{} performance even for prime sizes).  It is possible to customize FFTW
 for different array sizes; see @ref{Installation and Customization}.
 Transforms whose sizes are powers of @math{2} are especially fast.
 @end itemize
@@ -630,8 +629,7 @@ $2^a 3^b 5^c 7^d 11^e 13^f$,
 @end html
 where @math{e+f} is either @math{0} or @math{1}, and the other exponents
 are arbitrary.  Other sizes are computed by means of a slow,
-general-purpose algorithm (which nevertheless retains @Onlogn
-performance even for prime sizes).  (It is possible to customize FFTW
+general-purpose algorithm (which nevertheless retains @Onlogn{} performance even for prime sizes).  (It is possible to customize FFTW
 for different array sizes; see @ref{Installation and Customization}.)
 Transforms whose sizes are powers of @math{2} are especially fast, and
 it is generally beneficial for the @emph{last} dimension of an r2c/c2r
@@ -840,8 +838,7 @@ $2^a 3^b 5^c 7^d 11^e 13^f$,
 @end html
 where @math{e+f} is either @math{0} or @math{1}, and the other exponents
 are arbitrary.  Other sizes are computed by means of a slow,
-general-purpose algorithm (which nevertheless retains @Onlogn
-performance even for prime sizes).  (It is possible to customize FFTW
+general-purpose algorithm (which nevertheless retains @Onlogn{} performance even for prime sizes).  (It is possible to customize FFTW
 for different array sizes; see @ref{Installation and Customization}.)
 Transforms whose sizes are powers of @math{2} are especially fast.
 @item
