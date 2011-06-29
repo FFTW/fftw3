@@ -472,7 +472,7 @@ Suppose you have are transforming multi-dimensional data with (at
 least two) dimensions @ndims{}.  As always, it is distributed along
 the first dimension @dimk{0}.  Now, if we compute its DFT with the
 @code{FFTW_MPI_TRANSPOSED_OUT} flag, the resulting output data are stored
-with the first @emph{two} dimensions transosed: @ndimstrans{},
+with the first @emph{two} dimensions transposed: @ndimstrans{},
 distributed along the @dimk{1} dimension.  Conversely, if we take the
 @ndimstrans{} data and transform it with the
 @code{FFTW_MPI_TRANSPOSED_IN} flag, then the format goes back to the
@@ -665,6 +665,19 @@ values is twice as many.  The @code{rin} array is then
 @threedims{local_n0,M,2(N/2+1)} in row-major order, so its
 @code{(i,j,k)} element is at the index @code{(i*M + j) * (2*(N/2+1)) +
 k} (@pxref{Multi-dimensional Array Format }).
+
+@cindex transpose
+@ctindex FFTW_TRANSPOSED_OUT
+@ctindex FFTW_TRANSPOSED_IN
+As for the complex transforms, improved performance can be obtained by
+specifying that the output is the transpose of the input or vice versa
+(@pxref{Transposed distributions}).  In our @threedims{L,M,N} r2c
+example, including @code{FFTW_TRANSPOSED_OUT} in the flags means that
+the input would be a padded @threedims{L,M,2(N/2+1)} real array
+distributed over the @code{L} dimension, while the output would be a
+@threedims{M,L,N/2+1} complex array distributed over the @code{M}
+dimension.  To perform the inverse c2r transform with the same data
+distributions, you would use the @code{FFTW_TRANSPOSED_IN} flag.
 
 @c ------------------------------------------------------------
 @node Other Multi-dimensional Real-data MPI Transforms, FFTW MPI Transposes, Multi-dimensional MPI DFTs of Real Data, Distributed-memory FFTW with MPI
