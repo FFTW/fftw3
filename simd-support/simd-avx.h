@@ -181,17 +181,22 @@ static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 #define STN2(x, v0, v1, ovs) /* nop */
 #define STM4(x, v, ovs, aligned_like) /* no-op */
 
-static inline void STN4(R *x, V v0, V v1, V v2, V v3, INT ovs)
-{
-     V x0, x1, x2, x3;
-     x0 = _mm256_unpacklo_pd(v0, v1);
-     x1 = _mm256_unpackhi_pd(v0, v1);
-     x2 = _mm256_unpacklo_pd(v2, v3);
-     x3 = _mm256_unpackhi_pd(v2, v3);
-     STA(x,           _mm256_permute2f128_pd(x0, x2, 0x20), 0, 0);
-     STA(x +     ovs, _mm256_permute2f128_pd(x1, x3, 0x20), 0, 0);
-     STA(x + 2 * ovs, _mm256_permute2f128_pd(x0, x2, 0x31), 0, 0);
-     STA(x + 3 * ovs, _mm256_permute2f128_pd(x1, x3, 0x31), 0, 0);
+/* STN4 is a macro, not a function, thanks to Visual C++ developers
+   deciding "it would be infrequent that people would want to pass more
+   than 3 [__m128 parameters] by value."  Even though the comment
+   was made about __m128 parameters, it appears to apply to __m256
+   parameters as well. */
+#define STN4(x, v0, v1, v2, v3, ovs)					\
+{									\
+     V xxx0, xxx1, xxx2, xxx3;						\
+     xxx0 = _mm256_unpacklo_pd(v0, v1);					\
+     xxx1 = _mm256_unpackhi_pd(v0, v1);					\
+     xxx2 = _mm256_unpacklo_pd(v2, v3);					\
+     xxx3 = _mm256_unpackhi_pd(v2, v3);					\
+     STA(x,           _mm256_permute2f128_pd(xxx0, xxx2, 0x20), 0, 0); \
+     STA(x +     ovs, _mm256_permute2f128_pd(xxx1, xxx3, 0x20), 0, 0); \
+     STA(x + 2 * ovs, _mm256_permute2f128_pd(xxx0, xxx2, 0x31), 0, 0); \
+     STA(x + 3 * ovs, _mm256_permute2f128_pd(xxx1, xxx3, 0x31), 0, 0); \
 }
 #endif
 

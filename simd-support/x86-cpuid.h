@@ -150,7 +150,13 @@ static inline int cpuid_ecx(int op)
 static inline int xgetbv_eax(int op)
 {
 #    ifdef _MSC_VER
-#error "FIXME"
+     int veax, vedx;
+     _asm {
+          xgetbv
+          mov veax,eax
+          mov vedx,edx
+     }
+     return veax;
 #    else
      int eax, edx;
      __asm__ (".byte 0x0f, 0x01, 0xd0" : "=a"(eax), "=d"(edx) : "c" (op));
