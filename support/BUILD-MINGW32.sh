@@ -53,8 +53,8 @@ your compiler must have sizeof(long double) == 12.
 In order to link to these .dll files from Visual C++, you need to
 create .lib "import libraries" for them, and can do so with the "lib"
 command that comes with VC++.  In particular, run:
-     lib /def:libfftw3-3.def
      lib /def:libfftw3f-3.def
+     lib /def:libfftw3-3.def
      lib /def:libfftw3l-3.def
 
 The single- and double-precision libraries use SSE and SSE2, respectively,
