@@ -34,7 +34,7 @@ EOF
 
     echo
     echo "  interface"
-    gcc -E fftw3.h |grep "fftw${p}_plan_dft" |tr ';' '\n' | perl genf03.pl
+    gcc -E fftw3.h |grep "fftw${p}_plan_dft" |tr ';' '\n' | grep -v "fftw${p}_execute(" | perl genf03.pl
     echo "  end interface"
 
 done
