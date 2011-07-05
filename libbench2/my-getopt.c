@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "config.h"
 #include "my-getopt.h"
 
 int my_optind = 1;
