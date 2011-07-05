@@ -6,6 +6,10 @@
 #include <string.h>
 #include "fftw-bench.h"
 
+#ifdef HAVE_OPENMP
+#  include <omp.h>
+#endif
+
 #ifdef HAVE_SMP
 int threads_ok = 1;
 #endif
@@ -68,6 +72,7 @@ void rdwisdom(void)
      if (threads_ok) {
 	  BENCH_ASSERT(FFTW(init_threads)());
 	  FFTW(plan_with_nthreads)(nthreads);
+	  omp_set_num_threads(nthreads);
      }
      else if (nthreads > 1 && verbose > 1) {
 	  fprintf(stderr, "bench: WARNING - nthreads = %d, but threads not supported\n", nthreads);
