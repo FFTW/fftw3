@@ -38,7 +38,7 @@ endif
 
 if SMP
 if COMBINED_THREADS
-COMBINED_THREADLIBS=threads/libfftw3@PREC_SUFFIX@_threads.la
+COMBINED_THREADLIBS=threads/libfftw3@PREC_SUFFIX@_@THREADSUFF@.la
 endif
 endif
 
