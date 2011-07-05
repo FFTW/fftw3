@@ -22,8 +22,6 @@
 
 #include "threads.h"
 
-#ifdef HAVE_OPENMP
-
 #if !defined(_OPENMP)
 #error OpenMP enabled but not using an OpenMP compiler
 #endif
@@ -76,5 +74,3 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
 void X(threads_cleanup)(void)
 {
 }
-
-#endif /* HAVE_OPENMP */

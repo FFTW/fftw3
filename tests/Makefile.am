@@ -5,12 +5,16 @@ AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/libbench2	\
 noinst_PROGRAMS = bench
 EXTRA_DIST = check.pl README
 
-if SMP
+if THREADS
+bench_CFLAGS = $(PTHREAD_CFLAGS)
 if !COMBINED_THREADS
 LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_threads.la
 endif
 else
-LIBFFTWTHREADS = 
+if OPENMP
+bench_CFLAGS = $(OPENMP_CFLAGS)
+LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_omp.la
+endif
 endif
 
 bench_SOURCES = bench.c hook.c fftw-bench.c fftw-bench.h

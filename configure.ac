@@ -172,6 +172,7 @@ AC_SUBST(PREC_SUFFIX)
 
 dnl Checks for programs.
 AC_PROG_CC
+AM_PROG_CC_C_O
 AX_COMPILER_VENDOR
 AC_PROG_CC_STDC
 AC_PROG_INSTALL
@@ -456,35 +457,25 @@ have_smp="no"
 AC_ARG_ENABLE(openmp, [AC_HELP_STRING([--enable-openmp],[use OpenMP directives for parallelism])], enable_openmp=$enableval, enable_openmp=no)
 
 if test "$enable_openmp" = "yes"; then
-	AC_DEFINE(HAVE_OPENMP,1,[Define to enable OpenMP])
-	have_smp="yes"
-	THREADSUFF=omp
+   AC_DEFINE(HAVE_OPENMP,1,[Define to enable OpenMP])
+   AX_OPENMP([], [AC_MSG_ERROR([don't know how to enable OpenMP])])
 fi
 
 AC_ARG_ENABLE(threads, [AC_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
 
 if test "$enable_threads" = "yes"; then
    AC_DEFINE(HAVE_THREADS,1,[Define to enable SMP threads])
-   if test "$enable_openmp" = "yes"; then
-      AC_MSG_ERROR([--enable-threads/--enable-openmp are mutually exclusive])
-   fi
-   have_smp="yes"
-   THREADSUFF=threads
-fi
-
-AC_SUBST(THREADSUFF)
-
-if test "$enable_openmp"x != "nox" -a "$enable_threads"x != "nox"; then
-   AC_MSG_ERROR([--enable-threads/--enable-openmp are mutually exclusive])
 fi
 
 AC_ARG_WITH(combined-threads, [AC_HELP_STRING([--with-combined-threads],[combine threads into main libfftw3])], with_combined_threads=$withval, with_combined_threads=no)
 
-if test "$enable_openmp"x != nox; then
-   AX_OPENMP([THREADLIBS=" "
-     AC_DEFINE(USING_OPENMP_THREADS, 1, [Define if we have and are using OpenMP multithreading directives])
-     CFLAGS="$CFLAGS $OPENMP_CFLAGS"],
-     [AC_MSG_ERROR([don't know how to enable OpenMP])])
+if test "$with_combined_threads" = yes; then
+   if test "$enable_openmp" = "yes"; then
+      AC_MSG_ERROR([--with-combined-threads incompatible with --enable-openmp])
+   fi
+   if test "$enable_threads" != "yes"; then
+      AC_MSG_ERROR([--with-combined-threads requires --enable-threads])
+   fi
 fi
 
 dnl Check for threads library...
@@ -493,7 +484,6 @@ if test "$enable_threads" = "yes"; then
 	# POSIX threads, the default choice:
 	if test -z "$THREADLIBS"; then
 		ACX_PTHREAD([THREADLIBS="$PTHREAD_LIBS "
-	                     CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 	                     CC="$PTHREAD_CC"
 	                     AC_DEFINE(USING_POSIX_THREADS, 1, [Define if we have and are using POSIX threads.])])
 	fi
@@ -512,7 +502,9 @@ if test "$enable_threads" = "yes"; then
 	AC_DEFINE(HAVE_THREADS, 1, [Define if we have a threads library.])
 fi
 AC_SUBST(THREADLIBS)
-AM_CONDITIONAL(SMP, test "$have_smp" = "yes")
+AM_CONDITIONAL(THREADS, test "$enable_threads" = "yes")
+AM_CONDITIONAL(OPENMP, test "$enable_openmp" = "yes")
+AM_CONDITIONAL(SMP, test "$enable_threads" = "yes" -o "$enable_openmp" = "yes")
 AM_CONDITIONAL(COMBINED_THREADS, test x"$with_combined_threads" = xyes)
 
 dnl -----------------------------------------------------------------------

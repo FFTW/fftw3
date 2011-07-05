@@ -41,22 +41,30 @@ subdirectory of the FFTW package.  On Unix systems, the FFTW threads
 libraries and header files can be automatically configured, compiled,
 and installed along with the uniprocessor FFTW libraries simply by
 including @code{--enable-threads} in the flags to the @code{configure}
-script (@pxref{Installation on Unix}).
+script (@pxref{Installation on Unix}), or @code{--enable-openmp} to use
+@uref{http://www.openmp.org,OpenMP} threads.
 @fpindex configure
 
 
 @cindex portability
+@cindex OpenMP
 The threads routines require your operating system to have some sort
 of shared-memory threads support.  Specifically, the FFTW threads
 package works with POSIX threads (available on most Unix variants,
-from GNU/Linux to MacOS X) and Win32 threads.  We also support using
-@uref{http://www.openmp.org,OpenMP}, enabled by using
-@code{--enable-openmp} (@emph{instead} of @code{--enable-threads}).
-(This may be useful if you are employing that sort of directive in
-your own code, in order to minimize conflicts.)  If you have a
+from GNU/Linux to MacOS X) and Win32 threads.  OpenMP threads, which
+are supported in many common compilers (e.g. gcc) are also supported,
+and may give better performance on some systems.  (OpenMP threads are
+also useful if you are employing OpenMP in your own code, in order to
+minimize conflicts between threading models.)  If you have a
 shared-memory machine that uses a different threads API, it should be
 a simple matter of programming to include support for it; see the file
 @code{threads/threads.c} for more detail.
+
+You can compile FFTW with @emph{both} @code{--enable-threads} and
+@code{--enable-openmp} at the same time, since they install libraries
+with different names (@samp{fftw3_threads} and @samp{fftw3_omp}, as
+described below).  However, your programs may only link to @emph{one}
+of these two libraries at a time.
 
 Ideally, of course, you should also have multiple processors in order to
 get any benefit from the threaded transforms.
@@ -70,10 +78,13 @@ of the uniprocessor FFTW routines, described elsewhere in this manual.
 We only describe what one has to change in order to use the
 multi-threaded routines.
 
-First, programs using the parallel complex transforms should be linked with
-@code{-lfftw3_threads -lfftw3 -lm} on Unix. You will also need to link
+@cindex OpenMP
+First, programs using the parallel complex transforms should be linked
+with @code{-lfftw3_threads -lfftw3 -lm} on Unix, or @code{-lfftw3_omp
+-lfftw3 -lm} if you compiled with OpenMP. You will also need to link
 with whatever library is responsible for threads on your system
-(e.g. @code{-lpthread} on GNU/Linux).
+(e.g. @code{-lpthread} on GNU/Linux) or include whatever compiler flag
+enables OpenMP (e.g. @code{-fopenmp} with gcc).
 @cindex linking on Unix
 
 
@@ -108,10 +119,22 @@ before a call to @code{fftw_plan_with_nthreads} are unaffected.  If you
 pass an @code{nthreads} argument of @code{1} (the default), threads are
 disabled for subsequent plans.
 
+@cindex OpenMP
+With OpenMP, to configure FFTW to use all of the currently running
+OpenMP threads (set by @code{omp_set_num_threads(nthreads)} or by the
+@code{OMP_NUM_THREADS} environment variable), you can do:
+@code{fftw_plan_with_nthreads(omp_get_num_threads())}. (The @samp{omp_}
+OpenMP functions are declared via @code{#include <omp.h>}.)
+
+@cindex thread safety
 Given a plan, you then execute it as usual with
 @code{fftw_execute(plan)}, and the execution will use the number of
-threads specified when the plan was created.  When done, you destroy it
-as usual with @code{fftw_destroy_plan}.
+threads specified when the plan was created.  When done, you destroy
+it as usual with @code{fftw_destroy_plan}.  As described in
+@ref{Thread safety}, plan @emph{execution} is thread-safe, but plan
+creation and destruction are @emph{not}: you should create/destroy
+plans only from a single thread, but can safely execute multiple plans
+in parallel.
 
 There is one additional routine: if you want to get rid of all memory
 and other resources allocated internally by FFTW, you can call:
@@ -157,13 +180,14 @@ parallelization.
 @section Thread safety
 
 @cindex threads
+@cindex OpenMP
 @cindex thread safety
-Users writing multi-threaded programs must concern themselves with the
-@dfn{thread safety} of the libraries they use---that is, whether it is
-safe to call routines in parallel from multiple threads.  FFTW can be
-used in such an environment, but some care must be taken because the
-planner routines share data (e.g. wisdom and trigonometric tables)
-between calls and plans.
+Users writing multi-threaded programs (including OpenMP) must concern
+themselves with the @dfn{thread safety} of the libraries they
+use---that is, whether it is safe to call routines in parallel from
+multiple threads.  FFTW can be used in such an environment, but some
+care must be taken because the planner routines share data
+(e.g. wisdom and trigonometric tables) between calls and plans.
 
 The upshot is that the only thread-safe (re-entrant) routine in FFTW is
 @code{fftw_execute} (and the new-array variants thereof).  All other routines
@@ -181,13 +205,13 @@ threads.  However, since a given plan operates by default on a fixed
 array, you need to use one of the new-array execute functions (@pxref{New-array Execute Functions}) so that different threads compute the transform of different data.
 
 (Users should note that these comments only apply to programs using
-shared-memory threads.  Parallelism using MPI or forked processes
+shared-memory threads or OpenMP.  Parallelism using MPI or forked processes
 involves a separate address-space and global variables for each process,
 and is not susceptible to problems of this sort.)
 
 If you are configured FFTW with the @code{--enable-debug} or
 @code{--enable-debug-malloc} flags (@pxref{Installation on Unix}),
-then @code{fftw_execute} is not thread-safe.  This flags are not
+then @code{fftw_execute} is not thread-safe.  These flags are not
 documented because they are intended only for developing
 and debugging FFTW, but if you must use @code{--enable-debug} then you
 should also specifically pass @code{--disable-debug-malloc} for

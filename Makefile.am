@@ -36,7 +36,7 @@ ALTIVEC_LIBS = dft/simd/altivec/libdft_altivec_codelets.la	\
 rdft/simd/altivec/librdft_altivec_codelets.la
 endif
 
-if SMP
+if THREADS
 if COMBINED_THREADS
 COMBINED_THREADLIBS=threads/libfftw3@PREC_SUFFIX@_@THREADSUFF@.la
 endif

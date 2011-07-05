@@ -23,13 +23,9 @@
 
 static const solvtab s =
 {
-#if defined(HAVE_THREADS) || defined(HAVE_OPENMP)
-
      SOLVTAB(X(dft_thr_vrank_geq1_register)),
      SOLVTAB(X(rdft_thr_vrank_geq1_register)),
      SOLVTAB(X(rdft2_thr_vrank_geq1_register)),
-
-#endif 
 
      SOLVTAB_END
 };

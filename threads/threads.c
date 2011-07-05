@@ -24,7 +24,6 @@
 
 #include "threads.h"
 
-#ifdef HAVE_THREADS
 #if defined(USING_POSIX_THREADS)
 
 #include <pthread.h>
@@ -438,5 +437,3 @@ void X(threads_cleanup)(void)
      os_mutex_destroy(&queue_lock);
      os_sem_destroy(&termination_semaphore);
 }
-
-#endif /* HAVE_THREADS */

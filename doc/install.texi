@@ -129,23 +129,22 @@ the threads routines are not compiled.
 @item
 @code{--enable-openmp}: Like @code{--enable-threads}, but using OpenMP
 compiler directives in order to induce parallelism rather than
-spawning its own threads directly.  Useful especially for programs
-already employing such directives, in order to minimize conflicts
-between different parallelization mechanisms.  Use either
-@code{--enable-openmp} or @code{--enable-threads}, not both; in either
-case the multi-threaded FFTW interface/library (@pxref{Multi-threaded
-FFTW}) is compiled (with different back ends).
+spawning its own threads directly, and installing an @samp{fftw3_omp} library
+rather than an @samp{fftw3_threads} library (@pxref{Multi-threaded           
+FFTW}).  You can use both @code{--enable-openmp} and @code{--enable-threads}
+since they compile/install libraries with different names.  By default,
+the OpenMP routines are not compiled.
 
 @item
 @code{--with-combined-threads}: By default, if @code{--enable-threads}
-or @code{--enable-openmp} are used, the threads support is compiled
-into a separate library that must be linked in addition to the main
-FFTW library.  This is so that users of the serial library do not need
-to link the system threads libraries.  If
-@code{--with-combined-threads} is specified, however, then no separate
-threads library is created, and threads are included in the main FFTW
-library.  This is mainly useful under Windows, where no system threads
-library is required and inter-library dependencies are problematic.
+is used, the threads support is compiled into a separate library that
+must be linked in addition to the main FFTW library.  This is so that
+users of the serial library do not need to link the system threads
+libraries.  If @code{--with-combined-threads} is specified, however,
+then no separate threads library is created, and threads are included
+in the main FFTW library.  This is mainly useful under Windows, where
+no system threads library is required and inter-library dependencies
+are problematic.
 
 @item
 @cindex MPI
