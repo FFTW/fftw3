@@ -302,15 +302,14 @@ dnl c_asm.h: Header file for enabling asm() on Digital Unix
 dnl intrinsics.h: cray unicos
 dnl sys/sysctl.h: MacOS X altivec detection
 
-dnl altivec.h requires the simd cflags
+dnl altivec.h requires $ALTIVEC_CFLAGS
 save_CFLAGS="$CFLAGS"
 save_CPPFLAGS="$CPPFLAGS"
-CFLAGS="$CFLAGS $SIMD_CFLAGS"
-CPPFLAGS="$CPPFLAGS $SIMD_CFLAGS"
-AC_CHECK_HEADERS([altivec.h xmmintrin.h])
+CFLAGS="$CFLAGS $ALTIVEC_CFLAGS"
+CPPFLAGS="$CPPFLAGS $ALTIVEC_CFLAGS"
+AC_CHECK_HEADERS([altivec.h])
 CFLAGS="$save_CFLAGS"
 CPPFLAGS="$save_CPPFLAGS"
-
 
 
 dnl Checks for typedefs, structures, and compiler characteristics.
