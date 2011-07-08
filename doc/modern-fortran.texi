@@ -667,7 +667,7 @@ Rather than using the @code{include} statement to include the
 @code{fftw3.f03} interface file in any subroutine where you want to
 use FFTW, you might prefer to define an FFTW Fortran module.  FFTW
 does not install itself as a module, primarily because
-@code{fftw3.f03} can be shared between different Fortran compilers but
+@code{fftw3.f03} can be shared between different Fortran compilers while
 modules (in general) cannot.  However, it is trivial to define your
 own FFTW module if you want.  Just create a file containing:
 
@@ -687,5 +687,5 @@ routines you can just do:
   use FFTW3
 @end example
 
-as usual for FFTW modules.  (You still need to link to the FFTW
+as usual for Fortran modules.  (You still need to link to the FFTW
 library, of course.)
