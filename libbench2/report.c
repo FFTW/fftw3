@@ -58,8 +58,8 @@ static void mkstat(double *t, int st, struct stats *a)
 	  for (j = 0; j < i - 1; ++j) {
 	       double t0, t1;
 	       if ((t0 = t[j]) > (t1 = t[j + 1])) {
-		    t[j] = t0;
-		    t[j + 1] = t1;
+		    t[j] = t1;
+		    t[j + 1] = t0;
 	       }
 	  } 
      }
