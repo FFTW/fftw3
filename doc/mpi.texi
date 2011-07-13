@@ -637,7 +637,7 @@ int main(int argc, char **argv)
     rin = fftw_alloc_real(2 * alloc_local);
     cout = fftw_alloc_complex(alloc_local);
 
-    /* @r{create plan for in-place r2c DFT} */
+    /* @r{create plan for out-of-place r2c DFT} */
     plan = fftw_mpi_plan_dft_r2c_3d(L, M, N, rin, cout, MPI_COMM_WORLD,
                                     FFTW_MEASURE);
 
