@@ -1,4 +1,14 @@
-FFTW 3.3-beta1
+FFTW 3.3
+
+* Changes since 3.3-beta1:
+
+  - Compiling OpenMP support (--enable-openmp) now installs a
+    fftw3_omp library, instead of fftw3_threads, so that OpenMP
+    and POSIX threads (--enable-threads) libraries can be built
+    and installed at the same time.
+
+  - Various minor compilation fixes, corrections of manual typos, and
+    improvements to the benchmark test program.
 
 * Add support for the AVX extensions to x86 and x86-64.  The AVX code
   works with 16-byte alignment (as opposed to 32-byte alignment),
@@ -23,10 +33,11 @@ FFTW 3.3-beta1
 * Add support for quad-precision __float128 in gcc 4.6 or later (on x86.
   x86-64, and Itanium).  The new routines use the fftwq_ prefix.
 
-* Temporarily removed MIPS paired-single support due to lack of
-  available hardware for testing.  We hope to add it back before the
-  final FFTW 3.3 release; meanwhile, users who want this functionality
-  should continue using FFTW 3.2.x.
+* Removed support for MIPS paired-single instructions due to lack of
+  available hardware for testing.  Users who want this functionality
+  should continue using FFTW 3.2.x.  (Note that FFTW 3.3 still works
+  on MIPS; this only concerns special instructions available on some
+  MIPS chips.)
 
 * Removed support for the Cell Broadband Engine.  Cell users should
   use FFTW 3.2.x.
