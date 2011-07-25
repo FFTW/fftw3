@@ -206,9 +206,7 @@ same memory as both a real array and a complex array.
   real(C_DOUBLE), pointer :: in(:,:,:)
   complex(C_DOUBLE_COMPLEX), pointer :: out(:,:,:)
   type(C_PTR) :: plan, data
-  integer(C_SIZE_T) :: sz
-  sz = (L/2+1) * M * N
-  data = fftw_alloc_complex(sz)
+  data = fftw_alloc_complex(int((L/2+1) * M * N, C_SIZE_T))
   call c_f_pointer(data, in, [2*(L/2+1),M,N])
   call c_f_pointer(data, out, [L/2+1,M,N])
   plan = fftw_plan_dft_r2c_3d(N,M,L, in,out, FFTW_ESTIMATE)
@@ -428,9 +426,12 @@ for a 2d real array, or @code{complex(C_DOUBLE_COMPLEX), pointer ::
 a(:,:,:)} for a 3d complex array.
 
 @item
-Declare an @code{integer(C_SIZE_T) :: sz} to hold the number of
-elements to allocate.  Set @code{sz} to the total number of elements
-in your array.   e.g. @code{sz = L * M * N} for an @threedims{L,M,N} array.
+The number of elements to allocate must be an
+@code{integer(C_SIZE_T)}.  You can either declare a variable of this
+type, e.g. @code{integer(C_SIZE_T) :: sz}, to store the number of
+elements to allocate, or you can use the @code{int(..., C_SIZE_T)}
+intrinsic function. e.g. set @code{sz = L * M * N} or use
+@code{int(L * M * N, C_SIZE_T)} for an @threedims{L,M,N} array.
 
 @item
 Declare a @code{type(C_PTR) :: p} to hold the return value from
@@ -458,10 +459,8 @@ For example, here is how we would allocate an @twodims{L,M} 2d real array:
 
 @example
   real(C_DOUBLE), pointer :: arr(:,:)
-  integer(C_SIZE_T) ::  sz
   type(C_PTR) :: p
-  sz = L * M
-  p = fftw_alloc_real(sz)
+  p = fftw_alloc_real(int(L * M, C_SIZE_T))
   call c_f_pointer(p, arr, [L,M])
   @emph{...use arr and arr(i,j) as usual...}
   call fftw_free(p)
@@ -471,10 +470,8 @@ and here is an @threedims{L,M,N} 3d complex array:
 
 @example
   complex(C_DOUBLE_COMPLEX), pointer :: arr(:,:,:)
-  integer(C_SIZE_T) ::  sz
   type(C_PTR) :: p
-  sz = L * M * N
-  p = fftw_alloc_complex(sz)
+  p = fftw_alloc_complex(int(L * M * N, C_SIZE_T))
   call c_f_pointer(p, arr, [L,M,N])
   @emph{...use arr and arr(i,j,k) as usual...}
   call fftw_free(p)
