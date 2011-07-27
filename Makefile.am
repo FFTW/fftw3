@@ -38,7 +38,7 @@ endif
 
 if THREADS
 if COMBINED_THREADS
-COMBINED_THREADLIBS=threads/libfftw3@PREC_SUFFIX@_@THREADSUFF@.la
+COMBINED_THREADLIBS=threads/libfftw3@PREC_SUFFIX@_threads.la
 endif
 endif
 
