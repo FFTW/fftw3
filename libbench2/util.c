@@ -183,20 +183,19 @@ void *bench_malloc(size_t n)
      void *p;
      if (n == 0) n = 1;
 
-#if defined(WITH_OUR_MALLOC16) && (MIN_ALIGNMENT == 16)
-     /* Our own 16-byte aligned malloc/free.  Assumes sizeof(void*) is
+#if defined(WITH_OUR_MALLOC)
+     /* Our own aligned malloc/free.  Assumes sizeof(void*) is
 	a power of two <= 8 and that malloc is at least
 	sizeof(void*)-aligned.  Assumes size_t = uintptr_t.  */
      {
 	  void *p0;
-	  if ((p0 = malloc(n + 16))) {
-	       p = (void *) (((size_t) p0 + 16) & (~((size_t) 15)));
+	  if ((p0 = malloc(n + MIN_ALIGNMENT))) {
+	       p = (void *) (((size_t) p0 + MIN_ALIGNMENT) & (~((size_t) (MIN_ALIGNMENT - 1))));
 	       *((void **) p - 1) = p0;
 	  }
 	  else
 	       p = (void *) 0;
      }
-#    define OUR_FREE16     
 #elif defined(HAVE_MEMALIGN)
      p = memalign(MIN_ALIGNMENT, n);
 #elif defined(HAVE_POSIX_MEMALIGN)
@@ -220,7 +219,7 @@ void *bench_malloc(size_t n)
 
 void bench_free(void *p)
 {
-#ifdef OUR_FREE16
+#ifdef WITH_OUR_MALLOC
      if (p) free(*((void **) p - 1));
 #else
      real_free(p);
