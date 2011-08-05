@@ -15,6 +15,11 @@
 #define FFTW(x) CONCAT(fftw_, x)
 #endif
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
 extern FFTW(plan) mkplan(bench_problem *p, unsigned flags);
 extern void initial_cleanup(void);
 extern void final_cleanup(void);
@@ -25,3 +30,8 @@ extern void export_wisdom(FILE *f);
 #  define HAVE_SMP
    extern int threads_ok;
 #endif
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif /* __cplusplus */
+
