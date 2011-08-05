@@ -15,6 +15,8 @@ sub canonicalize_type {
     $type =~ s/^ //;
     $type =~ s/ $//;
     $type =~ s/([^\* ])\*/$1 \*/g;
+    $type =~ s/double/R/;
+    $type =~ s/fftw_([A-Za-z0-9_]+)/X(\1)/;
     return $type;
 }
 
