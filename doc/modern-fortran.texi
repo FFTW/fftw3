@@ -172,7 +172,7 @@ multidimensional real-to-complex transforms (@pxref{Multi-Dimensional
 DFTs of Real Data}).  In C, a multidimensional real-to-complex DFT
 chops the last dimension roughly in half (@threedims{N,M,L} real input
 goes to @threedims{N,M,L/2+1} complex output).  In Fortran, because
-the array dimension notation is reversed, the @code{last} dimension of
+the array dimension notation is reversed, the @emph{first} dimension of
 the complex data is chopped roughly in half.  For example consider the
 @samp{r2c} transform of @threedims{L,M,N} real input in Fortran:
 
