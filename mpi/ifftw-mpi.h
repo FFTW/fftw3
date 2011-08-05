@@ -63,6 +63,9 @@ typedef struct {
      INT b[2]; /* b[IB], b[OB] */
 } ddim;
 
+/* Loop over k in {IB, OB}.  Note: need explicit casts for C++. */
+#define FORALL_BLOCK_KIND(k) for (k = IB; k <= OB; k = (block_kind) (((int) k) + 1))
+
 /* unlike tensors in the serial FFTW, the ordering of the dtensor
    dimensions matters - both the array and the block layout are
    row-major order. */
@@ -136,7 +139,7 @@ typedef enum {
 
 /* skipping SQUARE_AFTER since it doesn't seem to offer any advantage
    over SQUARE_BEFORE */
-#define FORALL_REARRANGE(rearrange) for (rearrange = CONTIG; rearrange <= SQUARE_MIDDLE; ++rearrange)
+#define FORALL_REARRANGE(rearrange) for (rearrange = CONTIG; rearrange <= SQUARE_MIDDLE; rearrange = (rearrangement) (((int) rearrange) + 1))
 
 int XM(rearrange_applicable)(rearrangement rearrange, 
 			     ddim dim0, INT vn, int n_pes);

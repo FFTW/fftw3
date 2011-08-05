@@ -8,8 +8,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "fftw-bench.h"
 #include "fftw3-mpi.h"
+#include "fftw-bench.h"
 
 #if defined(BENCHFFT_SINGLE)
 #  define BENCH_MPI_TYPE MPI_FLOAT

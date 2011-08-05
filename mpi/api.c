@@ -172,7 +172,7 @@ static dtensor *default_sz(int rnk, const XM(ddim) *dims0, int n_pes,
 	block sizes weren't specified (i.e. 0), then set the
 	unspecified blocks so as to use as many processes as
 	possible with as few distributed dimensions as possible. */
-     for (k = IB; k <= OB; ++k) {
+     FORALL_BLOCK_KIND(k) {
 	  INT nb = XM(num_blocks_total)(sz, k);
 	  INT np = n_pes / nb;
 	  for (i = 0; i < rnk && np > 1; ++i)
@@ -634,8 +634,6 @@ X(plan) XM(plan_dft_3d)(ptrdiff_t nx, ptrdiff_t ny, ptrdiff_t nz,
 
 /*************************************************************************/
 /* R2R API */
-
-extern rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind);
 
 X(plan) XM(plan_guru_r2r)(int rnk, const XM(ddim) *dims0,
 			  ptrdiff_t howmany,

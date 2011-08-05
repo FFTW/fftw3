@@ -24,6 +24,11 @@
 #include "ifftw.h"
 #include "codelet-rdft.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
 /* problem.c: */
 typedef struct {
      problem super;
@@ -163,5 +168,9 @@ void X(rdft2_rank_geq2_register)(planner *p);
 
 /* configurations */
 void X(rdft_conf_standard)(planner *p);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif /* __cplusplus */
 
 #endif /* __RDFT_H__ */

@@ -21,8 +21,6 @@
 #include "api.h"
 #include "rdft.h"
 
-rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind);
-
 #define N0(nembed)((nembed) ? (nembed) : n)
 
 X(plan) X(plan_many_r2r)(int rank, const int *n,

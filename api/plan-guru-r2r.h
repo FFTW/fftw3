@@ -21,8 +21,6 @@
 #include "api.h"
 #include "rdft.h"
 
-rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind);
-
 X(plan) XGURU(r2r)(int rank, const IODIM *dims,
 			 int howmany_rank,
 			 const IODIM *howmany_dims,

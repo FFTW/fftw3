@@ -100,7 +100,7 @@ dtensor *XM(dtensor_canonical)(const dtensor *sz, int compress)
      for (i = rnk = 0; i < sz->rnk; ++i) {
 	  if (!compress || sz->dims[i].n > 1) {
                x->dims[rnk].n = sz->dims[i].n;
-	       for (k = IB; k <= OB; ++k) {
+	       FORALL_BLOCK_KIND(k) {
 		    if (XM(num_blocks)(sz->dims[i].n, sz->dims[i].b[k]) == 1)
 			 x->dims[rnk].b[k] = sz->dims[i].n;
 		    else

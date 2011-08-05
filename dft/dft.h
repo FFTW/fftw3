@@ -25,6 +25,11 @@
 #include "ifftw.h"
 #include "codelet-dft.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
 /* problem.c: */
 typedef struct {
      problem super;
@@ -75,5 +80,9 @@ void X(ct_genericbuf_register)(planner *p);
 
 /* configurations */
 void X(dft_conf_standard)(planner *p);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif /* __cplusplus */
 
 #endif /* __DFT_H__ */

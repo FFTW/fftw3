@@ -51,6 +51,12 @@
 
 #include "fftw3.h"
 #include "ifftw.h"
+#include "rdft.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
 
 /* the API ``plan'' contains both the kernel plan and problem */
 struct X(plan_s) {
@@ -94,5 +100,11 @@ void X(configure_planner)(planner *plnr);
 void X(mapflags)(planner *, unsigned);
 
 apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb);
+
+rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif /* __cplusplus */
 
 #endif				/* __API_H__ */

@@ -41,6 +41,11 @@
 # include <inttypes.h>           /* uintptr_t, maybe */
 #endif
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
 /* Windows annoyances -- since tests/hook.c uses some internal
    FFTW functions, we need to given them the dllexport attribute
    under Windows when compiling as a DLL (see api/fftw3.h). */
@@ -1119,5 +1124,9 @@ static __inline__ E FNMS(E a, E b, E c)
 #define FNMA(a, b, c) (- (((a) * (b)) + (c)))
 #define FNMS(a, b, c) ((c) - ((a) * (b)))
 #endif
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif /* __cplusplus */
 
 #endif /* __IFFTW_H__ */
