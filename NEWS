@@ -1,3 +1,8 @@
+FFTW 3.3.1
+
+* MPI code now compiles even if mpicc is a C++ compiler; thanks to
+  Kyle Spyksma for the bug report.
+
 FFTW 3.3
 
 * Changes since 3.3-beta1:

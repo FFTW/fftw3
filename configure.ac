@@ -1,10 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(fftw, 3.3, fftw@fftw.org)
+AC_INIT(fftw, 3.3.1, fftw@fftw.org)
 AC_CONFIG_SRCDIR(kernel/ifftw.h)
 # fftw-3.1.x was 4:X:1
 # fftw-3.2.x was 5:X:2
 # fftw-3.3.x was 6:X:3
-SHARED_VERSION_INFO="6:0:3" # CURRENT:REVISION:AGE
+SHARED_VERSION_INFO="6:1:3" # CURRENT:REVISION:AGE
 
 AM_INIT_AUTOMAKE(1.7)
 AM_CONFIG_HEADER(config.h)
