@@ -129,14 +129,24 @@ if test "$have_altivec" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_ALTIVEC, test "$have_altivec" = "yes")
 
-AC_ARG_ENABLE(mips-ps, [AC_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
-if test "$have_mips_ps" = "yes"; then
-	AC_DEFINE(HAVE_MIPS_PS,1,[Define to enable MIPS paired-single optimizations.])
+AC_ARG_ENABLE(neon, [AC_HELP_STRING([--enable-neon],[enable ARM NEON optimizations])], have_neon=$enableval, have_neon=no)
+if test "$have_neon" = "yes"; then
+	AC_DEFINE(HAVE_NEON,1,[Define to enable ARM NEON optimizations.])
 	if test "$PRECISION" != "s"; then
-		AC_MSG_ERROR([MIPS paired-single requires single precision])
+		AC_MSG_ERROR([NEON requires single precision])
 	fi
 fi
-AM_CONDITIONAL(HAVE_MIPS_PS, test "$have_mips_ps" = "yes")
+AM_CONDITIONAL(HAVE_NEON, test "$have_neon" = "yes")
+
+dnl FIXME:
+dnl AC_ARG_ENABLE(mips-ps, [AC_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
+dnl if test "$have_mips_ps" = "yes"; then
+dnl 	AC_DEFINE(HAVE_MIPS_PS,1,[Define to enable MIPS paired-single optimizations.])
+dnl 	if test "$PRECISION" != "s"; then
+dnl 		AC_MSG_ERROR([MIPS paired-single requires single precision])
+dnl 	fi
+dnl fi
+dnl AM_CONDITIONAL(HAVE_MIPS_PS, test "$have_mips_ps" = "yes")
 
 AC_ARG_WITH(slow-timer, [AC_HELP_STRING([--with-slow-timer],[use low-precision timers (SLOW)])], with_slow_timer=$withval, with_slow_timer=no)
 if test "$with_slow_timer" = "yes"; then
@@ -263,6 +273,11 @@ case "${ax_cv_c_compiler_vendor}" in
 			[AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
 	fi
 
+	if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
+	    AX_CHECK_COMPILER_FLAGS(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon"],
+		[AC_MSG_ERROR([Need a version of gcc with -mfpu=neon])])
+	fi
+
 	dnl FIXME:
 	dnl elif test "$have_mips_ps" = "yes"; then
 	dnl     # Just punt here and use only new 4.2 compiler :(
@@ -282,6 +297,7 @@ esac
 AC_SUBST(SSE2_CFLAGS)
 AC_SUBST(AVX_CFLAGS)
 AC_SUBST(ALTIVEC_CFLAGS)
+AC_SUBST(NEON_CFLAGS)
 
 dnl add stack alignment CFLAGS if so requested
 if test "$with_incoming_stack_boundary"x != "no"x; then
@@ -543,6 +559,7 @@ AC_CONFIG_FILES([
    dft/simd/sse2/Makefile
    dft/simd/avx/Makefile
    dft/simd/altivec/Makefile
+   dft/simd/neon/Makefile
 
    rdft/Makefile
    rdft/scalar/Makefile
@@ -554,6 +571,7 @@ AC_CONFIG_FILES([
    rdft/simd/sse2/Makefile
    rdft/simd/avx/Makefile
    rdft/simd/altivec/Makefile
+   rdft/simd/neon/Makefile
 
    reodft/Makefile
 

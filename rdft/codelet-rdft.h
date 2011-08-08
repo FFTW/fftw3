@@ -138,6 +138,7 @@ extern const solvtab X(solvtab_rdft_r2cb);
 extern const solvtab X(solvtab_rdft_sse2);
 extern const solvtab X(solvtab_rdft_avx);
 extern const solvtab X(solvtab_rdft_altivec);
+extern const solvtab X(solvtab_rdft_neon);
 
 /* real-input & output DFT-like codelets (DHT, etc.) */
 typedef struct kr2r_desc_s kr2r_desc;

@@ -86,6 +86,16 @@ if test "$ac_test_CFLAGS" != "set"; then
      AX_CHECK_COMPILER_FLAGS(-fstrict-aliasing,
 	CFLAGS="$CFLAGS -fstrict-aliasing")
 
+     # -fno-schedule-insns is pretty much required on all risc
+     # processors.
+     # 
+     # gcc performs one pass of instruction scheduling, then a pass of
+     # register allocation, then another pass of instruction
+     # scheduling.  The first pass reorders instructions in a way that
+     # is pretty much the worst possible for the purposes of register
+     # allocation.  We disable the first pass.
+     AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns, CFLAGS="$CFLAGS -fno-schedule-insns")
+
      # note that we enable "unsafe" fp optimization with other compilers, too
      AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
 

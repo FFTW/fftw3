@@ -70,4 +70,8 @@ void X(rdft_conf_standard)(planner *p)
      if (X(have_simd_altivec)())
 	  X(solvtab_exec)(X(solvtab_rdft_altivec), p);
 #endif
+#if HAVE_NEON
+     if (X(have_simd_neon)())
+	  X(solvtab_exec)(X(solvtab_rdft_neon), p);
+#endif
 }

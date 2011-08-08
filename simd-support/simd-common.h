@@ -34,6 +34,9 @@
 #elif defined(HAVE_ALTIVEC)
 #  define ALIGNMENT 8     /* Alignment for the LD/ST macros */
 #  define ALIGNMENTA 16   /* Alignment for the LDA/STA macros */
+#elif defined(HAVE_NEON)
+#  define ALIGNMENT 8     /* Alignment for the LD/ST macros */
+#  define ALIGNMENTA 8    /* Alignment for the LDA/STA macros */
 #endif
 
 #if HAVE_SIMD

@@ -105,6 +105,8 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 
 extern int X(have_simd_sse2)(void);
 extern int X(have_simd_avx)(void);
+extern int X(have_simd_altivec)(void);
+extern int X(have_simd_neon)(void);
 
 /* forward declarations */
 typedef struct problem_s problem;
