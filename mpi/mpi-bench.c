@@ -736,13 +736,13 @@ FFTW(plan) mkplan(bench_problem *p, unsigned flags)
      FFTW(destroy_plan)(plan_scramble_in); plan_scramble_in = 0;
      FFTW(destroy_plan)(plan_unscramble_out); plan_unscramble_out = 0;
      if (p->scrambled_in) {
-	  if (p->sz->rnk == 1) 
+	  if (p->sz->rnk == 1 && p->sz->dims[0].n != 1) 
 	       flags |= FFTW_MPI_SCRAMBLED_IN;
 	  else
 	       flags |= FFTW_MPI_TRANSPOSED_IN;
      }
      if (p->scrambled_out) {
-	  if (p->sz->rnk == 1) 
+	  if (p->sz->rnk == 1 && p->sz->dims[0].n != 1) 
 	       flags |= FFTW_MPI_SCRAMBLED_OUT;
 	  else
 	       flags |= FFTW_MPI_TRANSPOSED_OUT;
