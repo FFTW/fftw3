@@ -35,7 +35,7 @@ typedef struct {
 typedef struct {
      plan_mpi_transpose super;
 
-     plan *cld1, *cld2, *cld2rest;
+     plan *cld1, *cld2, *cld2rest, *cld3;
 
      MPI_Comm comm;
      int *send_block_sizes, *send_block_offsets;
@@ -49,7 +49,7 @@ typedef struct {
 static void apply(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
-     plan_rdft *cld1, *cld2, *cld2rest;
+     plan_rdft *cld1, *cld2, *cld2rest, *cld3;
 
      /* transpose locally to get contiguous chunks */
      cld1 = (plan_rdft *) ego->cld1;
@@ -88,9 +88,14 @@ static void apply(const plan *ego_, R *I, R *O)
      if (cld2) {
 	  cld2->apply(ego->cld2, I, O);
 	  cld2rest = (plan_rdft *) ego->cld2rest;
-	  if (cld2rest) /* leftover from unequal block sizes */
+	  if (cld2rest) { /* leftover from unequal block sizes */
 	       cld2rest->apply(ego->cld2rest,
 			       I + ego->rest_Ioff, O + ego->rest_Ooff);
+	       cld3 = (plan_rdft *) ego->cld3;
+	       if (cld3)
+		    cld3->apply(ego->cld3, O, O);
+	       /* else TRANSPOSED_OUT is true and user wants O transposed */
+	  }
      }
 }
 
@@ -113,6 +118,7 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      X(plan_awake)(ego->cld1, wakefulness);
      X(plan_awake)(ego->cld2, wakefulness);
      X(plan_awake)(ego->cld2rest, wakefulness);
+     X(plan_awake)(ego->cld3, wakefulness);
 }
 
 static void destroy(plan *ego_)
@@ -120,6 +126,7 @@ static void destroy(plan *ego_)
      P *ego = (P *) ego_;
      X(ifree0)(ego->send_block_sizes);
      MPI_Comm_free(&ego->comm);
+     X(plan_destroy_internal)(ego->cld3);
      X(plan_destroy_internal)(ego->cld2rest);
      X(plan_destroy_internal)(ego->cld2);
      X(plan_destroy_internal)(ego->cld1);
@@ -128,9 +135,9 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(mpi-transpose-alltoall%s%(%p%)%(%p%)%(%p%))",
+     p->print(p, "(mpi-transpose-alltoall%s%(%p%)%(%p%)%(%p%)%(%p%))",
 	      ego->equal_blocks ? "/e" : "",
-	      ego->cld1, ego->cld2, ego->cld2rest);
+	      ego->cld1, ego->cld2, ego->cld2rest, ego->cld3);
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
@@ -138,8 +145,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      const S *ego = (const S *) ego_;
      const problem_mpi_transpose *p;
      P *pln;
-     plan *cld1 = 0, *cld2 = 0, *cld2rest = 0;
-     INT b, bt, nxb, vn, Ioff = 0, Ooff = 0;
+     plan *cld1 = 0, *cld2 = 0, *cld2rest = 0, *cld3 = 0;
+     INT b, bt, vn, rest_Ioff, rest_Ooff;
      R *I;
      int *sbs, *sbo, *rbs, *rbo;
      int pe, my_pe, n_pes;
@@ -182,77 +189,23 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  if (XM(any_true)(!cld1, p->comm)) goto nada;
      }
 	  
-     bt = XM(block)(p->ny, p->tblock, my_pe);
-     nxb = (p->nx + p->block - 1) / p->block;
-     if (p->nx != nxb * p->block)
-	  nxb -= 1; /* number of equal-sized blocks */
-     if (!(p->flags & TRANSPOSED_OUT)) {
-	  INT nx = p->nx * vn;
-	  b = p->block * vn;
-	  cld2 = X(mkplan_f_d)(plnr, 
-			       X(mkproblem_rdft_0_d)(X(mktensor_3d)
-						     (nxb, bt * b, b,
-						      bt, b, nx,
-						      b, 1, 1),
-						     I, p->O),
-			       0, 0, NO_SLOW);
-	  if (XM(any_true)(!cld2, p->comm)) goto nada;
-	  
-	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
-	       Ioff = bt * b * nxb;
-	       Ooff = b * nxb;
-	       b = nx - nxb * b;
-	       cld2rest = X(mkplan_f_d)(plnr,
-					X(mkproblem_rdft_0_d)(X(mktensor_2d)
-							      (bt, b, nx,
-							       b, 1, 1),
-							      I + Ioff,
-							      p->O + Ooff),
-					0, 0, NO_SLOW);
-	       if (XM(any_true)(!cld2rest, p->comm)) goto nada;
-	  }
-     }
-     else { /* TRANSPOSED_OUT */
-	  b = p->block;
-	  cld2 = X(mkplan_f_d)(plnr, 
-			     X(mkproblem_rdft_0_d)(X(mktensor_4d)
-						   (nxb, bt * b*vn, bt * b*vn,
-						    bt, b*vn, vn,
-						    b, vn, bt*vn,
-						    vn, 1, 1),
-						   I, p->O),
-			       0, 0, NO_SLOW);
-	  if (XM(any_true)(!cld2, p->comm)) goto nada;
-	  
-	  if (p->nx != nxb * p->block) { /* leftover blocks to transpose */
-	       Ioff = Ooff = bt * b * nxb * vn;
-	       b = p->nx - nxb * b;
-	       cld2rest = X(mkplan_f_d)(plnr,
-					X(mkproblem_rdft_0_d)(X(mktensor_3d)
-							      (bt, b*vn, vn,
-							       b, vn, bt*vn,
-							       vn, 1, 1),
-							      I + Ioff,
-							      p->O + Ooff),
-					0, 0, NO_SLOW);
-	       if (XM(any_true)(!cld2rest, p->comm)) goto nada;
-	  }
-     }
+     if (XM(any_true)(!XM(mkplans_posttranspose)(p, plnr, I, p->O, my_pe,
+						 &cld2, &cld2rest, &cld3,
+						 &rest_Ioff, &rest_Ooff),
+		      p->comm)) goto nada;
 
      pln = MKPLAN_MPI_TRANSPOSE(P, &padt, apply);
 
      pln->cld1 = cld1;
      pln->cld2 = cld2;
      pln->cld2rest = cld2rest;
-     pln->rest_Ioff = Ioff;
-     pln->rest_Ooff = Ooff;
+     pln->rest_Ioff = rest_Ioff;
+     pln->rest_Ooff = rest_Ooff;
+     pln->cld3 = cld3;
 
      MPI_Comm_dup(p->comm, &pln->comm);
 
-     /* Compute sizes/offsets of blocks to send for all-to-all
-        command.  TODO: In the special case where all block sizes are
-        equal, we could use the MPI_Alltoall command.  It's not clear
-        whether/why this would be any faster, though. */
+     /* Compute sizes/offsets of blocks to send for all-to-all command. */
      sbs = (int *) MALLOC(4 * n_pes * sizeof(int), PLANS);
      sbo = sbs + n_pes;
      rbs = sbo + n_pes;
@@ -284,11 +237,13 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      if (cld1) X(ops_add2)(&cld1->ops, &pln->super.super.ops);
      if (cld2) X(ops_add2)(&cld2->ops, &pln->super.super.ops);
      if (cld2rest) X(ops_add2)(&cld2rest->ops, &pln->super.super.ops);
+     if (cld3) X(ops_add2)(&cld3->ops, &pln->super.super.ops);
      /* FIXME: should MPI operations be counted in "other" somehow? */
 
      return &(pln->super.super);
 
  nada:
+     X(plan_destroy_internal)(cld3);
      X(plan_destroy_internal)(cld2rest);
      X(plan_destroy_internal)(cld2);
      X(plan_destroy_internal)(cld1);

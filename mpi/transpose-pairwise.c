@@ -37,7 +37,7 @@ typedef struct {
      plan_mpi_transpose super;
 
      plan *cld1, *cld2, *cld2rest, *cld3;
-     INT rest_offset;
+     INT rest_Ioff, rest_Ooff;
      
      int n_pes, my_pe, *sched;
      INT *send_block_sizes, *send_block_offsets;
@@ -140,8 +140,8 @@ static void apply(const plan *ego_, R *I, R *O)
      cld2->apply(ego->cld2, I, O);
      cld2rest = (plan_rdft *) ego->cld2rest;
      if (cld2rest) {
-	  ptrdiff_t rest_offset = ego->rest_offset;
-	  cld2rest->apply(ego->cld2rest, I + rest_offset, O + rest_offset);
+	  cld2rest->apply(ego->cld2rest,
+			  I + ego->rest_Ioff, O + ego->rest_Ooff);
 	  cld3 = (plan_rdft *) ego->cld3;
 	  if (cld3)
 	       cld3->apply(ego->cld3, O, O);
@@ -266,13 +266,100 @@ static void sort1_comm_sched(int *sched, int npes, int sortpe, int ascending)
      X(ifree)(sortsched);
 }
 
+/* make the plans to do the post-MPI transpositions (shared with
+   transpose-alltoall) */
+int XM(mkplans_posttranspose)(const problem_mpi_transpose *p, planner *plnr,
+			      R *I, R *O, int my_pe,
+			      plan **cld2, plan **cld2rest, plan **cld3,
+			      INT *rest_Ioff, INT *rest_Ooff)
+{
+     INT vn = p->vn;
+     INT b = p->block;
+     INT bt = XM(block)(p->ny, p->tblock, my_pe);
+     INT nxb = p->nx / b; /* number of equal-sized blocks */
+     INT nxr = p->nx - nxb * b; /* leftover rows after equal blocks */
+
+     *cld2 = *cld2rest = *cld3 = NULL;
+     *rest_Ioff = *rest_Ooff = 0;
+
+     if (!(p->flags & TRANSPOSED_OUT) && (nxr == 0 || I != O)) {
+	  INT nx = p->nx * vn;
+	  b *= vn;
+	  *cld2 = X(mkplan_f_d)(plnr, 
+				X(mkproblem_rdft_0_d)(X(mktensor_3d)
+						      (nxb, bt * b, b,
+						       bt, b, nx,
+						       b, 1, 1),
+						      I, O),
+				0, 0, NO_SLOW);
+	  if (!*cld2) goto nada;
+
+	  if (nxr > 0) {
+	       *rest_Ioff = nxb * bt * b;
+	       *rest_Ooff = nxb * b;
+	       b = nxr * vn;
+	       *cld2rest = X(mkplan_f_d)(plnr,
+					 X(mkproblem_rdft_0_d)(X(mktensor_2d)
+							       (bt, b, nx,
+								b, 1, 1),
+							       I + *rest_Ioff,
+							       O + *rest_Ooff),
+                                        0, 0, NO_SLOW);
+               if (!*cld2rest) goto nada;
+	  }
+     }
+     else {
+	  *cld2 = X(mkplan_f_d)(plnr,
+				X(mkproblem_rdft_0_d)(
+				     X(mktensor_4d)
+				     (nxb, bt * b * vn, bt * b * vn,
+				      bt, b * vn, vn,
+				      b, vn, bt * vn,
+				      vn, 1, 1),
+				     I, O),
+				0, 0, NO_SLOW);
+	  if (!*cld2) goto nada;
+
+	  *rest_Ioff = *rest_Ooff = nxb * bt * b * vn;
+	  *cld2rest = X(mkplan_f_d)(plnr,
+				    X(mkproblem_rdft_0_d)(
+					 X(mktensor_3d)
+					 (bt, nxr * vn, vn,
+					  nxr, vn, bt * vn,
+					  vn, 1, 1),
+					 I + *rest_Ioff, O + *rest_Ooff),
+				    0, 0, NO_SLOW);
+	  if (!*cld2rest) goto nada;
+
+	  if (!(p->flags & TRANSPOSED_OUT)) {
+	       *cld3 = X(mkplan_f_d)(plnr,
+				     X(mkproblem_rdft_0_d)(
+					  X(mktensor_3d)
+					  (p->nx, bt * vn, vn,
+					   bt, vn, p->nx * vn,
+					   vn, 1, 1),
+					  O, O),
+				     0, 0, NO_SLOW);
+	       if (!*cld3) goto nada;
+	  }
+     }
+
+     return 1;
+
+nada:
+     X(plan_destroy_internal)(*cld3);
+     X(plan_destroy_internal)(*cld2rest);
+     X(plan_destroy_internal)(*cld2);
+     return 0;
+}
+
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 {
      const S *ego = (const S *) ego_;
      const problem_mpi_transpose *p;
      P *pln;
      plan *cld1 = 0, *cld2 = 0, *cld2rest = 0, *cld3 = 0;
-     INT b, bt, nxb, vn, rest_offset = 0;
+     INT b, bt, vn, rest_Ioff, rest_Ooff;
      INT *sbs, *sbo, *rbs, *rbo;
      int pe, my_pe, n_pes, sort_pe = -1, ascending = 1;
      R *I, *O;
@@ -306,74 +393,18 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      }
      if (ego->preserve_input || NO_DESTROY_INPUTP(plnr)) I = O;
 
-     b = p->block;
-     bt = XM(block)(p->ny, p->tblock, my_pe);
-     nxb = p->nx / b;
-     if (p->nx == nxb * p->block) { /* divisible => ordinary transpose */
-	  if (!(p->flags & TRANSPOSED_OUT)) {
-	       b *= vn;
-	       cld2 = X(mkplan_f_d)(plnr, 
-				    X(mkproblem_rdft_0_d)(X(mktensor_3d)
-							  (nxb, bt * b, b,
-							   bt, b, nxb * b,
-							   b, 1, 1),
-							  I, O),
-				    0, 0, NO_SLOW);
-	  }
-	  else {
-	       cld2 = X(mkplan_f_d)(plnr, 
-				    X(mkproblem_rdft_0_d)(
-					 X(mktensor_4d)
-					 (nxb, bt * b * vn, bt * b * vn,
-					  bt, b * vn, vn,
-					  b, vn, bt * vn,
-					  vn, 1, 1),
-					 I, O),
-				    0, 0, NO_SLOW);
-	  }
-	  if (XM(any_true)(!cld2, p->comm)) goto nada;
-     }
-     else {
-	  INT nxr = p->nx - nxb * b;
-	  cld2 = X(mkplan_f_d)(plnr,
-			       X(mkproblem_rdft_0_d)(
-				    X(mktensor_4d)
-				    (nxb, bt * b * vn, bt * b * vn,
-				     bt, b * vn, vn,
-				     b, vn, bt * vn,
-				     vn, 1, 1),
-				    I, O),
-			       0, 0, NO_SLOW);
-	  if (XM(any_true)(!cld2, p->comm)) goto nada;
-	  rest_offset = nxb * b * bt * vn;
-	  cld2rest = X(mkplan_f_d)(plnr,
-				   X(mkproblem_rdft_0_d)(
-					X(mktensor_3d)
-					(bt, nxr * vn, vn,
-					 nxr, vn, bt * vn,
-					 vn, 1, 1),
-					I + rest_offset, O + rest_offset),
-				   0, 0, NO_SLOW);
-	  if (XM(any_true)(!cld2rest, p->comm)) goto nada;
-	  if (!(p->flags & TRANSPOSED_OUT)) {
-	       cld3 = X(mkplan_f_d)(plnr,
-				    X(mkproblem_rdft_0_d)(
-					 X(mktensor_3d)
-					 (p->nx, bt * vn, vn,
-					  bt, vn, p->nx * vn,
-					  vn, 1, 1),
-					 O, O),
-				    0, 0, NO_SLOW);
-	       if (XM(any_true)(!cld3, p->comm)) goto nada;
-	  }
-     }
+     if (XM(any_true)(!XM(mkplans_posttranspose)(p, plnr, I, O, my_pe,
+						 &cld2, &cld2rest, &cld3,
+						 &rest_Ioff, &rest_Ooff),
+		      p->comm)) goto nada;
 
      pln = MKPLAN_MPI_TRANSPOSE(P, &padt, apply);
 
      pln->cld1 = cld1;
      pln->cld2 = cld2;
      pln->cld2rest = cld2rest;
-     pln->rest_offset = rest_offset;
+     pln->rest_Ioff = rest_Ioff;
+     pln->rest_Ooff = rest_Ooff;
      pln->cld3 = cld3;
      pln->preserve_input = ego->preserve_input ? 2 : NO_DESTROY_INPUTP(plnr);
 
