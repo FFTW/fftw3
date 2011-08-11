@@ -232,6 +232,7 @@ sub one_random_test {
 	$sz = "]${sz}" if ($stype == 1);
 	$sz = "[${sz}" if ($stype == 2);
     }
+    $sz = "d$sz" if (int(rand(3)) == 0);
     if ($is_r2r) {
 	do_problem("ik$sz", 1);
 	do_problem("ok$sz", 1);
