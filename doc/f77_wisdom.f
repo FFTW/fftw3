@@ -13,7 +13,7 @@ c     GNU General Public License for more details.
 c     
 c     You should have received a copy of the GNU General Public License
 c     along with this program; if not, write to the Free Software
-c     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+c     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 c
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c     
