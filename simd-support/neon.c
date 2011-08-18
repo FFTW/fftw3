@@ -23,9 +23,56 @@
 
 #if HAVE_NEON
 
-int X(have_simd_neon)(void)
-{
-     return 1;
-}
+/* check for an environment where signals are known to work */
+#if defined(unix) || defined(linux)
+  # include <signal.h>
+  # include <setjmp.h>
+
+  static jmp_buf jb;
+
+  static void sighandler(int x)
+  {
+       UNUSED(x);
+       longjmp(jb, 1);
+  }
+
+  static int really_have_neon(void)
+  {
+       void (*oldsig)(int);
+       oldsig = signal(SIGILL, sighandler);
+       if (setjmp(jb)) {
+	    signal(SIGILL, oldsig);
+	    return 0;
+       } else {
+	    /* paranoia: encode the instruction in binary because the
+	       assembler may not recognize it without -mfpu=neon */
+	    /*asm volatile ("vand q0, q0, q0");*/
+	    asm volatile (".long 0xf2000150");
+	    signal(SIGILL, oldsig);
+	    return 1;
+       }
+  }
+
+  extern void X(check_alignment_of_sse2_pm)(void);
+
+  int X(have_simd_neon)(void)
+  {
+       static int init = 0, res;
+
+       if (!init) {
+	    res = really_have_neon();
+	    init = 1;
+       }
+       return res;
+  }
+
+
+#else
+/* don't know how to autodetect NEON; assume it is present */
+  int X(have_simd_neon)(void)
+  {
+       return 1;
+  }
+#endif
 
 #endif
