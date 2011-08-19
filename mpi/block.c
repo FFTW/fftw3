@@ -45,12 +45,8 @@ INT XM(default_block)(INT n, int n_pes)
    on the given process. */
 INT XM(block)(INT n, INT block, int which_block)
 {
-     INT n_blocks = XM(num_blocks)(n, block);
-     if (which_block >= n_blocks)
-	  return 0;
-     else
-	  return ((which_block == n_blocks - 1)
-		  ? (n - which_block * block) : block);
+     INT d = n - which_block * block;
+     return d <= 0 ? 0 : (d > block ? block : d);
 }
 
 static INT num_blocks_kind(const ddim *dim, block_kind k)
