@@ -190,14 +190,14 @@ of the time).  @xref{Cycle Counters}.
 
 @item
 @code{--enable-sse}, @code{--enable-sse2}, @code{--enable-avx},
-@code{--enable-altivec}: Enable the compilation of SIMD code for SSE
-(Pentium III+), SSE2 (Pentium IV+), AVX (Sandy Bridge, Interlagos),
-AltiVec (PowerPC G4+).  SSE and AltiVec only work with
-@code{--enable-float} (above).  SSE2 works in both single and double
-precision (and is simply SSE in single precision).  The resulting code
-will @emph{still work} on earlier CPUs lacking the SIMD extensions
-(SIMD is automatically disabled, although the FFTW library is still
-larger).
+@code{--enable-altivec}, @code{--enable-neon}: Enable the compilation of
+SIMD code for SSE (Pentium III+), SSE2 (Pentium IV+), AVX (Sandy Bridge,
+Interlagos), AltiVec (PowerPC G4+), NEON (some ARM processors).  SSE,
+AltiVec, and NEON only work with @code{--enable-float} (above).  SSE2
+works in both single and double precision (and is simply SSE in single
+precision).  The resulting code will @emph{still work} on earlier CPUs
+lacking the SIMD extensions (SIMD is automatically disabled, although
+the FFTW library is still larger).
 @itemize @minus
 @item
 These options require a compiler supporting SIMD extensions, and
@@ -214,6 +214,16 @@ properly aligns the stack when compiling any code that links to FFTW.
 By default, @code{gcc} 2.95 and later versions align the stack as
 needed, but you should not compile FFTW with the @code{-Os} option or the
 @code{-mpreferred-stack-boundary} option with an argument less than 4.
+@item
+Because of the large variety of ARM processors and ABIs, FFTW
+does not attempt to guess the correct @code{gcc} flags for generating
+NEON code.  In general, you will have to provide them on the command line.
+This command line is known to have worked at least once:
+@example
+./configure --with-slow-timer --host=arm-linux-gnueabi \
+  --enable-single --enable-neon \
+  "CC=arm-linux-gnueabi-gcc -march=armv7-a -mfloat-abi=softfp"
+@end example
 @end itemize
 
 @end itemize

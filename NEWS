@@ -1,5 +1,9 @@
 FFTW 3.3.1
 
+* Added support for the NEON extensions to the ARM ISA.  (Note to beta
+  users: an ARM cycle counter is not yet implemented; please contact
+  fftw@fftw.org if you know how to do it right.)
+
 * MPI code now compiles even if mpicc is a C++ compiler; thanks to
   Kyle Spyksma for the bug report.
 
