@@ -214,6 +214,10 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 	      ego->omega = 0;
 	      break;
 	 default:
+	      ego->g = X(find_generator)(ego->n);
+	      ego->ginv = X(power_mod)(ego->g, ego->n - 2, ego->n);
+	      A(MULMOD(ego->g, ego->ginv, ego->n) == 1);
+
 	      A(!ego->omega);
 	      ego->omega = mkomega(wakefulness, 
 				   ego->cld_omega,ego->n,ego->npad,ego->ginv);
@@ -344,9 +348,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->npad = npad;
      pln->is = is;
      pln->os = os;
-     pln->g = X(find_generator)(n);
-     pln->ginv = X(power_mod)(pln->g, n - 2, n);
-     A(MULMOD(pln->g, pln->ginv, n) == 1);
 
      X(ops_add)(&cld1->ops, &cld2->ops, &pln->super.super.ops);
      pln->super.super.ops.other += (npad/2-1)*6 + npad + n + (n-1) * ego->pad;

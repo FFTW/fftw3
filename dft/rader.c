@@ -180,6 +180,10 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 	      ego->omega = 0;
 	      break;
 	 default:
+	      ego->g = X(find_generator)(ego->n);
+	      ego->ginv = X(power_mod)(ego->g, ego->n - 2, ego->n);
+	      A(MULMOD(ego->g, ego->ginv, ego->n) == 1);
+
 	      ego->omega = mkomega(wakefulness,
 				   ego->cld_omega, ego->n, ego->ginv);
 	      break;
@@ -268,9 +272,6 @@ static int mkP(P *pln, INT n, INT is, INT os, R *ro, R *io,
      pln->n = n;
      pln->is = is;
      pln->os = os;
-     pln->g = X(find_generator)(n);
-     pln->ginv = X(power_mod)(pln->g, n - 2, n);
-     A(MULMOD(pln->g, pln->ginv, n) == 1);
 
      X(ops_add)(&cld1->ops, &cld2->ops, &pln->super.super.ops);
      pln->super.super.ops.other += (n - 1) * (4 * 2 + 6) + 6;
