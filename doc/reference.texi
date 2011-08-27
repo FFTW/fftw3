@@ -1639,7 +1639,7 @@ void fftw_execute_r2r(
 @findex fftw_execute_split_dft_r2c
 @findex fftw_execute_dft_c2r
 @findex fftw_execute_split_dft_c2r
-@findex fftw_execute_dft_r2r
+@findex fftw_execute_r2r
 
 These execute the @code{plan} to compute the corresponding transform on
 the input/output arrays specified by the subsequent arguments.  The
