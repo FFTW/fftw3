@@ -240,8 +240,10 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln->nthr = nthr;
      pln->r = r;
      X(ops_zero)(&pln->super.super.ops);
-     for (i = 0; i < nthr; ++i)
+     for (i = 0; i < nthr; ++i) {
           X(ops_add2)(&cldws[i]->ops, &pln->super.super.ops);
+	  pln->super.super.could_prune_now_p |= cldws[i]->could_prune_now_p;
+     }
      X(ops_add2)(&cld->ops, &pln->super.super.ops);
      return &(pln->super.super);
 
