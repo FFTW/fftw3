@@ -204,3 +204,9 @@ INT X(modulo)(INT a, INT n)
 	  return (n - 1) - ((-(a + (INT)1)) % n);
 }
 
+/* TRUE if N factors into small primes */
+int X(factors_into_small_primes)(INT n)
+{
+     static const INT primes[] = { 2, 3, 5, 0 };
+     return X(factors_into)(n, primes);
+}

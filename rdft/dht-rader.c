@@ -246,8 +246,9 @@ static void print(const plan *ego_, printer *p)
      p->putchr(p, ')');
 }
 
-static int applicable0(const problem *p_)
+static int applicable(const solver *ego, const problem *p_, const planner *plnr)
 {
+     UNUSED(ego);
      const problem_rdft *p = (const problem_rdft *) p_;
      return (1
 	     && p->sz->rnk == 1
@@ -255,13 +256,13 @@ static int applicable0(const problem *p_)
 	     && p->kind[0] == DHT
 	     && X(is_prime)(p->sz->dims[0].n)
 	     && p->sz->dims[0].n > 2
+	     && CIMPLIES(NO_SLOWP(plnr), p->sz->dims[0].n > RADER_MAX_SLOW)
+	     /* proclaim the solver SLOW if p-1 is not easily
+		factorizable.  Unlike in the complex case where
+		Bluestein can solve the problem, in the DHT case we
+		may have no other choice */
+	     && CIMPLIES(NO_SLOWP(plnr), X(factors_into_small_primes)(p->sz->dims[0].n - 1))
 	  );
-}
-
-static int applicable(const solver *ego, const problem *p, const planner *plnr)
-{
-     UNUSED(ego);
-     return (!NO_SLOWP(plnr) && applicable0(p));
 }
 
 static INT choose_transform_size(INT minsz)

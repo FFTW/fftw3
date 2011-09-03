@@ -210,21 +210,21 @@ static void print(const plan *ego_, printer *p)
      p->putchr(p, ')');
 }
 
-static int applicable0(const solver *ego_, const problem *p_)
+static int applicable(const solver *ego_, const problem *p_,
+		      const planner *plnr)
 {
      const problem_dft *p = (const problem_dft *) p_;
      UNUSED(ego_);
      return (1
 	     && p->sz->rnk == 1
 	     && p->vecsz->rnk == 0
+	     && CIMPLIES(NO_SLOWP(plnr), p->sz->dims[0].n > RADER_MAX_SLOW)
 	     && X(is_prime)(p->sz->dims[0].n)
-	  );
-}
 
-static int applicable(const solver *ego_, const problem *p_,
-		      const planner *plnr)
-{
-     return (!NO_SLOWP(plnr) && applicable0(ego_, p_));
+	     /* proclaim the solver SLOW if p-1 is not easily factorizable.
+		Bluestein should take care of this case. */
+	     && CIMPLIES(NO_SLOWP(plnr), X(factors_into_small_primes)(p->sz->dims[0].n - 1))
+	  );
 }
 
 static int mkP(P *pln, INT n, INT is, INT os, R *ro, R *io,

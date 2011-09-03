@@ -163,9 +163,19 @@ static int applicable(const solver *ego, const problem *p_,
 		      const planner *plnr)
 {
      UNUSED(ego);
-     if (NO_SLOWP(plnr)) return 0;
-     if (!applicable0(p_)) return 0;
-     return 1;
+     const problem_dft *p = (const problem_dft *) p_;
+     return (1
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk == 0
+	     /* FIXME: allow other sizes */
+	     && X(is_prime)(p->sz->dims[0].n)
+
+	     /* FIXME: avoid infinite recursion of bluestein with itself.
+		This works because all factors in child problems are 2, 3, 5 */
+	     && p->sz->dims[0].n > 16
+
+	     && CIMPLIES(NO_SLOWP(plnr), p->sz->dims[0].n > BLUESTEIN_MAX_SLOW)
+	  );
 }
 
 static void destroy(plan *ego_)
@@ -183,8 +193,7 @@ static void print(const plan *ego_, printer *p)
 
 static INT choose_transform_size(INT minsz)
 {
-     static const INT primes[] = { 2, 3, 5, 0 };
-     while (!X(factors_into)(minsz, primes))
+     while (!X(factors_into_small_primes)(minsz))
 	  ++minsz;
      return minsz;
 }

@@ -109,29 +109,20 @@ static void print(const plan *ego_, printer *p)
      p->print(p, "(dft-generic-%D)", ego->n);
 }
 
-static int applicable0(const problem *p_)
-{
-     const problem_dft *p = (const problem_dft *) p_;
-     return (1
-	     && p->sz->rnk == 1
-	     && p->vecsz->rnk == 0
-	     && (p->sz->dims[0].n % 2) == 1 
-	     && X(is_prime)(p->sz->dims[0].n)
-	  );
-}
-
 static int applicable(const solver *ego, const problem *p_, 
 		      const planner *plnr)
 {
      UNUSED(ego);
-     if (NO_SLOWP(plnr)) return 0;
-     if (!applicable0(p_)) return 0;
+     const problem_dft *p = (const problem_dft *) p_;
 
-     if (NO_LARGE_GENERICP(plnr)) {
-          const problem_dft *p = (const problem_dft *) p_;
-	  if (p->sz->dims[0].n >= GENERIC_MIN_BAD) return 0; 
-     }
-     return 1;
+     return (1
+	     && p->sz->rnk == 1
+	     && p->vecsz->rnk == 0
+	     && (p->sz->dims[0].n % 2) == 1 
+	     && CIMPLIES(NO_LARGE_GENERICP(plnr), p->sz->dims[0].n < GENERIC_MIN_BAD)
+	     && CIMPLIES(NO_SLOWP(plnr), p->sz->dims[0].n > GENERIC_MAX_SLOW)
+	     && X(is_prime)(p->sz->dims[0].n)
+	  );
 }
 
 static plan *mkplan(const solver *ego, const problem *p_, planner *plnr)

@@ -168,29 +168,19 @@ static void print(const plan *ego_, printer *p)
 	      ego->n);
 }
 
-static int applicable0(const S *ego, const problem *p_)
+static int applicable(const S *ego, const problem *p_, 
+		      const planner *plnr)
 {
      const problem_rdft *p = (const problem_rdft *) p_;
      return (1
 	     && p->sz->rnk == 1
 	     && p->vecsz->rnk == 0
 	     && (p->sz->dims[0].n % 2) == 1 
+	     && CIMPLIES(NO_LARGE_GENERICP(plnr), p->sz->dims[0].n < GENERIC_MIN_BAD)
+	     && CIMPLIES(NO_SLOWP(plnr), p->sz->dims[0].n > GENERIC_MAX_SLOW)
 	     && X(is_prime)(p->sz->dims[0].n)
 	     && p->kind[0] == ego->kind
 	  );
-}
-
-static int applicable(const S *ego, const problem *p_, 
-		      const planner *plnr)
-{
-     if (NO_SLOWP(plnr)) return 0;
-     if (!applicable0(ego, p_)) return 0;
-
-     if (NO_LARGE_GENERICP(plnr)) {
-          const problem_rdft *p = (const problem_rdft *) p_;
-	  if (p->sz->dims[0].n >= GENERIC_MIN_BAD) return 0; 
-     }
-     return 1;
 }
 
 static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)

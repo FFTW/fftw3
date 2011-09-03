@@ -94,6 +94,7 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 
 #define STRINGIZEx(x) #x
 #define STRINGIZE(x) STRINGIZEx(x)
+#define CIMPLIES(ante, post) (!(ante) || (post))
 
 /* define HAVE_SIMD if any simd extensions are supported */
 #if defined(HAVE_SSE) || defined(HAVE_SSE2) || defined(HAVE_ALTIVEC) || \
@@ -923,11 +924,18 @@ INT X(first_divisor)(INT n);
 int X(is_prime)(INT n);
 INT X(next_prime)(INT n);
 int X(factors_into)(INT n, const INT *primes);
+int X(factors_into_small_primes)(INT n);
 INT X(choose_radix)(INT r, INT n);
 INT X(isqrt)(INT n);
 INT X(modulo)(INT a, INT n);
 
 #define GENERIC_MIN_BAD 173 /* min prime for which generic becomes bad */
+
+/* thresholds below which certain solvers are considered SLOW.  These are guesses
+   believed to be conservative */
+#define GENERIC_MAX_SLOW     16
+#define RADER_MAX_SLOW       32
+#define BLUESTEIN_MAX_SLOW   24
 
 /*-----------------------------------------------------------------------*/
 /* rader.c: */
