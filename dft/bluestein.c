@@ -162,8 +162,8 @@ static int applicable0(const problem *p_)
 static int applicable(const solver *ego, const problem *p_, 
 		      const planner *plnr)
 {
-     UNUSED(ego);
      const problem_dft *p = (const problem_dft *) p_;
+     UNUSED(ego);
      return (1
 	     && p->sz->rnk == 1
 	     && p->vecsz->rnk == 0
