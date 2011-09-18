@@ -20,6 +20,8 @@
 
 
 #ifdef _MSC_VER
+#include <intrin.h>
+#include <immintrin.h>
 #ifndef inline
 #define inline __inline
 #endif
@@ -28,7 +30,9 @@
 static inline int cpuid_ecx(int op)
 {
 #    ifdef _MSC_VER
-#    error "Please write this code and send it to fftw@fftw.org"
+     int info[4];
+     __cpuid(info, op);
+     return info[2];
 #    else
      int eax, ecx, edx;
 
@@ -42,7 +46,11 @@ static inline int cpuid_ecx(int op)
 static inline int xgetbv_eax(int op)
 {
 #    ifdef _MSC_VER
-#    error "Please write this code and send it to fftw@fftw.org"
+     /* I think _xgetbv() was introduced in "Service Pack 1"
+	of "Visual Studio 2010".  It is unclear whether the
+	spelling is _xgetbv() or __xgetbv().  If you cannot
+	compile this function, send a note to fftw@fftw.org */
+     return (int)(_xgetbv(op) & 0xFFFFFFFFLL);
 #    else
      int eax, edx;
      __asm__ (".byte 0x0f, 0x01, 0xd0" : "=a"(eax), "=d"(edx) : "c" (op));
