@@ -57,6 +57,13 @@ command that comes with VC++.  In particular, run:
      lib /def:libfftw3-3.def
      lib /def:libfftw3l-3.def
 
+On Visual Studio 2008 in 64-bit mode, and possibly in
+other cases, you may need to specify the machine explicitly:
+
+     lib /machine:x64 /def:libfftw3f-3.def
+     lib /machine:x64 /def:libfftw3-3.def
+     lib /machine:x64 /def:libfftw3l-3.def
+
 The single- and double-precision libraries use SSE and SSE2, respectively,
 but should also work on older processors (the library checks at runtime
 to see whether SSE/SSE2 is supported and disables the relevant code if not).
