@@ -114,8 +114,8 @@ but rather using the more specialized functions like
 However, you should execute the plan on the @code{same arrays} as the
 ones for which you created the plan, unless you are especially
 careful.  @xref{Plan execution in Fortran}.  To prevent
-you from using @code{fftw_execute} by mistake, we the @code{fftw3.f03}
-file does not even provide a @code{fftw_execute} interface declaration.
+you from using @code{fftw_execute} by mistake, the @code{fftw3.f03}
+file does not provide an @code{fftw_execute} interface declaration.
 
 @item
 @cindex flags
