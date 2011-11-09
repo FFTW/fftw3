@@ -89,6 +89,11 @@ FFTW_VOIDFUNC F77(cost,COST)(double *cost, X(plan) * const p)
      *cost = X(cost)(*p);
 }
 
+FFTW_VOIDFUNC F77(set_timelimit,SET_TIMELIMIT)(double *t)
+{
+     X(set_timelimit)(*t);
+}
+
 /******************************** DFT ***********************************/
 
 FFTW_VOIDFUNC F77(plan_dft, PLAN_DFT)(X(plan) *p, int *rank, const int *n,
