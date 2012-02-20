@@ -6,6 +6,7 @@ if MPI
 lib_LTLIBRARIES = libfftw3@PREC_SUFFIX@_mpi.la
 include_HEADERS = fftw3-mpi.h
 nodist_include_HEADERS = fftw3-mpi.f03
+CLEANFILES=fftw3-mpi.f03
 noinst_PROGRAMS = mpi-bench
 endif
 
