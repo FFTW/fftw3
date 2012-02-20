@@ -127,6 +127,15 @@ static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
 
 #ifdef FFTW_SINGLE
 
+#  ifdef _MSC_VER
+     /* Temporarily disable the warning "uninitialized local variable
+	'name' used" and runtime checks for using a variable before it is
+	defined which is erroneously triggered by the LOADL0 / LOADH macros
+	as they only modify VAL partly each. */
+#    pragma warning(disable : 4700)
+#    pragma runtime_checks("u", off)
+#  endif
+
 static inline V LD(const R *x, INT ivs, const R *aligned_like)
 {
      V var;
@@ -147,6 +156,11 @@ static inline V LD(const R *x, INT ivs, const R *aligned_like)
 #  endif
      return var;
 }
+
+#  ifdef _MSC_VER
+#    pragma warning(default : 4700)
+#    pragma runtime_checks("u", restore)
+#  endif
 
 static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 {
