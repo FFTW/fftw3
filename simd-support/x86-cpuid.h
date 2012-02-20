@@ -152,7 +152,14 @@ static inline int xgetbv_eax(int op)
 #    ifdef _MSC_VER
      int veax, vedx;
      _asm {
+          mov ecx,op
+#    if defined(__INTEL_COMPILER) || (_MSC_VER >= 1600)
           xgetbv
+#    else
+          __emit 15
+          __emit 1
+          __emit 208
+#    endif
           mov veax,eax
           mov vedx,edx
      }

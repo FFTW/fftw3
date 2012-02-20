@@ -39,6 +39,12 @@
 #error "compiling simd-avx.h without -mavx"
 #endif
 
+#ifdef _MSC_VER
+#ifndef inline
+#define inline __inline
+#endif
+#endif
+
 #include <immintrin.h>
 
 typedef DS(__m256d, __m256) V;

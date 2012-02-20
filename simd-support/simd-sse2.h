@@ -41,10 +41,18 @@
 #  error "compiling simd-sse2.h in single precision without -msse"
 #endif
 
+#ifdef _MSC_VER
+#ifndef inline
+#define inline __inline
+#endif
+#endif
+
 /* some versions of glibc's sys/cdefs.h define __inline to be empty,
    which is wrong because emmintrin.h defines several inline
    procedures */
+#ifndef _MSC_VER
 #undef __inline
+#endif
 
 #ifdef FFTW_SINGLE
 #  include <xmmintrin.h>

@@ -20,19 +20,36 @@
 
 
 #ifdef _MSC_VER
-#include <intrin.h>
-#include <immintrin.h>
 #ifndef inline
 #define inline __inline
+#endif
+#endif
+
+#ifdef _MSC_VER
+#include <intrin.h>
+#if (_MSC_VER >= 1600) && !defined(__INTEL_COMPILER)
+#include <immintrin.h>
 #endif
 #endif
 
 static inline int cpuid_ecx(int op)
 {
 #    ifdef _MSC_VER
-     int info[4];
-     __cpuid(info, op);
-     return info[2];
+#    ifdef __INTEL_COMPILER
+     int result;
+     _asm {
+	  push rbx
+          mov eax,op
+          cpuid
+          mov result,ecx
+          pop rbx
+     }
+     return result;
+#    else
+     int cpu_info[4];
+     __cpuid(cpu_info,op);
+     return cpu_info[2];
+#    endif
 #    else
      int eax, ecx, edx;
 
@@ -46,11 +63,24 @@ static inline int cpuid_ecx(int op)
 static inline int xgetbv_eax(int op)
 {
 #    ifdef _MSC_VER
-     /* I think _xgetbv() was introduced in "Service Pack 1"
-	of "Visual Studio 2010".  It is unclear whether the
-	spelling is _xgetbv() or __xgetbv().  If you cannot
-	compile this function, send a note to fftw@fftw.org */
-     return (int)(_xgetbv(op) & 0xFFFFFFFFLL);
+#    ifdef __INTEL_COMPILER
+     int veax, vedx;
+     _asm {
+          mov ecx,op
+          xgetbv
+          mov veax,eax
+          mov vedx,edx
+     }
+     return veax;
+#    else
+#    if defined(_MSC_VER) && (_MSC_VER >= 1600)
+     unsigned __int64 result;
+     result = _xgetbv(op);
+     return (int)result;
+#    else
+#    error "Need at least Visual Studio 10 SP1 for AVX support"
+#    endif
+#    endif
 #    else
      int eax, edx;
      __asm__ (".byte 0x0f, 0x01, 0xd0" : "=a"(eax), "=d"(edx) : "c" (op));
