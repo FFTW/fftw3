@@ -123,6 +123,42 @@ Multiple planner flags are combined with @code{ior} (equivalent to @samp{|} in C
 
 @end itemize
 
+@menu
+* Extended and quadruple precision in Fortran::  
+@end menu
+
+@node Extended and quadruple precision in Fortran,  , Overview of Fortran interface, Overview of Fortran interface
+@subsection Extended and quadruple precision in Fortran
+@cindex precision
+
+If FFTW is compiled in @code{long double} (extended) precision
+(@pxref{Installation and Customization}), you may be able to call the
+resulting @code{fftwl_} routines (@pxref{Precision}) from Fortran if
+your compiler supports the @code{C_LONG_DOUBLE_COMPLEX} type code.
+
+Because some Fortran compilers do not support
+@code{C_LONG_DOUBLE_COMPLEX}, the @code{fftwl_} declarations are
+segregated into a separate interface file @code{fftw3l.f03}, which you
+should include @emph{in addition} to @code{fftw3.f03} (which declares
+precision-independent @samp{FFTW_} constants):
+
+@cindex iso_c_binding
+@example
+  use, intrinsic :: iso_c_binding 
+  include 'fftw3.f03'
+  include 'fftw3l.f03'
+@end example
+
+We also support using the nonstandard @code{__float128}
+quadruple-precision type provided by recent versions of @code{gcc} on
+32- and 64-bit x86 hardware (@pxref{Installation and Customization}),
+using the corresponding @code{real(16)} and @code{complex(16)} types
+supported by @code{gfortran}.  The quadruple-precision @samp{fftwq_}
+functions (@pxref{Precision}) are declared in a @code{fftw3q.f03}
+interface file, which should be included in addition to
+@code{fftw3l.f03}, as above.  You should also link with
+@code{-lfftw3q -lquadmath -lm} as in C.
+
 @c -------------------------------------------------------
 @node Reversing array dimensions, FFTW Fortran type reference, Overview of Fortran interface, Calling FFTW from Modern Fortran
 @section Reversing array dimensions
@@ -246,9 +282,10 @@ double} correspond to @code{real(C_DOUBLE)}, @code{real(C_FLOAT)}, and
 @code{fftw_complex}, @code{fftwf_complex}, and @code{fftwl_complex}
 correspond in Fortran to @code{complex(C_DOUBLE_COMPLEX)},
 @code{complex(C_FLOAT_COMPLEX)}, and
-@code{complex(C_LONG_DOUBLE_COMPLEX)}, respectively.  Just as in C
+@code{complex(C_LONG_DOUBLE_COMPLEX)}, respectively.  
+Just as in C
 (@pxref{Precision}), the FFTW subroutines and types are prefixed with
-@samp{fftw_}, @code{fftwf_}, and @code{fftwl_} for the different precisions, and link to different libraries (@code{-lfftw3}, @code{-lfftw3f}, and @code{-lfftw3l} on Unix), but use the @emph{same} include file @code{fftw3.f03} and the @emph{same} constants (all of which begin with @samp{FFTW_}).
+@samp{fftw_}, @code{fftwf_}, and @code{fftwl_} for the different precisions, and link to different libraries (@code{-lfftw3}, @code{-lfftw3f}, and @code{-lfftw3l} on Unix), but use the @emph{same} include file @code{fftw3.f03} and the @emph{same} constants (all of which begin with @samp{FFTW_}).  The exception is @code{long double} precision, for which you should @emph{also} include @code{fftw3l.f03} (@pxref{Extended and quadruple precision in Fortran}).
 
 @item
 @tindex ptrdiff_t

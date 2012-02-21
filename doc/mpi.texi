@@ -1642,7 +1642,7 @@ interface }, you should @code{include 'fftw3-mpi.f03'} (after
 @emph{not} @code{include} them both yourself.  (You will also want to
 include the MPI header file, usually via @code{include 'mpif.h'} or
 similar, although though this is not needed by @code{fftw3-mpi.f03}
-@i{per se}.)
+@i{per se}.)  (To use the @samp{fftwl_} @code{long double} extended-precision routines in supporting compilers, you should include @code{fftw3f-mpi.f03} in @emph{addition} to @code{fftw3-mpi.f03}. @xref{Extended and quadruple precision in Fortran}.)
 
 @item
 Because of the different storage conventions between C and Fortran,
@@ -1702,7 +1702,7 @@ initialized MPI with @code{MPI_init} and have also performed
 
 @example
   use, intrinsic :: iso_c_binding
-  include 'fftw3.f03'
+  include 'fftw3-mpi.f03'
   integer(C_INTPTR_T), parameter :: L = ...
   integer(C_INTPTR_T), parameter :: M = ...
   type(C_PTR) :: plan, cdata

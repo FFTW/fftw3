@@ -25,7 +25,9 @@ perl -pe 's/#define +([A-Z0-9_]+) +\(([+-]?[0-9]+)U?\)/\n  integer\(C_INTPTR_T\)
 perl -pe 'if (/#define +([A-Z0-9_]+) +\(([0-9]+)U? *<< *([0-9]+)\)/) { print "\n  integer\(C_INT\), parameter :: $1 = ",$2 << $3,"\n"; }' < fftw3-mpi.h | grep 'integer(C_INT)'
 
 # Extract function declarations
-for p in "" "f" "l"; do
+for p in $*; do
+    if test "$p" = "d"; then p=""; fi
+
     echo
     cat <<EOF
   type, bind(C) :: fftw${p}_mpi_ddim
@@ -35,7 +37,7 @@ EOF
 
     echo
     echo "  interface"
-    grep -v 'mpi.h' fftw3-mpi.h | gcc -E - |grep "fftw${p}_mpi_init" |tr ';' '\n' | perl ../api/genf03.pl
+    grep -v 'mpi.h' fftw3-mpi.h | gcc -D__GNUC__=5 -D__i386__ -E - |grep "fftw${p}_mpi_init" |tr ';' '\n' | perl ../api/genf03.pl
     echo "  end interface"
 
 done

@@ -25,7 +25,7 @@ sub canonicalize_type {
     "double" => "real(C_DOUBLE)",
     "float" => "real(C_FLOAT)",
     "long double" => "real(C_LONG_DOUBLE)",
-    "float128__" => "real*16",
+    "float128__" => "real(16)",
     "fftw_plan" => "type(C_PTR)",
     "fftwf_plan" => "type(C_PTR)",
     "fftwl_plan" => "type(C_PTR)",
@@ -57,12 +57,12 @@ sub canonicalize_type {
     "double" => "real(C_DOUBLE), value",
     "float" => "real(C_FLOAT), value",
     "long double" => "real(C_LONG_DOUBLE), value",
-    "__float128" => "real*16, value",
+    "__float128" => "real(16), value",
 
     "fftw_complex" => "complex(C_DOUBLE_COMPLEX), value",
     "fftwf_complex" => "complex(C_DOUBLE_COMPLEX), value",
     "fftwl_complex" => "complex(C_LONG_DOUBLE), value",
-    "fftwq_complex" => "complex*32, value",
+    "fftwq_complex" => "complex(16), value",
 
     "fftw_plan" => "type(C_PTR), value",
     "fftwf_plan" => "type(C_PTR), value",
@@ -85,12 +85,12 @@ sub canonicalize_type {
     "double *" => "real(C_DOUBLE), dimension(*), intent(out)",
     "float *" => "real(C_FLOAT), dimension(*), intent(out)",
     "long double *" => "real(C_LONG_DOUBLE), dimension(*), intent(out)",
-    "__float128 *" => "real*16, dimension(*), intent(out)",
+    "__float128 *" => "real(16), dimension(*), intent(out)",
 
     "fftw_complex *" => "complex(C_DOUBLE_COMPLEX), dimension(*), intent(out)",
     "fftwf_complex *" => "complex(C_FLOAT_COMPLEX), dimension(*), intent(out)",
     "fftwl_complex *" => "complex(C_LONG_DOUBLE_COMPLEX), dimension(*), intent(out)",
-    "fftwq_complex *" => "complex*32, dimension(*), intent(out)",
+    "fftwq_complex *" => "complex(16), dimension(*), intent(out)",
 
     "const fftw_iodim *" => "type(fftw_iodim), dimension(*), intent(in)",
     "const fftwf_iodim *" => "type(fftwf_iodim), dimension(*), intent(in)",

@@ -21,7 +21,9 @@ perl -pe 's/#define +([A-Z0-9_]+) +\(([+-]?[0-9]+)U?\)/\n  integer\(C_INT\), par
 perl -pe 'if (/#define +([A-Z0-9_]+) +\(([0-9]+)U? *<< *([0-9]+)\)/) { print "\n  integer\(C_INT\), parameter :: $1 = ",$2 << $3,"\n"; }' < fftw3.h | grep 'integer(C_INT)'
 
 # Extract function declarations
-for p in "" "f" "l"; do
+for p in $*; do
+    if test "$p" = "d"; then p=""; fi
+
     echo
     cat <<EOF
   type, bind(C) :: fftw${p}_iodim
@@ -34,7 +36,7 @@ EOF
 
     echo
     echo "  interface"
-    gcc -E fftw3.h |grep "fftw${p}_plan_dft" |tr ';' '\n' | grep -v "fftw${p}_execute(" | perl genf03.pl
+    gcc -D__GNUC__=5 -D__i386__ -E fftw3.h |grep "fftw${p}_plan_dft" |tr ';' '\n' | grep -v "fftw${p}_execute(" | perl genf03.pl
     echo "  end interface"
 
 done
