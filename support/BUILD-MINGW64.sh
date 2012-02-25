@@ -1,6 +1,6 @@
 set -e
 
-confflags="--prefix=`pwd`/mingw64 --host=amd64-mingw32msvc --disable-alloca --with-our-malloc --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads"
+confflags="--prefix=`pwd`/mingw64 --host=x86_64-w64-mingw32 --disable-alloca --with-our-malloc --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads"
 
 rm -rf mingw64
 
@@ -34,7 +34,12 @@ for dll in *.dll; do
     def=`basename $dll .dll`.def
     echo "LIBRARY $dll" > $def
     echo EXPORTS >> $def
-    amd64-mingw32msvc-nm $dll | grep ' T _' | sed 's/.* T _//' | grep fftw >> $def
+
+# For some reason mingw does not prepend an underscore anymore in
+# 64-bit mode.  Hmmm...
+#    x86_64-w64-mingw32-nm $dll | grep ' T _' | sed 's/.* T _//' | grep fftw >> $def
+
+    x86_64-w64-mingw32-nm $dll | grep ' T ' | sed 's/.* T //' | grep fftw >> $def
 done
 )
 

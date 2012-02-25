@@ -1,6 +1,6 @@
 set -e
 
-confflags="--prefix=`pwd`/mingw32 --host=i586-mingw32msvc --with-our-malloc --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads --with-incoming-stack-boundary=2"
+confflags="--prefix=`pwd`/mingw32 --host=i686-w64-mingw32 --with-our-malloc --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads --with-incoming-stack-boundary=2"
 
 rm -rf mingw32
 
@@ -34,7 +34,7 @@ for dll in *.dll; do
     def=`basename $dll .dll`.def
     echo "LIBRARY $dll" > $def
     echo EXPORTS >> $def
-    i586-mingw32msvc-nm $dll | grep ' T _' | sed 's/.* T _//' | grep fftw >> $def
+    i686-w64-mingw32-nm $dll | grep ' T _' | sed 's/.* T _//' | grep fftw >> $def
 done
 )
 
@@ -63,7 +63,7 @@ to see whether SSE/SSE2 is supported and disables the relevant code if not).
 
 They were compiled by the GNU C compiler for MinGW, specifically:
 EOF
-i586-mingw32msvc-gcc --version |head -1 >> README-WINDOWS
+i686-w64-mingw32-gcc --version |head -1 >> README-WINDOWS
 cp -f tests/README README-bench
 
 fftw_vers=`grep PACKAGE_VERSION double-mingw32/config.h |cut -d" " -f3 |tr -d \"`
