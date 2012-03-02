@@ -385,6 +385,7 @@ FFTW_DEFINE_API(FFTW_MANGLE_QUAD, __float128, fftwq_complex)
 #define FFTW_PRESERVE_INPUT (1U << 4) /* cancels FFTW_DESTROY_INPUT */
 #define FFTW_PATIENT (1U << 5) /* IMPATIENT is default */
 #define FFTW_ESTIMATE (1U << 6)
+#define FFTW_WISDOM_ONLY (1U << 21)
 
 /* undocumented beyond-guru flags */
 #define FFTW_ESTIMATE_PATIENT (1U << 7)
@@ -401,7 +402,6 @@ FFTW_DEFINE_API(FFTW_MANGLE_QUAD, __float128, fftwq_complex)
 #define FFTW_NO_SLOW (1U << 18)
 #define FFTW_NO_FIXED_RADIX_LARGE_N (1U << 19)
 #define FFTW_ALLOW_PRUNING (1U << 20)
-#define FFTW_WISDOM_ONLY (1U << 21)
 
 #ifdef __cplusplus
 }  /* extern "C" */
