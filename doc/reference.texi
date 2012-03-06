@@ -101,7 +101,7 @@ Include the @emph{same} @code{<fftw3.h>} header file.
 
 @item
 Replace all lowercase instances of @samp{fftw_} with @samp{fftwf_} or
-@code{fftwl_} for single or long-double precision, respectively.
+@samp{fftwl_} for single or long-double precision, respectively.
 (@code{fftw_complex} becomes @code{fftwf_complex}, @code{fftw_execute}
 becomes @code{fftwf_execute}, etcetera.)
 
