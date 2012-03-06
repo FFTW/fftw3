@@ -303,7 +303,7 @@ complex numbers (the non-redundant outputs); this also requires slight
 ``padding'' of the input array for
 @cindex padding
 in-place transforms.  Second, the inverse transform (complex to real)
-has the side-effect of @emph{destroying its input array}, by default.
+has the side-effect of @emph{overwriting its input array}, by default.
 Neither of these inconveniences should pose a serious problem for
 users, but it is important to be aware of them.
 
