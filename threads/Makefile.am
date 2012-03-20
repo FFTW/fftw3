@@ -26,6 +26,7 @@ threads.h dft-vrank-geq1.c ct.c rdft-vrank-geq1.c hc2hc.c		\
 vrank-geq1-rdft2.c f77api.c f77funcs.h
 libfftw3@PREC_SUFFIX@_threads_la_CFLAGS = $(AM_CFLAGS) $(PTHREAD_CFLAGS)
 libfftw3@PREC_SUFFIX@_threads_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
+libfftw3@PREC_SUFFIX@_threads_la_LIBADD = ../libfftw3@PREC_SUFFIX@.la
 
 libfftw3@PREC_SUFFIX@_omp_la_SOURCES = api.c conf.c openmp.c	\
 threads.h dft-vrank-geq1.c ct.c rdft-vrank-geq1.c hc2hc.c	\

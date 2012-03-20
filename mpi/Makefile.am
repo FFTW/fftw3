@@ -24,6 +24,7 @@ SRC = any-true.c api.c block.c choose-radix.c conf.c dtensor.c fftw3-mpi.h ifftw
 libfftw3@PREC_SUFFIX@_mpi_la_SOURCES = $(SRC) $(TRANSPOSE_SRC) $(DFT_SRC) $(RDFT_SRC) $(RDFT2_SRC)
 
 libfftw3@PREC_SUFFIX@_mpi_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
+libfftw3@PREC_SUFFIX@_mpi_la_LIBADD = ../libfftw3@PREC_SUFFIX@.la @MPILIBS@
 
 if THREADS
 mpi_bench_CFLAGS = $(PTHREAD_CFLAGS)
