@@ -236,12 +236,12 @@ bench_problem *problem_parse(const char *s)
      int transpose = 0;
 
      p = (bench_problem *) bench_malloc(sizeof(bench_problem));
-
      p->kind = PROBLEM_COMPLEX;
      p->k = 0;
      p->sign = -1;
      p->in = p->out = 0;
      p->inphys = p->outphys = 0;
+     p->iphyssz = p->ophyssz = 0;
      p->in_place = 0;
      p->destroy_input = 0;
      p->split = 0;
