@@ -35,5 +35,5 @@
 /* in a separate file so that the user can override it */
 int main(int argc, char *argv[])
 {
-     return aligned_main(argc, argv);
+     return bench_main(argc, argv);
 }
