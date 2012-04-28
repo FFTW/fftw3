@@ -1,3 +1,18 @@
+FFTW 3.3.2
+
+* Removed an archaic stack-alignment hack that was failing with
+  gcc-4.7/i386.
+
+* Added stack-alignment hack necessary for gcc on Windows/i386.  We
+  will regret this in ten years (see previous change).
+  
+* Fix incompatibility with Intel icc which pretends to be gcc
+  but does not support quad precision.
+
+* make libfftw{threads,mpi} depend upon libfftw when using libtool;
+  this is consistent with most other libraries and simplifies the life
+  of various distributors of GNU/Linux.
+
 FFTW 3.3.1
 
 * Changes since 3.3.1-beta1:
