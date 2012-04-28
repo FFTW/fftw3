@@ -13,8 +13,25 @@ endif
 
 ACLOCAL_AMFLAGS=-I m4
 
+# when using combined thread libraries (necessary on Windows), we want
+# to build threads/ first, because libfftw3_threads is added to
+# libfftw3.
+#
+# Otherwise, we want to build libfftw3_threads after libfftw3
+# so that we can track the fact that libfftw3_threads depends upon
+# libfftw3.
+#
+# This is the inescapable result of combining three bad ideas
+# (threads, Windows, and shared libraries).
+#
+if COMBINED_THREADS
+CHICKEN_EGG=threads .
+else
+CHICKEN_EGG=. threads
+endif
+
 SUBDIRS=support $(GENFFT) kernel simd-support dft rdft reodft api	\
-libbench2 . threads tests mpi doc tools m4
+libbench2 $(CHICKEN_EGG) tests mpi doc tools m4
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in
 
 SIMD_LIBS =						\
