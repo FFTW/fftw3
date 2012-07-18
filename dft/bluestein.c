@@ -145,20 +145,6 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
      }
 }
 
-static int applicable0(const problem *p_)
-{
-     const problem_dft *p = (const problem_dft *) p_;
-     return (1
-	     && p->sz->rnk == 1
-	     && p->vecsz->rnk == 0
-	     /* FIXME: allow other sizes */
-	     && X(is_prime)(p->sz->dims[0].n)
-
-	     /* FIXME: infinite recursion of bluestein with itself */
-	     && p->sz->dims[0].n > 16
-	  );
-}
-
 static int applicable(const solver *ego, const problem *p_, 
 		      const planner *plnr)
 {
