@@ -21,11 +21,10 @@ transform (DFT) and various special cases thereof.
 @item  FFTW supports the SSE, SSE2, AVX, Altivec, and MIPS PS instruction
        sets.
 
-@item  FFTW @value{VERSION} includes parallel (multi-threaded) transforms
-  for shared-memory systems.
-  FFTW @value{VERSION} does not include distributed-memory parallel
-  transforms, but we plan to implement an MPI version soon.  (Meanwhile,
-  you can use the MPI implementation from FFTW 2.1.3.)
+@item  FFTW includes parallel (multi-threaded) transforms
+       for shared-memory systems.
+@item  Starting with version 3.3, FFTW includes distributed-memory parallel
+       transforms using MPI.
 @end itemize
 
 We assume herein that you are familiar with the properties and uses of
