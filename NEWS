@@ -1,3 +1,10 @@
+FFTW 3.3.3
+
+* Use 128-bit ARM NEON instructions instead of 64-bits.  This speeds
+  up even processors with a 64-bit pipe.
+
+* Speed up planner on machines without "official" cycle counters, such as ARM.
+
 FFTW 3.3.2
 
 * Removed an archaic stack-alignment hack that was failing with
