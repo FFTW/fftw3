@@ -77,7 +77,7 @@ static double elapsed_since(crude_time t0)
      return elapsed_sec(t1, t0);
 }
 
-#  define TIME_MIN_SEC 1.0e-2 /* from fftw2 */
+#  define TIME_MIN_SEC 1.0e-3
 
 #else /* !HAVE_GETTIMEOFDAY */
 
