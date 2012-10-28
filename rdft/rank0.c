@@ -331,6 +331,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      pln = MKPLAN_RDFT(P, &padt, ego->apply);
 
      retval = fill_iodim(pln, p);
+     (void)retval; /* UNUSED unless DEBUG */
      A(retval);
      A(pln->vl > 0); /* because FINITE_RNK(p->vecsz->rnk) holds */
      pln->nam = ego->nam;

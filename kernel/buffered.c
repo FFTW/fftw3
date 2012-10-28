@@ -74,6 +74,7 @@ int X(nbuf_redundant)(INT n, INT vl, int which,
 		      const INT *maxnbuf, int nmaxnbuf)
 {
      int i;
+     (void)nmaxnbuf; /* UNUSED */
      for (i = 0; i < which; ++i)
 	  if (X(nbuf)(n, vl, maxnbuf[i]) == X(nbuf)(n, vl, maxnbuf[which]))
 	       return 1;
