@@ -117,8 +117,8 @@ let generate n =
 					       byvl (CVar sivs)]);
 	     Expr_assign (CVar roarray, CPlus [CVar roarray; 
 					       byvl (CVar sovs)]);
-	     make_volatile_stride (CVar istride);
-	     make_volatile_stride (CVar ostride)
+	     make_volatile_stride (2*n) (CVar istride);
+	     make_volatile_stride (2*n) (CVar ostride)
 	   ],
 	  Asch annot);
    ])

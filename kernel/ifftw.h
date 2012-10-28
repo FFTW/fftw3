@@ -827,7 +827,7 @@ extern stride X(mkstride)(INT n, INT s);
 void X(stride_destroy)(stride p);
 /* hackery to prevent the compiler from copying the strides array
    onto the stack */
-#define MAKE_VOLATILE_STRIDE(x) (x) = (x) + X(an_INT_guaranteed_to_be_zero)
+#define MAKE_VOLATILE_STRIDE(nptr, x) (x) = (x) + X(an_INT_guaranteed_to_be_zero)
 #else
 
 typedef INT stride;
@@ -840,9 +840,26 @@ typedef INT stride;
 #define fftwl_stride_destroy(p) ((void) p)
 
 /* hackery to prevent the compiler from ``optimizing'' induction
-   variables in codelet loops. */
-#define MAKE_VOLATILE_STRIDE(x) (x) = (x) ^ X(an_INT_guaranteed_to_be_zero)
+   variables in codelet loops.  The problem is that for each K and for
+   each expression of the form P[I + STRIDE * K] in a loop, most
+   compilers will try to lift an induction variable PK := &P[I + STRIDE * K].
+   For large values of K this behavior overflows the
+   register set, which is likely worse than doing the index computation
+   in the first place.
 
+   If we guess that there are more than
+   ESTIMATED_AVAILABLE_INDEX_REGISTERS such pointers, we deliberately confuse
+   the compiler by setting STRIDE ^= ZERO, where ZERO is a value guaranteed to
+   be 0, but the compiler does not know this. 
+
+   16 registers ought to be enough for anybody, or so the amd64 and ARM ISA's
+   seem to imply.
+*/
+#define ESTIMATED_AVAILABLE_INDEX_REGISTERS 16
+#define MAKE_VOLATILE_STRIDE(nptr, x)                   \
+     (nptr <= ESTIMATED_AVAILABLE_INDEX_REGISTERS ?     \
+        0 :                                             \
+      ((x) = (x) ^ X(an_INT_guaranteed_to_be_zero)))
 #endif /* PRECOMPUTE_ARRAY_INDICES */
 
 /*-----------------------------------------------------------------------*/

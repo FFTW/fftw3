@@ -324,4 +324,5 @@ let twinstr_to_string vl x =
   else
     Twiddle.twinstr_to_c_string x
 
-let make_volatile_stride x = C.CCall ("MAKE_VOLATILE_STRIDE", x)
+let make_volatile_stride n x = 
+  C.CCall ("MAKE_VOLATILE_STRIDE", C.Comma((C.Integer n), x))

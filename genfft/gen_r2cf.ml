@@ -118,9 +118,9 @@ let generate n =
 	     Expr_assign (CVar ar1, CPlus [CVar ar1; CVar sivs]);
 	     Expr_assign (CVar acr, CPlus [CVar acr; CVar sovs]);
 	     Expr_assign (CVar aci, CPlus [CVar aci; CVar sovs]);
-	     make_volatile_stride (CVar rs);
-	     make_volatile_stride (CVar csr);
-	     make_volatile_stride (CVar csi)
+	     make_volatile_stride (4*n) (CVar rs);
+	     make_volatile_stride (4*n) (CVar csr);
+	     make_volatile_stride (4*n) (CVar csi)
 	   ],
 	  Asch annot)
    ])

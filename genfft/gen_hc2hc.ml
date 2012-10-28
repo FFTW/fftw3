@@ -124,7 +124,7 @@ let generate n =
 			  CPlus [viioarray; CUminus (byvl vms)]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
 					       byvl (Integer nt)]);
-	     make_volatile_stride (CVar rs)
+	     make_volatile_stride (2*n) (CVar rs)
 	   ],
 	  Asch asch)])
   in

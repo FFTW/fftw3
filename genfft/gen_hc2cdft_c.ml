@@ -171,7 +171,7 @@ let generate n =
 	     Expr_assign (vaim, CPlus [vaim; CUminus (byvl vms)]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
 					       bytwvl (Integer nt)]);
-	     make_volatile_stride (CVar rs)
+	     make_volatile_stride (4*n) (CVar rs)
 	   ],
 	  Asch asch)]
     )

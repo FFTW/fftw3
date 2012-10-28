@@ -197,8 +197,8 @@ let generate n mode =
 	    [Expr_assign (CVar i, CPlus [CVar i; CUminus (Integer 1)]);
 	     Expr_assign (CVar iarray, CPlus [CVar iarray; CVar sivs]);
 	     Expr_assign (CVar oarray, CPlus [CVar oarray; CVar sovs]);
-	     make_volatile_stride (CVar istride);
-	     make_volatile_stride (CVar ostride)
+	     make_volatile_stride (2*n) (CVar istride);
+	     make_volatile_stride (2*n) (CVar ostride)
 	   ],
 	  Asch annot)
    ])

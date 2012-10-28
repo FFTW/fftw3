@@ -108,7 +108,7 @@ let generate n =
 						byvl (CVar sms)]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; 
 					       byvl (Integer nt)]);
-	     make_volatile_stride (CVar rs)
+	     make_volatile_stride (2*n) (CVar rs)
 	    ],
 	  Asch annot)])
   in

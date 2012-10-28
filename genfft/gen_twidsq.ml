@@ -123,8 +123,8 @@ let generate n =
 	     Expr_assign (CVar rioarray, CPlus [CVar rioarray; CVar ms]);
 	     Expr_assign (CVar iioarray, CPlus [CVar iioarray; CVar ms]);
 	     Expr_assign (CVar twarray, CPlus [CVar twarray; Integer nt]);
-	     make_volatile_stride (CVar rs);
-	     make_volatile_stride (CVar vs)
+	     make_volatile_stride (2*n) (CVar rs);
+	     make_volatile_stride (2*0) (CVar vs)
 	   ],
 	  Asch annot)]) in
 
