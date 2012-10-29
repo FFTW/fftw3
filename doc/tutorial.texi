@@ -422,8 +422,8 @@ is rounded down.)  The ordering of the data is otherwise exactly the
 same as in the complex-DFT case.
 
 For out-of-place transforms, this is the end of the story: the real
-data is stored as a row-major array of size @ndims, and the complex
-data is stored as a row-major array of size @ndimshalf.
+data is stored as a row-major array of size @ndims and the complex
+data is stored as a row-major array of size @ndimshalf{}.
 
 For in-place transforms, however, extra padding of the real-data array
 is necessary because the complex array is larger than the real array,
