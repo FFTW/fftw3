@@ -421,11 +421,16 @@ over half of the output of the corresponding complex DFT.  (The division
 is rounded down.)  The ordering of the data is otherwise exactly the
 same as in the complex-DFT case.
 
-Since the complex data is slightly larger than the real data, some
-complications arise for in-place transforms.  In this case, the final
-dimension of the real data must be padded with extra values to
-accommodate the size of the complex data---two values if the last
-dimension is even and one if it is odd.
+For out-of-place transforms, this is the end of the story: the real
+data is stored as a row-major array of size @ndims, and the complex
+data is stored as a row-major array of size @ndimshalf.
+
+For in-place transforms, however, extra padding of the real-data array
+is necessary because the complex array is larger than the real array,
+and the two arrays share the same memory locations.  Thus, for
+in-place transforms, the final dimension of the real-data array must
+be padded with extra values to accommodate the size of the complex
+data---two values if the last dimension is even and one if it is odd.
 @cindex padding
 That is, the last dimension of the real data must physically contain
 @tex
