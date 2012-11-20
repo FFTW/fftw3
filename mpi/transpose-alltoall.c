@@ -216,6 +216,8 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  INT db, dbt; /* destination block sizes */
 	  db = XM(block)(p->nx, p->block, pe);
 	  dbt = XM(block)(p->ny, p->tblock, pe);
+	  if (db != p->block || dbt != p->tblock)
+	       equal_blocks = 0;
 
 	  /* MPI requires type "int" here; apparently it
 	     has no 64-bit API?  Grrr. */
@@ -223,9 +225,6 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  sbo[pe] = (int) (pe * (b * p->tblock) * vn);
 	  rbs[pe] = (int) (db * bt * vn);
 	  rbo[pe] = (int) (pe * (p->block * bt) * vn);
-	  if (sbs[pe] != (b * p->tblock) * vn
-	      || rbs[pe] != (p->block * bt) * vn)
-	       equal_blocks = 0;
      }
      pln->send_block_sizes = sbs;
      pln->send_block_offsets = sbo;
