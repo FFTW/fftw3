@@ -63,10 +63,10 @@ AC_LANG_CASE([C], [
 ])
 
 if test x = x"$MPILIBS"; then
-	AC_LANG_CASE([C], [AC_CHECK_FUNC(MPI_Init, [MPILIBS=""])],
-		[C++], [AC_CHECK_FUNC(MPI_Init, [MPILIBS=""])],
+	AC_LANG_CASE([C], [AC_CHECK_FUNC(MPI_Init, [MPILIBS=" "])],
+		[C++], [AC_CHECK_FUNC(MPI_Init, [MPILIBS=" "])],
 		[Fortran 77], [AC_MSG_CHECKING([for MPI_Init])
-			AC_TRY_LINK([],[      call MPI_Init], [MPILIBS=""
+			AC_TRY_LINK([],[      call MPI_Init], [MPILIBS=" "
 				AC_MSG_RESULT(yes)], [AC_MSG_RESULT(no)])])
 fi
 if test x = x"$MPILIBS"; then
