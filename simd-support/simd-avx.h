@@ -120,8 +120,20 @@ static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
      STOREL(x, l);
 }
 
-#define STM2 ST
-#define STN2(x, v0, v1, ovs) /* nop */
+#define STM2(x, v, ovs, aligned_like) /* no-op */
+static inline void STN2(R *x, V v0, V v1, INT ovs)
+{
+    V x0 = VSHUF(v0, v1, SHUFVALS(0, 1, 0, 1));
+    V x1 = VSHUF(v0, v1, SHUFVALS(2, 3, 2, 3));
+    __m128 h0 = _mm256_extractf128_ps(x0, 1);
+    __m128 l0 = _mm256_castps256_ps128(x0);
+    __m128 h1 = _mm256_extractf128_ps(x1, 1);
+    __m128 l1 = _mm256_castps256_ps128(x1);
+    *(__m128 *)(x + 3*ovs) = h1;
+    *(__m128 *)(x + 2*ovs) = h0;
+    *(__m128 *)(x + 1*ovs) = l1;
+    *(__m128 *)(x + 0*ovs) = l0;
+}
 
 #define STM4(x, v, ovs, aligned_like) /* no-op */
 #define STN4(x, v0, v1, v2, v3, ovs)				\
