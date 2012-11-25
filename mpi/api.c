@@ -118,6 +118,17 @@ static void nowisdom_hook(const problem *p)
      XM(any_true)(1, comm); /* signal nowisdom to any wisdom_ok_hook */
 }
 
+/* needed to synchronize planner bogosity flag, in case non-MPI problems
+   on a subset of processes encountered bogus wisdom */
+static wisdom_state_t bogosity_hook(wisdom_state_t state, const problem *p)
+{
+     MPI_Comm comm = problem_comm(p);
+     if (comm != MPI_COMM_NULL /* an MPI problem */
+	 && XM(any_true)(state == WISDOM_IS_BOGUS, comm)) /* bogus somewhere */
+	  return WISDOM_IS_BOGUS;
+     return state;
+}
+
 void XM(init)(void)
 {
      if (!mpi_inited) {
@@ -125,6 +136,7 @@ void XM(init)(void)
 	  plnr->cost_hook = cost_hook;
 	  plnr->wisdom_ok_hook = wisdom_ok_hook;
 	  plnr->nowisdom_hook = nowisdom_hook;
+	  plnr->bogosity_hook = bogosity_hook;
           XM(conf_standard)(plnr);
 	  mpi_inited = 1;	  
      }

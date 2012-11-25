@@ -614,9 +614,11 @@ static plan *search(planner *ego, const problem *p, unsigned *slvndx,
      return pln;
 }
 
-#define CHECK_FOR_BOGOSITY			\
-     if (ego->wisdom_state == WISDOM_IS_BOGUS)	\
-	  goto wisdom_is_bogus
+#define CHECK_FOR_BOGOSITY						\
+     if ((ego->bogosity_hook ?						\
+	  (ego->wisdom_state = ego->bogosity_hook(ego->wisdom_state, p)) \
+	  : ego->wisdom_state) == WISDOM_IS_BOGUS)			\
+	  goto wisdom_is_bogus;
 
 static plan *mkplan(planner *ego, const problem *p)
 {
@@ -923,6 +925,7 @@ planner *X(mkplanner)(void)
      p->cost_hook = 0;
      p->wisdom_ok_hook = 0;
      p->nowisdom_hook = 0;
+     p->bogosity_hook = 0;
      p->cur_reg_nam = 0;
      p->wisdom_state = WISDOM_NORMAL;
 
