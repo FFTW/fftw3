@@ -148,7 +148,7 @@ approved by the Free Software Foundation.
 @end quotation
 @end copying
 
-@dircategory Texinfo documentation system
+@dircategory Development 
 @direntry
 * fftw3: (fftw3).	FFTW User's Manual.
 @end direntry

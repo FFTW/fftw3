@@ -19,6 +19,7 @@
 
 \endcopy
 \copyto INFO
+INFO-DIR-SECTION Development
 START-INFO-DIR-ENTRY
 * FFTW FAQ: (fftw-faq). FFTW Frequently Asked Questions with Answers.
 END-INFO-DIR-ENTRY
