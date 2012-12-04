@@ -18,13 +18,13 @@
 .\"
 .TH FFTW-WISDOM-TO-CONF 1 "February, 2003" "fftw" "fftw"
 .SH NAME
-fftw-wisdom-to-conf \- generate FFTW wisdom (pre-planned transforms)
+fftw\-wisdom\-to\-conf \- generate FFTW wisdom (pre-planned transforms)
 .SH SYNOPSIS
-\fBfftw-wisdom-to-conf\fR [< \fIINPUT\fR] [> \fIOUTPUT\fR]
+\fBfftw\-wisdom\-to\-conf\fR [< \fIINPUT\fR] [> \fIOUTPUT\fR]
 .SH DESCRIPTION
 .PP
-." Add any additional description here
-.I fftw-wisdom-to-conf
+.\" Add any additional description here
+.I fftw\-wisdom\-to\-conf
 is a utility to generate C
 .B configuration
 routines from FFTW
@@ -48,15 +48,15 @@ data, among other related operations.  More information on FFTW can be
 found at the FFTW home page:
 .I http://www.fftw.org
 
-.I fftw-wisdom-to-conf
+.I fftw\-wisdom\-to\-conf
 reads wisdom from standard input and writes the configuration to
 standard output.  It can easily be combined with the
-.I fftw-wisdom
+.I fftw\-wisdom
 tool, for example:
 
-fftw-wisdom -n cof1024 cob1024 -o wisdom
+fftw\-wisdom \-n cof1024 cob1024 \-o wisdom
 .br
-fftw-wisdom-to-conf < wisdom > conf.c
+fftw\-wisdom\-to\-conf < wisdom > conf.c
 
 will create a configuration "conf.c" containing only those parts of
 FFTW needed for the optimized complex forwards and backwards
@@ -65,7 +65,7 @@ out-of-place transforms of size 1024 (also saving the wisdom itself in
 
 Alternatively, you can run your actual program, export wisdom for all
 plans that were created (ideally in FFTW_PATIENT or FFTW_EXHAUSTIVE
-mode), use this as input for \fIfftw-wisdom-to-conf\fR,
+mode), use this as input for \fIfftw\-wisdom\-to\-conf\fR,
 and then re-link your program with the resulting configuration routine.
 
 Note that the configuration routine does not contain the wisdom, only
@@ -74,10 +74,10 @@ also import the wisdom in order to benefit from the pre-optimized
 plans.
 .SH OPTIONS
 .TP
-\fB\-h\fR, \fB\--help\fR
+\fB\-h\fR, \fB\-\-help\fR
 Display help on the command-line options and usage.
 .TP
-\fB\-V\fR, \fB\--version\fR
+\fB\-V\fR, \fB\-\-version\fR
 Print the version number and copyright information.
 .SH BUGS
 Send bug reports to fftw@fftw.org.
