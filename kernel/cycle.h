@@ -230,6 +230,7 @@ static __inline__ ticks getticks(void)
 INLINE_ELAPSED(__inline__)
 
 #define HAVE_TICK_COUNTER
+#define TIME_MIN 5000.0
 #endif
 
 /* PGI compiler, courtesy Cristiano Calonaci, Andrea Tarsi, & Roberto Gori.
@@ -243,6 +244,7 @@ static ticks getticks(void)
 }
 INLINE_ELAPSED(__inline__)
 #define HAVE_TICK_COUNTER
+#define TIME_MIN 5000.0
 #endif
 
 /* Visual C++, courtesy of Dirk Michaelis */
@@ -255,6 +257,7 @@ typedef unsigned __int64 ticks;
 INLINE_ELAPSED(__inline)
 
 #define HAVE_TICK_COUNTER
+#define TIME_MIN 5000.0
 #endif
 
 /*----------------------------------------------------------------*/

@@ -1,3 +1,7 @@
+FFTW 3.3.4
+
+* Increased timing interval on x86_64 to reduce timing errors.
+
 FFTW 3.3.3
 
 * Fix deadlock bug in MPI transforms (thanks to Michael Pippig for the
