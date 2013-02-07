@@ -496,19 +496,20 @@ fi
 dnl Check for threads library...
 THREADLIBS=""
 if test "$enable_threads" = "yes"; then
-	# POSIX threads, the default choice:
-	if test -z "$THREADLIBS"; then
-		ACX_PTHREAD([THREADLIBS="$PTHREAD_LIBS "
-	                     CC="$PTHREAD_CC"
-	                     AC_DEFINE(USING_POSIX_THREADS, 1, [Define if we have and are using POSIX threads.])])
-	fi
-
+        # Win32 threads are the default on Windows:
 	if test -z "$THREADLIBS"; then
 		AC_MSG_CHECKING([for Win32 threads])
 		AC_TRY_LINK([#include <windows.h>],
 			[_beginthreadex(0,0,0,0,0,0);],
 			[THREADLIBS=" "; AC_MSG_RESULT(yes)],
 			[AC_MSG_RESULT(no)])
+	fi
+
+	# POSIX threads, the default choice everywhere else:
+	if test -z "$THREADLIBS"; then
+		ACX_PTHREAD([THREADLIBS="$PTHREAD_LIBS "
+	                     CC="$PTHREAD_CC"
+	                     AC_DEFINE(USING_POSIX_THREADS, 1, [Define if we have and are using POSIX threads.])])
 	fi
 
 	if test -z "$THREADLIBS"; then
