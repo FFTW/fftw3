@@ -1,9 +1,13 @@
 NJOBS=4
 
-darcs pull fftw@fftw.org:darcs/fftw3
+tag=`git tag --contains HEAD`
+if [ -z "$tag" ]; then
+    echo "Current git HEAD is not tagged---refusing to build distribution"
+    exit 1
+fi
 
 # hackery to build ChangeLog
-darcs changes --summary > ChangeLog
+git log --pretty=medium --date-order > ChangeLog
 
 sh bootstrap.sh
 
