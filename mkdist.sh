@@ -1,3 +1,6 @@
+# This is a script used by the FFTW authors to generate FFTW distributions.
+# You should never need to use it.
+
 NJOBS=4
 
 tag=`git tag --contains HEAD`

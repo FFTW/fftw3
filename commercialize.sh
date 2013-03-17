@@ -1,5 +1,8 @@
 #! /bin/sh
 
+# This is a script used by the FFTW copyright holders to
+# create commercial versions with a non-GPL license.
+# You should never need to use it.
 tarball=$1
 newtarball="commercial-"`basename $tarball`
 
