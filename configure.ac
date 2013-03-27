@@ -1,10 +1,22 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(fftw, 3.3.3, fftw@fftw.org)
+
+dnl Define the fftw version number as M4 macros, so that we can enforce
+dnl the invariant that the minor version number in FFTW-X.Y.MINOR is the same
+dnl as the revision number in SHARED_VERSION_INFO.
+define(FFTW_MAJOR_VERSION, 3.3)dnl
+define(FFTW_MINOR_VERSION, 4)dnl
+
+dnl Version number of the FFTW source package.
+AC_INIT(fftw, FFTW_MAJOR_VERSION.FFTW_MINOR_VERSION, fftw@fftw.org)
 AC_CONFIG_SRCDIR(kernel/ifftw.h)
-# fftw-3.1.x was 4:X:1
-# fftw-3.2.x was 5:X:2
-# fftw-3.3.x was 6:X:3
-SHARED_VERSION_INFO="6:2:3" # CURRENT:REVISION:AGE
+
+dnl Version number for libtool shared libraries.  Libtool wants a string
+dnl of the form CURRENT:REVISION:AGE.  We adopt the convention that
+dnl REVISION is the same as the FFTW minor version number.
+dnl fftw-3.1.x was 4:X:1
+dnl fftw-3.2.x was 5:X:2
+dnl fftw-3.3.x was 6:X:3
+SHARED_VERSION_INFO="6:FFTW_MINOR_VERSION:3" # CURRENT:REVISION:AGE
 
 AM_INIT_AUTOMAKE(1.7)
 AM_CONFIG_HEADER(config.h)
