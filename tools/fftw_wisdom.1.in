@@ -178,6 +178,12 @@ is specified).  Multiple wisdom files can be read via multiple
 options.  If
 .I file
 is "\-", then read wisdom from standard input.
+.TP
+\fB\-T\fR \fIN\fR, \fB\--threads\fR=\fIN\fR
+Plan with
+.I N
+threads.  This option is only present if FFTW was configured with
+thread support.
 .SH BUGS
 Send bug reports to fftw@fftw.org.
 .SH AUTHORS
