@@ -45,19 +45,19 @@ of the serial (uniprocessor) FFTW, and focus only on the concepts new
 to the MPI interface.
 
 @menu
-* FFTW MPI Installation::       
-* Linking and Initializing MPI FFTW::  
-* 2d MPI example::              
-* MPI Data Distribution::       
-* Multi-dimensional MPI DFTs of Real Data::  
-* Other Multi-dimensional Real-data MPI Transforms::  
-* FFTW MPI Transposes::         
-* FFTW MPI Wisdom::             
-* Avoiding MPI Deadlocks::      
-* FFTW MPI Performance Tips::   
-* Combining MPI and Threads::   
-* FFTW MPI Reference::          
-* FFTW MPI Fortran Interface::  
+* FFTW MPI Installation::
+* Linking and Initializing MPI FFTW::
+* 2d MPI example::
+* MPI Data Distribution::
+* Multi-dimensional MPI DFTs of Real Data::
+* Other Multi-dimensional Real-data MPI Transforms::
+* FFTW MPI Transposes::
+* FFTW MPI Wisdom::
+* Avoiding MPI Deadlocks::
+* FFTW MPI Performance Tips::
+* Combining MPI and Threads::
+* FFTW MPI Reference::
+* FFTW MPI Fortran Interface::
 @end menu
 
 @c ------------------------------------------------------------
@@ -298,10 +298,10 @@ for these intermediate steps and tell you the correct amount to
 allocate.
 
 @menu
-* Basic and advanced distribution interfaces::  
-* Load balancing::              
-* Transposed distributions::    
-* One-dimensional distributions::  
+* Basic and advanced distribution interfaces::
+* Load balancing::
+* Transposed distributions::
+* One-dimensional distributions::
 @end menu
 
 @node Basic and advanced distribution interfaces, Load balancing, MPI Data Distribution, MPI Data Distribution
@@ -745,9 +745,9 @@ uses besides FFTs, FFTW's transpose routines can be called directly,
 as documented in this section. 
 
 @menu
-* Basic distributed-transpose interface::  
-* Advanced distributed-transpose interface::  
-* An improved replacement for MPI_Alltoall::  
+* Basic distributed-transpose interface::
+* Advanced distributed-transpose interface::
+* An improved replacement for MPI_Alltoall::
 @end menu
 
 @node Basic distributed-transpose interface, Advanced distributed-transpose interface, FFTW MPI Transposes, FFTW MPI Transposes
@@ -1135,12 +1135,12 @@ datatypes, and constants.  See also @ref{FFTW Reference} for information
 on functions and types in common with the serial interface.
 
 @menu
-* MPI Files and Data Types::    
-* MPI Initialization::          
-* Using MPI Plans::             
-* MPI Data Distribution Functions::  
-* MPI Plan Creation::           
-* MPI Wisdom Communication::    
+* MPI Files and Data Types::
+* MPI Initialization::
+* Using MPI Plans::
+* MPI Data Distribution Functions::
+* MPI Plan Creation::
+* MPI Wisdom Communication::
 @end menu
 
 @node MPI Files and Data Types, MPI Initialization, FFTW MPI Reference, FFTW MPI Reference
@@ -1296,9 +1296,9 @@ first dimension of an @ndims{} array that is stored on the local
 process.  @xref{Basic and advanced distribution interfaces}.  For
 @code{FFTW_MPI_TRANSPOSED_OUT} plans, the @samp{_transposed} variants
 are useful in order to also return the local portion of the first
-dimension in the @ndimstrans{} transposed output.  @xref{Transposed
-distributions}.  The advanced interface for multidimensional
-transforms is:
+dimension in the @ndimstrans{} transposed output.  
+@xref{Transposed distributions}.  
+The advanced interface for multidimensional transforms is:
 
 @cindex advanced interface
 @findex fftw_mpi_local_size_many

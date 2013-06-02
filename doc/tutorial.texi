@@ -1,11 +1,11 @@
 @node  Tutorial, Other Important Topics, Introduction, Top
 @chapter Tutorial
 @menu
-* Complex One-Dimensional DFTs::  
-* Complex Multi-Dimensional DFTs::  
-* One-Dimensional DFTs of Real Data::  
-* Multi-Dimensional DFTs of Real Data::  
-* More DFTs of Real Data::      
+* Complex One-Dimensional DFTs::
+* Complex Multi-Dimensional DFTs::
+* One-Dimensional DFTs of Real Data::
+* Multi-Dimensional DFTs of Real Data::
+* More DFTs of Real Data::
 @end menu
 
 This chapter describes the basic usage of FFTW, i.e., how to compute
@@ -514,9 +514,9 @@ complex transforms.)
 @node More DFTs of Real Data,  , Multi-Dimensional DFTs of Real Data, Tutorial
 @section More DFTs of Real Data
 @menu
-* The Halfcomplex-format DFT::  
-* Real even/odd DFTs (cosine/sine transforms)::  
-* The Discrete Hartley Transform::  
+* The Halfcomplex-format DFT::
+* Real even/odd DFTs (cosine/sine transforms)::
+* The Discrete Hartley Transform::
 @end menu
 
 FFTW supports several other transform types via a unified @dfn{r2r}

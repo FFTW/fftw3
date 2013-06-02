@@ -6,14 +6,14 @@ one-processor) FFTW functions.  Parallel transforms are described in
 later chapters.
 
 @menu
-* Data Types and Files::        
-* Using Plans::                 
-* Basic Interface::             
-* Advanced Interface::          
-* Guru Interface::              
-* New-array Execute Functions::  
-* Wisdom::                      
-* What FFTW Really Computes::   
+* Data Types and Files::
+* Using Plans::
+* Basic Interface::
+* Advanced Interface::
+* Guru Interface::
+* New-array Execute Functions::
+* Wisdom::
+* What FFTW Really Computes::
 @end menu
 
 @c ------------------------------------------------------------
@@ -30,9 +30,9 @@ You must also link to the FFTW library.  On Unix, this
 means adding @code{-lfftw3 -lm} at the @emph{end} of the link command.
 
 @menu
-* Complex numbers::             
-* Precision::                   
-* Memory Allocation::           
+* Complex numbers::
+* Precision::
+* Memory Allocation::
 @end menu
 
 @c =========>
@@ -298,12 +298,12 @@ multiplicities, and strides.  This section describes the the basic
 interface, which we expect to satisfy the needs of most users.
 
 @menu
-* Complex DFTs::                
-* Planner Flags::               
-* Real-data DFTs::              
-* Real-data DFT Array Format::  
-* Real-to-Real Transforms::     
-* Real-to-Real Transform Kinds::  
+* Complex DFTs::
+* Planner Flags::
+* Real-data DFTs::
+* Real-data DFT Array Format::
+* Real-to-Real Transforms::
+* Real-to-Real Transform Kinds::
 @end menu
 
 @c =========>
@@ -985,9 +985,9 @@ the same fashion as in the basic interface, and the resulting
 @code{fftw_plan} is used in the same way (@pxref{Using Plans}).
 
 @menu
-* Advanced Complex DFTs::       
-* Advanced Real-data DFTs::     
-* Advanced Real-to-real Transforms::  
+* Advanced Complex DFTs::
+* Advanced Real-data DFTs::
+* Advanced Real-to-real Transforms::
 @end menu
 
 @c =========>
@@ -1186,12 +1186,12 @@ important that they pay special attention to the documentation lest they
 shoot themselves in the foot.
 
 @menu
-* Interleaved and split arrays::  
-* Guru vector and transform sizes::  
-* Guru Complex DFTs::           
-* Guru Real-data DFTs::         
-* Guru Real-to-real Transforms::  
-* 64-bit Guru Interface::       
+* Interleaved and split arrays::
+* Guru vector and transform sizes::
+* Guru Complex DFTs::
+* Guru Real-data DFTs::
+* Guru Real-to-real Transforms::
+* 64-bit Guru Interface::
 @end menu
 
 @c =========>
@@ -1664,10 +1664,10 @@ This section documents the FFTW mechanism for saving and restoring
 plans from disk.  This mechanism is called @dfn{wisdom}.
 
 @menu
-* Wisdom Export::               
-* Wisdom Import::               
-* Forgetting Wisdom::           
-* Wisdom Utilities::            
+* Wisdom Export::
+* Wisdom Import::
+* Forgetting Wisdom::
+* Wisdom Utilities::
 @end menu
 
 @c =========>
@@ -1825,12 +1825,12 @@ one-dimensional (1d) transform definitions, and then give the
 straightforward extension to multi-dimensional transforms.
 
 @menu
-* The 1d Discrete Fourier Transform (DFT)::  
-* The 1d Real-data DFT::        
-* 1d Real-even DFTs (DCTs)::    
-* 1d Real-odd DFTs (DSTs)::     
-* 1d Discrete Hartley Transforms (DHTs)::  
-* Multi-dimensional Transforms::  
+* The 1d Discrete Fourier Transform (DFT)::
+* The 1d Real-data DFT::
+* 1d Real-even DFTs (DCTs)::
+* 1d Real-odd DFTs (DSTs)::
+* 1d Discrete Hartley Transforms (DHTs)::
+* Multi-dimensional Transforms::
 @end menu
 
 @c =========>

@@ -1,10 +1,10 @@
 @node Other Important Topics, FFTW Reference, Tutorial, Top
 @chapter Other Important Topics
 @menu
-* SIMD alignment and fftw_malloc::  
-* Multi-dimensional Array Format::  
-* Words of Wisdom-Saving Plans::  
-* Caveats in Using Wisdom::     
+* SIMD alignment and fftw_malloc::
+* Multi-dimensional Array Format::
+* Words of Wisdom-Saving Plans::
+* Caveats in Using Wisdom::
 @end menu
 
 @c ------------------------------------------------------------
@@ -74,11 +74,11 @@ was necessary.  Since several different formats are common, this topic
 is often a source of confusion.
 
 @menu
-* Row-major Format::            
-* Column-major Format::         
-* Fixed-size Arrays in C::      
-* Dynamic Arrays in C::         
-* Dynamic Arrays in C-The Wrong Way::  
+* Row-major Format::
+* Column-major Format::
+* Fixed-size Arrays in C::
+* Dynamic Arrays in C::
+* Dynamic Arrays in C-The Wrong Way::
 @end menu
 
 @c =========>

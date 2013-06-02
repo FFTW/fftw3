@@ -20,13 +20,13 @@ few subtle points such as memory allocation, wisdom, and data types
 that deserve closer attention.
 
 @menu
-* Overview of Fortran interface::  
-* Reversing array dimensions::  
-* FFTW Fortran type reference::  
-* Plan execution in Fortran::   
-* Allocating aligned memory in Fortran::  
-* Accessing the wisdom API from Fortran::  
-* Defining an FFTW module::     
+* Overview of Fortran interface::
+* Reversing array dimensions::
+* FFTW Fortran type reference::
+* Plan execution in Fortran::
+* Allocating aligned memory in Fortran::
+* Accessing the wisdom API from Fortran::
+* Defining an FFTW module::
 @end menu
 
 @c -------------------------------------------------------
@@ -124,7 +124,7 @@ Multiple planner flags are combined with @code{ior} (equivalent to @samp{|} in C
 @end itemize
 
 @menu
-* Extended and quadruple precision in Fortran::  
+* Extended and quadruple precision in Fortran::
 @end menu
 
 @node Extended and quadruple precision in Fortran,  , Overview of Fortran interface, Overview of Fortran interface
@@ -532,9 +532,9 @@ from Fortran, however, because of differences in file I/O and string
 types between C and Fortran.
 
 @menu
-* Wisdom File Export/Import from Fortran::  
-* Wisdom String Export/Import from Fortran::  
-* Wisdom Generic Export/Import from Fortran::  
+* Wisdom File Export/Import from Fortran::
+* Wisdom String Export/Import from Fortran::
+* Wisdom Generic Export/Import from Fortran::
 @end menu
 
 @c =========>

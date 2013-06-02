@@ -33,10 +33,10 @@ efficiently by the standard FFTW distribution.
 @cindex codelet
 
 @menu
-* Installation on Unix::        
-* Installation on non-Unix systems::  
-* Cycle Counters::              
-* Generating your own code::    
+* Installation on Unix::
+* Installation on non-Unix systems::
+* Cycle Counters::
+* Generating your own code::
 @end menu
 
 @c ------------------------------------------------------------

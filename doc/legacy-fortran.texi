@@ -26,11 +26,11 @@ The MPI parallel interface to FFTW is @emph{not} currently available
 to legacy Fortran.
 
 @menu
-* Fortran-interface routines::  
-* FFTW Constants in Fortran::   
-* FFTW Execution in Fortran::   
-* Fortran Examples::            
-* Wisdom of Fortran?::          
+* Fortran-interface routines::
+* FFTW Constants in Fortran::
+* FFTW Execution in Fortran::
+* Fortran Examples::
+* Wisdom of Fortran?::
 @end menu
 
 @c -------------------------------------------------------

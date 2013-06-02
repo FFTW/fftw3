@@ -26,10 +26,10 @@ threads if your problem is sufficiently large.
 @cindex threads
 
 @menu
-* Installation and Supported Hardware/Software::  
-* Usage of Multi-threaded FFTW::  
-* How Many Threads to Use?::    
-* Thread safety::               
+* Installation and Supported Hardware/Software::
+* Usage of Multi-threaded FFTW::
+* How Many Threads to Use?::
+* Thread safety::
 @end menu
 
 @c ------------------------------------------------------------
