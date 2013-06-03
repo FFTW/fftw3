@@ -1,5 +1,7 @@
 FFTW 3.3.4
 
+* Fixed manual to work with texinfo-5.
+
 * Increased timing interval on x86_64 to reduce timing errors.
 
 FFTW 3.3.3
