@@ -253,6 +253,28 @@ FFTW 3.2alpha2
 * Fixed missing return value from dfftw_init_threads in Fortran;
   thanks to Markus Wetzstein for the bug report.
 
+FFTW 3.1.3
+
+* Bug fix: FFTW computes incorrect results when the user plans both
+  REDFT11 and RODFT11 transforms of certain sizes.  The bug is caused
+  by incorrect sharing of twiddle-factor tables between the two
+  transforms, and only occurs when both are used.  Thanks to Paul
+  A. Valiant for the bug report.
+
+FFTW 3.1.2
+
+* Correct bug in configure script: --enable-portable-binary option was ignored!
+  Thanks to Andrew Salamon for the bug report.
+
+* Threads compilation fix on AIX: prefer xlc_r to cc_r, and don't use
+  either if we are using gcc.  Thanks to Guy Moebs for the bug report.
+
+* Updated FAQ to note that Apple gcc 4.0.1 on MacOS/Intel is broken,
+  and suggest a workaround.  configure script now detects Core/Duo arch.
+
+* Use -maltivec when checking for altivec.h.  Fixes Gentoo bug #129304,
+  thanks to Markus Dittrich.
+
 FFTW 3.1.1
 
 * Performance improvements for Intel EMT64.
