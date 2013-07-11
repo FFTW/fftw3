@@ -39,7 +39,7 @@ fi
 read preamble fftw_wisdom
 
 case "$preamble $fftw_wisdom" in
-	\(@PACKAGE@-@VERSION@\ *_wisdom)
+	\(@PACKAGE@-@VERSION@\ *_wisdom*)
 		prefix=`echo $fftw_wisdom | cut -d_ -f1`_
 		;;
 	*)
