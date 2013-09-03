@@ -18,6 +18,7 @@ rdft/simd/altivec/*.c
 rdft/simd/avx/*.c
 rdft/simd/avx-128/*.c
 rdft/simd/common/*.c
+rdft/simd/kcvi/*.c
 rdft/simd/neon/*.c
 rdft/simd/sse2/*.c
 rdft/scalar/r2cb/*.c
@@ -28,6 +29,7 @@ dft/simd/altivec/*.c
 dft/simd/avx/*.c
 dft/simd/avx-128/*.c
 dft/simd/common/*.c
+dft/simd/kcvi/*.c
 dft/simd/neon/*.c
 dft/simd/sse2/*.c
 

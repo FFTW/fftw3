@@ -52,6 +52,10 @@ void X(dft_conf_standard)(planner *p)
          X(solvtab_exec)(X(solvtab_dft_avx_128), p);
      }
 #endif
+#if HAVE_KCVI
+     if (X(have_simd_kcvi)())
+	  X(solvtab_exec)(X(solvtab_dft_kcvi), p);
+#endif
 #if HAVE_ALTIVEC
      if (X(have_simd_altivec)())
 	  X(solvtab_exec)(X(solvtab_dft_altivec), p);

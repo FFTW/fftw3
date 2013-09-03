@@ -132,6 +132,15 @@ if test "$have_avx" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_AVX, test "$have_avx" = "yes")
 
+AC_ARG_ENABLE(kcvi, [AC_HELP_STRING([--enable-kcvi],[enable Knights Corner vector instructions optimizations])], have_kcvi=$enableval, have_kcvi=no)
+if test "$have_kcvi" = "yes"; then
+        AC_DEFINE(HAVE_KCVI,1,[Define to enable KCVI optimizations.])
+	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+		AC_MSG_ERROR([Knights Corner vector instructions requires single or double precision])
+	fi
+fi
+AM_CONDITIONAL(HAVE_KCVI, test "$have_kcvi" = "yes")
+
 AC_ARG_ENABLE(altivec, [AC_HELP_STRING([--enable-altivec],[enable Altivec optimizations])], have_altivec=$enableval, have_altivec=no)
 if test "$have_altivec" = "yes"; then
 	AC_DEFINE(HAVE_ALTIVEC,1,[Define to enable Altivec optimizations.])
@@ -275,6 +284,12 @@ case "${ax_cv_c_compiler_vendor}" in
 		[AC_MSG_ERROR([Need a version of gcc with -mavx])])
 	fi
 
+	# KCVI
+	if test "$have_kcvi" = "yes" -a "x$KCVI_CFLAGS" = x; then
+	    AX_CHECK_COMPILER_FLAGS(-mmic, [KCVI_CFLAGS="-mmic"],
+		[AC_MSG_ERROR([Need a version of icc with -mmic])])
+	fi
+
 	if test "$have_altivec" = "yes" -a "x$ALTIVEC_CFLAGS" = x; then
 	    # -DFAKE__VEC__ is a workaround because gcc-3.3 does not
 	    # #define __VEC__ with -maltivec.
@@ -308,6 +323,7 @@ esac
 
 AC_SUBST(SSE2_CFLAGS)
 AC_SUBST(AVX_CFLAGS)
+AC_SUBST(KCVI_CFLAGS)
 AC_SUBST(ALTIVEC_CFLAGS)
 AC_SUBST(NEON_CFLAGS)
 
@@ -577,6 +593,7 @@ AC_CONFIG_FILES([
    dft/simd/sse2/Makefile
    dft/simd/avx/Makefile
    dft/simd/avx-128/Makefile
+   dft/simd/kcvi/Makefile
    dft/simd/altivec/Makefile
    dft/simd/neon/Makefile
 
@@ -590,6 +607,7 @@ AC_CONFIG_FILES([
    rdft/simd/sse2/Makefile
    rdft/simd/avx/Makefile
    rdft/simd/avx-128/Makefile
+   rdft/simd/kcvi/Makefile
    rdft/simd/altivec/Makefile
    rdft/simd/neon/Makefile
 

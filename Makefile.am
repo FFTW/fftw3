@@ -50,6 +50,11 @@ rdft/simd/avx/librdft_avx_codelets.la \
 rdft/simd/avx-128/librdft_avx_128_codelets.la
 endif
 
+if HAVE_KCVI
+KCVI_LIBS = dft/simd/kcvi/libdft_kcvi_codelets.la	\
+rdft/simd/kcvi/librdft_kcvi_codelets.la
+endif
+
 if HAVE_ALTIVEC
 ALTIVEC_LIBS = dft/simd/altivec/libdft_altivec_codelets.la	\
 rdft/simd/altivec/librdft_altivec_codelets.la
@@ -80,7 +85,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	rdft/scalar/r2r/librdft_scalar_r2r.la		\
 	reodft/libreodft.la				\
 	api/libapi.la					\
-        $(SIMD_LIBS) $(SSE2_LIBS) $(AVX_LIBS) $(ALTIVEC_LIBS) $(NEON_LIBS)    	\
+        $(SIMD_LIBS) $(SSE2_LIBS) $(AVX_LIBS) $(ALTIVEC_LIBS) $(NEON_LIBS) $(KCVI_LIBS)	\
 	$(COMBINED_THREADLIBS)
 
 if QUAD
