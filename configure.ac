@@ -141,6 +141,15 @@ if test "$have_avx2" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_AVX2, test "$have_avx2" = "yes")
 
+AC_ARG_ENABLE(avx512, [AC_HELP_STRING([--enable-avx512],[enable AVX512 optimizations])], have_avx512=$enableval, have_avx512=no)
+if test "$have_avx512" = "yes"; then
+        AC_DEFINE(HAVE_AVX512,1,[Define to enable AVX512 optimizations.])
+	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+		AC_MSG_ERROR([AVX512 requires single or double precision])
+	fi
+fi
+AM_CONDITIONAL(HAVE_AVX512, test "$have_avx512" = "yes")
+
 AC_ARG_ENABLE(kcvi, [AC_HELP_STRING([--enable-kcvi],[enable Knights Corner vector instructions optimizations])], have_kcvi=$enableval, have_kcvi=no)
 if test "$have_kcvi" = "yes"; then
         AC_DEFINE(HAVE_KCVI,1,[Define to enable KCVI optimizations.])
@@ -304,6 +313,12 @@ case "${ax_cv_c_compiler_vendor}" in
                 [AC_MSG_WARN([Need a version of gcc with -mfma (harmless for icc)])])
         fi
 
+	# AVX512
+	if test "$have_avx512" = "yes" -a "x$AVX512_CFLAGS" = x; then
+	    AX_CHECK_COMPILER_FLAGS(-mavx512f, [AVX512_CFLAGS="-mavx512f"],
+		[AC_MSG_ERROR([Need a version of gcc with -mavx512f])])
+	fi
+
 	# KCVI
 	if test "$have_kcvi" = "yes" -a "x$KCVI_CFLAGS" = x; then
 	    AX_CHECK_COMPILER_FLAGS(-mmic, [KCVI_CFLAGS="-mmic"],
@@ -344,6 +359,7 @@ esac
 AC_SUBST(SSE2_CFLAGS)
 AC_SUBST(AVX_CFLAGS)
 AC_SUBST(AVX2_CFLAGS)
+AC_SUBST(AVX512_CFLAGS)
 AC_SUBST(KCVI_CFLAGS)
 AC_SUBST(ALTIVEC_CFLAGS)
 AC_SUBST(NEON_CFLAGS)
@@ -616,6 +632,7 @@ AC_CONFIG_FILES([
    dft/simd/avx-128/Makefile
    dft/simd/avx2/Makefile
    dft/simd/avx2-128/Makefile
+   dft/simd/avx512/Makefile
    dft/simd/kcvi/Makefile
    dft/simd/altivec/Makefile
    dft/simd/neon/Makefile
@@ -632,6 +649,7 @@ AC_CONFIG_FILES([
    rdft/simd/avx-128/Makefile
    rdft/simd/avx2/Makefile
    rdft/simd/avx2-128/Makefile
+   rdft/simd/avx512/Makefile
    rdft/simd/kcvi/Makefile
    rdft/simd/altivec/Makefile
    rdft/simd/neon/Makefile
