@@ -1,7 +1,7 @@
 Authors of FFTW (reachable at fftw@fftw.org):
 
 Matteo Frigo <athena@fftw.org>
-Stevenj G. Johnson <stevenj@alum.mit.edu>
+Steven G. Johnson <stevenj@alum.mit.edu>
 
 Stefan Kral <skral@fftw.org> wrote genfft-k7/*.ml*, which was
 added in fftw-3.0 and removed in fftw-3.2.
