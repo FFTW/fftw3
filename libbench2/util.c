@@ -24,12 +24,12 @@
 #include <stddef.h>
 #include <math.h>
 
+#if defined(HAVE_MALLOC_H)
+#  include <malloc.h>
+#endif
+
 #if defined(HAVE_DECL_MEMALIGN) && !HAVE_DECL_MEMALIGN
-#  if defined(HAVE_MALLOC_H)
-#    include <malloc.h>
-#  else
 extern void *memalign(size_t, size_t);
-#  endif
 #endif
 
 #if defined(HAVE_DECL_POSIX_MEMALIGN) && !HAVE_DECL_POSIX_MEMALIGN
