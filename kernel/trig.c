@@ -27,10 +27,10 @@
 #  define COS cosl
 #  define SIN sinl
 #  define KTRIG(x) (x##L)
-#  ifndef HAVE_DECL_SINL
+#  if !HAVE_DECL_SINL
      extern long double sinl(long double x);
 #  endif
-#  ifndef HAVE_DECL_COSL
+#  if !HAVE_DECL_COSL
      extern long double cosl(long double x);
 #  endif
 #elif defined(TRIGREAL_IS_QUAD)
