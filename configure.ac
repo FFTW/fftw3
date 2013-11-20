@@ -402,13 +402,12 @@ fi
 AC_SUBST(LIBQUADMATH)
 
 AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl snprintf])
-AC_CHECK_DECLS([drand48, srand48],,,[#include <stdlib.h>])
 AC_CHECK_DECLS([sinl, cosl, sinq, cosq],,,[#include <math.h>])
 AC_CHECK_DECLS([memalign],,,[
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif])
-AC_CHECK_DECLS([posix_memalign]) dnl in stdlib.h
+AC_CHECK_DECLS([drand48, srand48, posix_memalign]) dnl in stdlib.h
 
 dnl Cray UNICOS _rtc() (real-time clock) intrinsic
 AC_MSG_CHECKING([for _rtc intrinsic])
