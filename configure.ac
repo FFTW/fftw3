@@ -16,7 +16,7 @@ dnl REVISION is the same as the FFTW minor version number.
 dnl fftw-3.1.x was 4:X:1
 dnl fftw-3.2.x was 5:X:2
 dnl fftw-3.3.x was 6:X:3
-SHARED_VERSION_INFO="6:FFTW_MINOR_VERSION:3" # CURRENT:REVISION:AGE
+SHARED_VERSION_INFO="7:FFTW_MINOR_VERSION:4" # CURRENT:REVISION:AGE
 
 AM_INIT_AUTOMAKE(1.7)
 AM_CONFIG_HEADER(config.h)

@@ -343,7 +343,8 @@ FFTW_EXTERN void X(flops)(const X(plan) p,				   \
 FFTW_EXTERN double X(estimate_cost)(const X(plan) p);			   \
 FFTW_EXTERN double X(cost)(const X(plan) p);				   \
 									   \
-FFTW_EXTERN const char X(version)[];					   \
+FFTW_EXTERN int X(alignment_of)(R *p);                                     \
+FFTW_EXTERN const char X(version)[];                                       \
 FFTW_EXTERN const char X(cc)[];						   \
 FFTW_EXTERN const char X(codelet_optim)[];
 
