@@ -277,12 +277,15 @@ even for single and long-double precision versions of FFTW.)
 @example
 void fftw_fprint_plan(const fftw_plan plan, FILE *output_file);
 void fftw_print_plan(const fftw_plan plan);
+char *fftw_sprint_plan(const fftw_plan plan);
 @end example
 @findex fftw_fprint_plan
 @findex fftw_print_plan
 
 This outputs a ``nerd-readable'' representation of the @code{plan} to
-the given file or to @code{stdout}, respectively.
+the given file, to @code{stdout}, or two a newly allocated
+NUL-terminated string (which the caller is responsible for deallocating
+with @code{free}), respectively.
 
 @c ------------------------------------------------------------
 @node Basic Interface, Advanced Interface, Using Plans, FFTW Reference

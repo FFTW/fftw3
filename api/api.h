@@ -94,6 +94,9 @@ int X(guru64_kosherp)(int rank, const X(iodim64) *dims,
 
 FFTW_EXTERN printer *X(mkprinter_file)(FILE *f);
 
+printer *X(mkprinter_cnt)(int *cnt);
+printer *X(mkprinter_str)(char *s);
+
 FFTW_EXTERN planner *X(the_planner)(void);
 void X(configure_planner)(planner *plnr);
 
