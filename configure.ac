@@ -13,9 +13,9 @@ AC_CONFIG_SRCDIR(kernel/ifftw.h)
 dnl Version number for libtool shared libraries.  Libtool wants a string
 dnl of the form CURRENT:REVISION:AGE.  We adopt the convention that
 dnl REVISION is the same as the FFTW minor version number.
-dnl fftw-3.1.x was 4:X:1
-dnl fftw-3.2.x was 5:X:2
-dnl fftw-3.3.x was 6:X:3
+dnl fftw-3.1.x was 4:x:1
+dnl fftw-3.2.x was 5:x:2
+dnl fftw-3.3.x was 6:x:3 for x < 4 and 7:x:4 for x >= 4
 SHARED_VERSION_INFO="7:FFTW_MINOR_VERSION:4" # CURRENT:REVISION:AGE
 
 AM_INIT_AUTOMAKE(1.7)

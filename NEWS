@@ -1,8 +1,19 @@
 FFTW 3.3.4
 
+* New functions fftw_alignment_of (to check whether two arrays are
+  equally aligned for the purposes of applying a plan) and fftw_sprint_plan
+  (to output a description of plan to a string).
+
+* Bugfix in fftw-wisdom-to-conf; thanks to Florian Oppermann for the
+  bug report.
+
 * Fixed manual to work with texinfo-5.
 
 * Increased timing interval on x86_64 to reduce timing errors.
+
+* Default to Win32 threads, not pthreads, if both are present.
+
+* Various build-script fixes.
 
 FFTW 3.3.3
 
