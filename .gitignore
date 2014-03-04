@@ -35,12 +35,21 @@ api/fftw3*.f*
 mpi/f03-wrap.c
 mpi/fftw3*-mpi.f*
 
-# build products
+# other build products
 tests/bench
 tools/fftw-wisdom
 tools/fftw-wisdom-to-conf
 tools/fftw-wisdom.1
 tools/fftw_wisdom.1
+doc/FAQ/*.ascii
+doc/FAQ/*.html
+doc/FAQ/html.refs2
+doc/FAQ/*.info
+doc/FAQ/*.xrefdb
+doc/*.pdf
+doc/*.t2p
+doc/html
+doc/rfftwnd-for-html.png
 
 # generated documentation files
 doc/fftw3.info*
