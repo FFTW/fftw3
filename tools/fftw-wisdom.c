@@ -182,8 +182,8 @@ int bench_main(int argc, char *argv[])
 		   printf("fftw-wisdom tool for FFTW version " VERSION ".\n");
 		   printf(
 "\n"
-"Copyright (c) 2003, 2007-11 Matteo Frigo\n"
-"Copyright (c) 2003, 2007-11 Massachusetts Institute of Technology\n"
+"Copyright (c) 2003, 2007-14 Matteo Frigo\n"
+"Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology\n"
 "\n"
 "This program is free software; you can redistribute it and/or modify\n"
 "it under the terms of the GNU General Public License as published by\n"
