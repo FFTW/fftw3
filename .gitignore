@@ -40,6 +40,7 @@ tests/bench
 tools/fftw-wisdom
 tools/fftw-wisdom-to-conf
 tools/fftw-wisdom.1
+tools/fftw_wisdom.1
 
 # generated documentation files
 doc/fftw3.info*
