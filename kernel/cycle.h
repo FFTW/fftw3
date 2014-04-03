@@ -341,7 +341,7 @@ INLINE_ELAPSED(inline)
 /*
  * PA-RISC cycle counter 
  */
-#if defined(__hppa__) || defined(__hppa) && !defined(HAVE_TICK_COUNTER)
+#if (defined(__hppa__) || defined(__hppa)) && !defined(HAVE_TICK_COUNTER)
 typedef unsigned long ticks;
 
 #  ifdef __GNUC__
