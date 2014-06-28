@@ -10,6 +10,7 @@
 *.dSYM
 *.zip
 *.native
+*~
 _build
 
 # generated codelets:
