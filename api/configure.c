@@ -25,7 +25,11 @@
 
 void X(configure_planner)(planner *plnr)
 {
+#ifdef WITH_ONLY_R2HC
      X(dft_conf_standard)(plnr);
+#endif
      X(rdft_conf_standard)(plnr);
+#ifdef WITH_ONLY_R2HC
      X(reodft_conf_standard)(plnr);
+#endif
 }
