@@ -6,6 +6,17 @@
 #include <string.h>
 #include "fftw-bench.h"
 
+/* define to enable code that traps floating-point exceptions.
+   Disabled by default because I don't want to worry about the
+   portability of such code.  feenableexcept() seems to be a GNU
+   thing */
+#undef TRAP_FP_EXCEPTIONS
+
+#ifdef TRAP_FP_EXCEPTIONS
+#  include <signal.h>
+#  include <fenv.h>
+#endif
+
 #ifdef _OPENMP
 #  include <omp.h>
 #endif
@@ -29,6 +40,33 @@ extern void uninstall_hook(void);  /* in hook.c */
 
 #ifdef FFTW_RANDOM_ESTIMATOR
 extern unsigned FFTW(random_estimate_seed);
+#endif
+
+#ifdef TRAP_FP_EXCEPTIONS
+static void sigfpe_handler(int sig, siginfo_t *info, void *context)
+{
+     /* fftw code is not supposed to generate FP exceptions */
+     UNUSED(sig); UNUSED(info); UNUSED(context);
+     fprintf(stderr, "caught FPE, aborting\n");
+     abort();
+}
+
+static void setup_sigfpe_handler(void)
+{
+  struct sigaction a;
+  feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW | FE_UNDERFLOW);
+  memset(&a, 0, sizeof(a));
+  a.sa_sigaction = sigfpe_handler;
+  a.sa_flags = SA_SIGINFO;
+  if (sigaction(SIGFPE, &a, NULL) == -1) {
+       fprintf(stderr, "cannot install sigfpe handler\n");
+       exit(1);
+  }
+}
+#else
+static void setup_sigfpe_handler(void)
+{
+}
 #endif
 
 void useropt(const char *arg)
@@ -161,6 +199,8 @@ int can_do(bench_problem *p)
 void setup(bench_problem *p)
 {
      double tim;
+
+     setup_sigfpe_handler();
 
      if (amnesia) {
 	  FFTW(forget_wisdom)();

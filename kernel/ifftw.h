@@ -975,6 +975,7 @@ void X(tile2d)(INT n0l, INT n0u, INT n1l, INT n1u, INT tilesz,
 	       void (*f)(INT n0l, INT n0u, INT n1l, INT n1u, void *args),
 	       void *args);
 void X(cpy1d)(R *I, R *O, INT n0, INT is0, INT os0, INT vl);
+void X(zero1d_pair)(R *O0, R *O1, INT n0, INT os0);
 void X(cpy2d)(R *I, R *O,
 	      INT n0, INT is0, INT os0,
 	      INT n1, INT is1, INT os1,

@@ -108,21 +108,33 @@ static void dobatch(const P *ego, R *Rp, R *Ip, R *Rm, R *Im,
      INT rs = WS(ego->rs, 1);
      INT ms = ego->ms;
      R *bufm = bufp + b - 2;
+     INT n = me - mb;
 
      X(cpy2d_pair_ci)(Rp + mb * ms, Ip + mb * ms, bufp, bufp + 1,
 		      ego->r / 2, rs, b,
-		      me - mb, ms, 2);
+		      n, ms, 2);
      X(cpy2d_pair_ci)(Rm - mb * ms, Im - mb * ms, bufm, bufm + 1,
 		      ego->r / 2, rs, b,
-		      me - mb, -ms, -2);
+		      n, -ms, -2);
+
+     if (extra_iter) {
+          /* initialize the extra_iter element to 0.  It would be ok
+             to leave it uninitialized, since we transform uninitialized
+             data and ignore the result.  However, we want to avoid
+             FP exceptions in case somebody is trapping them. */
+          A(n < compute_batchsize(ego->r));
+          X(zero1d_pair)(bufp + 2*n, bufp + 1 + 2*n, ego->r / 2, b);
+          X(zero1d_pair)(bufm - 2*n, bufm + 1 - 2*n, ego->r / 2, b);
+     }
+
      ego->k(bufp, bufp + 1, bufm, bufm + 1, ego->td->W, 
 	    ego->brs, mb, me + extra_iter, 2);
      X(cpy2d_pair_co)(bufp, bufp + 1, Rp + mb * ms, Ip + mb * ms, 
 		      ego->r / 2, b, rs,
-		      me - mb, 2, ms);
+		      n, 2, ms);
      X(cpy2d_pair_co)(bufm, bufm + 1, Rm - mb * ms, Im - mb * ms,
 		      ego->r / 2, b, rs,
-		      me - mb, -2, -ms);
+		      n, -2, -ms);
 }
 
 static void apply_buf(const plan *ego_, R *cr, R *ci)
@@ -222,7 +234,7 @@ static int applicable0(const S *ego, rdft_kind kind,
 	  && ((*extra_iter = 0,
 	       e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
 			     rs, 1, (m+1)/2, ms, plnr))
-	      ||
+              ||
 	      (*extra_iter = 1,
 	       ((e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
 			       rs, 1, (m-1)/2, ms, plnr))

@@ -36,6 +36,15 @@ void X(cpy2d_pair)(R *I0, R *I1, R *O0, R *O1,
 	  }
 }
 
+void X(zero1d_pair)(R *O0, R *O1, INT n0, INT os0)
+{
+     INT i0;
+     for (i0 = 0; i0 < n0; ++i0) {
+          O0[i0 * os0] = 0;
+          O1[i0 * os0] = 0;
+     }
+}
+
 /* like cpy2d_pair, but read input contiguously if possible */
 void X(cpy2d_pair_ci)(R *I0, R *I1, R *O0, R *O1,
 		      INT n0, INT is0, INT os0,
