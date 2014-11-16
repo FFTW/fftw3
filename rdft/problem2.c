@@ -37,10 +37,10 @@ static void hash(const problem *p_, md5 *m)
      X(md5int)(m, p->r0 == p->cr);
      X(md5INT)(m, p->r1 - p->r0);
      X(md5INT)(m, p->ci - p->cr);
-     X(md5int)(m, X(alignment_of)(p->r0));
-     X(md5int)(m, X(alignment_of)(p->r1));
-     X(md5int)(m, X(alignment_of)(p->cr)); 
-     X(md5int)(m, X(alignment_of)(p->ci)); 
+     X(md5int)(m, X(ialignment_of)(p->r0));
+     X(md5int)(m, X(ialignment_of)(p->r1));
+     X(md5int)(m, X(ialignment_of)(p->cr)); 
+     X(md5int)(m, X(ialignment_of)(p->ci)); 
      X(md5int)(m, p->kind);
      X(tensor_md5)(m, p->sz);
      X(tensor_md5)(m, p->vecsz);

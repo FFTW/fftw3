@@ -45,8 +45,8 @@ static void hash(const problem *p_, md5 *m)
      X(md5puts)(m, "rdft");
      X(md5int)(m, p->I == p->O);
      kind_hash(m, p->kind, p->sz->rnk);
-     X(md5int)(m, X(alignment_of)(p->I));
-     X(md5int)(m, X(alignment_of)(p->O));
+     X(md5int)(m, X(ialignment_of)(p->I));
+     X(md5int)(m, X(ialignment_of)(p->O));
      X(tensor_md5)(m, p->sz);
      X(tensor_md5)(m, p->vecsz);
 }
@@ -96,7 +96,7 @@ static void print(const problem *ego_, printer *p)
      const problem_rdft *ego = (const problem_rdft *) ego_;
      int i;
      p->print(p, "(rdft %d %D %T %T", 
-	      X(alignment_of)(ego->I),
+	      X(ialignment_of)(ego->I),
 	      (INT)(ego->O - ego->I), 
 	      ego->sz,
 	      ego->vecsz);

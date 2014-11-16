@@ -169,3 +169,8 @@ void X(destroy_plan)(X(plan) p)
           X(ifree)(p);
      }
 }
+
+int X(alignment_of)(R *p)
+{
+     return X(ialignment_of(p));
+}

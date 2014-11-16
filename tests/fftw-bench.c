@@ -209,7 +209,11 @@ void setup(bench_problem *p)
 
      /* Regression test: check that fftw_malloc exists and links
       * properly */
-     FFTW(free(FFTW(malloc(42))));
+     {
+          void *ptr = FFTW(malloc(42));
+          BENCH_ASSERT(FFTW(alignment_of)(ptr) == 0);
+          FFTW(free(ptr));
+     }
 
      rdwisdom();
      install_hook();

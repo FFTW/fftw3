@@ -36,10 +36,10 @@ static void hash(const problem *p_, md5 *m)
      X(md5int)(m, p->ri == p->ro);
      X(md5INT)(m, p->ii - p->ri);
      X(md5INT)(m, p->io - p->ro);
-     X(md5int)(m, X(alignment_of)(p->ri));
-     X(md5int)(m, X(alignment_of)(p->ii));
-     X(md5int)(m, X(alignment_of)(p->ro));
-     X(md5int)(m, X(alignment_of)(p->io));
+     X(md5int)(m, X(ialignment_of)(p->ri));
+     X(md5int)(m, X(ialignment_of)(p->ii));
+     X(md5int)(m, X(ialignment_of)(p->ro));
+     X(md5int)(m, X(ialignment_of)(p->io));
      X(tensor_md5)(m, p->sz);
      X(tensor_md5)(m, p->vecsz);
 }
@@ -49,8 +49,8 @@ static void print(const problem *ego_, printer *p)
      const problem_dft *ego = (const problem_dft *) ego_;
      p->print(p, "(dft %d %d %d %D %D %T %T)", 
 	      ego->ri == ego->ro,
-	      X(alignment_of)(ego->ri),
-	      X(alignment_of)(ego->ro),
+	      X(ialignment_of)(ego->ri),
+	      X(ialignment_of)(ego->ro),
 	      (INT)(ego->ii - ego->ri), 
 	      (INT)(ego->io - ego->ro),
 	      ego->sz,

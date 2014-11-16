@@ -34,8 +34,8 @@ static void hash(const problem *p_, md5 *m)
      X(md5puts)(m, "mpi-transpose");
      X(md5int)(m, p->I == p->O);
      /* don't include alignment -- may differ between processes
-	X(md5int)(m, X(alignment_of)(p->I));
-	X(md5int)(m, X(alignment_of)(p->O));
+	X(md5int)(m, X(ialignment_of)(p->I));
+	X(md5int)(m, X(ialignment_of)(p->O));
 	... note that applicability of MPI plans does not depend
 	    on alignment (although optimality may, in principle). */
      X(md5INT)(m, p->vn);
@@ -54,8 +54,8 @@ static void print(const problem *ego_, printer *p)
      MPI_Comm_size(ego->comm, &i);
      p->print(p, "(mpi-transpose %d %d %d %D %D %D %D %D %d)", 
 	      ego->I == ego->O,
-	      X(alignment_of)(ego->I),
-	      X(alignment_of)(ego->O),
+	      X(ialignment_of)(ego->I),
+	      X(ialignment_of)(ego->O),
 	      ego->vn,
 	      ego->nx, ego->ny,
 	      ego->block, ego->tblock,

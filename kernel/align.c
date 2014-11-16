@@ -30,7 +30,7 @@
 #endif
 
 /* NONPORTABLE */
-int X(alignment_of)(R *p)
+int X(ialignment_of)(R *p)
 {
 #if ALGN == 0
      UNUSED(p);

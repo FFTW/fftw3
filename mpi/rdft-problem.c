@@ -38,8 +38,8 @@ static void hash(const problem *p_, md5 *m)
      X(md5puts)(m, "mpi-dft");
      X(md5int)(m, p->I == p->O);
      /* don't include alignment -- may differ between processes
-	X(md5int)(m, X(alignment_of)(p->I));
-	X(md5int)(m, X(alignment_of)(p->O));
+	X(md5int)(m, X(ialignment_of)(p->I));
+	X(md5int)(m, X(ialignment_of)(p->O));
 	... note that applicability of MPI plans does not depend
 	    on alignment (although optimality may, in principle). */
      XM(dtensor_md5)(m, p->sz);
@@ -57,8 +57,8 @@ static void print(const problem *ego_, printer *p)
      int i;
      p->print(p, "(mpi-rdft %d %d %d ", 
 	      ego->I == ego->O,
-	      X(alignment_of)(ego->I),
-	      X(alignment_of)(ego->O));
+	      X(ialignment_of)(ego->I),
+	      X(ialignment_of)(ego->O));
      XM(dtensor_print)(ego->sz, p);
      for (i = 0; i < ego->sz->rnk; ++i)
           p->print(p, " %d", (int)ego->kind[i]);
