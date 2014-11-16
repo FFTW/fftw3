@@ -43,9 +43,7 @@ static plan *mkplan0(planner *plnr, unsigned flags,
      plnr->wisdom_state = wisdom_state;
 
      /* create plan */
-     pln = plnr->adt->mkplan(plnr, prb);
-
-     return pln;
+     return plnr->adt->mkplan(plnr, prb);
 }
 
 static unsigned force_estimator(unsigned flags)
