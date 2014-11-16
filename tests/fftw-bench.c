@@ -196,9 +196,21 @@ int can_do(bench_problem *p)
      return 0;
 }
 
+static int before_planner_hook_called = 0;
+static int after_planner_hook_called = 0;
+static void before_planner_hook(void)
+{
+     before_planner_hook_called = 1;
+}
+static void after_planner_hook(void)
+{
+     after_planner_hook_called = 1;
+}
+
 void setup(bench_problem *p)
 {
      double tim;
+     static int setup_hooks = 0;
 
      setup_sigfpe_handler();
 
@@ -222,12 +234,24 @@ void setup(bench_problem *p)
      if (verbose > 1 && nthreads > 1) printf("NTHREADS = %d\n", nthreads);
 #endif
 
+     if (setup_hooks)
+          FFTW(set_planner_hooks(before_planner_hook, after_planner_hook));
+          
+     before_planner_hook_called = 0;
+     after_planner_hook_called = 0;
+     
      timer_start(USER_TIMER);
      the_plan = mkplan(p, preserve_input_flags(p) | the_flags);
      tim = timer_stop(USER_TIMER);
      if (verbose > 1) printf("planner time: %g s\n", tim);
 
      BENCH_ASSERT(the_plan);
+     BENCH_ASSERT(setup_hooks == before_planner_hook_called);
+     BENCH_ASSERT(setup_hooks == after_planner_hook_called);
+
+     /* do something different with hooks next time */
+     FFTW(set_planner_hooks(0, 0));
+     setup_hooks = 1 - setup_hooks;
      
      {
 	  double add, mul, nfma, cost, pcost;
