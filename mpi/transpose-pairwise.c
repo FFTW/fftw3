@@ -350,6 +350,7 @@ nada:
      X(plan_destroy_internal)(*cld3);
      X(plan_destroy_internal)(*cld2rest);
      X(plan_destroy_internal)(*cld2);
+     *cld2 = *cld2rest = *cld3 = NULL;
      return 0;
 }
 
