@@ -40,7 +40,7 @@ int verbose;
 static void do_problem(bench_problem *p)
 {
      if (verbose)
-	  printf("PLANNING PROBLEM: %s\n", p->pstring);
+	  printf("Planning transform: %s\n", p->pstring);
      /* BENCH_ASSERT(can_do(p)); */
      problem_alloc(p);
      setup(p);
