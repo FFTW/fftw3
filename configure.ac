@@ -171,11 +171,22 @@ AM_CONDITIONAL(HAVE_ALTIVEC, test "$have_altivec" = "yes")
 AC_ARG_ENABLE(neon, [AC_HELP_STRING([--enable-neon],[enable ARM NEON optimizations])], have_neon=$enableval, have_neon=no)
 if test "$have_neon" = "yes"; then
 	AC_DEFINE(HAVE_NEON,1,[Define to enable ARM NEON optimizations.])
-	if test "$PRECISION" != "s"; then
-		AC_MSG_ERROR([NEON requires single precision])
-	fi
+        case "${host_cpu}" in
+                aarch64)
+                ;;
+                *)
+		if test "$PRECISION" != "s"; then
+			AC_MSG_ERROR([NEON requires single precision])
+		fi
+                ;;
+        esac
 fi
 AM_CONDITIONAL(HAVE_NEON, test "$have_neon" = "yes")
+
+AC_ARG_ENABLE(armv8cyclecounter, [AC_HELP_STRING([--enable-armv8cyclecounter],[enable the cycle counter on ARMv8 ; require enabling in kernel mode, see <https://github.com/rdolbeau/enable_arm_pmu>])], have_armv8cyclecounter=$enableval)
+if test "$have_armv8cyclecounter"x = "yes"x; then
+	AC_DEFINE(HAVE_ARMV8CC,1,[Define if you have enabled the cycle counter on ARMv8])
+fi
 
 dnl FIXME:
 dnl AC_ARG_ENABLE(mips-ps, [AC_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
@@ -335,10 +346,16 @@ case "${ax_cv_c_compiler_vendor}" in
 			[AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
 	fi
 
-	if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
-	    AX_CHECK_COMPILER_FLAGS(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon"],
-		[AC_MSG_ERROR([Need a version of gcc with -mfpu=neon])])
-	fi
+        case "${host_cpu}" in
+                aarch64)
+                ;;
+                *)
+	        if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
+	            AX_CHECK_COMPILER_FLAGS(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon"],
+			[AC_MSG_ERROR([Need a version of gcc with -mfpu=neon])])
+	        fi
+                ;;
+        esac
 
 	dnl FIXME:
 	dnl elif test "$have_mips_ps" = "yes"; then
@@ -592,6 +609,36 @@ AM_CONDITIONAL(THREADS, test "$enable_threads" = "yes")
 AM_CONDITIONAL(OPENMP, test "$enable_openmp" = "yes")
 AM_CONDITIONAL(SMP, test "$enable_threads" = "yes" -o "$enable_openmp" = "yes")
 AM_CONDITIONAL(COMBINED_THREADS, test x"$with_combined_threads" = xyes)
+
+
+dnl -----------------------------------------------------------------------
+dnl Check for not-always-available (not quite) cycle counters
+case "${host_cpu}" in
+        armv7*)
+        AC_MSG_CHECKING([armv7a has 64 bits readable CNTVCT])
+        AC_RUN_IFELSE(
+                [AC_LANG_PROGRAM([[#include <stdint.h>]],
+                        [[uint32_t Rt, Rt2 = 0;asm volatile("mrrc p15, 1, %0, %1, c14" : "=r"(Rt), "=r"(Rt2));]]
+                )],
+                [AC_DEFINE(ARMV7A_HAS_CNTCVT,1,[Define if CNTVCT is 64 bits readable on armv7a ])
+                 AC_MSG_RESULT([yes])],
+                [AC_MSG_RESULT([no])]
+                )
+        ;;
+        aarch64)
+        AC_MSG_CHECKING([armv8 has 64 bits readable CNTVCT_EL0])
+        AC_RUN_IFELSE(
+                [AC_LANG_PROGRAM([[#include <stdint.h>]],
+                        [[uint64_t Rt;asm volatile("mrs %0, CNTVCT_EL0" : "=r" (Rt));]]
+                )],
+                [AC_DEFINE(ARMV8_HAS_CNTCVT_EL0,1,[Define if CNTVCT_EL0 is 64 bits readable on armv8 ])
+                 AC_MSG_RESULT([yes])],
+                [AC_MSG_RESULT([no])]
+                )
+        ;;
+        *)
+        ;;
+esac
 
 dnl -----------------------------------------------------------------------
 
