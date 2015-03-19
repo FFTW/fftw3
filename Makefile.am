@@ -82,6 +82,13 @@ NEON_LIBS = dft/simd/neon/libdft_neon_codelets.la	\
 rdft/simd/neon/librdft_neon_codelets.la
 endif
 
+if HAVE_GENERIC_SIMD
+GENERIC_SIMD_LIBS = dft/simd/generic-simd256/libdft_generic_simd256_codelets.la	\
+dft/simd/generic-simd128/libdft_generic_simd128_codelets.la \
+rdft/simd/generic-simd256/librdft_generic_simd256_codelets.la \
+rdft/simd/generic-simd128/librdft_generic_simd128_codelets.la
+endif
+
 if THREADS
 if COMBINED_THREADS
 COMBINED_THREADLIBS=threads/libfftw3@PREC_SUFFIX@_threads.la
@@ -104,6 +111,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	api/libapi.la					\
         $(SIMD_LIBS) $(SSE2_LIBS) $(AVX_LIBS) $(AVX2_LIBS) $(ALTIVEC_LIBS) \
         $(VSX_LIBS) $(NEON_LIBS) $(KCVI_LIBS) $(AVX512_LIBS) \
+        $(GENERIC_SIMD_LIBS) \
 	$(COMBINED_THREADLIBS)
 
 if QUAD

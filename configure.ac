@@ -194,6 +194,12 @@ if test "$have_armv8cyclecounter"x = "yes"x; then
 	AC_DEFINE(HAVE_ARMV8CC,1,[Define if you have enabled the cycle counter on ARMv8])
 fi
 
+AC_ARG_ENABLE(generic-simd, [AC_HELP_STRING([--enable-generic-simd],[enable generic (gcc) SIMD optimizations])], have_generic_simd=$enableval, have_generic_simd=no)
+if test "$have_generic_simd" = "yes"; then
+        AC_DEFINE(HAVE_GENERIC_SIMD,1,[Define to enable generic (gcc) SIMD float optimizations.])
+fi
+AM_CONDITIONAL(HAVE_GENERIC_SIMD, test "$have_generic_simd" = "yes")
+
 dnl FIXME:
 dnl AC_ARG_ENABLE(mips-ps, [AC_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
 dnl if test "$have_mips_ps" = "yes"; then
@@ -714,6 +720,8 @@ AC_CONFIG_FILES([
    dft/simd/altivec/Makefile
    dft/simd/vsx/Makefile
    dft/simd/neon/Makefile
+   dft/simd/generic-simd128/Makefile
+   dft/simd/generic-simd256/Makefile
 
    rdft/Makefile
    rdft/scalar/Makefile
@@ -732,6 +740,8 @@ AC_CONFIG_FILES([
    rdft/simd/altivec/Makefile
    rdft/simd/vsx/Makefile
    rdft/simd/neon/Makefile
+   rdft/simd/generic-simd128/Makefile
+   rdft/simd/generic-simd256/Makefile
 
    reodft/Makefile
 

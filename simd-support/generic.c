@@ -19,56 +19,11 @@
  */
 
 
-#include "api.h"
+#include "ifftw.h"
 
-const char X(cc)[] = FFTW_CC;
-
-/* fftw <= 3.2.2 had special compiler flags for codelets, which are
-   not used anymore.  We keep this variable around because it is part
-   of the ABI */
-const char X(codelet_optim)[] = "";
-
-const char X(version)[] = PACKAGE "-" PACKAGE_VERSION
-
-#if HAVE_FMA
-   "-fma"
+#ifdef HAVE_GENERIC_SIMD
+int X(have_simd_generic)(void)
+{
+  return 1;
+}
 #endif
-
-#if HAVE_SSE2
-   "-sse2"
-#endif
-
-#if HAVE_AVX
-   "-avx"
-#endif
-
-#if HAVE_AVX2
-   "-avx2"
-#endif
-
-#if HAVE_AVX512
-   "-avx512"
-#endif
-
-#if HAVE_KCVI
-   "-kcvi"
-#endif
-
-#if HAVE_ALTIVEC
-   "-altivec"
-#endif
-
-#if HAVE_VSX
-   "-vsx"
-#endif
-
-#if HAVE_NEON
-   "-neon"
-#endif
-
-#if defined(HAVE_GENERIC_SIMD)
-   "-generic_simd"
-#endif
-
-
-;
