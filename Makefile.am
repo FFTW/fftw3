@@ -72,6 +72,11 @@ ALTIVEC_LIBS = dft/simd/altivec/libdft_altivec_codelets.la	\
 rdft/simd/altivec/librdft_altivec_codelets.la
 endif
 
+if HAVE_VSX
+VSX_LIBS = dft/simd/vsx/libdft_vsx_codelets.la      \
+rdft/simd/vsx/librdft_vsx_codelets.la
+endif
+
 if HAVE_NEON
 NEON_LIBS = dft/simd/neon/libdft_neon_codelets.la	\
 rdft/simd/neon/librdft_neon_codelets.la
@@ -97,7 +102,8 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	rdft/scalar/r2r/librdft_scalar_r2r.la		\
 	reodft/libreodft.la				\
 	api/libapi.la					\
-        $(SIMD_LIBS) $(SSE2_LIBS) $(AVX_LIBS) $(AVX2_LIBS) $(ALTIVEC_LIBS) $(NEON_LIBS) $(KCVI_LIBS)$(AVX512_LIBS) \
+        $(SIMD_LIBS) $(SSE2_LIBS) $(AVX_LIBS) $(AVX2_LIBS) $(ALTIVEC_LIBS) \
+        $(VSX_LIBS) $(NEON_LIBS) $(KCVI_LIBS) $(AVX512_LIBS) \
 	$(COMBINED_THREADLIBS)
 
 if QUAD

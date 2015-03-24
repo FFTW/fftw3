@@ -1,3 +1,8 @@
+Modified version of FFTW 3.3.4:
+
+* SIMD implementation for Power8 VSX instructions in single
+  and double precision. To use, add --enable-vsx to configure.
+
 FFTW 3.3.4
 
 * New functions fftw_alignment_of (to check whether two arrays are

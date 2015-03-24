@@ -2,6 +2,9 @@
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
  *
+ * VSX SIMD implementation added 2015 Erik Lindahl.
+ * Erik Lindahl places his modifications in the public domain.
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -19,51 +22,48 @@
  */
 
 
-#include "api.h"
-
-const char X(cc)[] = FFTW_CC;
-
-/* fftw <= 3.2.2 had special compiler flags for codelets, which are
-   not used anymore.  We keep this variable around because it is part
-   of the ABI */
-const char X(codelet_optim)[] = "";
-
-const char X(version)[] = PACKAGE "-" PACKAGE_VERSION
-
-#if HAVE_FMA
-   "-fma"
-#endif
-
-#if HAVE_SSE2
-   "-sse2"
-#endif
-
-#if HAVE_AVX
-   "-avx"
-#endif
-
-#if HAVE_AVX2
-   "-avx2"
-#endif
-
-#if HAVE_AVX512
-   "-avx512"
-#endif
-
-#if HAVE_KCVI
-   "-kcvi"
-#endif
-
-#if HAVE_ALTIVEC
-   "-altivec"
-#endif
+#include "ifftw.h"
 
 #if HAVE_VSX
-   "-vsx"
+
+#if HAVE_SYS_SYSCTL_H
+#  include <sys/sysctl.h>
 #endif
 
-#if HAVE_NEON
-   "-neon"
-#endif
+#include <signal.h>
+#include <setjmp.h>
 
-;
+static jmp_buf jb;
+
+static void sighandler(int x)
+{
+     longjmp(jb, 1);
+}
+
+static int really_have_vsx(void)
+{
+     void (*oldsig)(int);
+     oldsig = signal(SIGILL, sighandler);
+     if (setjmp(jb)) {
+	  signal(SIGILL, oldsig);
+	  return 0;
+     } else {
+          float mem[2];
+          __asm__ __volatile__ ("stxsdx 0,0,%0" :: "r" (mem) : "memory" );
+	  signal(SIGILL, oldsig);
+	  return 1;
+     }
+     return 0;
+}
+
+int X(have_simd_vsx)(void)
+{
+     static int init = 0, res;
+     if (!init) {
+	  res = really_have_vsx();
+	  init = 1;
+     }
+     return res;
+}
+
+#endif

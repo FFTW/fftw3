@@ -42,7 +42,7 @@
 #elif defined(HAVE_ALTIVEC)
 #  define ALIGNMENT 8     /* Alignment for the LD/ST macros */
 #  define ALIGNMENTA 16   /* Alignment for the LDA/STA macros */
-#elif defined(HAVE_NEON)
+#elif defined(HAVE_NEON) || defined(HAVE_VSX)
 #  define ALIGNMENT 8     /* Alignment for the LD/ST macros */
 #  define ALIGNMENTA 8    /* Alignment for the LDA/STA macros */
 #elif defined(HAVE_KCVI) || defined(HAVE_AVX512)

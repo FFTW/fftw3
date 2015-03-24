@@ -71,6 +71,10 @@ void X(dft_conf_standard)(planner *p)
      if (X(have_simd_altivec)())
 	  X(solvtab_exec)(X(solvtab_dft_altivec), p);
 #endif
+#if HAVE_VSX
+     if (X(have_simd_vsx)())
+       X(solvtab_exec)(X(solvtab_dft_vsx), p);
+#endif
 #if HAVE_NEON
      if (X(have_simd_neon)())
 	  X(solvtab_exec)(X(solvtab_dft_neon), p);
