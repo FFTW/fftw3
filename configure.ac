@@ -615,6 +615,7 @@ AC_CONFIG_FILES([
    dft/simd/avx/Makefile
    dft/simd/avx-128/Makefile
    dft/simd/avx2/Makefile
+   dft/simd/avx2-128/Makefile
    dft/simd/kcvi/Makefile
    dft/simd/altivec/Makefile
    dft/simd/neon/Makefile
@@ -630,6 +631,7 @@ AC_CONFIG_FILES([
    rdft/simd/avx/Makefile
    rdft/simd/avx-128/Makefile
    rdft/simd/avx2/Makefile
+   rdft/simd/avx2-128/Makefile
    rdft/simd/kcvi/Makefile
    rdft/simd/altivec/Makefile
    rdft/simd/neon/Makefile

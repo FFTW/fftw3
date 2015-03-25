@@ -97,8 +97,11 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 #define CIMPLIES(ante, post) (!(ante) || (post))
 
 /* define HAVE_SIMD if any simd extensions are supported */
-#if defined(HAVE_SSE) || defined(HAVE_SSE2) || defined(HAVE_ALTIVEC) || \
-     defined(HAVE_MIPS_PS) || defined(HAVE_AVX) || defined(HAVE_AVX2) || defined(HAVE_KCVI)
+#if defined(HAVE_SSE) || defined(HAVE_SSE2) || \
+      defined(HAVE_AVX) || defined(HAVE_AVX2) || \
+      defined(HAVE_KCVI) || \
+      defined(HAVE_ALTIVEC) || \
+      defined(HAVE_MIPS_PS)
 #define HAVE_SIMD 1
 #else
 #define HAVE_SIMD 0

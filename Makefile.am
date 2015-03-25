@@ -52,7 +52,9 @@ endif
 
 if HAVE_AVX2
 AVX2_LIBS = dft/simd/avx2/libdft_avx2_codelets.la	\
-rdft/simd/avx2/librdft_avx2_codelets.la
+dft/simd/avx2-128/libdft_avx2_128_codelets.la \
+rdft/simd/avx2/librdft_avx2_codelets.la \
+rdft/simd/avx2-128/librdft_avx2_128_codelets.la
 endif
 
 if HAVE_KCVI
