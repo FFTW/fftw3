@@ -45,7 +45,9 @@ endif
 
 if HAVE_AVX
 AVX_LIBS = dft/simd/avx/libdft_avx_codelets.la	\
-rdft/simd/avx/librdft_avx_codelets.la
+dft/simd/avx-128/libdft_avx_128_codelets.la \
+rdft/simd/avx/librdft_avx_codelets.la \
+rdft/simd/avx-128/librdft_avx_128_codelets.la
 endif
 
 if HAVE_ALTIVEC
