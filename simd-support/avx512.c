@@ -39,7 +39,7 @@ int X(have_simd_avx512)(void)
     {
         if((xgetbv_eax(0) & 0x6) == 0x6)
         {
-            int eax,ebc,ecx,edx;
+            int eax,ebx,ecx,edx;
             cpuid_all(7,0,&eax,&ebx,&ecx,&edx);
             /* Bit 16 of ebx for CPUID level 7 is AVX-512 foundation layer support (ErikL) */
             res = ( (ebx & (1 << 16))  != 0 );
