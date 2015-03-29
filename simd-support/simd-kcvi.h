@@ -192,7 +192,7 @@ static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
   __m512i index = _mm512_set_epi32(15 * ovs, 14 * ovs,
                                    13 * ovs, 12 * ovs,
                                    11 * ovs, 10 * ovs,
-                                   1 * ovs, 8 * ovs,
+                                   9 * ovs, 8 * ovs,
                                    7 * ovs, 6 * ovs,
                                    5 * ovs, 4 * ovs,
                                    3 * ovs, 2 * ovs,
