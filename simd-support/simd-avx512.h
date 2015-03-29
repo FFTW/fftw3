@@ -48,15 +48,15 @@
 
 typedef DS(__m512d, __m512) V;
 
-#define VSHUF SUFF(_mm512_shuffle)
 #define VLIT(re, im) DS(SUFF(_mm512_setr)(im, re, im, re, im, re, im, re),SUFF(_mm512_setr)(im, re, im, re, im, re, im, re, im, re, im, re, im, re, im, re))
+#define VLIT1(val) SUFF(_mm512_set1)(val)
 #define LDK(x) x
-#define DVK(var, val) V var = VLIT(val, val)
+#define DVK(var, val) V var = VLIT1(val)
 #define VZERO SUFF(_mm512_setzero)()
 
 #define VDUPL(x) SUFF(_mm512_unpacklo)(x, x)
 #define VDUPH(x) SUFF(_mm512_unpackhi)(x, x)
-#define FLIP_RI(x) SUFF(_mm512_shuffle)(x, x, DS(0x00000055, 0x00005555))
+#define FLIP_RI(x) SUFF(_mm512_shuffle)(x, x, DS(0x55,0xB1))
 #define VCONJ(x) SUFF(_mm512_fmsubadd)(VZERO, VZERO, x)
 static inline V VBYI(V x)
 {
@@ -69,11 +69,11 @@ static inline V VBYI(V x)
 #define VFMA(a, b, c)  SUFF(_mm512_fmadd)(a, b, c)
 #define VFMS(a, b, c)  SUFF(_mm512_fmsub)(a, b, c)
 #define VFNMS(a, b, c) SUFF(_mm512_fnmadd)(a, b, c)
-#define VFMAI(b, c)    SUFF(_mm512_fmaddsub)(VLIT(1., 1.), c, FLIP_RI(b))
-#define VFNMSI(b, c)   SUFF(_mm512_fmsubadd)(VLIT(1., 1.), c, FLIP_RI(b))
-#define VFMACONJ(b,c)  SUFF(_mm512_fmsubadd)(VLIT(1., 1.), c, b)
-#define VFMSCONJ(b,c)  SUFF(_mm512_fmsubadd)(VLIT(-1.,-1.), c, b)
-#define VFNMSCONJ(b,c) SUFF(_mm512_fmaddsub)(VLIT(1., 1.), c, b)
+#define VFMAI(b, c)    SUFF(_mm512_fmaddsub)(VLIT1(1.), c, FLIP_RI(b))
+#define VFNMSI(b, c)   SUFF(_mm512_fmsubadd)(VLIT1(1.), c, FLIP_RI(b))
+#define VFMACONJ(b,c)  SUFF(_mm512_fmsubadd)(VLIT1(1.), c, b)
+#define VFMSCONJ(b,c)  SUFF(_mm512_fmsubadd)(VLIT1(-1.), c, b)
+#define VFNMSCONJ(b,c) SUFF(_mm512_fmaddsub)(VLIT1(1.), c, b)
 
 static inline V LDA(const R *x, INT ivs, const R *aligned_like) {
   (void)aligned_like; /* UNUSED */
@@ -157,7 +157,7 @@ static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
   __m512i index = _mm512_set_epi32(15 * ovs, 14 * ovs,
                                    13 * ovs, 12 * ovs,
                                    11 * ovs, 10 * ovs,
-                                   1 * ovs, 8 * ovs,
+                                   9 * ovs, 8 * ovs,
                                    7 * ovs, 6 * ovs,
                                    5 * ovs, 4 * ovs,
                                    3 * ovs, 2 * ovs,
