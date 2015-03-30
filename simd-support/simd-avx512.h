@@ -54,8 +54,8 @@ typedef DS(__m512d, __m512) V;
 #define DVK(var, val) V var = VLIT1(val)
 #define VZERO SUFF(_mm512_setzero)()
 
-#define VDUPL(x) SUFF(_mm512_unpacklo)(x, x)
-#define VDUPH(x) SUFF(_mm512_unpackhi)(x, x)
+#define VDUPL(x) DS(_mm512_movedup_pd(x),_mm512_moveldup_ps(x))
+#define VDUPH(x) DS(_mm512_unpackhi_pd(x, x),_mm512_movehdup_ps(x))
 #define FLIP_RI(x) SUFF(_mm512_shuffle)(x, x, DS(0x55,0xB1))
 #define VCONJ(x) SUFF(_mm512_fmsubadd)(VZERO, VZERO, x)
 static inline V VBYI(V x)
