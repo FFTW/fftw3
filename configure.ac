@@ -35,12 +35,6 @@ case "${host_cpu}" in
   *) have_fma=no;;
 esac
 
-AC_ARG_ENABLE(fma, [AC_HELP_STRING([--enable-fma],[enable optimizations for machines with fused multiply-add])], have_fma=$enableval)
-if test "$have_fma"x = "yes"x; then
-	AC_DEFINE(HAVE_FMA,1,[Define if you have a machine with fused multiply-add])
-fi
-
-
 AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_DEBUG,1,[Define to enable extra FFTW debugging code.])
@@ -138,6 +132,7 @@ if test "$have_avx2" = "yes"; then
 	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
 		AC_MSG_ERROR([AVX2 requires single or double precision])
 	fi
+        have_fma="yes"
 fi
 AM_CONDITIONAL(HAVE_AVX2, test "$have_avx2" = "yes")
 
@@ -147,6 +142,7 @@ if test "$have_avx512" = "yes"; then
 	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
 		AC_MSG_ERROR([AVX512 requires single or double precision])
 	fi
+        have_fma="yes"
 fi
 AM_CONDITIONAL(HAVE_AVX512, test "$have_avx512" = "yes")
 
@@ -198,7 +194,7 @@ AC_ARG_ENABLE(generic-simd128, [AC_HELP_STRING([--enable-generic-simd128],[enabl
 if test "$have_generic_simd128" = "yes"; then
         AC_DEFINE(HAVE_GENERIC_SIMD128,1,[Define to enable generic (gcc) 128-bit SIMD optimizations.])
 fi
-AM_CONDITIONAL(HAVE_GENERIC_SIMD128, test "$have_generic_simd" = "yes")
+AM_CONDITIONAL(HAVE_GENERIC_SIMD128, test "$have_generic_simd128" = "yes")
 
 AC_ARG_ENABLE(generic-simd256, [AC_HELP_STRING([--enable-generic-simd256],[enable generic (gcc) 256-bit SIMD optimizations])], have_generic_simd256=$enableval, have_generic_simd256=no)
 if test "$have_generic_simd256" = "yes"; then
@@ -239,6 +235,11 @@ if test "$with_windows_f77_mangling" = "yes"; then
 fi
 
 AC_ARG_WITH(incoming-stack-boundary, [AC_HELP_STRING([--with-incoming-stack-boundary=X],[Assume that stack is aligned to (1<<X) bytes])], with_incoming_stack_boundary=$withval, with_incoming_stack_boundary=no)
+
+
+if test "$have_fma"x = "yes"x; then
+        AC_DEFINE(HAVE_FMA,1,[Define if you have a machine with fused multiply-add])
+fi
 
 dnl compute library suffix
 case "$PRECISION" in
@@ -349,6 +350,13 @@ case "${ax_cv_c_compiler_vendor}" in
 		[AC_MSG_ERROR([Need a version of gcc with -mavx512f])])
 	fi
 
+        if test "$host_vendor" = "apple"; then
+            # We need to tell gcc to use an external assembler to get AVX/AVX2 with gcc on OS X
+            AX_CHECK_COMPILER_FLAGS([-Wa,-q], [CFLAGS="$CFLAGS -Wa,-q"])
+            # Disable the new compact unwinding format so we avoid warnings/potential errors.
+            AX_CHECK_COMPILER_FLAGS([-Wl,-no_compact_unwind], [CFLAGS="$CFLAGS -Wl,-no_compact_unwind"])
+        fi
+
 	# KCVI
 	if test "$have_kcvi" = "yes" -a "x$KCVI_CFLAGS" = x; then
 	    AX_CHECK_COMPILER_FLAGS(-mmic, [KCVI_CFLAGS="-mmic"],
@@ -397,6 +405,18 @@ case "${ax_cv_c_compiler_vendor}" in
 	;;
 
     clang)
+
+        if test "$have_avx" = "yes" -a "x$AVX_CFLAGS" = x; then
+            AX_CHECK_COMPILER_FLAGS(-mavx, [AVX_CFLAGS="-mavx"],
+                [AC_MSG_ERROR([Need a version of clang with -mavx])])
+        fi
+
+	if test "$have_avx2" = "yes" -a "x$AVX2_CFLAGS" = x; then
+            AX_CHECK_COMPILER_FLAGS(-mavx2, [AVX2_CFLAGS="-mavx2"],
+                [AC_MSG_ERROR([Need a version of clang with -mavx2])])
+            AX_CHECK_COMPILER_FLAGS(-mfma, [AVX2_CFLAGS="$AVX2_CFLAGS -mfma"])
+        fi
+
         if test "$have_vsx" = "yes" -a "x$VSX_CFLAGS" = x; then
             # clang appears to need both -mvsx and -maltivec for VSX
             AX_CHECK_COMPILER_FLAGS(-maltivec, [VSX_CFLAGS="-maltivec"],
