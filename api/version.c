@@ -38,12 +38,19 @@ const char X(version)[] = PACKAGE "-" PACKAGE_VERSION
    "-sse2"
 #endif
 
+  /* Earlier versions of FFTW only provided 256-bit AVX, which meant
+   * it was important to also enable sse2 for best performance for
+   * short transforms. Since some programs check for this and warn
+   * the user, we explicitly add avx_128 to the suffix to emphasize
+   * that this version is more capable.
+   */
+
 #if HAVE_AVX
-   "-avx"
+   "-avx-avx_128"
 #endif
 
 #if HAVE_AVX2
-   "-avx2"
+   "-avx2-avx2_128"
 #endif
 
 #if HAVE_AVX512
