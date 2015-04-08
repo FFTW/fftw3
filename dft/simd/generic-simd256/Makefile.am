@@ -3,7 +3,7 @@ SIMD_HEADER=simd-generic256.h
 include $(top_srcdir)/dft/simd/codlist.mk
 include $(top_srcdir)/dft/simd/simd.mk
 
-if HAVE_GENERIC_SIMD
+if HAVE_GENERIC_SIMD256
 
 BUILT_SOURCES = $(EXTRA_DIST)
 noinst_LTLIBRARIES = libdft_generic_simd256_codelets.la

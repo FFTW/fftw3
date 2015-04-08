@@ -52,7 +52,7 @@
 #    define ALIGNMENT 16     /* Alignment for the LD/ST macros */
 #  endif
 #  define ALIGNMENTA 64   /* Alignment for the LDA/STA macros */
-#elif defined(HAVE_GENERIC_SIMD)
+#elif defined(HAVE_GENERIC_SIMD128) || defined(HAVE_GENERIC_SIMD256)
 #    define ALIGNMENT 16
 #    define ALIGNMENTA sizeof(V)
 #endif

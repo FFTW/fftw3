@@ -10,7 +10,7 @@ avx512.c simd-avx512.h \
 kcvi.c simd-kcvi.h \
 altivec.c simd-altivec.h vsx.c simd-vsx.h \
 neon.c simd-neon.h \
-generic.c simd-generic128.h simd-generic256.h
+simd-generic128.h simd-generic256.h
 
 # sse2-nonportable.c needs SSE2_CFLAGS, but Automake does not support
 # per-object CFLAGS.  Thus we build a separate library.

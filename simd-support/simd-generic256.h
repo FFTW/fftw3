@@ -24,7 +24,7 @@
  */
 
 #if defined(FFTW_LDOUBLE) || defined(FFTW_QUAD)
-#  error "Generic simd only works in single or double precision"
+#  error "Generic simd256 only works in single or double precision"
 #endif
 
 #define SIMD_SUFFIX  _generic_simd256  /* for renaming */

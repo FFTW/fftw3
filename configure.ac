@@ -194,11 +194,18 @@ if test "$have_armv8cyclecounter"x = "yes"x; then
 	AC_DEFINE(HAVE_ARMV8CC,1,[Define if you have enabled the cycle counter on ARMv8])
 fi
 
-AC_ARG_ENABLE(generic-simd, [AC_HELP_STRING([--enable-generic-simd],[enable generic (gcc) SIMD optimizations])], have_generic_simd=$enableval, have_generic_simd=no)
-if test "$have_generic_simd" = "yes"; then
-        AC_DEFINE(HAVE_GENERIC_SIMD,1,[Define to enable generic (gcc) SIMD float optimizations.])
+AC_ARG_ENABLE(generic-simd128, [AC_HELP_STRING([--enable-generic-simd128],[enable generic (gcc) 128-bit SIMD optimizations])], have_generic_simd128=$enableval, have_generic_simd128=no)
+if test "$have_generic_simd128" = "yes"; then
+        AC_DEFINE(HAVE_GENERIC_SIMD128,1,[Define to enable generic (gcc) 128-bit SIMD optimizations.])
 fi
-AM_CONDITIONAL(HAVE_GENERIC_SIMD, test "$have_generic_simd" = "yes")
+AM_CONDITIONAL(HAVE_GENERIC_SIMD128, test "$have_generic_simd" = "yes")
+
+AC_ARG_ENABLE(generic-simd256, [AC_HELP_STRING([--enable-generic-simd256],[enable generic (gcc) 256-bit SIMD optimizations])], have_generic_simd256=$enableval, have_generic_simd256=no)
+if test "$have_generic_simd256" = "yes"; then
+        AC_DEFINE(HAVE_GENERIC_SIMD256,1,[Define to enable generic (gcc) 256-bit SIMD optimizations.])
+fi
+AM_CONDITIONAL(HAVE_GENERIC_SIMD256, test "$have_generic_simd256" = "yes")
+
 
 dnl FIXME:
 dnl AC_ARG_ENABLE(mips-ps, [AC_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)

@@ -66,9 +66,12 @@ const char X(version)[] = PACKAGE "-" PACKAGE_VERSION
    "-neon"
 #endif
 
-#if defined(HAVE_GENERIC_SIMD)
-   "-generic_simd"
+#if defined(HAVE_GENERIC_SIMD128)
+   "-generic_simd128"
 #endif
 
+#if defined(HAVE_GENERIC_SIMD256)
+   "-generic_simd256"
+#endif
 
 ;
