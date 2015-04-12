@@ -44,6 +44,18 @@
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2) 
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
+#if defined(__GNUC__) && !defined(__AVX512F__) /* sanity check */
+#error "compiling simd-avx512.h without avx-512f support"
+#endif
+
+#if !defined(HAVE_FMA)
+#warning "You should probably enable FMAs with --enable-fma for AVX-512"
+#endif
+
+#if !defined(HAVE_AVX2)
+#warning "You should probably enable AVX2 with --enable-avx2 for AVX-512"
+#endif
+
 #include <immintrin.h>
 
 typedef DS(__m512d, __m512) V;
