@@ -237,6 +237,7 @@ fi
 AC_ARG_WITH(incoming-stack-boundary, [AC_HELP_STRING([--with-incoming-stack-boundary=X],[Assume that stack is aligned to (1<<X) bytes])], with_incoming_stack_boundary=$withval, with_incoming_stack_boundary=no)
 
 
+AC_ARG_ENABLE(fma, [AC_HELP_STRING([--enable-fma],[enable optimizations for machines with fused multiply-add])], have_fma=$enableval)
 if test "$have_fma"x = "yes"x; then
         AC_DEFINE(HAVE_FMA,1,[Define if you have a machine with fused multiply-add])
 fi
