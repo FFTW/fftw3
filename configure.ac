@@ -35,12 +35,6 @@ case "${host_cpu}" in
   *) have_fma=no;;
 esac
 
-AC_ARG_ENABLE(fma, [AC_HELP_STRING([--enable-fma],[enable optimizations for machines with fused multiply-add])], have_fma=$enableval)
-if test "$have_fma"x = "yes"x; then
-	AC_DEFINE(HAVE_FMA,1,[Define if you have a machine with fused multiply-add])
-fi
-
-
 AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_DEBUG,1,[Define to enable extra FFTW debugging code.])
@@ -138,6 +132,7 @@ if test "$have_avx2" = "yes"; then
 	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
 		AC_MSG_ERROR([AVX2 requires single or double precision])
 	fi
+        have_fma="yes"
 fi
 AM_CONDITIONAL(HAVE_AVX2, test "$have_avx2" = "yes")
 
@@ -147,6 +142,7 @@ if test "$have_avx512" = "yes"; then
 	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
 		AC_MSG_ERROR([AVX512 requires single or double precision])
 	fi
+        have_fma="yes"
 fi
 AM_CONDITIONAL(HAVE_AVX512, test "$have_avx512" = "yes")
 
@@ -239,6 +235,11 @@ if test "$with_windows_f77_mangling" = "yes"; then
 fi
 
 AC_ARG_WITH(incoming-stack-boundary, [AC_HELP_STRING([--with-incoming-stack-boundary=X],[Assume that stack is aligned to (1<<X) bytes])], with_incoming_stack_boundary=$withval, with_incoming_stack_boundary=no)
+
+
+if test "$have_fma"x = "yes"x; then
+        AC_DEFINE(HAVE_FMA,1,[Define if you have a machine with fused multiply-add])
+fi
 
 dnl compute library suffix
 case "$PRECISION" in
