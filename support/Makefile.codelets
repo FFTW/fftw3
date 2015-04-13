@@ -38,7 +38,7 @@ maintainer-clean-local:
 
 if MAINTAINER_MODE
 
-INDENT = indent -kr -cs -i5 -l800 -fca -nfc1 -sc -sob -cli4 -TR -Tplanner -TV
+#INDENT = indent -kr -cs -i5 -l800 -fca -nfc1 -sc -sob -cli4 -TR -Tplanner -TV
 TWOVERS = sh ${top_srcdir}/support/twovers.sh
 GENFFTDIR = ${top_builddir}/genfft
 GEN_NOTW = ${GENFFTDIR}/gen_notw.native

@@ -446,6 +446,25 @@ if test "$ac_test_CFLAGS" != "set"; then
 fi
 fi
 
+dnl check for a proper indent in maintainer mode
+if test "$USE_MAINTAINER_MODE" = yes; then
+        AC_PATH_PROG(INDENT, indent, indent)
+        # if INDENT is set to 'indent' then we didn't find indent
+        if test "$INDENT" != indent ; then
+                AC_MSG_CHECKING(if $INDENT is GNU indent)
+                if $INDENT --version 2>/dev/null | head -n 1|grep "GNU indent" > /dev/null ; then
+                        AC_MSG_RESULT(yes)
+                        INDENT="$INDENT -kr -cs -i5 -l800 -fca -nfc1 -sc -sob -cli4 -TR -Tplanner -TV"
+                else
+                        AC_MSG_RESULT(no)
+                        AC_MSG_WARN($INDENT does not appear to be GNU indent.)
+                fi
+        else
+                AC_MSG_WARN(no indent program found: codelets will be ugly)
+                INDENT=cat
+        fi
+fi
+
 dnl -----------------------------------------------------------------------
 
 AC_ARG_ENABLE(fortran, [AC_HELP_STRING([--disable-fortran],[don't include Fortran-callable wrappers])], enable_fortran=$enableval, enable_fortran=yes)
