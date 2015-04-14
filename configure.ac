@@ -49,6 +49,9 @@ else
 	debug_malloc=no
 fi
 
+AC_ARG_ENABLE(doc, [AC_HELP_STRING([--disable-doc],[disable building the documentation])], build_doc=$enableval, build_doc=yes)
+AM_CONDITIONAL(BUILD_DOC, test x"$build_doc" = xyes)
+
 AC_ARG_ENABLE(debug-malloc, [AC_HELP_STRING([--enable-debug-malloc],[enable malloc debugging version])], ok=$enableval, ok=$debug_malloc)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_DEBUG_MALLOC,1,[Define to enable debugging malloc.])

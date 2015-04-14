@@ -30,8 +30,16 @@ else
 CHICKEN_EGG=. threads
 endif
 
+# Only build in doc/ if not disabled by user (i.e. not all
+# tools are available, such as fig2dev in maintainer mode)
+if BUILD_DOC
+DOCDIR=doc
+else
+DOCDIR=
+endif
+
 SUBDIRS=support $(GENFFT) kernel simd-support dft rdft reodft api	\
-libbench2 $(CHICKEN_EGG) tests mpi doc tools m4
+libbench2 $(CHICKEN_EGG) tests mpi $(DOCDIR) tools m4
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in
 
 SIMD_LIBS =						\
