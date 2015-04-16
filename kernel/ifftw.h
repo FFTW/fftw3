@@ -129,7 +129,7 @@ typedef struct scanner_s scanner;
 #if HAVE_SIMD
 #  if defined(HAVE_KCVI) || defined(HAVE_AVX512)
 #    define MIN_ALIGNMENT 64
-#  elif defined(HAVE_AVX) || defined(HAVE_AVX2)
+#  elif defined(HAVE_AVX) || defined(HAVE_AVX2) || defined(HAVE_GENERIC_SIMD256)
 #    define MIN_ALIGNMENT 32  /* best alignment for AVX, conservative for
 			       * everything else */
 #  else
