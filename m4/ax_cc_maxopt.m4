@@ -38,20 +38,10 @@ if test "$ac_test_CFLAGS" != "set"; then
     hp)  CFLAGS="+Oall +Optrs_ansi +DSnative"
     	 ;;
 
-    ibm) xlc_opt="-qtune=auto"
+    ibm) xlc_opt="-qarch=auto -qtune=auto"
          AX_CHECK_COMPILER_FLAGS($xlc_opt,
-         	CFLAGS="-O3 -qansialias -w $xlc_opt",
-               [CFLAGS="-O3 -qansialias -w"
-                echo "******************************************************"
-                echo "*  You seem to have the IBM  C compiler.  It is      *"
-                echo "*  recommended for best performance that you use:    *"
-                echo "*                                                    *"
-                echo "*    CFLAGS=-O3 -qarch=xxx -qtune=xxx -qansialias -w *"
-                echo "*                      ^^^        ^^^                *"
-                echo "*  where xxx is pwr2, pwr3, 604, or whatever kind of *"
-                echo "*  CPU you have.  (Set the CFLAGS environment var.   *"
-                echo "*  and re-run configure.)  For more info, man cc.    *"
-                echo "******************************************************"])
+         	CFLAGS="-O3 -qalias=ansi -w $xlc_opt",
+               [CFLAGS="-O3 -qalias=ansi -w"])
          ;;
 
     intel) CFLAGS="-O3"
@@ -71,6 +61,13 @@ if test "$ac_test_CFLAGS" != "set"; then
 	# non-ABI changing flag.
 	;;
     
+    clang)
+        CFLAGS="-O3 -fomit-frame-pointer"
+        AX_CHECK_COMPILER_FLAGS(-mtune=native, CFLAGS="$CFLAGS -mtune=native")
+        AX_CHECK_COMPILER_FLAGS(-fstrict-aliasing,CFLAGS="$CFLAGS -fstrict-aliasing")
+        AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
+        ;;
+
     gnu) 
      # Default optimization flags for gcc on all systems.
      # Somehow -O3 does not imply -fomit-frame-pointer on ia32
@@ -99,6 +96,13 @@ if test "$ac_test_CFLAGS" != "set"; then
      # note that we enable "unsafe" fp optimization with other compilers, too
      AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
 
+     # flags to enable power ISA 2.07 instructions with gcc (always true with vsx)
+     if test "$have_vsx" = "yes"; then
+         AX_CHECK_COMPILER_FLAGS(-mcpu=power8, CFLAGS="$CFLAGS -mcpu=power8")
+         AX_CHECK_COMPILER_FLAGS(-mpower8-fusion, CFLAGS="$CFLAGS -mpower8-fusion")
+         AX_CHECK_COMPILER_FLAGS(-mpower8-vector, CFLAGS="$CFLAGS -mpower8-vector")
+         AX_CHECK_COMPILER_FLAGS(-mdirect-move, CFLAGS="$CFLAGS -mdirect-move")
+     fi
      ;;
   esac
 

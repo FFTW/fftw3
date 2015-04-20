@@ -103,6 +103,47 @@ static inline int has_cpuid()
     return (result != tst);
 }
 
+/* cpuid version to get all registers. Donated by Erik Lindahl from Gromacs. */
+static inline void
+cpuid_all(int level, int ecxval, int *eax, int *ebx, int *ecx, int *edx)
+{
+#if (defined _MSC_VER)
+    int CPUInfo[4];
+    
+#    if (_MSC_VER > 1500) || (_MSC_VER == 1500 & _MSC_FULL_VER >= 150030729)
+    /* MSVC 9.0 SP1 or later */
+    __cpuidex(CPUInfo, level, ecxval);
+    rc = 0;
+#    else
+    __cpuid(CPUInfo, level);
+    /* Set an error code if the user wanted a non-zero ecxval, since we did not have cpuidex */
+    rc = (ecxval > 0) ? -1 : 0;
+#    endif
+    *eax = CPUInfo[0];
+    *ebx = CPUInfo[1];
+    *ecx = CPUInfo[2];
+    *edx = CPUInfo[3];
+
+#else
+    /* Not MSVC */
+    *eax = level;
+    *ecx = ecxval;
+    *ebx = 0;
+    *edx = 0;
+    /* Avoid clobbering global offset table in 32-bit pic code (ebx) */
+#    if defined(__PIC__)
+    __asm__ ("xchgl %%ebx, %1  \n\t"
+             "cpuid            \n\t"
+             "xchgl %%ebx, %1  \n\t"
+             : "+a" (*eax), "+r" (*ebx), "+c" (*ecx), "+d" (*edx));
+#    else
+    /* No need to save ebx if we are not in pic mode */
+    __asm__ ("cpuid            \n\t"
+             : "+a" (*eax), "+b" (*ebx), "+c" (*ecx), "+d" (*edx));
+#    endif
+#endif
+}
+
 static inline int cpuid_edx(int op)
 {
 #    ifdef _MSC_VER

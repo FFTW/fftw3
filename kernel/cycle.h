@@ -515,3 +515,38 @@ INLINE_ELAPSED(inline)
 #endif
 #endif /* HAVE_MIPS_ZBUS_TIMER */
 
+#if defined(__ARM_ARCH_7A__) && defined(ARMV7A_HAS_CNTCVT)
+typedef uint64_t ticks;
+static inline ticks getticks(void)
+{
+  uint32_t Rt, Rt2 = 0;
+  asm volatile("mrrc p15, 1, %0, %1, c14" : "=r"(Rt), "=r"(Rt2));
+  return ((uint64_t)Rt) | (((uint64_t)Rt2) << 32);
+}
+INLINE_ELAPSED(inline)
+#define HAVE_TICK_COUNTER
+#endif
+
+#if defined(__aarch64__) && defined(ARMV8_HAS_CNTCVT_EL0) && !defined(HAVE_ARMV8CC)
+typedef uint64_t ticks;
+static inline ticks getticks(void)
+{
+  uint64_t Rt;
+  asm volatile("mrs %0,  CNTVCT_EL0" : "=r" (Rt));
+  return Rt;
+}
+INLINE_ELAPSED(inline)
+#define HAVE_TICK_COUNTER
+#endif
+
+#if defined(__aarch64__) && defined(HAVE_ARMV8CC)
+typedef uint64_t ticks;
+static inline ticks getticks(void)
+{
+        uint64_t cc = 0;
+        asm volatile("mrs %0, PMCCNTR_EL0" : "=r"(cc));
+        return cc;
+}
+INLINE_ELAPSED(inline)
+#define HAVE_TICK_COUNTER
+#endif

@@ -2,8 +2,9 @@
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
  *
- * Improvements to 256-bit AVX by Erik Lindahl, 2015.
- * Erik Lindahl places his modifications in the public domain.
+ * Modifications by Romain Dolbeau & Erik Lindahl, derived from simd-avx.h
+ * Romain Dolbeau hereby places his modifications in the public domain.
+ * Erik Lindahl hereby places his modifications in the public domain.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +23,7 @@
  */
 
 #if defined(FFTW_LDOUBLE) || defined(FFTW_QUAD)
-#error "AVX only works in single or double precision"
+#error "AVX2 only works in single or double precision"
 #endif
 
 #ifdef FFTW_SINGLE
@@ -33,13 +34,17 @@
 #  define SUFF(name) name ## d
 #endif
 
-#define SIMD_SUFFIX  _avx  /* for renaming */
+#define SIMD_SUFFIX  _avx2  /* for renaming */
 #define VL DS(2, 4)        /* SIMD complex vector length */
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2) 
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
-#if defined(__GNUC__) && !defined(__AVX__) /* sanity check */
-#error "compiling simd-avx.h without -mavx"
+#if defined(__GNUC__) && !defined(__AVX2__) /* sanity check */
+#error "compiling simd-avx2.h without avx2 support"
+#endif
+
+#if !defined(HAVE_FMA)
+#warning "You should probably enable FMAs with --enable-fma for AVX2"
 #endif
 
 #ifdef _MSC_VER
@@ -91,12 +96,6 @@ static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
 #define STOREH(addr, val) _mm_storeh_pi((__m64 *)(addr), val)
 #define STOREL(addr, val) _mm_storel_pi((__m64 *)(addr), val)
 
-/* it seems like the only AVX way to store 4 complex floats is to
-   extract two pairs of complex floats into two __m128 registers, and
-   then use SSE-like half-stores.  Similarly, to load 4 complex
-   floats, we load two pairs of complex floats into two __m128
-   registers, and then pack the two __m128 registers into one __m256
-   value. */
 static inline V LD(const R *x, INT ivs, const R *aligned_like)
 {
      __m128 l0, l1, h0, h1;
@@ -139,7 +138,6 @@ static inline void STN2(R *x, V v0, V v1, INT ovs)
     __m128 l0 = _mm256_castps256_ps128(x0);
     __m128 h1 = _mm256_extractf128_ps(x1, 1);
     __m128 l1 = _mm256_castps256_ps128(x1);
-
     *(__m128 *)(x + 3*ovs) = h1;
     *(__m128 *)(x + 2*ovs) = h0;
     *(__m128 *)(x + 1*ovs) = l1;
@@ -231,9 +229,7 @@ static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 
 static inline V FLIP_RI(V x)
 {
-     return VPERM1(x,
-		   DS(SHUFVALD(1, 0), 
-		      SHUFVALS(1, 0, 3, 2)));
+     return VPERM1(x, DS(SHUFVALD(1, 0), SHUFVALS(1, 0, 3, 2)));
 }
 
 static inline V VCONJ(V x)
@@ -248,31 +244,33 @@ static inline V VBYI(V x)
 }
 
 /* FMA support */
-#define VFMA(a, b, c) VADD(c, VMUL(a, b))
-#define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
-#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
-#define VFMAI(b, c)  SUFF(_mm_addsub256_p)(c,FLIP_RI(b))
-#define VFNMSI(b, c) VSUB(c, VBYI(b))
+#define VFMA    SUFF(_mm256_fmadd_p)
+#define VFNMS   SUFF(_mm256_fnmadd_p)
+#define VFMS    SUFF(_mm256_fmsub_p)
+#define VFMAI(b, c) SUFF(_mm256_addsub_p)(c, FLIP_RI(b)) /* VADD(c, VBYI(b)) */
+#define VFNMSI(b, c)   VSUB(c, VBYI(b))
 #define VFMACONJ(b,c)  VADD(VCONJ(b),c)
 #define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
-#define VFNMSCONJ(b,c) SUFF(_mm_addsub256_p)(c,b)
+#define VFNMSCONJ(b,c) SUFF(_mm256_addsub_p)(c, b)  /* VSUB(c, VCONJ(b)) */
 
 static inline V VZMUL(V tx, V sr)
 {
-  V tr = VDUPL(tx);
-  V ti = VDUPH(tx);
-  tr = VMUL(tr, sr);
-  ti = VMUL(ti, FLIP_RI(sr));
-  return SUFF(_mm256_addsub_p)(tr,ti);
+     /* V tr = VDUPL(tx); */
+     /* V ti = VDUPH(tx); */
+     /* tr = VMUL(sr, tr); */
+     /* sr = VBYI(sr); */
+     /* return VFMA(ti, sr, tr); */
+     return SUFF(_mm256_fmaddsub_p)(sr, VDUPL(tx), VMUL(FLIP_RI(sr), VDUPH(tx)));
 }
 
 static inline V VZMULJ(V tx, V sr)
 {
-     V tr = VDUPL(tx);
-     V ti = VDUPH(tx);
-     tr = VMUL(tr, sr);
-     sr = VBYI(sr);
-     return VFNMS(ti, sr, tr);
+     /* V tr = VDUPL(tx); */
+     /* V ti = VDUPH(tx); */
+     /* tr = VMUL(sr, tr); */
+     /* sr = VBYI(sr); */
+     /* return VFNMS(ti, sr, tr); */
+     return SUFF(_mm256_fmsubadd_p)(sr, VDUPL(tx), VMUL(FLIP_RI(sr), VDUPH(tx)));
 }
 
 static inline V VZMULI(V tx, V sr)
@@ -282,15 +280,25 @@ static inline V VZMULI(V tx, V sr)
      ti = VMUL(ti, sr);
      sr = VBYI(sr);
      return VFMS(tr, sr, ti);
+    /*
+     * Keep the old version
+     * (2 permute, 1 shuffle, 1 constant load (L1), 1 xor, 2 fp), since the below FMA one
+     * would be 2 permute, 1 shuffle, 1 xor (setzero), 3 fp), but with a longer pipeline.
+     *
+     * Alternative new fma version:
+     * return SUFF(_mm256_addsub_p)(SUFF(_mm256_fnmadd_p)(sr, VDUPH(tx), SUFF(_mm256_setzero_p)()),
+     * VMUL(FLIP_RI(sr), VDUPL(tx)));
+    */
 }
 
 static inline V VZMULIJ(V tx, V sr)
 {
-     V tr = VDUPL(tx);
-     V ti = VDUPH(tx);
-     ti = VMUL(ti, sr);
-     tr = VMUL(tr, FLIP_RI(sr));
-     return SUFF(_mm256_addsub_p)(ti,tr);
+     /* V tr = VDUPL(tx); */
+     /* V ti = VDUPH(tx); */
+     /* ti = VMUL(ti, sr); */
+     /* sr = VBYI(sr); */
+     /* return VFMA(tr, sr, ti); */
+     return SUFF(_mm256_fmaddsub_p)(sr, VDUPH(tx), VMUL(FLIP_RI(sr), VDUPL(tx)));
 }
 
 /* twiddle storage #1: compact, slower */
@@ -359,10 +367,6 @@ static inline V BYTWJ2(const R *t, V sr)
 #endif
 #define TWVLS (2 * VL)
 
-
-/* Use VZEROUPPER to avoid the penalty of switching from AVX to SSE.
-   See Intel Optimization Manual (April 2011, version 248966), Section
-   11.3 */
 #define VLEAVE _mm256_zeroupper
 
 #include "simd-common.h"
