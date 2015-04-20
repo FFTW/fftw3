@@ -47,14 +47,42 @@ void X(dft_conf_standard)(planner *p)
 #endif
 #if HAVE_AVX
      if (X(have_simd_avx)())
-	  X(solvtab_exec)(X(solvtab_dft_avx), p);
+     {
+         X(solvtab_exec)(X(solvtab_dft_avx), p);
+         X(solvtab_exec)(X(solvtab_dft_avx_128), p);
+     }
+#endif
+#if HAVE_AVX2
+     if (X(have_simd_avx2)())
+     {
+         X(solvtab_exec)(X(solvtab_dft_avx2), p);
+         X(solvtab_exec)(X(solvtab_dft_avx2_128), p);
+     }
+#endif
+#if HAVE_AVX512
+     if (X(have_simd_avx512)())
+	  X(solvtab_exec)(X(solvtab_dft_avx512), p);
+#endif
+#if HAVE_KCVI
+     if (X(have_simd_kcvi)())
+	  X(solvtab_exec)(X(solvtab_dft_kcvi), p);
 #endif
 #if HAVE_ALTIVEC
      if (X(have_simd_altivec)())
 	  X(solvtab_exec)(X(solvtab_dft_altivec), p);
 #endif
+#if HAVE_VSX
+     if (X(have_simd_vsx)())
+       X(solvtab_exec)(X(solvtab_dft_vsx), p);
+#endif
 #if HAVE_NEON
      if (X(have_simd_neon)())
 	  X(solvtab_exec)(X(solvtab_dft_neon), p);
+#endif
+#if HAVE_GENERIC_SIMD128
+     X(solvtab_exec)(X(solvtab_dft_generic_simd128), p);
+#endif
+#if HAVE_GENERIC_SIMD256
+     X(solvtab_exec)(X(solvtab_dft_generic_simd256), p);
 #endif
 }

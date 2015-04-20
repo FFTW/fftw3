@@ -32,6 +32,37 @@
 #endif
 #endif
 
+/* cpuid version to get all registers. Donated by Erik Lindahl from Gromacs. */
+static inline void
+cpuid_all(int level, int ecxval, int *eax, int *ebx, int *ecx, int *edx)
+{
+#    ifdef _MSC_VER
+    int CPUInfo[4];
+
+#if (_MSC_VER > 1500) || (_MSC_VER == 1500 & _MSC_FULL_VER >= 150030729)
+    /* MSVC 9.0 SP1 or later */
+    __cpuidex(CPUInfo, op, ecxval);
+#else
+    __cpuid(CPUInfo, level);
+#endif
+    *eax = CPUInfo[0];
+    *ebx = CPUInfo[1];
+    *ecx = CPUInfo[2];
+    *edx = CPUInfo[3];
+    
+#    else
+    /* Not MSVC */
+    *eax = level;
+    *ecx = ecxval;
+    *ebx = 0;
+    *edx = 0;
+    /* No need to save ebx if we are not in pic mode */
+    __asm__ ("cpuid            \n\t"
+             : "+a" (*eax), "+b" (*ebx), "+c" (*ecx), "+d" (*edx));
+#    endif
+}
+
+
 static inline int cpuid_ecx(int op)
 {
 #    ifdef _MSC_VER
@@ -51,11 +82,39 @@ static inline int cpuid_ecx(int op)
      return cpu_info[2];
 #    endif
 #    else
-     int eax, ecx, edx;
+     int eax, ecx = 0, edx;
 
      __asm__("pushq %%rbx\n\tcpuid\n\tpopq %%rbx"
-	     : "=a" (eax), "=c" (ecx), "=d" (edx)
+	     : "=a" (eax), "+c" (ecx), "=d" (edx)
 	     : "a" (op));
+     return ecx;
+#    endif
+}
+
+static inline int cpuid_ebx(int op)
+{
+#    ifdef _MSC_VER
+#    ifdef __INTEL_COMPILER
+     int result;
+     _asm {
+          push rbx
+          mov eax,op
+          cpuid
+          mov result,ebx
+          pop rbx
+     }
+     return result;
+#    else
+     int cpu_info[4];
+     __cpuid(cpu_info,op);
+     return cpu_info[1];
+#    endif
+#    else
+     int eax, ecx = 0, edx;
+
+     __asm__("pushq %%rbx\n\tcpuid\nmov %%ebx,%%ecx\n\tpopq %%rbx"
+             : "=a" (eax), "+c" (ecx), "=d" (edx)
+             : "a" (op));
      return ecx;
 #    endif
 }

@@ -23,7 +23,15 @@
    set of alignment contraints.  So this alignment stuff cannot be
    defined in the SIMD header files.  Rather than defining a separate
    set of "machine" header files, we just do this ugly ifdef here. */
-#if defined(HAVE_SSE2) || defined(HAVE_AVX)
+#if defined(HAVE_AVX512)
+#  if defined(FFTW_SINGLE)
+#    define ALIGNMENT 8     /* Alignment for the LD/ST macros */
+#    define ALIGNMENTA 64   /* Alignment for the LDA/STA macros */
+#  else
+#    define ALIGNMENT 16    /* Alignment for the LD/ST macros */
+#    define ALIGNMENTA 64   /* Alignment for the LDA/STA macros */
+#  endif
+#elif defined(HAVE_SSE2) || defined(HAVE_AVX) || defined(HAVE_AVX2)
 #  if defined(FFTW_SINGLE)
 #    define ALIGNMENT 8     /* Alignment for the LD/ST macros */
 #    define ALIGNMENTA 16   /* Alignment for the LDA/STA macros */
@@ -34,9 +42,32 @@
 #elif defined(HAVE_ALTIVEC)
 #  define ALIGNMENT 8     /* Alignment for the LD/ST macros */
 #  define ALIGNMENTA 16   /* Alignment for the LDA/STA macros */
-#elif defined(HAVE_NEON)
+#elif defined(HAVE_NEON) || defined(HAVE_VSX)
 #  define ALIGNMENT 8     /* Alignment for the LD/ST macros */
 #  define ALIGNMENTA 8    /* Alignment for the LDA/STA macros */
+#elif defined(HAVE_KCVI)
+#  if defined(FFTW_SINGLE)
+#    define ALIGNMENT 8     /* Alignment for the LD/ST macros */
+#  else
+#    define ALIGNMENT 16     /* Alignment for the LD/ST macros */
+#  endif
+#  define ALIGNMENTA 64   /* Alignment for the LDA/STA macros */
+#elif defined(HAVE_GENERIC_SIMD256)
+#  if defined(FFTW_SINGLE)
+#    define ALIGNMENT 8
+#    define ALIGNMENTA 32
+#  else
+#    define ALIGNMENT 16
+#    define ALIGNMENTA 32
+#  endif
+#elif defined(HAVE_GENERIC_SIMD128)
+#  if defined(FFTW_SINGLE)
+#    define ALIGNMENT 8
+#    define ALIGNMENTA 16
+#  else
+#    define ALIGNMENT 16
+#    define ALIGNMENTA 16
+#  endif
 #endif
 
 #if HAVE_SIMD
