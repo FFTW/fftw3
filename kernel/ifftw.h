@@ -110,7 +110,9 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 
 extern int X(have_simd_sse2)(void);
 extern int X(have_simd_avx)(void);
+extern int X(have_simd_avx_128)(void);
 extern int X(have_simd_avx2)(void);
+extern int X(have_simd_avx2_128)(void);
 extern int X(have_simd_avx512)(void);
 extern int X(have_simd_altivec)(void);
 extern int X(have_simd_vsx)(void);

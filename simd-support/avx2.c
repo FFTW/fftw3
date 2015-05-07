@@ -27,7 +27,7 @@
 
 #include "amd64-cpuid.h"
 
-int X(have_simd_avx2)(void) /* fixme: still testing for normal AVX */
+int X(have_simd_avx2_128)(void)
 {
     static int init = 0, res;
 
@@ -49,7 +49,7 @@ int X(have_simd_avx2)(void) /* fixme: still testing for normal AVX */
 
 #include "x86-cpuid.h"
 
-int X(have_simd_avx2)(void)
+int X(have_simd_avx2_128)(void)
 {
     static int init = 0, res;
 
@@ -67,4 +67,15 @@ int X(have_simd_avx2)(void)
 }
 #endif
 
+int X(have_simd_avx2)(void)
+{
+  /*
+   * For now 256-bit AVX2 support is identical to 128-bit.
+   * This might change in the future if AMD released AVX2-capable
+   * chips that work better with the 128-bit flavor, but since AMD
+   * might actually change it to implement 256-bit AVX2 efficiently
+   * by then we don't want to disable it before we know.
+   */
+  return X(have_simd_avx2_128)();
+}
 #endif

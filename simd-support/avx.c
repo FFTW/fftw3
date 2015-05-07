@@ -27,7 +27,7 @@
 
 #include "amd64-cpuid.h"
 
-int X(have_simd_avx)(void)
+int X(have_simd_avx_128)(void)
 {
        static int init = 0, res;
 
@@ -44,7 +44,7 @@ int X(have_simd_avx)(void)
 
 #include "x86-cpuid.h"
 
-int X(have_simd_avx)(void)
+int X(have_simd_avx_128)(void)
 {
        static int init = 0, res;
 
@@ -57,6 +57,49 @@ int X(have_simd_avx)(void)
        }
        return res;
 }
+
+int X(have_simd_avx)(void)
+{
+  IF not AMD, call avx_128;
+}
+
 #endif
+
+int X(have_simd_avx)(void)
+{
+    static int init = 0, res;
+    int eax,ebx,ecx,edx;
+
+    if(!init)
+    {
+        /* Check if this is an AMD CPU */
+        cpuid_all(0,0,&eax,&ebx,&ecx,&edx);
+
+        /* 0x68747541: "Auth"  , 0x444d4163: "enti"  , 0x69746e65: "cAMD" */
+        if (ebx==0x68747541 && ecx==0x444d4163 && edx==0x69746e65)
+	{
+  	    /* This is an AMD chip. While AMD does support 256-bit AVX, it does
+	     * so by separately scheduling two 128-bit lanes to both halves of
+	     * a compute unit (pair of cores). Since 256-bit AVX requires more
+	     * permutations on the load this is a _double_ loss for us.
+	     * Unfortunately FFTW will often not detect this, this the
+	     * timing script only run a single thread, and then the 256-bit
+	     * version might appear faster, although it will be (much) slower
+	     * in actual use.
+	     *
+	     * To work around this, we always disable 256-bit AVX and rely on the
+	     * 128-bit flavor.
+	     */
+	    res= 0;
+	}
+        else
+	{
+	    /* For non-AMD, we rely on the result from 128-bit AVX */
+	    res = X(have_simd_avx_128)();
+	}
+        init = 1;
+    }
+    return res;
+}
 
 #endif
