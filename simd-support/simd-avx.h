@@ -251,11 +251,11 @@ static inline V VBYI(V x)
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
 #define VFMS(a, b, c) VSUB(VMUL(a, b), c)
-#define VFMAI(b, c)  SUFF(_mm_addsub256_p)(c,FLIP_RI(b))
+#define VFMAI(b, c)  SUFF(_mm256_addsub_p)(c,FLIP_RI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 #define VFMACONJ(b,c)  VADD(VCONJ(b),c)
 #define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
-#define VFNMSCONJ(b,c) SUFF(_mm_addsub256_p)(c,b)
+#define VFNMSCONJ(b,c) SUFF(_mm256_addsub_p)(c,b)
 
 static inline V VZMUL(V tx, V sr)
 {
