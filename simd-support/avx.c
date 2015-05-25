@@ -58,11 +58,6 @@ int X(have_simd_avx_128)(void)
        return res;
 }
 
-int X(have_simd_avx)(void)
-{
-  IF not AMD, call avx_128;
-}
-
 #endif
 
 int X(have_simd_avx)(void)
