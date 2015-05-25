@@ -22,12 +22,15 @@
 
 static X(before_planner_hook_t) before_planner_hook = 0;
 static X(after_planner_hook_t) after_planner_hook = 0;
+static void *planner_hook_arg = 0;
 
 void X(set_planner_hooks)(X(before_planner_hook_t) before,
-                          X(after_planner_hook_t) after)
+                          X(after_planner_hook_t) after,
+                          void *arg)
 {
      before_planner_hook = before;
      after_planner_hook = after;
+     planner_hook_arg = arg;
 }
 
 static plan *mkplan0(planner *plnr, unsigned flags,
@@ -99,7 +102,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
      double pcost = 0;
      
      if (before_planner_hook)
-          before_planner_hook();
+          before_planner_hook(planner_hook_arg);
      
      plnr = X(the_planner)();
 
@@ -175,7 +178,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 #endif
 
      if (after_planner_hook)
-          after_planner_hook();
+          after_planner_hook(planner_hook_arg);
      
      return p;
 }

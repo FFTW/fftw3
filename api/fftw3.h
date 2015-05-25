@@ -107,8 +107,8 @@ struct fftw_iodim64_do_not_use_me {
 
 typedef void (*fftw_write_char_func_do_not_use_me)(char c, void *);
 typedef int (*fftw_read_char_func_do_not_use_me)(void *);
-typedef void (*fftw_before_planner_hook_do_not_use_me)(void);
-typedef void (*fftw_after_planner_hook_do_not_use_me)(void);
+typedef void (*fftw_before_planner_hook_do_not_use_me)(void *arg);
+typedef void (*fftw_after_planner_hook_do_not_use_me)(void *arg);
 
 /*
   huge second-order macro that defines prototypes for all API
@@ -136,9 +136,10 @@ typedef fftw_before_planner_hook_do_not_use_me X(before_planner_hook_t);   \
 typedef fftw_after_planner_hook_do_not_use_me X(after_planner_hook_t);     \
                                                                            \
 FFTW_EXTERN void X(set_planner_hooks)(X(before_planner_hook_t) before,     \
-                                      X(after_planner_hook_t) after);      \
-									   \
-FFTW_EXTERN void X(execute)(const X(plan) p);				   \
+                                      X(after_planner_hook_t) after,       \
+                                      void *arg);                          \
+                                                                           \
+FFTW_EXTERN void X(execute)(const X(plan) p);                              \
 									   \
 FFTW_EXTERN X(plan) X(plan_dft)(int rank, const int *n,			   \
 		    C *in, C *out, int sign, unsigned flags);		   \

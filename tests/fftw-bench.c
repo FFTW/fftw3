@@ -198,13 +198,15 @@ int can_do(bench_problem *p)
 
 static int before_planner_hook_called = 0;
 static int after_planner_hook_called = 0;
-static void before_planner_hook(void)
+static void before_planner_hook(void *arg)
 {
      before_planner_hook_called = 1;
+     BENCH_ASSERT(arg == &before_planner_hook_called);
 }
-static void after_planner_hook(void)
+static void after_planner_hook(void *arg)
 {
      after_planner_hook_called = 1;
+     BENCH_ASSERT(arg == &before_planner_hook_called);
 }
 
 void setup(bench_problem *p)
@@ -235,7 +237,7 @@ void setup(bench_problem *p)
 #endif
 
      if (setup_hooks)
-          FFTW(set_planner_hooks(before_planner_hook, after_planner_hook));
+          FFTW(set_planner_hooks(before_planner_hook, after_planner_hook, &before_planner_hook_called));
           
      before_planner_hook_called = 0;
      after_planner_hook_called = 0;
@@ -250,7 +252,7 @@ void setup(bench_problem *p)
      BENCH_ASSERT(setup_hooks == after_planner_hook_called);
 
      /* do something different with hooks next time */
-     FFTW(set_planner_hooks(0, 0));
+     FFTW(set_planner_hooks(0, 0, 0));
      setup_hooks = 1 - setup_hooks;
      
      {
