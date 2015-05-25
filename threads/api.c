@@ -79,3 +79,8 @@ void X(plan_with_nthreads)(int nthreads)
      plnr = X(the_planner)();
      plnr->nthr = X(imax)(1, nthreads);
 }
+
+void X(make_planner_thread_safe)(void)
+{
+     X(threads_register_planner_hooks)();
+}

@@ -74,3 +74,9 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
 void X(threads_cleanup)(void)
 {
 }
+
+/* FIXME [Matteo Frigo 2015-05-25] What does "thread-safe"
+   mean for openmp? */
+void X(threads_register_planner_hooks)(void)
+{
+}

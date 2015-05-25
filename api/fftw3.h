@@ -107,8 +107,6 @@ struct fftw_iodim64_do_not_use_me {
 
 typedef void (*fftw_write_char_func_do_not_use_me)(char c, void *);
 typedef int (*fftw_read_char_func_do_not_use_me)(void *);
-typedef void (*fftw_before_planner_hook_do_not_use_me)(void *arg);
-typedef void (*fftw_after_planner_hook_do_not_use_me)(void *arg);
 
 /*
   huge second-order macro that defines prototypes for all API
@@ -132,12 +130,6 @@ typedef enum fftw_r2r_kind_do_not_use_me X(r2r_kind);			   \
 									   \
 typedef fftw_write_char_func_do_not_use_me X(write_char_func);		   \
 typedef fftw_read_char_func_do_not_use_me X(read_char_func);		   \
-typedef fftw_before_planner_hook_do_not_use_me X(before_planner_hook_t);   \
-typedef fftw_after_planner_hook_do_not_use_me X(after_planner_hook_t);     \
-                                                                           \
-FFTW_EXTERN void X(set_planner_hooks)(X(before_planner_hook_t) before,     \
-                                      X(after_planner_hook_t) after,       \
-                                      void *arg);                          \
                                                                            \
 FFTW_EXTERN void X(execute)(const X(plan) p);                              \
 									   \
@@ -326,6 +318,7 @@ FFTW_EXTERN void X(set_timelimit)(double t);				   \
 FFTW_EXTERN void X(plan_with_nthreads)(int nthreads);			   \
 FFTW_EXTERN int X(init_threads)(void);					   \
 FFTW_EXTERN void X(cleanup_threads)(void);				   \
+FFTW_EXTERN void X(make_planner_thread_safe)(void);                        \
 									   \
 FFTW_EXTERN int X(export_wisdom_to_filename)(const char *filename);	   \
 FFTW_EXTERN void X(export_wisdom_to_file)(FILE *output_file);		   \
