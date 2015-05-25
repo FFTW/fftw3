@@ -4,7 +4,7 @@ dnl Define the fftw version number as M4 macros, so that we can enforce
 dnl the invariant that the minor version number in FFTW-X.Y.MINOR is the same
 dnl as the revision number in SHARED_VERSION_INFO.
 define(FFTW_MAJOR_VERSION, 3.3)dnl
-define(FFTW_MINOR_VERSION, 5)dnl
+define(FFTW_MINOR_VERSION, 4)dnl
 
 dnl Version number of the FFTW source package.
 AC_INIT(fftw, FFTW_MAJOR_VERSION.FFTW_MINOR_VERSION, fftw@fftw.org)
