@@ -8,6 +8,10 @@ TODO before FFTW-3.3.5
   (avx, avx2, avx-128, wtf?)  Maybe *remove* some choices to simplify
   life.
 
+* figure out how to autodetect NEON at runtime
+
+* figure out the arm cycle counter business
+
 TODO before FFTW-$2\pi$:
 
 * Wisdom: make it clear that it is specific to the exact fftw version
