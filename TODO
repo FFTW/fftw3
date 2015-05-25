@@ -1,3 +1,13 @@
+TODO before FFTW-3.3.5
+
+* document planner hooks
+
+* document the new simd support
+
+* offer some guidance to the poor user regarding what to enable
+  (avx, avx2, avx-128, wtf?)  Maybe *remove* some choices to simplify
+  life.
+
 TODO before FFTW-$2\pi$:
 
 * Wisdom: make it clear that it is specific to the exact fftw version
