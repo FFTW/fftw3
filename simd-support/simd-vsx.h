@@ -49,56 +49,13 @@ typedef DS(vector double,vector float) V;
 #define VXOR(a,b)   vec_xor(a,b)
 #define UNPCKL(a,b) vec_mergel(a,b)
 #define UNPCKH(a,b) vec_mergeh(a,b)
-#define VDUPL(a)    DS(vsx_permdi(a,a,3),vsx_mergeo(a,a))
-#define VDUPH(a)    DS(vsx_permdi(a,a,0),vsx_mergee(a,a))
-
-/* We use inline asm for a handful of special instructions to make sure this 
- * file keeps working although the compilers are still a bit immature and 
- * not entirely compatible for VSX:
- *
- * - vmrgew/vmrgow is not supported with just -mvsx, but you need a special 
- *   -mcpu=power8 flag for gcc, and it is anyway only implemented for integer
- *   data. To avoid hassle, we roll our own.
- * -  vpermxor is a very special instruction intended for raid calculations, 
- *   but since it helps us save an operation in VBYI(), we have picked it up 
- *   (there is no intrinsic for it in gcc at least).
- * - The VSX instruction set is a bit peculiar since Power8 normally runs in
- *   little-endian memory mode, but the registers are still organized as big
- *   endian. To handle this, many memory operations are implemented as other
- *   instructions combined with permutations. Since we anyway need to permute
- *   some load/stores, we can save two (!) permutations by using the
- *   lower-level instructions directly in a few cases.
- * - The xxpermdi intrinsic has slightly different naming in gcc vs. xlc, and
- *   worse: They interpret bot the constant and order of parameters in opposite
- *   ways in little endian mode. We stick to the gcc version, and use inline
- *   asm for xlc.
- * - vec_neg() seems to be missing in gcc.
- * - the gcc versions of vec_vsx_ld cannot take a (double *) argument in
- *   gcc-4.9, but accepts (vector double *).
- * - xlc does not do word-swapping for little endian if we use vector pointers
- *   (but float/double pointers work), and the vec_xl() load function takes a
- *   non-constant pointer, so we need to cast that away.
- */
-
-#ifdef __ibmxl__
-#    define vsx_load(addr)        vec_xl(0,(DS(double,float) *)addr)
-#    define vsx_store(a,addr)     vec_xst(a,0,addr)
-#    define vsx_lxsdx(addr)       ({ V res;__asm__ ( "lxsdx %x0,0,%1" : "=v" (res) : "r" (addr)); res; })
-#    define vsx_stxsdx(v,addr)    { __asm__ ( "stxsdx %x0,0,%1" :: "v" (v), "r" (addr) : "memory" ); }
-#    define vsx_permdi(a,b,c)     ({ V res; __asm__ ( "xxpermdi %x0,%x1,%x2,%3" : "=v" (res) : "v" (a), "v" (b), "K" (c)); res; })
-#    define vsx_neg(a)            vec_neg(a)
+#ifdef FFTW_SINGLE
+#    define VDUPL(a)    ({ const vector unsigned char perm = {0,1,2,3,0,1,2,3,8,9,10,11,8,9,10,11}; vec_perm(a,a,perm); })
+#    define VDUPH(a)    ({ const vector unsigned char perm = {4,5,6,7,4,5,6,7,12,13,14,15,12,13,14,15}; vec_perm(a,a,perm); })
 #else
-#    define vsx_load(addr)        vec_vsx_ld(0,(V *)addr)
-#    define vsx_store(a,addr)     vec_vsx_st(a,0,(V *)addr)
-#    define vsx_lxsdx(addr)       ({ V res; __asm__ ( "lxsdx %0,0,%1" : "=ww" (res) : "r" (addr)); res; })
-#    define vsx_stxsdx(v,addr)    { __asm__ ( "stxsdx %0,0,%1" :: "ww" (v), "r" (addr) : "memory" ); }
-#    define vsx_permdi(a,b,c)     vec_xxpermdi(a,b,c)
-#    define vsx_neg(a)            ({ V res; __asm__ ( DS("xvnegdp","xvnegsp") " %0,%1" : "=ww" (res) : "ww" (a)); res; })
+#    define VDUPL(a)    ({ const vector unsigned char perm = {0,1,2,3,4,5,6,7,0,1,2,3,4,5,6,7}; vec_perm(a,a,perm); })
+#    define VDUPH(a)    ({ const vector unsigned char perm = {8,9,10,11,12,13,14,15,8,9,10,11,12,13,14,15}; vec_perm(a,a,perm); })
 #endif
-/* These (altivec) intrinsics do not depend on the compiler */
-#define vsx_vpermxor(a,b,c)       ({ V res; __asm__ ( "vpermxor %0,%1,%2,%3" : "=v" (res) : "v" (a), "v" (b), "v" (c)); res; })
-#define vsx_mergee(a,b)           ({ V res; __asm__ ( "vmrgew %0,%1,%2" : "=v" (res) : "v" (a), "v" (b)); res; })
-#define vsx_mergeo(a,b)           ({ V res; __asm__ ( "vmrgow %0,%1,%2" : "=v" (res) : "v" (a), "v" (b)); res; })
 
 static inline V LDK(R f) { return vec_splats(f); }
 
@@ -106,41 +63,52 @@ static inline V LDK(R f) { return vec_splats(f); }
 
 static inline V VCONJ(V x)
 {
-  const V pmpm = vec_mergel(vec_splats((R)0.0),vsx_neg(vec_splats((R)0.0)));
+  const V pmpm = vec_mergel(vec_splats((R)0.0),-(vec_splats((R)0.0)));
   return vec_xor(x, pmpm);
 }
 
 static inline V LDA(const R *x, INT ivs, const R *aligned_like)
 {
-  return vsx_load(x);
+#ifdef __ibmxl__
+  return vec_xl(0,(DS(double,float) *)x);
+#else
+  return (*(const V *)(x));
+#endif
 }
 
 static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
 {
-  vsx_store(v,x);
+#ifdef __ibmxl__
+  vec_xst(v,0,x);
+#else
+  *(V *)x = v;
+#endif
 }
 
 static inline V FLIP_RI(V x)
 {
 #ifdef FFTW_SINGLE
-  const vector unsigned int perm = { 0x07060504, 0x03020100, 0x0f0e0d0c, 0x0b0a0908 };
-  return vec_perm(x, x, (vector unsigned char)perm);
+  const vector unsigned char perm = { 4,5,6,7,0,1,2,3,12,13,14,15,8,9,10,11 };
 #else
-  return vsx_permdi(x,x,2);
+  const vector unsigned char perm = { 8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7 };
 #endif
+  return vec_perm(x,x,perm);
 }
 
 #ifdef FFTW_SINGLE
 
 static inline V LD(const R *x, INT ivs, const R *aligned_like)
 {
-  return vsx_permdi(vsx_lxsdx(x+ivs),vsx_lxsdx(x),0);
+  const vector unsigned char perm = {0,1,2,3,4,5,6,7,16,17,18,19,20,21,22,23};
+
+  return vec_perm((vector float)vec_splats(*(double *)(x)),
+		  (vector float)vec_splats(*(double *)(x+ivs)),perm);
 }
 
 static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 {
-  vsx_stxsdx(v,x+ovs);
-  vsx_stxsdx(vsx_permdi(v,v,3),x);
+  *(double *)(x+ovs) = vec_extract( (vector double)v, 1 );
+  *(double *)x       = vec_extract( (vector double)v, 0 );
 }
 #else
 /* DOUBLE */
@@ -156,10 +124,6 @@ static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 #ifdef FFTW_SINGLE
 
 #  define STM4(x, v, ovs, aligned_like) /* no-op */
-/* Note on optimization for VSX: Normally the vec_vsx_st() store instructions would
- * be translated into a permute and two stxsdx on little endian. We bypass this
- * and access the lower-level instructions directly, which saves us four permutes.
- */
 static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
 {
     V xxx0, xxx1, xxx2, xxx3;
@@ -167,36 +131,53 @@ static inline void STN4(R *x, V v0, V v1, V v2, V v3, int ovs)
     xxx1 = vec_mergel(v0,v1);
     xxx2 = vec_mergeh(v2,v3);
     xxx3 = vec_mergel(v2,v3);
-    vsx_stxsdx(xxx0,x+ovs);
-    vsx_stxsdx(xxx1,x+3*ovs);
-    vsx_stxsdx(xxx2,x+ovs+2);
-    vsx_stxsdx(xxx3,x+3*ovs+2);
-    vsx_stxsdx(vsx_permdi(xxx0,xxx0,3),x);
-    vsx_stxsdx(vsx_permdi(xxx1,xxx1,3),x+2*ovs);
-    vsx_stxsdx(vsx_permdi(xxx2,xxx2,3),x+2);
-    vsx_stxsdx(vsx_permdi(xxx3,xxx3,3),x+2*ovs+2);
+    *(double *)x           = vec_extract( (vector double)xxx0, 0 );
+    *(double *)(x+ovs)     = vec_extract( (vector double)xxx0, 1 );
+    *(double *)(x+2*ovs)   = vec_extract( (vector double)xxx1, 0 );
+    *(double *)(x+3*ovs)   = vec_extract( (vector double)xxx1, 1 );
+    *(double *)(x+2)       = vec_extract( (vector double)xxx2, 0 );
+    *(double *)(x+ovs+2)   = vec_extract( (vector double)xxx2, 1 );
+    *(double *)(x+2*ovs+2) = vec_extract( (vector double)xxx3, 0 );
+    *(double *)(x+3*ovs+2) = vec_extract( (vector double)xxx3, 1 );
 }
 #else /* !FFTW_SINGLE */
 
 static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 {
      (void)aligned_like; /* UNUSED */
-     vsx_stxsdx(vsx_permdi(v,v,3),x);
-     vsx_stxsdx(v,x+ovs);
+     x[0]    = vec_extract(v,0);
+     x[ovs]  = vec_extract(v,1);
 }
 #  define STN4(x, v0, v1, v2, v3, ovs) /* nothing */
 #endif
 
 static inline V VBYI(V x)
 {
-#ifdef FFTW_SINGLE
+  /* Complicated low-level stuff. vpermxor is really a cryptographic instruction that is only 
+   * available in the low-level inteface both for GCC and XLC. However, on little-endian
+   * platforms there is also the complicated swapping going on. XLC does this here too, but
+   * not GCC, so we need different permute constants. 
+   */ 
+#if defined(__POWER8_VECTOR__) && defined(__GNUC__) && defined(__LITTLE_ENDIAN__)
+#    ifdef FFTW_SINGLE
   const vector unsigned char perm = { 0xbb, 0xaa, 0x99, 0x88, 0xff, 0xee, 0xdd, 0xcc, 0x33, 0x22, 0x11, 0x00, 0x77, 0x66, 0x55, 0x44 };
-#else
+#    else
   const vector unsigned char perm = { 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00, 0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88 };
+#    endif
+  const V                    pmpm = vec_mergel(vec_splats((R)0.0),-(vec_splats((R)0.0)));
+  return (V)__builtin_crypto_vpermxor((vector unsigned char)x,(vector unsigned char)pmpm,perm);
+#elif defined(__POWER8_VECTOR__) && (defined(__ibmxl__) || (defined(__GNUC__) && !defined(__LITTLE_ENDIAN__)))
+#    ifdef FFTW_SINGLE
+  const vector unsigned char perm = { 0x44, 0x55, 0x66, 0x77, 0x00, 0x11, 0x22, 0x33, 0xCC, 0xDD, 0xEE, 0xFF, 0x88, 0x99, 0xAA, 0xBB };
+#    else
+  const vector unsigned char perm = { 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77 };
+#    endif
+  const V                    pmpm = vec_mergel(vec_splats((R)0.0),-(vec_splats((R)0.0)));
+  return (V)__vpermxor((vector unsigned char)x,(vector unsigned char)pmpm,perm);
+#else
+  /* The safe option */
+  return FLIP_RI(VCONJ(x));
 #endif
-  const V                    pmpm = vec_mergel(vec_splats((R)0.0),vsx_neg(vec_splats((R)0.0)));
-  /* We borrow a neat raid instruction that does a permute and xor in a single step */
-  return vsx_vpermxor(x,pmpm,perm);
 }
 
 /* FMA support */
