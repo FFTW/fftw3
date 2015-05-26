@@ -21,7 +21,7 @@
 
 #include "ifftw.h"
 
-#if HAVE_AVX
+#if HAVE_AVX_128_FMA
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
 #    include "amd64-cpuid.h"
@@ -29,20 +29,25 @@
 #    include "x86-cpuid.h"
 #endif
 
-int X(have_simd_avx)(void)
+int X(have_simd_avx_128_fma)(void)
 {
        static int init = 0, res = 0;
-       int max_stdfn,max_extfn, eax,ebx,ecx,edx, nunits;
+       int eax,ebx,ecx,edx;
 
        if (!init)
        {
+	 /* Check if this is an AMD CPU */
 	 cpuid_all(0,0,&eax,&ebx,&ecx,&edx);
-	 max_stdfn = eax;
-	 if(max_stdfn >= 0x1)
+
+	 /* 0x68747541: "Auth"  , 0x444d4163: "enti"  , 0x69746e65: "cAMD" */
+	 if (ebx==0x68747541 && ecx==0x444d4163 && edx==0x69746e65)
 	 {
-	   cpuid_all(0x1, 0, &eax, &ebx, &ecx, &edx);
-	   /* Bit 28 of ecx for fn==1 specifies AVX */
-	   res = ((ecx & (1 << 28))  != 0);
+	   /* OK, this is an AMD CPU. Check if we support FMA4 */
+	   cpuid_all(0x80000001,0,&eax,&ebx,&ecx,&edx);
+	   if(ecx & (1<<16))
+	     {
+	       res = 1;
+	     }
 	 }
 	 init = 1;
        }
@@ -50,4 +55,3 @@ int X(have_simd_avx)(void)
 }
 
 #endif
-

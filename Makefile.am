@@ -53,9 +53,12 @@ endif
 
 if HAVE_AVX
 AVX_LIBS = dft/simd/avx/libdft_avx_codelets.la	\
-dft/simd/avx-128/libdft_avx_128_codelets.la \
-rdft/simd/avx/librdft_avx_codelets.la \
-rdft/simd/avx-128/librdft_avx_128_codelets.la
+rdft/simd/avx/librdft_avx_codelets.la
+endif
+
+if HAVE_AVX_128_FMA
+AVX_128_FMA_LIBS = dft/simd/avx-128-fma/libdft_avx_128_fma_codelets.la \
+rdft/simd/avx-128-fma/librdft_avx_128_fma_codelets.la
 endif
 
 if HAVE_AVX2
@@ -120,7 +123,8 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	rdft/scalar/r2r/librdft_scalar_r2r.la		\
 	reodft/libreodft.la				\
 	api/libapi.la					\
-        $(SIMD_LIBS) $(SSE2_LIBS) $(AVX_LIBS) $(AVX2_LIBS) $(ALTIVEC_LIBS) \
+        $(SIMD_LIBS) $(SSE2_LIBS) $(AVX_LIBS) $(AVX_128_FMA_LIBS) \
+        $(AVX2_LIBS) $(ALTIVEC_LIBS) \
         $(VSX_LIBS) $(NEON_LIBS) $(KCVI_LIBS) $(AVX512_LIBS) \
         $(GENERIC_SIMD128_LIBS) $(GENERIC_SIMD256_LIBS) \
 	$(COMBINED_THREADLIBS)

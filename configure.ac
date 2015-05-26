@@ -1,3 +1,5 @@
+
+
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Define the fftw version number as M4 macros, so that we can enforce
@@ -478,6 +480,32 @@ AC_CHECK_HEADERS([altivec.h])
 CFLAGS="$save_CFLAGS"
 CPPFLAGS="$save_CPPFLAGS"
 
+dnl 128-bit AVX is special. There is no reason to use it on Intel processors
+dnl since SSE2 is just as fast. However, on AMD processors we can both use
+dnl FMA4, and 128-bit SIMD is better than 256-bit since core pairs in a
+dnl compute unit can execute two 128-bit instructions independently.
+dnl Check if we have x86intrin.h and fma4, and enable if present. This will
+dnl only apply to the avx-128-fma SIMD files, so the rest of the code will
+dnl run fine on any architecture.
+dnl The same thing does not apply to AVX2: There all CPUs will benefit
+dnl from FMA (although it is presently only available from Intel).
+if test "$have_avx" = "yes"; then
+    AC_CHECK_HEADERS([x86intrin.h],[
+save_CC="$CC"
+CC="$CC -mfma4"
+AC_TRY_LINK([#ifdef HAVE_X86INTRIN_H
+#include <x86intrin.h>
+#endif],[__m128 x=_mm_set1_ps(0.5);x=_mm_macc_ps(x,x,x);],
+            [have_avx_128_fma="yes"])
+CC="$save_CC"])
+
+    if test "$have_avx_128_fma" = "yes"; then
+        AC_DEFINE(HAVE_AVX_128_FMA,1,[Define to enable 128-bit FMA AVX optimization])
+        AVX_128_FMA_CFLAGS="${AVX_CFLAGS} -mfma4"
+        AC_SUBST(AVX_128_FMA_CFLAGS)
+    fi
+fi
+AM_CONDITIONAL(HAVE_AVX_128_FMA, test "$have_avx_128_fma" = "yes")
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -764,7 +792,7 @@ AC_CONFIG_FILES([
    dft/simd/common/Makefile
    dft/simd/sse2/Makefile
    dft/simd/avx/Makefile
-   dft/simd/avx-128/Makefile
+   dft/simd/avx-128-fma/Makefile
    dft/simd/avx2/Makefile
    dft/simd/avx2-128/Makefile
    dft/simd/avx512/Makefile
@@ -784,7 +812,7 @@ AC_CONFIG_FILES([
    rdft/simd/common/Makefile
    rdft/simd/sse2/Makefile
    rdft/simd/avx/Makefile
-   rdft/simd/avx-128/Makefile
+   rdft/simd/avx-128-fma/Makefile
    rdft/simd/avx2/Makefile
    rdft/simd/avx2-128/Makefile
    rdft/simd/avx512/Makefile

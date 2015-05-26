@@ -33,14 +33,10 @@
 #  define SUFF(name) name ## d
 #endif
 
-#define SIMD_SUFFIX  _avx_128  /* for renaming */
+#define SIMD_SUFFIX  _avx_128_fma  /* for renaming */
 #define VL DS(1,2)         /* SIMD vector length, in term of complex numbers */
 #define SIMD_VSTRIDE_OKA(x) DS(1,((x) == 2))
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
-
-#if defined(__GNUC__) && !defined(__AVX__) /* sanity check */
-#error "compiling simd-avx-128.h without -mavx"
-#endif
 
 #ifdef _MSC_VER
 #ifndef inline
@@ -49,6 +45,15 @@
 #endif
 
 #include <immintrin.h>
+#ifdef _MSC_VER
+#    include <intrin.h>
+#elif defined (__GNUC__)
+#    include <x86intrin.h>
+#endif
+
+#if !(defined(__AVX__) && defined(__FMA4__)) /* sanity check */
+#error "compiling simd-avx-128-fma.h without -mavx or -mfma4"
+#endif
 
 typedef DS(__m128d,__m128) V;
 #define VADD SUFF(_mm_add_p)
@@ -92,16 +97,15 @@ static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
 
 static inline V LD(const R *x, INT ivs, const R *aligned_like)
 {
-    __m128 l0, l1;
-    (void)aligned_like; /* UNUSED */
+    V var;
 #if defined(__ICC) || (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ > 8)
-    l0 = LOADL(x, SUFF(_mm_undefined_p)());
-    l1 = LOADL(x + ivs, SUFF(_mm_undefined_p)());
+    var = LOADL(x, SUFF(_mm_undefined_p)());
+    var = LOADH(x + ivs, var);
 #else
-    l0 = LOADL(x, l0);
-    l1 = LOADL(x + ivs, l1);
+    var = LOADL(x, var);
+    var = LOADH(x + ivs, var);
 #endif
-    return SUFF(_mm_movelh_p)(l0,l1);
+    return var;
 }
 
 #  ifdef _MSC_VER
@@ -156,8 +160,9 @@ static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 
 static inline V FLIP_RI(V x)
 {
-     return VPERM1(x, DS(1, SHUFVALS(1, 0, 3, 2)));
+  return VPERM1(x, DS(1, SHUFVALS(1, 0, 3, 2)));
 }
+
 
 static inline V VCONJ(V x)
 {
@@ -173,9 +178,9 @@ static inline V VBYI(V x)
 }
 
 /* FMA support */
-#define VFMA(a, b, c) VADD(c, VMUL(a, b))
-#define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
-#define VFMS(a, b, c) VSUB(VMUL(a, b), c)
+#define VFMA(a, b, c)  SUFF(_mm_macc_p)(a,b,c)
+#define VFNMS(a, b, c) SUFF(_mm_nmacc_p)(a,b,c)
+#define VFMS(a, b, c)  SUFF(_mm_msub_p)(a,b,c)
 #define VFMAI(b, c)  SUFF(_mm_addsub_p)(c,FLIP_RI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 #define VFMACONJ(b,c)  VADD(VCONJ(b),c)

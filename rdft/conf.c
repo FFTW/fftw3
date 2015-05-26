@@ -65,8 +65,10 @@ void X(rdft_conf_standard)(planner *p)
 #if HAVE_AVX
      if (X(have_simd_avx)())
 	  X(solvtab_exec)(X(solvtab_rdft_avx), p);
-     if (X(have_simd_avx_128)())
-          X(solvtab_exec)(X(solvtab_rdft_avx_128), p);
+#endif
+#if HAVE_AVX_128_FMA
+     if (X(have_simd_avx_128_fma)())
+          X(solvtab_exec)(X(solvtab_rdft_avx_128_fma), p);
 #endif
 #if HAVE_AVX2
      if (X(have_simd_avx2)())
