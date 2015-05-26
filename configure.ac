@@ -107,23 +107,6 @@ AM_CONDITIONAL(QUAD, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 AC_SUBST(CHECK_PL_OPTS)
 
-AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
-if test "$have_sse" = "yes"; then
-	if test "$PRECISION" != "s"; then
-		AC_MSG_ERROR([SSE requires single precision])
-	fi
-fi
-
-AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE/SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
-if test "$have_sse" = "yes"; then have_sse2=yes; fi
-if test "$have_sse2" = "yes"; then
-	AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE/SSE2 optimizations.])
-	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
-		AC_MSG_ERROR([SSE2 requires single or double precision])
-	fi
-fi
-AM_CONDITIONAL(HAVE_SSE2, test "$have_sse2" = "yes")
-
 AC_ARG_ENABLE(avx, [AC_HELP_STRING([--enable-avx],[enable AVX optimizations])], have_avx=$enableval, have_avx=no)
 if test "$have_avx" = "yes"; then
         AC_DEFINE(HAVE_AVX,1,[Define to enable AVX optimizations.])
@@ -152,6 +135,29 @@ if test "$have_avx512" = "yes"; then
         have_fma="yes"
 fi
 AM_CONDITIONAL(HAVE_AVX512, test "$have_avx512" = "yes")
+
+dnl Process SSE/SSE2 after AVX, so we can enable the shorter-length vectors too.
+dnl All AVX-capable platforms, including AVX-512, support the old SSE instructions.
+AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
+if test "$have_sse" = "yes"; then
+        if test "$PRECISION" != "s"; then
+                AC_MSG_ERROR([SSE requires single precision])
+        fi
+fi
+
+AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE/SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
+if test "$have_sse" = "yes"; then have_sse2=yes; fi
+if test "$have_avx" = "yes"; then have_sse2=yes; fi
+if test "$have_avx2" = "yes"; then have_sse2=yes; fi
+if test "$have_avx512" = "yes"; then have_sse2=yes; fi
+if test "$have_sse2" = "yes"; then
+        AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE/SSE2 optimizations.])
+        if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+                AC_MSG_ERROR([SSE2 requires single or double precision])
+        fi
+fi
+AM_CONDITIONAL(HAVE_SSE2, test "$have_sse2" = "yes")
+
 
 AC_ARG_ENABLE(kcvi, [AC_HELP_STRING([--enable-kcvi],[enable Knights Corner vector instructions optimizations])], have_kcvi=$enableval, have_kcvi=no)
 if test "$have_kcvi" = "yes"; then
