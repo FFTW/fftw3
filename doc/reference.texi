@@ -1496,7 +1496,7 @@ dimension larger than
 2<sup><small>31</small></sup>&minus;1
 @end html
 @tex
-$2^31-1$
+$2^{31}-1$
 @end tex
 numbers.
 
