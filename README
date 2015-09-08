@@ -18,21 +18,30 @@ of the manual.
 INSTALLATION
 ------------
 
-If you have downloaded an official release, please read chapter
-10 "Installation and Customization" of the manual.  In short:
+INSTALLATION FROM AN OFFICIAL RELEASE:
+
+Please read chapter 10 "Installation and Customization" of the manual.
+In short:
 
      ./configure
      make
      make install
 
-If you are using the git repository, install these programs:
+INSTALLATION FROM THE GIT REPOSITORY:
+
+First, install these programs:
 
   ocaml, ocamlbuild, autoconf, automake, indent, and libtool,
 
-and then execute the bootstrap.sh script.  Most of the source code of
-fftw is generated automatically, and this script generates all the
-required source files.
+Then, execute
 
+    sh bootstrap.sh
+    make
+    
+The bootstrap.sh script runs configure directly, but if you need to
+re-run configure, you must pass the --enable-maintainer-mode flag:
+
+    ./configure --enable-maintainer-mode [OTHER CONFIGURE FLAGS]
 
 CONTACTS
 --------
