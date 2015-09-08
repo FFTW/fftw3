@@ -25,10 +25,13 @@ If you have downloaded an official release, please read chapter
      make
      make install
 
-If you are using the git repository, install ocaml, autoconf,
-automake, indent and libtool, and execute the bootstrap.sh script.  Most of
-the source code of fftw is generated automatically, and this script
-generates all the required source files.
+If you are using the git repository, install these programs:
+
+  ocaml, ocamlbuild, autoconf, automake, indent, and libtool,
+
+and then execute the bootstrap.sh script.  Most of the source code of
+fftw is generated automatically, and this script generates all the
+required source files.
 
 
 CONTACTS
