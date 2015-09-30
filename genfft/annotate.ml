@@ -80,7 +80,7 @@ let reorder l =
 	let c' =
 	  Sort.list 
 	    (fun (_, (a, la)) (_, (b, lb)) -> 
-	      la < lb or a > b)
+	      la < lb || a > b)
 	    c in
 	let b' = List.map (fun (a, _) -> a) c' in
 	a :: (loop b') in
@@ -273,7 +273,7 @@ let rec rewrite_declarations force_declarations
   let m = !Magic.number_of_variables in
 
   let declare_it declared =
-    if (force_declarations or List.length declared >= m) then
+    if (force_declarations || List.length declared >= m) then
       ([], declared)
     else
       (declared, [])

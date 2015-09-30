@@ -57,10 +57,10 @@ end = struct
     | (NaN a, NaN b) -> a == b
     | (Load a, Load b) -> Variable.same a b
     | (Times (a, a'), Times (b, b')) ->
- 	((a == b) && (a' == b')) or
+ 	((a == b) && (a' == b')) ||
  	((a == b') && (a' == b))
     | (CTimes (a, a'), CTimes (b, b')) ->
- 	((a == b) && (a' == b')) or
+ 	((a == b) && (a' == b')) ||
  	((a == b') && (a' == b))
     | (CTimesJ (a, a'), CTimesJ (b, b')) -> ((a == b) && (a' == b'))
     | (Plus a, Plus b) -> subset a b && subset b a

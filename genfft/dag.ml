@@ -56,7 +56,7 @@ let node_clobbers node v =
 
 (* true if nodeb depends on nodea *)
 let depends_on nodea nodeb =
-  node_uses nodea.assigned nodeb or
+  node_uses nodea.assigned nodeb ||
   node_clobbers nodea nodeb.assigned
 
 (* transform an assignment list into a dag *)
