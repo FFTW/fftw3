@@ -62,7 +62,7 @@ let mone = of_int (-1)
 (* comparison predicate for real numbers *)
 let equal (N x) (N y) = (* use both relative and absolute error *)
   let absdiff = abs_num (x -/ y) in
-  absdiff <=/ pepsilon or
+  absdiff <=/ pepsilon ||
   absdiff <=/ pepsilon */ (abs_num x +/ abs_num y)
 
 let is_zero = equal zero
