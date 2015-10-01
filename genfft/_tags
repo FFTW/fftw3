@@ -1,0 +1,3 @@
+true: annot, bin_annot, principal
+<src/lib/*.cmx> and not <src/lib/oml.cm*> : for-pack(Oml)
+<src/lib/datasets/*.cmx> and not <src/lib/datasets/data.cm*> : for-pack(Data)
