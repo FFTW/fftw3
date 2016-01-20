@@ -21,14 +21,15 @@
 
 (* repository of unique tokens *)
 
-type unique = int
+type unique = Unique of int
 
-let id = ref 0
+let make =
+  let id = ref 0 in
+    fun () -> begin
+      id := !id + 1;
+      Unique !id
+    end
 
-let make () =
-  id := !id + 1;
-  !id
-
-let same a b =
+let same (Unique a) (Unique b) =
   a = b
 
