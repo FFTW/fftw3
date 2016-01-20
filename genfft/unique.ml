@@ -21,18 +21,14 @@
 
 (* repository of unique tokens *)
 
-type unique = Unique of unit
+type unique = int
 
-(* this depends on the compiler not being too smart *)
+let id = ref 0
+
 let make () =
-  let make_aux x = Unique x in
-  make_aux ()
+  id := !id + 1;
+  !id
 
-(* note that the obvious definition
+let same a b =
+  a = b
 
-      let make () = Unique ()
-
-   fails *)
-
-let same (a : unique) (b : unique) =
-  (a == b)
