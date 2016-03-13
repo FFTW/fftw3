@@ -1948,7 +1948,7 @@ As a result of this symmetry, half of the output @math{Y} is redundant
 (being the complex conjugate of the other half), and so the 1d r2c
 transforms only output elements @math{0}@dots{}@math{n/2} of @math{Y}
 (@math{n/2+1} complex numbers), where the division by @math{2} is
-rounded down.
+rounded down. 
 
 Moreover, the Hermitian symmetry implies that
 @tex
@@ -1970,8 +1970,8 @@ Y[n/2]
 @html
 <i>Y</i><sub><i>n</i>/2</sub>
 @end html
-element, are purely real.  So, for the @code{R2HC} r2r transform, these
-elements are not stored in the halfcomplex output format.
+element, are purely real.  So, for the @code{R2HC} r2r transform, the
+halfcomplex format does not store the imaginary parts of these elements.
 @cindex r2r
 @ctindex R2HC
 @cindex halfcomplex format
