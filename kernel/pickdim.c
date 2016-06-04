@@ -60,10 +60,11 @@ static int really_pickdim(int which_dim, const tensor *sz, int oop, int *dp)
 
 /* Like really_pickdim, but only returns 1 if no previous "buddy"
    which_dim in the buddies list would give the same dim. */
-int X(pickdim)(int which_dim, const int *buddies, int nbuddies,
+int X(pickdim)(int which_dim, const int *buddies, size_t nbuddies,
 	       const tensor *sz, int oop, int *dp)
 {
-     int i, d1;
+     size_t i;
+     int d1;
 
      if (!really_pickdim(which_dim, sz, oop, dp))
           return 0;

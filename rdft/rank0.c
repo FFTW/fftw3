@@ -214,7 +214,7 @@ static int applicable_memcpy(const P *pln, const problem_rdft *p)
    transposes of vl-tuples ... for large vl it should be more
    efficient to use memcpy than the tiled stuff). */
 
-static void memcpy_loop(INT cpysz, int rnk, const iodim *d, R *I, R *O)
+static void memcpy_loop(size_t cpysz, int rnk, const iodim *d, R *I, R *O)
 {
      INT i, n = d->n, is = d->is, os = d->os;
      if (rnk == 1)

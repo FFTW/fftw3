@@ -127,8 +127,8 @@ static int applicable0(const hc2c_solver *ego, const problem *p_, planner *plnr)
 	     && p->sz->dims[0].n > r);
 }
 
-int X(hc2c_applicable)(const hc2c_solver *ego, const problem *p_,
-		       planner *plnr)
+static int hc2c_applicable(const hc2c_solver *ego, const problem *p_,
+                           planner *plnr)
 {
      const problem_rdft2 *p;
 
@@ -156,7 +156,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
 	  X(rdft2_solve), awake, print, destroy
      };
 
-     if (!X(hc2c_applicable)(ego, p_, plnr))
+     if (!hc2c_applicable(ego, p_, plnr))
           return (plan *) 0;
 
      p = (const problem_rdft2 *) p_;

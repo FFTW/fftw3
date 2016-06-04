@@ -40,7 +40,7 @@ typedef struct {
      solver super;
      int vecloop_dim;
      const int *buddies;
-     int nbuddies;
+     size_t nbuddies;
 } S;
 
 typedef struct {
@@ -195,7 +195,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return &(pln->super.super);
 }
 
-static solver *mksolver(int vecloop_dim, const int *buddies, int nbuddies)
+static solver *mksolver(int vecloop_dim, const int *buddies, size_t nbuddies)
 {
      static const solver_adt sadt = { PROBLEM_RDFT2, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);
@@ -207,13 +207,10 @@ static solver *mksolver(int vecloop_dim, const int *buddies, int nbuddies)
 
 void X(rdft2_vrank_geq1_register)(planner *p)
 {
-     int i;
-
      /* FIXME: Should we try other vecloop_dim values? */
      static const int buddies[] = { 1, -1 };
+     size_t i;
 
-     const int nbuddies = (int)(sizeof(buddies) / sizeof(buddies[0]));
-
-     for (i = 0; i < nbuddies; ++i)
-          REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));
+     for (i = 0; i < NELEM(buddies); ++i)
+          REGISTER_SOLVER(p, mksolver(buddies[i], buddies, NELEM(buddies)));
 }

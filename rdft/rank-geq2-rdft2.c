@@ -28,7 +28,7 @@ typedef struct {
      solver super;
      int spltrnk;
      const int *buddies;
-     int nbuddies;
+     size_t nbuddies;
 } S;
 
 typedef struct {
@@ -216,7 +216,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(int spltrnk, const int *buddies, int nbuddies)
+static solver *mksolver(int spltrnk, const int *buddies, size_t nbuddies)
 {
      static const solver_adt sadt = { PROBLEM_RDFT2, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);
@@ -228,13 +228,11 @@ static solver *mksolver(int spltrnk, const int *buddies, int nbuddies)
 
 void X(rdft2_rank_geq2_register)(planner *p)
 {
-     int i;
      static const int buddies[] = { 1, 0, -2 };
+     size_t i;
 
-     const int nbuddies = (int)(sizeof(buddies) / sizeof(buddies[0]));
-
-     for (i = 0; i < nbuddies; ++i)
-          REGISTER_SOLVER(p, mksolver(buddies[i], buddies, nbuddies));
+     for (i = 0; i < NELEM(buddies); ++i)
+          REGISTER_SOLVER(p, mksolver(buddies[i], buddies, NELEM(buddies)));
 
      /* FIXME: Should we try more buddies?  See also dft/rank-geq2. */
 }

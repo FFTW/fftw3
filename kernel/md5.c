@@ -134,7 +134,7 @@ void X(md5end)(md5 *p)
 
      /* rfc 1321 section 3.2: length (little endian) */
      for (i = 0; i < 8; ++i) {
-	  X(md5putc)(p, l & 0xFF);
+	  X(md5putc)(p, (unsigned char)(l & 0xFF));
 	  l = l >> 8;
      }
 

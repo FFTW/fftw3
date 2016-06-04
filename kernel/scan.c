@@ -80,7 +80,7 @@ static void mygets(scanner *sc, char *s, size_t maxlen)
      A(maxlen > 0);
      while ((ch = GETCHR(sc)) != EOF && !isspace(ch)
 	    && ch != ')' && ch != '(' && s < s0 + maxlen)
-	  *s++ = ch;
+	  *s++ = (char)(ch & 0xFF);
      *s = 0;
      UNGETCHR(sc, ch);
 }

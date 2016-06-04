@@ -23,7 +23,7 @@
 
 typedef struct {
      solver super;
-     int maxnbuf_ndx;
+     size_t maxnbuf_ndx;
 } S;
 
 static const INT maxnbufs[] = { 8, 256 };
@@ -321,7 +321,7 @@ static plan *mkplan(const solver *ego_, const problem *p_, planner *plnr)
      return (plan *) 0;
 }
 
-static solver *mksolver(int maxnbuf_ndx)
+static solver *mksolver(size_t maxnbuf_ndx)
 {
      static const solver_adt sadt = { PROBLEM_RDFT, mkplan, 0 };
      S *slv = MKSOLVER(S, &sadt);

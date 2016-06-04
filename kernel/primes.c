@@ -82,9 +82,9 @@ static INT get_prime_factors(INT n, INT *primef)
 
      A(n % 2 == 0); /* this routine is designed only for even n */
      primef[size++] = (INT)2;
-     do
+     do {
 	  n >>= 1;
-     while ((n & 1) == 0);
+     } while ((n & 1) == 0);
 
      if (n == 1)
 	  return size;
@@ -92,9 +92,9 @@ static INT get_prime_factors(INT n, INT *primef)
      for (i = 3; i * i <= n; i += 2)
 	  if (!(n % i)) {
 	       primef[size++] = i;
-	       do
+	       do {
 		    n /= i;
-	       while (!(n % i));
+	       } while (!(n % i));
 	  }
      if (n == 1)
 	  return size;

@@ -103,7 +103,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       }
 		       case 'c': {
 			    int x = va_arg(ap, int);
-			    p->putchr(p, x);
+			    p->putchr(p, (char)x);
 			    break;
 		       }
 		       case 's': {

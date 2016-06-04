@@ -28,6 +28,7 @@
 #include <stdlib.h>		/* size_t */
 #include <stdarg.h>		/* va_list */
 #include <stddef.h>             /* ptrdiff_t */
+#include <limits.h>             /* INT_MAX */
 
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -85,7 +86,7 @@ typedef ptrdiff_t INT;
 /* dummy use of unused parameters to silence compiler warnings */
 #define UNUSED(x) (void)x
 
-#define NELEM(array) ((int) (sizeof(array) / sizeof((array)[0])))
+#define NELEM(array) ((sizeof(array) / sizeof((array)[0])))
 
 #define FFT_SIGN (-1)  /* sign convention for forward transforms */
 extern void X(extract_reim)(int sign, R *c, R **r, R **i);
@@ -445,7 +446,7 @@ typedef struct {
  
   A tensor of rank -infinity has size 0.
 */
-#define RNK_MINFTY  ((int)(((unsigned) -1) >> 1))
+#define RNK_MINFTY  INT_MAX
 #define FINITE_RNK(rnk) ((rnk) != RNK_MINFTY)
 
 typedef enum { INPLACE_IS, INPLACE_OS } inplace_kind;
@@ -886,7 +887,7 @@ void X(solvtab_exec)(const solvtab tbl, planner *p);
 
 /*-----------------------------------------------------------------------*/
 /* pickdim.c */
-int X(pickdim)(int which_dim, const int *buddies, int nbuddies,
+int X(pickdim)(int which_dim, const int *buddies, size_t nbuddies,
 	       const tensor *sz, int oop, int *dp);
 
 /*-----------------------------------------------------------------------*/
@@ -1042,8 +1043,8 @@ double X(measure_execution_time)(const planner *plnr,
 IFFTW_EXTERN int X(ialignment_of)(R *p);
 unsigned X(hash)(const char *s);
 INT X(nbuf)(INT n, INT vl, INT maxnbuf);
-int X(nbuf_redundant)(INT n, INT vl, int which, 
-		      const INT *maxnbuf, int nmaxnbuf);
+int X(nbuf_redundant)(INT n, INT vl, size_t which, 
+		      const INT *maxnbuf, size_t nmaxnbuf);
 INT X(bufdist)(INT n, INT vl);
 int X(toobig)(INT n);
 int X(ct_uglyp)(INT min_n, INT v, INT n, INT r);
