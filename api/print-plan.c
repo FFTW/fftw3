@@ -22,7 +22,7 @@
 
 char *X(sprint_plan)(const X(plan) p)
 {
-     int cnt;
+     size_t cnt;
      char *s;
      plan *pln = p->pln;
 

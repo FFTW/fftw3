@@ -53,8 +53,6 @@
        }
   }
 
-  extern void X(check_alignment_of_sse2_pm)(void);
-
   int X(have_simd_neon)(void)
   {
        static int init = 0, res;
