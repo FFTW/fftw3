@@ -27,6 +27,7 @@ extern "C" {
 
 /* benchmark program definitions for user code */
 #include "config.h"
+#include <limits.h>
 
 #if HAVE_STDDEF_H
 #include <stddef.h>
@@ -105,8 +106,8 @@ void tensor_obounds(bench_tensor *t, int *lbp, int *ubp);
  
   A tensor of rank -infinity has size 0.
 */
-#define RNK_MINFTY  ((int)(((unsigned) -1) >> 1))
-#define FINITE_RNK(rnk) ((rnk) != RNK_MINFTY)
+#define BENCH_RNK_MINFTY  INT_MAX
+#define BENCH_FINITE_RNK(rnk) ((rnk) != BENCH_RNK_MINFTY)
 
 typedef struct {
      problem_kind_t kind;

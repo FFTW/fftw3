@@ -48,7 +48,7 @@ static void recur(int rnk, const bench_iodim *dims0, const bench_iodim *dims1,
 void bench_dotens2(const bench_tensor *sz0, const bench_tensor *sz1, dotens2_closure *k)
 {
      BENCH_ASSERT(sz0->rnk == sz1->rnk);
-     if (sz0->rnk == RNK_MINFTY)
+     if (sz0->rnk == BENCH_RNK_MINFTY)
           return;
      recur(sz0->rnk, sz0->dims, sz1->dims, k, 0, 0, 0, 0);
 }

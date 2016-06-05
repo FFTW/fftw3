@@ -158,13 +158,13 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 #if defined(STRUCT_HACK_KR)
      ego = (problem_rdft *) X(mkproblem)(sizeof(problem_rdft)
 					 + sizeof(rdft_kind)
-					 * (rnk > 0 ? rnk - 1 : 0), &padt);
+					 * (rnk > 0 ? rnk - 1u : 0u), &padt);
 #elif defined(STRUCT_HACK_C99)
      ego = (problem_rdft *) X(mkproblem)(sizeof(problem_rdft)
-					 + sizeof(rdft_kind) * rnk, &padt);
+					 + sizeof(rdft_kind) * (unsigned)rnk, &padt);
 #else
      ego = (problem_rdft *) X(mkproblem)(sizeof(problem_rdft), &padt);
-     ego->kind = (rdft_kind *) MALLOC(sizeof(rdft_kind) * rnk, PROBLEMS);
+     ego->kind = (rdft_kind *) MALLOC(sizeof(rdft_kind) * (unsigned)rnk, PROBLEMS);
 #endif
 
      /* do compression and sorting as in X(tensor_compress), but take

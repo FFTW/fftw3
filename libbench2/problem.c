@@ -51,7 +51,7 @@ static bench_tensor *dwim(bench_tensor *t, bench_iodim **last_iodim,
      int i;
      bench_iodim *d, *d1;
 
-     if (!FINITE_RNK(t->rnk) || t->rnk < 1)
+     if (!BENCH_FINITE_RNK(t->rnk) || t->rnk < 1)
 	  return t;
 
      i = t->rnk;
@@ -72,7 +72,7 @@ static bench_tensor *dwim(bench_tensor *t, bench_iodim **last_iodim,
 
 static void transpose_tensor(bench_tensor *t)
 {
-     if (!FINITE_RNK(t->rnk) || t->rnk < 2)
+     if (!BENCH_FINITE_RNK(t->rnk) || t->rnk < 2)
           return;
 
      t->dims[0].os = t->dims[1].os;

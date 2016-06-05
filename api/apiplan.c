@@ -29,7 +29,7 @@ void X(set_planner_hooks)(planner_hook_t before, planner_hook_t after)
 }
 
 static plan *mkplan0(planner *plnr, unsigned flags,
-		     const problem *prb, int hash_info,
+		     const problem *prb, unsigned hash_info,
 		     wisdom_state_t wisdom_state)
 {
      /* map API flags into FFTW flags */
@@ -49,7 +49,7 @@ static unsigned force_estimator(unsigned flags)
 }
 
 static plan *mkplan(planner *plnr, unsigned flags,
-		    const problem *prb, int hash_info)
+		    const problem *prb, unsigned hash_info)
 {
      plan *pln;
      
@@ -121,7 +121,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	  for (pln = 0, flags_used_for_planning = 0; pat <= pat_max; ++pat) {
 	       plan *pln1;
 	       unsigned tmpflags = flags | pats[pat];
-	       pln1 = mkplan(plnr, tmpflags, prb, 0);
+	       pln1 = mkplan(plnr, tmpflags, prb, 0u);
 
 	       if (!pln1) {
 		    /* don't bother continuing if planner failed or timed out */

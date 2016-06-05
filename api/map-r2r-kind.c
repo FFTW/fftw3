@@ -27,7 +27,7 @@ rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind)
      rdft_kind *k;
 
      A(FINITE_RNK(rank));
-     k = (rdft_kind *) MALLOC(rank * sizeof(rdft_kind), PROBLEMS);
+     k = (rdft_kind *) MALLOC((unsigned)rank * sizeof(rdft_kind), PROBLEMS);
      for (i = 0; i < rank; ++i) {
 	  rdft_kind m;
           switch (kind[i]) {

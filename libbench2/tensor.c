@@ -28,7 +28,7 @@ bench_tensor *mktensor(int rnk)
      BENCH_ASSERT(rnk >= 0);
 
      x = (bench_tensor *)bench_malloc(sizeof(bench_tensor));
-     if (FINITE_RNK(rnk) && rnk > 0)
+     if (BENCH_FINITE_RNK(rnk) && rnk > 0)
           x->dims = (bench_iodim *)bench_malloc(sizeof(bench_iodim) * rnk);
      else
           x->dims = 0;
@@ -47,7 +47,7 @@ int tensor_sz(const bench_tensor *sz)
 {
      int i, n = 1;
 
-     if (!FINITE_RNK(sz->rnk))
+     if (!BENCH_FINITE_RNK(sz->rnk))
           return 0;
 
      for (i = 0; i < sz->rnk; ++i)
@@ -71,7 +71,7 @@ bench_tensor *tensor_compress(const bench_tensor *sz)
      int i, rnk;
      bench_tensor *x;
 
-     BENCH_ASSERT(FINITE_RNK(sz->rnk));
+     BENCH_ASSERT(BENCH_FINITE_RNK(sz->rnk));
      for (i = rnk = 0; i < sz->rnk; ++i) {
           BENCH_ASSERT(sz->dims[i].n > 0);
           if (sz->dims[i].n != 1)
@@ -95,7 +95,7 @@ bench_tensor *tensor_compress(const bench_tensor *sz)
 
 int tensor_unitstridep(bench_tensor *t)
 {
-     BENCH_ASSERT(FINITE_RNK(t->rnk));
+     BENCH_ASSERT(BENCH_FINITE_RNK(t->rnk));
      return (t->rnk == 0 ||
 	     (t->dims[t->rnk - 1].is == 1 && t->dims[t->rnk - 1].os == 1));
 }
@@ -105,7 +105,7 @@ int tensor_real_rowmajorp(bench_tensor *t, int sign, int in_place)
 {
      int i;
 
-     BENCH_ASSERT(FINITE_RNK(t->rnk));
+     BENCH_ASSERT(BENCH_FINITE_RNK(t->rnk));
 
      i = t->rnk - 1;
 
@@ -139,7 +139,7 @@ int tensor_rowmajorp(bench_tensor *t)
 {
      int i;
 
-     BENCH_ASSERT(FINITE_RNK(t->rnk));
+     BENCH_ASSERT(BENCH_FINITE_RNK(t->rnk));
 
      i = t->rnk - 1;
      while (--i >= 0) {
@@ -155,15 +155,15 @@ int tensor_rowmajorp(bench_tensor *t)
 static void dimcpy(bench_iodim *dst, const bench_iodim *src, int rnk)
 {
      int i;
-     if (FINITE_RNK(rnk))
+     if (BENCH_FINITE_RNK(rnk))
           for (i = 0; i < rnk; ++i)
                dst[i] = src[i];
 }
 
 bench_tensor *tensor_append(const bench_tensor *a, const bench_tensor *b)
 {
-     if (!FINITE_RNK(a->rnk) || !FINITE_RNK(b->rnk)) {
-          return mktensor(RNK_MINFTY);
+     if (!BENCH_FINITE_RNK(a->rnk) || !BENCH_FINITE_RNK(b->rnk)) {
+          return mktensor(BENCH_RNK_MINFTY);
      } else {
 	  bench_tensor *x = mktensor(a->rnk + b->rnk);
           dimcpy(x->dims, a->dims, a->rnk);
@@ -189,7 +189,7 @@ void name(bench_tensor *t, int *lbp, int *ubp)	\
      int ub = 1;				\
      int i;					\
 						\
-     BENCH_ASSERT(FINITE_RNK(t->rnk));		\
+     BENCH_ASSERT(BENCH_FINITE_RNK(t->rnk));		\
 						\
      for (i = 0; i < t->rnk; ++i) {		\
 	  bench_iodim *d = t->dims + i;		\
@@ -218,7 +218,7 @@ bench_tensor *tensor_copy_sub(const bench_tensor *sz, int start_dim, int rnk)
 {
      bench_tensor *x;
 
-     BENCH_ASSERT(FINITE_RNK(sz->rnk) && start_dim + rnk <= sz->rnk);
+     BENCH_ASSERT(BENCH_FINITE_RNK(sz->rnk) && start_dim + rnk <= sz->rnk);
      x = mktensor(rnk);
      dimcpy(x->dims, sz->dims + start_dim, rnk);
      return x;
@@ -228,7 +228,7 @@ bench_tensor *tensor_copy_swapio(const bench_tensor *sz)
 {
      bench_tensor *x = tensor_copy(sz);
      int i;
-     if (FINITE_RNK(x->rnk))
+     if (BENCH_FINITE_RNK(x->rnk))
 	  for (i = 0; i < x->rnk; ++i) {
 	       int s;
 	       s = x->dims[i].is;

@@ -84,7 +84,7 @@ static void cpyhc2(R *ra, R *ia,
      k.k.apply = cpyhc20;
      k.n = tensor_sz(sza);
      k.scalea = scalea;
-     if (!FINITE_RNK(sza->rnk) || sza->rnk == 0)
+     if (!BENCH_FINITE_RNK(sza->rnk) || sza->rnk == 0)
 	  k.as = 0;
      else
 	  k.as = sza->dims[0].os;
@@ -121,7 +121,7 @@ static void icpyhc2(R *ra, R *ia,
      k.k.apply = icpyhc20;
      k.n = tensor_sz(sza);
      k.scalea = scalea;
-     if (!FINITE_RNK(sza->rnk) || sza->rnk == 0)
+     if (!BENCH_FINITE_RNK(sza->rnk) || sza->rnk == 0)
 	  k.as = 0;
      else
 	  k.as = sza->dims[0].is;
@@ -148,13 +148,13 @@ static void rdft2_apply(dofft_closure *k_,
      totalsz = tensor_append(p->vecsz, p->sz);
      pckdsz = verify_pack(totalsz, 2);
      n2 = tensor_sz(totalsz);
-     if (FINITE_RNK(p->sz->rnk) && p->sz->rnk > 0)
+     if (BENCH_FINITE_RNK(p->sz->rnk) && p->sz->rnk > 0)
 	  n2 = (n2 / p->sz->dims[p->sz->rnk - 1].n) * 
 	       (p->sz->dims[p->sz->rnk - 1].n / 2 + 1);
      ri = (bench_real *) p->in;
      ro = (bench_real *) p->out;
 
-     if (FINITE_RNK(p->sz->rnk) && p->sz->rnk > 0 && n2 > 0) {
+     if (BENCH_FINITE_RNK(p->sz->rnk) && p->sz->rnk > 0 && n2 > 0) {
 	  probsz2 = tensor_copy_sub(p->sz, p->sz->rnk - 1, 1);
 	  totalsz2 = tensor_copy_sub(totalsz, 0, totalsz->rnk - 1);
 	  pckdsz2 = tensor_copy_sub(pckdsz, 0, pckdsz->rnk - 1);
@@ -232,7 +232,7 @@ void verify_rdft2(bench_problem *p, int rounds, double tol, errors *e)
 
      BENCH_ASSERT(p->kind == PROBLEM_REAL);
 
-     if (!FINITE_RNK(p->sz->rnk) || !FINITE_RNK(p->vecsz->rnk))
+     if (!BENCH_FINITE_RNK(p->sz->rnk) || !BENCH_FINITE_RNK(p->vecsz->rnk))
 	  return;      /* give up */
 
      k.k.apply = rdft2_apply;

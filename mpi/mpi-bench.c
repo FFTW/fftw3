@@ -340,7 +340,7 @@ static int tensor_rowmajor_transposedp(bench_tensor *t)
      bench_iodim *d;
      int i;
 
-     BENCH_ASSERT(FINITE_RNK(t->rnk));
+     BENCH_ASSERT(BENCH_FINITE_RNK(t->rnk));
      if (t->rnk < 2)
 	  return 0;
 

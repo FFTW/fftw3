@@ -54,7 +54,7 @@ int X(dimcmp)(const iodim *a, const iodim *b)
 static void canonicalize(tensor *x)
 {
      if (x->rnk > 1) {
-	  qsort(x->dims, (size_t)x->rnk, sizeof(iodim),
+	  qsort(x->dims, (unsigned)x->rnk, sizeof(iodim),
 		(int (*)(const void *, const void *))X(dimcmp));
      }
 }
@@ -137,7 +137,7 @@ tensor *X(tensor_compress_contiguous)(const tensor *sz)
 
      /* sort in descending order of |istride|, so that compressible
 	dimensions appear contigously */
-     qsort(sz2->dims, (size_t)sz2->rnk, sizeof(iodim),
+     qsort(sz2->dims, (unsigned)sz2->rnk, sizeof(iodim),
 		(int (*)(const void *, const void *))compare_by_istride);
 
      /* compute what the rank will be after compression */

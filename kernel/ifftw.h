@@ -674,9 +674,9 @@ enum {
 
 /* hashtable information */
 enum {
-     BLESSING = 0x1,   /* save this entry */
-     H_VALID = 0x2,    /* valid hastable entry */
-     H_LIVE = 0x4      /* entry is nonempty, implies H_VALID */
+     BLESSING = 0x1u,   /* save this entry */
+     H_VALID = 0x2u,    /* valid hastable entry */
+     H_LIVE = 0x4u      /* entry is nonempty, implies H_VALID */
 };
 
 #define PLNR_L(plnr) ((plnr)->flags.l)

@@ -43,9 +43,9 @@ typedef struct {
 #define NEQV(a, b) IMPLIES(YES(a), NO(b)), IMPLIES(NO(a), YES(b))
 
 static void map_flags(unsigned *iflags, unsigned *oflags,
-		      const flagop flagmap[], int nmap)
+		      const flagop flagmap[], size_t nmap)
 {
-     int i;
+     size_t i;
      for (i = 0; i < nmap; ++i)
           if (FLAGP(*iflags, flagmap[i].flag))
                *oflags = OP(*oflags, flagmap[i].op);

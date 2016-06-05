@@ -64,7 +64,7 @@ static void putint(printer *p, INT i)
      } while (f != buf);
 }
 
-static void putulong(printer *p, unsigned long i, int base, int width)
+static void putulong(printer *p, unsigned long i, unsigned base, int width)
 {
      char buf[BSZ];
      char *f = buf;
@@ -98,7 +98,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    /* md5 value */
 			    md5uint x = va_arg(ap, md5uint);
 			    putulong(p, (unsigned long)(0xffffffffUL & x),
-				     16, 8);
+				     16u, 8);
 			    break;
 		       }
 		       case 'c': {
@@ -148,12 +148,12 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       }
 		       case 'u': {
 			    unsigned x = va_arg(ap, unsigned);
-			    putulong(p, (unsigned long)x, 10, 0);
+			    putulong(p, (unsigned long)x, 10u, 0);
 			    break;
 		       }
 		       case 'x': {
 			    unsigned x = va_arg(ap, unsigned);
-			    putulong(p, (unsigned long)x, 16, 0);
+			    putulong(p, (unsigned long)x, 16u, 0);
 			    break;
 		       }
 		       case '(': {

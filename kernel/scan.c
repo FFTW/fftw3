@@ -72,7 +72,7 @@ static void eat_blanks(scanner *sc)
      UNGETCHR(sc, ch);
 }
 
-static void mygets(scanner *sc, char *s, size_t maxlen)
+static void mygets(scanner *sc, char *s, int maxlen)
 {
      char *s0 = s;
      int ch;
@@ -124,7 +124,7 @@ static int vscan(scanner *sc, const char *format, va_list ap)
      const char *s = format;
      char c;
      int ch = 0;
-     size_t fmt_len;
+     int fmt_len;
 
      while ((c = *s++)) {
 	  fmt_len = 0;

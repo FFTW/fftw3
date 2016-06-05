@@ -64,7 +64,7 @@ static int expressible_as_api_many(bench_tensor *t)
 {
      int i;
 
-     BENCH_ASSERT(FINITE_RNK(t->rnk));
+     BENCH_ASSERT(BENCH_FINITE_RNK(t->rnk));
 
      i = t->rnk - 1;
      while (--i >= 0) {
@@ -91,7 +91,7 @@ static void mknembed_many(bench_tensor *t, int **inembedp, int **onembedp)
      int *inembed = (int *) bench_malloc(sizeof(int *) * t->rnk);
      int *onembed = (int *) bench_malloc(sizeof(int *) * t->rnk);
 
-     BENCH_ASSERT(FINITE_RNK(t->rnk));
+     BENCH_ASSERT(BENCH_FINITE_RNK(t->rnk));
      *inembedp = inembed; *onembedp = onembed;
 
      i = t->rnk - 1;
@@ -109,7 +109,7 @@ static int imax(int a, int b) { return (a > b ? a : b); }
 static int halfish_sizeof_problem(bench_problem *p)
 {
      int n2 = sizeof_problem(p);
-     if (FINITE_RNK(p->sz->rnk) && p->sz->rnk > 0)
+     if (BENCH_FINITE_RNK(p->sz->rnk) && p->sz->rnk > 0)
           n2 = (n2 / imax(p->sz->dims[p->sz->rnk - 1].n, 1)) *
                (p->sz->dims[p->sz->rnk - 1].n / 2 + 1);
      return n2;

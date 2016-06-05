@@ -29,20 +29,20 @@ tensor *X(mktensor)(int rnk)
 
 #if defined(STRUCT_HACK_KR)
      if (FINITE_RNK(rnk) && rnk > 1)
-	  x = (tensor *)MALLOC(sizeof(tensor) + (rnk - 1) * sizeof(iodim),
+	  x = (tensor *)MALLOC(sizeof(tensor) + (unsigned)(rnk - 1) * sizeof(iodim),
 				    TENSORS);
      else
 	  x = (tensor *)MALLOC(sizeof(tensor), TENSORS);
 #elif defined(STRUCT_HACK_C99)
      if (FINITE_RNK(rnk))
-	  x = (tensor *)MALLOC(sizeof(tensor) + rnk * sizeof(iodim),
+	  x = (tensor *)MALLOC(sizeof(tensor) + (unsigned)rnk * sizeof(iodim),
 				    TENSORS);
      else
 	  x = (tensor *)MALLOC(sizeof(tensor), TENSORS);
 #else
      x = (tensor *)MALLOC(sizeof(tensor), TENSORS);
      if (FINITE_RNK(rnk) && rnk > 0)
-          x->dims = (iodim *)MALLOC(sizeof(iodim) * rnk, TENSORS);
+          x->dims = (iodim *)MALLOC(sizeof(iodim) * (unsigned)rnk, TENSORS);
      else
           x->dims = 0;
 #endif

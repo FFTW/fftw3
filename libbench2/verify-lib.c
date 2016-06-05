@@ -440,7 +440,7 @@ void preserves_input(dofft_closure *k, aconstrain constrain,
 bench_tensor *verify_pack(const bench_tensor *sz, int s)
 {
      bench_tensor *x = tensor_copy(sz);
-     if (FINITE_RNK(x->rnk) && x->rnk > 0) {
+     if (BENCH_FINITE_RNK(x->rnk) && x->rnk > 0) {
 	  int i;
 	  x->dims[x->rnk - 1].is = s;
 	  x->dims[x->rnk - 1].os = s;

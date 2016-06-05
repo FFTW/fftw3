@@ -114,7 +114,7 @@ static void register_solver(planner *ego, solver *s)
 
 	  kind = s->adt->problem_kind;
 	  n->next_for_same_problem_kind = ego->slvdescs_for_problem_kind[kind];
-	  ego->slvdescs_for_problem_kind[kind] = ego->nslvdesc;
+	  ego->slvdescs_for_problem_kind[kind] = (int)/*from unsigned*/ego->nslvdesc;
 
 	  ego->nslvdesc++;
      }
@@ -127,7 +127,7 @@ static unsigned slookup(planner *ego, char *nam, int id)
 	  UNUSED(s);
 	  if (sp->reg_id == id && sp->nam_hash == h
 	      && !strcmp(sp->reg_nam, nam))
-	       return sp - ego->slvdescs;
+	       return (unsigned)/*from ptrdiff_t*/(sp - ego->slvdescs);
      });
      return INFEASIBLE_SLVNDX;
 }
@@ -552,13 +552,13 @@ static plan *search0(planner *ego, const problem *p, unsigned *slvndx,
 		    if (pln->pcost < best->pcost) {
 			 X(plan_destroy_internal)(best);
 			 best = pln;
-			 *slvndx = sp - ego->slvdescs;
+                         *slvndx = (unsigned)/*from ptrdiff_t*/(sp - ego->slvdescs);
 		    } else {
 			 X(plan_destroy_internal)(pln);
 		    }
 	       } else {
 		    best = pln;
-		    *slvndx = sp - ego->slvdescs;
+                    *slvndx = (unsigned)/*from ptrdiff_t*/(sp - ego->slvdescs);                    
 	       }
 
 	       if (ALLOW_PRUNINGP(ego) && could_prune_now_p) 
