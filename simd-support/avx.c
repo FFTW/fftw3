@@ -31,22 +31,20 @@
 
 int X(have_simd_avx)(void)
 {
-       static int init = 0, res = 0;
-       int max_stdfn,max_extfn, eax,ebx,ecx,edx, nunits;
+     static int init = 0, res = 0;
+     int max_stdfn, eax, ebx, ecx, edx;
 
-       if (!init)
-       {
-	 cpuid_all(0,0,&eax,&ebx,&ecx,&edx);
-	 max_stdfn = eax;
-	 if(max_stdfn >= 0x1)
-	 {
-	   cpuid_all(0x1, 0, &eax, &ebx, &ecx, &edx);
-	   /* Bit 28 of ecx for fn==1 specifies AVX */
-	   res = ((ecx & (1 << 28))  != 0);
-	 }
-	 init = 1;
-       }
-       return res;
+     if (!init) {
+          cpuid_all(0,0,&eax,&ebx,&ecx,&edx);
+          max_stdfn = eax;
+          if (max_stdfn >= 0x1) {
+               cpuid_all(0x1, 0, &eax, &ebx, &ecx, &edx);
+               /* Bit 28 of ecx for fn==1 specifies AVX */
+               res = ((ecx & (1 << 28))  != 0);
+          }
+          init = 1;
+     }
+     return res;
 }
 
 #endif
