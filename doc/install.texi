@@ -189,31 +189,31 @@ have a cycle counter but still really want an optimized plan regardless
 of the time).  @xref{Cycle Counters}.
 
 @item
-@code{--enable-sse}, @code{--enable-sse2}, @code{--enable-avx},
-@code{--enable-altivec}, @code{--enable-neon}: Enable the compilation of
-SIMD code for SSE (Pentium III+), SSE2 (Pentium IV+), AVX (Sandy Bridge,
-Interlagos), AltiVec (PowerPC G4+), NEON (some ARM processors).  SSE,
-AltiVec, and NEON only work with @code{--enable-float} (above).  SSE2
-works in both single and double precision (and is simply SSE in single
-precision).  The resulting code will @emph{still work} on earlier CPUs
-lacking the SIMD extensions (SIMD is automatically disabled, although
-the FFTW library is still larger).
+@code{--enable-sse} (single precision),
+@code{--enable-sse2} (single, double),
+@code{--enable-avx} (single, double),
+@code{--enable-avx2} (single, double),
+@code{--enable-avx512} (single, double),
+@code{--enable-avx128-fma},
+@code{--enable-kcvi} (single),
+@code{--enable-altivec} (single),
+@code{--enable-vsx} (single, double),
+@code{--enable-neon} (single, double on aarch64),
+@code{--enable-generic-simd128},
+and
+@code{--enable-generic-simd256}:
+
+Enable various SIMD instruction sets.  You need compiler that supports
+the given SIMD extensions, but FFTW will try to detect at runtime
+whether the CPU supports these extensions.  That is, you can compile
+with@code{--enable-avx} and the code will still run on a CPU without AVX
+support.
+
 @itemize @minus
 @item
 These options require a compiler supporting SIMD extensions, and
 compiler support is always a bit flaky: see the FFTW FAQ for a list of
 compiler versions that have problems compiling FFTW.
-@item
-With AltiVec and @code{gcc}, you may have to use the
-@code{-mabi=altivec} option when compiling any code that links to FFTW,
-in order to properly align the stack; otherwise, FFTW could crash when
-it tries to use an AltiVec feature.  (This is not necessary on MacOS X.)
-@item
-With SSE/SSE2 and @code{gcc}, you should use a version of gcc that
-properly aligns the stack when compiling any code that links to FFTW.
-By default, @code{gcc} 2.95 and later versions align the stack as
-needed, but you should not compile FFTW with the @code{-Os} option or the
-@code{-mpreferred-stack-boundary} option with an argument less than 4.
 @item
 Because of the large variety of ARM processors and ABIs, FFTW
 does not attempt to guess the correct @code{gcc} flags for generating

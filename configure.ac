@@ -107,6 +107,31 @@ AM_CONDITIONAL(QUAD, test "$ok" = "yes")
 AC_SUBST(PRECISION)
 AC_SUBST(CHECK_PL_OPTS)
 
+dnl SSE/SSE2 theory:
+dnl
+dnl Historically, you had to supply --enable-sse in single precision and --enable-sse2
+dnl in double precision.
+dnl 
+dnl This behavior is pointless in 2016.  --enable-sse2 now works in both precisions,
+dnl and is interpreted as --enable-sse in single precision.  The old flag --enable--se
+dnl is still supported in single-precision only.
+AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
+if test "$have_sse" = "yes"; then
+        if test "$PRECISION" != "s"; then
+                AC_MSG_ERROR([SSE requires single precision])
+        fi
+fi
+
+AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE/SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
+if test "$have_sse" = "yes"; then have_sse2=yes; fi
+if test "$have_sse2" = "yes"; then
+        AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE/SSE2 optimizations.])
+        if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+                AC_MSG_ERROR([SSE2 requires single or double precision])
+        fi
+fi
+AM_CONDITIONAL(HAVE_SSE2, test "$have_sse2" = "yes")
+
 AC_ARG_ENABLE(avx, [AC_HELP_STRING([--enable-avx],[enable AVX optimizations])], have_avx=$enableval, have_avx=no)
 if test "$have_avx" = "yes"; then
         AC_DEFINE(HAVE_AVX,1,[Define to enable AVX optimizations.])
@@ -136,28 +161,17 @@ if test "$have_avx512" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_AVX512, test "$have_avx512" = "yes")
 
-dnl Process SSE/SSE2 after AVX, so we can enable the shorter-length vectors too.
-dnl All AVX-capable platforms, including AVX-512, support the old SSE instructions.
-AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
-if test "$have_sse" = "yes"; then
-        if test "$PRECISION" != "s"; then
-                AC_MSG_ERROR([SSE requires single precision])
-        fi
+dnl 128-bit AVX is special. There is no reason to use it on Intel processors
+dnl since SSE2 is just as fast. However, on AMD processors we can both use
+dnl FMA4, and 128-bit SIMD is better than 256-bit since core pairs in a
+dnl compute unit can execute two 128-bit instructions independently.
+AC_ARG_ENABLE(avx_128_fma, [AC_HELP_STRING([--enable-avx128-fma],[enable AVX128/FMA optimizations])], have_avx_128_fma=$enableval, have_avx_128_fma=no)
+if test "$have_avx_128_fma" = "yes"; then
+        AC_DEFINE(HAVE_AVX_128_FMA,1,[Define to enable 128-bit FMA AVX optimization])
+        AVX_128_FMA_CFLAGS="${AVX_CFLAGS} -mfma4"
+        AC_SUBST(AVX_128_FMA_CFLAGS)
 fi
-
-AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE/SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
-if test "$have_sse" = "yes"; then have_sse2=yes; fi
-if test "$have_avx" = "yes"; then have_sse2=yes; fi
-if test "$have_avx2" = "yes"; then have_sse2=yes; fi
-if test "$have_avx512" = "yes"; then have_sse2=yes; fi
-if test "$have_sse2" = "yes"; then
-        AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE/SSE2 optimizations.])
-        if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
-                AC_MSG_ERROR([SSE2 requires single or double precision])
-        fi
-fi
-AM_CONDITIONAL(HAVE_SSE2, test "$have_sse2" = "yes")
-
+AM_CONDITIONAL(HAVE_AVX_128_FMA, test "$have_avx_128_fma" = "yes")
 
 AC_ARG_ENABLE(kcvi, [AC_HELP_STRING([--enable-kcvi],[enable Knights Corner vector instructions optimizations])], have_kcvi=$enableval, have_kcvi=no)
 if test "$have_kcvi" = "yes"; then
@@ -485,33 +499,6 @@ CPPFLAGS="$CPPFLAGS $ALTIVEC_CFLAGS $VSX_CFLAGS"
 AC_CHECK_HEADERS([altivec.h])
 CFLAGS="$save_CFLAGS"
 CPPFLAGS="$save_CPPFLAGS"
-
-dnl 128-bit AVX is special. There is no reason to use it on Intel processors
-dnl since SSE2 is just as fast. However, on AMD processors we can both use
-dnl FMA4, and 128-bit SIMD is better than 256-bit since core pairs in a
-dnl compute unit can execute two 128-bit instructions independently.
-dnl Check if we have x86intrin.h and fma4, and enable if present. This will
-dnl only apply to the avx-128-fma SIMD files, so the rest of the code will
-dnl run fine on any architecture.
-dnl The same thing does not apply to AVX2: There all CPUs will benefit
-dnl from FMA (although it is presently only available from Intel).
-if test "$have_avx" = "yes"; then
-    AC_CHECK_HEADERS([x86intrin.h],[
-save_CC="$CC"
-CC="$CC -mfma4"
-AC_TRY_LINK([#ifdef HAVE_X86INTRIN_H
-#include <x86intrin.h>
-#endif],[__m128 x=_mm_set1_ps(0.5);x=_mm_macc_ps(x,x,x);],
-            [have_avx_128_fma="yes"])
-CC="$save_CC"])
-
-    if test "$have_avx_128_fma" = "yes"; then
-        AC_DEFINE(HAVE_AVX_128_FMA,1,[Define to enable 128-bit FMA AVX optimization])
-        AVX_128_FMA_CFLAGS="${AVX_CFLAGS} -mfma4"
-        AC_SUBST(AVX_128_FMA_CFLAGS)
-    fi
-fi
-AM_CONDITIONAL(HAVE_AVX_128_FMA, test "$have_avx_128_fma" = "yes")
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

@@ -8,6 +8,7 @@ FFTW 3.3.5:
   - Experimental support for AVX512 and KCVI. (--enable-avx512, --enable-kcvi)
     This code is expected to work but the FFTW maintainers do not have
     hardware to test it.
+  - Support for AVX128/FMA (for some AMD machines) (--enable-avx128-fma)
   - Double precision Neon SIMD for aarch64.
     This code is expected to work but the FFTW maintainers do not have
     hardware to test it.
@@ -22,8 +23,8 @@ FFTW 3.3.5:
   zillion SIMD instruction sets, enabling them all at the same time is
   a bad idea, because it increases the planning time for minimal gain.
   We recommend that general-purpose x86 distributions only enable SSE2
-  and possibly AVX.  Users who care about the last ounce of
-  performance should recompile FFTW themselves.
+  and perhaps AVX.  Users who care about the last ounce of performance
+  should recompile FFTW themselves.
 
 FFTW 3.3.4
 

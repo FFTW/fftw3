@@ -15,16 +15,17 @@ SIMD, which stands for ``Single Instruction Multiple Data,'' is a set of
 special operations supported by some processors to perform a single
 operation on several numbers (usually 2 or 4) simultaneously.  SIMD
 floating-point instructions are available on several popular CPUs:
-SSE/SSE2/AVX on recent x86/x86-64 processors, AltiVec (single precision)
-on some PowerPCs (Apple G4 and higher), NEON on some ARM models, and MIPS Paired Single
-(currently only in FFTW 3.2.x).  FFTW can be compiled to support the
-SIMD instructions on any of these systems.
+SSE/SSE2/AVX/AVX2/AVX512/KCVI on some x86/x86-64 processors, AltiVec and
+VSX on some POWER/PowerPCs, NEON on some ARM models.  FFTW can be
+compiled to support the SIMD instructions on any of these systems.
 @cindex SIMD
 @cindex SSE
 @cindex SSE2
 @cindex AVX
+@cindex AVX2
+@cindex AVX512
 @cindex AltiVec
-@cindex MIPS PS
+@cindex VSX
 @cindex precision
 
 
