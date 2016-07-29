@@ -1,7 +1,29 @@
-Modified version of FFTW 3.3.4:
+FFTW 3.3.5:
 
-* SIMD implementation for Power8 VSX instructions in single
-  and double precision. To use, add --enable-vsx to configure.
+* New SIMD support:
+  - Power8 VSX instructions in single and double precision.
+    To use, add --enable-vsx to configure.
+  - Support for AVX2 (256-bit FMA instructions).
+    To use, add --enable-avx2 to configure.
+  - Experimental support for AVX512 and KCVI. (--enable-avx512, --enable-kcvi)
+    This code is expected to work but the FFTW maintainers do not have
+    hardware to test it.
+  - Double precision Neon SIMD for aarch64.
+    This code is expected to work but the FFTW maintainers do not have
+    hardware to test it.
+  - generic SIMD support using gcc vector intrinsics
+* Add fftw_make_planner_thread_safe() API    
+* fix #18 (disable float128 for CUDACC)
+* fix #19: missing Fortran interface for fftwq_alloc_real
+* fix #21 (don't use float128 on Portland compilers, which pretend to be gcc)
+* fix: Avoid segfaults due to double free in MPI transpose
+
+* Special note for distribution maintainers: Although FFTW supports a
+  zillion SIMD instruction sets, enabling them all at the same time is
+  a bad idea, because it increases the planning time for minimal gain.
+  We recommend that general-purpose x86 distributions only enable SSE2
+  and possibly AVX.  Users who care about the last ounce of
+  performance should recompile FFTW themselves.
 
 FFTW 3.3.4
 
