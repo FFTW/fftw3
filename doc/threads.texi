@@ -217,3 +217,16 @@ and debugging FFTW, but if you must use @code{--enable-debug} then you
 should also specifically pass @code{--disable-debug-malloc} for
 @code{fftw_execute} to be thread-safe.
 
+Starting from FFTW-3.3.5, FFTW supports a new API to make the
+planner thread-safe:
+@example
+void fftw_make_planner_thread_safe(void);
+@end example
+@findex fftw_make_planner_thread_safe
+
+This call installs a hook that wraps a lock around all planner calls.
+This API is meant for ``applications'' that use ``plugins'' in multiple
+threads, where each ``plugin'' calls single-threaded FFTW but is unaware
+of the other ``plugins'' doing the same thing at the same time.  In this
+case, the ``application'' calls @code{fftw_make_planner_thread_safe()}
+at the beginning to protect ``plugins'' from each other.
