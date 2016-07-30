@@ -38,9 +38,12 @@ int X(have_simd_avx)(void)
           cpuid_all(0,0,&eax,&ebx,&ecx,&edx);
           max_stdfn = eax;
           if (max_stdfn >= 0x1) {
+               /* have AVX and OSXSAVE? (implies XGETBV exists) */
                cpuid_all(0x1, 0, &eax, &ebx, &ecx, &edx);
-               /* Bit 28 of ecx for fn==1 specifies AVX */
-               res = ((ecx & (1 << 28))  != 0);
+               if ((ecx & 0x18000000) == 0x18000000) {
+                    /* have OS support for XMM, YMM? */
+                    res = ((xgetbv_eax(0) & 0x6) == 0x6);                    
+               }
           }
           init = 1;
      }

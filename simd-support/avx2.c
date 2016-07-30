@@ -24,48 +24,35 @@
 #if HAVE_AVX2
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
-
-#include "amd64-cpuid.h"
+#    include "amd64-cpuid.h"
+#else
+#    include "x86-cpuid.h"
+#endif
 
 int X(have_simd_avx2_128)(void)
 {
     static int init = 0, res;
-
-    if (!init)
-    {
-        if((xgetbv_eax(0) & 0x6) == 0x6)
-        {
-            int eax,ebx,ecx,edx;
-            cpuid_all(7,0,&eax,&ebx,&ecx,&edx);
-	    /* Bit 5 of ebx for CPUID level 7 is AVX2 support */
-            res = ( (ebx & (1 << 5))  != 0 );
+    int max_stdfn, eax, ebx, ecx, edx;
+    
+    if (!init) {
+         cpuid_all(0,0,&eax,&ebx,&ecx,&edx);
+         max_stdfn = eax;
+         if (max_stdfn >= 0x1) {
+              /* have AVX and OSXSAVE? (implies XGETBV exists) */
+              cpuid_all(0x1, 0, &eax, &ebx, &ecx, &edx);
+              if ((ecx & 0x18000000) == 0x18000000) {              
+                   /* have AVX2? */
+                   cpuid_all(7,0,&eax,&ebx,&ecx,&edx);
+                   if (ebx & (1 << 5)) {
+                        /* have OS support for XMM, YMM? */
+                        res = ((xgetbv_eax(0) & 0x6) == 0x6);
+                   }
+              }
         }
         init = 1;
     }
     return res;
 }
-
-#else /* 32-bit code */
-
-#include "x86-cpuid.h"
-
-int X(have_simd_avx2_128)(void)
-{
-    static int init = 0, res;
-
-    if (!init)
-    {
-        if(has_cpuid() && ((xgetbv_eax(0) & 0x6) == 0x6))
-	{
-            int eax,ebx,ecx,edx;
-            cpuid_all(7,0,&eax,&ebx,&ecx,&edx);
-            /* Bit 5 of ebx for CPUID level 7 is AVX2 support */
-            res = ((ebx & (1 << 5))  != 0 );
-	}
-    }
-    return res;
-}
-#endif
 
 int X(have_simd_avx2)(void)
 {
