@@ -131,10 +131,10 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 
 if QUAD
 # cannot use -no-undefined since dependent on libquadmath
-libfftw3@PREC_SUFFIX@_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@
+libfftw3@PREC_SUFFIX@_la_LDFLAGS = -version-info @SHARED_VERSION_INFO@ $(ENVIRONMENT_LIBFFTW3_LDFLAGS)
 else
 libfftw3@PREC_SUFFIX@_la_LDFLAGS = -no-undefined -version-info	\
-@SHARED_VERSION_INFO@
+@SHARED_VERSION_INFO@  $(ENVIRONMENT_LIBFFTW3_LDFLAGS)
 endif
 
 fftw3@PREC_SUFFIX@.pc: fftw.pc

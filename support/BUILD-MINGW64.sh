@@ -1,6 +1,7 @@
 set -e
 
 confflags="--prefix=`pwd`/mingw64 --host=x86_64-w64-mingw32 --disable-alloca --with-our-malloc --with-windows-f77-mangling --enable-shared --disable-static --enable-threads --with-combined-threads"
+export ENVIRONMENT_LIBFFTW3_LDFLAGS='-Wc,-static-libgcc'
 
 rm -rf mingw64
 
