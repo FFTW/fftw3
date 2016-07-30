@@ -194,7 +194,7 @@ of the time).  @xref{Cycle Counters}.
 @code{--enable-avx} (single, double),
 @code{--enable-avx2} (single, double),
 @code{--enable-avx512} (single, double),
-@code{--enable-avx128-fma},
+@code{--enable-avx-128-fma},
 @code{--enable-kcvi} (single),
 @code{--enable-altivec} (single),
 @code{--enable-vsx} (single, double),

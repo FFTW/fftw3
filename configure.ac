@@ -165,7 +165,7 @@ dnl 128-bit AVX is special. There is no reason to use it on Intel processors
 dnl since SSE2 is just as fast. However, on AMD processors we can both use
 dnl FMA4, and 128-bit SIMD is better than 256-bit since core pairs in a
 dnl compute unit can execute two 128-bit instructions independently.
-AC_ARG_ENABLE(avx_128_fma, [AC_HELP_STRING([--enable-avx128-fma],[enable AVX128/FMA optimizations])], have_avx_128_fma=$enableval, have_avx_128_fma=no)
+AC_ARG_ENABLE(avx-128-fma, [AC_HELP_STRING([--enable-avx-128-fma],[enable AVX128/FMA optimizations])], have_avx_128_fma=$enableval, have_avx_128_fma=no)
 if test "$have_avx_128_fma" = "yes"; then
         AC_DEFINE(HAVE_AVX_128_FMA,1,[Define to enable 128-bit FMA AVX optimization])
         AVX_128_FMA_CFLAGS="${AVX_CFLAGS} -mfma4"

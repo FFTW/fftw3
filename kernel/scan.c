@@ -152,7 +152,7 @@ static int vscan(scanner *sc, const char *format, va_list ap)
 		       case 'M': {
 			    md5uint *x = va_arg(ap, md5uint *);
 			    *x = (md5uint)
-				    (0xffffffffUL & getlong(sc, 16, &ch));
+				    (0xFFFFFFFF & getlong(sc, 16, &ch));
 			    if (!ch) return 0;
 			    break;
 		       }

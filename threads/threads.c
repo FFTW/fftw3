@@ -23,6 +23,7 @@
    spawn and join threads on various systems. */
 
 #include "threads.h"
+#include "api.h"
 
 #if defined(USING_POSIX_THREADS)
 

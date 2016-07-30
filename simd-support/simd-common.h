@@ -31,7 +31,7 @@
 #    define ALIGNMENT 16    /* Alignment for the LD/ST macros */
 #    define ALIGNMENTA 64   /* Alignment for the LDA/STA macros */
 #  endif
-#elif defined(HAVE_SSE2) || defined(HAVE_AVX) || defined(HAVE_AVX2)
+#elif defined(HAVE_SSE2) || defined(HAVE_AVX) || defined(HAVE_AVX2) || (HAVE_AVX_128_FMA)
 #  if defined(FFTW_SINGLE)
 #    define ALIGNMENT 8     /* Alignment for the LD/ST macros */
 #    define ALIGNMENTA 16   /* Alignment for the LDA/STA macros */
