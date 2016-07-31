@@ -1,5 +1,5 @@
-DO NOT CHECK OUT THESE FILES FROM GITHUB UNLESS YOU KNOW WHAT YOU ARE
-DOING.  (SEE BELOW.)
+*DO NOT CHECK OUT THESE FILES FROM GITHUB UNLESS YOU KNOW WHAT YOU ARE
+DOING.*  (See below.)
 
 This is the git repository for the FFTW library for computing Fourier
 transforms (version 3.x), maintained by the FFTW authors.
