@@ -41,7 +41,7 @@ cpuid_all(int level, int ecxval, int *eax, int *ebx, int *ecx, int *edx)
 
 #if (_MSC_VER > 1500) || (_MSC_VER == 1500 & _MSC_FULL_VER >= 150030729)
     /* MSVC 9.0 SP1 or later */
-    __cpuidex(CPUInfo, op, ecxval);
+    __cpuidex(CPUInfo, level, ecxval);
 #else
     __cpuid(CPUInfo, level);
 #endif
