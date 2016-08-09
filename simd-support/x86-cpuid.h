@@ -113,11 +113,9 @@ cpuid_all(int level, int ecxval, int *eax, int *ebx, int *ecx, int *edx)
 #    if (_MSC_VER > 1500) || (_MSC_VER == 1500 & _MSC_FULL_VER >= 150030729)
     /* MSVC 9.0 SP1 or later */
     __cpuidex(CPUInfo, level, ecxval);
-    rc = 0;
 #    else
     __cpuid(CPUInfo, level);
     /* Set an error code if the user wanted a non-zero ecxval, since we did not have cpuidex */
-    rc = (ecxval > 0) ? -1 : 0;
 #    endif
     *eax = CPUInfo[0];
     *ebx = CPUInfo[1];
