@@ -1,3 +1,7 @@
+since FFTW 3.3.5:
+
+* fix race condition when destroying plans
+
 FFTW 3.3.5:
 
 * New SIMD support:
