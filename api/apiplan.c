@@ -179,10 +179,16 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 void X(destroy_plan)(X(plan) p)
 {
      if (p) {
+          if (before_planner_hook)
+               before_planner_hook();
+     
           X(plan_awake)(p->pln, SLEEPY);
           X(plan_destroy_internal)(p->pln);
           X(problem_destroy)(p->prb);
           X(ifree)(p);
+
+          if (after_planner_hook)
+               after_planner_hook();
      }
 }
 
