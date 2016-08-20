@@ -1,0 +1,13 @@
+macro(arg_check_and_set _varname _value _argname)
+  if(${_varname})
+    message(FATAL_ERROR "${_argname} expects only a single argument")
+  else()
+    set(${_varname} ${_value})
+  endif()
+endmacro()
+
+macro(arg_require_set _varname _argname)
+  if(NOT ${_varname})
+    message(FATAL_ERROR "Argument ${_argname} required but not provided!")
+  endif()
+endmacro()
