@@ -1,4 +1,3 @@
-include (codelets.cmake)
 
 set(FFTW_dft_simd_common_dir ${CMAKE_CURRENT_SOURCE_DIR}/common)
 set(FFTW_dft_simd_includes

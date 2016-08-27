@@ -24,30 +24,17 @@ set_property(TARGET fftw_dft_interface APPEND
   $<TARGET_OBJECTS:fftw_dft_scalar_codelets>
 )
 
-if(HAVE_AVX)
-  set_property(TARGET fftw_dft_interface APPEND
-    PROPERTY INTERFACE_SOURCES
-    $<TARGET_OBJECTS:fftw_dft_simd_avx_objects>
-  )
-endif()
+macro(fftw_dft_simd_add_objects _vec_ext)
+  if(HAVE_${_vec_ext})
+    set_property(TARGET fftw_dft_interface APPEND
+      PROPERTY INTERFACE_SOURCES
+      $<TARGET_OBJECTS:fftw_dft_simd_${_vec_ext}_objects>
+    )
+  endif()
+endmacro()
 
-if(HAVE_ALTIVEC)
-  set_property(TARGET fftw_dft_interface APPEND
-    PROPERTY INTERFACE_SOURCES
-    $<TARGET_OBJECTS:fftw_dft_simd_altivec_objects>
-  )
-endif()
+set(fftw_dft_vector_extensions ALTIVEC AVX NEON SSE2)
 
-if(HAVE_NEON)
-  set_property(TARGET fftw_dft_interface APPEND
-    PROPERTY INTERFACE_SOURCES
-    $<TARGET_OBJECTS:fftw_dft_simd_neon_objects>
-  )
-endif()
-
-if(HAVE_SSE2)
-  set_property(TARGET fftw_dft_interface APPEND
-    PROPERTY INTERFACE_SOURCES
-    $<TARGET_OBJECTS:fftw_dft_simd_sse2_objects>
-  )
-endif()
+foreach(_vector_ext IN LISTS fftw_dft_vector_extensions)
+  fftw_dft_simd_add_objects(${_vector_ext})
+endforeach()

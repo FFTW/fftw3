@@ -92,6 +92,7 @@ endif()
 
 if(FFTW_SIMD_USE_SSE)
   if(FFTW_PRECISION STREQUAL "single")
+    set(HAVE_SSE 1)
     set(HAVE_SSE2 1)
   else()
     message(FATAL_ERROR "SSE requires single precision")
@@ -101,6 +102,7 @@ endif()
 set(fftw_sd_prec_list "single" "double")
 if(FFTW_SIMD_USE_SSE2)
   if(FFTW_PRECISION IN_LIST fftw_sd_prec_list)
+    set(HAVE_SSE 1)
     set(HAVE_SSE2 1)
   else()
     message(FATAL_ERROR "SSE2 requires single or double precision")
@@ -108,10 +110,10 @@ if(FFTW_SIMD_USE_SSE2)
 endif()
 
 if(FFTW_SIMD_USE_AVX)
-  if(FFTW_PRECISION IN_LIST fftw_sd_prec_list)
+  if(FFTW_PRECISION STREQUAL "double")
     set(HAVE_AVX 1)
   else()
-    message(FATAl_ERROR "AVX requires single or double precision")
+    message(FATAL_ERROR "AVX requires double precision")
   endif()
 endif()
 
@@ -164,6 +166,12 @@ if(FFTW_MAINTENANCE_MODE)
   add_subdirectory(genfft)
 endif(FFTW_MAINTENANCE_MODE)
 
+if(HAVE_SSE)
+  CHECK_C_COMPILER_FLAG("-msse" FFTW_CC_HAS_MSSE)
+  if(FFTW_CC_HAS_MSSE2)
+    set(FFTW_SSE_FLAGS "-msse")
+  endif()
+endif()
 
 if(HAVE_SSE2)
   CHECK_C_COMPILER_FLAG("-msse2" FFTW_CC_HAS_MSSE2)
@@ -182,7 +190,7 @@ if(HAVE_AVX)
 endif()
 
 
-set(FFTW_SIMD_FLAGS ${FFTW_AVX_FLAGS} ${FFTW_SSE2_FLAGS})
+set(FFTW_SIMD_FLAGS ${FFTW_AVX_FLAGS} ${FFTW_SSE2_FLAGS} ${FFTW_SSE_FLAGS})
 
 # prepare config.h
 
