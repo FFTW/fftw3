@@ -211,7 +211,7 @@ void setup(bench_problem *p)
      /* Regression test: check that fftw_malloc exists and links
       * properly */
      {
-          void *ptr = FFTW(malloc(42));
+          double *ptr = (double *)FFTW(malloc(42));
           BENCH_ASSERT(FFTW(alignment_of)(ptr) == 0);
           FFTW(free(ptr));
      }
