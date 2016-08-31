@@ -142,6 +142,15 @@ fftw3@PREC_SUFFIX@.pc: fftw.pc
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = fftw3@PREC_SUFFIX@.pc
 
+FindFFTW3@PREC_SUFFIX@.cmake: $(top_srcdir)/FindFFTW3.cmake.in
+	$(SED) \
+		-e 's|[@]PREC_SUFFIX@|@PREC_SUFFIX@|g' \
+		-e 's|[@]libdir@|$(libdir)|g' \
+		-e 's|[@]includedir@|$(includedir)|g' \
+		"$<" > "$@"
+cmakedir = $(datarootdir)/cmake/Modules
+cmake_DATA = FindFFTW3@PREC_SUFFIX@.cmake
+
 WISDOM_DIR = /etc/fftw
 WISDOM = wisdom@PREC_SUFFIX@
 
