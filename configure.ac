@@ -212,9 +212,19 @@ if test "$have_neon" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_NEON, test "$have_neon" = "yes")
 
-AC_ARG_ENABLE(armv8cyclecounter, [AC_HELP_STRING([--enable-armv8cyclecounter],[enable the cycle counter on ARMv8 ; require enabling in kernel mode, see <https://github.com/rdolbeau/enable_arm_pmu>])], have_armv8cyclecounter=$enableval)
+AC_ARG_ENABLE(armv8cyclecounter, [AC_HELP_STRING([--enable-armv8cyclecounter],[enable the cycle counter on ARMv8 via the PMCCNTR_EL0 register. Requires enabling in kernel mode, see <https://github.com/rdolbeau/enable_arm_pmu>])], have_armv8cyclecounter=$enableval)
 if test "$have_armv8cyclecounter"x = "yes"x; then
 	AC_DEFINE(HAVE_ARMV8CC,1,[Define if you have enabled the cycle counter on ARMv8])
+fi
+
+AC_ARG_ENABLE(armv8-cntvct-el0, [AC_HELP_STRING([--enable-armv8-cntvct-el0],[enable the cycle counter on ARMv8 via the CNTVCT_EL0 register])], have_armv8cntvctel0=$enableval)
+if test "$have_armv8cntvctel0"x = "yes"x; then
+	AC_DEFINE(HAVE_ARMV8_CNTVCT_EL0,1,[Define if you have enabled the CNTVCT_EL0 cycle counter on ARMv8])
+fi
+
+AC_ARG_ENABLE(armv7a-cntvct, [AC_HELP_STRING([--enable-armv7a-cntvct],[enable the cycle counter on Armv7a via the CNTVCT register])], have_armv7acntvct=$enableval)
+if test "$have_armv7acntvct"x = "yes"x; then
+	AC_DEFINE(HAVE_ARMV7A_CNTVCT,1,[Define if you have enabled the CNTVCT cycle counter on ARMv7a])
 fi
 
 AC_ARG_ENABLE(generic-simd128, [AC_HELP_STRING([--enable-generic-simd128],[enable generic (gcc) 128-bit SIMD optimizations])], have_generic_simd128=$enableval, have_generic_simd128=no)
@@ -718,36 +728,6 @@ AM_CONDITIONAL(THREADS, test "$enable_threads" = "yes")
 AM_CONDITIONAL(OPENMP, test "$enable_openmp" = "yes")
 AM_CONDITIONAL(SMP, test "$enable_threads" = "yes" -o "$enable_openmp" = "yes")
 AM_CONDITIONAL(COMBINED_THREADS, test x"$with_combined_threads" = xyes)
-
-
-dnl -----------------------------------------------------------------------
-dnl Check for not-always-available (not quite) cycle counters
-case "${host_cpu}" in
-        armv7*)
-        AC_MSG_CHECKING([armv7a has 64 bits readable CNTVCT])
-        AC_RUN_IFELSE(
-                [AC_LANG_PROGRAM([[#include <stdint.h>]],
-                        [[uint32_t Rt, Rt2 = 0;asm volatile("mrrc p15, 1, %0, %1, c14" : "=r"(Rt), "=r"(Rt2));]]
-                )],
-                [AC_DEFINE(ARMV7A_HAS_CNTCVT,1,[Define if CNTVCT is 64 bits readable on armv7a ])
-                 AC_MSG_RESULT([yes])],
-                [AC_MSG_RESULT([no])]
-                )
-        ;;
-        aarch64)
-        AC_MSG_CHECKING([armv8 has 64 bits readable CNTVCT_EL0])
-        AC_RUN_IFELSE(
-                [AC_LANG_PROGRAM([[#include <stdint.h>]],
-                        [[uint64_t Rt;asm volatile("mrs %0, CNTVCT_EL0" : "=r" (Rt));]]
-                )],
-                [AC_DEFINE(ARMV8_HAS_CNTCVT_EL0,1,[Define if CNTVCT_EL0 is 64 bits readable on armv8 ])
-                 AC_MSG_RESULT([yes])],
-                [AC_MSG_RESULT([no])]
-                )
-        ;;
-        *)
-        ;;
-esac
 
 dnl -----------------------------------------------------------------------
 
