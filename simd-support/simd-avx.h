@@ -2,9 +2,6 @@
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
  *
- * Improvements to 256-bit AVX by Erik Lindahl, 2015.
- * Erik Lindahl places his modifications in the public domain.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -56,15 +53,14 @@ typedef DS(__m256d, __m256) V;
 #define VMUL SUFF(_mm256_mul_p)
 #define VXOR SUFF(_mm256_xor_p)
 #define VSHUF SUFF(_mm256_shuffle_p)
-#define VPERM1 SUFF(_mm256_permute_p)
 
 #define SHUFVALD(fp0,fp1) \
    (((fp1) << 3) | ((fp0) << 2) | ((fp1) << 1) | ((fp0)))
 #define SHUFVALS(fp0,fp1,fp2,fp3) \
    (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | ((fp0)))
 
-#define VDUPL(x) DS(_mm256_movedup_pd(x), _mm256_moveldup_ps(x))
-#define VDUPH(x) DS(_mm256_permute_pd(x,SHUFVALD(1,1)), _mm256_movehdup_ps(x))
+#define VDUPL(x) DS(_mm256_unpacklo_pd(x, x), VSHUF(x, x, SHUFVALS(0, 0, 2, 2)))
+#define VDUPH(x) DS(_mm256_unpackhi_pd(x, x), VSHUF(x, x, SHUFVALS(1, 1, 3, 3)))
 
 #define VLIT(x0, x1) DS(_mm256_set_pd(x0, x1, x0, x1), _mm256_set_ps(x0, x1, x0, x1, x0, x1, x0, x1))
 #define DVK(var, val) V var = VLIT(val, val)
@@ -113,22 +109,16 @@ static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
    value. */
 static inline V LD(const R *x, INT ivs, const R *aligned_like)
 {
-     __m128 l0, l1, h0, h1;
+     __m128 l, h;
+     V v;
      (void)aligned_like; /* UNUSED */
-#if defined(__ICC) || (__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ > 8)
-     l0 = LOADL(x, SUFF(_mm_undefined_p)());
-     l1 = LOADL(x + ivs, SUFF(_mm_undefined_p)());
-     h0 = LOADL(x + 2*ivs, SUFF(_mm_undefined_p)());
-     h1 = LOADL(x + 3*ivs, SUFF(_mm_undefined_p)());
-#else
-     l0 = LOADL(x, l0);
-     l1 = LOADL(x + ivs, l1);
-     h0 = LOADL(x + 2*ivs, h0);
-     h1 = LOADL(x + 3*ivs, h1);
-#endif
-     l0 = SUFF(_mm_movelh_p)(l0,l1);
-     h0 = SUFF(_mm_movelh_p)(h0,h1);
-     return _mm256_insertf128_ps(_mm256_castps128_ps256(l0), h0, 1);
+     l = LOADL(x, l);
+     l = LOADH(x + ivs, l);
+     h = LOADL(x + 2*ivs, h);
+     h = LOADH(x + 3*ivs, h);
+     v = _mm256_castps128_ps256(l);
+     v = _mm256_insertf128_ps(v, h, 1);
+     return v;
 }
 
 #  ifdef _MSC_VER
@@ -255,9 +245,9 @@ static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 
 static inline V FLIP_RI(V x)
 {
-     return VPERM1(x,
-		   DS(SHUFVALD(1, 0), 
-		      SHUFVALS(1, 0, 3, 2)));
+     return VSHUF(x, x,
+		  DS(SHUFVALD(1, 0), 
+		     SHUFVALS(1, 0, 3, 2)));
 }
 
 static inline V VCONJ(V x)
@@ -275,26 +265,26 @@ static inline V VBYI(V x)
 #define VFMA(a, b, c) VADD(c, VMUL(a, b))
 #define VFNMS(a, b, c) VSUB(c, VMUL(a, b))
 #define VFMS(a, b, c) VSUB(VMUL(a, b), c)
-#define VFMAI(b, c)  SUFF(_mm256_addsub_p)(c,FLIP_RI(b))
+#define VFMAI(b, c) VADD(c, VBYI(b))
 #define VFNMSI(b, c) VSUB(c, VBYI(b))
 #define VFMACONJ(b,c)  VADD(VCONJ(b),c)
 #define VFMSCONJ(b,c)  VSUB(VCONJ(b),c)
-#define VFNMSCONJ(b,c) SUFF(_mm256_addsub_p)(c,b)
+#define VFNMSCONJ(b,c) VSUB(c, VCONJ(b))
 
 static inline V VZMUL(V tx, V sr)
 {
-  V tr = VDUPL(tx);
-  V ti = VDUPH(tx);
-  tr = VMUL(tr, sr);
-  ti = VMUL(ti, FLIP_RI(sr));
-  return SUFF(_mm256_addsub_p)(tr,ti);
+     V tr = VDUPL(tx);
+     V ti = VDUPH(tx);
+     tr = VMUL(sr, tr);
+     sr = VBYI(sr);
+     return VFMA(ti, sr, tr);
 }
 
 static inline V VZMULJ(V tx, V sr)
 {
      V tr = VDUPL(tx);
      V ti = VDUPH(tx);
-     tr = VMUL(tr, sr);
+     tr = VMUL(sr, tr);
      sr = VBYI(sr);
      return VFNMS(ti, sr, tr);
 }
@@ -313,8 +303,8 @@ static inline V VZMULIJ(V tx, V sr)
      V tr = VDUPL(tx);
      V ti = VDUPH(tx);
      ti = VMUL(ti, sr);
-     tr = VMUL(tr, FLIP_RI(sr));
-     return SUFF(_mm256_addsub_p)(ti,tr);
+     sr = VBYI(sr);
+     return VFMA(tr, sr, ti);
 }
 
 /* twiddle storage #1: compact, slower */
