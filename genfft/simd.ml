@@ -172,17 +172,6 @@ and unparse_ast ast =
             (unparse_code code) ^
 	    "}\n"
 
-(* ---- *)
-  and unparse_plus = function
-    | [] -> ""
-    | (CUminus a :: b) -> " - " ^ (parenthesize a) ^ (unparse_plus b)
-    | (a :: b) -> " + " ^ (parenthesize a) ^ (unparse_plus b)
-  and parenthesize x = match x with
-  | (CVar _) -> unparse_ast x
-  | (CCall _) -> unparse_ast x
-  | (Integer _) -> unparse_ast x
-  | _ -> "(" ^ (unparse_ast x) ^ ")"
-
   in match ast with 
   | Asch a -> (unparse_annotated true a)
   | Return x -> "return " ^ unparse_ast x ^ ";"

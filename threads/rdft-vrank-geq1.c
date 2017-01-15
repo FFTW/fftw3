@@ -212,7 +212,7 @@ static solver *mksolver(int vecloop_dim, const int *buddies, size_t nbuddies)
 
 void X(rdft_thr_vrank_geq1_register)(planner *p)
 {
-     int i;
+     size_t i;
 
      /* FIXME: Should we try other vecloop_dim values? */
      static const int buddies[] = { 1, -1 };
