@@ -199,6 +199,8 @@
 /* Define to enable ARM NEON optimizations. */
 #cmakedefine HAVE_NEON @HAVE_NEON@
 
+#cmakedefine HAVE_THREADS @HAVE_OPENMP@
+
 /* Define if OpenMP is enabled */
 #cmakedefine HAVE_OPENMP @HAVE_OPENMP@
 

@@ -21,6 +21,9 @@ target_include_directories(bench PRIVATE
 set_target_properties(bench PROPERTIES OUTPUT_NAME "bench${fftw_precision_suffix}")
 set_target_properties(bench PROPERTIES DEBUG_OUTPUT_NAME "bench${fftw_precision_suffix}-debug")
 target_link_libraries(bench PUBLIC fftw3 bench2)
+if(NOT FFTW_COMBINED_THREADS)
+  target_link_libraries(bench PUBLIC fftw3_threads)
+endif()
 
 if(FFTW_ENABLE_TESTS)
 function(fftw_invoke_prob _name _prob)
