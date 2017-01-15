@@ -41,8 +41,8 @@ function(fftw_test_geom _name _geom)
 endfunction()
 
 function(fftw_test_size _name _size)
-  fftw_test_geom("${_name}_c" "c${_size}")
-  fftw_test_geom("${_name}_r" "r${_size}")
+  fftw_test_geom("${_name}" "c${_size}")
+  fftw_test_geom("${_name}" "r${_size}")
 endfunction()
 
 set(fftw_powers_of_two 2 4 8 16 32 64 128 256 512 1024 2048 4096)

@@ -7,12 +7,21 @@ include(CheckCCompilerFlag)
 LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 set(FFTW_MAJOR_VERSION, "3.3")
-set(FFTW_MINOR_VERSION, "4")
+set(FFTW_MINOR_VERSION, "6")
 set(PACKAGE "fftw")
-set(PACKAGE_VERSION "3.3.4")
-set(VERSION "3.3.4")
+set(PACKAGE_VERSION "3.3.6")
+set(VERSION "3.3.6")
 
 # Configuration options
+
+# -- Maintainer settings
+
+option(FFTW_MAINTENANCE_MODE "Enable Maintainer mode" OFF)
+
+# -- Library flavor (shared / static)
+
+option(FFTW_ENABLE_SHARED "Build shared library" OFF)
+set(FFTW_ENABLE_STATIC ON)
 
 # -- Floating point precision
 
@@ -28,16 +37,10 @@ endif()
 
 option(FFTW_SIMD_USE_ALTIVEC "Compile with Altivec SIMD code" OFF)
 option(FFTW_SIMD_USE_AVX "Compile with AVX SIMD code" OFF)
+option(FFTW_SIMD_USE_AVX2 "Compile with AVX2 SIMD code" OFF)
 option(FFTW_SIMD_USE_NEON "Compile with Neon SIMD code" OFF)
 option(FFTW_SIMD_USE_SSE2 "Compile with SSE2 SIMD code" OFF)
 option(FFTW_SIMD_USE_SSE "Compile with SSE SIMD code" OFF)
-
-# -- fused multiply-add (FMA)
-
-option(FFTW_FMA "Compile FFTW with optimizations for machines with fused multiply-add" OFF)
-if(FFTW_FMA)
-    set(HAVE_FMA 1)
-endif()
 
 # -- testing using ctest
 
@@ -66,8 +69,7 @@ if(FFTW_BUILD_THREADS)
     endif()
 endif()
 
-
-
+option(FFTW_USE_FMA "Compile with FMA code" OFF)
 
 
 # -- set options for precision (double is default)
@@ -114,6 +116,14 @@ if(FFTW_SIMD_USE_AVX)
     set(HAVE_AVX 1)
   else()
     message(FATAL_ERROR "AVX requires double precision")
+  endif()
+endif()
+
+if(FFTW_SIMD_USE_AVX2)
+  if(FFTW_PRECISION STREQUAL "double")
+    set(HAVE_AVX2 1)
+  else()
+    message(FATAL_ERROR "AVX2 requires double precision")
   endif()
 endif()
 
@@ -166,31 +176,53 @@ if(FFTW_MAINTENANCE_MODE)
   add_subdirectory(genfft)
 endif(FFTW_MAINTENANCE_MODE)
 
+
+macro(fftw_check_flag _purpose _flag _var)
+  unset(FFTW_CC_HAS_${_var})
+  CHECK_C_COMPILER_FLAG(${_flag} FFTW_CC_HAS_${_var})
+  if(FFTW_CC_HAS_${_var})
+    set(${_var} ${_flag})
+  else()
+    message(FATAL_ERROR "Can not determine how to set ${_purpose}")
+  endif()
+endmacro()
+
 if(HAVE_SSE)
-  CHECK_C_COMPILER_FLAG("-msse" FFTW_CC_HAS_MSSE)
-  if(FFTW_CC_HAS_MSSE2)
-    set(FFTW_SSE_FLAGS "-msse")
+  fftw_check_flag("SSE extension" "-msse" FFTW_SSE_FLAGS)
+  if(FFTW_USE_FMA)
+    set(FFTW_SSE_DEFINE "HAVE_FMA")
   endif()
 endif()
 
 if(HAVE_SSE2)
-  CHECK_C_COMPILER_FLAG("-msse2" FFTW_CC_HAS_MSSE2)
-  if(FFTW_CC_HAS_MSSE2)
-    set(FFTW_SSE2_FLAGS "-msse2")
+  fftw_check_flag("SSE2 extension" "-msse2" FFTW_SSE2_FLAGS)
+  if(FFTW_USE_FMA)
+    set(FFTW_SSE2_DEFINE "HAVE_FMA")
   endif()
 endif()
 
 if(HAVE_AVX)
-  CHECK_C_COMPILER_FLAG("-mavx" FFTW_CC_HAS_MAVX)
-  if(FFTW_CC_HAS_MAVX)
-    set(FFTW_AVX_FLAGS "-mavx")
-  else()
-    message(FATAL_ERROR "Can not set AVX compiler flag")
+  fftw_check_flag("AVX extension" "-mavx" FFTW_AVX_FLAGS)
+  if(FFTW_USE_FMA)
+    set(FFTW_AVX_DEFINE "HAVE_FMA")
   endif()
 endif()
 
+if(HAVE_AVX2)
+  fftw_check_flag("AVX2 extension" "-mavx2" FFTW_AVX2_FLAGS)
+  fftw_check_flag("FMA for AVX2" "-mfma" FFTW_FMA_FLAGS)
+  set(FFTW_AVX2_DEFINES "HAVE_FMA")
+  list(APPEND FFTW_AVX2_FLAGS ${FFTW_FMA_FLAGS})
+endif()
 
-set(FFTW_SIMD_FLAGS ${FFTW_AVX_FLAGS} ${FFTW_SSE2_FLAGS} ${FFTW_SSE_FLAGS})
+
+set(FFTW_SIMD_FLAGS
+    ${FFTW_AVX_FLAGS}
+    ${FFTW_AVX2_FLAGS}
+    ${FFTW_SSE2_FLAGS}
+    ${FFTW_SSE_FLAGS}
+  )
+message(STATUS "CC flags are : ${FFTW_SIMD_FLAGS}")
 
 # prepare config.h
 
@@ -210,40 +242,60 @@ if(FFTW_WITH_SIMD)
     add_subdirectory(simd-support)
 endif()
 
+if(FFTW_USE_OPENMP OR FFTW_BUILD_THREADS)
+  add_subdirectory(threads)
+endif()
+
 set(fftw_lib_objects
   $<TARGET_OBJECTS:fftw_api_objects>
   $<TARGET_OBJECTS:fftw_kernel_objects>
 )
 
-if(FFTW_USE_OPENMP OR FFTW_BUILD_THREADS)
-  add_subdirectory(threads)
-endif()
-
-
-add_library(fftw3 STATIC ${fftw_lib_objects})
-target_sources(fftw3 PUBLIC ${CMAKE_SOURCE_DIR}/api/fftw3.h)
-target_link_libraries(fftw3 PRIVATE
-    fftw_dft_interface
-    fftw_rdft_interface
-    fftw_reodft_interface
+set(fftw_lib_private_libs
+  fftw_dft_interface
+  fftw_rdft_interface
+  fftw_reodft_interface
 )
 
 if(FFTW_WITH_SIMD)
-  target_link_libraries(fftw3 PRIVATE fftw_simd_support_interface)
+  list(APPEND fftw_lib_private_libs fftw_simd_support_interface)
 endif()
 
 if(FFTW_COMBINED_THREADS)
-  target_link_libraries(fftw3 PRIVATE fftw_threads_interface)
+  list(APPEND fftw_lib_private_libs fftw_threads_interface)
+endif()
+
+if(FFTW_ENABLE_STATIC)
+  add_library(fftw3 STATIC ${fftw_lib_objects})
+  target_sources(fftw3 PUBLIC ${CMAKE_SOURCE_DIR}/api/fftw3.h)
+  target_link_libraries(fftw3 PRIVATE ${fftw_lib_private_libs})
+  set_target_properties(fftw3 PROPERTIES OUTPUT_NAME "fftw3${fftw_precision_suffix}")
+  set_target_properties(fftw3 PROPERTIES DEBUG_OUTPUT_NAME "fftw3${fftw_precision_suffix}-debug")
+endif()
+
+if(FFTW_ENABLE_SHARED)
+  add_library(fftw3_shared SHARED ${fftw_lib_objects})
+  target_sources(fftw3_shared PUBLIC ${CMAKE_SOURCE_DIR}/api/fftw3.h)
+  target_link_libraries(fftw3_shared PRIVATE ${fftw_lib_private_libs})
+  set_target_properties(fftw3_shared PROPERTIES OUTPUT_NAME "fftw3${fftw_precision_suffix}")
+  set_target_properties(fftw3_shared PROPERTIES DEBUG_OUTPUT_NAME "fftw3${fftw_precision_suffix}-debug")
+endif()
+
+if(FFTW_ENABLE_SHARED)
+  list(APPEND fftw_lib_targets fftw3_shared)
+endif()
+if(FFTW_ENABLE_STATIC)
+  list(APPEND fftw_lib_targets fftw3)
 endif()
 
 
-install(TARGETS fftw3
+install(TARGETS ${fftw_lib_targets}
+        LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
+
 install(FILES ${CMAKE_SOURCE_DIR}/api/fftw3.h DESTINATION include)
 
 
-set_target_properties(fftw3 PROPERTIES OUTPUT_NAME "fftw3${fftw_precision_suffix}")
-set_target_properties(fftw3 PROPERTIES DEBUG_OUTPUT_NAME "fftw3${fftw_precision_suffix}-debug")
 
 add_subdirectory(libbench2)
 

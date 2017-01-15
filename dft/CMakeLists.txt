@@ -33,7 +33,7 @@ macro(fftw_dft_simd_add_objects _vec_ext)
   endif()
 endmacro()
 
-set(fftw_dft_vector_extensions ALTIVEC AVX NEON SSE2)
+set(fftw_dft_vector_extensions ALTIVEC AVX NEON SSE2 AVX2 AVX_128_FMA)
 
 foreach(_vector_ext IN LISTS fftw_dft_vector_extensions)
   fftw_dft_simd_add_objects(${_vector_ext})

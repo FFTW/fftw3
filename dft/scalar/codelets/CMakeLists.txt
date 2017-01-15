@@ -48,6 +48,24 @@ if(FFTW_MAINTENANCE_MODE)
     PRELUDE ${FFTW_dft_prelude}
   )
 
+  genfft_make_codelets(NAME f1
+    SOURCES ${F1_code}
+    GENERATOR gen_twiddle
+    ARGS ${FLAGS_F1}
+    SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}
+    BINDIR ${CMAKE_CURRENT_BINARY_DIR}
+    PRELUDE ${FFTW_dft_prelude}
+  )
+
+  genfft_make_codelets(NAME f2
+    SOURCES ${F2_code}
+    GENERATOR gen_twiddle
+    ARGS ${FLAGS_F2}
+    SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}
+    BINDIR ${CMAKE_CURRENT_BINARY_DIR}
+    PRELUDE ${FFTW_dft_prelude}
+  )
+
   genfft_make_codelets(NAME q1
     SOURCES ${Q1_code}
     GENERATOR gen_twidsq

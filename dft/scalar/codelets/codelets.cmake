@@ -31,10 +31,16 @@ set(T2_code
 # for sub-transforms.  So, we comment them out, at least for now.
 
 # f1_<r> is a "twiddle" FFT of size <r>, implementing a radix-r DIF step
-#F1 = # f1_2.c f1_3.c f1_4.c f1_5.c f1_6.c f1_7.c f1_8.c f1_9.c f1_10.c f1_12.c f1_15.c f1_16.c f1_32.c f1_64.c
+set(F1_code
+  # f1_2.c f1_3.c f1_4.c f1_5.c
+  # f1_6.c f1_7.c f1_8.c f1_9.c f1_10.c
+  # f1_12.c f1_15.c f1_16.c f1_32.c f1_64.c
+)
 
 # like f1, but partially generates its trig. table on the fly
-#F2 = # f2_4.c f2_8.c f2_16.c f2_32.c f2_64.c
+set(F2_code
+   # f2_4.c f2_8.c f2_16.c f2_32.c f2_64.c
+ )
 
 ###########################################################################
 # q1_<r> is <r> twiddle FFTs of size <r> (DIF step), where the output is
@@ -44,4 +50,4 @@ set(T2_code
 set(Q1_code q1_2.c q1_4.c q1_8.c  q1_3.c q1_5.c q1_6.c)
 
 ###########################################################################
-set(fftw_dft_scalar_codelets ${N1_code} ${T1_code} ${T2_code} ${Q1_code})
+set(fftw_dft_scalar_codelets ${N1_code} ${T1_code} ${T2_code} ${F1_code} ${F2_code} ${Q1_code})

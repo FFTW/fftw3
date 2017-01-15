@@ -13,7 +13,6 @@ set(simd_support_source
 )
 
 add_library(fftw_simd_support_objects OBJECT ${simd_support_source})
-target_compile_options(fftw_simd_support_objects PRIVATE ${FFTW_SIMD_FLAGS})
 target_include_directories(fftw_simd_support_objects PRIVATE
     ${fftw_config_path}
     ${CMAKE_SOURCE_DIR}/kernel
