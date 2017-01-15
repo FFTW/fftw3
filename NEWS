@@ -1,3 +1,11 @@
+FFTW 3.3.6:
+
+* The fftw_make_planner_thread_safe() API introduced in 3.3.5 didn't
+  work, and this 3.3.6 fixes it.  Sorry about that.
+* compilation fixes for IBM XLC
+* compilation fixes for threads on Windows
+* fix SIMD autodetection on amd64 when (_MSC_VER > 1500)
+
 FFTW 3.3.5:
 
 * New SIMD support:

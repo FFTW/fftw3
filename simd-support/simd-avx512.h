@@ -90,12 +90,12 @@ static inline V VBYI(V x)
 static inline V LDA(const R *x, INT ivs, const R *aligned_like) {
   (void)aligned_like; /* UNUSED */
   (void)ivs; /* UNUSED */
-  return SUFF(_mm512_load)(x);
+  return SUFF(_mm512_loadu)(x);
 }
 static inline void STA(R *x, V v, INT ovs, const R *aligned_like) {
   (void)aligned_like; /* UNUSED */
   (void)ovs; /* UNUSED */
-  SUFF(_mm512_store)(x, v);
+  SUFF(_mm512_storeu)(x, v);
 }
 
 #if FFTW_SINGLE

@@ -163,6 +163,7 @@ static void os_static_mutex_unlock(os_static_mutex_t *s) { pthread_mutex_unlock(
 #define INT magnus_ab_INTegro_seclorum_nascitur_ordo
 #include <windows.h>
 #include <process.h>
+#include <intrin.h>
 #undef INT
 
 typedef HANDLE os_mutex_t;

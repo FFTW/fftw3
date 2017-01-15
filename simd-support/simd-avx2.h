@@ -91,6 +91,20 @@ static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
 
 #if FFTW_SINGLE
 
+#  ifdef _MSC_VER
+     /* Temporarily disable the warning "uninitialized local variable
+	'name' used" and runtime checks for using a variable before it is
+	defined which is erroneously triggered by the LOADL0 / LOADH macros
+	as they only modify VAL partly each. */
+#    ifndef __INTEL_COMPILER
+#      pragma warning(disable : 4700)
+#      pragma runtime_checks("u", off)
+#    endif
+#  endif
+#  ifdef __INTEL_COMPILER
+#    pragma warning(disable : 592)
+#  endif
+
 #define LOADH(addr, val) _mm_loadh_pi(val, (const __m64 *)(addr))
 #define LOADL(addr, val) _mm_loadl_pi(val, (const __m64 *)(addr))
 #define STOREH(addr, val) _mm_storeh_pi((__m64 *)(addr), val)
@@ -115,6 +129,16 @@ static inline V LD(const R *x, INT ivs, const R *aligned_like)
      h0 = SUFF(_mm_movelh_p)(h0,h1);
      return _mm256_insertf128_ps(_mm256_castps128_ps256(l0), h0, 1);
 }
+
+#  ifdef _MSC_VER
+#    ifndef __INTEL_COMPILER
+#      pragma warning(default : 4700)
+#      pragma runtime_checks("u", restore)
+#    endif
+#  endif
+#  ifdef __INTEL_COMPILER
+#    pragma warning(default : 592)
+#  endif
 
 static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 {
