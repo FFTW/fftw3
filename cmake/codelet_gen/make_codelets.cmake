@@ -56,11 +56,12 @@ function(genfft_make_codelets)
   endif()
 
   if(NOT _codelet_sources)
-    message(FATAL_ERROR "Not codelet sources specified")
+    message(STATUS "No codelet sources specified for ${_codelet_basename}")
+    return()
   endif()
 
   if(NOT _codelet_generator)
-    message(FATAL_ERROR "Not codelet generator specified")
+    message(FATAL_ERROR "No codelet generator specified")
   endif()
 
   if(NOT _codelet_source_dir)
