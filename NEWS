@@ -1,3 +1,9 @@
+FFTW 3.3.6-pl1:
+
+* Bugfix: FFTW 3.3.6 had the wrong libtool version number, and generated
+  shared libraries of the form libfftw3.so.2.6.6 instead of
+  libfftw3.so.3.*.  
+
 FFTW 3.3.6:
 
 * The fftw_make_planner_thread_safe() API introduced in 3.3.5 didn't
