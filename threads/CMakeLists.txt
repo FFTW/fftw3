@@ -43,4 +43,8 @@ if(NOT FFTW_COMBINED_THREADS)
   set_target_properties(fftw3_threads PROPERTIES OUTPUT_NAME "fftw3${fftw_precision_suffix}_threads")
   set_target_properties(fftw3_threads PROPERTIES DEBUG_OUTPUT_NAME "fftw3${fftw_precision_suffix}_threads-debug")
 
+  install(TARGETS fftw3_threads
+          LIBRARY DESTINATION lib
+          ARCHIVE DESTINATION lib)
+
 endif()

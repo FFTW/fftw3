@@ -289,14 +289,6 @@ if(FFTW_ENABLE_STATIC)
 endif()
 
 
-install(TARGETS ${fftw_lib_targets}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
-
-install(FILES ${CMAKE_SOURCE_DIR}/api/fftw3.h DESTINATION include)
-
-
-
 add_subdirectory(libbench2)
 
 if(FFTW_ENABLE_TESTS)
@@ -305,3 +297,10 @@ endif()
 
 add_subdirectory(tests)
 add_subdirectory(tools)
+
+
+install(TARGETS ${fftw_lib_targets}
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
+
+install(FILES ${CMAKE_SOURCE_DIR}/api/fftw3.h DESTINATION include)
