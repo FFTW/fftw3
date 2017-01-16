@@ -299,8 +299,24 @@ add_subdirectory(tests)
 add_subdirectory(tools)
 
 
+# -- Installation
+
 install(TARGETS ${fftw_lib_targets}
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 
 install(FILES ${CMAKE_SOURCE_DIR}/api/fftw3.h DESTINATION include)
+
+
+
+# -- Source code packaging
+
+if(FFTW_MAINTENANCE_MODE)
+add_custom_target(fftw_tarball
+   COMMAND ${CMAKE_COMMAND}
+   "-E" "tar" "cfz" "${CMAKE_BINARY_DIR}/fftw.tar.gz"
+   "${CMAKE_SOURCE_DIR}/*"
+   DEPENDS ${fftw_lib_targets}
+   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+endif()
