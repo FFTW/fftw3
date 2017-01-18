@@ -1,4 +1,3 @@
-
 function(genfft_make_codelets)
   set(_keywords "NAME" "SOURCES" "GENERATOR" "ARGS" "SRCDIR" "BINDIR" "PRELUDE")
   set(_lastkeyword "")
@@ -96,7 +95,7 @@ function(genfft_make_codelets)
     "-DARGS=\"${_codelet_nofma_args}\""
     "-DRESULT_FILE=\"${_codelet_tmp_nofma_file}\"" "-P" "${FFTW_fftgen_rungenfft_script}"
     WORKING_DIRECTORY ${_codelet_binary_dir}
-    DEPENDS ${fftgen_cmake_script} ${_codelet_fft_generator} ${FFTW_fftgen_rungenfft_script})
+    DEPENDS ${fftgen_cmake_script} ${_codelet_generator} ${FFTW_fftgen_rungenfft_script})
 
     add_custom_command(OUTPUT ${_codelet_tmp_fma_file}
     COMMAND ${CMAKE_COMMAND}
@@ -104,7 +103,7 @@ function(genfft_make_codelets)
     "-DARGS=\"${_codelet_fma_args}\""
     "-DRESULT_FILE=\"${_codelet_tmp_fma_file}\"" "-P" "${FFTW_fftgen_rungenfft_script}"
     WORKING_DIRECTORY ${_codelet_binary_dir}
-    DEPENDS ${fftgen_cmake_script} ${_codelet_fft_generator} ${FFTW_fftgen_rungenfft_script})
+    DEPENDS ${fftgen_cmake_script} ${_codelet_generator} ${FFTW_fftgen_rungenfft_script})
 
     set(_codelet_codelet_output ${_codelet_source_dir}/${_codelet_codelet_source})
     if(ClangFormat_EXECUTABLE)

@@ -20,7 +20,7 @@ target_include_directories(bench PRIVATE
 
 set_target_properties(bench PROPERTIES OUTPUT_NAME "bench${fftw_precision_suffix}")
 set_target_properties(bench PROPERTIES DEBUG_OUTPUT_NAME "bench${fftw_precision_suffix}-debug")
-target_link_libraries(bench PUBLIC fftw3 bench2)
+target_link_libraries(bench PUBLIC fftw3 bench2 ${FFTW_M_LIB})
 if(NOT FFTW_COMBINED_THREADS)
   target_link_libraries(bench PUBLIC fftw3_threads)
 endif()

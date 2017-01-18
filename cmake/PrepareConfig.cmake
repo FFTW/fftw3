@@ -1,3 +1,10 @@
+find_library(FOUND_FFTW_M_LIB m DOC "Math library")
+if(NOT FOUND_FFTW_M_LIB STREQUAL "FFTW_M_LIB-NOTFOUND")
+  set(FFTW_M_LIB ${FOUND_FFTW_M_LIB})
+  message(STATUS "Use m lib : ${FFTW_M_LIB}")
+  set(FTTW_HAVE_M_LIB YES)
+endif()
+
 include(CheckIncludeFile)
 include(CheckSymbolExists)
 include(CheckFunctionExists)
@@ -29,7 +36,7 @@ CHECK_INCLUDE_FILE(memory.h HAVE_MEMORY_H)
 CHECK_INCLUDE_FILE(math.h HAVE_MATH_H)
 
 
-# check ANSI C headers 
+# check ANSI C headers
 # C90/89
 CHECK_INCLUDE_FILE(assert.h HAVE_ASSERT_H)
 CHECK_INCLUDE_FILE(ctype.h  HAVE_CTYPE_H )
@@ -89,6 +96,9 @@ if(HAVE_ABORT_FUN AND HAVE_ABORT_DECL)
     set(HAVE_ABORT 1)
 endif()
 
+if(FFTW_HAVE_M_LIB)
+  set(CMAKE_REQUIRED_LIBRARIES m)
+endif()
 if(HAVE_MATH_H)
     CHECK_SYMBOL_EXISTS(cosl math.h HAVE_DECL_COSL)
     CHECK_FUNCTION_EXISTS(cosl HAVE_COSL)
@@ -99,10 +109,12 @@ if(HAVE_MATH_H)
     CHECK_FUNCTION_EXISTS(tanl HAVE_TANL)
     CHECK_SYMBOL_EXISTS(isnan math.h HAVE_ISNAN)
     CHECK_SYMBOL_EXISTS(sqrt math.h HAVE_SQRT_DECL_IN_MATH_H)
+
     if(HAVE_SQRT_DECL_IN_MATH_H)
         CHECK_FUNCTION_EXISTS(sqrt HAVE_SQRT)
     endif()
 endif()
+unset(CMAKE_REQUIRED_LIBRARIES)
 
 CHECK_SYMBOL_EXISTS(gethrtime sys/time.h HAVE_GETHRTIME)
 CHECK_SYMBOL_EXISTS(gettimeofday sys/time.h HAVE_GETTIMEOFDAY)
@@ -144,8 +156,8 @@ CHECK_FUNCTION_EXISTS(_mm_malloc HAVE__MM_MALLOC)
 
 
 
-#FIXME : check size 
-#set(CMAKE_EXTRA_INCLUDE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/api/fftw3.h) 
+#FIXME : check size
+#set(CMAKE_EXTRA_INCLUDE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/api/fftw3.h)
 #check_type_size("fftw_r2r_kind_do_not_use_me" SIZEOF_FFTW_R2R_KIND)
 
 CHECK_TYPE_SIZE("long double" SIZEOF_LONG_DOUBLE)
@@ -165,4 +177,3 @@ CHECK_TYPE_SIZE("void*" SIZEOF_VOID_P)
 if(HAVE_SIZEOF_LONG_DOUBLE)
     set(HAVE_LONG_DOUBLE 1)
 endif()
-

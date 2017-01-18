@@ -1,5 +1,5 @@
 
-cmake_minimum_required (VERSION 3.3)
+cmake_minimum_required (VERSION 3.4)
 project (libfftw3)
 
 include(CheckCCompilerFlag)
@@ -17,6 +17,7 @@ set(VERSION "3.3.6")
 # -- Maintainer settings
 
 option(FFTW_MAINTENANCE_MODE "Enable Maintainer mode" OFF)
+option(FFTW_USE_NATIVE_FFTGEN "Enable Native FFTgen" OFF)
 
 # -- Library flavor (shared / static)
 
@@ -164,7 +165,7 @@ endif()
 
 if(FFTW_MAINTENANCE_MODE)
   find_package(OCaml REQUIRED)
-  find_package(ClangFormat)
+  find_package(ClangFormat REQUIRED)
   set(FFTW_copyright_header ${CMAKE_SOURCE_DIR}/COPYRIGHT)
   set(FFTW_codelet_gen_root ${CMAKE_SOURCE_DIR}/cmake/codelet_gen)
   set(FFTW_make_codelets ${FFTW_codelet_gen_root}/make_codelets.cmake)
@@ -269,6 +270,9 @@ if(FFTW_ENABLE_STATIC)
   add_library(fftw3 STATIC ${fftw_lib_objects})
   target_sources(fftw3 PUBLIC ${CMAKE_SOURCE_DIR}/api/fftw3.h)
   target_link_libraries(fftw3 PRIVATE ${fftw_lib_private_libs})
+  if(FFTW_HAVE_M_LIB)
+    target_link_libraries(fftw3 PRIVATE ${FFTW_M_LIB})
+  endif()
   set_target_properties(fftw3 PROPERTIES OUTPUT_NAME "fftw3${fftw_precision_suffix}")
   set_target_properties(fftw3 PROPERTIES DEBUG_OUTPUT_NAME "fftw3${fftw_precision_suffix}-debug")
 endif()
@@ -277,6 +281,9 @@ if(FFTW_ENABLE_SHARED)
   add_library(fftw3_shared SHARED ${fftw_lib_objects})
   target_sources(fftw3_shared PUBLIC ${CMAKE_SOURCE_DIR}/api/fftw3.h)
   target_link_libraries(fftw3_shared PRIVATE ${fftw_lib_private_libs})
+  if(FFTW_HAVE_M_LIB)
+    target_link_libraries(fftw3_shared PRIVATE ${FFTW_M_LIB})
+  endif()
   set_target_properties(fftw3_shared PROPERTIES OUTPUT_NAME "fftw3${fftw_precision_suffix}")
   set_target_properties(fftw3_shared PROPERTIES DEBUG_OUTPUT_NAME "fftw3${fftw_precision_suffix}-debug")
 endif()
@@ -314,7 +321,7 @@ install(FILES ${CMAKE_SOURCE_DIR}/api/fftw3.h DESTINATION include)
 if(FFTW_MAINTENANCE_MODE)
 add_custom_target(fftw_tarball
    COMMAND ${CMAKE_COMMAND}
-   "-E" "tar" "cfz" "${CMAKE_BINARY_DIR}/fftw.tar.gz"
+   "-E" "tar" "cfz" "${CMAKE_BINARY_DIR}/fftw3.tar.gz"
    "${CMAKE_SOURCE_DIR}/*"
    DEPENDS ${fftw_lib_targets}
    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

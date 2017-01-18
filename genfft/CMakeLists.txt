@@ -66,12 +66,13 @@ set(genfft_mlis
 
 set(ocaml_build_folder ${CMAKE_CURRENT_BINARY_DIR}/ocaml_build)
 
-set(ocaml_native_compile_options
-  "-lib" "Unix" "-lib" "Nums" "-j" "8"
+set(ocaml_genfft_compile_options
+  "-verbose" "1"
   "-ocamlopt" "${OCaml_OCAMLOPTOPT_EXECUTABLE}"
   "-ocamldep" "${OCaml_OCAMLDEPOPT_EXECUTABLE}"
-  "-ocamlc"   "${OCaml_OCAMLOPTOPT_EXECUTABLE}"
-  "-cflag" "-O3" "-quiet")
+  "-ocamlc"   "${OCaml_OCAMLCOPT_EXECUTABLE}"
+  "-libs" "nums,unix"
+)
 
 file(MAKE_DIRECTORY ${ocaml_build_folder})
 
@@ -92,20 +93,26 @@ set(genfft_progs
   gen_twidsq_c
 )
 
+if(FFTW_USE_NATIVE_FFTGEN)
+  set(fftw_fftgen_extension native)
+else()
+  set(fftw_fftgen_extension byte)
+endif()
+
 foreach(genfft_program IN LISTS genfft_progs)
-  list(APPEND genfft_native_targets ${genfft_program}.native)
-  list(APPEND genfft_native_builds ${ocaml_build_folder}/${genfft_program}.native)
+  list(APPEND genfft_native_targets ${genfft_program}.${fftw_fftgen_extension})
+  list(APPEND genfft_native_builds ${ocaml_build_folder}/${genfft_program}.${fftw_fftgen_extension})
 endforeach()
 
 add_custom_command(
   OUTPUT ${genfft_native_builds}
   COMMAND ${OCaml_OCAMLBUILDNATIVE_EXECUTABLE}
   "-build-dir" ${ocaml_build_folder}
-  ${ocaml_native_compile_options}
+  ${ocaml_genfft_compile_options}
   ${genfft_native_targets}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 foreach(genfft_program IN LISTS genfft_progs)
-  add_custom_target(${genfft_program} ALL DEPENDS ${ocaml_build_folder}/${genfft_program}.native)
-  set_property(TARGET ${genfft_program} PROPERTY OUTPUT_NAME ${ocaml_build_folder}/${genfft_program}.native)
+  add_custom_target(${genfft_program} ALL DEPENDS ${ocaml_build_folder}/${genfft_program}.${fftw_fftgen_extension})
+  set_property(TARGET ${genfft_program} PROPERTY OUTPUT_NAME ${ocaml_build_folder}/${genfft_program}.${fftw_fftgen_extension})
 endforeach()

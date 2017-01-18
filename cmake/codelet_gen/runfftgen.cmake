@@ -1,4 +1,3 @@
-
 file(RELATIVE_PATH _codelet_fftgen_command ${CMAKE_SOURCE_DIR} ${FFT_GEN})
 
 execute_process(COMMAND ${_codelet_fftgen_command} ${ARGS}

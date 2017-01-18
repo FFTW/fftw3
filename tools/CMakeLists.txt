@@ -9,7 +9,7 @@ target_include_directories(fftw-wisdom PRIVATE
   ${CMAKE_SOURCE_DIR}/api
 )
 
-target_link_libraries(fftw-wisdom PRIVATE fftw3 bench2)
+target_link_libraries(fftw-wisdom PRIVATE fftw3 bench2 ${FFTW_M_LIB})
 
 install(TARGETS fftw-wisdom
 RUNTIME DESTINATION bin)
