@@ -9,7 +9,7 @@ define(FFTW_MAJOR_VERSION, 3.3)dnl
 define(FFTW_MINOR_VERSION, 6)dnl
 
 dnl Version number of the FFTW source package.
-AC_INIT(fftw, FFTW_MAJOR_VERSION.FFTW_MINOR_VERSION, fftw@fftw.org)
+AC_INIT(fftw, FFTW_MAJOR_VERSION.FFTW_MINOR_VERSION-pl1, fftw@fftw.org)
 AC_CONFIG_SRCDIR(kernel/ifftw.h)
 
 dnl Version number for libtool shared libraries.  Libtool wants a string
@@ -19,8 +19,10 @@ dnl fftw-3.1.x was 4:x:1
 dnl fftw-3.2.x was 5:x:2
 dnl fftw-3.3.x was 6:x:3 for x < 4
 dnl fftw-3.3.4 was 7:x:4
-dnl fftw-3.3.5 was 8:x:5 (added planner hooks) 
-SHARED_VERSION_INFO="8:FFTW_MINOR_VERSION:6" # CURRENT:REVISION:AGE
+dnl fftw-3.3.5 was 8:x:5 (added planner hooks)
+dnl fftw-3.3.6 was 8:x:6 (8:x:6 is a bug, should have been 8:x:5.  No API changes)
+dnl fftw-3.3.6.1 fixes the 8:x:6 screwup
+SHARED_VERSION_INFO="8:FFTW_MINOR_VERSION:5" # CURRENT:REVISION:AGE
 
 AM_INIT_AUTOMAKE(1.7)
 AM_CONFIG_HEADER(config.h)

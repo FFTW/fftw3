@@ -189,7 +189,7 @@ multiple threads.  FFTW can be used in such an environment, but some
 care must be taken because the planner routines share data
 (e.g. wisdom and trigonometric tables) between calls and plans.
 
-The upshot is that the only thread-safe (re-entrant) routine in FFTW is
+The upshot is that the only thread-safe routine in FFTW is
 @code{fftw_execute} (and the new-array variants thereof).  All other routines
 (e.g. the planner) should only be called from one thread at a time.  So,
 for example, you can wrap a semaphore lock around any calls to the
@@ -209,24 +209,33 @@ shared-memory threads or OpenMP.  Parallelism using MPI or forked processes
 involves a separate address-space and global variables for each process,
 and is not susceptible to problems of this sort.)
 
-If you are configured FFTW with the @code{--enable-debug} or
-@code{--enable-debug-malloc} flags (@pxref{Installation on Unix}),
-then @code{fftw_execute} is not thread-safe.  These flags are not
-documented because they are intended only for developing
-and debugging FFTW, but if you must use @code{--enable-debug} then you
-should also specifically pass @code{--disable-debug-malloc} for
-@code{fftw_execute} to be thread-safe.
+The FFTW planner is intended to be called from a single thread.  If you
+really must call it from multiple threads, you are expected to grab
+whatever lock makes sense for your application, with the understanding
+that you may be holding that lock for a long time, which is undesirable.
 
-Starting from FFTW-3.3.5, FFTW supports a new API to make the
-planner thread-safe:
+Neither strategy works, however, in the following situation.  The
+``application'' is structured as a set of ``plugins'' which are unaware
+of each other, and for whatever reason the ``plugins'' cannot coordinate
+on grabbing the lock.  (This is not a technical problem, but an
+organizational one.  The ``plugins'' are written by independent agents,
+and from the perspective of each plugin's author, each plugin is using
+FFTW correctly from a single thread.)  To cope with this situation,
+starting from FFTW-3.3.5, FFTW supports an API to make the planner
+thread-safe:
+
 @example
 void fftw_make_planner_thread_safe(void);
 @end example
 @findex fftw_make_planner_thread_safe
 
-This call installs a hook that wraps a lock around all planner calls.
-This API is meant for ``applications'' that use ``plugins'' in multiple
-threads, where each ``plugin'' calls single-threaded FFTW but is unaware
-of the other ``plugins'' doing the same thing at the same time.  In this
-case, the ``application'' calls @code{fftw_make_planner_thread_safe()}
-at the beginning to protect ``plugins'' from each other.
+This call operates by brute force: It just installs a hook that wraps a
+lock (chosen by us) around all planner calls.  So there is no magic and
+you get the worst of all worlds.  The planner is still single-threaded,
+but you cannot choose which lock to use.  The planner still holds the
+lock for a long time, but you cannot impose a timeout on lock
+acquisition.  As of FFTW-3.3.5 and FFTW-3.3.6, this call does not work
+when using OpenMP as threading substrate.  (Suggestions on what to do
+about this bug are welcome.)  @emph{Do not use
+@code{fftw_make_planner_thread_safe} unless there is no other choice,}
+such as in the application/plugin situation.

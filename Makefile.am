@@ -7,6 +7,7 @@ lib_LTLIBRARIES = libfftw3@PREC_SUFFIX@.la
 # recompile genfft if maintainer mode is true
 if MAINTAINER_MODE
 GENFFT = genfft
+EXTRA_libfftw3@PREC_SUFFIX@_la_DEPENDENCIES = assert-shared-version-info
 else
 GENFFT =
 endif
@@ -154,3 +155,12 @@ wisdom:
 install-wisdom: wisdom
 	$(mkinstalldirs) $(WISDOM_DIR)
 	$(INSTALL_DATA) wisdom $(WISDOM_DIR)/$(WISDOM)
+
+if MAINTAINER_MODE
+assert-shared-version-info:
+	current=`echo @SHARED_VERSION_INFO@ | cut -d: -f1`;	\
+	age=`echo @SHARED_VERSION_INFO@ | cut -d: -f3`;		\
+	major=3;						\
+	expected=`expr $$age + $$major`;			\
+	test $$current -eq $$expected
+endif

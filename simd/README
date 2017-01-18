@@ -1,2 +1,0 @@
-This directory contains files that are specific to the SIMD
-implementation but are not DFT- or RDFT- specific.
