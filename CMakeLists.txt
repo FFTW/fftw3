@@ -183,6 +183,7 @@ macro(fftw_check_flag _purpose _flag _var)
   CHECK_C_COMPILER_FLAG(${_flag} FFTW_CC_HAS_${_var})
   if(FFTW_CC_HAS_${_var})
     set(${_var} ${_flag})
+    message(STATUS "Flags for ${_purpose} : ${_flag}" )
   else()
     message(FATAL_ERROR "Can not determine how to set ${_purpose}")
   endif()
@@ -216,14 +217,6 @@ if(HAVE_AVX2)
   list(APPEND FFTW_AVX2_FLAGS ${FFTW_FMA_FLAGS})
 endif()
 
-
-set(FFTW_SIMD_FLAGS
-    ${FFTW_AVX_FLAGS}
-    ${FFTW_AVX2_FLAGS}
-    ${FFTW_SSE2_FLAGS}
-    ${FFTW_SSE_FLAGS}
-  )
-message(STATUS "CC flags are : ${FFTW_SIMD_FLAGS}")
 
 # prepare config.h
 

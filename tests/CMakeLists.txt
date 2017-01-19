@@ -21,14 +21,15 @@ target_include_directories(bench PRIVATE
 set_target_properties(bench PROPERTIES OUTPUT_NAME "bench${fftw_precision_suffix}")
 set_target_properties(bench PROPERTIES DEBUG_OUTPUT_NAME "bench${fftw_precision_suffix}-debug")
 target_link_libraries(bench PUBLIC fftw3 bench2 ${FFTW_M_LIB})
-if(NOT FFTW_COMBINED_THREADS)
-  target_link_libraries(bench PUBLIC fftw3_threads)
+
+if(FFTW_BUILD_THREADS)
+  target_link_libraries(bench PUBLIC fftw_threads_interface)
 endif()
 
 if(FFTW_ENABLE_TESTS)
 function(fftw_invoke_prob _name _prob)
   add_test(NAME "${_name}"
-    COMMAND $<TARGET_FILE:bench> -o patient --verbose=2 --verify-rounds 5 --verify "${_prob}"
+    COMMAND $<TARGET_FILE:bench> -o patient --verbose=2 --verify-rounds 2 --verify "${_prob}"
   )
 endfunction()
 
@@ -49,12 +50,16 @@ function(fftw_test_size _name _size)
 endfunction()
 
 set(fftw_powers_of_two 2 4 8 16 32 64 128 256 512 1024 2048 4096)
+set(fftw_other_radix 5 25 125 9 15 10 27 81 90 1125)
 
 foreach(_fftsize IN LISTS fftw_powers_of_two)
-  math(EXPR _fftsize_uneven "${_fftsize} + 5")
   fftw_test_size("one_dimension" ${_fftsize})
-  fftw_test_size("one_dimension" ${_fftsize_uneven})
 endforeach()
+
+foreach(_fftsize IN LISTS fftw_other_radix)
+  fftw_test_size("one_dimension" ${_fftsize})
+endforeach()
+
 
 if(FFTW_TEST_ZERODIM)
   set(_test_count 0)

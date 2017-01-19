@@ -24,17 +24,13 @@ set_property(TARGET fftw_dft_interface APPEND
   $<TARGET_OBJECTS:fftw_dft_scalar_codelets>
 )
 
-macro(fftw_dft_simd_add_objects _vec_ext)
+set(fftw_dft_vector_extensions ALTIVEC AVX NEON SSE2 AVX2 AVX_128_FMA)
+
+foreach(_vec_ext IN LISTS fftw_dft_vector_extensions)
   if(HAVE_${_vec_ext})
     set_property(TARGET fftw_dft_interface APPEND
       PROPERTY INTERFACE_SOURCES
       $<TARGET_OBJECTS:fftw_dft_simd_${_vec_ext}_objects>
     )
   endif()
-endmacro()
-
-set(fftw_dft_vector_extensions ALTIVEC AVX NEON SSE2 AVX2 AVX_128_FMA)
-
-foreach(_vector_ext IN LISTS fftw_dft_vector_extensions)
-  fftw_dft_simd_add_objects(${_vector_ext})
 endforeach()
