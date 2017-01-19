@@ -17,6 +17,7 @@ _build
 rdft/simd/altivec/*.c
 rdft/simd/avx/*.c
 rdft/simd/avx-128/*.c
+rdft/simd/avx-128-fma/*.c
 rdft/simd/avx2/*.c
 rdft/simd/avx2-128/*.c
 rdft/simd/avx512/*.c
@@ -26,6 +27,7 @@ rdft/simd/common/*.c
 rdft/simd/kcvi/*.c
 rdft/simd/neon/*.c
 rdft/simd/sse2/*.c
+rdft/simd/vsx/*.c
 rdft/scalar/r2cb/*.c
 rdft/scalar/r2cf/*.c
 rdft/scalar/r2r/*.c
@@ -43,6 +45,7 @@ dft/simd/common/*.c
 dft/simd/kcvi/*.c
 dft/simd/neon/*.c
 dft/simd/sse2/*.c
+dft/simd/vsx/*.c
 
 # other generated files
 ChangeLog

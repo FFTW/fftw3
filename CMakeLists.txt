@@ -213,7 +213,7 @@ endif()
 if(HAVE_AVX2)
   fftw_check_flag("AVX2 extension" "-mavx2" FFTW_AVX2_FLAGS)
   fftw_check_flag("FMA for AVX2" "-mfma" FFTW_FMA_FLAGS)
-  set(FFTW_AVX2_DEFINES "HAVE_FMA")
+  set(FFTW_AVX2_DEFINE "HAVE_FMA")
   list(APPEND FFTW_AVX2_FLAGS ${FFTW_FMA_FLAGS})
 endif()
 

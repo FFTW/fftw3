@@ -30,30 +30,18 @@ set_property(TARGET fftw_rdft_interface APPEND
   $<TARGET_OBJECTS:fftw_rdft_scalar_common_objects>
 )
 
-if(HAVE_ALTIVEC)
-  set_property(TARGET fftw_rdft_interface APPEND
-    PROPERTY INTERFACE_SOURCES
-    $<TARGET_OBJECTS:fftw_rdft_simd_altivec_objects>
-  )
-endif()
+set(fftw_rdft_vector_extensions
+ALTIVEC
+AVX AVX_128_FMA AVX2 AVX2_128 AVX512 SSE2
+GENERIC_SIMD128 GENERIC_SIMD256
+NEON KCVI VSX
+)
 
-if(HAVE_AVX)
-  set_property(TARGET fftw_rdft_interface APPEND
-    PROPERTY INTERFACE_SOURCES
-    $<TARGET_OBJECTS:fftw_rdft_simd_avx_objects>
-  )
-endif()
-
-if(HAVE_NEON)
-  set_property(TARGET fftw_rdft_interface APPEND
-    PROPERTY INTERFACE_SOURCES
-    $<TARGET_OBJECTS:fftw_rdft_simd_neon_objects>
-  )
-endif()
-
-if(HAVE_SSE2)
-  set_property(TARGET fftw_rdft_interface APPEND
-    PROPERTY INTERFACE_SOURCES
-    $<TARGET_OBJECTS:fftw_rdft_simd_sse2_objects>
-  )
-endif()
+foreach(_vec_ext IN LISTS fftw_rdft_vector_extensions)
+  if(HAVE_${_vec_ext})
+    set_property(TARGET fftw_rdft_interface APPEND
+      PROPERTY INTERFACE_SOURCES
+      $<TARGET_OBJECTS:fftw_rdft_simd_${_vec_ext}_objects>
+    )
+  endif()
+endforeach()

@@ -24,7 +24,12 @@ set_property(TARGET fftw_dft_interface APPEND
   $<TARGET_OBJECTS:fftw_dft_scalar_codelets>
 )
 
-set(fftw_dft_vector_extensions ALTIVEC AVX NEON SSE2 AVX2 AVX_128_FMA)
+set(fftw_dft_vector_extensions
+ALTIVEC
+AVX AVX_128_FMA AVX2 AVX2_128 AVX512 SSE2
+GENERIC_SIMD128 GENERIC_SIMD256
+NEON KCVI VSX
+)
 
 foreach(_vec_ext IN LISTS fftw_dft_vector_extensions)
   if(HAVE_${_vec_ext})
