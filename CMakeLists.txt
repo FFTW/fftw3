@@ -14,10 +14,9 @@ set(VERSION "3.3.6")
 
 # Configuration options
 
-# -- Maintainer settings
+# -- Maintainer / build server settings
 
 option(FFTW_MAINTENANCE_MODE "Enable Maintainer mode" OFF)
-option(FFTW_USE_NATIVE_FFTGEN "Enable Native FFTgen" OFF)
 
 # -- Library flavor (shared / static)
 

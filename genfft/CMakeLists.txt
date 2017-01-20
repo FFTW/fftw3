@@ -93,15 +93,9 @@ set(genfft_progs
   gen_twidsq_c
 )
 
-if(FFTW_USE_NATIVE_FFTGEN)
-  set(fftw_fftgen_extension native)
-else()
-  set(fftw_fftgen_extension byte)
-endif()
-
 foreach(genfft_program IN LISTS genfft_progs)
-  list(APPEND genfft_native_targets ${genfft_program}.${fftw_fftgen_extension})
-  list(APPEND genfft_native_builds ${ocaml_build_folder}/${genfft_program}.${fftw_fftgen_extension})
+  list(APPEND genfft_native_targets ${genfft_program}.native)
+  list(APPEND genfft_native_builds ${ocaml_build_folder}/${genfft_program}.native)
 endforeach()
 
 add_custom_command(
@@ -113,6 +107,6 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 foreach(genfft_program IN LISTS genfft_progs)
-  add_custom_target(${genfft_program} ALL DEPENDS ${ocaml_build_folder}/${genfft_program}.${fftw_fftgen_extension})
-  set_property(TARGET ${genfft_program} PROPERTY OUTPUT_NAME ${ocaml_build_folder}/${genfft_program}.${fftw_fftgen_extension})
+  add_custom_target(${genfft_program} ALL DEPENDS ${ocaml_build_folder}/${genfft_program}.native)
+  set_property(TARGET ${genfft_program} PROPERTY OUTPUT_NAME ${ocaml_build_folder}/${genfft_program}.native)
 endforeach()
