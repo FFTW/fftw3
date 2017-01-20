@@ -21,7 +21,7 @@ option(FFTW_MAINTENANCE_MODE "Enable Maintainer mode" OFF)
 # -- Library flavor (shared / static)
 
 option(FFTW_ENABLE_SHARED "Build shared library" OFF)
-set(FFTW_ENABLE_STATIC ON)
+option(FFTW_ENABLE_STATIC "Build static library" ON)
 
 # -- Floating point precision
 
