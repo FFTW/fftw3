@@ -38,6 +38,7 @@ if(NOT FFTW_COMBINED_THREADS)
     add_library(fftw3_threads STATIC $<TARGET_OBJECTS:fftw_threads_omp_objects>)
   else()
     add_library(fftw3_threads STATIC $<TARGET_OBJECTS:fftw_threads_objects>)
+    target_link_libraries(fftw3_threads PUBLIC Threads::Threads)
   endif()
 
   set_target_properties(fftw3_threads PROPERTIES OUTPUT_NAME "fftw3${fftw_precision_suffix}_threads")

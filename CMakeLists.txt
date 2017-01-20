@@ -61,12 +61,14 @@ if(FFTW_USE_OPENMP)
 endif()
 
 if(FFTW_BUILD_THREADS)
+  if(NOT WIN32)
     set(CMAKE_THREAD_PREFER_PTHREAD ON)
+  endif()
     find_package(Threads REQUIRED)
-
     if(CMAKE_USE_PTHREADS_INIT)
         set(USING_POSIX_THREADS 1)
         set(HAVE_PTHREAD 1)
+        message(STATUS "Using pthreads")
     endif()
 endif()
 
@@ -177,46 +179,9 @@ if(FFTW_MAINTENANCE_MODE)
   add_subdirectory(genfft)
 endif(FFTW_MAINTENANCE_MODE)
 
+# -- check compiler flags for SIMD support
 
-macro(fftw_check_flag _purpose _flag _var)
-  unset(FFTW_CC_HAS_${_var})
-  CHECK_C_COMPILER_FLAG(${_flag} FFTW_CC_HAS_${_var})
-  if(FFTW_CC_HAS_${_var})
-    set(${_var} ${_flag})
-    message(STATUS "Flags for ${_purpose} : ${_flag}" )
-  else()
-    message(FATAL_ERROR "Can not determine how to set ${_purpose}")
-  endif()
-endmacro()
-
-if(HAVE_SSE)
-  fftw_check_flag("SSE extension" "-msse" FFTW_SSE_FLAGS)
-  if(FFTW_USE_FMA)
-    set(FFTW_SSE_DEFINE "HAVE_FMA")
-  endif()
-endif()
-
-if(HAVE_SSE2)
-  fftw_check_flag("SSE2 extension" "-msse2" FFTW_SSE2_FLAGS)
-  if(FFTW_USE_FMA)
-    set(FFTW_SSE2_DEFINE "HAVE_FMA")
-  endif()
-endif()
-
-if(HAVE_AVX)
-  fftw_check_flag("AVX extension" "-mavx" FFTW_AVX_FLAGS)
-  if(FFTW_USE_FMA)
-    set(FFTW_AVX_DEFINE "HAVE_FMA")
-  endif()
-endif()
-
-if(HAVE_AVX2)
-  fftw_check_flag("AVX2 extension" "-mavx2" FFTW_AVX2_FLAGS)
-  fftw_check_flag("FMA for AVX2" "-mfma" FFTW_FMA_FLAGS)
-  set(FFTW_AVX2_DEFINE "HAVE_FMA")
-  list(APPEND FFTW_AVX2_FLAGS ${FFTW_FMA_FLAGS})
-endif()
-
+include(cmake/simd_flags.cmake)
 
 # prepare config.h
 
