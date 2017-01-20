@@ -23,7 +23,7 @@ set_target_properties(bench PROPERTIES DEBUG_OUTPUT_NAME "bench${fftw_precision_
 target_link_libraries(bench PUBLIC fftw3 bench2 ${FFTW_M_LIB})
 
 if(FFTW_BUILD_THREADS)
-  target_link_libraries(bench PUBLIC fftw_threads_interface)
+  target_link_libraries(bench PUBLIC fftw_threads_interface Threads::Threads)
 endif()
 
 if(FFTW_ENABLE_TESTS)

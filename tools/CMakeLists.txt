@@ -12,7 +12,7 @@ target_include_directories(fftw-wisdom PRIVATE
 target_link_libraries(fftw-wisdom PRIVATE fftw3 bench2 ${FFTW_M_LIB})
 
 if(FFTW_BUILD_THREADS)
-  target_link_libraries(fftw-wisdom PRIVATE fftw_threads_interface)
+  target_link_libraries(fftw-wisdom PRIVATE fftw_threads_interface Threads::Threads)
 endif()
 
 install(TARGETS fftw-wisdom
