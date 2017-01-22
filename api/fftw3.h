@@ -330,7 +330,7 @@ FFTW_EXTRN(void) X(make_planner_thread_safe)(void);                     \
                                                                         \
 FFTW_EXTRN(int) X(export_wisdom_to_filename)(const char *filename);     \
 FFTW_EXTRN(void) X(export_wisdom_to_file)(FILE *output_file);           \
-FFTW_EXTRN(char) *X(export_wisdom_to_string)(void);                     \
+FFTW_EXTRN(char*) X(export_wisdom_to_string)(void);                     \
 FFTW_EXTRN(void) X(export_wisdom)(X(write_char_func) write_char,        \
                                   void *data);                          \
 FFTW_EXTRN(int) X(import_system_wisdom)(void);                          \
@@ -341,11 +341,11 @@ FFTW_EXTRN(int) X(import_wisdom)(X(read_char_func) read_char, void *data); \
                                                                         \
 FFTW_EXTRN(void) X(fprint_plan)(const X(plan) p, FILE *output_file);    \
 FFTW_EXTRN(void) X(print_plan)(const X(plan) p);                        \
-FFTW_EXTRN(char) *X(sprint_plan)(const X(plan) p);                      \
+FFTW_EXTRN(char*) X(sprint_plan)(const X(plan) p);                      \
                                                                         \
-FFTW_EXTRN(void) *X(malloc)(size_t n);                                  \
-FFTW_EXTRN(R) *X(alloc_real)(size_t n);                                 \
-FFTW_EXTRN(C) *X(alloc_complex)(size_t n);                              \
+FFTW_EXTRN(void*) X(malloc)(size_t n);                                  \
+FFTW_EXTRN(R*) X(alloc_real)(size_t n);                                 \
+FFTW_EXTRN(C*) X(alloc_complex)(size_t n);                              \
 FFTW_EXTRN(void) X(free)(void *p);                                      \
                                                                         \
 FFTW_EXTRN(void) X(flops)(const X(plan) p,                              \
