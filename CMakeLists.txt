@@ -283,4 +283,11 @@ add_custom_target(fftw_tarball
    DEPENDS ${fftw_lib_targets}
    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
+add_custom_target(fftw_zip
+   COMMAND ${CMAKE_COMMAND}
+   "-E" "tar" "cf" "${CMAKE_BINARY_DIR}/fftw3.zip" "--format=zip"
+   "${CMAKE_SOURCE_DIR}/*"
+   DEPENDS ${fftw_lib_targets}
+   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
 endif()
