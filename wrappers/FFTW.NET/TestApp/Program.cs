@@ -28,6 +28,11 @@ namespace TestApp
 			Console.ReadKey();
 			Console.Clear();
 
+			ExampleR2C();
+
+			Console.ReadKey();
+			Console.Clear();
+
 			DFT.Wisdom.Export("wisdom.txt");
 			Console.WriteLine(DFT.Wisdom.Current);
 			Console.ReadKey();
@@ -67,6 +72,24 @@ namespace TestApp
 					Console.Write((output[row, col].Real/Math.Sqrt(input.Length)).ToString("F2").PadLeft(6));
 				Console.WriteLine();
 			}
+		}
+
+		static void ExampleR2C()
+		{
+			double[] input = new double[97];
+			Array<double> wInput = new Array<double>(input);
+			Array<Complex> wOutput = new Array<Complex>(DFT.GetComplexBufferSize(wInput.GetSize()));
+			Complex[] output = wOutput.Buffer as Complex[];
+
+			var rand = new Random();
+
+			for (int i = 0; i < input.Length; i++)
+				input[i] = rand.NextDouble();
+
+			DFT.FFT(wInput, wOutput);
+
+			for (int i = 0; i < output.Length; i++)
+				Console.WriteLine(output[i]);
 		}
 	}
 }

@@ -51,7 +51,8 @@
       <DependentUpon>FftwInterop.tt</DependentUpon>
     </Compile>
     <Compile Include="FftwPlan.cs" />
-    <Compile Include="FftwPlanR2C.cs" />
+    <Compile Include="FftwPlanC2C.cs" />
+    <Compile Include="FftwPlanRC.cs" />
     <Compile Include="PinnedGCHandle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

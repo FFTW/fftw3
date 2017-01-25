@@ -22,36 +22,25 @@ using System.Numerics;
 
 namespace FFTW.NET
 {
+	/// <summary>
+	/// This class provides methods for convenience.
+	/// However, for optimal performance you should consider using
+	/// <see cref="FftwPlanC2C"/> or <see cref="FftwPlanRC"/> directly.
+	/// </summary>
 	public static class DFT
 	{
-		static readonly WeakReference<Array<Complex>> _buffer = new WeakReference<Array<Complex>>(null);
-
-		static Array<Complex> GetInitializationBuffer(long size)
-		{
-			Array<Complex> buffer;
-			lock (_buffer)
-			{
-				if (!_buffer.TryGetTarget(out buffer) || buffer == null || buffer.Buffer.LongLength < size)
-				{
-					buffer = new Array<Complex>(new Complex[size]);
-					_buffer.SetTarget(buffer);
-				}
-			}
-			return buffer;
-		}
-
 		static void Transform(Array<Complex> input, Array<Complex> output, DftDirection direction, PlannerFlags plannerFlags, int nThreads)
 		{
 			if ((plannerFlags & PlannerFlags.Estimate) == PlannerFlags.Estimate)
 			{
-				using (var plan = FftwPlan.Create(input, output, direction, plannerFlags, nThreads))
+				using (var plan = FftwPlanC2C.Create(input, output, direction, plannerFlags, nThreads))
 				{
 					plan.Execute();
 					return;
 				}
 			}
 
-			using (var plan = FftwPlan.Create(input, output, direction, plannerFlags | PlannerFlags.WisdomOnly, nThreads))
+			using (var plan = FftwPlanC2C.Create(input, output, direction, plannerFlags | PlannerFlags.WisdomOnly, nThreads))
 			{
 				if (plan != null)
 				{
@@ -65,7 +54,7 @@ namespace FFTW.NET
 			/// a different buffer to avoid overwriting the input
 			if (input != output)
 			{
-				using (var plan = FftwPlan.Create(output, output, input.Rank, input.GetSize(), direction, plannerFlags, nThreads))
+				using (var plan = FftwPlanC2C.Create(output, output, input.Rank, input.GetSize(), direction, plannerFlags, nThreads))
 				{
 					input.CopyTo(output);
 					plan.Execute();
@@ -73,15 +62,12 @@ namespace FFTW.NET
 			}
 			else
 			{
-				var buffer = GetInitializationBuffer(input.LongLength);
-				lock (buffer)
+				var buffer = new Array<Complex>(input.GetSize());
+				using (var plan = FftwPlanC2C.Create(buffer, buffer, input.Rank, input.GetSize(), direction, plannerFlags, nThreads))
 				{
-					using (var plan = FftwPlan.Create(buffer, buffer, input.Rank, input.GetSize(), direction, plannerFlags, nThreads))
-					{
-						input.CopyTo(buffer);
-						plan.Execute();
-						buffer.CopyTo(output, 0, 0, input.LongLength);
-					}
+					input.CopyTo(buffer);
+					plan.Execute();
+					buffer.CopyTo(output, 0, 0, input.LongLength);
 				}
 			}
 		}
@@ -95,6 +81,76 @@ namespace FFTW.NET
 		/// Performs a inverse fast fourier transformation. The dimension is inferred from the input (<see cref="Array{T}.Rank"/>).
 		/// </summary>
 		public static void IFFT(Array<Complex> input, Array<Complex> output, PlannerFlags plannerFlags = PlannerFlags.Default, int nThreads = 1) => Transform(input, output, DftDirection.Backwards, plannerFlags, nThreads);
+
+		public static void FFT(Array<double> input, Array<Complex> output, PlannerFlags plannerFlags = PlannerFlags.Default, int nThreads = 1)
+		{
+			if ((plannerFlags & PlannerFlags.Estimate) == PlannerFlags.Estimate)
+			{
+				using (var plan = FftwPlanRC.Create(input, output, DftDirection.Forwards, plannerFlags, nThreads))
+				{
+					plan.Execute();
+					return;
+				}
+			}
+
+			using (var plan = FftwPlanRC.Create(input, output, DftDirection.Forwards, plannerFlags | PlannerFlags.WisdomOnly, nThreads))
+			{
+				if (plan != null)
+				{
+					plan.Execute();
+					return;
+				}
+			}
+
+			/// If with <see cref="PlannerFlags.WisdomOnly"/> no plan can be created
+			/// and <see cref="PlannerFlags.Estimate"/> is not specified, we use
+			/// a different buffer to avoid overwriting the input
+			var buffer = new Array<double>(input.GetSize());
+			using (var plan = FftwPlanRC.Create(buffer, output, input.Rank, input.GetSize(), DftDirection.Forwards, plannerFlags, nThreads))
+			{
+				input.CopyTo(buffer);
+				plan.Execute();
+			}
+		}
+
+		public static void IFFT(Array<Complex> input, Array<double> output, PlannerFlags plannerFlags = PlannerFlags.Default, int nThreads = 1)
+		{
+			if ((plannerFlags & PlannerFlags.Estimate) == PlannerFlags.Estimate)
+			{
+				using (var plan = FftwPlanRC.Create(output, input, DftDirection.Backwards, plannerFlags, nThreads))
+				{
+					plan.Execute();
+					return;
+				}
+			}
+
+			using (var plan = FftwPlanRC.Create(output, input, DftDirection.Backwards, plannerFlags | PlannerFlags.WisdomOnly, nThreads))
+			{
+				if (plan != null)
+				{
+					plan.Execute();
+					return;
+				}
+			}
+
+			/// If with <see cref="PlannerFlags.WisdomOnly"/> no plan can be created
+			/// and <see cref="PlannerFlags.Estimate"/> is not specified, we use
+			/// a different buffer to avoid overwriting the input
+			var buffer = new Array<Complex>(input.GetSize());
+			using (var plan = FftwPlanRC.Create(output, buffer, input.Rank, input.GetSize(), DftDirection.Backwards, plannerFlags, nThreads))
+			{
+				input.CopyTo(buffer);
+				plan.Execute();
+			}
+		}
+
+		public static int[] GetComplexBufferSize(int[] realBufferSize)
+		{
+			int[] n = new int[realBufferSize.Length];
+			Buffer.BlockCopy(realBufferSize, 0, n, 0, n.Length * sizeof(int));
+			n[n.Length - 1] = realBufferSize[n.Length - 1] / 2 + 1;
+			return n;
+		}
 
 		public static class Wisdom
 		{
