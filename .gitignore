@@ -98,3 +98,10 @@ depcomp
 missing
 py-compile
 compile
+
+# FFTW.NET
+*.g.cs
+/wrappers/FFTW.NET/.vs
+/wrappers/FFTW.NET/*/.vs
+/wrappers/FFTW.NET/*/bin
+/wrappers/FFTW.NET/*/obj
