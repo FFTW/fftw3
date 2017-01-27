@@ -15,8 +15,8 @@ echo "#include \"ifftw-mpi.h\""
 echo
 
 # Declare prototypes using FFTW_EXTERN, important for Windows DLLs
-grep -v 'mpi.h' fftw3-mpi.h | gcc -E - |grep "fftw_mpi_init" |tr ';' '\n' | grep "MPI_Comm" | perl genf03-wrap.pl | grep "MPI_Fint" | sed 's/^/FFTW_EXTERN /;s/$/;/'
+grep -v 'mpi.h' fftw3-mpi.h | gcc -E -I../api - |grep "fftw_mpi_init" |tr ';' '\n' | grep "MPI_Comm" | perl genf03-wrap.pl | grep "MPI_Fint" | sed 's/^/FFTW_EXTERN /;s/$/;/'
 
-grep -v 'mpi.h' fftw3-mpi.h | gcc -E - |grep "fftw_mpi_init" |tr ';' '\n' | grep "MPI_Comm" | perl genf03-wrap.pl
+grep -v 'mpi.h' fftw3-mpi.h | gcc -E -I../api - |grep "fftw_mpi_init" |tr ';' '\n' | grep "MPI_Comm" | perl genf03-wrap.pl
 
 

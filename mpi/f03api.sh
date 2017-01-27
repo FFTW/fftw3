@@ -37,7 +37,7 @@ EOF
 
     echo
     echo "  interface"
-    grep -v 'mpi.h' fftw3-mpi.h | gcc -D__GNUC__=5 -D__i386__ -E - |grep "fftw${p}_mpi_init" |tr ';' '\n' | perl ../api/genf03.pl
+    grep -v 'mpi.h' fftw3-mpi.h | gcc -I../api -D__GNUC__=5 -D__i386__ -E - |grep "fftw${p}_mpi_init" |tr ';' '\n' | perl ../api/genf03.pl
     echo "  end interface"
 
 done
