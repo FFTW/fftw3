@@ -87,7 +87,7 @@ typedef struct {
 
 bench_tensor *mktensor(int rnk);
 void tensor_destroy(bench_tensor *sz);
-int tensor_sz(const bench_tensor *sz);
+size_t tensor_sz(const bench_tensor *sz);
 bench_tensor *tensor_compress(const bench_tensor *sz);
 int tensor_unitstridep(bench_tensor *t);
 int tensor_rowmajorp(bench_tensor *t);

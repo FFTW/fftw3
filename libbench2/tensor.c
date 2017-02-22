@@ -43,9 +43,10 @@ void tensor_destroy(bench_tensor *sz)
      bench_free(sz);
 }
 
-int tensor_sz(const bench_tensor *sz)
+size_t tensor_sz(const bench_tensor *sz)
 {
-     int i, n = 1;
+     int i;
+     size_t n = 1;
 
      if (!BENCH_FINITE_RNK(sz->rnk))
           return 0;
