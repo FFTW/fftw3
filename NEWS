@@ -1,3 +1,7 @@
+FFTW 3.3.6-pl2:
+
+* Bugfix: MPI Fortran-03 headers were missing in FFTW 3.3.6-pl1.
+
 FFTW 3.3.6-pl1:
 
 * Bugfix: FFTW 3.3.6 had the wrong libtool version number, and generated

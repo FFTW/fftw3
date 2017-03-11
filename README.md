@@ -17,5 +17,10 @@ compiled on any system with a C compiler.
 
 Advanced users and FFTW maintainers can obtain code from github and
 run the generation process themselves.  This is a long process that
-requires special tools.  See README for details.
+requires special tools.  See README for details.  (Summary: in
+addition to the usual Unix developer software, you need [GNU
+autotools](https://en.wikipedia.org/wiki/GNU_Build_System) and
+[OCaml](http://www.ocaml.org/).  Then you can run `sh mkdist.sh`
+to compile FFTW and generate `.tar.gz` files similar to the official
+releases.)
 

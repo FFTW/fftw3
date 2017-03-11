@@ -43,6 +43,13 @@ re-run configure, you must pass the --enable-maintainer-mode flag:
 
     ./configure --enable-maintainer-mode [OTHER CONFIGURE FLAGS]
 
+Alternatively, you can run
+
+    sh mkdist.sh
+
+which will run the entire bootstrapping process and generate
+.tar.gz files similar to those for official releases.
+
 CONTACTS
 --------
 
