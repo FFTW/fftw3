@@ -438,7 +438,7 @@ INLINE_ELAPSED(__inline)
 #endif
 /*----------------------------------------------------------------*/
 /* SGI/Irix */
-#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_SGI_CYCLE) && !defined(HAVE_TICK_COUNTER)
+#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_SGI_CYCLE) && !defined(HAVE_TICK_COUNTER) && !defined(__ANDROID__)
 typedef struct timespec ticks;
 
 static inline ticks getticks(void)
