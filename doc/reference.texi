@@ -1023,7 +1023,7 @@ these possibilities, @code{fftw_plan_many_dft} adds the new parameters
 and@tie{}3, but the advanced interface handles only the general-rank
 case.
 
-@code{howmany} is the number of transforms to compute.  The resulting
+@code{howmany} is the (nonnegative) number of transforms to compute.  The resulting
 plan computes @code{howmany} transforms, where the input of the
 @code{k}-th transform is at location @code{in+k*idist} (in C pointer
 arithmetic), and its output is at location @code{out+k*odist}.  Plans
@@ -1265,7 +1265,9 @@ The guru planner interfaces all take a (@code{rank}, @code{dims[rank]})
 pair describing the transform size, and a (@code{howmany_rank},
 @code{howmany_dims[howmany_rank]}) pair describing the ``vector'' size (a
 multi-dimensional loop of transforms to perform), where @code{dims} and
-@code{howmany_dims} are arrays of @code{fftw_iodim}.
+@code{howmany_dims} are arrays of @code{fftw_iodim}.  Each @code{n} field must
+be positive for @code{dims} and nonnegative for @code{howmany_dims}, while both
+@code{rank} and @code{howmany_rank} must be nonnegative.
 
 For example, the @code{howmany} parameter in the advanced complex-DFT
 interface corresponds to @code{howmany_rank} = 1,
