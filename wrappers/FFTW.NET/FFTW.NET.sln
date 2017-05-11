@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FFTW.NET", "FFTW.NET\FFTW.NET.csproj", "{4503AC9C-F2E2-4E6B-8C34-01FC8F5EBC58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{FF3AE58A-D8C5-4660-A253-6DFD46EEB8E6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4503AC9C-F2E2-4E6B-8C34-01FC8F5EBC58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4503AC9C-F2E2-4E6B-8C34-01FC8F5EBC58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4503AC9C-F2E2-4E6B-8C34-01FC8F5EBC58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4503AC9C-F2E2-4E6B-8C34-01FC8F5EBC58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF3AE58A-D8C5-4660-A253-6DFD46EEB8E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF3AE58A-D8C5-4660-A253-6DFD46EEB8E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF3AE58A-D8C5-4660-A253-6DFD46EEB8E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF3AE58A-D8C5-4660-A253-6DFD46EEB8E6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
