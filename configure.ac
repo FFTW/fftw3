@@ -675,6 +675,11 @@ if test "x$with_g77_wrappers" = "xyes"; then
 	AC_DEFINE(WITH_G77_WRAPPERS,1,[Include g77-compatible wrappers in addition to any other Fortran wrappers.])
 fi
 
+AC_ARG_WITH(only-r2hc-forward, [AC_HELP_STRING([--with-only-r2hc-forward],[only r2hc api to reduce code size])], with_only_r2hc=$withval)
+if test "x$with_only_r2hc" = "xyes"; then
+	AC_DEFINE(WITH_ONLY_R2HC,1,[only r2hc api to reduce code size])
+fi
+
 dnl -----------------------------------------------------------------------
 have_smp="no"
 AC_ARG_ENABLE(openmp, [AC_HELP_STRING([--enable-openmp],[use OpenMP directives for parallelism])], enable_openmp=$enableval, enable_openmp=no)
