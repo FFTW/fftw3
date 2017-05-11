@@ -23,3 +23,6 @@ all-local::
 
 maintainer-clean-local::
 	$(OCAMLBUILD) -classic-display -clean
+
+top::
+	$(OCAMLBUILD) toplooplib.cma
