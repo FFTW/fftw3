@@ -6,12 +6,12 @@
 genfft=$1
 shift
 
-echo "#ifdef HAVE_FMA"
+echo "#if defined(ARCH_PREFERS_FMA) || defined(ISA_EXTENSION_PREFERS_FMA)"
 echo
-  $genfft -fma -reorder-insns -schedule-for-pipeline $*
+  $genfft -fma $*
 echo
-echo "#else /* HAVE_FMA */"
+echo "#else"
 echo
   $genfft $*
 echo
-echo "#endif /* HAVE_FMA */"
+echo "#endif"

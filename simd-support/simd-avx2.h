@@ -43,9 +43,7 @@
 #error "compiling simd-avx2.h without avx2 support"
 #endif
 
-#if !defined(HAVE_FMA)
-#warning "You should probably enable FMAs with --enable-fma for AVX2"
-#endif
+#define ISA_EXTENSION_PREFERS_FMA 1
 
 #ifdef _MSC_VER
 #ifndef inline

@@ -77,7 +77,7 @@ typedef DS(float64x2_t, float32x4_t) V;
    At least one move must be implemented, negating the advantage of
    the FMA in the first place.  At least some versions of gcc generate
    both moves.  So we are better off generating t=b*c;t0=a+t;t1=a-t;*/
-#if HAVE_FMA
+#if ARCH_PREFERS_FMA
 #warning "--enable-fma on NEON is probably a bad idea (see source code)"
 #endif
 

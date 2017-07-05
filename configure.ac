@@ -6,10 +6,10 @@ dnl Define the fftw version number as M4 macros, so that we can enforce
 dnl the invariant that the minor version number in FFTW-X.Y.MINOR is the same
 dnl as the revision number in SHARED_VERSION_INFO.
 define(FFTW_MAJOR_VERSION, 3.3)dnl
-define(FFTW_MINOR_VERSION, 6)dnl
+define(FFTW_MINOR_VERSION, 7)dnl
 
 dnl Version number of the FFTW source package.
-AC_INIT(fftw, FFTW_MAJOR_VERSION.FFTW_MINOR_VERSION-pl2, fftw@fftw.org)
+AC_INIT(fftw, FFTW_MAJOR_VERSION.FFTW_MINOR_VERSION, fftw@fftw.org)
 AC_CONFIG_SRCDIR(kernel/ifftw.h)
 
 dnl Version number for libtool shared libraries.  Libtool wants a string
@@ -22,6 +22,7 @@ dnl fftw-3.3.4 was 7:x:4
 dnl fftw-3.3.5 was 8:x:5 (added planner hooks)
 dnl fftw-3.3.6 was 8:x:6 (8:x:6 is a bug, should have been 8:x:5.  No API changes)
 dnl fftw-3.3.6.1 fixes the 8:x:6 screwup
+dnl fftw-3.3.7 was 8:x:5
 SHARED_VERSION_INFO="8:FFTW_MINOR_VERSION:5" # CURRENT:REVISION:AGE
 
 AM_INIT_AUTOMAKE(1.7)
@@ -34,11 +35,11 @@ AC_CANONICAL_HOST
 
 dnl configure options
 case "${host_cpu}" in
-  powerpc*) have_fma=yes;;
-  ia64*) have_fma=yes;;
-  hppa*) have_fma=yes;;
-  mips64*) have_fma=yes;;
-  *) have_fma=no;;
+  powerpc*) arch_prefers_fma=yes;;
+  ia64*) arch_prefers_fma=yes;;
+  hppa*) arch_prefers_fma=yes;;
+  mips64*) arch_prefers_fma=yes;;
+  *) arch_prefers_fma=no;;
 esac
 
 AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
@@ -149,7 +150,6 @@ if test "$have_avx2" = "yes"; then
 	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
 		AC_MSG_ERROR([AVX2 requires single or double precision])
 	fi
-        have_fma="yes"
 fi
 AM_CONDITIONAL(HAVE_AVX2, test "$have_avx2" = "yes")
 
@@ -159,7 +159,6 @@ if test "$have_avx512" = "yes"; then
 	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
 		AC_MSG_ERROR([AVX512 requires single or double precision])
 	fi
-        have_fma="yes"
 fi
 AM_CONDITIONAL(HAVE_AVX512, test "$have_avx512" = "yes")
 
@@ -276,9 +275,9 @@ fi
 AC_ARG_WITH(incoming-stack-boundary, [AC_HELP_STRING([--with-incoming-stack-boundary=X],[Assume that stack is aligned to (1<<X) bytes])], with_incoming_stack_boundary=$withval, with_incoming_stack_boundary=no)
 
 
-AC_ARG_ENABLE(fma, [AC_HELP_STRING([--enable-fma],[enable optimizations for machines with fused multiply-add])], have_fma=$enableval)
-if test "$have_fma"x = "yes"x; then
-        AC_DEFINE(HAVE_FMA,1,[Define if you have a machine with fused multiply-add])
+AC_ARG_ENABLE(fma, [AC_HELP_STRING([--enable-fma],[enable if the machine architecture "naturally" prefers fused multiply-add instructions])], arch_prefers_fma=$enableval)
+if test "$arch_prefers_fma"x = "yes"x; then
+        AC_DEFINE(ARCH_PREFERS_FMA,1,[Define if the machine architecture "naturally" prefers fused multiply-add instructions])
 fi
 
 dnl compute library suffix
