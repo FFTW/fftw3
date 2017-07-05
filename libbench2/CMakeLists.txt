@@ -1,0 +1,41 @@
+set(bench2_source after-ccopy-from.c
+after-ccopy-to.c
+after-hccopy-from.c
+after-hccopy-to.c
+after-rcopy-from.c
+after-rcopy-to.c
+allocate.c
+aset.c
+bench-cost-postprocess.c
+bench-exit.c
+bench-main.c
+bench-user.h
+bench.h
+can-do.c
+caset.c
+dotens2.c
+info.c
+main.c
+mflops.c
+mp.c
+my-getopt.c
+my-getopt.h
+ovtpvt.c
+pow2.c
+problem.c
+report.c
+speed.c
+tensor.c
+timer.c
+useropt.c
+util.c
+verify-dft.c
+verify-lib.c
+verify-r2r.c
+verify-rdft2.c
+verify.c
+verify.h
+zero.c)
+
+add_library(bench2 STATIC ${bench2_source})
+target_include_directories(bench2 PRIVATE ${fftw_config_path})
