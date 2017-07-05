@@ -43,8 +43,6 @@
 #error "compiling simd-avx2.h without avx2 support"
 #endif
 
-#define ISA_EXTENSION_PREFERS_FMA 1
-
 #ifdef _MSC_VER
 #ifndef inline
 #define inline __inline

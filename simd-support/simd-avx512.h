@@ -48,8 +48,6 @@
 #error "compiling simd-avx512.h without avx-512f support"
 #endif
 
-#define ISA_EXTENSION_PREFERS_FMA 1
-
 #if !defined(HAVE_AVX2)
 #warning "You should probably enable AVX2 with --enable-avx2 for AVX-512"
 #endif
