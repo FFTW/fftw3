@@ -149,7 +149,7 @@ FindFFTW3@PREC_SUFFIX@.cmake: $(top_srcdir)/FindFFTW3.cmake.in
 		-e 's|[@]PREC_SUFFIX@|@PREC_SUFFIX@|g' \
 		-e 's|[@]libdir@|$(libdir)|g' \
 		-e 's|[@]includedir@|$(includedir)|g' \
-		"$<" > "$@"
+		$(top_srcdir)/FindFFTW3.cmake.in > $@
 cmakedir = $(datarootdir)/cmake/Modules
 cmake_DATA = FindFFTW3@PREC_SUFFIX@.cmake
 
