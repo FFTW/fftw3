@@ -163,6 +163,18 @@ if (ENABLE_AVX2)
   endforeach ()
 endif ()
 
+# AVX2 codelets require FMA support as well
+if (ENABLE_AVX2)
+  foreach (FLAG "-mfma" "/arch:FMA")
+    unset (HAVE_FMA CACHE)
+    check_c_compiler_flag (${FLAG} HAVE_FMA)
+    if (HAVE_FMA)
+      set (FMA_FLAG ${FLAG})
+      break()
+    endif ()
+  endforeach ()
+endif ()
+
 if (HAVE_SSE2 OR HAVE_AVX)
   set (HAVE_SIMD TRUE)
 endif ()
@@ -174,7 +186,7 @@ file(GLOB           fftw_dft_simd_SOURCE            dft/simd/*.c        dft/simd
 
 file(GLOB           fftw_dft_simd_sse2_SOURCE       dft/simd/sse2/*.c   dft/simd/sse2/*.h)
 file(GLOB           fftw_dft_simd_avx_SOURCE        dft/simd/avx/*.c    dft/simd/avx/*.h)
-file(GLOB           fftw_dft_simd_avx2_SOURCE       dft/simd/avx2/*.c   dft/simd/avx2/*.h)
+file(GLOB           fftw_dft_simd_avx2_SOURCE       dft/simd/avx2/*.c   dft/simd/avx2/*.h dft/simd/avx2-128/*.c   dft/simd/avx2-128/*.h)
 file(GLOB           fftw_kernel_SOURCE              kernel/*.c          kernel/*.h)
 file(GLOB           fftw_rdft_SOURCE                rdft/*.c            rdft/*.h)
 file(GLOB           fftw_rdft_scalar_SOURCE         rdft/scalar/*.c     rdft/scalar/*.h)
@@ -189,7 +201,7 @@ file(GLOB           fftw_rdft_scalar_r2r_SOURCE     rdft/scalar/r2r/*.c
 file(GLOB           fftw_rdft_simd_SOURCE           rdft/simd/*.c       rdft/simd/*.h)
 file(GLOB           fftw_rdft_simd_sse2_SOURCE      rdft/simd/sse2/*.c  rdft/simd/sse2/*.h)
 file(GLOB           fftw_rdft_simd_avx_SOURCE       rdft/simd/avx/*.c   rdft/simd/avx/*.h)
-file(GLOB           fftw_rdft_simd_avx2_SOURCE      rdft/simd/avx2/*.c   rdft/simd/avx2/*.h)
+file(GLOB           fftw_rdft_simd_avx2_SOURCE      rdft/simd/avx2/*.c  rdft/simd/avx2/*.h rdft/simd/avx2-128/*.c  rdft/simd/avx2-128/*.h)
 
 file(GLOB           fftw_reodft_SOURCE              reodft/*.c          reodft/*.h)
 file(GLOB           fftw_simd_support_SOURCE        simd-support/*.c    simd-support/*.h)
@@ -268,7 +280,7 @@ if (HAVE_AVX2)
   list (APPEND SOURCEFILES ${fftw_dft_simd_avx2_SOURCE} ${fftw_rdft_simd_avx2_SOURCE})
 endif ()
 
-set (FFTW_VERSION 3.3.6)
+set (FFTW_VERSION 3.3.7)
 
 set (fftw3_lib fftw3)
 if (ENABLE_FLOAT)
@@ -311,7 +323,10 @@ if (HAVE_AVX)
   target_compile_options (${fftw3_lib} PRIVATE ${AVX_FLAG})
 endif ()
 if (HAVE_AVX2)
-  target_compile_options (${fftw3_lib} PRIVATE ${AVX_FLAG2})
+  target_compile_options (${fftw3_lib} PRIVATE ${AVX2_FLAG})
+endif ()
+if (HAVE_FMA)
+  target_compile_options (${fftw3_lib} PRIVATE ${FMA_FLAG})
 endif ()
 if (HAVE_LIBM)
   target_link_libraries (${fftw3_lib} m)
@@ -339,23 +354,25 @@ if (OPENMP_FOUND)
 endif ()
 
 foreach(subtarget ${subtargets})
-  set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.6 VERSION 3)
+  set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.7 VERSION 3)
   install (TARGETS ${subtarget}
           RUNTIME DESTINATION bin
           LIBRARY DESTINATION ${LIBRARY_PATH}
           ARCHIVE DESTINATION ${LIBRARY_PATH})
 endforeach ()
 
+add_executable (bench ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
+
+if (WITH_COMBINED_THREADS OR NOT ENABLE_THREADS)
+  target_link_libraries (bench ${fftw3_lib})
+else ()
+  target_link_libraries (bench ${fftw3_lib}_threads)
+endif ()
+
+
 enable_testing ()
 
 if (Threads_FOUND AND BUILD_TESTS)
-  add_executable (bench ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
-
-  if (WITH_COMBINED_THREADS)
-    target_link_libraries (bench ${fftw3_lib})
-  else ()
-    target_link_libraries (bench ${fftw3_lib}_threads)
-  endif ()
 
   macro (fftw_add_test problem)
     add_test (NAME ${problem} COMMAND bench -s ${problem})
