@@ -363,10 +363,10 @@ endforeach ()
 
 add_executable (bench ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
 
-if (WITH_COMBINED_THREADS OR NOT ENABLE_THREADS)
-  target_link_libraries (bench ${fftw3_lib})
-else ()
+if (ENABLE_THREADS AND NOT WITH_COMBINED_THREADS)
   target_link_libraries (bench ${fftw3_lib}_threads)
+else ()
+  target_link_libraries (bench ${fftw3_lib})
 endif ()
 
 
