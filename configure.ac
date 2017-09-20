@@ -299,6 +299,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
+AC_PROG_RANLIB
 
 AC_CHECK_PROG(OCAMLBUILD, ocamlbuild, ocamlbuild)
 
@@ -497,7 +498,7 @@ AC_SUBST(STACK_ALIGN_CFLAGS)
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([libintl.h malloc.h stddef.h stdlib.h string.h strings.h sys/time.h unistd.h limits.h c_asm.h intrinsics.h stdint.h mach/mach_time.h sys/sysctl.h])
+AC_CHECK_HEADERS([fcntl.h fenv.h limits.h malloc.h stddef.h sys/time.h])
 dnl c_asm.h: Header file for enabling asm() on Digital Unix  
 dnl intrinsics.h: cray unicos
 dnl sys/sysctl.h: MacOS X altivec detection
@@ -515,6 +516,8 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
 AC_HEADER_TIME
 AC_CHECK_TYPE([long double],
               [AC_DEFINE(HAVE_LONG_DOUBLE, 1, [Define to 1 if the compiler supports `long double'])],
@@ -539,6 +542,7 @@ AC_CHECK_SIZEOF(unsigned long long)
 AC_CHECK_SIZEOF(size_t)
 AC_CHECK_SIZEOF(ptrdiff_t)
 
+AC_CHECK_TYPES([ptrdiff_t])
 AC_CHECK_TYPES(uintptr_t, [], [AC_CHECK_SIZEOF(void *)], [$ac_includes_default
 #ifdef HAVE_STDINT_H
 #  include <stdint.h>
@@ -561,6 +565,9 @@ AC_SUBST(C_FFTW_R2R_KIND)
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
+AC_FUNC_MALLOC
+AC_FUNC_MMAP
+AC_FUNC_REALLOC
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
@@ -572,7 +579,7 @@ if test $PRECISION = q; then
 fi
 AC_SUBST(LIBQUADMATH)
 
-AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl snprintf])
+AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl snprintf memmove strchr getpagesize])
 AC_CHECK_DECLS([sinl, cosl, sinq, cosq],,,[#include <math.h>])
 AC_CHECK_DECLS([memalign],,,[
 #ifdef HAVE_MALLOC_H
