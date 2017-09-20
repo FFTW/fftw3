@@ -243,8 +243,6 @@ set (fftw_omp_SOURCE ${fftw_par_SOURCE} threads/openmp.c)
 
 include_directories(.)
 
-install (FILES api/fftw3.h api/fftw3.f DESTINATION include)
-
 
 if (WITH_COMBINED_THREADS)
   list (APPEND SOURCEFILES ${fftw_threads_SOURCE})
@@ -265,24 +263,25 @@ endif ()
 
 set (FFTW_VERSION 3.3.7)
 
-set (fftw3_lib fftw3)
+set (PREC_SUFFIX)
 if (ENABLE_FLOAT)
   set (FFTW_SINGLE TRUE)
   set (BENCHFFT_SINGLE TRUE)
-  set (fftw3_lib fftw3f)
+  set (PREC_SUFFIX f)
 endif ()
 
 if (ENABLE_LONG_DOUBLE)
   set (FFTW_LDOUBLE TRUE)
   set (BENCHFFT_LDOUBLE TRUE)
-  set(fftw3_lib fftw3l)
+  set (PREC_SUFFIX l)
 endif ()
 
 if (ENABLE_QUAD_PRECISION)
   set (FFTW_QUAD TRUE)
   set (BENCHFFT_QUAD TRUE)
-  set (fftw3_lib fftw3q)
+  set (PREC_SUFFIX q)
 endif ()
+set (fftw3_lib fftw3${PREC_SUFFIX})
 
 configure_file (cmake.config.h.in config.h @ONLY)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
@@ -344,6 +343,11 @@ foreach(subtarget ${subtargets})
           ARCHIVE DESTINATION ${LIBRARY_PATH})
 endforeach ()
 
+install (FILES api/fftw3.h DESTINATION include RENAME fftw3${PREC_SUFFIX}.h)
+if (EXISTS api/fftw3.f)
+  install (FILES api/fftw3.f DESTINATION include RENAME fftw3${PREC_SUFFIX}.f)
+endif ()
+
 add_executable (bench ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
 
 if (ENABLE_THREADS AND NOT WITH_COMBINED_THREADS)
@@ -365,3 +369,24 @@ if (Threads_FOUND AND BUILD_TESTS)
   fftw_add_test (ib256)
 
 endif ()
+
+# pkgconfig file
+set (prefix ${CMAKE_INSTALL_PREFIX})
+set (exec_prefix ${CMAKE_INSTALL_PREFIX})
+set (libdir ${CMAKE_INSTALL_PREFIX}/${LIBRARY_PATH})
+set (includedir ${CMAKE_INSTALL_PREFIX}/include)
+set (VERSION ${FFTW_VERSION})
+configure_file (fftw.pc.in fftw${PREC_SUFFIX}.pc @ONLY)
+install (FILES
+          ${CMAKE_CURRENT_BINARY_DIR}/fftw${PREC_SUFFIX}.pc
+         DESTINATION ${LIBRARY_PATH}/pkgconfig
+         COMPONENT Development)
+
+# cmake file
+configure_file (FFTW3Config.cmake.in FFTW3${PREC_SUFFIX}Config.cmake @ONLY)
+configure_file (FFTW3ConfigVersion.cmake.in FFTW3${PREC_SUFFIX}ConfigVersion.cmake @ONLY)
+install (FILES
+          ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}Config.cmake
+          ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}ConfigVersion.cmake
+         DESTINATION ${LIBRARY_PATH}/cmake/fftw3
+         COMPONENT Development)
