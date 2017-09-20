@@ -12,10 +12,8 @@
 
 touch ChangeLog
 
-echo "PLEASE IGNORE WARNINGS AND ERRORS"
-
 rm -rf autom4te.cache
-autoreconf --verbose --install --symlink --force
+autoreconf --verbose --install --symlink --force -Wno-portability
 
 rm -f config.cache
 
