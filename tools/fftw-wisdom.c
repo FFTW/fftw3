@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <fftw3.h>
+#include "api/fftw3.h"
 #include <string.h>
 #include <time.h>
 
