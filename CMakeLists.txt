@@ -26,7 +26,7 @@ option (ENABLE_SSE2 "Compile with SSE2 instruction set support" OFF)
 option (ENABLE_AVX "Compile with AVX instruction set support" OFF)
 option (ENABLE_AVX2 "Compile with AVX2 instruction set support" OFF)
 
-set (LIBRARY_PATH lib${LIB_SUFFIX})
+include(GNUInstallDirs)
 
 
 include (CheckIncludeFile)
@@ -338,14 +338,14 @@ endif ()
 foreach(subtarget ${subtargets})
   set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.7 VERSION 3)
   install (TARGETS ${subtarget}
-          RUNTIME DESTINATION bin
-          LIBRARY DESTINATION ${LIBRARY_PATH}
-          ARCHIVE DESTINATION ${LIBRARY_PATH})
+	  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endforeach ()
 
-install (FILES api/fftw3.h DESTINATION include RENAME fftw3${PREC_SUFFIX}.h)
+install (FILES api/fftw3.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} RENAME fftw3${PREC_SUFFIX}.h)
 if (EXISTS api/fftw3.f)
-  install (FILES api/fftw3.f DESTINATION include RENAME fftw3${PREC_SUFFIX}.f)
+  install (FILES api/fftw3.f DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} RENAME fftw3${PREC_SUFFIX}.f)
 endif ()
 
 if (BUILD_TESTS)
@@ -382,7 +382,7 @@ set (VERSION ${FFTW_VERSION})
 configure_file (fftw.pc.in fftw${PREC_SUFFIX}.pc @ONLY)
 install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/fftw${PREC_SUFFIX}.pc
-         DESTINATION ${LIBRARY_PATH}/pkgconfig
+         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
          COMPONENT Development)
 
 # cmake file
@@ -391,5 +391,5 @@ configure_file (FFTW3ConfigVersion.cmake.in FFTW3${PREC_SUFFIX}ConfigVersion.cma
 install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}Config.cmake
           ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}ConfigVersion.cmake
-         DESTINATION ${LIBRARY_PATH}/cmake/fftw3
+	  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3
          COMPONENT Development)
