@@ -241,8 +241,22 @@ set (fftw_threads_SOURCE ${fftw_par_SOURCE} threads/threads.c)
 set (fftw_omp_SOURCE ${fftw_par_SOURCE} threads/openmp.c)
 
 
-include_directories(.)
-
+include_directories(.
+    kernel
+    api
+    dft
+    dft/scalar
+    dft/scalar/codelets # really needed?
+    dft/simd
+    dft/simd/sse2
+    dft/simd/avx
+    rdft
+    rdft/scalar
+    rdft/simd
+    reodft
+    simd-support
+    libbench2
+)
 
 if (WITH_COMBINED_THREADS)
   list (APPEND SOURCEFILES ${fftw_threads_SOURCE})
@@ -342,10 +356,15 @@ foreach(subtarget ${subtargets})
           LIBRARY DESTINATION ${LIBRARY_PATH}
           ARCHIVE DESTINATION ${LIBRARY_PATH})
 endforeach ()
+install(TARGETS ${fftw3_lib}
+          EXPORT FFTW3LibraryDepends
+          RUNTIME DESTINATION bin
+          LIBRARY DESTINATION ${LIBRARY_PATH}
+          ARCHIVE DESTINATION ${LIBRARY_PATH})
 
-install (FILES api/fftw3.h DESTINATION include RENAME fftw3${PREC_SUFFIX}.h)
+install (FILES api/fftw3.h DESTINATION include)
 if (EXISTS api/fftw3.f)
-  install (FILES api/fftw3.f DESTINATION include RENAME fftw3${PREC_SUFFIX}.f)
+  install (FILES api/fftw3.f DESTINATION include)
 endif ()
 
 if (BUILD_TESTS)
@@ -386,10 +405,17 @@ install (FILES
          COMPONENT Development)
 
 # cmake file
+set (FFTW3_LIBRARIES "FFTW3::${fftw3_lib}")
 configure_file (FFTW3Config.cmake.in FFTW3${PREC_SUFFIX}Config.cmake @ONLY)
 configure_file (FFTW3ConfigVersion.cmake.in FFTW3${PREC_SUFFIX}ConfigVersion.cmake @ONLY)
 install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}Config.cmake
           ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}ConfigVersion.cmake
-         DESTINATION ${LIBRARY_PATH}/cmake/fftw3
+         DESTINATION ${LIBRARY_PATH}/cmake/fftw3${PREC_SUFFIX}
          COMPONENT Development)
+
+export (TARGETS ${fftw3_lib} NAMESPACE FFTW3:: FILE ${PROJECT_BINARY_DIR}/FFTW3LibraryDepends.cmake)
+install(EXPORT FFTW3LibraryDepends
+        NAMESPACE FFTW3::
+        DESTINATION ${LIBRARY_PATH}/cmake/fftw3${PREC_SUFFIX}
+        COMPONENT Development)
