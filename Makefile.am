@@ -44,9 +44,7 @@ libbench2 $(CHICKEN_EGG) tests mpi $(DOCDIR) tools m4
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in	\
 CMakeLists.txt cmake.config.h.in FindFFTW3.cmake.in
 
-SIMD_LIBS =						\
-	simd-support/libsimd_support.la			\
-	simd-support/libsimd_sse2_nonportable.la
+SIMD_LIBS = simd-support/libsimd_support.la
 
 if HAVE_SSE2
 SSE2_LIBS = dft/simd/sse2/libdft_sse2_codelets.la	\

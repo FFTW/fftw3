@@ -70,8 +70,6 @@
        }
   }
 
-  extern void X(check_alignment_of_sse2_pm)(void);
-
   int X(have_simd_sse2)(void)
   {
        static int init = 0, res;
@@ -82,7 +80,6 @@
 		 && (cpuid_edx(1) & (1 << DS(26,25)))
 		 && sse2_works();
 	    init = 1;
-	    X(check_alignment_of_sse2_pm)();
        }
        return res;
   }
