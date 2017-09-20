@@ -348,26 +348,29 @@ if (EXISTS api/fftw3.f)
   install (FILES api/fftw3.f DESTINATION include RENAME fftw3${PREC_SUFFIX}.f)
 endif ()
 
-add_executable (bench ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
+if (BUILD_TESTS)
 
-if (ENABLE_THREADS AND NOT WITH_COMBINED_THREADS)
-  target_link_libraries (bench ${fftw3_lib}_threads)
-else ()
-  target_link_libraries (bench ${fftw3_lib})
-endif ()
+  add_executable (bench ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
+
+  if (ENABLE_THREADS AND NOT WITH_COMBINED_THREADS)
+    target_link_libraries (bench ${fftw3_lib}_threads)
+  else ()
+    target_link_libraries (bench ${fftw3_lib})
+  endif ()
 
 
-enable_testing ()
+  enable_testing ()
 
-if (Threads_FOUND AND BUILD_TESTS)
+  if (Threads_FOUND)
 
-  macro (fftw_add_test problem)
-    add_test (NAME ${problem} COMMAND bench -s ${problem})
-  endmacro ()
+    macro (fftw_add_test problem)
+      add_test (NAME ${problem} COMMAND bench -s ${problem})
+    endmacro ()
 
-  fftw_add_test (32x64)
-  fftw_add_test (ib256)
+    fftw_add_test (32x64)
+    fftw_add_test (ib256)
 
+  endif ()
 endif ()
 
 # pkgconfig file
