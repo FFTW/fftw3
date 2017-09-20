@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I $(top_srcdir)
 AM_CFLAGS = $(STACK_ALIGN_CFLAGS)
 
 EXTRA_DIST = f03api.sh genf03.pl fftw3.f03.in

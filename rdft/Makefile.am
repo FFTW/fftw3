@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I $(top_srcdir)
 SUBDIRS = scalar simd
 
 noinst_LTLIBRARIES = librdft.la

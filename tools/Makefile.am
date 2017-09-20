@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I $(top_srcdir)
 bin_SCRIPTS = fftw-wisdom-to-conf
 bin_PROGRAMS = fftw@PREC_SUFFIX@-wisdom
 

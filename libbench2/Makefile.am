@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I $(top_srcdir)
 noinst_LIBRARIES=libbench2.a
 
 libbench2_a_SOURCES=after-ccopy-from.c after-ccopy-to.c			\

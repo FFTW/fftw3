@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I $(top_srcdir)
 SUBDIRS = 
 
 noinst_LTLIBRARIES = libreodft.la

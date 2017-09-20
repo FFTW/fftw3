@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I $(top_srcdir)
 SUBDIRS=codelets
 noinst_LTLIBRARIES = libdft_scalar.la
 

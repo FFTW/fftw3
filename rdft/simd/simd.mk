@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I $(top_srcdir)
 EXTRA_DIST = $(SIMD_CODELETS) genus.c codlist.c
 
 $(EXTRA_DIST): Makefile

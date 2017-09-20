@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I $(top_srcdir)
 noinst_LTLIBRARIES = libsimd_support.la 
 
 libsimd_support_la_SOURCES = taint.c simd-common.h \

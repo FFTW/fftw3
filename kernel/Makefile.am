@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -I $(top_srcdir)
 noinst_LTLIBRARIES = libkernel.la
 
 # pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@

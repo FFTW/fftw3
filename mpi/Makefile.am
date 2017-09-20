@@ -1,3 +1,5 @@
+AM_CPPFLAGS = -I $(top_srcdir)
+
 if MPI
 lib_LTLIBRARIES = libfftw3@PREC_SUFFIX@_mpi.la
 include_HEADERS = fftw3-mpi.h
