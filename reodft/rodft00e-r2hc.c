@@ -39,7 +39,7 @@
    algorithm for the specific case of odd n (logically adapting the
    split-radix algorithm); see reodft00e-splitradix.c. */
 
-#include "reodft.h"
+#include "reodft/reodft.h"
 
 typedef struct {
      solver super;

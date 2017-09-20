@@ -12,12 +12,12 @@
 */
 
 #include <stdio.h>
-#include "bench-user.h"
+#include "libbench2/bench-user.h"
 
 #define CALLING_FFTW /* hack for Windows DLL nonsense */
-#include "api.h"
-#include "dft.h"
-#include "rdft.h"
+#include "api/api.h"
+#include "dft/dft.h"
+#include "rdft/rdft.h"
 
 extern int paranoid; /* in bench.c */
 extern X(plan) the_plan; /* in bench.c */

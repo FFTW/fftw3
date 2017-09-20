@@ -25,7 +25,7 @@
    Recipes), but we abandoned the latter after we discovered that it
    has intrinsic accuracy problems. */
 
-#include "reodft.h"
+#include "reodft/reodft.h"
 
 typedef struct {
      solver super;

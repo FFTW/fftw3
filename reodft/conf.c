@@ -19,7 +19,7 @@
  */
 
 
-#include "reodft.h"
+#include "reodft/reodft.h"
 
 static const solvtab s =
 {

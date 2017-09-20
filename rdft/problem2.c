@@ -19,8 +19,8 @@
  */
 
 
-#include "dft.h"
-#include "rdft.h"
+#include "dft/dft.h"
+#include "rdft/rdft.h"
 #include <stddef.h>
 
 static void destroy(problem *ego_)

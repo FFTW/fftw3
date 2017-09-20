@@ -22,8 +22,8 @@
    function.  The first portion of this file is a set of macros to
    spawn and join threads on various systems. */
 
-#include "threads.h"
-#include "api.h"
+#include "threads/threads.h"
+#include "api/api.h"
 
 #if defined(USING_POSIX_THREADS)
 

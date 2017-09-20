@@ -1,4 +1,4 @@
-SIMD_HEADER=simd-generic256.h
+SIMD_HEADER=simd-support/simd-generic256.h
 
 include $(top_srcdir)/dft/simd/codlist.mk
 include $(top_srcdir)/dft/simd/simd.mk

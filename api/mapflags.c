@@ -18,7 +18,7 @@
  *
  */
 
-#include "api.h"
+#include "api/api.h"
 #include <math.h>
 
 /* a flag operation: x is either a flag, in which case xm == 0, or

@@ -19,7 +19,7 @@
  */
 
 
-#include "bench.h"
+#include "libbench2/bench.h"
 #include <stdio.h>
 
 void report_can_do(const char *param)

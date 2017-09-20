@@ -18,7 +18,7 @@
  *
  */
 
-#include "api.h"
+#include "api/api.h"
 
 void X(forget_wisdom)(void)
 {

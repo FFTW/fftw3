@@ -1,6 +1,6 @@
 /* not worth copyrighting */
 
-#include "bench.h"
+#include "libbench2/bench.h"
 
 void caset(bench_complex *A, int n, bench_complex x)
 {

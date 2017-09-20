@@ -23,7 +23,7 @@
    rank-0 HC2R.  Note that in-place rank-0 R2HC is *not* a no-op, because
    we have to set the imaginary parts of the output to zero. */
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 static void apply(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 {

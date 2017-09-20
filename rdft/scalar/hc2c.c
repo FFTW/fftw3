@@ -18,8 +18,8 @@
  *
  */
 
-#include "codelet-rdft.h"
-#include "hc2cf.h"
+#include "rdft/codelet-rdft.h"
+#include "rdft/scalar/hc2cf.h"
 
 static int okp(const R *Rp, const R *Ip, const R *Rm, const R *Im, 
 	       INT rs, INT mb, INT me, INT ms, 
@@ -34,6 +34,6 @@ static int okp(const R *Rp, const R *Ip, const R *Rm, const R *Im,
 const hc2c_genus GENUS = { okp, R2HC, 1 };
 
 #undef GENUS
-#include "hc2cb.h"
+#include "rdft/scalar/hc2cb.h"
 
 const hc2c_genus GENUS = { okp, HC2R, 1 };

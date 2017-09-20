@@ -39,7 +39,7 @@
    (For odd sizes, see reodft11e-r2hc-odd.c.)
 */
 
-#include "reodft.h"
+#include "reodft/reodft.h"
 
 typedef struct {
      solver super;

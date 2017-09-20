@@ -21,7 +21,7 @@
 /* express a hc2hc problem in terms of rdft + multiplication by
    twiddle factors */
 
-#include "hc2hc.h"
+#include "rdft/hc2hc.h"
 
 typedef hc2hc_solver S;
 

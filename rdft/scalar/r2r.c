@@ -18,7 +18,7 @@
  *
  */
 
-#include "codelet-rdft.h"
-#include "r2r.h"
+#include "rdft/codelet-rdft.h"
+#include "rdft/scalar/r2r.h"
 
 const kr2r_genus GENUS = { 1 };

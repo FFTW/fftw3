@@ -21,7 +21,7 @@
 /* express a twiddle problem in terms of dft + multiplication by
    twiddle factors */
 
-#include "ct.h"
+#include "dft/ct.h"
 
 typedef ct_solver S;
 

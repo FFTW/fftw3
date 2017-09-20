@@ -18,7 +18,7 @@
  *
  */
 
-#include "dft.h"
+#include "dft/dft.h"
 
 /*
  * Compute transforms of prime sizes using Rader's trick: turn them

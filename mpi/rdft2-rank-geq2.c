@@ -23,7 +23,7 @@
 
 #include "mpi-dft.h"
 #include "mpi-rdft2.h"
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 typedef struct {
      solver super;

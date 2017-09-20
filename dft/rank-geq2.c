@@ -21,7 +21,7 @@
 
 /* plans for DFT of rank >= 2 (multidimensional) */
 
-#include "dft.h"
+#include "dft/dft.h"
 
 typedef struct {
      solver super;

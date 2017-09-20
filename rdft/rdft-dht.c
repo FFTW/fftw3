@@ -24,7 +24,7 @@
    sizes.  It also allows us to express hc2r problems in terms of r2hc
    (via dht-r2hc), and to do hc2r problems without destroying the input. */
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 typedef struct {
      solver super;

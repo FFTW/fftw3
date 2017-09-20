@@ -34,7 +34,7 @@
    Each vrank-geq1-rdft2 plan reduces the vector rank by 1, picking out a
    dimension determined by the vecloop_dim field of the solver. */
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 typedef struct {
      solver super;

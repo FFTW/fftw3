@@ -18,7 +18,7 @@
  *
  */
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 /* in place square transposition, iterative */
 void X(transpose)(R *I, INT n, INT s0, INT s1, INT vl)

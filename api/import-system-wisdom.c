@@ -18,7 +18,7 @@
  *
  */
 
-#include "api.h"
+#include "api/api.h"
 
 #if defined(FFTW_SINGLE)
 #  define WISDOM_NAME "wisdomf"

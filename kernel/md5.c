@@ -26,7 +26,7 @@
    sizeof(md5uint) >= 4.
 */
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 /* sintab[i] = 4294967296.0 * abs(sin((double)(i + 1))) */
 static const md5uint sintab[64] = {

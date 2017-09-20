@@ -18,7 +18,7 @@
  *
  */
 
-#include "bench.h"
+#include "libbench2/bench.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>

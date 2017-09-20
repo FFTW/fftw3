@@ -1,7 +1,3 @@
-AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
--I$(top_srcdir)/rdft -I$(top_srcdir)/api -I$(top_srcdir)/tests	\
--I$(top_srcdir)/libbench2
-
 if MPI
 lib_LTLIBRARIES = libfftw3@PREC_SUFFIX@_mpi.la
 include_HEADERS = fftw3-mpi.h

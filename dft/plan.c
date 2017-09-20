@@ -19,7 +19,7 @@
  */
 
 
-#include "dft.h"
+#include "dft/dft.h"
 
 plan *X(mkplan_dft)(size_t size, const plan_adt *adt, dftapply apply)
 {

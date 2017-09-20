@@ -21,8 +21,8 @@
 
 /* buffering of rdft2.  We always buffer the complex array */
 
-#include "rdft.h"
-#include "dft.h"
+#include "rdft/rdft.h"
+#include "dft/dft.h"
 
 typedef struct {
      solver super;

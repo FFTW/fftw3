@@ -18,7 +18,7 @@
  *
  */
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 #include <stdio.h>
 #include <stdlib.h>
 

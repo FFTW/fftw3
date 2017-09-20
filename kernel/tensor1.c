@@ -19,7 +19,7 @@
  */
 
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 tensor *X(mktensor_0d)(void)
 {

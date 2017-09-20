@@ -19,7 +19,7 @@
  */
 
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 /* like X(tensor_max_index), but takes into account the special n/2+1
    final dimension for the complex output/input of an R2HC/HC2R transform. */

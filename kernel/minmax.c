@@ -19,7 +19,7 @@
  */
 
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 INT X(imax)(INT a, INT b)
 {

@@ -19,7 +19,7 @@
  */
 
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 static int signof(INT x)
 {

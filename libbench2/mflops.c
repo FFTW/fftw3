@@ -1,6 +1,6 @@
 /* not worth copyrighting */
 
-#include "bench.h"
+#include "libbench2/bench.h"
 #include <math.h>
 
 double mflops(const bench_problem *p, double t)

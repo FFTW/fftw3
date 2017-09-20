@@ -19,7 +19,7 @@
  */
 
 
-#include "dft.h"
+#include "dft/dft.h"
 
 /* fill a complex array with zeros. */
 static void recur(const iodim *dims, int rnk, R *ri, R *ii)

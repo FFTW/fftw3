@@ -29,8 +29,8 @@
 
 #include "mpi-rdft2.h"
 #include "mpi-transpose.h"
-#include "rdft.h"
-#include "dft.h"
+#include "rdft/rdft.h"
+#include "dft/dft.h"
 
 typedef struct {
      solver super;

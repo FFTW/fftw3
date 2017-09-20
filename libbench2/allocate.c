@@ -1,7 +1,7 @@
 /* not worth copyrighting */
 
 
-#include "bench.h"
+#include "libbench2/bench.h"
 
 static void bounds(bench_problem *p, int *ilb, int *iub, int *olb, int *oub)
 {

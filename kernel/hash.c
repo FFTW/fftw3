@@ -18,7 +18,7 @@
  *
  */
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 unsigned X(hash)(const char *s)
 {

@@ -18,7 +18,7 @@
  *
  */
 
-#include "codelet-dft.h"
+#include "dft/codelet-dft.h"
 #include SIMD_HEADER
 
 #define EXTERN_CONST(t, x) extern const t x; const t x

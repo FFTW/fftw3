@@ -19,7 +19,7 @@
  */
 
 
-#include "hc2hc.h"
+#include "rdft/hc2hc.h"
 
 typedef struct {
      hc2hc_solver super;

@@ -1,7 +1,3 @@
-AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/libbench2	\
--I$(top_srcdir)/dft -I$(top_srcdir)/rdft -I$(top_srcdir)/reodft	\
--I$(top_srcdir)/threads -I$(top_srcdir)/api 
-
 noinst_PROGRAMS = bench
 EXTRA_DIST = check.pl README
 

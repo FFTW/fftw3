@@ -18,8 +18,8 @@
  *
  */
 
-#include "codelet-dft.h"
-#include "t.h"
+#include "dft/codelet-dft.h"
+#include "dft/scalar/t.h"
 
 static int okp(const ct_desc *d,
 	       const R *rio, const R *iio, 

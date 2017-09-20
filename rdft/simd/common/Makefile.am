@@ -16,9 +16,9 @@ if MAINTAINER_MODE
 FLAGS_HC2C=-simd $(FLAGS_COMMON) -pipeline-latency 8 -trivial-stores -variables 32 -no-generate-bytw
 
 hc2cfdftv_%.c:  $(CODELET_DEPS) $(GEN_HC2CDFT_C)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT_C) $(FLAGS_HC2C) -n $* -dit -name hc2cfdftv_$* -include "hc2cfv.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT_C) $(FLAGS_HC2C) -n $* -dit -name hc2cfdftv_$* -include "rdft/simd/hc2cfv.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hc2cbdftv_%.c:  $(CODELET_DEPS) $(GEN_HC2CDFT_C)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT_C) $(FLAGS_HC2C) -n $* -dif -sign 1 -name hc2cbdftv_$* -include "hc2cbv.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT_C) $(FLAGS_HC2C) -n $* -dif -sign 1 -name hc2cbdftv_$* -include "rdft/simd/hc2cbv.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE

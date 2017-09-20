@@ -49,9 +49,9 @@
    and is defined even if <complex.h> is not included) */
 #define FFTW_NO_Complex
 
-#include "fftw3.h"
-#include "ifftw.h"
-#include "rdft.h"
+#include "api/fftw3.h"
+#include "kernel/ifftw.h"
+#include "rdft/rdft.h"
 
 #ifdef __cplusplus
 extern "C"

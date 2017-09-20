@@ -18,7 +18,7 @@
  *
  */
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 #ifdef FFTW_DEBUG
 #include <stdio.h>

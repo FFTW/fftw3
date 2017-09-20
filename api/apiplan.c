@@ -18,7 +18,7 @@
  *
  */
 
-#include "api.h"
+#include "api/api.h"
 
 static planner_hook_t before_planner_hook = 0, after_planner_hook = 0;
 

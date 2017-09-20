@@ -31,7 +31,7 @@
    sacrifices (ala redft00-r2hc.c).
 */
 
-#include "reodft.h"
+#include "reodft/reodft.h"
 
 typedef struct {
      solver super;

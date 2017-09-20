@@ -20,7 +20,7 @@
 
 /* openmp.c: thread spawning via OpenMP  */
 
-#include "threads.h"
+#include "threads/threads.h"
 
 #if !defined(_OPENMP)
 #error OpenMP enabled but not using an OpenMP compiler

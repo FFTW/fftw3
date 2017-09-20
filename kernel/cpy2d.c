@@ -19,7 +19,7 @@
  */
 
 /* out of place 2D copy routines */
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
 #  ifdef HAVE_XMMINTRIN_H

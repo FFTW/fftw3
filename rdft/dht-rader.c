@@ -18,7 +18,7 @@
  *
  */
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 /*
  * Compute DHTs of prime sizes using Rader's trick: turn them

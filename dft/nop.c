@@ -21,7 +21,7 @@
 
 /* plans for vrank -infty DFTs (nothing to do) */
 
-#include "dft.h"
+#include "dft/dft.h"
 
 static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 {

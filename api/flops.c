@@ -18,7 +18,7 @@
  *
  */
 
-#include "api.h"
+#include "api/api.h"
 
 void X(flops)(const X(plan) p, double *add, double *mul, double *fma)
 {

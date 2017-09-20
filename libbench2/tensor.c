@@ -18,7 +18,7 @@
  *
  */
 
-#include "bench.h"
+#include "libbench2/bench.h"
 #include <stdlib.h>
 
 bench_tensor *mktensor(int rnk) 

@@ -22,7 +22,7 @@
 /* Do an R{E,O}DFT{01,10} problem via an R2HC problem, with some
    pre/post-processing ala FFTPACK. */
 
-#include "reodft.h"
+#include "reodft/reodft.h"
 
 typedef struct {
      solver super;

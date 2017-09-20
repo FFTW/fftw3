@@ -19,7 +19,7 @@
  */
 
 
-#include "dft.h"
+#include "dft/dft.h"
 
 /* use the apply() operation for DFT problems */
 void X(dft_solve)(const plan *ego_, const problem *p_)

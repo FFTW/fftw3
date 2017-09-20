@@ -19,7 +19,7 @@
  */
 
 
-#include "dft.h"
+#include "dft/dft.h"
 #include <stddef.h>
 
 static void destroy(problem *ego_)

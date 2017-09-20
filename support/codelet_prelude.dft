@@ -2,7 +2,7 @@
 /* This file was automatically generated --- DO NOT EDIT */
 /* Generated on @DATE@ */
 
-#include "codelet-dft.h"
+#include "dft/codelet-dft.h"
 
 
 

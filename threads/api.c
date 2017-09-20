@@ -18,8 +18,8 @@
  *
  */
 
-#include "api.h"
-#include "threads.h"
+#include "api/api.h"
+#include "threads/threads.h"
 
 static int threads_inited = 0;
 

@@ -1,4 +1,4 @@
-#include "bench.h"
+#include "libbench2/bench.h"
 
 int power_of_two(int n)
 {

@@ -1,5 +1,5 @@
 AM_CFLAGS = $(NEON_CFLAGS)
-SIMD_HEADER=simd-neon.h
+SIMD_HEADER=simd-support/simd-neon.h
 
 include $(top_srcdir)/dft/simd/codlist.mk
 include $(top_srcdir)/dft/simd/simd.mk

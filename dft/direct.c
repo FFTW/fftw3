@@ -21,7 +21,7 @@
 
 /* direct DFT solver, if we have a codelet */
 
-#include "dft.h"
+#include "dft/dft.h"
 
 typedef struct {
      solver super;

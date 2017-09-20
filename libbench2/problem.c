@@ -20,7 +20,7 @@
 
 
 #include "config.h"
-#include "bench.h"
+#include "libbench2/bench.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

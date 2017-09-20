@@ -19,7 +19,7 @@
  */
 
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 /* "Plan: To bother about the best method of accomplishing an
    accidental result."  (Ambrose Bierce, The Enlarged Devil's

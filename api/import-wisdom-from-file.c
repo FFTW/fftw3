@@ -18,7 +18,7 @@
  *
  */
 
-#include "api.h"
+#include "api/api.h"
 #include <stdio.h>
 
 /* getc()/putc() are *unbelievably* slow on linux.  Looks like glibc

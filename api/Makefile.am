@@ -1,5 +1,3 @@
-AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft		\
--I$(top_srcdir)/rdft -I$(top_srcdir)/reodft
 AM_CFLAGS = $(STACK_ALIGN_CFLAGS)
 
 EXTRA_DIST = f03api.sh genf03.pl fftw3.f03.in

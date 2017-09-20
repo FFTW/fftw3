@@ -19,7 +19,7 @@
  */
 
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 /* constructor */
 problem *X(mkproblem)(size_t sz, const problem_adt *adt)

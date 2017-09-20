@@ -1,4 +1,3 @@
-AM_CPPFLAGS = -I$(top_srcdir)/kernel
 SUBDIRS = scalar simd
 
 noinst_LTLIBRARIES = libdft.la

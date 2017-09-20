@@ -29,7 +29,7 @@
 /* FIXME: merge with rank-geq2.c(?), since this is just a special case
    of a rank split where the first/second transform has rank 0. */
 
-#include "dft.h"
+#include "dft/dft.h"
 
 typedef problem *(*mkcld_t) (const problem_dft *p);
 

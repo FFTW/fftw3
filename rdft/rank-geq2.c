@@ -32,7 +32,7 @@
    using the fast Hartley transform," Proc. IEEE 75(2), 264-266 (1987).
 */
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 typedef struct {
      solver super;

@@ -19,7 +19,7 @@
  */
 
 /* out of place 1D copy routine */
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 void X(cpy1d)(R *I, R *O, INT n0, INT is0, INT os0, INT vl)
 {

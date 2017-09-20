@@ -1,7 +1,7 @@
 /* Re-use libbench2 and the test program, but override bench_main so that
    we can have different command-line syntax. */
-#include "my-getopt.h"
-#include "bench.h"
+#include "libbench2/my-getopt.h"
+#include "libbench2/bench.h"
 
 #include <stdio.h>
 #include <stdlib.h>

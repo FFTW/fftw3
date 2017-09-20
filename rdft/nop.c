@@ -21,7 +21,7 @@
 
 /* plans for vrank -infty RDFTs (nothing to do) */
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 static void apply(const plan *ego_, R *I, R *O)
 {

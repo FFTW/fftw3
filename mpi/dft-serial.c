@@ -22,7 +22,7 @@
    call through to serial API. */
 
 #include "mpi-dft.h"
-#include "dft.h"
+#include "dft/dft.h"
 
 typedef struct {
      plan_mpi_dft super;

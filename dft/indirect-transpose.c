@@ -24,7 +24,7 @@
    we restrict ourselves to the case of a square transpose (or a
    sequence thereof). */
 
-#include "dft.h"
+#include "dft/dft.h"
 
 typedef solver S;
 

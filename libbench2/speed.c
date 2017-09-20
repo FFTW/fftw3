@@ -19,7 +19,7 @@
  */
 
 
-#include "bench.h"
+#include "libbench2/bench.h"
 
 int no_speed_allocation = 0; /* 1 to not allocate array data in speed() */
 

@@ -18,7 +18,7 @@
  *
  */
 
-#include "api.h"
+#include "api/api.h"
 #include "fftw3-mpi.h"
 #include "ifftw-mpi.h"
 #include "mpi-transpose.h"

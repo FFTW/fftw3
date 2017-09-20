@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "fftw-bench.h"
+#include "tests/fftw-bench.h"
 
 /* define to enable code that traps floating-point exceptions.
    Disabled by default because I don't want to worry about the

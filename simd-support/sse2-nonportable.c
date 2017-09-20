@@ -18,7 +18,7 @@
  *
  */
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 #if HAVE_SSE2
 /* this file must be compiled with -msse/-msse2 or equivalent, and it will

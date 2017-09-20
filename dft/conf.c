@@ -19,7 +19,7 @@
  */
 
 
-#include "dft.h"
+#include "dft/dft.h"
 
 static const solvtab s =
 {

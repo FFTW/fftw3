@@ -18,8 +18,8 @@
  *
  */
 
-#include "api.h"
-#include "dft.h"
+#include "api/api.h"
+#include "dft/dft.h"
 
 #define N0(nembed)((nembed) ? (nembed) : n)
 

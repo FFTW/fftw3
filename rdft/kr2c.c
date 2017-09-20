@@ -19,7 +19,7 @@
  */
 
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 void X(kr2c_register)(planner *p, kr2c codelet, const kr2c_desc *desc)
 {

@@ -19,7 +19,7 @@
  */
 
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 /* use the apply() operation for RDFT2 problems */
 void X(rdft2_solve)(const plan *ego_, const problem *p_)

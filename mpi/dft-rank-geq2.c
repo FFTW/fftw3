@@ -22,7 +22,7 @@
    across the first dimension only, and the output is not transposed. */
 
 #include "mpi-dft.h"
-#include "dft.h"
+#include "dft/dft.h"
 
 typedef struct {
      solver super;

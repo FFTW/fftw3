@@ -1,4 +1,3 @@
-AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/rdft
 SUBDIRS = r2cf r2cb r2r
 noinst_LTLIBRARIES = librdft_scalar.la
 

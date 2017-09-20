@@ -21,7 +21,7 @@
 
 /* plans for rank-0 RDFT2 (copy operations, plus setting 0 imag. parts) */
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>		/* for memcpy() */

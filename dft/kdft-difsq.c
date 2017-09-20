@@ -19,7 +19,7 @@
  */
 
 
-#include "ct.h"
+#include "dft/ct.h"
 
 void X(kdft_difsq_register)(planner *p, kdftwsq k, const ct_desc *desc)
 {

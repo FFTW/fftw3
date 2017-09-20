@@ -21,7 +21,7 @@
 
 /* Twiddle manipulation */
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 #include <math.h>
 
 #define HASHSZ 109

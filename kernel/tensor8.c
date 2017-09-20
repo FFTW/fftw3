@@ -19,7 +19,7 @@
  */
 
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 void X(tensor_destroy2)(tensor *a, tensor *b)
 {

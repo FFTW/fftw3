@@ -19,7 +19,7 @@
  */
 
 
-#include "threads.h"
+#include "threads/threads.h"
 
 static const solvtab s =
 {

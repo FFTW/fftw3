@@ -18,7 +18,7 @@
  *
  */
 
-#include "codelet-rdft.h"
+#include "rdft/codelet-rdft.h"
 #include SIMD_HEADER
 
 #define EXTERN_CONST(t, x) extern const t x; const t x

@@ -11,7 +11,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "fftw-bench.h"
+#include "tests/fftw-bench.h"
 
 static const char *mkversion(void) { return FFTW(version); }
 static const char *mkcc(void) { return FFTW(cc); }

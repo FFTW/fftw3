@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "bench.h"
+#include "libbench2/bench.h"
 
 void useropt(const char *arg)
 {

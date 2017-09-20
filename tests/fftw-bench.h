@@ -1,8 +1,8 @@
 /* declarations of common subroutines, etc. for use with FFTW
    self-test/benchmark program (see bench.c). */
 
-#include "bench-user.h"
-#include "fftw3.h"
+#include "libbench2/bench-user.h"
+#include "api/fftw3.h"
 
 #define CONCAT(prefix, name) prefix ## name
 #if defined(BENCHFFT_SINGLE)

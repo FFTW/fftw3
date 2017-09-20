@@ -19,7 +19,7 @@
  */
 
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 #if defined(HAVE_MALLOC_H)
 #  include <malloc.h>

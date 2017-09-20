@@ -19,7 +19,7 @@
  */
 
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 /* Check if the vecsz/sz strides are consistent with the problem
    being in-place for vecsz.dim[vdim], or for all dimensions

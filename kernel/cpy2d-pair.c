@@ -19,7 +19,7 @@
  */
 
 /* out of place copy routines for pairs of isomorphic 2D arrays */
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 void X(cpy2d_pair)(R *I0, R *I1, R *O0, R *O1,
 		   INT n0, INT is0, INT os0,

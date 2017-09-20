@@ -11,8 +11,6 @@
 # manual).
 
 ###########################################################################
-AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/rdft	\
--I$(top_srcdir)/rdft/scalar
 noinst_LTLIBRARIES = librdft_scalar_r2cf.la
 
 ###########################################################################
@@ -84,27 +82,27 @@ FLAGS_HC2CF2=$(RDFT_FLAGS_COMMON) -twiddle-log3 -precompute-twiddles
 FLAGS_R2CFII=$(RDFT_FLAGS_COMMON)
 
 r2cf_%.c:  $(CODELET_DEPS) $(GEN_R2CF)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2CF) $(FLAGS_R2CF) -n $* -name r2cf_$* -include "r2cf.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2CF) $(FLAGS_R2CF) -n $* -name r2cf_$* -include "rdft/scalar/r2cf.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hf_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2HC) $(FLAGS_HF) -n $* -dit -name hf_$* -include "hf.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2HC) $(FLAGS_HF) -n $* -dit -name hf_$* -include "rdft/scalar/hf.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hf2_%.c:  $(CODELET_DEPS) $(GEN_HC2HC)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2HC) $(FLAGS_HF2) -n $* -dit -name hf2_$* -include "hf.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2HC) $(FLAGS_HF2) -n $* -dit -name hf2_$* -include "rdft/scalar/hf.h") | $(ADD_DATE) | $(INDENT) >$@
 
 r2cfII_%.c:  $(CODELET_DEPS) $(GEN_R2CF)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2CF) $(FLAGS_R2CF) -n $* -name r2cfII_$* -dft-II -include "r2cfII.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2CF) $(FLAGS_R2CF) -n $* -name r2cfII_$* -dft-II -include "rdft/scalar/r2cfII.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hc2cf_%.c:  $(CODELET_DEPS) $(GEN_HC2C)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2C) $(FLAGS_HC2CF) -n $* -dit -name hc2cf_$* -include "hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2C) $(FLAGS_HC2CF) -n $* -dit -name hc2cf_$* -include "rdft/scalar/hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hc2cf2_%.c:  $(CODELET_DEPS) $(GEN_HC2C)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2C) $(FLAGS_HC2CF2) -n $* -dit -name hc2cf2_$* -include "hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2C) $(FLAGS_HC2CF2) -n $* -dit -name hc2cf2_$* -include "rdft/scalar/hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hc2cfdft_%.c:  $(CODELET_DEPS) $(GEN_HC2CDFT)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT) $(FLAGS_HC2CF) -n $* -dit -name hc2cfdft_$* -include "hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT) $(FLAGS_HC2CF) -n $* -dit -name hc2cfdft_$* -include "rdft/scalar/hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
 
 hc2cfdft2_%.c:  $(CODELET_DEPS) $(GEN_HC2CDFT)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT) $(FLAGS_HC2CF2) -n $* -dit -name hc2cfdft2_$* -include "hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_HC2CDFT) $(FLAGS_HC2CF2) -n $* -dit -name hc2cfdft2_$* -include "rdft/scalar/hc2cf.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE

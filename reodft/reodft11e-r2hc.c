@@ -33,7 +33,7 @@
    of the cosine, the REDFT01 must produce a near-singular output.
 */
 
-#include "reodft.h"
+#include "reodft/reodft.h"
 
 typedef struct {
      solver super;

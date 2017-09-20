@@ -18,7 +18,7 @@
  *
  */
 
-#include "dft.h"
+#include "dft/dft.h"
 
 typedef void (*dftwapply)(const plan *ego, R *rio, R *iio);
 typedef struct ct_solver_s ct_solver;

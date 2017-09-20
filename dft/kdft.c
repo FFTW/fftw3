@@ -19,7 +19,7 @@
  */
 
 
-#include "dft.h"
+#include "dft/dft.h"
 
 void X(kdft_register)(planner *p, kdft codelet, const kdft_desc *desc)
 {

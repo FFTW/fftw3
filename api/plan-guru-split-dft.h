@@ -18,8 +18,8 @@
  *
  */
 
-#include "api.h"
-#include "dft.h"
+#include "api/api.h"
+#include "dft/dft.h"
 
 X(plan) XGURU(split_dft)(int rank, const IODIM *dims,
 			       int howmany_rank, const IODIM *howmany_dims,

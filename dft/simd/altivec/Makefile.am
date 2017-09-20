@@ -1,5 +1,5 @@
 AM_CFLAGS = $(ALTIVEC_CFLAGS)
-SIMD_HEADER=simd-altivec.h
+SIMD_HEADER=simd-support/simd-altivec.h
 
 include $(top_srcdir)/dft/simd/codlist.mk
 include $(top_srcdir)/dft/simd/simd.mk

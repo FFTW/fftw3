@@ -18,8 +18,8 @@
  *
  */
 
-#include "api.h"
-#include "rdft.h"
+#include "api/api.h"
+#include "rdft/rdft.h"
 
 X(plan) XGURU(dft_r2c)(int rank, const IODIM *dims,
 		       int howmany_rank,

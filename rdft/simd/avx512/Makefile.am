@@ -1,5 +1,5 @@
 AM_CFLAGS = $(AVX512_CFLAGS)
-SIMD_HEADER=simd-avx512.h
+SIMD_HEADER=simd-support/simd-avx512.h
 
 include $(top_srcdir)/rdft/simd/codlist.mk
 include $(top_srcdir)/rdft/simd/simd.mk

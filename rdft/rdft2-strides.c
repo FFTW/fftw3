@@ -18,7 +18,7 @@
  *
  */
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 /* Deal with annoyance because the tensor (is,os) applies to
    (r,rio/iio) for R2HC and vice-versa for HC2R.  We originally had

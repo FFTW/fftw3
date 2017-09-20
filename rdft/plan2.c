@@ -19,7 +19,7 @@
  */
 
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 plan *X(mkplan_rdft2)(size_t size, const plan_adt *adt, rdft2apply apply)
 {

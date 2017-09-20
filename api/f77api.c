@@ -18,11 +18,11 @@
  *
  */
 
-#include "api.h"
-#include "dft.h"
-#include "rdft.h"
+#include "api/api.h"
+#include "dft/dft.h"
+#include "rdft/rdft.h"
 
-#include "x77.h"
+#include "api/x77.h"
 
 /* if F77_FUNC is not defined, then we don't know how to mangle identifiers
    for the Fortran linker, and we must omit the f77 API. */

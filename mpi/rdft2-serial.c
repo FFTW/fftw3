@@ -22,7 +22,7 @@
    call through to serial API. */
 
 #include "mpi-rdft2.h"
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 typedef struct {
      plan_mpi_rdft2 super;

@@ -1,5 +1,5 @@
 #include "config.h"
-#include "bench.h"
+#include "libbench2/bench.h"
 #include <math.h>
 
 #define DG unsigned short

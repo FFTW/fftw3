@@ -8,7 +8,7 @@ CODELET_NAME=codelet_
 # rule to build codlist
 $(CODLIST): Makefile
 	(									\
-	echo "#include \"ifftw.h\"";						\
+	echo "#include \"kernel/ifftw.h\"";					\
 	echo $(INCLUDE_SIMD_HEADER);						\
 	echo;									\
 	for i in $(ALL_CODELETS) NIL; do					\

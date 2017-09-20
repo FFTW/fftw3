@@ -18,7 +18,7 @@
  *
  */
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 typedef void (*hc2capply) (const plan *ego, R *cr, R *ci);
 typedef struct hc2c_solver_s hc2c_solver;

@@ -19,7 +19,7 @@
  */
 
 
-#include "bench.h"
+#include "libbench2/bench.h"
 
 /* On some systems, we are required to define a dummy main-like
    routine (called "MAIN__" or something similar in order to link a C

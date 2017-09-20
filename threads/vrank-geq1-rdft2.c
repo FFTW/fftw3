@@ -20,7 +20,7 @@
 
 
 
-#include "threads.h"
+#include "threads/threads.h"
 
 typedef struct {
      solver super;

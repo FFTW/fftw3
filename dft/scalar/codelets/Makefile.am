@@ -11,8 +11,6 @@
 # manual).
 
 ###########################################################################
-AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/dft	\
--I$(top_srcdir)/dft/scalar
 noinst_LTLIBRARIES = libdft_scalar_codelets.la
 
 ###########################################################################
@@ -74,24 +72,24 @@ FLAGS_Q1=$(DFT_FLAGS_COMMON) -reload-twiddle
 FLAGS_Q2=$(DFT_FLAGS_COMMON) -twiddle-log3  -precompute-twiddles
 
 n1_%.c:  $(CODELET_DEPS) $(GEN_NOTW)
-	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_NOTW) $(FLAGS_N1) -n $* -name n1_$* -include "n.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_NOTW) $(FLAGS_N1) -n $* -name n1_$* -include "dft/scalar/n.h") | $(ADD_DATE) | $(INDENT) >$@
 
 t1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE) $(FLAGS_T1) -n $* -name t1_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE) $(FLAGS_T1) -n $* -name t1_$* -include "dft/scalar/t.h") | $(ADD_DATE) | $(INDENT) >$@
 
 t2_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE) $(FLAGS_T2) -n $* -name t2_$* -include "t.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE) $(FLAGS_T2) -n $* -name t2_$* -include "dft/scalar/t.h") | $(ADD_DATE) | $(INDENT) >$@
 
 f1_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE) $(FLAGS_F1) -dif -n $* -name f1_$* -include "f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE) $(FLAGS_F1) -dif -n $* -name f1_$* -include "dft/scalar/f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 f2_%.c:  $(CODELET_DEPS) $(GEN_TWIDDLE)
-	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE) $(FLAGS_F2) -dif -n $* -name f2_$* -include "f.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDDLE) $(FLAGS_F2) -dif -n $* -name f2_$* -include "dft/scalar/f.h") | $(ADD_DATE) | $(INDENT) >$@
 
 q1_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ)
-	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDSQ) $(FLAGS_Q1) -dif -n $* -name q1_$* -include "q.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDSQ) $(FLAGS_Q1) -dif -n $* -name q1_$* -include "dft/scalar/q.h") | $(ADD_DATE) | $(INDENT) >$@
 
 q2_%.c:  $(CODELET_DEPS) $(GEN_TWIDSQ)
-	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDSQ) $(FLAGS_Q2) -dif -n $* -name q2_$* -include "q.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_DFT); $(TWOVERS) $(GEN_TWIDSQ) $(FLAGS_Q2) -dif -n $* -name q2_$* -include "dft/scalar/q.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE

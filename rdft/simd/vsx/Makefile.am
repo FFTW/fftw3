@@ -1,5 +1,5 @@
 AM_CFLAGS = $(VSX_CFLAGS)
-SIMD_HEADER=simd-vsx.h
+SIMD_HEADER=simd-support/simd-vsx.h
 
 include $(top_srcdir)/rdft/simd/codlist.mk
 include $(top_srcdir)/rdft/simd/simd.mk

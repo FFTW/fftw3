@@ -22,8 +22,8 @@
 #ifndef __IFFTW_MPI_H__
 #define __IFFTW_MPI_H__
 
-#include "ifftw.h"
-#include "rdft.h"
+#include "kernel/ifftw.h"
+#include "rdft/rdft.h"
 
 #include <mpi.h>
 

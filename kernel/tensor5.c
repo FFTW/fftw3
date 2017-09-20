@@ -19,7 +19,7 @@
  */
 
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 static void dimcpy(iodim *dst, const iodim *src, int rnk)
 {

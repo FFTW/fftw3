@@ -18,10 +18,10 @@
  *
  */
 
-#include "api.h"
-#include "dft.h"
-#include "rdft.h"
-#include "reodft.h"
+#include "api/api.h"
+#include "dft/dft.h"
+#include "rdft/rdft.h"
+#include "reodft/reodft.h"
 
 void X(configure_planner)(planner *plnr)
 {

@@ -19,7 +19,7 @@
  */
 
 
-#include "bench.h"
+#include "libbench2/bench.h"
 
 /* set I/O arrays to zero.  Default routine */
 void problem_zero(bench_problem *p)

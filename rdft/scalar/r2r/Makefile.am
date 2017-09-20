@@ -11,8 +11,6 @@
 # manual).
 
 ###########################################################################
-AM_CPPFLAGS = -I$(top_srcdir)/kernel -I$(top_srcdir)/rdft	\
--I$(top_srcdir)/rdft/scalar
 noinst_LTLIBRARIES = librdft_scalar_r2r.la
 
 ###########################################################################
@@ -59,32 +57,32 @@ FLAGS_O11=$(RDFT_FLAGS_COMMON)
 FLAGS_DHT=$(RDFT_FLAGS_COMMON)
 
 e00_%.c:  $(CODELET_DEPS) $(GEN_R2R)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_E00) -redft00 -n $* -name e00_$* -include "r2r.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_E00) -redft00 -n $* -name e00_$* -include "rdft/scalar/r2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 e01_%.c:  $(CODELET_DEPS) $(GEN_R2R)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_E01) -redft01 -n $* -name e01_$* -include "r2r.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_E01) -redft01 -n $* -name e01_$* -include "rdft/scalar/r2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 e10_%.c:  $(CODELET_DEPS) $(GEN_R2R)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_E10) -redft10 -n $* -name e10_$* -include "r2r.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_E10) -redft10 -n $* -name e10_$* -include "rdft/scalar/r2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 e11_%.c:  $(CODELET_DEPS) $(GEN_R2R)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_E11) -redft11 -n $* -name e11_$* -include "r2r.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_E11) -redft11 -n $* -name e11_$* -include "rdft/scalar/r2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 
 o00_%.c:  $(CODELET_DEPS) $(GEN_R2R)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_O00) -rodft00 -n $* -name o00_$* -include "r2r.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_O00) -rodft00 -n $* -name o00_$* -include "rdft/scalar/r2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 o01_%.c:  $(CODELET_DEPS) $(GEN_R2R)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_O01) -rodft01 -n $* -name o01_$* -include "r2r.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_O01) -rodft01 -n $* -name o01_$* -include "rdft/scalar/r2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 o10_%.c:  $(CODELET_DEPS) $(GEN_R2R)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_O10) -rodft10 -n $* -name o10_$* -include "r2r.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_O10) -rodft10 -n $* -name o10_$* -include "rdft/scalar/r2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 o11_%.c:  $(CODELET_DEPS) $(GEN_R2R)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_O11) -rodft11 -n $* -name o11_$* -include "r2r.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_O11) -rodft11 -n $* -name o11_$* -include "rdft/scalar/r2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 
 dht_%.c:  $(CODELET_DEPS) $(GEN_R2R)
-	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_DHT) -dht -sign 1 -n $* -name dht_$* -include "r2r.h") | $(ADD_DATE) | $(INDENT) >$@
+	($(PRELUDE_COMMANDS_RDFT); $(TWOVERS) $(GEN_R2R) $(FLAGS_DHT) -dht -sign 1 -n $* -name dht_$* -include "rdft/scalar/r2r.h") | $(ADD_DATE) | $(INDENT) >$@
 
 endif # MAINTAINER_MODE

@@ -19,7 +19,7 @@
  */
 
 
-#include "api.h"
+#include "api/api.h"
 
 const char X(cc)[] = FFTW_CC;
 

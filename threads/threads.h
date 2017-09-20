@@ -21,9 +21,9 @@
 #ifndef __THREADS_H__
 #define __THREADS_H__
 
-#include "ifftw.h"
-#include "ct.h"
-#include "hc2hc.h"
+#include "kernel/ifftw.h"
+#include "dft/ct.h"
+#include "rdft/hc2hc.h"
 
 typedef struct {
      int min, max, thr_num;

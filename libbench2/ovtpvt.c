@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include "bench.h"
+#include "libbench2/bench.h"
 
 void ovtpvt(const char *format, ...)
 {

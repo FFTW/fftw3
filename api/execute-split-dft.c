@@ -18,8 +18,8 @@
  *
  */
 
-#include "api.h"
-#include "dft.h"
+#include "api/api.h"
+#include "dft/dft.h"
 
 /* guru interface: requires care in alignment, r - i, etcetera. */
 void X(execute_split_dft)(const X(plan) p, R *ri, R *ii, R *ro, R *io)

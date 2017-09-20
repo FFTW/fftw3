@@ -18,13 +18,13 @@
  *
  */
 
-#include "api.h"
+#include "api/api.h"
 
 /* if F77_FUNC is not defined, then we don't know how to mangle identifiers
    for the Fortran linker, and we must omit the f77 API. */
 #if defined(F77_FUNC) || defined(WINDOWS_F77_MANGLING)
 
-#include "x77.h"
+#include "api/x77.h"
 
 #define F77(a, A) F77x(x77(a), X77(A))
 

@@ -1,6 +1,6 @@
 /* not worth copyrighting */
 
-#include "bench.h"
+#include "libbench2/bench.h"
 
 void aset(bench_real *A, int n, bench_real x)
 {

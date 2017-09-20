@@ -42,7 +42,7 @@
    forgot to correspondingly multiply S (the sine terms) by -1.
 */
 
-#include "reodft.h"
+#include "reodft/reodft.h"
 
 typedef struct {
      solver super;

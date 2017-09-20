@@ -18,8 +18,8 @@
  *
  */
 
-#include "api.h"
-#include "rdft.h"
+#include "api/api.h"
+#include "rdft/rdft.h"
 
 #define N0(nembed)((nembed) ? (nembed) : n)
 

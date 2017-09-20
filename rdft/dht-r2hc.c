@@ -22,7 +22,7 @@
 /* Solve a DHT problem (Discrete Hartley Transform) via post-processing
    of an R2HC problem. */
 
-#include "rdft.h"
+#include "rdft/rdft.h"
 
 typedef struct {
      solver super;

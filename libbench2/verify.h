@@ -18,7 +18,7 @@
  *
  */
 
-#include "bench.h"
+#include "libbench2/bench.h"
 
 typedef bench_real R;
 typedef bench_complex C;

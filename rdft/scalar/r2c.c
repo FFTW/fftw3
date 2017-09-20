@@ -18,20 +18,20 @@
  *
  */
 
-#include "codelet-rdft.h"
+#include "rdft/codelet-rdft.h"
 
-#include "r2cf.h"
+#include "rdft/scalar/r2cf.h"
 const kr2c_genus GENUS = { R2HC, 1 };
 #undef GENUS
 
-#include "r2cfII.h"
+#include "rdft/scalar/r2cfII.h"
 const kr2c_genus GENUS = { R2HCII, 1 };
 #undef GENUS
 
-#include "r2cb.h"
+#include "rdft/scalar/r2cb.h"
 const kr2c_genus GENUS = { HC2R, 1 };
 #undef GENUS
 
-#include "r2cbIII.h"
+#include "rdft/scalar/r2cbIII.h"
 const kr2c_genus GENUS = { HC2RIII, 1 };
 #undef GENUS

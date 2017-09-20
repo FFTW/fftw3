@@ -19,7 +19,7 @@
  */
 
 
-#include "ct.h"
+#include "dft/ct.h"
 
 void X(kdft_dif_register)(planner *p, kdftw codelet, const ct_desc *desc)
 {

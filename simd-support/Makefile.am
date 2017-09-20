@@ -1,4 +1,3 @@
-AM_CPPFLAGS = -I$(top_srcdir)/kernel
 noinst_LTLIBRARIES = libsimd_support.la libsimd_sse2_nonportable.la
 
 libsimd_support_la_SOURCES = taint.c simd-common.h \

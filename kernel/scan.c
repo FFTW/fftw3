@@ -19,7 +19,7 @@
  */
 
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 #include <string.h>
 #include <stddef.h>
 #include <stdarg.h>

@@ -1,5 +1,5 @@
 AM_CFLAGS = $(SSE2_CFLAGS)
-SIMD_HEADER=simd-sse2.h
+SIMD_HEADER=simd-support/simd-sse2.h
 
 include $(top_srcdir)/dft/simd/codlist.mk
 include $(top_srcdir)/dft/simd/simd.mk

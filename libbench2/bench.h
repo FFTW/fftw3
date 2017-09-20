@@ -20,7 +20,7 @@
 
 
 /* benchmark program definitions */
-#include "bench-user.h"
+#include "libbench2/bench-user.h"
 
 extern double time_min;
 extern int time_repeat;

@@ -19,7 +19,7 @@
  */
 
 
-#include "ifftw.h"
+#include "kernel/ifftw.h"
 
 solver *X(mksolver)(size_t size, const solver_adt *adt)
 {
