@@ -226,7 +226,9 @@ static inline V VCONJ(V x)
           unsigned u[4];
           V v;
      };
-     const union uvec pm = {
+     /* it looks like gcc-3.3.5 produces slow code unless PM is
+        declared static. */
+     static const union uvec pm = {
 #ifdef FFTW_SINGLE
           { 0x00000000, 0x80000000, 0x00000000, 0x80000000 }
 #else
