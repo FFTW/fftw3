@@ -376,8 +376,8 @@ endif ()
 # pkgconfig file
 set (prefix ${CMAKE_INSTALL_PREFIX})
 set (exec_prefix ${CMAKE_INSTALL_PREFIX})
-set (libdir ${CMAKE_INSTALL_PREFIX}/${LIBRARY_PATH})
-set (includedir ${CMAKE_INSTALL_PREFIX}/include)
+set (libdir ${CMAKE_INSTALL_FULL_LIBDIR})
+set (includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 set (VERSION ${FFTW_VERSION})
 configure_file (fftw.pc.in fftw${PREC_SUFFIX}.pc @ONLY)
 install (FILES
