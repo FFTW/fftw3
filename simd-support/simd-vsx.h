@@ -153,35 +153,15 @@ static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 
 static inline V VBYI(V x)
 {
-  /* Complicated low-level stuff. vpermxor is really a cryptographic instruction that is only 
-   * available in the low-level inteface both for GCC and XLC. However, on little-endian
-   * platforms there is also the complicated swapping going on. XLC does this here too, but
-   * not GCC, so we need different permute constants. 
-   */ 
-#if defined(__POWER8_VECTOR__) && defined(__GNUC__) && defined(__LITTLE_ENDIAN__)
-#    ifdef FFTW_SINGLE
-  const vector unsigned char perm = { 0xbb, 0xaa, 0x99, 0x88, 0xff, 0xee, 0xdd, 0xcc, 0x33, 0x22, 0x11, 0x00, 0x77, 0x66, 0x55, 0x44 };
-#    else
-  const vector unsigned char perm = { 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11, 0x00, 0xff, 0xee, 0xdd, 0xcc, 0xbb, 0xaa, 0x99, 0x88 };
-#    endif
-  const V                    pmpm = vec_mergel(vec_splats((R)0.0),-(vec_splats((R)0.0)));
-#ifdef __ibmxl__
-  return (V)__vpermxor((vector unsigned char)x,(vector unsigned char)pmpm,perm);
-#else
-  return (V)__builtin_crypto_vpermxor((vector unsigned char)x,(vector unsigned char)pmpm,perm);
-#endif
-#elif defined(__POWER8_VECTOR__) && (defined(__ibmxl__) || (defined(__GNUC__) && !defined(__LITTLE_ENDIAN__)))
-#    ifdef FFTW_SINGLE
-  const vector unsigned char perm = { 0x44, 0x55, 0x66, 0x77, 0x00, 0x11, 0x22, 0x33, 0xCC, 0xDD, 0xEE, 0xFF, 0x88, 0x99, 0xAA, 0xBB };
-#    else
-  const vector unsigned char perm = { 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77 };
-#    endif
-  const V                    pmpm = vec_mergel(vec_splats((R)0.0),-(vec_splats((R)0.0)));
-  return (V)__vpermxor((vector unsigned char)x,(vector unsigned char)pmpm,perm);
-#else
-  /* The safe option */
-  return FLIP_RI(VCONJ(x));
-#endif
+     /* FIXME [matteof 2017-09-21] It is possible to use vpermxor(),
+        but gcc and xlc treat the permutation bits differently, and
+        gcc-6 seems to generate incorrect code when using
+        __builtin_crypto_vpermxor() (i.e., VBYI() works for a small
+        test case but fails in the large).
+
+        Punt on vpermxor() for now and do the simple thing.
+     */
+     return FLIP_RI(VCONJ(x));
 }
 
 /* FMA support */
