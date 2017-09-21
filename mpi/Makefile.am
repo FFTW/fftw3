@@ -1,4 +1,7 @@
-AM_CPPFLAGS = -I $(top_srcdir)
+# -I $(top_srcdir)/api is necessary because fftw3-mpi.h includes
+# "fftw3.h", and we cannot change the latter to "api/fftw3.h" because
+# fftw3-mpi.h is installed in /usr/include.
+AM_CPPFLAGS = -I $(top_srcdir) -I $(top_srcdir)/api
 
 if MPI
 lib_LTLIBRARIES = libfftw3@PREC_SUFFIX@_mpi.la
