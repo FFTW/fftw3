@@ -17,9 +17,6 @@ else
 lib_LTLIBRARIES = $(FFTWOMPLIB)
 endif
 
-# pkgincludedir = $(includedir)/fftw3@PREC_SUFFIX@
-# pkginclude_HEADERS = threads.h
-
 libfftw3@PREC_SUFFIX@_threads_la_SOURCES = api.c conf.c threads.c	\
 threads.h dft-vrank-geq1.c ct.c rdft-vrank-geq1.c hc2hc.c		\
 vrank-geq1-rdft2.c f77api.c f77funcs.h
