@@ -145,11 +145,15 @@ pkgconfig_DATA = fftw3@PREC_SUFFIX@.pc
 FFTW3@PREC_SUFFIX@Config.cmake: $(top_srcdir)/FFTW3Config.cmake.in
 	$(SED) \
 		-e 's|[@]PREC_SUFFIX@|@PREC_SUFFIX@|g' \
-		-e 's|[@]libdir@|$(libdir)|g' \
-		-e 's|[@]includedir@|$(includedir)|g' \
+		-e 's|[@]CMAKE_INSTALL_FULL_LIBDIR@|$(libdir)|g' \
+		-e 's|[@]CMAKE_INSTALL_FULL_INCLUDEDIR@|$(includedir)|g' \
 		$(top_srcdir)/FFTW3Config.cmake.in > $@
+FFTW3@PREC_SUFFIX@ConfigVersion.cmake: $(top_srcdir)/FFTW3ConfigVersion.cmake.in
+	$(SED) \
+		-e 's|[@]FFTW_VERSION@|@PACKAGE_VERSION@|g' \
+		$(top_srcdir)/FFTW3ConfigVersion.cmake.in > $@
 cmakedir = $(libdir)/cmake/fftw3
-cmake_DATA = FFTW3@PREC_SUFFIX@Config.cmake
+cmake_DATA = FFTW3@PREC_SUFFIX@Config.cmake FFTW3@PREC_SUFFIX@ConfigVersion.cmake
 
 WISDOM_DIR = /etc/fftw
 WISDOM = wisdom@PREC_SUFFIX@

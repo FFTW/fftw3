@@ -26,7 +26,7 @@ option (ENABLE_SSE2 "Compile with SSE2 instruction set support" OFF)
 option (ENABLE_AVX "Compile with AVX instruction set support" OFF)
 option (ENABLE_AVX2 "Compile with AVX2 instruction set support" OFF)
 
-set (LIBRARY_PATH lib${LIB_SUFFIX})
+include(GNUInstallDirs)
 
 
 include (CheckIncludeFile)
@@ -241,7 +241,7 @@ set (fftw_threads_SOURCE ${fftw_par_SOURCE} threads/threads.c)
 set (fftw_omp_SOURCE ${fftw_par_SOURCE} threads/openmp.c)
 
 
-include_directories(.)
+include_directories (.)
 
 
 if (WITH_COMBINED_THREADS)
@@ -338,14 +338,19 @@ endif ()
 foreach(subtarget ${subtargets})
   set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.7 VERSION 3)
   install (TARGETS ${subtarget}
-          RUNTIME DESTINATION bin
-          LIBRARY DESTINATION ${LIBRARY_PATH}
-          ARCHIVE DESTINATION ${LIBRARY_PATH})
+	  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+	  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endforeach ()
+install(TARGETS ${fftw3_lib}
+          EXPORT FFTW3LibraryDepends
+          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-install (FILES api/fftw3.h DESTINATION include RENAME fftw3${PREC_SUFFIX}.h)
+install (FILES api/fftw3.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (EXISTS api/fftw3.f)
-  install (FILES api/fftw3.f DESTINATION include RENAME fftw3${PREC_SUFFIX}.f)
+  install (FILES api/fftw3.f DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif ()
 
 if (BUILD_TESTS)
@@ -376,20 +381,27 @@ endif ()
 # pkgconfig file
 set (prefix ${CMAKE_INSTALL_PREFIX})
 set (exec_prefix ${CMAKE_INSTALL_PREFIX})
-set (libdir ${CMAKE_INSTALL_PREFIX}/${LIBRARY_PATH})
-set (includedir ${CMAKE_INSTALL_PREFIX}/include)
+set (libdir ${CMAKE_INSTALL_FULL_LIBDIR})
+set (includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 set (VERSION ${FFTW_VERSION})
 configure_file (fftw.pc.in fftw${PREC_SUFFIX}.pc @ONLY)
 install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/fftw${PREC_SUFFIX}.pc
-         DESTINATION ${LIBRARY_PATH}/pkgconfig
+         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
          COMPONENT Development)
 
 # cmake file
+set (FFTW3_LIBRARIES "FFTW3::${fftw3_lib}")
 configure_file (FFTW3Config.cmake.in FFTW3${PREC_SUFFIX}Config.cmake @ONLY)
 configure_file (FFTW3ConfigVersion.cmake.in FFTW3${PREC_SUFFIX}ConfigVersion.cmake @ONLY)
 install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}Config.cmake
           ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}ConfigVersion.cmake
-         DESTINATION ${LIBRARY_PATH}/cmake/fftw3
+	  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
          COMPONENT Development)
+
+export (TARGETS ${fftw3_lib} NAMESPACE FFTW3:: FILE ${PROJECT_BINARY_DIR}/FFTW3LibraryDepends.cmake)
+install(EXPORT FFTW3LibraryDepends
+        NAMESPACE FFTW3::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
+        COMPONENT Development)
