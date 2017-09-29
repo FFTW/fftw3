@@ -515,7 +515,7 @@ INLINE_ELAPSED(inline)
 #endif
 #endif /* HAVE_MIPS_ZBUS_TIMER */
 
-#if defined(__ARM_ARCH_7A__) && defined(HAVE_ARMV7A_CNTVCT)
+#if defined(HAVE_ARMV7A_CNTVCT)
 typedef uint64_t ticks;
 static inline ticks getticks(void)
 {
