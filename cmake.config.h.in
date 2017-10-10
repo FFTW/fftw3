@@ -37,12 +37,6 @@
 /* Define to enable extra FFTW debugging code. */
 /* #undef FFTW_DEBUG */
 
-/* Define to enable alignment debugging hacks. */
-/* #undef FFTW_DEBUG_ALIGNMENT */
-
-/* Define to enable debugging malloc. */
-/* #undef FFTW_DEBUG_MALLOC */
-
 /* Define to enable the use of alloca(). */
 #define FFTW_ENABLE_ALLOCA 1
 

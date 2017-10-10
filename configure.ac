@@ -45,23 +45,10 @@ esac
 AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	AC_DEFINE(FFTW_DEBUG,1,[Define to enable extra FFTW debugging code.])
-	debug_malloc=yes
-else
-	debug_malloc=no
 fi
 
 AC_ARG_ENABLE(doc, [AC_HELP_STRING([--disable-doc],[disable building the documentation])], build_doc=$enableval, build_doc=yes)
 AM_CONDITIONAL(BUILD_DOC, test x"$build_doc" = xyes)
-
-AC_ARG_ENABLE(debug-malloc, [AC_HELP_STRING([--enable-debug-malloc],[enable malloc debugging version])], ok=$enableval, ok=$debug_malloc)
-if test "$ok" = "yes"; then
-	AC_DEFINE(FFTW_DEBUG_MALLOC,1,[Define to enable debugging malloc.])
-fi
-
-AC_ARG_ENABLE(debug-alignment, [AC_HELP_STRING([--enable-debug-alignment],[enable alignment debugging hacks])], ok=$enableval, ok=no)
-if test "$ok" = "yes"; then
-	AC_DEFINE(FFTW_DEBUG_ALIGNMENT,1,[Define to enable alignment debugging hacks.])
-fi
 
 AC_ARG_ENABLE(random-estimator, [AC_HELP_STRING([--enable-random-estimator],[enable pseudorandom estimator (debugging hack)])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then

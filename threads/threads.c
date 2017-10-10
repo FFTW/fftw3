@@ -354,9 +354,6 @@ static void kill_workforce(void)
 
      w.proc = 0;
 
-     THREAD_ON; /* needed for debugging mode: since make_worker
-		   is called from dequeue which is only called in
-		   thread_on mode, we need to unmake_worker in thread_on. */
      WITH_QUEUE_LOCK({
 	  /* tell all workers that they must terminate.  
 
@@ -374,7 +371,6 @@ static void kill_workforce(void)
 	       unmake_worker(q);
 	  }
      });
-     THREAD_OFF;
 }
 
 static os_static_mutex_t initialization_mutex = OS_STATIC_MUTEX_INITIALIZER;
@@ -420,7 +416,6 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      block_size = (loopmax + nthr - 1) / nthr;
      nthr = (loopmax + block_size - 1) / block_size;
 
-     THREAD_ON; /* prevent debugging mode from failing under threads */
      STACK_MALLOC(struct work *, r, sizeof(struct work) * nthr);
 	  
      /* distribute work: */
@@ -455,7 +450,6 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      }
 
      STACK_FREE(r);
-     THREAD_OFF; /* prevent debugging mode from failing under threads */
 }
 
 void X(threads_cleanup)(void)

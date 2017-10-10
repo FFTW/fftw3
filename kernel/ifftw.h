@@ -288,30 +288,8 @@ enum malloc_tag {
 IFFTW_EXTERN void X(ifree)(void *ptr);
 extern void X(ifree0)(void *ptr);
 
-#ifdef FFTW_DEBUG_MALLOC
-
-IFFTW_EXTERN void *X(malloc_debug)(size_t n, enum malloc_tag what,
-			     const char *file, int line);
-#define MALLOC(n, what) X(malloc_debug)(n, what, __FILE__, __LINE__)
-IFFTW_EXTERN void X(malloc_print_minfo)(int vrbose);
-
-#else /* ! FFTW_DEBUG_MALLOC */
-
 IFFTW_EXTERN void *X(malloc_plain)(size_t sz);
 #define MALLOC(n, what)  X(malloc_plain)(n)
-
-#endif
-
-#if defined(FFTW_DEBUG) && defined(FFTW_DEBUG_MALLOC) && (defined(HAVE_THREADS) || defined(HAVE_OPENMP))
-extern int X(in_thread);
-#  define IN_THREAD X(in_thread)
-#  define THREAD_ON { int in_thread_save = X(in_thread); X(in_thread) = 1
-#  define THREAD_OFF X(in_thread) = in_thread_save; }
-#else
-#  define IN_THREAD 0
-#  define THREAD_ON 
-#  define THREAD_OFF 
-#endif
 
 /*-----------------------------------------------------------------------*/
 /* low-resolution clock */
@@ -1063,16 +1041,7 @@ R *X(join_taint)(R *p1, R *p2);
 #define JOIN_TAINT(p1, p2) p1
 #endif
 
-#ifdef FFTW_DEBUG_ALIGNMENT
-#  define ASSERT_ALIGNED_DOUBLE {		\
-     double __foo;				\
-     CK(!(((uintptr_t) &__foo) & 0x7));		\
-}
-#else
-#  define ASSERT_ALIGNED_DOUBLE 
-#endif /* FFTW_DEBUG_ALIGNMENT */
-
-
+#define ASSERT_ALIGNED_DOUBLE  /*unused, legacy*/
 
 /*-----------------------------------------------------------------------*/
 /* macros used in codelets to reduce source code size */

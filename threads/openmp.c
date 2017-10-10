@@ -58,7 +58,6 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      block_size = (loopmax + nthr - 1) / nthr;
      nthr = (loopmax + block_size - 1) / block_size;
 
-     THREAD_ON; /* prevent debugging mode from failing under threads */
 #pragma omp parallel for private(d)
      for (i = 0; i < nthr; ++i) {
 	  d.max = (d.min = i * block_size) + block_size;
@@ -68,7 +67,6 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
 	  d.data = data;
 	  proc(&d);
      }
-     THREAD_OFF; /* prevent debugging mode from failing under threads */
 }
 
 void X(threads_cleanup)(void)
