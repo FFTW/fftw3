@@ -47,7 +47,7 @@
 #ifndef FFTW3_MPI_H
 #define FFTW3_MPI_H
 
-#include "fftw3.h"
+#include <fftw3.h>
 #include <mpi.h>
 
 #ifdef __cplusplus
