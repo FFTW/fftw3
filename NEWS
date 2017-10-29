@@ -1,3 +1,12 @@
+FFTW 3.3.7:
+
+* Experimental support for cmake.
+* Fixes for armv7a cycle counter.
+* Official support for aarch64, now that we have hardware to test it.
+* Tweak usage of FMA instructions in a way that favors newer processors
+  (Skylake and Ryzen) over older processors (Haswell).
+* tests/bench: use 64-bit precision to compute mflops.
+
 FFTW 3.3.6-pl2:
 
 * Bugfix: MPI Fortran-03 headers were missing in FFTW 3.3.6-pl1.
