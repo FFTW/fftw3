@@ -1,6 +1,14 @@
 FFTW 3.3.7:
 
-* Experimental support for cmake.
+* Experimental support for CMake.
+
+  The primary build mechanism for FFTW remains GNU autoconf/automake.
+  CMake support is meant to offer an easy way to compile FFTW on
+  Windows, and as such it does not cover all the features of the
+  automake build system, such as exotic cycle counters,
+  cross-compiling, or build of binaries for a mixture of ISA's
+  (e.g., amd64 vs amd64+avx vs amd64+avx2).  Patches are welcome.
+
 * Fixes for armv7a cycle counter.
 * Official support for aarch64, now that we have hardware to test it.
 * Tweak usage of FMA instructions in a way that favors newer processors
