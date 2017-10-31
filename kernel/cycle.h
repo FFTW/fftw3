@@ -539,7 +539,7 @@ INLINE_ELAPSED(inline)
 #define HAVE_TICK_COUNTER
 #endif
 
-#if defined(__aarch64__) && defined(HAVE_ARMV8_CNTVCT_EL0) && !defined(HAVE_ARMV8CC)
+#if defined(__aarch64__) && defined(HAVE_ARMV8_CNTVCT_EL0) && !defined(HAVE_ARMV8_PMCCNTR_EL0)
 typedef uint64_t ticks;
 static inline ticks getticks(void)
 {
@@ -551,7 +551,7 @@ INLINE_ELAPSED(inline)
 #define HAVE_TICK_COUNTER
 #endif
 
-#if defined(__aarch64__) && defined(HAVE_ARMV8CC)
+#if defined(__aarch64__) && defined(HAVE_ARMV8_PMCCNTR_EL0)
 typedef uint64_t ticks;
 static inline ticks getticks(void)
 {
