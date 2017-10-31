@@ -200,19 +200,24 @@ if test "$have_neon" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_NEON, test "$have_neon" = "yes")
 
-AC_ARG_ENABLE(armv8cyclecounter, [AC_HELP_STRING([--enable-armv8cyclecounter],[enable the cycle counter on ARMv8 via the PMCCNTR_EL0 register. Requires enabling in kernel mode, see <https://github.com/rdolbeau/enable_arm_pmu>])], have_armv8cyclecounter=$enableval)
+AC_ARG_ENABLE(armv8cyclecounter, [AC_HELP_STRING([--enable-armv8cyclecounter],[enable the cycle counter on ARMv8 via the PMCCNTR_EL0 register (see README-perfcounters for details and mandatory instructions)])], have_armv8cyclecounter=$enableval)
 if test "$have_armv8cyclecounter"x = "yes"x; then
 	AC_DEFINE(HAVE_ARMV8CC,1,[Define if you have enabled the cycle counter on ARMv8])
 fi
 
-AC_ARG_ENABLE(armv8-cntvct-el0, [AC_HELP_STRING([--enable-armv8-cntvct-el0],[enable the cycle counter on ARMv8 via the CNTVCT_EL0 register])], have_armv8cntvctel0=$enableval)
+AC_ARG_ENABLE(armv8-cntvct-el0, [AC_HELP_STRING([--enable-armv8-cntvct-el0],[enable the cycle counter on ARMv8 via the CNTVCT_EL0 register (see README-perfcounters for details and mandatory instructions)])], have_armv8cntvctel0=$enableval)
 if test "$have_armv8cntvctel0"x = "yes"x; then
 	AC_DEFINE(HAVE_ARMV8_CNTVCT_EL0,1,[Define if you have enabled the CNTVCT_EL0 cycle counter on ARMv8])
 fi
 
-AC_ARG_ENABLE(armv7a-cntvct, [AC_HELP_STRING([--enable-armv7a-cntvct],[enable the cycle counter on Armv7a via the CNTVCT register])], have_armv7acntvct=$enableval)
+AC_ARG_ENABLE(armv7a-cntvct, [AC_HELP_STRING([--enable-armv7a-cntvct],[enable the cycle counter on Armv7a via the CNTVCT register (see README-perfcounters for details and mandatory instructions)])], have_armv7acntvct=$enableval)
 if test "$have_armv7acntvct"x = "yes"x; then
 	AC_DEFINE(HAVE_ARMV7A_CNTVCT,1,[Define if you have enabled the CNTVCT cycle counter on ARMv7a])
+fi
+
+AC_ARG_ENABLE(armv7a-pmccntr, [AC_HELP_STRING([--enable-armv7a-pmccntr],[enable the cycle counter on Armv7a via the PMCCNTR register (see README-perfcounters for details and mandatory instructions)])], have_armv7apmccntr=$enableval)
+if test "$have_armv7apmccntr"x = "yes"x; then
+	AC_DEFINE(HAVE_ARMV7A_PMCCNTR,1,[Define if you have enabled the PMCCNTR cycle counter on ARMv7a])
 fi
 
 AC_ARG_ENABLE(generic-simd128, [AC_HELP_STRING([--enable-generic-simd128],[enable generic (gcc) 128-bit SIMD optimizations])], have_generic_simd128=$enableval, have_generic_simd128=no)

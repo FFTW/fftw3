@@ -527,6 +527,18 @@ INLINE_ELAPSED(inline)
 #define HAVE_TICK_COUNTER
 #endif
 
+#if defined(HAVE_ARMV7A_PMCCNTR)
+typedef uint64_t ticks;
+static inline ticks getticks(void)
+{
+  uint32_t r;
+  asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r) );
+  return r;
+}
+INLINE_ELAPSED(inline)
+#define HAVE_TICK_COUNTER
+#endif
+
 #if defined(__aarch64__) && defined(HAVE_ARMV8_CNTVCT_EL0) && !defined(HAVE_ARMV8CC)
 typedef uint64_t ticks;
 static inline ticks getticks(void)
