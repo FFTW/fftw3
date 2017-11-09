@@ -12,7 +12,7 @@
 /* #undef C_ALLOCA */
 
 /* Define to disable Fortran wrappers. */
-/* #undef DISABLE_FORTRAN */
+#cmakedefine DISABLE_FORTRAN 1
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */

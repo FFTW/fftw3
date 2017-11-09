@@ -26,6 +26,8 @@ option (ENABLE_SSE2 "Compile with SSE2 instruction set support" OFF)
 option (ENABLE_AVX "Compile with AVX instruction set support" OFF)
 option (ENABLE_AVX2 "Compile with AVX2 instruction set support" OFF)
 
+option (DISABLE_FORTRAN "Disable Fortran wrapper routines" OFF)
+
 include(GNUInstallDirs)
 
 
@@ -101,6 +103,8 @@ check_type_size ("unsigned long" SIZEOF_UNSIGNED_LONG)
 check_type_size ("unsigned long long" SIZEOF_UNSIGNED_LONG_LONG)
 check_type_size ("size_t" SIZEOF_SIZE_T)
 check_type_size ("ptrdiff_t" SIZEOF_PTRDIFF_T)
+math (EXPR SIZEOF_INT_BITS "8 * ${SIZEOF_INT}")
+set (C_FFTW_R2R_KIND "C_INT${SIZEOF_INT_BITS}_T")
 
 find_library (LIBM_LIBRARY NAMES m)
 if (LIBM_LIBRARY)
@@ -357,8 +361,15 @@ install(TARGETS ${fftw3_lib}
           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install (FILES api/fftw3.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-if (EXISTS api/fftw3.f)
-  install (FILES api/fftw3.f DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+if (EXISTS ${CMAKE_SOURCE_DIR}/api/fftw3.f)
+  install (FILES api/fftw3.f api/fftw3l.f03 api/fftw3q.f03 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+endif ()
+if (EXISTS ${CMAKE_SOURCE_DIR}/api/fftw3.f03.in)
+  file (READ api/fftw3.f03.in FFTW3_F03_IN OFFSET 42)
+  file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 "! Generated automatically.  DO NOT EDIT!\n\n")
+  file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 "  integer, parameter :: C_FFTW_R2R_KIND = ${C_FFTW_R2R_KIND}\n\n")
+  file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 "${FFTW3_F03_IN}")
+  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif ()
 
 if (BUILD_TESTS)
