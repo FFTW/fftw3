@@ -81,10 +81,10 @@ smallcheck: mpi-bench$(EXEEXT)
 
 endif
 
-fftw3-mpi.f03: fftw3-mpi.f03.in
+fftw3-mpi.f03: fftw3-mpi.f03.in Makefile
 	sed 's/C_MPI_FINT/@C_MPI_FINT@/' $(srcdir)/fftw3-mpi.f03.in > $@
 
-fftw3l-mpi.f03: fftw3l-mpi.f03.in
+fftw3l-mpi.f03: fftw3l-mpi.f03.in Makefile
 	sed 's/C_MPI_FINT/@C_MPI_FINT@/' $(srcdir)/fftw3l-mpi.f03.in > $@
 
 if MAINTAINER_MODE
