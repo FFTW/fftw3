@@ -21,7 +21,7 @@
 
 #include "kernel/ifftw.h"
 
-INT X(imax)(INT a, INT b)
+IFFTW_EXTERN INT X(imax)(INT a, INT b)
 {
      return (a > b) ? a : b;
 }

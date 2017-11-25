@@ -21,7 +21,7 @@
 
 #include "kernel/ifftw.h"
 
-tensor *X(mktensor)(int rnk) 
+IFFTW_EXTERN tensor *X(mktensor)(int rnk) 
 {
      tensor *x;
 
@@ -51,7 +51,7 @@ tensor *X(mktensor)(int rnk)
      return x;
 }
 
-void X(tensor_destroy)(tensor *sz)
+IFFTW_EXTERN void X(tensor_destroy)(tensor *sz)
 {
 #if !defined(STRUCT_HACK_C99) && !defined(STRUCT_HACK_KR)
      X(ifree0)(sz->dims);
@@ -59,7 +59,7 @@ void X(tensor_destroy)(tensor *sz)
      X(ifree)(sz);
 }
 
-INT X(tensor_sz)(const tensor *sz)
+IFFTW_EXTERN INT X(tensor_sz)(const tensor *sz)
 {
      int i;
      INT n = 1;
@@ -88,7 +88,7 @@ void X(tensor_md5)(md5 *p, const tensor *t)
 
 /* treat a (rank <= 1)-tensor as a rank-1 tensor, extracting
    appropriate n, is, and os components */
-int X(tensor_tornk1)(const tensor *t, INT *n, INT *is, INT *os)
+IFFTW_EXTERN int X(tensor_tornk1)(const tensor *t, INT *n, INT *is, INT *os)
 {
      A(t->rnk <= 1);
      if (t->rnk == 1) {

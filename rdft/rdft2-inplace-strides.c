@@ -27,7 +27,7 @@
    because rdft transforms have the unfortunate property of
    differing input and output sizes.   This routine is not
    exhaustive; we only return 1 for the most common case.  */
-int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim)
+IFFTW_EXTERN int X(rdft2_inplace_strides)(const problem_rdft2 *p, int vdim)
 {
      INT N, Nc;
      INT rs, cs;

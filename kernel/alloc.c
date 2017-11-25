@@ -40,7 +40,7 @@ void X(ifree)(void *p)
      X(kernel_free)(p);
 }
 
-void X(ifree0)(void *p)
+IFFTW_EXTERN void X(ifree0)(void *p)
 {
      /* common pattern */
      if (p) X(ifree)(p);

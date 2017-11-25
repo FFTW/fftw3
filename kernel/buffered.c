@@ -62,7 +62,7 @@ INT X(bufdist)(INT n, INT vl)
 	  return n + X(modulo)(SKEW - n, SKEWMOD);
 }
 
-int X(toobig)(INT n)
+IFFTW_EXTERN int X(toobig)(INT n)
 {
      return n > MAXBUFSZ;
 }

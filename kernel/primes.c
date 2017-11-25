@@ -123,7 +123,7 @@ INT X(find_generator)(INT p)
 
 /* Return first prime divisor of n  (It would be at best slightly faster to
    search a static table of primes; there are 6542 primes < 2^16.)  */
-INT X(first_divisor)(INT n)
+IFFTW_EXTERN INT X(first_divisor)(INT n)
 {
      INT i;
      if (n <= 1)
@@ -136,7 +136,7 @@ INT X(first_divisor)(INT n)
      return n;
 }
 
-int X(is_prime)(INT n)
+IFFTW_EXTERN int X(is_prime)(INT n)
 {
      return(n > 1 && X(first_divisor)(n) == n);
 }
@@ -156,7 +156,7 @@ int X(factors_into)(INT n, const INT *primes)
 }
 
 /* integer square root.  Return floor(sqrt(N)) */
-INT X(isqrt)(INT n)
+IFFTW_EXTERN INT X(isqrt)(INT n)
 {
      INT guess, iguess;
 
@@ -180,7 +180,7 @@ static INT isqrt_maybe(INT n)
 }
 
 #define divides(a, b) (((b) % (a)) == 0)
-INT X(choose_radix)(INT r, INT n)
+IFFTW_EXTERN INT X(choose_radix)(INT r, INT n)
 {
      if (r > 0) {
 	  if (divides(r, n)) return r;

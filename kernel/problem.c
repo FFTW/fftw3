@@ -22,7 +22,7 @@
 #include "kernel/ifftw.h"
 
 /* constructor */
-problem *X(mkproblem)(size_t sz, const problem_adt *adt)
+IFFTW_EXTERN problem *X(mkproblem)(size_t sz, const problem_adt *adt)
 {
      problem *p = (problem *)MALLOC(sz, PROBLEMS);
 
