@@ -156,6 +156,8 @@ typedef pthread_mutex_t os_static_mutex_t;
 static void os_static_mutex_lock(os_static_mutex_t *s) { pthread_mutex_lock(s); }
 static void os_static_mutex_unlock(os_static_mutex_t *s) { pthread_mutex_unlock(s); }
 
+#define NOT_SIGNALED 1
+
 #elif defined(__WIN32__) || defined(_WIN32) || defined(_WINDOWS)
 /* hack: windef.h defines INT for its own purposes and this causes
    a conflict with our own INT in ifftw.h.  Divert the windows
@@ -245,6 +247,9 @@ static void os_static_mutex_unlock(os_static_mutex_t *s)
      LONG old = InterlockedExchange(s, 0);
      A(old == 1);
 }
+
+#define NOT_SIGNALED (WaitForSingleObject(q->ready, 0) == WAIT_TIMEOUT)
+
 #else
 #error "No threading layer defined"
 #endif
@@ -367,7 +372,8 @@ static void kill_workforce(void)
 	       worker_queue = q->cdr;
 	       q->w = &w;
 	       os_sem_up(&q->ready);
-	       os_sem_down(&termination_semaphore);
+	       if (NOT_SIGNALED)
+	            os_sem_down(&termination_semaphore);
 	       unmake_worker(q);
 	  }
      });
