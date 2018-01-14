@@ -438,8 +438,8 @@ INLINE_ELAPSED(__inline)
 #endif
 /*----------------------------------------------------------------*/
 /* SGI/Irix/Linux but not android */
-#if !defined(__ANDROID__)
-#if defined(HAVE_CLOCK_GETTIME) && !defined(HAVE_TICK_COUNTER)
+#if !defined(__ANDROID__) && !defined(HAVE_TICK_COUNTER)
+#if defined(HAVE_CLOCK_GETTIME)
 #if defined(CLOCK_MONOTONIC)
 #define METHOD CLOCK_MONOTONIC
 #elif defined(CLOCK_REALTIME)
@@ -454,7 +454,7 @@ typedef struct timespec ticks;
 static inline ticks getticks(void)
 {
      struct timespec t;
-     clock_gettime(CLOCK_SGI_CYCLE, &t);
+     clock_gettime(METHOD, &t);
      return t;
 }
 
