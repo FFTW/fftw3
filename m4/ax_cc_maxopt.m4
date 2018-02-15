@@ -91,7 +91,10 @@ if test "$ac_test_CFLAGS" != "set"; then
      # scheduling.  The first pass reorders instructions in a way that
      # is pretty much the worst possible for the purposes of register
      # allocation.  We disable the first pass.
-     AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns, CFLAGS="$CFLAGS -fno-schedule-insns")
+     #
+     # Update by aur-ml: according to tests on arm hardware, disabling the first pass
+     # of instruction scheculing slows down peroformance by ~2% -> the flag is commented.
+     # AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns, CFLAGS="$CFLAGS -fno-schedule-insns")
 
      # note that we enable "unsafe" fp optimization with other compilers, too
      AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
