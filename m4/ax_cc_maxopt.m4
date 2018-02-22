@@ -96,6 +96,9 @@ if test "$ac_test_CFLAGS" != "set"; then
      # of instruction scheculing slows down peroformance by ~2% -> the flag is commented.
      # AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns, CFLAGS="$CFLAGS -fno-schedule-insns")
 
+     # Update by aur-ml: for arm hardware that suports the "cortex-a35" flag - use it.
+     AX_CHECK_COMPILER_FLAGS(-mcpu=cortex-a35, CFLAGS="$CFLAGS -mcpu=cortex-a35")
+
      # note that we enable "unsafe" fp optimization with other compilers, too
      AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
 
