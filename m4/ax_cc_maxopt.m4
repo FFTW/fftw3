@@ -99,6 +99,10 @@ if test "$ac_test_CFLAGS" != "set"; then
      # Update by aur-ml: for arm hardware that suports the "cortex-a35" flag - use it.
      AX_CHECK_COMPILER_FLAGS(-mcpu=cortex-a35, CFLAGS="$CFLAGS -mcpu=cortex-a35")
 
+     # Update by aur-ml: switching on NaN signaling leads to performance increase,
+     # probably, due to more correct estimations at planning phase.
+     AX_CHECK_COMPILER_FLAGS(-fsignaling-nans, CFLAGS="$CFLAGS -fsignaling-nans")
+
      # note that we enable "unsafe" fp optimization with other compilers, too
      AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
 
