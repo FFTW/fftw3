@@ -33,9 +33,11 @@ rm -rf mingw32
 cd mingw32/bin
 for dll in *.dll; do
     def=`basename $dll .dll`.def
+    lib=`basename $dll .dll`.lib
     echo "LIBRARY $dll" > $def
     echo EXPORTS >> $def
     i686-w64-mingw32-nm $dll | grep ' T _' | sed 's/.* T _//' | grep fftw >> $def
+    i686-w64-mingw32-dlltool -l $lib -d $def
 done
 )
 
@@ -51,12 +53,7 @@ There are three libraries: single precision (float), double precision,
 and extended precision (long double).  To use the third library,
 your compiler must have sizeof(long double) == 12.
 
-In order to link to these .dll files from Visual C++, you need to
-create .lib "import libraries" for them, and can do so with the "lib"
-command that comes with VC++.  In particular, run:
-     lib /def:libfftw3f-3.def
-     lib /def:libfftw3-3.def
-     lib /def:libfftw3l-3.def
+The .lib "import libraries" for Visual C++ are created by dlltool from GNU binutils.
 
 The single- and double-precision libraries use SSE and SSE2, respectively,
 but should also work on older processors (the library checks at runtime
@@ -70,5 +67,5 @@ cp -f tests/README README-bench
 fftw_vers=`grep PACKAGE_VERSION double-mingw32/config.h |cut -d" " -f3 |tr -d \"`
 zip=fftw-${fftw_vers}-dll32.zip
 rm -f $zip
-zip -vj $zip mingw32/bin/*.dll mingw32/bin/*.exe
+zip -vj $zip mingw32/bin/*.dll mingw32/bin/*.lib mingw32/bin/*.exe
 zip -vjgl $zip mingw32/bin/*.def mingw32/include/* README COPYING COPYRIGHT NEWS README-WINDOWS README-bench

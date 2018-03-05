@@ -33,6 +33,7 @@ rm -rf mingw64
 cd mingw64/bin
 for dll in *.dll; do
     def=`basename $dll .dll`.def
+    lib=`basename $dll .dll`.lib
     echo "LIBRARY $dll" > $def
     echo EXPORTS >> $def
 
@@ -41,6 +42,7 @@ for dll in *.dll; do
 #    x86_64-w64-mingw32-nm $dll | grep ' T _' | sed 's/.* T _//' | grep fftw >> $def
 
     x86_64-w64-mingw32-nm $dll | grep ' T ' | sed 's/.* T //' | grep fftw >> $def
+    x86_64-w64-mingw32-dlltool -l $lib -d $def
 done
 )
 
@@ -56,12 +58,7 @@ There are three libraries: single precision (float), double precision,
 and extended precision (long double).  To use the third library,
 your compiler must have sizeof(long double) == 12.
 
-In order to link to these .dll files from Visual C++, you need to
-create .lib "import libraries" for them, and can do so with the "lib"
-command that comes with VC++.  In particular, run:
-     lib /def:libfftw3f-3.def
-     lib /def:libfftw3-3.def
-     lib /def:libfftw3l-3.def
+The .lib "import libraries" for Visual C++ are created by dlltool from GNU binutils.
 
 On Visual Studio 2008 in 64-bit mode, and possibly in
 other cases, you may need to specify the machine explicitly:
@@ -82,5 +79,5 @@ cp -f tests/README README-bench
 fftw_vers=`grep PACKAGE_VERSION double-mingw64/config.h |cut -d" " -f3 |tr -d \"`
 zip=fftw-${fftw_vers}-dll64.zip
 rm -f $zip
-zip -vj $zip mingw64/bin/*.dll mingw64/bin/*.exe
+zip -vj $zip mingw64/bin/*.dll mingw64/bin/*.lib mingw64/bin/*.exe
 zip -vjgl $zip mingw64/bin/*.def mingw64/include/* README COPYING COPYRIGHT NEWS README-WINDOWS README-bench
