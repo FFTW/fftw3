@@ -19,3 +19,9 @@ compiled on any system with a C compiler.
 Advanced users and FFTW maintainers may obtain code from github and
 run the generation process themselves.  See README for details.
 
+
+Update by aur-ml: this fork is intended for FFTW performance optimization
+on several specific hardware platforms (arm-based) and is not fully tested 
+on all possible platorms. Please, use with caution.
+
+

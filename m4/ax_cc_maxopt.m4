@@ -93,7 +93,7 @@ if test "$ac_test_CFLAGS" != "set"; then
      # allocation.  We disable the first pass.
      #
      # Update by aur-ml: according to tests on arm hardware, disabling the first pass
-     # of instruction scheculing slows down peroformance by ~2% -> the flag is commented.
+     # of instruction scheduling slows down peroformance by ~2% -> the flag is commented.
      # AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns, CFLAGS="$CFLAGS -fno-schedule-insns")
 
      # Update by aur-ml: for arm hardware that suports the "cortex-a35" flag - use it.
@@ -102,6 +102,11 @@ if test "$ac_test_CFLAGS" != "set"; then
      # Update by aur-ml: switching on NaN signaling leads to performance increase,
      # probably, due to more correct estimations at planning phase.
      AX_CHECK_COMPILER_FLAGS(-fsignaling-nans, CFLAGS="$CFLAGS -fsignaling-nans")
+
+     # Update by aur-ml: the following flags slightly increase performance, thought
+     # not fully testes, use with caution.
+     AX_CHECK_COMPILER_FLAGS(-frename-registers, CFLAGS="$CFLAGS -frename-registers")
+     AX_CHECK_COMPILER_FLAGS(-fstack-protector-explicit, CFLAGS="$CFLAGS -fstack-protector-explicit")
 
      # note that we enable "unsafe" fp optimization with other compilers, too
      AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
