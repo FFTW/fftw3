@@ -107,6 +107,8 @@ if test "$ac_test_CFLAGS" != "set"; then
      # not fully testes, use with caution.
      AX_CHECK_COMPILER_FLAGS(-frename-registers, CFLAGS="$CFLAGS -frename-registers")
      AX_CHECK_COMPILER_FLAGS(-fstack-protector-explicit, CFLAGS="$CFLAGS -fstack-protector-explicit")
+     AX_CHECK_COMPILER_FLAGS(-fpack-struct, CFLAGS="$CFLAGS -fpack-struct")
+
 
      # note that we enable "unsafe" fp optimization with other compilers, too
      AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
