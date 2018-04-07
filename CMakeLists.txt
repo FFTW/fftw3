@@ -304,7 +304,7 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 add_library (${fftw3_lib} ${SOURCEFILES})
-if (MSVC)
+if (MSVC AND NOT (CMAKE_C_COMPILER_ID STREQUAL "Intel"))
   target_compile_definitions (${fftw3_lib} PRIVATE /bigobj)
 endif ()
 if (HAVE_SSE)
