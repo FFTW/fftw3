@@ -52,5 +52,5 @@
   "version":"3.3.7",
   "dateCreated":"1997-02-17",
   "datePublished":"1997-03-24",
-  "programmingLanguage": "C"
+  "programmingLanguage": ["C", "OCaml"]
 }
