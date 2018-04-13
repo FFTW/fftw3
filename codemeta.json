@@ -45,7 +45,7 @@
       "familyName": "Lindahl",
       "email": "erik.lindahl@scilifelab.se",
       "@id": "http://orcid.org/0000-0002-2734-2794"
-    },
+    }
   ],
   "developmentStatus": "active",
   "downloadUrl": "http://fftw.org/download.html",
