@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.1)
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
@@ -18,6 +18,7 @@ option (ENABLE_THREADS "Use pthread for multithreading" OFF)
 option (WITH_COMBINED_THREADS "Merge thread library" OFF)
 
 option (ENABLE_FLOAT "single-precision" OFF)
+option (ENABLE_DOUBLE "double-precision" ON)
 option (ENABLE_LONG_DOUBLE "long-double precision" OFF)
 option (ENABLE_QUAD_PRECISION "quadruple-precision" OFF)
 
@@ -276,89 +277,157 @@ endif ()
 
 set (FFTW_VERSION 3.3.7)
 
-set (PREC_SUFFIX)
-if (ENABLE_FLOAT)
-  set (FFTW_SINGLE TRUE)
-  set (BENCHFFT_SINGLE TRUE)
-  set (PREC_SUFFIX f)
-endif ()
-
-if (ENABLE_LONG_DOUBLE)
-  set (FFTW_LDOUBLE TRUE)
-  set (BENCHFFT_LDOUBLE TRUE)
-  set (PREC_SUFFIX l)
-endif ()
-
-if (ENABLE_QUAD_PRECISION)
-  set (FFTW_QUAD TRUE)
-  set (BENCHFFT_QUAD TRUE)
-  set (PREC_SUFFIX q)
-endif ()
-set (fftw3_lib fftw3${PREC_SUFFIX})
-
-configure_file (cmake.config.h.in config.h @ONLY)
-include_directories (${CMAKE_CURRENT_BINARY_DIR})
-
 if (BUILD_SHARED_LIBS)
   add_definitions (-DFFTW_DLL)
 endif ()
 
-add_library (${fftw3_lib} ${SOURCEFILES})
-if (MSVC)
-  target_compile_definitions (${fftw3_lib} PRIVATE /bigobj)
-endif ()
-if (HAVE_SSE)
-  target_compile_options (${fftw3_lib} PRIVATE ${SSE_FLAG})
-endif ()
-if (HAVE_SSE2)
-  target_compile_options (${fftw3_lib} PRIVATE ${SSE2_FLAG})
-endif ()
-if (HAVE_AVX)
-  target_compile_options (${fftw3_lib} PRIVATE ${AVX_FLAG})
-endif ()
-if (HAVE_AVX2)
-  target_compile_options (${fftw3_lib} PRIVATE ${AVX2_FLAG})
-endif ()
-if (HAVE_FMA)
-  target_compile_options (${fftw3_lib} PRIVATE ${FMA_FLAG})
-endif ()
-if (HAVE_LIBM)
-  target_link_libraries (${fftw3_lib} m)
-endif ()
-
-set (subtargets ${fftw3_lib})
-
-if (Threads_FOUND)
-  if (WITH_COMBINED_THREADS)
-    target_link_libraries (${fftw3_lib} ${CMAKE_THREAD_LIBS_INIT})
-  else ()
-    add_library (${fftw3_lib}_threads ${fftw_threads_SOURCE})
-    target_link_libraries (${fftw3_lib}_threads ${fftw3_lib})
-    target_link_libraries (${fftw3_lib}_threads ${CMAKE_THREAD_LIBS_INIT})
-    list (APPEND subtargets ${fftw3_lib}_threads)
+function (add_fftw_library PRECISION)
+  if (PRECISION MATCHES "^(SINGLE|LDOUBLE|QUAD)$")
+    set (FFTW_${PRECISION} TRUE)
+    set (BENCHFFT_${PRECISION} TRUE)
+    if (PRECISION STREQUAL SINGLE)
+      set (PREC_SUFFIX f)
+    else ()
+      string (SUBSTRING ${PRECISION} 0 1 PREC_SUFFIX)
+      string (TOLOWER ${PREC_SUFFIX} PREC_SUFFIX)
+    endif()
   endif ()
-endif ()
 
-if (OPENMP_FOUND)
-  add_library (${fftw3_lib}_omp ${fftw_omp_SOURCE})
-  target_link_libraries (${fftw3_lib}_omp ${fftw3_lib})
-  target_link_libraries (${fftw3_lib}_omp ${CMAKE_THREAD_LIBS_INIT})
-  list (APPEND subtargets ${fftw3_lib}_omp)
-  target_compile_options (${fftw3_lib}_omp PRIVATE ${OpenMP_C_FLAGS})
+  set (fftw3_lib fftw3${PREC_SUFFIX})
+
+  add_library (${fftw3_lib} ${SOURCEFILES})
+
+  configure_file (cmake.config.h.in ${CMAKE_CURRENT_BINARY_DIR}/${fftw3_lib}/config.h @ONLY)
+  target_include_directories (${fftw3_lib} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${fftw3_lib}")
+
+  if (MSVC)
+    target_compile_definitions (${fftw3_lib} PRIVATE /bigobj)
+  endif ()
+  if (HAVE_SSE)
+    target_compile_options (${fftw3_lib} PRIVATE ${SSE_FLAG})
+  endif ()
+  if (HAVE_SSE2)
+    target_compile_options (${fftw3_lib} PRIVATE ${SSE2_FLAG})
+  endif ()
+  if (HAVE_AVX)
+    target_compile_options (${fftw3_lib} PRIVATE ${AVX_FLAG})
+  endif ()
+  if (HAVE_AVX2)
+    target_compile_options (${fftw3_lib} PRIVATE ${AVX2_FLAG})
+  endif ()
+  if (HAVE_FMA)
+    target_compile_options (${fftw3_lib} PRIVATE ${FMA_FLAG})
+  endif ()
+  if (HAVE_LIBM)
+    target_link_libraries (${fftw3_lib} m)
+  endif ()
+
+  list (APPEND subtargets ${fftw3_lib})
+
+  if (ENABLE_THREADS AND Threads_FOUND)
+    if (WITH_COMBINED_THREADS)
+      target_link_libraries (${fftw3_lib} Threads::Threads)
+    else ()
+      add_library (${fftw3_lib}_threads ${fftw_threads_SOURCE})
+      target_link_libraries (${fftw3_lib}_threads ${fftw3_lib})
+      target_link_libraries (${fftw3_lib}_threads Threads::Threads)
+      list (APPEND subtargets ${fftw3_lib}_threads)
+    endif ()
+  endif ()
+
+  if (ENABLE_OPENMP AND OPENMP_FOUND)
+    add_library (${fftw3_lib}_omp ${fftw_omp_SOURCE})
+    target_link_libraries (${fftw3_lib}_omp ${fftw3_lib})
+    target_link_libraries (${fftw3_lib}_omp ${CMAKE_THREAD_LIBS_INIT})
+    list (APPEND subtargets ${fftw3_lib}_omp)
+    target_compile_options (${fftw3_lib}_omp PRIVATE ${OpenMP_C_FLAGS})
+  endif ()
+
+  install(TARGETS ${fftw3_lib}
+            EXPORT FFTW3LibraryDepends
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+
+  # pkgconfig file
+  set (prefix ${CMAKE_INSTALL_PREFIX})
+  set (exec_prefix ${CMAKE_INSTALL_PREFIX})
+  set (libdir ${CMAKE_INSTALL_FULL_LIBDIR})
+  set (includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
+  set (VERSION ${FFTW_VERSION})
+  configure_file (fftw.pc.in fftw${PREC_SUFFIX}.pc @ONLY)
+  install (FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/fftw${PREC_SUFFIX}.pc
+           DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+           COMPONENT Development)
+
+  # cmake file
+  set (FFTW3_LIBRARIES "FFTW3::${fftw3_lib}")
+  configure_file (FFTW3Config.cmake.in FFTW3${PREC_SUFFIX}Config.cmake @ONLY)
+  configure_file (FFTW3ConfigVersion.cmake.in FFTW3${PREC_SUFFIX}ConfigVersion.cmake @ONLY)
+  install (FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}Config.cmake
+            ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}ConfigVersion.cmake
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
+           COMPONENT Development)
+
+  export (TARGETS ${fftw3_lib} NAMESPACE FFTW3:: FILE ${PROJECT_BINARY_DIR}/FFTW3LibraryDepends.cmake)
+  install(EXPORT FFTW3LibraryDepends
+          NAMESPACE FFTW3::
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
+          COMPONENT Development)
+
+
+  if (BUILD_TESTS)
+
+    set (bench bench${PREC_SUFFIX})
+    add_executable (${bench} ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
+
+    if (ENABLE_THREADS AND NOT WITH_COMBINED_THREADS)
+      target_link_libraries (${bench} ${fftw3_lib}_threads)
+    else ()
+      target_link_libraries (${bench} ${fftw3_lib})
+    endif ()
+
+    enable_testing ()
+
+    if (Threads_FOUND)
+
+      macro (fftw_add_test problem)
+        add_test (NAME ${problem} COMMAND ${bench} -s ${problem})
+      endmacro ()
+
+      fftw_add_test (32x64)
+      fftw_add_test (ib256)
+
+    endif ()
+
+    target_include_directories (${bench} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${fftw3_lib}")
+  endif ()
+
+endfunction ()
+
+if (ENABLE_FLOAT)
+  add_fftw_library (SINGLE)
+endif ()
+if (ENABLE_DOUBLE)
+  add_fftw_library (DOUBLE)
+endif ()
+if (ENABLE_LONG_DOUBLE)
+  add_fftw_library (LDOUBLE)
+endif ()
+if (ENABLE_QUAD_PRECISION)
+  add_fftw_library (QUAD)
 endif ()
 
 foreach(subtarget ${subtargets})
   set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.7 VERSION 3)
   install (TARGETS ${subtarget}
-	  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endforeach ()
-install(TARGETS ${fftw3_lib}
-          EXPORT FFTW3LibraryDepends
-          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install (FILES api/fftw3.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (EXISTS ${CMAKE_SOURCE_DIR}/api/fftw3.f)
@@ -371,56 +440,3 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/api/fftw3.f03.in)
   file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 "${FFTW3_F03_IN}")
   install (FILES ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif ()
-
-if (BUILD_TESTS)
-
-  add_executable (bench ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
-
-  if (ENABLE_THREADS AND NOT WITH_COMBINED_THREADS)
-    target_link_libraries (bench ${fftw3_lib}_threads)
-  else ()
-    target_link_libraries (bench ${fftw3_lib})
-  endif ()
-
-
-  enable_testing ()
-
-  if (Threads_FOUND)
-
-    macro (fftw_add_test problem)
-      add_test (NAME ${problem} COMMAND bench -s ${problem})
-    endmacro ()
-
-    fftw_add_test (32x64)
-    fftw_add_test (ib256)
-
-  endif ()
-endif ()
-
-# pkgconfig file
-set (prefix ${CMAKE_INSTALL_PREFIX})
-set (exec_prefix ${CMAKE_INSTALL_PREFIX})
-set (libdir ${CMAKE_INSTALL_FULL_LIBDIR})
-set (includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
-set (VERSION ${FFTW_VERSION})
-configure_file (fftw.pc.in fftw${PREC_SUFFIX}.pc @ONLY)
-install (FILES
-          ${CMAKE_CURRENT_BINARY_DIR}/fftw${PREC_SUFFIX}.pc
-         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
-         COMPONENT Development)
-
-# cmake file
-set (FFTW3_LIBRARIES "FFTW3::${fftw3_lib}")
-configure_file (FFTW3Config.cmake.in FFTW3${PREC_SUFFIX}Config.cmake @ONLY)
-configure_file (FFTW3ConfigVersion.cmake.in FFTW3${PREC_SUFFIX}ConfigVersion.cmake @ONLY)
-install (FILES
-          ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}Config.cmake
-          ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}ConfigVersion.cmake
-	  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
-         COMPONENT Development)
-
-export (TARGETS ${fftw3_lib} NAMESPACE FFTW3:: FILE ${PROJECT_BINARY_DIR}/FFTW3LibraryDepends.cmake)
-install(EXPORT FFTW3LibraryDepends
-        NAMESPACE FFTW3::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
-        COMPONENT Development)
