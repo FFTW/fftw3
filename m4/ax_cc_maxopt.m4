@@ -106,8 +106,8 @@ if test "$ac_test_CFLAGS" != "set"; then
      # Update by aur-ml: the following flags slightly increase performance, thought
      # not fully testes, use with caution.
      AX_CHECK_COMPILER_FLAGS(-frename-registers, CFLAGS="$CFLAGS -frename-registers")
-     AX_CHECK_COMPILER_FLAGS(-fstack-protector-explicit, CFLAGS="$CFLAGS -fstack-protector-explicit")
      AX_CHECK_COMPILER_FLAGS(-fpack-struct, CFLAGS="$CFLAGS -fpack-struct")
+     AX_CHECK_COMPILER_FLAGS(-funroll-all-loops, CFLAGS="$CFLAGS -funroll-all-loops")
 
 
      # note that we enable "unsafe" fp optimization with other compilers, too
