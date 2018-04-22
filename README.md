@@ -23,5 +23,5 @@ run the generation process themselves.  See README for details.
 Update by aur-ml: this fork is intended for FFTW performance optimization
 on several specific hardware platforms (arm-based) and is not fully tested 
 on all possible platforms. Please, use with caution.
-
+Especially this relates to code including usage of cycle counters.
 
