@@ -1,0 +1,55 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "FFTW",
+  "description": "FFTW is a C subroutine library for computing the discrete Fourier transform (DFT).",
+  "url": "http://fftw.org/",
+  "codeRepository": "https://github.com/FFTW/fftw3",
+  "issueTracker": "https://github.com/FFTW/fftw3/issues",
+  "license": "https://spdx.org/licenses/GPL-2.0-or-later.html",
+  "citation": "http://dx.doi.org/10.1109/JPROC.2004.840301",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Matteo",
+      "familyName": "Frigo",
+      "email": "athena@fftw.org",
+      "@id": "http://orcid.org/0000-0002-9365-8017"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Steven G.",
+      "familyName": "Johnson",
+      "email": "stevenj@alum.mit.edu",
+      "@id": "http://orcid.org/0000-0001-7327-4967"
+    }
+  ],
+  "contributor": [
+    {
+      "@type": "Person",
+      "givenName": "Stefan",
+      "familyName": "Kral",
+      "email": "skral@fftw.org"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Romain",
+      "familyName": "Dolbeau",
+      "email": "romain@dolbeau.org",
+      "@id": "http://orcid.org/0000-0002-4466-8948"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Erik",
+      "familyName": "Lindahl",
+      "email": "erik.lindahl@scilifelab.se",
+      "@id": "http://orcid.org/0000-0002-2734-2794"
+    }
+  ],
+  "developmentStatus": "active",
+  "downloadUrl": "http://fftw.org/download.html",
+  "version":"3.3.7",
+  "dateCreated":"1997-02-17",
+  "datePublished":"1997-03-24",
+  "programmingLanguage": ["C", "OCaml"]
+}
