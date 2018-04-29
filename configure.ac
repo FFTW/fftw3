@@ -325,6 +325,14 @@ AM_CONDITIONAL(MPI, test "$enable_mpi" = "yes")
 
 dnl -----------------------------------------------------------------------
 
+case ${CC} in
+    *thunderx*) # If ThunderX is passed via mtune, etc, then set flag for this architecture
+        AC_DEFINE(TARGET_THUNDERX_COMPATIBLE,1,[Define for the ThunderX target machine architecture.])
+        ;;
+esac
+
+dnl -----------------------------------------------------------------------
+
 dnl determine CFLAGS first
 AX_CC_MAXOPT
 
