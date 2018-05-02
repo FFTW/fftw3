@@ -120,6 +120,11 @@ if test "$ac_test_CFLAGS" != "set"; then
          AX_CHECK_COMPILER_FLAGS(-mpower8-vector, CFLAGS="$CFLAGS -mpower8-vector")
          AX_CHECK_COMPILER_FLAGS(-mdirect-move, CFLAGS="$CFLAGS -mdirect-move")
      fi
+
+     if test -n "$TARGET_THUNDERX_COMPATIBLE"; then
+         CFLAGS="-O0"  # Test
+     fi
+
      ;;
   esac
 
