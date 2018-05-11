@@ -108,6 +108,8 @@ if test "$ac_test_CFLAGS" != "set"; then
          CFLAGS="-Ofast"  # Override the above settings (they are not optimal for ThunderX)
          AX_CHECK_COMPILER_FLAGS(-funroll-all-loops, CFLAGS="$CFLAGS -funroll-all-loops")
          AX_CHECK_COMPILER_FLAGS(-ftree-ch, CFLAGS="$CFLAGS -ftree-ch")
+         AX_CHECK_COMPILER_FLAGS(-ftree-cselim, CFLAGS="$CFLAGS -ftree-cselim")
+         AX_CHECK_COMPILER_FLAGS(-fstrict-enums, CFLAGS="$CFLAGS -fstrict-enums")
      fi
 
      ;;
