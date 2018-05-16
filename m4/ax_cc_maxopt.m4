@@ -105,11 +105,16 @@ if test "$ac_test_CFLAGS" != "set"; then
      fi
 
      if test -n "$TARGET_THUNDERX_COMPATIBLE"; then
-         CFLAGS="-Ofast"  # Override the above settings (they are not optimal for ThunderX)
+         CFLAGS="-Ofast -O4"  # Override the above settings (they are not optimal for ThunderX)
          AX_CHECK_COMPILER_FLAGS(-funroll-all-loops, CFLAGS="$CFLAGS -funroll-all-loops")
          AX_CHECK_COMPILER_FLAGS(-ftree-ch, CFLAGS="$CFLAGS -ftree-ch")
          AX_CHECK_COMPILER_FLAGS(-ftree-cselim, CFLAGS="$CFLAGS -ftree-cselim")
          AX_CHECK_COMPILER_FLAGS(-fstrict-enums, CFLAGS="$CFLAGS -fstrict-enums")
+         AX_CHECK_COMPILER_FLAGS(-funroll-loops, CFLAGS="$CFLAGS -funroll-loops")
+         AX_CHECK_COMPILER_FLAGS(-fvariable-expansion-in-unroller, CFLAGS="$CFLAGS -fvariable-expansion-in-unroller")
+         AX_CHECK_COMPILER_FLAGS(-fnon-call-exceptions, CFLAGS="$CFLAGS -fnon-call-exceptions")
+         AX_CHECK_COMPILER_FLAGS(-ffinite-math-only, CFLAGS="$CFLAGS -ffinite-math-only")
+         AX_CHECK_COMPILER_FLAGS(-fstack-protector, CFLAGS="$CFLAGS -fstack-protector")
      fi
 
      ;;
