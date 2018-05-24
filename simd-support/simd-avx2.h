@@ -254,8 +254,30 @@ static inline V FLIP_RI(V x)
 
 static inline V VCONJ(V x)
 {
-     V pmpm = VLIT(-0.0, 0.0);
-     return VXOR(pmpm, x);
+     /* Produce a SIMD vector[VL] of (0 + -0i). 
+
+        We really want to write this:
+
+           V pmpm = VLIT(-0.0, 0.0);
+
+        but historically some compilers have ignored the distiction
+        between +0 and -0.  It looks like 'gcc-8 -fast-math' treats -0
+        as 0 too.
+      */
+     union uvec {
+          unsigned u[8];
+          V v;
+     };
+     static const union uvec pmpm = {
+#ifdef FFTW_SINGLE
+          { 0x00000000, 0x80000000, 0x00000000, 0x80000000,
+            0x00000000, 0x80000000, 0x00000000, 0x80000000 }
+#else
+          { 0x00000000, 0x00000000, 0x00000000, 0x80000000,
+            0x00000000, 0x00000000, 0x00000000, 0x80000000 }
+#endif
+     };
+     return VXOR(pmpm.v, x);
 }
 
 static inline V VBYI(V x)
