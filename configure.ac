@@ -6,7 +6,7 @@ dnl Define the fftw version number as M4 macros, so that we can enforce
 dnl the invariant that the minor version number in FFTW-X.Y.MINOR is the same
 dnl as the revision number in SHARED_VERSION_INFO.
 define(FFTW_MAJOR_VERSION, 3.3)dnl
-define(FFTW_MINOR_VERSION, 7)dnl
+define(FFTW_MINOR_VERSION, 8)dnl
 
 dnl Version number of the FFTW source package.
 AC_INIT(fftw, FFTW_MAJOR_VERSION.FFTW_MINOR_VERSION, fftw@fftw.org)
@@ -23,6 +23,7 @@ dnl fftw-3.3.5 was 8:x:5 (added planner hooks)
 dnl fftw-3.3.6 was 8:x:6 (8:x:6 is a bug, should have been 8:x:5.  No API changes)
 dnl fftw-3.3.6.1 fixes the 8:x:6 screwup
 dnl fftw-3.3.7 was 8:x:5 (No API changes)
+dnl fftw-3.3.8 was 8:x:5 (No API changes)
 SHARED_VERSION_INFO="8:FFTW_MINOR_VERSION:5" # CURRENT:REVISION:AGE
 
 AM_INIT_AUTOMAKE(1.7)
