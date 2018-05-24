@@ -1,3 +1,13 @@
+FFTW 3.3.8:
+
+* Fixed AVX, AVX2 for gcc-8.
+
+  By default, FFTW 3.3.7 was broken with gcc-8.  AVX and AVX2 code
+  assumed that the compiler honors the distinction between +0 and -0,
+  but gcc-8 -ffast-math does not.  The default CFLAGS included -ffast-math.
+  This release ensures that FFTW works with gcc-8 -ffast-math, and
+  removes -ffast-math from the default CFLAGS for good measure.
+
 FFTW 3.3.7:
 
 * Experimental support for CMake.
