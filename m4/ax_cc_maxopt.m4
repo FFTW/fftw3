@@ -65,7 +65,6 @@ if test "$ac_test_CFLAGS" != "set"; then
         CFLAGS="-O3 -fomit-frame-pointer"
         AX_CHECK_COMPILER_FLAGS(-mtune=native, CFLAGS="$CFLAGS -mtune=native")
         AX_CHECK_COMPILER_FLAGS(-fstrict-aliasing,CFLAGS="$CFLAGS -fstrict-aliasing")
-        AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
         ;;
 
     gnu) 
@@ -92,9 +91,6 @@ if test "$ac_test_CFLAGS" != "set"; then
      # is pretty much the worst possible for the purposes of register
      # allocation.  We disable the first pass.
      AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns, CFLAGS="$CFLAGS -fno-schedule-insns")
-
-     # note that we enable "unsafe" fp optimization with other compilers, too
-     AX_CHECK_COMPILER_FLAGS(-ffast-math, CFLAGS="$CFLAGS -ffast-math")
 
      # flags to enable power ISA 2.07 instructions with gcc (always true with vsx)
      if test "$have_vsx" = "yes"; then
