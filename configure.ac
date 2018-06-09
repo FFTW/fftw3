@@ -329,6 +329,7 @@ dnl -----------------------------------------------------------------------
 case ${CC} in
     *thunderx*) # If ThunderX is passed via mtune, etc, then set flag for this architecture
         TARGET_THUNDERX_COMPATIBLE=1
+        AC_DEFINE(HAVE_ARMV8_CNTVCT_EL0,1,[Define if you have enabled the CNTVCT_EL0 cycle counter on ARMv8])
         ;;
 esac
 
@@ -734,35 +735,6 @@ AM_CONDITIONAL(THREADS, test "$enable_threads" = "yes")
 AM_CONDITIONAL(OPENMP, test "$enable_openmp" = "yes")
 AM_CONDITIONAL(SMP, test "$enable_threads" = "yes" -o "$enable_openmp" = "yes")
 AM_CONDITIONAL(COMBINED_THREADS, test x"$with_combined_threads" = xyes)
-
-dnl -----------------------------------------------------------------------
-dnl Check for not-always-available (not quite) cycle counters
-case "${host_cpu}" in
-        armv7*)
-        AC_MSG_CHECKING([armv7a has 64 bits readable CNTVCT])
-        AC_RUN_IFELSE(
-                [AC_LANG_PROGRAM([[#include <stdint.h>]],
-                        [[uint32_t Rt, Rt2 = 0;asm volatile("mrrc p15, 1, %0, %1, c14" : "=r"(Rt), "=r"(Rt2));]]
-                )],
-                [AC_DEFINE(HAVE_ARMV7A_CNTVCT,1,[Define if CNTVCT is 64 bits readable on armv7a ])
-                 AC_MSG_RESULT([yes])],
-                [AC_MSG_RESULT([no])]
-                )
-        ;;
-        aarch64)
-        AC_MSG_CHECKING([armv8 has 64 bits readable CNTVCT_EL0])
-        AC_RUN_IFELSE(
-                [AC_LANG_PROGRAM([[#include <stdint.h>]],
-                        [[uint64_t Rt;asm volatile("mrs %0, CNTVCT_EL0" : "=r" (Rt));]]
-                )],
-                [AC_DEFINE(HAVE_ARMV8_CNTVCT_EL0,1,[Define if CNTVCT_EL0 is 64 bits readable on armv8 ])
-                 AC_MSG_RESULT([yes])],
-                [AC_MSG_RESULT([no])]
-                )
-        ;;
-        *)
-        ;;
-esac
 
 dnl -----------------------------------------------------------------------
 

@@ -101,7 +101,7 @@ if test "$ac_test_CFLAGS" != "set"; then
      fi
 
      if test -n "$TARGET_THUNDERX_COMPATIBLE"; then
-         CFLAGS="-Ofast"  # Override the above settings (they are not optimal for ThunderX)
+         CFLAGS="-O2"  # Override the above settings (they are not optimal for ThunderX)
      fi
 
      ;;
