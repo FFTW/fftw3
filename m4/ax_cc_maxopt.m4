@@ -101,7 +101,8 @@ if test "$ac_test_CFLAGS" != "set"; then
      fi
 
      if test -n "$TARGET_THUNDERX_COMPATIBLE"; then
-         CFLAGS="-O2"  # Override the above settings (they are not optimal for ThunderX)
+         CFLAGS="-Ofast"  # Override the above settings (they are not optimal for ThunderX)
+         AX_CHECK_COMPILER_FLAGS(-faggressive-loop-optimizations, CFLAGS="$CFLAGS -faggressive-loop-optimizations")
      fi
 
      ;;
