@@ -305,7 +305,7 @@ endif ()
 
 add_library (${fftw3_lib} ${SOURCEFILES})
 target_include_directories (${fftw3_lib} INTERFACE $<INSTALL_INTERFACE:include>)
-if (MSVC)
+if (MSVC AND NOT (CMAKE_C_COMPILER_ID STREQUAL "Intel"))
   target_compile_definitions (${fftw3_lib} PRIVATE /bigobj)
 endif ()
 if (HAVE_SSE)
