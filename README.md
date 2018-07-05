@@ -25,3 +25,8 @@ on several specific hardware platforms (arm-based) and is not fully tested
 on all possible platforms. Please, use with caution.
 Especially this relates to code including usage of cycle counters.
 
+TBD: It was noticed that the library compilation under some platforms 
+(in particular, arm-based) could be very slow. Latest commits should be 
+carefully checked.
+
+
