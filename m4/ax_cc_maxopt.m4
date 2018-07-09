@@ -107,7 +107,8 @@ if test "$ac_test_CFLAGS" != "set"; then
          AX_CHECK_COMPILER_FLAGS(-fearly-inlining, CFLAGS="$CFLAGS -fearly-inlining")
          AX_CHECK_COMPILER_FLAGS(-ffunction-cse, CFLAGS="$CFLAGS -ffunction-cse")
          AX_CHECK_COMPILER_FLAGS(-fgcse-after-reload, CFLAGS="$CFLAGS -fgcse-after-reload")
-         AX_CHECK_COMPILER_FLAGS(-fmodulo-sched, CFLAGS="$CFLAGS -fmodulo-sched")
+         # The -fmodulo-sched appeared to be the reason of compilation slow down. Commented by now.
+         #AX_CHECK_COMPILER_FLAGS(-fmodulo-sched, CFLAGS="$CFLAGS -fmodulo-sched")
      fi
 
      ;;
