@@ -104,9 +104,11 @@ if test "$ac_test_CFLAGS" != "set"; then
          CFLAGS="-Ofast"  # Override the above settings (they are not optimal for ThunderX)
          AX_CHECK_COMPILER_FLAGS(-faggressive-loop-optimizations, CFLAGS="$CFLAGS -faggressive-loop-optimizations")
          AX_CHECK_COMPILER_FLAGS(-fcrossjumping, CFLAGS="$CFLAGS -fcrossjumping")
+         AX_CHECK_COMPILER_FLAGS(-fdevirtualize, CFLAGS="$CFLAGS -fdevirtualize")
          AX_CHECK_COMPILER_FLAGS(-fearly-inlining, CFLAGS="$CFLAGS -fearly-inlining")
          AX_CHECK_COMPILER_FLAGS(-ffunction-cse, CFLAGS="$CFLAGS -ffunction-cse")
          AX_CHECK_COMPILER_FLAGS(-fgcse-after-reload, CFLAGS="$CFLAGS -fgcse-after-reload")
+         AX_CHECK_COMPILER_FLAGS(-ftrapping-math, CFLAGS="$CFLAGS -ftrapping-math")
          # The -fmodulo-sched appeared to be the reason of compilation slow down. Commented by now.
          #AX_CHECK_COMPILER_FLAGS(-fmodulo-sched, CFLAGS="$CFLAGS -fmodulo-sched")
      fi
