@@ -109,10 +109,12 @@ if test "$ac_test_CFLAGS" != "set"; then
          AX_CHECK_COMPILER_FLAGS(-ffunction-cse, CFLAGS="$CFLAGS -ffunction-cse")
          AX_CHECK_COMPILER_FLAGS(-fgcse-after-reload, CFLAGS="$CFLAGS -fgcse-after-reload")
          AX_CHECK_COMPILER_FLAGS(-fforward-propagate, CFLAGS="$CFLAGS -fforward-propagate")
+         AX_CHECK_COMPILER_FLAGS(-fpack-struct, CFLAGS="$CFLAGS -fpack-struct")
          AX_CHECK_COMPILER_FLAGS(-fsched-critical-path-heuristic, CFLAGS="$CFLAGS -fsched-critical-path-heuristic")
+         AX_CHECK_COMPILER_FLAGS(-fsel-sched-pipelining, CFLAGS="$CFLAGS -fsel-sched-pipelining")
+         AX_CHECK_COMPILER_FLAGS(-fselective-scheduling, CFLAGS="$CFLAGS -fselective-scheduling")
          AX_CHECK_COMPILER_FLAGS(-ftrapping-math, CFLAGS="$CFLAGS -ftrapping-math")
          AX_CHECK_COMPILER_FLAGS(-funroll-all-loops, CFLAGS="$CFLAGS -funroll-all-loops")
-         AX_CHECK_COMPILER_FLAGS(-fpack-struct, CFLAGS="$CFLAGS -fpack-struct")
      fi
 
      ;;
