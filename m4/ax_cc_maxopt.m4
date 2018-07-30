@@ -114,7 +114,6 @@ if test "$ac_test_CFLAGS" != "set"; then
          AX_CHECK_COMPILER_FLAGS(-fsel-sched-pipelining, CFLAGS="$CFLAGS -fsel-sched-pipelining")
          AX_CHECK_COMPILER_FLAGS(-fselective-scheduling, CFLAGS="$CFLAGS -fselective-scheduling")
          AX_CHECK_COMPILER_FLAGS(-ftrapping-math, CFLAGS="$CFLAGS -ftrapping-math")
-         AX_CHECK_COMPILER_FLAGS(-funroll-all-loops, CFLAGS="$CFLAGS -funroll-all-loops")
      fi
 
      ;;
