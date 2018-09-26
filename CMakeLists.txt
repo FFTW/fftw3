@@ -385,6 +385,11 @@ if (BUILD_TESTS)
     target_link_libraries (bench ${fftw3_lib})
   endif ()
 
+  if (ENABLE_OPENMP)
+    target_link_libraries (bench ${fftw3_lib}_omp)
+  else ()
+    target_link_libraries (bench ${fftw3_lib})
+  endif ()
 
   enable_testing ()
 
