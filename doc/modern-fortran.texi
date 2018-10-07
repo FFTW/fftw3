@@ -156,7 +156,7 @@ using the corresponding @code{real(16)} and @code{complex(16)} types
 supported by @code{gfortran}.  The quadruple-precision @samp{fftwq_}
 functions (@pxref{Precision}) are declared in a @code{fftw3q.f03}
 interface file, which should be included in addition to
-@code{fftw3l.f03}, as above.  You should also link with
+@code{fftw3.f03}, as above.  You should also link with
 @code{-lfftw3q -lquadmath -lm} as in C.
 
 @c -------------------------------------------------------
