@@ -145,7 +145,7 @@ let info string =
 (* iota n produces the list [0; 1; ...; n - 1] *)
 let iota n = forall [] cons 0 n identity
 
-(* interval a b produces the list [a; 1; ...; b - 1] *)
+(* interval a b produces the list [a; a + 1; ...; b - 1] *)
 let interval a b = List.map ((+) a) (iota (b - a))
 
 (*
