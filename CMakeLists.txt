@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.4)
+cmake_minimum_required (VERSION 3.9)
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
@@ -343,16 +343,16 @@ if (Threads_FOUND)
   endif ()
 endif ()
 
-if (OPENMP_FOUND)
+if (OpenMP_FOUND)
   add_library (${fftw3_lib}_omp ${fftw_omp_SOURCE})
   target_include_directories (${fftw3_lib}_omp INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
     $<INSTALL_INTERFACE:include>
   )
   target_link_libraries (${fftw3_lib}_omp ${fftw3_lib})
-  target_link_libraries (${fftw3_lib}_omp ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries (${fftw3_lib}_omp Threads::Threads)
+  target_link_libraries (${fftw3_lib}_omp OpenMP::OpenMP_C)
   list (APPEND subtargets ${fftw3_lib}_omp)
-  target_compile_options (${fftw3_lib}_omp PRIVATE ${OpenMP_C_FLAGS})
 endif ()
 
 foreach(subtarget ${subtargets})
