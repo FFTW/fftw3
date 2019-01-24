@@ -26,10 +26,8 @@
 #ifdef _MSC_VER
 #ifdef FFTW_EXPORTS
     #define API __declspec(dllexport)
-    #pragma message ("dllexport")
 #else // FFTW_EXPORTS
     #define API __declspec(dllimport)
-    #pragma message ("dllimport")
 #endif // FFTW_EXPORTS
 #else // _MSC_VER
     #define API
