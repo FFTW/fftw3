@@ -28,6 +28,8 @@ option (ENABLE_AVX2 "Compile with AVX2 instruction set support" OFF)
 
 option (DISABLE_FORTRAN "Disable Fortran wrapper routines" OFF)
 
+option (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "Export all symbols when compiling on Windows" OFF)
+
 include(GNUInstallDirs)
 
 
@@ -306,6 +308,7 @@ target_include_directories (${fftw3_lib} INTERFACE
 )
 if (MSVC AND NOT (CMAKE_C_COMPILER_ID STREQUAL "Intel"))
   target_compile_definitions (${fftw3_lib} PRIVATE /bigobj)
+  target_compile_definitions (${fftw3_lib} PRIVATE FFTW_EXPORTS)
 endif ()
 if (HAVE_SSE)
   target_compile_options (${fftw3_lib} PRIVATE ${SSE_FLAG})

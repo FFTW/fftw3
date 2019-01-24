@@ -20,7 +20,7 @@
 
 #include "rdft/hc2hc.h"
 
-hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, INT, hc2hc_mkinferior) = 0;
+API hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, INT, hc2hc_mkinferior) = 0;
 
 typedef struct {
      plan_rdft super;

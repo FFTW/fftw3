@@ -62,6 +62,18 @@ extern "C"
 #  define FFTW_DEFINE_COMPLEX(R, C) typedef R C[2]
 #endif
 
+#ifdef _MSC_VER
+#ifdef FFTW_EXPORTS
+    #define API __declspec(dllexport)
+    #pragma message ("dllexport")
+#else // FFTW_EXPORTS
+    #define API __declspec(dllimport)
+    #pragma message ("dllimport")
+#endif // FFTW_EXPORTS
+#else // _MSC_VER
+    #define API
+#endif // _MSC_VER)
+
 #define FFTW_CONCAT(prefix, name) prefix ## name
 #define FFTW_MANGLE_DOUBLE(name) FFTW_CONCAT(fftw_, name)
 #define FFTW_MANGLE_FLOAT(name) FFTW_CONCAT(fftwf_, name)
@@ -429,9 +441,9 @@ FFTW_CDECL X(cost)(const X(plan) p);                                    \
 extern int                                                         \
 FFTW_CDECL X(alignment_of)(R *p);                                       \
                                                                         \
-extern const char X(version)[];                                    \
-extern const char X(cc)[];                                         \
-extern const char X(codelet_optim)[];
+API extern const char X(version)[];                                    \
+API extern const char X(cc)[];                                         \
+API extern const char X(codelet_optim)[];
 
 
 /* end of FFTW_DEFINE_API macro */

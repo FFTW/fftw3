@@ -23,6 +23,18 @@
 
 #include "rdft/rdft.h"
 
+#ifdef _MSC_VER
+#ifdef FFTW_EXPORTS
+    #define API __declspec(dllexport)
+    #pragma message ("dllexport")
+#else // FFTW_EXPORTS
+    #define API __declspec(dllimport)
+    #pragma message ("dllimport")
+#endif // FFTW_EXPORTS
+#else // _MSC_VER
+    #define API
+#endif // _MSC_VER)
+
 typedef void (*hc2hcapply) (const plan *ego, R *IO);
 typedef struct hc2hc_solver_s hc2hc_solver;
 typedef plan *(*hc2hc_mkinferior)(const hc2hc_solver *ego,
@@ -49,7 +61,7 @@ struct hc2hc_solver_s {
 };
 
 hc2hc_solver *X(mksolver_hc2hc)(size_t size, INT r, hc2hc_mkinferior mkcldw);
-extern hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, INT, hc2hc_mkinferior);
+API extern hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, INT, hc2hc_mkinferior);
 
 void X(regsolver_hc2hc_direct)(planner *plnr, khc2hc codelet, 
 			       const hc2hc_desc *desc);
