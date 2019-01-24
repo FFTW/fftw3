@@ -23,28 +23,28 @@
    f77api.c, possibly multiple times in order to support multiple
    compiler manglings (via redefinition of F77). */
 
-FFTW_VOIDFUNC F77(execute, EXECUTE)(X(plan) * const p)
+void F77(execute, EXECUTE)(X(plan) * const p)
 {
      plan *pln = (*p)->pln;
      pln->adt->solve(pln, (*p)->prb);
 }
 
-FFTW_VOIDFUNC F77(destroy_plan, DESTROY_PLAN)(X(plan) *p)
+void F77(destroy_plan, DESTROY_PLAN)(X(plan) *p)
 {
      X(destroy_plan)(*p);
 }
 
-FFTW_VOIDFUNC F77(cleanup, CLEANUP)(void)
+void F77(cleanup, CLEANUP)(void)
 {
      X(cleanup)();
 }
 
-FFTW_VOIDFUNC F77(forget_wisdom, FORGET_WISDOM)(void)
+void F77(forget_wisdom, FORGET_WISDOM)(void)
 {
      X(forget_wisdom)();
 }
 
-FFTW_VOIDFUNC F77(export_wisdom, EXPORT_WISDOM)(void (*f77_write_char)(char *, void *),
+void F77(export_wisdom, EXPORT_WISDOM)(void (*f77_write_char)(char *, void *),
 				       void *data)
 {
      write_char_data ad;
@@ -53,7 +53,7 @@ FFTW_VOIDFUNC F77(export_wisdom, EXPORT_WISDOM)(void (*f77_write_char)(char *, v
      X(export_wisdom)(write_char, (void *) &ad);
 }
 
-FFTW_VOIDFUNC F77(import_wisdom, IMPORT_WISDOM)(int *isuccess,
+void F77(import_wisdom, IMPORT_WISDOM)(int *isuccess,
 				       void (*f77_read_char)(int *, void *),
 				       void *data)
 {
@@ -63,40 +63,40 @@ FFTW_VOIDFUNC F77(import_wisdom, IMPORT_WISDOM)(int *isuccess,
      *isuccess = X(import_wisdom)(read_char, (void *) &ed);
 }
 
-FFTW_VOIDFUNC F77(import_system_wisdom, IMPORT_SYSTEM_WISDOM)(int *isuccess)
+void F77(import_system_wisdom, IMPORT_SYSTEM_WISDOM)(int *isuccess)
 {
      *isuccess = X(import_system_wisdom)();
 }
 
-FFTW_VOIDFUNC F77(print_plan, PRINT_PLAN)(X(plan) * const p)
+void F77(print_plan, PRINT_PLAN)(X(plan) * const p)
 {
      X(print_plan)(*p);
      fflush(stdout);
 }
 
-FFTW_VOIDFUNC F77(flops,FLOPS)(X(plan) *p, double *add, double *mul, double *fma)
+void F77(flops,FLOPS)(X(plan) *p, double *add, double *mul, double *fma)
 {
      X(flops)(*p, add, mul, fma);
 }
 
-FFTW_VOIDFUNC F77(estimate_cost,ESTIMATE_COST)(double *cost, X(plan) * const p)
+void F77(estimate_cost,ESTIMATE_COST)(double *cost, X(plan) * const p)
 {
      *cost = X(estimate_cost)(*p);
 }
 
-FFTW_VOIDFUNC F77(cost,COST)(double *cost, X(plan) * const p)
+void F77(cost,COST)(double *cost, X(plan) * const p)
 {
      *cost = X(cost)(*p);
 }
 
-FFTW_VOIDFUNC F77(set_timelimit,SET_TIMELIMIT)(double *t)
+void F77(set_timelimit,SET_TIMELIMIT)(double *t)
 {
      X(set_timelimit)(*t);
 }
 
 /******************************** DFT ***********************************/
 
-FFTW_VOIDFUNC F77(plan_dft, PLAN_DFT)(X(plan) *p, int *rank, const int *n,
+void F77(plan_dft, PLAN_DFT)(X(plan) *p, int *rank, const int *n,
 			     C *in, C *out, int *sign, int *flags)
 {
      int *nrev = reverse_n(*rank, n);
@@ -104,26 +104,26 @@ FFTW_VOIDFUNC F77(plan_dft, PLAN_DFT)(X(plan) *p, int *rank, const int *n,
      X(ifree0)(nrev);
 }
 
-FFTW_VOIDFUNC F77(plan_dft_1d, PLAN_DFT_1D)(X(plan) *p, int *n, C *in, C *out,
+void F77(plan_dft_1d, PLAN_DFT_1D)(X(plan) *p, int *n, C *in, C *out,
 				   int *sign, int *flags)
 {
      *p = X(plan_dft_1d)(*n, in, out, *sign, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_dft_2d, PLAN_DFT_2D)(X(plan) *p, int *nx, int *ny,
+void F77(plan_dft_2d, PLAN_DFT_2D)(X(plan) *p, int *nx, int *ny,
 				   C *in, C *out, int *sign, int *flags)
 {
      *p = X(plan_dft_2d)(*ny, *nx, in, out, *sign, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_dft_3d, PLAN_DFT_3D)(X(plan) *p, int *nx, int *ny, int *nz,
+void F77(plan_dft_3d, PLAN_DFT_3D)(X(plan) *p, int *nx, int *ny, int *nz,
 				   C *in, C *out,
 				   int *sign, int *flags)
 {
      *p = X(plan_dft_3d)(*nz, *ny, *nx, in, out, *sign, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_many_dft, PLAN_MANY_DFT)(X(plan) *p, int *rank, const int *n,
+void F77(plan_many_dft, PLAN_MANY_DFT)(X(plan) *p, int *rank, const int *n,
 				       int *howmany,
 				       C *in, const int *inembed,
 				       int *istride, int *idist,
@@ -143,7 +143,7 @@ FFTW_VOIDFUNC F77(plan_many_dft, PLAN_MANY_DFT)(X(plan) *p, int *rank, const int
      X(ifree0)(nrev);
 }
 
-FFTW_VOIDFUNC F77(plan_guru_dft, PLAN_GURU_DFT)(X(plan) *p, int *rank, const int *n,
+void F77(plan_guru_dft, PLAN_GURU_DFT)(X(plan) *p, int *rank, const int *n,
 				       const int *is, const int *os,
 				       int *howmany_rank, const int *h_n,
 				       const int *h_is, const int *h_os,
@@ -157,7 +157,7 @@ FFTW_VOIDFUNC F77(plan_guru_dft, PLAN_GURU_DFT)(X(plan) *p, int *rank, const int
      X(ifree0)(dims);
 }
 
-FFTW_VOIDFUNC F77(plan_guru_split_dft, PLAN_GURU_SPLIT_DFT)(X(plan) *p, int *rank, const int *n,
+void F77(plan_guru_split_dft, PLAN_GURU_SPLIT_DFT)(X(plan) *p, int *rank, const int *n,
 				       const int *is, const int *os,
 				       int *howmany_rank, const int *h_n,
 				       const int *h_is, const int *h_os,
@@ -171,7 +171,7 @@ FFTW_VOIDFUNC F77(plan_guru_split_dft, PLAN_GURU_SPLIT_DFT)(X(plan) *p, int *ran
      X(ifree0)(dims);
 }
 
-FFTW_VOIDFUNC F77(execute_dft, EXECUTE_DFT)(X(plan) * const p, C *in, C *out)
+void F77(execute_dft, EXECUTE_DFT)(X(plan) * const p, C *in, C *out)
 {
      plan_dft *pln = (plan_dft *) (*p)->pln;
      if ((*p)->sign == FFT_SIGN)
@@ -180,7 +180,7 @@ FFTW_VOIDFUNC F77(execute_dft, EXECUTE_DFT)(X(plan) * const p, C *in, C *out)
           pln->apply((plan *) pln, in[0]+1, in[0], out[0]+1, out[0]);
 }
 
-FFTW_VOIDFUNC F77(execute_split_dft, EXECUTE_SPLIT_DFT)(X(plan) * const p,
+void F77(execute_split_dft, EXECUTE_SPLIT_DFT)(X(plan) * const p,
 					       R *ri, R *ii, R *ro, R *io)
 {
      plan_dft *pln = (plan_dft *) (*p)->pln;
@@ -189,7 +189,7 @@ FFTW_VOIDFUNC F77(execute_split_dft, EXECUTE_SPLIT_DFT)(X(plan) * const p,
 
 /****************************** DFT r2c *********************************/
 
-FFTW_VOIDFUNC F77(plan_dft_r2c, PLAN_DFT_R2C)(X(plan) *p, int *rank, const int *n,
+void F77(plan_dft_r2c, PLAN_DFT_R2C)(X(plan) *p, int *rank, const int *n,
 				     R *in, C *out, int *flags)
 {
      int *nrev = reverse_n(*rank, n);
@@ -197,19 +197,19 @@ FFTW_VOIDFUNC F77(plan_dft_r2c, PLAN_DFT_R2C)(X(plan) *p, int *rank, const int *
      X(ifree0)(nrev);
 }
 
-FFTW_VOIDFUNC F77(plan_dft_r2c_1d, PLAN_DFT_R2C_1D)(X(plan) *p, int *n, R *in, C *out,
+void F77(plan_dft_r2c_1d, PLAN_DFT_R2C_1D)(X(plan) *p, int *n, R *in, C *out,
 					   int *flags)
 {
      *p = X(plan_dft_r2c_1d)(*n, in, out, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_dft_r2c_2d, PLAN_DFT_R2C_2D)(X(plan) *p, int *nx, int *ny,
+void F77(plan_dft_r2c_2d, PLAN_DFT_R2C_2D)(X(plan) *p, int *nx, int *ny,
 					   R *in, C *out, int *flags)
 {
      *p = X(plan_dft_r2c_2d)(*ny, *nx, in, out, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_dft_r2c_3d, PLAN_DFT_R2C_3D)(X(plan) *p,
+void F77(plan_dft_r2c_3d, PLAN_DFT_R2C_3D)(X(plan) *p,
 					   int *nx, int *ny, int *nz,
 					   R *in, C *out,
 					   int *flags)
@@ -217,7 +217,7 @@ FFTW_VOIDFUNC F77(plan_dft_r2c_3d, PLAN_DFT_R2C_3D)(X(plan) *p,
      *p = X(plan_dft_r2c_3d)(*nz, *ny, *nx, in, out, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_many_dft_r2c, PLAN_MANY_DFT_R2C)(
+void F77(plan_many_dft_r2c, PLAN_MANY_DFT_R2C)(
      X(plan) *p, int *rank, const int *n,
      int *howmany,
      R *in, const int *inembed, int *istride, int *idist,
@@ -236,7 +236,7 @@ FFTW_VOIDFUNC F77(plan_many_dft_r2c, PLAN_MANY_DFT_R2C)(
      X(ifree0)(nrev);
 }
 
-FFTW_VOIDFUNC F77(plan_guru_dft_r2c, PLAN_GURU_DFT_R2C)(
+void F77(plan_guru_dft_r2c, PLAN_GURU_DFT_R2C)(
      X(plan) *p, int *rank, const int *n,
      const int *is, const int *os,
      int *howmany_rank, const int *h_n,
@@ -251,7 +251,7 @@ FFTW_VOIDFUNC F77(plan_guru_dft_r2c, PLAN_GURU_DFT_R2C)(
      X(ifree0)(dims);
 }
 
-FFTW_VOIDFUNC F77(plan_guru_split_dft_r2c, PLAN_GURU_SPLIT_DFT_R2C)(
+void F77(plan_guru_split_dft_r2c, PLAN_GURU_SPLIT_DFT_R2C)(
      X(plan) *p, int *rank, const int *n,
      const int *is, const int *os,
      int *howmany_rank, const int *h_n,
@@ -266,14 +266,14 @@ FFTW_VOIDFUNC F77(plan_guru_split_dft_r2c, PLAN_GURU_SPLIT_DFT_R2C)(
      X(ifree0)(dims);
 }
 
-FFTW_VOIDFUNC F77(execute_dft_r2c, EXECUTE_DFT_R2C)(X(plan) * const p, R *in, C *out)
+void F77(execute_dft_r2c, EXECUTE_DFT_R2C)(X(plan) * const p, R *in, C *out)
 {
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
      problem_rdft2 *prb = (problem_rdft2 *) (*p)->prb;
      pln->apply((plan *) pln, in, in + (prb->r1 - prb->r0), out[0], out[0]+1);
 }
 
-FFTW_VOIDFUNC F77(execute_split_dft_r2c, EXECUTE_SPLIT_DFT_R2C)(X(plan) * const p,
+void F77(execute_split_dft_r2c, EXECUTE_SPLIT_DFT_R2C)(X(plan) * const p,
 						       R *in, R *ro, R *io)
 {
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
@@ -283,7 +283,7 @@ FFTW_VOIDFUNC F77(execute_split_dft_r2c, EXECUTE_SPLIT_DFT_R2C)(X(plan) * const 
 
 /****************************** DFT c2r *********************************/
 
-FFTW_VOIDFUNC F77(plan_dft_c2r, PLAN_DFT_C2R)(X(plan) *p, int *rank, const int *n,
+void F77(plan_dft_c2r, PLAN_DFT_C2R)(X(plan) *p, int *rank, const int *n,
 				     C *in, R *out, int *flags)
 {
      int *nrev = reverse_n(*rank, n);
@@ -291,19 +291,19 @@ FFTW_VOIDFUNC F77(plan_dft_c2r, PLAN_DFT_C2R)(X(plan) *p, int *rank, const int *
      X(ifree0)(nrev);
 }
 
-FFTW_VOIDFUNC F77(plan_dft_c2r_1d, PLAN_DFT_C2R_1D)(X(plan) *p, int *n, C *in, R *out,
+void F77(plan_dft_c2r_1d, PLAN_DFT_C2R_1D)(X(plan) *p, int *n, C *in, R *out,
 					   int *flags)
 {
      *p = X(plan_dft_c2r_1d)(*n, in, out, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_dft_c2r_2d, PLAN_DFT_C2R_2D)(X(plan) *p, int *nx, int *ny,
+void F77(plan_dft_c2r_2d, PLAN_DFT_C2R_2D)(X(plan) *p, int *nx, int *ny,
 					   C *in, R *out, int *flags)
 {
      *p = X(plan_dft_c2r_2d)(*ny, *nx, in, out, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_dft_c2r_3d, PLAN_DFT_C2R_3D)(X(plan) *p,
+void F77(plan_dft_c2r_3d, PLAN_DFT_C2R_3D)(X(plan) *p,
 					   int *nx, int *ny, int *nz,
 					   C *in, R *out,
 					   int *flags)
@@ -311,7 +311,7 @@ FFTW_VOIDFUNC F77(plan_dft_c2r_3d, PLAN_DFT_C2R_3D)(X(plan) *p,
      *p = X(plan_dft_c2r_3d)(*nz, *ny, *nx, in, out, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_many_dft_c2r, PLAN_MANY_DFT_C2R)(
+void F77(plan_many_dft_c2r, PLAN_MANY_DFT_C2R)(
      X(plan) *p, int *rank, const int *n,
      int *howmany,
      C *in, const int *inembed, int *istride, int *idist,
@@ -330,7 +330,7 @@ FFTW_VOIDFUNC F77(plan_many_dft_c2r, PLAN_MANY_DFT_C2R)(
      X(ifree0)(nrev);
 }
 
-FFTW_VOIDFUNC F77(plan_guru_dft_c2r, PLAN_GURU_DFT_C2R)(
+void F77(plan_guru_dft_c2r, PLAN_GURU_DFT_C2R)(
      X(plan) *p, int *rank, const int *n,
      const int *is, const int *os,
      int *howmany_rank, const int *h_n,
@@ -345,7 +345,7 @@ FFTW_VOIDFUNC F77(plan_guru_dft_c2r, PLAN_GURU_DFT_C2R)(
      X(ifree0)(dims);
 }
 
-FFTW_VOIDFUNC F77(plan_guru_split_dft_c2r, PLAN_GURU_SPLIT_DFT_C2R)(
+void F77(plan_guru_split_dft_c2r, PLAN_GURU_SPLIT_DFT_C2R)(
      X(plan) *p, int *rank, const int *n,
      const int *is, const int *os,
      int *howmany_rank, const int *h_n,
@@ -360,14 +360,14 @@ FFTW_VOIDFUNC F77(plan_guru_split_dft_c2r, PLAN_GURU_SPLIT_DFT_C2R)(
      X(ifree0)(dims);
 }
 
-FFTW_VOIDFUNC F77(execute_dft_c2r, EXECUTE_DFT_C2R)(X(plan) * const p, C *in, R *out)
+void F77(execute_dft_c2r, EXECUTE_DFT_C2R)(X(plan) * const p, C *in, R *out)
 {
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
      problem_rdft2 *prb = (problem_rdft2 *) (*p)->prb;
      pln->apply((plan *) pln, out, out + (prb->r1 - prb->r0), in[0], in[0]+1);
 }
 
-FFTW_VOIDFUNC F77(execute_split_dft_c2r, EXECUTE_SPLIT_DFT_C2R)(X(plan) * const p,
+void F77(execute_split_dft_c2r, EXECUTE_SPLIT_DFT_C2R)(X(plan) * const p,
 					   R *ri, R *ii, R *out)
 {
      plan_rdft2 *pln = (plan_rdft2 *) (*p)->pln;
@@ -377,7 +377,7 @@ FFTW_VOIDFUNC F77(execute_split_dft_c2r, EXECUTE_SPLIT_DFT_C2R)(X(plan) * const 
 
 /****************************** r2r *********************************/
 
-FFTW_VOIDFUNC F77(plan_r2r, PLAN_R2R)(X(plan) *p, int *rank, const int *n,
+void F77(plan_r2r, PLAN_R2R)(X(plan) *p, int *rank, const int *n,
 			     R *in, R *out,
 			     int *kind, int *flags)
 {
@@ -388,13 +388,13 @@ FFTW_VOIDFUNC F77(plan_r2r, PLAN_R2R)(X(plan) *p, int *rank, const int *n,
      X(ifree0)(nrev);
 }
 
-FFTW_VOIDFUNC F77(plan_r2r_1d, PLAN_R2R_1D)(X(plan) *p, int *n, R *in, R *out,
+void F77(plan_r2r_1d, PLAN_R2R_1D)(X(plan) *p, int *n, R *in, R *out,
 				   int *kind, int *flags)
 {
      *p = X(plan_r2r_1d)(*n, in, out, (X(r2r_kind)) *kind, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_r2r_2d, PLAN_R2R_2D)(X(plan) *p, int *nx, int *ny,
+void F77(plan_r2r_2d, PLAN_R2R_2D)(X(plan) *p, int *nx, int *ny,
 				   R *in, R *out, 
 				   int *kindx, int *kindy, int *flags)
 {
@@ -402,7 +402,7 @@ FFTW_VOIDFUNC F77(plan_r2r_2d, PLAN_R2R_2D)(X(plan) *p, int *nx, int *ny,
 			 (X(r2r_kind)) *kindy, (X(r2r_kind)) *kindx, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_r2r_3d, PLAN_R2R_3D)(X(plan) *p,
+void F77(plan_r2r_3d, PLAN_R2R_3D)(X(plan) *p,
 				   int *nx, int *ny, int *nz,
 				   R *in, R *out,
 				   int *kindx, int *kindy, int *kindz,
@@ -413,7 +413,7 @@ FFTW_VOIDFUNC F77(plan_r2r_3d, PLAN_R2R_3D)(X(plan) *p,
 			 (X(r2r_kind)) *kindx, *flags);
 }
 
-FFTW_VOIDFUNC F77(plan_many_r2r, PLAN_MANY_R2R)(
+void F77(plan_many_r2r, PLAN_MANY_R2R)(
      X(plan) *p, int *rank, const int *n,
      int *howmany,
      R *in, const int *inembed, int *istride, int *idist,
@@ -434,7 +434,7 @@ FFTW_VOIDFUNC F77(plan_many_r2r, PLAN_MANY_R2R)(
      X(ifree0)(nrev);
 }
 
-FFTW_VOIDFUNC F77(plan_guru_r2r, PLAN_GURU_R2R)(
+void F77(plan_guru_r2r, PLAN_GURU_R2R)(
      X(plan) *p, int *rank, const int *n,
      const int *is, const int *os,
      int *howmany_rank, const int *h_n,
@@ -451,7 +451,7 @@ FFTW_VOIDFUNC F77(plan_guru_r2r, PLAN_GURU_R2R)(
      X(ifree0)(dims);
 }
 
-FFTW_VOIDFUNC F77(execute_r2r, EXECUTE_R2R)(X(plan) * const p, R *in, R *out)
+void F77(execute_r2r, EXECUTE_R2R)(X(plan) * const p, R *in, R *out)
 {
      plan_rdft *pln = (plan_rdft *) (*p)->pln;
      pln->apply((plan *) pln, in, out);

@@ -47,18 +47,6 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-/* Windows annoyances -- since tests/hook.c uses some internal
-   FFTW functions, we need to given them the dllexport attribute
-   under Windows when compiling as a DLL (see api/fftw3.h). */
-#if defined(FFTW_EXTERN)
-#  define IFFTW_EXTERN FFTW_EXTERN
-#elif (defined(FFTW_DLL) || defined(DLL_EXPORT)) \
- && (defined(_WIN32) || defined(__WIN32__))
-#  define IFFTW_EXTERN extern __declspec(dllexport)
-#else
-#  define IFFTW_EXTERN extern
-#endif
-
 /* determine precision and name-mangling scheme */
 #define CONCAT(prefix, name) prefix ## name
 #if defined(FFTW_SINGLE)
@@ -242,7 +230,7 @@ void *alloca(size_t);
 
 /*-----------------------------------------------------------------------*/
 /* assert.c: */
-IFFTW_EXTERN void X(assertion_failed)(const char *s, 
+extern void X(assertion_failed)(const char *s, 
 				      int line, const char *file);
 
 /* always check */
@@ -285,10 +273,10 @@ enum malloc_tag {
      MALLOC_WHAT_LAST		/* must be last */
 };
 
-IFFTW_EXTERN void X(ifree)(void *ptr);
+extern void X(ifree)(void *ptr);
 extern void X(ifree0)(void *ptr);
 
-IFFTW_EXTERN void *X(malloc_plain)(size_t sz);
+extern void *X(malloc_plain)(size_t sz);
 #define MALLOC(n, what)  X(malloc_plain)(n)
 
 /*-----------------------------------------------------------------------*/
@@ -524,7 +512,7 @@ struct printer_s {
 printer *X(mkprinter)(size_t size, 
 		      void (*putchr)(printer *p, char c),
 		      void (*cleanup)(printer *p));
-IFFTW_EXTERN void X(printer_destroy)(printer *p);
+extern void X(printer_destroy)(printer *p);
 
 /*-----------------------------------------------------------------------*/
 /* scan.c */
@@ -565,7 +553,7 @@ struct plan_s {
 
 plan *X(mkplan)(size_t size, const plan_adt *adt);
 void X(plan_destroy_internal)(plan *ego);
-IFFTW_EXTERN void X(plan_awake)(plan *ego, enum wakefulness wakefulness);
+extern void X(plan_awake)(plan *ego, enum wakefulness wakefulness);
 void X(plan_null_destroy)(plan *ego);
 
 /*-----------------------------------------------------------------------*/
@@ -1018,7 +1006,7 @@ extern unsigned X(random_estimate_seed);
 
 double X(measure_execution_time)(const planner *plnr, 
 				 plan *pln, const problem *p);
-IFFTW_EXTERN int X(ialignment_of)(R *p);
+extern int X(ialignment_of)(R *p);
 unsigned X(hash)(const char *s);
 INT X(nbuf)(INT n, INT vl, INT maxnbuf);
 int X(nbuf_redundant)(INT n, INT vl, size_t which, 

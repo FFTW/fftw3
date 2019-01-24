@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.4)
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
@@ -298,10 +298,6 @@ set (fftw3_lib fftw3${PREC_SUFFIX})
 
 configure_file (cmake.config.h.in config.h @ONLY)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
-
-if (BUILD_SHARED_LIBS)
-  add_definitions (-DFFTW_DLL)
-endif ()
 
 add_library (${fftw3_lib} ${SOURCEFILES})
 target_include_directories (${fftw3_lib} INTERFACE
