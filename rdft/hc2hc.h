@@ -18,6 +18,9 @@
  *
  */
 
+#ifndef __RDFT_HCHC_H__
+#define __RDFT_HC2HC_H__
+
 #include "rdft/rdft.h"
 
 typedef void (*hc2hcapply) (const plan *ego, R *IO);
@@ -52,3 +55,5 @@ void X(regsolver_hc2hc_direct)(planner *plnr, khc2hc codelet,
 			       const hc2hc_desc *desc);
 
 int X(hc2hc_applicable)(const hc2hc_solver *, const problem *, planner *);
+
+#endif				/* __RDFT_HC2HC_H__ */

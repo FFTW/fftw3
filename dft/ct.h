@@ -18,6 +18,9 @@
  *
  */
 
+#ifndef __DFT_CT_H__
+#define __DFT_CT_H__
+
 #include "dft/dft.h"
 
 typedef void (*dftwapply)(const plan *ego, R *rio, R *iio);
@@ -66,3 +69,5 @@ void X(regsolver_ct_directwbuf)(planner *plnr,
 solver *X(mksolver_ctsq)(kdftwsq codelet, const ct_desc *desc, int dec);
 void X(regsolver_ct_directwsq)(planner *plnr, kdftwsq codelet, 
 			       const ct_desc *desc, int dec);
+
+#endif				/* __DFT_CT_H__ */
