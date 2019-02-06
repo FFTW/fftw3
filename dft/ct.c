@@ -21,7 +21,7 @@
 
 #include "dft/ct.h"
 
-API ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
+ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
 				  ct_mkinferior, ct_force_vrecursion) = 0;
 
 typedef struct {
