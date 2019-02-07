@@ -23,15 +23,11 @@
 
 #include "dft/dft.h"
 
-#ifdef _MSC_VER
-#ifdef FFTW_EXPORTS
-    #define API __declspec(dllexport)
-#else // FFTW_EXPORTS
-    #define API __declspec(dllimport)
-#endif // FFTW_EXPORTS
-#else // _MSC_VER
-    #define API
-#endif // _MSC_VER)
+#if defined(_MSC_VER) && !defined(FFTW_STATIC) && !defined(FFTW_EXPORTS)
+    #define FFTW_EXTERN extern __declspec(dllimport)
+#else
+    #define FFTW_EXTERN extern 
+#endif
 
 typedef void (*dftwapply)(const plan *ego, R *rio, R *iio);
 typedef struct ct_solver_s ct_solver;
@@ -69,7 +65,7 @@ int X(ct_applicable)(const ct_solver *, const problem *, planner *);
 ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, 
 			  ct_mkinferior mkcldw, 
 			  ct_force_vrecursion force_vrecursionp);
-API extern ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
+FFTW_EXTERN ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
 					 ct_mkinferior, ct_force_vrecursion);
 
 void X(regsolver_ct_directw)(planner *plnr,

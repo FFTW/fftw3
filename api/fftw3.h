@@ -62,15 +62,21 @@ extern "C"
 #  define FFTW_DEFINE_COMPLEX(R, C) typedef R C[2]
 #endif
 
-#ifdef _MSC_VER
-#ifdef FFTW_EXPORTS
-    #define API __declspec(dllexport)
-#else // FFTW_EXPORTS
-    #define API __declspec(dllimport)
-#endif // FFTW_EXPORTS
-#else // _MSC_VER
-    #define API
-#endif // _MSC_VER)
+#if defined(_MSC_VER) && !defined(FFTW_STATIC) && !defined(FFTW_EXPORTS)
+    #define FFTW_EXTERN extern __declspec(dllimport)
+#else
+    #define FFTW_EXTERN extern 
+#endif
+
+#if defined(_MSC_VER) && !defined(FFTW_STATIC)
+#if defined(FFTW_EXPORTS)
+    #define FFTW_EXTERN_OBJ extern __declspec(dllexport)
+#else
+    #define FFTW_EXTERN_OBJ extern __declspec(dllimport)
+#endif
+#else
+    #define FFTW_EXTERN_OBJ extern 
+#endif
 
 #define FFTW_CONCAT(prefix, name) prefix ## name
 #define FFTW_MANGLE_DOUBLE(name) FFTW_CONCAT(fftw_, name)
@@ -130,24 +136,24 @@ typedef enum fftw_r2r_kind_do_not_use_me X(r2r_kind);                   \
 typedef fftw_write_char_func_do_not_use_me X(write_char_func);          \
 typedef fftw_read_char_func_do_not_use_me X(read_char_func);            \
                                                                         \
-extern void                                                        \
+FFTW_EXTERN void                                                        \
 FFTW_CDECL X(execute)(const X(plan) p);                                 \
                                                                         \
-extern X(plan)                                                     \
+FFTW_EXTERN X(plan)                                                     \
 FFTW_CDECL X(plan_dft)(int rank, const int *n,                          \
                        C *in, C *out, int sign, unsigned flags);        \
                                                                         \
-extern X(plan)                                                     \
+FFTW_EXTERN X(plan)                                                     \
 FFTW_CDECL X(plan_dft_1d)(int n, C *in, C *out, int sign,               \
                           unsigned flags);                              \
-extern X(plan)                                                     \
+FFTW_EXTERN X(plan)                                                     \
 FFTW_CDECL X(plan_dft_2d)(int n0, int n1,                               \
                           C *in, C *out, int sign, unsigned flags);     \
-extern X(plan)                                                     \
+FFTW_EXTERN X(plan)                                                     \
 FFTW_CDECL X(plan_dft_3d)(int n0, int n1, int n2,                       \
                           C *in, C *out, int sign, unsigned flags);     \
                                                                         \
-extern X(plan)                                                     \
+FFTW_EXTERN X(plan)                                                     \
 FFTW_CDECL X(plan_many_dft)(int rank, const int *n,                     \
                             int howmany,                                \
                             C *in, const int *inembed,                  \
@@ -439,9 +445,9 @@ FFTW_CDECL X(cost)(const X(plan) p);                                    \
 extern int                                                         \
 FFTW_CDECL X(alignment_of)(R *p);                                       \
                                                                         \
-API extern const char X(version)[];                                    \
-API extern const char X(cc)[];                                         \
-API extern const char X(codelet_optim)[];
+FFTW_EXTERN_OBJ const char X(version)[];                                    \
+FFTW_EXTERN_OBJ const char X(cc)[];                                         \
+FFTW_EXTERN_OBJ const char X(codelet_optim)[];
 
 
 /* end of FFTW_DEFINE_API macro */

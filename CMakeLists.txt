@@ -301,6 +301,10 @@ set (fftw3_lib fftw3${PREC_SUFFIX})
 configure_file (cmake.config.h.in config.h @ONLY)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
+if (NOT BUILD_SHARED_LIBS)
+  add_definitions (-DFFTW_STATIC)
+endif ()
+
 add_library (${fftw3_lib} ${SOURCEFILES})
 target_include_directories (${fftw3_lib} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
