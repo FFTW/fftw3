@@ -22,10 +22,6 @@
 #ifndef __API_H__
 #define __API_H__
 
-#ifndef CALLING_FFTW /* defined in hook.c, when calling internal functions */
-#  define COMPILING_FFTW /* used for DLL symbol exporting in fftw3.h */
-#endif
-
 /* just in case: force <fftw3.h> not to use C99 complex numbers
    (we need this for IBM xlc because _Complex_I is treated specially
    and is defined even if <complex.h> is not included) */

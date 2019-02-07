@@ -14,7 +14,6 @@
 #include <stdio.h>
 #include "libbench2/bench-user.h"
 
-#define CALLING_FFTW /* hack for Windows DLL nonsense */
 #include "api/api.h"
 #include "dft/dft.h"
 #include "rdft/rdft.h"
