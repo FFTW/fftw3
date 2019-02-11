@@ -302,7 +302,7 @@ configure_file (cmake.config.h.in config.h @ONLY)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
 if (NOT BUILD_SHARED_LIBS)
-  add_definitions (-DFFTW_STATIC)
+  add_compile_definitions(FFTW_STATIC)
 endif ()
 
 add_library (${fftw3_lib} ${SOURCEFILES})
