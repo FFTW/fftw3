@@ -406,9 +406,9 @@ set (exec_prefix ${CMAKE_INSTALL_PREFIX})
 set (libdir ${CMAKE_INSTALL_FULL_LIBDIR})
 set (includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 set (VERSION ${FFTW_VERSION})
-configure_file (fftw.pc.in fftw${PREC_SUFFIX}.pc @ONLY)
+configure_file (fftw.pc.in fftw3${PREC_SUFFIX}.pc @ONLY)
 install (FILES
-          ${CMAKE_CURRENT_BINARY_DIR}/fftw${PREC_SUFFIX}.pc
+          ${CMAKE_CURRENT_BINARY_DIR}/fftw3${PREC_SUFFIX}.pc
          DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
          COMPONENT Development)
 
