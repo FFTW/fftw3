@@ -32,7 +32,7 @@ if SMP
 endif
 
 bigcheck: bench$(EXEEXT)
-	perl -w $(srcdir)/check.pl $(CHECK_PL_OPTS) -a -v `pwd`/bench$(EXEEXT)
+	perl -w $(srcdir)/check.pl $(CHECK_PL_OPTS) --validate-wisdom -a -v `pwd`/bench$(EXEEXT)
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW transforms passed big tests!"
 	@echo "--------------------------------------------------------------"
