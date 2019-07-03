@@ -2,6 +2,7 @@
 @c Update by C-x C-e on: (texinfo-multiple-files-update "fftw3.texi" nil t)
 @setfilename fftw3.info
 @include version.texi
+@finalout
 @settitle FFTW @value{VERSION}
 @setchapternewpage odd
 @c define constant index (ct)
