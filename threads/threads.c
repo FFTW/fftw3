@@ -77,8 +77,8 @@
       variables */
    typedef pthread_mutex_t os_mutex_t;
 
-   static void os_mutex_init(os_mutex_t *s) 
-   { 
+   static void os_mutex_init(os_mutex_t *s)
+   {
 	pthread_mutex_init(s, (pthread_mutexattr_t *)0);
    }
 
@@ -90,7 +90,7 @@
 	pthread_mutex_t m;
 	pthread_cond_t c;
 	volatile int x;
-   } os_sem_t; 
+   } os_sem_t;
 
    static void os_sem_init(os_sem_t *s)
    {
@@ -113,7 +113,7 @@
    static void os_sem_down(os_sem_t *s)
    {
 	pthread_mutex_lock(&s->m);
-	while (s->x <= 0) 
+	while (s->x <= 0)
 	     pthread_cond_wait(&s->c, &s->m);
 	--s->x;
 	pthread_mutex_unlock(&s->m);
@@ -131,14 +131,14 @@
 
 #define FFTW_WORKER void *
 
-static void os_create_thread(FFTW_WORKER (*worker)(void *arg), 
+static void os_create_thread(FFTW_WORKER (*worker)(void *arg),
 			     void *arg)
 {
      pthread_attr_t attr;
      pthread_t tid;
 
      pthread_attr_init(&attr);
-     pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM); 
+     pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
      pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
      pthread_create(&tid, &attr, worker, (void *)arg);
@@ -168,44 +168,44 @@ static void os_static_mutex_unlock(os_static_mutex_t *s) { pthread_mutex_unlock(
 
 typedef HANDLE os_mutex_t;
 
-static void os_mutex_init(os_mutex_t *s) 
-{ 
+static void os_mutex_init(os_mutex_t *s)
+{
      *s = CreateMutex(NULL, FALSE, NULL);
 }
 
-static void os_mutex_destroy(os_mutex_t *s) 
-{ 
+static void os_mutex_destroy(os_mutex_t *s)
+{
      CloseHandle(*s);
 }
 
 static void os_mutex_lock(os_mutex_t *s)
-{ 
+{
      WaitForSingleObject(*s, INFINITE);
 }
 
-static void os_mutex_unlock(os_mutex_t *s) 
-{ 
+static void os_mutex_unlock(os_mutex_t *s)
+{
      ReleaseMutex(*s);
 }
 
 typedef HANDLE os_sem_t;
 
-static void os_sem_init(os_sem_t *s) 
+static void os_sem_init(os_sem_t *s)
 {
      *s = CreateSemaphore(NULL, 0, 0x7FFFFFFFL, NULL);
 }
 
-static void os_sem_destroy(os_sem_t *s) 
-{ 
+static void os_sem_destroy(os_sem_t *s)
+{
      CloseHandle(*s);
 }
 
-static void os_sem_down(os_sem_t *s) 
-{ 
+static void os_sem_down(os_sem_t *s)
+{
      WaitForSingleObject(*s, INFINITE);
 }
 
-static void os_sem_up(os_sem_t *s) 
+static void os_sem_up(os_sem_t *s)
 {
      ReleaseSemaphore(*s, 1, NULL);
 }
@@ -334,7 +334,7 @@ static struct worker *dequeue(void)
 
      WITH_QUEUE_LOCK({
 	  q = worker_queue;
-	  if (q) 
+	  if (q)
 	       worker_queue = q->cdr;
      });
 
@@ -355,7 +355,7 @@ static void kill_workforce(void)
      w.proc = 0;
 
      WITH_QUEUE_LOCK({
-	  /* tell all workers that they must terminate.  
+	  /* tell all workers that they must terminate.
 
 	     Because workers enqueue themselves before signaling the
 	     completion of the work, all workers belong to the worker queue
@@ -389,6 +389,15 @@ int X(ithreads_init)(void)
      return 0; /* no error */
 }
 
+typedef void (*spawnloop_function)(spawn_function, spawn_data *, size_t, int, void *);
+static spawnloop_function spawnloop_callback = (spawnloop_function) 0;
+void *spawnloop_callback_data = (void *) 0;
+void X(threads_set_callback)(spawnloop_function spawnloop, void *data)
+{
+     spawnloop_callback = spawnloop;
+     spawnloop_callback_data = data;
+}
+
 /* Distribute a loop from 0 to loopmax-1 over nthreads threads.
    proc(d) is called to execute a block of iterations from d->min
    to d->max-1.  d->thr_num indicate the number of the thread
@@ -399,7 +408,6 @@ int X(ithreads_init)(void)
 void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
 {
      int block_size;
-     struct work *r;
      int i;
 
      A(loopmax >= 0);
@@ -416,40 +424,57 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      block_size = (loopmax + nthr - 1) / nthr;
      nthr = (loopmax + block_size - 1) / block_size;
 
-     STACK_MALLOC(struct work *, r, sizeof(struct work) * nthr);
-	  
-     /* distribute work: */
-     for (i = 0; i < nthr; ++i) {
-	  struct work *w = &r[i];
-	  spawn_data *d = &w->d;
-
-	  d->max = (d->min = i * block_size) + block_size;
-	  if (d->max > loopmax)
-	       d->max = loopmax;
-	  d->thr_num = i;
-	  d->data = data;
-	  w->proc = proc;
-	   
-	  if (i == nthr - 1) {
-	       /* do the work ourselves */
-	       proc(d);
-	  } else {
-	       /* assign a worker to W */
-	       w->q = dequeue();
-
-	       /* tell worker w->q to do it */
-	       w->q->w = w; /* Dirac could have written this */
-	       os_sem_up(&w->q->ready);
-	  }
+     if (spawnloop_callback) { /* user-defined spawnloop backend */
+          spawn_data *sdata;
+          STACK_MALLOC(spawn_data *, sdata, sizeof(spawn_data) * nthr);
+          for (i = 0; i < nthr; ++i) {
+               spawn_data *d = &sdata[i];
+               d->max = (d->min = i * block_size) + block_size;
+               if (d->max > loopmax)
+                    d->max = loopmax;
+               d->thr_num = i;
+               d->data = data;
+          }
+          spawnloop_callback(proc, sdata, sizeof(spawn_data), nthr, spawnloop_callback_data);
+          STACK_FREE(sdata);
      }
+     else {
+          struct work *r;
+          STACK_MALLOC(struct work *, r, sizeof(struct work) * nthr);
 
-     for (i = 0; i < nthr - 1; ++i) { 
-	  struct work *w = &r[i];
-	  os_sem_down(&w->q->done);
-	  enqueue(w->q);
+          /* distribute work: */
+          for (i = 0; i < nthr; ++i) {
+               struct work *w = &r[i];
+               spawn_data *d = &w->d;
+
+               d->max = (d->min = i * block_size) + block_size;
+               if (d->max > loopmax)
+                    d->max = loopmax;
+               d->thr_num = i;
+               d->data = data;
+               w->proc = proc;
+
+               if (i == nthr - 1) {
+                    /* do the work ourselves */
+                    proc(d);
+               } else {
+                    /* assign a worker to W */
+                    w->q = dequeue();
+
+                    /* tell worker w->q to do it */
+                    w->q->w = w; /* Dirac could have written this */
+                    os_sem_up(&w->q->ready);
+               }
+          }
+
+          for (i = 0; i < nthr - 1; ++i) {
+               struct work *w = &r[i];
+               os_sem_down(&w->q->done);
+               enqueue(w->q);
+          }
+
+          STACK_FREE(r);
      }
-
-     STACK_FREE(r);
 }
 
 void X(threads_cleanup)(void)
