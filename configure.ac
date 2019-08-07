@@ -412,8 +412,8 @@ case "${ax_cv_c_compiler_vendor}" in
                 ;;
                 *)
 	        if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
-	            AX_CHECK_COMPILER_FLAGS(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon"],
-			[AC_MSG_ERROR([Need a version of gcc with -mfpu=neon])])
+	            AX_CHECK_COMPILER_FLAGS(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon -mfloat-abi=softfp"],
+			[AC_MSG_ERROR([Need a version of gcc with -mfpu=neon -mfloat-abi=softfp])])
 	        fi
                 ;;
         esac
