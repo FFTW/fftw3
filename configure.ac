@@ -46,7 +46,7 @@ esac
 
 AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
-	AC_DEFINE(FFTW_DEBUG,1,[Define to enable extra FFTW debugging code.])
+    AC_DEFINE(FFTW_DEBUG,1,[Define to enable extra FFTW debugging code.])
 fi
 
 AC_ARG_ENABLE(doc, [AC_HELP_STRING([--disable-doc],[disable building the documentation])], build_doc=$enableval, build_doc=yes)
@@ -54,45 +54,45 @@ AM_CONDITIONAL(BUILD_DOC, test x"$build_doc" = xyes)
 
 AC_ARG_ENABLE(random-estimator, [AC_HELP_STRING([--enable-random-estimator],[enable pseudorandom estimator (debugging hack)])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
-	AC_DEFINE(FFTW_RANDOM_ESTIMATOR,1,[Define to enable pseudorandom estimate planning for debugging.])
-	CHECK_PL_OPTS="--estimate"
+    AC_DEFINE(FFTW_RANDOM_ESTIMATOR,1,[Define to enable pseudorandom estimate planning for debugging.])
+    CHECK_PL_OPTS="--estimate"
 fi
 
 AC_ARG_ENABLE(alloca, [AC_HELP_STRING([--disable-alloca],[disable use of the alloca() function (may be broken on mingw64)])], ok=$enableval, ok=yes)
 if test "$ok" = "yes"; then
-	AC_DEFINE(FFTW_ENABLE_ALLOCA,1,[Define to enable the use of alloca().])
+    AC_DEFINE(FFTW_ENABLE_ALLOCA,1,[Define to enable the use of alloca().])
 fi
 
 AC_ARG_ENABLE(single, [AC_HELP_STRING([--enable-single],[compile fftw in single precision])], ok=$enableval, ok=no)
 AC_ARG_ENABLE(float, [AC_HELP_STRING([--enable-float],[synonym for --enable-single])], ok=$enableval)
 if test "$ok" = "yes"; then
-	AC_DEFINE(FFTW_SINGLE,1,[Define to compile in single precision.])
-	AC_DEFINE(BENCHFFT_SINGLE,1,[Define to compile in single precision.])
-	PRECISION=s
+    AC_DEFINE(FFTW_SINGLE,1,[Define to compile in single precision.])
+    AC_DEFINE(BENCHFFT_SINGLE,1,[Define to compile in single precision.])
+    PRECISION=s
 else
-	PRECISION=d
+    PRECISION=d
 fi
 AM_CONDITIONAL(SINGLE, test "$ok" = "yes")
 
 AC_ARG_ENABLE(long-double, [AC_HELP_STRING([--enable-long-double],[compile fftw in long-double precision])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
-	if test "$PRECISION" = "s"; then
-		AC_MSG_ERROR([--enable-single/--enable-long-double conflict])
-	fi
-	AC_DEFINE(FFTW_LDOUBLE,1,[Define to compile in long-double precision.])
-	AC_DEFINE(BENCHFFT_LDOUBLE,1,[Define to compile in long-double precision.])
-	PRECISION=l
+    if test "$PRECISION" = "s"; then
+        AC_MSG_ERROR([--enable-single/--enable-long-double conflict])
+    fi
+    AC_DEFINE(FFTW_LDOUBLE,1,[Define to compile in long-double precision.])
+    AC_DEFINE(BENCHFFT_LDOUBLE,1,[Define to compile in long-double precision.])
+    PRECISION=l
 fi
 AM_CONDITIONAL(LDOUBLE, test "$ok" = "yes")
 
 AC_ARG_ENABLE(quad-precision, [AC_HELP_STRING([--enable-quad-precision],[compile fftw in quadruple precision if available])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
-	if test "$PRECISION" != "d"; then
-		AC_MSG_ERROR([conflicting precisions specified])
-	fi
-	AC_DEFINE(FFTW_QUAD,1,[Define to compile in quad precision.])
-	AC_DEFINE(BENCHFFT_QUAD,1,[Define to compile in quad precision.])
-	PRECISION=q
+    if test "$PRECISION" != "d"; then
+        AC_MSG_ERROR([conflicting precisions specified])
+    fi
+    AC_DEFINE(FFTW_QUAD,1,[Define to compile in quad precision.])
+    AC_DEFINE(BENCHFFT_QUAD,1,[Define to compile in quad precision.])
+    PRECISION=q
 fi
 AM_CONDITIONAL(QUAD, test "$ok" = "yes")
 
@@ -103,51 +103,51 @@ dnl SSE/SSE2 theory:
 dnl
 dnl Historically, you had to supply --enable-sse in single precision and --enable-sse2
 dnl in double precision.
-dnl 
+dnl
 dnl This behavior is pointless in 2016.  --enable-sse2 now works in both precisions,
 dnl and is interpreted as --enable-sse in single precision.  The old flag --enable--se
 dnl is still supported in single-precision only.
 AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
 if test "$have_sse" = "yes"; then
-        if test "$PRECISION" != "s"; then
-                AC_MSG_ERROR([SSE requires single precision])
-        fi
+    if test "$PRECISION" != "s"; then
+            AC_MSG_ERROR([SSE requires single precision])
+    fi
 fi
 
 AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE/SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
 if test "$have_sse" = "yes"; then have_sse2=yes; fi
 if test "$have_sse2" = "yes"; then
-        AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE/SSE2 optimizations.])
-        if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
-                AC_MSG_ERROR([SSE2 requires single or double precision])
-        fi
+    AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE/SSE2 optimizations.])
+    if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+            AC_MSG_ERROR([SSE2 requires single or double precision])
+    fi
 fi
 AM_CONDITIONAL(HAVE_SSE2, test "$have_sse2" = "yes")
 
 AC_ARG_ENABLE(avx, [AC_HELP_STRING([--enable-avx],[enable AVX optimizations])], have_avx=$enableval, have_avx=no)
 if test "$have_avx" = "yes"; then
-        AC_DEFINE(HAVE_AVX,1,[Define to enable AVX optimizations.])
-	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
-		AC_MSG_ERROR([AVX requires single or double precision])
-	fi
+    AC_DEFINE(HAVE_AVX,1,[Define to enable AVX optimizations.])
+    if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+        AC_MSG_ERROR([AVX requires single or double precision])
+    fi
 fi
 AM_CONDITIONAL(HAVE_AVX, test "$have_avx" = "yes")
 
 AC_ARG_ENABLE(avx2, [AC_HELP_STRING([--enable-avx2],[enable AVX2 optimizations])], have_avx2=$enableval, have_avx2=no)
 if test "$have_avx2" = "yes"; then
-        AC_DEFINE(HAVE_AVX2,1,[Define to enable AVX2 optimizations.])
-	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
-		AC_MSG_ERROR([AVX2 requires single or double precision])
-	fi
+    AC_DEFINE(HAVE_AVX2,1,[Define to enable AVX2 optimizations.])
+    if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+        AC_MSG_ERROR([AVX2 requires single or double precision])
+    fi
 fi
 AM_CONDITIONAL(HAVE_AVX2, test "$have_avx2" = "yes")
 
 AC_ARG_ENABLE(avx512, [AC_HELP_STRING([--enable-avx512],[enable AVX512 optimizations])], have_avx512=$enableval, have_avx512=no)
 if test "$have_avx512" = "yes"; then
-        AC_DEFINE(HAVE_AVX512,1,[Define to enable AVX512 optimizations.])
-	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
-		AC_MSG_ERROR([AVX512 requires single or double precision])
-	fi
+    AC_DEFINE(HAVE_AVX512,1,[Define to enable AVX512 optimizations.])
+    if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+        AC_MSG_ERROR([AVX512 requires single or double precision])
+    fi
 fi
 AM_CONDITIONAL(HAVE_AVX512, test "$have_avx512" = "yes")
 
@@ -157,27 +157,27 @@ dnl FMA4, and 128-bit SIMD is better than 256-bit since core pairs in a
 dnl compute unit can execute two 128-bit instructions independently.
 AC_ARG_ENABLE(avx-128-fma, [AC_HELP_STRING([--enable-avx-128-fma],[enable AVX128/FMA optimizations])], have_avx_128_fma=$enableval, have_avx_128_fma=no)
 if test "$have_avx_128_fma" = "yes"; then
-        AC_DEFINE(HAVE_AVX_128_FMA,1,[Define to enable 128-bit FMA AVX optimization])
-        AVX_128_FMA_CFLAGS="${AVX_CFLAGS} -mfma4"
-        AC_SUBST(AVX_128_FMA_CFLAGS)
+    AC_DEFINE(HAVE_AVX_128_FMA,1,[Define to enable 128-bit FMA AVX optimization])
+    AVX_128_FMA_CFLAGS="${AVX_CFLAGS} -mfma4"
+    AC_SUBST(AVX_128_FMA_CFLAGS)
 fi
 AM_CONDITIONAL(HAVE_AVX_128_FMA, test "$have_avx_128_fma" = "yes")
 
 AC_ARG_ENABLE(kcvi, [AC_HELP_STRING([--enable-kcvi],[enable Knights Corner vector instructions optimizations])], have_kcvi=$enableval, have_kcvi=no)
 if test "$have_kcvi" = "yes"; then
-        AC_DEFINE(HAVE_KCVI,1,[Define to enable KCVI optimizations.])
-	if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
-		AC_MSG_ERROR([Knights Corner vector instructions requires single or double precision])
-	fi
+    AC_DEFINE(HAVE_KCVI,1,[Define to enable KCVI optimizations.])
+    if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
+        AC_MSG_ERROR([Knights Corner vector instructions requires single or double precision])
+    fi
 fi
 AM_CONDITIONAL(HAVE_KCVI, test "$have_kcvi" = "yes")
 
 AC_ARG_ENABLE(altivec, [AC_HELP_STRING([--enable-altivec],[enable Altivec optimizations])], have_altivec=$enableval, have_altivec=no)
 if test "$have_altivec" = "yes"; then
-	AC_DEFINE(HAVE_ALTIVEC,1,[Define to enable Altivec optimizations.])
-	if test "$PRECISION" != "s"; then
-		AC_MSG_ERROR([Altivec requires single precision])
-	fi
+    AC_DEFINE(HAVE_ALTIVEC,1,[Define to enable Altivec optimizations.])
+    if test "$PRECISION" != "s"; then
+        AC_MSG_ERROR([Altivec requires single precision])
+    fi
 fi
 AM_CONDITIONAL(HAVE_ALTIVEC, test "$have_altivec" = "yes")
 
@@ -189,14 +189,14 @@ AM_CONDITIONAL(HAVE_VSX, test "$have_vsx" = "yes")
 
 AC_ARG_ENABLE(neon, [AC_HELP_STRING([--enable-neon],[enable ARM NEON optimizations])], have_neon=$enableval, have_neon=no)
 if test "$have_neon" = "yes"; then
-	AC_DEFINE(HAVE_NEON,1,[Define to enable ARM NEON optimizations.])
+    AC_DEFINE(HAVE_NEON,1,[Define to enable ARM NEON optimizations.])
         case "${host_cpu}" in
                 aarch64)
                 ;;
                 *)
-		if test "$PRECISION" != "s"; then
-			AC_MSG_ERROR([NEON requires single precision])
-		fi
+        if test "$PRECISION" != "s"; then
+            AC_MSG_ERROR([NEON requires single precision])
+        fi
                 ;;
         esac
 fi
@@ -204,22 +204,22 @@ AM_CONDITIONAL(HAVE_NEON, test "$have_neon" = "yes")
 
 AC_ARG_ENABLE(armv8-pmccntr-el0, [AC_HELP_STRING([--enable-armv8-pmccntr-el0],[enable the cycle counter on ARMv8 via the PMCCNTR_EL0 register (see README-perfcounters for details and mandatory instructions)])], have_armv8pmccntrel0=$enableval)
 if test "$have_armv8pmccntrel0"x = "yes"x; then
-	AC_DEFINE(HAVE_ARMV8_PMCCNTR_EL0,1,[Define if you have enabled the PMCCNTR_EL0 cycle counter on ARMv8])
+    AC_DEFINE(HAVE_ARMV8_PMCCNTR_EL0,1,[Define if you have enabled the PMCCNTR_EL0 cycle counter on ARMv8])
 fi
 
 AC_ARG_ENABLE(armv8-cntvct-el0, [AC_HELP_STRING([--enable-armv8-cntvct-el0],[enable the cycle counter on ARMv8 via the CNTVCT_EL0 register (see README-perfcounters for details and mandatory instructions)])], have_armv8cntvctel0=$enableval)
 if test "$have_armv8cntvctel0"x = "yes"x; then
-	AC_DEFINE(HAVE_ARMV8_CNTVCT_EL0,1,[Define if you have enabled the CNTVCT_EL0 cycle counter on ARMv8])
+    AC_DEFINE(HAVE_ARMV8_CNTVCT_EL0,1,[Define if you have enabled the CNTVCT_EL0 cycle counter on ARMv8])
 fi
 
 AC_ARG_ENABLE(armv7a-cntvct, [AC_HELP_STRING([--enable-armv7a-cntvct],[enable the cycle counter on Armv7a via the CNTVCT register (see README-perfcounters for details and mandatory instructions)])], have_armv7acntvct=$enableval)
 if test "$have_armv7acntvct"x = "yes"x; then
-	AC_DEFINE(HAVE_ARMV7A_CNTVCT,1,[Define if you have enabled the CNTVCT cycle counter on ARMv7a])
+    AC_DEFINE(HAVE_ARMV7A_CNTVCT,1,[Define if you have enabled the CNTVCT cycle counter on ARMv7a])
 fi
 
 AC_ARG_ENABLE(armv7a-pmccntr, [AC_HELP_STRING([--enable-armv7a-pmccntr],[enable the cycle counter on Armv7a via the PMCCNTR register (see README-perfcounters for details and mandatory instructions)])], have_armv7apmccntr=$enableval)
 if test "$have_armv7apmccntr"x = "yes"x; then
-	AC_DEFINE(HAVE_ARMV7A_PMCCNTR,1,[Define if you have enabled the PMCCNTR cycle counter on ARMv7a])
+    AC_DEFINE(HAVE_ARMV7A_PMCCNTR,1,[Define if you have enabled the PMCCNTR cycle counter on ARMv7a])
 fi
 
 AC_ARG_ENABLE(generic-simd128, [AC_HELP_STRING([--enable-generic-simd128],[enable generic (gcc) 128-bit SIMD optimizations])], have_generic_simd128=$enableval, have_generic_simd128=no)
@@ -247,23 +247,23 @@ dnl AM_CONDITIONAL(HAVE_MIPS_PS, test "$have_mips_ps" = "yes")
 
 AC_ARG_WITH(slow-timer, [AC_HELP_STRING([--with-slow-timer],[use low-precision timers (SLOW)])], with_slow_timer=$withval, with_slow_timer=no)
 if test "$with_slow_timer" = "yes"; then
-	AC_DEFINE(WITH_SLOW_TIMER,1,[Use low-precision timers, making planner very slow])
+    AC_DEFINE(WITH_SLOW_TIMER,1,[Use low-precision timers, making planner very slow])
 fi
 
 AC_ARG_ENABLE(mips_zbus_timer, [AC_HELP_STRING([--enable-mips-zbus-timer],[use MIPS ZBus cycle-counter])], have_mips_zbus_timer=$enableval, have_mips_zbus_timer=no)
 if test "$have_mips_zbus_timer" = "yes"; then
-	AC_DEFINE(HAVE_MIPS_ZBUS_TIMER,1,[Define to enable use of MIPS ZBus cycle-counter.])
+    AC_DEFINE(HAVE_MIPS_ZBUS_TIMER,1,[Define to enable use of MIPS ZBus cycle-counter.])
 fi
 
 AC_ARG_WITH(our-malloc, [AC_HELP_STRING([--with-our-malloc],[use our aligned malloc (helpful for Win32)])], with_our_malloc=$withval, with_our_malloc=no)
 AC_ARG_WITH(our-malloc16, [AC_HELP_STRING([--with-our-malloc16],[Obsolete alias for --with-our-malloc16])], with_our_malloc=$withval)
 if test "$with_our_malloc" = "yes"; then
-	AC_DEFINE(WITH_OUR_MALLOC,1,[Use our own aligned malloc routine; mainly helpful for Windows systems lacking aligned allocation system-library routines.])
+    AC_DEFINE(WITH_OUR_MALLOC,1,[Use our own aligned malloc routine; mainly helpful for Windows systems lacking aligned allocation system-library routines.])
 fi
 
 AC_ARG_WITH(windows-f77-mangling, [AC_HELP_STRING([--with-windows-f77-mangling],[use common Win32 Fortran interface styles])], with_windows_f77_mangling=$withval, with_windows_f77_mangling=no)
 if test "$with_windows_f77_mangling" = "yes"; then
-	AC_DEFINE(WINDOWS_F77_MANGLING,1,[Use common Windows Fortran mangling styles for the Fortran interfaces.])
+    AC_DEFINE(WINDOWS_F77_MANGLING,1,[Use common Windows Fortran mangling styles for the Fortran interfaces.])
 fi
 
 AC_ARG_WITH(incoming-stack-boundary, [AC_HELP_STRING([--with-incoming-stack-boundary=X],[Assume that stack is aligned to (1<<X) bytes])], with_incoming_stack_boundary=$withval, with_incoming_stack_boundary=no)
@@ -316,7 +316,7 @@ if test "$enable_mpi" = "yes"; then
    if test 0 = $ac_cv_sizeof_MPI_Fint; then
       AC_MSG_WARN([sizeof(MPI_Fint) test failed]);
       dnl As a backup, assume Fortran integer == C int
-      AC_CHECK_SIZEOF(int) 
+      AC_CHECK_SIZEOF(int)
       if test 0 = $ac_cv_sizeof_int; then AC_MSG_ERROR([sizeof(int) test failed]); fi
       ac_cv_sizeof_MPI_Fint=$ac_cv_sizeof_int
    fi
@@ -334,19 +334,19 @@ case "${ax_cv_c_compiler_vendor}" in
    intel) # Stop icc from defining __GNUC__, except on MacOS where this fails
         case "${host_os}" in
             *darwin*) ;; # icc -no-gcc fails to compile some system headers
-            *) 
-	       AX_CHECK_COMPILER_FLAGS([-no-gcc], [CC="$CC -no-gcc"])
-               ;;
+            *)
+                AX_CHECK_COMPILER_FLAGS([-no-gcc], [CC="$CC -no-gcc"])
+                    ;;
         esac
         ;;
 
    hp) # must (sometimes) manually increase cpp limits to handle fftw3.h
         AX_CHECK_COMPILER_FLAGS([-Wp,-H128000],
-        		        [CC="$CC -Wp,-H128000"])
+                        [CC="$CC -Wp,-H128000"])
         ;;
 
    portland) # -Masmkeyword required for asm("") cycle counters
-	AX_CHECK_COMPILER_FLAGS([-Masmkeyword],
+        AX_CHECK_COMPILER_FLAGS([-Masmkeyword],
                                 [CC="$CC -Masmkeyword"])
         ;;
 esac
@@ -354,18 +354,18 @@ esac
 dnl Determine SIMD CFLAGS at least for gcc and icc
 case "${ax_cv_c_compiler_vendor}" in
     gnu|intel)
-	# SSE/SSE2
-	if test "$have_sse2" = "yes" -a "x$SSE2_CFLAGS" = x; then
-	    if test "$PRECISION" = d; then flag=msse2; else flag=msse; fi
-	    AX_CHECK_COMPILER_FLAGS(-$flag, [SSE2_CFLAGS="-$flag"],
-		[AC_MSG_ERROR([Need a version of gcc with -$flag])])
-	fi
+        # SSE/SSE2
+        if test "$have_sse2" = "yes" -a "x$SSE2_CFLAGS" = x; then
+            if test "$PRECISION" = d; then flag=msse2; else flag=msse; fi
+            AX_CHECK_COMPILER_FLAGS(-$flag, [SSE2_CFLAGS="-$flag"],
+            [AC_MSG_ERROR([Need a version of gcc with -$flag])])
+        fi
 
-	# AVX
-	if test "$have_avx" = "yes" -a "x$AVX_CFLAGS" = x; then
-	    AX_CHECK_COMPILER_FLAGS(-mavx, [AVX_CFLAGS="-mavx"],
-		[AC_MSG_ERROR([Need a version of gcc with -mavx])])
-	fi
+        # AVX
+        if test "$have_avx" = "yes" -a "x$AVX_CFLAGS" = x; then
+            AX_CHECK_COMPILER_FLAGS(-mavx, [AVX_CFLAGS="-mavx"],
+            [AC_MSG_ERROR([Need a version of gcc with -mavx])])
+        fi
 
         # AVX2
         # gcc-4.8 works with -march=core-avx2, but -mavx2 is not enough.
@@ -378,11 +378,11 @@ case "${ax_cv_c_compiler_vendor}" in
                 [AC_MSG_WARN([Need a version of gcc with -mfma (harmless for icc)])])
         fi
 
-	# AVX512
-	if test "$have_avx512" = "yes" -a "x$AVX512_CFLAGS" = x; then
-	    AX_CHECK_COMPILER_FLAGS(-mavx512f, [AVX512_CFLAGS="-mavx512f"],
-		[AC_MSG_ERROR([Need a version of gcc with -mavx512f])])
-	fi
+        # AVX512
+        if test "$have_avx512" = "yes" -a "x$AVX512_CFLAGS" = x; then
+            AX_CHECK_COMPILER_FLAGS(-mavx512f, [AVX512_CFLAGS="-mavx512f"],
+            [AC_MSG_ERROR([Need a version of gcc with -mavx512f])])
+        fi
 
         if test "$host_vendor" = "apple"; then
             # We need to tell gcc to use an external assembler to get AVX/AVX2 with gcc on OS X
@@ -391,30 +391,30 @@ case "${ax_cv_c_compiler_vendor}" in
             AX_CHECK_COMPILER_FLAGS([-Wl,-no_compact_unwind], [CFLAGS="$CFLAGS -Wl,-no_compact_unwind"])
         fi
 
-	# KCVI
-	if test "$have_kcvi" = "yes" -a "x$KCVI_CFLAGS" = x; then
-	    AX_CHECK_COMPILER_FLAGS(-mmic, [KCVI_CFLAGS="-mmic"],
-		[AC_MSG_ERROR([Need a version of icc with -mmic])])
-	fi
+        # KCVI
+        if test "$have_kcvi" = "yes" -a "x$KCVI_CFLAGS" = x; then
+            AX_CHECK_COMPILER_FLAGS(-mmic, [KCVI_CFLAGS="-mmic"],
+            [AC_MSG_ERROR([Need a version of icc with -mmic])])
+        fi
 
-	if test "$have_altivec" = "yes" -a "x$ALTIVEC_CFLAGS" = x; then
-	    # -DFAKE__VEC__ is a workaround because gcc-3.3 does not
-	    # #define __VEC__ with -maltivec.
-	    AX_CHECK_COMPILER_FLAGS(-faltivec, [ALTIVEC_CFLAGS="-faltivec"],
-		[AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
-		    [ALTIVEC_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
-		    [AX_CHECK_COMPILER_FLAGS(-fvec, [ALTIVEC_CFLAGS="-fvec"],
-			[AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
-	fi
+        if test "$have_altivec" = "yes" -a "x$ALTIVEC_CFLAGS" = x; then
+            # -DFAKE__VEC__ is a workaround because gcc-3.3 does not
+            # #define __VEC__ with -maltivec.
+            AX_CHECK_COMPILER_FLAGS(-faltivec, [ALTIVEC_CFLAGS="-faltivec"],
+            [AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
+                [ALTIVEC_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
+                [AX_CHECK_COMPILER_FLAGS(-fvec, [ALTIVEC_CFLAGS="-fvec"],
+                [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
+        fi
 
         case "${host_cpu}" in
-                aarch64)
+            aarch64)
                 ;;
-                *)
-	        if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
-	            AX_CHECK_COMPILER_FLAGS(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon"],
-			[AC_MSG_ERROR([Need a version of gcc with -mfpu=neon])])
-	        fi
+            *)
+                if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
+                    AX_CHECK_COMPILER_FLAGS(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon"],
+                [AC_MSG_ERROR([Need a version of gcc with -mfpu=neon])])
+                fi
                 ;;
         esac
 
@@ -423,20 +423,20 @@ case "${ax_cv_c_compiler_vendor}" in
                 [AC_MSG_ERROR([Need a version of gcc with -mvsx])])
         fi
 
-	dnl FIXME:
-	dnl elif test "$have_mips_ps" = "yes"; then
-	dnl     # Just punt here and use only new 4.2 compiler :(
-	dnl 	# Should add section for older compilers...
-	dnl 	AX_CHECK_COMPILER_FLAGS(-mpaired-single,
-	dnl 	    [SIMD_CFLAGS="-mpaired-single"],
-	dnl 	    #[AC_MSG_ERROR([Need a version of gcc with -mpaired-single])])
-	dnl 	    [AX_CHECK_COMPILER_FLAGS(-march=mips64,
-	dnl 	      [SIMD_CFLAGS="-march=mips64"],
-	dnl 	        [AC_MSG_ERROR(
-	dnl 		 [Need a version of gcc with -mpaired-single or -march=mips64])
-	dnl 		])])
-	dnl fi
-	;;
+    dnl FIXME:
+    dnl elif test "$have_mips_ps" = "yes"; then
+    dnl     # Just punt here and use only new 4.2 compiler :(
+    dnl 	# Should add section for older compilers...
+    dnl 	AX_CHECK_COMPILER_FLAGS(-mpaired-single,
+    dnl 	    [SIMD_CFLAGS="-mpaired-single"],
+    dnl 	    #[AC_MSG_ERROR([Need a version of gcc with -mpaired-single])])
+    dnl 	    [AX_CHECK_COMPILER_FLAGS(-march=mips64,
+    dnl 	      [SIMD_CFLAGS="-march=mips64"],
+    dnl 	        [AC_MSG_ERROR(
+    dnl 		 [Need a version of gcc with -mpaired-single or -march=mips64])
+    dnl 		])])
+    dnl fi
+    ;;
 
     clang)
 
@@ -445,10 +445,16 @@ case "${ax_cv_c_compiler_vendor}" in
                 [AC_MSG_ERROR([Need a version of clang with -mavx])])
         fi
 
-	if test "$have_avx2" = "yes" -a "x$AVX2_CFLAGS" = x; then
-            AX_CHECK_COMPILER_FLAGS(-mavx2, [AVX2_CFLAGS="-mavx2"],
-                [AC_MSG_ERROR([Need a version of clang with -mavx2])])
-            AX_CHECK_COMPILER_FLAGS(-mfma, [AVX2_CFLAGS="$AVX2_CFLAGS -mfma"])
+        if test "$have_avx2" = "yes" -a "x$AVX2_CFLAGS" = x; then
+                AX_CHECK_COMPILER_FLAGS(-mavx2, [AVX2_CFLAGS="-mavx2"],
+                    [AC_MSG_ERROR([Need a version of clang with -mavx2])])
+                AX_CHECK_COMPILER_FLAGS(-mfma, [AVX2_CFLAGS="$AVX2_CFLAGS -mfma"])
+        fi
+
+        # AVX512
+        if test "$have_avx512" = "yes" -a "x$AVX512_CFLAGS" = x; then
+            AX_CHECK_COMPILER_FLAGS(-mavx512f, [AVX512_CFLAGS="-mavx512f"],
+            [AC_MSG_ERROR([Need a version of clang with -mavx512f])])
         fi
 
         if test "$have_vsx" = "yes" -a "x$VSX_CFLAGS" = x; then
@@ -483,8 +489,8 @@ if test "$with_incoming_stack_boundary"x != "no"x; then
    case "${ax_cv_c_compiler_vendor}" in
       gnu)
         tentative_flags="-mincoming-stack-boundary=$with_incoming_stack_boundary";
-        AX_CHECK_COMPILER_FLAGS($tentative_flags, 
-	          [STACK_ALIGN_CFLAGS=$tentative_flags])
+        AX_CHECK_COMPILER_FLAGS($tentative_flags,
+              [STACK_ALIGN_CFLAGS=$tentative_flags])
       ;;
    esac
 fi
@@ -493,7 +499,7 @@ AC_SUBST(STACK_ALIGN_CFLAGS)
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h fenv.h limits.h malloc.h stddef.h sys/time.h])
-dnl c_asm.h: Header file for enabling asm() on Digital Unix  
+dnl c_asm.h: Header file for enabling asm() on Digital Unix
 dnl intrinsics.h: cray unicos
 dnl sys/sysctl.h: MacOS X altivec detection
 
@@ -587,14 +593,14 @@ AC_TRY_LINK([#ifdef HAVE_INTRINSICS_H
 AC_MSG_RESULT($rtc_ok)
 
 if test "$PRECISION" = "l"; then
-	AC_CHECK_FUNCS([cosl sinl tanl], [], [AC_MSG_ERROR([long-double precision requires long-double trigonometric routines])])
+    AC_CHECK_FUNCS([cosl sinl tanl], [], [AC_MSG_ERROR([long-double precision requires long-double trigonometric routines])])
 fi
 
 AC_MSG_CHECKING([for isnan])
 AC_TRY_LINK([#include <math.h>
 ], if (!isnan(3.14159)) isnan(2.7183);, ok=yes, ok=no)
 if test "$ok" = "yes"; then
-	AC_DEFINE(HAVE_ISNAN,1,[Define if the isnan() function/macro is available.])
+    AC_DEFINE(HAVE_ISNAN,1,[Define if the isnan() function/macro is available.])
 fi
 AC_MSG_RESULT(${ok})
 
@@ -603,35 +609,35 @@ AX_GCC_ALIGNS_STACK()
 
 dnl override CFLAGS selection when debugging
 if test "${enable_debug}" = "yes"; then
-	CFLAGS="-g"
+    CFLAGS="-g"
 fi
 
 dnl add gcc warnings, in debug/maintainer mode only
 if test "$enable_debug" = yes || test "$USE_MAINTAINER_MODE" = yes; then
 if test "$ac_test_CFLAGS" != "set"; then
-	if test $ac_cv_prog_gcc = yes; then
-		CFLAGS="$CFLAGS -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align -pedantic -Wno-long-long -Wshadow -Wbad-function-cast -Wwrite-strings -Wstrict-prototypes -Wredundant-decls -Wnested-externs" # -Wundef -Wconversion -Wmissing-prototypes -Wmissing-declarations 
-	fi
+    if test $ac_cv_prog_gcc = yes; then
+        CFLAGS="$CFLAGS -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align -pedantic -Wno-long-long -Wshadow -Wbad-function-cast -Wwrite-strings -Wstrict-prototypes -Wredundant-decls -Wnested-externs" # -Wundef -Wconversion -Wmissing-prototypes -Wmissing-declarations
+    fi
 fi
 fi
 
 dnl check for a proper indent in maintainer mode
 if test "$USE_MAINTAINER_MODE" = yes; then
-        AC_PATH_PROG(INDENT, indent, indent)
-        # if INDENT is set to 'indent' then we didn't find indent
-        if test "$INDENT" != indent ; then
-                AC_MSG_CHECKING(if $INDENT is GNU indent)
-                if $INDENT --version 2>/dev/null | head -n 1|grep "GNU indent" > /dev/null ; then
-                        AC_MSG_RESULT(yes)
-                        INDENT="$INDENT -kr -cs -i5 -l800 -fca -nfc1 -sc -sob -cli4 -TR -Tplanner -TV"
-                else
-                        AC_MSG_RESULT(no)
-                        AC_MSG_WARN($INDENT does not appear to be GNU indent.)
-                fi
+    AC_PATH_PROG(INDENT, indent, indent)
+    # if INDENT is set to 'indent' then we didn't find indent
+    if test "$INDENT" != indent ; then
+        AC_MSG_CHECKING(if $INDENT is GNU indent)
+        if $INDENT --version 2>/dev/null | head -n 1|grep "GNU indent" > /dev/null ; then
+                AC_MSG_RESULT(yes)
+                INDENT="$INDENT -kr -cs -i5 -l800 -fca -nfc1 -sc -sob -cli4 -TR -Tplanner -TV"
         else
-                AC_MSG_WARN(no indent program found: codelets will be ugly)
-                INDENT=cat
+                AC_MSG_RESULT(no)
+                AC_MSG_WARN($INDENT does not appear to be GNU indent.)
         fi
+    else
+        AC_MSG_WARN(no indent program found: codelets will be ugly)
+        INDENT=cat
+    fi
 fi
 
 dnl -----------------------------------------------------------------------
@@ -639,37 +645,37 @@ dnl -----------------------------------------------------------------------
 AC_ARG_ENABLE(fortran, [AC_HELP_STRING([--disable-fortran],[don't include Fortran-callable wrappers])], enable_fortran=$enableval, enable_fortran=yes)
 
 if test "$enable_fortran" = "yes"; then
-        AC_PROG_F77
-        if test -z "$F77"; then
-                enable_fortran=no
-                AC_MSG_WARN([*** Couldn't find f77 compiler; using default Fortran wrappers.])
-	else
-		AC_F77_DUMMY_MAIN([], [enable_fortran=no
-			AC_MSG_WARN([*** Couldn't figure out how to link C and Fortran; using default Fortran wrappers.])])
-        fi
+    AC_PROG_F77
+    if test -z "$F77"; then
+        enable_fortran=no
+        AC_MSG_WARN([*** Couldn't find f77 compiler; using default Fortran wrappers.])
+    else
+        AC_F77_DUMMY_MAIN([], [enable_fortran=no
+        AC_MSG_WARN([*** Couldn't figure out how to link C and Fortran; using default Fortran wrappers.])])
+    fi
 else
-	AC_DEFINE([DISABLE_FORTRAN], 1, [Define to disable Fortran wrappers.])
+    AC_DEFINE([DISABLE_FORTRAN], 1, [Define to disable Fortran wrappers.])
 fi
 
 if test "x$enable_fortran" = xyes; then
-        AC_F77_WRAPPERS
-	AC_F77_FUNC(f77foo)
-	AC_F77_FUNC(f77_foo)
-	f77_foo2=`echo $f77foo | sed 's/77/77_/'`
-	if test "$f77_foo" = "$f77_foo2"; then
-		AC_DEFINE(F77_FUNC_EQUIV, 1, [Define if F77_FUNC and F77_FUNC_ are equivalent.])
+    AC_F77_WRAPPERS
+    AC_F77_FUNC(f77foo)
+    AC_F77_FUNC(f77_foo)
+    f77_foo2=`echo $f77foo | sed 's/77/77_/'`
+    if test "$f77_foo" = "$f77_foo2"; then
+        AC_DEFINE(F77_FUNC_EQUIV, 1, [Define if F77_FUNC and F77_FUNC_ are equivalent.])
 
-		# Include g77 wrappers by default for GNU systems or gfortran
-		with_g77_wrappers=$ac_cv_f77_compiler_gnu
-		case $host_os in *gnu*) with_g77_wrappers=yes ;; esac
-	fi
+        # Include g77 wrappers by default for GNU systems or gfortran
+        with_g77_wrappers=$ac_cv_f77_compiler_gnu
+        case $host_os in *gnu*) with_g77_wrappers=yes ;; esac
+    fi
 else
-	with_g77_wrappers=no
+    with_g77_wrappers=no
 fi
 
 AC_ARG_WITH(g77-wrappers, [AC_HELP_STRING([--with-g77-wrappers],[force inclusion of g77-compatible wrappers in addition to any other Fortran compiler that is detected])], with_g77_wrappers=$withval)
 if test "x$with_g77_wrappers" = "xyes"; then
-	AC_DEFINE(WITH_G77_WRAPPERS,1,[Include g77-compatible wrappers in addition to any other Fortran wrappers.])
+    AC_DEFINE(WITH_G77_WRAPPERS,1,[Include g77-compatible wrappers in addition to any other Fortran wrappers.])
 fi
 
 dnl -----------------------------------------------------------------------
@@ -690,37 +696,37 @@ fi
 AC_ARG_WITH(combined-threads, [AC_HELP_STRING([--with-combined-threads],[combine threads into main libfftw3])], with_combined_threads=$withval, with_combined_threads=no)
 
 if test "$with_combined_threads" = yes; then
-   if test "$enable_openmp" = "yes"; then
-      AC_MSG_ERROR([--with-combined-threads incompatible with --enable-openmp])
-   fi
-   if test "$enable_threads" != "yes"; then
-      AC_MSG_ERROR([--with-combined-threads requires --enable-threads])
-   fi
+    if test "$enable_openmp" = "yes"; then
+        AC_MSG_ERROR([--with-combined-threads incompatible with --enable-openmp])
+    fi
+    if test "$enable_threads" != "yes"; then
+        AC_MSG_ERROR([--with-combined-threads requires --enable-threads])
+    fi
 fi
 
 dnl Check for threads library...
 THREADLIBS=""
 if test "$enable_threads" = "yes"; then
         # Win32 threads are the default on Windows:
-	if test -z "$THREADLIBS"; then
-		AC_MSG_CHECKING([for Win32 threads])
-		AC_TRY_LINK([#include <windows.h>],
-			[_beginthreadex(0,0,0,0,0,0);],
-			[THREADLIBS=" "; AC_MSG_RESULT(yes)],
-			[AC_MSG_RESULT(no)])
-	fi
+    if test -z "$THREADLIBS"; then
+        AC_MSG_CHECKING([for Win32 threads])
+        AC_TRY_LINK([#include <windows.h>],
+            [_beginthreadex(0,0,0,0,0,0);],
+            [THREADLIBS=" "; AC_MSG_RESULT(yes)],
+            [AC_MSG_RESULT(no)])
+    fi
 
-	# POSIX threads, the default choice everywhere else:
-	if test -z "$THREADLIBS"; then
-		ACX_PTHREAD([THREADLIBS="$PTHREAD_LIBS "
-	                     CC="$PTHREAD_CC"
-	                     AC_DEFINE(USING_POSIX_THREADS, 1, [Define if we have and are using POSIX threads.])])
-	fi
+    # POSIX threads, the default choice everywhere else:
+    if test -z "$THREADLIBS"; then
+        ACX_PTHREAD([THREADLIBS="$PTHREAD_LIBS "
+                         CC="$PTHREAD_CC"
+                         AC_DEFINE(USING_POSIX_THREADS, 1, [Define if we have and are using POSIX threads.])])
+    fi
 
-	if test -z "$THREADLIBS"; then
-		AC_MSG_ERROR([couldn't find threads library for --enable-threads])
-	fi
-	AC_DEFINE(HAVE_THREADS, 1, [Define if we have a threads library.])
+    if test -z "$THREADLIBS"; then
+        AC_MSG_ERROR([couldn't find threads library for --enable-threads])
+    fi
+    AC_DEFINE(HAVE_THREADS, 1, [Define if we have a threads library.])
 fi
 AC_SUBST(THREADLIBS)
 AM_CONDITIONAL(THREADS, test "$enable_threads" = "yes")
@@ -740,10 +746,10 @@ AC_TRY_CPP([#include "cycle.h"
 CPPFLAGS=$save_CPPFLAGS
 AC_MSG_RESULT($ok)
 if test $ok = no && test "x$with_slow_timer" = xno; then
-	echo "***************************************************************"
-	echo "WARNING: No cycle counter found.  FFTW will use ESTIMATE mode  "
-	echo "         for all plans.  See the manual for more information."
-	echo "***************************************************************"
+    echo "***************************************************************"
+    echo "WARNING: No cycle counter found.  FFTW will use ESTIMATE mode  "
+    echo "         for all plans.  See the manual for more information."
+    echo "***************************************************************"
 fi
 
 dnl -----------------------------------------------------------------------
