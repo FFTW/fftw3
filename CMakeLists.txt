@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.9)
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
@@ -28,8 +28,10 @@ option (ENABLE_AVX2 "Compile with AVX2 instruction set support" OFF)
 
 option (DISABLE_FORTRAN "Disable Fortran wrapper routines" OFF)
 
-include(GNUInstallDirs)
+option (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "Export all symbols when compiling on Windows" OFF)
 
+include(GNUInstallDirs)
+include(FindThreads)
 
 include (CheckIncludeFile)
 check_include_file (alloca.h         HAVE_ALLOCA_H)
@@ -299,14 +301,18 @@ set (fftw3_lib fftw3${PREC_SUFFIX})
 configure_file (cmake.config.h.in config.h @ONLY)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-if (BUILD_SHARED_LIBS)
-  add_definitions (-DFFTW_DLL)
+if (NOT BUILD_SHARED_LIBS)
+  add_compile_definitions(FFTW_STATIC)
 endif ()
 
 add_library (${fftw3_lib} ${SOURCEFILES})
-target_include_directories (${fftw3_lib} INTERFACE $<INSTALL_INTERFACE:include>)
+target_include_directories (${fftw3_lib} INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
+  $<INSTALL_INTERFACE:include>
+)
 if (MSVC AND NOT (CMAKE_C_COMPILER_ID STREQUAL "Intel"))
   target_compile_definitions (${fftw3_lib} PRIVATE /bigobj)
+  target_compile_definitions (${fftw3_lib} PRIVATE FFTW_EXPORTS)
 endif ()
 if (HAVE_SSE)
   target_compile_options (${fftw3_lib} PRIVATE ${SSE_FLAG})
@@ -334,20 +340,26 @@ if (Threads_FOUND)
     target_link_libraries (${fftw3_lib} ${CMAKE_THREAD_LIBS_INIT})
   else ()
     add_library (${fftw3_lib}_threads ${fftw_threads_SOURCE})
-    target_include_directories (${fftw3_lib}_threads INTERFACE $<INSTALL_INTERFACE:include>)
+    target_include_directories (${fftw3_lib}_threads INTERFACE
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
+      $<INSTALL_INTERFACE:include>
+    )
     target_link_libraries (${fftw3_lib}_threads ${fftw3_lib})
     target_link_libraries (${fftw3_lib}_threads ${CMAKE_THREAD_LIBS_INIT})
     list (APPEND subtargets ${fftw3_lib}_threads)
   endif ()
 endif ()
 
-if (OPENMP_FOUND)
+if (OpenMP_FOUND)
   add_library (${fftw3_lib}_omp ${fftw_omp_SOURCE})
-  target_include_directories (${fftw3_lib}_omp INTERFACE $<INSTALL_INTERFACE:include>)
+  target_include_directories (${fftw3_lib}_omp INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
+    $<INSTALL_INTERFACE:include>
+  )
   target_link_libraries (${fftw3_lib}_omp ${fftw3_lib})
-  target_link_libraries (${fftw3_lib}_omp ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries (${fftw3_lib}_omp Threads::Threads)
+  target_link_libraries (${fftw3_lib}_omp OpenMP::OpenMP_C)
   list (APPEND subtargets ${fftw3_lib}_omp)
-  target_compile_options (${fftw3_lib}_omp PRIVATE ${OpenMP_C_FLAGS})
 endif ()
 
 foreach(subtarget ${subtargets})

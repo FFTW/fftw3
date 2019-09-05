@@ -18,7 +18,16 @@
  *
  */
 
+#ifndef __DFT_CT_H__
+#define __DFT_CT_H__
+
 #include "dft/dft.h"
+
+#if defined(_MSC_VER) && !defined(FFTW_STATIC) && !defined(FFTW_EXPORTS)
+    #define FFTW_EXTERN extern __declspec(dllimport)
+#else
+    #define FFTW_EXTERN extern 
+#endif
 
 typedef void (*dftwapply)(const plan *ego, R *rio, R *iio);
 typedef struct ct_solver_s ct_solver;
@@ -56,7 +65,7 @@ int X(ct_applicable)(const ct_solver *, const problem *, planner *);
 ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, 
 			  ct_mkinferior mkcldw, 
 			  ct_force_vrecursion force_vrecursionp);
-extern ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
+FFTW_EXTERN ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
 					 ct_mkinferior, ct_force_vrecursion);
 
 void X(regsolver_ct_directw)(planner *plnr,
@@ -66,3 +75,5 @@ void X(regsolver_ct_directwbuf)(planner *plnr,
 solver *X(mksolver_ctsq)(kdftwsq codelet, const ct_desc *desc, int dec);
 void X(regsolver_ct_directwsq)(planner *plnr, kdftwsq codelet, 
 			       const ct_desc *desc, int dec);
+
+#endif				/* __DFT_CT_H__ */

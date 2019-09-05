@@ -125,6 +125,11 @@ void *X(kernel_malloc)(size_t n)
 #    undef real_free
 #    define real_free MPFree
 
+# elif defined(__MINGW32__)
+    p = _aligned_malloc(n, MIN_ALIGNMENT);
+#   undef real_free
+#   define real_free _aligned_free
+
 #  else
      /* Add your machine here and send a patch to fftw@fftw.org 
         or (e.g. for Windows) configure --with-our-malloc */

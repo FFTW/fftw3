@@ -75,124 +75,124 @@ struct fftw_mpi_ddim_do_not_use_me {
 								\
 typedef struct fftw_mpi_ddim_do_not_use_me XM(ddim);		\
 								\
-FFTW_EXTERN void XM(init)(void);				\
-FFTW_EXTERN void XM(cleanup)(void);				\
+extern void XM(init)(void);				\
+extern void XM(cleanup)(void);				\
 								\
-FFTW_EXTERN ptrdiff_t XM(local_size_many_transposed)		\
+extern ptrdiff_t XM(local_size_many_transposed)		\
      (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,		\
       ptrdiff_t block0, ptrdiff_t block1, MPI_Comm comm,	\
       ptrdiff_t *local_n0, ptrdiff_t *local_0_start,		\
       ptrdiff_t *local_n1, ptrdiff_t *local_1_start);		\
-FFTW_EXTERN ptrdiff_t XM(local_size_many)			\
+extern ptrdiff_t XM(local_size_many)			\
      (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,		\
       ptrdiff_t block0, MPI_Comm comm,				\
       ptrdiff_t *local_n0, ptrdiff_t *local_0_start);		\
-FFTW_EXTERN ptrdiff_t XM(local_size_transposed)			\
+extern ptrdiff_t XM(local_size_transposed)			\
      (int rnk, const ptrdiff_t *n, MPI_Comm comm,		\
       ptrdiff_t *local_n0, ptrdiff_t *local_0_start,		\
       ptrdiff_t *local_n1, ptrdiff_t *local_1_start);		\
-FFTW_EXTERN ptrdiff_t XM(local_size)				\
+extern ptrdiff_t XM(local_size)				\
      (int rnk, const ptrdiff_t *n, MPI_Comm comm,		\
       ptrdiff_t *local_n0, ptrdiff_t *local_0_start);		\
-FFTW_EXTERN ptrdiff_t XM(local_size_many_1d)(			\
+extern ptrdiff_t XM(local_size_many_1d)(			\
      ptrdiff_t n0, ptrdiff_t howmany,				\
      MPI_Comm comm, int sign, unsigned flags,			\
      ptrdiff_t *local_ni, ptrdiff_t *local_i_start,		\
      ptrdiff_t *local_no, ptrdiff_t *local_o_start);		\
-FFTW_EXTERN ptrdiff_t XM(local_size_1d)(			\
+extern ptrdiff_t XM(local_size_1d)(			\
      ptrdiff_t n0, MPI_Comm comm, int sign, unsigned flags,	\
      ptrdiff_t *local_ni, ptrdiff_t *local_i_start,		\
      ptrdiff_t *local_no, ptrdiff_t *local_o_start);		\
-FFTW_EXTERN ptrdiff_t XM(local_size_2d)(			\
+extern ptrdiff_t XM(local_size_2d)(			\
      ptrdiff_t n0, ptrdiff_t n1, MPI_Comm comm,			\
      ptrdiff_t *local_n0, ptrdiff_t *local_0_start);		\
-FFTW_EXTERN ptrdiff_t XM(local_size_2d_transposed)(		\
+extern ptrdiff_t XM(local_size_2d_transposed)(		\
      ptrdiff_t n0, ptrdiff_t n1, MPI_Comm comm,			\
      ptrdiff_t *local_n0, ptrdiff_t *local_0_start,		\
      ptrdiff_t *local_n1, ptrdiff_t *local_1_start);		\
-FFTW_EXTERN ptrdiff_t XM(local_size_3d)(			\
+extern ptrdiff_t XM(local_size_3d)(			\
      ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2, MPI_Comm comm,	\
      ptrdiff_t *local_n0, ptrdiff_t *local_0_start);		\
-FFTW_EXTERN ptrdiff_t XM(local_size_3d_transposed)(		\
+extern ptrdiff_t XM(local_size_3d_transposed)(		\
      ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2, MPI_Comm comm,	\
      ptrdiff_t *local_n0, ptrdiff_t *local_0_start,		\
      ptrdiff_t *local_n1, ptrdiff_t *local_1_start);		\
 								\
-FFTW_EXTERN X(plan) XM(plan_many_transpose)			\
+extern X(plan) XM(plan_many_transpose)			\
      (ptrdiff_t n0, ptrdiff_t n1,				\
       ptrdiff_t howmany, ptrdiff_t block0, ptrdiff_t block1,	\
       R *in, R *out, MPI_Comm comm, unsigned flags);		\
-FFTW_EXTERN X(plan) XM(plan_transpose)				\
+extern X(plan) XM(plan_transpose)				\
      (ptrdiff_t n0, ptrdiff_t n1,				\
       R *in, R *out, MPI_Comm comm, unsigned flags);		\
 								\
-FFTW_EXTERN X(plan) XM(plan_many_dft)				\
+extern X(plan) XM(plan_many_dft)				\
      (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,		\
       ptrdiff_t block, ptrdiff_t tblock, C *in, C *out,		\
       MPI_Comm comm, int sign, unsigned flags);			\
-FFTW_EXTERN X(plan) XM(plan_dft)				\
+extern X(plan) XM(plan_dft)				\
      (int rnk, const ptrdiff_t *n, C *in, C *out,		\
       MPI_Comm comm, int sign, unsigned flags);			\
-FFTW_EXTERN X(plan) XM(plan_dft_1d)				\
+extern X(plan) XM(plan_dft_1d)				\
      (ptrdiff_t n0, C *in, C *out,				\
       MPI_Comm comm, int sign, unsigned flags);			\
-FFTW_EXTERN X(plan) XM(plan_dft_2d)				\
+extern X(plan) XM(plan_dft_2d)				\
      (ptrdiff_t n0, ptrdiff_t n1, C *in, C *out,		\
       MPI_Comm comm, int sign, unsigned flags);			\
-FFTW_EXTERN X(plan) XM(plan_dft_3d)				\
+extern X(plan) XM(plan_dft_3d)				\
      (ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2, C *in, C *out,	\
       MPI_Comm comm, int sign, unsigned flags);			\
 								\
-FFTW_EXTERN X(plan) XM(plan_many_r2r)				\
+extern X(plan) XM(plan_many_r2r)				\
      (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,		\
       ptrdiff_t iblock, ptrdiff_t oblock, R *in, R *out,	\
       MPI_Comm comm, const X(r2r_kind) *kind, unsigned flags);	\
-FFTW_EXTERN X(plan) XM(plan_r2r)				\
+extern X(plan) XM(plan_r2r)				\
      (int rnk, const ptrdiff_t *n, R *in, R *out,		\
       MPI_Comm comm, const X(r2r_kind) *kind, unsigned flags);	\
-FFTW_EXTERN X(plan) XM(plan_r2r_2d)				\
+extern X(plan) XM(plan_r2r_2d)				\
      (ptrdiff_t n0, ptrdiff_t n1, R *in, R *out, MPI_Comm comm,	\
       X(r2r_kind) kind0, X(r2r_kind) kind1, unsigned flags);	\
-FFTW_EXTERN X(plan) XM(plan_r2r_3d)				\
+extern X(plan) XM(plan_r2r_3d)				\
      (ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2,			\
       R *in, R *out, MPI_Comm comm, X(r2r_kind) kind0,		\
       X(r2r_kind) kind1, X(r2r_kind) kind2, unsigned flags);	\
 								\
-FFTW_EXTERN X(plan) XM(plan_many_dft_r2c)			\
+extern X(plan) XM(plan_many_dft_r2c)			\
      (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,		\
       ptrdiff_t iblock, ptrdiff_t oblock, R *in, C *out,	\
       MPI_Comm comm, unsigned flags);				\
-FFTW_EXTERN X(plan) XM(plan_dft_r2c)				\
+extern X(plan) XM(plan_dft_r2c)				\
      (int rnk, const ptrdiff_t *n, R *in, C *out,		\
       MPI_Comm comm, unsigned flags);				\
-FFTW_EXTERN X(plan) XM(plan_dft_r2c_2d)				\
+extern X(plan) XM(plan_dft_r2c_2d)				\
      (ptrdiff_t n0, ptrdiff_t n1, R *in, C *out,		\
       MPI_Comm comm, unsigned flags);				\
-FFTW_EXTERN X(plan) XM(plan_dft_r2c_3d)				\
+extern X(plan) XM(plan_dft_r2c_3d)				\
      (ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2, R *in, C *out,	\
       MPI_Comm comm, unsigned flags);				\
 								\
-FFTW_EXTERN X(plan) XM(plan_many_dft_c2r)			\
+extern X(plan) XM(plan_many_dft_c2r)			\
      (int rnk, const ptrdiff_t *n, ptrdiff_t howmany,		\
       ptrdiff_t iblock, ptrdiff_t oblock, C *in, R *out,	\
       MPI_Comm comm, unsigned flags);				\
-FFTW_EXTERN X(plan) XM(plan_dft_c2r)				\
+extern X(plan) XM(plan_dft_c2r)				\
      (int rnk, const ptrdiff_t *n, C *in, R *out,		\
       MPI_Comm comm, unsigned flags);				\
-FFTW_EXTERN X(plan) XM(plan_dft_c2r_2d)				\
+extern X(plan) XM(plan_dft_c2r_2d)				\
      (ptrdiff_t n0, ptrdiff_t n1, C *in, R *out,		\
       MPI_Comm comm, unsigned flags);				\
-FFTW_EXTERN X(plan) XM(plan_dft_c2r_3d)				\
+extern X(plan) XM(plan_dft_c2r_3d)				\
      (ptrdiff_t n0, ptrdiff_t n1, ptrdiff_t n2, C *in, R *out,	\
       MPI_Comm comm, unsigned flags);				\
 								\
-FFTW_EXTERN void XM(gather_wisdom)(MPI_Comm comm_);		\
-FFTW_EXTERN void XM(broadcast_wisdom)(MPI_Comm comm_);          \
+extern void XM(gather_wisdom)(MPI_Comm comm_);		\
+extern void XM(broadcast_wisdom)(MPI_Comm comm_);          \
 								\
-FFTW_EXTERN void XM(execute_dft)(X(plan) p, C *in, C *out);	\
-FFTW_EXTERN void XM(execute_dft_r2c)(X(plan) p, R *in, C *out);	\
-FFTW_EXTERN void XM(execute_dft_c2r)(X(plan) p, C *in, R *out);	\
-FFTW_EXTERN void XM(execute_r2r)(X(plan) p, R *in, R *out); 
+extern void XM(execute_dft)(X(plan) p, C *in, C *out);	\
+extern void XM(execute_dft_r2c)(X(plan) p, R *in, C *out);	\
+extern void XM(execute_dft_c2r)(X(plan) p, C *in, R *out);	\
+extern void XM(execute_r2r)(X(plan) p, R *in, R *out); 
 
 
 
