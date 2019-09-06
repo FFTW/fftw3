@@ -154,6 +154,14 @@ extern const solvtab X(solvtab_rdft_lsx);
 extern const solvtab X(solvtab_rdft_lasx);
 extern const solvtab X(solvtab_rdft_generic_simd128);
 extern const solvtab X(solvtab_rdft_generic_simd256);
+extern const solvtab X(solvtab_rdft_r5v128);
+extern const solvtab X(solvtab_rdft_r5v256);
+extern const solvtab X(solvtab_rdft_r5v512);
+extern const solvtab X(solvtab_rdft_r5v1024);
+extern const solvtab X(solvtab_rdft_r5v2048);
+extern const solvtab X(solvtab_rdft_r5v4096);
+extern const solvtab X(solvtab_rdft_r5v8192);
+extern const solvtab X(solvtab_rdft_r5v16384);
 
 /* real-input & output DFT-like codelets (DHT, etc.) */
 typedef struct kr2r_desc_s kr2r_desc;

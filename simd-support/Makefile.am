@@ -16,4 +16,5 @@ neon.c simd-neon.h \
 lsx.c simd-lsx.h \
 lasx.c simd-lasx.h \
 simd-generic128.h simd-generic256.h \
-sve.c simd-maskedsve.h simd-maskedsve128.h simd-maskedsve256.h simd-maskedsve512.h simd-maskedsve1024.h simd-maskedsve2048.h
+sve.c simd-maskedsve.h simd-maskedsve128.h simd-maskedsve256.h simd-maskedsve512.h simd-maskedsve1024.h simd-maskedsve2048.h \
+r5v.c simd-r5v.h simd-r5v128.h simd-r5v256.h simd-r5v512.h simd-r5v1024.h simd-r5v2048.h simd-r5v4096.h simd-r5v8192.h simd-r5v16384.h
