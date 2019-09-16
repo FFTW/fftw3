@@ -37,13 +37,17 @@ void X(spawn_loop)(int loopmax, int nthreads,
 int X(ithreads_init)(void);
 void X(threads_cleanup)(void);
 
+typedef void (*spawnloop_function)(spawn_function, spawn_data *, size_t, int, void *);
+extern spawnloop_function X(spawnloop_callback);
+extern void *X(spawnloop_callback_data);
+
 /* configurations */
 
 void X(dft_thr_vrank_geq1_register)(planner *p);
 void X(rdft_thr_vrank_geq1_register)(planner *p);
 void X(rdft2_thr_vrank_geq1_register)(planner *p);
 
-ct_solver *X(mksolver_ct_threads)(size_t size, INT r, int dec, 
+ct_solver *X(mksolver_ct_threads)(size_t size, INT r, int dec,
 				  ct_mkinferior mkcldw,
 				  ct_force_vrecursion force_vrecursionp);
 hc2hc_solver *X(mksolver_hc2hc_threads)(size_t size, INT r, hc2hc_mkinferior mkcldw);
@@ -52,5 +56,5 @@ void X(threads_conf_standard)(planner *p);
 void X(threads_register_hooks)(void);
 void X(threads_unregister_hooks)(void);
 void X(threads_register_planner_hooks)(void);
-                                      
+
 #endif /* __THREADS_H__ */

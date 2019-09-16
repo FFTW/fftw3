@@ -389,15 +389,6 @@ int X(ithreads_init)(void)
      return 0; /* no error */
 }
 
-typedef void (*spawnloop_function)(spawn_function, spawn_data *, size_t, int, void *);
-static spawnloop_function spawnloop_callback = (spawnloop_function) 0;
-void *spawnloop_callback_data = (void *) 0;
-void X(threads_set_callback)(spawnloop_function spawnloop, void *data)
-{
-     spawnloop_callback = spawnloop;
-     spawnloop_callback_data = data;
-}
-
 /* Distribute a loop from 0 to loopmax-1 over nthreads threads.
    proc(d) is called to execute a block of iterations from d->min
    to d->max-1.  d->thr_num indicate the number of the thread
@@ -424,7 +415,7 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      block_size = (loopmax + nthr - 1) / nthr;
      nthr = (loopmax + block_size - 1) / block_size;
 
-     if (spawnloop_callback) { /* user-defined spawnloop backend */
+     if (X(spawnloop_callback)) { /* user-defined spawnloop backend */
           spawn_data *sdata;
           STACK_MALLOC(spawn_data *, sdata, sizeof(spawn_data) * nthr);
           for (i = 0; i < nthr; ++i) {
@@ -435,7 +426,7 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
                d->thr_num = i;
                d->data = data;
           }
-          spawnloop_callback(proc, sdata, sizeof(spawn_data), nthr, spawnloop_callback_data);
+          X(spawnloop_callback)(proc, sdata, sizeof(spawn_data), nthr, X(spawnloop_callback_data));
           STACK_FREE(sdata);
      }
      else {

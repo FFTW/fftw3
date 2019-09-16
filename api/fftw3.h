@@ -386,6 +386,11 @@ FFTW_EXTERN void                                                        \
 FFTW_CDECL X(cleanup_threads)(void);                                    \
                                                                         \
 FFTW_EXTERN void                                                        \
+FFTW_CDECL X(threads_set_callback)(                                     \
+     void (*spawnloop)(void *(*work)(void *),                           \
+     void *jobdata, size_t elsize, int njobs, void *data), void *data); \
+                                                                        \
+FFTW_EXTERN void                                                        \
 FFTW_CDECL X(make_planner_thread_safe)(void);                           \
                                                                         \
 FFTW_EXTERN int                                                         \

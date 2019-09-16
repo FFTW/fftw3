@@ -58,6 +58,22 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      block_size = (loopmax + nthr - 1) / nthr;
      nthr = (loopmax + block_size - 1) / block_size;
 
+     if (X(spawnloop_callback)) { /* user-defined spawnloop backend */
+          spawn_data *sdata;
+          STACK_MALLOC(spawn_data *, sdata, sizeof(spawn_data) * nthr);
+          for (i = 0; i < nthr; ++i) {
+               spawn_data *d = &sdata[i];
+               d->max = (d->min = i * block_size) + block_size;
+               if (d->max > loopmax)
+                    d->max = loopmax;
+               d->thr_num = i;
+               d->data = data;
+          }
+          X(spawnloop_callback)(proc, sdata, sizeof(spawn_data), nthr, X(spawnloop_callback_data));
+          STACK_FREE(sdata);
+          return;
+     }
+
 #pragma omp parallel for private(d)
      for (i = 0; i < nthr; ++i) {
 	  d.max = (d.min = i * block_size) + block_size;
