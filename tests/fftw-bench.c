@@ -70,7 +70,7 @@ static void setup_sigfpe_handler(void)
 #endif
 
 /* dummy serial threads backend for testing threads_set_callback */
-static void serial_threads(void *(*work)(void *), void *jobdata, size_t elsize, int njobs, void *data)
+static void serial_threads(void *(*work)(char *), char *jobdata, size_t elsize, int njobs, void *data)
 {
      int i;
      (void) data; /* unused */

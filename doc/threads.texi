@@ -153,6 +153,39 @@ program using the multi-threaded FFTW, that wisdom @emph{cannot be used}
 by a program using only the single-threaded FFTW (i.e. not calling
 @code{fftw_init_threads}).  @xref{Words of Wisdom-Saving Plans}.
 
+Finally, FFTW provides a optional callback interface that allows you to
+replace its parallel threading backend at runtime:
+
+@example
+void fftw_threads_set_callback(
+    void (*parallel_loop)(void *(*work)(void *), char *jobdata, size_t elsize, int njobs, void *data),
+    void *data);
+@end example
+@findex fftw_threads_set_callback
+
+This routine (which is @emph{not} threadsafe and should generally be called before creating
+any FFTW plans) allows you to provide a function @code{parallel_loop} that executes
+parallel work for FFTW: it should call the function @code{work(jobdata + elsize*i)} for
+@code{i} from @code{0} to @code{njobs-1}, possibly in parallel.  (The `data` pointer
+supplied to @code{fftw_threads_set_callback} is passed through to your @code{parallel_loop}
+function.)   For example, if you link to an FFTW threads library built to use POSIX threads,
+but you want it to use OpenMP instead (because you are using OpenMP elsewhere in your program
+and want to avoid competing threads), you can call @code{fftw_threads_set_callback} with
+the callback function:
+
+@example
+void parallel_loop(void *(*work)(char *), char *jobdata, size_t elsize, int njobs, void *data)
+@{
+#pragma omp parallel for
+     for (int i = 0; i < njobs; ++i)
+          work(jobdata + elsize * i);
+@}
+@end example
+
+The same mechanism could be used in order to make FFTW use a threading backend
+implemented via Intel TBB, Apple GCD, or Cilk, for example.
+
+
 @c ------------------------------------------------------------
 @node How Many Threads to Use?, Thread safety, Usage of Multi-threaded FFTW, Multi-threaded FFTW
 @section How Many Threads to Use?

@@ -87,7 +87,7 @@ void X(make_planner_thread_safe)(void)
 
 spawnloop_function X(spawnloop_callback) = (spawnloop_function) 0;
 void *X(spawnloop_callback_data) = (void *) 0;
-void X(threads_set_callback)(void (*spawnloop)(void *(*work)(void *), void *, size_t, int, void *), void *data)
+void X(threads_set_callback)(void (*spawnloop)(void *(*work)(char *), char *, size_t, int, void *), void *data)
 {
      X(spawnloop_callback) = (spawnloop_function) spawnloop;
      X(spawnloop_callback_data) = data;

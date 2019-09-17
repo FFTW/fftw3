@@ -387,8 +387,8 @@ FFTW_CDECL X(cleanup_threads)(void);                                    \
                                                                         \
 FFTW_EXTERN void                                                        \
 FFTW_CDECL X(threads_set_callback)(                                     \
-     void (*spawnloop)(void *(*work)(void *),                           \
-     void *jobdata, size_t elsize, int njobs, void *data), void *data); \
+     void (*parallel_loop)(void *(*work)(char *),                       \
+     char *jobdata, size_t elsize, int njobs, void *data), void *data); \
                                                                         \
 FFTW_EXTERN void                                                        \
 FFTW_CDECL X(make_planner_thread_safe)(void);                           \
