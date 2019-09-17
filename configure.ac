@@ -24,8 +24,8 @@ dnl fftw-3.3.6 was 8:x:6 (8:x:6 is a bug, should have been 8:x:5.  No API change
 dnl fftw-3.3.6.1 fixes the 8:x:6 screwup
 dnl fftw-3.3.7 was 8:x:5 (No API changes)
 dnl fftw-3.3.8 was 8:x:5 (No API changes)
-dnl fftw-3.3.9 was 8:x:5 (No API changes)
-SHARED_VERSION_INFO="8:FFTW_MINOR_VERSION:5" # CURRENT:REVISION:AGE
+dnl fftw-3.3.9 was 9:x:6 (added threads callback)
+SHARED_VERSION_INFO="9:FFTW_MINOR_VERSION:6" # CURRENT:REVISION:AGE
 
 AM_INIT_AUTOMAKE(1.7)
 AM_CONFIG_HEADER(config.h)

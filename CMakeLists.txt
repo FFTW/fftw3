@@ -59,7 +59,7 @@ if (HAVE_TIME_H AND HAVE_SYS_TIME_H)
   set (TIME_WITH_SYS_TIME TRUE)
 endif ()
 
-include (CheckPrototypeDefinition) 
+include (CheckPrototypeDefinition)
 check_prototype_definition (drand48 "double drand48 (void)" "0" stdlib.h HAVE_DECL_DRAND48)
 check_prototype_definition (srand48 "void srand48(long int seedval)" "0" stdlib.h HAVE_DECL_SRAND48)
 check_prototype_definition (cosl "long double cosl( long double arg )" "0" math.h HAVE_DECL_COSL)
@@ -274,7 +274,7 @@ if (HAVE_AVX2)
   list (APPEND SOURCEFILES ${fftw_dft_simd_avx2_SOURCE} ${fftw_rdft_simd_avx2_SOURCE})
 endif ()
 
-set (FFTW_VERSION 3.3.7)
+set (FFTW_VERSION 3.3.9)
 
 set (PREC_SUFFIX)
 if (ENABLE_FLOAT)
@@ -351,7 +351,7 @@ if (OPENMP_FOUND)
 endif ()
 
 foreach(subtarget ${subtargets})
-  set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.7 VERSION 3)
+  set_target_properties (${subtarget} PROPERTIES SOVERSION 3.6.9 VERSION 3)
   install (TARGETS ${subtarget}
 	  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
