@@ -69,6 +69,15 @@ static void setup_sigfpe_handler(void)
 }
 #endif
 
+/* dummy serial threads backend for testing threads_set_callback */
+static void serial_threads(void *(*work)(void *), void *jobdata, size_t elsize, int njobs, void *data)
+{
+     int i;
+     (void) data; /* unused */
+     for (i = 0; i < njobs; ++i)
+          work(jobdata + elsize * i);
+}
+
 void useropt(const char *arg)
 {
      int x;
@@ -87,6 +96,8 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "paranoid")) paranoid = 1;
      else if (!strcmp(arg, "wisdom")) usewisdom = 1;
      else if (!strcmp(arg, "amnesia")) amnesia = 1;
+     else if (!strcmp(arg, "threads_callback"))
+          FFTW(threads_set_callback)(serial_threads, NULL);
      else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
 #ifdef FFTW_RANDOM_ESTIMATOR
      else if (sscanf(arg, "eseed=%d", &x) == 1) FFTW(random_estimate_seed) = x;
@@ -135,7 +146,7 @@ void rdwisdom(void)
 
      if (success) {
 	  if (verbose > 1) printf("READ WISDOM (%g seconds): ", tim);
-	  
+
 	  if (verbose > 3)
 	       export_wisdom(stdout);
 	  if (verbose > 1)
@@ -165,9 +176,9 @@ static unsigned preserve_input_flags(bench_problem *p)
       * fftw3 cannot preserve input for multidimensional c2r transforms.
       * Enforce FFTW_DESTROY_INPUT
       */
-     if (p->kind == PROBLEM_REAL && 
-	 p->sign > 0 && 
-	 !p->in_place && 
+     if (p->kind == PROBLEM_REAL &&
+	 p->sign > 0 &&
+	 !p->in_place &&
 	 p->sz->rnk > 1)
 	  p->destroy_input = 1;
 
@@ -202,7 +213,7 @@ void setup(bench_problem *p)
      double tim;
 
      setup_sigfpe_handler();
-     
+
      if (amnesia) {
 	  FFTW(forget_wisdom)();
 	  havewisdom = 0;
@@ -252,7 +263,7 @@ void doit(int iter, bench_problem *p)
      FFTW(plan) q = the_plan;
 
      UNUSED(p);
-     for (i = 0; i < iter; ++i) 
+     for (i = 0; i < iter; ++i)
 	  FFTW(execute)(q);
 }
 

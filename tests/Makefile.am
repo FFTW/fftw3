@@ -26,6 +26,7 @@ check-local: bench$(EXEEXT)
 	@echo "--------------------------------------------------------------"
 if SMP
 	perl -w $(srcdir)/check.pl $(CHECK_PL_OPTS) -r -c=30 -v --nthreads=2 `pwd`/bench$(EXEEXT)
+	perl -w $(srcdir)/check.pl $(CHECK_PL_OPTS) -r -c=5 -v --threads_callback --nthreads=2 `pwd`/bench$(EXEEXT)
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW threaded transforms passed basic tests!"
 	@echo "--------------------------------------------------------------"
@@ -40,6 +41,7 @@ if SMP
 	perl -w $(srcdir)/check.pl $(CHECK_PL_OPTS) --validate-wisdom -a -v --nthreads=2 `pwd`/bench$(EXEEXT)
 	perl -w $(srcdir)/check.pl $(CHECK_PL_OPTS) --validate-wisdom -a -v --nthreads=3 `pwd`/bench$(EXEEXT)
 	perl -w $(srcdir)/check.pl $(CHECK_PL_OPTS) --validate-wisdom -a -v --nthreads=10 `pwd`/bench$(EXEEXT)
+	perl -w $(srcdir)/check.pl $(CHECK_PL_OPTS) --validate-wisdom -a -v --threads_callback --nthreads=2 `pwd`/bench$(EXEEXT)
 	@echo "--------------------------------------------------------------"
 	@echo "         FFTW threaded transforms passed big tests!"
 	@echo "--------------------------------------------------------------"
@@ -73,5 +75,6 @@ if SMP
 	perl -w $(srcdir)/check.pl -a --exhaustive --nthreads=7 --paranoid `pwd`/bench$(EXEEXT)
 	perl -w $(srcdir)/check.pl -a --exhaustive --nthreads=3 --paranoid `pwd`/bench$(EXEEXT)
 	perl -w $(srcdir)/check.pl -a --exhaustive --nthreads=2 --paranoid `pwd`/bench$(EXEEXT)
+	perl -w $(srcdir)/check.pl -a --exhaustive --threads_callback --nthreads=2 --paranoid `pwd`/bench$(EXEEXT)
 endif
 	perl -w $(srcdir)/check.pl -a --exhaustive --paranoid `pwd`/bench$(EXEEXT)
