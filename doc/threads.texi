@@ -177,8 +177,8 @@ the callback function:
 void parallel_loop(void *(*work)(char *), char *jobdata, size_t elsize, int njobs, void *data)
 @{
 #pragma omp parallel for
-     for (int i = 0; i < njobs; ++i)
-          work(jobdata + elsize * i);
+    for (int i = 0; i < njobs; ++i)
+        work(jobdata + elsize * i);
 @}
 @end example
 
