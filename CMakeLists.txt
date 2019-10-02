@@ -357,7 +357,6 @@ if (OpenMP_FOUND)
     $<INSTALL_INTERFACE:include>
   )
   target_link_libraries (${fftw3_lib}_omp ${fftw3_lib})
-  target_link_libraries (${fftw3_lib}_omp Threads::Threads)
   target_link_libraries (${fftw3_lib}_omp OpenMP::OpenMP_C)
   list (APPEND subtargets ${fftw3_lib}_omp)
 endif ()
