@@ -31,7 +31,7 @@ option (DISABLE_FORTRAN "Disable Fortran wrapper routines" OFF)
 option (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "Export all symbols when compiling on Windows" OFF)
 
 include(GNUInstallDirs)
-include(FindThreads)
+
 
 include (CheckIncludeFile)
 check_include_file (alloca.h         HAVE_ALLOCA_H)
