@@ -337,7 +337,7 @@ set (subtargets ${fftw3_lib})
 
 if (Threads_FOUND)
   if (WITH_COMBINED_THREADS)
-    target_link_libraries (${fftw3_lib} ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries (${fftw3_lib} Threads::Threads)
   else ()
     add_library (${fftw3_lib}_threads ${fftw_threads_SOURCE})
     target_include_directories (${fftw3_lib}_threads INTERFACE
@@ -345,7 +345,7 @@ if (Threads_FOUND)
       $<INSTALL_INTERFACE:include>
     )
     target_link_libraries (${fftw3_lib}_threads ${fftw3_lib})
-    target_link_libraries (${fftw3_lib}_threads ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries (${fftw3_lib}_threads Threads::Threads)
     list (APPEND subtargets ${fftw3_lib}_threads)
   endif ()
 endif ()
