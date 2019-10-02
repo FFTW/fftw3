@@ -108,10 +108,11 @@ void rdwisdom(void)
 
 #ifdef HAVE_SMP
      if (threads_ok) {
+#if defined(HAVE_THREADS)
 	  BENCH_ASSERT(FFTW(init_threads)());
 	  FFTW(plan_with_nthreads)(nthreads);
           FFTW(make_planner_thread_safe)();
-#ifdef _OPENMP
+#elif defined(HAVE_OPENMP)
 	  omp_set_num_threads(nthreads);
 #endif
      }
@@ -269,7 +270,7 @@ void cleanup(void)
      initial_cleanup();
 
      wrwisdom();
-#ifdef HAVE_SMP
+#ifdef HAVE_THREADS
      FFTW(cleanup_threads)();
 #else
      FFTW(cleanup)();

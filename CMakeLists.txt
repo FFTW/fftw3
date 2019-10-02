@@ -390,8 +390,10 @@ if (BUILD_TESTS)
 
   add_executable (bench ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
 
-  if (ENABLE_THREADS AND NOT WITH_COMBINED_THREADS)
+  if (Threads_FOUND AND NOT WITH_COMBINED_THREADS)
     target_link_libraries (bench ${fftw3_lib}_threads)
+  elseif (OPENMP_FOUND)
+    target_link_libraries (bench ${fftw3_lib}_omp)
   else ()
     target_link_libraries (bench ${fftw3_lib})
   endif ()
