@@ -306,6 +306,7 @@ if (NOT BUILD_SHARED_LIBS)
 endif ()
 
 add_library (${fftw3_lib} ${SOURCEFILES})
+add_library (FFTW3::${fftw3_lib} ALIAS ${fftw3_lib})
 target_include_directories (${fftw3_lib} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
   $<INSTALL_INTERFACE:include>
@@ -340,6 +341,7 @@ if (Threads_FOUND)
     target_link_libraries (${fftw3_lib} Threads::Threads)
   else ()
     add_library (${fftw3_lib}_threads ${fftw_threads_SOURCE})
+    add_library (FFTW3::${fftw3_lib}_threads ALIAS ${fftw3_lib}_threads)
     target_include_directories (${fftw3_lib}_threads INTERFACE
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
       $<INSTALL_INTERFACE:include>
@@ -352,6 +354,7 @@ endif ()
 
 if (OpenMP_FOUND)
   add_library (${fftw3_lib}_omp ${fftw_omp_SOURCE})
+  add_library (FFTW3::${fftw3_lib}_omp ALIAS ${fftw3_lib}_omp)
   target_include_directories (${fftw3_lib}_omp INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
     $<INSTALL_INTERFACE:include>
