@@ -429,7 +429,6 @@ install (FILES
          COMPONENT Development)
 
 # cmake file
-set (FFTW3_LIBRARIES "FFTW3::${fftw3_lib}")
 configure_file (FFTW3Config.cmake.in FFTW3${PREC_SUFFIX}Config.cmake @ONLY)
 configure_file (FFTW3ConfigVersion.cmake.in FFTW3${PREC_SUFFIX}ConfigVersion.cmake @ONLY)
 install (FILES
