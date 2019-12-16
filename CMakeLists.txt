@@ -4,7 +4,9 @@ if (NOT DEFINED CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
 endif ()
 
-project (fftw)
+project (FFTW3
+    VERSION 3.3.8
+    HOMEPAGE_URL http://www.fftw.org/)
 
 if (POLICY CMP0042)
   cmake_policy (SET CMP0042 NEW)
@@ -30,7 +32,8 @@ option (DISABLE_FORTRAN "Disable Fortran wrapper routines" OFF)
 
 option (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "Export all symbols when compiling on Windows" OFF)
 
-include(GNUInstallDirs)
+include (GNUInstallDirs)
+include (CMakePackageConfigHelpers)
 
 
 include (CheckIncludeFile)
@@ -276,8 +279,6 @@ if (HAVE_AVX2)
   list (APPEND SOURCEFILES ${fftw_dft_simd_avx2_SOURCE} ${fftw_rdft_simd_avx2_SOURCE})
 endif ()
 
-set (FFTW_VERSION 3.3.8)
-
 set (PREC_SUFFIX)
 if (ENABLE_FLOAT)
   set (FFTW_SINGLE TRUE)
@@ -421,7 +422,7 @@ set (prefix ${CMAKE_INSTALL_PREFIX})
 set (exec_prefix ${CMAKE_INSTALL_PREFIX})
 set (libdir ${CMAKE_INSTALL_FULL_LIBDIR})
 set (includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
-set (VERSION ${FFTW_VERSION})
+set (VERSION ${PROJECT_VERSION})
 configure_file (fftw.pc.in fftw${PREC_SUFFIX}.pc @ONLY)
 install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/fftw${PREC_SUFFIX}.pc
@@ -430,7 +431,9 @@ install (FILES
 
 # cmake file
 configure_file (FFTW3Config.cmake.in FFTW3${PREC_SUFFIX}Config.cmake @ONLY)
-configure_file (FFTW3ConfigVersion.cmake.in FFTW3${PREC_SUFFIX}ConfigVersion.cmake @ONLY)
+write_basic_package_version_file(FFTW3${PREC_SUFFIX}ConfigVersion.cmake
+    COMPATIBILITY SameMajorVersion)
+
 install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}Config.cmake
           ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}ConfigVersion.cmake
