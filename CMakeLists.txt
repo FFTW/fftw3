@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.9)
+cmake_minimum_required (VERSION 3.12)
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
@@ -308,6 +308,8 @@ endif ()
 
 add_library (${fftw3_lib} ${SOURCEFILES})
 add_library (${PROJECT_NAME}::${fftw3_lib} ALIAS ${fftw3_lib})
+set_target_properties(${fftw3_lib} PROPERTIES
+    PUBLIC_HEADER api/fftw3.h)
 target_include_directories (${fftw3_lib} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
   $<INSTALL_INTERFACE:include>
@@ -370,20 +372,13 @@ if (OpenMP_FOUND)
   list (APPEND subtargets ${fftw3_lib}_omp)
 endif ()
 
-foreach(subtarget ${subtargets})
-  set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.7 VERSION 3)
-  install (TARGETS ${subtarget}
-	  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endforeach ()
-install(TARGETS ${fftw3_lib}
-          EXPORT FFTW3LibraryDepends
-          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install (TARGETS ${subtargets}
+    EXPORT ${PROJECT_NAME}Targets
+    ARCHIVE COMPONENT Library
+    LIBRARY COMPONENT Library
+    RUNTIME COMPONENT Library # This is for Windows
+    PUBLIC_HEADER COMPONENT Development)
 
-install (FILES api/fftw3.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 if (EXISTS ${CMAKE_SOURCE_DIR}/api/fftw3.f)
   install (FILES api/fftw3.f api/fftw3l.f03 api/fftw3q.f03 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif ()
@@ -435,18 +430,20 @@ install (FILES
          COMPONENT Development)
 
 # cmake file
+set (ConfigPackageLocation "${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}")
+
 configure_file (FFTW3Config.cmake.in ${PROJECT_NAME}${PREC_SUFFIX}Config.cmake @ONLY)
 write_basic_package_version_file(${PROJECT_NAME}${PREC_SUFFIX}ConfigVersion.cmake
     COMPATIBILITY SameMajorVersion)
 
 install (FILES
-          ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PREC_SUFFIX}Config.cmake
-          ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PREC_SUFFIX}ConfigVersion.cmake
-	  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
-         COMPONENT Development)
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PREC_SUFFIX}Config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PREC_SUFFIX}ConfigVersion.cmake
+    DESTINATION ${ConfigPackageLocation}
+    COMPONENT Development)
 
-export (TARGETS ${fftw3_lib} NAMESPACE ${PROJECT_NAME}:: FILE ${PROJECT_BINARY_DIR}/FFTW3LibraryDepends.cmake)
-install(EXPORT FFTW3LibraryDepends
-        NAMESPACE ${PROJECT_NAME}::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
-        COMPONENT Development)
+install(EXPORT ${PROJECT_NAME}Targets FILE ${PROJECT_NAME}${PREC_SUFFIX}Targets.cmake
+  NAMESPACE ${PROJECT_NAME}${PREC_SUFFIX}::
+  DESTINATION ${ConfigPackageLocation}
+  COMPONENT Development
+)

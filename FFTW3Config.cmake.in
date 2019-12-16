@@ -1,17 +1,17 @@
-# defined since 2.8.3
-if (CMAKE_VERSION VERSION_LESS 2.8.3)
-  get_filename_component (CMAKE_CURRENT_LIST_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
-endif ()
+get_filename_component(@PROJECT_NAME@@PREC_SUFFIX@_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(CMakeFindDependencyMacro)
 
-# Allows loading FFTW3 settings from another project
-set (FFTW3_CONFIG_FILE "${CMAKE_CURRENT_LIST_FILE}")
+set(ENABLE_OPENMP @ENABLE_OPENMP@)
+set(ENABLE_THREADS @ENABLE_THREADS@)
 
-set (FFTW3@PREC_SUFFIX@_LIBRARIES fftw3@PREC_SUFFIX@)
-set (FFTW3@PREC_SUFFIX@_LIBRARY_DIRS @CMAKE_INSTALL_FULL_LIBDIR@)
-set (FFTW3@PREC_SUFFIX@_INCLUDE_DIRS @CMAKE_INSTALL_FULL_INCLUDEDIR@)
+if(${ENABLE_OPENMP})
+    find_dependency(OpenMP REQUIRED)
+endif()
+if(${ENABLE_THREADS})
+    find_dependency(Threads REQUIRED)
+endif()
 
-include ("${CMAKE_CURRENT_LIST_DIR}/FFTW3LibraryDepends.cmake")
-
-if (CMAKE_VERSION VERSION_LESS 2.8.3)
-  set (CMAKE_CURRENT_LIST_DIR)
-endif ()
+if(NOT TARGET @PROJECT_NAME@@PREC_SUFFIX@::fftw3@PREC_SUFFIX@)
+    include("${@PROJECT_NAME@@PREC_SUFFIX@_CMAKE_DIR}/@PROJECT_NAME@@PREC_SUFFIX@Targets.cmake")
+endif()
+ 
