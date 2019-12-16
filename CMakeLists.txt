@@ -347,8 +347,11 @@ if (Threads_FOUND)
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
       $<INSTALL_INTERFACE:include>
     )
-    target_link_libraries (${fftw3_lib}_threads ${fftw3_lib})
-    target_link_libraries (${fftw3_lib}_threads Threads::Threads)
+    target_link_libraries (${fftw3_lib}_threads
+        PUBLIC
+            ${fftw3_lib}
+        PRIVATE
+            Threads::Threads)
     list (APPEND subtargets ${fftw3_lib}_threads)
   endif ()
 endif ()
@@ -360,8 +363,10 @@ if (OpenMP_FOUND)
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
     $<INSTALL_INTERFACE:include>
   )
-  target_link_libraries (${fftw3_lib}_omp ${fftw3_lib})
-  target_link_libraries (${fftw3_lib}_omp OpenMP::OpenMP_C)
+  target_link_libraries (${fftw3_lib}_omp
+    PUBLIC
+        ${fftw3_lib}
+        OpenMP::OpenMP_C)
   list (APPEND subtargets ${fftw3_lib}_omp)
 endif ()
 
