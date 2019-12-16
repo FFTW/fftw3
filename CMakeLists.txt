@@ -118,7 +118,7 @@ endif ()
 
 
 if (ENABLE_THREADS)
-  find_package (Threads)
+  find_package (Threads REQUIRED)
 endif ()
 if (Threads_FOUND)
   if(CMAKE_USE_PTHREADS_INIT)
@@ -128,7 +128,7 @@ if (Threads_FOUND)
 endif ()
 
 if (ENABLE_OPENMP)
-  find_package (OpenMP)
+  find_package (OpenMP REQUIRED)
 endif ()
 if (OPENMP_FOUND)
   add_compile_definitions(HAVE_OPENMP)
