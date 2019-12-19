@@ -372,6 +372,10 @@ if (OpenMP_FOUND)
   list (APPEND subtargets ${fftw3_lib}_omp)
 endif ()
 
+foreach(subtarget ${subtargets})
+    set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.7)
+endforeach()
+
 install (TARGETS ${subtargets}
     EXPORT ${PROJECT_NAME}Targets
     ARCHIVE COMPONENT Library
