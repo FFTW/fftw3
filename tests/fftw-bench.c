@@ -97,7 +97,11 @@ void useropt(const char *arg)
      else if (!strcmp(arg, "wisdom")) usewisdom = 1;
      else if (!strcmp(arg, "amnesia")) amnesia = 1;
      else if (!strcmp(arg, "threads_callback"))
+#ifdef HAVE_SMP
           FFTW(threads_set_callback)(serial_threads, NULL);
+#else
+          fprintf(stderr, "Serial FFTW; ignoring threads_callback option.\n");
+#endif
      else if (sscanf(arg, "nthreads=%d", &x) == 1) nthreads = x;
 #ifdef FFTW_RANDOM_ESTIMATOR
      else if (sscanf(arg, "eseed=%d", &x) == 1) FFTW(random_estimate_seed) = x;
@@ -117,7 +121,7 @@ void rdwisdom(void)
 
      if (havewisdom) return;
 
-#ifdef HAVE_SMP
+#ifdef HAVE_THREADS
      if (threads_ok) {
 	  BENCH_ASSERT(FFTW(init_threads)());
 	  FFTW(plan_with_nthreads)(nthreads);
