@@ -87,7 +87,7 @@ void report_benchmark(const bench_problem *p, double *t, int st)
 {
      struct stats s;
      mkstat(t, st, &s);
-     ovtpvt("%.5g %.8g %g\n", mflops(p, s.min), s.min, p->setup_time);
+     ovtpvt("%.8g %.8g %g\n", mflops(p, s.min), s.min, p->setup_time);
 }
 
 static void sprintf_time(double x, char *buf, int buflen)
@@ -124,7 +124,7 @@ void report_verbose(const bench_problem *p, double *t, int st)
      sprintf_time(time_min, btmin, 64);
      sprintf_time(p->setup_time, bsetup, 64);
 
-     ovtpvt("Problem: %s, setup: %s, time: %s, %s: %.5g\n",
+     ovtpvt("Problem: %s, setup: %s, time: %s, %s: %.8g\n",
 	    p->pstring, bsetup, bmin, 
 	    copyp ? "fp-move/us" : "``mflops''",
 	    mflops(p, s.min));
