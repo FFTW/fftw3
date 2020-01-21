@@ -140,9 +140,7 @@ endif ()
 
 if (ENABLE_OPENMP)
   find_package (OpenMP REQUIRED)
-endif ()
-if (OpenMP_FOUND)
-  add_compile_definitions(HAVE_OPENMP)
+  set (HAVE_OPENMP TRUE)
 endif ()
 
 include (CheckCCompilerFlag)
