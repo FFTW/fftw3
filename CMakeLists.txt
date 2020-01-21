@@ -336,7 +336,12 @@ add_subdirectory(simd-support)
 add_subdirectory(threads)
 
 foreach(subtarget ${subtargets})
-    set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.7)
+    set_target_properties (${subtarget} PROPERTIES
+        LANGUAGES C
+        SOVERSION 3.5.7
+        C_STANDARD 11
+        C_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN 1)
     target_include_directories (${subtarget}
       PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
