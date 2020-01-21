@@ -378,20 +378,24 @@ endforeach()
 
 install (TARGETS ${subtargets}
     EXPORT ${PROJECT_NAME}Targets
-    ARCHIVE COMPONENT Library
-    LIBRARY COMPONENT Library
-    RUNTIME COMPONENT Library # This is for Windows
-    PUBLIC_HEADER COMPONENT Development)
+    ARCHIVE COMPONENT FFTW3_LIBRARY
+    LIBRARY COMPONENT FFTW3_LIBRARY
+    RUNTIME COMPONENT FFTW3_LIBRARY # This is for Windows
+    PUBLIC_HEADER COMPONENT FFTW3_DEVELOPMENT)
 
 if (EXISTS ${CMAKE_SOURCE_DIR}/api/fftw3.f)
-  install (FILES api/fftw3.f api/fftw3l.f03 api/fftw3q.f03 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  install (FILES api/fftw3.f api/fftw3l.f03 api/fftw3q.f03
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT FFTW3_DEVELOPMENT)
 endif ()
 if (EXISTS ${CMAKE_SOURCE_DIR}/api/fftw3.f03.in)
   file (READ api/fftw3.f03.in FFTW3_F03_IN OFFSET 42)
   file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 "! Generated automatically.  DO NOT EDIT!\n\n")
   file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 "  integer, parameter :: C_FFTW_R2R_KIND = ${C_FFTW_R2R_KIND}\n\n")
   file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 "${FFTW3_F03_IN}")
-  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+  install (FILES ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        COMPONENT FFTW3_DEVELOPMENT)
 endif ()
 
 if (BUILD_TESTS)
@@ -431,7 +435,7 @@ configure_file (fftw.pc.in fftw${PREC_SUFFIX}.pc @ONLY)
 install (FILES
           ${CMAKE_CURRENT_BINARY_DIR}/fftw${PREC_SUFFIX}.pc
          DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
-         COMPONENT Development)
+         COMPONENT FFTW3_DEVELOPMENT)
 
 # cmake file
 set (ConfigPackageLocation "${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}")
@@ -444,10 +448,29 @@ install (FILES
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PREC_SUFFIX}Config.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}${PREC_SUFFIX}ConfigVersion.cmake
     DESTINATION ${ConfigPackageLocation}
-    COMPONENT Development)
+    COMPONENT FFTW3_DEVELOPMENT)
 
 install(EXPORT ${PROJECT_NAME}Targets FILE ${PROJECT_NAME}${PREC_SUFFIX}Targets.cmake
   NAMESPACE ${PROJECT_NAME}${PREC_SUFFIX}::
   DESTINATION ${ConfigPackageLocation}
-  COMPONENT Development
-)
+  COMPONENT FFTW3_DEVELOPMENT)
+
+# CPack settings
+set(CPACK_PACKAGE_NAME "libfftw3")
+set(CPACK_PACKAGE_DESCRIPTION "Library for computing Fast Fourier Transforms")
+set(CPACK_PACKAGE_CONTACT "Martin Stolpe martin.stolpe@iaf.fraunhofer.de")
+set(CPACK_PACKAGE_VENDOR "Fraunhofer-Institut für Angewandte Festkörperphysik IAF")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "")
+set(CPACK_DEB_COMPONENT_INSTALL ON)
+set(CPACK_DEBIAN_FFTW3_LIBRARY_PACKAGE_NAME "libfftw3")
+set(CPACK_DEBIAN_FFTW3_DEVELOPMENT_PACKAGE_NAME "libfftw3-dev")
+
+include(CPack)
+
+cpack_add_component(FFTW3_LIBRARY
+    DISPLAY_NAME "libfftw3"
+    DESCRIPTION "Library for computing Fast Fourier Transforms")
+cpack_add_component(FFTW3_DEVELOPMENT
+    DISPLAY_NAME "libfftw3-dev"
+    DESCRIPTION "Library for computing Fast Fourier Transforms - development"
+    DEPENDS FFTW3_LIBRARY)
