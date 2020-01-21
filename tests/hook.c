@@ -211,7 +211,7 @@ static void hook(planner *plnr, plan *pln, const problem *p_, int optimalp)
 	  if (bp) {
 	       X(plan) the_plan_save = the_plan;
 
-	       the_plan = (apiplan *) MALLOC(sizeof(apiplan), PLANS);
+         the_plan = (apiplan *) X(malloc)(sizeof(apiplan));
 	       the_plan->pln = pln;
 	       the_plan->prb = (problem *) p_;
 
@@ -219,7 +219,7 @@ static void hook(planner *plnr, plan *pln, const problem *p_, int optimalp)
 	       verify_problem(bp, rounds, tol);
 	       X(plan_awake)(pln, SLEEPY);
 
-	       X(ifree)(the_plan);
+         X(free)(the_plan);
 	       the_plan = the_plan_save;
 
 	       problem_destroy(bp);
