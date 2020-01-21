@@ -8,9 +8,8 @@ project (FFTW3
     VERSION 3.3.8
     HOMEPAGE_URL http://www.fftw.org/)
 
-if (POLICY CMP0042)
-  cmake_policy (SET CMP0042 NEW)
-endif ()
+cmake_policy (SET CMP0042 NEW)
+cmake_policy (SET CMP0076 NEW)
 
 option (BUILD_SHARED_LIBS "Build shared libraries" ON)
 option (BUILD_TESTS "Build tests" ON)
@@ -34,7 +33,6 @@ option (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "Export all symbols when compiling on W
 
 include (GNUInstallDirs)
 include (CMakePackageConfigHelpers)
-
 
 include (CheckIncludeFile)
 check_include_file (alloca.h         HAVE_ALLOCA_H)
@@ -195,89 +193,9 @@ endif ()
 if (HAVE_SSE2 OR HAVE_AVX)
   set (HAVE_SIMD TRUE)
 endif ()
-file(GLOB           fftw_api_SOURCE                 api/*.c             api/*.h)
-file(GLOB           fftw_dft_SOURCE                 dft/*.c             dft/*.h)
-file(GLOB           fftw_dft_scalar_SOURCE          dft/scalar/*.c      dft/scalar/*.h)
-file(GLOB           fftw_dft_scalar_codelets_SOURCE dft/scalar/codelets/*.c     dft/scalar/codelets/*.h)
-file(GLOB           fftw_dft_simd_SOURCE            dft/simd/*.c        dft/simd/*.h)
-
-file(GLOB           fftw_dft_simd_sse2_SOURCE       dft/simd/sse2/*.c   dft/simd/sse2/*.h)
-file(GLOB           fftw_dft_simd_avx_SOURCE        dft/simd/avx/*.c    dft/simd/avx/*.h)
-file(GLOB           fftw_dft_simd_avx2_SOURCE       dft/simd/avx2/*.c   dft/simd/avx2/*.h dft/simd/avx2-128/*.c   dft/simd/avx2-128/*.h)
-file(GLOB           fftw_kernel_SOURCE              kernel/*.c          kernel/*.h)
-file(GLOB           fftw_rdft_SOURCE                rdft/*.c            rdft/*.h)
-file(GLOB           fftw_rdft_scalar_SOURCE         rdft/scalar/*.c     rdft/scalar/*.h)
-
-file(GLOB           fftw_rdft_scalar_r2cb_SOURCE    rdft/scalar/r2cb/*.c
-                                                    rdft/scalar/r2cb/*.h)
-file(GLOB           fftw_rdft_scalar_r2cf_SOURCE    rdft/scalar/r2cf/*.c
-                                                    rdft/scalar/r2cf/*.h)
-file(GLOB           fftw_rdft_scalar_r2r_SOURCE     rdft/scalar/r2r/*.c
-                                                    rdft/scalar/r2r/*.h)
-
-file(GLOB           fftw_rdft_simd_SOURCE           rdft/simd/*.c       rdft/simd/*.h)
-file(GLOB           fftw_rdft_simd_sse2_SOURCE      rdft/simd/sse2/*.c  rdft/simd/sse2/*.h)
-file(GLOB           fftw_rdft_simd_avx_SOURCE       rdft/simd/avx/*.c   rdft/simd/avx/*.h)
-file(GLOB           fftw_rdft_simd_avx2_SOURCE      rdft/simd/avx2/*.c  rdft/simd/avx2/*.h rdft/simd/avx2-128/*.c  rdft/simd/avx2-128/*.h)
-
-file(GLOB           fftw_reodft_SOURCE              reodft/*.c          reodft/*.h)
-file(GLOB           fftw_simd_support_SOURCE        simd-support/*.c    simd-support/*.h)
-file(GLOB           fftw_libbench2_SOURCE           libbench2/*.c       libbench2/*.h)
-list (REMOVE_ITEM   fftw_libbench2_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/libbench2/useropt.c)
-
-set(SOURCEFILES
-    ${fftw_api_SOURCE}
-    ${fftw_dft_SOURCE}
-    ${fftw_dft_scalar_SOURCE}
-    ${fftw_dft_scalar_codelets_SOURCE}
-    ${fftw_dft_simd_SOURCE}
-    ${fftw_kernel_SOURCE}
-    ${fftw_rdft_SOURCE}
-    ${fftw_rdft_scalar_SOURCE}
-
-    ${fftw_rdft_scalar_r2cb_SOURCE}
-    ${fftw_rdft_scalar_r2cf_SOURCE}
-    ${fftw_rdft_scalar_r2r_SOURCE}
-
-    ${fftw_rdft_simd_SOURCE}
-    ${fftw_reodft_SOURCE}
-    ${fftw_simd_support_SOURCE}
-    ${fftw_threads_SOURCE}
-)
-
-set(fftw_par_SOURCE
-    threads/api.c
-    threads/conf.c
-    threads/ct.c
-    threads/dft-vrank-geq1.c
-    threads/f77api.c
-    threads/hc2hc.c
-    threads/rdft-vrank-geq1.c
-    threads/vrank-geq1-rdft2.c)
-
-set (fftw_threads_SOURCE ${fftw_par_SOURCE} threads/threads.c)
-set (fftw_omp_SOURCE ${fftw_par_SOURCE} threads/openmp.c)
-
 
 include_directories (.)
 
-
-if (WITH_COMBINED_THREADS)
-  list (APPEND SOURCEFILES ${fftw_threads_SOURCE})
-endif ()
-
-
-if (HAVE_SSE2)
-  list (APPEND SOURCEFILES ${fftw_dft_simd_sse2_SOURCE} ${fftw_rdft_simd_sse2_SOURCE})
-endif ()
-
-if (HAVE_AVX)
-  list (APPEND SOURCEFILES ${fftw_dft_simd_avx_SOURCE} ${fftw_rdft_simd_avx_SOURCE})
-endif ()
-
-if (HAVE_AVX2)
-  list (APPEND SOURCEFILES ${fftw_dft_simd_avx2_SOURCE} ${fftw_rdft_simd_avx2_SOURCE})
-endif ()
 
 set (PREC_SUFFIX)
 if (ENABLE_FLOAT)
@@ -306,8 +224,11 @@ if (NOT BUILD_SHARED_LIBS)
   add_compile_definitions(FFTW_STATIC)
 endif ()
 
-add_library (${fftw3_lib} ${SOURCEFILES})
+add_library (${fftw3_lib})
 add_library (${PROJECT_NAME}::${fftw3_lib} ALIAS ${fftw3_lib})
+
+generate_export_header(${fftw3_lib})
+
 set_target_properties(${fftw3_lib} PROPERTIES
     PUBLIC_HEADER api/fftw3.h)
 target_include_directories (${fftw3_lib} INTERFACE
@@ -343,7 +264,7 @@ if (Threads_FOUND)
   if (WITH_COMBINED_THREADS)
     target_link_libraries (${fftw3_lib} Threads::Threads)
   else ()
-    add_library (${fftw3_lib}_threads ${fftw_threads_SOURCE})
+    add_library (${fftw3_lib}_threads)
     add_library (${PROJECT_NAME}::${fftw3_lib}_threads ALIAS ${fftw3_lib}_threads)
     target_include_directories (${fftw3_lib}_threads INTERFACE
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
@@ -359,7 +280,7 @@ if (Threads_FOUND)
 endif ()
 
 if (OpenMP_FOUND)
-  add_library (${fftw3_lib}_omp ${fftw_omp_SOURCE})
+  add_library (${fftw3_lib}_omp)
   add_library (${PROJECT_NAME}::${fftw3_lib}_omp ALIAS ${fftw3_lib}_omp)
   target_include_directories (${fftw3_lib}_omp INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
@@ -371,6 +292,14 @@ if (OpenMP_FOUND)
         OpenMP::OpenMP_C)
   list (APPEND subtargets ${fftw3_lib}_omp)
 endif ()
+
+add_subdirectory(api)
+add_subdirectory(dft)
+add_subdirectory(kernel)
+add_subdirectory(rdft)
+add_subdirectory(reodft)
+add_subdirectory(simd-support)
+add_subdirectory(threads)
 
 foreach(subtarget ${subtargets})
     set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.7)
@@ -400,7 +329,9 @@ endif ()
 
 if (BUILD_TESTS)
 
-  add_executable (bench ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
+  add_executable (bench)
+  add_subdirectory(libbench2)
+  add_subdirectory(tests)
 
   if (Threads_FOUND AND NOT WITH_COMBINED_THREADS)
     target_link_libraries (bench ${PROJECT_NAME}::${fftw3_lib}_threads)
@@ -455,7 +386,8 @@ install(EXPORT ${PROJECT_NAME}Targets FILE ${PROJECT_NAME}${PREC_SUFFIX}Targets.
   DESTINATION ${ConfigPackageLocation}
   COMPONENT FFTW3_DEVELOPMENT)
 
-# CPack settings
+
+# CPack settings
 set(CPACK_PACKAGE_NAME "libfftw3")
 set(CPACK_PACKAGE_DESCRIPTION "Library for computing Fast Fourier Transforms")
 set(CPACK_PACKAGE_CONTACT "Martin Stolpe martin.stolpe@iaf.fraunhofer.de")
@@ -469,8 +401,10 @@ include(CPack)
 
 cpack_add_component(FFTW3_LIBRARY
     DISPLAY_NAME "libfftw3"
-    DESCRIPTION "Library for computing Fast Fourier Transforms")
+    DESCRIPTION "Library for computing Fast Fourier Transforms"
+)
 cpack_add_component(FFTW3_DEVELOPMENT
     DISPLAY_NAME "libfftw3-dev"
     DESCRIPTION "Library for computing Fast Fourier Transforms - development"
-    DEPENDS FFTW3_LIBRARY)
+    DEPENDS FFTW3_LIBRARY
+)

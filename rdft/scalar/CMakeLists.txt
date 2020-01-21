@@ -1,0 +1,19 @@
+target_sources(${fftw3_lib}
+  PRIVATE
+    hb.h
+    hc2cb.h
+    hc2cf.h
+    hf.h
+    r2cb.h
+    r2cbIII.h
+    r2cf.h
+    r2cfII.h
+    r2r.h
+    hc2c.c
+    hfb.c
+    r2c.c
+    r2r.c)
+
+add_subdirectory(r2cb)
+add_subdirectory(r2cf)
+add_subdirectory(r2r)

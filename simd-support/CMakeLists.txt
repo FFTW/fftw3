@@ -1,0 +1,27 @@
+target_sources(${fftw3_lib}
+  PRIVATE
+    amd64-cpuid.h
+    simd-altivec.h
+    simd-avx-128-fma.h
+    simd-avx.h
+    simd-avx2-128.h
+    simd-avx2.h
+    simd-avx512.h
+    simd-common.h
+    simd-generic128.h
+    simd-generic256.h
+    simd-kcvi.h
+    simd-neon.h
+    simd-sse2.h
+    simd-vsx.h
+    x86-cpuid.h
+    altivec.c
+    avx-128-fma.c
+    avx.c
+    avx2.c
+    avx512.c
+    kcvi.c
+    neon.c
+    sse2.c
+    taint.c
+    vsx.c)
