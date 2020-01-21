@@ -34,7 +34,7 @@ typedef struct {
      hc2capply apply;
 } plan_hc2c;
 
-extern plan *X(mkplan_hc2c)(size_t size, const plan_adt *adt, 
+plan *X(mkplan_hc2c)(size_t size, const plan_adt *adt,
 			    hc2capply apply);
 
 #define MKPLAN_HC2C(type, adt, apply) \

@@ -29,10 +29,23 @@ option (ENABLE_AVX2 "Compile with AVX2 instruction set support" OFF)
 
 option (DISABLE_FORTRAN "Disable Fortran wrapper routines" OFF)
 
-option (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS "Export all symbols when compiling on Windows" OFF)
+set(ENABLED_PRECISIONS 0)
+foreach(SELECTED_PRECISION ENABLE_FLOAT ENABLE_LONG_DOUBLE ENABLE_QUAD_PRECISION)
+    if(${SELECTED_PRECISION})
+        math(EXPR ENABLED_PRECISIONS "${ENABLED_PRECISIONS} + 1")
+    endif()
+endforeach(SELECTED_PRECISION)
+if(ENABLED_PRECISIONS GREATER 1)
+    message(FATAL_ERROR "Only one or no (defaults to double precision) precision can be selected")
+endif()
 
-include (GNUInstallDirs)
-include (CMakePackageConfigHelpers)
+if((ENABLE_LONG_DOUBLE OR ENABLE_QUAD_PRECISION) AND (ENABLE_SSE2 OR ENABLE_AVX OR ENABLE_AVX2))
+    message(FATAL_ERROR "ENABLE_SSE2, ENABLE_AVX and ENABLE_AVX2 not supported when ENABLE_LONG_DOUBLE or ENABLE_QUAD_PRECISION was selected")
+endif()
+
+include(GNUInstallDirs)
+include(GenerateExportHeader)
+include(CMakePackageConfigHelpers)
 
 include (CheckIncludeFile)
 check_include_file (alloca.h         HAVE_ALLOCA_H)
@@ -217,20 +230,29 @@ set (fftw3_lib fftw3${PREC_SUFFIX})
 configure_file (cmake.config.h.in config.h @ONLY)
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
 
-if (NOT BUILD_SHARED_LIBS)
-  add_compile_definitions(FFTW_STATIC)
-endif ()
+set(PUBLIC_HEADER_FILES
+    "${CMAKE_CURRENT_LIST_DIR}/api/fftw3.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/fftw3_export.h")
 
 add_library (${fftw3_lib})
 add_library (${PROJECT_NAME}::${fftw3_lib} ALIAS ${fftw3_lib})
 
-generate_export_header(${fftw3_lib})
+target_include_directories (${fftw3_lib}
+  INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/api>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<INSTALL_INTERFACE:include>)
 
 set_target_properties(${fftw3_lib} PROPERTIES
-    PUBLIC_HEADER api/fftw3.h)
+    PUBLIC_HEADER "${PUBLIC_HEADER_FILES}"
+    DEFINE_SYMBOL "fftw3_EXPORTS")
+
+generate_export_header(${fftw3_lib}
+    BASE_NAME "fftw3")
+
+set (fftw3_libs ${fftw3_lib})
 if (MSVC AND NOT (CMAKE_C_COMPILER_ID STREQUAL "Intel"))
   target_compile_definitions (${fftw3_lib} PRIVATE /bigobj)
-  target_compile_definitions (${fftw3_lib} PRIVATE FFTW_EXPORTS)
 endif ()
 if (HAVE_SSE)
   target_compile_options (${fftw3_lib} PRIVATE ${SSE_FLAG})
@@ -254,11 +276,25 @@ endif ()
 set (subtargets ${fftw3_lib})
 
 if (Threads_FOUND)
+  target_compile_definitions (${fftw3_lib}
+      PUBLIC
+        ENABLE_THREADS)
   if (WITH_COMBINED_THREADS)
     target_link_libraries (${fftw3_lib} Threads::Threads)
   else ()
     add_library (${fftw3_lib}_threads)
     add_library (${PROJECT_NAME}::${fftw3_lib}_threads ALIAS ${fftw3_lib}_threads)
+    set_target_properties(${fftw3_lib}_threads PROPERTIES
+        DEFINE_SYMBOL "fftw3_threads_EXPORTS")
+    generate_export_header(${fftw3_lib}_threads
+        BASE_NAME "fftw3_threads")
+    target_compile_definitions (${fftw3_lib}
+        PRIVATE
+            ENABLE_EXPORT_ADDITIONAL_FUNCTIONS)
+    target_compile_definitions (${fftw3_lib}_threads
+        PRIVATE
+            ENABLE_EXPORT_ADDITIONAL_FUNCTIONS
+            BUILD_THREADS_EXTERNAL)
     target_link_libraries (${fftw3_lib}_threads
         PUBLIC
             ${PROJECT_NAME}::${fftw3_lib}
@@ -271,6 +307,19 @@ endif ()
 if (OpenMP_FOUND)
   add_library (${fftw3_lib}_omp)
   add_library (${PROJECT_NAME}::${fftw3_lib}_omp ALIAS ${fftw3_lib}_omp)
+  set_target_properties(${fftw3_lib}_omp PROPERTIES
+      DEFINE_SYMBOL "fftw3_threads_EXPORTS")
+  generate_export_header(${fftw3_lib}_omp
+      BASE_NAME "fftw3_threads")
+  target_compile_definitions (${fftw3_lib}
+      PUBLIC
+          ENABLE_THREADS
+      PRIVATE
+          ENABLE_EXPORT_ADDITIONAL_FUNCTIONS)
+  target_compile_definitions (${fftw3_lib}_omp
+      PRIVATE
+          ENABLE_EXPORT_ADDITIONAL_FUNCTIONS
+          BUILD_THREADS_EXTERNAL)
   target_link_libraries (${fftw3_lib}_omp
     PUBLIC
         ${PROJECT_NAME}::${fftw3_lib}

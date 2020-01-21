@@ -23,12 +23,6 @@
 
 #include "dft/dft.h"
 
-#if defined(_MSC_VER) && !defined(FFTW_STATIC) && !defined(FFTW_EXPORTS)
-    #define FFTW_EXTERN extern __declspec(dllimport)
-#else
-    #define FFTW_EXTERN extern 
-#endif
-
 typedef void (*dftwapply)(const plan *ego, R *rio, R *iio);
 typedef struct ct_solver_s ct_solver;
 typedef plan *(*ct_mkinferior)(const ct_solver *ego,
@@ -45,7 +39,7 @@ typedef struct {
      dftwapply apply;
 } plan_dftw;
 
-extern plan *X(mkplan_dftw)(size_t size, const plan_adt *adt, dftwapply apply);
+EXPORT_ADDITIONAL_FUNCTIONS plan *X(mkplan_dftw)(size_t size, const plan_adt *adt, dftwapply apply);
 
 #define MKPLAN_DFTW(type, adt, apply) \
   (type *)X(mkplan_dftw)(sizeof(type), adt, apply)
@@ -61,12 +55,15 @@ struct ct_solver_s {
      ct_force_vrecursion force_vrecursionp;
 };
 
-int X(ct_applicable)(const ct_solver *, const problem *, planner *);
+int EXPORT_ADDITIONAL_FUNCTIONS X(ct_applicable)(const ct_solver *, const problem *, planner *);
 ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, 
 			  ct_mkinferior mkcldw, 
-			  ct_force_vrecursion force_vrecursionp);
-FFTW_EXTERN ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
-					 ct_mkinferior, ct_force_vrecursion);
+              ct_force_vrecursion force_vrecursionp);
+extern EXPORT_ADDITIONAL_FUNCTIONS ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int,
+                     ct_mkinferior, ct_force_vrecursion);
+
+extern EXPORT_ADDITIONAL_FUNCTIONS ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int,
+                     ct_mkinferior, ct_force_vrecursion);
 
 void X(regsolver_ct_directw)(planner *plnr,
      kdftw codelet, const ct_desc *desc, int dec);

@@ -70,12 +70,12 @@ int X(guru64_kosherp)(int rank, const X(iodim64) *dims,
 
 /* Note: extern is used for "internal" functions used in tests/hook.c */
 
-extern printer *X(mkprinter_file)(FILE *f);
+FFTW3_EXPORT printer *X(mkprinter_file)(FILE *f);
 
 printer *X(mkprinter_cnt)(size_t *cnt);
 printer *X(mkprinter_str)(char *s);
 
-extern planner *X(the_planner)(void);
+FFTW3_EXPORT planner *X(the_planner)(void);
 void X(configure_planner)(planner *plnr);
 
 void X(mapflags)(planner *, unsigned);
@@ -86,7 +86,7 @@ rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind);
 
 typedef void (*planner_hook_t)(void);
                                                      
-void X(set_planner_hooks)(planner_hook_t before, planner_hook_t after);
+void EXPORT_ADDITIONAL_FUNCTIONS X(set_planner_hooks)(planner_hook_t before, planner_hook_t after);
 
 #ifdef __cplusplus
 }  /* extern "C" */

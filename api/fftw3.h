@@ -47,6 +47,17 @@
 #ifndef FFTW3_H
 #define FFTW3_H
 
+#include <fftw3_export.h>
+#ifdef ENABLE_THREADS
+  #ifdef BUILD_THREADS_EXTERNAL
+    #include <fftw3_threads_export.h>
+  #else
+    #define FFTW3_THREADS_EXPORT FFTW3_EXPORT
+  #endif
+#else
+    #define FFTW3_THREADS_EXPORT
+#endif /* ENABLE_THREADS */
+
 #include <stdio.h>
 
 #ifdef __cplusplus
@@ -60,22 +71,6 @@ extern "C"
 #  define FFTW_DEFINE_COMPLEX(R, C) typedef R _Complex C
 #else
 #  define FFTW_DEFINE_COMPLEX(R, C) typedef R C[2]
-#endif
-
-#if defined(_MSC_VER) && !defined(FFTW_STATIC) && !defined(FFTW_EXPORTS)
-    #define FFTW_EXTERN extern __declspec(dllimport)
-#else
-    #define FFTW_EXTERN extern 
-#endif
-
-#if defined(_MSC_VER) && !defined(FFTW_STATIC)
-#if defined(FFTW_EXPORTS)
-    #define FFTW_EXTERN_OBJ extern __declspec(dllexport)
-#else
-    #define FFTW_EXTERN_OBJ extern __declspec(dllimport)
-#endif
-#else
-    #define FFTW_EXTERN_OBJ extern 
 #endif
 
 #define FFTW_CONCAT(prefix, name) prefix ## name
@@ -136,24 +131,24 @@ typedef enum fftw_r2r_kind_do_not_use_me X(r2r_kind);                   \
 typedef fftw_write_char_func_do_not_use_me X(write_char_func);          \
 typedef fftw_read_char_func_do_not_use_me X(read_char_func);            \
                                                                         \
-FFTW_EXTERN void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(execute)(const X(plan) p);                                 \
                                                                         \
-FFTW_EXTERN X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft)(int rank, const int *n,                          \
                        C *in, C *out, int sign, unsigned flags);        \
                                                                         \
-FFTW_EXTERN X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_1d)(int n, C *in, C *out, int sign,               \
                           unsigned flags);                              \
-FFTW_EXTERN X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_2d)(int n0, int n1,                               \
                           C *in, C *out, int sign, unsigned flags);     \
-FFTW_EXTERN X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_3d)(int n0, int n1, int n2,                       \
                           C *in, C *out, int sign, unsigned flags);     \
                                                                         \
-FFTW_EXTERN X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_many_dft)(int rank, const int *n,                     \
                             int howmany,                                \
                             C *in, const int *inembed,                  \
@@ -162,27 +157,27 @@ FFTW_CDECL X(plan_many_dft)(int rank, const int *n,                     \
                             int ostride, int odist,                     \
                             int sign, unsigned flags);                  \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru_dft)(int rank, const X(iodim) *dims,             \
                             int howmany_rank,                           \
                             const X(iodim) *howmany_dims,               \
                             C *in, C *out,                              \
                             int sign, unsigned flags);                  \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru_split_dft)(int rank, const X(iodim) *dims,       \
                                   int howmany_rank,                     \
                                   const X(iodim) *howmany_dims,         \
                                   R *ri, R *ii, R *ro, R *io,           \
                                   unsigned flags);                      \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru64_dft)(int rank,                                 \
                               const X(iodim64) *dims,                   \
                               int howmany_rank,                         \
                               const X(iodim64) *howmany_dims,           \
                               C *in, C *out,                            \
                               int sign, unsigned flags);                \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru64_split_dft)(int rank,                           \
                                     const X(iodim64) *dims,             \
                                     int howmany_rank,                   \
@@ -190,14 +185,14 @@ FFTW_CDECL X(plan_guru64_split_dft)(int rank,                           \
                                     R *ri, R *ii, R *ro, R *io,         \
                                     unsigned flags);                    \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(execute_dft)(const X(plan) p, C *in, C *out);              \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(execute_split_dft)(const X(plan) p, R *ri, R *ii,          \
                                       R *ro, R *io);                    \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_many_dft_r2c)(int rank, const int *n,                 \
                                 int howmany,                            \
                                 R *in, const int *inembed,              \
@@ -206,23 +201,23 @@ FFTW_CDECL X(plan_many_dft_r2c)(int rank, const int *n,                 \
                                 int ostride, int odist,                 \
                                 unsigned flags);                        \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_r2c)(int rank, const int *n,                      \
                            R *in, C *out, unsigned flags);              \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_r2c_1d)(int n,R *in,C *out,unsigned flags);       \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_r2c_2d)(int n0, int n1,                           \
                               R *in, C *out, unsigned flags);           \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_r2c_3d)(int n0, int n1,                           \
                               int n2,                                   \
                               R *in, C *out, unsigned flags);           \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_many_dft_c2r)(int rank, const int *n,                 \
                                 int howmany,                            \
                                 C *in, const int *inembed,              \
@@ -231,51 +226,51 @@ FFTW_CDECL X(plan_many_dft_c2r)(int rank, const int *n,                 \
                                 int ostride, int odist,                 \
                                 unsigned flags);                        \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_c2r)(int rank, const int *n,                      \
                            C *in, R *out, unsigned flags);              \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_c2r_1d)(int n,C *in,R *out,unsigned flags);       \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_c2r_2d)(int n0, int n1,                           \
                               C *in, R *out, unsigned flags);           \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_dft_c2r_3d)(int n0, int n1,                           \
                               int n2,                                   \
                               C *in, R *out, unsigned flags);           \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru_dft_r2c)(int rank, const X(iodim) *dims,         \
                                 int howmany_rank,                       \
                                 const X(iodim) *howmany_dims,           \
                                 R *in, C *out,                          \
                                 unsigned flags);                        \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru_dft_c2r)(int rank, const X(iodim) *dims,         \
                                 int howmany_rank,                       \
                                 const X(iodim) *howmany_dims,           \
                                 C *in, R *out,                          \
                                 unsigned flags);                        \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru_split_dft_r2c)(int rank, const X(iodim) *dims,   \
                                       int howmany_rank,                 \
                                       const X(iodim) *howmany_dims,     \
                                       R *in, R *ro, R *io,              \
                                       unsigned flags);                  \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru_split_dft_c2r)(int rank, const X(iodim) *dims,   \
                                       int howmany_rank,                 \
                                       const X(iodim) *howmany_dims,     \
                                       R *ri, R *ii, R *out,             \
                                       unsigned flags);                  \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru64_dft_r2c)(int rank,                             \
                                   const X(iodim64) *dims,               \
                                   int howmany_rank,                     \
@@ -283,7 +278,7 @@ FFTW_CDECL X(plan_guru64_dft_r2c)(int rank,                             \
                                   R *in, C *out,                        \
                                   unsigned flags);                      \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru64_dft_c2r)(int rank,                             \
                                   const X(iodim64) *dims,               \
                                   int howmany_rank,                     \
@@ -291,34 +286,34 @@ FFTW_CDECL X(plan_guru64_dft_c2r)(int rank,                             \
                                   C *in, R *out,                        \
                                   unsigned flags);                      \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru64_split_dft_r2c)(int rank, const X(iodim64) *dims, \
                                         int howmany_rank,               \
                                         const X(iodim64) *howmany_dims, \
                                         R *in, R *ro, R *io,            \
                                         unsigned flags);                \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru64_split_dft_c2r)(int rank, const X(iodim64) *dims, \
                                         int howmany_rank,               \
                                         const X(iodim64) *howmany_dims, \
                                         R *ri, R *ii, R *out,           \
                                         unsigned flags);                \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(execute_dft_r2c)(const X(plan) p, R *in, C *out);          \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(execute_dft_c2r)(const X(plan) p, C *in, R *out);          \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(execute_split_dft_r2c)(const X(plan) p,                    \
                                     R *in, R *ro, R *io);               \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(execute_split_dft_c2r)(const X(plan) p,                    \
                                     R *ri, R *ii, R *out);              \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_many_r2r)(int rank, const int *n,                     \
                             int howmany,                                \
                             R *in, const int *inembed,                  \
@@ -327,127 +322,115 @@ FFTW_CDECL X(plan_many_r2r)(int rank, const int *n,                     \
                             int ostride, int odist,                     \
                             const X(r2r_kind) *kind, unsigned flags);   \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_r2r)(int rank, const int *n, R *in, R *out,           \
                        const X(r2r_kind) *kind, unsigned flags);        \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_r2r_1d)(int n, R *in, R *out,                         \
                           X(r2r_kind) kind, unsigned flags);            \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_r2r_2d)(int n0, int n1, R *in, R *out,                \
                           X(r2r_kind) kind0, X(r2r_kind) kind1,         \
                           unsigned flags);                              \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_r2r_3d)(int n0, int n1, int n2,                       \
                           R *in, R *out, X(r2r_kind) kind0,             \
                           X(r2r_kind) kind1, X(r2r_kind) kind2,         \
                           unsigned flags);                              \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru_r2r)(int rank, const X(iodim) *dims,             \
                             int howmany_rank,                           \
                             const X(iodim) *howmany_dims,               \
                             R *in, R *out,                              \
                             const X(r2r_kind) *kind, unsigned flags);   \
                                                                         \
-extern X(plan)                                                     \
+FFTW3_EXPORT X(plan)                                                    \
 FFTW_CDECL X(plan_guru64_r2r)(int rank, const X(iodim64) *dims,         \
                               int howmany_rank,                         \
                               const X(iodim64) *howmany_dims,           \
                               R *in, R *out,                            \
                               const X(r2r_kind) *kind, unsigned flags); \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(execute_r2r)(const X(plan) p, R *in, R *out);              \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(destroy_plan)(X(plan) p);                                  \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(forget_wisdom)(void);                                      \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(cleanup)(void);                                            \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(set_timelimit)(double t);                                  \
                                                                         \
-extern void                                                        \
-FFTW_CDECL X(plan_with_nthreads)(int nthreads);                         \
-                                                                        \
-extern int                                                         \
-FFTW_CDECL X(init_threads)(void);                                       \
-                                                                        \
-extern void                                                        \
-FFTW_CDECL X(cleanup_threads)(void);                                    \
-                                                                        \
-extern void                                                        \
-FFTW_CDECL X(make_planner_thread_safe)(void);                           \
-                                                                        \
-extern int                                                         \
+FFTW3_EXPORT int                                                        \
 FFTW_CDECL X(export_wisdom_to_filename)(const char *filename);          \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(export_wisdom_to_file)(FILE *output_file);                 \
                                                                         \
-extern char *                                                      \
+FFTW3_EXPORT char *                                                     \
 FFTW_CDECL X(export_wisdom_to_string)(void);                            \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(export_wisdom)(X(write_char_func) write_char,              \
                                   void *data);                          \
-extern int                                                         \
+FFTW3_EXPORT int                                                        \
 FFTW_CDECL X(import_system_wisdom)(void);                               \
                                                                         \
-extern int                                                         \
+FFTW3_EXPORT int                                                        \
 FFTW_CDECL X(import_wisdom_from_filename)(const char *filename);        \
                                                                         \
-extern int                                                         \
+FFTW3_EXPORT int                                                        \
 FFTW_CDECL X(import_wisdom_from_file)(FILE *input_file);                \
                                                                         \
-extern int                                                         \
+FFTW3_EXPORT int                                                        \
 FFTW_CDECL X(import_wisdom_from_string)(const char *input_string);      \
                                                                         \
-extern int                                                         \
+FFTW3_EXPORT int                                                        \
 FFTW_CDECL X(import_wisdom)(X(read_char_func) read_char, void *data);   \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(fprint_plan)(const X(plan) p, FILE *output_file);          \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(print_plan)(const X(plan) p);                              \
                                                                         \
-extern char *                                                      \
+FFTW3_EXPORT char *                                                     \
 FFTW_CDECL X(sprint_plan)(const X(plan) p);                             \
                                                                         \
-extern void *                                                      \
+FFTW3_EXPORT void *                                                     \
 FFTW_CDECL X(malloc)(size_t n);                                         \
                                                                         \
-extern R *                                                         \
+FFTW3_EXPORT R *                                                        \
 FFTW_CDECL X(alloc_real)(size_t n);                                     \
-extern C *                                                         \
+FFTW3_EXPORT C *                                                        \
 FFTW_CDECL X(alloc_complex)(size_t n);                                  \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(free)(void *p);                                            \
                                                                         \
-extern void                                                        \
+FFTW3_EXPORT void                                                       \
 FFTW_CDECL X(flops)(const X(plan) p,                                    \
                     double *add, double *mul, double *fmas);            \
-extern double                                                      \
+FFTW3_EXPORT double                                                     \
 FFTW_CDECL X(estimate_cost)(const X(plan) p);                           \
                                                                         \
-extern double                                                      \
+FFTW3_EXPORT double                                                     \
 FFTW_CDECL X(cost)(const X(plan) p);                                    \
                                                                         \
-extern int                                                         \
+FFTW3_EXPORT int                                                        \
 FFTW_CDECL X(alignment_of)(R *p);                                       \
                                                                         \
-FFTW_EXTERN_OBJ const char X(version)[];                                    \
-FFTW_EXTERN_OBJ const char X(cc)[];                                         \
-FFTW_EXTERN_OBJ const char X(codelet_optim)[];
+extern FFTW3_EXPORT const char X(version)[];                            \
+extern FFTW3_EXPORT const char X(cc)[];                                 \
+extern FFTW3_EXPORT const char X(codelet_optim)[];
 
 
 /* end of FFTW_DEFINE_API macro */
@@ -455,6 +438,26 @@ FFTW_EXTERN_OBJ const char X(codelet_optim)[];
 FFTW_DEFINE_API(FFTW_MANGLE_DOUBLE, double, fftw_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_FLOAT, float, fftwf_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
+
+#if defined(ENABLE_THREADS) || defined(WITH_COMBINED_THREADS)
+#define FFTW_DEFINE_THREADS_API(X, R, C)                                \
+FFTW3_THREADS_EXPORT void                                               \
+FFTW_CDECL X(plan_with_nthreads)(int nthreads);                         \
+                                                                        \
+FFTW3_THREADS_EXPORT int                                                \
+FFTW_CDECL X(init_threads)(void);                                       \
+                                                                        \
+FFTW3_THREADS_EXPORT void                                               \
+FFTW_CDECL X(cleanup_threads)(void);                                    \
+                                                                        \
+FFTW3_THREADS_EXPORT void                                               \
+FFTW_CDECL X(make_planner_thread_safe)(void);
+
+FFTW_DEFINE_THREADS_API(FFTW_MANGLE_DOUBLE, double, fftw_complex)
+FFTW_DEFINE_THREADS_API(FFTW_MANGLE_FLOAT, float, fftwf_complex)
+FFTW_DEFINE_THREADS_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
+#endif /* ENABLE_THREADS */
+
 
 /* __float128 (quad precision) is a gcc extension on i386, x86_64, and ia64
    for gcc >= 4.6 (compiled in FFTW with --enable-quad-precision) */
@@ -506,7 +509,7 @@ FFTW_DEFINE_API(FFTW_MANGLE_QUAD, __float128, fftwq_complex)
 #define FFTW_ALLOW_PRUNING (1U << 20)
 
 #ifdef __cplusplus
-}  /* extern "C" */
+}  /* FFTW3_EXPORT "C" */
 #endif /* __cplusplus */
 
 #endif /* FFTW3_H */

@@ -25,14 +25,14 @@ static int threads_inited = 0;
 
 static void threads_register_hooks(void)
 {
-     X(mksolver_ct_hook) = X(mksolver_ct_threads);
-     X(mksolver_hc2hc_hook) = X(mksolver_hc2hc_threads);
+    X(mksolver_ct_hook) = X(mksolver_ct_threads);
+    X(mksolver_hc2hc_hook) = X(mksolver_hc2hc_threads);
 }
 
 static void threads_unregister_hooks(void)
 {
-     X(mksolver_ct_hook) = 0;
-     X(mksolver_hc2hc_hook) = 0;
+    X(mksolver_ct_hook) = 0;
+    X(mksolver_hc2hc_hook) = 0;
 }
 
 /* should be called before all other FFTW functions! */

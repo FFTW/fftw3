@@ -29,6 +29,7 @@
 #include <stdarg.h>		/* va_list */
 #include <stddef.h>             /* ptrdiff_t */
 #include <limits.h>             /* INT_MAX */
+#include <fftw3_export.h>
 
 #if HAVE_SYS_TYPES_H
 # include <sys/types.h>
@@ -41,6 +42,12 @@
 #if HAVE_INTTYPES_H
 # include <inttypes.h>           /* uintptr_t, maybe */
 #endif
+
+#ifdef ENABLE_EXPORT_ADDITIONAL_FUNCTIONS
+    #define EXPORT_ADDITIONAL_FUNCTIONS FFTW3_EXPORT
+#else
+    #define EXPORT_ADDITIONAL_FUNCTIONS
+#endif /* ENABLE_EXPORT_ADDITIONAL_FUNCTIONS */
 
 #ifdef __cplusplus
 extern "C"
@@ -77,7 +84,7 @@ typedef ptrdiff_t INT;
 #define NELEM(array) ((sizeof(array) / sizeof((array)[0])))
 
 #define FFT_SIGN (-1)  /* sign convention for forward transforms */
-extern void X(extract_reim)(int sign, R *c, R **r, R **i);
+void X(extract_reim)(int sign, R *c, R **r, R **i);
 
 #define REGISTER_SOLVER(p, s) X(solver_register)(p, s)
 
@@ -98,15 +105,15 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 #define HAVE_SIMD 0
 #endif
 
-extern int X(have_simd_sse2)(void);
-extern int X(have_simd_avx)(void);
-extern int X(have_simd_avx_128_fma)(void);
-extern int X(have_simd_avx2)(void);
-extern int X(have_simd_avx2_128)(void);
-extern int X(have_simd_avx512)(void);
-extern int X(have_simd_altivec)(void);
-extern int X(have_simd_vsx)(void);
-extern int X(have_simd_neon)(void);
+int X(have_simd_sse2)(void);
+int X(have_simd_avx)(void);
+int X(have_simd_avx_128_fma)(void);
+int X(have_simd_avx2)(void);
+int X(have_simd_avx2_128)(void);
+int X(have_simd_avx512)(void);
+int X(have_simd_altivec)(void);
+int X(have_simd_vsx)(void);
+int X(have_simd_neon)(void);
 
 /* forward declarations */
 typedef struct problem_s problem;
@@ -230,7 +237,7 @@ void *alloca(size_t);
 
 /*-----------------------------------------------------------------------*/
 /* assert.c: */
-extern void X(assertion_failed)(const char *s, 
+FFTW3_EXPORT void X(assertion_failed)(const char *s,
 				      int line, const char *file);
 
 /* always check */
@@ -245,13 +252,13 @@ extern void X(assertion_failed)(const char *s,
 #define A(ex) /* nothing */
 #endif
 
-extern void X(debug)(const char *format, ...);
+void X(debug)(const char *format, ...);
 #define D X(debug)
 
 /*-----------------------------------------------------------------------*/
 /* kalloc.c: */
-extern void *X(kernel_malloc)(size_t n);
-extern void X(kernel_free)(void *p);
+void *X(kernel_malloc)(size_t n);
+void X(kernel_free)(void *p);
 
 /*-----------------------------------------------------------------------*/
 /* alloc.c: */
@@ -273,10 +280,10 @@ enum malloc_tag {
      MALLOC_WHAT_LAST		/* must be last */
 };
 
-extern void X(ifree)(void *ptr);
-extern void X(ifree0)(void *ptr);
+EXPORT_ADDITIONAL_FUNCTIONS void X(ifree)(void *ptr);
+void X(ifree0)(void *ptr);
 
-extern void *X(malloc_plain)(size_t sz);
+EXPORT_ADDITIONAL_FUNCTIONS void *X(malloc_plain)(size_t sz);
 #define MALLOC(n, what)  X(malloc_plain)(n)
 
 /*-----------------------------------------------------------------------*/
@@ -328,12 +335,12 @@ typedef struct {
      double other;
 } opcnt;
 
-void X(ops_zero)(opcnt *dst);
+void EXPORT_ADDITIONAL_FUNCTIONS X(ops_zero)(opcnt *dst);
 void X(ops_other)(INT o, opcnt *dst);
 void X(ops_cpy)(const opcnt *src, opcnt *dst);
 
 void X(ops_add)(const opcnt *a, const opcnt *b, opcnt *dst);
-void X(ops_add2)(const opcnt *a, opcnt *dst);
+void EXPORT_ADDITIONAL_FUNCTIONS X(ops_add2)(const opcnt *a, opcnt *dst);
 
 /* dst = m * a + b */
 void X(ops_madd)(INT m, const opcnt *a, const opcnt *b, opcnt *dst);
@@ -344,7 +351,7 @@ void X(ops_madd2)(INT m, const opcnt *a, opcnt *dst);
 
 /*-----------------------------------------------------------------------*/
 /* minmax.c: */
-INT X(imax)(INT a, INT b);
+INT EXPORT_ADDITIONAL_FUNCTIONS X(imax)(INT a, INT b);
 INT X(imin)(INT a, INT b);
 
 /*-----------------------------------------------------------------------*/
@@ -419,8 +426,8 @@ typedef enum { INPLACE_IS, INPLACE_OS } inplace_kind;
 
 tensor *X(mktensor)(int rnk);
 tensor *X(mktensor_0d)(void);
-tensor *X(mktensor_1d)(INT n, INT is, INT os);
-tensor *X(mktensor_2d)(INT n0, INT is0, INT os0,
+tensor EXPORT_ADDITIONAL_FUNCTIONS *X(mktensor_1d)(INT n, INT is, INT os);
+tensor EXPORT_ADDITIONAL_FUNCTIONS *X(mktensor_2d)(INT n0, INT is0, INT os0,
 		       INT n1, INT is1, INT os1);
 tensor *X(mktensor_3d)(INT n0, INT is0, INT os0,
 		       INT n1, INT is1, INT os1,
@@ -444,7 +451,7 @@ int X(tensor_inplace_strides)(const tensor *sz);
 int X(tensor_inplace_strides2)(const tensor *a, const tensor *b);
 int X(tensor_strides_decrease)(const tensor *sz, const tensor *vecsz,
                                inplace_kind k);
-tensor *X(tensor_copy)(const tensor *sz);
+tensor EXPORT_ADDITIONAL_FUNCTIONS *X(tensor_copy)(const tensor *sz);
 int X(tensor_kosherp)(const tensor *x);
 
 tensor *X(tensor_copy_inplace)(const tensor *sz, inplace_kind k);
@@ -454,8 +461,8 @@ tensor *X(tensor_compress)(const tensor *sz);
 tensor *X(tensor_compress_contiguous)(const tensor *sz);
 tensor *X(tensor_append)(const tensor *a, const tensor *b);
 void X(tensor_split)(const tensor *sz, tensor **a, int a_rnk, tensor **b);
-int X(tensor_tornk1)(const tensor *t, INT *n, INT *is, INT *os);
-void X(tensor_destroy)(tensor *sz);
+int EXPORT_ADDITIONAL_FUNCTIONS X(tensor_tornk1)(const tensor *t, INT *n, INT *is, INT *os);
+void EXPORT_ADDITIONAL_FUNCTIONS X(tensor_destroy)(tensor *sz);
 void X(tensor_destroy2)(tensor *a, tensor *b);
 void X(tensor_destroy4)(tensor *a, tensor *b, tensor *c, tensor *d);
 void X(tensor_print)(const tensor *sz, printer *p);
@@ -512,7 +519,7 @@ struct printer_s {
 printer *X(mkprinter)(size_t size, 
 		      void (*putchr)(printer *p, char c),
 		      void (*cleanup)(printer *p));
-extern void X(printer_destroy)(printer *p);
+void FFTW3_EXPORT X(printer_destroy)(printer *p);
 
 /*-----------------------------------------------------------------------*/
 /* scan.c */
@@ -552,8 +559,8 @@ struct plan_s {
 };
 
 plan *X(mkplan)(size_t size, const plan_adt *adt);
-void X(plan_destroy_internal)(plan *ego);
-extern void X(plan_awake)(plan *ego, enum wakefulness wakefulness);
+void EXPORT_ADDITIONAL_FUNCTIONS X(plan_destroy_internal)(plan *ego);
+void FFTW3_EXPORT X(plan_awake)(plan *ego, enum wakefulness wakefulness);
 void X(plan_null_destroy)(plan *ego);
 
 /*-----------------------------------------------------------------------*/
@@ -569,10 +576,10 @@ struct solver_s {
      int refcnt;
 };
 
-solver *X(mksolver)(size_t size, const solver_adt *adt);
+solver EXPORT_ADDITIONAL_FUNCTIONS *X(mksolver)(size_t size, const solver_adt *adt);
 void X(solver_use)(solver *ego);
 void X(solver_destroy)(solver *ego);
-void X(solver_register)(planner *plnr, solver *s);
+void EXPORT_ADDITIONAL_FUNCTIONS X(solver_register)(planner *plnr, solver *s);
 
 /* shorthand */
 #define MKSOLVER(type, adt) (type *)X(mksolver)(sizeof(type), adt)
@@ -786,7 +793,7 @@ void X(planner_destroy)(planner *ego);
 
 
 /* make plan, destroy problem */
-plan *X(mkplan_d)(planner *ego, problem *p);
+plan EXPORT_ADDITIONAL_FUNCTIONS *X(mkplan_d)(planner *ego, problem *p);
 plan *X(mkplan_f_d)(planner *ego, problem *p, 
 		    unsigned l_set, unsigned u_set, unsigned u_reset);
 
@@ -803,7 +810,7 @@ extern const INT X(an_INT_guaranteed_to_be_zero);
 #ifdef PRECOMPUTE_ARRAY_INDICES
 typedef INT *stride;
 #define WS(stride, i)  (stride[i])
-extern stride X(mkstride)(INT n, INT s);
+stride X(mkstride)(INT n, INT s);
 void X(stride_destroy)(stride p);
 /* hackery to prevent the compiler from copying the strides array
    onto the stack */
@@ -847,13 +854,13 @@ typedef INT stride;
 
 struct solvtab_s { void (*reg)(planner *); const char *reg_nam; };
 typedef struct solvtab_s solvtab[];
-void X(solvtab_exec)(const solvtab tbl, planner *p);
+void EXPORT_ADDITIONAL_FUNCTIONS X(solvtab_exec)(const solvtab tbl, planner *p);
 #define SOLVTAB(s) { s, STRINGIZE(s) }
 #define SOLVTAB_END { 0, 0 }
 
 /*-----------------------------------------------------------------------*/
 /* pickdim.c */
-int X(pickdim)(int which_dim, const int *buddies, size_t nbuddies,
+int EXPORT_ADDITIONAL_FUNCTIONS X(pickdim)(int which_dim, const int *buddies, size_t nbuddies,
 	       const tensor *sz, int oop, int *dp);
 
 /*-----------------------------------------------------------------------*/
@@ -922,7 +929,7 @@ int X(is_prime)(INT n);
 INT X(next_prime)(INT n);
 int X(factors_into)(INT n, const INT *primes);
 int X(factors_into_small_primes)(INT n);
-INT X(choose_radix)(INT r, INT n);
+INT EXPORT_ADDITIONAL_FUNCTIONS X(choose_radix)(INT r, INT n);
 INT X(isqrt)(INT n);
 INT X(modulo)(INT a, INT n);
 
@@ -1006,7 +1013,7 @@ extern unsigned X(random_estimate_seed);
 
 double X(measure_execution_time)(const planner *plnr, 
 				 plan *pln, const problem *p);
-extern int X(ialignment_of)(R *p);
+int X(ialignment_of)(R *p);
 unsigned X(hash)(const char *s);
 INT X(nbuf)(INT n, INT vl, INT maxnbuf);
 int X(nbuf_redundant)(INT n, INT vl, size_t which, 

@@ -21,8 +21,8 @@
 
 #include "dft/ct.h"
 
-ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
-				  ct_mkinferior, ct_force_vrecursion) = 0;
+ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int,
+                  ct_mkinferior, ct_force_vrecursion) = 0;
 
 typedef struct {
      plan_dft super;
