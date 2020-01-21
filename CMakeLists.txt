@@ -272,7 +272,7 @@ if (Threads_FOUND)
     )
     target_link_libraries (${fftw3_lib}_threads
         PUBLIC
-            ${fftw3_lib}
+            ${PROJECT_NAME}::${fftw3_lib}
         PRIVATE
             Threads::Threads)
     list (APPEND subtargets ${fftw3_lib}_threads)
@@ -288,7 +288,7 @@ if (OpenMP_FOUND)
   )
   target_link_libraries (${fftw3_lib}_omp
     PUBLIC
-        ${fftw3_lib}
+        ${PROJECT_NAME}::${fftw3_lib}
         OpenMP::OpenMP_C)
   list (APPEND subtargets ${fftw3_lib}_omp)
 endif ()
