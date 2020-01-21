@@ -194,9 +194,6 @@ if (HAVE_SSE2 OR HAVE_AVX)
   set (HAVE_SIMD TRUE)
 endif ()
 
-include_directories (.)
-
-
 set (PREC_SUFFIX)
 if (ENABLE_FLOAT)
   set (FFTW_SINGLE TRUE)
@@ -231,10 +228,6 @@ generate_export_header(${fftw3_lib})
 
 set_target_properties(${fftw3_lib} PROPERTIES
     PUBLIC_HEADER api/fftw3.h)
-target_include_directories (${fftw3_lib} INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
-  $<INSTALL_INTERFACE:include>
-)
 if (MSVC AND NOT (CMAKE_C_COMPILER_ID STREQUAL "Intel"))
   target_compile_definitions (${fftw3_lib} PRIVATE /bigobj)
   target_compile_definitions (${fftw3_lib} PRIVATE FFTW_EXPORTS)
@@ -266,10 +259,6 @@ if (Threads_FOUND)
   else ()
     add_library (${fftw3_lib}_threads)
     add_library (${PROJECT_NAME}::${fftw3_lib}_threads ALIAS ${fftw3_lib}_threads)
-    target_include_directories (${fftw3_lib}_threads INTERFACE
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
-      $<INSTALL_INTERFACE:include>
-    )
     target_link_libraries (${fftw3_lib}_threads
         PUBLIC
             ${PROJECT_NAME}::${fftw3_lib}
@@ -282,10 +271,6 @@ endif ()
 if (OpenMP_FOUND)
   add_library (${fftw3_lib}_omp)
   add_library (${PROJECT_NAME}::${fftw3_lib}_omp ALIAS ${fftw3_lib}_omp)
-  target_include_directories (${fftw3_lib}_omp INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/api>
-    $<INSTALL_INTERFACE:include>
-  )
   target_link_libraries (${fftw3_lib}_omp
     PUBLIC
         ${PROJECT_NAME}::${fftw3_lib}
@@ -303,6 +288,13 @@ add_subdirectory(threads)
 
 foreach(subtarget ${subtargets})
     set_target_properties (${subtarget} PROPERTIES SOVERSION 3.5.7)
+    target_include_directories (${subtarget}
+      PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+      INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/api>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<INSTALL_INTERFACE:include>)
 endforeach()
 
 install (TARGETS ${subtargets}
@@ -332,6 +324,10 @@ if (BUILD_TESTS)
   add_executable (bench)
   add_subdirectory(libbench2)
   add_subdirectory(tests)
+
+  target_include_directories (bench
+    PRIVATE
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
 
   if (Threads_FOUND AND NOT WITH_COMBINED_THREADS)
     target_link_libraries (bench ${PROJECT_NAME}::${fftw3_lib}_threads)
