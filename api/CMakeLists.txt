@@ -1,4 +1,6 @@
 target_sources(${fftw3_lib}
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/fftw3.h>
   PRIVATE
     api.h
     f77funcs.h
