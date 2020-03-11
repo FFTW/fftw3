@@ -99,31 +99,19 @@ static inline void STA(R *x, V v, INT ovs, const R *aligned_like) {
 static inline V LDu(const R *x, INT ivs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
-  __m512i index = _mm512_set_epi32(7 * ivs + 1, 7 * ivs,
-                                   6 * ivs + 1, 6 * ivs,
-                                   5 * ivs + 1, 5 * ivs,
-                                   4 * ivs + 1, 4 * ivs,
-                                   3 * ivs + 1, 3 * ivs,
-                                   2 * ivs + 1, 2 * ivs,
-                                   1 * ivs + 1, 1 * ivs,
-                                   0 * ivs + 1, 0 * ivs);
+  /* pretend pair of single are a double */
+  const __m256i index = _mm256_set_epi32(7 * ivs, 6 * ivs, 5 * ivs, 4 * ivs, 3 * ivs, 2 * ivs, 1 * ivs, 0 * ivs);
   
-  return _mm512_i32gather_ps(index, x, 4);
+  return (V)_mm512_i32gather_pd(index, x, 4);
 }
 
 static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
-  __m512i index = _mm512_set_epi32(7 * ovs + 1, 7 * ovs,
-                                   6 * ovs + 1, 6 * ovs,
-                                   5 * ovs + 1, 5 * ovs,
-                                   4 * ovs + 1, 4 * ovs,
-                                   3 * ovs + 1, 3 * ovs,
-                                   2 * ovs + 1, 2 * ovs,
-                                   1 * ovs + 1, 1 * ovs,
-                                   0 * ovs + 1, 0 * ovs);
-  
-  _mm512_i32scatter_ps(x, index, v, 4);
+  /* pretend pair of single are a double */
+  const __m256i index = _mm256_set_epi32(7 * ovs, 6 * ovs, 5 * ovs, 4 * ovs, 3 * ovs, 2 * ovs, 1 * ovs, 0 * ovs);
+
+  _mm512_i32scatter_pd(x, index, (__m512d)v, 4);
 }
 
 #else /* !FFTW_SINGLE */
