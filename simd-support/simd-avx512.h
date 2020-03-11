@@ -56,7 +56,7 @@
 
 typedef DS(__m512d, __m512) V;
 
-#define VLIT(re, im) DS(SUFF(_mm512_setr)(im, re, im, re, im, re, im, re),SUFF(_mm512_setr)(im, re, im, re, im, re, im, re, im, re, im, re, im, re, im, re))
+#define VLIT(re, im) DS(SUFF(_mm512_setr)(re, im, re, im, re, im, re, im),SUFF(_mm512_setr)(re, im, re, im, re, im, re, im, re, im, re, im, re, im, re, im))
 #define VLIT1(val) SUFF(_mm512_set1)(val)
 #define LDK(x) x
 #define DVK(var, val) V var = VLIT1(val)
@@ -131,23 +131,43 @@ static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 static inline V LDu(const R *x, INT ivs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
+#if defined(AVX512_SCATTERGATHER)
   __m256i index = _mm256_set_epi32(3 * ivs + 1, 3 * ivs,
                                    2 * ivs + 1, 2 * ivs,
                                    1 * ivs + 1, 1 * ivs,
                                    0 * ivs + 1, 0 * ivs);
   
   return _mm512_i32gather_pd(index, x, 8);
+#else
+  __m128d va0, va1, va2, va3;
+  __m256d vb0, vb1;
+  int i;
+  va0 = _mm_loadu_pd(x + 0*ivs);
+  va1 = _mm_loadu_pd(x + 1*ivs);
+  va2 = _mm_loadu_pd(x + 2*ivs);
+  va3 = _mm_loadu_pd(x + 3*ivs);
+  vb0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(va0), va1, 1);
+  vb1 = _mm256_insertf128_pd(_mm256_castpd128_pd256(va2), va3, 1);
+  return (_mm512_insertf64x4(_mm512_castpd256_pd512(vb0), vb1, 1));
+#endif
 }
 
 static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
+#if defined(AVX512_SCATTERGATHER)
   __m256i index = _mm256_set_epi32(3 * ovs + 1, 3 * ovs,
                                    2 * ovs + 1, 2 * ovs,
                                    1 * ovs + 1, 1 * ovs,
                                    0 * ovs + 1, 0 * ovs);
   
   _mm512_i32scatter_pd(x, index, v, 8);
+#else
+  _mm_storeu_pd(x+ovs*0, _mm512_extractf64x2_pd(v, 0));
+  _mm_storeu_pd(x+ovs*1, _mm512_extractf64x2_pd(v, 1));
+  _mm_storeu_pd(x+ovs*2, _mm512_extractf64x2_pd(v, 2));
+  _mm_storeu_pd(x+ovs*3, _mm512_extractf64x2_pd(v, 3));
+#endif
 }
 
 #endif /* FFTW_SINGLE */
