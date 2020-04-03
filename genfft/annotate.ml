@@ -78,9 +78,9 @@ let reorder l =
 	  List.map 
 	    (fun (a, x) -> ((a, x), (overlap va x, List.length x))) b in
 	let c' =
-	  Sort.list 
+	  List.sort 
 	    (fun (_, (a, la)) (_, (b, lb)) -> 
-	      la < lb || a > b)
+              if la > lb then la - lb else b - a)
 	    c in
 	let b' = List.map (fun (a, _) -> a) c' in
 	a :: (loop b') in
