@@ -80,9 +80,7 @@ let reorder l =
 	let c' =
 	  List.sort 
 	    (fun (_, (a, la)) (_, (b, lb)) ->
-              if la < lb then -1
-              else if a > b then -1
-              else 1)
+              if la < lb || a > b then -1 else 1)
 	    c in
 	let b' = List.map (fun (a, _) -> a) c' in
 	a :: (loop b') in
