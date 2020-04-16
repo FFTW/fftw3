@@ -22,6 +22,7 @@
 /* this code was kindly donated by Eric J. Korpela */
 
 #ifdef _MSC_VER
+#include <intrin.h>
 #ifndef inline
 #define inline __inline
 #endif
