@@ -17,5 +17,5 @@ code, do not require any special tools or knowledge, and can be
 compiled on any system with a C compiler.
 
 Advanced users and FFTW maintainers may obtain code from github and
-run the generation process themselves.  See README for details.
-
+run the generation process themselves.  See [README](README) for
+details.
