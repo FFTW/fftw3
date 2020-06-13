@@ -214,7 +214,7 @@ static inline V VZMULIJ(V tx, V sr)
 /* twiddle storage #1: compact, slower */
 #ifdef FFTW_SINGLE
 #  define VTW1(v,x)  \
-  {TW_COS, v, x}, {TW_COS, v+1, x}, {TW_SIN, v, x}, {TW_SIN, v+1, x}
+  {TW_CEXP, v, x}, {TW_CEXP, v+1, x}     
 static inline V BYTW1(const R *t, V sr)
 {
     return VZMUL(LDA(t, 2, t), sr);
