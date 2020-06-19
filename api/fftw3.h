@@ -380,6 +380,9 @@ FFTW_EXTERN void                                                        \
 FFTW_CDECL X(plan_with_nthreads)(int nthreads);                         \
                                                                         \
 FFTW_EXTERN int                                                         \
+FFTW_CDECL X(planner_nthreads)(void);                                   \
+                                                                        \
+FFTW_EXTERN int                                                         \
 FFTW_CDECL X(init_threads)(void);                                       \
                                                                         \
 FFTW_EXTERN void                                                        \

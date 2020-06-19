@@ -28,6 +28,11 @@ FFTW_VOIDFUNC F77(plan_with_nthreads, PLAN_WITH_NTHREADS)(int *nthreads)
      X(plan_with_nthreads)(*nthreads);
 }
 
+FFTW_VOIDFUNC F77(planner_nthreads, PLANNER_NTHREADS)(int *nthreads)
+{
+    *nthreads = X(planner_nthreads)();
+}
+
 FFTW_VOIDFUNC F77(init_threads, INIT_THREADS)(int *okay)
 {
      *okay = X(init_threads)();
