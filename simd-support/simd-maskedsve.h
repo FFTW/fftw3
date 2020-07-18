@@ -161,12 +161,9 @@ static inline void STA(R *x, V v, INT ovs, const R *aligned_like) {
 static inline V LDu(const R *x, INT ivs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
-  svint32_t  gvvl = svindex_s32(0, 1);
-  gvvl = svmul_n_s32_x(MASKA, gvvl, sizeof(R)*ivs);
-  gvvl = svzip1_s32(gvvl, gvvl);
-  gvvl = svadd_s32_x(MASKA, gvvl, svdupq_n_s32(0,sizeof(R),0,sizeof(R)));
-  
-  return svld1_gather_s32offset_f32(MASKA, x, gvvl);
+  svint64_t gvvl = svindex_s64(0, ivs/2);
+
+  return svreinterpret_f32_f64(svld1_gather_s64index_f64(MASKA, (const double *)x, gvvl));
 }
 
 static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
@@ -175,12 +172,9 @@ static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
   if (ovs==0) { // FIXME: hack for extra_iter hack support
     v = svreinterpret_f32_f64(svdup_lane_f64(svreinterpret_f64_f32(v),0));
   }
-  svint32_t  gvvl = svindex_s32(0, 1);
-  gvvl = svmul_n_s32_x(MASKA, gvvl, sizeof(R)*ovs);
-  gvvl = svzip1_s32(gvvl, gvvl);
-  gvvl = svadd_s32_x(MASKA, gvvl, svdupq_n_s32(0,sizeof(R),0,sizeof(R)));
+  svint64_t gvvl = svindex_s64(0, ovs/2);
 
-  svst1_scatter_s32offset_f32(MASKA, x, gvvl, v);
+  svst1_scatter_s64index_f64(MASKA, (double *)x, gvvl, svreinterpret_f64_f32(v));
 }
 
 #else /* !FFTW_SINGLE */
@@ -189,12 +183,10 @@ static inline V LDu(const R *x, INT ivs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
   (void)aligned_like; /* UNUSED */
-  svint64_t  gvvl = svindex_s64(0, 1);
-  gvvl = svmul_n_s64_x(MASKA, gvvl, sizeof(R)*ivs);
-  gvvl = svzip1_s64(gvvl, gvvl);
-  gvvl = svadd_s64_x(MASKA, gvvl, svdupq_n_s64(0,sizeof(R)));
+  svint64_t  gvvl = svindex_s64(0, ivs);
+  gvvl = svzip1_s64(gvvl, svadd_n_s64_x(MASKA, gvvl, 1));
 
-  return svld1_gather_s64offset_f64(MASKA, x, gvvl);
+  return svld1_gather_s64index_f64(MASKA, x, gvvl);
 }
 
 static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
@@ -203,12 +195,10 @@ static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
   if (ovs==0) { // FIXME: hack for extra_iter hack support
     v = svdupq_lane_f64(v,0);
   }
-  svint64_t  gvvl = svindex_s64(0, 1);
-  gvvl = svmul_n_s64_x(MASKA, gvvl, sizeof(R)*ovs);
-  gvvl = svzip1_s64(gvvl, gvvl);
-  gvvl = svadd_s64_x(MASKA, gvvl, svdupq_n_s64(0,sizeof(R)));
+  svint64_t  gvvl = svindex_s64(0, ovs);
+  gvvl = svzip1_s64(gvvl, svadd_n_s64_x(MASKA, gvvl, 1));
 
-  svst1_scatter_s64offset_f64(MASKA, x, gvvl, v);
+  svst1_scatter_s64index_f64(MASKA, x, gvvl, v);
 }
 
 #endif /* FFTW_SINGLE */
@@ -224,10 +214,9 @@ static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
   (void)aligned_like; /* UNUSED */
-  svint32_t  gvvl = svindex_s32(0, 1);
-  gvvl = svmul_n_s32_x(svptrue_b32(), gvvl, sizeof(R)*ovs);
+  svint32_t  gvvl = svindex_s32(0, ovs);
 
-  svst1_scatter_s32offset_f32(MASKA, x, gvvl, v);
+  svst1_scatter_s32index_f32(MASKA, x, gvvl, v);
 }
 #define STN4(x, v0, v1, v2, v3, ovs)  /* no-op */
 #else /* !FFTW_SINGLE */
@@ -238,10 +227,9 @@ static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
   (void)aligned_like; /* UNUSED */
-  svint64_t  gvvl = svindex_s64(0, 1);
-  gvvl = svmul_n_s64_x(svptrue_b64(), gvvl, sizeof(R)*ovs);
+  svint64_t  gvvl = svindex_s64(0, ovs);
 
-  svst1_scatter_s64offset_f64(MASKA, x, gvvl, v);
+  svst1_scatter_s64index_f64(MASKA, x, gvvl, v);
 }
 #define STN4(x, v0, v1, v2, v3, ovs)  /* no-op */
 #endif /* FFTW_SINGLE */
