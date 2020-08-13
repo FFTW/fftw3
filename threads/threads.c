@@ -33,7 +33,7 @@
 #  include <unistd.h>
 #endif
 
-/* imlementation of semaphores and mutexes: */
+/* implementation of semaphores and mutexes: */
 #if (defined(_POSIX_SEMAPHORES) && (_POSIX_SEMAPHORES >= 200112L))
 
    /* If optional POSIX semaphores are supported, use them to
