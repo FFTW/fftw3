@@ -260,6 +260,15 @@ FFTW}), you would simply prefix these calls with:
 (You might want to check the value of @code{iret}: if it is zero, it
 indicates an unlikely error during thread initialization.)
 
+To check the number of threads currently being used by the planner, you
+can do the following:
+
+@example
+        integer iret
+        call dfftw_planner_nthreads(iret)
+@end example
+@findex dfftw_planner_nthreads
+
 To transform a three-dimensional array in-place with C, you might do:
 
 @example

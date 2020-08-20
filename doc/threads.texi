@@ -119,6 +119,14 @@ before a call to @code{fftw_plan_with_nthreads} are unaffected.  If you
 pass an @code{nthreads} argument of @code{1} (the default), threads are
 disabled for subsequent plans.
 
+You can determine the current number of threads that the planner can
+use by calling:
+
+@example
+int fftw_planner_nthreads(void);
+@end example
+@findex fftw_planner_nthreads
+
 @cindex OpenMP
 With OpenMP, to configure FFTW to use all of the currently running
 OpenMP threads (set by @code{omp_set_num_threads(nthreads)} or by the

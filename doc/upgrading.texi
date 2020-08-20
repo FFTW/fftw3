@@ -189,7 +189,8 @@ now stored in the plan, and is specified before the planner is called by
 @code{fftw_plan_with_nthreads}.  The threads initialization routine used
 to be called @code{fftw_threads_init} and would return zero on success;
 the new routine is called @code{fftw_init_threads} and returns zero on
-failure.  @xref{Multi-threaded FFTW}.
+failure. The current number of threads used by the planner can be
+checked with @code{fftw_planner_nthreads}. @xref{Multi-threaded FFTW}.
 
 There is no separate threads header file in FFTW 3; all the function
 prototypes are in @code{<fftw3.h>}.  However, you still have to link to
