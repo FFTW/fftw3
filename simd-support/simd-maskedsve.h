@@ -94,7 +94,11 @@ typedef DS(svfloat64_t, svfloat32_t) V;
 /* FXIME: there is a better way, surely */
 /* #define VCONJ(x)  TYPESUF(svcmla,_x)(MASKA,TYPESUF(svcmla,_x)(MASKA,VZERO,x,VRONE,0),x,VRONE,270) */
 #define VCONJ(x) TYPESUF(svmul,_x)(MASKA,x,VCONEMI)
+#if 0
 #define VBYI(x)  TYPESUF(svcmla,_x)(MASKA,TYPESUF(svcmla,_x)(MASKA,VZERO,x,VCI,0),x,VCI,90)
+#else
+#define VBYI(x)  TYPESUF(svcadd,_x)(MASKA,VZERO,x,90)
+#endif
 
 #define VNEG(a)   TYPESUF(svneg,_x)(MASKA,a)
 #define VADD(a,b) TYPESUF(svadd,_x)(MASKA,a,b)
@@ -169,12 +173,19 @@ static inline V LDu(const R *x, INT ivs, const R *aligned_like)
 static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
-  if (ovs==0) { // FIXME: hack for extra_iter hack support
-    v = svreinterpret_f32_f64(svdup_lane_f64(svreinterpret_f64_f32(v),0));
-  }
-  svint64_t gvvl = svindex_s64(0, ovs/2);
+/*   if (ovs==0) { // FIXME: hack for extra_iter hack support */
+/*     v = svreinterpret_f32_f64(svdup_lane_f64(svreinterpret_f64_f32(v),0)); */
+/*   } */
+  const svint64_t gvvl = svindex_s64(0, ovs/2);
 
-  svst1_scatter_s64index_f64(MASKA, (double *)x, gvvl, svreinterpret_f64_f32(v));
+  /* no-branch implementation of extra_iter hack support
+   * if ovs is non-zero, keep the original MASKA;
+   * if not, only store one 64 bits element (two 32 bits consecutive)
+   */
+  const svbool_t which = svdupq_n_b64(ovs != 0, ovs != 0);
+  const svbool_t mask = svsel_b(which, MASKA, svptrue_pat_b64(SV_VL1));
+
+  svst1_scatter_s64index_f64(mask, (double *)x, gvvl, svreinterpret_f64_f32(v));
 }
 
 #else /* !FFTW_SINGLE */
@@ -192,13 +203,20 @@ static inline V LDu(const R *x, INT ivs, const R *aligned_like)
 static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
-  if (ovs==0) { // FIXME: hack for extra_iter hack support
-    v = svdupq_lane_f64(v,0);
-  }
-  svint64_t  gvvl = svindex_s64(0, ovs);
+/*   if (ovs==0) { // FIXME: hack for extra_iter hack support */
+/*     v = svdupq_lane_f64(v,0); */
+/*   } */
+  svint64_t gvvl = svindex_s64(0, ovs);
   gvvl = svzip1_s64(gvvl, svadd_n_s64_x(MASKA, gvvl, 1));
 
-  svst1_scatter_s64index_f64(MASKA, x, gvvl, v);
+  /* no-branch implementation of extra_iter hack support
+   * if ovs is non-zero, keep the original MASKA;
+   * if not, only store two 64 bits elements
+   */
+  const svbool_t which = svdupq_n_b64(ovs != 0, ovs != 0);
+  const svbool_t mask = svsel_b(which, MASKA, svptrue_pat_b64(SV_VL2));
+
+  svst1_scatter_s64index_f64(mask, x, gvvl, v);
 }
 
 #endif /* FFTW_SINGLE */
