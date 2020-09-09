@@ -40,7 +40,6 @@
 #  define ALLA  svptrue_b64()
 #endif /* FFTW_SINGLE */
 
-//#define SIMD_SUFFIX  _sve  /* for renaming */
 #if SVE_SIZE == 2048
 #define VL DS(16, 32)        /* SIMD complex vector length */
 #define MASKA DS(svptrue_pat_b64(SV_VL32),svptrue_pat_b32(SV_VL64))
@@ -70,8 +69,19 @@
 
 typedef DS(svfloat64_t, svfloat32_t) V;
 
+/* The goal is to limit to the required width by using masking.
+ * However, some SVE instructions are limited to two-addresses
+ * rather than three adresses when masked.
+ * (i.e. they do X op= Y, not X = Z op X)
+ * Loads will put zero in masked-out value.
+ * For performance reason, we want to use non-masked for the instructions
+ * with a two-addresses masked form: add & sub.
+ * But ACLE doesn't have the non-masked form...
+ */
+
+/* do we need to mask VLIT somehow ?*/
 #define VLIT(re, im) DS(svdupq_n_f64(re,im),svdupq_n_f32(re,im,re,im))
-#define VLIT1(val) DS(svdup_n_f64(val), svdup_n_f32(val))
+#define VLIT1(val) TYPESUF(svdup_n,_z)(MASKA,val)
 #define LDK(x) x
 #define DVK(var, val) V var = VLIT1(val)
 #define VZERO VLIT1(DS(0.,0.f))
@@ -91,7 +101,7 @@ typedef DS(svfloat64_t, svfloat32_t) V;
 #define FLIP_RI(x) TYPE(svtrn1)(VDUPH(x),x)
 #endif
 
-/* FXIME: there is a better way, surely */
+/* FIXME: there is a better way, surely */
 /* #define VCONJ(x)  TYPESUF(svcmla,_x)(MASKA,TYPESUF(svcmla,_x)(MASKA,VZERO,x,VRONE,0),x,VRONE,270) */
 #define VCONJ(x) TYPESUF(svmul,_x)(MASKA,x,VCONEMI)
 #if 0
@@ -101,9 +111,27 @@ typedef DS(svfloat64_t, svfloat32_t) V;
 #endif
 
 #define VNEG(a)   TYPESUF(svneg,_x)(MASKA,a)
+#if 0
 #define VADD(a,b) TYPESUF(svadd,_x)(MASKA,a,b)
 #define VSUB(a,b) TYPESUF(svsub,_x)(MASKA,a,b)
 #define VMUL(a,b) TYPESUF(svmul,_x)(MASKA,a,b)
+#else
+static inline V VADD(const V a, const V b) {
+	V r;
+	asm("fadd %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+	return r;
+}
+static inline V VSUB(const V a, const V b) {
+	V r;
+	asm("fsub %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+	return r;
+}
+static inline V VMUL(const V a, const V b) {
+	V r;
+	asm("fmul %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+	return r;
+}
+#endif
 #define VFMA(a, b, c)  TYPESUF(svmad,_x)(MASKA,b,a,c)
 #define VFMS(a, b, c)  TYPESUF(svnmsb,_x)(MASKA,b,a,c)
 #define VFNMS(a, b, c) TYPESUF(svmsb,_x)(MASKA,b,a,c)
