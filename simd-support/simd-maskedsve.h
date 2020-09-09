@@ -77,7 +77,13 @@ typedef DS(svfloat64_t, svfloat32_t) V;
  * For performance reason, we want to use non-masked for the instructions
  * with a two-addresses masked form: add & sub.
  * But ACLE doesn't have the non-masked form...
+ * clang 11 & armclang 20.2 used masked form in assembly and lots of copies
+ * gcc 10 uses the non-masked form (!) and no copies
  */
+#define USE_UNMASKED_ASSEMBLY
+/* Define below to use masking instead of branching in STu
+ */
+//#define BRANCHLESS_STU
 
 /* do we need to mask VLIT somehow ?*/
 #define VLIT(re, im) DS(svdupq_n_f64(re,im),svdupq_n_f32(re,im,re,im))
@@ -111,7 +117,7 @@ typedef DS(svfloat64_t, svfloat32_t) V;
 #endif
 
 #define VNEG(a)   TYPESUF(svneg,_x)(MASKA,a)
-#if 0
+#if !defined(USE_UNMASKED_ASSEMBLY)
 #define VADD(a,b) TYPESUF(svadd,_x)(MASKA,a,b)
 #define VSUB(a,b) TYPESUF(svsub,_x)(MASKA,a,b)
 #define VMUL(a,b) TYPESUF(svmul,_x)(MASKA,a,b)
@@ -201,19 +207,21 @@ static inline V LDu(const R *x, INT ivs, const R *aligned_like)
 static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
-/*   if (ovs==0) { // FIXME: hack for extra_iter hack support */
-/*     v = svreinterpret_f32_f64(svdup_lane_f64(svreinterpret_f64_f32(v),0)); */
-/*   } */
   const svint64_t gvvl = svindex_s64(0, ovs/2);
-
+#if !defined(BRANCHLESS_STU)
+  if (ovs==0) { // FIXME: hack for extra_iter hack support
+    v = svreinterpret_f32_f64(svdup_lane_f64(svreinterpret_f64_f32(v),0));
+  }
+  svst1_scatter_s64index_f64(MASKA, (double *)x, gvvl, svreinterpret_f64_f32(v));
+#else
   /* no-branch implementation of extra_iter hack support
    * if ovs is non-zero, keep the original MASKA;
    * if not, only store one 64 bits element (two 32 bits consecutive)
    */
   const svbool_t which = svdupq_n_b64(ovs != 0, ovs != 0);
   const svbool_t mask = svsel_b(which, MASKA, svptrue_pat_b64(SV_VL1));
-
   svst1_scatter_s64index_f64(mask, (double *)x, gvvl, svreinterpret_f64_f32(v));
+#endif
 }
 
 #else /* !FFTW_SINGLE */
@@ -231,12 +239,14 @@ static inline V LDu(const R *x, INT ivs, const R *aligned_like)
 static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 {
   (void)aligned_like; /* UNUSED */
-/*   if (ovs==0) { // FIXME: hack for extra_iter hack support */
-/*     v = svdupq_lane_f64(v,0); */
-/*   } */
   svint64_t gvvl = svindex_s64(0, ovs);
   gvvl = svzip1_s64(gvvl, svadd_n_s64_x(MASKA, gvvl, 1));
-
+#if !defined(BRANCHLESS_STU)
+  if (ovs==0) { // FIXME: hack for extra_iter hack support
+    v = svdupq_lane_f64(v,0);
+  }
+  svst1_scatter_s64index_f64(MASKA, x, gvvl, v);
+#else
   /* no-branch implementation of extra_iter hack support
    * if ovs is non-zero, keep the original MASKA;
    * if not, only store two 64 bits elements
@@ -245,6 +255,7 @@ static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
   const svbool_t mask = svsel_b(which, MASKA, svptrue_pat_b64(SV_VL2));
 
   svst1_scatter_s64index_f64(mask, x, gvvl, v);
+#endif
 }
 
 #endif /* FFTW_SINGLE */
