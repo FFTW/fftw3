@@ -121,7 +121,7 @@ void rdwisdom(void)
 
      if (havewisdom) return;
 
-#ifdef HAVE_THREADS
+#ifdef HAVE_SMP
      if (threads_ok) {
 	  BENCH_ASSERT(FFTW(init_threads)());
 	  FFTW(plan_with_nthreads)(nthreads);
