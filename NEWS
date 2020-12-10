@@ -1,5 +1,10 @@
 FFTW 3.3.9:
 
+* New API fftw_planner_nthreads() returns the number of threads
+  currently being used by the planner.
+
+* Fix incorrect math in 128-bit generic SIMD
+
 * Fix wisdom for avx512.
 
   The avx512 alignment requirement was set to 64 bytes, but this is
