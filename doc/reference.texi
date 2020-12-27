@@ -297,7 +297,7 @@ omnis divisa in partes tres} (Julius Caesar).}: the @dfn{basic interface}
 computes a single transform of contiguous data, the @dfn{advanced
 interface} computes transforms of multiple or strided arrays, and the
 @dfn{guru interface} supports the most general data layouts,
-multiplicities, and strides.  This section describes the the basic
+multiplicities, and strides.  This section describes the basic
 interface, which we expect to satisfy the needs of most users.
 
 @menu
@@ -542,7 +542,7 @@ This function instructs FFTW to spend at most @code{seconds} seconds
 (approximately) in the planner.  If @code{seconds ==
 FFTW_NO_TIMELIMIT} (the default value, which is negative), then
 planning time is unbounded.  Otherwise, FFTW plans with a
-progressively wider range of algorithms until the the given time limit
+progressively wider range of algorithms until the given time limit
 is reached or the given range of algorithms is explored, returning the
 best available plan.
 @ctindex FFTW_NO_TIMELIMIT
