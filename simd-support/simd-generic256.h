@@ -42,7 +42,7 @@
 #endif
 
 #define VL DS(2,4)         /* SIMD vector length, in term of complex numbers */
-#define SIMD_VSTRIDE_OKA(x) DS(1,((x) == 2))
+#define SIMD_VSTRIDE_OKA(x) DS(SIMD_STRIDE_OKA(x),((x) == 2))     
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
 typedef DS(double,float) V __attribute__ ((vector_size(32)));

@@ -32,7 +32,7 @@
 
 #define SIMD_SUFFIX  _sse2  /* for renaming */
 #define VL DS(1,2)         /* SIMD vector length, in term of complex numbers */
-#define SIMD_VSTRIDE_OKA(x) DS(1,((x) == 2))
+#define SIMD_VSTRIDE_OKA(x) DS(SIMD_STRIDE_OKA(x),((x) == 2))
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
 #if defined(__GNUC__) && !defined(FFTW_SINGLE) && !defined(__SSE2__)

@@ -40,7 +40,7 @@
    taint.c which is compiled without neon */
 #define SIMD_SUFFIX _neon	/* for renaming */
 #define VL DS(1,2)            /* SIMD complex vector length */
-#define SIMD_VSTRIDE_OKA(x) DS(1,((x) == 2))
+#define SIMD_VSTRIDE_OKA(x) DS(SIMD_STRIDE_OKA(x),((x) == 2))
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
 #if defined(__GNUC__) && !defined(__ARM_NEON__) && !defined(__ARM_NEON)
