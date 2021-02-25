@@ -1,3 +1,28 @@
+FFTW 3.3.10:
+
+* Fix bug that would cause 2-way SIMD (notably SSE2 in double precision)
+  to attempt unaligned accesses in certain obscure cases, causing
+  segfaults.
+  
+  The following test triggers the bug (SSE2, double precision):
+
+    ./tests/bench -oexhaustive r4*2:5:3
+
+  This test computes a pair of length-4 real->complex transforms where
+  the second input is 5 real numbers away from the first input.  That
+  is, there is a gap of one real number between the first and second
+  input array.  The -oexhaustive level allow FFTW to attempt to
+  compute this transform by reducing it to a pair of complex
+  transforms of length 2, but now the second input is not aligned to a
+  complex-number boundary.  The fact that 5 is odd is the problem.
+
+  The bug cannot occur in complex->complex transforms because the
+  complex interface accepts strides in units of complex numbers, so
+  strides are aligned by construction.
+  
+  This bug has been around at least since fftw-3.1.2 (July 2006), and
+  probably since fftw-3.0 (2003).
+
 FFTW 3.3.9:
 
 * New API fftw_planner_nthreads() returns the number of threads
