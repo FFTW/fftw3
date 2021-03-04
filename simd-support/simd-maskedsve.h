@@ -124,17 +124,29 @@ typedef DS(svfloat64_t, svfloat32_t) V;
 #else
 static inline V VADD(const V a, const V b) {
 	V r;
+#ifdef FFTW_SINGLE
+	asm("fadd %[r].s, %[a].s, %[b].s\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+#else
 	asm("fadd %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+#endif
 	return r;
 }
 static inline V VSUB(const V a, const V b) {
 	V r;
+#ifdef FFTW_SINGLE
+	asm("fsub %[r].s, %[a].s, %[b].s\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+#else
 	asm("fsub %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+#endif
 	return r;
 }
 static inline V VMUL(const V a, const V b) {
 	V r;
+#ifdef FFTW_SINGLE
+	asm("fmul %[r].s, %[a].s, %[b].s\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+#else
 	asm("fmul %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+#endif
 	return r;
 }
 #endif
