@@ -80,7 +80,7 @@ typedef DS(svfloat64_t, svfloat32_t) V;
  * clang 11 & armclang 20.2 used masked form in assembly and lots of copies
  * gcc 10 uses the non-masked form (!) and no copies
  */
-#define USE_UNMASKED_ASSEMBLY
+//#define USE_UNMASKED_ASSEMBLY
 /* Define below to use masking instead of branching in STu
  */
 //#define BRANCHLESS_STU
