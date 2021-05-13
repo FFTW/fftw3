@@ -359,12 +359,9 @@ case "${ax_cv_c_compiler_vendor}" in
         fi
 
         # AVX2
-        # gcc-4.8 works with -march=core-avx2, but -mavx2 is not enough.
-        # Later versions seem to happy with -mavx2, so try the arch one first.
         if test "$have_avx2" = "yes" -a "x$AVX2_CFLAGS" = x; then
-            AX_CHECK_COMPILER_FLAGS(-march=core-avx2, [AVX2_CFLAGS="-march=core-avx2"],
-                [AX_CHECK_COMPILER_FLAGS(-mavx2, [AVX2_CFLAGS="-mavx2"],
-                    [AC_MSG_ERROR([Need a version of gcc with either -march=core-avx2 or -mavx2])])])
+            AX_CHECK_COMPILER_FLAGS(-mavx2, [AVX2_CFLAGS="-mavx2"],
+                [AC_MSG_ERROR([Need a version of gcc with -mavx2])])
             AX_CHECK_COMPILER_FLAGS(-mfma, [AVX2_CFLAGS="$AVX2_CFLAGS -mfma"],
                 [AC_MSG_WARN([Need a version of gcc with -mfma (harmless for icc)])])
         fi
