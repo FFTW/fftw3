@@ -234,6 +234,11 @@ if test "$have_generic_simd256" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_GENERIC_SIMD256, test "$have_generic_simd256" = "yes")
 
+AC_ARG_ENABLE(msa, [AC_HELP_STRING([--enable-msa],[enable MIPS MSA optimizations])], have_msa=$enableval, have_msa=no)
+if test "$have_msa" = "yes"; then
+        AC_DEFINE(HAVE_MSA,1,[Define to enable MIPS MSA optimizations.])
+fi
+AM_CONDITIONAL(HAVE_MSA, test "$have_msa" = "yes")
 
 dnl FIXME:
 dnl AC_ARG_ENABLE(mips-ps, [AC_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
@@ -359,9 +364,12 @@ case "${ax_cv_c_compiler_vendor}" in
         fi
 
         # AVX2
+        # gcc-4.8 works with -march=core-avx2, but -mavx2 is not enough.
+        # Later versions seem to happy with -mavx2, so try the arch one first.
         if test "$have_avx2" = "yes" -a "x$AVX2_CFLAGS" = x; then
-            AX_CHECK_COMPILER_FLAGS(-mavx2, [AVX2_CFLAGS="-mavx2"],
-                [AC_MSG_ERROR([Need a version of gcc with -mavx2])])
+            AX_CHECK_COMPILER_FLAGS(-march=core-avx2, [AVX2_CFLAGS="-march=core-avx2"],
+                [AX_CHECK_COMPILER_FLAGS(-mavx2, [AVX2_CFLAGS="-mavx2"],
+                    [AC_MSG_ERROR([Need a version of gcc with either -march=core-avx2 or -mavx2])])])
             AX_CHECK_COMPILER_FLAGS(-mfma, [AVX2_CFLAGS="$AVX2_CFLAGS -mfma"],
                 [AC_MSG_WARN([Need a version of gcc with -mfma (harmless for icc)])])
         fi
@@ -409,6 +417,11 @@ case "${ax_cv_c_compiler_vendor}" in
         if test "$have_vsx" = "yes" -a "x$VSX_CFLAGS" = x; then
             AX_CHECK_COMPILER_FLAGS(-mvsx, [VSX_CFLAGS="-mvsx"],
                 [AC_MSG_ERROR([Need a version of gcc with -mvsx])])
+        fi
+
+        if test "$have_msa" = "yes" -a "x$MSA_CFLAGS" = x; then
+            AX_CHECK_COMPILER_FLAGS(-mmsa, [MSA_CFLAGS="-mmsa"],
+                [AC_MSG_ERROR([Need a version of gcc with -mmsa])])
         fi
 
     dnl FIXME:
@@ -471,6 +484,7 @@ AC_SUBST(KCVI_CFLAGS)
 AC_SUBST(ALTIVEC_CFLAGS)
 AC_SUBST(VSX_CFLAGS)
 AC_SUBST(NEON_CFLAGS)
+AC_SUBST(MSA_CFLAGS)
 
 dnl add stack alignment CFLAGS if so requested
 if test "$with_incoming_stack_boundary"x != "no"x; then
@@ -766,6 +780,7 @@ AC_CONFIG_FILES([
    dft/simd/altivec/Makefile
    dft/simd/vsx/Makefile
    dft/simd/neon/Makefile
+   dft/simd/msa/Makefile
    dft/simd/generic-simd128/Makefile
    dft/simd/generic-simd256/Makefile
 
@@ -786,6 +801,7 @@ AC_CONFIG_FILES([
    rdft/simd/altivec/Makefile
    rdft/simd/vsx/Makefile
    rdft/simd/neon/Makefile
+   rdft/simd/msa/Makefile
    rdft/simd/generic-simd128/Makefile
    rdft/simd/generic-simd256/Makefile
 

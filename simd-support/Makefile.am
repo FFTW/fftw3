@@ -11,5 +11,6 @@ avx512.c simd-avx512.h \
 kcvi.c simd-kcvi.h \
 altivec.c simd-altivec.h vsx.c simd-vsx.h \
 neon.c simd-neon.h \
+msa.c simd-msa.h \
 simd-generic128.h simd-generic256.h
 

@@ -202,6 +202,9 @@
 /* Define to enable ARM NEON optimizations. */
 /* #undef HAVE_NEON */
 
+/* Define to enable MIPS MSA optimizations. */
+/* #undef HAVE_MSA */
+
 /* Define if OpenMP is enabled */
 #cmakedefine HAVE_OPENMP
 
