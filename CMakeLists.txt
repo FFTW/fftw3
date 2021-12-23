@@ -369,10 +369,10 @@ install(TARGETS ${fftw3_lib}
           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 install (FILES api/fftw3.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-if (EXISTS ${CMAKE_SOURCE_DIR}/api/fftw3.f)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/api/fftw3.f)
   install (FILES api/fftw3.f api/fftw3l.f03 api/fftw3q.f03 DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif ()
-if (EXISTS ${CMAKE_SOURCE_DIR}/api/fftw3.f03.in)
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/api/fftw3.f03.in)
   file (READ api/fftw3.f03.in FFTW3_F03_IN OFFSET 42)
   file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 "! Generated automatically.  DO NOT EDIT!\n\n")
   file (APPEND ${CMAKE_CURRENT_BINARY_DIR}/fftw3.f03 "  integer, parameter :: C_FFTW_R2R_KIND = ${C_FFTW_R2R_KIND}\n\n")
