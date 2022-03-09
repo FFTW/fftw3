@@ -200,7 +200,7 @@
 /* #undef HAVE_MPI */
 
 /* Define to enable ARM NEON optimizations. */
-/* #undef HAVE_NEON */
+#cmakedefine HAVE_NEON 1
 
 /* Define if OpenMP is enabled */
 #cmakedefine HAVE_OPENMP
