@@ -279,7 +279,7 @@ if (HAVE_AVX2)
   list (APPEND SOURCEFILES ${fftw_dft_simd_avx2_SOURCE} ${fftw_rdft_simd_avx2_SOURCE})
 endif ()
 
-set (FFTW_VERSION 3.3.9)
+set (FFTW_VERSION 3.3.10)
 
 set (PREC_SUFFIX)
 if (ENABLE_FLOAT)
