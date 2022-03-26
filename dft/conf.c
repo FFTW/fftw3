@@ -85,4 +85,15 @@ void X(dft_conf_standard)(planner *p)
 #if HAVE_GENERIC_SIMD256
      X(solvtab_exec)(X(solvtab_dft_generic_simd256), p);
 #endif
+
+#if HAVE_RVV
+     if (X(have_simd_rvv)(128))
+          X(solvtab_exec)(X(solvtab_dft_rvv128), p);
+     if (X(have_simd_rvv)(256))
+          X(solvtab_exec)(X(solvtab_dft_rvv256), p);
+     if (X(have_simd_rvv)(512))
+          X(solvtab_exec)(X(solvtab_dft_rvv512), p);
+     if (X(have_simd_rvv)(1024))
+          X(solvtab_exec)(X(solvtab_dft_rvv1024), p);
+#endif
 }

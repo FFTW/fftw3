@@ -85,4 +85,8 @@ const char X(version)[] = PACKAGE "-" PACKAGE_VERSION
    "-generic_simd256"
 #endif
 
+#if defined(HAVE_R5V)
+   "-rvv"
+#endif
+
 ;
