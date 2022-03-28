@@ -96,6 +96,10 @@ void X(rdft_conf_standard)(planner *p)
      if (X(have_simd_neon)())
 	  X(solvtab_exec)(X(solvtab_rdft_neon), p);
 #endif
+#if HAVE_LSX
+     if (X(have_simd_lsx)())
+	  X(solvtab_exec)(X(solvtab_rdft_lsx), p);
+#endif
 #if HAVE_GENERIC_SIMD128
      X(solvtab_exec)(X(solvtab_rdft_generic_simd128), p);
 #endif
