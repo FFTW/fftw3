@@ -44,7 +44,7 @@
 #    define ALIGNMENT 16     /* Alignment for the LD/ST macros */
 #  endif
 #  define ALIGNMENTA 64   /* Alignment for the LDA/STA macros */
-#elif defined(HAVE_LSX)
+#elif defined(HAVE_LSX) || defined(HAVE_LASX)
 #  if defined(FFTW_SINGLE)
 #    define ALIGNMENT 8
 #    define ALIGNMENTA 16

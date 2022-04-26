@@ -146,6 +146,7 @@ extern const solvtab X(solvtab_rdft_altivec);
 extern const solvtab X(solvtab_rdft_vsx);
 extern const solvtab X(solvtab_rdft_neon);
 extern const solvtab X(solvtab_rdft_lsx);
+extern const solvtab X(solvtab_rdft_lasx);
 extern const solvtab X(solvtab_rdft_generic_simd128);
 extern const solvtab X(solvtab_rdft_generic_simd256);
 

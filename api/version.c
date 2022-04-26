@@ -89,4 +89,8 @@ const char X(version)[] = PACKAGE "-" PACKAGE_VERSION
    "-mlsx"
 #endif
 
+#if HAVE_LASX
+   "-mlasx"
+#endif
+
 ;
