@@ -85,7 +85,7 @@ let reorder l =
 	let b' = List.map (fun (a, _) -> a) c' in
 	a :: (loop b') in
   let l' = List.map (fun x -> x, uniq (find_block_vars x)) l in
-  (* start with smallest block --- does this matter ? *)
+  (* start with smallest block --- does this matter? *)
   match l' with
     [] -> []
   | _ ->  
