@@ -37,7 +37,7 @@ You also need the ocaml Num library, which was standard in Ocaml but
 was removed without warning in OCaml 4.06.0 (3 Nov 2017).  On Fedora
 30, try installing the ocaml-num-devel package.
 
-Then, execute
+Then, executed 
 
     sh bootstrap.sh
     make
