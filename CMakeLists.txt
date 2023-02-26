@@ -25,6 +25,7 @@ option (ENABLE_SSE "Compile with SSE instruction set support" OFF)
 option (ENABLE_SSE2 "Compile with SSE2 instruction set support" OFF)
 option (ENABLE_AVX "Compile with AVX instruction set support" OFF)
 option (ENABLE_AVX2 "Compile with AVX2 instruction set support" OFF)
+option (ENABLE_NEON "Compile with NEON instruction set support" OFF)
 
 option (DISABLE_FORTRAN "Disable Fortran wrapper routines" OFF)
 
@@ -192,9 +193,14 @@ if (ENABLE_AVX2)
   endforeach ()
 endif ()
 
-if (HAVE_SSE2 OR HAVE_AVX)
+if (ENABLE_NEON)
+  set (HAVE_NEON TRUE)
+endif()
+
+if (HAVE_SSE2 OR HAVE_AVX OR HAVE_NEON)
   set (HAVE_SIMD TRUE)
 endif ()
+
 file(GLOB           fftw_api_SOURCE                 api/*.c             api/*.h)
 file(GLOB           fftw_dft_SOURCE                 dft/*.c             dft/*.h)
 file(GLOB           fftw_dft_scalar_SOURCE          dft/scalar/*.c      dft/scalar/*.h)
@@ -204,6 +210,7 @@ file(GLOB           fftw_dft_simd_SOURCE            dft/simd/*.c        dft/simd
 file(GLOB           fftw_dft_simd_sse2_SOURCE       dft/simd/sse2/*.c   dft/simd/sse2/*.h)
 file(GLOB           fftw_dft_simd_avx_SOURCE        dft/simd/avx/*.c    dft/simd/avx/*.h)
 file(GLOB           fftw_dft_simd_avx2_SOURCE       dft/simd/avx2/*.c   dft/simd/avx2/*.h dft/simd/avx2-128/*.c   dft/simd/avx2-128/*.h)
+file(GLOB           fftw_dft_simd_neon_SOURCE       dft/simd/neon/*.c   dft/simd/neon/*.h)
 file(GLOB           fftw_kernel_SOURCE              kernel/*.c          kernel/*.h)
 file(GLOB           fftw_rdft_SOURCE                rdft/*.c            rdft/*.h)
 file(GLOB           fftw_rdft_scalar_SOURCE         rdft/scalar/*.c     rdft/scalar/*.h)
@@ -219,6 +226,7 @@ file(GLOB           fftw_rdft_simd_SOURCE           rdft/simd/*.c       rdft/sim
 file(GLOB           fftw_rdft_simd_sse2_SOURCE      rdft/simd/sse2/*.c  rdft/simd/sse2/*.h)
 file(GLOB           fftw_rdft_simd_avx_SOURCE       rdft/simd/avx/*.c   rdft/simd/avx/*.h)
 file(GLOB           fftw_rdft_simd_avx2_SOURCE      rdft/simd/avx2/*.c  rdft/simd/avx2/*.h rdft/simd/avx2-128/*.c  rdft/simd/avx2-128/*.h)
+file(GLOB           fftw_rdft_simd_neon_SOURCE      rdft/simd/neon/*.c  rdft/simd/neon/*.h)
 
 file(GLOB           fftw_reodft_SOURCE              reodft/*.c          reodft/*.h)
 file(GLOB           fftw_simd_support_SOURCE        simd-support/*.c    simd-support/*.h)
@@ -278,6 +286,10 @@ endif ()
 if (HAVE_AVX2)
   list (APPEND SOURCEFILES ${fftw_dft_simd_avx2_SOURCE} ${fftw_rdft_simd_avx2_SOURCE})
 endif ()
+
+if (HAVE_NEON)
+  list (APPEND SOURCEFILES ${fftw_dft_simd_neon_SOURCE} ${fftw_rdft_simd_neon_SOURCE})
+endif()
 
 set (FFTW_VERSION 3.3.9)
 

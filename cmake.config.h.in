@@ -77,6 +77,9 @@
 /* Define to enable AVX2 optimizations. */
 #cmakedefine HAVE_AVX2 1
 
+/* Define to enable NEON optimizations. */
+#cmakedefine HAVE_NEON 1
+
 /* Define to enable AVX512 optimizations. */
 /* #undef HAVE_AVX512 */
 
