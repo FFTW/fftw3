@@ -188,7 +188,7 @@ X(plan) X(copy_plan)(X(plan) p)
           if (after_planner_hook)
                after_planner_hook();
      }
-	 return p;
+     return p;
 }
 
 void X(destroy_plan)(X(plan) p)
