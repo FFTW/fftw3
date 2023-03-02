@@ -214,7 +214,7 @@ void fftw_destroy_plan(fftw_plan plan);
 @findex fftw_destroy_plan
 deallocates the @code{plan} and all its associated data.
 
-Sometimes, it is useful to make a copy of a @code{fftw_plan}
+Sometimes, it is useful to make a copy of an @code{fftw_plan}
 instance so that it is safe to call @code{fftw_destroy_plan}
 on the original. You can do this by calling:
 @example
@@ -223,7 +223,7 @@ fftw_plan fftw_copy_plan(fftw_plan plan);
 @findex fftw_copy_plan
 (Technically, @code{fftw_copy_plan} currently returns the same
 @code{plan} with an internal reference count incremented, analogous
-to a `std::shared_ptr` in C++, which is safe since plan usage is
+to a @code{std::shared_ptr} in C++, which is safe since plan usage is
 effectively read-only; this is why plan execution is thread-safe.
 The plan is not deallocated until you call @code{fftw_destroy_plan}
 on @emph{both} the original and the ``copy''.)
