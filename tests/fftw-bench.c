@@ -291,13 +291,5 @@ void cleanup(void)
      FFTW(cleanup)();
 #endif
 
-#    ifdef FFTW_DEBUG_MALLOC
-     {
-	  /* undocumented memory checker */
-	  FFTW_EXTERN void FFTW(malloc_print_minfo)(int v);
-	  FFTW(malloc_print_minfo)(verbose);
-     }
-#    endif
-
      final_cleanup();
 }
