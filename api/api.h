@@ -62,6 +62,7 @@ extern "C"
 struct X(plan_s) {
      plan *pln;
      problem *prb;
+     size_t refcount;
      int sign;
 };
 
@@ -107,7 +108,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb);
 rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind);
 
 typedef void (*planner_hook_t)(void);
-                                                     
+
 void X(set_planner_hooks)(planner_hook_t before, planner_hook_t after);
 
 #ifdef __cplusplus

@@ -214,6 +214,19 @@ void fftw_destroy_plan(fftw_plan plan);
 @findex fftw_destroy_plan
 deallocates the @code{plan} and all its associated data.
 
+Sometimes, especially when calling FFTW from higher-level languages,
+it is useful to make a copy of a @code{fftw_plan} instance so that
+it is safe to call @code{fftw_destroy_plan} on the original. You
+can do this by calling:
+@example
+fftw_plan fftw_copy_plan(fftw_plan plan);
+@end example
+@findex fftw_copy_plan
+(Technically, @code{fftw_copy_plan} currently returns the same
+@code{plan} with an internal reference count incremented.  The plan
+is not deallocated until you call @code{fftw_destroy_plan} on
+@emph{both} the original and the ``copy''.)
+
 FFTW's planner saves some other persistent data, such as the
 accumulated wisdom and a list of algorithms available in the current
 configuration.  If you want to deallocate all of that and reset FFTW
@@ -258,7 +271,7 @@ The following two routines are provided purely for academic purposes
 (that is, for entertainment).
 
 @example
-void fftw_flops(const fftw_plan plan, 
+void fftw_flops(const fftw_plan plan,
                 double *add, double *mul, double *fma);
 @end example
 @findex fftw_flops
@@ -362,7 +375,7 @@ copy of one number from input to output.
 @code{n0}, @code{n1}, @code{n2}, or @code{n[0..rank-1]} (as appropriate
 for each routine) specify the size of the transform dimensions.  They
 can be any positive integer.
- 
+
 @itemize @minus
 @item
 @cindex row-major
@@ -619,7 +632,7 @@ for each routine) specify the size of the transform dimensions.  They
 can be any positive integer.  This is different in general from the
 @emph{physical} array dimensions, which are described in @ref{Real-data
 DFT Array Format}.
- 
+
 @itemize @minus
 @item
 FFTW is best at handling sizes of the form
@@ -822,7 +835,7 @@ of one number from input to output.
 @code{n}, or @code{n0}/@code{n1}/@code{n2}, or @code{n[rank]},
 respectively, gives the (physical) size of the transform dimensions.
 They can be any positive integer.
- 
+
 @itemize @minus
 @item
 @cindex row-major
@@ -1094,7 +1107,7 @@ Transform each column of a 2d array with 10 rows and 3 columns:
    int n[] = @{10@}; /* 1d transforms of length 10 */
    int howmany = 3;
    int idist = odist = 1;
-   int istride = ostride = 3; /* distance between two elements in 
+   int istride = ostride = 3; /* distance between two elements in
                                  the same column */
    int *inembed = n, *onembed = n;
 @end example
@@ -1615,7 +1628,7 @@ int fftw_alignment_of(double *p);
 @end example
 Two arrays have equivalent alignment (for the purposes of applying a
 plan) if and only if @code{fftw_alignment_of} returns the same value
-for the corresponding pointers to their data (typecast to @code{double*} 
+for the corresponding pointers to their data (typecast to @code{double*}
 if necessary).
 
 If you are tempted to use the new-array execute interface because you
@@ -1627,11 +1640,11 @@ The new-array execute functions are:
 
 @example
 void fftw_execute_dft(
-     const fftw_plan p, 
+     const fftw_plan p,
      fftw_complex *in, fftw_complex *out);
 
 void fftw_execute_split_dft(
-     const fftw_plan p, 
+     const fftw_plan p,
      double *ri, double *ii, double *ro, double *io);
 
 void fftw_execute_dft_r2c(
@@ -1651,7 +1664,7 @@ void fftw_execute_split_dft_c2r(
      double *ri, double *ii, double *out);
 
 void fftw_execute_r2r(
-     const fftw_plan p, 
+     const fftw_plan p,
      double *in, double *out);
 @end example
 @findex fftw_execute_dft
@@ -1950,7 +1963,7 @@ As a result of this symmetry, half of the output @math{Y} is redundant
 (being the complex conjugate of the other half), and so the 1d r2c
 transforms only output elements @math{0}@dots{}@math{n/2} of @math{Y}
 (@math{n/2+1} complex numbers), where the division by @math{2} is
-rounded down. 
+rounded down.
 
 Moreover, the Hermitian symmetry implies that
 @tex
@@ -2364,7 +2377,7 @@ Y[k_1, k_2, \ldots, k_d] =
         \sum_{j_2 = 0}^{n_2 - 1}
            \cdots
               \sum_{j_d = 0}^{n_d - 1}
-                  X[j_1, j_2, \ldots, j_d] 
+                  X[j_1, j_2, \ldots, j_d]
                       \omega_1^{-j_1 k_1}
                       \omega_2^{-j_2 k_2}
                       \cdots
@@ -2378,7 +2391,7 @@ Y[k_1, k_2, \ldots, k_d] =
         \sum_{j_2 = 0}^{n_2 - 1}
            \cdots
               \sum_{j_d = 0}^{n_d - 1}
-                  X[j_1, j_2, \ldots, j_d] 
+                  X[j_1, j_2, \ldots, j_d]
                       \omega_1^{j_1 k_1}
                       \omega_2^{j_2 k_2}
                       \cdots
@@ -2453,4 +2466,3 @@ Halfcomplex-format DFT}.  Likewise, FFTW's multidimensional
 @code{FFTW_DHT} r2r transform is not the same thing as the logical
 multi-dimensional discrete Hartley transform defined in the literature,
 as discussed in @ref{The Discrete Hartley Transform}.
-
