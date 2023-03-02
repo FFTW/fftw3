@@ -214,18 +214,19 @@ void fftw_destroy_plan(fftw_plan plan);
 @findex fftw_destroy_plan
 deallocates the @code{plan} and all its associated data.
 
-Sometimes, especially when calling FFTW from higher-level languages,
-it is useful to make a copy of a @code{fftw_plan} instance so that
-it is safe to call @code{fftw_destroy_plan} on the original. You
-can do this by calling:
+Sometimes, it is useful to make a copy of a @code{fftw_plan}
+instance so that it is safe to call @code{fftw_destroy_plan}
+on the original. You can do this by calling:
 @example
 fftw_plan fftw_copy_plan(fftw_plan plan);
 @end example
 @findex fftw_copy_plan
 (Technically, @code{fftw_copy_plan} currently returns the same
-@code{plan} with an internal reference count incremented.  The plan
-is not deallocated until you call @code{fftw_destroy_plan} on
-@emph{both} the original and the ``copy''.)
+@code{plan} with an internal reference count incremented, analogous
+to a `std::shared_ptr` in C++, which is safe since plan usage is
+effectively read-only; this is why plan execution is thread-safe.
+The plan is not deallocated until you call @code{fftw_destroy_plan}
+on @emph{both} the original and the ``copy''.)
 
 FFTW's planner saves some other persistent data, such as the
 accumulated wisdom and a list of algorithms available in the current
