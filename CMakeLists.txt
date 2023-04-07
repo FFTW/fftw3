@@ -314,19 +314,29 @@ if (MSVC AND NOT (CMAKE_C_COMPILER_ID STREQUAL "Intel"))
   target_compile_definitions (${fftw3_lib} PRIVATE /bigobj)
 endif ()
 if (HAVE_SSE)
-  target_compile_options (${fftw3_lib} PRIVATE ${SSE_FLAG})
+  set_source_files_properties (${fftw_dft_simd_sse2_SOURCE}
+                               ${fftw_rdft_simd_sse2_SOURCE}
+                               PROPERTIES COMPILE_FLAGS "${SSE_FLAG}")
 endif ()
 if (HAVE_SSE2)
-  target_compile_options (${fftw3_lib} PRIVATE ${SSE2_FLAG})
+  set_source_files_properties (${fftw_dft_simd_sse2_SOURCE}
+                               ${fftw_rdft_simd_sse2_SOURCE}
+                               PROPERTIES COMPILE_FLAGS "${SSE2_FLAG}")
 endif ()
 if (HAVE_AVX)
-  target_compile_options (${fftw3_lib} PRIVATE ${AVX_FLAG})
+  set_source_files_properties (${fftw_dft_simd_avx_SOURCE}
+                               ${fftw_rdft_simd_avx_SOURCE}
+                               PROPERTIES COMPILE_FLAGS "${AVX_FLAG}")
 endif ()
 if (HAVE_AVX2)
-  target_compile_options (${fftw3_lib} PRIVATE ${AVX2_FLAG})
+  set_source_files_properties (${fftw_dft_simd_avx2_SOURCE}
+                               ${fftw_rdft_simd_avx2_SOURCE}
+                               PROPERTIES COMPILE_FLAGS "${AVX2_FLAG}")
 endif ()
 if (HAVE_FMA)
-  target_compile_options (${fftw3_lib} PRIVATE ${FMA_FLAG})
+  set_source_files_properties (${fftw_dft_simd_avx2_SOURCE}
+                               ${fftw_rdft_simd_avx2_SOURCE}
+                               PROPERTIES COMPILE_FLAGS "${FMA_FLAG}")
 endif ()
 if (HAVE_LIBM)
   target_link_libraries (${fftw3_lib} m)
