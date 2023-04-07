@@ -25,6 +25,7 @@ option (ENABLE_SSE "Compile with SSE instruction set support" OFF)
 option (ENABLE_SSE2 "Compile with SSE2 instruction set support" OFF)
 option (ENABLE_AVX "Compile with AVX instruction set support" OFF)
 option (ENABLE_AVX2 "Compile with AVX2 instruction set support" OFF)
+option (ENABLE_NEON "Compile with NEON instruction set support" OFF)
 
 option (DISABLE_FORTRAN "Disable Fortran wrapper routines" OFF)
 
@@ -192,9 +193,20 @@ if (ENABLE_AVX2)
   endforeach ()
 endif ()
 
+if (ENABLE_NEON)
+  if (ENABLE_LONG_DOUBLE)
+    message (FATAL_ERROR "NEON only works in single or double precision, please disable long double support")
+  endif ()
+  if (ENABLE_QUAD_PRECISION)
+    message (FATAL_ERROR "NEON only works in single or double precision, please disable quad precision support")
+  endif ()
+  set (HAVE_NEON TRUE)
+endif ()
+
 if (HAVE_SSE2 OR HAVE_AVX)
   set (HAVE_SIMD TRUE)
 endif ()
+
 file(GLOB           fftw_api_SOURCE                 api/*.c             api/*.h)
 file(GLOB           fftw_dft_SOURCE                 dft/*.c             dft/*.h)
 file(GLOB           fftw_dft_scalar_SOURCE          dft/scalar/*.c      dft/scalar/*.h)
@@ -204,6 +216,7 @@ file(GLOB           fftw_dft_simd_SOURCE            dft/simd/*.c        dft/simd
 file(GLOB           fftw_dft_simd_sse2_SOURCE       dft/simd/sse2/*.c   dft/simd/sse2/*.h)
 file(GLOB           fftw_dft_simd_avx_SOURCE        dft/simd/avx/*.c    dft/simd/avx/*.h)
 file(GLOB           fftw_dft_simd_avx2_SOURCE       dft/simd/avx2/*.c   dft/simd/avx2/*.h dft/simd/avx2-128/*.c   dft/simd/avx2-128/*.h)
+file(GLOB           fftw_dft_simd_neon_SOURCE       dft/simd/neon/*.c   dft/simd/neon/*.h)
 file(GLOB           fftw_kernel_SOURCE              kernel/*.c          kernel/*.h)
 file(GLOB           fftw_rdft_SOURCE                rdft/*.c            rdft/*.h)
 file(GLOB           fftw_rdft_scalar_SOURCE         rdft/scalar/*.c     rdft/scalar/*.h)
@@ -219,6 +232,7 @@ file(GLOB           fftw_rdft_simd_SOURCE           rdft/simd/*.c       rdft/sim
 file(GLOB           fftw_rdft_simd_sse2_SOURCE      rdft/simd/sse2/*.c  rdft/simd/sse2/*.h)
 file(GLOB           fftw_rdft_simd_avx_SOURCE       rdft/simd/avx/*.c   rdft/simd/avx/*.h)
 file(GLOB           fftw_rdft_simd_avx2_SOURCE      rdft/simd/avx2/*.c  rdft/simd/avx2/*.h rdft/simd/avx2-128/*.c  rdft/simd/avx2-128/*.h)
+file(GLOB           fftw_rdft_simd_neon_SOURCE      rdft/simd/neon/*.c  rdft/simd/neon/*.h)
 
 file(GLOB           fftw_reodft_SOURCE              reodft/*.c          reodft/*.h)
 file(GLOB           fftw_simd_support_SOURCE        simd-support/*.c    simd-support/*.h)
@@ -279,7 +293,11 @@ if (HAVE_AVX2)
   list (APPEND SOURCEFILES ${fftw_dft_simd_avx2_SOURCE} ${fftw_rdft_simd_avx2_SOURCE})
 endif ()
 
-set (FFTW_VERSION 3.3.9)
+if (HAVE_NEON)
+  list (APPEND SOURCEFILES ${fftw_dft_simd_neon_SOURCE} ${fftw_rdft_simd_neon_SOURCE})
+endif ()
+
+set (FFTW_VERSION 3.3.10)
 
 set (PREC_SUFFIX)
 if (ENABLE_FLOAT)
@@ -368,9 +386,9 @@ endif ()
 foreach(subtarget ${subtargets})
   set_target_properties (${subtarget} PROPERTIES SOVERSION 3.6.9 VERSION 3)
   install (TARGETS ${subtarget}
-	  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+      RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+      LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+      ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endforeach ()
 install(TARGETS ${fftw3_lib}
           EXPORT FFTW3LibraryDepends
@@ -391,7 +409,6 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/api/fftw3.f03.in)
 endif ()
 
 if (BUILD_TESTS)
-
   add_executable (bench ${fftw_libbench2_SOURCE} tests/bench.c tests/hook.c tests/fftw-bench.c)
 
   if (ENABLE_THREADS AND NOT WITH_COMBINED_THREADS)
@@ -400,18 +417,15 @@ if (BUILD_TESTS)
     target_link_libraries (bench ${fftw3_lib})
   endif ()
 
-
   enable_testing ()
 
   if (Threads_FOUND)
-
     macro (fftw_add_test problem)
       add_test (NAME ${problem} COMMAND bench -s ${problem})
     endmacro ()
 
     fftw_add_test (32x64)
     fftw_add_test (ib256)
-
   endif ()
 endif ()
 
@@ -423,22 +437,22 @@ set (includedir ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 set (VERSION ${FFTW_VERSION})
 configure_file (fftw.pc.in fftw3${PREC_SUFFIX}.pc @ONLY)
 install (FILES
-          ${CMAKE_CURRENT_BINARY_DIR}/fftw3${PREC_SUFFIX}.pc
-         DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
-         COMPONENT Development)
+    ${CMAKE_CURRENT_BINARY_DIR}/fftw3${PREC_SUFFIX}.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+    COMPONENT Development)
 
 # cmake file
 set (FFTW3_LIBRARIES "FFTW3::${fftw3_lib}")
 configure_file (FFTW3Config.cmake.in FFTW3${PREC_SUFFIX}Config.cmake @ONLY)
 configure_file (FFTW3ConfigVersion.cmake.in FFTW3${PREC_SUFFIX}ConfigVersion.cmake @ONLY)
 install (FILES
-          ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}Config.cmake
-          ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}ConfigVersion.cmake
-	  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
-         COMPONENT Development)
+    ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}Config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/FFTW3${PREC_SUFFIX}ConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
+    COMPONENT Development)
 
 export (TARGETS ${fftw3_lib} NAMESPACE FFTW3:: FILE ${PROJECT_BINARY_DIR}/FFTW3LibraryDepends.cmake)
 install(EXPORT FFTW3LibraryDepends
-        NAMESPACE FFTW3::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
-        COMPONENT Development)
+    NAMESPACE FFTW3::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/fftw3${PREC_SUFFIX}
+    COMPONENT Development)
