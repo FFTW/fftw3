@@ -249,7 +249,7 @@ and unparse_function = function
 
 
 (*************************************************************
- * traverse a a function and return a list of all expressions,
+ * traverse a function and return a list of all expressions,
  * in the execution order
  **************************************************************)
 let rec fcn_to_expr_list = fun (Fcn (_, _, _, body)) -> ast_to_expr_list body 

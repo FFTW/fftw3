@@ -33,7 +33,7 @@
    unity, since the Num package only supplies simple arithmetic.  The
    arbitrary-precision operations in Num look like the normal
    operations except that they have an appended slash (e.g. +/ -/ */
-   // etcetera). *)
+   // etc.). *)
 
 open Num
 
