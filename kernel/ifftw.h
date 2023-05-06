@@ -877,7 +877,7 @@ enum { TW_COS = 0, TW_SIN = 1, TW_CEXP = 2, TW_NEXT = 3,
 
 typedef struct {
      unsigned char op;
-     signed char v;
+     short v;
      short i;
 } tw_instr;
 

@@ -780,6 +780,12 @@ AC_CONFIG_FILES([
    dft/simd/rvv256/Makefile
    dft/simd/rvv512/Makefile
    dft/simd/rvv1024/Makefile
+   dft/simd/rvv2048/Makefile
+   dft/simd/rvv4096/Makefile
+   dft/simd/rvv8192/Makefile
+   dft/simd/rvv16384/Makefile
+   dft/simd/rvv32768/Makefile
+   dft/simd/rvv65536/Makefile
 
    rdft/Makefile
    rdft/scalar/Makefile
@@ -804,6 +810,12 @@ AC_CONFIG_FILES([
    rdft/simd/rvv256/Makefile
    rdft/simd/rvv512/Makefile
    rdft/simd/rvv1024/Makefile
+   rdft/simd/rvv2048/Makefile
+   rdft/simd/rvv4096/Makefile
+   rdft/simd/rvv8192/Makefile
+   rdft/simd/rvv16384/Makefile
+   rdft/simd/rvv32768/Makefile
+   rdft/simd/rvv65536/Makefile
 
    reodft/Makefile
 

@@ -45,8 +45,19 @@
 #  define TYPEMEM(name) name ## e64_v_f64m1
 #endif
 
-// vlen up to 1024 to support qemu 7.0.0
-#if RVV_VLEN == 1024
+#if RVV_VLEN == 65536
+#  define VL DS(512, 1024)        /* SIMD complex vector length */
+#elif RVV_VLEN == 32768
+#  define VL DS(256, 512)        /* SIMD complex vector length */
+#elif RVV_VLEN == 16384
+#  define VL DS(128, 256)        /* SIMD complex vector length */
+#elif RVV_VLEN == 8192
+#  define VL DS(64, 128)        /* SIMD complex vector length */
+#elif RVV_VLEN == 4096
+#  define VL DS(32, 64)        /* SIMD complex vector length */
+#elif RVV_VLEN == 2048
+#  define VL DS(16, 32)        /* SIMD complex vector length */
+#elif RVV_VLEN == 1024
 #  define VL DS(8, 16)        /* SIMD complex vector length */
 #elif RVV_VLEN == 512
 #  define VL DS(4, 8)        /* SIMD complex vector length */
@@ -55,7 +66,7 @@
 #elif RVV_VLEN == 128
 #  define VL DS(1, 2)        /* SIMD complex vector length */
 #else
-#  error "RVV_VLEN must be a power of 2 between 128 and 1024 bits temporarily"
+#  error "RVV_VLEN must be a power of 2 between 128 and 65536 bits"
 #endif /* RVV_VLEN */
 
 #define SIMD_VSTRIDE_OKA(x) ((x) == 2) 
@@ -229,36 +240,12 @@ static inline void ST(R *x, V v, INT ovs, const R *aligned_like)
 #define STN4(x, v0, v1, v2, v3, ovs)  /* no-op */
 
 /* twiddle storage #1: compact, slower */
-#ifdef FFTW_SINGLE
-#  if RVV_VLEN == 1024
-#    define VTW1(v,x) {TW_CEXP, v, x}, {TW_CEXP, v+1, x}, {TW_CEXP, v+2, x}, {TW_CEXP, v+3, x}, \
-		      {TW_CEXP, v+4, x}, {TW_CEXP, v+5, x}, {TW_CEXP, v+6, x}, {TW_CEXP, v+7, x}, \
-		      {TW_CEXP, v+8, x}, {TW_CEXP, v+9, x}, {TW_CEXP, v+10, x}, {TW_CEXP, v+11, x}, \
-		      {TW_CEXP, v+12, x}, {TW_CEXP, v+13, x}, {TW_CEXP, v+14, x}, {TW_CEXP, v+15, x}
-#  elif RVV_VLEN == 512
-#    define VTW1(v,x) {TW_CEXP, v, x}, {TW_CEXP, v+1, x}, {TW_CEXP, v+2, x}, {TW_CEXP, v+3, x}, \
-		      {TW_CEXP, v+4, x}, {TW_CEXP, v+5, x}, {TW_CEXP, v+6, x}, {TW_CEXP, v+7, x}
-#  elif RVV_VLEN == 256
-#    define VTW1(v,x) {TW_CEXP, v, x}, {TW_CEXP, v+1, x}, {TW_CEXP, v+2, x}, {TW_CEXP, v+3, x}
-#  elif RVV_VLEN == 128
-#    define VTW1(v,x) {TW_CEXP, v, x}, {TW_CEXP, v+1, x}
-#  else
-#    error "RVV_VLEN must be a power of 2 between 128 and 1024 bits temporarily"
-#  endif /* RVV_VLEN */
-#else
-#  if RVV_VLEN == 1024
-#    define VTW1(v,x) {TW_CEXP, v, x}, {TW_CEXP, v+1, x}, {TW_CEXP, v+2, x}, {TW_CEXP, v+3, x}, \
-		      {TW_CEXP, v+4, x}, {TW_CEXP, v+5, x}, {TW_CEXP, v+6, x}, {TW_CEXP, v+7, x}
-#  elif RVV_VLEN == 512
-#    define VTW1(v,x) {TW_CEXP, v, x}, {TW_CEXP, v+1, x}, {TW_CEXP, v+2, x}, {TW_CEXP, v+3, x}
-#  elif RVV_VLEN == 256
-#    define VTW1(v,x) {TW_CEXP, v, x}, {TW_CEXP, v+1, x}
-#  elif RVV_VLEN == 128
-#    define VTW1(v,x) {TW_CEXP, v, x}
-#  else
-#    error "RVV_VLEN must be a power of 2 between 128 and 1024 bits temporarily"
-#  endif /* RVV_VLEN */
-#endif
+#define REQ_VTW1
+#define VTW_SIZE VL
+#include "vtw.h"
+#define TWVL1 (VL)
+#undef VTW_SIZE
+#undef REQ_VTW1
 
 #define TWVL1 (VL)
 
@@ -273,68 +260,12 @@ static inline V BYTWJ1(const R *t, V sr)
 }
 
 /* twiddle storage #2: twice the space, faster (when in cache) */
-#ifdef FFTW_SINGLE
-#  if RVV_VLEN == 1024
-#    define VTW2(v,x) {TW_COS, v+0, x}, {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+1, x}, \
-		      {TW_COS, v+2, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, {TW_COS, v+3, x}, \
-		      {TW_COS, v+4, x}, {TW_COS, v+4, x}, {TW_COS, v+5, x}, {TW_COS, v+5, x}, \
-		      {TW_COS, v+6, x}, {TW_COS, v+6, x}, {TW_COS, v+7, x}, {TW_COS, v+7, x}, \
-		      {TW_COS, v+8, x}, {TW_COS, v+8, x}, {TW_COS, v+9, x}, {TW_COS, v+9, x}, \
-		      {TW_COS, v+10, x}, {TW_COS, v+10, x}, {TW_COS, v+11, x}, {TW_COS, v+11, x}, \
-		      {TW_COS, v+12, x}, {TW_COS, v+12, x}, {TW_COS, v+13, x}, {TW_COS, v+13, x}, \
-		      {TW_COS, v+14, x}, {TW_COS, v+14, x}, {TW_COS, v+15, x}, {TW_COS, v+15, x}, \
-		      {TW_SIN, v+0, -x}, {TW_SIN, v+0, x}, {TW_SIN, v+1, -x}, {TW_SIN, v+1, x}, \
-		      {TW_SIN, v+2, -x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, -x}, {TW_SIN, v+3, x}, \
-		      {TW_SIN, v+4, -x}, {TW_SIN, v+4, x}, {TW_SIN, v+5, -x}, {TW_SIN, v+5, x}, \
-		      {TW_SIN, v+6, -x}, {TW_SIN, v+6, x}, {TW_SIN, v+7, -x}, {TW_SIN, v+7, x}, \
-		      {TW_SIN, v+8, -x}, {TW_SIN, v+8, x}, {TW_SIN, v+9, -x}, {TW_SIN, v+9, x}, \
-		      {TW_SIN, v+10, -x}, {TW_SIN, v+10, x}, {TW_SIN, v+11, -x}, {TW_SIN, v+11, x}, \
-		      {TW_SIN, v+12, -x}, {TW_SIN, v+12, x}, {TW_SIN, v+13, -x}, {TW_SIN, v+13, x}, \
-		      {TW_SIN, v+14, -x}, {TW_SIN, v+14, x}, {TW_SIN, v+15, -x}, {TW_SIN, v+15, x}
-#  elif RVV_VLEN == 512
-#    define VTW2(v,x) {TW_COS, v+0, x}, {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+1, x}, \
-		      {TW_COS, v+2, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, {TW_COS, v+3, x}, \
-		      {TW_COS, v+4, x}, {TW_COS, v+4, x}, {TW_COS, v+5, x}, {TW_COS, v+5, x}, \
-		      {TW_COS, v+6, x}, {TW_COS, v+6, x}, {TW_COS, v+7, x}, {TW_COS, v+7, x}, \
-		      {TW_SIN, v+0, -x}, {TW_SIN, v+0, x}, {TW_SIN, v+1, -x}, {TW_SIN, v+1, x}, \
-		      {TW_SIN, v+2, -x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, -x}, {TW_SIN, v+3, x}, \
-		      {TW_SIN, v+4, -x}, {TW_SIN, v+4, x}, {TW_SIN, v+5, -x}, {TW_SIN, v+5, x}, \
-		      {TW_SIN, v+6, -x}, {TW_SIN, v+6, x}, {TW_SIN, v+7, -x}, {TW_SIN, v+7, x}
-#  elif RVV_VLEN == 256
-#    define VTW2(v,x) {TW_COS, v+0, x}, {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+1, x}, \
-		      {TW_COS, v+2, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, {TW_COS, v+3, x}, \
-		      {TW_SIN, v+0, -x}, {TW_SIN, v+0, x}, {TW_SIN, v+1, -x}, {TW_SIN, v+1, x}, \
-		      {TW_SIN, v+2, -x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, -x}, {TW_SIN, v+3, x}
-#  elif RVV_VLEN == 128
-#    define VTW2(v,x) {TW_COS, v+0, x}, {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+1, x}, \
-		      {TW_SIN, v+0, -x}, {TW_SIN, v+0, x}, {TW_SIN, v+1, -x}, {TW_SIN, v+1, x}
-#  else
-#    error "RVV_VLEN must be a power of 2 between 128 and 1024 bits temporarily"
-#  endif /* RVV_VLEN */
-#else
-#  if RVV_VLEN == 1024
-#    define VTW2(v,x) {TW_COS, v+0, x}, {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+1, x}, \
-		      {TW_COS, v+2, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, {TW_COS, v+3, x}, \
-		      {TW_COS, v+4, x}, {TW_COS, v+4, x}, {TW_COS, v+5, x}, {TW_COS, v+5, x}, \
-		      {TW_COS, v+6, x}, {TW_COS, v+6, x}, {TW_COS, v+7, x}, {TW_COS, v+7, x}, \
-		      {TW_SIN, v+0, -x}, {TW_SIN, v+0, x}, {TW_SIN, v+1, -x}, {TW_SIN, v+1, x}, \
-		      {TW_SIN, v+2, -x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, -x}, {TW_SIN, v+3, x}, \
-		      {TW_SIN, v+4, -x}, {TW_SIN, v+4, x}, {TW_SIN, v+5, -x}, {TW_SIN, v+5, x}, \
-		      {TW_SIN, v+6, -x}, {TW_SIN, v+6, x}, {TW_SIN, v+7, -x}, {TW_SIN, v+7, x}
-#  elif RVV_VLEN == 512
-#    define VTW2(v,x) {TW_COS, v+0, x}, {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+1, x}, \
-		      {TW_COS, v+2, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, {TW_COS, v+3, x}, \
-		      {TW_SIN, v+0, -x}, {TW_SIN, v+0, x}, {TW_SIN, v+1, -x}, {TW_SIN, v+1, x}, \
-		      {TW_SIN, v+2, -x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, -x}, {TW_SIN, v+3, x}
-#  elif RVV_VLEN == 256
-#    define VTW2(v,x) {TW_COS, v+0, x}, {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+1, x}, \
-		      {TW_SIN, v+0, -x}, {TW_SIN, v+0, x}, {TW_SIN, v+1, -x}, {TW_SIN, v+1, x}
-#  elif RVV_VLEN == 128
-#    define VTW2(v,x) {TW_COS, v+0, x}, {TW_COS, v+0, x}, {TW_SIN, v+0, -x}, {TW_SIN, v+0, x}
-#  else
-#    error "RVV_VLEN must be a power of 2 between 128 and 1024 bits temporarily"
-#  endif /* RVV_VLEN */
-#endif
+#define REQ_VTW2
+#define VTW_SIZE (2*VL)
+#include "vtw.h"
+#define TWVL2 (2*VL)
+#undef VTW_SIZE
+#undef REQ_VTW2
 
 #define TWVL2 (2*VL)
 
@@ -359,68 +290,12 @@ static inline V BYTWJ2(const R *t, V sr)
 #define TWVL3 TWVL1
 
 /* twiddle storage for split arrays */
-#ifdef FFTW_SINGLE
-#  if RVV_VLEN == 1024
-#    define VTWS(v,x) {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, \
-		      {TW_COS, v+4, x}, {TW_COS, v+5, x}, {TW_COS, v+6, x}, {TW_COS, v+7, x}, \
-		      {TW_COS, v+8, x}, {TW_COS, v+9, x}, {TW_COS, v+10, x}, {TW_COS, v+11, x}, \
-		      {TW_COS, v+12, x}, {TW_COS, v+13, x}, {TW_COS, v+14, x}, {TW_COS, v+15, x}, \
-		      {TW_COS, v+16, x}, {TW_COS, v+17, x}, {TW_COS, v+18, x}, {TW_COS, v+19, x}, \
-		      {TW_COS, v+20, x}, {TW_COS, v+21, x}, {TW_COS, v+22, x}, {TW_COS, v+23, x}, \
-		      {TW_COS, v+24, x}, {TW_COS, v+25, x}, {TW_COS, v+26, x}, {TW_COS, v+27, x}, \
-		      {TW_COS, v+28, x}, {TW_COS, v+29, x}, {TW_COS, v+30, x}, {TW_COS, v+31, x}, \
-		      {TW_SIN, v+0, x}, {TW_SIN, v+1, x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, x}, \
-		      {TW_SIN, v+4, x}, {TW_SIN, v+5, x}, {TW_SIN, v+6, x}, {TW_SIN, v+7, x}, \
-		      {TW_SIN, v+8, x}, {TW_SIN, v+9, x}, {TW_SIN, v+10, x}, {TW_SIN, v+11, x}, \
-		      {TW_SIN, v+12, x}, {TW_SIN, v+13, x}, {TW_SIN, v+14, x}, {TW_SIN, v+15, x}, \
-		      {TW_SIN, v+16, x}, {TW_SIN, v+17, x}, {TW_SIN, v+18, x}, {TW_SIN, v+19, x}, \
-		      {TW_SIN, v+20, x}, {TW_SIN, v+21, x}, {TW_SIN, v+22, x}, {TW_SIN, v+23, x}, \
-		      {TW_SIN, v+24, x}, {TW_SIN, v+25, x}, {TW_SIN, v+26, x}, {TW_SIN, v+27, x}, \
-		      {TW_SIN, v+28, x}, {TW_SIN, v+29, x}, {TW_SIN, v+30, x}, {TW_SIN, v+31, x}
-#  elif RVV_VLEN == 512
-#    define VTWS(v,x) {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, \
-		      {TW_COS, v+4, x}, {TW_COS, v+5, x}, {TW_COS, v+6, x}, {TW_COS, v+7, x}, \
-		      {TW_COS, v+8, x}, {TW_COS, v+9, x}, {TW_COS, v+10, x}, {TW_COS, v+11, x}, \
-		      {TW_COS, v+12, x}, {TW_COS, v+13, x}, {TW_COS, v+14, x}, {TW_COS, v+15, x}, \
-		      {TW_SIN, v+0, x}, {TW_SIN, v+1, x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, x}, \
-		      {TW_SIN, v+4, x}, {TW_SIN, v+5, x}, {TW_SIN, v+6, x}, {TW_SIN, v+7, x}, \
-		      {TW_SIN, v+8, x}, {TW_SIN, v+9, x}, {TW_SIN, v+10, x}, {TW_SIN, v+11, x}, \
-		      {TW_SIN, v+12, x}, {TW_SIN, v+13, x}, {TW_SIN, v+14, x}, {TW_SIN, v+15, x}
-#  elif RVV_VLEN == 256
-#    define VTWS(v,x) {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, \
-		      {TW_COS, v+4, x}, {TW_COS, v+5, x}, {TW_COS, v+6, x}, {TW_COS, v+7, x}, \
-		      {TW_SIN, v+0, x}, {TW_SIN, v+1, x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, x}, \
-		      {TW_SIN, v+4, x}, {TW_SIN, v+5, x}, {TW_SIN, v+6, x}, {TW_SIN, v+7, x}
-#  elif RVV_VLEN == 128
-#    define VTWS(v,x) {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, \
-		      {TW_SIN, v+0, x}, {TW_SIN, v+1, x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, x}
-#  else
-#    error "RVV_VLEN must be a power of 2 between 128 and 1024 bits temporarily"
-#  endif /* RVV_VLEN */
-#else
-#  if RVV_VLEN == 1024
-#    define VTWS(v,x) {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, \
-		      {TW_COS, v+4, x}, {TW_COS, v+5, x}, {TW_COS, v+6, x}, {TW_COS, v+7, x}, \
-		      {TW_COS, v+8, x}, {TW_COS, v+9, x}, {TW_COS, v+10, x}, {TW_COS, v+11, x}, \
-		      {TW_COS, v+12, x}, {TW_COS, v+13, x}, {TW_COS, v+14, x}, {TW_COS, v+15, x}, \
-		      {TW_SIN, v+0, x}, {TW_SIN, v+1, x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, x}, \
-		      {TW_SIN, v+4, x}, {TW_SIN, v+5, x}, {TW_SIN, v+6, x}, {TW_SIN, v+7, x}, \
-		      {TW_SIN, v+8, x}, {TW_SIN, v+9, x}, {TW_SIN, v+10, x}, {TW_SIN, v+11, x}, \
-		      {TW_SIN, v+12, x}, {TW_SIN, v+13, x}, {TW_SIN, v+14, x}, {TW_SIN, v+15, x}
-#  elif RVV_VLEN == 512
-#    define VTWS(v,x) {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, \
-		      {TW_COS, v+4, x}, {TW_COS, v+5, x}, {TW_COS, v+6, x}, {TW_COS, v+7, x}, \
-		      {TW_SIN, v+0, x}, {TW_SIN, v+1, x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, x}, \
-		      {TW_SIN, v+4, x}, {TW_SIN, v+5, x}, {TW_SIN, v+6, x}, {TW_SIN, v+7, x}
-#  elif RVV_VLEN == 256
-#    define VTWS(v,x) {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, \
-		      {TW_SIN, v+0, x}, {TW_SIN, v+1, x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, x}
-#  elif RVV_VLEN == 128
-#    define VTWS(v,x) {TW_COS, v+0, x}, {TW_COS, v+1, x}, {TW_SIN, v+0, x}, {TW_SIN, v+1, x}
-#  else
-#    error "RVV_VLEN must be a power of 2 between 128 and 1024 bits temporarily"
-#  endif /* RVV_VLEN */
-#endif
+#define REQ_VTWS
+#define VTW_SIZE (2*VL)
+#include "vtw.h"
+#define TWVLS (2*VL)
+#undef VTW_SIZE
+#undef REQ_VTWS
 
 #define TWVLS (2*VL)
 
