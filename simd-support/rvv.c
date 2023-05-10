@@ -26,6 +26,6 @@
 /* don't know how to autodetect RVV; assume it is present */
   int X(have_simd_rvv)(int rs)
   {
-       return vsetvlmax_e64m1() == (rs / 64);
+       return __riscv_vsetvlmax_e64m1() == (rs / 64);
   }
 #endif

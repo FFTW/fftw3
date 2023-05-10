@@ -31,18 +31,18 @@
 
 #ifdef FFTW_SINGLE
 #  define DS(d,s) s /* single-precision option */
-#  define TYPE(name) name ## _f32m1
-#  define TYPEUINT(name) name ## _u32m1
-#  define TYPEINTERPRETF2U(name) name ## _f32m1_u32m1
-#  define TYPEINTERPRETU2F(name) name ## _u32m1_f32m1
-#  define TYPEMEM(name) name ## e32_v_f32m1
+#  define TYPE(name) __riscv_ ## name ## _f32m1
+#  define TYPEUINT(name) __riscv_ ## name ## _u32m1
+#  define TYPEINTERPRETF2U(name) __riscv_ ## name ## _f32m1_u32m1
+#  define TYPEINTERPRETU2F(name) __riscv_ ## name ## _u32m1_f32m1
+#  define TYPEMEM(name) __riscv_ ## name ## e32_v_f32m1
 #else
 #  define DS(d,s) d /* double-precision option */
-#  define TYPE(name) name ## _f64m1
-#  define TYPEUINT(name) name ## _u64m1
-#  define TYPEINTERPRETF2U(name) name ## _f64m1_u64m1
-#  define TYPEINTERPRETU2F(name) name ## _u64m1_f64m1
-#  define TYPEMEM(name) name ## e64_v_f64m1
+#  define TYPE(name) __riscv_ ## name ## _f64m1
+#  define TYPEUINT(name) __riscv_ ## name ## _u64m1
+#  define TYPEINTERPRETF2U(name) __riscv_ ## name ## _f64m1_u64m1
+#  define TYPEINTERPRETU2F(name) __riscv_ ## name ## _u64m1_f64m1
+#  define TYPEMEM(name) __riscv_ ## name ## e64_v_f64m1
 #endif
 
 #if RVV_VLEN == 65536
