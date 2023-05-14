@@ -14,9 +14,9 @@ dnl Note also that the flags assume that ANSI C aliasing rules are
 dnl followed by the code (e.g. for gcc's -fstrict-aliasing), and that
 dnl floating-point computations can be re-ordered as needed.
 dnl
-dnl Requires macros: AX_CHECK_COMPILER_FLAGS, AX_COMPILER_VENDOR,
+dnl Requires macros: AX_CHECK_COMPILE_FLAG, AX_COMPILER_VENDOR,
 dnl
-dnl @version 2011-06-22
+dnl @version 2023-05-14
 dnl @license GPLWithACException
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu> and Matteo Frigo.
 AC_DEFUN([AX_CC_MAXOPT],
@@ -39,7 +39,7 @@ if test "x$ac_test_CFLAGS" != "xset" -a "x$ac_test_CFLAGS" != "xy"; then
     	 ;;
 
     ibm) xlc_opt="-qarch=auto -qtune=auto"
-         AX_CHECK_COMPILER_FLAGS($xlc_opt,
+         AX_CHECK_COMPILE_FLAG($xlc_opt,
          	CFLAGS="-O3 -qalias=ansi -w $xlc_opt",
                [CFLAGS="-O3 -qalias=ansi -w"])
          ;;
@@ -48,12 +48,12 @@ if test "x$ac_test_CFLAGS" != "xset" -a "x$ac_test_CFLAGS" != "xy"; then
         # Intel seems to have changed the spelling of this flag recently
         icc_ansi_alias="unknown"
 	for flag in -ansi-alias -ansi_alias; do
-	  AX_CHECK_COMPILER_FLAGS($flag, [icc_ansi_alias=$flag; break])
+	  AX_CHECK_COMPILE_FLAG($flag, [icc_ansi_alias=$flag; break])
 	done
  	if test "x$icc_ansi_alias" != xunknown; then
             CFLAGS="$CFLAGS $icc_ansi_alias"
         fi
-	AX_CHECK_COMPILER_FLAGS(-malign-double, CFLAGS="$CFLAGS -malign-double")
+	AX_CHECK_COMPILE_FLAG(-malign-double, CFLAGS="$CFLAGS -malign-double")
 	# We used to check for architecture flags here, e.g. -xHost etc.,
 	# but these flags are problematic.  On icc-12.0.0, "-mavx -xHost"
 	# overrides -mavx with -xHost, generating SSE2 code instead of AVX
@@ -63,8 +63,8 @@ if test "x$ac_test_CFLAGS" != "xset" -a "x$ac_test_CFLAGS" != "xy"; then
     
     clang)
         CFLAGS="-O3 -fomit-frame-pointer"
-        AX_CHECK_COMPILER_FLAGS(-mtune=native, CFLAGS="$CFLAGS -mtune=native")
-        AX_CHECK_COMPILER_FLAGS(-fstrict-aliasing,CFLAGS="$CFLAGS -fstrict-aliasing")
+        AX_CHECK_COMPILE_FLAG(-mtune=native, CFLAGS="$CFLAGS -mtune=native")
+        AX_CHECK_COMPILE_FLAG(-fstrict-aliasing,CFLAGS="$CFLAGS -fstrict-aliasing")
         ;;
 
     gnu) 
@@ -73,13 +73,13 @@ if test "x$ac_test_CFLAGS" != "xset" -a "x$ac_test_CFLAGS" != "xy"; then
      CFLAGS="-O3 -fomit-frame-pointer"
 
      # tune for the host by default
-     AX_CHECK_COMPILER_FLAGS(-mtune=native, CFLAGS="$CFLAGS -mtune=native")
+     AX_CHECK_COMPILE_FLAG(-mtune=native, CFLAGS="$CFLAGS -mtune=native")
 
      # -malign-double for x86 systems
-     AX_CHECK_COMPILER_FLAGS(-malign-double, CFLAGS="$CFLAGS -malign-double")
+     AX_CHECK_COMPILE_FLAG(-malign-double, CFLAGS="$CFLAGS -malign-double")
 
      #  -fstrict-aliasing for gcc-2.95+
-     AX_CHECK_COMPILER_FLAGS(-fstrict-aliasing,
+     AX_CHECK_COMPILE_FLAG(-fstrict-aliasing,
 	CFLAGS="$CFLAGS -fstrict-aliasing")
 
      # -fno-schedule-insns is pretty much required on all risc
@@ -90,14 +90,14 @@ if test "x$ac_test_CFLAGS" != "xset" -a "x$ac_test_CFLAGS" != "xy"; then
      # scheduling.  The first pass reorders instructions in a way that
      # is pretty much the worst possible for the purposes of register
      # allocation.  We disable the first pass.
-     AX_CHECK_COMPILER_FLAGS(-fno-schedule-insns, CFLAGS="$CFLAGS -fno-schedule-insns")
+     AX_CHECK_COMPILE_FLAG(-fno-schedule-insns, CFLAGS="$CFLAGS -fno-schedule-insns")
 
      # flags to enable power ISA 2.07 instructions with gcc (always true with vsx)
      if test "$have_vsx" = "yes"; then
-         AX_CHECK_COMPILER_FLAGS(-mcpu=power8, CFLAGS="$CFLAGS -mcpu=power8")
-         AX_CHECK_COMPILER_FLAGS(-mpower8-fusion, CFLAGS="$CFLAGS -mpower8-fusion")
-         AX_CHECK_COMPILER_FLAGS(-mpower8-vector, CFLAGS="$CFLAGS -mpower8-vector")
-         AX_CHECK_COMPILER_FLAGS(-mdirect-move, CFLAGS="$CFLAGS -mdirect-move")
+         AX_CHECK_COMPILE_FLAG(-mcpu=power8, CFLAGS="$CFLAGS -mcpu=power8")
+         AX_CHECK_COMPILE_FLAG(-mpower8-fusion, CFLAGS="$CFLAGS -mpower8-fusion")
+         AX_CHECK_COMPILE_FLAG(-mpower8-vector, CFLAGS="$CFLAGS -mpower8-vector")
+         AX_CHECK_COMPILE_FLAG(-mdirect-move, CFLAGS="$CFLAGS -mdirect-move")
      fi
      ;;
   esac
@@ -113,7 +113,7 @@ if test "x$ac_test_CFLAGS" != "xset" -a "x$ac_test_CFLAGS" != "xy"; then
         CFLAGS="-O3"
   fi
 
-  AX_CHECK_COMPILER_FLAGS($CFLAGS, [], [
+  AX_CHECK_COMPILE_FLAG($CFLAGS, [], [
 	echo ""
         echo "********************************************************"
         echo "* WARNING: The guessed CFLAGS don't seem to work with  *"
