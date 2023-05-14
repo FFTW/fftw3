@@ -334,12 +334,12 @@ AX_CC_MAXOPT
 
 case "${ax_cv_c_compiler_vendor}" in
    hp) # must (sometimes) manually increase cpp limits to handle fftw3.h
-        AX_CHECK_COMPILER_FLAGS([-Wp,-H128000],
+        AX_CHECK_COMPILE_FLAG([-Wp,-H128000],
                         [CC="$CC -Wp,-H128000"])
         ;;
 
    portland) # -Masmkeyword required for asm("") cycle counters
-        AX_CHECK_COMPILER_FLAGS([-Masmkeyword],
+        AX_CHECK_COMPILE_FLAG([-Masmkeyword],
                                 [CC="$CC -Masmkeyword"])
         ;;
 esac
@@ -350,50 +350,50 @@ case "${ax_cv_c_compiler_vendor}" in
         # SSE/SSE2
         if test "$have_sse2" = "yes" -a "x$SSE2_CFLAGS" = x; then
             if test "$PRECISION" = d; then flag=msse2; else flag=msse; fi
-            AX_CHECK_COMPILER_FLAGS(-$flag, [SSE2_CFLAGS="-$flag"],
+            AX_CHECK_COMPILE_FLAG(-$flag, [SSE2_CFLAGS="-$flag"],
             [AC_MSG_ERROR([Need a version of gcc with -$flag])])
         fi
 
         # AVX
         if test "$have_avx" = "yes" -a "x$AVX_CFLAGS" = x; then
-            AX_CHECK_COMPILER_FLAGS(-mavx, [AVX_CFLAGS="-mavx"],
+            AX_CHECK_COMPILE_FLAG(-mavx, [AVX_CFLAGS="-mavx"],
             [AC_MSG_ERROR([Need a version of gcc with -mavx])])
         fi
 
         # AVX2
         if test "$have_avx2" = "yes" -a "x$AVX2_CFLAGS" = x; then
-            AX_CHECK_COMPILER_FLAGS(-mavx2, [AVX2_CFLAGS="-mavx2"],
+            AX_CHECK_COMPILE_FLAG(-mavx2, [AVX2_CFLAGS="-mavx2"],
                 [AC_MSG_ERROR([Need a version of gcc with -mavx2])])
-            AX_CHECK_COMPILER_FLAGS(-mfma, [AVX2_CFLAGS="$AVX2_CFLAGS -mfma"],
+            AX_CHECK_COMPILE_FLAG(-mfma, [AVX2_CFLAGS="$AVX2_CFLAGS -mfma"],
                 [AC_MSG_WARN([Need a version of gcc with -mfma (harmless for icc)])])
         fi
 
         # AVX512
         if test "$have_avx512" = "yes" -a "x$AVX512_CFLAGS" = x; then
-            AX_CHECK_COMPILER_FLAGS(-mavx512f, [AVX512_CFLAGS="-mavx512f"],
+            AX_CHECK_COMPILE_FLAG(-mavx512f, [AVX512_CFLAGS="-mavx512f"],
             [AC_MSG_ERROR([Need a version of gcc with -mavx512f])])
         fi
 
         if test "$host_vendor" = "apple"; then
             # We need to tell gcc to use an external assembler to get AVX/AVX2 with gcc on OS X
-            AX_CHECK_COMPILER_FLAGS([-Wa,-q], [CFLAGS="$CFLAGS -Wa,-q"])
+            AX_CHECK_COMPILE_FLAG([-Wa,-q], [CFLAGS="$CFLAGS -Wa,-q"])
             # Disable the new compact unwinding format so we avoid warnings/potential errors.
-            AX_CHECK_COMPILER_FLAGS([-Wl,-no_compact_unwind], [CFLAGS="$CFLAGS -Wl,-no_compact_unwind"])
+            AX_CHECK_LINK_FLAG([-Wl,-no_compact_unwind], [CFLAGS="$CFLAGS -Wl,-no_compact_unwind"])
         fi
 
         # KCVI
         if test "$have_kcvi" = "yes" -a "x$KCVI_CFLAGS" = x; then
-            AX_CHECK_COMPILER_FLAGS(-mmic, [KCVI_CFLAGS="-mmic"],
+            AX_CHECK_COMPILE_FLAG(-mmic, [KCVI_CFLAGS="-mmic"],
             [AC_MSG_ERROR([Need a version of icc with -mmic])])
         fi
 
         if test "$have_altivec" = "yes" -a "x$ALTIVEC_CFLAGS" = x; then
             # -DFAKE__VEC__ is a workaround because gcc-3.3 does not
             # #define __VEC__ with -maltivec.
-            AX_CHECK_COMPILER_FLAGS(-faltivec, [ALTIVEC_CFLAGS="-faltivec"],
-            [AX_CHECK_COMPILER_FLAGS(-maltivec -mabi=altivec,
+            AX_CHECK_COMPILE_FLAG(-faltivec, [ALTIVEC_CFLAGS="-faltivec"],
+            [AX_CHECK_COMPILE_FLAG(-maltivec -mabi=altivec,
                 [ALTIVEC_CFLAGS="-maltivec -mabi=altivec -DFAKE__VEC__"],
-                [AX_CHECK_COMPILER_FLAGS(-fvec, [ALTIVEC_CFLAGS="-fvec"],
+                [AX_CHECK_COMPILE_FLAG(-fvec, [ALTIVEC_CFLAGS="-fvec"],
                 [AC_MSG_ERROR([Need a version of gcc with -maltivec])])])])
         fi
 
@@ -402,14 +402,14 @@ case "${ax_cv_c_compiler_vendor}" in
                 ;;
             *)
                 if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
-                    AX_CHECK_COMPILER_FLAGS(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon"],
+                    AX_CHECK_COMPILE_FLAG(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon"],
                 [AC_MSG_ERROR([Need a version of gcc with -mfpu=neon])])
                 fi
                 ;;
         esac
 
         if test "$have_vsx" = "yes" -a "x$VSX_CFLAGS" = x; then
-            AX_CHECK_COMPILER_FLAGS(-mvsx, [VSX_CFLAGS="-mvsx"],
+            AX_CHECK_COMPILE_FLAG(-mvsx, [VSX_CFLAGS="-mvsx"],
                 [AC_MSG_ERROR([Need a version of gcc with -mvsx])])
         fi
 
@@ -417,10 +417,10 @@ case "${ax_cv_c_compiler_vendor}" in
     dnl elif test "$have_mips_ps" = "yes"; then
     dnl     # Just punt here and use only new 4.2 compiler :(
     dnl 	# Should add section for older compilers...
-    dnl 	AX_CHECK_COMPILER_FLAGS(-mpaired-single,
+    dnl 	AX_CHECK_COMPILE_FLAG(-mpaired-single,
     dnl 	    [SIMD_CFLAGS="-mpaired-single"],
     dnl 	    #[AC_MSG_ERROR([Need a version of gcc with -mpaired-single])])
-    dnl 	    [AX_CHECK_COMPILER_FLAGS(-march=mips64,
+    dnl 	    [AX_CHECK_COMPILE_FLAG(-march=mips64,
     dnl 	      [SIMD_CFLAGS="-march=mips64"],
     dnl 	        [AC_MSG_ERROR(
     dnl 		 [Need a version of gcc with -mpaired-single or -march=mips64])
@@ -431,27 +431,27 @@ case "${ax_cv_c_compiler_vendor}" in
     clang)
 
         if test "$have_avx" = "yes" -a "x$AVX_CFLAGS" = x; then
-            AX_CHECK_COMPILER_FLAGS(-mavx, [AVX_CFLAGS="-mavx"],
+            AX_CHECK_COMPILE_FLAG(-mavx, [AVX_CFLAGS="-mavx"],
                 [AC_MSG_ERROR([Need a version of clang with -mavx])])
         fi
 
         if test "$have_avx2" = "yes" -a "x$AVX2_CFLAGS" = x; then
-                AX_CHECK_COMPILER_FLAGS(-mavx2, [AVX2_CFLAGS="-mavx2"],
+                AX_CHECK_COMPILE_FLAG(-mavx2, [AVX2_CFLAGS="-mavx2"],
                     [AC_MSG_ERROR([Need a version of clang with -mavx2])])
-                AX_CHECK_COMPILER_FLAGS(-mfma, [AVX2_CFLAGS="$AVX2_CFLAGS -mfma"])
+                AX_CHECK_COMPILE_FLAG(-mfma, [AVX2_CFLAGS="$AVX2_CFLAGS -mfma"])
         fi
 
         # AVX512
         if test "$have_avx512" = "yes" -a "x$AVX512_CFLAGS" = x; then
-            AX_CHECK_COMPILER_FLAGS(-mavx512f, [AVX512_CFLAGS="-mavx512f"],
+            AX_CHECK_COMPILE_FLAG(-mavx512f, [AVX512_CFLAGS="-mavx512f"],
             [AC_MSG_ERROR([Need a version of clang with -mavx512f])])
         fi
 
         if test "$have_vsx" = "yes" -a "x$VSX_CFLAGS" = x; then
             # clang appears to need both -mvsx and -maltivec for VSX
-            AX_CHECK_COMPILER_FLAGS(-maltivec, [VSX_CFLAGS="-maltivec"],
+            AX_CHECK_COMPILE_FLAG(-maltivec, [VSX_CFLAGS="-maltivec"],
                 [AC_MSG_ERROR([Need a version of gcc with -maltivec])])
-            AX_CHECK_COMPILER_FLAGS(-mvsx, [VSX_CFLAGS="-mvsx $VSX_CFLAGS"],
+            AX_CHECK_COMPILE_FLAG(-mvsx, [VSX_CFLAGS="-mvsx $VSX_CFLAGS"],
                 [AC_MSG_ERROR([Need a version of gcc with -mvsx])])
         fi
         ;;
@@ -459,7 +459,7 @@ case "${ax_cv_c_compiler_vendor}" in
     ibm)
         if test "$have_vsx" = "yes" -a "x$VSX_CFLAGS" = x; then
             # Note that IBM xlC uses -qaltivec for VSX too.
-            AX_CHECK_COMPILER_FLAGS(-qaltivec, [VSX_CFLAGS="-qaltivec"],
+            AX_CHECK_COMPILE_FLAG(-qaltivec, [VSX_CFLAGS="-qaltivec"],
                 [AC_MSG_ERROR([Need a version of gcc with -qaltivec])])
         fi
         ;;
@@ -479,7 +479,7 @@ if test "$with_incoming_stack_boundary"x != "no"x; then
    case "${ax_cv_c_compiler_vendor}" in
       gnu)
         tentative_flags="-mincoming-stack-boundary=$with_incoming_stack_boundary";
-        AX_CHECK_COMPILER_FLAGS($tentative_flags,
+        AX_CHECK_COMPILE_FLAG($tentative_flags,
               [STACK_ALIGN_CFLAGS=$tentative_flags])
       ;;
    esac
