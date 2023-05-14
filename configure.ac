@@ -9,7 +9,7 @@ define(FFTW_MAJOR_VERSION, 3.3)dnl
 define(FFTW_MINOR_VERSION, 10)dnl
 
 dnl Version number of the FFTW source package.
-AC_INIT(fftw, FFTW_MAJOR_VERSION.FFTW_MINOR_VERSION, fftw@fftw.org)
+AC_INIT([fftw],[FFTW_MAJOR_VERSION.FFTW_MINOR_VERSION],[fftw@fftw.org])
 AC_CONFIG_SRCDIR(kernel/ifftw.h)
 
 dnl Version number for libtool shared libraries.  Libtool wants a string
@@ -45,27 +45,27 @@ case "${host_cpu}" in
   *) arch_prefers_fma=no;;
 esac
 
-AC_ARG_ENABLE(debug, [AC_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
+AC_ARG_ENABLE(debug, [AS_HELP_STRING([--enable-debug],[compile fftw with extra runtime checks for debugging])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
     AC_DEFINE(FFTW_DEBUG,1,[Define to enable extra FFTW debugging code.])
 fi
 
-AC_ARG_ENABLE(doc, [AC_HELP_STRING([--disable-doc],[disable building the documentation])], build_doc=$enableval, build_doc=yes)
+AC_ARG_ENABLE(doc, [AS_HELP_STRING([--disable-doc],[disable building the documentation])], build_doc=$enableval, build_doc=yes)
 AM_CONDITIONAL(BUILD_DOC, test x"$build_doc" = xyes)
 
-AC_ARG_ENABLE(random-estimator, [AC_HELP_STRING([--enable-random-estimator],[enable pseudorandom estimator (debugging hack)])], ok=$enableval, ok=no)
+AC_ARG_ENABLE(random-estimator, [AS_HELP_STRING([--enable-random-estimator],[enable pseudorandom estimator (debugging hack)])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
     AC_DEFINE(FFTW_RANDOM_ESTIMATOR,1,[Define to enable pseudorandom estimate planning for debugging.])
     CHECK_PL_OPTS="--estimate"
 fi
 
-AC_ARG_ENABLE(alloca, [AC_HELP_STRING([--disable-alloca],[disable use of the alloca() function (may be broken on mingw64)])], ok=$enableval, ok=yes)
+AC_ARG_ENABLE(alloca, [AS_HELP_STRING([--disable-alloca],[disable use of the alloca() function (may be broken on mingw64)])], ok=$enableval, ok=yes)
 if test "$ok" = "yes"; then
     AC_DEFINE(FFTW_ENABLE_ALLOCA,1,[Define to enable the use of alloca().])
 fi
 
-AC_ARG_ENABLE(single, [AC_HELP_STRING([--enable-single],[compile fftw in single precision])], ok=$enableval, ok=no)
-AC_ARG_ENABLE(float, [AC_HELP_STRING([--enable-float],[synonym for --enable-single])], ok=$enableval)
+AC_ARG_ENABLE(single, [AS_HELP_STRING([--enable-single],[compile fftw in single precision])], ok=$enableval, ok=no)
+AC_ARG_ENABLE(float, [AS_HELP_STRING([--enable-float],[synonym for --enable-single])], ok=$enableval)
 if test "$ok" = "yes"; then
     AC_DEFINE(FFTW_SINGLE,1,[Define to compile in single precision.])
     AC_DEFINE(BENCHFFT_SINGLE,1,[Define to compile in single precision.])
@@ -75,7 +75,7 @@ else
 fi
 AM_CONDITIONAL(SINGLE, test "$ok" = "yes")
 
-AC_ARG_ENABLE(long-double, [AC_HELP_STRING([--enable-long-double],[compile fftw in long-double precision])], ok=$enableval, ok=no)
+AC_ARG_ENABLE(long-double, [AS_HELP_STRING([--enable-long-double],[compile fftw in long-double precision])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
     if test "$PRECISION" = "s"; then
         AC_MSG_ERROR([--enable-single/--enable-long-double conflict])
@@ -86,7 +86,7 @@ if test "$ok" = "yes"; then
 fi
 AM_CONDITIONAL(LDOUBLE, test "$ok" = "yes")
 
-AC_ARG_ENABLE(quad-precision, [AC_HELP_STRING([--enable-quad-precision],[compile fftw in quadruple precision if available])], ok=$enableval, ok=no)
+AC_ARG_ENABLE(quad-precision, [AS_HELP_STRING([--enable-quad-precision],[compile fftw in quadruple precision if available])], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
     if test "$PRECISION" != "d"; then
         AC_MSG_ERROR([conflicting precisions specified])
@@ -108,14 +108,14 @@ dnl
 dnl This behavior is pointless in 2016.  --enable-sse2 now works in both precisions,
 dnl and is interpreted as --enable-sse in single precision.  The old flag --enable--se
 dnl is still supported in single-precision only.
-AC_ARG_ENABLE(sse, [AC_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
+AC_ARG_ENABLE(sse, [AS_HELP_STRING([--enable-sse],[enable SSE optimizations])], have_sse=$enableval, have_sse=no)
 if test "$have_sse" = "yes"; then
     if test "$PRECISION" != "s"; then
             AC_MSG_ERROR([SSE requires single precision])
     fi
 fi
 
-AC_ARG_ENABLE(sse2, [AC_HELP_STRING([--enable-sse2],[enable SSE/SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
+AC_ARG_ENABLE(sse2, [AS_HELP_STRING([--enable-sse2],[enable SSE/SSE2 optimizations])], have_sse2=$enableval, have_sse2=no)
 if test "$have_sse" = "yes"; then have_sse2=yes; fi
 if test "$have_sse2" = "yes"; then
     AC_DEFINE(HAVE_SSE2,1,[Define to enable SSE/SSE2 optimizations.])
@@ -125,7 +125,7 @@ if test "$have_sse2" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_SSE2, test "$have_sse2" = "yes")
 
-AC_ARG_ENABLE(avx, [AC_HELP_STRING([--enable-avx],[enable AVX optimizations])], have_avx=$enableval, have_avx=no)
+AC_ARG_ENABLE(avx, [AS_HELP_STRING([--enable-avx],[enable AVX optimizations])], have_avx=$enableval, have_avx=no)
 if test "$have_avx" = "yes"; then
     AC_DEFINE(HAVE_AVX,1,[Define to enable AVX optimizations.])
     if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
@@ -134,7 +134,7 @@ if test "$have_avx" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_AVX, test "$have_avx" = "yes")
 
-AC_ARG_ENABLE(avx2, [AC_HELP_STRING([--enable-avx2],[enable AVX2 optimizations])], have_avx2=$enableval, have_avx2=no)
+AC_ARG_ENABLE(avx2, [AS_HELP_STRING([--enable-avx2],[enable AVX2 optimizations])], have_avx2=$enableval, have_avx2=no)
 if test "$have_avx2" = "yes"; then
     AC_DEFINE(HAVE_AVX2,1,[Define to enable AVX2 optimizations.])
     if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
@@ -143,7 +143,7 @@ if test "$have_avx2" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_AVX2, test "$have_avx2" = "yes")
 
-AC_ARG_ENABLE(avx512, [AC_HELP_STRING([--enable-avx512],[enable AVX512 optimizations])], have_avx512=$enableval, have_avx512=no)
+AC_ARG_ENABLE(avx512, [AS_HELP_STRING([--enable-avx512],[enable AVX512 optimizations])], have_avx512=$enableval, have_avx512=no)
 if test "$have_avx512" = "yes"; then
     AC_DEFINE(HAVE_AVX512,1,[Define to enable AVX512 optimizations.])
     if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
@@ -156,7 +156,7 @@ dnl 128-bit AVX is special. There is no reason to use it on Intel processors
 dnl since SSE2 is just as fast. However, on AMD processors we can both use
 dnl FMA4, and 128-bit SIMD is better than 256-bit since core pairs in a
 dnl compute unit can execute two 128-bit instructions independently.
-AC_ARG_ENABLE(avx-128-fma, [AC_HELP_STRING([--enable-avx-128-fma],[enable AVX128/FMA optimizations])], have_avx_128_fma=$enableval, have_avx_128_fma=no)
+AC_ARG_ENABLE(avx-128-fma, [AS_HELP_STRING([--enable-avx-128-fma],[enable AVX128/FMA optimizations])], have_avx_128_fma=$enableval, have_avx_128_fma=no)
 if test "$have_avx_128_fma" = "yes"; then
     AC_DEFINE(HAVE_AVX_128_FMA,1,[Define to enable 128-bit FMA AVX optimization])
     AVX_128_FMA_CFLAGS="${AVX_CFLAGS} -mfma4"
@@ -164,7 +164,7 @@ if test "$have_avx_128_fma" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_AVX_128_FMA, test "$have_avx_128_fma" = "yes")
 
-AC_ARG_ENABLE(kcvi, [AC_HELP_STRING([--enable-kcvi],[enable Knights Corner vector instructions optimizations])], have_kcvi=$enableval, have_kcvi=no)
+AC_ARG_ENABLE(kcvi, [AS_HELP_STRING([--enable-kcvi],[enable Knights Corner vector instructions optimizations])], have_kcvi=$enableval, have_kcvi=no)
 if test "$have_kcvi" = "yes"; then
     AC_DEFINE(HAVE_KCVI,1,[Define to enable KCVI optimizations.])
     if test "$PRECISION" != "d" -a "$PRECISION" != "s"; then
@@ -173,7 +173,7 @@ if test "$have_kcvi" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_KCVI, test "$have_kcvi" = "yes")
 
-AC_ARG_ENABLE(altivec, [AC_HELP_STRING([--enable-altivec],[enable Altivec optimizations])], have_altivec=$enableval, have_altivec=no)
+AC_ARG_ENABLE(altivec, [AS_HELP_STRING([--enable-altivec],[enable Altivec optimizations])], have_altivec=$enableval, have_altivec=no)
 if test "$have_altivec" = "yes"; then
     AC_DEFINE(HAVE_ALTIVEC,1,[Define to enable Altivec optimizations.])
     if test "$PRECISION" != "s"; then
@@ -182,13 +182,13 @@ if test "$have_altivec" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_ALTIVEC, test "$have_altivec" = "yes")
 
-AC_ARG_ENABLE(vsx, [AC_HELP_STRING([--enable-vsx],[enable IBM VSX optimizations])], have_vsx=$enableval, have_vsx=no)
+AC_ARG_ENABLE(vsx, [AS_HELP_STRING([--enable-vsx],[enable IBM VSX optimizations])], have_vsx=$enableval, have_vsx=no)
 if test "$have_vsx" = "yes"; then
         AC_DEFINE(HAVE_VSX,1,[Define to enable IBM VSX optimizations.])
 fi
 AM_CONDITIONAL(HAVE_VSX, test "$have_vsx" = "yes")
 
-AC_ARG_ENABLE(neon, [AC_HELP_STRING([--enable-neon],[enable ARM NEON optimizations])], have_neon=$enableval, have_neon=no)
+AC_ARG_ENABLE(neon, [AS_HELP_STRING([--enable-neon],[enable ARM NEON optimizations])], have_neon=$enableval, have_neon=no)
 if test "$have_neon" = "yes"; then
     AC_DEFINE(HAVE_NEON,1,[Define to enable ARM NEON optimizations.])
         case "${host_cpu}" in
@@ -203,33 +203,33 @@ if test "$have_neon" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_NEON, test "$have_neon" = "yes")
 
-AC_ARG_ENABLE(armv8-pmccntr-el0, [AC_HELP_STRING([--enable-armv8-pmccntr-el0],[enable the cycle counter on ARMv8 via the PMCCNTR_EL0 register (see README-perfcounters for details and mandatory instructions)])], have_armv8pmccntrel0=$enableval)
+AC_ARG_ENABLE(armv8-pmccntr-el0, [AS_HELP_STRING([--enable-armv8-pmccntr-el0],[enable the cycle counter on ARMv8 via the PMCCNTR_EL0 register (see README-perfcounters for details and mandatory instructions)])], have_armv8pmccntrel0=$enableval)
 if test "$have_armv8pmccntrel0"x = "yes"x; then
     AC_DEFINE(HAVE_ARMV8_PMCCNTR_EL0,1,[Define if you have enabled the PMCCNTR_EL0 cycle counter on ARMv8])
 fi
 
-AC_ARG_ENABLE(armv8-cntvct-el0, [AC_HELP_STRING([--enable-armv8-cntvct-el0],[enable the cycle counter on ARMv8 via the CNTVCT_EL0 register (see README-perfcounters for details and mandatory instructions)])], have_armv8cntvctel0=$enableval)
+AC_ARG_ENABLE(armv8-cntvct-el0, [AS_HELP_STRING([--enable-armv8-cntvct-el0],[enable the cycle counter on ARMv8 via the CNTVCT_EL0 register (see README-perfcounters for details and mandatory instructions)])], have_armv8cntvctel0=$enableval)
 if test "$have_armv8cntvctel0"x = "yes"x; then
     AC_DEFINE(HAVE_ARMV8_CNTVCT_EL0,1,[Define if you have enabled the CNTVCT_EL0 cycle counter on ARMv8])
 fi
 
-AC_ARG_ENABLE(armv7a-cntvct, [AC_HELP_STRING([--enable-armv7a-cntvct],[enable the cycle counter on Armv7a via the CNTVCT register (see README-perfcounters for details and mandatory instructions)])], have_armv7acntvct=$enableval)
+AC_ARG_ENABLE(armv7a-cntvct, [AS_HELP_STRING([--enable-armv7a-cntvct],[enable the cycle counter on Armv7a via the CNTVCT register (see README-perfcounters for details and mandatory instructions)])], have_armv7acntvct=$enableval)
 if test "$have_armv7acntvct"x = "yes"x; then
     AC_DEFINE(HAVE_ARMV7A_CNTVCT,1,[Define if you have enabled the CNTVCT cycle counter on ARMv7a])
 fi
 
-AC_ARG_ENABLE(armv7a-pmccntr, [AC_HELP_STRING([--enable-armv7a-pmccntr],[enable the cycle counter on Armv7a via the PMCCNTR register (see README-perfcounters for details and mandatory instructions)])], have_armv7apmccntr=$enableval)
+AC_ARG_ENABLE(armv7a-pmccntr, [AS_HELP_STRING([--enable-armv7a-pmccntr],[enable the cycle counter on Armv7a via the PMCCNTR register (see README-perfcounters for details and mandatory instructions)])], have_armv7apmccntr=$enableval)
 if test "$have_armv7apmccntr"x = "yes"x; then
     AC_DEFINE(HAVE_ARMV7A_PMCCNTR,1,[Define if you have enabled the PMCCNTR cycle counter on ARMv7a])
 fi
 
-AC_ARG_ENABLE(generic-simd128, [AC_HELP_STRING([--enable-generic-simd128],[enable generic (gcc) 128-bit SIMD optimizations])], have_generic_simd128=$enableval, have_generic_simd128=no)
+AC_ARG_ENABLE(generic-simd128, [AS_HELP_STRING([--enable-generic-simd128],[enable generic (gcc) 128-bit SIMD optimizations])], have_generic_simd128=$enableval, have_generic_simd128=no)
 if test "$have_generic_simd128" = "yes"; then
         AC_DEFINE(HAVE_GENERIC_SIMD128,1,[Define to enable generic (gcc) 128-bit SIMD optimizations.])
 fi
 AM_CONDITIONAL(HAVE_GENERIC_SIMD128, test "$have_generic_simd128" = "yes")
 
-AC_ARG_ENABLE(generic-simd256, [AC_HELP_STRING([--enable-generic-simd256],[enable generic (gcc) 256-bit SIMD optimizations])], have_generic_simd256=$enableval, have_generic_simd256=no)
+AC_ARG_ENABLE(generic-simd256, [AS_HELP_STRING([--enable-generic-simd256],[enable generic (gcc) 256-bit SIMD optimizations])], have_generic_simd256=$enableval, have_generic_simd256=no)
 if test "$have_generic_simd256" = "yes"; then
         AC_DEFINE(HAVE_GENERIC_SIMD256,1,[Define to enable generic (gcc) 256-bit SIMD optimizations.])
 fi
@@ -237,7 +237,7 @@ AM_CONDITIONAL(HAVE_GENERIC_SIMD256, test "$have_generic_simd256" = "yes")
 
 
 dnl FIXME:
-dnl AC_ARG_ENABLE(mips-ps, [AC_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
+dnl AC_ARG_ENABLE(mips-ps, [AS_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
 dnl if test "$have_mips_ps" = "yes"; then
 dnl 	AC_DEFINE(HAVE_MIPS_PS,1,[Define to enable MIPS paired-single optimizations.])
 dnl 	if test "$PRECISION" != "s"; then
@@ -246,31 +246,31 @@ dnl 	fi
 dnl fi
 dnl AM_CONDITIONAL(HAVE_MIPS_PS, test "$have_mips_ps" = "yes")
 
-AC_ARG_WITH(slow-timer, [AC_HELP_STRING([--with-slow-timer],[use low-precision timers (SLOW)])], with_slow_timer=$withval, with_slow_timer=no)
+AC_ARG_WITH(slow-timer, [AS_HELP_STRING([--with-slow-timer],[use low-precision timers (SLOW)])], with_slow_timer=$withval, with_slow_timer=no)
 if test "$with_slow_timer" = "yes"; then
     AC_DEFINE(WITH_SLOW_TIMER,1,[Use low-precision timers, making planner very slow])
 fi
 
-AC_ARG_ENABLE(mips_zbus_timer, [AC_HELP_STRING([--enable-mips-zbus-timer],[use MIPS ZBus cycle-counter])], have_mips_zbus_timer=$enableval, have_mips_zbus_timer=no)
+AC_ARG_ENABLE(mips_zbus_timer, [AS_HELP_STRING([--enable-mips-zbus-timer],[use MIPS ZBus cycle-counter])], have_mips_zbus_timer=$enableval, have_mips_zbus_timer=no)
 if test "$have_mips_zbus_timer" = "yes"; then
     AC_DEFINE(HAVE_MIPS_ZBUS_TIMER,1,[Define to enable use of MIPS ZBus cycle-counter.])
 fi
 
-AC_ARG_WITH(our-malloc, [AC_HELP_STRING([--with-our-malloc],[use our aligned malloc (helpful for Win32)])], with_our_malloc=$withval, with_our_malloc=no)
-AC_ARG_WITH(our-malloc16, [AC_HELP_STRING([--with-our-malloc16],[Obsolete alias for --with-our-malloc16])], with_our_malloc=$withval)
+AC_ARG_WITH(our-malloc, [AS_HELP_STRING([--with-our-malloc],[use our aligned malloc (helpful for Win32)])], with_our_malloc=$withval, with_our_malloc=no)
+AC_ARG_WITH(our-malloc16, [AS_HELP_STRING([--with-our-malloc16],[Obsolete alias for --with-our-malloc16])], with_our_malloc=$withval)
 if test "$with_our_malloc" = "yes"; then
     AC_DEFINE(WITH_OUR_MALLOC,1,[Use our own aligned malloc routine; mainly helpful for Windows systems lacking aligned allocation system-library routines.])
 fi
 
-AC_ARG_WITH(windows-f77-mangling, [AC_HELP_STRING([--with-windows-f77-mangling],[use common Win32 Fortran interface styles])], with_windows_f77_mangling=$withval, with_windows_f77_mangling=no)
+AC_ARG_WITH(windows-f77-mangling, [AS_HELP_STRING([--with-windows-f77-mangling],[use common Win32 Fortran interface styles])], with_windows_f77_mangling=$withval, with_windows_f77_mangling=no)
 if test "$with_windows_f77_mangling" = "yes"; then
     AC_DEFINE(WINDOWS_F77_MANGLING,1,[Use common Windows Fortran mangling styles for the Fortran interfaces.])
 fi
 
-AC_ARG_WITH(incoming-stack-boundary, [AC_HELP_STRING([--with-incoming-stack-boundary=X],[Assume that stack is aligned to (1<<X) bytes])], with_incoming_stack_boundary=$withval, with_incoming_stack_boundary=no)
+AC_ARG_WITH(incoming-stack-boundary, [AS_HELP_STRING([--with-incoming-stack-boundary=X],[Assume that stack is aligned to (1<<X) bytes])], with_incoming_stack_boundary=$withval, with_incoming_stack_boundary=no)
 
 
-AC_ARG_ENABLE(fma, [AC_HELP_STRING([--enable-fma],[enable if the machine architecture "naturally" prefers fused multiply-add instructions])], arch_prefers_fma=$enableval)
+AC_ARG_ENABLE(fma, [AS_HELP_STRING([--enable-fma],[enable if the machine architecture "naturally" prefers fused multiply-add instructions])], arch_prefers_fma=$enableval)
 if test "$arch_prefers_fma"x = "yes"x; then
         AC_DEFINE(ARCH_PREFERS_FMA,1,[Define if the machine architecture "naturally" prefers fused multiply-add instructions])
 fi
@@ -301,7 +301,7 @@ AC_CHECK_PROG(OCAMLBUILD, ocamlbuild, ocamlbuild)
 
 dnl -----------------------------------------------------------------------
 
-AC_ARG_ENABLE(mpi, [AC_HELP_STRING([--enable-mpi],[compile FFTW MPI library])], enable_mpi=$enableval, enable_mpi=no)
+AC_ARG_ENABLE(mpi, [AS_HELP_STRING([--enable-mpi],[compile FFTW MPI library])], enable_mpi=$enableval, enable_mpi=no)
 
 if test "$enable_mpi" = "yes"; then
    if test $PRECISION = q; then
@@ -577,9 +577,9 @@ AC_CHECK_DECLS([drand48, srand48, posix_memalign]) dnl in stdlib.h
 dnl Cray UNICOS _rtc() (real-time clock) intrinsic
 AC_MSG_CHECKING([for _rtc intrinsic])
 rtc_ok=yes
-AC_TRY_LINK([#ifdef HAVE_INTRINSICS_H
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#ifdef HAVE_INTRINSICS_H
 #include <intrinsics.h>
-#endif], [_rtc()], [AC_DEFINE(HAVE__RTC,1,[Define if you have the UNICOS _rtc() intrinsic.])], [rtc_ok=no])
+#endif]], [[_rtc()]])],[AC_DEFINE(HAVE__RTC,1,[Define if you have the UNICOS _rtc() intrinsic.])],[rtc_ok=no])
 AC_MSG_RESULT($rtc_ok)
 
 if test "$PRECISION" = "l"; then
@@ -587,8 +587,8 @@ if test "$PRECISION" = "l"; then
 fi
 
 AC_MSG_CHECKING([for isnan])
-AC_TRY_LINK([#include <math.h>
-], if (!isnan(3.14159)) isnan(2.7183);, ok=yes, ok=no)
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <math.h>
+]], [[if (!isnan(3.14159)) isnan(2.7183);]])],[ok=yes],[ok=no])
 if test "$ok" = "yes"; then
     AC_DEFINE(HAVE_ISNAN,1,[Define if the isnan() function/macro is available.])
 fi
@@ -605,7 +605,7 @@ fi
 dnl add gcc warnings, in debug/maintainer mode only
 if test "$enable_debug" = yes || test "$USE_MAINTAINER_MODE" = yes; then
 if test "x$ac_test_CFLAGS" != "xset" -a "x$ac_test_CFLAGS" != "xy"; then
-    if test $ac_cv_prog_gcc = yes; then
+    if test $ac_cv_c_compiler_gnu = yes; then
         CFLAGS="$CFLAGS -Wall -W -Wcast-qual -Wpointer-arith -Wcast-align -pedantic -Wno-long-long -Wshadow -Wbad-function-cast -Wwrite-strings -Wstrict-prototypes -Wredundant-decls -Wnested-externs" # -Wundef -Wconversion -Wmissing-prototypes -Wmissing-declarations
     fi
 fi
@@ -632,7 +632,7 @@ fi
 
 dnl -----------------------------------------------------------------------
 
-AC_ARG_ENABLE(fortran, [AC_HELP_STRING([--disable-fortran],[don't include Fortran-callable wrappers])], enable_fortran=$enableval, enable_fortran=yes)
+AC_ARG_ENABLE(fortran, [AS_HELP_STRING([--disable-fortran],[don't include Fortran-callable wrappers])], enable_fortran=$enableval, enable_fortran=yes)
 
 if test "$enable_fortran" = "yes"; then
     AC_PROG_F77
@@ -663,27 +663,27 @@ else
     with_g77_wrappers=no
 fi
 
-AC_ARG_WITH(g77-wrappers, [AC_HELP_STRING([--with-g77-wrappers],[force inclusion of g77-compatible wrappers in addition to any other Fortran compiler that is detected])], with_g77_wrappers=$withval)
+AC_ARG_WITH(g77-wrappers, [AS_HELP_STRING([--with-g77-wrappers],[force inclusion of g77-compatible wrappers in addition to any other Fortran compiler that is detected])], with_g77_wrappers=$withval)
 if test "x$with_g77_wrappers" = "xyes"; then
     AC_DEFINE(WITH_G77_WRAPPERS,1,[Include g77-compatible wrappers in addition to any other Fortran wrappers.])
 fi
 
 dnl -----------------------------------------------------------------------
 have_smp="no"
-AC_ARG_ENABLE(openmp, [AC_HELP_STRING([--enable-openmp],[use OpenMP directives for parallelism])], enable_openmp=$enableval, enable_openmp=no)
+AC_ARG_ENABLE(openmp, [AS_HELP_STRING([--enable-openmp],[use OpenMP directives for parallelism])], enable_openmp=$enableval, enable_openmp=no)
 
 if test "$enable_openmp" = "yes"; then
    AC_DEFINE(HAVE_OPENMP,1,[Define to enable OpenMP])
    AX_OPENMP([], [AC_MSG_ERROR([don't know how to enable OpenMP])])
 fi
 
-AC_ARG_ENABLE(threads, [AC_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
+AC_ARG_ENABLE(threads, [AS_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
 
 if test "$enable_threads" = "yes"; then
    AC_DEFINE(HAVE_THREADS,1,[Define to enable SMP threads])
 fi
 
-AC_ARG_WITH(combined-threads, [AC_HELP_STRING([--with-combined-threads],[combine threads into main libfftw3])], with_combined_threads=$withval, with_combined_threads=no)
+AC_ARG_WITH(combined-threads, [AS_HELP_STRING([--with-combined-threads],[combine threads into main libfftw3])], with_combined_threads=$withval, with_combined_threads=no)
 
 if test "$with_combined_threads" = yes; then
     if test "$enable_openmp" = "yes"; then
@@ -700,10 +700,7 @@ if test "$enable_threads" = "yes"; then
         # Win32 threads are the default on Windows:
     if test -z "$THREADLIBS"; then
         AC_MSG_CHECKING([for Win32 threads])
-        AC_TRY_LINK([#include <windows.h>],
-            [_beginthreadex(0,0,0,0,0,0);],
-            [THREADLIBS=" "; AC_MSG_RESULT(yes)],
-            [AC_MSG_RESULT(no)])
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <windows.h>]], [[_beginthreadex(0,0,0,0,0,0);]])],[THREADLIBS=" "; AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
     fi
 
     # POSIX threads, the default choice everywhere else:
@@ -729,10 +726,10 @@ dnl -----------------------------------------------------------------------
 AC_MSG_CHECKING([whether a cycle counter is available])
 save_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="$CPPFLAGS -I$srcdir/kernel"
-AC_TRY_CPP([#include "cycle.h"
+AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include "cycle.h"
 #ifndef HAVE_TICK_COUNTER
 #  error No cycle counter
-#endif], [ok=yes], [ok=no])
+#endif]])],[ok=yes],[ok=no])
 CPPFLAGS=$save_CPPFLAGS
 AC_MSG_RESULT($ok)
 if test $ok = no && test "x$with_slow_timer" = xno; then
