@@ -52,7 +52,7 @@ static plan *mkplan(planner *plnr, unsigned flags,
 		    const problem *prb, unsigned hash_info)
 {
      plan *pln;
-     
+
      pln = mkplan0(plnr, flags, prb, hash_info, WISDOM_NORMAL);
 
      if (plnr->wisdom_state == WISDOM_NORMAL && !pln) {
@@ -93,10 +93,10 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
                                          FFTW_PATIENT, FFTW_EXHAUSTIVE};
      int pat, pat_max;
      double pcost = 0;
-     
+
      if (before_planner_hook)
           before_planner_hook();
-     
+
      plnr = X(the_planner)();
 
      if (flags & FFTW_WISDOM_ONLY) {
@@ -140,6 +140,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	  /* build apiplan */
 	  p = (apiplan *) MALLOC(sizeof(apiplan), PLANS);
 	  p->prb = prb;
+	  p->refcount = 1u;
 	  p->sign = sign; /* cache for execute_dft */
 
 	  /* re-create plan from wisdom, adding blessing */
@@ -172,7 +173,21 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 
      if (after_planner_hook)
           after_planner_hook();
-     
+
+     return p;
+}
+
+X(plan) X(copy_plan)(X(plan) p)
+{
+     if (p) {
+          if (before_planner_hook)
+               before_planner_hook();
+
+          p->refcount++;
+
+          if (after_planner_hook)
+               after_planner_hook();
+     }
      return p;
 }
 
@@ -181,11 +196,13 @@ void X(destroy_plan)(X(plan) p)
      if (p) {
           if (before_planner_hook)
                before_planner_hook();
-     
-          X(plan_awake)(p->pln, SLEEPY);
-          X(plan_destroy_internal)(p->pln);
-          X(problem_destroy)(p->prb);
-          X(ifree)(p);
+
+          if (p->refcount-- == 1u) {
+               X(plan_awake)(p->pln, SLEEPY);
+               X(plan_destroy_internal)(p->pln);
+               X(problem_destroy)(p->prb);
+               X(ifree)(p);
+          }
 
           if (after_planner_hook)
                after_planner_hook();
