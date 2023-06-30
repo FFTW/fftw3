@@ -34,6 +34,11 @@ FFTW_VOIDFUNC F77(destroy_plan, DESTROY_PLAN)(X(plan) *p)
      X(destroy_plan)(*p);
 }
 
+FFTW_VOIDFUNC F77(copy_plan, COPY_PLAN)(X(plan) *pcopy, X(plan) *p)
+{
+     *pcopy = X(copy_plan)(*p);
+}
+
 FFTW_VOIDFUNC F77(cleanup, CLEANUP)(void)
 {
      X(cleanup)();
@@ -395,7 +400,7 @@ FFTW_VOIDFUNC F77(plan_r2r_1d, PLAN_R2R_1D)(X(plan) *p, int *n, R *in, R *out,
 }
 
 FFTW_VOIDFUNC F77(plan_r2r_2d, PLAN_R2R_2D)(X(plan) *p, int *nx, int *ny,
-				   R *in, R *out, 
+				   R *in, R *out,
 				   int *kindx, int *kindy, int *flags)
 {
      *p = X(plan_r2r_2d)(*ny, *nx, in, out,
@@ -409,7 +414,7 @@ FFTW_VOIDFUNC F77(plan_r2r_3d, PLAN_R2R_3D)(X(plan) *p,
 				   int *flags)
 {
      *p = X(plan_r2r_3d)(*nz, *ny, *nx, in, out,
-			 (X(r2r_kind)) *kindz, (X(r2r_kind)) *kindy, 
+			 (X(r2r_kind)) *kindz, (X(r2r_kind)) *kindy,
 			 (X(r2r_kind)) *kindx, *flags);
 }
 
