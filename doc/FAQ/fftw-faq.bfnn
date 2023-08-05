@@ -462,7 +462,7 @@ vice versa) yields the original array scaled by the size of the array.
 (For multi-dimensional transforms, the size of the array is the
 product of the dimensions.)  We could, instead, have chosen a
 normalization that would have returned the unscaled array. Or, to
-accomodate the many conventions in this matter, the transform routines
+accommodate the many conventions in this matter, the transform routines
 could have accepted a "scale factor" parameter. We did not do this,
 however, for two reasons. First, we didn't want to sacrifice
 performance in the common case where the scale factor is 1. Second, in

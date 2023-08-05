@@ -4,5 +4,5 @@ ax_gcc_aligns_stack.m4 ax_gcc_version.m4 ax_openmp.m4
 
 # libtool sticks a bunch of extra .m4 files in this directory,
 # but they don't seem to be needed for the distributed tarball
-# (they aren't needed for configure && make, and boostrapping
+# (they aren't needed for configure && make, and bootstrapping
 # will regenerate them anyway).

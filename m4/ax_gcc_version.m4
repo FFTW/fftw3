@@ -1,5 +1,5 @@
 dnl @synopsis AX_GCC_VERSION(MAJOR, MINOR, PATCHLEVEL, [ACTION-SUCCESS], [ACTION-FAILURE])
-dnl @summary check wither gcc is at least version MAJOR.MINOR.PATCHLEVEL
+dnl @summary check whether gcc is at least version MAJOR.MINOR.PATCHLEVEL
 dnl @category InstalledPackages
 dnl
 dnl Check whether we are using gcc and, if so, whether its version
