@@ -654,7 +654,7 @@ enum {
 /* hashtable information */
 enum {
      BLESSING = 0x1u,   /* save this entry */
-     H_VALID = 0x2u,    /* valid hastable entry */
+     H_VALID = 0x2u,    /* valid hashtable entry */
      H_LIVE = 0x4u      /* entry is nonempty, implies H_VALID */
 };
 

@@ -372,7 +372,7 @@ even) elements of the complex output are purely real.  Some
 implementations therefore store the Nyquist element where the DC
 imaginary part would go, in order to make the input and output arrays
 the same size.  Such packing, however, does not generalize well to
-multi-dimensional transforms, and the space savings are miniscule in
+multi-dimensional transforms, and the space savings are minuscule in
 any case; FFTW does not support it.
 
 An alternative interface for one-dimensional r2c and c2r DFTs can be
