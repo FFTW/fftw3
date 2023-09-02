@@ -16,8 +16,9 @@ special operations supported by some processors to perform a single
 operation on several numbers (usually 2 or 4) simultaneously.  SIMD
 floating-point instructions are available on several popular CPUs:
 SSE/SSE2/AVX/AVX2/AVX512/KCVI on some x86/x86-64 processors, AltiVec and
-VSX on some POWER/PowerPCs, NEON on some ARM models.  FFTW can be
-compiled to support the SIMD instructions on any of these systems.
+VSX on some POWER/PowerPCs, NEON on some ARM models, MSA on some MIPS
+models.  FFTW can be compiled to support the SIMD instructions on any of
+these systems.
 @cindex SIMD
 @cindex SSE
 @cindex SSE2
