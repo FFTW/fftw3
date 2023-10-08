@@ -170,9 +170,15 @@ static inline V VBYI(V x)
 }
 
 /* FMA support */
-#define VFMA(a, b, c)   VADD(c, VMUL(a, b))
-#define VFNMS(a, b, c)  VSUB(c, VMUL(a, b))
-#define VFMS(a, b, c)   VSUB(VMUL(a, b), c)
+#ifdef FFTW_SINGLE
+#define VFMA(a, b, c)  (V)__lsx_vfmadd_s((__m128)a, (__m128)b, (__m128)c)
+#define VFNMS(a, b, c) (V)__lsx_vfnmsub_s((__m128)a, (__m128)b, (__m128)c)
+#define VFMS(a, b, c)  (V)__lsx_vfmsub_s((__m128)a, (__m128)b, (__m128)c)
+#else
+#define VFMA(a, b, c)  (V)__lsx_vfmadd_d((__m128d)a, (__m128d)b, (__m128d)c)
+#define VFNMS(a, b, c) (V)__lsx_vfnmsub_d((__m128d)a, (__m128d)b, (__m128d)c)
+#define VFMS(a, b, c)  (V)__lsx_vfmsub_d((__m128d)a, (__m128d)b, (__m128d)c)
+#endif
 #define VFMAI(b, c)     VADD(c, VBYI(b))
 #define VFNMSI(b, c)    VSUB(c, VBYI(b))
 #define VFMACONJ(b, c)  VADD(VCONJ(b), c)
