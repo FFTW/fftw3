@@ -254,9 +254,15 @@ static inline V VBYI(V x)
 }
 
 /* FMA support */
-#define VFMA(a, b, c)   VADD(c, VMUL(a, b))
-#define VFNMS(a, b, c)  VSUB(c, VMUL(a, b))
-#define VFMS(a, b, c)   VSUB(VMUL(a, b), c)
+#ifdef FFTW_SINGLE
+#define VFMA(a, b, c)  (V)__lasx_xvfmadd_s((__m256)a, (__m256)b, (__m256)c)
+#define VFNMS(a, b, c) (V)__lasx_xvfnmsub_s((__m256)a, (__m256)b, (__m256)c)
+#define VFMS(a, b, c)  (V)__lasx_xvfmsub_s((__m256)a, (__m256)b, (__m256)c)
+#else
+#define VFMA(a, b, c)  (V)__lasx_xvfmadd_d((__m256d)a, (__m256d)b, (__m256d)c)
+#define VFNMS(a, b, c) (V)__lasx_xvfnmsub_d((__m256d)a, (__m256d)b, (__m256d)c)
+#define VFMS(a, b, c)  (V)__lasx_xvfmsub_d((__m256d)a, (__m256d)b, (__m256d)c)
+#endif
 #define VFMAI(b, c)     VADD(c, VBYI(b))
 #define VFNMSI(b, c)    VSUB(c, VBYI(b))
 #define VFMACONJ(b, c)  VADD(VCONJ(b), c)
