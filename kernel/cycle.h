@@ -562,3 +562,16 @@ static inline ticks getticks(void)
 INLINE_ELAPSED(inline)
 #define HAVE_TICK_COUNTER
 #endif
+
+#if defined(__loongarch64) && !defined(HAVE_TICK_COUNTER)
+typedef uint64_t ticks;
+static inline ticks getticks(void)
+{
+  uint64_t counter = 0;
+  uint64_t id = 0;
+  asm volatile("rdtime.d %0, %1" : "=r"(counter), "=r"(id));
+  return counter;
+}
+INLINE_ELAPSED(inline)
+#define HAVE_TICK_COUNTER
+#endif
