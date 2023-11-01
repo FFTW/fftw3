@@ -1238,7 +1238,7 @@ void fftw_mpi_execute_r2r(fftw_plan p, double *in, double *out);
 These functions have the same restrictions as those of the serial
 new-array execute functions.  They are @emph{always} safe to apply to
 the @emph{same} @code{in} and @code{out} arrays that were used to
-create the plan.  They can only be applied to new arrays if those
+create the plan.  They can only be applied to new arrarys if those
 arrays have the same types, dimensions, in-placeness, and alignment as
 the original arrays, where the best way to ensure the same alignment
 is to use FFTW's @code{fftw_malloc} and related allocation functions

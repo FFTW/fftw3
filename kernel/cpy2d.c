@@ -172,7 +172,7 @@ void X(cpy2d_tiled)(R *I, R *O,
 {
      INT tilesz = X(compute_tilesz)(vl,
 				    1 /* input array */
-				    + 1 /* output array */);
+				    + 1 /* ouput array */);
      struct cpy2d_closure k;
      k.I = I;
      k.O = O;

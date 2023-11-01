@@ -570,7 +570,7 @@ It is also possible to use the lower-level routines
 type @code{FILE*}, expressed in Fortran as @code{type(C_PTR)}.
 However, you are then responsible for creating the @code{FILE*}
 yourself.  You can do this by using @code{iso_c_binding} to define
-Fortran interfaces for the C library functions @code{fopen} and
+Fortran intefaces for the C library functions @code{fopen} and
 @code{fclose}, which is a bit strange in Fortran but workable.
 
 @c =========>

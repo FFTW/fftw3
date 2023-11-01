@@ -2,7 +2,7 @@
 ############################################################################
 #
 # NOTE: If you just want to build FFTW, do not use this file.  Just use
-# the ordinary ./configure && make commands as described in the installation
+# the ordinary ./configure && make commmands as described in the installation
 # section of the manual.
 #
 # This file is only for users that want to generate their own codelets,

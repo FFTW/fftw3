@@ -32,7 +32,7 @@ void X(free)(void *p)
 }
 
 /* The following two routines are mainly for the convenience of
-   the Fortran 2003 API, although C users may find them convenient
+   the Fortran 2003 API, although C users may find them convienent
    as well.  The problem is that, although Fortran 2003 has a
    c_sizeof intrinsic that is equivalent to sizeof, it is broken
    in some gfortran versions, and in any case is a bit unnatural

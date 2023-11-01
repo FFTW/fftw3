@@ -27,7 +27,7 @@
    resulting schedule data structure expresses a "good" ordering
    and structure for the computation.
 
-   The scheduler makes use of utilities in Dag and other packages to
+   The scheduler makes use of utilties in Dag and other packages to
    manipulate the Dag and the instruction list. *)
 
 open Dag

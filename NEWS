@@ -246,7 +246,7 @@ FFTW 3.3
 
 * Remove the automatic detection of native architecture flag for gcc
   which was introduced in fftw-3.1, since new gcc supports -mtune=native.
-  Remove the --with-gcc-arch flag; if you want to specify a particular
+  Remove the --with-gcc-arch flag; if you want to specify a particlar
   arch to configure, use ./configure CC="gcc -mtune=...".
 
 * --with-our-malloc16 configure flag is now renamed --with-our-malloc.
