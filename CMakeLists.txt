@@ -14,6 +14,7 @@ option (BUILD_SHARED_LIBS "Build shared libraries" ON)
 option (BUILD_TESTS "Build tests" ON)
 
 option (ENABLE_OPENMP "Use OpenMP for multithreading" OFF)
+option (ENABLE_HPX "Use HPX for multithreading" OFF)
 option (ENABLE_THREADS "Use pthread for multithreading" OFF)
 option (WITH_COMBINED_THREADS "Merge thread library" OFF)
 
@@ -122,11 +123,22 @@ if (Threads_FOUND)
   set (HAVE_THREADS TRUE)
 endif ()
 
+if(ENABLE_OPENMP AND ENABLE_HPX)
+  message(FATAL "OpenMP and HPX cannot be enabled at the same time")
+endif ()
+
 if (ENABLE_OPENMP)
   find_package (OpenMP)
 endif ()
 if (OPENMP_FOUND)
   set (HAVE_OPENMP TRUE)
+endif ()
+
+if (ENABLE_HPX)
+  find_package (HPX)
+endif ()
+if (HPX_FOUND)
+  set (HAVE_HPX TRUE)
 endif ()
 
 include (CheckCCompilerFlag)
@@ -257,6 +269,7 @@ set(fftw_par_SOURCE
 
 set (fftw_threads_SOURCE ${fftw_par_SOURCE} threads/threads.c)
 set (fftw_omp_SOURCE ${fftw_par_SOURCE} threads/openmp.c)
+set (fftw_hpx_SOURCE ${fftw_par_SOURCE} threads/hpx.cpp)
 
 
 include_directories (.)
@@ -363,6 +376,15 @@ if (OPENMP_FOUND)
   target_link_libraries (${fftw3_lib}_omp ${CMAKE_THREAD_LIBS_INIT})
   list (APPEND subtargets ${fftw3_lib}_omp)
   target_compile_options (${fftw3_lib}_omp PRIVATE ${OpenMP_C_FLAGS})
+endif ()
+
+if (HPX_FOUND)
+  add_library (${fftw3_lib}_hpx ${fftw_hpx_SOURCE})
+  target_include_directories (${fftw3_lib}_hpx INTERFACE $<INSTALL_INTERFACE:include>)
+  target_link_libraries (${fftw3_lib}_hpx ${fftw3_lib})
+  target_link_libraries (${fftw3_lib}_hpx ${CMAKE_THREAD_LIBS_INIT})
+  list (APPEND subtargets ${fftw3_lib}_hpx)
+  target_compile_options (${fftw3_lib}_hpx PRIVATE ${OpenMP_C_FLAGS})
 endif ()
 
 foreach(subtarget ${subtargets})
