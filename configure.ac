@@ -296,6 +296,7 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_PROG_RANLIB
 AC_PROG_CPP
+AC_PROG_CXX
 
 AC_CHECK_PROG(OCAMLBUILD, ocamlbuild, ocamlbuild)
 
@@ -677,6 +678,19 @@ if test "$enable_openmp" = "yes"; then
    AX_OPENMP([], [AC_MSG_ERROR([don't know how to enable OpenMP])])
 fi
 
+AC_ARG_ENABLE(hpx, [AC_HELP_STRING([--enable-hpx],[use HPX for parallelism])], enable_hpx=$enableval, enable_hpx=no)
+
+if test "$enable_hpx" = "yes"; then
+   AC_SUBST(HPX_LIBS)
+   AC_SUBST(HPX_CFLAGS)
+   PKG_CHECK_EXISTS([hpx_component],[],[
+      AC_MSG_ERROR([required library HPX not found, check PKG_CONFIG_PATH]) 
+   ])
+   PKG_CHECK_MODULES([HPX], [hpx_component]) 
+   AC_SUBST(HPX_CXXFLAGS, ["$HPX_CFLAGS"])
+   AC_DEFINE(HAVE_HPX,1,[Define to enable HPX])
+fi
+
 AC_ARG_ENABLE(threads, [AC_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
 
 if test "$enable_threads" = "yes"; then
@@ -721,6 +735,7 @@ fi
 AC_SUBST(THREADLIBS)
 AM_CONDITIONAL(THREADS, test "$enable_threads" = "yes")
 AM_CONDITIONAL(OPENMP, test "$enable_openmp" = "yes")
+AM_CONDITIONAL(HPX, test "$enable_hpx" = "yes")
 AM_CONDITIONAL(SMP, test "$enable_threads" = "yes" -o "$enable_openmp" = "yes")
 AM_CONDITIONAL(COMBINED_THREADS, test x"$with_combined_threads" = xyes)
 

@@ -17,6 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+#ifdef __cplusplus
+#if defined(HAVE_HPX)
+#pragma once
+#endif
+#endif
 
 #ifndef __THREADS_H__
 #define __THREADS_H__
@@ -32,10 +37,23 @@ typedef struct {
 
 typedef void *(*spawn_function) (spawn_data *);
 
+#ifdef __cplusplus
+#if defined(HAVE_HPX)
+extern "C" {
+#endif
+#endif
+
 void X(spawn_loop)(int loopmax, int nthreads,
 		   spawn_function proc, void *data);
 int X(ithreads_init)(void);
 void X(threads_cleanup)(void);
+void X(threads_register_planner_hooks)(void);
+
+#ifdef __cplusplus
+#if defined(HAVE_HPX)
+} // end extern "C"
+#endif
+#endif
 
 typedef void (*spawnloop_function)(spawn_function, spawn_data *, size_t, int, void *);
 extern spawnloop_function X(spawnloop_callback);
@@ -55,6 +73,5 @@ hc2hc_solver *X(mksolver_hc2hc_threads)(size_t size, INT r, hc2hc_mkinferior mkc
 void X(threads_conf_standard)(planner *p);
 void X(threads_register_hooks)(void);
 void X(threads_unregister_hooks)(void);
-void X(threads_register_planner_hooks)(void);
 
 #endif /* __THREADS_H__ */
