@@ -29,6 +29,7 @@
 
 #else
 
+#include <cstdlib>
 #include <hpx/hpx_start.hpp>
 #include <hpx/runtime_local/run_as_hpx_thread.hpp>
 #include <hpx/execution.hpp>
@@ -39,7 +40,14 @@ extern "C" {
 
 int X(ithreads_init)(void)
 {
-     return hpx::start( nullptr, 0, nullptr );
+     const char * nthreads_cstr = std::get("FFTW3_HPX_NTHREADS");
+     if(nthreads_cstr == nullptr) {
+          return hpx::start( nullptr, 0, nullptr );
+     }
+     
+     std::string count(nthreads_cstr); 
+     std::string thread_arg = "--hpx:threads=" + count;
+     return hpx::start( nullptr, 1, thread_arg.c_str() );
 }
 
 /* Distribute a loop from 0 to loopmax-1 over nthreads threads.
