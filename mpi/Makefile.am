@@ -39,7 +39,7 @@ LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_omp.la
 endif
 if HPX
 mpi_bench_CFLAGS = $(HPX_CXXFLAGS)
-LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_hpx.la
+LIBFFTWTHREADS = $(HPX_LIBS) $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_hpx.la
 endif
 
 mpi_bench_SOURCES = mpi-bench.c $(top_srcdir)/tests/fftw-bench.c $(top_srcdir)/tests/hook.c
