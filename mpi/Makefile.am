@@ -32,11 +32,14 @@ mpi_bench_CFLAGS = $(PTHREAD_CFLAGS)
 if !COMBINED_THREADS
 LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_threads.la
 endif
-else
+endif
 if OPENMP
 mpi_bench_CFLAGS = $(OPENMP_CFLAGS)
 LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_omp.la
 endif
+if HPX
+mpi_bench_CFLAGS = $(HPX_CXXFLAGS)
+LIBFFTWTHREADS = $(top_builddir)/threads/libfftw3@PREC_SUFFIX@_hpx.la
 endif
 
 mpi_bench_SOURCES = mpi-bench.c $(top_srcdir)/tests/fftw-bench.c $(top_srcdir)/tests/hook.c
