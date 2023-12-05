@@ -46,8 +46,8 @@ endif
 endif
 
 if HPX
-libfftw3@PREC_SUFFIX@_hpx_la_SOURCES = conf.c hpx.cpp \
-threads.h dft-vrank-geq1.c rdft-vrank-geq1.c hc2hc.c  \
+libfftw3@PREC_SUFFIX@_hpx_la_SOURCES = api.c conf.c hpx.cpp \
+threads.h dft-vrank-geq1.c ct.c rdft-vrank-geq1.c hc2hc.c  \
 vrank-geq1-rdft2.c f77api.c f77funcs.h
 libfftw3@PREC_SUFFIX@_hpx_la_CXXFLAGS = $(HPX_CXXFLAGS)
 libfftw3@PREC_SUFFIX@_hpx_la_CFLAGS = $(AM_CFLAGS)
