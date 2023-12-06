@@ -40,7 +40,7 @@ extern "C" {
 
 int X(ithreads_init)(void)
 {
-     const char * nthreads_cstr = std::get("FFTW3_HPX_NTHREADS");
+     const char * nthreads_cstr = std::getenv("FFTW3_HPX_NTHREADS");
      if(nthreads_cstr == nullptr) {
           return hpx::start( nullptr, 0, nullptr );
      }
