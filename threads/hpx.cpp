@@ -113,8 +113,9 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
                }));
           }
 
-          hpx::wait_all(futures);
      });
+
+     hpx::wait_all(futures);
 }
 
 void X(threads_cleanup)(void)
