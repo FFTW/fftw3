@@ -97,25 +97,28 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      futures.reserve(nthr);
      std::vector<spawn_data> sdata(nthr, d);
 	
-     hpx::threads::run_as_hpx_thread([&d, &data, loopmax, nthr, block_size, &proc, &futures, &sdata]()
-     {
-          for (int tid = 0; tid < nthr; ++tid)
+     hpx::future<void> fut =
+          hpx::threads::run_as_hpx_thread([&d, &data, loopmax, nthr, block_size, &proc, &futures, &sdata]()
           {
-               futures.push_back(hpx::async([tid, &sdata, &data, &proc, block_size, loopmax]()
-               {
-                    sdata[tid].max = (sdata[tid].min = tid * block_size) + block_size;
-                    if (sdata[tid].max > loopmax) {
-                         sdata[tid].max = loopmax;
-                    }
-                    sdata[tid].thr_num = tid;
-                    sdata[tid].data = data;
-                    proc(&sdata[tid]);
-               }));
-          }
+              for (int tid = 0; tid < nthr; ++tid)
+              {
+                   futures.push_back(hpx::async([tid, &sdata, &data, &proc, block_size, loopmax]()
+                   {
+                        sdata[tid].max = (sdata[tid].min = tid * block_size) + block_size;
+                        if (sdata[tid].max > loopmax) {
+                             sdata[tid].max = loopmax;
+                        }
+                        sdata[tid].thr_num = tid;
+                        sdata[tid].data = data;
+                        proc(&sdata[tid]);
+                   }));
+              }
 
-     });
+              hpx::wait_all(futures);
+              return hpx::make_ready_future();
+          });
 
-     hpx::wait_all(futures);
+     fut.wait();
 }
 
 void X(threads_cleanup)(void)
