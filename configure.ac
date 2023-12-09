@@ -683,12 +683,39 @@ AC_ARG_ENABLE(hpx, [AC_HELP_STRING([--enable-hpx],[use HPX for parallelism])], e
 if test "$enable_hpx" = "yes"; then
    AC_SUBST(HPX_LIBS)
    AC_SUBST(HPX_CFLAGS)
-   PKG_CHECK_EXISTS([hpx_component],[],[
-      AC_MSG_ERROR([required library HPX not found, check PKG_CONFIG_PATH]) 
-   ])
-   PKG_CHECK_MODULES([HPX], [hpx_component]) 
-   AC_SUBST(HPX_CXXFLAGS, ["$HPX_CFLAGS"])
-   AC_DEFINE(HAVE_HPX,1,[Define to enable HPX])
+
+   AC_CHECK_PROG(HAS_PKGCONFIG, pkg-config, yes, no, [], [])
+
+   if test "$HAS_PKGCONFIG" = "yes"; then
+      PKG_CHECK_EXISTS([hpx_component, hpx_component_relwithdebinfo],[],[
+         AC_MSG_ERROR([required library HPX not found, check PKG_CONFIG_PATH]) 
+      ])
+      PKG_CHECK_MODULES([HPX], [hpx_component]) 
+      AC_SUBST(HPX_CXXFLAGS, ["$HPX_CFLAGS"])
+      AC_DEFINE(HAVE_HPX,1,[Define to enable HPX])
+   else
+      AC_LANG_PUSH([C++])
+
+      AC_SUBST(HAVE_HPX_HPP)
+      AC_CHECK_HEADER(hpx.hpp,[HAVE_HPX_HPP=1],[HAVE_HPX_HPP=0]) 
+      if test "$HAVE_HPX_HPP" = "0"; then
+         AC_MSG_ERROR([required library HPX not found, check CXXFLAGS]) 
+      fi
+
+      AC_SUBST(HAVE_HPX)
+      AC_LINK_IFELSE(
+        [AC_LANG_PROGRAM([#include <hpx.hpp>], 
+           [hpx::init(); hpx::finalize();])],
+        [HAVE_HPX=1],
+        [HAVE_HPX=0])
+      if test "$HAVE_HPX_HPP" = "0"; then
+         AC_MSG_ERROR([required library HPX not found, check LD_LIBRARY_PATH]) 
+      fi
+
+      HPX_LIBS="-lhpx -lhpx_core"
+      AC_LANG_POP([C++])
+   fi
+
 fi
 
 AC_ARG_ENABLE(threads, [AC_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
