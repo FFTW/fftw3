@@ -690,25 +690,26 @@ if test "$enable_hpx" = "yes"; then
       PKG_CHECK_EXISTS([hpx_component, hpx_component_relwithdebinfo],[],[
          AC_MSG_ERROR([required library HPX not found, check PKG_CONFIG_PATH]) 
       ])
-      PKG_CHECK_MODULES([HPX], [hpx_component]) 
+      PKG_CHECK_MODULES([HPX], [hpx_component])
       AC_SUBST(HPX_CXXFLAGS, ["$HPX_CFLAGS"])
       AC_DEFINE(HAVE_HPX,1,[Define to enable HPX])
    else
       AC_LANG_PUSH([C++])
 
       AC_SUBST(HAVE_HPX_HPP)
-      AC_CHECK_HEADER(hpx.hpp,[HAVE_HPX_HPP=1],[HAVE_HPX_HPP=0]) 
+      AC_CHECK_HEADER(hpx/hpx.hpp,[HAVE_HPX_HPP=1],[HAVE_HPX_HPP=0])
       if test "$HAVE_HPX_HPP" = "0"; then
-         AC_MSG_ERROR([required library HPX not found, check CXXFLAGS]) 
+         AC_MSG_ERROR([required HPX not found, check CXXFLAGS])
       fi
 
       AC_SUBST(HAVE_HPX)
       AC_LINK_IFELSE(
-        [AC_LANG_PROGRAM([#include <hpx.hpp>], 
+        [AC_LANG_PROGRAM([#include <hpx/hpx.hpp>],
            [hpx::init(); hpx::finalize();])],
         [HAVE_HPX=1],
         [HAVE_HPX=0])
-      if test "$HAVE_HPX_HPP" = "0"; then
+
+      if test "$HAVE_HPX" = "0"; then
          AC_MSG_ERROR([required library HPX not found, check LD_LIBRARY_PATH]) 
       fi
 
