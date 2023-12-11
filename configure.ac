@@ -687,10 +687,19 @@ if test "$enable_hpx" = "yes"; then
    AC_CHECK_PROG(HAS_PKGCONFIG, pkg-config, yes, no, [], [])
 
    if test "$HAS_PKGCONFIG" = "yes"; then
-      PKG_CHECK_EXISTS([hpx_component, hpx_component_relwithdebinfo],[],[
-         AC_MSG_ERROR([required library HPX not found, check PKG_CONFIG_PATH]) 
-      ])
-      PKG_CHECK_MODULES([HPX], [hpx_component])
+      AC_SUBST(hpxcompfound)
+
+      PKG_CHECK_EXISTS([hpx_component],[hpxcompfound=yes],[hpxcompfound=no])
+
+      if test "$hpxcompfound" = "no"; then
+         PKG_CHECK_EXISTS([hpx_component_relwithdebinfo],[],[
+            AC_MSG_ERROR([required library HPX not found, check PKG_CONFIG_PATH]) 
+         ])
+         PKG_CHECK_MODULES([HPX], [hpx_component_relwithdebinfo])
+      else
+         PKG_CHECK_MODULES([HPX], [hpx_component])
+      fi
+
       AC_SUBST(HPX_CXXFLAGS, ["$HPX_CFLAGS"])
       AC_DEFINE(HAVE_HPX,1,[Define to enable HPX])
    else
