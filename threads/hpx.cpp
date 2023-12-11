@@ -100,7 +100,7 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      std::vector<spawn_data> sdata(nthr, d);
 	
      hpx::future<void> fut =
-          hpx::run_as_hpx_thread([&d, &data, loopmax, nthr, block_size, &proc, &futures, &sdata]() -> hpx::future<void>
+          hpx::threads::run_as_hpx_thread([&d, &data, loopmax, nthr, block_size, &proc, &futures, &sdata]() -> hpx::future<void>
           {
               for (int tid = 0; tid < nthr; ++tid)
               {
