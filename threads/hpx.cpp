@@ -47,7 +47,8 @@ int X(ithreads_init)(void)
      
      std::string count(nthreads_cstr); 
      std::string thread_arg = "--hpx:threads=" + count;
-     return hpx::start( nullptr, 1, thread_arg.c_str() );
+     char * args[] = { const_cast<char*>(thread_arg.c_str()) };
+     return hpx::start( nullptr, 1, args );
 }
 
 /* Distribute a loop from 0 to loopmax-1 over nthreads threads.
@@ -98,7 +99,7 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      std::vector<spawn_data> sdata(nthr, d);
 	
      hpx::future<void> fut =
-          hpx::threads::run_as_hpx_thread([&d, &data, loopmax, nthr, block_size, &proc, &futures, &sdata]()
+          hpx::run_as_hpx_thread([&d, &data, loopmax, nthr, block_size, &proc, &futures, &sdata]() -> hpx::future<void>
           {
               for (int tid = 0; tid < nthr; ++tid)
               {
@@ -115,7 +116,7 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
               }
 
               hpx::wait_all(futures);
-              return hpx::make_ready_future();
+              return hpx::make_ready_future<void>();
           });
 
      fut.wait();
