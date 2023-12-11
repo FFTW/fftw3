@@ -99,6 +99,23 @@ if test "x$ac_test_CFLAGS" != "xset" -a "x$ac_test_CFLAGS" != "xy"; then
          AX_CHECK_COMPILE_FLAG(-mpower8-vector, CFLAGS="$CFLAGS -mpower8-vector")
          AX_CHECK_COMPILE_FLAG(-mdirect-move, CFLAGS="$CFLAGS -mdirect-move")
      fi
+
+     if test -n "$TARGET_THUNDERX_COMPATIBLE"; then
+         CFLAGS="-Ofast"  # Override the above settings (they are not optimal for ThunderX)
+         AX_CHECK_COMPILER_FLAGS(-faggressive-loop-optimizations, CFLAGS="$CFLAGS -faggressive-loop-optimizations")
+         AX_CHECK_COMPILER_FLAGS(-fcrossjumping, CFLAGS="$CFLAGS -fcrossjumping")
+         AX_CHECK_COMPILER_FLAGS(-fdevirtualize, CFLAGS="$CFLAGS -fdevirtualize")
+         AX_CHECK_COMPILER_FLAGS(-fearly-inlining, CFLAGS="$CFLAGS -fearly-inlining")
+         AX_CHECK_COMPILER_FLAGS(-ffunction-cse, CFLAGS="$CFLAGS -ffunction-cse")
+         AX_CHECK_COMPILER_FLAGS(-fgcse-after-reload, CFLAGS="$CFLAGS -fgcse-after-reload")
+         AX_CHECK_COMPILER_FLAGS(-fforward-propagate, CFLAGS="$CFLAGS -fforward-propagate")
+         AX_CHECK_COMPILER_FLAGS(-fpack-struct, CFLAGS="$CFLAGS -fpack-struct")
+         AX_CHECK_COMPILER_FLAGS(-fsched-critical-path-heuristic, CFLAGS="$CFLAGS -fsched-critical-path-heuristic")
+         AX_CHECK_COMPILER_FLAGS(-fsel-sched-pipelining, CFLAGS="$CFLAGS -fsel-sched-pipelining")
+         AX_CHECK_COMPILER_FLAGS(-fselective-scheduling, CFLAGS="$CFLAGS -fselective-scheduling")
+         AX_CHECK_COMPILER_FLAGS(-ftrapping-math, CFLAGS="$CFLAGS -ftrapping-math")
+     fi
+
      ;;
   esac
 

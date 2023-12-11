@@ -329,6 +329,15 @@ AM_CONDITIONAL(MPI, test "$enable_mpi" = "yes")
 
 dnl -----------------------------------------------------------------------
 
+case ${CC} in
+    *thunderx*) # If ThunderX is passed via mtune, etc, then set flag for this architecture
+        TARGET_THUNDERX_COMPATIBLE=1
+        AC_DEFINE(HAVE_ARMV8_CNTVCT_EL0,1,[Define if you have enabled the CNTVCT_EL0 cycle counter on ARMv8])
+        ;;
+esac
+
+dnl -----------------------------------------------------------------------
+
 dnl determine CFLAGS first
 AX_CC_MAXOPT
 
