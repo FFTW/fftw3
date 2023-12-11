@@ -47,8 +47,9 @@ int X(ithreads_init)(void)
      
      std::string count(nthreads_cstr); 
      std::string thread_arg = "--hpx:threads=" + count;
-     char * args[] = { const_cast<char*>(thread_arg.c_str()) };
-     return hpx::start( nullptr, 1, args );
+     hpx::init_params params;
+     params.cfg = { thread_arg };
+     return hpx::start(nullptr, 0, nullptr, params);
 }
 
 /* Distribute a loop from 0 to loopmax-1 over nthreads threads.
