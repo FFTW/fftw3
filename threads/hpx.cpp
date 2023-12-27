@@ -129,10 +129,28 @@ void X(threads_cleanup)(void)
      hpx::stop();
 }
 
-/* FIXME [Matteo Frigo 2015-05-25] What does "thread-safe"
-   mean for openmp? */
+static hpx::mutex planner_mutex;
+static hpx::mutex install_planner_hooks_mutex;
+static std::unique_lock<hpx::mutex> planner_lock = std::unique_lock<hpx::mutex>(planner_mutex);;
+static int planner_hooks_installed = 0;
+
+static void lock_planner_mutex(void)
+{
+     planner_lock.lock();
+}
+
+static void unlock_planner_mutex(void)
+{
+     planner_lock.unlock();
+}
+
 void X(threads_register_planner_hooks)(void)
 {
+     std::lock_guard<hpx::mutex> lkg(install_planner_hooks_mutex);
+     if (!planner_hooks_installed) {
+         X(set_planner_hooks)(lock_planner_mutex, unlock_planner_mutex);
+         planner_hooks_installed = 1;
+     }
 }
 
 } // end extern "C"
