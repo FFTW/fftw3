@@ -102,7 +102,7 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
      hpx::future<void> fut =
           hpx::threads::run_as_hpx_thread([&d, &data, loopmax, nthr, block_size, &proc, &futures, &sdata]() -> hpx::future<void>
           {
-              for (int tid = 0; tid < nthr; ++tid)
+              for (int tid = 1; tid < nthr; ++tid)
               {
                    futures.push_back(hpx::async([tid, &sdata, &data, &proc, block_size, loopmax]()
                    {
@@ -114,6 +114,16 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
                         sdata[tid].data = data;
                         proc(&sdata[tid]);
                    }));
+              }
+
+              {
+                  sdata[0].max = (sdata[0].min = 0) + block_size;
+                  if (sdata[0].max > loopmax) {
+                      sdata[0].max = loopmax;
+                  }
+                  sdata[0].thr_num = tid;
+                  sdata[0].data = data;
+                  proc(&sdata[0]);
               }
 
               hpx::wait_all(futures);
