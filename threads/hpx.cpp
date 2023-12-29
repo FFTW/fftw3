@@ -141,8 +141,8 @@ void X(threads_cleanup)(void)
 
 static hpx::mutex planner_mutex;
 static hpx::mutex install_planner_hooks_mutex;
-static std::unique_lock<hpx::mutex> planner_lock = std::unique_lock<hpx::mutex>(planner_mutex);;
-static int planner_hooks_installed = 0;
+static std::unique_lock<hpx::mutex> planner_lock = std::unique_lock<hpx::mutex>(planner_mutex);
+static bool planner_hooks_installed = false
 
 static void lock_planner_mutex(void)
 {
@@ -159,7 +159,7 @@ void X(threads_register_planner_hooks)(void)
      std::lock_guard<hpx::mutex> lkg(install_planner_hooks_mutex);
      if (!planner_hooks_installed) {
          X(set_planner_hooks)(lock_planner_mutex, unlock_planner_mutex);
-         planner_hooks_installed = 1;
+         planner_hooks_installed = true;
      }
 }
 
