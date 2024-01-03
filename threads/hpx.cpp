@@ -22,6 +22,7 @@
 /* openmp.c: thread spawning via HPX */
 
 #include "threads/threads.h"
+#include "api/api.h"
 
 #if !defined(HAVE_HPX)
 
