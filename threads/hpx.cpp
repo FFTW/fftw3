@@ -34,6 +34,7 @@
 #include <hpx/hpx_start.hpp>
 #include <hpx/runtime_local/run_as_hpx_thread.hpp>
 #include <hpx/execution.hpp>
+#include <hpx/semaphore.hpp>
 
 #endif
 
@@ -122,7 +123,7 @@ void X(spawn_loop)(int loopmax, int nthr, spawn_function proc, void *data)
                   if (sdata[0].max > loopmax) {
                       sdata[0].max = loopmax;
                   }
-                  sdata[0].thr_num = tid;
+                  sdata[0].thr_num = 0;
                   sdata[0].data = data;
                   proc(&sdata[0]);
               }
@@ -140,19 +141,18 @@ void X(threads_cleanup)(void)
      hpx::stop();
 }
 
-static hpx::mutex planner_mutex;
+static hpx::counting_semaphore<> planner_semaphore = hpx::counting_semaphore<>(1);
 static hpx::mutex install_planner_hooks_mutex;
-static std::unique_lock<hpx::mutex> planner_lock = std::unique_lock<hpx::mutex>(planner_mutex);
-static bool planner_hooks_installed = false
+static bool planner_hooks_installed = false;
 
 static void lock_planner_mutex(void)
 {
-     planner_lock.lock();
+     planner_semaphore.acquire();
 }
 
 static void unlock_planner_mutex(void)
 {
-     planner_lock.unlock();
+     planner_semaphore.release();
 }
 
 void X(threads_register_planner_hooks)(void)
