@@ -81,7 +81,7 @@ sub flush_problems {
 
     if ($#list_of_problems >= 0) {
 	for (@list_of_problems) {
-	    $problist = "$problist --verify '$_'";
+	    $problist = "$problist --verify $_";
 	}
 
         if ($validate_wisdom) {
