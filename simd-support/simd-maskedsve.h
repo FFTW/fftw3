@@ -101,20 +101,14 @@ typedef DS(svfloat64_t, svfloat32_t) V;
 #define VDUPH(x) TYPE(svtrn2)(x,x)
 
 #ifdef FFTW_SINGLE
-//#define FLIP_RI(x) svreinterpret_f32_u64(svrevw_u64_x(MASKA,svreinterpret_u64_f32(x)))
 #define FLIP_RI(x) TYPE(svtrn1)(VDUPH(x),x)
 #else
 #define FLIP_RI(x) TYPE(svtrn1)(VDUPH(x),x)
 #endif
 
-/* FIXME: there is a better way, surely */
-/* #define VCONJ(x)  TYPESUF(svcmla,_x)(MASKA,TYPESUF(svcmla,_x)(MASKA,VZERO,x,VRONE,0),x,VRONE,270) */
+/* there might be a better way */
 #define VCONJ(x) TYPESUF(svmul,_x)(MASKA,x,VCONEMI)
-#if 0
-#define VBYI(x)  TYPESUF(svcmla,_x)(MASKA,TYPESUF(svcmla,_x)(MASKA,VZERO,x,VCI,0),x,VCI,90)
-#else
 #define VBYI(x)  TYPESUF(svcadd,_x)(MASKA,VZERO,x,90)
-#endif
 
 #define VNEG(a)   TYPESUF(svneg,_x)(MASKA,a)
 #if !defined(USE_UNMASKED_ASSEMBLY)
@@ -155,26 +149,14 @@ static inline V VMUL(const V a, const V b) {
 #define VFNMS(a, b, c) TYPESUF(svmsb,_x)(MASKA,b,a,c)
 #define VFMAI(b, c)    TYPESUF(svcadd,_x)(MASKA,c,b,90)
 #define VFNMSI(b, c)   TYPESUF(svcadd,_x)(MASKA,c,b,270)
-/* FIXME: next 3 overkill ? */
-#if 0
-#define VFMACONJ(b,c)  TYPESUF(svcmla,_x)(MASKA,TYPESUF(svcmla,_x)(MASKA,c,b,VRONE,0),b,VRONE,270)
-#else
-/* Use inline functions instead of macros to avoid replicating inputs */
+
 static inline V VFMACONJ(V b, V c) {
 	V m = TYPESUF(svcmla,_x)(MASKA,c,b,VRONE,0);
 	return TYPESUF(svcmla,_x)(MASKA,m,b,VRONE,270);
 }
-#endif
 #define VFMSCONJ(b,c)  VFMACONJ(b,VNEG(c))
 #define VFNMSCONJ(b,c) VNEG(VFMSCONJ(b,c))
 
-#if 0
-#define VZMUL(a,b)    TYPESUF(svcmla,_x)(MASKA,TYPESUF(svcmla,_x)(MASKA,VZERO,a,b,0),a,b,90)
-#define VZMULJ(a,b)   TYPESUF(svcmla,_x)(MASKA,TYPESUF(svcmla,_x)(MASKA,VZERO,a,b,0),a,b,270)
-#define VZMULI(a,b)   VZMUL(VCI,VZMUL(a,b))
-#define VZMULIJ(a,b)   VZMUL(VCI,VZMULJ(a,b))
-#else
-/* Use inline functions instead of macros to avoid replicating inputs */
 static inline V VZMUL(V a, V b) {
 	V m = TYPESUF(svcmla,_x)(MASKA,VZERO,a,b,0);
 	return TYPESUF(svcmla,_x)(MASKA,m,a,b,90);
@@ -183,17 +165,16 @@ static inline V VZMULJ(V a, V b) {
         V m = TYPESUF(svcmla,_x)(MASKA,VZERO,a,b,0);
         return TYPESUF(svcmla,_x)(MASKA,m,a,b,270);
 }
-/* FIXME: there's probably a better way */
+/* there might be a better way */
 static inline V VZMULI(V a, V b) {
 	V m = VZMUL(a,b);
-	return VZMUL(VCI,m);
+	return VFMAI(m, VZERO);
 }
-/* FIXME: there's probably a better way */
+/* there might be a better way */
 static inline V VZMULIJ(V a, V b) {
 	V m = VZMULJ(a,b);
-	return VZMUL(VCI,m);
+	return VFMAI(m, VZERO);
 }
-#endif
 
 static inline V LDA(const R *x, INT ivs, const R *aligned_like) {
   (void)aligned_like; /* UNUSED */
