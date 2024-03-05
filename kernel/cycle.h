@@ -562,3 +562,25 @@ static inline ticks getticks(void)
 INLINE_ELAPSED(inline)
 #define HAVE_TICK_COUNTER
 #endif
+
+/*----------------------------------------------------------------*/
+/*
+ * RISC_V 64-bit cycle counter (RV64G)
+ */
+#if defined(__riscv) && (__riscv_xlen == 64) && !defined(HAVE_TICK_COUNTER)
+typedef unsigned long ticks;
+
+static __inline__ ticks getticks(void)
+{
+     ticks ret;
+
+     __asm__ __volatile__ ("csrrs %0, 0xc00, x0" : "=r" (ret) );
+
+     /* no input, nothing else clobbered */
+     return ret;
+}
+
+INLINE_ELAPSED(inline)
+
+#define HAVE_TICK_COUNTER
+#endif
