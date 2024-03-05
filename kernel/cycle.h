@@ -574,7 +574,7 @@ static __inline__ ticks getticks(void)
 {
      ticks ret;
 
-     __asm__ __volatile__ ("csrrs %0, 0xc00, x0" : "=r" (dst) );
+     __asm__ __volatile__ ("csrrs %0, 0xc00, x0" : "=r" (ret) );
 
      /* no input, nothing else clobbered */
      return ret;
