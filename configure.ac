@@ -700,7 +700,8 @@ if test "$enable_threads" = "yes"; then
         # Win32 threads are the default on Windows:
     if test -z "$THREADLIBS"; then
         AC_MSG_CHECKING([for Win32 threads])
-        AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <windows.h>]], [[_beginthreadex(0,0,0,0,0,0);]])],[THREADLIBS=" "; AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <windows.h>
+                                          #include <process.h>]], [[_beginthreadex(0,0,0,0,0,0);]])],[THREADLIBS=" "; AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
     fi
 
     # POSIX threads, the default choice everywhere else:
