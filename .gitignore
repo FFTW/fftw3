@@ -27,6 +27,7 @@ rdft/simd/common/*.c
 rdft/simd/kcvi/*.c
 rdft/simd/neon/*.c
 rdft/simd/sse2/*.c
+rdft/simd/sve*/*.c
 rdft/simd/vsx/*.c
 rdft/scalar/r2cb/*.c
 rdft/scalar/r2cf/*.c
@@ -45,6 +46,7 @@ dft/simd/common/*.c
 dft/simd/kcvi/*.c
 dft/simd/neon/*.c
 dft/simd/sse2/*.c
+dft/simd/sve*/*.c
 dft/simd/vsx/*.c
 
 # other generated files
@@ -54,6 +56,8 @@ api/fftw3*.f*
 *.cmake
 mpi/f03-wrap.c
 mpi/fftw3*-mpi.f*
+simd-support/vtw.h
+simd-support/generate_vtw
 
 # other build products
 tests/bench

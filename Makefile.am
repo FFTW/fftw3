@@ -94,6 +94,21 @@ NEON_LIBS = dft/simd/neon/libdft_neon_codelets.la	\
 rdft/simd/neon/librdft_neon_codelets.la
 endif
 
+if HAVE_SVE
+SVE_LIBS = \
+dft/simd/sve128/libdft_sve128_codelets.la       \
+rdft/simd/sve128/librdft_sve128_codelets.la \
+dft/simd/sve256/libdft_sve256_codelets.la       \
+rdft/simd/sve256/librdft_sve256_codelets.la \
+dft/simd/sve512/libdft_sve512_codelets.la       \
+rdft/simd/sve512/librdft_sve512_codelets.la	\
+dft/simd/sve1024/libdft_sve1024_codelets.la       \
+rdft/simd/sve1024/librdft_sve1024_codelets.la	\
+dft/simd/sve2048/libdft_sve2048_codelets.la	\
+rdft/simd/sve2048/librdft_sve2048_codelets.la
+endif
+
+
 if HAVE_GENERIC_SIMD128
 GENERIC_SIMD128_LIBS = dft/simd/generic-simd128/libdft_generic_simd128_codelets.la \
 rdft/simd/generic-simd128/librdft_generic_simd128_codelets.la
@@ -126,7 +141,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
 	api/libapi.la					\
         $(SIMD_LIBS) $(SSE2_LIBS) $(AVX_LIBS) $(AVX_128_FMA_LIBS) \
         $(AVX2_LIBS) $(ALTIVEC_LIBS) \
-        $(VSX_LIBS) $(NEON_LIBS) $(KCVI_LIBS) $(AVX512_LIBS) \
+        $(VSX_LIBS) $(NEON_LIBS) $(SVE_LIBS) $(KCVI_LIBS) $(AVX512_LIBS) \
         $(GENERIC_SIMD128_LIBS) $(GENERIC_SIMD256_LIBS) \
 	$(COMBINED_THREADLIBS)
 

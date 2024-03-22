@@ -119,6 +119,7 @@ extern int X(have_simd_avx512)(void);
 extern int X(have_simd_altivec)(void);
 extern int X(have_simd_vsx)(void);
 extern int X(have_simd_neon)(void);
+extern int X(have_simd_sve)(int minwidth);
 
 /* forward declarations */
 typedef struct problem_s problem;
