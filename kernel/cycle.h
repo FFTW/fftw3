@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
+ * Copyright (c) 2024 Christopher Taylor, Tactical Computing Labs, LLC
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -560,5 +561,27 @@ static inline ticks getticks(void)
         return cc;
 }
 INLINE_ELAPSED(inline)
+#define HAVE_TICK_COUNTER
+#endif
+
+/*----------------------------------------------------------------*/
+/*
+ * RISC_V 64-bit cycle counter (RV64G)
+ */
+#if defined(__riscv) && (__riscv_xlen == 64) && !defined(HAVE_TICK_COUNTER)
+typedef unsigned long ticks;
+
+static __inline__ ticks getticks(void)
+{
+     ticks ret;
+
+     __asm__ __volatile__ ("csrrs %0, 0xc00, x0" : "=r" (ret) );
+
+     /* no input, nothing else clobbered */
+     return ret;
+}
+
+INLINE_ELAPSED(inline)
+
 #define HAVE_TICK_COUNTER
 #endif
