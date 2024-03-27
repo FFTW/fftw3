@@ -24,7 +24,7 @@
 
 #if HAVE_SIMD
 
-R *X(taint)(R *p, INT s)
+IFFTW_EXTERN R *X(taint)(R *p, INT s)
 {
      if (((unsigned)s * sizeof(R)) % ALIGNMENT)
 	  p = (R *) (PTRINT(p) | TAINT_BIT);
@@ -35,7 +35,7 @@ R *X(taint)(R *p, INT s)
 
 /* join the taint of two pointers that are supposed to be
    the same modulo the taint */
-R *X(join_taint)(R *p1, R *p2)
+IFFTW_EXTERN R *X(join_taint)(R *p1, R *p2)
 {
      A(UNTAINT(p1) == UNTAINT(p2));
      return (R *)(PTRINT(p1) | PTRINT(p2));

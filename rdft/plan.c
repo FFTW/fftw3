@@ -21,7 +21,7 @@
 
 #include "rdft/rdft.h"
 
-plan *X(mkplan_rdft)(size_t size, const plan_adt *adt, rdftapply apply)
+IFFTW_EXTERN plan *X(mkplan_rdft)(size_t size, const plan_adt *adt, rdftapply apply)
 {
      plan_rdft *ego;
 

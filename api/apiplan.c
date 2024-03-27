@@ -22,7 +22,7 @@
 
 static planner_hook_t before_planner_hook = 0, after_planner_hook = 0;
 
-void X(set_planner_hooks)(planner_hook_t before, planner_hook_t after)
+IFFTW_EXTERN void X(set_planner_hooks)(planner_hook_t before, planner_hook_t after)
 {
      before_planner_hook = before;
      after_planner_hook = after;
@@ -83,7 +83,7 @@ static plan *mkplan(planner *plnr, unsigned flags,
      return pln;
 }
 
-apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
+IFFTW_EXTERN apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 {
      apiplan *p = 0;
      plan *pln;

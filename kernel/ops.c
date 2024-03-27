@@ -21,12 +21,12 @@
 
 #include "kernel/ifftw.h"
 
-void X(ops_zero)(opcnt *dst)
+IFFTW_EXTERN void X(ops_zero)(opcnt *dst)
 {
      dst->add = dst->mul = dst->fma = dst->other = 0;
 }
 
-void X(ops_cpy)(const opcnt *src, opcnt *dst)
+IFFTW_EXTERN void X(ops_cpy)(const opcnt *src, opcnt *dst)
 {
      *dst = *src;
 }
@@ -45,12 +45,12 @@ void X(ops_madd)(INT m, const opcnt *a, const opcnt *b, opcnt *dst)
      dst->other = m * a->other + b->other;
 }
 
-void X(ops_add)(const opcnt *a, const opcnt *b, opcnt *dst)
+IFFTW_EXTERN void X(ops_add)(const opcnt *a, const opcnt *b, opcnt *dst)
 {
      X(ops_madd)(1, a, b, dst);
 }
 
-void X(ops_add2)(const opcnt *a, opcnt *dst)
+IFFTW_EXTERN void X(ops_add2)(const opcnt *a, opcnt *dst)
 {
      X(ops_add)(a, dst, dst);
 }

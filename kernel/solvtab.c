@@ -21,7 +21,7 @@
 
 #include "kernel/ifftw.h"
 
-void X(solvtab_exec)(const solvtab tbl, planner *p)
+IFFTW_EXTERN void X(solvtab_exec)(const solvtab tbl, planner *p)
 {
      for (; tbl->reg_nam; ++tbl) {
 	  p->cur_reg_nam = tbl->reg_nam;

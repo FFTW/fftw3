@@ -132,8 +132,8 @@ static int nontrivial(const iodim *d, rdft_kind kind)
 	     || (REODFT_KINDP(kind) && kind != REDFT01 && kind != RODFT01));
 }
 
-problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
-			   R *I, R *O, const rdft_kind *kind)
+IFFTW_EXTERN problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
+                                       R *I, R *O, const rdft_kind *kind)
 {
      problem_rdft *ego;
      int rnk = sz->rnk;
@@ -207,8 +207,8 @@ problem *X(mkproblem_rdft)(const tensor *sz, const tensor *vecsz,
 }
 
 /* Same as X(mkproblem_rdft), but also destroy input tensors. */
-problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
-			     R *I, R *O, const rdft_kind *kind)
+IFFTW_EXTERN problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
+                                         R *I, R *O, const rdft_kind *kind)
 {
      problem *p = X(mkproblem_rdft)(sz, vecsz, I, O, kind);
      X(tensor_destroy2)(vecsz, sz);
@@ -217,21 +217,21 @@ problem *X(mkproblem_rdft_d)(tensor *sz, tensor *vecsz,
 
 /* As above, but for rnk <= 1 only and takes a scalar kind parameter */
 problem *X(mkproblem_rdft_1)(const tensor *sz, const tensor *vecsz,
-			     R *I, R *O, rdft_kind kind)
+                            R *I, R *O, rdft_kind kind)
 {
      A(sz->rnk <= 1);
      return X(mkproblem_rdft)(sz, vecsz, I, O, &kind);
 }
 
-problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
-			       R *I, R *O, rdft_kind kind)
+IFFTW_EXTERN problem *X(mkproblem_rdft_1_d)(tensor *sz, tensor *vecsz,
+                                           R *I, R *O, rdft_kind kind)
 {
      A(sz->rnk <= 1);
      return X(mkproblem_rdft_d)(sz, vecsz, I, O, &kind);
 }
 
 /* create a zero-dimensional problem */
-problem *X(mkproblem_rdft_0_d)(tensor *vecsz, R *I, R *O)
+IFFTW_EXTERN problem *X(mkproblem_rdft_0_d)(tensor *vecsz, R *I, R *O)
 {
      return X(mkproblem_rdft_d)(X(mktensor_0d)(), vecsz, I, O, 
 				(const rdft_kind *)0);

@@ -29,7 +29,7 @@ void X(md5putb)(md5 *p, const void *d_, size_t len)
 	  X(md5putc)(p, d[i]);
 }
 
-void X(md5puts)(md5 *p, const char *s)
+IFFTW_EXTERN void X(md5puts)(md5 *p, const char *s)
 {
      /* also hash final '\0' */
      do {
@@ -37,12 +37,12 @@ void X(md5puts)(md5 *p, const char *s)
      } while(*s++);
 }
 
-void X(md5int)(md5 *p, int i)
+IFFTW_EXTERN void X(md5int)(md5 *p, int i)
 {
      X(md5putb)(p, &i, sizeof(i));
 }
 
-void X(md5INT)(md5 *p, INT i)
+IFFTW_EXTERN void X(md5INT)(md5 *p, INT i)
 {
      X(md5putb)(p, &i, sizeof(i));
 }

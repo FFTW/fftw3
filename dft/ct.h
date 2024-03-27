@@ -56,6 +56,9 @@ int X(ct_applicable)(const ct_solver *, const problem *, planner *);
 ct_solver *X(mksolver_ct)(size_t size, INT r, int dec, 
 			  ct_mkinferior mkcldw, 
 			  ct_force_vrecursion force_vrecursionp);
+#if (defined(FFTW_DLL) || defined(DLL_EXPORT)) && (defined(_WIN32) || defined(__WIN32__))
+  __declspec(dllimport)
+#endif
 extern ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
 					 ct_mkinferior, ct_force_vrecursion);
 

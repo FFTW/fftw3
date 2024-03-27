@@ -21,7 +21,7 @@
 
 #include "kernel/ifftw.h"
 
-solver *X(mksolver)(size_t size, const solver_adt *adt)
+IFFTW_EXTERN solver *X(mksolver)(size_t size, const solver_adt *adt)
 {
      solver *s = (solver *)MALLOC(size, SOLVERS);
 
@@ -44,7 +44,7 @@ void X(solver_destroy)(solver *ego)
      }
 }
 
-void X(solver_register)(planner *plnr, solver *s)
+IFFTW_EXTERN void X(solver_register)(planner *plnr, solver *s)
 {
      plnr->adt->register_solver(plnr, s);
 }

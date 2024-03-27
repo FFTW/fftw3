@@ -74,8 +74,8 @@ static const problem_adt padt =
      destroy
 };
 
-problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
-			  R *ri, R *ii, R *ro, R *io)
+IFFTW_EXTERN problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
+                                      R *ri, R *ii, R *ro, R *io)
 {
      problem_dft *ego;
 
@@ -112,8 +112,8 @@ problem *X(mkproblem_dft)(const tensor *sz, const tensor *vecsz,
 }
 
 /* Same as X(mkproblem_dft), but also destroy input tensors. */
-problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
-			    R *ri, R *ii, R *ro, R *io)
+IFFTW_EXTERN problem *X(mkproblem_dft_d)(tensor *sz, tensor *vecsz,
+                                        R *ri, R *ii, R *ro, R *io)
 {
      problem *p = X(mkproblem_dft)(sz, vecsz, ri, ii, ro, io);
      X(tensor_destroy2)(vecsz, sz);

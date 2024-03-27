@@ -21,7 +21,7 @@
 
 #include "dft/dft.h"
 
-plan *X(mkplan_dft)(size_t size, const plan_adt *adt, dftapply apply)
+IFFTW_EXTERN plan *X(mkplan_dft)(size_t size, const plan_adt *adt, dftapply apply)
 {
      plan_dft *ego;
 

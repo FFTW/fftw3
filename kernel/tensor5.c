@@ -29,7 +29,7 @@ static void dimcpy(iodim *dst, const iodim *src, int rnk)
                dst[i] = src[i];
 }
 
-tensor *X(tensor_copy)(const tensor *sz)
+IFFTW_EXTERN tensor *X(tensor_copy)(const tensor *sz)
 {
      tensor *x = X(mktensor)(sz->rnk);
      dimcpy(x->dims, sz->dims, sz->rnk);

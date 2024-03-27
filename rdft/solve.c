@@ -22,7 +22,7 @@
 #include "rdft/rdft.h"
 
 /* use the apply() operation for RDFT problems */
-void X(rdft_solve)(const plan *ego_, const problem *p_)
+IFFTW_EXTERN void X(rdft_solve)(const plan *ego_, const problem *p_)
 {
      const plan_rdft *ego = (const plan_rdft *) ego_;
      const problem_rdft *p = (const problem_rdft *) p_;

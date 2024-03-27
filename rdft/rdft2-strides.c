@@ -24,7 +24,7 @@
    (r,rio/iio) for R2HC and vice-versa for HC2R.  We originally had
    (is,os) always apply to (r,rio/iio), but this causes other
    headaches with the tensor functions. */
-void X(rdft2_strides)(rdft_kind kind, const iodim *d, INT *rs, INT *cs)
+IFFTW_EXTERN void X(rdft2_strides)(rdft_kind kind, const iodim *d, INT *rs, INT *cs)
 {
      if (kind == R2HC) {
 	  *rs = d->is;

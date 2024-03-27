@@ -20,7 +20,7 @@
 
 #include "rdft/hc2hc.h"
 
-hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, INT, hc2hc_mkinferior) = 0;
+IFFTW_EXTERN hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, INT, hc2hc_mkinferior) = 0;
 
 typedef struct {
      plan_rdft super;
@@ -98,7 +98,7 @@ static int applicable0(const hc2hc_solver *ego, const problem *p_, planner *plnr
 	     && p->sz->dims[0].n > r);
 }
 
-int X(hc2hc_applicable)(const hc2hc_solver *ego, const problem *p_, planner *plnr)
+IFFTW_EXTERN int X(hc2hc_applicable)(const hc2hc_solver *ego, const problem *p_, planner *plnr)
 {
      const problem_rdft *p;
 
