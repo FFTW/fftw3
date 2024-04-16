@@ -237,10 +237,9 @@ AM_CONDITIONAL(HAVE_GENERIC_SIMD256, test "$have_generic_simd256" = "yes")
 
 AC_ARG_ENABLE(sve, [AC_HELP_STRING([--enable-sve],[enable ARM SVE optimizations])], have_sve=$enableval, have_sve=no)
 if test "$have_sve" = "yes"; then
-        AC_DEFINE(HAVE_SVE,1,[Define to enable ARM SVE optimizations.])
+   AC_DEFINE(HAVE_SVE,1,[Define to enable ARM SVE optimizations])
 fi
 AM_CONDITIONAL(HAVE_SVE, test "$have_sve" = "yes")
-
 
 dnl FIXME:
 dnl AC_ARG_ENABLE(mips-ps, [AS_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
@@ -681,6 +680,13 @@ AC_ARG_ENABLE(openmp, [AS_HELP_STRING([--enable-openmp],[use OpenMP directives f
 if test "$enable_openmp" = "yes"; then
    AC_DEFINE(HAVE_OPENMP,1,[Define to enable OpenMP])
    AX_OPENMP([], [AC_MSG_ERROR([don't know how to enable OpenMP])])
+fi
+
+if test "$have_sve" = "yes"; then
+   ACX_SVE([sve_ok=yes], [sve_ok=no])
+   if test "$sve_ok" != "yes"; then
+      AC_MSG_ERROR([Cannot build a SVE program, aborting])
+   fi
 fi
 
 AC_ARG_ENABLE(threads, [AS_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
