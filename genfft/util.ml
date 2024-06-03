@@ -21,7 +21,7 @@
 
 (* various utility functions *)
 open List
-open Unix 
+open Unix
 
 (*****************************************
  * Integer operations
@@ -50,7 +50,7 @@ let lowest_terms n m =
       (1,0)
     else
       let nn = (abs n) in let mm = m * (n / nn)
-      in let mpos = 
+      in let mpos =
 	  if (mm > 0) then (mm mod nn)
 	  else (mm + (1 + (abs mm) / nn) * nn) mod nn
       and d = gcd nn (abs mm)
@@ -84,7 +84,7 @@ let rec pow_mod x n p =
     else x * (pow_mod x (n - 1) p) mod p
 
 (******************************************
- * auxiliary functions 
+ * auxiliary functions
  ******************************************)
 let rec forall id combiner a b f =
     if (a >= b) then id
@@ -93,11 +93,11 @@ let rec forall id combiner a b f =
 let sum_list l = fold_right (+) l 0
 let max_list l = fold_right (max) l (-999999)
 let min_list l = fold_right (min) l 999999
-let count pred = fold_left 
+let count pred = fold_left
     (fun a elem -> if (pred elem) then 1 + a else a) 0
 let remove elem = List.filter (fun e -> (e != elem))
 let cons a b = a :: b
-let null = function 
+let null = function
     [] -> true
   | _ -> false
 let for_list l f = List.iter f l
@@ -134,12 +134,12 @@ let rec suchthat a pred =
 (* print an information message *)
 let info string =
   if !Magic.verbose then begin
-    let now = Unix.times () 
+    let now = Unix.times ()
     and pid = Unix.getpid () in
     prerr_string ((string_of_int pid) ^ ": " ^
 		  "at t = " ^  (string_of_float now.tms_utime) ^ " : ");
     prerr_string (string ^ "\n");
-    flush Pervasives.stderr;
+    flush Stdlib.stderr;
   end
 
 (* iota n produces the list [0; 1; ...; n - 1] *)
