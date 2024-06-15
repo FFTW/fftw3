@@ -151,7 +151,7 @@ FFTW3@PREC_SUFFIX@Config.cmake: $(top_srcdir)/FFTW3Config.cmake.in
 		$(top_srcdir)/FFTW3Config.cmake.in > $@
 FFTW3@PREC_SUFFIX@ConfigVersion.cmake: $(top_srcdir)/FFTW3ConfigVersion.cmake.in
 	$(SED) \
-		-e 's|[@]FFTW_VERSION@|@PACKAGE_VERSION@|g' \
+		-e 's|[@]PROJECT_VERSION@|@PACKAGE_VERSION@|g' \
 		$(top_srcdir)/FFTW3ConfigVersion.cmake.in > $@
 cmakedir = $(libdir)/cmake/fftw3
 cmake_DATA = FFTW3@PREC_SUFFIX@Config.cmake FFTW3@PREC_SUFFIX@ConfigVersion.cmake
