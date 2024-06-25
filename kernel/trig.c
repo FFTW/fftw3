@@ -166,7 +166,7 @@ static void rotate_generic(triggen *p, INT m, R xr, R xi, R *res)
      res[1] = xi * w[0] + xr * (FFT_SIGN * w[1]);
 }
 
-triggen *X(mktriggen)(enum wakefulness wakefulness, INT n)
+IFFTW_EXTERN triggen *X(mktriggen)(enum wakefulness wakefulness, INT n)
 {
      INT i, n0, n1;
      triggen *p = (triggen *)MALLOC(sizeof(*p), TWIDDLES);
@@ -226,7 +226,7 @@ triggen *X(mktriggen)(enum wakefulness wakefulness, INT n)
      return p;
 }
 
-void X(triggen_destroy)(triggen *p)
+IFFTW_EXTERN void X(triggen_destroy)(triggen *p)
 {
      X(ifree0)(p->W0);
      X(ifree0)(p->W1);

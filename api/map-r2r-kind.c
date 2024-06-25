@@ -21,7 +21,7 @@
 #include "api/api.h"
 #include "rdft/rdft.h"
 
-rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind)
+IFFTW_EXTERN rdft_kind *X(map_r2r_kind)(int rank, const X(r2r_kind) * kind)
 {
      int i;
      rdft_kind *k;

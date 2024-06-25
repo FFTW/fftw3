@@ -142,9 +142,9 @@ static const problem_adt padt =
      destroy
 };
 
-problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
-			    R *r0, R *r1, R *cr, R *ci,
-			    rdft_kind kind)
+IFFTW_EXTERN problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
+                                        R *r0, R *r1, R *cr, R *ci,
+                                        rdft_kind kind)
 {
      problem_rdft2 *ego;
 
@@ -191,8 +191,8 @@ problem *X(mkproblem_rdft2)(const tensor *sz, const tensor *vecsz,
 }
 
 /* Same as X(mkproblem_rdft2), but also destroy input tensors. */
-problem *X(mkproblem_rdft2_d)(tensor *sz, tensor *vecsz,
-			      R *r0, R *r1, R *cr, R *ci, rdft_kind kind)
+IFFTW_EXTERN problem *X(mkproblem_rdft2_d)(tensor *sz, tensor *vecsz,
+                                          R *r0, R *r1, R *cr, R *ci, rdft_kind kind)
 {
      problem *p = X(mkproblem_rdft2)(sz, vecsz, r0, r1, cr, ci, kind);
      X(tensor_destroy2)(vecsz, sz);

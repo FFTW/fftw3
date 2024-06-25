@@ -21,12 +21,12 @@
 
 #include "kernel/ifftw.h"
 
-tensor *X(mktensor_0d)(void)
+IFFTW_EXTERN tensor *X(mktensor_0d)(void)
 {
      return X(mktensor(0));
 }
 
-tensor *X(mktensor_1d)(INT n, INT is, INT os)
+IFFTW_EXTERN tensor *X(mktensor_1d)(INT n, INT is, INT os)
 {
      tensor *x = X(mktensor)(1);
      x->dims[0].n = n;

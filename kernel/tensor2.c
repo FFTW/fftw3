@@ -21,8 +21,8 @@
 
 #include "kernel/ifftw.h"
 
-tensor *X(mktensor_2d)(INT n0, INT is0, INT os0,
-		       INT n1, INT is1, INT os1)
+IFFTW_EXTERN tensor *X(mktensor_2d)(INT n0, INT is0, INT os0,
+                                   INT n1, INT is1, INT os1)
 {
      tensor *x = X(mktensor)(2);
      x->dims[0].n = n0;
@@ -35,9 +35,9 @@ tensor *X(mktensor_2d)(INT n0, INT is0, INT os0,
 }
 
 
-tensor *X(mktensor_3d)(INT n0, INT is0, INT os0,
-		       INT n1, INT is1, INT os1,
-		       INT n2, INT is2, INT os2)
+IFFTW_EXTERN tensor *X(mktensor_3d)(INT n0, INT is0, INT os0,
+                                   INT n1, INT is1, INT os1,
+                                   INT n2, INT is2, INT os2)
 {
      tensor *x = X(mktensor)(3);
      x->dims[0].n = n0;

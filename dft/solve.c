@@ -22,7 +22,7 @@
 #include "dft/dft.h"
 
 /* use the apply() operation for DFT problems */
-void X(dft_solve)(const plan *ego_, const problem *p_)
+IFFTW_EXTERN void X(dft_solve)(const plan *ego_, const problem *p_)
 {
      const plan_dft *ego = (const plan_dft *) ego_;
      const problem_dft *p = (const problem_dft *) p_;

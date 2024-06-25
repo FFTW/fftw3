@@ -21,8 +21,8 @@
 
 #include "dft/ct.h"
 
-ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
-				  ct_mkinferior, ct_force_vrecursion) = 0;
+IFFTW_EXTERN ct_solver *(*X(mksolver_ct_hook))(size_t, INT, int, 
+                                              ct_mkinferior, ct_force_vrecursion) = 0;
 
 typedef struct {
      plan_dft super;
@@ -98,7 +98,7 @@ static int applicable0(const ct_solver *ego, const problem *p_, planner *plnr)
 }
 
 
-int X(ct_applicable)(const ct_solver *ego, const problem *p_, planner *plnr)
+IFFTW_EXTERN int X(ct_applicable)(const ct_solver *ego, const problem *p_, planner *plnr)
 {
      const problem_dft *p;
 

@@ -42,7 +42,7 @@ plan *X(mkplan)(size_t size, const plan_adt *adt)
 /*
  * destroy a plan
  */
-void X(plan_destroy_internal)(plan *ego)
+IFFTW_EXTERN void X(plan_destroy_internal)(plan *ego)
 {
      if (ego) {
 	  A(ego->wakefulness == SLEEPY);

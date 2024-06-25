@@ -46,6 +46,9 @@ struct hc2hc_solver_s {
 };
 
 hc2hc_solver *X(mksolver_hc2hc)(size_t size, INT r, hc2hc_mkinferior mkcldw);
+#if (defined(FFTW_DLL) || defined(DLL_EXPORT)) && (defined(_WIN32) || defined(__WIN32__))
+  __declspec(dllimport)
+#endif
 extern hc2hc_solver *(*X(mksolver_hc2hc_hook))(size_t, INT, hc2hc_mkinferior);
 
 void X(regsolver_hc2hc_direct)(planner *plnr, khc2hc codelet, 
