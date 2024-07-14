@@ -378,7 +378,13 @@ case "${ax_cv_c_compiler_vendor}" in
         fi
 
         # AVX512
-        if test "$have_avx512" = "yes" -a "x$AVX512_CFLAGS" = x; then
+        if test "$have_avx512" = "yes" -a "$have_avx512_scattergather" = "no" -a "x$AVX512_CFLAGS" = x; then
+            AX_CHECK_COMPILE_FLAG(-mavx512f, [AVX512_CFLAGS="-mavx512f -mavx512dq"],
+            [AC_MSG_ERROR([Need a version of gcc with -mavx512f and -mavx512dq])])
+        fi
+
+        # AVX512 (KNL)
+        if test "$have_avx512_scattergather" = "yes" -a "x$AVX512_CFLAGS" = x; then
             AX_CHECK_COMPILE_FLAG(-mavx512f, [AVX512_CFLAGS="-mavx512f"],
             [AC_MSG_ERROR([Need a version of gcc with -mavx512f])])
         fi
