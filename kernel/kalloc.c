@@ -103,7 +103,7 @@ void *X(kernel_malloc)(size_t n)
 #    undef real_free
 #    define real_free _mm_free
 
-#  elif defined(_MSC_VER)
+#  elif defined(_MSC_VER) || defined (HAVE_ALIGNED_MALLOC)
      /* MS Visual C++ 6.0 with a "Processor Pack" supports SIMD
 	and _aligned_malloc/free (uses malloc.h) */
      p = (void *) _aligned_malloc(n, MIN_ALIGNMENT);

@@ -112,6 +112,10 @@
    you don't. */
 #cmakedefine01 HAVE_DECL_POSIX_MEMALIGN
 
+/* Define to 1 if you have the declaration of `_aligned_malloc', and to 0 if you
+   don't. */
+#cmakedefine01 HAVE_DECL_ALIGNED_MALLOC
+
 /* Define to 1 if you have the declaration of `sinl', and to 0 if you don't.
    */
 #cmakedefine01 HAVE_DECL_SINL
@@ -183,6 +187,9 @@
 
 /* Define to 1 if you have the `memalign' function. */
 #cmakedefine HAVE_MEMALIGN 1
+
+/* Define to 1 if you have the `_aligned_malloc' function. */
+#cmakedefine HAVE_ALIGNED_MALLOC 1
 
 /* Define to 1 if you have the `memmove' function. */
 #cmakedefine HAVE_MEMMOVE 1
