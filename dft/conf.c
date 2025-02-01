@@ -79,6 +79,18 @@ void X(dft_conf_standard)(planner *p)
      if (X(have_simd_neon)())
 	  X(solvtab_exec)(X(solvtab_dft_neon), p);
 #endif
+#if HAVE_SVE
+     if (X(have_simd_sve)(128))
+          X(solvtab_exec)(X(solvtab_dft_sve128), p);
+     if (X(have_simd_sve)(256))
+          X(solvtab_exec)(X(solvtab_dft_sve256), p);
+     if (X(have_simd_sve)(512))
+          X(solvtab_exec)(X(solvtab_dft_sve512), p);
+     if (X(have_simd_sve)(1024))
+          X(solvtab_exec)(X(solvtab_dft_sve1024), p);
+     if (X(have_simd_sve)(2048))
+          X(solvtab_exec)(X(solvtab_dft_sve2048), p);
+#endif
 #if HAVE_GENERIC_SIMD128
      X(solvtab_exec)(X(solvtab_dft_generic_simd128), p);
 #endif

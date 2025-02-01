@@ -235,6 +235,11 @@ if test "$have_generic_simd256" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_GENERIC_SIMD256, test "$have_generic_simd256" = "yes")
 
+AC_ARG_ENABLE(sve, [AC_HELP_STRING([--enable-sve],[enable ARM SVE optimizations])], have_sve=$enableval, have_sve=no)
+if test "$have_sve" = "yes"; then
+   AC_DEFINE(HAVE_SVE,1,[Define to enable ARM SVE optimizations])
+fi
+AM_CONDITIONAL(HAVE_SVE, test "$have_sve" = "yes")
 
 dnl FIXME:
 dnl AC_ARG_ENABLE(mips-ps, [AS_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
@@ -677,6 +682,13 @@ if test "$enable_openmp" = "yes"; then
    AX_OPENMP([], [AC_MSG_ERROR([don't know how to enable OpenMP])])
 fi
 
+if test "$have_sve" = "yes"; then
+   ACX_SVE([sve_ok=yes], [sve_ok=no])
+   if test "$sve_ok" != "yes"; then
+      AC_MSG_ERROR([Cannot build a SVE program, aborting])
+   fi
+fi
+
 AC_ARG_ENABLE(threads, [AS_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
 
 if test "$enable_threads" = "yes"; then
@@ -766,6 +778,11 @@ AC_CONFIG_FILES([
    dft/simd/altivec/Makefile
    dft/simd/vsx/Makefile
    dft/simd/neon/Makefile
+   dft/simd/sve128/Makefile
+   dft/simd/sve256/Makefile
+   dft/simd/sve512/Makefile
+   dft/simd/sve1024/Makefile
+   dft/simd/sve2048/Makefile
    dft/simd/generic-simd128/Makefile
    dft/simd/generic-simd256/Makefile
 
@@ -786,6 +803,11 @@ AC_CONFIG_FILES([
    rdft/simd/altivec/Makefile
    rdft/simd/vsx/Makefile
    rdft/simd/neon/Makefile
+   rdft/simd/sve128/Makefile
+   rdft/simd/sve256/Makefile
+   rdft/simd/sve512/Makefile
+   rdft/simd/sve1024/Makefile
+   rdft/simd/sve2048/Makefile
    rdft/simd/generic-simd128/Makefile
    rdft/simd/generic-simd256/Makefile
 
