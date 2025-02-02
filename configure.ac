@@ -152,6 +152,15 @@ if test "$have_avx512" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_AVX512, test "$have_avx512" = "yes")
 
+AC_ARG_ENABLE(avx512-scattergather, [AC_HELP_STRING([--enable-avx512-scattergather],[Favor scatter/gather when using AVX512 (for Xeon Phi/KNL)])], have_avx512_scattergather=$enableval, have_avx512_scattergather=no)
+if test "$have_avx512_scattergather" = "yes"; then
+        AC_DEFINE(AVX512_SCATTERGATHER,1,[Define to favor scatter/gather when using AVX512.])
+        if test "$have_avx512" != "yes"; then
+                AC_MSG_ERROR([AVX512 Scatter/Gather requires AVX512])
+        fi
+fi
+AM_CONDITIONAL(AVX512_SCATTERGATHER, test "$have_avx512_scattergather" = "yes")
+
 dnl 128-bit AVX is special. There is no reason to use it on Intel processors
 dnl since SSE2 is just as fast. However, on AMD processors we can both use
 dnl FMA4, and 128-bit SIMD is better than 256-bit since core pairs in a
@@ -374,7 +383,13 @@ case "${ax_cv_c_compiler_vendor}" in
         fi
 
         # AVX512
-        if test "$have_avx512" = "yes" -a "x$AVX512_CFLAGS" = x; then
+        if test "$have_avx512" = "yes" -a "$have_avx512_scattergather" = "no" -a "x$AVX512_CFLAGS" = x; then
+            AX_CHECK_COMPILE_FLAG(-mavx512f, [AVX512_CFLAGS="-mavx512f -mavx512dq"],
+            [AC_MSG_ERROR([Need a version of gcc with -mavx512f and -mavx512dq])])
+        fi
+
+        # AVX512 (KNL)
+        if test "$have_avx512_scattergather" = "yes" -a "x$AVX512_CFLAGS" = x; then
             AX_CHECK_COMPILE_FLAG(-mavx512f, [AVX512_CFLAGS="-mavx512f"],
             [AC_MSG_ERROR([Need a version of gcc with -mavx512f])])
         fi
