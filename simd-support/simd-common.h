@@ -72,8 +72,7 @@
 #endif
 
 /* rename for precision and for SIMD extensions */
-#define XSIMD0(name, suffix) CONCAT(name, suffix)
-#define XSIMD(name) XSIMD0(X(name), SIMD_SUFFIX)
+#define XSIMD(name) CONCAT2(X(name), SIMD_SUFFIX)
 #define XSIMD_STRING(x) x STRINGIZE(SIMD_SUFFIX)
 
 /* TAINT_BIT is set if pointers are not guaranteed to be multiples of
@@ -95,4 +94,13 @@
 #define SIMD_STRIDE_OK(x) (!(((x) * sizeof(R)) % ALIGNMENT))
 #define SIMD_STRIDE_OKA(x) (!(((x) * sizeof(R)) % ALIGNMENTA))
 #define SIMD_VSTRIDE_OK SIMD_STRIDE_OK
+
+/* macrology to call DEFX N times */
+#define REPEAT_1(DEFX, v, x) DEFX(v, x)
+#define REPEAT_2(DEFX, v, x) REPEAT_1(DEFX, v, x), REPEAT_1(DEFX, (v)+1, x)
+#define REPEAT_4(DEFX, v, x) REPEAT_2(DEFX, v, x), REPEAT_2(DEFX, (v)+2, x)
+#define REPEAT_8(DEFX, v, x) REPEAT_4(DEFX, v, x), REPEAT_4(DEFX, (v)+4, x)
+#define REPEAT_16(DEFX, v, x) REPEAT_8(DEFX, v, x), REPEAT_8(DEFX,(v)+8, x)
+#define REPEAT_32(DEFX, v, x) REPEAT_16(DEFX, v, x), REPEAT_16(DEFX, (v)+16, x)
+#define REPEAT_64(DEFX, v, x) REPEAT_32(DEFX, v, x), REPEAT_32(DEFX, (v)+32, x)
 

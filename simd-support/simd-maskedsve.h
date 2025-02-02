@@ -67,18 +67,6 @@
 
 #include <arm_sve.h>
 
-/* CONCAT2 is needed to force expansion of the parameters */
-#define CONCAT2(prefix, name) CONCAT(prefix, name)
-
-/* macrology to call DEFX N times */
-#define REPEAT_1(DEFX, v, x) DEFX(v, x)
-#define REPEAT_2(DEFX, v, x) REPEAT_1(DEFX, v, x), REPEAT_1(DEFX, (v)+1, x)
-#define REPEAT_4(DEFX, v, x) REPEAT_2(DEFX, v, x), REPEAT_2(DEFX, (v)+2, x)
-#define REPEAT_8(DEFX, v, x) REPEAT_4(DEFX, v, x), REPEAT_4(DEFX, (v)+4, x)
-#define REPEAT_16(DEFX, v, x) REPEAT_8(DEFX, v, x), REPEAT_8(DEFX,(v)+8, x)
-#define REPEAT_32(DEFX, v, x) REPEAT_16(DEFX, v, x), REPEAT_16(DEFX, (v)+16, x)
-#define REPEAT_64(DEFX, v, x) REPEAT_32(DEFX, v, x), REPEAT_32(DEFX, (v)+32, x)
-
 typedef DS(svfloat64_t, svfloat32_t) V;
 
 /* The goal is to limit to the required width by using masking.

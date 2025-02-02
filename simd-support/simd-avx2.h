@@ -36,7 +36,7 @@
 
 #define SIMD_SUFFIX  _avx2  /* for renaming */
 #define VL DS(2, 4)        /* SIMD complex vector length */
-#define SIMD_VSTRIDE_OKA(x) ((x) == 2) 
+#define SIMD_VSTRIDE_OKA(x) ((x) == 2)
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
 #if defined(__GNUC__) && !defined(__AVX2__) /* sanity check */
@@ -254,7 +254,7 @@ static inline V FLIP_RI(V x)
 
 static inline V VCONJ(V x)
 {
-     /* Produce a SIMD vector[VL] of (0 + -0i). 
+     /* Produce a SIMD vector[VL] of (0 + -0i).
 
         We really want to write this:
 
@@ -344,11 +344,8 @@ static inline V VZMULIJ(V tx, V sr)
 }
 
 /* twiddle storage #1: compact, slower */
-#ifdef FFTW_SINGLE
-# define VTW1(v,x) {TW_CEXP, v, x}, {TW_CEXP, v+1, x}, {TW_CEXP, v+2, x}, {TW_CEXP, v+3, x}
-#else
-# define VTW1(v,x) {TW_CEXP, v, x}, {TW_CEXP, v+1, x}
-#endif
+#define DEFVTW1(v, x) {TW_CEXP, v, x}
+#define VTW1(v,x) CONCAT2(REPEAT_, VL)(DEFVTW1, v, x)
 #define TWVL1 (VL)
 
 static inline V BYTW1(const R *t, V sr)
@@ -362,18 +359,11 @@ static inline V BYTWJ1(const R *t, V sr)
 }
 
 /* twiddle storage #2: twice the space, faster (when in cache) */
-#ifdef FFTW_SINGLE
-# define VTW2(v,x)							\
-   {TW_COS, v, x}, {TW_COS, v, x}, {TW_COS, v+1, x}, {TW_COS, v+1, x},	\
-   {TW_COS, v+2, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x}, {TW_COS, v+3, x}, \
-   {TW_SIN, v, -x}, {TW_SIN, v, x}, {TW_SIN, v+1, -x}, {TW_SIN, v+1, x}, \
-   {TW_SIN, v+2, -x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, -x}, {TW_SIN, v+3, x}
-#else
-# define VTW2(v,x)							\
-   {TW_COS, v, x}, {TW_COS, v, x}, {TW_COS, v+1, x}, {TW_COS, v+1, x},	\
-   {TW_SIN, v, -x}, {TW_SIN, v, x}, {TW_SIN, v+1, -x}, {TW_SIN, v+1, x}
-#endif
-#define TWVL2 (2 * VL)
+#define DEFVTW2_COS(v, x) {TW_COS, v, x}, {TW_COS, v, x}
+#define DEFVTW2_SIN(v, x) {TW_SIN, v, -x}, {TW_SIN, v, x}
+#define VTW2(v,x) CONCAT2(REPEAT_, VL)(DEFVTW2_COS, v, x),      \
+          CONCAT2(REPEAT_, VL)(DEFVTW2_SIN, v, x)
+#define TWVL2 (2*VL)
 
 static inline V BYTW2(const R *t, V sr)
 {
@@ -396,18 +386,11 @@ static inline V BYTWJ2(const R *t, V sr)
 #define TWVL3 TWVL1
 
 /* twiddle storage for split arrays */
-#ifdef FFTW_SINGLE
-# define VTWS(v,x)							\
-  {TW_COS, v, x}, {TW_COS, v+1, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x},	\
-  {TW_COS, v+4, x}, {TW_COS, v+5, x}, {TW_COS, v+6, x}, {TW_COS, v+7, x}, \
-  {TW_SIN, v, x}, {TW_SIN, v+1, x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, x},	\
-  {TW_SIN, v+4, x}, {TW_SIN, v+5, x}, {TW_SIN, v+6, x}, {TW_SIN, v+7, x}
-#else
-# define VTWS(v,x)							\
-  {TW_COS, v, x}, {TW_COS, v+1, x}, {TW_COS, v+2, x}, {TW_COS, v+3, x},	\
-  {TW_SIN, v, x}, {TW_SIN, v+1, x}, {TW_SIN, v+2, x}, {TW_SIN, v+3, x}	
-#endif
-#define TWVLS (2 * VL)
+#define DEFVTWS_COS(v, x) {TW_COS, 2*(v), x}, {TW_COS, 2*(v)+1, x}
+#define DEFVTWS_SIN(v, x) {TW_SIN, 2*(v), x}, {TW_SIN, 2*(v)+1, x}
+#define VTWS(v,x) CONCAT2(REPEAT_, VL)(DEFVTWS_COS, v, x),      \
+          CONCAT2(REPEAT_, VL)(DEFVTWS_SIN, v, x)
+#define TWVLS (2*VL)
 
 #define VLEAVE _mm256_zeroupper
 
