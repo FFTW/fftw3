@@ -58,7 +58,7 @@
 #else /* SVE_SIZE */
 #error "SVE_SIZE must be 128, 256, 512, 1024, 2048 bits"
 #endif /* SVE_SIZE */
-#define SIMD_VSTRIDE_OKA(x) ((x) == 2) 
+#define SIMD_VSTRIDE_OKA(x) ((x) == 2)
 #define SIMD_STRIDE_OKPAIR SIMD_STRIDE_OK
 
 #if defined(__GNUC__) && !defined(__ARM_FEATURE_SVE) /* sanity check */
@@ -66,6 +66,18 @@
 #endif
 
 #include <arm_sve.h>
+
+/* CONCAT2 is needed to force expansion of the parameters */
+#define CONCAT2(prefix, name) CONCAT(prefix, name)
+
+/* macrology to call DEFX N times */
+#define REPEAT_1(DEFX, v, x) DEFX(v, x)
+#define REPEAT_2(DEFX, v, x) REPEAT_1(DEFX, v, x), REPEAT_1(DEFX, (v)+1, x)
+#define REPEAT_4(DEFX, v, x) REPEAT_2(DEFX, v, x), REPEAT_2(DEFX, (v)+2, x)
+#define REPEAT_8(DEFX, v, x) REPEAT_4(DEFX, v, x), REPEAT_4(DEFX, (v)+4, x)
+#define REPEAT_16(DEFX, v, x) REPEAT_8(DEFX, v, x), REPEAT_8(DEFX,(v)+8, x)
+#define REPEAT_32(DEFX, v, x) REPEAT_16(DEFX, v, x), REPEAT_16(DEFX, (v)+16, x)
+#define REPEAT_64(DEFX, v, x) REPEAT_32(DEFX, v, x), REPEAT_32(DEFX, (v)+32, x)
 
 typedef DS(svfloat64_t, svfloat32_t) V;
 
@@ -116,32 +128,37 @@ typedef DS(svfloat64_t, svfloat32_t) V;
 #define VSUB(a,b) TYPESUF(svsub,_x)(MASKA,a,b)
 #define VMUL(a,b) TYPESUF(svmul,_x)(MASKA,a,b)
 #else
-static inline V VADD(const V a, const V b) {
-	V r;
+
+static inline V VADD(const V a, const V b)
+{
+     V r;
 #ifdef FFTW_SINGLE
-	asm("fadd %[r].s, %[a].s, %[b].s\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+     asm("fadd %[r].s, %[a].s, %[b].s\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
 #else
-	asm("fadd %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+     asm("fadd %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
 #endif
-	return r;
+     return r;
 }
-static inline V VSUB(const V a, const V b) {
-	V r;
+
+static inline V VSUB(const V a, const V b)
+{
+     V r;
 #ifdef FFTW_SINGLE
-	asm("fsub %[r].s, %[a].s, %[b].s\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+     asm("fsub %[r].s, %[a].s, %[b].s\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
 #else
-	asm("fsub %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+     asm("fsub %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
 #endif
-	return r;
+     return r;
 }
-static inline V VMUL(const V a, const V b) {
-	V r;
+static inline V VMUL(const V a, const V b)
+{
+     V r;
 #ifdef FFTW_SINGLE
-	asm("fmul %[r].s, %[a].s, %[b].s\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+     asm("fmul %[r].s, %[a].s, %[b].s\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
 #else
-	asm("fmul %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
+     asm("fmul %[r].d, %[a].d, %[b].d\n" : [r]"=w"(r) : [a]"w"(a), [b]"w"(b));
 #endif
-	return r;
+     return r;
 }
 #endif
 #define VFMA(a, b, c)  TYPESUF(svmad,_x)(MASKA,b,a,c)
@@ -150,70 +167,77 @@ static inline V VMUL(const V a, const V b) {
 #define VFMAI(b, c)    TYPESUF(svcadd,_x)(MASKA,c,b,90)
 #define VFNMSI(b, c)   TYPESUF(svcadd,_x)(MASKA,c,b,270)
 
-static inline V VFMACONJ(V b, V c) {
-	V m = TYPESUF(svcmla,_x)(MASKA,c,b,VRONE,0);
-	return TYPESUF(svcmla,_x)(MASKA,m,b,VRONE,270);
+static inline V VFMACONJ(V b, V c)
+{
+     V m = TYPESUF(svcmla,_x)(MASKA,c,b,VRONE,0);
+     return TYPESUF(svcmla,_x)(MASKA,m,b,VRONE,270);
 }
 #define VFMSCONJ(b,c)  VFMACONJ(b,VNEG(c))
 #define VFNMSCONJ(b,c) VNEG(VFMSCONJ(b,c))
 
-static inline V VZMUL(V a, V b) {
-	V m = TYPESUF(svcmla,_x)(MASKA,VZERO,a,b,0);
-	return TYPESUF(svcmla,_x)(MASKA,m,a,b,90);
+static inline V VZMUL(V a, V b)
+{
+     V m = TYPESUF(svcmla,_x)(MASKA,VZERO,a,b,0);
+     return TYPESUF(svcmla,_x)(MASKA,m,a,b,90);
 }
-static inline V VZMULJ(V a, V b) {
-        V m = TYPESUF(svcmla,_x)(MASKA,VZERO,a,b,0);
-        return TYPESUF(svcmla,_x)(MASKA,m,a,b,270);
-}
-/* there might be a better way */
-static inline V VZMULI(V a, V b) {
-	V m = VZMUL(a,b);
-	return VFMAI(m, VZERO);
+static inline V VZMULJ(V a, V b)
+{
+     V m = TYPESUF(svcmla,_x)(MASKA,VZERO,a,b,0);
+     return TYPESUF(svcmla,_x)(MASKA,m,a,b,270);
 }
 /* there might be a better way */
-static inline V VZMULIJ(V a, V b) {
-	V m = VZMULJ(a,b);
-	return VFMAI(m, VZERO);
+static inline V VZMULI(V a, V b)
+{
+     V m = VZMUL(a,b);
+     return VFMAI(m, VZERO);
+}
+/* there might be a better way */
+static inline V VZMULIJ(V a, V b)
+{
+     V m = VZMULJ(a,b);
+     return VFMAI(m, VZERO);
 }
 
-static inline V LDA(const R *x, INT ivs, const R *aligned_like) {
-  (void)aligned_like; /* UNUSED */
-  (void)ivs; /* UNUSED */
-  return TYPE(svld1)(MASKA,x);
+static inline V LDA(const R *x, INT ivs, const R *aligned_like)
+{
+     (void)aligned_like; /* UNUSED */
+     (void)ivs; /* UNUSED */
+     return TYPE(svld1)(MASKA,x);
 }
-static inline void STA(R *x, V v, INT ovs, const R *aligned_like) {
-  (void)aligned_like; /* UNUSED */
-  (void)ovs; /* UNUSED */
-  TYPE(svst1)(MASKA,x,v);
+static inline void STA(R *x, V v, INT ovs, const R *aligned_like)
+{
+     (void)aligned_like; /* UNUSED */
+     (void)ovs; /* UNUSED */
+     TYPE(svst1)(MASKA,x,v);
 }
 
 #if FFTW_SINGLE
 
 static inline V LDu(const R *x, INT ivs, const R *aligned_like)
 {
-  (void)aligned_like; /* UNUSED */
-  svint64_t gvvl = svindex_s64(0, ivs/2);
+     (void)aligned_like; /* UNUSED */
+     svint64_t gvvl = svindex_s64(0, ivs/2);
 
-  return svreinterpret_f32_f64(svld1_gather_s64index_f64(MASKA, (const double *)x, gvvl));
+     return svreinterpret_f32_f64(svld1_gather_s64index_f64(MASKA, (const double *)x, gvvl));
 }
 
 static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 {
-  (void)aligned_like; /* UNUSED */
-  const svint64_t gvvl = svindex_s64(0, ovs/2);
+     (void)aligned_like; /* UNUSED */
+     const svint64_t gvvl = svindex_s64(0, ovs/2);
 #if !defined(BRANCHLESS_STU)
-  if (ovs==0) { // FIXME: hack for extra_iter hack support
-    v = svreinterpret_f32_f64(svdup_lane_f64(svreinterpret_f64_f32(v),0));
-  }
-  svst1_scatter_s64index_f64(MASKA, (double *)x, gvvl, svreinterpret_f64_f32(v));
+     if (ovs==0) { // FIXME: hack for extra_iter hack support
+          v = svreinterpret_f32_f64(svdup_lane_f64(svreinterpret_f64_f32(v),0));
+     }
+     svst1_scatter_s64index_f64(MASKA, (double *)x, gvvl, svreinterpret_f64_f32(v));
 #else
-  /* no-branch implementation of extra_iter hack support
-   * if ovs is non-zero, keep the original MASKA;
-   * if not, only store one 64 bits element (two 32 bits consecutive)
-   */
-  const svbool_t which = svdupq_n_b64(ovs != 0, ovs != 0);
-  const svbool_t mask = svsel_b(which, MASKA, svptrue_pat_b64(SV_VL1));
-  svst1_scatter_s64index_f64(mask, (double *)x, gvvl, svreinterpret_f64_f32(v));
+     /* no-branch implementation of extra_iter hack support
+      * if ovs is non-zero, keep the original MASKA;
+      * if not, only store one 64 bits element (two 32 bits consecutive)
+      */
+     const svbool_t which = svdupq_n_b64(ovs != 0, ovs != 0);
+     const svbool_t mask = svsel_b(which, MASKA, svptrue_pat_b64(SV_VL1));
+     svst1_scatter_s64index_f64(mask, (double *)x, gvvl, svreinterpret_f64_f32(v));
 #endif
 }
 
@@ -221,33 +245,33 @@ static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 
 static inline V LDu(const R *x, INT ivs, const R *aligned_like)
 {
-  (void)aligned_like; /* UNUSED */
-  (void)aligned_like; /* UNUSED */
-  svint64_t  gvvl = svindex_s64(0, ivs);
-  gvvl = svzip1_s64(gvvl, svadd_n_s64_x(MASKA, gvvl, 1));
+     (void)aligned_like; /* UNUSED */
+     (void)aligned_like; /* UNUSED */
+     svint64_t  gvvl = svindex_s64(0, ivs);
+     gvvl = svzip1_s64(gvvl, svadd_n_s64_x(MASKA, gvvl, 1));
 
-  return svld1_gather_s64index_f64(MASKA, x, gvvl);
+     return svld1_gather_s64index_f64(MASKA, x, gvvl);
 }
 
 static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 {
-  (void)aligned_like; /* UNUSED */
-  svint64_t gvvl = svindex_s64(0, ovs);
-  gvvl = svzip1_s64(gvvl, svadd_n_s64_x(MASKA, gvvl, 1));
+     (void)aligned_like; /* UNUSED */
+     svint64_t gvvl = svindex_s64(0, ovs);
+     gvvl = svzip1_s64(gvvl, svadd_n_s64_x(MASKA, gvvl, 1));
 #if !defined(BRANCHLESS_STU)
-  if (ovs==0) { // FIXME: hack for extra_iter hack support
-    v = svdupq_lane_f64(v,0);
-  }
-  svst1_scatter_s64index_f64(MASKA, x, gvvl, v);
+     if (ovs==0) { // FIXME: hack for extra_iter hack support
+          v = svdupq_lane_f64(v,0);
+     }
+     svst1_scatter_s64index_f64(MASKA, x, gvvl, v);
 #else
-  /* no-branch implementation of extra_iter hack support
-   * if ovs is non-zero, keep the original MASKA;
-   * if not, only store two 64 bits elements
-   */
-  const svbool_t which = svdupq_n_b64(ovs != 0, ovs != 0);
-  const svbool_t mask = svsel_b(which, MASKA, svptrue_pat_b64(SV_VL2));
+     /* no-branch implementation of extra_iter hack support
+      * if ovs is non-zero, keep the original MASKA;
+      * if not, only store two 64 bits elements
+      */
+     const svbool_t which = svdupq_n_b64(ovs != 0, ovs != 0);
+     const svbool_t mask = svsel_b(which, MASKA, svptrue_pat_b64(SV_VL2));
 
-  svst1_scatter_s64index_f64(mask, x, gvvl, v);
+     svst1_scatter_s64index_f64(mask, x, gvvl, v);
 #endif
 }
 
@@ -262,11 +286,11 @@ static inline void STu(R *x, V v, INT ovs, const R *aligned_like)
 
 static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 {
-  (void)aligned_like; /* UNUSED */
-  (void)aligned_like; /* UNUSED */
-  svint32_t  gvvl = svindex_s32(0, ovs);
+     (void)aligned_like; /* UNUSED */
+     (void)aligned_like; /* UNUSED */
+     svint32_t  gvvl = svindex_s32(0, ovs);
 
-  svst1_scatter_s32index_f32(MASKA, x, gvvl, v);
+     svst1_scatter_s32index_f32(MASKA, x, gvvl, v);
 }
 #define STN4(x, v0, v1, v2, v3, ovs)  /* no-op */
 #else /* !FFTW_SINGLE */
@@ -275,22 +299,19 @@ static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 
 static inline void STM4(R *x, V v, INT ovs, const R *aligned_like)
 {
-  (void)aligned_like; /* UNUSED */
-  (void)aligned_like; /* UNUSED */
-  svint64_t  gvvl = svindex_s64(0, ovs);
+     (void)aligned_like; /* UNUSED */
+     (void)aligned_like; /* UNUSED */
+     svint64_t  gvvl = svindex_s64(0, ovs);
 
-  svst1_scatter_s64index_f64(MASKA, x, gvvl, v);
+     svst1_scatter_s64index_f64(MASKA, x, gvvl, v);
 }
 #define STN4(x, v0, v1, v2, v3, ovs)  /* no-op */
 #endif /* FFTW_SINGLE */
 
 /* twiddle storage #1: compact, slower */
-#define REQ_VTW1
-#define VTW_SIZE VL
-#include "vtw.h"
+#define DEFVTW1(v, x) {TW_CEXP, v, x}
+#define VTW1(v,x) CONCAT2(REPEAT_, VL)(DEFVTW1, v, x)
 #define TWVL1 (VL)
-#undef VTW_SIZE
-#undef REQ_VTW1
 
 static inline V BYTW1(const R *t, V sr)
 {
@@ -303,12 +324,11 @@ static inline V BYTWJ1(const R *t, V sr)
 }
 
 /* twiddle storage #2: twice the space, faster (when in cache) */
-#define REQ_VTW2
-#define VTW_SIZE (2*VL)
-#include "vtw.h"
+#define DEFVTW2_COS(v, x) {TW_COS, v, x}, {TW_COS, v, x}
+#define DEFVTW2_SIN(v, x) {TW_SIN, v, -x}, {TW_SIN, v, x}
+#define VTW2(v,x) CONCAT2(REPEAT_, VL)(DEFVTW2_COS, v, x),      \
+          CONCAT2(REPEAT_, VL)(DEFVTW2_SIN, v, x)
 #define TWVL2 (2*VL)
-#undef VTW_SIZE
-#undef REQ_VTW2
 
 static inline V BYTW2(const R *t, V sr)
 {
@@ -331,12 +351,11 @@ static inline V BYTWJ2(const R *t, V sr)
 #define TWVL3 TWVL1
 
 /* twiddle storage for split arrays */
-#define REQ_VTWS
-#define VTW_SIZE (2*VL)
-#include "vtw.h"
+#define DEFVTWS_COS(v, x) {TW_COS, 2*(v), x}, {TW_COS, 2*(v)+1, x}
+#define DEFVTWS_SIN(v, x) {TW_SIN, 2*(v), x}, {TW_SIN, 2*(v)+1, x}
+#define VTWS(v,x) CONCAT2(REPEAT_, VL)(DEFVTWS_COS, v, x),      \
+          CONCAT2(REPEAT_, VL)(DEFVTWS_SIN, v, x)
 #define TWVLS (2*VL)
-#undef VTW_SIZE
-#undef REQ_VTWS
 
 #define VLEAVE() /* nothing */
 
