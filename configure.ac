@@ -223,6 +223,18 @@ if test "$have_armv7apmccntr"x = "yes"x; then
     AC_DEFINE(HAVE_ARMV7A_PMCCNTR,1,[Define if you have enabled the PMCCNTR cycle counter on ARMv7a])
 fi
 
+AC_ARG_ENABLE(lsx, [AS_HELP_STRING([--enable-lsx],[enable LoongArch LSX optimizations])], have_lsx=$enableval, have_lsx=no)
+if test "$have_lsx" = "yes"; then
+    AC_DEFINE(HAVE_LSX,1,[Define to enable LoongArch LSX optimizations.])
+fi
+AM_CONDITIONAL(HAVE_LSX, test "$have_lsx" = "yes")
+
+AC_ARG_ENABLE(lasx, [AC_HELP_STRING([--enable-lasx],[enable LoongArch LASX optimizations])], have_lasx=$enableval, have_lasx=no)
+if test "$have_lasx" = "yes"; then
+    AC_DEFINE(HAVE_LASX,1,[Define to enable LoongArch LASX optimizations.])
+fi
+AM_CONDITIONAL(HAVE_LASX, test "$have_lasx" = "yes")
+
 AC_ARG_ENABLE(generic-simd128, [AS_HELP_STRING([--enable-generic-simd128],[enable generic (gcc) 128-bit SIMD optimizations])], have_generic_simd128=$enableval, have_generic_simd128=no)
 if test "$have_generic_simd128" = "yes"; then
         AC_DEFINE(HAVE_GENERIC_SIMD128,1,[Define to enable generic (gcc) 128-bit SIMD optimizations.])
@@ -418,6 +430,18 @@ case "${ax_cv_c_compiler_vendor}" in
                 [AC_MSG_ERROR([Need a version of gcc with -mvsx])])
         fi
 
+        # LSX
+        if test "$have_lsx" = "yes" -a "x$LSX_CFLAGS" = x; then
+            AX_CHECK_COMPILE_FLAG(-mlsx, [LSX_CFLAGS="-mlsx"],
+            [AC_MSG_ERROR([Need a version of gcc with -mlsx])])
+        fi
+
+        # LASX
+        if test "$have_lasx" = "yes" -a "x$LASX_CFLAGS" = x; then
+            AX_CHECK_COMPILE_FLAG(-mlasx, [LASX_CFLAGS="-mlasx"],
+            [AC_MSG_ERROR([Need a version of gcc with -mlasx])])
+        fi
+
     dnl FIXME:
     dnl elif test "$have_mips_ps" = "yes"; then
     dnl     # Just punt here and use only new 4.2 compiler :(
@@ -459,6 +483,18 @@ case "${ax_cv_c_compiler_vendor}" in
             AX_CHECK_COMPILE_FLAG(-mvsx, [VSX_CFLAGS="-mvsx $VSX_CFLAGS"],
                 [AC_MSG_ERROR([Need a version of gcc with -mvsx])])
         fi
+
+        # LSX
+        if test "$have_lsx" = "yes" -a "x$LSX_CFLAGS" = x; then
+            AX_CHECK_COMPILE_FLAG(-mlsx, [LSX_CFLAGS="-mlsx"],
+            [AC_MSG_ERROR([Need a version of clang with -mlsx])])
+        fi
+
+        # LASX
+        if test "$have_lasx" = "yes" -a "x$LASX_CFLAGS" = x; then
+            AX_CHECK_COMPILE_FLAG(-mlasx, [LASX_CFLAGS="-mlasx"],
+            [AC_MSG_ERROR([Need a version of clang with -mlasx])])
+        fi
         ;;
 
     ibm)
@@ -478,6 +514,8 @@ AC_SUBST(KCVI_CFLAGS)
 AC_SUBST(ALTIVEC_CFLAGS)
 AC_SUBST(VSX_CFLAGS)
 AC_SUBST(NEON_CFLAGS)
+AC_SUBST(LSX_CFLAGS)
+AC_SUBST(LASX_CFLAGS)
 
 dnl add stack alignment CFLAGS if so requested
 if test "$with_incoming_stack_boundary"x != "no"x; then
@@ -783,6 +821,8 @@ AC_CONFIG_FILES([
    dft/simd/sve512/Makefile
    dft/simd/sve1024/Makefile
    dft/simd/sve2048/Makefile
+   dft/simd/lsx/Makefile
+   dft/simd/lasx/Makefile
    dft/simd/generic-simd128/Makefile
    dft/simd/generic-simd256/Makefile
 
@@ -808,6 +848,8 @@ AC_CONFIG_FILES([
    rdft/simd/sve512/Makefile
    rdft/simd/sve1024/Makefile
    rdft/simd/sve2048/Makefile
+   rdft/simd/lsx/Makefile
+   rdft/simd/lasx/Makefile
    rdft/simd/generic-simd128/Makefile
    rdft/simd/generic-simd256/Makefile
 

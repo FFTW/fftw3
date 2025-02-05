@@ -91,6 +91,14 @@ void X(dft_conf_standard)(planner *p)
      if (X(have_simd_sve)(2048))
           X(solvtab_exec)(X(solvtab_dft_sve2048), p);
 #endif
+#if HAVE_LSX
+     if (X(have_simd_lsx)())
+     X(solvtab_exec)(X(solvtab_dft_lsx), p);
+#endif
+#if HAVE_LASX
+     if (X(have_simd_lasx)())
+     X(solvtab_exec)(X(solvtab_dft_lasx), p);
+#endif
 #if HAVE_GENERIC_SIMD128
      X(solvtab_exec)(X(solvtab_dft_generic_simd128), p);
 #endif
