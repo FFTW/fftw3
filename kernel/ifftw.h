@@ -109,7 +109,8 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
       defined(HAVE_ALTIVEC) || defined(HAVE_VSX) || \
       defined(HAVE_MIPS_PS) || \
       defined(HAVE_LSX) || defined(HAVE_LASX) || \
-      defined(HAVE_GENERIC_SIMD128) || defined(HAVE_GENERIC_SIMD256)
+      defined(HAVE_GENERIC_SIMD128) || defined(HAVE_GENERIC_SIMD256) || \
+      defined(HAVE_R5V)
 #define HAVE_SIMD 1
 #else
 #define HAVE_SIMD 0
@@ -127,6 +128,7 @@ extern int X(have_simd_neon)(void);
 extern int X(have_simd_lsx)(void);
 extern int X(have_simd_lasx)(void);
 extern int X(have_simd_sve)(int minwidth);
+extern int X(have_simd_r5v)(int);
 
 /* forward declarations */
 typedef struct problem_s problem;
@@ -884,7 +886,7 @@ enum { TW_COS = 0, TW_SIN = 1, TW_CEXP = 2, TW_NEXT = 3,
 
 typedef struct {
      unsigned char op;
-     signed char v;
+     short v;
      short i;
 } tw_instr;
 
