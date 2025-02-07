@@ -294,7 +294,7 @@
 #define PACKAGE_NAME "fftw"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "fftw @FFTW_VERSION@"
+#define PACKAGE_STRING "fftw @PROJECT_VERSION@"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "fftw"
@@ -303,7 +303,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "@FFTW_VERSION@"
+#define PACKAGE_VERSION "@PROJECT_VERSION@"
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
@@ -366,7 +366,7 @@
 #cmakedefine USING_POSIX_THREADS 1
 
 /* Version number of package */
-#define VERSION "@FFTW_VERSION@"
+#define VERSION "@PROJECT_VERSION@"
 
 /* Use common Windows Fortran mangling styles for the Fortran interfaces. */
 /* #undef WINDOWS_F77_MANGLING */
