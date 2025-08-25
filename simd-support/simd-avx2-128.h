@@ -186,7 +186,7 @@ static inline V VCONJ(V x)
 
            V pmpm = VLIT(-0.0, 0.0);
 
-        but historically some compilers have ignored the distiction
+        but historically some compilers have ignored the distinction
         between +0 and -0.  It looks like 'gcc-8 -fast-math' treats -0
         as 0 too.
       */

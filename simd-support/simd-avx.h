@@ -187,7 +187,7 @@ static inline void STN2(R *x, V v0, V v1, INT ovs)
 static inline __m128d VMOVAPD_LD(const R *x)
 {
      /* gcc-4.6 miscompiles the combination _mm256_castpd128_pd256(VMOVAPD_LD(x))
-	into a 256-bit vmovapd, which requires 32-byte aligment instead of
+	into a 256-bit vmovapd, which requires 32-byte alignment instead of
 	16-byte alignment.
 
 	Force the use of vmovapd via asm until compilers stabilize.
@@ -258,7 +258,7 @@ static inline V VCONJ(V x)
 
            V pmpm = VLIT(-0.0, 0.0);
 
-        but historically some compilers have ignored the distiction
+        but historically some compilers have ignored the distinction
         between +0 and -0.  It looks like 'gcc-8 -fast-math' treats -0
         as 0 too.
       */
