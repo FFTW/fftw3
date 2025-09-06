@@ -789,7 +789,7 @@ void main_init(int *argc, char ***argv)
 
      /* init_threads must be called before any other FFTW function,
 	including mpi_init, because it has to register the threads hooks
-	before the planner is initalized */
+	before the planner is initialized */
 #ifdef HAVE_SMP
      if (threads_ok) { BENCH_ASSERT(FFTW(init_threads)()); }
 #endif

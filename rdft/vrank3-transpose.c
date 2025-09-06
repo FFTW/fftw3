@@ -504,7 +504,7 @@ static const transpose_adt adt_cut =
  */
 
 /*
- * "a" is a 1D array of length ny*nx*N which constains the nx x ny
+ * "a" is a 1D array of length ny*nx*N which contains the nx x ny
  * matrix of N-tuples to be transposed.  "a" is stored in row-major
  * order (last index varies fastest).  move is a 1D array of length
  * move_size used to store information to speed up the process.  The
