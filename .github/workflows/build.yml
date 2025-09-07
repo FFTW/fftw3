@@ -1,0 +1,22 @@
+name: Build
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install ocaml ocamlbuild libnum-ocaml-dev autoconf automake indent libtool fig2dev
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Bootstrap
+      run: sh bootstrap.sh
+
+    - name: Build
+      run: make
+
+    - name: Test
+      run: make -C tests smallcheck
