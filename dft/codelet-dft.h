@@ -115,5 +115,12 @@ extern const solvtab X(solvtab_dft_lsx);
 extern const solvtab X(solvtab_dft_lasx);
 extern const solvtab X(solvtab_dft_generic_simd128);
 extern const solvtab X(solvtab_dft_generic_simd256);
-
+extern const solvtab X(solvtab_dft_r5v128);
+extern const solvtab X(solvtab_dft_r5v256);
+extern const solvtab X(solvtab_dft_r5v512);
+extern const solvtab X(solvtab_dft_r5v1024);
+extern const solvtab X(solvtab_dft_r5v2048);
+extern const solvtab X(solvtab_dft_r5v4096);
+extern const solvtab X(solvtab_dft_r5v8192);
+extern const solvtab X(solvtab_dft_r5v16384);
 #endif				/* __DFT_CODELET_H__ */

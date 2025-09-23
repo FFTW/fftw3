@@ -68,6 +68,14 @@
 #    define ALIGNMENT 16
 #    define ALIGNMENTA 16
 #  endif
+#elif defined(HAVE_R5V)
+#  if defined(FFTW_SINGLE)
+#    define ALIGNMENT 8
+#    define ALIGNMENTA 16
+#  else
+#    define ALIGNMENT 16
+#    define ALIGNMENTA 16
+#  endif
 #endif
 
 #if HAVE_SIMD
