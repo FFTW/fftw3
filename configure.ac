@@ -192,7 +192,7 @@ AC_ARG_ENABLE(neon, [AS_HELP_STRING([--enable-neon],[enable ARM NEON optimizatio
 if test "$have_neon" = "yes"; then
     AC_DEFINE(HAVE_NEON,1,[Define to enable ARM NEON optimizations.])
         case "${host_cpu}" in
-                aarch64)
+                aarch64 | arm)
                 ;;
                 *)
         if test "$PRECISION" != "s"; then
@@ -415,7 +415,7 @@ case "${ax_cv_c_compiler_vendor}" in
         fi
 
         case "${host_cpu}" in
-            aarch64)
+            aarch64 | arm)
                 ;;
             *)
                 if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
