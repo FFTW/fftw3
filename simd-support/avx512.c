@@ -31,37 +31,36 @@
 
 #include "amd64-cpuid.h"
 
-int X(have_simd_avx512)(void)
-{
-     static int init = 0, res;     
+int X(have_simd_avx512) (void) {
+     static int init = 0, res = 0;
      int max_stdfn, eax, ebx, ecx, edx;
 
-     /* NOTE: this code is a total guess.  I don't have an avx512
-        machine available.  The code contributed by Erik Lindahl would
-        crash on a machine without XGETBV, so I had to guess a fix. */
      if (!init) {
-          cpuid_all(0,0,&eax,&ebx,&ecx,&edx);
-          max_stdfn = eax;
-          if (max_stdfn >= 0x1) {
-               /* have OSXSAVE? (implies XGETBV exists) */
-               cpuid_all(0x1, 0, &eax, &ebx, &ecx, &edx);
-               if ((ecx & 0x08000000) == 0x08000000) {
-                    /* have AVX512? */
-                    cpuid_all(7,0,&eax,&ebx,&ecx,&edx);
-                    if (ebx & (1 << 16)) {
-                         /* have OS support for XMM, YMM, ZMM */
-                         int zmm_ymm_xmm = (7 << 5) | (1 << 2) | (1 << 1);
-                         res = ((xgetbv_eax(0) & zmm_ymm_xmm) == zmm_ymm_xmm);
-                    }
-               }
-          }
-          init = 1;
+	  cpuid_all(0, 0, &eax, &ebx, &ecx, &edx);
+	  max_stdfn = eax;
+
+	  if (max_stdfn >= 0x7) {
+	       cpuid_all(0x1, 0, &eax, &ebx, &ecx, &edx);
+
+	       /* have OSXSAVE? (implies XGETBV exists) */
+	       if ((ecx & 0x08000000) == 0x08000000) {
+		    cpuid_all(7, 0, &eax, &ebx, &ecx, &edx);
+
+		    /* have OS support for XMM, YMM, OPMASK/ZMM */
+		    if ((xgetbv_eax(0) & 0xe6) == 0xe6) {
+			 /* have AVX512 */
+			 res = ((ebx & 0xd0030000) == 0xd0030000);
+		    }
+	       }
+	  }
+
+	  init = 1;
      }
 
      return res;
 }
 
-#else /* 32-bit code */
+#else				/* 32-bit code */
 
 #error "Avx512 is 64 bits only"
 
