@@ -1,0 +1,48 @@
+(version 4.14.2)
+
+(install
+ (withenv
+  ((= MSYS2_ARG_CONV_EXCL *))
+  (run %{make} install)))
+
+(build
+ (withenv
+  ((= MSYS2_ARG_CONV_EXCL *))
+  (progn
+   (run
+    ./configure
+    (when
+     (catch_undefined_var
+      (and_absorb_undefined_var
+       %{pkg:system-msvc:installed}
+       %{pkg:arch-x86_64:installed})
+      false)
+     --host=x86_64-pc-windows)
+    (when
+     (catch_undefined_var
+      (and_absorb_undefined_var
+       %{pkg:system-msvc:installed}
+       %{pkg:arch-x86_32:installed})
+      false)
+     --host=i686-pc-windows)
+    --prefix=%{prefix}
+    --docdir=%{doc}/ocaml
+    -C)
+   (run %{make} -j%{jobs}))))
+
+(source
+ (fetch
+  (url https://github.com/ocaml/ocaml/archive/4.14.2.tar.gz)
+  (checksum
+   sha256=c2d706432f93ba85bd3383fa451d74543c32a4e84a1afaf3e8ace18f7f097b43)))
+
+(exported_env
+ (= CAML_LD_LIBRARY_PATH "\%{lib}%/stublibs"))
+
+(extra_sources
+ (ocaml-base-compiler.install
+  (fetch
+   (url
+    https://raw.githubusercontent.com/ocaml/opam-source-archives/main/patches/ocaml-base-compiler/ocaml-base-compiler.install)
+   (checksum
+    sha256=79f2a1a5044a91350a0eb6ce12e261a72a2855c094c425cddf3860e58c486678))))

@@ -1,0 +1,7 @@
+set(FFTW3_VERSION @version@)
+
+@PACKAGE_INIT@
+
+set_and_check(FFTW3@prec_suffix@_LIBRARIES @lib_name@)
+set_and_check(FFTW3@prec_suffix@_LIBRARY_DIRS @libdir@)
+set_and_check(FFTW3@prec_suffix@_INCLUDE_DIRS @includedir@)

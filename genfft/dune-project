@@ -1,0 +1,7 @@
+(lang dune 3.0)
+(package
+ (name genfft)
+ (allow_empty)
+ (depends
+  (ocaml (< 5))
+  num))

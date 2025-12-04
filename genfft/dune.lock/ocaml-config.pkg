@@ -1,0 +1,20 @@
+(version 2)
+
+(build
+ (substitute gen_ocaml_config.ml.in gen_ocaml_config.ml))
+
+(depends ocaml-base-compiler)
+
+(extra_sources
+ (gen_ocaml_config.ml.in
+  (fetch
+   (url
+    https://raw.githubusercontent.com/ocaml/opam-source-archives/main/patches/ocaml-config/gen_ocaml_config.ml.in.2)
+   (checksum
+    sha256=22eb7c0211fc426028e444b272b97eac1e8287a49a512aebaa33c608652cfd29)))
+ (ocaml-config.install
+  (fetch
+   (url
+    https://raw.githubusercontent.com/ocaml/opam-source-archives/main/patches/ocaml-config/ocaml-config.install)
+   (checksum
+    sha256=6e4fd93f4cce6bad0ed3c08afd0248dbe7d7817109281de6294e5b5ef5597051))))

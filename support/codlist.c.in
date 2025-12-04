@@ -1,0 +1,11 @@
+#include "kernel/ifftw.h"
+@extra_includes@
+
+@decls@
+
+
+extern const solvtab @solvtab_name@;
+const solvtab @solvtab_name@ = {
+@solvtab_entries@
+   SOLVTAB_END
+};

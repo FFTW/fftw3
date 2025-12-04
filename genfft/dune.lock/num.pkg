@@ -1,0 +1,28 @@
+(version 1.6)
+
+(build
+ (run
+  %{make}
+  PROFILE=release
+  (when
+   (catch_undefined_var
+    (and_absorb_undefined_var
+     (not %{pkg:ocaml:preinstalled})
+     (< %{pkg:ocaml:version} 5.0.0~~))
+    false)
+   opam-legacy)
+  (when
+   (catch_undefined_var
+    (or_absorb_undefined_var
+     %{pkg:ocaml:preinstalled}
+     (>= %{pkg:ocaml:version} 5.0.0~~))
+    false)
+   opam-modern)))
+
+(depends ocaml)
+
+(source
+ (fetch
+  (url https://github.com/ocaml/num/archive/refs/tags/v1.6.tar.gz)
+  (checksum
+   sha256=b5cce325449aac746d5ca963d84688a627cca5b38d41e636cf71c68b60495b3e)))

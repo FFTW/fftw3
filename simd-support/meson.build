@@ -1,0 +1,16 @@
+fftw_srcset.add(
+    files(
+        'altivec.c',
+        'avx-128-fma.c',
+        'avx.c',
+        'avx2.c',
+        'avx512.c',
+        'kcvi.c',
+        'lasx.c',
+        'lsx.c',
+        'neon.c',
+        'sse2.c',
+        'taint.c',
+        'vsx.c',
+    ),
+)

@@ -1,0 +1,6 @@
+(lang dune 3.0)
+
+(context
+ (default
+  (name genfft)
+  (profile release)))

@@ -1,0 +1,47 @@
+#!/bin/sh
+set -e
+
+version_major="$1"
+shift
+version_minor="$1"
+shift
+version_current="$1"
+shift
+version_revision="$1"
+shift
+version_age="$1"
+
+$MESONREWRITE --sourcedir="$MESON_PROJECT_DIST_ROOT" kwargs set project / version "$version_major.$version_minor"
+
+git -C "$MESON_PROJECT_SOURCE_ROOT" log --pretty=medium --date-order > "$MESON_PROJECT_DIST_ROOT/ChangeLog"
+
+meson compile dist_src
+for f in @files@; do
+    cp -rp "$MESON_PROJECT_BUILD_ROOT/$f" "$MESON_PROJECT_DIST_ROOT/$f"
+done
+
+cd "$MESON_PROJECT_DIST_ROOT"
+if git -C "$MESON_PROJECT_SOURCE_ROOT" describe --tags --exact-match; then
+    pat_major='(FFTW_MAJOR_VERSION\s*,\s*)[^\)]*'
+    pat_minor='(FFTW_MINOR_VERSION\s*,\s*)[^\)]*'
+    sed -i -E "s/$pat_major/\1$version_major/;s/$pat_minor/\1$version_minor/" configure.ac
+
+    pat_shared='(SHARED_VERSION_INFO=")([^:]*):([^:]*):([^"]*)(")'
+    sed -i -E "s/$pat_shared/\1$version_current:\3:$version_age\5/" configure.ac
+
+    sh bootstrap.sh
+    make distclean
+    find -name .deps -type d -delete
+else
+    echo "***************************************************"
+    echo " WARNING: Current commit does not match any tag."
+    echo " Refusing to include Autotools build system files."
+    echo "***************************************************"
+
+    find -name Makefile.* -type f -delete
+    rm configure.ac
+    rm fftw.pc.in
+    rm bootstrap.sh
+    rm mkdist.sh
+    rm commercialize.sh
+fi
