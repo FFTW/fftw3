@@ -42,8 +42,7 @@ endif
 SUBDIRS=support $(GENFFT) kernel simd-support dft rdft reodft api	\
 libbench2 $(CHICKEN_EGG) tests mpi $(DOCDIR) tools m4
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in	\
-CMakeLists.txt cmake.config.h.in FFTW3Config.cmake.in		\
-FFTW3ConfigVersion.cmake.in README-perfcnt.md
+README-perfcnt.md
 
 SIMD_LIBS = simd-support/libsimd_support.la
 
@@ -167,19 +166,6 @@ fftw3@PREC_SUFFIX@.pc: fftw.pc
 	cp -f fftw.pc fftw3@PREC_SUFFIX@.pc
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = fftw3@PREC_SUFFIX@.pc
-
-FFTW3@PREC_SUFFIX@Config.cmake: $(top_srcdir)/FFTW3Config.cmake.in
-	$(SED) \
-		-e 's|[@]PREC_SUFFIX@|@PREC_SUFFIX@|g' \
-		-e 's|[@]CMAKE_INSTALL_FULL_LIBDIR@|$(libdir)|g' \
-		-e 's|[@]CMAKE_INSTALL_FULL_INCLUDEDIR@|$(includedir)|g' \
-		$(top_srcdir)/FFTW3Config.cmake.in > $@
-FFTW3@PREC_SUFFIX@ConfigVersion.cmake: $(top_srcdir)/FFTW3ConfigVersion.cmake.in
-	$(SED) \
-		-e 's|[@]FFTW_VERSION@|@PACKAGE_VERSION@|g' \
-		$(top_srcdir)/FFTW3ConfigVersion.cmake.in > $@
-cmakedir = $(libdir)/cmake/fftw3
-cmake_DATA = FFTW3@PREC_SUFFIX@Config.cmake FFTW3@PREC_SUFFIX@ConfigVersion.cmake
 
 WISDOM_DIR = /etc/fftw
 WISDOM = wisdom@PREC_SUFFIX@

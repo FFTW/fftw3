@@ -9,7 +9,7 @@ generated automatically.  This repository contains the *generator* and
 it does not contain the *generated code*.  *YOU WILL BE UNABLE TO
 COMPILE CODE FROM THIS REPOSITORY* unless you have special tools and
 know what you are doing.   In particular, do not expect things to
-work by simply executing `configure; make` or `cmake`.
+work by simply executing `configure; make` or `meson setup <dir>`.
 
 Most users should ignore this repository, and should instead download
 official tarballs from http://fftw.org/, which contain the generated
