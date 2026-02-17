@@ -128,6 +128,25 @@ GENERIC_SIMD256_LIBS = dft/simd/generic-simd256/libdft_generic_simd256_codelets.
 rdft/simd/generic-simd256/librdft_generic_simd256_codelets.la
 endif
 
+if HAVE_R5V
+R5V_LIBS = dft/simd/r5v128/libdft_r5v128_codelets.la      \
+rdft/simd/r5v128/librdft_r5v128_codelets.la	\
+dft/simd/r5v256/libdft_r5v256_codelets.la      \
+rdft/simd/r5v256/librdft_r5v256_codelets.la	\
+dft/simd/r5v512/libdft_r5v512_codelets.la      \
+rdft/simd/r5v512/librdft_r5v512_codelets.la	\
+dft/simd/r5v1024/libdft_r5v1024_codelets.la      \
+rdft/simd/r5v1024/librdft_r5v1024_codelets.la	\
+dft/simd/r5v2048/libdft_r5v2048_codelets.la      \
+rdft/simd/r5v2048/librdft_r5v2048_codelets.la	\
+dft/simd/r5v4096/libdft_r5v4096_codelets.la      \
+rdft/simd/r5v4096/librdft_r5v4096_codelets.la   \
+dft/simd/r5v8192/libdft_r5v8192_codelets.la      \
+rdft/simd/r5v8192/librdft_r5v8192_codelets.la   \
+dft/simd/r5v16384/libdft_r5v16384_codelets.la      \
+rdft/simd/r5v16384/librdft_r5v16384_codelets.la
+endif
+
 if THREADS
 if COMBINED_THREADS
 COMBINED_THREADLIBS=threads/libfftw3@PREC_SUFFIX@_threads.la
@@ -152,7 +171,7 @@ libfftw3@PREC_SUFFIX@_la_LIBADD =			\
         $(AVX2_LIBS) $(ALTIVEC_LIBS) \
         $(VSX_LIBS) $(NEON_LIBS) $(SVE_LIBS) $(KCVI_LIBS) $(AVX512_LIBS) \
         $(LSX_LIBS) $(LASX_LIBS) \
-        $(GENERIC_SIMD128_LIBS) $(GENERIC_SIMD256_LIBS) \
+        $(GENERIC_SIMD128_LIBS) $(GENERIC_SIMD256_LIBS) $(R5V_LIBS) \
 	$(COMBINED_THREADLIBS)
 
 if QUAD
