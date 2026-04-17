@@ -52,7 +52,7 @@ you have negotiated.
 Please note that this package is provided WITHOUT ANY WARRANTY.
 See your license agreement for complete details.
 
-Contact Mr. Tyler A Guitroz <tguitroz@mit.edu> for more information
+Contact Ms. Ashley Dessources <ashleybd@mit.edu> for more information
 regarding licensing.
 EOF
 
