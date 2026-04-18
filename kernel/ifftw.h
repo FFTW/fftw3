@@ -101,15 +101,21 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 /* CONCAT2 forces expansion of the parameters */
 #define CONCAT2(prefix, name) CONCAT(prefix, name)
 
-/* define HAVE_SIMD if any simd extensions are supported */
-#if defined(HAVE_SSE) || defined(HAVE_SSE2) || \
-      defined(HAVE_AVX) || defined(HAVE_AVX_128_FMA) || \
-      defined(HAVE_AVX2) || defined(HAVE_AVX512) || \
-      defined(HAVE_KCVI) || \
-      defined(HAVE_ALTIVEC) || defined(HAVE_VSX) || \
-      defined(HAVE_MIPS_PS) || \
-      defined(HAVE_LSX) || defined(HAVE_LASX) || \
-      defined(HAVE_GENERIC_SIMD128) || defined(HAVE_GENERIC_SIMD256)
+/* define HAVE_SIMD if any simd extensions are supported */             
+#if defined(HAVE_SSE) ||                        \
+    defined(HAVE_SSE2) ||                       \
+    defined(HAVE_AVX) ||                        \
+    defined(HAVE_AVX_128_FMA) ||                \
+    defined(HAVE_AVX2) ||                       \
+    defined(HAVE_AVX512) ||                     \
+    defined(HAVE_KCVI) ||                       \
+    defined(HAVE_ALTIVEC) ||                    \
+    defined(HAVE_VSX) ||                        \
+    defined(HAVE_MIPS_PS) ||                    \
+    defined(HAVE_LSX) ||                        \
+    defined(HAVE_LASX) ||                       \
+    defined(HAVE_GENERIC_SIMD128) ||            \
+    defined(HAVE_GENERIC_SIMD256)
 #define HAVE_SIMD 1
 #else
 #define HAVE_SIMD 0
