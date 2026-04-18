@@ -112,6 +112,7 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
     defined(HAVE_ALTIVEC) ||                    \
     defined(HAVE_VSX) ||                        \
     defined(HAVE_MIPS_PS) ||                    \
+    defined(HAVE_SVE) ||                        \
     defined(HAVE_LSX) ||                        \
     defined(HAVE_LASX) ||                       \
     defined(HAVE_GENERIC_SIMD128) ||            \
