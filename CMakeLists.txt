@@ -97,7 +97,7 @@ if (ENABLE_QUAD_PRECISION)
   check_symbol_exists (sinq quadmath.h HAVE_QUADMATH)
   set(CMAKE_REQUIRED_FLAGS "${SAVE_CMAKE_REQUIRED_FLAGS}")
   if(NOT HAVE_QUADMATH)
-    MESSAGE(FATAL_ERROR "uad precision requires libquadmath for quad-precision trigonometric routines")
+    MESSAGE(FATAL_ERROR "quad precision requires libquadmath for quad-precision trigonometric routines")
   endif()
 endif()
 
