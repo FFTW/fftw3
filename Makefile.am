@@ -45,7 +45,7 @@ EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in	\
 CMakeLists.txt cmake.config.h.in FFTW3Config.cmake.in		\
 FFTW3ConfigVersion.cmake.in README-perfcnt.md
 
-SIMD_LIBS = simd-support/libsimd_support.la
+SIMD_LIBS = simd-support/libsimd_support.la simd-support/libsimd_sve.la
 
 if HAVE_SSE2
 SSE2_LIBS = dft/simd/sse2/libdft_sse2_codelets.la	\

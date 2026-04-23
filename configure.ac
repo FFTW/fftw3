@@ -417,6 +417,10 @@ case "${ax_cv_c_compiler_vendor}" in
 
         case "${host_cpu}" in
             aarch64)
+                if test "$have_sve" = "yes" -a "x$SVE_CFLAGS" = x; then
+                    AX_CHECK_COMPILE_FLAG(-march=armv8-a+sve, [SVE_CFLAGS="-march=armv8-a+sve"],
+                [AC_MSG_ERROR([Need a version of gcc supporting -march=armv8-a+sve])])
+                fi
                 ;;
             *)
                 if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
@@ -442,20 +446,6 @@ case "${ax_cv_c_compiler_vendor}" in
             AX_CHECK_COMPILE_FLAG(-mlasx, [LASX_CFLAGS="-mlasx"],
             [AC_MSG_ERROR([Need a version of gcc with -mlasx])])
         fi
-
-    dnl FIXME:
-    dnl elif test "$have_mips_ps" = "yes"; then
-    dnl     # Just punt here and use only new 4.2 compiler :(
-    dnl 	# Should add section for older compilers...
-    dnl 	AX_CHECK_COMPILE_FLAG(-mpaired-single,
-    dnl 	    [SIMD_CFLAGS="-mpaired-single"],
-    dnl 	    #[AC_MSG_ERROR([Need a version of gcc with -mpaired-single])])
-    dnl 	    [AX_CHECK_COMPILE_FLAG(-march=mips64,
-    dnl 	      [SIMD_CFLAGS="-march=mips64"],
-    dnl 	        [AC_MSG_ERROR(
-    dnl 		 [Need a version of gcc with -mpaired-single or -march=mips64])
-    dnl 		])])
-    dnl fi
     ;;
 
     clang)
@@ -496,6 +486,21 @@ case "${ax_cv_c_compiler_vendor}" in
             AX_CHECK_COMPILE_FLAG(-mlasx, [LASX_CFLAGS="-mlasx"],
             [AC_MSG_ERROR([Need a version of clang with -mlasx])])
         fi
+
+        case "${host_cpu}" in
+            aarch64)
+                if test "$have_sve" = "yes" -a "x$SVE_CFLAGS" = x; then
+                    AX_CHECK_COMPILE_FLAG(-march=armv8-a+sve, [SVE_CFLAGS="-march=armv8-a+sve"],
+                [AC_MSG_ERROR([Need a version of gcc supporting -march=armv8-a+sve])])
+                fi
+                ;;
+            *)
+                if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
+                    AX_CHECK_COMPILE_FLAG(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon"],
+                [AC_MSG_ERROR([Need a version of gcc with -mfpu=neon])])
+                fi
+                ;;
+        esac
         ;;
 
     ibm)
@@ -515,6 +520,7 @@ AC_SUBST(KCVI_CFLAGS)
 AC_SUBST(ALTIVEC_CFLAGS)
 AC_SUBST(VSX_CFLAGS)
 AC_SUBST(NEON_CFLAGS)
+AC_SUBST(SVE_CFLAGS)
 AC_SUBST(LSX_CFLAGS)
 AC_SUBST(LASX_CFLAGS)
 
@@ -719,13 +725,6 @@ AC_ARG_ENABLE(openmp, [AS_HELP_STRING([--enable-openmp],[use OpenMP directives f
 if test "$enable_openmp" = "yes"; then
    AC_DEFINE(HAVE_OPENMP,1,[Define to enable OpenMP])
    AX_OPENMP([], [AC_MSG_ERROR([don't know how to enable OpenMP])])
-fi
-
-if test "$have_sve" = "yes"; then
-   ACX_SVE([sve_ok=yes], [sve_ok=no])
-   if test "$sve_ok" != "yes"; then
-      AC_MSG_ERROR([Cannot build a SVE program, aborting])
-   fi
 fi
 
 AC_ARG_ENABLE(threads, [AS_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
