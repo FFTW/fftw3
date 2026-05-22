@@ -19,7 +19,7 @@ gen_hc2cdft.native gen_hc2cdft_c.native gen_hc2hc.native		\
 gen_mdct.native
 
 all-local::
-	$(OCAMLBUILD) -classic-display -libs unix,nums $(GENFFT_NATIVE)
+	$(OCAMLBUILD) -classic-display -pkgs num  $(GENFFT_NATIVE)
 
 maintainer-clean-local::
 	$(OCAMLBUILD) -classic-display -clean

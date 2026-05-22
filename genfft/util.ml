@@ -21,7 +21,6 @@
 
 (* various utility functions *)
 open List
-open Unix
 
 (*****************************************
  * Integer operations
@@ -134,10 +133,7 @@ let rec suchthat a pred =
 (* print an information message *)
 let info string =
   if !Magic.verbose then begin
-    let now = Unix.times ()
-    and pid = Unix.getpid () in
-    prerr_string ((string_of_int pid) ^ ": " ^
-		  "at t = " ^  (string_of_float now.tms_utime) ^ " : ");
+    prerr_string ("at t = " ^  (string_of_float (Sys.time())) ^ " : ");
     prerr_string (string ^ "\n");
     flush Stdlib.stderr;
   end

@@ -71,7 +71,7 @@ typedef DS(svfloat64_t, svfloat32_t) V;
 
 /* The goal is to limit to the required width by using masking.
  * However, some SVE instructions are limited to two-addresses
- * rather than three adresses when masked.
+ * rather than three addresses when masked.
  * (i.e. they do X op= Y, not X = Z op X)
  * Loads will put zero in masked-out value.
  * For performance reason, we want to use non-masked for the instructions

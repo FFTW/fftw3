@@ -1,3 +1,13 @@
+FFTW 3.3.11:
+
+* New API fftw_copy_plan()
+
+* Support for SVE SIMD instructions.
+
+* Support for LoongArch LSX and LASX SIMD instructions.
+
+* Support for Apple ARM, RISCV, and LoongArch cycle counters.
+
 FFTW 3.3.10:
 
 * Fix bug that would cause 2-way SIMD (notably SSE2 in double precision)

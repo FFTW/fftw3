@@ -102,14 +102,20 @@ extern void X(extract_reim)(int sign, R *c, R **r, R **i);
 #define CONCAT2(prefix, name) CONCAT(prefix, name)
 
 /* define HAVE_SIMD if any simd extensions are supported */
-#if defined(HAVE_SSE) || defined(HAVE_SSE2) || \
-      defined(HAVE_AVX) || defined(HAVE_AVX_128_FMA) || \
-      defined(HAVE_AVX2) || defined(HAVE_AVX512) || \
-      defined(HAVE_KCVI) || \
-      defined(HAVE_ALTIVEC) || defined(HAVE_VSX) || \
-      defined(HAVE_MIPS_PS) || \
-      defined(HAVE_LSX) || defined(HAVE_LASX) || \
-      defined(HAVE_GENERIC_SIMD128) || defined(HAVE_GENERIC_SIMD256)
+#if defined(HAVE_ALTIVEC)||                     \
+    defined(HAVE_AVX)||                         \
+    defined(HAVE_AVX2)||                        \
+    defined(HAVE_AVX512)||                      \
+    defined(HAVE_AVX_128_FMA)||                 \
+    defined(HAVE_KCVI)||                        \
+    defined(HAVE_LASX)||                        \
+    defined(HAVE_LSX)||                         \
+    defined(HAVE_NEON)||                        \
+    defined(HAVE_SSE2)||                        \
+    defined(HAVE_SVE)||                         \
+    defined(HAVE_VSX)||                         \
+    defined(HAVE_GENERIC_SIMD128) ||            \
+    defined(HAVE_GENERIC_SIMD256)
 #define HAVE_SIMD 1
 #else
 #define HAVE_SIMD 0
@@ -813,22 +819,7 @@ plan *X(mkplan_f_d)(planner *ego, problem *p,
 /*-----------------------------------------------------------------------*/
 /* stride.c: */
 
-/* If PRECOMPUTE_ARRAY_INDICES is defined, precompute all strides. */
-#if (defined(__i386__) || defined(__x86_64__) || _M_IX86 >= 500) && !defined(FFTW_LDOUBLE)
-#define PRECOMPUTE_ARRAY_INDICES
-#endif
-
 extern const INT X(an_INT_guaranteed_to_be_zero);
-
-#ifdef PRECOMPUTE_ARRAY_INDICES
-typedef INT *stride;
-#define WS(stride, i)  (stride[i])
-extern stride X(mkstride)(INT n, INT s);
-void X(stride_destroy)(stride p);
-/* hackery to prevent the compiler from copying the strides array
-   onto the stack */
-#define MAKE_VOLATILE_STRIDE(nptr, x) (x) = (x) + X(an_INT_guaranteed_to_be_zero)
-#else
 
 typedef INT stride;
 #define WS(stride, i)  (stride * i)
@@ -860,7 +851,6 @@ typedef INT stride;
      (nptr <= ESTIMATED_AVAILABLE_INDEX_REGISTERS ?     \
         0 :                                             \
       ((x) = (x) ^ X(an_INT_guaranteed_to_be_zero)))
-#endif /* PRECOMPUTE_ARRAY_INDICES */
 
 /*-----------------------------------------------------------------------*/
 /* solvtab.c */

@@ -9,7 +9,7 @@
 #   include 'fftw3-mpi.f03'
 # and then call the C FFTW MPI functions directly, with type checking.
 #
-# One caveat: because there is no standard way to conver MPI_Comm objects
+# One caveat: because there is no standard way to convert MPI_Comm objects
 # from Fortran (= integer) to C (= opaque type), the Fortran interface
 # technically calls C wrapper functions (also auto-generated) which
 # call MPI_Comm_f2c to convert the communicators as needed.

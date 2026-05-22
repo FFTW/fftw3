@@ -29,7 +29,7 @@ for name in $d/tools/fftw-wisdom.c; do
 done
 
 for name in $d/configure.ac; do
-    cat $name | sed -e 's+AC_INIT(fftw,+AC_INIT(commercial-fftw,+' > ${name}.tmp
+    cat $name | sed -e 's+AC_INIT(\[fftw\],+AC_INIT([commercial-fftw],+' > ${name}.tmp
     chmod --reference=$name ${name}.tmp
     touch --reference=$name ${name}.tmp
     mv ${name}.tmp $name
@@ -52,7 +52,7 @@ you have negotiated.
 Please note that this package is provided WITHOUT ANY WARRANTY.
 See your license agreement for complete details.
 
-Contact Mr. Tyler A Guitroz <tguitroz@mit.edu> for more information
+Contact Ms. Ashley Dessources <ashleybd@mit.edu> for more information
 regarding licensing.
 EOF
 

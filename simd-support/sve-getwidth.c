@@ -18,32 +18,12 @@
  *
  */
 
-
 #include "kernel/ifftw.h"
 
 #if HAVE_SVE
-extern int sve_getwidth(void);
+#include <arm_sve.h>
 
-#if defined(__linux__)
-
-#include <sys/auxv.h>
-#include <asm/hwcap.h>
-
-static int have_sve(void) {
-  unsigned long hwcap = getauxval(AT_HWCAP);
-  return (hwcap & HWCAP_SVE) != 0;
-}
-
-int X(have_simd_sve)(int minwidth) {
-  return have_sve() && (sve_getwidth() >= minwidth);
-}
-
-#elif defined(__APPLE__)
-// no Apple hardware supports SVE as of Apr 2026.  Revisit
-// if this changes
-int X(have_simd_sve)(int minwidth){
-  return 0;
+int sve_getwidth(void) {
+    return svcntb()*8;
 }
 #endif
-
-#endif // HAVE_SVE

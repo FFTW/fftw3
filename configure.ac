@@ -6,7 +6,7 @@ dnl Define the fftw version number as M4 macros, so that we can enforce
 dnl the invariant that the minor version number in FFTW-X.Y.MINOR is the same
 dnl as the revision number in SHARED_VERSION_INFO.
 define(FFTW_MAJOR_VERSION, 3.3)dnl
-define(FFTW_MINOR_VERSION, 10)dnl
+define(FFTW_MINOR_VERSION, 11)dnl
 
 dnl Version number of the FFTW source package.
 AC_INIT([fftw],[FFTW_MAJOR_VERSION.FFTW_MINOR_VERSION],[fftw@fftw.org])
@@ -26,7 +26,8 @@ dnl fftw-3.3.7 was 8:x:5 (No API changes)
 dnl fftw-3.3.8 was 8:x:5 (No API changes)
 dnl fftw-3.3.9 was 9:x:6 (added threads callback)
 dnl fftw-3.3.10 was 9:x:6 (No API changes)
-SHARED_VERSION_INFO="9:FFTW_MINOR_VERSION:6" # CURRENT:REVISION:AGE
+dnl fftw-3.3.11 was 10:x:7 (added fftw_copy_plan())
+SHARED_VERSION_INFO="10:FFTW_MINOR_VERSION:7" # CURRENT:REVISION:AGE
 
 AM_INIT_AUTOMAKE(1.7)
 AM_CONFIG_HEADER(config.h)
@@ -416,6 +417,10 @@ case "${ax_cv_c_compiler_vendor}" in
 
         case "${host_cpu}" in
             aarch64)
+                if test "$have_sve" = "yes" -a "x$SVE_CFLAGS" = x; then
+                    AX_CHECK_COMPILE_FLAG(-march=armv8-a+sve, [SVE_CFLAGS="-march=armv8-a+sve"],
+                [AC_MSG_ERROR([Need a version of gcc supporting -march=armv8-a+sve])])
+                fi
                 ;;
             *)
                 if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
@@ -441,20 +446,6 @@ case "${ax_cv_c_compiler_vendor}" in
             AX_CHECK_COMPILE_FLAG(-mlasx, [LASX_CFLAGS="-mlasx"],
             [AC_MSG_ERROR([Need a version of gcc with -mlasx])])
         fi
-
-    dnl FIXME:
-    dnl elif test "$have_mips_ps" = "yes"; then
-    dnl     # Just punt here and use only new 4.2 compiler :(
-    dnl 	# Should add section for older compilers...
-    dnl 	AX_CHECK_COMPILE_FLAG(-mpaired-single,
-    dnl 	    [SIMD_CFLAGS="-mpaired-single"],
-    dnl 	    #[AC_MSG_ERROR([Need a version of gcc with -mpaired-single])])
-    dnl 	    [AX_CHECK_COMPILE_FLAG(-march=mips64,
-    dnl 	      [SIMD_CFLAGS="-march=mips64"],
-    dnl 	        [AC_MSG_ERROR(
-    dnl 		 [Need a version of gcc with -mpaired-single or -march=mips64])
-    dnl 		])])
-    dnl fi
     ;;
 
     clang)
@@ -495,6 +486,21 @@ case "${ax_cv_c_compiler_vendor}" in
             AX_CHECK_COMPILE_FLAG(-mlasx, [LASX_CFLAGS="-mlasx"],
             [AC_MSG_ERROR([Need a version of clang with -mlasx])])
         fi
+
+        case "${host_cpu}" in
+            aarch64)
+                if test "$have_sve" = "yes" -a "x$SVE_CFLAGS" = x; then
+                    AX_CHECK_COMPILE_FLAG(-march=armv8-a+sve, [SVE_CFLAGS="-march=armv8-a+sve"],
+                [AC_MSG_ERROR([Need a version of gcc supporting -march=armv8-a+sve])])
+                fi
+                ;;
+            *)
+                if test "$have_neon" = "yes" -a "x$NEON_CFLAGS" = x; then
+                    AX_CHECK_COMPILE_FLAG(-mfpu=neon, [NEON_CFLAGS="-mfpu=neon"],
+                [AC_MSG_ERROR([Need a version of gcc with -mfpu=neon])])
+                fi
+                ;;
+        esac
         ;;
 
     ibm)
@@ -514,6 +520,7 @@ AC_SUBST(KCVI_CFLAGS)
 AC_SUBST(ALTIVEC_CFLAGS)
 AC_SUBST(VSX_CFLAGS)
 AC_SUBST(NEON_CFLAGS)
+AC_SUBST(SVE_CFLAGS)
 AC_SUBST(LSX_CFLAGS)
 AC_SUBST(LASX_CFLAGS)
 
@@ -718,13 +725,6 @@ AC_ARG_ENABLE(openmp, [AS_HELP_STRING([--enable-openmp],[use OpenMP directives f
 if test "$enable_openmp" = "yes"; then
    AC_DEFINE(HAVE_OPENMP,1,[Define to enable OpenMP])
    AX_OPENMP([], [AC_MSG_ERROR([don't know how to enable OpenMP])])
-fi
-
-if test "$have_sve" = "yes"; then
-   ACX_SVE([sve_ok=yes], [sve_ok=no])
-   if test "$sve_ok" != "yes"; then
-      AC_MSG_ERROR([Cannot build a SVE program, aborting])
-   fi
 fi
 
 AC_ARG_ENABLE(threads, [AS_HELP_STRING([--enable-threads],[compile FFTW SMP threads library])], enable_threads=$enableval, enable_threads=no)
