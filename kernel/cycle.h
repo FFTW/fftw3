@@ -524,6 +524,18 @@ INLINE_ELAPSED(inline)
 #define HAVE_TICK_COUNTER
 #endif
 
+#if defined(__e2k__) && !defined(HAVE_TICK_COUNTER)
+typedef uint64_t ticks;
+static inline ticks getticks(void)
+{
+  ticks ret;
+  __asm__ __volatile__( "rrd %%clkr, %0" :"=r"( ret ) );
+  return ret;
+}
+INLINE_ELAPSED(inline)
+#define HAVE_TICK_COUNTER
+#endif
+
 /*----------------------------------------------------------------*/
 /* SGI/Irix */
 #if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_SGI_CYCLE) && !defined(HAVE_TICK_COUNTER) && !defined(__ANDROID__)
