@@ -29,7 +29,7 @@
 
 #if HAVE_SSE2
 
-# if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
+# if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64) || defined(__e2k__)
 
   int X(have_simd_sse2)(void)
   {
