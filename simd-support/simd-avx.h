@@ -192,7 +192,7 @@ static inline __m128d VMOVAPD_LD(const R *x)
 
 	Force the use of vmovapd via asm until compilers stabilize.
      */
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__e2k__)
      __m128d var;
      __asm__("vmovapd %1, %0\n" : "=x"(var) : "m"(x[0]));
      return var;

@@ -23,6 +23,20 @@
 
 #if HAVE_AVX2
 
+#ifdef __e2k__
+
+int X(have_simd_avx2_128)(void)
+{
+     return 1;
+}
+
+int X(have_simd_avx2)(void)
+{
+     return 1;
+}
+
+#else
+
 #if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
 #    include "amd64-cpuid.h"
 #else
@@ -65,4 +79,6 @@ int X(have_simd_avx2)(void)
    */
   return X(have_simd_avx2_128)();
 }
+
+#endif /* x86 */
 #endif
