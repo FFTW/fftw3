@@ -64,6 +64,8 @@ tests/bench
 tools/fftw-wisdom
 tools/fftw-wisdom-to-conf
 tools/fftw-wisdom.1
+tools/fftwf-wisdom
+tools/fftwf-wisdom.1
 tools/fftw_wisdom.1
 doc/FAQ/*.ascii
 doc/FAQ/*.html
