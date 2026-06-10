@@ -10,7 +10,7 @@ jobs:
         sudo apt-get install ocaml ocamlbuild libnum-ocaml-dev autoconf automake indent libtool fig2dev
 
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Bootstrap
       run: sh bootstrap.sh
