@@ -486,7 +486,7 @@ INLINE_ELAPSED(inline)
 #define HAVE_TICK_COUNTER
 #endif
 
-#if defined(__riscv_xlen) && !defined(HAVE_TICK_COUNTER)
+#if defined(__riscv_xlen) && defined(__riscv_zicntr) && !defined(HAVE_TICK_COUNTER)
 typedef uint64_t ticks;
 static inline ticks getticks(void)
 {
