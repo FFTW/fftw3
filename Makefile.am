@@ -165,8 +165,20 @@ endif
 
 fftw3@PREC_SUFFIX@.pc: fftw.pc
 	cp -f fftw.pc fftw3@PREC_SUFFIX@.pc
+if MPI
+fftw3@PREC_SUFFIX@_mpi.pc: fftw.pc
+	$(SED) -e 's|-lfftw3@PREC_SUFFIX@|-lfftw3@PREC_SUFFIX@_mpi|' \
+	       -e 's|^Name: FFTW|Name: FFTW MPI|' \
+	       -e 's|^Description: fast Fourier transform library|Description: fast Fourier transform library (MPI parallel runtime)|' \
+	       -e '/^Version:/a Requires: fftw3@PREC_SUFFIX@' \
+	       fftw.pc > $@
+endif
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = fftw3@PREC_SUFFIX@.pc
+if MPI
+pkgconfig_DATA += fftw3@PREC_SUFFIX@_mpi.pc
+endif
 
 FFTW3@PREC_SUFFIX@Config.cmake: $(top_srcdir)/FFTW3Config.cmake.in
 	$(SED) \
