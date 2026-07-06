@@ -374,10 +374,10 @@ ptrdiff_t XM(local_size_many_transposed)(int rnk, const ptrdiff_t *n,
      local = (ptrdiff_t *) MALLOC(sizeof(ptrdiff_t) * rnk * 4, TENSORS);
 
      /* default 1d block distribution, with transposed output
-        if yblock < n[1] */
+        if yblock <= n[1] */
      dims[0].ib = xblock;
      if (rnk > 1) {
-	  if (yblock < n[1])
+	  if (yblock <= n[1])
 	       dims[1].ob = yblock;
 	  else
 	       dims[0].ob = xblock;
