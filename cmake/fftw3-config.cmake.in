@@ -1,0 +1,64 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+set(${CMAKE_FIND_PACKAGE_NAME}_FOUND TRUE)
+
+set(_fftw_language C)
+if(NOT CMAKE_C_COMPILER_LOADED AND CMAKE_CXX_COMPILER_LOADED)
+  set(_fftw_language CXX)
+endif()
+
+# Components have the same names as the libraries; no component means double.
+if(NOT ${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS)
+  set(${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS fftw3)
+  set(${CMAKE_FIND_PACKAGE_NAME}_FIND_REQUIRED_fftw3 TRUE)
+endif()
+
+set(_fftw_components @FFTW_COMPONENTS@)
+# The export includes all installed target even when no component is requested.
+foreach(_fftw_component IN LISTS _fftw_components
+                                 ${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS)
+  set(${CMAKE_FIND_PACKAGE_NAME}_${_fftw_component}_FOUND TRUE)
+  if(NOT _fftw_component IN_LIST _fftw_components)
+    set(${CMAKE_FIND_PACKAGE_NAME}_${_fftw_component}_FOUND FALSE)
+  elseif(_fftw_component MATCHES "_mpi$")
+    find_package(MPI QUIET COMPONENTS ${_fftw_language})
+    set(${CMAKE_FIND_PACKAGE_NAME}_${_fftw_component}_FOUND
+        ${MPI_${_fftw_language}_FOUND})
+    if(MPI_${_fftw_language}_FOUND AND NOT TARGET FFTW::MPI)
+      add_library(FFTW::MPI INTERFACE IMPORTED)
+      target_link_libraries(FFTW::MPI INTERFACE MPI::MPI_${_fftw_language})
+    endif()
+  elseif(NOT @BUILD_SHARED_LIBS@ AND _fftw_component MATCHES "_omp$")
+    if(CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED)
+      find_package(OpenMP QUIET COMPONENTS ${_fftw_language})
+    endif()
+    set(${CMAKE_FIND_PACKAGE_NAME}_${_fftw_component}_FOUND
+        ${OpenMP_${_fftw_language}_FOUND})
+    if(OpenMP_${_fftw_language}_FOUND AND NOT TARGET FFTW::OpenMP)
+      add_library(FFTW::OpenMP INTERFACE IMPORTED)
+      target_link_libraries(FFTW::OpenMP
+                            INTERFACE OpenMP::OpenMP_${_fftw_language})
+    endif()
+  endif()
+  if(${CMAKE_FIND_PACKAGE_NAME}_${_fftw_component}_FOUND
+     AND NOT @BUILD_SHARED_LIBS@
+     AND (_fftw_component MATCHES "_threads$" OR @WITH_COMBINED_THREADS@))
+    if(NOT CMAKE_C_COMPILER_LOADED AND NOT CMAKE_CXX_COMPILER_LOADED)
+      set(${CMAKE_FIND_PACKAGE_NAME}_${_fftw_component}_FOUND FALSE)
+    elseif(${CMAKE_FIND_PACKAGE_NAME}_FIND_REQUIRED_${_fftw_component})
+      find_dependency(Threads)
+    else()
+      find_package(Threads QUIET)
+      set(${CMAKE_FIND_PACKAGE_NAME}_${_fftw_component}_FOUND ${Threads_FOUND})
+    endif()
+  endif()
+endforeach()
+unset(_fftw_component)
+unset(_fftw_components)
+unset(_fftw_language)
+
+check_required_components(${CMAKE_FIND_PACKAGE_NAME})
+if(${CMAKE_FIND_PACKAGE_NAME}_FOUND)
+  include("${CMAKE_CURRENT_LIST_DIR}/fftw3-targets.cmake")
+endif()
