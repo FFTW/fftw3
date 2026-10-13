@@ -42,8 +42,10 @@ endif
 SUBDIRS=support $(GENFFT) kernel simd-support dft rdft reodft api	\
 libbench2 $(CHICKEN_EGG) tests mpi $(DOCDIR) tools m4
 EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in	\
-CMakeLists.txt cmake.config.h.in FFTW3Config.cmake.in		\
-FFTW3ConfigVersion.cmake.in README-perfcnt.md
+CMakeLists.txt cmake/cmake.config.h.in FFTW3Config.cmake.in		\
+FFTW3ConfigVersion.cmake.in README-perfcnt.md \
+cmake/CMakeLists.txt cmake/checks.cmake cmake/fortran.cmake cmake/simd.cmake \
+cmake/fftw3-config.cmake.in cmake/fftw.pc.in
 
 SIMD_LIBS = simd-support/libsimd_support.la simd-support/libsimd_sve.la
 

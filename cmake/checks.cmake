@@ -1,0 +1,103 @@
+# Platform checks shared by all precisions.
+set(WITH_OUR_MALLOC ${MINGW})
+include(CMakePushCheckState)
+include(CheckLibraryExists)
+include(CheckCSourceCompiles)
+cmake_push_check_state(RESET)
+
+set(FFTW_MATH_LIBRARIES "")
+check_library_exists(m sin "" HAVE_LIBM)
+if(HAVE_LIBM)
+  list(APPEND FFTW_MATH_LIBRARIES m)
+endif()
+if(ENABLE_QUAD_PRECISION)
+  set(CMAKE_REQUIRED_LIBRARIES quadmath)
+  check_c_source_compiles(
+    "#include <quadmath.h>
+    int main(void) { volatile __float128 x = 1.0Q; return sinq(x) == 0; }"
+    FFTW_HAVE_QUADMATH)
+  if(NOT FFTW_HAVE_QUADMATH)
+    message(FATAL_ERROR "Quad precision requires __float128 and libquadmath")
+  endif()
+endif()
+set(CMAKE_REQUIRED_LIBRARIES ${FFTW_MATH_LIBRARIES})
+
+include(CheckIncludeFile)
+check_include_file(alloca.h HAVE_ALLOCA_H)
+check_include_file(c_asm.h HAVE_C_ASM_H)
+check_include_file(dlfcn.h HAVE_DLFCN_H)
+check_include_file(intrinsics.h HAVE_INTRINSICS_H)
+check_include_file(inttypes.h HAVE_INTTYPES_H)
+check_include_file(libintl.h HAVE_LIBINTL_H)
+check_include_file(limits.h HAVE_LIMITS_H)
+check_include_file(mach/mach_time.h HAVE_MACH_MACH_TIME_H)
+check_include_file(malloc.h HAVE_MALLOC_H)
+check_include_file(memory.h HAVE_MEMORY_H)
+check_include_file(stddef.h HAVE_STDDEF_H)
+check_include_file(stdint.h HAVE_STDINT_H)
+check_include_file(stdlib.h HAVE_STDLIB_H)
+check_include_file(string.h HAVE_STRING_H)
+check_include_file(strings.h HAVE_STRINGS_H)
+check_include_file(sys/types.h HAVE_SYS_TYPES_H)
+check_include_file(sys/time.h HAVE_SYS_TIME_H)
+check_include_file(sys/stat.h HAVE_SYS_STAT_H)
+check_include_file(sys/sysctl.h HAVE_SYS_SYSCTL_H)
+check_include_file(time.h HAVE_TIME_H)
+check_include_file(uintptr.h HAVE_UINTPTR_H)
+check_include_file(unistd.h HAVE_UNISTD_H)
+if(HAVE_TIME_H AND HAVE_SYS_TIME_H)
+  set(TIME_WITH_SYS_TIME TRUE)
+endif()
+
+include(CheckPrototypeDefinition)
+check_prototype_definition(drand48 "double drand48 (void)" "0" stdlib.h
+                           HAVE_DECL_DRAND48)
+check_prototype_definition(srand48 "void srand48(long int seedval)" "0"
+                           stdlib.h HAVE_DECL_SRAND48)
+check_prototype_definition(cosl "long double cosl( long double arg )" "0"
+                           math.h HAVE_DECL_COSL)
+check_prototype_definition(sinl "long double sinl( long double arg )" "0"
+                           math.h HAVE_DECL_SINL)
+check_prototype_definition(
+  memalign "void *memalign(size_t alignment, size_t size)" "0" malloc.h
+  HAVE_DECL_MEMALIGN)
+check_prototype_definition(
+  posix_memalign
+  "int posix_memalign(void **memptr, size_t alignment, size_t size)" "0"
+  stdlib.h HAVE_DECL_POSIX_MEMALIGN)
+
+include(CheckSymbolExists)
+check_symbol_exists(clock_gettime time.h HAVE_CLOCK_GETTIME)
+check_symbol_exists(gettimeofday sys/time.h HAVE_GETTIMEOFDAY)
+check_symbol_exists(getpagesize unistd.h HAVE_GETPAGESIZE)
+check_symbol_exists(drand48 stdlib.h HAVE_DRAND48)
+check_symbol_exists(srand48 stdlib.h HAVE_SRAND48)
+check_symbol_exists(memalign malloc.h HAVE_MEMALIGN)
+check_symbol_exists(posix_memalign stdlib.h HAVE_POSIX_MEMALIGN)
+check_symbol_exists(mach_absolute_time mach/mach_time.h HAVE_MACH_ABSOLUTE_TIME)
+check_symbol_exists(alloca alloca.h HAVE_ALLOCA)
+if(NOT HAVE_ALLOCA)
+  unset(HAVE_ALLOCA CACHE)
+  check_symbol_exists(alloca malloc.h HAVE_ALLOCA)
+endif()
+check_symbol_exists(isnan math.h HAVE_ISNAN)
+check_symbol_exists(snprintf stdio.h HAVE_SNPRINTF)
+check_symbol_exists(strchr string.h HAVE_STRCHR)
+check_symbol_exists(memmove string.h HAVE_MEMMOVE)
+check_symbol_exists(sysctl unistd.h HAVE_SYSCTL)
+
+check_symbol_exists(cosl math.h HAVE_COSL)
+check_symbol_exists(sinl math.h HAVE_SINL)
+
+include(CheckTypeSize)
+check_type_size("float" SIZEOF_FLOAT)
+check_type_size("double" SIZEOF_DOUBLE)
+check_type_size("int" SIZEOF_INT)
+check_type_size("long" SIZEOF_LONG)
+check_type_size("long long" SIZEOF_LONG_LONG)
+check_type_size("unsigned int" SIZEOF_UNSIGNED_INT)
+check_type_size("unsigned long" SIZEOF_UNSIGNED_LONG)
+check_type_size("unsigned long long" SIZEOF_UNSIGNED_LONG_LONG)
+check_type_size("size_t" SIZEOF_SIZE_T)
+check_type_size("ptrdiff_t" SIZEOF_PTRDIFF_T)
+cmake_pop_check_state()
