@@ -826,9 +826,11 @@ typedef INT stride;
 #define fftwf_mkstride(n, stride) stride
 #define fftw_mkstride(n, stride) stride
 #define fftwl_mkstride(n, stride) stride
+#define fftwq_mkstride(n, stride) stride
 #define fftwf_stride_destroy(p) ((void) p)
 #define fftw_stride_destroy(p) ((void) p)
 #define fftwl_stride_destroy(p) ((void) p)
+#define fftwq_stride_destroy(p) ((void) p)
 
 /* hackery to prevent the compiler from ``optimizing'' induction
    variables in codelet loops.  The problem is that for each K and for
