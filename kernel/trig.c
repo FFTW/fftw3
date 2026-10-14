@@ -42,7 +42,7 @@
 #    define COS cosf128
 #    define SIN sinf128
 #  endif
-#  if __STDC_VERSION__ >= 202311L
+#  if (__STDC_VERSION__ >= 202311L) && defined(__STDC_IEC_60559_TYPES__)
 #    define KTRIG(x) (x##f128)
 #  else
 #    define KTRIG(x) (x##Q)

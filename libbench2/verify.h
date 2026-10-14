@@ -97,7 +97,7 @@ void accuracy_r2r(bench_problem *p, int rounds, int impulse_rounds,
 #    define SIN sinf128
 #    define TAN tanf128
 #  endif
-#  if __STDC_VERSION__ >= 202311L
+#  if (__STDC_VERSION__ >= 202311L) && defined(__STDC_IEC_60559_TYPES__)
      typedef _Float128 trigreal;
 #    define KTRIG(x) (x##f128)
 #  else
