@@ -470,7 +470,7 @@ FFTW_DEFINE_API(FFTW_MANGLE_FLOAT, float, fftwf_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 
 /* C23 defines a _Float128 type for quad precision */
-#if (__STDC_VERSION__ >= 202311L) && defined(__STDC_IEC_60559_TYPES__)
+#if __STDC_VERSION__ >= 202311L && defined(__STDC_IEC_60559_TYPES__)
 FFTW_DEFINE_API(FFTW_MANGLE_QUAD, _Float128, fftwq_complex)
 
 /* __float128 (quad precision) is a gcc extension on i386, x86_64, and ia64
