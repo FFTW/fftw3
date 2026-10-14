@@ -123,7 +123,7 @@ although it is standard in C99).
 
 We also support using the C23 standard's @code{_Float128}
 quadruple-precision type if your compiler implements this (@pxref{Installation and Customization}).
-To use this type, link with @code{-lfftw3q -lm} (or possibly @code{-lfftw3q -lquadmath -lm}
+To use this type, link with @code{-lfftw3q -lm} (or possibly @code{-lfftw3q -lquadmath -lm})
 on platforms that require GCC's software libquadmath library)
 and use @samp{fftwq_} identifiers.
 
