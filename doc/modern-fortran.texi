@@ -157,7 +157,7 @@ supported by @code{gfortran}.  The quadruple-precision @samp{fftwq_}
 functions (@pxref{Precision}) are declared in a @code{fftw3q.f03}
 interface file, which should be included in addition to
 @code{fftw3.f03}, as above.  You should also link with
-@code{-lfftw3q -lm} (or possibly @code{-lfftw3q -lquadmath -lm} ) as in C.
+@code{-lfftw3q -lm} (or possibly @code{-lfftw3q -lquadmath -lm}) as in C.
 
 @c -------------------------------------------------------
 @node Reversing array dimensions, FFTW Fortran type reference, Overview of Fortran interface, Calling FFTW from Modern Fortran
