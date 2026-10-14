@@ -44,7 +44,7 @@
 #  endif
 #  if __STDC_VERSION__ >= 202311L
 #    define KTRIG(x) (x##f128)
-#  elif
+#  else
 #    define KTRIG(x) (x##Q)
 #  endif
 #else

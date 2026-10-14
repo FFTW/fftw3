@@ -100,7 +100,7 @@ void accuracy_r2r(bench_problem *p, int rounds, int impulse_rounds,
 #  if __STDC_VERSION__ >= 202311L
      typedef _Float128 trigreal;
 #    define KTRIG(x) (x##f128)
-#  elif
+#  else
      typedef __float128 trigreal;
 #    define KTRIG(x) (x##Q)
 #  endif
