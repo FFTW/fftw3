@@ -618,7 +618,7 @@ if test $PRECISION = q; then
       [AC_MSG_CHECKING([for sinq in -lquadmath])
        LIBQUADMATH="-lquadmath"
        LIBS="$LIBQUADMATH $LIBS"
-       AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <quadmath.h>]],[[int main (void) { return sinq(1.0f128) == 0; }]])],
+       AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <quadmath.h>]],[[int main (void) { return sinq(1.0) == 0; }]])],
          [AC_MSG_RESULT([yes])
           AC_DEFINE(HAVE_LIBQUADMATH, 1, [Define to 1 to use libquadmath trig functions])],
          [AC_MSG_RESULT([no])
