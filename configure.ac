@@ -254,6 +254,12 @@ if test "$have_sve" = "yes"; then
 fi
 AM_CONDITIONAL(HAVE_SVE, test "$have_sve" = "yes")
 
+AC_ARG_ENABLE(rvv, [AC_HELP_STRING([--enable-rvv],[enable RISC-V V optimizations])], have_rvv=$enableval, have_rvv=no)
+if test "$have_rvv" = "yes"; then
+        AC_DEFINE(HAVE_RVV,1,[Define to enable RISC-V V optimizations.])
+fi
+AM_CONDITIONAL(HAVE_RVV, test "$have_rvv" = "yes")
+
 dnl FIXME:
 dnl AC_ARG_ENABLE(mips-ps, [AS_HELP_STRING([--enable-mips-ps],[enable MIPS pair-single optimizations])], have_mips_ps=$enableval, have_mips_ps=no)
 dnl if test "$have_mips_ps" = "yes"; then
@@ -446,6 +452,12 @@ case "${ax_cv_c_compiler_vendor}" in
             AX_CHECK_COMPILE_FLAG(-mlasx, [LASX_CFLAGS="-mlasx"],
             [AC_MSG_ERROR([Need a version of gcc with -mlasx])])
         fi
+        
+        # RVV
+        if test "$have_rvv" = "yes" -a "x$RVV_CFLAGS" = x; then
+            AX_CHECK_COMPILE_FLAG(-march=rv64gcv, [RVV_CFLAGS="-march=rv64gcv"],
+            [AC_MSG_ERROR([Need a version of gcc with -march=rv64gcv])])
+        fi
     ;;
 
     clang)
@@ -486,6 +498,12 @@ case "${ax_cv_c_compiler_vendor}" in
             AX_CHECK_COMPILE_FLAG(-mlasx, [LASX_CFLAGS="-mlasx"],
             [AC_MSG_ERROR([Need a version of clang with -mlasx])])
         fi
+        
+        # RVV
+        if test "$have_rvv" = "yes" -a "x$RVV_CFLAGS" = x; then
+            AX_CHECK_COMPILE_FLAG(-march=rv64gcv, [RVV_CFLAGS="-march=rv64gcv"],
+            [AC_MSG_ERROR([Need a version of clang with -march=rv64gcv])])
+        fi
 
         case "${host_cpu}" in
             aarch64)
@@ -523,6 +541,7 @@ AC_SUBST(NEON_CFLAGS)
 AC_SUBST(SVE_CFLAGS)
 AC_SUBST(LSX_CFLAGS)
 AC_SUBST(LASX_CFLAGS)
+AC_SUBST(RVV_CFLAGS)
 
 dnl add stack alignment CFLAGS if so requested
 if test "$with_incoming_stack_boundary"x != "no"x; then
@@ -823,6 +842,16 @@ AC_CONFIG_FILES([
    dft/simd/sve2048/Makefile
    dft/simd/lsx/Makefile
    dft/simd/lasx/Makefile
+   dft/simd/rvv128/Makefile
+   dft/simd/rvv256/Makefile
+   dft/simd/rvv512/Makefile
+   dft/simd/rvv1024/Makefile
+   dft/simd/rvv2048/Makefile
+   dft/simd/rvv4096/Makefile
+   dft/simd/rvv8192/Makefile
+   dft/simd/rvv16384/Makefile
+   dft/simd/rvv32768/Makefile
+   dft/simd/rvv65536/Makefile
    dft/simd/generic-simd128/Makefile
    dft/simd/generic-simd256/Makefile
 
@@ -850,6 +879,16 @@ AC_CONFIG_FILES([
    rdft/simd/sve2048/Makefile
    rdft/simd/lsx/Makefile
    rdft/simd/lasx/Makefile
+   rdft/simd/rvv128/Makefile
+   rdft/simd/rvv256/Makefile
+   rdft/simd/rvv512/Makefile
+   rdft/simd/rvv1024/Makefile
+   rdft/simd/rvv2048/Makefile
+   rdft/simd/rvv4096/Makefile
+   rdft/simd/rvv8192/Makefile
+   rdft/simd/rvv16384/Makefile
+   rdft/simd/rvv32768/Makefile
+   rdft/simd/rvv65536/Makefile
    rdft/simd/generic-simd128/Makefile
    rdft/simd/generic-simd256/Makefile
 

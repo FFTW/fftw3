@@ -16,6 +16,8 @@ neon.c simd-neon.h \
 lsx.c simd-lsx.h \
 lasx.c simd-lasx.h \
 simd-generic128.h simd-generic256.h \
+rvv.c simd-rvv.h simd-rvv128.h simd-rvv256.h simd-rvv512.h simd-rvv1024.h \
+simd-rvv2048.h simd-rvv4096.h simd-rvv8192.h simd-rvv16384.h simd-rvv32768.h simd-rvv65536.h \
 sve.c simd-maskedsve.h simd-maskedsve128.h simd-maskedsve256.h simd-maskedsve512.h simd-maskedsve1024.h simd-maskedsve2048.h
 
 # sve-getwidth.c goes into a separate library with SVE compilation flags

@@ -202,6 +202,9 @@
 /* Define to enable ARM NEON optimizations. */
 /* #undef HAVE_NEON */
 
+/* Define to enable RISC-V Vector optimizations. */
+/* #undef HAVE_RVV */
+
 /* Define if OpenMP is enabled */
 #cmakedefine HAVE_OPENMP
 
