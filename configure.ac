@@ -610,9 +610,9 @@ AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
 
 if test $PRECISION = q; then
-   AC_CHECK_TYPE([_Float128],
-                 [AC_DEFINE(HAVE__FLOAT128, 1, [Define to 1 if the compiler supports `_Float128'])],
-                 [AC_MSG_ERROR([quad precision requires C32 _Float128 type])])
+   AC_CHECK_TYPE([_Float128], [],
+                 [AC_CHECK_TYPE([__float128], [],
+                    [AC_MSG_ERROR([quad precision requires C32 _Float128 or gcc __float128 type])])])
    LIBQUADMATH=""
    AC_CHECK_FUNC(sinf128, [],
       [AC_MSG_CHECKING([for sinq in -lquadmath])
