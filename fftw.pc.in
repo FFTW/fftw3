@@ -7,5 +7,5 @@ Name: FFTW
 Description: fast Fourier transform library
 Version: @VERSION@
 Libs: -L${libdir} -lfftw3@PREC_SUFFIX@ @LIBQUADMATH@
-Libs.private: -lm
+Libs.private: @THREADLIBS@ -lm
 Cflags: -I${includedir}
