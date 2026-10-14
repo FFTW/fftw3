@@ -487,7 +487,7 @@ FFTW_DEFINE_API(FFTW_MANGLE_QUAD, _Float128, fftwq_complex)
 #    undef FFTW_DEFINE_COMPLEX
 #    define FFTW_DEFINE_COMPLEX(R, C) typedef _Complex float __attribute__((mode(TC))) C
 #  endif
-   FFTW_DEFINE_API(FFTW_MANGLE_QUAD, __float128, fftwq_complex)
+FFTW_DEFINE_API(FFTW_MANGLE_QUAD, __float128, fftwq_complex)
 #endif
 
 #define FFTW_FORWARD (-1)
