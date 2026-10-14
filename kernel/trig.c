@@ -42,7 +42,11 @@
 #    define COS cosf128
 #    define SIN sinf128
 #  endif
-#  define KTRIG(x) (x##f128)
+#  if __STDC_VERSION__ >= 202311L
+#    define KTRIG(x) (x##f128)
+#  elif
+#    define KTRIG(x) (x##Q)
+#  endif
 #else
 #  define COS cos
 #  define SIN sin

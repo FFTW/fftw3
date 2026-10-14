@@ -116,6 +116,8 @@ of FFTW using the C23 standard's @code{_Float128} type
 instead of the default double-precision (@code{double}).  The
 @code{configure} script will halt with an error message if the
 compiler does not does support this type and associated functions.
+(On older x86, x86-64, and Itanium systems this can alternatively
+use the nonstandard @code{__float128} type provided by GCC 4.6 or later.)
 
 @item
 @cindex threads
