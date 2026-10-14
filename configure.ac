@@ -610,9 +610,17 @@ AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
 
 if test $PRECISION = q; then
-   AC_CHECK_TYPE([_Float128], [],
-                 [AC_CHECK_TYPE([__float128], [],
-                    [AC_MSG_ERROR([quad precision requires C32 _Float128 or gcc __float128 type])])])
+   AC_MSG_CHECKING([for C23-ish _Float128])
+   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[[
+#if __STDC_VERSION__ >= 202311L && (defined(__STDC_IEC_60559_TYPES__) || defined(__FLT128_MANT_DIG__))
+    int main(void) { _Float128 x; return 0; }
+#else
+#   error "C23-standard _Float128 not available"
+#endif]])],
+        [AC_MSG_RESULT([yes])],
+        [AC_MSG_RESULT([no])
+         AC_CHECK_TYPE([__float128], [],
+            [AC_MSG_ERROR([quad precision requires C32 _Float128 or gcc __float128 type])])])
    LIBQUADMATH=""
    AC_CHECK_FUNC(sinf128, [],
       [AC_MSG_CHECKING([for sinq in -lquadmath])
