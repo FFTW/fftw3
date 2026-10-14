@@ -41,7 +41,8 @@ endif
 
 SUBDIRS=support $(GENFFT) kernel simd-support dft rdft reodft api	\
 libbench2 $(CHICKEN_EGG) tests mpi $(DOCDIR) tools m4
-EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in	\
+EXTRA_DIST=COPYRIGHT bootstrap.sh CONVENTIONS fftw.pc.in		\
+fftw_threads.pc.in fftw_omp.pc.in				\
 CMakeLists.txt cmake.config.h.in FFTW3Config.cmake.in		\
 FFTW3ConfigVersion.cmake.in README-perfcnt.md
 
@@ -165,8 +166,27 @@ endif
 
 fftw3@PREC_SUFFIX@.pc: fftw.pc
 	cp -f fftw.pc fftw3@PREC_SUFFIX@.pc
+
+# A separate pkg-config file is installed for each threading variant that is
+# built.  Each one Requires: the base fftw3 package and adds the threaded
+# library plus the threading libraries needed when linking statically.
+if THREADS
+if !COMBINED_THREADS
+THREADS_PC = fftw3@PREC_SUFFIX@_threads.pc
+endif
+endif
+
+if OPENMP
+OPENMP_PC = fftw3@PREC_SUFFIX@_omp.pc
+endif
+
+fftw3@PREC_SUFFIX@_threads.pc: fftw_threads.pc
+	cp -f fftw_threads.pc fftw3@PREC_SUFFIX@_threads.pc
+fftw3@PREC_SUFFIX@_omp.pc: fftw_omp.pc
+	cp -f fftw_omp.pc fftw3@PREC_SUFFIX@_omp.pc
+
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = fftw3@PREC_SUFFIX@.pc
+pkgconfig_DATA = fftw3@PREC_SUFFIX@.pc $(THREADS_PC) $(OPENMP_PC)
 
 FFTW3@PREC_SUFFIX@Config.cmake: $(top_srcdir)/FFTW3Config.cmake.in
 	$(SED) \

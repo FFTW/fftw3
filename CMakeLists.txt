@@ -431,6 +431,25 @@ install (FILES
          DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
          COMPONENT Development)
 
+# pkgconfig files for the threading variants
+if (Threads_FOUND AND NOT WITH_COMBINED_THREADS)
+  set (THREADLIBS "${CMAKE_THREAD_LIBS_INIT}")
+  configure_file (fftw_threads.pc.in fftw3${PREC_SUFFIX}_threads.pc @ONLY)
+  install (FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/fftw3${PREC_SUFFIX}_threads.pc
+           DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+           COMPONENT Development)
+endif ()
+
+if (OPENMP_FOUND)
+  set (OPENMP_CFLAGS "${OpenMP_C_FLAGS}")
+  configure_file (fftw_omp.pc.in fftw3${PREC_SUFFIX}_omp.pc @ONLY)
+  install (FILES
+            ${CMAKE_CURRENT_BINARY_DIR}/fftw3${PREC_SUFFIX}_omp.pc
+           DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+           COMPONENT Development)
+endif ()
+
 # cmake file
 set (FFTW3_LIBRARIES "FFTW3::${fftw3_lib}")
 configure_file (FFTW3Config.cmake.in FFTW3${PREC_SUFFIX}Config.cmake @ONLY)

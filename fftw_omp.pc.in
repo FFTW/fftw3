@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: FFTW OpenMP
+Description: fast Fourier transform library, OpenMP variant
+Version: @VERSION@
+Requires: fftw3@PREC_SUFFIX@
+Libs: -L${libdir} -lfftw3@PREC_SUFFIX@_omp
+Libs.private: @OPENMP_CFLAGS@ -lm
+Cflags: -I${includedir}
