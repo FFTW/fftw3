@@ -49,6 +49,15 @@
 
 #include <stdio.h>
 
+#if __STDC_VERSION__ >= 202311L
+#  include <float.h> /* for FLT128_MANT_DIG */
+#elif __cplusplus >= 202302L
+#  include <stdfloat>
+#  if defined(__STDCPP_FLOAT128_T__)
+        typedef std::float128_t fftw_float128_t;
+#  endif
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -469,9 +478,15 @@ FFTW_DEFINE_API(FFTW_MANGLE_DOUBLE, double, fftw_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_FLOAT, float, fftwf_complex)
 FFTW_DEFINE_API(FFTW_MANGLE_LONG_DOUBLE, long double, fftwl_complex)
 
-/* C23 defines a _Float128 type for quad precision */
-#if __STDC_VERSION__ >= 202311L && defined(__STDC_IEC_60559_TYPES__)
+/* C23 defines a _Float128 type for quad precision, and this was also added
+   by gcc 7 and by some clang releases as an extension prior to full C23 support */
+#if (__STDC_VERSION__ >= 202311L && defined(FLT128_MANT_DIG)) \
+ || (defined(__GNUC__) && defined(__FLT128_MANT_DIG__) && !defined(__cplusplus))
 FFTW_DEFINE_API(FFTW_MANGLE_QUAD, _Float128, fftwq_complex)
+
+/* C++23 defines a similar std::float128_t type with f128-suffixed literals */
+#elif __cplusplus >= 202302L && defined(__STDCPP_FLOAT128_T__)
+FFTW_DEFINE_API(FFTW_MANGLE_QUAD, fftw_float128_t, fftwq_complex)
 
 /* __float128 (quad precision) is a gcc extension on i386, x86_64, and ia64
    for gcc >= 4.6 (compiled in FFTW with --enable-quad-precision) */

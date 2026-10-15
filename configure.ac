@@ -612,7 +612,8 @@ AC_CHECK_LIB(m, sin)
 if test $PRECISION = q; then
    AC_MSG_CHECKING([for C23-ish _Float128])
    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[[
-#if __STDC_VERSION__ >= 202311L && defined(__STDC_IEC_60559_TYPES__)
+#if (__STDC_VERSION__ >= 202311L && defined(__STDC_IEC_60559_TYPES__)) \
+ || (defined(__GNUC__) && defined(__FLT128_MANT_DIG__))
     int main(void) { _Float128 x; return 0; }
 #else
 #   error "C23-standard _Float128 not available"
