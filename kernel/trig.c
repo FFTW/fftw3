@@ -33,12 +33,21 @@
 #  if defined(HAVE_DECL_COSL) && !HAVE_DECL_COSL
      extern long double cosl(long double x);
 #  endif
-#elif defined(TRIGREAL_IS_QUAD)
-#  define COS cosq
-#  define SIN sinq
-#  define KTRIG(x) (x##Q)
-   extern __float128 sinq(__float128 x);
-   extern __float128 cosq(__float128 x);
+#elif defined(TRIGREAL_IS_QUAD) /* _Float128 in C23 */
+#  if defined(HAVE_LIBQUADMATH)
+#    include <quadmath.h>
+#    define COS cosq
+#    define SIN sinq
+#  else
+#    define COS cosf128
+#    define SIN sinf128
+#  endif
+#  if (__STDC_VERSION__ >= 202311L && defined(__STDC_IEC_60559_TYPES__)) \
+    || (defined(__GNUC__) && defined(__FLT128_MANT_DIG__))
+#    define KTRIG(x) (x##f128)
+#  else
+#    define KTRIG(x) (x##Q)
+#  endif
 #else
 #  define COS cos
 #  define SIN sin
@@ -75,8 +84,8 @@ static void real_cexp(INT m, INT n, trigreal *out)
      if (octant & 2) { t = c; c = -s; s = t; }
      if (octant & 4) { s = -s; }
 
-     out[0] = c; 
-     out[1] = s; 
+     out[0] = c;
+     out[1] = s;
 }
 
 static INT choose_twshft(INT n)
@@ -194,10 +203,10 @@ triggen *X(mktriggen)(enum wakefulness wakefulness, INT n)
 	      p->W0 = (trigreal *)MALLOC(n0 * 2 * sizeof(trigreal), TWIDDLES);
 	      p->W1 = (trigreal *)MALLOC(n1 * 2 * sizeof(trigreal), TWIDDLES);
 
-	      for (i = 0; i < n0; ++i) 
+	      for (i = 0; i < n0; ++i)
 		   real_cexp(i, n, p->W0 + 2 * i);
 
-	      for (i = 0; i < n1; ++i) 
+	      for (i = 0; i < n1; ++i)
 		   real_cexp(i * p->twradix, n, p->W1 + 2 * i);
 
 	      p->cexpl = cexpl_sqrtn_table;
@@ -205,11 +214,11 @@ triggen *X(mktriggen)(enum wakefulness wakefulness, INT n)
 	      break;
 	 }
 
-	 case AWAKE_SINCOS: 
+	 case AWAKE_SINCOS:
 	      p->cexpl = cexpl_sincos;
 	      break;
 
-	 case AWAKE_ZERO: 
+	 case AWAKE_ZERO:
 	      p->cexp = cexp_zero;
 	      p->cexpl = cexpl_zero;
 	      break;
@@ -221,7 +230,7 @@ triggen *X(mktriggen)(enum wakefulness wakefulness, INT n)
 	  else
 	       p->cexp = cexp_generic;
      }
-     if (!p->rotate)     
+     if (!p->rotate)
 	       p->rotate = rotate_generic;
      return p;
 }

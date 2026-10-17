@@ -610,14 +610,33 @@ AC_FUNC_VPRINTF
 AC_CHECK_LIB(m, sin)
 
 if test $PRECISION = q; then
-   AX_GCC_VERSION(4,6,0,[],[AC_MSG_ERROR([gcc 4.6 or later required for quad precision support])])
-   AC_CHECK_LIB(quadmath, sinq, [], [AC_MSG_ERROR([quad precision requires libquadmath for quad-precision trigonometric routines])])
-   LIBQUADMATH=-lquadmath
+   AC_MSG_CHECKING([for C23-ish _Float128])
+   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[[
+#if (__STDC_VERSION__ >= 202311L && defined(__STDC_IEC_60559_TYPES__)) \
+ || (defined(__GNUC__) && defined(__FLT128_MANT_DIG__))
+    int main(void) { _Float128 x; return 0; }
+#else
+#   error "C23-standard _Float128 not available"
+#endif]])],
+        [AC_MSG_RESULT([yes])],
+        [AC_MSG_RESULT([no])
+         AC_CHECK_TYPE([__float128], [],
+            [AC_MSG_ERROR([quad precision requires C32 _Float128 or gcc __float128 type])])])
+   LIBQUADMATH=""
+   AC_CHECK_FUNC(sinf128, [],
+      [AC_MSG_CHECKING([for sinq in -lquadmath])
+       LIBQUADMATH="-lquadmath"
+       LIBS="$LIBQUADMATH $LIBS"
+       AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <quadmath.h>]],[[int main (void) { return sinq(1.0) == 0; }]])],
+         [AC_MSG_RESULT([yes])
+          AC_DEFINE(HAVE_LIBQUADMATH, 1, [Define to 1 to use libquadmath trig functions])],
+         [AC_MSG_RESULT([no])
+          AC_MSG_ERROR([quad precision requires C23 _Float128 functions])])])
 fi
 AC_SUBST(LIBQUADMATH)
 
 AC_CHECK_FUNCS([BSDgettimeofday gettimeofday gethrtime read_real_time time_base_to_time drand48 sqrt memset posix_memalign memalign _mm_malloc _mm_free clock_gettime mach_absolute_time sysctl abort sinl cosl snprintf memmove strchr getpagesize])
-AC_CHECK_DECLS([sinl, cosl, sinq, cosq],,,[#include <math.h>])
+AC_CHECK_DECLS([sinl, cosl],,,[#include <math.h>])
 AC_CHECK_DECLS([memalign],,,[
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>

@@ -41,7 +41,7 @@ you want to use FFTW functions, you should begin with:
 
 @cindex iso_c_binding
 @example
-  use, intrinsic :: iso_c_binding 
+  use, intrinsic :: iso_c_binding
   include 'fftw3.f03'
 @end example
 
@@ -110,7 +110,7 @@ in Fortran}.
 Similar to the legacy Fortran interface (@pxref{FFTW Execution in
 Fortran}), we currently recommend @emph{not} using @code{fftw_execute}
 but rather using the more specialized functions like
-@code{fftw_execute_dft} (@pxref{New-array Execute Functions}).  
+@code{fftw_execute_dft} (@pxref{New-array Execute Functions}).
 However, you should execute the plan on the @code{same arrays} as the
 ones for which you created the plan, unless you are especially
 careful.  @xref{Plan execution in Fortran}.  To prevent
@@ -144,7 +144,7 @@ precision-independent @samp{FFTW_} constants):
 
 @cindex iso_c_binding
 @example
-  use, intrinsic :: iso_c_binding 
+  use, intrinsic :: iso_c_binding
   include 'fftw3.f03'
   include 'fftw3l.f03'
 @end example
@@ -157,7 +157,7 @@ supported by @code{gfortran}.  The quadruple-precision @samp{fftwq_}
 functions (@pxref{Precision}) are declared in a @code{fftw3q.f03}
 interface file, which should be included in addition to
 @code{fftw3.f03}, as above.  You should also link with
-@code{-lfftw3q -lquadmath -lm} as in C.
+@code{-lfftw3q -lm} (or possibly @code{-lfftw3q -lquadmath -lm}) as in C.
 
 @c -------------------------------------------------------
 @node Reversing array dimensions, FFTW Fortran type reference, Overview of Fortran interface, Calling FFTW from Modern Fortran
@@ -282,7 +282,7 @@ double} correspond to @code{real(C_DOUBLE)}, @code{real(C_FLOAT)}, and
 @code{fftw_complex}, @code{fftwf_complex}, and @code{fftwl_complex}
 correspond in Fortran to @code{complex(C_DOUBLE_COMPLEX)},
 @code{complex(C_FLOAT_COMPLEX)}, and
-@code{complex(C_LONG_DOUBLE_COMPLEX)}, respectively.  
+@code{complex(C_LONG_DOUBLE_COMPLEX)}, respectively.
 Just as in C
 (@pxref{Precision}), the FFTW subroutines and types are prefixed with
 @samp{fftw_}, @code{fftwf_}, and @code{fftwl_} for the different precisions, and link to different libraries (@code{-lfftw3}, @code{-lfftw3f}, and @code{-lfftw3l} on Unix), but use the @emph{same} include file @code{fftw3.f03} and the @emph{same} constants (all of which begin with @samp{FFTW_}).  The exception is @code{long double} precision, for which you should @emph{also} include @code{fftw3l.f03} (@pxref{Extended and quadruple precision in Fortran}).
