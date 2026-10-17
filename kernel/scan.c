@@ -88,7 +88,7 @@ static void mygets(scanner *sc, char *s, int maxlen)
 static long getlong(scanner *sc, int base, int *ret)
 {
      int sign = 1, ch, count;
-     long x = 0;     
+     unsigned long x = 0;     
 
      ch = GETCHR(sc);
      if (ch == '-' || ch == '+') {
@@ -104,13 +104,14 @@ static long getlong(scanner *sc, int base, int *ret)
 	       ch -= 'a' - 10;
 	  else
 	       break;
-	  x = x * base + ch;
+	  x = x * (unsigned long) base + (unsigned long) ch;
 	  ch = GETCHR(sc);
      }
-     x *= sign;
+     if (sign < 0)
+	  x = -x;
      UNGETCHR(sc, ch);
      *ret = count > 0;
-     return x;
+     return (long) x;
 }
 
 /* vscan is mostly scanf-like, with our additional format specifiers,
