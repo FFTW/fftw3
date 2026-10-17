@@ -41,10 +41,14 @@ void X(free)(void *p)
 
 R *X(alloc_real)(size_t n)
 {
+     if (n > ((size_t) -1) / sizeof(R))
+	  return (R *) 0;
      return (R *) X(malloc)(sizeof(R) * n);
 }
 
 C *X(alloc_complex)(size_t n)
 {
+     if (n > ((size_t) -1) / sizeof(C))
+	  return (C *) 0;
      return (C *) X(malloc)(sizeof(C) * n);
 }
