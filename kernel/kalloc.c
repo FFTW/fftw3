@@ -57,6 +57,7 @@ extern int posix_memalign(void **, size_t, size_t);
 static void *our_malloc(size_t n)
 {
      void *p0, *p;
+     if (n > ((size_t) -1) - MIN_ALIGNMENT) return (void *) 0;
      if (!(p0 = malloc(n + MIN_ALIGNMENT))) return (void *) 0;
      p = (void *) (((uintptr_t) p0 + MIN_ALIGNMENT) & (~((uintptr_t) (MIN_ALIGNMENT - 1))));
      *((void **) p - 1) = p0;
