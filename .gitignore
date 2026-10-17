@@ -53,7 +53,6 @@ dft/simd/vsx/*.c
 ChangeLog
 api/fftw3*.f*
 *.pc
-/*.cmake
 mpi/f03-wrap.c
 mpi/fftw3*-mpi.f*
 simd-support/vtw.h
