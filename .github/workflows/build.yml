@@ -42,6 +42,8 @@ jobs:
       run: cmake --build build --target install -j $(nproc)
 
     - name: Test (CMake)
+      env:
+        UCX_TLS: tcp,self
       run: ctest --test-dir build --output-on-failure -j $(nproc)
 
     - name: Check CMake package
