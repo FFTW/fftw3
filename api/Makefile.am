@@ -1,7 +1,7 @@
 AM_CPPFLAGS = -I $(top_srcdir)
 AM_CFLAGS = $(STACK_ALIGN_CFLAGS)
 
-EXTRA_DIST = f03api.sh genf03.pl fftw3.f03.in
+EXTRA_DIST = f03api.sh genf03.pl genf08.pl fftw3.f03.in
 
 include_HEADERS = fftw3.h fftw3.f fftw3l.f03 fftw3q.f03
 nodist_include_HEADERS = fftw3.f03
