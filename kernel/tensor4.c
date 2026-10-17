@@ -72,16 +72,29 @@ int X(tensor_inplace_strides2)(const tensor *a, const tensor *b)
      return X(tensor_inplace_strides(a)) && X(tensor_inplace_strides(b));
 }
 
-/* return true (1) iff *any* strides of sz decrease when we
-   tensor_inplace_copy(sz, k). */
+/* Compare strides by magnitude first, using the signed value to distinguish
+   opposite traversal directions with equal magnitude. */
+static int stride_lt(INT a, INT b)
+{
+     INT aa = X(iabs)(a);
+     INT ab = X(iabs)(b);
+
+     return aa < ab || (aa == ab && a < b);
+}
+
+/* Return true (1) iff any stride of sz decreases in the magnitude-first
+   order when we tensor_inplace_copy(sz, k). */
 static int tensor_strides_decrease(const tensor *sz, inplace_kind k)
 {
      if (FINITE_RNK(sz->rnk)) {
           int i;
-          for (i = 0; i < sz->rnk; ++i)
-               if ((sz->dims[i].os - sz->dims[i].is)
-                   * (k == INPLACE_OS ? (INT)1 : (INT)-1) < 0)
+          for (i = 0; i < sz->rnk; ++i) {
+               const iodim *p = sz->dims + i;
+               if (k == INPLACE_OS
+                   ? stride_lt(p->os, p->is)
+                   : stride_lt(p->is, p->os))
                     return 1;
+          }
      }
      return 0;
 }
