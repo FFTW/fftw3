@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=@FFTW_PC_LIBDIR@
+includedir=@FFTW_PC_INCLUDEDIR@
+
+Name: @PROJECT_NAME@
+Description: @PROJECT_DESCRIPTION@
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -l@fftw3_lib@
+Libs.private:@FFTW_PC_PRIVATE_LIBS@
+Cflags: -I${includedir}
