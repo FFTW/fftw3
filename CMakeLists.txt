@@ -338,9 +338,11 @@ if (HAVE_AVX2)
                                PROPERTIES COMPILE_FLAGS "${AVX2_FLAG}")
 endif ()
 if (HAVE_FMA)
-  set_source_files_properties (${fftw_dft_simd_avx2_SOURCE}
-                               ${fftw_rdft_simd_avx2_SOURCE}
-                               PROPERTIES COMPILE_FLAGS "${FMA_FLAG}")
+  # APPEND_STRING, not PROPERTIES COMPILE_FLAGS: COMPILE_FLAGS is single-valued,
+  # so a plain set here would clobber AVX2_FLAG above and drop -mavx2.
+  set_property (SOURCE ${fftw_dft_simd_avx2_SOURCE}
+                      ${fftw_rdft_simd_avx2_SOURCE}
+               APPEND_STRING PROPERTY COMPILE_FLAGS " ${FMA_FLAG}")
 endif ()
 if (HAVE_LIBM)
   target_link_libraries (${fftw3_lib} m)
