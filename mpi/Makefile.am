@@ -13,7 +13,7 @@ endif
 CC=@MPICC@
 
 EXTRA_DIST = testsched.c f03api.sh f03-wrap.sh genf03-wrap.pl fftw3-mpi.f03.in fftw3l-mpi.f03.in
-BUILT_SOURCES = fftw3-mpi.f03.in fftw3-mpi.f03 fftw3l-mpi.f03.in fftw3l-mpi.f03 f03-wrap.c
+BUILT_SOURCES = fftw3-mpi.f03 fftw3l-mpi.f03
 CLEANFILES = fftw3-mpi.f03 fftw3l-mpi.f03
 
 TRANSPOSE_SRC = transpose-alltoall.c transpose-pairwise.c transpose-recurse.c transpose-problem.c transpose-solve.c mpi-transpose.h
@@ -86,16 +86,3 @@ fftw3-mpi.f03: fftw3-mpi.f03.in Makefile
 
 fftw3l-mpi.f03: fftw3l-mpi.f03.in Makefile
 	sed 's/C_MPI_FINT/@C_MPI_FINT@/' $(srcdir)/fftw3l-mpi.f03.in > $@
-
-if MAINTAINER_MODE
-
-fftw3-mpi.f03.in: fftw3-mpi.h f03api.sh $(top_srcdir)/api/genf03.pl
-	sh $(srcdir)/f03api.sh d f > $@
-
-fftw3l-mpi.f03.in: fftw3-mpi.h f03api.sh $(top_srcdir)/api/genf03.pl
-	sh $(srcdir)/f03api.sh l | grep -v parameter | sed 's/fftw3.f03/fftw3l.f03/' > $@
-
-f03-wrap.c: fftw3-mpi.h f03-wrap.sh genf03-wrap.pl
-	sh $(srcdir)/f03-wrap.sh > $@
-
-endif

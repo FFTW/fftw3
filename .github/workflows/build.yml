@@ -3,20 +3,80 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [autotools, cmake]
+
     steps:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install ocaml ocamlbuild libnum-ocaml-dev autoconf automake indent libtool fig2dev
+        sudo apt-get install -y \
+          ocaml ocamlbuild ocaml-findlib libnum-ocaml-dev \
+          python3 autoconf automake indent libtool fig2dev \
+          cmake ninja-build gfortran libmpich-dev
 
     - name: Checkout
       uses: actions/checkout@v6
 
-    - name: Bootstrap
-      run: sh bootstrap.sh
+    - name: Generate sources
+      run: python3 support/code_generation.py -j $(nproc)
 
-    - name: Build
-      run: make
+    - name: Configure (Autotools)
+      if: ${{ matrix.build == 'autotools'}}
+      run: |
+        ./autogen.sh
+        ./configure --disable-shared --enable-maintainer-mode --enable-openmp
 
-    - name: Test
-      run: make -C tests smallcheck
+    - name: Build (Autotools)
+      if: ${{ matrix.build == 'autotools'}}
+      run: make all -j $(nproc)
+
+    - name: Test (Autotools)
+      if: ${{ matrix.build == 'autotools'}}
+      run: make -C tests smallcheck -j $(nproc)
+
+    - name: Configure (CMake)
+      if: ${{ matrix.build == 'cmake'}}
+      run: |
+        cmake -B build -G Ninja \
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+          -DCMAKE_INSTALL_PREFIX=install \
+          -DBUILD_TESTS=ON \
+          -DENABLE_DOUBLE=ON \
+          -DENABLE_FLOAT=ON \
+          -DENABLE_LONG_DOUBLE=ON \
+          -DENABLE_QUAD_PRECISION=ON \
+          -DENABLE_MPI=ON \
+          -DENABLE_OPENMP=ON \
+          -DENABLE_THREADS=ON
+
+    - name: Build (CMake)
+      if: ${{ matrix.build == 'cmake'}}
+      run: cmake --build build --target install -j $(nproc) --verbose
+
+    - name: Test (CMake)
+      if: ${{ matrix.build == 'cmake'}}
+      env:
+        UCX_TLS: tcp,self
+      run: ctest --test-dir build --output-on-failure -j $(nproc)
+
+    - name: Check CMake package
+      if: ${{ matrix.build == 'cmake'}}
+      run: |
+        mkdir consumer
+        cat > consumer/CMakeLists.txt <<'EOF'
+        cmake_minimum_required(VERSION 3.14)
+        project(consumer LANGUAGES C Fortran)
+        find_package(fftw3 CONFIG REQUIRED COMPONENTS fftw3_omp)
+        if(NOT TARGET FFTW::fftw3)
+          message(FATAL_ERROR "FFTW::fftw3 target not found")
+        else()
+          if(NOT TARGET FFTW::fftw3_omp)
+            message(FATAL_ERROR "FFTW::fftw3_omp target not found")
+          endif()
+        endif()
+        EOF
+        cmake -S consumer -B consumer/build \
+          -DCMAKE_PREFIX_PATH="$PWD/install"

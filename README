@@ -31,7 +31,8 @@ INSTALLATION FROM THE GIT REPOSITORY:
 
 First, install these programs:
 
-  ocaml, ocamlbuild, autoconf, automake, indent, libtool.
+  python(>=3.8), ocaml, ocamlbuild,
+  autoconf, automake, indent, libtool.
 
 You also need the ocaml Num library, which was standard in Ocaml but
 was removed without warning in OCaml 4.06.0 (3 Nov 2017).  On Fedora
@@ -39,20 +40,17 @@ was removed without warning in OCaml 4.06.0 (3 Nov 2017).  On Fedora
 
 Then, execute
 
-    sh bootstrap.sh
+    python3 support/code_generation.py
+    ./autogen.sh
+    ./configure [OTHER CONFIGURE FLAGS]
     make
-    
-The bootstrap.sh script runs configure directly, but if you need to
-re-run configure, you must pass the --enable-maintainer-mode flag:
-
-    ./configure --enable-maintainer-mode [OTHER CONFIGURE FLAGS]
 
 Alternatively, you can run
 
-    sh mkdist.sh
+    ./mkdist.sh
 
-which will run the entire bootstrapping process and generate
-.tar.gz files similar to those for official releases.
+which will run the entire code generation and configuration process
+and generate .tar.gz files similar to those for official releases.
 
 CONTACTS
 --------

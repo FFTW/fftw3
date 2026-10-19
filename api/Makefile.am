@@ -30,30 +30,10 @@ plan-guru64-dft-r2c.c plan-guru64-dft.c plan-guru64-r2r.c		\
 plan-guru64-split-dft-c2r.c plan-guru64-split-dft-r2c.c			\
 plan-guru64-split-dft.c mktensor-iodims64.c
 
-BUILT_SOURCES = fftw3.f fftw3.f03.in fftw3.f03 fftw3l.f03 fftw3q.f03
+BUILT_SOURCES = fftw3.f03
 CLEANFILES = fftw3.f03
 
 fftw3.f03: fftw3.f03.in
 	(echo "! Generated automatically.  DO NOT EDIT!"; echo; \
          echo "  integer, parameter :: C_FFTW_R2R_KIND = @C_FFTW_R2R_KIND@"; \
          grep -v "Generated automatically" $(srcdir)/fftw3.f03.in) > $@
-
-if MAINTAINER_MODE
-
-# convert constants to F77 PARAMETER statements
-fftw3.f: fftw3.h
-	rm -f $@
-	perl -pe 's/([A-Z0-9_]+)=([+-]?[0-9]+)/\n      INTEGER \1\n      PARAMETER (\1=\2)\n/g' $< |egrep 'PARAMETER|INTEGER' > $@
-	perl -pe 's/#define +([A-Z0-9_]+) +\(([+-]?[0-9]+)U?\)/\n      INTEGER \1\n      PARAMETER (\1=\2)\n/g' $< |egrep 'PARAMETER|INTEGER' >> $@
-	perl -pe 'if (/#define +([A-Z0-9_]+) +\(([0-9]+)U? *<< *([0-9]+)\)/) { print "\n      INTEGER $$1\n      PARAMETER ($$1=",$$2 << $$3,")\n"; }' $< |egrep 'PARAMETER|INTEGER' >> $@
-
-fftw3.f03.in: fftw3.h f03api.sh genf03.pl
-	sh $(srcdir)/f03api.sh d f > $@
-
-fftw3l.f03: fftw3.h f03api.sh genf03.pl
-	sh $(srcdir)/f03api.sh l | grep -v parameter > $@
-
-fftw3q.f03: fftw3.h f03api.sh genf03.pl
-	sh $(srcdir)/f03api.sh q | grep -v parameter > $@
-
-endif # MAINTAINER_MODE

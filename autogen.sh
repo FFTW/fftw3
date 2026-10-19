@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/bash -e
 ############################################################################
 #
 # NOTE: If you just want to build FFTW, do not use this file.  Just use
@@ -10,17 +10,10 @@
 #
 ############################################################################
 
-touch ChangeLog
+if test ! -f support/codelets.mk; then
+    echo "Run python3 support/code_generation.py before autogen.sh." >&2
+    exit 1
+fi
 
-echo "PLEASE IGNORE WARNINGS AND ERRORS"
-
-rm -rf autom4te.cache
-autoreconf --verbose --install --symlink --force
-
-rm -f config.cache
-
-# --enable-maintainer-mode enables build of genfft and automatic
-# rebuild of codelets whenever genfft changes
-(
-    ./configure --disable-shared --enable-maintainer-mode --enable-threads $*
-)
+test -f ChangeLog || touch ChangeLog
+exec autoreconf --verbose --install --force "$@"

@@ -331,17 +331,21 @@ written in Objective Caml, a dialect of ML, which is available at
 @cindex Caml
 
 
-If you have Objective Caml installed (along with recent versions of
-GNU @code{autoconf}, @code{automake}, and @code{libtool}), then you
-can change the set of codelets that are generated or play with the
-generation options.  The set of generated codelets is specified by the
-@code{@{dft,rdft@}/@{codelets,simd@}/*/Makefile.am} files.  For example, you can add
-efficient REDFT codelets of small sizes by modifying
-@code{rdft/codelets/r2r/Makefile.am}.
+Source generation requires Python 3.8 or later, Objective Caml,
+@code{ocamlbuild}, @code{ocamlfind}, the Caml Num library, GCC, Perl,
+and Bash.  GNU @code{indent} is used when available.
+You can change the set of codelets or their generation options by editing
+@code{RECIPES} in @code{support/code_generation.py}.  For example, edit
+the @code{rdft/scalar/r2r} entries to add REDFT codelets of small sizes.
+Empty size lists preserve the optional codelet families.
 @cindex REDFT
-After you modify any @code{Makefile.am} files, you can type @code{sh
-bootstrap.sh} in the top-level directory followed by @code{make} to
-re-generate the files.
+Run @code{python3 support/code_generation.py -j 8} in the top-level
+directory to regenerate the complete source set, including all SIMD
+variants and Fortran interfaces.  The script also writes
+@code{support/codelets.mk}, the source lists consumed by Automake.
+After changing these lists, run @code{sh autogen.sh} again before
+@code{./configure} and @code{make}.  CMake can consume the generated
+sources directly.  Neither build system runs the source generators.
 
 We do not provide more details about the code-generation process, since
 we do not expect that most users will need to generate their own code.

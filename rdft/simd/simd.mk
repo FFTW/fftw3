@@ -1,11 +1,5 @@
-AM_CPPFLAGS = -I $(top_srcdir)
-EXTRA_DIST = $(SIMD_CODELETS) genus.c codlist.c
+include $(top_srcdir)/support/codelets.mk
 
-if MAINTAINER_MODE
-$(EXTRA_DIST): Makefile
-	(							\
-	echo "/* Generated automatically.  DO NOT EDIT! */";	\
-	echo "#define SIMD_HEADER \"$(SIMD_HEADER)\"";		\
-	echo "#include \"../common/"$*".c\"";			\
-	) >$@
-endif # MAINTAINER_MODE
+AM_CPPFLAGS = -I $(top_srcdir)
+SIMD_SOURCES = $(RDFT_SIMD_CODELETS) genus.c codlist.c
+EXTRA_DIST = $(SIMD_SOURCES)
