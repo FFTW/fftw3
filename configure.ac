@@ -873,6 +873,8 @@ AC_CONFIG_FILES([
    m4/Makefile
 
    fftw.pc
+   fftw_threads.pc
+   fftw_omp.pc
 ])
 
 AC_OUTPUT
