@@ -89,6 +89,10 @@ const char X(version)[] = PACKAGE "-" PACKAGE_VERSION
    "-mlasx"
 #endif
 
+#if HAVE_RVV
+   "-rvv"
+#endif
+
 #if defined(HAVE_GENERIC_SIMD128)
    "-generic_simd128"
 #endif

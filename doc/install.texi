@@ -199,6 +199,7 @@ of the time).  @xref{Cycle Counters}.
 @code{--enable-altivec} (single),
 @code{--enable-vsx} (single, double),
 @code{--enable-neon} (single, double on aarch64),
+@code{--enable-rvv} (single, double on risc-v vector),
 @code{--enable-generic-simd128},
 and
 @code{--enable-generic-simd256}:

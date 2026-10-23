@@ -113,6 +113,16 @@ extern const solvtab X(solvtab_dft_sve1024);
 extern const solvtab X(solvtab_dft_sve2048);
 extern const solvtab X(solvtab_dft_lsx);
 extern const solvtab X(solvtab_dft_lasx);
+extern const solvtab X(solvtab_dft_rvv128);
+extern const solvtab X(solvtab_dft_rvv256);
+extern const solvtab X(solvtab_dft_rvv512);
+extern const solvtab X(solvtab_dft_rvv1024);
+extern const solvtab X(solvtab_dft_rvv2048);
+extern const solvtab X(solvtab_dft_rvv4096);
+extern const solvtab X(solvtab_dft_rvv8192);
+extern const solvtab X(solvtab_dft_rvv16384);
+extern const solvtab X(solvtab_dft_rvv32768);
+extern const solvtab X(solvtab_dft_rvv65536);
 extern const solvtab X(solvtab_dft_generic_simd128);
 extern const solvtab X(solvtab_dft_generic_simd256);
 

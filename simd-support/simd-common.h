@@ -52,6 +52,14 @@
 #    define ALIGNMENT 16
 #    define ALIGNMENTA 16
 #  endif
+#elif defined(HAVE_RVV)
+#  if defined(FFTW_SINGLE)
+#    define ALIGNMENT 8
+#    define ALIGNMENTA 16
+#  else
+#    define ALIGNMENT 16
+#    define ALIGNMENTA 16
+#  endif
 #elif defined(HAVE_GENERIC_SIMD256)
 #  if defined(FFTW_SINGLE)
 #    define ALIGNMENT 8
@@ -111,4 +119,8 @@
 #define REPEAT_16(DEFX, v, x) REPEAT_8(DEFX, v, x), REPEAT_8(DEFX,(v)+8, x)
 #define REPEAT_32(DEFX, v, x) REPEAT_16(DEFX, v, x), REPEAT_16(DEFX, (v)+16, x)
 #define REPEAT_64(DEFX, v, x) REPEAT_32(DEFX, v, x), REPEAT_32(DEFX, (v)+32, x)
+#define REPEAT_128(DEFX, v, x) REPEAT_64(DEFX, v, x), REPEAT_64(DEFX, (v)+64, x)
+#define REPEAT_256(DEFX, v, x) REPEAT_128(DEFX, v, x), REPEAT_128(DEFX, (v)+128, x)
+#define REPEAT_512(DEFX, v, x) REPEAT_256(DEFX, v, x), REPEAT_256(DEFX, (v)+256, x)
+#define REPEAT_1024(DEFX, v, x) REPEAT_512(DEFX, v, x), REPEAT_512(DEFX, (v)+512, x)
 
