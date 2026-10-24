@@ -495,11 +495,11 @@ static inline ticks getticks(void)
   asm volatile("rdtime %0" : "=r" (result));
 #elif __riscv_xlen == 32
   uint32_t l, h, h2;
-  asm volatile(	"start:\n"
+  asm volatile(	"1:\n"
 		"rdtimeh %0\n"
 		"rdtime %1\n"
 		"rdtimeh %2\n"
-		"bne %0, %2, start\n"
+		"bne %0, %2, 1b\n"
 		: "=r" (h), "=r" (l), "=r" (h2));
   result = (((uint64_t)h)<<32) | ((uint64_t)l);
 #else
