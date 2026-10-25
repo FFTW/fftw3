@@ -537,8 +537,13 @@ INLINE_ELAPSED(inline)
 #endif
 
 /*----------------------------------------------------------------*/
-/* SGI/Irix */
-#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_SGI_CYCLE) && !defined(HAVE_TICK_COUNTER) && !defined(__ANDROID__)
+/* SGI/Irix
+
+   Linux removed the CLOCK_SGI_CYCLE driver and clock_gettime() fails with
+   EINVAL for it, but musl still defines the constant.  Using it leaves the
+   timespec unset, so every measurement reads as zero and the planner keeps
+   doubling the iteration count forever. */
+#if defined(HAVE_CLOCK_GETTIME) && defined(CLOCK_SGI_CYCLE) && !defined(HAVE_TICK_COUNTER) && !defined(__ANDROID__) && !defined(__linux__)
 typedef struct timespec ticks;
 
 static inline ticks getticks(void)
