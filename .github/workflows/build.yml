@@ -7,7 +7,10 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install ocaml ocamlbuild libnum-ocaml-dev autoconf automake indent libtool fig2dev
+        sudo apt-get install -y \
+          ocaml ocamlbuild libnum-ocaml-dev \
+          autoconf automake indent libtool fig2dev \
+          cmake ninja-build gfortran libmpich-dev
 
     - name: Checkout
       uses: actions/checkout@v6
@@ -15,8 +18,48 @@ jobs:
     - name: Bootstrap
       run: sh bootstrap.sh
 
-    - name: Build
-      run: make
+    - name: Build (Autotools & Code generation)
+      run: make all -j $(nproc)
 
-    - name: Test
-      run: make -C tests smallcheck
+    - name: Test (Autotools)
+      run: make -C tests smallcheck -j $(nproc)
+
+    - name: Configure (CMake)
+      run: |
+        cmake -B build -G Ninja \
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+          -DCMAKE_INSTALL_PREFIX=install \
+          -DBUILD_TESTS=ON \
+          -DENABLE_DOUBLE=ON \
+          -DENABLE_FLOAT=ON \
+          -DENABLE_LONG_DOUBLE=ON \
+          -DENABLE_QUAD_PRECISION=ON \
+          -DENABLE_MPI=ON \
+          -DENABLE_OPENMP=ON \
+          -DENABLE_THREADS=ON
+
+    - name: Build (CMake)
+      run: cmake --build build --target install -j $(nproc)
+
+    - name: Test (CMake)
+      env:
+        UCX_TLS: tcp,self
+      run: ctest --test-dir build --output-on-failure -j $(nproc)
+
+    - name: Check CMake package
+      run: |
+        mkdir consumer
+        cat > consumer/CMakeLists.txt <<'EOF'
+        cmake_minimum_required(VERSION 3.14)
+        project(consumer LANGUAGES C Fortran)
+        find_package(fftw3 CONFIG REQUIRED COMPONENTS fftw3_omp)
+        if(NOT TARGET FFTW::fftw3)
+          message(FATAL_ERROR "FFTW::fftw3 target not found")
+        else()
+          if(NOT TARGET FFTW::fftw3_omp)
+            message(FATAL_ERROR "FFTW::fftw3_omp target not found")
+          endif()
+        endif()
+        EOF
+        cmake -S consumer -B consumer/build \
+          -DCMAKE_PREFIX_PATH="$PWD/install"
