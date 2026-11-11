@@ -50,16 +50,22 @@
 #include <stdio.h>
 
 #ifdef __cplusplus
+#  if __cplusplus >= 201103L && defined(FFTW_cpp_complex)
+#    include <complex>
+#    define FFTW_DEFINE_COMPLEX(R, C) typedef ::std::complex<R> C
+#  endif
 extern "C"
 {
 #endif /* __cplusplus */
 
+#ifndef FFTW_DEFINE_COMPLEX
 /* If <complex.h> is included, use the C99 complex type.  Otherwise
    define a type bit-compatible with C99 complex */
-#if !defined(FFTW_NO_Complex) && defined(_Complex_I) && defined(complex) && defined(I)
-#  define FFTW_DEFINE_COMPLEX(R, C) typedef R _Complex C
-#else
-#  define FFTW_DEFINE_COMPLEX(R, C) typedef R C[2]
+#  if !defined(FFTW_NO_Complex) && defined(_Complex_I) && defined(complex) && defined(I)
+#    define FFTW_DEFINE_COMPLEX(R, C) typedef R _Complex C
+#  else
+#    define FFTW_DEFINE_COMPLEX(R, C) typedef R C[2]
+#  endif
 #endif
 
 #define FFTW_CONCAT(prefix, name) prefix ## name
